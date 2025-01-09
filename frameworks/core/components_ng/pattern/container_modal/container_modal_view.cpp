@@ -119,7 +119,9 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
     if (isFloatingTitle) {
         auto renderContext = containerTitleRow->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, nullptr);
-        auto theme = PipelineContext::GetCurrentContext()->GetTheme<ContainerModalTheme>();
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        auto theme = pipeline->GetTheme<ContainerModalTheme>();
         renderContext->UpdateBackgroundColor(theme->GetBackGroundColor(true));
     }
     return containerTitleRow;

@@ -437,7 +437,7 @@ export struct ToolBarV2 {
 
   @Builder
   itemCardDialogBuilder(item: ToolBarV2Item, index: number): void {
-    if (item.content) {
+    if (item.content && item.content.text) {
       Column() {
         if (item.symbol) {
           SymbolGlyph()

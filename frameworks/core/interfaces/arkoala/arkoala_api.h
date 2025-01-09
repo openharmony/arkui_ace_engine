@@ -1519,6 +1519,8 @@ struct ArkUIDragPreview {
 struct ArkUIDragInteractionOptions {
     ArkUI_Bool isMultiSelectionEnabled;
     ArkUI_Bool defaultAnimationBeforeLifting;
+    ArkUI_Bool enableEdgeAutoScroll;
+    ArkUI_Bool enableHapticFeedback;
 };
 
 struct ArkUIDragPreViewAndInteractionOptions {
@@ -1528,6 +1530,8 @@ struct ArkUIDragPreViewAndInteractionOptions {
     bool isNumberBadgeEnabled = false;
     bool isDefaultShadowEnabled = false;
     bool isDefaultRadiusEnabled = false;
+    bool enableEdgeAutoScroll = true;
+    bool enableHapticFeedback = false;
     ArkUI_Int32 badgeNumber = 0;
     bool isShowBadge = true;
 };
@@ -2365,6 +2369,12 @@ struct ArkUIButtonModifier {
     void (*setButtonOptions)(ArkUINodeHandle node, ArkUI_Uint32 buttonStyle, ArkUI_Uint32 buttonRole);
     void (*resetButtonOptions)(ArkUINodeHandle node);
     void (*setCreateWithLabel)(ArkUINodeHandle node, bool createWithLabel);
+    void (*setButtonMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 minFontScale);
+    void (*resetButtonMinFontScale)(ArkUINodeHandle node);
+    void (*setButtonMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 maxFontScale);
+    void (*resetButtonMaxFontScale)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getButtonMinFontScale)(ArkUINodeHandle node);
+    ArkUI_Float32 (*getButtonMaxFontScale)(ArkUINodeHandle node);
 };
 
 struct ArkUIImageModifier {
@@ -4479,6 +4489,9 @@ struct ArkUITextPickerModifier {
     void (*setTextPickerDefaultTextStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_CharPtr fontInfo,
         ArkUI_Int32 style, ArkUI_CharPtr minFontSize, ArkUI_CharPtr maxFontSize, ArkUI_Int32 overflow);
     void (*resetTextPickerDefaultTextStyle)(ArkUINodeHandle node);
+    ArkUI_Bool (*getTextPickerEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setTextPickerEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool isEnableHapticFeedback);
+    void (*resetTextPickerEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct ArkUITextTimerModifier {
@@ -4601,6 +4614,9 @@ struct ArkUIDatePickerModifier {
     ArkUI_Int32 (*getDatePickerMode)(ArkUINodeHandle node);
     void (*setDatePickerMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetDatePickerMode)(ArkUINodeHandle node);
+    ArkUI_Bool (*getEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool enableHapticFeedback);
+    void (*resetEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct ArkUISpanModifier {
@@ -4898,6 +4914,8 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorMaxLength)(ArkUINodeHandle node);
     void (*setRichEditorMaxLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine);
     void (*resetRichEditorMaxLines)(ArkUINodeHandle node);
+    void (*setRichEditorStopBackPress)(ArkUINodeHandle node, ArkUI_Uint32 isStopBackPress);
+    void (*resetRichEditorStopBackPress)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {
@@ -5043,6 +5061,7 @@ struct ArkUIXComponentModifier {
     void (*resetXComponentEnableTransparentLayer)(ArkUINodeHandle node);
     void (*setXComponentRenderFit)(ArkUINodeHandle node, ArkUI_Int32 renderFit);
     void (*resetXComponentRenderFit)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getXComponentRenderFit)(ArkUINodeHandle node);
 };
 
 struct ArkUIStateModifier {
@@ -5541,6 +5560,7 @@ struct ArkUIDialogAPI {
     ArkUI_Int32 (*registerOnWillDismiss)(ArkUIDialogHandle handle, bool (*eventHandler)(ArkUI_Int32));
     ArkUI_Int32 (*registerOnWillDismissWithUserData)(
         ArkUIDialogHandle handler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
+    ArkUI_Int32 (*setKeyboardAvoidDistance)(ArkUIDialogHandle handle, float distance, ArkUI_Int32 unit);
 };
 
 struct ArkUIBasicNodeAPI {

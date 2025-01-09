@@ -31,9 +31,17 @@ RefPtr<FocusManager> GetCurrentFocusManager()
 
 FocusManager::FocusManager(const RefPtr<PipelineContext>& pipeline): pipeline_(pipeline)
 {
-    if (pipeline && pipeline->GetRootElement()) {
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetRootElement()) {
         currentFocus_ = pipeline->GetRootElement()->GetFocusHub();
     }
+    // After switching between portrait and landscape mode
+    // reset the isNeedTriggerScroll parameter to enable screen focus scrolling.
+    pipeline->RegisterSurfaceChangedCallback([weak = WeakClaim(this)](int32_t width, int32_t height, int32_t oldWidth,
+                                                 int32_t oldHeight, WindowSizeChangeReason type) {
+        auto context = weak.Upgrade();
+        context->SetNeedTriggerScroll(true);
+    });
 }
 
 void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView, bool isTriggerByStep)

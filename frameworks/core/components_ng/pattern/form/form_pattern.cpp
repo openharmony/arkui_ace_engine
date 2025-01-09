@@ -797,7 +797,6 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
 #if OHOS_STANDARD_SYSTEM
         AppExecFwk::FormInfo formInfo;
         FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo);
-        std::lock_guard<std::mutex> lock(formManagerBridge_->GetRecycleMutex());
         formManagerBridge_->SetParamForWant(info, formInfo);
 #endif
     }
@@ -1350,11 +1349,20 @@ void FormPattern::GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRec
     parentRectInfo.scaleX = finalScale.x;
     parentRectInfo.scaleY = finalScale.y;
 
-    auto pipeline = host->GetContext();
+    auto pipeline = host->GetContextRefPtr();
     if (pipeline) {
-        auto windowRect = pipeline->GetDisplayWindowRectInfo();
-        parentRectInfo.top += static_cast<int32_t>(windowRect.Top());
-        parentRectInfo.left += static_cast<int32_t>(windowRect.Left());
+        auto accessibilityManager = pipeline->GetAccessibilityManager();
+        if (accessibilityManager) {
+            auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
+            parentRectInfo.top = parentRectInfo.top * windowInfo.scaleX + static_cast<int32_t>(windowInfo.top);
+            parentRectInfo.left = parentRectInfo.left * windowInfo.scaleY + static_cast<int32_t>(windowInfo.left);
+            parentRectInfo.scaleX *= windowInfo.scaleX;
+            parentRectInfo.scaleY *= windowInfo.scaleY;
+        } else {
+            auto windowRect = pipeline->GetDisplayWindowRectInfo();
+            parentRectInfo.top += static_cast<int32_t>(windowRect.Top());
+            parentRectInfo.left += static_cast<int32_t>(windowRect.Left());
+        }
     }
 
     TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "elementId: %{public}" PRId64 ", top: %{public}d, left: %{public}d",

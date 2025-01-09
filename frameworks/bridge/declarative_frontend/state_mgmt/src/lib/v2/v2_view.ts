@@ -24,7 +24,7 @@
  */
 function ReusableV2<T extends Constructor>(BaseClass: T): T {
     stateMgmtConsole.debug(`@ReusableV2 ${BaseClass.name}: Redefining isReusable_ as true.`);
-    Reflect.defineProperty(BaseClass.prototype, "isReusable_", {
+    Reflect.defineProperty(BaseClass.prototype, 'isReusable_', {
         get: () => {
           return true;
         }
@@ -53,7 +53,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     private recyclePoolV2_: RecyclePoolV2 | undefined = undefined;
 
     public hasBeenRecycled_: boolean = false;
-    private freezeOnRecycle_: boolean = false;
 
     public paramsGenerator_?: () => Object;
 
@@ -61,12 +60,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         super(parent, elmtId, extraInfo);
         this.setIsV2(true);
         PUV2ViewBase.arkThemeScopeManager?.onViewPUCreate(this);
-        if (this.parent_ && (this.parent_ as ViewV2).freezeOnRecycle_) {
-            // Flags all descendant components as reusable if their parent is reusable.
-            // This avoids explicit freezing for the component (if `hasCompFreezeEnabled`),
-            // since freezing is handled automatically for components in the recycle pool.
-           this.freezeOnRecycle_ = true;
-        }
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
 
@@ -130,7 +123,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * - If the JSView object is managed by the RecycleManager, the CustomNode is reused.
      *
      * @param {string} reuseId - The ID used for recycling the component.
-    */
+     */
     public recycleSelf(reuseId: string): void {
         stateMgmtConsole.debug(`${this.debugInfo__()}:  reuseId: ${reuseId}`);
 
@@ -148,10 +141,9 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     // The resetStateVarsOnReuse function defined in the transpiler will be called.
     // If it's not defined, it indicates that an older version of the toolchain is being used,
     // and an error is thrown to notify about the outdated toolchain.
-    public resetStateVarsOnReuse(params: Object) {
+    public resetStateVarsOnReuse(params: Object): void {
         throw new Error('Old toolchain detected. Please upgrade to the latest.');
     }
-
 
     // The aboutToReuse function defined in the application will be called if it exists.
     // If not, this empty function will be called, which does nothing.
@@ -168,38 +160,26 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * It also invokes the `aboutToReuse` function if defined in the application.
      * Additionally, it recursively traverses  all its subcomponents, calling `resetStateVarsOnReuse`
      * and `aboutToReuse` on each subcomponent to prepare them for reuse.
-     * @param initialParams optional, the first reused component use this params to reset value, or it will not record
+     * @param {?Object} initialParams - optional, the first reused component use this params to reset value, or it will not record
      * dependency of params.
-    */
+     */
     aboutToReuseInternal(initialParams?: Object): void {
-
         stateMgmtConsole.debug(`${this.debugInfo__()}: aboutToReuseInternal`);
-
         stateMgmtTrace.scopedTrace(() => {
             if (this.paramsGenerator_ && typeof this.paramsGenerator_ === 'function') {
-              const params = initialParams ? initialParams : this.paramsGenerator_();
-              stateMgmtConsole.debug(`${this.debugInfo__()}: resetStateVarsOnReuse params: ${JSON.stringify(params)}`);
-
+                const params = initialParams ? initialParams : this.paramsGenerator_();
+                stateMgmtConsole.debug(`${this.debugInfo__()}: resetStateVarsOnReuse params: ${JSON.stringify(params)}`);
+                ObserveV2.getObserve().setCurrentReuseId(this.id__());
                 // resets the variables to its initial state
                 this.resetStateVarsOnReuse(params);
-
                 // unfreeze the component on reuse
                 this.unfreezeReusedComponent();
-
                 this.aboutToReuse();
             }
         }, 'aboutToReuseInternal', this.constructor.name);
-
-        ObserveV2.getObserve().updateDirty2(true);
-
-        this.childrenWeakrefMap_.forEach((weakRefChild) => {
-            const child = weakRefChild.deref();
-            if (child instanceof ViewV2 || child instanceof ViewPU) {
-                if (!child.hasBeenRecycled_ && !child.__isBlockRecycleOrReuse__) {
-                    child.aboutToReuseInternal();
-                }
-            }
-        });
+        ObserveV2.getObserve().updateDirty2(true, true);
+        ObserveV2.getObserve().setCurrentReuseId(ObserveV2.NO_REUSE);
+        this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doReuse);
     }
 
     /**
@@ -211,7 +191,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * Then, it freezes the component to avoid performing UI updates when its in recycle pool
      * Finally recursively traverses all subcomponents, calling `aboutToRecycleInternal` on each subcomponent
      * that is about to be recycled, preparing them for recycling as well.
-    */
+     */
     aboutToRecycleInternal(): void {
 
         stateMgmtConsole.debug(`ViewV2 ${this.debugInfo__()} aboutToRecycleInternal`);
@@ -222,15 +202,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         // Freeze the component when its in recycle pool
         this.freezeRecycledComponent();
 
-        this.childrenWeakrefMap_.forEach((weakRefChild) => {
-            const child = weakRefChild.deref();
-            if (child instanceof ViewPU || child instanceof ViewV2) {
-                //__isBlockRecycleOrReuse__ set for  BuilderNode
-                if (!child.hasBeenRecycled_ && !child.__isBlockRecycleOrReuse__) {
-                    child.aboutToRecycleInternal();
-                }
-            }// if child
-        });
+        this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doRecycle);
     }
 
     // Freezes the component when it is moved to the recycle pool to prevent elementId updates
@@ -246,11 +218,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * are reset by resetStateVarsOnReuse() prior to calling this function
      *
      * @returns void
-    */
+     */
     private unfreezeReusedComponent(): void {
         this.activeCount_++;
-
-        if(this.elmtIdsDelayedUpdate.size) {
+        if (this.elmtIdsDelayedUpdate.size) {
             this.elmtIdsDelayedUpdate.forEach((element) => {
                 ObserveV2.getObserve().elmtIdsChanged_.add(element);
             });
@@ -265,7 +236,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * if it does not exist.
      *
      * @returns {RecyclePoolV2} - The `RecyclePoolV2` instance for managing recycling.
-    */
+     */
     getOrCreateRecyclePool(): RecyclePoolV2 {
         if (!this.recyclePoolV2_) {
           this.recyclePoolV2_ = new RecyclePoolV2();
@@ -277,7 +248,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * @function getRecyclePool
      * @description Retrieves the `RecyclePoolV2` instance if it exists.
      * @returns {RecyclePoolV2} - The existing `RecyclePoolV2` instance for managing recycling.
-    */
+     */
     getRecyclePool(): RecyclePoolV2 {
         return this.recyclePoolV2_;
     }
@@ -288,7 +259,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * The RecyclePoolV2 instance is created when the native side triggers the recycleSelf callback
      * during the recycling of a component.
      * @returns {boolean} - `true` if the `RecyclePoolV2` exists, otherwise `false`.
-    */
+     */
     hasRecyclePool(): boolean {
         return !(this.recyclePoolV2_ === undefined);
     }
@@ -298,7 +269,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * @description purges the recycled Element ID in ViewV2
      *
      * @returns void
-    */
+     */
     private cleanupRecycledElmtId(elmtId: number): void {
         this.updateFuncByElmtId.delete(elmtId);
         UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(elmtId);
@@ -315,7 +286,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      *
      * @param rmElmtId - The Element ID to be purged and deleted
      * @returns {boolean} - Returns `true` if the Element ID was successfully deleted, `false` otherwise.
-    */
+     */
     public purgeDeleteElmtId(rmElmtId: number): boolean {
         stateMgmtConsole.debug(`${this.debugInfo__()} purgeDeleteElmtId (V2) is purging the rmElmtId:${rmElmtId}`);
         const result = this.updateFuncByElmtId.delete(rmElmtId);
@@ -404,7 +375,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * @description
      * Called from the transpiler's `resetStateVarsOnReuse` method when the component is about to be reused.
      * Ensures that @Monitor functions are reset and reinitialized during the reuse cycle
-    */
+     */
     public resetMonitorsOnReuse(): void {
         // Clear the monitorIds set for delayed updates, if any
         this.monitorIdsDelayedUpdate.clear();
@@ -481,30 +452,35 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     /**
-   *
-   * @param paramVariableName
-   * @param @once paramVariableName
-   * @param is read only, therefore, init from parent needs to be done without
-   *        causing property setter() to be called
-   * @param newValue
-   */
+     *
+     * @param paramVariableName
+     * @Param @Once paramVariableName
+     * @Param is read only, therefore, init from parent needs to be done without
+     *        causing property setter() to be called
+     * @param newValue
+     */
     protected initParam<Z>(paramVariableName: string, newValue: Z): void {
         this.checkIsV1Proxy(paramVariableName, newValue);
         VariableUtilV2.initParam<Z>(this, paramVariableName, newValue);
     }
     /**
-   *
-   * @param paramVariableName
-   * @param @once paramVariableName
-   * @param is read only, therefore, update from parent needs to be done without
-   *        causing property setter() to be called
-   * @param @once reject any update
-    * @param newValue
-   */
+     *
+     * @param paramVariableName
+     * @Param @Once paramVariableName
+     * @Param is read only, therefore, update from parent needs to be done without
+     *        causing property setter() to be called
+     * @Param @Once reject any update
+     * @param newValue
+     */
     protected updateParam<Z>(paramVariableName: string, newValue: Z): void {
         this.checkIsV1Proxy(paramVariableName, newValue);
         VariableUtilV2.updateParam<Z>(this, paramVariableName, newValue);
-      }
+    }
+
+    protected resetParam<Z>(paramVariableName: string, newValue: Z): void {
+        this.checkIsV1Proxy(paramVariableName, newValue);
+        VariableUtilV2.resetParam<Z>(this, paramVariableName, newValue);
+    }
 
     private checkIsV1Proxy<Z>(paramVariableName: string, value: Z): void {
         if (ObservedObject.IsObservedObject(value)) {
@@ -513,12 +489,12 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     /**
-   *  inform that UINode with given elmtId needs rerender
-   *  does NOT exec @Watch function.
-   *  only used on V2 code path from ObserveV2.fireChange.
-   *
-   * FIXME will still use in the future?
-   */
+     *  inform that UINode with given elmtId needs rerender
+     *  does NOT exec @Watch function.
+     *  only used on V2 code path from ObserveV2.fireChange.
+     *
+     * FIXME will still use in the future?
+     */
     public uiNodeNeedUpdateV2(elmtId: number): void {
         if (this.isFirstRender()) {
             return;
@@ -545,10 +521,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
 
     /**
- * For each recorded dirty Element in this custom component
- * run its update function
- *
- */
+     * For each recorded dirty Element in this custom component
+     * run its update function
+     *
+     */
     public updateDirtyElements(): void {
         stateMgmtProfiler.begin('ViewV2.updateDirtyElements');
         do {
@@ -618,10 +594,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     }
 
     /**
- * Retrieve child by given id
- * @param id
- * @returns child if child with this id exists and it is instance of ViewV2
- */
+     * Retrieve child by given id
+     * @param id
+     * @returns child if child with this id exists and it is instance of ViewV2
+     */
     public getViewV2ChildById(id: number): ViewV2 | undefined {
         const childWeakRef = this.childrenWeakrefMap_.get(id);
         const child = childWeakRef ? childWeakRef.deref() : undefined;
@@ -642,10 +618,10 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
     // If the component has `hasComponentFreezeEnabled` set to true and is marked as @ReusableV2,
     // skip the delayed update, as freeze and delayed updates are handled in `aboutToRecycleInternal`
     // and `aboutToReuseInternal` for @ReusableV2 components.
-    public setActiveInternal(active: boolean): void {
+    public setActiveInternal(active: boolean, isReuse: boolean = false): void {
         stateMgmtProfiler.begin('ViewV2.setActive');
-        stateMgmtConsole.debug(`${this.debugInfo__()}: isCompFreezeAllowed : ${this.isCompFreezeAllowed()} and isReusableComponent : ${this.freezeOnRecycle_}`);
-        if (this.isCompFreezeAllowed() && !this.freezeOnRecycle_) {
+        stateMgmtConsole.debug(`${this.debugInfo__()}: isCompFreezeAllowed : ${this.isCompFreezeAllowed()}`);
+        if (this.isCompFreezeAllowed() && !isReuse) {
             stateMgmtConsole.debug(`${this.debugInfo__()}: ViewV2.setActive ${active ? ' inActive -> active' : 'active -> inActive'}`);
             this.setActiveCount(active);
             if (this.isViewActive()) {
@@ -658,7 +634,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         for (const child of this.childrenWeakrefMap_.values()) {
             const childView: IView | undefined = child.deref();
             if (childView) {
-                childView.setActiveInternal(active);
+                childView.setActiveInternal(active, isReuse);
             }
         }
         stateMgmtProfiler.end();
@@ -725,31 +701,23 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
      * @param getParams - A function returning the parameters for the component.
      * @param getReuseId - A function providing a unique reuse ID (default: component class name).
      * @param extraInfo - Additional information required for component creation.
-    */
-    public reuseOrCreateNewComponent(params: { componentClass: any, getParams: () => Object,
-                                            getReuseId?: () => string, extraInfo?: ExtraInfo }): void {
-
-        const { componentClass, getParams, getReuseId = () => '', extraInfo } = params;
-
+     */
+    public reuseOrCreateNewComponent(params: {
+        componentClass: any, getParams: () => Object,
+        getReuseId?: () => string, extraInfo?: ExtraInfo
+    }): void {
+        const { componentClass, getParams, getReuseId = (): string => '', extraInfo } = params;
         let reuseId = getReuseId();
-
         // If reuseId is null or empty (not set by the application), default to the component's name
         if (!reuseId) {
             reuseId = componentClass.name;
         }
-
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             if (isInitialRender) {
                 const params = getParams(); // should call here to record dependency
                 const recycledNode = this.hasRecyclePool() ? this.getRecyclePool().popRecycleV2Component(reuseId) : null;
-
                 const componentRef = recycledNode ? recycledNode :
-                                        new componentClass(/* Parent */this, params, /*localStorage */ undefined, elmtId, /*paramsLambda */ () => { }, extraInfo);
-
-                if (this.freezeOnRecycle_ === false) {
-                    componentRef.freezeOnRecycle_ = true;
-                }
-
+                    new componentClass(/* Parent */this, params, /*localStorage */undefined, elmtId, /*paramsLambda */() => { }, extraInfo);
                 if (recycledNode) {
                     // If a recycled node is found, update the recycled element ID mapping in the recycle pool
                     const lastId = this.recyclePoolV2_.getRecycleIdMapping(recycledNode.id__());
@@ -761,7 +729,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
                 }
 
                 // Native call to fetch the cached recycle node or create a new one if it doesn't exist
-                ViewV2.createRecycle(componentRef, recycledNode != null, reuseId , () => {
+                ViewV2.createRecycle(componentRef, recycledNode != null, reuseId, () => {
                         // Callback from the native side when the component is reused.
                         recycledNode?.aboutToReuseInternal(params);
                     });

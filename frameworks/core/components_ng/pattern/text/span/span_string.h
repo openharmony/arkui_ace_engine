@@ -53,7 +53,8 @@ public:
     void SetSpanMap(std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>&& spansMap);
     const std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>>& GetSpansMap() const;
     bool IsEqualToSpanString(const RefPtr<SpanString>& other) const;
-    RefPtr<SpanString> GetSubSpanString(int32_t start, int32_t length) const;
+    RefPtr<SpanString> GetSubSpanString(int32_t start, int32_t length, bool includeStartHalf = false,
+        bool includeEndHalf = true, bool rangeNeedNotChange = true) const;
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length) const;
     std::vector<RefPtr<SpanBase>> GetSpans(int32_t start, int32_t length, SpanType spanType) const;
     bool operator==(const SpanString& other) const;

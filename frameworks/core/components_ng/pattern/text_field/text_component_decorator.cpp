@@ -251,8 +251,6 @@ void CounterDecorator::UpdateTextNodeAndMeasure(
     CHECK_NULL_VOID(textNode);
     auto pipeline = decoratedNode->GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
     auto textFieldPattern = decoratedNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     auto textFieldLayoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();

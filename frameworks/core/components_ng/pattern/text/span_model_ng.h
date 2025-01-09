@@ -92,7 +92,7 @@ public:
     static Ace::TextCase GetTextCase(UINode* uiNode);
     static Dimension GetLetterSpacing(UINode* uiNode);
     static Dimension GetBaselineOffset(UINode* uiNode);
-    static TextStyle GetDefaultTextStyle();
+    static TextStyle GetDefaultTextStyle(int32_t themeScopeId);
     void CreateContainSpan() override;
     void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
     static void SetTextBackgroundStyle(UINode* uiNode, const TextBackgroundStyle& style);

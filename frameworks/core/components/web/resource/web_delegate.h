@@ -901,6 +901,7 @@ public:
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    void UpdateOptimizeParserBudgetEnabled(const bool enable);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -1025,6 +1026,7 @@ public:
     bool GetIsSmoothDragResizeEnabled();
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
     void SetDragResizeStartFlag(bool isDragResizeStart);
+    void SetDragResizePreSize(const double& pre_height, const double& pre_width);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
@@ -1367,6 +1369,8 @@ private:
     RefPtr<TaskExecutor> taskExecutor_;
     bool isEnableHardwareComposition_ = false;
     bool isDragResizeStart_ = false;
+    double dragResize_preHight_ = 0.0;
+    double dragResize_preWidth_ = 0.0;
 #endif
 };
 

@@ -23,6 +23,8 @@ import { ListBootcamp } from './ListBootcamp';
 import { GridBootcamp } from './GridBootcamp';
 import { FlexBootcamp } from './FlexBootcamp';
 import { ColumnBootcamp } from './ColumnBootcamp';
+import { GridColBootcamp } from './GridColBootcamp';
+import { FolderStackBootcamp } from './FolderStackBootcamp';
 import { StackBootcamp } from './StackBootcamp';
 import { RelativeContainerBootcamp } from './RelativeContainerBootcamp';
 import { RowBootcamp } from './RowBootcamp';
@@ -45,12 +47,14 @@ export const containersRoute: RouteGroup = {
     { name: 'grid', label: '网格/Grid' },
     { name: 'flex', label: '弹性布局/Flex' },
     { name: 'column', label: '纵向布局/Column' },
+    { name: 'grid-col', label: '栅格列/GridCol' },
     { name: 'stack', label: '层叠布局/Stack' },
     { name: 'relative-container', label: '相对布局/RelativeContainer' },
     { name: 'row', label: '横向布局/Row' },
     { name: 'scroll', label: '滚动容器/Scroll' },
     { name: 'waterFlow', label: '瀑布流容器/WaterFlow' },
-    { name: 'gridRow', label: '栅格容器/GridRow' }
+    { name: 'gridRow', label: '栅格容器/GridRow' },
+    { name: 'folder-stack', label: '折叠布局/FolderStack' },
   ]
 };
 
@@ -76,6 +80,8 @@ export function ContainersDestination(name: string, route: Route) {
     FlexBootcamp({ title: route.label })
   } else if (name === 'containers/column') {
     ColumnBootcamp({ title: route.label })
+  } else if (name === 'containers/grid-col') {
+    GridColBootcamp({ title: route.label })
   } else if (name === 'containers/stack') {
     StackBootcamp({ title: route.label })
   } else if (name === 'containers/relative-container') {
@@ -88,5 +94,7 @@ export function ContainersDestination(name: string, route: Route) {
     WaterFlowBootcamp({ title: route.label })
   }else if (name === 'containers/gridRow') {
     GridRowBootcamp({ title: route.label })
+  } else if (name === 'containers/folder-stack') {
+    FolderStackBootcamp({ title: route.label })
   }
 }

@@ -115,6 +115,35 @@ public:
             }
         }
     }
+
+    void OnColorConfigurationUpdate() override
+    {
+        auto frameNode = GetHost();
+        CHECK_NULL_VOID(frameNode);
+        auto hostRenderContext = frameNode->GetRenderContext();
+        CHECK_NULL_VOID(hostRenderContext);
+        auto subNode = AceType::DynamicCast<FrameNode>(
+            frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId_.value())));
+        CHECK_NULL_VOID(subNode);
+        auto subTexNode = DynamicCast<FrameNode>(subNode->GetFirstChild());
+        CHECK_NULL_VOID(subTexNode);
+        auto subButtonTextLP = subTexNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(subButtonTextLP);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto textTheme = pipeline->GetTheme<TextTheme>(subTexNode->GetThemeScopeId());
+        CHECK_NULL_VOID(textTheme);
+        Color textColor = hostRenderContext->GetForegroundColorValue(textTheme->GetTextStyle().GetTextColor());
+        subButtonTextLP->UpdateTextColor(textColor);
+
+        auto addNode = AceType::DynamicCast<FrameNode>(
+            frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId_.value())));
+        auto addTexNode = DynamicCast<FrameNode>(addNode->GetFirstChild());
+        CHECK_NULL_VOID(addTexNode);
+        auto addButtonTextLP = addTexNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(addButtonTextLP);
+        addButtonTextLP->UpdateTextColor(textColor);
+    }
     
 private:
     void DumpInfo() override

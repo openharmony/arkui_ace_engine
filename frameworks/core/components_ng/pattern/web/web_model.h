@@ -202,6 +202,7 @@ public:
     virtual void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
     virtual void SetEnabledHapticFeedback(bool isEnabled) {}
+    virtual void SetOptimizeParserBudgetEnabled(bool enable) = 0;
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

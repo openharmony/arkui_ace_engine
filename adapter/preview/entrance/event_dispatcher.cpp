@@ -102,7 +102,7 @@ void ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, T
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event)
 {
     event.code = static_cast<KeyCode>(static_cast<int32_t>(keyEvent->code));
-    event.key = keyEvent->key;
+    event.key.assign(keyEvent->key);
     event.action = static_cast<KeyAction>(static_cast<int32_t>(keyEvent->action));
     for (auto& item : keyEvent->pressedCodes) {
         event.pressedCodes.push_back(static_cast<KeyCode>(static_cast<int32_t>(item)));

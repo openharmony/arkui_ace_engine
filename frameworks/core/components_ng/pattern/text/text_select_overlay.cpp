@@ -256,7 +256,7 @@ std::string TextSelectOverlay::GetSelectedText()
     CHECK_NULL_RETURN(textPattern, "");
     auto start = textPattern->GetTextSelector().GetTextStart();
     auto end = textPattern->GetTextSelector().GetTextEnd();
-    return UtfUtils::Str16ToStr8(textPattern->GetSelectedText(start, end));
+    return UtfUtils::Str16DebugToStr8(textPattern->GetSelectedText(start, end));
 }
 
 RectF TextSelectOverlay::GetSelectArea()

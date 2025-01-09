@@ -925,49 +925,41 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleFocusEvent001, TestSize.Level1)
 
     richEditorPattern->usingMouseRightButton_ = true;
     richEditorPattern->isLongPress_ = true;
-    richEditorPattern->isDragging_ = true;
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
     richEditorPattern->HandleFocusEvent();
 
     richEditorPattern->usingMouseRightButton_ = false;
     richEditorPattern->isLongPress_ = true;
-    richEditorPattern->isDragging_ = true;
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
     richEditorPattern->HandleFocusEvent();
 
     richEditorPattern->usingMouseRightButton_ = true;
     richEditorPattern->isLongPress_ = false;
-    richEditorPattern->isDragging_ = true;
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
     richEditorPattern->HandleFocusEvent();
 
     richEditorPattern->usingMouseRightButton_ = true;
     richEditorPattern->isLongPress_ = true;
-    richEditorPattern->isDragging_ = false;
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
     richEditorPattern->HandleFocusEvent();
 
     richEditorPattern->usingMouseRightButton_ = true;
     richEditorPattern->isLongPress_ = true;
-    richEditorPattern->isDragging_ = true;
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
     richEditorPattern->HandleFocusEvent();
 
     richEditorPattern->usingMouseRightButton_ = false;
     richEditorPattern->isLongPress_ = false;
-    richEditorPattern->isDragging_ = true;
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
     richEditorPattern->HandleFocusEvent();
 
     richEditorPattern->usingMouseRightButton_ = false;
     richEditorPattern->isLongPress_ = false;
-    richEditorPattern->isDragging_ = false;
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
     richEditorPattern->HandleFocusEvent();
 
     richEditorPattern->usingMouseRightButton_ = false;
     richEditorPattern->isLongPress_ = false;
-    richEditorPattern->isDragging_ = false;
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
     richEditorPattern->HandleFocusEvent();
 

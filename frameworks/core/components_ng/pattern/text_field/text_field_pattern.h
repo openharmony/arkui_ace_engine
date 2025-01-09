@@ -309,6 +309,7 @@ public:
 
     void InsertValue(const std::u16string& insertValue, bool isIME = false) override;
     void InsertValue(const std::string& insertValue, bool isIME = false) override;
+    int32_t InsertValueByController(const std::u16string& insertValue, int32_t offset);
     void InsertValueOperation(const SourceAndValueInfo& info);
     void CalcCounterAfterFilterInsertValue(int32_t curLength, const std::u16string insertValue, int32_t maxLength);
     void UpdateObscure(const std::u16string& insertValue, bool hasInsertValue);
@@ -401,7 +402,7 @@ public:
     {
         static TextEditingValue value;
         value.text = contentController_->GetTextValue();
-        value.hint = UtfUtils::Str16ToStr8(GetPlaceHolder());
+        value.hint = UtfUtils::Str16DebugToStr8(GetPlaceHolder());
         value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         return value;
     };
@@ -418,7 +419,7 @@ public:
 
     void UpdateEditingValue(const std::string& value, int32_t caretPosition)
     {
-        contentController_->SetTextValue(UtfUtils::Str8ToStr16(value));
+        contentController_->SetTextValue(UtfUtils::Str8DebugToStr16(value));
         selectController_->UpdateCaretIndex(caretPosition);
     }
     void UpdateCaretPositionByTouch(const Offset& offset);
@@ -679,18 +680,8 @@ public:
     void NotifyKeyboardClosed() override
     {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed");
-        CHECK_NULL_VOID(HasFocus());
-        CHECK_NULL_VOID(!customKeyboard_ && !customKeyboardBuilder_);
-        CHECK_NULL_VOID(IsStopEditWhenCloseKeyboard());
-        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipelineContext);
-        auto windowManager = pipelineContext->GetWindowManager();
-        CHECK_NULL_VOID(windowManager);
-
-        auto windowMode = windowManager->GetWindowMode();
-        TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "NotifyKeyboardClosed windowMode = %{public}d", windowMode);
-        if ((windowMode == WindowMode::WINDOW_MODE_FLOATING || windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) && IsStopEditWhenCloseKeyboard()) {
+        CHECK_NULL_VOID(IsStopEditWhenCloseKeyboard()); // false when specified product
+        if (HasFocus() && !(customKeyboard_ || customKeyboardBuilder_)) {
             FocusHub::LostFocusToViewRoot();
         }
     }
@@ -1533,7 +1524,7 @@ public:
 
     bool InsertOrDeleteSpace(int32_t index) override;
 
-    void DeleteRange(int32_t start, int32_t end) override;
+    void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
 
     bool SetCaretOffset(int32_t caretPostion) override;
 
@@ -1605,6 +1596,8 @@ public:
         return maxFontSizeScale_;
     }
 
+    SelectionInfo GetSelection();
+
     void SetTextFadeoutCapacity(bool enabled)
     {
         haveTextFadeoutCapacity_ = enabled;
@@ -1651,6 +1644,8 @@ protected:
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
     virtual bool IsNeedProcessAutoFill();
+    void UpdatePasswordIconColor(const Color& color);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
@@ -1785,7 +1780,7 @@ private:
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();
     void ProcessRectPadding();
-    void CalcInlineScrollRect(Rect& inlineScrollRect);
+    void CalcScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
     bool IsAccessibilityClick();

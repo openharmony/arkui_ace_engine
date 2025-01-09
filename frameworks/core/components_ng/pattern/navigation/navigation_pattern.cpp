@@ -77,7 +77,10 @@ void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDest
         name = pathInfo->GetName();
         param = pathInfo->GetParamObj();
     }
-    info = std::make_optional<NavDestinationInfo>(navigationId, name, state, index, param, navDestinationId);
+    NavDestinationMode mode = context->GetMode();
+    int32_t uniqueId = context->GetUniqueId();
+    info = std::make_optional<NavDestinationInfo>(navigationId, name, state, index, param,
+        navDestinationId, mode, std::to_string(uniqueId));
 }
 
 void LogCustomAnimationStart(const RefPtr<NavDestinationGroupNode>& preTopDestination,
@@ -1514,7 +1517,8 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     }
                 }
             },
-            TaskExecutor::TaskType::UI, "ArkUINavigationDirtyLayoutWrapperSwap");
+            TaskExecutor::TaskType::UI, "ArkUINavigationDirtyLayoutWrapperSwap",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     CHECK_NULL_RETURN(navigationLayoutProperty, false);

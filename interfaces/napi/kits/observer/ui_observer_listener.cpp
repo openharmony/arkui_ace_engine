@@ -696,17 +696,25 @@ napi_value UIObserverListener::CreateNavDestinationInfoObj(const NG::NavDestinat
     napi_value napiState = nullptr;
     napi_value napiIdx = nullptr;
     napi_value napiNavDesId = nullptr;
+    napi_value napiMode = nullptr;
+    napi_value napiUniqueId = nullptr;
     napi_create_string_utf8(env_, info.navigationId.c_str(), info.navigationId.length(), &napiNavId);
     napi_create_string_utf8(env_, info.name.c_str(), info.name.length(), &napiName);
     napi_create_int32(env_, static_cast<int32_t>(info.state), &napiState);
     napi_create_int32(env_, info.index, &napiIdx);
     napi_create_string_utf8(env_, info.navDestinationId.c_str(), info.navDestinationId.length(), &napiNavDesId);
+    napi_create_int32(env_, static_cast<int32_t>(info.mode), &napiMode);
+    napi_create_string_utf8(env_, info.uniqueId.c_str(), info.uniqueId.length(), &napiUniqueId);
     napi_set_named_property(env_, objValue, "navigationId", napiNavId);
     napi_set_named_property(env_, objValue, "name", napiName);
     napi_set_named_property(env_, objValue, "state", napiState);
     napi_set_named_property(env_, objValue, "index", napiIdx);
     napi_set_named_property(env_, objValue, "param", info.param);
     napi_set_named_property(env_, objValue, "navDestinationId", napiNavDesId);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        napi_set_named_property(env_, objValue, "mode", napiMode);
+        napi_set_named_property(env_, objValue, "uniqueId", napiUniqueId);
+    }
     return objValue;
 }
 

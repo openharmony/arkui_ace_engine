@@ -1773,4 +1773,59 @@ HWTEST_F(SearchTestTwoNg, StopBackPress, TestSize.Level1)
     EXPECT_TRUE(textFieldPattern->OnBackPressed());
     EXPECT_TRUE(manager->IsStopBackPress());
 }
+
+/**
+ * @tc.name: MinFontScale001
+ * @tc.desc: test search minFontScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, MinFontScale001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    /**
+     * @tc.step: step2.  set minFontScale 1.0
+     */
+    searchModelInstance.SetMinFontScale(1.0);
+
+    /**
+     * @tc.step: step3. test minFontScale
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetMinFontScale(), 1.0);
+}
+
+/**
+ * @tc.name: MaxFontScale001
+ * @tc.desc: test search maxFontScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestTwoNg, MaxFontScale001, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. create frameNode and pattern.
+     */
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    /**
+     * @tc.step: step2.  set maxFontScale 2.0
+     */
+    searchModelInstance.SetMaxFontScale(2.0);
+
+    /**
+     * @tc.step: step3. test maxFontScale
+     */
+    EXPECT_EQ(textFieldLayoutProperty->GetMaxFontScale(), 2.0);
+}
 } // namespace OHOS::Ace::NG

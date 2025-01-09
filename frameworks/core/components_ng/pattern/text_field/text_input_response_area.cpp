@@ -329,6 +329,18 @@ void PasswordResponseArea::OnPasswordIconClicked()
     ChangeObscuredState();
 }
 
+void PasswordResponseArea::UpdatePasswordIconColor(const Color& color)
+{
+    showIcon_->SetFillColor(color);
+    hideIcon_->SetFillColor(color);
+
+    if (IsSymbolIcon()) {
+        UpdateSymbolColor();
+    } else {
+        UpdateImageSource();
+    }
+}
+
 void PasswordResponseArea::ChangeObscuredState()
 {
     auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
@@ -401,7 +413,7 @@ void PasswordResponseArea::LoadImageSourceInfo()
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>(tmpHost->GetThemeScopeId());
     CHECK_NULL_VOID(textFieldTheme);
     if (showIcon_->GetResourceId() == InternalResource::ResourceId::SHOW_PASSWORD_SVG) {
         showIcon_->SetFillColor(textFieldTheme->GetTextColor());
@@ -477,7 +489,7 @@ void PasswordResponseArea::UpdateSymbolSource()
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(textFieldTheme);
     auto symbolNode = passwordNode_.Upgrade();
     CHECK_NULL_VOID(symbolNode);
@@ -503,7 +515,7 @@ void PasswordResponseArea::UpdateSymbolColor()
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(textFieldTheme);
     auto symbolNode = passwordNode_.Upgrade();
     CHECK_NULL_VOID(symbolNode);
@@ -751,7 +763,7 @@ void CleanNodeResponseArea::UpdateSymbolSource()
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(textFieldTheme);
     auto symbolNode = cleanNode_->GetFirstChild();
     CHECK_NULL_VOID(symbolNode);
@@ -1004,7 +1016,7 @@ void CleanNodeResponseArea::LoadingCancelButtonColor()
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
         CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetTheme<TextFieldTheme>();
+        auto theme = pipeline->GetTheme<TextFieldTheme>(host->GetThemeScopeId());
         CHECK_NULL_VOID(theme);
         iconColor_ = theme->GetTextColorDisable();
     } else if (textFieldLayoutProperty->HasIconColor()) {

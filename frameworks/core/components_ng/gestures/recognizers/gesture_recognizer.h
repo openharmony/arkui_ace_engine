@@ -408,6 +408,15 @@ public:
     {
         return extraInfo_;
     }
+
+    virtual void CleanRecognizerStateVoluntarily() {}
+
+    void ResetStateVoluntarily();
+
+    void SetIsNeedResetRecognizer(bool isNeedResetRecognizerState);
+
+    bool IsNeedResetRecognizerState();
+
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -476,6 +485,10 @@ protected:
     bool enabled_ = true;
     ResponseLinkResult responseLinkRecognizer_;
     std::string extraInfo_;
+    // This flag is set when the current recognition of the recognizer ends. Used when all fingers on the recognizer are
+    // raised.
+    bool isNeedResetVoluntarily_ = false;
+    bool isNeedResetRecognizerState_ = false;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;

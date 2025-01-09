@@ -296,6 +296,13 @@ void* createXComponentNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createXComponentTextureNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, "", XComponentType::TEXTURE, "");
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
 {
     ArkUI_XComponent_Params* xcParams = (ArkUI_XComponent_Params*)(&params);
@@ -684,6 +691,11 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createMarqueeNode,
     createCheckBoxGroupNode,
     createRatingNode,
+#ifdef XCOMPONENT_SUPPORTED
+    createXComponentTextureNode,
+#else
+    nullptr,
+#endif
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)

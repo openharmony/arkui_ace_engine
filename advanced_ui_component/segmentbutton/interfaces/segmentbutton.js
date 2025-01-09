@@ -13,21 +13,21 @@
  * limitations under the License.
  */
 
-var j = (this && this.j) || function (t3, target, key, desc) {
-    var c = arguments.length,
-        r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.o1 === "function") {
-        r = Reflect.o1(t3, target, key, desc);
+var __decorate = (this && this.__decorate) || function (r37, s37, t37, u37) {
+    var v37 = arguments.length,
+        w37 = v37 < 3 ? s37 : u37 === null ? u37 = Object.getOwnPropertyDescriptor(s37, t37) : u37, x37;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") {
+        w37 = Reflect.decorate(r37, s37, t37, u37);
     } else {
-        for (var u3 = t3.length - 1; u3 >= 0; u3--) {
-            if (d = t3[u3]) {
-                r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+        for (var y37 = r37.length - 1; y37 >= 0; y37--) {
+            if (x37 = r37[y37]) {
+                w37 = (v37 < 3 ? x37(w37) : v37 > 3 ? x37(s37, t37, w37) : x37(s37, t37)) || w37;
             }
         }
     }
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
+    return v37 > 3 && w37 && Object.defineProperty(s37, t37, w37), w37;
 };
-var m, o;
+var SegmentButtonItemOptionsArray_1, SegmentButtonOptions_1;
 if (!("finalizeConstruction" in ViewPU.prototype)) {
     Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {
     });
@@ -36,332 +36,424 @@ const curves = globalThis.requireNativeModule('ohos.curves');
 const KeyCode = globalThis.requireNapi('multimodalInput.keyCode').KeyCode;
 const util = globalThis.requireNapi('util');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
-const t = requireNapi('i18n');
+const I18n = requireNapi('i18n');
 
-const u = 2;
-const a1 = 5;
-const b1 = 1;
-const c1 = 2;
-const d1 = 1;
-const e1 = {
-    q1: {
+const MIN_ITEM_COUNT = 2;
+const MAX_ITEM_COUNT = 5;
+const DEFAULT_MAX_FONT_SCALE = 1;
+const MAX_MAX_FONT_SCALE = 2;
+const MIN_MAX_FONT_SCALE = 1;
+const segmentButtonTheme = {
+    FONT_COLOR: {
         "id": -1,
         "type": 10001,
-        params: ['sys.color.ohos_id_color_text_secondary'],
+        params: ['sys.color.segment_button_unselected_text_color'],
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
-    s1: {
+    TAB_SELECTED_FONT_COLOR: {
         "id": -1,
         "type": 10001,
-        params: ['sys.color.ohos_id_color_text_primary'],
+        params: ['sys.color.segment_button_checked_text_color'],
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
-    t1: {
+    CAPSULE_SELECTED_FONT_COLOR: {
         "id": -1,
         "type": 10001,
         params: ['sys.color.ohos_id_color_foreground_contrary'],
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
-    u1: {
+    FONT_SIZE: {
         "id": -1,
         "type": 10002,
-        params: ['sys.float.ohos_id_text_size_body2'],
+        params: ['sys.float.segment_button_unselected_text_size'],
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
-    v1: {
+    SELECTED_FONT_SIZE: {
         "id": -1,
         "type": 10002,
-        params: ['sys.float.ohos_id_text_size_body2'],
+        params: ['sys.float.segment_button_checked_text_size'],
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
     BACKGROUND_COLOR: {
         "id": -1,
         "type": 10001,
-        params: ['sys.color.ohos_id_color_button_normal'],
+        params: ['sys.color.segment_button_backboard_color'],
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
-    w1: {
+    TAB_SELECTED_BACKGROUND_COLOR: {
         "id": -1,
         "type": 10001,
-        params: ['sys.color.ohos_id_color_foreground_contrary'],
+        params: ['sys.color.segment_button_checked_foreground_color'],
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
-    z1: {
+    CAPSULE_SELECTED_BACKGROUND_COLOR: {
         "id": -1,
         "type": 10001,
         params: ['sys.color.ohos_id_color_emphasize'],
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
-    a2: {
+    FOCUS_BORDER_COLOR: {
         "id": -1,
         "type": 10001,
         params: ['sys.color.ohos_id_color_focused_outline'],
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
-    b2: {
+    HOVER_COLOR: {
         "id": -1,
         "type": 10001,
-        params: ['sys.color.ohos_id_color_hover'],
+        params: ['sys.color.segment_button_hover_color'],
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
-    c2: {
+    PRESS_COLOR: {
         "id": -1,
         "type": 10001,
-        params: ['sys.color.ohos_id_color_click_effect'],
+        params: ['sys.color.segment_button_press_color'],
         "bundleName": "__harDefaultBundleName__",
         "moduleName": "__harDefaultModuleName__"
     },
-    d2: BlurStyle.NONE
+    BACKGROUND_BLUR_STYLE: LengthMetrics.resource({
+        "id": -1,
+        "type": 10002,
+        params: ['sys.float.segment_button_background_blur_style'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    })
+        .value,
+    SEGMENT_BUTTON_PADDING: LengthMetrics.resource({
+        "id": -1,
+        "type": 10002,
+        params: ['sys.float.segment_button_baseplate_padding'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    }).value,
+    CONSTRAINT_SIZE_MIN_HEIGHT: {
+        "id": -1,
+        "type": 10002,
+        params: ['sys.float.segment_button_height'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    },
+    SEGMENT_BUTTON_MIN_FONT_SIZE: {
+        "id": -1,
+        "type": 10002,
+        params: ['sys.float.segment_button_min_font_size'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    },
+    SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: {
+        "id": -1,
+        "type": 10002,
+        params: ['sys.float.segment_button_normal_border_radius'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    },
+    SEGMENT_ITEM_TEXT_OVERFLOW: LengthMetrics.resource({
+        "id": -1,
+        "type": 10002,
+        params: ['sys.float.segment_marquee'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    }).value === 0.0,
+    SEGMENT_BUTTON_FOCUS_TEXT_COLOR: {
+        "id": -1,
+        "type": 10001,
+        params: ['sys.color.segment_button_focus_text_primary'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    },
+    SEGMENT_BUTTON_SHADOW: LengthMetrics.resource({
+        "id": -1,
+        "type": 10002,
+        params: ['sys.float.segment_button_shadow'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    }).value,
+    SEGMENT_TEXT_HORIZONTAL_PADDING: {
+        "id": -1,
+        "type": 10002,
+        params: ['sys.float.segment_button_text_l_r_padding'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    },
+    SEGMENT_TEXT_VERTICAL_PADDING: {
+        "id": -1,
+        "type": 10002,
+        params: ['sys.float.segment_button_text_u_d_padding'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    },
+    SEGMENT_TEXT_CAPSULE_VERTICAL_PADDING: {
+        "id": -1,
+        "type": 10002,
+        params: ['sys.float.segment_button_text_capsule_u_d_padding'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    },
+    SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR: {
+        "id": -1,
+        "type": 10001,
+        params: ['sys.color.segment_button_focus_backboard_primary'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    },
+    SEGMENT_FOCUS_STYLE_CUSTOMIZED: LengthMetrics.resource({
+        "id": -1,
+        "type": 10002,
+        params: ['sys.float.segment_focus_control'],
+        "bundleName": "__harDefaultBundleName__",
+        "moduleName": "__harDefaultModuleName__"
+    }).value === 0.0
 };
 
-function i(first, second) {
-    return Math.abs(first - second) < 0.001;
+function nearEqual(o37, p37) {
+    return Math.abs(o37 - p37) < 0.001;
 }
 
 let SegmentButtonItemOptions = class SegmentButtonItemOptions {
-    constructor(options) {
-        this.icon = options.icon;
-        this.selectedIcon = options.selectedIcon;
-        this.text = options.text;
-        this.iconAccessibilityText = options.iconAccessibilityText;
-        this.selectedIconAccessibilityText = options.selectedIconAccessibilityText;
-        this.accessibilityLevel = options.accessibilityLevel;
-        this.accessibilityDescription = options.accessibilityDescription;
+    constructor(n37) {
+        this.icon = n37.icon;
+        this.selectedIcon = n37.selectedIcon;
+        this.text = n37.text;
+        this.iconAccessibilityText = n37.iconAccessibilityText;
+        this.selectedIconAccessibilityText = n37.selectedIconAccessibilityText;
+        this.accessibilityLevel = n37.accessibilityLevel;
+        this.accessibilityDescription = n37.accessibilityDescription;
     }
 };
-SegmentButtonItemOptions = j([
+SegmentButtonItemOptions = __decorate([
     Observed
 ], SegmentButtonItemOptions);
-let SegmentButtonItemOptionsArray = m = class SegmentButtonItemOptionsArray extends Array {
-    constructor(s3) {
-        super(typeof s3 === 'number' ? s3 : 0);
-        this.e2 = void 0;
-        this.deleteCount = void 0;
-        this.f2 = void 0;
-        if (typeof s3 !== 'number' && s3 !== void 0) {
-            super.push(...s3.map((element) => new SegmentButtonItemOptions(element)));
+let SegmentButtonItemOptionsArray =
+    SegmentButtonItemOptionsArray_1 = class SegmentButtonItemOptionsArray extends Array {
+        constructor(k37) {
+            super(typeof k37 === 'number' ? k37 : 0);
+            this.changeStartIndex = void 0;
+            this.deleteCount = void 0;
+            this.addLength = void 0;
+            if (typeof k37 !== 'number' && k37 !== void 0) {
+                super.push(...k37.map((m37) => new SegmentButtonItemOptions(m37)));
+            }
         }
-    }
 
-    push(...items) {
-        if (this.length + items.length > a1) {
-            console.warn('Exceeded the maximum number of elements (5).');
-            return this.length;
-        }
-        this.e2 = this.length;
-        this.deleteCount = 0;
-        this.f2 = items.length;
-        return super.push(...items.map((element) => new SegmentButtonItemOptions(element)));
-    }
-
-    pop() {
-        if (this.length <= u) {
-            console.warn('Below the minimum number of elements (2).');
-            return void 0;
-        }
-        this.e2 = this.length - 1;
-        this.deleteCount = 1;
-        this.f2 = 0;
-        return super.pop();
-    }
-
-    shift() {
-        if (this.length <= u) {
-            console.warn('Below the minimum number of elements (2).');
-            return void 0;
-        }
-        this.e2 = 0;
-        this.deleteCount = 1;
-        this.f2 = 0;
-        return super.shift();
-    }
-
-    unshift(...items) {
-        if (this.length + items.length > a1) {
-            console.warn('Exceeded the maximum number of elements (5).');
-            return this.length;
-        }
-        if (items.length > 0) {
-            this.e2 = 0;
+        push(...h37) {
+            if (this.length + h37.length > MAX_ITEM_COUNT) {
+                console.warn('Exceeded the maximum number of elements (5).');
+                return this.length;
+            }
+            this.changeStartIndex = this.length;
             this.deleteCount = 0;
-            this.f2 = items.length;
+            this.addLength = h37.length;
+            return super.push(...h37.map((j37) => new SegmentButtonItemOptions(j37)));
         }
-        return super.unshift(...items.map((element) => new SegmentButtonItemOptions(element)));
-    }
 
-    splice(start, deleteCount, ...items) {
-        let length = (this.length - deleteCount) < 0 ? 0 : (this.length - deleteCount);
-        length += items.length;
-        if (length < u) {
-            console.warn('Below the minimum number of elements (2).');
-            return [];
+        pop() {
+            if (this.length <= MIN_ITEM_COUNT) {
+                console.warn('Below the minimum number of elements (2).');
+                return void 0;
+            }
+            this.changeStartIndex = this.length - 1;
+            this.deleteCount = 1;
+            this.addLength = 0;
+            return super.pop();
         }
-        if (length > a1) {
-            console.warn('Exceeded the maximum number of elements (5).');
-            return [];
-        }
-        this.e2 = start;
-        this.deleteCount = deleteCount;
-        this.f2 = items.length;
-        return super.splice(start, deleteCount, ...items);
-    }
 
-    static create(elements) {
-        return new m(elements);
-    }
-};
-SegmentButtonItemOptionsArray = m = j([
+        shift() {
+            if (this.length <= MIN_ITEM_COUNT) {
+                console.warn('Below the minimum number of elements (2).');
+                return void 0;
+            }
+            this.changeStartIndex = 0;
+            this.deleteCount = 1;
+            this.addLength = 0;
+            return super.shift();
+        }
+
+        unshift(...e37) {
+            if (this.length + e37.length > MAX_ITEM_COUNT) {
+                console.warn('Exceeded the maximum number of elements (5).');
+                return this.length;
+            }
+            if (e37.length > 0) {
+                this.changeStartIndex = 0;
+                this.deleteCount = 0;
+                this.addLength = e37.length;
+            }
+            return super.unshift(...e37.map((g37) => new SegmentButtonItemOptions(g37)));
+        }
+
+        splice(a37, b37, ...c37) {
+            let d37 = (this.length - b37) < 0 ? 0 : (this.length - b37);
+            d37 += c37.length;
+            if (d37 < MIN_ITEM_COUNT) {
+                console.warn('Below the minimum number of elements (2).');
+                return [];
+            }
+            if (d37 > MAX_ITEM_COUNT) {
+                console.warn('Exceeded the maximum number of elements (5).');
+                return [];
+            }
+            this.changeStartIndex = a37;
+            this.deleteCount = b37;
+            this.addLength = c37.length;
+            return super.splice(a37, b37, ...c37);
+        }
+
+        static create(z36) {
+            return new SegmentButtonItemOptionsArray_1(z36);
+        }
+    };
+SegmentButtonItemOptionsArray = SegmentButtonItemOptionsArray_1 = __decorate([
     Observed
 ], SegmentButtonItemOptionsArray);
 
 export { SegmentButtonItemOptionsArray };
-let SegmentButtonOptions = o = class SegmentButtonOptions {
+let SegmentButtonOptions = SegmentButtonOptions_1 = class SegmentButtonOptions {
     get buttons() {
-        return this.g2;
+        return this._buttons;
     }
 
-    set buttons(val) {
-        if (this.g2 !== void 0 && this.g2 !== val) {
-            this.h2?.();
+    set buttons(y36) {
+        if (this._buttons !== void 0 && this._buttons !== y36) {
+            this.onButtonsChange?.();
         }
-        this.g2 = val;
+        this._buttons = y36;
     }
 
-    constructor(options) {
+    constructor(x36) {
         this.multiply = false;
-        this.i2 = false;
+        this.showText = false;
         this.showIcon = false;
-        this.g2 = void 0;
-        this.fontColor = options.fontColor ?? e1.q1;
-        this.selectedFontColor = options.selectedFontColor ?? e1.s1;
-        this.fontSize = options.fontSize ?? e1.u1;
-        this.selectedFontSize = options.selectedFontSize ?? e1.v1;
-        this.fontWeight = options.fontWeight ?? FontWeight.Regular;
-        this.selectedFontWeight = options.selectedFontWeight ?? FontWeight.Medium;
-        this.backgroundColor = options.backgroundColor ?? e1.BACKGROUND_COLOR;
-        this.selectedBackgroundColor = options.selectedBackgroundColor ?? e1.w1;
-        this.imageSize = options.imageSize ?? { width: 24, height: 24 };
-        this.buttonPadding = options.buttonPadding;
-        this.textPadding = options.textPadding;
-        this.type = options.type;
-        this.backgroundBlurStyle = options.backgroundBlurStyle ?? e1.d2;
-        this.localizedTextPadding = options.localizedTextPadding;
-        this.localizedButtonPadding = options.localizedButtonPadding;
-        this.direction = options.direction ?? Direction.Auto;
-        this.buttons = new SegmentButtonItemOptionsArray(options.buttons);
+        this._buttons = void 0;
+        this.fontColor = x36.fontColor ?? segmentButtonTheme.FONT_COLOR;
+        this.selectedFontColor = x36.selectedFontColor ?? segmentButtonTheme.TAB_SELECTED_FONT_COLOR;
+        this.fontSize = x36.fontSize ?? segmentButtonTheme.FONT_SIZE;
+        this.selectedFontSize = x36.selectedFontSize ?? segmentButtonTheme.SELECTED_FONT_SIZE;
+        this.fontWeight = x36.fontWeight ?? FontWeight.Regular;
+        this.selectedFontWeight = x36.selectedFontWeight ?? FontWeight.Medium;
+        this.backgroundColor = x36.backgroundColor ?? segmentButtonTheme.BACKGROUND_COLOR;
+        this.selectedBackgroundColor = x36.selectedBackgroundColor ?? segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR;
+        this.imageSize = x36.imageSize ?? { width: 24, height: 24 };
+        this.buttonPadding = x36.buttonPadding;
+        this.textPadding = x36.textPadding;
+        this.type = x36.type;
+        this.backgroundBlurStyle = x36.backgroundBlurStyle ?? segmentButtonTheme.BACKGROUND_BLUR_STYLE;
+        this.localizedTextPadding = x36.localizedTextPadding;
+        this.localizedButtonPadding = x36.localizedButtonPadding;
+        this.direction = x36.direction ?? Direction.Auto;
+        this.buttons = new SegmentButtonItemOptionsArray(x36.buttons);
         if (this.type === 'capsule') {
-            this.multiply = options.multiply ?? false;
-            this.j2();
-            this.selectedFontColor = options.selectedFontColor ?? e1.t1;
-            this.selectedBackgroundColor = options.selectedBackgroundColor ??
-            e1.z1;
+            this.multiply = x36.multiply ?? false;
+            this.onButtonsUpdated();
+            this.selectedFontColor = x36.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
+            this.selectedBackgroundColor = x36.selectedBackgroundColor ??
+            segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
         } else {
-            this.i2 = true;
+            this.showText = true;
         }
-        this.l2 = this.multiply ? 0 : 2;
+        this.componentPadding = this.multiply ? 0 : segmentButtonTheme.SEGMENT_BUTTON_PADDING;
     }
 
-    j2() {
-        this.buttons?.forEach(button => {
-            this.i2 ||= button.text !== void 0;
-            this.showIcon ||= button.icon !== void 0 || button.selectedIcon !== void 0;
+    onButtonsUpdated() {
+        this.buttons?.forEach(w36 => {
+            this.showText ||= w36.text !== void 0;
+            this.showIcon ||= w36.icon !== void 0 || w36.selectedIcon !== void 0;
         });
-        if (this.i2 && this.showIcon) {
-            this.m2 = 12;
-            this.n2 = 14;
+        if (this.showText && this.showIcon) {
+            this.iconTextRadius = 12;
+            this.iconTextBackgroundRadius = 14;
         }
     }
 
-    static tab(options) {
-        return new o({
+    static tab(u36) {
+        return new SegmentButtonOptions_1({
             type: 'tab',
-            buttons: options.buttons,
-            fontColor: options.fontColor,
-            selectedFontColor: options.selectedFontColor,
-            fontSize: options.fontSize,
-            selectedFontSize: options.selectedFontSize,
-            fontWeight: options.fontWeight,
-            selectedFontWeight: options.selectedFontWeight,
-            backgroundColor: options.backgroundColor,
-            selectedBackgroundColor: options.selectedBackgroundColor,
-            imageSize: options.imageSize,
-            buttonPadding: options.buttonPadding,
-            textPadding: options.textPadding,
-            localizedTextPadding: options.localizedTextPadding,
-            localizedButtonPadding: options.localizedButtonPadding,
-            backgroundBlurStyle: options.backgroundBlurStyle,
-            direction: options.direction
+            buttons: u36.buttons,
+            fontColor: u36.fontColor,
+            selectedFontColor: u36.selectedFontColor,
+            fontSize: u36.fontSize,
+            selectedFontSize: u36.selectedFontSize,
+            fontWeight: u36.fontWeight,
+            selectedFontWeight: u36.selectedFontWeight,
+            backgroundColor: u36.backgroundColor,
+            selectedBackgroundColor: u36.selectedBackgroundColor,
+            imageSize: u36.imageSize,
+            buttonPadding: u36.buttonPadding,
+            textPadding: u36.textPadding,
+            localizedTextPadding: u36.localizedTextPadding,
+            localizedButtonPadding: u36.localizedButtonPadding,
+            backgroundBlurStyle: u36.backgroundBlurStyle,
+            direction: u36.direction
         });
     }
 
-    static capsule(options) {
-        return new o({
+    static capsule(t36) {
+        return new SegmentButtonOptions_1({
             type: 'capsule',
-            buttons: options.buttons,
-            multiply: options.multiply,
-            fontColor: options.fontColor,
-            selectedFontColor: options.selectedFontColor,
-            fontSize: options.fontSize,
-            selectedFontSize: options.selectedFontSize,
-            fontWeight: options.fontWeight,
-            selectedFontWeight: options.selectedFontWeight,
-            backgroundColor: options.backgroundColor,
-            selectedBackgroundColor: options.selectedBackgroundColor,
-            imageSize: options.imageSize,
-            buttonPadding: options.buttonPadding,
-            textPadding: options.textPadding,
-            localizedTextPadding: options.localizedTextPadding,
-            localizedButtonPadding: options.localizedButtonPadding,
-            backgroundBlurStyle: options.backgroundBlurStyle,
-            direction: options.direction
+            buttons: t36.buttons,
+            multiply: t36.multiply,
+            fontColor: t36.fontColor,
+            selectedFontColor: t36.selectedFontColor,
+            fontSize: t36.fontSize,
+            selectedFontSize: t36.selectedFontSize,
+            fontWeight: t36.fontWeight,
+            selectedFontWeight: t36.selectedFontWeight,
+            backgroundColor: t36.backgroundColor,
+            selectedBackgroundColor: t36.selectedBackgroundColor,
+            imageSize: t36.imageSize,
+            buttonPadding: t36.buttonPadding,
+            textPadding: t36.textPadding,
+            localizedTextPadding: t36.localizedTextPadding,
+            localizedButtonPadding: t36.localizedButtonPadding,
+            backgroundBlurStyle: t36.backgroundBlurStyle,
+            direction: t36.direction
         });
     }
 };
-SegmentButtonOptions = o = j([
+SegmentButtonOptions = SegmentButtonOptions_1 = __decorate([
     Observed
 ], SegmentButtonOptions);
 
 export { SegmentButtonOptions };
 
-class f1 extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
+class MultiSelectBackground extends ViewPU {
+    constructor(n36, o36, p36, q36 = -1, r36 = undefined, s36) {
+        super(n36, p36, q36, s36);
+        if (typeof r36 === "function") {
+            this.paramsGenerator_ = r36;
         }
-        this.__optionsArray = new SynchedPropertyNesedObjectPU(params.optionsArray, this, "optionsArray");
-        this.__options = new SynchedPropertyNesedObjectPU(params.options, this, "options");
+        this.__optionsArray = new SynchedPropertyNesedObjectPU(o36.optionsArray, this, "optionsArray");
+        this.__options = new SynchedPropertyNesedObjectPU(o36.options, this, "options");
         this.__buttonBorderRadius = this.initializeConsume("buttonBorderRadius", "buttonBorderRadius");
         this.__buttonItemsSize = this.initializeConsume("buttonItemsSize", "buttonItemsSize");
-        this.setInitiallyProvidedValue(params);
+        this.setInitiallyProvidedValue(o36);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(params) {
-        this.__optionsArray.set(params.optionsArray);
-        this.__options.set(params.options);
+    setInitiallyProvidedValue(m36) {
+        this.__optionsArray.set(m36.optionsArray);
+        this.__options.set(m36.options);
     }
 
-    updateStateVars(params) {
-        this.__optionsArray.set(params.optionsArray);
-        this.__options.set(params.options);
+    updateStateVars(l36) {
+        this.__optionsArray.set(l36.optionsArray);
+        this.__options.set(l36.options);
     }
 
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__optionsArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__options.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonBorderRadius.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonItemsSize.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(k36) {
+        this.__optionsArray.purgeDependencyOnElmtId(k36);
+        this.__options.purgeDependencyOnElmtId(k36);
+        this.__buttonBorderRadius.purgeDependencyOnElmtId(k36);
+        this.__buttonItemsSize.purgeDependencyOnElmtId(k36);
     }
 
     aboutToBeDeleted() {
@@ -385,39 +477,40 @@ class f1 extends ViewPU {
         return this.__buttonBorderRadius.get();
     }
 
-    set buttonBorderRadius(newValue) {
-        this.__buttonBorderRadius.set(newValue);
+    set buttonBorderRadius(j36) {
+        this.__buttonBorderRadius.set(j36);
     }
 
     get buttonItemsSize() {
         return this.__buttonItemsSize.get();
     }
 
-    set buttonItemsSize(newValue) {
-        this.__buttonItemsSize.set(newValue);
+    set buttonItemsSize(i36) {
+        this.__buttonItemsSize.set(i36);
     }
 
     initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((g36, h36) => {
             Row.create({ space: 1 });
             Row.direction(this.options.direction);
-            Row.padding(this.options.l2);
+            Row.padding(this.options.componentPadding);
         }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((r35, s35) => {
             ForEach.create();
-            const forEachItemGenFunction = (_item, index) => {
-                const r3 = _item;
-                this.observeComponentCreation2((elmtId, isInitialRender) => {
+            const t35 = (v35, w35) => {
+                const x35 = v35;
+                this.observeComponentCreation2((z35, a36) => {
                     If.create();
-                    if (index < a1) {
+                    if (w35 < MAX_ITEM_COUNT) {
                         this.ifElseBranchUpdateFunction(0, () => {
-                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            this.observeComponentCreation2((e36, f36) => {
                                 Stack.create();
                                 Stack.direction(this.options.direction);
                                 Stack.layoutWeight(1);
-                                Stack.height(this.buttonItemsSize[index].height);
-                                Stack.backgroundColor(this.options.backgroundColor ?? e1.BACKGROUND_COLOR);
-                                Stack.borderRadius(this.buttonBorderRadius[index]);
+                                Stack.height(this.buttonItemsSize[w35].height);
+                                Stack.backgroundColor(this.options.backgroundColor ??
+                                segmentButtonTheme.BACKGROUND_COLOR);
+                                Stack.borderRadius(this.buttonBorderRadius[w35]);
                                 Stack.backgroundBlurStyle(this.options.backgroundBlurStyle);
                             }, Stack);
                             Stack.pop();
@@ -429,7 +522,7 @@ class f1 extends ViewPU {
                 }, If);
                 If.pop();
             };
-            this.forEachUpdateFunction(elmtId, this.optionsArray, forEachItemGenFunction, undefined, true, false);
+            this.forEachUpdateFunction(r35, this.optionsArray, t35, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Row.pop();
@@ -440,41 +533,41 @@ class f1 extends ViewPU {
     }
 }
 
-class g1 extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
+class SelectItem extends ViewPU {
+    constructor(j35, k35, l35, m35 = -1, n35 = undefined, o35) {
+        super(j35, l35, m35, o35);
+        if (typeof n35 === "function") {
+            this.paramsGenerator_ = n35;
         }
-        this.__optionsArray = new SynchedPropertyNesedObjectPU(params.optionsArray, this, "optionsArray");
-        this.__options = new SynchedPropertyNesedObjectPU(params.options, this, "options");
-        this.__selectedIndexes = new SynchedPropertyObjectTwoWayPU(params.selectedIndexes, this, "selectedIndexes");
+        this.__optionsArray = new SynchedPropertyNesedObjectPU(k35.optionsArray, this, "optionsArray");
+        this.__options = new SynchedPropertyNesedObjectPU(k35.options, this, "options");
+        this.__selectedIndexes = new SynchedPropertyObjectTwoWayPU(k35.selectedIndexes, this, "selectedIndexes");
         this.__buttonItemsSize = this.initializeConsume("buttonItemsSize", "buttonItemsSize");
         this.__selectedItemPosition = this.initializeConsume("selectedItemPosition", "selectedItemPosition");
         this.__zoomScaleArray = this.initializeConsume("zoomScaleArray", "zoomScaleArray");
         this.__buttonBorderRadius = this.initializeConsume("buttonBorderRadius", "buttonBorderRadius");
-        this.setInitiallyProvidedValue(params);
+        this.setInitiallyProvidedValue(k35);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(params) {
-        this.__optionsArray.set(params.optionsArray);
-        this.__options.set(params.options);
+    setInitiallyProvidedValue(i35) {
+        this.__optionsArray.set(i35.optionsArray);
+        this.__options.set(i35.options);
     }
 
-    updateStateVars(params) {
-        this.__optionsArray.set(params.optionsArray);
-        this.__options.set(params.options);
+    updateStateVars(h35) {
+        this.__optionsArray.set(h35.optionsArray);
+        this.__options.set(h35.options);
     }
 
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__optionsArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__options.purgeDependencyOnElmtId(rmElmtId);
-        this.__selectedIndexes.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonItemsSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__selectedItemPosition.purgeDependencyOnElmtId(rmElmtId);
-        this.__zoomScaleArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonBorderRadius.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(g35) {
+        this.__optionsArray.purgeDependencyOnElmtId(g35);
+        this.__options.purgeDependencyOnElmtId(g35);
+        this.__selectedIndexes.purgeDependencyOnElmtId(g35);
+        this.__buttonItemsSize.purgeDependencyOnElmtId(g35);
+        this.__selectedItemPosition.purgeDependencyOnElmtId(g35);
+        this.__zoomScaleArray.purgeDependencyOnElmtId(g35);
+        this.__buttonBorderRadius.purgeDependencyOnElmtId(g35);
     }
 
     aboutToBeDeleted() {
@@ -501,61 +594,61 @@ class g1 extends ViewPU {
         return this.__selectedIndexes.get();
     }
 
-    set selectedIndexes(newValue) {
-        this.__selectedIndexes.set(newValue);
+    set selectedIndexes(f35) {
+        this.__selectedIndexes.set(f35);
     }
 
     get buttonItemsSize() {
         return this.__buttonItemsSize.get();
     }
 
-    set buttonItemsSize(newValue) {
-        this.__buttonItemsSize.set(newValue);
+    set buttonItemsSize(e35) {
+        this.__buttonItemsSize.set(e35);
     }
 
     get selectedItemPosition() {
         return this.__selectedItemPosition.get();
     }
 
-    set selectedItemPosition(newValue) {
-        this.__selectedItemPosition.set(newValue);
+    set selectedItemPosition(d35) {
+        this.__selectedItemPosition.set(d35);
     }
 
     get zoomScaleArray() {
         return this.__zoomScaleArray.get();
     }
 
-    set zoomScaleArray(newValue) {
-        this.__zoomScaleArray.set(newValue);
+    set zoomScaleArray(c35) {
+        this.__zoomScaleArray.set(c35);
     }
 
     get buttonBorderRadius() {
         return this.__buttonBorderRadius.get();
     }
 
-    set buttonBorderRadius(newValue) {
-        this.__buttonBorderRadius.set(newValue);
+    set buttonBorderRadius(b35) {
+        this.__buttonBorderRadius.set(b35);
     }
 
     initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((u34, v34) => {
             If.create();
             if (this.selectedIndexes !== void 0 && this.selectedIndexes.length !== 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((z34, a35) => {
                         Stack.create();
                         Stack.direction(this.options.direction);
                         Stack.borderRadius(this.buttonBorderRadius[this.selectedIndexes[0]]);
                         Stack.size(this.buttonItemsSize[this.selectedIndexes[0]]);
                         Stack.backgroundColor(this.options.selectedBackgroundColor ??
-                            (this.options.type === 'tab' ? e1.w1 :
-                            e1.z1));
+                            (this.options.type === 'tab' ? segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR :
+                            segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR));
                         Stack.position(ObservedObject.GetRawObject(this.selectedItemPosition));
                         Stack.scale({
                             x: this.zoomScaleArray[this.selectedIndexes[0]],
                             y: this.zoomScaleArray[this.selectedIndexes[0]]
                         });
-                        Stack.shadow(ShadowStyle.OUTER_DEFAULT_XS);
+                        Stack.shadow(segmentButtonTheme.SEGMENT_BUTTON_SHADOW);
                     }, Stack);
                     Stack.pop();
                 });
@@ -572,48 +665,48 @@ class g1 extends ViewPU {
     }
 }
 
-class h1 extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
+class MultiSelectItemArray extends ViewPU {
+    constructor(k34, l34, m34, n34 = -1, o34 = undefined, p34) {
+        super(k34, m34, n34, p34);
+        if (typeof o34 === "function") {
+            this.paramsGenerator_ = o34;
         }
-        this.__optionsArray = new SynchedPropertyNesedObjectPU(params.optionsArray, this, "optionsArray");
-        this.__options = new SynchedPropertyNesedObjectPU(params.options, this, "options");
-        this.__selectedIndexes = new SynchedPropertyObjectTwoWayPU(params.selectedIndexes, this, "selectedIndexes");
+        this.__optionsArray = new SynchedPropertyNesedObjectPU(l34.optionsArray, this, "optionsArray");
+        this.__options = new SynchedPropertyNesedObjectPU(l34.options, this, "options");
+        this.__selectedIndexes = new SynchedPropertyObjectTwoWayPU(l34.selectedIndexes, this, "selectedIndexes");
         this.__buttonItemsSize = this.initializeConsume("buttonItemsSize", "buttonItemsSize");
         this.__zoomScaleArray = this.initializeConsume("zoomScaleArray", "zoomScaleArray");
         this.__buttonBorderRadius = this.initializeConsume("buttonBorderRadius", "buttonBorderRadius");
         this.__multiColor =
-            new ObservedPropertyObjectPU(Array.from({ length: a1 }, (q3, index) => Color.Transparent), this,
+            new ObservedPropertyObjectPU(Array.from({ length: MAX_ITEM_COUNT }, (r34, s34) => Color.Transparent), this,
                 "multiColor");
-        this.setInitiallyProvidedValue(params);
+        this.setInitiallyProvidedValue(l34);
         this.declareWatch("options", this.onOptionsChange);
         this.declareWatch("selectedIndexes", this.onSelectedChange);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(params) {
-        this.__optionsArray.set(params.optionsArray);
-        this.__options.set(params.options);
-        if (params.multiColor !== undefined) {
-            this.multiColor = params.multiColor;
+    setInitiallyProvidedValue(j34) {
+        this.__optionsArray.set(j34.optionsArray);
+        this.__options.set(j34.options);
+        if (j34.multiColor !== undefined) {
+            this.multiColor = j34.multiColor;
         }
     }
 
-    updateStateVars(params) {
-        this.__optionsArray.set(params.optionsArray);
-        this.__options.set(params.options);
+    updateStateVars(i34) {
+        this.__optionsArray.set(i34.optionsArray);
+        this.__options.set(i34.options);
     }
 
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__optionsArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__options.purgeDependencyOnElmtId(rmElmtId);
-        this.__selectedIndexes.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonItemsSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__zoomScaleArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonBorderRadius.purgeDependencyOnElmtId(rmElmtId);
-        this.__multiColor.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(h34) {
+        this.__optionsArray.purgeDependencyOnElmtId(h34);
+        this.__options.purgeDependencyOnElmtId(h34);
+        this.__selectedIndexes.purgeDependencyOnElmtId(h34);
+        this.__buttonItemsSize.purgeDependencyOnElmtId(h34);
+        this.__zoomScaleArray.purgeDependencyOnElmtId(h34);
+        this.__buttonBorderRadius.purgeDependencyOnElmtId(h34);
+        this.__multiColor.purgeDependencyOnElmtId(h34);
     }
 
     aboutToBeDeleted() {
@@ -640,87 +733,87 @@ class h1 extends ViewPU {
         return this.__selectedIndexes.get();
     }
 
-    set selectedIndexes(newValue) {
-        this.__selectedIndexes.set(newValue);
+    set selectedIndexes(g34) {
+        this.__selectedIndexes.set(g34);
     }
 
     get buttonItemsSize() {
         return this.__buttonItemsSize.get();
     }
 
-    set buttonItemsSize(newValue) {
-        this.__buttonItemsSize.set(newValue);
+    set buttonItemsSize(f34) {
+        this.__buttonItemsSize.set(f34);
     }
 
     get zoomScaleArray() {
         return this.__zoomScaleArray.get();
     }
 
-    set zoomScaleArray(newValue) {
-        this.__zoomScaleArray.set(newValue);
+    set zoomScaleArray(e34) {
+        this.__zoomScaleArray.set(e34);
     }
 
     get buttonBorderRadius() {
         return this.__buttonBorderRadius.get();
     }
 
-    set buttonBorderRadius(newValue) {
-        this.__buttonBorderRadius.set(newValue);
+    set buttonBorderRadius(d34) {
+        this.__buttonBorderRadius.set(d34);
     }
 
     get multiColor() {
         return this.__multiColor.get();
     }
 
-    set multiColor(newValue) {
-        this.__multiColor.set(newValue);
+    set multiColor(c34) {
+        this.__multiColor.set(c34);
     }
 
     onOptionsChange() {
-        for (let p3 = 0; p3 < this.selectedIndexes.length; p3++) {
-            this.multiColor[this.selectedIndexes[p3]] = this.options.selectedBackgroundColor ??
-            e1.z1;
+        for (let b34 = 0; b34 < this.selectedIndexes.length; b34++) {
+            this.multiColor[this.selectedIndexes[b34]] = this.options.selectedBackgroundColor ??
+            segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
         }
     }
 
     onSelectedChange() {
-        for (let n3 = 0; n3 < a1; n3++) {
-            this.multiColor[n3] = Color.Transparent;
+        for (let a34 = 0; a34 < MAX_ITEM_COUNT; a34++) {
+            this.multiColor[a34] = Color.Transparent;
         }
-        for (let m3 = 0; m3 < this.selectedIndexes.length; m3++) {
-            this.multiColor[this.selectedIndexes[m3]] = this.options.selectedBackgroundColor ??
-            e1.z1;
+        for (let z33 = 0; z33 < this.selectedIndexes.length; z33++) {
+            this.multiColor[this.selectedIndexes[z33]] = this.options.selectedBackgroundColor ??
+            segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
         }
     }
 
     aboutToAppear() {
-        for (let l3 = 0; l3 < this.selectedIndexes.length; l3++) {
-            this.multiColor[this.selectedIndexes[l3]] = this.options.selectedBackgroundColor ??
-            e1.z1;
+        for (let y33 = 0; y33 < this.selectedIndexes.length; y33++) {
+            this.multiColor[this.selectedIndexes[y33]] = this.options.selectedBackgroundColor ??
+            segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
         }
     }
 
     initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((w33, x33) => {
             Row.create({ space: 1 });
             Row.direction(this.options.direction);
-            Row.padding(this.options.l2);
+            Row.padding(this.options.componentPadding);
         }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((h33, i33) => {
             ForEach.create();
-            const forEachItemGenFunction = (_item, index) => {
-                const k3 = _item;
-                this.observeComponentCreation2((elmtId, isInitialRender) => {
+            const j33 = (l33, m33) => {
+                const n33 = l33;
+                this.observeComponentCreation2((p33, q33) => {
                     If.create();
-                    if (index < a1) {
+                    if (m33 < MAX_ITEM_COUNT) {
                         this.ifElseBranchUpdateFunction(0, () => {
-                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            this.observeComponentCreation2((u33, v33) => {
                                 Stack.create();
                                 Stack.direction(this.options.direction);
-                                Stack.width(this.buttonItemsSize[index].width);
-                                Stack.height(this.buttonItemsSize[index].height);
-                                Stack.backgroundColor(this.multiColor[index]);
-                                Stack.borderRadius(this.buttonBorderRadius[index]);
+                                Stack.width(this.buttonItemsSize[m33].width);
+                                Stack.height(this.buttonItemsSize[m33].height);
+                                Stack.backgroundColor(this.multiColor[m33]);
+                                Stack.borderRadius(this.buttonBorderRadius[m33]);
                             }, Stack);
                             Stack.pop();
                         });
@@ -731,7 +824,7 @@ class h1 extends ViewPU {
                 }, If);
                 If.pop();
             };
-            this.forEachUpdateFunction(elmtId, this.optionsArray, forEachItemGenFunction, undefined, true, false);
+            this.forEachUpdateFunction(h33, this.optionsArray, j33, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Row.pop();
@@ -742,49 +835,78 @@ class h1 extends ViewPU {
     }
 }
 
-class i1 extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
+class SegmentButtonItem extends ViewPU {
+    constructor(z32, a33, b33, c33 = -1, d33 = undefined, e33) {
+        super(z32, b33, c33, e33);
+        if (typeof d33 === "function") {
+            this.paramsGenerator_ = d33;
         }
-        this.__selectedIndexes = new SynchedPropertyObjectTwoWayPU(params.selectedIndexes, this, "selectedIndexes");
-        this.__focusIndex = new SynchedPropertySimpleTwoWayPU(params.focusIndex, this, "focusIndex");
-        this.__maxFontScale = new SynchedPropertyObjectOneWayPU(params.maxFontScale, this, "maxFontScale");
-        this.__itemOptions = new SynchedPropertyNesedObjectPU(params.itemOptions, this, "itemOptions");
-        this.__options = new SynchedPropertyNesedObjectPU(params.options, this, "options");
-        this.__property = new SynchedPropertyNesedObjectPU(params.property, this, "property");
-        this.__index = new SynchedPropertySimpleOneWayPU(params.index, this, "index");
+        this.__selectedIndexes = new SynchedPropertyObjectTwoWayPU(a33.selectedIndexes, this, "selectedIndexes");
+        this.__focusIndex = new SynchedPropertySimpleTwoWayPU(a33.focusIndex, this, "focusIndex");
+        this.__maxFontScale = new SynchedPropertyObjectOneWayPU(a33.maxFontScale, this, "maxFontScale");
+        this.__itemOptions = new SynchedPropertyNesedObjectPU(a33.itemOptions, this, "itemOptions");
+        this.__options = new SynchedPropertyNesedObjectPU(a33.options, this, "options");
+        this.__property = new SynchedPropertyNesedObjectPU(a33.property, this, "property");
+        this.__index = new SynchedPropertySimpleOneWayPU(a33.index, this, "index");
+        this.__isTextSupportMarquee =
+            new ObservedPropertySimplePU(segmentButtonTheme.SEGMENT_ITEM_TEXT_OVERFLOW, this, "isTextSupportMarquee");
+        this.__isMarqueeAndFadeout =
+            new SynchedPropertySimpleOneWayPU(a33.isMarqueeAndFadeout, this, "isMarqueeAndFadeout");
+        this.__isSegmentFocusStyleCustomized =
+            new SynchedPropertySimpleOneWayPU(a33.isSegmentFocusStyleCustomized, this, "isSegmentFocusStyleCustomized");
+        this.__isTextInMarqueeCondition = new ObservedPropertySimplePU(false, this, "isTextInMarqueeCondition");
+        this.__isButtonTextFadeout = new ObservedPropertySimplePU(false, this, "isButtonTextFadeout");
         this.groupId = '';
-        this.setInitiallyProvidedValue(params);
+        this.__hover = new SynchedPropertySimpleOneWayPU(a33.hover, this, "hover");
+        this.setInitiallyProvidedValue(a33);
+        this.declareWatch("focusIndex", this.onFocusIndex);
+        this.declareWatch("hover", this.onFocusIndex);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(params) {
-        this.__itemOptions.set(params.itemOptions);
-        this.__options.set(params.options);
-        this.__property.set(params.property);
-        if (params.groupId !== undefined) {
-            this.groupId = params.groupId;
+    setInitiallyProvidedValue(y32) {
+        this.__itemOptions.set(y32.itemOptions);
+        this.__options.set(y32.options);
+        this.__property.set(y32.property);
+        if (y32.isTextSupportMarquee !== undefined) {
+            this.isTextSupportMarquee = y32.isTextSupportMarquee;
+        }
+        if (y32.isTextInMarqueeCondition !== undefined) {
+            this.isTextInMarqueeCondition = y32.isTextInMarqueeCondition;
+        }
+        if (y32.isButtonTextFadeout !== undefined) {
+            this.isButtonTextFadeout = y32.isButtonTextFadeout;
+        }
+        if (y32.groupId !== undefined) {
+            this.groupId = y32.groupId;
         }
     }
 
-    updateStateVars(params) {
-        this.__maxFontScale.reset(params.maxFontScale);
-        this.__itemOptions.set(params.itemOptions);
-        this.__options.set(params.options);
-        this.__property.set(params.property);
-        this.__index.reset(params.index);
+    updateStateVars(x32) {
+        this.__maxFontScale.reset(x32.maxFontScale);
+        this.__itemOptions.set(x32.itemOptions);
+        this.__options.set(x32.options);
+        this.__property.set(x32.property);
+        this.__index.reset(x32.index);
+        this.__isMarqueeAndFadeout.reset(x32.isMarqueeAndFadeout);
+        this.__isSegmentFocusStyleCustomized.reset(x32.isSegmentFocusStyleCustomized);
+        this.__hover.reset(x32.hover);
     }
 
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__selectedIndexes.purgeDependencyOnElmtId(rmElmtId);
-        this.__focusIndex.purgeDependencyOnElmtId(rmElmtId);
-        this.__maxFontScale.purgeDependencyOnElmtId(rmElmtId);
-        this.__itemOptions.purgeDependencyOnElmtId(rmElmtId);
-        this.__options.purgeDependencyOnElmtId(rmElmtId);
-        this.__property.purgeDependencyOnElmtId(rmElmtId);
-        this.__index.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(w32) {
+        this.__selectedIndexes.purgeDependencyOnElmtId(w32);
+        this.__focusIndex.purgeDependencyOnElmtId(w32);
+        this.__maxFontScale.purgeDependencyOnElmtId(w32);
+        this.__itemOptions.purgeDependencyOnElmtId(w32);
+        this.__options.purgeDependencyOnElmtId(w32);
+        this.__property.purgeDependencyOnElmtId(w32);
+        this.__index.purgeDependencyOnElmtId(w32);
+        this.__isTextSupportMarquee.purgeDependencyOnElmtId(w32);
+        this.__isMarqueeAndFadeout.purgeDependencyOnElmtId(w32);
+        this.__isSegmentFocusStyleCustomized.purgeDependencyOnElmtId(w32);
+        this.__isTextInMarqueeCondition.purgeDependencyOnElmtId(w32);
+        this.__isButtonTextFadeout.purgeDependencyOnElmtId(w32);
+        this.__hover.purgeDependencyOnElmtId(w32);
     }
 
     aboutToBeDeleted() {
@@ -795,6 +917,12 @@ class i1 extends ViewPU {
         this.__options.aboutToBeDeleted();
         this.__property.aboutToBeDeleted();
         this.__index.aboutToBeDeleted();
+        this.__isTextSupportMarquee.aboutToBeDeleted();
+        this.__isMarqueeAndFadeout.aboutToBeDeleted();
+        this.__isSegmentFocusStyleCustomized.aboutToBeDeleted();
+        this.__isTextInMarqueeCondition.aboutToBeDeleted();
+        this.__isButtonTextFadeout.aboutToBeDeleted();
+        this.__hover.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -803,24 +931,24 @@ class i1 extends ViewPU {
         return this.__selectedIndexes.get();
     }
 
-    set selectedIndexes(newValue) {
-        this.__selectedIndexes.set(newValue);
+    set selectedIndexes(v32) {
+        this.__selectedIndexes.set(v32);
     }
 
     get focusIndex() {
         return this.__focusIndex.get();
     }
 
-    set focusIndex(newValue) {
-        this.__focusIndex.set(newValue);
+    set focusIndex(u32) {
+        this.__focusIndex.set(u32);
     }
 
     get maxFontScale() {
         return this.__maxFontScale.get();
     }
 
-    set maxFontScale(newValue) {
-        this.__maxFontScale.set(newValue);
+    set maxFontScale(t32) {
+        this.__maxFontScale.set(t32);
     }
 
     get itemOptions() {
@@ -839,8 +967,56 @@ class i1 extends ViewPU {
         return this.__index.get();
     }
 
-    set index(newValue) {
-        this.__index.set(newValue);
+    set index(s32) {
+        this.__index.set(s32);
+    }
+
+    get isTextSupportMarquee() {
+        return this.__isTextSupportMarquee.get();
+    }
+
+    set isTextSupportMarquee(r32) {
+        this.__isTextSupportMarquee.set(r32);
+    }
+
+    get isMarqueeAndFadeout() {
+        return this.__isMarqueeAndFadeout.get();
+    }
+
+    set isMarqueeAndFadeout(q32) {
+        this.__isMarqueeAndFadeout.set(q32);
+    }
+
+    get isSegmentFocusStyleCustomized() {
+        return this.__isSegmentFocusStyleCustomized.get();
+    }
+
+    set isSegmentFocusStyleCustomized(p32) {
+        this.__isSegmentFocusStyleCustomized.set(p32);
+    }
+
+    get isTextInMarqueeCondition() {
+        return this.__isTextInMarqueeCondition.get();
+    }
+
+    set isTextInMarqueeCondition(o32) {
+        this.__isTextInMarqueeCondition.set(o32);
+    }
+
+    get isButtonTextFadeout() {
+        return this.__isButtonTextFadeout.get();
+    }
+
+    set isButtonTextFadeout(n32) {
+        this.__isButtonTextFadeout.set(n32);
+    }
+
+    get hover() {
+        return this.__hover.get();
+    }
+
+    set hover(m32) {
+        this.__hover.set(m32);
     }
 
     getTextPadding() {
@@ -860,20 +1036,54 @@ class i1 extends ViewPU {
         if (this.options.buttonPadding !== void (0)) {
             return this.options.buttonPadding;
         }
-        if (this.options.type === 'capsule' && this.options.i2 && this.options.showIcon) {
+        if (this.options.type === 'capsule' && this.options.showText && this.options.showIcon) {
             return {
-                top: LengthMetrics.vp(6),
-                bottom: LengthMetrics.vp(6),
-                start: LengthMetrics.vp(8),
-                end: LengthMetrics.vp(8)
+                top: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_CAPSULE_VERTICAL_PADDING),
+                bottom: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_CAPSULE_VERTICAL_PADDING),
+                start: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_HORIZONTAL_PADDING),
+                end: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_HORIZONTAL_PADDING)
             };
         }
         return {
-            top: LengthMetrics.vp(4),
-            bottom: LengthMetrics.vp(4),
-            start: LengthMetrics.vp(8),
-            end: LengthMetrics.vp(8)
+            top: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_VERTICAL_PADDING),
+            bottom: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_VERTICAL_PADDING),
+            start: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_HORIZONTAL_PADDING),
+            end: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_HORIZONTAL_PADDING)
         };
+    }
+
+    onFocusIndex() {
+        this.isTextInMarqueeCondition =
+            this.isSegmentFocusStyleCustomized && (this.focusIndex === this.index || this.hover);
+    }
+
+    aboutToAppear() {
+        this.isButtonTextFadeout = this.isSegmentFocusStyleCustomized;
+    }
+
+    isDefaultSelectedFontColor() {
+        if (this.options.type === 'tab') {
+            return this.options.selectedFontColor === segmentButtonTheme.TAB_SELECTED_FONT_COLOR;
+        } else if (this.options.type === 'capsule') {
+            return this.options.selectedFontColor === segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
+        }
+        return false;
+    }
+
+    getFontColor() {
+        if (this.property.isSelected) {
+            if (this.isDefaultSelectedFontColor() && this.isSegmentFocusStyleCustomized &&
+                this.focusIndex === this.index) {
+                return segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR;
+            }
+            return this.options.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
+        } else {
+            if (this.options.fontColor === segmentButtonTheme.FONT_COLOR && this.isSegmentFocusStyleCustomized &&
+                this.focusIndex === this.index) {
+                return segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR;
+            }
+            return this.options.fontColor ?? segmentButtonTheme.FONT_COLOR;
+        }
     }
 
     getAccessibilityText() {
@@ -888,27 +1098,25 @@ class i1 extends ViewPU {
     }
 
     initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((k32, l32) => {
             Column.create({ space: 2 });
             Column.direction(this.options.direction);
             Column.focusScopePriority(this.groupId,
                 Math.min(...this.selectedIndexes) === this.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO);
             Column.justifyContent(FlexAlign.Center);
             Column.padding(this.getButtonPadding());
-            Column.constraintSize({ minHeight: 28 });
+            Column.constraintSize({ minHeight: segmentButtonTheme.CONSTRAINT_SIZE_MIN_HEIGHT });
         }, Column);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((d32, e32) => {
             If.create();
             if (this.options.showIcon) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((i32, j32) => {
                         Image.create(this.property.isSelected ? this.itemOptions.selectedIcon : this.itemOptions.icon);
                         Image.direction(this.options.direction);
                         Image.size(this.options.imageSize ?? { width: 24, height: 24 });
                         Image.draggable(false);
-                        Image.fillColor(this.property.isSelected ? (this.options.selectedFontColor ??
-                        e1.t1) : (this.options.fontColor ??
-                        e1.q1));
+                        Image.fillColor(this.getFontColor());
                         Image.accessibilityText(this.getAccessibilityText());
                     }, Image);
                 });
@@ -918,20 +1126,27 @@ class i1 extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((w31, x31) => {
             If.create();
-            if (this.options.i2) {
+            if (this.options.showText) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((b32, c32) => {
                         Text.create(this.itemOptions.text);
                         Text.direction(this.options.direction);
-                        Text.fontColor(this.property.fontColor);
+                        Text.fontColor(this.getFontColor());
                         Text.fontWeight(this.property.fontWeight);
                         Text.fontSize(this.property.fontSize);
                         Text.minFontSize(9);
                         Text.maxFontSize(this.property.fontSize);
                         Text.maxFontScale(ObservedObject.GetRawObject(this.maxFontScale));
-                        Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+                        Text.textOverflow({
+                            overflow: this.isTextSupportMarquee ? TextOverflow.MARQUEE : TextOverflow.Ellipsis
+                        });
+                        Text.marqueeOptions({
+                            start: this.isTextInMarqueeCondition,
+                            fadeout: this.isButtonTextFadeout,
+                            marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
+                        });
                         Text.maxLines(1);
                         Text.textAlign(TextAlign.Center);
                         Text.padding(this.getTextPadding());
@@ -952,58 +1167,58 @@ class i1 extends ViewPU {
     }
 }
 
-let j1 = class HoverColorProperty {
+let HoverColorProperty = class HoverColorProperty {
     constructor() {
-        this.o2 = Color.Transparent;
+        this.hoverColor = Color.Transparent;
     }
 };
-j1 = j([
+HoverColorProperty = __decorate([
     Observed
-], j1);
+], HoverColorProperty);
 
-class l1 extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
+class PressAndHoverEffect extends ViewPU {
+    constructor(n31, o31, p31, q31 = -1, r31 = undefined, s31) {
+        super(n31, p31, q31, s31);
+        if (typeof r31 === "function") {
+            this.paramsGenerator_ = r31;
         }
         this.__buttonItemsSize = this.initializeConsume("buttonItemsSize", "buttonItemsSize");
-        this.__press = new SynchedPropertySimpleOneWayPU(params.press, this, "press");
-        this.__hover = new SynchedPropertySimpleOneWayPU(params.hover, this, "hover");
-        this.__colorProperty = new SynchedPropertyNesedObjectPU(params.colorProperty, this, "colorProperty");
+        this.__press = new SynchedPropertySimpleOneWayPU(o31.press, this, "press");
+        this.__hover = new SynchedPropertySimpleOneWayPU(o31.hover, this, "hover");
+        this.__colorProperty = new SynchedPropertyNesedObjectPU(o31.colorProperty, this, "colorProperty");
         this.__buttonBorderRadius = this.initializeConsume("buttonBorderRadius", "buttonBorderRadius");
-        this.__options = new SynchedPropertyNesedObjectPU(params.options, this, "options");
+        this.__options = new SynchedPropertyNesedObjectPU(o31.options, this, "options");
         this.pressIndex = 0;
-        this.pressColor = e1.c2;
-        this.setInitiallyProvidedValue(params);
+        this.pressColor = segmentButtonTheme.PRESS_COLOR;
+        this.setInitiallyProvidedValue(o31);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(params) {
-        this.__colorProperty.set(params.colorProperty);
-        this.__options.set(params.options);
-        if (params.pressIndex !== undefined) {
-            this.pressIndex = params.pressIndex;
+    setInitiallyProvidedValue(m31) {
+        this.__colorProperty.set(m31.colorProperty);
+        this.__options.set(m31.options);
+        if (m31.pressIndex !== undefined) {
+            this.pressIndex = m31.pressIndex;
         }
-        if (params.pressColor !== undefined) {
-            this.pressColor = params.pressColor;
+        if (m31.pressColor !== undefined) {
+            this.pressColor = m31.pressColor;
         }
     }
 
-    updateStateVars(params) {
-        this.__press.reset(params.press);
-        this.__hover.reset(params.hover);
-        this.__colorProperty.set(params.colorProperty);
-        this.__options.set(params.options);
+    updateStateVars(l31) {
+        this.__press.reset(l31.press);
+        this.__hover.reset(l31.hover);
+        this.__colorProperty.set(l31.colorProperty);
+        this.__options.set(l31.options);
     }
 
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__buttonItemsSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__press.purgeDependencyOnElmtId(rmElmtId);
-        this.__hover.purgeDependencyOnElmtId(rmElmtId);
-        this.__colorProperty.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonBorderRadius.purgeDependencyOnElmtId(rmElmtId);
-        this.__options.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(k31) {
+        this.__buttonItemsSize.purgeDependencyOnElmtId(k31);
+        this.__press.purgeDependencyOnElmtId(k31);
+        this.__hover.purgeDependencyOnElmtId(k31);
+        this.__colorProperty.purgeDependencyOnElmtId(k31);
+        this.__buttonBorderRadius.purgeDependencyOnElmtId(k31);
+        this.__options.purgeDependencyOnElmtId(k31);
     }
 
     aboutToBeDeleted() {
@@ -1021,24 +1236,24 @@ class l1 extends ViewPU {
         return this.__buttonItemsSize.get();
     }
 
-    set buttonItemsSize(newValue) {
-        this.__buttonItemsSize.set(newValue);
+    set buttonItemsSize(j31) {
+        this.__buttonItemsSize.set(j31);
     }
 
     get press() {
         return this.__press.get();
     }
 
-    set press(newValue) {
-        this.__press.set(newValue);
+    set press(i31) {
+        this.__press.set(i31);
     }
 
     get hover() {
         return this.__hover.get();
     }
 
-    set hover(newValue) {
-        this.__hover.set(newValue);
+    set hover(h31) {
+        this.__hover.set(h31);
     }
 
     get colorProperty() {
@@ -1049,8 +1264,8 @@ class l1 extends ViewPU {
         return this.__buttonBorderRadius.get();
     }
 
-    set buttonBorderRadius(newValue) {
-        this.__buttonBorderRadius.set(newValue);
+    set buttonBorderRadius(g31) {
+        this.__buttonBorderRadius.set(g31);
     }
 
     get options() {
@@ -1058,11 +1273,11 @@ class l1 extends ViewPU {
     }
 
     initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((e31, f31) => {
             Stack.create();
             Stack.direction(this.options.direction);
             Stack.size(this.buttonItemsSize[this.pressIndex]);
-            Stack.backgroundColor(this.press && this.hover ? this.pressColor : this.colorProperty.o2);
+            Stack.backgroundColor(this.press && this.hover ? this.pressColor : this.colorProperty.hoverColor);
             Stack.borderRadius(this.buttonBorderRadius[this.pressIndex]);
         }, Stack);
         Stack.pop();
@@ -1073,39 +1288,39 @@ class l1 extends ViewPU {
     }
 }
 
-class v3 extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
+class PressAndHoverEffectArray extends ViewPU {
+    constructor(x30, y30, z30, a31 = -1, b31 = undefined, c31) {
+        super(x30, z30, a31, c31);
+        if (typeof b31 === "function") {
+            this.paramsGenerator_ = b31;
         }
-        this.__buttons = new SynchedPropertyNesedObjectPU(params.buttons, this, "buttons");
-        this.__options = new SynchedPropertyNesedObjectPU(params.options, this, "options");
-        this.__pressArray = new SynchedPropertyObjectTwoWayPU(params.pressArray, this, "pressArray");
-        this.__hoverArray = new SynchedPropertyObjectTwoWayPU(params.hoverArray, this, "hoverArray");
-        this.__hoverColorArray = new SynchedPropertyObjectTwoWayPU(params.hoverColorArray, this, "hoverColorArray");
+        this.__buttons = new SynchedPropertyNesedObjectPU(y30.buttons, this, "buttons");
+        this.__options = new SynchedPropertyNesedObjectPU(y30.options, this, "options");
+        this.__pressArray = new SynchedPropertyObjectTwoWayPU(y30.pressArray, this, "pressArray");
+        this.__hoverArray = new SynchedPropertyObjectTwoWayPU(y30.hoverArray, this, "hoverArray");
+        this.__hoverColorArray = new SynchedPropertyObjectTwoWayPU(y30.hoverColorArray, this, "hoverColorArray");
         this.__zoomScaleArray = this.initializeConsume("zoomScaleArray", "zoomScaleArray");
-        this.setInitiallyProvidedValue(params);
+        this.setInitiallyProvidedValue(y30);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(params) {
-        this.__buttons.set(params.buttons);
-        this.__options.set(params.options);
+    setInitiallyProvidedValue(w30) {
+        this.__buttons.set(w30.buttons);
+        this.__options.set(w30.options);
     }
 
-    updateStateVars(params) {
-        this.__buttons.set(params.buttons);
-        this.__options.set(params.options);
+    updateStateVars(v30) {
+        this.__buttons.set(v30.buttons);
+        this.__options.set(v30.options);
     }
 
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__buttons.purgeDependencyOnElmtId(rmElmtId);
-        this.__options.purgeDependencyOnElmtId(rmElmtId);
-        this.__pressArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__hoverArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__hoverColorArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__zoomScaleArray.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(u30) {
+        this.__buttons.purgeDependencyOnElmtId(u30);
+        this.__options.purgeDependencyOnElmtId(u30);
+        this.__pressArray.purgeDependencyOnElmtId(u30);
+        this.__hoverArray.purgeDependencyOnElmtId(u30);
+        this.__hoverColorArray.purgeDependencyOnElmtId(u30);
+        this.__zoomScaleArray.purgeDependencyOnElmtId(u30);
     }
 
     aboutToBeDeleted() {
@@ -1131,88 +1346,88 @@ class v3 extends ViewPU {
         return this.__pressArray.get();
     }
 
-    set pressArray(newValue) {
-        this.__pressArray.set(newValue);
+    set pressArray(t30) {
+        this.__pressArray.set(t30);
     }
 
     get hoverArray() {
         return this.__hoverArray.get();
     }
 
-    set hoverArray(newValue) {
-        this.__hoverArray.set(newValue);
+    set hoverArray(s30) {
+        this.__hoverArray.set(s30);
     }
 
     get hoverColorArray() {
         return this.__hoverColorArray.get();
     }
 
-    set hoverColorArray(newValue) {
-        this.__hoverColorArray.set(newValue);
+    set hoverColorArray(r30) {
+        this.__hoverColorArray.set(r30);
     }
 
     get zoomScaleArray() {
         return this.__zoomScaleArray.get();
     }
 
-    set zoomScaleArray(newValue) {
-        this.__zoomScaleArray.set(newValue);
+    set zoomScaleArray(q30) {
+        this.__zoomScaleArray.set(q30);
     }
 
     initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((o30, p30) => {
             Row.create({ space: 1 });
             Row.direction(this.options.direction);
         }, Row);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((s29, t29) => {
             ForEach.create();
-            const forEachItemGenFunction = (_item, index) => {
-                const item = _item;
-                this.observeComponentCreation2((elmtId, isInitialRender) => {
+            const u29 = (w29, x29) => {
+                const y29 = w29;
+                this.observeComponentCreation2((a30, b30) => {
                     If.create();
-                    if (index < a1) {
+                    if (x29 < MAX_ITEM_COUNT) {
                         this.ifElseBranchUpdateFunction(0, () => {
-                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                            this.observeComponentCreation2((m30, n30) => {
                                 Stack.create();
                                 Stack.direction(this.options.direction);
                                 Stack.scale({
                                     x: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 :
-                                    this.zoomScaleArray[index],
+                                    this.zoomScaleArray[x29],
                                     y: this.options.type === 'capsule' && (this.options.multiply ?? false) ? 1 :
-                                    this.zoomScaleArray[index]
+                                    this.zoomScaleArray[x29]
                                 });
                             }, Stack);
                             {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                    if (isInitialRender) {
-                                        let componentCall = new l1(this, {
-                                            pressIndex: index,
-                                            colorProperty: this.hoverColorArray[index],
-                                            press: this.pressArray[index],
-                                            hover: this.hoverArray[index],
+                                this.observeComponentCreation2((g30, h30) => {
+                                    if (h30) {
+                                        let i30 = new PressAndHoverEffect(this, {
+                                            pressIndex: x29,
+                                            colorProperty: this.hoverColorArray[x29],
+                                            press: this.pressArray[x29],
+                                            hover: this.hoverArray[x29],
                                             options: this.options,
-                                        }, undefined, elmtId, () => {
+                                        }, undefined, g30, () => {
                                         }, {
-                                            page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                            line: 615,
-                                            q2: 13
+                                            page: "library/src/main/ets/components/segmentbutton.ets",
+                                            line: 684,
+                                            col: 13
                                         });
-                                        ViewPU.create(componentCall);
-                                        let paramsLambda = () => {
+                                        ViewPU.create(i30);
+                                        let j30 = () => {
                                             return {
-                                                pressIndex: index,
-                                                colorProperty: this.hoverColorArray[index],
-                                                press: this.pressArray[index],
-                                                hover: this.hoverArray[index],
+                                                pressIndex: x29,
+                                                colorProperty: this.hoverColorArray[x29],
+                                                press: this.pressArray[x29],
+                                                hover: this.hoverArray[x29],
                                                 options: this.options
                                             };
                                         };
-                                        componentCall.paramsGenerator_ = paramsLambda;
+                                        i30.paramsGenerator_ = j30;
                                     } else {
-                                        this.updateStateVarsOfChildByElmtId(elmtId, {
-                                            colorProperty: this.hoverColorArray[index],
-                                            press: this.pressArray[index],
-                                            hover: this.hoverArray[index],
+                                        this.updateStateVarsOfChildByElmtId(g30, {
+                                            colorProperty: this.hoverColorArray[x29],
+                                            press: this.pressArray[x29],
+                                            hover: this.hoverArray[x29],
                                             options: this.options
                                         });
                                     }
@@ -1227,7 +1442,7 @@ class v3 extends ViewPU {
                 }, If);
                 If.pop();
             };
-            this.forEachUpdateFunction(elmtId, this.buttons, forEachItemGenFunction, undefined, true, false);
+            this.forEachUpdateFunction(s29, this.buttons, u29, undefined, true, false);
         }, ForEach);
         ForEach.pop();
         Row.pop();
@@ -1238,15 +1453,15 @@ class v3 extends ViewPU {
     }
 }
 
-class m1 extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
+class SegmentButtonItemArrayComponent extends ViewPU {
+    constructor(b29, c29, d29, e29 = -1, f29 = undefined, g29) {
+        super(b29, d29, e29, g29);
+        if (typeof f29 === "function") {
+            this.paramsGenerator_ = f29;
         }
-        this.__optionsArray = new SynchedPropertyNesedObjectPU(params.optionsArray, this, "optionsArray");
-        this.__options = new SynchedPropertyNesedObjectPU(params.options, this, "options");
-        this.__selectedIndexes = new SynchedPropertyObjectTwoWayPU(params.selectedIndexes, this, "selectedIndexes");
+        this.__optionsArray = new SynchedPropertyNesedObjectPU(c29.optionsArray, this, "optionsArray");
+        this.__options = new SynchedPropertyNesedObjectPU(c29.options, this, "options");
+        this.__selectedIndexes = new SynchedPropertyObjectTwoWayPU(c29.selectedIndexes, this, "selectedIndexes");
         this.__componentSize = this.initializeConsume("componentSize", "componentSize");
         this.__buttonBorderRadius = this.initializeConsume("buttonBorderRadius", "buttonBorderRadius");
         this.__buttonItemsSize = this.initializeConsume("buttonItemsSize", "buttonItemsSize");
@@ -1255,68 +1470,78 @@ class m1 extends ViewPU {
         this.__zoomScaleArray = this.initializeConsume("zoomScaleArray", "zoomScaleArray");
         this.__buttonItemProperty = this.initializeConsume("buttonItemProperty", "buttonItemProperty");
         this.__buttonItemsSelected = this.initializeConsume("buttonItemsSelected", "buttonItemsSelected");
-        this.__pressArray = new SynchedPropertyObjectTwoWayPU(params.pressArray, this, "pressArray");
-        this.__hoverArray = new SynchedPropertyObjectTwoWayPU(params.hoverArray, this, "hoverArray");
-        this.__hoverColorArray = new SynchedPropertyObjectTwoWayPU(params.hoverColorArray, this, "hoverColorArray");
-        this.__maxFontScale = new SynchedPropertyObjectOneWayPU(params.maxFontScale, this, "maxFontScale");
+        this.__pressArray = new SynchedPropertyObjectTwoWayPU(c29.pressArray, this, "pressArray");
+        this.__hoverArray = new SynchedPropertyObjectTwoWayPU(c29.hoverArray, this, "hoverArray");
+        this.__hoverColorArray = new SynchedPropertyObjectTwoWayPU(c29.hoverColorArray, this, "hoverColorArray");
+        this.__maxFontScale = new SynchedPropertyObjectOneWayPU(c29.maxFontScale, this, "maxFontScale");
         this.__buttonWidth =
-            new ObservedPropertyObjectPU(Array.from({ length: a1 }, (j3, index) => 0), this, "buttonWidth");
+            new ObservedPropertyObjectPU(Array.from({ length: MAX_ITEM_COUNT }, (o29, p29) => 0), this, "buttonWidth");
         this.__buttonHeight =
-            new ObservedPropertyObjectPU(Array.from({ length: a1 }, (i3, index) => 0), this, "buttonHeight");
-        this.buttonItemsRealHeight = Array.from({ length: a1 }, (h3, index) => 0);
+            new ObservedPropertyObjectPU(Array.from({ length: MAX_ITEM_COUNT }, (m29, n29) => 0), this, "buttonHeight");
+        this.__isMarqueeAndFadeout = new ObservedPropertySimplePU(false, this, "isMarqueeAndFadeout");
+        this.buttonItemsRealHeight = Array.from({ length: MAX_ITEM_COUNT }, (k29, l29) => 0);
         this.groupId = util.generateRandomUUID(true);
         this.onItemClicked = undefined;
-        this.setInitiallyProvidedValue(params);
+        this.__isSegmentFocusStyleCustomized =
+            new SynchedPropertySimpleOneWayPU(c29.isSegmentFocusStyleCustomized, this, "isSegmentFocusStyleCustomized");
+        this.setInitiallyProvidedValue(c29);
         this.declareWatch("optionsArray", this.onOptionsArrayChange);
         this.declareWatch("options", this.onOptionsChange);
         this.declareWatch("buttonItemsSize", this.onButtonItemsSizeChange);
+        this.declareWatch("focusIndex", this.onFocusIndex);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(params) {
-        this.__optionsArray.set(params.optionsArray);
-        this.__options.set(params.options);
-        if (params.buttonWidth !== undefined) {
-            this.buttonWidth = params.buttonWidth;
+    setInitiallyProvidedValue(a29) {
+        this.__optionsArray.set(a29.optionsArray);
+        this.__options.set(a29.options);
+        if (a29.buttonWidth !== undefined) {
+            this.buttonWidth = a29.buttonWidth;
         }
-        if (params.buttonHeight !== undefined) {
-            this.buttonHeight = params.buttonHeight;
+        if (a29.buttonHeight !== undefined) {
+            this.buttonHeight = a29.buttonHeight;
         }
-        if (params.buttonItemsRealHeight !== undefined) {
-            this.buttonItemsRealHeight = params.buttonItemsRealHeight;
+        if (a29.isMarqueeAndFadeout !== undefined) {
+            this.isMarqueeAndFadeout = a29.isMarqueeAndFadeout;
         }
-        if (params.groupId !== undefined) {
-            this.groupId = params.groupId;
+        if (a29.buttonItemsRealHeight !== undefined) {
+            this.buttonItemsRealHeight = a29.buttonItemsRealHeight;
         }
-        if (params.onItemClicked !== undefined) {
-            this.onItemClicked = params.onItemClicked;
+        if (a29.groupId !== undefined) {
+            this.groupId = a29.groupId;
+        }
+        if (a29.onItemClicked !== undefined) {
+            this.onItemClicked = a29.onItemClicked;
         }
     }
 
-    updateStateVars(params) {
-        this.__optionsArray.set(params.optionsArray);
-        this.__options.set(params.options);
-        this.__maxFontScale.reset(params.maxFontScale);
+    updateStateVars(z28) {
+        this.__optionsArray.set(z28.optionsArray);
+        this.__options.set(z28.options);
+        this.__maxFontScale.reset(z28.maxFontScale);
+        this.__isSegmentFocusStyleCustomized.reset(z28.isSegmentFocusStyleCustomized);
     }
 
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__optionsArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__options.purgeDependencyOnElmtId(rmElmtId);
-        this.__selectedIndexes.purgeDependencyOnElmtId(rmElmtId);
-        this.__componentSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonBorderRadius.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonItemsSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonItemsPosition.purgeDependencyOnElmtId(rmElmtId);
-        this.__focusIndex.purgeDependencyOnElmtId(rmElmtId);
-        this.__zoomScaleArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonItemProperty.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonItemsSelected.purgeDependencyOnElmtId(rmElmtId);
-        this.__pressArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__hoverArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__hoverColorArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__maxFontScale.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonWidth.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonHeight.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(y28) {
+        this.__optionsArray.purgeDependencyOnElmtId(y28);
+        this.__options.purgeDependencyOnElmtId(y28);
+        this.__selectedIndexes.purgeDependencyOnElmtId(y28);
+        this.__componentSize.purgeDependencyOnElmtId(y28);
+        this.__buttonBorderRadius.purgeDependencyOnElmtId(y28);
+        this.__buttonItemsSize.purgeDependencyOnElmtId(y28);
+        this.__buttonItemsPosition.purgeDependencyOnElmtId(y28);
+        this.__focusIndex.purgeDependencyOnElmtId(y28);
+        this.__zoomScaleArray.purgeDependencyOnElmtId(y28);
+        this.__buttonItemProperty.purgeDependencyOnElmtId(y28);
+        this.__buttonItemsSelected.purgeDependencyOnElmtId(y28);
+        this.__pressArray.purgeDependencyOnElmtId(y28);
+        this.__hoverArray.purgeDependencyOnElmtId(y28);
+        this.__hoverColorArray.purgeDependencyOnElmtId(y28);
+        this.__maxFontScale.purgeDependencyOnElmtId(y28);
+        this.__buttonWidth.purgeDependencyOnElmtId(y28);
+        this.__buttonHeight.purgeDependencyOnElmtId(y28);
+        this.__isMarqueeAndFadeout.purgeDependencyOnElmtId(y28);
+        this.__isSegmentFocusStyleCustomized.purgeDependencyOnElmtId(y28);
     }
 
     aboutToBeDeleted() {
@@ -1337,6 +1562,8 @@ class m1 extends ViewPU {
         this.__maxFontScale.aboutToBeDeleted();
         this.__buttonWidth.aboutToBeDeleted();
         this.__buttonHeight.aboutToBeDeleted();
+        this.__isMarqueeAndFadeout.aboutToBeDeleted();
+        this.__isSegmentFocusStyleCustomized.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -1353,142 +1580,158 @@ class m1 extends ViewPU {
         return this.__selectedIndexes.get();
     }
 
-    set selectedIndexes(newValue) {
-        this.__selectedIndexes.set(newValue);
+    set selectedIndexes(x28) {
+        this.__selectedIndexes.set(x28);
     }
 
     get componentSize() {
         return this.__componentSize.get();
     }
 
-    set componentSize(newValue) {
-        this.__componentSize.set(newValue);
+    set componentSize(w28) {
+        this.__componentSize.set(w28);
     }
 
     get buttonBorderRadius() {
         return this.__buttonBorderRadius.get();
     }
 
-    set buttonBorderRadius(newValue) {
-        this.__buttonBorderRadius.set(newValue);
+    set buttonBorderRadius(v28) {
+        this.__buttonBorderRadius.set(v28);
     }
 
     get buttonItemsSize() {
         return this.__buttonItemsSize.get();
     }
 
-    set buttonItemsSize(newValue) {
-        this.__buttonItemsSize.set(newValue);
+    set buttonItemsSize(u28) {
+        this.__buttonItemsSize.set(u28);
     }
 
     get buttonItemsPosition() {
         return this.__buttonItemsPosition.get();
     }
 
-    set buttonItemsPosition(newValue) {
-        this.__buttonItemsPosition.set(newValue);
+    set buttonItemsPosition(t28) {
+        this.__buttonItemsPosition.set(t28);
     }
 
     get focusIndex() {
         return this.__focusIndex.get();
     }
 
-    set focusIndex(newValue) {
-        this.__focusIndex.set(newValue);
+    set focusIndex(s28) {
+        this.__focusIndex.set(s28);
     }
 
     get zoomScaleArray() {
         return this.__zoomScaleArray.get();
     }
 
-    set zoomScaleArray(newValue) {
-        this.__zoomScaleArray.set(newValue);
+    set zoomScaleArray(r28) {
+        this.__zoomScaleArray.set(r28);
     }
 
     get buttonItemProperty() {
         return this.__buttonItemProperty.get();
     }
 
-    set buttonItemProperty(newValue) {
-        this.__buttonItemProperty.set(newValue);
+    set buttonItemProperty(q28) {
+        this.__buttonItemProperty.set(q28);
     }
 
     get buttonItemsSelected() {
         return this.__buttonItemsSelected.get();
     }
 
-    set buttonItemsSelected(newValue) {
-        this.__buttonItemsSelected.set(newValue);
+    set buttonItemsSelected(p28) {
+        this.__buttonItemsSelected.set(p28);
     }
 
     get pressArray() {
         return this.__pressArray.get();
     }
 
-    set pressArray(newValue) {
-        this.__pressArray.set(newValue);
+    set pressArray(o28) {
+        this.__pressArray.set(o28);
     }
 
     get hoverArray() {
         return this.__hoverArray.get();
     }
 
-    set hoverArray(newValue) {
-        this.__hoverArray.set(newValue);
+    set hoverArray(n28) {
+        this.__hoverArray.set(n28);
     }
 
     get hoverColorArray() {
         return this.__hoverColorArray.get();
     }
 
-    set hoverColorArray(newValue) {
-        this.__hoverColorArray.set(newValue);
+    set hoverColorArray(m28) {
+        this.__hoverColorArray.set(m28);
     }
 
     get maxFontScale() {
         return this.__maxFontScale.get();
     }
 
-    set maxFontScale(newValue) {
-        this.__maxFontScale.set(newValue);
+    set maxFontScale(l28) {
+        this.__maxFontScale.set(l28);
     }
 
     get buttonWidth() {
         return this.__buttonWidth.get();
     }
 
-    set buttonWidth(newValue) {
-        this.__buttonWidth.set(newValue);
+    set buttonWidth(k28) {
+        this.__buttonWidth.set(k28);
     }
 
     get buttonHeight() {
         return this.__buttonHeight.get();
     }
 
-    set buttonHeight(newValue) {
-        this.__buttonHeight.set(newValue);
+    set buttonHeight(j28) {
+        this.__buttonHeight.set(j28);
+    }
+
+    get isMarqueeAndFadeout() {
+        return this.__isMarqueeAndFadeout.get();
+    }
+
+    set isMarqueeAndFadeout(i28) {
+        this.__isMarqueeAndFadeout.set(i28);
+    }
+
+    get isSegmentFocusStyleCustomized() {
+        return this.__isSegmentFocusStyleCustomized.get();
+    }
+
+    set isSegmentFocusStyleCustomized(h28) {
+        this.__isSegmentFocusStyleCustomized.set(h28);
     }
 
     onButtonItemsSizeChange() {
-        this.buttonItemsSize.forEach((value, index) => {
-            this.buttonWidth[index] = value.width;
-            this.buttonHeight[index] = value.height;
+        this.buttonItemsSize.forEach((f28, g28) => {
+            this.buttonWidth[g28] = f28.width;
+            this.buttonHeight[g28] = f28.height;
         });
     }
 
-    changeSelectedIndexes(c3) {
-        if (this.optionsArray.e2 === void 0 || this.optionsArray.deleteCount === void 0 ||
-            this.optionsArray.f2 === void 0) {
+    changeSelectedIndexes(t27) {
+        if (this.optionsArray.changeStartIndex === void 0 || this.optionsArray.deleteCount === void 0 ||
+            this.optionsArray.addLength === void 0) {
             return;
         }
         if (!(this.options.multiply ?? false)) {
             if (this.selectedIndexes[0] === void 0) {
                 return;
             }
-            if (this.selectedIndexes[0] < this.optionsArray.e2) {
+            if (this.selectedIndexes[0] < this.optionsArray.changeStartIndex) {
                 return;
             }
-            if (this.optionsArray.e2 + this.optionsArray.deleteCount > this.selectedIndexes[0]) {
+            if (this.optionsArray.changeStartIndex + this.optionsArray.deleteCount > this.selectedIndexes[0]) {
                 if (this.options.type === 'tab') {
                     this.selectedIndexes[0] = 0;
                 } else if (this.options.type === 'capsule') {
@@ -1496,43 +1739,43 @@ class m1 extends ViewPU {
                 }
             } else {
                 this.selectedIndexes[0] =
-                    this.selectedIndexes[0] - this.optionsArray.deleteCount + this.optionsArray.f2;
+                    this.selectedIndexes[0] - this.optionsArray.deleteCount + this.optionsArray.addLength;
             }
         } else {
-            let d3 = this.selectedIndexes;
-            for (let f3 = 0; f3 < this.optionsArray.deleteCount; f3++) {
-                let g3 = d3.indexOf(this.optionsArray.e2);
-                let indexes = d3.map(value => this.optionsArray.e2 &&
-                    (value > this.optionsArray.e2) ? value - 1 : value);
-                if (g3 !== -1) {
-                    indexes.splice(g3, 1);
+            let u27 = this.selectedIndexes;
+            for (let z27 = 0; z27 < this.optionsArray.deleteCount; z27++) {
+                let a28 = u27.indexOf(this.optionsArray.changeStartIndex);
+                let b28 = u27.map(d28 => this.optionsArray.changeStartIndex &&
+                    (d28 > this.optionsArray.changeStartIndex) ? d28 - 1 : d28);
+                if (a28 !== -1) {
+                    b28.splice(a28, 1);
                 }
-                d3 = indexes;
+                u27 = b28;
             }
-            for (let e3 = 0; e3 < this.optionsArray.f2; e3++) {
-                let indexes = d3.map(value => this.optionsArray.e2 &&
-                    (value >= this.optionsArray.e2) ? value + 1 : value);
-                d3 = indexes;
+            for (let v27 = 0; v27 < this.optionsArray.addLength; v27++) {
+                let w27 = u27.map(y27 => this.optionsArray.changeStartIndex &&
+                    (y27 >= this.optionsArray.changeStartIndex) ? y27 + 1 : y27);
+                u27 = w27;
             }
-            this.selectedIndexes = d3;
+            this.selectedIndexes = u27;
         }
     }
 
-    changeFocusIndex(b3) {
-        if (this.optionsArray.e2 === void 0 || this.optionsArray.deleteCount === void 0 ||
-            this.optionsArray.f2 === void 0) {
+    changeFocusIndex(s27) {
+        if (this.optionsArray.changeStartIndex === void 0 || this.optionsArray.deleteCount === void 0 ||
+            this.optionsArray.addLength === void 0) {
             return;
         }
         if (this.focusIndex === -1) {
             return;
         }
-        if (this.focusIndex < this.optionsArray.e2) {
+        if (this.focusIndex < this.optionsArray.changeStartIndex) {
             return;
         }
-        if (this.optionsArray.e2 + this.optionsArray.deleteCount > this.focusIndex) {
+        if (this.optionsArray.changeStartIndex + this.optionsArray.deleteCount > this.focusIndex) {
             this.focusIndex = 0;
         } else {
-            this.focusIndex = this.focusIndex - this.optionsArray.deleteCount + this.optionsArray.f2;
+            this.focusIndex = this.focusIndex - this.optionsArray.deleteCount + this.optionsArray.addLength;
         }
     }
 
@@ -1540,14 +1783,14 @@ class m1 extends ViewPU {
         if (this.options === void 0 || this.options.buttons === void 0) {
             return;
         }
-        let a3 = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
-        if (this.optionsArray.e2 !== void 0 && this.optionsArray.deleteCount !== void 0 &&
-            this.optionsArray.f2 !== void 0) {
-            this.changeSelectedIndexes(a3);
-            this.changeFocusIndex(a3);
-            this.optionsArray.e2 = void 0;
+        let r27 = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+        if (this.optionsArray.changeStartIndex !== void 0 && this.optionsArray.deleteCount !== void 0 &&
+            this.optionsArray.addLength !== void 0) {
+            this.changeSelectedIndexes(r27);
+            this.changeFocusIndex(r27);
+            this.optionsArray.changeStartIndex = void 0;
             this.optionsArray.deleteCount = void 0;
-            this.optionsArray.f2 = void 0;
+            this.optionsArray.addLength = void 0;
         }
     }
 
@@ -1558,43 +1801,47 @@ class m1 extends ViewPU {
         this.calculateBorderRadius();
     }
 
+    onFocusIndex() {
+        this.isMarqueeAndFadeout = this.isSegmentFocusStyleCustomized && !this.isMarqueeAndFadeout;
+    }
+
     aboutToAppear() {
-        for (let index = 0; index < this.buttonItemsRealHeight.length; index++) {
-            this.buttonItemsRealHeight[index] = 0;
+        for (let q27 = 0; q27 < this.buttonItemsRealHeight.length; q27++) {
+            this.buttonItemsRealHeight[q27] = 0;
         }
     }
 
-    getBorderRadius(index) {
-        let borderRadius = this.buttonBorderRadius[index];
+    getBorderRadius(o27) {
+        let p27 = this.buttonBorderRadius[o27];
         if (this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex]) {
             return {
-                topStart: LengthMetrics.vp((borderRadius.topStart?.value ?? 0) + 4),
-                topEnd: LengthMetrics.vp((borderRadius.topEnd?.value ?? 0) + 4),
-                bottomStart: LengthMetrics.vp((borderRadius.bottomStart?.value ?? 0) + 4),
-                bottomEnd: LengthMetrics.vp((borderRadius.bottomEnd?.value ?? 0) + 4)
+                topStart: LengthMetrics.vp((p27.topStart?.value ?? 0) + 4),
+                topEnd: LengthMetrics.vp((p27.topEnd?.value ?? 0) + 4),
+                bottomStart: LengthMetrics.vp((p27.bottomStart?.value ?? 0) + 4),
+                bottomEnd: LengthMetrics.vp((p27.bottomEnd?.value ?? 0) + 4)
             };
         }
-        return borderRadius;
+        return p27;
     }
 
-    focusStack(index, parent = null) {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+    focusStack(g27, h27 = null) {
+        this.observeComponentCreation2((m27, n27) => {
             Stack.create();
             Stack.direction(this.options.direction);
             Stack.size({ width: 1, height: 1 });
             Stack.align(Alignment.Center);
         }, Stack);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((k27, l27) => {
             Stack.create();
             Stack.direction(this.options.direction);
-            Stack.borderRadius(this.getBorderRadius(index));
+            Stack.borderRadius(this.getBorderRadius(g27));
             Stack.size({
                 width: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ?
-                    this.buttonWidth[index] + 8 : this.buttonWidth[index],
+                    this.buttonWidth[g27] + 8 : this.buttonWidth[g27],
                 height: this.options.type === 'capsule' && this.buttonItemsSelected[this.focusIndex] ?
-                    this.buttonHeight[index] + 8 : this.buttonHeight[index]
+                    this.buttonHeight[g27] + 8 : this.buttonHeight[g27]
             });
-            Stack.borderColor(e1.a2);
+            Stack.borderColor(segmentButtonTheme.FOCUS_BORDER_COLOR);
             Stack.borderWidth(2);
         }, Stack);
         Stack.pop();
@@ -1602,9 +1849,9 @@ class m1 extends ViewPU {
     }
 
     calculateBorderRadius() {
-        let v2 = Array.from({
-            length: a1
-        }, (z2, index) => {
+        let a27 = Array.from({
+            length: MAX_ITEM_COUNT
+        }, (e27, f27) => {
             return {
                 topStart: LengthMetrics.vp(0),
                 topEnd: LengthMetrics.vp(0),
@@ -1612,95 +1859,102 @@ class m1 extends ViewPU {
                 bottomEnd: LengthMetrics.vp(0)
             };
         });
-        for (let index = 0; index < this.buttonBorderRadius.length; index++) {
-            let w2 = this.buttonItemsSize[index].height / 2;
+        for (let c27 = 0; c27 < this.buttonBorderRadius.length; c27++) {
+            let d27 = this.buttonItemsSize[c27].height / 2;
             if (this.options.type === 'tab' || !(this.options.multiply ?? false)) {
-                v2[index].topStart = LengthMetrics.vp(this.options.m2 ?? w2);
-                v2[index].topEnd = LengthMetrics.vp(this.options.m2 ?? w2);
-                v2[index].bottomStart = LengthMetrics.vp(this.options.m2 ?? w2);
-                v2[index].bottomEnd = LengthMetrics.vp(this.options.m2 ?? w2);
+                a27[c27].topStart = LengthMetrics.vp(this.options.iconTextRadius ?? d27);
+                a27[c27].topEnd = LengthMetrics.vp(this.options.iconTextRadius ?? d27);
+                a27[c27].bottomStart = LengthMetrics.vp(this.options.iconTextRadius ?? d27);
+                a27[c27].bottomEnd = LengthMetrics.vp(this.options.iconTextRadius ?? d27);
             } else {
-                if (index === 0) {
-                    v2[index].topStart = LengthMetrics.vp(this.options.m2 ?? w2);
-                    v2[index].topEnd = LengthMetrics.vp(0);
-                    v2[index].bottomStart = LengthMetrics.vp(this.options.m2 ?? w2);
-                    v2[index].bottomEnd = LengthMetrics.vp(0);
+                if (c27 === 0) {
+                    a27[c27].topStart = LengthMetrics.vp(this.options.iconTextRadius ?? d27);
+                    a27[c27].topEnd = LengthMetrics.vp(0);
+                    a27[c27].bottomStart = LengthMetrics.vp(this.options.iconTextRadius ?? d27);
+                    a27[c27].bottomEnd = LengthMetrics.vp(0);
                 } else if (this.options.buttons &&
-                    index === Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1) {
-                    v2[index].topStart = LengthMetrics.vp(0);
-                    v2[index].topEnd = LengthMetrics.vp(this.options.m2 ?? w2);
-                    v2[index].bottomStart = LengthMetrics.vp(0);
-                    v2[index].bottomEnd = LengthMetrics.vp(this.options.m2 ?? w2);
+                    c27 === Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1) {
+                    a27[c27].topStart = LengthMetrics.vp(0);
+                    a27[c27].topEnd = LengthMetrics.vp(this.options.iconTextRadius ?? d27);
+                    a27[c27].bottomStart = LengthMetrics.vp(0);
+                    a27[c27].bottomEnd = LengthMetrics.vp(this.options.iconTextRadius ?? d27);
                 } else {
-                    v2[index].topStart = LengthMetrics.vp(0);
-                    v2[index].topEnd = LengthMetrics.vp(0);
-                    v2[index].bottomStart = LengthMetrics.vp(0);
-                    v2[index].bottomEnd = LengthMetrics.vp(0);
+                    a27[c27].topStart = LengthMetrics.vp(0);
+                    a27[c27].topEnd = LengthMetrics.vp(0);
+                    a27[c27].bottomStart = LengthMetrics.vp(0);
+                    a27[c27].bottomEnd = LengthMetrics.vp(0);
                 }
             }
         }
-        this.buttonBorderRadius = v2;
+        this.buttonBorderRadius = a27;
     }
 
-    getAccessibilityDescription(value) {
-        return (typeof value !== undefined) ? value : undefined;
+    getAccessibilityDescription(z26) {
+        return (typeof z26 !== undefined) ? z26 : undefined;
+    }
+
+    isDefaultSelectedBgColor() {
+        if (this.options.type === 'tab') {
+            return this.options.selectedBackgroundColor === segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR;
+        } else if (this.options.type === 'capsule') {
+            return this.options.selectedBackgroundColor === segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
+        }
+        return true;
     }
 
     initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((q24, r24) => {
             If.create();
             if (this.optionsArray !== void 0 && this.optionsArray.length > 1) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((u26, v26) => {
                         Row.create({ space: 1 });
                         Row.direction(this.options.direction);
                         Row.focusScopeId(this.groupId, true);
-                        Row.padding(this.options.l2);
-                        Row.onSizeChange((u2, newValue) => {
-                            this.componentSize = { width: newValue.width, height: newValue.height };
+                        Row.padding(this.options.componentPadding);
+                        Row.onSizeChange((x26, y26) => {
+                            this.componentSize = { width: y26.width, height: y26.height };
                         });
                     }, Row);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((w24, x24) => {
                         ForEach.create();
-                        const forEachItemGenFunction = (_item, index) => {
-                            const item = _item;
-                            this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        const y24 = (a25, b25) => {
+                            const c25 = a25;
+                            this.observeComponentCreation2((e25, f25) => {
                                 If.create();
-                                if (index < a1) {
+                                if (b25 < MAX_ITEM_COUNT) {
                                     this.ifElseBranchUpdateFunction(0, () => {
-                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                        this.observeComponentCreation2((y25, z25) => {
                                             Button.createWithChild();
                                             Button.type(ButtonType.Normal);
                                             Button.stateEffect(false);
                                             Button.hoverEffect(HoverEffect.None);
                                             Button.backgroundColor(Color.Transparent);
-                                            Button.accessibilityLevel(item.accessibilityLevel);
+                                            Button.accessibilityLevel(c25.accessibilityLevel);
                                             Button.accessibilitySelected(this.options.multiply ? undefined :
-                                            this.selectedIndexes.includes(index));
+                                            this.selectedIndexes.includes(z25));
                                             Button.accessibilityChecked(this.options.multiply ?
-                                            this.selectedIndexes.includes(index) : undefined);
-                                            Button.accessibilityDescription(this.getAccessibilityDescription(item.accessibilityDescription));
+                                            this.selectedIndexes.includes(z25) : undefined);
+                                            Button.accessibilityDescription(this.getAccessibilityDescription(c25.accessibilityDescription));
                                             Button.direction(this.options.direction);
-                                            Button.borderRadius(this.buttonBorderRadius[index]);
+                                            Button.borderRadius(this.buttonBorderRadius[b25]);
                                             Button.scale({
                                                 x: this.options.type === 'capsule' && (this.options.multiply ?? false) ?
-                                                    1 : this.zoomScaleArray[index],
+                                                    1 : this.zoomScaleArray[b25],
                                                 y: this.options.type === 'capsule' && (this.options.multiply ?? false) ?
-                                                    1 : this.zoomScaleArray[index]
+                                                    1 : this.zoomScaleArray[b25]
                                             });
                                             Button.layoutWeight(1);
                                             Button.padding(0);
-                                            Button.onSizeChange((t2, newValue) => {
-                                                this.buttonItemsSize[index] = {
-                                                    width: newValue.width,
-                                                    height: this.buttonItemsSize[index].height
-                                                };
-                                                if (newValue.width) {
-                                                    this.buttonItemsPosition[index] = {
-                                                        start: LengthMetrics.vp(Number.parseFloat(this.options.l2.toString()) +
-                                                            (Number.parseFloat(newValue.width.toString()) + 1) * index),
+                                            Button.onSizeChange((s26, t26) => {
+                                                this.buttonItemsSize[b25] =
+                                                    { width: t26.width, height: this.buttonItemsSize[b25].height };
+                                                if (t26.width) {
+                                                    this.buttonItemsPosition[b25] = {
+                                                        start: LengthMetrics.vp(Number.parseFloat(this.options.componentPadding.toString()) +
+                                                            (Number.parseFloat(t26.width.toString()) + 1) * b25),
                                                         top: LengthMetrics.px(Math.floor(this.getUIContext()
-                                                            .vp2px(Number.parseFloat(this.options.l2.toString()))))
+                                                            .vp2px(Number.parseFloat(this.options.componentPadding.toString()))))
                                                     };
                                                 }
                                             });
@@ -1709,142 +1963,168 @@ class m1 extends ViewPU {
                                             ViewStackProcessor.visualState("focused");
                                             Button.overlay({
                                                 builder: () => {
-                                                    this.focusStack.call(this, index);
+                                                    this.focusStack.call(this, b25);
                                                 }
                                             }, {
                                                 align: Alignment.Center
                                             });
                                             ViewStackProcessor.visualState();
                                             Button.onFocus(() => {
-                                                this.focusIndex = index;
+                                                this.focusIndex = b25;
+                                                if (this.isSegmentFocusStyleCustomized) {
+                                                    this.customizeSegmentFocusStyle(b25);
+                                                }
+                                            });
+                                            Button.onBlur(() => {
+                                                this.focusIndex = -1;
+                                                this.hoverColorArray[b25].hoverColor = Color.Transparent;
                                             });
                                             Gesture.create(GesturePriority.Low);
                                             TapGesture.create();
                                             TapGesture.onAction(() => {
                                                 if (this.onItemClicked) {
-                                                    this.onItemClicked(index);
+                                                    this.onItemClicked(b25);
                                                 }
                                                 if (this.options.type === 'capsule' &&
                                                     (this.options.multiply ?? false)) {
-                                                    if (this.selectedIndexes.indexOf(index) === -1) {
-                                                        this.selectedIndexes.push(index);
+                                                    if (this.selectedIndexes.indexOf(b25) === -1) {
+                                                        this.selectedIndexes.push(b25);
                                                     } else {
-                                                        this.selectedIndexes.splice(this.selectedIndexes.indexOf(index),
+                                                        this.selectedIndexes.splice(this.selectedIndexes.indexOf(b25),
                                                             1);
                                                     }
                                                 } else {
-                                                    this.selectedIndexes[0] = index;
+                                                    this.selectedIndexes[0] = b25;
                                                 }
                                             });
                                             TapGesture.pop();
                                             Gesture.pop();
-                                            Button.onTouch((event) => {
-                                                if (event.source !== SourceType.TouchScreen) {
+                                            Button.onTouch((p26) => {
+                                                if (this.isSegmentFocusStyleCustomized) {
+                                                    this.getUIContext().getFocusController().clearFocus();
+                                                }
+                                                if (p26.source !== SourceType.TouchScreen) {
                                                     return;
                                                 }
-                                                if (event.type === TouchType.Down) {
+                                                if (p26.type === TouchType.Down) {
                                                     Context.animateTo({
                                                         curve: curves.interpolatingSpring(10, 1, 410, 38)
                                                     }, () => {
-                                                        this.zoomScaleArray[index] = 0.95;
+                                                        this.zoomScaleArray[b25] = 0.95;
                                                     });
-                                                } else if (event.type === TouchType.Up ||
-                                                    event.type === TouchType.Cancel) {
+                                                } else if (p26.type === TouchType.Up || p26.type === TouchType.Cancel) {
                                                     Context.animateTo({
                                                         curve: curves.interpolatingSpring(10, 1, 410, 38)
                                                     }, () => {
-                                                        this.zoomScaleArray[index] = 1;
+                                                        this.zoomScaleArray[b25] = 1;
                                                     });
                                                 }
                                             });
-                                            Button.onHover((isHover) => {
-                                                this.hoverArray[index] = isHover;
-                                                if (isHover) {
+                                            Button.onHover((m26) => {
+                                                this.hoverArray[b25] = m26;
+                                                if (m26) {
                                                     Context.animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                                                        this.hoverColorArray[index].o2 = (e1.b2);
+                                                        this.hoverColorArray[b25].hoverColor =
+                                                            this.isSegmentFocusStyleCustomized &&
+                                                                this.focusIndex === b25 ?
+                                                            segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR :
+                                                            segmentButtonTheme.HOVER_COLOR;
                                                     });
                                                 } else {
                                                     Context.animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                                                        this.hoverColorArray[index].o2 = Color.Transparent;
+                                                        this.hoverColorArray[b25].hoverColor =
+                                                            this.isSegmentFocusStyleCustomized &&
+                                                                this.focusIndex === b25 ?
+                                                            segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR :
+                                                            Color.Transparent;
                                                     });
                                                 }
                                             });
-                                            Button.onMouse((event) => {
-                                                switch (event.action) {
+                                            Button.onMouse((h26) => {
+                                                switch (h26.action) {
                                                     case MouseAction.Press:
                                                         Context.animateTo({ curve: curves.springMotion(0.347, 0.99) },
                                                             () => {
-                                                                this.zoomScaleArray[index] = 0.95;
+                                                                this.zoomScaleArray[b25] = 0.95;
                                                             });
                                                         Context.animateTo({ duration: 100, curve: Curve.Sharp }, () => {
-                                                            this.pressArray[index] = true;
+                                                            this.pressArray[b25] = true;
                                                         });
                                                         break;
                                                     case MouseAction.Release:
                                                         Context.animateTo({ curve: curves.springMotion(0.347, 0.99) },
                                                             () => {
-                                                                this.zoomScaleArray[index] = 1;
+                                                                this.zoomScaleArray[b25] = 1;
                                                             });
                                                         Context.animateTo({ duration: 100, curve: Curve.Sharp }, () => {
-                                                            this.pressArray[index] = false;
+                                                            this.pressArray[b25] = false;
                                                         });
                                                         break;
                                                 }
                                             });
                                         }, Button);
-                                        this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                        this.observeComponentCreation2((r25, s25) => {
                                             __Common__.create();
-                                            __Common__.onSizeChange((s2, newValue) => {
-                                                this.buttonItemsRealHeight[index] = newValue.height;
-                                                let maxHeight = Math.max(...this.buttonItemsRealHeight.slice(0,
+                                            __Common__.onSizeChange((u25, v25) => {
+                                                this.buttonItemsRealHeight[b25] = v25.height;
+                                                let w25 = Math.max(...this.buttonItemsRealHeight.slice(0,
                                                     this.options.buttons ?
                                                     this.options.buttons.length : 0));
-                                                for (let index = 0; index < this.buttonItemsSize.length; index++) {
-                                                    this.buttonItemsSize[index] =
-                                                        { width: this.buttonItemsSize[index].width, height: maxHeight };
+                                                for (let x25 = 0; x25 < this.buttonItemsSize.length; x25++) {
+                                                    this.buttonItemsSize[x25] =
+                                                        { width: this.buttonItemsSize[x25].width, height: w25 };
                                                 }
                                                 this.calculateBorderRadius();
                                             });
                                         }, __Common__);
                                         {
-                                            this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                if (isInitialRender) {
-                                                    let componentCall = new i1(this, {
+                                            this.observeComponentCreation2((l25, m25) => {
+                                                if (m25) {
+                                                    let n25 = new SegmentButtonItem(this, {
+                                                        isMarqueeAndFadeout: this.isMarqueeAndFadeout,
+                                                        isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized,
                                                         selectedIndexes: this.__selectedIndexes,
                                                         focusIndex: this.__focusIndex,
-                                                        index: index,
-                                                        itemOptions: item,
+                                                        index: b25,
+                                                        itemOptions: c25,
                                                         options: this.options,
-                                                        property: this.buttonItemProperty[index],
+                                                        property: this.buttonItemProperty[b25],
                                                         groupId: this.groupId,
-                                                        maxFontScale: this.maxFontScale
-                                                    }, undefined, elmtId, () => {
+                                                        maxFontScale: this.maxFontScale,
+                                                        hover: this.hoverArray[b25],
+                                                    }, undefined, l25, () => {
                                                     }, {
-                                                        page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                        line: 838,
-                                                        q2: 15
+                                                        page: "library/src/main/ets/components/segmentbutton.ets",
+                                                        line: 921,
+                                                        col: 15
                                                     });
-                                                    ViewPU.create(componentCall);
-                                                    let paramsLambda = () => {
+                                                    ViewPU.create(n25);
+                                                    let o25 = () => {
                                                         return {
+                                                            isMarqueeAndFadeout: this.isMarqueeAndFadeout,
+                                                            isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized,
                                                             selectedIndexes: this.selectedIndexes,
                                                             focusIndex: this.focusIndex,
-                                                            index: index,
-                                                            itemOptions: item,
+                                                            index: b25,
+                                                            itemOptions: c25,
                                                             options: this.options,
-                                                            property: this.buttonItemProperty[index],
+                                                            property: this.buttonItemProperty[b25],
                                                             groupId: this.groupId,
-                                                            maxFontScale: this.maxFontScale
+                                                            maxFontScale: this.maxFontScale,
+                                                            hover: this.hoverArray[b25]
                                                         };
                                                     };
-                                                    componentCall.paramsGenerator_ = paramsLambda;
+                                                    n25.paramsGenerator_ = o25;
                                                 } else {
-                                                    this.updateStateVarsOfChildByElmtId(elmtId, {
-                                                        index: index,
-                                                        itemOptions: item,
+                                                    this.updateStateVarsOfChildByElmtId(l25, {
+                                                        isMarqueeAndFadeout: this.isMarqueeAndFadeout,
+                                                        isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized,
+                                                        index: b25,
+                                                        itemOptions: c25,
                                                         options: this.options,
-                                                        property: this.buttonItemProperty[index],
-                                                        maxFontScale: this.maxFontScale
+                                                        property: this.buttonItemProperty[b25],
+                                                        maxFontScale: this.maxFontScale,
+                                                        hover: this.hoverArray[b25]
                                                     });
                                                 }
                                             }, { name: "SegmentButtonItem" });
@@ -1859,8 +2139,7 @@ class m1 extends ViewPU {
                             }, If);
                             If.pop();
                         };
-                        this.forEachUpdateFunction(elmtId, this.optionsArray, forEachItemGenFunction, undefined, true,
-                            false);
+                        this.forEachUpdateFunction(w24, this.optionsArray, y24, undefined, true, false);
                     }, ForEach);
                     ForEach.pop();
                     Row.pop();
@@ -1873,38 +2152,50 @@ class m1 extends ViewPU {
         If.pop();
     }
 
+    customizeSegmentFocusStyle(o24) {
+        if (this.selectedIndexes !== void 0 && this.selectedIndexes.length !== 0 &&
+            this.selectedIndexes[0] === o24) {
+            this.hoverColorArray[o24].hoverColor = this.isDefaultSelectedBgColor() ?
+            segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : this.options.selectedBackgroundColor;
+        } else {
+            this.hoverColorArray[o24].hoverColor =
+                this.options.backgroundColor === segmentButtonTheme.BACKGROUND_COLOR ?
+                segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : this.options.backgroundColor;
+        }
+    }
+
     rerender() {
         this.updateDirtyElements();
     }
 }
 
-let n1 = class ItemProperty {
+let ItemProperty = class ItemProperty {
     constructor() {
-        this.fontColor = e1.q1;
-        this.fontSize = e1.u1;
+        this.fontColor = segmentButtonTheme.FONT_COLOR;
+        this.fontSize = segmentButtonTheme.FONT_SIZE;
         this.fontWeight = FontWeight.Regular;
         this.isSelected = false;
     }
 };
-n1 = j([
+ItemProperty = __decorate([
     Observed
-], n1);
+], ItemProperty);
 
 export class SegmentButton extends ViewPU {
-    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
-        super(parent, __localStorage, elmtId, extraInfo);
-        if (typeof paramsLambda === "function") {
-            this.paramsGenerator_ = paramsLambda;
+    constructor(h23, i23, j23, k23 = -1, l23 = undefined, m23) {
+        super(h23, j23, k23, m23);
+        if (typeof l23 === "function") {
+            this.paramsGenerator_ = l23;
         }
-        this.__options = new SynchedPropertyNesedObjectPU(params.options, this, "options");
-        this.__selectedIndexes = new SynchedPropertyObjectTwoWayPU(params.selectedIndexes, this, "selectedIndexes");
+        this.__options = new SynchedPropertyNesedObjectPU(i23.options, this, "options");
+        this.__selectedIndexes = new SynchedPropertyObjectTwoWayPU(i23.selectedIndexes, this, "selectedIndexes");
         this.onItemClicked = undefined;
-        this.__maxFontScale = new SynchedPropertyObjectOneWayPU(params.maxFontScale, this, "maxFontScale");
+        this.__maxFontScale = new SynchedPropertyObjectOneWayPU(i23.maxFontScale, this, "maxFontScale");
         this.__componentSize = new ObservedPropertyObjectPU({ width: 0, height: 0 }, this, "componentSize");
         this.addProvidedVar("componentSize", this.__componentSize, false);
         this.__buttonBorderRadius = new ObservedPropertyObjectPU(Array.from({
-            length: a1
-        }, (r2, index) => {
+            length: MAX_ITEM_COUNT
+        }, (m24, n24) => {
             return {
                 topStart: LengthMetrics.vp(0),
                 topEnd: LengthMetrics.vp(0),
@@ -1913,132 +2204,140 @@ export class SegmentButton extends ViewPU {
             };
         }), this, "buttonBorderRadius");
         this.addProvidedVar("buttonBorderRadius", this.__buttonBorderRadius, false);
-        this.__buttonItemsSize = new ObservedPropertyObjectPU(Array.from({ length: a1 }, (q2, index) => {
+        this.__buttonItemsSize = new ObservedPropertyObjectPU(Array.from({ length: MAX_ITEM_COUNT }, (k24, l24) => {
             return {};
         }), this, "buttonItemsSize");
         this.addProvidedVar("buttonItemsSize", this.__buttonItemsSize, false);
         this.__buttonItemsPosition = new ObservedPropertyObjectPU(Array.from({
-            length: a1
-        }, (o2, index) => {
+            length: MAX_ITEM_COUNT
+        }, (i24, j24) => {
             return {};
         }), this, "buttonItemsPosition");
         this.addProvidedVar("buttonItemsPosition", this.__buttonItemsPosition, false);
         this.__buttonItemsSelected =
-            new ObservedPropertyObjectPU(Array.from({ length: a1 }, (n2, index) => false), this, "buttonItemsSelected");
+            new ObservedPropertyObjectPU(Array.from({ length: MAX_ITEM_COUNT }, (g24, h24) => false), this,
+                "buttonItemsSelected");
         this.addProvidedVar("buttonItemsSelected", this.__buttonItemsSelected, false);
         this.__buttonItemProperty = new ObservedPropertyObjectPU(Array.from({
-            length: a1
-        }, (m2, index) => new n1()), this, "buttonItemProperty");
+            length: MAX_ITEM_COUNT
+        }, (e24, f24) => new ItemProperty()), this, "buttonItemProperty");
         this.addProvidedVar("buttonItemProperty", this.__buttonItemProperty, false);
         this.__focusIndex = new ObservedPropertySimplePU(-1, this, "focusIndex");
         this.addProvidedVar("focusIndex", this.__focusIndex, false);
         this.__selectedItemPosition = new ObservedPropertyObjectPU({}, this, "selectedItemPosition");
         this.addProvidedVar("selectedItemPosition", this.__selectedItemPosition, false);
         this.__zoomScaleArray =
-            new ObservedPropertyObjectPU(Array.from({ length: a1 }, (l2, index) => 1.0), this, "zoomScaleArray");
+            new ObservedPropertyObjectPU(Array.from({ length: MAX_ITEM_COUNT }, (c24, d24) => 1.0), this,
+                "zoomScaleArray");
         this.addProvidedVar("zoomScaleArray", this.__zoomScaleArray, false);
         this.__pressArray =
-            new ObservedPropertyObjectPU(Array.from({ length: a1 }, (k2, index) => false), this, "pressArray");
+            new ObservedPropertyObjectPU(Array.from({ length: MAX_ITEM_COUNT }, (a24, b24) => false), this,
+                "pressArray");
         this.__hoverArray =
-            new ObservedPropertyObjectPU(Array.from({ length: a1 }, (j2, index) => false), this, "hoverArray");
+            new ObservedPropertyObjectPU(Array.from({ length: MAX_ITEM_COUNT }, (y23, z23) => false), this,
+                "hoverArray");
         this.__hoverColorArray = new ObservedPropertyObjectPU(Array.from({
-            length: a1
-        }, (i2, index) => new j1()), this, "hoverColorArray");
+            length: MAX_ITEM_COUNT
+        }, (w23, x23) => new HoverColorProperty()), this, "hoverColorArray");
         this.doSelectedChangeAnimate = false;
         this.isCurrentPositionSelected = false;
         this.panGestureStartPoint = { x: 0, y: 0 };
         this.isPanGestureMoved = false;
         this.__shouldMirror = new ObservedPropertySimplePU(false, this, "shouldMirror");
-        this.setInitiallyProvidedValue(params);
+        this.isSegmentFocusStyleCustomized = segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED;
+        this.setInitiallyProvidedValue(i23);
         this.declareWatch("options", this.onOptionsChange);
         this.declareWatch("selectedIndexes", this.onSelectedChange);
         this.declareWatch("buttonItemsPosition", this.onItemsPositionChange);
         this.finalizeConstruction();
     }
 
-    setInitiallyProvidedValue(params) {
-        this.__options.set(params.options);
-        if (params.onItemClicked !== undefined) {
-            this.onItemClicked = params.onItemClicked;
+    setInitiallyProvidedValue(g23) {
+        this.__options.set(g23.options);
+        if (g23.onItemClicked !== undefined) {
+            this.onItemClicked = g23.onItemClicked;
         }
-        if (params.maxFontScale === undefined) {
-            this.__maxFontScale.set(b1);
+        if (g23.maxFontScale === undefined) {
+            this.__maxFontScale.set(DEFAULT_MAX_FONT_SCALE);
         }
-        if (params.componentSize !== undefined) {
-            this.componentSize = params.componentSize;
+        if (g23.componentSize !== undefined) {
+            this.componentSize = g23.componentSize;
         }
-        if (params.buttonBorderRadius !== undefined) {
-            this.buttonBorderRadius = params.buttonBorderRadius;
+        if (g23.buttonBorderRadius !== undefined) {
+            this.buttonBorderRadius = g23.buttonBorderRadius;
         }
-        if (params.buttonItemsSize !== undefined) {
-            this.buttonItemsSize = params.buttonItemsSize;
+        if (g23.buttonItemsSize !== undefined) {
+            this.buttonItemsSize = g23.buttonItemsSize;
         }
-        if (params.buttonItemsPosition !== undefined) {
-            this.buttonItemsPosition = params.buttonItemsPosition;
+        if (g23.buttonItemsPosition !== undefined) {
+            this.buttonItemsPosition = g23.buttonItemsPosition;
         }
-        if (params.buttonItemsSelected !== undefined) {
-            this.buttonItemsSelected = params.buttonItemsSelected;
+        if (g23.buttonItemsSelected !== undefined) {
+            this.buttonItemsSelected = g23.buttonItemsSelected;
         }
-        if (params.buttonItemProperty !== undefined) {
-            this.buttonItemProperty = params.buttonItemProperty;
+        if (g23.buttonItemProperty !== undefined) {
+            this.buttonItemProperty = g23.buttonItemProperty;
         }
-        if (params.focusIndex !== undefined) {
-            this.focusIndex = params.focusIndex;
+        if (g23.focusIndex !== undefined) {
+            this.focusIndex = g23.focusIndex;
         }
-        if (params.selectedItemPosition !== undefined) {
-            this.selectedItemPosition = params.selectedItemPosition;
+        if (g23.selectedItemPosition !== undefined) {
+            this.selectedItemPosition = g23.selectedItemPosition;
         }
-        if (params.zoomScaleArray !== undefined) {
-            this.zoomScaleArray = params.zoomScaleArray;
+        if (g23.zoomScaleArray !== undefined) {
+            this.zoomScaleArray = g23.zoomScaleArray;
         }
-        if (params.pressArray !== undefined) {
-            this.pressArray = params.pressArray;
+        if (g23.pressArray !== undefined) {
+            this.pressArray = g23.pressArray;
         }
-        if (params.hoverArray !== undefined) {
-            this.hoverArray = params.hoverArray;
+        if (g23.hoverArray !== undefined) {
+            this.hoverArray = g23.hoverArray;
         }
-        if (params.hoverColorArray !== undefined) {
-            this.hoverColorArray = params.hoverColorArray;
+        if (g23.hoverColorArray !== undefined) {
+            this.hoverColorArray = g23.hoverColorArray;
         }
-        if (params.doSelectedChangeAnimate !== undefined) {
-            this.doSelectedChangeAnimate = params.doSelectedChangeAnimate;
+        if (g23.doSelectedChangeAnimate !== undefined) {
+            this.doSelectedChangeAnimate = g23.doSelectedChangeAnimate;
         }
-        if (params.isCurrentPositionSelected !== undefined) {
-            this.isCurrentPositionSelected = params.isCurrentPositionSelected;
+        if (g23.isCurrentPositionSelected !== undefined) {
+            this.isCurrentPositionSelected = g23.isCurrentPositionSelected;
         }
-        if (params.panGestureStartPoint !== undefined) {
-            this.panGestureStartPoint = params.panGestureStartPoint;
+        if (g23.panGestureStartPoint !== undefined) {
+            this.panGestureStartPoint = g23.panGestureStartPoint;
         }
-        if (params.isPanGestureMoved !== undefined) {
-            this.isPanGestureMoved = params.isPanGestureMoved;
+        if (g23.isPanGestureMoved !== undefined) {
+            this.isPanGestureMoved = g23.isPanGestureMoved;
         }
-        if (params.shouldMirror !== undefined) {
-            this.shouldMirror = params.shouldMirror;
+        if (g23.shouldMirror !== undefined) {
+            this.shouldMirror = g23.shouldMirror;
+        }
+        if (g23.isSegmentFocusStyleCustomized !== undefined) {
+            this.isSegmentFocusStyleCustomized = g23.isSegmentFocusStyleCustomized;
         }
     }
 
-    updateStateVars(params) {
-        this.__options.set(params.options);
-        this.__maxFontScale.reset(params.maxFontScale);
+    updateStateVars(f23) {
+        this.__options.set(f23.options);
+        this.__maxFontScale.reset(f23.maxFontScale);
     }
 
-    purgeVariableDependenciesOnElmtId(rmElmtId) {
-        this.__options.purgeDependencyOnElmtId(rmElmtId);
-        this.__selectedIndexes.purgeDependencyOnElmtId(rmElmtId);
-        this.__maxFontScale.purgeDependencyOnElmtId(rmElmtId);
-        this.__componentSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonBorderRadius.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonItemsSize.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonItemsPosition.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonItemsSelected.purgeDependencyOnElmtId(rmElmtId);
-        this.__buttonItemProperty.purgeDependencyOnElmtId(rmElmtId);
-        this.__focusIndex.purgeDependencyOnElmtId(rmElmtId);
-        this.__selectedItemPosition.purgeDependencyOnElmtId(rmElmtId);
-        this.__zoomScaleArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__pressArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__hoverArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__hoverColorArray.purgeDependencyOnElmtId(rmElmtId);
-        this.__shouldMirror.purgeDependencyOnElmtId(rmElmtId);
+    purgeVariableDependenciesOnElmtId(e23) {
+        this.__options.purgeDependencyOnElmtId(e23);
+        this.__selectedIndexes.purgeDependencyOnElmtId(e23);
+        this.__maxFontScale.purgeDependencyOnElmtId(e23);
+        this.__componentSize.purgeDependencyOnElmtId(e23);
+        this.__buttonBorderRadius.purgeDependencyOnElmtId(e23);
+        this.__buttonItemsSize.purgeDependencyOnElmtId(e23);
+        this.__buttonItemsPosition.purgeDependencyOnElmtId(e23);
+        this.__buttonItemsSelected.purgeDependencyOnElmtId(e23);
+        this.__buttonItemProperty.purgeDependencyOnElmtId(e23);
+        this.__focusIndex.purgeDependencyOnElmtId(e23);
+        this.__selectedItemPosition.purgeDependencyOnElmtId(e23);
+        this.__zoomScaleArray.purgeDependencyOnElmtId(e23);
+        this.__pressArray.purgeDependencyOnElmtId(e23);
+        this.__hoverArray.purgeDependencyOnElmtId(e23);
+        this.__hoverColorArray.purgeDependencyOnElmtId(e23);
+        this.__shouldMirror.purgeDependencyOnElmtId(e23);
     }
 
     aboutToBeDeleted() {
@@ -2070,120 +2369,120 @@ export class SegmentButton extends ViewPU {
         return this.__selectedIndexes.get();
     }
 
-    set selectedIndexes(newValue) {
-        this.__selectedIndexes.set(newValue);
+    set selectedIndexes(d23) {
+        this.__selectedIndexes.set(d23);
     }
 
     get maxFontScale() {
         return this.__maxFontScale.get();
     }
 
-    set maxFontScale(newValue) {
-        this.__maxFontScale.set(newValue);
+    set maxFontScale(c23) {
+        this.__maxFontScale.set(c23);
     }
 
     get componentSize() {
         return this.__componentSize.get();
     }
 
-    set componentSize(newValue) {
-        this.__componentSize.set(newValue);
+    set componentSize(b23) {
+        this.__componentSize.set(b23);
     }
 
     get buttonBorderRadius() {
         return this.__buttonBorderRadius.get();
     }
 
-    set buttonBorderRadius(newValue) {
-        this.__buttonBorderRadius.set(newValue);
+    set buttonBorderRadius(a23) {
+        this.__buttonBorderRadius.set(a23);
     }
 
     get buttonItemsSize() {
         return this.__buttonItemsSize.get();
     }
 
-    set buttonItemsSize(newValue) {
-        this.__buttonItemsSize.set(newValue);
+    set buttonItemsSize(z22) {
+        this.__buttonItemsSize.set(z22);
     }
 
     get buttonItemsPosition() {
         return this.__buttonItemsPosition.get();
     }
 
-    set buttonItemsPosition(newValue) {
-        this.__buttonItemsPosition.set(newValue);
+    set buttonItemsPosition(y22) {
+        this.__buttonItemsPosition.set(y22);
     }
 
     get buttonItemsSelected() {
         return this.__buttonItemsSelected.get();
     }
 
-    set buttonItemsSelected(newValue) {
-        this.__buttonItemsSelected.set(newValue);
+    set buttonItemsSelected(x22) {
+        this.__buttonItemsSelected.set(x22);
     }
 
     get buttonItemProperty() {
         return this.__buttonItemProperty.get();
     }
 
-    set buttonItemProperty(newValue) {
-        this.__buttonItemProperty.set(newValue);
+    set buttonItemProperty(w22) {
+        this.__buttonItemProperty.set(w22);
     }
 
     get focusIndex() {
         return this.__focusIndex.get();
     }
 
-    set focusIndex(newValue) {
-        this.__focusIndex.set(newValue);
+    set focusIndex(v22) {
+        this.__focusIndex.set(v22);
     }
 
     get selectedItemPosition() {
         return this.__selectedItemPosition.get();
     }
 
-    set selectedItemPosition(newValue) {
-        this.__selectedItemPosition.set(newValue);
+    set selectedItemPosition(u22) {
+        this.__selectedItemPosition.set(u22);
     }
 
     get zoomScaleArray() {
         return this.__zoomScaleArray.get();
     }
 
-    set zoomScaleArray(newValue) {
-        this.__zoomScaleArray.set(newValue);
+    set zoomScaleArray(t22) {
+        this.__zoomScaleArray.set(t22);
     }
 
     get pressArray() {
         return this.__pressArray.get();
     }
 
-    set pressArray(newValue) {
-        this.__pressArray.set(newValue);
+    set pressArray(s22) {
+        this.__pressArray.set(s22);
     }
 
     get hoverArray() {
         return this.__hoverArray.get();
     }
 
-    set hoverArray(newValue) {
-        this.__hoverArray.set(newValue);
+    set hoverArray(r22) {
+        this.__hoverArray.set(r22);
     }
 
     get hoverColorArray() {
         return this.__hoverColorArray.get();
     }
 
-    set hoverColorArray(newValue) {
-        this.__hoverColorArray.set(newValue);
+    set hoverColorArray(q22) {
+        this.__hoverColorArray.set(q22);
     }
 
     get shouldMirror() {
         return this.__shouldMirror.get();
     }
 
-    set shouldMirror(newValue) {
-        this.__shouldMirror.set(newValue);
+    set shouldMirror(p22) {
+        this.__shouldMirror.set(p22);
     }
 
     onItemsPositionChange() {
@@ -2191,7 +2490,7 @@ export class SegmentButton extends ViewPU {
             return;
         }
         if (this.options.type === 'capsule') {
-            this.options.j2();
+            this.options.onButtonsUpdated();
         }
         if (this.doSelectedChangeAnimate) {
             this.updateAnimatedProperty(this.getSelectedChangeCurve());
@@ -2201,11 +2500,11 @@ export class SegmentButton extends ViewPU {
     }
 
     setItemsSelected() {
-        this.buttonItemsSelected.forEach((h2, index) => {
-            this.buttonItemsSelected[index] = false;
+        this.buttonItemsSelected.forEach((n22, o22) => {
+            this.buttonItemsSelected[o22] = false;
         });
         if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
-            this.selectedIndexes.forEach(index => this.buttonItemsSelected[index] = true);
+            this.selectedIndexes.forEach(m22 => this.buttonItemsSelected[m22] = true);
         } else {
             this.buttonItemsSelected[this.selectedIndexes[0]] = true;
         }
@@ -2226,10 +2525,10 @@ export class SegmentButton extends ViewPU {
                 this.selectedIndexes = [];
             }
         }
-        let g2 = this.selectedIndexes.some(index => {
-            return (index === void 0 || index < 0 || (this.options.buttons && index >= this.options.buttons.length));
+        let h22 = this.selectedIndexes.some(j22 => {
+            return (j22 === void 0 || j22 < 0 || (this.options.buttons && j22 >= this.options.buttons.length));
         });
-        if (g2) {
+        if (h22) {
             if (this.options.type === 'tab') {
                 this.selectedIndexes = [0];
             } else {
@@ -2265,7 +2564,7 @@ export class SegmentButton extends ViewPU {
         if (this.options === void 0 || this.options.buttons === void 0) {
             return;
         }
-        this.options.h2 = () => {
+        this.options.onButtonsChange = () => {
             if (this.options.type === 'tab') {
                 this.selectedIndexes = [0];
             } else {
@@ -2278,12 +2577,12 @@ export class SegmentButton extends ViewPU {
         this.updateAnimatedProperty(null);
     }
 
-    isMouseWheelScroll(event) {
-        return event.source === SourceType.Mouse && !this.isPanGestureMoved;
+    isMouseWheelScroll(f22) {
+        return f22.source === SourceType.Mouse && !this.isPanGestureMoved;
     }
 
-    isMovedFromPanGestureStartPoint(x, y) {
-        return !i(x, this.panGestureStartPoint.x) || !i(y, this.panGestureStartPoint.y);
+    isMovedFromPanGestureStartPoint(d22, e22) {
+        return !nearEqual(d22, this.panGestureStartPoint.x) || !nearEqual(e22, this.panGestureStartPoint.y);
     }
 
     isShouldMirror() {
@@ -2291,30 +2590,30 @@ export class SegmentButton extends ViewPU {
             return true;
         }
         try {
-            let f2 = t.System.getSystemLanguage();
-            if (f2 === 'ug' && this.options.direction != Direction.Ltr) {
+            let c22 = I18n.System.getSystemLanguage();
+            if (c22 === 'ug' && this.options.direction != Direction.Ltr) {
                 return true;
             }
-        } catch (error) {
-            console.error(`Ace SegmentButton getSystemLanguage, error: ${error.toString()}`);
+        } catch (b22) {
+            console.error(`Ace SegmentButton getSystemLanguage, error: ${b22.toString()}`);
         }
         return false;
     }
 
     initialRender() {
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((q20, r20) => {
             Stack.create();
             Stack.direction(this.options ? this.options.direction : undefined);
             Stack.onBlur(() => {
                 this.focusIndex = -1;
             });
-            Stack.onKeyEvent((event) => {
+            Stack.onKeyEvent((a22) => {
                 if (this.options === void 0 || this.options.buttons === void 0) {
                     return;
                 }
-                if (event.type === KeyType.Down) {
-                    if (event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER ||
-                        event.keyCode === KeyCode.KEYCODE_NUMPAD_ENTER) {
+                if (a22.type === KeyType.Down) {
+                    if (a22.keyCode === KeyCode.KEYCODE_SPACE || a22.keyCode === KeyCode.KEYCODE_ENTER ||
+                        a22.keyCode === KeyCode.KEYCODE_NUMPAD_ENTER) {
                         if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
                             if (this.selectedIndexes.indexOf(this.focusIndex) === -1) {
                                 this.selectedIndexes.push(this.focusIndex);
@@ -2331,37 +2630,37 @@ export class SegmentButton extends ViewPU {
             Gesture.create(GesturePriority.High);
             GestureGroup.create(GestureMode.Parallel);
             TapGesture.create();
-            TapGesture.onAction((event) => {
-                let a2 = event.fingerList.find(Boolean);
-                if (a2 === void 0) {
+            TapGesture.onAction((t21) => {
+                let u21 = t21.fingerList.find(Boolean);
+                if (u21 === void 0) {
                     return;
                 }
                 if (this.options === void 0 || this.options.buttons === void 0) {
                     return;
                 }
-                let b2 = a2.localX;
-                let c2 = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
-                for (let d2 = 0; d2 < c2; d2++) {
-                    b2 = b2 - this.buttonItemsSize[d2].width;
-                    if (b2 >= 0) {
+                let v21 = u21.localX;
+                let w21 = Math.min(this.options.buttons.length, this.buttonItemsSize.length);
+                for (let x21 = 0; x21 < w21; x21++) {
+                    v21 = v21 - this.buttonItemsSize[x21].width;
+                    if (v21 >= 0) {
                         continue;
                     }
                     this.doSelectedChangeAnimate =
                         this.selectedIndexes[0] > Math.min(this.options.buttons.length, this.buttonItemsSize.length) ?
                             false : true;
-                    let e2 = this.isShouldMirror() ? c2 - 1 - d2 : d2;
+                    let y21 = this.isShouldMirror() ? w21 - 1 - x21 : x21;
                     if (this.onItemClicked) {
-                        this.onItemClicked(e2);
+                        this.onItemClicked(y21);
                     }
                     if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
-                        let selectedIndex = this.selectedIndexes.indexOf(e2);
-                        if (selectedIndex === -1) {
-                            this.selectedIndexes.push(e2);
+                        let z21 = this.selectedIndexes.indexOf(y21);
+                        if (z21 === -1) {
+                            this.selectedIndexes.push(y21);
                         } else {
-                            this.selectedIndexes.splice(selectedIndex, 1);
+                            this.selectedIndexes.splice(z21, 1);
                         }
                     } else {
-                        this.selectedIndexes[0] = e2;
+                        this.selectedIndexes[0] = y21;
                     }
                     this.doSelectedChangeAnimate = false;
                     break;
@@ -2369,9 +2668,9 @@ export class SegmentButton extends ViewPU {
             });
             TapGesture.pop();
             SwipeGesture.create();
-            SwipeGesture.onAction((event) => {
+            SwipeGesture.onAction((s21) => {
                 if (this.options === void 0 || this.options.buttons === void 0 ||
-                    event.sourceTool === SourceTool.TOUCHPAD) {
+                    s21.sourceTool === SourceTool.TOUCHPAD) {
                     return;
                 }
                 if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
@@ -2380,12 +2679,12 @@ export class SegmentButton extends ViewPU {
                 if (this.isCurrentPositionSelected) {
                     return;
                 }
-                if (Math.abs(event.angle) < 90 && this.selectedIndexes[0] !==
+                if (Math.abs(s21.angle) < 90 && this.selectedIndexes[0] !==
                     Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1) {
                     this.doSelectedChangeAnimate = true;
                     this.selectedIndexes[0] = this.selectedIndexes[0] + 1;
                     this.doSelectedChangeAnimate = false;
-                } else if (Math.abs(event.angle) > 90 && this.selectedIndexes[0] !== 0) {
+                } else if (Math.abs(s21.angle) > 90 && this.selectedIndexes[0] !== 0) {
                     this.doSelectedChangeAnimate = true;
                     this.selectedIndexes[0] = this.selectedIndexes[0] - 1;
                     this.doSelectedChangeAnimate = false;
@@ -2393,29 +2692,29 @@ export class SegmentButton extends ViewPU {
             });
             SwipeGesture.pop();
             PanGesture.create();
-            PanGesture.onActionStart((event) => {
+            PanGesture.onActionStart((o21) => {
                 if (this.options === void 0 || this.options.buttons === void 0) {
                     return;
                 }
                 if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
                     return;
                 }
-                let v1 = event.fingerList.find(Boolean);
-                if (v1 === void 0) {
+                let p21 = o21.fingerList.find(Boolean);
+                if (p21 === void 0) {
                     return;
                 }
-                let w1 = v1.localX;
-                this.panGestureStartPoint = { x: v1.globalX, y: v1.globalY };
+                let q21 = p21.localX;
+                this.panGestureStartPoint = { x: p21.globalX, y: p21.globalY };
                 this.isPanGestureMoved = false;
-                for (let z1 = 0; z1 < Math.min(this.options.buttons.length, this.buttonItemsSize.length); z1++) {
-                    w1 = w1 - this.buttonItemsSize[z1].width;
-                    if (w1 < 0) {
-                        this.isCurrentPositionSelected = z1 === this.selectedIndexes[0] ? true : false;
+                for (let r21 = 0; r21 < Math.min(this.options.buttons.length, this.buttonItemsSize.length); r21++) {
+                    q21 = q21 - this.buttonItemsSize[r21].width;
+                    if (q21 < 0) {
+                        this.isCurrentPositionSelected = r21 === this.selectedIndexes[0] ? true : false;
                         break;
                     }
                 }
             });
-            PanGesture.onActionUpdate((event) => {
+            PanGesture.onActionUpdate((f21) => {
                 if (this.options === void 0 || this.options.buttons === void 0) {
                     return;
                 }
@@ -2425,55 +2724,55 @@ export class SegmentButton extends ViewPU {
                 if (!this.isCurrentPositionSelected) {
                     return;
                 }
-                let q1 = event.fingerList.find(Boolean);
-                if (q1 === void 0) {
+                let g21 = f21.fingerList.find(Boolean);
+                if (g21 === void 0) {
                     return;
                 }
-                let s1 = q1.localX;
-                if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(q1.globalX, q1.globalY)) {
+                let h21 = g21.localX;
+                if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(g21.globalX, g21.globalY)) {
                     this.isPanGestureMoved = true;
                 }
-                for (let u1 = 0; u1 < Math.min(this.options.buttons.length, this.buttonItemsSize.length); u1++) {
-                    s1 = s1 - this.buttonItemsSize[u1].width;
-                    if (s1 < 0) {
+                for (let n21 = 0; n21 < Math.min(this.options.buttons.length, this.buttonItemsSize.length); n21++) {
+                    h21 = h21 - this.buttonItemsSize[n21].width;
+                    if (h21 < 0) {
                         this.doSelectedChangeAnimate = true;
-                        this.selectedIndexes[0] = u1;
+                        this.selectedIndexes[0] = n21;
                         this.doSelectedChangeAnimate = false;
                         break;
                     }
                 }
-                this.zoomScaleArray.forEach((t1, index) => {
-                    if (index === this.selectedIndexes[0]) {
+                this.zoomScaleArray.forEach((j21, k21) => {
+                    if (k21 === this.selectedIndexes[0]) {
                         Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
-                            this.zoomScaleArray[index] = 0.95;
+                            this.zoomScaleArray[k21] = 0.95;
                         });
                     } else {
                         Context.animateTo({ curve: curves.interpolatingSpring(10, 1, 410, 38) }, () => {
-                            this.zoomScaleArray[index] = 1;
+                            this.zoomScaleArray[k21] = 1;
                         });
                     }
                 });
             });
-            PanGesture.onActionEnd((event) => {
+            PanGesture.onActionEnd((b21) => {
                 if (this.options === void 0 || this.options.buttons === void 0) {
                     return;
                 }
                 if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
                     return;
                 }
-                let p1 = event.fingerList.find(Boolean);
-                if (p1 === void 0) {
+                let c21 = b21.fingerList.find(Boolean);
+                if (c21 === void 0) {
                     return;
                 }
-                if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(p1.globalX, p1.globalY)) {
+                if (!this.isPanGestureMoved && this.isMovedFromPanGestureStartPoint(c21.globalX, c21.globalY)) {
                     this.isPanGestureMoved = true;
                 }
-                if (this.isMouseWheelScroll(event)) {
-                    let offset = event.offsetX !== 0 ? event.offsetX : event.offsetY;
+                if (this.isMouseWheelScroll(b21)) {
+                    let e21 = b21.offsetX !== 0 ? b21.offsetX : b21.offsetY;
                     this.doSelectedChangeAnimate = true;
-                    if (offset > 0 && this.selectedIndexes[0] > 0) {
+                    if (e21 > 0 && this.selectedIndexes[0] > 0) {
                         this.selectedIndexes[0] -= 1;
-                    } else if (offset < 0 && this.selectedIndexes[0] <
+                    } else if (e21 < 0 && this.selectedIndexes[0] <
                         Math.min(this.options.buttons.length, this.buttonItemsSize.length) - 1) {
                         this.selectedIndexes[0] += 1;
                     }
@@ -2500,36 +2799,36 @@ export class SegmentButton extends ViewPU {
             GestureGroup.pop();
             Gesture.pop();
         }, Stack);
-        this.observeComponentCreation2((elmtId, isInitialRender) => {
+        this.observeComponentCreation2((i18, j18) => {
             If.create();
             if (this.options !== void 0 && this.options.buttons != void 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((q19, r19) => {
                         If.create();
                         if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 {
-                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                        if (isInitialRender) {
-                                            let componentCall = new f1(this, {
+                                    this.observeComponentCreation2((k20, l20) => {
+                                        if (l20) {
+                                            let m20 = new MultiSelectBackground(this, {
                                                 optionsArray: this.options.buttons,
                                                 options: this.options,
-                                            }, undefined, elmtId, () => {
+                                            }, undefined, k20, () => {
                                             }, {
-                                                page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1144,
-                                                q2: 11
+                                                page: "library/src/main/ets/components/segmentbutton.ets",
+                                                line: 1260,
+                                                col: 11
                                             });
-                                            ViewPU.create(componentCall);
-                                            let paramsLambda = () => {
+                                            ViewPU.create(m20);
+                                            let n20 = () => {
                                                 return {
                                                     optionsArray: this.options.buttons,
                                                     options: this.options
                                                 };
                                             };
-                                            componentCall.paramsGenerator_ = paramsLambda;
+                                            m20.paramsGenerator_ = n20;
                                         } else {
-                                            this.updateStateVarsOfChildByElmtId(elmtId, {
+                                            this.updateStateVarsOfChildByElmtId(k20, {
                                                 optionsArray: this.options.buttons,
                                                 options: this.options
                                             });
@@ -2539,35 +2838,37 @@ export class SegmentButton extends ViewPU {
                             });
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                this.observeComponentCreation2((g20, h20) => {
                                     Stack.create();
                                     Stack.direction(this.options.direction);
                                     Stack.size(ObservedObject.GetRawObject(this.componentSize));
-                                    Stack.backgroundColor(this.options.backgroundColor ?? e1.BACKGROUND_COLOR);
-                                    Stack.borderRadius(this.options.n2 ?? this.componentSize.height / 2);
+                                    Stack.backgroundColor(this.options.backgroundColor ??
+                                    segmentButtonTheme.BACKGROUND_COLOR);
+                                    Stack.borderRadius(this.options.iconTextBackgroundRadius ??
+                                        this.componentSize.height / 2);
                                     Stack.backgroundBlurStyle(this.options.backgroundBlurStyle);
                                 }, Stack);
-                                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                                this.observeComponentCreation2((v19, w19) => {
                                     If.create();
                                     if (this.options.buttons !== void 0 && this.options.buttons.length > 1) {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             {
-                                                this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                                    if (isInitialRender) {
-                                                        let componentCall = new v3(this, {
+                                                this.observeComponentCreation2((a20, b20) => {
+                                                    if (b20) {
+                                                        let c20 = new PressAndHoverEffectArray(this, {
                                                             options: this.options,
                                                             buttons: this.options.buttons,
                                                             pressArray: this.__pressArray,
                                                             hoverArray: this.__hoverArray,
                                                             hoverColorArray: this.__hoverColorArray
-                                                        }, undefined, elmtId, () => {
+                                                        }, undefined, a20, () => {
                                                         }, {
-                                                            page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                            line: 1151,
-                                                            q2: 15
+                                                            page: "library/src/main/ets/components/segmentbutton.ets",
+                                                            line: 1267,
+                                                            col: 15
                                                         });
-                                                        ViewPU.create(componentCall);
-                                                        let paramsLambda = () => {
+                                                        ViewPU.create(c20);
+                                                        let d20 = () => {
                                                             return {
                                                                 options: this.options,
                                                                 buttons: this.options.buttons,
@@ -2576,9 +2877,9 @@ export class SegmentButton extends ViewPU {
                                                                 hoverColorArray: this.hoverColorArray
                                                             };
                                                         };
-                                                        componentCall.paramsGenerator_ = paramsLambda;
+                                                        c20.paramsGenerator_ = d20;
                                                     } else {
-                                                        this.updateStateVarsOfChildByElmtId(elmtId, {
+                                                        this.updateStateVarsOfChildByElmtId(a20, {
                                                             options: this.options,
                                                             buttons: this.options.buttons
                                                         });
@@ -2597,45 +2898,45 @@ export class SegmentButton extends ViewPU {
                         }
                     }, If);
                     If.pop();
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((o19, p19) => {
                         Stack.create();
                         Context.animation({ duration: 0 });
                         Stack.direction(this.options.direction);
                         Stack.size(ObservedObject.GetRawObject(this.componentSize));
                         Context.animation(null);
                         Stack.borderRadius((this.options.type === 'capsule' && (this.options.multiply ?? false) ?
-                        this.options.m2 : this.options.n2) ??
+                        this.options.iconTextRadius : this.options.iconTextBackgroundRadius) ??
                             this.componentSize.height / 2);
                         Stack.clip(true);
                     }, Stack);
-                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                    this.observeComponentCreation2((w18, x18) => {
                         If.create();
                         if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 {
-                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                        if (isInitialRender) {
-                                            let componentCall = new h1(this, {
+                                    this.observeComponentCreation2((i19, j19) => {
+                                        if (j19) {
+                                            let k19 = new MultiSelectItemArray(this, {
                                                 optionsArray: this.options.buttons,
                                                 options: this.options,
                                                 selectedIndexes: this.__selectedIndexes
-                                            }, undefined, elmtId, () => {
+                                            }, undefined, i19, () => {
                                             }, {
-                                                page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1168,
-                                                q2: 13
+                                                page: "library/src/main/ets/components/segmentbutton.ets",
+                                                line: 1284,
+                                                col: 13
                                             });
-                                            ViewPU.create(componentCall);
-                                            let paramsLambda = () => {
+                                            ViewPU.create(k19);
+                                            let l19 = () => {
                                                 return {
                                                     optionsArray: this.options.buttons,
                                                     options: this.options,
                                                     selectedIndexes: this.selectedIndexes
                                                 };
                                             };
-                                            componentCall.paramsGenerator_ = paramsLambda;
+                                            k19.paramsGenerator_ = l19;
                                         } else {
-                                            this.updateStateVarsOfChildByElmtId(elmtId, {
+                                            this.updateStateVarsOfChildByElmtId(i19, {
                                                 optionsArray: this.options.buttons,
                                                 options: this.options
                                             });
@@ -2646,29 +2947,29 @@ export class SegmentButton extends ViewPU {
                         } else {
                             this.ifElseBranchUpdateFunction(1, () => {
                                 {
-                                    this.observeComponentCreation2((elmtId, isInitialRender) => {
-                                        if (isInitialRender) {
-                                            let componentCall = new g1(this, {
+                                    this.observeComponentCreation2((a19, b19) => {
+                                        if (b19) {
+                                            let c19 = new SelectItem(this, {
                                                 optionsArray: this.options.buttons,
                                                 options: this.options,
                                                 selectedIndexes: this.__selectedIndexes
-                                            }, undefined, elmtId, () => {
+                                            }, undefined, a19, () => {
                                             }, {
-                                                page: "segmentbutton/src/main/ets/components/MainPage.ets",
-                                                line: 1174,
-                                                q2: 13
+                                                page: "library/src/main/ets/components/segmentbutton.ets",
+                                                line: 1290,
+                                                col: 13
                                             });
-                                            ViewPU.create(componentCall);
-                                            let paramsLambda = () => {
+                                            ViewPU.create(c19);
+                                            let d19 = () => {
                                                 return {
                                                     optionsArray: this.options.buttons,
                                                     options: this.options,
                                                     selectedIndexes: this.selectedIndexes
                                                 };
                                             };
-                                            componentCall.paramsGenerator_ = paramsLambda;
+                                            c19.paramsGenerator_ = d19;
                                         } else {
-                                            this.updateStateVarsOfChildByElmtId(elmtId, {
+                                            this.updateStateVarsOfChildByElmtId(a19, {
                                                 optionsArray: this.options.buttons,
                                                 options: this.options
                                             });
@@ -2681,9 +2982,9 @@ export class SegmentButton extends ViewPU {
                     If.pop();
                     Stack.pop();
                     {
-                        this.observeComponentCreation2((elmtId, isInitialRender) => {
-                            if (isInitialRender) {
-                                let componentCall = new m1(this, {
+                        this.observeComponentCreation2((q18, r18) => {
+                            if (r18) {
+                                let s18 = new SegmentButtonItemArrayComponent(this, {
                                     pressArray: this.__pressArray,
                                     hoverArray: this.__hoverArray,
                                     hoverColorArray: this.__hoverColorArray,
@@ -2691,11 +2992,12 @@ export class SegmentButton extends ViewPU {
                                     options: this.options,
                                     selectedIndexes: this.__selectedIndexes,
                                     maxFontScale: this.getMaxFontSize(),
-                                    onItemClicked: this.onItemClicked
-                                }, undefined, elmtId, () => {
-                                }, { page: "segmentbutton/src/main/ets/components/MainPage.ets", line: 1189, q2: 9 });
-                                ViewPU.create(componentCall);
-                                let paramsLambda = () => {
+                                    onItemClicked: this.onItemClicked,
+                                    isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized
+                                }, undefined, q18, () => {
+                                }, { page: "library/src/main/ets/components/segmentbutton.ets", line: 1305, col: 9 });
+                                ViewPU.create(s18);
+                                let t18 = () => {
                                     return {
                                         pressArray: this.pressArray,
                                         hoverArray: this.hoverArray,
@@ -2704,15 +3006,17 @@ export class SegmentButton extends ViewPU {
                                         options: this.options,
                                         selectedIndexes: this.selectedIndexes,
                                         maxFontScale: this.getMaxFontSize(),
-                                        onItemClicked: this.onItemClicked
+                                        onItemClicked: this.onItemClicked,
+                                        isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized
                                     };
                                 };
-                                componentCall.paramsGenerator_ = paramsLambda;
+                                s18.paramsGenerator_ = t18;
                             } else {
-                                this.updateStateVarsOfChildByElmtId(elmtId, {
+                                this.updateStateVarsOfChildByElmtId(q18, {
                                     optionsArray: this.options.buttons,
                                     options: this.options,
-                                    maxFontScale: this.getMaxFontSize()
+                                    maxFontScale: this.getMaxFontSize(),
+                                    isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized
                                 });
                             }
                         }, { name: "SegmentButtonItemArrayComponent" });
@@ -2729,20 +3033,20 @@ export class SegmentButton extends ViewPU {
 
     getMaxFontSize() {
         if (typeof this.maxFontScale === void 0) {
-            return b1;
+            return DEFAULT_MAX_FONT_SCALE;
         }
         if (typeof this.maxFontScale === 'number') {
-            return Math.max(Math.min(this.maxFontScale, c1), d1);
+            return Math.max(Math.min(this.maxFontScale, MAX_MAX_FONT_SCALE), MIN_MAX_FONT_SCALE);
         }
-        const resourceManager = this.getUIContext().getHostContext()?.resourceManager;
-        if (!resourceManager) {
-            return b1;
+        const e18 = this.getUIContext().getHostContext()?.resourceManager;
+        if (!e18) {
+            return DEFAULT_MAX_FONT_SCALE;
         }
         try {
-            return resourceManager.getNumber(this.maxFontScale.id);
-        } catch (error) {
-            console.error(`Ace SegmentButton getMaxFontSize, error: ${error.toString()}`);
-            return b1;
+            return e18.getNumber(this.maxFontScale.id);
+        } catch (f18) {
+            console.error(`Ace SegmentButton getMaxFontSize, error: ${f18.toString()}`);
+            return DEFAULT_MAX_FONT_SCALE;
         }
     }
 
@@ -2753,29 +3057,28 @@ export class SegmentButton extends ViewPU {
         return curves.springMotion(0.347, 0.99);
     }
 
-    updateAnimatedProperty(curve) {
-        let o1 = () => {
+    updateAnimatedProperty(v17) {
+        let w17 = () => {
             this.selectedItemPosition =
                 this.selectedIndexes.length === 0 ? {} : this.buttonItemsPosition[this.selectedIndexes[0]];
-            this.buttonItemsSelected.forEach((selected, index) => {
-                this.buttonItemProperty[index].fontColor = selected ?
+            this.buttonItemsSelected.forEach((c18, d18) => {
+                this.buttonItemProperty[d18].fontColor = c18 ?
                     this.options.selectedFontColor ?? (this.options.type === 'tab' ?
-                    e1.s1 : e1.t1) :
-                    this.options.fontColor ?? e1.q1;
+                    segmentButtonTheme.TAB_SELECTED_FONT_COLOR : segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) :
+                    this.options.fontColor ?? segmentButtonTheme.FONT_COLOR;
             });
         };
-        if (curve) {
-            Context.animateTo({ curve: curve }, o1);
+        if (v17) {
+            Context.animateTo({ curve: v17 }, w17);
         } else {
-            o1();
+            w17();
         }
-        this.buttonItemsSelected.forEach((selected, index) => {
-            this.buttonItemProperty[index].fontSize = selected ? this.options.selectedFontSize ??
-            e1.v1 : this.options.fontSize ?? e1.u1;
-            this.buttonItemProperty[index].fontWeight =
-                selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
-                    this.options.fontWeight ?? FontWeight.Regular;
-            this.buttonItemProperty[index].isSelected = selected;
+        this.buttonItemsSelected.forEach((z17, a18) => {
+            this.buttonItemProperty[a18].fontSize = z17 ? this.options.selectedFontSize ??
+            segmentButtonTheme.SELECTED_FONT_SIZE : this.options.fontSize ?? segmentButtonTheme.FONT_SIZE;
+            this.buttonItemProperty[a18].fontWeight = z17 ? this.options.selectedFontWeight ?? FontWeight.Medium :
+                this.options.fontWeight ?? FontWeight.Regular;
+            this.buttonItemProperty[a18].isSelected = z17;
         });
     }
 
@@ -2785,8 +3088,8 @@ export class SegmentButton extends ViewPU {
 }
 
 export default {
-  SegmentButton,
-  SegmentButtonOptions,
-  SegmentButtonItemOptionsArray,
-  SegmentButtonItemOptions,
+    SegmentButton,
+    SegmentButtonOptions,
+    SegmentButtonItemOptionsArray,
+    SegmentButtonItemOptions,
 };

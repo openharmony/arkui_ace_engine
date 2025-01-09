@@ -327,6 +327,7 @@ public:
     static RefPtr<Container> GetActive();
     static RefPtr<Container> GetDefault();
     static RefPtr<Container> GetFoucsed();
+    static RefPtr<Container> GetByWindowId(uint32_t windowId);
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
