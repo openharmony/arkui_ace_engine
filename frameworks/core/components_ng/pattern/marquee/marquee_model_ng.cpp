@@ -45,7 +45,7 @@ void MarqueeModelNG::Create()
 }
 
 void MarqueeModelNG::SetValue(const std::optional<std::string>& srcValue)
-{   
+{
     if (srcValue.has_value()) {
         ACE_UPDATE_LAYOUT_PROPERTY(MarqueeLayoutProperty, Src, srcValue.value());
     } else {
