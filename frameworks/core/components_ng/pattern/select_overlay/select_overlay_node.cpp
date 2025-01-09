@@ -2369,7 +2369,7 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
     }
     if (extensionOptionStartIndex != -1 || isDefaultOverMaxWidth) {
         moreButton_ = BuildMoreOrBackButton(GetId(), true);
-        CHECK_NUL_VOID(moreButton_);
+        CHECK_NULL_VOID(moreButton_);
         moreButton_->MountToParent(selectMenuInner_);
         isMoreOrBackSymbolIcon_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
         if (isMoreOrBackSymbolIcon_) {

@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 
 namespace OHOS::Ace::NG {
 
