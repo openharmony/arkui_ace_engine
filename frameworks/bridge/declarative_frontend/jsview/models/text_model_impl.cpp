@@ -312,40 +312,5 @@ void TextModelImpl::SetCopyOption(CopyOptions copyOption)
     component->SetCopyOption(copyOption);
 }
 
-void TextModelImpl::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
-{
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-    component->SetOnDragStartId(ViewAbstractModelImpl::ToDragFunc(std::move(onDragStart)));
-}
-
-void TextModelImpl::SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter)
-{
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-    component->SetOnDragEnterId(onDragEnter);
-}
-
-void TextModelImpl::SetOnDragMove(NG::OnDragDropFunc&& onDragMove)
-{
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-    component->SetOnDragMoveId(onDragMove);
-}
-
-void TextModelImpl::SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave)
-{
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-    component->SetOnDragLeaveId(onDragLeave);
-}
-
-void TextModelImpl::SetOnDrop(NG::OnDragDropFunc&& onDrop)
-{
-    auto component = GetComponent();
-    CHECK_NULL_VOID(component);
-    component->SetOnDropId(onDrop);
-}
-
 void TextModelImpl::SetHalfLeading(bool halfLeading) {}
 } // namespace OHOS::Ace::Framework
