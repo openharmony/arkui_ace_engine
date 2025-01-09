@@ -1030,7 +1030,7 @@ void FrameNode::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)
     DumpSimplifyCommonInfo(json);
     DumpSimplifySafeAreaInfo(json);
     DumpSimplifyOverlayInfo(json);
-    if (pattern_ && GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+    if (pattern_ && GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
         pattern_->DumpInfo(json);
     }
     if (renderContext_) {
