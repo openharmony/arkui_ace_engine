@@ -109,6 +109,9 @@ constexpr int32_t MAX_CLICK = 3;
 constexpr Color SYSTEM_CARET_COLOR = Color(0xff007dff);
 constexpr Color SYSTEM_SELECT_BACKGROUND_COLOR = Color(0x33007dff);
 
+const auto MAGNIFIER_ANIMATION_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
+constexpr int32_t MAGNIFIER_ANIMATION_DURATION = 100;
+
 constexpr int32_t ERROR_BAD_PARAMETERS = -1;
 constexpr char PREVIEW_STYLE_NORMAL[] = "normal";
 constexpr char PREVIEW_STYLE_UNDERLINE[] = "underline";
@@ -6857,6 +6860,7 @@ void RichEditorPattern::HandleTouchUp()
 
 void RichEditorPattern::StartFloatingCaretLand()
 {
+    AnimationUtils::StopAnimation(magnifierAnimation_);
     CHECK_NULL_VOID(floatingCaretState_.isFloatingCaretVisible);
     auto caretOffset = CalculateCaretOffsetAndHeight().first;
     auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
@@ -6925,7 +6929,10 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
     SetCaretTouchMoveOffset(offset);
     MoveCaretToContentRect();
     CalcAndRecordLastClickCaretInfo(textOffset);
-    SetMagnifierLocalOffset(offset);
+    auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
+    auto floatingCaretCenter =
+        Offset(floatingCaretState_.touchMoveOffset->GetX(), caretOffset.GetY() + caretHeight / 2);
+    SetMagnifierOffsetWithAnimation(offset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -6967,6 +6974,24 @@ void RichEditorPattern::SetMagnifierLocalOffset(Offset offset)
     auto localOffsetWithTrans = localOffset;
     selectOverlay_->GetLocalPointWithTransform(localOffsetWithTrans);
     magnifierController_->SetLocalOffset(localOffsetWithTrans, localOffset);
+}
+
+void RichEditorPattern::SetMagnifierOffsetWithAnimation(Offset offset)
+{
+    CHECK_NULL_VOID(magnifierController_);
+    auto currentLocalOffset = magnifierController_->GetLocalOffset();
+    auto currentOffset = magnifierController_->GetLocalOffsetWithoutTrans().value_or(currentLocalOffset);
+    if (NearEqual(currentOffset.GetY(), offset.GetY(), 0.5f) || !magnifierController_->GetShowMagnifier()) {
+        SetMagnifierLocalOffset(offset);
+        return;
+    }
+    AnimationUtils::StopAnimation(magnifierAnimation_);
+    AnimationOption option{ MAGNIFIER_ANIMATION_CURVE, MAGNIFIER_ANIMATION_DURATION };
+    magnifierAnimation_ = AnimationUtils::StartAnimation(option, [weak = WeakClaim(this), offset]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->SetMagnifierLocalOffset(offset);
+    });
 }
 
 Offset RichEditorPattern::AdjustLocalOffsetOnMoveEvent(const Offset& originalOffset)

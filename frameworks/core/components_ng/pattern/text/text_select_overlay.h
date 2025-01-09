@@ -81,6 +81,7 @@ public:
     std::optional<Color> GetHandleColor() override;
 
 protected:
+    OffsetF GetHandleReferenceOffset(const RectF& handleRect);
     virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle);
     void UpdateTransformFlag() override
     {
