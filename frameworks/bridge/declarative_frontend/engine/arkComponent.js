@@ -29376,6 +29376,10 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperOnChangeModifier.identity, SwiperOnChangeModifier, value);
     return this;
   }
+  onSelected(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnSelectedModifier.identity, SwiperOnSelectedModifier, value);
+    return this;
+  }
   indicatorStyle(value) {
     throw new Error('Method not implemented.');
   }
@@ -29741,6 +29745,22 @@ class SwiperOnChangeModifier extends ModifierWithKey {
   }
 }
 SwiperOnChangeModifier.identity = Symbol('swiperOnChange');
+class SwiperOnSelectedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnSelected(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnSelected(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperOnSelectedModifier.identity = Symbol('swiperOnSelected');
 class SwiperEffectModeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
@@ -30347,6 +30367,9 @@ class ArkTabsComponent extends ArkComponent {
     return this;
   }
   onChange(event) {
+    throw new Error('Method not implemented.');
+  }
+  onSelected(event) {
     throw new Error('Method not implemented.');
   }
   onTabBarClick(event) {

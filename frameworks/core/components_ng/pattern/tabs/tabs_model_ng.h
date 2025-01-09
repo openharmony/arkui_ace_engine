@@ -53,6 +53,7 @@ public:
     void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) override;
     void SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd) override;
     void SetOnGestureSwipe(GestureSwipeEvent&& gestureSwipe) override;
+    void SetOnSelected(std::function<void(const BaseEventInfo*)>&& onSelected) override;
     void SetDivider(const TabsItemDivider& divider) override;
     void SetFadingEdge(bool fadingEdge) override;
     void SetBarOverlap(bool barOverlap) override;

@@ -121,6 +121,10 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperOnChangeModifier.identity, SwiperOnChangeModifier, event);
     return this;
   }
+  onSelected(event: (index: number) => void): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnSelectedModifier.identity, SwiperOnSelectedModifier, event);
+    return this;
+  }
   indicatorStyle(value?: IndicatorStyle | undefined): this {
     throw new Error('Method not implemented.');
   }
@@ -566,6 +570,21 @@ class SwiperOnChangeModifier extends ModifierWithKey<Callback<number>> {
     }
   }
 }
+
+class SwiperOnSelectedModifier extends ModifierWithKey<Callback<number>> {
+  constructor(value: Callback<number>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnSelected');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnSelected(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnSelected(node, this.value);
+    }
+  }
+}
+
 class SwiperDisableSwipeModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('swiperDisableSwipe');
   applyPeer(node: KNode, reset: boolean): void {

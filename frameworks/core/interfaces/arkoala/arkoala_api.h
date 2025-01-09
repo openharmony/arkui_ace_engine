@@ -925,6 +925,7 @@ enum ArkUIEventSubKind {
     ON_SWIPER_ANIMATION_END,
     ON_SWIPER_GESTURE_SWIPE,
     ON_SWIPER_DID_CONTENT_SCROLL,
+    ON_SWIPER_SELECTED,
 
     ON_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_SCROLL,
     ON_SCROLL_FRAME_BEGIN,
@@ -2793,6 +2794,8 @@ struct ArkUISwiperModifier {
     ArkUI_Int32 (*getSwiperPageFlipMode)(ArkUINodeHandle node);
     void (*setSwiperOnContentWillScroll)(ArkUINodeHandle node, bool* callback);
     void (*resetSwiperOnContentWillScroll)(ArkUINodeHandle node);
+    void (*setSwiperOnSelected)(ArkUINodeHandle node, void* callback);
+    void (*resetSwiperOnSelected)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {

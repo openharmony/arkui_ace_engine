@@ -1037,4 +1037,30 @@ bool SwiperModelNG::GetIndicatorInteractive(FrameNode* frameNode)
     CHECK_NULL_RETURN(pattern, false);
     return pattern->IsIndicatorInteractive();
 }
+
+void SwiperModelNG::SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+
+    pattern->UpdateOnSelectedEvent([event = std::move(onSelected)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelNG::SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnSelectedEvent([event = std::move(onSelected)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
 } // namespace OHOS::Ace::NG

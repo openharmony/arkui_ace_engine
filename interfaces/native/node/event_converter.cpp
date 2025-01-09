@@ -278,6 +278,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TEXT_AREA_DID_DELETE;
         case NODE_SWIPER_EVENT_ON_CHANGE:
             return ON_SWIPER_CHANGE;
+        case NODE_SWIPER_EVENT_ON_SELECTED:
+            return ON_SWIPER_SELECTED;
         case NODE_SWIPER_EVENT_ON_ANIMATION_START:
             return ON_SWIPER_ANIMATION_START;
         case NODE_SWIPER_EVENT_ON_ANIMATION_END:
@@ -488,6 +490,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_AREA_ON_DID_DELETE;
         case ON_SWIPER_CHANGE:
             return NODE_SWIPER_EVENT_ON_CHANGE;
+        case ON_SWIPER_SELECTED:
+            return NODE_SWIPER_EVENT_ON_SELECTED;
         case ON_SWIPER_ANIMATION_START:
             return NODE_SWIPER_EVENT_ON_ANIMATION_START;
         case ON_SWIPER_ANIMATION_END:

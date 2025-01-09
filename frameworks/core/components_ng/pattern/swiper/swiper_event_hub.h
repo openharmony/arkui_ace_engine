@@ -82,6 +82,11 @@ public:
         gestureSwipeEvent_ = std::move(gestureSwipeEvent);
     }
 
+    void AddOnSlectedEvent(const ChangeEventPtr& changeEvent)
+    {
+        selectedEvents_.emplace_back(changeEvent);
+    }
+
     void FireChangeDoneEvent(bool direction)
     {
         if (changeDoneEvent_) {
@@ -235,6 +240,21 @@ public:
         }
     }
 
+    void FireSelectedEvent(int32_t index)
+    {
+        auto frameNode = GetFrameNode();
+        ACE_SCOPED_TRACE("Swiper FireSelectedEvent, id: %d, index: %d", frameNode ? frameNode->GetId() : -1, index);
+        if (!selectedEvents_.empty()) {
+            std::for_each(selectedEvents_.begin(), selectedEvents_.end(), [index](const ChangeEventPtr& changeEvent) {
+                if (!changeEvent || !(*changeEvent)) {
+                    return;
+                }
+                auto event = *changeEvent;
+                event(index);
+            });
+        }
+    }
+
 private:
     void FireJSChangeEvent(int32_t preIndex, int32_t index)
     {
@@ -255,6 +275,7 @@ private:
 
     Direction direction_;
     std::list<ChangeEventPtr> changeEvents_;
+    std::list<ChangeEventPtr> selectedEvents_;
     std::list<ChangeEventWithPreIndexPtr> changeEventsWithPreIndex_;
     ChangeDoneEvent changeDoneEvent_;
     ChangeIndicatorEvent changeIndicatorEvent_;
