@@ -221,10 +221,11 @@ public:
     void SetTextDetectTypes(const std::string& types)
     {
         dataDetectorAdapter_->SetTextDetectTypes(types);
+        textDetectTypes_ = types; // url value is not recorded in dataDetectorAdapter_, need to record it here
     }
     std::string GetTextDetectTypes()
     {
-        return dataDetectorAdapter_->textDetectTypes_;
+        return textDetectTypes_;
     }
     RefPtr<DataDetectorAdapter> GetDataDetectorAdapter()
     {
@@ -1048,6 +1049,7 @@ private:
     Offset lastLeftMouseMoveLocation_;
     bool isAutoScrollByMouse_ = false;
     bool shiftFlag_ = false;
+    std::string textDetectTypes_ = "";
 };
 } // namespace OHOS::Ace::NG
 
