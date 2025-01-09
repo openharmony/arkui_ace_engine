@@ -312,7 +312,7 @@ void SetSliderStyle(ArkUINodeHandle node, int value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (value >= static_cast<int32_t>(SLIDER_MODE.size())) {
+    if (value < 0 || value >= static_cast<int32_t>(SLIDER_MODE.size())) {
         return;
     }
     SliderModelNG::SetSliderMode(frameNode, SLIDER_MODE[value]);
@@ -448,6 +448,9 @@ void SetSliderBlockType(ArkUINodeHandle node, int value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (value < 0 || value >= static_cast<int32_t>(SLIDER_STYLE_TYPE.size())) {
+        return;
+    }
     SliderModelNG::SetBlockType(frameNode, SLIDER_STYLE_TYPE[value]);
 }
 
