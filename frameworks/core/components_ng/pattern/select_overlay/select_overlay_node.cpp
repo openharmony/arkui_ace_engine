@@ -124,7 +124,7 @@ const std::unordered_map<std::string, std::function<uint32_t(RefPtr<OHOS::Ace::T
     { OH_DEFAULT_AI_WRITE,
         [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetAIWriteSymbolId();}
     }
-}
+};
 
 void SetResponseRegion(RefPtr<FrameNode>& node)
 {
