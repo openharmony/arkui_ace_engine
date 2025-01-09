@@ -104,8 +104,6 @@ export struct ProgressButtonV2 {
           .borderRadius(this.buttonBorderRadius)
           .width('100%')
           .hoverEffect(HoverEffect.None)
-          .style({borderRadius:LengthMetrics.resource($r('sys.float.button_container_border_radius_small'))})
-          .padding({ top: 0.6, left: 0.6, right: 0.6, bottom: 0.6})
           .clip(false)
           .enabled(this.isEnabled)
           .key(PROGRESS_BUTTON_PROGRESS_KEY)
@@ -145,11 +143,11 @@ export struct ProgressButtonV2 {
           })
           .height(this.textHeight)
           .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
-          .borderRadius($r('sys.float.button_container_border_radius_small'))
+          .borderRadius(this.buttonBorderRadius)
           .width('100%')
       }
     }
-    .borderRadius($r('sys.float.button_container_border_radius_small'))
+    .borderRadius(this.buttonBorderRadius)
     .clip(false)
     .hoverEffect(HoverEffect.None)
     .key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY)
