@@ -709,7 +709,7 @@ void SetTextInputPlaceholderString(ArkUINodeHandle node, ArkUI_CharPtr value)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::string placeholderStr(value);
-    TextFieldModelNG::SetTextFieldPlaceHolder(frameNode, UtfUtils::Str8ToStr16(placeholderStr));
+    TextFieldModelNG::SetTextFieldPlaceHolder(frameNode, UtfUtils::Str8DebugToStr16(placeholderStr));
 }
 
 void SetTextInputTextString(ArkUINodeHandle node, ArkUI_CharPtr value)
@@ -717,7 +717,7 @@ void SetTextInputTextString(ArkUINodeHandle node, ArkUI_CharPtr value)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::string textStr(value);
-    TextFieldModelNG::SetTextFieldText(frameNode, UtfUtils::Str8ToStr16(textStr));
+    TextFieldModelNG::SetTextFieldText(frameNode, UtfUtils::Str8DebugToStr16(textStr));
 }
 
 void StopTextInputTextEditing(ArkUINodeHandle node)
@@ -792,7 +792,7 @@ ArkUI_CharPtr GetTextInputPlaceholder(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, "");
-    g_strValue = UtfUtils::Str16ToStr8(TextFieldModelNG::GetPlaceholderText(frameNode));
+    g_strValue = UtfUtils::Str16DebugToStr8(TextFieldModelNG::GetPlaceholderText(frameNode));
     return g_strValue.c_str();
 }
 
@@ -800,7 +800,7 @@ ArkUI_CharPtr GetTextInputText(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, "");
-    g_strValue = UtfUtils::Str16ToStr8(TextFieldModelNG::GetTextFieldText(frameNode));
+    g_strValue = UtfUtils::Str16DebugToStr8(TextFieldModelNG::GetTextFieldText(frameNode));
     return g_strValue.c_str();
 }
 
@@ -2311,7 +2311,7 @@ void SetOnTextInputChange(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onChange = [node, extraParam](const std::u16string& str, PreviewText&) {
         ArkUINodeEvent event;
-        std::string utf8Str = UtfUtils::Str16ToStr8(str);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXT_INPUT_CHANGE;
@@ -2328,8 +2328,8 @@ void SetOnTextInputChangeWithPreviewText(ArkUINodeHandle node, void* extraParam)
     auto onChange = [node, extraParam](const std::u16string& value, PreviewText& previewText) {
         ArkUINodeEvent eventWithPreview;
         eventWithPreview.kind = TEXT_INPUT_CHANGE;
-        std::string utf8StrValue = UtfUtils::Str16ToStr8(value);
-        std::string utf8Str = UtfUtils::Str16ToStr8(previewText.value);
+        std::string utf8StrValue = UtfUtils::Str16DebugToStr8(value);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(previewText.value);
         eventWithPreview.extraParam = reinterpret_cast<intptr_t>(extraParam);
         eventWithPreview.textChangeEvent.subKind = ON_TEXT_INPUT_CHANGE_WITH_PREVIEW_TEXT;
         eventWithPreview.textChangeEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8StrValue.c_str());
@@ -2361,7 +2361,7 @@ void SetOnTextInputCut(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onCut = [node, extraParam](const std::u16string& str) {
         ArkUINodeEvent event;
-        std::string utf8Str = UtfUtils::Str16ToStr8(str);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXT_INPUT_CUT;
@@ -2377,7 +2377,7 @@ void SetOnTextInputPaste(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onPaste = [node, extraParam](const std::u16string& str, NG::TextCommonEvent& commonEvent) {
         ArkUINodeEvent event;
-        std::string utf8Str = UtfUtils::Str16ToStr8(str);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXT_INPUT_PASTE;
@@ -2444,7 +2444,7 @@ void SetOnTextInputInputFilterError(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onInputFilterError = [node, extraParam](const std::u16string& str) {
         ArkUINodeEvent event;
-        std::string utf8Str = UtfUtils::Str16ToStr8(str);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXT_INPUT_INPUT_FILTER_ERROR;
@@ -2476,7 +2476,7 @@ void SetTextInputOnWillInsert(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onWillInsert = [node, extraParam](const InsertValueInfo& Info) -> bool {
         ArkUINodeEvent event;
-        std::string insertValueUtf8 = UtfUtils::Str16ToStr8(Info.insertValue);
+        std::string insertValueUtf8 = UtfUtils::Str16DebugToStr8(Info.insertValue);
         event.kind = MIXED_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.mixedEvent.subKind = ON_TEXT_INPUT_WILL_INSERT;
@@ -2496,7 +2496,7 @@ void SetTextInputOnDidInsert(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onDidInsert = [node, extraParam](const InsertValueInfo& Info) {
         ArkUINodeEvent event;
-        std::string insertValueUtf8 = UtfUtils::Str16ToStr8(Info.insertValue);
+        std::string insertValueUtf8 = UtfUtils::Str16DebugToStr8(Info.insertValue);
         event.kind = MIXED_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.mixedEvent.subKind = ON_TEXT_INPUT_DID_INSERT;
@@ -2515,7 +2515,7 @@ void SetTextInputOnWillDelete(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onWillDelete = [node, extraParam](const DeleteValueInfo& Info) -> bool {
         ArkUINodeEvent event;
-        std::string deleteValueUtf8 = UtfUtils::Str16ToStr8(Info.deleteValue);
+        std::string deleteValueUtf8 = UtfUtils::Str16DebugToStr8(Info.deleteValue);
         event.kind = MIXED_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.mixedEvent.subKind = ON_TEXT_INPUT_WILL_DELETE;
@@ -2536,7 +2536,7 @@ void SetTextInputOnDidDelete(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onDidDelete = [node, extraParam](const DeleteValueInfo& Info) {
         ArkUINodeEvent event;
-        std::string deleteValueUtf8 = UtfUtils::Str16ToStr8(Info.deleteValue);
+        std::string deleteValueUtf8 = UtfUtils::Str16DebugToStr8(Info.deleteValue);
         event.kind = MIXED_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.mixedEvent.subKind = ON_TEXT_INPUT_DID_DELETE;

@@ -917,13 +917,17 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     option.SetIteration(1);
     option.SetAnimationDirection(AnimationDirection::NORMAL);
     option.SetOnFinishEvent(
-        [weak = WeakClaim(this), nodeWk = WeakPtr<FrameNode>(node), dialogPattern, id = Container::CurrentId()] {
+        [weak = WeakClaim(this), nodeWk = WeakPtr<FrameNode>(node), id = Container::CurrentId()] {
             ContainerScope scope(id);
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->PostDialogFinishEvent(nodeWk);
+            auto node = nodeWk.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto dialogPattern = node->GetPattern<DialogPattern>();
+            CHECK_NULL_VOID(dialogPattern);
             dialogPattern->CallDialogDidDisappearCallback();
-        });
+    });
     auto ctx = node->GetRenderContext();
     if (!ctx) {
         TAG_LOGW(AceLogTag::ACE_OVERLAY, "not find render context when closing dialog");
@@ -5236,13 +5240,18 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
 
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetTopSafeArea;
     if (sheetStyle.sheetMode.has_value()) {
+        auto context = sheetNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto sheetTheme = context->GetTheme<SheetTheme>();
+        CHECK_NULL_VOID(sheetTheme);
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
-            sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE;
+            sheetHeight_ = sheetMaxHeight * sheetTheme->GetMediumPercent();
             if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE_PRE;
             }
         } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
-            sheetHeight_ = largeHeight;
+            sheetHeight_ = sheetTheme->GetHeightApplyFullScreen() ? sheetMaxHeight : largeHeight;
+            sheetHeight_ *= sheetTheme->GetLargePercent();
         } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
             sheetHeight_ = sheetPattern->GetFitContentHeight();
             if (GreatNotEqual(sheetHeight_, largeHeight)) {
@@ -5275,13 +5284,18 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetTopSafeArea;
     auto selection = sheetStyle.detents[sheetPattern->GetDetentsIndex()];
     if (selection.sheetMode.has_value()) {
+        auto context = sheetNode->GetContext();
+        CHECK_NULL_VOID(context);
+        auto sheetTheme = context->GetTheme<SheetTheme>();
+        CHECK_NULL_VOID(sheetTheme);
         if (selection.sheetMode == SheetMode::MEDIUM) {
-            sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE;
+            sheetHeight_ = sheetMaxHeight * sheetTheme->GetMediumPercent();
             if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE_PRE;
             }
         } else if (selection.sheetMode == SheetMode::LARGE) {
-            sheetHeight_ = largeHeight;
+            sheetHeight_ = sheetTheme->GetHeightApplyFullScreen() ? sheetMaxHeight : largeHeight;
+            sheetHeight_ *= sheetTheme->GetLargePercent();
         } else if (selection.sheetMode == SheetMode::AUTO) {
             sheetHeight_ = sheetPattern->GetFitContentHeight();
             if (GreatNotEqual(sheetHeight_, largeHeight)) {

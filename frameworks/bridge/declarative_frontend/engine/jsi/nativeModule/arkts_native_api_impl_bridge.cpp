@@ -4524,6 +4524,10 @@ void ArkUINativeModule::RegisterDatePickerAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetBackgroundColor));
     datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetBackgroundColor));
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableHapticFeedback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetEnableHapticFeedback));
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableHapticFeedback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetEnableHapticFeedback));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "datePicker"), datePicker);
 }
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,9 +19,9 @@ build_component_ng("ui_extension_pattern_ng") {
     "accessibility_session_adapter_isolated_component.cpp",
     "accessibility_session_adapter_ui_extension.cpp",
     "dynamic_component/dynamic_component_manager.cpp",
-    "dynamic_node.cpp",
-    "dynamic_pattern.cpp",
-    "isolated_pattern.cpp",
+    "dynamic_component/dynamic_node.cpp",
+    "dynamic_component/dynamic_pattern.cpp",
+    "isolated_component/isolated_pattern.cpp",
     "modal_ui_extension_proxy_impl.cpp",
     "platform_event_proxy.cpp",
     "platform_pattern.cpp",
@@ -30,6 +30,7 @@ build_component_ng("ui_extension_pattern_ng") {
     "security_ui_extension_proxy.cpp",
     "session_wrapper_factory.cpp",
     "session_wrapper_impl.cpp",
+    "surface_proxy_node.cpp",
     "ui_extension_manager.cpp",
     "ui_extension_model_ng.cpp",
     "ui_extension_pattern.cpp",
@@ -43,6 +44,7 @@ build_component_ng("ui_extension_pattern_ng") {
       "c_utils:utils",
       "graphic_2d:librender_service_client",
       "hilog:libhilog",
+      "init:libbegetutil",
       "input:libmmi-client",
       "ipc:ipc_single",
       "napi:ace_napi",

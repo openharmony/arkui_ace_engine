@@ -2602,7 +2602,8 @@ class DragPreviewOptionsModifier extends ModifierWithKey {
     }
     else {
       getUINativeModule().common.setDragPreviewOptions(node, this.value.mode, this.value.numberBadge,
-        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting, this.value.enableEdgeAutoScroll);
+        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting, this.value.enableEdgeAutoScroll,
+        this.value.enableHapticFeedback);
     }
   }
   checkObjectDiff() {
@@ -2610,7 +2611,8 @@ class DragPreviewOptionsModifier extends ModifierWithKey {
       && this.value.numberBadge === this.stageValue.numberBadge
       && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
       && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting
-      && this.value.enableEdgeAutoScroll === this.stageValue.enableEdgeAutoScroll);
+      && this.value.enableEdgeAutoScroll === this.stageValue.enableEdgeAutoScroll
+      && this.value.enableHapticFeedback === this.stageValue.enableHapticFeedback);
   }
 }
 DragPreviewOptionsModifier.identity = Symbol('dragPreviewOptions');
@@ -3399,6 +3401,7 @@ class ArkComponent {
       arkDragPreviewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;
       arkDragPreviewOptions.defaultAnimationBeforeLifting = options.defaultAnimationBeforeLifting;
       arkDragPreviewOptions.enableEdgeAutoScroll = options.enableEdgeAutoScroll;
+      arkDragPreviewOptions.enableHapticFeedback = options.enableHapticFeedback;
     }
     modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
       DragPreviewOptionsModifier, arkDragPreviewOptions);
@@ -17536,6 +17539,7 @@ class ArkDragPreviewOptions {
     this.isMultiSelectionEnabled = undefined;
     this.defaultAnimationBeforeLifting = undefined;
     this.enableEdgeAutoScroll = undefined;
+    this.enableHapticFeedback = undefined;
   }
 
   isEqual(another) {
@@ -17544,7 +17548,8 @@ class ArkDragPreviewOptions {
       this.numberBadge === another.numberBadge &&
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting &&
-      this.enableEdgeAutoScroll === another.enableEdgeAutoScroll
+      this.enableEdgeAutoScroll === another.enableEdgeAutoScroll &&
+      this.enableHapticFeedback === another.enableHapticFeedback
     );
   }
 }
@@ -24426,6 +24431,10 @@ class ArkDatePickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, DatePickerBackgroundColorModifier.identity, DatePickerBackgroundColorModifier, value);
     return this;
   }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, DatePickerEnableHapticFeedbackModifier.identity, DatePickerEnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 class DatePickerLunarModifier extends ModifierWithKey {
   constructor(value) {
@@ -24585,6 +24594,21 @@ class DatePickerBackgroundColorModifier extends ModifierWithKey {
   }
 }
 DatePickerBackgroundColorModifier.identity = Symbol('datePickerBackgroundColor');
+class DatePickerEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().datePicker.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().datePicker.setEnableHapticFeedback(node, this.value);
+    }
+  }
+}
+DatePickerEnableHapticFeedbackModifier.identity = Symbol('datePickerEnableHapticFeedback');
+
 //@ts-ignore
 if (globalThis.DatePicker !== undefined) {
   globalThis.DatePicker.attributeModifier = function (modifier) {
@@ -29665,8 +29689,8 @@ class SwiperAutoPlayModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay)
-      || !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched); 
+    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay) ||
+      !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched);
   }
 }
 SwiperAutoPlayModifier.identity = Symbol('swiperAutoPlay');

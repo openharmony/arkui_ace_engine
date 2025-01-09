@@ -191,7 +191,7 @@ void FrontendDelegateDeclarativeNG::RunPage(
                 pipeline->SetMinPlatformVersion(manifestParser->GetMinPlatformVersion());
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIRunPageUrl");
+        TaskExecutor::TaskType::JS, "ArkUIRunPageUrl", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void FrontendDelegateDeclarativeNG::RunPage(
@@ -205,7 +205,7 @@ void FrontendDelegateDeclarativeNG::RunPage(
             pageRouterManager->RunPage(content, params);
             auto pipeline = delegate->GetPipelineContext();
         },
-        TaskExecutor::TaskType::JS, "ArkUIRunPageContent");
+        TaskExecutor::TaskType::JS, "ArkUIRunPageContent", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void FrontendDelegateDeclarativeNG::OnConfigurationUpdated(const std::string& data)
@@ -292,14 +292,16 @@ void FrontendDelegateDeclarativeNG::UpdateApplicationState(const std::string& pa
 {
     taskExecutor_->PostTask([updateApplicationState = updateApplicationState_, packageName,
                                 state] { updateApplicationState(packageName, state); },
-        TaskExecutor::TaskType::JS, "ArkUIUpdateApplicationState");
+        TaskExecutor::TaskType::JS, "ArkUIUpdateApplicationState",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void FrontendDelegateDeclarativeNG::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
 {
     taskExecutor_->PostTask([onWindowDisplayModeChanged = onWindowDisplayModeChanged_, isShownInMultiWindow,
                                 data] { onWindowDisplayModeChanged(isShownInMultiWindow, data); },
-        TaskExecutor::TaskType::JS, "ArkUIWindowDisplayModeChanged");
+        TaskExecutor::TaskType::JS, "ArkUIWindowDisplayModeChanged",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void FrontendDelegateDeclarativeNG::NotifyAppStorage(
@@ -313,7 +315,7 @@ void FrontendDelegateDeclarativeNG::NotifyAppStorage(
             }
             jsEngine->NotifyAppStorage(key, value);
         },
-        TaskExecutor::TaskType::JS, "ArkUINotifyAppStorage");
+        TaskExecutor::TaskType::JS, "ArkUINotifyAppStorage", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void FrontendDelegateDeclarativeNG::FireAccessibilityEvent(const AccessibilityEvent& accessibilityEvent)
@@ -542,9 +544,10 @@ void FrontendDelegateDeclarativeNG::NavigatePage(uint8_t type, const PageTarget&
     }
 }
 
-void FrontendDelegateDeclarativeNG::PostJsTask(std::function<void()>&& task, const std::string& name)
+void FrontendDelegateDeclarativeNG::PostJsTask(
+    std::function<void()>&& task, const std::string& name, PriorityType priorityType)
 {
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name, priorityType);
 }
 
 const std::string& FrontendDelegateDeclarativeNG::GetAppID() const
@@ -592,7 +595,8 @@ void FrontendDelegateDeclarativeNG::ChangeLocale(const std::string& language, co
 {
     taskExecutor_->PostTask(
         [language, countryOrRegion]() { AceApplicationInfo::GetInstance().ChangeLocale(language, countryOrRegion); },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIChangeLocale");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIChangeLocale",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void FrontendDelegateDeclarativeNG::RegisterFont(const std::string& familyName, const std::string& familySrc,

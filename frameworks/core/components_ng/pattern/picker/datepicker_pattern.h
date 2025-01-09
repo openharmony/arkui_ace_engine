@@ -720,6 +720,22 @@ public:
         curOpacity_ = opacity;
     }
 
+    void SetEnableHapticFeedback(bool value)
+    {
+        if (isEnableHaptic_ != value) {
+            isHapticChanged_ = true;
+        }
+        isEnableHaptic_ = value;
+    }
+
+    bool GetEnableHapticFeedback() const
+    {
+        return isEnableHaptic_;
+    }
+
+    void ColumnPatternInitHapticController();
+    void ColumnPatternInitHapticController(const RefPtr<FrameNode>& columnNode);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -834,6 +850,8 @@ private:
     double curOpacity_ = 1.0;
     DatePickerMode datePickerMode_ = DatePickerMode::DATE;
     bool isFocus_ = true;
+    bool isEnableHaptic_ = true;
+    bool isHapticChanged_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };

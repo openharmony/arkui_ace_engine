@@ -87,6 +87,7 @@ struct DatePickerSettingData {
     std::map<std::string, PickerTime> timePickerProperty;
     PickerTextProperties properties;
     DateTimeType dateTimeOptions;
+    bool isEnableHapticFeedback = true;
 };
 
 struct TextPickerSettingData {

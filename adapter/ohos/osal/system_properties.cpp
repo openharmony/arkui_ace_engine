@@ -404,7 +404,8 @@ int32_t GetPageCountProp()
 
 bool IsTaskPriorityAdjustmentEnable()
 {
-    return system::GetBoolParameter("persist.sys.arkui.task_priority.enable", false);
+    int32_t appVsyncPriority = system::GetIntParameter("const.graphic.app_vsync_priority", -1);
+    return appVsyncPriority != -1;
 }
 
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();

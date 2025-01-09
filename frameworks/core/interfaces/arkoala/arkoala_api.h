@@ -1520,6 +1520,7 @@ struct ArkUIDragInteractionOptions {
     ArkUI_Bool isMultiSelectionEnabled;
     ArkUI_Bool defaultAnimationBeforeLifting;
     ArkUI_Bool enableEdgeAutoScroll;
+    ArkUI_Bool enableHapticFeedback;
 };
 
 struct ArkUIDragPreViewAndInteractionOptions {
@@ -1530,6 +1531,7 @@ struct ArkUIDragPreViewAndInteractionOptions {
     bool isDefaultShadowEnabled = false;
     bool isDefaultRadiusEnabled = false;
     bool enableEdgeAutoScroll = true;
+    bool enableHapticFeedback = false;
     ArkUI_Int32 badgeNumber = 0;
     bool isShowBadge = true;
 };
@@ -4612,6 +4614,9 @@ struct ArkUIDatePickerModifier {
     ArkUI_Int32 (*getDatePickerMode)(ArkUINodeHandle node);
     void (*setDatePickerMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetDatePickerMode)(ArkUINodeHandle node);
+    ArkUI_Bool (*getEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool enableHapticFeedback);
+    void (*resetEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct ArkUISpanModifier {

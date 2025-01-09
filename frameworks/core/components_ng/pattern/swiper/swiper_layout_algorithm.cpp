@@ -1373,6 +1373,9 @@ RefPtr<LayoutWrapper> SwiperLayoutAlgorithm::GetNodeLayoutWrapperByTag(
     CHECK_NULL_RETURN(hostNode, nullptr);
     auto swiperPattern = hostNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(swiperPattern, nullptr);
+    if (swiperPattern->IsBindIndicator() && V2::SWIPER_INDICATOR_ETS_TAG == tagName) {
+        return nullptr;
+    }
     RefPtr<LayoutWrapper> nodeWrapper = nullptr;
     int32_t totalChildCount = layoutWrapper->GetTotalChildCount();
     if (totalChildCount == 0) {
