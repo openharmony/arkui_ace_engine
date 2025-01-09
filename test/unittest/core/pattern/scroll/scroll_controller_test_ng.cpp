@@ -342,7 +342,7 @@ HWTEST_F(ScrollControllerTestNg, ScrollPage001, TestSize.Level1)
      * @tc.expected: Scroll down
      */
     ScrollPage(false, false);
-    EXPECT_TRUE(Position(-SCROLL_HEIGHT));
+    EXPECT_TRUE(Position(-HEIGHT));
 
     /**
      * @tc.steps: step2. ScrollPage up
@@ -371,15 +371,15 @@ HWTEST_F(ScrollControllerTestNg, ScrollPage002, TestSize.Level1)
     bool smooth = true;
     MockAnimationManager::GetInstance().SetTicks(TICK);
     ScrollPage(false, smooth);
-    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT / TICK));
-    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT));
+    EXPECT_TRUE(TickPosition(-HEIGHT / TICK));
+    EXPECT_TRUE(TickPosition(-HEIGHT));
 
     /**
      * @tc.steps: step1. ScrollPage up with animation
      * @tc.expected: Scroll up with animation
      */
     ScrollPage(true, smooth);
-    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT / TICK));
+    EXPECT_TRUE(TickPosition(-HEIGHT / TICK));
     EXPECT_TRUE(TickPosition(0));
 }
 
@@ -397,7 +397,7 @@ HWTEST_F(ScrollControllerTestNg, GetInfo001, TestSize.Level1)
     EXPECT_EQ(GetScrollDirection(), Axis::VERTICAL);
     EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset()));
     EXPECT_FALSE(IsAtEnd());
-    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, 0, SCROLL_WIDTH, CONTENT_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, 0, WIDTH, CONTENT_MAIN_SIZE)));
 
     /**
      * @tc.steps: step1. AnimateTo the position
@@ -405,7 +405,7 @@ HWTEST_F(ScrollControllerTestNg, GetInfo001, TestSize.Level1)
     AnimateTo(Dimension(ITEM_MAIN_SIZE), 0, nullptr, false);
     EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset(0, ITEM_MAIN_SIZE)));
     EXPECT_FALSE(IsAtEnd());
-    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, -ITEM_MAIN_SIZE, SCROLL_WIDTH, CONTENT_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, -ITEM_MAIN_SIZE, WIDTH, CONTENT_MAIN_SIZE)));
 
     /**
      * @tc.steps: step2. AnimateTo bottom
@@ -413,6 +413,6 @@ HWTEST_F(ScrollControllerTestNg, GetInfo001, TestSize.Level1)
     AnimateTo(Dimension(CONTENT_MAIN_SIZE), 0, nullptr, false);
     EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset(0, VERTICAL_SCROLLABLE_DISTANCE)));
     EXPECT_TRUE(IsAtEnd());
-    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, -VERTICAL_SCROLLABLE_DISTANCE, SCROLL_WIDTH, CONTENT_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, -VERTICAL_SCROLLABLE_DISTANCE, WIDTH, CONTENT_MAIN_SIZE)));
 }
 } // namespace OHOS::Ace::NG

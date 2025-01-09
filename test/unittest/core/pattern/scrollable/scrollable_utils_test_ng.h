@@ -22,6 +22,14 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
+constexpr float WIDTH = 240.0f;
+constexpr float HEIGHT = 400.0f;
+constexpr float ITEM_MAIN_SIZE = 100.0f;
+constexpr float CONTENT_MAIN_SIZE = 1000.0f;
+constexpr float VERTICAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - HEIGHT;
+constexpr float HORIZONTAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - WIDTH;
+constexpr int32_t TICK = 2;
+
 class ScrollableUtilsTestNG : public TestNG {
 protected:
     // scrollable handle drag
