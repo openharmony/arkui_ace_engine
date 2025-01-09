@@ -1751,7 +1751,7 @@ bool FrameNode::IsFrameAncestorDisappear(uint64_t timestamp)
     bool curFrameIsActive = isActive_;
     bool curIsVisible = IsVisible();
     bool result = !curIsVisible || !curFrameIsActive;
-    RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame();
+    RefPtr<FrameNode> parentUi = GetAncestorNodeOfFrame(false);
     if (!parentUi) {
         cachedIsFrameDisappear_ = { timestamp, result };
         return result;
@@ -1986,7 +1986,7 @@ void FrameNode::SetActive(bool active, bool needRebuildRenderContext)
         activeChanged = true;
     }
     CHECK_NULL_VOID(activeChanged);
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(false);
     if (parent) {
         parent->MarkNeedSyncRenderTree();
         if (needRebuildRenderContext) {
@@ -2027,13 +2027,13 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
             auto layoutConstraint = GetLayoutConstraint();
             ACE_SCOPED_TRACE("CreateTaskMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]"
                              "[layoutPriority:%d][pageId:%d][depth:%d]",
-                GetTag().c_str(), GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
+                GetTag().c_str(), GetId(), GetAncestorNodeOfFrame(false) ? GetAncestorNodeOfFrame(false)->GetId() : 0,
                 layoutConstraint.ToString().c_str(), GetLayoutPriority(), GetPageId(), GetDepth());
             Measure(layoutConstraint);
         }
         {
             ACE_SCOPED_TRACE("CreateTaskLayout[%s][self:%d][parent:%d][layoutPriority:%d][pageId:%d][depth:%d]",
-                GetTag().c_str(), GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
+                GetTag().c_str(), GetId(), GetAncestorNodeOfFrame(false) ? GetAncestorNodeOfFrame(false)->GetId() : 0,
                 GetLayoutPriority(), GetPageId(), GetDepth());
             Layout();
         }
@@ -2081,15 +2081,6 @@ LayoutConstraintF FrameNode::GetLayoutConstraint() const
     layoutConstraint.maxSize.SetWidth(rootWidth);
     layoutConstraint.maxSize.SetHeight(rootHeight);
     return layoutConstraint;
-}
-
-OffsetF FrameNode::GetParentGlobalOffset() const
-{
-    auto parent = GetAncestorNodeOfFrame();
-    if (!parent) {
-        return { 0.0f, 0.0f };
-    }
-    return parent->geometryNode_->GetParentGlobalOffset();
 }
 
 void FrameNode::UpdateLayoutPropertyFlag()
@@ -2457,7 +2448,7 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary)
         context->AddDirtyRenderNode(Claim(this));
         return;
     }
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(false);
     if (parent) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_RENDER_BY_CHILD_REQUEST);
     }
@@ -2465,7 +2456,7 @@ void FrameNode::MarkNeedRender(bool isRenderBoundary)
 
 bool FrameNode::RequestParentDirty()
 {
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(false);
     CHECK_NULL_RETURN(parent, false);
     parent->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
     return true;
@@ -2724,7 +2715,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
 
     int32_t parentId = -1;
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(false);
     if (parent) {
         parentId = parent->GetId();
     }
@@ -3461,35 +3452,28 @@ OffsetF FrameNode::GetTransformRelativeOffset() const
     return offset;
 }
 
-// returns a node's offset relative to window
-// and accumulate every ancestor node's graphic properties such as rotate and transform
-// ancestor will NOT check boundary of window scene
-OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
+OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf, bool checkBoundary) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
     OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithTransform().GetOffset();
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(checkBoundary);
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
         offset += renderContext->GetPaintRectWithTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(checkBoundary);
     }
     return offset;
 }
 
-// returns a node's offset relative to window
-// and accumulate every ancestor node's graphic properties such as rotate and transform
-// can exclude querying node
-// ancestor will NOT check boundary of window scene
-OffsetF FrameNode::GetPaintRectOffsetNG(bool excludeSelf) const
+OffsetF FrameNode::GetPaintRectOffsetNG(bool excludeSelf, bool checkBoundary) const
 {
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
     OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithoutTransform().GetOffset();
     Point point = Matrix4::Invert(context->GetRevertMatrix()) * Point(offset.GetX(), offset.GetY());
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(checkBoundary);
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
@@ -3497,7 +3481,7 @@ OffsetF FrameNode::GetPaintRectOffsetNG(bool excludeSelf) const
         point = point + Offset(parentOffset.GetX(), parentOffset.GetY());
         auto parentMatrix = Matrix4::Invert(renderContext->GetRevertMatrix());
         point = parentMatrix * point;
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(checkBoundary);
     }
     return OffsetF(point.GetX(), point.GetY());
 }
@@ -3559,10 +3543,10 @@ RectF FrameNode::GetPaintRectToWindowWithTransform()
     auto frameSize = geometryNode->GetFrameSize();
     auto pointList = GetRectPoints(frameSize);
     GetRectPointToParentWithTransform(pointList, Claim(this));
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(false);
     while (parent) {
         if (GetRectPointToParentWithTransform(pointList, parent)) {
-            parent = parent->GetAncestorNodeOfFrame();
+            parent = parent->GetAncestorNodeOfFrame(false);
         } else {
             return RectF();
         }
@@ -3576,10 +3560,10 @@ RectF FrameNode::GetPaintRectToWindowWithTransform()
 OffsetF FrameNode::GetParentGlobalOffsetDuringLayout() const
 {
     OffsetF offset {};
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(false);
     while (parent) {
         offset += parent->geometryNode_->GetFrameOffset();
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     return offset;
 }
@@ -3587,13 +3571,13 @@ OffsetF FrameNode::GetParentGlobalOffsetDuringLayout() const
 // returns a node's offset relative to window
 // and accumulate every ancestor node's graphic translate properties
 // error means any ancestor node renderContext has hasScales_ bool
-std::pair<OffsetF, bool> FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf) const
+std::pair<OffsetF, bool> FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf, bool checkBoundary) const
 {
     bool error = false;
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, std::make_pair(OffsetF(), error));
     OffsetF offset = excludeSelf ? OffsetF() : context->GetPaintRectWithTranslate().first.GetOffset();
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(checkBoundary);
     while (parent) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, std::make_pair(OffsetF(), error));
@@ -3601,7 +3585,7 @@ std::pair<OffsetF, bool> FrameNode::GetPaintRectGlobalOffsetWithTranslate(bool e
         error = error || err;
         CHECK_NULL_RETURN(rect.IsValid(), std::make_pair(offset + parent->GetPaintRectOffset(), error));
         offset += rect.GetOffset();
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(checkBoundary);
     }
     return std::make_pair(offset, error);
 }
@@ -3614,7 +3598,7 @@ OffsetF FrameNode::GetPaintRectOffsetToStage() const
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
     OffsetF offset = context->GetPaintRectWithTransform().GetOffset();
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(true);
     while (parent && parent->GetTag() != V2::STAGE_ETS_TAG) {
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, OffsetF());
@@ -3624,23 +3608,23 @@ OffsetF FrameNode::GetPaintRectOffsetToStage() const
         } else {
             offset += renderContext->GetPaintRectWithTransform().GetOffset();
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     return (parent && parent->GetTag() == V2::STAGE_ETS_TAG) ? offset : OffsetF();
 }
 
-std::optional<RectF> FrameNode::GetViewPort() const
+std::optional<RectF> FrameNode::GetViewPort(bool checkBoundary) const
 {
     if (viewPort_.has_value()) {
         return viewPort_;
     }
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(checkBoundary);
     while (parent && parent->GetTag() != V2::PAGE_ETS_TAG) {
         auto parentViewPort = parent->GetSelfViewPort();
         if (parentViewPort.has_value()) {
             return parentViewPort;
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(checkBoundary);
     }
     return std::nullopt;
 }
@@ -4111,13 +4095,13 @@ void FrameNode::UpdatePercentSensitive()
     bool percentWidth = layoutAlgorithm_ ? layoutAlgorithm_->GetPercentWidth() : true;
     auto res = layoutProperty_->UpdatePercentSensitive(percentHeight, percentWidth);
     if (res.first) {
-        auto parent = GetAncestorNodeOfFrame();
+        auto parent = GetAncestorNodeOfFrame(false);
         if (parent && parent->layoutAlgorithm_) {
             parent->layoutAlgorithm_->SetPercentWidth(true);
         }
     }
     if (res.second) {
-        auto parent = GetAncestorNodeOfFrame();
+        auto parent = GetAncestorNodeOfFrame(false);
         if (parent && parent->layoutAlgorithm_) {
             parent->layoutAlgorithm_->SetPercentHeight(true);
         }
@@ -4128,11 +4112,11 @@ void FrameNode::UpdatePercentSensitive()
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
     ACE_LAYOUT_TRACE_BEGIN("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
-        GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
+        GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0, GetInspectorIdValue("").c_str());
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
         ACE_MEASURE_SCOPED_TRACE(
             "Measure[%s][self:%d][parent:%d][key:%s][frameRect:%s][parentConstraint:%s][calcConstraint:%s]",
-            GetTag().c_str(), GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
+            GetTag().c_str(), GetId(), GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0,
             GetInspectorIdValue("").c_str(), GetGeometryNode()->GetFrameRect().ToString().c_str(),
             parentConstraint.has_value() ? parentConstraint.value().ToString().c_str() : "NA",
             layoutProperty_->GetCalcLayoutConstraint() ? layoutProperty_->GetCalcLayoutConstraint()->ToString().c_str()
@@ -4243,7 +4227,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     layoutProperty_->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
         ACE_MEASURE_SCOPED_TRACE("MeasureFinish[%s][self:%d][parent:%d][key:%s][frameRect:%s][contentSize:%s]",
-            GetTag().c_str(), GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0,
+            GetTag().c_str(), GetId(), GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0,
             GetInspectorIdValue("").c_str(), GetGeometryNode()->GetFrameRect().ToString().c_str(),
             GetGeometryNode()->GetContentSize().ToString().c_str());
     }
@@ -4254,10 +4238,10 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 void FrameNode::Layout()
 {
     ACE_LAYOUT_TRACE_BEGIN("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(), GetId(),
-        GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str());
+        GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0, GetInspectorIdValue("").c_str());
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
         ACE_MEASURE_SCOPED_TRACE("Layout[%s][self:%d][parent:%d][key:%s][frameRect:%s]", GetTag().c_str(), GetId(),
-            GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str(),
+            GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0, GetInspectorIdValue("").c_str(),
             GetGeometryNode()->GetFrameRect().ToString().c_str());
     }
     if (layoutProperty_->GetLayoutRect()) {
@@ -4312,8 +4296,8 @@ void FrameNode::Layout()
     }
     if (SystemProperties::GetMeasureDebugTraceEnabled()) {
         ACE_MEASURE_SCOPED_TRACE("LayoutFinish[%s][self:%d][parent:%d][key:%s][frameRect:%s]", GetTag().c_str(),
-            GetId(), GetAncestorNodeOfFrame() ? GetAncestorNodeOfFrame()->GetId() : 0, GetInspectorIdValue("").c_str(),
-            GetGeometryNode()->GetFrameRect().ToString().c_str());
+            GetId(), GetAncestorNodeOfFrame(true) ? GetAncestorNodeOfFrame(true)->GetId() : 0,
+            GetInspectorIdValue("").c_str(), GetGeometryNode()->GetFrameRect().ToString().c_str());
     }
 
     auto pipeline = GetContext();
@@ -4370,7 +4354,7 @@ bool FrameNode::SelfExpansiveToKeyboard()
 
 bool FrameNode::ParentExpansive()
 {
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(false);
     CHECK_NULL_RETURN(parent, false);
     auto parentLayoutProperty = parent->GetLayoutProperty();
     CHECK_NULL_RETURN(parentLayoutProperty, false);
@@ -4826,7 +4810,7 @@ void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
     renderContext_->UpdateNodeName(id);
     ElementRegister::GetInstance()->AddFrameNodeByInspectorId(id, AceType::WeakClaim(this));
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(true);
     if (parent && parent->GetTag() == V2::RELATIVE_CONTAINER_ETS_TAG) {
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -5681,7 +5665,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
 
 void FrameNode::MarkAndCheckNewOpIncNode()
 {
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     if (parent->GetSuggestOpIncActivatedOnce() && !GetSuggestOpIncActivatedOnce()) {
         SetSuggestOpIncActivatedOnce();

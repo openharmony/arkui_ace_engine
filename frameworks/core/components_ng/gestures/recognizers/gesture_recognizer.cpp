@@ -335,7 +335,7 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
                 SEC_PLD(%{public}d) ".", SEC_PARAM(host->GetId()));
             break;
         }
-        host = host->GetAncestorNodeOfFrame();
+        host = host->GetAncestorNodeOfFrame(false);
     }
 
     Point temp(localPointF.GetX(), localPointF.GetY());

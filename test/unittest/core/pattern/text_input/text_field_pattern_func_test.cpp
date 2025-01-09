@@ -900,7 +900,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc052, TestSize.Level1)
     info.isIME = true;
     pattern->selectController_->firstHandleInfo_.index = 0;
     pattern->selectController_->secondHandleInfo_.index = 0;
-    
+
     pattern->InsertValueOperation(info);
     EXPECT_TRUE(state);
 }
@@ -924,7 +924,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc053, TestSize.Level1)
     info.isIME = true;
     pattern->selectController_->firstHandleInfo_.index = 0;
     pattern->selectController_->secondHandleInfo_.index = 0;
-    
+
     pattern->InsertValueOperation(info);
     EXPECT_FALSE(pattern->cursorVisible_);
 }
@@ -986,7 +986,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc057, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     std::u16string insertValue = u"1";
     pattern->obscureTickCountDown_ = 10;
     pattern->UpdateObscure(insertValue, false);
@@ -1001,7 +1001,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc058, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     auto eventHub = pattern->GetFocusHub();
     eventHub->currentFocus_ = false;
     pattern->InsertValue(u"", true);
@@ -1016,7 +1016,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc059, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     auto eventHub = pattern->GetFocusHub();
     eventHub->currentFocus_ = true;
     pattern->isEdit_ = false;
@@ -1032,7 +1032,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc060, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     auto eventHub = pattern->GetFocusHub();
     eventHub->currentFocus_ = true;
     pattern->isEdit_ = true;
@@ -1050,7 +1050,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc061, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     auto eventHub = pattern->GetFocusHub();
     eventHub->currentFocus_ = true;
     pattern->isEdit_ = true;
@@ -1319,7 +1319,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc072, TestSize.Level1)
     element->tag_ = V2::SHEET_WRAPPER_TAG;
     textFieldNode->SetParent(element);
     auto result = textFieldManager->FindNavNode(textFieldNode);
-    auto parent = textFieldNode->GetAncestorNodeOfFrame();
+    auto parent = textFieldNode->GetAncestorNodeOfFrame(false);
     auto sheetNode = parent->GetChildAtIndex(0);
     EXPECT_EQ(result, sheetNode);
 }
@@ -1376,9 +1376,9 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc074, TestSize.Level1)
     ASSERT_NE(navigationNode, nullptr);
     navigationNode->tag_ = V2::NAVIGATION_VIEW_ETS_TAG;
     element1->SetParent(navigationNode);
-    auto oldParent = textFieldNode1->GetAncestorNodeOfFrame();
+    auto oldParent = textFieldNode1->GetAncestorNodeOfFrame(false);
     auto result = textFieldManager->FindNavNode(textFieldNode1);
-    auto newParent = textFieldNode1->GetAncestorNodeOfFrame();
+    auto newParent = textFieldNode1->GetAncestorNodeOfFrame(false);
     EXPECT_EQ(oldParent, newParent);
     EXPECT_EQ(result, nullptr);
 }
@@ -1414,11 +1414,11 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc075, TestSize.Level1)
     ASSERT_NE(navigationNode, nullptr);
     navigationNode->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
     element1->SetParent(navigationNode);
-    auto oldParent = textFieldNode1->GetAncestorNodeOfFrame();
-    auto oldNavigationNode = oldParent->GetAncestorNodeOfFrame();
+    auto oldParent = textFieldNode1->GetAncestorNodeOfFrame(false);
+    auto oldNavigationNode = oldParent->GetAncestorNodeOfFrame(false);
     auto result = textFieldManager->FindNavNode(textFieldNode1);
-    auto newParent = textFieldNode1->GetAncestorNodeOfFrame();
-    auto newNavigationNode = oldParent->GetAncestorNodeOfFrame();
+    auto newParent = textFieldNode1->GetAncestorNodeOfFrame(false);
+    auto newNavigationNode = oldParent->GetAncestorNodeOfFrame(false);
     EXPECT_EQ(oldNavigationNode, newNavigationNode);
     EXPECT_EQ(result, nullptr);
 }
@@ -1454,11 +1454,11 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc076, TestSize.Level1)
     ASSERT_NE(navigationNode, nullptr);
     navigationNode->tag_ = V2::NAVBAR_ETS_TAG;
     element1->SetParent(navigationNode);
-    auto oldParent = textFieldNode1->GetAncestorNodeOfFrame();
-    auto oldNavigationNode = oldParent->GetAncestorNodeOfFrame();
+    auto oldParent = textFieldNode1->GetAncestorNodeOfFrame(false);
+    auto oldNavigationNode = oldParent->GetAncestorNodeOfFrame(false);
     auto result = textFieldManager->FindNavNode(textFieldNode1);
-    auto newParent = textFieldNode1->GetAncestorNodeOfFrame();
-    auto newNavigationNode = oldParent->GetAncestorNodeOfFrame();
+    auto newParent = textFieldNode1->GetAncestorNodeOfFrame(false);
+    auto newNavigationNode = oldParent->GetAncestorNodeOfFrame(false);
     EXPECT_EQ(oldNavigationNode, newNavigationNode);
     EXPECT_EQ(result, nullptr);
 }

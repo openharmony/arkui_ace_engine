@@ -530,14 +530,14 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         HandleNotAllowDrag(info);
         return;
     }
-    
+
     // set drag drop status is moving
     DragDropGlobalController::GetInstance().UpdateDragDropInitiatingStatus(frameNode, DragDropInitiatingStatus::MOVING);
 
     if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         SetMouseDragMonitorState(true);
     }
-    
+
     // create drag event
     auto event = CreateDragEvent(info, pipeline, frameNode);
 
@@ -550,7 +550,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
 
     bool isMenuShow = DragDropGlobalController::GetInstance().IsMenuShowing();
     CalcFrameNodeOffsetAndSize(frameNode, isMenuShow);
-    
+
     // set drag pointer status
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
@@ -841,7 +841,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
 void GestureEventHub::StartVibratorByDrag(const RefPtr<FrameNode>& frameNode)
 {
     bool enableHapticFeedback = frameNode->GetDragPreviewOption().enableHapticFeedback;
-    auto parent = frameNode->GetAncestorNodeOfFrame();
+    auto parent = frameNode->GetAncestorNodeOfFrame(false);
     if (parent && parent->GetTag() == V2::RICH_EDITOR_ETS_TAG) {
         enableHapticFeedback = parent->GetDragPreviewOption().enableHapticFeedback;
     }
@@ -1401,7 +1401,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     // create text node
     auto subWindowOffset = isExpandDisplay ? subWindow->GetWindowRect().GetOffset() : OffsetF();
     auto textNode = DragEventActuator::CreateBadgeTextNode(data.badgeNumber);
-    
+
     // create gatherNode
     auto originGatherNode = overlayManager->GetGatherNode();
     OffsetF positionToWindow = originGatherNode ? originGatherNode->GetPositionToWindowWithTransform() : OffsetF();
@@ -1423,7 +1423,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     DragEventActuator::UpdateBadgeTextNodePosition(frameNode, textNode, data.badgeNumber, data.previewScale,
         data.dragPreviewOffsetToScreen - subWindowOffset);
     DragDropFuncWrapper::UpdateNodePositionToScreen(data.imageNode, data.dragPreviewOffsetToScreen);
-    
+
     auto subwindowContext = data.imageNode->GetContext();
     if (subwindowContext) {
         subwindowContext->FlushSyncGeometryNodeTasks();

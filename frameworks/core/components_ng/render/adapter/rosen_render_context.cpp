@@ -1630,7 +1630,7 @@ void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scal
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto parent = frameNode->GetAncestorNodeOfFrame();
+    auto parent = frameNode->GetAncestorNodeOfFrame(false);
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
         CHECK_NULL_VOID(parentRenderContext);
@@ -1639,7 +1639,7 @@ void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scal
             scale[0] *= parentScale.value().x;
             scale[1] *= parentScale.value().y;
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     scaleX = scale[0];
     scaleY = scale[1];
@@ -2787,7 +2787,7 @@ void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& custo
     firstParam.checkImageStatus = true;
     firstParam.options.waitUntilRenderFinished = true;
     NG::ComponentSnapshot::Create(customNode, std::move(firstCallback), false, firstParam, true);
-    
+
     SnapshotParam param;
     NG::ComponentSnapshot::Create(customNode, std::move(callback), false, param, false);
 }
@@ -3020,7 +3020,7 @@ OffsetF RosenRenderContext::GetRectOffsetWithPositionEdges(
     std::unique_ptr<MarginProperty> margin(
         marginOri ? std::make_unique<MarginProperty>(*marginOri) : std::make_unique<MarginProperty>());
 
-    auto parentNode = frameNode->GetAncestorNodeOfFrame();
+    auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
     CHECK_NULL_RETURN(parentNode, OffsetF {});
     auto parentLayoutProperty = parentNode->GetLayoutProperty();
     CHECK_NULL_RETURN(parentLayoutProperty, OffsetF {});
@@ -3408,7 +3408,7 @@ void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddi
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto frameNodeParent = frameNode->GetAncestorNodeOfFrame();
+    auto frameNodeParent = frameNode->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(frameNodeParent);
     auto layoutProperty = frameNodeParent->GetLayoutProperty();
     if (layoutProperty && layoutProperty->GetPaddingProperty()) {
@@ -3504,7 +3504,7 @@ void RosenRenderContext::OnZIndexUpdate(int32_t value)
     rsNode_->SetPositionZ(static_cast<float>(value));
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
-    auto parent = uiNode->GetAncestorNodeOfFrame();
+    auto parent = uiNode->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
@@ -5456,7 +5456,7 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
     } else {
         if (!transitionEffect_->HasDisappearTransition()) {
             if (frameNode->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-                auto frameParent = frameNode->GetAncestorNodeOfFrame();
+                auto frameParent = frameNode->GetAncestorNodeOfFrame(false);
                 CHECK_NULL_VOID(frameParent);
                 // for window surfaceNode, remove surfaceNode explicitly
                 frameParent->GetRenderContext()->RemoveChild(Claim(this));

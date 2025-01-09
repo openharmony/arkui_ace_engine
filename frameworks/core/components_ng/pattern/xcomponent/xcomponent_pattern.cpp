@@ -1504,7 +1504,7 @@ bool XComponentPattern::ExportTextureAvailable()
     auto host = GetHost();
     auto parnetNodeContainer = host->GetNodeContainer();
     CHECK_NULL_RETURN(parnetNodeContainer, false);
-    auto parent = parnetNodeContainer->GetAncestorNodeOfFrame();
+    auto parent = parnetNodeContainer->GetAncestorNodeOfFrame(false);
     CHECK_NULL_RETURN(parent, false);
     auto ancestorNodeContainer = parent->GetNodeContainer();
     CHECK_NULL_RETURN(ancestorNodeContainer, true);
