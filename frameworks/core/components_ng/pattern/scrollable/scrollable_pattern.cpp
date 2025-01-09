@@ -1987,7 +1987,7 @@ bool ScrollablePattern::HandleOutBoundary(float& offset, int32_t source, NestedS
         if (NearZero(backOverOffset)) {
             return false;
         }
-        result = {offset - backOverOffset, true};
+        result = {0.0, true};
         offset = backOverOffset;
         return true;
     }
