@@ -96,10 +96,10 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     if (sheetStyle.isTitleBuilder.has_value() && pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
         layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(
-            sheetTheme->GetOperationAreaHeight() - sheetTheme->GetSheetTitleAeraMargin())));
+            sheetTheme->GetOperationAreaHeight() - sheetTheme->GetSheetTitleAreaMargin())));
         if (sheetStyle.sheetTitle.has_value() && sheetStyle.sheetSubtitle.has_value()) {
             layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(
-                SHEET_OPERATION_AREA_HEIGHT_DOUBLE - sheetTheme->GetSheetTitleAeraMargin())));
+                SHEET_OPERATION_AREA_HEIGHT_DOUBLE - sheetTheme->GetSheetTitleAreaMargin())));
         }
     }
     CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode, sheetDragBarHeight);
@@ -382,7 +382,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
             CalcSize(std::nullopt, CalcLength(sheetTheme->GetOperationAreaHeight())));
     }
     MarginProperty margin;
-    margin.top = CalcLength(sheetTheme->GetSheetTitleAeraMargin());
+    margin.top = CalcLength(sheetTheme->GetSheetTitleAreaMargin());
     margin.bottom = CalcLength(SHEET_DOUBLE_TITLE_BOTTON_MARGIN);
     layoutProperty->UpdateMargin(margin);
     auto columnProps = titleColumn->GetLayoutProperty<LinearLayoutProperty>();

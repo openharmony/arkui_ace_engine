@@ -1420,12 +1420,12 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
             CHECK_NULL_VOID(sheetTheme);
             auto operationAreaHeight = sheetTheme->GetOperationAreaHeight();
             layoutProps->UpdateUserDefinedIdealSize(
-                CalcSize(std::nullopt, CalcLength(operationAreaHeight - sheetTheme->GetSheetTitleAeraMargin())));
+                CalcSize(std::nullopt, CalcLength(operationAreaHeight - sheetTheme->GetSheetTitleAreaMargin())));
             titleLayoutProps->UpdateUserDefinedIdealSize(
                 CalcSize(std::nullopt, CalcLength(operationAreaHeight)));
             if (sheetStyle.sheetSubtitle.has_value()) {
                 layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
-                    CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - sheetTheme->GetSheetTitleAeraMargin())));
+                    CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - sheetTheme->GetSheetTitleAreaMargin())));
                 titleLayoutProps->UpdateUserDefinedIdealSize(
                     CalcSize(std::nullopt,
                         CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
@@ -1661,7 +1661,7 @@ void SheetPresentationPattern::InitSheetDetents()
 }
 
 void SheetPresentationPattern::InitDetents(
-    SheetStyle sheetStyle, float& height, double mediumSize, float largeHeightOfTheme, double largeHeight)
+    SheetStyle sheetStyle, float height, double mediumSize, float largeHeightOfTheme, double largeHeight)
 {
     for (auto iter : sheetStyle.detents) {
         preDetents_.emplace_back(iter);
