@@ -240,12 +240,12 @@ public:
     RefPtr<FrameNode> FindTouchedEmbeddedMenuItem(const OffsetF& position);
     void OnHover(bool isHover);
     void NotifyPressStatus(bool isPress);
-    void SetBgColor(const Color& color);
-    void SetFontColor(const Color& color);
+    void SetBgColor(const std::optional<Color>& color);
+    void SetFontColor(const std::optional<Color>& color);
     void SetFontFamily(const std::vector<std::string>& value);
-    void SetFontSize(const Dimension& value);
-    void SetFontWeight(const FontWeight& value);
-    void SetItalicFontStyle(const Ace::FontStyle& value);
+    void SetFontSize(const std::optional<Dimension>& value);
+    void SetFontWeight(const std::optional<FontWeight>& value);
+    void SetItalicFontStyle(const std::optional<Ace::FontStyle>& value);
     void UpdateIcon(const std::string& src, const std::function<void(WeakPtr<NG::FrameNode>)> symbolIcon);
     void UpdateNextNodeDivider(bool needDivider);
     void UpdateText(const std::string& content);

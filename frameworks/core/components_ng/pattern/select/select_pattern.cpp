@@ -662,7 +662,7 @@ void SelectPattern::SetOptionBgColor(const std::optional<Color>& color)
         }
         auto pattern = options_[i]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetBgColor(color.value_or(Color{}));
+        pattern->SetBgColor(color);
     }
 }
 
@@ -675,7 +675,7 @@ void SelectPattern::SetOptionFontSize(const std::optional<Dimension>& value)
         }
         auto pattern = options_[i]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetFontSize(value.value_or(Dimension{}));
+        pattern->SetFontSize(value);
     }
 }
 
@@ -688,7 +688,7 @@ void SelectPattern::SetOptionItalicFontStyle(const std::optional<Ace::FontStyle>
         }
         auto pattern = options_[i]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetItalicFontStyle(value.value_or(Ace::FontStyle{}));
+        pattern->SetItalicFontStyle(value);
     }
 }
 
@@ -701,7 +701,7 @@ void SelectPattern::SetOptionFontWeight(const std::optional<FontWeight>& value)
         }
         auto pattern = options_[i]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetFontWeight(value.value_or(FontWeight{}));
+        pattern->SetFontWeight(value);
     }
 }
 
@@ -727,7 +727,7 @@ void SelectPattern::SetOptionFontColor(const std::optional<Color>& color)
         }
         auto pattern = options_[i]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetFontColor(color.value_or(Color{}));
+        pattern->SetFontColor(color);
     }
 }
 
@@ -738,7 +738,7 @@ void SelectPattern::SetSelectedOptionBgColor(const std::optional<Color>& color)
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
         auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetBgColor(color.value_or(Color{}));
+        pattern->SetBgColor(color);
     }
 }
 
@@ -748,7 +748,7 @@ void SelectPattern::SetSelectedOptionFontSize(const std::optional<Dimension>& va
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
         auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetFontSize(value.value_or(Dimension{}));
+        pattern->SetFontSize(value);
     }
 }
 
@@ -758,7 +758,7 @@ void SelectPattern::SetSelectedOptionItalicFontStyle(const std::optional<Ace::Fo
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
         auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetItalicFontStyle(value.value_or(Ace::FontStyle{}));
+        pattern->SetItalicFontStyle(value);
     }
 }
 
@@ -768,7 +768,7 @@ void SelectPattern::SetSelectedOptionFontWeight(const std::optional<FontWeight>&
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
         auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetFontWeight(value.value_or(FontWeight{}));
+        pattern->SetFontWeight(value);
     }
 }
 
@@ -788,7 +788,7 @@ void SelectPattern::SetSelectedOptionFontColor(const std::optional<Color>& color
     if (selected_ >= 0 && selected_ < static_cast<int32_t>(options_.size())) {
         auto pattern = options_[selected_]->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(pattern);
-        pattern->SetFontColor(color.value_or(Color{}));
+        pattern->SetFontColor(color);
     }
 }
 

@@ -1767,45 +1767,64 @@ RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const OffsetF& po
     return menuItem;
 }
 
-void MenuItemPattern::SetBgColor(const Color& color)
+void MenuItemPattern::SetBgColor(const std::optional<Color>& color)
 {
     auto renderContext = GetHost()->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdateBackgroundColor(color);
+    if (color) {
+        renderContext->UpdateBackgroundColor(color.value());
+    } else {
+        renderContext->ResetBackgroundColor();
+    }
     bgColor_ = color;
 }
 
-void MenuItemPattern::SetFontColor(const Color& color)
+void MenuItemPattern::SetFontColor(const std::optional<Color>& color)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
-    props->UpdateTextColor(color);
     auto context = text_->GetRenderContext();
     CHECK_NULL_VOID(context);
-    context->UpdateForegroundColor(color);
+    if (color) {
+        auto value = color.value();
+        props->UpdateTextColor(value);
+        context->UpdateForegroundColor(value);
+    } else {
+        props->ResetTextColor();
+        context->ResetForegroundColor();
+    }
     context->UpdateForegroundColorFlag(false);
     context->ResetForegroundColorStrategy();
 }
 
-void MenuItemPattern::SetFontSize(const Dimension& value)
+void MenuItemPattern::SetFontSize(const std::optional<Dimension>& value)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
     CHECK_NULL_VOID(selectTheme_);
-    props->UpdateFontSize(value.IsNegative() ? selectTheme_->GetMenuFontSize() : value);
+    if (value) {
+        Dimension fontSize = value.value();
+        props->UpdateFontSize(fontSize.IsNegative() ? selectTheme_->GetMenuFontSize() : fontSize);
+    } else {
+        props->ResetFontSize();
+    }
 }
 
-void MenuItemPattern::SetFontWeight(const FontWeight& value)
+void MenuItemPattern::SetFontWeight(const std::optional<FontWeight>& value)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
-    props->UpdateFontWeight(value);
+    if (value) {
+        props->UpdateFontWeight(value.value());
+    } else {
+        props->ResetFontWeight();
+    }
 }
 
 void MenuItemPattern::SetFontFamily(const std::vector<std::string>& value)
@@ -1817,13 +1836,17 @@ void MenuItemPattern::SetFontFamily(const std::vector<std::string>& value)
     props->UpdateFontFamily(value);
 }
 
-void MenuItemPattern::SetItalicFontStyle(const Ace::FontStyle& value)
+void MenuItemPattern::SetItalicFontStyle(const std::optional<Ace::FontStyle>& value)
 {
     CHECK_NULL_VOID(text_);
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(props);
     text_->MarkModifyDone();
-    props->UpdateItalicFontStyle(value);
+    if (value) {
+        props->UpdateItalicFontStyle(value.value());
+    } else {
+        props->ResetItalicFontStyle();
+    }
 }
 
 void MenuItemPattern::UpdateIconSrc()
