@@ -1001,6 +1001,7 @@ private:
     void EncodeTlvFontStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvTextLineStyleNoChild(std::vector<uint8_t>& buff);
     void EncodeTlvSpanItems(const std::string& pasteData, std::vector<uint8_t>& buff);
+    void UpdateMarqueeStartPolicy();
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
