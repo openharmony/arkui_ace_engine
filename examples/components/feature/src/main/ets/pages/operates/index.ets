@@ -27,6 +27,7 @@ import { ActionMenuBootcamp } from './ActionMenuBootcamp';
 import { DialogBootcamp } from './DialogBootcamp';
 import { ActionDialogBootcamp } from './ActionDialogBootcamp';
 import { CustomDialogBootcamp } from './CustomDialogBootcamp';
+import { AlertDialogBootcamp } from './AlertDialogBootcamp';
 
 export const operatesRoute: RouteGroup = {
   name: 'operates',
