@@ -56,6 +56,15 @@ public:
         isEntry_ = isEntry;
     }
 
+    virtual void UpdateNavPathInfo(const RefPtr<NG::NavPathInfo>& info)
+    {
+        if (!info) {
+            return;
+        }
+        name_ = info->GetName();
+        isEntry_ = info->GetIsEntry();
+    }
+
 protected:
     std::string name_;
     bool isEntry_ = false;
