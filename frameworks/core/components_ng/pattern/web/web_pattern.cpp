@@ -3378,6 +3378,7 @@ void WebPattern::InitInOfflineMode()
     if (offlineWebInited_) {
         return;
     }
+    ACE_SCOPED_TRACE("WebPattern::InitInOfflineMode");
     TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type, webId:%{public}d", GetWebId());
     delegate_->OnRenderToBackground();
     offlineWebInited_ = true;
