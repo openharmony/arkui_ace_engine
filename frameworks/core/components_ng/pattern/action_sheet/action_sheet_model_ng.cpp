@@ -17,6 +17,7 @@
 #endif
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -31,6 +32,12 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+    if (arg.dialogLevelMode == LevelMode::EMBEDDED) {
+        auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(arg.dialogLevelUniqueId, context);
+        if (embeddedOverlay) {
+            overlayManager = embeddedOverlay;
+        }
+    }
     RefPtr<NG::FrameNode> dialog;
     if (arg.isShowInSubWindow) {
         dialog = SubwindowManager::GetInstance()->ShowDialogNG(arg, nullptr);

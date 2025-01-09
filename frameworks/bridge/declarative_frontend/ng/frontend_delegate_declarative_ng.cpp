@@ -18,6 +18,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "frameworks/core/common/ace_engine.h"
 
@@ -721,6 +722,9 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode,
         .maskRect = dialogAttr.maskRect,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
@@ -783,7 +787,10 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .onDidAppear = dialogAttr.onDidAppear, .onDidDisappear = dialogAttr.onDidDisappear,
         .onWillAppear = dialogAttr.onWillAppear, .onWillDisappear = dialogAttr.onWillDisappear,
         .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback,
-        .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance
+        .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -828,7 +835,12 @@ void FrontendDelegateDeclarativeNG::OpenCustomDialog(const PromptDialogAttr &dia
                 overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
             }
         };
-        MainWindowOverlay(std::move(task), "ArkUIOverlayOpenCustomDialog");
+        if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+            NG::DialogManager::ShowInEmbeddedOverlay(
+                std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
+        } else {
+            MainWindowOverlay(std::move(task), "ArkUIOverlayOpenCustomDialog");
+        }
         return;
     } else {
         TAG_LOGW(AceLogTag::ACE_OVERLAY, "not support old pipeline");
@@ -1138,7 +1150,12 @@ void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProp
             CHECK_NULL_VOID(dialog);
         }
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog");
+    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+        NG::DialogManager::ShowInEmbeddedOverlay(
+            std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
+    } else {
+        MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog");
+    }
     return;
 }
 

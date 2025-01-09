@@ -281,6 +281,7 @@ build_component_ng("pattern_ng") {
     "node_container/node_container_model_ng.cpp",
     "node_container/node_container_node.cpp",
     "node_container/node_container_pattern.cpp",
+    "overlay/dialog_manager.cpp",
     "overlay/group_manager.cpp",
     "overlay/keyboard_base_pattern.cpp",
     "overlay/modal_presentation_pattern.cpp",

@@ -2389,6 +2389,8 @@ frameworks/core/components_ng/pattern/navrouter/ @arkui_superman
 frameworks/core/components_ng/pattern/node_container/ @arkuiframework
 frameworks/core/components_ng/pattern/option/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/overlay/content_cover_param.h @arkui_superman
+frameworks/core/components_ng/pattern/overlay/dialog_manager.cpp @arkuipopupwindow
+frameworks/core/components_ng/pattern/overlay/dialog_manager.h @arkuipopupwindow
 frameworks/core/components_ng/pattern/overlay/group_manager.cpp @arkuipopupwindow
 frameworks/core/components_ng/pattern/overlay/group_manager.h @arkuipopupwindow
 frameworks/core/components_ng/pattern/overlay/keyboard_base_pattern.cpp @huawei_g_five
