@@ -245,6 +245,7 @@ private:
     float touchDuration_ = 0.0f;
     float colorAnimationDuration_ = 0.0f;
     bool hasUnselectedColor_ = false;
+    bool showCircleDial_ = false;
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
