@@ -389,6 +389,16 @@ void DynamicComponentRendererImpl::UnRegisterConfigChangedCallback()
 
 void DynamicComponentRendererImpl::AttachRenderContext()
 {
+    if (uIContentType_ == UIContentType::DYNAMIC_COMPONENT) {
+        AttachRenderContextInDynamicComponent();
+        return;
+    }
+
+    AttachRenderContextInIsolatedComponent();
+}
+
+void DynamicComponentRendererImpl::AttachRenderContextInIsolatedComponent()
+{
     auto taskExecutor = GetHostTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask([weak = host_, hostInstanceId = hostInstanceId_,
@@ -428,6 +438,43 @@ void DynamicComponentRendererImpl::AttachRenderContext()
             parent->MarkNeedSyncRenderTree();
             parent->RebuildRenderContextTree();
             hostRenderContext->RequestNextFrame();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIIsolatedComponentAttachRenderContext");
+}
+
+void DynamicComponentRendererImpl::AttachRenderContextInDynamicComponent()
+{
+    auto taskExecutor = GetHostTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask([weak = host_, hostInstanceId = hostInstanceId_,
+        instanceId = uiContent_->GetInstanceId(), aceLogTag = aceLogTag_,
+        backgroundTransparent = GetBackgroundTransparent()]() {
+            ContainerScope scope(hostInstanceId);
+            auto host = weak.Upgrade();
+            CHECK_NULL_VOID(host);
+            auto surfaceProxyNode = AceType::DynamicCast<NG::SurfaceProxyNode>(host->GetPattern());
+            CHECK_NULL_VOID(surfaceProxyNode);
+            auto container = Platform::AceContainer::GetContainer(instanceId);
+            CHECK_NULL_VOID(container);
+            auto surfaceNode = container->GetFormSurfaceNode(instanceId);
+            CHECK_NULL_VOID(surfaceNode);
+
+            auto pipeline = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipeline);
+            auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipeline);
+            CHECK_NULL_VOID(pipelineContext);
+            auto rootElement = pipelineContext->GetRootElement();
+            CHECK_NULL_VOID(rootElement);
+            auto renderContext = rootElement->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            if (backgroundTransparent) {
+                pipeline->SetAppBgColor(Color::TRANSPARENT);
+            }
+            renderContext->SetClipToFrame(true);
+            renderContext->SetClipToBounds(true);
+            surfaceProxyNode->AddSurfaceNode(surfaceNode);
+            TAG_LOGI(aceLogTag, "add render context of dynamic component for '%{public}d'",
+                instanceId);
         },
         TaskExecutor::TaskType::UI, "ArkUIDynamicComponentAttachRenderContext");
 }

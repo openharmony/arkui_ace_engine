@@ -90,6 +90,8 @@ private:
         const std::shared_ptr<Framework::JsValue>& jsContext);
 
     void AttachRenderContext();
+    void AttachRenderContextInIsolatedComponent();
+    void AttachRenderContextInDynamicComponent();
     void RegisterSizeChangedCallback();
     void RegisterConfigChangedCallback();
     void UnRegisterConfigChangedCallback();
