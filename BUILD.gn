@@ -64,13 +64,11 @@ config("ace_config") {
     "-Werror=unknown-warning-option",
     "-Werror=abstract-final-class",
     "-Werror=range-loop-construct",
-    "-Werror=dangling-gsl",
+    "-Werror=incompatible-pointer-types",
   ]
 
   if (is_arkui_x) {
-    cflags -= [
-      "-Werror=deprecated-copy",
-    ]
+    cflags -= [ "-Werror=deprecated-copy" ]
   }
 
   if (is_ohos && is_clang && (target_cpu == "arm" || target_cpu == "arm64") &&
