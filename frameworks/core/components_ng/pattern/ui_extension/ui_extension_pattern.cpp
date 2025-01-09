@@ -395,9 +395,10 @@ void UIExtensionPattern::OnConnect()
         return;
     }
     context->SetRSNode(surfaceNode);
-    RemovePlaceholderNode();
-    host->AddChild(contentNode_, 0);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (curPlaceholderType_ != PlaceholderType::INITIAL) {
+        host->AddChild(contentNode_, 0);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
     surfaceNode->CreateNodeInRenderThread();
     surfaceNode->SetForeground(usage_ == UIExtensionUsage::MODAL);
     FireOnRemoteReadyCallback();
@@ -1768,6 +1769,7 @@ void UIExtensionPattern::SetOnDrawReadyCallback(const std::function<void()>&& ca
 
 void UIExtensionPattern::FireOnDrawReadyCallback()
 {
+    ReplacePlaceholderByContent();
     if (onDrawReadyCallback_) {
         onDrawReadyCallback_();
     }

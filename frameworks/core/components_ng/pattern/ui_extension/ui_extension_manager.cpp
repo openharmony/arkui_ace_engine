@@ -279,6 +279,14 @@ bool UIExtensionManager::IsShowPlaceholder(int32_t nodeId)
             return uiExtension->IsShowPlaceholder();
         }
     }
+
+    auto itSec = aliveSecurityUIExtensions_.find(nodeId);
+    if (itSec != aliveSecurityUIExtensions_.end()) {
+        auto secExtension = itSec->second.Upgrade();
+        if (secExtension) {
+            return secExtension->IsShowPlaceholder();
+        }
+    }
     return true;
 }
 

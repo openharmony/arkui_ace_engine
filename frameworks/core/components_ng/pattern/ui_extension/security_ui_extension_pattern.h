@@ -44,6 +44,11 @@ public:
         placeholderNode_ = placeholderNode;
     }
 
+    bool IsShowPlaceholder()
+    {
+        return isShowPlaceholder_;
+    }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<UIExtensionHub>();
