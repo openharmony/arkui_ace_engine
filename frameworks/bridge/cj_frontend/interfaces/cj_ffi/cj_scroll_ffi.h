@@ -16,11 +16,12 @@
 #ifndef OHOS_ACE_FRAMEWORK_CJ_SCROLL_FFI_H
 #define OHOS_ACE_FRAMEWORK_CJ_SCROLL_FFI_H
 
+#include "ffi_remote_data.h"
+
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
-#include "ffi_remote_data.h"
 
 using VectorInt32Ptr = void*;
 using VectorFloat32Ptr = void*;

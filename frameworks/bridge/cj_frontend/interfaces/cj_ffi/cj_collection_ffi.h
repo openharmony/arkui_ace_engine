@@ -17,14 +17,14 @@
 #define OHOS_ACE_FRAMEWORK_FFI_CJ_COLLECTION_H
 
 #include <cstdint>
-#include <string>
 #include <functional>
+#include <string>
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 
 extern "C" struct NavigationItemFFI {
-    const char *value;
-    const char *icon;
+    const char* value;
+    const char* icon;
     int64_t builder;
 };
 
@@ -37,7 +37,7 @@ struct NavigationItem {
     explicit NavigationItem(const NavigationItemFFI& source);
     NavigationItemFFI ToFFI()
     {
-        return NavigationItemFFI {.value = value.c_str(), .icon = icon.c_str(), .builder = builderFFI};
+        return NavigationItemFFI { .value = value.c_str(), .icon = icon.c_str(), .builder = builderFFI };
     }
 };
 
@@ -86,10 +86,9 @@ CJ_EXPORT double FFICJCommonVectorFloat64GetElement(VectorFloat64Handle vec, int
 CJ_EXPORT void FFICJCommonVectorBoolSetElement(VectorBoolHandle vec, int64_t index, bool value);
 CJ_EXPORT bool FFICJCommonVectorBoolGetElement(VectorBoolHandle vec, int64_t index);
 
-CJ_EXPORT void FFICJCommonVectorNavigationItemSetElement(VectorNavigationItemHandle vec, int64_t index,
-                                                         NavigationItemFFI value);
-CJ_EXPORT NavigationItemFFI
-FFICJCommonVectorNavigationItemGetElement(VectorNavigationItemHandle vec, int64_t index);
+CJ_EXPORT void FFICJCommonVectorNavigationItemSetElement(
+    VectorNavigationItemHandle vec, int64_t index, NavigationItemFFI value);
+CJ_EXPORT NavigationItemFFI FFICJCommonVectorNavigationItemGetElement(VectorNavigationItemHandle vec, int64_t index);
 };
 
 #endif // OHOS_ACE_FRAMEWORK_FFI_CJ_COLLECTION_H
