@@ -139,12 +139,14 @@ void BoxLayoutAlgorithm::PerformMeasureSelfWithChildList(
 // Called to perform measure current render node.
 void BoxLayoutAlgorithm::PerformMeasureSelf(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     PerformMeasureSelfWithChildList(layoutWrapper, layoutWrapper->GetAllChildrenWithBuild());
 }
 
 // Called to perform layout render node and child.
 void BoxLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
 {
+    CHECK_NULL_VOID(layoutWrapper);
     // update child position.
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
