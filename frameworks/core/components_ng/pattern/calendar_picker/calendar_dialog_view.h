@@ -120,7 +120,7 @@ private:
         const RefPtr<FrameNode>& weekNode);
     static constexpr double deviceHeightLimit = 640.0;
     static void UpdateTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
-        RefPtr<CalendarTheme>& theme)
+        RefPtr<CalendarTheme>& theme);
     static DeviceOrientation previousOrientation_;
 };
 } // namespace OHOS::Ace::NG
