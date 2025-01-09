@@ -40,12 +40,14 @@ enum class CrownAction : int32_t {
 };
 
 struct CrownEvent final : public NonPointerEvent {
+    std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     CrownAction action = CrownAction::UNKNOWN;
     TimeStamp timeStamp;
     double angularVelocity = 0.0;
     double degree = 0.0;
     int32_t touchEventId = 0;
     bool isInjected = false;
+
     CrownEvent()
     {
         eventType = UIInputEventType::CROWN;
@@ -73,6 +75,16 @@ struct CrownEvent final : public NonPointerEvent {
     void SetAction(CrownAction crownAction)
     {
         action = crownAction;
+    }
+
+    void SetPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+    {
+        pointerEvent_ = pointerEvent;
+    }
+
+    const std::shared_ptr<MMI::PointerEvent>& GetPointerEvent() const
+    {
+        return pointerEvent_;
     }
 };
 

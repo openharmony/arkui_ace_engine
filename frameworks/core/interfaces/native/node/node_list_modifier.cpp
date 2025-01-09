@@ -592,14 +592,14 @@ void SetListFlingSpeedLimit(ArkUINodeHandle node, ArkUI_Float32 maxSpeed)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetFlingSpeedLimit(frameNode, maxSpeed);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, maxSpeed);
 }
 
 void ResetListFlingSpeedLimit(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetFlingSpeedLimit(frameNode, -1.0);
+    ScrollableModelNG::SetMaxFlingSpeed(frameNode, -1.0);
 }
 
 ArkUI_Int32 GetInitialIndex(ArkUINodeHandle node)
@@ -694,7 +694,7 @@ ArkUI_Bool GetShowCached(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIListModifier* GetListModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIListModifier modifier = {
         .setListLanes = SetListLanes,
         .resetListLanes = ResetListLanes,
@@ -760,8 +760,6 @@ const ArkUIListModifier* GetListModifier()
         .setListChildrenMainSize = SetListChildrenMainSize,
         .resetListChildrenMainSize = ResetListChildrenMainSize,
         .setListCloseAllSwipeActions = SetListCloseAllSwipeActions,
-        .setListFlingSpeedLimit = SetListFlingSpeedLimit,
-        .resetListFlingSpeedLimit = ResetListFlingSpeedLimit,
         .getInitialIndex = GetInitialIndex,
         .getlistDivider = GetlistDivider,
         .setInitialScroller = SetInitialScroller,
@@ -804,20 +802,13 @@ const ArkUIListModifier* GetListModifier()
         .resetOnListReachStart = ResetOnListReachStart,
         .resetOnListReachEnd = ResetOnListReachEnd,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIListModifier* GetCJUIListModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIListModifier modifier = {
         .setListLanes = SetListLanes,
         .resetListLanes = ResetListLanes,
@@ -888,14 +879,7 @@ const CJUIListModifier* GetCJUIListModifier()
         .getInitialIndex = GetInitialIndex,
         .getlistDivider = GetlistDivider,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 

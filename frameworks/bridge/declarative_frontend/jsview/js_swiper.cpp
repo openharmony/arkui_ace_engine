@@ -230,9 +230,23 @@ void JSSwiper::SetIndicatorInteractive(const JSCallbackInfo& info)
     }
 }
 
-void JSSwiper::SetAutoPlay(bool autoPlay)
+void JSSwiper::SetAutoPlay(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    bool autoPlay = false;
+    if (info[0]->IsBoolean()) {
+        autoPlay = info[0]->ToBoolean();
+    }
     SwiperModel::GetInstance()->SetAutoPlay(autoPlay);
+    SwiperAutoPlayOptions swiperAutoPlayOptions;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[1]);
+        GetAutoPlayOptionsInfo(obj, swiperAutoPlayOptions);
+    }
+
+    SwiperModel::GetInstance()->SetAutoPlayOptions(swiperAutoPlayOptions);
 }
 
 void JSSwiper::SetEnabled(const JSCallbackInfo& info)
@@ -1402,5 +1416,13 @@ void JSSwiper::SetPageFlipMode(const JSCallbackInfo& info)
     }
     JSViewAbstract::ParseJsInt32(info[0], value);
     SwiperModel::GetInstance()->SetPageFlipMode(value);
+}
+
+void JSSwiper::GetAutoPlayOptionsInfo(const JSRef<JSObject>& obj, SwiperAutoPlayOptions& swiperAutoPlayOptions)
+{
+    auto stopWhenTouched = obj->GetProperty("stopWhenTouched");
+    if (stopWhenTouched->IsBoolean()) {
+        swiperAutoPlayOptions.stopWhenTouched = stopWhenTouched->ToBoolean();
+    }
 }
 } // namespace OHOS::Ace::Framework

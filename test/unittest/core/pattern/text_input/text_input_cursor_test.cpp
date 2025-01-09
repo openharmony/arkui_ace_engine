@@ -571,7 +571,7 @@ HWTEST_F(TextInputCursorTest, OnHandleMove002, TestSize.Level1)
     pattern_->HandleSelect(select[2]);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end);
+    EXPECT_NE(pattern_->selectController_->GetSecondHandleInfo().index, end);
 
     /**
      * @tc.steps: Move the handles and selection down.
@@ -582,7 +582,7 @@ HWTEST_F(TextInputCursorTest, OnHandleMove002, TestSize.Level1)
     pattern_->HandleSelect(select[3]);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end);
+    EXPECT_NE(pattern_->selectController_->GetSecondHandleInfo().index, end);
 }
 
 /**

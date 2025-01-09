@@ -1429,12 +1429,14 @@ class ArkDragPreviewOptions {
   numberBadge: boolean | number | undefined;
   isMultiSelectionEnabled: boolean | undefined;
   defaultAnimationBeforeLifting: boolean | undefined;
+  enableEdgeAutoScroll: boolean | undefined;
 
   constructor() {
     this.mode = undefined;
     this.numberBadge = undefined;
     this.isMultiSelectionEnabled = undefined;
     this.defaultAnimationBeforeLifting = undefined;
+    this.enableEdgeAutoScroll = undefined;
   }
 
   isEqual(another: ArkDragPreviewOptions): boolean {
@@ -1442,7 +1444,8 @@ class ArkDragPreviewOptions {
       this.mode === another.mode &&
       this.numberBadge === another.numberBadge &&
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
-      this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting
+      this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting && 
+      this.enableEdgeAutoScroll === another.enableEdgeAutoScroll
     );
   }
 }
@@ -1584,5 +1587,19 @@ class ArkNavHideTitleBarOrToolBar {
   }
   isEqual(another: ArkNavHideTitleBarOrToolBar): boolean {
     return (this.isHide === another.isHide) && (this.animated === another.animated);
+  }
+}
+
+class ArkAutoPlay {
+  autoPlay: boolean;
+  needStopWhenTouched: boolean;
+
+  constructor() {
+    this.autoPlay = undefined;
+    this.needStopWhenTouched = undefined;
+  }
+
+  isEqual(another: ArkAutoPlay): boolean {
+    return this.autoPlay === another.autoPlay && this.needStopWhenTouched === another.needStopWhenTouched;
   }
 }

@@ -387,35 +387,6 @@ ArkUINativeModuleValue ScrollBridge::ResetInitialOffset(ArkUIRuntimeCallInfo* ru
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue ScrollBridge::SetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> flingSpeedLimitArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
-    double max = -1.0;
-    if (!ArkTSUtils::ParseJsDouble(vm, flingSpeedLimitArg, max)) {
-        GetArkUINodeModifiers()->getScrollModifier()->resetScrollFlingSpeedLimit(nativeNode);
-    } else {
-        GetArkUINodeModifiers()->getScrollModifier()->setScrollFlingSpeedLimit(nativeNode,
-            static_cast<ArkUI_Float32>(max));
-    }
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue ScrollBridge::ResetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nativeNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    CHECK_NULL_RETURN(nativeNodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nativeNodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getScrollModifier()->resetScrollFlingSpeedLimit(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
 ArkUINativeModuleValue ScrollBridge::SetScrollInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

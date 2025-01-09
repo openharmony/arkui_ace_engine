@@ -332,36 +332,36 @@ bool TextLayoutElement::GetCurrentTextSize(std::optional<SizeF>& currentTextSize
 bool TextLayoutElement::TryShrinkTextWidth(SizeF& point, SizeF& circlePoint, bool maxSpaceToShrink, float maxDistance,
     float threshold)
 {
+#ifdef ENABLE_ROSEN_BACKEND
     auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
     CHECK_NULL_RETURN(textProp, false);
 
     auto stepPx = Dimension(1.0, DimensionUnit::VP).ConvertToPx();
-    auto tempHeight = height_;
+    auto currentHeight = height_;
     auto tempWidth = width_;
     auto currentRectWidth = point.Width();
-    while (NearEqual(tempHeight, height_)) {
+    while (NearEqual(currentHeight, height_)) {
         if (LessOrEqual(tempWidth, threshold)) {
+            MeasureForWidth(tempWidth + stepPx);
             return false;
         }
-        tempWidth -= stepPx;
+        auto newWidth = tempWidth - stepPx;
         currentRectWidth -= stepPx;
-        auto tempSize = GetMeasureTextSize(UtfUtils::Str16ToStr8(textProp->GetContent().value()),
-            textProp->GetFontSize().value(), textProp->GetFontWeight().value_or(FontWeight::NORMAL), tempWidth);
-        if (!tempSize.has_value()) {
-            return false;
-        }
-        tempHeight = tempSize.value().Height();
-        if (!NearEqual(tempHeight, height_)) {
+        MeasureForWidth(newWidth);
+        if (!NearEqual(currentHeight, height_)) {
+            MeasureForWidth(tempWidth);
             return false;
         }
         auto distance = pow(currentRectWidth - circlePoint.Width()) + pow(point.Height() - circlePoint.Height());
+        tempWidth = newWidth;
         if (!GreatNotEqual(distance, maxDistance)) {
             break;
         }
     }
-
-    MeasureForWidth(tempWidth);
     return true;
+#else
+    return false;
+#endif
 }
 
 std::optional<SizeF> TextLayoutElement::GetMeasureTextSize(const std::string& data,

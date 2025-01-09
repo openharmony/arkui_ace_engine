@@ -19,6 +19,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -57,6 +58,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(dialogPattern);
     expandDisplay_ = dialogTheme->GetExpandDisplay() || dialogPattern->IsShowInFreeMultiWindow();
     keyboardAvoidMode_ = dialogPattern->GetDialogProperties().keyboardAvoidMode;
+    keyboardAvoidDistance_ = dialogPattern->GetDialogProperties().keyboardAvoidDistance;
     isUIExtensionSubWindow_ = dialogPattern->IsUIExtensionSubWindow();
     hostWindowRect_ = dialogPattern->GetHostWindowRect();
     customSize_ = dialogProp->GetUseCustomStyle().value_or(false);
@@ -85,7 +87,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (isSuitableForElderly_ || GreatOrEqual(dialogContext->GetFontScale(), 1.75f)) {
         dialogPattern->UpdateDeviceOrientation(SystemProperties::GetDeviceOrientation());
     }
-    UpdateSafeArea();
+    UpdateSafeArea(hostNode);
     isShowInFloatingWindow_ = dialogPattern->IsShowInFloatingWindow();
     ResizeDialogSubwindow(expandDisplay_, isShowInSubWindow_, isShowInFloatingWindow_);
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
@@ -865,7 +867,11 @@ double DialogLayoutAlgorithm::GetPaddingBottom() const
     auto dialogTheme = pipelineContext->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, 0);
     auto bottom = dialogTheme->GetDefaultDialogMarginBottom();
-    return pipelineContext->NormalizeToPx(bottom);
+    if (keyboardAvoidDistance_.has_value()) {
+        return pipelineContext->NormalizeToPx(keyboardAvoidDistance_.value());
+    } else {
+        return pipelineContext->NormalizeToPx(bottom);
+    }
 }
 
 OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
@@ -897,14 +903,18 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE) && childOffset.GetY() < limitPos) {
             resizeFlag_ = true;
             dialogChildSize_ = childSize;
-            dialogChildSize_.MinusHeight(limitPos - childOffset.GetY());
+            if (limitPos - childOffset.GetY() > dialogChildSize_.Height()) {
+                dialogChildSize_.MinusHeight(dialogChildSize_.Height());
+            } else {
+                dialogChildSize_.MinusHeight(limitPos - childOffset.GetY());
+            }
             childOffset.SetY(limitPos);
         }
     }
     return childOffset;
 }
 
-void DialogLayoutAlgorithm::UpdateSafeArea()
+void DialogLayoutAlgorithm::UpdateSafeArea(const RefPtr<FrameNode>& frameNode)
 {
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
@@ -915,11 +925,7 @@ void DialogLayoutAlgorithm::UpdateSafeArea()
         CHECK_NULL_VOID(container);
         ContainerScope scope(currentId);
     }
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    CHECK_NULL_VOID(context);
-    safeAreaInsets_ = context->GetSafeAreaWithoutProcess();
+    safeAreaInsets_ = OverlayManager::GetSafeAreaInsets(frameNode);
     if (isHoverMode_) {
         auto displayInfo = container->GetDisplayInfo();
         CHECK_NULL_VOID(displayInfo);

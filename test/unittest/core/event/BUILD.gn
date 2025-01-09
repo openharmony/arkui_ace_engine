@@ -20,6 +20,7 @@ ace_unittest("event_manager_test_ng") {
     "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
     "$ace_root/test/mock/core/common/mock_window.cpp",
     "event_dump_test_ng.cpp",
+    "event_manager_dispatch_mouse_hover_event_ng.cpp",
     "event_manager_test_ng.cpp",
     "event_manager_test_ng_issuse.cpp",
     "event_manager_test_ng_new.cpp",
@@ -61,6 +62,9 @@ ace_unittest("focus_hub_test_ng") {
   type = "new"
   module_output = "events"
   sources = [
+    "focus_core/focus_api_test.cpp",
+    "focus_core/focus_test_base.cpp",
+    "focus_core/focus_window_test.cpp",
     "focus_hub_test_ng.cpp",
     "focus_hub_test_ng_branch_coverage.cpp",
     "focus_hub_test_ng_for_property_config.cpp",

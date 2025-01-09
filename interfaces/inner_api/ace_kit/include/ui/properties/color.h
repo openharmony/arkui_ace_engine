@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include "ui/base/macros.h"
 
@@ -145,6 +146,9 @@ public:
 
     static Color ColorFromString(const std::string& str);
     static bool MatchColorHexString(const std::string& colorStr);
+    static bool MatchColorWithMagic(std::string& colorStr, uint32_t maskAlpha, Color& color);
+    static bool MatchColorWithMagicMini(std::string& colorStr, uint32_t maskAlpha, Color& color);
+    static bool MatchColorSpecialString(const std::string& colorStr, Color& color);
 
     std::string ToString() const;
 
@@ -156,11 +160,8 @@ private:
         const Color& gammaColor, double& linearRed, double& linearGreen, double& linearBlue);
     static uint8_t ConvertLinearToGamma(double value);
     static Color ConvertLinearToGamma(double alpha, double linearRed, double linearGreen, double linearBlue);
-    static bool MatchColorWithMagic(std::string& colorStr, uint32_t maskAlpha, Color& color);
-    static bool MatchColorWithMagicMini(std::string& colorStr, uint32_t maskAlpha, Color& color);
     static bool MatchColorWithRGB(const std::string& colorStr, Color& color);
     static bool MatchColorWithRGBA(const std::string& colorStr, Color& color);
-    static bool MatchColorSpecialString(const std::string& colorStr, Color& color);
     static bool ParseUintColorString(const std::string& colorStr, Color& color);
     static bool ParseUintColorString(const std::string& colorStr, Color& color, const Color& defaultColor);
     static bool IsRGBValid(int value);

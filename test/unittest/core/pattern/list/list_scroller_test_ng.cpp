@@ -254,10 +254,41 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex005, TestSize.Level1)
 
 /**
  * @tc.name: ScrollToIndex006
- * @tc.desc: Test ScrollToIndex with update estimate offset
+ * @tc.desc: Test whether the extraOffset has been reset normally.
  * @tc.type: FUNC
  */
 HWTEST_F(ListScrollerTestNg, ScrollToIndex006, TestSize.Level1)
+{
+    /**
+     * @tc.cases: ScrollToIndex with animation
+     * @tc.expected: GetFinalPosition is right
+     */
+    CreateList();
+    CreateListItems(20);
+    CreateDone();
+    ASSERT_NE(pattern_, nullptr);
+    std::optional<float> extraOffset = -200.0f;
+
+    /**
+     * @tc.steps: step2. scroll to the outside item.
+     * @tc.expected: The extraOffset_ of List will be reset.
+     */
+    ScrollToIndex(-1, true, ScrollAlign::START, extraOffset);
+    EXPECT_TRUE(TickPosition(0));
+    EXPECT_FALSE(pattern_->extraOffset_.has_value());
+    
+    ScrollToIndex(18, true, ScrollAlign::START, extraOffset);
+    EXPECT_TRUE(TickPosition(-1600.0f));
+    ScrollToIndex(20, true, ScrollAlign::START, extraOffset);
+    EXPECT_FALSE(pattern_->extraOffset_.has_value());
+}
+
+/**
+ * @tc.name: ScrollToIndex007
+ * @tc.desc: Test ScrollToIndex with update estimate offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, ScrollToIndex007, TestSize.Level1)
 {
     /**
      * @tc.cases: Test ScrollToIndex with update estimate offset
@@ -294,11 +325,11 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex006, TestSize.Level1)
 }
 
 /**
- * @tc.name: ScrollToIndex007
+ * @tc.name: ScrollToIndex008
  * @tc.desc: Test ScrollTo top with update estimate offset
  * @tc.type: FUNC
  */
-HWTEST_F(ListScrollerTestNg, ScrollToIndex007, TestSize.Level1)
+HWTEST_F(ListScrollerTestNg, ScrollToIndex008, TestSize.Level1)
 {
     /**
      * @tc.cases: Test ScrollTo top with update estimate offset

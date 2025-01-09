@@ -132,6 +132,12 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
     }
     pattern->StopContentScroll();
     RemoveAvoidKeyboardCallback();
+    if (pattern->GetFloatingCursorVisible()) {
+        pattern->SetFloatingCursorVisible(false);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
@@ -361,7 +367,7 @@ std::string TextFieldSelectOverlay::GetSelectedText()
     CHECK_NULL_RETURN(textSelectController, "");
     auto start = textSelectController->GetStartIndex();
     auto end = textSelectController->GetEndIndex();
-    return UtfUtils::Str16ToStr8(pattern->GetTextContentController()->GetSelectedValue(start, end));
+    return UtfUtils::Str16DebugToStr8(pattern->GetTextContentController()->GetSelectedValue(start, end));
 }
 
 void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type)
@@ -680,5 +686,12 @@ bool TextFieldSelectOverlay::AllowSearch()
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, false);
     return pattern->AllowCopy();
+}
+
+bool TextFieldSelectOverlay::IsStopBackPress() const
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    return pattern->IsStopBackPress();
 }
 } // namespace OHOS::Ace::NG

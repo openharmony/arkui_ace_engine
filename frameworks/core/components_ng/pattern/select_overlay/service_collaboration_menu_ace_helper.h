@@ -38,7 +38,8 @@ class ACE_FORCE_EXPORT ServiceCollaborationMenuAceHelper : public virtual AceTyp
 public:
     void CreateText(const std::string& value, const RefPtr<FrameNode>& parent, const Color& color,
         bool needMargin, bool hasEndIncon);
-    void CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& parent);
+    void CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& row,
+        const RefPtr<FrameNode>& menuItemGroupNode);
     void CreateEndIcon(uint32_t iconId, const RefPtr<FrameNode>& parent);
     void CreateStartIcon(uint32_t iconId, const RefPtr<FrameNode>& parent);
     uint32_t GetSymbolId(const std::string& abilityType);
@@ -50,7 +51,8 @@ public:
     void RemoveSubmenu(const RefPtr<FrameNode>& menuWrapper);
     void SubMenuDown(const RefPtr<FrameNode>& menuWrapper);
     RefPtr<FrameNode> CreateMenuItemGroupNode(uint32_t index, const std::string& deviceName);
-    RefPtr<FrameNode> CreateSubDeviceMenuOnCol(const RefPtr<FrameNode>& column, const RefPtr<FrameNode>& menuWrapper);
+    RefPtr<FrameNode> CreateMenuNode();
+    RefPtr<FrameNode> CreateSubDeviceOutMenu(const RefPtr<FrameNode>& column, const RefPtr<FrameNode>& menuWrapper);
     void SubMeunMountToMainMenu(const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
         std::function<RefPtr<FrameNode>(void)> subDeviceMenuCreator);
     void AddHoverEventToMainMenu(const RefPtr<FrameNode>& menuNode, const RefPtr<FrameNode>& menuWrapper,
@@ -67,7 +69,7 @@ private:
     static constexpr int32_t TEXT_RIGHT_MARGIN = 8;
     static constexpr int32_t TEXT_RIGHT_MARGIN_NO_ENDICON = 12;
     static constexpr int32_t TEXT_LEFT_MARGIN = 0;
-    static constexpr int32_t HEADER_MIN_WIDTH = 224;
+    static constexpr int32_t HEADER_MIN_WIDTH = 64;
     static constexpr int32_t HEADER_MIN_HEIGHT = 24;
     static constexpr int32_t HEADER_MARGIN_TOP = 26;
     static constexpr int32_t HEADER_MARGIN_BOTTOM = 16;
@@ -81,10 +83,11 @@ private:
     static constexpr int32_t MENUITEM_HEIGHT = 60;
     static constexpr int32_t MENUITEM_MARGIN = 2;
     static constexpr int32_t ROW_PADDING = 2;
-    static constexpr int32_t GROUP_MIN_WIDTH = 224;
-    static constexpr int32_t GROUP_MARGIN = 16;
+    static constexpr int32_t GROUP_MIN_WIDTH = 64;
+    static constexpr int32_t GROUP_MARGIN = 12;
     static constexpr int32_t MAIN_MENUGROUP_INDEX = 5;
     static constexpr int32_t SUB_MENU_ID = -2;
+    static constexpr int32_t INNER_MENU_ID = -3;
     static constexpr uint32_t ENDICON_COLOR = 0x33000000;
     static constexpr uint32_t BORDER_COLOR = 0x33000000;
     static constexpr uint32_t HEADER_COLOR = 0x99000000;
@@ -92,6 +95,7 @@ private:
     static constexpr uint32_t INDEX_TWO = 2;
     static constexpr uint32_t INDEX_THREE = 3;
     static constexpr uint32_t HEADER_TEXT_MAX_LINE = 2;
+    static constexpr int32_t HEADER_TEXT_FONT_SIZE = 14;
     static constexpr char SUN_MENU_TAG[33] = "SelectOverlayMenuByRightClickSub";
 };
 

@@ -256,7 +256,7 @@ std::string TextSelectOverlay::GetSelectedText()
     CHECK_NULL_RETURN(textPattern, "");
     auto start = textPattern->GetTextSelector().GetTextStart();
     auto end = textPattern->GetTextSelector().GetTextEnd();
-    return UtfUtils::Str16ToStr8(textPattern->GetSelectedText(start, end));
+    return UtfUtils::Str16DebugToStr8(textPattern->GetSelectedText(start, end));
 }
 
 RectF TextSelectOverlay::GetSelectArea()
@@ -488,14 +488,23 @@ void TextSelectOverlay::UpdateClipHandleViewPort(RectF& rect)
         RectF visibleRect;
         RectF frameRect;
         clipNode->GetVisibleRect(visibleRect, frameRect);
+        if (GreatNotEqual(rect.Top(), visibleRect.Bottom()) || GreatNotEqual(rect.Left(), visibleRect.Right())) {
+            return;
+        }
         rect.SetHeight(visibleRect.Bottom() - rect.Top());
+        rect.SetWidth(visibleRect.Right() - rect.Left());
         return;
     }
     // root node.
     if (prevNode) {
         auto geoNode = prevNode->GetGeometryNode();
         CHECK_NULL_VOID(geoNode);
-        rect.SetHeight(geoNode->GetFrameRect().Height() - rect.Top());
+        RectF visibleRect = geoNode->GetFrameRect();
+        if (GreatNotEqual(rect.Top(), visibleRect.Height()) || GreatNotEqual(rect.Left(), visibleRect.Width())) {
+            return;
+        }
+        rect.SetHeight(visibleRect.Height() - rect.Top());
+        rect.SetWidth(visibleRect.Width() - rect.Left());
     }
 }
 

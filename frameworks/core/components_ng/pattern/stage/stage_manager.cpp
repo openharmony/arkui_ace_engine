@@ -41,7 +41,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(pagePattern);
     auto eventHub = page->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         if (transitionType == PageTransitionType::EXIT_POP) {
             eventHub->SetEnabled(false);
         }
@@ -680,7 +680,7 @@ std::string StageManager::GetSrcPageInfo(const RefPtr<FrameNode>& srcPage)
 bool StageManager::CheckPageInTransition(const RefPtr<UINode>& pageNode)
 {
     auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
-    CHECK_NULL_RETURN(pageNode, false);
+    CHECK_NULL_RETURN(frameNode, false);
     auto pagePattern = frameNode->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     return pagePattern->GetPageInTransition();

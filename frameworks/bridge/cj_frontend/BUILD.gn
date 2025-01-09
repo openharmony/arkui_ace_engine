@@ -138,7 +138,6 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_polygon_ffi.cpp",
       "interfaces/cj_ffi/cj_polyline_ffi.cpp",
       "interfaces/cj_ffi/cj_progress_ffi.cpp",
-      "interfaces/cj_ffi/cj_qrcode_ffi.cpp",
       "interfaces/cj_ffi/cj_radio_ffi.cpp",
       "interfaces/cj_ffi/cj_rating_ffi.cpp",
       "interfaces/cj_ffi/cj_rect_ffi.cpp",
@@ -204,6 +203,10 @@ template("cj_frontend") {
       "$ace_root/frameworks/core:ace_container_scope",
       "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility",
     ]
+
+    if (qrcodegen_support) {
+      sources += [ "interfaces/cj_ffi/cj_qrcode_ffi.cpp" ]
+    }
 
     if (platform_config.is_ohos) {
       external_deps += [

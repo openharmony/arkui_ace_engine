@@ -233,9 +233,6 @@ void OneStepDragController::CopyDragCallback(TextSpanType spanType, const RefPtr
     auto oneStepDragEnd = [end, weakPattern = pattern_, scopeId = Container::CurrentId()]
         (const RefPtr<OHOS::Ace::DragEvent>& event) {
         ContainerScope scope(scopeId);
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->isDragging_ = false;
         IF_TRUE(end, end(event));
     };
     frameNodeEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(oneStepDragEnd));

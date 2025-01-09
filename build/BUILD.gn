@@ -113,18 +113,22 @@ config("lto_link_config") {
 }
 
 ohos_shared_library("libace_compatible") {
-  public_configs = [ ":ace_engine_public_config" ]
+  public_configs = [
+    ":ace_engine_public_config",
+    "$ace_root/interfaces/inner_api/ace_kit:ace_kit_config",
+  ]
   external_deps = []
   if (use_hilog) {
     external_deps += [ "hilog:libhilog" ]
   }
+  deps = [ "$ace_root/interfaces/inner_api/ace_kit:ace_kit" ]
   if (is_ohos) {
     sanitize = {
       integer_overflow = true
       boundary_sanitize = true
       debug = ace_sanitize_debug
     }
-    deps = [ "$ace_root/build:libace_static_ohos" ]
+    deps += [ "$ace_root/build:libace_static_ohos" ]
     version_script = "libace.map"
     innerapi_tags = [ "platformsdk" ]
     configs = [ "$ace_root:ace_coverage_config" ]
@@ -133,11 +137,11 @@ ohos_shared_library("libace_compatible") {
       configs += [ ":lto_link_config" ]
     }
   } else if (use_mingw_win) {
-    deps = [ "$ace_root/build:libace_static_windows" ]
+    deps += [ "$ace_root/build:libace_static_windows" ]
   } else if (use_mac) {
-    deps = [ "$ace_root/build:libace_static_mac" ]
+    deps += [ "$ace_root/build:libace_static_mac" ]
   } else if (use_linux) {
-    deps = [ "$ace_root/build:libace_static_linux" ]
+    deps += [ "$ace_root/build:libace_static_linux" ]
   }
   public_external_deps = external_deps
   part_name = ace_engine_part

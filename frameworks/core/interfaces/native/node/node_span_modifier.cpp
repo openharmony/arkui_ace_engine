@@ -40,14 +40,14 @@ void SetSpanContent(ArkUINodeHandle node, const char* value)
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     std::string content(value);
-    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8ToStr16(content));
+    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8DebugToStr16(content));
 }
 
 const char* GetSpanContent(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(uiNode, nullptr);
-    g_strValue = UtfUtils::Str16ToStr8(SpanModelNG::GetContent(uiNode));
+    g_strValue = UtfUtils::Str16DebugToStr8(SpanModelNG::GetContent(uiNode));
     return g_strValue.c_str();
 }
 
@@ -56,7 +56,7 @@ void SetSpanSrc(ArkUINodeHandle node, ArkUI_CharPtr src)
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     std::string content(src);
-    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8ToStr16(content));
+    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8DebugToStr16(content));
 }
 
 void SetSpanTextCase(ArkUINodeHandle node, int32_t value)
@@ -486,7 +486,7 @@ ArkUI_CharPtr GetSpanFontFamily(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUISpanModifier* GetSpanModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISpanModifier modifier = {
         .setSpanSrc = SetSpanSrc,
         .setContent = SetSpanContent,
@@ -537,20 +537,13 @@ const ArkUISpanModifier* GetSpanModifier()
         .setAccessibilityLevel = SetAccessibilityLevel,
         .resetAccessibilityLevel = ResetAccessibilityLevel,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUISpanModifier* GetCJUISpanModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUISpanModifier modifier = {
         .setSpanSrc = SetSpanSrc,
         .setContent = SetSpanContent,
@@ -594,14 +587,7 @@ const CJUISpanModifier* GetCJUISpanModifier()
         .resetTextShadow = ResetTextTextShadow,
         .getTextShadows = GetTextShadow,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 

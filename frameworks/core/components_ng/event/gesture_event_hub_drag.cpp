@@ -138,7 +138,7 @@ void GestureEventHub::StartLongPressActionForWeb()
             CHECK_NULL_VOID(dragEventActuator);
             dragEventActuator->StartLongPressActionForWeb();
         },
-        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress");
+        TaskExecutor::TaskType::UI, "ArkUIGestureWebStartLongPress", PriorityType::VIP);
 }
 
 void GestureEventHub::CancelDragForWeb()
@@ -348,8 +348,8 @@ OffsetF GestureEventHub::GetPixelMapOffset(
     return result;
 }
 
-void GestureEventHub::ProcessMenuPreviewScale(
-    const RefPtr<FrameNode> imageNode, float& scale, float defaultDragScale, float defaultMenuPreviewScale)
+void GestureEventHub::ProcessMenuPreviewScale(const RefPtr<FrameNode> imageNode, float& scale, float previewScale,
+    float windowScale, float defaultMenuPreviewScale)
 {
     auto imageGestureEventHub = imageNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(imageGestureEventHub);
@@ -358,8 +358,8 @@ void GestureEventHub::ProcessMenuPreviewScale(
             imageGestureEventHub->SetMenuPreviewScale(defaultMenuPreviewScale);
         } else {
             //if not in sceneboard,use default drag scale
-            scale = defaultDragScale;
-            imageGestureEventHub->SetMenuPreviewScale(defaultDragScale);
+            scale = previewScale * windowScale;
+            imageGestureEventHub->SetMenuPreviewScale(previewScale);
         }
     } else {
         imageGestureEventHub->SetMenuPreviewScale(scale);
@@ -446,8 +446,7 @@ void GestureEventHub::GenerateMousePixelMap(const GestureEvent& info)
         context = frameNode->GetRenderContext();
     }
     CHECK_NULL_VOID(context);
-    bool isOffline = GetTextDraggable() ? true : false;
-    auto thumbnailPixelMap = context->GetThumbnailPixelMap(false, isOffline);
+    auto thumbnailPixelMap = context->GetThumbnailPixelMap(false, GetTextDraggable());
     CHECK_NULL_VOID(thumbnailPixelMap);
     SetPixelMap(thumbnailPixelMap);
 }
@@ -672,8 +671,11 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         }
         pixelMap = pixelMap_;
     }
-    (info.GetSourceDevice() == SourceType::MOUSE) ? HandleDragThroughMouse(frameNode)
-                                                  : HandleDragThroughTouch(frameNode);
+    auto dragPreviewOptions = frameNode->GetDragPreviewOption();
+    if (dragPreviewOptions.isDefaultDragItemGrayEffectEnabled) {
+        (info.GetSourceDevice() == SourceType::MOUSE) ? HandleDragThroughMouse(frameNode)
+                                                      : HandleDragThroughTouch(frameNode);
+    }
     SetDragGatherPixelMaps(info);
     dragDropManager->SetIsMouseDrag(info.GetInputEventType() == InputEventType::MOUSE_BUTTON);
     auto dragNodePipeline = frameNode->GetContextRefPtr();
@@ -708,7 +710,7 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         data.previewScale = previewScale;
         // use menu preview scale replace default pixelMap scale.
         if (isMenuShow) {
-            ProcessMenuPreviewScale(imageNode, scale, previewScale * windowScale, defaultPixelMapScale);
+            ProcessMenuPreviewScale(imageNode, scale, previewScale, windowScale, defaultPixelMapScale);
         }
         {
             ACE_SCOPED_TRACE("drag: sub window show");
@@ -861,7 +863,7 @@ int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>
         auto taskScheduler = context->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
         taskScheduler->PostTask([dragDropManager]() { dragDropManager->HideDragPreviewOverlay(); },
-            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay");
+            TaskExecutor::TaskType::UI, "ArkUIGestureHideDragPreviewOverlay", PriorityType::VIP);
     };
     return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }
@@ -873,8 +875,13 @@ void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
 
 void GestureEventHub::HandleDragEndAction(const DragframeNodeInfo& info)
 {
-    auto frameNode = info.frameNode;
+    auto weakFrameNode = info.frameNode;
+    auto frameNode = weakFrameNode.Upgrade();
     CHECK_NULL_VOID(frameNode);
+    auto dragPreviewOptions = frameNode->GetDragPreviewOption();
+    if (!dragPreviewOptions.isDefaultDragItemGrayEffectEnabled) {
+        return;
+    }
     auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto dragDropManager = pipeline->GetDragDropManager();
@@ -1282,7 +1289,7 @@ void GestureEventHub::StartDragForCustomBuilder(const GestureEvent& info, const 
                 CHECK_NULL_VOID(frameNode);
                 gestureEventHubPtr->OnDragStart(info, pipeline, frameNode, dragDropInfo, event);
             },
-            TaskExecutor::TaskType::UI, "ArkUIGestureDragStart");
+            TaskExecutor::TaskType::UI, "ArkUIGestureDragStart", PriorityType::VIP);
     };
     SnapshotParam param;
     param.delay = CREATE_PIXELMAP_TIME;

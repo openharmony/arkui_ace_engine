@@ -872,7 +872,7 @@ panda::Local<panda::JSValueRef> JsSendTouchEvent(panda::JsiRuntimeCallInfo* runt
     TouchEvent touchPoint = GetTouchPointFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, touchPoint]() { pipelineContext->OnTouchEvent(touchPoint); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendTouchEvent");
+        TaskExecutor::TaskType::UI, "ArkUIJsSendTouchEvent", PriorityType::VIP);
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -930,7 +930,7 @@ panda::Local<panda::JSValueRef> JsSendKeyEvent(panda::JsiRuntimeCallInfo* runtim
     KeyEvent keyEvent = GetKeyEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, keyEvent]() { pipelineContext->OnNonPointerEvent(keyEvent); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendKeyEvent");
+        TaskExecutor::TaskType::UI, "ArkUIJsSendKeyEvent", PriorityType::VIP);
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -982,7 +982,7 @@ panda::Local<panda::JSValueRef> JsSendMouseEvent(panda::JsiRuntimeCallInfo* runt
     MouseEvent mouseEvent = GetMouseEventFromJS(obj);
     auto result = pipelineContext->GetTaskExecutor()->PostTask(
         [pipelineContext, mouseEvent]() { pipelineContext->OnMouseEvent(mouseEvent); },
-        TaskExecutor::TaskType::UI, "ArkUIJsSendMouseEvent");
+        TaskExecutor::TaskType::UI, "ArkUIJsSendMouseEvent", PriorityType::VIP);
     return panda::BooleanRef::New(vm, result);
 }
 
@@ -1410,6 +1410,11 @@ void JsRegisterFormViews(
     sliderStyle.Constant("InSet", 1);
     sliderStyle.Constant("NONE", 2);
 
+    JSObjectTemplate datePickerMode;
+    datePickerMode.Constant("DATE", static_cast<int>(DatePickerMode::DATE));
+    datePickerMode.Constant("YEAR_AND_MONTH", static_cast<int>(DatePickerMode::YEAR_AND_MONTH));
+    datePickerMode.Constant("MONTH_AND_DAY", static_cast<int>(DatePickerMode::MONTH_AND_DAY));
+
     JSObjectTemplate sliderChangeMode;
     sliderChangeMode.Constant("Begin", 0);
     sliderChangeMode.Constant("Moving", 1);
@@ -1448,6 +1453,7 @@ void JsRegisterFormViews(
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToggleType"), *toggleType);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "RefreshStatus"), *refreshStatus);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "SliderStyle"), *sliderStyle);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "DatePickerMode"), *datePickerMode);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "SliderChangeMode"), *sliderChangeMode);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "IconPosition"), *iconPosition);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "PickerStyle"), *pickerStyle);
@@ -1613,6 +1619,11 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     sliderStyle.Constant("InSet", 1);
     sliderStyle.Constant("NONE", 2);
 
+    JSObjectTemplate datePickerMode;
+    datePickerMode.Constant("DATE", static_cast<int>(DatePickerMode::DATE));
+    datePickerMode.Constant("YEAR_AND_MONTH", static_cast<int>(DatePickerMode::YEAR_AND_MONTH));
+    datePickerMode.Constant("MONTH_AND_DAY", static_cast<int>(DatePickerMode::MONTH_AND_DAY));
+
     JSObjectTemplate sliderChangeMode;
     sliderChangeMode.Constant("Begin", 0);
     sliderChangeMode.Constant("Moving", 1);
@@ -1657,6 +1668,7 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "ToggleType"), *toggleType);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "RefreshStatus"), *refreshStatus);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "SliderStyle"), *sliderStyle);
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "DatePickerMode"), *datePickerMode);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "SliderChangeMode"), *sliderChangeMode);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "IconPosition"), *iconPosition);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "PickerStyle"), *pickerStyle);

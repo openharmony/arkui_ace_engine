@@ -217,7 +217,7 @@ struct RangeOptions {
 
 struct TextSpanOptions : SpanOptionBase {
     std::optional<int32_t> offset;
-    std::string value;
+    std::u16string value;
     std::optional<TextStyle> style;
     std::optional<UpdateParagraphStyle> paraStyle;
     UserGestureOptions userGestureOption;
@@ -254,7 +254,7 @@ struct SymbolSpanOptions : SpanOptionBase {
 };
 
 struct PlaceholderOptions {
-    std::optional<std::string> value;
+    std::optional<std::u16string> value;
     std::optional<FontWeight> fontWeight;
     std::optional<Dimension> fontSize;
     std::optional<Color> fontColor;
@@ -274,7 +274,7 @@ struct PlaceholderOptions {
 };
 
 struct PreviewTextInfo {
-    std::optional<std::string> value;
+    std::optional<std::u16string> value;
     std::optional<int32_t> offset;
 
     std::string ToString() const
@@ -378,6 +378,8 @@ public:
     virtual void SetMaxLength(std::optional<int32_t> value) {}
     virtual void ResetMaxLength() {}
     virtual void SetMaxLines(uint32_t value) {};
+    virtual void SetStopBackPress(bool isStopBackPress) {};
+
 private:
     static std::unique_ptr<RichEditorModel> instance_;
     static std::mutex mutex_;

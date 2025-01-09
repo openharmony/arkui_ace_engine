@@ -38,14 +38,13 @@ CanvasDrawFunction TabBarPaintMethod::GetForegroundDrawFunction(PaintWrapper* pa
     
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
-    auto frameRect = geometryNode->GetFrameRect();
     MarginPropertyF padding;
     if (geometryNode->GetPadding()) {
         padding.left = geometryNode->GetPadding()->left;
         padding.right = geometryNode->GetPadding()->right;
     }
 
-    auto paintFunc = [gradientRegions = gradientRegions_, barRect = frameRect, backgroundColor = backgroundColor_,
+    auto paintFunc = [gradientRegions = gradientRegions_, barRect = frameRect_, backgroundColor = backgroundColor_,
                          padding](RSCanvas& canvas) {
         PaintGradient(canvas, barRect, backgroundColor, gradientRegions, padding);
     };

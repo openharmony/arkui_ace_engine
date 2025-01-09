@@ -528,6 +528,7 @@ inline std::string ConvertWrapWordBreakToString(WordBreak wordBreak)
         { WordBreak::NORMAL, "normal" },
         { WordBreak::BREAK_ALL, "break-all" },
         { WordBreak::BREAK_WORD, "break-word" },
+        { WordBreak::HYPHENATION, "hyphenation" },
     };
 
     auto index = BinarySearchFindIndex(wordBreakTable, ArraySize(wordBreakTable), wordBreak);

@@ -152,8 +152,10 @@ public:
     virtual void TriggerPageUpdate(int32_t pageId, bool directExecute = false) = 0;
 
     // posting js task from jsengine
-    virtual void PostJsTask(std::function<void()>&& task, const std::string& name) = 0;
-    virtual void PostUITask(std::function<void()>&& task, const std::string& name) {}
+    virtual void PostJsTask(std::function<void()>&& task, const std::string& name, PriorityType priority) = 0;
+    virtual void PostUITask(
+        std::function<void()>&& task, const std::string& name, PriorityType priority = PriorityType::LOW)
+    {}
 
     // ----------------
     // system.app
@@ -243,6 +245,17 @@ public:
     {}
 
     virtual std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshot(const std::string& componentId,
+        const NG::SnapshotOptions& options)
+    {
+        return {};
+    }
+
+    virtual void GetSnapshotByUniqueId(int32_t uniqueId,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        const NG::SnapshotOptions& options)
+    {}
+
+    virtual std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshotByUniqueId(int32_t uniqueId,
         const NG::SnapshotOptions& options)
     {
         return {};

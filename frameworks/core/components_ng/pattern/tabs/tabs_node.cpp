@@ -74,12 +74,12 @@ void TabsNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilt
         auto optionsJson = JsonUtil::Create(true);
         auto options = GetScrollableBarModeOptions();
         optionsJson->Put("margin", options.margin.ToString().c_str());
-        if (options.nonScrollableLayoutStyle == LayoutStyle::ALWAYS_AVERAGE_SPLIT) {
-            optionsJson->Put("nonScrollableLayoutStyle", "LayoutStyle.ALWAYS_AVERAGE_SPLIT");
-        } else if (options.nonScrollableLayoutStyle == LayoutStyle::SPACE_BETWEEN_OR_CENTER) {
-            optionsJson->Put("nonScrollableLayoutStyle", "LayoutStyle.SPACE_BETWEEN_OR_CENTER");
-        } else {
+        if (options.nonScrollableLayoutStyle.value_or(LayoutStyle::ALWAYS_CENTER) == LayoutStyle::ALWAYS_CENTER) {
             optionsJson->Put("nonScrollableLayoutStyle", "LayoutStyle.ALWAYS_CENTER");
+        } else if (options.nonScrollableLayoutStyle.value() == LayoutStyle::ALWAYS_AVERAGE_SPLIT) {
+            optionsJson->Put("nonScrollableLayoutStyle", "LayoutStyle.ALWAYS_AVERAGE_SPLIT");
+        } else if (options.nonScrollableLayoutStyle.value() == LayoutStyle::SPACE_BETWEEN_OR_CENTER) {
+            optionsJson->Put("nonScrollableLayoutStyle", "LayoutStyle.SPACE_BETWEEN_OR_CENTER");
         }
         std::string barMode = "BarMode.Scrollable," + optionsJson->ToString();
         json->PutExtAttr("barMode", barMode.c_str(), filter);
@@ -214,9 +214,9 @@ Color TabsNode::GetBarBackgroundColor() const
     }
     auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, backgroundColor);
-    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_RETURN(tabBarPaintProperty, backgroundColor);
-    return tabBarPaintProperty->GetBarBackgroundColor().value_or(backgroundColor);
+    auto tabBarRenderContext = tabBarNode->GetRenderContext();
+    CHECK_NULL_RETURN(tabBarRenderContext, backgroundColor);
+    return tabBarRenderContext->GetBackgroundColor().value_or(backgroundColor);
 }
 
 BlurStyle TabsNode::GetBarBackgroundBlurStyle() const
@@ -227,9 +227,9 @@ BlurStyle TabsNode::GetBarBackgroundBlurStyle() const
     }
     auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, barBackgroundBlurStyle);
-    auto tabBarProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_RETURN(tabBarProperty, barBackgroundBlurStyle);
-    auto styleOption = tabBarProperty->GetTabBarBlurStyleOption().value_or(BlurStyleOption{});
+    auto tabBarRenderContext = tabBarNode->GetRenderContext();
+    CHECK_NULL_RETURN(tabBarRenderContext, barBackgroundBlurStyle);
+    auto styleOption = tabBarRenderContext->GetBackBlurStyle().value_or(BlurStyleOption{});
     return styleOption.blurStyle;
 }
 
@@ -246,9 +246,9 @@ std::unique_ptr<JsonValue> TabsNode::GetBarBackgroundBlurStyleOptions() const
     static const char* BLUR_TYPE[] = { "BlurType.WITHIN_WINDOW", "BlurType.BEHIND_WINDOW" };
     auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, jsonBlurStyle);
-    auto tabBarProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_RETURN(tabBarProperty, jsonBlurStyle);
-    auto styleOption = tabBarProperty->GetTabBarBlurStyleOption().value_or(BlurStyleOption{});
+    auto tabBarRenderContext = tabBarNode->GetRenderContext();
+    CHECK_NULL_RETURN(tabBarRenderContext, jsonBlurStyle);
+    auto styleOption = tabBarRenderContext->GetBackBlurStyle().value_or(BlurStyleOption{});
     jsonBlurStyle->Put("colorMode", COLOR_MODE[static_cast<int>(styleOption.colorMode)]);
     jsonBlurStyle->Put("adaptiveColor",
         ADAPTIVE_COLOR[static_cast<int>(styleOption.adaptiveColor)]);
@@ -360,9 +360,9 @@ std::unique_ptr<JsonValue> TabsNode::GetBarBackgroundEffect() const
     static const char* BLUR_TYPE[] = { "WITHIN_WINDOW", "BEHIND_WINDOW" };
     auto tabBarNode = GetFrameNode(V2::TAB_BAR_ETS_TAG, tabBarId_.value());
     CHECK_NULL_RETURN(tabBarNode, jsonEffect);
-    auto tabBarProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_RETURN(tabBarProperty, jsonEffect);
-    EffectOption effectOption = tabBarProperty->GetTabBarEffectOption().value_or(effectOption);
+    auto tabBarRenderContext = tabBarNode->GetRenderContext();
+    CHECK_NULL_RETURN(tabBarRenderContext, jsonEffect);
+    EffectOption effectOption = tabBarRenderContext->GetBackgroundEffect().value_or(effectOption);
     jsonEffect->Put("radius", effectOption.radius.Value());
     jsonEffect->Put("saturation", effectOption.saturation);
     jsonEffect->Put("brightness", effectOption.brightness);

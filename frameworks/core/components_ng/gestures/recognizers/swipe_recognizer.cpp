@@ -65,6 +65,7 @@ void SwipeRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Swipe accepted, tag = %{public}s",
         node ? node->GetTag().c_str() : "null");
+    auto lastRefereeState = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onAction_);
     int64_t overTime = GetSysTimestamp();
@@ -73,6 +74,9 @@ void SwipeRecognizer::OnAccepted()
             static_cast<long long>(inputTime), static_cast<long long>(overTime));
     }
     firstInputTime_.reset();
+    if (lastRefereeState != RefereeState::SUCCEED_BLOCKED) {
+        ResetStateVoluntarily();
+    }
 }
 
 void SwipeRecognizer::OnRejected()

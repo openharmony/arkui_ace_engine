@@ -101,11 +101,58 @@ inline constexpr uint32_t POPUP_TITLE_BG_COLOR_SINGLE = 0x00ffffff;
 inline constexpr float INDEXER_ZERO_WIDTH = 0.0f;
 inline constexpr int32_t INDEXER_COLLAPSE_WAIT_DURATION = 1;
 
+inline constexpr int32_t ARC_INDEXER_ITEM_MAX_COUNT = 30; // [indexer], default max count
+inline const std::u16string ARC_INDEXER_STR_SHARP = StringUtils::Str8ToStr16("#");
+inline const std::u16string ARC_INDEXER_STR_EXPANDED = StringUtils::Str8ToStr16(">");
+inline const std::u16string ARC_INDEXER_STR_COLLAPSED = StringUtils::Str8ToStr16("<");
+
+inline constexpr float ARC_INDEXER_SIZE = 233.0;
+inline constexpr int32_t ARC_INDEXER_EXPANDED_DURATION = 470;
+inline constexpr int32_t ARC_INDEXER_COLLAPED_DURATION = 470;
+inline constexpr int32_t ARC_INDEXER_BUBBLE_EXIT_DURATION = 400;
+inline constexpr int32_t ARC_INDEXER_BUBBLE_ENTER_DURATION = 200;
+inline constexpr int32_t ARC_INDEXER_PRESS_IN_DURATION = 100;
+inline constexpr int32_t ARC_INDEXER_PRESS_OUT_DURATION = 100;
+inline constexpr int32_t ARC_INDEXER_BUBBLE_WAIT_DURATION = 2000;
+inline constexpr int32_t ARC_INDEXER_BUBBLE_MAX_TEXT_LINE = 2;
+
+inline constexpr double ARC_BUBBLE_BOX_SIZE = 46.0;
+inline constexpr double ARC_BUBBLE_BOX_RADIUS = 23.0;
+inline constexpr double ARC_BUBBLE_POSITION_Y = 44.0;
+inline constexpr double ARC_INDEXER_ITEM_SIZE = 24.0;      // circle mode, item size (VP)
+inline constexpr float ARC_INDEXER_ITEM_TEXT_SIZE = 13.0f; // circle, mode font size (FP)
+inline constexpr float ARC_INDEXER_POPUP_TEXT_SIZE = 19.0f; // circle, mode popup font size (FP)
+
+inline constexpr int32_t ARC_INDEXER_COLLAPSE_ITEM_COUNT = 4;
+inline constexpr float FULL_CIRCLE_ANGLE = 360.0;
+inline constexpr float HALF = 0.5f;
+inline constexpr double DOUBLE = 2.0;
+inline constexpr float HALF_CIRCLE_ANGLE = 180.0;
+inline constexpr uint32_t ARC_INDEXER_STR_DOT_COLOR = 0xA9FFFFFF;
+inline constexpr uint32_t ARC_INDEXER_SELECTED_BG_COLOR = 0xFF1F71FF;
+inline constexpr uint32_t ARC_POPUP_BG_COLOR = 0xD8404040;
+inline constexpr float ARC_INDEXER_PADDING_LEFT = 4.0f;
+inline constexpr double ARC_BUBBLE_RADIUS = 23.0;
+inline constexpr double ARC_INDEXER_DEFAULT_RADIUS = 12.0;
+inline constexpr int32_t ARC_INDEXER_COLLAPSE_WAIT_DURATION = 1;
+
 enum class AlignStyle {
     LEFT = 0,
     RIGHT,
     START,
     END,
+};
+
+enum class ArcIndexerBarState {
+    INVALID,
+    COLLAPSED,
+    EXPANDED
+};
+
+enum class ArcIndexerCollapsingMode {
+    INVALID,
+    NONE, // all array should be displayed
+    FOUR, // 4 + 1 collapsing mode
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_INDEXER_INDEXER_THEME_H

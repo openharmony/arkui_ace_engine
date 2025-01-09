@@ -21,7 +21,9 @@
 #include "core/components/select/select_theme.h"
 #include "core/components/theme/blur_style_theme.h"
 #include "core/components/theme/shadow_theme.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/list/list_item_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -94,7 +96,7 @@ void PostStopDrag(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAct
             InteractionInterface::GetInstance()->StopDrag(dropResult);
             InteractionInterface::GetInstance()->SetDragWindowVisible(false);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDragStop");
+        TaskExecutor::TaskType::UI, "ArkUIDragStop", PriorityType::VIP);
 }
 
 bool ConfirmCurPointerEventInfo(
@@ -751,4 +753,93 @@ OffsetF DragDropFuncWrapper::GetPointRelativeToMainWindow(const Point& point)
     }
     return position;
 }
+
+bool DragDropFuncWrapper::IsSelectedItemNode(const RefPtr<UINode>& uiNode)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureHub, false);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_RETURN(eventHub, false);
+    auto dragPreview = frameNode->GetDragPreviewOption();
+    if (!dragPreview.isMultiSelectionEnabled) {
+        return false;
+    }
+    bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
+    if (!isAllowedDrag) {
+        return false;
+    }
+    if (frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG) {
+        auto itemPattern = frameNode->GetPattern<GridItemPattern>();
+        CHECK_NULL_RETURN(itemPattern, false);
+        if (itemPattern->IsSelected()) {
+            return true;
+        }
+    }
+    if (frameNode->GetTag() == V2::LIST_ITEM_ETS_TAG) {
+        auto itemPattern = frameNode->GetPattern<ListItemPattern>();
+        CHECK_NULL_RETURN(itemPattern, false);
+        if (itemPattern->IsSelected()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool DragDropFuncWrapper::IsBelongToMultiItemNode(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto uiNode = frameNode->GetParent();
+    CHECK_NULL_RETURN(uiNode, false);
+    while (!IsSelectedItemNode(uiNode)) {
+        uiNode = uiNode->GetParent();
+        CHECK_NULL_RETURN(uiNode, false);
+    }
+    return true;
+}
+
+bool DragDropFuncWrapper::CheckIsNeedGather(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto dragPreview = frameNode->GetDragPreviewOption();
+    if (!dragPreview.isMultiSelectionEnabled) {
+        return false;
+    }
+    return IsSelectedItemNode(frameNode);
+}
+
+RefPtr<FrameNode> DragDropFuncWrapper::FindItemParentNode(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    if (frameNode->GetTag() != V2::GRID_ITEM_ETS_TAG && frameNode->GetTag() != V2::LIST_ITEM_ETS_TAG) {
+        return nullptr;
+    }
+    auto parentType = frameNode->GetTag() == V2::GRID_ITEM_ETS_TAG ? V2::GRID_ETS_TAG : V2::LIST_ETS_TAG;
+    auto uiNode = frameNode->GetParent();
+    CHECK_NULL_RETURN(uiNode, nullptr);
+    while (uiNode->GetTag() != parentType) {
+        uiNode = uiNode->GetParent();
+        CHECK_NULL_RETURN(uiNode, nullptr);
+    }
+    return AceType::DynamicCast<FrameNode>(uiNode);
+}
+
+RefPtr<PixelMap> DragDropFuncWrapper::GetGatherNodePreviewPixelMap(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto dragPreviewInfo = frameNode->GetDragPreview();
+    if (dragPreviewInfo.inspectorId != "") {
+        auto previewPixelMap = DragEventActuator::GetPreviewPixelMap(dragPreviewInfo.inspectorId, frameNode);
+        return previewPixelMap;
+    }
+    if (dragPreviewInfo.pixelMap != nullptr) {
+        return dragPreviewInfo.pixelMap;
+    }
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto pixelMap = context->GetThumbnailPixelMap(true);
+    return pixelMap;
+}
+
 } // namespace OHOS::Ace

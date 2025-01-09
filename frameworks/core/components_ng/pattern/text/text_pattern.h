@@ -59,7 +59,7 @@
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
-enum class Status { DRAGGING, ON_DROP, NONE };
+enum class Status { DRAGGING, FLOATING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
 struct SpanNodeInfo {
@@ -118,7 +118,7 @@ public:
         return MakeRefPtr<TextEventHub>();
     }
 
-    bool IsDragging() const
+    virtual bool IsDragging() const
     {
         return status_ == Status::DRAGGING;
     }
@@ -352,7 +352,6 @@ public:
         onClick_ = std::move(onClick);
         distanceThreshold_ = distanceThreshold;
     }
-    virtual void OnColorConfigurationUpdate() override;
 
     NG::DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     DragDropInfo OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
@@ -371,7 +370,8 @@ public:
     void ProcessNormalUdmfData(const RefPtr<UnifiedData>& unifiedData);
     void AddPixelMapToUdmfData(const RefPtr<PixelMap>& pixelMap, const RefPtr<UnifiedData>& unifiedData);
 
-    std::u16string GetSelectedSpanText(std::u16string value, int32_t start, int32_t end) const;
+    std::u16string GetSelectedSpanText(std::u16string value, int32_t start, int32_t end, bool includeStartHalf = false,
+        bool includeEndHalf = true, bool getSubstrDirectly = true) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
     SymbolSpanStyle GetSymbolSpanStyleObject(const RefPtr<SpanNode>& node);
     virtual RefPtr<UINode> GetChildByIndex(int32_t index) const;
@@ -571,7 +571,7 @@ public:
     // select overlay
     virtual int32_t GetHandleIndex(const Offset& offset) const;
     std::u16string GetSelectedText(int32_t start, int32_t end, bool includeStartHalf = false,
-        bool includeEndHalf = false) const;
+        bool includeEndHalf = false, bool getSubstrDirectly = false) const;
     void UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void ResetSelection();
@@ -766,6 +766,10 @@ public:
     std::string GetCaretColor() const;
     std::string GetSelectedBackgroundColor() const;
 
+    void ResetCustomFontColor();
+    void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
 protected:
     int32_t GetClickedSpanPosition()
     {
@@ -859,6 +863,8 @@ protected:
     void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) override;
     void OnTextGenstureSelectionEnd(const TouchLocationInfo& locationInfo) override;
     void StartGestureSelection(int32_t start, int32_t end, const Offset& startOffset) override;
+
+    void SetImageNodeGesture(RefPtr<ImageSpanNode> imageNode);
 
     bool enabled_ = true;
     Status status_ = Status::NONE;
@@ -959,7 +965,6 @@ private:
     ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
     void CreateModifier();
 
-    bool IsLineBreakOrEndOfParagraph(int32_t pos) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override;
     void ProcessOverlayAfterLayout();

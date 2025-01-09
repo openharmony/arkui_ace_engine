@@ -510,6 +510,12 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     rectangle.windowOffset = frameNode->GetOffsetRelativeToWindow();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender() &&
+        container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT) {
+        rectangle.windowOffset = rectangle.windowOffset + OffsetF(pipeline->GetHostParentOffsetToWindow().GetX(),
+            pipeline->GetHostParentOffsetToWindow().GetY());
+    }
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
     ACE_SCOPED_TRACE("Inspector::GetRectangleById_Id=%d_Tag=%s_Key=%s",
         frameNode->GetId(), frameNode->GetTag().c_str(), key.c_str());

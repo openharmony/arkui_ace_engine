@@ -151,7 +151,8 @@ enum class TabBarState {
 enum class TabBarParamType {
     NORMAL = 0,
     CUSTOM_BUILDER,
-    COMPONENT_CONTENT
+    COMPONENT_CONTENT,
+    SUB_COMPONENT_CONTENT
 };
 
 class TabBarPattern : public Pattern {
@@ -650,10 +651,11 @@ private:
     bool CheckSwiperDisable() const;
     void SetSwiperCurve(const RefPtr<Curve>& curve) const;
     void InitTurnPageRateEvent();
-    void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
+    void GetIndicatorStyle(IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset, RectF& tabBarItemRect);
     void CalculateIndicatorStyle(
         int32_t startIndex, int32_t nextIndex, IndicatorStyle& indicatorStyle, OffsetF& indicatorOffset);
     Color GetTabBarBackgroundColor() const;
+    SizeF GetContentSize() const;
     float GetLeftPadding() const;
     void HandleBottomTabBarAnimation(int32_t index);
     void UpdatePaintIndicator(int32_t indicator, bool needMarkDirty);
@@ -661,10 +663,11 @@ private:
     void RemoveTabBarEventCallback();
     void AddTabBarEventCallback();
     void AddMaskItemClickEvent();
-    bool ParseTabsIsRtl();
     bool IsValidIndex(int32_t index);
     int32_t GetLoopIndex(int32_t originalIndex) const;
     RefPtr<SwiperPattern> GetSwiperPattern() const;
+    void UpdateBackBlurStyle(const RefPtr<TabTheme>& tabTheme);
+    void UpdateChildrenClipEdge();
 
     void StartShowTabBar(int32_t delay = 0);
     void StartShowTabBarImmediately();
@@ -731,6 +734,7 @@ private:
     bool translateAnimationIsRunning_ = false;
 
     bool isRTL_ = false;
+    bool clipEdge_ = true;
 
     bool touching_ = false; // whether the item is in touching
     bool isHover_ = false;
@@ -777,6 +781,7 @@ private:
     std::optional<int32_t> focusIndex_;
     float currentDelta_ = 0.0f;
     float currentOffset_ = 0.0f;
+    float barGridMargin_ = 0.0f;
     std::map<int32_t, ItemInfo> visibleItemPosition_;
     bool canOverScroll_ = false;
     bool accessibilityScroll_ = false;

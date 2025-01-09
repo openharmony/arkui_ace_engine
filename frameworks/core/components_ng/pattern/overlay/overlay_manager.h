@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
 #include "core/components_ng/pattern/toast/toast_layout_property.h"
 #include "core/components_ng/pattern/toast/toast_view.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 #include "interfaces/inner_api/ace/modal_ui_extension_config.h"
 
@@ -119,6 +120,7 @@ public:
     void ShowPopupAnimation(const RefPtr<FrameNode>& popupNode);
     void ShowPopupAnimationNG(const RefPtr<FrameNode>& popupNode);
     void HidePopupAnimation(const RefPtr<FrameNode>& popupNode, const std::function<void()>& finish);
+    PopupInfo GetPopupInfoWithExistContent(const RefPtr<UINode>& node);
 
     PopupInfo GetPopupInfo(int32_t targetId) const
     {
@@ -488,6 +490,7 @@ public:
     {
         return dismissSheetId_;
     }
+    RefPtr<FrameNode> GetModalStackTop();
     void RemoveSheetNode(const RefPtr<FrameNode>& sheetNode);
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, const SheetKey& sheetKey);
@@ -657,6 +660,7 @@ public:
     RefPtr<FrameNode> GetDialogNodeWithExistContent(const RefPtr<UINode>& node);
     OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
     BorderRadiusProperty GetPrepareDragFrameNodeBorderRadius() const;
+    static SafeAreaInsets GetSafeAreaInsets(const RefPtr<FrameNode>& frameNode, bool useCurrentWindow = false);
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
@@ -838,6 +842,7 @@ private:
     void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode);
     void SetDragNodeNeedClean();
     RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
+    void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index

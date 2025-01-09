@@ -37,11 +37,13 @@ public:
     void SetType(TextInputType value) override;
     void SetContentType(const TextContentType& value) override;
     void SetPlaceholderColor(const Color& value) override;
+    void ResetPlaceholderColor() override;
     void SetPlaceholderFont(const Font& value) override;
     void SetEnterKeyType(TextInputAction value) override;
     void SetTextAlign(TextAlign value) override;
     void SetLineBreakStrategy(LineBreakStrategy value) override;
     void SetCaretColor(const Color& value) override;
+    void ResetCaretColor() override;
     void SetCaretStyle(const CaretStyle& value) override;
     void SetCaretPosition(const int32_t& value) override;
     void SetSelectedBackgroundColor(const Color& value) override;
@@ -50,6 +52,7 @@ public:
     void SetFontSize(const Dimension& value) override;
     void SetFontWeight(FontWeight value) override;
     void SetTextColor(const Color& value) override;
+    void ResetTextColor() override;
     void SetWordBreak(Ace::WordBreak value) override;
     void SetFontStyle(Ace::FontStyle value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
@@ -90,6 +93,7 @@ public:
     void SetShowCounterBorder(bool value) override;
     void SetOnChangeEvent(std::function<void(const std::u16string&)>&& func) override;
     void SetBackgroundColor(const Color& color, bool tmp) override;
+    void ResetBackgroundColor() override;
     void SetHeight(const Dimension& value) override;
     void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) override;
     void SetMargin() override;
@@ -127,6 +131,7 @@ public:
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetEnablePreviewText(bool enablePreviewText) override;
     void SetEnableHapticFeedback(bool state) override;
+    void SetStopBackPress(bool isStopBackPress) override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -164,12 +169,14 @@ public:
     static void SetShowPassword(FrameNode* frameNode, bool value);
     static void SetTextAlign(FrameNode* frameNode, TextAlign value);
     static void SetTextColor(FrameNode* frameNode, const Color& value);
+    static void ResetTextColor(FrameNode* frameNode);
     static void SetCaretPosition(FrameNode* frameNode, const int32_t& value);
     static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetMaxLength(FrameNode* frameNode, uint32_t value);
     static void ResetMaxLength(FrameNode* frameNode);
     static void SetCaretStyle(FrameNode* frameNode, const CaretStyle& value);
     static void SetPlaceholderColor(FrameNode* frameNode, const Color& value);
+    static void ResetPlaceholderColor(FrameNode* frameNode);
     static void SetFontWeight(FrameNode* frameNode, FontWeight value);
     static void SetEnterKeyType(FrameNode* frameNode, TextInputAction value);
     static void SetShowUnderline(FrameNode* frameNode, bool showUnderLine);
@@ -180,6 +187,7 @@ public:
     static void SetPlaceholderFont(FrameNode* frameNode, const Font& value);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetCaretColor(FrameNode* frameNode, const Color& value);
+    static void ResetCaretColor(FrameNode* frameNode);
     static void SetShowCounter(FrameNode* frameNode, bool value);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
     static void SetShowError(FrameNode* frameNode, const std::u16string& errorText, bool visible);
@@ -202,6 +210,7 @@ public:
     static void SetCancelSymbolIcon(FrameNode* frameNode,
         const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void ResetBackgroundColor(FrameNode* frameNode);
     static std::u16string GetPlaceholderText(FrameNode* frameNode);
     static std::u16string GetTextFieldText(FrameNode* frameNode);
     static Color GetCaretColor(FrameNode* frameNode);
@@ -295,6 +304,7 @@ public:
     static Dimension GetLetterSpacing(FrameNode* frameNode);
     static bool GetEnablePreviewText(FrameNode* frameNode);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode modal);
+    static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
 
 private:
     void AddDragFrameNodeToManager() const;

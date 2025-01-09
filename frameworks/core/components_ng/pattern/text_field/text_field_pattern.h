@@ -309,6 +309,7 @@ public:
 
     void InsertValue(const std::u16string& insertValue, bool isIME = false) override;
     void InsertValue(const std::string& insertValue, bool isIME = false) override;
+    int32_t InsertValueByController(const std::u16string& insertValue, int32_t offset);
     void InsertValueOperation(const SourceAndValueInfo& info);
     void CalcCounterAfterFilterInsertValue(int32_t curLength, const std::u16string insertValue, int32_t maxLength);
     void UpdateObscure(const std::u16string& insertValue, bool hasInsertValue);
@@ -401,7 +402,7 @@ public:
     {
         static TextEditingValue value;
         value.text = contentController_->GetTextValue();
-        value.hint = UtfUtils::Str16ToStr8(GetPlaceHolder());
+        value.hint = UtfUtils::Str16DebugToStr8(GetPlaceHolder());
         value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         return value;
     };
@@ -418,7 +419,7 @@ public:
 
     void UpdateEditingValue(const std::string& value, int32_t caretPosition)
     {
-        contentController_->SetTextValue(UtfUtils::Str8ToStr16(value));
+        contentController_->SetTextValue(UtfUtils::Str8DebugToStr16(value));
         selectController_->UpdateCaretIndex(caretPosition);
     }
     void UpdateCaretPositionByTouch(const Offset& offset);
@@ -616,7 +617,7 @@ public:
     {
         return selectOverlay_->IsUsingMouse();
     }
-    int32_t GetWordLength(int32_t originCaretPosition, int32_t directionalMove);
+    int32_t GetWordLength(int32_t originCaretPosition, int32_t directionalMove, bool skipNewLineChar = true);
     int32_t GetLineBeginPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     int32_t GetLineEndPosition(int32_t originCaretPosition, bool needToCheckLineChanged = true);
     bool HasText() const
@@ -968,6 +969,7 @@ public:
     void ClearFocusStyle();
     void ProcessFocusStyle();
     bool OnBackPressed() override;
+    bool IsStopBackPress() const;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
     bool CheckMousePressedOverScrollBar(GestureEvent& info);
@@ -1516,8 +1518,7 @@ public:
 
     bool IsShowPasswordSymbol() const
     {
-        return isPasswordSymbol_ &&
-            AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN);
+        return isPasswordSymbol_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN);
     }
 
     bool IsResponseRegionExpandingNeededForStylus(const TouchEvent& touchEvent) const override;
@@ -1533,7 +1534,7 @@ public:
 
     bool InsertOrDeleteSpace(int32_t index) override;
 
-    void DeleteRange(int32_t start, int32_t end) override;
+    void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
 
     bool SetCaretOffset(int32_t caretPostion) override;
 
@@ -1605,6 +1606,8 @@ public:
         return maxFontSizeScale_;
     }
 
+    SelectionInfo GetSelection();
+
     void SetTextFadeoutCapacity(bool enabled)
     {
         haveTextFadeoutCapacity_ = enabled;
@@ -1619,6 +1622,9 @@ public:
         hoverAndPressBgColorEnabled_ = enabled;
     }
 
+    bool GetOriginCaretPosition(OffsetF& offset) const;
+    void ResetOriginCaretPosition() override;
+    bool RecordOriginCaretPosition() override;
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1648,6 +1654,8 @@ protected:
     void UpdateSelection(int32_t both);
     void UpdateSelection(int32_t start, int32_t end);
     virtual bool IsNeedProcessAutoFill();
+    void UpdatePasswordIconColor(const Color& color);
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
     RefPtr<ContentController> contentController_;
     RefPtr<TextSelectController> selectController_;
@@ -1782,7 +1790,7 @@ private:
     void UpdateCopyAllStatus();
     void RestorePreInlineStates();
     void ProcessRectPadding();
-    void CalcInlineScrollRect(Rect& inlineScrollRect);
+    void CalcScrollRect(Rect& inlineScrollRect);
 
     bool ResetObscureTickCountDown();
     bool IsAccessibilityClick();
@@ -1935,6 +1943,9 @@ private:
     // Action when "enter" pressed.
     TextInputAction action_ = TextInputAction::UNSPECIFIED;
     TextDirection textDirection_ = TextDirection::LTR;
+    // Used to record original caret position for "shift + up/down"
+    // Less than 0 is invalid, initialized as invalid in constructor
+    OffsetF originCaretPosition_;
 
     OffsetF parentGlobalOffset_;
     OffsetF lastTouchOffset_;

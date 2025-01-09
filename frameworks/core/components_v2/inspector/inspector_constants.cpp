@@ -114,6 +114,10 @@ const char SWIPER_RIGHT_ARROW_ETS_TAG[] = "RightArrow";
 const char SWIPER_LEFT_CAPTURE_ETS_TAG[] = "SwiperLeftCapture";
 const char SWIPER_RIGHT_CAPTURE_ETS_TAG[] = "SwiperRightCapture";
 
+// indicator
+const char INDICATOR_COMPONENT_TAG[] = "IndicatorComponentComponent";
+const char INDICATOR_ETS_TAG[] = "IndicatorComponent";
+
 // tabs
 const char TABS_COMPONENT_TAG[] = "TabsComponent";
 const char TABS_ETS_TAG[] = "Tabs";
@@ -619,4 +623,16 @@ const char CUSTOM_SPAN_NODE_ETS_TAG[] = "CustomSpanNode";
 // LinearIndicator
 const char LINEARINDICATOR_COMPONENT_TAG[] = "LinearIndicatorComponent";
 const char LINEARINDICATOR_ETS_TAG[] = "LinearIndicator";
+
+// ArcList
+const char ARC_LIST_COMPONENT_TAG[] = "ArcListComponent";
+const char ARC_LIST_ETS_TAG[] = "ArcList";
+
+// ArcListItem
+const char ARC_LIST_ITEM_COMPONENT_TAG[] = "ArcListItemComponent";
+const char ARC_LIST_ITEM_ETS_TAG[] = "ArcListItem";
+
+// ArcScrollBar
+const char ARC_SCROLL_BAR_COMPONENT_TAG[] = "ArcScrollBarComponent";
+const char ARC_SCROLL_BAR_ETS_TAG[] = "ArcScrollBar";
 } // namespace OHOS::Ace::V2

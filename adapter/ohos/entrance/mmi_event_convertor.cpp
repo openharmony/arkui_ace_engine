@@ -426,11 +426,12 @@ void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, C
     }
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
-    event.angularVelocity =  pointerEvent->GetVelocity();
+    event.angularVelocity = pointerEvent->GetVelocity();
     event.degree =  pointerEvent->GetAxisValue(MMI::PointerEvent::AXIS_TYPE_SCROLL_VERTICAL);
     std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.timeStamp = time;
+    event.SetPointerEvent(pointerEvent);
 }
 #endif
 
@@ -502,7 +503,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     std::chrono::microseconds microseconds(keyEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.timeStamp = time;
-    event.key = MMI::KeyEvent::KeyCodeToString(keyEvent->GetKeyCode());
+    event.key.assign(MMI::KeyEvent::KeyCodeToString(keyEvent->GetKeyCode()));
     event.deviceId = keyEvent->GetDeviceId();
     int32_t orgDevice = keyEvent->GetSourceType();
     event.sourceType =

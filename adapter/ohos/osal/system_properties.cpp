@@ -18,6 +18,7 @@
 #include <shared_mutex>
 #include <regex>
 
+#include "display_info.h"
 #include "display_manager.h"
 #include "locale_config.h"
 #include "parameter.h"
@@ -148,6 +149,16 @@ bool IsSyncDebugTraceEnabled()
     return (system::GetParameter("persist.ace.trace.sync.debug.enabled", "false") == "true");
 }
 
+bool IsMeasureDebugTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.measure.debug.enabled", "false") == "true");
+}
+
+bool IsSafeAreaDebugTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.safeArea.debug.enabled", "false") == "true");
+}
+
 bool IsDeveloperModeOn()
 {
     return (system::GetParameter("const.security.developermode.state", "false") == "true");
@@ -160,7 +171,7 @@ bool IsWindowRectResizeEnabled()
 
 bool IsFocusCanBeActive()
 {
-    return system::GetParameter("persist.gesture.smart_gesture_enable", "1") == "1";
+    return system::GetParameter("persist.gesture.smart_gesture_enable", "1") != "0";
 }
 
 bool IsCacheNavigationNodeEnable()
@@ -391,6 +402,12 @@ int32_t GetPageCountProp()
     return pageCount > 0.0f ? pageCount : 0.0f;
 }
 
+bool IsTaskPriorityAdjustmentEnable()
+{
+    int32_t appVsyncPriority = system::GetIntParameter("const.graphic.app_vsync_priority", -1);
+    return appVsyncPriority != -1;
+}
+
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
@@ -400,6 +417,8 @@ std::atomic<bool> SystemProperties::stateManagerEnable_(IsStateManagerEnable());
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
 bool SystemProperties::cacheNavigationNodeEnable_ = IsCacheNavigationNodeEnable();
 bool SystemProperties::syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+bool SystemProperties::measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
+bool SystemProperties::safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
 bool SystemProperties::pixelRoundEnable_ = IsPixelRoundEnabled();
 bool SystemProperties::textTraceEnable_ = IsTextTraceEnabled();
 bool SystemProperties::syntaxTraceEnable_ = IsSyntaxTraceEnabled();
@@ -456,6 +475,7 @@ std::pair<float, float> SystemProperties::brightUpPercent_ = GetPercent();
 float SystemProperties::pageCount_ = GetPageCountProp();
 bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 std::atomic<bool> SystemProperties::acePerformanceMonitorEnable_(IsAcePerformanceMonitorEnabled());
+std::atomic<bool> SystemProperties::focusCanBeActive_(IsFocusCanBeActive());
 bool SystemProperties::aceCommercialLogEnable_ = IsAceCommercialLogEnable();
 bool SystemProperties::faultInjectEnabled_  = IsFaultInjectEnabled();
 bool SystemProperties::opincEnabled_ = IsOpIncEnabled();
@@ -465,7 +485,7 @@ uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
 float SystemProperties::fontScale_ = 1.0;
 float SystemProperties::fontWeightScale_ = 1.0;
 double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
-bool SystemProperties::focusCanBeActive_ = IsFocusCanBeActive();
+bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -597,6 +617,8 @@ void SystemProperties::InitDeviceInfo(
     stateManagerEnable_.store(IsStateManagerEnable());
     buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
     syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+    measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
+    safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
     pixelRoundEnable_ = IsPixelRoundEnabled();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     canvasDebugMode_ = ReadCanvasDebugMode();
@@ -612,9 +634,10 @@ void SystemProperties::InitDeviceInfo(
     gridCacheEnabled_ = IsGridCacheEnabled();
     sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
     acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
+    focusCanBeActive_.store(IsFocusCanBeActive());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
-    focusCanBeActive_ = IsFocusCanBeActive();
+    taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
@@ -859,14 +882,28 @@ void SystemProperties::EnableSystemParameterPerformanceMonitorCallback(const cha
     }
 }
 
+void SystemProperties::OnFocusActiveChanged(const char* key, const char* value, void* context)
+{
+    bool focusCanBeActive = true;
+    if (value && strcmp(value, "0") == 0) {
+        focusCanBeActive = false;
+    }
+    if (focusCanBeActive != focusCanBeActive_) {
+        SetFocusCanBeActive(focusCanBeActive);
+        LOGI("focusCanBeActive turns to %{public}d", focusCanBeActive);
+    }
+    return;
+}
+
 float SystemProperties::GetDefaultResolution()
 {
     // always return density of main screen, don't use this interface unless you need density when no window exists
     float density = 1.0f;
     auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
-    if (defaultDisplay) {
-        density = defaultDisplay->GetVirtualPixelRatio();
-    }
+    CHECK_NULL_RETURN(defaultDisplay, density);
+    auto displayInfo = defaultDisplay->GetDisplayInfoWithCache();
+    CHECK_NULL_RETURN(displayInfo, density);
+    density = displayInfo->GetVirtualPixelRatio();
     return density;
 }
 
@@ -893,6 +930,11 @@ void SystemProperties::SetDebugBoundaryEnabled(bool debugBoundaryEnabled)
 void SystemProperties::SetPerformanceMonitorEnabled(bool performanceMonitorEnable)
 {
     acePerformanceMonitorEnable_.store(performanceMonitorEnable);
+}
+
+void SystemProperties::SetFocusCanBeActive(bool focusCanBeActive)
+{
+    focusCanBeActive_.store(focusCanBeActive);
 }
 
 std::string SystemProperties::GetAtomicServiceBundleName()
@@ -966,10 +1008,5 @@ bool SystemProperties::IsNeedResampleTouchPoints()
 bool SystemProperties::IsNeedSymbol()
 {
     return true;
-}
-
-bool SystemProperties::GetFocusCanBeActive()
-{
-    return focusCanBeActive_;
 }
 } // namespace OHOS::Ace

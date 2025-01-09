@@ -2657,6 +2657,13 @@ HWTEST_F(NativeNodeTest, NativeNodeTest026, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SCROLL_OFFSET), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SCROLL_EDGE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_SCROLL_ENABLE_PAGING), nullptr);
+    EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_SCROLL_FLING_SPEED_LIMIT)->value->f32, 9000.0f);
+    value[0].f32 = 100.0f;
+    EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_SCROLL_FLING_SPEED_LIMIT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_SCROLL_FLING_SPEED_LIMIT)->value->f32, 100.0f);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SCROLL_FLING_SPEED_LIMIT), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_SCROLL_FLING_SPEED_LIMIT)->value->f32, 9000.0f);
+
     EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_SCROLL_CLIP_CONTENT)->value->i32,
                                     ArkUI_ContentClipMode::ARKUI_CONTENT_CLIP_MODE_BOUNDARY);
 
@@ -5384,5 +5391,32 @@ HWTEST_F(NativeNodeTest, NativeNodeIssueTest001, TestSize.Level1)
     ArkUI_NodeEvent event = { 0, 0 };
     event.node = node;
     OHOS::Ace::NodeModel::HandleNodeEvent(&event);
+}
+
+/**
+ * @tc.name: NativeNodeTest084
+ * @tc.desc: Test swiperNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest084, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    ArkUI_NumberValue value[] = { { .i32 = 1 }, { .i32 = 1 } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue), nullptr, nullptr };
+
+    value[0].i32 = true;
+    value[1].i32 = false;
+    auto ret = nodeAPI->setAttribute(rootNode, NODE_SWIPER_AUTO_PLAY, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    auto resultTtem = nodeAPI->getAttribute(rootNode, NODE_SWIPER_AUTO_PLAY);
+    EXPECT_TRUE(resultTtem->value[0].i32);
+    EXPECT_FALSE(resultTtem->value[1].i32);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SWIPER_AUTO_PLAY), ARKUI_ERROR_CODE_NO_ERROR);
+    resultTtem = nodeAPI->getAttribute(rootNode, NODE_SWIPER_AUTO_PLAY);
+    EXPECT_FALSE(resultTtem->value[0].i32);
+    EXPECT_TRUE(resultTtem->value[1].i32);
+    nodeAPI->disposeNode(rootNode);
 }
 } // namespace OHOS::Ace

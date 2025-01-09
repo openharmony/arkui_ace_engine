@@ -36,6 +36,7 @@ struct PickerDialogInfo {
     bool isEndDate;
     bool isSelectedDate;
     bool enableHoverMode = false;
+    bool isEnableCascade = false;
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
@@ -60,6 +61,7 @@ public:
     virtual void SetStartDate(const PickerDate& value) = 0;
     virtual void SetEndDate(const PickerDate& value) = 0;
     virtual void SetSelectedDate(const PickerDate& value) = 0;
+    virtual void SetMode(const DatePickerMode& value) = 0;
     virtual void SetShowLunar(bool lunar) = 0;
     virtual void SetOnChange(DateChangeEvent&& onChange) = 0;
     virtual void SetOnDateChange(DateChangeEvent&& onChange) = 0;
@@ -74,10 +76,11 @@ public:
     virtual void SetBackgroundColor(const Color& color) = 0;
     virtual void SetChangeEvent(DateChangeEvent&& onChange) = 0;
     virtual void HasUserDefinedOpacity() = 0;
+    virtual void SetEnableHapticFeedback(bool isEnableHapticFeedback) {};
 
 private:
     static std::unique_ptr<DatePickerModel> datePickerInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 
 class DatePickerDialogModel {
@@ -93,7 +96,7 @@ public:
 
 private:
     static std::unique_ptr<DatePickerDialogModel> datePickerDialogInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_MODEL_H

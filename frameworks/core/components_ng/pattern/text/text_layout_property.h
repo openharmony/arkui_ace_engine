@@ -172,7 +172,7 @@ public:
 public:
     void UpdateContent(const std::string& value)
     {
-        UpdateContent(UtfUtils::Str8ToStr16(value));
+        UpdateContent(UtfUtils::Str8DebugToStr16(value));
     }
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOption, CopyOptions, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(AdaptFontSizeStep, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
@@ -182,7 +182,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsAnimationNeeded, bool, PROPERTY_UPDATE_NORMAL);
 
     // placeholder
-    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(Placeholder, std::string, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_TEXT_PROPERTY_ITEM_WITHOUT_GROUP(Placeholder, std::u16string, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(PlaceholderFontStyle, FontStyle);
     ACE_DEFINE_TEXT_PROPERTY_ITEM_WITH_GROUP_ITEM(
         PlaceholderFontStyle, FontSize, PlaceholderFontSize, Dimension, PROPERTY_UPDATE_MEASURE);

@@ -404,138 +404,6 @@ ArkUINativeModuleValue XComponentBridge::ResetOpacity(ArkUIRuntimeCallInfo *runt
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue XComponentBridge::SetLinearGradientBlur(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetLinearGradientBlur(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetPixelStretchEffect(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetPixelStretchEffect(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetLightUpEffect(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetLightUpEffect(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetSphericalEffect(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetSphericalEffect(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetColorBlend(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetColorBlend(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetHueRotate(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetHueRotate(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetSepia(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetSepia(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetInvert(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetInvert(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetContrast(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetContrast(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetSaturate(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetSaturate(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetBrightness(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetBrightness(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
 ArkUINativeModuleValue XComponentBridge::SetGrayscale(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -543,66 +411,6 @@ ArkUINativeModuleValue XComponentBridge::SetGrayscale(ArkUIRuntimeCallInfo *runt
 }
 
 ArkUINativeModuleValue XComponentBridge::ResetGrayscale(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetBackdropBlur(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetBackdropBlur(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetBlur(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetBlur(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetBackgroundImagePosition(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetBackgroundImagePosition(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetBackgroundImageSize(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetBackgroundImageSize(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetBackgroundImage(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetBackgroundImage(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     return panda::JSValueRef::Undefined(vm);
@@ -746,6 +554,35 @@ ArkUINativeModuleValue XComponentBridge::ResetHdrBrightness(ArkUIRuntimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentHdrBrightness(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue XComponentBridge::SetEnableTransparentLayer(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsBoolean()) {
+        bool enableTransparentLayer = secondArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getXComponentModifier()->setXComponentEnableTransparentLayer(
+            nativeNode, enableTransparentLayer);
+    } else {
+        GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableTransparentLayer(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue XComponentBridge::ResetEnableTransparentLayer(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableTransparentLayer(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

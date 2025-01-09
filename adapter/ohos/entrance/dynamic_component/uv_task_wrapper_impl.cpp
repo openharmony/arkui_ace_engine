@@ -18,6 +18,7 @@
 namespace OHOS::Ace::NG {
 
 UVTaskWrapperImpl::UVTaskWrapperImpl(napi_env env)
+    :env_(env)
 {
     if (env == nullptr) {
         LOGE("env is null");
@@ -28,7 +29,6 @@ UVTaskWrapperImpl::UVTaskWrapperImpl(napi_env env)
         LOGE("native engine is null");
         return;
     }
-    loop_ = engine->GetUVLoop();
     threadId_ = engine->GetTid();
 }
 
@@ -39,17 +39,8 @@ bool UVTaskWrapperImpl::WillRunOnCurrentThread()
 
 void UVTaskWrapperImpl::Call(const TaskExecutor::Task& task)
 {
-    if (loop_ == nullptr) {
-        LOGW("loop is null");
-        return;
-    }
-    UVWorkWrapper* workWrapper = new UVWorkWrapper(task);
-    uv_queue_work(
-        loop_, workWrapper, [](uv_work_t* req) {},
-        [](uv_work_t* req, int status) {
-            auto workWrapper = static_cast<UVWorkWrapper*>(req);
-            (*workWrapper)();
-            delete workWrapper;
-        });
+    napi_send_event(env_, [work = std::make_shared<UVWorkWrapper>(task)] {
+        (*work)();
+    }, napi_eprio_high);
 }
 } // namespace OHOS::Ace::NG
