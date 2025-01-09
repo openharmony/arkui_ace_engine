@@ -314,13 +314,12 @@ void RichEditorOverlayModifier::UpdateScrollBar(PaintWrapper* paintWrapper)
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
 }
 
-void RichEditorOverlayModifier::StartFloatingCaretLand()
+void RichEditorOverlayModifier::StartFloatingCaretLand(const OffsetF& originCaretOffset)
 {
     AnimationOption option = AnimationOption();
     option.SetDuration(LAND_DURATION);
     option.SetCurve(LAND_CURVE);
     caretLanding_ = true;
-    auto originCaretOffset = caretOffset_->Get();
     AnimationUtils::Animate(
         option,
         [weak = WeakClaim(this), originCaretOffset]() {

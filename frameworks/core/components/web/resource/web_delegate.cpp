@@ -3187,12 +3187,21 @@ void WebDelegate::UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
 
 bool WebDelegate::GetIsSmoothDragResizeEnabled()
 {
+    if (OHOS::system::GetDeviceType() != "2in1") {
+        isSmoothDragResizeEnabled_ = false;
+    }
     return isSmoothDragResizeEnabled_;
 }
 
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart)
 {
     isDragResizeStart_ = isDragResizeStart;
+}
+
+void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width)
+{
+    dragResize_preHight_ = pre_height;
+    dragResize_preWidth_ = pre_width;
 }
 
 void WebDelegate::UpdateJavaScriptEnabled(const bool& isJsEnabled)
@@ -6240,6 +6249,7 @@ sptr<OHOS::SurfaceDelegate> WebDelegate::GetSurfaceDelegateClient()
 void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset, bool isKeyboard)
 {
     if (isDragResizeStart_) {
+        DragResize(drawSize.Width(), drawSize.Height(), dragResize_preHight_, dragResize_preWidth_);
         return;
     }
     if ((drawSize.Width() == 0) && (drawSize.Height() == 0)) {
@@ -7529,5 +7539,21 @@ void WebDelegate::ScaleGestureChangeV2(int type, double scale, double originScal
         nweb_->ScaleGestureChangeV2(type, scale, originScale, centerX, centerY);
     }
 #endif
+}
+
+void WebDelegate::UpdateOptimizeParserBudgetEnabled(const bool enable)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), enable]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                delegate->nweb_->PutOptimizeParserBudgetEnabled(enable);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateOptimizeParserBudget");
 }
 } // namespace OHOS::Ace

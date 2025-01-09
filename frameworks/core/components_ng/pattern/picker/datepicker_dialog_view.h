@@ -173,6 +173,7 @@ private:
     static bool switchDatePickerFlag_;
     static bool isShowTime_;
     static bool isUserSetFont_;
+    static bool isEnableHapticFeedback_;
     static Dimension selectedTextStyleFont_;
     static Dimension normalTextStyleFont_;
     static Dimension disappearTextStyleFont_;

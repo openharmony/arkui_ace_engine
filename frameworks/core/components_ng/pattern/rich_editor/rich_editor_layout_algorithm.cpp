@@ -344,7 +344,7 @@ std::string RichEditorLayoutAlgorithm::SpansToString()
         ss << "[";
         for_each(list.begin(), list.end(), [&ss](const RefPtr<SpanItem>& item) {
 #ifndef IS_RELEASE_VERSION
-            ss << "(" << StringUtils::RestoreEscape(UtfUtils::Str16ToStr8(item->content)) << ")";
+            ss << "(" << StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(item->content)) << ")";
 #endif
             ss << "[" << item->rangeStart << ":" << item->position << "],";
         });

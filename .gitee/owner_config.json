@@ -37,7 +37,9 @@
             "https://gitee.com/ileft2019",
             "https://gitee.com/jinweiliu",
             "https://gitee.com/lexiaoyao2",
-            "https://gitee.com/liyujie43"
+            "https://gitee.com/liyujie43",
+            "https://gitee.com/luoying_ace_admin",
+            "https://gitee.com/xiaoxiaohuang9"
         ],
         "https://gitee.com/arkuistatemgmt": [
             "https://gitee.com/seaside_wu",
@@ -207,6 +209,14 @@
             "info": "[Image能力 liyujie]",
             "group": "https://gitee.com/arkui_image"
         },
+        "https://gitee.com/luoying_ace_admin": {
+            "info": "[picker类组件 luoying]",
+            "group": "https://gitee.com/arkui_image"
+        },
+        "https://gitee.com/xiaoxiaohuang9": {
+            "info": "[picker类组件 huangxiaoxiao]",
+            "group": "https://gitee.com/arkui_image"
+        },
         "https://gitee.com/lixingchi1": {
             "info": "[逻辑组件 lixingchi]",
             "group": "https://gitee.com/arkuistatemgmt"
@@ -281,10 +291,6 @@
         },
         "https://gitee.com/futurescape": {
             "info": "Popup/Toast相关 miaoyu",
-            "group": "https://gitee.com/arkuipopupwindow"
-        },
-        "https://gitee.com/luoying_ace_admin": {
-            "info": "Dialog相关 luoying",
             "group": "https://gitee.com/arkuipopupwindow"
         },
         "https://gitee.com/houguobiao": {

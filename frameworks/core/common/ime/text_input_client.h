@@ -98,7 +98,7 @@ public:
     virtual void InsertValue(const std::string& insertValue, bool isIME = false) {};
     virtual void InsertValue(const std::u16string& insertValue, bool isIME = false)
     {
-        InsertValue(UtfUtils::Str16ToStr8(insertValue), isIME);
+        InsertValue(UtfUtils::Str16DebugToStr8(insertValue), isIME);
     };
     virtual void DeleteBackward(int32_t length) {};
     virtual void DeleteForward(int32_t length) {};
@@ -133,7 +133,7 @@ public:
     virtual void UpdateInputFilterErrorText(const std::string& errorText) {};
     virtual void UpdateInputFilterErrorText(const std::u16string& errorText)
     {
-        UpdateInputFilterErrorText(UtfUtils::Str16ToStr8(errorText));
+        UpdateInputFilterErrorText(UtfUtils::Str16DebugToStr8(errorText));
     };
     virtual void ResetTouchAtLeftOffsetFlag() {}
 
@@ -205,7 +205,7 @@ public:
 
     virtual int32_t SetPreviewText(const std::u16string& previewValue, const PreviewRange range)
     {
-        return SetPreviewText(UtfUtils::Str16ToStr8(previewValue), range);
+        return SetPreviewText(UtfUtils::Str16DebugToStr8(previewValue), range);
     }
 
     virtual int32_t SetPreviewText(const std::string& previewValue, const PreviewRange range)
@@ -223,7 +223,7 @@ public:
 
     virtual int32_t CheckPreviewTextValidate(const std::u16string& previewValue, const PreviewRange range)
     {
-        return CheckPreviewTextValidate(UtfUtils::Str16ToStr8(previewValue), range);
+        return CheckPreviewTextValidate(UtfUtils::Str16DebugToStr8(previewValue), range);
     }
 
     static std::map<KeyComb, std::function<bool(TextInputClient*)>> functionKeys_;
@@ -242,7 +242,7 @@ public:
     {
         return false;
     }
-    virtual void DeleteRange(int32_t start, int32_t end) {}
+    virtual void DeleteRange(int32_t start, int32_t end, bool isIME = true) {}
     virtual void HandleOnPageUp() {};
     virtual void HandleOnPageDown() {};
     virtual void ResetOriginCaretPosition() {};

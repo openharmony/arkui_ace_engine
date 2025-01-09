@@ -63,7 +63,7 @@ void TextModelNG::Create(const std::u16string& content)
 
 void TextModelNG::Create(const std::string& content)
 {
-    Create(UtfUtils::Str8ToStr16(content));
+    Create(UtfUtils::Str8DebugToStr16(content));
 }
 
 void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
@@ -161,6 +161,20 @@ void TextModelNG::SetTextColor(const Color& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true);
 }
 
+void TextModelNG::ResetTextColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, TextColor);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, false);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorFlag);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->ResetCustomFontColor();
+}
+
 void TextModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -174,6 +188,19 @@ void TextModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
     CHECK_NULL_VOID(textPattern);
     textPattern->UpdateFontColor(value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true, frameNode);
+}
+
+void TextModelNG::ResetTextColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, false, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->ResetCustomFontColor();
 }
 
 void TextModelNG::SetTextShadow(const std::vector<Shadow>& value)
@@ -934,18 +961,19 @@ Ace::FontStyle TextModelNG::GetItalicFontStyle(FrameNode* frameNode)
     return value;
 }
 
-Color TextModelNG::GetDefaultColor()
+Color TextModelNG::GetDefaultColor(int32_t themeScopeId)
 {
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Color::BLACK);
-    auto theme = context->GetTheme<TextTheme>();
+    auto theme = context->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_RETURN(theme, Color::BLACK);
     return theme->GetTextStyle().GetTextColor();
 }
 
 Color TextModelNG::GetFontColor(FrameNode* frameNode)
 {
-    auto defaultColor = GetDefaultColor();
+    auto themeScopeId = frameNode ? frameNode->GetThemeScopeId() : 0;
+    auto defaultColor = GetDefaultColor(themeScopeId);
     CHECK_NULL_RETURN(frameNode, defaultColor);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultColor);
@@ -1054,7 +1082,8 @@ Color TextModelNG::GetCaretColor(FrameNode* frameNode)
 {
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Color::BLACK);
-    auto theme = context->GetTheme<TextTheme>();
+    auto themeScopeId = frameNode ? frameNode->GetThemeScopeId() : 0;
+    auto theme = context->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_RETURN(theme, Color::BLACK);
     Color value = theme->GetCaretColor();
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, CursorColor, value, frameNode, value);

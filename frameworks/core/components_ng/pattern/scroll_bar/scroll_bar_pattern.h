@@ -364,6 +364,8 @@ public:
 
     void OnModifyDone() override;
 
+    PositionMode GetPositionMode();
+
 private:
     void InitScrollPositionCallback();
     void InitScrollEndCallback();

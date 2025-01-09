@@ -45,14 +45,19 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            InitThemeDefaults(theme);
+            ParsePattern(themeConstants, theme);
+            return theme;
+        }
+    protected:
+        void InitThemeDefaults(const RefPtr<TextTheme>& theme) const
+        {
             // Styles below do not need to get from ThemeConstants, directly set at here.
             theme->textStyle_.SetFontStyle(FontStyle::NORMAL);
             theme->textStyle_.SetFontWeight(FontWeight::NORMAL);
             theme->textStyle_.SetTextDecoration(TextDecoration::NONE);
-            ParsePattern(themeConstants, theme);
-            return theme;
         }
-    private:
+
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<TextTheme>& theme) const
         {
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_TEXT);
@@ -171,9 +176,9 @@ public:
 
 protected:
     TextTheme() = default;
+    TextStyle textStyle_;
 
 private:
-    TextStyle textStyle_;
     Color caretColor_;
     Color selectedColor_;
     Color dragBackgroundColor_ = Color::WHITE;

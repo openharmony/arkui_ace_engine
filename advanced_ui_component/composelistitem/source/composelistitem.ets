@@ -281,8 +281,9 @@ struct ContentItemStruct {
     if (this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
       if (this.symbolStyle != null) {
         SymbolGlyph()
+          .fontColor([this.getContentItemIconFillColor()])
           .attributeModifier(this.symbolStyle)
-          .fontSize(ICON_SIZE_MAP.get(this.iconStyle))
+          .fontSize(`${ICON_SIZE_MAP.get(this.iconStyle)}vp`)
           .effectStrategy(SymbolEffectStrategy.NONE)
           .symbolEffect(new SymbolEffect(), false)
           .borderRadius($r('sys.float.composeListItem_Image_Radius'))
@@ -292,7 +293,7 @@ struct ContentItemStruct {
       } else if (this.icon != null) {
         if (Util.isSymbolResource(this.icon)) {
           SymbolGlyph(this.icon as Resource)
-            .fontSize(ICON_SIZE_MAP.get(this.iconStyle))
+            .fontSize(`${ICON_SIZE_MAP.get(this.iconStyle)}vp`)
             .fontColor([this.getContentItemIconFillColor()])
             .borderRadius($r('sys.float.composeListItem_Image_Radius'))
             .focusable(false)
@@ -568,8 +569,9 @@ struct OperateItemStruct {
     Button({ type: ButtonType.Normal }) {
       if (param.icon?.symbolStyle) {
         SymbolGlyph()
+          .fontColor([this.iconColor])
           .attributeModifier(param.icon?.symbolStyle)
-          .fontSize(OPERATEITEM_ICONLIKE_SIZE)
+          .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
           .effectStrategy(SymbolEffectStrategy.NONE)
           .symbolEffect(new SymbolEffect(), false)
           .focusable(true)
@@ -577,7 +579,7 @@ struct OperateItemStruct {
       } else {
         if (Util.isSymbolResource(param.icon?.value)) {
           SymbolGlyph(param.icon?.value as Resource)
-            .fontSize(OPERATEITEM_ICONLIKE_SIZE)
+            .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
             .fontColor([this.iconColor])
             .focusable(true)
             .draggable(false)
@@ -624,7 +626,7 @@ struct OperateItemStruct {
   createImage() {
     if (Util.isSymbolResource(this.image)) {
       SymbolGlyph(this.image as Resource)
-        .fontSize(OPERATEITEM_IMAGE_SIZE)
+        .fontSize(`${OPERATEITEM_IMAGE_SIZE}vp`)
         .draggable(false)
         .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
     } else {
@@ -640,7 +642,7 @@ struct OperateItemStruct {
   createSymbol() {
     SymbolGlyph()
       .attributeModifier(this.symbolStyle)
-      .fontSize(OPERATEITEM_IMAGE_SIZE)
+      .fontSize(`${OPERATEITEM_IMAGE_SIZE}vp`)
       .effectStrategy(SymbolEffectStrategy.NONE)
       .symbolEffect(new SymbolEffect(), false)
       .draggable(false)
@@ -672,8 +674,9 @@ struct OperateItemStruct {
     Button({ type: ButtonType.Normal }) {
       if (this.arrow?.symbolStyle) {
         SymbolGlyph()
+          .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.ohos_id_color_fourth') : this.iconColor])
           .attributeModifier(this.arrow?.symbolStyle)
-          .fontSize(OPERATEITEM_ARROW_WIDTH)
+          .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
           .effectStrategy(SymbolEffectStrategy.NONE)
           .symbolEffect(new SymbolEffect(), false)
           .focusable(true)
@@ -681,7 +684,7 @@ struct OperateItemStruct {
       } else {
         if (Util.isSymbolResource(this.arrow?.value)) {
           SymbolGlyph(this.arrow?.value as Resource)
-            .fontSize(OPERATEITEM_ARROW_WIDTH)
+            .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
             .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.ohos_id_color_fourth') : this.iconColor])
             .focusable(true)
             .draggable(false)
@@ -737,11 +740,12 @@ struct OperateItemStruct {
       .radioStyle({
         uncheckedBorderColor: this.getUnselectedColor()
       })
-      .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent)
+      .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
+      Color.Transparent)
       .borderRadius(OPERATE_ITEM_RADIUS)
       .onChange((isCheck: boolean) => {
         if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
-		  this.radioState = isCheck;
+          this.radioState = isCheck;
           this.isChecked = isCheck;
         }
         if (this.radio?.onChange) {
@@ -779,7 +783,8 @@ struct OperateItemStruct {
     Checkbox()
       .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS)
       .unselectedColor(this.getUnselectedColor())
-      .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent)
+      .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
+      Color.Transparent)
       .margin({ end: LengthMetrics.vp(LISTITEM_PADDING) })
       .select(this.checkBoxState)
       .onChange((isCheck: boolean) => {
@@ -822,8 +827,10 @@ struct OperateItemStruct {
     Row() {
       Toggle({ type: ToggleType.Switch, isOn: this.switchState })
         .borderRadius(IS_SUPPORT_SUBCOMPONENT_EVENT ? UNUSUAL : OPERATE_ITEM_RADIUS)
-        .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR : Color.Transparent)
-        .switchPointColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus && !this.switchState ? OPERATE_ITEM_COLOR : UNUSUAL)
+        .backgroundColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus ? OPERATE_ITEM_BACKGROUND_COLOR :
+        Color.Transparent)
+        .switchPointColor(!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isFocus && !this.switchState ? OPERATE_ITEM_COLOR :
+          UNUSUAL)
         .onChange((isCheck: boolean) => {
           this.switchState = isCheck;
           if (!IS_SUPPORT_SUBCOMPONENT_EVENT) {
@@ -878,8 +885,9 @@ struct OperateItemStruct {
             })
           if (this.arrow?.symbolStyle) {
             SymbolGlyph()
+              .fontColor([$r('sys.color.ohos_id_color_fourth')])
               .attributeModifier(this.arrow?.symbolStyle)
-              .fontSize(OPERATEITEM_ARROW_WIDTH)
+              .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
               .effectStrategy(SymbolEffectStrategy.NONE)
               .symbolEffect(new SymbolEffect(), false)
               .focusable(false)
@@ -887,7 +895,7 @@ struct OperateItemStruct {
           } else {
             if (Util.isSymbolResource(this.arrow?.value)) {
               SymbolGlyph(this.arrow?.value as Resource)
-                .fontSize(OPERATEITEM_ARROW_WIDTH)
+                .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
                 .fontColor([$r('sys.color.ohos_id_color_fourth')])
                 .focusable(false)
                 .draggable(false)
@@ -929,8 +937,9 @@ struct OperateItemStruct {
             .margin({ right: OPERATEITEM_ARROW_MARGIN_WIDTH })
           if (this.arrow?.symbolStyle) {
             SymbolGlyph()
+              .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.icon_fourth') : this.iconColor])
               .attributeModifier(this.arrow?.symbolStyle)
-              .fontSize(OPERATEITEM_ARROW_WIDTH)
+              .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
               .effectStrategy(SymbolEffectStrategy.NONE)
               .symbolEffect(new SymbolEffect(), false)
               .focusable(false)
@@ -938,7 +947,7 @@ struct OperateItemStruct {
           } else {
             if (Util.isSymbolResource(this.arrow?.value)) {
               SymbolGlyph(this.arrow?.value as Resource)
-                .fontSize(OPERATEITEM_ARROW_WIDTH)
+                .fontSize(`${OPERATEITEM_ICONLIKE_SIZE}vp`)
                 .fontColor([IS_SUPPORT_SUBCOMPONENT_EVENT ? $r('sys.color.icon_fourth') : this.iconColor])
                 .focusable(false)
                 .draggable(false)
@@ -1323,7 +1332,7 @@ export struct ComposeListItem {
     )
   }
 
-  getPadding(): Padding {
+  getPadding(): Padding | undefined {
     if (!IS_SUPPORT_SUBCOMPONENT_EVENT && this.isWrapText) {
       let paddingNum = LengthMetrics.resource(ITEM_PADDING).value;
       let compareSize = paddingNum > LISTITEM_PADDING;
@@ -1477,7 +1486,7 @@ export struct ComposeListItem {
       left: !IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : undefined,
       right: !IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : undefined
     })
-   .padding({
+    .padding({
       left: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0,
       right: IS_SUPPORT_SUBCOMPONENT_EVENT ? STACK_PADDING : 0
     })

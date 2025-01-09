@@ -133,6 +133,17 @@ RefPtr<Container> Container::GetFoucsed()
     return foucsContainer;
 }
 
+RefPtr<Container> Container::GetByWindowId(uint32_t windowId)
+{
+    RefPtr<Container> windowContainer;
+    AceEngine::Get().NotifyContainers([&windowContainer, windowId](const RefPtr<Container>& container) {
+        if (windowId == container->GetWindowId()) {
+            windowContainer = container;
+        }
+    });
+    return windowContainer;
+}
+
 RefPtr<TaskExecutor> Container::CurrentTaskExecutor()
 {
     auto curContainer = Current();

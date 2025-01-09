@@ -1332,6 +1332,8 @@ void FocusHub::OnBlurNode()
     });
     if (blurReason_ != BlurReason::FRAME_DESTROY) {
         ClearFocusState();
+    } else {
+        ClearFocusState(true, false);
     }
 
     pipeline->RequestFrame();
@@ -1661,13 +1663,13 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
     return true;
 }
 
-void FocusHub::ClearFocusState(bool isNeedStateStyles)
+void FocusHub::ClearFocusState(bool isNeedStateStyles, bool isNeedClearCallBack)
 {
     if (isNeedStateStyles) {
         // check focus state style.
         CheckFocusStateStyle(false);
     }
-    if (onClearFocusStateCallback_) {
+    if (isNeedClearCallBack && onClearFocusStateCallback_) {
         onClearFocusStateCallback_();
     }
     if (focusStyleType_ != FocusStyleType::NONE) {

@@ -314,7 +314,7 @@ public:
 
     bool HasIndicatorNode() const
     {
-        return indicatorId_.has_value();
+        return indicatorId_.has_value() || GetIndicatorNode() != nullptr;
     }
 
     bool HasLeftButtonNode() const
@@ -681,6 +681,41 @@ public:
 
     float CalcCurrentTurnPageRate() const;
     int32_t GetFirstIndexInVisibleArea() const;
+
+    bool IsBindIndicator() const
+    {
+        return isBindIndicator_;
+    }
+
+    void SetBindIndicator(bool bind)
+    {
+        isBindIndicator_ = bind;
+    }
+
+    void SetIndicatorNode(const WeakPtr<NG::UINode>& indicatorNode)
+    {
+        if (isBindIndicator_) {
+            indicatorNode_ = indicatorNode;
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+
+            auto frameIndicatorNode = GetIndicatorNode();
+            CHECK_NULL_VOID(frameIndicatorNode);
+            frameIndicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }
+
+    RefPtr<FrameNode> GetIndicatorNode() const
+    {
+        auto refUINode = indicatorNode_.Upgrade();
+        CHECK_NULL_RETURN(refUINode, nullptr);
+        auto frameNode = DynamicCast<FrameNode>(refUINode);
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        return frameNode;
+    }
+
+    bool IsFocusNodeInItemPosition(const RefPtr<FrameNode>& focusNode);
 
 protected:
     void MarkDirtyNodeSelf();
@@ -1258,6 +1293,13 @@ private:
     PageFlipMode pageFlipMode_ = PageFlipMode::CONTINUOUS;
     bool isFirstAxisAction_ = true;
     bool stopWhenTouched_ = true;
+    WeakPtr<NG::UINode> indicatorNode_;
+    bool isBindIndicator_ = false;
+    RefPtr<FrameNode> GetCommonIndicatorNode();
+    bool IsIndicator(const std::string& tag) const
+    {
+        return tag == V2::SWIPER_INDICATOR_ETS_TAG || tag == V2::INDICATOR_ETS_TAG;
+    }
 };
 } // namespace OHOS::Ace::NG
 

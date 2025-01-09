@@ -2268,7 +2268,7 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::STRING };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("JsSharedTransition", jsVal, checkList)) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
             ViewAbstractModel::GetInstance()->SetSharedTransition("", nullptr);
         }
         return;
@@ -2276,7 +2276,7 @@ void JSViewAbstract::JsSharedTransition(const JSCallbackInfo& info)
     // id
     auto id = jsVal->ToString();
     if (id.empty()) {
-        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
             ViewAbstractModel::GetInstance()->SetSharedTransition("", nullptr);
         }
         return;
@@ -5096,7 +5096,7 @@ bool JSViewAbstract::ParseJsString(const JSRef<JSVal>& jsValue, std::u16string& 
     }
     bool ret = ParseJsStringObj(jsValue, u8Result);
     if (ret) {
-        result = UtfUtils::Str8ToStr16(u8Result);
+        result = UtfUtils::Str8DebugToStr16(u8Result);
         return true;
     }
     return false;
@@ -5638,6 +5638,10 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
         auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
         if (dragPreview->IsBoolean()) {
             previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
+        }
+        auto enableEdgeAutoScroll = interObj->GetProperty("enableEdgeAutoScroll");
+        if (enableEdgeAutoScroll->IsBoolean()) {
+            previewOption.enableEdgeAutoScroll = enableEdgeAutoScroll->ToBoolean();
         }
     }
 

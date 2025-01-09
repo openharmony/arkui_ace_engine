@@ -513,6 +513,21 @@ public:
         return isDisableTextStyleAnimation_;
     }
 
+    void SetIsEnableHaptic(bool isEnableHapticFeedback)
+    {
+        if (isEnableHaptic_ != isEnableHapticFeedback) {
+            isHapticChanged_ = true;
+        }
+        isEnableHaptic_ = isEnableHapticFeedback;
+    }
+
+    bool GetIsEnableHaptic() const
+    {
+        return isEnableHaptic_;
+    }
+
+    void ColumnPatternInitHapticController();
+
 private:
     void OnModifyDone() override;
     void SetLayoutDirection(TextDirection textDirection);
@@ -628,6 +643,8 @@ private:
     std::optional<float> dividerLength_;
 
     bool isDisableTextStyleAnimation_ = false;
+    bool isEnableHaptic_ = true;
+    bool isHapticChanged_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -50,7 +50,28 @@ public:
         value->LayoutProperty::UpdateLayoutProperty(DynamicCast<LayoutProperty>(this));
         value->propIndicatorLayoutStyle_ = CloneIndicatorLayoutStyle();
         value->propDigitIndicatorLayoutStyle_ = CloneDigitIndicatorLayoutStyle();
+        value->propDirection_ = CloneDirection();
+        value->propInitialIndex_ = CloneInitialIndex();
+        value->propCount_ = CloneCount();
+        value->propShowIndicator_ = CloneShowIndicator();
+        value->propIndicatorType_ = CloneIndicatorType();
+        value->propLoop_ = CloneLoop();
+
         return value;
+    }
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
+    {
+        LayoutProperty::ToJsonValue(json, filter);
+        /* no fixed attr below, just return */
+        if (filter.IsFastFilter()) {
+            return;
+        }
+        json->PutExtAttr("initialIndex", propInitialIndex_.value_or(0), filter);
+        json->PutExtAttr("count", propCount_.value_or(0), filter);
+        json->PutExtAttr(
+            "vertical", propDirection_.value_or(Axis::HORIZONTAL) == Axis::VERTICAL ? "true" : "false", filter);
+        json->PutExtAttr("loop", propLoop_.value_or(true) ? "true" : "false", filter);
     }
 
     void Reset() override
@@ -58,8 +79,20 @@ public:
         LayoutProperty::Reset();
         ResetIndicatorLayoutStyle();
         ResetDigitIndicatorLayoutStyle();
+        ResetDirection();
+        ResetInitialIndex();
+        ResetCount();
+        ResetShowIndicator();
+        ResetIndicatorType();
+        ResetLoop();
     }
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Direction, Axis, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(InitialIndex, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Count, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowIndicator, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IndicatorType, SwiperIndicatorType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(IndicatorLayoutStyle, IndicatorLayoutStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(IndicatorLayoutStyle, Left, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(IndicatorLayoutStyle, Top, Dimension, PROPERTY_UPDATE_MEASURE_SELF);

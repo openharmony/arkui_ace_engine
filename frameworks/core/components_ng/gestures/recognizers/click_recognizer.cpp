@@ -164,6 +164,7 @@ void ClickRecognizer::OnAccepted()
     auto node = GetAttachedNode().Upgrade();
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Click accepted, tag: %{public}s",
         node ? node->GetTag().c_str() : "null");
+    auto lastRefereeState = refereeState_;
     refereeState_ = RefereeState::SUCCEED;
     ResSchedReport::GetInstance().ResSchedDataReport("click");
     if (backupTouchPointsForSucceedBlock_.has_value()) {
@@ -202,6 +203,9 @@ void ClickRecognizer::OnAccepted()
     // already send Event in onClick
     if (onAccessibilityEventFunc_ && !onClick_) {
         onAccessibilityEventFunc_(AccessibilityEventType::CLICK);
+    }
+    if (lastRefereeState != RefereeState::SUCCEED_BLOCKED) {
+        ResetStateVoluntarily();
     }
 }
 
