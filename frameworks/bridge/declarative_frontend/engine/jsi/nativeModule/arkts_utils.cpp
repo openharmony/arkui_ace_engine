@@ -500,6 +500,7 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
     }
     if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber(vm)->Value());
+        result.SetResourceId(resId->Int32Value(vm));
         return true;
     }
     return false;
