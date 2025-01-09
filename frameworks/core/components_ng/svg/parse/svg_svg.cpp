@@ -139,6 +139,28 @@ void SvgSvg::AdjustContentAreaByViewBox(RSCanvas& canvas, const Size& viewPort)
     }
 }
 
+void SvgSvg::OnImageColorFilter(RSCanvas& canvas, const ImageColorFilter& imageColorFilter)
+{
+    auto rsColorFilterPtr = SvgColorFilterEffect::GetRsColorFilter(imageColorFilter);
+    CHECK_NULL_VOID(rsColorFilterPtr);
+    RSBrush brush;
+    auto filter = brush.GetFilter();
+    auto imageFilter = RSRecordingImageFilter::CreateColorFilterImageFilter(*rsColorFilterPtr, nullptr);
+    filter.SetImageFilter(imageFilter);
+    brush.SetFilter(filter);
+    RSSaveLayerOps slo(nullptr, &brush);
+    canvas.SaveLayer(slo);
+}
+
+void SvgSvg::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
+{
+    auto imageColorFilterOpt = GetColorFilter();
+    if (isRootNode_ && imageColorFilterOpt.has_value()) {
+        OnImageColorFilter(canvas, imageColorFilterOpt.value());
+    }
+    SvgNode::OnDraw(canvas, lengthRule);
+}
+
 Size SvgSvg::GetSize() const
 {
     return Size(svgAttr_.width.Value(), svgAttr_.height.Value());

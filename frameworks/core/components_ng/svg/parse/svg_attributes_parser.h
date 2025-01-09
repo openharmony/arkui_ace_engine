@@ -67,6 +67,8 @@ public:
         const SvgAlign& svgAlign, float& translateX, float& translateY);
     static void ComputeScale(const Size& viewBox, const Size& viewPort,
         const SvgPreserveAspectRatio& preserveAspectRatio, float& scaleX, float& scaleY);
+    static Color GetColorFromHexString(const std::string& value);
+    static Color GetColorFrom4HexString(const std::string& value);
 };
 enum class SvgFeColorMatrixType {
     MATRIX,
