@@ -939,7 +939,8 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
                 session->InnerNotifyOccupiedAreaChangeInfo(info, false, curTime);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIUecAreaChange");
+        TaskExecutor::TaskType::UI, "ArkUIUecAreaChange",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     return true;
 }
 
