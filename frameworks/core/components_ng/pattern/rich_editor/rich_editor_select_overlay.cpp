@@ -209,7 +209,7 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
 
 void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
 {
-    BaseTextSelectOverlay::OnHandleMoveDone(handleRect, isFirstHandle);
+    dragHandleIndex_ = DragHandleIndex::NONE;
     isHandleMoving_ = false;
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
@@ -482,7 +482,7 @@ void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag
 
 void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst)
 {
-    BaseTextSelectOverlay::OnHandleMoveStart(event, isFirst);
+    dragHandleIndex_ = isFirst ? DragHandleIndex::FIRST : DragHandleIndex::SECOND;
     isHandleMoving_ = true;
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
