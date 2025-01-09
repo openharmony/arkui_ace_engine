@@ -98,10 +98,8 @@ void ArcScrollBar::SetRoundTrickRegion(double estimatedHeight, double barRegionS
         double radius = size.Width() * FACTOR_HALF - centerDeviation_;
 
         Point centerPoint(size.Width() * HALF, size.Height() * HALF);
-        auto activeMaxOffsetAngle = GetPositionMode() == PositionMode::LEFT ? -GetActiveMaxOffsetAngle() :
-                                                                              GetActiveMaxOffsetAngle();
-        arcHotZoneRect_ = ArcRound(centerPoint, radius, GetActiveStartAngle(),
-            activeMaxOffsetAngle, NormalizeToPx(GetActiveBackgroundWidth()));
+        arcHotZoneRect_ = ArcRound(centerPoint, radius, trickStartAngle_, trickSweepAngle_, 
+            NormalizeToPx(GetActiveBackgroundWidth()));
         arcHotZoneRect_.SetPositionMode(GetPositionMode());
         arcActiveRect_ = ArcRound(centerPoint, radius, trickStartAngle_, trickSweepAngle_, width_);
         arcHoverRegion_ = arcActiveRect_;
