@@ -97,7 +97,7 @@ void WindowNode::SetParent(const WeakPtr<UINode>& parent)
 {
     auto prevParent = GetParent();
     if (prevParent && prevParent != parent.Upgrade()) {
-        removeFromParentCleanly(Claim(this), prevParent);
+        RemoveFromParentCleanly(Claim(this), prevParent);
     }
     UINode::SetParent(parent);
 }

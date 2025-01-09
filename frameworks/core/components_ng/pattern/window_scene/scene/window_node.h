@@ -20,7 +20,6 @@
 
 #include "core/components_ng/base/frame_node.h"
 
-constexpr int32_t INVALID_SCREEN_ID = -100;
 namespace OHOS::Ace::NG {
 class ACE_EXPORT WindowNode : public FrameNode {
     DECLARE_ACE_TYPE(WindowNode, FrameNode);
@@ -46,7 +45,7 @@ private:
     std::vector<RectF> ConvertHotRects(const std::vector<Rosen::Rect>& hotAreas);
 
     int32_t sessionId_ = 0;
-    int32_t screenId_ = INVALID_SCREEN_ID;
+    int32_t screenId_ = 0;
 };
 } // namespace OHOS::Ace::NG
 
