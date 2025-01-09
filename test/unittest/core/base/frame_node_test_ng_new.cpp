@@ -1747,6 +1747,43 @@ HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetPreviewOptionFromModifier015
+ * @tc.desc: Test UpdatePreviewOptionFromModifier
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewOptionFromModifier015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+    EXPECT_NE(frameNode, nullptr);
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    /**
+     * @tc.steps: step2. get DragPreviewOption.
+     */
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    /**
+     * @tc.steps: step3. set auto scrolling when drag to the edge of scrollable component.
+     */
+    dragPreviewOption.enableEdgeAutoScroll = false;
+    frameNode->SetDragPreviewOptions(dragPreviewOption);
+    /**
+     * @tc.steps: step4. call UpdatePreviewOptionFromModifier
+     * @tc.expected: enableEdgeAutoScroll is false.
+     */
+    dragEventActuator->UpdatePreviewOptionFromModifier(frameNode);
+    dragPreviewOption = frameNode->GetDragPreviewOption();
+    EXPECT_EQ(dragPreviewOption.enableEdgeAutoScroll, false);
+}
+
+/**
  * @tc.name: FrameNodeJSCustomProperty
  * @tc.desc: Test JSCustomProperty.
  * @tc.type: FUNC
