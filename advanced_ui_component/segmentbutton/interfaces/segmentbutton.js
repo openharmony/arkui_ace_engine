@@ -1932,9 +1932,9 @@ class SegmentButtonItemArrayComponent extends ViewPU {
                                             Button.backgroundColor(Color.Transparent);
                                             Button.accessibilityLevel(c25.accessibilityLevel);
                                             Button.accessibilitySelected(this.options.multiply ? undefined :
-                                            this.selectedIndexes.includes(index));
+                                            this.selectedIndexes.includes(z25));
                                             Button.accessibilityChecked(this.options.multiply ?
-                                            this.selectedIndexes.includes(index) : undefined);
+                                            this.selectedIndexes.includes(z25) : undefined);
                                             Button.accessibilityDescription(this.getAccessibilityDescription(c25.accessibilityDescription));
                                             Button.direction(this.options.direction);
                                             Button.borderRadius(this.buttonBorderRadius[b25]);
