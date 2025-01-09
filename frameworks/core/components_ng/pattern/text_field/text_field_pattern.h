@@ -201,6 +201,14 @@ struct FloatingCaretState {
     bool FloatingCursorVisible = false;
     bool ShowOriginCursor = false;
     Color OriginCursorColor = Color(0x4D000000);
+    std::optional<float> lastFloatingCursorY = std::nullopt;
+
+    void Reset()
+    {
+        FloatingCursorVisible = false;
+        ShowOriginCursor = false;
+        lastFloatingCursorY = std::nullopt;
+    }
 };
 
 struct ContentScroller {
@@ -482,6 +490,13 @@ public:
     {
         floatCaretState_.FloatingCursorVisible = floatingCursorVisible;
     }
+
+    void ResetFloatingCursorState()
+    {
+        floatCaretState_.Reset();
+    }
+
+    void SetMagnifierLocalOffsetToFloatingCaretPos();
 
     bool GetShowOriginCursor() const
     {
@@ -1599,6 +1614,11 @@ public:
     }
 
     SelectionInfo GetSelection();
+
+    bool GetContentScrollerIsScrolling() const
+    {
+        return contentScroller_.isScrolling;
+    }
 
     void SetTextFadeoutCapacity(bool enabled)
     {
