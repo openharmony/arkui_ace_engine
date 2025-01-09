@@ -77,6 +77,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_gesture_modifier.cpp",
       "node/node_image_modifier.cpp",
       "node/node_image_span_modifier.cpp",
+      "node/node_indicator_modifier.cpp",
       "node/node_list_item_group_modifier.cpp",
       "node/node_list_item_modifier.cpp",
       "node/node_list_modifier.cpp",
