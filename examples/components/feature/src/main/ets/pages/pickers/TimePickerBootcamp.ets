@@ -102,13 +102,15 @@ class MyGestureModifier2 implements GestureModifier {
 
 @Component
 export struct TimePickerBootcamp {
-
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
   @State enableFormat: boolean = false;
   @State format: TimePickerFormat = TimePickerFormat.HOUR_MINUTE;
-  @State enableUseMilitaryTime: boolean = false;
-  @State useMilitaryTime: boolean = false;
+  @State enableIsMilitaryTime: boolean = false;
+  @State isMilitaryTime: boolean = false;;
+  @State isEnableCascade: boolean = false;
+  @State enableCascade: boolean = false;
+  private selectedTime: Date = new Date('2022-07-22T12:00:00')
   @State enableDisappearTextStyleColor: boolean = false;
   @State disappearTextStyleColor: ResourceColor = '#ff182431';
   @State enableDisappearTextStyleFontSize: boolean = false;
@@ -919,8 +921,6 @@ export struct TimePickerBootcamp {
     }, 200)
   }
 
-  private selectedTime: Date = new Date();
-
   build() {
     NavDestination() {
       Drawer({
@@ -1070,7 +1070,7 @@ export struct TimePickerBootcamp {
           selected: this.selectedTime,
           format: useEnabled(this.enableFormat, this.format)
         })
-          .useMilitaryTime(useEnabled(this.enableUseMilitaryTime, this.useMilitaryTime))
+          .useMilitaryTime(useEnabled(this.enableIsMilitaryTime, this.isMilitaryTime))
           .disappearTextStyle({
             color: useEnabled(this.enableDisappearTextStyleColor, this.disappearTextStyleColor),
             font: {
@@ -1101,6 +1101,7 @@ export struct TimePickerBootcamp {
           .enableHapticFeedback(useEnabled(this.enableEnableHapticFeedback, this.enableHapticFeedback))
           .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
           .direction(useEnabled(this.enableCompDirection, this.compDirection))
+
           .width(useEnabled(this.enableCompWidth, this.compWidth))
           .height(useEnabled(this.enableCompHeight, this.compHeight))
           .padding(useEnabled(this.enableCompPadding, this.compPadding))
@@ -1974,7 +1975,10 @@ export struct TimePickerBootcamp {
             return HitTestMode.Default;
           })
           .onChange((value: TimePickerResult) => {
-            this.compEventTriggeredLog('选择时间事件触发')
+            if(value.hour >= 0) {
+              this.selectedTime.setHours(value.hour, value.minute)
+              console.info('select current date is: ' + JSON.stringify(value))
+            }
           })
       }
     }.width('100%').height('100%')
@@ -1995,12 +1999,22 @@ export struct TimePickerBootcamp {
         })
 
         RadioBlock({
-          title: 'useMilitaryTime',
-          isEnabled: $enableUseMilitaryTime,
-          value: $useMilitaryTime,
+          title: '切换12小时制/24小时制',
+          isEnabled: this.enableIsMilitaryTime,
+          value: this.isMilitaryTime,
           dataSource: [
-            { label: '24-hour', value: true },
-            { label: '12-hour', value: false }
+            { label: '12小时制', value: false },
+            { label: '24小时制', value: true }
+          ]
+        })
+
+        RadioBlock({
+          title: '切换12小时制上午下午跟随小时联动/不随小时联动',
+          isEnabled: this.isEnableCascade,
+          value: this.enableCascade,
+          dataSource: [
+            { label: '不随小时联动', value: false },
+            { label: '跟随小时联动', value: true }
           ]
         })
 
