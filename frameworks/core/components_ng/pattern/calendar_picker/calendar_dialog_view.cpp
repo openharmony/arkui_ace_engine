@@ -292,18 +292,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     CHECK_NULL_RETURN(textTitleNode, nullptr);
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(u"");
-    MarginProperty textMargin;
-    textMargin.left = CalcLength(theme->GetCalendarTitleTextPadding());
-    textMargin.right = CalcLength(theme->GetCalendarTitleTextPadding());
-    textLayoutProperty->UpdateMargin(textMargin);
-    textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleFontSize());
-    textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
-    textLayoutProperty->UpdateTextColorFlagByUser(true);
-    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
-    textLayoutProperty->UpdateMaxLines(1);
-    textLayoutProperty->UpdateLayoutWeight(1);
-    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    UpdateTextLayoutProperty(textLayoutProperty, theme);
     textTitleNode->MarkModifyDone();
     textTitleNode->MountToParent(titleRow);
 
@@ -1184,5 +1173,21 @@ void CalendarDialogView::UpdateButtons(
     CalendarDialogView::UpdateButtonStyles(
         buttonInfos, buttonIndex, buttonLayoutProperty, buttonNode->GetRenderContext());
     buttonNode->MarkModifyDone();
+}
+
+void CalendarDialogView::UpdateTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<CalendarTheme>& theme)
+{
+    textLayoutProperty->UpdateContent(u"");
+    MarginProperty textMargin;
+    textMargin.left = CalcLength(theme->GetCalendarTitleTextPadding());
+    textMargin.right = CalcLength(theme->GetCalendarTitleTextPadding());
+    textLayoutProperty->UpdateMargin(textMargin);
+    textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleFontSize());
+    textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
+    textLayoutProperty->UpdateTextColorFlagByUser(true);
+    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateLayoutWeight(1);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
 }
 } // namespace OHOS::Ace::NG
