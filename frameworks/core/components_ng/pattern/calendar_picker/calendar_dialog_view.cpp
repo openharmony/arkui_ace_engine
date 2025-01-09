@@ -1175,7 +1175,8 @@ void CalendarDialogView::UpdateButtons(
     buttonNode->MarkModifyDone();
 }
 
-void CalendarDialogView::UpdateTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty, RefPtr<CalendarTheme>& theme)
+void CalendarDialogView::UpdateTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    RefPtr<CalendarTheme>& theme)
 {
     textLayoutProperty->UpdateContent(u"");
     MarginProperty textMargin;
