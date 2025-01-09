@@ -119,7 +119,7 @@ private:
     static void SetWeekTextDirection(const TextDirection& dialogDirection, const TextDirection& calendarDirection,
         const RefPtr<FrameNode>& weekNode);
     static constexpr double deviceHeightLimit = 640.0;
-    static UpdateTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    static void UpdateTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
         RefPtr<CalendarTheme>& theme)
     static DeviceOrientation previousOrientation_;
 };
