@@ -512,8 +512,10 @@ void ContainerModalPattern::SetContainerButtonHide(bool hideSplit, bool hideMaxi
     CHECK_NULL_VOID(controlButtonsRow);
     SetTitleButtonHide(controlButtonsRow, hideSplit, hideMaximize, hideMinimize, hideClose);
     hideSplitButton_ = hideSplit;
-    LOGI("Set containerModal button status successfully, hideSplit: %{public}d, hideMaximize: %{public}d, "
-         "hideMinimize: %{public}d, hideClose: %{public}d",
+    TAG_LOGI(AceLogTag::ACE_APPBAR,
+        "Set containerModal button status successfully, "
+        "hideSplit: %{public}d, hideMaximize: %{public}d, "
+        "hideMinimize: %{public}d, hideClose: %{public}d",
         hideSplit, hideMaximize, hideMinimize, hideClose);
 }
 
