@@ -125,6 +125,11 @@ const std::map<Accessibility::ActionType, std::function<bool(const Accessibility
         } },
 };
 
+bool IsDynamicComponent(const RefPtr<NG::UINode>& node)
+{
+    return node && (node->GetTag() == V2::DYNAMIC_COMPONENT_ETS_TAG);
+}
+
 bool IsExtensionComponent(const RefPtr<NG::UINode>& node)
 {
     return node && (node->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG
@@ -151,6 +156,11 @@ bool IsUIExtensionShowPlaceholder(const RefPtr<NG::UINode>& node)
     return manager->IsShowPlaceholder(node->GetId());
 #endif
     return true;
+}
+
+bool NeedUpdateChildrenOfAccessibilityElementInfo(const RefPtr<NG::UINode>& node)
+{
+    return !IsDynamicComponent(node);
 }
 
 Accessibility::EventType ConvertStrToEventType(const std::string& type)
@@ -1618,6 +1628,11 @@ namespace {
 void UpdateChildrenOfAccessibilityElementInfo(
     const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty, AccessibilityElementInfo& nodeInfo)
 {
+    if (!NeedUpdateChildrenOfAccessibilityElementInfo(node)) {
+        TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "Node %{public}s not need update children"
+            " of accessibilityElementInfo", node->GetTag().c_str());
+        return;
+    }
     if (!IsExtensionComponent(node) || IsUIExtensionShowPlaceholder(node)) {
         std::vector<int64_t> children;
         for (const auto& item : node->GetChildren(true)) {
