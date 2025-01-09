@@ -184,12 +184,9 @@ private:
     void SelectPlaybackMode(PlaybackMode mode);
     void StartPlayback();
     void StartAnimation();
-    void CommonStartAnimation(const RefPtr<RenderContext>& image, const RefPtr<RenderContext>& video);
-    void RepeatStartAnimation(const RefPtr<RenderContext>& videoRsContext);
     void StopPlayback();
     void PausePlayback();
     void StopAnimation();
-    void RepeatStopAnimation(const RefPtr<RenderContext>& videoRsContext);
     void StopAnimationCallback();
     void StartAutoPlay();
     void StartRepeatPlay();

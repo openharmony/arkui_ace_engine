@@ -16,6 +16,7 @@
 const __MovingPhotoView__ = requireInternal("multimedia.movingphotoview");
 var PixelMapFormat;
 (function (PixelMapFormat) {
+    PixelMapFormat[PixelMapFormat["UNKNOWN"] = 0] = "UNKNOWN";
     PixelMapFormat[PixelMapFormat["RGBA_8888"] = 1] = "RGBA_8888";
     PixelMapFormat[PixelMapFormat["NV21"] = 2] = "NV21";
     PixelMapFormat[PixelMapFormat["RGBA_1010102"] = 3] = "RGBA_1010102";

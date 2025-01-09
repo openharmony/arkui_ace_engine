@@ -113,15 +113,6 @@ void MovingPhotoModelNG::SetObjectFit(ImageFit objectFit)
     ACE_UPDATE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ObjectFit, objectFit);
 }
 
-void MovingPhotoModelNG::SetOnStart(MovingPhotoEventFunc&& onStart)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnStart(std::move(onStart));
-}
-
 void MovingPhotoModelNG::SetOnComplete(MovingPhotoEventFunc&& onComplete)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -129,6 +120,15 @@ void MovingPhotoModelNG::SetOnComplete(MovingPhotoEventFunc&& onComplete)
     auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnComplete(std::move(onComplete));
+}
+
+void MovingPhotoModelNG::SetOnStart(MovingPhotoEventFunc&& onStart)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<MovingPhotoEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStart(std::move(onStart));
 }
 
 void MovingPhotoModelNG::SetOnStop(MovingPhotoEventFunc&& onStop)
