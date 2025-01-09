@@ -531,7 +531,7 @@ void RichEditorPattern::OnModifyDone()
         enabled_ = enabledCache;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    TriggerAvoidOnCaretChangeImmediately();
+    IF_TRUE(!isModifyingContent_, TriggerAvoidOnCaretChangeImmediately());
 }
 
 void RichEditorPattern::HandleEnabled()
@@ -886,7 +886,6 @@ void RichEditorPattern::CopyDragCallback(const RefPtr<ImageSpanNode>& imageNode)
         ContainerScope scope(scopeId);
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->isDragging_ = false;
     };
     auto end = hostEventHub->GetCustomerOnDragEndFunc();
     auto oneStepDragEnd = [end, resetOnDragEnd](const RefPtr<OHOS::Ace::DragEvent>& event) {
@@ -3223,7 +3222,7 @@ void RichEditorPattern::HandleFocusEvent()
     if (host) {
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
-    if (!usingMouseRightButton_ && !isLongPress_ && !isDragging_ && !dataDetectorAdapter_->hasClickedMenuOption_) {
+    if (!usingMouseRightButton_ && !isLongPress_ && !dataDetectorAdapter_->hasClickedMenuOption_) {
         auto windowMode = GetWindowMode();
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "onFocus, requestKeyboard=%{public}d, windowMode=%{public}d",
             needToRequestKeyboardOnFocus_, windowMode);
@@ -3830,7 +3829,6 @@ void RichEditorPattern::OnDragStartAndEnd()
         pattern->isDragSponsor_ = false;
         pattern->dragRange_ = { 0, 0 };
         pattern->showSelect_ = true;
-        pattern->isDragging_ = false;
         pattern->StopAutoScroll();
         pattern->ClearRedoOperationRecords();
         pattern->OnDragEnd(event);
@@ -3854,6 +3852,7 @@ NG::DragDropInfo RichEditorPattern::HandleDragStart(const RefPtr<Ace::DragEvent>
         recoverStart_ = -1;
         recoverEnd_ = -1;
     }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleDragStart dragStatus=%{public}d", status_);
     return dropInfo;
 }
 
@@ -3946,6 +3945,7 @@ void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     if (status_ == Status::DRAGGING) {
         status_ = Status::NONE;
     }
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnDragEnd dragStatus=%{public}d", status_);
     ResetDragSpanItems();
     if (recoverDragResultObjects_.empty()) {
         return;
@@ -5062,8 +5062,9 @@ void RichEditorPattern::ProcessInsertValue(const std::string& insertValue, Opera
         StringUtils::ToWstring(insertValue).length(), isIME, calledByImf, isSpanStringMode_);
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "insertValue=[%{private}s]", StringUtils::RestoreEscape(insertValue).c_str());
 
-    if (isIME && calledByImf && !IsEditing()) {
-        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NOT allow physical keyboard input in preview state");
+    if (isIME && calledByImf && (!isEditing_ || IsDragging())) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NOT allow input, isEditing=%{public}d, isDragging=%{public}d",
+            isEditing_, IsDragging());
         return;
     }
     if (isSpanStringMode_) {
@@ -5471,7 +5472,9 @@ int32_t RichEditorPattern::CalculateDeleteLength(int32_t length, bool isBackward
 void RichEditorPattern::DeleteBackward(int32_t oriLength)
 {
     int32_t length = isAPI14Plus ? std::clamp(oriLength, 0, caretPosition_) : oriLength;
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "oriLength=%{public}d, length=%{public}d", oriLength, length);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "oriLength=%{public}d, length=%{public}d, isDragging=%{public}d",
+        oriLength, length, IsDragging());
+    CHECK_NULL_VOID(!IsDragging());
     if (isSpanStringMode_) {
         DeleteBackwardInStyledString(length);
         return;
@@ -5539,7 +5542,9 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
 void RichEditorPattern::DeleteForward(int32_t oriLength)
 {
     int32_t length = isAPI14Plus ? std::clamp(oriLength, 0, GetTextContentLength() - caretPosition_) : oriLength;
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "oriLength=%{public}d, length=%{public}d", oriLength, length);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "oriLength=%{public}d, length=%{public}d, isDragging=%{public}d",
+        oriLength, length, IsDragging());
+    CHECK_NULL_VOID(!IsDragging());
     if (isSpanStringMode_) {
         DeleteForwardInStyledString(length);
         return;
@@ -8884,6 +8889,7 @@ void RichEditorPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& n
         "In OnDragMoved, the dragging node is moving in the richEditor, id:%{public}d", host->GetId());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
+    isOnlyRequestFocus_ = true;
     focusHub->RequestFocusImmediately();
     if (focusHub->IsCurrentFocus()) {
         ShowCaretWithoutTwinkling();
@@ -8929,14 +8935,12 @@ void RichEditorPattern::HandleOnDragStatusCallback(
     ScrollablePattern::HandleOnDragStatusCallback(dragEventType, notifyDragEvent);
     switch (dragEventType) {
         case DragEventType::MOVE:
-            isDragging_ = true;
             HandleCursorOnDragMoved(notifyDragEvent);
             break;
         case DragEventType::LEAVE:
             HandleCursorOnDragLeaved(notifyDragEvent);
             break;
         case DragEventType::DROP:
-            isDragging_ = false;
             HandleCursorOnDragEnded(notifyDragEvent);
             break;
         default:

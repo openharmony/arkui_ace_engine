@@ -848,7 +848,6 @@ HWTEST_F(RichEditorPatternTestFourNg, GetDeletedSpan001, TestSize.Level1)
 
     richEditorPattern->usingMouseRightButton_ = false;
     richEditorPattern->isLongPress_ = false;
-    richEditorPattern->isDragging_ = false;
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
     richEditorPattern->HandleFocusEvent();
 
