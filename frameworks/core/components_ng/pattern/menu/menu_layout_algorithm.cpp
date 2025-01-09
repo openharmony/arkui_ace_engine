@@ -327,13 +327,10 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     // user-set offset
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
     dumpInfo_.offset = positionOffset_;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        InitializePaddingAPI12(layoutWrapper);
-    } else {
-        InitializePadding(layoutWrapper);
-    }
+    InitializePadding(layoutWrapper);
     InitializeParam(menuPattern);
-    if (canExpandCurrentWindow_ && isExpandDisplay_ && !menuPattern->IsSelectMenu()) {
+    if (canExpandCurrentWindow_ && isExpandDisplay_ && !menuPattern->IsSelectMenu() &&
+        !menuPattern->IsSelectOverlayRightClickMenu()) {
         position_ += NG::OffsetF { displayWindowRect_.Left(), displayWindowRect_.Top() };
         TAG_LOGI(AceLogTag::ACE_MENU, "original postion after applying displayWindowRect : %{public}s",
             position_.ToString().c_str());
@@ -591,6 +588,10 @@ void MenuLayoutAlgorithm::InitSpace(const RefPtr<MenuLayoutProperty>& props, con
 
 void MenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
 {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        InitializePaddingAPI12(layoutWrapper);
+        return;
+    }
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
