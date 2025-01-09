@@ -183,10 +183,7 @@ public:
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
-    void SetParent(const WeakPtr<UINode>& parent)
-    {
-        parent_ = parent;
-    }
+    void SetParent(const WeakPtr<UINode>& parent, bool needDetect = true);
     // Tree operation end.
 
     // performance.
