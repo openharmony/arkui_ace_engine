@@ -73,6 +73,7 @@ group("advanced_ui_component") {
   deps += [
     "counter/interfaces:counter",
     "dialog/interfaces:dialog",
+    "dialogv2/interfaces:dialogv2",
     "downloadfilebutton/interfaces:downloadfilebutton",
     "foldsplitcontainer/interfaces:foldsplitcontainer",
     "formmenu/interfaces:formmenu",
