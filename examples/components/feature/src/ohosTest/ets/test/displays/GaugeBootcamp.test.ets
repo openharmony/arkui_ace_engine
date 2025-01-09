@@ -46,7 +46,7 @@ export default function GaugeBootcampTest() {
         await atomDisplays.click();
         await driver.delayMs(1000);
 
-        let ListItems:Array<Component> = await driver.findComponents(ON.type('ListItem'))
+        let ListItems:Component[] = await driver.findComponents(ON.type('ListItem'))
         let width:Point = await ListItems[0].getBoundsCenter()
         let width2:Point = await ListItems[7].getBoundsCenter()
         await driver.swipe(width.x, width2.y, width.x, width.y, 500)
@@ -56,7 +56,7 @@ export default function GaugeBootcampTest() {
         await scrollSearch.click()
         await driver.delayMs(1000);
 
-        let Buttons:Array<Component> = await driver.findComponents(ON.type('Button'));
+        let Buttons:Component[] = await driver.findComponents(ON.type('Button'));
         await Buttons[1].click()
         await driver.delayMs(1000);
 
@@ -75,9 +75,9 @@ export default function GaugeBootcampTest() {
       // Presets a clear action, which is performed after each unit test case ends.
       // The number of execution times is the same as the number of test cases defined by **it**.
       // This API supports only one parameter: clear action function.
-      let radio:Array<Component> = await driver.findComponents(ON.type('Radio').within(ON.type('Scroll')).clickable())
+      let radio:Component[] = await driver.findComponents(ON.type('Radio').within(ON.type('Scroll')).clickable())
       let slider:Component= await driver.findComponent(ON.type('Slider').within(ON.type('Scroll')).scrollable())
-      let Button:Array<Component> = await driver.findComponents(ON.type('Button').within(ON.type('Scroll')).clickable())
+      let Button:Component[] = await driver.findComponents(ON.type('Button').within(ON.type('Scroll')).clickable())
 
       if (!radio && !slider && !Button) {
         await swipeColumn()

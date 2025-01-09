@@ -73,7 +73,7 @@ export async function checkButtonAndClickWithID(text: string) {
 
 // 向下滑动一个Block的距离
 export async function swipeColumn() {
-  let toggle:Array<Component> = await driver.findComponents(ON.type('Toggle'))
+  let toggle:Component[] = await driver.findComponents(ON.type('Toggle'))
   let width:Point = await toggle[0].getBoundsCenter()
   let width2:Point = await toggle[1].getBoundsCenter()
 
@@ -127,14 +127,14 @@ export async function radioClick(radioOperate: radioOperateType) {
   if (radioOperate.toggleClick?.toggleClickType != undefined &&
     radioOperate.toggleClick?.toggleClickType == ToggleClick.Open) {
 
-    let toggle:Array<Component> = await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')))
+    let toggle:Component[] = await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')))
     await toggle[radioOperate.toggleClick.toggleClickObj].click()
     await driver.delayMs(1000);
 
   }
 
   if (radioOperate.radioClickObj != undefined) {
-    let radio:Array<Component> = await driver.findComponents(ON.type('Radio').within(ON.type('Scroll')).clickable(true))
+    let radio:Component[] = await driver.findComponents(ON.type('Radio').within(ON.type('Scroll')).clickable(true))
     await radio[radioOperate.radioClickObj].click(); // 等待点击操作完成
     await driver.delayMs(1000);
   }
@@ -155,7 +155,7 @@ export async function radioClick(radioOperate: radioOperateType) {
 
   if (radioOperate.toggleClick?.toggleClickType != undefined &&
     radioOperate.toggleClick?.toggleClickType == ToggleClick.Close) {
-    let toggle:Array<Component> = await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')))
+    let toggle:Component[] = await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')))
     await toggle[radioOperate.toggleClick.toggleClickObj].click()
     await driver.delayMs(1000);
   }
@@ -167,7 +167,7 @@ export async function sliderDrag(sliderOperate: sliderOperateType) {
 
   if (sliderOperate.toggleClick?.toggleClickType != undefined &&
     sliderOperate.toggleClick?.toggleClickType == ToggleClick.Open) {
-    let toggle:Array<Component> = await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')))
+    let toggle:Component[] = await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')))
     await toggle[sliderOperate.toggleClick.toggleClickObj].click()
     await driver.delayMs(1000);
   }
@@ -195,7 +195,7 @@ export async function sliderDrag(sliderOperate: sliderOperateType) {
 
   if (sliderOperate.toggleClick?.toggleClickType != undefined &&
     sliderOperate.toggleClick.toggleClickType == ToggleClick.Close) {
-    let toggle:Array<Component> = await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')))
+    let toggle:Component[] = await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')))
     await toggle[sliderOperate.toggleClick.toggleClickObj].click()
     await driver.delayMs(1000);
   }
@@ -207,11 +207,11 @@ export async function buttonClick(buttonOperate: buttonOperateType) {
 
   if (buttonOperate.toggleClick?.toggleClickType != undefined &&
     buttonOperate.toggleClick?.toggleClickType == ToggleClick.Open) {
-    let toggle:Array<Component> = await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')))
+    let toggle:Component[] = await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')))
     await toggle[buttonOperate.toggleClick.toggleClickObj].click()
     await driver.delayMs(1000);
   }
-  let button:Array<Component> = await driver.findComponents(ON.type('Button').within(ON.type('Scroll')).clickable(true))
+  let button:Component[] = await driver.findComponents(ON.type('Button').within(ON.type('Scroll')).clickable(true))
 
   await button[buttonOperate.buttonClickObj].click()
   await driver.delayMs(1000);
@@ -228,7 +228,7 @@ export async function buttonClick(buttonOperate: buttonOperateType) {
 
   if (buttonOperate.toggleClick?.toggleClickType != undefined &&
     buttonOperate.toggleClick?.toggleClickType == ToggleClick.Close) {
-    let toggle:Array<Component> = await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')))
+    let toggle:Component[] = await driver.findComponents(ON.type('Toggle').within(ON.type('Scroll')))
     await toggle[buttonOperate.toggleClick.toggleClickObj].click()
     await driver.delayMs(1000);
   }
