@@ -1429,7 +1429,7 @@ void CalendarDialogPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(theme);
-    auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutPorperty>();
+    auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     
     textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
