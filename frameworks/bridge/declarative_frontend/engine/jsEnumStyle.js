@@ -3756,3 +3756,9 @@ let CrownAction;
   CrownAction[CrownAction.UPDATE = 1] = 'UPDATE';
   CrownAction[CrownAction.END = 2] = 'END';
 })(CrownAction || (CrownAction = {}));
+
+let AccessibilitySamePageMode;
+(function (AccessibilitySamePageMode) {
+  AccessibilitySamePageMode[AccessibilitySamePageMode.SEMI_SILENT = 0] = 'SEMI_SILENT';
+  AccessibilitySamePageMode[AccessibilitySamePageMode.FULL_SILENT = 1] = 'FULL_SILENT';
+})(AccessibilitySamePageMode || (AccessibilitySamePageMode = {}));

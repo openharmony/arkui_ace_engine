@@ -419,6 +419,7 @@ void UIExtensionPattern::OnConnect()
     InitializeAccessibility();
     ReDispatchDisplayArea();
     InitBusinessDataHandleCallback();
+    RegisterReplyPageModeCallback();
     NotifyHostWindowMode();
 }
 
@@ -513,12 +514,26 @@ void UIExtensionPattern::OnExtensionEvent(UIExtCallbackEventId eventId)
     }
 }
 
+void UIExtensionPattern::UpdateFrameNodeState()
+{
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(ngPipeline);
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->UpdateFrameNodeState(frameNode->GetId());
+}
+
 void UIExtensionPattern::OnUeaAccessibilityEventAsync()
 {
     auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    UpdateFrameNodeState();
     if ((accessibilityChildTreeCallback_ != nullptr) && (accessibilityProperty->GetChildTreeId() != -1)) {
         UIEXT_LOGI("uec need notify register accessibility again %{public}d, %{public}d.",
             accessibilityProperty->GetChildWindowId(), accessibilityProperty->GetChildTreeId());
@@ -700,6 +715,11 @@ void UIExtensionPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(pattern);
         pattern->SetFoldStatusChanged(true);
     });
+    auto frontend = pipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->SendFrameNodeToAccessibility(host, true);
     UIEXT_LOGI("OnAttachToFrameNode");
 }
 
@@ -1749,6 +1769,25 @@ void UIExtensionPattern::RegisterTransformParamGetCallback()
                 parentRectInfo.left, parentRectInfo.top, parentRectInfo.scaleX, parentRectInfo.scaleY);
             return 0;
         });
+}
+
+void UIExtensionPattern::RegisterReplyPageModeCallback()
+{
+    auto callback = [weak = WeakClaim(this)](const AAFwk::Want& data, std::optional<AAFwk::Want>& reply) -> int32_t {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, -1);
+        auto host = pattern->GetHost();
+        CHECK_NULL_RETURN(host, -1);
+        auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_RETURN(accessibilityProperty, -1);
+
+        if (reply.has_value() && data.HasParameter("requestPageMode")) {
+            reply->SetParam("pageMode", accessibilityProperty->GetAccessibilitySamePage());
+            return 0;
+        }
+        return -1;
+    };
+    RegisterUIExtBusinessConsumeReplyCallback(UIContentBusinessCode::SEND_PAGE_MODE, callback);
 }
 
 bool UIExtensionPattern::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)

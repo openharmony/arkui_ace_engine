@@ -254,6 +254,12 @@ void JsThirdProviderInteractionOperation::SearchElementInfosByText(
     SetSearchElementInfoByTextResult(callback, std::move(infos), requestId);
 }
 
+void JsThirdProviderInteractionOperation::SearchDefaultFocusByWindowId(
+    const int32_t windowId, const int32_t requestId,
+    Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t pageId)
+{
+}
+
 bool JsThirdProviderInteractionOperation::FindAccessibilityNodeInfosByTextFromProvider(
     const int64_t splitElementId, const std::string& text, const int32_t requestId,
     std::list<Accessibility::AccessibilityElementInfo>& infos)

@@ -408,6 +408,8 @@ public:
     virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
     virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
     virtual void ResetOnAccessibilityFocus() = 0;
+    virtual void SetAccessibilityDefaultFocus() = 0;
+    virtual void SetAccessibilityUseSamePage(bool isFullSilent) = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;
