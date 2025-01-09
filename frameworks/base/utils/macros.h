@@ -16,42 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MACROS_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MACROS_H
 
-#define ACE_WEAK_SYM     __attribute__((weak))
-
-#ifndef ACE_FORCE_EXPORT
-#ifndef WINDOWS_PLATFORM
-#define ACE_FORCE_EXPORT __attribute__((visibility("default")))
-#else
-#define ACE_FORCE_EXPORT __declspec(dllexport)
-#endif
-#endif
-
-#ifndef ACE_EXPORT
-#if !defined(HIDDEN_SYMBOL) && !defined(WINDOWS_PLATFORM)
-#define ACE_EXPORT ACE_FORCE_EXPORT
-#else
-#define ACE_EXPORT
-#endif
-#endif
-
-#ifdef ACE_DEBUG
-
-#ifdef NDEBUG
-#define CANCEL_NDEBUG
-#undef NDEBUG
-#endif // NDEBUG
-
-#include <cassert>
-
-#ifdef CANCEL_NDEBUG
-#define NDEBUG
-#undef CANCEL_NDEBUG
-#endif // CANCEL_NDEBUG
-
-#define ACE_DCHECK(expr) assert(expr)
-#else
-#define ACE_DCHECK(expr) ((void)0)
-
-#endif // ACE_DEBUG
+#include "ui/base/macros.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_MACROS_H

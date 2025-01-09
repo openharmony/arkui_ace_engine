@@ -114,6 +114,7 @@ void TextFieldPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         layoutProperty->GetShowErrorTextValue(false) && !textFieldPattern->IsNormalInlineState());
     textFieldContentModifier_->SetErrorTextValue(layoutProperty->GetErrorTextValue(u""));
     textFieldContentModifier_->SetShowUnderlineState(layoutProperty->GetShowUnderlineValue(false));
+    DoTextFadeoutIfNeed(paintWrapper);
     PropertyChangeFlag flag = 0;
     if (textFieldContentModifier_->NeedMeasureUpdate(flag)) {
         frameNode->MarkDirtyNode(flag);
@@ -174,6 +175,8 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     auto cursorColor = paintProperty->GetCursorColorValue(theme->GetCursorColor());
     textFieldOverlayModifier_->SetCursorColor(cursorColor);
 
+    SetFloatingCursor();
+
     InputStyle inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
     textFieldOverlayModifier_->SetInputStyle(inputStyle);
 
@@ -195,6 +198,42 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     textFieldOverlayModifier_->SetPreviewTextDecorationColor(previewDecorationColor);
     textFieldOverlayModifier_->SetPreviewTextStyle(textFieldPattern->GetPreviewTextStyle());
     UpdateScrollBar();
+}
+
+void TextFieldPaintMethod::SetFloatingCursor()
+{
+    CHECK_NULL_VOID(textFieldOverlayModifier_);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    if (!textFieldOverlayModifier_->GetFloatCaretLanding()) {
+        auto floatingCursorRect = textFieldPattern->GetFloatingCaretRect();
+        textFieldOverlayModifier_->SetFloatingCursorOffset(floatingCursorRect.GetOffset());
+    }
+    auto floatingCursorVisible = textFieldPattern->GetFloatingCursorVisible();
+    textFieldOverlayModifier_->SetFloatingCursorVisible(floatingCursorVisible);
+    auto showOriginCursor = textFieldPattern->GetShowOriginCursor();
+    textFieldOverlayModifier_->SetShowOriginCursor(showOriginCursor);
+}
+
+void TextFieldPaintMethod::DoTextFadeoutIfNeed(PaintWrapper* paintWrapper)
+{
+    CHECK_NULL_VOID(paintWrapper);
+    CHECK_NULL_VOID(textFieldContentModifier_);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto textFieldTheme = textFieldPattern->GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto frameNode = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    if ((textFieldTheme->TextFadeoutEnabled() && textFieldPattern->GetTextFadeoutCapacity())) {
+        auto paragraph = textFieldPattern->GetParagraph();
+        CHECK_NULL_VOID(paragraph);
+        auto paintContentWidth = paintWrapper->GetContentSize().Width();
+        auto textFadeoutEnabled =
+            GreatNotEqual(paintContentWidth, 0.0) &&
+            GreatNotEqual(paragraph->GetTextWidth() + textFieldPattern->GetTextParagraphIndent(), paintContentWidth);
+        textFieldContentModifier_->SetTextFadeoutEnabled(textFadeoutEnabled);
+    }
 }
 
 void TextFieldPaintMethod::UpdateScrollBar()

@@ -204,10 +204,17 @@ private:
     void SetAccessibilityAction();
     void UpdateSelectStatus(bool isSelected);
     void FireBuilder();
+    bool OnKeyEvent(const KeyEvent& event);
 
     void ImageNodeCreate();
     void startEnterAnimation();
     void startExitAnimation();
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     ImageSourceInfo GetImageSourceInfoFromTheme(int32_t RadioIndicator);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
     void SetPrePageIdToLastPageId();
@@ -246,6 +253,8 @@ private:
     bool enabled_ = true;
     std::optional<RadioMakeCallback> makeFunc_;
     RefPtr<RadioModifier> radioModifier_;
+    bool focusEventInitialized_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     bool isTouchPreventDefault_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);
 };

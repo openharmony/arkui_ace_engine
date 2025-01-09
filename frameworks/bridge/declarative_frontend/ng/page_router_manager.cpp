@@ -59,7 +59,8 @@ void ExitToDesktop()
             pipeline->SendEventToAccessibility(event);
             pipeline->Finish(false);
         },
-        TaskExecutor::TaskType::UI, "ArkUIPageRouterExitToDesktop");
+        TaskExecutor::TaskType::UI, "ArkUIPageRouterExitToDesktop",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 } // namespace
@@ -77,7 +78,9 @@ void PageRouterManager::RunPage(const std::string& url, const std::string& param
     PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
     ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
-    RouterPageInfo info { url, params };
+    RouterPageInfo info;
+    info.url = url;
+    info.params = params;
 #if !defined(PREVIEW)
     if (info.url.substr(0, strlen(BUNDLE_TAG)) == BUNDLE_TAG) {
         info.errorCallback = [](const std::string& errorMsg, int32_t errorCode) {
@@ -130,7 +133,8 @@ void PageRouterManager::RunPage(const std::shared_ptr<std::vector<uint8_t>>& con
     CHECK_NULL_VOID(pageRouterManager);
     taskExecutor->PostTask(
         [pageRouterManager, info]() { pageRouterManager->LoadOhmUrl(info); },
-        TaskExecutor::TaskType::JS, "ArkUIPageRouterLoadOhmUrlContent");
+        TaskExecutor::TaskType::JS, "ArkUIPageRouterLoadOhmUrlContent",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 #endif
 }
 
@@ -159,7 +163,9 @@ void PageRouterManager::RunPageByNamedRouterInner(const std::string& name, const
         return;
     }
 
-    RouterPageInfo info { name, params };
+    RouterPageInfo info;
+    info.url = name;
+    info.params = params;
     info.isNamedRouterMode = true;
     RouterOptScope scope(this);
     LoadPage(GenerateNextPageId(), info);
@@ -169,7 +175,8 @@ UIContentErrorCode PageRouterManager::RunCard(
     const std::string& url, const std::string& params, int64_t cardId, const std::string& entryPoint)
 {
     CHECK_RUN_ON(JS);
-    RouterPageInfo info { url };
+    RouterPageInfo info;
+    info.url = url;
 #ifndef PREVIEW
     if (!info.url.empty()) {
         info.path = manifestParser_->GetRouter()->GetPagePath(url);
@@ -232,7 +239,8 @@ bool PageRouterManager::TryPreloadNamedRouter(const std::string& name, std::func
                 if (finishCallback) {
                     finishCallback();
                 }
-            }, TaskExecutor::TaskType::JS, "ArkUIPageRouterPreloadNamedRouterFinishCallback");
+            }, TaskExecutor::TaskType::JS, "ArkUIPageRouterPreloadNamedRouterFinishCallback",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     preloadNamedRouter_(name, std::move(preloadFinishCallback));
     return true;
@@ -1158,7 +1166,8 @@ void PageRouterManager::PushOhmUrl(const RouterPageInfo& target)
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask([pageUrlChecker, url = target.url]() { pageUrlChecker->CheckPreload(url); },
-        TaskExecutor::TaskType::BACKGROUND, "ArkUIPageRouterPushOhmUrl");
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIPageRouterPushOhmUrl",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::HIGH));
 }
 
 void PageRouterManager::StartPush(const RouterPageInfo& target)
@@ -1256,7 +1265,8 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask([pageUrlChecker, url = target.url]() { pageUrlChecker->CheckPreload(url); },
-        TaskExecutor::TaskType::BACKGROUND, "ArkUIPageRouterReplaceOhmUrl");
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIPageRouterReplaceOhmUrl",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::HIGH));
 }
 
 void PageRouterManager::StartReplace(const RouterPageInfo& target)
@@ -2264,7 +2274,8 @@ void PageRouterManager::LoadOhmUrlPage(const std::string& url, std::function<voi
     CHECK_NULL_VOID(taskExecutor);
     auto callback = [taskExecutor, instanceId, task = std::move(finishCallback), finishCallbackTaskName]() {
             ContainerScope scope(instanceId);
-            taskExecutor->PostTask(task, TaskExecutor::TaskType::JS, finishCallbackTaskName);
+            taskExecutor->PostTask(task, TaskExecutor::TaskType::JS, finishCallbackTaskName,
+                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
         };
 
     auto silentInstallErrorCallBack = [errorCb = errorCallback, taskExecutor, instanceId, errorCallbackTaskName](
@@ -2275,7 +2286,8 @@ void PageRouterManager::LoadOhmUrlPage(const std::string& url, std::function<voi
         }
         ContainerScope scope(instanceId);
         taskExecutor->PostTask([errorCb, errorCode, errorMsg]() { errorCb(errorMsg, errorCode); },
-            TaskExecutor::TaskType::JS, errorCallbackTaskName);
+            TaskExecutor::TaskType::JS, errorCallbackTaskName,
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     pageUrlChecker->LoadPageUrl(url, callback, silentInstallErrorCallBack);
 }

@@ -36,7 +36,7 @@ public:
 private:
     static void ParseTextStyle(const JSRef<JSObject>& paramObj, NG::PickerTextStyle& textStyle);
     static void ParseSelectedDateObject(const JSCallbackInfo& info, const JSRef<JSObject>& selectedObject);
-    static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
+    static PickerDate ParseDate(const JSRef<JSVal>& dateVal, bool useCurrentDate = true);
     static void ParseCalendarPickerBorderColor(const JSRef<JSVal>& args);
     static NG::PaddingProperty SetPaddings(const std::optional<CalcDimension>& top,
         const std::optional<CalcDimension>& bottom, const std::optional<CalcDimension>& left,
@@ -59,7 +59,7 @@ private:
     static std::map<std::string, NG::DialogGestureEvent> DialogCancelEvent(const JSCallbackInfo& info);
     static std::map<std::string, NG::DialogCancelEvent> LifeCycleDialogEvent(const JSCallbackInfo& info);
 
-    static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
+    static PickerDate ParseDate(const JSRef<JSVal>& dateVal, bool useCurrentDate = false);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CALENDAR_PICKER_H

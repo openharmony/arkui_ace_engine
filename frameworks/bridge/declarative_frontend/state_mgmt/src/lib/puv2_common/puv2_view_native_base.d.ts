@@ -25,7 +25,12 @@ declare class NativeViewPartialUpdate {
   syncInstanceId(): void;
   isFirstRender(): boolean;
   restoreInstanceId(): void;
+  // create for NON @Reusable/@ReusableV2 components
   static create(newView: NativeViewPartialUpdate): void;
+
+  // createRecycle for @Reusable/@ReusableV2 components
+  static createRecycle(componentCall: any, isRecycling: boolean,
+    reuseId: string, callback: () => void): void;
   finishUpdateFunc(elmtId: number): void;
   isLazyItemRender(elmtId : number) : boolean;
   setCardId(cardId: number): void;
@@ -33,4 +38,5 @@ declare class NativeViewPartialUpdate {
   resetRecycleCustomNode(): void;
   sendStateInfo(stateInfo: string): void;
   setIsV2(isV2: boolean): void;
+  allowReusableV2Descendant(): boolean;
 }

@@ -35,6 +35,10 @@ export declare interface EditableTitleBarMenuItem {
   isEnabled: boolean;
   label?: ResourceStr;
   action?: () => void;
+  accessibilityLevel?: string;
+  accessibilityText?: ResourceStr;
+  accessibilityDescription?: ResourceStr;
+  defaultFocus?: boolean;
 }
 
 export type EditableTitleBarItem = EditableTitleBarMenuItem;
@@ -135,6 +139,8 @@ export struct EditableTitleBar {
   onSave?: () => void;
   onCancel?: () => void;
   constraintWidth: number = 0;
+  leftIconDefaultFocus?: boolean = false;
+  saveIconDefaultFocus?: boolean = false;
   public static readonly maxCountOfExtraItems = 3;
   public static readonly maxOtherCountOfExtraItems = 2;
   public static readonly commonZero = 0;
@@ -205,18 +211,23 @@ export struct EditableTitleBar {
         }
         .flexShrink(0)
 
-        if (this.imageItem) {
-          Row() {
-            this.imageItemLayout();
-          }
-          .flexShrink(0)
-        }
-
         Row() {
-          this.titleLayout();
+          if (this.imageItem) {
+            Row() {
+              this.imageItemLayout();
+            }
+            .flexShrink(0)
+          }
+
+          Row() {
+            this.titleLayout();
+          }
+          .width('100%')
+          .flexShrink(1)
         }
         .width('100%')
         .flexShrink(1)
+        .accessibilityGroup(true)
 
         Row() {
           this.rightMenuItemsLayout();
@@ -251,10 +262,12 @@ export struct EditableTitleBar {
         item: {
           value: PUBLIC_BACK,
           isEnabled: true,
-          action: () => this.onCancel ? this.onCancel() : this.getUIContext()?.getRouter()?.back()
+          action: () => this.onCancel ? this.onCancel() : this.getUIContext()?.getRouter()?.back(),
+          defaultFocus: this.leftIconDefaultFocus
         },
         fontSize: this.fontSize,
         attribute: ItemType.LeftIcon,
+        imageMenuItemId: `BackMenuItem_${this.getUniqueId()}`
       })
     } else {
       ImageMenuItem({
@@ -262,9 +275,11 @@ export struct EditableTitleBar {
           value: PUBLIC_CANCEL,
           isEnabled: true,
           action: () => this.onCancel && this.onCancel(),
+          defaultFocus: this.leftIconDefaultFocus
         },
         fontSize: this.fontSize,
         attribute: ItemType.LeftIcon,
+        imageMenuItemId: `CancelMenuItem_${this.getUniqueId()}`
       })
     }
   }
@@ -326,6 +341,8 @@ export struct EditableTitleBar {
       onSave: this.onSave,
       isSaveEnabled: this.isSaveIconRequired,
       fontSize: this.fontSize,
+      parentUniqueId: this.getUniqueId(),
+      saveIconDefaultFocus: this.saveIconDefaultFocus
     })
   }
 
@@ -351,7 +368,9 @@ struct EditableTitleBarMenuSection {
   menuItems: Array<EditableTitleBarMenuItem> | undefined = undefined;
   onSave?: () => void;
   isSaveEnabled: boolean = true;
+  saveIconDefaultFocus?: boolean = false;
   @Prop fontSize: number = 1;
+  @Prop parentUniqueId?: number;
 
   build() {
     Column() {
@@ -360,11 +379,12 @@ struct EditableTitleBarMenuSection {
           ForEach(this.menuItems.slice(EditableTitleBar.commonZero,
             this.isSaveEnabled ?
             EditableTitleBar.maxOtherCountOfExtraItems : EditableTitleBar.maxCountOfExtraItems),
-            (item: EditableTitleBarMenuItem) => {
+            (item: EditableTitleBarMenuItem, index: number) => {
               ImageMenuItem({
                 item: item,
                 attribute: ItemType.Icon,
                 fontSize: this.fontSize,
+                imageMenuItemId: `ImageMenuItem_${this.parentUniqueId}_${index}`
               })
             })
         }
@@ -374,9 +394,11 @@ struct EditableTitleBarMenuSection {
               value: PUBLIC_OK,
               isEnabled: true,
               action: () => this.onSave && this.onSave(),
+              defaultFocus: this.saveIconDefaultFocus
             },
             fontSize: this.fontSize,
             attribute: ItemType.Icon,
+            imageMenuItemId: `SaveMenuItem_${this.parentUniqueId}`
           })
         }
       }
@@ -391,6 +413,9 @@ struct ImageMenuItem {
     value: '',
     isEnabled: true,
     label: '',
+    accessibilityLevel: 'auto',
+    accessibilityText: '',
+    accessibilityDescription: '',
   };
   attribute: ItemType = ItemType.Image;
   callbackId: number | undefined = undefined;
@@ -401,6 +426,7 @@ struct ImageMenuItem {
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
+  imageMenuItemId?: string;
   @Consume editableTitleBarTheme: EditableTitleBarTheme;
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: EditableTitleBarDialog({
@@ -548,17 +574,49 @@ struct ImageMenuItem {
     }
   }
 
-  private getAccessibilityReadText(): Resource | undefined {
-    if (this.item.value === PUBLIC_OK) {
-      return $r('sys.string.icon_save');
-    } else if (this.item.value === PUBLIC_CANCEL) {
-      return $r('sys.string.icon_cancel');
-    } else if (this.item.value === PUBLIC_BACK) {
-      return $r('sys.string.icon_back');
-    } else if (this.item.label) {
-      return this.item.label as Resource;
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return resource;
+    } else {
+      let resourceString: string = '';
+      try {
+        resourceString = getContext()?.resourceManager?.getStringSync(resource);
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to subHeader toStringFormat, code: ${code}, message: ${message}`)
+      }
+      return resourceString;
     }
-    return undefined;
+  }
+
+  private getAccessibilityReadText(): string | undefined {
+    if (this.item.value === PUBLIC_OK) {
+      return getContext()?.resourceManager?.getStringByNameSync('icon_save');
+    } else if (this.item.value === PUBLIC_CANCEL) {
+      return getContext()?.resourceManager?.getStringByNameSync('icon_cancel');
+    } else if (this.item.value === PUBLIC_BACK) {
+      return getContext()?.resourceManager?.getStringByNameSync('icon_back');
+    } else if (this.item.accessibilityText) {
+      return this.toStringFormat(this.item.accessibilityText);
+    } else if (this.item.label) {
+      return this.toStringFormat(this.item.label);
+    }
+    return ' ';
+  }
+
+  private getRightIconAccessibilityLevel(): string {
+    if (this.item.accessibilityLevel && this.item.accessibilityLevel !== '') {
+      return this.item.accessibilityLevel;
+    }
+    return 'auto';
+  }
+
+  private getAccessibilityDescription(): string | undefined {
+    if (this.item.accessibilityDescription && this.item.accessibilityDescription !== '') {
+      return this.toStringFormat(this.item.accessibilityDescription);
+    }
+    return '';
   }
 
   @Builder
@@ -575,6 +633,7 @@ struct ImageMenuItem {
           .effectStrategy(SymbolEffectStrategy.NONE)
           .symbolEffect(new SymbolEffect(), false)
           .fontSize(SYMBOL_SIZE)
+          .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
       } else {
         if (Util.isSymbolResource(this.item.value)) {
           SymbolGlyph(this.item.value as Resource)
@@ -584,6 +643,7 @@ struct ImageMenuItem {
             .enabled(this.item.isEnabled)
             .draggable(false)
             .accessibilityText(this.getAccessibilityReadText())
+            .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
         } else {
           Image(this.item.value)
             .fillColor(this.editableTitleBarTheme.iconColor)
@@ -594,9 +654,11 @@ struct ImageMenuItem {
             .enabled(this.item.isEnabled)
             .draggable(false)
             .accessibilityText(this.getAccessibilityReadText())
+            .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
         }
       }
     }
+    .id(this.imageMenuItemId)
     .backgroundButtonStyle()
     .borderRadius($r('sys.float.titlebar_icon_background_shape'))
     .margin({
@@ -609,6 +671,8 @@ struct ImageMenuItem {
     .buttonStateStyles()
     .buttonEventStyle()
     .gestureModifier(this.buttonGestureModifier)
+    .accessibilityLevel(this.getRightIconAccessibilityLevel())
+    .accessibilityDescription(this.getAccessibilityDescription())
   }
 
   @Builder
@@ -628,6 +692,7 @@ struct ImageMenuItem {
         .buttonStateStyles()
         .buttonEventStyle()
         .gestureModifier(this.buttonGestureModifier)
+        .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
     }
     .margin({
       start: LengthMetrics.resource($r('sys.float.titlebar_icon_background_space_horizontal')),
@@ -686,6 +751,7 @@ struct EditableTitleBarDialog {
             .effectStrategy(SymbolEffectStrategy.NONE)
             .symbolEffect(new SymbolEffect(), false)
             .fontSize(SYMBOL_TITLE_SIZE)
+            .direction(Direction.Ltr)
         } else {
           if (Util.isSymbolResource(this.itemEditableDialog.value)) {
             SymbolGlyph(this.itemEditableDialog.value as Resource)
@@ -695,6 +761,7 @@ struct EditableTitleBarDialog {
               })
               .fontColor([$r('sys.color.icon_primary')])
               .fontSize(SYMBOL_TITLE_SIZE)
+              .direction(Direction.Ltr)
           } else {
             Image(this.itemEditableDialog.value)
               .width(IMAGE_SIZE)
@@ -704,6 +771,7 @@ struct EditableTitleBarDialog {
                 bottom: $r('sys.float.padding_level8'),
               })
               .fillColor($r('sys.color.icon_primary'))
+              .direction(Direction.Ltr)
           }
         }
         Column() {
@@ -755,6 +823,7 @@ struct EditableTitleBarDialog {
       .shadow(ShadowStyle.OUTER_DEFAULT_LG)
       .borderRadius(($r('sys.float.corner_radius_level10')))
       .justifyContent(FlexAlign.Center)
+      .direction(Direction.Ltr)
     }
   }
 
@@ -797,9 +866,6 @@ class Util {
   private static RESOURCE_TYPE_SYMBOL = 40000;
 
   public static isSymbolResource(resourceStr: ResourceStr | undefined): boolean {
-    if (resourceStr === undefined) {
-      return true;
-    }
     if (!Util.isResourceType(resourceStr)) {
       return false;
     }
@@ -807,10 +873,13 @@ class Util {
     return resource.type === Util.RESOURCE_TYPE_SYMBOL;
   }
 
-  public static isResourceType(resource: ResourceStr): boolean {
+  public static isResourceType(resource: ResourceStr | Resource | undefined): boolean {
     if (!resource) {
       return false;
     }
-    return typeof resource !== 'string';
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
   }
 }

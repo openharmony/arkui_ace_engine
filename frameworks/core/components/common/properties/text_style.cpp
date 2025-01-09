@@ -16,7 +16,8 @@
 #include "core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace {
-const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD };
+const std::vector<WordBreak> WORD_BREAK_TYPES = { WordBreak::NORMAL, WordBreak::BREAK_ALL, WordBreak::BREAK_WORD,
+    WordBreak::HYPHENATION };
 const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES = { LineBreakStrategy::GREEDY,
     LineBreakStrategy::HIGH_QUALITY, LineBreakStrategy::BALANCED };
 TextStyle::TextStyle(const std::vector<std::string>& fontFamilies, double fontSize, FontWeight fontWeight,
@@ -80,6 +81,9 @@ void TextStyle::UpdateColorByResourceId()
 {
     textColor_.UpdateColorByResourceId();
     textDecorationColor_.UpdateColorByResourceId();
+    if (textBackgroundStyle_.has_value()) {
+        textBackgroundStyle_->UpdateColorByResourceId();
+    }
     std::for_each(renderColors_.begin(), renderColors_.end(), [](Color& cl) { cl.UpdateColorByResourceId(); });
     std::for_each(textShadows_.begin(), textShadows_.end(), [](Shadow& sd) { sd.UpdateColorByResourceId(); });
 }

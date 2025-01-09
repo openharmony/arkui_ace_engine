@@ -30,6 +30,9 @@ void JSTextEditableController::JSBind(BindingTarget globalObj)
         "getTextContentRect", &JSTextEditableController::GetTextContentRect);
     JSClass<JSTextEditableController>::CustomMethod(
         "getTextContentLineCount", &JSTextEditableController::GetTextContentLinesNum);
+    JSClass<JSTextEditableController>::CustomMethod("addText", &JSTextEditableController::AddText);
+    JSClass<JSTextEditableController>::CustomMethod("deleteText", &JSTextEditableController::DeleteText);
+    JSClass<JSTextEditableController>::CustomMethod("getSelection", &JSTextEditableController::GetSelection);
     JSClass<JSTextEditableController>::Method("stopEditing", &JSTextEditableController::StopEditing);
     JSClass<JSTextEditableController>::Bind(
         globalObj, JSTextEditableController::Constructor, JSTextEditableController::Destructor);
@@ -150,6 +153,84 @@ void JSTextEditableController::GetTextContentLinesNum(const JSCallbackInfo& info
         info.SetReturnValue(textLines);
     } else {
         TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "GetTextContentLinesNum: The JSTextEditableController is NULL");
+    }
+}
+
+void JSTextEditableController::AddText(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        const auto& text = info[0];
+        const auto& options = info[1];
+        std::u16string textValue;
+        if (text->IsString()) {
+            textValue = text->ToU16String();
+        } else {
+            TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "AddText: The text is null");
+            auto returnValue = JSVal(ToJSValue(controller->GetCaretIndex()));
+            info.SetReturnValue(JSRef<JSVal>::Make(returnValue));
+            return;
+        }
+        int32_t offsetIndex = -1;
+        if (options->IsObject()) {
+            JSRef<JSObject> optionObj = JSRef<JSObject>::Cast(options);
+            JSRef<JSVal> offset = optionObj->GetProperty("offset");
+            if (offset->IsNumber()) {
+                offsetIndex = offset->ToNumber<int32_t>();
+            }
+            offsetIndex = std::max(0, offsetIndex);
+        }
+        // add text
+        int32_t result = controller->AddText(textValue, offsetIndex);
+        auto returnValue = JSVal(ToJSValue(result));
+        info.SetReturnValue(JSRef<JSVal>::Make(returnValue));
+    } else {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "AddText: The JSTextEditableController is NULL");
+    }
+}
+
+void JSTextEditableController::DeleteText(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        const auto& textRange = info[0];
+        if (!textRange->IsObject()) {
+            controller->DeleteText(-1, -1);
+            return;
+        }
+        JSRef<JSObject> rangeObj = JSRef<JSObject>::Cast(textRange);
+
+        int32_t startIndex = -1;
+        int32_t endIndex = -1;
+        JSRef<JSVal> start = rangeObj->GetProperty("start");
+        if (start->IsNumber()) {
+            startIndex = start->ToNumber<int32_t>();
+            startIndex = std::max(0, startIndex);
+        }
+        JSRef<JSVal> end = rangeObj->GetProperty("end");
+        if (end->IsNumber()) {
+            endIndex = end->ToNumber<int32_t>();
+            endIndex = std::max(0, endIndex);
+        }
+        controller->DeleteText(startIndex, endIndex);
+    } else {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "DeleteText: The JSTextEditableController is NULL");
+    }
+}
+
+void JSTextEditableController::GetSelection(const JSCallbackInfo& info)
+{
+    auto controller = controllerWeak_.Upgrade();
+    if (controller) {
+        SelectionInfo selectInfo = controller->GetSelection();
+        JSRef<JSObject> selectionObject = JSRef<JSObject>::New();
+        selectionObject->SetPropertyObject("start",
+            JSRef<JSVal>::Make(ToJSValue(selectInfo.GetSelection().selection[0])));
+        selectionObject->SetPropertyObject("end",
+            JSRef<JSVal>::Make(ToJSValue(selectInfo.GetSelection().selection[1])));
+        info.SetReturnValue(JSRef<JSVal>::Cast(selectionObject));
+    } else {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "GetSelection: The JSTextEditableController is NULL");
     }
 }
 

@@ -86,6 +86,7 @@ protected:
 
     void GrayDisplayAISpan(const DragSpanPosition& dragSpanPosition, const std::u16string textForAI,
         const TextStyle& textStyle, bool isDragging, const RefPtr<Paragraph>& paragraph);
+    bool DidExceedMaxLines(const SizeF& maxSize) override;
 
     std::u16string StringOutBoundProtection(int32_t position, int32_t length, std::u16string wTextForAI);
 
@@ -124,7 +125,7 @@ private:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize);
     std::pair<bool, double> GetSuitableSizeBS(TextStyle& textStyle, const std::u16string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, double stepSize);
-        
+    bool IsAdaptExceedLimit(const SizeF& maxSize) override;
 
     RefPtr<PropertyBool> showSelect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);

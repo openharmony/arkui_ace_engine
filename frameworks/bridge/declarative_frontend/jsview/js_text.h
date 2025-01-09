@@ -68,11 +68,6 @@ public:
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsOnClickWithoutNGBUILD(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
-    static void JsOnDragStart(const JSCallbackInfo& info);
-    static void JsOnDragEnter(const JSCallbackInfo& info);
-    static void JsOnDragMove(const JSCallbackInfo& info);
-    static void JsOnDragLeave(const JSCallbackInfo& info);
-    static void JsOnDrop(const JSCallbackInfo& info);
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsDraggable(const JSCallbackInfo& info);
     static void JsMenuOptionsExtension(const JSCallbackInfo& info);
@@ -85,6 +80,9 @@ public:
     static void JsClip(const JSCallbackInfo& info);
     static void SetFontFeature(const JSCallbackInfo &info);
     static void SetForegroundColor(const JSCallbackInfo& info);
+    static void SetMarqueeOptions(const JSCallbackInfo& info);
+    static void SetOnMarqueeStateChange(const JSCallbackInfo& info);
+    static void ParseMarqueeParam(const JSRef<JSObject>& paramObject, NG::TextMarqueeOptions& options);
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void JsResponseRegion(const JSCallbackInfo& info);
     static void SetHalfLeading(const JSCallbackInfo& info);

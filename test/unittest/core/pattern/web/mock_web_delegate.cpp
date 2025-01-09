@@ -18,7 +18,7 @@
 #include <gmock/gmock.h>
 #include <vector>
 
-#include "core/components/web/resource/web_delegate.h"
+#include "core/components/web/resource/web_area_changed.h"
 
 namespace OHOS::Ace {
 #define EGLCONFIG_VERSION 3
@@ -622,6 +622,7 @@ void WebDelegate::UpdateSupportZoom(const bool& isZoomAccessEnabled) {}
 void WebDelegate::UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled) {}
 void WebDelegate::UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled) {}
 void WebDelegate::UpdateCacheMode(const WebCacheMode& mode) {}
+void WebDelegate::UpdateOptimizeParserBudgetEnabled(const bool enable) {}
 std::shared_ptr<OHOS::NWeb::NWeb> WebDelegate::GetNweb()
 {
     return nullptr;
@@ -1063,6 +1064,13 @@ bool WebDelegate::ShouldVirtualKeyboardOverlay()
 void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type) {}
 void WebDelegate::JavaScriptOnDocumentStart() {}
 void WebDelegate::JavaScriptOnDocumentEnd() {}
+
+void WebDelegate::SetJavaScriptItemsByOrder(
+    const ScriptItems& scriptItems,
+    const ScriptItemType& type,
+    const ScriptItemsByOrder& scriptItemsByOrder) {}
+void WebDelegate::JavaScriptOnDocumentStartByOrder() {}
+void WebDelegate::JavaScriptOnDocumentEndByOrder() {}
 bool WebDelegate::ExecuteAction(
     int64_t accessibilityId, AceAction action, const std::map<std::string, std::string>& actionArguments)
 {
@@ -1187,4 +1195,10 @@ void WebDelegate::RegisterNativeArkJSFunction(const std::string& objName,
     const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh)
 {}
 void WebDelegate::UnRegisterNativeArkJSFunction(const std::string& objName) {}
+bool WebDelegate::IsActivePolicyDisable()
+{
+    return false;
+}
+void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
+void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}
 } // namespace OHOS::Ace

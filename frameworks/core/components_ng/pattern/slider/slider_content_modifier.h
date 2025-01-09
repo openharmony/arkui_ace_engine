@@ -48,7 +48,7 @@ public:
         PointF backStart;
         PointF backEnd;
         PointF circleCenter;
-        Color selectColor;
+        Gradient selectGradientColor;
         Gradient trackBackgroundColor;
         Color blockColor;
     };
@@ -92,10 +92,10 @@ public:
         trackBackgroundColor_->Set(GradientArithmetic(color));
     }
 
-    void SetSelectColor(Color color)
+    void SetSelectColor(const Gradient& color)
     {
-        if (selectColor_) {
-            selectColor_->Set(LinearColor(color));
+        if (selectGradientColor_) {
+            selectGradientColor_->Set(GradientArithmetic(color));
         }
     }
 
@@ -257,6 +257,27 @@ public:
         isVisible_ = isVisible;
     }
 
+    void SetIsPressed(bool isPressed)
+    {
+        if (isPressed_) {
+            isPressed_->Set(isPressed);
+        }
+    }
+
+    void SetIsHovered(bool isHovered)
+    {
+        if (isHovered_) {
+            isHovered_->Set(isHovered);
+        }
+    }
+
+    void SetIsFocused(bool isFocused)
+    {
+        if (isFocused_) {
+            isFocused_->Set(isFocused);
+        }
+    }
+
     bool GetVisible() const
     {
         return isVisible_;
@@ -281,7 +302,7 @@ private:
     RSRect GetTrackRect();
     std::vector<GradientColor> GetTrackBackgroundColor() const;
     Gradient SortGradientColorsByOffset(const Gradient& gradient) const;
-
+    void DrawSelectColor(RSBrush& brush, RSRect& rect);
     void DrawBlock(DrawingContext& context);
     void DrawBlockShape(DrawingContext& context);
     void DrawBlockShapeCircle(DrawingContext& context, RefPtr<Circle>& circle);
@@ -306,7 +327,7 @@ private:
     RefPtr<AnimatablePropertyFloat> blockCenterY_;
     RefPtr<AnimatablePropertyFloat> trackThickness_;
     RefPtr<AnimatablePropertyVectorColor> trackBackgroundColor_;
-    RefPtr<AnimatablePropertyColor> selectColor_;
+    RefPtr<AnimatablePropertyVectorColor> selectGradientColor_;
     RefPtr<AnimatablePropertyColor> blockColor_;
     RefPtr<AnimatablePropertyColor> boardColor_;
 
@@ -339,6 +360,9 @@ private:
     RefPtr<PropertyFloat> minResponse_;
     RefPtr<PropertyInt> blockType_;
     RefPtr<PropertyBool> useContentModifier_;
+    RefPtr<PropertyBool> isHovered_;
+    RefPtr<PropertyBool> isPressed_;
+    RefPtr<PropertyBool> isFocused_;
 
     // others
     struct MarkerPenAndPath {
@@ -352,6 +376,8 @@ private:
     bool isVisible_ = true;
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
+    bool isEnlarge_ = false;
+    float scaleValue_ = 1.0f;
     bool reverse_ = false;
     SliderStatus animatorStatus_ = SliderStatus::DEFAULT; // Translate Animation on-off
     float hotCircleShadowWidth_ = 0.0f;

@@ -212,7 +212,7 @@ public:
     void RemoveScheduleTask(uint32_t id) override;
 
     // Called by view when touch event received.
-    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
+    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false, bool isEventsPassThrough = false) override;
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     // Used to determine whether the touched frameNode is the target

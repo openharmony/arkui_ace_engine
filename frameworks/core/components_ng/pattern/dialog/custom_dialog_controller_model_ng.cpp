@@ -55,7 +55,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
     }
     auto task = ParseOpenDialogTask(
         currentId, controller, dialogProperties, dialogs, std::move(buildFunc), overlayManager);
-    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog");
+    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogShowCustomDialog", PriorityType::VIP);
 }
 
 TaskExecutor::Task CustomDialogControllerModelNG::ParseOpenDialogTask(int32_t currentId,
@@ -172,7 +172,7 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
     auto executor = context->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
     auto task = ParseCloseDialogTask(controller, dialogProperties, dialogs, overlayManager);
-    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogCloseCustomDialog");
+    executor->PostTask(task, TaskExecutor::TaskType::UI, "ArkUIDialogCloseCustomDialog", PriorityType::VIP);
 }
 
 TaskExecutor::Task CustomDialogControllerModelNG::ParseCloseDialogTask(const WeakPtr<AceType>& controller,

@@ -84,10 +84,19 @@ struct AccessibilityParentRectInfo {
     int32_t rotateDegree = 0;  // final rotate degree of parent interface
 };
 
+struct AccessibilityWindowInfo {
+    int32_t left = 0;
+    int32_t top = 0;
+    int32_t innerWindowId = -1;
+    float_t scaleX = 1.0f;
+    float_t scaleY = 1.0f;
+};
+
 enum class AccessibilityCallbackEventId : uint32_t {
     ON_LOAD_PAGE = 0,
     ON_SHOW = 1,
     ON_HIDE = 2,
+    ON_SEND_ELEMENT_INFO_CHANGE = 3,
 };
 
 struct AccessibilityCallbackEvent {
@@ -96,7 +105,7 @@ struct AccessibilityCallbackEvent {
     AccessibilityCallbackEvent(AccessibilityCallbackEventId id, int64_t para) : eventId(id), parameter(para) {}
     bool operator < (const AccessibilityCallbackEvent& other) const
     {
-        return eventId < other.eventId;
+        return std::tie(eventId, parameter) < std::tie(other.eventId, other.parameter);
     }
 };
 
@@ -285,6 +294,12 @@ public:
     int64_t GetUiextensionId() const
     {
         return uiExtensionId_;
+    }
+
+    virtual AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
+        const RefPtr<PipelineBase>& context)
+    {
+        return AccessibilityWindowInfo();
     }
 
 protected:

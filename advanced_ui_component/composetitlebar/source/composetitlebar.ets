@@ -102,6 +102,7 @@ struct ComposeTitleBar {
   private static readonly portraitImageLeftPadding = 4;
   private static readonly portraitImageRightPadding = 16;
   private static instanceCount = 0;
+  @Provide('uniqueId') uniqueId?: number = -1;
 
   build() {
     Flex({
@@ -114,7 +115,9 @@ struct ComposeTitleBar {
             value: PUBLIC_BACK,
             isEnabled: true,
             action: () => this.getUIContext()?.getRouter()?.back()
-          }, index: -1
+          },
+          index: -1,
+          itemIndex: -1
         })
 
         Row() {
@@ -167,6 +170,9 @@ struct ComposeTitleBar {
         CollapsibleMenuSection({ menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ })
       }
     }
+    .onAppear(() => {
+      this.uniqueId = this.getUIContext().getFrameNodeByUniqueId(this.getUniqueId())?.getFirstChild()?.getUniqueId();
+    })
     .width('100%')
     .height(ComposeTitleBar.totalHeight)
     .backgroundColor($r('sys.color.ohos_id_color_background'))
@@ -260,7 +266,7 @@ struct CollapsibleMenuSection {
     }
     if (this.menuItems) {
       this.menuItems.forEach((item, index) => {
-        if (item.isEnabled && this.firstFocusableIndex == -1 &&
+        if (item.isEnabled && this.firstFocusableIndex === -1 &&
           index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
           this.firstFocusableIndex = this.index * 1000 + index + 1;
         }
@@ -295,12 +301,12 @@ struct CollapsibleMenuSection {
         if (this.menuItems) {
           if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
             ForEach(this.menuItems, (item: ComposeTitleBarMenuItem, index: number) => {
-              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1, itemIndex: index })
             })
           } else {
             ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
               (item: ComposeTitleBarMenuItem, index: number) => {
-                ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+                ImageMenuItem({ item: item, index: this.index * 1000 + index + 1, itemIndex: index })
               })
 
             Button({ type: ButtonType.Normal, stateEffect: true }) {
@@ -409,6 +415,7 @@ struct CollapsibleMenuSection {
 struct ImageMenuItem {
   item: ComposeTitleBarMenuItem = {} as ComposeTitleBarMenuItem;
   index: number = 0;
+  itemIndex?: number = 0;
   minFontSize: number = 1.75;
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
@@ -418,11 +425,12 @@ struct ImageMenuItem {
   static readonly imageHotZoneWidth = 48;
   static readonly buttonBorderRadius = 8;
   static readonly focusBorderWidth = 2;
-  static readonly focusablePrefix = "Id-ComposeTitleBar-ImageMenuItem-";
+  static readonly focusablePrefix = 'Id-ComposeTitleBar-ImageMenuItem-';
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
   @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
+  @Consume('uniqueId') parentParentUniqueId?: number;
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: ComposeTitleBarDialog({
       cancel: () => {
@@ -543,6 +551,7 @@ struct ImageMenuItem {
     Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
       if (this.item?.symbolStyle) {
         SymbolGlyph()
+          .fontColor([$r('sys.color.ohos_id_color_text_primary')])
           .attributeModifier(this.item?.symbolStyle)
           .fontSize(`${ImageMenuItem.imageSize}vp`)
           .effectStrategy(SymbolEffectStrategy.NONE)
@@ -570,6 +579,7 @@ struct ImageMenuItem {
         }
       }
     }
+    .id(`ComposeTitleBar_ImageMenuItem_${this.parentParentUniqueId}_${this.itemIndex}`)
     .accessibilityText(this.getAccessibilityReadText())
     .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
     .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
@@ -675,8 +685,9 @@ struct ComposeTitleBarDialog {
       Column() {
         if (this.itemComposeTitleDialog.symbolStyle) {
           SymbolGlyph()
+            .fontColor([$r('sys.color.icon_primary')])
             .attributeModifier(this.itemComposeTitleDialog.symbolStyle)
-            .fontSize(`${IMAGE_SIZE}vp`)
+            .fontSize(IMAGE_SIZE)
             .effectStrategy(SymbolEffectStrategy.NONE)
             .symbolEffect(new SymbolEffect(), false)
             .margin({
@@ -686,7 +697,7 @@ struct ComposeTitleBarDialog {
         } else {
           if (Util.isSymbolResource(this.itemComposeTitleDialog.value)) {
             SymbolGlyph(this.itemComposeTitleDialog.value as Resource)
-              .fontSize(`${IMAGE_SIZE}vp`)
+              .fontSize(IMAGE_SIZE)
               .fontColor([$r('sys.color.icon_primary')])
               .margin({
                 top: $r('sys.float.padding_level24'),
@@ -728,14 +739,15 @@ struct ComposeTitleBarDialog {
       Column() {
         if (this.itemComposeTitleDialog.symbolStyle) {
           SymbolGlyph()
+            .fontColor([$r('sys.color.icon_primary')])
             .attributeModifier(this.itemComposeTitleDialog.symbolStyle)
-            .fontSize(`${IMAGE_SIZE}vp`)
+            .fontSize(IMAGE_SIZE)
             .effectStrategy(SymbolEffectStrategy.NONE)
             .symbolEffect(new SymbolEffect(), false)
         } else {
           if (Util.isSymbolResource(this.itemComposeTitleDialog.value)) {
             SymbolGlyph(this.itemComposeTitleDialog.value as Resource)
-              .fontSize(`${IMAGE_SIZE}vp`)
+              .fontSize(IMAGE_SIZE)
               .fontColor([$r('sys.color.icon_primary')])
           } else {
             Image(this.itemComposeTitleDialog.value)

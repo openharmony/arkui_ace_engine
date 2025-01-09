@@ -106,14 +106,26 @@ int32_t GetAlignContent(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIStackModifier* GetStackModifier()
 {
-    static const ArkUIStackModifier modifier = { SetAlignContent, ResetAlignContent, GetAlignContent };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIStackModifier modifier = {
+        .setAlignContent = SetAlignContent,
+        .resetAlignContent = ResetAlignContent,
+        .getAlignContent = GetAlignContent,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIStackModifier* GetCJUIStackModifier()
 {
-    static const CJUIStackModifier modifier = { SetAlignContent, ResetAlignContent, GetAlignContent };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIStackModifier modifier = {
+        .setAlignContent = SetAlignContent,
+        .resetAlignContent = ResetAlignContent,
+        .getAlignContent = GetAlignContent,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

@@ -563,7 +563,7 @@ struct KeyEvent final : public NonPointerEvent {
     std::string ConvertCodeToString() const;
 
     KeyCode code { KeyCode::KEY_UNKNOWN };
-    const char* key = "";
+    std::string key;
     KeyAction action { KeyAction::UNKNOWN };
     std::vector<KeyCode> pressedCodes;
     // When the key is held down for a long period of time, it will be accumulated once in a while.
@@ -602,7 +602,7 @@ public:
     explicit KeyEventInfo(const KeyEvent& event) : BaseEventInfo("keyEvent")
     {
         keyCode_ = event.code;
-        keyText_ = event.key;
+        keyText_ = event.key.c_str();
         keyType_ = event.action;
         keySource_ = event.sourceType;
         keyIntention_ = event.keyIntention;
@@ -678,6 +678,7 @@ using OnPaintFocusStateFunc = std::function<bool()>;
 using OnBlurFunc = std::function<void()>;
 using OnBlurReasonFunc = std::function<void(BlurReason reason)>;
 using OnPreFocusFunc = std::function<void()>;
+using OnKeyEventDispatchFunc = std::function<bool(KeyEventInfo&)>;
 using OnFocusAxisEventFunc = std::function<void(NG::FocusAxisEventInfo&)>;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H

@@ -194,6 +194,23 @@ int32_t RegisterOnWillDismissWithUserData(
     return result;
 }
 
+int32_t SetKeyboardAvoidDistance(
+    ArkUI_NativeDialogHandle handle, float distance, ArkUI_LengthMetricUnit unit)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl) {
+        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+    }
+    if (!handle) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (unit < ARKUI_LENGTH_METRIC_UNIT_DEFAULT || unit > ARKUI_LENGTH_METRIC_UNIT_FP) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    int result = impl->getDialogAPI()->setKeyboardAvoidDistance(handle->controller, distance, unit);
+    return result;
+}
+
 } // namespace OHOS::Ace::NG::DialogModel
 
 #ifdef __cplusplus

@@ -34,14 +34,24 @@ void ResetNavRouteMode(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUINavRouterModifier* GetNavRouterModifier()
 {
-    static const ArkUINavRouterModifier modifier = {SetNavRouteMode, ResetNavRouteMode};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUINavRouterModifier modifier = {
+        .setNavRouteMode = SetNavRouteMode,
+        .resetNavRouteMode = ResetNavRouteMode,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUINavRouterModifier* GetCJUINavRouterModifier()
 {
-    static const CJUINavRouterModifier modifier = {SetNavRouteMode, ResetNavRouteMode};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUINavRouterModifier modifier = {
+        .setNavRouteMode = SetNavRouteMode,
+        .resetNavRouteMode = ResetNavRouteMode,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

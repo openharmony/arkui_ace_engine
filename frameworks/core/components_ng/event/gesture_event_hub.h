@@ -90,6 +90,11 @@ struct PreparedInfoForDrag {
     RefPtr<FrameNode> imageNode;
 };
 
+struct DragframeNodeInfo {
+    WeakPtr<FrameNode> frameNode;
+    std::vector<RefPtr<FrameNode>> gatherFrameNode;
+};
+
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
@@ -259,6 +264,9 @@ public:
         const RefPtr<FrameNode>& frameNode);
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
+    void HandleDragThroughMouse(const RefPtr<FrameNode> frameNode);
+    void HandleDragThroughTouch(const RefPtr<FrameNode> frameNode);
+    void HandleDragEndAction(const DragframeNodeInfo& info);
     void HandleOnDragUpdate(const GestureEvent& info);
     void HandleOnDragEnd(const GestureEvent& info);
     void HandleOnDragCancel();
@@ -317,6 +325,8 @@ public:
     bool IsGestureEmpty() const;
 
     bool IsPanEventEmpty() const;
+
+    void SetExcludedAxisForPanEvent(bool isExcludedAxis);
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
@@ -334,10 +344,11 @@ private:
 
     void OnDragStart(const GestureEvent& info, const RefPtr<PipelineBase>& context, const RefPtr<FrameNode> frameNode,
         DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& dragEvent);
+    void StartVibratorByDrag(const RefPtr<FrameNode>& frameNode);
     void UpdateExtraInfo(const RefPtr<FrameNode>& frameNode, std::unique_ptr<JsonValue>& arkExtraInfoJson,
         float scale);
-    void ProcessMenuPreviewScale(
-        const RefPtr<FrameNode> imageNode, float& scale, float defaultDragScale, float defaultMenuPreviewScale);
+    void ProcessMenuPreviewScale(const RefPtr<FrameNode> imageNode, float& scale, float previewScale,
+        float windowScale, float defaultMenuPreviewScale);
 
     template<typename T>
     const RefPtr<T> GetAccessibilityRecognizer();
@@ -415,6 +426,7 @@ private:
     bool contextMenuShowStatus_  = false;
     MenuBindingType menuBindingType_  = MenuBindingType::LONG_PRESS;
     BindMenuStatus bindMenuStatus_;
+    DragframeNodeInfo dragframeNodeInfo_;
     // disable drag for the node itself and its all children
     bool isDragForbiddenForWholeSubTree_ = false;
     bool textDraggable_ = false;

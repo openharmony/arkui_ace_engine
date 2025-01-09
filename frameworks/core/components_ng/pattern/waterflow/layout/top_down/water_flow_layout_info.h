@@ -72,6 +72,9 @@ public:
      */
     FlowItemIndex GetCrossIndexForNextItem(int32_t segmentIdx) const;
 
+    bool OverScrollTop() override;
+    bool OverScrollBottom() override;
+    
     float GetMainHeight(int32_t crossIndex, int32_t itemIndex) const;
     float GetStartMainPos(int32_t crossIndex, int32_t itemIndex) const;
     void Reset() override;
@@ -175,7 +178,7 @@ public:
      * @param mainSize waterFlow length on the main axis.
      * @param overScroll whether overScroll is allowed. Might adjust offset if not.
      */
-    void Sync(float mainSize, bool overScroll);
+    void Sync(float mainSize, bool canOverScrollStart_, bool canOverScrollEnd_);
 
     /**
      * @brief Obtain index of last item recorded in Original layout.

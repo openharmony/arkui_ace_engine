@@ -15,9 +15,6 @@
 
 #include "text_input_base.h"
 
-#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace
@@ -503,5 +500,49 @@ HWTEST_F(TextFieldPatternTestFour, IsModalCovered001, TestSize.Level0)
     ASSERT_NE(pattern, nullptr);
 
     pattern->IsModalCovered();
+}
+
+/**
+ * @tc.name: CursorMoveUpTest001
+ * @tc.desc: Test the cursor move up
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFour, CursorMoveUpTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: Move up and down in a single-line text
+     * @tc.expected: In single-line text, there is no up and down movement
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    auto ret = pattern_->CursorMoveUp();
+    EXPECT_TRUE(ret);
+    ret = pattern_->CursorMoveDown();
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: CursorMoveToParagraphEndTest001
+ * @tc.desc: Test the cursor move to pragraph to the end
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFour, CursorMoveToParagraphEndTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: Initialize text and move to the pargraph of the line
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+    auto ret = pattern_->CursorMoveToParagraphEnd();
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.expected: Moving to the paragraph end and check if cursor is on pargraph end
+     */
+    ret = pattern_->CursorMoveLeft();
+    ret = pattern_->CursorMoveToParagraphEnd();
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(pattern_->GetCaretIndex(), DEFAULT_TEXT.length())
+        << "Text is " + pattern_->GetTextValue() + ", CaretIndex is " + std::to_string(pattern_->GetCaretIndex());
 }
 }

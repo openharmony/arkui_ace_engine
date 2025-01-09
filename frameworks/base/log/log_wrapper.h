@@ -214,6 +214,7 @@ enum AceLogTag : uint8_t {
     ACE_LAYOUT_INSPECTOR = 88,     // C03958
     ACE_LAYOUT = 89,               // C03959
     ACE_STYLUS = 90,               // C0395A
+    ACE_INDICATOR = 91,            // C0395B
     ACE_BADGE = 92,                // C0395C
     ACE_QRCODE = 93,               // C0395D
     ACE_PROGRESS = 94,             // C0395E

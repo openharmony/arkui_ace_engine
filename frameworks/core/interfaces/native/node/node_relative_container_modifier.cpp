@@ -129,15 +129,31 @@ namespace NodeModifier {
 
 const ArkUIRelativeContainerModifier* GetRelativeContainerModifier()
 {
-    static const ArkUIRelativeContainerModifier modifier = { SetGuideLine, SetBarrier, GetGuideLine, GetBarrier,
-        ResetGuideline, ResetBarrier };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIRelativeContainerModifier modifier = {
+        .setGuideLine = SetGuideLine,
+        .setBarrier = SetBarrier,
+        .getGuideLine = GetGuideLine,
+        .getBarrier = GetBarrier,
+        .resetGuideline = ResetGuideline,
+        .resetBarrier = ResetBarrier,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIRelativeContainerModifier* GetCJUIRelativeContainerModifier()
 {
-    static const CJUIRelativeContainerModifier modifier = { SetGuideLine, SetBarrier, GetGuideLine, GetBarrier,
-        ResetGuideline, ResetBarrier };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIRelativeContainerModifier modifier = {
+        .setGuideLine = SetGuideLine,
+        .setBarrier = SetBarrier,
+        .getGuideLine = GetGuideLine,
+        .getBarrier = GetBarrier,
+        .resetGuideline = ResetGuideline,
+        .resetBarrier = ResetBarrier,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

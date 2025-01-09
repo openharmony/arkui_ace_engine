@@ -177,7 +177,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       : false;
   }
 
-  public getOwningView(): ViewPUInfo {
+  public getOwningView(): TargetInfo {
     return { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() };
   }
 

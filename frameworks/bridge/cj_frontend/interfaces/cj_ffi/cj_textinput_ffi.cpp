@@ -47,8 +47,8 @@ void FfiOHOSAceFrameworkTextInputCreate(const char* placeholder, const char* tex
     }
     std::string placeHolderStr8(placeholder);
     std::string textStr8(text);
-    auto nativeController = TextFieldModel::GetInstance()->CreateTextInput(UtfUtils::Str8ToStr16(placeHolderStr8),
-        UtfUtils::Str8ToStr16(textStr8));
+    auto nativeController = TextFieldModel::GetInstance()->CreateTextInput(UtfUtils::Str8DebugToStr16(placeHolderStr8),
+        UtfUtils::Str8DebugToStr16(textStr8));
     controller->SetController(nativeController);
 }
 

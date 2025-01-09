@@ -28,6 +28,7 @@
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
 #include "ui_extension_context.h"
+#include "ui/rs_surface_node.h"
 #include "window_manager.h"
 #include "wm/wm_common.h"
 
@@ -81,13 +82,19 @@
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
+#include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/components_ng/token_theme/token_theme_storage.h"
 
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
+#endif
+
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "base/ressched/ressched_report.h"
 #endif
 
 namespace OHOS::Ace::Platform {
@@ -107,7 +114,11 @@ const char ENABLE_TRACE_INPUTEVENT_KEY[] = "persist.ace.trace.inputevent.enabled
 const char ENABLE_SECURITY_DEVELOPERMODE_KEY[] = "const.security.developermode.state";
 const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
+const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
 std::mutex g_mutexFormRenderFontFamily;
+#ifdef SUPPORT_DIGITAL_CROWN
+constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
+#endif
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -326,8 +337,8 @@ bool AceContainer::MaybeRelease()
     } else {
         std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy AceContainer Task to PLATFORM thread.");
-        return !taskExecutor_->PostTask(
-            [this] { delete this; }, TaskExecutor::TaskType::PLATFORM, "ArkUIAceContainerDestroy");
+        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::PLATFORM,
+            "ArkUIAceContainerDestroy", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 }
 
@@ -349,7 +360,8 @@ void AceContainer::Destroy()
         if (GetSettings().usePlatformAsUIThread) {
             uiTask();
         } else {
-            taskExecutor_->PostTask(uiTask, TaskExecutor::TaskType::UI, "ArkUIPipelineDestroy");
+            taskExecutor_->PostTask(uiTask, TaskExecutor::TaskType::UI, "ArkUIPipelineDestroy",
+                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
         }
 
         if (isSubContainer_) {
@@ -371,7 +383,8 @@ void AceContainer::Destroy()
         if (GetSettings().usePlatformAsUIThread && GetSettings().useUIAsJSThread) {
             jsTask();
         } else {
-            taskExecutor_->PostTask(jsTask, TaskExecutor::TaskType::JS, "ArkUIFrontendDestroy");
+            taskExecutor_->PostTask(jsTask, TaskExecutor::TaskType::JS, "ArkUIFrontendDestroy",
+                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
         }
     }
     DestroyToastSubwindow(instanceId_);
@@ -655,8 +668,10 @@ void AceContainer::OnShow(int32_t instanceId)
         jsTask();
         uiTask();
     } else {
-        taskExecutor->PostTask(jsTask, TaskExecutor::TaskType::JS, "ArkUIFrontendShow");
-        taskExecutor->PostTask(uiTask, TaskExecutor::TaskType::UI, "ArkUICardFrontendShow");
+        taskExecutor->PostTask(jsTask, TaskExecutor::TaskType::JS, "ArkUIFrontendShow",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor->PostTask(uiTask, TaskExecutor::TaskType::UI, "ArkUICardFrontendShow",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 }
 
@@ -708,8 +723,10 @@ void AceContainer::OnHide(int32_t instanceId)
         jsTask();
         uiTask();
     } else {
-        taskExecutor->PostTask(jsTask, TaskExecutor::TaskType::JS, "ArkUIFrontendHide");
-        taskExecutor->PostTask(uiTask, TaskExecutor::TaskType::UI, "ArkUICardFrontendHide");
+        taskExecutor->PostTask(jsTask, TaskExecutor::TaskType::JS, "ArkUIFrontendHide",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor->PostTask(uiTask, TaskExecutor::TaskType::UI, "ArkUICardFrontendHide",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 }
 
@@ -733,7 +750,8 @@ void AceContainer::OnActive(int32_t instanceId)
                     frontend->OnActive();
                 }
             },
-            TaskExecutor::TaskType::JS, "ArkUIFrontendActive");
+            TaskExecutor::TaskType::JS, "ArkUIFrontendActive",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 
     taskExecutor->PostTask(
@@ -747,7 +765,7 @@ void AceContainer::OnActive(int32_t instanceId)
             pipelineContext->WindowFocus(true);
             pipelineContext->ChangeDarkModeBrightness();
         },
-        TaskExecutor::TaskType::UI, "ArkUIWindowFocus");
+        TaskExecutor::TaskType::UI, "ArkUIWindowFocus", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void AceContainer::OnInactive(int32_t instanceId)
@@ -770,7 +788,8 @@ void AceContainer::OnInactive(int32_t instanceId)
                     frontend->OnInactive();
                 }
             },
-            TaskExecutor::TaskType::JS, "ArkUIFrontendInactive");
+            TaskExecutor::TaskType::JS, "ArkUIFrontendInactive",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 
     taskExecutor->PostTask(
@@ -787,7 +806,7 @@ void AceContainer::OnInactive(int32_t instanceId)
                 JankFrameReport::GetInstance().FlushRecord();
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIWindowUnfocus");
+        TaskExecutor::TaskType::UI, "ArkUIWindowUnfocus", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void AceContainer::OnNewWant(int32_t instanceId, const std::string& data)
@@ -877,12 +896,23 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
 
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
-    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](
-                                    const TouchEvent& event, const std::function<void()>& markProcess,
+    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_,
+                                    isTouchEventsPassThrough = isTouchEventsPassThrough_](const TouchEvent& event,
+                                    const std::function<void()>& markProcess,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
+        bool passThroughMode = false;
+        if (isTouchEventsPassThrough.has_value()) {
+            passThroughMode = isTouchEventsPassThrough.value();
+        } else {
+            auto container = Platform::AceContainer::GetContainer(id);
+            if (container) {
+                passThroughMode = AceApplicationInfo::GetInstance().IsTouchEventsPassThrough();
+                container->SetTouchEventsPassThroughMode(passThroughMode);
+            }
+        }
         context->CheckAndLogLastReceivedTouchEventInfo(event.touchEventId, event.type);
-        auto touchTask = [context, event, markProcess, node]() {
+        auto touchTask = [context, event, markProcess, node, mode = passThroughMode]() {
             if (event.type == TouchType::HOVER_ENTER || event.type == TouchType::HOVER_MOVE ||
                 event.type == TouchType::HOVER_EXIT || event.type == TouchType::HOVER_CANCEL) {
                 context->OnAccessibilityHoverEvent(event, node);
@@ -890,9 +920,9 @@ void AceContainer::InitializeCallback()
                 context->OnPenHoverEvent(event, node);
             } else {
                 if (node) {
-                    context->OnTouchEvent(event, node);
+                    context->OnTouchEvent(event, node, false, mode);
                 } else {
-                    context->OnTouchEvent(event);
+                    context->OnTouchEvent(event, false, mode);
                 }
             }
             CHECK_NULL_VOID(markProcess);
@@ -959,18 +989,49 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
 
-    auto&& nonPointerEventCallback = [context = pipelineContext_, id = instanceId_](const NonPointerEvent& event) {
+    auto&& nonPointerEventCallback = [context = pipelineContext_, id = instanceId_](
+                                        const NonPointerEvent& event, const std::function<void()>& markProcess) {
         ContainerScope scope(id);
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, &event, &result, id]() {
+            [context, &event, &result, id, markProcess]() {
                 ContainerScope scope(id);
                 result = context->OnNonPointerEvent(event);
+                CHECK_NULL_VOID(markProcess);
+                markProcess();
             },
             TaskExecutor::TaskType::UI, "ArkUIAceContainerNonPointerEvent", PriorityType::VIP);
         return result;
     };
     aceView_->RegisterNonPointerEventCallback(nonPointerEventCallback);
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto&& crownEventCallback = [context = pipelineContext_, id = instanceId_](
+                                   const CrownEvent& event, const std::function<void()>& markProcess) {
+        if (event.action == CrownAction::BEGIN || event.action == CrownAction::END) {
+            std::unordered_map<std::string, std::string> mapPayload;
+            ResSchedReport::GetInstance().ResSchedDataReport(RES_TYPE_CROWN_ROTATION_STATUS,
+                static_cast<int32_t>(event.action), mapPayload);
+        }
+        ContainerScope scope(id);
+        bool result = false;
+        auto crownTask = [context, event, &result, markProcess, id]() {
+            ContainerScope scope(id);
+            result = context->OnNonPointerEvent(event);
+            CHECK_NULL_VOID(markProcess);
+            markProcess();
+        };
+        auto uiTaskRunner = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+        if (uiTaskRunner.IsRunOnCurrentThread()) {
+            crownTask();
+            return result;
+        }
+        context->GetTaskExecutor()->PostTask(
+            crownTask, TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent", PriorityType::VIP);
+        return result;
+    };
+    aceView_->RegisterCrownEventCallback(crownEventCallback);
+#endif
 
     auto&& rotationEventCallback = [context = pipelineContext_, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
@@ -1003,7 +1064,8 @@ void AceContainer::InitializeCallback()
             taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             callback();
         } else {
-            taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUISubwindowResizeWindow");
+            taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUISubwindowResizeWindow",
+                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
         }
     };
     aceView_->RegisterViewChangeCallback(viewChangeCallback);
@@ -1011,9 +1073,9 @@ void AceContainer::InitializeCallback()
     auto&& viewPositionChangeCallback = [context = pipelineContext_, id = instanceId_](int32_t posX, int32_t posY) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewPositionChangeCallback(%d, %d)", posX, posY);
-        context->GetTaskExecutor()->PostTask(
-            [context, posX, posY]() { context->OnSurfacePositionChanged(posX, posY); },
-            TaskExecutor::TaskType::UI, "ArkUISurfacePositionChanged");
+        context->GetTaskExecutor()->PostTask([context, posX, posY]() { context->OnSurfacePositionChanged(posX, posY); },
+            TaskExecutor::TaskType::UI, "ArkUISurfacePositionChanged",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     aceView_->RegisterViewPositionChangeCallback(viewPositionChangeCallback);
 
@@ -1035,7 +1097,8 @@ void AceContainer::InitializeCallback()
         if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             callback();
         } else {
-            taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUISurfaceDensityChanged");
+            taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUISurfaceDensityChanged",
+                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
         }
     };
     aceView_->RegisterDensityChangeCallback(densityChangeCallback);
@@ -1049,7 +1112,8 @@ void AceContainer::InitializeCallback()
         if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
             callback();
         } else {
-            taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUITransformHintChanged");
+            taskExecutor->PostTask(callback, TaskExecutor::TaskType::UI, "ArkUITransformHintChanged",
+                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
         }
     };
     aceView_->RegisterTransformHintChangeCallback(transformHintChangeCallback);
@@ -1060,7 +1124,8 @@ void AceContainer::InitializeCallback()
         ACE_SCOPED_TRACE("SystemBarHeightChangeCallback(%lf, %lf)", statusBar, navigationBar);
         context->GetTaskExecutor()->PostTask(
             [context, statusBar, navigationBar]() { context->OnSystemBarHeightChanged(statusBar, navigationBar); },
-            TaskExecutor::TaskType::UI, "ArkUISystemBarHeightChanged");
+            TaskExecutor::TaskType::UI, "ArkUISystemBarHeightChanged",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     aceView_->RegisterSystemBarHeightChangeCallback(systemBarHeightChangeCallback);
 
@@ -1142,7 +1207,8 @@ void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void
     if (container->GetSettings().usePlatformAsUIThread) {
         removeContainerTask();
     } else {
-        taskExecutor->PostTask(removeContainerTask, TaskExecutor::TaskType::PLATFORM, "ArkUIAceContainerRemove");
+        taskExecutor->PostTask(removeContainerTask, TaskExecutor::TaskType::PLATFORM, "ArkUIAceContainerRemove",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 }
 
@@ -1294,12 +1360,15 @@ bool AceContainer::UpdatePage(int32_t instanceId, int32_t pageId, const std::str
 class FillRequestCallback : public AbilityRuntime::IFillRequestCallback {
 public:
     FillRequestCallback(WeakPtr<NG::PipelineContext> pipelineContext, const RefPtr<NG::FrameNode>& node,
-        AceAutoFillType autoFillType, bool isNative = true)
-        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType), isNative_(isNative) {}
+        AceAutoFillType autoFillType, bool isNative = true, const std::function<void()>& onFinish = nullptr)
+        : pipelineContext_(pipelineContext), node_(node), autoFillType_(autoFillType), isNative_(isNative),
+          onFinish_(onFinish)
+    {}
     virtual ~FillRequestCallback() = default;
     void OnFillRequestSuccess(const AbilityBase::ViewData& viewData) override
     {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, pageUrl=[%{private}s]", viewData.pageUrl.c_str());
+        ProcessOnFinish();
         auto pipelineContext = pipelineContext_.Upgrade();
         CHECK_NULL_VOID(pipelineContext);
         auto taskExecutor = pipelineContext->GetTaskExecutor();
@@ -1331,6 +1400,7 @@ public:
     void OnFillRequestFailed(int32_t errCode, const std::string& fillContent, bool isPopup) override
     {
         TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, errCode: %{public}d", errCode);
+        ProcessOnFinish();
         auto pipelineContext = pipelineContext_.Upgrade();
         CHECK_NULL_VOID(pipelineContext);
         auto node = node_.Upgrade();
@@ -1467,12 +1537,32 @@ private:
         return safeAreaManager->GetSystemSafeArea().bottom_.Length();
     }
 
+    void ProcessOnFinish()
+    {
+        if (!onFinish_) {
+            return;
+        }
+        auto pipelineContext = pipelineContext_.Upgrade();
+        CHECK_NULL_VOID(pipelineContext);
+        auto taskExecutor = pipelineContext->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [onFinish = std::move(onFinish_)]() mutable {
+                if (onFinish) {
+                    onFinish();
+                    onFinish = nullptr;
+                }
+            },
+            TaskExecutor::TaskType::UI, "FillRequestCallbackProcessOnFinish");
+    }
+
     WeakPtr<NG::PipelineContext> pipelineContext_ = nullptr;
     WeakPtr<NG::FrameNode> node_ = nullptr;
     AceAutoFillType autoFillType_ = AceAutoFillType::ACE_UNSPECIFIED;
     bool isNative_ = true;
     AbilityBase::Rect rect_;
     Rosen::Rect windowRect_ { 0, 0, 0, 0 };
+    std::function<void()> onFinish_;
 };
 
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
@@ -1627,31 +1717,32 @@ void GetFocusedElementRect(const AbilityBase::ViewData& viewData, AbilityBase::R
     }
 }
 
-bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative)
+int32_t AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted)
 {
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "called, autoFillType: %{public}d", static_cast<int32_t>(autoFillType));
     auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
-    CHECK_NULL_RETURN(node, false);
-    CHECK_NULL_RETURN(pipelineContext, false);
-    CHECK_NULL_RETURN(uiWindow_, false);
+    CHECK_NULL_RETURN(node, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
+    CHECK_NULL_RETURN(pipelineContext, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
+    CHECK_NULL_RETURN(uiWindow_, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto uiContent = uiWindow_->GetUIContent();
-    CHECK_NULL_RETURN(uiContent, false);
+    CHECK_NULL_RETURN(uiContent, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto uiContentImpl = reinterpret_cast<UIContentImpl*>(uiContent);
-    CHECK_NULL_RETURN(uiContentImpl, false);
+    CHECK_NULL_RETURN(uiContentImpl, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
-    CHECK_NULL_RETURN(viewDataWrap, false);
+    CHECK_NULL_RETURN(viewDataWrap, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto autoFillContainerNode = node->GetFirstAutoFillContainerNode();
     uiContentImpl->DumpViewData(autoFillContainerNode, viewDataWrap, true);
     FillAutoFillViewData(node, viewDataWrap);
-    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType, isNative);
+    auto callback = std::make_shared<FillRequestCallback>(pipelineContext, node, autoFillType, isNative, onFinish);
     auto viewDataWrapOhos = AceType::DynamicCast<ViewDataWrapOhos>(viewDataWrap);
-    CHECK_NULL_RETURN(viewDataWrapOhos, false);
+    CHECK_NULL_RETURN(viewDataWrapOhos, AceAutoFillError::ACE_AUTO_FILL_DEFAULT);
     auto viewData = viewDataWrapOhos->GetViewData();
     TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "isNewPassWord is: %{public}d", isNewPassWord);
     if (isNewPassWord) {
         callback->OnFillRequestSuccess(viewData);
-        return true;
+        return AceAutoFillError::ACE_AUTO_FILL_SUCCESS;
     }
     if (!isNative) {
         OverwritePageNodeInfo(node, viewData);
@@ -1667,14 +1758,15 @@ bool AceContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFil
     autoFillRequest.autoFillType = static_cast<AbilityBase::AutoFillType>(autoFillType);
     autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::FILL;
     autoFillRequest.viewData = viewData;
+    autoFillRequest.doAfterAsyncModalBinding = std::move(onUIExtNodeBindingCompleted);
     AbilityRuntime::AutoFill::AutoFillResult result;
-    if (AbilityRuntime::AutoFillManager::GetInstance().RequestAutoFill(
-        uiContent, autoFillRequest, callback, result) != 0) {
-        return false;
+    auto resultCode =
+        AbilityRuntime::AutoFillManager::GetInstance().RequestAutoFill(uiContent, autoFillRequest, callback, result);
+    if (resultCode == AceAutoFillError::ACE_AUTO_FILL_SUCCESS) {
+        isPopup = result.isPopup;
+        autoFillSessionId = result.autoFillSessionId;
     }
-    isPopup = result.isPopup;
-    autoFillSessionId = result.autoFillSessionId;
-    return true;
+    return resultCode;
 }
 
 bool AceContainer::IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
@@ -1796,10 +1888,22 @@ void AceContainer::DispatchPluginError(int32_t callbackId, int32_t errorCode, st
         [front, callbackId, errorCode, errorMessage = std::move(errorMessage)]() mutable {
             front->TransferJsPluginGetError(callbackId, errorCode, std::move(errorMessage));
         },
-        TaskExecutor::TaskType::BACKGROUND, "ArkUIDispatchPluginError");
+        TaskExecutor::TaskType::BACKGROUND, "ArkUIDispatchPluginError",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    bool isDynamicUiContent = GetUIContentType() == UIContentType::DYNAMIC_COMPONENT;
+    if (isDynamicUiContent) {
+        return DumpDynamicUiContent(params, info);
+    }
+
+    return DumpCommon(params, info);
+}
+
+bool AceContainer::DumpCommon(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
 {
     if (isDumping_.test_and_set()) {
         LOGW("another dump is still running");
@@ -1827,6 +1931,14 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     }
     isDumping_.clear();
     return true;
+}
+
+bool AceContainer::DumpDynamicUiContent(
+    const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    LOGI("DumpDynamicUiContent");
+    ContainerScope scope(instanceId_);
+    return DumpInfo(params);
 }
 
 bool AceContainer::DumpInfo(const std::vector<std::string>& params)
@@ -1888,10 +2000,13 @@ void AceContainer::TriggerGarbageCollection()
     ContainerScope scope(instanceId_);
 #if !defined(OHOS_PLATFORM) || !defined(ENABLE_NATIVE_VIEW)
     // GPU and IO thread is standalone while disable native view
-    taskExecutor_->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::GPU, "ArkUIPurgeMallocCache");
-    taskExecutor_->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::IO, "ArkUIPurgeMallocCache");
+    taskExecutor_->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::GPU, "ArkUIPurgeMallocCache",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+    taskExecutor_->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::IO, "ArkUIPurgeMallocCache",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 #endif
-    taskExecutor_->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::UI, "ArkUIPurgeMallocCache");
+    taskExecutor_->PostTask([] { PurgeMallocCache(); }, TaskExecutor::TaskType::UI, "ArkUIPurgeMallocCache",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     taskExecutor_->PostTask(
         [frontend = WeakPtr<Frontend>(frontend_)] {
             auto sp = frontend.Upgrade();
@@ -1900,7 +2015,8 @@ void AceContainer::TriggerGarbageCollection()
             }
             PurgeMallocCache();
         },
-        TaskExecutor::TaskType::JS, "ArkUITriggerGarbageCollection");
+        TaskExecutor::TaskType::JS, "ArkUITriggerGarbageCollection",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void AceContainer::DumpHeapSnapshot(bool isPrivate)
@@ -1911,7 +2027,7 @@ void AceContainer::DumpHeapSnapshot(bool isPrivate)
             CHECK_NULL_VOID(sp);
             sp->DumpHeapSnapshot(isPrivate);
         },
-        TaskExecutor::TaskType::JS, "ArkUIDumpHeapSnapshot");
+        TaskExecutor::TaskType::JS, "ArkUIDumpHeapSnapshot", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void AceContainer::DestroyHeapProfiler()
@@ -1922,7 +2038,8 @@ void AceContainer::DestroyHeapProfiler()
             CHECK_NULL_VOID(sp);
             sp->DestroyHeapProfiler();
         },
-        TaskExecutor::TaskType::JS, "ArkUIDestroyHeapProfiler");
+        TaskExecutor::TaskType::JS, "ArkUIDestroyHeapProfiler",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void AceContainer::ForceFullGC()
@@ -1933,7 +2050,7 @@ void AceContainer::ForceFullGC()
             CHECK_NULL_VOID(sp);
             sp->ForceFullGC();
         },
-        TaskExecutor::TaskType::JS, "ArkUIForceFullGC");
+        TaskExecutor::TaskType::JS, "ArkUIForceFullGC", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void AceContainer::SetLocalStorage(
@@ -2066,6 +2183,8 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         window, taskExecutor_, assetManager_, resRegister_, frontend_, instanceId);
     pipelineContext_->SetTextFieldManager(AceType::MakeRefPtr<NG::TextFieldManagerNG>());
 #endif
+    RegisterUIExtDataConsumer();
+    RegisterUIExtDataSendToHost();
 
 #ifdef FORM_SUPPORTED
     if (isFormRender_) {
@@ -2098,9 +2217,17 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     pipelineContext_->SetWindowId(windowId);
     pipelineContext_->SetWindowModal(windowModal_);
     if (uiWindow_) {
-        auto windowType = uiWindow_->GetType();
-        pipelineContext_->SetIsAppWindow(
-            windowType < Rosen::WindowType::SYSTEM_WINDOW_BASE && windowType >= Rosen::WindowType::APP_WINDOW_BASE);
+        bool isAppWindow = uiWindow_->IsAppWindow();
+        bool isSystemWindow = uiWindow_->IsSystemWindow();
+        bool isSceneBoardWindow = uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_SCENE_BOARD;
+        pipelineContext_->SetIsAppWindow(isAppWindow);
+        auto pipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+        if (pipeline) {
+            auto safeAreaManager = pipeline->GetSafeAreaManager();
+            if (safeAreaManager) {
+                safeAreaManager->SetWindowTypeConfig(isAppWindow, isSystemWindow, isSceneBoardWindow);
+            }
+        }
     }
     if (installationFree_) {
         pipelineContext_->SetInstallationFree(installationFree_);
@@ -2130,7 +2257,8 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
                 CHECK_NULL_VOID(container);
                 container->OnFinish();
             },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleFinishEvent");
+            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleFinishEvent",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     pipelineContext_->SetFinishEventHandler(finishEventHandler);
 
@@ -2146,9 +2274,27 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
                 CHECK_NULL_VOID(container);
                 container->OnStartAbility(address);
             },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleStartAbility");
+            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleStartAbility",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     pipelineContext_->SetStartAbilityHandler(startAbilityHandler);
+
+    auto&& startAbilityOnQueryHandler = [weak = WeakClaim(this), instanceId](const std::string& queryWord) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        ContainerScope scope(instanceId);
+        auto context = container->GetPipelineContext();
+        CHECK_NULL_VOID(context);
+        context->GetTaskExecutor()->PostTask(
+            [weak = WeakPtr<AceContainer>(container), queryWord]() {
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                container->OnStartAbilityOnQuery(queryWord);
+            },
+            TaskExecutor::TaskType::PLATFORM, "ArkUIHandleStartAbilityOnQuery",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+    };
+    pipelineContext_->SetStartAbilityOnQueryHandler(startAbilityOnQueryHandler);
 
     auto&& setStatusBarEventHandler = [weak = WeakClaim(this), instanceId](const Color& color) {
         auto container = weak.Upgrade();
@@ -2164,7 +2310,8 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
                     container->platformEventCallback_->OnStatusBarBgColorChanged(color);
                 }
             },
-            TaskExecutor::TaskType::PLATFORM, "ArkUIStatusBarColorChanged");
+            TaskExecutor::TaskType::PLATFORM, "ArkUIStatusBarColorChanged",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     pipelineContext_->SetStatusBarEventHandler(setStatusBarEventHandler);
 
@@ -2185,8 +2332,8 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     if (GetSettings().usePlatformAsUIThread) {
         FrameReport::GetInstance().Init();
     } else {
-        taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); },
-            TaskExecutor::TaskType::UI, "ArkUIFrameReportInit");
+        taskExecutor_->PostTask([] { FrameReport::GetInstance().Init(); }, TaskExecutor::TaskType::UI,
+            "ArkUIFrameReportInit", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 
     // Load custom style at UI thread before frontend attach, for loading style before building tree.
@@ -2224,8 +2371,10 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         initThemeManagerTask();
         setupRootElementTask();
     } else {
-        taskExecutor_->PostTask(initThemeManagerTask, TaskExecutor::TaskType::UI, "ArkUIInitThemeManager");
-        taskExecutor_->PostTask(setupRootElementTask, TaskExecutor::TaskType::UI, "ArkUISetupRootElement");
+        taskExecutor_->PostTask(initThemeManagerTask, TaskExecutor::TaskType::UI, "ArkUIInitThemeManager",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        taskExecutor_->PostTask(setupRootElementTask, TaskExecutor::TaskType::UI, "ArkUISetupRootElement",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 
     aceView_->Launch();
@@ -2397,6 +2546,10 @@ void AceContainer::InitWindowCallback()
         [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY); });
     windowManager->SetWindowGetModeCallBack(
         [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
+    windowManager->SetWindowGetIsMidSceneCallBack(
+        [window = uiWindow_](bool& isMidScene) -> int32_t {
+            return static_cast<int32_t>(window->GetIsMidScene(isMidScene));
+        });
     windowManager->SetWindowGetTypeCallBack(
         [window = uiWindow_]() -> WindowType { return static_cast<WindowType>(window->GetType()); });
     windowManager->SetWindowSetMaximizeModeCallBack(
@@ -2431,11 +2584,20 @@ void AceContainer::InitWindowCallback()
     });
 }
 
-NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type)
+NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type,
+    std::optional<NG::RectF> windowRect)
 {
     CHECK_NULL_RETURN(uiWindow_, {});
     Rosen::AvoidArea avoidArea;
-    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
+    Rosen::WMError ret;
+    if (windowRect.has_value()) {
+        auto rect = windowRect.value();
+        Rosen::Rect rosenRect = { static_cast<int32_t>(rect.GetX()), static_cast<int32_t>(rect.GetY()),
+            static_cast<uint32_t>(rect.Width()), static_cast<uint32_t>(rect.Height()) };
+        ret = uiWindow_->GetAvoidAreaByType(type, avoidArea, rosenRect);
+    } else {
+        ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
+    }
     if (ret == Rosen::WMError::WM_OK) {
         auto safeAreaInsets = ConvertAvoidArea(avoidArea);
         TAG_LOGI(ACE_LAYOUT, "SafeArea get success, area type is:%{public}d insets area is:%{public}s",
@@ -2489,7 +2651,8 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
                     CHECK_NULL_VOID(container);
                     container->RecordResAdapter(encode);
                 },
-                TaskExecutor::TaskType::UI, "ArkUIRecordResAdapter");
+                TaskExecutor::TaskType::UI, "ArkUIRecordResAdapter",
+                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
         }
     }
     return isFormRender_ ? nullptr : context->CreateModuleContext(bundle, module);
@@ -2562,10 +2725,6 @@ void AceContainer::ReleaseResourceAdapter()
     if (isFormRender_) {
         auto runtimeContext = runtimeContext_.lock();
         if (runtimeContext) {
-            auto defaultBundleName = "";
-            auto defaultModuleName = "";
-            ResourceManager::GetInstance().RemoveResourceAdapter(defaultBundleName, defaultModuleName);
-
             auto bundleName = runtimeContext->GetBundleName();
             auto moduleName = runtimeContext->GetHapModuleInfo()->name;
             ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName);
@@ -2609,16 +2768,7 @@ void AceContainer::BuildResConfig(
     ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
     if (!parsedConfig.colorMode.empty()) {
-        configurationChange.colorModeUpdate = true;
-        if (parsedConfig.colorMode == "dark") {
-            SystemProperties::SetColorMode(ColorMode::DARK);
-            SetColorScheme(ColorScheme::SCHEME_DARK);
-            resConfig.SetColorMode(ColorMode::DARK);
-        } else {
-            SystemProperties::SetColorMode(ColorMode::LIGHT);
-            SetColorScheme(ColorScheme::SCHEME_LIGHT);
-            resConfig.SetColorMode(ColorMode::LIGHT);
-        }
+        ProcessColorModeUpdate(resConfig, configurationChange, parsedConfig);
     }
     if (!parsedConfig.deviceAccess.empty()) {
         // Event of accessing mouse or keyboard
@@ -2650,6 +2800,23 @@ void AceContainer::BuildResConfig(
     }
     if (!parsedConfig.mnc.empty()) {
         resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
+    }
+}
+
+void AceContainer::ProcessColorModeUpdate(
+    ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
+{
+    configurationChange.colorModeUpdate = true;
+    // clear cache of ark theme instances when configuration updates
+    NG::TokenThemeStorage::GetInstance()->CacheClear();
+    if (parsedConfig.colorMode == "dark") {
+        SystemProperties::SetColorMode(ColorMode::DARK);
+        SetColorScheme(ColorScheme::SCHEME_DARK);
+        resConfig.SetColorMode(ColorMode::DARK);
+    } else {
+        SystemProperties::SetColorMode(ColorMode::LIGHT);
+        SetColorScheme(ColorScheme::SCHEME_LIGHT);
+        resConfig.SetColorMode(ColorMode::LIGHT);
     }
 }
 
@@ -2757,9 +2924,11 @@ void AceContainer::NotifyConfigurationChange(
                     }
                     pipeline->ChangeDarkModeBrightness();
                 },
-                TaskExecutor::TaskType::UI, "ArkUIFlushReloadTransition");
+                TaskExecutor::TaskType::UI, "ArkUIFlushReloadTransition",
+                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
         },
-        TaskExecutor::TaskType::JS, "ArkUINotifyConfigurationChange");
+        TaskExecutor::TaskType::JS, "ArkUINotifyConfigurationChange",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void AceContainer::HotReload()
@@ -2781,7 +2950,7 @@ void AceContainer::HotReload()
             ConfigurationChange configurationChange { .hotReloadUpdate = true };
             pipeline->FlushReload(configurationChange);
         },
-        TaskExecutor::TaskType::UI, "ArkUIHotReload");
+        TaskExecutor::TaskType::UI, "ArkUIHotReload", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void AceContainer::SetToken(sptr<IRemoteObject>& token)
@@ -3121,29 +3290,29 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     }
 }
 
-bool AceContainer::GetCurPointerEventInfo(
-    int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-    int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
+bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback)
 {
     std::lock_guard<std::mutex> lock(pointerEventMutex_);
     MMI::PointerEvent::PointerItem pointerItem;
-    auto iter = currentEvents_.find(pointerId);
+    auto iter = currentEvents_.find(dragPointerEvent.pointerId);
     if (iter == currentEvents_.end()) {
         return false;
     }
 
     auto currentPointerEvent = iter->second;
     CHECK_NULL_RETURN(currentPointerEvent, false);
-    pointerId = currentPointerEvent->GetPointerId();
-    if (!currentPointerEvent->GetPointerItem(pointerId, pointerItem) || !pointerItem.IsPressed()) {
+    dragPointerEvent.pointerId = currentPointerEvent->GetPointerId();
+    if (!currentPointerEvent->GetPointerItem(dragPointerEvent.pointerId, pointerItem) ||
+        !pointerItem.IsPressed()) {
         return false;
     }
-    sourceType = currentPointerEvent->GetSourceType();
-    globalX = pointerItem.GetDisplayX();
-    globalY = pointerItem.GetDisplayY();
-    sourceTool = static_cast<int32_t>(GetSourceTool(pointerItem.GetToolType()));
-    displayId = currentPointerEvent->GetTargetDisplayId();
-    RegisterStopDragCallback(pointerId, std::move(stopDragCallback));
+    dragPointerEvent.sourceType = currentPointerEvent->GetSourceType();
+    dragPointerEvent.displayX = pointerItem.GetDisplayX();
+    dragPointerEvent.displayY = pointerItem.GetDisplayY();
+    dragPointerEvent.sourceTool = static_cast<SourceTool>(GetSourceTool(pointerItem.GetToolType()));
+    dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
+    dragPointerEvent.pointerEventId = currentPointerEvent->GetId();
+    RegisterStopDragCallback(dragPointerEvent.pointerId, std::move(stopDragCallback));
     return true;
 }
 
@@ -3297,7 +3466,8 @@ void AceContainer::HandleAccessibilityHoverEvent(float pointX, float pointY, int
             CHECK_NULL_VOID(accessibilityManagerNG);
             accessibilityManagerNG->HandleAccessibilityHoverEvent(root, pointX, pointY, sourceType, eventType, timeMs);
         },
-        TaskExecutor::TaskType::UI, "ArkUIHandleAccessibilityHoverEvent");
+        TaskExecutor::TaskType::UI, "ArkUIHandleAccessibilityHoverEvent",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void AceContainer::FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter)
@@ -3315,7 +3485,8 @@ void AceContainer::FireAccessibilityEventCallback(uint32_t eventId, int64_t para
             CHECK_NULL_VOID(accessibilityManager);
             accessibilityManager->FireAccessibilityEventCallback(eventId, parameter);
         },
-        TaskExecutor::TaskType::UI, "ArkUIHandleAccessibilityEventCallback");
+        TaskExecutor::TaskType::UI, "ArkUIHandleAccessibilityEventCallback",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 std::vector<Ace::RectF> AceContainer::GetOverlayNodePositions()
@@ -3436,6 +3607,8 @@ void AceContainer::AddWatchSystemParameter()
         SystemProperties::AddWatchSystemParameter(
             ENABLE_PERFORMANCE_MONITOR_KEY, container,
             SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
+        SystemProperties::AddWatchSystemParameter(
+            IS_FOCUS_ACTIVE_KEY, container, SystemProperties::OnFocusActiveChanged);
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
 }
@@ -3454,6 +3627,7 @@ void AceContainer::RemoveWatchSystemParameter()
         ENABLE_DEBUG_BOUNDARY_KEY, this, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_PERFORMANCE_MONITOR_KEY, this, SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
+    SystemProperties::RemoveWatchSystemParameter(IS_FOCUS_ACTIVE_KEY, this, SystemProperties::OnFocusActiveChanged);
 }
 
 void AceContainer::UpdateResourceOrientation(int32_t orientation)
@@ -3475,5 +3649,169 @@ void AceContainer::UpdateResourceDensity(double density)
         ResourceManager::GetInstance().UpdateResourceConfig(resConfig, false);
     }
     SetResourceConfiguration(resConfig);
+}
+
+void AceContainer::RegisterUIExtDataConsumer()
+{
+    ACE_FUNCTION_TRACE();
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    CHECK_NULL_VOID(uiWindow_);
+    auto dataHandler = uiWindow_->GetExtensionDataHandler();
+    CHECK_NULL_VOID(dataHandler);
+    auto uiExtDataConsumeCallback = [weak = WeakClaim(this)]
+        (SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply) ->int32_t {
+        auto container = weak.Upgrade();
+        CHECK_NULL_RETURN(container, 0);
+        container->DispatchUIExtDataConsume(static_cast<NG::UIContentBusinessCode>(customId), std::move(data), reply);
+        return 0;
+    };
+    auto result = dataHandler->RegisterDataConsumer(SubSystemId::ARKUI_UIEXT, std::move(uiExtDataConsumeCallback));
+    if (result != Rosen::DataHandlerErr::OK) {
+        TAG_LOGW(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "RegisterUIExtDataConsumer fail, same subSystemId repeate registe.");
+    }
+}
+
+void AceContainer::UnRegisterUIExtDataConsumer()
+{
+    ACE_FUNCTION_TRACE();
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    CHECK_NULL_VOID(uiWindow_);
+    auto dataHandler = uiWindow_->GetExtensionDataHandler();
+    CHECK_NULL_VOID(dataHandler);
+    dataHandler->UnregisterDataConsumer(SubSystemId::ARKUI_UIEXT);
+}
+
+void AceContainer::DispatchUIExtDataConsume(NG::UIContentBusinessCode code,
+    AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    ACE_FUNCTION_TRACE();
+    CHECK_NULL_VOID(taskExecutor_);
+    AAFwk::Want businessData = data;
+    if (reply.has_value()) {
+        taskExecutor_->PostSyncTask(
+            [weak = WeakClaim(this), code, businessData, &reply] {
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                ContainerScope scop(container->GetInstanceId());
+                auto pipelineContext = container->GetPipelineContext();
+                auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+                CHECK_NULL_VOID(ngPipeline);
+                auto uiExtManager = ngPipeline->GetUIExtensionManager();
+                CHECK_NULL_VOID(uiExtManager);
+                uiExtManager->DispatchBusinessDataConsumeReply(code, businessData, reply);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIUIxtDispatchDataConsumeReplyCallback");
+    } else {
+        taskExecutor_->PostTask(
+            [weak = WeakClaim(this), code, businessData] {
+                auto container = weak.Upgrade();
+                CHECK_NULL_VOID(container);
+                ContainerScope scop(container->GetInstanceId());
+                auto pipelineContext = container->GetPipelineContext();
+                auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+                CHECK_NULL_VOID(ngPipeline);
+                auto uiExtManager = ngPipeline->GetUIExtensionManager();
+                CHECK_NULL_VOID(uiExtManager);
+                uiExtManager->DispatchBusinessDataConsume(code, businessData);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIUIxtDispatchDataConsumeCallback");
+    }
+}
+
+bool AceContainer::FireUIExtDataSendToHost(
+    NG::UIContentBusinessCode code, AAFwk::Want&& data, NG::BusinessDataSendType type)
+{
+    if (code == NG::UIContentBusinessCode::UNDEFINED) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExt send data to host fail, businessCode is invalid.");
+        return false;
+    }
+    if (!IsUIExtensionWindow()) {
+        return false;
+    }
+    CHECK_NULL_RETURN(uiWindow_, false);
+    auto dataHandler = uiWindow_->GetExtensionDataHandler();
+    CHECK_NULL_RETURN(dataHandler, false);
+    if (type == NG::BusinessDataSendType::ASYNC) {
+        dataHandler->SendDataAsync(SubSystemId::ARKUI_UIEXT, static_cast<uint32_t>(code), data);
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExt sent data to host async success, businessCode=%{public}d.", code);
+        return true;
+    }
+    auto result = dataHandler->SendDataSync(SubSystemId::ARKUI_UIEXT, static_cast<uint32_t>(code), data);
+    if (result != DataHandlerErr::OK) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExt sent data to host sync fail, businessCode=%{public}d, result=%{public}d.",
+            code, static_cast<uint32_t>(result));
+            return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "UIExt sent data to host async success, businessCode=%{public}d.", code);
+    return true;
+}
+
+bool AceContainer::FireUIExtDataSendToHostReply(NG::UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+{
+    if (code == NG::UIContentBusinessCode::UNDEFINED) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExt send data to host fail, businessCode is invalid.");
+        return false;
+    }
+    if (!IsUIExtensionWindow()) {
+        return false;
+    }
+    CHECK_NULL_RETURN(uiWindow_, false);
+    auto dataHandler = uiWindow_->GetExtensionDataHandler();
+    CHECK_NULL_RETURN(dataHandler, false);
+    auto result = dataHandler->SendDataSync(SubSystemId::ARKUI_UIEXT, static_cast<uint32_t>(code), data, reply);
+    if (result != DataHandlerErr::OK) {
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UIExt sent data to host sync reply fail, businessCode=%{public}d, result=%{public}d.",
+            code, static_cast<uint32_t>(result));
+            return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "UIExt sent data to host sync reply success, businessCode=%{public}d.", code);
+    return true;
+}
+
+void AceContainer::RegisterUIExtDataSendToHost()
+{
+    auto uiExtDataSendSyncReply = [weak = WeakClaim(this)]
+        (uint32_t customId, AAFwk::Want&& data, AAFwk::Want& reply) ->bool {
+        auto container = weak.Upgrade();
+        CHECK_NULL_RETURN(container, false);
+        return container->FireUIExtDataSendToHostReply(
+            static_cast<NG::UIContentBusinessCode>(customId), std::move(data), reply);
+    };
+    auto uiExtDataSend = [weak = WeakClaim(this)]
+        (uint32_t customId, AAFwk::Want&& data, NG::BusinessDataSendType type) ->bool {
+        auto container = weak.Upgrade();
+        CHECK_NULL_RETURN(container, false);
+        return container->FireUIExtDataSendToHost(
+            static_cast<NG::UIContentBusinessCode>(customId), std::move(data), type);
+    };
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+    CHECK_NULL_VOID(ngPipeline);
+    auto uiExtManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtManager);
+    uiExtManager->RegisterBusinessSendToHostReply(uiExtDataSendSyncReply);
+    uiExtManager->RegisterBusinessSendToHost(uiExtDataSend);
+}
+
+void AceContainer::SetDrawReadyEventCallback()
+{
+    CHECK_NULL_VOID(uiWindow_);
+    auto surfaceNode = uiWindow_->GetSurfaceNode();
+    CHECK_NULL_VOID(surfaceNode);
+    auto callback = [weak = WeakClaim(this)] () {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireUIExtensionEventCallback(static_cast<int>(NG::UIExtCallbackEventId::ON_DRAW_FIRST));
+    };
+    surfaceNode->SetBufferAvailableCallback(callback);
 }
 } // namespace OHOS::Ace::Platform

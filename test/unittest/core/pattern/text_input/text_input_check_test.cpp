@@ -16,7 +16,6 @@
 #include "text_input_base.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {} // namespace
 
 class TextInputCheckTest : public TextInputBases {

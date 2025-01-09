@@ -285,6 +285,15 @@ void XComponentModelNG::HdrBrightness(float hdrBrightness)
     xcPattern->HdrBrightness(hdrBrightness);
 }
 
+void XComponentModelNG::EnableTransparentLayer(bool isTransparentLayer)
+{
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->EnableTransparentLayer(isTransparentLayer);
+}
+
 bool XComponentModelNG::IsTexture(FrameNode *frameNode)
 {
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
@@ -327,7 +336,9 @@ RefPtr<FrameNode> XComponentModelNG::CreateTypeNode(int32_t nodeId, ArkUI_XCompo
     }
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_RETURN(xcPattern, nullptr);
-    xcPattern->SetImageAIOptions(params->aiOptions);
+    if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
+        xcPattern->SetImageAIOptions(params->aiOptions);
+    }
     return frameNode;
 }
 
@@ -511,11 +522,27 @@ void XComponentModelNG::HdrBrightness(FrameNode* frameNode, float hdrBrightness)
     xcPattern->HdrBrightness(hdrBrightness);
 }
 
+void XComponentModelNG::EnableTransparentLayer(FrameNode* frameNode, bool enable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->EnableTransparentLayer(enable);
+}
+
 void XComponentModelNG::SetRenderFit(FrameNode* frameNode, RenderFit renderFit)
 {
     CHECK_NULL_VOID(frameNode);
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
     xcPattern->SetRenderFit(renderFit);
+}
+
+RenderFit XComponentModelNG::GetSurfaceRenderFit(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, RenderFit::RESIZE_FILL);
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_RETURN(xcPattern, RenderFit::RESIZE_FILL);
+    return xcPattern->GetSurfaceRenderFit();
 }
 } // namespace OHOS::Ace::NG

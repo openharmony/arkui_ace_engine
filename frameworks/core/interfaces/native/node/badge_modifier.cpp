@@ -74,8 +74,17 @@ void SetBadgeParamWithString(ArkUINodeHandle node, const struct ArkUIBadgeParam*
 namespace NodeModifier {
 const ArkUIBadgeModifier* GetBadgeModifier()
 {
-    static const ArkUIBadgeModifier modifier = { nullptr, nullptr, nullptr, nullptr, nullptr, SetBadgeParamWithNumber,
-        SetBadgeParamWithString };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIBadgeModifier modifier = {
+        .setBadgeParameters = nullptr,
+        .setBadgeValue = nullptr,
+        .setBadgeCount = nullptr,
+        .setBadgeMaxCount = nullptr,
+        .setBadgeFontWeight = nullptr,
+        .setBadgeParamWithNumber = SetBadgeParamWithNumber,
+        .setBadgeParamWithString = SetBadgeParamWithString,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

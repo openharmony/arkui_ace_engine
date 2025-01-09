@@ -16,20 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_H
 
-#include "base/memory/ace_type.h"
-
-namespace OHOS::Ace {
-
-using ThemeType = AceType::IdType;
-
-class Theme : public virtual AceType {
-    DECLARE_ACE_TYPE(Theme, AceType);
-
-public:
-    Theme() = default;
-    ~Theme() override = default;
-};
-
-} // namespace OHOS::Ace
+#include "ui/view/theme/theme.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_H

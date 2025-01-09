@@ -382,29 +382,130 @@ void ResetSelectedDate(ArkUINodeHandle node)
 
     DatePickerModelNG::SetSelectedDate(frameNode, pickerDate);
 }
+
+void SetDatePickerMode(ArkUINodeHandle node, int value)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (value < 0 || value > static_cast<int32_t>(DatePickerMode::MONTH_AND_DAY)) {
+        return;
+    }
+    DatePickerModelNG::SetMode(frameNode, static_cast<DatePickerMode>(value));
+}
+
+void ResetDatePickerMode(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetMode(frameNode, DatePickerMode::DATE);
+}
+
+ArkUI_Int32 GetDatePickerMode(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<int>(DatePickerModelNG::getMode(frameNode));
+}
+
+ArkUI_Bool GetEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return DatePickerModelNG::GetEnableHapticFeedback(frameNode);
+}
+
+void SetEnableHapticFeedback(ArkUINodeHandle node, int enableHapticFeedback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetEnableHapticFeedback(frameNode, enableHapticFeedback);
+}
+
+void ResetEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetEnableHapticFeedback(frameNode, true);
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUIDatePickerModifier* GetDatePickerModifier()
 {
-    static const ArkUIDatePickerModifier modifier = { GetSelectedTextStyle, SetSelectedTextStyle,
-        ResetSelectedTextStyle, GetDatePickerTextStyle, SetDatePickerTextStyle, ResetDatePickerTextStyle,
-        GetDisappearTextStyle, SetDisappearTextStyle, ResetDisappearTextStyle, GetLunar, SetLunar, ResetLunar,
-        GetStartDate, SetStartDate, ResetStartDate, GetEndDate, SetEndDate, ResetEndDate, GetSelectedDate,
-        SetSelectedDate, ResetSelectedDate, GetDatePickerBackgroundColor, SetDatePickerBackgroundColor,
-        ResetDatePickerBackgroundColor };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIDatePickerModifier modifier = {
+        .getSelectedTextStyle = GetSelectedTextStyle,
+        .setSelectedTextStyle = SetSelectedTextStyle,
+        .resetSelectedTextStyle = ResetSelectedTextStyle,
+        .getDatePickerTextStyle = GetDatePickerTextStyle,
+        .setDatePickerTextStyle = SetDatePickerTextStyle,
+        .resetDatePickerTextStyle = ResetDatePickerTextStyle,
+        .getDisappearTextStyle = GetDisappearTextStyle,
+        .setDisappearTextStyle = SetDisappearTextStyle,
+        .resetDisappearTextStyle = ResetDisappearTextStyle,
+        .getLunar = GetLunar,
+        .setLunar = SetLunar,
+        .resetLunar = ResetLunar,
+        .getStartDate = GetStartDate,
+        .setStartDate = SetStartDate,
+        .resetStartDate = ResetStartDate,
+        .getEndDate = GetEndDate,
+        .setEndDate = SetEndDate,
+        .resetEndDate = ResetEndDate,
+        .getSelectedDate = GetSelectedDate,
+        .setSelectedDate = SetSelectedDate,
+        .resetSelectedDate = ResetSelectedDate,
+        .getDatePickerBackgroundColor = GetDatePickerBackgroundColor,
+        .setDatePickerBackgroundColor = SetDatePickerBackgroundColor,
+        .resetDatePickerBackgroundColor = ResetDatePickerBackgroundColor,
+        .getDatePickerMode = GetDatePickerMode,
+        .setDatePickerMode = SetDatePickerMode,
+        .resetDatePickerMode = ResetDatePickerMode,
+        .getEnableHapticFeedback = GetEnableHapticFeedback,
+        .setEnableHapticFeedback = SetEnableHapticFeedback,
+        .resetEnableHapticFeedback = ResetEnableHapticFeedback,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIDatePickerModifier* GetCJUIDatePickerModifier()
 {
-    static const CJUIDatePickerModifier modifier = { GetSelectedTextStyle, SetSelectedTextStyle,
-        ResetSelectedTextStyle, GetDatePickerTextStyle, SetDatePickerTextStyle, ResetDatePickerTextStyle,
-        GetDisappearTextStyle, SetDisappearTextStyle, ResetDisappearTextStyle, GetLunar, SetLunar, ResetLunar,
-        GetStartDate, SetStartDate, ResetStartDate, GetEndDate, SetEndDate, ResetEndDate, GetSelectedDate,
-        SetSelectedDate, ResetSelectedDate, GetDatePickerBackgroundColor, SetDatePickerBackgroundColor,
-        ResetDatePickerBackgroundColor };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIDatePickerModifier modifier = {
+        .getSelectedTextStyle = GetSelectedTextStyle,
+        .setSelectedTextStyle = SetSelectedTextStyle,
+        .resetSelectedTextStyle = ResetSelectedTextStyle,
+        .getDatePickerTextStyle = GetDatePickerTextStyle,
+        .setDatePickerTextStyle = SetDatePickerTextStyle,
+        .resetDatePickerTextStyle = ResetDatePickerTextStyle,
+        .getDisappearTextStyle = GetDisappearTextStyle,
+        .setDisappearTextStyle = SetDisappearTextStyle,
+        .resetDisappearTextStyle = ResetDisappearTextStyle,
+        .getLunar = GetLunar,
+        .setLunar = SetLunar,
+        .resetLunar = ResetLunar,
+        .getStartDate = GetStartDate,
+        .setStartDate = SetStartDate,
+        .resetStartDate = ResetStartDate,
+        .getEndDate = GetEndDate,
+        .setEndDate = SetEndDate,
+        .resetEndDate = ResetEndDate,
+        .getSelectedDate = GetSelectedDate,
+        .setSelectedDate = SetSelectedDate,
+        .resetSelectedDate = ResetSelectedDate,
+        .getDatePickerBackgroundColor = GetDatePickerBackgroundColor,
+        .setDatePickerBackgroundColor = SetDatePickerBackgroundColor,
+        .resetDatePickerBackgroundColor = ResetDatePickerBackgroundColor,
+        .getDatePickerMode = GetDatePickerMode,
+        .setDatePickerMode = SetDatePickerMode,
+        .resetDatePickerMode = ResetDatePickerMode,
+        .getEnableHapticFeedback = GetEnableHapticFeedback,
+        .setEnableHapticFeedback = SetEnableHapticFeedback,
+        .resetEnableHapticFeedback = ResetEnableHapticFeedback,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

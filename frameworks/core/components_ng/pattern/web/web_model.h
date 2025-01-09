@@ -24,6 +24,7 @@
 
 namespace OHOS::Ace {
 using ScriptItems = std::map<std::string, std::vector<std::string>>;
+using ScriptItemsByOrder = std::vector<std::string>;
 class ACE_FORCE_EXPORT WebModel {
 public:
     static WebModel* GetInstance();
@@ -170,6 +171,10 @@ public:
     virtual void SetOverScrollMode(OverScrollMode mode) {}
     virtual void SetBlurOnKeyboardHideMode(BlurOnKeyboardHideMode mode) {}
     virtual void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) {};
+    virtual void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder) {};
+    virtual void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder) {};
     virtual void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) {};
 
     virtual void SetCopyOptionMode(CopyOptions mode) {};
@@ -197,6 +202,7 @@ public:
     virtual void SetEditMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) {};
     virtual void SetEnabledHapticFeedback(bool isEnabled) {}
+    virtual void SetOptimizeParserBudgetEnabled(bool enable) = 0;
 private:
     static std::unique_ptr<WebModel> instance_;
     static std::mutex mutex_;

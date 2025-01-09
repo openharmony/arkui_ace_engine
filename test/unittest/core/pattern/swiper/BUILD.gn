@@ -16,6 +16,9 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("swiper_test_ng") {
   type = "new"
   sources = [
+    "arc_swiper_indicator_modifiy_test_ng.cpp",
+    "arc_swiper_pattern_advanced_test_ng.cpp",
+    "arc_swiper_pattern_test_ng.cpp",
     "swiper_accessibility_test_ng.cpp",
     "swiper_animation_test_ng.cpp",
     "swiper_arrow_test_ng.cpp",

@@ -144,28 +144,22 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     CHECK_NULL_VOID(pattern->HasFocus());
     CHECK_NULL_VOID(SelectOverlayIsOn());
     CHECK_NULL_VOID(!pattern->spans_.empty());
-    TextSelectOverlay::OnHandleMove(handleRect, isFirst);
-    auto parentGlobalOffset = pattern->GetParentGlobalOffset();
-    if (hasTransform_) {
-        parentGlobalOffset = GetPaintOffsetWithoutTransform();
-    }
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    // the handle position is calculated based on the middle of the handle height.
+    auto handleOffset = GetHandleReferenceOffset(handleRect);
+    UpdateSelectorOnHandleMove(handleOffset, isFirst);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->MarkInfoChange(DIRTY_SELECT_TEXT);
     auto localOffset = handleRect.GetOffset();
     if (IsOverlayMode()) {
+        auto parentGlobalOffset = hasTransform_ ? GetPaintOffsetWithoutTransform() : pattern->GetParentGlobalOffset();
         localOffset = localOffset - parentGlobalOffset; // original offset
     }
+    SetMagnifierOffset(localOffset, handleRect);
 
-    // update moving handle offset
-    auto movingHandleOffset = pattern->ConvertTouchOffsetToTextOffset(Offset(localOffset.GetX(), localOffset.GetY()));
-    auto movingHandleOffsetF = OffsetF(movingHandleOffset.GetX(), movingHandleOffset.GetY());
-    GetLocalPointWithTransform(movingHandleOffsetF); // do affine transformation
-    pattern->SetMovingHandleOffset(movingHandleOffsetF);
-
-    float x = localOffset.GetX();
-    float handleHeight = IsSingleHandle() ? pattern->CalculateCaretOffsetAndHeight().second : handleRect.Height();
-    float y = localOffset.GetY() + handleRect.Height() - handleHeight / 2; // 2: Half the height of the handle
-    auto magnifierLocalOffset = OffsetF(x, y);
-    GetLocalPointWithTransform(magnifierLocalOffset); // do affine transformation
-    pattern->magnifierController_->SetLocalOffset(magnifierLocalOffset);
     bool isChangeSecondHandle = isFirst ? pattern->textSelector_.StartGreaterDest() :
         (!pattern->textSelector_.StartGreaterDest());
     IF_TRUE(isChangeSecondHandle, pattern->TriggerAvoidOnCaretChange());
@@ -176,12 +170,18 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     pattern->AutoScrollByEdgeDetection(param, localOffset, EdgeDetectionStrategy::OUT_BOUNDARY);
 }
 
-void RichEditorSelectOverlay::GetLocalPointWithTransform(OffsetF& localPoint)
+void RichEditorSelectOverlay::SetMagnifierOffset(const OffsetF& localOffset, const RectF& handleRect)
 {
-    if (!IsOverlayMode()) {
-        return;
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (IsSingleHandle()) {
+        auto [caretOffset, caretHeight] = pattern->CalculateCaretOffsetAndHeight();
+        auto floatingCaretCenter = Offset(localOffset.GetX(), caretOffset.GetY() + caretHeight / 2);
+        pattern->SetMagnifierOffsetWithAnimation(floatingCaretCenter);
+    } else {
+        auto handleCenter = Offset(localOffset.GetX(), localOffset.GetY() + handleRect.Height() / 2);
+        pattern->SetMagnifierLocalOffset(handleCenter);
     }
-    BaseTextSelectOverlay::GetLocalPointWithTransform(localPoint);
 }
 
 void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirst)
@@ -195,15 +195,17 @@ void RichEditorSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOf
         pattern->HandleSelectionChange(currentHandleIndex, initSelector_.second);
     } else {
         if (IsSingleHandle()) {
-            auto textOffset = handleOffset + pattern->contentRect_.GetOffset() - pattern->richTextRect_.GetOffset();
+            auto localOffset = handleOffset + pattern->contentRect_.GetOffset();
+            auto textOffset = localOffset - pattern->richTextRect_.GetOffset();
             pattern->CalcAndRecordLastClickCaretInfo(Offset(textOffset.GetX(), textOffset.GetY()));
             textSelector.Update(currentHandleIndex);
+            pattern->SetCaretTouchMoveOffset(Offset(localOffset.GetX(), localOffset.GetY()));
         } else {
             pattern->HandleSelectionChange(initSelector_.first, currentHandleIndex);
         }
     }
     auto finalHandleIndex = isFirst ? textSelector.baseOffset : textSelector.destinationOffset;
-    pattern->StartVibratorByIndexChange(finalHandleIndex, preHandleIndex);
+    IF_TRUE(!IsSingleHandle(), pattern->StartVibratorByIndexChange(finalHandleIndex, preHandleIndex));
 }
 
 void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
@@ -222,6 +224,8 @@ void RichEditorSelectOverlay::OnHandleMoveDone(const RectF& handleRect, bool isF
     pattern->FireOnSelect(selectStart, selectEnd);
     if (!IsSingleHandle()) {
         pattern->SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
+    } else {
+        pattern->StartFloatingCaretLand();
     }
     pattern->StopAutoScroll();
     pattern->magnifierController_->RemoveMagnifierFrameNode();
@@ -263,6 +267,13 @@ RectF RichEditorSelectOverlay::GetSelectArea()
     return intersectRect;
 }
 
+bool RichEditorSelectOverlay::IsStopBackPress() const
+{
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    return pattern->IsStopBackPress();
+}
+
 void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag)
 {
     auto pattern = GetPattern<RichEditorPattern>();
@@ -277,6 +288,7 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
     menuInfo.showCut = isShowItem && hasValue && !pattern->textSelector_.SelectNothing();
     menuInfo.showPaste = IsShowPaste();
     menuInfo.menuIsShow = IsShowMenu();
+    menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showAIWrite = pattern->IsShowAIWrite() && hasValue;
     pattern->UpdateSelectMenuInfo(menuInfo);
 }
@@ -346,7 +358,6 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "MenuActionId=%{public}d, MenuType=%{public}d", id, type);
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
-    auto usingMouse = pattern->IsUsingMouse();
     switch (id) {
         case OptionMenuActionId::COPY:
             needRefreshMenu_ = !IsShowPaste() && pattern->copyOption_ != CopyOptions::None;
@@ -360,8 +371,10 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
             break;
         case OptionMenuActionId::SELECT_ALL:
-            pattern->isMousePressed_ = usingMouse;
             pattern->HandleMenuCallbackOnSelectAll();
+            break;
+        case OptionMenuActionId::SEARCH:
+            HandleOnSearch();
             break;
         case OptionMenuActionId::CAMERA_INPUT:
             pattern->HandleOnCameraInput();
@@ -380,24 +393,41 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
     }
 }
 
-void RichEditorSelectOverlay::ToggleMenu()
+bool RichEditorSelectOverlay::IsMenuShow()
 {
     auto manager = GetManager<SelectContentOverlayManager>();
-    if (manager && !manager->IsMenuShow() && needRefreshMenu_) {
-        needRefreshMenu_ = false;
-        ProcessOverlay({ .menuIsShow = true, .animation = true, .requestCode = REQUEST_RECREATE });
+    return manager && manager->IsMenuShow();
+}
+
+void RichEditorSelectOverlay::ToggleMenu()
+{
+    if (IsMenuShow()) {
+        HideMenu();
         return;
     }
-    BaseTextSelectOverlay::ToggleMenu();
+    if (needRefreshMenu_) {
+        needRefreshMenu_ = false;
+        ProcessOverlay({ .menuIsShow = true, .animation = true, .requestCode = REQUEST_RECREATE });
+    } else {
+        UpdateMenuOffset();
+        ShowMenu();
+    }
 }
 
 void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason reason, RefPtr<OverlayInfo> info)
 {
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "menuType=%{public}d, closeReason=%{public}d", menuType, reason);
+    bool isSingleHandle = info && info->isSingleHandle;
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "menuType=%{public}d, closeReason=%{public}d, isSingleHandle=%{public}d",
+        menuType, reason, isSingleHandle);
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     BaseTextSelectOverlay::OnCloseOverlay(menuType, reason, info);
     isHandleMoving_ = false;
+    if (isSingleHandle) {
+        pattern->floatingCaretState_.Reset();
+        ResumeTwinkling();
+    }
+    IF_TRUE(isSingleHandle, pattern->floatingCaretState_.Reset());
     auto needResetSelection = pattern->GetTextDetectEnable() && !pattern->HasFocus() &&
         reason != CloseReason::CLOSE_REASON_DRAG_FLOATING;
     auto isBackPressed = reason == CloseReason::CLOSE_REASON_BACK_PRESSED;
@@ -406,7 +436,7 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     IF_TRUE(needResetSelection, pattern->ResetSelection());
     IF_TRUE(isHoldByOther, pattern->CloseSelectOverlay());
     if (isBackPressed) {
-        IF_TRUE((info && info->isSingleHandle), pattern->OnBackPressed());
+        IF_TRUE(isSingleHandle, pattern->OnBackPressed());
         if (!pattern->IsEditing() && pattern->HasFocus()) {
             FocusHub::LostFocusToViewRoot();
         }
@@ -538,6 +568,7 @@ void RichEditorSelectOverlay::UpdateSelectOverlayOnAreaChanged()
     CHECK_NULL_VOID(pattern);
     pattern->CalculateHandleOffsetAndShowOverlay();
     UpdateHandleOffset();
+    IF_TRUE(IsMenuShow(), UpdateMenuOffset());
 }
 
 void RichEditorSelectOverlay::SwitchCaretState(std::shared_ptr<SelectOverlayInfo> info)

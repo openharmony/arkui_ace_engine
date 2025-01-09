@@ -63,7 +63,7 @@ void TextModelNG::Create(const std::u16string& content)
 
 void TextModelNG::Create(const std::string& content)
 {
-    Create(UtfUtils::Str8ToStr16(content));
+    Create(UtfUtils::Str8DebugToStr16(content));
 }
 
 void TextModelNG::Create(const RefPtr<SpanStringBase>& spanBase)
@@ -161,6 +161,20 @@ void TextModelNG::SetTextColor(const Color& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true);
 }
 
+void TextModelNG::ResetTextColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY(TextLayoutProperty, TextColor);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, false);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorFlag);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->ResetCustomFontColor();
+}
+
 void TextModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -174,6 +188,19 @@ void TextModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
     CHECK_NULL_VOID(textPattern);
     textPattern->UpdateFontColor(value);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, true, frameNode);
+}
+
+void TextModelNG::ResetTextColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextColor, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextColorFlagByUser, false, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->ResetCustomFontColor();
 }
 
 void TextModelNG::SetTextShadow(const std::vector<Shadow>& value)
@@ -441,40 +468,6 @@ void TextModelNG::SetSelectedBackgroundColor(const Color& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedBackgroundColor, value);
 }
 
-void TextModelNG::SetOnDragStart(NG::OnDragStartFunc&& onDragStart)
-{
-    auto dragStart = [dragStartFunc = std::move(onDragStart)](
-                         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) -> DragDropInfo {
-        auto dragInfo = dragStartFunc(event, extraParams);
-        DragDropInfo info;
-        info.extraInfo = dragInfo.extraInfo;
-        info.pixelMap = dragInfo.pixelMap;
-        info.customNode = AceType::DynamicCast<UINode>(dragInfo.node);
-        return info;
-    };
-    ViewAbstract::SetOnDragStart(std::move(dragStart));
-}
-
-void TextModelNG::SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter)
-{
-    ViewAbstract::SetOnDragEnter(std::move(onDragEnter));
-}
-
-void TextModelNG::SetOnDragMove(NG::OnDragDropFunc&& onDragMove)
-{
-    ViewAbstract::SetOnDragMove(std::move(onDragMove));
-}
-
-void TextModelNG::SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave)
-{
-    ViewAbstract::SetOnDragLeave(std::move(onDragLeave));
-}
-
-void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
-{
-    ViewAbstract::SetOnDrop(std::move(onDrop));
-}
-
 void TextModelNG::InitText(FrameNode* frameNode, std::u16string& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);
@@ -652,6 +645,107 @@ void TextModelNG::SetFontFeature(const FONT_FEATURES_LIST& value)
 void TextModelNG::SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontFeature, value, frameNode);
+}
+
+void TextModelNG::SetMarqueeOptions(const TextMarqueeOptions& options)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetMarqueeOptions(frameNode, options);
+}
+
+void TextModelNG::SetMarqueeOptions(FrameNode* frameNode, const TextMarqueeOptions& options)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (options.HasTextMarqueeStart()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeStart, options.GetTextMarqueeStartValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStart, frameNode);
+    }
+    if (options.HasTextMarqueeStep()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeStep, options.GetTextMarqueeStepValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStep, frameNode);
+    }
+    if (options.HasTextMarqueeLoop()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeLoop, options.GetTextMarqueeLoopValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeLoop, frameNode);
+    }
+    if (options.HasTextMarqueeDirection()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeDirection, options.GetTextMarqueeDirectionValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDirection, frameNode);
+    }
+    if (options.HasTextMarqueeDelay()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeDelay, options.GetTextMarqueeDelayValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeDelay, frameNode);
+    }
+    if (options.HasTextMarqueeFadeout()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeFadeout, options.GetTextMarqueeFadeoutValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeFadeout, frameNode);
+    }
+    if (options.HasTextMarqueeStartPolicy()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextLayoutProperty, TextMarqueeStartPolicy, options.GetTextMarqueeStartPolicyValue(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextMarqueeStartPolicy, frameNode);
+    }
+}
+
+void TextModelNG::SetOnMarqueeStateChange(std::function<void(int32_t)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnMarqueeStateChange(std::move(func));
+}
+
+void TextModelNG::SetOnMarqueeStateChange(FrameNode* frameNode, std::function<void(int32_t)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnMarqueeStateChange(std::move(func));
+}
+
+TextMarqueeOptions TextModelNG::GetMarqueeOptions(FrameNode* frameNode)
+{
+    TextMarqueeOptions options;
+    CHECK_NULL_RETURN(frameNode, options);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, options);
+
+    if (layoutProperty->HasTextMarqueeStart()) {
+        options.UpdateTextMarqueeStart(layoutProperty->GetTextMarqueeStart().value());
+    }
+    if (layoutProperty->HasTextMarqueeStep()) {
+        options.UpdateTextMarqueeStep(layoutProperty->GetTextMarqueeStep().value());
+    }
+    if (layoutProperty->HasTextMarqueeLoop()) {
+        options.UpdateTextMarqueeLoop(layoutProperty->GetTextMarqueeLoop().value());
+    }
+    if (layoutProperty->HasTextMarqueeDirection()) {
+        options.UpdateTextMarqueeDirection(layoutProperty->GetTextMarqueeDirection().value());
+    }
+    if (layoutProperty->HasTextMarqueeDelay()) {
+        options.UpdateTextMarqueeDelay(layoutProperty->GetTextMarqueeDelay().value());
+    }
+    if (layoutProperty->HasTextMarqueeFadeout()) {
+        options.UpdateTextMarqueeFadeout(layoutProperty->GetTextMarqueeFadeout().value());
+    }
+    if (layoutProperty->HasTextMarqueeStartPolicy()) {
+        options.UpdateTextMarqueeStartPolicy(layoutProperty->GetTextMarqueeStartPolicy().value());
+    }
+
+    return options;
 }
 
 std::u16string TextModelNG::GetContent(FrameNode* frameNode)
@@ -833,18 +927,19 @@ Ace::FontStyle TextModelNG::GetItalicFontStyle(FrameNode* frameNode)
     return value;
 }
 
-Color TextModelNG::GetDefaultColor()
+Color TextModelNG::GetDefaultColor(int32_t themeScopeId)
 {
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Color::BLACK);
-    auto theme = context->GetTheme<TextTheme>();
+    auto theme = context->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_RETURN(theme, Color::BLACK);
     return theme->GetTextStyle().GetTextColor();
 }
 
 Color TextModelNG::GetFontColor(FrameNode* frameNode)
 {
-    auto defaultColor = GetDefaultColor();
+    auto themeScopeId = frameNode ? frameNode->GetThemeScopeId() : 0;
+    auto defaultColor = GetDefaultColor(themeScopeId);
     CHECK_NULL_RETURN(frameNode, defaultColor);
     auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, defaultColor);
@@ -953,7 +1048,8 @@ Color TextModelNG::GetCaretColor(FrameNode* frameNode)
 {
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(context, Color::BLACK);
-    auto theme = context->GetTheme<TextTheme>();
+    auto themeScopeId = frameNode ? frameNode->GetThemeScopeId() : 0;
+    auto theme = context->GetTheme<TextTheme>(themeScopeId);
     CHECK_NULL_RETURN(theme, Color::BLACK);
     Color value = theme->GetCaretColor();
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextLayoutProperty, CursorColor, value, frameNode, value);

@@ -193,21 +193,14 @@ public:
         onActionEnd_ = std::make_unique<GestureEventFunc>(onActionEnd);
     }
 
-    void SetOnActionCancel(const GestureEventNoParameter& onActionCancel)
+    void SetOnActionCancel(const GestureEventFunc& onActionCancel)
     {
-        onActionCancel_ = std::make_unique<GestureEventNoParameter>(onActionCancel);
+        onActionCancel_ = std::make_unique<GestureEventFunc>(onActionCancel);
     }
 
     void SetOnReject(const GestureEventNoParameter& onReject)
     {
         onReject_ = std::make_unique<GestureEventNoParameter>(onReject);
-    }
-
-    inline void SendCancelMsg()
-    {
-        if (onActionCancel_ && *onActionCancel_) {
-            (*onActionCancel_)();
-        }
     }
 
     inline void SendRejectMsg()
@@ -415,6 +408,15 @@ public:
     {
         return extraInfo_;
     }
+
+    virtual void CleanRecognizerStateVoluntarily() {}
+
+    void ResetStateVoluntarily();
+
+    void SetIsNeedResetRecognizer(bool isNeedResetRecognizerState);
+
+    bool IsNeedResetRecognizerState();
+
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -464,7 +466,7 @@ protected:
     std::unique_ptr<GestureEventFunc> onActionStart_;
     std::unique_ptr<GestureEventFunc> onActionUpdate_;
     std::unique_ptr<GestureEventFunc> onActionEnd_;
-    std::unique_ptr<GestureEventNoParameter> onActionCancel_;
+    std::unique_ptr<GestureEventFunc> onActionCancel_;
     // triggered when the recongnizer is rejected
     std::unique_ptr<GestureEventNoParameter> onReject_;
 
@@ -483,6 +485,10 @@ protected:
     bool enabled_ = true;
     ResponseLinkResult responseLinkRecognizer_;
     std::string extraInfo_;
+    // This flag is set when the current recognition of the recognizer ends. Used when all fingers on the recognizer are
+    // raised.
+    bool isNeedResetVoluntarily_ = false;
+    bool isNeedResetRecognizerState_ = false;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
     WeakPtr<NGGestureRecognizer> eventImportGestureGroup_;

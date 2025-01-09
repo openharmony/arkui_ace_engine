@@ -33,7 +33,10 @@ public:
     static void SetSelectedTime(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value);
     static void SetDialogTitleDate(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerDate& value);
     static void SetHour24(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isUseMilitaryTime = false);
+    static void SetEnableCascade(
+        const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isEnableCascade = false);
     static void SetDialogChange(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange);
+    static void SetDialogEnterSelectedArea(const RefPtr<FrameNode>& frameNode, DialogEvent&& onEnterSelectedArea);
     static RefPtr<FrameNode> CreateButtonNode(const RefPtr<FrameNode>& frameNode,
         const RefPtr<FrameNode>& timePickerNode, const std::vector<ButtonInfo>& buttonInfos,
         std::map<std::string, NG::DialogEvent> dialogEvent,

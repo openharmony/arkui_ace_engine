@@ -89,6 +89,7 @@ let WordBreak;
   WordBreak[WordBreak.NORMAL = 0] = 'normal';
   WordBreak[WordBreak.BREAK_ALL = 1] = 'break-all';
   WordBreak[WordBreak.BREAK_WORD = 2] = 'break-word';
+  WordBreak[WordBreak.HYPHENATION = 3] = "hyphenation";
 })(WordBreak || (WordBreak = {}));
 
 let DpiFollowStrategy;
@@ -102,6 +103,12 @@ let SecurityDpiFollowStrategy;
   SecurityDpiFollowStrategy[SecurityDpiFollowStrategy.FOLLOW_HOST_DPI = 0] = 'follow-host-dpi';
   SecurityDpiFollowStrategy[SecurityDpiFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_DPI = 1] = 'follow-ui-extension-ability-dpi';
 })(SecurityDpiFollowStrategy || (SecurityDpiFollowStrategy = {}));
+
+let WindowModeFollowStrategy;
+(function (WindowModeFollowStrategy) {
+  WindowModeFollowStrategy[WindowModeFollowStrategy.FOLLOW_HOST_WINDOW_MODE = 0] = 'follow-host-window-mode';
+  WindowModeFollowStrategy[WindowModeFollowStrategy.FOLLOW_UI_EXTENSION_ABILITY_WINDOW_MODE = 1] = 'follow-ui-extension-ability-window-mode';
+})(WindowModeFollowStrategy || (WindowModeFollowStrategy = {}));
 
 let EllipsisMode;
 (function (EllipsisMode) {
@@ -211,6 +218,7 @@ let ImageFit;
   ImageFit[ImageFit.BOTTOM_START = 13] = 'BOTTOM_START';
   ImageFit[ImageFit.BOTTOM = 14] = 'BOTTOM';
   ImageFit[ImageFit.BOTTOM_END = 15] = 'BOTTOM_END';
+  ImageFit[ImageFit.MATRIX = 16] = "MATRIX";
 })(ImageFit || (ImageFit = {}));
 
 let DynamicRangeMode ;
@@ -486,6 +494,13 @@ var EdgeEffect;
   EdgeEffect[EdgeEffect.None = 2] = 'None';
 })(EdgeEffect || (EdgeEffect = {}));
 
+let EffectEdge;
+(function (EffectEdge) {
+  EffectEdge[EffectEdge.START = 1] = 'START';
+  EffectEdge[EffectEdge.END = 2] = 'END';
+  EffectEdge[EffectEdge.ALL = 3] = 'ALL';
+})(EffectEdge || (EffectEdge = {}));
+
 let SwipeEdgeEffect;
 (function (SwipeEdgeEffect) {
   SwipeEdgeEffect[SwipeEdgeEffect.Spring = 0] = 'Spring';
@@ -536,6 +551,7 @@ let MouseAction;
   MouseAction[MouseAction.Release = 2] = 'Release';
   MouseAction[MouseAction.Move = 3] = 'Move';
   MouseAction[MouseAction.Hover = 4] = 'Hover';
+  MouseAction[MouseAction.CANCEL = 13] = 'CANCEL';
 })(MouseAction || (MouseAction = {}));
 
 let KeyType;
@@ -827,6 +843,12 @@ let LayoutStyle;
   LayoutStyle[LayoutStyle.ALWAYS_AVERAGE_SPLIT = 1] = 'ALWAYS_AVERAGE_SPLIT';
   LayoutStyle[LayoutStyle.SPACE_BETWEEN_OR_CENTER = 2] = 'SPACE_BETWEEN_OR_CENTER';
 })(LayoutStyle || (LayoutStyle = {}));
+
+let TabsCacheMode;
+(function (TabsCacheMode) {
+  TabsCacheMode[TabsCacheMode.CACHE_BOTH_SIDE = 0] = 'CACHE_BOTH_SIDE';
+  TabsCacheMode[TabsCacheMode.CACHE_LATEST_SWITCHED = 1] = 'CACHE_LATEST_SWITCHED';
+})(TabsCacheMode || (TabsCacheMode = {}));
 
 let SizeType;
 (function (SizeType) {
@@ -2063,6 +2085,10 @@ class TextMenuItemId {
     return new TextMenuItemId('OH_DEFAULT_SELECT_ALL');
   }
 
+  static get SEARCH() {
+    return new TextMenuItemId('OH_DEFAULT_SEARCH');
+  }
+
   static get COLLABORATION_SERVICE() {
     return new TextMenuItemId('OH_DEFAULT_COLLABORATION_SERVICE');
   }
@@ -2472,12 +2498,15 @@ class NavPathStack {
     let pathInfo = this.pathArray.pop();
     this.popArray.push(pathInfo);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
-      let popInfo = {
-        info: currentPathInfo,
-        result: result,
-      };
-      currentPathInfo.onPop(popInfo);
+    if (result !== undefined && typeof result !== 'boolean') {
+      if (currentPathInfo.onPop !== undefined) {
+        let popInfo = {
+          info: currentPathInfo,
+          result: result,
+        };
+        currentPathInfo.onPop(popInfo);
+      }
+      this.nativeStack.onPopCallback(result);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
@@ -2500,12 +2529,15 @@ class NavPathStack {
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
-      let popInfo = {
-        info: currentPathInfo,
-        result: result,
-      };
-      currentPathInfo.onPop(popInfo);
+    if (result !== undefined && typeof result !== 'boolean') {
+      if (currentPathInfo.onPop !== undefined) {
+        let popInfo = {
+          info: currentPathInfo,
+          result: result,
+        };
+        currentPathInfo.onPop(popInfo);
+      }
+      this.nativeStack.onPopCallback(result);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
@@ -2524,12 +2556,15 @@ class NavPathStack {
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
-      let popInfo = {
-        info: currentPathInfo,
-        result: result,
-      };
-      currentPathInfo.onPop(popInfo);
+    if (result !== undefined && typeof result !== 'boolean') {
+      if (currentPathInfo.onPop !== undefined) {
+        let popInfo = {
+          info: currentPathInfo,
+          result: result,
+        };
+        currentPathInfo.onPop(popInfo);
+      }
+      this.nativeStack.onPopCallback(result);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
@@ -3196,8 +3231,8 @@ let SwiperNestedScrollMode;
 
 let PageFlipMode;
 (function (PageFlipMode) {
-  PageFlipMode[PageFlipMode.CONTINUOUS = 0] = "CONTINUOUS";
-  PageFlipMode[PageFlipMode.SINGLE = 1] = "SINGLE";
+  PageFlipMode[PageFlipMode.CONTINUOUS = 0] = 'CONTINUOUS';
+  PageFlipMode[PageFlipMode.SINGLE = 1] = 'SINGLE';
 })(PageFlipMode || (PageFlipMode = {}));
 
 let CheckBoxStyle;
@@ -3271,6 +3306,7 @@ let DragPreviewMode;
   DragPreviewMode.DISABLE_SCALE = 2;
   DragPreviewMode.ENABLE_DEFAULT_SHADOW = 3;
   DragPreviewMode.ENABLE_DEFAULT_RADIUS = 4;
+  DragPreviewMode.ENABLE_DRAG_ITEM_GRAY_EFFECT = 5;
 })(DragPreviewMode || (DragPreviewMode = {}));
 
 let FoldStatus;
@@ -3342,6 +3378,19 @@ let TextResponseType;
   TextResponseType[TextResponseType.LONG_PRESS = 1] = 'LONG_PRESS';
   TextResponseType[TextResponseType.SELECT = 2] = 'SELECT';
 })(TextResponseType || (TextResponseType = {}));
+
+let MarqueeState;
+(function (MarqueeState) {
+  MarqueeState[MarqueeState.START = 0] = 'START';
+  MarqueeState[MarqueeState.BOUNCE = 1] = 'BOUNCE';
+  MarqueeState[MarqueeState.FINISH = 2] = 'FINISH';
+})(MarqueeState || (MarqueeState = {}));
+
+let MarqueeStartPolicy;
+(function (MarqueeStartPolicy) {
+  MarqueeStartPolicy[MarqueeStartPolicy.DEFAULT = 0] = 'DEFAULT';
+  MarqueeStartPolicy[MarqueeStartPolicy.ON_FOCUS = 1] = 'ON_FOCUS';
+})(MarqueeStartPolicy || (MarqueeStartPolicy = {}));
 
 let NativeEmbedStatus;
 (function (NativeEmbedStatus) {
@@ -3477,6 +3526,135 @@ let AccessibilityHoverType;
   AccessibilityHoverType[AccessibilityHoverType.HOVER_CANCEL = 3] = 'HOVER_CANCEL';
 })(AccessibilityHoverType || (AccessibilityHoverType = {}));
 
+let AccessibilityRoleType;
+(function (AccessibilityRoleType) {
+  AccessibilityRoleType[AccessibilityRoleType.ACTION_SHEET = 0] = "ACTION_SHEET";
+  AccessibilityRoleType[AccessibilityRoleType.ALERT_DIALOG = 1] = "ALERT_DIALOG";
+  AccessibilityRoleType[AccessibilityRoleType.INDEXER_COMPONENT = 2] = "INDEXER_COMPONENT";
+  AccessibilityRoleType[AccessibilityRoleType.BADGE_COMPONENT = 3] = "BADGE_COMPONENT";
+  AccessibilityRoleType[AccessibilityRoleType.BLANK = 4] = "BLANK";
+  AccessibilityRoleType[AccessibilityRoleType.BUTTON = 5] = "BUTTON";
+  AccessibilityRoleType[AccessibilityRoleType.BACK_BUTTON = 6] = "BACK_BUTTON";
+  AccessibilityRoleType[AccessibilityRoleType.SHEET_DRAG_BAR = 7] = "SHEET_DRAG_BAR";
+  AccessibilityRoleType[AccessibilityRoleType.CALENDAR_PICKER = 8] = "CALENDAR_PICKER";
+  AccessibilityRoleType[AccessibilityRoleType.CALENDAR = 9] = "CALENDAR";
+  AccessibilityRoleType[AccessibilityRoleType.CANVAS = 10] = "CANVAS";
+  AccessibilityRoleType[AccessibilityRoleType.CANVAS_GRADIENT = 11] = "CANVAS_GRADIENT";
+  AccessibilityRoleType[AccessibilityRoleType.CANVAS_PATTERN = 12] = "CANVAS_PATTERN";
+  AccessibilityRoleType[AccessibilityRoleType.CHECKBOX = 13] = "CHECKBOX";
+  AccessibilityRoleType[AccessibilityRoleType.CHECKBOX_GROUP = 14] = "CHECKBOX_GROUP";
+  AccessibilityRoleType[AccessibilityRoleType.CIRCLE = 15] = "CIRCLE";
+  AccessibilityRoleType[AccessibilityRoleType.COLUMN_SPLIT = 16] = "COLUMN_SPLIT";
+  AccessibilityRoleType[AccessibilityRoleType.COLUMN = 17] = "COLUMN";
+  AccessibilityRoleType[AccessibilityRoleType.CANVAS_RENDERING_CONTEXT_2D = 18] = "CANVAS_RENDERING_CONTEXT_2D";
+  AccessibilityRoleType[AccessibilityRoleType.CHART = 19] = "CHART";
+  AccessibilityRoleType[AccessibilityRoleType.COUNTER = 20] = "COUNTER";
+  AccessibilityRoleType[AccessibilityRoleType.CONTAINER_MODAL = 21] = "CONTAINER_MODAL";
+  AccessibilityRoleType[AccessibilityRoleType.DATA_PANEL = 22] = "DATA_PANEL";
+  AccessibilityRoleType[AccessibilityRoleType.DATE_PICKER = 23] = "DATE_PICKER";
+  AccessibilityRoleType[AccessibilityRoleType.DIALOG = 24] = "DIALOG";
+  AccessibilityRoleType[AccessibilityRoleType.DIVIDER = 25] = "DIVIDER";
+  AccessibilityRoleType[AccessibilityRoleType.DRAG_BAR = 26] = "DRAG_BAR";
+  AccessibilityRoleType[AccessibilityRoleType.EFFECT_COMPONENT = 27] = "EFFECT_COMPONENT";
+  AccessibilityRoleType[AccessibilityRoleType.ELLIPSE = 28] = "ELLIPSE";
+  AccessibilityRoleType[AccessibilityRoleType.FLEX = 29] = "FLEX";
+  AccessibilityRoleType[AccessibilityRoleType.FLOW_ITEM = 30] = "FLOW_ITEM";
+  AccessibilityRoleType[AccessibilityRoleType.FORM_COMPONENT = 31] = "FORM_COMPONENT";
+  AccessibilityRoleType[AccessibilityRoleType.FORM_LINK = 32] = "FORM_LINK";
+  AccessibilityRoleType[AccessibilityRoleType.GAUGE = 33] = "GAUGE";
+  AccessibilityRoleType[AccessibilityRoleType.GRID = 34] = "GRID";
+  AccessibilityRoleType[AccessibilityRoleType.GRID_COL = 35] = "GRID_COL";
+  AccessibilityRoleType[AccessibilityRoleType.GRID_CONTAINER = 36] = "GRID_CONTAINER";
+  AccessibilityRoleType[AccessibilityRoleType.GRID_ITEM = 37] = "GRID_ITEM";
+  AccessibilityRoleType[AccessibilityRoleType.GRID_ROW = 38] = "GRID_ROW";
+  AccessibilityRoleType[AccessibilityRoleType.HYPERLINK = 39] = "HYPERLINK";
+  AccessibilityRoleType[AccessibilityRoleType.IMAGE = 40] = "IMAGE";
+  AccessibilityRoleType[AccessibilityRoleType.IMAGE_ANIMATOR = 41] = "IMAGE_ANIMATOR";
+  AccessibilityRoleType[AccessibilityRoleType.ROLE_IMAGE_BITMAP = 42] = "ROLE_IMAGE_BITMAP";
+  AccessibilityRoleType[AccessibilityRoleType.IMAGE_DATA = 43] = "IMAGE_DATA";
+  AccessibilityRoleType[AccessibilityRoleType.IMAGE_SPAN = 44] = "IMAGE_SPAN";
+  AccessibilityRoleType[AccessibilityRoleType.LABEL = 45] = "LABEL";
+  AccessibilityRoleType[AccessibilityRoleType.LINE = 46] = "LINE";
+  AccessibilityRoleType[AccessibilityRoleType.LIST = 47] = "LIST";
+  AccessibilityRoleType[AccessibilityRoleType.LIST_ITEM = 48] = "LIST_ITEM";
+  AccessibilityRoleType[AccessibilityRoleType.LIST_ITEM_GROUP = 49] = "LIST_ITEM_GROUP";
+  AccessibilityRoleType[AccessibilityRoleType.LOADING_PROGRESS = 50] = "LOADING_PROGRESS";
+  AccessibilityRoleType[AccessibilityRoleType.MARQUEE = 51] = "MARQUEE";
+  AccessibilityRoleType[AccessibilityRoleType.MATRIX2D = 52] = "MATRIX2D";
+  AccessibilityRoleType[AccessibilityRoleType.MENU = 53] = "MENU";
+  AccessibilityRoleType[AccessibilityRoleType.MENU_ITEM = 54] = "MENU_ITEM";
+  AccessibilityRoleType[AccessibilityRoleType.MENU_ITEM_GROUP = 55] = "MENU_ITEM_GROUP";
+  AccessibilityRoleType[AccessibilityRoleType.NAV_DESTINATION = 56] = "NAV_DESTINATION";
+  AccessibilityRoleType[AccessibilityRoleType.NAV_ROUTER = 57] = "NAV_ROUTER";
+  AccessibilityRoleType[AccessibilityRoleType.NAVIGATION = 58] = "NAVIGATION";
+  AccessibilityRoleType[AccessibilityRoleType.NAVIGATION_BAR = 59] = "NAVIGATION_BAR";
+  AccessibilityRoleType[AccessibilityRoleType.NAVIGATION_MENU = 60] = "NAVIGATION_MENU";
+  AccessibilityRoleType[AccessibilityRoleType.NAVIGATOR = 61] = "NAVIGATOR";
+  AccessibilityRoleType[AccessibilityRoleType.OFFSCREEN_CANVAS = 62] = "OFFSCREEN_CANVAS";
+  AccessibilityRoleType[AccessibilityRoleType.OFFSCREEN_CANVAS_RENDERING_CONTEXT2D = 63] = "OFFSCREEN_CANVAS_RENDERING_CONTEXT2D";
+  AccessibilityRoleType[AccessibilityRoleType.OPTION = 64] = "OPTION";
+  AccessibilityRoleType[AccessibilityRoleType.PANEL = 65] = "PANEL";
+  AccessibilityRoleType[AccessibilityRoleType.PAPER_PAGE = 66] = "PAPER_PAGE";
+  AccessibilityRoleType[AccessibilityRoleType.PATH = 67] = "PATH";
+  AccessibilityRoleType[AccessibilityRoleType.PATH2D = 68] = "PATH2D";
+  AccessibilityRoleType[AccessibilityRoleType.PATTERN_LOCK = 69] = "PATTERN_LOCK";
+  AccessibilityRoleType[AccessibilityRoleType.PICKER = 70] = "PICKER";
+  AccessibilityRoleType[AccessibilityRoleType.PICKER_VIEW = 71] = "PICKER_VIEW";
+  AccessibilityRoleType[AccessibilityRoleType.PLUGIN_COMPONENT = 72] = "PLUGIN_COMPONENT";
+  AccessibilityRoleType[AccessibilityRoleType.POLYGON = 73] = "POLYGON";
+  AccessibilityRoleType[AccessibilityRoleType.POLYLINE = 74] = "POLYLINE";
+  AccessibilityRoleType[AccessibilityRoleType.POPUP = 75] = "POPUP";
+  AccessibilityRoleType[AccessibilityRoleType.PROGRESS = 76] = "PROGRESS";
+  AccessibilityRoleType[AccessibilityRoleType.QRCODE = 77] = "QRCODE";
+  AccessibilityRoleType[AccessibilityRoleType.RADIO = 78] = "RADIO";
+  AccessibilityRoleType[AccessibilityRoleType.RATING = 79] = "RATING";
+  AccessibilityRoleType[AccessibilityRoleType.RECT = 80] = "RECT";
+  AccessibilityRoleType[AccessibilityRoleType.REFRESH = 81] = "REFRESH";
+  AccessibilityRoleType[AccessibilityRoleType.RELATIVE_CONTAINER = 82] = "RELATIVE_CONTAINER";
+  AccessibilityRoleType[AccessibilityRoleType.REMOTE_WINDOW = 83] = "REMOTE_WINDOW";
+  AccessibilityRoleType[AccessibilityRoleType.RICH_EDITOR = 84] = "RICH_EDITOR";
+  AccessibilityRoleType[AccessibilityRoleType.RICH_TEXT = 85] = "RICH_TEXT";
+  AccessibilityRoleType[AccessibilityRoleType.ROLE_PAGER = 86] = "ROLE_PAGER";
+  AccessibilityRoleType[AccessibilityRoleType.ROW = 87] = "ROW";
+  AccessibilityRoleType[AccessibilityRoleType.ROW_SPLIT = 88] = "ROW_SPLIT";
+  AccessibilityRoleType[AccessibilityRoleType.SCROLL = 89] = "SCROLL";
+  AccessibilityRoleType[AccessibilityRoleType.SCROLL_BAR = 90] = "SCROLL_BAR";
+  AccessibilityRoleType[AccessibilityRoleType.SEARCH = 91] = "SEARCH";
+  AccessibilityRoleType[AccessibilityRoleType.SEARCH_FIELD = 92] = "SEARCH_FIELD";
+  AccessibilityRoleType[AccessibilityRoleType.SELECT = 93] = "SELECT";
+  AccessibilityRoleType[AccessibilityRoleType.SHAPE = 94] = "SHAPE";
+  AccessibilityRoleType[AccessibilityRoleType.SIDEBAR_CONTAINER = 95] = "SIDEBAR_CONTAINER";
+  AccessibilityRoleType[AccessibilityRoleType.SLIDER = 96] = "SLIDER";
+  AccessibilityRoleType[AccessibilityRoleType.SPAN = 97] = "SPAN";
+  AccessibilityRoleType[AccessibilityRoleType.STACK = 98] = "STACK";
+  AccessibilityRoleType[AccessibilityRoleType.STEPPER = 99] = "STEPPER";
+  AccessibilityRoleType[AccessibilityRoleType.STEPPER_ITEM = 100] = "STEPPER_ITEM";
+  AccessibilityRoleType[AccessibilityRoleType.SWIPER = 101] = "SWIPER";
+  AccessibilityRoleType[AccessibilityRoleType.SWIPER_INDICATOR = 102] = "SWIPER_INDICATOR";
+  AccessibilityRoleType[AccessibilityRoleType.SWITCH = 103] = "SWITCH";
+  AccessibilityRoleType[AccessibilityRoleType.SYMBOL_GLYPH = 104] = "SYMBOL_GLYPH";
+  AccessibilityRoleType[AccessibilityRoleType.TAB_CONTENT = 105] = "TAB_CONTENT";
+  AccessibilityRoleType[AccessibilityRoleType.TAB_BAR = 106] = "TAB_BAR";
+  AccessibilityRoleType[AccessibilityRoleType.TABS = 107] = "TABS";
+  AccessibilityRoleType[AccessibilityRoleType.TEXT = 108] = "TEXT";
+  AccessibilityRoleType[AccessibilityRoleType.TEXT_CLOCK = 109] = "TEXT_CLOCK";
+  AccessibilityRoleType[AccessibilityRoleType.TEXT_ENTRY = 110] = "TEXT_ENTRY";
+  AccessibilityRoleType[AccessibilityRoleType.TEXT_INPUT = 111] = "TEXT_INPUT";
+  AccessibilityRoleType[AccessibilityRoleType.TEXT_PICKER = 112] = "TEXT_PICKER";
+  AccessibilityRoleType[AccessibilityRoleType.TEXT_TIMER = 113] = "TEXT_TIMER";
+  AccessibilityRoleType[AccessibilityRoleType.TEXT_AREA = 114] = "TEXT_AREA";
+  AccessibilityRoleType[AccessibilityRoleType.TEXT_FIELD = 115] = "TEXT_FIELD";
+  AccessibilityRoleType[AccessibilityRoleType.TIME_PICKER = 116] = "TIME_PICKER";
+  AccessibilityRoleType[AccessibilityRoleType.TITLE_BAR = 117] = "TITLE_BAR";
+  AccessibilityRoleType[AccessibilityRoleType.TOGGLER = 118] = "TOGGLER";
+  AccessibilityRoleType[AccessibilityRoleType.UI_EXTENSION_COMPONENT = 119] = "UI_EXTENSION_COMPONENT";
+  AccessibilityRoleType[AccessibilityRoleType.VIDEO = 120] = "VIDEO";
+  AccessibilityRoleType[AccessibilityRoleType.WATER_FLOW = 121] = "WATER_FLOW";
+  AccessibilityRoleType[AccessibilityRoleType.WEB = 122] = "WEB";
+  AccessibilityRoleType[AccessibilityRoleType.XCOMPONENT = 123] = "XCOMPONENT";
+  AccessibilityRoleType[AccessibilityRoleType.ROLE_NONE = 124] = "ROLE_NONE";
+})(AccessibilityRoleType || (AccessibilityRoleType = {}));
+
 let WidthBreakpoint;
 (function (WidthBreakpoint) {
   WidthBreakpoint[WidthBreakpoint.WIDTH_XS = 0] = 'WIDTH_XS';
@@ -3543,3 +3721,17 @@ let AxisModel;
   AxisModel[AxisModel.ABS_HAT0X = 6] = 'ABS_HAT0X';
   AxisModel[AxisModel.ABS_HAT0Y = 7] = 'ABS_HAT0Y';
 })(AxisModel || (AxisModel = {}));
+
+let CrownSensitivity;
+(function (CrownSensitivity) {
+  CrownSensitivity[CrownSensitivity.LOW = 0] = 'LOW';
+  CrownSensitivity[CrownSensitivity.MEDIUM = 1] = 'MEDIUM';
+  CrownSensitivity[CrownSensitivity.HIGH = 2] = 'HIGH';
+})(CrownSensitivity || (CrownSensitivity = {}));
+
+let CrownAction;
+(function (CrownAction) {
+  CrownAction[CrownAction.BEGIN = 0] = 'BEGIN';
+  CrownAction[CrownAction.UPDATE = 1] = 'UPDATE';
+  CrownAction[CrownAction.END = 2] = 'END';
+})(CrownAction || (CrownAction = {}));

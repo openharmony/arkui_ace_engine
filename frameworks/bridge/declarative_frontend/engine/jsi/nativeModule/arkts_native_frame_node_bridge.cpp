@@ -1289,7 +1289,7 @@ ArkUINativeModuleValue FrameNodeBridge::IsAttached(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     bool isAttached;
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
         isAttached = GetArkUINodeModifiers()->getFrameNodeModifier()->isAttached(nativeNode);
     } else {
         isAttached = GetArkUINodeModifiers()->getFrameNodeModifier()->isVisible(nativeNode);
@@ -1669,6 +1669,7 @@ ArkUINativeModuleValue FrameNodeBridge::MarkDirty(ArkUIRuntimeCallInfo* runtimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
+#ifndef ARKUI_WEARABLE
 ArkUINativeModuleValue FrameNodeBridge::CreateNodeContent(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -1707,6 +1708,7 @@ ArkUINativeModuleValue FrameNodeBridge::RemoveFrameNodeFromNodeContent(ArkUIRunt
     }
     return panda::BooleanRef::New(vm, !result);
 }
+#endif
 
 ArkUINativeModuleValue FrameNodeBridge::GetFirstUINode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {

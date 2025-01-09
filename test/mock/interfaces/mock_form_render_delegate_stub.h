@@ -36,6 +36,7 @@ public:
     MOCK_METHOD1(OnSurfaceDetach, int32_t(uint64_t surfaceId));
     MOCK_METHOD1(OnFormLinkInfoUpdate, int32_t(const std::vector<std::string>& formLinkInfos));
     MOCK_METHOD1(OnGetRectRelativeToWindow, int32_t(AccessibilityParentRectInfo& parentRectInfo));
+    MOCK_METHOD1(OnCheckManagerDelegate, int32_t(bool &checkFlag));
 };
 } // namespace Ace
 } // namespace OHOS

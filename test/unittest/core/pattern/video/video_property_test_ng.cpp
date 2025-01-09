@@ -42,7 +42,6 @@
 #include "core/components/video/video_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -116,6 +115,10 @@ const SizeF LAYOUT_SIZE_RATIO_GREATER_THAN_1(MAX_WIDTH, VIDEO_HEIGHT);
 const SizeF LAYOUT_SIZE_RATIO_LESS_THAN_1(VIDEO_WIDTH, MAX_HEIGHT);
 const SizeF INVALID_SIZE(MAX_WIDTH, 0.0f);
 constexpr uint32_t VIDEO_CHILDREN_NUM = 3;
+constexpr uint32_t VIDEO_DURATION = 10u;
+constexpr uint32_t VIDEO_CURRENT_TIME = 5u;
+constexpr float VOLUME_STEP = 0.05f;
+constexpr int32_t MILLISECONDS_TO_SECONDS = 1000;
 TestProperty testProperty;
 } // namespace
 
@@ -810,72 +813,6 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest019, TestSize.Level1)
 }
 
 /**
- * @tc.name: VideoPatternTest020
- * @tc.desc: Test VideoPattern dragEnd
- * @tc.type: FUNC
- */
-HWTEST_F(VideoPropertyTestNg, VideoPatternTest020, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create a video and get the videoPattern.
-     * @tc.expected: step1. Create and get successfully.
-     */
-    VideoModelNG videoModelNG;
-    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
-    videoModelNG.Create(videoController);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
-    ASSERT_NE(videoPattern, nullptr);
-
-    videoPattern->videoSrcInfo_.src = "test";
-    videoPattern->EnableDrag();
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    RefPtr<OHOS::Ace::UnifiedData> unifiedData;
-    auto dragEnd = eventHub->onDrop_;
-    std::string extraParams;
-    dragEnd(dragEvent, extraParams);
-
-    /**
-     * @tc.steps: step2. Call dragEnd in different wrong situation.
-     * @tc.expected: step2. Log error message.
-     */
-    auto json = JsonUtil::Create(true);
-    json->Put(EXTRA_INFO_KEY.c_str(), "");
-    dragEnd(dragEvent, json->ToString());
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "test");
-    dragEnd(dragEvent, json->ToString());
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "test::");
-    dragEnd(dragEvent, json->ToString());
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "::test");
-    dragEnd(dragEvent, json->ToString());
-
-    dragEvent->SetData(unifiedData);
-    videoPattern->isInitialState_ = false;
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "test::test");
-    dragEnd(dragEvent, json->ToString());
-    videoPattern->isInitialState_ = true;
-    dragEnd(dragEvent, json->ToString());
-
-    /**
-     * @tc.steps: step3. Call dragEnd while use new video src.
-     * @tc.expected: step3. VideoPattern property set correctly.
-     */
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "test::newTest");
-    videoPattern->SetIsStop(false);
-    videoPattern->isInitialState_ = false;
-    dragEnd(dragEvent, json->ToString());
-    EXPECT_FALSE(videoPattern->isStop_);
-}
-
-/**
  * @tc.name: VideoFullScreenTest001
  * @tc.desc: Test VideoFullScreenPattern UpdateState.
  * @tc.type: FUNC
@@ -960,8 +897,14 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest021, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), PrepareAsync())
         .WillOnce(Return(0))
         .WillOnce(Return(-1));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetRenderFirstFrame(false))
+        .WillOnce(Return(0));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetRenderFirstFrame(true))
+        .WillOnce(Return(0));
+    videoPattern->showFirstFrame_ = false;
     videoPattern->ResetMediaPlayer();
     videoPattern->ResetMediaPlayer();
+    videoPattern->showFirstFrame_ = true;
     videoPattern->ResetMediaPlayer();
     videoPattern->mediaPlayer_ = nullptr;
     videoPattern->SetSourceForMediaPlayer();
@@ -1180,6 +1123,8 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest027, TestSize.Level1)
      * @tc.steps: step2. Update Video controllerBar while controllerBar is show or not.
      * @tc.expected: Visibility value is changed.
      */
+    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
+        .WillOnce(Return(false));
     layoutProperty->UpdateControls(false);
     auto controller = AceType::DynamicCast<FrameNode>(videoNode->GetControllerRow());
     ASSERT_NE(controller, nullptr);
@@ -1229,6 +1174,17 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest028, TestSize.Level1)
     videoPattern->UpdateVideoProperty();
     videoPattern->autoPlay_ = true;
     videoPattern->UpdateVideoProperty();
+
+    /**
+     * @tc.steps: step2. Call OnRebuildFrame while renderSurface_ in different status.
+     * @tc.expected: IsSurfaceValid function is called only once.
+     */
+    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
+        .Times(1)
+        .WillOnce(Return(true));
+    videoPattern->OnRebuildFrame();
+    videoPattern->renderSurface_ = nullptr;
+    videoPattern->OnRebuildFrame();
 }
 
 /**
@@ -1252,6 +1208,9 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest029, TestSize.Level1)
      * @tc.steps: step2. Call OnColorConfigurationUpdate with different childNode in controlBar_.
      * @tc.expected: BackgroundColor of renderContext is set.
      */
+    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
+        .Times(1)
+        .WillOnce(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
         .WillRepeatedly(Return(false));
     ASSERT_NE(videoPattern->controlBar_, nullptr);
@@ -1296,5 +1255,72 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest030, TestSize.Level1)
 
     videoPattern->imageAnalyzerManager_ = nullptr;
     EXPECT_FALSE(videoPattern->IsSupportImageAnalyzer());
+}
+
+/**
+ * @tc.name: VideoPatternTest031
+ * @tc.desc: VideoEnableShortcutKeyTest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoPropertyTestNg, VideoPatternTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video and get videoPattern.
+     */
+    VideoModelNG video;
+    video.Create(AceType::MakeRefPtr<VideoControllerV2>());
+    auto videoNode = AceType::DynamicCast<VideoNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(videoNode, nullptr);
+    auto videoPattern = videoNode->GetPattern<VideoPattern>();
+    videoPattern->duration_ = VIDEO_DURATION;
+    videoPattern->currentPos_ = VIDEO_CURRENT_TIME;
+    ASSERT_NE(videoPattern, nullptr);
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
+        .WillRepeatedly(Return(true));
+
+    /**
+     * @tc.steps: step2. call onKeyEvent when isEnableShortcutKey_ is false/code is incorrect/action is incorrect
+     * @tc.expected: will not response
+     */
+    KeyEvent keyEvent0 { KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN };
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), Seek(_, _)).Times(0);
+    videoPattern->OnKeyEvent(keyEvent0);
+    videoPattern->isEnableShortcutKey_ = true;
+    keyEvent0.code = KeyCode::KEY_CTRL_LEFT;
+    videoPattern->OnKeyEvent(keyEvent0);
+    keyEvent0.action = KeyAction::UP;
+    videoPattern->OnKeyEvent(keyEvent0);
+
+    /**
+     * @tc.steps: step3. call onKeyEvent when isEnableShortcutKey_ is true and code&action is right
+     * @tc.expected: response as expected
+     */
+    videoPattern->isPrepared_ = true;
+    KeyEvent keyEvent1 { KeyCode::KEY_DPAD_LEFT, KeyAction::DOWN };
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)),
+        Seek((VIDEO_CURRENT_TIME - 1) * MILLISECONDS_TO_SECONDS, _))
+        .Times(1);
+    videoPattern->OnKeyEvent(keyEvent1);
+    KeyEvent keyEvent2 { KeyCode::KEY_DPAD_RIGHT, KeyAction::DOWN };
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)),
+        Seek((VIDEO_CURRENT_TIME + 1) * MILLISECONDS_TO_SECONDS, _))
+        .Times(1);
+    videoPattern->OnKeyEvent(keyEvent2);
+    KeyEvent keyEvent3 { KeyCode::KEY_DPAD_DOWN, KeyAction::DOWN };
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)),
+        SetVolume(1.0f - VOLUME_STEP, 1.0f - VOLUME_STEP))
+        .Times(1);
+    videoPattern->OnKeyEvent(keyEvent3);
+    KeyEvent keyEvent4 { KeyCode::KEY_DPAD_UP, KeyAction::DOWN };
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetVolume(1.0f, 1.0f)).Times(1);
+    videoPattern->OnKeyEvent(keyEvent4);
+    KeyEvent keyEvent5 { KeyCode::KEY_SPACE, KeyAction::DOWN };
+    videoPattern->isPaused_ = true;
+    videoPattern->OnKeyEvent(keyEvent5);
+    EXPECT_FALSE(videoPattern->isPaused_);
+    videoPattern->isPlaying_ = true;
+    KeyEvent keyEvent6 { KeyCode::KEY_SPACE, KeyAction::DOWN };
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), Pause()).Times(1);
+    videoPattern->OnKeyEvent(keyEvent6);
 }
 } // namespace OHOS::Ace::NG

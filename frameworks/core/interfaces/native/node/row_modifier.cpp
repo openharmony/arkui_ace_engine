@@ -96,23 +96,37 @@ void ResetRowReverse(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIRowModifier* GetRowModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIRowModifier modifier = {
-        SetRowJustifyContent, ResetRowJustifyContent, SetRowAlignItems,
-        ResetRowAlignItems, GetRowJustifyContent, GetRowAlignItems,
-        SetRowSpace, ResetRowSpace,
-        SetRowReverse,
-        ResetRowReverse,
+        .setRowJustifyContent = SetRowJustifyContent,
+        .resetRowJustifyContent = ResetRowJustifyContent,
+        .setRowAlignItems = SetRowAlignItems,
+        .resetRowAlignItems = ResetRowAlignItems,
+        .getRowJustifyContent = GetRowJustifyContent,
+        .getRowAlignItems = GetRowAlignItems,
+        .setRowSpace = SetRowSpace,
+        .resetRowSpace = ResetRowSpace,
+        .setRowReverse = SetRowReverse,
+        .resetRowReverse = ResetRowReverse,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIRowModifier* GetCJUIRowModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIRowModifier modifier = {
-        SetRowJustifyContent, ResetRowJustifyContent, SetRowAlignItems,
-        ResetRowAlignItems, GetRowJustifyContent, GetRowAlignItems,
-        SetRowSpace, ResetRowSpace,
+        .setRowJustifyContent = SetRowJustifyContent,
+        .resetRowJustifyContent = ResetRowJustifyContent,
+        .setRowAlignItems = SetRowAlignItems,
+        .resetRowAlignItems = ResetRowAlignItems,
+        .getRowJustifyContent = GetRowJustifyContent,
+        .getRowAlignItems = GetRowAlignItems,
+        .setRowSpace = SetRowSpace,
+        .resetRowSpace = ResetRowSpace,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

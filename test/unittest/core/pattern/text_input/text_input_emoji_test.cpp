@@ -15,6 +15,9 @@
 
 #include "text_input_base.h"
 
+#include <unicode/putil.h>
+#include <unicode/uclean.h>
+
 namespace OHOS::Ace::NG {
 
 namespace {} // namespace

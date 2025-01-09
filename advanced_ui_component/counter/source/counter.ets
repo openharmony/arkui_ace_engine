@@ -81,7 +81,7 @@ export class DateStyleOptions extends CommonOptions {
 }
 
 export class CounterOptions {
-  public type: CounterType;
+  public type: CounterType = CounterType.LIST;
   public direction?: Direction;
   public numberOptions?: NumberStyleOptions;
   public inlineOptions?: InlineStyleOptions;
@@ -103,7 +103,6 @@ class CounterResource {
   // counter size
   public static readonly BUTTON_BORDER_FOCUSED_WIDTH = '2vp';
   public static readonly BUTTON_BORDER_BLUR_WIDTH = '0vp';
-  public static readonly COUNTER_BORDER_WIDTH = '1vp';
   public static readonly COUNTER_BORDER_WIDTH_NUMBER = 1;
   public static readonly COUNTER_LIST_LABEL_SIZE = $r('sys.float.ohos_id_text_size_body1');
   public static readonly COUNTER_LIST_NUMBER_SIZE = $r('sys.float.ohos_id_text_size_body1');
@@ -111,6 +110,12 @@ class CounterResource {
   public static readonly COUNTER_NUMBER_SIZE = $r('sys.float.ohos_id_text_size_body1');
   public static readonly COUNTER_LIST_LEFT_PADDING = $r('sys.float.ohos_id_default_padding_start');
   public static readonly COUNTER_LIST_RIGHT_PADDING = $r('sys.float.ohos_id_default_padding_end');
+  public static readonly COUNTER_COMPACT_BUTTON_ICON_SIZE = $r('sys.float.button_icon_size');
+  public static readonly COUNTER_COMPACT_CONTAINER_HEIGHT = $r('sys.float.container_height');
+  public static readonly COUNTER_BORDER_WIDTH = $r('sys.float.border_width');
+  public static readonly COUNTER_COMPACT_BUTTON_SIZE = $r('sys.float.button_size');
+  public static readonly COUNTER_COMPACT_CONTAINER_RADIUS = $r('sys.float.container_radius');
+  public static readonly COUNTER_COMPACT_BUTTON_CONTAINER_MARGIN = $r('sys.float.button_container_margin');
   public static readonly COUNTER_LIST_PADDING = 12;
   public static readonly COUNTER_LIST_HEIGHT = '48vp';
   public static readonly COUNTER_LIST_BUTTON_ICON_SIZE = '20vp';
@@ -122,13 +127,9 @@ class CounterResource {
   public static readonly COUNTER_LIST_FOCUS_BORDER_RADIUS = '15vp';
   public static readonly COUNTER_LIST_BUTTON_HOT_SPOT_X = '-8vp';
   public static readonly COUNTER_LIST_BUTTON_HOT_SPOT_Y = '-8vp';
-  public static readonly COUNTER_COMPACT_BUTTON_ICON_SIZE = '16vp';
-  public static readonly COUNTER_COMPACT_BUTTON_SIZE = '24vp';
   public static readonly COUNTER_COMPACT_BUTTON_RADIUS = '12vp';
   public static readonly COUNTER_COMPACT_BUTTON_TEXT_DISTANCE = '10vp';
   public static readonly COUNTER_COMPACT_BUTTON_TEXT_MARGIN = 10;
-  public static readonly COUNTER_COMPACT_CONTAINER_HEIGHT = '28vp';
-  public static readonly COUNTER_COMPACT_CONTAINER_RADIUS = '14vp';
   public static readonly COUNTER_COMPACT_CONTAINER_LABEL_DISTANCE = '8vp';
   public static readonly COUNTER_COMPACT_FOCUS_BORDER_SIZE = '22vp';
   public static readonly COUNTER_COMPACT_FOCUS_BORDER_RADIUS = '11vp';
@@ -215,7 +216,7 @@ export struct CounterComponent {
   @State hasFocusText3: boolean = false
   @State subBtnFocusWidh: string = '0vp'
   @State addBtnFocusWidh: string = '0vp'
-  @State value: number | undefined = undefined;
+  @State value: number = 0;
   @State year: number = 0;
   @State month: number = 0;
   @State day: number = 0;
@@ -244,14 +245,15 @@ export struct CounterComponent {
   private timeoutID1: number = -1;
   private timeoutID2: number = -1;
   private timeoutID3: number = -1;
-  private numberStyleOptions: NumberStyleOptions;
-  private dateStyleOptions: DateStyleOptions;
-  private inlineStyleOptions: InlineStyleOptions;
+  private numberStyleOptions: NumberStyleOptions = new NumberStyleOptions();
+  private dateStyleOptions: DateStyleOptions = new DateStyleOptions();
+  private inlineStyleOptions: InlineStyleOptions = new InlineStyleOptions();
   private timeStamp: number = 0;
   private hasTextWidth: boolean = false;
   private controller1: TextInputController = new TextInputController();
   private controller2: TextInputController = new TextInputController();
   private controller3: TextInputController = new TextInputController();
+  private initFlag = true;
 
   getTextInputFontSize() {
     let fontSize = this.resourceToVp(CounterResource.COUNTER_NUMBER_SIZE);
@@ -284,7 +286,8 @@ export struct CounterComponent {
     if (this.numberStyleOptions.label === undefined) {
       this.numberStyleOptions.label = '';
     }
-    if (this.value === undefined) {
+    if (this.initFlag) {
+      this.initFlag = false;
       this.value = this.numberStyleOptions.value !== undefined ? this.numberStyleOptions.value : 0;
       this.onChange?.(this.value);
       this.inputValue = this.value.toString();
@@ -354,7 +357,8 @@ export struct CounterComponent {
   }
 
   private updateInlineStyleOptions() {
-    if (this.value === undefined) {
+    if (this.initFlag) {
+      this.initFlag = false;
       this.value = this.inlineStyleOptions.value !== undefined ? this.inlineStyleOptions.value : 0;
       this.onChange?.(this.value);
       this.inputValue = this.value.toString();
@@ -472,17 +476,23 @@ export struct CounterComponent {
 
     if (this.type === CounterType.LIST ||
       this.type === CounterType.COMPACT) {
-      this.numberStyleOptions = this.options.numberOptions;
+      if (this.options.numberOptions !== undefined) {
+        this.numberStyleOptions = this.options.numberOptions;
+      }
       this.updateNumberStyleOptions();
     } else if (this.type === CounterType.INLINE) {
-      this.inlineStyleOptions = this.options.inlineOptions;
+      if (this.options.inlineOptions !== undefined) {
+        this.inlineStyleOptions = this.options.inlineOptions;
+      }
       this.updateInlineStyleOptions();
     } else if (this.type === CounterType.INLINE_DATE) {
       let options = this.options.dateOptions;
-      options.year = options.year ? options.year : CounterConstant.COUNTER_MIN_YEAR;
-      options.month = options.month ? options.month : CounterConstant.COUNTER_MIN_MONTH;
-      options.day = options.day ? options.day : CounterConstant.COUNTER_MIN_DAY;
-      this.dateStyleOptions = options;
+      if (options !== undefined) {
+        options.year = options.year ? options.year : CounterConstant.COUNTER_MIN_YEAR;
+        options.month = options.month ? options.month : CounterConstant.COUNTER_MIN_MONTH;
+        options.day = options.day ? options.day : CounterConstant.COUNTER_MIN_DAY;
+        this.dateStyleOptions = options;
+      }
       this.updateDateStyleOptions();
     } else {
 
@@ -584,6 +594,7 @@ export struct CounterComponent {
         }
         break;
       default:
+        return CounterConstant.SMALL_MONTH_DAYS;
         break;
     }
   }
@@ -862,7 +873,7 @@ export struct CounterComponent {
 
   private focusWithTarget(key: string) {
     setTimeout(() => {
-      var res = focusControl.requestFocus(key);
+      let res = focusControl.requestFocus(key);
       if (res) {
         console.log('Request success');
       } else {
@@ -926,7 +937,7 @@ export struct CounterComponent {
         Text(this.numberStyleOptions.label)
           .direction(this.counterDirection)
           .fontSize(CounterResource.COUNTER_LIST_LABEL_SIZE)
-          .maxFontScale(CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE);
+          .maxFontScale(CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE)
           .fontColor(CounterResource.COUNTER_TEXT_COLOR)
           .margin({
             start: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_LIST_LEFT_PADDING))
@@ -1031,7 +1042,7 @@ export struct CounterComponent {
               .width(this.textWidth.toString())
               .textAlign(TextAlign.Center)
               .fontSize(CounterResource.COUNTER_LIST_NUMBER_SIZE)
-              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
+              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE)
               .fontColor(CounterResource.COUNTER_TEXT_COLOR)
               .margin({
                 start: LengthMetrics.vp(CounterResource.COUNTER_LIST_BUTTON_TEXT_MARGIN),
@@ -1042,7 +1053,7 @@ export struct CounterComponent {
               .direction(this.counterDirection)
               .textAlign(TextAlign.Center)
               .fontSize(CounterResource.COUNTER_LIST_NUMBER_SIZE)
-              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
+              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE)
               .fontColor(CounterResource.COUNTER_TEXT_COLOR)
               .margin({
                 start: LengthMetrics.vp(CounterResource.COUNTER_LIST_BUTTON_TEXT_MARGIN),
@@ -1235,14 +1246,16 @@ export struct CounterComponent {
           .borderRadius(CounterResource.COUNTER_COMPACT_BUTTON_RADIUS)
           .borderWidth(this.subBtnFocusWidh)
           .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
-          .margin({ start: LengthMetrics.vp(1) })
+          .margin({
+            start: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_COMPACT_BUTTON_CONTAINER_MARGIN))
+          })
           .clip(true)
 
           if (this.hasTextWidth) {
             Text(this.value.toString())
               .textAlign(TextAlign.Center)
               .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
-              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
+              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE)
               .fontColor(CounterResource.COUNTER_TEXT_COLOR)
               .width(this.textWidth.toString())
               .margin({
@@ -1254,7 +1267,7 @@ export struct CounterComponent {
               .direction(this.counterDirection)
               .textAlign(TextAlign.Center)
               .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
-              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
+              .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE)
               .fontColor(CounterResource.COUNTER_TEXT_COLOR)
               .margin({
                 start: LengthMetrics.vp(CounterResource.COUNTER_COMPACT_BUTTON_TEXT_MARGIN),
@@ -1343,7 +1356,9 @@ export struct CounterComponent {
           .borderRadius(CounterResource.COUNTER_COMPACT_BUTTON_RADIUS)
           .borderWidth(this.addBtnFocusWidh)
           .borderColor(CounterResource.BUTTON_BORDER_FOCUSED_COLOR)
-          .margin({ end: LengthMetrics.vp(1) })
+          .margin({
+            end: LengthMetrics.vp(this.resourceToVp(CounterResource.COUNTER_COMPACT_BUTTON_CONTAINER_MARGIN))
+          })
           .clip(true)
         }
         .direction(this.counterDirection)
@@ -1358,7 +1373,7 @@ export struct CounterComponent {
           .direction(this.counterDirection)
           .margin({ top: CounterResource.COUNTER_COMPACT_CONTAINER_LABEL_DISTANCE })
           .fontSize(CounterResource.COUNTER_COMPACT_LABEL_SIZE)
-          .maxFontScale(CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE);
+          .maxFontScale(CounterResource.COUNTER_LABEL_MAX_FONT_SIZE_SCALE)
           .fontColor(CounterResource.COUNTER_TEXT_COLOR)
           .align(Alignment.Top)
       }
@@ -1926,7 +1941,7 @@ export struct CounterComponent {
             .direction(this.counterDirection)
             .textAlign(TextAlign.Center)
             .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
-            .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
+            .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE)
             .fontColor(CounterResource.COUNTER_TEXT_COLOR)
             .width('8vp')
           TextInput({
@@ -2063,7 +2078,7 @@ export struct CounterComponent {
             .direction(this.counterDirection)
             .textAlign(TextAlign.Center)
             .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
-            .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE);
+            .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE)
             .fontColor(CounterResource.COUNTER_TEXT_COLOR)
             .width('8vp')
           TextInput({

@@ -48,19 +48,25 @@ void SetTabContentLabel(ArkUINodeHandle node, ArkUI_CharPtr label)
 namespace NodeModifier {
 const ArkUITabContentModifier* GetTabContentModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITabContentModifier modifier = {
-        SetTabContentBuilder,
-        SetTabContentLabel
+        .setTabContentBuilder = SetTabContentBuilder,
+        .setTabContentLabel = SetTabContentLabel,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     return &modifier;
 }
 
 const CJUITabContentModifier* GetCJUITabContentModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITabContentModifier modifier = {
-        SetTabContentBuilder,
-        SetTabContentLabel
+        .setTabContentBuilder = SetTabContentBuilder,
+        .setTabContentLabel = SetTabContentLabel,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     return &modifier;
 }
 }

@@ -264,8 +264,17 @@ public:
         int64_t hostElementId,
         const std::vector<std::string>& params,
         std::vector<std::string>& info) override;
+    void ProcessParameters(
+        ActionType op, const std::vector<std::string>& params, std::map<std::string, std::string>& paramsMap);
+    bool CheckDumpHandleEventParams(const std::vector<std::string> &params);
+    bool CheckGetActionIdAndOp(
+        const std::vector<std::string>& params,
+        int64_t& actionAccessibilityId,
+        ActionType& actionOp);
 
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) override;
+    AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
+        const RefPtr<PipelineBase>& context) override;
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
@@ -454,8 +463,6 @@ private:
     RefPtr<NG::PipelineContext> FindPipelineByElementId(const int64_t elementId, RefPtr<NG::FrameNode>& node);
     RefPtr<NG::FrameNode> FindNodeFromPipeline(const WeakPtr<PipelineBase>& context, const int64_t elementId);
     RefPtr<PipelineBase> GetPipelineByWindowId(const int32_t windowId);
-    void ProcessParameters(Accessibility::ActionType op, const std::vector<std::string>& params,
-        std::map<std::string, std::string>& paramsMap);
 
     RefPtr<NG::PipelineContext> GetPipelineByWindowId(uint32_t windowId);
     void DumpTreeNG(bool useWindowId, uint32_t windowId, int64_t rootId, bool isDumpSimplify = false);
@@ -470,7 +477,6 @@ private:
     void DumpTreeAccessibilityNodeNG(const RefPtr<NG::UINode>& uiNodeParent,
         int32_t depth, int64_t nodeID, const CommonProperty& commonProperty);
     bool CheckDumpInfoParams(const std::vector<std::string> &params);
-    bool CheckDumpHandleEventParams(const std::vector<std::string> &params);
     void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
         const RefPtr<PipelineBase>& mainContext, const RefPtr<NG::FrameNode>& node = nullptr);
 

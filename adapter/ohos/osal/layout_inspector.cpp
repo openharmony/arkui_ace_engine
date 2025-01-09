@@ -128,6 +128,11 @@ constexpr static char RECNODE_NODEID[] = "nodeID";
 constexpr static char RECNODE_NAME[] = "value";
 constexpr static char RECNODE_DEBUGLINE[] = "debugLine";
 constexpr static char RECNODE_CHILDREN[] = "RSNode";
+constexpr static char KEY_METHOD[] = "method";
+constexpr static char KEY_PARAMS[] = "params";
+constexpr static char ARK_DEBUGGER_LIB_PATH[] = "libark_connect_inspector.z.so";
+constexpr static uint32_t INVALID_WINDOW_ID = 0;
+using SetArkUICallback = void (*)(const std::function<void(const char*)>& arkuiCallback);
 
 bool LayoutInspector::stateProfilerStatus_ = false;
 bool LayoutInspector::layoutInspectorStatus_ = false;
@@ -234,6 +239,7 @@ void LayoutInspector::SetCallback(int32_t instanceId)
         OHOS::AbilityRuntime::ConnectServerManager::Get().RegistConnectServerCallback(
             LayoutInspector::ConnectServerCallback);
         isUseStageModel_ = true;
+        RegisterConnectCallback();
     } else {
         OHOS::Ace::ConnectServerManager::Get().SetLayoutInspectorCallback(
             [](int32_t containerId) { return CreateLayoutInfo(containerId); },
@@ -245,15 +251,14 @@ void LayoutInspector::SetCallback(int32_t instanceId)
         [](bool status) { return SetStateProfilerStatus(status); });
 }
 
-void LayoutInspector::CreateLayoutInfo(int32_t containerId)
+void LayoutInspector::CreateContainerLayoutInfo(RefPtr<Container>& container)
 {
-    auto container = Container::GetFoucsed();
     CHECK_NULL_VOID(container);
     if (container->IsDynamicRender()) {
         container = Container::CurrentSafely();
         CHECK_NULL_VOID(container);
     }
-    containerId = container->GetInstanceId();
+    int32_t containerId = container->GetInstanceId();
     ContainerScope socpe(containerId);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -274,6 +279,18 @@ void LayoutInspector::CreateLayoutInfo(int32_t containerId)
     };
     context->GetTaskExecutor()->PostTask(
         std::move(getInspectorTask), TaskExecutor::TaskType::UI, "ArkUIGetInspectorTreeJson");
+}
+
+void LayoutInspector::CreateLayoutInfo(int32_t containerId)
+{
+    auto container = Container::GetFoucsed();
+    return CreateContainerLayoutInfo(container);
+}
+
+void LayoutInspector::CreateLayoutInfoByWinId(uint32_t windId)
+{
+    auto container = Container::GetByWindowId(windId);
+    return CreateContainerLayoutInfo(container);
 }
 
 void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId)
@@ -334,6 +351,47 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     SkString info(encodeLength);
     SkBase64::Encode(data->data(), data->size(), info.writable_str());
     message->Put("pixelMapBase64", info.c_str());
+}
+
+void LayoutInspector::RegisterConnectCallback()
+{
+    auto handlerConnectServerSo = dlopen(ARK_DEBUGGER_LIB_PATH, RTLD_NOLOAD | RTLD_NOW);
+    if (handlerConnectServerSo == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "null handlerConnectServerSo: %{public}s", dlerror());
+        return;
+    }
+
+    auto setArkUICallback = reinterpret_cast<SetArkUICallback>(dlsym(handlerConnectServerSo, "SetArkUICallback"));
+    if (setArkUICallback == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "null setArkUICallback: %{public}s", dlerror());
+        return;
+    }
+
+    setArkUICallback([](const char* message) { ProcessMessages(message); });
+    dlclose(handlerConnectServerSo);
+    handlerConnectServerSo = nullptr;
+}
+
+void LayoutInspector::ProcessMessages(const std::string& message)
+{
+    auto json = JsonUtil::ParseJsonString(message);
+    if (json == nullptr || !json->IsValid() || !json->IsObject() || !json->Contains(KEY_METHOD) ||
+        !json->Contains(KEY_PARAMS)) {
+        return;
+    }
+    auto methodVal = json->GetString(KEY_METHOD);
+    auto paramObj = json->GetObject(KEY_PARAMS);
+    if (paramObj == nullptr || !paramObj->IsValid() || !paramObj->IsObject()) {
+        return;
+    }
+    if (methodVal == "ArkUI.tree") {
+        auto windId = StringUtils::StringToUint(paramObj->GetString("windowId"));
+        if (windId == INVALID_WINDOW_ID) {
+            TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message: %{public}s", message.c_str());
+            return;
+        }
+        CreateLayoutInfoByWinId(windId);
+    }
 }
 
 void LayoutInspector::HandleStopRecord()

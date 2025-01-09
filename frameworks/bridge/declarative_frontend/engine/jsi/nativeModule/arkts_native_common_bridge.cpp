@@ -5209,6 +5209,27 @@ ArkUINativeModuleValue CommonBridge::ResetForegroundBrightness(ArkUIRuntimeCallI
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUIDragInteractionOptions SetInteractionOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    struct ArkUIDragInteractionOptions interactionOptions = { false, false, true, false };
+    CHECK_NULL_RETURN(vm, interactionOptions);
+    Local<JSValueRef> isMultiSelectionEnabled = runtimeCallInfo->GetCallArgRef(NUM_3);
+    Local<JSValueRef> defaultAnimationBeforeLifting = runtimeCallInfo->GetCallArgRef(NUM_4);
+    Local<JSValueRef> enableEdgeAutoScroll = runtimeCallInfo->GetCallArgRef(NUM_5);
+    if (isMultiSelectionEnabled->IsBoolean()) {
+        interactionOptions.isMultiSelectionEnabled = isMultiSelectionEnabled->ToBoolean(vm)->Value();
+    }
+    if (defaultAnimationBeforeLifting->IsBoolean()) {
+        interactionOptions.defaultAnimationBeforeLifting = defaultAnimationBeforeLifting->ToBoolean(vm)->Value();
+    }
+    if (enableEdgeAutoScroll->IsBoolean()) {
+        interactionOptions.enableEdgeAutoScroll = enableEdgeAutoScroll->ToBoolean(vm)->Value();
+    }
+    CommonBridge::SetEnableHapticFeedback(interactionOptions, runtimeCallInfo);
+    return interactionOptions;
+}
+
 ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -5217,8 +5238,6 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
     auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> mode = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> numberBadge = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> isMultiSelectionEnabled = runtimeCallInfo->GetCallArgRef(NUM_3);
-    Local<JSValueRef> defaultAnimationBeforeLifting = runtimeCallInfo->GetCallArgRef(NUM_4);
  
     struct ArkUIDragPreViewOptions preViewOptions = { 1, 0, 0, nullptr, false, true, false};
     int32_t* modeIntArray = nullptr;
@@ -5249,17 +5268,22 @@ ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo*
         preViewOptions.badgeNumber = numberBadge->Int32Value(vm);
     }
 
-    struct ArkUIDragInteractionOptions interactionOptions = { false, false };
-    if (isMultiSelectionEnabled->IsBoolean()) {
-        interactionOptions.isMultiSelectionEnabled = isMultiSelectionEnabled->ToBoolean(vm)->Value();
-    }
-    if (defaultAnimationBeforeLifting->IsBoolean()) {
-        interactionOptions.defaultAnimationBeforeLifting = defaultAnimationBeforeLifting->ToBoolean(vm)->Value();
-    }
+    struct ArkUIDragInteractionOptions interactionOptions = SetInteractionOptions(runtimeCallInfo);
     GetArkUINodeModifiers()->getCommonModifier()->setDragPreviewOptions(
         nativeNode, preViewOptions, interactionOptions);
     delete[] modeIntArray;
     return panda::JSValueRef::Undefined(vm);
+}
+
+void CommonBridge::SetEnableHapticFeedback(ArkUIDragInteractionOptions &interactionOptions,
+    ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_VOID(vm);
+    Local<JSValueRef> enableHapticFeedback = runtimeCallInfo->GetCallArgRef(NUM_6);
+    if (enableHapticFeedback->IsBoolean()) {
+        interactionOptions.enableHapticFeedback = enableHapticFeedback->ToBoolean(vm)->Value();
+    }
 }
 
 ArkUINativeModuleValue CommonBridge::ResetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -6505,23 +6529,26 @@ void CommonBridge::SetOnGestureEvent(
     auto containerId = Container::CurrentId();
     panda::Local<panda::FunctionRef> func = obj;
     auto* frameNode = GetFrameNode(runtimeCallInfo);
-    auto flag = FrameNodeBridge::IsCustomFrameNode(frameNode);
+    bool isWeak = frameNode == nullptr ? false : FrameNodeBridge::IsCustomFrameNode(frameNode);
 
     if (action == Ace::GestureEventAction::CANCEL) {
-        auto onActionCancelFunc = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag), containerId]() {
+        auto onActionCancelFunc = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), isWeak),
+            containerId](GestureEvent& info) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             ContainerScope scope(containerId);
             auto function = func.Lock();
             if (!function.IsEmpty() && function->IsFunction(vm)) {
-                function->Call(vm, function.ToLocal(), nullptr, 0);
+                auto obj = CreateCommonGestureEventInfo(vm, info);
+                panda::Local<panda::JSValueRef> params[1] = { obj };
+                function->Call(vm, function.ToLocal(), params, 1);
             }
         };
         auto gesturePtr = Referenced::Claim(reinterpret_cast<Gesture*>(gesture));
         gesturePtr->SetOnActionCancelId(onActionCancelFunc);
         return;
     }
-    auto event = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), flag), containerId](GestureEvent& info) {
+    auto event = [vm, func = JSFuncObjRef(panda::CopyableGlobal(vm, func), isWeak), containerId](GestureEvent& info) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(containerId);
@@ -7718,14 +7745,14 @@ ArkUINativeModuleValue CommonBridge::AddGestureGroup(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     int32_t mode = 2;
-    // when version >= 14, default mode is 0
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    // when version >= 16, default mode is 0
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         mode = 0;
     }
-    GetGestureModeValue(runtimeCallInfo, mode, NUM_2);
+    GetGestureModeValue(runtimeCallInfo, mode, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createGestureGroup(mode);
-    SetGestureTag(runtimeCallInfo, NUM_0, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_1, gesture);
+    SetGestureTag(runtimeCallInfo, NUM_1, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_2, gesture);
     return panda::NativePointerRef::New(vm, gesture);
 }
 
@@ -7736,13 +7763,13 @@ ArkUINativeModuleValue CommonBridge::AddTapGestureToGroup(ArkUIRuntimeCallInfo* 
     int32_t fingers = DEFAULT_TAP_FINGER;
     int32_t count = DEFAULT_TAP_COUNT;
     double distanceThreshold = DEFAULT_TAP_DISTANCE;
-    GetTapGestureValue(runtimeCallInfo, fingers, count, distanceThreshold, NUM_2);
+    GetTapGestureValue(runtimeCallInfo, fingers, count, distanceThreshold, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->
         createTapGestureWithDistanceThreshold(count, fingers, distanceThreshold, nullptr);
-    SetGestureTag(runtimeCallInfo, NUM_0, gesture);
-    SetGestureAllowedTypes(runtimeCallInfo, NUM_1, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_4, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_5);
+    SetGestureTag(runtimeCallInfo, NUM_1, gesture);
+    SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_5, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_6);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -7754,15 +7781,15 @@ ArkUINativeModuleValue CommonBridge::AddLongPressGestureToGroup(ArkUIRuntimeCall
     int32_t fingers = DEFAULT_LONG_PRESS_FINGER;
     bool repeat = false;
     int32_t duration = DEFAULT_LONG_PRESS_DURATION;
-    GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, NUM_2);
+    GetLongPressGestureValue(runtimeCallInfo, fingers, repeat, duration, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createLongPressGesture(
         fingers, repeat, duration, nullptr);
-    SetGestureTag(runtimeCallInfo, NUM_0, gesture);
-    SetGestureAllowedTypes(runtimeCallInfo, NUM_1, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_5, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_6, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_7, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_8);
+    SetGestureTag(runtimeCallInfo, NUM_1, gesture);
+    SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_6, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_7, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_8, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_9);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -7774,16 +7801,16 @@ ArkUINativeModuleValue CommonBridge::AddPanGestureToGroup(ArkUIRuntimeCallInfo* 
     int32_t fingers = DEFAULT_PAN_FINGER;
     int32_t direction = PanDirection::ALL;
     double distance = DEFAULT_PAN_DISTANCE.ConvertToPx();
-    GetPanGestureValue(runtimeCallInfo, fingers, direction, distance, NUM_2);
+    GetPanGestureValue(runtimeCallInfo, fingers, direction, distance, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPanGesture(
         fingers, direction, distance, nullptr);
-    SetGestureTag(runtimeCallInfo, NUM_0, gesture);
-    SetGestureAllowedTypes(runtimeCallInfo, NUM_1, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_5, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_6, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_7, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_8, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_9);
+    SetGestureTag(runtimeCallInfo, NUM_1, gesture);
+    SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_6, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_7, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_8, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_9, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_10);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -7795,13 +7822,13 @@ ArkUINativeModuleValue CommonBridge::AddSwipeGestureToGroup(ArkUIRuntimeCallInfo
     int32_t fingers = DEFAULT_SLIDE_FINGER;
     int32_t direction = SwipeDirection::ALL;
     double speed = DEFAULT_SLIDE_SPEED;
-    GetSwipeGestureValue(runtimeCallInfo, fingers, direction, speed, NUM_2);
+    GetSwipeGestureValue(runtimeCallInfo, fingers, direction, speed, NUM_3);
     auto* gesture =
         GetArkUINodeModifiers()->getGestureModifier()->createSwipeGestureByModifier(fingers, direction, speed);
-    SetGestureTag(runtimeCallInfo, NUM_0, gesture);
-    SetGestureAllowedTypes(runtimeCallInfo, NUM_1, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_5, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_6);
+    SetGestureTag(runtimeCallInfo, NUM_1, gesture);
+    SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::ACTION, NUM_6, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_7);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -7812,15 +7839,15 @@ ArkUINativeModuleValue CommonBridge::AddPinchGestureToGroup(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     int32_t fingers = DEFAULT_PINCH_FINGER;
     double distance = DEFAULT_PINCH_DISTANCE;
-    GetPinchGestureValue(runtimeCallInfo, fingers, distance, NUM_2);
+    GetPinchGestureValue(runtimeCallInfo, fingers, distance, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createPinchGesture(fingers, distance, nullptr);
-    SetGestureTag(runtimeCallInfo, NUM_0, gesture);
-    SetGestureAllowedTypes(runtimeCallInfo, NUM_1, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_4, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_5, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_6, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_7, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_8);
+    SetGestureTag(runtimeCallInfo, NUM_1, gesture);
+    SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_5, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_6, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_7, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_8, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_9);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -7831,15 +7858,15 @@ ArkUINativeModuleValue CommonBridge::AddRotationGestureToGroup(ArkUIRuntimeCallI
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     int32_t fingers = DEFAULT_ROTATION_FINGER;
     double angle = DEFAULT_ROTATION_ANGLE;
-    GetRotationGestureValue(runtimeCallInfo, fingers, angle, NUM_2);
+    GetRotationGestureValue(runtimeCallInfo, fingers, angle, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createRotationGesture(fingers, angle, nullptr);
-    SetGestureTag(runtimeCallInfo, NUM_0, gesture);
-    SetGestureAllowedTypes(runtimeCallInfo, NUM_1, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_4, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_5, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_6, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_7, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_8);
+    SetGestureTag(runtimeCallInfo, NUM_1, gesture);
+    SetGestureAllowedTypes(runtimeCallInfo, NUM_2, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::START, NUM_5, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::UPDATE, NUM_6, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::END, NUM_7, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_8, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_9);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -7849,11 +7876,11 @@ ArkUINativeModuleValue CommonBridge::AddGestureGroupToGroup(ArkUIRuntimeCallInfo
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     int32_t mode = 2;
-    GetGestureModeValue(runtimeCallInfo, mode, NUM_2);
+    GetGestureModeValue(runtimeCallInfo, mode, NUM_3);
     auto* gesture = GetArkUINodeModifiers()->getGestureModifier()->createGestureGroup(mode);
-    SetGestureTag(runtimeCallInfo, NUM_0, gesture);
-    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_1, gesture);
-    auto* group = GetGestureGroup(runtimeCallInfo, NUM_3);
+    SetGestureTag(runtimeCallInfo, NUM_1, gesture);
+    SetOnGestureEvent(runtimeCallInfo, GestureEventAction::CANCEL, NUM_2, gesture);
+    auto* group = GetGestureGroup(runtimeCallInfo, NUM_4);
     GetArkUINodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(group, gesture);
     return panda::NativePointerRef::New(vm, gesture);
 }

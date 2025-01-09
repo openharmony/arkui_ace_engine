@@ -16,6 +16,7 @@
 #include "core/components/theme/theme_constants.h"
 
 #include "base/resource/ace_res_config.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -65,17 +66,14 @@ void ThemeConstants::InitDeviceType()
 
 const ResValueWrapper* ThemeConstants::GetPlatformConstants(uint32_t key)
 {
-#ifdef WEARABLE_PRODUCT
     if (g_deviceType == DeviceType::WATCH && key < ThemeConstants::WatchMapCount &&
         ThemeConstants::styleMapWatch[key] != nullptr) {
         return ThemeConstants::styleMapWatch[key];
     }
-#else
     if (g_deviceType == DeviceType::TV && key < ThemeConstants::TvMapCount &&
         ThemeConstants::styleMapTv[key] != nullptr) {
         return ThemeConstants::styleMapTv[key];
     }
-#endif
     if (key < ThemeConstants::DefaultMapCount) {
         return ThemeConstants::styleMapDefault[key];
     }
@@ -559,6 +557,36 @@ void ThemeConstants::SetColorScheme(ColorScheme colorScheme)
         currentThemeStyle_->SetAttr(
             THEME_ATTR_BG_COLOR, { .type = ThemeConstantsType::COLOR, .value = TRANSPARENT_BG_COLOR });
     }
+}
+
+RefPtr<ThemeStyle> ThemeConstants::GetPatternByName(const std::string& patternName)
+{
+    // if LocalColorMode is different from SystemColorMode, GetPattern from SysResMgr directly by LocolColorMode
+    if (auto pipelineContext = NG::PipelineContext::GetCurrentContext(); pipelineContext) {
+        ColorMode systemMode = SystemProperties::GetColorMode();
+        ColorMode localMode = pipelineContext->GetLocalColorMode();
+        if (localMode != ColorMode::COLOR_MODE_UNDEFINED && localMode != systemMode) {
+            // currentThemeStyle_ contains patterns for different color scheme, so need to get pattern from resAdapter_
+            auto patternStyle = resAdapter_ ? resAdapter_->GetPatternByName(patternName) : nullptr;
+            if (patternStyle != nullptr) {
+                return patternStyle;
+            }
+        }
+    }
+
+    if (!currentThemeStyle_) {
+        TAG_LOGE(AceLogTag::ACE_THEME, "Get theme by name error: currentThemeStyle_ is null");
+        return nullptr;
+    }
+    currentThemeStyle_->CheckThemeStyleLoaded(patternName);
+    auto patternStyle = currentThemeStyle_->GetAttr<RefPtr<ThemeStyle>>(patternName, nullptr);
+    if (!patternStyle && resAdapter_) {
+        patternStyle = resAdapter_->GetPatternByName(patternName);
+        ResValueWrapper value = { .type = ThemeConstantsType::PATTERN,
+            .value = patternStyle };
+        currentThemeStyle_->SetAttr(patternName, value);
+    }
+    return patternStyle;
 }
 
 } // namespace OHOS::Ace

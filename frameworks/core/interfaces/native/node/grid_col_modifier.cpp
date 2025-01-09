@@ -105,17 +105,31 @@ void ResetOrder(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIGridColModifier* GetGridColModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIGridColModifier modifier = {
-        SetSpan, ResetSpan, SetGridColOffset, ResetGridColOffset, SetOrder, ResetOrder,
+        .setSpan = SetSpan,
+        .resetSpan = ResetSpan,
+        .setGridColOffset = SetGridColOffset,
+        .resetGridColOffset = ResetGridColOffset,
+        .setOrder = SetOrder,
+        .resetOrder = ResetOrder,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIGridColModifier* GetCJUIGridColModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIGridColModifier modifier = {
-        SetSpan, ResetSpan, SetGridColOffset, ResetGridColOffset, SetOrder, ResetOrder,
+        .setSpan = SetSpan,
+        .resetSpan = ResetSpan,
+        .setGridColOffset = SetGridColOffset,
+        .resetGridColOffset = ResetGridColOffset,
+        .setOrder = SetOrder,
+        .resetOrder = ResetOrder,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

@@ -31,9 +31,17 @@ RefPtr<FocusManager> GetCurrentFocusManager()
 
 FocusManager::FocusManager(const RefPtr<PipelineContext>& pipeline): pipeline_(pipeline)
 {
-    if (pipeline && pipeline->GetRootElement()) {
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetRootElement()) {
         currentFocus_ = pipeline->GetRootElement()->GetFocusHub();
     }
+    // After switching between portrait and landscape mode
+    // reset the isNeedTriggerScroll parameter to enable screen focus scrolling.
+    pipeline->RegisterSurfaceChangedCallback([weak = WeakClaim(this)](int32_t width, int32_t height, int32_t oldWidth,
+                                                 int32_t oldHeight, WindowSizeChangeReason type) {
+        auto context = weak.Upgrade();
+        context->SetNeedTriggerScroll(true);
+    });
 }
 
 void FocusManager::FocusViewShow(const RefPtr<FocusView>& focusView, bool isTriggerByStep)
@@ -338,6 +346,21 @@ int32_t FocusManager::AddFocusListener(FocusChangeCallback&& callback)
 void FocusManager::RemoveFocusListener(int32_t handler)
 {
     listeners_.erase(handler);
+}
+
+int32_t FocusManager::AddFocusActiveChangeListener(const FocusActiveChangeCallback& callback)
+{
+    return focusActiveChangeCallback_.AddListener(callback);
+}
+
+void FocusManager::RemoveFocusActiveChangeListener(int32_t handler)
+{
+    focusActiveChangeCallback_.RemoveListener(handler);
+}
+
+void FocusManager::TriggerFocusActiveChangeCallback(bool isFocusActive)
+{
+    focusActiveChangeCallback_.NotifyListener(isFocusActive);
 }
 
 RefPtr<FocusManager> FocusManager::GetFocusManager(RefPtr<FrameNode>& node)

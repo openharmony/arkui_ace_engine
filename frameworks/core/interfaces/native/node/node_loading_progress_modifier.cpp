@@ -85,20 +85,36 @@ void ResetLoadingProgressForegroundColor(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUILoadingProgressModifier* GetLoadingProgressModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUILoadingProgressModifier modifier = {
-        GetLoadingProgressColor, SetLoadingProgressColor, ResetLoadingProgressColor,
-        GetEnableLoading, SetEnableLoading, ResetEnableLoading,
-        SetLoadingProgressForegroundColor, ResetLoadingProgressForegroundColor };
+        .getColor = GetLoadingProgressColor,
+        .setColor = SetLoadingProgressColor,
+        .resetColor = ResetLoadingProgressColor,
+        .getEnableLoading = GetEnableLoading,
+        .setEnableLoading = SetEnableLoading,
+        .resetEnableLoading = ResetEnableLoading,
+        .setForegroundColor = SetLoadingProgressForegroundColor,
+        .resetForegroundColor = ResetLoadingProgressForegroundColor,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUILoadingProgressModifier* GetCJUILoadingProgressModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUILoadingProgressModifier modifier = {
-        GetLoadingProgressColor, SetLoadingProgressColor, ResetLoadingProgressColor,
-        GetEnableLoading, SetEnableLoading, ResetEnableLoading,
-        SetLoadingProgressForegroundColor, ResetLoadingProgressForegroundColor };
+        .getColor = GetLoadingProgressColor,
+        .setColor = SetLoadingProgressColor,
+        .resetColor = ResetLoadingProgressColor,
+        .getEnableLoading = GetEnableLoading,
+        .setEnableLoading = SetEnableLoading,
+        .resetEnableLoading = ResetEnableLoading,
+        .setForegroundColor = SetLoadingProgressForegroundColor,
+        .resetForegroundColor = ResetLoadingProgressForegroundColor,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

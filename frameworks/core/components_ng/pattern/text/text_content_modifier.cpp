@@ -33,12 +33,12 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float RACE_DURATION_RATIO = 85.0f;
+constexpr float RACE_MIN_GRADIENTPERCENT = 0.5f;
+constexpr float DEFAULT_FADEOUT_GRADIENTPERCENT = 0.033f;
 constexpr float RACE_MOVE_PERCENT_MIN = 0.0f;
 constexpr float RACE_MOVE_PERCENT_MAX = 100.0f;
-constexpr int32_t RACE_DURATION = 2000;
 constexpr float RACE_SPACE_WIDTH = 48.0f;
-constexpr Dimension DEFAULT_MARQUEE_SCROLL_AMOUNT = 6.0_vp;
-constexpr double DEFAULT_MARQUEE_SCROLL_DELAY = 85.0; // Delay time between each jump.
 constexpr float ROUND_VALUE = 0.5f;
 constexpr uint32_t POINT_COUNT = 4;
 constexpr float OBSCURED_ALPHA = 0.2f;
@@ -100,7 +100,6 @@ TextContentModifier::TextContentModifier(const std::optional<TextStyle>& textSty
 
     racePercentFloat_ = MakeRefPtr<AnimatablePropertyFloat>(0.0f);
     AttachProperty(racePercentFloat_);
-    ResetTextRacePercent();
 
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip_ = MakeRefPtr<PropertyBool>(true);
@@ -205,7 +204,7 @@ void TextContentModifier::AddShadow(const Shadow& shadow)
     textShadow.SetBlurRadius(shadow.GetBlurRadius());
     textShadow.SetOffset(shadow.GetOffset());
     textShadow.SetColor(shadow.GetColor());
-    shadows_.emplace_back(ShadowProp {
+    shadows_.emplace_back(ShadowProp { .shadow = textShadow,
         .blurRadius = shadowBlurRadiusFloat,
         .offsetX = shadowOffsetXFloat,
         .offsetY = shadowOffsetYFloat,
@@ -388,6 +387,16 @@ void TextContentModifier::PaintCustomSpan(DrawingContext& drawingContext)
 
 void TextContentModifier::onDraw(DrawingContext& drawingContext)
 {
+    auto info = GetFadeoutInfo(drawingContext);
+    if (!info.IsFadeout()) {
+        DrawContent(drawingContext, info);
+    } else {
+        DrawFadeout(drawingContext, info);
+    }
+}
+
+void TextContentModifier::DrawContent(DrawingContext& drawingContext, const FadeoutInfo& fadeoutInfo)
+{
     auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textPattern);
     auto pManager = textPattern->GetParagraphManager();
@@ -422,20 +431,12 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
                 contentSize.Width() + contentOffset.GetX(), contentSize.Height() + contentOffset.GetY());
             canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
         }
-        if (!CheckMarqueeState(MarqueeState::RUNNING)) {
-            auto paintOffsetY = paintOffset_.GetY();
+        if (!marqueeSet_) {
             textPattern->DumpRecord(std::to_string(host->GetId()) + " ,paintOffset:" + paintOffset_.ToString().c_str());
-            auto paragraphs = pManager->GetParagraphs();
-            for (auto&& info : paragraphs) {
-                auto paragraph = info.paragraph;
-                CHECK_NULL_VOID(paragraph);
-                ChangeParagraphColor(paragraph);
-                paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
-                paintOffsetY += paragraph->GetHeight();
-            }
+            DrawText(canvas, pManager);
         } else {
             // Racing
-            DrawTextRacing(drawingContext);
+            DrawTextRacing(drawingContext, fadeoutInfo, pManager);
         }
         canvas.Restore();
     } else {
@@ -444,27 +445,34 @@ void TextContentModifier::onDraw(DrawingContext& drawingContext)
     PaintCustomSpan(drawingContext);
 }
 
-void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext)
+void TextContentModifier::DrawText(RSCanvas& canvas, RefPtr<ParagraphManager> pManager)
 {
-    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(pattern);
-    auto pManager = pattern->GetParagraphManager();
+    auto paintOffsetY = paintOffset_.GetY();
+    auto paragraphs = pManager->GetParagraphs();
+    for (auto&& info : paragraphs) {
+        auto paragraph = info.paragraph;
+        CHECK_NULL_VOID(paragraph);
+        ChangeParagraphColor(paragraph);
+        paragraph->Paint(canvas, paintOffset_.GetX(), paintOffsetY);
+        paintOffsetY += paragraph->GetHeight();
+    }
+}
+
+void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext, const FadeoutInfo& info,
+    RefPtr<ParagraphManager> pManager)
+{
     CHECK_NULL_VOID(pManager);
     auto paragraph = pManager->GetParagraphs().front().paragraph;
     CHECK_NULL_VOID(paragraph);
     ChangeParagraphColor(paragraph);
-    float textRacePercent = GetTextRaceDirection() == TextDirection::LTR ?
-        GetTextRacePercent() : RACE_MOVE_PERCENT_MAX - GetTextRacePercent();
-    float paragraph1Offset =
-        (paragraph->GetTextWidth() + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
-    if ((paintOffset_.GetX() + paragraph1Offset + paragraph->GetTextWidth()) > 0) {
-        paragraph->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph1Offset, paintOffset_.GetY());
-        PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph1Offset, paintOffset_.GetY());
+    RSCanvas& canvas = drawingContext.canvas;
+    if (info.paragraph1EndPosition > 0) {
+        paragraph->Paint(canvas, info.paragraph1StartPosition, paintOffset_.GetY());
+        PaintImage(canvas, info.paragraph1StartPosition, paintOffset_.GetY());
     }
-    float paragraph2Offset = paragraph1Offset + paragraph->GetTextWidth() + textRaceSpaceWidth_;
-    if ((paintOffset_.GetX() + paragraph2Offset) < drawingContext.width) {
-        paragraph->Paint(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
-        PaintImage(drawingContext.canvas, paintOffset_.GetX() + paragraph2Offset, paintOffset_.GetY());
+    if (info.paragraph2StartPosition < drawingContext.width) {
+        paragraph->Paint(canvas, info.paragraph2StartPosition, paintOffset_.GetY());
+        PaintImage(canvas, info.paragraph2StartPosition, paintOffset_.GetY());
     }
 }
 
@@ -640,9 +648,15 @@ void TextContentModifier::ModifyTextStyle(TextStyle& textStyle)
     ModifyLineHeightInTextStyle(textStyle);
 }
 
+bool TextContentModifier::CheckNeedMeasure(float finalValue, float lastValue, float currentValue)
+{
+    return !NearEqual(finalValue, currentValue) || !NearEqual(lastValue, currentValue);
+}
+
 void TextContentModifier::UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag)
 {
-    if (fontSize_.has_value() && fontSizeFloat_ && !NearEqual(lastFontSize_, fontSizeFloat_->Get())) {
+    if (fontSize_.has_value() && fontSizeFloat_ &&
+        CheckNeedMeasure(fontSize_.value().Value(), lastFontSize_, fontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastFontSize_ = fontSizeFloat_->Get();
     }
@@ -651,7 +665,7 @@ void TextContentModifier::UpdateFontSizeMeasureFlag(PropertyChangeFlag& flag)
 void TextContentModifier::UpdateAdaptMinFontSizeMeasureFlag(PropertyChangeFlag& flag)
 {
     if (adaptMinFontSize_.has_value() && adaptMinFontSizeFloat_ &&
-        !NearEqual(lastMinFontSize_, adaptMinFontSizeFloat_->Get())) {
+        CheckNeedMeasure(adaptMinFontSize_.value().Value(), lastMinFontSize_, adaptMinFontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastMinFontSize_ = adaptMinFontSizeFloat_->Get();
     }
@@ -660,7 +674,7 @@ void TextContentModifier::UpdateAdaptMinFontSizeMeasureFlag(PropertyChangeFlag& 
 void TextContentModifier::UpdateAdaptMaxFontSizeMeasureFlag(PropertyChangeFlag& flag)
 {
     if (adaptMaxFontSize_.has_value() && adaptMaxFontSizeFloat_ &&
-        !NearEqual(lastMaxFontSize_, adaptMaxFontSizeFloat_->Get())) {
+        CheckNeedMeasure(adaptMaxFontSize_.value().Value(), lastMaxFontSize_, adaptMaxFontSizeFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastMaxFontSize_ = adaptMaxFontSizeFloat_->Get();
     }
@@ -668,7 +682,9 @@ void TextContentModifier::UpdateAdaptMaxFontSizeMeasureFlag(PropertyChangeFlag& 
 
 void TextContentModifier::UpdateFontWeightMeasureFlag(PropertyChangeFlag& flag)
 {
-    if (fontWeight_.has_value() && fontWeightFloat_ && !NearEqual(lastFontWeight_, fontWeightFloat_->Get())) {
+    if (fontWeight_.has_value() && fontWeightFloat_ &&
+        CheckNeedMeasure(
+            static_cast<float>(static_cast<int>(fontWeight_.value())), lastFontWeight_, fontWeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastFontWeight_ = fontWeightFloat_->Get();
     }
@@ -677,7 +693,8 @@ void TextContentModifier::UpdateFontWeightMeasureFlag(PropertyChangeFlag& flag)
 void TextContentModifier::UpdateTextColorMeasureFlag(PropertyChangeFlag& flag)
 {
     if (textColor_.has_value() && animatableTextColor_ &&
-        lastTextColor_.GetValue() != animatableTextColor_->Get().GetValue()) {
+        (textColor_->GetValue() != animatableTextColor_->Get().GetValue() ||
+            lastTextColor_.GetValue() != animatableTextColor_->Get().GetValue())) {
         flag |= PROPERTY_UPDATE_MEASURE_SELF;
         lastTextColor_.SetValue(animatableTextColor_->Get().GetValue());
     }
@@ -691,7 +708,7 @@ void TextContentModifier::UpdateTextShadowMeasureFlag(PropertyChangeFlag& flag)
         auto offsetY = shadow.offsetY->Get();
         auto color = shadow.color->Get();
         auto compareShadow = Shadow(blurRadius, 0, Offset(offsetX, offsetY), Color(color.GetValue()));
-        if (shadow.lastShadow != compareShadow) {
+        if (shadow.shadow != compareShadow || shadow.lastShadow != compareShadow) {
             flag |= PROPERTY_UPDATE_MEASURE;
             shadow.lastShadow = compareShadow;
             return;
@@ -704,7 +721,8 @@ void TextContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFlag& fl
     if (textDecoration_.has_value() && textDecorationColor_.has_value() && textDecorationColorAlpha_) {
         uint8_t alpha = static_cast<uint8_t>(std::floor(textDecorationColorAlpha_->Get() + ROUND_VALUE));
         if (textDecoration_.value() == TextDecoration::UNDERLINE &&
-            !NearEqual(textDecorationColorAlpha_->Get(), lastTextDecorationColorAlpha_)) {
+            (alpha != textDecorationColor_.value().GetAlpha() ||
+                !NearEqual(textDecorationColorAlpha_->Get(), lastTextDecorationColorAlpha_))) {
             flag |= PROPERTY_UPDATE_MEASURE;
         } else if (textDecoration_.value() == TextDecoration::NONE &&
                    (alpha != 0.0 || !NearZero(lastTextDecorationColorAlpha_))) {
@@ -717,7 +735,7 @@ void TextContentModifier::UpdateTextDecorationMeasureFlag(PropertyChangeFlag& fl
 void TextContentModifier::UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& flag)
 {
     if (baselineOffset_.has_value() && baselineOffsetFloat_ &&
-        !NearEqual(lastBaselineOffsetFloat_, baselineOffsetFloat_->Get())) {
+        CheckNeedMeasure(baselineOffset_.value().Value(), lastBaselineOffsetFloat_, baselineOffsetFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastBaselineOffsetFloat_ = baselineOffsetFloat_->Get();
     }
@@ -726,7 +744,7 @@ void TextContentModifier::UpdateBaselineOffsetMeasureFlag(PropertyChangeFlag& fl
 void TextContentModifier::UpdateLineHeightMeasureFlag(PropertyChangeFlag& flag)
 {
     if (lineHeight_.has_value() && lineHeightFloat_ &&
-        !NearEqual(lastLineHeight_, lineHeightFloat_->Get())) {
+        CheckNeedMeasure(lineHeight_.value().Value(), lastLineHeight_, lineHeightFloat_->Get())) {
         flag |= PROPERTY_UPDATE_MEASURE;
         lastLineHeight_ = lineHeightFloat_->Get();
     }
@@ -838,6 +856,7 @@ void TextContentModifier::SetTextShadow(const std::vector<Shadow>& value)
         textShadow.SetBlurRadius(newShadow.GetBlurRadius());
         textShadow.SetOffset(newShadow.GetOffset());
         textShadow.SetColor(newShadow.GetColor());
+        shadows_[i].shadow = textShadow;
         shadows_[i].blurRadius->Set(newShadow.GetBlurRadius());
         shadows_[i].offsetX->Set(newShadow.GetOffset().GetX());
         shadows_[i].offsetY->Set(newShadow.GetOffset().GetY());
@@ -917,50 +936,33 @@ void TextContentModifier::SetContentSize(SizeF& value)
     contentSize_->Set(value);
 }
 
-void TextContentModifier::StartTextRace()
+void TextContentModifier::StartTextRace(const MarqueeOption& option)
 {
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateImageNodeVisible(VisibleType::INVISIBLE);
     }
-    if (!CheckMarqueeState(MarqueeState::IDLE) && !CheckMarqueeState(MarqueeState::STOPPED)) {
+    if (!SetTextRace(option)) {
         return;
     }
 
-    textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    if (pipeline) {
-        textRaceSpaceWidth_ *= pipeline->GetDipScale();
+    if (!CheckMarqueeState(MarqueeState::IDLE) && !CheckMarqueeState(MarqueeState::STOPPED)) {
+        PauseTextRace();
     }
 
-    AnimationOption option = AnimationOption();
-    RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
-    option.SetDuration(GetDuration());
-    option.SetDelay(0);
-    option.SetCurve(curve);
-    option.SetIteration(-1);
-    raceAnimation_ = AnimationUtils::StartAnimation(option, [weak = WeakClaim(this)]() {
-        auto modifier = weak.Upgrade();
-        CHECK_NULL_VOID(modifier);
-        float startPercent = modifier->GetTextRacePercent();
-        modifier->racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX + startPercent);
-    });
-    SetMarqueeState(MarqueeState::RUNNING);
+    marqueeSet_ = true;
+    ResumeTextRace(false);
 }
 
 void TextContentModifier::StopTextRace()
 {
+    marqueeSet_ = false;
     if (!CheckMarqueeState(MarqueeState::RUNNING) && !CheckMarqueeState(MarqueeState::PAUSED)) {
         return;
     }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         UpdateImageNodeVisible(VisibleType::VISIBLE);
     }
-    if (raceAnimation_) {
-        AnimationUtils::StopAnimation(raceAnimation_);
-    }
-
-    SetMarqueeState(MarqueeState::STOPPED);
-    ResetTextRacePercent();
+    PauseTextRace();
 }
 
 void TextContentModifier::ResumeAnimation()
@@ -1033,11 +1035,12 @@ TextDirection TextContentModifier::GetTextRaceDirectionByContent() const
         TextDirection::RTL : TextDirection::LTR;
 }
 
-void TextContentModifier::ResetTextRacePercent() const
+void TextContentModifier::ResetTextRacePercent()
 {
     if (GetTextRaceDirection() == TextDirection::LTR) {
         // LTR start 0%
         racePercentFloat_->Set(RACE_MOVE_PERCENT_MIN);
+        marqueeRaceMaxPercent_ = RACE_MOVE_PERCENT_MAX + RACE_MOVE_PERCENT_MIN;
         return;
     }
     // RTL
@@ -1052,9 +1055,16 @@ void TextContentModifier::ResetTextRacePercent() const
     CHECK_NULL_VOID(paragraph);
     auto textRectWidth = textPattern->GetTextRect().Width();
     float textWidth = paragraph->GetTextWidth();
-    racePercentFloat_->Set(
-        (textRaceSpaceWidth_ + textRectWidth) / (textWidth + textRaceSpaceWidth_) *
-        RACE_MOVE_PERCENT_MAX - RACE_MOVE_PERCENT_MAX);
+    float racePercentFloat = 0.0f;
+    if (marqueeOption_.direction == MarqueeDirection::LEFT) {
+        racePercentFloat = (textWidth - textRectWidth) / (textWidth + textRaceSpaceWidth_) * RACE_MOVE_PERCENT_MAX;
+    } else {
+        racePercentFloat =
+            (textRaceSpaceWidth_ + textRectWidth) / (textWidth + textRaceSpaceWidth_) * RACE_MOVE_PERCENT_MAX -
+            RACE_MOVE_PERCENT_MAX;
+    }
+    marqueeRaceMaxPercent_ = RACE_MOVE_PERCENT_MAX + racePercentFloat;
+    racePercentFloat_->Set(racePercentFloat);
 }
 
 void TextContentModifier::ContentChange()
@@ -1070,8 +1080,12 @@ void TextContentModifier::AddDefaultShadow()
     auto offsetX = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetX());
     auto offsetY = MakeRefPtr<AnimatablePropertyFloat>(emptyShadow.GetOffset().GetY());
     auto color = MakeRefPtr<AnimatablePropertyColor>(LinearColor(emptyShadow.GetColor()));
+    Shadow textShadow;
+    textShadow.SetBlurRadius(emptyShadow.GetBlurRadius());
+    textShadow.SetOffset(emptyShadow.GetOffset());
+    textShadow.SetColor(emptyShadow.GetColor());
     shadows_.emplace_back(ShadowProp {
-        .blurRadius = blurRadius, .offsetX = offsetX, .offsetY = offsetY, .color = color });
+        .shadow = textShadow, .blurRadius = blurRadius, .offsetX = offsetX, .offsetY = offsetY, .color = color });
     AttachProperty(blurRadius);
     AttachProperty(offsetX);
     AttachProperty(offsetY);
@@ -1090,23 +1104,6 @@ void TextContentModifier::SetMarqueeState(MarqueeState state)
         host->GetId(), prevState, state);
 }
 
-int32_t TextContentModifier::GetDuration() const
-{
-    auto pattern = DynamicCast<TextPattern>(pattern_.Upgrade());
-    CHECK_NULL_RETURN(pattern, RACE_DURATION);
-    auto pManager = pattern->GetParagraphManager();
-    CHECK_NULL_RETURN(pManager, RACE_DURATION);
-    CHECK_NULL_RETURN(!pManager->GetParagraphs().empty(), RACE_DURATION);
-    auto paragraph = pManager->GetParagraphs().front().paragraph;
-    CHECK_NULL_RETURN(paragraph, RACE_DURATION);
-    auto textRaceWidth = paragraph->GetTextWidth() + textRaceSpaceWidth_;
-    if (LessOrEqual(DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx(), 0.0)) {
-        return RACE_DURATION;
-    }
-    return static_cast<int32_t>(
-        textRaceWidth / DEFAULT_MARQUEE_SCROLL_AMOUNT.ConvertToPx() * DEFAULT_MARQUEE_SCROLL_DELAY);
-}
-
 void TextContentModifier::ContentModifierDump()
 {
     auto& dumpLog = DumpLog::GetInstance();
@@ -1115,5 +1112,272 @@ void TextContentModifier::ContentModifierDump()
             std::string("animatableTextColor: ").append(Color(animatableTextColor_->Get().GetValue()).ColorToString()));
     }
     dumpLog.AddDesc(std::string("onlyTextColorAnimation: ").append(std::to_string(onlyTextColorAnimation_)));
+}
+
+void TextContentModifier::SetIsFocused(const bool isFocused)
+{
+    marqueeFocused_ = isFocused;
+    DetermineTextRace();
+}
+
+void TextContentModifier::SetIsHovered(const bool isHovered)
+{
+    marqueeHovered_ = isHovered;
+    DetermineTextRace();
+}
+
+bool TextContentModifier::SetTextRace(const MarqueeOption& option)
+{
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, false);
+    auto pManager = textPattern->GetParagraphManager();
+    CHECK_NULL_RETURN(pManager, false);
+    textRaceSpaceWidth_ = RACE_SPACE_WIDTH;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    if (pipeline) {
+        textRaceSpaceWidth_ *= pipeline->GetDipScale();
+    }
+
+    auto duration =
+        static_cast<int32_t>(std::abs(pManager->GetTextWidth() + textRaceSpaceWidth_) * RACE_DURATION_RATIO);
+    if (option.step > 0) {
+        duration = static_cast<int32_t>(duration / option.step);
+    }
+    if (duration <= 0) {
+        return false;
+    }
+    auto optionTemp = option;
+    if (optionTemp.direction == MarqueeDirection::DEFAULT ||
+        optionTemp.direction == MarqueeDirection::DEFAULT_REVERSE) {
+        auto textDirection = GetTextRaceDirection();
+        optionTemp.direction =
+            ((textDirection == TextDirection::LTR && optionTemp.direction == MarqueeDirection::DEFAULT) ||
+                (textDirection == TextDirection::RTL && optionTemp.direction == MarqueeDirection::DEFAULT_REVERSE))
+                ? MarqueeDirection::LEFT
+                : MarqueeDirection::RIGHT;
+    }
+    if (CheckMarqueeState(MarqueeState::RUNNING) && marqueeOption_ == optionTemp && duration == marqueeDuration_) {
+        return false;
+    }
+
+    marqueeDuration_ = duration;
+    marqueeOption_ = optionTemp;
+    ResetTextRacePercent();
+    marqueeGradientPercent_ = GetFadeoutPercent();
+    return true;
+}
+
+void TextContentModifier::ResumeTextRace(bool bounce)
+{
+    if (!AllowTextRace()) {
+        return;
+    }
+    if (!bounce) {
+        marqueeCount_ = 0;
+        auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+        CHECK_NULL_VOID(textPattern);
+        textPattern->FireOnMarqueeStateChange(TextMarqueeState::START);
+    }
+
+    AnimationOption option = AnimationOption();
+    RefPtr<Curve> curve = MakeRefPtr<LinearCurve>();
+    option.SetDuration(marqueeDuration_);
+    option.SetDelay(bounce ? marqueeOption_.delay : 0);
+    option.SetCurve(curve);
+    option.SetIteration(1);
+    SetTextRaceAnimation(option);
+}
+
+void TextContentModifier::SetTextRaceAnimation(const AnimationOption& option)
+{
+    marqueeAnimationId_++;
+    ResetTextRacePercent();
+    raceAnimation_ = AnimationUtils::StartAnimation(
+        option, [weak = AceType::WeakClaim(this)]() {
+             auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            float startPercent = modifier->GetTextRacePercent();
+            modifier->racePercentFloat_->Set(RACE_MOVE_PERCENT_MAX + startPercent);
+        },
+        [weak = AceType::WeakClaim(this), marqueeAnimationId = marqueeAnimationId_, id = Container::CurrentId()]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+
+            ContainerScope scope(id);
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+
+            auto onFinish = [weak, marqueeAnimationId]() {
+                auto modifier = weak.Upgrade();
+                CHECK_NULL_VOID(modifier);
+
+                if (marqueeAnimationId != modifier->marqueeAnimationId_) {
+                    return;
+                }
+                auto textPattern = DynamicCast<TextPattern>(modifier->pattern_.Upgrade());
+                CHECK_NULL_VOID(textPattern);
+                if (NearEqual(modifier->GetTextRacePercent(), modifier->marqueeRaceMaxPercent_)) {
+                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::BOUNCE);
+                    modifier->marqueeCount_++;
+                }
+                if (!modifier->AllowTextRace()) {
+                    textPattern->FireOnMarqueeStateChange(TextMarqueeState::FINISH);
+                } else {
+                    auto frameNode = textPattern->GetHost();
+                    CHECK_NULL_VOID(frameNode);
+                    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                    modifier->ResumeTextRace(true);
+                }
+            };
+
+            if (taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+                onFinish();
+            } else {
+                taskExecutor->PostTask(
+                    [onFinish]() { onFinish(); }, TaskExecutor::TaskType::UI, "ArkUITextStartTextRace");
+            }
+        });
+    SetMarqueeState(MarqueeState::RUNNING);
+}
+
+void TextContentModifier::PauseTextRace()
+{
+    if (CheckMarqueeState(MarqueeState::IDLE) || CheckMarqueeState(MarqueeState::STOPPED)) {
+        return;
+    }
+    if (raceAnimation_) {
+        AnimationUtils::StopAnimation(raceAnimation_);
+    }
+
+    SetMarqueeState(MarqueeState::STOPPED);
+    ResetTextRacePercent();
+}
+
+bool TextContentModifier::AllowTextRace()
+{
+    if (!marqueeSet_ || !marqueeOption_.start) {
+        return false;
+    }
+    if (marqueeOption_.loop > 0 && marqueeCount_ >= marqueeOption_.loop) {
+        return false;
+    }
+    if (marqueeOption_.startPolicy == MarqueeStartPolicy::ON_FOCUS && !(marqueeFocused_ || marqueeHovered_)) {
+        return false;
+    }
+
+    return true;
+}
+
+void TextContentModifier::DetermineTextRace()
+{
+    if (!marqueeSet_ || !marqueeOption_.start || marqueeOption_.startPolicy != MarqueeStartPolicy::ON_FOCUS) {
+        return;
+    }
+
+    auto textRaceing = CheckMarqueeState(MarqueeState::RUNNING);
+    if (textRaceing && !marqueeFocused_ && !marqueeHovered_) {
+        PauseTextRace();
+        return;
+    }
+    if (!textRaceing && (marqueeFocused_ || marqueeHovered_)) {
+        ResumeTextRace(false);
+    }
+}
+
+float TextContentModifier::GetFadeoutPercent()
+{
+    marqueeGradientPercent_ = DEFAULT_FADEOUT_GRADIENTPERCENT;
+
+    auto contentWidth = contentSize_->Get().Width();
+    if (contentWidth > 0) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, marqueeGradientPercent_);
+        auto theme = pipeline->GetTheme<TextTheme>();
+        CHECK_NULL_RETURN(theme, marqueeGradientPercent_);
+        auto fadeoutWidth = theme->GetFadeoutWidth();
+        marqueeGradientPercent_ = fadeoutWidth.ConvertToPx() / contentWidth;
+    }
+    return marqueeGradientPercent_;
+}
+
+FadeoutInfo TextContentModifier::GetFadeoutInfo(DrawingContext& drawingContext)
+{
+    FadeoutInfo info;
+    if (!marqueeSet_) {
+        return info;
+    }
+    CHECK_NULL_RETURN(contentSize_, info);
+    CHECK_NULL_RETURN(contentOffset_, info);
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_RETURN(textPattern, info);
+    auto pManager = textPattern->GetParagraphManager();
+    CHECK_NULL_RETURN(pManager, info);
+    float racePercent = GetTextRacePercent();
+    float textRacePercent =
+        marqueeOption_.direction == MarqueeDirection::LEFT ? racePercent : RACE_MOVE_PERCENT_MAX - racePercent;
+    auto paragraphText = pManager->GetParagraphs().front().paragraph;
+    float textWidth = paragraphText->GetTextWidth();
+    info.paragraph1StartPosition =
+        paintOffset_.GetX() + (textWidth + textRaceSpaceWidth_) * textRacePercent / RACE_MOVE_PERCENT_MAX * -1;
+    info.paragraph1EndPosition = info.paragraph1StartPosition + textWidth;
+    info.paragraph2StartPosition = info.paragraph1EndPosition + textRaceSpaceWidth_;
+    info.paragraph2EndPosition = info.paragraph2StartPosition + textWidth;
+    if (marqueeOption_.fadeout) {
+        auto contentSize = contentSize_->Get();
+        auto contentOffset = contentOffset_->Get();
+        float contentStartPosition = contentOffset.GetX();
+        float contentEndPosition = contentStartPosition + contentSize.Width();
+        info.isLeftFadeout = (LessNotEqual(info.paragraph1StartPosition, contentStartPosition) &&
+                                 GreatNotEqual(info.paragraph1EndPosition, contentStartPosition)) ||
+                             (LessNotEqual(info.paragraph2StartPosition, contentStartPosition) &&
+                                 GreatNotEqual(info.paragraph2EndPosition, contentStartPosition));
+        info.isRightFadeout = (LessNotEqual(info.paragraph1StartPosition, contentEndPosition) &&
+                                  GreatNotEqual(info.paragraph1EndPosition, contentEndPosition)) ||
+                              (LessNotEqual(info.paragraph2StartPosition, contentEndPosition) &&
+                                  GreatNotEqual(info.paragraph2EndPosition, contentEndPosition));
+    } else {
+        info.isLeftFadeout = false;
+        info.isRightFadeout = false;
+    }
+    if (info.IsFadeout()) {
+        marqueeGradientPercent_ = GetFadeoutPercent();
+        if (marqueeGradientPercent_ > RACE_MIN_GRADIENTPERCENT) {
+            marqueeGradientPercent_ = RACE_MIN_GRADIENTPERCENT;
+        }
+        info.fadeoutPercent = marqueeGradientPercent_;
+    }
+    return info;
+}
+
+void TextContentModifier::DrawFadeout(DrawingContext& drawingContext, const FadeoutInfo& info)
+{
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPattern);
+
+    RSCanvas& canvas = drawingContext.canvas;
+    auto contentRect = textPattern->GetTextContentRect();
+    auto contentSize = contentSize_->Get();
+    RSRect clipInnerRect = RSRect(0, 0, drawingContext.width + ROUND_VALUE, drawingContext.height);
+
+    RSSaveLayerOps slo(&clipInnerRect, nullptr);
+    canvas.SaveLayer(slo);
+
+    DrawContent(drawingContext, info);
+
+    RSBrush brush;
+    auto contentOffset = contentOffset_->Get();
+    std::vector<RSPoint> points = { RSPoint(contentRect.Left(), contentRect.Top()),
+        RSPoint(contentSize.Width() + contentOffset.GetX(), contentRect.Top()) };
+    std::vector<RSColorQuad> colors = { Color::TRANSPARENT.GetValue(), Color::WHITE.GetValue(), Color::WHITE.GetValue(),
+        Color::TRANSPARENT.GetValue() };
+    std::vector<RSScalar> pos = { 0.0f, info.isLeftFadeout ? info.fadeoutPercent : 0.0f,
+        info.isRightFadeout ? (1 - info.fadeoutPercent) : 1.0f, 1.0f };
+    brush.SetShaderEffect(
+        RSShaderEffect::CreateLinearGradient(points.at(0), points.at(1), colors, pos, RSTileMode::CLAMP));
+    brush.SetBlendMode(RSBlendMode::DST_IN);
+    canvas.AttachBrush(brush);
+    canvas.DrawRect(clipInnerRect);
+    canvas.DetachBrush();
+    canvas.Restore();
 }
 } // namespace OHOS::Ace::NG
