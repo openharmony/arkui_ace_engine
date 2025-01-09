@@ -33,6 +33,7 @@ import { WaterFlowBootcamp } from './WaterFlowBootcamp';
 import { RefreshBootcamp } from './RefreshBootcamp';
 import { ListItemBootcamp } from './ListItemBootcamp';
 import { GridRowBootcamp } from './GridRowBootcamp';
+import { GridItemBootcamp } from './GridItemBootcamp';
 
 export const containersRoute: RouteGroup = {
   name: 'containers',
@@ -59,6 +60,7 @@ export const containersRoute: RouteGroup = {
     { name: 'refresh', label: '刷新容器/Refresh' },
     { name: 'gridRow', label: '栅格容器/GridRow' }
     { name: 'gridRow', label: '栅格容器/GridRow' },
+    { name: 'gridItem', label: '网格选项/GridItem' }
     { name: 'folder-stack', label: '折叠布局/FolderStack' },
   ]
 };
@@ -101,6 +103,8 @@ export function ContainersDestination(name: string, route: Route) {
     RefreshBootcamp({ title: route.label })
   }else if (name === 'containers/gridRow') {
     GridRowBootcamp({ title: route.label })
+  } else if (name === 'containers/gridItem'){
+    GridItemBootcamp({ title: route.label})
   } else if (name === 'containers/folder-stack') {
     FolderStackBootcamp({ title: route.label })
   }
