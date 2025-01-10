@@ -669,6 +669,14 @@ enum class BlurReason : int32_t {
     BACK_TO_TABSTOP = 5,
 };
 
+enum class FocusReason : int32_t {
+    DEFAULT = 0,
+    FOCUS_TRAVEL = 1,
+    FOCUS_TOUCH = 2,
+    WINDOW_FOCUS = 3,
+    VIEW_SWITCH = 4,
+};
+
 using OnKeyEventFunc = std::function<bool(const KeyEvent&)>;
 using OnKeyCallbackFunc = std::function<void(KeyEventInfo&)>;
 using OnKeyConsumeFunc = std::function<bool(KeyEventInfo&)>;

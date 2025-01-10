@@ -31,7 +31,8 @@ class PipelineContext;
 using FocusViewMap = std::unordered_map<int32_t, std::pair<WeakPtr<FocusView>, std::list<WeakPtr<FocusView>>>>;
 using RequestFocusCallback = std::function<void(NG::RequestFocusResult result)>;
 using FocusHubScopeMap = std::unordered_map<std::string, std::pair<WeakPtr<FocusHub>, std::list<WeakPtr<FocusHub>>>>;
-using FocusChangeCallback = std::function<void(const WeakPtr<FocusHub>& last, const RefPtr<FocusHub>& current)>;
+using FocusChangeCallback = std::function<void(const WeakPtr<FocusHub>& last,
+    const RefPtr<FocusHub>& current, FocusReason focusReason)>;
 using FocusActiveChangeCallback = std::function<void(bool isFocusActive)>;
 
 enum class FocusActiveReason : int32_t {
@@ -188,7 +189,7 @@ public:
 
 private:
     void GetFocusViewMap(FocusViewMap& focusViewMap);
-    void ReportFocusSwitching();
+    void ReportFocusSwitching(FocusReason focusReason);
 
     std::list<WeakPtr<FocusView>> focusViewStack_;
     WeakPtr<FocusView> lastFocusView_;
