@@ -145,9 +145,9 @@ RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
 
 bool PipelineContext::NeedSoftKeyboard()
 {
-    auto needSoftKeyboard = InputMethodManager::GetInstance()->NeedSoftKeyboard();
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "window switch need keyboard %d", needSoftKeyboard);
-    return needSoftKeyboard;
+    auto needKeyboard = InputMethodManager::GetInstance()->NeedSoftKeyboard();
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "need keyboard : %{public}d.", needKeyboard);
+    return needKeyboard;
 }
 
 RefPtr<PipelineContext> PipelineContext::GetContextByContainerId(int32_t containerId)
@@ -842,7 +842,7 @@ void PipelineContext::FlushFocus()
         FlushFocusWithNode(focusScope, true);
         return;
     }
-    GetOrCreateFocusManager()->WindowFocusMoveEnd();
+    focusManager_->WindowFocusMoveEnd();
 }
 
 void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isScope)
@@ -867,7 +867,7 @@ void PipelineContext::FlushFocusWithNode(RefPtr<FrameNode> focusNode, bool isSco
     dirtyFocusNode_.Reset();
     dirtyFocusScope_.Reset();
     dirtyRequestFocusNode_.Reset();
-    GetOrCreateFocusManager()->WindowFocusMoveEnd();
+    focusManager_->WindowFocusMoveEnd();
 }
 
 void PipelineContext::FlushRequestFocus()
