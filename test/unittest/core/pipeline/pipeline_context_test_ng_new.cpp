@@ -310,10 +310,10 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg002, TestSize.Level1)
     EXPECT_EQ(taskScheduler.afterLayoutTasks_.size(), 2);
 
     /**
-     * @tc.steps4: Call FlushTask.
+     * @tc.steps4: Call FlushTaskWithCheck.
      * @tc.expected: afterLayoutTasks_ in the taskScheduler size is 0.
      */
-    taskScheduler.FlushTask();
+    taskScheduler.FlushTaskWithCheck();
     EXPECT_EQ(taskScheduler.afterLayoutTasks_.size(), 0);
 }
 
@@ -461,10 +461,10 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg006, TestSize.Level1)
     EXPECT_EQ(taskScheduler.persistAfterLayoutTasks_.size(), 2);
 
     /**
-     * @tc.steps4: Call FlushTask.
+     * @tc.steps4: Call FlushTaskWithCheck.
      * @tc.expected: afterLayoutTasks_ in the taskScheduler size is 0.
      */
-    taskScheduler.FlushTask();
+    taskScheduler.FlushTaskWithCheck();
     EXPECT_EQ(taskScheduler.afterLayoutTasks_.size(), 0);
 }
 
@@ -1722,14 +1722,14 @@ HWTEST_F(PipelineContextTestNg, UITaskSchedulerTestNg009, TestSize.Level1)
     taskScheduler.FlushAfterLayoutCallbackInImplicitAnimationTask();
 
     /**
-     * @tc.steps3: Call FlushAfterLayoutCallbackInImplicitAnimationTask/FlushTask
+     * @tc.steps3: Call FlushAfterLayoutCallbackInImplicitAnimationTask/FlushTaskWithCheck
      */
-    taskScheduler.FlushTask(true);
-    taskScheduler.FlushTask(false);
+    taskScheduler.FlushTaskWithCheck(true);
+    taskScheduler.FlushTaskWithCheck(false);
     taskScheduler.AddAfterLayoutTask([]() {}, true);
     taskScheduler.AddAfterLayoutTask(nullptr, true);
     taskScheduler.FlushAfterLayoutCallbackInImplicitAnimationTask();
-    taskScheduler.FlushTask(false);
+    taskScheduler.FlushTaskWithCheck(false);
 }
 
 /**

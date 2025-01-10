@@ -20,6 +20,7 @@
 #include <functional>
 #include <list>
 #include <map>
+#include <queue>
 #include <set>
 
 #include "base/log/frame_info.h"
@@ -85,7 +86,8 @@ public:
 
     void FlushLayoutTask(bool forceUseMainThread = false);
     void FlushRenderTask(bool forceUseMainThread = false);
-    void FlushTask(bool triggeredByImplicitAnimation = false);
+    void FlushTask();
+    void FlushTaskWithCheck(bool triggeredByImplicitAnimation = false);
     void FlushPredictTask(int64_t deadline, bool canUseLongPredictTask = false);
     void FlushAfterLayoutTask();
     void FlushAfterLayoutCallbackInImplicitAnimationTask();
@@ -126,6 +128,10 @@ public:
         return isLayouting_;
     }
 
+    void AddSingleNodeToFlush(const RefPtr<FrameNode>& dirtyNode);
+
+    bool RequestFrameOnLayoutCountExceeds();
+
     void SetJSViewActive(bool active, WeakPtr<CustomNode> custom);
 
     bool IsDirtyLayoutNodesEmpty()
@@ -151,7 +157,7 @@ public:
 
 private:
     bool NeedAdditionalLayout();
-
+    void FlushAllSingleNodeTasks();
     void SetLayoutNodeRect();
 
     template<typename T>
@@ -188,11 +194,15 @@ private:
     std::list<std::function<void()>> persistAfterLayoutTasks_;
     std::list<std::function<void()>> latestFrameLayoutFinishTasks_;
     std::list<std::function<void()>> syncGeometryNodeTasks_;
+    std::list<RefPtr<FrameNode>> singleDirtyNodesToFlush_;
+    std::queue<bool> layoutWithImplicitAnimation_;
     std::set<FrameNode*, NodeCompare<FrameNode*>> safeAreaPaddingProcessTasks_;
 
     uint32_t currentPageId_ = 0;
     bool is64BitSystem_ = false;
     bool isLayouting_ = false;
+    int32_t layoutedCount_ = 0;
+    int32_t multiLayoutCount_ = 0;
 
     FrameInfo* frameInfo_ = nullptr;
 
