@@ -29,11 +29,9 @@ TabContentComponent::TabContentComponent(
 
 RefPtr<Element> TabContentComponent::CreateElement()
 {
-#ifndef ARKUI_WEARABLE
     if (useProxy_) {
         return AceType::MakeRefPtr<V2::TabContentProxyElement>(GetChildren());
     }
-#endif
     return AceType::MakeRefPtr<TabContentElement>(GetChildren());
 }
 
