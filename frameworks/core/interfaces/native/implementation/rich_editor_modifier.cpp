@@ -523,42 +523,21 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(responseType);
     CHECK_NULL_VOID(options);
     auto aceSpanType = Converter::OptConvert<TextSpanType>(spanType);
-    CHECK_NULL_VOID(aceSpanType);
     auto aceResponseType = Converter::OptConvert<TextResponseType>(*responseType);
-    CHECK_NULL_VOID(aceResponseType); // A required parameter
-    auto arkMenuOptions = Converter::OptConvert<Ark_SelectionMenuOptions>(*options);
-    SelectMenuParam menuParam;
-    menuParam.onAppear = [](int32_t start, int32_t end) {};
-    menuParam.onDisappear = []() {};
-    if (arkMenuOptions) {
-        auto appearCb = Converter::OptConvert<MenuOnAppearCallback>(arkMenuOptions->onAppear);
-        auto disappearCb = Converter::OptConvert<Callback_Void>(arkMenuOptions->onDisappear);
-
-        CHECK_NULL_VOID(appearCb);
-        auto appearCbPtr = std::make_shared<MenuOnAppearCallback>(*appearCb); // Well captured as shared_ptr
-        menuParam.onAppear =
-            [appearCbPtr, arkCallback = CallbackHelper(*appearCbPtr)](int32_t start, int32_t end) {
-            if (appearCbPtr) {
-                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
-            }
-        };
-
-        CHECK_NULL_VOID(disappearCb);
-        auto disappearCbPtr = std::make_shared<Callback_Void>(*disappearCb); // Well captured as shared_ptr
-        menuParam.onDisappear =
-            [disappearCbPtr, arkCallback = CallbackHelper(*disappearCbPtr)]() {
-            if (disappearCbPtr) {
-                arkCallback.Invoke();
-            }
+    auto response = aceResponseType.value_or(TextResponseType::NONE);
+    auto span = aceSpanType.value_or(TextSpanType::NONE);
+    std::function<void()> convBuildFunc;
+    if (content) {
+        convBuildFunc = [callback = CallbackHelper(*content, frameNode), node]() {
+            auto builderNode = callback.BuildSync(node);
+            NG::ViewStackProcessor::GetInstance()->Push(builderNode);
         };
     }
-    std::function<void()> builder = [callback = CallbackHelper(*content, frameNode), node]() {
-        auto builderNode = callback.BuildSync(node);
-        NG::ViewStackProcessor::GetInstance()->Push(builderNode);
-    };
-    auto span = aceSpanType.value_or(TextSpanType::NONE);
-    auto response = aceResponseType.value_or(TextResponseType::NONE);
-    RichEditorModelNG::BindSelectionMenu(frameNode, span, response, builder, menuParam);
+    auto convMenuParam = Converter::OptConvert<SelectMenuParam>(*options);
+    if (convMenuParam.has_value()) {
+        RichEditorModelNG::BindSelectionMenu(
+            frameNode, span, response, convBuildFunc, convMenuParam.value());
+    }
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
                         const CustomNodeBuilder* value,

@@ -60,11 +60,13 @@ const std::string RADIO_VALUE_ATTR = "value";
 const auto RADIO_GROUP_VALUE = "test_value";
 const auto RADIO_VALUE_VALUE = "test_group";
 static constexpr int TEST_RESOURCE_ID = 1000;
+static constexpr int32_t NODE_ID = 555;
 struct CheckEvent {
     int32_t resourceId;
     Ark_NativePointer parentNode;
 };
 static std::optional<CheckEvent> checkEvent = std::nullopt;
+static std::optional<RefPtr<UINode>> uiNode = std::nullopt;
 
 static bool g_isCheckedTest = true;
 static auto radioOnChange(Ark_Int32 nodeId, const Ark_Boolean isChecked)
@@ -101,10 +103,6 @@ public:
 
     CustomNodeBuilder getBuilderCb()
     {
-        int32_t nodeId = 555;
-        auto node = BlankModelNG::CreateFrameNode(nodeId);
-        EXPECT_NE(node, nullptr);
-        static std::optional<RefPtr<UINode>> uiNode = node;
         auto checkCallback = [](
             Ark_VMContext context,
             const Ark_Int32 resourceId,
@@ -189,6 +187,7 @@ HWTEST_F(RadioModifierTest, RadioOptionsCustomBuilderTest, TestSize.Level1)
             .value = Converter::ArkValue<Ark_String>(RADIO_VALUE_VALUE),
             .indicatorType = Converter::ArkValue<Opt_RadioIndicatorType>(ARK_RADIO_INDICATOR_TYPE_CUSTOM),
         };
+        uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
         auto builder = getBuilderCb();
         radioOptions.indicatorBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
         modifier_->setRadioOptions(node_, &radioOptions);
@@ -199,6 +198,8 @@ HWTEST_F(RadioModifierTest, RadioOptionsCustomBuilderTest, TestSize.Level1)
         pattern->SetRadioChecked(true);
         ASSERT_EQ(checkEvent.has_value(), true);
         EXPECT_EQ(checkEvent->resourceId, TEST_RESOURCE_ID);
+        uiNode = std::nullopt;
+        checkEvent = std::nullopt;
     }
 }
 

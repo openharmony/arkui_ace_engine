@@ -101,12 +101,14 @@ const auto ATTRIBUTE_CONTENT_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_DATA_DETECTOR_CONFIG_NAME = "dataDetectorConfig";
 
 static constexpr int TEST_RESOURCE_ID = 1000;
+static constexpr int32_t NODE_ID = 555;
 static bool g_isCalled = false;
-struct CheckEvent {
+struct CheckCBEvent {
     int32_t resourceId;
     Ark_NativePointer parentNode;
 };
-static std::optional<CheckEvent> checkEvent = std::nullopt;
+static std::optional<CheckCBEvent> checkCBEvent = std::nullopt;
+static std::optional<RefPtr<UINode>> uiNode = std::nullopt;
 struct EventsTracker {
     static inline GENERATED_ArkUITextEventsReceiver textEventReceiver {};
 
@@ -141,16 +143,12 @@ public:
     }
     CustomNodeBuilder getBuilderCb()
     {
-        int32_t nodeId = 555;
-        auto node = BlankModelNG::CreateFrameNode(nodeId);
-        EXPECT_NE(node, nullptr);
-        static std::optional<RefPtr<UINode>> uiNode = node;
         auto checkCallback = [](
             Ark_VMContext context,
             const Ark_Int32 resourceId,
             const Ark_NativePointer parentNode,
             const Callback_Pointer_Void continuation) {
-            checkEvent = {
+            checkCBEvent = {
                 .resourceId = resourceId,
                 .parentNode = parentNode
             };
@@ -1243,6 +1241,8 @@ HWTEST_F(TextModifierTest, setDataDetectorConfigTestCallback, TestSize.Level1)
 
     EXPECT_EQ(actualResourceId, expectedResourceId);
     EXPECT_EQ(actualArg, expectedArg);
+}
+
 /**
  * @tc.name: setBindSelectionMenuTest
  * @tc.desc: Check the functionality of setBindSelectionMenu
@@ -1267,11 +1267,11 @@ HWTEST_F(TextModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     auto onDisappearCb = Converter::ArkValue<Callback_Void>(onDisappearCallback, TEST_RESOURCE_ID);
     value.onDisappear = Converter::ArkValue<Opt_Callback_Void>(onDisappearCb);
     auto options = Converter::ArkValue<Opt_SelectionMenuOptions>(value);
+    uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto buildFunc = getBuilderCb();
     modifier_->setBindSelectionMenu(node_,
         Ark_TextSpanType::ARK_TEXT_SPAN_TYPE_TEXT, &buildFunc,
         Ark_TextResponseType::ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK, &options);
-    // The testing part begins here:
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     SelectOverlayInfo selectInfo;
@@ -1280,10 +1280,12 @@ HWTEST_F(TextModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     pattern->SetTextResponseType(TextResponseType::RIGHT_CLICK);
     pattern->CopySelectionMenuParams(selectInfo);
     ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
-    checkEvent = std::nullopt;
+    checkCBEvent = std::nullopt;
     selectInfo.menuInfo.menuBuilder();
-    ASSERT_EQ(checkEvent.has_value(), true);
-    EXPECT_EQ(checkEvent->resourceId, TEST_RESOURCE_ID);
+    ASSERT_EQ(checkCBEvent.has_value(), true);
+    EXPECT_EQ(checkCBEvent->resourceId, TEST_RESOURCE_ID);
+    uiNode = std::nullopt;
+    checkCBEvent = std::nullopt;
     g_isCalled = false;
     ASSERT_NE(selectInfo.menuCallback.onAppear, nullptr);
     selectInfo.menuCallback.onAppear();

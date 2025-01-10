@@ -32,10 +32,12 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 static constexpr int TEST_RESOURCE_ID = 1000;
+static constexpr int32_t NODE_ID = 555;
 struct CheckEvent {
     int32_t resourceId;
     Ark_NativePointer parentNode;
 };
+static std::optional<RefPtr<UINode>> uiNode = std::nullopt;
 static std::optional<CheckEvent> checkEventH = std::nullopt;
 static std::optional<CheckEvent> checkEventF = std::nullopt;
 
@@ -44,10 +46,6 @@ class ListItemGroupModifierTest : public ModifierTestBase<GENERATED_ArkUIListIte
 public:
     CustomNodeBuilder getBuilderCb(bool headerCb = true)
     {
-        int32_t nodeId = 555;
-        auto node = BlankModelNG::CreateFrameNode(nodeId);
-        EXPECT_NE(node, nullptr);
-        static std::optional<RefPtr<UINode>> uiNode = node;
         static std::optional<bool> isHeader;
         static std::optional<bool> isFooter;
         if (headerCb) {
@@ -141,6 +139,7 @@ HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsTest, TestSize.Level1
  */
 HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsCustomBuilderTest, TestSize.Level1)
 {
+    uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto builder = getBuilderCb();
     auto header = Converter::ArkValue<Opt_CustomNodeBuilder>(builder);
 
@@ -161,6 +160,9 @@ HWTEST_F(ListItemGroupModifierTest, setListItemGroupOptionsCustomBuilderTest, Te
     EXPECT_EQ(checkEventH->resourceId, TEST_RESOURCE_ID);
     ASSERT_EQ(checkEventF.has_value(), true);
     EXPECT_EQ(checkEventF->resourceId, TEST_RESOURCE_ID);
+    uiNode = std::nullopt;
+    checkEventH = std::nullopt;
+    checkEventF = std::nullopt;
 }
 
 /**
