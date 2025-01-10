@@ -1349,6 +1349,14 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
         auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(selectTheme);
         BlurStyleOption styleOption;
+        if (menuParam.blurStyleOption.has_value()) {
+            styleOption = menuParam.blurStyleOption.value();
+            if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeLineContext->AddWindowFocusChangedCallback(menuNode->GetId());
+            } else {
+                pipeLineContext->RemoveWindowFocusChangedCallback(menuNode->GetId());
+            }
+        }
         Color color;
         if (selectTheme->GetMenuBlendBgColor()) {
             styleOption.blurStyle = static_cast<BlurStyle>(
@@ -1361,8 +1369,22 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
                 menuParam.backgroundBlurStyle.value_or(menuTheme->GetMenuBackgroundBlurStyle()));
             color = menuParam.backgroundColor.value_or(Color::TRANSPARENT);
         }
+        if (menuParam.blurStyleOption.has_value() && menuNodeRenderContext->GetBackgroundEffect().has_value()) {
+            menuNodeRenderContext->UpdateBackgroundEffect(std::nullopt);
+        }
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
         menuNodeRenderContext->UpdateBackgroundColor(color);
+        if (menuParam.effectOption.has_value()) {
+            if (menuParam.effectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeLineContext->AddWindowFocusChangedCallback(menuNode->GetId());
+            } else {
+                pipeLineContext->RemoveWindowFocusChangedCallback(menuNode->GetId());
+            }
+            if (menuNodeRenderContext->GetBackBlurStyle().has_value()) {
+                menuNodeRenderContext->UpdateBackBlurStyle(std::nullopt);
+            }
+            menuNodeRenderContext->UpdateBackgroundEffect(menuParam.effectOption.value());
+        }
     } else if (menuParam.backgroundColor.has_value()) {
         menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value());
     }

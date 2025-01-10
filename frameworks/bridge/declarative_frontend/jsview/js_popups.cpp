@@ -714,6 +714,28 @@ void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::Me
     }
 }
 
+void ParseMenuBlurStyleOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto blurStyle = menuOptions->GetProperty("backgroundBlurStyleOptions");
+    if (blurStyle->IsObject()) {
+        if (!menuParam.blurStyleOption.has_value()) {
+            menuParam.blurStyleOption.emplace();
+        }
+        JSViewAbstract::ParseBlurStyleOption(blurStyle, menuParam.blurStyleOption.value());
+    }
+}
+
+void ParseMenuEffectOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto effectOption = menuOptions->GetProperty("backgroundEffect");
+    if (effectOption->IsObject()) {
+        if (!menuParam.effectOption.has_value()) {
+            menuParam.effectOption.emplace();
+        }
+        JSViewAbstract::ParseEffectOption(effectOption, menuParam.effectOption.value());
+    }
+}
+
 void GetMenuShowInSubwindow(NG::MenuParam& menuParam)
 {
     menuParam.isShowInSubWindow = false;
@@ -841,6 +863,8 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     ParseMenuArrowParam(menuOptions, menuParam);
     ParseMenuBorderRadius(menuOptions, menuParam);
     ParseMenuLayoutRegionMarginParam(menuOptions, menuParam);
+    ParseMenuBlurStyleOption(menuOptions, menuParam);
+    ParseMenuEffectOption(menuOptions, menuParam);
 }
 
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
