@@ -36,7 +36,6 @@ const static uint8_t FULL_TRANSPARENCY_VALUE = 0xFF;
 const static std::set<uint32_t> RELEASE_ATTRIBUTE_LIST = {
     0x0C000000,
 };
-constexpr uint32_t colorAlphaOffset = 24;
 RefPtr<SecurityComponentTheme> SecurityComponentModelNG::GetTheme()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
