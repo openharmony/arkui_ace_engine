@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -402,7 +402,7 @@ HWTEST_F(TextInputModifierTest, setTextIndentTestTextIndentValidValues, TestSize
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPlaceholderFontTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultPlaceholderFont =
@@ -431,7 +431,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestDefaultValues, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontSizeValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontSizeValidValues, TestSize.Level1)
 {
     Opt_Font initValuePlaceholderFont;
 
@@ -440,8 +440,8 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontSi
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValuePlaceholderFont).family =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
     WriteTo(initValuePlaceholderFont).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
@@ -469,7 +469,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontSizeInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontSizeInvalidValues, TestSize.Level1)
 {
     Opt_Font initValuePlaceholderFont;
 
@@ -478,8 +478,8 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontSi
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValuePlaceholderFont).family =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
     WriteTo(initValuePlaceholderFont).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
@@ -509,7 +509,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontWeightValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontWeightValidValues, TestSize.Level1)
 {
     Opt_Font initValuePlaceholderFont;
 
@@ -518,8 +518,8 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontWe
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValuePlaceholderFont).family =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
     WriteTo(initValuePlaceholderFont).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
@@ -540,10 +540,10 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontWe
     for (auto& [input, value, expected] : Fixtures::testFixtureEnumFontWeightValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightNumbersValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureFontWeightStringsValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(value));
     }
 }
@@ -553,7 +553,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontWe
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontWeightInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontWeightInvalidValues, TestSize.Level1)
 {
     Opt_Font initValuePlaceholderFont;
 
@@ -562,8 +562,8 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontWe
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValuePlaceholderFont).family =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
     WriteTo(initValuePlaceholderFont).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
@@ -582,6 +582,12 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontWe
             "Input value is: " << input << ", method: setPlaceholderFont, attribute: placeholderFont.weight";
     };
 
+    for (auto& [input, value] : Fixtures::testFixtureFontWeightNumbersInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureFontWeightStringsInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_String>(value));
+    }
     for (auto& [input, value] : Fixtures::testFixtureEnumFontWeightInvalidValues) {
         checkValue(input, ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(value));
     }
@@ -596,7 +602,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontWe
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontFamilyValidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontFamilyValidValues, TestSize.Level1)
 {
     Opt_Font initValuePlaceholderFont;
 
@@ -605,8 +611,8 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontFa
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValuePlaceholderFont).family =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
     WriteTo(initValuePlaceholderFont).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
@@ -624,10 +630,12 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontFa
             "Input value is: " << input << ", method: setPlaceholderFont, attribute: placeholderFont.family";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureFontFamilyResourceValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureFontFamilyStringValidValues) {
         checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
     }
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
 
 /*
@@ -635,7 +643,7 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontFa
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontFamilyInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontFamilyInvalidValues, TestSize.Level1)
 {
     Opt_Font initValuePlaceholderFont;
 
@@ -644,8 +652,8 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontFa
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValuePlaceholderFont).family =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
     WriteTo(initValuePlaceholderFont).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
@@ -664,7 +672,12 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontFa
             "Input value is: " << input << ", method: setPlaceholderFont, attribute: placeholderFont.family";
     };
 
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    for (auto& [input, value] : Fixtures::testFixtureFontFamilyResourceInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureFontFamilyStringInvalidValues) {
+        checkValue(input, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
+    }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Opt_Union_String_Resource, Ark_Empty>(nullptr));
     // Check empty optional
@@ -685,8 +698,8 @@ HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontStyleValidV
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValuePlaceholderFont).family =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
     WriteTo(initValuePlaceholderFont).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
@@ -714,7 +727,7 @@ HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontStyleValidV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontStyleInvalidValues, TestSize.Level1)
+HWTEST_F(TextInputModifierTest, setPlaceholderFontTestPlaceholderFontStyleInvalidValues, TestSize.Level1)
 {
     Opt_Font initValuePlaceholderFont;
 
@@ -723,8 +736,8 @@ HWTEST_F(TextInputModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontSt
         ArkValue<Opt_Length>(std::get<1>(Fixtures::testFixtureLengthNonNegNonPctValidValues[0]));
     WriteTo(initValuePlaceholderFont).weight = ArkUnion<Opt_Union_FontWeight_Number_String, Ark_FontWeight>(
         std::get<1>(Fixtures::testFixtureEnumFontWeightValidValues[0]));
-    WriteTo(initValuePlaceholderFont).family =
-        ArkUnion<Opt_Union_String_Resource, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    WriteTo(initValuePlaceholderFont).family = ArkUnion<Opt_Union_String_Resource, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureFontFamilyResourceValidValues[0]));
     WriteTo(initValuePlaceholderFont).style =
         ArkValue<Opt_FontStyle>(std::get<1>(Fixtures::testFixtureEnumFontStyleValidValues[0]));
 
@@ -2174,45 +2187,6 @@ HWTEST_F(TextInputModifierTest, setShowErrorTestDefaultValues, TestSize.Level1)
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_ERROR_DEFAULT_VALUE) << "Default value for attribute 'showError'";
-}
-
-/*
- * @tc.name: setShowErrorTestShowErrorValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorValidValues, TestSize.Level1)
-{
-    Opt_ResourceStr initValueShowError;
-
-    // Initial setup
-    initValueShowError = ArkUnion<Opt_ResourceStr, Ark_Resource>(
-        std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0]));
-
-    auto checkValue = [this, &initValueShowError](
-                          const std::string& input, const std::string& expectedStr, const Opt_ResourceStr& value) {
-        Opt_ResourceStr inputValueShowError = initValueShowError;
-
-        inputValueShowError = value;
-        modifier_->setShowError(node_, &inputValueShowError);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setShowError, attribute: showError";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringEmptyResUndefinedValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringEmptyUndefinedValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringNoEmptyValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
-    }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringResNoEmptyValidValues) {
-        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
-    }
 }
 
 } // namespace OHOS::Ace::NG

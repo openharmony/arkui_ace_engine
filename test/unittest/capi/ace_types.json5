@@ -1574,7 +1574,8 @@
                 },
                 {
                     "name": "fontSize",
-                    "default": "0.00px"
+                    "default": "0.00px", // Docs says 16fp, but current theme values is 0.00px
+                    "type": "LengthNonNegNonPct"
                 },
                 {
                     "name": "fontWeight",
@@ -1647,6 +1648,7 @@
                 {
                     "name": "lineHeight",
                     "default": "0.00vp",
+                    "fixtures": ["DimensionsNumNonNeg", "DimensionsStrNonNeg", "DimensionsResNonNeg"],
                 },
                 {
                     "name": "maxLines",
@@ -1710,7 +1712,8 @@
                     "attributes": [
                         {
                             "name": "size",
-                            "default": "0.00px"
+                            "default": "0.00px", // Docs says 16fp, but current theme values is 0.00px
+                            "type": "LengthNonNegNonPct"
                         },
                         {
                             "name": "weight",
@@ -1731,12 +1734,6 @@
             ],
             "disable": [
                 "setTextAreaOptionsTestValidValues",
-                "setPlaceholderFontTestDefaultValues",
-				"setPlaceholderFontTestPlaceholderFontSizeValidValues",
-                "setPlaceholderFontTestPlaceholderFontWeightValidValues",
-                "setPlaceholderFontTestPlaceholderFontWeightInvalidValues",
-                "setPlaceholderFontTestPlaceholderFontFamilyValidValues",
-                "setPlaceholderFontTestPlaceholderFontFamilyInvalidValues",
                 "setEnterKeyTypeTestDefaultValues",
                 "setEnterKeyTypeTestEnterKeyTypeInvalidValues",
                 "setTextAlignTestTextAlignValidValues",
@@ -1746,8 +1743,6 @@
                 "setMaxLinesTestMaxLinesValidValues",
                 "setMaxLinesTestMaxLinesInvalidValues",
                 "setLineSpacingTestValidValues",
-                "setLineHeightTestLineHeightValidValues",
-                "setLineHeightTestLineHeightInvalidValues",
                 "setFontFeatureTestDefaultValues",
                 "setFontFeatureTestFontFeatureValidValues",
                 "setTextOverflowTestTextOverflowValidValues"
@@ -1780,7 +1775,8 @@
                 },
                 {
                     "name": "fontSize",
-                    "default": "0.00px"
+                    "default": "0.00px", // Docs says 16fp, but current theme values is 0.00px
+                    "type": "LengthNonNegNonPct"
                 },
                 {
                     "name": "fontWeight",
@@ -1960,15 +1956,16 @@
                     "attributes": [
                         {
                             "name": "size",
-                            "default": "0.00px"
+                            "default": "0.00px",  // Docs says 16fp, but current theme values is 0.00px
+                            "type": "LengthNonNegNonPct"
                         },
                         {
-                            "name": "fontWeight",
+                            "name": "weight",
                             "default": "FontWeight.Normal",
                             "fixtures": ["FontWeightNumbers", "FontWeightStrings"]
                         },
                         {
-                            "name": "fontFamily",
+                            "name": "family",
                             "default": "Harmony\"\"OS Sans",
                             "type": "FontFamily"
                         },
@@ -2075,14 +2072,6 @@
                 "setTypeTestTypeValidValues",
                 "setTextOverflowTestTextOverflowValidValues",
                 "setTextOverflowTestTextOverflowInvalidValues",
-                "setPlaceholderFontTestDefaultValues",
-                "setPlaceholderFontTestPlaceholderFontSizeValidValues",
-                "setPlaceholderFontTestPlaceholderFontSizeInvalidValues",
-                "setPlaceholderFontTestPlaceholderFontWeightValidValues",
-                "setPlaceholderFontTestPlaceholderFontWeightInvalidValues",
-                "setPlaceholderFontTestPlaceholderFontFamilyValidValues",
-                "setPlaceholderFontTestPlaceholderFontFamilyInvalidValues",
-                "setPlaceholderFontTestPlaceholderFontStyleInvalidValues",
                 "setCopyOptionTestCopyOptionValidValues",
                 "setCopyOptionTestCopyOptionInvalidValues",
                 "setTextAlignTestTextAlignValidValues",
@@ -4326,7 +4315,7 @@
                         {
                             "name": "size",
                             "default": "16.00fp",
-                            "fixtures": ["LengthPosNonPct"],
+                            "fixtures": ["LengthNonNegNonPct"],
                         },
                         {
                             "name": "weight",

@@ -124,6 +124,11 @@ void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src)
     dst.ptr = reinterpret_cast<Ark_NativePointer>(&const_cast<StyledStringPeer&>(src));
 }
 
+void AssignArkValue(Ark_TextAreaController& dst, const TextAreaControllerPeer& src)
+{
+    dst.ptr = reinterpret_cast<Ark_NativePointer>(&const_cast<TextAreaControllerPeer&>(src));
+}
+
 void AssignArkValue(Ark_Length& dst, const double& src)
 {
     dst.type = ARK_RUNTIME_NUMBER;
