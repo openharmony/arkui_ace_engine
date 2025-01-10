@@ -1342,7 +1342,7 @@ HWTEST_F(ListModifierTest, setOnItemMoveTest, TestSize.Level1)
 
 /*
  * @tc.name: DISABLED_setOnItemDeleteTest
- * @tc.desc: Check the functionality of ListModifier.setOnItemMove
+ * @tc.desc: Check the functionality of ListModifier.setOnItemDelete
  * @tc.type: FUNC
  */
 HWTEST_F(ListModifierTest, DISABLED_setOnItemDeleteTest, TestSize.Level1)
