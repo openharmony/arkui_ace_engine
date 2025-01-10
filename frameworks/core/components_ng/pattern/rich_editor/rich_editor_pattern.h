@@ -1257,10 +1257,11 @@ private:
     std::vector<RefPtr<SpanNode>> GetParagraphNodes(int32_t start, int32_t end) const;
     void OnHover(bool isHover);
     void ChangeMouseStyle(MouseFormat format, bool freeMouseHoldNode = false);
-    bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
+    bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
+        SourceType sourceType = SourceType::NONE);
     void UpdateCaretInfoToController();
 #if defined(ENABLE_STANDARD_INPUT)
-    bool EnableStandardInput(bool needShowSoftKeyboard);
+    bool EnableStandardInput(bool needShowSoftKeyboard, SourceType sourceType = SourceType::NONE);
     std::optional<MiscServices::TextConfig> GetMiscTextConfig();
 #else
     bool UnableStandardInput(bool isFocusViewChanged);
@@ -1443,6 +1444,7 @@ private:
     bool UpdatePreviewText(const std::u16string& previewTextValue, const PreviewRange& range);
     bool IsEnPreview();
     void SetMagnifierLocalOffset(Offset localOffset);
+    void SetMagnifierOffsetWithAnimation(Offset offset);
     void UpdateSelectionAndHandleVisibility();
 
 #if defined(ENABLE_STANDARD_INPUT)
@@ -1531,6 +1533,7 @@ private:
     bool isSingleHandle_ = false;
     TouchAndMoveCaretState moveCaretState_;
     FloatingCaretState floatingCaretState_;
+    std::shared_ptr<AnimationUtils::Animation> magnifierAnimation_;
     // Recorded when touch down or mouse left button press.
     OffsetF globalOffsetOnMoveStart_;
     SelectionRangeInfo lastSelectionRange_{-1, -1};

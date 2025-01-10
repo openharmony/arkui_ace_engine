@@ -555,6 +555,7 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
         auto overlayManager = GetOverlayManager(GetInstanceId());
         CHECK_NULL_RETURN(overlayManager, false);
         auto currentContainer = Container::Current();
+        CHECK_NULL_RETURN(currentContainer, false);
         if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
             return overlayManager->RemoveOverlayInSubwindow();
         } else {

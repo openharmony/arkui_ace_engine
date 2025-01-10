@@ -15,10 +15,9 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_column_split_ffi.h"
 
+#include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/linear_split/linear_split_model.h"
-#include "bridge/cj_frontend/cppview/shape_abstract.h"
-
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;

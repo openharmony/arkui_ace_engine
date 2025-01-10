@@ -177,6 +177,7 @@ template("ace_osal_ohos_source_set") {
     external_deps += [
       "ability_runtime:abilitykit_native",
       "ability_runtime:app_manager",
+      "ability_runtime:connect_server_manager",
       "ability_runtime:wantagent_innerkits",
       "app_file_service:fileuri_native",
       "background_task_mgr:bgtaskmgr_innerkits",

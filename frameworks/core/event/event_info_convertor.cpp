@@ -21,7 +21,7 @@ bool EventInfoConvertor::ConvertMouseToTouchIfNeeded(const MouseInfo& mouseInfo,
     return false;
 }
 
-bool EventInfoConvertor::IsTouchEventNeedAbandoned(TouchEventInfo& touchEventInfo)
+bool EventInfoConvertor::IsTouchEventNeedAbandoned(const TouchEventInfo& touchEventInfo)
 {
     return false;
 }

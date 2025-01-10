@@ -450,6 +450,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                               ? false : focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
     DragDropGlobalController::GetInstance().SetPreDragStatus(PreDragStatus::ACTION_DETECTING_STATUS);
     
+    DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(false);
     auto actionStart = [weak = WeakClaim(this), touchRestrict](GestureEvent& info) {
         auto containerId = Container::CurrentId();
         TAG_LOGI(AceLogTag::ACE_DRAG, "Trigger drag action start.");
@@ -1036,6 +1037,9 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
             auto webPattern = frameNode->GetPattern<WebPattern>();
             CHECK_NULL_VOID(webPattern);
             bool isWebmageDrag = webPattern->IsImageDrag();
+            if (isWebmageDrag) {
+                DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
+            }
             WebInfoType type = webPattern->GetWebInfoType();
             CHECK_NULL_VOID(isWebmageDrag && type == WebInfoType::TYPE_MOBILE);
 #endif

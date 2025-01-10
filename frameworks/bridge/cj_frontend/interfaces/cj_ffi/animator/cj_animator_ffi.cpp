@@ -116,7 +116,9 @@ int32_t FfiAnimatorPlay(int64_t id)
         auto result = animator->AttachSchedulerOnContainer();
         if (!result) {
             TAG_LOGW(AceLogTag::ACE_ANIMATION,
-                "Animator: play failed, animator is not bound to specific context, id:%{public}d", animator->GetId());
+                "Animator: play failed, animator is not bound to specific "
+                "context, id:%{public}d",
+                animator->GetId());
             return INIT_ERROR;
         }
     }
@@ -194,11 +196,32 @@ int32_t FfiAnimatorReverse(int64_t id)
     if (!animator->HasScheduler()) {
         auto result = animator->AttachSchedulerOnContainer();
         if (!result) {
-            TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: reverse failed, animator is not bound to specific context");
+            TAG_LOGW(AceLogTag::ACE_ANIMATION, "JsAnimator: reverse failed, animator "
+                                               "is not bound to specific context");
             return INIT_ERROR;
         }
     }
     animator->Reverse();
+    return ANIMATOR_OK;
+}
+
+int32_t FfiAnimatorSetExpectedFrameRateRange(int64_t id, int32_t minVal, int32_t maxVal, int32_t exceptedVal)
+{
+    auto nativeAnimatorResult = FFIData::GetData<AnimatorResultImpl>(id);
+    if (!nativeAnimatorResult) {
+        return INIT_ERROR;
+    }
+    auto animator = nativeAnimatorResult->GetAnimator();
+    if (!animator) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "Animator: no animator is created when call play");
+        return INIT_ERROR;
+    }
+    FrameRateRange frameRateRange;
+    frameRateRange.Set(minVal, maxVal, exceptedVal);
+    animator->SetExpectedFrameRateRange(frameRateRange);
+    if (!frameRateRange.IsValid()) {
+        return INIT_ERROR;
+    }
     return ANIMATOR_OK;
 }
 
@@ -212,6 +235,16 @@ int32_t FfiAnimatorOnframe(int64_t id, int64_t funcId)
     return ANIMATOR_OK;
 }
 
+int32_t FfiAnimatorOnFrame(int64_t id, int64_t funcId)
+{
+    auto nativeAnimatorResult = FFIData::GetData<AnimatorResultImpl>(id);
+    if (!nativeAnimatorResult) {
+        return INIT_ERROR;
+    }
+    nativeAnimatorResult->SetOnFrame(funcId);
+    return ANIMATOR_OK;
+}
+
 int32_t FfiAnimatorOncancel(int64_t id, int64_t funcId)
 {
     auto nativeAnimatorResult = FFIData::GetData<AnimatorResultImpl>(id);
@@ -219,6 +252,16 @@ int32_t FfiAnimatorOncancel(int64_t id, int64_t funcId)
         return INIT_ERROR;
     }
     nativeAnimatorResult->SetOncancel(funcId);
+    return ANIMATOR_OK;
+}
+
+int32_t FfiAnimatorOnCancel(int64_t id, int64_t funcId)
+{
+    auto nativeAnimatorResult = FFIData::GetData<AnimatorResultImpl>(id);
+    if (!nativeAnimatorResult) {
+        return INIT_ERROR;
+    }
+    nativeAnimatorResult->SetOnCancel(funcId);
     return ANIMATOR_OK;
 }
 
@@ -232,6 +275,16 @@ int32_t FfiAnimatorOnfinish(int64_t id, int64_t funcId)
     return ANIMATOR_OK;
 }
 
+int32_t FfiAnimatorOnFinish(int64_t id, int64_t funcId)
+{
+    auto nativeAnimatorResult = FFIData::GetData<AnimatorResultImpl>(id);
+    if (!nativeAnimatorResult) {
+        return INIT_ERROR;
+    }
+    nativeAnimatorResult->SetOnFinish(funcId);
+    return ANIMATOR_OK;
+}
+
 int32_t FfiAnimatorOnrepeat(int64_t id, int64_t funcId)
 {
     auto nativeAnimatorResult = FFIData::GetData<AnimatorResultImpl>(id);
@@ -239,6 +292,16 @@ int32_t FfiAnimatorOnrepeat(int64_t id, int64_t funcId)
         return INIT_ERROR;
     }
     nativeAnimatorResult->SetOnrepeat(funcId);
+    return ANIMATOR_OK;
+}
+
+int32_t FfiAnimatorOnRepeat(int64_t id, int64_t funcId)
+{
+    auto nativeAnimatorResult = FFIData::GetData<AnimatorResultImpl>(id);
+    if (!nativeAnimatorResult) {
+        return INIT_ERROR;
+    }
+    nativeAnimatorResult->SetOnRepeat(funcId);
     return ANIMATOR_OK;
 }
 }

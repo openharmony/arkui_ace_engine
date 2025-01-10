@@ -31,7 +31,8 @@ bool Frontend::MaybeRelease()
     } else {
         std::lock_guard lock(destructMutex_);
         LOGI("Post Destroy Frontend Task to JS thread.");
-        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::JS, "ArkUIFrontendRelease");
+        return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::JS, "ArkUIFrontendRelease",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 }
 

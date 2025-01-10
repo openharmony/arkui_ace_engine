@@ -15,13 +15,19 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_checkbox_ffi.h"
 
-
 #include "cj_lambda.h"
+
+#include "core/components/checkable/checkable_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
+
+namespace {
+constexpr int32_t INVALID_UNIT = -1;
+constexpr float CHECK_BOX_MARK_SIZE_INVALID_VALUE = -1.0f;
+} // namespace
 
 extern "C" {
 void FfiOHOSAceFrameworkCheckBoxCreate(const char* name, const char* group)
@@ -107,5 +113,42 @@ void FfiCheckBoxSetResponseRegionArray(VectorStringPtr vecContent)
     std::vector<DimensionRect> result;
     ParseVectorStringPtr(vecContent, result);
     CheckBoxModel::GetInstance()->SetResponseRegion(result);
+}
+
+void FfiCheckBoxCreateWithIndicator(const char* name, const char* group, void (*indicatorBuilder)())
+{
+    auto lambda = CJLambda::Create(indicatorBuilder);
+    auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    std::optional<std::function<void()>> customBuilderFunc = [func = std::move(lambda), node = targetNode]() {
+        PipelineContext::SetCallBackNode(node);
+        func();
+    };
+    CheckBoxModel::GetInstance()->Create(name, group, "Checkbox");
+    CheckBoxModel::GetInstance()->SetBuilder(customBuilderFunc);
+}
+
+void FfiCheckBoxUnselectedColor(uint32_t color)
+{
+    CheckBoxModel::GetInstance()->SetUnSelectedColor(Color(color));
+}
+
+void FfiCheckBoxMarkStyle(
+    uint32_t strokeColor, double size, int32_t sizeUnit, double strokeWidth, int32_t strokeWidthUnit)
+{
+    auto theme = GetTheme<CheckboxTheme>();
+    Color strokeColorValue = Color(strokeColor);
+    CheckBoxModel::GetInstance()->SetCheckMarkColor(strokeColorValue);
+    if (sizeUnit != INVALID_UNIT && static_cast<DimensionUnit>(sizeUnit) != DimensionUnit::PERCENT && size >= 0.0) {
+        CheckBoxModel::GetInstance()->SetCheckMarkSize(CalcDimension(size, static_cast<DimensionUnit>(sizeUnit)));
+    } else {
+        CheckBoxModel::GetInstance()->SetCheckMarkSize(Dimension(CHECK_BOX_MARK_SIZE_INVALID_VALUE));
+    }
+    if (strokeWidthUnit != INVALID_UNIT && static_cast<DimensionUnit>(strokeWidthUnit) != DimensionUnit::PERCENT &&
+        strokeWidth >= 0.0) {
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(
+            CalcDimension(strokeWidth, static_cast<DimensionUnit>(strokeWidthUnit)));
+    } else {
+        CheckBoxModel::GetInstance()->SetCheckMarkWidth(theme->GetCheckStroke());
+    }
 }
 }

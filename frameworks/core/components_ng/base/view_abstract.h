@@ -529,6 +529,7 @@ public:
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
     static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
+    static void SetNodeBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
     static void SetInvert(FrameNode* frameNode, const InvertVariant& invert);
     static void SetSepia(FrameNode* frameNode, const Dimension& sepia);
     static void SetSaturate(FrameNode* frameNode, const Dimension& saturate);
@@ -831,9 +832,6 @@ private:
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
     static int32_t OpenBindPopup(
         const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
-    static int32_t CloseBindPopup(
-        const RefPtr<PopupParam>& param, const int32_t& targetId, const RefPtr<UINode>& customNode);
-    static bool PopupIsCurrentOnShow(const RefPtr<UINode>& customNode);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;
