@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 
 #include "base/log/dump_log.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -25,6 +26,9 @@ constexpr double BAR_ADAPT_EPSLION = 1.0;
 constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 constexpr int32_t LONG_PRESS_TIME_THRESHOLD_MS = 500;
 constexpr int32_t SCROLL_BAR_LAYOUT_INFO_COUNT = 30;
+#ifdef ARKUI_WEARABLE
+constexpr char SCROLL_BAR_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength3";
+#endif
 } // namespace
 
 ScrollBar::ScrollBar()
@@ -1002,6 +1006,9 @@ void ScrollBar::PlayScrollBarAppearAnimation()
 
 void ScrollBar::PlayScrollBarGrowAnimation()
 {
+#ifdef ARKUI_WEARABLE
+    VibratorUtils::StartVibraFeedback(SCROLL_BAR_VIBRATOR_WEAK);
+#endif
     PlayScrollBarAppearAnimation();
     normalWidth_ = activeWidth_;
     FlushBarWidth();
@@ -1011,6 +1018,9 @@ void ScrollBar::PlayScrollBarGrowAnimation()
 
 void ScrollBar::PlayScrollBarShrinkAnimation()
 {
+#ifdef ARKUI_WEARABLE
+    VibratorUtils::StartVibraFeedback(SCROLL_BAR_VIBRATOR_WEAK);
+#endif
     normalWidth_ = inactiveWidth_;
     FlushBarWidth();
     hoverAnimationType_ = HoverAnimationType::SHRINK;
