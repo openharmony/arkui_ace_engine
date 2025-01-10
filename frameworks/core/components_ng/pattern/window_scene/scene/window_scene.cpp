@@ -703,17 +703,23 @@ uint32_t WindowScene::GetWindowPatternType() const
 void WindowScene::SetSubWindowBufferAvailableCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& surfaceNode)
 {
     CHECK_NULL_VOID(surfaceNode);
-    auto subWindowCallback = [weakSession = wptr(session_), weakThis = WeakClaim(this)]() {
-        auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
-        auto host = self->GetHost();
-        CHECK_NULL_VOID(host);
-        auto session = weakSession.promote();
-        CHECK_NULL_VOID(session);
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
-            "subWindowBufferAvailable id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
-            session->GetPersistentId(), host->GetId(), session->GetWindowType(), session->GetWindowName().c_str());
-        session->SetBufferAvailable(true);
+    auto subWindowCallback = [weakSession = wptr(session_), weakThis = WeakClaim(this), instanceId = instanceId_]() {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent([weakThis, weakSession]() {
+            auto self = weakThis.Upgrade();
+            CHECK_NULL_VOID(self);
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            auto session = weakSession.promote();
+            CHECK_NULL_VOID(session);
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+                "subWindowBufferAvailable id: %{public}d, node id: %{public}d, type: %{public}d, name: %{public}s",
+                session->GetPersistentId(), host->GetId(), session->GetWindowType(), session->GetWindowName().c_str());
+            session->SetBufferAvailable(true);
+        },
+            "ArkUIWindowSceneSubWindowBufferAvailable", TaskExecutor::TaskType::UI);
     };
     surfaceNode->SetBufferAvailableCallback(subWindowCallback);
 }
