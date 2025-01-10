@@ -1078,7 +1078,6 @@ void FormManagerDelegate::ProcessEnableForm(bool enable)
 
 void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo)
 {
-    std::lock_guard<std::mutex> lock(this->recycleMutex_);
     wantCache_.SetElementName(info.bundleName, info.abilityName);
 
     if (info.wantWrap) {
