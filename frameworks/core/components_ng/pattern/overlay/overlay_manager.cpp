@@ -4761,6 +4761,9 @@ void OverlayManager::UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode,
         UpdateSheetMask(maskNode, sheetNode, currentStyle, isPartialUpdate);
     }
     sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto sheetWrapper = sheetNode->GetParent();
+    CHECK_NULL_VOID(sheetWrapper);
+    sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     pipeline->FlushUITasks();
     ComputeSheetOffset(currentStyle, sheetNode);
 }
@@ -4951,7 +4954,7 @@ RefPtr<FrameNode> OverlayManager::CreateSheetMask(const RefPtr<FrameNode>& sheet
 {
     // create maskColor node(sheetWrapper)
     auto maskNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetWrapperPattern>());
+        AceType::MakeRefPtr<SheetWrapperPattern>(targetNode->GetId(), targetNode->GetTag()));
     CHECK_NULL_RETURN(maskNode, nullptr);
     auto maskLayoutProps = maskNode->GetLayoutProperty();
     CHECK_NULL_RETURN(maskLayoutProps, nullptr);

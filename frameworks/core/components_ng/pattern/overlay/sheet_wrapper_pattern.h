@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_paint_method.h"
 
@@ -27,6 +28,9 @@ class SheetWrapperPattern : virtual public PopupBasePattern {
 
 public:
     SheetWrapperPattern() = default;
+
+    SheetWrapperPattern(int32_t targetId, const std::string& targetTag) : targetId_(targetId), targetTag_(targetTag) {}
+
     ~SheetWrapperPattern() override = default;
 
     FocusPattern GetFocusPattern() const override
@@ -36,7 +40,17 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<SheetWrapperLayoutAlgorithm>();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto sheetNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(sheetNode, nullptr);
+        auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
+        CHECK_NULL_RETURN(sheetLayoutProperty, nullptr);
+        auto sheetStyle = sheetLayoutProperty->GetSheetStyleValue();
+        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_RETURN(sheetPattern, nullptr);
+        return MakeRefPtr<SheetWrapperLayoutAlgorithm>(
+            targetId_, targetTag_, sheetStyle, sheetPattern->GetSheetType());
     }
 
     void OnAttachToMainTree() override
@@ -75,6 +89,8 @@ protected:
     }
 
 private:
+    int32_t targetId_ = -1;
+    std::string targetTag_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetWrapperPattern);
 };
