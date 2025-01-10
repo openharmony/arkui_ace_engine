@@ -215,6 +215,7 @@ struct ArkUITouchEvent {
 
     ArkUI_Int32 subKind; // ArkUIEventSubKind actually
     ArkUI_Int32 interceptResult;
+    ArkUI_Int32 changedPointerId;
 };
 
 struct ArkUIMouseEvent {
