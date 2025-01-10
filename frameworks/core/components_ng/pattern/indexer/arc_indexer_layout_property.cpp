@@ -55,7 +55,7 @@ void ArcIndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, con
     defaultPopupFont.SetFontWeight(FontWeight::W500);
     defaultPopupFont.SetFontFamilies(fontFamily);
     json->PutExtAttr("font", ToJsonObjectValue(propFont_.value_or(defaultFont)), filter);
-    json->PutExtAttr("selectFont", ToJsonObjectValue(propSelectedFont_.value_or(defaultFont)), filter);
+    json->PutExtAttr("selectedFont", ToJsonObjectValue(propSelectedFont_.value_or(defaultFont)), filter);
     json->PutExtAttr("popupFont", ToJsonObjectValue(propPopupFont_.value_or(defaultPopupFont)), filter);
     json->PutExtAttr("autoCollapse", propAutoCollapse_.value_or(false) ? "true" : "false", filter);
 }

@@ -44,8 +44,7 @@ const Dimension OFFSET_LENGTH = 5.5_vp;
 const Dimension DIALOG_OFFSET = 1.0_vp;
 const Dimension DIALOG_OFFSET_LENGTH = 1.0_vp;
 constexpr uint32_t HALF = 2;
-const Dimension FOUCS_WIDTH = 2.0_vp;
-const Dimension MARGIN_SIZE = 12.0_vp;
+const Dimension FOCUS_WIDTH = 2.0_vp;
 constexpr float DISABLE_ALPHA = 0.6f;
 constexpr float MAX_PERCENT = 100.0f;
 } // namespace
@@ -434,13 +433,39 @@ void TextPickerPattern::CalcLeftTotalColumnWidth(
     }
 }
 
+void TextPickerPattern::ColumnPatternInitHapticController()
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+    if (!isHapticChanged_) {
+        return;
+    }
+
+    isHapticChanged_ = false;
+    auto frameNodes = GetColumnNodes();
+    for (auto iter : frameNodes) {
+        auto columnNode = iter.second;
+        if (!columnNode) {
+            continue;
+        }
+        auto columnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+        if (!columnPattern) {
+            continue;
+        }
+        columnPattern->InitHapticController(columnNode);
+    }
+}
+
 void TextPickerPattern::OnModifyDone()
 {
     Pattern::CheckLocalized();
     if (isFiredSelectsChange_) {
         isFiredSelectsChange_ = false;
+        ColumnPatternInitHapticController();
         return;
     }
+    isHapticChanged_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<LinearLayoutProperty>();
@@ -869,22 +894,13 @@ RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
     if (!GetIsShowInDialog()) {
         paintRectHeight = paintRectHeight - OFFSET_LENGTH.ConvertToPx();
         centerY = centerY + OFFSET.ConvertToPx();
-        if (paintRectWidth > columnWidth) {
-            paintRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_INTERVAL.ConvertToPx();
-            centerX = currentFocusIndex * (paintRectWidth + FOUCS_WIDTH.ConvertToPx() + PRESS_INTERVAL.ConvertToPx()) +
-                      FOUCS_WIDTH.ConvertToPx();
-        } else {
-            centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
-        }
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-            paintRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
-            centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
-        }
+        paintRectWidth = columnWidth - FOCUS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
+        centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
         AdjustFocusBoxOffset(centerX, centerY);
     } else {
         paintRectHeight = paintRectHeight - DIALOG_OFFSET.ConvertToPx();
         centerY = centerY + DIALOG_OFFSET_LENGTH.ConvertToPx();
-        paintRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
+        paintRectWidth = columnWidth - FOCUS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
         centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
     }
     return RectF(centerX, centerY, paintRectWidth, paintRectHeight);
@@ -1309,6 +1325,7 @@ void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
             }
         }
     }
+    json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
 }
 
 std::string TextPickerPattern::GetRangeStr() const

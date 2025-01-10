@@ -345,7 +345,7 @@ class SwiperDisplayArrowModifier extends ModifierWithKey<ArkDisplayArrow> {
   }
 }
 
-class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | DigitIndicator> {
+class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | DigitIndicator | IndicatorComponentController> {
   static identity: Symbol = Symbol('swiperIndicator');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -435,7 +435,7 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
           bottom
         );
       } else {
-        getUINativeModule().swiper.setSwiperIndicator(node, 'boolean', true);
+        getUINativeModule().swiper.setSwiperIndicator(node, "IndicatorComponentController", this.value );
       }
     }
   }
@@ -679,8 +679,8 @@ class SwiperAutoPlayModifier extends ModifierWithKey<ArkAutoPlay> {
     }
   }
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay)
-      || !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched);
+    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay) ||
+      !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched);
   }
 }
 class SwiperIndexModifier extends ModifierWithKey<number> {

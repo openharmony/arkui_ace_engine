@@ -272,12 +272,12 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Gap002, TestSize.Level1)
     bool smooth = GetParam();
     int32_t index = 5;
     ScrollToIndex(index, smooth, ScrollAlign::AUTO);
-    EXPECT_TRUE(TickPosition(-(ITEM_MAIN_SIZE * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT)));
+    EXPECT_TRUE(TickPosition(-(ITEM_MAIN_SIZE * 3 + BIG_ROW_GAP * 2 - HEIGHT)));
     /**
      * @tc.cases: use ScrollTo to make item 5 in the last line, ScrollTo index:5, text ScrollAlign::AUTO
      * @tc.expected: scrollToIndex don't change grid offset
      */
-    auto autoPosition = ITEM_MAIN_SIZE * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT + ITEM_MAIN_SIZE;
+    auto autoPosition = ITEM_MAIN_SIZE * 3 + BIG_ROW_GAP * 2 - HEIGHT + ITEM_MAIN_SIZE;
     ScrollTo(autoPosition);
     ScrollToIndex(index, smooth, ScrollAlign::AUTO);
     EXPECT_TRUE(TickPosition(-autoPosition));
@@ -300,10 +300,10 @@ HWTEST_P(GridScrollerTestNg, ScrollToIndex_Gap003, TestSize.Level1)
     CreateFixedItems(15);
     CreateDone();
 
-    auto endPosition = ITEM_MAIN_SIZE * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT;
+    auto endPosition = ITEM_MAIN_SIZE * 3 + BIG_ROW_GAP * 2 - HEIGHT;
     bool smooth = GetParam();
     ScrollToIndex(5, smooth, ScrollAlign::CENTER);
-    EXPECT_TRUE(TickPosition(-(endPosition + (GRID_HEIGHT - ITEM_MAIN_SIZE) / 2)));
+    EXPECT_TRUE(TickPosition(-(endPosition + (HEIGHT - ITEM_MAIN_SIZE) / 2)));
 }
 
 /**
@@ -551,7 +551,7 @@ HWTEST_P(GridScrollerTestNg, AnimateTo003, TestSize.Level1)
 
 /**
  * @tc.name: AnimateTo004
- * @tc.desc: Test scroll position greater than GRID_HEIGHT
+ * @tc.desc: Test scroll position greater than HEIGHT
  * @tc.type: FUNC
  */
 HWTEST_P(GridScrollerTestNg, AnimateTo004, TestSize.Level1)
@@ -676,7 +676,7 @@ HWTEST_P(GridScrollerTestNg, ScrollPage001, TestSize.Level1)
      */
     bool smooth = GetParam();
     ScrollPage(false, smooth);
-    EXPECT_TRUE(TickPosition(-GRID_HEIGHT));
+    EXPECT_TRUE(TickPosition(-HEIGHT));
 
     /**
      * @tc.steps: step2. ScrollPage up
@@ -834,7 +834,7 @@ HWTEST_F(GridScrollerTestNg, GetInfo001, TestSize.Level1)
     EXPECT_EQ(GetScrollDirection(), Axis::VERTICAL);
     EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset()));
     EXPECT_FALSE(IsAtEnd());
-    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, 0, GRID_WIDTH, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, 0, WIDTH, ITEM_MAIN_SIZE)));
     EXPECT_TRUE(IsEqual(GetItemRect(4), Rect()));
 
     /**
@@ -844,7 +844,7 @@ HWTEST_F(GridScrollerTestNg, GetInfo001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset(0, ITEM_MAIN_SIZE)));
     EXPECT_FALSE(IsAtEnd());
     EXPECT_TRUE(IsEqual(GetItemRect(0), Rect()));
-    EXPECT_TRUE(IsEqual(GetItemRect(1), Rect(0, 0, GRID_WIDTH, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(1), Rect(0, 0, WIDTH, ITEM_MAIN_SIZE)));
     EXPECT_TRUE(IsEqual(GetItemRect(5), Rect()));
 
     /**
@@ -854,7 +854,7 @@ HWTEST_F(GridScrollerTestNg, GetInfo001, TestSize.Level1)
     EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset(0, 600.0f)));
     EXPECT_TRUE(IsAtEnd());
     EXPECT_TRUE(IsEqual(GetItemRect(5), Rect()));
-    EXPECT_TRUE(IsEqual(GetItemRect(6), Rect(0, 0, GRID_WIDTH, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(6), Rect(0, 0, WIDTH, ITEM_MAIN_SIZE)));
 }
 
 /**

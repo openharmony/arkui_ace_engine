@@ -41,6 +41,7 @@ const int32_t PRESENT_CUSTOM_DIALOG_PARAM_MAND_COUNT = 1;
 const int32_t PRESENT_CUSTOM_DIALOG_PARAM_INDEX_CONTROLLER = 1;
 const int32_t PRESENT_CUSTOM_DIALOG_PARAM_INDEX_OPTIONS = 2;
 constexpr char DEFAULT_FONT_COLOR_STRING_VALUE[] = "#ff007dff";
+constexpr float AVOID_DISTANCE = 16.0f;
 const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
@@ -1222,7 +1223,7 @@ std::optional<CalcDimension> GetKeyboardAvoidDistanceProps(
                 Dimension dimension(avoidDistanceValue, avoidDistanceUnitValueType);
                 keyboardAvoidDistanceProperty = dimension;
             } else {
-                Dimension dimension(16.0f, DimensionUnit::VP);
+                Dimension dimension(AVOID_DISTANCE, DimensionUnit::VP);
                 keyboardAvoidDistanceProperty = dimension;
             }
         }

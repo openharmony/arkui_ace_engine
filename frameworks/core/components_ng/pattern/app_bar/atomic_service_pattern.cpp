@@ -27,6 +27,19 @@ void AtomicServicePattern::BeforeCreateLayoutWrapper()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<AppBarTheme>();
+    CHECK_NULL_VOID(theme);
+    auto menuBar = GetMenuBar();
+    auto safeArea = pipeline->GetSafeArea();
+    auto safeAreaLeft = safeArea.left_.Length();
+    auto safeAreaRight = safeArea.right_.Length();
+    if (safeAreaLeft_ != safeAreaLeft || safeAreaRight_ != safeAreaRight) {
+        safeAreaLeft_ = safeAreaLeft;
+        safeAreaRight_ = safeAreaRight;
+        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+        UpdateMenuBarLayout(theme, menuBar, isRtl);
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto manager = pipeline->GetSafeAreaManager();
@@ -34,8 +47,6 @@ void AtomicServicePattern::BeforeCreateLayoutWrapper()
     manager->SetIsAtomicService(true);
     manager->AddGeoRestoreNode(host);
     auto systemSafeArea = manager->GetSystemSafeArea();
-    auto theme = pipeline->GetTheme<AppBarTheme>();
-    CHECK_NULL_VOID(theme);
     float topMargin = theme->GetMenuBarTopMargin().ConvertToPx();
     topMargin += systemSafeArea.top_.Length();
     UpdateOverlayLayout();
@@ -43,8 +54,6 @@ void AtomicServicePattern::BeforeCreateLayoutWrapper()
     CHECK_NULL_VOID(menuBarRow);
     auto renderContext = menuBarRow->GetRenderContext();
     renderContext->UpdatePosition(OffsetT<Dimension>(0.0_vp, Dimension(topMargin, DimensionUnit::PX)));
-
-    auto menuBar = GetMenuBar();
     if (settedColorMode.has_value()) {
         UpdateMenuBarColor(theme, menuBar, settedColorMode.value());
     } else {
@@ -73,17 +82,6 @@ void AtomicServicePattern::UpdateLayoutMargin()
     layoutProperty->UpdateMargin(margin);
     stage->MarkModifyDone();
     stage->MarkDirtyNode();
-    // update menuBarRow margin
-    MarginProperty appBarmargin;
-    appBarmargin.left = CalcLength(safeArea.left_.Length());
-    appBarmargin.right = CalcLength(safeArea.right_.Length());
-    auto menuBarRow = GetMenuBarRow();
-    CHECK_NULL_VOID(menuBarRow);
-    auto property = menuBarRow->GetLayoutProperty();
-    CHECK_NULL_VOID(property);
-    property->UpdateMargin(appBarmargin);
-    menuBarRow->MarkModifyDone();
-    menuBarRow->MarkDirtyNode();
 }
 
 void AtomicServicePattern::UpdateOverlayLayout()
@@ -312,12 +310,19 @@ void AtomicServicePattern::UpdateMenuBarLayout(RefPtr<AppBarTheme>& theme, RefPt
     CHECK_NULL_VOID(menuBar);
 
     MarginProperty margin;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeArea = pipeline->GetSafeArea();
+
+    Dimension safeAreaLeft(pipeline->Px2VpWithCurrentDensity(safeArea.left_.Length()), DimensionUnit::VP);
+    Dimension safeAreaRight(pipeline->Px2VpWithCurrentDensity(safeArea.right_.Length()), DimensionUnit::VP);
+
     if (isRtl) {
-        margin.left = CalcLength(theme->GetMenuBarRightMargin());
-        margin.right = CalcLength(theme->GetMenuBarLeftMargin());
+        margin.left = CalcLength(theme->GetMenuBarRightMargin() + safeAreaLeft);
+        margin.right = CalcLength(theme->GetMenuBarLeftMargin() + safeAreaRight);
     } else {
-        margin.left = CalcLength(theme->GetMenuBarLeftMargin());
-        margin.right = CalcLength(theme->GetMenuBarRightMargin());
+        margin.left = CalcLength(theme->GetMenuBarLeftMargin() + safeAreaLeft);
+        margin.right = CalcLength(theme->GetMenuBarRightMargin() + safeAreaRight);
     }
     menuBar->GetLayoutProperty<LinearLayoutProperty>()->UpdateMargin(margin);
 

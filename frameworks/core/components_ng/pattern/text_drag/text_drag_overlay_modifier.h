@@ -109,9 +109,14 @@ public:
         selectedColor_->Set(static_cast<int32_t>(selectedColor));
     }
 
-    void SetIsHandleAnimation(bool isHandleAnimation)
+    void SetIsFirstHandleAnimated(bool isFirstHandleAnimated)
     {
-        isHandleAnimation_ = isHandleAnimation;
+        isFirstHandleAnimated_ = isFirstHandleAnimated;
+    }
+
+    void SetIsSecondHandleAnimated(bool isSecondHandleAnimated)
+    {
+        isSecondHandleAnimated_ = isSecondHandleAnimated;
     }
 
     void PaintBackground(const RSPath& path, RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern);
@@ -130,7 +135,8 @@ protected:
     WeakPtr<Pattern> pattern_;
     bool isAnimating_ = false;
     bool isHandlesShow_ = false;
-    bool isHandleAnimation_ = true;
+    bool isFirstHandleAnimated_ = true;
+    bool isSecondHandleAnimated_ = true;
     RefPtr<AnimatablePropertyFloat> backgroundOffset_;
     RefPtr<AnimatablePropertyFloat> selectedBackgroundOpacity_;
     RefPtr<AnimatablePropertyFloat> handleOpacity_;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,17 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/ui_extension/dynamic_node.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_node.h"
 
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/ui_extension/dynamic_pattern.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t DC_DEPTH = 2;
+}
 DynamicNode::DynamicNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : FrameNode(tag, nodeId, pattern, isRoot)
@@ -60,6 +63,6 @@ void DynamicNode::DumpTree(int32_t depth, bool hasJson)
     UINode::DumpTree(depth, hasJson);
     auto pattern = GetPattern<DynamicPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->DumpDynamicRenderer(depth + 1, hasJson);
+    pattern->DumpDynamicRenderer(depth + DC_DEPTH, hasJson);
 }
 } // namespace OHOS::Ace::NG

@@ -32,23 +32,22 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<CalendarPickerModel> CalendarPickerModel::instance_ = nullptr;
-std::mutex CalendarPickerModel::mutex_;
+std::once_flag CalendarPickerModel::onceFlag_;
+
 CalendarPickerModel* CalendarPickerModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            instance_.reset(new NG::CalendarPickerModelNG());
+        instance_.reset(new NG::CalendarPickerModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::CalendarPickerModelNG());
-            } else {
-                instance_.reset(new Framework::CalendarPickerModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::CalendarPickerModelNG());
+        } else {
+            instance_.reset(new Framework::CalendarPickerModelImpl());
         }
-    }
+#endif
+    });
+
     return instance_.get();
 }
 } // namespace OHOS::Ace
@@ -807,6 +806,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
             overlayManager->ShowCalendarDialog(
                 properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker");
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 } // namespace OHOS::Ace::Framework

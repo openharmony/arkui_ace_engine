@@ -416,6 +416,7 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest001, TestSize.Level1)
         .testCursorItems = { { 0, caretMetricsBegin, caretMetricsBegin}, {6, caretMetricsEnd, caretMetricsEnd} } };
     AddParagraph(paragraphItem);
     richEditorPattern->richTextRect_.SetSize({ 200.f, 200.f });
+    richEditorPattern->contentRect_ = { 0.0, 0.0, 500.0, 500.0 };
 
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->floatingCaretState_.Reset();
@@ -468,6 +469,7 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest002, TestSize.Level1)
         { 10, caretMetricsLineEndDown, caretMetricsLineEndUp} } };
     AddParagraph(paragraphItem);
     richEditorPattern->richTextRect_.SetSize({ 200.f, 200.f });
+    richEditorPattern->contentRect_ = { 0.0, 0.0, 500.0, 500.0 };
 
     richEditorPattern->caretPosition_ = 5;
     richEditorPattern->floatingCaretState_.Reset();
@@ -530,6 +532,7 @@ HWTEST_F(RichEditorPatternTestSevenNg, FloatingCaretTest003, TestSize.Level1)
         .testCursorItems = { { 10, caretMetricsLineEndDown, caretMetricsLineEndUp} } };
     AddParagraph(paragraphItem);
     richEditorPattern->richTextRect_.SetSize({ 200.f, 200.f });
+    richEditorPattern->contentRect_ = { 0.0, 0.0, 500.0, 500.0 };
 
     richEditorPattern->caretPosition_ = 10;
     richEditorPattern->floatingCaretState_.Reset();
@@ -562,5 +565,21 @@ HWTEST_F(RichEditorPatternTestSevenNg, UnableStandardInput002, TestSize.Level1)
     richEditorPattern->imeAttached_ = true;
     bool res = richEditorPattern->UnableStandardInput(false);
     EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: IsStopBackPress001
+ * @tc.desc: test IsStopBackPress
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, IsStopBackPress001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isStopBackPress_ = false;
+    richEditorPattern->isCustomKeyboardAttached_ = true;
+    auto result = richEditorPattern->OnBackPressed();
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG

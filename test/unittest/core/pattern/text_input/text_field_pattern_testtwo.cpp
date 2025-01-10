@@ -294,6 +294,8 @@ HWTEST_F(TextFieldPatternTestTwo, HandleClickEvent002, TestSize.Level0)
     themeConstants->currentThemeStyle_ = AceType::MakeRefPtr<ThemeStyle>();
     themeConstants->currentThemeStyle_->SetAttributes(attributes);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(TextOverlayTheme::Builder().Build(themeConstants)));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly(Return(TextOverlayTheme::Builder().Build(themeConstants)));
 
     auto selectOverlayPattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
     ASSERT_NE(selectOverlayPattern, nullptr);
@@ -339,6 +341,7 @@ HWTEST_F(TextFieldPatternTestTwo, HandleDoubleClickEvent001, TestSize.Level0)
     auto resourceAdapter = AceType::MakeRefPtr<MockResourceAdapterV2>();
     auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(resourceAdapter);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(TextFieldTheme::Builder().Build(themeConstants)));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(TextFieldTheme::Builder().Build(themeConstants)));
 
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
@@ -375,6 +378,7 @@ HWTEST_F(TextFieldPatternTestTwo, HandleTripleClickEvent001, TestSize.Level0)
     auto resourceAdapter = AceType::MakeRefPtr<MockResourceAdapterV2>();
     auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(resourceAdapter);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(TextFieldTheme::Builder().Build(themeConstants)));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(TextFieldTheme::Builder().Build(themeConstants)));
 
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);

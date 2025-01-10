@@ -49,48 +49,45 @@ const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType:
 const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
     TextOverflow::MARQUEE };
+constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK = true;
 }
 
 std::unique_ptr<TextPickerModel> TextPickerModel::textPickerInstance_ = nullptr;
 std::unique_ptr<TextPickerDialogModel> TextPickerDialogModel::textPickerDialogInstance_ = nullptr;
-std::mutex TextPickerModel::mutex_;
-std::mutex TextPickerDialogModel::mutex_;
+std::once_flag TextPickerModel::onceFlag_;
+std::once_flag TextPickerDialogModel::onceFlag_;
 
 TextPickerModel* TextPickerModel::GetInstance()
 {
-    if (!textPickerInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!textPickerInstance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            textPickerInstance_.reset(new NG::TextPickerModelNG());
+        textPickerInstance_.reset(new NG::TextPickerModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                textPickerInstance_.reset(new NG::TextPickerModelNG());
-            } else {
-                textPickerInstance_.reset(new Framework::TextPickerModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            textPickerInstance_.reset(new NG::TextPickerModelNG());
+        } else {
+            textPickerInstance_.reset(new Framework::TextPickerModelImpl());
         }
-    }
+#endif
+    });
+
     return textPickerInstance_.get();
 }
 
 TextPickerDialogModel* TextPickerDialogModel::GetInstance()
 {
-    if (!textPickerDialogInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!textPickerDialogInstance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
+        textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
-            } else {
-                textPickerDialogInstance_.reset(new Framework::TextPickerDialogModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            textPickerDialogInstance_.reset(new NG::TextPickerDialogModelNG());
+        } else {
+            textPickerDialogInstance_.reset(new Framework::TextPickerDialogModelImpl());
         }
-    }
+#endif
+    });
+
     return textPickerDialogInstance_.get();
 }
 } // namespace OHOS::Ace
@@ -227,6 +224,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSTextPicker>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSTextPicker>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
+    JSClass<JSTextPicker>::StaticMethod("enableHapticFeedback", &JSTextPicker::SetEnableHapticFeedback);
     JSClass<JSTextPicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1430,6 +1428,14 @@ void JSTextPicker::OnEnterSelectedArea(const JSCallbackInfo& info)
     TextPickerModel::GetInstance()->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
     info.ReturnSelf();
 }
+void JSTextPicker::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool isEnableHapticFeedback = DEFAULT_ENABLE_HAPTIC_FEEDBACK;
+    if (info[0]->IsBoolean()) {
+        isEnableHapticFeedback = info[0]->ToBoolean();
+    }
+    TextPickerModel::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);
+}
 
 void JSTextPickerDialog::JSBind(BindingTarget globalObj)
 {
@@ -1735,6 +1741,12 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
     }
 
+    bool isEnableHapticFeedback = DEFAULT_ENABLE_HAPTIC_FEEDBACK;
+    auto enableHapticFeedbackValue = paramObj->GetProperty("enableHapticFeedback");
+    if (enableHapticFeedbackValue->IsBoolean()) {
+        isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
+    }
+    settingData.isEnableHapticFeedback = isEnableHapticFeedback;
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
@@ -1747,7 +1759,8 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowTextDialog(properties, settingData, dialogEvent, dialogCancelEvent);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowTextPicker");
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowTextPicker",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 bool JSTextPickerDialog::ParseShowDataOptions(
@@ -1876,6 +1889,12 @@ bool JSTextPickerDialog::ParseShowData(const JSRef<JSObject>& paramObject, NG::T
     } else {
         ParseShowDataMultiContent(param.options, param.selecteds, param.values, attr, settingData);
     }
+    bool isEnableHapticFeedback = DEFAULT_ENABLE_HAPTIC_FEEDBACK;
+    auto enableHapticFeedbackValue = paramObject->GetProperty("enableHapticFeedback");
+    if (enableHapticFeedbackValue->IsBoolean()) {
+        isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
+    }
+    settingData.isEnableHapticFeedback = isEnableHapticFeedback;
     return true;
 }
 

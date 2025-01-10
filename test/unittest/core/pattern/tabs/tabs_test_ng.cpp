@@ -63,6 +63,7 @@ void TabsTestNg::SetUp() {}
 
 void TabsTestNg::TearDown()
 {
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     layoutProperty_ = nullptr;
@@ -120,7 +121,6 @@ TabsModelNG TabsTestNg::CreateTabs(BarPosition barPosition, int32_t index)
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
     tabBarNode->GetOrCreateFocusHub();
     GetTabs();
-    ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
     return model;
 }
 
@@ -139,16 +139,13 @@ TabContentModelNG TabsTestNg::CreateTabContent()
     tabContentNode->UpdateRecycleElmtId(elmtId); // for AddChildToGroup
     tabContentNode->GetTabBarItemId();           // for AddTabBarItem
     tabContentNode->SetParent(weakTab);          // for AddTabBarItem
-    ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
     return tabContentModel;
 }
 
-RefPtr<PaintWrapper> TabsTestNg::CreateTabsDone(TabsModelNG model)
+void TabsTestNg::CreateTabsDone(TabsModelNG model)
 {
     model.Pop();
-    frameNode_->ProcessOffscreenTask();
     CreateDone();
-    return frameNode_->CreatePaintWrapper();
 }
 
 void TabsTestNg::CreateTabContents(int32_t itemNumber)

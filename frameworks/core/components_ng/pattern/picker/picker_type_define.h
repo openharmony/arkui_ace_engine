@@ -87,6 +87,7 @@ struct DatePickerSettingData {
     std::map<std::string, PickerTime> timePickerProperty;
     PickerTextProperties properties;
     DateTimeType dateTimeOptions;
+    bool isEnableHapticFeedback = true;
 };
 
 struct TextPickerSettingData {
@@ -101,6 +102,7 @@ struct TextPickerSettingData {
     std::vector<NG::TextCascadePickerOptions> options;
     NG::TextCascadePickerOptionsAttr attr;
     bool isDisableTextStyleAnimation = false;
+    bool isEnableHapticFeedback = true;
 };
 
 struct TimePickerSettingData {
@@ -108,6 +110,7 @@ struct TimePickerSettingData {
     PickerDate dialogTitleDate;
     PickerTextProperties properties;
     DateTimeType dateTimeOptions;
+    bool isEnableHapticFeedback;
     bool showSecond;
     bool isEnableCascade;
 };

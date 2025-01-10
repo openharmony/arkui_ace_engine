@@ -297,6 +297,24 @@ public:
         return isCapi_;
     }
 
+    void SetDropAnimation(std::function<void()>&& executeDropAnimation)
+    {
+        executeDropAnimation_ = std::move(executeDropAnimation);
+    }
+
+    bool HasDropAnimation() const
+    {
+        return (executeDropAnimation_ != nullptr);
+    }
+
+    void ExecuteDropAnimation()
+    {
+        if (executeDropAnimation_) {
+            auto executeDropAnimation = executeDropAnimation_;
+            executeDropAnimation();
+        }
+    }
+
 private:
     RefPtr<PasteData> pasteData_;
     double screenX_ = 0.0;
@@ -321,6 +339,7 @@ private:
     Velocity velocity_;
     std::vector<KeyCode> pressedKeyCodes_;
     bool isCapi_ = false;
+    std::function<void()> executeDropAnimation_;
 };
 
 class NotifyDragEvent : public DragEvent {

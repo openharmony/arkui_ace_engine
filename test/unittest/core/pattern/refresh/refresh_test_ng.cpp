@@ -54,6 +54,7 @@ void RefreshTestNg::SetUp() {}
 
 void RefreshTestNg::TearDown()
 {
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -83,7 +84,7 @@ void RefreshTestNg::CreateText()
 {
     TextModelNG model;
     model.Create(u"text");
-    ViewAbstract::SetWidth(CalcLength(REFRESH_WIDTH));
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
     ViewAbstract::SetHeight(CalcLength(TEXT_HEIGHT));
     ViewStackProcessor::GetInstance()->Pop();
 }

@@ -18,9 +18,7 @@
 #include "test/unittest/core/pattern/scrollable/scrollable_test_utils.h"
 
 namespace OHOS::Ace::NG {
-class ListScrollVisibleContentChangeTestNg : public ListTestNg {
-public:
-};
+class ListScrollVisibleContentChangeTestNg : public ListTestNg {};
 
 /**
  * @tc.name: OnScrollVisibleContentChange001

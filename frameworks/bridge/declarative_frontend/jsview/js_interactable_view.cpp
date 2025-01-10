@@ -441,7 +441,7 @@ void JSInteractableView::ReportClickEvent(const WeakPtr<NG::FrameNode>& node, co
             if (!children.empty()) {
                 node.GetRawPtr()->GetContainerComponentText(content);
             }
-            data->Put("text", UtfUtils::Str16ToStr8(content).data());
+            data->Put("text", UtfUtils::Str16DebugToStr8(content).data());
             data->Put("position", node.GetRawPtr()->GetGeometryNode()->GetFrameRect().ToString().data());
         }
         UiSessionManager::GetInstance().ReportClickEvent(data->ToString());

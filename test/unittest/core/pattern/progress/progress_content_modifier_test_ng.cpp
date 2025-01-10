@@ -100,6 +100,8 @@ public:
 void ProgressConModTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
+    MockPipelineContext::GetCurrent()->SetUseFlushUITasks(true);
+    testing::FLAGS_gmock_verbose = "error";
     auto pipeline = PipelineContext::GetCurrentContext();
     pipeline->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     themeManager = AceType::MakeRefPtr<MockThemeManager>();
@@ -128,6 +130,7 @@ void ProgressConModTestNg::SetUp()
 
 void ProgressConModTestNg::TearDown()
 {
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;

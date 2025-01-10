@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1178,4 +1179,42 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest036, TestSize.Lev
     auto result1 = accessibilityProperty.GetAccessibilityResponseRegionRect(true);
     EXPECT_EQ(result1, rectInt);
 }
+
+/**
+ * @tc.name: AccessibilityPropertyTest037
+ * @tc.desc: AccessibilityRole
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest037, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    AccessibilityProperty accessibilityProperty;
+    ViewAbstractModelNG viewAbstractModelNG;
+    const std::string role = "";
+    viewAbstractModelNG.SetAccessibilityRole(role, true);
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityCustomRole(), "");
+    accessibilityProperty.SetAccessibilityCustomRole(role);
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityCustomRole(), role);
+    accessibilityProperty.ResetAccessibilityCustomRole();
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityCustomRole(), "");
+
+    const std::string customrole = "IMAGE";
+    viewAbstractModelNG.SetAccessibilityRole(customrole, false);
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityCustomRole(), customrole);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest038
+ * @tc.desc: OnAccessibilityFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest038, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    ViewAbstractModelNG viewAbstractModelNG;
+    viewAbstractModelNG.ResetOnAccessibilityFocus();
+    EXPECT_EQ(accessibilityProperty.onUserAccessibilityFocusCallbackImpl_, nullptr);
+}
+
 } // namespace OHOS::Ace::NG

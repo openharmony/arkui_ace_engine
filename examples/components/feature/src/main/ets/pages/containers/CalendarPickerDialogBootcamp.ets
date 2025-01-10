@@ -61,6 +61,26 @@ export struct CalendarPickerDialogBootcamp {
   @State enableCancelBorderRadius: boolean = false;
   @State compCancelBorderRadius: number = 10;
   @State buttonMargin: number = 20;
+  @State enableBackgroundBlurStyle: boolean = false;
+  @State compBackgroundBlurStyle: BlurStyle = BlurStyle.COMPONENT_ULTRA_THICK;
+  @State enableCompBackgroundColor: boolean = false;
+  @State compBackgroundColor: ResourceColor = Color.Transparent;
+  @State enableCompShadowType: boolean = false;
+  @State compShadowType: boolean = true;
+  @State enableCompShadowStyle: boolean = false;
+  @State compShadowStyle: ShadowStyle = ShadowStyle.OUTER_DEFAULT_MD;
+  @State enableCompShadowOptionsRadius: boolean = false;
+  @State compShadowOptionsRadius: number = 0;
+  @State enableCompShadowOptionsType: boolean = false;
+  @State compShadowOptionsType: ShadowType = ShadowType.COLOR;
+  @State enableCompShadowOptionsColor: boolean = false;
+  @State compShadowOptionsColor: ResourceColor = '#ff000000';
+  @State enableCompShadowOptionsOffsetX: boolean = false;
+  @State compShadowOptionsOffsetX: number = 0;
+  @State enableCompShadowOptionsOffsetY: boolean = false;
+  @State compShadowOptionsOffsetY: number = 0;
+  @State enableCompShadowOptionsFill: boolean = false;
+  @State compShadowOptionsFill: boolean = false;
 
   build() {
     NavDestination() {
@@ -111,6 +131,21 @@ export struct CalendarPickerDialogBootcamp {
               backgroundColor: useEnabled(this.enableCancelBackGroundColor, this.compCancelBackGroundColor),
               borderRadius: useEnabled(this.enableCancelBorderRadius, this.compCancelBorderRadius)
             },
+            backgroundColor: useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor),
+            backgroundBlurStyle: useEnabled(this.enableBackgroundBlurStyle,
+              this.compBackgroundBlurStyle),
+            shadow: useEnabled(this.enableCompShadowType, this.compShadowType) ?
+            useEnabled(this.enableCompShadowStyle, this.compShadowStyle) : {
+                radius: useEnabled(this.enableCompShadowOptionsRadius,
+                  this.compShadowOptionsRadius),
+                type: useEnabled(this.enableCompShadowOptionsType, this.compShadowOptionsType),
+                color: useEnabled(this.enableCompShadowOptionsColor, this.compShadowOptionsColor),
+                offsetX: useEnabled(this.enableCompShadowOptionsOffsetX,
+                  this.compShadowOptionsOffsetX),
+                offsetY: useEnabled(this.enableCompShadowOptionsOffsetY,
+                  this.compShadowOptionsOffsetY),
+                fill: useEnabled(this.enableCompShadowOptionsFill, this.compShadowOptionsFill),
+              },
             onAccept: (value) => {
               console.info('calendar onAccept:' + JSON.stringify(value))
             },
@@ -142,68 +177,69 @@ export struct CalendarPickerDialogBootcamp {
   Parameters() {
     Scroll() {
       Column({ space: 8 }) {
+
         RadioBlock({
-          title: '确认按钮类型',
-          isEnabled: this.enableAcceptType,
-          value: this.compAcceptType,
+          title: 'CalendarDialogOptions.acceptButtonStyle.type',
+          isEnabled: $enableAcceptType,
+          value: $compAcceptType,
           dataSource: [
-            { label: '胶囊按钮', value: ButtonType.Capsule },
-            { label: '普通按钮', value: ButtonType.Normal },
-            { label: '圆形按钮', value: ButtonType.Circle },
-            { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
+            { label: 'Capsule', value: ButtonType.Capsule },
+            { label: 'Normal', value: ButtonType.Normal },
+            { label: 'Circle', value: ButtonType.Circle },
+            { label: 'ROUNDED_RECTANGLE', value: ButtonType.ROUNDED_RECTANGLE }
           ]
         })
 
         RadioBlock({
-          title: '取消按钮类型',
-          isEnabled: this.enableCancelType,
-          value: this.compCancelType,
+          title: 'CalendarDialogOptions.cancelButtonStyle.type',
+          isEnabled: $enableCancelType,
+          value: $compCancelType,
           dataSource: [
-            { label: '胶囊按钮', value: ButtonType.Capsule },
-            { label: '普通按钮', value: ButtonType.Normal },
-            { label: '圆形按钮', value: ButtonType.Circle },
-            { label: '圆角矩形按钮', value: ButtonType.ROUNDED_RECTANGLE }
+            { label: 'Capsule', value: ButtonType.Capsule },
+            { label: 'Normal', value: ButtonType.Normal },
+            { label: 'Circle', value: ButtonType.Circle },
+            { label: 'ROUNDED_RECTANGLE', value: ButtonType.ROUNDED_RECTANGLE }
           ]
         })
 
         RadioBlock({
-          title: '确认按钮样式',
-          isEnabled: this.enableAcceptStyle,
-          value: this.compAcceptStyle,
+          title: 'CalendarDialogOptions.acceptButtonStyle.Style.ButtonStyleMode',
+          isEnabled: $enableAcceptStyle,
+          value: $compAcceptStyle,
           dataSource: [
-            { label: '强调型', value: ButtonStyleMode.EMPHASIZED },
-            { label: '普通型', value: ButtonStyleMode.NORMAL },
-            { label: '文本型', value: ButtonStyleMode.TEXTUAL }
+            { label: 'EMPHASIZED', value: ButtonStyleMode.EMPHASIZED },
+            { label: 'NORMAL', value: ButtonStyleMode.NORMAL },
+            { label: 'TEXTUAL', value: ButtonStyleMode.TEXTUAL }
           ]
         })
 
         RadioBlock({
-          title: '取消按钮样式',
-          isEnabled: this.enableCancelStyle,
-          value: this.compCancelStyle,
+          title: 'CalendarDialogOptions.cancelButtonStyle.Style.ButtonStyleMode',
+          isEnabled: $enableCancelStyle,
+          value: $compCancelStyle,
           dataSource: [
-            { label: '强调型', value: ButtonStyleMode.EMPHASIZED },
-            { label: '普通型', value: ButtonStyleMode.NORMAL },
-            { label: '文本型', value: ButtonStyleMode.TEXTUAL }
+            { label: 'EMPHASIZED', value: ButtonStyleMode.EMPHASIZED },
+            { label: 'NORMAL', value: ButtonStyleMode.NORMAL },
+            { label: 'TEXTUAL', value: ButtonStyleMode.TEXTUAL }
           ]
         })
 
         ColorBlock({
-          title: '确认按钮字体颜色',
-          isEnabled: this.enableAcceptFontColor,
-          color: this.compAcceptFontColor
+          title: 'CalendarDialogOptions.acceptButtonStyle.fontColor',
+          isEnabled: $enableAcceptFontColor,
+          color: $compAcceptFontColor
         })
 
         ColorBlock({
-          title: '取消按钮字体颜色',
-          isEnabled: this.enableCancelFontColor,
-          color: this.compCancelFontColor
+          title: 'CalendarDialogOptions.cancelButtonStyle.fontColor',
+          isEnabled: $enableCancelFontColor,
+          color: $compCancelFontColor
         })
 
         RadioBlock({
-          title: '确认按钮角色',
-          isEnabled: this.enableAcceptRole,
-          value: this.compAcceptRole,
+          title: 'CalendarDialogOptions.acceptButtonStyle.role.ButtonRole',
+          isEnabled: $enableAcceptRole,
+          value: $compAcceptRole,
           dataSource: [
             { label: 'NORMAL', value: ButtonRole.NORMAL },
             { label: 'ERROR', value: ButtonRole.ERROR },
@@ -211,9 +247,9 @@ export struct CalendarPickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '取消按钮角色',
-          isEnabled: this.enableCancelRole,
-          value: this.compCancelRole,
+          title: 'CalendarDialogOptions.cancelButtonStyle.role.ButtonRole',
+          isEnabled: $enableCancelRole,
+          value: $compCancelRole,
           dataSource: [
             { label: 'NORMAL', value: ButtonRole.NORMAL },
             { label: 'ERROR', value: ButtonRole.ERROR },
@@ -221,40 +257,40 @@ export struct CalendarPickerDialogBootcamp {
         })
 
         SliderBlock({
-          title: '确认按钮尺寸',
-          isEnabled: this.enableAcceptFontSize,
-          value: this.compAcceptFontSize,
+          title: 'CalendarDialogOptions.acceptButtonStyle.fontSize',
+          isEnabled: $enableAcceptFontSize,
+          value: $compAcceptFontSize,
           min: 12,
           max: 16
         })
 
         SliderBlock({
-          title: '取消按钮尺寸',
-          isEnabled: this.enableCancelFontSize,
-          value: this.compCancelFontSize,
+          title: 'CalendarDialogOptions.cancelButtonStyle.fontSize',
+          isEnabled: $enableCancelFontSize,
+          value: $compCancelFontSize,
           min: 12,
           max: 16
         })
 
         SliderBlock({
-          title: '确认按钮字体粗细',
-          isEnabled: this.enableAcceptFontWeight,
-          value: this.compAcceptFontWeight,
+          title: 'CalendarDialogOptions.acceptButtonStyle.fontWeight',
+          isEnabled: $enableAcceptFontWeight,
+          value: $compAcceptFontWeight,
           min: 400,
           max: 800
         })
         SliderBlock({
-          title: '取消按钮字体粗细',
-          isEnabled: this.enableCancelFontWeight,
-          value: this.compCancelFontWeight,
+          title: 'CalendarDialogOptions.cancelButtonStyle.fontWeight',
+          isEnabled: $enableCancelFontWeight,
+          value: $compCancelFontWeight,
           min: 400,
           max: 800
         })
 
         RadioBlock({
-          title: '确认按钮字体样式',
-          isEnabled: this.enableAcceptFontStyle,
-          value: this.compAcceptFontStyle,
+          title: 'CalendarDialogOptions.acceptButtonStyle.fontStyle',
+          isEnabled: $enableAcceptFontStyle,
+          value: $compAcceptFontStyle,
           dataSource: [
             { label: 'Normal', value: FontStyle.Normal },
             { label: 'Italic', value: FontStyle.Italic },
@@ -262,9 +298,9 @@ export struct CalendarPickerDialogBootcamp {
         })
 
         RadioBlock({
-          title: '取消按钮字体样式',
-          isEnabled: this.enableCancelFontStyle,
-          value: this.compCancelFontStyle,
+          title: 'CalendarDialogOptions.cancelButtonStyle.fontStyle',
+          isEnabled: $enableCancelFontStyle,
+          value: $compCancelFontStyle,
           dataSource: [
             { label: 'Normal', value: FontStyle.Normal },
             { label: 'Italic', value: FontStyle.Italic },
@@ -272,32 +308,137 @@ export struct CalendarPickerDialogBootcamp {
         })
 
         ColorBlock({
-          title: '确认按钮背景颜色',
-          isEnabled: this.enableAcceptBackGroundColor,
-          color: this.compAcceptBackGroundColor
+          title: 'CalendarDialogOptions.acceptButtonStyle.backgroundColor',
+          isEnabled: $enableAcceptBackGroundColor,
+          color: $compAcceptBackGroundColor
         })
 
         ColorBlock({
-          title: '取消按钮背景颜色',
-          isEnabled: this.enableCancelBackGroundColor,
-          color: this.compCancelBackGroundColor
+          title: 'CalendarDialogOptions.cancelButtonStyle.backgroundColor',
+          isEnabled: $enableCancelBackGroundColor,
+          color: $compCancelBackGroundColor
         })
 
         SliderBlock({
-          title: '确认按钮边框圆角半径',
-          isEnabled: this.enableAcceptBorderRadius,
-          value: this.compAcceptBorderRadius,
+          title: 'CalendarDialogOptions.acceptButtonStyle.borderRadius',
+          isEnabled: $enableAcceptBorderRadius,
+          value: $compAcceptBorderRadius,
           min: 10,
           max: 100
         })
 
         SliderBlock({
-          title: '取消按钮边框圆角半径',
-          isEnabled: this.enableCancelBorderRadius,
-          value: this.compCancelBorderRadius,
+          title: 'CalendarDialogOptions.cancelButtonStyle.borderRadius',
+          isEnabled: $enableCancelBorderRadius,
+          value: $compCancelBorderRadius,
           min: 10,
           max: 100
         })
+
+        RadioBlock({
+          title: 'CalendarDialogOptions.backgroundBlurStyle.BlurStyle',
+          isEnabled: $enableBackgroundBlurStyle,
+          value: $compBackgroundBlurStyle,
+          dataSource: [
+            { label: 'Thin', value: BlurStyle.Thin },
+            { label: 'Regular', value: BlurStyle.Regular },
+            { label: 'Thick', value: BlurStyle.Thick },
+            { label: 'BACKGROUND_THIN', value: BlurStyle.BACKGROUND_THIN },
+            { label: 'BACKGROUND_REGULAR', value: BlurStyle.BACKGROUND_REGULAR },
+            { label: 'BACKGROUND_THICK', value: BlurStyle.BACKGROUND_THICK },
+            { label: 'BACKGROUND_ULTRA_THICK', value: BlurStyle.BACKGROUND_ULTRA_THICK },
+            { label: 'NONE', value: BlurStyle.NONE },
+            { label: 'COMPONENT_ULTRA_THIN', value: BlurStyle.COMPONENT_ULTRA_THIN },
+            { label: 'COMPONENT_REGULAR', value: BlurStyle.COMPONENT_REGULAR },
+            { label: 'COMPONENT_THICK', value: BlurStyle.COMPONENT_THICK },
+            { label: 'COMPONENT_ULTRA_THICK', value: BlurStyle.COMPONENT_ULTRA_THICK },
+          ]
+        })
+
+        ColorBlock({
+          title: 'CalendarDialogOptions.backgroundColor',
+          isEnabled: $enableCompBackgroundColor,
+          color: $compBackgroundColor
+        })
+
+        RadioBlock({
+          title: 'CalendarDialogOptions.shadow',
+          isEnabled: $enableCompShadowType,
+          value: $compShadowType,
+          dataSource: [
+            { label: 'shadowStyle', value: true },
+            { label: 'shadowOptions', value: false }
+          ]
+        })
+
+        if (this.compShadowType) {
+          RadioBlock({
+            title: 'CalendarDialogOptions.shadow.shadowStyle',
+            isEnabled: $enableCompShadowStyle,
+            value: $compShadowStyle,
+            dataSource: [
+              { label: 'OUTER_DEFAULT_XS', value: ShadowStyle.OUTER_DEFAULT_XS },
+              { label: 'OUTER_DEFAULT_SM', value: ShadowStyle.OUTER_DEFAULT_SM },
+              { label: 'OUTER_DEFAULT_MD', value: ShadowStyle.OUTER_DEFAULT_MD },
+              { label: 'OUTER_DEFAULT_LG', value: ShadowStyle.OUTER_DEFAULT_LG },
+              { label: 'OUTER_FLOATING_SM', value: ShadowStyle.OUTER_FLOATING_SM },
+              { label: 'OUTER_FLOATING_MD', value: ShadowStyle.OUTER_FLOATING_MD },
+            ]
+          })
+        } else {
+
+          SliderBlock({
+            title: 'CalendarDialogOptions.shadow.shadowOptions.radius',
+            isEnabled: $enableCompShadowOptionsRadius,
+            value: $compShadowOptionsRadius,
+            min: 0,
+            max: 30,
+          })
+
+          RadioBlock({
+            title: 'CalendarDialogOptions.shadow.shadowOptions.type',
+            isEnabled: $enableCompShadowOptionsType,
+            value: $compShadowOptionsType,
+            dataSource: [
+              { label: 'COLOR', value: ShadowType.COLOR },
+              { label: 'BLUR', value: ShadowType.BLUR },
+            ]
+          })
+
+          ColorBlock({
+            title: 'CalendarDialogOptions.shadow.shadowOptions.color',
+            isEnabled: $enableCompShadowOptionsColor,
+            color: $compShadowOptionsColor,
+          })
+
+          SliderBlock({
+            title: 'CalendarDialogOptions.shadow.shadowOptions.offsetX',
+            isEnabled: $enableCompShadowOptionsOffsetX,
+            value: $compShadowOptionsOffsetX,
+            min: 0,
+            max: 40,
+          })
+
+          SliderBlock({
+            title: 'CalendarDialogOptions.shadow.shadowOptions.offsetY',
+            isEnabled: $enableCompShadowOptionsOffsetY,
+            value: $compShadowOptionsOffsetY,
+            min: 0,
+            max: 40,
+          })
+
+          RadioBlock({
+            title: 'CalendarDialogOptions.shadow.shadowOptions.fill',
+            isEnabled: $enableCompShadowOptionsFill,
+            value: $compShadowOptionsFill,
+            dataSource: [
+              { label: 'true', value: true },
+              { label: 'false', value: false },
+            ]
+          })
+
+        }
+
       }.width('100%')
     }
     .height('52%')
