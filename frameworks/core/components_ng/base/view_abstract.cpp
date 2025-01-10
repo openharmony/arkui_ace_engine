@@ -4338,6 +4338,57 @@ bool ViewAbstract::GetNeedFocus(FrameNode* frameNode)
     return focusHub->IsCurrentFocus();
 }
 
+int ViewAbstract::RequestFocus(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_NON_EXIST);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, ERROR_CODE_NON_EXIST);
+    auto instanceId = context->GetInstanceId();
+    ContainerScope scope(instanceId);
+    auto focusManager = context->GetOrCreateFocusManager();
+    focusManager->ResetRequestFocusResult();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    // check node focusable
+    if (focusHub->IsSyncRequestFocusable()) {
+        focusHub->RequestFocusImmediately();
+    }
+    auto retCode = focusManager->GetRequestFocusResult();
+    focusManager->ResetRequestFocusResult();
+    return retCode;
+}
+
+void ViewAbstract::ClearFocus(int32_t instanceId)
+{
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "Can't find attachedContext, please check the timing of the function call.");
+        return;
+    }
+    FocusHub::LostFocusToViewRoot();
+}
+
+void ViewAbstract::FocusActivate(int32_t instanceId, bool isActive, bool isAutoInactive)
+{
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "Can't find attachedContext, please check the timing of the function call.");
+        return;
+    }
+    context->SetIsFocusActive(isActive, NG::FocusActiveReason::USE_API, isAutoInactive);
+}
+
+void ViewAbstract::SetAutoFocusTransfer(int32_t instanceId, bool isAutoFocusTransfer)
+{
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "Can't find attachedContext, please check the timing of the function call.");
+        return;
+    }
+    auto focusManager = context->GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+    focusManager->SetIsAutoFocusTransfer(isAutoFocusTransfer);
+}
+
 double ViewAbstract::GetOpacity(FrameNode* frameNode)
 {
     double opacity = 1.0f;

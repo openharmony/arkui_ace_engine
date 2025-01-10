@@ -19,6 +19,7 @@
 #include <list>
 #include <optional>
 
+#include "base/error/error_code.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/manager/focus/focus_view.h"
@@ -98,6 +99,21 @@ public:
             requestCallback_(result);
             requestCallback_ = nullptr;
         }
+    }
+
+    void SetRequestFocusResult(const int32_t requestFocusResult)
+    {
+        requestFocusResult_ = requestFocusResult;
+    }
+
+    int32_t GetRequestFocusResult()
+    {
+        return requestFocusResult_;
+    }
+
+    void ResetRequestFocusResult()
+    {
+        requestFocusResult_ = ERROR_CODE_NO_ERROR;
     }
 
     void SetLastFocusStateNode(const RefPtr<FocusHub>& node)
@@ -203,6 +219,8 @@ private:
 
     bool isAutoFocusTransfer_ = true;
     FocusViewStackState focusViewStackState_ = FocusViewStackState::IDLE;
+
+    int32_t requestFocusResult_ = ERROR_CODE_NO_ERROR;
 
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };

@@ -5233,6 +5233,10 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Int32 (*resetDrawCompleteEvent)(ArkUINodeHandle node);
     ArkUI_Int32 (*setLayoutEvent)(ArkUINodeHandle node, void* userData, void* onDraw);
     ArkUI_Int32 (*resetLayoutEvent)(ArkUINodeHandle node);
+    ArkUI_Int32 (*requestFocus)(ArkUINodeHandle node);
+    void (*clearFocus)(ArkUI_Int32 instanceId);
+    void (*focusActivate)(ArkUI_Int32 instanceId, bool isActive, bool isAutoInactive);
+    void (*setAutoFocusTransfer)(ArkUI_Int32 instanceId, bool isAutoFocusTransfer);
     ArkUI_Int32 (*getWindowInfoByNode)(ArkUINodeHandle node, char** name);
 };
 

@@ -2087,6 +2087,21 @@ typedef enum {
     ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR = 106202,
     /** The node is not on main tree. */
     ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE = 106203,
+    /**
+     * @error The node requesting focus is not focusable.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_FOCUS_NON_FOCUSABLE = 150001,
+    /**
+     * @error The node requesting focus has unfocusable ancestor.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_FOCUS_NON_FOCUSABLE_ANCESTOR = 150002,
+    /**
+     * @error The node requesting focus does not exists.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_FOCUS_NON_EXISTENT = 150003,
     /** The component is not a scroll container. */
     ARKUI_ERROR_CODE_NON_SCROLLABLE_CONTAINER = 180001,
     /** The buffer is not large enough. */
