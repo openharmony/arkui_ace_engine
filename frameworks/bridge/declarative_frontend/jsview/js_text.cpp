@@ -863,11 +863,12 @@ void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
 void JSText::BindSelectionMenu(const JSCallbackInfo& info)
 {
     // TextSpanType
-    NG::TextSpanType testSpanType = NG::TextSpanType::TEXT;
+    NG::TextSpanType textSpanType = NG::TextSpanType::TEXT;
+    bool isValidTextSpanType = true;
     JSRef<JSVal> argsSpanType = info[0];
     if (argsSpanType->IsNumber()) {
-        auto spanType = argsSpanType->ToNumber<int32_t>();
-        testSpanType = static_cast<NG::TextSpanType>(spanType);
+        auto spanTypeId = argsSpanType->ToNumber<int32_t>();
+        isValidTextSpanType = NG::TextSpanTypeMapper::GetTextSpanTypeFromJsType(spanTypeId, textSpanType);
     }
 
     // Builder
@@ -903,6 +904,7 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
 
     // SelectionMenuOptions
     NG::SelectMenuParam menuParam;
+    menuParam.isValid = isValidTextSpanType;
     if (info.Length() > resquiredParameterCount) {
         JSRef<JSVal> argsMenuOptions = info[resquiredParameterCount];
         if (argsMenuOptions->IsObject()) {
@@ -910,7 +912,7 @@ void JSText::BindSelectionMenu(const JSCallbackInfo& info)
         }
     }
 
-    TextModel::GetInstance()->BindSelectionMenu(testSpanType, responseType, buildFunc, menuParam);
+    TextModel::GetInstance()->BindSelectionMenu(textSpanType, responseType, buildFunc, menuParam);
 }
 
 void JSText::SetOnTextSelectionChange(const JSCallbackInfo& info)
@@ -1123,6 +1125,31 @@ void JSText::ParseMenuParam(
         };
         menuParam.onDisappear = std::move(onDisappear);
     }
+    menuParam.onMenuShow = ParseMenuCallback(frameNode, menuOptions, info, "onMenuShow");
+    menuParam.onMenuHide = ParseMenuCallback(frameNode, menuOptions, info, "onMenuHide");
+}
+
+std::function<void(int32_t, int32_t)> JSText::ParseMenuCallback(const WeakPtr<NG::FrameNode>& frameNode,
+    const JSRef<JSObject>& menuOptions, const JSCallbackInfo& info, const std::string& name)
+{
+    auto onMenuCallbackValue = menuOptions->GetProperty(name.c_str());
+    if (onMenuCallbackValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnMenuCallbackFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onMenuCallbackValue));
+        auto onMenuCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsOnMenuCallbackFunc),
+                                  node = frameNode, eventName = name](int32_t start, int32_t end) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT(eventName);
+
+            JSRef<JSVal> params[2];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(start));
+            params[1] = JSRef<JSVal>::Make(ToJSValue(end));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(2, params);
+        };
+        return onMenuCallback;
+    }
+    return nullptr;
 }
 
 void JSText::SetMarqueeOptions(const JSCallbackInfo& info)
