@@ -59,6 +59,7 @@ class Transform;
 enum class AvoidAreaType : uint32_t;
 class AvoidArea;
 struct DecorButtonStyle;
+struct SingleHandTransform;
 } // namespace Rosen
 
 namespace AAFwk {
@@ -482,6 +483,8 @@ public:
     {
         return false;
     }
+
+    virtual void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) {};
 };
 
 } // namespace OHOS::Ace

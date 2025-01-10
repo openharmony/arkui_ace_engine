@@ -4477,4 +4477,20 @@ void UIContentImpl::ExecuteUITask(std::function<void()> task, const std::string&
     }
 }
 
+void UIContentImpl::UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_VOID(aceContainer);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [aceContainer, singleHandTransform = Platform::SingleHandTransform(transform.posX,
+            transform.posY, transform.scaleX, transform.scaleY)]() {
+            aceContainer->SetSingleHandTransform(singleHandTransform);
+        }, TaskExecutor::TaskType::UI, "ArkUISetSingleHandTransform");
+}
+
 } // namespace OHOS::Ace

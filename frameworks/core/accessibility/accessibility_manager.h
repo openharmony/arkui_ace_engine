@@ -92,6 +92,14 @@ struct AccessibilityWindowInfo {
     float_t scaleY = 1.0f;
 };
 
+struct AccessibilityWindowInfo {
+    int32_t left = 0;
+    int32_t top = 0;
+    int32_t innerWindowId = -1;
+    float_t scaleX = 1.0f;
+    float_t scaleY = 1.0f;
+};
+
 enum class AccessibilityCallbackEventId : uint32_t {
     ON_LOAD_PAGE = 0,
     ON_SHOW = 1,
@@ -302,6 +310,7 @@ public:
         return AccessibilityWindowInfo();
     }
 
+    virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo) {}
 protected:
     int32_t treeId_ = 0;
 

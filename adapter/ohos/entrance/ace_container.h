@@ -90,6 +90,17 @@ struct ParsedConfig {
     }
 };
 
+struct SingleHandTransform {
+    SingleHandTransform() = default;
+    SingleHandTransform(float x, float y, float scaleX, float scaleY)
+        : x_(x), y_(y), scaleX_(scaleX), scaleY_(scaleY) {}
+ 
+    float x_ = 0.0f;
+    float y_ = 0.0f;
+    float scaleX_ = 1.0f;
+    float scaleY_ = 1.0f;
+};
+
 using ConfigurationChangedCallback = std::function<void(const ParsedConfig& config, const std::string& configuration)>;
 
 class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatcher {
@@ -771,6 +782,15 @@ public:
         isTouchEventsPassThrough_ = isTouchEventsPassThrough;
     }
 
+    void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
+    {
+        singleHandTransform_ = singleHandTransform;
+    }
+
+    const SingleHandTransform& GetSingleHandTransform() const
+    {
+        return singleHandTransform_;
+    }
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -879,6 +899,7 @@ private:
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
     std::optional<bool> isTouchEventsPassThrough_;
+    SingleHandTransform singleHandTransform_;
 };
 
 } // namespace OHOS::Ace::Platform

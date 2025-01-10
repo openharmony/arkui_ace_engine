@@ -33,6 +33,8 @@ struct NodeConfig {
     int32_t parentWindowId = AccessibilityElementInfo::UNDEFINED_WINID_ID;
     std::string bundleName;
     std::string inspectorKey;
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
 };
 
 class JsThirdProviderInteractionOperation : public Accessibility::AccessibilityElementOperator,
