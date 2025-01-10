@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -255,6 +256,40 @@ public:
         scrollStopEventCallback_ = value;
     }
 
+    std::string GetEnterText() const
+    {
+        return GetOption(GetEnterIndex());
+    }
+
+    uint32_t GetEnterIndex() const
+    {
+        return currentEnterIndex_;
+    }
+
+    void SetEnterIndex(uint32_t value)
+    {
+        if (value != currentEnterIndex_) {
+            currentEnterIndex_ = value;
+        }
+    }
+
+    void HandleEnterSelectedAreaEventCallback(bool refresh)
+    {
+        if (enterSelectedAreaEventCallback_) {
+            enterSelectedAreaEventCallback_(refresh);
+        }
+    }
+
+    const EventCallback& GetEnterSelectedAreaEventCallback() const
+    {
+        return enterSelectedAreaEventCallback_;
+    }
+
+    void SetEnterSelectedAreaEventCallback(EventCallback&& value)
+    {
+        enterSelectedAreaEventCallback_ = value;
+    }
+
     void SetLocalDownDistance(float value)
     {
         localDownDistance_ = value;
@@ -371,6 +406,7 @@ public:
     }
     void ResetOptionPropertyHeight();
     void ResetTotalDelta();
+    void InitHapticController(const RefPtr<FrameNode>& host);
 
     void SetDisableTextStyleAnimation(bool value)
     {
@@ -381,6 +417,7 @@ public:
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme);
     void UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty);
@@ -463,9 +500,17 @@ private:
     void SpringCurveTailEndProcess(bool useRebound, bool stopMove);
     void UpdateTextAccessibilityProperty(
         int32_t virtualIndex, std::list<RefPtr<UINode>>::iterator& iter, bool virtualIndexValidate);
+    void OnWindowHide() override;
+    void OnWindowShow() override;
 
     void InitTextFadeOut();
     void UpdateTextOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty);
+    double GetDragDeltaLessThanJumpInterval(
+        double offsetY, float originalDragDelta, bool useRebound, float shiftDistance);
+    void RegisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback();
+
+    void HandleEnterSelectedArea(double scrollDelta, float shiftDistance);
 
     bool isFocusColumn_ = false;
     bool isTextFadeOut_ = false;
@@ -484,6 +529,7 @@ private:
     bool useButtonFocusArea_ = false;
     EventCallback EventCallback_;
     EventCallback scrollStopEventCallback_;
+    EventCallback enterSelectedAreaEventCallback_;
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -544,6 +590,11 @@ private:
     bool hasUserDefinedSelectedFontFamily_ = false;
 
     bool isDisableTextStyleAnimation_ = false;
+    bool isShow_ = true;
+    bool isEnableHaptic_ = true;
+    std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
+
+    uint32_t currentEnterIndex_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerColumnPattern);
 };

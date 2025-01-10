@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::Framework {
 namespace {
-const std::unordered_map<AccessibilityRoleType, std::string> AccessibilityRoleMap {
+const std::unordered_map<AccessibilityRoleType, std::string> accessibilityRoleMap {
     { AccessibilityRoleType::ACTION_SHEET, "actionsheet" }, { AccessibilityRoleType::ALERT_DIALOG, "alertdialog" },
     { AccessibilityRoleType::INDEXER_COMPONENT, "alphabetindexer" },
     { AccessibilityRoleType::BADGE_COMPONENT, "badge" }, { AccessibilityRoleType::BLANK, "blank" },
@@ -252,8 +252,8 @@ void JSViewAbstract::JsAccessibilityRole(const JSCallbackInfo& info)
     }
     auto index = info[0]->ToNumber<int32_t>();
     AccessibilityRoleType text = static_cast<AccessibilityRoleType>(index);
-    auto it = AccessibilityRoleMap.find(text);
-    if (it != AccessibilityRoleMap.end()) {
+    auto it = accessibilityRoleMap.find(text);
+    if (it != accessibilityRoleMap.end()) {
         role = it->second;
     } else {
         resetValue = true;

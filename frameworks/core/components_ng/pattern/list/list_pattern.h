@@ -437,6 +437,7 @@ protected:
     RefPtr<Scrollable> scrollable_;
 
     int32_t itemStartIndex_ = 0;
+    float scrollSnapVelocity_ = 0.0f;
 private:
     void OnScrollEndCallback() override;
     void FireOnReachStart(const OnReachEvent& onReachStart) override;
@@ -499,7 +500,6 @@ private:
     std::optional<int32_t> lastSnapTargetIndex_;
 
     bool crossMatchChild_ = false;
-    float scrollSnapVelocity_ = 0.0f;
     bool snapTrigOnScrollStart_ = false;
     bool snapTrigByScrollBar_ = false;
 

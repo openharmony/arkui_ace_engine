@@ -170,22 +170,38 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     CHECK_NULL_VOID(textPattern);
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto contentRect = textPattern->GetTextContentRect();
-    auto contentOffset = contentRect.GetOffset();
     auto localHandleOffset = handleRect.GetOffset();
     if (IsOverlayMode()) {
-        contentOffset = contentOffset + GetPaintOffsetWithoutTransform();
         localHandleOffset -= GetPaintOffsetWithoutTransform();
     }
     localHandleOffset.SetY(localHandleOffset.GetY() + handleRect.Height() / 2.0f);
     if (textPattern->HasContent() && textPattern->GetOrCreateMagnifier()) {
         textPattern->GetMagnifierController()->SetLocalOffset(localHandleOffset);
     }
+    // the handle position is calculated based on the middle of the handle height.
+    auto handleOffset = GetHandleReferenceOffset(handleRect);
+    UpdateSelectorOnHandleMove(handleOffset, isFirst);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->MarkInfoChange(DIRTY_SELECT_TEXT);
+}
+
+OffsetF TextSelectOverlay::GetHandleReferenceOffset(const RectF& handleRect)
+{
     auto handleOffset = handleRect.GetOffset();
     handleOffset.SetY(handleOffset.GetY() + handleRect.Height() / 2.0f);
-
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, handleOffset);
+    auto host = textPattern->GetHost();
+    CHECK_NULL_RETURN(host, handleOffset);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, handleOffset);
+    auto contentRect = textPattern->GetTextContentRect();
+    auto contentOffset = contentRect.GetOffset();
+    if (IsOverlayMode()) {
+        contentOffset = contentOffset + GetPaintOffsetWithoutTransform();
+    }
     auto clip = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip = true;
@@ -198,12 +214,7 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     }
     auto textPaintOffset = contentOffset - OffsetF(0.0f, std::min(textPattern->GetBaselineOffset(), 0.0f));
     handleOffset -= textPaintOffset;
-    // the handle position is calculated based on the middle of the handle height.
-    UpdateSelectorOnHandleMove(handleOffset, isFirst);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    auto overlayManager = GetManager<SelectContentOverlayManager>();
-    CHECK_NULL_VOID(overlayManager);
-    overlayManager->MarkInfoChange(DIRTY_SELECT_TEXT);
+    return handleOffset;
 }
 
 void TextSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle)
@@ -256,7 +267,7 @@ std::string TextSelectOverlay::GetSelectedText()
     CHECK_NULL_RETURN(textPattern, "");
     auto start = textPattern->GetTextSelector().GetTextStart();
     auto end = textPattern->GetTextSelector().GetTextEnd();
-    return UtfUtils::Str16ToStr8(textPattern->GetSelectedText(start, end));
+    return UtfUtils::Str16DebugToStr8(textPattern->GetSelectedText(start, end));
 }
 
 RectF TextSelectOverlay::GetSelectArea()
@@ -488,14 +499,23 @@ void TextSelectOverlay::UpdateClipHandleViewPort(RectF& rect)
         RectF visibleRect;
         RectF frameRect;
         clipNode->GetVisibleRect(visibleRect, frameRect);
+        if (GreatNotEqual(rect.Top(), visibleRect.Bottom()) || GreatNotEqual(rect.Left(), visibleRect.Right())) {
+            return;
+        }
         rect.SetHeight(visibleRect.Bottom() - rect.Top());
+        rect.SetWidth(visibleRect.Right() - rect.Left());
         return;
     }
     // root node.
     if (prevNode) {
         auto geoNode = prevNode->GetGeometryNode();
         CHECK_NULL_VOID(geoNode);
-        rect.SetHeight(geoNode->GetFrameRect().Height() - rect.Top());
+        RectF visibleRect = geoNode->GetFrameRect();
+        if (GreatNotEqual(rect.Top(), visibleRect.Height()) || GreatNotEqual(rect.Left(), visibleRect.Width())) {
+            return;
+        }
+        rect.SetHeight(visibleRect.Height() - rect.Top());
+        rect.SetWidth(visibleRect.Width() - rect.Left());
     }
 }
 

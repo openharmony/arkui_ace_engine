@@ -41,7 +41,7 @@ RefPtr<SpanItem> SpanModelNG::CreateSpanItem(ArkUI_SpanItem* item)
         return placeholder;
     }
     auto spanItem = AceType::MakeRefPtr<SpanItem>();
-    spanItem->content = UtfUtils::Str8ToStr16(item->content);
+    spanItem->content = UtfUtils::Str8DebugToStr16(item->content);
     auto* textStyle = reinterpret_cast<RSTextStyle*>(item->textStyle);
     if (!textStyle) {
         return spanItem;

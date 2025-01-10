@@ -1412,6 +1412,7 @@ public:
         JSClass<JSFileSelectorParam>::CustomMethod("getMode", &JSFileSelectorParam::GetMode);
         JSClass<JSFileSelectorParam>::CustomMethod("getAcceptType", &JSFileSelectorParam::GetAcceptType);
         JSClass<JSFileSelectorParam>::CustomMethod("isCapture", &JSFileSelectorParam::IsCapture);
+        JSClass<JSFileSelectorParam>::CustomMethod("getMimeType", &JSFileSelectorParam::GetMimeType);
         JSClass<JSFileSelectorParam>::Bind(
             globalObj, &JSFileSelectorParam::Constructor, &JSFileSelectorParam::Destructor);
     }
@@ -1449,6 +1450,20 @@ public:
         std::vector<std::string>::iterator iterator;
         uint32_t index = 0;
         for (iterator = acceptTypes.begin(); iterator != acceptTypes.end(); ++iterator) {
+            auto valueStr = JSVal(ToJSValue(*iterator));
+            auto value = JSRef<JSVal>::Make(valueStr);
+            result->SetValueAt(index++, value);
+        }
+        args.SetReturnValue(result);
+    }
+
+    void GetMimeType(const JSCallbackInfo& args)
+    {
+        auto mimeTypes = param_->GetMimeType();
+        JSRef<JSArray> result = JSRef<JSArray>::New();
+        std::vector<std::string>::iterator iterator;
+        uint32_t index = 0;
+        for (iterator = mimeTypes.begin(); iterator != mimeTypes.end(); ++iterator) {
             auto valueStr = JSVal(ToJSValue(*iterator));
             auto value = JSRef<JSVal>::Make(valueStr);
             result->SetValueAt(index++, value);
@@ -2009,7 +2024,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("editMenuOptions", &JSWeb::EditMenuOptions);
     JSClass<JSWeb>::StaticMethod("enableHapticFeedback", &JSWeb::EnableHapticFeedback);
     JSClass<JSWeb>::StaticMethod("bindSelectionMenu", &JSWeb::BindSelectionMenu);
-
+    JSClass<JSWeb>::StaticMethod("optimizeParserBudget", &JSWeb::OptimizeParserBudgetEnabled);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -5578,4 +5593,8 @@ void JSWeb::EnableHapticFeedback(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetEnabledHapticFeedback(isEnabled);
 }
 
+void JSWeb::OptimizeParserBudgetEnabled(bool enable)
+{
+    WebModel::GetInstance()->SetOptimizeParserBudgetEnabled(enable);
+}
 } // namespace OHOS::Ace::Framework

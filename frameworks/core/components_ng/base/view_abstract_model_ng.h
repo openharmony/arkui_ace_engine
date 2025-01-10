@@ -44,7 +44,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
+class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
 
@@ -1263,6 +1263,24 @@ public:
     {
         auto targetNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
+    }
+
+    int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
+    {
+        return ViewAbstract::OpenPopup(param, customNode);
+    }
+    int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode) override
+    {
+        return ViewAbstract::UpdatePopup(param, customNode);
+    }
+    int32_t ClosePopup(const RefPtr<UINode>& customNode) override
+    {
+        return ViewAbstract::ClosePopup(customNode);
+    }
+
+    int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
+    {
+        return ViewAbstract::GetPopupParam(param, customNode);
     }
 
     void DismissDialog() override

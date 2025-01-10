@@ -35,10 +35,24 @@ CJ_EXPORT void FfiOHOSAceFrameworkSliderTrackColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkSliderSelectedColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkSliderShowSteps(bool isShow);
 CJ_EXPORT void FfiOHOSAceFrameworkSliderShowTips(bool isShow);
+CJ_EXPORT void FfiOHOSAceFrameworkSliderShowTipsNew(bool isShow, const char* content, bool contentExist);
 CJ_EXPORT void FfiOHOSAceFrameworkSliderTrackThickness(double value, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkSliderMaxLabel(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkSliderMinLabel(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkSliderOnChange(void (*callback)(double value, int32_t mode));
+CJ_EXPORT void FfiOHOSAceFrameworkSliderBlockBorderColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkSliderBlockBorderWidth(double value, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkSliderBlockSize(
+    double widthVal, int32_t widthUnit, double heightVal, int32_t heightUnit);
+CJ_EXPORT void FfiOHOSAceFrameworkSliderMinResponsiveDistance(float value);
+CJ_EXPORT void FfiOHOSAceFrameworkSliderSelectedBorderRadius(double value, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkSliderInteractionMode(int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkSliderSlideRange(float from, float to, bool fromExist, bool toExist);
+CJ_EXPORT void FfiOHOSAceFrameworkSliderStepColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkSliderStepSize(double value, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkSliderTrackBorderRadius(double value, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkSliderContentModifier();
+CJ_EXPORT void FfiOHOSAceFrameworkSliderBlockStyle(int32_t type, const char* image, int64_t shapeId);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_SLIDER_FFI_H

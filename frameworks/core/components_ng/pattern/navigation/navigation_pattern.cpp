@@ -77,7 +77,10 @@ void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDest
         name = pathInfo->GetName();
         param = pathInfo->GetParamObj();
     }
-    info = std::make_optional<NavDestinationInfo>(navigationId, name, state, index, param, navDestinationId);
+    NavDestinationMode mode = context->GetMode();
+    int32_t uniqueId = context->GetUniqueId();
+    info = std::make_optional<NavDestinationInfo>(navigationId, name, state, index, param,
+        navDestinationId, mode, std::to_string(uniqueId));
 }
 
 void LogCustomAnimationStart(const RefPtr<NavDestinationGroupNode>& preTopDestination,
@@ -1514,11 +1517,13 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                     }
                 }
             },
-            TaskExecutor::TaskType::UI, "ArkUINavigationDirtyLayoutWrapperSwap");
+            TaskExecutor::TaskType::UI, "ArkUINavigationDirtyLayoutWrapperSwap",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     CHECK_NULL_RETURN(navigationLayoutProperty, false);
     UpdateTitleModeChangeEventHub(hostNode);
+    FireNavBarWidthChangeEvent(dirty);
     AddDragBarHotZoneRect();
     AddDividerHotZoneRect();
     ifNeedInit_ = false;
@@ -1600,6 +1605,36 @@ bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGro
         }
     }
     return true;
+}
+
+void NavigationPattern::FireNavBarWidthChangeEvent(const RefPtr<LayoutWrapper>& layoutWrapper)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    auto frameWidth = frameSize.Width();
+    auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(navigationLayoutProperty);
+    auto userSetDimensionUnit = navigationLayoutProperty->GetNavBarWidthValue(DEFAULT_NAV_BAR_WIDTH).Unit();
+    CHECK_NULL_VOID(layoutWrapper);
+    auto layoutAlgorithm = layoutWrapper->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(layoutAlgorithm);
+    auto navigationLayoutAlgorithm = AceType::DynamicCast<NavigationLayoutAlgorithm>(
+        layoutAlgorithm->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(navigationLayoutAlgorithm);
+    auto realBavBarWidth = navigationLayoutAlgorithm->GetRealNavBarWidth();
+    auto realNavBarWidthDimension = Dimension(realBavBarWidth, DimensionUnit::PX);
+    Dimension usrSetUnitWidth = Dimension(0.0, userSetDimensionUnit);
+    if (!NearZero(frameWidth)) {
+        usrSetUnitWidth = DimensionUnit::PERCENT == userSetDimensionUnit ?
+            Dimension(realBavBarWidth / frameWidth, DimensionUnit::PERCENT) :
+            Dimension(realNavBarWidthDimension.GetNativeValue(userSetDimensionUnit), userSetDimensionUnit);
+    }
+    auto eventHub = host->GetEventHub<NavigationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireNavBarWidthChangeEvent(usrSetUnitWidth);
 }
 
 int32_t NavigationPattern::GenerateUINodeFromRecovery(int32_t lastStandardIndex, NavPathList& navPathList)

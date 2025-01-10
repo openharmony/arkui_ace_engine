@@ -68,6 +68,8 @@ bool DatePickerDialogView::switchTimePickerFlag_ = false;
 bool DatePickerDialogView::switchDatePickerFlag_ = false;
 bool DatePickerDialogView::isShowTime_ = false;
 bool DatePickerDialogView::isUserSetFont_ = false;
+bool DatePickerDialogView::isEnableHapticFeedback_ = true;
+DatePickerMode DatePickerDialogView::datePickerMode_ = DatePickerMode::DATE;
 Dimension DatePickerDialogView::selectedTextStyleFont_ = 40.0_fp;
 Dimension DatePickerDialogView::normalTextStyleFont_ = 32.0_fp;
 Dimension DatePickerDialogView::disappearTextStyleFont_ = 28.0_fp;
@@ -96,6 +98,13 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     pickerPattern->SetIsShowInDialog(true);
     pickerPattern->SetShowLunarSwitch(settingData.lunarswitch);
     pickerPattern->SetTextProperties(settingData.properties);
+    pickerPattern->SetMode(settingData.mode);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        isEnableHapticFeedback_ = settingData.isEnableHapticFeedback;
+        pickerPattern->SetEnableHapticFeedback(isEnableHapticFeedback_);
+        pickerPattern->ColumnPatternInitHapticController();
+    }
+
     auto buttonTitleNode = CreateAndMountButtonTitleNode(dateNode, contentColumn);
     CHECK_NULL_RETURN(buttonTitleNode, nullptr);
 
@@ -129,6 +138,10 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     dateNode->MarkModifyDone();
 
     ViewStackProcessor::GetInstance()->Finish();
+    CHECK_NULL_RETURN(acceptNode, nullptr);
+    auto monthDaysPattern = acceptNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(monthDaysPattern, nullptr);
+    monthDaysPattern->ShowTitle(monthDaysPattern->GetTitleId());
     auto stackLayoutProperty = pickerStack->GetLayoutProperty();
     CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
     stackLayoutProperty->UpdateUserDefinedIdealSize(
@@ -1017,9 +1030,15 @@ void DatePickerDialogView::CreateNormalDateNode(const RefPtr<FrameNode>& dateNod
     datePickerPattern->SetColumn(dayColumnNode);
 
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        MountColumnNodeToPicker(yearColumnNode, dateNode, RATIO_THREE);
-        MountColumnNodeToPicker(monthColumnNode, dateNode, RATIO_TWO);
-        MountColumnNodeToPicker(dayColumnNode, dateNode, RATIO_TWO);
+        if (datePickerMode_ == DatePickerMode::DATE) {
+            MountColumnNodeToPicker(yearColumnNode, dateNode, RATIO_THREE);
+            MountColumnNodeToPicker(monthColumnNode, dateNode, RATIO_TWO);
+            MountColumnNodeToPicker(dayColumnNode, dateNode, RATIO_TWO);
+        } else {
+            MountColumnNodeToPicker(yearColumnNode, dateNode);
+            MountColumnNodeToPicker(monthColumnNode, dateNode);
+            MountColumnNodeToPicker(dayColumnNode, dateNode);
+        }
     } else {
         MountColumnNodeToPicker(yearColumnNode, dateNode);
         MountColumnNodeToPicker(monthColumnNode, dateNode);
@@ -1047,6 +1066,10 @@ void DatePickerDialogView::CreateSingleDateNode(const RefPtr<FrameNode>& dateNod
     }
 
     {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            datePickerPattern->SetEnableHapticFeedback(isEnableHapticFeedback_);
+            datePickerPattern->ColumnPatternInitHapticController(monthDaysColumnNode);
+        }
         auto stackYearNode = CreateStackNode();
         auto blendYearNode = CreateColumnNode();
         auto buttonYearNode = CreateButtonNode();
@@ -1089,6 +1112,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateTimeNode(
     timePickerRowPattern->SetShowCount(showCount);
     timePickerRowPattern->SetIsShowInDialog(true);
     timePickerRowPattern->SetIsShowInDatePickerDialog(true);
+    timePickerRowPattern->SetIsEnableHaptic(isEnableHapticFeedback_);
 
     auto hasHourNode = timePickerRowPattern->HasHourNode();
     auto hasMinuteNode = timePickerRowPattern->HasMinuteNode();
@@ -1480,6 +1504,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountDateNode(
     const DatePickerSettingData& settingData, const RefPtr<FrameNode>& pickerStack)
 {
     auto dateNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    datePickerMode_ = settingData.mode;
     auto dateNode =
         CreateDateNode(dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
     ViewStackProcessor::GetInstance()->Push(dateNode);
@@ -1699,6 +1724,11 @@ void DatePickerDialogView::SwitchPickerPage(const RefPtr<FrameNode>& pickerStack
     SetAnimationProperty(pickerStack, contentColumn, animationController);
     switchFlag_ = !switchFlag_;
     animationController->Play(switchFlag_);
+    if (!switchFlag_) {
+        monthDaysPickerPattern->ShowTitle(monthDaysPickerPattern->GetTitleId());
+    } else {
+        datePickerPattern->ShowTitle(datePickerPattern->GetTitleId());
+    }
 }
 
 void DatePickerDialogView::SetAnimationProperty(const RefPtr<FrameNode>& pickerStack,

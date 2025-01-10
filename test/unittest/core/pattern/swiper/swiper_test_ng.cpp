@@ -63,8 +63,7 @@ void SwiperTestNg::SetUp() {}
 
 void SwiperTestNg::TearDown()
 {
-    auto stageNode = MockPipelineContext::GetCurrent()->rootNode_->GetChildAtIndex(0);
-    stageNode->RemoveChildAtIndex(0);
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -81,8 +80,6 @@ void SwiperTestNg::TearDown()
 void SwiperTestNg::GetSwiper()
 {
     frameNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto stageNode = MockPipelineContext::GetCurrent()->rootNode_->GetChildAtIndex(0);
-    stageNode->AddChild(frameNode_);
     pattern_ = frameNode_->GetPattern<SwiperPattern>();
     eventHub_ = frameNode_->GetEventHub<SwiperEventHub>();
     layoutProperty_ = frameNode_->GetLayoutProperty<SwiperLayoutProperty>();
@@ -91,7 +88,7 @@ void SwiperTestNg::GetSwiper()
     controller_ = pattern_->GetSwiperController();
 }
 
-RefPtr<PaintWrapper> SwiperTestNg::CreateSwiperDone()
+void SwiperTestNg::CreateSwiperDone()
 {
     CreateDone();
     int index = pattern_->RealTotalCount();
@@ -106,8 +103,6 @@ RefPtr<PaintWrapper> SwiperTestNg::CreateSwiperDone()
     if (pattern_->HasRightButtonNode()) {
         rightArrowNode_ = GetChildFrameNode(frameNode_, index);
     }
-    auto paintWrapper = frameNode_->CreatePaintWrapper();
-    return paintWrapper;
 }
 
 SwiperModelNG SwiperTestNg::CreateSwiper()

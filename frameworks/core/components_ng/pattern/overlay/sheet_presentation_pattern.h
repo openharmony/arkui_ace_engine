@@ -694,6 +694,7 @@ public:
     void InitFoldCreaseRegion();
     Rect GetFoldScreenRect() const;
     void RecoverHalfFoldOrAvoidStatus();
+    bool UpdateAccessibilityDetents(float height);
     void CalculateSheetRadius(BorderRadiusProperty& sheetRadius);
 
 protected:
@@ -723,6 +724,8 @@ private:
     float GetWrapperHeight();
     bool SheetHeightNeedChanged();
     void InitSheetDetents();
+    void InitDetents(SheetStyle sheetStyle, float height, double mediumSize, float largeHeightOfTheme,
+        double largeHeight);
     void HandleFitContontChange(float height);
     void ChangeSheetHeight(float height);
     void StartSheetTransitionAnimation(const AnimationOption& option, bool isTransitionIn, float offset);
@@ -759,6 +762,16 @@ private:
     void GetCurrentScrollHeight();
     void RecoverAvoidKeyboardStatus();
     void RecoverScrollOrResizeAvoidStatus();
+
+    // broadcast
+    void SendTextUpdateEvent();
+    void SendSelectedEvent();
+    void HandleFollowAccessibilityEvent(float currHeight);
+    void HandleDragEndAccessibilityEvent();
+    void RegisterElementInfoCallBack();
+    uint32_t GetCurrentBroadcastDetentsIndex();
+    uint32_t broadcastPreDetentsIndex_ = 0;
+    SheetAccessibilityDetents sheetDetents_ = SheetAccessibilityDetents::HIGH;
 
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;

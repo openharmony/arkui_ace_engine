@@ -60,6 +60,15 @@ public:
         selectedDate_ = value;
     }
 
+    const DatePickerMode& GetMode() const
+    {
+        return mode_;
+    }
+    void SetMode(const DatePickerMode& value)
+    {
+        mode_ = value;
+    }
+
     void SetOnDateChange(const std::function<void(const PickerDate&)>& value)
     {
         onDateChange_ = value;
@@ -154,6 +163,7 @@ private:
     PickerDate endDateSolar_ = PickerDate(2100, 12, 31); // default end date is 2100-12-31 from FA document.
     LunarDate endDateLunar_;
     PickerDate selectedDate_ = PickerDate::Current();
+    DatePickerMode mode_ = DatePickerMode::DATE;
     std::function<void(const PickerDate&)> onDateChange_;
 
     static const PickerDate limitStartDate_;

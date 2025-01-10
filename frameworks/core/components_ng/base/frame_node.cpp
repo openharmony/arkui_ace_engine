@@ -500,6 +500,7 @@ FrameNode::~FrameNode()
         pipeline->RemoveFrameNodeChangeListener(GetId());
     }
     FireOnNodeDestroyCallback();
+    FireOnExtraNodeDestroyCallback();
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -5917,6 +5918,8 @@ void FrameNode::ChildrenUpdatedFrom(int32_t index)
 
 void FrameNode::OnThemeScopeUpdate(int32_t themeScopeId)
 {
+    TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "WithTheme Node(%{public}s/%{public}d) OnThemeScopeUpdate id:%{public}d",
+        GetTag().c_str(), GetId(), themeScopeId);
     if (pattern_->OnThemeScopeUpdate(themeScopeId)) {
         MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
@@ -6251,5 +6254,38 @@ void FrameNode::CleanVisibleAreaUserCallback(bool isApproximate)
 void FrameNode::SetKitNode(const RefPtr<Kit::FrameNode>& node)
 {
     kitNode_ = node;
+}
+
+bool FrameNode::GetCustomPropertyByKey(const std::string& key, std::string& value)
+{
+    auto iter = customPropertyMap_.find(key);
+    if (iter != customPropertyMap_.end()) {
+        value = iter->second;
+        return true;
+    }
+    return false;
+}
+
+void FrameNode::AddNodeDestroyCallback(const std::string& callbackKey, std::function<void()>&& callback)
+{
+    if (!callback) {
+        return;
+    }
+    destroyCallbacks_[callbackKey] = std::move(callback);
+}
+
+void FrameNode::RemoveNodeDestroyCallback(const std::string& callbackKey)
+{
+    auto iter = destroyCallbacks_.find(callbackKey);
+    if (iter != destroyCallbacks_.end()) {
+        destroyCallbacks_.erase(iter);
+    }
+}
+
+void FrameNode::FireOnExtraNodeDestroyCallback()
+{
+    for (const auto& callback : destroyCallbacks_) {
+        callback.second();
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -737,10 +737,6 @@ struct SelectTitleBarDialog {
             .fontSize(IMAGE_SIZE)
             .draggable(false)
             .focusable(this.selectTitleDialog.isEnabled)
-            .margin({
-              top: $r('sys.float.padding_level24'),
-              bottom: $r('sys.float.padding_level8'),
-            })
             .symbolEffect(new SymbolEffect(), false)
         } else if (this.selectTitleDialog.value) {
           if (Util.isSymbolResource(this.selectTitleDialog.value)) {
@@ -749,10 +745,6 @@ struct SelectTitleBarDialog {
               .fontSize(IMAGE_SIZE)
               .draggable(false)
               .focusable(this.selectTitleDialog.isEnabled)
-              .margin({
-                top: $r('sys.float.padding_level24'),
-                bottom: $r('sys.float.padding_level8'),
-              })
           } else {
             Image(this.selectTitleDialog.value)
               .width(IMAGE_SIZE)

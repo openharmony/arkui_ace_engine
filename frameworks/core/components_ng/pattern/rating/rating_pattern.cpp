@@ -581,10 +581,10 @@ float RatingPattern::GetFocusRectRadius(const RefPtr<RatingLayoutProperty>& prop
         radius = ratingTheme->GetFocusBorderRadius().ConvertToPx();
     } else {
         double starNum = property->GetStarsValue(themeStarNum_);
-        if (starNum != 0) {
+        if (!NearEqual(starNum, 0.0)) {
             auto contentSize = ratingModifier_->GetContentSize();
             CHECK_NULL_RETURN(contentSize, 0.0);
-            auto isSquare = contentSize->Get().Width() / starNum == contentSize->Get().Height();
+            auto isSquare = ((contentSize->Get().Width() / starNum) == contentSize->Get().Height());
             radius = (isSquare ? contentSize->Get().Height() / HALF_DIVIDE
                 : ratingTheme->GetFocusBorderRadius().ConvertToPx()) + ratingTheme->GetFocusSpace().ConvertToPx();
         }

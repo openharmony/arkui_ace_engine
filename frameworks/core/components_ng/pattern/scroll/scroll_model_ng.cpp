@@ -350,9 +350,11 @@ void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSn
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, scrollSnapAlign, frameNode);
         pattern->SetScrollSnapUpdate(true);
     }
-    pattern->SetIntervalSize(intervalSize);
-    pattern->SetSnapPaginations(snapPaginations);
-    pattern->SetEnableSnapToSide(enableSnapToSide);
+    if (scrollSnapAlign != ScrollSnapAlign::NONE) {
+        pattern->SetIntervalSize(intervalSize);
+        pattern->SetSnapPaginations(snapPaginations);
+        pattern->SetEnableSnapToSide(enableSnapToSide);
+    }
 }
 
 int32_t ScrollModelNG::GetScrollEnabled(FrameNode* frameNode)
@@ -446,9 +448,11 @@ void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimensi
         ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, scrollSnapAlign);
         pattern->SetScrollSnapUpdate(true);
     }
-    pattern->SetIntervalSize(intervalSize);
-    pattern->SetSnapPaginations(snapPaginations);
-    pattern->SetEnableSnapToSide(enableSnapToSide);
+    if (scrollSnapAlign != ScrollSnapAlign::NONE) {
+        pattern->SetIntervalSize(intervalSize);
+        pattern->SetSnapPaginations(snapPaginations);
+        pattern->SetEnableSnapToSide(enableSnapToSide);
+    }
 }
 
 void ScrollModelNG::SetAxis(FrameNode* frameNode, Axis axis)

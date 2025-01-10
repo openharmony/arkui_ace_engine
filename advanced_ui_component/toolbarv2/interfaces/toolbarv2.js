@@ -465,7 +465,7 @@ export class ToolBarV2 extends ViewV2 {
   itemCardDialogBuilder(h, i, j = null) {
     this.observeComponentCreation2((x, y) => {
       If.create();
-      if (h.content) {
+      if (h.content && h.content.text) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation2((r1, s1) => {
             Column.create();

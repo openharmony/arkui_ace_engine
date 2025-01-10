@@ -246,10 +246,22 @@ _arkui_shared_libs = [
     lib_names = [ "focuscontroller" ]
   },
   {
+    label = "//foundation/arkui/ace_engine/component_ext/arc_alphabet_indexer:arcalphabetindexer"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+    lib_names = [ "arcalphabetindexer" ]
+  },
+  {
     label = "//foundation/arkui/ace_engine/component_ext/arc_list:arclist"
     subsystem_name = "arkui"
     part_name = "ace_engine"
     lib_names = [ "arclist" ]
+  },
+  {
+    label = "//foundation/arkui/ace_engine/component_ext/arc_scroll_bar:arcscrollbar"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+    lib_names = [ "arcscrollbar" ]
   },
 ]
 
@@ -363,6 +375,12 @@ napi_modules = [
     prefix = "arkui/advanced"
     shard_libs = [
       {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/arcslider/interfaces:arcslider"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "arcslider" ]
+      },
+      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component:chip"
         subsystem_name = "arkui"
         part_name = "ace_engine"
@@ -385,6 +403,12 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "segmentbutton" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component:segmentbuttonv2"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "segmentbuttonv2" ]
       },
       {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/composelistitem/interfaces:composelistitem"
@@ -511,6 +535,12 @@ napi_modules = [
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "foldsplitcontainer" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/arcbutton/interfaces:arcbutton"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "arcbutton" ]
       },
     ]
   },

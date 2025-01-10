@@ -416,9 +416,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     float mainGap = GetMainGap();
     auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular);
     if (info_.offsetEnd_) {
-        if (GetEffectEdge() == EffectEdge::START && NonPositive(offset) && source == SCROLL_FROM_UPDATE) {
-            return true;
-        }
         if (source == SCROLL_FROM_UPDATE) {
             float overScroll = 0.0f;
             if (irregular) {
@@ -442,9 +439,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return true;
     }
     if (info_.reachStart_) {
-        if (GetEffectEdge() == EffectEdge::END && NonNegative(offset) && source == SCROLL_FROM_UPDATE) {
-            return true;
-        }
         if (source == SCROLL_FROM_UPDATE) {
             auto friction = CalculateFriction(std::abs(info_.currentOffset_) / GetMainContentSize());
             offset *= friction;
@@ -1065,7 +1059,7 @@ void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delt
     float heightInView = info_.totalHeightOfItemsInView_;
     if (info_.HeightSumSmaller(viewport, mainGap)) {
         // content < viewport, use viewport height to calculate overScroll
-        heightInView = viewport - info_.GetHeightInRange(0, info_.startMainLineIndex_, mainGap) - mainGap;
+        heightInView = viewport - info_.GetHeightInRange(0, info_.startMainLineIndex_, mainGap);
     }
     float disToBot = info_.GetDistanceToBottom(viewport, heightInView, mainGap);
     if (!info_.IsOutOfEnd(mainGap, true)) {

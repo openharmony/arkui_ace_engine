@@ -48,7 +48,7 @@ void SideBarContainerModelImpl::SetShowControlButton(bool showControlButton)
     component->SetShowControlButton(showControlButton);
 }
 
-void SideBarContainerModelImpl::ParseAndSetWidth(WidthType widthType, Dimension& width)
+void SideBarContainerModelImpl::ParseAndSetWidth(WidthType widthType, Dimension& width, bool isDoubleBind)
 {
     if (LessNotEqual(width.Value(), 0.0)) {
         width.SetValue(0.0);
@@ -74,7 +74,7 @@ void SideBarContainerModelImpl::ParseAndSetWidth(WidthType widthType, Dimension&
     }
 }
 
-void SideBarContainerModelImpl::SetSideBarWidth(const Dimension& sideBarWidth) {}
+void SideBarContainerModelImpl::SetSideBarWidth(const Dimension& sideBarWidth, bool isDoubleBind) {}
 
 void SideBarContainerModelImpl::SetMinSideBarWidth(const Dimension& minSideBarWidth) {}
 

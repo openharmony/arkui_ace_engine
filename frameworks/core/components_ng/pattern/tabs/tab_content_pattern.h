@@ -126,17 +126,31 @@ public:
         }
     }
 
+    void CleanChildren()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (host->GetChildren().empty()) {
+            return;
+        }
+        host->Clean();
+        firstTimeLayout_ = true;
+        CHECK_NULL_VOID(shallowBuilder_);
+        shallowBuilder_->MarkIsExecuteDeepRenderDone(false);
+    }
+
     void BeforeCreateLayoutWrapper() override
     {
         if (firstTimeLayout_) {
             CheckTabAnimateMode();
-            firstTimeLayout_ = false;
         }
 
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
             shallowBuilder_->ExecuteDeepRender();
-            shallowBuilder_.Reset();
-        } else if (shallowBuilder_ && shallowBuilder_->IsExecuteDeepRenderDone()) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        } else if (firstTimeLayout_ && shallowBuilder_ && shallowBuilder_->IsExecuteDeepRenderDone()) {
             auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             if (!pipeline) {
                 shallowBuilder_->MarkIsExecuteDeepRenderDone(false);
@@ -153,6 +167,7 @@ public:
                 host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             });
         }
+        firstTimeLayout_ = false;
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override

@@ -146,6 +146,7 @@ group("linux_core_unittest") {
     "pattern/waterflow:water_flow_test_original",
     "pattern/waterflow:water_flow_test_segmented",
     "pattern/waterflow:water_flow_test_sw",
+    "pattern/withtheme:withtheme_test_ng",
     "pattern/xcomponent:xcomponent_test_ng",
     "property:core_property_unittest",
     "render:core_render_unittest",

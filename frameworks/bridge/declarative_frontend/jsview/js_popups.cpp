@@ -158,8 +158,8 @@ static void GetBlurStyleFromTheme(const RefPtr<PopupParam>& popupParam)
     popupParam->SetBlurStyle(blurStyle);
 }
 
-void ParsePopupCommonParam(
-    const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
+void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj,
+    const RefPtr<PopupParam>& popupParam, const RefPtr<NG::FrameNode> popupTargetNode = nullptr)
 {
     auto arrowOffset = popupObj->GetProperty("arrowOffset");
     CalcDimension offset;
@@ -259,7 +259,12 @@ void ParsePopupCommonParam(
         std::vector<std::string> keys = { "isVisible" };
         RefPtr<JsFunction> jsFunc =
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onStateChangeVal));
-        auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        WeakPtr<NG::FrameNode> targetNode = nullptr;
+        if (popupTargetNode) {
+            targetNode = AceType::WeakClaim(AceType::RawPtr(popupTargetNode));
+        } else {
+            targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        }
         if (popupParam) {
             auto onStateChangeCallback = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), keys,
                                              node = targetNode](const std::string& param) {
@@ -357,12 +362,19 @@ void ParsePopupCommonParam(
     if (shadowVal->IsObject() || shadowVal->IsNumber()) {
         auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
         if (!ret) {
-            JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
+            if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
+                JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
+                popupParam->SetShadow(shadow);
+            }
+        } else {
+            popupParam->SetShadow(shadow);
         }
     } else {
-        JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
+        if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
+            JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
+            popupParam->SetShadow(shadow);
+        }
     }
-    popupParam->SetShadow(shadow);
 
     auto blurStyleValue = popupObj->GetProperty("backgroundBlurStyle");
     if (blurStyleValue->IsNumber()) {
@@ -371,18 +383,35 @@ void ParsePopupCommonParam(
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             popupParam->SetBlurStyle(static_cast<BlurStyle>(blurStyle));
         } else {
-            GetBlurStyleFromTheme(popupParam);
+            if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
+                GetBlurStyleFromTheme(popupParam);
+            }
         }
     } else {
-       GetBlurStyleFromTheme(popupParam);
+        if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
+            GetBlurStyleFromTheme(popupParam);
+        }
     }
 
     auto popupTransition = popupObj->GetProperty("transition");
     if (popupTransition->IsObject()) {
         popupParam->SetHasTransition(true);
         auto obj = JSRef<JSObject>::Cast(popupTransition);
-        auto effects = JSViewAbstract::ParseChainedTransition(obj, info.GetExecutionContext());
-        popupParam->SetTransitionEffects(effects);
+        if (popupTargetNode) {
+            auto effects = JSViewAbstract::ParseChainedTransition(obj, info.GetExecutionContext(), popupTargetNode);
+            popupParam->SetTransitionEffects(effects);
+        } else {
+            auto effects = JSViewAbstract::ParseChainedTransition(obj, info.GetExecutionContext());
+            popupParam->SetTransitionEffects(effects);
+        }
+    }
+    auto keyboardAvoidMode = popupObj->GetProperty("keyboardAvoidMode");
+    if (keyboardAvoidMode->IsNumber()) {
+        auto popupKeyboardAvoidMode = keyboardAvoidMode->ToNumber<int32_t>();
+        if (popupKeyboardAvoidMode >= static_cast<int>(PopupKeyboardAvoidMode::DEFAULT) &&
+            popupKeyboardAvoidMode <= static_cast<int>(PopupKeyboardAvoidMode::NONE)) {
+            popupParam->SetKeyBoardAvoidMode(static_cast<PopupKeyboardAvoidMode>(popupKeyboardAvoidMode));
+        }
     }
 }
 
@@ -1052,6 +1081,49 @@ panda::Local<panda::JSValueRef> JSViewAbstract::JsDismissPopup(panda::JsiRuntime
     return JSValueRef::Undefined(runtimeCallInfo->GetVM());
 }
 
+void JSViewAbstract::ParseContentPopupCommonParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
+{
+    CHECK_EQUAL_VOID(popupObj->IsEmpty(), true);
+    CHECK_NULL_VOID(popupParam);
+    if (popupParam->GetTargetId().empty() || std::stoi(popupParam->GetTargetId()) < 0) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetId is error.");
+        return;
+    }
+    int32_t targetId = std::stoi(popupParam->GetTargetId());
+    auto targetNode = ElementRegister::GetInstance()->GetSpecificItemById<NG::FrameNode>(targetId);
+    if (!targetNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist.");
+        return;
+    }
+    SetPopupDismiss(info, popupObj, popupParam);
+    ParsePopupCommonParam(info, popupObj, popupParam, targetNode);
+    auto focusableValue = popupObj->GetProperty("focusable");
+    if (focusableValue->IsBoolean()) {
+        popupParam->SetFocusable(focusableValue->ToBoolean());
+    }
+}
+
+int32_t JSViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode)
+{
+    return ViewAbstractModel::GetInstance()->OpenPopup(param, customNode);
+}
+
+int32_t JSViewAbstract::UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode)
+{
+    return ViewAbstractModel::GetInstance()->UpdatePopup(param, customNode);
+}
+
+int32_t JSViewAbstract::ClosePopup(const RefPtr<NG::UINode>& customNode)
+{
+    return ViewAbstractModel::GetInstance()->ClosePopup(customNode);
+}
+
+int32_t JSViewAbstract::GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode)
+{
+    return ViewAbstractModel::GetInstance()->GetPopupParam(param, customNode);
+}
+
 void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 {
     NG::MenuParam menuParam;
@@ -1106,29 +1178,11 @@ void JSViewAbstract::JsBindContextMenu(const JSCallbackInfo& info)
 }
 #endif
 
-bool ParseBindContentCoverIsShow(const JSCallbackInfo& info)
-{
-    bool isShow = false;
-    if (info[0]->IsBoolean()) {
-        isShow = info[0]->ToBoolean();
-    } else if (info[0]->IsObject()) {
-        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
-        auto isShowObj = callbackObj->GetProperty("value");
-        isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
-    }
-    TAG_LOGD(AceLogTag::ACE_SHEET, "ContentCover get isShow is: %{public}d", isShow);
-    return isShow;
-}
-
 void JSViewAbstract::JsBindContentCover(const JSCallbackInfo& info)
 {
     // parse isShow
-    bool isShow = ParseBindContentCoverIsShow(info);
     DoubleBindCallback callback = nullptr;
-    if (info[0]->IsObject()) {
-        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
-        callback = ParseDoubleBindCallback(info, callbackObj, "changeEvent");
-    }
+    bool isShow = ParseSheetIsShow(info, "ContentCover", callback);
 
     // parse builder
     if (!info[1]->IsObject()) {
@@ -1203,26 +1257,31 @@ void JSViewAbstract::ParseModalStyle(const JSRef<JSObject>& paramObj, NG::ModalS
     }
 }
 
-void JSViewAbstract::ParseSheetIsShow(
-    const JSCallbackInfo& info, bool& isShow, std::function<void(const std::string&)>& callback)
+bool JSViewAbstract::ParseSheetIsShow(const JSCallbackInfo& info, const std::string& name,
+    std::function<void(const std::string&)>& callback)
 {
+    bool isShow = false;
     if (info[0]->IsBoolean()) {
         isShow = info[0]->ToBoolean();
     } else if (info[0]->IsObject()) {
         JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
-        callback = ParseDoubleBindCallback(info, callbackObj, "changeEvent");
         auto isShowObj = callbackObj->GetProperty("value");
         isShow = isShowObj->IsBoolean() ? isShowObj->ToBoolean() : false;
+        callback = ParseDoubleBindCallback(info, callbackObj, "changeEvent");
+        if (!callback && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            TAG_LOGD(AceLogTag::ACE_SHEET, "Try %{public}s another parsing", name.c_str());
+            callback = ParseDoubleBindCallback(info, callbackObj, "$value");
+        }
     }
-    TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet get isShow is: %{public}d", isShow);
+    TAG_LOGD(AceLogTag::ACE_SHEET, "%{public}s get isShow is: %{public}d", name.c_str(), isShow);
+    return isShow;
 }
 
 void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
 {
     // parse isShow and builder
-    bool isShow = false;
     DoubleBindCallback callback = nullptr;
-    ParseSheetIsShow(info, isShow, callback);
+    bool isShow = ParseSheetIsShow(info, "Sheet", callback);
     if (!info[1]->IsObject())
         return;
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);

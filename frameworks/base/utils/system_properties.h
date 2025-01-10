@@ -635,6 +635,11 @@ public:
 
     static bool IsNeedSymbol();
 
+    static bool GetTaskPriorityAdjustmentEnable()
+    {
+        return taskPriorityAdjustmentEnable_;
+    }
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -713,6 +718,7 @@ private:
     static bool windowRectResizeEnabled_;
     static FoldScreenType foldScreenType_;
     static double scrollableDistance_;
+    static bool taskPriorityAdjustmentEnable_;
 };
 
 } // namespace OHOS::Ace

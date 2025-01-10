@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-const __ArcList__ = requireInternal("arkui.ArcList");
+const __ArcList__ = requireInternal('arkui.ArcList');
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 
 class ArcListChildrenMainSizeModifier extends ModifierWithKey {

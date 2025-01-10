@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
+#include "core/components_ng/property/accessibility_property_helper.h"
 
 #include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
@@ -140,14 +141,14 @@ float SheetPresentationPattern::GetSheetTopSafeArea()
         sheetTopSafeArea = SHEET_BLANK_FLOATING_STATUS_BAR.ConvertToPx();
     } else if ((sheetType == SheetType::SHEET_BOTTOMLANDSPACE || sheetType == SheetType::SHEET_BOTTOM ||
                 sheetType == SheetType::SHEET_BOTTOM_OFFSET) &&
-               Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+               Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         sheetTopSafeArea = GetBottomSafeArea();
     } else if (sheetType == SheetType::SHEET_BOTTOMLANDSPACE &&
                AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         sheetTopSafeArea = 0.0f;
     }
     // before API14，ignore safeArea height when in landscape
-    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         auto layoutProperty = DynamicCast<SheetPresentationProperty>(host->GetLayoutProperty());
         CHECK_NULL_RETURN(layoutProperty, 0.0f);
         auto sheetStyle = layoutProperty->GetSheetStyleValue();
@@ -563,6 +564,7 @@ void SheetPresentationPattern::HandleDragStart()
     }
     currentOffset_ = 0.0f;
     isDirectionUp_ = true;
+    GetCurrentBroadcastDetentsIndex();
 }
 
 void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
@@ -602,6 +604,7 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
         ChangeScrollHeight(height - currentOffset_);
     }
     ProcessColumnRect(height - currentOffset_);
+    HandleFollowAccessibilityEvent(height - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
     if (IsSheetBottomStyle()) {
@@ -609,6 +612,117 @@ void SheetPresentationPattern::HandleDragUpdate(const GestureEvent& info)
     }
 }
 
+void SheetPresentationPattern::SendTextUpdateEvent()
+{
+    auto sheetNode = GetHost();
+    CHECK_NULL_VOID(sheetNode);
+    // Use TEXT_CHANGE to send events.
+    TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet sent TEXT_CHANGE event, when follow up.");
+    sheetNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, "", "");
+}
+
+void SheetPresentationPattern::SendSelectedEvent()
+{
+    auto sheetNode = GetHost();
+    CHECK_NULL_VOID(sheetNode);
+    // Use SELECTED to send events.
+    TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet sent SELECTED event, when get out of your hands.");
+    sheetNode->OnAccessibilityEvent(AccessibilityEventType::SELECTED, "", "");
+}
+
+void SheetPresentationPattern::RegisterElementInfoCallBack()
+{
+    auto sheetNode = GetHost();
+    CHECK_NULL_VOID(sheetNode);
+    auto accessibilityProperty = sheetNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    auto callBack = [sheetDetents = std::to_string(static_cast<int32_t>(sheetDetents_))]
+        (Accessibility::ExtraElementInfo& extraElementInfo) {
+        extraElementInfo.SetExtraElementInfo("BindSheet", sheetDetents);
+    };
+    accessibilityProperty->SetRelatedElementInfoCallback(callBack);
+}
+
+bool SheetPresentationPattern::UpdateAccessibilityDetents(float height)
+{
+    auto sheetDetentsSize = sheetDetentHeight_.size();
+    bool invalid = sheetDetentsSize < 2 || !IsSheetBottomStyle();
+    if (invalid) {
+        return false;
+    }
+    for (uint32_t i = 0; i < sheetDetentsSize; i++) {
+        if (NearEqual(height, sheetDetentHeight_[i])) {
+            // size is 2, corresponds to high and low.
+            // size is 3, corresponds to high、medium and low.
+            // The lower of the two detents, corresponds to "LOW".
+            bool lowOfTwoDetents = sheetDetentsSize == 2 && i == 0;
+            sheetDetents_ = lowOfTwoDetents
+                ? static_cast<SheetAccessibilityDetents>(sheetDetentsSize - i)
+                : static_cast<SheetAccessibilityDetents>(sheetDetentsSize -1 - i);
+            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet detents enum value: %{public}d", sheetDetents_);
+            RegisterElementInfoCallBack();
+            return true;
+        }
+    }
+    return false;
+}
+
+uint32_t SheetPresentationPattern::GetCurrentBroadcastDetentsIndex()
+{
+    bool invalid = sheetDetentHeight_.size() < 2 || !IsSheetBottomStyle();
+    if (invalid) {
+        return broadcastPreDetentsIndex_;
+    }
+    // get currrent detents index.
+    auto it = std::find(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), height_);
+    if (it != sheetDetentHeight_.end()) {
+        broadcastPreDetentsIndex_ = static_cast<uint32_t>(std::distance(sheetDetentHeight_.begin(), it));
+    }
+    return broadcastPreDetentsIndex_;
+}
+
+void SheetPresentationPattern::HandleFollowAccessibilityEvent(float currHeight)
+{
+    auto sheetDetentsSize = sheetDetentHeight_.size();
+    bool invalid = sheetDetentsSize < 2 || !IsSheetBottomStyle();
+    if (invalid) {
+        return;
+    }
+    if (currHeight < sheetDetentHeight_[0] || currHeight > sheetDetentHeight_[sheetDetentsSize - 1]) {
+        return;
+    }
+    float upHeight = 0.0f;
+    float downHeight = 0.0f;
+    float finalHeight = 0.0f;
+
+    // record current position info.
+    uint32_t detentsLowerPos = 0;
+    uint32_t detentsUpperPos = 0;
+    uint32_t broadcastCurrDetentsIndex = 0;
+    ComputeDetentsPos(currHeight, upHeight, downHeight, detentsLowerPos, detentsUpperPos);
+
+    if (GreatNotEqual(std::abs(currHeight - upHeight), std::abs(currHeight - downHeight))) {
+        finalHeight = downHeight;
+        broadcastCurrDetentsIndex = detentsLowerPos;
+    } else if (LessNotEqual(std::abs(currHeight - upHeight), std::abs(currHeight - downHeight))) {
+        finalHeight = upHeight;
+        broadcastCurrDetentsIndex = detentsUpperPos;
+    }
+
+    // Broadcast once when enter other effect area.
+    if (broadcastCurrDetentsIndex != broadcastPreDetentsIndex_) {
+        UpdateAccessibilityDetents(finalHeight);
+        SendTextUpdateEvent();
+        broadcastPreDetentsIndex_ = broadcastCurrDetentsIndex;
+    }
+}
+
+void SheetPresentationPattern::HandleDragEndAccessibilityEvent()
+{
+    if (UpdateAccessibilityDetents(GetSheetHeightBeforeDragUpdate())) {
+        SendSelectedEvent();
+    }
+}
 void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
 {
     isNeedProcessHeight_ = true;
@@ -724,6 +838,7 @@ void SheetPresentationPattern::OnCoordScrollStart()
         isAnimationBreak_ = true;
     }
     currentOffset_ = 0.0f;
+    GetCurrentBroadcastDetentsIndex();
 }
 
 bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
@@ -752,6 +867,7 @@ bool SheetPresentationPattern::OnCoordScrollUpdate(float scrollOffset)
         currentOffset_ = height - sheetMaxHeight_;
     }
     ProcessColumnRect(height - currentOffset_);
+    HandleFollowAccessibilityEvent(height - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, offset, 0.0f });
     return true;
@@ -770,7 +886,7 @@ void SheetPresentationPattern::InitialLayoutProps()
 
 bool SheetPresentationPattern::GetWindowButtonRect(NG::RectF& floatButtons)
 {
-    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
         return false;
     }
     auto host = GetHost();
@@ -793,13 +909,18 @@ float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetSty
     auto sheetNode = GetHost();
     CHECK_NULL_RETURN(sheetNode, sheetHeight);
     if (sheetStyle.sheetMode.has_value()) {
+        auto pipelineContext = sheetNode->GetContext();
+        CHECK_NULL_RETURN(pipelineContext, sheetHeight);
+        auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+        CHECK_NULL_RETURN(sheetTheme, sheetHeight);
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
-            sheetHeight = pageHeight_ * MEDIUM_SIZE;
+            sheetHeight = pageHeight_ * sheetTheme->GetMediumPercent();
             if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 sheetHeight = pageHeight_ * MEDIUM_SIZE_PRE;
             }
         } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
-            sheetHeight = largeHeight;
+            sheetHeight = sheetTheme->GetHeightApplyFullScreen() ? pageHeight_ : largeHeight;
+            sheetHeight *= sheetTheme->GetLargePercent();
         } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
             sheetHeight = GetFitContentHeight();
             if (sheetHeight > largeHeight) {
@@ -990,10 +1111,9 @@ void SheetPresentationPattern::ModifyFireSheetTransition(float dragVelocity)
     };
 
     isAnimationProcess_ = true;
-
+    HandleDragEndAccessibilityEvent();
     property_->Set(start_);
-    animation_ = AnimationUtils::StartAnimation(
-        option,
+    animation_ = AnimationUtils::StartAnimation(option,
         [weak = AceType::WeakClaim(this), renderContext, offset]() {
             auto ref = weak.Upgrade();
             CHECK_NULL_VOID(ref);
@@ -1064,7 +1184,7 @@ float SheetPresentationPattern::UpdateSheetTransitionOffset()
 void SheetPresentationPattern::SetSheetAnimationOption(AnimationOption& option) const
 {
     option.SetFillMode(FillMode::FORWARDS);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
         option.SetDuration(SHEET_ANIMATION_DURATION);
     }
 }
@@ -1394,13 +1514,16 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
             layoutProps->ClearUserDefinedIdealSize(false, true);
             titleLayoutProps->ClearUserDefinedIdealSize(false, true);
         } else if (sheetStyle.isTitleBuilder.has_value()) {
+            auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+            CHECK_NULL_VOID(sheetTheme);
+            auto operationAreaHeight = sheetTheme->GetOperationAreaHeight();
             layoutProps->UpdateUserDefinedIdealSize(
-                CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT - SHEET_TITLE_AERA_MARGIN)));
+                CalcSize(std::nullopt, CalcLength(operationAreaHeight - sheetTheme->GetSheetTitleAreaMargin())));
             titleLayoutProps->UpdateUserDefinedIdealSize(
-                CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
+                CalcSize(std::nullopt, CalcLength(operationAreaHeight)));
             if (sheetStyle.sheetSubtitle.has_value()) {
-                layoutProps->UpdateUserDefinedIdealSize(
-                    CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_TITLE_AERA_MARGIN)));
+                layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
+                    CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - sheetTheme->GetSheetTitleAreaMargin())));
                 titleLayoutProps->UpdateUserDefinedIdealSize(
                     CalcSize(std::nullopt,
                         CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
@@ -1588,10 +1711,16 @@ void SheetPresentationPattern::InitSheetDetents()
     CHECK_NULL_VOID(sheetNode);
     auto geometryNode = sheetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
+    auto pipelineContext = sheetNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
+    CHECK_NULL_VOID(sheetTheme);
     auto largeHeight = sheetMaxHeight_ - SHEET_BLANK_MINI_HEIGHT.ConvertToPx();
     auto sheetType = GetSheetType();
     auto sheetFrameHeight = geometryNode->GetFrameSize().Height();
-    auto mediumSize = MEDIUM_SIZE;
+    auto mediumSize = sheetTheme->GetMediumPercent();
+    float largeHeightOfTheme = sheetTheme->GetHeightApplyFullScreen() ? pageHeight_ : largeHeight;
+    largeHeightOfTheme *= sheetTheme->GetLargePercent();
     if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         mediumSize = MEDIUM_SIZE_PRE;
     }
@@ -1611,33 +1740,7 @@ void SheetPresentationPattern::InitSheetDetents()
                 sheetDetentHeight_.emplace_back(height);
                 break;
             }
-            for (auto iter : sheetStyle.detents) {
-                preDetents_.emplace_back(iter);
-                if (iter.sheetMode.has_value()) {
-                    if (iter.sheetMode == SheetMode::MEDIUM) {
-                        height = pageHeight_ * mediumSize;
-                    } else if (iter.sheetMode == SheetMode::LARGE) {
-                        height = largeHeight;
-                    } else if (iter.sheetMode == SheetMode::AUTO) {
-                        height = GetFitContentHeight();
-                        height = GreatNotEqual(height, largeHeight) ? largeHeight : height;
-                        HandleFitContontChange(height);
-                    }
-                } else {
-                    if (iter.height->Unit() == DimensionUnit::PERCENT) {
-                        height = iter.height->ConvertToPxWithSize(sheetMaxHeight_);
-                    } else {
-                        height = iter.height->ConvertToPx();
-                    }
-                    if (GreatNotEqual(height, largeHeight)) {
-                        height = largeHeight;
-                    } else if (LessNotEqual(height, 0)) {
-                        height = largeHeight;
-                    }
-                }
-                sheetDetentHeight_.emplace_back(height);
-                unSortedSheetDentents_.emplace_back(height);
-            }
+            InitDetents(sheetStyle, height, mediumSize, largeHeightOfTheme, largeHeight);
             std::sort(sheetDetentHeight_.begin(), sheetDetentHeight_.end(), std::less<float>());
             sheetDetentHeight_.erase(
                 std::unique(sheetDetentHeight_.begin(), sheetDetentHeight_.end()), sheetDetentHeight_.end());
@@ -1652,6 +1755,38 @@ void SheetPresentationPattern::InitSheetDetents()
             break;
         default:
             break;
+    }
+}
+
+void SheetPresentationPattern::InitDetents(
+    SheetStyle sheetStyle, float height, double mediumSize, float largeHeightOfTheme, double largeHeight)
+{
+    for (auto iter : sheetStyle.detents) {
+        preDetents_.emplace_back(iter);
+        if (iter.sheetMode.has_value()) {
+            if (iter.sheetMode == SheetMode::MEDIUM) {
+                height = pageHeight_ * mediumSize;
+            } else if (iter.sheetMode == SheetMode::LARGE) {
+                height = largeHeightOfTheme;
+            } else if (iter.sheetMode == SheetMode::AUTO) {
+                height = GetFitContentHeight();
+                height = GreatNotEqual(height, largeHeight) ? largeHeight : height;
+                HandleFitContontChange(height);
+            }
+        } else {
+            if (iter.height->Unit() == DimensionUnit::PERCENT) {
+                height = iter.height->ConvertToPxWithSize(sheetMaxHeight_);
+            } else {
+                height = iter.height->ConvertToPx();
+            }
+            if (GreatNotEqual(height, largeHeight)) {
+                height = largeHeight;
+            } else if (LessNotEqual(height, 0)) {
+                height = largeHeight;
+            }
+        }
+        sheetDetentHeight_.emplace_back(height);
+        unSortedSheetDentents_.emplace_back(height);
     }
 }
 
@@ -1943,6 +2078,7 @@ void SheetPresentationPattern::StartSheetTransitionAnimation(
     auto sheetParent = DynamicCast<FrameNode>(host->GetParent());
     CHECK_NULL_VOID(sheetParent);
     if (isTransitionIn) {
+        HandleDragEndAccessibilityEvent();
         animation_ = AnimationUtils::StartAnimation(
             option,
             [context, offset]() {
@@ -2564,6 +2700,7 @@ void SheetPresentationPattern::OnScrollStartRecursive(
     currentOffset_ = 0.0f;
     isSheetNeedScroll_ = false;
     isDirectionUp_ = true;
+    GetCurrentBroadcastDetentsIndex();
 }
 
 ScrollResult SheetPresentationPattern::HandleScroll(float scrollOffset, int32_t source, NestedState state,
@@ -2642,6 +2779,7 @@ ScrollResult SheetPresentationPattern::HandleScrollWithSheet(float scrollOffset)
         ChangeScrollHeight(currentHeightPos - currentOffset_);
     }
     ProcessColumnRect(currentHeightPos - currentOffset_);
+    HandleFollowAccessibilityEvent(currentHeightPos - currentOffset_);
     auto renderContext = host->GetRenderContext();
     renderContext->UpdateTransformTranslate({ 0.0f, sheetOffsetInPage, 0.0f });
     isSheetPosChanged_ = NearZero(scrollOffset) ? false : true;

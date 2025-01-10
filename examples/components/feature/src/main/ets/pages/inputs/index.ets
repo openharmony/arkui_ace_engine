@@ -15,12 +15,16 @@
 
 import { Route, RouteGroup } from 'common/src/main/ets/common/route';
 import { TextInputBootcamp } from './TextInputBootcamp';
-import { RichEditorBootcamp } from './RichEditorBootcamp';
 import { TextAreaBootcamp } from './TextAreaBootcamp';
-import { ContainerSpanBootcamp } from './ContainerSpanBootcamp';
+import { RichEditorBootcamp } from './RichEditorBootcamp';
 import { RichEditorSpanUrlBootcamp } from './RichEditorSpanUrlBootcamp';
 import { SelectionMenuBootcamp } from './SelectionMenuBootcamp';
+import { ContainerSpanBootcamp } from './ContainerSpanBootcamp';
 import { SearchBootcamp } from './SearchBootcamp';
+import { HyperlinkBootcamp } from './HyperlinkBootcamp';
+import { SpanBootcamp } from './SpanBootcamp';
+import { SymbolGlyphBootcamp } from './SymbolGlyphBootcamp';
+import { TextBootcamp } from './TextBootcamp';
 
 export const inputsRoute: RouteGroup = {
   name: 'inputs',
@@ -30,31 +34,39 @@ export const inputsRoute: RouteGroup = {
     { name: 'textInput', label: '单行文本框/TextInput' },
     { name: 'textArea', label: '多行文本框/TextArea' },
     { name: 'richEditor', label: '富文本/RichEditor' },
+    { name: 'richeditorSpanurl', label: '富文本超链接/RichEditor' },
+    { name: 'SelectionMenu', label: '文本选择菜单/SelectionMenu' },
     { name: 'search', label: '搜索框/Search' },
     { name: 'span', label: 'Span' },
     { name: 'containerSpan', label: 'ContainerSpan/ContainerSpan' },
-    { name: 'richeditorSpanurl', label: '富文本超链接/RichEditor' },
-    { name: 'SelectionMenu', label: '文本选择菜单/SelectionMenu'},
+    { name: 'hyperlink', label: '超链接/Hyperlink' },
+    { name: 'symbolGlyph', label: 'SymbolGlyph/SymbolGlyph' },
   ]
 };
 
 @Builder
 export function InputsDestination(name: string, route: Route) {
-  if (name === 'inputs/richEditor') {
-    RichEditorBootcamp({ title: route.label })
-  }else if (name === 'inputs/textInput') {
+  if (name === 'inputs/text') {
+    TextBootcamp({ title: route.label })
+  } else if (name === 'inputs/textInput') {
     TextInputBootcamp({ title: route.label })
-  }else if (name === 'inputs/textArea') {
+  } else if (name === 'inputs/textArea') {
     TextAreaBootcamp({ title: route.label })
   } else if (name === 'inputs/richEditor') {
     RichEditorBootcamp({ title: route.label })
-  }else if (name === 'inputs/containerSpan') {
-    ContainerSpanBootcamp({ title: route.label })
   } else if (name === 'inputs/richeditorSpanurl') {
     RichEditorSpanUrlBootcamp({ title: route.label })
-  } else if (name === 'inputs/SelectionMenu'){
-    SelectionMenuBootcamp({ title: route.label})
+  } else if (name === 'inputs/SelectionMenu') {
+    SelectionMenuBootcamp({ title: route.label })
   } else if (name === 'inputs/search') {
     SearchBootcamp({ title: route.label })
+  } else if (name === 'inputs/containerSpan') {
+    ContainerSpanBootcamp({ title: route.label })
+  } else if (name === 'inputs/span') {
+    SpanBootcamp({ title: route.label })
+  } else if (name === 'inputs/hyperlink') {
+    HyperlinkBootcamp({ title: route.label })
+  } else if (name === 'inputs/symbolGlyph') {
+    SymbolGlyphBootcamp({ title: route.label })
   }
 }

@@ -75,7 +75,6 @@ interface SimpleSegmentButtonV2Theme extends SegmentButtonV2ContentTheme {
   buttonPadding: Resource;
   itemSelectedBackgroundColor: ResourceColor;
   itemBorderRadius: Resource;
-  hybridItemBorderRadius: Resource;
   itemShadow: ShadowStyle;
 }
 
@@ -91,14 +90,13 @@ const SMALLEST_MIN_FONT_SCALE: number = 0;
 const LARGEST_MIN_FONT_SCALE: number = 1;
 
 const tabSimpleTheme: SimpleSegmentButtonV2Theme = {
-  buttonBackgroundColor: $r('sys.color.comp_background_tertiary'),
-  buttonBorderRadius: $r('sys.float.corner_radius_level10'),
-  buttonMinHeight: 40,
-  hybridButtonMinHeight: 64,
+  buttonBackgroundColor: $r('sys.color.segment_button_v2_tab_button_background'),
+  buttonBorderRadius: $r('sys.float.segment_button_v2_background_corner_radius'),
+  buttonMinHeight: $r('sys.float.segment_button_v2_singleline_background_height'),
+  hybridButtonMinHeight: $r('sys.float.segment_button_v2_doubleline_background_height'),
   buttonPadding: $r('sys.float.padding_level1'),
-  itemSelectedBackgroundColor: $r('sys.color.white'),
-  itemBorderRadius: $r('sys.float.corner_radius_level9'),
-  hybridItemBorderRadius: $r('sys.float.corner_radius_level10'),
+  itemSelectedBackgroundColor: $r('sys.color.segment_button_v2_tab_selected_item_background'),
+  itemBorderRadius: $r('sys.float.segment_button_v2_selected_corner_radius'),
   itemSpace: LengthMetrics.vp(0),
   itemFontSize: $r('sys.float.ohos_id_text_size_button2'),
   itemFontColor: $r('sys.color.font_secondary'),
@@ -111,13 +109,13 @@ const tabSimpleTheme: SimpleSegmentButtonV2Theme = {
   itemSymbolFontSize: 20,
   itemSymbolFontColor: $r('sys.color.font_secondary'),
   itemSelectedSymbolFontColor: $r('sys.color.font_primary'),
-  itemMinHeight: 36,
-  hybridItemMinHeight: 60,
+  itemMinHeight: $r('sys.float.segment_button_v2_singleline_selected_height'),
+  hybridItemMinHeight: $r('sys.float.segment_button_v2_doubleline_selected_height'),
   itemPadding: {
     top: LengthMetrics.resource($r('sys.float.padding_level2')),
     bottom: LengthMetrics.resource($r('sys.float.padding_level2')),
-    start: LengthMetrics.resource($r('sys.float.padding_level8')),
-    end: LengthMetrics.resource($r('sys.float.padding_level8')),
+    start: LengthMetrics.resource($r('sys.float.padding_level4')),
+    end: LengthMetrics.resource($r('sys.float.padding_level4')),
   },
   itemShadow: ShadowStyle.OUTER_DEFAULT_XS,
   itemMaxFontScale: SMALLEST_MAX_FONT_SCALE,
@@ -129,15 +127,14 @@ const tabSimpleTheme: SimpleSegmentButtonV2Theme = {
 };
 
 const capsuleSimpleTheme: SimpleSegmentButtonV2Theme = {
-  buttonBackgroundColor: $r('sys.color.ohos_id_color_button_normal'),
-  buttonBorderRadius: $r('sys.float.corner_radius_level9'),
-  buttonMinHeight: 36,
-  hybridButtonMinHeight: 64,
+  buttonBackgroundColor: $r('sys.color.segment_button_v2_tab_button_background'),
+  buttonBorderRadius: $r('sys.float.segment_button_v2_background_corner_radius'),
+  buttonMinHeight: $r('sys.float.segment_button_v2_singleline_background_height'),
+  hybridButtonMinHeight: $r('sys.float.segment_button_v2_doubleline_background_height'),
   buttonPadding: $r('sys.float.padding_level1'),
-  itemSelectedBackgroundColor: $r('sys.color.brand'),
-  itemBorderRadius: $r('sys.float.corner_radius_level8'),
-  hybridItemBorderRadius: $r('sys.float.corner_radius_level9'),
-  itemSpace: LengthMetrics.vp(2),
+  itemSelectedBackgroundColor: $r('sys.color.comp_background_emphasize'),
+  itemBorderRadius: $r('sys.float.segment_button_v2_selected_corner_radius'),
+  itemSpace: LengthMetrics.vp(0),
   itemFontSize: $r('sys.float.ohos_id_text_size_button2'),
   itemFontColor: $r('sys.color.font_secondary'),
   itemSelectedFontColor: $r('sys.color.font_on_primary'),
@@ -149,13 +146,13 @@ const capsuleSimpleTheme: SimpleSegmentButtonV2Theme = {
   itemSymbolFontSize: 20,
   itemSymbolFontColor: $r('sys.color.font_secondary'),
   itemSelectedSymbolFontColor: $r('sys.color.font_on_primary'),
-  itemMinHeight: 32,
-  hybridItemMinHeight: 60,
+  itemMinHeight: $r('sys.float.segment_button_v2_singleline_selected_height'),
+  hybridItemMinHeight: $r('sys.float.segment_button_v2_doubleline_selected_height'),
   itemPadding: {
     top: LengthMetrics.resource($r('sys.float.padding_level2')),
     bottom: LengthMetrics.resource($r('sys.float.padding_level2')),
-    start: LengthMetrics.resource($r('sys.float.padding_level8')),
-    end: LengthMetrics.resource($r('sys.float.padding_level8')),
+    start: LengthMetrics.resource($r('sys.float.padding_level4')),
+    end: LengthMetrics.resource($r('sys.float.padding_level4')),
   },
   itemShadow: ShadowStyle.OUTER_DEFAULT_XS,
   itemMaxFontScale: SMALLEST_MAX_FONT_SCALE,
@@ -596,6 +593,7 @@ struct SimpleSegmentButtonV2 {
           .accessibilityLevel(repeatItem.item.accessibilityLevel)
           .backgroundColor(Color.Transparent)
           .borderRadius(this.getItemBorderRadius())
+          .direction(this.languageDirection)
           .enabled(repeatItem.item.enabled)
           .hoverEffect(HoverEffect.None)
           .layoutWeight(1)
@@ -725,18 +723,17 @@ struct SimpleSegmentButtonV2 {
   @LocalBuilder
   private BackplateLayer() {
     if (this.selectedItemRect) {
-      Stack() {
-      }
-      .position({
-        x: this.selectedItemRect.position.x,
-        y: this.selectedItemRect.position.y,
-      })
-      .backgroundColor(this.getItemSelectedBackgroundColor())
-      .borderRadius(this.getItemBorderRadius())
-      .scale({ x: this.itemScale, y: this.itemScale })
-      .shadow(this.getItemBackplateShadow())
-      .height(this.selectedItemRect.size.height)
-      .width(this.selectedItemRect.size.width)
+      Stack()
+        .position({
+          x: this.selectedItemRect.position.x,
+          y: this.selectedItemRect.position.y,
+        })
+        .backgroundColor(this.getItemSelectedBackgroundColor())
+        .borderRadius(this.getItemBorderRadius())
+        .scale({ x: this.itemScale, y: this.itemScale })
+        .shadow(this.getItemBackplateShadow())
+        .height(this.selectedItemRect.size.height)
+        .width(this.selectedItemRect.size.width)
     }
   }
 
@@ -766,6 +763,7 @@ struct SimpleSegmentButtonV2 {
       }
       .borderRadius(this.getButtonBorderRadius())
       .backgroundBlurStyle(this.getButtonBackgroundBlurStyle(), this.getButtonBackgroundBlurStyleOptions())
+      .direction(this.languageDirection)
     }
     .backgroundColor(this.getButtonBackgroundColor())
     .backgroundEffect(this.buttonBackgroundEffect)
@@ -774,6 +772,7 @@ struct SimpleSegmentButtonV2 {
       minWidth: '100%',
       minHeight: this.getButtonMinHeight()
     })
+    .direction(this.languageDirection)
   }
 
   private getItemBackplateShadow(): ShadowOptions | ShadowStyle | undefined {
@@ -840,10 +839,10 @@ struct SimpleSegmentButtonV2 {
 
   private getEffectBackgroundColor(repeatItem: RepeatItem<SegmentButtonV2ItemRect>): ResourceColor {
     if (repeatItem.index === this.mousePressedItemIndex) {
-      return $r('sys.color.ohos_id_color_click_effect');
+      return $r('sys.color.interactive_click');
     }
     if (repeatItem.index === this.hoveredItemIndex) {
-      return $r('sys.color.ohos_id_color_hover');
+      return $r('sys.color.interactive_hover');
     }
     return Color.Transparent;
   }
@@ -852,7 +851,7 @@ struct SimpleSegmentButtonV2 {
     if (this.itemBorderRadius && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemBorderRadius)) {
       return LengthMetricsUtils.getInstance().stringify(this.itemBorderRadius);
     }
-    return this.items.hasHybrid ? this.theme.hybridItemBorderRadius : this.theme.itemBorderRadius;
+    return this.theme.itemBorderRadius;
 
   }
 
@@ -965,9 +964,9 @@ interface MultiplySegmentButtonV2Theme extends SegmentButtonV2ContentTheme {
 }
 
 const multiplyCapsuleTheme: MultiplySegmentButtonV2Theme = {
-  itemBorderRadius: $r('sys.float.corner_radius_level10'),
-  itemBackgroundColor: $r('sys.color.comp_background_tertiary'),
-  itemSelectedBackgroundColor: $r('sys.color.brand'),
+  itemBorderRadius: $r('sys.float.segment_button_v2_multi_corner_radius'),
+  itemBackgroundColor: $r('sys.color.segment_button_v2_multi_capsule_button_background'),
+  itemSelectedBackgroundColor: $r('sys.color.comp_background_emphasize'),
   itemSpace: LengthMetrics.vp(1),
   itemFontColor: $r('sys.color.font_secondary'),
   itemSelectedFontColor: $r('sys.color.font_on_primary'),
@@ -983,11 +982,11 @@ const multiplyCapsuleTheme: MultiplySegmentButtonV2Theme = {
   itemPadding: {
     top: LengthMetrics.resource($r('sys.float.padding_level2')),
     bottom: LengthMetrics.resource($r('sys.float.padding_level2')),
-    start: LengthMetrics.resource($r('sys.float.padding_level8')),
-    end: LengthMetrics.resource($r('sys.float.padding_level8')),
+    start: LengthMetrics.resource($r('sys.float.padding_level4')),
+    end: LengthMetrics.resource($r('sys.float.padding_level4')),
   },
-  itemMinHeight: 40,
-  hybridItemMinHeight: 64,
+  itemMinHeight: $r('sys.float.segment_button_v2_multi_singleline_height'),
+  hybridItemMinHeight: $r('sys.float.segment_button_v2_multi_doubleline_height'),
   itemMaxFontScale: SMALLEST_MAX_FONT_SCALE,
   itemMaxFontScaleSmallest: SMALLEST_MAX_FONT_SCALE,
   itemMaxFontScaleLargest: LARGEST_MAX_FONT_SCALE,
@@ -1030,6 +1029,12 @@ export struct MultiCapsuleSegmentButtonV2 {
   itemBorderRadius?: LengthMetrics = undefined;
   @Param
   itemBackgroundColor?: ColorMetrics = undefined;
+  @Param
+  itemBackgroundEffect?: BackgroundEffectOptions = undefined;
+  @Param
+  itemBackgroundBlurStyle?: BlurStyle = undefined;
+  @Param
+  itemBackgroundBlurStyleOptions?: BackgroundBlurStyleOptions = undefined;
   @Param
   itemSelectedBackgroundColor?: ColorMetrics = undefined;
   @Param
@@ -1080,6 +1085,8 @@ export struct MultiCapsuleSegmentButtonV2 {
               itemPadding: this.itemPadding,
               languageDirection: this.languageDirection,
             })
+              .borderRadius(this.getItemButtonBorderRadius(repeatItem))
+              .backgroundBlurStyle(this.getItemBackgroundBlurStyle(), this.getItemBackgroundBlurStyleOptions())
           }
           .accessibilityGroup(true)
           .accessibilityChecked(this.isSelected(repeatItem))
@@ -1087,8 +1094,10 @@ export struct MultiCapsuleSegmentButtonV2 {
           .accessibilityDescription(this.getItemAccessibilityDescription(repeatItem))
           .accessibilityLevel(repeatItem.item.accessibilityLevel)
           .backgroundColor(this.getItemBackgroundColor(repeatItem))
+          .backgroundEffect(this.itemBackgroundEffect)
           .borderRadius(this.getItemButtonBorderRadius(repeatItem))
           .constraintSize({ minHeight: this.getItemMinHeight() })
+          .direction(this.languageDirection)
           .enabled(repeatItem.item.enabled)
           .layoutWeight(1)
           .padding(0)
@@ -1112,6 +1121,20 @@ export struct MultiCapsuleSegmentButtonV2 {
         })
     }
     .direction(this.languageDirection)
+  }
+
+  getItemBackgroundBlurStyleOptions(): BackgroundBlurStyleOptions | undefined {
+    if (this.itemBackgroundEffect) {
+      return undefined;
+    }
+    return this.itemBackgroundBlurStyleOptions;
+  }
+
+  getItemBackgroundBlurStyle(): BlurStyle | undefined {
+    if (this.itemBackgroundEffect) {
+      return undefined;
+    }
+    return this.itemBackgroundBlurStyle;
   }
 
   private getItemAccessibilityDescription(repeatItem: RepeatItem<SegmentButtonV2Item>): string | undefined {
@@ -1260,28 +1283,33 @@ struct SegmentButtonV2ItemContent {
         SymbolGlyph(this.item.symbol)
           .fontSize(this.getSymbolFontSize())
           .fontColor([this.getItemSymbolFillColor()])
+          .direction(this.languageDirection)
           .attributeModifier(this.item.symbolModifier)
       } else if (this.item.icon) {
         Image(this.item.icon)
           .fillColor(this.getItemIconFillColor())
           .width(this.getItemIconWidth())
           .height(this.getItemIconHeight())
+          .direction(this.languageDirection)
           .draggable(false)
           .attributeModifier(this.item.iconModifier)
       }
 
       if (this.item.text) {
         Text(this.item.text)
+          .direction(this.languageDirection)
           .fontSize(this.getItemFontSize())
           .fontColor(this.getItemFontColor())
           .fontWeight(this.getItemFontWeight())
           .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .minFontScale(this.getItemMinFontScale())
+          .maxLines(1)
           .maxFontScale(this.getItemMaxFontScale())
+          .minFontScale(this.getItemMinFontScale())
           .attributeModifier(this.item.textModifier)
       }
     }
-    .constraintSize({ minHeight: this.getItemMinHeight() })
+    .constraintSize({ minHeight: this.getItemMinHeight(), minWidth: '100%' })
+    .direction(this.languageDirection)
     .justifyContent(FlexAlign.Center)
     .padding(this.getItemPadding())
   }

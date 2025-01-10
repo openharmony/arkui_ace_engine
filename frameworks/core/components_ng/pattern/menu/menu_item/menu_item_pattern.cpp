@@ -552,6 +552,28 @@ RefPtr<MenuPattern> MenuItemPattern::GetMenuPattern(bool needTopMenu)
     return menu->GetPattern<MenuPattern>();
 }
 
+void MenuItemPattern::CleanParentMenuItemBgColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto menu = GetMenu(true);
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    SetBgBlendColor(Color::TRANSPARENT);
+    auto props = GetPaintProperty<MenuItemPaintProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateHover(false);
+    props->UpdatePress(false);
+    auto parentNode = host->GetParent();
+    CHECK_NULL_VOID(parentNode);
+    auto parent = AceType::DynamicCast<UINode>(parentNode);
+    CHECK_NULL_VOID(parent);
+    menuPattern->OnItemPressed(parent, index_, false, false);
+    PlayBgColorAnimation();
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
 {
     auto host = GetHost();
@@ -596,6 +618,15 @@ void MenuItemPattern::ShowSubMenu(ShowSubMenuType type)
     if (type == ShowSubMenuType::KEY_DPAD_RIGHT) {
         subMenuPattern->SetIsViewRootScopeFocused(false);
     }
+    if (type == ShowSubMenuType::LONG_PRESS && expandingMode_ == SubMenuExpandingMode::STACK) {
+        CleanParentMenuItemBgColor();
+    }
+    SendSubMenuOpenToAccessibility(subMenu, type);
+}
+
+void MenuItemPattern::SendSubMenuOpenToAccessibility(RefPtr<FrameNode>& subMenu, ShowSubMenuType type)
+{
+    CHECK_NULL_VOID(subMenu);
     auto accessibilityProperty = subMenu->GetAccessibilityProperty<MenuAccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityIsShow(true);
@@ -1889,6 +1920,9 @@ void MenuItemPattern::UpdateFont(RefPtr<MenuLayoutProperty>& menuProperty, RefPt
     auto fontStyle = isLabel ? itemProperty->GetLabelItalicFontStyle() : itemProperty->GetItalicFontStyle();
     UpdateFontStyle(textProperty, menuProperty, fontStyle);
     auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
+    if (!isLabel && !itemProperty->HasFontColor() && isFocused_) {
+        fontColor = theme->GetMenuItemFocusedTextColor();
+    }
     auto menuItemNode = GetHost();
     UpdateFontColor(
         node, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());

@@ -30,8 +30,8 @@ const Offset BELOW_ACTIVE_BAR_OFFSET = Offset(238.f, 300.f);
 const Point OUT_SCROLLBAR_POINT = Point(100.f, 100.f);
 const Point IN_ACTIVE_BAR_POINT = Point(238.f, 80.f);
 const Point BELOW_ACTIVE_BAR_POINT = Point(238.f, 300.f);
-const float VERTICAL_RATIO = SCROLL_HEIGHT / CONTENT_MAIN_SIZE;
-const float HORIZONTAL_RATIO = SCROLL_WIDTH / CONTENT_MAIN_SIZE;
+const float VERTICAL_RATIO = HEIGHT / CONTENT_MAIN_SIZE;
+const float HORIZONTAL_RATIO = WIDTH / CONTENT_MAIN_SIZE;
 } // namespace
 
 class ScrollInnerEventTestNg : public ScrollTestNg {
@@ -246,8 +246,8 @@ HWTEST_F(ScrollInnerEventTestNg, HandleClick002, TestSize.Level1)
     MouseOnScroll(MouseButton::LEFT_BUTTON, MouseAction::PRESS, BELOW_ACTIVE_BAR_OFFSET);
     MockAnimationManager::GetInstance().SetTicks(TICK);
     pattern_->HandleClickEvent();
-    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT / TICK));
-    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT));
+    EXPECT_TRUE(TickPosition(-HEIGHT / TICK));
+    EXPECT_TRUE(TickPosition(-HEIGHT));
 
     /**
      * @tc.steps: step2. Press above activeBar, trigger HandleClickEvent
@@ -257,7 +257,7 @@ HWTEST_F(ScrollInnerEventTestNg, HandleClick002, TestSize.Level1)
     MouseOnScrollBar(MouseButton::LEFT_BUTTON, MouseAction::PRESS, aboveActiveBarPoint);
     MouseOnScroll(MouseButton::LEFT_BUTTON, MouseAction::PRESS, aboveActiveBarPoint);
     pattern_->HandleClickEvent();
-    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT / TICK));
+    EXPECT_TRUE(TickPosition(-HEIGHT / TICK));
     EXPECT_TRUE(TickPosition(0));
 }
 
@@ -327,11 +327,11 @@ HWTEST_F(ScrollInnerEventTestNg, HandleLongPress002, TestSize.Level1)
     MouseOnScroll(MouseButton::LEFT_BUTTON, MouseAction::PRESS, belowActiveBarPoint);
     MockAnimationManager::GetInstance().SetTicks(1);
     scrollBar_->HandleLongPress(true);
-    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT));
+    EXPECT_TRUE(TickPosition(-HEIGHT));
     mockTaskExecutor->RunDelayTask();
-    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT * 2));
+    EXPECT_TRUE(TickPosition(-HEIGHT * 2));
     mockTaskExecutor->RunDelayTask();
-    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT * 2));
+    EXPECT_TRUE(TickPosition(-HEIGHT * 2));
 
     /**
      * @tc.steps: step2. Press above activeBar, longPress in scrollBar
@@ -341,7 +341,7 @@ HWTEST_F(ScrollInnerEventTestNg, HandleLongPress002, TestSize.Level1)
     MouseOnScrollBar(MouseButton::LEFT_BUTTON, MouseAction::PRESS, aboveActiveBarPoint);
     MouseOnScroll(MouseButton::LEFT_BUTTON, MouseAction::PRESS, aboveActiveBarPoint);
     scrollBar_->HandleLongPress(true);
-    EXPECT_TRUE(TickPosition(-SCROLL_HEIGHT * 1));
+    EXPECT_TRUE(TickPosition(-HEIGHT * 1));
     mockTaskExecutor->RunDelayTask();
     EXPECT_TRUE(TickPosition(0));
     mockTaskExecutor->RunDelayTask();
@@ -676,7 +676,7 @@ HWTEST_F(ScrollInnerEventTestNg, RegisterEventByClick001, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
-    model.SetScrollBarWidth(Dimension(SCROLL_HEIGHT + 1.f)); // will be default
+    model.SetScrollBarWidth(Dimension(HEIGHT + 1.f)); // will be default
     CreateContent();
     CreateScrollDone();
     EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(236, 0, 4, 160)));

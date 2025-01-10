@@ -15,15 +15,14 @@
 #ifndef OHOS_ACE_FRAMEWORK_CJ_FONT_MANAGER
 #define OHOS_ACE_FRAMEWORK_CJ_FONT_MANAGER
 
-#include "bridge/cj_frontend/frontend/cj_frontend_abstract.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_collection_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
+#include "core/common/font_manager.h"
+#include "cj_font_api_ffi.h"
 
 extern "C" {
 CJ_EXPORT void FfiFontManagerRegisterFont(const char* familyName, const char* familySrc);
 CJ_EXPORT VectorStringHandle FfiFontManagerGetSystemFontList();
-CJ_EXPORT NativeOptionFontInfo FfiFontManagerGetFontByName(const char* fontName);
+CJ_EXPORT NativeFontInfo4Font* FfiFontManagerGetFontByName(const char* fontName);
+CJ_EXPORT NativeUIFontConfig FfiFontManagerGetUIFontConfig();
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_FONT_MANAGER

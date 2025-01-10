@@ -156,12 +156,7 @@ void ResetTextAreaPlaceholderColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    uint32_t color = theme->GetPlaceholderColor().GetValue();
-    TextFieldModelNG::SetPlaceholderColor(frameNode, Color(color));
+    TextFieldModelNG::ResetPlaceholderColor(frameNode);
 }
 
 void SetTextAreaTextAlign(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -355,12 +350,7 @@ void ResetTextAreaCaretColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    auto caretColor = static_cast<int32_t>(theme->GetCursorColor().GetValue());
-    TextFieldModelNG::SetCaretColor(frameNode, Color(caretColor));
+    TextFieldModelNG::ResetCaretColor(frameNode);
 }
 
 void SetTextAreaMaxLength(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -388,12 +378,7 @@ void ResetTextAreaFontColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    int32_t textColor = 0;
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    textColor = static_cast<int32_t>(theme->GetTextColor().GetValue());
-    TextFieldModelNG::SetTextColor(frameNode, Color(textColor));
+    TextFieldModelNG::ResetTextColor(frameNode);
 }
 
 void SetTextAreaFontStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -466,7 +451,7 @@ void SetTextAreaPlaceholderString(ArkUINodeHandle node, ArkUI_CharPtr value)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::string placeholderStr(value);
-    TextFieldModelNG::SetTextFieldPlaceHolder(frameNode, UtfUtils::Str8ToStr16(placeholderStr));
+    TextFieldModelNG::SetTextFieldPlaceHolder(frameNode, UtfUtils::Str8DebugToStr16(placeholderStr));
 }
 
 void SetTextAreaTextString(ArkUINodeHandle node, ArkUI_CharPtr value)
@@ -474,7 +459,7 @@ void SetTextAreaTextString(ArkUINodeHandle node, ArkUI_CharPtr value)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::string textStr(value);
-    TextFieldModelNG::SetTextFieldText(frameNode, UtfUtils::Str8ToStr16(textStr));
+    TextFieldModelNG::SetTextFieldText(frameNode, UtfUtils::Str8DebugToStr16(textStr));
 }
 
 void StopTextAreaTextEditing(ArkUINodeHandle node)
@@ -488,7 +473,7 @@ ArkUI_CharPtr GetTextAreaPlaceholder(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, "");
-    g_strValue = UtfUtils::Str16ToStr8(TextFieldModelNG::GetPlaceholderText(frameNode));
+    g_strValue = UtfUtils::Str16DebugToStr8(TextFieldModelNG::GetPlaceholderText(frameNode));
     return g_strValue.c_str();
 }
 
@@ -496,7 +481,7 @@ ArkUI_CharPtr GetTextAreaText(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, "");
-    g_strValue = UtfUtils::Str16ToStr8(TextFieldModelNG::GetTextFieldText(frameNode));
+    g_strValue = UtfUtils::Str16DebugToStr8(TextFieldModelNG::GetTextFieldText(frameNode));
     return g_strValue.c_str();
 }
 
@@ -568,13 +553,7 @@ void ResetTextAreaBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Color backgroundColor;
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-    backgroundColor = buttonTheme->GetBgColor();
-    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
+    TextFieldModelNG::ResetBackgroundColor(frameNode);
 }
 
 void SetTextAreaType(ArkUINodeHandle node, ArkUI_Int32 type)
@@ -1804,7 +1783,7 @@ void ResetStopBackPress(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUITextAreaModifier* GetTextAreaModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITextAreaModifier modifier = {
         .setTextAreaStyle = SetTextAreaStyle,
         .resetTextAreaStyle = ResetTextAreaStyle,
@@ -1967,20 +1946,13 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setStopBackPress = SetStopBackPress,
         .resetStopBackPress = ResetStopBackPress,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUITextAreaModifier* GetCJUITextAreaModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITextAreaModifier modifier = {
         .setTextAreaStyle = SetTextAreaStyle,
         .resetTextAreaStyle = ResetTextAreaStyle,
@@ -2124,14 +2096,7 @@ const CJUITextAreaModifier* GetCJUITextAreaModifier()
         .resetTextAreaEnablePreviewText = ResetTextAreaEnablePreviewText,
         .getTextAreaPadding = GetTextAreaPadding,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
@@ -2141,7 +2106,7 @@ void SetOnTextAreaChange(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onChange = [node, extraParam](const std::u16string& str, PreviewText&) {
         ArkUINodeEvent event;
-        std::string utf8Str = UtfUtils::Str16ToStr8(str);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXTAREA_CHANGE;
@@ -2158,8 +2123,8 @@ void SetOnTextAreaChangeWithPreviewText(ArkUINodeHandle node, void* extraParam)
     auto onChange = [node, extraParam](const std::u16string& value, PreviewText& previewText) {
         ArkUINodeEvent eventWithPreview;
         eventWithPreview.kind = TEXT_INPUT_CHANGE;
-        std::string utf8StrValue = UtfUtils::Str16ToStr8(value);
-        std::string utf8Str = UtfUtils::Str16ToStr8(previewText.value);
+        std::string utf8StrValue = UtfUtils::Str16DebugToStr8(value);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(previewText.value);
         eventWithPreview.extraParam = reinterpret_cast<intptr_t>(extraParam);
         eventWithPreview.textChangeEvent.subKind = ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT;
         eventWithPreview.textChangeEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8StrValue.c_str());
@@ -2176,7 +2141,7 @@ void SetOnTextAreaPaste(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onPaste = [node, extraParam](const std::u16string& str, NG::TextCommonEvent& commonEvent) {
         ArkUINodeEvent event;
-        std::string utf8Str = UtfUtils::Str16ToStr8(str);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXTAREA_PASTE;
@@ -2243,7 +2208,7 @@ void SetOnTextAreaInputFilterError(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onInputFilterError = [node, extraParam](const std::u16string& str) {
         ArkUINodeEvent event;
-        std::string utf8Str = UtfUtils::Str16ToStr8(str);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXT_AREA_INPUT_FILTER_ERROR;
@@ -2291,7 +2256,7 @@ void SetTextAreaOnWillInsertValue(ArkUINodeHandle node, void* extraParam)
     std::function<bool(const InsertValueInfo&)> onWillInsert = [node, extraParam](
         const InsertValueInfo& Info) -> bool {
         ArkUINodeEvent event;
-        std::string insertValueUtf8 = UtfUtils::Str16ToStr8(Info.insertValue);
+        std::string insertValueUtf8 = UtfUtils::Str16DebugToStr8(Info.insertValue);
         event.kind = MIXED_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.mixedEvent.subKind = ON_TEXT_AREA_WILL_INSERT;
@@ -2311,7 +2276,7 @@ void SetTextAreaOnDidInsertValue(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onDidInsert = [node, extraParam](const InsertValueInfo& Info) {
         ArkUINodeEvent event;
-        std::string insertValueUtf8 = UtfUtils::Str16ToStr8(Info.insertValue);
+        std::string insertValueUtf8 = UtfUtils::Str16DebugToStr8(Info.insertValue);
         event.kind = MIXED_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.mixedEvent.subKind = ON_TEXT_AREA_DID_INSERT;
@@ -2330,7 +2295,7 @@ void SetTextAreaOnWillDeleteValue(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onWillDelete = [node, extraParam](const DeleteValueInfo& Info) -> bool {
         ArkUINodeEvent event;
-        std::string deleteValueUtf8 = UtfUtils::Str16ToStr8(Info.deleteValue);
+        std::string deleteValueUtf8 = UtfUtils::Str16DebugToStr8(Info.deleteValue);
         event.kind = MIXED_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.mixedEvent.subKind = ON_TEXT_AREA_WILL_DELETE;
@@ -2351,7 +2316,7 @@ void SetTextAreaOnDidDeleteValue(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onDidDelete = [node, extraParam](const DeleteValueInfo& Info) {
         ArkUINodeEvent event;
-        std::string deleteValueUtf8 = UtfUtils::Str16ToStr8(Info.deleteValue);
+        std::string deleteValueUtf8 = UtfUtils::Str16DebugToStr8(Info.deleteValue);
         event.kind = MIXED_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.mixedEvent.subKind = ON_TEXT_AREA_DID_DELETE;
