@@ -2061,8 +2061,8 @@ class ColorContent {
     this.colorContent_ = colorContent;
   }
 
-  static get RESET() {
-    return new ColorContent('RESET');
+  static get ORIGIN() {
+    return new ColorContent('ORIGIN');
   }
 }
 
