@@ -1085,7 +1085,6 @@ protected:
 
 private:
     friend class FocusView;
-
     friend class FocusManager;
  
     bool CalculatePosition();
@@ -1175,9 +1174,9 @@ private:
     bool isFocusScope_ { false };
     bool isGroup_ { false };
     FocusPriority focusPriority_ = FocusPriority::AUTO;
+    bool arrowKeyStepOut_ { true };
     bool tabStop_ { false };
     bool isSwitchByEnter_ { false };
-    bool arrowKeyStepOut_ { true };
 };
 } // namespace OHOS::Ace::NG
 

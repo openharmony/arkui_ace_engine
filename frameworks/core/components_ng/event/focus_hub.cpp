@@ -313,7 +313,7 @@ void FocusHub::DumpFocusUie()
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
-    if (pattern && frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+    if (pattern && frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
         pattern->DumpInfo();
     }
 }
@@ -1075,7 +1075,8 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
     }
     auto ret = TryRequestFocus(nextFocusHub, rect, moveStep);
     TAG_LOGI(AceLogTag::ACE_FOCUS,
-        "Request next focus by custom focus algorithm Return %{public}d", ret);
+        "Request next focus by custom focus algorithm. Next focus node is %{public}s/%{public}d. Return %{public}d",
+        nextFocusHub->GetFrameName().c_str(), nextFocusHub->GetFrameId(), ret);
     return (ret || IsArrowKeyStepOut(moveStep));
 }
 
@@ -1083,8 +1084,9 @@ bool FocusHub::IsArrowKeyStepOut(FocusStep moveStep)
 {
     if (!IsFocusStepTab(moveStep) && GetIsFocusGroup() && !arrowKeyStepOut_) {
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "IsArrowKeyStepOut step(%{public}d),"
-            "this node is focus group and set can not step out!", moveStep);
+            "IsArrowKeyStepOut Node(%{public}s/%{public}d), step(%{public}d),"
+            "this node is focus group and set can not step out!",
+            GetFrameName().c_str(), GetFrameId(), moveStep);
         return true;
     }
     return false;
@@ -1183,7 +1185,6 @@ void FocusHub::SwitchFocus(const RefPtr<FocusHub>& focusNode)
 
     auto focusNodeNeedBlur = lastWeakFocusNode_.Upgrade();
     lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusNode));
-
     TAG_LOGD(AceLogTag::ACE_FOCUS, "Switch focus from %{public}s/"
         SEC_PLD(%{public}d) " to %{public}s/" SEC_PLD(%{public}d),
         focusNodeNeedBlur ? focusNodeNeedBlur->GetFrameName().c_str() : "NULL",
@@ -1490,7 +1491,7 @@ void FocusHub::OnFocusScope(bool currentHasFocused)
         OnFocusNode();
         auto focusManager = GetFocusManager();
         CHECK_NULL_VOID(focusManager);
-        focusManager->FocusSwitchingEnd(SwitchingEndReason::NO_FOCUSABLE_CHILD);
+        focusManager->UpdateSwitchingEndReason(SwitchingEndReason::NO_FOCUSABLE_CHILD);
         return;
     }
 
@@ -2724,7 +2725,7 @@ void FocusHub::DumpFocusUieInJson(std::unique_ptr<JsonValue>& json)
     auto frameNode = GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern();
-    if (pattern && frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+    if (pattern && frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
         pattern->DumpInfo(json);
     }
 }
