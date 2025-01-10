@@ -218,7 +218,6 @@ HWTEST_F(WaterFlowTestNg, CacheScroll001, TestSize.Level1)
     model.SetColumnsGap(Dimension(10));
     CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
     CreateDone();
-    frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
 
     pattern_->isAnimationStop_ = false;
     UpdateCurrentOffset(-2000.0f);
@@ -306,7 +305,6 @@ HWTEST_F(WaterFlowTestNg, LazyForEachJump002, TestSize.Level1)
     model.SetCachedCount(10);
     RefPtr<WaterFlowMockLazy> mockLazy = CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
     CreateDone();
-    frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
 
     pattern_->ScrollToIndex(2, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
