@@ -24,7 +24,7 @@
 #include "core/components_ng/property/measure_property.h"
 
 namespace OHOS::Ace::NG {
-using GetItemMainSizeByIndex = std::function<float(int32_t)>;
+using GetItemMainSizeByIndx = std::function<float(int32_t)>;
 
 class WaterFlowSections : public virtual AceType {
     DECLARE_ACE_TYPE(WaterFlowSections, AceType)
@@ -48,7 +48,7 @@ public:
 
         int32_t itemsCount = 0;
         std::optional<int32_t> crossCount;
-        GetItemMainSizeByIndex onGetItemMainSizeByIndex;
+        GetItemMainSizeByIndx onGetItemMainSizeByIndex;
         std::optional<Dimension> columnsGap;
         std::optional<Dimension> rowsGap;
         std::optional<MarginProperty> margin;
