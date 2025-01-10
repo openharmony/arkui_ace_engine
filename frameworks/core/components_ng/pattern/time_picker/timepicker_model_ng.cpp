@@ -487,7 +487,8 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
             overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
                 dialogLifeCycleEvent, buttonInfos);
         },
-        TaskExecutor::TaskType::UI, "ArkUITimePickerShowTimeDialog");
+        TaskExecutor::TaskType::UI, "ArkUITimePickerShowTimeDialog",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void TimePickerModelNG::SetSelectedTime(FrameNode* frameNode, const PickerTime& value)

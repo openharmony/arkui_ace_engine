@@ -29,7 +29,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT SymbolSpanModel {
+class ACE_FORCE_EXPORT SymbolSpanModel {
 public:
     static SymbolSpanModel* GetInstance();
     virtual ~SymbolSpanModel() = default;

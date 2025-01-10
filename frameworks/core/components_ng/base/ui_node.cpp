@@ -320,6 +320,7 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
 
 void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
 {
+    bool needSyncRenderTree = false;
     int32_t index = 0;
 
     auto children = GetChildren();
@@ -335,6 +336,7 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
         if (child->OnRemoveFromParent(allowTransition)) {
             // OnRemoveFromParent returns true means the child can be removed from tree immediately.
             RemoveDisappearingChild(child);
+            needSyncRenderTree = true;
         } else {
             // else move child into disappearing children, skip syncing render tree
             AddDisappearingChild(child, index, branchId);
@@ -478,7 +480,7 @@ void UINode::DoAddChild(
         }
     }
 
-    child->SetParent(Claim(this));
+    child->SetParent(Claim(this), false);
     auto themeScopeId = GetThemeScopeId();
     if (child->IsAllowUseParentTheme() && child->GetThemeScopeId() != themeScopeId) {
         child->UpdateThemeScopeId(themeScopeId);
@@ -1793,6 +1795,16 @@ void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, Notifica
     if (parent) {
         parent->NotifyChange(updateFrom, count, accessibilityId, notificationType);
     }
+}
+
+void UINode::SetParent(const WeakPtr<UINode>& parent, bool needDetect)
+{
+    auto current = parent.Upgrade();
+    CHECK_NULL_VOID(current);
+    if (needDetect && DetectLoop(Claim(this), current)) {
+        return;
+    }
+    parent_ = parent;
 }
 
 int32_t UINode::GetThemeScopeId() const

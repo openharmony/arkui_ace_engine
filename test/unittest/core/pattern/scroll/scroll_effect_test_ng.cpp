@@ -149,7 +149,7 @@ HWTEST_F(ScrollEffectTestNg, ScrollFadeEffect001, TestSize.Level1)
      * @tc.steps: step2. call HandleOverScroll(), overScroll is 0
      * @tc.expected: do nothing
      */
-    const SizeF viewPort(SCROLL_WIDTH, SCROLL_HEIGHT);
+    const SizeF viewPort(WIDTH, HEIGHT);
     scrollFadeEffect->HandleOverScroll(Axis::VERTICAL, 0.f, viewPort);
 
     /**
@@ -383,7 +383,7 @@ HWTEST_F(ScrollEffectTestNg, ScrollFadeEffect005, TestSize.Level1)
      * @tc.steps: step2. call HandleOverScroll(), axis is vertical and isScrollFromUpdate is false.
      * @tc.expected: do nothing
      */
-    const SizeF viewPort(SCROLL_WIDTH, SCROLL_HEIGHT);
+    const SizeF viewPort(WIDTH, HEIGHT);
     scrollFadeEffect->HandleOverScroll(Axis::VERTICAL, 0.f, viewPort);
 
     /**
@@ -607,7 +607,7 @@ HWTEST_F(ScrollEffectTestNg, EdgeEffectOption001, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, false);
-    CreateContent(SCROLL_HEIGHT);
+    CreateContent(HEIGHT);
     CreateScrollDone();
     EXPECT_FALSE(pattern_->GetAlwaysEnabled());
     EXPECT_FALSE(pattern_->GetScrollableEvent()->GetEnabled());
@@ -622,7 +622,7 @@ HWTEST_F(ScrollEffectTestNg, EdgeEffectOption002, TestSize.Level1)
 {
     ScrollModelNG model = CreateScroll();
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    CreateContent(SCROLL_HEIGHT);
+    CreateContent(HEIGHT);
     CreateScrollDone();
     EXPECT_TRUE(pattern_->GetAlwaysEnabled());
     EXPECT_TRUE(pattern_->GetScrollableEvent()->GetEnabled());

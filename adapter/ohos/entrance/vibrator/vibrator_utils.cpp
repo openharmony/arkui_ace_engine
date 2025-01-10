@@ -96,4 +96,11 @@ bool VibratorUtils::StartExclusiveVibraFeedback(const char* effectId)
     }
     return state;
 }
+
+void VibratorUtils::StartViratorDirectly(const std::string& vibratorType)
+{
+    if (!vibratorType.empty()) {
+        Sensors::StartVibrator(vibratorType.c_str());
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -32,6 +32,34 @@ template("napi_dragcontroller_static") {
 
     if (platform != "" && is_arkui_x) {
       deps += [ "$crossplatform_plugin_root/libs/napi:napi_$platform" ]
+      defines += [ "CROSS_PLATFORM" ]
+      if (defined(config.enable_drag_framework) &&
+          config.enable_drag_framework) {
+        defines += [ "OHOS_BUILD_ENABLE_ARKUI_X" ]
+      }
+      if (target_os == "android") {
+        include_dirs = [ "$ace_root/adapter/android/entrance/java/jni" ]
+      } else if (target_os == "ios") {
+        include_dirs = [ "$ace_root/adapter/ios/entrance" ]
+      }
+      include_dirs += [
+        "$ace_graphic/rosen/modules",
+        "$ace_graphic/interfaces/inner_api/common",
+        "$ace_graphic/rosen/modules/platform/ipc_core",
+        "$ace_graphic/rosen/modules/2d_graphics/include",
+        "$ace_graphic/rosen/modules/2d_graphics/src",
+        "$ace_graphic/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+        "$ace_graphic/rosen/modules/render_service_client/core",
+        "$ace_graphic/rosen/modules/2d_engine/rosen_text/export/rosen_text",
+        "$ace_graphic/interfaces/inner_api/composer",
+        "$ace_graphic/rosen/modules/composer/vsync/include",
+        "$ace_graphic/rosen/modules/platform",
+        "$ace_graphic/rosen/modules/platform/eventhandler",
+        "$ace_drag/interfaces/innerkits/interaction/include",
+        "$acd_input/interfaces/native/innerkits/event/include",
+        "$ace_graphic_surface/interfaces/inner_api/surface",
+        "$ace_graphic_surface/interfaces/inner_api/utils",
+      ]
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",

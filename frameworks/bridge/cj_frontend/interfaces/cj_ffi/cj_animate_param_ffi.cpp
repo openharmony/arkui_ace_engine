@@ -14,23 +14,22 @@
  */
 
 #include "cj_animate_param_ffi.h"
+
+#include "cj_lambda.h"
+
 #include "bridge/common/utils/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "cj_lambda.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
 
 namespace {
-const std::vector<AnimationDirection> ANIMATION_DIRECTION = {
-    AnimationDirection::NORMAL, AnimationDirection::REVERSE,
-    AnimationDirection::ALTERNATE, AnimationDirection::ALTERNATE_REVERSE
-};
-const std::vector<FinishCallbackType> FINISH_CALLBACK_TYPE = {
-    FinishCallbackType::REMOVED, FinishCallbackType::LOGICALLY
-};
-}
+const std::vector<AnimationDirection> ANIMATION_DIRECTION = { AnimationDirection::NORMAL, AnimationDirection::REVERSE,
+    AnimationDirection::ALTERNATE, AnimationDirection::ALTERNATE_REVERSE };
+const std::vector<FinishCallbackType> FINISH_CALLBACK_TYPE = { FinishCallbackType::REMOVED,
+    FinishCallbackType::LOGICALLY };
+} // namespace
 
 namespace OHOS::Ace::Framework {
 void ParseCjAnimation(NativeAnimateParam animationValue, AnimationOption& result)
@@ -70,10 +69,7 @@ void ParseCjAnimation(NativeAnimateParam animationValue, AnimationOption& result
 
     if (animationValue.min.hasValue && animationValue.max.hasValue && animationValue.expected.hasValue) {
         RefPtr<FrameRateRange> range = AceType::MakeRefPtr<FrameRateRange>(
-            animationValue.min.hasValue,
-            animationValue.max.hasValue,
-            animationValue.expected.hasValue
-        );
+            animationValue.min.hasValue, animationValue.max.hasValue, animationValue.expected.hasValue);
         result.SetFrameRateRange(range);
     }
 
@@ -91,4 +87,4 @@ void ParseCjAnimation(NativeAnimateParam animationValue, AnimationOption& result
         result.SetOnFinishEvent(onFinishEvent);
     }
 }
-}
+} // namespace OHOS::Ace::Framework

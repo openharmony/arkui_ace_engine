@@ -503,7 +503,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
     std::chrono::microseconds microseconds(keyEvent->GetActionTime());
     TimeStamp time(microseconds);
     event.timeStamp = time;
-    event.key = MMI::KeyEvent::KeyCodeToString(keyEvent->GetKeyCode());
+    event.key.assign(MMI::KeyEvent::KeyCodeToString(keyEvent->GetKeyCode()));
     event.deviceId = keyEvent->GetDeviceId();
     int32_t orgDevice = keyEvent->GetSourceType();
     event.sourceType =

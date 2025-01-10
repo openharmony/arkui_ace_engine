@@ -58,7 +58,8 @@ public:
     }
 
 private:
-    static RefPtr<FrameNode> CreateTitleNode(const RefPtr<FrameNode>& calendarNode);
+    static RefPtr<FrameNode> CreateTitleNode(const RefPtr<FrameNode>& calendarNode,
+        const RefPtr<FrameNode>& calendarDialogNode);
     static RefPtr<FrameNode> CreateWeekNode(const RefPtr<FrameNode>& calendarNode);
     static RefPtr<FrameNode> CreateScrollNode();
     static RefPtr<FrameNode> CreateTitleImageNode(
@@ -118,6 +119,8 @@ private:
     static void SetWeekTextDirection(const TextDirection& dialogDirection, const TextDirection& calendarDirection,
         const RefPtr<FrameNode>& weekNode);
     static constexpr double deviceHeightLimit = 640.0;
+    static void UpdateTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        RefPtr<CalendarTheme>& theme);
     static DeviceOrientation previousOrientation_;
 };
 } // namespace OHOS::Ace::NG

@@ -1759,7 +1759,8 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowTextDialog(properties, settingData, dialogEvent, dialogCancelEvent);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowTextPicker");
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowTextPicker",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 bool JSTextPickerDialog::ParseShowDataOptions(

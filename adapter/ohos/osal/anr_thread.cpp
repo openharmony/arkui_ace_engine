@@ -27,7 +27,8 @@ void AnrThread::Start() {}
 
 void AnrThread::Stop() {}
 
-bool AnrThread::PostTaskToTaskRunner(Task&& task, uint32_t delayTime, const std::string& name)
+bool AnrThread::PostTaskToTaskRunner(
+    Task&& task, uint32_t delayTime, const std::string& name, PriorityType priorityType)
 {
     CHECK_NULL_RETURN(task, false);
     if (delayTime > 0) {

@@ -87,4 +87,16 @@ PreDragStatus DragDropGlobalController::GetPreDragStatus() const
     std::shared_lock<std::shared_mutex> lock(mutex_);
     return preDragStatus_;
 }
+
+void DragDropGlobalController::UpdateDragFilterShowingStatus(bool isShowing)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    isDragFilterShowing_ = isShowing;
+}
+
+bool DragDropGlobalController::IsDragFilterShowing() const
+{
+    std::shared_lock<std::shared_mutex> lock(mutex_);
+    return isDragFilterShowing_;
+}
 } // namespace OHOS::Ace

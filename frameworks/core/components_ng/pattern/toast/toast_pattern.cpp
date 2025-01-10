@@ -390,7 +390,7 @@ void ToastPattern::UpdateTextSizeConstraint(const RefPtr<FrameNode>& text)
         auto limitHeight = GetTextMaxHeight();
         textLayoutProperty->UpdateCalcMaxSize(
             CalcSize(NG::CalcLength(limitWidth), NG::CalcLength(Dimension(limitHeight))));
-
+        CHECK_NULL_VOID(textNode_);
         auto textProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textProperty);
         auto toastMaxFontSize = toastTheme->GetTextStyle().GetFontSize();
@@ -419,6 +419,7 @@ void ToastPattern::OnColorConfigurationUpdate()
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto textColor = toastTheme->GetTextStyle().GetTextColor();
+    CHECK_NULL_VOID(textNode_);
     auto textLayoutProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto toastInfo = GetToastInfo();

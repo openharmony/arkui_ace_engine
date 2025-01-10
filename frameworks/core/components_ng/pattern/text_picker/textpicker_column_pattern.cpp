@@ -1473,6 +1473,7 @@ void TextPickerColumnPattern::HandleEnterSelectedArea(double scrollDelta, float 
     auto shiftThreshold = shiftDistance / HALF_NUMBER;
     uint32_t totalOptionCount = GetOptionCount();
     uint32_t currentEnterIndex = GetCurrentIndex();
+    auto isOverScroll = NotLoopOptions() && overscroller_.IsOverScroll();
     if (totalOptionCount == 0) {
         return;
     }
@@ -1482,7 +1483,8 @@ void TextPickerColumnPattern::HandleEnterSelectedArea(double scrollDelta, float 
         auto totalCountAndIndex = totalOptionCount + currentEnterIndex;
         currentEnterIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount;
     }
-    if (GreatOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex) {
+    if (GreatOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex &&
+        !isOverScroll) {
         SetEnterIndex(currentEnterIndex);
         HandleEnterSelectedAreaEventCallback(true);
     }

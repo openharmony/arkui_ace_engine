@@ -22,15 +22,8 @@ using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
 namespace {
-const std::vector<FlexAlign> FLEX_ALIGNS = {
-    FlexAlign::AUTO,
-    FlexAlign::FLEX_START,
-    FlexAlign::CENTER,
-    FlexAlign::FLEX_END,
-    FlexAlign::SPACE_BETWEEN,
-    FlexAlign::SPACE_AROUND,
-    FlexAlign::SPACE_EVENLY
-};
+const std::vector<FlexAlign> FLEX_ALIGNS = { FlexAlign::AUTO, FlexAlign::FLEX_START, FlexAlign::CENTER,
+    FlexAlign::FLEX_END, FlexAlign::SPACE_BETWEEN, FlexAlign::SPACE_AROUND, FlexAlign::SPACE_EVENLY };
 } // namespace
 
 extern "C" {
@@ -70,6 +63,15 @@ void FfiOHOSAceFrameworkFlexSetFlexSize(double width, int32_t widthUnit, double 
     FlexModel::GetInstance()->SetFlexWidth();
     FfiOHOSAceFrameworkViewAbstractSetHeight(height, heightUnit);
     FlexModel::GetInstance()->SetFlexHeight();
+}
+
+void FfiOHOSAceFrameworkFlexCreateByOptions(CJFlexOptions options)
+{
+    if (options.wrap == 0) {
+        FlexCreateFlexComponentByOptions(options);
+    } else {
+        FlexCreateWrapComponentByOptions(options);
+    }
 }
 }
 
@@ -112,6 +114,61 @@ void FlexCreateWrapComponent(CJFlexParams params)
     auto alignContentVal = static_cast<int32_t>(FLEX_ALIGNS[params.alignContent]);
     if (alignContentVal >= 0 && alignContentVal <= MAIN_ALIGN_MAX_VALUE) {
         FlexModel::GetInstance()->SetWrapAlignment(WRAP_TABLE[alignContentVal]);
+    }
+}
+
+void FlexCreateFlexComponentByOptions(CJFlexOptions options)
+{
+    FlexModel::GetInstance()->CreateFlexRow();
+    if (options.direction >= 0 && options.direction <= DIRECTION_MAX_VALUE) {
+        FlexModel::GetInstance()->SetDirection(static_cast<FlexDirection>(options.direction));
+    }
+    auto justifyVal = static_cast<int32_t>(FLEX_ALIGNS[options.justifyContent]);
+    if (justifyVal >= 0 && justifyVal <= MAIN_ALIGN_MAX_VALUE) {
+        FlexModel::GetInstance()->SetMainAxisAlign(static_cast<FlexAlign>(justifyVal));
+    }
+    if (options.alignItems >= 0 && options.alignItems <= CROSS_ALIGN_MAX_VALUE) {
+        FlexModel::GetInstance()->SetCrossAxisAlign(static_cast<FlexAlign>(options.alignItems));
+    }
+    if (options.mainSpace >= 0.0 && options.mainSpaceUnit != static_cast<int32_t>(DimensionUnit::PERCENT)) {
+        FlexModel::GetInstance()->SetMainSpace(
+            CalcDimension(options.mainSpace, static_cast<DimensionUnit>(options.mainSpaceUnit)));
+    }
+}
+
+void FlexCreateWrapComponentByOptions(CJFlexOptions options)
+{
+    FlexModel::GetInstance()->CreateWrap();
+    if (options.direction >= 0 && options.direction <= DIRECTION_MAX_VALUE) {
+        FlexModel::GetInstance()->SetDirection(static_cast<FlexDirection>(options.direction));
+        // WrapReverse means wrapVal = 2. Wrap means wrapVal = 1.
+        constexpr int reverseDirection = 2;
+        if (options.direction <= 1) {
+            options.direction += reverseDirection * (options.wrap - 1);
+        } else {
+            options.direction -= reverseDirection * (options.wrap - 1);
+        }
+        FlexModel::GetInstance()->SetWrapDirection(static_cast<WrapDirection>(options.direction));
+    }
+    auto justifyVal = static_cast<int32_t>(FLEX_ALIGNS[options.justifyContent]);
+    if (justifyVal >= 0 && justifyVal <= MAIN_ALIGN_MAX_VALUE) {
+        FlexModel::GetInstance()->SetWrapMainAlignment(WRAP_TABLE[justifyVal]);
+    }
+    if (options.alignItems >= 0 && options.alignItems <= CROSS_ALIGN_MAX_VALUE) {
+        FlexModel::GetInstance()->SetWrapCrossAlignment(WRAP_TABLE[options.alignItems]);
+    }
+    auto alignContentVal = static_cast<int32_t>(FLEX_ALIGNS[options.alignContent]);
+    if (alignContentVal >= 0 && alignContentVal <= MAIN_ALIGN_MAX_VALUE) {
+        FlexModel::GetInstance()->SetWrapAlignment(WRAP_TABLE[alignContentVal]);
+    }
+
+    if (options.mainSpace >= 0.0 && options.mainSpaceUnit != static_cast<int32_t>(DimensionUnit::PERCENT)) {
+        FlexModel::GetInstance()->SetMainSpace(
+            CalcDimension(options.mainSpace, static_cast<DimensionUnit>(options.mainSpaceUnit)));
+    }
+    if (options.crossSpace >= 0.0 && options.crossSpaceUnit != static_cast<int32_t>(DimensionUnit::PERCENT)) {
+        FlexModel::GetInstance()->SetCrossSpace(
+            CalcDimension(options.crossSpace, static_cast<DimensionUnit>(options.crossSpaceUnit)));
     }
 }
 } // namespace OHOS::Ace

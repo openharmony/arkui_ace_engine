@@ -16,7 +16,7 @@
 let LogTag;
 (function (LogTag) {
   LogTag[LogTag['STATE_MGMT'] = 0] = 'STATE_MGMT';
-  LogTag[LogTag['JS_UI_CONTEXT'] = 1] = 'JS_UI_CONTEXT';
+  LogTag[LogTag['ARK_COMPONENT'] = 1] = 'ARK_COMPONENT';
 })(LogTag || (LogTag = {}));
 class JSUIContextLogConsole {
   static log(...args) {
@@ -1324,7 +1324,7 @@ class PromptAction {
                 reject({ message: paramErrMsg, code: 401 });
             });
         }
-        let result_
+        let result_;
         if (argLength === 2) {
             result_ = Context.updatePopup(content.getNodePtr(), options);
         } else {
