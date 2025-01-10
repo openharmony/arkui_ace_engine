@@ -77,6 +77,8 @@ protected:
     virtual void OnLayoutFinished() {}
     virtual void OnDrawingCompleted() {}
     virtual void OnRemoveBlank() {}
+    virtual void OnAddSnapshot() {}
+    virtual void OnRemoveSnapshot() {}
     virtual void OnAppRemoveStartingWindow() {}
 
     RefPtr<FrameNode> startingWindow_;
