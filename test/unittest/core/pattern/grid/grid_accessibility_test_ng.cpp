@@ -162,7 +162,7 @@ HWTEST_F(GridAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
      * @tc.expected: Trigger ScrollPage down
      */
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(TickPosition(-GRID_HEIGHT));
+    EXPECT_TRUE(TickPosition(-HEIGHT));
 
     /**
      * @tc.steps: step2. Call ActActionScrollForward

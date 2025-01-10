@@ -1134,7 +1134,7 @@ void SearchModelNG::SetTextValue(FrameNode* frameNode, const std::optional<std::
     auto textValue = pattern->GetTextUtf16Value();
     if (textFieldLayoutProperty) {
         if (value.has_value()) {
-            auto u16Value = UtfUtils::Str8ToStr16(value.value());
+            auto u16Value = UtfUtils::Str8DebugToStr16(value.value());
             if (u16Value != textValue) {
                 pattern->InitValueText(u16Value);
             }
@@ -1162,7 +1162,7 @@ void SearchModelNG::SetPlaceholder(FrameNode* frameNode, const std::optional<std
     CHECK_NULL_VOID(textField);
     auto textFieldLayoutProperty = textField->GetLayoutProperty<TextFieldLayoutProperty>();
     if (textFieldLayoutProperty) {
-        textFieldLayoutProperty->UpdatePlaceholder(UtfUtils::Str8ToStr16(placeholder.value_or("")));
+        textFieldLayoutProperty->UpdatePlaceholder(UtfUtils::Str8DebugToStr16(placeholder.value_or("")));
     }
 }
 

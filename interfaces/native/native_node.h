@@ -1865,6 +1865,27 @@ typedef enum {
     NODE_TAB_STOP = 98,
 
     /**
+     * @brief Defines blur attribute of backdrop, which can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].f32：Represents the blur radius of backdrop. The unit is px. The value range is [0,+∞).\n
+     * .value[1]?.f32：Represents a gray scale blur parameter, which affects the degree of brightening black color.\n
+     * The value range is [0,127].\n
+     * .value[2]?.f32：Represents a gray scale blur parameter, which affects the degree of darkening white color.\n
+     * The value range is [0,127].\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].f32：Represents the blur radius of backdrop. The unit is px. The value range is [0,+∞).\n
+     * .value[1].f32：Represents a gray scale blur parameter, which affects the degree of brightening black color.\n
+     * The value range is [0,127].\n
+     * .value[2].f32：Represents a gray scale blur parameter, which affects the degree of darkening white color.\n
+     * The value range is [0,127].\n
+     *
+     * @since 16
+     */
+    NODE_BACKDROP_BLUR = 99,
+
+    /**
      * @brief Defines the text content attribute, which can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
@@ -3765,6 +3786,20 @@ typedef enum {
      * @since 16
      */
     NODE_DATE_PICKER_MODE = 13007,
+    /**
+     * @brief Defines whether haptic feedback.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to feedback. The value <b>true</b> means to feedback, and
+     * <b>false</b> means the opposite.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: whether to feedback.\n
+     *
+     * @since 16
+     */
+    NODE_DATE_PICKER_ENABLE_HAPTIC_FEEDBACK = 13008,
     /**
      * @brief Defines the time of the selected item. in the timer picker.
      * This attribute can be set, reset, and obtained as required through APIs.

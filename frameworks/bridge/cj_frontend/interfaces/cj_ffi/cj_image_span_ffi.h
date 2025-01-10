@@ -38,6 +38,10 @@ CJ_EXPORT void FfiOHOSAceFrameworkImageSpanVerticalAlign(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSpanObjectFit(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSpanTextBackgroundStyle(uint32_t color, double radius, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkImageSpanTextBackgroundStyleBorder(uint32_t color, CBorderRadiuses radius);
+CJ_EXPORT void FfiOHOSAceFrameworkImageSpanSetColorFilter(void* vectorHandle);
+CJ_EXPORT void FfiOHOSAceFrameworkImageSpanAlt(int64_t pixelMapId);
+CJ_EXPORT void FfiOHOSAceFrameworkImageSpanOnComplete(void (*callback)(CJImageComplete completeInfo));
+CJ_EXPORT void FfiOHOSAceFrameworkImageSpanOnError(void (*callback)(CJImageError errorInfo));
 }
-
+ 
 #endif // OHOS_ACE_FRAMEWORK_CJ_IMAGE_SPAN_FFI_H

@@ -367,6 +367,11 @@ void BorderImagePainter::PaintBorderImageSpace(const OffsetF& offset, RSCanvas& 
     double offsetTopY = std::ceil(offset.GetY() - topOutset_);
     double offsetBottomY = std::ceil(offset.GetY() + paintSize_.Height() + bottomOutset_);
 
+    if (NearZero(imageCenterWidth_) || NearZero(imageCenterHeight_)) {
+        LOGW("Image center width or height is zero.");
+        return;
+    }
+
     // calculate maximum count of image pieces can fit in border
     auto roundHorizontalCount = static_cast<int32_t>(borderCenterWidth_ / imageCenterWidth_);
     auto roundVerticalCount = static_cast<int32_t>(borderCenterHeight_ / imageCenterHeight_);

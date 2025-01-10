@@ -726,6 +726,12 @@ struct ArkUIMenuDividerOptions {
     ArkUIDimensionType endMargin;
 };
 
+struct ArkUIBackdropBlur {
+    ArkUI_Float32 dimensionRadius = 0.0f;
+    ArkUI_Float32 brighteningBlur = 0.0f;
+    ArkUI_Float32 darkeningBlur = 0.0f;
+};
+
 struct ArkUIBadgeParam {
     ArkUI_Bool isPositionXy;
     ArkUI_Bool isDefaultFontSize;
@@ -1520,6 +1526,7 @@ struct ArkUIDragInteractionOptions {
     ArkUI_Bool isMultiSelectionEnabled;
     ArkUI_Bool defaultAnimationBeforeLifting;
     ArkUI_Bool enableEdgeAutoScroll;
+    ArkUI_Bool enableHapticFeedback;
 };
 
 struct ArkUIDragPreViewAndInteractionOptions {
@@ -1530,6 +1537,7 @@ struct ArkUIDragPreViewAndInteractionOptions {
     bool isDefaultShadowEnabled = false;
     bool isDefaultRadiusEnabled = false;
     bool enableEdgeAutoScroll = true;
+    bool enableHapticFeedback = false;
     ArkUI_Int32 badgeNumber = 0;
     bool isShowBadge = true;
 };
@@ -2108,6 +2116,9 @@ struct ArkUICommonModifier {
     void (*dispatchKeyEvent)(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent);
     void (*resetEnableAnalyzer)(ArkUINodeHandle node);
     void (*setEnableAnalyzer)(ArkUINodeHandle node, ArkUI_Bool enable);
+    void (*setNodeBackdropBlur)(
+        ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize);
+    ArkUIBackdropBlur (*getNodeBackdropBlur)(ArkUINodeHandle node);
 };
 
 struct ArkUICommonShapeModifier {
@@ -2746,6 +2757,21 @@ struct ArkUISwiperControllerModifier {
     ArkUINodeHandle (*getSwiperController)(ArkUINodeHandle node);
     void (*showNext)(ArkUINodeHandle node);
     void (*showPrevious)(ArkUINodeHandle node);
+};
+
+struct ArkUIIndicatorComponentModifier {
+    void (*setInitialIndex)(ArkUINodeHandle node, ArkUI_Int32 index);
+    void (*resetInitialIndex)(ArkUINodeHandle node);
+    void (*setCount)(ArkUINodeHandle node, ArkUI_Int32 count);
+    void (*resetCount)(ArkUINodeHandle node);
+    void (*setOnChange)(ArkUINodeHandle node, void* callback);
+    void (*resetOnChange)(ArkUINodeHandle node);
+    void (*setStyle)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr);
+    void (*resetStyle)(ArkUINodeHandle node);
+    void (*setLoop)(ArkUINodeHandle node, ArkUI_Bool loop);
+    void (*resetLoop)(ArkUINodeHandle node);
+    void (*setVertical)(ArkUINodeHandle node, ArkUI_Bool isVertical);
+    void (*resetVertical)(ArkUINodeHandle node);
 };
 
 struct ArkUIStackModifier {
@@ -4612,6 +4638,9 @@ struct ArkUIDatePickerModifier {
     ArkUI_Int32 (*getDatePickerMode)(ArkUINodeHandle node);
     void (*setDatePickerMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetDatePickerMode)(ArkUINodeHandle node);
+    ArkUI_Bool (*getEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool enableHapticFeedback);
+    void (*resetEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct ArkUISpanModifier {
@@ -5469,6 +5498,7 @@ struct ArkUINodeModifiers {
     const ArkUICustomNodeExtModifier* (*getCustomNodeExtModifier)();
     const ArkUIThemeModifier* (*getThemeModifier)();
     const ArkUILinearIndicatorModifier* (*getLinearIndicatorModifier)();
+    const ArkUIIndicatorComponentModifier* (*getIndicatorComponentModifier)();
 };
 
 // same as inner defines in property.h

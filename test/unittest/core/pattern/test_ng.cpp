@@ -36,6 +36,9 @@ void TestNG::SetUpTestSuite()
     MockContainer::Current()->SetUseNewPipeline();
     MockPipelineContext::SetUp();
     testing::FLAGS_gmock_verbose = "error";
+    auto rootNode = MockPipelineContext::GetCurrent()->GetRootElement();
+    auto stageNode = AceType::DynamicCast<FrameNode>(rootNode->GetChildAtIndex(0));
+    stageNode->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
 }
 
 void TestNG::TearDownTestSuite()
@@ -47,8 +50,8 @@ void TestNG::TearDownTestSuite()
 
 void TestNG::FlushUITasks()
 {
-    rootNode_->SetActive();
-    rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto currentNode = GetStageNode()->GetChildAtIndex(0);
+    currentNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     MockPipelineContext::GetCurrent()->FlushUITasks();
 }
 
@@ -61,12 +64,7 @@ RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode,
             MockPipelineContext::GetCurrent()->FlushUITasks();
             return frameNode->CreatePaintWrapper();
         }
-        if (rootNode_) {
-            rootNode_->SetActive();
-            rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            MockPipelineContext::GetCurrent()->FlushUITasks();
-            return rootNode_->CreatePaintWrapper();
-        }
+        FlushUITasks();
         return nullptr;
     }
     if (markDirty) {
@@ -102,8 +100,10 @@ void TestNG::CreateDone()
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    rootNode_ = AceType::DynamicCast<FrameNode>(element);
+    auto currentNode = AceType::DynamicCast<FrameNode>(element);
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    // rootNode > stageNode > currentNode
+    MountToStageNode(currentNode);
     FlushUITasks();
 }
 
@@ -112,6 +112,25 @@ void TestNG::CreateLayoutTask(const RefPtr<FrameNode>& frameNode)
     frameNode->SetActive();
     frameNode->SetLayoutDirtyMarked(true);
     frameNode->CreateLayoutTask();
+}
+
+RefPtr<FrameNode> TestNG::GetStageNode()
+{
+    auto rootNode = MockPipelineContext::GetCurrent()->GetRootElement();
+    auto stageNode = rootNode->GetChildAtIndex(0);
+    return AceType::DynamicCast<FrameNode>(stageNode);
+}
+
+void TestNG::MountToStageNode(const RefPtr<FrameNode>& currentNode)
+{
+    auto stageNode = GetStageNode();
+    auto oldNode = stageNode->GetChildAtIndex(0);
+    stageNode->ReplaceChild(oldNode, currentNode);
+}
+
+void TestNG::RemoveFromStageNode()
+{
+    GetStageNode()->RemoveChildAtIndex(0);
 }
 
 uint64_t TestNG::GetActions(const RefPtr<AccessibilityProperty>& accessibilityProperty)

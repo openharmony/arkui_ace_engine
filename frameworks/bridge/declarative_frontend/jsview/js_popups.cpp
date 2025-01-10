@@ -362,7 +362,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     if (shadowVal->IsObject() || shadowVal->IsNumber()) {
         auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
         if (!ret) {
-            if (!popupParam->IsPartialUpdate()) {
+            if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
                 JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
                 popupParam->SetShadow(shadow);
             }
@@ -370,7 +370,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             popupParam->SetShadow(shadow);
         }
     } else {
-        if (!popupParam->IsPartialUpdate()) {
+        if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
             JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
             popupParam->SetShadow(shadow);
         }
@@ -383,12 +383,12 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             popupParam->SetBlurStyle(static_cast<BlurStyle>(blurStyle));
         } else {
-            if (!popupParam->IsPartialUpdate()) {
+            if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
                 GetBlurStyleFromTheme(popupParam);
             }
         }
     } else {
-        if (!popupParam->IsPartialUpdate()) {
+        if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
             GetBlurStyleFromTheme(popupParam);
         }
     }

@@ -448,6 +448,7 @@ int32_t OH_ArkUI_SetNodeDragPreviewOption(ArkUI_NodeHandle node, ArkUI_DragPrevi
     dragInteractionOptions.defaultAnimationBeforeLifting = previewOption->defaultAnimationBeforeLifting;
     dragInteractionOptions.isMultiSelectionEnabled = previewOption->isMultiSelectionEnabled;
     dragInteractionOptions.enableEdgeAutoScroll = previewOption->enableEdgeAutoScroll;
+    dragInteractionOptions.enableHapticFeedback = previewOption->enableHapticFeedback;
 
     impl->getNodeModifiers()->getCommonModifier()->setDragPreviewOptions(
         node->uiNodeHandle, dragPreviewOptions, dragInteractionOptions);

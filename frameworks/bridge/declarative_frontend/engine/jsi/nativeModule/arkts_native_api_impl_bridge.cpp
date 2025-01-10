@@ -40,6 +40,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_row_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_grid_item_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_hyperlink_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_indicator_component_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
@@ -2876,6 +2877,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterFlexAttributes(object, vm);
     RegisterBadgeAttributes(object, vm);
     RegisterScrollBarAttributes(object, vm);
+    RegisterIndicatorComponentAttributes(object, vm);
     return object;
 }
 
@@ -4520,6 +4522,10 @@ void ArkUINativeModule::RegisterDatePickerAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetBackgroundColor));
     datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetBackgroundColor));
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableHapticFeedback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetEnableHapticFeedback));
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableHapticFeedback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetEnableHapticFeedback));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "datePicker"), datePicker);
 }
 
@@ -5683,5 +5689,41 @@ void ArkUINativeModule::RegisterScrollBarAttributes(Local<panda::ObjectRef> obje
     ScrollBar->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollBarEnableNestedScroll"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ScrollBarBridge::ResetScrollBarEnableNestedScroll));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "ScrollBar"), ScrollBar);
+}
+
+void ArkUINativeModule::RegisterIndicatorComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto indicatorComponent = panda::ObjectRef::New(vm);
+    indicatorComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setInitialIndex"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), IndicatorComponentBridge::SetInitialIndex));
+    indicatorComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetInitialIndex"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), IndicatorComponentBridge::ResetInitialIndex));
+
+    indicatorComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), IndicatorComponentBridge::SetCount));
+    indicatorComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCount"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), IndicatorComponentBridge::ResetCount));
+
+    indicatorComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), IndicatorComponentBridge::SetStyle));
+    indicatorComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), IndicatorComponentBridge::ResetStyle));
+
+    indicatorComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLoop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), IndicatorComponentBridge::SetLoop));
+    indicatorComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLoop"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), IndicatorComponentBridge::ResetLoop));
+
+    indicatorComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVertical"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), IndicatorComponentBridge::SetVertical));
+    indicatorComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetVertical"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), IndicatorComponentBridge::ResetVertical));
+
+    indicatorComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), IndicatorComponentBridge::SetOnChange));
+    indicatorComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnChange"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), IndicatorComponentBridge::ResetOnChange));
+
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "indicatorComponent"), indicatorComponent);
 }
 } // namespace OHOS::Ace::NG

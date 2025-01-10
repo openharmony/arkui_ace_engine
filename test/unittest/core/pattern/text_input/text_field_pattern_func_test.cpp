@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/common/mock_container.h"
 #include "text_input_base.h"
+#include "test/mock/core/common/mock_container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1689,5 +1689,131 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc084, TestSize.Level1)
     textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     textFieldManager->SetClickPosition(menuOffset);
     EXPECT_NE(textFieldManager->optionalPosition_, menuOffset);
+}
+
+/**
+ * @tc.name: TextPatternFunc085
+ * @tc.desc: test GetKeyboardHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc085, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    auto result = pattern->GetKeyboardHeight();
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: TextPatternFunc086
+ * @tc.desc: test SetKeyboardAreaChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc086, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
+    keyboard->children_.emplace_back(element);
+    RefPtr<SafeAreaManager> safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    ASSERT_NE(safeAreaManager, nullptr);
+    safeAreaManager->SetRawKeyboardHeight(5.0f);
+    auto pipeline = pattern->GetHost()->GetContext();
+    pipeline->safeAreaManager_ = safeAreaManager;
+    pattern->SetKeyboardAreaChange(true);
+    EXPECT_EQ(pipeline->safeAreaManager_->GetRawKeyboardHeight(), 0.0f);
+}
+
+/**
+ * @tc.name: TextPatternFunc087
+ * @tc.desc: test SetKeyboardAreaChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc087, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = pattern->GetHost()->GetContext();
+    pipeline->safeAreaManager_ = nullptr;
+    pattern->SetKeyboardAreaChange(true);
+    EXPECT_EQ(pipeline->safeAreaManager_, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternFunc088
+ * @tc.desc: test SetKeyboardAreaChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc088, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<SafeAreaManager> safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    ASSERT_NE(safeAreaManager, nullptr);
+    safeAreaManager->SetRawKeyboardHeight(5.0f);
+    auto pipeline = pattern->GetHost()->GetContext();
+    pipeline->safeAreaManager_ = safeAreaManager;
+    pattern->SetKeyboardAreaChange(false);
+    EXPECT_EQ(pipeline->safeAreaManager_->GetRawKeyboardHeight(), 5.0f);
+}
+
+/**
+ * @tc.name: TextPatternFunc089
+ * @tc.desc: test OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc089, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetKeyboardOption(true);
+    pattern->OnAreaChangedInner();
+    EXPECT_EQ(pattern->keyboardHeight_, 0.0f);
+}
+
+/**
+ * @tc.name: TextPatternFunc090
+ * @tc.desc: test OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc090, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetKeyboardOption(false);
+    pattern->keyboardHeight_ = 5.0f;
+    pattern->OnAreaChangedInner();
+    EXPECT_EQ(pattern->keyboardHeight_, 5.0f);
+}
+
+/**
+ * @tc.name: TextPatternFunc091
+ * @tc.desc: test OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc091, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetKeyboardOption(true);
+    pattern->keyboardHeight_ = 5.0f;
+    pattern->OnAreaChangedInner();
+    EXPECT_EQ(pattern->keyboardHeight_, 0.0f);
 }
 } // namespace OHOS::Ace

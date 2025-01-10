@@ -24,6 +24,9 @@
 #include "include/utils/SkBase64.h"
 
 #include "wm/window.h"
+#include "dm/display_manager.h"
+
+#include "connect_server_manager.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "adapter/ohos/entrance/ace_container.h"
@@ -40,8 +43,6 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_v2/inspector/inspector.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "dm/display_manager.h"
-#include "foundation/ability/ability_runtime/frameworks/native/runtime/connect_server_manager.h"
 
 namespace OHOS::Ace {
 
@@ -204,7 +205,7 @@ void LayoutInspector::SetRsProfilerNodeMountCallback(RsProfilerNodeMountCallback
 
 void LayoutInspector::SendStateProfilerMessage(const std::string& message)
 {
-    OHOS::AbilityRuntime::ConnectServerManager::Get().SendArkUIStateProfilerMessage(message);
+    OHOS::AbilityRuntime::ConnectServerManager::Get().SendStateProfilerMessage(message);
 }
 
 void LayoutInspector::SetStateProfilerStatus(bool status)
@@ -231,12 +232,17 @@ void LayoutInspector::SetCallback(int32_t instanceId)
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     if (container->IsUseStageModel()) {
-        OHOS::AbilityRuntime::ConnectServerManager::Get().SetLayoutInspectorCallback(
-            [](int32_t containerId) { return CreateLayoutInfo(containerId); },
-            [](bool status) { return SetStatus(status); });
+        AddInstanceCallBack addInstanceCallBack = [](int32_t id) {
+            OHOS::AbilityRuntime::ConnectServerManager::Get().SetProfilerCallBack(
+                [](bool status) { return SetStateProfilerStatus(status); });
+            OHOS::AbilityRuntime::ConnectServerManager::Get().SetSwitchCallback(
+                [](bool status) { return SetStatus(status); },
+                [](int32_t containerId) { return CreateLayoutInfo(containerId); }, id);
+        };
+        OHOS::AbilityRuntime::ConnectServerManager::Get().RegisterAddInstanceCallback(addInstanceCallBack);
         OHOS::AbilityRuntime::ConnectServerManager::Get().SetRecordCallback(
             LayoutInspector::HandleStartRecord, LayoutInspector::HandleStopRecord);
-        OHOS::AbilityRuntime::ConnectServerManager::Get().RegistConnectServerCallback(
+        OHOS::AbilityRuntime::ConnectServerManager::Get().RegisterConnectServerCallback(
             LayoutInspector::ConnectServerCallback);
         isUseStageModel_ = true;
         RegisterConnectCallback();
@@ -247,8 +253,14 @@ void LayoutInspector::SetCallback(int32_t instanceId)
         isUseStageModel_ = false;
     }
 
-    OHOS::AbilityRuntime::ConnectServerManager::Get().SetStateProfilerCallback(
-        [](bool status) { return SetStateProfilerStatus(status); });
+    SendInstanceMessageCallBack sendInstanceMessageCallBack = [](int32_t id) {
+        OHOS::AbilityRuntime::ConnectServerManager::Get().SetProfilerCallBack(
+            [](bool status) { return SetStateProfilerStatus(status); });
+        OHOS::AbilityRuntime::ConnectServerManager::Get().SetSwitchCallback(
+            [](bool status) { return SetStatus(status); },
+            [](int32_t containerId) { return CreateLayoutInfo(containerId); }, id);
+    };
+    OHOS::AbilityRuntime::ConnectServerManager::Get().RegisterSendInstanceMessageCallback(sendInstanceMessageCallBack);
 }
 
 void LayoutInspector::CreateContainerLayoutInfo(RefPtr<Container>& container)

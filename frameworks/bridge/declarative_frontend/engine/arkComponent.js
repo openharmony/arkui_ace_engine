@@ -2602,7 +2602,8 @@ class DragPreviewOptionsModifier extends ModifierWithKey {
     }
     else {
       getUINativeModule().common.setDragPreviewOptions(node, this.value.mode, this.value.numberBadge,
-        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting, this.value.enableEdgeAutoScroll);
+        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting, this.value.enableEdgeAutoScroll,
+        this.value.enableHapticFeedback);
     }
   }
   checkObjectDiff() {
@@ -2610,7 +2611,8 @@ class DragPreviewOptionsModifier extends ModifierWithKey {
       && this.value.numberBadge === this.stageValue.numberBadge
       && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
       && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting
-      && this.value.enableEdgeAutoScroll === this.stageValue.enableEdgeAutoScroll);
+      && this.value.enableEdgeAutoScroll === this.stageValue.enableEdgeAutoScroll
+      && this.value.enableHapticFeedback === this.stageValue.enableHapticFeedback);
   }
 }
 DragPreviewOptionsModifier.identity = Symbol('dragPreviewOptions');
@@ -3399,6 +3401,7 @@ class ArkComponent {
       arkDragPreviewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;
       arkDragPreviewOptions.defaultAnimationBeforeLifting = options.defaultAnimationBeforeLifting;
       arkDragPreviewOptions.enableEdgeAutoScroll = options.enableEdgeAutoScroll;
+      arkDragPreviewOptions.enableHapticFeedback = options.enableHapticFeedback;
     }
     modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
       DragPreviewOptionsModifier, arkDragPreviewOptions);
@@ -17536,6 +17539,7 @@ class ArkDragPreviewOptions {
     this.isMultiSelectionEnabled = undefined;
     this.defaultAnimationBeforeLifting = undefined;
     this.enableEdgeAutoScroll = undefined;
+    this.enableHapticFeedback = undefined;
   }
 
   isEqual(another) {
@@ -17544,7 +17548,8 @@ class ArkDragPreviewOptions {
       this.numberBadge === another.numberBadge &&
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting &&
-      this.enableEdgeAutoScroll === another.enableEdgeAutoScroll
+      this.enableEdgeAutoScroll === another.enableEdgeAutoScroll &&
+      this.enableHapticFeedback === another.enableHapticFeedback
     );
   }
 }
@@ -24426,6 +24431,10 @@ class ArkDatePickerComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, DatePickerBackgroundColorModifier.identity, DatePickerBackgroundColorModifier, value);
     return this;
   }
+  enableHapticFeedback(value) {
+    modifierWithKey(this._modifiersWithKeys, DatePickerEnableHapticFeedbackModifier.identity, DatePickerEnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 class DatePickerLunarModifier extends ModifierWithKey {
   constructor(value) {
@@ -24585,6 +24594,21 @@ class DatePickerBackgroundColorModifier extends ModifierWithKey {
   }
 }
 DatePickerBackgroundColorModifier.identity = Symbol('datePickerBackgroundColor');
+class DatePickerEnableHapticFeedbackModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().datePicker.resetEnableHapticFeedback(node);
+    }
+    else {
+      getUINativeModule().datePicker.setEnableHapticFeedback(node, this.value);
+    }
+  }
+}
+DatePickerEnableHapticFeedbackModifier.identity = Symbol('datePickerEnableHapticFeedback');
+
 //@ts-ignore
 if (globalThis.DatePicker !== undefined) {
   globalThis.DatePicker.attributeModifier = function (modifier) {
@@ -29453,7 +29477,7 @@ class SwiperIndicatorModifier extends ModifierWithKey {
           digitFontWeight, selectedDigitFontSize, selectedDigitFontWeight, left, top, right, bottom);
       }
       else {
-        getUINativeModule().swiper.setSwiperIndicator(node, 'boolean', true);
+        getUINativeModule().swiper.setSwiperIndicator(node, "IndicatorComponentController", this.value );
       }
     }
   }
@@ -29665,8 +29689,8 @@ class SwiperAutoPlayModifier extends ModifierWithKey {
     }
   }
   checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay)
-      || !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched); 
+    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay) ||
+      !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched);
   }
 }
 SwiperAutoPlayModifier.identity = Symbol('swiperAutoPlay');
@@ -29844,6 +29868,230 @@ if (globalThis.Swiper !== undefined) {
       return new ArkSwiperComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.SwiperModifier(nativePtr, classType);
+    });
+  };
+}
+
+class IndicatorComponentInitialIndexModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().indicatorComponent.resetInitialIndex(node);
+    } else {
+      getUINativeModule().indicatorComponent.setInitialIndex(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+IndicatorComponentInitialIndexModifier.identity = Symbol('indicatorComponentInitialIndex');
+
+class IndicatorComponentCountModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().indicatorComponent.resetCount(node);
+    } else {
+      getUINativeModule().indicatorComponent.setCount(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+IndicatorComponentCountModifier.identity = Symbol('indicatorComponentCount');
+
+class IndicatorComponentStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().indicatorComponent.resetStyle(node);
+    }
+    else {
+      let left;
+      let top;
+      let right;
+      let bottom;
+      let itemWidth;
+      let itemHeight;
+      let selectedItemWidth;
+      let selectedItemHeight;
+      let mask;
+      let color;
+      let selectedColor;
+      let fontColor;
+      let selectedFontColor;
+      let digitFontSize;
+      let digitFontWeight;
+      let selectedDigitFontSize;
+      let selectedDigitFontWeight;
+      let maxDisplayCount;
+      if (typeof this.value === 'object' && this.value.type === 'DigitIndicator') {
+        left = this.value.leftValue;
+        top = this.value.topValue;
+        right = this.value.rightValue;
+        bottom = this.value.bottomValue;
+        fontColor = this.value.fontColorValue;
+        selectedFontColor = this.value.selectedFontColorValue;
+        let arkDigitFont = new ArkDigitFont();
+        if (typeof this.value.digitFontValue === 'object') {
+          digitFontSize = this.value.digitFontValue.size;
+          digitFontWeight = arkDigitFont.parseFontWeight(this.value.digitFontValue.weight);
+        }
+        if (typeof this.value.selectedDigitFontValue === 'object') {
+          selectedDigitFontSize = this.value.selectedDigitFontValue.size;
+          selectedDigitFontWeight = arkDigitFont.parseFontWeight(this.value.selectedDigitFontValue.weight);
+        }
+        getUINativeModule().indicatorComponent.setStyle(node, 'ArkDigitIndicator', fontColor, selectedFontColor, digitFontSize,
+          digitFontWeight, selectedDigitFontSize, selectedDigitFontWeight, left, top, right, bottom);
+      } else {
+        left = this.value.leftValue;
+        top = this.value.topValue;
+        right = this.value.rightValue;
+        bottom = this.value.bottomValue;
+        itemWidth = this.value.itemWidthValue;
+        itemHeight = this.value.itemHeightValue;
+        selectedItemWidth = this.value.selectedItemWidthValue;
+        selectedItemHeight = this.value.selectedItemHeightValue;
+        mask = this.value.maskValue;
+        color = this.value.colorValue;
+        selectedColor = this.value.selectedColorValue;
+        maxDisplayCount = this.value.maxDisplayCountValue;
+        getUINativeModule().indicatorComponent.setStyle(node, 'ArkDotIndicator', itemWidth, itemHeight, selectedItemWidth,
+          selectedItemHeight, mask, color, selectedColor, left, top, right, bottom, maxDisplayCount);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (typeof this.stageValue !== typeof this.value) {
+      return true;
+    }
+    if (this.stageValue instanceof ArkDotIndicator && this.value instanceof ArkDotIndicator) {
+      return (!isBaseOrResourceEqual(this.stageValue.itemWidthValue, this.value.itemWidthValue) ||
+        !isBaseOrResourceEqual(this.stageValue.itemHeightValue, this.value.itemHeightValue) ||
+        !isBaseOrResourceEqual(this.stageValue.selectedItemWidthValue, this.value.selectedItemWidthValue) ||
+        !isBaseOrResourceEqual(this.stageValue.selectedItemHeightValue, this.value.selectedItemHeightValue) ||
+        !isBaseOrResourceEqual(this.stageValue.maskValue, this.value.maskValue) ||
+        !isBaseOrResourceEqual(this.stageValue.colorValue, this.value.colorValue) ||
+        !isBaseOrResourceEqual(this.stageValue.selectedColorValue, this.value.selectedColorValue) ||
+        !isBaseOrResourceEqual(this.stageValue.maxDisplayCountValue, this.value.maxDisplayCountValue));
+    }
+    else if (this.stageValue instanceof ArkDigitIndicator && this.value instanceof ArkDigitIndicator) {
+      return (!isBaseOrResourceEqual(this.stageValue.fontColorValue, this.value.fontColorValue) ||
+        !isBaseOrResourceEqual(this.stageValue.selectedFontColorValue, this.value.selectedFontColorValue) ||
+        !isBaseOrResourceEqual(this.stageValue.digitFontValue.size, this.value.digitFontValue.size) ||
+        !isBaseOrResourceEqual(this.stageValue.digitFontValue.weight, this.value.digitFontValue.weight) ||
+        !isBaseOrResourceEqual(this.stageValue.selectedDigitFontValue.size, this.value.selectedDigitFontValue.size) ||
+        !isBaseOrResourceEqual(this.stageValue.selectedDigitFontValue.weight, this.value.selectedDigitFontValue.weight));
+    }
+    else {
+      return true;
+    }
+  }
+}
+IndicatorComponentStyleModifier.identity = Symbol('indicatorComponentStyle');
+
+class IndicatorComponentLoopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().indicatorComponent.resetLoop(node);
+    } else {
+      getUINativeModule().indicatorComponent.setLoop(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+IndicatorComponentLoopModifier.identity = Symbol('indicatorComponentLoop');
+
+class IndicatorComponentVerticalModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().indicatorComponent.resetVertical(node);
+    } else {
+      getUINativeModule().indicatorComponent.setVertical(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+IndicatorComponentVerticalModifier.identity = Symbol('indicatorComponentVertical');
+
+class IndicatorComponentOnChangeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().indicatorComponent.resetOnChange(node);
+    } else {
+      getUINativeModule().indicatorComponent.setOnChange(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+IndicatorComponentOnChangeModifier.identity = Symbol('indicatorComponentOnChange');
+
+class ArkIndicatorComponentComponent extends ArkComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+  }
+
+  initialIndex(value) {
+    modifierWithKey(this._modifiersWithKeys, IndicatorComponentInitialIndexModifier.identity, IndicatorComponentInitialIndexModifier, value);
+    return this;
+  }
+
+  count(value) {
+    modifierWithKey(this._modifiersWithKeys, IndicatorComponentCountModifier.identity, IndicatorComponentCountModifier, value);
+    return this;
+  }
+
+  style(value) {
+    modifierWithKey(this._modifiersWithKeys, IndicatorComponentStyleModifier.identity, IndicatorComponentStyleModifier, value);
+    return this;
+  }
+
+  loop(value) {
+    modifierWithKey(this._modifiersWithKeys, IndicatorComponentLoopModifier.identity, IndicatorComponentLoopModifier, value);
+    return this;
+  }
+
+  vertical(value) {
+    modifierWithKey(this._modifiersWithKeys, IndicatorComponentVerticalModifier.identity, IndicatorComponentVerticalModifier, value);
+    return this;
+  }
+
+  onChange(value) {
+    modifierWithKey(this._modifiersWithKeys, IndicatorComponentOnChangeModifier.identity, IndicatorComponentOnChangeModifier, value);
+    return this;
+  }
+}
+
+// @ts-ignore
+if (globalThis.IndicatorComponent !== undefined) {
+  globalThis.IndicatorComponent.attributeModifier = function (modifier) {
+    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+      return new ArkIndicatorComponentComponent(nativePtr);
+    }, (nativePtr, classType, modifierJS) => {
+      return new modifierJS.IndicatorComponentModifier(nativePtr, classType);
     });
   };
 }

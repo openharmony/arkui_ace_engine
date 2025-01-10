@@ -905,6 +905,43 @@ const ArkUI_AttributeItem* GetBackgroundColor(ArkUI_NodeHandle node)
     return &g_attributeItem;
 }
 
+int32_t SetBackdropBlur(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    bool sizeIllegal = item->size < NUM_1 || item->size > NUM_3;
+    if (sizeIllegal) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    float grayScaleStart = item->size > NUM_1 ? item->value[NUM_1].f32 : 0.0f;
+    float grayScaleEnd = item->size > NUM_2 ? item->value[NUM_2].f32 : 0.0f;
+    bool valueIllegal = LessNotEqual(item->value[NUM_0].f32, 0.0f)
+        || LessNotEqual(grayScaleStart, 0.0f) || GreatNotEqual(grayScaleStart, MAX_GRAYSCALE)
+        || LessNotEqual(grayScaleEnd, 0.0f) || GreatNotEqual(grayScaleEnd, MAX_GRAYSCALE);
+    if (valueIllegal) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto* fullImpl = GetFullImpl();
+    BlurOption blurOption = {{grayScaleStart, grayScaleEnd}};
+    fullImpl->getNodeModifiers()->getCommonModifier()->setNodeBackdropBlur(
+        node->uiNodeHandle, item->value[NUM_0].f32, blurOption.grayscale.data(), blurOption.grayscale.size());
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetBackdropBlur(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetBackdropBlur(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetBackdropBlur(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getCommonModifier()->getNodeBackdropBlur(node->uiNodeHandle);
+    g_numberValues[NUM_0].f32 = resultValue.dimensionRadius;
+    g_numberValues[NUM_1].f32 = resultValue.brighteningBlur;
+    g_numberValues[NUM_2].f32 = resultValue.darkeningBlur;
+    g_attributeItem.size = NUM_3;
+    return &g_attributeItem;
+}
+
 int32_t SetBackgroundImage(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     if ((!item->string && !item->object) || (item->string && item->object)) {
@@ -8298,6 +8335,40 @@ void ResetDatePickerSelectedTextStyle(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getDatePickerModifier()->resetSelectedTextStyle(node->uiNodeHandle);
 }
 
+const ArkUI_AttributeItem* GetDatePickerEnableHapticFeedback(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getDatePickerModifier()) {
+        auto resultValue = fullImpl->getNodeModifiers()->getDatePickerModifier()->getEnableHapticFeedback(node->uiNodeHandle);
+        g_numberValues[0].i32 = resultValue;
+    }  
+    return &g_attributeItem;
+}
+
+int32_t SetDatePickerEnableHapticFeedback(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item) {
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl || !fullImpl->getNodeModifiers() || !fullImpl->getNodeModifiers()->getDatePickerModifier()) {
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+
+    auto datePickerModifier = fullImpl->getNodeModifiers()->getDatePickerModifier();
+    if (item->size == 0 || !CheckAttributeIsBool(item->value[0].i32)) {
+        datePickerModifier->resetEnableHapticFeedback(node->uiNodeHandle);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    datePickerModifier->setEnableHapticFeedback(node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetDatePickerEnableHapticFeedback(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getDatePickerModifier()) {
+        fullImpl->getNodeModifiers()->getDatePickerModifier()->resetEnableHapticFeedback(node->uiNodeHandle);
+    }
+}
+
 // timepicker
 const ArkUI_AttributeItem* GetTimePickerSelected(ArkUI_NodeHandle node)
 {
@@ -13650,6 +13721,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetFocusBox,
         SetClickDistance,
         SetTabStop,
+        SetBackdropBlur,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -13760,6 +13832,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         nullptr,
         nullptr,
         GetTabStop,
+        GetBackdropBlur,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -13874,6 +13947,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetFocusBox,
         ResetClickDistance,
         ResetTabStop,
+        ResetBackdropBlur,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14336,7 +14410,8 @@ void ResetXComponentAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 int32_t SetDatePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI_AttributeItem* item)
 {
     static Setter* setters[] = { SetDatePickerLunar, SetDatePickerStart, SetDatePickerEnd, SetDatePickerSelected,
-        SetDatePickerDisappearTextStyle, SetDatePickerTextStyle, SetDatePickerSelectedTextStyle, SetDatePickerMode };
+        SetDatePickerDisappearTextStyle, SetDatePickerTextStyle, SetDatePickerSelectedTextStyle, SetDatePickerMode,
+        SetDatePickerEnableHapticFeedback };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "datepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -14347,7 +14422,8 @@ int32_t SetDatePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const A
 const ArkUI_AttributeItem* GetDatePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetDatePickerLunar, GetDatePickerStart, GetDatePickerEnd, GetDatePickerSelected,
-        GetDatePickerDisappearTextStyle, GetDatePickerTextStyle, GetDatePickerSelectedTextStyle, GetDatePickerMode };
+        GetDatePickerDisappearTextStyle, GetDatePickerTextStyle, GetDatePickerSelectedTextStyle, GetDatePickerMode,
+        GetDatePickerEnableHapticFeedback };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "datepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
@@ -14359,7 +14435,7 @@ void ResetDatePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetDatePickerLunar, ResetDatePickerStart, ResetDatePickerEnd,
         ResetDatePickerSelected, ResetDatePickerDisappearTextStyle, ResetDatePickerTextStyle,
-        ResetDatePickerSelectedTextStyle, ResetDatePickerMode };
+        ResetDatePickerSelectedTextStyle, ResetDatePickerMode, ResetDatePickerEnableHapticFeedback };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "datepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
