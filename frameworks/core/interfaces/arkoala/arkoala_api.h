@@ -1470,6 +1470,13 @@ struct ArkUIAccessibilityValue {
     ArkUIOptionalCharPtr text;
 };
 
+struct ArkUIProgressLinearStyleOption {
+    bool scanEffectEnable;
+    bool smoothEffectEnable;
+    float strokeWidth;
+    float strokeRadius;
+};
+
 struct ArkUITranslateOption {
     ArkUI_Float32 x;
     ArkUI_Float32 y;
@@ -3375,6 +3382,7 @@ struct ArkUIProgressModifier {
     void (*setProgressInitialize)(
         ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Float32 total, ArkUI_Int32 progressStyle);
     void (*resetProgressInitialize)(ArkUINodeHandle node);
+    void (*getProgressLinearStyle)(ArkUINodeHandle node, ArkUIProgressLinearStyleOption& option);
 };
 
 struct ArkUIPluginModifier {

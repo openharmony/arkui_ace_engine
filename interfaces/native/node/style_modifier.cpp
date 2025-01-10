@@ -6811,22 +6811,31 @@ void ResetProgressType(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getProgressModifier()->resetProgressType(node->uiNodeHandle);
 }
 
+const ArkUIProgressModifier* GetProgressModifierByNode(ArkUI_NodeHandle node)
+{
+    CHECK_NULL_RETURN(node, nullptr);
+    auto fullImpl = GetFullImpl();
+    CHECK_NULL_RETURN(fullImpl, nullptr);
+    auto modifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(modifiers, nullptr);
+    auto progressModifier = modifiers->getProgressModifier();
+    CHECK_NULL_RETURN(progressModifier, nullptr);
+    return progressModifier;
+}
+
 int32_t SetProgressLinearStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
-    if (item == nullptr) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     node->progressLinearStyle = item->object;
 
-    auto* fullImpl = GetFullImpl();
-    auto resultValue = fullImpl->getNodeModifiers()->getProgressModifier()->getProgressType(node->uiNodeHandle);
-    if (item->size < 0 || item->object == nullptr || PROGRESS_TYPE_LINEAR != resultValue) {
+    auto progressModifier = GetProgressModifierByNode(node);
+    CHECK_NULL_RETURN(progressModifier, ERROR_CODE_PARAM_INVALID);
+    auto progressType = progressModifier->getProgressType(node->uiNodeHandle);
+    if (item->size < 0 || item->object == nullptr || PROGRESS_TYPE_LINEAR != progressType) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* option = reinterpret_cast<ArkUI_ProgressLinearStyleOption*>(item->object);
-    if (option == nullptr) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
+    CHECK_NULL_RETURN(option, ERROR_CODE_PARAM_INVALID);
 
     ArkUIProgressStyle progressStyle;
     progressStyle.enableScanEffect = option->scanEffectEnable;
@@ -6836,20 +6845,35 @@ int32_t SetProgressLinearStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem*
     progressStyle.strokeRadiusValue = option->strokeRadius;
     progressStyle.strokeRadiusUnit = static_cast<uint8_t>(DimensionUnit::VP);
 
-    fullImpl->getNodeModifiers()->getProgressModifier()->setProgressStyle(node->uiNodeHandle, &progressStyle);
+    progressModifier->setProgressStyle(node->uiNodeHandle, &progressStyle);
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetProgressLinearStyle(ArkUI_NodeHandle node)
 {
-    g_attributeItem.object = node->progressLinearStyle;
+    auto progressModifier = GetProgressModifierByNode(node);
+    CHECK_NULL_RETURN(progressModifier, nullptr);
+    auto progressType = progressModifier->getProgressType(node->uiNodeHandle);
+    if (PROGRESS_TYPE_LINEAR != progressType) {
+        return nullptr;
+    }
+
+    static ArkUIProgressLinearStyleOption option;
+    progressModifier->getProgressLinearStyle(node->uiNodeHandle, option);
+    g_attributeItem.object = &option;
     return &g_attributeItem;
 }
 
 void ResetProgressLinearStyle(ArkUI_NodeHandle node)
 {
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getProgressModifier()->resetProgressStyle(node->uiNodeHandle);
+    auto progressModifier = GetProgressModifierByNode(node);
+    CHECK_NULL_VOID(progressModifier);
+    auto progressType = progressModifier->getProgressType(node->uiNodeHandle);
+    if (PROGRESS_TYPE_LINEAR != progressType) {
+        return;
+    }
+
+    progressModifier->resetProgressStyle(node->uiNodeHandle);
 }
 
 int32_t SetXComponentId(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)

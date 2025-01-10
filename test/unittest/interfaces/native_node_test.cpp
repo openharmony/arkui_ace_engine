@@ -5431,14 +5431,15 @@ HWTEST_F(NativeNodeTest, BackdropBlurTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: NativeNodeTest083
+ * @tc.name: NativeNodeProgressTest001
  * @tc.desc: Test progressNode function.
  * @tc.type: FUNC
  */
-HWTEST_F(NativeNodeTest, NativeNodeTest083, TestSize.Level1)
+HWTEST_F(NativeNodeTest, NativeNodeProgressTest001, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
     auto rootNode = nodeAPI->createNode(ARKUI_NODE_PROGRESS);
     ASSERT_NE(rootNode, nullptr);
     ArkUI_NumberValue value[] = {{.f32 = 10.0f}};
@@ -5451,18 +5452,75 @@ HWTEST_F(NativeNodeTest, NativeNodeTest083, TestSize.Level1)
 
     auto linearStyleOption = OH_ArkUI_ProgressLinearStyleOption_Create();
     ArkUI_AttributeItem linearStyleItem = {.size = 0, .object = linearStyleOption};
-    OH_ArkUI_ProgressLinearStyleOption_SetSmoothEffectEnabled(linearStyleOption, true);
+    OH_ArkUI_ProgressLinearStyleOption_SetSmoothEffectEnabled(linearStyleOption, false);
     OH_ArkUI_ProgressLinearStyleOption_SetScanEffectEnabled(linearStyleOption, true);
     OH_ArkUI_ProgressLinearStyleOption_SetStrokeWidth(linearStyleOption, 50.0f);
     OH_ArkUI_ProgressLinearStyleOption_SetStrokeRadius(linearStyleOption, 20.0f);
     nodeAPI->setAttribute(rootNode, NODE_PROGRESS_LINEAR_STYLE, &linearStyleItem);
 
-    EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled(linearStyleOption), true);
+    EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled(linearStyleOption), false);
     EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetScanEffectEnabled(linearStyleOption), true);
     EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth(linearStyleOption), 50.0f);
     EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius(linearStyleOption), 20.0f);
 
+    nodeAPI->resetAttribute(rootNode, NODE_PROGRESS_LINEAR_STYLE);
+    EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled(linearStyleOption), false);
+    EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetScanEffectEnabled(linearStyleOption), true);
+    EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth(linearStyleOption), 50.0f);
+    EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius(linearStyleOption), 20.0f);
     OH_ArkUI_ProgressLinearStyleOption_Destroy(linearStyleOption);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeProgressTest002
+ * @tc.desc: Test progressNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeProgressTest002, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    ASSERT_NE(nodeAPI, nullptr);
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_PROGRESS);
+    ASSERT_NE(rootNode, nullptr);
+    ArkUI_NumberValue value[] = {{.f32 = 10.0f}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    nodeAPI->setAttribute(rootNode, NODE_PROGRESS_VALUE, &item);
+    value[0].i32 = 100.0f;
+    nodeAPI->setAttribute(rootNode, NODE_PROGRESS_TOTAL, &item);
+    value[0].i32 = ARKUI_PROGRESS_TYPE_LINEAR;
+    nodeAPI->setAttribute(rootNode, NODE_PROGRESS_TYPE, &item);
+
+    ArkUI_ProgressLinearStyleOption* linearStyleOption = nullptr;
+    // set attribute value
+    OH_ArkUI_ProgressLinearStyleOption_SetSmoothEffectEnabled(linearStyleOption, false);
+    OH_ArkUI_ProgressLinearStyleOption_SetScanEffectEnabled(linearStyleOption, true);
+    OH_ArkUI_ProgressLinearStyleOption_SetStrokeWidth(linearStyleOption, 50.0f);
+    OH_ArkUI_ProgressLinearStyleOption_SetStrokeRadius(linearStyleOption, 20.0f);
+
+    // get attribute default value
+    EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled(linearStyleOption), true);
+    EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetScanEffectEnabled(linearStyleOption), false);
+    EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth(linearStyleOption), -1.0f);
+    EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius(linearStyleOption), -1.0f);
+    OH_ArkUI_ProgressLinearStyleOption_Destroy(linearStyleOption);
+
+    // reset attribute value
+    nodeAPI->resetAttribute(rootNode, NODE_PROGRESS_LINEAR_STYLE);
+    auto linearStyleItem = nodeAPI->getAttribute(rootNode, NODE_PROGRESS_LINEAR_STYLE);
+    linearStyleOption = reinterpret_cast<ArkUI_ProgressLinearStyleOption*>(linearStyleItem->object);
+    EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetSmoothEffectEnabled(linearStyleOption), true);
+    EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetScanEffectEnabled(linearStyleOption), false);
+    EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth(linearStyleOption), 4.0f);
+    EXPECT_EQ(OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius(linearStyleOption), 2.0f);
+    nodeAPI->setAttribute(rootNode, NODE_PROGRESS_LINEAR_STYLE, nullptr);
+
+    value[0].i32 = ARKUI_PROGRESS_TYPE_RING;
+    nodeAPI->setAttribute(rootNode, NODE_PROGRESS_TYPE, &item);
+    nodeAPI->setAttribute(rootNode, NODE_PROGRESS_LINEAR_STYLE, linearStyleItem);
+    nodeAPI->resetAttribute(rootNode, NODE_PROGRESS_LINEAR_STYLE);
+    EXPECT_EQ(nodeAPI->getAttribute(rootNode, NODE_PROGRESS_LINEAR_STYLE), nullptr);
     nodeAPI->disposeNode(rootNode);
 }
 
