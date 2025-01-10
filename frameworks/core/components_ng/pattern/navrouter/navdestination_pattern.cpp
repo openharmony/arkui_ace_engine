@@ -801,4 +801,32 @@ RefPtr<FrameNode> NavDestinationPattern::GetBarNode(const RefPtr<NavDestinationN
     return isTitle ? AceType::DynamicCast<FrameNode>(nodeBase->GetTitleBarNode())
                    : AceType::DynamicCast<FrameNode>(nodeBase->GetToolBarNode());
 }
+
+void NavDestinationPattern::OnCoordScrollStart()
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->FireOnCoordScrollStartAction();
+}
+
+float NavDestinationPattern::OnCoordScrollUpdate(float offset, float currentOffset)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(navDestinationGroupNode, 0.0f);
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_RETURN(navDestinationEventHub, 0.0f);
+    navDestinationEventHub->FireOnCoordScrollUpdateAction(currentOffset);
+    return 0.0f;
+}
+
+void NavDestinationPattern::OnCoordScrollEnd()
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationEventHub = navDestinationGroupNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->FireOnCoordScrollEndAction();
+}
 } // namespace OHOS::Ace::NG

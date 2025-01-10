@@ -1098,7 +1098,7 @@ private:
     RefPtr<SelectMotion> selectMotion_;
     RefPtr<PanEvent> boxSelectPanEvent_;
 
-    RefPtr<NavBarPattern> navBarPattern_;
+    RefPtr<NavDestinationPatternBase> navBarPattern_;
     RefPtr<SheetPresentationPattern> sheetPattern_;
     std::vector<RefPtr<ScrollingListener>> scrollingListener_;
 

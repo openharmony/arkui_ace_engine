@@ -480,7 +480,10 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::BackButtonAn
     }
     auto titleNode = AceType::DynamicCast<TitleBarNode>(GetTitleBarNode());
     CHECK_NULL_RETURN(titleNode, nullptr);
-    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleNode->GetBackButton());
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleNode->GetCustomBackButton());
+    if (!backButtonNode) {
+        backButtonNode = AceType::DynamicCast<FrameNode>(titleNode->GetBackButton());
+    }
     CHECK_NULL_RETURN(backButtonNode, nullptr);
     AnimationOption transitionOption;
     transitionOption.SetCurve(Curves::SHARP);

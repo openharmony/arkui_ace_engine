@@ -342,7 +342,10 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
-    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetCustomBackButton());
+    if (!backButtonNode) {
+        backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    }
     CHECK_NULL_VOID(backButtonNode);
     auto backButtonEventHub = backButtonNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(backButtonEventHub);

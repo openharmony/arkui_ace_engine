@@ -231,6 +231,11 @@ ArkUINodeHandle GetOrCreateCustomNode(ArkUI_CharPtr tag)
     return reinterpret_cast<ArkUINodeHandle>(ViewModel::GetOrCreateCustomNode(tag));
 }
 
+ArkUI_Bool IsRightToLeft()
+{
+    return AceApplicationInfo::GetInstance().IsRightToLeft();
+}
+
 void CreateNewScope()
 {
     ViewStackModel::GetInstance()->NewScope();
@@ -1997,6 +2002,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     CreateCustomNode,
     GetOrCreateCustomNode,
     GetRSNodeByNode,
+    IsRightToLeft,
     CreateNewScope,
     RegisterOEMVisualEffect,
     SetOnNodeDestroyCallback,
