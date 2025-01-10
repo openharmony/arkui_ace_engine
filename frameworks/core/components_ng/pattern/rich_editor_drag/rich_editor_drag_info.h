@@ -29,7 +29,8 @@ struct TextDragInfo {
     RectF firstHandle;
     RectF secondHandle;
     float maxSelectedWidth = 0.0f;
-    bool isHandleAnimation = true;
+    bool isFirstHandleAnimation = true;
+    bool isSecondHandleAnimation = true;
 };
 } // namespace OHOS::Ace::NG
 

@@ -183,10 +183,7 @@ public:
         needCallChildrenUpdate_ = needCallChildrenUpdate;
     }
 
-    void SetParent(const WeakPtr<UINode>& parent)
-    {
-        parent_ = parent;
-    }
+    virtual void SetParent(const WeakPtr<UINode>& parent, bool needDetect = true);
     // Tree operation end.
 
     // performance.
@@ -360,7 +357,7 @@ public:
 
     virtual void SetActive(bool active, bool needRebuildRenderContext = false);
 
-    virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false);
+    virtual void SetJSViewActive(bool active, bool isLazyForEachNode = false, bool isReuse = false);
 
     virtual void TryVisibleChangeOnDescendant(VisibleType preVisibility, VisibleType currentVisibility);
 

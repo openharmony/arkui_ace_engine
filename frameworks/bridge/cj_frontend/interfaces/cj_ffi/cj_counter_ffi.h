@@ -32,6 +32,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkCounterSetStateChange(bool state);
 CJ_EXPORT void FfiOHOSAceFrameworkCounterSetBackgroundColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkCounterSetOnInc(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkCounterSetOnDec(void (*callback)());
+CJ_EXPORT void FfiOHOSAceFrameworkCounterEnableDec(bool enable);
+CJ_EXPORT void FfiOHOSAceFrameworkCounterEnableInc(bool enable);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_COUNTER_FFI_H

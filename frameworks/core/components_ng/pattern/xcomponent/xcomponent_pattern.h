@@ -326,6 +326,7 @@ public:
     void EnableSecure(bool isSecure);
     void HdrBrightness(float hdrBrightness);
     void EnableTransparentLayer(bool isTransparentLayer);
+    RenderFit GetSurfaceRenderFit() const;
 
 private:
     void OnAttachToFrameNode() override;

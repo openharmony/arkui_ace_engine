@@ -16,8 +16,8 @@
 #include "tabs_test_ng.h"
 
 #include "core/components/tab_bar/tab_theme.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
@@ -1588,6 +1588,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem005, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Pop();
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     CreateTabsDone(model);
+
     /**
      * @tc.steps: step1. check if SvgFillColor is called and value is set correctly.
      */

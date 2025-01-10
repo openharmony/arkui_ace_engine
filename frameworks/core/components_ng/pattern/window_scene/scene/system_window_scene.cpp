@@ -297,6 +297,24 @@ void SystemWindowScene::RegisterFocusCallback()
             auto self = weakThis.Upgrade();
             CHECK_NULL_VOID(self);
             self->FocusViewShow();
+
+            CHECK_NULL_VOID(self->GetSession());
+            TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "focus callback id:%{public}d, use-control-session:%{public}u",
+                self->GetSession()->GetPersistentId(), self->GetSession()->GetIsUseControlSession());
+            CHECK_EQUAL_VOID(self->GetSession()->GetIsUseControlSession(), false);
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            auto parentScene = WindowSceneHelper::FindWindowScene(host);
+            CHECK_NULL_VOID(parentScene);
+            auto parentFrame = AceType::DynamicCast<FrameNode>(parentScene);
+            CHECK_NULL_VOID(parentFrame);
+            auto parentType = parentFrame->GetWindowPatternType();
+            TAG_LOGD(AceLogTag::ACE_WINDOW_SCENE, "focus callback node:%{public}d, parent:%{public}d,"
+                " parentType:%{public}d", host->GetId(), parentFrame->GetId(), parentType);
+            CHECK_EQUAL_VOID(WindowSceneHelper::IsAppOrSubScene(parentType), false);
+            auto parentFocusHub = parentFrame->GetFocusHub();
+            CHECK_NULL_VOID(parentFocusHub);
+            parentFocusHub->SetParentFocusable(true);
         }, "ArkUIWindowFocusViewShow", TaskExecutor::TaskType::UI);
     };
     session_->SetNotifyUIRequestFocusFunc(requestFocusCallback);

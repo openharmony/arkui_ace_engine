@@ -320,6 +320,7 @@ void UINode::ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& n
 
 void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
 {
+    bool needSyncRenderTree = false;
     int32_t index = 0;
 
     auto children = GetChildren();
@@ -335,6 +336,7 @@ void UINode::Clean(bool cleanDirectly, bool allowTransition, int32_t branchId)
         if (child->OnRemoveFromParent(allowTransition)) {
             // OnRemoveFromParent returns true means the child can be removed from tree immediately.
             RemoveDisappearingChild(child);
+            needSyncRenderTree = true;
         } else {
             // else move child into disappearing children, skip syncing render tree
             AddDisappearingChild(child, index, branchId);
@@ -478,7 +480,7 @@ void UINode::DoAddChild(
         }
     }
 
-    child->SetParent(Claim(this));
+    child->SetParent(Claim(this), false);
     auto themeScopeId = GetThemeScopeId();
     if (child->IsAllowUseParentTheme() && child->GetThemeScopeId() != themeScopeId) {
         child->UpdateThemeScopeId(themeScopeId);
@@ -1313,7 +1315,7 @@ void UINode::SetActive(bool active, bool needRebuildRenderContext)
     }
 }
 
-void UINode::SetJSViewActive(bool active, bool isLazyForEachNode)
+void UINode::SetJSViewActive(bool active, bool isLazyForEachNode, bool isReuse)
 {
     for (const auto& child : GetChildren()) {
         auto customNode = AceType::DynamicCast<CustomNode>(child);
@@ -1322,10 +1324,10 @@ void UINode::SetJSViewActive(bool active, bool isLazyForEachNode)
             return;
         }
         if (customNode) {
-            customNode->SetJSViewActive(active);
+            customNode->SetJSViewActive(active, isLazyForEachNode, isReuse);
             continue;
         }
-        child->SetJSViewActive(active);
+        child->SetJSViewActive(active, isLazyForEachNode, isReuse);
     }
 }
 
@@ -1795,6 +1797,16 @@ void UINode::NotifyChange(int32_t changeIdx, int32_t count, int64_t id, Notifica
     }
 }
 
+void UINode::SetParent(const WeakPtr<UINode>& parent, bool needDetect)
+{
+    auto current = parent.Upgrade();
+    CHECK_NULL_VOID(current);
+    if (needDetect && DetectLoop(Claim(this), current)) {
+        return;
+    }
+    parent_ = parent;
+}
+
 int32_t UINode::GetThemeScopeId() const
 {
     return themeScopeId_;
@@ -1802,6 +1814,7 @@ int32_t UINode::GetThemeScopeId() const
 
 void UINode::SetThemeScopeId(int32_t themeScopeId)
 {
+    LOGD("WithTheme SetThemeScopeId %{public}d", themeScopeId);
     themeScopeId_ = themeScopeId;
     auto children = GetChildren();
     for (const auto& child : children) {
@@ -1817,6 +1830,7 @@ void UINode::UpdateThemeScopeId(int32_t themeScopeId)
     if (GetThemeScopeId() == themeScopeId) {
         return;
     }
+    LOGD("WithTheme UpdateThemeScopeId old:%{public}d new:%{public}d", GetThemeScopeId(), themeScopeId);
     themeScopeId_ = themeScopeId;
     OnThemeScopeUpdate(themeScopeId);
     auto children = GetChildren();

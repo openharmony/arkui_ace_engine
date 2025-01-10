@@ -1357,6 +1357,15 @@ void JSRichEditor::SetMaxLines(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetMaxLines(normalMaxLines);
 }
 
+void JSRichEditor::SetStopBackPress(const JSCallbackInfo& info)
+{
+    bool isStopBackPress = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isStopBackPress = info[0]->ToBoolean();
+    }
+    RichEditorModel::GetInstance()->SetStopBackPress(isStopBackPress);
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -1402,6 +1411,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("barState", &JSRichEditor::SetBarState);
     JSClass<JSRichEditor>::StaticMethod("maxLength", &JSRichEditor::SetMaxLength);
     JSClass<JSRichEditor>::StaticMethod("maxLines", &JSRichEditor::SetMaxLines);
+    JSClass<JSRichEditor>::StaticMethod("stopBackPress", &JSRichEditor::SetStopBackPress);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

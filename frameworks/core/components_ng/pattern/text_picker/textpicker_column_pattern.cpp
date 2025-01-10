@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <cstdlib>
 
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/measure_util.h"
@@ -75,6 +76,16 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
     CreateAnimation();
     InitPanEvent(gestureHub);
     host->GetRenderContext()->SetClipToFrame(true);
+    InitHapticController(host);
+    RegisterWindowStateChangedCallback();
+}
+
+void TextPickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+    UnregisterWindowStateChangedCallback();
 }
 
 bool TextPickerColumnPattern::OnDirtyLayoutWrapperSwap(
@@ -106,10 +117,10 @@ void TextPickerColumnPattern::OnModifyDone()
     auto showCount = GetShowOptionCount();
     InitMouseAndPressEvent();
     SetAccessibilityAction();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (optionProperties_.size() <= 0) {
         auto midIndex = showCount / HALF_NUMBER;
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         dividerSpacing_ = pipeline->NormalizeToPx(theme->GetDividerSpacing());
         gradientHeight_ = static_cast<float>(pipeline->NormalizeToPx(theme->GetGradientHeight()));
         MeasureContext measureContext;
@@ -142,6 +153,71 @@ void TextPickerColumnPattern::OnModifyDone()
         }
         SetOptionShiftDistance();
     }
+    InitHapticController(host);
+}
+
+void TextPickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto textPickerPattern = parentNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    if (textPickerPattern->GetIsEnableHaptic()) {
+        isEnableHaptic_ = true;
+        if (!hapticController_) {
+            auto context = parentNode->GetContext();
+            CHECK_NULL_VOID(context);
+            context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+            });
+        }
+    } else {
+        isEnableHaptic_ = false;
+        if (hapticController_) {
+            hapticController_->Stop();
+        }
+    }
+}
+
+void TextPickerColumnPattern::RegisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
+}
+
+void TextPickerColumnPattern::UnregisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(host->GetId());
+}
+
+void TextPickerColumnPattern::OnWindowHide()
+{
+    isShow_ = false;
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+}
+
+void TextPickerColumnPattern::OnWindowShow()
+{
+    isShow_ = true;
 }
 
 void TextPickerColumnPattern::OnMiddleButtonTouchDown()
@@ -1284,6 +1360,9 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
 
 void TextPickerColumnPattern::HandleDragEnd()
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     pressed_ = false;
     CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
@@ -1394,6 +1473,7 @@ void TextPickerColumnPattern::HandleEnterSelectedArea(double scrollDelta, float 
     auto shiftThreshold = shiftDistance / HALF_NUMBER;
     uint32_t totalOptionCount = GetOptionCount();
     uint32_t currentEnterIndex = GetCurrentIndex();
+    auto isOverScroll = NotLoopOptions() && overscroller_.IsOverScroll();
     if (totalOptionCount == 0) {
         return;
     }
@@ -1403,7 +1483,8 @@ void TextPickerColumnPattern::HandleEnterSelectedArea(double scrollDelta, float 
         auto totalCountAndIndex = totalOptionCount + currentEnterIndex;
         currentEnterIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount;
     }
-    if (GreatOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex) {
+    if (GreatOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex &&
+        !isOverScroll) {
         SetEnterIndex(currentEnterIndex);
         HandleEnterSelectedAreaEventCallback(true);
     }
@@ -1634,6 +1715,9 @@ void TextPickerColumnPattern::TossStoped()
 
 void TextPickerColumnPattern::TossAnimationStoped()
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     yLast_ = 0.0;
     ScrollOption(0.0);
 }
@@ -1701,6 +1785,11 @@ void TextPickerColumnPattern::SpringCurveTailEndProcess(bool useRebound, bool st
 void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     double dragDelta = offsetY - yLast_;
+    if (hapticController_ && isShow_) {
+        if (isEnableHaptic_) {
+            hapticController_->HandleDelta(dragDelta);
+        }
+    }
     auto midIndex = GetShowOptionCount() / HALF_NUMBER;
     auto shiftDistance = isDownScroll_ ? optionProperties_[midIndex].nextDistance
                                        : optionProperties_[midIndex].prevDistance;
@@ -1709,7 +1798,32 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     offsetCurSet_ = 0.0;
 
     // the abs of drag delta is less than jump interval.
-    dragDelta = dragDelta + yOffset_;
+    dragDelta = GetDragDeltaLessThanJumpInterval(offsetY, dragDelta, useRebound, shiftDistance);
+
+    // Set options position
+    ScrollOption(dragDelta);
+    offsetCurSet_ = dragDelta;
+    yOffset_ = dragDelta;
+    yLast_ = offsetY;
+
+    if (useRebound && !pressed_ && isTossStatus_ && !isReboundInProgress_ && overscroller_.IsOverScroll()) {
+        overscroller_.UpdateTossSpring(offsetY);
+        if (overscroller_.ShouldStartRebound()) {
+            auto toss = GetToss();
+            CHECK_NULL_VOID(toss);
+            toss->StopTossAnimation(); // Stop fling animation and start rebound animation implicitly
+            if (hapticController_) {
+                hapticController_->Stop();
+            }
+        }
+    }
+    SpringCurveTailEndProcess(useRebound, stopMove);
+}
+
+double TextPickerColumnPattern::GetDragDeltaLessThanJumpInterval(
+    double offsetY, float originalDragDelta, bool useRebound, float shiftDistance)
+{
+    double dragDelta = originalDragDelta + yOffset_;
     auto isOverScroll = useRebound && overscroller_.IsOverScroll();
     if (NearEqual(std::abs(dragDelta), std::abs(shiftDistance)) && !NearZero(dragDelta)) {
         dragDelta = std::abs(dragDelta) / dragDelta * std::abs(shiftDistance);
@@ -1735,22 +1849,7 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
                 overscroller_.IsBackOverScroll() ? overscroller_.GetBackScroll() : overscroller_.GetOverScroll();
         }
     }
-
-    // Set options position
-    ScrollOption(dragDelta);
-    offsetCurSet_ = dragDelta;
-    yOffset_ = dragDelta;
-    yLast_ = offsetY;
-
-    if (useRebound && !pressed_ && isTossStatus_ && !isReboundInProgress_ && overscroller_.IsOverScroll()) {
-        overscroller_.UpdateTossSpring(offsetY);
-        if (overscroller_.ShouldStartRebound()) {
-            auto toss = GetToss();
-            CHECK_NULL_VOID(toss);
-            toss->StopTossAnimation(); // Stop fling animation and start rebound animation implicitly
-        }
-    }
-    SpringCurveTailEndProcess(useRebound, stopMove);
+    return dragDelta;
 }
 
 bool TextPickerColumnPattern::CanMove(bool isDown) const
@@ -1796,6 +1895,9 @@ bool TextPickerColumnPattern::InnerHandleScroll(
         currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
+    if (hapticController_ && isEnableHaptic_) {
+        hapticController_->PlayOnce();
+    }
     FlushCurrentOptions(isDown, isUpatePropertiesOnly, isUpdateAnimationProperties);
     HandleChangeCallback(isDown, true);
     HandleEventCallback(true);

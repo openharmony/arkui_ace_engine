@@ -42,7 +42,6 @@ class ArkThemeWhiteList {
         'Swiper',
         'Text',
         'TextClock',
-        'TextInput',
         'TextPicker',
         'TimePicker',
         'Toggle',

@@ -1256,4 +1256,10 @@ bool GestureEventHub::IsPanEventEmpty() const
     return true;
 }
 
+void GestureEventHub::SetExcludedAxisForPanEvent(bool isExcludedAxis)
+{
+    CHECK_NULL_VOID(panEventActuator_);
+    panEventActuator_->SetExcludedAxis(isExcludedAxis);
+}
+
 } // namespace OHOS::Ace::NG

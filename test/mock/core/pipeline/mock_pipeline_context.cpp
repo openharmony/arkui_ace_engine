@@ -316,7 +316,9 @@ void PipelineContext::SendEventToAccessibilityWithNode(
     const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node)
 {}
 
-void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe) {}
+void PipelineContext::OnTouchEvent(
+    const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe, bool isEventsPassThrough)
+{}
 
 void PipelineContext::ReDispatch(KeyEvent& keyEvent) {}
 
@@ -326,7 +328,7 @@ void PipelineContext::OnMouseMoveEventForAxisEvent(const MouseEvent& event, cons
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node) {}
 
-void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
+void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe, bool isEventsPassThrough) {}
 
 void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
@@ -759,11 +761,32 @@ void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId) {}
 
 void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow) {}
 
-void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow) {}
+void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbSystemSafeArea(systemSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateSystemSafeArea(systemSafeArea);
+}
 
-void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow) {}
+void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbCutoutSafeArea(cutoutSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
+}
 
-void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow) {}
+void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbNavSafeArea(navSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateNavArea(navSafeArea);
+}
 
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
 {

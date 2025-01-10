@@ -2498,12 +2498,15 @@ class NavPathStack {
     let pathInfo = this.pathArray.pop();
     this.popArray.push(pathInfo);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
-      let popInfo = {
-        info: currentPathInfo,
-        result: result,
-      };
-      currentPathInfo.onPop(popInfo);
+    if (result !== undefined && typeof result !== 'boolean') {
+      if (currentPathInfo.onPop !== undefined) {
+        let popInfo = {
+          info: currentPathInfo,
+          result: result,
+        };
+        currentPathInfo.onPop(popInfo);
+      }
+      this.nativeStack.onPopCallback(result);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
@@ -2526,12 +2529,15 @@ class NavPathStack {
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
-      let popInfo = {
-        info: currentPathInfo,
-        result: result,
-      };
-      currentPathInfo.onPop(popInfo);
+    if (result !== undefined && typeof result !== 'boolean') {
+      if (currentPathInfo.onPop !== undefined) {
+        let popInfo = {
+          info: currentPathInfo,
+          result: result,
+        };
+        currentPathInfo.onPop(popInfo);
+      }
+      this.nativeStack.onPopCallback(result);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
@@ -2550,12 +2556,15 @@ class NavPathStack {
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
-      let popInfo = {
-        info: currentPathInfo,
-        result: result,
-      };
-      currentPathInfo.onPop(popInfo);
+    if (result !== undefined && typeof result !== 'boolean') {
+      if (currentPathInfo.onPop !== undefined) {
+        let popInfo = {
+          info: currentPathInfo,
+          result: result,
+        };
+        currentPathInfo.onPop(popInfo);
+      }
+      this.nativeStack.onPopCallback(result);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
@@ -3713,16 +3722,16 @@ let AxisModel;
   AxisModel[AxisModel.ABS_HAT0Y = 7] = 'ABS_HAT0Y';
 })(AxisModel || (AxisModel = {}));
 
-var CrownSensitivity;
+let CrownSensitivity;
 (function (CrownSensitivity) {
-  CrownSensitivity[CrownSensitivity["LOW"] = 0] = "LOW";
-  CrownSensitivity[CrownSensitivity["MEDIUM"] = 1] = "MEDIUM";
-  CrownSensitivity[CrownSensitivity["HIGH"] = 2] = "HIGH";
+  CrownSensitivity[CrownSensitivity.LOW = 0] = 'LOW';
+  CrownSensitivity[CrownSensitivity.MEDIUM = 1] = 'MEDIUM';
+  CrownSensitivity[CrownSensitivity.HIGH = 2] = 'HIGH';
 })(CrownSensitivity || (CrownSensitivity = {}));
 
-var CrownAction;
+let CrownAction;
 (function (CrownAction) {
-  CrownAction[CrownAction["BEGIN"] = 0] = "BEGIN";
-  CrownAction[CrownAction["UPDATE"] = 1] = "UPDATE";
-  CrownAction[CrownAction["END"] = 2] = "END";
+  CrownAction[CrownAction.BEGIN = 0] = 'BEGIN';
+  CrownAction[CrownAction.UPDATE = 1] = 'UPDATE';
+  CrownAction[CrownAction.END = 2] = 'END';
 })(CrownAction || (CrownAction = {}));

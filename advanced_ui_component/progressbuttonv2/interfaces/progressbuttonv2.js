@@ -105,7 +105,7 @@ export class ProgressButtonV2 extends ViewV2 {
   initialRender() {
     this.observeComponentCreation2((y, z) => {
       Button.createWithChild();
-      Button.borderRadius(this.buttonBorderRadius);
+      Button.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.button_container_border_radius_small'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
       Button.clip(false);
       Button.hoverEffect(HoverEffect.None);
       Button.key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY);
@@ -139,6 +139,8 @@ export class ProgressButtonV2 extends ViewV2 {
       Progress.borderRadius(this.buttonBorderRadius);
       Progress.width('100%');
       Progress.hoverEffect(HoverEffect.None);
+      Progress.style({ borderRadius: LengthMetrics.resource({ "id": -1, "type": 10002, params: ['sys.float.button_container_border_radius_small'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }) });
+      Progress.padding({ top: 0.6, left: 0.6, right: 0.6, bottom: 0.6 });
       Progress.clip(false);
       Progress.enabled(this.isEnabled);
       Progress.key(PROGRESS_BUTTON_PROGRESS_KEY);
@@ -184,7 +186,7 @@ export class ProgressButtonV2 extends ViewV2 {
       });
       Row.height(this.textHeight);
       Row.constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT });
-      Row.borderRadius(this.buttonBorderRadius);
+      Row.borderRadius({ "id": -1, "type": 10002, params: ['sys.float.button_container_border_radius_small'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
       Row.width('100%');
     }, Row);
     Row.pop();

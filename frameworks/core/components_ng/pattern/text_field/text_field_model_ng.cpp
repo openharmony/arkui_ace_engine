@@ -87,7 +87,7 @@ void TextFieldModelNG::CreateNode(
     textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
     textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
     pattern->SetHoverPressBgColorEnabled(textFieldTheme->GetHoverAndPressBgColorEnabled());
-    SetCaretColor(textFieldTheme->GetCursorColor());
+    textfieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
     CaretStyle caretStyle;
     caretStyle.caretWidth = textFieldTheme->GetCursorWidth();
     SetCaretStyle(caretStyle);
@@ -300,6 +300,19 @@ void TextFieldModelNG::SetType(TextInputType value)
 void TextFieldModelNG::SetPlaceholderColor(const Color& value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderTextColor, value);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, PlaceholderColorFlagByUser, true);
+}
+
+void TextFieldModelNG::ResetPlaceholderColor()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetPlaceholderFontStyle()) {
+        layoutProperty->GetPlaceholderFontStyle()->ResetTextColor();
+    }
+    ACE_RESET_PAINT_PROPERTY(TextFieldPaintProperty, PlaceholderColorFlagByUser);
 }
 
 void TextFieldModelNG::SetContentType(const TextContentType& value)
@@ -344,6 +357,13 @@ void TextFieldModelNG::SetEnterKeyType(TextInputAction value)
 void TextFieldModelNG::SetCaretColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, value);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, CaretColorFlagByUser, true);
+}
+
+void TextFieldModelNG::ResetCaretColor()
+{
+    ACE_RESET_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor);
+    ACE_RESET_PAINT_PROPERTY(TextFieldPaintProperty, CaretColorFlagByUser);
 }
 
 void TextFieldModelNG::SetCaretStyle(const CaretStyle& value)
@@ -432,6 +452,14 @@ void TextFieldModelNG::SetTextColor(const Color& value)
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, TextColorFlagByUser, value);
+}
+void TextFieldModelNG::ResetTextColor()
+{
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(TextFieldLayoutProperty, TextColor, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(TextFieldPaintProperty, TextColorFlagByUser, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorFlag);
 }
 void TextFieldModelNG::SetWordBreak(Ace::WordBreak value)
 {
@@ -729,11 +757,21 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
     ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, backgroundColor);
 }
 
+void TextFieldModelNG::ResetBackgroundColor()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(TextFieldPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER);
+}
+
 void TextFieldModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 {
     CHECK_NULL_VOID(frameNode);
     NG::ViewAbstract::SetBackgroundColor(frameNode, color);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, BackgroundColor, color, frameNode);
+}
+
+void TextFieldModelNG::ResetBackgroundColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(TextFieldPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER, frameNode);
 }
 
 void TextFieldModelNG::SetHeight(const Dimension& value) {}
@@ -1157,6 +1195,13 @@ void TextFieldModelNG::SetTextColor(FrameNode* frameNode, const Color& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
 }
 
+void TextFieldModelNG::ResetTextColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextColor, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColorFlag, frameNode);
+}
+
 void TextFieldModelNG::SetCaretPosition(FrameNode* frameNode, const int32_t& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -1202,6 +1247,18 @@ void TextFieldModelNG::SetCaretStyle(FrameNode* frameNode, const CaretStyle& val
 void TextFieldModelNG::SetPlaceholderColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, PlaceholderTextColor, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PlaceholderColorFlagByUser, true, frameNode);
+}
+
+void TextFieldModelNG::ResetPlaceholderColor(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->GetPlaceholderFontStyle()) {
+        layoutProperty->GetPlaceholderFontStyle()->ResetTextColor();
+    }
+    ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, PlaceholderColorFlagByUser, frameNode);
 }
 
 void TextFieldModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)
@@ -1280,6 +1337,13 @@ void TextFieldModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 void TextFieldModelNG::SetCaretColor(FrameNode* frameNode, const Color& value)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CaretColorFlagByUser, true, frameNode);
+}
+
+void TextFieldModelNG::ResetCaretColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CursorColor, frameNode);
+    ACE_RESET_NODE_PAINT_PROPERTY(TextFieldPaintProperty, CaretColorFlagByUser, frameNode);
 }
 
 void TextFieldModelNG::SetSelectionMenuHidden(FrameNode* frameNode, bool selectionMenuHidden)

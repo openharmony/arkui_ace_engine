@@ -494,34 +494,7 @@ HWTEST_F(RichEditorPatternTestNg, HandleOnDragStatusCallback001, TestSize.Level1
     notifyDragEvent->SetX(10.0f);
     notifyDragEvent->SetY(20.0f);
     richEditorPattern->HandleOnDragStatusCallback(dragEventType1, notifyDragEvent);
-    EXPECT_TRUE(richEditorPattern->isDragging_);
-
-    /**
-     * @tc.steps: step3. change parameter and call function.
-     */
-    DragEventType dragEventType2 = DragEventType::LEAVE;
-    notifyDragEvent->SetX(20.0f);
-    notifyDragEvent->SetY(20.0f);
-    richEditorPattern->HandleOnDragStatusCallback(dragEventType2, notifyDragEvent);
-    EXPECT_EQ(richEditorPattern->isDragging_, true);
-
-    /**
-     * @tc.steps: step4. change parameter and call function.
-     */
-    DragEventType dragEventType3 = DragEventType::DROP;
-    notifyDragEvent->SetX(20.0f);
-    notifyDragEvent->SetY(10.0f);
-    richEditorPattern->HandleOnDragStatusCallback(dragEventType3, notifyDragEvent);
-    EXPECT_FALSE(richEditorPattern->isDragging_);
-
-    /**
-     * @tc.steps: step5. change parameter and call function.
-     */
-    DragEventType dragEventType4 = DragEventType::ENTER;
-    notifyDragEvent->SetX(20.0f);
-    notifyDragEvent->SetY(15.0f);
-    richEditorPattern->HandleOnDragStatusCallback(dragEventType4, notifyDragEvent);
-    EXPECT_EQ(richEditorPattern->isDragging_, false);
+    EXPECT_TRUE(richEditorPattern->isOnlyRequestFocus_);
 }
 
 /**

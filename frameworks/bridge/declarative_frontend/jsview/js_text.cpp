@@ -29,7 +29,7 @@
 #include "base/log/ace_trace.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_text_theme.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
@@ -278,11 +278,8 @@ void JSText::SetTextColor(const JSCallbackInfo& info)
     Color textColor;
     JSRef<JSVal> args = info[0];
     if (!ParseJsColor(args, textColor)) {
-        auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipelineContext);
-        auto theme = pipelineContext->GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
-        textColor = theme->GetTextStyle().GetTextColor();
+        TextModel::GetInstance()->ResetTextColor();
+        return;
     }
     TextModel::GetInstance()->SetTextColor(textColor);
 }
@@ -774,7 +771,6 @@ void JSText::Create(const JSCallbackInfo& info)
         TextModel::GetInstance()->Create(data);
     }
 
-    JSTextTheme::ApplyTheme();
     if (info.Length() <= 1 || !info[1]->IsObject()) {
         return;
     }
@@ -812,104 +808,6 @@ void JSText::SetOnCopy(const JSCallbackInfo& info)
     CHECK_NULL_VOID(args->IsFunction());
     JsEventCallback<void(const std::u16string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(args));
     TextModel::GetInstance()->SetOnCopy(std::move(callback));
-}
-
-void JSText::JsOnDragStart(const JSCallbackInfo& info)
-{
-    JSRef<JSVal> args = info[0];
-    CHECK_NULL_VOID(args->IsFunction());
-    RefPtr<JsDragFunction> jsOnDragStartFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onDragStart = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragStartFunc),
-                           targetNode = frameNode](
-                           const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
-        NG::DragDropBaseInfo itemInfo;
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, itemInfo);
-        PipelineContext::SetCallBackNode(targetNode);
-        auto ret = func->Execute(info, extraParams);
-        if (!ret->IsObject()) {
-            return itemInfo;
-        }
-        auto node = ParseDragNode(ret);
-        if (node) {
-            itemInfo.node = node;
-            return itemInfo;
-        }
-        auto builderObj = JSRef<JSObject>::Cast(ret);
-#if defined(PIXEL_MAP_SUPPORTED)
-        auto pixmap = builderObj->GetProperty("pixelMap");
-        itemInfo.pixelMap = CreatePixelMapFromNapiValue(pixmap);
-#endif
-        auto extraInfo = builderObj->GetProperty("extraInfo");
-        ParseJsString(extraInfo, itemInfo.extraInfo);
-        node = ParseDragNode(builderObj->GetProperty("builder"));
-        itemInfo.node = node;
-        return itemInfo;
-    };
-
-    TextModel::GetInstance()->SetOnDragStart(std::move(onDragStart));
-}
-
-void JSText::JsOnDragEnter(const JSCallbackInfo& info)
-{
-    JSRef<JSVal> args = info[0];
-    CHECK_NULL_VOID(args->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    RefPtr<JsDragFunction> jsOnDragEnterFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
-    auto onDragEnterId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragEnterFunc), node = frameNode](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDragEnter");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(info, extraParams);
-    };
-    TextModel::GetInstance()->SetOnDragEnter(std::move(onDragEnterId));
-}
-
-void JSText::JsOnDragMove(const JSCallbackInfo& info)
-{
-    JSRef<JSVal> args = info[0];
-    CHECK_NULL_VOID(args->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    RefPtr<JsDragFunction> jsOnDragMoveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
-    auto onDragMoveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragMoveFunc), node = frameNode](
-                            const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDragMove");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(info, extraParams);
-    };
-    TextModel::GetInstance()->SetOnDragMove(std::move(onDragMoveId));
-}
-
-void JSText::JsOnDragLeave(const JSCallbackInfo& info)
-{
-    JSRef<JSVal> args = info[0];
-    CHECK_NULL_VOID(args->IsFunction());
-    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    RefPtr<JsDragFunction> jsOnDragLeaveFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
-    auto onDragLeaveId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDragLeaveFunc), node = frameNode](
-                             const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDragLeave");
-        PipelineContext::SetCallBackNode(node);
-        func->Execute(info, extraParams);
-    };
-    TextModel::GetInstance()->SetOnDragLeave(std::move(onDragLeaveId));
-}
-
-void JSText::JsOnDrop(const JSCallbackInfo& info)
-{
-    JSRef<JSVal> args = info[0];
-    CHECK_NULL_VOID(args->IsFunction());
-    RefPtr<JsDragFunction> jsOnDropFunc = AceType::MakeRefPtr<JsDragFunction>(JSRef<JSFunc>::Cast(args));
-    auto onDropId = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDropFunc)](
-                        const RefPtr<DragEvent>& info, const std::string& extraParams) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("onDrop");
-        func->Execute(info, extraParams);
-    };
-    TextModel::GetInstance()->SetOnDrop(std::move(onDropId));
 }
 
 void JSText::JsFocusable(const JSCallbackInfo& info)
@@ -1123,11 +1021,6 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSText>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSText>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
-    JSClass<JSText>::StaticMethod("onDragStart", &JSText::JsOnDragStart);
-    JSClass<JSText>::StaticMethod("onDragEnter", &JSText::JsOnDragEnter);
-    JSClass<JSText>::StaticMethod("onDragMove", &JSText::JsOnDragMove);
-    JSClass<JSText>::StaticMethod("onDragLeave", &JSText::JsOnDragLeave);
-    JSClass<JSText>::StaticMethod("onDrop", &JSText::JsOnDrop);
     JSClass<JSText>::StaticMethod("focusable", &JSText::JsFocusable);
     JSClass<JSText>::StaticMethod("draggable", &JSText::JsDraggable);
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);

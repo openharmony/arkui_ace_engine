@@ -5918,6 +5918,8 @@ void FrameNode::ChildrenUpdatedFrom(int32_t index)
 
 void FrameNode::OnThemeScopeUpdate(int32_t themeScopeId)
 {
+    TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "WithTheme Node(%{public}s/%{public}d) OnThemeScopeUpdate id:%{public}d",
+        GetTag().c_str(), GetId(), themeScopeId);
     if (pattern_->OnThemeScopeUpdate(themeScopeId)) {
         MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }

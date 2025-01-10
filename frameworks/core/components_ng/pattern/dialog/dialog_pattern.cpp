@@ -931,19 +931,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     textProps->UpdateContent(text);
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateMaxLines(1);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto context = host->GetContext();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto textTheme = context->GetTheme<TextTheme>();
-    CHECK_NULL_RETURN(textTheme, nullptr);
-    if (textTheme->GetIsTextFadeout()) {
-        textProps->UpdateTextOverflow(TextOverflow::MARQUEE);
-        textProps->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
-        textProps->UpdateTextMarqueeFadeout(true);
-    } else {
-        textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    }
+    textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     Dimension buttonTextSize = dialogTheme_->GetButtonTextSize().IsValid() ? dialogTheme_->GetButtonTextSize()
                                                                            : dialogTheme_->GetNormalButtonFontSize();
     textProps->UpdateFontSize(buttonTextSize);
@@ -954,6 +942,17 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
         textProps->UpdateTextColor(color);
     } else {
         textProps->UpdateTextColor(DEFAULT_BUTTON_COLOR);
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, textNode);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, textNode);
+    auto textTheme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, textNode);
+    if (textTheme->GetIsTextFadeout()) {
+        textProps->UpdateTextOverflow(TextOverflow::MARQUEE);
+        textProps->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+        textProps->UpdateTextMarqueeFadeout(true);
     }
     return textNode;
 }

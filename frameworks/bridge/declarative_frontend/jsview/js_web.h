@@ -149,6 +149,7 @@ public:
     static void OnNativeEmbedGestureEvent(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentEnd(const JSCallbackInfo& args);
+    static void OptimizeParserBudgetEnabled(bool enable);
     // Enable or disable debugging of web content
     static bool webDebuggingAccess_;
     static JSwebEventCallback OnControllerAttachedCallback_;

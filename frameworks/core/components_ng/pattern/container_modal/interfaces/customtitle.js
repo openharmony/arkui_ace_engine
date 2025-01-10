@@ -852,7 +852,7 @@ class c3 extends ViewPU {
         ContainerModal.callNative(t1);
     }
     onMenuWidthChange() {
-        ContainerModal.callNative(u1,"125833961");
+        ContainerModal.callNative(u1,'125833961');
     }
     setHideSplit(j3) {
         this.hideSplit = j3;

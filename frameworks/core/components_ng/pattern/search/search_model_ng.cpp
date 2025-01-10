@@ -194,6 +194,7 @@ void SearchModelNG::SetCaretColor(const Color& color)
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textPaintProperty);
     textPaintProperty->UpdateCursorColor(color);
+    textPaintProperty->UpdateCaretColorFlagByUser(true);
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -389,6 +390,9 @@ void SearchModelNG::SetPlaceholderColor(const Color& color)
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdatePlaceholderTextColor(color);
+    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    textFieldPaintProperty->UpdatePlaceholderColorFlagByUser(true);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -460,8 +464,10 @@ void SearchModelNG::SetTextColor(const Color& color)
     CHECK_NULL_VOID(textFieldChild);
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
-
     textFieldLayoutProperty->UpdateTextColor(color);
+    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    textFieldPaintProperty->UpdateTextColorFlagByUser(color);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1128,7 +1134,7 @@ void SearchModelNG::SetTextValue(FrameNode* frameNode, const std::optional<std::
     auto textValue = pattern->GetTextUtf16Value();
     if (textFieldLayoutProperty) {
         if (value.has_value()) {
-            auto u16Value = UtfUtils::Str8ToStr16(value.value());
+            auto u16Value = UtfUtils::Str8DebugToStr16(value.value());
             if (u16Value != textValue) {
                 pattern->InitValueText(u16Value);
             }
@@ -1156,7 +1162,7 @@ void SearchModelNG::SetPlaceholder(FrameNode* frameNode, const std::optional<std
     CHECK_NULL_VOID(textField);
     auto textFieldLayoutProperty = textField->GetLayoutProperty<TextFieldLayoutProperty>();
     if (textFieldLayoutProperty) {
-        textFieldLayoutProperty->UpdatePlaceholder(UtfUtils::Str8ToStr16(placeholder.value_or("")));
+        textFieldLayoutProperty->UpdatePlaceholder(UtfUtils::Str8DebugToStr16(placeholder.value_or("")));
     }
 }
 
@@ -1358,6 +1364,9 @@ void SearchModelNG::SetPlaceholderColor(FrameNode* frameNode, const Color& color
     auto textFieldLayoutProperty = textFieldChild->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     textFieldLayoutProperty->UpdatePlaceholderTextColor(color);
+    auto textFieldPaintProperty = textFieldChild->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textFieldPaintProperty);
+    textFieldPaintProperty->UpdatePlaceholderColorFlagByUser(true);
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
@@ -1391,6 +1400,7 @@ void SearchModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
     auto textPaintProperty = textFrameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textPaintProperty);
     textPaintProperty->UpdateCursorColor(color);
+    textPaintProperty->UpdateCaretColorFlagByUser(true);
     textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 

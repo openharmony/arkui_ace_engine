@@ -44,7 +44,7 @@ void ScrollInnerLayoutTestNg::VerifyDrawScrollBar(bool needDraw)
     } else {
         EXPECT_CALL(canvas, DrawRoundRect(_)).Times(0);
     }
-    DrawingContext drawingContext = { canvas, SCROLL_WIDTH, SCROLL_HEIGHT };
+    DrawingContext drawingContext = { canvas, WIDTH, HEIGHT };
     FlushLayoutTask(frameNode_);
     auto scrollBarOverlayModifier = pattern_->GetScrollBarOverlayModifier();
     scrollBarOverlayModifier->onDraw(drawingContext);
@@ -102,10 +102,10 @@ HWTEST_F(ScrollInnerLayoutTestNg, AdaptAnimation001, TestSize.Level1)
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(2);
     EXPECT_CALL(canvas, AttachBrush).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush).WillRepeatedly(ReturnRef(canvas));
-    DrawingContext drawingContext = { canvas, SCROLL_WIDTH, SCROLL_HEIGHT };
+    DrawingContext drawingContext = { canvas, WIDTH, HEIGHT };
     auto scrollBarOverlayModifier = pattern_->GetScrollBarOverlayModifier();
     MockAnimationManager::GetInstance().SetTicks(TICK);
-    const float contentHeight = SCROLL_HEIGHT - 10.f;
+    const float contentHeight = HEIGHT - 10.f;
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(contentHeight));
     FlushLayoutTask(frameNode_, true);
     float ratio = contentHeight / CONTENT_MAIN_SIZE;
@@ -175,11 +175,11 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect001, TestSize.Level1)
     CreateContent();
     CreateScrollDone();
     EXPECT_EQ(scrollBar_->GetPositionMode(), PositionMode::RIGHT);
-    float ratio = SCROLL_HEIGHT / CONTENT_MAIN_SIZE;
-    float activeBarHeight = SCROLL_HEIGHT * ratio;
+    float ratio = HEIGHT / CONTENT_MAIN_SIZE;
+    float activeBarHeight = HEIGHT * ratio;
     EXPECT_TRUE(IsEqual(scrollBar_->touchRegion_, Rect(208, 0, DEFAULT_TOUCH_WIDTH, activeBarHeight)));
     EXPECT_TRUE(IsEqual(scrollBar_->hoverRegion_, Rect(232, 0, DEFAULT_ACTIVE_WIDTH, activeBarHeight)));
-    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(236, 0, NORMAL_WIDTH, SCROLL_HEIGHT)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(236, 0, NORMAL_WIDTH, HEIGHT)));
     EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(236, 0, NORMAL_WIDTH, activeBarHeight)));
 
     /**
@@ -205,11 +205,11 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect002, TestSize.Level1)
     CreateContent();
     CreateScrollDone();
     EXPECT_EQ(scrollBar_->GetPositionMode(), PositionMode::RIGHT);
-    float ratio = SCROLL_HEIGHT / CONTENT_MAIN_SIZE;
-    float activeBarHeight = SCROLL_HEIGHT * ratio;
+    float ratio = HEIGHT / CONTENT_MAIN_SIZE;
+    float activeBarHeight = HEIGHT * ratio;
     EXPECT_TRUE(IsEqual(scrollBar_->touchRegion_, Rect(230, 0, BAR_WIDTH, activeBarHeight)));
     EXPECT_TRUE(IsEqual(scrollBar_->hoverRegion_, Rect(230, 0, BAR_WIDTH, activeBarHeight)));
-    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(230, 0, BAR_WIDTH, SCROLL_HEIGHT)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(230, 0, BAR_WIDTH, HEIGHT)));
     EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(230, 0, BAR_WIDTH, activeBarHeight)));
 }
 
@@ -225,13 +225,13 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect003, TestSize.Level1)
     CreateContent();
     CreateScrollDone();
     EXPECT_EQ(scrollBar_->GetPositionMode(), PositionMode::LEFT);
-    float ratio = SCROLL_HEIGHT / CONTENT_MAIN_SIZE;
-    float activeBarHeight = SCROLL_HEIGHT * ratio;
+    float ratio = HEIGHT / CONTENT_MAIN_SIZE;
+    float activeBarHeight = HEIGHT * ratio;
     EXPECT_TRUE(
         IsEqual(scrollBar_->touchRegion_, Rect(0, 0, DEFAULT_TOUCH_WIDTH + DEFAULT_INACTIVE_WIDTH, activeBarHeight)));
     EXPECT_TRUE(
         IsEqual(scrollBar_->hoverRegion_, Rect(0, 0, DEFAULT_ACTIVE_WIDTH + DEFAULT_INACTIVE_WIDTH, activeBarHeight)));
-    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 0, NORMAL_WIDTH, SCROLL_HEIGHT)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 0, NORMAL_WIDTH, HEIGHT)));
     EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(0, 0, NORMAL_WIDTH, activeBarHeight)));
 
     /**
@@ -258,11 +258,11 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect004, TestSize.Level1)
     CreateContent();
     CreateScrollDone();
     EXPECT_EQ(scrollBar_->GetPositionMode(), PositionMode::LEFT);
-    float ratio = SCROLL_HEIGHT / CONTENT_MAIN_SIZE;
-    float activeBarHeight = SCROLL_HEIGHT * ratio;
+    float ratio = HEIGHT / CONTENT_MAIN_SIZE;
+    float activeBarHeight = HEIGHT * ratio;
     EXPECT_TRUE(IsEqual(scrollBar_->touchRegion_, Rect(0, 0, BAR_WIDTH, activeBarHeight)));
     EXPECT_TRUE(IsEqual(scrollBar_->hoverRegion_, Rect(0, 0, BAR_WIDTH, activeBarHeight)));
-    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 0, BAR_WIDTH, SCROLL_HEIGHT)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 0, BAR_WIDTH, HEIGHT)));
     EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(0, 0, BAR_WIDTH, activeBarHeight)));
 }
 
@@ -278,11 +278,11 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect005, TestSize.Level1)
     CreateContent();
     CreateScrollDone();
     EXPECT_EQ(scrollBar_->GetPositionMode(), PositionMode::BOTTOM);
-    float ratio = SCROLL_WIDTH / CONTENT_MAIN_SIZE;
-    float activeBarWidth = SCROLL_WIDTH * ratio;
+    float ratio = WIDTH / CONTENT_MAIN_SIZE;
+    float activeBarWidth = WIDTH * ratio;
     EXPECT_TRUE(IsEqual(scrollBar_->touchRegion_, Rect(0, 368, activeBarWidth, DEFAULT_TOUCH_WIDTH)));
     EXPECT_TRUE(IsEqual(scrollBar_->hoverRegion_, Rect(0, 392, activeBarWidth, DEFAULT_ACTIVE_WIDTH)));
-    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 396, SCROLL_WIDTH, NORMAL_WIDTH)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 396, WIDTH, NORMAL_WIDTH)));
     EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(0, 396, activeBarWidth, NORMAL_WIDTH)));
 
     /**
@@ -309,11 +309,11 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRect006, TestSize.Level1)
     CreateContent();
     CreateScrollDone();
     EXPECT_EQ(scrollBar_->GetPositionMode(), PositionMode::BOTTOM);
-    float ratio = SCROLL_WIDTH / CONTENT_MAIN_SIZE;
-    float activeBarWidth = SCROLL_WIDTH * ratio;
+    float ratio = WIDTH / CONTENT_MAIN_SIZE;
+    float activeBarWidth = WIDTH * ratio;
     EXPECT_TRUE(IsEqual(scrollBar_->touchRegion_, Rect(0, 390, activeBarWidth, BAR_WIDTH)));
     EXPECT_TRUE(IsEqual(scrollBar_->hoverRegion_, Rect(0, 390, activeBarWidth, BAR_WIDTH)));
-    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 390, SCROLL_WIDTH, BAR_WIDTH)));
+    EXPECT_TRUE(IsEqual(scrollBar_->barRect_, Rect(0, 390, WIDTH, BAR_WIDTH)));
     EXPECT_TRUE(IsEqual(scrollBar_->activeRect_, Rect(0, 390, activeBarWidth, BAR_WIDTH)));
 }
 
@@ -345,28 +345,28 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarWidth001, TestSize.Level1)
     EXPECT_EQ(scrollBar_->barRect_.Width(), BAR_WIDTH);
 
     /**
-     * @tc.steps: step3. Set scrollBar width greater than SCROLL_HEIGHT
+     * @tc.steps: step3. Set scrollBar width greater than HEIGHT
      * @tc.expected: It will be default
      */
-    model.SetScrollBarWidth(AceType::RawPtr(frameNode_), Dimension(SCROLL_HEIGHT + 1));
+    model.SetScrollBarWidth(AceType::RawPtr(frameNode_), Dimension(HEIGHT + 1));
     frameNode_->MarkModifyDone();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
     EXPECT_EQ(scrollBar_->barRect_.Width(), NORMAL_WIDTH);
 
     /**
-     * @tc.steps: step4. Set scrollBar width less than SCROLL_HEIGHT
+     * @tc.steps: step4. Set scrollBar width less than HEIGHT
      * @tc.expected: The scrollBar width will be the value that was set,
      * and scrollBar height will be equal to scrollBar width
      */
-    float barWidth = SCROLL_HEIGHT - 1;
+    float barWidth = HEIGHT - 1;
     model.SetScrollBarWidth(AceType::RawPtr(frameNode_), Dimension(barWidth));
     frameNode_->MarkModifyDone();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(scrollBar_->activeRect_.Width(), barWidth);
     EXPECT_EQ(scrollBar_->activeRect_.Height(), barWidth);
     EXPECT_EQ(scrollBar_->barRect_.Width(), barWidth);
-    EXPECT_EQ(scrollBar_->barRect_.Height(), SCROLL_HEIGHT);
+    EXPECT_EQ(scrollBar_->barRect_.Height(), HEIGHT);
 }
 
 /**
@@ -388,7 +388,7 @@ HWTEST_F(ScrollInnerLayoutTestNg, ScrollBarRound001, TestSize.Level1)
     EXPECT_EQ(scrollBar_->trickStartAngle_, -150);
 
     auto contentNode = GetChildFrameNode(frameNode_, 0);
-    ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(SCROLL_WIDTH));
+    ViewAbstract::SetHeight(AceType::RawPtr(contentNode), CalcLength(WIDTH));
     FlushLayoutTask(frameNode_, true);
     scrollBar_->FlushBarWidth();
     EXPECT_EQ(scrollBar_->trickStartAngle_, -150);

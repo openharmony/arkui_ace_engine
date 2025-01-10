@@ -25,6 +25,8 @@ constexpr int32_t DEFAULT_BUTTON_TYPE_VERSION_SIXTEEN = (int32_t)ButtonType::ROU
 constexpr bool DEFAULT_STATE_EFFECT = true;
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
+constexpr float DEFAULT_MIN_FONT_SCALE = 0.0f;
+constexpr float DEFAULT_MAX_FONT_SCALE = static_cast<float>(INT32_MAX);
 constexpr uint32_t INDEX_STRING_FONT_WEIGHT_0 = 0;
 constexpr uint32_t INDEX_STRING_FONT_FAMILY_1 = 1;
 constexpr uint32_t INDEX_VALUE_TEXT_OVERFLOW_0 = 0;
@@ -639,6 +641,48 @@ void SetCreateWithLabel(ArkUINodeHandle node, bool createWithLabel)
     ButtonModelNG::SetCreateWithLabel(frameNode, createWithLabel);
 }
 
+void SetButtonMinFontScale(ArkUINodeHandle node, ArkUI_Float32 minFontScale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetMinFontScale(frameNode, minFontScale);
+}
+
+void ResetButtonMinFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetMinFontScale(frameNode, DEFAULT_MIN_FONT_SCALE);
+}
+
+void SetButtonMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 maxFontScale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetMaxFontScale(frameNode, maxFontScale);
+}
+
+void ResetButtonMaxFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetMaxFontScale(frameNode, DEFAULT_MAX_FONT_SCALE);
+}
+
+ArkUI_Float32 GetButtonMinFontScale(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Float32>(ButtonModelNG::GetMinFontScale(frameNode));
+}
+
+ArkUI_Float32 GetButtonMaxFontScale(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Float32>(ButtonModelNG::GetMaxFontScale(frameNode));
+}
+
 namespace NodeModifier {
 const ArkUIButtonModifier* GetButtonModifier()
 {
@@ -685,6 +729,12 @@ const ArkUIButtonModifier* GetButtonModifier()
         .setButtonOptions = SetButtonOptions,
         .resetButtonOptions = ResetButtonOptions,
         .setCreateWithLabel = SetCreateWithLabel,
+        .setButtonMinFontScale = SetButtonMinFontScale,
+        .resetButtonMinFontScale = ResetButtonMinFontScale,
+        .setButtonMaxFontScale = SetButtonMaxFontScale,
+        .resetButtonMaxFontScale = ResetButtonMaxFontScale,
+        .getButtonMinFontScale = GetButtonMinFontScale,
+        .getButtonMaxFontScale = GetButtonMaxFontScale,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -735,6 +785,12 @@ const CJUIButtonModifier* GetCJUIButtonModifier()
         .setButtonOptions = SetButtonOptions,
         .resetButtonOptions = ResetButtonOptions,
         .setCreateWithLabel = SetCreateWithLabel,
+        .setButtonMinFontScale = SetButtonMinFontScale,
+        .resetButtonMinFontScale = ResetButtonMinFontScale,
+        .setButtonMaxFontScale = SetButtonMaxFontScale,
+        .resetButtonMaxFontScale = ResetButtonMaxFontScale,
+        .getButtonMinFontScale = GetButtonMinFontScale,
+        .getButtonMaxFontScale = GetButtonMaxFontScale,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
