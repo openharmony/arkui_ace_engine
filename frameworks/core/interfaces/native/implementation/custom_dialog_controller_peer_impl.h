@@ -16,6 +16,7 @@
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CUSTOM_DIALOG_CONTROLLER_PEER_IMPL_H
 
 #include "base/memory/ace_type.h"
+#include "core/common/container_consts.h"
 #include "core/components/dialog/dialog_properties.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -27,6 +28,9 @@ public:
     CustomDialogControllerPeerImpl() = default;
     ~CustomDialogControllerPeerImpl() override = default;
 
+    void SetOwnerView(Ark_NativePointer node);
+    void SetBuilder(CustomNodeBuilder builder, Ark_NativePointer node);
+    void SetOnCancel(Opt_Callback_Void cancel, Ark_NativePointer node);
     void SetAutoCancel(Opt_Boolean autoCancel);
     void SetDialogAlignment(Opt_DialogAlignment alignment);
     void SetOffset(Opt_Offset offset);
@@ -40,6 +44,7 @@ public:
     void SetBackgroundColor(Opt_ResourceColor backgroundColor);
     void SetCornerRadius(Opt_Union_Dimension_BorderRadiuses cornerRadius);
     void SetIsModal(Opt_Boolean isModal);
+    void SetDismiss(Opt_Callback_DismissDialogAction_Void onWillDismiss);
     void SetWidth(Opt_Length width);
     void SetHeight(Opt_Length height);
     void SetBorderWidth(Opt_Union_Dimension_EdgeWidths borderWidth);
@@ -53,9 +58,27 @@ public:
 
     DialogProperties GetDialogProperties() const;
 
+    void OpenDialog();
+    void CloseDialog();
+
+    void SetInstanceId(int32_t id)
+    {
+        instanceId_ = id;
+    }
+
 private:
+    RefPtr<UINode> GetWindowScene() const;
+
+    WeakPtr<FrameNode> ownerView_;
     DialogProperties dialogProperties_;
+    std::vector<WeakPtr<AceType>> dialogs_;
+    std::function<RefPtr<UINode>()> builder_;
+    int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 };
 } // namespace OHOS::Ace::NG::GeneratedModifier
+
+struct CustomDialogControllerPeer : public OHOS::Ace::NG::GeneratedModifier::CustomDialogControllerPeerImpl {
+    ~CustomDialogControllerPeer() override = default;
+};
 
 #endif //FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_CUSTOM_DIALOG_CONTROLLER_PEER_IMPL_H

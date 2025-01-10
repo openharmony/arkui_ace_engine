@@ -22,46 +22,46 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace CustomDialogControllerAccessor {
 void DestroyPeerImpl(CustomDialogControllerPeer* peer)
 {
-    auto peerImpl = reinterpret_cast<CustomDialogControllerPeerImpl *>(peer);
-    if (peerImpl) {
-        peerImpl->DecRefCount();
-    }
+    CHECK_NULL_VOID(peer);
+    peer->DecRefCount();
 }
 Ark_NativePointer CtorImpl(const Ark_CustomDialogControllerOptions* value)
 {
-    auto peerImpl = AceType::MakeRefPtr<CustomDialogControllerPeerImpl>();
-    peerImpl->IncRefCount();
-    auto result = reinterpret_cast<CustomDialogControllerPeer*>(AceType::RawPtr(peerImpl));
-    CHECK_NULL_RETURN(value, result);
+    auto peer = AceType::MakeRefPtr<CustomDialogControllerPeer>();
+    peer->IncRefCount();
+    CHECK_NULL_RETURN(value, AceType::RawPtr(peer));
 
-    LOGE("CustomDialogControllerAccessor::CtorImpl unsupported options: builder, cancel, onWillDismiss");
-    LOGE("CustomDialogControllerAccessor::CtorImpl partially supported options: openAnimation, closeAnimation");
+    LOGE("CustomDialogControllerAccessor::CtorImpl. There is no nodes.");
 
-    peerImpl->SetAutoCancel(value->autoCancel);
-    peerImpl->SetDialogAlignment(value->alignment);
-    peerImpl->SetOffset(value->offset);
-    peerImpl->SetCustomStyle(value->customStyle);
-    peerImpl->SetGridCount(value->gridCount);
-    peerImpl->SetMaskColor(value->maskColor);
-    peerImpl->SetMaskRect(value->maskRect);
-    peerImpl->SetOpenAnimation(value->openAnimation);
-    peerImpl->SetCloseAnimation(value->closeAnimation);
-    peerImpl->SetShowInSubWindow(value->showInSubWindow);
-    peerImpl->SetBackgroundColor(value->backgroundColor);
-    peerImpl->SetCornerRadius(value->cornerRadius);
-    peerImpl->SetIsModal(value->isModal);
-    peerImpl->SetWidth(value->width);
-    peerImpl->SetHeight(value->height);
-    peerImpl->SetBorderWidth(value->borderWidth);
-    peerImpl->SetBorderColor(value->borderColor);
-    peerImpl->SetBorderStyle(value->borderStyle);
-    peerImpl->SetShadow(value->shadow);
-    peerImpl->SetBlurStyle(value->backgroundBlurStyle);
-    peerImpl->SetKeyboardAvoidMode(value->keyboardAvoidMode);
-    peerImpl->SetEnableHoverMode(value->enableHoverMode);
-    peerImpl->SetHoverModeArea(value->hoverModeArea);
+    peer->SetOwnerView(nullptr); // TODO. SetOwnerView is not implemented yet. We need to pass frame node.
+    // TODO. SetBuilder is not implemented. We need to pass value->builder and frame node to peer->SetBuilder.
+    // TODO. SetOnCancel is not implemented. We need to pass value->cancel and frame node to peer->SetOnCancel.
+    peer->SetAutoCancel(value->autoCancel);
+    peer->SetDialogAlignment(value->alignment);
+    peer->SetOffset(value->offset);
+    peer->SetCustomStyle(value->customStyle);
+    peer->SetGridCount(value->gridCount);
+    peer->SetMaskColor(value->maskColor);
+    peer->SetMaskRect(value->maskRect);
+    peer->SetOpenAnimation(value->openAnimation);
+    peer->SetCloseAnimation(value->closeAnimation);
+    peer->SetShowInSubWindow(value->showInSubWindow);
+    peer->SetBackgroundColor(value->backgroundColor);
+    peer->SetCornerRadius(value->cornerRadius);
+    peer->SetIsModal(value->isModal);
+    peer->SetDismiss(value->onWillDismiss);
+    peer->SetWidth(value->width);
+    peer->SetHeight(value->height);
+    peer->SetBorderWidth(value->borderWidth);
+    peer->SetBorderColor(value->borderColor);
+    peer->SetBorderStyle(value->borderStyle);
+    peer->SetShadow(value->shadow);
+    peer->SetBlurStyle(value->backgroundBlurStyle);
+    peer->SetKeyboardAvoidMode(value->keyboardAvoidMode);
+    peer->SetEnableHoverMode(value->enableHoverMode);
+    peer->SetHoverModeArea(value->hoverModeArea);
 
-    return result;
+    return AceType::RawPtr(peer);
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -69,11 +69,13 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void OpenImpl(CustomDialogControllerPeer* peer)
 {
-    LOGE("CustomDialogControllerAccessor::OpenImpl method is not implemented");
+    CHECK_NULL_VOID(peer);
+    peer->OpenDialog();
 }
 void CloseImpl(CustomDialogControllerPeer* peer)
 {
-    LOGE("CustomDialogControllerAccessor::CloseImpl method is not implemented");
+    CHECK_NULL_VOID(peer);
+    peer->CloseDialog();
 }
 } // CustomDialogControllerAccessor
 const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor()
@@ -87,8 +89,4 @@ const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAc
     };
     return &CustomDialogControllerAccessorImpl;
 }
-
-struct CustomDialogControllerPeer {
-    virtual ~CustomDialogControllerPeer() = default;
-};
 }

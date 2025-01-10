@@ -16,6 +16,8 @@
 #include "core/interfaces/native/implementation/custom_dialog_controller_peer_impl.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/components_ng/pattern/dialog/custom_dialog_controller_model_ng.h"
 #include "core/components/theme/shadow_theme.h"
 
 namespace {
@@ -35,6 +37,44 @@ inline void AssignCast(std::optional<KeyboardAvoidMode>& dst, const Ark_Keyboard
 } // namespace OHOS::Ace::NG::Converter
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+void CustomDialogControllerPeerImpl::SetOwnerView(Ark_NativePointer node)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto weakNode = AceType::WeakClaim(frameNode);
+    CHECK_NULL_VOID(!weakNode.Invalid());
+    ownerView_ = weakNode;
+}
+
+void CustomDialogControllerPeerImpl::SetBuilder(CustomNodeBuilder builder, Ark_NativePointer node)
+{
+    CHECK_NULL_VOID(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    builder_ = [callback = CallbackHelper(builder, frameNode), frameNode]() -> RefPtr<UINode> {
+        auto refNode = AceType::Claim(frameNode);
+        CHECK_NULL_RETURN(refNode, nullptr);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, nullptr);
+        pipelineContext->UpdateCurrentActiveNode(refNode);
+        return callback.BuildSync(reinterpret_cast<Ark_NativePointer>(frameNode));
+    };
+}
+
+void CustomDialogControllerPeerImpl::SetOnCancel(Opt_Callback_Void cancel, Ark_NativePointer node)
+{
+    CHECK_NULL_VOID(node);
+    auto cancelOpt = Converter::OptConvert<Callback_Void>(cancel);
+    CHECK_NULL_VOID(cancelOpt);
+    dialogProperties_.onCancel = [callback = CallbackHelper(cancelOpt.value()), node]() {
+        auto refNode = AceType::Claim(reinterpret_cast<FrameNode*>(node));
+        CHECK_NULL_VOID(refNode);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->UpdateCurrentActiveNode(refNode);
+        callback.Invoke();
+    };
+}
+
 void CustomDialogControllerPeerImpl::SetAutoCancel(Opt_Boolean autoCancel)
 {
     auto result = Converter::OptConvert<bool>(autoCancel);
@@ -159,6 +199,25 @@ void CustomDialogControllerPeerImpl::SetIsModal(Opt_Boolean isModal)
     }
 }
 
+void CustomDialogControllerPeerImpl::SetDismiss(Opt_Callback_DismissDialogAction_Void onWillDismiss)
+{
+    auto onWillDismissOpt = Converter::OptConvert<Callback_DismissDialogAction_Void>(onWillDismiss);
+    CHECK_NULL_VOID(onWillDismissOpt);
+    dialogProperties_.onWillDismiss = [callback = CallbackHelper(onWillDismissOpt.value())](
+        const int32_t& info, const int32_t& instanceId
+    ) {
+        const auto dismissReason = static_cast<BindSheetDismissReason>(info);
+        auto dismissCallback = [](const Ark_Int32 resourceId) {
+            ViewAbstract::DismissDialog();
+        };
+        Ark_DismissDialogAction action {
+            .dismiss = Converter::ArkValue<Callback_Void>(dismissCallback, instanceId),
+            .reason = Converter::ArkValue<Ark_DismissReason>(dismissReason)
+        };
+        callback.Invoke(action);
+    };
+}
+
 void CustomDialogControllerPeerImpl::SetWidth(Opt_Length width)
 {
     auto result = Converter::OptConvert<Dimension>(width);
@@ -229,4 +288,40 @@ DialogProperties CustomDialogControllerPeerImpl::GetDialogProperties() const
 {
     return dialogProperties_;
 }
+
+void CustomDialogControllerPeerImpl::OpenDialog()
+{
+    ContainerScope scope(instanceId_);
+    if (dialogProperties_.windowScene.Invalid()) {
+        const auto windowScene = GetWindowScene();
+        if (windowScene) {
+            dialogProperties_.isScenceBoardDialog = true;
+            dialogProperties_.windowScene = windowScene;
+        }
+    }
+    dialogProperties_.isSysBlurStyle = true;
+    CustomDialogControllerModelNG::SetOpenDialog(dialogProperties_, dialogs_, WeakClaim(this), std::move(builder_));
+}
+
+void CustomDialogControllerPeerImpl::CloseDialog()
+{
+    ContainerScope scope(instanceId_);
+    CustomDialogControllerModelNG::SetCloseDialog(dialogProperties_, dialogs_, WeakClaim(this));
+}
+
+RefPtr<UINode> CustomDialogControllerPeerImpl::GetWindowScene() const
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto viewNode = ownerView_.Upgrade();
+    CHECK_NULL_RETURN(viewNode, nullptr);
+    auto parentCustom = AceType::DynamicCast<NG::CustomNode>(viewNode);
+    CHECK_NULL_RETURN(parentCustom, nullptr);
+    auto parent = parentCustom->GetParent();
+    while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
+        parent = parent->GetParent();
+    }
+    return parent;
+}
+
 } // namespace OHOS::Ace::NG::GeneratedModifier

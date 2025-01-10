@@ -35,11 +35,16 @@ public:
         std::list<DialogOperation>& dialogOperation) override;
     static void SetCloseDialogForNDK(FrameNode* dialogNode);
 
+    static void SetOpenDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
+        const WeakPtr<AceType>& controller, std::function<RefPtr<UINode>()>&& builder);
+    static void SetCloseDialog(DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
+        const WeakPtr<AceType>& controller);
+
 private:
-    TaskExecutor::Task ParseOpenDialogTask(int32_t currentId, const WeakPtr<AceType>& controller,
+    static TaskExecutor::Task ParseOpenDialogTask(int32_t currentId, const WeakPtr<AceType>& controller,
         DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs, std::function<void()>&& buildFunc,
         const RefPtr<OverlayManager>& overlayManager);
-    TaskExecutor::Task ParseCloseDialogTask(const WeakPtr<AceType>& controller, DialogProperties& dialogProperties,
+    static TaskExecutor::Task ParseCloseDialogTask(const WeakPtr<AceType>& controller, DialogProperties& dialogProperties,
         std::vector<WeakPtr<AceType>>& dialogs, const RefPtr<OverlayManager>& overlayManager);
 };
 } // namespace OHOS::Ace::NG
