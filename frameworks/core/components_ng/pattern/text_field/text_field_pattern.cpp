@@ -2479,7 +2479,8 @@ void TextFieldPattern::InitDragDropCallBack()
             }
         }
         auto textPaintOffset = pattern->GetPaintRectGlobalOffset();
-        Offset localOffset = Offset(event->GetX(), event->GetY()) - Offset(textPaintOffset.GetX(), textPaintOffset.GetY());
+        Offset localOffset =
+            Offset(event->GetX(), event->GetY()) - Offset(textPaintOffset.GetX(), textPaintOffset.GetY());
         if (host->GetDragPreviewOption().enableEdgeAutoScroll) {
             pattern->UpdateContentScroller(localOffset);
         } else {
