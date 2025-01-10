@@ -1447,6 +1447,15 @@ void ViewAbstract::AddDragFrameNodeToManager(FrameNode* frameNode)
     dragDropManager->AddDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 
+void ViewAbstract::NotifyDragStartRequest(DragStartRequestStatus dragStatus)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->HandleSyncOnDragStart(dragStatus);
+}
+
 void ViewAbstract::SetDraggable(bool draggable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

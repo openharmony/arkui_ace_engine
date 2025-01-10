@@ -303,6 +303,10 @@ public:
     void SetNotMouseDragGatherPixelMaps();
     void FireCustomerOnDragEnd(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
     void SetMouseDragMonitorState(bool state);
+    void DoOnDragStartHandling(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
+        DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event,
+        DragDropInfo dragPreviewInfo, const RefPtr<PipelineContext>& pipeline);
+    void HideMenu();
 #if defined(PIXEL_MAP_SUPPORTED)
     static void PrintBuilderNode(const RefPtr<UINode>& customNode);
     static void PrintIfImageNode(

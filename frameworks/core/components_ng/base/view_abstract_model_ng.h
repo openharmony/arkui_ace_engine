@@ -1330,6 +1330,11 @@ public:
     void DismissContentCover() override;
     void SheetSpringBack() override;
 
+    void NotifyDragStartRequest(DragStartRequestStatus dragStatus) override
+    {
+        ViewAbstract::NotifyDragStartRequest(dragStatus);
+    }
+
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
     void SetAccessibilityTextHint(const std::string& text) override;

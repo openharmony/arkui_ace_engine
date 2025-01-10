@@ -495,6 +495,7 @@ public:
      * Binds the native methods to the the js object
      */
     static void JSBind(BindingTarget globalObj);
+    static void JsNotifyDragStartRequest(const JSCallbackInfo& info);
     static void ParseDialogCallback(const JSRef<JSObject>& paramObj,
         std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss);
     static panda::Local<panda::JSValueRef> JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);

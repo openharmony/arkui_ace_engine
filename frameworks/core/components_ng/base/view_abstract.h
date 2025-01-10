@@ -208,7 +208,7 @@ public:
     static void SetHasBorderImageOutset(bool tag);
     static void SetHasBorderImageRepeat(bool tag);
     static void SetBorderImageGradient(const NG::Gradient &gradient);
-
+    static void NotifyDragStartRequest(DragStartRequestStatus dragStatus);
     // customBackground
     static void SetBackgroundAlign(const Alignment &align);
 

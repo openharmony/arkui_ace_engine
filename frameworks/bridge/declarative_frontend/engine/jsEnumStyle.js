@@ -3445,7 +3445,14 @@ let PreDragStatus;
   PreDragStatus.PREVIEW_LANDING_STARTED = 4;
   PreDragStatus.PREVIEW_LANDING_FINISHED = 5;
   PreDragStatus.ACTION_CANCELED_BEFORE_DRAG = 6;
+  PreDragStatus.PREPARING_FOR_DRAG_DETECTION = 7;
 })(PreDragStatus || (PreDragStatus = {}));
+
+let DragStartRequestStatus;
+(function (DragStartRequestStatus) {
+  DragStartRequestStatus.WAITING = 0;
+  DragStartRequestStatus.READY = 1;
+})(DragStartRequestStatus || (DragStartRequestStatus = {}));
 
 let DataOperationType;
 (function (DataOperationType) {

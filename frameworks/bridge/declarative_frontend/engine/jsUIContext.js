@@ -198,6 +198,12 @@ class DragController {
         JSViewAbstract.setDragEventStrictReportingEnabled(enable);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    notifyDragStartRequest(request) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.notifyDragStartRequest(request);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class UIObserver {
