@@ -207,7 +207,7 @@ SwiperParameters JSIndicator::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     bool parseSelectedItemHOk =
         ParseJsDimensionVpNG(selectedItemHeightValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
     swiperParameters.selectedItemHeight = parseSelectedItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    SwiperModel::GetInstance()->SetIsIndicatorCustomSize(
+    IndicatorModel::GetInstance()->SetIsIndicatorCustomSize(
         parseSelectedItemWOk || parseSelectedItemHOk || parseItemWOk || parseItemHOk);
     SetDotIndicatorInfo(obj, swiperParameters, swiperIndicatorTheme);
     return swiperParameters;

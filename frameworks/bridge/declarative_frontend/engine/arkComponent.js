@@ -29639,7 +29639,7 @@ class SwiperIndicatorModifier extends ModifierWithKey {
           digitFontWeight, selectedDigitFontSize, selectedDigitFontWeight, left, top, right, bottom);
       }
       else {
-        getUINativeModule().swiper.setSwiperIndicator(node, "IndicatorComponentController", this.value );
+        getUINativeModule().swiper.setSwiperIndicator(node, 'IndicatorComponentController', this.value );
       }
     }
   }
