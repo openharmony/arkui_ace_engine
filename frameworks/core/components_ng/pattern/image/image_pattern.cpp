@@ -1597,6 +1597,8 @@ inline void ImagePattern::DumpFillColor(const RefPtr<OHOS::Ace::NG::ImageRenderP
     if (fillColor.has_value()) {
         auto color = fillColor.value();
         DumpLog::GetInstance().AddDesc(std::string("fillColor: ").append(color.ColorToString()));
+    } else {
+        DumpLog::GetInstance().AddDesc("fillColor: Null");
     }
 }
 

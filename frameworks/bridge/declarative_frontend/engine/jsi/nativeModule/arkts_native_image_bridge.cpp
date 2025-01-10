@@ -709,6 +709,8 @@ ArkUINativeModuleValue ImageBridge::SetFillColor(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
         nodeModifiers->getImageModifier()->setFillColor(nativeNode, color.GetValue());
+    } else if (ArkTSUtils::ParseJsColorContent(vm, colorArg)) {
+        nodeModifiers->getImageModifier()->resetImageFill(nativeNode);
     } else {
         nodeModifiers->getImageModifier()->resetFillColor(nativeNode);
     }
