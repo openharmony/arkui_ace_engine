@@ -834,11 +834,6 @@ class FocusController {
         return result;
     }
 
-    setAutoFocusTransfer(value) {
-        __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        this.ohos_focusController.setAutoFocusTransfer(value);
-        __JSScopeUtil__.restoreInstanceId();
-    }
     activate(isActive, autoInactive) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         if (arguments.length === 2) {
@@ -850,6 +845,12 @@ class FocusController {
             __JSScopeUtil__.restoreInstanceId();
             return result;
         }
+    }
+
+    setAutoFocusTransfer(value) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_focusController.setAutoFocusTransfer(value);
+        __JSScopeUtil__.restoreInstanceId();
     }
 }
 

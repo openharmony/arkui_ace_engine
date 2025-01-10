@@ -206,7 +206,9 @@ public:
 
     void WindowPerformBack()
     {
-        windowPerformBackCallback_();
+        if (windowPerformBackCallback_) {
+            windowPerformBackCallback_();
+        }
     }
 
     WindowMode GetWindowMode() const
