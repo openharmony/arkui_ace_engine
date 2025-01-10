@@ -66,7 +66,7 @@ const std::string END_ICON_PATH = "resource:///ohos_ic_public_cancel.svg";
 } // namespace
 
 void ServiceCollaborationMenuAceHelper::CreateText(
-    const std::string& value, const RefPtr<FrameNode>& parent, const Color& color, bool needMargin, bool hasEndIncon)
+    const std::string& value, const RefPtr<FrameNode>& parent, const Color& color, bool needMargin, bool hasEndIcon)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "text is %{public}s", value.c_str());
     auto textPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -89,7 +89,7 @@ void ServiceCollaborationMenuAceHelper::CreateText(
     if (needMargin) {
         MarginProperty margin;
         margin.right = CalcLength(
-            static_cast<float>(hasEndIncon ? TEXT_RIGHT_MARGIN : TEXT_RIGHT_MARGIN_NO_ENDICON), DimensionUnit::VP);
+            static_cast<float>(hasEndIcon ? TEXT_RIGHT_MARGIN : TEXT_RIGHT_MARGIN_NO_ENDICON), DimensionUnit::VP);
         margin.left = CalcLength(static_cast<float>(TEXT_LEFT_MARGIN));
         textProperty->UpdateMargin(margin);
     }
