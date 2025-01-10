@@ -63,7 +63,7 @@ FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
     indexToNode_[markIndex_] = WeakClaim(item);
     nodeToIndex_[item] = markIndex_;
     // 2: check if more space for new item.
-    if (!fillAlgorithm_->CanFillMore(size_, rect, direction)) {
+    if (!fillAlgorithm_->CanFillMore(axis_, size_, rect, direction)) {
         LOGI("no more space left");
         return nullptr;
     }
@@ -119,7 +119,7 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
         endRect_ = rect;
     }
     // 3: check if more space for new item.
-    if (!fillAlgorithm_->CanFillMore(size_, rect, direction)) {
+    if (!fillAlgorithm_->CanFillMore(axis_, size_, rect, direction)) {
         LOGE("no more space left");
         return nullptr;
     }

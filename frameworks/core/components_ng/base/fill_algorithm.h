@@ -46,7 +46,7 @@ public:
 
     virtual void OnSlidingOffsetUpdate(float x, float y) {}
 
-    virtual bool CanFillMore(const SizeF& scrollWindowSize, const RectF& markItemRect, FillDirection direction) = 0;
+    virtual bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, const RectF& markItemRect, FillDirection direction) = 0;
 
     virtual bool IsReady() const
     {
