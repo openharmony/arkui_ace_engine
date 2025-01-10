@@ -216,7 +216,7 @@ export struct GridObjectSortComponent {
   @State editGridHeight: number = 0;
   @State addGridHeight: number = 0;
   @State subTitleHeight: number = 0;
-  @State isOpenAccessibility: boolean = false;
+  @State isOpenAccessibility: boolean = accessibility.isScreenReaderOpenSync();
   private callbackId: number | undefined = undefined;
   // current column, text: 4 column  , image_text: 3 column
   private colNum: number = COL_IMAGE_TEXT;
@@ -286,7 +286,7 @@ export struct GridObjectSortComponent {
       this.firstIn = false;
     }, 500);
     this.bundleName = (getContext(this) as common.UIAbilityContext)?.abilityInfo?.bundleName;
-    accessibility.on('accessibilityStateChange', (state: boolean) => {
+    accessibility.on('screenReaderStateChange', (state: boolean) => {
       // 上面的state  就是无障碍的状态
       this.isOpenAccessibility = state;
     });
