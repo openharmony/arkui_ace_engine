@@ -28,7 +28,7 @@ WaterFlowSections::Section Convert(const Ark_SectionOptions& src)
     dst.itemsCount = Converter::Convert<int32_t>(src.itemsCount);
     dst.crossCount = Converter::OptConvert<int32_t>(src.crossCount);
     dst.onGetItemMainSizeByIndex = nullptr;
-    auto onGetItemMainSizeByIndex = Converter::OptConvert<GetItemMainSizeByIndex>(src.onGetItemMainSizeByIndex);
+    auto onGetItemMainSizeByIndex = Converter::OptConvert<::GetItemMainSizeByIndex>(src.onGetItemMainSizeByIndex);
     if (onGetItemMainSizeByIndex) {
         auto modelCallback = [callback = CallbackHelper(*onGetItemMainSizeByIndex)]
             (int32_t value) -> float {
