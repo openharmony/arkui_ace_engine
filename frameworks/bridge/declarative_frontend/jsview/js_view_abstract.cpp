@@ -2826,58 +2826,55 @@ void SetBgImgPositionWithAlign(BackgroundImagePosition& bgImgPosition, int32_t a
 void ParseJsKeyEvent(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
 {
     if (jsObj->HasProperty("type")) {
-        int32_t defaultValue = 0;
-        keyEvent.action =
-            static_cast<KeyAction>(JSViewAbstract::ParseJsInt32(jsObj->GetProperty("type"), defaultValue));
+        int32_t value = 0;
+        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("type"), value);
+        keyEvent.action = static_cast<KeyAction>(value);
     }
     if (jsObj->HasProperty("keyCode")) {
-        int32_t defaultValue = 0;
-        keyEvent.code = static_cast<KeyCode>(JSViewAbstract::ParseJsInt32(jsObj->GetProperty("keyCode"), defaultValue));
+        int32_t value = 0;
+        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("keyCode"), value);
+        keyEvent.code = static_cast<KeyCode>(value);
     }
     if (jsObj->HasProperty("keyText")) {
         auto jsValue = jsObj->GetProperty("keyText");
         if (jsValue->IsString()) {
-            keyEvent.key = jsValue->ToString().c_str();
+            keyEvent.key = jsValue->ToString();
         }
     }
-
     if (jsObj->HasProperty("sourceType")) {
-        int32_t defaultValue = 0;
-        keyEvent.sourceType =
-            static_cast<SourceType>(JSViewAbstract::ParseJsInt32(jsObj->GetProperty("sourceType"), defaultValue));
+        int32_t value = 0;
+        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("sourceType"), value);
+        keyEvent.sourceType = static_cast<SourceType>(value);
     }
-
     if (jsObj->HasProperty("deviceId")) {
         auto jsValue = jsObj->GetProperty("deviceId");
         if (jsValue->IsNumber()) {
             keyEvent.deviceId = static_cast<int64_t>(jsValue->ToNumber<int64_t>());
         }
     }
-
     if (jsObj->HasProperty("metaKey")) {
-        int32_t defaultValue = 0;
-        keyEvent.metaKey = JSViewAbstract::ParseJsInt32(jsObj->GetProperty("metaKey"), defaultValue);
+        int32_t value = 0;
+        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("metaKey"), value);
+        keyEvent.metaKey = value;
     }
-
     if (jsObj->HasProperty("unicode")) {
-        int32_t defaultValue = 0;
-        keyEvent.unicode = JSViewAbstract::ParseJsInt32(jsObj->GetProperty("unicode"), defaultValue);
+        int32_t value = 0;
+        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("unicode"), value);
+        keyEvent.unicode = value;
     }
-
-    if (jsObj->HasProperty("timeStamp")) {
-        auto jsValue = jsObj->GetProperty("timeStamp");
+    if (jsObj->HasProperty("timestamp")) {
+        auto jsValue = jsObj->GetProperty("timestamp");
         if (jsValue->IsNumber()) {
-            auto timeStamp = static_cast<int64_t>(jsValue->ToNumber<int64_t>());
-            std::chrono::milliseconds milliseconds(timeStamp);
-            TimeStamp time(milliseconds);
+            auto timeStamp = jsValue->ToNumber<int64_t>();
+            std::chrono::nanoseconds nanoseconds(timeStamp);
+            TimeStamp time(nanoseconds);
             keyEvent.timeStamp = time;
         }
     }
-
     if (jsObj->HasProperty("intentionCode")) {
-        int32_t defaultValue = 0;
-        keyEvent.keyIntention =
-            static_cast<KeyIntention>(JSViewAbstract::ParseJsInt32(jsObj->GetProperty("intentionCode"), defaultValue));
+        int32_t value = 0;
+        JSViewAbstract::ParseJsInt32(jsObj->GetProperty("intentionCode"), value);
+        keyEvent.keyIntention = static_cast<KeyIntention>(value);
     }
 }
 
@@ -5635,6 +5632,10 @@ NG::DragPreviewOption JSViewAbstract::ParseDragPreviewOptions (const JSCallbackI
         if (defaultAnimation->IsBoolean()) {
             previewOption.defaultAnimationBeforeLifting = defaultAnimation->ToBoolean();
         }
+        auto hapicFeedback = interObj->GetProperty("enableHapticFeedback");
+        if (hapicFeedback->IsBoolean()) {
+            previewOption.enableHapticFeedback = hapicFeedback->ToBoolean();
+        }
         auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
         if (dragPreview->IsBoolean()) {
             previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
@@ -6540,7 +6541,10 @@ void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
 
-    JSRef<JSObject> jsObject = args[1];
+    if (!(args[1]->IsObject())) {
+        return;
+    }
+    JSRef<JSObject> jsObject = JSRef<JSObject>::Cast(args[1]);
     KeyEvent keyEvent;
     ParseJsKeyEvent(jsObject, keyEvent);
     auto result = focusHub->HandleEvent(keyEvent);

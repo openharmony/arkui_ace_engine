@@ -1056,7 +1056,7 @@ void JSViewContext::JSOpenPopup(const JSCallbackInfo& info)
     return;
 }
 
-bool ParseContentPopupCommonParam(const JSCallbackInfo& info, RefPtr<PopupParam>& popupParam,
+bool UpdateParsePopupParam(const JSCallbackInfo& info, RefPtr<PopupParam>& popupParam,
     const RefPtr<NG::UINode>& customNode, bool isPartialUpdate)
 {
     if ((!popupParam) || (!customNode)) {
@@ -1067,37 +1067,30 @@ bool ParseContentPopupCommonParam(const JSCallbackInfo& info, RefPtr<PopupParam>
         ReturnPromise(info, ERROR_CODE_PARAM_INVALID);
         return false;
     }
-    bool isShowInSubWindow = false;
-    if (isPartialUpdate) {
-        auto result = JSViewAbstract::GetPopupParam(popupParam, customNode);
-        if (result == ERROR_CODE_NO_ERROR) {
-            isShowInSubWindow = popupParam->IsShowInSubWindow();
+    auto param = AceType::MakeRefPtr<PopupParam>();
+    CHECK_NULL_RETURN(param, false);
+    auto result = JSViewAbstract::GetPopupParam(param, customNode);
+    if (result == ERROR_CODE_NO_ERROR) {
+        if (isPartialUpdate) {
+            popupParam = param;
         } else {
-            if (result != ERROR_CODE_INTERNAL_ERROR) {
-                ReturnPromise(info, result);
-            }
-            return false;
+            popupParam->SetTargetId(param->GetTargetId());
         }
     } else {
-        auto param = AceType::MakeRefPtr<PopupParam>();
-        CHECK_NULL_RETURN(param, false);
-        auto result = JSViewAbstract::GetPopupParam(param, customNode);
-        if (result == ERROR_CODE_NO_ERROR) {
-            isShowInSubWindow = param->IsShowInSubWindow();
-            popupParam->SetTargetId(param->GetTargetId());
-        } else {
-            if (result != ERROR_CODE_INTERNAL_ERROR) {
-                ReturnPromise(info, result);
-            }
-            return false;
+        if (result != ERROR_CODE_INTERNAL_ERROR) {
+            ReturnPromise(info, result);
         }
+        return false;
     }
+    auto isShowInSubWindow = param->IsShowInSubWindow();
+    auto focusable = param->GetFocusable();
     popupParam->SetIsShow(true);
     popupParam->SetUseCustomComponent(true);
     popupParam->SetIsPartialUpdate(isPartialUpdate);
     auto popupObj = JSRef<JSObject>::Cast(info[INDEX_ONE]);
     JSViewAbstract::ParseContentPopupCommonParam(info, popupObj, popupParam);
     popupParam->SetShowInSubWindow(isShowInSubWindow);
+    popupParam->SetFocusable(focusable);
     return true;
 }
 
@@ -1123,7 +1116,7 @@ void JSViewContext::JSUpdatePopup(const JSCallbackInfo& info)
         }
         isPartialUpdate = info[INDEX_TWO]->ToBoolean();
     }
-    auto result = ParseContentPopupCommonParam(info, popupParam, popupContentNode, isPartialUpdate);
+    auto result = UpdateParsePopupParam(info, popupParam, popupContentNode, isPartialUpdate);
     if (!result) {
         return;
     }

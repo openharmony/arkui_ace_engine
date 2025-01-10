@@ -34,6 +34,10 @@ CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxSetOnChange(void (*callback)(bool isOn
 CJ_EXPORT void FfiOHOSAceFrameworkCheckBoxSetCheckboxStyle(int32_t checkBoxStyle);
 CJ_EXPORT void FfiCheckBoxSetResponseRegion(CJResponseRegion value);
 CJ_EXPORT void FfiCheckBoxSetResponseRegionArray(VectorStringPtr vecContent);
+CJ_EXPORT void FfiCheckBoxCreateWithIndicator(const char* name, const char* group, void (*indicatorBuilder)());
+CJ_EXPORT void FfiCheckBoxUnselectedColor(uint32_t color);
+CJ_EXPORT void FfiCheckBoxMarkStyle(
+    uint32_t strokeColor, double size, int32_t sizeUnit, double strokeWidth, int32_t strokeWidthUnit);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_CHECKBOX_FFI_H

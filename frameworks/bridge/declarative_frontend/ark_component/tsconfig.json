@@ -101,7 +101,8 @@
         "src/ArkSymbolSpan.ts",
         "src/ArkComponent3D.ts",
         "src/ArkContainerSpan.ts",
-        "src/ArkLinearIndicator.ts"
+        "src/ArkLinearIndicator.ts",
+        "src/ArkIndicatorComponent.ts"
     ],
     "compilerOptions": {
         "module": "none",

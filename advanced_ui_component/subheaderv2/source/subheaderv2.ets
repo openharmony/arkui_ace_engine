@@ -552,6 +552,25 @@ export struct SubHeaderV2 {
     }
   }
 
+  onMeasureSize(selfLayoutInfo: GeometryInfo, children: Measurable[], constraint: ConstraintSizeOptions): SizeResult {
+    let result: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
+    let context = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    this.fontSize = this.updateFontScale();
+    if (this.isSuitableAging()) {
+      this.ageing = true;
+      this.subHeaderModifier.isAgeing = this.ageing;
+    } else {
+      this.ageing = false;
+      this.subHeaderModifier.isAgeing = this.ageing;
+    }
+    children.forEach((child) => {
+      constraint.minHeight = Math.min(Number(this.getMinHeight()), Number(constraint.maxHeight));
+      result.height = child.measure(constraint).height;
+      result.width = Number(constraint.maxWidth);
+    })
+    return result;
+  }
+
   @Builder
   ButtonStyle(): void {
     if (this.operationItems) {

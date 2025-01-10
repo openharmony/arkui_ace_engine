@@ -68,11 +68,6 @@ public:
     static void JsOnClick(const JSCallbackInfo& info);
     static void JsOnClickWithoutNGBUILD(const JSCallbackInfo& info);
     static void JsRemoteMessage(const JSCallbackInfo& info);
-    static void JsOnDragStart(const JSCallbackInfo& info);
-    static void JsOnDragEnter(const JSCallbackInfo& info);
-    static void JsOnDragMove(const JSCallbackInfo& info);
-    static void JsOnDragLeave(const JSCallbackInfo& info);
-    static void JsOnDrop(const JSCallbackInfo& info);
     static void JsFocusable(const JSCallbackInfo& info);
     static void JsDraggable(const JSCallbackInfo& info);
     static void JsMenuOptionsExtension(const JSCallbackInfo& info);

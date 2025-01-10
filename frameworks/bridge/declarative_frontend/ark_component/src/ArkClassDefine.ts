@@ -1430,6 +1430,7 @@ class ArkDragPreviewOptions {
   isMultiSelectionEnabled: boolean | undefined;
   defaultAnimationBeforeLifting: boolean | undefined;
   enableEdgeAutoScroll: boolean | undefined;
+  enableHapticFeedback: boolean | undefined;
 
   constructor() {
     this.mode = undefined;
@@ -1437,6 +1438,7 @@ class ArkDragPreviewOptions {
     this.isMultiSelectionEnabled = undefined;
     this.defaultAnimationBeforeLifting = undefined;
     this.enableEdgeAutoScroll = undefined;
+    this.enableHapticFeedback = undefined;
   }
 
   isEqual(another: ArkDragPreviewOptions): boolean {
@@ -1445,7 +1447,8 @@ class ArkDragPreviewOptions {
       this.numberBadge === another.numberBadge &&
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
       this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting && 
-      this.enableEdgeAutoScroll === another.enableEdgeAutoScroll
+      this.enableEdgeAutoScroll === another.enableEdgeAutoScroll &&
+      this.enableHapticFeedback === another.enableHapticFeedback
     );
   }
 }

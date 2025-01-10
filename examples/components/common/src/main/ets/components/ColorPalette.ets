@@ -32,7 +32,7 @@ export struct ColorPalette {
           Circle({ width: 24, height: 24 })
             .fill(color)
             .borderRadius(12)
-            .shadow(ShadowStyle.OUTER_DEFAULT_XS)
+            .shadow(this.isEnabled ? ShadowStyle.OUTER_DEFAULT_XS : null)
             .scale({
               x: this.color === color ? 1.25 : 1,
               y: this.color === color ? 1.25 : 1,
@@ -47,6 +47,7 @@ export struct ColorPalette {
         .backgroundColor(Color.Transparent)
         .width(32)
         .height(32)
+        .enabled(this.isEnabled)
         .onClick(() => {
           this.onChange?.(color);
         })

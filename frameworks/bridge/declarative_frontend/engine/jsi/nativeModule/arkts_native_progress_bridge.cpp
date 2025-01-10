@@ -501,7 +501,6 @@ void ParseCapsuleStyle(const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, 
 {
     ParseBorderColor(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_BORDER_COLOR);
     ParseBorderWidth(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_BORDER_WIDTH);
-    ParseContent(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_CONTENT);
     ParseFontColor(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_FONT_COLOR);
     ParseCapsuleFontSize(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_FONT_SIZE);
     ParseCapsuleFontWeight(vm, runtimeCallInfo, progressStyle, ARG_NUM_STYLE_FONT_WEIGHT);
@@ -559,6 +558,8 @@ ArkUINativeModuleValue ProgressBridge::SetProgressStyle(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto progressLayoutProperty = frameNode->GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_RETURN(progressLayoutProperty, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> contentArg = runtimeCallInfo->GetCallArgRef(ARG_NUM_STYLE_CONTENT);
+    std::string content = contentArg->ToString(vm)->ToString(vm);
     auto progresstype = progressLayoutProperty->GetType();
     if (progresstype == ProgressType::LINEAR) {
         ParseLinearStyle(vm, runtimeCallInfo, progressStyle);
@@ -566,6 +567,7 @@ ArkUINativeModuleValue ProgressBridge::SetProgressStyle(ArkUIRuntimeCallInfo* ru
         ParseRingStyle(vm, runtimeCallInfo, progressStyle);
     } else if (progresstype == ProgressType::CAPSULE) {
         ParseCapsuleStyle(vm, runtimeCallInfo, progressStyle);
+        progressStyle.content = (contentArg->IsString(vm)) ? content.c_str() : nullptr;
     } else {
         ParseProgressStyle(vm, runtimeCallInfo, progressStyle);
     }

@@ -22,14 +22,25 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "display_manager.h"
-#include "core/pipeline_ng/pipeline_context.h"
+#include "parameters.h"
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t WORKER_HAS_USED_ERROR = 10011;
 constexpr char DC_DEPTH_PREFIX[] = "dcDepth_";
 constexpr char PARAM_NAME_WORKER_HAS_USED[] = "workerHasUsed";
-constexpr char PARAM_MSG_WORKER_HAS_USED[] = "Two workers are not allowed to run at the same time";
+constexpr char PARAM_MSG_WORKER_HAS_USED[] = "Two worker are not allowed to run at the same time";
+constexpr char PARAM_NAME_DC_ONLY_ON_SCB[] = "onlyRunOnSCB";
+constexpr char PARAM_MSG_DC_ONLY_ON_SCB[] = "DC only run on SCB";
+constexpr char PARAM_NAME_INTERNAL_ERROR[] = "internalError";
+constexpr char PARAM_MSG_INTERNAL_ERROR[] = "Internal error";
+constexpr char PARAM_NAME_PARAM_ERROR[] = "paramError";
+constexpr char PARAM_MSG_PARAM_ERROR[] = "Param error";
+const char ENABLE_DEBUG_DC_KEY[] = "persist.ace.debug.dc.enabled";
+
+bool IsDebugDCEnabled()
+{
+    return OHOS::system::GetParameter(ENABLE_DEBUG_DC_KEY, "false") == "true";
+}
 }
 
 int32_t DynamicPattern::dynamicGenerator_ = 0;
@@ -63,6 +74,7 @@ void DynamicPattern::InitializeDynamicComponent(
 {
     if (entryPoint.empty() || runtime == nullptr) {
         PLATFORM_LOGE("The param empty.");
+        HandleErrorCallback(DCResultCode::DC_PARAM_ERROE);
         return;
     }
 
@@ -70,34 +82,77 @@ void DynamicPattern::InitializeDynamicComponent(
     InitializeRender(runtime);
 }
 
-void DynamicPattern::SetBackgroundTransparent(bool backgroundTransparent)
+void DynamicPattern::HandleErrorCallback(DCResultCode resultCode)
 {
-    backgroundTransparent_ = backgroundTransparent;
+    switch (resultCode) {
+        case DCResultCode::DC_WORKER_HAS_USED_ERROR:
+            FireOnErrorCallbackOnUI(
+                resultCode, PARAM_NAME_WORKER_HAS_USED, PARAM_MSG_WORKER_HAS_USED);
+            break;
+        case DCResultCode::DC_ONLY_RUN_ON_SCB:
+            FireOnErrorCallbackOnUI(
+                resultCode, PARAM_NAME_DC_ONLY_ON_SCB, PARAM_MSG_DC_ONLY_ON_SCB);
+            break;
+        case DCResultCode::DC_INTERNAL_ERROR:
+            FireOnErrorCallbackOnUI(
+                resultCode, PARAM_NAME_INTERNAL_ERROR, PARAM_MSG_INTERNAL_ERROR);
+            break;
+        case DCResultCode::DC_PARAM_ERROE:
+            FireOnErrorCallbackOnUI(
+                resultCode, PARAM_NAME_PARAM_ERROR, PARAM_MSG_PARAM_ERROR);
+            break;
+        default:
+            PLATFORM_LOGI("HandleErrorCallback code: %{public}d is invalid.", resultCode);
+    }
+}
+
+DCResultCode DynamicPattern::CheckConstraint()
+{
+    auto instanceId = GetHostInstanceId();
+    PLATFORM_LOGI("CheckConstraint instanceId: %{public}d.", instanceId);
+    auto container = Platform::AceContainer::GetContainer(instanceId);
+    if (!container) {
+        PLATFORM_LOGE("container is null.");
+        return DCResultCode::DC_INTERNAL_ERROR;
+    }
+
+    if (container->IsScenceBoardWindow()) {
+        return DCResultCode::DC_NO_ERRORS;
+    }
+
+    return IsDebugDCEnabled() ? DCResultCode::DC_NO_ERRORS : DCResultCode::DC_ONLY_RUN_ON_SCB;
 }
 
 void DynamicPattern::InitializeRender(void* runtime)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     dynamicDumpInfo_.createLimitedWorkerTime = GetCurrentTimestamp();
 #if !defined(PREVIEW)
+    DCResultCode code = CheckConstraint();
+    if (code != DCResultCode::DC_NO_ERRORS) {
+        HandleErrorCallback(code);
+        PLATFORM_LOGE("CheckConstraint failed, code: %{public}d.", code);
+        return;
+    }
+
     if (!dynamicComponentRenderer_) {
         ContainerScope scope(instanceId_);
+        SetHostNode(host);
         dynamicComponentRenderer_ =
             DynamicComponentRenderer::Create(GetHost(), runtime, curDynamicInfo_);
         CHECK_NULL_VOID(dynamicComponentRenderer_);
         if (dynamicComponentRenderer_->HasWorkerUsing(runtime)) {
-            FireOnErrorCallbackOnUI(
-                WORKER_HAS_USED_ERROR, PARAM_NAME_WORKER_HAS_USED, PARAM_MSG_WORKER_HAS_USED);
+            HandleErrorCallback(DCResultCode::DC_WORKER_HAS_USED_ERROR);
             return;
         }
+
         dynamicComponentRenderer_->SetUIContentType(UIContentType::DYNAMIC_COMPONENT);
         dynamicComponentRenderer_->SetAdaptiveSize(adaptiveWidth_, adaptiveHeight_);
         dynamicComponentRenderer_->SetBackgroundTransparent(backgroundTransparent_);
         dynamicComponentRenderer_->CreateContent();
         accessibilitySessionAdapter_ =
             AceType::MakeRefPtr<AccessibilitySessionAdapterIsolatedComponent>(dynamicComponentRenderer_);
-
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_VOID(eventHub);
         OnAreaChangedFunc onAreaChangedFunc = [renderer = dynamicComponentRenderer_](
@@ -113,6 +168,11 @@ void DynamicPattern::InitializeRender(void* runtime)
 #else
     PLATFORM_LOGE("DynamicComponent not support preview.");
 #endif
+}
+
+void DynamicPattern::SetBackgroundTransparent(bool backgroundTransparent)
+{
+    backgroundTransparent_ = backgroundTransparent;
 }
 
 void DynamicPattern::FireOnErrorCallbackOnUI(
