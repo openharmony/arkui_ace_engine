@@ -4592,6 +4592,8 @@ void FrameNode::SyncGeometryNode(bool needSyncRsNode, const DirtySwapConfig& con
     // rebuild child render node.
     if (!isLayoutNode_) {
         RebuildRenderContextTree();
+    } else if (GetParent()) {
+        GetParent()->RebuildRenderContextTree();
     }
 
     /* Adjust components' position which have been set grid properties */
@@ -4738,6 +4740,9 @@ float FrameNode::GetBaselineDistance() const
 
 void FrameNode::MarkNeedSyncRenderTree(bool needRebuild)
 {
+    if (isLayoutNode_ && GetParent()) {
+        GetParent()->MarkNeedSyncRenderTree(needRebuild);
+    }
     if (needRebuild) {
         frameProxy_->ResetChildren(true);
     }
