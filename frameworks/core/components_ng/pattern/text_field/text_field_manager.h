@@ -85,18 +85,7 @@ public:
         onFocusTextField_ = onFocusTextField;
     }
 
-    void GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocusTextField)
-    {
-        auto node = onFocusTextField.Upgrade();
-        CHECK_NULL_VOID(node);
-        auto frameNode = node->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        auto scrollableNode = FindScrollableOfFocusedTextField(frameNode);
-        if (scrollableNode) {
-            isScrollableChild_ = true;
-        }
-        TAG_LOGI(ACE_KEYBOARD, "isScrollableChild_: %{public}d", isScrollableChild_);
-    }
+    void GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocusTextField);
 
     bool IsScrollableChild()
     {
@@ -320,6 +309,7 @@ private:
     int32_t laterOrientation_ = -1;
     bool isImeAttached_ = false;
     bool isScrollableChild_ = false;
+    float lastKeyboardOffset_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

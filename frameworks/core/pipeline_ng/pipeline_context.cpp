@@ -2063,7 +2063,7 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
         SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "origin positionY: %{public}f, height %{public}f", positionY, height);
         float caretPos = manager->GetFocusedNodeCaretRect().Top() - context->GetRootRect().GetOffset().GetY() -
-            context->GetSafeAreaManager()->GetKeyboardOffset();
+            context->GetSafeAreaManager()->GetKeyboardOffsetDirectly();
         auto onFocusField = manager->GetOnFocusTextField().Upgrade();
         float adjust = 0.0f;
         if (onFocusField && onFocusField->GetHost() && onFocusField->GetHost()->GetGeometryNode()) {
@@ -2075,13 +2075,15 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
         if (rootSize.Height() - positionY - height < 0 && manager->IsScrollableChild()) {
             height = rootSize.Height() - positionY;
         }
-        auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
+        auto lastKeyboardOffset = context->safeAreaManager_->GetKeyboardOffsetDirectly();
         auto newKeyboardOffset = context->CalcNewKeyboardOffset(keyboardHeight, positionY, height, rootSize);
         if (NearZero(keyboardHeight) || LessOrEqual(newKeyboardOffset, lastKeyboardOffset) ||
             (manager->GetOnFocusTextFieldId() == manager->GetLastAvoidFieldId() && !keyboardHeightChanged)) {
             context->safeAreaManager_->UpdateKeyboardOffset(newKeyboardOffset);
         } else {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "calc offset %{public}f is smaller, keep current", newKeyboardOffset);
+            manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
+            return;
         }
         manager->SetLastAvoidFieldId(manager->GetOnFocusTextFieldId());
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
@@ -2125,7 +2127,7 @@ float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positi
     CHECK_NULL_RETURN(geometryNode, newKeyboardOffset);
     auto paintOffset = host->GetPaintRectOffset();
     auto frameSize = geometryNode->GetFrameSize();
-    auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffset(),
+    auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffsetDirectly(),
         frameSize.Height(), rootSize);
     return std::max(offset, newKeyboardOffset);
 }

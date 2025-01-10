@@ -194,9 +194,6 @@ void SheetPresentationPattern::InitScrollProps()
     // When sheet content height is larger than sheet height,
     // the sheet height should set scroll always enabled.
     scrollPattern->SetAlwaysEnabled(scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && IsScrollable());
-
-    // reset isScrolling prop to false.
-    isScrolling_ = false;
 }
 
 bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
@@ -735,13 +732,14 @@ float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetSty
     return sheetHeight;
 }
 
-void SheetPresentationPattern::AvoidSafeArea(bool forceChange)
+void SheetPresentationPattern::AvoidSafeArea(bool forceAvoid)
 {
-    if (IsCurSheetNeedHalfFoldHover()) {
+    auto sheetType = GetSheetType();
+    if (sheetType == SheetType::SHEET_POPUP || IsCurSheetNeedHalfFoldHover()) {
         return;
     }
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_THIRTEEN)) {
-        AvoidKeyboardBySheetMode();
+        AvoidKeyboardBySheetMode(forceAvoid);
         return;
     }
     auto host = GetHost();
@@ -749,7 +747,7 @@ void SheetPresentationPattern::AvoidSafeArea(bool forceChange)
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetSafeAreaManager();
-    if (!forceChange && keyboardHeight_ == manager->GetKeyboardInset().Length()) {
+    if (!forceAvoid && keyboardHeight_ == manager->GetKeyboardInset().Length()) {
         return;
     }
     keyboardHeight_ = manager->GetKeyboardInset().Length();
@@ -795,16 +793,29 @@ float SheetPresentationPattern::GetSheetHeightChange()
     CHECK_NULL_RETURN(pipelineContext, .0f);
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
+    if (keyboardInsert.Length() == 0) {
+        return 0.f;
+    }
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipelineContext->GetTextFieldManager());
     // inputH : Distance from input component's Caret to bottom of screen
     // = caret's offset + caret's height + 24vp
-    if (textFieldManager && !textFieldManager->GetOptionalClickPosition().has_value()) {
+    if (textFieldManager && !textFieldManager->GetOptionalClickPosition().has_value() &&
+        !pipelineContext->UsingCaretAvoidMode()) {
         TAG_LOGD(AceLogTag::ACE_SHEET, "illegal caret position, don't calc height this time");
         return .0f;
     }
-    auto inputH = textFieldManager ? (pipelineContext->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
-                                         textFieldManager->GetHeight())
-                                   : .0;
+    float inputH = 0.f;
+    if (pipelineContext->UsingCaretAvoidMode()) {
+        // when user scroll after avoiding keyboard, we need to update scroll offset before avoid keyboard twice.
+        GetCurrentScrollHeight();
+        // when avoiding keyboard twice, recover input height before avoiding is needed.
+        inputH = textFieldManager ? pipelineContext->GetRootHeight() -
+            textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight() - sheetHeightUp_ -
+            scrollHeight_ : 0.f;
+    } else {
+        inputH = textFieldManager ? (pipelineContext->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
+                                    textFieldManager->GetHeight()) : 0.f;
+    }
     // keyboardH : keyboard height + height of the bottom navigation bar
     auto keyboardH = keyboardInsert.Length() + manager->GetSystemSafeArea().bottom_.Length();
     // The minimum height of the input component from the bottom of the screen after popping up the soft keyboard
@@ -821,6 +832,7 @@ float SheetPresentationPattern::GetSheetHeightChange()
     // The expected height of the sheet to be lifted
     auto h = inputMinH - inputH;
     if (h <= maxH) {
+        RecoverScrollOrResizeAvoidStatus();
         // sheet is lifted up with h
         TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet is lifted up with h = %{public}f", h);
         return h;
@@ -1557,6 +1569,7 @@ SheetType SheetPresentationPattern::GetSheetType()
     }
     SheetType sheetType = SheetType::SHEET_BOTTOM;
     auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, sheetType);
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
@@ -1912,6 +1925,16 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
         windowChanged_ = true;
     }
 
+    if (type == WindowSizeChangeReason::ROTATION && sheetType == SheetType::SHEET_CENTER) {
+        auto recoverTask = [weak = WeakClaim(this), id = Container::CurrentId()] () {
+            ContainerScope scope(id);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->RecoverHalfFoldOrAvoidStatus();
+        };
+        PostTask(recoverTask, "ArkUISheetHalfFoldStatusSwitch");
+    }
+
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipelineContext = host->GetContext();
@@ -1953,8 +1976,26 @@ void SheetPresentationPattern::ScrollTo(float height)
     SetColumnMinSize(!isScrolling_);
     if (!AdditionalScrollTo(scroll, height)) {
         scrollHeight_ = height;
-        layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(GetScrollHeight() - scrollHeight_)));
-        scrollPattern->UpdateCurrentOffset(-height, SCROLL_FROM_JUMP);
+        float maxScrollDecreaseHeight = scrollHeight_;
+        float maxAvoidSize = keyboardHeight_ - (sheetType_ == SheetType::SHEET_CENTER ? height_ - centerHeight_ : 0.f);
+        auto pipelineContext = host->GetContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto useCaretAvoidMode = pipelineContext->UsingCaretAvoidMode();
+        /*
+         * when the screen rotates from portrait to landscape, and the sheet needs to avoid caret twice,
+         * there is a condition that, the caret position that does not exceed the height of sheet in portrait mode,
+         * may be exceed the height of sheet in landscape mode. In that case,
+         * the distance to avoid caret may exceed as well. To keep bindSheet display normally,
+         * we need to obtain the minimum content height and then the avoidance is made.
+         */
+        if (useCaretAvoidMode && NonNegative(maxAvoidSize) && NonNegative(maxAvoidSize - sheetHeightUp_) &&
+            maxScrollDecreaseHeight > maxAvoidSize - sheetHeightUp_) {
+            maxScrollDecreaseHeight = maxAvoidSize - sheetHeightUp_;
+        }
+        layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt,
+            CalcLength(GetScrollHeight() - maxScrollDecreaseHeight)));
+        auto curScrollOffset = (useCaretAvoidMode && Positive(height)) ? scrollPattern->GetTotalOffset() : 0.f;
+        scrollPattern->UpdateCurrentOffset(-height + curScrollOffset, SCROLL_FROM_JUMP);
     }
     scroll->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
@@ -1970,8 +2011,16 @@ bool SheetPresentationPattern::AdditionalScrollTo(const RefPtr<FrameNode>& scrol
     auto buildContent = GetFirstFrameNodeOfBuilder();
     CHECK_NULL_RETURN(buildContent, false);
     auto scrollHeight = scroll->GetGeometryNode() ? scroll->GetGeometryNode()->GetFrameSize().Height() : .0f;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto useCaretAvoidMode = pipelineContext->UsingCaretAvoidMode();
+    if (useCaretAvoidMode) {
+        scrollHeight = GetScrollHeight();
+    }
     auto childHeight = buildContent->GetGeometryNode() ? buildContent->GetGeometryNode()->GetFrameSize().Height() : .0f;
-    if (scrollHeight - height <= childHeight) {
+    if (scrollHeight <= childHeight) {
         return false;
     }
     auto layoutProp = scroll->GetLayoutProperty<ScrollLayoutProperty>();
@@ -1985,7 +2034,8 @@ bool SheetPresentationPattern::AdditionalScrollTo(const RefPtr<FrameNode>& scrol
     layoutProp->UpdateUserDefinedIdealSize(
         CalcSize(std::nullopt, CalcLength(GetScrollHeight() - (scrollHeight - childHeight + height))));
     // And then scroll move the content with '-height' offset
-    scrollPattern->UpdateCurrentOffset(-height, SCROLL_FROM_JUMP);
+    auto curScrollOffset = (useCaretAvoidMode && Positive(height)) ? scrollPattern->GetTotalOffset() : 0.f;
+    scrollPattern->UpdateCurrentOffset(-height + curScrollOffset, SCROLL_FROM_JUMP);
     return true;
 }
 
@@ -2500,7 +2550,7 @@ void SheetPresentationPattern::OverlaySheetSpringBack()
     overlayManager->SheetSpringBack();
 }
 
-void SheetPresentationPattern::AvoidKeyboardBySheetMode()
+void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
 {
     if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE) {
         TAG_LOGD(AceLogTag::ACE_SHEET, "Sheet will not avoid keyboard.");
@@ -2511,7 +2561,7 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode()
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetSafeAreaManager();
-    if (keyboardHeight_ == manager->GetKeyboardInset().Length()) {
+    if (keyboardHeight_ == manager->GetKeyboardInset().Length() && !forceAvoid) {
         return;
     }
     keyboardHeight_ = manager->GetKeyboardInset().Length();
@@ -2634,6 +2684,22 @@ bool SheetPresentationPattern::IsCurSheetNeedHalfFoldHover()
     return isHoverMode && GetSheetType() == SheetType::SHEET_CENTER;
 }
 
+void SheetPresentationPattern::GetCurrentScrollHeight()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto scrollNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    auto curOffset = scrollPattern->GetTotalOffset();
+    if (NearEqual(scrollHeight_, curOffset)) {
+        return;
+    }
+    TAG_LOGD(AceLogTag::ACE_SHEET, "scroll height changed because of user scrolling, %{public}f", curOffset);
+    scrollHeight_ = curOffset;
+}
+
 void SheetPresentationPattern::InitFoldCreaseRegion()
 {
     auto host = GetHost();
@@ -2677,5 +2743,41 @@ void SheetPresentationPattern::FireHoverModeChangeCallback()
         return;
     }
     OnHeightDidChange(centerHeight_);
+}
+
+void SheetPresentationPattern::RecoverHalfFoldOrAvoidStatus()
+{
+    TAG_LOGD(AceLogTag::ACE_SHEET, "recover half fold status because of window rotate");
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (IsCurSheetNeedHalfFoldHover()) {
+        RecoverAvoidKeyboardStatus();
+    } else {
+        AvoidSafeArea(true);
+    }
+}
+
+void SheetPresentationPattern::RecoverAvoidKeyboardStatus()
+{
+    RecoverScrollOrResizeAvoidStatus();
+    sheetHeightUp_ = 0.f;
+    OnHeightDidChange(centerHeight_);
+}
+
+void SheetPresentationPattern::RecoverScrollOrResizeAvoidStatus()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto scroll = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_VOID(scroll);
+    auto layoutProp = scroll->GetLayoutProperty<ScrollLayoutProperty>();
+    CHECK_NULL_VOID(layoutProp);
+    layoutProp->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(GetScrollHeight())));
+    resizeDecreasedHeight_ = 0.f;
+    scrollHeight_ = 0.f;
+    ScrollTo(0.f);
+    isScrolling_ = false;
 }
 } // namespace OHOS::Ace::NG
