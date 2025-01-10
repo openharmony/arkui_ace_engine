@@ -705,8 +705,9 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg013, TestSize.Level1)
     model.Create();
     auto menu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menu, nullptr);
-    auto container = FrameNode::CreateFrameNode("", 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
-    auto mockScroll = FrameNode::CreateFrameNode("", 2, AceType::MakeRefPtr<Pattern>());
+    auto container =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
+    auto mockScroll = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
     container->GetGeometryNode()->SetFrameSize(SizeF(200, 200));
     menu->GetGeometryNode()->SetFrameSize(SizeF(70, 70));
     mockScroll->MountToParent(container);
@@ -755,8 +756,9 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg014, TestSize.Level1)
     model.Create();
     auto menu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(menu, nullptr);
-    auto container = FrameNode::CreateFrameNode("", 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
-    auto mockScroll = FrameNode::CreateFrameNode("", 2, AceType::MakeRefPtr<Pattern>());
+    auto container =
+        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(-1, "", MenuType::MENU));
+    auto mockScroll = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>());
     container->GetGeometryNode()->SetFrameSize(SizeF(200, 200));
     menu->GetGeometryNode()->SetFrameSize(SizeF(70, 70));
     mockScroll->MountToParent(container);
@@ -847,6 +849,7 @@ HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg015, TestSize.Level1)
  */
 HWTEST_F(MenuWrapperTestNg, MenuWrapperPatternTestNg016, TestSize.Level1)
 {
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto wrapperNode =
         FrameNode::CreateFrameNode(V2::SELECT_OVERLAY_ETS_TAG, 1, AceType::MakeRefPtr<MenuWrapperPattern>(1));
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
