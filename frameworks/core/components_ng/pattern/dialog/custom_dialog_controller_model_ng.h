@@ -44,8 +44,9 @@ private:
     static TaskExecutor::Task ParseOpenDialogTask(int32_t currentId, const WeakPtr<AceType>& controller,
         DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs, std::function<void()>&& buildFunc,
         const RefPtr<OverlayManager>& overlayManager);
-    static TaskExecutor::Task ParseCloseDialogTask(const WeakPtr<AceType>& controller, DialogProperties& dialogProperties,
-        std::vector<WeakPtr<AceType>>& dialogs, const RefPtr<OverlayManager>& overlayManager);
+    static TaskExecutor::Task ParseCloseDialogTask(const WeakPtr<AceType>& controller,
+        DialogProperties& dialogProperties, std::vector<WeakPtr<AceType>>& dialogs,
+        const RefPtr<OverlayManager>& overlayManager);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_DIALOG_JS_CUSTOM_DIALOG_CONTROLLER_H

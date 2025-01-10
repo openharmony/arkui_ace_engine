@@ -31,11 +31,12 @@ Ark_NativePointer CtorImpl(const Ark_CustomDialogControllerOptions* value)
     peer->IncRefCount();
     CHECK_NULL_RETURN(value, AceType::RawPtr(peer));
 
-    LOGE("CustomDialogControllerAccessor::CtorImpl. There is no nodes.");
-
-    peer->SetOwnerView(nullptr); // TODO. SetOwnerView is not implemented yet. We need to pass frame node.
-    // TODO. SetBuilder is not implemented. We need to pass value->builder and frame node to peer->SetBuilder.
-    // TODO. SetOnCancel is not implemented. We need to pass value->cancel and frame node to peer->SetOnCancel.
+    LOGE("CustomDialogControllerAccessor::CtorImpl. There is no a frame node for SetOwnerView.");
+    peer->SetOwnerView(nullptr);
+    LOGE("CustomDialogControllerAccessor::CtorImpl. There is no a frame node for SetBuilder.");
+    // Call peer->SetBuilder with value->builder and frameNode if it possible.
+    LOGE("CustomDialogControllerAccessor::CtorImpl. There is no a frame node for SetOnCancel.");
+    peer->SetOnCancel(value->cancel, nullptr);
     peer->SetAutoCancel(value->autoCancel);
     peer->SetDialogAlignment(value->alignment);
     peer->SetOffset(value->offset);
