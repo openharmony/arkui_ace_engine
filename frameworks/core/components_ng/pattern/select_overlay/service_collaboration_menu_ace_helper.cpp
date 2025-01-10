@@ -186,14 +186,24 @@ void ServiceCollaborationMenuAceHelper::CreateStartIcon(uint32_t iconId, const R
 RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     const std::string& value, const std::string& iconType, const Color& color, bool needEndIcon)
 {
-    auto iconPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(iconPipeline, nullptr);
-    auto iconTheme = iconPipeline->GetTheme<IconTheme>();
-    CHECK_NULL_RETURN(iconTheme, nullptr);
-    auto richTheme = iconPipeline->GetTheme<RichEditorTheme>();
+    auto textPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(textPipeline, nullptr);
+    auto selectTheme = textPipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, nullptr);
+    auto richTheme = textPipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richTheme, nullptr);
-    return CreateMainMenuItem(
-        value, GetSymbolId(iconType), color == Color::BLACK ? richTheme->GetMenuTextColor() : color, needEndIcon);
+    auto mainMenuItem = CreateMainMenuItem(
+        value, GetSymbolId(iconType), richTheme->GetMenuTextColor(), needEndIcon);
+    CHECK_NULL_RETURN(mainMenuItem, nullptr);
+    if (!needEndIcon) {
+        auto leftRow = DynamicCast<FrameNode>(mainMenuItem->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(leftRow, nullptr);
+        auto textNode = DynamicCast<FrameNode>(leftRow->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(textNode, nullptr);
+        textNode->GetRenderContext()->UpdateOpacity(selectTheme->GetDisabledFontColorAlpha());
+        textNode->MarkModifyDone();
+    }
+    return mainMenuItem;
 }
 RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     const std::string& value, uint32_t iconId, const Color& color, bool needEndIcon)
