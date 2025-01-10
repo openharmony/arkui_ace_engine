@@ -1384,6 +1384,9 @@ bool ScrollByOffsetToParent(const RefPtr<NG::FrameNode>& curFrameNode, const Ref
     if (!scrollFunc || scrollAxis == Axis::NONE) {
         return false;
     }
+    if (parentFrameNode->GetTag() == V2::SCROLL_ETS_TAG) {
+        return false;
+    }
     auto moveOffset = NG::ScrollableUtils::GetMoveOffset(parentFrameNode, curFrameNode, scrollAxis == Axis::VERTICAL,
         scrollAbility.contentStartOffset, scrollAbility.contentEndOffset);
     if (!NearZero(moveOffset)) {
