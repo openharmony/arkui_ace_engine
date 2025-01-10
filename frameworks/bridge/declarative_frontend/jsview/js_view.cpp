@@ -856,7 +856,7 @@ void JSViewPartialUpdate::Create(const JSCallbackInfo& info)
 
     if (info[0]->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
-        auto* view = object->Unwrap<JSView>();
+        auto* view = JSViewPartialUpdate::GetNativeViewPartialUpdate(object);
         if (view == nullptr) {
             LOGE("View is null");
             return;
@@ -909,7 +909,8 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
     }
 
     auto viewObj = JSRef<JSObject>::Cast(params[PARAM_VIEW_OBJ]);
-    auto* view = viewObj->Unwrap<JSViewPartialUpdate>();
+    JSRef<JSObject> nativeViewPartialUpdate = viewObj->GetProperty("nativeViewPartialUpdate");
+    auto* view = nativeViewPartialUpdate->Unwrap<JSViewPartialUpdate>();
     if (!view) {
         return;
     }
@@ -1163,7 +1164,11 @@ bool JSViewPartialUpdate::JSAllowReusableV2Descendant()
 
 void JSViewPartialUpdate::ConstructorCallback(const JSCallbackInfo& info)
 {
-    JSRef<JSObject> thisObj = info.This();
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        LOGE("NativeViewPartialUpdate argument invalid");
+        return;
+    }
+    JSRef<JSObject> thisObj = JSRef<JSObject>::Cast(info[0]);
 
     // Get js view name by this.constructor.name
     JSRef<JSObject> constructor = thisObj->GetProperty("constructor");
@@ -1245,4 +1250,9 @@ void JSViewPartialUpdate::FindChildByIdForPreview(const JSCallbackInfo& info)
     return;
 }
 
+JSView* JSViewPartialUpdate::GetNativeViewPartialUpdate(JSRef<JSObject> obj)
+{
+    JSRef<JSObject> nativeViewPartialUpdate = obj->GetProperty("nativeViewPartialUpdate");
+    return nativeViewPartialUpdate->Unwrap<JSView>();
+}
 } // namespace OHOS::Ace::Framework
