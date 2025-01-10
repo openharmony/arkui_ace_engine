@@ -58,7 +58,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     void GetSwiper();
-    RefPtr<PaintWrapper> CreateSwiperDone();
+    void CreateSwiperDone();
     SwiperModelNG CreateSwiper();
     SwiperModelNG CreateArcSwiper();
     void CreateSwiperItems(int32_t itemNumber = ITEM_NUMBER);

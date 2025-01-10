@@ -14,8 +14,8 @@
  */
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_pattern_lock.h"
 
-
 #include "cj_lambda.h"
+
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 
 using namespace OHOS::Ace;
@@ -23,6 +23,8 @@ using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::Framework {
+const std::vector<V2::PatternLockChallengeResult> CHALLENGE_RESULT = { V2::PatternLockChallengeResult::CORRECT,
+    V2::PatternLockChallengeResult::WRONG };
 NativePatternLockController::NativePatternLockController() : FFIData()
 {
     LOGI("Native NativePatternLockController constructed: %{public}" PRId64, GetID());
@@ -34,6 +36,14 @@ void NativePatternLockController::Reset()
         controller_->Reset();
     }
 }
+
+void NativePatternLockController::SetChallengeResult(int64_t challengeResult)
+{
+    if (controller_) {
+        controller_->SetChallengeResult(CHALLENGE_RESULT[challengeResult]);
+    }
+}
+
 } // namespace OHOS::Ace::Framework
 
 extern "C" {
@@ -58,6 +68,18 @@ void FfiOHOSAceFrameworkPatternLockOnPatternComplete(void (*callback)(VectorInt3
         ffiCallback(&vectorC);
     };
     PatternLockModel::GetInstance()->SetPatternComplete(std::move(onPatternComplete));
+}
+void FfiOHOSAceFrameworkPatternLockonDotConnect(void (*callback)(int32_t idx))
+{
+    auto onDotConnect = [ffiCallback = CJLambda::Create(callback)](int64_t idx) { ffiCallback(idx); };
+    PatternLockModel::GetInstance()->SetDotConnect(std::move(onDotConnect));
+}
+void FfiOHOSAceFrameworkPatternLockActivateCircleStyle(CJCircleStyleOptions options)
+{
+    PatternLockModel::GetInstance()->SetActiveCircleColor(Color(options.color));
+    PatternLockModel::GetInstance()->SetActiveCircleRadius(
+        Dimension(options.radius, static_cast<DimensionUnit>(options.radiusUnit)));
+    PatternLockModel::GetInstance()->SetEnableWaveEffect(options.enableWaveEffect);
 }
 void FfiOHOSAceFrameworkPatternLockSelectedColor(uint32_t color)
 {
@@ -101,6 +123,15 @@ void FfiOHOSAceFrameworkPatternLockControllerReset(int64_t selfID)
     auto self = FFIData::GetData<NativePatternLockController>(selfID);
     if (self) {
         self->Reset();
+    } else {
+        LOGE("invalid pattern lock controller id");
+    }
+}
+void FfiOHOSAceFrameworkPatternLockControllerSetChallengeResult(int64_t selfID, int64_t challengeResult)
+{
+    auto self = FFIData::GetData<NativePatternLockController>(selfID);
+    if (self) {
+        self->SetChallengeResult(challengeResult);
     } else {
         LOGE("invalid pattern lock controller id");
     }

@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ComponentSnapshot {
+class ACE_FORCE_EXPORT ComponentSnapshot {
 public:
     using JsCallback = std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>;
     using NormalCallback = std::function<void(std::shared_ptr<Media::PixelMap>)>;

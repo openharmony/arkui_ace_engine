@@ -1092,6 +1092,11 @@ HWTEST_F(VideoTestExtraAddNg, UpdatePreviewImage001, TestSize.Level1)
     videoPattern->isInitialState_ = false;
     videoPattern->UpdatePreviewImage();
     EXPECT_EQ(posterLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
+
+    posterLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    videoPattern->showFirstFrame_ = true;
+    videoPattern->UpdatePreviewImage();
+    EXPECT_EQ(posterLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
 }
 
 /**

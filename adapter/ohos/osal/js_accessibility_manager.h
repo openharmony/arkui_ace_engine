@@ -273,6 +273,8 @@ public:
         ActionType& actionOp);
 
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter) override;
+    AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
+        const RefPtr<PipelineBase>& context) override;
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;

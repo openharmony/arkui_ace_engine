@@ -761,11 +761,32 @@ void PipelineContext::RemoveNavigationNode(int32_t pageId, int32_t nodeId) {}
 
 void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow) {}
 
-void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow) {}
+void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbSystemSafeArea(systemSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateSystemSafeArea(systemSafeArea);
+}
 
-void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow) {}
+void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbCutoutSafeArea(cutoutSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
+}
 
-void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow) {}
+void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSceneBoardWindow)
+{
+    if (checkSceneBoardWindow) {
+        safeAreaManager_->UpdateScbNavSafeArea(navSafeArea);
+        return;
+    }
+    safeAreaManager_->UpdateNavArea(navSafeArea);
+}
 
 KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
 {

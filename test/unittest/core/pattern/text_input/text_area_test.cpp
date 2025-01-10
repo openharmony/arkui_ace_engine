@@ -103,6 +103,13 @@ void TextAreaBase::SetUpTestSuite()
             }
             return textFieldTheme;
         });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([textFieldTheme = textFieldTheme](ThemeType type, int themeScopeId) -> RefPtr<Theme> {
+            if (type == ScrollBarTheme::TypeId()) {
+                return AceType::MakeRefPtr<ScrollBarTheme>();
+            }
+            return textFieldTheme;
+        });
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(MIN_PLATFORM_VERSION);
     MockPipelineContext::GetCurrent()->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
@@ -806,8 +813,8 @@ HWTEST_F(TextFieldUXTest, OnHandleMove008, TestSize.Level1)
      * tc.expected: step2. Check if the value is created.
      */
     pattern_->HandleSetSelection(5, 10, false);
-    pattern_->SetIsSingleHandle(false);
     pattern_->ProcessOverlay();
+    pattern_->SetIsSingleHandle(false);
     RectF handleRect(5, 5, 1, 1);
     pattern_->selectOverlay_->OnHandleMove(handleRect, true);
 

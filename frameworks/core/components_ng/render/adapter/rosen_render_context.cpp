@@ -3979,7 +3979,7 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
 void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
 {
     const auto& groupProperty = GetOrCreateBackground();
-    if (groupProperty->CheckBlurRadius(radius)) {
+    if (groupProperty->CheckBlurRadiusChanged(radius)) {
         // Same with previous value
         return;
     }
@@ -4000,7 +4000,7 @@ void RosenRenderContext::UpdateBackBlur(const Dimension& radius, const BlurOptio
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateBackground();
-    if (groupProperty->CheckBlurRadius(radius)) {
+    if (groupProperty->CheckBlurRadiusChanged(radius)) {
         // Same with previous value
         return;
     }
@@ -4012,10 +4012,27 @@ void RosenRenderContext::UpdateBackBlur(const Dimension& radius, const BlurOptio
     }
 }
 
+void RosenRenderContext::UpdateNodeBackBlur(const Dimension& radius, const BlurOption& blurOption)
+{
+    CHECK_NULL_VOID(rsNode_);
+    const auto& groupProperty = GetOrCreateBackground();
+    groupProperty->propBackdropBlurOption = blurOption;
+    if (groupProperty->CheckBlurRadiusChanged(radius) && groupProperty->CheckBlurOptionChanged(blurOption)) {
+        // Same with previous value
+        return;
+    }
+    groupProperty->propBlurRadius = radius;
+    SetBackBlurFilter();
+    if (blurOption.grayscale.size() > 1) {
+        Rosen::Vector2f grayScale(blurOption.grayscale[0], blurOption.grayscale[1]);
+        rsNode_->SetGreyCoef(grayScale);
+    }
+}
+
 void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
 {
     const auto& groupProperty = GetOrCreateForeground();
-    if (groupProperty->CheckBlurRadius(radius)) {
+    if (groupProperty->CheckBlurRadiusChanged(radius)) {
         // Same with previous value
         return;
     }
@@ -4027,7 +4044,7 @@ void RosenRenderContext::UpdateFrontBlur(const Dimension& radius, const BlurOpti
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateForeground();
-    if (groupProperty->CheckBlurRadius(radius)) {
+    if (groupProperty->CheckBlurRadiusChanged(radius)) {
         // Same with previous value
         return;
     }
@@ -4997,6 +5014,7 @@ void RosenRenderContext::SetSurfaceRotation(bool isLock)
 void RosenRenderContext::SetRenderFit(RenderFit renderFit)
 {
     CHECK_NULL_VOID(rsNode_);
+    propRenderFit_ = renderFit;
     auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     if (rsSurfaceNode) {
         rsSurfaceNode->SetFrameGravity(GetRosenGravity(renderFit));

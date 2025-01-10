@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 class EventInfoConvertor final {
 public:
     static bool ConvertMouseToTouchIfNeeded(const MouseInfo& mouseInfo, TouchEventInfo& touchEventInfo);
+    static bool IsTouchEventNeedAbandoned(const TouchEventInfo& touchEventInfo);
 private:
     EventInfoConvertor() = default;
     ~EventInfoConvertor() = default;

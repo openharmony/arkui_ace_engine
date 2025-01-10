@@ -128,7 +128,7 @@ public:
 
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override {}
 
-    void PostJsTask(std::function<void()>&& task, const std::string& name) override;
+    void PostJsTask(std::function<void()>&& task, const std::string& name, PriorityType priorityType) override;
     const std::string& GetAppID() const override;
     const std::string& GetAppName() const override;
     const std::string& GetVersionName() const override;

@@ -1107,7 +1107,7 @@ void HtmlToSpan::AddImageSpans(const SpanInfo& info, RefPtr<MutableSpanString> m
 RefPtr<MutableSpanString> HtmlToSpan::GenerateSpans(
     const std::string& allContent, const std::vector<SpanInfo>& spanInfos)
 {
-    auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>(UtfUtils::Str8ToStr16(allContent));
+    auto mutableSpan = AceType::MakeRefPtr<MutableSpanString>(UtfUtils::Str8DebugToStr16(allContent));
     RefPtr<MutableSpanString> span;
     for (auto& info : spanInfos) {
         if (info.type == HtmlType::PARAGRAPH) {

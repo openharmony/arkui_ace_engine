@@ -1327,4 +1327,11 @@ void WebModelNG::SetEnabledHapticFeedback(bool isEnabled)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateEnabledHapticFeedback(isEnabled);
 }
+
+void WebModelNG::SetOptimizeParserBudgetEnabled(bool enable)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateOptimizeParserBudgetEnabled(enable);
+}
 } // namespace OHOS::Ace::NG

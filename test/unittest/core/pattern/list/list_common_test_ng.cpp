@@ -585,7 +585,7 @@ HWTEST_F(ListCommonTestNg, MouseSelect001, TestSize.Level1)
      * @tc.steps: step1. Select item(index:0)
      * @tc.expected: The item(index:0) is selected
      */
-    MouseSelect(Offset(0, 0), Offset(LIST_WIDTH, 50.f));
+    MouseSelect(Offset(0, 0), Offset(WIDTH, 50.f));
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
     std::vector<RefPtr<FrameNode>> expectSelectItems = { GetChildFrameNode(frameNode_, 0) };
     EXPECT_EQ(pattern_->GetVisibleSelectedItems(), expectSelectItems);
@@ -594,7 +594,7 @@ HWTEST_F(ListCommonTestNg, MouseSelect001, TestSize.Level1)
      * @tc.steps: step2. Select from selected item(index:0) to item(index:1)
      * @tc.expected: Selected items unchanged, item(index:0) is selected, item(index:1) is unselected
      */
-    MouseSelect(Offset(0, 50.f), Offset(LIST_WIDTH, 150.f));
+    MouseSelect(Offset(0, 50.f), Offset(WIDTH, 150.f));
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
 
@@ -602,7 +602,7 @@ HWTEST_F(ListCommonTestNg, MouseSelect001, TestSize.Level1)
      * @tc.steps: step3. Select from unselected item(index:1) to item(index:1)
      * @tc.expected: Selected items changed, item(index:0) is unselected, item(index:1) is selected
      */
-    MouseSelect(Offset(0, 150.f), Offset(LIST_WIDTH, 170.f));
+    MouseSelect(Offset(0, 150.f), Offset(WIDTH, 170.f));
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
     std::vector<RefPtr<FrameNode>> expectSelectItems2 = { GetChildFrameNode(frameNode_, 1) };
@@ -612,14 +612,14 @@ HWTEST_F(ListCommonTestNg, MouseSelect001, TestSize.Level1)
      * @tc.steps: step4. Click selected item(index:1)
      * @tc.expected: Selected items unchanged, item(index:1) is selected
      */
-    MouseSelect(Offset(LIST_WIDTH / 2, 150.f), Offset(LIST_WIDTH / 2, 150.f));
+    MouseSelect(Offset(WIDTH / 2, 150.f), Offset(WIDTH / 2, 150.f));
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
 
     /**
      * @tc.steps: step5. Click unselected items(index:0)
      * @tc.expected: Each item not selected, item(index:0) item(index:1) are unselected
      */
-    MouseSelect(Offset(LIST_WIDTH / 2, 50.f), Offset(LIST_WIDTH / 2, 50.f));
+    MouseSelect(Offset(WIDTH / 2, 50.f), Offset(WIDTH / 2, 50.f));
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
 }
@@ -782,206 +782,6 @@ HWTEST_F(ListCommonTestNg, MouseSelect008, TestSize.Level1)
 }
 
 /**
- * @tc.name: AccessibilityProperty001
- * @tc.desc: Test List AccessibilityProperty func
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, AccessibilityProperty001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Scrollable List
-     */
-    CreateList();
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone();
-    EXPECT_TRUE(accessibilityProperty_->IsScrollable());
-    EXPECT_EQ(accessibilityProperty_->GetBeginIndex(), 0);
-    EXPECT_EQ(accessibilityProperty_->GetEndIndex(), 3);
-    EXPECT_EQ(accessibilityProperty_->GetCollectionItemCounts(), TOTAL_ITEM_NUMBER);
-
-    /**
-     * @tc.steps: step2. scroll to second item
-     */
-    ScrollTo(ITEM_MAIN_SIZE);
-    EXPECT_EQ(accessibilityProperty_->GetBeginIndex(), 1);
-    EXPECT_EQ(accessibilityProperty_->GetEndIndex(), 4);
-
-    /**
-     * @tc.steps: step3. unScrollable List
-     */
-    ClearOldNodes();
-    CreateList();
-    CreateListItems(2);
-    CreateDone();
-    EXPECT_FALSE(accessibilityProperty_->IsScrollable());
-    EXPECT_EQ(accessibilityProperty_->GetBeginIndex(), 0);
-    EXPECT_EQ(accessibilityProperty_->GetEndIndex(), 1);
-    EXPECT_EQ(accessibilityProperty_->GetCollectionItemCounts(), 2);
-}
-
-/**
- * @tc.name: AccessibilityProperty002
- * @tc.desc: Test List SetSpecificSupportAction when scroll to middle
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, AccessibilityProperty002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Scroll to Top.
-     */
-    CreateList();
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone();
-    accessibilityProperty_->ResetSupportAction();
-    uint64_t exptectActions = 0;
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions);
-
-    /**
-     * @tc.steps: step2. Scroll to middle.
-     */
-    ScrollTo(ITEM_MAIN_SIZE);
-    accessibilityProperty_->ResetSupportAction();
-    exptectActions = 0;
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_FORWARD);
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions);
-
-    /**
-     * @tc.steps: step3. Scroll to bottom.
-     */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    accessibilityProperty_->ResetSupportAction();
-    exptectActions = 0;
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SCROLL_BACKWARD);
-    EXPECT_EQ(GetActions(accessibilityProperty_), exptectActions);
-
-    /**
-     * @tc.steps: step4. UnScrollable List.
-     */
-    ClearOldNodes();
-    CreateList();
-    CreateListItems(2);
-    CreateDone();
-    accessibilityProperty_->ResetSupportAction();
-    EXPECT_EQ(GetActions(accessibilityProperty_), 0);
-}
-
-/**
- * @tc.name: AccessibilityProperty003
- * @tc.desc: Test ListItem AccessibilityProperty func
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, AccessibilityProperty003, TestSize.Level1)
-{
-    CreateList();
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone();
-    auto listItem = GetChildFrameNode(frameNode_, 0);
-    auto itemAccessibilityProperty = listItem->GetAccessibilityProperty<ListItemAccessibilityProperty>();
-    EXPECT_FALSE(itemAccessibilityProperty->IsSelected());
-
-    itemAccessibilityProperty->ResetSupportAction();
-    uint64_t exptectActions = 0;
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_SELECT);
-    exptectActions |= 1UL << static_cast<uint32_t>(AceAction::ACTION_CLEAR_SELECTION);
-    EXPECT_EQ(GetActions(itemAccessibilityProperty), exptectActions);
-}
-
-/**
- * @tc.name: AccessibilityProperty004
- * @tc.desc: Test ListItemGroup AccessibilityProperty func
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, AccessibilityProperty004, TestSize.Level1)
-{
-    CreateList();
-    CreateGroupWithSetting(GROUP_NUMBER, V2::ListItemGroupStyle::NONE);
-    CreateDone();
-    auto groupAccessibilityProperty =
-        GetChildFrameNode(frameNode_, 0)->GetAccessibilityProperty<ListItemGroupAccessibilityProperty>();
-    EXPECT_EQ(groupAccessibilityProperty->GetBeginIndex(), 0);
-    EXPECT_EQ(groupAccessibilityProperty->GetEndIndex(), 1);
-
-    groupAccessibilityProperty =
-        GetChildFrameNode(frameNode_, 3)->GetAccessibilityProperty<ListItemGroupAccessibilityProperty>();
-    EXPECT_EQ(groupAccessibilityProperty->GetBeginIndex(), -1);
-    EXPECT_EQ(groupAccessibilityProperty->GetEndIndex(), -1);
-}
-
-/**
- * @tc.name: PerformActionTest001
- * @tc.desc: ListItem Accessibility PerformAction test Select and ClearSelection.
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, PerformActionTest001, TestSize.Level1)
-{
-    CreateList();
-    CreateListItems(2);
-    CreateDone();
-    auto listItemPattern = GetChildPattern<ListItemPattern>(frameNode_, 0);
-    auto listItemAccessibilityProperty = GetChildAccessibilityProperty<ListItemAccessibilityProperty>(frameNode_, 0);
-
-    /**
-     * @tc.steps: step1. When listItem is unSelectable
-     * @tc.expected: can not be selected
-     */
-    listItemPattern->SetSelectable(false);
-    listItemAccessibilityProperty->ActActionSelect();
-    EXPECT_FALSE(listItemPattern->IsSelected());
-    listItemAccessibilityProperty->ActActionClearSelection();
-    EXPECT_FALSE(listItemPattern->IsSelected());
-
-    /**
-     * @tc.steps: step2. When listItem is Selectable
-     * @tc.expected: can be selected
-     */
-    listItemPattern->SetSelectable(true);
-    listItemAccessibilityProperty->ActActionSelect();
-    EXPECT_TRUE(listItemPattern->IsSelected());
-    listItemAccessibilityProperty->ActActionClearSelection();
-    EXPECT_FALSE(listItemPattern->IsSelected());
-}
-
-/**
- * @tc.name: PerformActionTest002
- * @tc.desc: List Accessibility PerformAction test ScrollForward and ScrollBackward.
- * @tc.type: FUNC
- */
-HWTEST_F(ListCommonTestNg, PerformActionTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. When list is not Scrollable
-     * @tc.expected: can not scrollPage
-     */
-    CreateList();
-    CreateListItems(2);
-    CreateDone();
-    accessibilityProperty_->ActActionScrollForward();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
-    accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
-
-    /**
-     * @tc.steps: step2. When list is Scrollable
-     * @tc.expected: can scrollPage
-     */
-    ClearOldNodes();
-    CreateList();
-    CreateListItems(TOTAL_ITEM_NUMBER);
-    CreateDone();
-
-    MockAnimationManager::GetInstance().SetTicks(TICK);
-    accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(TickPosition(-200.0f));
-    EXPECT_TRUE(TickPosition(-400.0f));
-
-    accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_TRUE(TickPosition(-200.0f));
-    EXPECT_TRUE(TickPosition(0));
-}
-
-/**
  * @tc.name: FRCCallback001
  * @tc.desc: Test FRC callback
  * @tc.type: FUNC
@@ -1046,7 +846,7 @@ HWTEST_F(ListCommonTestNg, EventHub001, TestSize.Level1)
      * @tc.steps: step5. Not drag on listItem
      * @tc.expected: Will not take effect
      */
-    info.SetGlobalPoint(Point(LIST_WIDTH + 1.f, LIST_HEIGHT));
+    info.SetGlobalPoint(Point(WIDTH + 1.f, HEIGHT));
     eventHub_->HandleOnItemDragStart(info);
     EXPECT_EQ(eventHub_->draggedIndex_, -1);
 }
@@ -1587,14 +1387,14 @@ HWTEST_F(ListCommonTestNg, ForEachDrag007, TestSize.Level1)
      * @tc.steps: step2. Set onMoveEvent to null
      * @tc.expected: dragEvent uninit
      */
-    CreateForEachList(3, 2, nullptr);
-    CreateDone();
+    forEachNode->SetOnMove(nullptr);
+    FlushUITasks();
     forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
     syntaxItem = AceType::DynamicCast<SyntaxItem>(forEachNode->GetChildAtIndex(0));
     listItem = AceType::DynamicCast<FrameNode>(syntaxItem->GetChildAtIndex(0));
     listItemEventHub = listItem->GetEventHub<ListItemEventHub>();
     gestureHub = listItemEventHub->GetOrCreateGestureEventHub();
-    EXPECT_NE(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
+    EXPECT_EQ(gestureHub->GetDragEventActuator()->userCallback_, nullptr);
 }
 
 /**

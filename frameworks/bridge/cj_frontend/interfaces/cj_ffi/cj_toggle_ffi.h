@@ -36,6 +36,12 @@ CJ_EXPORT void FfiOHOSAceFrameworkToggleOnChange(void (*callback)(bool isOn));
 CJ_EXPORT void FfiOHOSAceFrameworkTogglePop();
 CJ_EXPORT void FfiToggleSetResponseRegion(CJResponseRegion value);
 CJ_EXPORT void FfiToggleSetResponseRegionArray(VectorStringPtr vecContent);
+CJ_EXPORT void FfiOHOSAceFrameworkToggleSwitchStyle(
+    double pointRadius, uint32_t unselectedColor,
+    uint32_t pointColor, double trackBorderRadius);
+CJ_EXPORT void FfiOHOSAceFrameworkToggleBackgroundColor(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkToggleHoverEffect(int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkToggleRadius(double radius, int32_t unit);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TOGGLE_FFI_H

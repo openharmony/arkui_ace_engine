@@ -20,15 +20,23 @@
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.h"
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "core/components_ng/pattern/ui_extension/platform_accessibility_child_tree_callback.h"
+#include "core/components_ng/pattern/ui_extension/surface_proxy_node.h"
 
 namespace OHOS::Ace::NG {
+enum DCResultCode : int32_t {
+    DC_NO_ERRORS = 0,
+    DC_INTERNAL_ERROR = 10011,
+    DC_WORKER_HAS_USED_ERROR = 10012,
+    DC_ONLY_RUN_ON_SCB = 10013,
+    DC_PARAM_ERROE = 10014
+};
 
 struct DynamicDumpInfo {
     int64_t createLimitedWorkerTime = 0;
 };
 
-class DynamicPattern : public PlatformPattern, public PlatformAccessibilityBase {
-    DECLARE_ACE_TYPE(DynamicPattern, PlatformPattern, PlatformAccessibilityBase);
+class DynamicPattern : public PlatformPattern, public PlatformAccessibilityBase, public SurfaceProxyNode {
+    DECLARE_ACE_TYPE(DynamicPattern, PlatformPattern, PlatformAccessibilityBase, SurfaceProxyNode);
 
 public:
     DynamicPattern();
@@ -66,6 +74,8 @@ public:
 
 private:
     void InitializeRender(void* runtime);
+    DCResultCode CheckConstraint();
+    void HandleErrorCallback(DCResultCode resultCode);
 
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     void DispatchFocusActiveEvent(bool isFocusActive) override;

@@ -968,13 +968,13 @@ HWTEST_F(GridCommonTestNg, EventHub001, TestSize.Level1)
     CreateFixedItems(8);
     CreateDone();
     auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
-    mockRenderContext->rect_ = RectF(0, 0, GRID_WIDTH, GRID_HEIGHT);
+    mockRenderContext->rect_ = RectF(0, 0, WIDTH, HEIGHT);
 
     /**
      * @tc.cases: case1. Position out of grid
      * @tc.expected: Return -1
      */
-    EXPECT_EQ(eventHub_->GetInsertPosition(GRID_WIDTH + 1.f, GRID_HEIGHT), NULL_VALUE);
+    EXPECT_EQ(eventHub_->GetInsertPosition(WIDTH + 1.f, HEIGHT), NULL_VALUE);
 
     /**
      * @tc.cases: case2. Position in item
@@ -986,14 +986,14 @@ HWTEST_F(GridCommonTestNg, EventHub001, TestSize.Level1)
      * @tc.cases: case3. Position in grid but not in item
      * @tc.expected: Return items count:8
      */
-    EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_MAIN_SIZE, GRID_HEIGHT), 8);
+    EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_MAIN_SIZE, HEIGHT), 8);
 
     /**
      * @tc.cases: case4. Position in grid but not in item and in currentRect_
      * @tc.expected: Return -1
      */
-    pattern_->info_.currentRect_ = RectF(0, 0, GRID_WIDTH, GRID_HEIGHT);
-    EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_MAIN_SIZE, GRID_HEIGHT), NULL_VALUE);
+    pattern_->info_.currentRect_ = RectF(0, 0, WIDTH, HEIGHT);
+    EXPECT_EQ(eventHub_->GetInsertPosition(ITEM_MAIN_SIZE, HEIGHT), NULL_VALUE);
 }
 
 /**
@@ -1133,11 +1133,15 @@ HWTEST_F(GridCommonTestNg, ClipContent001, TestSize.Level1)
     FlushUITasks();
 
     EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetPaddingSize(true), SizeF(238, 398)));
-    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetPaddingRect()))).Times(1);
+    auto gridRect = frameNode_->GetGeometryNode()->GetPaddingRect();
+    gridRect.SetOffset(gridRect.GetOffset() - frameNode_->GetGeometryNode()->GetFrameOffset());
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(gridRect))).Times(1);
     props->UpdateContentClip({ ContentClipMode::CONTENT_ONLY, nullptr });
     FlushUITasks();
 
-    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetFrameRect()))).Times(2);
+    gridRect = frameNode_->GetGeometryNode()->GetFrameRect();
+    gridRect.SetOffset({ 0.0f, 0.0f });
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(gridRect))).Times(2);
     props->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
     FlushUITasks();
 
@@ -1218,7 +1222,7 @@ HWTEST_F(GridCommonTestNg, Focus003, TestSize.Level1)
      * @tc.steps: step3. Scroll to forth row
      * @tc.expected: item 0 scroll out of cache, lost focus
      */
-    pattern_->UpdateCurrentOffset(- ITEM_MAIN_SIZE * 1, SCROLL_FROM_UPDATE);
+    pattern_->UpdateCurrentOffset(-ITEM_MAIN_SIZE * 1, SCROLL_FROM_UPDATE);
     FlushUITasks();
     EXPECT_FALSE(GetChildFocusHub(frameNode_, 0)->IsCurrentFocus());
 

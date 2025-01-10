@@ -60,6 +60,7 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM_END };
 const std::vector<KeyboardAvoidMode> KEYBOARD_AVOID_MODE = { KeyboardAvoidMode::DEFAULT, KeyboardAvoidMode::NONE };
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
+constexpr float AVOID_DISTANCE = 16.0f;
 
 } // namespace
 
@@ -163,7 +164,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
                 Dimension avoidDistanceDimension(avoidDisValue->ToNumber<double>(), avoidDisUnit);
                 instance->dialogProperties_.keyboardAvoidDistance = avoidDistanceDimension;
             } else {
-                Dimension avoidDistanceDimension(16.0f, OHOS::Ace::DimensionUnit::VP);
+                Dimension avoidDistanceDimension(AVOID_DISTANCE, OHOS::Ace::DimensionUnit::VP);
                 instance->dialogProperties_.keyboardAvoidDistance = avoidDistanceDimension;
             }
         }
