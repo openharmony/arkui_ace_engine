@@ -6529,6 +6529,7 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
     }
     RectT<int32_t> rect;
     if (focusedAccessibilityId_ <= 0 || !GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
+        focusedAccessibilityId_ = -1;
         renderContext->ResetAccessibilityFocusRect();
         renderContext->UpdateAccessibilityFocus(false);
         return;
@@ -6567,13 +6568,16 @@ bool WebPattern::GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t ac
         return false;
     }
     CHECK_NULL_RETURN(delegate_, false);
-    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
-        delegate_->GetAccessibilityNodeInfoById(accessibilityId);
-    if (!info) {
+    int32_t rectWidth = 0;
+    int32_t rectHeight = 0;
+    int32_t rectX = 0;
+    int32_t rectY = 0;
+    bool result = delegate_->GetAccessibilityNodeRectById(accessibilityId, &rectWidth, &rectHeight, &rectX, &rectY);
+    if (!result) {
         return false;
     }
 
-    paintRect.SetRect(info->GetRectX(), info->GetRectY(), info->GetRectWidth(), info->GetRectHeight());
+    paintRect.SetRect(rectX, rectY, rectWidth, rectHeight);
     return true;
 }
 

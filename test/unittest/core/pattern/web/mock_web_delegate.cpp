@@ -1064,6 +1064,11 @@ bool WebDelegate::ExecuteAction(
 {
     return false;
 }
+bool WebDelegate::GetAccessibilityNodeRectById(
+    int64_t accessibilityId, int32_t* width, int32_t* height, int32_t* offsetX, int32_t* offsetY)
+{
+    return false;
+}
 void WebDelegate::SetAccessibilityState(bool state, bool isDelayed) {}
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(
     int64_t accessibilityId, bool isAccessibilityFocus)
