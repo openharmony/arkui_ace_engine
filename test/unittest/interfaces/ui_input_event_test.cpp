@@ -99,4 +99,38 @@ HWTEST_F(UIInputEventTest, UIInputEventTest001, TestSize.Level1)
     EXPECT_EQ(sourceType, UI_INPUT_EVENTT_SOURCE_TYPE_MOUSE);
     EXPECT_EQ(toolType, UI_INPUT_EVENT_TOOL_TYPE_JOYSTICK);
 }
+
+/**
+ * @tc.name: NativeTouchEventTest001
+ * @tc.desc: Test OH_ArkUI_PointerEvent_GetChangedPointerId function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, NativeTouchEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1.create ArkUI_NodeEvent, related function is called.
+     */
+    ArkUI_NodeEvent nodeEvent;
+    ArkUINodeEvent event;
+    ArkUI_UIInputEvent uiInputEvent;
+    event.touchEvent.changedPointerId = 1;
+    event.touchEvent.touchPointSize = 1;
+    uint32_t pointerIndex = 0;
+    uiInputEvent.inputEvent = &event.touchEvent;
+    uiInputEvent.eventTypeId = C_TOUCH_EVENT_ID;
+    nodeEvent.origin = &uiInputEvent;
+    nodeEvent.category = NodeEventCategory::NODE_EVENT_CATEGORY_INPUT_EVENT;
+    auto inputEvent = OH_ArkUI_NodeEvent_GetInputEvent(&nodeEvent);
+
+    /**
+     * @tc.steps: step2. call functions.
+     */
+    auto changed_PointerId = OH_ArkUI_PointerEvent_GetChangedPointerId(inputEvent, &pointerIndex);
+
+    /**
+     * @tc.expected: Return expected results.
+     */
+    EXPECT_EQ(changed_PointerId, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(pointerIndex, 1);
+}
 } // namespace OHOS::Ace
