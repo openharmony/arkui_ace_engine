@@ -987,7 +987,7 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
 
     newSections = { WaterFlowSections::Section { .itemsCount = 2, .crossCount = 5 } };
     secObj->ChangeData(4, 1, newSections);
-    EXPECT_EQ(info_->newStartIndex_, -1);
+    EXPECT_EQ(info_->newStartIndex_, -2);
 
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 13);
@@ -1004,7 +1004,7 @@ HWTEST_F(WaterFlowSWTest, NotifyDataChange002, TestSize.Level1)
 
     newSections = { WaterFlowSections::Section { .itemsCount = 30, .crossCount = 5 } };
     secObj->ChangeData(6, 1, newSections);
-    EXPECT_EQ(info_->newStartIndex_, -2);
+    EXPECT_EQ(info_->newStartIndex_, -1);
 }
 
 /**
@@ -1264,7 +1264,7 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition003, TestSize.Level1)
     };
     secObj->ChangeData(0, 2, newSection);
 
-    EXPECT_EQ(info_->newStartIndex_, 6);
+    EXPECT_EQ(info_->newStartIndex_, -1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 6);
@@ -1293,7 +1293,7 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition003, TestSize.Level1)
     };
     secObj->ChangeData(0, 2, newSection);
 
-    EXPECT_EQ(info_->newStartIndex_, 6);
+    EXPECT_EQ(info_->newStartIndex_, -1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 6);
@@ -1665,7 +1665,7 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition006, TestSize.Level1)
 
     secObj->ChangeData(0, 2, newSection);
 
-    EXPECT_EQ(info_->newStartIndex_, 5);
+    EXPECT_EQ(info_->newStartIndex_, -1);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(info_->startIndex_, 5);
@@ -1682,6 +1682,66 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition006, TestSize.Level1)
     EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -25.000000 EndPos: 180.000000 Items [2 4 ] }");
     EXPECT_TRUE(info_->lanes_[1][0].items_.empty());
     EXPECT_EQ(info_->lanes_[2][0].ToString(), "{StartPos: 200.000000 EndPos: 606.000000 Items [5 6 7 8 ] }");
+}
+
+/**
+ * @tc.name: KeepContentPosition007
+ * @tc.desc: In segment layout, test the function of KeepContentPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, KeepContentPosition007, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(45);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_10);
+    CreateDone();
+
+    /**
+     * @ts.brief: when use section.UPDATE operate the section on the screen and use section.UPDATE operate the section
+     on the upper of screen, can't keep content unchanged.
+     * @tc.steps: step1. current lanes_[2,3,4]: [5, 12], operate lanes_[0](on the upper of screen) and lanes_[3](on the
+     screen).
+     * @tc.expected: newStartIndex_ should be set to -2, can't keep content unchanged.
+     */
+    ScrollToIndex(5, false, ScrollAlign::START);
+    EXPECT_EQ(info_->startIndex_, 5);
+    EXPECT_EQ(info_->endIndex_, 12);
+    EXPECT_TRUE(info_->lanes_[0][0].items_.empty());
+    EXPECT_TRUE(info_->lanes_[1][0].items_.empty());
+    EXPECT_EQ(info_->lanes_[2][0].ToString(), "{StartPos: 0.000000 EndPos: 200.000000 Items [5 ] }");
+    EXPECT_EQ(info_->lanes_[2][1].ToString(), "{StartPos: 0.000000 EndPos: 100.000000 Items [6 ] }");
+    EXPECT_EQ(info_->lanes_[2][2].ToString(), "{StartPos: 0.000000 EndPos: 200.000000 Items [7 ] }");
+    EXPECT_EQ(info_->lanes_[3][0].ToString(), "{StartPos: 200.000000 EndPos: 300.000000 Items [8 ] }");
+    EXPECT_EQ(info_->lanes_[3].size(), 2);
+
+    // itemsCount reduce from 3 to 2
+    std::vector<WaterFlowSections::Section> newSection = { WaterFlowSections::Section {
+        .itemsCount = 2, .crossCount = 3, .margin = MARGIN_2, .rowsGap = Dimension(5.0f) } };
+    frameNode_->ChildrenUpdatedFrom(0);
+    frameNode_->RemoveChildAtIndex(0);
+    info_->NotifyDataChange(0, -1);
+    secObj->ChangeData(0, 1, newSection);
+
+    // crossCount reduce from 2 to 1
+    newSection = { WaterFlowSections::Section { .itemsCount = 2, .crossCount = 1 } };
+    secObj->ChangeData(3, 1, newSection);
+
+    // can't keep content unchanged
+    EXPECT_EQ(info_->newStartIndex_, -2);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(info_->startIndex_, 5);
+    EXPECT_EQ(info_->endIndex_, 11);
+    EXPECT_TRUE(info_->lanes_[0][0].items_.empty());
+    EXPECT_TRUE(info_->lanes_[1][0].items_.empty());
+    EXPECT_EQ(info_->lanes_[2][0].ToString(), "{StartPos: 0.000000 EndPos: 100.000000 Items [5 ] }");
+    EXPECT_EQ(info_->lanes_[2][1].ToString(), "{StartPos: 0.000000 EndPos: 200.000000 Items [6 ] }");
+    EXPECT_EQ(info_->lanes_[2][2].ToString(), "{StartPos: 0.000000 EndPos: 0.000000 empty}");
+    EXPECT_EQ(info_->lanes_[3][0].ToString(), "{StartPos: 200.000000 EndPos: 500.000000 Items [7 8 ] }");
+    EXPECT_EQ(info_->lanes_[3].size(), 1);
 }
 
 /**
