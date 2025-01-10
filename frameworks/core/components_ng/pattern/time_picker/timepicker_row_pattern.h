@@ -607,9 +607,6 @@ public:
 
     void SetEnableCascade(bool value)
     {
-        if (isEnableCascade_ != value) {
-            isEnableCascade_ = false;
-        }
         isEnableCascade_ = value;
     }
 
