@@ -157,7 +157,7 @@ RichEditorPattern::~RichEditorPattern()
 void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
 {
     if (GetTextContentLength() > maxLength_.value_or(INT_MAX)) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return;
     }
     CHECK_NULL_VOID(value && styledString_);
@@ -316,12 +316,8 @@ void RichEditorPattern::InsertValueInStyledString(const std::u16string& insertVa
         changeLength = textSelector_.GetTextEnd() - changeStart;
     }
     auto subValue = insertValue;
-    int32_t startLength = maxLength_.value_or(INT_MAX) + changeLength - GetTextContentLength();
-    if (subValue.length() >= startLength) {
-        auto range = TextEmojiProcessor::CalSubU16stringRange(
-            startLength, subValue.length() - startLength, subValue, true, true);
-        auto subLength = range.endIndex - range.startIndex;
-        subValue = subValue.substr(0, subValue.length() - subLength);
+    if (!ProcessTextTruncationOperation(subValue, calledByImf)) {
+        return;
     }
     auto needReplaceInTextPreview = (previewTextRecord_.needReplacePreviewText || previewTextRecord_.needReplaceText) &&
                                previewTextRecord_.replacedRange.end - previewTextRecord_.replacedRange.start > 0;
@@ -864,7 +860,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     bool updateCaret)
 {
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return 0;
     }
     auto host = GetHost();
@@ -1045,7 +1041,7 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
 int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
 {
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return 0;
     }
     CHECK_NULL_RETURN(customNode, 0);
@@ -1139,13 +1135,14 @@ void RichEditorPattern::SetSelfAndChildDraggableFalse(const RefPtr<UINode>& cust
 int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, bool isPaste, int32_t index)
 {
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return 0;
     }
-    auto allowInsertValue = GetTextContentLength() + options.value.length() - maxLength_.value_or(INT_MAX);
+    auto allowInsertValue =
+        GetTextContentLength() + static_cast<int32_t>(options.value.length()) - maxLength_.value_or(INT_MAX);
     auto length = CalculateTruncationLength(
         options.value, maxLength_.value_or(INT_MAX) - GetTextContentLength(), allowInsertValue);
-    options.value = options.value.substr(0, options.value.length() - length);
+    options.value = options.value.substr(0, static_cast<int32_t>(options.value.length()) - length);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddTextSpan, opts=%{public}s", ToBriefString(options).c_str());
     SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddTextSpan, opts=%{public}s", options.ToString().c_str());
     AdjustAddPosition(options);
@@ -1266,7 +1263,7 @@ void RichEditorPattern::UpdateTextBackgroundStyle(
 int32_t RichEditorPattern::AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste, int32_t index)
 {
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX) - 1) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return 0;
     }
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
@@ -4324,7 +4321,7 @@ void RichEditorPattern::HandleOnDragInsertStyledString(const RefPtr<SpanString>&
 void RichEditorPattern::AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& spans)
 {
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return;
     }
     if (textSelector_.IsValid()) {
@@ -5104,12 +5101,20 @@ void RichEditorPattern::InsertValueByOperationType(const std::u16string& insertV
 bool RichEditorPattern::ProcessTextTruncationOperation(std::u16string& text, bool calledByImf)
 {
     bool needTruncationInsertValue = calledByImf || !previewTextRecord_.needReplacePreviewText;
-    auto selectLength = textSelector_.GetTextEnd() - textSelector_.GetTextStart();
-    int32_t previewContentLength = previewTextRecord_.previewContent.length();
-    if (previewTextRecord_.previewContent.empty()) {
-        previewContentLength = previewTextRecord_.replacedRange.end - previewTextRecord_.replacedRange.start;
-    }
-    if (!needTruncationInsertValue || GetTextContentLength() - previewContentLength <= maxLength_.value_or(INT_MAX)) {
+    int32_t selectLength =
+        textSelector_.SelectNothing() ? 0 : textSelector_.GetTextEnd() - textSelector_.GetTextStart();
+    int32_t previewContentLength = previewTextRecord_.previewContent.empty()
+                                       ? previewTextRecord_.replacedRange.end - previewTextRecord_.replacedRange.start
+                                       : static_cast<int32_t>(previewTextRecord_.previewContent.length());
+
+    if (!needTruncationInsertValue || GetTextContentLength() - previewContentLength < maxLength_.value_or(INT_MAX)) {
+        if (needTruncationInsertValue && text.length() != 1) {
+            auto maxLength = maxLength_.value_or(INT_MAX) - GetTextContentLength() + previewContentLength;
+            auto allowInsertLength =
+                static_cast<int32_t>(text.length()) - CalculateTruncationLength(text, maxLength, text.length() - maxLength);
+            text = text.substr(0, allowInsertLength);
+            return true;
+        }
         return true;
     }
 
@@ -5118,8 +5123,8 @@ bool RichEditorPattern::ProcessTextTruncationOperation(std::u16string& text, boo
         return true;
     }
     if (!textSelector_.SelectNothing()) {
-        auto maxLength = text.length() - selectLength - selectLength;
-        auto allowInsertLength = text.length() - CalculateTruncationLength(text, selectLength, maxLength);
+        auto maxLength = static_cast<int32_t>(text.length()) - selectLength - selectLength;
+        auto allowInsertLength = static_cast<int32_t>(text.length()) - CalculateTruncationLength(text, selectLength, maxLength);
         if (allowInsertLength == 0) {
             TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
             return false;
