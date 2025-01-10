@@ -901,6 +901,7 @@ public:
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    void UpdateOptimizeParserBudgetEnabled(const bool enable);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);

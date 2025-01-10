@@ -201,6 +201,13 @@ typedef struct ArkUI_ListChildrenMainSize ArkUI_ListChildrenMainSize;
 typedef struct ArkUI_CustomProperty ArkUI_CustomProperty;
 
 /**
+ * @brief Define the information of the HostWindowInfo class for window properties.
+ *
+ * @since 16
+ */
+typedef struct ArkUI_HostWindowInfo ArkUI_HostWindowInfo;
+
+/**
  * @brief Define ActiveChildenInfo class information.
  *
  * @since 14
@@ -2078,6 +2085,8 @@ typedef enum {
     ARKUI_ERROR_CODE_GET_INFO_FAILED = 106201,
     /** The buffer size is not large enough. */
     ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR = 106202,
+    /** The node is not on main tree. */
+    ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE = 106203,
     /**
      * @error The node requesting focus is not focusable.
      * @since 16
@@ -2120,10 +2129,28 @@ typedef enum {
 } ArkUI_SafeAreaType;
 
 /**
+ * @brief Define an enum for the areas of the <b>ListItemGroup</b> component.
+ *
+ * @since 16
+ */
+typedef enum {
+    /** Outside the area of the <b>ListItemGroup</b> component. */
+    ARKUI_LIST_ITEM_GROUP_AREA_OUTSIDE = 0,
+    /** Area when the <b>ListItemGroup</b> component does not have the header, footer, or list item. */
+    ARKUI_LIST_ITEM_SWIPE_AREA_NONE,
+    /** List item area of the <b>ListItemGroup</b> component. */
+    ARKUI_LIST_ITEM_SWIPE_AREA_ITEM,
+    /** Header area of the <b>ListItemGroup</b> component. */
+    ARKUI_LIST_ITEM_SWIPE_AREA_HEADER,
+    /** Footer area of the <b>ListItemGroup</b> component. */
+    ARKUI_LIST_ITEM_SWIPE_AREA_FOOTER,
+} ArkUI_ListItemGroupArea;
+
+/**
  * @brief defines the enumerated value of the direction of the extended security zone.
  *
  * @since 12
-*/
+ */
 typedef enum {
     /** Upper area. */
     ARKUI_SAFE_AREA_EDGE_TOP = 1,
@@ -3924,6 +3951,23 @@ void OH_ArkUI_CustomProperty_Destroy(ArkUI_CustomProperty* handle);
  * @since 14
  */
 const char* OH_ArkUI_CustomProperty_GetStringValue(ArkUI_CustomProperty* handle);
+
+/**
+ * @brief Get window name from HostWindowInfo.
+ *
+ * @param info HostWindowInfo object pointer.
+ * @return Window name in HostWindowInfo.
+ * @since 16
+ */
+const char* OH_ArkUI_HostWindowInfo_GetName(ArkUI_HostWindowInfo* info);
+
+/**
+ * @brief Destroy the instance of HostWindowInfo.
+ *
+ * @param info Instance of HostWindowInfo to be destroyed.
+ * @since 16
+ */
+void OH_ArkUI_HostWindowInfo_Destroy(ArkUI_HostWindowInfo* info);
 
 /**
  * @brief Destroy ActiveChildenInfo instance.

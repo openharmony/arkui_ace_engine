@@ -28,6 +28,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "frameworks/base/error/error_code.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -5338,6 +5339,98 @@ HWTEST_F(NativeNodeTest, NativeNodeTest082, TestSize.Level1)
 }
 
 /**
+ * @tc.name: BackdropBlurTest
+ * @tc.desc: Test customNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, BackdropBlurTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create nodeAPI、rootNode、childNode.
+     */
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_STACK);
+    ASSERT_NE(rootNode, nullptr);
+
+    /**
+     * @tc.steps: step2. init value.
+     */
+    float val0 = 0.0f;
+    ArkUI_NumberValue value[] = {{.f32 = val0}, {.f32 = val0}, {.f32 = val0}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+
+    ArkUI_NumberValue value1[] = {{.f32 = val0}};
+    ArkUI_AttributeItem item1 = {value1, sizeof(value1) / sizeof(ArkUI_NumberValue)};
+
+    ArkUI_NumberValue value2[] = {{.f32 = val0}, {.f32 = val0}, {.f32 = val0}, {.f32 = val0}};
+    ArkUI_AttributeItem item2 = {value2, sizeof(value2) / sizeof(ArkUI_NumberValue)};
+    /**
+     * @tc.steps: step3. test NODE_BACKDROP_BLUR ,when one values are in the legal range.
+     */
+    value1[0].f32 = 20;
+    auto backdropBlurResult = nodeAPI->setAttribute(rootNode, NODE_BACKDROP_BLUR, &item1);
+    EXPECT_EQ(backdropBlurResult, 0);
+    auto backdropBlurVal = nodeAPI->getAttribute(rootNode, NODE_BACKDROP_BLUR);
+    EXPECT_EQ(backdropBlurVal->value[0].f32, 20);
+
+    /**
+     * @tc.steps: step4. test NODE_BACKDROP_BLUR ,when three values are in the legal range.
+     */
+    value[0].f32 = 20;
+    value[1].f32 = 30;
+    value[2].f32 = 50;
+    
+    backdropBlurResult = nodeAPI->setAttribute(rootNode, NODE_BACKDROP_BLUR, &item);
+    EXPECT_EQ(backdropBlurResult, 0);
+    backdropBlurVal = nodeAPI->getAttribute(rootNode, NODE_BACKDROP_BLUR);
+    EXPECT_EQ(backdropBlurVal->value[0].f32, 20);
+    EXPECT_EQ(backdropBlurVal->value[1].f32, 30);
+    EXPECT_EQ(backdropBlurVal->value[2].f32, 50);
+
+    /**
+     * @tc.steps: step5. test NODE_BACKDROP_BLUR ,when the first value is not in the legal range.
+     */
+    value[0].f32 = -20;
+    value[1].f32 = 30;
+    value[2].f32 = 50;
+
+    backdropBlurResult = nodeAPI->setAttribute(rootNode, NODE_BACKDROP_BLUR, &item);
+    EXPECT_EQ(backdropBlurResult, 401);
+
+    /**
+     * @tc.steps: step6. test NODE_BACKDROP_BLUR ,when the second value is not in the legal range.
+     */
+    value[0].f32 = 20;
+    value[1].f32 = 128;
+    value[2].f32 = 127;
+
+    backdropBlurResult = nodeAPI->setAttribute(rootNode, NODE_BACKDROP_BLUR, &item);
+    EXPECT_EQ(backdropBlurResult, 401);
+
+    /**
+     * @tc.steps: step7. test NODE_BACKDROP_BLUR ,when the third value is not in the legal range.
+     */
+    value[0].f32 = 20;
+    value[1].f32 = 127;
+    value[2].f32 = 128;
+
+    backdropBlurResult = nodeAPI->setAttribute(rootNode, NODE_BACKDROP_BLUR, &item);
+    EXPECT_EQ(backdropBlurResult, 401);
+
+    /**
+     * @tc.steps: step8. test NODE_BACKDROP_BLUR ,when four parameters are passed in.
+     */
+    value2[0].f32 = 20;
+    value2[1].f32 = 127;
+    value2[2].f32 = 127;
+    value2[3].f32 = 127;
+
+    backdropBlurResult = nodeAPI->setAttribute(rootNode, NODE_BACKDROP_BLUR, &item2);
+    EXPECT_EQ(backdropBlurResult, 401);
+}
+
+/**
  * @tc.name: NativeNodeTest083
  * @tc.desc: Test progressNode function.
  * @tc.type: FUNC
@@ -5391,5 +5484,100 @@ HWTEST_F(NativeNodeTest, NativeNodeIssueTest001, TestSize.Level1)
     ArkUI_NodeEvent event = { 0, 0 };
     event.node = node;
     OHOS::Ace::NodeModel::HandleNodeEvent(&event);
+}
+
+/**
+ * @tc.name: NativeNodeTest084
+ * @tc.desc: Test swiperNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest084, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = nodeAPI->createNode(ARKUI_NODE_SWIPER);
+    ArkUI_NumberValue value[] = { { .i32 = 1 }, { .i32 = 1 } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue), nullptr, nullptr };
+
+    value[0].i32 = true;
+    value[1].i32 = false;
+    auto ret = nodeAPI->setAttribute(rootNode, NODE_SWIPER_AUTO_PLAY, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    auto resultTtem = nodeAPI->getAttribute(rootNode, NODE_SWIPER_AUTO_PLAY);
+    EXPECT_TRUE(resultTtem->value[0].i32);
+    EXPECT_FALSE(resultTtem->value[1].i32);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_SWIPER_AUTO_PLAY), ARKUI_ERROR_CODE_NO_ERROR);
+    resultTtem = nodeAPI->getAttribute(rootNode, NODE_SWIPER_AUTO_PLAY);
+    EXPECT_FALSE(resultTtem->value[0].i32);
+    EXPECT_TRUE(resultTtem->value[1].i32);
+    nodeAPI->disposeNode(rootNode);
+}
+
+void LayoutCallback(void* userData)
+{
+}
+
+/**
+ * @tc.name: NativeNodeTest085
+ * @tc.desc: Test OH_ArkUI_RegisterLayoutCallbackOnNodeHandle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest085, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto ret = OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(node, nullptr, LayoutCallback);
+    EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(nullptr, nullptr, LayoutCallback);
+    EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeTest086
+ * @tc.desc: Test OH_ArkUI_RegisterDrawCallbackOnNodeHandle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest086, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto ret = OH_ArkUI_RegisterDrawCallbackOnNodeHandle(node, nullptr, LayoutCallback);
+    EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_RegisterDrawCallbackOnNodeHandle(nullptr, nullptr, LayoutCallback);
+    EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeTest087
+ * @tc.desc: Test OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest087, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto ret = OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(node);
+    EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(nullptr);
+    EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeTest088
+ * @tc.desc: Test OH_ArkUI_UnregisterDrawCallbackOnNodeHandle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest088, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_STACK);
+    auto ret = OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(node);
+    EXPECT_EQ(ret, ERROR_CODE_NO_ERROR);
+    ret = OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(nullptr);
+    EXPECT_EQ(ret, ERROR_CODE_PARAM_INVALID);
 }
 } // namespace OHOS::Ace

@@ -234,7 +234,7 @@ void BubblePaintMethod::PaintSingleBorder(RSCanvas& canvas, PaintWrapper* paintW
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
     CHECK_NULL_VOID(popupTheme);
     float borderWidth = popupTheme->GetBorderWidth().ConvertToPx();
-    if (borderWidth > 0.0f) {
+    if (GreatNotEqual(static_cast<double>(borderWidth), 0.0)) {
         IsPaintDoubleBorder(paintWrapper);
         RSPen pen;
         pen.SetAntiAlias(true);

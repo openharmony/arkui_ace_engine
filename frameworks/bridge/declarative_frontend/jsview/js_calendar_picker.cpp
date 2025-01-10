@@ -806,6 +806,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
             overlayManager->ShowCalendarDialog(
                 properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker");
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 } // namespace OHOS::Ace::Framework

@@ -46,6 +46,109 @@ struct AnimatorOption {
     }
 };
 
+class JsSimpleAnimatorOption {
+public:
+    JsSimpleAnimatorOption() = default;
+    ~JsSimpleAnimatorOption() = default;
+
+    napi_value OnSetDuration(napi_env env, napi_callback_info info);
+    napi_value OnSetEasing(napi_env env, napi_callback_info info);
+    napi_value OnSetDelay(napi_env env, napi_callback_info info);
+    napi_value OnSetFill(napi_env env, napi_callback_info info);
+    napi_value OnSetDirection(napi_env env, napi_callback_info info);
+    napi_value OnSetIterations(napi_env env, napi_callback_info info);
+
+    double GetBegin() const
+    {
+        return begin_;
+    }
+
+    void SetBegin(const double& begin)
+    {
+        begin_ = begin;
+    }
+
+    double GetEnd() const
+    {
+        return end_;
+    }
+
+    void SetEnd(const double& end)
+    {
+        end_ = end;
+    }
+
+    void SetDuration(const std::optional<int32_t>& duration)
+    {
+        duration_ = duration;
+    }
+
+    std::optional<int32_t> GetDuration() const
+    {
+        return duration_;
+    }
+
+    void SetEasing(const std::optional<std::string>& easing)
+    {
+        easing_ = easing;
+    }
+
+    std::optional<std::string> GetEasing() const
+    {
+        return easing_;
+    }
+
+    void SetDelay(const std::optional<int32_t>& delay)
+    {
+        delay_ = delay;
+    }
+
+    std::optional<int32_t> GetDelay() const
+    {
+        return delay_;
+    }
+
+    void SetFill(const std::optional<FillMode>& fill)
+    {
+        fill_ = fill;
+    }
+
+    std::optional<FillMode> GetFill() const
+    {
+        return fill_;
+    }
+
+    void SetDirection(const std::optional<AnimationDirection>& direction)
+    {
+        direction_ = direction;
+    }
+
+    std::optional<AnimationDirection> GetDirection() const
+    {
+        return direction_;
+    }
+
+    void SetIterations(const std::optional<int32_t>& iterations)
+    {
+        iterations_ = iterations;
+    }
+
+    std::optional<int32_t> GetIterations() const
+    {
+        return iterations_;
+    }
+
+private:
+    double begin_ = 0.0;
+    double end_ = 1.0;
+    std::optional<int32_t> duration_;
+    std::optional<int32_t> delay_;
+    std::optional<int32_t> iterations_;
+    std::optional<std::string> easing_;
+    std::optional<FillMode> fill_;
+    std::optional<AnimationDirection> direction_;
+};
+
 class AnimatorResult final {
 public:
     AnimatorResult() = default;

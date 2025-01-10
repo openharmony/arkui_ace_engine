@@ -258,6 +258,7 @@ ohos_source_set("ace_components_event") {
     "$ace_root/frameworks/core/components_ng/manager/focus/focus_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/focus/focus_view.cpp",
     "$ace_root/frameworks/core/event/axis_event.cpp",
+    "$ace_root/frameworks/core/event/event_info_convertor.cpp",
     "$ace_root/frameworks/core/event/mouse_event.cpp",
     "$ace_root/frameworks/core/event/touch_event.cpp",
     "$ace_root/frameworks/core/gestures/gesture_referee.cpp",

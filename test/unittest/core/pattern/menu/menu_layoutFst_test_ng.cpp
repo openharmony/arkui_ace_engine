@@ -124,6 +124,7 @@ constexpr int PLACEMENT_RIGHT_TOP_X = 120;
 constexpr int PLACEMENT_RIGHT_TOP_Y = 20;
 constexpr int PLACEMENT_RIGHT_BOTTOM_X = 120;
 constexpr int PLACEMENT_RIGHT_BOTTOM_Y = 38;
+const Dimension CONTENT_PADDING = 4.0_vp;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
 const std::vector<SelectParam> CREATE_VALUE = { { "content1", "icon1" }, { "content2", "" },
@@ -1572,7 +1573,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
     /**
      * @tc.steps: step4. layoutWrapper, target and the geometry node of target is not null, isContextMenu and
      * isContainerModal is true
-     * @tc.expected: targetOffset_ is OffsetF(-5.0f, -1.0f)
+     * @tc.expected: targetOffset_ is as expected
      */
     MockPipelineContext::GetCurrent()->SetWindowModal(WindowModal::CONTAINER_MODAL);
     MockPipelineContext::GetCurrent()->windowManager_ = AceType::MakeRefPtr<WindowManager>();
@@ -1580,7 +1581,7 @@ HWTEST_F(MenuLayout1TestNg, MenuLayoutAlgorithmTestNg038, TestSize.Level1)
         []() -> WindowMode { return WindowMode::WINDOW_MODE_FLOATING; });
 
     menuLayoutAlgorithm->InitTargetSizeAndPosition(layoutWrapper, true, menuPattern);
-    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, OffsetF(-5.0f, -1.0f));
+    EXPECT_EQ(menuLayoutAlgorithm->targetOffset_, OffsetF(-CONTENT_PADDING.ConvertToPx(), 0.0f));
     delete layoutWrapper;
     layoutWrapper = nullptr;
 }

@@ -139,11 +139,14 @@ void ArcIndexerLayoutAlgorithm::MeasureArc(LayoutWrapper* layoutWrapper)
     } else {
         arcRadius_ = height * HALF - itemRadius_ - verticalPadding * HALF;
     }
-    
+
     stepAngle_ = DOUBLE * atan2f(itemRadius_, arcRadius_) * HALF_CIRCLE_ANGLE / M_PI;
     auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
     if (autoCollapse && fullCount_ > ARC_INDEXER_COLLAPSE_ITEM_COUNT) {
         fullCount_ += 1;
+    }
+    if (fullCount_ > ARC_INDEXER_ITEM_MAX_COUNT) {
+        fullCount_ = ARC_INDEXER_ITEM_MAX_COUNT + 1;
     }
     if (stepAngle_ * fullCount_ > FULL_CIRCLE_ANGLE) {
         stepAngle_ = FULL_CIRCLE_ANGLE / fullCount_;

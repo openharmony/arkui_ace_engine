@@ -673,6 +673,30 @@ void JSNavigationStack::UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::f
     // When switching the navigation stack, it is necessary to immediately trigger a refresh
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation necessary to immediately trigger a refresh");
     stack->OnStateChanged();
+    stack->SetOnPopCallback([weakStack = AceType::WeakClaim(this)](const JSRef<JSVal>& param) {
+        auto navigationStack = weakStack.Upgrade();
+        CHECK_NULL_VOID(navigationStack);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(navigationStack->executionContext_);
+        auto size = navigationStack->GetSize();
+        if (size == 0) {
+            return;
+        }
+        auto pathInfo = navigationStack->GetJsPathInfo(size - 1);
+        if (pathInfo->IsEmpty()) {
+            return;
+        }
+        auto navDestinationId = pathInfo->GetProperty("navDestinationId");
+        if (!navDestinationId->IsString()) {
+            return;
+        }
+        auto id = navDestinationId->ToString();
+        auto navPathList = navigationStack->GetAllNavDestinationNodes();
+        for (auto iter : navPathList) {
+            if (navigationStack->ExecutePopCallback(iter.second, std::atoi(id.c_str()), param)) {
+                return;
+            }
+        }
+    });
 }
 
 void JSNavigationStack::OnAttachToParent(RefPtr<NG::NavigationStack> parent)
@@ -1264,5 +1288,30 @@ void JSNavigationStack::SetRecoveryFromReplaceDestination(int32_t index, bool va
         return;
     }
     pathInfo->SetProperty<bool>("recoveryFromReplaceDestination", value);
+}
+
+bool JSNavigationStack::ExecutePopCallback(const RefPtr<NG::UINode>& uiNode,
+    uint64_t navDestinationId, const JSRef<JSVal>& param)
+{
+    auto navDestinationNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(
+        NG::NavigationGroupNode::GetNavDestinationNode(uiNode));
+    CHECK_NULL_RETURN(navDestinationNode, false);
+    auto pattern = navDestinationNode->GetPattern<NG::NavDestinationPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    if (pattern->GetNavDestinationId() != navDestinationId) {
+        return false;
+    }
+    auto navPathInfo = AceType::DynamicCast<JSNavPathInfo>(pattern->GetNavPathInfo());
+    CHECK_NULL_RETURN(navPathInfo, false);
+    auto callback = navPathInfo->GetNavDestinationPopCallback();
+    if (callback->IsEmpty()) {
+        return false;
+    }
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "fire onPop callback: %{public}s", pattern->GetName().c_str());
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext_, false);
+    JSRef<JSVal> params[1];
+    params[0] = param;
+    callback->Call(JSRef<JSObject>(), 1, params);
+    return true;
 }
 } // namespace OHOS::Ace::Framework

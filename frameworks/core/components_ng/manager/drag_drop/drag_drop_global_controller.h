@@ -53,6 +53,8 @@ public:
     const WeakPtr<FrameNode> GetPrepareDragFrameNode() const;
     void SetPreDragStatus(PreDragStatus preDragStatus);
     PreDragStatus GetPreDragStatus() const;
+    void UpdateDragFilterShowingStatus(bool isShowing);
+    bool IsDragFilterShowing() const;
 
 private:
     DragDropGlobalController() = default;
@@ -64,6 +66,8 @@ private:
     RefPtr<FrameNode> currentDragNode_ = nullptr;
     WeakPtr<FrameNode> prepareDragFrameNode_;
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
+
+    bool isDragFilterShowing_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -433,7 +433,7 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
-    RefPtr<FrameNode> GetAncestorNodeOfFrame(bool checkBoundary = false) const;
+    RefPtr<FrameNode> GetAncestorNodeOfFrame(bool checkBoundary) const;
 
     std::string& GetNodeName()
     {
@@ -477,15 +477,24 @@ public:
 
     RectF GetTransformRectRelativeToWindow() const;
 
-    OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
+    // deprecated, please use GetPaintRectOffsetNG.
+    // this function only consider transform of itself when calculate transform,
+    // do not consider the transform of its ansestors
+    OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false) const;
 
-    OffsetF GetPaintRectOffsetNG(bool excludeSelf = false) const;
+    // returns a node's offset relative to root.
+    // and accumulate every ancestor node's graphic properties such as rotate and transform
+    // @param excludeSelf default false, set true can exclude self.
+    // @param checkBoundary default false. should be true if you want check boundary of window scene
+    // for getting the offset to window.
+    OffsetF GetPaintRectOffsetNG(bool excludeSelf = false, bool checkBoundary = false) const;
 
     bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
 
     RectF GetPaintRectToWindowWithTransform();
 
-    std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
+    std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(
+        bool excludeSelf = false, bool checkBoundary = false) const;
 
     OffsetF GetPaintRectOffsetToStage() const;
 
@@ -753,7 +762,7 @@ public:
         return viewPort_;
     }
 
-    std::optional<RectF> GetViewPort() const;
+    std::optional<RectF> GetViewPort(bool checkBoundary = false) const;
 
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     // speed is measured by millimeter/second
@@ -1240,8 +1249,6 @@ private:
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
-    OffsetF GetParentGlobalOffset() const;
-
     RefPtr<PaintWrapper> CreatePaintWrapper();
     void LayoutOverlay();
 
@@ -1457,7 +1464,8 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, false, { .isShowBadge = true } };
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, true,
+        false, true, false, { .isShowBadge = true } };
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
 

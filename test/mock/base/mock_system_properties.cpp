@@ -80,6 +80,7 @@ float SystemProperties::dragStartPanDisThreshold_ = 10.0f;
 float SystemProperties::pageCount_ = 0.0f;
 std::pair<float, float> SystemProperties::brightUpPercent_ = {};
 int32_t SystemProperties::imageFileCacheConvertAstcThreshold_ = 3;
+bool SystemProperties::taskPriorityAdjustmentEnable_ = false;
 
 bool g_irregularGrid = true;
 bool g_segmentedWaterflow = true;

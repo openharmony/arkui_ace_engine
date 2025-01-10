@@ -402,6 +402,12 @@ int32_t GetPageCountProp()
     return pageCount > 0.0f ? pageCount : 0.0f;
 }
 
+bool IsTaskPriorityAdjustmentEnable()
+{
+    int32_t appVsyncPriority = system::GetIntParameter("const.graphic.app_vsync_priority", -1);
+    return appVsyncPriority != -1;
+}
+
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
@@ -479,6 +485,7 @@ uint32_t SystemProperties::canvasDebugMode_ = ReadCanvasDebugMode();
 float SystemProperties::fontScale_ = 1.0;
 float SystemProperties::fontWeightScale_ = 1.0;
 double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
+bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -630,6 +637,7 @@ void SystemProperties::InitDeviceInfo(
     focusCanBeActive_.store(IsFocusCanBeActive());
     faultInjectEnabled_  = IsFaultInjectEnabled();
     windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
+    taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {

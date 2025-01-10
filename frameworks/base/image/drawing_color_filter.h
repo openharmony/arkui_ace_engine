@@ -20,6 +20,9 @@
 
 #include "base/memory/ace_type.h"
 
+class NativeEngine;
+typedef struct napi_value__* napi_value;
+
 namespace OHOS {
 
 namespace Rosen {
@@ -37,6 +40,7 @@ public:
     static RefPtr<DrawingColorFilter> CreateDrawingColorFilter(const std::vector<float>& matrix);
     static RefPtr<DrawingColorFilter> CreateDrawingColorFilterFromNative(void* sptrAddr);
     virtual void* GetDrawingColorFilterSptrAddr() = 0; //define the return value as void is for tdd compilation
+    virtual napi_value GetDrawingColorFilterNapiValue(NativeEngine* nativeEngine) = 0;
 };
 
 } // namespace Ace

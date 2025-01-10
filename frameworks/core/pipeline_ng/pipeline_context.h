@@ -1166,6 +1166,7 @@ private:
 
     void RegisterFocusCallback();
     void DumpFocus(bool hasJson) const;
+    void DumpResLoadError() const;
     void DumpInspector(const std::vector<std::string>& params, bool hasJson) const;
     void DumpElement(const std::vector<std::string>& params, bool hasJson) const;
     void DumpData(const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const;

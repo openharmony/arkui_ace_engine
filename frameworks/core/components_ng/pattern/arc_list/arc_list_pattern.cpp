@@ -139,7 +139,9 @@ RefPtr<LayoutAlgorithm> ArcListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetListChildrenMainSize(childrenSize_);
         listLayoutAlgorithm->SetListPositionMap(posMap_);
     }
-    if (!isInitialized_) {
+    bool needUseInitialIndex = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) ?
+        !isInitialized_ && !jumpIndex_ : !isInitialized_;
+    if (needUseInitialIndex) {
         jumpIndex_ = listLayoutProperty->GetInitialIndex().value_or(0);
     }
     if (jumpIndex_) {
@@ -162,8 +164,9 @@ RefPtr<LayoutAlgorithm> ArcListPattern::CreateLayoutAlgorithm()
         listLayoutAlgorithm->SetOverScrollFeature();
     }
     listLayoutAlgorithm->SetIsSpringEffect(IsScrollableSpringEffect());
-    listLayoutAlgorithm->SetCanOverScroll(CanOverScroll(GetScrollSource()));
-    if (chainAnimation_) {
+    listLayoutAlgorithm->SetCanOverScrollStart(CanOverScrollStart(GetScrollSource()) && IsAtTop());
+    listLayoutAlgorithm->SetCanOverScrollEnd(CanOverScrollEnd(GetScrollSource()) && IsAtBottom());
+    if (chainAnimation_ && GetEffectEdge() == EffectEdge::ALL) {
         SetChainAnimationLayoutAlgorithm(listLayoutAlgorithm, listLayoutProperty);
         SetChainAnimationToPosMap();
     }

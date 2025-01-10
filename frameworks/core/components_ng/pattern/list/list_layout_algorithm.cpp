@@ -162,6 +162,7 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             posMap_->ClearPosMap();
         }
     }
+
     // In the secondary layout scenario, the previous contentMainSize_ is used as the next prevContentMainSize_.
     prevContentMainSize_ = contentMainSize_;
     
@@ -1114,8 +1115,8 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
         auto itemTotalSize = currentEndPos - firstItemTop + contentEndOffset_ + contentStartOffset_;
         if (LessOrEqual(itemTotalSize, contentMainSize_) && (itemPosition_.begin()->first == 0)) {
             // all items size is less than list.
-            if ((GreatNotEqual(firstItemTop, currentOffset_ + contentStartOffset_) && !canOverScrollStart_) ||
-                (LessNotEqual(firstItemTop, currentOffset_ + contentStartOffset_) && !canOverScrollEnd_)) {
+            if ((GreatOrEqual(firstItemTop, currentOffset_ + contentStartOffset_) && !canOverScrollStart_) ||
+                (LessOrEqual(firstItemTop, currentOffset_ + contentStartOffset_) && !canOverScrollEnd_)) {
                 currentOffset_ = firstItemTop - contentStartOffset_;
                 startMainPos_ = currentOffset_;
                 endMainPos_ = startMainPos_ + contentMainSize_;
@@ -1189,7 +1190,8 @@ void ListLayoutAlgorithm::LayoutBackward(LayoutWrapper* layoutWrapper, int32_t e
             }
             contentMainSize_ = itemTotalSize;
         }
-        if (!canOverScrollStart_ || jumpIndex_.has_value()) {
+        if ((!canOverScrollStart_ && GreatOrEqual(currentStartPos, contentStartOffset_ + currentOffset_)) ||
+            jumpIndex_.has_value()) {
             currentOffset_ = currentStartPos - contentStartOffset_;
         }
         endMainPos_ = currentStartPos - contentStartOffset_ + contentMainSize_;

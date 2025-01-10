@@ -86,7 +86,7 @@ public:
     TabContentModelNG CreateTabContent();
     void CreateTabContents(int32_t itemNumber = TABCONTENT_NUMBER);
     void CreateTabContentsWithBuilder(int32_t itemNumber = TABCONTENT_NUMBER);
-    RefPtr<PaintWrapper> CreateTabsDone(TabsModelNG model);
+    void CreateTabsDone(TabsModelNG model);
     TabBarBuilderFunc TabBarItemBuilder();
     void CreateTabContentTabBarStyle(TabBarStyle tabBarStyle);
     void CreateTabContentTabBarStyleWithBuilder(TabBarStyle tabBarStyle);

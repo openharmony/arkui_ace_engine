@@ -20,6 +20,7 @@
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -363,7 +364,8 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
-    auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
+    CHECK_NULL_VOID(menuPattern);
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(menuPattern->GetHost());
     auto top = safeAreaInsets.top_.Length();
     auto props = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(props);
@@ -473,7 +475,8 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
     // system safeArea(AvoidAreaType.TYPE_SYSTEM) only include status bar,now the bottom is 0
-    auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
+    CHECK_NULL_VOID(menuPattern);
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(menuPattern->GetHost());
     bottom_ = static_cast<double>(GetBottomBySafeAreaManager(safeAreaManager, props, menuPattern));
     top_ = static_cast<double>(safeAreaInsets.top_.Length());
     left_ = static_cast<double>(safeAreaInsets.left_.Length());
@@ -492,12 +495,12 @@ void MenuLayoutAlgorithm::InitWrapperRect(
         if (!canExpandCurrentWindow_ && isContainerModal) {
             LimitContainerModalMenuRect(width_, height_);
         }
-        isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
-        if (isHalfFoldHover_ && menuPattern->GetHoverMode()) {
-            UpdateWrapperRectForHoverMode(props, menuPattern);
-        } else {
-            wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
-        }
+    }
+    isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
+    if (isHalfFoldHover_ && menuPattern->GetHoverMode()) {
+        UpdateWrapperRectForHoverMode(props, menuPattern);
+    } else {
+        wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
     }
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
     dumpInfo_.wrapperRect = wrapperRect_;
@@ -538,14 +541,17 @@ void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(
 uint32_t MenuLayoutAlgorithm::GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
     const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
 {
-    auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
+    CHECK_NULL_RETURN(menuPattern, 0);
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(menuPattern->GetHost());
     auto bottom = safeAreaInsets.bottom_.Length();
+    CHECK_NULL_RETURN(safeAreaManager, 0);
     auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
     if ((menuPattern->IsSelectOverlayExtensionMenu() || menuPattern->IsSelectOverlayRightClickMenu()) &&
         GreatNotEqual(keyboardHeight, 0)) {
         bottom = keyboardHeight;
     }
 
+    CHECK_NULL_RETURN(props, 0);
     // Determine whether the menu is an AI menu
     if (props->GetIsRectInTargetValue(false)) {
         if (LessOrEqual(keyboardHeight, 0)) {

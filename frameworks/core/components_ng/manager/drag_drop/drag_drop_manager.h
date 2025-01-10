@@ -114,6 +114,9 @@ public:
         const std::string& udKey, int32_t count = 0);
     void OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefPtr<FrameNode>& dragFrameNode,
         const OHOS::Ace::DragPointerEvent& pointerEvent);
+    void ExecuteStopDrag(const RefPtr<OHOS::Ace::DragEvent>& event, DragRet dragResult, bool useCustomAnimation,
+        int32_t windowId, DragBehavior dragBehavior, const OHOS::Ace::DragPointerEvent& pointerEvent);
+    void ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEvent>& dragEvent, DragDropRet dragDropRet);
     void ResetDragDropStatus(const Point& point, const DragDropRet& dragDropRet, int32_t windowId);
     bool CheckRemoteData(
         const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent, const std::string& udKey);

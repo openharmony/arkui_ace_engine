@@ -67,7 +67,8 @@ void CheckGcSignal()
     }
 
     // Check again
-    AnrThread::AnrThread::PostTaskToTaskRunner(CheckGcSignal, GC_CHECK_PERIOD, "ArkUIWatchDogCheckGcSignal");
+    AnrThread::AnrThread::PostTaskToTaskRunner(CheckGcSignal, GC_CHECK_PERIOD, "ArkUIWatchDogCheckGcSignal",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 inline int32_t BlockGcSignal()
@@ -157,7 +158,7 @@ ThreadWatcher::ThreadWatcher(int32_t instanceId, TaskExecutor::TaskType type, bo
             CHECK_NULL_VOID(sp);
             sp->Check();
         },
-        NORMAL_CHECK_PERIOD, "ArkUIWatchDogCheck");
+        NORMAL_CHECK_PERIOD, "ArkUIWatchDogCheck", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 ThreadWatcher::~ThreadWatcher() {}
@@ -184,7 +185,7 @@ void ThreadWatcher::DefusingBomb()
                 sp->DefusingTopBomb();
             }
         },
-        type_, "ArkUIWatchDogDefusingTopBomb");
+        type_, "ArkUIWatchDogDefusingTopBomb", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void ThreadWatcher::DefusingTopBomb()
@@ -283,7 +284,7 @@ void ThreadWatcher::Check()
             CHECK_NULL_VOID(sp);
             sp->Check();
         },
-        period, "ArkUIWatchDogThreadStateCheck");
+        period, "ArkUIWatchDogThreadStateCheck", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void ThreadWatcher::CheckAndResetIfNeeded()
@@ -351,13 +352,14 @@ void ThreadWatcher::RawReport(RawEventType type) const
             std::lock_guard lk(*m);
             auto engine = EngineHelper::GetEngine(instanceId_);
             message = engine ? engine->GetStacktraceMessage() : "";
-                
+
             taskExecutor->PostTask(
                 [engine, m]() mutable {
                     std::lock_guard lk(*m);
                     engine.Reset();
                 },
-                TaskExecutor::TaskType::JS, "ArkUIWatchDogEngineReset");
+                TaskExecutor::TaskType::JS, "ArkUIWatchDogEngineReset",
+                TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
         }
         tid = taskExecutor->GetTid(type_);
     }
@@ -387,7 +389,7 @@ void ThreadWatcher::PostCheckTask()
                 CHECK_NULL_VOID(sp);
                 sp->TagIncrease();
             },
-            type_, "ArkUIWatchDogTagIncrease");
+            type_, "ArkUIWatchDogTagIncrease", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
         std::unique_lock<std::shared_mutex> lock(mutex_);
         ++loopTime_;
         if (state_ != State::NORMAL) {
@@ -416,7 +418,8 @@ WatchDog::WatchDog()
 {
     AnrThread::Start();
 #if defined(OHOS_PLATFORM) || defined(ANDROID_PLATFORM)
-    AnrThread::PostTaskToTaskRunner(InitializeGcTrigger, GC_CHECK_PERIOD, "ArkUIWatchDogInitGcTrigger");
+    AnrThread::PostTaskToTaskRunner(InitializeGcTrigger, GC_CHECK_PERIOD, "ArkUIWatchDogInitGcTrigger",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 #endif
 }
 
@@ -469,7 +472,7 @@ void WatchDog::BuriedBomb(int32_t instanceId, uint64_t bombId)
                 watchers.uiWatcher->BuriedBomb(bombId);
             }
         },
-        IMMEDIATELY_PERIOD, "ArkUIWatchDogBuriedBomb");
+        IMMEDIATELY_PERIOD, "ArkUIWatchDogBuriedBomb", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void WatchDog::DefusingBomb(int32_t instanceId)
@@ -490,6 +493,6 @@ void WatchDog::DefusingBomb(int32_t instanceId)
                 watchers.uiWatcher->DefusingBomb();
             }
         },
-        IMMEDIATELY_PERIOD, "ArkUIWatchDogDefusingBomb");
+        IMMEDIATELY_PERIOD, "ArkUIWatchDogDefusingBomb", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 } // namespace OHOS::Ace

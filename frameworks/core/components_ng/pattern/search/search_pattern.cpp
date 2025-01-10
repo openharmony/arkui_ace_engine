@@ -1656,7 +1656,7 @@ void SearchPattern::ToJsonValueForTextField(std::unique_ptr<JsonValue>& json, co
     CHECK_NULL_VOID(textFieldPattern);
 
     json->PutExtAttr("value", textFieldPattern->GetTextValue().c_str(), filter);
-    json->PutExtAttr("placeholder", UtfUtils::Str16ToStr8(textFieldPattern->GetPlaceHolder()).c_str(), filter);
+    json->PutExtAttr("placeholder", UtfUtils::Str16DebugToStr8(textFieldPattern->GetPlaceHolder()).c_str(), filter);
     json->PutExtAttr("placeholderColor", textFieldPattern->GetPlaceholderColor().c_str(), filter);
     json->PutExtAttr("placeholderFont", textFieldPattern->GetPlaceholderFont().c_str(), filter);
     json->PutExtAttr("textAlign", V2::ConvertWrapTextAlignToString(textFieldPattern->GetTextAlign()).c_str(), filter);

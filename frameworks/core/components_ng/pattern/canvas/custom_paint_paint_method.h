@@ -218,7 +218,7 @@ public:
 
     void SetDefaultTextAlign()
     {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
             // The default value of TextAlign is TextAlign::START.
             SetTextAlign(TextAlign::START);
         }

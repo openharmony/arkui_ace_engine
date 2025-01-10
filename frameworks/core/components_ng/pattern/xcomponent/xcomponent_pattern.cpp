@@ -51,6 +51,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
+#include "core/event/event_info_convertor.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -74,6 +75,16 @@ std::string XComponentTypeToString(XComponentType type)
         default:
             return "unknown";
     }
+}
+
+std::string XComponentRenderFitToString(RenderFit renderFit)
+{
+    static const std::string renderFitStyles[] = { "RenderFit.CENTER", "RenderFit.TOP", "RenderFit.BOTTOM",
+        "RenderFit.LEFT", "RenderFit.RIGHT", "RenderFit.TOP_LEFT", "RenderFit.TOP_RIGHT", "RenderFit.BOTTOM_LEFT",
+        "RenderFit.BOTTOM_RIGHT", "RenderFit.RESIZE_FILL", "RenderFit.RESIZE_CONTAIN",
+        "RenderFit.RESIZE_CONTAIN_TOP_LEFT", "RenderFit.RESIZE_CONTAIN_BOTTOM_RIGHT", "RenderFit.RESIZE_COVER",
+        "RenderFit.RESIZE_COVER_TOP_LEFT", "RenderFit.RESIZE_COVER_BOTTOM_RIGHT" };
+    return renderFitStyles[static_cast<int>(renderFit)];
 }
 
 OH_NativeXComponent_TouchEventType ConvertNativeXComponentTouchEvent(const TouchType& touchType)
@@ -568,6 +579,9 @@ void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
     json->PutExtAttr("enableSecure", isEnableSecure_ ? "true" : "false", filter);
     json->PutExtAttr("hdrBrightness", std::to_string(hdrBrightness_).c_str(), filter);
     json->PutExtAttr("enableTransparentLayer", isTransparentLayer_ ? "true" : "false", filter);
+    if (type_ == XComponentType::SURFACE) {
+        json->PutExtAttr("renderFit", XComponentRenderFitToString(GetSurfaceRenderFit()).c_str(), filter);
+    }
 }
 
 void XComponentPattern::SetRotation(uint32_t rotation)
@@ -1025,6 +1039,9 @@ void XComponentPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
     CHECK_NULL_VOID(!touchEvent_);
 
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        if (EventInfoConvertor::IsTouchEventNeedAbandoned(info)) {
+            return;
+        }
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleTouchEvent(info);
@@ -1071,10 +1088,15 @@ void XComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
     CHECK_NULL_VOID(!mouseEvent_);
 
     auto mouseTask = [weak = WeakClaim(this)](const MouseInfo& info) {
-        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "HandleMouseEvent[%{public}f,%{public}f,%{public}d,%{public}d]",
-            info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY(), info.GetAction(), info.GetButton());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        TouchEventInfo touchEventInfo("touchEvent");
+        if (EventInfoConvertor::ConvertMouseToTouchIfNeeded(info, touchEventInfo)) {
+            pattern->HandleTouchEvent(touchEventInfo);
+            return;
+        }
+        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "HandleMouseEvent[%{public}f,%{public}f,%{public}d,%{public}d]",
+            info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY(), info.GetAction(), info.GetButton());
         pattern->HandleMouseEvent(info);
     };
 
@@ -1482,7 +1504,7 @@ bool XComponentPattern::ExportTextureAvailable()
     auto host = GetHost();
     auto parnetNodeContainer = host->GetNodeContainer();
     CHECK_NULL_RETURN(parnetNodeContainer, false);
-    auto parent = parnetNodeContainer->GetAncestorNodeOfFrame();
+    auto parent = parnetNodeContainer->GetAncestorNodeOfFrame(false);
     CHECK_NULL_RETURN(parent, false);
     auto ancestorNodeContainer = parent->GetNodeContainer();
     CHECK_NULL_RETURN(ancestorNodeContainer, true);
@@ -2085,5 +2107,11 @@ void XComponentPattern::EnableTransparentLayer(bool isTransparentLayer)
     CHECK_NULL_VOID(renderContextForSurface_);
     renderContextForSurface_->SetTransparentLayer(isTransparentLayer);
     isTransparentLayer_ = isTransparentLayer;
+}
+
+RenderFit XComponentPattern::GetSurfaceRenderFit() const
+{
+    CHECK_NULL_RETURN(handlingSurfaceRenderContext_, RenderFit::RESIZE_FILL);
+    return handlingSurfaceRenderContext_->GetRenderFit().value_or(RenderFit::RESIZE_FILL);
 }
 } // namespace OHOS::Ace::NG

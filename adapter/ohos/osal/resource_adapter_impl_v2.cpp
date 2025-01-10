@@ -23,6 +23,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/resource_convertor.h"
 #include "base/utils/utils.h"
+#include "core/common/resource/resource_manager.h"
 #include "core/components/theme/theme_attributes.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace {
@@ -212,18 +213,11 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetTheme(int32_t themeId)
         auto manager = GetResourceManager();
         if (manager) {
             auto ret = manager->GetThemeById(themeId, theme->rawAttrs_);
-            if (ret != Global::Resource::SUCCESS) {
-                TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get theme by id error, id=%{public}d", themeId);
-            }
             for (size_t i = 0; i < sizeof(PATTERN_MAP) / sizeof(PATTERN_MAP[0]); i++) {
                 ResourceThemeStyle::RawAttrMap attrMap;
                 std::string patternTag = PATTERN_MAP[i];
                 std::string patternName = std::string(flag) + PATTERN_MAP[i];
                 ret = manager->GetPatternByName(patternName.c_str(), attrMap);
-                if (ret != Global::Resource::SUCCESS) {
-                    TAG_LOGW(
-                        AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternName.c_str());
-                }
                 if (attrMap.empty()) {
                     continue;
                 }
@@ -253,7 +247,8 @@ void ResourceAdapterImplV2::PreloadTheme(int32_t themeId, RefPtr<ResourceThemeSt
     CHECK_NULL_VOID(taskExecutor);
 
     // post an asynchronous task to preload themes in PRELOAD_LIST
-    auto task = [manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme), weak = WeakClaim(this)]() -> void {
+    auto task = [themeId, manager, resourceThemeStyle = WeakPtr<ResourceThemeStyle>(theme),
+        weak = WeakClaim(this)]() -> void {
         auto themeStyle = resourceThemeStyle.Upgrade();
         CHECK_NULL_VOID(themeStyle);
         auto adapter = weak.Upgrade();
@@ -299,6 +294,9 @@ RefPtr<ThemeStyle> ResourceAdapterImplV2::GetPatternByName(const std::string& pa
             state = manager->GetPatternByName(patternName.c_str(), attrMap);
             if (state != Global::Resource::SUCCESS) {
                 TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern by name error, name=%{public}s", patternName.c_str());
+                auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+                ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+                    patternName, "Pattern", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
             } else if (attrMap.empty()) {
                 TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get pattern %{public}s empty!", patternName.c_str());
             }
@@ -319,6 +317,9 @@ Color ResourceAdapterImplV2::GetColor(uint32_t resId)
     auto state = manager->GetColorById(resId, result);
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get color by id error, id=%{public}u", resId);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            std::to_string(resId), "Color", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return ERROR_VALUE_COLOR;
     }
     return Color(result);
@@ -334,6 +335,9 @@ Color ResourceAdapterImplV2::GetColorByName(const std::string& resName)
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get color by name error, name=%{public}s, errorCode=%{public}d",
             resName.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            resName, "Color", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return Color(result);
 }
@@ -349,6 +353,9 @@ Dimension ResourceAdapterImplV2::GetDimension(uint32_t resId)
         if (state != Global::Resource::SUCCESS) {
             TAG_LOGW(AceLogTag::ACE_RESOURCE, "NG Get dimension by id error, id=%{public}u, errorCode=%{public}d",
                 resId, state);
+            auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+            ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+                std::to_string(resId), "Dimension", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         }
     }
     return Dimension(static_cast<double>(dimensionFloat), ParseDimensionUnit(unit));
@@ -361,6 +368,10 @@ Dimension ResourceAdapterImplV2::GetDimension(uint32_t resId)
             if (state != Global::Resource::SUCCESS) {
                 TAG_LOGW(AceLogTag::ACE_RESOURCE, "NG: Get dimension by id error, id=%{public}u, errorCode=%{public}d",
                     resId, state);
+                auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+                ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+                    std::to_string(resId), "Dimension", host ? host->GetTag().c_str() : "",
+                    GetCurrentTimestamp(), state));
             }
         }
         return Dimension(static_cast<double>(dimensionFloat), ParseDimensionUnit(unit));
@@ -372,6 +383,9 @@ Dimension ResourceAdapterImplV2::GetDimension(uint32_t resId)
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(
             AceLogTag::ACE_RESOURCE, "Get dimension by id error, id=%{public}u, errorCode=%{public}d", resId, state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            std::to_string(resId), "Dimension", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return Dimension(static_cast<double>(dimensionFloat));
 #endif
@@ -388,6 +402,9 @@ Dimension ResourceAdapterImplV2::GetDimensionByName(const std::string& resName)
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get dimension by name error, resName=%{public}s, errorCode=%{public}d",
             resName.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            resName, "Dimension", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return Dimension(static_cast<double>(dimensionFloat), ParseDimensionUnit(unit));
 }
@@ -400,6 +417,9 @@ std::string ResourceAdapterImplV2::GetString(uint32_t resId)
     auto state = manager->GetStringById(resId, strResult);
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get string by id error, id=%{public}u, errorCode=%{public}d", resId, state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            std::to_string(resId), "String", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return strResult;
 }
@@ -414,6 +434,9 @@ std::string ResourceAdapterImplV2::GetStringByName(const std::string& resName)
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get string by name error, resName=%{public}s, errorCode=%{public}d",
             resName.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            resName, "String", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return strResult;
 }
@@ -427,6 +450,9 @@ std::string ResourceAdapterImplV2::GetPluralString(uint32_t resId, int quantity)
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get plural string by id error, id=%{public}u, errorCode=%{public}d", resId,
             state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            std::to_string(resId), "PluralString", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return strResult;
 }
@@ -441,6 +467,9 @@ std::string ResourceAdapterImplV2::GetPluralStringByName(const std::string& resN
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get plural string by name error, resName=%{public}s, errorCode=%{public}d",
             resName.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            resName, "PluralString", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return strResult;
 }
@@ -454,6 +483,9 @@ std::vector<std::string> ResourceAdapterImplV2::GetStringArray(uint32_t resId) c
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(
             AceLogTag::ACE_RESOURCE, "Get stringArray by id error, id=%{public}u, errorCode=%{public}d", resId, state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            std::to_string(resId), "StringArray", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return strResults;
 }
@@ -468,6 +500,9 @@ std::vector<std::string> ResourceAdapterImplV2::GetStringArrayByName(const std::
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get stringArray by name error, resName=%{public}s, errorCode=%{public}d",
             resName.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            resName, "StringArray", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return strResults;
 }
@@ -480,6 +515,9 @@ double ResourceAdapterImplV2::GetDouble(uint32_t resId)
     auto state = manager->GetFloatById(resId, result);
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get double by id error, id=%{public}u, errorCode=%{public}d", resId, state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            std::to_string(resId), "Double", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return static_cast<double>(result);
 }
@@ -494,6 +532,9 @@ double ResourceAdapterImplV2::GetDoubleByName(const std::string& resName)
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get double by name error, resName=%{public}s, errorCode=%{public}d",
             resName.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            resName, "Double", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return static_cast<double>(result);
 }
@@ -506,6 +547,9 @@ int32_t ResourceAdapterImplV2::GetInt(uint32_t resId)
     auto state = manager->GetIntegerById(resId, result);
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get int by id error, id=%{public}u, errorCode=%{public}d", resId, state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            std::to_string(resId), "Int", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return result;
 }
@@ -520,6 +564,9 @@ int32_t ResourceAdapterImplV2::GetIntByName(const std::string& resName)
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get int by name error, resName=%{public}s, errorCode=%{public}d",
             resName.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            resName, "Int", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return result;
 }
@@ -534,6 +581,10 @@ std::vector<uint32_t> ResourceAdapterImplV2::GetIntArray(uint32_t resId) const
             if (state != Global::Resource::SUCCESS) {
                 TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get intArray by id error, id=%{public}u, errorCode=%{public}d",
                     resId, state);
+                auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+                ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+                    std::to_string(resId), "IntArray", host ? host->GetTag().c_str() : "",
+                    GetCurrentTimestamp(), state));
             }
         }
     }
@@ -554,6 +605,9 @@ std::vector<uint32_t> ResourceAdapterImplV2::GetIntArrayByName(const std::string
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get intArray by name error, resName=%{public}s, errorCode=%{public}d",
             resName.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            resName, "IntArray", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
 
     std::vector<uint32_t> result(intVectorResult.size());
@@ -570,6 +624,9 @@ bool ResourceAdapterImplV2::GetBoolean(uint32_t resId) const
     auto state = manager->GetBooleanById(resId, result);
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get boolean by id error, id=%{public}u, errorCode=%{public}d", resId, state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            std::to_string(resId), "Boolean", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return result;
 }
@@ -584,6 +641,9 @@ bool ResourceAdapterImplV2::GetBooleanByName(const std::string& resName) const
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get boolean by name error, resName=%{public}s, errorCode=%{public}d",
             resName.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            resName, "Boolean", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return result;
 }
@@ -600,6 +660,9 @@ std::shared_ptr<Media::PixelMap> ResourceAdapterImplV2::GetPixelMap(uint32_t res
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Failed to Create drawableDescriptor by %{public}d, errorCode=%{public}d",
             resId, state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            std::to_string(resId), "PixelMap", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return nullptr;
     }
     CHECK_NULL_RETURN(drawableDescriptor, nullptr);
@@ -614,6 +677,9 @@ std::string ResourceAdapterImplV2::GetMediaPath(uint32_t resId)
     auto state = manager->GetMediaById(resId, mediaPath);
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get media by id error, id=%{public}u, errorCode=%{public}u", resId, state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            std::to_string(resId), "MediaPath", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return "";
     }
     if (SystemProperties::GetUnZipHap()) {
@@ -637,6 +703,9 @@ std::string ResourceAdapterImplV2::GetMediaPathByName(const std::string& resName
         if (state != Global::Resource::SUCCESS) {
             TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get media path by name error, resName=%{public}s, errorCode=%{public}u",
                 resName.c_str(), state);
+            auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+            ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+                resName, "MediaPath", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
             return "";
         }
     }
@@ -669,6 +738,9 @@ std::string ResourceAdapterImplV2::GetRawfile(const std::string& fileName)
         if (state != Global::Resource::SUCCESS) {
             TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get rawFile error, filename:%{public}s, error:%{public}u",
                 fileName.c_str(), state);
+            auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+            ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+                fileName, "RawFile", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
             return "";
         }
         return "file:///" + outPath + params;
@@ -690,6 +762,9 @@ bool ResourceAdapterImplV2::GetRawFileData(const std::string& rawFile, size_t& l
     if (state != Global::Resource::SUCCESS || !dest) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get rawFile from hap error, raw filename:%{public}s, error:%{public}u",
             rawFile.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            rawFile, "RawFile", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return false;
     }
     return true;
@@ -706,6 +781,9 @@ bool ResourceAdapterImplV2::GetRawFileData(const std::string& rawFile, size_t& l
             "Get rawFile from hap error, raw filename:%{public}s, bundleName:%{public}s, moduleName:%{public}s, "
             "error:%{public}u",
             rawFile.c_str(), bundleName.c_str(), moduleName.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            rawFile, "RawFile", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return false;
     }
     return true;
@@ -718,6 +796,9 @@ bool ResourceAdapterImplV2::GetMediaData(uint32_t resId, size_t& len, std::uniqu
     auto state = manager->GetMediaDataById(resId, len, dest);
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get media data by id error, id:%{public}u, error:%{public}u", resId, state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            std::to_string(resId), "MediaData", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return false;
     }
     return true;
@@ -733,6 +814,9 @@ bool ResourceAdapterImplV2::GetMediaData(uint32_t resId, size_t& len, std::uniqu
         TAG_LOGW(AceLogTag::ACE_RESOURCE,
             "Get media data by id error, id:%{public}u, bundleName:%{public}s, moduleName:%{public}s, error:%{public}u",
             resId, bundleName.c_str(), moduleName.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            std::to_string(resId), "MediaData", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return false;
     }
     return true;
@@ -746,6 +830,9 @@ bool ResourceAdapterImplV2::GetMediaData(const std::string& resName, size_t& len
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get media data by name error, resName:%{public}s, error:%{public}u",
             resName.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            resName, "MediaData", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return false;
     }
     return true;
@@ -762,6 +849,9 @@ bool ResourceAdapterImplV2::GetMediaData(const std::string& resName, size_t& len
             "Get media data by name error, resName:%{public}s, bundleName:%{public}s, moduleName:%{public}s, "
             "error:%{public}u",
             resName.c_str(), bundleName.c_str(), moduleName.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            resName, "MediaData", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return false;
     }
     return true;
@@ -777,6 +867,9 @@ bool ResourceAdapterImplV2::GetRawFileDescription(
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get raw file description error, rawFileName:%{public}s, error:%{public}u",
             rawfileName.c_str(), state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            rawfileName, "RawFileDescription", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return false;
     }
     rawfileDescription.fd = descriptor.fd;
@@ -792,6 +885,9 @@ bool ResourceAdapterImplV2::CloseRawFileDescription(const std::string &rawfileNa
     auto state = manager->CloseRawFileDescriptor(rawfileName);
     if (state != Global::Resource::SUCCESS) {
         LOGE("Close RawFile Description error, error:%{public}u", state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            rawfileName, "RawFileDescription", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return false;
     }
     return true;
@@ -804,6 +900,9 @@ bool ResourceAdapterImplV2::GetMediaById(const int32_t& resId, std::string& medi
     auto state = manager->GetMediaById(resId, mediaPath);
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get media by id error, resId:%{public}d, error:%{public}u", resId, state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            std::to_string(resId), "Media", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
         return false;
     }
     return true;
@@ -835,6 +934,9 @@ uint32_t ResourceAdapterImplV2::GetSymbolByName(const char* resName) const
     if (state != Global::Resource::SUCCESS) {
         TAG_LOGW(AceLogTag::ACE_RESOURCE, "Get symbol by name error, name=%{public}s, errorCode=%{public}d",
             resName, state);
+        auto host = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+        ResourceManager::GetInstance().AddResourceLoadError(ResourceErrorInfo(host ? host->GetId(): -1,
+            resName, "Symbol", host ? host->GetTag().c_str() : "", GetCurrentTimestamp(), state));
     }
     return result;
 }

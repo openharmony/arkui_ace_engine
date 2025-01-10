@@ -87,6 +87,8 @@ public:
     static void SetBarState(const JSCallbackInfo& info);
     static void SetMaxLength(const JSCallbackInfo& info);
     static void SetMaxLines(const JSCallbackInfo& info);
+    static void SetStopBackPress(const JSCallbackInfo& info);
+
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,

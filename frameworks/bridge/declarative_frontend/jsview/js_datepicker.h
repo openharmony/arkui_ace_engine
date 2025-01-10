@@ -45,6 +45,7 @@ public:
     static void UseMilitaryTime(bool isUseMilitaryTime);
     static void IsUserDefinedFontFamily(const std::string& pos);
     static void JsOpacity(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
 
 private:
     static void CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);

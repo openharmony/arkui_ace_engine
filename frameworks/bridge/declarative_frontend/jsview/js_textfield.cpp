@@ -119,14 +119,6 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
     result = dimension;
     return true;
 }
-
-void HandleTextFieldInvalidUTF16(std::optional<std::u16string>& str)
-{
-    if (str.has_value()) {
-        UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(str.value().data()), str.value().length(), 0);
-    }
-}
-
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -187,8 +179,6 @@ void JSTextField::CreateTextInput(const JSCallbackInfo& info)
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }
-    HandleTextFieldInvalidUTF16(placeholderSrc);
-    HandleTextFieldInvalidUTF16(value);
     auto controller = TextFieldModel::GetInstance()->CreateTextInput(placeholderSrc, value);
     if (jsController) {
         jsController->SetController(controller);
@@ -237,8 +227,6 @@ void JSTextField::CreateTextArea(const JSCallbackInfo& info)
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }
-    HandleTextFieldInvalidUTF16(placeholderSrc);
-    HandleTextFieldInvalidUTF16(value);
     auto controller = TextFieldModel::GetInstance()->CreateTextArea(placeholderSrc, value);
     if (jsController) {
         jsController->SetController(controller);
@@ -293,7 +281,10 @@ void JSTextField::SetPlaceholderColor(const JSCallbackInfo& info)
     auto theme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(theme);
     Color color = theme->GetPlaceholderColor();
-    CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor");
+    if (!CheckColor(info[0], color, V2::TEXTINPUT_ETS_TAG, "PlaceholderColor")) {
+        TextFieldModel::GetInstance()->ResetPlaceholderColor();
+        return;
+    }
     TextFieldModel::GetInstance()->SetPlaceholderColor(color);
 }
 
@@ -414,9 +405,9 @@ void JSTextField::SetCaretColor(const JSCallbackInfo& info)
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
+        TextFieldModel::GetInstance()->ResetCaretColor();
         return;
     }
-
     TextFieldModel::GetInstance()->SetCaretColor(color);
 }
 
@@ -589,9 +580,8 @@ void JSTextField::SetTextColor(const JSCallbackInfo& info)
     }
     Color textColor;
     if (!ParseJsColor(info[0], textColor)) {
-        auto theme = GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
-        textColor = theme->GetTextColor();
+        TextFieldModel::GetInstance()->ResetTextColor();
+        return;
     }
     TextFieldModel::GetInstance()->SetTextColor(textColor);
 }
@@ -715,8 +705,11 @@ void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
         return;
     }
     Color backgroundColor;
-    bool tmp = !ParseJsColor(info[0], backgroundColor);
-    TextFieldModel::GetInstance()->SetBackgroundColor(backgroundColor, tmp);
+    if (!ParseJsColor(info[0], backgroundColor)) {
+        TextFieldModel::GetInstance()->ResetBackgroundColor();
+        return;
+    }
+    TextFieldModel::GetInstance()->SetBackgroundColor(backgroundColor, false);
 }
 
 void JSTextField::JsHeight(const JSCallbackInfo& info)

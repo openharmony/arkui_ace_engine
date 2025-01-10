@@ -75,6 +75,7 @@ void GridTestNg::SetUp()
 
 void GridTestNg::TearDown()
 {
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -107,8 +108,8 @@ GridModelNG GridTestNg::CreateGrid()
     RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
     RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
     model.Create(positionController, scrollBarProxy);
-    ViewAbstract::SetWidth(CalcLength(GRID_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(GRID_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
     GetGrid();
     return model;
 }
