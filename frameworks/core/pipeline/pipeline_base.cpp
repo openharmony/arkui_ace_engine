@@ -892,8 +892,10 @@ void PipelineBase::SetAccessibilityEventCallback(std::function<void(uint32_t, in
 
 void PipelineBase::AddAccessibilityCallbackEvent(AccessibilityCallbackEventId event, int64_t parameter)
 {
-    ACE_SCOPED_TRACE("AccessibilityCallbackEvent event[%u]", static_cast<uint32_t>(event));
-    accessibilityEvents_.insert(AccessibilityCallbackEvent(event, parameter));
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        ACE_SCOPED_TRACE("AccessibilityCallbackEvent event[%u]", static_cast<uint32_t>(event));
+        accessibilityEvents_.insert(AccessibilityCallbackEvent(event, parameter));
+    }
 }
 
 void PipelineBase::FireAccessibilityEvents()
@@ -901,7 +903,7 @@ void PipelineBase::FireAccessibilityEvents()
     if (!accessibilityCallback_ || accessibilityEvents_.empty()) {
         return;
     }
-    
+
     std::set<AccessibilityCallbackEvent> localEvents;
     {
         localEvents.swap(accessibilityEvents_);
