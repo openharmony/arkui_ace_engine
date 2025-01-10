@@ -499,6 +499,15 @@ std::optional<EffectOption> DragDropFuncWrapper::BrulStyleToEffection(
     return DragDropManager::GetMaxWidthBaseOnGridSystem(pipeline);
 }
 
+void DragDropFuncWrapper::SetDragStartRequestStatus(DragStartRequestStatus dragStartRequestStatus) noexcept
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto dragDropManager = pipelineContext->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->HandleSyncOnDragStart(dragStartRequestStatus);
+}
+
 void DragDropFuncWrapper::SetExtraInfo(int32_t containerId, std::string extraInfo)
 {
     auto pipelineContext = PipelineContext::GetContextByContainerId(containerId);

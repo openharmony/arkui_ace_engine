@@ -343,7 +343,6 @@ public:
     void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) override {};
     void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override {};
     void SetBackgroundImageResizableSlice(const ImageResizableSlice& Slice) override {};
-
     // global light
     void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override {};
