@@ -395,7 +395,7 @@ void DragDropManager::UpdateDragAllowDrop(
         UpdateDragStyle(DragCursorStyleCore::MOVE, eventId);
         return;
     }
-    
+
     // drop allowed
     CHECK_NULL_VOID(dragFrameNode);
     const auto& dragFrameNodeAllowDrop = dragFrameNode->GetAllowDrop();
@@ -444,7 +444,7 @@ bool DragDropManager::CheckExtraSituation(const RefPtr<FrameNode>& dragFrameNode
 bool DragDropManager::CheckInRichEditor(const RefPtr<FrameNode>& dragFrameNode) const
 {
     CHECK_NULL_RETURN(dragFrameNode && draggedFrameNode_, false);
-    auto parent = draggedFrameNode_->GetAncestorNodeOfFrame();
+    auto parent = draggedFrameNode_->GetAncestorNodeOfFrame(false);
     CHECK_NULL_RETURN(parent && parent->GetTag() == V2::RICH_EDITOR_ETS_TAG, false);
     return dragFrameNode == parent;
 }

@@ -569,7 +569,7 @@ bool FocusHub::IsFocusableScope()
     if (focusDepend_ == FocusDependence::SELF || focusDepend_ == FocusDependence::AUTO) {
         return true;
     }
-    
+
     return AnyChildFocusHub([](const RefPtr<FocusHub>& focusHub) { return focusHub->IsFocusable(); });
 }
 
@@ -1844,10 +1844,10 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
     rect = frameNode->GetPaintRectWithTransform();
 
     //  Calculate currentNode -> childNode offset
-    auto parent = frameNode->GetAncestorNodeOfFrame();
+    auto parent = frameNode->GetAncestorNodeOfFrame(false);
     while (parent && parent != GetFrameNode()) {
         rect += parent->GetPaintRectWithTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     return true;
 }
@@ -2167,7 +2167,7 @@ bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event)
     if (!isDirectionKeyDown && !isTabDown) {
         return false;
     }
-    
+
     auto pipeline = node->GetContextRefPtr();
     if (pipeline && pipeline->IsTabJustTriggerOnKeyEvent()) {
         return false;

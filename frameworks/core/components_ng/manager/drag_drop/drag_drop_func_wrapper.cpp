@@ -550,7 +550,7 @@ OffsetF DragDropFuncWrapper::GetPaintRectCenter(const RefPtr<FrameNode>& frameNo
     auto offset = paintRect.GetOffset();
     PointF pointNode(offset.GetX() + paintRect.Width() / 2.0f, offset.GetY() + paintRect.Height() / 2.0f);
     context->GetPointTransformRotate(pointNode);
-    auto parent = frameNode->GetAncestorNodeOfFrame();
+    auto parent = frameNode->GetAncestorNodeOfFrame(false);
     while (parent) {
         if (checkWindowBoundary && parent->IsWindowBoundary()) {
             break;
@@ -561,7 +561,7 @@ OffsetF DragDropFuncWrapper::GetPaintRectCenter(const RefPtr<FrameNode>& frameNo
         pointNode.SetX(offset.GetX() + pointNode.GetX());
         pointNode.SetY(offset.GetY() + pointNode.GetY());
         renderContext->GetPointTransformRotate(pointNode);
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     return OffsetF(pointNode.GetX(), pointNode.GetY());
 }
