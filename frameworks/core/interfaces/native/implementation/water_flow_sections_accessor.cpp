@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "water_flow_sections_accessor_peer_impl.h"
@@ -26,7 +27,17 @@ WaterFlowSections::Section Convert(const Ark_SectionOptions& src)
     WaterFlowSections::Section dst;
     dst.itemsCount = Converter::Convert<int32_t>(src.itemsCount);
     dst.crossCount = Converter::OptConvert<int32_t>(src.crossCount);
-
+    dst.onGetItemMainSizeByIndex = nullptr;
+    auto onGetItemMainSizeByIndex = Converter::OptConvert<::GetItemMainSizeByIndex>(src.onGetItemMainSizeByIndex);
+    if (onGetItemMainSizeByIndex) {
+        auto modelCallback = [callback = CallbackHelper(*onGetItemMainSizeByIndex)]
+            (int32_t value) -> float {
+                Ark_Number param = Converter::ArkValue<Ark_Number>(value);
+                auto resultOpt = callback.InvokeWithOptConvertResult<float, Ark_Number, Callback_Number_Void>(param);
+                return resultOpt.value_or(0);
+            };
+        dst.onGetItemMainSizeByIndex = modelCallback;
+    }
     dst.columnsGap = Converter::OptConvert<Dimension>(src.columnsGap);
     dst.rowsGap = Converter::OptConvert<Dimension>(src.rowsGap);
     dst.margin = Converter::OptConvert<MarginProperty>(src.margin);
@@ -67,8 +78,6 @@ Ark_Boolean SpliceImpl(WaterFlowSectionsPeer* peer,
                        const Opt_Number* deleteCount,
                        const Opt_Array_SectionOptions* sections)
 {
-    LOGE("ARKOALA WaterFlowSectionAccessor.SpliceImpl -> Method is not fully implemented. "
-          "Synchronous method is needed for onGetItemMainSizeByIndex");
     CHECK_NULL_RETURN(peer, false);
     CHECK_NULL_RETURN(peer->GetController(), false);
     CHECK_NULL_RETURN(start, false);
@@ -88,8 +97,6 @@ Ark_Boolean PushImpl(WaterFlowSectionsPeer* peer,
 {
     CHECK_NULL_RETURN(peer, false);
     CHECK_NULL_RETURN(peer->GetController(), false);
-    LOGE("ARKOALA WaterFlowSectionAccessor.PushImpl -> Method is not fully implemented. "
-          "Synchronous method is needed for onGetItemMainSizeByIndex");
     auto start = peer->GetController()->GetSectionInfo().size();
     std::vector<WaterFlowSections::Section> sections;
     auto newSection = Converter::OptConvert<WaterFlowSections::Section>(*section);
@@ -101,8 +108,6 @@ Ark_Boolean UpdateImpl(WaterFlowSectionsPeer* peer,
                        const Ark_Number* sectionIndex,
                        const Ark_SectionOptions* section)
 {
-    LOGE("ARKOALA WaterFlowSectionAccessor.UpdateImpl -> Method is not fully implemented. "
-          "Synchronous method is needed for onGetItemMainSizeByIndex");
     CHECK_NULL_RETURN(peer, false);
     CHECK_NULL_RETURN(peer->GetController(), false);
     std::vector<WaterFlowSections::Section> sections;
