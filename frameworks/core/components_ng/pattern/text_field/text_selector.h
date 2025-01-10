@@ -185,6 +185,11 @@ struct TextSelector {
         return baseOffset > destinationOffset;
     }
 
+    bool ContainsRange(const std::pair<int32_t, int32_t>& range) const
+    {
+        return IsValid() && GetTextStart() <= range.first && range.second <= GetTextEnd();
+    }
+
     std::string ToString()
     {
         std::string result;

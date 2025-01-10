@@ -7082,7 +7082,8 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
 {
     isMousePressed_ = true;
     auto frameNodeRange = GetSpanRangeByLocalOffset(info.GetLocalLocation());
-    bool pressFrameNode = !IsSelected() && InRangeRect(info.GetGlobalLocation(), frameNodeRange);
+    bool frameNodeSelected = textSelector_.ContainsRange(frameNodeRange);
+    bool pressFrameNode = !frameNodeSelected && InRangeRect(info.GetGlobalLocation(), frameNodeRange);
     if (IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation()) || pressFrameNode) {
         blockPress_ = true;
         return;
