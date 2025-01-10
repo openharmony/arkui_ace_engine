@@ -216,7 +216,7 @@ export struct GridObjectSortComponent {
   @State editGridHeight: number = 0;
   @State addGridHeight: number = 0;
   @State subTitleHeight: number = 0;
-  @State isOpenAccessibility: boolean = false;
+  @State isOpenAccessibility: boolean = access;
   private callbackId: number | undefined = undefined;
   // current column, text: 4 column  , image_text: 3 column
   private colNum: number = COL_IMAGE_TEXT;
