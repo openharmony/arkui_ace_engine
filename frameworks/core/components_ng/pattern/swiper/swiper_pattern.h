@@ -354,6 +354,11 @@ public:
         return rightButtonId_.value();
     }
 
+    int32_t GetId() const
+    {
+        return swiperId_;
+    }
+
     void RemoveIndicatorNode()
     {
         CHECK_NULL_VOID(HasIndicatorNode());

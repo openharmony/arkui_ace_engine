@@ -57,19 +57,15 @@ void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controll
     controller->SetChangeIndexImpl([weak](int32_t index, bool useAnimation) {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
-        auto swiperNode = swiper->GetHost();
-        CHECK_NULL_VOID(swiperNode);
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ChangeIndex %{public}d, useAnimation:%{public}d, id:%{public}d", index,
-            useAnimation, swiperNode->GetId());
+            useAnimation, swiper->GetId());
         swiper->ChangeIndex(index, useAnimation);
     });
 
     controller->SetFinishImpl([weak]() {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
-        auto swiperNode = swiper->GetHost();
-        CHECK_NULL_VOID(swiperNode);
-        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper user finish animation id:%{public}d", swiperNode->GetId());
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper user finish animation id:%{public}d", swiper->GetId());
         swiper->FinishAnimation();
     });
 
