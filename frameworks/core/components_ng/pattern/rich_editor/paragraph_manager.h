@@ -88,9 +88,9 @@ public:
     float GetLongestLineWithIndent() const;
     size_t GetLineCount() const;
     LineMetrics GetLineMetricsByRectF(RectF rect, int32_t paragraphIndex) const;
+    void GetPaintRegion(RectF& boundsRect, float x, float y) const;
     std::vector<TextBox> GetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle);
-    void GetPaintRegion(RectF& boundsRect, float x, float y) const;
     TextLineMetrics GetLineMetrics(size_t lineNumber);
 
 private:

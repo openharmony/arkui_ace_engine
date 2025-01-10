@@ -1364,22 +1364,22 @@ bool ParseCommonEdgeColors(const JSRef<JSObject>& object, CommonColor& commonCol
 void ParseEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension, bool notNegative)
 {
     CalcDimension left;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), left)) {
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(LEFT_PROPERTY), left)) {
         CheckDimensionUnit(left, true, notNegative);
         commonCalcDimension.left = left;
     }
     CalcDimension right;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), right)) {
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(RIGHT_PROPERTY), right)) {
         CheckDimensionUnit(right, true, notNegative);
         commonCalcDimension.right = right;
     }
     CalcDimension top;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top)) {
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(TOP_PROPERTY), top)) {
         CheckDimensionUnit(top, true, notNegative);
         commonCalcDimension.top = top;
     }
     CalcDimension bottom;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom)) {
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(BOTTOM_PROPERTY), bottom)) {
         CheckDimensionUnit(bottom, true, notNegative);
         commonCalcDimension.bottom = bottom;
     }
