@@ -2867,11 +2867,7 @@ void TextPattern::OnModifyDone()
             renderContext->UpdateClipEdge(true);
             renderContext->SetClipToFrame(true);
         }
-        if (textLayoutProperty->GetTextMarqueeStartPolicyValue(MarqueeStartPolicy::DEFAULT) ==
-            MarqueeStartPolicy::ON_FOCUS) {
-            InitFocusEvent();
-            InitHoverEvent();
-        }
+        UpdateMarqueeStartPolicy();
     }
     const auto& children = host->GetChildren();
     if (children.empty()) {
@@ -2892,6 +2888,26 @@ void TextPattern::OnModifyDone()
         }
     }
     RecoverCopyOption();
+}
+
+void TextPattern::UpdateMarqueeStartPolicy()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (!textLayoutProperty->HasTextMarqueeStartPolicy()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        textLayoutProperty->UpdateTextMarqueeStartPolicy(theme->GetMarqueeStartPolicy());
+    }
+    if (textLayoutProperty->GetTextMarqueeStartPolicyValue(MarqueeStartPolicy::DEFAULT) ==
+        MarqueeStartPolicy::ON_FOCUS) {
+        InitFocusEvent();
+        InitHoverEvent();
+    }
 }
 
 bool TextPattern::SetActionExecSubComponent()
