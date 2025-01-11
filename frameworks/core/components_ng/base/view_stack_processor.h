@@ -440,6 +440,16 @@ public:
         return customTitleNode_;
     }
 
+    void SetCustomWindowMaskNode(const RefPtr<UINode>& customWindowMaskNode)
+    {
+        customWindowMaskNode_ = customWindowMaskNode;
+    }
+
+    const RefPtr<UINode> GetCustomWindowMaskNode() const
+    {
+        return customWindowMaskNode_;
+    }
+
     void SetCustomButtonNode(const RefPtr<UINode>& customButtonNode)
     {
         customButtonNode_ = customButtonNode;
@@ -494,6 +504,7 @@ private:
 
     RefPtr<UINode> customTitleNode_;
     RefPtr<UINode> customButtonNode_;
+    RefPtr<UINode> customWindowMaskNode_;
 
     RefPtr<GestureProcessor> gestureStack_;
 

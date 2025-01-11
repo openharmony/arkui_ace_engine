@@ -482,6 +482,11 @@ public:
     {
         return false;
     }
+
+    virtual bool ConfigCustomWindowMask(bool enable)
+    {
+        return false;
+    }
 };
 
 } // namespace OHOS::Ace

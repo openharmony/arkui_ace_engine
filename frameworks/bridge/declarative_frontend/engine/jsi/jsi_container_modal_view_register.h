@@ -22,6 +22,7 @@
 namespace OHOS::Ace::Framework {
 panda::Local<panda::JSValueRef> JsLoadCustomTitleBar(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 panda::Local<panda::JSValueRef> JsLoadCustomButton(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+panda::Local<panda::JSValueRef> JsLoadCustomWindowMask(panda::JsiRuntimeCallInfo* runtimeCallInfo);
 } // namespace OHOS::Ace::Framework
 
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_JSI_CONTAINER_MODAL_VIEW_REGISTER_H

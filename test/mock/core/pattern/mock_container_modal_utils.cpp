@@ -24,4 +24,9 @@ bool ExecuteCustomTitleAbc()
     ViewStackProcessor::GetInstance()->SetCustomTitleNode(custom);
     return true;
 }
+
+bool ExecuteCustomWindowMaskAbc()
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG
