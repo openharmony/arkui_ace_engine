@@ -89,7 +89,8 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
     return frameNode;
 }
 
-RefPtr<FrameNode> SecurityComponentModelNG::InitChild(SecurityComponentElementStyle& style)
+RefPtr<FrameNode> SecurityComponentModelNG::InitChild(const std::string& tag, int32_t nodeId,
+    SecurityComponentElementStyle& style, const std::function<RefPtr<Pattern>(void)>& patternCreator)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(tag, nodeId, patternCreator);
     CHECK_NULL_RETURN(frameNode, nullptr);
