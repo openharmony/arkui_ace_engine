@@ -6355,6 +6355,7 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         nestedScroll == NestedScrollMode::SELF_ONLY ? "SwiperNestedScrollMode.SELF_ONLY"
                                                     : "SwiperNestedScrollMode.SELF_FIRST",
         filter);
+    json->PutExtAttr("stopWhenTouched", IsStopWhenTouched() ? "true" : "false", filter);
     json->PutExtAttr("currentIndex", currentIndex_, filter);
     json->PutExtAttr("currentOffset", currentOffset_, filter);
     json->PutExtAttr("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1), filter);
