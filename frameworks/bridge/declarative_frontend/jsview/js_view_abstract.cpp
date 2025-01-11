@@ -2397,6 +2397,10 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
     RefPtr<PixelMap> pixmap = nullptr;
     auto jsBackgroundImage = info[0];
     GetJsMediaBundleInfo(jsBackgroundImage, bundle, module);
+    int32_t repeatIndex = 0;
+    bool syncMode = false;
+    ParseBackgroundImageOption(info, repeatIndex, syncMode);
+    ViewAbstractModel::GetInstance()->SetBackgroundImageSyncMode(syncMode);
     if (jsBackgroundImage->IsString()) {
         src = jsBackgroundImage->ToString();
         ViewAbstractModel::GetInstance()->SetBackgroundImage(
@@ -2413,8 +2417,6 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 #endif
         ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { pixmap }, nullptr);
     }
-
-    int32_t repeatIndex = 0;
     if (info.Length() == 2) {
         auto jsImageRepeat = info[1];
         if (jsImageRepeat->IsNumber()) {
@@ -2423,6 +2425,23 @@ void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
     }
     auto repeat = static_cast<ImageRepeat>(repeatIndex);
     ViewAbstractModel::GetInstance()->SetBackgroundImageRepeat(repeat);
+}
+
+void JSViewAbstract::ParseBackgroundImageOption(const JSCallbackInfo& info, int32_t& repeatIndex, bool& syncMode)
+{
+    if (info.Length() < 2) { // 2 represents the least para num;
+        return;
+    }
+    if (!info[1]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> jsOption  = JSRef<JSObject>::Cast(info[1]);
+    if (jsOption->GetProperty("syncLoad")->IsBoolean()) {
+        syncMode = jsOption->GetProperty("syncLoad")->ToBoolean();
+    }
+    if (jsOption->GetProperty("repeat")->IsNumber()) {
+        repeatIndex = jsOption->GetProperty("repeat")->ToNumber<int32_t>();
+    }
 }
 
 void JSViewAbstract::ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOption& blurOption)

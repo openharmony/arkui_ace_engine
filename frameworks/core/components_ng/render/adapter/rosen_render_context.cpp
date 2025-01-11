@@ -812,12 +812,19 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
         frameNode->SetColorModeUpdateCallback(std::move(callback));
     }
     LoadNotifier bgLoadNotifier(CreateBgImageDataReadyCallback(), CreateBgImageLoadSuccessCallback(), nullptr);
-    bgLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(bgLoadNotifier));
+    auto syncMode = GetBackgroundImageSyncMode().value_or(false);
+    bgLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(bgLoadNotifier), syncMode);
     CHECK_NULL_VOID(bgLoadingCtx_);
     bgLoadingCtx_->LoadImageData();
 }
 
 void RosenRenderContext::OnBackgroundImageRepeatUpdate(const ImageRepeat& /*imageRepeat*/)
+{
+    CHECK_NULL_VOID(rsNode_);
+    PaintBackground();
+}
+
+void RosenRenderContext::OnBackgroundImageSyncModeUpdate(bool /*syncMode*/)
 {
     CHECK_NULL_VOID(rsNode_);
     PaintBackground();
