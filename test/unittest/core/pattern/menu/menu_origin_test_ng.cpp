@@ -1275,6 +1275,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmAPI11PaddingTest2, TestSize.Level1)
     algorithm->canExpandCurrentWindow_ = false;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->outPadding_ = 10.0_vp;
+    selectTheme->menuPadding_ = 10.0_vp;
     selectTheme->menuLargeMargin_ = 10.0_vp;
     algorithm->InitializePaddingAPI12(wrapper);
     ASSERT_EQ(algorithm->optionPadding_, 10.0f);
