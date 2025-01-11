@@ -2949,7 +2949,7 @@ interfaces/napi/kits/utils/ @arkuiframework
 
 
 [Test source]
-test/mock/  @chenjiafeng-openharmony
+test/mock/  @zhoulianhai5
 test/mock/core/event/ @arkuievent
 test/mock/core/accessibility/ @arkuiabilitygroup
 test/mock/core/animation/ @arkuiframework
@@ -2957,7 +2957,7 @@ test/mock/core/image_provider/ @arkui_image
 test/mock/core/svg/ @arkui_image
 test/mock/interfaces/ @arkui_architecture
 
-test/unittest/ @chenjiafeng-openharmony
+test/unittest/ @zhoulianhai5
 test/unittest/core/accessibility/ @arkuiabilitygroup
 test/unittest/core/animation/ @arkuiframework
 test/unittest/core/common/ace_engine/ @arkuiframework
@@ -3076,7 +3076,7 @@ test/unittest/core/pattern/waterflow/ @arkuiscroll
 test/unittest/core/pattern/web/ @arkwebinarkuireview
 test/unittest/core/pattern/xcomponent/ @arkuilayout
 test/unittest/core/pipeline/ @arkuiframework
-test/unittest/core/property/ @chenjiafeng-openharmony
+test/unittest/core/property/ @zhoulianhai5
 test/unittest/core/render/ @arkuiframework
 test/unittest/core/rosen/ @arkuiframework 
 test/unittest/core/svg/ @arkui_image
