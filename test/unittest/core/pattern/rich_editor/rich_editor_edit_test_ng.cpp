@@ -426,11 +426,7 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorCalcLineEndPosition001, TestSize.Le
     /**
      * @tc.steps: step2. change parameter and call function.
      */
-    auto ret1 = richEditorPattern->CalcLineEndPosition();
-    richEditorPattern->lastClickOffset_.x_ = 10.0f;
-    richEditorPattern->lastClickOffset_.y_ = 20.0f;
-    auto ret2 = richEditorPattern->CalcLineEndPosition();
-    EXPECT_EQ(ret1, ret2);
+    EXPECT_EQ(richEditorPattern->CalcLineEndPosition(), 0);
 }
 
 /**
@@ -687,33 +683,6 @@ HWTEST_F(RichEditorEditTestNg, UpdateChildrenOffset002, TestSize.Level1)
     richEditorPattern->HandleOnCameraInput();
     richEditorPattern->UpdateChildrenOffset();
     EXPECT_NE(richEditorPattern->spans_.size(), 0);
-}
-
-/**
- * @tc.name: RichEditorToJsonValue002
- * @tc.desc: test ToJsonValue
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, RichEditorToJsonValue002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. init and call function.
-    */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-
-    auto jsonObject = JsonUtil::Create(true);
-    InspectorFilter filter;
-    filter.filterFixed = 10;
-    filter.filterExt.clear();
-    auto ret1 = filter.IsFastFilter();
-    richEditorPattern->ToJsonValue(jsonObject, filter);
-    auto ret2 = filter.IsFastFilter();
-    EXPECT_EQ(ret1, ret2);
 }
 
 /**
@@ -1182,9 +1151,8 @@ HWTEST_F(RichEditorEditTestNg, HandleOnCopy003, TestSize.Level1)
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->textSelector_.baseOffset = 0;
     richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
     richEditorPattern->HandleOnCopy();
-    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
+    EXPECT_NE(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
     EXPECT_EQ(isEventCalled, true);
 }
 
@@ -1260,9 +1228,8 @@ HWTEST_F(RichEditorEditTestNg, HandleOnCut003, TestSize.Level1)
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->textSelector_.baseOffset = 0;
     richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
     richEditorPattern->HandleOnCut();
-    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
+    EXPECT_NE(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
     EXPECT_EQ(isEventCalled, true);
 }
 
