@@ -76,11 +76,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
     SecurityComponentElementStyle& style, const std::function<RefPtr<Pattern>(void)>& patternCreator,
     bool isArkuiComponent)
 {
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(tag, nodeId, patternCreator);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    InitChild(frameNode, style);
-
+    auto frameNode = InitChild(style);
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_RETURN(property, nullptr);
     property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
@@ -92,8 +88,11 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
     return frameNode;
 }
 
-void SecurityComponentModelNG::InitChild(const RefPtr<FrameNode>& frameNode, SecurityComponentElementStyle& style)
+RefPtr<FrameNode> SecurityComponentModelNG::InitChild(SecurityComponentElementStyle& style)
 {
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(tag, nodeId, patternCreator);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     if (frameNode->GetChildren().empty()) {
         bool isButtonVisible = (style.backgroundType != BUTTON_TYPE_NULL);
         auto buttonNode = FrameNode::CreateFrameNode(
@@ -135,6 +134,7 @@ void SecurityComponentModelNG::InitChild(const RefPtr<FrameNode>& frameNode, Sec
         }
         InitLayoutProperty(frameNode, style.text, style.icon, style.symbolIcon, style.backgroundType);
     }
+    return frameNode;
 }
 
 void SecurityComponentModelNG::CreateCommon(const std::string& tag, int32_t text, int32_t icon,

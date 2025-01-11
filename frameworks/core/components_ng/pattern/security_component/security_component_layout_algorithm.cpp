@@ -828,7 +828,8 @@ void SecurityComponentLayoutAlgorithm::UpdateTextFlags(LayoutWrapper* layoutWrap
     securityComponentLayoutProperty->UpdateIsMaxLineLimitExceeded(GetMaxLineLimitExceededFlag(currentTextSize));
 }
 
-void SecurityComponentLayoutAlgorithm::InitLayoutWrapper(LayoutWrapper* layoutWrapper)
+void SecurityComponentLayoutAlgorithm::InitLayoutWrapper(LayoutWrapper* layoutWrapper,
+    RefPtr<SecurityComponentLayoutProperty>& property)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto iconWrapper = GetChildWrapper(layoutWrapper, V2::IMAGE_ETS_TAG);
@@ -847,7 +848,7 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto securityComponentLayoutProperty =
         AceType::DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(securityComponentLayoutProperty);
-    InitLayoutWrapper(layoutWrapper);
+    InitLayoutWrapper(layoutWrapper, securityComponentLayoutProperty);
 
     constraint_ = securityComponentLayoutProperty->GetContentLayoutConstraint();
     CHECK_NULL_VOID(constraint_);
