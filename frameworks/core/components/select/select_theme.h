@@ -328,7 +328,8 @@ public:
                 static_cast<uint32_t>(pattern->GetAttr<double>("menu_item_content_align", CONTENT_ALIGN_LEFT));
             theme->selectFocusStyleType_ = pattern->GetAttr<double>("select_focus_style_type", 0.0);
             theme->optionFocusStyleType_ = pattern->GetAttr<double>("option_focus_style_type", 0.0);
-            theme->menuItemHorIntervalPadding_ = pattern->GetAttr<Dimension>("menu_item_hor_interval", theme->menuItemHorIntervalPadding_);
+            theme->menuItemHorIntervalPadding_ =
+                pattern->GetAttr<Dimension>("menu_item_hor_interval", theme->menuItemHorIntervalPadding_);
             theme->menuPadding_ = pattern->GetAttr<Dimension>("menu_padding_interval", theme->menuPadding_);
         }
 
