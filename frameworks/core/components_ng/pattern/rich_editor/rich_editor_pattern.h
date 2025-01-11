@@ -1128,6 +1128,7 @@ private:
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleBlurEvent();
     void HandleFocusEvent();
+    void OnFocusNodeChange(FocusReason focusReason) override;
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     bool HandleClickSelection(const OHOS::Ace::GestureEvent& info);
@@ -1577,6 +1578,7 @@ private:
     std::list<WeakPtr<ImageSpanNode>> imageNodes;
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
     bool isStopBackPress_ = true;
+    bool blockKbInFloatingWindow_ = false;
 };
 } // namespace OHOS::Ace::NG
 

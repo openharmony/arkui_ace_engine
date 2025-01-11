@@ -5149,7 +5149,7 @@ void PipelineContext::RegisterFocusCallback()
         CHECK_NULL_VOID(current);
         auto node = current->GetFrameNode();
         CHECK_NULL_VOID(node);
-        InputMethodManager::GetInstance()->OnFocusNodeChange(node);
+        InputMethodManager::GetInstance()->OnFocusNodeChange(node, focusReason);
     });
 }
 
