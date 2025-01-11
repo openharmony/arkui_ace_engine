@@ -80,6 +80,7 @@ public:
     void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) override;
     void SetDisableTransitionAnimation(bool isDisable) override;
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) override;
+    void SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll) override;
     void SetBindIndicator(bool bind) override;
     void SetPageFlipMode(int32_t pageFlipMode) override;
     void SetDigitalCrownSensitivity(int32_t sensitivity) override;
@@ -148,6 +149,7 @@ public:
     static int32_t GetIndicatorType(FrameNode* frameNode);
     static RefPtr<SwiperController> GetSwiperController(FrameNode* frameNode);
     static void SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll);
+    static void SetOnContentWillScroll(FrameNode* frameNode, ContentWillScrollEvent&& onContentWillScroll);
     static void SetCustomContentTransition(FrameNode* frameNode, SwiperContentAnimatedTransition& transition);
     static RefPtr<SwiperController> GetOrCreateSwiperController(FrameNode* frameNode);
     static bool GetIndicatorInteractive(FrameNode* frameNode);

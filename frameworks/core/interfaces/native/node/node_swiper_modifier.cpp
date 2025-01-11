@@ -1207,6 +1207,25 @@ ArkUI_Int32 GetSwiperSwiperPageFlipMode(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     return SwiperModelNG::GetPageFlipMode(frameNode);
 }
+
+void SetSwiperOnContentWillScroll(ArkUINodeHandle node, bool* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<bool(const SwiperContentWillScrollResult&)>*>(callback);
+        SwiperModelNG::SetOnContentWillScroll(frameNode, std::move(*onEvent));
+    } else {
+        SwiperModelNG::SetOnContentWillScroll(frameNode, nullptr);
+    }
+}
+
+void ResetSwiperOnContentWillScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnContentWillScroll(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1300,6 +1319,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setSwiperPageFlipMode = SetSwiperPageFlipMode,
         .resetSwiperPageFlipMode = ResetSwiperPageFlipMode,
         .getSwiperPageFlipMode = GetSwiperSwiperPageFlipMode,
+        .setSwiperOnContentWillScroll = SetSwiperOnContentWillScroll,
+        .resetSwiperOnContentWillScroll = ResetSwiperOnContentWillScroll,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
