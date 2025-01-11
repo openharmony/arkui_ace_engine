@@ -1494,6 +1494,8 @@ private:
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
     std::list<WeakPtr<ImageSpanNode>> hoverableNodes;
+    RefPtr<ImageSpanItem> lastHoverSpanItem_ = nullptr;
+    HoverInfo lastHoverInfo_;
 
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;
