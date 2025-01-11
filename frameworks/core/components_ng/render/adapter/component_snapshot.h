@@ -36,6 +36,9 @@ public:
         bool flag = true);
     static void GetNormalCapture(const RefPtr<FrameNode>& frameNode, NormalCallback&& callback);
 
+    static std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSync(
+        RefPtr<FrameNode>& node, const SnapshotOptions& options);
+
     static std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSync(const std::string& componentId,
         const SnapshotOptions& options);
     static std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncByUniqueId(int32_t uniqueId,

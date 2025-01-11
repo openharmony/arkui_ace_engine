@@ -8065,6 +8065,24 @@ int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_C
  * @since 15
  */
 int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
+
+/**
+ * @brief Get the snapshot pixelmap for the given node synchronously, will get error if the node is not on the
+ * tree or is not rendered yet.
+ * Note: the pixelmap should be released through OH_PixelmapNative_Release when it's not used any more.
+ *
+ * @param node Indicates the target node.
+ * @param snapshotOptions the given configuration for taking snapshot, can be null for using default.
+ * @param pixelmap Pixelmap pointer created by system, it's the out result.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_INTERNAL_ERROR} if the snapshot taking failed will null pixelmap returned.
+ *         Returns {@link ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT} if the snapshot taking is timeout.
+ * @since 15
+ */
+int32_t OH_ArkUI_GetNodeSnapshot(ArkUI_NodeHandle node, ArkUI_SnapshotOptions* snapshotOptions,
+    OH_PixelmapNative** pixelmap);
 #ifdef __cplusplus
 };
 #endif
