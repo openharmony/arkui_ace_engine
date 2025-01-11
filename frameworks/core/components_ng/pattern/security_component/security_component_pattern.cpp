@@ -344,7 +344,8 @@ void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, con
     auto paddingJson = JsonUtil::Create(true);
     CHECK_NULL_VOID(paddingJson);
     paddingJson->Put("top", layoutProperty->GetBackgroundTopPadding().value_or(Dimension(0.0)).ToString().c_str());
-    paddingJson->Put("bottom", layoutProperty->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ToString().c_str());
+    paddingJson->Put("bottom",
+        layoutProperty->GetBackgroundBottomPadding().value_or(Dimension(0.0)).ToString().c_str());
     paddingJson->Put("left", layoutProperty->GetBackgroundLeftPadding().value_or(Dimension(0.0)).ToString().c_str());
     paddingJson->Put("right", layoutProperty->GetBackgroundRightPadding().value_or(Dimension(0.0)).ToString().c_str());
     json->PutExtAttr("padding", paddingJson, filter);
