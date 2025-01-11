@@ -300,6 +300,17 @@ void SecurityComponentPattern::ToJsonValueIconNode(std::unique_ptr<JsonValue>& j
         value_or(theme->GetIconColor()).ColorToString().c_str(), filter);
 }
 
+void SecurityComponentPattern::ToJsonValueSymbolIconNode(std::unique_ptr<JsonValue>& json,
+    const RefPtr<FrameNode>& symbolIconNode, const InspectorFilter& filter) const
+{
+    auto iconProp = symbolIconNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(iconProp);
+    json->PutExtAttr("iconSize",
+        iconProp->GetFontSize().value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
+    json->PutExtAttr("iconColor",
+        V2::ConvertSymbolColorToString(iconProp->GetSymbolColorListValue({})).c_str(), filter);
+}
+
 void SecurityComponentPattern::ToJsonValueTextNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& textNode,
     const InspectorFilter& filter) const
 {
@@ -350,12 +361,7 @@ void SecurityComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, con
     }
     RefPtr<FrameNode> symbolIconNode = GetSecCompChildNode(node, V2::SYMBOL_ETS_TAG);
     if (symbolIconNode != nullptr) {
-        auto iconProp = symbolIconNode->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(iconProp);
-        json->PutExtAttr("iconSize",
-            iconProp->GetFontSize().value_or(Dimension(0, DimensionUnit::VP)).ToString().c_str(), filter);
-        json->PutExtAttr("iconColor",
-            V2::ConvertSymbolColorToString(iconProp->GetSymbolColorListValue({})).c_str(), filter);
+        ToJsonValueSymbolIconNode(json, symbolIconNode, filter);
     }
     RefPtr<FrameNode> textNode = GetSecCompChildNode(node, V2::TEXT_ETS_TAG);
     if (textNode != nullptr) {

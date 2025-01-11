@@ -76,6 +76,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
     SecurityComponentElementStyle& style, const std::function<RefPtr<Pattern>(void)>& patternCreator,
     bool isArkuiComponent)
 {
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     auto frameNode = InitChild(style);
     auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
     CHECK_NULL_RETURN(property, nullptr);
@@ -90,7 +91,6 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
 
 RefPtr<FrameNode> SecurityComponentModelNG::InitChild(SecurityComponentElementStyle& style)
 {
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(tag, nodeId, patternCreator);
     CHECK_NULL_RETURN(frameNode, nullptr);
     if (frameNode->GetChildren().empty()) {

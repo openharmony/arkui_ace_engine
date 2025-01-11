@@ -73,7 +73,8 @@ private:
     bool BottomRightCompDistance(float obtainedRadius, float maxRadius, float threshold);
     bool IsTextOutOfOneColumn(RefPtr<FrameNode>& frameNode, float threshold);
     Alignment ParseAlignmentRTL(LayoutWrapper* layoutWrapper, Alignment align);
-    void InitLayoutWrapper(LayoutWrapper* layoutWrapper, RefPtr<SecurityComponentLayoutProperty>& property);
+    void InitLayoutWrapper(LayoutWrapper* layoutWrapper,
+        RefPtr<SecurityComponentLayoutProperty>& securityComponentLayoutProperty);
 
     void UpdateTextSize();
 
