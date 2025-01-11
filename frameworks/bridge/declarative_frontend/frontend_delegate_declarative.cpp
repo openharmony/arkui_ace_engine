@@ -3475,6 +3475,15 @@ void FrontendDelegateDeclarative::GetSnapshot(
 }
 
 std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative::GetSyncSnapshot(
+    RefPtr<NG::FrameNode>& node, const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return NG::ComponentSnapshot::GetSync(node, options);
+#endif
+    return { ERROR_CODE_INTERNAL_ERROR, nullptr };
+}
+
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative::GetSyncSnapshot(
     const std::string& componentId, const NG::SnapshotOptions& options)
 {
 #ifdef ENABLE_ROSEN_BACKEND

@@ -223,6 +223,9 @@ public:
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
         bool enableInspector, const NG::SnapshotParam& param) override;
 
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshot(
+        RefPtr<NG::FrameNode>& node, const NG::SnapshotOptions& options) override;
+        
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshot(const std::string& componentId,
         const NG::SnapshotOptions& options) override;
 

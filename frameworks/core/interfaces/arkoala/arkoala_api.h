@@ -5802,6 +5802,17 @@ typedef struct {
     void (*setDragEventStrictReportingEnabledWithContext)(ArkUI_Int32 instanceId, bool enabled);
 } ArkUIDragAdapterAPI;
 
+struct ArkUISnapshotOptions {
+    ArkUI_Float32 scale = 1.0f;
+};
+
+typedef struct {
+    ArkUISnapshotOptions* (*createSnapshotOptions)();
+    void (*destroySnapshotOptions)(ArkUISnapshotOptions* snapshotOptions);
+    ArkUI_Int32 (*snapshotOptionsSetScale)(ArkUISnapshotOptions* snapshotOptions, ArkUI_Float32 scale);
+    ArkUI_Int32 (*getSyncSnapshot)(ArkUINodeHandle node, ArkUISnapshotOptions* snapshotOptions, void* mediaPixel);
+} ArkUISnapshotAPI;
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_NODE_API_VERSION above for binary
@@ -5820,6 +5831,7 @@ struct ArkUIFullNodeAPI {
     const ArkUINodeAdapterAPI* (*getNodeAdapterAPI)();
     const ArkUIDragAdapterAPI* (*getDragAdapterAPI)();
     const ArkUIStyledStringAPI* (*getStyledStringAPI)();
+    const ArkUISnapshotAPI* (*getSnapshotAPI)();
 };
 
 struct ArkUIAnyAPI {
