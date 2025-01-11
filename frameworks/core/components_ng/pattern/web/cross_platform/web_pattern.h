@@ -316,6 +316,8 @@ public:
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
 
     void SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt);
+
+    void OnScrollStart(const float x, const float y);
     /**
      *  End of NestableScrollContainer implementations
      */
