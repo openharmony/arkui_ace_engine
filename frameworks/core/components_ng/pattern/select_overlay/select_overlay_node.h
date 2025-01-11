@@ -64,7 +64,7 @@ public:
 
     void UpdateToolBar(bool menuItemChanged, bool noAnimation = false);
 
-    void UpdateMenuOptions();
+    void UpdateMenuOptions(const std::shared_ptr<SelectOverlayInfo>& info);
 
     void UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation = false);
 

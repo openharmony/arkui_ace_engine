@@ -2329,7 +2329,7 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
     }
 }
 
-void SelectOverlayNode::UpdateMenuOptions()
+void SelectOverlayNode::UpdateMenuOptions(const std::shared_ptr<SelectOverlayInfo>& info)
 {
     float maxWidth = 0.0f;
     GetDefaultButtonAndMenuWidth(maxWidth);
@@ -2385,7 +2385,7 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
     auto selectProperty = selectMenu_->GetLayoutProperty();
     CHECK_NULL_VOID(selectProperty);
     selectProperty->ClearUserDefinedIdealSize(true, false);
-    UpdateMenuOptions();
+    UpdateMenuOptions(info);
 }
 
 void SelectOverlayNode::SetSelectMenuInnerSize()
