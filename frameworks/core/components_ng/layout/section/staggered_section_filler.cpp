@@ -51,6 +51,7 @@ bool SectionEndFiller::Fill(const RefPtr<Measurer>& measurer, FrameNode* node, i
         lane.endPos -= section_.mainGap;
     }
     lane.items_.push_back({ index, itemLen });
+    section_.idxToLane[index] = laneIdx;
     float nextPos = lane.endPos + section_.mainGap;
     if (LessNotEqual(nextPos, viewportBound)) {
         q_.push({ nextPos, laneIdx });
@@ -73,6 +74,7 @@ bool SectionStartFiller::Fill(const RefPtr<Measurer>& measurer, FrameNode* node,
         lane.startPos += section_.mainGap;
     }
     lane.items_.push_front({ index, itemLen });
+    section_.idxToLane[index] = laneIdx;
     float nextPos = lane.startPos - section_.mainGap;
     if (GreatNotEqual(nextPos, viewportBound)) {
         q_.push({ nextPos, laneIdx });
@@ -80,4 +82,4 @@ bool SectionStartFiller::Fill(const RefPtr<Measurer>& measurer, FrameNode* node,
 
     return true;
 }
-} // namespace OHOS::Ace::NG::Staggered
+} // namespace OHOS::Ace::NG

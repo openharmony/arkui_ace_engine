@@ -41,6 +41,7 @@ bool StaggeredFillAlgorithm::CanFillMoreAtStart(Axis axis)
     SectionStartFiller filler(section);
     return filler.CanFill();
 }
+
 bool StaggeredFillAlgorithm::CanFillMoreAtEnd(float viewportBound, Axis axis)
 {
     int32_t item = -1;
@@ -58,6 +59,7 @@ bool StaggeredFillAlgorithm::CanFillMoreAtEnd(float viewportBound, Axis axis)
     SectionEndFiller filler(section, viewportBound);
     return filler.CanFill();
 }
+
 void StaggeredFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt)
 {
     InitSections();
@@ -67,13 +69,20 @@ void StaggeredFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t t
             MakeRefPtr<FlowItemMeasurer>([this](int32_t index) { return GetSection(index).userDefMainLen(index); },
                 axis, viewport.MainSize(axis), DynamicCast<WaterFlowLayoutProperty>(props_));
     }
+
+    for (auto& section : sections_) {
+        section.PruneFront(0.0f);
+        section.PruneBack(viewport.MainSize(axis));
+    }
 }
+
 bool StaggeredFillAlgorithm::CanFillMore(
     Axis axis, const SizeF& scrollWindowSize, const RectF& markItemRect, FillDirection direction)
 {
     return direction == FillDirection::END ? CanFillMoreAtEnd(scrollWindowSize.MainSize(axis), axis)
                                            : CanFillMoreAtStart(axis);
 }
+
 RectF StaggeredFillAlgorithm::CalcItemRectBeforeMarkItem(
     const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem)
 {
@@ -89,6 +98,7 @@ RectF StaggeredFillAlgorithm::CalcItemRectBeforeMarkItem(
     filler.Fill(measurer_, node, index, viewport.MainSize(axis));
     return {};
 }
+
 RectF StaggeredFillAlgorithm::CalcItemRectAfterMarkItem(
     const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem)
 {
@@ -103,6 +113,7 @@ RectF StaggeredFillAlgorithm::CalcItemRectAfterMarkItem(
     filler.Fill(measurer_, node, index, viewport.MainSize(axis));
     return {};
 }
+
 RectF StaggeredFillAlgorithm::CalcMarkItemRect(
     const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const std::optional<OffsetF>& slidingOffset)
 {
@@ -125,6 +136,7 @@ RectF StaggeredFillAlgorithm::CalcMarkItemRect(
     }
     return {};
 }
+
 void StaggeredFillAlgorithm::InitSections()
 {
     // factory method
@@ -137,6 +149,7 @@ void StaggeredFillAlgorithm::InitSections()
         }
     }
 }
+
 Section& StaggeredFillAlgorithm::GetSection(int32_t item)
 {
     for (auto& section : sections_) {

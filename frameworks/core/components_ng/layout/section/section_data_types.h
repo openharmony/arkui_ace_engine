@@ -29,7 +29,7 @@ struct ItemInfo {
 };
 
 struct Lane {
-    // std::string ToString() const;
+    std::string ToString() const;
 
     float startPos = 0.0f;
     float endPos = 0.0f;
@@ -38,20 +38,47 @@ struct Lane {
 };
 
 struct Section {
-    bool Contains(int32_t idx) const
+    inline bool Contains(int32_t idx) const
     {
         return idx >= StartIdx() && idx <= EndIdx();
     }
+    /**
+     * @return index of first item currently in the section. 
+     */
     int32_t StartIdx() const;
 
+    /**
+     * @return index of last item currently in the section.
+     */
     int32_t EndIdx() const;
 
     inline float StartPos() const;
 
     inline float EndPos() const;
-    void PrepareNextSection(Axis axis,Section& nextSection) const;
 
-    void PreparePrevSection(Axis axis,Section& prevSection) const;
+    /**
+     * @brief prepare next section's position and clear junk lanes.
+     */
+    void PrepareNextSection(Axis axis, Section& nextSection) const;
+    /**
+     * @brief prepare previous section's end position and clear junk lanes.
+     */
+    void PreparePrevSection(Axis axis, Section& prevSection) const;
+
+    Lane& GetLane(int32_t item);
+
+    /**
+     * @brief clean out items that are above viewport.
+     * @param start start position of the viewport.
+     */
+    void PruneFront(float start);
+
+    /**
+     * @brief clean out items that are below viewport.
+     * @param end end position of the viewport.
+     */
+    void PruneBack(float end);
+
     float mainGap = 0.0f;
     float crossGap = 0.0f;
     int32_t minItem = -1;
@@ -59,7 +86,8 @@ struct Section {
     MarginPropertyF margin;
     std::function<float(int32_t)> userDefMainLen;
     std::vector<Lane> lanes;
+    std::unordered_map<int32_t, size_t> idxToLane;
 };
-} // namespace OHOS::Ace::NG::Staggered
+} // namespace OHOS::Ace::NG
 
 #endif

@@ -25,6 +25,7 @@ int32_t Section::StartIdx() const
     }
     return minIdx;
 }
+
 int32_t Section::EndIdx() const
 {
     int32_t maxIdx = std::numeric_limits<int32_t>::min();
@@ -36,6 +37,7 @@ int32_t Section::EndIdx() const
     }
     return maxIdx;
 }
+
 inline float Section::StartPos() const
 {
     if (lanes.empty()) {
@@ -46,6 +48,7 @@ inline float Section::StartPos() const
         return LessNotEqual(lhs.startPos, rhs.startPos);
     })->startPos;
 }
+
 inline float Section::EndPos() const
 {
     if (lanes.empty()) {
@@ -56,6 +59,7 @@ inline float Section::EndPos() const
         return GreatNotEqual(lhs.endPos, rhs.endPos);
     })->endPos;
 }
+
 void Section::PrepareNextSection(Axis axis,Section& nextSection) const
 {
     float pos = EndPos();
@@ -66,6 +70,7 @@ void Section::PrepareNextSection(Axis axis,Section& nextSection) const
         lane.items_.clear();
     });
 }
+
 void Section::PreparePrevSection(Axis axis,Section& prevSection) const
 {
     float pos = StartPos();
@@ -82,4 +87,74 @@ void Section::PreparePrevSection(Axis axis,Section& prevSection) const
         lane.items_.clear();
     });
 }
- }
+
+void Section::PruneBack(float end)
+{
+    const int32_t startIdx = StartIdx();
+    for (int32_t i = EndIdx(); i >= startIdx; --i) {
+        auto& lane = GetLane(i);
+        if (lane.items_.empty() || lane.items_.back().idx != i) {
+            LOGW("corrupted item data");
+            break;
+        }
+        float itemStartPos = lane.endPos - lane.items_.back().mainSize;
+        if (LessNotEqual(itemStartPos, end)) {
+            break;
+        }
+        lane.items_.pop_back();
+        lane.endPos = itemStartPos - mainGap;
+        if (lane.items_.empty()) {
+            lane.endPos += mainGap;
+        }
+    }
+}
+
+void Section::PruneFront(float start)
+{
+    const int32_t endIdx = EndIdx();
+    for (int32_t i = StartIdx(); i <= endIdx; ++i) {
+        auto& lane = GetLane(i);
+        if (lane.items_.empty() || lane.items_.front().idx != i) {
+            LOGW("corrupted item data");
+            break;
+        }
+        const float& itemLen = lane.items_.front().mainSize;
+        const float itemEndPos = lane.startPos + itemLen;
+        if (GreatNotEqual(itemEndPos, start)) {
+            break;
+        }
+        lane.items_.pop_front();
+        lane.startPos = itemEndPos + mainGap;
+        if (lane.items_.empty()) {
+            lane.startPos -= mainGap;
+        }
+    }
+}
+
+Lane& Section::GetLane(int32_t item)
+{
+    auto it = idxToLane.find(item);
+    if (it != idxToLane.end() && it->second < lanes.size()) {
+        return lanes[it->second];
+    }
+    LOGW("invalid item index");
+    static Lane emptyLane;
+    return emptyLane;
+}
+
+std::string Lane::ToString() const
+{
+    std::string res = "{StartPos: " + std::to_string(startPos) + " EndPos: " + std::to_string(endPos) + " ";
+    if (items_.empty()) {
+        res += "empty";
+    } else {
+        res += "Items [";
+        for (const auto& item : items_) {
+            res += std::to_string(item.idx) + " ";
+        }
+        res += "] ";
+    }
+    res += "}";
+    return res;
+}
+} // namespace OHOS::Ace::NG
