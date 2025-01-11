@@ -1265,7 +1265,7 @@ void BubbleLayoutAlgorithm::CheckArrowPosition(OffsetF& position, float width, f
         }
     } else if (simplePlacement == Placement::TOP) {
         xMin = position.GetX() + cornerDistance;
-        xMax = position.GetX() + height - cornerDistance;
+        xMax = position.GetX() + width - cornerDistance;
         if (GreatNotEqual(xMin, targetOffset_.GetX() + targetSize_.Width()) ||
             LessNotEqual(xMax, targetOffset_.GetX())) {
             showArrow_ = false;
@@ -1273,7 +1273,7 @@ void BubbleLayoutAlgorithm::CheckArrowPosition(OffsetF& position, float width, f
         }
     } else if (simplePlacement == Placement::BOTTOM) {
         xMin = position.GetX() + cornerDistance;
-        xMax = position.GetX() + height - cornerDistance;
+        xMax = position.GetX() + width - cornerDistance;
         if (GreatNotEqual(xMin, targetOffset_.GetX() + targetSize_.Width()) ||
             LessNotEqual(xMax, targetOffset_.GetX())) {
             showArrow_ = false;

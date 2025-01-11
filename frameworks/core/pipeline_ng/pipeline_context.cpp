@@ -1875,13 +1875,14 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         CHECK_NULL_VOID(manager);
         manager->AvoidKeyBoardInNavigation();
-        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
         // layout before scrolling textfield to safeArea, because of getting correct position
         FlushUITasks();
         bool scrollResult = manager->ScrollTextFieldToSafeArea();
         if (scrollResult) {
             FlushUITasks();
         }
+        MarkDirtyOverlay();
+        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
 
         TAG_LOGI(AceLogTag::ACE_KEYBOARD,
             "AvoidanceLogic keyboardHeight: %{public}f, positionY: %{public}f, safeHeight: %{public}f, "
@@ -1933,13 +1934,14 @@ void PipelineContext::OriginalAvoidanceLogic(
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         CHECK_NULL_VOID(manager);
         manager->AvoidKeyBoardInNavigation();
-        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
         // layout before scrolling textfield to safeArea, because of getting correct position
         FlushUITasks();
         bool scrollResult = manager->ScrollTextFieldToSafeArea();
         if (scrollResult) {
             FlushUITasks();
         }
+        MarkDirtyOverlay();
+        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     };
     FlushUITasks();
     DoKeyboardAvoidAnimate(keyboardAnimationConfig_, keyboardHeight, func);
@@ -2076,13 +2078,14 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         manager->AvoidKeyBoardInNavigation();
-        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
         // layout before scrolling textfield to safeArea, because of getting correct position
         context->FlushUITasks();
         bool scrollResult = manager->ScrollTextFieldToSafeArea();
         if (scrollResult) {
             context->FlushUITasks();
         }
+        context->MarkDirtyOverlay();
+        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     };
     FlushUITasks();
     FlushDirtyPropertyNodesWhenExist();
@@ -2094,6 +2097,16 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         rsTransaction->Commit();
     }
 #endif
+}
+
+void PipelineContext::MarkDirtyOverlay()
+{
+    if (rootNode_) {
+        auto lastChild = rootNode_->GetLastChild();
+        if (lastChild && lastChild->GetTag() == V2::POPUP_ETS_TAG) {
+            lastChild->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+        }
+    }
 }
 
 void PipelineContext::FlushDirtyPropertyNodesWhenExist()
@@ -2137,6 +2150,8 @@ void PipelineContext::OnCaretPositionChangeOrKeyboardHeightChange(
         auto context = weak.Upgrade();
         CHECK_NULL_VOID(context);
         context->DoKeyboardAvoidFunc(keyboardHeight, positionY, height, keyboardHeightChanged);
+        context->MarkDirtyOverlay();
+        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     };
     FlushUITasks();
     SetIsLayouting(true);
@@ -2195,7 +2210,6 @@ void PipelineContext::DoKeyboardAvoidFunc(float keyboardHeight, double positionY
         safeAreaManager_->GetKeyboardOffset());
     SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
     manager->AvoidKeyBoardInNavigation();
-    SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     // layout before scrolling textfield to safeArea, because of getting correct position
     FlushUITasks();
     bool scrollResult = manager->ScrollTextFieldToSafeArea();
