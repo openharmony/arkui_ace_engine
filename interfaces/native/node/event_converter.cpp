@@ -43,6 +43,11 @@ constexpr int32_t ORIGIN_MOUSE_BUTTON_RIGHT = 2;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_MIDDLE = 4;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_BACK = 8;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_FORWARD = 16;
+constexpr int32_t ORIGIN_AXIS_ACTION_NONE = 0;
+constexpr int32_t ORIGIN_AXIS_ACTION_BEGIN = 1;
+constexpr int32_t ORIGIN_AXIS_ACTION_UPDATE = 2;
+constexpr int32_t ORIGIN_AXIS_ACTION_END = 3;
+constexpr int32_t ORIGIN_AXIS_ACTION_CANCEL = 4;
 
 void ConvertToOriginEvent(const ArkUITouchEvent& origin, ArkUI_NodeTouchEvent& event)
 {
@@ -745,6 +750,25 @@ int32_t ConvertToCMouseEventButtonType(int32_t originButtonType)
             break;
     }
     return static_cast<int32_t>(UI_MOUSE_EVENT_BUTTON_NONE);
+}
+
+int32_t ConvertToCAxisActionType(int32_t originActionType)
+{
+    switch (originActionType) {
+        case ORIGIN_AXIS_ACTION_NONE:
+            return static_cast<int32_t>(UI_AXIS_EVENT_ACTION_NONE);
+        case ORIGIN_AXIS_ACTION_BEGIN:
+            return static_cast<int32_t>(UI_AXIS_EVENT_ACTION_BEGIN);
+        case ORIGIN_AXIS_ACTION_UPDATE:
+            return static_cast<int32_t>(UI_AXIS_EVENT_ACTION_UPDATE);
+        case ORIGIN_AXIS_ACTION_END:
+            return static_cast<int32_t>(UI_AXIS_EVENT_ACTION_END);
+        case ORIGIN_AXIS_ACTION_CANCEL:
+            return static_cast<int32_t>(UI_AXIS_EVENT_ACTION_CANCEL);
+        default:
+            break;
+    }
+    return static_cast<int32_t>(UI_AXIS_EVENT_ACTION_NONE);
 }
 
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_CompatibleNodeEvent* event)

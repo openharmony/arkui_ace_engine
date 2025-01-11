@@ -1328,6 +1328,32 @@ double OH_ArkUI_AxisEvent_GetPinchAxisScaleValue(const ArkUI_UIInputEvent* event
     return 0.0;
 }
 
+int32_t OH_ArkUI_AxisEvent_GetAxisAction(const ArkUI_UIInputEvent* event)
+{
+    if (!event) {
+        return UI_AXIS_EVENT_ACTION_NONE;
+    }
+    switch (event->eventTypeId) {
+        case AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<const OHOS::Ace::AxisEvent*>(event->inputEvent);
+            if (axisEvent) {
+                return OHOS::Ace::NodeModel::ConvertToCAxisActionType(static_cast<int32_t>(axisEvent->action));
+            }
+            break;
+        }
+        case C_AXIS_EVENT_ID: {
+            const auto* axisEvent = reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent);
+            if (axisEvent) {
+                return OHOS::Ace::NodeModel::ConvertToCAxisActionType(axisEvent->action);
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return UI_AXIS_EVENT_ACTION_NONE;
+}
+
 int32_t OH_ArkUI_PointerEvent_SetInterceptHitTestMode(const ArkUI_UIInputEvent* event, HitTestMode mode)
 {
     if (!event) {
