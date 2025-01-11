@@ -65,6 +65,8 @@ void JSImageAnimator::JSBind(BindingTarget globalObj)
     JSClass<JSImageAnimator>::StaticMethod("fixedSize", &JSImageAnimator::SetFixedSize, opt);
     JSClass<JSImageAnimator>::StaticMethod("fillMode", &JSImageAnimator::SetFillMode, opt);
     JSClass<JSImageAnimator>::StaticMethod("preDecode", &JSImageAnimator::SetPreDecode, opt);
+    JSClass<JSImageAnimator>::StaticMethod(
+        "autoMonitorInvisibleArea", &JSImageAnimator::SetAutoMonitorInvisibleArea, opt);
 
     JSClass<JSImageAnimator>::StaticMethod("onStart", &JSImageAnimator::OnStart, opt);
     JSClass<JSImageAnimator>::StaticMethod("onPause", &JSImageAnimator::OnPause, opt);
@@ -78,6 +80,15 @@ void JSImageAnimator::JSBind(BindingTarget globalObj)
     JSClass<JSImageAnimator>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
 
     JSClass<JSImageAnimator>::InheritAndBind<JSContainerBase>(globalObj);
+}
+
+void JSImageAnimator::SetAutoMonitorInvisibleArea(const JSCallbackInfo& info)
+{
+    bool autoMonitorInvisibleArea = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        autoMonitorInvisibleArea = info[0]->ToBoolean();
+    }
+    ImageAnimatorModel::GetInstance()->SetAutoMonitorInvisibleArea(autoMonitorInvisibleArea);
 }
 
 void JSImageAnimator::SetImages(const JSCallbackInfo& info)

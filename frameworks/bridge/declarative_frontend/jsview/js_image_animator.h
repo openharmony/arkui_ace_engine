@@ -37,6 +37,7 @@ public:
     static void SetPreDecode(const JSCallbackInfo& info);
     static void SetIsReverse(const JSCallbackInfo& info);
     static void SetFixedSize(const JSCallbackInfo& info);
+    static void SetAutoMonitorInvisibleArea(const JSCallbackInfo& info);
 
     static void OnStart(const JSCallbackInfo& info);
     static void OnPause(const JSCallbackInfo& info);
