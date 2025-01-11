@@ -99,8 +99,7 @@ void MenuItemPaintMethod::HandleOption(PaintWrapper* paintWrapper, const RefPtr<
     CHECK_NULL_VOID(layoutProperty);
 
     auto optionSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-    auto horInterval = static_cast<float>(selectTheme->GetMenuIconPadding().ConvertToPx()) -
-                       static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
+    auto horInterval = static_cast<float>(selectTheme->GetMenuItemHorIntervalPadding().ConvertToPx());
     auto hasIcon = props->GetHasIcon().value_or(false);
     float iconHorInterval = 0.0f;
     auto textDirection = layoutProperty->GetNonAutoLayoutDirection();

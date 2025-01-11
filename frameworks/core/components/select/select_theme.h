@@ -329,6 +329,7 @@ public:
             theme->selectFocusStyleType_ = pattern->GetAttr<double>("select_focus_style_type", 0.0);
             theme->optionFocusStyleType_ = pattern->GetAttr<double>("option_focus_style_type", 0.0);
             theme->menuItemHorIntervalPadding_ = pattern->GetAttr<Dimension>("menu_item_hor_interval", theme->menuItemHorIntervalPadding_);
+            theme->menuPadding_ = pattern->GetAttr<Dimension>("menu_padding_interval", theme->menuPadding_);
         }
 
         void ParseAttribute(const RefPtr<SelectTheme>& theme, const RefPtr<ThemeStyle>& pattern) const
@@ -510,6 +511,7 @@ public:
         theme->menuMaxWidthRatio_ = menuMaxWidthRatio_;
         theme->menuBackgroundBlurStyle_ = menuBackgroundBlurStyle_;
         theme->menuItemHorIntervalPadding_ = menuItemHorIntervalPadding_;
+        theme->menuPadding_ = menuPadding_;
     }
 
     void CloneWideScreenAttrs(RefPtr<SelectTheme>& theme)
@@ -1028,6 +1030,11 @@ public:
         return menuItemHorIntervalPadding_;
     }
 
+    const Dimension& GetMenuPadding() const
+    {
+        return menuPadding_;
+    }
+
     const Dimension& GetIconContentPadding() const
     {
         return iconContentPadding_;
@@ -1535,6 +1542,7 @@ private:
     Dimension menuTitleHeight_;
     Dimension menuIconPadding_;
     Dimension menuItemHorIntervalPadding_;
+    Dimension menuPadding_;
     Dimension iconContentPadding_;
     Dimension dividerPaddingVertical_;
 

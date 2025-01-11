@@ -261,7 +261,7 @@ void SubMenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     if (!menuPattern->IsSelectOverlayExtensionMenu()) {
-        margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+        margin_ = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
         paddingStart_ = static_cast<float>(theme->GetDefaultPaddingStart().ConvertToPx());
         paddingEnd_ = static_cast<float>(theme->GetDefaultPaddingEnd().ConvertToPx());
         if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -282,7 +282,7 @@ void SubMenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     if (!menuPattern->IsSelectOverlayExtensionMenu()) {
-        margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+        margin_ = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
         if (!canExpandCurrentWindow_) {
             paddingStart_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());
             paddingEnd_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());

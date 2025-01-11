@@ -180,8 +180,7 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    auto padding = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
-                   static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    auto padding = static_cast<float>(theme->GetMenuItemHorIntervalPadding().ConvertToPx());
     PaddingProperty textPadding;
     textPadding.left = CalcLength(padding);
     textPadding.right = CalcLength(padding);
@@ -217,7 +216,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto theme = pipeline->GetTheme<SelectTheme>();
     float contentPadding = 0.0f;
     if (theme) {
-        contentPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+        contentPadding = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
     }
     PaddingProperty padding;
     padding.left = padding.right = padding.top = padding.bottom = CalcLength(contentPadding);

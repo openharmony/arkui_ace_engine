@@ -55,8 +55,7 @@ GroupDividerInfo MenuItemGroupPaintMethod::PreparePaintData(
     Color dividerColor = Color::TRANSPARENT;
     GroupDividerInfo info;
     if (selectTheme) {
-        float horIntervalF = static_cast<float>(selectTheme->GetMenuIconPadding().ConvertToPx()) -
-            static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
+        float horIntervalF = static_cast<float>(selectTheme->GetMenuItemHorIntervalPadding().ConvertToPx());
         horInterval = Dimension(horIntervalF, DimensionUnit::PX);
         strokeWidth = selectTheme->GetDefaultDividerWidth();
         dividerColor =  selectTheme->GetLineColor();

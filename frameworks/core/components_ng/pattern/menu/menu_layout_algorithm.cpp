@@ -599,7 +599,7 @@ void MenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    margin_ = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
     optionPadding_ = margin_;
     paddingStart_ = static_cast<float>(theme->GetDefaultPaddingStart().ConvertToPx());
     paddingEnd_ = static_cast<float>(theme->GetDefaultPaddingEnd().ConvertToPx());
@@ -618,7 +618,7 @@ void MenuLayoutAlgorithm::InitializePaddingAPI12(LayoutWrapper* layoutWrapper)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
 
-    margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    margin_ = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
     optionPadding_ = margin_;
     if (!canExpandCurrentWindow_) {
         paddingStart_ = static_cast<float>(theme->GetMenuLargeMargin().ConvertToPx());

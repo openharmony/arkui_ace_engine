@@ -318,7 +318,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, nullptr);
-    auto contentPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    auto contentPadding = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
     PaddingProperty padding;
     padding.left = padding.right = padding.top = padding.bottom = CalcLength(contentPadding);
     props->UpdatePadding(padding);
@@ -1021,7 +1021,7 @@ void InnerMenuPattern::InitTheme(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(theme);
     // apply default padding from theme on inner menu
     PaddingProperty padding;
-    padding.SetEdges(CalcLength(theme->GetOutPadding()));
+    padding.SetEdges(CalcLength(theme->GetMenuPadding()));
     host->GetLayoutProperty()->UpdatePadding(padding);
 
     host->GetRenderContext()->SetClipToBounds(true);
