@@ -1747,7 +1747,6 @@ HWTEST_F(WebPatternPartTwoTest, OnScrollStartRecursive_001, TestSize.Level1)
     ASSERT_NE(webPattern->delegate_, nullptr);
     webPattern->OnScrollStartRecursive(webPattern, 1.f, 1.f);
     EXPECT_TRUE(webPattern->isFirstFlingScrollVelocity_);
-    EXPECT_TRUE(webPattern->isNeedUpdateScrollAxis_);
     EXPECT_TRUE(webPattern->isScrollStarted_);
 
 #endif
@@ -1772,10 +1771,8 @@ HWTEST_F(WebPatternPartTwoTest, OnScrollStartRecursive_002, TestSize.Level1)
     ASSERT_NE(webPattern, nullptr);
     webPattern->OnModifyDone();
     ASSERT_NE(webPattern->delegate_, nullptr);
-    std::vector<float> positions = { 1.f };
-    webPattern->OnScrollStartRecursive(positions);
+    webPattern->OnScrollStartRecursive(1.f);
     EXPECT_TRUE(webPattern->isFirstFlingScrollVelocity_);
-    EXPECT_TRUE(webPattern->isNeedUpdateScrollAxis_);
     EXPECT_TRUE(webPattern->isScrollStarted_);
 
 #endif
