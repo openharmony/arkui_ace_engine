@@ -36,6 +36,7 @@ const static uint8_t FULL_TRANSPARENCY_VALUE = 0xFF;
 const static std::set<uint32_t> RELEASE_ATTRIBUTE_LIST = {
     0x0C000000,
 };
+const static double DEFAULT_ICON_FONT_SIZE = 24;
 RefPtr<SecurityComponentTheme> SecurityComponentModelNG::GetTheme()
 {
     auto pipeline = PipelineContext::GetCurrentContextSafely();
@@ -72,13 +73,26 @@ void SecurityComponentModelNG::InitLayoutProperty(RefPtr<FrameNode>& node, int32
 }
 
 RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, int32_t nodeId,
-    SecurityComponentElementStyle& style,
-    const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent)
+    SecurityComponentElementStyle& style, const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(tag, nodeId, patternCreator);
     CHECK_NULL_RETURN(frameNode, nullptr);
+    InitChild(frameNode, style);
 
+    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
+    CHECK_NULL_RETURN(property, nullptr);
+    property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    property->UpdateIsArkuiComponent(isArkuiComponent);
+    property->UpdateTextStyle(style.text);
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafely());
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    pipeline->AddWindowStateChangedCallback(nodeId);
+    return frameNode;
+}
+
+void SecurityComponentModelNG::InitChild(const RefPtr<FrameNode>& frameNode, SecurityComponentElementStyle& style)
+{
     if (frameNode->GetChildren().empty()) {
         bool isButtonVisible = (style.backgroundType != BUTTON_TYPE_NULL);
         auto buttonNode = FrameNode::CreateFrameNode(
@@ -120,15 +134,6 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
         }
         InitLayoutProperty(frameNode, style.text, style.icon, style.symbolIcon, style.backgroundType);
     }
-    auto property = frameNode->GetLayoutProperty<SecurityComponentLayoutProperty>();
-    CHECK_NULL_RETURN(property, nullptr);
-    property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
-    property->UpdateIsArkuiComponent(isArkuiComponent);
-    property->UpdateTextStyle(style.text);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafely());
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    pipeline->AddWindowStateChangedCallback(nodeId);
-    return frameNode;
 }
 
 void SecurityComponentModelNG::CreateCommon(const std::string& tag, int32_t text, int32_t icon,
@@ -203,7 +208,7 @@ void SecurityComponentModelNG::SetDefaultSymbolIconStyle(
         iconProp->UpdateSymbolColorList({secCompTheme->GetIconColorNoBg()});
     }
     iconProp->UpdateSymbolSourceInfo(symbolSourceInfo);
-    iconProp->UpdateFontSize(Dimension(24, DimensionUnit::VP));
+    iconProp->UpdateFontSize(Dimension(DEFAULT_ICON_FONT_SIZE, DimensionUnit::VP));
     symbolNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     symbolNode->MarkModifyDone();
 }

@@ -187,8 +187,7 @@ RefPtr<FrameNode> BuildPasteButton(
     if (callback) {
         buttonPaintProperty->UpdateFontColor(textStyle.GetTextColor());
     } else {
-        buttonPaintProperty->UpdateFontColor(
-            textStyle.GetTextColor().BlendOpacity(textOverlayTheme->GetAlphaDisabled()));
+        buttonPaintProperty->UpdateFontColor(textStyle.GetTextColor().BlendOpacity(textOverlayTheme->GetAlphaDisabled()));
     }
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     buttonLayoutProperty->UpdateBackgroundLeftPadding(padding.Left());
@@ -2330,19 +2329,8 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
     }
 }
 
-void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation)
+void SelectOverlayNode::UpdateMenuOptions()
 {
-    CHECK_NULL_VOID(selectMenuInner_);
-    selectMenuInner_->Clean();
-    selectMenuInner_->GetLayoutProperty()->ClearUserDefinedIdealSize(true, true);
-    SetSelectMenuInnerSize();
-    selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    if (isExtensionMenu_) {
-        MoreOrBackAnimation(false, noAnimation);
-    }
-    auto selectProperty = selectMenu_->GetLayoutProperty();
-    CHECK_NULL_VOID(selectProperty);
-    selectProperty->ClearUserDefinedIdealSize(true, false);
     float maxWidth = 0.0f;
     GetDefaultButtonAndMenuWidth(maxWidth);
     if (info->onCreateCallback.onCreateMenuCallback) {
@@ -2382,6 +2370,22 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
         }
     }
     AddExtensionMenuOptions(info, extensionOptionStartIndex);
+}
+
+void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation)
+{
+    CHECK_NULL_VOID(selectMenuInner_);
+    selectMenuInner_->Clean();
+    selectMenuInner_->GetLayoutProperty()->ClearUserDefinedIdealSize(true, true);
+    SetSelectMenuInnerSize();
+    selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (isExtensionMenu_) {
+        MoreOrBackAnimation(false, noAnimation);
+    }
+    auto selectProperty = selectMenu_->GetLayoutProperty();
+    CHECK_NULL_VOID(selectProperty);
+    selectProperty->ClearUserDefinedIdealSize(true, false);
+    UpdateMenuOptions();
 }
 
 void SelectOverlayNode::SetSelectMenuInnerSize()
