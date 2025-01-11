@@ -532,7 +532,7 @@ void GestureEventHub::HandleDragThroughMouse(const RefPtr<FrameNode> frameNode)
     }
     auto size = GetSelectItemSize();
     if (size) {
-        auto fatherNode = dragEventActuator_->GetItemParentNode();
+        auto fatherNode = DragDropFuncWrapper::FindItemParentNode(frameNode);
         CHECK_NULL_VOID(fatherNode);
         auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
         CHECK_NULL_VOID(scrollPattern);
@@ -1192,7 +1192,7 @@ void GestureEventHub::SetMouseDragGatherPixelMaps()
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->ClearGatherPixelMap();
     CHECK_NULL_VOID(dragEventActuator_);
-    auto fatherNode = dragEventActuator_->GetItemParentNode();
+    auto fatherNode = DragDropFuncWrapper::FindItemParentNode(frameNode);
     CHECK_NULL_VOID(fatherNode);
     auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(scrollPattern);
@@ -1255,7 +1255,7 @@ int32_t GestureEventHub::GetSelectItemSize()
     if (!dragEventActuator_->IsNeedGather()) {
         return 0;
     }
-    auto fatherNode = dragEventActuator_->GetItemParentNode();
+    auto fatherNode = DragDropFuncWrapper::FindItemParentNode(GetFrameNode());
     CHECK_NULL_RETURN(fatherNode, 0);
     auto scrollPattern = fatherNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(scrollPattern, 0);
@@ -1489,7 +1489,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     auto originGatherNode = overlayManager->GetGatherNode();
     OffsetF positionToWindow = originGatherNode ? originGatherNode->GetPositionToWindowWithTransform() : OffsetF();
     std::vector<GatherNodeChildInfo> childrenInfo;
-    auto gatherNode = DragEventActuator::GetOrCreateGatherNode(overlayManager, dragEventActuator_, childrenInfo);
+    auto gatherNode = DragAnimationHelper::GetOrCreateGatherNode(overlayManager, dragEventActuator_, childrenInfo);
     auto gatherNodeOffset = isExpandDisplay
             ? DragDropManager::GetTouchOffsetRelativeToSubwindow(dragNodePipeline->GetInstanceId()) + positionToWindow
             : positionToWindow;
@@ -1516,6 +1516,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     overlayManager->RemovePixelMap();
     HideMenu();
     DragAnimationHelper::ShowBadgeAnimation(textNode);
+    DragAnimationHelper::HideDragNodeCopy(overlayManager);
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_RETURN(dragDropManager, false);
 

@@ -17,6 +17,7 @@
 
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_initiating/drag_drop_initiating_state_machine.h"
+#include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/gestures/drag_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
@@ -105,6 +106,30 @@ void DragDropInitiatingStateIdle::StartPreDragDetectingStartTask()
         params.notifyPreDragCallback, PRE_DRAG_DELAY_TIME, "ArkUIDragDropPreDragDetectingThumbnailTimer");
 }
 
+void DragDropInitiatingStateIdle::StartGatherTask()
+{
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto& params = machine->GetDragDropInitiatingParams();
+    auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    if (!params.isNeedGather) {
+        params.showGatherCallback.Cancel();
+        return;
+    }
+    auto&& showGatherCallback = [weakNode = AceType::WeakClaim(RawPtr(frameNode))]() {
+        auto frameNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        DragAnimationHelper::ShowGatherNodeAnimation(frameNode);
+    };
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    params.showGatherCallback.Reset(showGatherCallback);
+    taskExecutor.PostDelayedTask(
+        params.showGatherCallback, SNAPSHOT_DELAY_TIME, "ArkUIDragDropStartGather");
+}
+
 void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
 {
     auto machine = GetStateMachine();
@@ -114,10 +139,12 @@ void DragDropInitiatingStateIdle::HandleHitTesting(const TouchEvent& touchEvent)
     CHECK_NULL_VOID(frameNode);
     ResetStateForHitTest(frameNode);
     params.idleFingerId = touchEvent.id;
+    params.isNeedGather = DragDropFuncWrapper::CheckIsNeedGather(frameNode);
     RegisterDragListener();
     if (touchEvent.sourceType != SourceType::MOUSE) {
         StartCreateSnapshotTask(touchEvent.id);
         StartPreDragDetectingStartTask();
+        StartGatherTask();
     }
     machine->RequestStatusTransition(AceType::Claim(this), static_cast<int32_t>(DragDropInitiatingStatus::READY));
 }
