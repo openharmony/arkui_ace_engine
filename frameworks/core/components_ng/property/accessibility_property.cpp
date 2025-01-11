@@ -701,6 +701,21 @@ std::string AccessibilityProperty::GetAccessibilityCustomRole() const
     return accessibilityCustomRole_.value_or("");
 }
 
+void AccessibilityProperty::SetAccessibilitySamePage(const std::string& pageMode)
+{
+    accessibilityUseSamePage_ = pageMode;
+}
+
+bool AccessibilityProperty::HasAccessibilitySamePage()
+{
+    return accessibilityUseSamePage_.has_value();
+}
+
+std::string AccessibilityProperty::GetAccessibilitySamePage()
+{
+    return accessibilityUseSamePage_.value_or("");
+}
+
 void AccessibilityProperty::SetActions(const ActionsImpl& actionsImpl)
 {
     actionsImpl_ = actionsImpl;

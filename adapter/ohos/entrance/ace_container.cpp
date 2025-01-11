@@ -2419,6 +2419,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(syncTask);
     });
 #endif
+    if (IsUIExtensionWindow()) {
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+        CHECK_NULL_VOID(ngPipeline);
+        auto uiExtManager = ngPipeline->GetUIExtensionManager();
+        CHECK_NULL_VOID(uiExtManager);
+        uiExtManager->SendPageModeToUEA(ngPipeline);
+    }
 }
 
 void AceContainer::SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow)
