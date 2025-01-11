@@ -937,7 +937,6 @@ HoverInfo RichEditorPattern::CreateHoverInfo(const MouseInfo& info)
 
 void RichEditorPattern::HandleImageHoverEvent(const MouseInfo& mouseInfo)
 {
-    static RefPtr<ImageSpanItem> lastHoverSpanItem = nullptr;
     CHECK_NULL_VOID(mouseInfo.GetAction() == MouseAction::MOVE && !isMousePressed_);
     ACE_SCOPED_TRACE("RichEditorHandleImageHoverEvent");
     PointF mouseOffset = { mouseInfo.GetLocalLocation().GetX(), mouseInfo.GetLocalLocation().GetY() };
@@ -960,21 +959,23 @@ void RichEditorPattern::HandleImageHoverEvent(const MouseInfo& mouseInfo)
             ++it;
             continue;
         }
-        if (!lastHoverSpanItem) {
+        if (!lastHoverSpanItem_) {
             imageSpanItem->onHover_(true, info);
-            lastHoverSpanItem = imageSpanItem;
+            lastHoverSpanItem_ = imageSpanItem;
+            lastHoverInfo_ = info;
             return;
         }
-        CHECK_NULL_VOID(lastHoverSpanItem.GetRawPtr() != imageSpanItem.GetRawPtr());
+        CHECK_NULL_VOID(lastHoverSpanItem_.GetRawPtr() != imageSpanItem.GetRawPtr());
         imageSpanItem->onHover_(true, info);
-        lastHoverSpanItem->onHover_(false, info);
-        lastHoverSpanItem = imageSpanItem;
+        lastHoverSpanItem_->onHover_(false, info);
+        lastHoverSpanItem_ = imageSpanItem;
+        lastHoverInfo_ = info;
         return;
     }
 
-    if (lastHoverSpanItem) {
-        lastHoverSpanItem->onHover_(false, info);
-        lastHoverSpanItem.Reset();
+    if (lastHoverSpanItem_) {
+        lastHoverSpanItem_->onHover_(false, info);
+        lastHoverSpanItem_.Reset();
     }
 }
 
@@ -4502,6 +4503,11 @@ void RichEditorPattern::InitMouseEvent()
 void RichEditorPattern::OnHover(bool isHover)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isHover=%{public}d", isHover);
+    if (lastHoverSpanItem_) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "spanItem hover false");
+        lastHoverSpanItem_->onHover_(false, lastHoverInfo_);
+        lastHoverSpanItem_.Reset();
+    }
     auto scrollBar = GetScrollBar();
     if (isHover && (!scrollBar || !scrollBar->IsPressed())) {
         ChangeMouseStyle(MouseFormat::TEXT_CURSOR);
