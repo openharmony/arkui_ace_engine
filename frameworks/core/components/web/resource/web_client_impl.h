@@ -301,6 +301,8 @@ public:
     bool CloseImageOverlaySelection() override;
 
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight) override;
+
+    void OnScrollStart(const float x, const float y) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;
