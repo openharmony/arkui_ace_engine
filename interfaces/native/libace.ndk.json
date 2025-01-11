@@ -1492,6 +1492,10 @@
         "name": "OH_ArkUI_NodeUtils_GetWindowInfo"
     },
     {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NodeUtils_MoveTo"
+    },
+    {
         "first_introduced": "14",
         "name": "OH_ArkUI_ActiveChildrenInfo_Destroy"
     },

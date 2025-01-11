@@ -19,6 +19,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
@@ -775,6 +776,35 @@ ArkUI_Int32 GetWindowInfoByNode(ArkUINodeHandle node, char** name)
     return OHOS::Ace::ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 MoveNodeTo(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkUI_Int32 index)
+{
+    auto* moveNode = reinterpret_cast<UINode*>(node);
+    auto* toNode = reinterpret_cast<UINode*>(target_parent);
+    CHECK_NULL_RETURN(moveNode, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(toNode, ERROR_CODE_PARAM_INVALID);
+    auto pipeline = moveNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGF("MoveNodeTo doesn't run on UI thread");
+        abort();
+    }
+    auto oldParent = moveNode->GetParent();
+    moveNode->setIsMoving(true);
+    if (oldParent) {
+        oldParent->RemoveChild(AceType::Claim(moveNode));
+        oldParent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    }
+    int32_t childCount = toNode->TotalChildCount();
+    if (index >= childCount || index < 0) {
+        toNode->AddChild(AceType::Claim(moveNode));
+    } else {
+        auto indexChild = toNode->GetChildAtIndex(index);
+        toNode->AddChildBefore(AceType::Claim(moveNode), indexChild);
+    }
+    toNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    moveNode->setIsMoving(false);
+    return ERROR_CODE_NO_ERROR;
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -844,6 +874,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .clearFocus = ClearFocus,
         .focusActivate = FocusActivate,
         .setAutoFocusTransfer = SetAutoFocusTransfer,
+        .moveNodeTo = MoveNodeTo,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

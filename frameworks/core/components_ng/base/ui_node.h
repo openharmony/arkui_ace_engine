@@ -816,6 +816,16 @@ public:
     virtual void AddCustomProperty(const std::string& key, const std::string& value) {}
     virtual void RemoveCustomProperty(const std::string& key) {}
 
+    bool IsMoving() const
+    {
+        return isMoving_;
+    }
+
+    void setIsMoving(bool isMoving)
+    {
+        isMoving_ = isMoving;
+    }
+
     /**
      * flag used by Repeat virtual scroll
      * to mark a child UINode of RepeatVirtualScroll as either allowing or not allowing
@@ -967,6 +977,7 @@ private:
     bool allowReusableV2Descendant_ = true;
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
+    bool isMoving_ = false;
 };
 
 } // namespace OHOS::Ace::NG

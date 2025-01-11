@@ -376,6 +376,26 @@ class FrameNode {
     __JSScopeUtil__.restoreInstanceId();
   }
 
+  moveTo(targetParent: FrameNode, index?: number): void {
+    if (targetParent === undefined || targetParent === null) {
+      return;
+    }
+    if (index === undefined || index === null) {
+      index = -1;
+    }
+    const oldParent = this.getParent();
+    if (oldParent && !oldParent.isModifiable() || !targetParent.isModifiable() || !targetParent.checkValid(this)) {
+      throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+    }
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    getUINativeModule().frameNode.moveTo(this.nodePtr_, targetParent.nodePtr_, index);
+    __JSScopeUtil__.restoreInstanceId();
+    if (oldParent) {
+      oldParent._childList.delete(this._nodeId);
+    }
+    targetParent._childList.set(this._nodeId, this);
+  }
+
   getPositionToParent(): Position {
     const position = getUINativeModule().frameNode.getPositionToParent(this.getNodePtr());
     return { x: position[0], y: position[1] };
@@ -637,6 +657,9 @@ class ProxyFrameNode extends ImmutableFrameNode {
     this._nodeId = -1;
     this._nativeRef = undefined;
     this.nodePtr_ = undefined;
+  }
+  moveTo(targetParent: FrameNode, index?: number): void {
+    throw { message: 'The FrameNode is not modifiable.', code: 100021 };
   }
 }
 
