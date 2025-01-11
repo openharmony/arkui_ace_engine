@@ -41,6 +41,7 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
+#include "core/common/container_handler.h"
 #include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
@@ -771,6 +772,16 @@ public:
         isTouchEventsPassThrough_ = isTouchEventsPassThrough;
     }
 
+    void RegisterContainerHandler(const WeakPtr<ContainerHandler>& containerHandler)
+    {
+        containerHandler_ = containerHandler;
+    }
+
+    WeakPtr<ContainerHandler> GetContainerHandler()
+    {
+        return containerHandler_;
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -879,6 +890,9 @@ private:
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
     std::optional<bool> isTouchEventsPassThrough_;
+
+    // for common handler
+    WeakPtr<ContainerHandler> containerHandler_;
 };
 
 } // namespace OHOS::Ace::Platform
