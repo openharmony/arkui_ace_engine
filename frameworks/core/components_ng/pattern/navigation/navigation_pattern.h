@@ -425,6 +425,7 @@ public:
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     void FollowStdNavdestinationAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
     const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
+    bool FindInCurStack(const RefPtr<FrameNode>& navDestinationNode);
 
     std::unique_ptr<JsonValue> GetNavdestinationJsonArray();
     void RestoreJsStackIfNeeded();

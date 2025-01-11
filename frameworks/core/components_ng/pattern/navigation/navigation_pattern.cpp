@@ -3197,6 +3197,17 @@ void NavigationPattern::CloseLongPressDialog()
     }
 }
 
+bool NavigationPattern::FindInCurStack(const RefPtr<FrameNode>& navDestinationNode)
+{
+    const auto& navdestinationNodes = GetAllNavDestinationNodes();
+    for (auto navdestination : navdestinationNodes) {
+        if (navDestinationNode == NavigationGroupNode::GetNavDestinationNode(navdestination.second)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void NavigationPattern::SetMouseStyle(MouseFormat format)
 {
     auto host = GetHost();
