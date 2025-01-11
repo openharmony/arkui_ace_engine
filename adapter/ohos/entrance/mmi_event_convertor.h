@@ -30,9 +30,7 @@
 #include "core/event/focus_axis_event.h"
 #include "core/event/touch_event.h"
 #include "core/event/pointer_event.h"
-#ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
-#endif
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -86,9 +84,7 @@ void SetTouchEventType(int32_t orgAction, TouchEvent& event);
 void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode,
     bool useRealtimeMatrix = false);
 
-#ifdef SUPPORT_DIGITAL_CROWN
 void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, CrownEvent& event);
-#endif
 
 void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
     const NG::VectorF& scale, int32_t udegree = 0);

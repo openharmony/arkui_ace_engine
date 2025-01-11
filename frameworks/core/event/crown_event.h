@@ -15,7 +15,6 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_CROWN_EVENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_CROWN_EVENT_H
-#ifdef SUPPORT_DIGITAL_CROWN
 #include <map>
 #include "core/event/ace_events.h"
 #include "core/event/non_pointer_event.h"
@@ -133,5 +132,3 @@ using OnCrownCallbackFunc = std::function<void(CrownEventInfo&)>;
 
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_CROWN_EVENT_H
-#endif // SUPPORT_DIGITAL_CROWN
-

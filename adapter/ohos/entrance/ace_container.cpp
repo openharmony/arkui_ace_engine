@@ -93,9 +93,7 @@
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
 
-#ifdef SUPPORT_DIGITAL_CROWN
 #include "base/ressched/ressched_report.h"
-#endif
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -116,9 +114,7 @@ const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
 const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
 std::mutex g_mutexFormRenderFontFamily;
-#ifdef SUPPORT_DIGITAL_CROWN
 constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
-#endif
 
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
@@ -1005,7 +1001,6 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterNonPointerEventCallback(nonPointerEventCallback);
 
-#ifdef SUPPORT_DIGITAL_CROWN
     auto&& crownEventCallback = [context = pipelineContext_, id = instanceId_](
                                    const CrownEvent& event, const std::function<void()>& markProcess) {
         if (event.action == CrownAction::BEGIN || event.action == CrownAction::END) {
@@ -1031,7 +1026,6 @@ void AceContainer::InitializeCallback()
         return result;
     };
     aceView_->RegisterCrownEventCallback(crownEventCallback);
-#endif
 
     auto&& rotationEventCallback = [context = pipelineContext_, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);

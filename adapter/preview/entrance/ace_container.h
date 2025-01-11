@@ -33,10 +33,7 @@
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/platform_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
-#ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
-#endif
-
 
 #include <refbase.h>
 
@@ -310,13 +307,11 @@ public:
         moduleName_ = moduleName;
     }
 
-#ifdef SUPPORT_DIGITAL_CROWN
     void RegisterCrownEventCallback(CrownEventCallback&& callback)
     {
         ACE_DCHECK(callback);
         crownEventCallback_ = std::move(callback);
     }
-#endif
 
 private:
     void InitializeFrontend();
@@ -356,9 +351,7 @@ private:
     std::string moduleName_;
     RefPtr<StagePkgContextInfo> PkgContextInfo_;
 
-#ifdef SUPPORT_DIGITAL_CROWN
     CrownEventCallback crownEventCallback_;
-#endif
 
     // Support to execute the ets code mocked by developer
     std::map<std::string, std::string> mockJsonInfo_;
