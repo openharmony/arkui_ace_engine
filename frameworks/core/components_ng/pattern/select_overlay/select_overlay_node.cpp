@@ -184,11 +184,6 @@ RefPtr<FrameNode> BuildPasteButton(
     buttonLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
 
     auto buttonPaintProperty = pasteButton->GetPaintProperty<SecurityComponentPaintProperty>();
-    if (callback) {
-        buttonPaintProperty->UpdateFontColor(textStyle.GetTextColor());
-    } else {
-        buttonPaintProperty->UpdateFontColor(textStyle.GetTextColor().BlendOpacity(textOverlayTheme->GetAlphaDisabled()));
-    }
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     buttonLayoutProperty->UpdateBackgroundLeftPadding(padding.Left());
     buttonLayoutProperty->UpdateBackgroundRightPadding(padding.Right());
@@ -204,6 +199,7 @@ RefPtr<FrameNode> BuildPasteButton(
     }
     buttonPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     if (callback) {
+        buttonPaintProperty->UpdateFontColor(textStyle.GetTextColor());
         pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& info) {
             if (!PasteButtonModelNG::GetInstance()->IsClickResultSuccess(info)) {
                 return;
@@ -213,6 +209,8 @@ RefPtr<FrameNode> BuildPasteButton(
             }
         });
     } else {
+        buttonPaintProperty->UpdateFontColor(
+            textStyle.GetTextColor().BlendOpacity(textOverlayTheme->GetAlphaDisabled()));
         auto buttonEventHub = pasteButton->GetEventHub<MenuItemEventHub>();
         CHECK_NULL_RETURN(buttonEventHub, pasteButton);
         buttonEventHub->SetEnabled(false);

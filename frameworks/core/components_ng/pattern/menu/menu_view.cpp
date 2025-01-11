@@ -1484,8 +1484,8 @@ void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& o
     CHECK_NULL_VOID(overlayTheme);
     RefPtr<FrameNode> pasteNode;
     pasteNode = PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-            optionsHasIcon ? static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE) 
-                : static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
+            optionsHasIcon ? static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE) :
+            static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
             static_cast<int32_t>(ButtonType::NORMAL),
             true,
             optionsHasIcon ? overlayTheme->GetPasteSymbolId() : static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL));

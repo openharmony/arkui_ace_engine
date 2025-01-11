@@ -73,7 +73,8 @@ void SecurityComponentModelNG::InitLayoutProperty(RefPtr<FrameNode>& node, int32
 }
 
 RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, int32_t nodeId,
-    SecurityComponentElementStyle& style, const std::function<RefPtr<Pattern>(void)>& patternCreator, bool isArkuiComponent)
+    SecurityComponentElementStyle& style, const std::function<RefPtr<Pattern>(void)>& patternCreator,
+    bool isArkuiComponent)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(tag, nodeId, patternCreator);
