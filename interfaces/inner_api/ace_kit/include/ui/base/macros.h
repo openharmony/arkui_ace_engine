@@ -34,6 +34,14 @@
 #endif
 #endif
 
+#ifndef CJ_FORCE_EXPORT
+#ifndef WINDOWS_PLATFORM
+#define CJ_FORCE_EXPORT ACE_FORCE_EXPORT
+#else
+#define CJ_FORCE_EXPORT ACE_EXPORT
+#endif
+#endif
+
 #ifdef ACE_DEBUG
 
 #ifdef NDEBUG

@@ -828,7 +828,7 @@ void PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<FrameNode>& no
         node->Measure(std::nullopt);
         node->Layout();
     } else {
-        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame();
+        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame(false);
         {
             ACE_SCOPED_TRACE("FlushUITaskWithSingleDirtyNodeMeasure[%s][self:%d][parent:%d][layoutConstraint:%s]"
                              "[pageId:%d][depth:%d]",
@@ -1875,6 +1875,7 @@ void PipelineContext::AvoidanceLogic(float keyboardHeight, const std::shared_ptr
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         CHECK_NULL_VOID(manager);
         manager->AvoidKeyBoardInNavigation();
+        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
         // layout before scrolling textfield to safeArea, because of getting correct position
         FlushUITasks();
         bool scrollResult = manager->ScrollTextFieldToSafeArea();
@@ -1932,6 +1933,7 @@ void PipelineContext::OriginalAvoidanceLogic(
         SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         CHECK_NULL_VOID(manager);
         manager->AvoidKeyBoardInNavigation();
+        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
         // layout before scrolling textfield to safeArea, because of getting correct position
         FlushUITasks();
         bool scrollResult = manager->ScrollTextFieldToSafeArea();
@@ -2074,6 +2076,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
             context->safeAreaManager_->GetKeyboardOffset());
         context->SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
         manager->AvoidKeyBoardInNavigation();
+        SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
         // layout before scrolling textfield to safeArea, because of getting correct position
         context->FlushUITasks();
         bool scrollResult = manager->ScrollTextFieldToSafeArea();
@@ -2192,6 +2195,7 @@ void PipelineContext::DoKeyboardAvoidFunc(float keyboardHeight, double positionY
         safeAreaManager_->GetKeyboardOffset());
     SyncSafeArea(SafeAreaSyncType::SYNC_TYPE_KEYBOARD);
     manager->AvoidKeyBoardInNavigation();
+    SubwindowManager::GetInstance()->FlushSubWindowUITasks(Container::CurrentId());
     // layout before scrolling textfield to safeArea, because of getting correct position
     FlushUITasks();
     bool scrollResult = manager->ScrollTextFieldToSafeArea();
@@ -4546,7 +4550,12 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
 void PipelineContext::EnableContainerModalGesture(bool isEnable)
 {
     CHECK_NULL_VOID(rootNode_);
-    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetChildren().front());
+    const auto &children = rootNode_->GetChildren();
+    if (children.empty()) {
+        LOGW("rootNode children list is empty.");
+        return;
+    }
+    auto containerNode = AceType::DynamicCast<FrameNode>(children.front());
     if (!containerNode) {
         LOGW("container node is null when set event on gesture row");
         return;
@@ -5135,7 +5144,8 @@ void PipelineContext::UnregisterTouchEventListener(const WeakPtr<NG::Pattern>& p
 
 void PipelineContext::RegisterFocusCallback()
 {
-    focusManager_->AddFocusListener([](const WeakPtr<FocusHub>& last, const RefPtr<FocusHub>& current) {
+    focusManager_->AddFocusListener([](const WeakPtr<FocusHub>& last, const RefPtr<FocusHub>& current,
+        FocusReason focusReason) {
         CHECK_NULL_VOID(current);
         auto node = current->GetFrameNode();
         CHECK_NULL_VOID(node);

@@ -153,6 +153,9 @@ constexpr float AUTO_SCROLL_HOT_AREA_LONGPRESS_DURATION = 80.0f;
 constexpr Dimension AUTO_SCROLL_HOT_AREA_LONGPRESS_DISTANCE = 5.0_vp;
 constexpr Dimension MOUSE_SCROLL_BAR_REGION_WIDTH = 8.0_vp;
 constexpr int32_t HOVER_ANIMATION_DURATION = 250;
+const RefPtr<Curve> MOVE_MAGNIFIER_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 228.0f, 30.0f);
+constexpr int32_t LAND_DURATION = 100;
 
 static std::unordered_map<AceAutoFillType, TextInputType> keyBoardMap_ = {
     { AceAutoFillType::ACE_PASSWORD, TextInputType::VISIBLE_PASSWORD},
@@ -1451,7 +1454,7 @@ void TextFieldPattern::HandleBlurEvent()
     HandleCrossPlatformInBlurEvent();
     selectController_->UpdateCaretIndex(selectController_->GetCaretIndex());
     NotifyOnEditChanged(false);
-    SetFloatingCursorVisible(false);
+    ResetFloatingCursorState();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -2079,7 +2082,6 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
     }
     // limit move when preview text is shown
     auto touchOffset = info.GetLocalLocation();
-    int32_t preCaretIndex = selectController_->GetCaretIndex();
     if (GetIsPreviewText()) {
         TAG_LOGI(ACE_TEXT_FIELD, "UpdateCaretByTouchMove when has previewText");
         float offsetY = IsTextArea() ? GetTextRect().GetY() : contentRect_.GetY();
@@ -2100,9 +2102,6 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
         previewTextTouchOffset.SetX(std::clamp(touchOffset.GetX(), limitL, limitR));
         previewTextTouchOffset.SetY(std::clamp(touchOffset.GetY(), limitT, limitB));
         selectController_->UpdateCaretInfoByOffset(previewTextTouchOffset, true, true);
-        if (moveCaretState_.isMoveCaret) {
-            StartVibratorByIndexChange(selectController_->GetCaretIndex(), preCaretIndex);
-        }
     } else {
         UpdateContentScroller(touchOffset);
         auto touchCaretX = std::clamp(
@@ -2115,16 +2114,35 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
             !contentScroller_.isScrolling ? Offset(touchCaretX, touchCaretY) : touchOffset,
             !contentScroller_.isScrolling, true);
         if (magnifierController_ && HasText()) {
-            auto floatCaretRectCenter = GetFloatingCaretRect().Center();
-            magnifierController_->SetLocalOffset({ floatCaretRectCenter.GetX(), floatCaretRectCenter.GetY() });
+            SetMagnifierLocalOffsetToFloatingCaretPos();
         }
-        StartVibratorByIndexChange(selectController_->GetCaretIndex(), preCaretIndex);
     }
 
     UpdateCaretInfoToController();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextFieldPattern::SetMagnifierLocalOffsetToFloatingCaretPos()
+{
+    auto floatCaretRectCenter = GetFloatingCaretRect().Center();
+    if (floatCaretState_.lastFloatingCursorY.has_value() && !NearEqual(floatCaretState_.lastFloatingCursorY.value(),
+        static_cast<float>(floatCaretRectCenter.GetY()))) {
+        AnimationOption option = AnimationOption();
+        option.SetCurve(MOVE_MAGNIFIER_CURVE);
+        option.SetDuration(LAND_DURATION);
+        AnimationUtils::Animate(option,
+            [weak = WeakClaim(this), floatCaretRectCenter]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->GetMagnifierController()->SetLocalOffset({ floatCaretRectCenter.GetX(),
+                    floatCaretRectCenter.GetY() });
+            });
+    } else {
+        magnifierController_->SetLocalOffset({ floatCaretRectCenter.GetX(), floatCaretRectCenter.GetY() });
+    }
+    floatCaretState_.lastFloatingCursorY = floatCaretRectCenter.GetY();
 }
 
 void TextFieldPattern::InitDragEvent()
@@ -2195,9 +2213,13 @@ TextDragInfo TextFieldPattern::CreateTextDragInfo() const
     }
     auto firstIsShow = selectOverlayInfo->firstHandle.isShow;
     auto secondIsShow = selectOverlayInfo->secondHandle.isShow;
-    if (!(firstIsShow && secondIsShow)) {
-        info.isHandleAnimation = false;
+    if (!firstIsShow) {
+        info.isFirstHandleAnimation = firstIsShow;
     }
+    if (!secondIsShow) {
+        info.isSecondHandleAnimation = secondIsShow;
+    }
+
     info.selectedBackgroundColor = selectedBackgroundColor;
     info.handleColor = handleColor;
     return info;
@@ -2720,18 +2742,18 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
         CloseSelectOverlay(true);
         StartTwinkling();
     }
-    DoProcessAutoFill();
+    DoProcessAutoFill(info.GetSourceDevice());
     // emulate clicking bottom of the textField
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     TriggerAvoidOnCaretChange();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-void TextFieldPattern::DoProcessAutoFill()
+void TextFieldPattern::DoProcessAutoFill(SourceType sourceType)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "DoProcessAutoFill");
     if (!IsNeedProcessAutoFill()) {
-        if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK)) {
+        if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK, sourceType)) {
             NotifyOnEditChanged(true);
         }
         return;
@@ -2740,7 +2762,7 @@ void TextFieldPattern::DoProcessAutoFill()
     auto isSuccess = ProcessAutoFill(isPopup);
     if (!isPopup && isSuccess) {
         SetNeedToRequestKeyboardInner(false, RequestKeyboardInnerChangeReason::AUTOFILL_PROCESS);
-    } else if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK)) {
+    } else if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK, sourceType)) {
         NotifyOnEditChanged(true);
     }
 }
@@ -2768,7 +2790,7 @@ bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType, bo
     if (isFromKeyBoard) {
         return true;
     }
-    
+
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto isTriggerPassword = IsTriggerAutoFillPassword();
@@ -4132,7 +4154,9 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
     ChangeMouseState(info.GetLocalLocation(), frameId, info.GetAction() == MouseAction::WINDOW_LEAVE);
 
-    selectOverlay_->SetUsingMouse(true);
+    if (info.GetAction() == OHOS::Ace::MouseAction::PRESS) {
+        selectOverlay_->SetUsingMouse(true);
+    }
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleRightMouseEvent(info);
     } else if (info.GetButton() == MouseButton::LEFT_BUTTON) {
@@ -4384,7 +4408,8 @@ int32_t TextFieldPattern::GetRequestKeyboardId()
     return host->GetId();
 }
 
-bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard)
+bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
+    SourceType sourceType)
 {
     bool isFocus = HasFocus();
     if (!showKeyBoardOnFocus_ || !isFocus) {
@@ -4415,9 +4440,9 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     ACE_LAYOUT_SCOPED_TRACE("RequestKeyboard[id:%d][WId:%u]", tmpHost->GetId(), textConfig.windowId);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
         "node:%{public}d, RequestKeyboard set calling window id:%{public}u"
-        " inputType:%{public}d, enterKeyType:%{public}d, needKeyboard:%{public}d",
+        " inputType:%{public}d, enterKeyType:%{public}d, needKeyboard:%{public}d, sourceType:%{public}u",
         tmpHost->GetId(), textConfig.windowId, textConfig.inputAttribute.inputPattern,
-        textConfig.inputAttribute.enterKeyType, needShowSoftKeyboard);
+        textConfig.inputAttribute.enterKeyType, needShowSoftKeyboard, sourceType);
 #ifdef WINDOW_SCENE_SUPPORTED
     auto systemWindowId = GetSCBSystemWindowId();
     if (systemWindowId) {
@@ -4436,7 +4461,11 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
         textFieldManager->SetImeAttached(true);
         textFieldManager->SetLastRequestKeyboardId(GetRequestKeyboardId());
     }
-    auto ret = inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
+    OHOS::MiscServices::AttachOptions attachOptions;
+    attachOptions.isShowKeyboard = needShowSoftKeyboard;
+    attachOptions.requestKeyboardReason =
+        static_cast<OHOS::MiscServices::RequestKeyboardReason>(static_cast<int32_t>(sourceType));
+    auto ret = inputMethod->Attach(textChangeListener_, attachOptions, textConfig);
     if (ret == MiscServices::ErrorCode::NO_ERROR) {
         auto pipeline = GetContext();
         CHECK_NULL_RETURN(pipeline, false);
@@ -5719,13 +5748,13 @@ void TextFieldPattern::RequestKeyboardByFocusSwitch()
 }
 
 // to distiguish request keyboard not by focus switching
-bool TextFieldPattern::RequestKeyboardNotByFocusSwitch(RequestKeyboardReason reason)
+bool TextFieldPattern::RequestKeyboardNotByFocusSwitch(RequestKeyboardReason reason, SourceType sourceType)
 {
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "%{public}d requestKeyboard With Reason %{public}s",
         tmpHost->GetId(), TextFieldPattern::RequestKeyboardReasonToString(reason).c_str());
-    if (!RequestKeyboard(false, true, true)) {
+    if (!RequestKeyboard(false, true, true, sourceType)) {
         return false;
     }
     auto context = tmpHost->GetContextRefPtr();
@@ -7450,8 +7479,8 @@ void TextFieldPattern::ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json
     auto menuNode = manager->GetSelectOverlayNode();
     CHECK_NULL_VOID(menuNode);
     json->PutExtAttr("MenuNode", menuNode->GetTag().c_str(), filter);
-    if (menuNode->GetAncestorNodeOfFrame()) {
-        json->PutExtAttr("MountOn", menuNode->GetAncestorNodeOfFrame()->GetTag().c_str(), filter);
+    if (menuNode->GetAncestorNodeOfFrame(false)) {
+        json->PutExtAttr("MountOn", menuNode->GetAncestorNodeOfFrame(false)->GetTag().c_str(), filter);
     }
     auto menuLayoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(menuLayoutProperty);
@@ -8636,6 +8665,7 @@ void TextFieldPattern::PasswordResponseKeyEvent()
 
 void TextFieldPattern::UnitResponseKeyEvent()
 {
+#ifndef ARKUI_WAERABLE
     auto unitArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
     CHECK_NULL_VOID(unitArea);
     auto frameNode = unitArea->GetFrameNode();
@@ -8645,6 +8675,7 @@ void TextFieldPattern::UnitResponseKeyEvent()
         CHECK_NULL_VOID(selectPattern);
         selectPattern->ShowSelectMenu();
     }
+#endif
 }
 
 void TextFieldPattern::ScrollToSafeArea() const

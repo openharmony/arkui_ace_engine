@@ -76,6 +76,7 @@ public:
         return true;
     }
     float GetHandleHotZoneRadius();
+    bool IsMenuShow();
 
 private:
     void RemoveAreaChangeInner();

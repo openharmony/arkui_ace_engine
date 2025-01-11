@@ -443,6 +443,10 @@ public:
                 return;
             }
         }
+        if (container->IsScenceBoardWindow()) {
+            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SceneBoard window, no keyboard avoidance");
+            return;
+        }
         auto curWindow = context->GetCurrentWindowRect();
         positionY -= curWindow.Top();
         ContainerScope scope(instanceId_);

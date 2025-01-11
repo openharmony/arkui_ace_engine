@@ -917,13 +917,17 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     option.SetIteration(1);
     option.SetAnimationDirection(AnimationDirection::NORMAL);
     option.SetOnFinishEvent(
-        [weak = WeakClaim(this), nodeWk = WeakPtr<FrameNode>(node), dialogPattern, id = Container::CurrentId()] {
+        [weak = WeakClaim(this), nodeWk = WeakPtr<FrameNode>(node), id = Container::CurrentId()] {
             ContainerScope scope(id);
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->PostDialogFinishEvent(nodeWk);
+            auto node = nodeWk.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto dialogPattern = node->GetPattern<DialogPattern>();
+            CHECK_NULL_VOID(dialogPattern);
             dialogPattern->CallDialogDidDisappearCallback();
-        });
+    });
     auto ctx = node->GetRenderContext();
     if (!ctx) {
         TAG_LOGW(AceLogTag::ACE_OVERLAY, "not find render context when closing dialog");
@@ -1703,8 +1707,12 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
     popupPattern->AddPipelineCallBack();
-    popupPattern->SetInteractiveDismiss(interactiveDismiss);
-    popupPattern->UpdateOnWillDismiss(move(onWillDismiss));
+    auto param = popupPattern->GetPopupParam();
+    CHECK_NULL_VOID(param);
+    if ((!(param->GetIsPartialUpdate().has_value()))) {
+        popupPattern->SetInteractiveDismiss(interactiveDismiss);
+        popupPattern->UpdateOnWillDismiss(move(onWillDismiss));
+    }
     if ((isTypeWithOption && !isShowInSubWindow) ||
         (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom && popupInfo.focusable)) {
         ShowPopupAnimation(popupNode);
@@ -5554,7 +5562,7 @@ CustomKeyboardOffsetInfo OverlayManager::CalcCustomKeyboardOffset(const RefPtr<F
         pageHeight = rootGeo->GetFrameSize().Height();
         finalOffset = (pageHeight - keyboardHeight) - (pageHeight - keyboardHeight) / NUM_FLOAT_2;
     } else if (!pageNode) {
-        auto fatherNode = customKeyboard->GetAncestorNodeOfFrame();
+        auto fatherNode = customKeyboard->GetAncestorNodeOfFrame(false);
         CHECK_NULL_RETURN(fatherNode, keyboardOffsetInfo);
         auto fatherGeoNode = fatherNode->GetGeometryNode();
         CHECK_NULL_RETURN(fatherGeoNode, keyboardOffsetInfo);

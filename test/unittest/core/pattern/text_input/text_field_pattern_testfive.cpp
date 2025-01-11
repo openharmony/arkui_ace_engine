@@ -758,4 +758,73 @@ HWTEST_F(TextFieldPatternTestFive, TextEmojiInputTest001, TestSize.Level0)
     EXPECT_EQ(TextEmojiProcessor::SubU16string(0, 3, test3, true), u"😅\xD83D");
 }
 
+/**
+ * @tc.name: TextFieldControllerAddTextTest
+ * @tc.desc: test textfield controller AddText function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldControllerAddTextTest, TestSize.Level0)
+{
+    CreateTextField("", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    pattern_->textFieldController_->AddText(u"123", -1);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "123");
+
+    pattern_->textFieldController_->AddText(u"A", 1);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "1A23");
+}
+
+/**
+ * @tc.name: TextFieldControllerRemoveTextTest
+ * @tc.desc: test textfield controller RemoveText function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldControllerRemoveTextTest, TestSize.Level0)
+{
+    CreateTextField("123", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    pattern_->textFieldController_->DeleteText(0, 1);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "23");
+
+    pattern_->textFieldController_->DeleteText(-1, -1);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTextValue(), "");
+}
+
+/**
+ * @tc.name: TextFieldControllerGetSelectionTest
+ * @tc.desc: test textfield controller GetSelection function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestFive, TextFieldControllerGetSelectionTest, TestSize.Level0)
+{
+    CreateTextField("123", "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+    GetFocus();
+
+    SelectionInfo info = pattern_->textFieldController_->GetSelection();
+    auto selectionStart = info.GetSelection().selection[0];
+    auto selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 3);
+    EXPECT_EQ(selectionEnd, 3);
+
+    auto controller = pattern_->GetTextSelectController();
+    controller->UpdateCaretIndex(2);
+    FlushLayoutTask(frameNode_);
+    info = pattern_->textFieldController_->GetSelection();
+    selectionStart = info.GetSelection().selection[0];
+    selectionEnd = info.GetSelection().selection[1];
+    EXPECT_EQ(selectionStart, 2);
+    EXPECT_EQ(selectionEnd, 2);
+}
 } // namespace OHOS::Ace::NG

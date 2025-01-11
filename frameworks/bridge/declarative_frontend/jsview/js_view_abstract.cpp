@@ -6541,7 +6541,10 @@ void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
     auto focusHub = frameNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
 
-    JSRef<JSObject> jsObject = args[1];
+    if (!(args[1]->IsObject())) {
+        return;
+    }
+    JSRef<JSObject> jsObject = JSRef<JSObject>::Cast(args[1]);
     KeyEvent keyEvent;
     ParseJsKeyEvent(jsObject, keyEvent);
     auto result = focusHub->HandleEvent(keyEvent);
@@ -6813,6 +6816,16 @@ void JSViewAbstract::JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& 
     }
 }
 
+void JSViewAbstract::JsNotifyDragStartRequest(const JSCallbackInfo& info)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    if (info[0]->IsNumber()) {
+        int32_t dragStatus = info[0]->ToNumber<int32_t>();
+        ViewAbstractModel::GetInstance()->NotifyDragStartRequest(
+            static_cast<DragStartRequestStatus>(dragStatus));
+    }
+}
+
 void JSViewAbstract::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
@@ -7033,7 +7046,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("drawModifier", &JSViewAbstract::JsDrawModifier);
     JSClass<JSViewAbstract>::StaticMethod("customProperty", &JSViewAbstract::JsCustomProperty);
     JSClass<JSViewAbstract>::StaticMethod("gestureModifier", &JSViewAbstract::JsGestureModifier);
-
+    JSClass<JSViewAbstract>::StaticMethod("notifyDragStartRequest", &JSViewAbstract::JsNotifyDragStartRequest);
     JSClass<JSViewAbstract>::StaticMethod(
         "setDragEventStrictReportingEnabled", &JSViewAbstract::JsSetDragEventStrictReportingEnabled);
 

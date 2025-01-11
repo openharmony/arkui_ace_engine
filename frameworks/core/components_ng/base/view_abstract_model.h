@@ -352,6 +352,7 @@ public:
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
     virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
+    virtual void NotifyDragStartRequest(DragStartRequestStatus dragStatus) {}
     virtual void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) = 0;
     virtual void SetDisallowDropForcedly(bool isDisallowDropForcedly) {}
     // obscured

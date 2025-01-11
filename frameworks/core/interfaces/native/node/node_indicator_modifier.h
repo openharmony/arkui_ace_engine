@@ -13,20 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef WEB_AREA_CHANGED_H
-#define WEB_AREA_CHANGED_H
-#include "core/components/web/resource/web_delegate.h"
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_INDICATOR_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_INDICATOR_MODIFIER_H
 
-namespace OHOS::Ace {
-class WebAvoidAreaChangedListener : public Referenced, public OHOS::Rosen::IAvoidAreaChangedListener {
-public:
-    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
-    ~WebAvoidAreaChangedListener() = default;
-    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
+#include "core/interfaces/native/node/node_api.h"
 
-private:
-    WeakPtr<WebDelegate> webDelegate_;
-};
+namespace OHOS::Ace::NG::NodeModifier {
+const ArkUIIndicatorComponentModifier* GetIndicatorComponentModifier();
 }
 
-#endif
+#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_INDICATOR_MODIFIER_H

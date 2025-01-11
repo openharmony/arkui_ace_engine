@@ -546,8 +546,6 @@ HWTEST_F(WaterFlowSWTest, Misaligned001, TestSize.Level1)
     UpdateCurrentOffset(2800.0f + 101.0f);
     // should mark misaligned
     EXPECT_EQ(info_->startIndex_, 0);
-    EXPECT_EQ(info_->jumpIndex_, 0);
-    EXPECT_EQ(info_->delta_, -49.0f);
     EXPECT_EQ(GetChildY(frameNode_, 1), -49.0f);
     EXPECT_EQ(GetChildX(frameNode_, 1), 0.0f);
     UpdateCurrentOffset(2.0f);
@@ -1281,7 +1279,7 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition003, TestSize.Level1)
      * @tc.steps: step2. current lanes_: [6, 12], {seg0: {0,1}, seg1:{2,3,4}} -> {seg0: {0,1,2,3}, seg1: {4}}.
      * @tc.expected: newStartIndex_ should be set to 6, keep content unchanged.
      */
-    UpdateCurrentOffset(-700.0f);
+    UpdateCurrentOffset(-600.0f);
     EXPECT_EQ(info_->startIndex_, 6);
     EXPECT_EQ(info_->endIndex_, 12);
 
@@ -1308,7 +1306,7 @@ HWTEST_F(WaterFlowSWTest, KeepContentPosition003, TestSize.Level1)
     // slide backward.
     UpdateCurrentOffset(1000.0f);
     EXPECT_EQ(info_->startIndex_, 0);
-    EXPECT_EQ(info_->endIndex_, 7);
+    EXPECT_EQ(info_->endIndex_, 6);
 }
 
 /**

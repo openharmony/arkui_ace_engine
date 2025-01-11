@@ -41,14 +41,22 @@ public:
     {
         auto paint = MakeRefPtr<ArcScrollBarPaintMethod>();
         paint->SetScrollBar(GetScrollBar());
-        CreateScrollBarOverlayModifier();
-        paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
+        auto scrollBarOverlayModifier = GetScrollBarOverlayModifier();
+        auto scrollBar = GetScrollBar();
+        if (scrollBar && scrollBar->NeedPaint() && !scrollBarOverlayModifier) {
+            scrollBarOverlayModifier = AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
+            auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar);
+            auto arcScrollBarOverlayModifier =
+                AceType::DynamicCast<ArcScrollBarOverlayModifier>(scrollBarOverlayModifier);
+            if (arcScrollBar && arcScrollBarOverlayModifier) {
+                arcScrollBarOverlayModifier->SetPositionMode(arcScrollBar->GetPositionMode());
+                arcScrollBarOverlayModifier->SetArcRect(arcScrollBar->GetArcActiveRect());
+                arcScrollBarOverlayModifier->SetBackgroundArcRect(arcScrollBar->GetArcBarRect());
+            }
+            SetScrollBarOverlayModifier(scrollBarOverlayModifier);
+        }
+        paint->SetScrollBarOverlayModifier(scrollBarOverlayModifier);
         return paint;
-    }
-
-    RefPtr<ScrollBarOverlayModifier> CreateOverlayModifier() const override
-    {
-        return AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
     }
 
     bool UseInnerScrollBar() const override

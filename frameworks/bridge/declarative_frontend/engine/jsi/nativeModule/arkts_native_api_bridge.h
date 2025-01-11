@@ -63,9 +63,7 @@ private:
     static void RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSideBarContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCalendarPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-#ifndef ARKUI_WEARABLE
     static void RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-#endif
     static void RegisterStepperItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFormAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -106,14 +104,13 @@ private:
     static void RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextTimerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-#ifndef ARKUI_WEARABLE
     static void RegisterTabContentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-#endif
     static void RegisterRefreshAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterResourceAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFlexAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterBadgeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollBarAttributes(Local<panda::ObjectRef> object, EcmaVM *vm);
+    static void RegisterIndicatorComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H

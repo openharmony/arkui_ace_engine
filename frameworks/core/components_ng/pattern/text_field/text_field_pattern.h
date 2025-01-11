@@ -201,6 +201,14 @@ struct FloatingCaretState {
     bool FloatingCursorVisible = false;
     bool ShowOriginCursor = false;
     Color OriginCursorColor = Color(0x4D000000);
+    std::optional<float> lastFloatingCursorY = std::nullopt;
+
+    void Reset()
+    {
+        FloatingCursorVisible = false;
+        ShowOriginCursor = false;
+        lastFloatingCursorY = std::nullopt;
+    }
 };
 
 struct ContentScroller {
@@ -429,7 +437,8 @@ public:
 
     virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboardCrossPlatForm(bool isFocusViewChanged);
-    bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
+    bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard,
+        SourceType sourceType = SourceType::NONE);
     bool CloseKeyboard(bool forceClose) override;
     bool CloseKeyboard(bool forceClose, bool isStopTwinkling);
 
@@ -481,6 +490,13 @@ public:
     {
         floatCaretState_.FloatingCursorVisible = floatingCursorVisible;
     }
+
+    void ResetFloatingCursorState()
+    {
+        floatCaretState_.Reset();
+    }
+
+    void SetMagnifierLocalOffsetToFloatingCaretPos();
 
     bool GetShowOriginCursor() const
     {
@@ -702,7 +718,8 @@ public:
 
     void SearchRequestKeyboard();
 
-    bool RequestKeyboardNotByFocusSwitch(RequestKeyboardReason reason = RequestKeyboardReason::UNKNOWN);
+    bool RequestKeyboardNotByFocusSwitch(
+        RequestKeyboardReason reason = RequestKeyboardReason::UNKNOWN, SourceType sourceType = SourceType::NONE);
 
     bool TextFieldRequestFocus(RequestFocusReason reason = RequestFocusReason::UNKNOWN);
 
@@ -1598,6 +1615,11 @@ public:
 
     SelectionInfo GetSelection();
 
+    bool GetContentScrollerIsScrolling() const
+    {
+        return contentScroller_.isScrolling;
+    }
+
     void SetTextFadeoutCapacity(bool enabled)
     {
         haveTextFadeoutCapacity_ = enabled;
@@ -1843,7 +1865,7 @@ private:
     void SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     AceAutoFillType GetAutoFillType(bool isNeedToHitType = true);
     bool IsAutoFillPasswordType(const AceAutoFillType& autoFillType);
-    void DoProcessAutoFill();
+    void DoProcessAutoFill(SourceType sourceType = SourceType::NONE);
     void KeyboardContentTypeToInputType();
     void ProcessScroll();
     void ProcessCounter();

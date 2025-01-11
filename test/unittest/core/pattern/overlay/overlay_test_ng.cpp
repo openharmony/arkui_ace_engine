@@ -750,6 +750,9 @@ HWTEST_F(OverlayTestNg, PopupTest006, TestSize.Level1)
     rootNode->isLayoutComplete_ = true;
     auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     popupPattern->SetHasTransition(true);
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(popupParam, nullptr);
+    popupPattern->SetPopupParam(popupParam);
     overlayManager->ShowPopup(targetId, popupInfo);
     EXPECT_TRUE(popupPattern->GetHasTransition());
     auto layoutProp1 = popupInfo.popupNode->GetLayoutProperty();
@@ -1658,6 +1661,15 @@ HWTEST_F(OverlayTestNg, CreateOverlayNode001, TestSize.Level1)
      */
     overlayManager->CreateOverlayNode();
     EXPECT_EQ(rootNode->GetChildren().size(), childrenSize + 1);
+    
+    /**
+     * @tc.steps: step5.call CreateOverlayNode again.
+     * @tc.expected: the overlay node is layoutNode.
+     */
+    overlayManager->overlayNode_ = nullptr;
+    overlayManager->overlayInfo_ = NG::OverlayManagerInfo { .renderRootOverlay = false };
+    overlayManager->CreateOverlayNode();
+    EXPECT_EQ(overlayManager->overlayNode_->GetIsLayoutNode(), true);
 }
 
 /**

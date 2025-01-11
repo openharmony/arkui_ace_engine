@@ -30,8 +30,10 @@ import { RelativeContainerBootcamp } from './RelativeContainerBootcamp';
 import { RowBootcamp } from './RowBootcamp';
 import { ScrollBootcamp } from './ScrollBootcamp';
 import { WaterFlowBootcamp } from './WaterFlowBootcamp';
+import { RefreshBootcamp } from './RefreshBootcamp';
 import { ListItemBootcamp } from './ListItemBootcamp';
 import { GridRowBootcamp } from './GridRowBootcamp';
+import { GridItemBootcamp } from './GridItemBootcamp';
 
 export const containersRoute: RouteGroup = {
   name: 'containers',
@@ -41,6 +43,8 @@ export const containersRoute: RouteGroup = {
     { name: 'time-picker-dialog', label: '时间选择器弹窗/TimepickerDialog' },
     { name: 'date-picker-dialog', label: '日期选择器弹窗/DatepickerDialog' },
     { name: 'calendar-picker-dialog', label: '日历选择器弹窗/CalendarPickerDialog' },
+    { name: 'list-item-group', label: '分组列表/ListItemGroup' },
+    { name: 'list', label: '列表/List' },
     { name: 'list-item-group', label: '分组列表/ListItemGroup'},
     { name: 'list', label: '列表/List'},
     { name: 'list-item', label: '列表选项/ListItem'},
@@ -53,7 +57,10 @@ export const containersRoute: RouteGroup = {
     { name: 'row', label: '横向布局/Row' },
     { name: 'scroll', label: '滚动容器/Scroll' },
     { name: 'waterFlow', label: '瀑布流容器/WaterFlow' },
+    { name: 'refresh', label: '刷新容器/Refresh' },
+    { name: 'gridRow', label: '栅格容器/GridRow' }
     { name: 'gridRow', label: '栅格容器/GridRow' },
+    { name: 'gridItem', label: '网格选项/GridItem' }
     { name: 'folder-stack', label: '折叠布局/FolderStack' },
   ]
 };
@@ -92,8 +99,12 @@ export function ContainersDestination(name: string, route: Route) {
     ScrollBootcamp({ title: route.label })
   } else if (name === 'containers/waterFlow') {
     WaterFlowBootcamp({ title: route.label })
+  } else if (name === 'containers/refresh') {
+    RefreshBootcamp({ title: route.label })
   }else if (name === 'containers/gridRow') {
     GridRowBootcamp({ title: route.label })
+  } else if (name === 'containers/gridItem'){
+    GridItemBootcamp({ title: route.label})
   } else if (name === 'containers/folder-stack') {
     FolderStackBootcamp({ title: route.label })
   }

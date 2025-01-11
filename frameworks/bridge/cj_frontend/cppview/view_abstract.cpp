@@ -16,6 +16,8 @@
 
 #include <regex>
 
+#include "cj_lambda.h"
+
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -81,11 +83,7 @@ void CompleteResourceObjectFromParams(
     }
     auto identity = identityValue->GetString();
     if (!ViewAbstract::ParseDollarResource(
-        identity,
-        targetModule,
-        resType,
-        resName,
-        obj.type == UNKNOWN_RESOURCE_TYPE)) {
+            identity, targetModule, resType, resName, obj.type == UNKNOWN_RESOURCE_TYPE)) {
         return;
     }
     std::regex resNameRegex(RESOURCE_NAME_PATTERN);
@@ -260,10 +258,8 @@ void ViewAbstract::CjEnabled(bool enabled)
     ViewAbstractModel::GetInstance()->SetEnabled(enabled);
 }
 
-void ViewAbstract::CompleteResourceObject(NativeResourceObject& obj)
+void ViewAbstract::CompleteResourceObject(NativeResourceObject& obj, std::string& bundleName, std::string& moduleName)
 {
-    std::string bundleName;
-    std::string moduleName;
     int32_t resId = UNKNOWN_RESOURCE_ID;
     CompleteResourceObjectInner(obj, bundleName, moduleName, resId);
 }
@@ -310,6 +306,7 @@ bool ViewAbstract::ConvertResourceType(const std::string& typeName, ResourceType
         { "integer", ResourceType::INTEGER },
         { "strarray", ResourceType::STRARRAY },
         { "intarray", ResourceType::INTARRAY },
+        { "symbol", ResourceType::SYMBOL },
     };
     auto it = resTypeMap.find(typeName);
     if (it == resTypeMap.end()) {
@@ -338,7 +335,9 @@ bool ViewAbstract::ParseDollarResource(const std::string& resPath, std::string& 
 
 bool ViewAbstract::ParseCjString(NativeResourceObject& obj, std::string& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -400,7 +399,9 @@ bool ViewAbstract::ParseCjString(NativeResourceObject& obj, std::string& result)
 
 bool ViewAbstract::ParseCjMedia(NativeResourceObject& obj, std::string& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     return ParseCjMediaInternal(obj, result);
 }
 
@@ -455,9 +456,31 @@ bool ViewAbstract::ParseCjMediaInternal(NativeResourceObject& obj, std::string& 
     return false;
 }
 
+bool ViewAbstract::ParseCjSymbolId(NativeResourceObject& obj, uint32_t& result)
+{
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
+    if (obj.type == UNKNOWN_RESOURCE_TYPE) {
+        return false;
+    }
+    auto resourceObject = GetResourceObjectByBundleAndModule(obj);
+    auto resourceWrapper = CreateResourceWrapper(obj, resourceObject);
+    if (!resourceWrapper) {
+        return false;
+    }
+    if (obj.type == static_cast<int32_t>(ResourceType::SYMBOL)) {
+        result = resourceWrapper->GetSymbolById(static_cast<uint32_t>(obj.id));
+        return true;
+    }
+    return false;
+}
+
 bool ViewAbstract::ParseCjColor(NativeResourceObject& obj, Color& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -498,7 +521,9 @@ bool ViewAbstract::ParseCjColor(NativeResourceObject& obj, Color& result)
 bool ViewAbstract::ParseCjDimension(
     NativeResourceObject& obj, CalcDimension& result, DimensionUnit defaultUnit, bool isSupportPercent)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -554,7 +579,9 @@ bool ViewAbstract::ParseCjDimensionFP(NativeResourceObject& obj, CalcDimension& 
 
 bool ViewAbstract::ParseCjDouble(NativeResourceObject& obj, double& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -613,7 +640,9 @@ bool ViewAbstract::ParseCjInteger(NativeResourceObject& obj, uint32_t& result)
 
 bool ViewAbstract::ParseCjBool(NativeResourceObject& obj, bool& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -647,7 +676,9 @@ bool ViewAbstract::ParseCjBool(NativeResourceObject& obj, bool& result)
 
 bool ViewAbstract::ParseCjIntegerArray(NativeResourceObject& obj, std::vector<uint32_t>& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -680,7 +711,9 @@ bool ViewAbstract::ParseCjIntegerArray(NativeResourceObject& obj, std::vector<ui
 
 bool ViewAbstract::ParseCjStringArray(NativeResourceObject& obj, std::vector<std::string>& result)
 {
-    CompleteResourceObject(obj);
+    std::string bundleName;
+    std::string moduleName;
+    CompleteResourceObject(obj, bundleName, moduleName);
     if (obj.type == UNKNOWN_RESOURCE_TYPE) {
         return false;
     }
@@ -709,5 +742,72 @@ bool ViewAbstract::ParseCjStringArray(NativeResourceObject& obj, std::vector<std
         return true;
     }
     return false;
+}
+
+void ViewAbstract::ParseOnCreateMenu(CjOnCreateMenu& cjOnCreateMenu, NG::OnCreateMenuCallback& onCreateMenuCallback)
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto cjCallback = [func = CJLambda::Create(cjOnCreateMenu), node = frameNode, instanceId = Container::CurrentId()](
+                          const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        std::vector<NG::MenuOptionsParam> menuParams;
+        CHECK_NULL_RETURN(pipelineContext, menuParams);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto cjMenuItems = new std::vector<FfiTextMenuItem>(systemMenuItems.size());
+        for (size_t i = 0; i < systemMenuItems.size(); i++) {
+            FfiTextMenuItem item;
+            auto content = systemMenuItems[i].menuOptionsParam.content;
+            auto icon = systemMenuItems[i].menuOptionsParam.icon;
+            item.content = content.has_value() ? Utils::MallocCString(content.value()) : Utils::MallocCString("");
+            item.icon = icon.has_value() ? Utils::MallocCString(icon.value()) : Utils::MallocCString("");
+            item.id = Utils::MallocCString(systemMenuItems[i].menuOptionsParam.id);
+            (*cjMenuItems)[i] = item;
+        }
+        auto vectorResult = func(cjMenuItems);
+        auto menuItemsArray = reinterpret_cast<std::vector<FfiTextMenuItem>*>(vectorResult);
+        for (size_t i = 0; i < menuItemsArray->size(); i++) {
+            auto ffiMenuItem = (*menuItemsArray)[i];
+            NG::MenuOptionsParam menuOptionsParam;
+            menuOptionsParam.content =
+                ffiMenuItem.content.value ? std::make_optional(ffiMenuItem.content.value) : std::nullopt;
+            menuOptionsParam.icon = ffiMenuItem.icon.value ? std::make_optional(ffiMenuItem.icon.value) : std::nullopt;
+            menuOptionsParam.id = ffiMenuItem.id.value;
+            menuParams.emplace_back(menuOptionsParam);
+        }
+        delete menuItemsArray;
+        return menuParams;
+    };
+    onCreateMenuCallback = cjCallback;
+}
+
+void ViewAbstract::ParseOnMenuItemClick(
+    CjOnMenuItemClick& cjOnMenuItemClick, NG::OnMenuItemClickCallback& onMenuItemClick)
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto cjCallback = [func = CJLambda::Create(cjOnMenuItemClick), node = frameNode,
+                          instanceId = Container::CurrentId()](NG::MenuItemParam menuOptionsParam) -> bool {
+        ContainerScope scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipelineContext, false);
+        pipelineContext->UpdateCurrentActiveNode(node);
+        auto content = menuOptionsParam.menuOptionsParam.content;
+        auto icon = menuOptionsParam.menuOptionsParam.icon;
+        FfiTextMenuItem ffiTextMenuItem;
+        ffiTextMenuItem.content =
+            content.has_value() ? Utils::MallocCString(content.value()) : Utils::MallocCString("");
+        ffiTextMenuItem.icon = icon.has_value() ? Utils::MallocCString(icon.value()) : Utils::MallocCString("");
+        ffiTextMenuItem.id = Utils::MallocCString(menuOptionsParam.menuOptionsParam.id);
+        return func(ffiTextMenuItem, menuOptionsParam.start, menuOptionsParam.end);
+    };
+    onMenuItemClick = cjCallback;
+}
+
+bool ViewAbstract::ParseEditMenuOptions(CjOnCreateMenu& cjOnCreateMenu, CjOnMenuItemClick& cjOnMenuItemClick,
+    NG::OnCreateMenuCallback& onCreateMenuCallback, NG::OnMenuItemClickCallback& onMenuItemClick)
+{
+    ParseOnCreateMenu(cjOnCreateMenu, onCreateMenuCallback);
+    ParseOnMenuItemClick(cjOnMenuItemClick, onMenuItemClick);
+    return true;
 }
 } // namespace OHOS::Ace::Framework

@@ -2054,6 +2054,18 @@ class TransitionEffect {
   }
 }
 
+class ColorContent {
+  colorContent_ = '';
+
+  constructor(colorContent) {
+    this.colorContent_ = colorContent;
+  }
+
+  static get ORIGIN() {
+    return new ColorContent('ORIGIN');
+  }
+}
+
 class TextMenuItemId {
   id_ = '';
 
@@ -3370,6 +3382,7 @@ let TextSpanType;
   TextSpanType[TextSpanType.TEXT = 0] = 'TEXT';
   TextSpanType[TextSpanType.IMAGE = 1] = 'IMAGE';
   TextSpanType[TextSpanType.MIXED = 2] = 'MIXED';
+  TextSpanType[TextSpanType.DEFAULT = 3] = 'DEFAULT';
 })(TextSpanType || (TextSpanType = {}));
 
 let TextResponseType;
@@ -3377,6 +3390,7 @@ let TextResponseType;
   TextResponseType[TextResponseType.RIGHT_CLICK = 0] = 'RIGHT_CLICK';
   TextResponseType[TextResponseType.LONG_PRESS = 1] = 'LONG_PRESS';
   TextResponseType[TextResponseType.SELECT = 2] = 'SELECT';
+  TextResponseType[TextResponseType.DEFAULT = 3] = 'DEFAULT';
 })(TextResponseType || (TextResponseType = {}));
 
 let MarqueeState;
@@ -3431,7 +3445,14 @@ let PreDragStatus;
   PreDragStatus.PREVIEW_LANDING_STARTED = 4;
   PreDragStatus.PREVIEW_LANDING_FINISHED = 5;
   PreDragStatus.ACTION_CANCELED_BEFORE_DRAG = 6;
+  PreDragStatus.PREPARING_FOR_DRAG_DETECTION = 7;
 })(PreDragStatus || (PreDragStatus = {}));
+
+let DragStartRequestStatus;
+(function (DragStartRequestStatus) {
+  DragStartRequestStatus.WAITING = 0;
+  DragStartRequestStatus.READY = 1;
+})(DragStartRequestStatus || (DragStartRequestStatus = {}));
 
 let DataOperationType;
 (function (DataOperationType) {

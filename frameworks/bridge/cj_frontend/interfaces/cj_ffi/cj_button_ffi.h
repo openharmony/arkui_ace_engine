@@ -16,13 +16,45 @@
 #ifndef OHOS_ACE_FRAMEWORK_CJ_BUTTON_FFI_H
 #define OHOS_ACE_FRAMEWORK_CJ_BUTTON_FFI_H
 
+#include <cstdint>
+
+#include "foundation/graphic/graphic_utils_lite/interfaces/kits/gfx_utils/graphic_types.h"
+
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 
 extern "C" {
+struct ButtonOptions {
+    int32_t shape;
+    bool stateEffect;
+    int32_t buttonStyle;
+    int32_t controlSize;
+    int32_t role;
+};
+
+struct CJLabelStyle {
+    int32_t overflow;
+    uint32_t maxLines;
+    bool minFontFlag;
+    double minFontSize;
+    int32_t minFontSize_unit;
+    bool maxFontFlag;
+    double maxFontSize;
+    int32_t maxFontSize_unit;
+    int32_t heightAdaptivePolicy;
+    double fontSize;
+    int32_t fontSize_unit;
+    const char* fontWeight;
+    const char* fontFamiliy;
+    int32_t fontStyle;
+};
+
 CJ_EXPORT void FfiOHOSAceFrameworkButtonCreateWithChild();
+CJ_EXPORT void FfiOHOSAceFrameworkButtonCreateWithChildAndOptions(ButtonOptions buttonOptions);
+CJ_EXPORT void FfiOHOSAceFrameworkButtonCreateWithButtonOptions(ButtonOptions buttonOptions);
 CJ_EXPORT void FfiOHOSAceFrameworkButtonCreateWithLabel(const char* label);
+CJ_EXPORT void FfiOHOSAceFrameworkButtonCreateWithLabelAndOptions(const char* label, ButtonOptions buttonOptions);
 CJ_EXPORT void FfiOHOSAceFrameworkButtonSetFontColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkButtonSetFontSize(double fontSize, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkButtonSetFontStyle(int32_t fontStyle);
@@ -39,6 +71,10 @@ CJ_EXPORT void FfiOHOSAceFrameworkButtonSetBorder(CJBorder params);
 CJ_EXPORT void FfiOHOSAceFrameworkButtonSetBackgroundColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkButtonSetType(int32_t shape);
 CJ_EXPORT void FfiOHOSAceFrameworkButtonSetStateEffect(bool stateEffect);
+CJ_EXPORT void FfiOHOSAceFrameworkButtonSetRole(int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkButtonSetControlSize(int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkButtonSetButtonStyle(int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkButtonSetLabelStyle(CJLabelStyle labelStyle);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_BUTTON_FFI_H

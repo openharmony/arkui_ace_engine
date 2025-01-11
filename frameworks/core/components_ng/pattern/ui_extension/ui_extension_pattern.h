@@ -329,7 +329,9 @@ private:
     {
         forceProcessOnKeyEventInternal_ = forceProcessOnKeyEventInternal;
     }
+    void InitBusinessDataHandleCallback();
     void RegisterEventProxyFlagCallback();
+    void RegisterTransformParamGetCallback();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;

@@ -17,6 +17,7 @@
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
+using namespace OHOS::Ace::V2;
 
 CJDataChangeListener::CJDataChangeListener() : FFIData()
 {
@@ -56,4 +57,9 @@ void CJDataChangeListener::OnDataChanged(size_t index)
 void CJDataChangeListener::OnDataMoved(size_t from, size_t to)
 {
     NotifyAll(&V2::DataChangeListener::OnDataMoved, from, to);
+}
+
+void CJDataChangeListener::OnDataSetChanged(const std::list<V2::Operation>& dataOperations)
+{
+    NotifyAll(&V2::DataChangeListener::OnDatasetChange, dataOperations);
 }

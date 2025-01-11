@@ -462,6 +462,14 @@ void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createArcAlphabetIndexerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = IndexerModelNG::CreateFrameNode(nodeId, true);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createSearchNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = SearchModelNG::CreateFrameNode(nodeId);
@@ -620,11 +628,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createRowNode,
     createFlexNode,
     createListItemNode,
-#ifndef ARKUI_WEARABLE
     createTabsNode,
-#else
-    nullptr, // createTabsNode
-#endif
     nullptr, // Navigator
     nullptr, // Web
     createSliderNode,
@@ -662,6 +666,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createBlankNode,
     createDividerNode,
     createAlphabetIndexerNode,
+    createArcAlphabetIndexerNode,
     createSearchNode,
     createGridRowNode,
     createGridColNode,
@@ -672,11 +677,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
 #endif
     createImageAnimatorNode,
     createCircleNode,
-#ifndef ARKUI_WEARABLE
     createTabContentNode,
-#else
-    nullptr, // createTabContentNode
-#endif
     createNavigationNode,
     createCustomSpanNode,
     createSymbolNode,
@@ -700,7 +701,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
-    if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
+    if (tag >= static_cast<ArkUINodeType>(sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*))) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
         return nullptr;
     }
@@ -713,7 +714,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 
 void* CreateNodeWithParams(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Params& params)
 {
-    if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
+    if (tag >= static_cast<ArkUINodeType>(sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*))) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
         return nullptr;
     }

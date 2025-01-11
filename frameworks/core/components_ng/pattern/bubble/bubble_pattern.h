@@ -284,7 +284,7 @@ protected:
 
     bool AvoidKeyboard() const override
     {
-        return avoidKeyboard_;
+        return false;
     }
 
     bool AvoidBottom() const override

@@ -44,7 +44,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
+class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
 
@@ -1329,6 +1329,11 @@ public:
     void DismissSheet() override;
     void DismissContentCover() override;
     void SheetSpringBack() override;
+
+    void NotifyDragStartRequest(DragStartRequestStatus dragStatus) override
+    {
+        ViewAbstract::NotifyDragStartRequest(dragStatus);
+    }
 
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;

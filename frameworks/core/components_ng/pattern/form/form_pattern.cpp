@@ -797,6 +797,7 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
 #if OHOS_STANDARD_SYSTEM
         AppExecFwk::FormInfo formInfo;
         FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo);
+        std::lock_guard<std::mutex> lock(formManagerBridge_->GetRecycleMutex());
         formManagerBridge_->SetParamForWant(info, formInfo);
 #endif
     }
@@ -1354,8 +1355,8 @@ void FormPattern::GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRec
         auto accessibilityManager = pipeline->GetAccessibilityManager();
         if (accessibilityManager) {
             auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
-            parentRectInfo.top = parentRectInfo.top * windowInfo.scaleX + static_cast<int32_t>(windowInfo.top);
-            parentRectInfo.left = parentRectInfo.left * windowInfo.scaleY + static_cast<int32_t>(windowInfo.left);
+            parentRectInfo.left = parentRectInfo.left * windowInfo.scaleX + static_cast<int32_t>(windowInfo.left);
+            parentRectInfo.top = parentRectInfo.top * windowInfo.scaleY + static_cast<int32_t>(windowInfo.top);
             parentRectInfo.scaleX *= windowInfo.scaleX;
             parentRectInfo.scaleY *= windowInfo.scaleY;
         } else {

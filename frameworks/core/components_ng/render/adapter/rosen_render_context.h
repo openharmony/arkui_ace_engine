@@ -201,6 +201,7 @@ public:
     void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override;
     void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
+    void UpdateNodeBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
@@ -266,6 +267,7 @@ public:
     static SizeF GetPercentReference(const RefPtr<FrameNode>& frameNode);
 
     void FlushContentModifier(const RefPtr<Modifier>& modifier) override;
+    void FlushKitContentModifier(const RefPtr<Kit::Modifier>& modifier) override;
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
     void FlushForegroundModifier(const RefPtr<Modifier>& modifier) override;
 

@@ -1294,7 +1294,8 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
     if (debugVersion) {
         libraryPath = ARK_DEBUGGER_LIB_PATH;
     }
-    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion](NativeEngine* nativeEngine) {
+    auto&& initWorkerFunc = [weakInstance, libraryPath, debugVersion, instanceId = instanceId_](
+                                NativeEngine* nativeEngine) {
         if (nativeEngine == nullptr) {
             return;
         }

@@ -198,6 +198,12 @@ class DragController {
         JSViewAbstract.setDragEventStrictReportingEnabled(enable);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    notifyDragStartRequest(request) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.notifyDragStartRequest(request);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class UIObserver {
@@ -1324,7 +1330,7 @@ class PromptAction {
                 reject({ message: paramErrMsg, code: 401 });
             });
         }
-        let result_
+        let result_;
         if (argLength === 2) {
             result_ = Context.updatePopup(content.getNodePtr(), options);
         } else {

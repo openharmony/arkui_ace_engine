@@ -110,16 +110,6 @@ export struct CompPopupControlBlocks {
     Column() {
 
       RadioBlock({
-        title: 'bindPopupType',
-        isEnabled: $enableCompBindPopupType,
-        value: $compBindPopupType,
-        dataSource: [
-          { label: 'PopupOptions', value: true },
-          { label: 'CustomPopupOptions', value: false }
-        ]
-      })
-
-      RadioBlock({
         title: 'show.button',
         isEnabled: $enableCompPopupType,
         value: $compPopupType,
