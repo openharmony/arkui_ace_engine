@@ -941,12 +941,15 @@ void FormPattern::UpdateAppLockCfg()
     CHECK_NULL_VOID(node);
     auto imageLayoutProperty = node->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto info = ImageSourceInfo("");
-    info.SetResourceId(InternalResource::ResourceId::APP_LOCK_SVG);
-    info.SetFillColor(SystemProperties::GetColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK);
-    imageLayoutProperty->UpdateImageSourceInfo(info);
-    node->MarkModifyDone();
-    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    auto currentColor = sourceInfo->GetFillColor();
+    auto newColor = SystemProperties::GetColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK;
+    if (currentColor != newColor) {
+        sourceInfo->SetFillColor(newColor);
+        imageLayoutProperty->UpdateImageSourceInfo(sourceInfo.value());
+        node->MarkModifyDone();
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefresh)
