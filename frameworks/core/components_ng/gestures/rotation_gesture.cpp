@@ -22,7 +22,8 @@ namespace {
 constexpr double MAX_ANGLE = 360.0;
 } // namespace
 
-RotationGesture::RotationGesture(int32_t fingers, double angle) : Gesture(fingers)
+RotationGesture::RotationGesture(int32_t fingers, double angle, bool isLimitFingerCount)
+    : Gesture(fingers, isLimitFingerCount)
 {
     if (angle > MAX_ANGLE || angle <= 0) {
         angle_ = 1.0;
@@ -39,7 +40,7 @@ RotationGesture::RotationGesture(int32_t fingers, double angle) : Gesture(finger
 }
 RefPtr<NGGestureRecognizer> RotationGesture::CreateRecognizer()
 {
-    auto rotationRecognizer = AceType::MakeRefPtr<RotationRecognizer>(fingers_, angle_);
+    auto rotationRecognizer = AceType::MakeRefPtr<RotationRecognizer>(fingers_, angle_, isLimitFingerCount_);
     if (onActionStartId_) {
         rotationRecognizer->SetOnActionStart(*onActionStartId_);
     }
