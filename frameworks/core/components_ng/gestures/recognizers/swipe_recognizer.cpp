@@ -193,6 +193,10 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
                 return;
             }
+            if (CheckLimitFinger()) {
+                Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+                return;
+            }
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         }
     }
