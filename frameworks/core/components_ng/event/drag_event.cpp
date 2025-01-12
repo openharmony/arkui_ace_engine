@@ -805,11 +805,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             DragEventActuator::ExecutePreDragAction(PreDragStatus::PREPARING_FOR_DRAG_DETECTION, frameNode);
         }
     };
-    RefPtr<TaskExecutor> taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIPreDragLongPressTimer");
-    taskExecutor->PostDelayedTask(preDragStatusTask, TaskExecutor::TaskType::UI,
-        PREVIEW_LONG_PRESS_STATUS, "ArkUIPreDragLongPressTimer");
     longPressRecognizer_->SetOnAction(longPressUpdateValue);
     auto longPressUpdate = [weak = WeakClaim(this), hasContextMenuUsingGesture = hasContextMenuUsingGesture](
                                 GestureEvent& info) {
@@ -970,6 +965,11 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
     SequencedRecognizer_->SetIsEventHandoverNeeded(true);
     result.emplace_back(SequencedRecognizer_);
     result.emplace_back(previewLongPressRecognizer_);
+    RefPtr<TaskExecutor> taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIPreDragLongPressTimer");
+    taskExecutor->PostDelayedTask(preDragStatusTask, TaskExecutor::TaskType::UI,
+        PREVIEW_LONG_PRESS_STATUS, "ArkUIPreDragLongPressTimer");
 }
 
 void DragEventActuator::ResetDragStatus()
