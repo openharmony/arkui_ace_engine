@@ -596,7 +596,9 @@ void FrameNode::GetOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& children)
 
 void FrameNode::GetOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& children, OffsetF& offset)
 {
-    offset += GetGeometryNode()->GetFrameOffset();
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    offset += context->GetPaintRectWithoutTransform().GetOffset();
     GenerateOneDepthVisibleFrameWithOffset(children, offset);
     if (overlayNode_) {
         children.emplace_back(overlayNode_);
