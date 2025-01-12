@@ -8854,6 +8854,92 @@ void ResetTimePickerSelectedTextStyle(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getTimepickerModifier()->resetTimepickerSelectedTextStyle(node->uiNodeHandle);
 }
 
+const ArkUI_AttributeItem* GetTimePickerStart(ArkUI_NodeHandle node)
+{
+    if (GetFullImpl() && GetFullImpl()->getNodeModifiers() &&
+        GetFullImpl()->getNodeModifiers()->getTimepickerModifier()) {
+        auto value = GetFullImpl()->getNodeModifiers()->getTimepickerModifier()->getTimepickerStart(node->uiNodeHandle);
+        g_attributeItem.string = value;
+    }
+    return &g_attributeItem;
+}
+
+int32_t SetTimePickerStart(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item->string) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    std::vector<std::string> time;
+    StringUtils::StringSplitter(item->string, ':', time);
+    if (time.size() != NUM_2) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    auto hour = StringToInt(time[NUM_0].c_str());
+    auto minute = StringToInt(time[NUM_1].c_str());
+    if (!InRegion(NUM_0, NUM_23, hour) || !InRegion(NUM_0, NUM_59, minute)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getTimepickerModifier()) {
+        fullImpl->getNodeModifiers()->getTimepickerModifier()->setTimepickerStart(node->uiNodeHandle, hour, minute);
+    }
+
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTimePickerStart(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getTimepickerModifier()) {
+        fullImpl->getNodeModifiers()->getTimepickerModifier()->resetTimepickerStart(node->uiNodeHandle);
+    }
+}
+
+const ArkUI_AttributeItem* GetTimePickerEnd(ArkUI_NodeHandle node)
+{
+    if (GetFullImpl() && GetFullImpl()->getNodeModifiers() &&
+        GetFullImpl()->getNodeModifiers()->getTimepickerModifier()) {
+        auto value = GetFullImpl()->getNodeModifiers()->getTimepickerModifier()->getTimepickerEnd(node->uiNodeHandle);
+        g_attributeItem.string = value;
+    }
+    return &g_attributeItem;
+}
+
+int32_t SetTimePickerEnd(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (!item->string) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    auto fullImpl = GetFullImpl();
+    std::vector<std::string> time;
+    StringUtils::StringSplitter(item->string, ':', time);
+    if (time.size() != NUM_2) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+
+    auto hour = StringToInt(time[NUM_0].c_str());
+    auto minute = StringToInt(time[NUM_1].c_str());
+    if (!InRegion(NUM_0, NUM_23, hour) || !InRegion(NUM_0, NUM_59, minute)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getTimepickerModifier()) {
+        fullImpl->getNodeModifiers()->getTimepickerModifier()->setTimepickerEnd(node->uiNodeHandle, hour, minute);
+    }
+
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTimePickerEnd(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+
+    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getTimepickerModifier()) {
+        fullImpl->getNodeModifiers()->getTimepickerModifier()->resetTimepickerEnd(node->uiNodeHandle);
+    }
+}
+
 // TextPicker
 const ArkUI_AttributeItem* GetTextPickerDisappearTextStyle(ArkUI_NodeHandle node)
 {
@@ -14715,7 +14801,7 @@ int32_t SetTimePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const A
 {
     static Setter* setters[] = { SetTimePickerSelected, SetTimePickerUseMilitaryTime,
         SetTimePickerDisappearTextStyle, SetTimePickerTextStyle, SetTimePickerSelectedTextStyle,
-        nullptr, nullptr, SetTimePickerEnableCascade };
+         SetTimePickerStart, SetTimePickerEnd, SetTimePickerEnableCascade };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "timepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -14726,7 +14812,8 @@ int32_t SetTimePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const A
 const ArkUI_AttributeItem* GetTimePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Getter* getters[] = { GetTimePickerSelected, GetTimePickerUseMilitaryTime, GetTimePickerDisappearTextStyle,
-        GetTimePickerTextStyle, GetTimePickerSelectedTextStyle, nullptr, nullptr, GetTimePickerEnableCascade };
+        GetTimePickerTextStyle, GetTimePickerSelectedTextStyle, GetTimePickerStart, GetTimePickerEnd,
+        GetTimePickerEnableCascade };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return &g_attributeItem;
@@ -14738,7 +14825,7 @@ void ResetTimePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
     static Resetter* resetters[] = { ResetTimePickerSelected, ResetTimePickerUseMilitaryTime,
         ResetTimePickerDisappearTextStyle, ResetTimePickerTextStyle, ResetTimePickerSelectedTextStyle,
-        nullptr, nullptr, ResetTimePickerEnableCascade };
+        ResetTimePickerStart, ResetTimePickerEnd, ResetTimePickerEnableCascade };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "timepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
