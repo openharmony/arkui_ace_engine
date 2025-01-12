@@ -802,6 +802,30 @@ void ViewAbstractModelNG::SetAccessibilityTextPreferred(FrameNode* frameNode, bo
     accessibilityProperty->SetAccessibilityTextPreferred(accessibilityTextPreferred);
 }
 
+void ViewAbstractModelNG::SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus)
+{
+    if (!isFocus) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->SendFrameNodeToAccessibility(AceType::Claim(frameNode), false);
+}
+
+void ViewAbstractModelNG::SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode)
+{
+    if (pageMode.empty()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilitySamePage(pageMode);
+}
+
 bool ViewAbstractModelNG::GetAccessibilityGroup(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, false);

@@ -1911,6 +1911,12 @@ struct ArkUICommonModifier {
     void (*resetDraggable)(ArkUINodeHandle node);
     void (*setAccessibilityGroup)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetAccessibilityGroup)(ArkUINodeHandle node);
+    void (*setAccessibilityNextFocusId)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityNextFocusId)(ArkUINodeHandle node);
+    void (*setAccessibilityDefaultFocus)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetAccessibilityDefaultFocus)(ArkUINodeHandle node);
+    void (*setAccessibilityUseSamePage)(ArkUINodeHandle node, ArkUI_Bool isFullSilent);
+    void (*resetAccessibilityUseSamePage)(ArkUINodeHandle node);
     void (*setHoverEffect)(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue);
     void (*resetHoverEffect)(ArkUINodeHandle node);
     void (*setClickEffect)(ArkUINodeHandle node, ArkUI_Int32 level, ArkUI_Float32 scaleValue);

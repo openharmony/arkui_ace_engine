@@ -878,6 +878,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityGroup));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityGroup"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityGroup));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityNextFocusId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityNextFocusId));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityNextFocusId"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityNextFocusId));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityDefaultFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityDefaultFocus));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityDefaultFocus"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityDefaultFocus));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAccessibilityUseSamePage"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAccessibilityUseSamePage));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAccessibilityUseSamePage"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAccessibilityUseSamePage));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHoverEffect"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetHoverEffect));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHoverEffect"),
