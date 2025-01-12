@@ -1317,6 +1317,7 @@ void CalendarPickerPattern::SetDate(const std::string& info)
     textLayoutProperty->UpdateContent(dayString);
     dayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     UpdateAccessibilityText();
+    FlushAddAndSubButton();
 }
 
 void CalendarPickerPattern::FlushTextStyle()
