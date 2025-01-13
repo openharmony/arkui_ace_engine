@@ -2069,6 +2069,7 @@ HWTEST_F(SearchTestNg, SetTextAlign002, TestSize.Level1)
         }
     }
 }
+
 /**
  * @tc.name: SetSearchEnterKeyType001
  * @tc.desc: SetSearchEnterKeyType
@@ -2084,7 +2085,9 @@ HWTEST_F(SearchTestNg, SetSearchEnterKeyType001, TestSize.Level1)
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     searchModelInstance.SetSearchEnterKeyType(TextInputAction::UNSPECIFIED);
+    EXPECT_EQ(textFieldPattern->GetTextInputAction(), TextInputAction::SEARCH);
 }
+
 /**
  * @tc.name: SetSearchEnterKeyType002
  * @tc.desc: SetSearchEnterKeyType
@@ -2101,7 +2104,9 @@ HWTEST_F(SearchTestNg, SetSearchEnterKeyType002, TestSize.Level1)
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     searchModelInstance.SetTextIndent(DEFAULT_INDENT_SIZE);
     searchModelInstance.SetSearchEnterKeyType(TextInputAction::GO);
+    EXPECT_EQ(textFieldPattern->GetTextInputAction(), TextInputAction::GO);
 }
+
 /**
  * @tc.name: SetEnablePreviewText
  * @tc.desc: Test SetEnablePreviewText
