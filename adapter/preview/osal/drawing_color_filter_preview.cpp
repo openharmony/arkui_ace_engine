@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "color_filter_napi/js_color_filter.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace {
 RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilter(void* sptrAddr)
@@ -44,5 +45,10 @@ RefPtr<DrawingColorFilter> DrawingColorFilter::CreateDrawingColorFilterFromNativ
 void* DrawingColorFilterPreview::GetDrawingColorFilterSptrAddr()
 {
     return static_cast<void*>(&colorFilter_);
+}
+
+napi_value DrawingColorFilterPreview::GetDrawingColorFilterNapiValue(NativeEngine* nativeEngine)
+{
+    return nullptr;
 }
 } // namespace OHOS::Ace

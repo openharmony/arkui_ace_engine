@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ACE_FRAMEWORK_CJ_TEXT_CLOCK_FFI_H
-#define OHOS_ACE_FRAMEWORK_CJ_TEXT_CLOCK_FFI_H
+#ifndef OHOS_ACE_FRAMEWORK_CJ_TEXT_TIMER_FFI_H
+#define OHOS_ACE_FRAMEWORK_CJ_TEXT_TIMER_FFI_H
 
 #include <cinttypes>
 
@@ -44,19 +44,36 @@ private:
 };
 } // namespace OHOS::Ace::Framework
 
+using VectorNativeTextTimerShadow = void*;
+using VectorStringPtr = void*;
+
 extern "C" {
+struct NativeTextTimerShadow {
+    double radius;
+    double offsetX;
+    double offsetY;
+    uint32_t color;
+    bool isFilled;
+    int32_t type;
+};
+CJ_EXPORT VectorNativeTextTimerShadow FfiTextTimerCreateVectorNativeTextShadow(int64_t size);
+CJ_EXPORT void FfiTextTimerVectorNativeTextShadowSetElement(
+    VectorNativeTextTimerShadow vec, int64_t index, NativeTextTimerShadow textShadow);
+CJ_EXPORT void FfiTextTimerVectorNativeTextShadowDelete(VectorNativeTextTimerShadow vec);
+
 CJ_EXPORT void FfiOHOSAceFrameworkTextTimerCreate(bool isCountDown, int64_t count, int64_t controllerId);
 CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetFormat(const char* value);
-CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetOnTimer(void (*callback)(int64_t, int64_t elapsedTime));
-CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetFontSize(double fontSize, int32_t unit);
-CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetFontWeight(const char* fontWeight);
 CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetFontColor(uint32_t textColor);
+CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetFontSize(double fontSize, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetFontStyle(int32_t fontStyle);
+CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetFontWeight(const char* fontWeight);
 CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetFontFamily(const char* fontFamily);
+CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetTextShadow(VectorStringPtr vecContent);
+CJ_EXPORT void FfiOHOSAceFrameworkTextTimerSetOnTimer(void (*callback)(int64_t, int64_t elapsedTime));
 CJ_EXPORT int64_t FfiOHOSAceFrameworkTextTimerControllerCtor();
 CJ_EXPORT void FfiOHOSAceFrameworkTextTimerControllerStart(int64_t selfID);
 CJ_EXPORT void FfiOHOSAceFrameworkTextTimerControllerPause(int64_t selfID);
 CJ_EXPORT void FfiOHOSAceFrameworkTextTimerControllerReset(int64_t selfID);
 }
 
-#endif // OHOS_ACE_FRAMEWORK_CJ_TEXT_CLOCK_FFI_H
+#endif // OHOS_ACE_FRAMEWORK_CJ_TEXT_TIMER_FFI_H

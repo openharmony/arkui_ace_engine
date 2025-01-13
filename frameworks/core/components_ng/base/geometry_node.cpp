@@ -52,6 +52,7 @@ RefPtr<GeometryNode> GeometryNode::Clone() const
     node->parentGlobalOffset_ = parentGlobalOffset_;
     node->parentLayoutConstraint_ = parentLayoutConstraint_;
     node->parentAbsoluteOffset_ = parentAbsoluteOffset_;
+    node->selfAdjust_ = selfAdjust_;
     return node;
 }
 

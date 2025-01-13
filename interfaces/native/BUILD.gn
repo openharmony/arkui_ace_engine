@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -74,6 +74,7 @@ ohos_shared_library("ace_ndk") {
     "node/list_option.cpp",
     "node/native_drawable_descriptor.cpp",
     "node/native_impl.cpp",
+    "node/native_interface_focus.cpp",
     "node/native_node_extented.cpp",
     "node/native_node_napi.cpp",
     "node/node_adapter_impl.cpp",
@@ -84,6 +85,7 @@ ohos_shared_library("ace_ndk") {
     "node/node_transition.cpp",
     "node/node_transition_imp.cpp",
     "node/node_utils.cpp",
+    "node/progress_option.cpp",
     "node/style_modifier.cpp",
     "node/waterflow_section_option.cpp",
   ]
@@ -127,6 +129,7 @@ if (is_arkui_x) {
       "$ace_root",
       "$ace_root/frameworks",
       "$ace_root/interfaces/native",
+      "$ace_root/interfaces/inner_api/ace_kit/include",
     ]
 
     sources = [

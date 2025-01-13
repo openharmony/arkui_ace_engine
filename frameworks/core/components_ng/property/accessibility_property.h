@@ -414,6 +414,10 @@ public:
     bool ActActionClearSelection();
 
     void SetOnAccessibilityFocusCallback(const OnAccessibilityFocusCallbackImpl& onAccessibilityFocusCallbackImpl);
+    void ResetUserOnAccessibilityFocusCallback();
+
+    void SetUserOnAccessibilityFocusCallback(
+        const OnAccessibilityFocusCallbackImpl& onUserAccessibilityFocusCallbackImpl);
 
     void OnAccessibilityFocusCallback(bool isFocus);
 
@@ -435,6 +439,8 @@ public:
 
     void SetAccessibilityText(const std::string& text);
 
+    void SetAccessibilityNextFocusInspectorKey(const std::string& accessibilityNextFocusInspectorKey);
+
     void SetAccessibilityTextWithEvent(const std::string& text);
 
     void SetAccessibilityTextHint(const std::string& text);
@@ -442,6 +448,14 @@ public:
     void SetAccessibilityDescription(const std::string& accessibilityDescription);
 
     void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
+
+    bool IsMatchAccessibilityResponseRegion(bool isAccessibilityVirtualNode);
+
+    bool IsAccessibilityCompInResponseRegion(const RectF& rect, const RectF& origRect);
+
+    static NG::RectF UpdateHoverTestRect(const RefPtr<FrameNode>& node);
+
+    NG::RectT<int32_t> GetAccessibilityResponseRegionRect(bool isAccessibilityVirtualNode);
 
     bool IsAccessibilityGroup() const;
 
@@ -464,6 +478,11 @@ public:
     virtual std::string GetAccessibilityText() const
     {
         return accessibilityText_.value_or("");
+    }
+
+    virtual std::string GetAccessibilityNextFocusInspectorKey() const
+    {
+        return accessibilityNextFocusInspectorKey_.value_or("");
     }
 
     std::string GetAccessibilityDescription() const;
@@ -544,6 +563,14 @@ public:
     void ResetAccessibilityRole();
     bool HasAccessibilityRole();
     std::string GetAccessibilityRole() const;
+    void SetAccessibilityCustomRole(const std::string& role);
+    void ResetAccessibilityCustomRole();
+    bool HasAccessibilityCustomRole();
+    std::string GetAccessibilityCustomRole() const;
+
+    void SetAccessibilitySamePage(const std::string& pageMode);
+    bool HasAccessibilitySamePage();
+    std::string GetAccessibilitySamePage();
 
     void SetActions(const ActionsImpl& actionsImpl);
     bool ActionsDefined(uint32_t action);
@@ -660,6 +687,7 @@ protected:
     GetRelatedElementInfoImpl getRelatedElementInfoImpl_;
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     GetWindowScenePositionImpl getWindowScenePositionImpl_;
+    OnAccessibilityFocusCallbackImpl onUserAccessibilityFocusCallbackImpl_;
 
     bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
@@ -672,8 +700,11 @@ protected:
     std::optional<std::string> accessibilityDescription_;
     std::optional<std::string> accessibilityLevel_;
     std::optional<std::string> textTypeHint_;
+    std::optional<std::string> accessibilityNextFocusInspectorKey_;
     std::optional<uint32_t> accessibilityActions_;
     std::optional<std::string> accessibilityRole_;
+    std::optional<std::string> accessibilityCustomRole_;
+    std::optional<std::string> accessibilityUseSamePage_;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
 
     std::optional<bool> isDisabled_;

@@ -176,22 +176,62 @@ void ResetShow(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIPanelModifier* GetPanelModifier()
 {
-    static const ArkUIPanelModifier modifier = { SetPanelMode, ResetPanelMode, SetPanelFullHeight,
-        ResetPanelFullHeight, SetPanelHalfHeight, ResetPanelHalfHeight, SetPanelMiniHeight, ResetPanelMiniHeight,
-        SetPanelBackgroundMask, ResetPanelBackgroundMask, SetPanelType, ResetPanelType, SetPanelCustomHeight,
-        SetPanelCustomHeightByString, ResetPanelCustomHeight, SetShowCloseIcon, ResetShowCloseIcon, SetDragBar,
-        ResetDragBar, SetShow, ResetShow };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIPanelModifier modifier = {
+        .setPanelMode = SetPanelMode,
+        .resetPanelMode = ResetPanelMode,
+        .setPanelFullHeight = SetPanelFullHeight,
+        .resetPanelFullHeight = ResetPanelFullHeight,
+        .setPanelHalfHeight = SetPanelHalfHeight,
+        .resetPanelHalfHeight = ResetPanelHalfHeight,
+        .setPanelMiniHeight = SetPanelMiniHeight,
+        .resetPanelMiniHeight = ResetPanelMiniHeight,
+        .setPanelBackgroundMask = SetPanelBackgroundMask,
+        .resetPanelBackgroundMask = ResetPanelBackgroundMask,
+        .setPanelType = SetPanelType,
+        .resetPanelType = ResetPanelType,
+        .setPanelCustomHeight = SetPanelCustomHeight,
+        .setPanelCustomHeightByString = SetPanelCustomHeightByString,
+        .resetPanelCustomHeight = ResetPanelCustomHeight,
+        .setShowCloseIcon = SetShowCloseIcon,
+        .resetShowCloseIcon = ResetShowCloseIcon,
+        .setDragBar = SetDragBar,
+        .resetDragBar = ResetDragBar,
+        .setShow = SetShow,
+        .resetShow = ResetShow,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIPanelModifier* GetCJUIPanelModifier()
 {
-    static const CJUIPanelModifier modifier = { SetPanelMode, ResetPanelMode, SetPanelFullHeight,
-        ResetPanelFullHeight, SetPanelHalfHeight, ResetPanelHalfHeight, SetPanelMiniHeight, ResetPanelMiniHeight,
-        SetPanelBackgroundMask, ResetPanelBackgroundMask, SetPanelType, ResetPanelType, SetPanelCustomHeight,
-        SetPanelCustomHeightByString, ResetPanelCustomHeight, SetShowCloseIcon, ResetShowCloseIcon, SetDragBar,
-        ResetDragBar, SetShow, ResetShow };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIPanelModifier modifier = {
+        .setPanelMode = SetPanelMode,
+        .resetPanelMode = ResetPanelMode,
+        .setPanelFullHeight = SetPanelFullHeight,
+        .resetPanelFullHeight = ResetPanelFullHeight,
+        .setPanelHalfHeight = SetPanelHalfHeight,
+        .resetPanelHalfHeight = ResetPanelHalfHeight,
+        .setPanelMiniHeight = SetPanelMiniHeight,
+        .resetPanelMiniHeight = ResetPanelMiniHeight,
+        .setPanelBackgroundMask = SetPanelBackgroundMask,
+        .resetPanelBackgroundMask = ResetPanelBackgroundMask,
+        .setPanelType = SetPanelType,
+        .resetPanelType = ResetPanelType,
+        .setPanelCustomHeight = SetPanelCustomHeight,
+        .setPanelCustomHeightByString = SetPanelCustomHeightByString,
+        .resetPanelCustomHeight = ResetPanelCustomHeight,
+        .setShowCloseIcon = SetShowCloseIcon,
+        .resetShowCloseIcon = ResetShowCloseIcon,
+        .setDragBar = SetDragBar,
+        .resetDragBar = ResetDragBar,
+        .setShow = SetShow,
+        .resetShow = ResetShow,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

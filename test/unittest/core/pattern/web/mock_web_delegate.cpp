@@ -622,6 +622,7 @@ void WebDelegate::UpdateSupportZoom(const bool& isZoomAccessEnabled) {}
 void WebDelegate::UpdateDomStorageEnabled(const bool& isDomStorageAccessEnabled) {}
 void WebDelegate::UpdateGeolocationEnabled(const bool& isGeolocationAccessEnabled) {}
 void WebDelegate::UpdateCacheMode(const WebCacheMode& mode) {}
+void WebDelegate::UpdateOptimizeParserBudgetEnabled(const bool enable) {}
 std::shared_ptr<OHOS::NWeb::NWeb> WebDelegate::GetNweb()
 {
     return nullptr;
@@ -1063,8 +1064,21 @@ bool WebDelegate::ShouldVirtualKeyboardOverlay()
 void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type) {}
 void WebDelegate::JavaScriptOnDocumentStart() {}
 void WebDelegate::JavaScriptOnDocumentEnd() {}
+
+void WebDelegate::SetJavaScriptItemsByOrder(
+    const ScriptItems& scriptItems,
+    const ScriptItemType& type,
+    const ScriptItemsByOrder& scriptItemsByOrder) {}
+void WebDelegate::JavaScriptOnDocumentStartByOrder() {}
+void WebDelegate::JavaScriptOnDocumentEndByOrder() {}
+void WebDelegate::JavaScriptOnHeadReadyByOrder() {}
 bool WebDelegate::ExecuteAction(
     int64_t accessibilityId, AceAction action, const std::map<std::string, std::string>& actionArguments)
+{
+    return false;
+}
+bool WebDelegate::GetAccessibilityNodeRectById(
+    int64_t accessibilityId, int32_t* width, int32_t* height, int32_t* offsetX, int32_t* offsetY)
 {
     return false;
 }
@@ -1187,4 +1201,10 @@ void WebDelegate::RegisterNativeArkJSFunction(const std::string& objName,
     const std::vector<std::pair<std::string, NativeMethodCallback>>& methodList, bool isNeedRefresh)
 {}
 void WebDelegate::UnRegisterNativeArkJSFunction(const std::string& objName) {}
+bool WebDelegate::IsActivePolicyDisable()
+{
+    return false;
+}
+void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
+void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}
 } // namespace OHOS::Ace

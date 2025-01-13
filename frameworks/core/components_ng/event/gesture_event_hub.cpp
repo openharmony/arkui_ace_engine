@@ -903,19 +903,6 @@ void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc
     touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
 }
 
-bool GestureEventHub::IsNeedSwitchToSubWindow() const
-{
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto focusHub = frameNode->GetFocusHub();
-    CHECK_NULL_RETURN(focusHub, false);
-    if (IsPixelMapNeedScale()) {
-        return true;
-    }
-    CHECK_NULL_RETURN(dragEventActuator_, false);
-    return dragEventActuator_->IsNeedGather();
-}
-
 void GestureEventHub::RemoveGesturesByTag(const std::string& gestureTag)
 {
     bool needRecollect = false;
@@ -1254,6 +1241,12 @@ bool GestureEventHub::IsPanEventEmpty() const
         return panEventActuator_->IsPanEventEmpty();
     }
     return true;
+}
+
+void GestureEventHub::SetExcludedAxisForPanEvent(bool isExcludedAxis)
+{
+    CHECK_NULL_VOID(panEventActuator_);
+    panEventActuator_->SetExcludedAxis(isExcludedAxis);
 }
 
 } // namespace OHOS::Ace::NG

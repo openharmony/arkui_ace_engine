@@ -52,7 +52,7 @@ bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(layoutProperty, false);
     bool isHideRightClickMenu = layoutProperty->GetSelectionMenuHiddenValue(false) && IsUsingMouse();
     bool isFontSizeZero = layoutProperty->HasFontSize() && NearZero(layoutProperty->GetFontSize()->Value());
-    if (isHideRightClickMenu || isFontSizeZero) {
+    if (isHideRightClickMenu || (isFontSizeZero && !SelectOverlayIsOn())) {
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
             "The selection menu is not displayed cause Font size is zero or selectionMenuHidden is true");
         return false;
@@ -132,6 +132,12 @@ void TextFieldSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReason
     }
     pattern->StopContentScroll();
     RemoveAvoidKeyboardCallback();
+    if (pattern->GetFloatingCursorVisible()) {
+        pattern->ResetFloatingCursorState();
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void TextFieldSelectOverlay::OnHandleGlobalTouchEvent(SourceType sourceType, TouchType touchType, bool touchInside)
@@ -299,6 +305,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     menuInfo.showCopy = hasText && pattern->AllowCopy() && pattern->IsSelected();
     menuInfo.showCut = menuInfo.showCopy;
     menuInfo.showCopyAll = hasText && !pattern->IsSelectAll();
+    menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showAIWrite = pattern->IsShowAIWrite() && pattern->IsSelected();
 }
 
@@ -360,7 +367,7 @@ std::string TextFieldSelectOverlay::GetSelectedText()
     CHECK_NULL_RETURN(textSelectController, "");
     auto start = textSelectController->GetStartIndex();
     auto end = textSelectController->GetEndIndex();
-    return UtfUtils::Str16ToStr8(pattern->GetTextContentController()->GetSelectedValue(start, end));
+    return UtfUtils::Str16DebugToStr8(pattern->GetTextContentController()->GetSelectedValue(start, end));
 }
 
 void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type)
@@ -380,6 +387,9 @@ void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuT
             return;
         case OptionMenuActionId::PASTE:
             pattern->HandleOnPaste();
+            return;
+        case OptionMenuActionId::SEARCH:
+            HandleOnSearch();
             return;
         case OptionMenuActionId::CAMERA_INPUT:
             pattern->HandleOnCameraInput();
@@ -463,30 +473,37 @@ void TextFieldSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     CHECK_NULL_VOID(selectController);
     int32_t startIndex = selectController->GetFirstHandleIndex();
     int32_t endIndex = selectController->GetSecondHandleIndex();
-    if (pattern->GetMagnifierController() && SelectOverlayIsOn()) {
-        auto magnifierLocalOffsetY = localOffset.GetY();
-        auto magnifierLocalOffset = OffsetF(localOffset.GetX(), magnifierLocalOffsetY);
-        if (IsOverlayMode()) {
-            GetLocalPointWithTransform(magnifierLocalOffset);
-        }
-        pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
-    }
     TriggerContentToScroll(localOffset, false);
     if (IsSingleHandle()) {
-        int32_t preIndex = selectController->GetCaretIndex();
-        selectController->UpdateCaretInfoByOffset(Offset(localOffset.GetX(), localOffset.GetY()), false);
+        auto isScrolling = pattern->GetContentScrollerIsScrolling();
+        auto contentRect = pattern->GetContentRect();
+        auto touchCaretX = std::clamp(localOffset.GetX(), contentRect.Left(), contentRect.Right());
+        // 1/4 line height.
+        auto yOffset = pattern->PreferredLineHeight() * 0.25f;
+        auto touchCaretY = std::clamp(localOffset.GetY(), contentRect.Top() + yOffset, contentRect.Bottom() - yOffset);
+        selectController->UpdateCaretInfoByOffset(!isScrolling ? Offset(touchCaretX, touchCaretY) :
+            Offset(localOffset.GetX(), localOffset.GetY()), !isScrolling, true);
         pattern->ShowCaretAndStopTwinkling();
-        pattern->StartVibratorByIndexChange(selectController->GetCaretIndex(), preIndex);
     } else {
         auto position = GetCaretPositionOnHandleMove(localOffset, isFirst);
+        pattern->StartVibratorByIndexChange(position, isFirst ? startIndex : endIndex);
         if (isFirst) {
-            pattern->StartVibratorByIndexChange(position, startIndex);
             selectController->MoveFirstHandleToContentRect(position, false, false);
             UpdateSecondHandleOffset();
         } else {
-            pattern->StartVibratorByIndexChange(position, endIndex);
             selectController->MoveSecondHandleToContentRect(position, false, false);
             UpdateFirstHandleOffset();
+        }
+    }
+    if (pattern->GetMagnifierController() && SelectOverlayIsOn()) {
+        if (IsSingleHandle()) {
+            pattern->SetMagnifierLocalOffsetToFloatingCaretPos();
+        } else {
+            auto magnifierLocalOffset = OffsetF(localOffset.GetX(), localOffset.GetY());
+            if (IsOverlayMode()) {
+                GetLocalPointWithTransform(magnifierLocalOffset);
+            }
+            pattern->GetMagnifierController()->SetLocalOffset(magnifierLocalOffset);
         }
     }
     pattern->PlayScrollBarAppearAnimation();
@@ -539,6 +556,7 @@ void TextFieldSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     }
     pattern->ScheduleDisappearDelayTask();
     pattern->UpdateCaretInfoToController();
+    pattern->FloatingCaretLand();
     auto tmpHost = pattern->GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -668,5 +686,19 @@ void TextFieldSelectOverlay::UpdateSecondHandleOffset()
         return;
     }
     BaseTextSelectOverlay::UpdateSecondHandleOffset();
+}
+
+bool TextFieldSelectOverlay::AllowSearch()
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->AllowCopy();
+}
+
+bool TextFieldSelectOverlay::IsStopBackPress() const
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, true);
+    return pattern->IsStopBackPress();
 }
 } // namespace OHOS::Ace::NG

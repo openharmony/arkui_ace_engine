@@ -79,6 +79,8 @@ ACE_EXPORT extern const char JS_SYNTAX_ITEM_ETS_TAG[];
 ACE_EXPORT extern const char JS_REPEAT_ETS_TAG[];
 // js if else node
 ACE_EXPORT extern const char JS_IF_ELSE_ETS_TAG[];
+// js with theme node
+ACE_EXPORT extern const char JS_WITH_THEME_ETS_TAG[];
 // js node slot node
 ACE_EXPORT extern const char JS_NODE_SLOT_ETS_TAG[];
 // js toast node
@@ -121,6 +123,10 @@ ACE_EXPORT extern const char SWIPER_LEFT_ARROW_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_RIGHT_ARROW_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_LEFT_CAPTURE_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_RIGHT_CAPTURE_ETS_TAG[];
+
+// indicator
+ACE_EXPORT extern const char INDICATOR_COMPONENT_TAG[];
+ACE_EXPORT extern const char INDICATOR_ETS_TAG[];
 
 // tabs
 ACE_EXPORT extern const char TABS_COMPONENT_TAG[];
@@ -595,9 +601,13 @@ ACE_EXPORT extern const char SELECT_OVERLAY_ETS_TAG[];
 ACE_EXPORT extern const char SYMBOL_COMPONENT_TAG[];
 ACE_EXPORT extern const char SYMBOL_ETS_TAG[];
 
-// DynamicComponent
+// IsolatedComponent
 ACE_EXPORT extern const char ISOLATED_COMPONENT_TAG[];
 ACE_EXPORT extern const char ISOLATED_COMPONENT_ETS_TAG[];
+
+// DynamicComponent
+ACE_EXPORT extern const char DYNAMIC_COMPONENT_TAG[];
+ACE_EXPORT extern const char DYNAMIC_COMPONENT_ETS_TAG[];
 
 // ContainerSpan
 ACE_EXPORT extern const char CONTAINER_SPAN_COMPONENT_TAG[];
@@ -618,5 +628,25 @@ ACE_FORCE_EXPORT extern const char MOVING_PHOTO_ETS_TAG[];
 
 // CustomSpanNode
 ACE_EXPORT extern const char CUSTOM_SPAN_NODE_ETS_TAG[];
+
+// LinearIndicator
+ACE_EXPORT extern const char LINEARINDICATOR_COMPONENT_TAG[];
+ACE_EXPORT extern const char LINEARINDICATOR_ETS_TAG[];
+
+// ArcList
+ACE_EXPORT extern const char ARC_LIST_COMPONENT_TAG[];
+ACE_EXPORT extern const char ARC_LIST_ETS_TAG[];
+
+// ArcListItem
+ACE_EXPORT extern const char ARC_LIST_ITEM_COMPONENT_TAG[];
+ACE_EXPORT extern const char ARC_LIST_ITEM_ETS_TAG[];
+
+// ArcScrollBar
+ACE_EXPORT extern const char ARC_SCROLL_BAR_COMPONENT_TAG[];
+ACE_EXPORT extern const char ARC_SCROLL_BAR_ETS_TAG[];
+
+// ArcAlphabetIndexer
+ACE_EXPORT extern const char ARC_INDEXER_COMPONENT_TAG[];
+ACE_EXPORT extern const char ARC_INDEXER_ETS_TAG[];
 } // namespace OHOS::Ace::V2
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_V2_INSPECTOR_INSPECTOR_CONSTANTS_H

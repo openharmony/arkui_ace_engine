@@ -16,6 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_PROPERTIES_SIZE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_PROPERTIES_SIZE_H
 
-#include "interfaces/inner_api/ace_kit/include/ui/base/geometry/ng/size_t.h"
+#include "ui/base/geometry/ng/size_t.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_NG_PROPERTIES_SIZE_H

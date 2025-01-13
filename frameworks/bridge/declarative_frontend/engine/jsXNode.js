@@ -699,8 +699,11 @@ globalThis.__AddToNodeControllerMap__ = function __AddToNodeControllerMap__(cont
 };
 globalThis.__RemoveFromNodeControllerMap__ = function __RemoveFromNodeControllerMap__(containerId) {
     let nodeController = NodeControllerRegisterProxy.__NodeControllerMap__.get(containerId);
-    nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
-    NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
+    if (nodeController) {
+        nodeController._nodeContainerId.__rootNodeOfNodeController__ = undefined;
+        nodeController._value = -1;
+        NodeControllerRegisterProxy.__NodeControllerMap__.delete(containerId);
+    }
 };
 globalThis.__viewPuStack__ = new Array();
 globalThis.__CheckIsInBuilderNode__ = function __CheckIsInBuilderNode__(parent) {
@@ -1726,7 +1729,10 @@ class ColorMetrics {
             const green = chanels[1];
             const blue = chanels[2];
             const alpha = chanels[3];
-            return new ColorMetrics(red, green, blue, alpha);
+            const resourceId = chanels[4];
+            const colorMetrics = new ColorMetrics(red, green, blue, alpha);
+            colorMetrics.setResourceId(resourceId);
+            return colorMetrics;
         }
         else if (typeof color === 'number') {
             return ColorMetrics.numeric(color);
@@ -1809,6 +1815,12 @@ class ColorMetrics {
     }
     get alpha() {
         return this.alpha_;
+    }
+    setResourceId(resourceId) {
+      this.resourceId_ = resourceId;
+    }
+    getResourceId() {
+      return this.resourceId_;
     }
 }
 class BaseShape {

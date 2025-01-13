@@ -71,7 +71,8 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             onVsync();
             return;
         }
-        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync");
+        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
     if (window->GetSurfaceNode()) {
@@ -122,6 +123,11 @@ void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
         ACE_SCOPED_TRACE("disable dvsync");
     }
     rsWindow_->SetUiDvsyncSwitch(dvsyncSwitch);
+}
+
+bool RosenWindow::GetIsRequestFrame()
+{
+    return isRequestVsync_;
 }
 
 void RosenWindow::RequestFrame()

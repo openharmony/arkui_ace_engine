@@ -126,6 +126,17 @@ bool ArkTSUtils::ParseJsColorAlpha(const EcmaVM* vm, const Local<JSValueRef>& va
     return false;
 }
 
+bool ArkTSUtils::ParseJsColorContent(const EcmaVM* vm, const Local<JSValueRef>& value)
+{
+    if (!value->IsObject(vm)) {
+        return false;
+    }
+    auto obj = value->ToObject(vm);
+    auto colorContentValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "colorContent_"));
+    return !colorContentValue.IsEmpty() && colorContentValue->IsString(vm) &&
+           colorContentValue->ToString(vm)->ToString(vm) == "ORIGIN";
+}
+
 bool ArkTSUtils::ParseJsColorAlpha(
     const EcmaVM* vm, const Local<JSValueRef>& value, Color& result, const Color& defaultColor)
 {
@@ -500,6 +511,7 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
     }
     if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::COLOR)) {
         result = resourceWrapper->GetColor(resId->ToNumber(vm)->Value());
+        result.SetResourceId(resId->Int32Value(vm));
         return true;
     }
     return false;

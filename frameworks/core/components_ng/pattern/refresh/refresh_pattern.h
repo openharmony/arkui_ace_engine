@@ -195,6 +195,8 @@ private:
     float customBuilderOffset_ = 0.0f;
     RefPtr<NodeAnimatablePropertyFloat> lowVersionOffset_;
     ACE_DISALLOW_COPY_AND_MOVE(RefreshPattern);
+    Dimension loadingProgressSizeTheme_ = 32.0_vp;
+    Dimension triggerLoadingDistanceTheme_ = 16.0_vp;
 };
 } // namespace OHOS::Ace::NG
 

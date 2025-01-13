@@ -38,6 +38,8 @@ void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam);
 void SetOnKeyEvent(ArkUINodeHandle node, void* extraParam);
 void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam);
 void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam);
+void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam);
+
 
 void ResetOnAppear(ArkUINodeHandle node);
 void ResetOnDisappear(ArkUINodeHandle node);

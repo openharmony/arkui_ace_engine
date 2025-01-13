@@ -26,4 +26,25 @@ void SearchController::CaretPosition(int32_t caretPosition)
     }
 }
 
+void SearchController::StopEditing()
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        controller->StopEditing();
+    } else {
+        LOGW("StopEditing failed, controller is null.");
+    }
+}
+
+void SearchController::SetTextSelection(
+    int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options)
+{
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        controller->SetTextSelection(selectionStart, selectionEnd, options);
+    } else {
+        LOGW("SetTextSelection failed, controller is null.");
+    }
+}
+
 } // namespace OHOS::Ace::Framework

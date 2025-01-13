@@ -190,6 +190,7 @@ void FormRenderWindow::InitOnVsyncCallback()
             }
         };
 
+        ContainerScope scope(id);
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::JS);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
             onVsync();

@@ -17,7 +17,7 @@
 #include "interfaces/native/node/event_converter.h"
 #include "interfaces/native/node/node_model.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
-
+#include "frameworks/core/interfaces/arkoala/arkoala_api.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -122,6 +122,19 @@ void OH_ArkUI_KeyEvent_SetConsumed(const ArkUI_UIInputEvent *event, bool isConsu
         return;
     }
     keyEvent->isConsumed = isConsumed;
+}
+
+void OH_ArkUI_KeyEvent_Dispatch(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event)
+{
+    if (!node || !event) {
+        return;
+    }
+    auto* keyEvent = reinterpret_cast<ArkUIKeyEvent*>(event->inputEvent);
+    if (!keyEvent) {
+        return;
+    }
+    auto fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->dispatchKeyEvent(node->uiNodeHandle, keyEvent);
 }
 #ifdef __cplusplus
 };

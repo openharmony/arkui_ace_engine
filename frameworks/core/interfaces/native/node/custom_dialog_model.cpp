@@ -33,6 +33,7 @@ namespace {
     constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_START_INDEX = 6;
     constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_INDEX = 7;
     constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_END_INDEX = 8;
+    constexpr float AVOID_DISTANCE = 16.0f;
 } // namespace
 
 ArkUIDialogHandle CreateDialog()
@@ -54,7 +55,9 @@ ArkUIDialogHandle CreateDialog()
         .enableCustomAnimation = false,
         .onWillDismissCall = nullptr,
         .onWillDismissCallByNDK  = nullptr,
-        .userData = nullptr });
+        .userData = nullptr,
+        .keyboardAvoidDistanceValue = std::optional<ArkUI_Float32>(),
+        .keyboardAvoidDistanceUnit = DimensionUnit::VP});
 }
 
 void DisposeDialog(ArkUIDialogHandle controllerHandler)
@@ -178,6 +181,18 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     if (controllerHandler->enableCustomAnimation && !dialogProperties.closeAnimation.has_value()) {
         AnimationOption animation;
         dialogProperties.closeAnimation = animation;
+    }
+
+    if (!dialogProperties.keyboardAvoidDistance.has_value() &&
+        controllerHandler->keyboardAvoidDistanceValue.has_value()) {
+        auto unitEnum = controllerHandler->keyboardAvoidDistanceUnit;
+        if (controllerHandler->keyboardAvoidDistanceValue.value() < 0 || unitEnum < OHOS::Ace::DimensionUnit::PX ||
+            unitEnum > OHOS::Ace::DimensionUnit::CALC || unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
+            dialogProperties.keyboardAvoidDistance = Dimension(AVOID_DISTANCE, OHOS::Ace::DimensionUnit::VP);
+        } else {
+            dialogProperties.keyboardAvoidDistance = Dimension(controllerHandler->keyboardAvoidDistanceValue.value(),
+                unitEnum);
+        }
     }
 }
 
@@ -331,6 +346,15 @@ ArkUI_Int32 RegisterOnWillDialogDismissWithUserData(
     CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
     controllerHandler->onWillDismissCallByNDK  = callback;
     controllerHandler->userData = userData;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetKeyboardAvoidDistance(
+    ArkUIDialogHandle controllerHandler, float distance, ArkUI_Int32 unit)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->keyboardAvoidDistanceValue = distance;
+    controllerHandler->keyboardAvoidDistanceUnit = static_cast<OHOS::Ace::DimensionUnit>(unit);
     return ERROR_CODE_NO_ERROR;
 }
 

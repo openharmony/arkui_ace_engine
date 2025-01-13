@@ -24,6 +24,17 @@
 
 namespace OHOS::Ace::NG {
 // SafeAreaManager stores layout information to apply SafeArea correctly.
+
+struct WindowTypeConfig {
+    WindowTypeConfig() = default;
+    WindowTypeConfig(bool isAppWindow, bool isSystemWindow, bool isSceneBoardWindow)
+        : isAppWindow(isAppWindow), isSystemWindow(isSystemWindow), isSceneBoardWindow(isSceneBoardWindow)
+    {}
+    bool isAppWindow = true;
+    bool isSystemWindow = false;
+    bool isSceneBoardWindow = false;
+};
+
 class SafeAreaManager : public virtual AceType {
     DECLARE_ACE_TYPE(SafeAreaManager, AceType);
 
@@ -99,6 +110,13 @@ public:
      * @return The safe area insets that account for any cutout areas on the screen.
      */
     SafeAreaInsets GetCutoutSafeArea() const;
+
+    bool UpdateScbSystemSafeArea(const SafeAreaInsets& safeArea);
+
+    bool UpdateScbCutoutSafeArea(
+        const SafeAreaInsets& safeArea, NG::OptionalSize<uint32_t> rootSize = NG::OptionalSize<uint32_t>());
+
+    bool UpdateScbNavSafeArea(const SafeAreaInsets& safeArea);
 
     /**
      * @brief Retrieves the safe area insets combining System and Cutout.
@@ -206,6 +224,8 @@ public:
 
     SafeAreaInsets GetSafeAreaWithoutProcess() const;
 
+    SafeAreaInsets GetScbSafeArea() const;
+
     bool SetIsFullScreen(bool value);
     bool SetIsNeedAvoidWindow(bool value);
     bool SetIgnoreSafeArea(bool value);
@@ -243,9 +263,21 @@ public:
     }
 
     bool IsSafeAreaValid() const;
+
     // check if the page node needs to be avoid keyboard
     bool CheckPageNeedAvoidKeyboard(const RefPtr<FrameNode>& frameNode);
+
     PaddingPropertyF SafeAreaToPadding(bool withoutProcess = false);
+
+    void SetWindowTypeConfig(bool isAppWindow, bool isSystemWindow, bool isSceneBoardWindow)
+    {
+        windowTypeConfig_ = WindowTypeConfig(isAppWindow, isSystemWindow, isSceneBoardWindow);
+    }
+
+    WindowTypeConfig GetWindowTypeConfig()
+    {
+        return windowTypeConfig_;
+    }
 
     uint32_t GetkeyboardHeightConsideringUIExtension()
     {
@@ -291,7 +323,8 @@ private:
     /**
      * @brief Indicates whether the keyboard safe area is enabled. When enabled, UI avoids the keyboard inset and the
      * Page is compressed when the keyboard is up. When disabled, the size of Page doesn't change, but Page would
-     * offset vertically according to [keyboardOffset_].
+     * offset vertically according to [keyboardOffset_] when [keyboardAvoidMode_] is OFFSET or stay still when
+     * [keyboardAvoidMode_] is NONE.
      */
     bool keyboardSafeAreaEnabled_ = false;
 
@@ -302,6 +335,12 @@ private:
     SafeAreaInsets navSafeArea_;
     // keyboard is bottom direction only
     SafeAreaInsets::Inset keyboardInset_;
+
+    std::optional<SafeAreaInsets> scbSystemSafeArea_;
+    std::optional<SafeAreaInsets> scbCutoutSafeArea_;
+    std::optional<SafeAreaInsets> scbNavSafeArea_;
+    
+    WindowTypeConfig windowTypeConfig_;
 
     /**
      * @brief A set of weak pointers to FrameNode objects whose geometry info are saved before their SafeArea

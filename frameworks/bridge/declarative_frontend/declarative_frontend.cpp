@@ -212,7 +212,8 @@ bool DeclarativeFrontend::Initialize(FrontendType type, const RefPtr<TaskExecuto
         jsEngine->Initialize(delegate);
     };
     if (needPostJsTask) {
-        taskExecutor->PostTask(initJSEngineTask, TaskExecutor::TaskType::JS, "ArkUIInitJsEngine");
+        taskExecutor->PostTask(initJSEngineTask, TaskExecutor::TaskType::JS, "ArkUIInitJsEngine",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     } else {
         initJSEngineTask();
     }
@@ -672,7 +673,8 @@ UIContentErrorCode DeclarativeFrontend::RunPage(const std::string& url, const st
                 CHECK_NULL_VOID(frontend->jsEngine_);
                 frontend->jsEngine_->LoadFaAppSource();
             },
-            TaskExecutor::TaskType::JS, "ArkUILoadFaAppSource");
+            TaskExecutor::TaskType::JS, "ArkUILoadFaAppSource",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 
     if (delegate_) {

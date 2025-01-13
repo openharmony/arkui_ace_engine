@@ -61,13 +61,27 @@ void ResetShapeMesh(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIShapeModifier* GetShapeModifier()
 {
-    static const ArkUIShapeModifier modifier = { SetShapeViewPort, ResetShapeViewPort, SetShapeMesh, ResetShapeMesh };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIShapeModifier modifier = {
+        .setShapeViewPort = SetShapeViewPort,
+        .resetShapeViewPort = ResetShapeViewPort,
+        .setShapeMesh = SetShapeMesh,
+        .resetShapeMesh = ResetShapeMesh,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIShapeModifier* GetCJUIShapeModifier()
 {
-    static const CJUIShapeModifier modifier = { SetShapeViewPort, ResetShapeViewPort, SetShapeMesh, ResetShapeMesh };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIShapeModifier modifier = {
+        .setShapeViewPort = SetShapeViewPort,
+        .resetShapeViewPort = ResetShapeViewPort,
+        .setShapeMesh = SetShapeMesh,
+        .resetShapeMesh = ResetShapeMesh,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

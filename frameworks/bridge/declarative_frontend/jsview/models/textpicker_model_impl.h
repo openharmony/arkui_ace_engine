@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXTPICKER_MODEL_IMPL_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXTPICKER_MODEL_IMPL_H
 
+#include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model.h"
 
 namespace OHOS::Ace::Framework {
@@ -42,8 +43,10 @@ public:
     void SetIsCascade(bool isCascade) override {};
     void SetOnCascadeChange(TextCascadeChangeEvent&& onChange) override;
     void SetOnScrollStop(TextCascadeChangeEvent&& onScrollStop) override;
+    void SetOnEnterSelectedArea(TextCascadeChangeEvent&& onEnterSelectedArea) override;
     void SetValues(const std::vector<std::string>& values) override {};
     void SetSelecteds(const std::vector<uint32_t>& values) override {};
+    void SetColumnWidths(const std::vector<Dimension>& widths) override {};
     void SetBackgroundColor(const Color& color) override;
     void HasUserDefinedOpacity() override {};
     bool IsSingle() override
@@ -75,6 +78,10 @@ public:
     {
         return true;
     }
+
+    void SetDisableTextStyleAnimation(const bool value) override {};
+    void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) override {};
+    void SetEnableHapticFeedback(bool isEnableHapticFeedback) override {};
 };
 
 class ACE_EXPORT TextPickerDialogModelImpl : public TextPickerDialogModel {
@@ -83,8 +90,8 @@ public:
     void SetTextPickerDialogShow(RefPtr<AceType>& PickerText, NG::TextPickerSettingData& settingData,
         std::function<void()>&& onCancel, std::function<void(const std::string&)>&& onAccept,
         std::function<void(const std::string&)>&& onChange, std::function<void(const std::string&)>&& onScrollStop,
-        TextPickerDialog& textPickerDialog, TextPickerDialogEvent& textPickerDialogEvent,
-        const std::vector<ButtonInfo>& buttonInfos) override;
+        std::function<void(const std::string&)>&& onEnterSelectedArea, TextPickerDialog& textPickerDialog,
+        TextPickerDialogEvent& textPickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_TEXTPICKER_MODEL_IMPL_H

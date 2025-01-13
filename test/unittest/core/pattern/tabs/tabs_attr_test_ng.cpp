@@ -16,14 +16,33 @@
 #include "tabs_test_ng.h"
 
 #include "core/components/tab_bar/tab_theme.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
 namespace OHOS::Ace::NG {
 class TabsAttrTestNg : public TabsTestNg {
 public:
+    std::function<void()> GetDefaultBuilder()
+    {
+        return []() {
+            RowModelNG rowModel;
+            rowModel.Create(std::nullopt, nullptr, "");
+            ViewAbstract::SetWidth(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)));
+            ViewAbstract::SetHeight(CalcLength(Dimension(50.f)));
+        };
+    }
+
+    RefPtr<FrameNode> CreateCustomNode(const std::string& tag)
+    {
+        auto frameNode = AceType::MakeRefPtr<FrameNode>(
+            tag, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>());
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        layoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(CalcLength(Dimension(1.0, DimensionUnit::PERCENT)), CalcLength(Dimension(50.f))));
+        return frameNode;
+    }
 };
 
 /**
@@ -144,7 +163,8 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     EXPECT_EQ(swiperLayoutProperty_->GetDirectionValue(), Axis::HORIZONTAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarWidthValue(Dimension(56.f)), Dimension(-1.f));
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarHeightValue(Dimension(56.f)), Dimension(-1.f));
-    EXPECT_EQ(tabBarPaintProperty_->GetTabBarBlurStyleOption().value_or(option).blurStyle, BlurStyle::NO_MATERIAL);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackBlurStyle().value_or(option).blurStyle, BlurStyle::NO_MATERIAL);
 
     /**
      * @tc.steps3: set valid properties
@@ -167,7 +187,7 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     EXPECT_EQ(swiperLayoutProperty_->GetDirectionValue(), Axis::VERTICAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarWidthValue(Dimension(56.f)), Dimension(60.f));
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarHeightValue(Dimension(56.f)), Dimension(60.f));
-    EXPECT_EQ(tabBarPaintProperty_->GetTabBarBlurStyleOption().value_or(option).blurStyle, BlurStyle::COMPONENT_THICK);
+    EXPECT_EQ(renderContext->GetBackBlurStyle().value_or(option).blurStyle, BlurStyle::COMPONENT_THICK);
 }
 
 /**
@@ -763,14 +783,15 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarOverlap001, TestSize.Level1)
     model.SetBarOverlap(true);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    tabBarPaintProperty_->UpdateBarBackgroundColor(Color::RED);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    renderContext->UpdateBackgroundColor(Color::RED);
     EXPECT_TRUE(layoutProperty_->GetBarOverlap().value());
 
     model = CreateTabs();
     model.SetBarOverlap(false);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    tabBarPaintProperty_->UpdateBarBackgroundColor(Color::RED);
+    renderContext->UpdateBackgroundColor(Color::RED);
     EXPECT_FALSE(layoutProperty_->GetBarOverlap().value());
 }
 
@@ -789,7 +810,8 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarBackgroundColor001, TestSize.Level1)
     model.SetBarBackgroundColor(Color::RED);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    EXPECT_EQ(tabBarPaintProperty_->GetBarBackgroundColor().value_or(Color::BLACK), Color::RED);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::BLACK), Color::RED);
 }
 
 /**
@@ -1566,6 +1588,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem005, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Pop();
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     CreateTabsDone(model);
+
     /**
      * @tc.steps: step1. check if SvgFillColor is called and value is set correctly.
      */
@@ -1620,6 +1643,78 @@ HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem006, TestSize.Level1)
     EXPECT_EQ(imagePaintProperty->GetSvgFillColor().value(), defaultColorOn);
     auto imagePaintProperty1 = iconNode1->GetPaintProperty<ImageRenderProperty>();
     EXPECT_EQ(imagePaintProperty1->GetSvgFillColor().value(), defaultColorOff);
+}
+
+/**
+ * @tc.name: TabContentModelAddTabBarItem007
+ * @tc.desc: test method with ComponentContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem007, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    auto tabContentModel = CreateTabContent();
+    RefPtr<FrameNode> tabBarNode1 = CreateCustomNode("tabbar1");
+    tabContentModel.SetTabBar("", "", std::nullopt, nullptr, true);
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    frameNodePattern->SetTabBarWithContent(tabBarNode1);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+
+    auto tabContentModel2 = CreateTabContent();
+    tabContentModel2.SetTabBar("", "", std::nullopt, nullptr, true);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentFrameNode1 = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 1));
+    ASSERT_NE(tabContentFrameNode1, nullptr);
+    auto columnNode = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode->GetTabBarItemId());
+    auto columnNode1 = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode1->GetTabBarItemId());
+    EXPECT_EQ(columnNode->GetChildren().size(), 1);
+    EXPECT_EQ(columnNode1->GetChildren().size(), 2);
+}
+
+/**
+ * @tc.name: TabContentModelAddTabBarItem008
+ * @tc.desc: test method with ComponentContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem008, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    auto tabContentModel = CreateTabContent();
+    RefPtr<FrameNode> tabBarNode1 = CreateCustomNode("tabbar1");
+    tabContentModel.SetTabBar("", "", std::nullopt, nullptr, true);
+    auto frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    frameNodePattern->SetTabBarWithContent(tabBarNode1);
+    ViewStackProcessor::GetInstance()->Pop();
+    frameNodePattern->SetTabBarWithContent(nullptr);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+
+    auto tabContentModel2 = CreateTabContent();
+    RefPtr<FrameNode> tabBarNode2 = CreateCustomNode("tabbar2");
+    tabContentModel2.SetTabBar("", "", std::nullopt, nullptr, true);
+    frameNodePattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TabContentPattern>();
+    frameNodePattern->SetTabBarWithContent(tabBarNode2);
+    ViewStackProcessor::GetInstance()->Pop();
+    RefPtr<FrameNode> tabBarNode3 = CreateCustomNode("tabbar3");
+    frameNodePattern->SetTabBarWithContent(tabBarNode3);
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateTabsDone(model);
+
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    auto tabContentFrameNode1 = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 1));
+    ASSERT_NE(tabContentFrameNode1, nullptr);
+    auto columnNode = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode->GetTabBarItemId());
+    auto columnNode1 = FrameNode::GetFrameNode(V2::COLUMN_ETS_TAG, tabContentFrameNode1->GetTabBarItemId());
+    EXPECT_EQ(columnNode->GetChildren().size(), 2);
+    EXPECT_EQ(columnNode1->GetChildren().size(), 1);
 }
 
 /**

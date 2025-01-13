@@ -15,15 +15,17 @@
 
 #include "core/components_ng/render/paint_wrapper.h"
 
+#include "interfaces/inner_api/ace_kit/include/ui/view/draw/node_paint_method.h"
+
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
 
 PaintWrapper::PaintWrapper(WeakPtr<RenderContext> renderContext, RefPtr<GeometryNode> geometryNode,
-    RefPtr<PaintProperty> layoutProperty, RefPtr<ExtensionHandler> handler)
+    RefPtr<PaintProperty> paintProperty, RefPtr<ExtensionHandler> handler)
     : renderContext_(std::move(renderContext)), geometryNode_(std::move(geometryNode)),
-      paintProperty_(std::move(layoutProperty)), extensionHandler_(std::move(handler))
+      paintProperty_(std::move(paintProperty)), extensionHandler_(std::move(handler))
 {}
 
 PaintWrapper::~PaintWrapper() = default;
@@ -55,6 +57,15 @@ void PaintWrapper::SetNodePaintMethod(const RefPtr<NodePaintMethod>& nodePaintIm
         }
         renderContext->FlushForegroundModifier(foregroundModifier);
     }
+}
+
+void PaintWrapper::SetKitNodePaintMethod(const RefPtr<Kit::NodePaintMethod>& nodePaintMethod)
+{
+    nodePaintMethod_ = nodePaintMethod;
+    auto modifier = nodePaintMethod_->GetContentModifier();
+    auto renderContext = renderContext_.Upgrade();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->FlushKitContentModifier(modifier);
 }
 
 void PaintWrapper::FlushOverlayModifier()

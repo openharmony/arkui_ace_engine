@@ -58,9 +58,22 @@ public:
 
     napi_value GetParamObj() const override;
 
+    void SetNavDestinationPopCallback(const JSRef<JSFunc>& popCallback)
+    {
+        navDestinationPopCallback_ = popCallback;
+    }
+
+    JSRef<JSFunc> GetNavDestinationPopCallback() const
+    {
+        return navDestinationPopCallback_;
+    }
+
+    void UpdateNavPathInfo(const RefPtr<NG::NavPathInfo>& info) override;
+
 private:
     JSRef<JSVal> param_;
     JSRef<JSVal> onPop_;
+    JSRef<JSFunc> navDestinationPopCallback_;
 };
 
 class JSNavDestinationContext : public Referenced {

@@ -482,7 +482,7 @@ HWTEST_F(GridLayoutRangeTest, Jump001, TestSize.Level1)
     CreateDone();
     ScrollToIndex(22, false, ScrollAlign::AUTO, itemHeight);
     const auto& info = pattern_->info_;
-    EXPECT_EQ(GetChildRect(frameNode_, 22).Bottom(), GRID_HEIGHT - itemHeight);
+    EXPECT_EQ(GetChildRect(frameNode_, 22).Bottom(), HEIGHT - itemHeight);
     EXPECT_EQ(info.startIndex_, 22);
 
     ScrollToIndex(88, false, ScrollAlign::AUTO, itemHeight);
@@ -527,7 +527,7 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget001, TestSize.Level1)
         }
         EXPECT_TRUE(found);
     }
-    EXPECT_FLOAT_EQ(info.GetAnimatePosIrregular(23, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f), 5750.0f);
+    EXPECT_FLOAT_EQ(info.GetAnimatePosIrregular(23, HEIGHT, ScrollAlign::AUTO, 20.0f), 5750.0f);
 }
 
 /**
@@ -557,14 +557,14 @@ HWTEST_F(GridLayoutRangeTest, MeasureToTarget002, TestSize.Level1)
 
     ScrollToIndex(22, true, ScrollAlign::AUTO);
     EXPECT_TRUE(pattern_->AnimateToTargetImpl(ScrollAlign::AUTO, nullptr));
-    const float offset = info.GetAnimatePosIrregular(22, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f);
+    const float offset = info.GetAnimatePosIrregular(22, HEIGHT, ScrollAlign::AUTO, 20.0f);
     UpdateCurrentOffset(pattern_->GetTotalOffset() - offset);
 
     EXPECT_TRUE(NearEqual(GetChildY(frameNode_, 22), 0.0f));
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 22)->IsActive());
 
     ScrollToIndex(22, true, ScrollAlign::AUTO);
-    EXPECT_EQ(info.GetAnimatePosIrregular(22, GRID_HEIGHT, ScrollAlign::AUTO, 20.0f), -1.0f);
+    EXPECT_EQ(info.GetAnimatePosIrregular(22, HEIGHT, ScrollAlign::AUTO, 20.0f), -1.0f);
     pattern_->extraOffset_ = 0.0f;
     EXPECT_FALSE(pattern_->AnimateToTargetImpl(ScrollAlign::AUTO, nullptr));
 }
@@ -595,7 +595,7 @@ HWTEST_F(GridLayoutRangeTest, Cache001, TestSize.Level1)
     CheckPreloadListEqual(preloadList);
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(pattern_->preloadItemList_.empty());
-    constexpr float itemWidth = (GRID_WIDTH - 20.0f) / 3.0f;
+    constexpr float itemWidth = (WIDTH - 20.0f) / 3.0f;
     for (const int32_t i : preloadList) {
         EXPECT_TRUE(frameNode_->GetChildByIndex(i));
         EXPECT_EQ(GetChildWidth(frameNode_, i), itemWidth);
@@ -771,7 +771,6 @@ HWTEST_F(GridLayoutRangeTest, Focus002, TestSize.Level1)
     model.SetLayoutOptions(options);
     model.SetCachedCount(1);
     CreateDone();
-    frameNode_->AttachToMainTree(false, PipelineContext::GetCurrentContextPtrSafely());
 
     auto algo = pattern_->GetScopeFocusAlgorithm();
     auto curFocus = GetChildFocusHub(frameNode_, 0);
@@ -794,5 +793,78 @@ HWTEST_F(GridLayoutRangeTest, Focus002, TestSize.Level1)
         EXPECT_EQ(pattern_->focusHandler_.focusIndex_, i);
         curFocus = next.Upgrade();
     }
+}
+
+/**
+ * @tc.name: GetOverScrollOffset002
+ * @tc.desc: Test GetOverScrollOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, GetOverScrollOffset002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedItems(8);
+
+    CreateDone();
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+
+    OverScrollOffset offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
+    OverScrollOffset expectOffset = { ITEM_MAIN_SIZE, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, -ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    pattern_->info_.currentOffset_ = -ITEM_MAIN_SIZE;
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE * 2);
+    expectOffset = { ITEM_MAIN_SIZE, ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE * 2);
+    expectOffset = { 0, -ITEM_MAIN_SIZE * 2 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    pattern_->info_.currentOffset_ = -ITEM_MAIN_SIZE * 2;
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
+    expectOffset = { 0, ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, -ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    pattern_->info_.currentOffset_ = ITEM_MAIN_SIZE;
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE);
+    expectOffset = { ITEM_MAIN_SIZE, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE * 2);
+    expectOffset = { -ITEM_MAIN_SIZE, -ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+
+    pattern_->info_.currentOffset_ = -ITEM_MAIN_SIZE * 3;
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
+    offset = pattern_->GetOverScrollOffset(ITEM_MAIN_SIZE * 2);
+    expectOffset = { 0, ITEM_MAIN_SIZE * 2 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(0);
+    expectOffset = { 0, 0 };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
+    offset = pattern_->GetOverScrollOffset(-ITEM_MAIN_SIZE);
+    expectOffset = { 0, -ITEM_MAIN_SIZE };
+    EXPECT_TRUE(IsEqual(offset, expectOffset));
 }
 } // namespace OHOS::Ace::NG

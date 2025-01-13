@@ -140,11 +140,16 @@ struct CJImageComplete {
     double componentWidth;
     double componentHeight;
     int32_t loadingStatus;
+    double contentWidth;
+    double contentHeight;
+    double contentOffsetX;
+    double contentOffsetY;
 };
 
 struct CJImageError {
     double componentWidth;
     double componentHeight;
+    const char* message;
 };
 
 struct CJPosition {
@@ -230,6 +235,13 @@ struct CJGestureEvent {
     double pinchCenterY;
     double angle;
     double speed;
+    int64_t tiltX;
+    int64_t tiltY;
+    int32_t sourceTool;
+    double velocityX;
+    double velocityY;
+    double velocity;
+    double pressure;
 };
 
 struct CJDragInfo {
@@ -241,6 +253,16 @@ struct CJDragItemInfo {
     int64_t pixelMapId;
     void (*builder)();
     const char* extraInfo;
+};
+
+struct CJBaseEvent {
+    CJEventTarget* target;
+    int64_t timestamp;
+    int32_t source;
+    double pressure;
+    int64_t tiltX;
+    int64_t tiltY;
+    int32_t sourceTool;
 };
 
 struct AtCPackage;
@@ -293,6 +315,21 @@ struct AtCPackage {
 CJ_EXPORT void FfiOHOSAceFrameworkRegisterCJFuncs(AtCPackage cjFuncs);
 
 CJ_EXPORT int64_t FfiGeneralSizeOfPointer();
+
+struct CJIndicator {
+    double left;
+    int32_t leftUnit;
+    double top;
+    int32_t topUnit;
+    double right;
+    int32_t rightUnit;
+    double bottom;
+    int32_t bottomUnit;
+    double start;
+    int32_t startUnit;
+    double end;
+    int32_t endUnit;
+};
 }
 
 namespace OHOS::Ace {

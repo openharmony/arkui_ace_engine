@@ -157,6 +157,69 @@ bool SecurityComponentHandler::CheckBlendMode(const RefPtr<FrameNode>& node,
     return false;
 }
 
+bool SecurityComponentHandler::GetBorderRect(const RefPtr<FrameNode>& parentNode, std::vector<RectF>& borderRects)
+{
+    auto renderContext = parentNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto borderWidth = renderContext->GetBorderWidth();
+    CHECK_NULL_RETURN(borderWidth, false);
+    auto parentRect = renderContext->GetPaintRectWithTransform();
+    parentRect.SetOffset(parentNode->GetPositionToScreenWithTransform());
+    auto borderColor = renderContext->GetBorderColor();
+    auto leftIsTransparent = borderColor && borderColor->leftColor.has_value() &&
+        (borderColor->leftColor.value() == Color::TRANSPARENT);
+    auto rightIsTransparent = borderColor && borderColor->rightColor.has_value() &&
+        (borderColor->rightColor.value() == Color::TRANSPARENT);
+    auto topIsTransparent = borderColor && borderColor->topColor.has_value() &&
+        (borderColor->topColor.value() == Color::TRANSPARENT);
+    auto bottomIsTransparent = borderColor && borderColor->bottomColor.has_value() &&
+        (borderColor->bottomColor.value() == Color::TRANSPARENT);
+
+    if (borderWidth->leftDimen.has_value() && GreatNotEqual(borderWidth->leftDimen.value().ConvertToPx(), 1.0) &&
+        !leftIsTransparent) {
+        auto leftWidth = borderWidth->leftDimen.value().ConvertToPx();
+        borderRects.emplace_back(RectF(parentRect.GetX(), parentRect.GetY(), leftWidth, parentRect.Height()));
+    }
+    if (borderWidth->rightDimen.has_value() && GreatNotEqual(borderWidth->rightDimen.value().ConvertToPx(), 1.0) &&
+        !rightIsTransparent) {
+        auto rightWidth = borderWidth->rightDimen.value().ConvertToPx();
+        borderRects.emplace_back(RectF(parentRect.GetX() + parentRect.Width() - rightWidth, parentRect.GetY(),
+            rightWidth, parentRect.Height()));
+    }
+    if (borderWidth->topDimen.has_value() && GreatNotEqual(borderWidth->topDimen.value().ConvertToPx(), 1.0) &&
+        !topIsTransparent) {
+        auto topWidth = borderWidth->topDimen.value().ConvertToPx();
+        borderRects.emplace_back(RectF(parentRect.GetX(), parentRect.GetY(), parentRect.Width(), topWidth));
+    }
+    if (borderWidth->bottomDimen.has_value() && GreatNotEqual(borderWidth->bottomDimen.value().ConvertToPx(), 1.0) &&
+        !bottomIsTransparent) {
+        auto bottomWidth = borderWidth->bottomDimen.value().ConvertToPx();
+        borderRects.emplace_back(RectF(parentRect.GetX(), parentRect.GetY() + parentRect.Height() - bottomWidth,
+            parentRect.Width(), bottomWidth));
+    }
+    return true;
+}
+
+bool SecurityComponentHandler::CheckParentBorder(const RefPtr<FrameNode>& parentNode, const RectF& scRect,
+    std::string& message)
+{
+    std::vector<RectF> borderRects;
+    if (!GetBorderRect(parentNode, borderRects)) {
+        return false;
+    }
+    for (const auto& rect : borderRects) {
+        if (!rect.IsInnerIntersectWithRound(scRect)) {
+            continue;
+        }
+        SC_LOG_ERROR("SecurityComponentCheckFail: security component is covered by the border of parent" \
+            " %{public}s", parentNode->GetTag().c_str());
+        message = ", security component is covered by the border of parent " + parentNode->GetTag();
+        return true;
+    }
+
+    return false;
+}
+
 float SecurityComponentHandler::GetLinearGradientBlurRatio(std::vector<std::pair<float, float>>& fractionStops)
 {
     float ratio = 1.0;
@@ -203,7 +266,7 @@ bool SecurityComponentHandler::CheckDiagonalLinearGradientBlur(const RectF& pare
     switch (direction) {
         case GradientDirection::LEFT_TOP:
             dest.SetX(rect.GetX() + radius);
-            dest.SetY(rect.GetY()+ radius);
+            dest.SetY(rect.GetY() + radius);
             src.SetX(parentRect.GetX() + (1 - ratio) * parentRect.Width());
             src.SetY(parentRect.GetY() + (1 - ratio) * parentRect.Height());
             gradient = (0 - parentRect.Width()) / parentRect.Height();
@@ -254,9 +317,9 @@ float SecurityComponentHandler::GetBorderRadius(RefPtr<FrameNode>& node, const N
     }
 
     RefPtr<FrameNode> buttonNode = GetSecCompChildNode(node, V2::BUTTON_ETS_TAG);
-    CHECK_NULL_RETURN(buttonNode, false);
+    CHECK_NULL_RETURN(buttonNode, 0.0);
     auto bgProp = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-    CHECK_NULL_RETURN(bgProp, false);
+    CHECK_NULL_RETURN(bgProp, 0.0);
     auto borderRadius = bgProp->GetBorderRadius();
     float radius = 0.0;
 
@@ -509,14 +572,33 @@ std::string GetClipErrorMsg(const std::string& scId, const std::string& scType,
     const RectF& visibleRect, const RectF& frameRect, const std::string& parentNode)
 {
     std::string message = "The id of " + scType + " is " + scId +
-        ", attribute clip of parent component is set, " + scType +
-        " is not completely displayed. The rect of visible part is {" +
+        ", attribute clip of parent component " + parentNode + "is set, " +
+        scType + " is not completely displayed. The rect of visible part is {" +
         std::to_string(visibleRect.Width()) +
         ", height = " + std::to_string(visibleRect.Height()) +
         "}, the real size of " + scType + " is {" +
         std::to_string(frameRect.Width()) +
         ", height = " + std::to_string(frameRect.Height()) + "}";
     return message;
+}
+
+bool SecurityComponentHandler::IsSecComponentClipped(RefPtr<FrameNode>& parentNode,
+    RectF& visibleRect, const RectF& frameRect, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo)
+{
+    GetVisibleRect(parentNode, visibleRect);
+    bool isClipped = IsOutOfParentWithRound(visibleRect, frameRect, buttonInfo);
+    buttonInfo.isClipped_ = isClipped;
+    buttonInfo.parentTag_ = parentNode->GetTag();
+
+    if (isClipped && (visibleRect.IsValid() || frameRect.IsValid())) {
+        SC_LOG_ERROR("SecurityComponentCheckFail: Parents clip is set, " \
+            "security component is not completely displayed.");
+        SC_LOG_ERROR("visibleWidth: %{public}f, visibleHeight: %{public}f, " \
+            "frameWidth: %{public}f, frameHeight: %{public}f",
+            visibleRect.Width(), visibleRect.Height(), frameRect.Width(), frameRect.Height());
+        return true;
+    }
+    return false;
 }
 
 bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
@@ -540,6 +622,10 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
             message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType + message;
             return true;
         }
+        if (CheckParentBorder(parentNode, frameRect, message)) {
+            message = SEC_COMP_ID + scId + SEC_COMP_TYPE + scType + message;
+            return true;
+        }
         if (CheckLinearGradientBlur(parentNode, node)) {
             SC_LOG_ERROR("SecurityComponentCheckFail: Parent %{public}s LinearGradientBlur is set, " \
                 "security component is invalid", parentNode->GetTag().c_str());
@@ -554,18 +640,8 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
             parent = parent->GetParent();
             continue;
         }
-        GetVisibleRect(parentNode, visibleRect);
-        bool isClipped = IsOutOfParentWithRound(visibleRect, frameRect, buttonInfo);
-        buttonInfo.isClipped_ = isClipped;
-        buttonInfo.parentTag_ = parentNode->GetTag();
-
-        if (isClipped && (visibleRect.IsValid() || frameRect.IsValid())) {
-            SC_LOG_ERROR("SecurityComponentCheckFail: Parents clip is set, " \
-                "security component is not completely displayed.");
-            SC_LOG_ERROR("visibleWidth: %{public}f, visibleHeight: %{public}f, " \
-                "frameWidth: %{public}f, frameHeight: %{public}f",
-                visibleRect.Width(), visibleRect.Height(), frameRect.Width(), frameRect.Height());
-            message = GetClipErrorMsg(scId, scType, visibleRect, frameRect, parentNode->GetTag());
+        if (IsSecComponentClipped(parentNode, visibleRect, frameRect, buttonInfo)) {
+            message = GetClipErrorMsg(scId, scType, visibleRect, frameRect, node->GetTag());
             return true;
         }
         parent = parent->GetParent();
@@ -1075,6 +1151,11 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
     }
 #endif
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    if (layoutProperty && layoutProperty->GetIsMaxLineLimitExceeded().has_value() &&
+        layoutProperty->GetIsMaxLineLimitExceeded().value()) {
+        SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is cliped by lines.");
+        return -1;
+    }
     if (layoutProperty && layoutProperty->GetIsTextLimitExceeded().has_value() &&
         layoutProperty->GetIsTextLimitExceeded().value()) {
         SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is out of range.");
@@ -1105,6 +1186,11 @@ int32_t SecurityComponentHandler::ReportSecurityComponentClickEvent(int32_t& scI
         secEvent.extraInfo.dataSize = data.size();
     }
     auto layoutProperty = AceType::DynamicCast<SecurityComponentLayoutProperty>(node->GetLayoutProperty());
+    if (layoutProperty && layoutProperty->GetIsMaxLineLimitExceeded().has_value() &&
+        layoutProperty->GetIsMaxLineLimitExceeded().value()) {
+        SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is cliped by lines.");
+        return -1;
+    }
     if (layoutProperty && layoutProperty->GetIsTextLimitExceeded().has_value() &&
         layoutProperty->GetIsTextLimitExceeded().value()) {
         SC_LOG_ERROR("SecurityComponentCheckFail: The text of the security component is out of range.");

@@ -58,6 +58,8 @@
 #include "frameworks/base/utils/system_properties.h"
 #endif
 
+#include "core/common/container.h"
+
 namespace OHOS::Ace {
 
 namespace {
@@ -342,6 +344,14 @@ bool FileSelectorParamOhos::IsCapture()
         return param_->IsCapture();
     }
     return false;
+}
+
+std::vector<std::string> FileSelectorParamOhos::GetMimeType()
+{
+    if (param_) {
+        return param_->MimeType();
+    }
+    return std::vector<std::string>();
 }
 
 void FileSelectorResultOhos::HandleFileList(std::vector<std::string>& result)
@@ -1759,7 +1769,9 @@ void WebDelegate::ShowWebView()
         window_->Show();
     }
 
-    OnActive();
+    if (!IsActivePolicyDisable()) {
+        OnActive();
+    }
     OnWebviewShow();
 }
 
@@ -1769,8 +1781,19 @@ void WebDelegate::HideWebView()
         window_->Hide();
     }
 
-    OnInactive();
+    if (!IsActivePolicyDisable()) {
+        OnInactive();
+    }
     OnWebviewHide();
+}
+
+bool WebDelegate::IsActivePolicyDisable()
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        return nweb_->IsActivePolicyDisable();
+    }
+    return false;
 }
 
 void WebDelegate::InitOHOSWeb(const RefPtr<PipelineBase>& context, const RefPtr<NG::RenderSurface>& surface)
@@ -2586,8 +2609,13 @@ void WebDelegate::InitWebViewWithWindow()
                 delegate->window_ = nullptr;
                 return;
             }
+
+            delegate->JavaScriptOnDocumentStartByOrder();
+            delegate->JavaScriptOnDocumentEndByOrder();
             delegate->JavaScriptOnDocumentStart();
             delegate->JavaScriptOnDocumentEnd();
+
+            delegate->JavaScriptOnHeadReadyByOrder();
             delegate->cookieManager_ = OHOS::NWeb::NWebHelper::Instance().GetCookieManager();
             if (delegate->cookieManager_ == nullptr) {
                 return;
@@ -2952,8 +2980,12 @@ void WebDelegate::InitWebViewWithSurface()
                     delegate->drawSize_.Width(),
                     delegate->drawSize_.Height(),
                     delegate->incognitoMode_);
+
+                delegate->JavaScriptOnDocumentStartByOrder();
+                delegate->JavaScriptOnDocumentEndByOrder();
                 delegate->JavaScriptOnDocumentStart();
                 delegate->JavaScriptOnDocumentEnd();
+                delegate->JavaScriptOnHeadReadyByOrder();
             } else {
 #ifdef ENABLE_ROSEN_BACKEND
                 wptr<Surface> surfaceWeak(delegate->surface_);
@@ -2965,8 +2997,12 @@ void WebDelegate::InitWebViewWithSurface()
                     delegate->drawSize_.Width(),
                     delegate->drawSize_.Height(),
                     delegate->incognitoMode_);
+
+                delegate->JavaScriptOnDocumentStartByOrder();
+                delegate->JavaScriptOnDocumentEndByOrder();
                 delegate->JavaScriptOnDocumentStart();
                 delegate->JavaScriptOnDocumentEnd();
+                delegate->JavaScriptOnHeadReadyByOrder();
 #endif
             }
             CHECK_NULL_VOID(delegate->nweb_);
@@ -3156,7 +3192,21 @@ void WebDelegate::UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled)
 
 bool WebDelegate::GetIsSmoothDragResizeEnabled()
 {
+    if (OHOS::system::GetDeviceType() != "2in1") {
+        isSmoothDragResizeEnabled_ = false;
+    }
     return isSmoothDragResizeEnabled_;
+}
+
+void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart)
+{
+    isDragResizeStart_ = isDragResizeStart;
+}
+
+void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width)
+{
+    dragResize_preHight_ = pre_height;
+    dragResize_preWidth_ = pre_width;
 }
 
 void WebDelegate::UpdateJavaScriptEnabled(const bool& isJsEnabled)
@@ -4947,25 +4997,35 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     CHECK_NULL_VOID(webPattern);
     auto accessibilityManager = context->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUSED) {
-        webPattern->UpdateFocusedAccessibilityId(accessibilityId);
-    } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED) {
-        webPattern->ClearFocusedAccessibilityId();
-    } else if (eventType == AccessibilityEventType::PAGE_CHANGE || eventType == AccessibilityEventType::SCROLL_END) {
-        webPattern->UpdateFocusedAccessibilityId();
+    if (accessibilityId != 0) {
+        if (accessibilityManager->IsScreenReaderEnabled()) {
+            if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUSED) {
+                webPattern->UpdateFocusedAccessibilityId(accessibilityId);
+            } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED) {
+                webPattern->ClearFocusedAccessibilityId();
+            } else if (eventType == AccessibilityEventType::CHANGE) {
+                webPattern->UpdateFocusedAccessibilityId();
+            }
+        }
+        if (eventType == AccessibilityEventType::FOCUS) {
+            TextBlurReportByFocusEvent(accessibilityId);
+        }
+        if (eventType == AccessibilityEventType::CLICK) {
+            WebComponentClickReport(accessibilityId);
+        }
+        if (eventType == AccessibilityEventType::BLUR) {
+            TextBlurReportByBlurEvent(accessibilityId);
+        }
+        event.nodeId = accessibilityId;
+        event.type = eventType;
+        accessibilityManager->SendWebAccessibilityAsyncEvent(event, webPattern);
+    } else {
+        auto webNode = webPattern->GetHost();
+        CHECK_NULL_VOID(webNode);
+        event.nodeId = webNode->GetAccessibilityId();
+        event.type = eventType;
+        accessibilityManager->SendAccessibilityAsyncEvent(event);
     }
-    if (eventType == AccessibilityEventType::FOCUS) {
-        TextBlurReportByFocusEvent(accessibilityId);
-    }
-    if (eventType == AccessibilityEventType::CLICK) {
-        WebComponentClickReport(accessibilityId);
-    }
-    if (eventType == AccessibilityEventType::BLUR) {
-        TextBlurReportByBlurEvent(accessibilityId);
-    }
-    event.nodeId = accessibilityId;
-    event.type = eventType;
-    accessibilityManager->SendWebAccessibilityAsyncEvent(event, webPattern);
 }
 
 void WebDelegate::TextBlurReportByFocusEvent(int64_t accessibilityId)
@@ -5147,6 +5207,13 @@ void WebDelegate::OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t heigh
             webPattern->OnPopupSize(x, y, width, height);
         },
         TaskExecutor::TaskType::UI, "ArkUIWebPopupSize");
+}
+
+void WebDelegate::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->GetVisibleRectToWeb(visibleX, visibleY, visibleWidth, visibleHeight);
 }
 
 void WebDelegate::OnPopupShow(bool show)
@@ -6196,6 +6263,10 @@ sptr<OHOS::SurfaceDelegate> WebDelegate::GetSurfaceDelegateClient()
 
 void WebDelegate::SetBoundsOrResize(const Size& drawSize, const Offset& offset, bool isKeyboard)
 {
+    if (isDragResizeStart_) {
+        DragResize(drawSize.Width(), drawSize.Height(), dragResize_preHight_, dragResize_preWidth_);
+        return;
+    }
     if ((drawSize.Width() == 0) && (drawSize.Height() == 0)) {
         return;
     }
@@ -6800,24 +6871,77 @@ void WebDelegate::SetJavaScriptItems(const ScriptItems& scriptItems, const Scrip
 {
     if (type == ScriptItemType::DOCUMENT_START) {
         onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
-    } else {
+        onDocumentStartScriptItemsByOrder_ = std::nullopt;
+    } else if (type == ScriptItemType::DOCUMENT_END) {
         onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+        onDocumentEndScriptItemsByOrder_ = std::nullopt;
+    } else if (type == ScriptItemType::DOCUMENT_HEAD_READY) {
+        onHeadReadyScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+        onHeadReadyScriptItemsByOrder_ = std::nullopt;
     }
 }
 
 void WebDelegate::JavaScriptOnDocumentStart()
 {
     CHECK_NULL_VOID(nweb_);
-    if (onDocumentStartScriptItems_.has_value()) {
+    if (onDocumentStartScriptItems_.has_value() && !onDocumentStartScriptItemsByOrder_.has_value()) {
         nweb_->JavaScriptOnDocumentStart(onDocumentStartScriptItems_.value());
         onDocumentStartScriptItems_ = std::nullopt;
+    }
+}
+
+void WebDelegate::SetJavaScriptItemsByOrder(const ScriptItems& scriptItems, const ScriptItemType& type,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    if (type == ScriptItemType::DOCUMENT_START) {
+        onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+        onDocumentStartScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    } else if (type == ScriptItemType::DOCUMENT_END) {
+        onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+        onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    } else if (type == ScriptItemType::DOCUMENT_HEAD_READY) {
+        onHeadReadyScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+        onHeadReadyScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    }
+}
+
+void WebDelegate::JavaScriptOnDocumentStartByOrder()
+{
+    CHECK_NULL_VOID(nweb_);
+    if (onDocumentStartScriptItems_.has_value() && onDocumentStartScriptItemsByOrder_.has_value()) {
+        nweb_->JavaScriptOnDocumentStartByOrder(onDocumentStartScriptItems_.value(),
+            onDocumentStartScriptItemsByOrder_.value());
+        onDocumentStartScriptItems_ = std::nullopt;
+        onDocumentStartScriptItemsByOrder_ = std::nullopt;
+    }
+}
+
+void WebDelegate::JavaScriptOnDocumentEndByOrder()
+{
+    CHECK_NULL_VOID(nweb_);
+    if (onDocumentEndScriptItems_.has_value() && onDocumentEndScriptItemsByOrder_.has_value()) {
+        nweb_->JavaScriptOnDocumentEndByOrder(onDocumentEndScriptItems_.value(),
+            onDocumentEndScriptItemsByOrder_.value());
+        onDocumentEndScriptItems_ = std::nullopt;
+        onDocumentEndScriptItemsByOrder_ = std::nullopt;
+    }
+}
+
+void WebDelegate::JavaScriptOnHeadReadyByOrder()
+{
+    CHECK_NULL_VOID(nweb_);
+    if (onHeadReadyScriptItems_.has_value() && onHeadReadyScriptItemsByOrder_.has_value()) {
+        nweb_->JavaScriptOnHeadReadyByOrder(onHeadReadyScriptItems_.value(),
+            onHeadReadyScriptItemsByOrder_.value());
+        onHeadReadyScriptItems_ = std::nullopt;
+        onHeadReadyScriptItemsByOrder_ = std::nullopt;
     }
 }
 
 void WebDelegate::JavaScriptOnDocumentEnd()
 {
     CHECK_NULL_VOID(nweb_);
-    if (onDocumentEndScriptItems_.has_value()) {
+    if (onDocumentEndScriptItems_.has_value() && !onDocumentEndScriptItemsByOrder_.has_value()) {
         nweb_->JavaScriptOnDocumentEnd(onDocumentEndScriptItems_.value());
         onDocumentEndScriptItems_ = std::nullopt;
     }
@@ -6829,18 +6953,19 @@ bool WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
     if (!accessibilityState_) {
         return false;
     }
-    auto context = context_.Upgrade();
-    CHECK_NULL_RETURN(context, false);
     uint32_t nwebAction = static_cast<uint32_t>(action);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), accessibilityId, nwebAction, actionArguments]() {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->PerformAction(accessibilityId, nwebAction, actionArguments);
-        },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebExecuteAction");
-    return true;
+    CHECK_NULL_RETURN(nweb_, false);
+    return nweb_->PerformActionV2(accessibilityId, nwebAction, actionArguments);
+}
+
+bool WebDelegate::GetAccessibilityNodeRectById(
+    int64_t accessibilityId, int32_t* width, int32_t* height, int32_t* offsetX, int32_t* offsetY)
+{
+    if (!accessibilityState_) {
+        return false;
+    }
+    CHECK_NULL_RETURN(nweb_, false);
+    return nweb_->GetAccessibilityNodeRectById(accessibilityId, width, height, offsetX, offsetY);
 }
 
 void WebDelegate::SetAccessibilityState(bool state, bool isDelayed)
@@ -7449,5 +7574,21 @@ void WebDelegate::ScaleGestureChangeV2(int type, double scale, double originScal
         nweb_->ScaleGestureChangeV2(type, scale, originScale, centerX, centerY);
     }
 #endif
+}
+
+void WebDelegate::UpdateOptimizeParserBudgetEnabled(const bool enable)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), enable]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                delegate->nweb_->PutOptimizeParserBudgetEnabled(enable);
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateOptimizeParserBudget");
 }
 } // namespace OHOS::Ace

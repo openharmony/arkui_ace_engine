@@ -25,6 +25,7 @@ constexpr int FOR_HOTZONESIZE_CALCULATE_MULTIPLY_TWO = 2;
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 
 constexpr int32_t DEFAULT_RADIO_ANIMATION_DURATION = 200;
+constexpr int32_t DEFAULT_RADIO_ANIMATION_DURATION_CIRCLE = 150;
 constexpr float DEFAULT_CUSTOM_SCALE = 0.7F;
 constexpr float INDICATOR_MIN_SCALE = 0.8F;
 constexpr float INDICATOR_MAX_SCALE = 1.0F;
@@ -139,10 +140,81 @@ void RadioPattern::OnModifyDone()
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
+    InitFocusEvent();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     SetAccessibilityAction();
+}
+
+void RadioPattern::InitFocusEvent()
+{
+    if (focusEventInitialized_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleFocusEvent();
+    };
+    focusHub->SetOnFocusInternal(focusTask);
+    auto blurTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleBlurEvent();
+    };
+    focusHub->SetOnBlurInternal(blurTask);
+    focusEventInitialized_ = true;
+}
+
+void RadioPattern::HandleFocusEvent()
+{
+    CHECK_NULL_VOID(radioModifier_);
+    AddIsFocusActiveUpdateEvent();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (pipeline->GetIsFocusActive()) {
+        OnIsFocusActiveUpdate(true);
+    }
+}
+
+void RadioPattern::HandleBlurEvent()
+{
+    CHECK_NULL_VOID(radioModifier_);
+    RemoveIsFocusActiveUpdateEvent();
+    OnIsFocusActiveUpdate(false);
+}
+
+void RadioPattern::AddIsFocusActiveUpdateEvent()
+{
+    if (!isFocusActiveUpdateEvent_) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->OnIsFocusActiveUpdate(isFocusAcitve);
+        };
+    }
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->AddIsFocusActiveUpdateEvent(GetHost(), isFocusActiveUpdateEvent_);
+}
+
+void RadioPattern::RemoveIsFocusActiveUpdateEvent()
+{
+    auto pipline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipline);
+    pipline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void RadioPattern::OnIsFocusActiveUpdate(bool isFocusAcitve)
+{
+    CHECK_NULL_VOID(radioModifier_);
+    radioModifier_->SetIsFocused(isFocusAcitve);
 }
 
 void RadioPattern::ImageNodeCreate()
@@ -527,8 +599,18 @@ void RadioPattern::startEnterAnimation()
     auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(DEFAULT_INTERPOLATINGSPRING_VELOCITY,
         DEFAULT_INTERPOLATINGSPRING_MASS, DEFAULT_INTERPOLATINGSPRING_STIFFNESS, DEFAULT_INTERPOLATINGSPRING_DAMPING);
     AnimationOption delayOption;
-    delayOption.SetCurve(springCurve);
-    delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION);
+
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    if (radioTheme->IsCircleDial()) {
+        delayOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
+        delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION_CIRCLE);
+    } else {
+        delayOption.SetCurve(springCurve);
+        delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION);
+    }
+
     CHECK_NULL_VOID(builderChildNode_);
     auto renderContext = builderChildNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -555,7 +637,17 @@ void RadioPattern::startExitAnimation()
     auto springCurve = AceType::MakeRefPtr<InterpolatingSpring>(DEFAULT_INTERPOLATINGSPRING_VELOCITY,
         DEFAULT_INTERPOLATINGSPRING_MASS, DEFAULT_INTERPOLATINGSPRING_STIFFNESS, DEFAULT_INTERPOLATINGSPRING_DAMPING);
     AnimationOption delayOption;
-    delayOption.SetCurve(springCurve);
+
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto radioTheme = pipeline->GetTheme<RadioTheme>();
+    if (radioTheme->IsCircleDial()) {
+        delayOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
+        delayOption.SetDelay(DEFAULT_RADIO_ANIMATION_DURATION_CIRCLE);
+    } else {
+        delayOption.SetCurve(springCurve);
+    }
+
     CHECK_NULL_VOID(builderChildNode_);
     auto renderContext = builderChildNode_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -724,6 +816,15 @@ void RadioPattern::UpdateUIStatus(bool check)
     host->MarkNeedRenderOnly();
 }
 
+bool RadioPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action == KeyAction::DOWN && event.code == KeyCode::KEY_FUNCTION) {
+        OnClick();
+        return true;
+    }
+    return false;
+}
+
 void RadioPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
@@ -733,6 +834,16 @@ void RadioPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        } else {
+            return false;
+        }
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
 }
 
 void RadioPattern::GetInnerFocusPaintRect(RoundRect& paintRect)

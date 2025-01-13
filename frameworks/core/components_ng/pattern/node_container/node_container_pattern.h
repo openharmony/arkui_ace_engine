@@ -73,6 +73,14 @@ public:
         return makeFunc_();
     }
 
+    void FireOnWillBind(int32_t containerId);
+
+    void FireOnWillUnbind(int32_t containerId);
+
+    void FireOnBind(int32_t containerId);
+
+    void FireOnUnbind(int32_t containerId);
+
     void SetOnResize(std::function<void(const SizeF& size)>&& resizeFunc)
     {
         resizeFunc_ = std::move(resizeFunc);
@@ -117,6 +125,7 @@ private:
     std::function<void(const SizeF& size)> resizeFunc_;
     WeakPtr<UINode> exportTextureNode_;
     uint64_t surfaceId_ = 0U;
+    RefPtr<NodeContainerEventHub> GetNodeContainerEventHub();
 
     ACE_DISALLOW_COPY_AND_MOVE(NodeContainerPattern);
 };

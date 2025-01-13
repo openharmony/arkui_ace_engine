@@ -674,6 +674,8 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest007, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
     Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Save()).Times(0);
+    EXPECT_CALL(rsCanvas, Restore()).Times(0);
     gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
@@ -702,6 +704,8 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest008, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
     Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Save()).Times(0);
+    EXPECT_CALL(rsCanvas, Restore()).Times(0);
     gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
@@ -730,6 +734,8 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest009, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
     Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Save()).Times(0);
+    EXPECT_CALL(rsCanvas, Restore()).Times(0);
     gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 
@@ -758,6 +764,8 @@ HWTEST_F(GaugeTestNg, GaugePaintMethodTest010, TestSize.Level1)
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
     Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, Save()).Times(0);
+    EXPECT_CALL(rsCanvas, Restore()).Times(0);
     gaugeModifier.PaintCircularAndIndicator(rsCanvas);
 }
 

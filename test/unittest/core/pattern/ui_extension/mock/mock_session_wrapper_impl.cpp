@@ -156,9 +156,20 @@ void SessionWrapperImpl::NotifyCreate()
 {
 }
 
+RefPtr<SystemWindowScene> SessionWrapperImpl::GetWindowScene()
+{
+    return nullptr;
+}
+
 int32_t SessionWrapperImpl::GetWindowSceneId()
 {
     return 1;
+}
+
+Rosen::WSRect SessionWrapperImpl::GetWindowSceneRcet()
+{
+    Rosen::WSRect rect = {0, 0, 0, 0};
+    return rect;
 }
 
 void SessionWrapperImpl::NotifyForeground()
@@ -268,8 +279,15 @@ void SessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, s
 {
 }
 
-WindowSizeChangeReason SessionWrapperImpl::GetSizeChangeReason() const
+bool SessionWrapperImpl::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
 {
-    return static_cast<WindowSizeChangeReason>(0);
+    return false;
 }
+
+bool SessionWrapperImpl::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+{
+    return false;
+}
+
+void SessionWrapperImpl::NotifyHostWindowMode(int32_t mode) {}
 } // namespace OHOS::Ace::NG

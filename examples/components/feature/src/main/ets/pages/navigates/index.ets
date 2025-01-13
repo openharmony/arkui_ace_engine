@@ -15,6 +15,7 @@
 
 import { Route, RouteGroup } from 'common/src/main/ets/common/route';
 import { SwiperBootcamp } from './SwiperBootcamp';
+import { TabContentBootcamp } from './TabContentBootcamp'
 import { TabsBootcamp } from './TabsBootcamp'
 
 export const navigatesRoute: RouteGroup = {
@@ -22,6 +23,7 @@ export const navigatesRoute: RouteGroup = {
   label: '导航类',
   children: [
     { name: 'swiper', label: '轮播/Swiper' },
+    { name: 'tabContent', label: '页签内容/TabContent' }
     { name: 'tabs', label: '页签容器/Tabs' }
   ]
 };
@@ -30,6 +32,8 @@ export const navigatesRoute: RouteGroup = {
 export function NavigatesDestination(name: string, route: Route) {
   if (name === 'navigates/swiper') {
     SwiperBootcamp({ title: route.label });
+  } else if (name == 'navigates/tabContent') {
+    TabContentBootcamp({ title: route.label })
   } else if (name === 'navigates/tabs') {
     TabsBootcamp({ title: route.label })
   }

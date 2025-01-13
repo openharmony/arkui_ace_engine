@@ -117,6 +117,8 @@ public:
     }
     virtual UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
                                                 napi_value storage) = 0;
+    virtual void InitializeByName(OHOS::Rosen::Window *window,
+        const std::string &name, napi_value storage, uint32_t focusWindowId) {};
     virtual void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
         const std::string& entryPoint, const std::vector<std::string>& registerComponents) {};
 
@@ -149,6 +151,7 @@ public:
         const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction = nullptr,
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {}) {};
     virtual void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) = 0;
+    virtual void NotifyWindowMode(OHOS::Rosen::WindowMode mode) {};
     virtual void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) = 0;
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) = 0;
     virtual void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) {};
@@ -260,6 +263,9 @@ public:
      * If the sessionId is 0, refuse to close
      */
     virtual void CloseModalUIExtension(int32_t sessionId) = 0;
+
+    virtual void UpdateModalUIExtensionConfig(
+        int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config) {};
 
     /**
      * @description: Set parent ability token.
@@ -463,6 +469,19 @@ public:
     virtual void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) {}
 
     virtual void SetContainerButtonStyle(const Rosen::DecorButtonStyle& decorButtonStyle) {}
+
+    virtual int32_t AddFocusActiveChangeCallback(const std::function<void(bool isFocusAvtive)>& callback)
+    {
+        return 0;
+    }
+
+    virtual void RemoveFocusActiveChangeCallback(int32_t handler) {};
+
+    virtual bool ProcessPointerEvent(
+        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void(bool)>& callback)
+    {
+        return false;
+    }
 };
 
 } // namespace OHOS::Ace

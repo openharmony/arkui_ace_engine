@@ -38,6 +38,7 @@ export declare interface EditableTitleBarMenuItem {
   accessibilityLevel?: string;
   accessibilityText?: ResourceStr;
   accessibilityDescription?: ResourceStr;
+  defaultFocus?: boolean;
 }
 
 export type EditableTitleBarItem = EditableTitleBarMenuItem;
@@ -138,6 +139,8 @@ export struct EditableTitleBar {
   onSave?: () => void;
   onCancel?: () => void;
   constraintWidth: number = 0;
+  leftIconDefaultFocus?: boolean = false;
+  saveIconDefaultFocus?: boolean = false;
   public static readonly maxCountOfExtraItems = 3;
   public static readonly maxOtherCountOfExtraItems = 2;
   public static readonly commonZero = 0;
@@ -259,10 +262,12 @@ export struct EditableTitleBar {
         item: {
           value: PUBLIC_BACK,
           isEnabled: true,
-          action: () => this.onCancel ? this.onCancel() : this.getUIContext()?.getRouter()?.back()
+          action: () => this.onCancel ? this.onCancel() : this.getUIContext()?.getRouter()?.back(),
+          defaultFocus: this.leftIconDefaultFocus
         },
         fontSize: this.fontSize,
         attribute: ItemType.LeftIcon,
+        imageMenuItemId: `BackMenuItem_${this.getUniqueId()}`
       })
     } else {
       ImageMenuItem({
@@ -270,9 +275,11 @@ export struct EditableTitleBar {
           value: PUBLIC_CANCEL,
           isEnabled: true,
           action: () => this.onCancel && this.onCancel(),
+          defaultFocus: this.leftIconDefaultFocus
         },
         fontSize: this.fontSize,
         attribute: ItemType.LeftIcon,
+        imageMenuItemId: `CancelMenuItem_${this.getUniqueId()}`
       })
     }
   }
@@ -334,6 +341,8 @@ export struct EditableTitleBar {
       onSave: this.onSave,
       isSaveEnabled: this.isSaveIconRequired,
       fontSize: this.fontSize,
+      parentUniqueId: this.getUniqueId(),
+      saveIconDefaultFocus: this.saveIconDefaultFocus
     })
   }
 
@@ -359,7 +368,9 @@ struct EditableTitleBarMenuSection {
   menuItems: Array<EditableTitleBarMenuItem> | undefined = undefined;
   onSave?: () => void;
   isSaveEnabled: boolean = true;
+  saveIconDefaultFocus?: boolean = false;
   @Prop fontSize: number = 1;
+  @Prop parentUniqueId?: number;
 
   build() {
     Column() {
@@ -368,11 +379,12 @@ struct EditableTitleBarMenuSection {
           ForEach(this.menuItems.slice(EditableTitleBar.commonZero,
             this.isSaveEnabled ?
             EditableTitleBar.maxOtherCountOfExtraItems : EditableTitleBar.maxCountOfExtraItems),
-            (item: EditableTitleBarMenuItem) => {
+            (item: EditableTitleBarMenuItem, index: number) => {
               ImageMenuItem({
                 item: item,
                 attribute: ItemType.Icon,
                 fontSize: this.fontSize,
+                imageMenuItemId: `ImageMenuItem_${this.parentUniqueId}_${index}`
               })
             })
         }
@@ -382,9 +394,11 @@ struct EditableTitleBarMenuSection {
               value: PUBLIC_OK,
               isEnabled: true,
               action: () => this.onSave && this.onSave(),
+              defaultFocus: this.saveIconDefaultFocus
             },
             fontSize: this.fontSize,
             attribute: ItemType.Icon,
+            imageMenuItemId: `SaveMenuItem_${this.parentUniqueId}`
           })
         }
       }
@@ -412,6 +426,7 @@ struct ImageMenuItem {
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
+  imageMenuItemId?: string;
   @Consume editableTitleBarTheme: EditableTitleBarTheme;
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: EditableTitleBarDialog({
@@ -618,6 +633,7 @@ struct ImageMenuItem {
           .effectStrategy(SymbolEffectStrategy.NONE)
           .symbolEffect(new SymbolEffect(), false)
           .fontSize(SYMBOL_SIZE)
+          .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
       } else {
         if (Util.isSymbolResource(this.item.value)) {
           SymbolGlyph(this.item.value as Resource)
@@ -627,6 +643,7 @@ struct ImageMenuItem {
             .enabled(this.item.isEnabled)
             .draggable(false)
             .accessibilityText(this.getAccessibilityReadText())
+            .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
         } else {
           Image(this.item.value)
             .fillColor(this.editableTitleBarTheme.iconColor)
@@ -637,9 +654,11 @@ struct ImageMenuItem {
             .enabled(this.item.isEnabled)
             .draggable(false)
             .accessibilityText(this.getAccessibilityReadText())
+            .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
         }
       }
     }
+    .id(this.imageMenuItemId)
     .backgroundButtonStyle()
     .borderRadius($r('sys.float.titlebar_icon_background_shape'))
     .margin({
@@ -673,6 +692,7 @@ struct ImageMenuItem {
         .buttonStateStyles()
         .buttonEventStyle()
         .gestureModifier(this.buttonGestureModifier)
+        .defaultFocus(this.item.isEnabled ? this.item.defaultFocus : false)
     }
     .margin({
       start: LengthMetrics.resource($r('sys.float.titlebar_icon_background_space_horizontal')),
@@ -846,9 +866,6 @@ class Util {
   private static RESOURCE_TYPE_SYMBOL = 40000;
 
   public static isSymbolResource(resourceStr: ResourceStr | undefined): boolean {
-    if (resourceStr === undefined) {
-      return true;
-    }
     if (!Util.isResourceType(resourceStr)) {
       return false;
     }
@@ -856,10 +873,13 @@ class Util {
     return resource.type === Util.RESOURCE_TYPE_SYMBOL;
   }
 
-  public static isResourceType(resource: ResourceStr): boolean {
+  public static isResourceType(resource: ResourceStr | Resource | undefined): boolean {
     if (!resource) {
       return false;
     }
-    return typeof resource !== 'string';
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
   }
 }

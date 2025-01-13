@@ -155,7 +155,7 @@ RefPtr<Curve> TossAnimationController::UpdatePlayAnimationValue()
 }
 double TossAnimationController::GetCurrentTime() const
 {
-    struct timeval tv = { 0 };
+    struct timeval tv {};
     int result = gettimeofday(&tv, nullptr);
     if (result != 0) {
         return 0.0;

@@ -63,6 +63,8 @@ private:
         std::string& message);
     static bool CheckBlendMode(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
         std::string& message);
+    static bool CheckParentBorder(const RefPtr<FrameNode>& parentNode, const RectF& scRect, std::string& message);
+    static bool GetBorderRect(const RefPtr<FrameNode>& parentNode, std::vector<RectF>& borderRects);
     static float GetLinearGradientBlurRatio(std::vector<std::pair<float, float>>& fractionStops);
     static bool CheckDistance(const float& deltaY, const float& radius, const float& distance,
         const int32_t& multiplier);
@@ -119,6 +121,8 @@ private:
     static void UpdateAllZindex(const RefPtr<UINode>& root, std::unordered_map<int32_t, int32_t>& nodeId2Zindex);
     static void WriteButtonInfo(const RefPtr<OHOS::Ace::NG::SecurityComponentLayoutProperty>& layoutProperty,
         RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, std::string& message);
+    static bool IsSecComponentClipped(RefPtr<FrameNode>& parentNode, RectF& visibleRect, const RectF& frameRect,
+        OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H

@@ -21,10 +21,12 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_BUTTON_TYPE = (int32_t)ButtonType::CAPSULE;
-constexpr int32_t DEFAULT_BUTTON_TYPE_VERSION_FOURTEEN = (int32_t)ButtonType::ROUNDED_RECTANGLE;
+constexpr int32_t DEFAULT_BUTTON_TYPE_VERSION_SIXTEEN = (int32_t)ButtonType::ROUNDED_RECTANGLE;
 constexpr bool DEFAULT_STATE_EFFECT = true;
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
+constexpr float DEFAULT_MIN_FONT_SCALE = 0.0f;
+constexpr float DEFAULT_MAX_FONT_SCALE = static_cast<float>(INT32_MAX);
 constexpr uint32_t INDEX_STRING_FONT_WEIGHT_0 = 0;
 constexpr uint32_t INDEX_STRING_FONT_FAMILY_1 = 1;
 constexpr uint32_t INDEX_VALUE_TEXT_OVERFLOW_0 = 0;
@@ -125,8 +127,8 @@ void ResetButtonType(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE_VERSION_FOURTEEN);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE_VERSION_SIXTEEN);
     } else {
         ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE);
     }
@@ -621,8 +623,8 @@ void ResetButtonOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE_VERSION_FOURTEEN);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE_VERSION_SIXTEEN);
     } else {
         ButtonModelNG::SetType(frameNode, DEFAULT_BUTTON_TYPE);
     }
@@ -639,32 +641,158 @@ void SetCreateWithLabel(ArkUINodeHandle node, bool createWithLabel)
     ButtonModelNG::SetCreateWithLabel(frameNode, createWithLabel);
 }
 
+void SetButtonMinFontScale(ArkUINodeHandle node, ArkUI_Float32 minFontScale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetMinFontScale(frameNode, minFontScale);
+}
+
+void ResetButtonMinFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetMinFontScale(frameNode, DEFAULT_MIN_FONT_SCALE);
+}
+
+void SetButtonMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 maxFontScale)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetMaxFontScale(frameNode, maxFontScale);
+}
+
+void ResetButtonMaxFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetMaxFontScale(frameNode, DEFAULT_MAX_FONT_SCALE);
+}
+
+ArkUI_Float32 GetButtonMinFontScale(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Float32>(ButtonModelNG::GetMinFontScale(frameNode));
+}
+
+ArkUI_Float32 GetButtonMaxFontScale(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_FLOAT_CODE);
+    return static_cast<ArkUI_Float32>(ButtonModelNG::GetMaxFontScale(frameNode));
+}
+
 namespace NodeModifier {
 const ArkUIButtonModifier* GetButtonModifier()
 {
-    static const ArkUIButtonModifier modifier = { SetButtonLabel, ResetButtonLabel, SetButtonType, ResetButtonType,
-        SetButtonStateEffect, ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize,
-        ResetButtonFontSize, SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle,
-        SetButtonFontFamily, ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle,
-        SetButtonBackgroundColor, ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius,
-        SetButtonFontWeightEnum, SetButtonSize, ResetButtonSize, GetButtonLabel, GetButtonFontSize, GetButtonFontWeight,
-        GetButtonFontColor, SetButtonRole, ResetButtonRole, SetButtonStyle, ResetButtonStyle, SetButtonControlSize,
-        ResetButtonControlSize, GetButtonType, SetButtonLabelWithCheck, ResetButtonLabelWithCheck,
-        SetButtonOptions, ResetButtonOptions, SetCreateWithLabel };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIButtonModifier modifier = {
+        .setButtonLabel = SetButtonLabel,
+        .resetButtonLabel = ResetButtonLabel,
+        .setButtonType = SetButtonType,
+        .resetButtonType = ResetButtonType,
+        .setButtonStateEffect = SetButtonStateEffect,
+        .resetButtonStateEffect = ResetButtonStateEffect,
+        .setButtonFontColor = SetButtonFontColor,
+        .resetButtonFontColor = ResetButtonFontColor,
+        .setButtonFontSize = SetButtonFontSize,
+        .resetButtonFontSize = ResetButtonFontSize,
+        .setButtonFontWeight = SetButtonFontWeight,
+        .resetButtonFontWeight = ResetButtonFontWeight,
+        .setButtonFontStyle = SetButtonFontStyle,
+        .resetButtonFontStyle = ResetButtonFontStyle,
+        .setButtonFontFamily = SetButtonFontFamily,
+        .resetButtonFontFamily = ResetButtonFontFamily,
+        .setButtonLabelStyle = SetButtonLabelStyle,
+        .resetButtonLabelStyle = ResetButtonLabelStyle,
+        .setButtonBackgroundColor = SetButtonBackgroundColor,
+        .resetButtonBackgroundColor = ResetButtonBackgroundColor,
+        .setButtonBorderRadius = SetButtonBorderRadius,
+        .resetButtonBorderRadius = ResetButtonBorderRadius,
+        .setButtonFontWeightEnum = SetButtonFontWeightEnum,
+        .setButtonSize = SetButtonSize,
+        .resetButtonSize = ResetButtonSize,
+        .getButtonLabel = GetButtonLabel,
+        .getButtonFontSize = GetButtonFontSize,
+        .getButtonFontWeight = GetButtonFontWeight,
+        .getButtonFontColor = GetButtonFontColor,
+        .setButtonRole = SetButtonRole,
+        .resetButtonRole = ResetButtonRole,
+        .setButtonStyle = SetButtonStyle,
+        .resetButtonStyle = ResetButtonStyle,
+        .setButtonControlSize = SetButtonControlSize,
+        .resetButtonControlSize = ResetButtonControlSize,
+        .getButtonType = GetButtonType,
+        .setButtonLabelWithCheck = SetButtonLabelWithCheck,
+        .resetButtonLabelWithCheck = ResetButtonLabelWithCheck,
+        .setButtonOptions = SetButtonOptions,
+        .resetButtonOptions = ResetButtonOptions,
+        .setCreateWithLabel = SetCreateWithLabel,
+        .setButtonMinFontScale = SetButtonMinFontScale,
+        .resetButtonMinFontScale = ResetButtonMinFontScale,
+        .setButtonMaxFontScale = SetButtonMaxFontScale,
+        .resetButtonMaxFontScale = ResetButtonMaxFontScale,
+        .getButtonMinFontScale = GetButtonMinFontScale,
+        .getButtonMaxFontScale = GetButtonMaxFontScale,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIButtonModifier* GetCJUIButtonModifier()
 {
-    static const CJUIButtonModifier modifier = { SetButtonLabel, ResetButtonLabel, SetButtonType, ResetButtonType,
-        SetButtonStateEffect, ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize,
-        ResetButtonFontSize, SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle,
-        SetButtonFontFamily, ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle,
-        SetButtonBackgroundColor, ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius,
-        SetButtonFontWeightEnum, SetButtonSize, ResetButtonSize, GetButtonLabel, GetButtonFontSize, GetButtonFontWeight,
-        GetButtonFontColor, SetButtonRole, ResetButtonRole, SetButtonStyle, ResetButtonStyle, SetButtonControlSize,
-        ResetButtonControlSize, GetButtonType, SetButtonLabelWithCheck, ResetButtonLabelWithCheck,
-        SetButtonOptions, ResetButtonOptions, SetCreateWithLabel };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIButtonModifier modifier = {
+        .setButtonLabel = SetButtonLabel,
+        .resetButtonLabel = ResetButtonLabel,
+        .setButtonType = SetButtonType,
+        .resetButtonType = ResetButtonType,
+        .setButtonStateEffect = SetButtonStateEffect,
+        .resetButtonStateEffect = ResetButtonStateEffect,
+        .setButtonFontColor = SetButtonFontColor,
+        .resetButtonFontColor = ResetButtonFontColor,
+        .setButtonFontSize = SetButtonFontSize,
+        .resetButtonFontSize = ResetButtonFontSize,
+        .setButtonFontWeight = SetButtonFontWeight,
+        .resetButtonFontWeight = ResetButtonFontWeight,
+        .setButtonFontStyle = SetButtonFontStyle,
+        .resetButtonFontStyle = ResetButtonFontStyle,
+        .setButtonFontFamily = SetButtonFontFamily,
+        .resetButtonFontFamily = ResetButtonFontFamily,
+        .setButtonLabelStyle = SetButtonLabelStyle,
+        .resetButtonLabelStyle = ResetButtonLabelStyle,
+        .setButtonBackgroundColor = SetButtonBackgroundColor,
+        .resetButtonBackgroundColor = ResetButtonBackgroundColor,
+        .setButtonBorderRadius = SetButtonBorderRadius,
+        .resetButtonBorderRadius = ResetButtonBorderRadius,
+        .setButtonFontWeightEnum = SetButtonFontWeightEnum,
+        .setButtonSize = SetButtonSize,
+        .resetButtonSize = ResetButtonSize,
+        .getButtonLabel = GetButtonLabel,
+        .getButtonFontSize = GetButtonFontSize,
+        .getButtonFontWeight = GetButtonFontWeight,
+        .getButtonFontColor = GetButtonFontColor,
+        .setButtonRole = SetButtonRole,
+        .resetButtonRole = ResetButtonRole,
+        .setButtonStyle = SetButtonStyle,
+        .resetButtonStyle = ResetButtonStyle,
+        .setButtonControlSize = SetButtonControlSize,
+        .resetButtonControlSize = ResetButtonControlSize,
+        .getButtonType = GetButtonType,
+        .setButtonLabelWithCheck = SetButtonLabelWithCheck,
+        .resetButtonLabelWithCheck = ResetButtonLabelWithCheck,
+        .setButtonOptions = SetButtonOptions,
+        .resetButtonOptions = ResetButtonOptions,
+        .setCreateWithLabel = SetCreateWithLabel,
+        .setButtonMinFontScale = SetButtonMinFontScale,
+        .resetButtonMinFontScale = ResetButtonMinFontScale,
+        .setButtonMaxFontScale = SetButtonMaxFontScale,
+        .resetButtonMaxFontScale = ResetButtonMaxFontScale,
+        .getButtonMinFontScale = GetButtonMinFontScale,
+        .getButtonMaxFontScale = GetButtonMaxFontScale,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

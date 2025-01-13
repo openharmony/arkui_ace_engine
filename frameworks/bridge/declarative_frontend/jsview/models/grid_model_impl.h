@@ -45,7 +45,7 @@ public:
     void SetMultiSelectable(bool value) override;
     void SetSupportAnimation(bool value) override;
     void SetSupportDragAnimation(bool value) override;
-    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override {};
     void SetScrollEnabled(bool scrollEnabled) override {};
     void SetFriction(double friction) override {};

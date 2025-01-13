@@ -472,7 +472,7 @@ void LayoutProperty::CheckAspectRatio()
 void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(gridProperty_);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     while (parent) {
         if (parent->GetTag() == V2::GRIDCONTAINER_ETS_TAG) {
             auto containerLayout = parent->GetLayoutProperty();
@@ -480,7 +480,7 @@ void LayoutProperty::BuildGridProperty(const RefPtr<FrameNode>& host)
             UpdateUserDefinedIdealSize(CalcSize(CalcLength(gridProperty_->GetWidth()), std::nullopt));
             break;
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
 }
 
@@ -505,7 +505,7 @@ bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
         return false;
     }
 
-    RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame();
+    RefPtr<FrameNode> parent = host->GetAncestorNodeOfFrame(false);
     if (!parent) {
         return false;
     }
@@ -804,7 +804,7 @@ void LayoutProperty::OnVisibilityUpdate(VisibleType visible, bool allowTransitio
         }
     }
 
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     // if visible is not changed to/from VisibleType::Gone, only need to update render tree.
     if (preVisibility.value_or(VisibleType::VISIBLE) != VisibleType::GONE && visible != VisibleType::GONE) {
@@ -1010,7 +1010,6 @@ void LayoutProperty::UpdatePadding(const PaddingProperty& value)
 
 void LayoutProperty::UpdateSafeAreaPadding(const PaddingProperty& value)
 {
-    auto host = GetHost();
     if (!safeAreaPadding_) {
         safeAreaPadding_ = std::make_unique<PaddingProperty>();
     }
@@ -1258,20 +1257,7 @@ void LayoutProperty::UpdateDisplayIndex(int32_t displayIndex)
         flexItemProperty_ = std::make_unique<FlexItemProperty>();
     }
     if (flexItemProperty_->UpdateDisplayIndex(displayIndex)) {
-        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto parent = host->GetAncestorNodeOfFrame();
-        CHECK_NULL_VOID(parent);
-        const auto& children = parent->GetChildren();
-        CHECK_EQUAL_VOID(children.empty(), true);
-        for (const auto& child : children) {
-            auto childFrameNode = AceType::DynamicCast<NG::FrameNode>(child);
-            CHECK_NULL_CONTINUE(childFrameNode);
-            auto layoutProperty = childFrameNode->GetLayoutProperty();
-            CHECK_NULL_CONTINUE(layoutProperty);
-            layoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
-        }
+        propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT;
     }
 }
 

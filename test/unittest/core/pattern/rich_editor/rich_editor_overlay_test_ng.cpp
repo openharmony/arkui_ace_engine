@@ -42,44 +42,17 @@ const std::string TEST_IMAGE_SOURCE = "src/image.png";
 int32_t callBack1 = 0;
 int32_t callBack2 = 0;
 int32_t callBack3 = 0;
+constexpr float DEFAULT_CONTENT_WIDTH = 800.0f;
+constexpr float DEFAULT_TEXT_HEIGHT = 50.0f;
 } // namespace
 
 class RichEditorOverlayTestNg : public RichEditorCommonTestNg {
 public:
     void SetUp() override;
     void TearDown() override;
-    void InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr);
     void RequestFocus();
     static void TearDownTestSuite();
 };
-
-void RichEditorOverlayTestNg::InitAdjustObject(MockDataDetectorMgr& mockDataDetectorMgr)
-{
-    EXPECT_CALL(mockDataDetectorMgr, GetCursorPosition(_, _))
-            .WillRepeatedly([](const std::string &text, int8_t offset) -> int8_t {
-                if (text.empty()) {
-                    return DEFAULT_RETURN_VALUE;
-                }
-                if (text.length() <= WORD_LIMIT_LEN) {
-                    return WORD_LIMIT_RETURN;
-                } else {
-                    return BEYOND_LIMIT_RETURN;
-                }
-            });
-
-    EXPECT_CALL(mockDataDetectorMgr, GetWordSelection(_, _))
-            .WillRepeatedly([](const std::string &text, int8_t offset) -> std::vector<int8_t> {
-                if (text.empty()) {
-                    return std::vector<int8_t> { -1, -1 };
-                }
-
-                if (text.length() <= WORD_LIMIT_LEN) {
-                    return std::vector<int8_t> { 2, 3 };
-                } else {
-                    return std::vector<int8_t> { 0, 2 };
-                }
-            });
-}
 
 void RichEditorOverlayTestNg::RequestFocus()
 {
@@ -225,600 +198,6 @@ HWTEST_F(RichEditorOverlayTestNg, SelectedBackgroundColorTest001, TestSize.Level
     patternSelectedBackgroundColor = richEditorPattern->GetSelectedBackgroundColor();
     auto selectedBackgroundColorResult = Color::RED.ChangeOpacity(DEFAILT_OPACITY);
     EXPECT_EQ(patternSelectedBackgroundColor, selectedBackgroundColorResult);
-}
-
-/**
- * @tc.name: InitSelection001
- * @tc.desc: test InitSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, InitSelection001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textForDisplay_ = u"test";
-    richEditorPattern->InitSelection(Offset(0, 0));
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
-}
-
-/**
- * @tc.name: InitSelection002
- * @tc.desc: test InitSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, InitSelection002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->textForDisplay_ = u"test";
-    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
-    richEditorPattern->spans_.front()->position = 3;
-    richEditorPattern->InitSelection(Offset(0, 0));
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
-}
-
-/**
- * @tc.name: Selection001
- * @tc.desc: test SetSelection and GetSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, Selection001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    AddSpan(INIT_VALUE_1);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    richEditorPattern->SetSelection(0, 1);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
-    auto richEditorSelection = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection.selection[0], 0);
-    EXPECT_EQ(richEditorSelection.selection[1], 0);
-
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->RequestFocusImmediately();
-    richEditorPattern->isEditing_ = true;
-    richEditorPattern->SetSelection(0, 1);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 1);
-    auto richEditorSelection2 = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection2.selection[0], 0);
-    EXPECT_EQ(richEditorSelection2.selection[1], 1);
-
-    richEditorPattern->SetSelection(3, 1);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 1);
-    auto richEditorSelection3 = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection3.selection[0], 1);
-    EXPECT_EQ(richEditorSelection3.selection[1], 1);
-
-    richEditorPattern->SetSelection(-1, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
-    auto richEditorSelection4 = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection4.selection[0], 0);
-    EXPECT_EQ(richEditorSelection4.selection[1], 6);
-}
-
-/**
- * @tc.name: Selection011
- * @tc.desc: test SetSelection and GetSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, Selection101, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    AddSpan(INIT_VALUE_1);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->RequestFocusImmediately();
-    richEditorPattern->isEditing_ = true;
-
-    richEditorPattern->SetSelection(0, 10);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
-    auto richEditorSelection5 = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection5.selection[0], 0);
-    EXPECT_EQ(richEditorSelection5.selection[1], 6);
-
-    richEditorPattern->SetSelection(-2, 3);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 3);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 3);
-    auto richEditorSelection6 = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection6.selection[0], 0);
-    EXPECT_EQ(richEditorSelection6.selection[1], 3);
-
-    richEditorPattern->SetSelection(-2, 8);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 6);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
-    auto richEditorSelection7 = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection7.selection[0], 0);
-    EXPECT_EQ(richEditorSelection7.selection[1], 6);
-
-    richEditorPattern->SetSelection(-2, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 6);
-    auto richEditorSelection8 = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection8.selection[0], 6);
-    EXPECT_EQ(richEditorSelection8.selection[1], 6);
-
-    richEditorPattern->SetSelection(1, 3);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 1);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 3);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 3);
-    auto richEditorSelection9 = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection9.selection[0], 1);
-    EXPECT_EQ(richEditorSelection9.selection[1], 3);
-}
-
-/**
- * @tc.name: SetSelection002
- * @tc.desc: test SetSelection and GetSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, Selection002, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    AddSpan(INIT_VALUE_1);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-    focusHub->RequestFocusImmediately();
-    richEditorPattern->isEditing_ = true;
-    richEditorPattern->SetSelection(0, 1);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    /**
-     * @tc.step: step1. Empty text calls the setSelection interface.
-     * @tc.expected: The interface exits normally, but it does not take effect
-     */
-    ClearSpan();
-    richEditorPattern->SetSelection(1, 3);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, -1);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, -1);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
-    auto richEditorSelection = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection.selection[0], 0);
-    EXPECT_EQ(richEditorSelection.selection[1], 0);
-    /**
-     * @tc.step: step2. Extra-long text scenes.
-     * @tc.expected: A portion of the selected text is not displayed, but the selection range can be updated
-     * successfully
-     */
-    AddSpan(INIT_VALUE_3);
-    SizeF sizeF(10.0f, 10.0f);
-    richEditorNode_->GetGeometryNode()->SetContentSize(sizeF);
-    richEditorPattern->SetSelection(15, 30);
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 15);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 30);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 30);
-    auto richEditorSelection2 = richEditorController->GetSelectionSpansInfo().GetSelection();
-    EXPECT_EQ(richEditorSelection2.selection[0], 15);
-    EXPECT_EQ(richEditorSelection2.selection[1], 30);
-    auto resultObject = richEditorSelection2.resultObjects.front();
-    EXPECT_EQ(StringUtils::Str16ToStr8(resultObject.valueString), INIT_VALUE_3);
-    EXPECT_EQ(resultObject.offsetInSpan[0], 15);
-    EXPECT_EQ(resultObject.offsetInSpan[1], 30);
-}
-
-/**
- * @tc.name: Selection003
- * @tc.desc: test SetSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, Selection003, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. Add text span and get richeditor pattern.
-     */
-    AddSpan(INIT_VALUE_1);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.step: step2. Request focus.
-     */
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-    richEditorPattern->isEditing_ = true;
-
-    /**
-     * @tc.step: step3. Call SetSelection with no menu
-     * @tc.expected: Text is selected and the menu doesn't pop up
-     */
-    int32_t start = 0;
-    int32_t end = 1;
-    SelectionOptions options;
-    options.menuPolicy = MenuPolicy::DEFAULT;
-    richEditorPattern->OnModifyDone();
-    richEditorPattern->SetSelection(start, end, options);
-
-    /**
-     * @tc.step: step4. Call SetSelection with forward selection
-     * @tc.expected: Cursor at start position
-     */
-    richEditorPattern->SetSelection(start, end, options, true);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), start);
-
-    /**
-     * @tc.step: step5. Call SetSelection with backward selection
-     * @tc.expected: Cursor at end position
-     */
-    richEditorPattern->SetSelection(start, end, options, false);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), end);
-
-    ClearSpan();
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, start);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, end);
-}
-
-/**
- * @tc.name: Selection004
- * @tc.desc: test SetSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, Selection004, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. Add text span and get richeditor pattern.
-     */
-    AddSpan(INIT_VALUE_1);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.step: step2. Request focus.
-     */
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-    richEditorPattern->isEditing_ = true;
-
-    /**
-     * @tc.step: step3. Create a scene where the text menu has popped up.
-     */
-    richEditorPattern->OnModifyDone();
-    richEditorPattern->textSelector_.Update(0, 1);
-    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
-    richEditorPattern->ShowSelectOverlay(
-        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
-
-    /**
-     * @tc.step: step4. Call SetSelection with menu pop up
-     * @tc.expected: Text is selected and the menu still pop up
-     */
-    int32_t start = -1;
-    int32_t end = -1;
-    SelectionOptions options;
-    options.menuPolicy = MenuPolicy::DEFAULT;
-    richEditorPattern->SetSelection(start, end, options);
-
-    /**
-     * @tc.step: step5. Call SetSelection with forward selection
-     * @tc.expected: Cursor at start position
-     */
-    richEditorPattern->SetSelection(start, end, options, true);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 0);
-
-    /**
-     * @tc.step: step6. Call SetSelection with backward selection
-     * @tc.expected: Cursor at end position
-     */
-    richEditorPattern->SetSelection(start, end, options, false);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), INIT_VALUE_1.length());
-
-    ClearSpan();
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, INIT_VALUE_1.length());
-}
-
-/**
- * @tc.name: Selection005
- * @tc.desc: test SetSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, Selection005, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. Add text span and get richeditor pattern.
-     */
-    AddSpan(INIT_VALUE_1);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.step: step2. Request focus.
-     */
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-    richEditorPattern->isEditing_ = true;
-
-    /**
-     * @tc.step: step3. Call SetSelection with no menu
-     * @tc.expected: Text is selected and the menu doesn't pop up
-     */
-    int32_t start = 0;
-    int32_t end = 1;
-    SelectionOptions options;
-    options.menuPolicy = MenuPolicy::HIDE;
-    richEditorPattern->OnModifyDone();
-    richEditorPattern->SetSelection(start, end, options);
-    ClearSpan();
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, start);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, end);
-}
-
-/**
- * @tc.name: Selection006
- * @tc.desc: test SetSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, Selection006, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. Add text span and get richeditor pattern.
-     */
-    AddSpan(INIT_VALUE_1);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.step: step2. Request focus.
-     */
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-    richEditorPattern->isEditing_ = true;
-
-    /**
-     * @tc.step: step3. Create a scene where the text menu has popped up.
-     */
-    richEditorPattern->OnModifyDone();
-    richEditorPattern->textSelector_.Update(0, 1);
-    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
-    richEditorPattern->ShowSelectOverlay(
-        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
-
-    /**
-     * @tc.step: step4. Call SetSelection with menu pop up.
-     * @tc.expected: Text is selected and menu doesn't pop up.
-     */
-    int32_t start = -1;
-    int32_t end = -1;
-    SelectionOptions options;
-    options.menuPolicy = MenuPolicy::HIDE;
-    richEditorPattern->SetSelection(start, end, options);
-    ClearSpan();
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, INIT_VALUE_1.length());
-}
-
-/**
- * @tc.name: Selection007
- * @tc.desc: test SetSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, Selection007, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. Add text span and get richeditor pattern.
-     */
-    AddSpan(INIT_VALUE_1);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.step: step2. Request focus.
-     */
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-    richEditorPattern->isEditing_ = true;
-
-    /**
-     * @tc.step: step3. Call SetSelection with no menu
-     * @tc.expected: Text is selected and the menu pop up
-     */
-    int32_t start = 0;
-    int32_t end = 1;
-    SelectionOptions options;
-    options.menuPolicy = MenuPolicy::SHOW;
-    richEditorPattern->OnModifyDone();
-    richEditorPattern->SetSelection(start, end, options);
-    ClearSpan();
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, start);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, end);
-}
-
-/**
- * @tc.name: SetSelection
- * @tc.desc: test Set Selection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, SetSelection, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    TextStyle style;
-    style.SetLineHeight(LINE_HEIGHT_VALUE);
-    style.SetLetterSpacing(LETTER_SPACING);
-    style.SetFontFeatures(TEXT_FONTFEATURE);
-    TextSpanOptions options;
-    options.value = INIT_VALUE_1;
-    options.style = style;
-    richEditorController->AddTextSpan(options);
-    AddSpan(INIT_VALUE_1);
-    richEditorPattern->SetSelection(1, 3);
-    auto info1 = richEditorController->GetSpansInfo(1, 2);
-    ASSERT_NE(info1.selection_.resultObjects.size(), 0);
-    EXPECT_EQ(info1.selection_.resultObjects.front().textStyle.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
-    EXPECT_EQ(info1.selection_.resultObjects.front().textStyle.letterSpacing, LETTER_SPACING.ConvertToVp());
-    for (const auto& pair : info1.selection_.resultObjects.front().textStyle.fontFeature) {
-        EXPECT_EQ(pair.first, "subs");
-        EXPECT_EQ(pair.second, 1);
-    }
-    ClearSpan();
-}
-
-/**
- * @tc.name: SetSelection
- * @tc.desc: test Set Selection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, SetSelection2, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    TextStyle style;
-    style.SetFontFeatures(TEXT_FONTFEATURE_2);
-    TextSpanOptions options;
-    options.value = INIT_VALUE_1;
-    options.style = style;
-    richEditorController->AddTextSpan(options);
-    AddSpan(INIT_VALUE_1);
-    richEditorPattern->SetSelection(1, 3);
-    auto info1 = richEditorController->GetSpansInfo(1, 2);
-    ASSERT_NE(info1.selection_.resultObjects.size(), 0);
-    for (const auto& pair : info1.selection_.resultObjects.front().textStyle.fontFeature) {
-        EXPECT_EQ(pair.first, "subs");
-        EXPECT_EQ(pair.second, 0);
-    }
-    ClearSpan();
-}
-
-/**
- * @tc.name: Selection008
- * @tc.desc: test SetSelection
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, Selection008, TestSize.Level1)
-{
-    /**
-     * @tc.step: step1. Add text span and get richeditor pattern.
-     */
-    AddSpan(INIT_VALUE_1);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    /**
-     * @tc.step: step2. Request focus.
-     */
-    auto focusHub = richEditorNode_->GetOrCreateFocusHub();
-    focusHub->RequestFocusImmediately();
-    richEditorPattern->isEditing_ = true;
-
-    /**
-     * @tc.step: step3. Create a scene where the text menu has popped up.
-     */
-    richEditorPattern->OnModifyDone();
-    richEditorPattern->textSelector_.Update(0, 1);
-    richEditorPattern->CalculateHandleOffsetAndShowOverlay();
-    richEditorPattern->ShowSelectOverlay(
-        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
-    EXPECT_TRUE(richEditorPattern->SelectOverlayIsOn());
-
-    /**
-     * @tc.step: step4. Call SetSelection with menu pop up.
-     * @tc.expected: Text is selected and menu pop up.
-     */
-    int32_t start = -1;
-    int32_t end = -1;
-    SelectionOptions options;
-    options.menuPolicy = MenuPolicy::SHOW;
-    richEditorPattern->SetSelection(start, end, options);
-    ClearSpan();
-    EXPECT_FALSE(richEditorPattern->SelectOverlayIsOn());
-    EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, INIT_VALUE_1.length());
-}
-
-/*
- * @tc.name: AdjustWordCursorAndSelect01
- * @tc.desc: test double click
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorOverlayTestNg, AdjustWordCursorAndSelect01, TestSize.Level1)
-{
-    using namespace std::chrono;
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-
-    AddSpan(INIT_VALUE_1);
-    int32_t pos = 3;
-
-    MockDataDetectorMgr mockDataDetectorMgr;
-    InitAdjustObject(mockDataDetectorMgr);
-
-    richEditorPattern->lastAiPosTimeStamp_ = high_resolution_clock::now();
-    richEditorPattern->lastClickTimeStamp_ = richEditorPattern->lastAiPosTimeStamp_ + seconds(2);
-    int32_t spanStart = -1;
-    std::string content = richEditorPattern->GetPositionSpansText(pos, spanStart);
-    mockDataDetectorMgr.AdjustCursorPosition(
-        pos, content, richEditorPattern->lastAiPosTimeStamp_, richEditorPattern->lastClickTimeStamp_);
-    EXPECT_EQ(pos, 2);
-
-    int32_t start = 1;
-    int32_t end = 3;
-    mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
-    EXPECT_EQ(start, 2);
-    EXPECT_EQ(end, 3);
-
-    AddSpan(INIT_VALUE_2);
-    pos = 1;
-    content = richEditorPattern->GetPositionSpansText(pos, spanStart);
-    mockDataDetectorMgr.AdjustCursorPosition(
-        pos, content, richEditorPattern->lastAiPosTimeStamp_, richEditorPattern->lastClickTimeStamp_);
-    EXPECT_EQ(pos, 4);
-
-    start = 1;
-    end = 3;
-    mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
-    EXPECT_EQ(start, 0);
-    EXPECT_EQ(end, 2);
-
-    ClearSpan();
-    pos = 2;
-    content = richEditorPattern->GetPositionSpansText(pos, spanStart);
-    mockDataDetectorMgr.AdjustCursorPosition(
-        pos, content, richEditorPattern->lastAiPosTimeStamp_, richEditorPattern->lastClickTimeStamp_);
-    EXPECT_EQ(pos, -1);
-
-    start = 1;
-    end = 3;
-    mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
-    EXPECT_EQ(start, -1);
-    EXPECT_EQ(end, -1);
 }
 
 /**
@@ -1206,6 +585,48 @@ HWTEST_F(RichEditorOverlayTestNg, UpdateOverlayModifier001, TestSize.Level1)
     EXPECT_EQ(selection.baseOffset, -1);
     EXPECT_EQ(selection.destinationOffset, -1);
     EXPECT_FALSE(richEditorPattern->caretVisible_);
+}
+
+/**
+ * @tc.name: CalculateSelectedRect001
+ * @tc.desc: test CalculateSelectedRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorOverlayTestNg, CalculateSelectedRect001, TestSize.Level1)
+{
+    std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> paragraphsRects;
+    auto result = RichEditorPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_TRUE(result.empty());
+
+    std::vector<RectF> rects;
+    ParagraphStyle paragraphStyle;
+    std::pair<std::vector<RectF>, ParagraphStyle> paragraphRects;
+
+    paragraphRects.first = rects;
+    paragraphRects.second = paragraphStyle;
+    paragraphsRects.emplace_back(paragraphRects);
+    result = RichEditorPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_TRUE(result.empty());
+
+    rects.clear();
+    paragraphsRects.clear();
+    rects.emplace_back(RectF(0.0f, 0.0f, 0.0f, DEFAULT_TEXT_HEIGHT));
+    paragraphRects.first = rects;
+    paragraphRects.second = paragraphStyle;
+    paragraphsRects.emplace_back(paragraphRects);
+    result = RichEditorPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result.size(), rects.size());
+
+    rects.clear();
+    paragraphsRects.clear();
+    rects.emplace_back(RectF(0.0f, 0.0f, 0.0f, DEFAULT_TEXT_HEIGHT));
+    rects.emplace_back(RectF(0.0f, DEFAULT_TEXT_HEIGHT, 0.0f, DEFAULT_TEXT_HEIGHT));
+    rects.emplace_back(RectF(0.0f, DEFAULT_TEXT_HEIGHT + DEFAULT_TEXT_HEIGHT, 0.0f, DEFAULT_TEXT_HEIGHT));
+    paragraphRects.first = rects;
+    paragraphRects.second = paragraphStyle;
+    paragraphsRects.emplace_back(paragraphRects);
+    result = RichEditorPaintMethod::CalculateSelectedRect(paragraphsRects, DEFAULT_CONTENT_WIDTH);
+    EXPECT_EQ(result.size(), rects.size());
 }
 
 /**

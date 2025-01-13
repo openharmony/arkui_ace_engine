@@ -1211,6 +1211,24 @@ void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
     // cross platform is not support now;
 }
 
+void WebPattern::JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnOverScrollModeUpdate(int mode)
 {
    // cross platform is not support now;
@@ -1369,6 +1387,11 @@ void WebPattern::RemovePreviewMenuNode()
 }
 
 void WebPattern::UpdateImagePreviewParam()
+{
+    // cross platform is not support now;
+}
+
+void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
 {
     // cross platform is not support now;
 }

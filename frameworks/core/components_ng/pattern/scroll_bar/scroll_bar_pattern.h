@@ -205,9 +205,10 @@ public:
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult);
     void SetScrollBar(DisplayMode displayMode);
-    void UpdateScrollBarOffset();
+    void UpdateScrollBarOffset(int32_t scrollSource);
     void HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent);
-    void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
+    void UpdateScrollBarRegion(
+        float offset, float estimatedHeight, Size viewPort, Offset viewOffset, int32_t scrollSource);
     void RegisterScrollBarEventTask();
     void InitScrollBarGestureEvent();
     bool UpdateScrollBarDisplay();
@@ -340,8 +341,32 @@ public:
     {
         return scrollBar_;
     }
-private:
+
+    RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
+    {
+        return scrollBarOverlayModifier_;
+    }
+
+    virtual RefPtr<ScrollBar> CreateScrollBar() const
+    {
+        return AceType::MakeRefPtr<ScrollBar>();
+    }
+
+    virtual bool UseInnerScrollBar() const
+    {
+        return !hasChild_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    }
+
     void OnModifyDone() override;
+
+    PositionMode GetPositionMode();
+
+    void SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModifier>& scrollBarOverlayModifier)
+    {
+        scrollBarOverlayModifier_ = scrollBarOverlayModifier;
+    }
+
+private:
     void InitScrollPositionCallback();
     void InitScrollEndCallback();
     void AddScrollableEvent();

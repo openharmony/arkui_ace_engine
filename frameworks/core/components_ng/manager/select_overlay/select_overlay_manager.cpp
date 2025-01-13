@@ -57,6 +57,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
     selectOverlayItem_ = selectOverlayNode;
 
     auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, nullptr);
     taskExecutor->PostTask(
         [weakRoot = rootNodeWeak_, overlayNode = selectOverlayNode, animation,
             isUsingMouse = infoPtr->isUsingMouse, weak = WeakClaim(this), weakCaller = infoPtr->callerFrameNode] {
@@ -92,7 +93,7 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
                 node->ShowSelectOverlay(animation);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUISelectOverlayShow");
+        TaskExecutor::TaskType::UI, "ArkUISelectOverlayShow", PriorityType::VIP);
 
     auto proxy = MakeRefPtr<SelectOverlayProxy>(selectOverlayNode->GetId());
     return proxy;
@@ -148,9 +149,10 @@ bool SelectOverlayManager::ResetSelectionAndDestroySelectOverlay(bool isBackPres
     NotifyOverlayClosed(true);
     auto isDestroyed = DestroySelectOverlay(animation);
     CHECK_NULL_RETURN(selectContentManager_, isDestroyed);
+    auto isStopBackPress = selectContentManager_->IsStopBackPress();
     auto isClosed = selectContentManager_->CloseCurrent(
         animation, isBackPressed ? CloseReason::CLOSE_REASON_BACK_PRESSED : CloseReason::CLOSE_REASON_NORMAL);
-    auto closeFlag = isDestroyed || isClosed;
+    auto closeFlag = isDestroyed || (isClosed && isStopBackPress);
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "isDestroyed:%{public}d,isClosed:%{public}d", isDestroyed, isClosed);
     return closeFlag;
 }

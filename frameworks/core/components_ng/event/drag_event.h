@@ -317,7 +317,7 @@ private:
     std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     float RadiusToSigma(float radius);
     void RecordMenuWrapperNodeForDrag(int32_t targetId);
-    void HandleTextDragCallback(GestureEvent& info);
+    void HandleTextDragCallback(Offset offset);
     void HandleOnPanActionCancel();
 
 private:
@@ -336,7 +336,7 @@ private:
     RefPtr<PixelMap> preScaledPixelMap_;
     std::function<void(GestureEvent&)> actionStart_;
     std::function<void(GestureEvent&)> longPressUpdate_;
-    std::function<void()> actionCancel_;
+    std::function<void(GestureEvent&)> actionCancel_;
     std::function<void(Offset)> textDragCallback_;
     GestureEvent longPressInfo_;
     bool isReceivedLongPress_ = false;

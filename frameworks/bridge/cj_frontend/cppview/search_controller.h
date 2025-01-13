@@ -34,6 +34,9 @@ public:
     };
     ~SearchController() override = default;
     void CaretPosition(int32_t caretPosition);
+    void StopEditing();
+    void SetTextSelection(
+        int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options = std::nullopt);
     void SetController(const RefPtr<OHOS::Ace::TextFieldControllerBase>& controller)
     {
         controller_ = controller;

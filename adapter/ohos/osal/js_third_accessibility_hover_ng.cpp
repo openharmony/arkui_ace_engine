@@ -343,6 +343,9 @@ struct DumpInfoArgument {
 
 bool GetDumpInfoArgument(const std::vector<std::string>& params, DumpInfoArgument& argument)
 {
+    if (params.empty()) {
+        return false;
+    }
     argument.isDumpSimplify = params[0].compare("-simplify") == 0;
     for (auto arg = params.begin() + 1; arg != params.end(); ++arg) {
         if (*arg == "-w") {
@@ -457,6 +460,78 @@ bool IsDumpTreeForThird(
     }
     return false;
 }
+
+class MockDumpOperatorCallBack : public Accessibility::AccessibilityElementOperatorCallback {
+public:
+    ~MockDumpOperatorCallBack() = default;
+
+    void SetSearchElementInfoByAccessibilityIdResult(const std::list<Accessibility::AccessibilityElementInfo> &infos,
+        const int32_t requestId)  override
+    {
+    }
+
+    void SetSearchElementInfoByTextResult(const std::list<Accessibility::AccessibilityElementInfo> &infos,
+        const int32_t requestId) override
+    {
+    }
+
+    void SetSearchDefaultFocusByWindowIdResult(const std::list<Accessibility::AccessibilityElementInfo> &infos,
+        const int32_t requestId) override
+    {
+    }
+
+    void SetFindFocusedElementInfoResult(
+        const Accessibility::AccessibilityElementInfo &info,
+        const int32_t requestId) override
+    {
+    }
+
+    void SetFocusMoveSearchResult(const Accessibility::AccessibilityElementInfo &info, const int32_t requestId) override
+    {
+    }
+
+    void SetExecuteActionResult(const bool succeeded, const int32_t requestId) override
+    {
+        if (succeeded) {
+            DumpLog::GetInstance().Print("Result: action execute succeeded");
+        } else {
+            DumpLog::GetInstance().Print("Result: action execute fail");
+        }
+    }
+
+    void SetCursorPositionResult(const int32_t cursorPosition, const int32_t requestId) override
+    {
+    }
+};
+
+void DumpHandleAction(
+    const std::vector<std::string>& params,
+    const WeakPtr<JsAccessibilityManager>& jsAccessibilityManager,
+    const std::shared_ptr<JsThirdProviderInteractionOperation>& jsThirdProviderOperator)
+{
+    auto jsAccessibilityManagerTemp = jsAccessibilityManager.Upgrade();
+    CHECK_NULL_VOID(jsAccessibilityManagerTemp);
+    if (!jsAccessibilityManagerTemp->CheckDumpHandleEventParams(params)) {
+        return;
+    }
+
+    ActionType op;
+    int64_t nodeId;
+    if (!jsAccessibilityManagerTemp->CheckGetActionIdAndOp(params, nodeId, op)) {
+        return DumpLog::GetInstance().Print("Error: params is illegal!");
+    }
+
+    int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
+    int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
+    AccessibilitySystemAbilityClient::GetTreeIdAndElementIdBySplitElementId(nodeId, splitElementId, splitTreeId);
+    nodeId = splitElementId;
+
+    std::map<std::string, std::string> paramsMap;
+    jsAccessibilityManagerTemp->ProcessParameters(op, params, paramsMap);
+    
+    MockDumpOperatorCallBack operatorCallback;
+    jsThirdProviderOperator->ExecuteAction(nodeId, op, paramsMap, 0, operatorCallback);
+}
 } // namespace
 
 void AccessibilityHoverManagerForThirdNG::DumpPropertyForThird(
@@ -496,6 +571,7 @@ bool AccessibilityHoverManagerForThirdNG::OnDumpChildInfoForThirdRecursive(
     auto jsThirdProviderOperator =
         GetJsThirdProviderInteractionOperation(hostElementId).lock();
     if (jsThirdProviderOperator == nullptr) {
+        DumpLog::GetInstance().Print("Error: need start screenReader first");
         return true;
     }
     switch (argument.mode) {
@@ -509,6 +585,8 @@ bool AccessibilityHoverManagerForThirdNG::OnDumpChildInfoForThirdRecursive(
             DumpTreeForThird(argument.rootId, jsThirdProviderOperator, 0);
             break;
         case DumpMode::HANDLE_EVENT:
+            DumpHandleAction(params, jsAccessibilityManager, jsThirdProviderOperator);
+            break;
         case DumpMode::HOVER_TEST:
         default:
             DumpLog::GetInstance().Print("Error: invalid arguments!");

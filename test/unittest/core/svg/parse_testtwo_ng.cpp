@@ -1091,8 +1091,8 @@ HWTEST_F(ParseTestTwoNg, ParseStopTest001, TestSize.Level1)
      * @tc.steps: step4. parse stopOpacity
      * @tc.expected: The property is parse successfully
      */
-    svgStop->ParseAndSetSpecializedAttr("stopOpacity", "1.0");
-    EXPECT_FALSE(GreatOrEqual(svgStop->stopAttr_.gradientColor.GetOpacity(), 1.0));
+    svgStop->ParseAndSetSpecializedAttr("stopOpacity", "0.0");
+    EXPECT_EQ(svgStop->GetGradientColor().GetOpacity(), 0.0);
 
     /* *
      * @tc.steps: step5. parse properties that do not belong to SvgStop
@@ -1371,48 +1371,6 @@ HWTEST_F(ParseTestTwoNg, ParseFeOffsetTest001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ParseGradientTest003
- * @tc.desc: test Gradient
- * @tc.type: FUNC
- */
-HWTEST_F(ParseTestTwoNg, ParseGradientTest003, TestSize.Level1)
-{
-    auto svgStream = SkMemoryStream::MakeCopy(GRADIENT_SVG_RADIAL.c_str(), GRADIENT_SVG_RADIAL.length());
-    EXPECT_NE(svgStream, nullptr);
-    ImageSourceInfo src;
-    src.SetFillColor(Color::BLACK);
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
-    EXPECT_NE(svgDom, nullptr);
-    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
-    EXPECT_NE(svg, nullptr);
-    EXPECT_EQ(svg->children_.size(), CHILD_NUMBER);
-    auto defers = AceType::DynamicCast<SvgDefs>(svg->children_.at(0));
-    EXPECT_NE(defers, nullptr);
-    EXPECT_NE(defers->children_.at(0), nullptr);
-    auto svgGradient = AceType::DynamicCast<SvgGradient>(defers->children_.at(0));
-    EXPECT_NE(svgGradient, nullptr);
-    SvgGradientAttribute& svgGradientAttribute = svgGradient->gradientAttr_;
-
-    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN);
-    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
-
-    svgGradient->SetSpreadMethod("reflect", svgGradientAttribute);
-    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
-    svgGradient->SetSpreadMethod("repeat", svgGradientAttribute);
-    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
-
-    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
-
-    svgGradient->SetSpreadMethod("pad", svgGradientAttribute);
-    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
-    svgGradient->SetSpreadMethod("reflect", svgGradientAttribute);
-    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
-    svgGradient->SetSpreadMethod("repeat", svgGradientAttribute);
-    EXPECT_EQ(svgGradientAttribute.gradient.GetSpreadMethod(), SpreadMethod::REFLECT);
-}
-
-/**
  * @tc.name: ParseMaskTest001
  * @tc.desc: test Mask
  * @tc.type: FUNC
@@ -1463,5 +1421,363 @@ HWTEST_F(ParseTestTwoNg, ParseRectTest005, TestSize.Level1)
     svgRect->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     auto rectDeclaration = svgRect->rectAttr_;
     EXPECT_NE(rectDeclaration.rx.Value(), 0);
+}
+
+/**
+ * @tc.name: ParseUseTest003
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseUseTest003, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(USE_SVG_LABEL.c_str(), USE_SVG_LABEL.length());
+    EXPECT_NE(svgStream, nullptr);
+
+    ImageSourceInfo src;
+    src.SetFillColor(Color::GREEN);
+
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_NE(svg, nullptr);
+    EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
+
+    auto svgUse = AceType::DynamicCast<SvgUse>(svg->children_.at(INDEX_ONE));
+    EXPECT_NE(svgUse, nullptr);
+
+    Testing::MockCanvas rSCanvas;
+    CallBack(rSCanvas);
+    svgUse->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    svgUse->useAttr_.x = Dimension(1.0, DimensionUnit::PERCENT);
+    svgUse->useAttr_.y = Dimension(1.0, DimensionUnit::PERCENT);
+    svgUse->OnDraw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
+    svgUse->useAttr_.x = Dimension(0.0, DimensionUnit::PERCENT);
+    svgUse->OnDraw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
+    svgUse->attributes_.href = "";
+    svgUse->OnDraw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
+
+    auto bResult = svgUse->ParseAndSetSpecializedAttr("viewBox", "");
+    EXPECT_TRUE(bResult);
+
+    svgUse->ParseAndSetSpecializedAttr("viewBox", "0 0 0 10");
+    EXPECT_EQ(svgUse->useAttr_.viewBox.Height(), 10.0);
+    svgUse->ParseAndSetSpecializedAttr("viewBox", "0 0 10");
+    EXPECT_EQ(svgUse->useAttr_.viewBox.Height(), 10.0);
+
+    bResult = svgUse->ParseAndSetSpecializedAttr("viewbox", "");
+    EXPECT_TRUE(bResult);
+
+    svgUse->ParseAndSetSpecializedAttr("viewbox", "0 0 24");
+    EXPECT_EQ(svgUse->useAttr_.viewBox.Width(), 0.0);
+    svgUse->ParseAndSetSpecializedAttr("viewbox", "0 0 10 10");
+    EXPECT_EQ(svgUse->useAttr_.viewBox.Width(), 10.0);
+
+    bResult = svgUse->ParseAndSetSpecializedAttr("undefine", "");
+    EXPECT_FALSE(bResult);
+}
+
+/**
+ * @tc.name: ParseSvgTest001
+ * @tc.desc: parse svg label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseSvgTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(USE_SVG_LABEL.c_str(), USE_SVG_LABEL.length());
+    EXPECT_NE(svgStream, nullptr);
+
+    ImageSourceInfo src;
+    src.SetFillColor(Color::GREEN);
+
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_NE(svg, nullptr);
+
+    Testing::MockCanvas rSCanvas;
+    EXPECT_CALL(rSCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachPen()).WillRepeatedly(ReturnRef(rSCanvas));
+
+    svg->svgAttr_.width = Dimension(1.0);
+    svg->svgAttr_.height = Dimension(-1.0);
+    svg->AdjustContentAreaByViewBox(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    svg->svgAttr_.height = Dimension(1.0);
+    svg->svgAttr_.width = Dimension(-1.0);
+    svg->AdjustContentAreaByViewBox(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    svg->svgAttr_.height = Dimension(-1.0);
+    svg->AdjustContentAreaByViewBox(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    svg->svgAttr_.viewBox.height_ = 0.0;
+    svg->AdjustContentAreaByViewBox(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    svg->svgAttr_.viewBox.width_ = 0.0;
+    svg->AdjustContentAreaByViewBox(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+
+    auto bResult = svg->ParseAndSetSpecializedAttr("viewBox", "");
+    EXPECT_TRUE(bResult);
+    svg->ParseAndSetSpecializedAttr("viewBox", "0 0 10");
+    EXPECT_EQ(svg->GetViewBox().Height(), 0.0);
+    svg->ParseAndSetSpecializedAttr("viewBox", "0 0 0 10");
+    EXPECT_EQ(svg->GetViewBox().Height(), 10.0);
+    svg->ParseAndSetSpecializedAttr("viewbox", "0 0 10");
+    EXPECT_EQ(svg->GetViewBox().Width(), 0.0);
+    svg->ParseAndSetSpecializedAttr("viewbox", "0 0 10 10");
+    EXPECT_EQ(svg->GetViewBox().Width(), 10.0);
+    bResult = svg->ParseAndSetSpecializedAttr("viewbox", "");
+    EXPECT_TRUE(bResult);
+}
+
+/**
+ * @tc.name: ParsePathTest001
+ * @tc.desc: parse path label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParsePathTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(PATH_SVG_LABEL1.c_str(), PATH_SVG_LABEL1.length());
+    EXPECT_NE(svgStream, nullptr);
+
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_NE(svg, nullptr);
+    EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
+
+    auto svgPath = AceType::DynamicCast<SvgPath>(svg->children_.at(0));
+    EXPECT_NE(svgPath, nullptr);
+
+    svgPath->attributes_.fillState.SetFillRule("evenodd");
+    svgPath->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    EXPECT_TRUE(svgPath->attributes_.fillState.IsEvenodd());
+
+    svgPath->d_ = "";
+    svgPath->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    EXPECT_TRUE(svgPath->d_.empty());
+}
+
+/**
+ * @tc.name: ParseFeTest002
+ * @tc.desc: Test SvgFe Method
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseFeTest002, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call MakeRefPtr<SvgFe>()
+     * @tc.expected: Execute function return value not is nullptr
+     */
+    auto svgFe = AccessibilityManager::MakeRefPtr<SvgFe>();
+    EXPECT_NE(svgFe, nullptr);
+
+    /* *
+     * @tc.steps: step2. call MakeImageFilter
+     * @tc.expected: Execute function return value not is nullptr
+     */
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+    SvgFeIn in = {
+        .in = SvgFeInType::SOURCE_GRAPHIC,
+        .id = "test"
+    };
+
+    in.in = SvgFeInType::PRIMITIVE;
+    auto value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
+    EXPECT_EQ(value, nullptr);
+
+    /* *
+     * @tc.steps: step3. call RegisterResult
+     * @tc.expected: Register Successfully
+     */
+    svgFe->RegisterResult("test", imageFilter, resultHash);
+    EXPECT_TRUE(resultHash.find("test") != resultHash.end());
+
+    SvgColorInterpolationType colorInterpolationType = SvgColorInterpolationType::SRGB;
+    svgFe->feAttr_.in.in = SvgFeInType::SOURCE_GRAPHIC;
+    svgFe->GetImageFilter(imageFilter, colorInterpolationType, resultHash);
+
+    colorInterpolationType = SvgColorInterpolationType::LINEAR_RGB;
+    SvgColorInterpolationType srcColor = SvgColorInterpolationType::LINEAR_RGB;
+    svgFe->ConverImageFilterColor(imageFilter, srcColor, colorInterpolationType);
+
+    value = svgFe->MakeImageFilter(in, imageFilter, resultHash);
+    EXPECT_EQ(value, nullptr);
+}
+
+/**
+ * @tc.name: ParsePatternTest001
+ * @tc.desc: parse pattern label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParsePatternTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(PATTERN_SVG_LABEL.c_str(), PATTERN_SVG_LABEL.length());
+    EXPECT_NE(svgStream, nullptr);
+
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_NE(svg, nullptr);
+    EXPECT_GT(svg->children_.size(), 0);
+
+    auto svgDefs = AceType::DynamicCast<SvgDefs>(svg->children_.at(0));
+    EXPECT_NE(svgDefs, nullptr);
+
+    auto svgPattern = AceType::DynamicCast<SvgPattern>(svgDefs->children_.at(0));
+    EXPECT_NE(svgPattern, nullptr);
+    auto patternDeclaration = svgPattern->patternAttr_;
+
+    Testing::MockCanvas rSCanvas;
+    EXPECT_CALL(rSCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rSCanvas));
+    EXPECT_CALL(rSCanvas, DetachPen()).WillRepeatedly(ReturnRef(rSCanvas));
+
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
+    svgPattern->OnDrawTraversedBefore(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+
+    svgPattern->ParseAndSetSpecializedAttr("viewbox", "");
+    svgPattern->ParseAndSetSpecializedAttr("viewbox", "0 0 24");
+    EXPECT_EQ(patternDeclaration.viewBox.Width(), 10.0);
+    EXPECT_EQ(patternDeclaration.viewBox.Height(), 10.0);
+}
+
+/**
+ * @tc.name: ParseFilterTest001
+ * @tc.desc: parse Filter label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseFilterTest001, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(COMPOSITE_SVG_LABEL.c_str(), COMPOSITE_SVG_LABEL.length());
+    EXPECT_NE(svgStream, nullptr);
+
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_NE(svg, nullptr);
+    EXPECT_GT(svg->children_.size(), 0);
+
+    auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
+    EXPECT_NE(svgFilter, nullptr);
+
+    auto svgFeComposite = AceType::DynamicCast<SvgFeComposite>(svgFilter->children_.at(0));
+    EXPECT_NE(svgFeComposite, nullptr);
+
+    svgFilter->filterAttr_.height = Dimension(1.0, DimensionUnit::PX);
+    svgFilter->filterAttr_.width = Dimension(1.0, DimensionUnit::PX);
+    svgFilter->filterAttr_.x = Dimension(1.0, DimensionUnit::PX);
+    svgFilter->filterAttr_.y = Dimension(1.0, DimensionUnit::PX);
+    svgFilter->OnAsPaint();
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.x_, 1.0);
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.y_, 1.0);
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.width_, 1.0);
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.height_, 1.0);
+
+    svgFilter->filterAttr_.height = Dimension(1.0, DimensionUnit::PERCENT);
+    svgFilter->filterAttr_.width = Dimension(1.0, DimensionUnit::PERCENT);
+    svgFilter->filterAttr_.x = Dimension(1.0, DimensionUnit::PERCENT);
+    svgFilter->filterAttr_.y = Dimension(1.0, DimensionUnit::PERCENT);
+    svgFilter->OnAsPaint();
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.x_, 0);
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.y_, 0);
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.width_, 0);
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.height_, 0);
+}
+
+/**
+ * @tc.name: ParseFilterTest002
+ * @tc.desc: parse Filter label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseFilterTest002, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(FE_COLOR_MATRIX.c_str(), FE_COLOR_MATRIX.length());
+    EXPECT_NE(svgStream, nullptr);
+
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_NE(svg, nullptr);
+    EXPECT_GT(svg->children_.size(), 0);
+
+    auto svgFilter = AceType::DynamicCast<SvgFilter>(svg->children_.at(0));
+    EXPECT_NE(svgFilter, nullptr);
+
+    svgFilter->children_.at(0) = nullptr;
+    svgFilter->OnAsPaint();
+    auto nodeFe1 = AceType::DynamicCast<SvgFe>(svgFilter->children_.at(0));
+    auto nodeFe2 = AceType::DynamicCast<SvgFe>(svgFilter->children_.at(1));
+    EXPECT_EQ(nodeFe1, nullptr);
+    EXPECT_NE(nodeFe2, nullptr);
+}
+
+/**
+ * @tc.name: ParseNodeTest006
+ * @tc.desc: Test SvgNode SetAttr Parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseNodeTest006, TestSize.Level1)
+{
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    svgNode->SetAttr("fill", "url(#test)");
+    EXPECT_EQ(svgNode->GetBaseAttributes().fillState.GetHref(), "test");
+
+    int32_t settingApiVersion = static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN);
+    int32_t backupApiVersion = MockContainer::Current()->GetApiTargetVersion();
+    MockContainer::Current()->SetApiTargetVersion(settingApiVersion);
+
+    svgNode->SetAttr("stroke", "#test");
+
+    MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
+
+    svgNode->SetAttr("stroke", "url(#test)");
+
+    svgNode->InitStyle(SvgBaseAttribute());
+    EXPECT_EQ(svgNode->GetBaseAttributes().strokeState.GetHref(), "test");
+}
+
+/**
+ * @tc.name: ParseNodeTest007
+ * @tc.desc: Test SvgNode SetAttr Parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestTwoNg, ParseNodeTest007, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(GRADIENT_SVG_LINEAR.c_str(), GRADIENT_SVG_LINEAR.length());
+    EXPECT_NE(svgStream, nullptr);
+
+    ImageSourceInfo src;
+    src.SetFillColor(Color::BLACK);
+
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, src);
+    EXPECT_NE(svgDom, nullptr);
+
+    svgDom->root_->SetAttr("fill", "url(#grad1)");
+    svgDom->root_->SetAttr("stroke", "url(#grad1)");
+    svgDom->root_->InitStyle(SvgBaseAttribute());
+    EXPECT_EQ(svgDom->root_->GetBaseAttributes().strokeState.GetHref(), "grad1");
+    EXPECT_EQ(svgDom->root_->GetBaseAttributes().fillState.GetHref(), "grad1");
 }
 } // namespace OHOS::Ace::NG

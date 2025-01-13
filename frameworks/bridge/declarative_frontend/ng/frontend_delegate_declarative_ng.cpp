@@ -46,7 +46,7 @@ void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, c
             auto overlayManager = weak.Upgrade();
             task(overlayManager);
         },
-        TaskExecutor::TaskType::UI, name);
+        TaskExecutor::TaskType::UI, name, PriorityType::VIP);
 }
 } // namespace
 
@@ -191,7 +191,7 @@ void FrontendDelegateDeclarativeNG::RunPage(
                 pipeline->SetMinPlatformVersion(manifestParser->GetMinPlatformVersion());
             }
         },
-        TaskExecutor::TaskType::JS, "ArkUIRunPageUrl");
+        TaskExecutor::TaskType::JS, "ArkUIRunPageUrl", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void FrontendDelegateDeclarativeNG::RunPage(
@@ -205,7 +205,7 @@ void FrontendDelegateDeclarativeNG::RunPage(
             pageRouterManager->RunPage(content, params);
             auto pipeline = delegate->GetPipelineContext();
         },
-        TaskExecutor::TaskType::JS, "ArkUIRunPageContent");
+        TaskExecutor::TaskType::JS, "ArkUIRunPageContent", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void FrontendDelegateDeclarativeNG::OnConfigurationUpdated(const std::string& data)
@@ -292,14 +292,16 @@ void FrontendDelegateDeclarativeNG::UpdateApplicationState(const std::string& pa
 {
     taskExecutor_->PostTask([updateApplicationState = updateApplicationState_, packageName,
                                 state] { updateApplicationState(packageName, state); },
-        TaskExecutor::TaskType::JS, "ArkUIUpdateApplicationState");
+        TaskExecutor::TaskType::JS, "ArkUIUpdateApplicationState",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void FrontendDelegateDeclarativeNG::OnWindowDisplayModeChanged(bool isShownInMultiWindow, const std::string& data)
 {
     taskExecutor_->PostTask([onWindowDisplayModeChanged = onWindowDisplayModeChanged_, isShownInMultiWindow,
                                 data] { onWindowDisplayModeChanged(isShownInMultiWindow, data); },
-        TaskExecutor::TaskType::JS, "ArkUIWindowDisplayModeChanged");
+        TaskExecutor::TaskType::JS, "ArkUIWindowDisplayModeChanged",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void FrontendDelegateDeclarativeNG::NotifyAppStorage(
@@ -313,7 +315,7 @@ void FrontendDelegateDeclarativeNG::NotifyAppStorage(
             }
             jsEngine->NotifyAppStorage(key, value);
         },
-        TaskExecutor::TaskType::JS, "ArkUINotifyAppStorage");
+        TaskExecutor::TaskType::JS, "ArkUINotifyAppStorage", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void FrontendDelegateDeclarativeNG::FireAccessibilityEvent(const AccessibilityEvent& accessibilityEvent)
@@ -374,14 +376,23 @@ void FrontendDelegateDeclarativeNG::ClearTimer(const std::string& callbackId)
 void FrontendDelegateDeclarativeNG::Push(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, true }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    pageRouterManager_->Push(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+    pageRouterManager_->Push(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
@@ -389,8 +400,13 @@ void FrontendDelegateDeclarativeNG::PushWithCallback(const std::string& uri, con
     bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push(
-        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+    routerPageInfo.errorCallback = errorCallback;
+    pageRouterManager_->Push(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
@@ -398,23 +414,36 @@ void FrontendDelegateDeclarativeNG::PushNamedRoute(const std::string& uri, const
     bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->PushNamedRoute(
-        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+    routerPageInfo.errorCallback = errorCallback;
+    pageRouterManager_->PushNamedRoute(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::Replace(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, true }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    pageRouterManager_->Replace(routerPageInfo);
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceWithMode(
     const std::string& uri, const std::string& params, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace(
-        NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = true;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+    pageRouterManager_->Replace(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
@@ -422,8 +451,13 @@ void FrontendDelegateDeclarativeNG::ReplaceWithCallback(const std::string& uri, 
     bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace(
-        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+    routerPageInfo.errorCallback = errorCallback;
+    pageRouterManager_->Replace(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
@@ -431,15 +465,23 @@ void FrontendDelegateDeclarativeNG::ReplaceNamedRoute(const std::string& uri, co
     bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->ReplaceNamedRoute(
-        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    routerPageInfo.recoverable = recoverable;
+    routerPageInfo.routerMode = static_cast<NG::RouterMode>(routerMode);
+    routerPageInfo.errorCallback = errorCallback;
+    pageRouterManager_->ReplaceNamedRoute(routerPageInfo);
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::Back(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->BackWithTarget(NG::RouterPageInfo({ uri, params }));
+    NG::RouterPageInfo routerPageInfo;
+    routerPageInfo.url = uri;
+    routerPageInfo.params = params;
+    pageRouterManager_->BackWithTarget(routerPageInfo);
 }
 
 void FrontendDelegateDeclarativeNG::BackToIndex(int32_t index, const std::string& params)
@@ -502,9 +544,10 @@ void FrontendDelegateDeclarativeNG::NavigatePage(uint8_t type, const PageTarget&
     }
 }
 
-void FrontendDelegateDeclarativeNG::PostJsTask(std::function<void()>&& task, const std::string& name)
+void FrontendDelegateDeclarativeNG::PostJsTask(
+    std::function<void()>&& task, const std::string& name, PriorityType priorityType)
 {
-    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name);
+    taskExecutor_->PostTask(task, TaskExecutor::TaskType::JS, name, priorityType);
 }
 
 const std::string& FrontendDelegateDeclarativeNG::GetAppID() const
@@ -552,7 +595,8 @@ void FrontendDelegateDeclarativeNG::ChangeLocale(const std::string& language, co
 {
     taskExecutor_->PostTask(
         [language, countryOrRegion]() { AceApplicationInfo::GetInstance().ChangeLocale(language, countryOrRegion); },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIChangeLocale");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIChangeLocale",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void FrontendDelegateDeclarativeNG::RegisterFont(const std::string& familyName, const std::string& familySrc,
@@ -726,30 +770,21 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
 
 DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const PromptDialogAttr &dialogAttr)
 {
-    DialogProperties dialogProperties = { .autoCancel = dialogAttr.autoCancel,
-        .customStyle = dialogAttr.customStyle,
-        .onWillDismiss = dialogAttr.customOnWillDismiss,
-        .maskColor = dialogAttr.maskColor,
-        .backgroundColor = dialogAttr.backgroundColor,
-        .borderRadius = dialogAttr.borderRadius,
-        .isShowInSubWindow = dialogAttr.showInSubWindow,
-        .isModal = dialogAttr.isModal,
-        .enableHoverMode = dialogAttr.enableHoverMode,
-        .customBuilder = dialogAttr.customBuilder,
-        .borderWidth = dialogAttr.borderWidth,
-        .borderColor = dialogAttr.borderColor,
-        .borderStyle = dialogAttr.borderStyle,
-        .shadow = dialogAttr.shadow,
-        .width = dialogAttr.width,
-        .height = dialogAttr.height,
-        .maskRect = dialogAttr.maskRect,
-        .transitionEffect = dialogAttr.transitionEffect,
-        .contentNode = dialogAttr.contentNode,
-        .onDidAppear = dialogAttr.onDidAppear,
-        .onDidDisappear = dialogAttr.onDidDisappear,
-        .onWillAppear = dialogAttr.onWillAppear,
-        .onWillDisappear = dialogAttr.onWillDisappear,
-        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode };
+    DialogProperties dialogProperties = {
+        .autoCancel = dialogAttr.autoCancel, .customStyle = dialogAttr.customStyle,
+        .onWillDismiss = dialogAttr.customOnWillDismiss, .maskColor = dialogAttr.maskColor,
+        .backgroundColor = dialogAttr.backgroundColor, .borderRadius = dialogAttr.borderRadius,
+        .isShowInSubWindow = dialogAttr.showInSubWindow, .isModal = dialogAttr.isModal,
+        .enableHoverMode = dialogAttr.enableHoverMode, .customBuilder = dialogAttr.customBuilder,
+        .customBuilderWithId = dialogAttr.customBuilderWithId, .borderWidth = dialogAttr.borderWidth,
+        .borderColor = dialogAttr.borderColor, .borderStyle = dialogAttr.borderStyle, .shadow = dialogAttr.shadow,
+        .width = dialogAttr.width, .height = dialogAttr.height, .maskRect = dialogAttr.maskRect,
+        .transitionEffect = dialogAttr.transitionEffect, .contentNode = dialogAttr.contentNode,
+        .onDidAppear = dialogAttr.onDidAppear, .onDidDisappear = dialogAttr.onDidDisappear,
+        .onWillAppear = dialogAttr.onWillAppear, .onWillDisappear = dialogAttr.onWillDisappear,
+        .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback,
+        .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance
+    };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
         LOGW("[Engine Log] Unable to use the SubWindow in the Previewer. Perform this operation on the "
@@ -827,7 +862,7 @@ void FrontendDelegateDeclarativeNG::CloseCustomDialog(const WeakPtr<NG::UINode>&
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to close custom dialog.");
             overlayManager->CloseCustomDialog(node, std::move(callback));
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog");
+        TaskExecutor::TaskType::UI, "ArkUIOverlayCloseCustomDialog", PriorityType::VIP);
 }
 
 void FrontendDelegateDeclarativeNG::UpdateCustomDialog(
@@ -857,7 +892,7 @@ void FrontendDelegateDeclarativeNG::UpdateCustomDialog(
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "begin to update custom dialog.");
             overlayManager->UpdateCustomDialog(node, dialogProperties, std::move(callback));
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog");
+        TaskExecutor::TaskType::UI, "ArkUIOverlayUpdateCustomDialog", PriorityType::VIP);
 }
 
 void FrontendDelegateDeclarativeNG::ShowActionMenu(
@@ -917,7 +952,7 @@ void FrontendDelegateDeclarativeNG::OnMediaQueryUpdate(bool isSynchronous)
             delegate->mediaQueryCallback_(listenerId, info);
             delegate->mediaQueryInfo_->ResetListenerId();
         },
-        TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate");
+        TaskExecutor::TaskType::JS, "ArkUIMediaQueryUpdate", PriorityType::VIP);
 }
 
 void FrontendDelegateDeclarativeNG::OnLayoutCompleted(const std::string& componentId)
@@ -1073,7 +1108,7 @@ void FrontendDelegateDeclarativeNG::ShowDialogInner(DialogProperties& dialogProp
     dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
         taskExecutor->PostTask(
             [callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
-            TaskExecutor::TaskType::JS, "ArkUIOverlayShowDialogCancel");
+            TaskExecutor::TaskType::JS, "ArkUIOverlayShowDialogCancel", PriorityType::VIP);
     };
     auto task = [dialogProperties](const RefPtr<NG::OverlayManager>& overlayManager) {
         LOGI("Begin to show dialog ");
@@ -1115,7 +1150,7 @@ void FrontendDelegateDeclarativeNG::ShowActionMenuInner(DialogProperties& dialog
     dialogProperties.onCancel = [callback, taskExecutor = taskExecutor_] {
         taskExecutor->PostTask(
             [callback]() { callback(CALLBACK_ERRORCODE_CANCEL, CALLBACK_DATACODE_ZERO); },
-            TaskExecutor::TaskType::JS, "ArkUIOverlayShowActionMenuCancel");
+            TaskExecutor::TaskType::JS, "ArkUIOverlayShowActionMenuCancel", PriorityType::VIP);
     };
     auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
@@ -1125,7 +1160,7 @@ void FrontendDelegateDeclarativeNG::ShowActionMenuInner(DialogProperties& dialog
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowDialog(dialogProperties, nullptr, AceApplicationInfo::GetInstance().IsRightToLeft());
         },
-        TaskExecutor::TaskType::UI, "ArkUIOverlayShowActionMenu");
+        TaskExecutor::TaskType::UI, "ArkUIOverlayShowActionMenu", PriorityType::VIP);
     return;
 }
 
@@ -1188,6 +1223,33 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative
     return NG::ComponentSnapshot::GetSync(componentId, options);
 #endif
     return {ERROR_CODE_INTERNAL_ERROR, nullptr};
+}
+
+void FrontendDelegateDeclarativeNG::GetSnapshotByUniqueId(int32_t uniqueId,
+    std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    NG::ComponentSnapshot::GetByUniqueId(uniqueId, std::move(callback), options);
+#endif
+}
+
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarativeNG::GetSyncSnapshotByUniqueId(
+    int32_t uniqueId, const NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    return NG::ComponentSnapshot::GetSyncByUniqueId(uniqueId, options);
+#endif
+    return {ERROR_CODE_INTERNAL_ERROR, nullptr};
+}
+
+void FrontendDelegateDeclarativeNG::CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,
+    NG::ComponentSnapshot::JsCallback&& callback, bool enableInspector, const NG::SnapshotParam& param)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    ViewStackModel::GetInstance()->NewScope();
+    NG::ComponentSnapshot::Create(nodeWk, std::move(callback), enableInspector, param);
+#endif
 }
 
 std::string FrontendDelegateDeclarativeNG::GetContentInfo(ContentInfoType type)
@@ -1286,4 +1348,25 @@ void FrontendDelegateDeclarativeNG::HideAllNodesOnOverlay()
     };
     MainWindowOverlay(std::move(task), "ArkUIOverlayHideAllNodes");
 }
+
+bool FrontendDelegateDeclarativeNG::SetOverlayManagerOptions(const NG::OverlayManagerInfo& overlayInfo)
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    return overlayManager->SetOverlayManagerOptions(overlayInfo);
+};
+std::optional<NG::OverlayManagerInfo> FrontendDelegateDeclarativeNG::GetOverlayManagerOptions()
+{
+    auto currentId = Container::CurrentId();
+    ContainerScope scope(currentId);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_RETURN(context, std::nullopt);
+    return overlayManager->GetOverlayManagerOptions();
+};
 } // namespace OHOS::Ace::Framework

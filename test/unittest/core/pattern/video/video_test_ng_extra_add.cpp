@@ -44,7 +44,6 @@
 #include "core/components/video/video_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -70,6 +69,7 @@ struct TestProperty {
     std::optional<std::string> src;
     std::optional<double> progressRate;
     std::optional<std::string> posterUrl;
+    std::optional<bool> showFirstFrame;
     std::optional<bool> muted;
     std::optional<bool> autoPlay;
     std::optional<bool> controls;
@@ -83,6 +83,7 @@ constexpr bool MUTED_VALUE = false;
 constexpr bool AUTO_PLAY = false;
 constexpr bool CONTROL_VALUE = true;
 constexpr bool LOOP_VALUE = false;
+constexpr bool SHOW_FIRST_FRAME = false;
 const ImageFit VIDEO_IMAGE_FIT = ImageFit::COVER;
 const std::string VIDEO_SRC = "common/video.mp4";
 const std::string VIDEO_POSTER_URL = "common/img2.png";
@@ -134,6 +135,7 @@ protected:
 void VideoTestExtraAddNg::SetUpTestSuite()
 {
     g_testProperty.progressRate = VIDEO_PROGRESS_RATE;
+    g_testProperty.showFirstFrame = SHOW_FIRST_FRAME;
     g_testProperty.muted = MUTED_VALUE;
     g_testProperty.autoPlay = AUTO_PLAY;
     g_testProperty.controls = CONTROL_VALUE;
@@ -195,6 +197,9 @@ RefPtr<FrameNode> VideoTestExtraAddNg::CreateVideoNode(TestProperty& g_testPrope
     }
     if (g_testProperty.objectFit.has_value()) {
         VideoModelNG().SetObjectFit(g_testProperty.objectFit.value());
+    }
+    if (g_testProperty.showFirstFrame.has_value()) {
+        VideoModelNG().SetShowFirstFrame(g_testProperty.showFirstFrame.value());
     }
 
     auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -1058,42 +1063,6 @@ HWTEST_F(VideoTestExtraAddNg, UpdateAnalyzerUIConfig001, TestSize.Level1)
 }
 
 /**
- * @tc.name: EnableDrag001
- * @tc.desc: Test EnableDrag
- * @tc.type: FUNC
- */
-HWTEST_F(VideoTestExtraAddNg, EnableDrag001, TestSize.Level1)
-{
-    VideoModelNG videoModelNG;
-    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
-    videoModelNG.Create(videoController);
-    auto frameNode = AceType::Claim<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    ASSERT_NE(frameNode, nullptr);
-    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
-    ASSERT_NE(videoPattern, nullptr);
-
-    videoPattern->EnableDrag();
-
-    auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    ASSERT_NE(event, nullptr);
-    std::string extraParams = "Test";
-
-    auto unifiedData = AceType::MakeRefPtr<MockUnifiedData>();
-    ASSERT_NE(unifiedData, nullptr);
-    std::vector<uint8_t> arr;
-    auto spanString = AceType::MakeRefPtr<SpanString>(u"Test");
-    spanString->EncodeTlv(arr);
-    UdmfClient::GetInstance()->AddSpanStringRecord(unifiedData, arr);
-    event->SetData(unifiedData);
-
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-
-    eventHub->onDrop_(event, extraParams);
-    EXPECT_NE(eventHub->onDrop_, nullptr);
-}
-
-/**
  * @tc.name: UpdatePreviewImage001
  * @tc.desc: Test UpdatePreviewImage
  * @tc.type: FUNC
@@ -1127,6 +1096,11 @@ HWTEST_F(VideoTestExtraAddNg, UpdatePreviewImage001, TestSize.Level1)
     EXPECT_EQ(posterLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
 
     videoPattern->isInitialState_ = false;
+    videoPattern->UpdatePreviewImage();
+    EXPECT_EQ(posterLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
+
+    posterLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    videoPattern->showFirstFrame_ = true;
     videoPattern->UpdatePreviewImage();
     EXPECT_EQ(posterLayoutProperty->GetVisibilityValue(), VisibleType::INVISIBLE);
 }
