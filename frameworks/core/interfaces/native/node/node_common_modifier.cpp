@@ -3820,6 +3820,50 @@ void ResetAccessibilityGroup(ArkUINodeHandle node)
     ViewAbstractModelNG::SetAccessibilityGroup(frameNode, false);
 }
 
+void SetAccessibilityNextFocusId(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string valueStr = value;
+    ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, valueStr);
+}
+
+void ResetAccessibilityNextFocusId(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityNextFocusId(frameNode, "");
+}
+
+void SetAccessibilityDefaultFocus(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityDefaultFocus(frameNode, value);
+}
+
+void ResetAccessibilityDefaultFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityDefaultFocus(frameNode, false);
+}
+
+void SetAccessibilityUseSamePage(ArkUINodeHandle node, ArkUI_Bool isFullSilent)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string pageMode = isFullSilent ? "FULL_SILENT" : "SEMI_SILENT";
+    ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, pageMode);
+}
+
+void ResetAccessibilityUseSamePage(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetAccessibilityUseSamePage(frameNode, "");
+}
+
 void SetHoverEffect(ArkUINodeHandle node, ArkUI_Int32 hoverEffectValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6760,6 +6804,12 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetDraggable = ResetDraggable,
         .setAccessibilityGroup = SetAccessibilityGroup,
         .resetAccessibilityGroup = ResetAccessibilityGroup,
+        .setAccessibilityNextFocusId = SetAccessibilityNextFocusId,
+        .resetAccessibilityNextFocusId = ResetAccessibilityNextFocusId,
+        .setAccessibilityDefaultFocus = SetAccessibilityDefaultFocus,
+        .resetAccessibilityDefaultFocus = ResetAccessibilityDefaultFocus,
+        .setAccessibilityUseSamePage = SetAccessibilityUseSamePage,
+        .resetAccessibilityUseSamePage = ResetAccessibilityUseSamePage,
         .setHoverEffect = SetHoverEffect,
         .resetHoverEffect = ResetHoverEffect,
         .setClickEffect = SetClickEffect,

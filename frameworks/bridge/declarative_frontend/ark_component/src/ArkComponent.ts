@@ -3121,6 +3121,48 @@ class AccessibilityGroupModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class AccessibilityNextFocusIdModifier extends ModifierWithKey<string> {
+  constructor(value: string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityNextFocusId');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityNextFocusId(node);
+    } else {
+      getUINativeModule().common.setAccessibilityNextFocusId(node, this.value);
+    }
+  }
+}
+
+class AccessibilityDefaultFocusModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityDefaultFocus');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityDefaultFocus(node);
+    } else {
+      getUINativeModule().common.setAccessibilityDefaultFocus(node, this.value);
+    }
+  }
+}
+
+class AccessibilityUseSamePageModifier extends ModifierWithKey<AccessibilitySamePageMode> {
+  constructor(value: AccessibilitySamePageMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityUseSamePage');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityUseSamePage(node);
+    } else {
+      getUINativeModule().common.setAccessibilityUseSamePage(node, this.value);
+    }
+  }
+}
+
 class HoverEffectModifier extends ModifierWithKey<HoverEffect> {
   constructor(value: HoverEffect) {
     super(value);
@@ -4723,6 +4765,29 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   
   onAccessibilityFocus(value: AccessibilityFocusCallback): this {
     modifierWithKey(this._modifiersWithKeys, AccessibilityFocusCallbackModifier.identity, AccessibilityFocusCallbackModifier, value);
+    return this;
+  }
+
+  accessibilityNextFocusId(value: string): this {
+    if (typeof value === 'string') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityNextFocusIdModifier.identity, AccessibilityNextFocusIdModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityNextFocusIdModifier.identity, AccessibilityNextFocusIdModifier, undefined);
+    }
+    return this;
+  }
+
+  accessibilityDefaultFocus(value: boolean): this {
+    if (typeof value === 'boolean') {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityDefaultFocusModifier.identity, AccessibilityDefaultFocusModifier, value);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, AccessibilityDefaultFocusModifier.identity, AccessibilityDefaultFocusModifier, undefined);
+    }
+    return this;
+  }
+
+  accessibilityUseSamePage(value: AccessibilitySamePageMode): this {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityUseSamePageModifier.identity, AccessibilityUseSamePageModifier, value);
     return this;
   }
 
