@@ -32,6 +32,7 @@
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/event/pointer_event.h"
+#include "ui/base/dirty_flag.h"
 
 namespace OHOS::Accessibility {
 class AccessibilityElementInfo;
@@ -41,15 +42,6 @@ class AccessibilityEventInfo;
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
-
-struct DirtySwapConfig {
-    bool frameSizeChange = false;
-    bool frameOffsetChange = false;
-    bool contentSizeChange = false;
-    bool contentOffsetChange = false;
-    bool skipMeasure = false;
-    bool skipLayout = false;
-};
 
 class ScrollingListener : public AceType {
     DECLARE_ACE_TYPE(ScrollingListener, AceType);
@@ -668,6 +660,8 @@ public:
         CHECK_NULL_RETURN(host, 0);
         return host->GetThemeScopeId();
     }
+
+    virtual void OnFocusNodeChange(FocusReason focusReason) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

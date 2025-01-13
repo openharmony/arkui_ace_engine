@@ -52,6 +52,8 @@ public:
     void SearchElementInfosByText(
         const int64_t elementId, const std::string& text, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback) override;
+    void SearchDefaultFocusByWindowId(const int32_t windowId, const int32_t requestId,
+        AccessibilityElementOperatorCallback& callback, const int32_t pageId) override;
     void FindFocusedElementInfo(
         const int64_t elementId, const int32_t focusType, const int32_t requestId,
         Accessibility::AccessibilityElementOperatorCallback& callback) override;

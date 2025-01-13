@@ -1488,6 +1488,10 @@
         "name": "OH_ArkUI_NodeUtils_GetAttachedNodeHandleById"
     },
     {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NodeUtils_GetWindowInfo"
+    },
+    {
         "first_introduced": "14",
         "name": "OH_ArkUI_ActiveChildrenInfo_Destroy"
     },
@@ -2578,5 +2582,29 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_PostFrameCallback"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_FocusRequest"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_FocusClear"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_FocusActivate"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_FocusSetAutoTransfer"
+    },
+    { 
+        "first_introduced": "16",
+        "name": "OH_ArkUI_HostWindowInfo_GetName"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_HostWindowInfo_Destroy"
     }
 ]

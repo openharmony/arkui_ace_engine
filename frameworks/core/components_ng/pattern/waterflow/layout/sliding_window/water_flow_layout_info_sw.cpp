@@ -754,6 +754,17 @@ void WaterFlowLayoutInfoSW::NotifyDataChange(int32_t index, int32_t count)
     newStartIndex_ += count;
 }
 
+void WaterFlowLayoutInfoSW::NotifySectionChange(int32_t index)
+{
+    if (startIndex_ == Infinity<int32_t>()) {
+        newStartIndex_ = INVALID_NEW_START_INDEX;
+        return;
+    }
+    if (index >= startIndex_) {
+        newStartIndex_ = INVALID_NEW_START_INDEX;
+    }
+}
+
 void WaterFlowLayoutInfoSW::UpdateLanesIndex(int32_t updateIdx)
 {
     idxToLane_.clear();

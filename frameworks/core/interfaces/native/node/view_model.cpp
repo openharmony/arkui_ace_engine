@@ -628,11 +628,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createRowNode,
     createFlexNode,
     createListItemNode,
-#ifndef ARKUI_WEARABLE
     createTabsNode,
-#else
-    nullptr, // createTabsNode
-#endif
     nullptr, // Navigator
     nullptr, // Web
     createSliderNode,
@@ -681,11 +677,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
 #endif
     createImageAnimatorNode,
     createCircleNode,
-#ifndef ARKUI_WEARABLE
     createTabContentNode,
-#else
-    nullptr, // createTabContentNode
-#endif
     createNavigationNode,
     createCustomSpanNode,
     createSymbolNode,

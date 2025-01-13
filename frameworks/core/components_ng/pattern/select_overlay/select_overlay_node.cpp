@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/security_component/security_component_pattern.h"
 #include "core/components_ng/pattern/select_content_overlay/select_content_overlay_pattern.h"
 #include "core/components_ng/pattern/select_overlay/expanded_menu_plugin_loader.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_event_hub.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -1201,13 +1202,7 @@ void SelectOverlayNode::CreateCustomSelectOverlay(const std::shared_ptr<SelectOv
         });
     selectMenu_->MountToParent(Claim(this));
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "CreateCustomSelectOverlay by menu:%{public}d", selectMenu_->GetId());
-    auto eventHub = selectMenu_->GetEventHub<EventHub>();
-    if (eventHub && info->menuCallback.onAppear) {
-        eventHub->SetOnAppear(std::move(info->menuCallback.onAppear));
-    }
-    if (eventHub && info->menuCallback.onDisappear) {
-        eventHub->SetOnDisappear(std::move(info->menuCallback.onDisappear));
-    }
+    AddCustomMenuCallbacks(info);
     auto renderContext = selectMenu_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateClipEdge(false);
@@ -2145,12 +2140,14 @@ const MenuItemParam SelectOverlayNode::GetSystemMenuItemParam(const std::string&
 
 void SelectOverlayNode::MenuOnlyStatusChange(const std::shared_ptr<SelectOverlayInfo>& info, bool noAnimation)
 {
-    if (info->menuInfo.menuDisable || !info->menuInfo.menuIsShow) {
+    bool isHideMenu = info->menuInfo.menuDisable || !info->menuInfo.menuIsShow;
+    if (isHideMenu) {
         (noAnimation) ? HideMenuOnlyImmediately()
                       : ExecuteOverlayStatus(FrameNodeType::MENUONLY, FrameNodeTrigger::HIDE);
     } else {
         ExecuteOverlayStatus(FrameNodeType::MENUONLY, FrameNodeTrigger::SHOW);
     }
+    FireCustomMenuChangeEvent(!isHideMenu);
 }
 
 void SelectOverlayNode::HideMenuOnlyImmediately()
@@ -2670,5 +2667,68 @@ void SelectOverlayNode::UpdateSelectMenuBg()
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
     renderContext->UpdateBackgroundColor(textOverlayTheme->GetMenuBackgroundColor());
+}
+
+void SelectOverlayNode::AddCustomMenuCallbacks(const std::shared_ptr<SelectOverlayInfo>& info)
+{
+    auto overlayEventHub = GetEventHub<SelectOverlayEventHub>();
+    CHECK_NULL_VOID(overlayEventHub);
+    if (info->menuCallback.onMenuShow) {
+        overlayEventHub->SetMenuShowCallback(std::move(info->menuCallback.onMenuShow));
+    }
+    if (info->menuCallback.onMenuHide) {
+        overlayEventHub->SetMenuHideCallback(std::move(info->menuCallback.onMenuHide));
+    }
+    if (info->menuCallback.onAppear) {
+        overlayEventHub->SetMenuAppearCallback(std::move(info->menuCallback.onAppear));
+    }
+    if (info->menuCallback.onDisappear) {
+        overlayEventHub->SetMenuDisappearCallback(std::move(info->menuCallback.onDisappear));
+    }
+    CHECK_NULL_VOID(selectMenu_);
+    auto eventHub = selectMenu_->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnAppear([weak = WeakClaim(this)]() {
+        auto overlayNode = weak.Upgrade();
+        CHECK_NULL_VOID(overlayNode);
+        overlayNode->OnCustomSelectMenuAppear();
+    });
+    eventHub->SetOnDisappear([weakHub = WeakClaim(AceType::RawPtr(overlayEventHub))]() {
+        auto overlayEventHub = weakHub.Upgrade();
+        CHECK_NULL_VOID(overlayEventHub);
+        overlayEventHub->FireDisappearEvent();
+    });
+}
+
+void SelectOverlayNode::OnCustomSelectMenuAppear()
+{
+    isCustomMenuAppear_ = true;
+    auto eventHub = GetEventHub<SelectOverlayEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    // fire appear event.
+    eventHub->FireAppearEvent();
+    // fire onMenuShow
+    auto pattern = GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto info = pattern->GetSelectOverlayInfo();
+    CHECK_NULL_VOID(info);
+    bool isHideMenu = info->menuInfo.menuDisable || !info->menuInfo.menuIsShow;
+    eventHub->FireMenuVisibilityChangeEvent(!isHideMenu);
+}
+
+void SelectOverlayNode::FireCustomMenuChangeEvent(bool isMenuShow)
+{
+    if (isCustomMenuAppear_) {
+        auto eventHub = GetEventHub<SelectOverlayEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->FireMenuVisibilityChangeEvent(isMenuShow);
+    }
+}
+
+void SelectOverlayNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
+{
+    FireCustomMenuChangeEvent(false);
+    isCustomMenuAppear_ = false;
+    FrameNode::OnDetachFromMainTree(recursive, context);
 }
 } // namespace OHOS::Ace::NG

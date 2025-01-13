@@ -95,6 +95,7 @@ void ListItemGroupModelNG::SetHeader(FrameNode* frameNode, FrameNode* headerNode
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->AddHeader(AceType::Claim<UINode>(headerNode));
+    pattern->SetHeaderComponentContentExist(true);
 }
 
 void ListItemGroupModelNG::SetFooter(FrameNode* frameNode, FrameNode* footerNode)
@@ -104,6 +105,7 @@ void ListItemGroupModelNG::SetFooter(FrameNode* frameNode, FrameNode* footerNode
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->AddFooter(AceType::Claim<UINode>(footerNode));
+    pattern->SetFooterComponentContentExist(true);
 }
 
 RefPtr<ListChildrenMainSize> ListItemGroupModelNG::GetOrCreateListChildrenMainSize()
@@ -190,5 +192,35 @@ void ListItemGroupModelNG::RemoveHeader()
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->RemoveHeader();
+}
+
+void ListItemGroupModelNG::RemoveFooter(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveFooter();
+}
+
+void ListItemGroupModelNG::RemoveHeader(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveHeader();
+}
+
+bool ListItemGroupModelNG::HasFooter(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsHasFooter();
+}
+
+bool ListItemGroupModelNG::HasHeader(FrameNode* frameNode)
+{
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->IsHasHeader();
 }
 } // namespace OHOS::Ace::NG

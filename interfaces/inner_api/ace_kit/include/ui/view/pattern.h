@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_PATTERN_H
 
 #include "ui/base/ace_type.h"
+#include "ui/base/dirty_flag.h"
 #include "ui/view/draw/node_paint_method.h"
 #include "ui/view/layout/layout_algorithm.h"
 
@@ -27,6 +28,10 @@ class Pattern : public AceType {
 public:
     virtual RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() = 0;
     virtual RefPtr<NodePaintMethod> CreateNodePaintMethod() = 0;
+    virtual bool OnDirtyLayoutrSwap(const NG::DirtySwapConfig& config)
+    {
+        return false;
+    }
 
     void SetHost(const WeakPtr<FrameNode>& host)
     {
@@ -36,6 +41,11 @@ public:
     const WeakPtr<FrameNode>& GetHost() const
     {
         return host_;
+    }
+
+    virtual bool IsAtomicNode() const
+    {
+        return true;
     }
 
 private:

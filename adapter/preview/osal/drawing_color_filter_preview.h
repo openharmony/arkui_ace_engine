@@ -26,6 +26,7 @@ public:
         : colorFilter_(std::move(colorFilter)) {}
     ~DrawingColorFilterPreview() override = default;
     void* GetDrawingColorFilterSptrAddr() override;
+    napi_value GetDrawingColorFilterNapiValue(NativeEngine* nativeEngine) override;
 
 private:
     std::shared_ptr<Rosen::Drawing::ColorFilter> colorFilter_;

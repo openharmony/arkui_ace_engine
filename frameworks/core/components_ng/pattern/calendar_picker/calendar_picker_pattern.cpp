@@ -1317,6 +1317,7 @@ void CalendarPickerPattern::SetDate(const std::string& info)
     textLayoutProperty->UpdateContent(dayString);
     dayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     UpdateAccessibilityText();
+    FlushAddAndSubButton();
 }
 
 void CalendarPickerPattern::FlushTextStyle()
@@ -1383,5 +1384,15 @@ bool CalendarPickerPattern::IsContainerModal()
     auto windowManager = pipelineContext->GetWindowManager();
     return pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+}
+
+void CalendarPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    /* no fixed attr below, just return */
+    if (filter.IsFastFilter()) {
+        return;
+    }
+    json->PutExtAttr("start", calendarData_.startDate.ToString(false).c_str(), filter);
+    json->PutExtAttr("end", calendarData_.endDate.ToString(false).c_str(), filter);
 }
 } // namespace OHOS::Ace::NG

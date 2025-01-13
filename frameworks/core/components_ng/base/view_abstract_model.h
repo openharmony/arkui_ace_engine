@@ -83,6 +83,7 @@ public:
     virtual void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) = 0;
     virtual void SetBackgroundImagePosition(const BackgroundImagePosition& bgImgPosition) = 0;
     virtual void SetBackgroundBlurStyle(const BlurStyleOption& bgBlurStyle) = 0;
+    virtual void SetBackgroundImageSyncMode(bool syncMode) {}
     virtual void SetBackgroundEffect(const EffectOption& effectOption) {}
     virtual void SetBackgroundImageResizableSlice(const ImageResizableSlice& slice) = 0;
     virtual void SetForegroundBlurStyle(const BlurStyleOption& fgBlurStyle) {}
@@ -352,6 +353,7 @@ public:
     virtual void SetKeyboardShortcut(const std::string& value, const std::vector<ModifierKey>& keys,
         std::function<void()>&& onKeyboardShortcutAction) = 0;
     virtual void SetMonopolizeEvents(bool monopolizeEvents) = 0;
+    virtual void NotifyDragStartRequest(DragStartRequestStatus dragStatus) {}
     virtual void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) = 0;
     virtual void SetDisallowDropForcedly(bool isDisallowDropForcedly) {}
     // obscured
@@ -407,6 +409,8 @@ public:
     virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
     virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
     virtual void ResetOnAccessibilityFocus() = 0;
+    virtual void SetAccessibilityDefaultFocus() = 0;
+    virtual void SetAccessibilityUseSamePage(bool isFullSilent) = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;

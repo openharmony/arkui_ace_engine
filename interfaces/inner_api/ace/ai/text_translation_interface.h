@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (C) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef WEB_AREA_CHANGED_H
-#define WEB_AREA_CHANGED_H
-#include "core/components/web/resource/web_delegate.h"
+#ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_TEXT_TRANSLATION_INTERFACE_H
+#define FOUNDATION_ACE_INTERFACE_INNERKITS_TEXT_TRANSLATION_INTERFACE_H
+
+#include <string>
 
 namespace OHOS::Ace {
-class WebAvoidAreaChangedListener : public Referenced, public OHOS::Rosen::IAvoidAreaChangedListener {
+
+class TextTranslationInterface {
 public:
-    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
-    ~WebAvoidAreaChangedListener() = default;
-    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
+    virtual int32_t PullUpTranslationPanel(std::string translateText, std::string rectStr) = 0;
 
-private:
-    WeakPtr<WebDelegate> webDelegate_;
+protected:
+    virtual ~TextTranslationInterface() {}
 };
-}
-
-#endif
+} // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_INTERFACE_INNERKITS_TEXT_TRANSLATION_INTERFACE_H

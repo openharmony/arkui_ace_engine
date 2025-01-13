@@ -7952,6 +7952,24 @@ class ImageAnimatorIterationsModeModifier extends ModifierWithKey {
   }
 }
 ImageAnimatorIterationsModeModifier.identity = Symbol('imageAnimatorIterationsMode');
+
+class ImageAnimatorAutoMonitorInvisibleAreaModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().imageAnimator.setAutoMonitorInvisibleArea(node, false);
+    }
+    else {
+      getUINativeModule().imageAnimator.setAutoMonitorInvisibleArea(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+ImageAnimatorAutoMonitorInvisibleAreaModifier.identity = Symbol('autoMonitorInvisibleArea');
 class ArkImageAnimatorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -7985,6 +8003,11 @@ class ArkImageAnimatorComponent extends ArkComponent {
   }
   iterations(value) {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorIterationsModeModifier.identity, ImageAnimatorIterationsModeModifier, value);
+    return this;
+  }
+  autoMonitorInvisibleArea(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorAutoMonitorInvisibleAreaModifier.identity,
+      ImageAnimatorAutoMonitorInvisibleAreaModifier, value);
     return this;
   }
   onStart(event) {

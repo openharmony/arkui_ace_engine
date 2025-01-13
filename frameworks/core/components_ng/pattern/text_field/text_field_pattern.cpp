@@ -2790,7 +2790,7 @@ bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType, bo
     if (isFromKeyBoard) {
         return true;
     }
-    
+
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto isTriggerPassword = IsTriggerAutoFillPassword();
@@ -4154,7 +4154,9 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
     ChangeMouseState(info.GetLocalLocation(), frameId, info.GetAction() == MouseAction::WINDOW_LEAVE);
 
-    selectOverlay_->SetUsingMouse(true);
+    if (info.GetAction() == OHOS::Ace::MouseAction::PRESS) {
+        selectOverlay_->SetUsingMouse(true);
+    }
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleRightMouseEvent(info);
     } else if (info.GetButton() == MouseButton::LEFT_BUTTON) {
@@ -7477,8 +7479,8 @@ void TextFieldPattern::ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json
     auto menuNode = manager->GetSelectOverlayNode();
     CHECK_NULL_VOID(menuNode);
     json->PutExtAttr("MenuNode", menuNode->GetTag().c_str(), filter);
-    if (menuNode->GetAncestorNodeOfFrame()) {
-        json->PutExtAttr("MountOn", menuNode->GetAncestorNodeOfFrame()->GetTag().c_str(), filter);
+    if (menuNode->GetAncestorNodeOfFrame(false)) {
+        json->PutExtAttr("MountOn", menuNode->GetAncestorNodeOfFrame(false)->GetTag().c_str(), filter);
     }
     auto menuLayoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(menuLayoutProperty);
@@ -8663,6 +8665,7 @@ void TextFieldPattern::PasswordResponseKeyEvent()
 
 void TextFieldPattern::UnitResponseKeyEvent()
 {
+#ifndef ARKUI_WAERABLE
     auto unitArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
     CHECK_NULL_VOID(unitArea);
     auto frameNode = unitArea->GetFrameNode();
@@ -8672,6 +8675,7 @@ void TextFieldPattern::UnitResponseKeyEvent()
         CHECK_NULL_VOID(selectPattern);
         selectPattern->ShowSelectMenu();
     }
+#endif
 }
 
 void TextFieldPattern::ScrollToSafeArea() const

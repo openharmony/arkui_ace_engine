@@ -49,7 +49,7 @@ void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (pattern->GetMode() == SelectOverlayMode::HANDLE_ONLY) {
         auto geometryNode = layoutWrapper->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
-        auto parentNode = host->GetAncestorNodeOfFrame();
+        auto parentNode = host->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parentNode);
         auto parentGeo = parentNode->GetGeometryNode();
         CHECK_NULL_VOID(parentGeo);
