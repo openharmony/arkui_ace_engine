@@ -563,26 +563,6 @@ HWTEST_F(SelectOverlayTestTwoNg, UpdateMoreOrBackSymbolOptions002, TestSize.Leve
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     EXPECT_NE(selectOverlayNode, nullptr);
-    selectOverlayNode->UpdateMoreOrBackSymbolOptions(false, true);
-    EXPECT_NE(selectOverlayNode->moreOrBackSymbol_, nullptr);
-}
-
-/**
- * @tc.name: UpdateMoreOrBackSymbolOptions003
- * @tc.desc: moreOrBackSymbol_ != nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(SelectOverlayTestTwoNg, UpdateMoreOrBackSymbolOptions003, TestSize.Level1)
-{
-    SelectOverlayInfo selectInfo;
-    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
-    auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
-    auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
-    selectOverlayNode->isMoreOrBackSymbolIcon_ = true;
-    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
-    EXPECT_NE(selectOverlayNode, nullptr);
     selectOverlayNode->moreButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
@@ -594,11 +574,11 @@ HWTEST_F(SelectOverlayTestTwoNg, UpdateMoreOrBackSymbolOptions003, TestSize.Leve
 }
 
 /**
- * @tc.name: UpdateMoreOrBackSymbolOptions004
+ * @tc.name: UpdateMoreOrBackSymbolOptions003
  * @tc.desc: moreOrBackSymbol_ != nullptr
  * @tc.type: FUNC
  */
-HWTEST_F(SelectOverlayTestTwoNg, UpdateMoreOrBackSymbolOptions004, TestSize.Level1)
+HWTEST_F(SelectOverlayTestTwoNg, UpdateMoreOrBackSymbolOptions003, TestSize.Level1)
 {
     SelectOverlayInfo selectInfo;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
