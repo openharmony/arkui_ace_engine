@@ -50,13 +50,19 @@ const auto FORM_ON_ERROR_CODE_KEY = "errcode";
 const auto FORM_ON_ERROR_MSG_KEY = "msg";
 const auto FORM_EMPTY_STRING = "";
 
-
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFormSizeDimensionValidValues = {
-    { "100.00vp", Converter::ArkValue<Ark_Number>(100), "100.00vp" },
-    { "0.00vp", Converter::ArkValue<Ark_Number>(0), "0.00vp" },
-    { "-100.00vp", Converter::ArkValue<Ark_Number>(-100), "-100.00vp" },
-    { "12.34vp", Converter::ArkValue<Ark_Number>(12.34), "12.34vp" },
-    { "-56.78vp", Converter::ArkValue<Ark_Number>(-56.78), "-56.78vp" },
+static const std::vector<std::tuple<std::string, Opt_Length, std::string>> testFixtureFormSizeDimensionValidValues = {
+    { "100.00px", Converter::ArkValue<Opt_Length>(100), "100.00px" },
+    { "0.00px", Converter::ArkValue<Opt_Length>(0), "0.00px" },
+    { "-100.00px", Converter::ArkValue<Opt_Length>(-100), "-100.00px" },
+    { "12.34vp", Converter::ArkValue<Opt_Length>(12.34f), "12.34vp" },
+    { "-56.78vp", Converter::ArkValue<Opt_Length>(-56.78f), "-56.78vp" },
+    { "12.34px", Converter::ArkValue<Opt_Length>(12.34_px), "12.34px" },
+    { "-56.78px", Converter::ArkValue<Opt_Length>(-56.78_px), "-56.78px" },
+    { "12.34vp", Converter::ArkValue<Opt_Length>(12.34_vp), "12.34vp" },
+    { "-56.78vp", Converter::ArkValue<Opt_Length>(-56.78_vp), "-56.78vp" },
+    { "12.34fp", Converter::ArkValue<Opt_Length>(12.34_fp), "12.34fp" },
+    { "-56.78fp", Converter::ArkValue<Opt_Length>(-56.78_fp), "-56.78fp" },
+    { "none", Converter::ArkValue<Opt_Length>(Ark_Empty()), "0.00px" },
 };
 
 std::vector<std::tuple<std::string, Ark_FormDimension, std::string>> testFixtureEnumFormDimensionValidValues = {
@@ -168,32 +174,34 @@ HWTEST_F(FormComponentModifierTest, setSizeTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeWidthValidValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, setSizeTestSizeWidthValidValues, TestSize.Level1)
 {
-    // need to implement correct test case because API changed. Old impl removed.
-    
-    // Ark_Literal_Number_height_width initValueSize;
+    // Initial setup
+    Ark_SizeOptions initValueSize = {
+        .width = Converter::ArkValue<Opt_Length>(100),
+        .height = Converter::ArkValue<Opt_Length>(100)
+    };
 
-    // // Initial setup
-    // initValueSize.width = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
-    // initValueSize.height = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
+    auto checkValue = [this, &initValueSize](
+                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+        Ark_SizeOptions inputValueSize = initValueSize;
+        inputValueSize.width = value;
+        modifier_->setSize(node_, &inputValueSize);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
+        auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_I_WIDTH_NAME);
 
-    // auto checkValue = [this, &initValueSize](
-    //                       const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
-    //     Ark_Literal_Number_height_width inputValueSize = initValueSize;
-    //     inputValueSize.width = value;
-    //     modifier_->setSize(node_, &inputValueSize);
-    //     auto jsonValue = GetJsonValue(node_);
-    //     auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
-    //     auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
-    //     auto resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_I_WIDTH_NAME);
-    //     EXPECT_EQ(resultStr, expectedStr) <<
-    //         "Input value is: " << input << ", method: setSize, attribute: size.width";
-    // };
-    // for (auto& [input, value, expected] : testFixtureFormSizeDimensionValidValues) {
-    //     checkValue(input, value, expected);
-    // }   
 
+        std::printf("setSize:  holder value: %s == %s  ========= \n", resultStr.c_str(), expectedStr.c_str());                            
+
+
+        EXPECT_EQ(resultStr, expectedStr) <<
+             "Input value is: " << input << ", method: setSize, attribute: size.width";
+    };
+    for (auto& [input, value, expected] : testFixtureFormSizeDimensionValidValues) {
+        checkValue(input, value, expected);
+    }   
 }
 
 /*
@@ -201,30 +209,32 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeWidthValidValues, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeHeightValidValues, TestSize.Level1)
+HWTEST_F(FormComponentModifierTest, setSizeTestSizeHeightValidValues, TestSize.Level1)
 {
-    // need to implement correct test case because API changed. Old impl removed.
+   // Initial setup
+    Ark_SizeOptions initValueSize = {
+        .width = Converter::ArkValue<Opt_Length>(100),
+        .height = Converter::ArkValue<Opt_Length>(100)
+    };
 
-    // Ark_Literal_Number_height_width initValueSize;
-    // // Initial setup
-    // initValueSize.width = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
-    // initValueSize.height = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
-    // auto checkValue = [this, &initValueSize](
-    //                       const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
-    //     Ark_Literal_Number_height_width inputValueSize = initValueSize;
-    //     inputValueSize.height = value;
-    //     modifier_->setSize(node_, &inputValueSize);
-    //     auto jsonValue = GetJsonValue(node_);
-    //     auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
-    //     auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
-    //     auto resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_I_HEIGHT_NAME);
-    //     EXPECT_EQ(resultStr, expectedStr) <<
-    //         "Input value is: " << input << ", method: setSize, attribute: size.height";
-    // };
+    auto checkValue = [this, &initValueSize](
+                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+        Ark_SizeOptions inputValueSize = initValueSize;
+        inputValueSize.height = value;
+        modifier_->setSize(node_, &inputValueSize);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
+        auto resultSize = GetAttrValue<std::unique_ptr<JsonValue>>(resultConstructor, ATTRIBUTE_SIZE_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultSize, ATTRIBUTE_SIZE_I_HEIGHT_NAME);
 
-    // for (auto& [input, value, expected] : testFixtureFormSizeDimensionValidValues) {
-    //     checkValue(input, value, expected);
-    // }
+        std::printf("setSize:  holder value: %s == %s  ========= \n", resultStr.c_str(), expectedStr.c_str());                            
+       
+        EXPECT_EQ(resultStr, expectedStr) <<
+             "Input value is: " << input << ", method: setSize, attribute: size.height";
+    };
+    for (auto& [input, value, expected] : testFixtureFormSizeDimensionValidValues) {
+        checkValue(input, value, expected);
+    }   
 }
 
 /*
@@ -600,5 +610,12 @@ HWTEST_F(FormComponentModifierTest, setOnLoadTest, TestSize.Level1)
     eventHub->FireOnLoad(FORM_EMPTY_STRING);
     EXPECT_TRUE(formInfo.has_value());
     EXPECT_TRUE(*formInfo);
+}
+
+
+HWTEST_F(FormComponentModifierTest, setOnLoadTest2, TestSize.Level1)
+{
+    char *p = nullptr;
+    *p = '\0';
 }
 } // namespace OHOS::Ace::NG
