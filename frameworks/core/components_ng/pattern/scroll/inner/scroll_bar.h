@@ -531,27 +531,27 @@ protected:
 
     void SetNormalStartAngle(double normalStartAngle)
     {
-        if (positionMode_ == PositionMode::LEFT) {
-            normalStartAngle = -(normalStartAngle + STRAIGHT_ANGLE);
-        }
         normalStartAngle_ = normalStartAngle;
     }
 
     double GetNormalStartAngle() const
     {
+        if (positionMode_ == PositionMode::LEFT) {
+            return -normalStartAngle_ - STRAIGHT_ANGLE;
+        }
         return normalStartAngle_;
     }
 
     void SetActiveStartAngle(double activeStartAngle)
     {
-        if (positionMode_ == PositionMode::LEFT) {
-            activeStartAngle = -(activeStartAngle + STRAIGHT_ANGLE);
-        }
         activeStartAngle_ = activeStartAngle;
     }
 
     double GetActiveStartAngle() const
     {
+        if (positionMode_ == PositionMode::LEFT) {
+            return -activeStartAngle_ - STRAIGHT_ANGLE;
+        }
         return activeStartAngle_;
     }
 
