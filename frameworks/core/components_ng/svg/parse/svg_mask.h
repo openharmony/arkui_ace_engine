@@ -32,12 +32,14 @@ public:
     static RefPtr<SvgNode> Create();
 
 protected:
+    void OnMaskEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) override;
     void OnInitStyle() override;
     void OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override;
     void OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override;
 
     double ParseUnitsAttr(const Dimension& attr, double value);
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+    void DrawChildren(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule);
 
 private:
     Dimension x_ = Dimension(-0.1, DimensionUnit::PERCENT); // x-axis default value

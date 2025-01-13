@@ -261,6 +261,11 @@ public:
         return {};
     }
 
+    virtual void CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        bool enableInspector, const NG::SnapshotParam& param)
+    {}
+
     virtual bool GetAssetContent(const std::string& url, std::string& content) = 0;
     virtual bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) = 0;
     virtual std::string GetAssetPath(const std::string& url) = 0;

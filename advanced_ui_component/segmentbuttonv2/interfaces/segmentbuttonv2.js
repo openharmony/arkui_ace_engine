@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-var m =
-  (this && this.m) ||
-  function (l1, target, key, desc) {
+var j =
+  (this && this.j) ||
+  function (m1, target, key, desc) {
     var c = arguments.length,
       r =
         c < 3
@@ -25,10 +25,10 @@ var m =
           : desc,
       d;
     if (typeof Reflect === 'object' && typeof Reflect.h1 === 'function')
-      r = Reflect.h1(l1, target, key, desc);
+      r = Reflect.h1(m1, target, key, desc);
     else
-      for (var m1 = l1.length - 1; m1 >= 0; m1--)
-        if ((d = l1[m1]))
+      for (var n1 = m1.length - 1; n1 >= 0; n1--)
+        if ((d = m1[n1]))
           r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
   };
@@ -42,11 +42,11 @@ const curves = requireNativeModule('ohos.curves');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const i18n = requireNapi('i18n');
-const o = 1;
-const t = 2;
-const u = 0;
-const a1 = 1;
-const b1 = {
+const m = 1;
+const o = 2;
+const t = 0;
+const u = 1;
+const a1 = {
   buttonBackgroundColor: {
     id: -1,
     type: 10001,
@@ -195,14 +195,14 @@ const b1 = {
     }),
   },
   itemShadow: ShadowStyle.OUTER_DEFAULT_XS,
-  itemMaxFontScale: o,
-  l1: o,
-  m1: t,
-  itemMinFontScale: u,
-  n1: u,
-  o1: a1,
+  itemMaxFontScale: m,
+  l1: m,
+  m1: o,
+  itemMinFontScale: t,
+  n1: t,
+  o1: u,
 };
-const c1 = {
+const b1 = {
   buttonBackgroundColor: {
     id: -1,
     type: 10001,
@@ -351,12 +351,12 @@ const c1 = {
     }),
   },
   itemShadow: ShadowStyle.OUTER_DEFAULT_XS,
-  itemMaxFontScale: o,
-  l1: o,
-  m1: t,
-  itemMinFontScale: u,
-  n1: u,
-  o1: a1,
+  itemMaxFontScale: m,
+  l1: m,
+  m1: o,
+  itemMinFontScale: t,
+  n1: t,
+  o1: u,
 };
 let SegmentButtonV2Item = class SegmentButtonV2Item {
   constructor(options) {
@@ -375,25 +375,27 @@ let SegmentButtonV2Item = class SegmentButtonV2Item {
     return !!this.text && (!!this.icon || !!this.symbol);
   }
 };
-m([Trace], SegmentButtonV2Item.prototype, 'text', void 0);
-m([Trace], SegmentButtonV2Item.prototype, 'icon', void 0);
-m([Trace], SegmentButtonV2Item.prototype, 'symbol', void 0);
-m([Trace], SegmentButtonV2Item.prototype, 'enabled', void 0);
-m([Trace], SegmentButtonV2Item.prototype, 'textModifier', void 0);
-m([Trace], SegmentButtonV2Item.prototype, 'iconModifier', void 0);
-m([Trace], SegmentButtonV2Item.prototype, 'symbolModifier', void 0);
-m([Trace], SegmentButtonV2Item.prototype, 'accessibilityText', void 0);
-m([Trace], SegmentButtonV2Item.prototype, 'accessibilityDescription', void 0);
-m([Trace], SegmentButtonV2Item.prototype, 'accessibilityLevel', void 0);
-m([Computed], SegmentButtonV2Item.prototype, 'isHybrid', null);
-SegmentButtonV2Item = m([ObservedV2], SegmentButtonV2Item);
+j([Trace], SegmentButtonV2Item.prototype, 'text', void 0);
+j([Trace], SegmentButtonV2Item.prototype, 'icon', void 0);
+j([Trace], SegmentButtonV2Item.prototype, 'symbol', void 0);
+j([Trace], SegmentButtonV2Item.prototype, 'enabled', void 0);
+j([Trace], SegmentButtonV2Item.prototype, 'textModifier', void 0);
+j([Trace], SegmentButtonV2Item.prototype, 'iconModifier', void 0);
+j([Trace], SegmentButtonV2Item.prototype, 'symbolModifier', void 0);
+j([Trace], SegmentButtonV2Item.prototype, 'accessibilityText', void 0);
+j([Trace], SegmentButtonV2Item.prototype, 'accessibilityDescription', void 0);
+j([Trace], SegmentButtonV2Item.prototype, 'accessibilityLevel', void 0);
+j([Computed], SegmentButtonV2Item.prototype, 'isHybrid', null);
+SegmentButtonV2Item = j([ObservedV2], SegmentButtonV2Item);
 export { SegmentButtonV2Item };
 let SegmentButtonV2Items = class SegmentButtonV2Items extends Array {
-  constructor(items) {
-    super();
-    for (let options of items) {
-      if (options) {
-        this.push(new SegmentButtonV2Item(options));
+  constructor(l1) {
+    super(typeof l1 === 'number' ? l1 : 0);
+    if (typeof l1 !== 'number' && l1 && l1.length) {
+      for (let options of l1) {
+        if (options) {
+          this.push(new SegmentButtonV2Item(options));
+        }
       }
     }
   }
@@ -401,9 +403,10 @@ let SegmentButtonV2Items = class SegmentButtonV2Items extends Array {
     return this.some((item) => item.isHybrid);
   }
 };
-m([Computed], SegmentButtonV2Items.prototype, 'hasHybrid', null);
-SegmentButtonV2Items = m([ObservedV2], SegmentButtonV2Items);
+j([Computed], SegmentButtonV2Items.prototype, 'hasHybrid', null);
+SegmentButtonV2Items = j([ObservedV2], SegmentButtonV2Items);
 export { SegmentButtonV2Items };
+const c1 = new SegmentButtonV2Items([]);
 export class TabSegmentButtonV2 extends ViewV2 {
   constructor(
     parent,
@@ -585,7 +588,7 @@ export class TabSegmentButtonV2 extends ViewV2 {
             let componentCall = new d1(
               this,
               {
-                theme: b1,
+                theme: a1,
                 items: this.items,
                 selectedIndex: this.selectedIndex,
                 $selectedIndex: (selectedIndex) => {
@@ -627,14 +630,14 @@ export class TabSegmentButtonV2 extends ViewV2 {
               () => {},
               {
                 page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                line: 286,
+                line: 294,
                 q1: 5,
               }
             );
             ViewV2.create(componentCall);
             let paramsLambda = () => {
               return {
-                theme: b1,
+                theme: a1,
                 items: this.items,
                 selectedIndex: this.selectedIndex,
                 $selectedIndex: (selectedIndex) => {
@@ -675,7 +678,7 @@ export class TabSegmentButtonV2 extends ViewV2 {
             componentCall.paramsGenerator_ = paramsLambda;
           } else {
             this.updateStateVarsOfChildByElmtId(elmtId, {
-              theme: b1,
+              theme: a1,
               items: this.items,
               selectedIndex: this.selectedIndex,
               itemMinFontScale: this.itemMinFontScale,
@@ -831,43 +834,43 @@ export class TabSegmentButtonV2 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-m([Param], TabSegmentButtonV2.prototype, 'items', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'selectedIndex', void 0);
-m([Event], TabSegmentButtonV2.prototype, '$selectedIndex', void 0);
-m([Event], TabSegmentButtonV2.prototype, 'onItemClicked', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemSpace', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemFontSize', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontSize', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemFontColor', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontColor', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemFontWeight', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontWeight', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemSelectedBackgroundColor', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemIconSize', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemSelectedIconFillColor', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemSymbolFontColor', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemSelectedSymbolFontColor', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemMinHeight', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemPadding', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'itemShadow', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundColor', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundBlurStyle', void 0);
-m(
+j([Param], TabSegmentButtonV2.prototype, 'items', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'selectedIndex', void 0);
+j([Event], TabSegmentButtonV2.prototype, '$selectedIndex', void 0);
+j([Event], TabSegmentButtonV2.prototype, 'onItemClicked', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemSpace', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemFontSize', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontSize', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemFontColor', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontColor', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemFontWeight', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontWeight', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemSelectedBackgroundColor', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemIconSize', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemSelectedIconFillColor', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemSymbolFontColor', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemSelectedSymbolFontColor', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemMinHeight', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemPadding', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'itemShadow', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundColor', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundBlurStyle', void 0);
+j(
   [Param],
   TabSegmentButtonV2.prototype,
   'buttonBackgroundBlurStyleOptions',
   void 0
 );
-m([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundEffect', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'buttonBorderRadius', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'buttonMinHeight', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'buttonPadding', void 0);
-m([Param], TabSegmentButtonV2.prototype, 'languageDirection', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundEffect', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'buttonBorderRadius', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'buttonMinHeight', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'buttonPadding', void 0);
+j([Param], TabSegmentButtonV2.prototype, 'languageDirection', void 0);
 export class CapsuleSegmentButtonV2 extends ViewV2 {
   constructor(
     parent,
@@ -1049,7 +1052,7 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
             let componentCall = new d1(
               this,
               {
-                theme: c1,
+                theme: b1,
                 items: this.items,
                 selectedIndex: this.selectedIndex,
                 $selectedIndex: (selectedIndex) => {
@@ -1091,14 +1094,14 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
               () => {},
               {
                 page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                line: 396,
+                line: 404,
                 q1: 5,
               }
             );
             ViewV2.create(componentCall);
             let paramsLambda = () => {
               return {
-                theme: c1,
+                theme: b1,
                 items: this.items,
                 selectedIndex: this.selectedIndex,
                 $selectedIndex: (selectedIndex) => {
@@ -1139,7 +1142,7 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
             componentCall.paramsGenerator_ = paramsLambda;
           } else {
             this.updateStateVarsOfChildByElmtId(elmtId, {
-              theme: c1,
+              theme: b1,
               items: this.items,
               selectedIndex: this.selectedIndex,
               itemMinFontScale: this.itemMinFontScale,
@@ -1295,63 +1298,63 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-m([Param], CapsuleSegmentButtonV2.prototype, 'items', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'selectedIndex', void 0);
-m([Event], CapsuleSegmentButtonV2.prototype, '$selectedIndex', void 0);
-m([Event], CapsuleSegmentButtonV2.prototype, 'onItemClicked', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemSpace', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemFontColor', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontColor', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemFontSize', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontSize', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemFontWeight', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontWeight', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
-m(
+j([Param], CapsuleSegmentButtonV2.prototype, 'items', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'selectedIndex', void 0);
+j([Event], CapsuleSegmentButtonV2.prototype, '$selectedIndex', void 0);
+j([Event], CapsuleSegmentButtonV2.prototype, 'onItemClicked', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemSpace', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemFontColor', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontColor', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemFontSize', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontSize', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemFontWeight', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontWeight', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
+j(
   [Param],
   CapsuleSegmentButtonV2.prototype,
   'itemSelectedBackgroundColor',
   void 0
 );
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemIconSize', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
-m(
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemIconSize', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
+j(
   [Param],
   CapsuleSegmentButtonV2.prototype,
   'itemSelectedIconFillColor',
   void 0
 );
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemSymbolFontColor', void 0);
-m(
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemSymbolFontColor', void 0);
+j(
   [Param],
   CapsuleSegmentButtonV2.prototype,
   'itemSelectedSymbolFontColor',
   void 0
 );
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemMinHeight', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemPadding', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'itemShadow', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'buttonBackgroundColor', void 0);
-m(
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemMinHeight', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemPadding', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'itemShadow', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'buttonBackgroundColor', void 0);
+j(
   [Param],
   CapsuleSegmentButtonV2.prototype,
   'buttonBackgroundBlurStyle',
   void 0
 );
-m(
+j(
   [Param],
   CapsuleSegmentButtonV2.prototype,
   'buttonBackgroundBlurStyleOptions',
   void 0
 );
-m([Param], CapsuleSegmentButtonV2.prototype, 'buttonBackgroundEffect', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'buttonBorderRadius', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'buttonMinHeight', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'buttonPadding', void 0);
-m([Param], CapsuleSegmentButtonV2.prototype, 'languageDirection', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'buttonBackgroundEffect', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'buttonBorderRadius', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'buttonMinHeight', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'buttonPadding', void 0);
+j([Param], CapsuleSegmentButtonV2.prototype, 'languageDirection', void 0);
 class d1 extends ViewV2 {
   constructor(
     parent,
@@ -1381,19 +1384,23 @@ class d1 extends ViewV2 {
         Gesture.create(GesturePriority.High);
         PanGesture.create();
         PanGesture.onActionStart((event) => {
-          if (event.axisHorizontal !== 0 || event.axisVertical !== 0) {
-            this.isMouseWheelScroll = true;
-            return;
-          }
           const finger = event.fingerList.find(Boolean);
           if (!finger) {
             return;
           }
           const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+          if (!this.isItemEnabled(index)) {
+            return;
+          }
+          if (event.axisHorizontal !== 0 || event.axisVertical !== 0) {
+            this.isMouseWheelScroll = true;
+            return;
+          }
           if (index === this.normalizedSelectedIndex) {
             this.isDragging = true;
           }
           this.panStartGlobalX = finger.globalX;
+          this.panStartIndex = index;
         });
         PanGesture.onActionUpdate((event) => {
           if (!this.isDragging) {
@@ -1404,11 +1411,12 @@ class d1 extends ViewV2 {
             return;
           }
           const index = this.getIndexByPosition(finger.globalX, finger.globalY);
-          if (index !== -1) {
-            this.updateSelectedIndex(index);
-          }
+          this.updateSelectedIndex(index);
         });
         PanGesture.onActionEnd((event) => {
+          if (!this.isItemEnabled(this.panStartIndex)) {
+            return;
+          }
           if (this.isMouseWheelScroll) {
             const offset = event.offsetX !== 0 ? event.offsetX : event.offsetY;
             const k1 = offset < 0 ? 1 : -1;
@@ -1418,6 +1426,9 @@ class d1 extends ViewV2 {
           }
           if (this.isDragging) {
             this.isDragging = false;
+            return;
+          }
+          if (!this.isItemEnabled(this.normalizedSelectedIndex)) {
             return;
           }
           const finger = event.fingerList.find(Boolean);
@@ -1433,12 +1444,13 @@ class d1 extends ViewV2 {
         PanGesture.onActionCancel(() => {
           this.isDragging = false;
           this.isMouseWheelScroll = false;
+          this.panStartIndex = -1;
         });
         PanGesture.pop();
         Gesture.pop();
       }, Flex);
       this.observeComponentCreation2((elmtId, isInitialRender) => {
-        Repeat(this.items, this)
+        Repeat(this.getItems(), this)
           .each((repeatItem) => {
             this.observeComponentCreation2((elmtId, isInitialRender) => {
               Button.createWithChild({ type: ButtonType.Normal });
@@ -1539,14 +1551,14 @@ class d1 extends ViewV2 {
                         itemMinHeight: this.itemMinHeight,
                         itemPadding: this.itemPadding,
                         languageDirection: this.languageDirection,
-                        hasHybrid: this.items.hasHybrid,
+                        hasHybrid: this.getItems().hasHybrid,
                       },
                       undefined,
                       elmtId,
                       () => {},
                       {
                         page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                        line: 565,
+                        line: 582,
                         q1: 13,
                       }
                     );
@@ -1575,7 +1587,7 @@ class d1 extends ViewV2 {
                         itemMinHeight: this.itemMinHeight,
                         itemPadding: this.itemPadding,
                         languageDirection: this.languageDirection,
-                        hasHybrid: this.items.hasHybrid,
+                        hasHybrid: this.getItems().hasHybrid,
                       };
                     };
                     componentCall.paramsGenerator_ = paramsLambda;
@@ -1602,7 +1614,7 @@ class d1 extends ViewV2 {
                       itemMinHeight: this.itemMinHeight,
                       itemPadding: this.itemPadding,
                       languageDirection: this.languageDirection,
-                      hasHybrid: this.items.hasHybrid,
+                      hasHybrid: this.getItems().hasHybrid,
                     });
                   }
                 },
@@ -1842,13 +1854,25 @@ class d1 extends ViewV2 {
     this.isMouseWheelScroll = false;
     this.isDragging = false;
     this.panStartGlobalX = 0;
+    this.panStartIndex = -1;
     this.finalizeConstruction();
   }
+  onItemsChange() {
+    this.itemRects = [];
+  }
   get normalizedSelectedIndex() {
-    return normalize(this.selectedIndex, 0, this.items.length - 1);
+    const items = this.getItems();
+    return normalize(this.selectedIndex, 0, items.length - 1);
   }
   get selectedItemRect() {
     return this.itemRects[this.normalizedSelectedIndex];
+  }
+  isItemEnabled(index) {
+    const items = this.getItems();
+    if (index < 0 || index >= items.length) {
+      return false;
+    }
+    return items[index].enabled;
   }
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
@@ -1878,6 +1902,9 @@ class d1 extends ViewV2 {
     Stack.pop();
     Stack.pop();
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
+  }
+  getItems() {
+    return this.items ?? c1;
   }
   getItemBackplateShadow() {
     return this.itemShadow ?? this.theme.itemShadow;
@@ -1966,7 +1993,11 @@ class d1 extends ViewV2 {
     return this.theme.itemSelectedBackgroundColor;
   }
   getItemSpace() {
-    if (this.itemSpace && g1.getInstance().s1(this.itemSpace)) {
+    if (
+      this.itemSpace &&
+      this.itemSpace.unit !== LengthUnit.PERCENT &&
+      g1.getInstance().s1(this.itemSpace)
+    ) {
       return this.itemSpace;
     }
     return this.theme.itemSpace;
@@ -1992,8 +2023,7 @@ class d1 extends ViewV2 {
   }
   updateSelectedIndex(selectedIndex) {
     if (
-      selectedIndex < 0 ||
-      selectedIndex > this.items.length - 1 ||
+      !this.isItemEnabled(selectedIndex) ||
       selectedIndex === this.selectedIndex
     ) {
       return;
@@ -2017,22 +2047,10 @@ class d1 extends ViewV2 {
     );
   }
   getItemAccessibilityDescription(repeatItem) {
-    if (typeof repeatItem.item.accessibilityDescription === 'object') {
-      return i(this.getUIContext(), repeatItem.item.accessibilityDescription);
-    } else if (typeof repeatItem.item.accessibilityDescription === 'string') {
-      return repeatItem.item.accessibilityDescription;
-    } else {
-      return undefined;
-    }
+    return repeatItem.item.accessibilityDescription;
   }
   getItemAccessibilityText(repeatItem) {
-    if (typeof repeatItem.item.accessibilityText === 'object') {
-      return i(this.getUIContext(), repeatItem.item.accessibilityText);
-    } else if (typeof repeatItem.item.accessibilityText === 'string') {
-      return repeatItem.item.accessibilityText;
-    } else {
-      return undefined;
-    }
+    return repeatItem.item.accessibilityText;
   }
   isSelected(repeatItem) {
     return repeatItem.index === this.normalizedSelectedIndex;
@@ -2062,7 +2080,8 @@ class d1 extends ViewV2 {
     if (this.buttonMinHeight && g1.getInstance().s1(this.buttonMinHeight)) {
       return g1.getInstance().stringify(this.buttonMinHeight);
     }
-    return this.items.hasHybrid ? this.theme.i1 : this.theme.buttonMinHeight;
+    const items = this.getItems();
+    return items.hasHybrid ? this.theme.i1 : this.theme.buttonMinHeight;
   }
   updateStateVars(params) {
     if (params === undefined) {
@@ -2183,46 +2202,47 @@ class d1 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-m([Param], d1.prototype, 'items', void 0);
-m([Param], d1.prototype, 'selectedIndex', void 0);
-m([Event], d1.prototype, '$selectedIndex', void 0);
-m([Param], d1.prototype, 'theme', void 0);
-m([Event], d1.prototype, 'onItemClicked', void 0);
-m([Param], d1.prototype, 'itemMinFontScale', void 0);
-m([Param], d1.prototype, 'itemMaxFontScale', void 0);
-m([Param], d1.prototype, 'itemSpace', void 0);
-m([Param], d1.prototype, 'itemFontColor', void 0);
-m([Param], d1.prototype, 'itemSelectedFontColor', void 0);
-m([Param], d1.prototype, 'itemFontSize', void 0);
-m([Param], d1.prototype, 'itemSelectedFontSize', void 0);
-m([Param], d1.prototype, 'itemFontWeight', void 0);
-m([Param], d1.prototype, 'itemSelectedFontWeight', void 0);
-m([Param], d1.prototype, 'itemBorderRadius', void 0);
-m([Param], d1.prototype, 'itemSelectedBackgroundColor', void 0);
-m([Param], d1.prototype, 'itemIconSize', void 0);
-m([Param], d1.prototype, 'itemIconFillColor', void 0);
-m([Param], d1.prototype, 'itemSelectedIconFillColor', void 0);
-m([Param], d1.prototype, 'itemSymbolFontSize', void 0);
-m([Param], d1.prototype, 'itemSymbolFontColor', void 0);
-m([Param], d1.prototype, 'itemSelectedSymbolFontColor', void 0);
-m([Param], d1.prototype, 'itemMinHeight', void 0);
-m([Param], d1.prototype, 'itemPadding', void 0);
-m([Param], d1.prototype, 'itemShadow', void 0);
-m([Param], d1.prototype, 'buttonBackgroundColor', void 0);
-m([Param], d1.prototype, 'buttonBackgroundBlurStyle', void 0);
-m([Param], d1.prototype, 'buttonBackgroundBlurStyleOptions', void 0);
-m([Param], d1.prototype, 'buttonBackgroundEffect', void 0);
-m([Param], d1.prototype, 'buttonBorderRadius', void 0);
-m([Param], d1.prototype, 'buttonMinHeight', void 0);
-m([Param], d1.prototype, 'buttonPadding', void 0);
-m([Param], d1.prototype, 'languageDirection', void 0);
-m([Local], d1.prototype, 'itemRects', void 0);
-m([Local], d1.prototype, 'itemScale', void 0);
-m([Local], d1.prototype, 'hoveredItemIndex', void 0);
-m([Local], d1.prototype, 'mousePressedItemIndex', void 0);
-m([Local], d1.prototype, 'touchPressedItemIndex', void 0);
-m([Computed], d1.prototype, 'normalizedSelectedIndex', null);
-m([Computed], d1.prototype, 'selectedItemRect', null);
+j([Param], d1.prototype, 'items', void 0);
+j([Param], d1.prototype, 'selectedIndex', void 0);
+j([Event], d1.prototype, '$selectedIndex', void 0);
+j([Param], d1.prototype, 'theme', void 0);
+j([Event], d1.prototype, 'onItemClicked', void 0);
+j([Param], d1.prototype, 'itemMinFontScale', void 0);
+j([Param], d1.prototype, 'itemMaxFontScale', void 0);
+j([Param], d1.prototype, 'itemSpace', void 0);
+j([Param], d1.prototype, 'itemFontColor', void 0);
+j([Param], d1.prototype, 'itemSelectedFontColor', void 0);
+j([Param], d1.prototype, 'itemFontSize', void 0);
+j([Param], d1.prototype, 'itemSelectedFontSize', void 0);
+j([Param], d1.prototype, 'itemFontWeight', void 0);
+j([Param], d1.prototype, 'itemSelectedFontWeight', void 0);
+j([Param], d1.prototype, 'itemBorderRadius', void 0);
+j([Param], d1.prototype, 'itemSelectedBackgroundColor', void 0);
+j([Param], d1.prototype, 'itemIconSize', void 0);
+j([Param], d1.prototype, 'itemIconFillColor', void 0);
+j([Param], d1.prototype, 'itemSelectedIconFillColor', void 0);
+j([Param], d1.prototype, 'itemSymbolFontSize', void 0);
+j([Param], d1.prototype, 'itemSymbolFontColor', void 0);
+j([Param], d1.prototype, 'itemSelectedSymbolFontColor', void 0);
+j([Param], d1.prototype, 'itemMinHeight', void 0);
+j([Param], d1.prototype, 'itemPadding', void 0);
+j([Param], d1.prototype, 'itemShadow', void 0);
+j([Param], d1.prototype, 'buttonBackgroundColor', void 0);
+j([Param], d1.prototype, 'buttonBackgroundBlurStyle', void 0);
+j([Param], d1.prototype, 'buttonBackgroundBlurStyleOptions', void 0);
+j([Param], d1.prototype, 'buttonBackgroundEffect', void 0);
+j([Param], d1.prototype, 'buttonBorderRadius', void 0);
+j([Param], d1.prototype, 'buttonMinHeight', void 0);
+j([Param], d1.prototype, 'buttonPadding', void 0);
+j([Param], d1.prototype, 'languageDirection', void 0);
+j([Local], d1.prototype, 'itemRects', void 0);
+j([Local], d1.prototype, 'itemScale', void 0);
+j([Local], d1.prototype, 'hoveredItemIndex', void 0);
+j([Local], d1.prototype, 'mousePressedItemIndex', void 0);
+j([Local], d1.prototype, 'touchPressedItemIndex', void 0);
+j([Monitor('items')], d1.prototype, 'onItemsChange', null);
+j([Computed], d1.prototype, 'normalizedSelectedIndex', null);
+j([Computed], d1.prototype, 'selectedItemRect', null);
 const e1 = {
   itemBorderRadius: {
     id: -1,
@@ -2343,12 +2363,12 @@ const e1 = {
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
-  itemMaxFontScale: o,
-  l1: o,
-  m1: t,
-  itemMinFontScale: u,
-  n1: u,
-  o1: a1,
+  itemMaxFontScale: m,
+  l1: m,
+  m1: o,
+  itemMinFontScale: t,
+  n1: t,
+  o1: u,
 };
 export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
   constructor(
@@ -2515,7 +2535,7 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
       Flex.direction(this.languageDirection);
     }, Flex);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
-      Repeat(this.items, this)
+      Repeat(this.getItems(), this)
         .each((repeatItem) => {
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             Button.createWithChild({ type: ButtonType.Normal });
@@ -2537,18 +2557,18 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
             Button.onClick(() => {
               this.onItemClicked?.(repeatItem.index);
               let selection;
+              const items = this.getItems();
+              const selectedIndexes = this.selectedIndexes ?? [];
               if (this.isSelected(repeatItem)) {
-                selection = this.selectedIndexes.filter((index) => {
-                  if (index < 0 || index > this.items.length - 1) {
+                selection = selectedIndexes.filter((index) => {
+                  if (index < 0 || index > items.length - 1) {
                     return false;
                   }
                   return index !== repeatItem.index;
                 });
               } else {
-                selection = this.selectedIndexes
-                  .filter(
-                    (index) => index >= 0 && index <= this.items.length - 1
-                  )
+                selection = selectedIndexes
+                  .filter((index) => index >= 0 && index <= items.length - 1)
                   .concat(repeatItem.index);
               }
               this.$selectedIndexes(selection);
@@ -2572,7 +2592,7 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
                       theme: this.theme,
                       item: repeatItem.item,
                       selected: this.isSelected(repeatItem),
-                      hasHybrid: this.items.hasHybrid,
+                      hasHybrid: this.getItems().hasHybrid,
                       itemMinFontScale: this.itemMinFontScale,
                       itemMaxFontScale: this.itemMaxFontScale,
                       itemFontColor: this.itemFontColor,
@@ -2597,7 +2617,7 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
                     () => {},
                     {
                       page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                      line: 1065,
+                      line: 1091,
                       q1: 13,
                     }
                   );
@@ -2607,7 +2627,7 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
                       theme: this.theme,
                       item: repeatItem.item,
                       selected: this.isSelected(repeatItem),
-                      hasHybrid: this.items.hasHybrid,
+                      hasHybrid: this.getItems().hasHybrid,
                       itemMinFontScale: this.itemMinFontScale,
                       itemMaxFontScale: this.itemMaxFontScale,
                       itemFontColor: this.itemFontColor,
@@ -2634,7 +2654,7 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
                     theme: this.theme,
                     item: repeatItem.item,
                     selected: this.isSelected(repeatItem),
-                    hasHybrid: this.items.hasHybrid,
+                    hasHybrid: this.getItems().hasHybrid,
                     itemMinFontScale: this.itemMinFontScale,
                     itemMaxFontScale: this.itemMaxFontScale,
                     itemFontColor: this.itemFontColor,
@@ -2667,6 +2687,9 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
     Flex.pop();
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
+  getItems() {
+    return this.items ?? c1;
+  }
   getItemBackgroundBlurStyleOptions() {
     if (this.itemBackgroundEffect) {
       return undefined;
@@ -2680,25 +2703,17 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
     return this.itemBackgroundBlurStyle;
   }
   getItemAccessibilityDescription(repeatItem) {
-    if (typeof repeatItem.item.accessibilityDescription === 'object') {
-      return i(this.getUIContext(), repeatItem.item.accessibilityDescription);
-    } else if (typeof repeatItem.item.accessibilityDescription === 'string') {
-      return repeatItem.item.accessibilityDescription;
-    } else {
-      return undefined;
-    }
+    return repeatItem.item.accessibilityDescription;
   }
   getItemAccessibilityText(repeatItem) {
-    if (typeof repeatItem.item.accessibilityText === 'object') {
-      return i(this.getUIContext(), repeatItem.item.accessibilityText);
-    } else if (typeof repeatItem.item.accessibilityText === 'string') {
-      return repeatItem.item.accessibilityText;
-    } else {
-      return undefined;
-    }
+    return repeatItem.item.accessibilityText;
   }
   getItemSpace() {
-    if (this.itemSpace && g1.getInstance().s1(this.itemSpace)) {
+    if (
+      this.itemSpace &&
+      this.itemSpace.unit !== LengthUnit.PERCENT &&
+      g1.getInstance().s1(this.itemSpace)
+    ) {
       return this.itemSpace;
     }
     return this.theme.itemSpace;
@@ -2719,38 +2734,33 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
     return this.itemBackgroundColor?.color ?? this.theme.itemBackgroundColor;
   }
   isSelected(repeatItem) {
-    return this.selectedIndexes.includes(repeatItem.index);
+    const selectedIndexes = this.selectedIndexes ?? [];
+    return selectedIndexes.includes(repeatItem.index);
   }
   getItemButtonBorderRadius(repeatItem) {
+    const items = this.getItems();
     const h1 = LengthMetrics.vp(0);
-    if (repeatItem.index === 0) {
-      const borderRadius =
-        this.itemBorderRadius ??
-        LengthMetrics.resource(this.theme.itemBorderRadius);
-      return {
-        topStart: borderRadius,
-        bottomStart: borderRadius,
-        topEnd: h1,
-        bottomEnd: h1,
-      };
-    }
-    if (repeatItem.index === Math.min(this.items.length - 1, 4)) {
-      const borderRadius =
-        this.itemBorderRadius ??
-        LengthMetrics.resource(this.theme.itemBorderRadius);
-      return {
-        topStart: h1,
-        bottomStart: h1,
-        topEnd: borderRadius,
-        bottomEnd: borderRadius,
-      };
-    }
-    return {
+    const borderRadiuses = {
       topStart: h1,
       bottomStart: h1,
       topEnd: h1,
       bottomEnd: h1,
     };
+    if (repeatItem.index === 0) {
+      const borderRadius =
+        this.itemBorderRadius ??
+        LengthMetrics.resource(this.theme.itemBorderRadius);
+      borderRadiuses.topStart = borderRadius;
+      borderRadiuses.bottomStart = borderRadius;
+    }
+    if (repeatItem.index === items.length - 1) {
+      const borderRadius =
+        this.itemBorderRadius ??
+        LengthMetrics.resource(this.theme.itemBorderRadius);
+      borderRadiuses.topEnd = borderRadius;
+      borderRadiuses.bottomEnd = borderRadius;
+    }
+    return borderRadiuses;
   }
   updateStateVars(params) {
     if (params === undefined) {
@@ -2856,89 +2866,89 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'items', void 0);
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'selectedIndexes', void 0);
-m([Event], MultiCapsuleSegmentButtonV2.prototype, '$selectedIndexes', void 0);
-m([Event], MultiCapsuleSegmentButtonV2.prototype, 'onItemClicked', void 0);
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemSpace', void 0);
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontColor', void 0);
-m(
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'items', void 0);
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'selectedIndexes', void 0);
+j([Event], MultiCapsuleSegmentButtonV2.prototype, '$selectedIndexes', void 0);
+j([Event], MultiCapsuleSegmentButtonV2.prototype, 'onItemClicked', void 0);
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemSpace', void 0);
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontColor', void 0);
+j(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemSelectedFontColor',
   void 0
 );
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontSize', void 0);
-m(
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontSize', void 0);
+j(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemSelectedFontSize',
   void 0
 );
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontWeight', void 0);
-m(
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontWeight', void 0);
+j(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemSelectedFontWeight',
   void 0
 );
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
-m(
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
+j(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemBackgroundColor',
   void 0
 );
-m(
+j(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemBackgroundEffect',
   void 0
 );
-m(
+j(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemBackgroundBlurStyle',
   void 0
 );
-m(
+j(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemBackgroundBlurStyleOptions',
   void 0
 );
-m(
+j(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemSelectedBackgroundColor',
   void 0
 );
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemIconSize', void 0);
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
-m(
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemIconSize', void 0);
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
+j(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemSelectedIconFillColor',
   void 0
 );
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
-m(
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
+j(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemSymbolFontColor',
   void 0
 );
-m(
+j(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemSelectedSymbolFontColor',
   void 0
 );
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMinHeight', void 0);
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemPadding', void 0);
-m([Param], MultiCapsuleSegmentButtonV2.prototype, 'languageDirection', void 0);
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMinHeight', void 0);
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemPadding', void 0);
+j([Param], MultiCapsuleSegmentButtonV2.prototype, 'languageDirection', void 0);
 class f1 extends ViewV2 {
   constructor(
     parent,
@@ -3071,7 +3081,7 @@ class f1 extends ViewV2 {
     }, Column);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
-      if (this.item.symbol) {
+      if (this.item.symbol || this.item.symbolModifier) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create(this.item.symbol);
@@ -3154,10 +3164,10 @@ class f1 extends ViewV2 {
     }
     if (typeof this.itemMaxFontScale === 'object') {
       const itemMaxFontScale =
-        j(this.getUIContext(), this.itemMaxFontScale) ?? o;
+        i(this.getUIContext(), this.itemMaxFontScale) ?? m;
       return normalize(itemMaxFontScale, this.theme.l1, this.theme.m1);
     }
-    return o;
+    return m;
   }
   getItemMinFontScale() {
     if (typeof this.itemMinFontScale === 'number') {
@@ -3165,10 +3175,10 @@ class f1 extends ViewV2 {
     }
     if (typeof this.itemMinFontScale === 'object') {
       const itemMinFontScale =
-        j(this.getUIContext(), this.itemMinFontScale) ?? u;
+        i(this.getUIContext(), this.itemMinFontScale) ?? t;
       return normalize(itemMinFontScale, this.theme.n1, this.theme.o1);
     }
-    return u;
+    return t;
   }
   getItemPadding() {
     const itemPadding = {
@@ -3340,27 +3350,27 @@ class f1 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-m([Param], f1.prototype, 'hasHybrid', void 0);
-m([Param], f1.prototype, 'item', void 0);
-m([Param], f1.prototype, 'selected', void 0);
-m([Param], f1.prototype, 'theme', void 0);
-m([Param], f1.prototype, 'itemMinFontScale', void 0);
-m([Param], f1.prototype, 'itemMaxFontScale', void 0);
-m([Param], f1.prototype, 'itemFontColor', void 0);
-m([Param], f1.prototype, 'itemSelectedFontColor', void 0);
-m([Param], f1.prototype, 'itemFontSize', void 0);
-m([Param], f1.prototype, 'itemSelectedFontSize', void 0);
-m([Param], f1.prototype, 'itemFontWeight', void 0);
-m([Param], f1.prototype, 'itemSelectedFontWeight', void 0);
-m([Param], f1.prototype, 'itemIconSize', void 0);
-m([Param], f1.prototype, 'itemIconFillColor', void 0);
-m([Param], f1.prototype, 'itemSelectedIconFillColor', void 0);
-m([Param], f1.prototype, 'itemSymbolFontSize', void 0);
-m([Param], f1.prototype, 'itemSymbolFontColor', void 0);
-m([Param], f1.prototype, 'itemSelectedSymbolFontColor', void 0);
-m([Param], f1.prototype, 'itemMinHeight', void 0);
-m([Param], f1.prototype, 'itemPadding', void 0);
-m([Param], f1.prototype, 'languageDirection', void 0);
+j([Param], f1.prototype, 'hasHybrid', void 0);
+j([Param], f1.prototype, 'item', void 0);
+j([Param], f1.prototype, 'selected', void 0);
+j([Param], f1.prototype, 'theme', void 0);
+j([Param], f1.prototype, 'itemMinFontScale', void 0);
+j([Param], f1.prototype, 'itemMaxFontScale', void 0);
+j([Param], f1.prototype, 'itemFontColor', void 0);
+j([Param], f1.prototype, 'itemSelectedFontColor', void 0);
+j([Param], f1.prototype, 'itemFontSize', void 0);
+j([Param], f1.prototype, 'itemSelectedFontSize', void 0);
+j([Param], f1.prototype, 'itemFontWeight', void 0);
+j([Param], f1.prototype, 'itemSelectedFontWeight', void 0);
+j([Param], f1.prototype, 'itemIconSize', void 0);
+j([Param], f1.prototype, 'itemIconFillColor', void 0);
+j([Param], f1.prototype, 'itemSelectedIconFillColor', void 0);
+j([Param], f1.prototype, 'itemSymbolFontSize', void 0);
+j([Param], f1.prototype, 'itemSymbolFontColor', void 0);
+j([Param], f1.prototype, 'itemSelectedSymbolFontColor', void 0);
+j([Param], f1.prototype, 'itemMinHeight', void 0);
+j([Param], f1.prototype, 'itemPadding', void 0);
+j([Param], f1.prototype, 'languageDirection', void 0);
 class g1 {
   constructor() {}
   static getInstance() {
@@ -3388,17 +3398,6 @@ class g1 {
   }
 }
 function i(context, resource) {
-  const resourceManager = context.getHostContext()?.resourceManager;
-  if (!resourceManager) {
-    return undefined;
-  }
-  try {
-    return resourceManager.getStringSync(resource);
-  } catch (err) {
-    return undefined;
-  }
-}
-function j(context, resource) {
   const resourceManager = context.getHostContext()?.resourceManager;
   if (!resourceManager) {
     return undefined;

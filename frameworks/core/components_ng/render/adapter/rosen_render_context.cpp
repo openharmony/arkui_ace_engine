@@ -559,7 +559,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s", host->GetTag().c_str(),
             host->GetId(), paintRect.ToString().c_str());
     }
-    SyncGeometryFrame(paintRect);
+    if (extraOffset_.has_value()) {
+        SyncGeometryFrame(paintRect + extraOffset_.value());
+    } else {
+        SyncGeometryFrame(paintRect);
+    }
 
     if (!isSynced_) {
         isSynced_ = true;
@@ -812,12 +816,19 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
         frameNode->SetColorModeUpdateCallback(std::move(callback));
     }
     LoadNotifier bgLoadNotifier(CreateBgImageDataReadyCallback(), CreateBgImageLoadSuccessCallback(), nullptr);
-    bgLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(bgLoadNotifier));
+    auto syncMode = GetBackgroundImageSyncMode().value_or(false);
+    bgLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(bgLoadNotifier), syncMode);
     CHECK_NULL_VOID(bgLoadingCtx_);
     bgLoadingCtx_->LoadImageData();
 }
 
 void RosenRenderContext::OnBackgroundImageRepeatUpdate(const ImageRepeat& /*imageRepeat*/)
+{
+    CHECK_NULL_VOID(rsNode_);
+    PaintBackground();
+}
+
+void RosenRenderContext::OnBackgroundImageSyncModeUpdate(bool /*syncMode*/)
 {
     CHECK_NULL_VOID(rsNode_);
     PaintBackground();
@@ -2472,6 +2483,11 @@ void RosenRenderContext::SetOuterBorderWidth(const BorderWidthProperty& value)
         static_cast<float>((value.bottomDimen.value_or(Dimension(0.0))).ConvertToPx()));
     rsNode_->SetOuterBorderWidth(cornerBorderWidth);
     RequestNextFrame();
+}
+
+void RosenRenderContext::SetExtraOffset(const std::optional<OffsetF>& offset)
+{
+    extraOffset_ = offset;
 }
 
 void RosenRenderContext::OnOuterBorderStyleUpdate(const BorderStyleProperty& value)

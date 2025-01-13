@@ -791,4 +791,31 @@ HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset001, TestSize.Level1)
 
     EXPECT_EQ(info.startIndex_, 9675);
 }
+
+HWTEST_F(GridLayoutInfoTest, SkipStartIndexByOffset002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 0 }, { 2, 0 } } },
+        { 1, { { 0, 1 }, { 1, 1 }, { 2, 1 } } },
+        { 2, { { 0, 2 }, { 1, 2 }, { 2, 2 } } },
+    };
+    info.lineHeightMap_ = { { 0, 400.f }, { 1, 400.f }, { 2, 400.f } };
+    info.crossCount_ = 3;
+    info.childrenCount_ = 10;
+    info.lastRegularMainSize_ = 0;
+
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
+
+    info.currentOffset_ = -5000.f;
+    info.prevOffset_ = -20.f;
+    info.currentHeight_ = 420.f;
+
+    info.SkipStartIndexByOffset(option, 0.f);
+
+    EXPECT_EQ(info.startIndex_, 13);
+}
 } // namespace OHOS::Ace::NG

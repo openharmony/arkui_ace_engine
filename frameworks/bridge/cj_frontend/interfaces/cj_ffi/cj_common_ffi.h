@@ -134,6 +134,11 @@ struct CJTextPickerResult {
     uint32_t index;
 };
 
+struct CJDatePickerResult {
+    const char* value;
+    uint32_t index;
+};
+
 struct CJImageComplete {
     double width;
     double height;

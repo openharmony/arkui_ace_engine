@@ -2025,6 +2025,10 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("enableHapticFeedback", &JSWeb::EnableHapticFeedback);
     JSClass<JSWeb>::StaticMethod("bindSelectionMenu", &JSWeb::BindSelectionMenu);
     JSClass<JSWeb>::StaticMethod("optimizeParserBudget", &JSWeb::OptimizeParserBudgetEnabled);
+    JSClass<JSWeb>::StaticMethod("runJavaScriptOnHeadEnd", &JSWeb::RunJavaScriptOnHeadEnd);
+    JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentStart", &JSWeb::RunJavaScriptOnDocumentStart);
+    JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentEnd", &JSWeb::RunJavaScriptOnDocumentEnd);
+
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -5177,11 +5181,8 @@ void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
     ScriptItems scriptItems;
     ScriptItemsByOrder scriptItemsByOrder;
     ParseScriptItems(args, scriptItems, scriptItemsByOrder);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
-        WebModel::GetInstance()->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
-    } else {
-        WebModel::GetInstance()->JavaScriptOnDocumentStart(scriptItems);
-    }
+
+    WebModel::GetInstance()->JavaScriptOnDocumentStart(scriptItems);
 }
 
 void JSWeb::JavaScriptOnDocumentEnd(const JSCallbackInfo& args)
@@ -5190,11 +5191,34 @@ void JSWeb::JavaScriptOnDocumentEnd(const JSCallbackInfo& args)
     ScriptItemsByOrder scriptItemsByOrder;
     ParseScriptItems(args, scriptItems, scriptItemsByOrder);
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
-        WebModel::GetInstance()->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
-    } else {
-        WebModel::GetInstance()->JavaScriptOnDocumentEnd(scriptItems);
-    }
+    WebModel::GetInstance()->JavaScriptOnDocumentEnd(scriptItems);
+}
+
+void JSWeb::RunJavaScriptOnDocumentStart(const JSCallbackInfo& args)
+{
+    ScriptItems scriptItems;
+    ScriptItemsByOrder scriptItemsByOrder;
+    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+
+    WebModel::GetInstance()->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
+}
+
+void JSWeb::RunJavaScriptOnDocumentEnd(const JSCallbackInfo& args)
+{
+    ScriptItems scriptItems;
+    ScriptItemsByOrder scriptItemsByOrder;
+    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+
+    WebModel::GetInstance()->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
+}
+
+void JSWeb::RunJavaScriptOnHeadEnd(const JSCallbackInfo& args)
+{
+    ScriptItems scriptItems;
+    ScriptItemsByOrder scriptItemsByOrder;
+    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+
+    WebModel::GetInstance()->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
 }
 
 void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)

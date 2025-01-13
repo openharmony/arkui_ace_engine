@@ -817,7 +817,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionUpdateWantTest, 
      * @tc.steps: step1. construct a SecurityUIExtensionComponent node and get pattern
      */
     auto pattern = CreateSecurityUEC();
-
+    ASSERT_NE(pattern, nullptr);
     /**
      * @tc.steps: step2. test UpdateWant
      */
@@ -826,6 +826,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionUpdateWantTest, 
     pattern->UpdateWant(wantOhos);
     auto wantOhos2 = AceType::DynamicCast<WantWrap>(wantOhos);
     pattern->UpdateWant(wantOhos2);
+    EXPECT_NE(pattern, nullptr);
 #endif
 }
 

@@ -454,6 +454,10 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
         totalHeight += irregularHeight;
         lastIndex = idx;
     }
+    if (NonPositive(regularHeight)) {
+        startIndex_ = lastIndex;
+        return;
+    }
     int32_t lines = static_cast<int32_t>(std::floor((targetContent - totalHeight) / regularHeight));
     currentOffset_ = totalHeight + lines * regularHeight - targetContent;
     int32_t startIdx = lines * crossCount_ + lastIndex + 1;

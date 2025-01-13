@@ -153,6 +153,22 @@ class ComponentSnapshot {
         __JSScopeUtil__.restoreInstanceId();
         return pixelmap;
     }
+
+    createFromComponent(content, delay, checkImageStatus, options) {
+        if (content === undefined || content === null) {
+            let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let promise = this.ohos_componentSnapshot.createFromComponent(content.getFrameNode(), delay, checkImageStatus, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return promise;
+    }
 }
 
 class DragController {

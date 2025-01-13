@@ -649,6 +649,9 @@ public:
     {
         return unicode_;
     }
+
+    void ParseKeyEvent(KeyEvent& keyEvent);
+
 private:
     KeyCode keyCode_ = KeyCode::KEY_UNKNOWN;
     const char* keyText_ = "";
