@@ -32776,7 +32776,7 @@ class ArkContainerSpanComponent extends ArkComponent {
 // @ts-ignore
 if (globalThis.ContainerSpan !== undefined) {
   globalThis.ContainerSpan.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+    attributeModifierFuncWithoutStateStyles.call(this, modifier, (nativePtr) => {
       return new ArkContainerSpanComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.ContainerSpanModifier(nativePtr, classType);
