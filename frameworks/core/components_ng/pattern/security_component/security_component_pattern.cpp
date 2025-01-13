@@ -904,7 +904,7 @@ int32_t SecurityComponentPattern::ReportSecurityComponentClickEvent(const KeyEve
 void SecurityComponentPattern::HandleReportSecCompClickEventResult(int32_t& code, std::string& message)
 {
     if (!message.empty()) {
-        code = code = SecurityComponentErrorCode::PROPERTY_SETING_ERROR;
+        code = SecurityComponentErrorCode::PROPERTY_SETING_ERROR;
     }
 
     if (code != SecurityComponentErrorCode::SUCCESS && message.empty()) {

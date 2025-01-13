@@ -107,10 +107,10 @@ private:
     static bool InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool CheckSecurityComponentStatus(const RefPtr<UINode>& root,
-        std::unordered_map<int32_t, NG::RectF>& nodeId2Rect, int32_t secNodeId,
+        std::unordered_map<int32_t, std::pair<std::string, NG::RectF>>& nodeId2Rect, int32_t secNodeId,
         std::unordered_map<int32_t, int32_t>& nodeId2Zindex, std::string& message);
     static bool CheckRectIntersect(const RectF& dest, int32_t secNodeId,
-        const std::unordered_map<int32_t, NG::RectF>& nodeId2Rect,
+        const std::unordered_map<int32_t, std::pair<std::string, NG::RectF>>& nodeId2Rect,
         std::unordered_map<int32_t, int32_t>& nodeId2Zindex, std::string& message);
     static bool IsSecurityComponent(RefPtr<FrameNode>& node);
     static bool CheckComponentCoveredStatus(int32_t secNodeId, std::string& message);
@@ -123,6 +123,7 @@ private:
         RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, std::string& message);
     static bool IsSecComponentClipped(RefPtr<FrameNode>& parentNode, RectF& visibleRect, const RectF& frameRect,
         OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
+    static bool CheckSecurityComponentTextLimits(const RefPtr<FrameNode>& node, std::string& message);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H
