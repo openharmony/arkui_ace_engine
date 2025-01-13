@@ -66,6 +66,10 @@ public:
     {
         return isHandleMoving_;
     }
+    bool IsSingleHandleMoving()
+    {
+        return isHandleMoving_ && IsSingleHandle();
+    }
     void OnHandleIsHidden() override;
     void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
     void OnHandleMouseEvent(const MouseInfo& event) override;
