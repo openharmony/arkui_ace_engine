@@ -853,6 +853,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetAnimationDuration001, TestSize.Level1)
     }
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    EXPECT_TRUE(frameNode_);
 }
 
 /**
@@ -903,6 +904,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetScrollable001, TestSize.Level1)
     model.SetScrollable(false);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    ASSERT_NE(frameNode_, nullptr);
 }
 
 /**
@@ -917,6 +919,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetClipEdge001, TestSize.Level1)
     model.SetClipEdge(false);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    ASSERT_NE(frameNode_, nullptr);
 }
 
 /**
@@ -1286,6 +1289,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModelCreate002, TestSize.Level1)
     TabsModelNG Mode1NG;
     Mode1NG.Create(BarPosition::END, 0, nullptr, nullptr);
     tabContentPattern->shallowBuilder_->deepRenderFunc_();
+    EXPECT_FALSE(frameNode_);
 }
 
 /**

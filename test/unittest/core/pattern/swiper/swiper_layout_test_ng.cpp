@@ -188,6 +188,7 @@ HWTEST_F(SwiperLayoutTestNg, SwiperLayoutAlgorithmSetInactive001, TestSize.Level
         }
         swiperLayoutAlgorithm->nextMargin_ = 1.0;
     }
+    EXPECT_TRUE(frameNode_);
 }
 
 /**
