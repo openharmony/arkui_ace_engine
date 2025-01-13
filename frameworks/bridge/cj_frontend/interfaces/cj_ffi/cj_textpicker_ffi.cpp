@@ -194,6 +194,7 @@ void FfiOHOSAceFrameworkTextPickerSetTextStyle(uint32_t color, double size, int3
     TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
+
 void FfiOHOSAceFrameworkTextPickerSetSelectedTextStyle(uint32_t color, double size, int32_t unit,
     const char* weight, const char* family, uint32_t style)
 {

@@ -23,6 +23,7 @@
 
 using VectorStringPtr = void*;
 
+
 extern "C" {
 struct CJDialogShow {
     uint32_t selected;
