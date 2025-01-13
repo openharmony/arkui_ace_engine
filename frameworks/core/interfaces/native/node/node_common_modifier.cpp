@@ -2953,6 +2953,24 @@ void ResetAccessibilityLevel(ArkUINodeHandle node)
     ViewAbstractModelNG::SetAccessibilityImportance(frameNode, "");
 }
 
+void SetAccessibilityCustomRole(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityCustomRole(std::string(value));
+}
+
+void ResetAccessibilityCustomRole(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetAccessibilityCustomRole();
+}
+
 void SetDirection(ArkUINodeHandle node, ArkUI_Int32 direction)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -6671,6 +6689,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAllowDrop = ResetAllowDrop,
         .setAccessibilityLevel = SetAccessibilityLevel,
         .resetAccessibilityLevel = ResetAccessibilityLevel,
+        .setAccessibilityCustomRole = SetAccessibilityCustomRole,
+        .resetAccessibilityCustomRole = ResetAccessibilityCustomRole,
         .setDirection = SetDirection,
         .resetDirection = ResetDirection,
         .setLayoutWeight = SetLayoutWeight,
@@ -7078,6 +7098,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetAllowDrop = ResetAllowDrop,
         .setAccessibilityLevel = SetAccessibilityLevel,
         .resetAccessibilityLevel = ResetAccessibilityLevel,
+        .setAccessibilityCustomRole = SetAccessibilityCustomRole,
+        .resetAccessibilityCustomRole = ResetAccessibilityCustomRole,
         .setDirection = SetDirection,
         .resetDirection = ResetDirection,
         .setLayoutWeight = SetLayoutWeight,
