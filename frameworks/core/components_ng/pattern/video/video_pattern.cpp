@@ -695,10 +695,6 @@ void VideoPattern::checkNeedAutoPlay()
     if (isStop_) {
         isStop_ = false;
     }
-    if (dragEndAutoPlay_) {
-        dragEndAutoPlay_ = false;
-        Start();
-    }
     if (autoPlay_) {
         Start();
     }
@@ -977,7 +973,6 @@ void VideoPattern::OnModifyDone()
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->AddOnAreaChangeNode(host->GetId());
     }
-    EnableDrag();
     auto eventHub = GetEventHub<VideoEventHub>();
     if (!AceType::InstanceOf<VideoFullScreenPattern>(this)) {
         auto host = GetHost();
@@ -1793,55 +1788,6 @@ void VideoPattern::FullScreen()
         VideoFullScreenNode::CreateFullScreenNode(V2::VIDEO_ETS_TAG, fullScreenNodeId_.value(), fullScreenPattern);
     CHECK_NULL_VOID(fullScreenNode);
     fullScreenPattern->RequestFullScreen(videoNode);
-}
-
-void VideoPattern::EnableDrag()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-    auto dragEnd = [wp = WeakClaim(this)](
-                       const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
-        auto videoPattern = wp.Upgrade();
-        CHECK_NULL_VOID(videoPattern);
-        auto videoLayoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
-        CHECK_NULL_VOID(videoLayoutProperty);
-        CHECK_NULL_VOID(event);
-        auto unifiedData = event->GetData();
-        std::string videoSrc;
-        if (unifiedData != nullptr) {
-            int ret = UdmfClient::GetInstance()->GetVideoRecordUri(unifiedData, videoSrc);
-            if (ret != 0) {
-                TAG_LOGW(AceLogTag::ACE_VIDEO, "unifiedRecords is empty");
-                return;
-            }
-        } else {
-            auto json = JsonUtil::ParseJsonString(extraParams);
-            std::string key = "extraInfo";
-            videoSrc = json->GetString(key);
-        }
-
-        if (videoSrc == videoPattern->GetSrc()) {
-            return;
-        }
-
-        std::regex extensionRegex("\\.(" + PNG_FILE_EXTENSION + ")$");
-        bool isPng = std::regex_search(videoSrc, extensionRegex);
-        if (isPng) {
-            event->SetResult(DragRet::DRAG_FAIL);
-            return;
-        }
-
-        videoPattern->SetIsDragEndAutoPlay(true);
-        VideoSourceInfo videoSrcInfo = {videoSrc, "", ""};
-        videoLayoutProperty->UpdateVideoSource(videoSrcInfo);
-        auto frameNode = videoPattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->MarkModifyDone();
-    };
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDrop(std::move(dragEnd));
 }
 
 VideoPattern::~VideoPattern()
