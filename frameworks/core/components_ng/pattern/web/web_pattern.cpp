@@ -1410,6 +1410,11 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
             "Set cursor to pointer when mouse pointer is hover exit.");
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
         isHoverExit_ = true;
+        MouseInfo changedInfo;
+        changedInfo.SetAction(MouseAction::HOVER_EXIT);
+        changedInfo.SetLocalLocation(Offset(mouseHoveredX_, mouseHoveredY_));
+        WebSendMouseEvent(changedInfo, SINGLE_CLICK_NUM);
+        return;
     } else if (info.GetAction() == MouseAction::HOVER && isMouseLocked_) {
         OnCursorChange(OHOS::NWeb::CursorType::CT_LOCK, nullptr);
     }
