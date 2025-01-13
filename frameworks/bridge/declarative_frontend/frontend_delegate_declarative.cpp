@@ -24,6 +24,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "frameworks/core/common/ace_engine.h"
 #include "jsview/js_view_abstract.h"
@@ -1694,7 +1695,12 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
                 CHECK_NULL_VOID(dialog);
             }
         };
-        MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog");
+        if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+            NG::DialogManager::ShowInEmbeddedOverlay(
+                std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
+        } else {
+            MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog");
+        }
         return;
     }
     std::unordered_map<std::string, EventMarker> callbackMarkers;
@@ -1779,6 +1785,9 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .isModal = dialogAttr.isModal,
         .enableHoverMode = dialogAttr.enableHoverMode,
         .maskRect = dialogAttr.maskRect,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -1862,7 +1871,10 @@ DialogProperties FrontendDelegateDeclarative::ParsePropertiesFromAttr(const Prom
         .onDidAppear = dialogAttr.onDidAppear, .onDidDisappear = dialogAttr.onDidDisappear,
         .onWillAppear = dialogAttr.onWillAppear, .onWillDisappear = dialogAttr.onWillDisappear,
         .keyboardAvoidMode = dialogAttr.keyboardAvoidMode, .dialogCallback = dialogAttr.dialogCallback,
-        .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance
+        .keyboardAvoidDistance = dialogAttr.keyboardAvoidDistance,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
@@ -1909,7 +1921,12 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
                 overlayManager->OpenCustomDialog(dialogProperties, std::move(callback));
             }
         };
-        MainWindowOverlay(std::move(task), "ArkUIOverlayOpenCustomDialog");
+        if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+            NG::DialogManager::ShowInEmbeddedOverlay(
+                std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
+        } else {
+            MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog");
+        }
         return;
     } else {
         LOGW("not support old pipeline");
@@ -2027,6 +2044,12 @@ void FrontendDelegateDeclarative::ShowActionMenuInnerNG(DialogProperties& dialog
     };
     auto context = DynamicCast<NG::PipelineContext>(pipelineContextHolder_.Get());
     auto overlayManager = context ? context->GetOverlayManager() : nullptr;
+    if (dialogProperties.dialogLevelMode == LevelMode::EMBEDDED) {
+        auto embeddedOverlay = NG::DialogManager::GetEmbeddedOverlay(dialogProperties.dialogLevelUniqueId, context);
+        if (embeddedOverlay) {
+            overlayManager = embeddedOverlay;
+        }
+    }
     taskExecutor_->PostTask(
         [dialogProperties, weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
@@ -2098,6 +2121,9 @@ void FrontendDelegateDeclarative::ShowActionMenu(const PromptDialogAttr& dialogA
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
         .maskRect = dialogAttr.maskRect,
+        .dialogLevelMode = dialogAttr.dialogLevelMode,
+        .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {

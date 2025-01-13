@@ -387,6 +387,8 @@ private:
     void UpdateTextFontScale();
     void UpdateTitleTextFontScale();
     void CheckScrollHeightIsNegative(const RefPtr<UINode>& contentColumn, const DialogProperties& props);
+    RefPtr<OverlayManager> GetEmbeddedOverlay();
+    void OnAttachToMainTree() override;
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;

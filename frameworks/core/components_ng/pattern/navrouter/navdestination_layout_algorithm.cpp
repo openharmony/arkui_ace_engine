@@ -24,6 +24,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+const std::unordered_set<std::string> EMBEDDED_NODE_TAG = { V2::SHEET_WRAPPER_TAG, V2::ALERT_DIALOG_ETS_TAG,
+    V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
 bool CheckTopEdgeOverlap(const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty,
     const RefPtr<NavDestinationGroupNode>& hostNode, SafeAreaExpandOpts opts)
 {
@@ -277,35 +279,31 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
     contentWrapper->Layout();
 }
 
-void MeasureSheet(const RefPtr<NavDestinationGroupNode>& hostNode,
+void MeasureOverlay(const RefPtr<NavDestinationGroupNode>& hostNode,
     const LayoutConstraintF& constraint)
 {
-    auto children = hostNode->GetAllChildrenWithBuild();
-    const auto& sheetWrapper = children.back();
-    CHECK_NULL_VOID(sheetWrapper);
-    if (sheetWrapper->GetHostNode()->GetTag() != V2::SHEET_WRAPPER_TAG) {
-        return;
+    for (const auto& children : hostNode->GetAllChildrenWithBuild()) {
+        if (children && EMBEDDED_NODE_TAG.find(children->GetHostNode()->GetTag()) != EMBEDDED_NODE_TAG.end()) {
+            children->Measure(constraint);
+        }
     }
-    sheetWrapper->Measure(constraint);
 }
 
-void LayoutSheet(const RefPtr<NavDestinationGroupNode>& hostNode)
+void LayoutOverlay(const RefPtr<NavDestinationGroupNode>& hostNode)
 {
-    auto children = hostNode->GetAllChildrenWithBuild();
-    const auto& sheetWrapper = children.back();
-    CHECK_NULL_VOID(sheetWrapper);
-    if (sheetWrapper->GetHostNode()->GetTag() != V2::SHEET_WRAPPER_TAG) {
-        return;
-    }
     auto navdestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navdestinationLayoutProperty);
-    auto geometryNode = sheetWrapper->GetGeometryNode();
-    auto paddingOffset = OffsetT<float>(0.0f, 0.0f);
-    const auto& padding = navdestinationLayoutProperty->CreatePaddingAndBorder();
-    paddingOffset.AddX(padding.left.value_or(0.0f));
-    paddingOffset.AddY(padding.top.value_or(0.0f));
-    geometryNode->SetMarginFrameOffset(paddingOffset);
-    sheetWrapper->Layout();
+    for (const auto& children : hostNode->GetAllChildrenWithBuild()) {
+        if (children && EMBEDDED_NODE_TAG.find(children->GetHostNode()->GetTag()) != EMBEDDED_NODE_TAG.end()) {
+            auto geometryNode = children->GetGeometryNode();
+            auto paddingOffset = OffsetT<float>(0.0f, 0.0f);
+            const auto& padding = navdestinationLayoutProperty->CreatePaddingAndBorder();
+            paddingOffset.AddX(padding.left.value_or(0.0f));
+            paddingOffset.AddY(padding.top.value_or(0.0f));
+            geometryNode->SetMarginFrameOffset(paddingOffset);
+            children->Layout();
+        }
+    }
 }
 
 float TransferBarHeight(const RefPtr<NavDestinationGroupNode>& hostNode, float defaultBarHeight, bool isTitleBar)
@@ -442,7 +440,7 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         size.AddHeight(padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
     }
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
-    MeasureSheet(hostNode, navDestinationLayoutProperty->CreateChildConstraint());
+    MeasureOverlay(hostNode, navDestinationLayoutProperty->CreateChildConstraint());
 }
 
 void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -476,7 +474,7 @@ void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             "Navdestination id is %{public}d, frameRect is %{public}s",
             hostNode->GetId(), geometryNode->GetFrameRect().ToString().c_str());
     }
-    LayoutSheet(hostNode);
+    LayoutOverlay(hostNode);
 }
 
 } // namespace OHOS::Ace::NG
