@@ -5691,4 +5691,256 @@ HWTEST_F(NativeNodeTest, NativeNodeTest090, TestSize.Level1)
     EXPECT_EQ(nodeAPI->setAttribute(rootNode, NODE_XCOMPONENT_SURFACE_SIZE, &item0), ARKUI_ERROR_CODE_PARAM_INVALID);
     nodeAPI->disposeNode(rootNode);
 }
+
+/**
+ * @tc.name: NativeNodeTest091
+ * @tc.desc: Test scrollToIndex and scrollToItemInGroup function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest091, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto list = nodeAPI->createNode(ARKUI_NODE_LIST);
+    auto listItem = nodeAPI->createNode(ARKUI_NODE_LIST_ITEM);
+    auto listItemGroup = nodeAPI->createNode(ARKUI_NODE_LIST_ITEM_GROUP);
+    nodeAPI->addChild(listItemGroup, listItem);
+    nodeAPI->addChild(list, listItemGroup);
+    ASSERT_NE(list, nullptr);
+    ArkUI_NumberValue value[] = { 0, 0, 0, 1 };
+    ArkUI_AttributeItem item = { value, 4 };
+    value[0].i32 = 0;
+    value[1].i32 = 0;
+    value[2].i32 = 0;
+    value[3].i32 = 1;
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_LIST_SCROLL_TO_INDEX, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_LIST_SCROLL_TO_INDEX_IN_GROUP, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    value[0].i32 = 2;
+    value[1].i32 = 2;
+    ArkUI_AttributeItem item0 = { value, 2 };
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_LIST_SCROLL_TO_INDEX_IN_GROUP, &item0), ARKUI_ERROR_CODE_NO_ERROR);
+    value[0].i32 = 3;
+    value[1].i32 = 3;
+    value[2].i32 = -1;
+    value[3].i32 = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_LIST_SCROLL_TO_INDEX_IN_GROUP, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
+    nodeAPI->disposeNode(listItem);
+    nodeAPI->disposeNode(listItemGroup);
+    nodeAPI->disposeNode(list);
+}
+
+/**
+ * @tc.name: NativeNodeTest092
+ * @tc.desc: Test setLanes function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest092, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto list = nodeAPI->createNode(ARKUI_NODE_LIST);
+    ASSERT_NE(list, nullptr);
+    ArkUI_NumberValue value[] = { 2, 3, 4, 5 };
+    ArkUI_AttributeItem item = { value, 4 };
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_LIST_LANES, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto ret = nodeAPI->getAttribute(list, NODE_LIST_LANES);
+    EXPECT_EQ(ret->value[0].u32, 1);
+    EXPECT_EQ(ret->value[1].f32, 3);
+    EXPECT_EQ(ret->value[2].f32, 4);
+    EXPECT_EQ(ret->value[3].f32, 5);
+    value[0].u32 = 2;
+    value[1].f32 = -1;
+    value[2].f32 = -1;
+    value[3].f32 = 3;
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_LIST_LANES, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(list, NODE_LIST_LANES);
+    EXPECT_EQ(ret->value[0].u32, 2);
+    EXPECT_EQ(ret->value[1].f32, 0);
+    EXPECT_EQ(ret->value[2].f32, 0);
+    EXPECT_EQ(ret->value[3].f32, 3);
+    EXPECT_EQ(nodeAPI->resetAttribute(list, NODE_LIST_LANES), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(list, NODE_LIST_LANES);
+    EXPECT_EQ(ret->value[0].u32, 1);
+    EXPECT_EQ(ret->value[1].f32, 0);
+    EXPECT_EQ(ret->value[2].f32, 0);
+    EXPECT_EQ(ret->value[3].f32, 0);
+    value[0].u32 = -1;
+    value[1].f32 = -1;
+    value[2].f32 = -1;
+    value[3].f32 = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_LIST_LANES, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(list, NODE_LIST_LANES);
+    EXPECT_EQ(ret->value[0].u32, 1);
+    EXPECT_EQ(ret->value[1].f32, 0);
+    EXPECT_EQ(ret->value[2].f32, 0);
+    EXPECT_EQ(ret->value[3].f32, 0);
+    nodeAPI->disposeNode(list);
+}
+
+/**
+ * @tc.name: NativeNodeTest093
+ * @tc.desc: Test listScrollSnapAlign function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest093, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto list = nodeAPI->createNode(ARKUI_NODE_LIST);
+    ASSERT_NE(list, nullptr);
+    ArkUI_NumberValue value[] = { 1 };
+    ArkUI_AttributeItem item = { value, 1 };
+    value[0].i32 = 1;
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_LIST_SCROLL_SNAP_ALIGN, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto ret = nodeAPI->getAttribute(list, NODE_LIST_SCROLL_SNAP_ALIGN);
+    EXPECT_EQ(ret->value[0].i32, 1);
+    EXPECT_EQ(nodeAPI->resetAttribute(list, NODE_LIST_SCROLL_SNAP_ALIGN), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(list, NODE_LIST_SCROLL_SNAP_ALIGN);
+    EXPECT_EQ(ret->value[0].i32, 0);
+    value[0].i32 = -1;
+    nodeAPI->setAttribute(list, NODE_LIST_SCROLL_SNAP_ALIGN, &item);
+    ret = nodeAPI->getAttribute(list, NODE_LIST_SCROLL_SNAP_ALIGN);
+    EXPECT_EQ(ret->value[0].i32, 0);
+    nodeAPI->disposeNode(list);
+}
+
+/**
+ * @tc.name: NativeNodeTest094
+ * @tc.desc: Test scrollContentStartOffset and scrollContentEndOffset function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest094, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto list = nodeAPI->createNode(ARKUI_NODE_LIST);
+    ASSERT_NE(list, nullptr);
+    ArkUI_NumberValue value[] = { 1 };
+    ArkUI_AttributeItem item = { value, 1 };
+    value[0].f32 = 1;
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_SCROLL_CONTENT_START_OFFSET, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_SCROLL_CONTENT_END_OFFSET, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto ret = nodeAPI->getAttribute(list, NODE_SCROLL_CONTENT_START_OFFSET);
+    EXPECT_EQ(ret->value[0].f32, 1);
+    ret = nodeAPI->getAttribute(list, NODE_SCROLL_CONTENT_END_OFFSET);
+    EXPECT_EQ(ret->value[0].f32, 1);
+    EXPECT_EQ(nodeAPI->resetAttribute(list, NODE_SCROLL_CONTENT_START_OFFSET), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(list, NODE_SCROLL_CONTENT_END_OFFSET), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(list, NODE_SCROLL_CONTENT_START_OFFSET);
+    EXPECT_EQ(ret->value[0].f32, 0);
+    ret = nodeAPI->getAttribute(list, NODE_SCROLL_CONTENT_END_OFFSET);
+    EXPECT_EQ(ret->value[0].f32, 0);
+    nodeAPI->disposeNode(list);
+}
+
+/**
+ * @tc.name: NativeNodeTest095
+ * @tc.desc: Test listMaintainVisibleContentPosition function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest095, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto list = nodeAPI->createNode(ARKUI_NODE_LIST);
+    ASSERT_NE(list, nullptr);
+    ArkUI_NumberValue value[] = { 1 };
+    ArkUI_AttributeItem item = { value, 1 };
+    value[0].i32 = 1;
+    auto ret = nodeAPI->setAttribute(list, NODE_LIST_MAINTAIN_VISIBLE_CONTENT_POSITION, &item);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    auto ret1 = nodeAPI->getAttribute(list, NODE_LIST_MAINTAIN_VISIBLE_CONTENT_POSITION);
+    EXPECT_EQ(ret1->value[0].i32, 1);
+    EXPECT_EQ(nodeAPI->resetAttribute(list, NODE_LIST_MAINTAIN_VISIBLE_CONTENT_POSITION), ARKUI_ERROR_CODE_NO_ERROR);
+    ret1 = nodeAPI->getAttribute(list, NODE_LIST_MAINTAIN_VISIBLE_CONTENT_POSITION);
+    EXPECT_EQ(ret1->value[0].i32, 0);
+    nodeAPI->disposeNode(list);
+}
+
+/**
+ * @tc.name: NativeNodeTest096
+ * @tc.desc: Test onScrollVisibleContentChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest096, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto listNode = nodeAPI->createNode(ARKUI_NODE_LIST);
+    auto ret = nodeAPI->registerNodeEvent(listNode, NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE, 1, nullptr);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->unregisterNodeEvent(listNode, NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE);
+    nodeAPI->disposeNode(listNode);
+
+    int32_t nodeType = static_cast<int32_t>(ARKUI_NODE_LIST);
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_LIST_SCROLL_VISIBLE_CONTENT_CHANGE));
+
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_LIST_SCROLL_VISIBLE_CONTENT_CHANGE);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE));
+}
+
+/**
+ * @tc.name: NativeNodeTest097
+ * @tc.desc: Test cachedCount function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest097, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto list = nodeAPI->createNode(ARKUI_NODE_LIST);
+    ASSERT_NE(list, nullptr);
+    ArkUI_NumberValue value[] = { 1, 1 };
+    ArkUI_AttributeItem item = { value, 2 };
+    value[0].i32 = 1;
+    value[1].i32 = 1;
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_LIST_CACHED_COUNT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    auto ret = nodeAPI->getAttribute(list, NODE_LIST_CACHED_COUNT);
+    EXPECT_EQ(ret->value[1].i32, 1);
+    EXPECT_EQ(nodeAPI->resetAttribute(list, NODE_LIST_CACHED_COUNT), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(list, NODE_LIST_CACHED_COUNT);
+    EXPECT_EQ(ret->value[1].i32, 0);
+    value[1].i32 = -1;
+    EXPECT_EQ(nodeAPI->setAttribute(list, NODE_LIST_CACHED_COUNT, &item), ARKUI_ERROR_CODE_NO_ERROR);
+    ret = nodeAPI->getAttribute(list, NODE_LIST_CACHED_COUNT);
+    EXPECT_EQ(ret->value[1].i32, 0);
+    nodeAPI->disposeNode(list);
+}
+
+/**
+ * @tc.name: NativeNodeTest098
+ * @tc.desc: Test setHeader and setFooter function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest098, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto listItemGroup = nodeAPI->createNode(ARKUI_NODE_LIST_ITEM_GROUP);
+    ASSERT_NE(listItemGroup, nullptr);
+    EXPECT_EQ(nodeAPI->resetAttribute(listItemGroup, NODE_LIST_ITEM_GROUP_SET_HEADER), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(listItemGroup, NODE_LIST_ITEM_GROUP_SET_FOOTER), ARKUI_ERROR_CODE_NO_ERROR);
+    nodeAPI->disposeNode(listItemGroup);
+}
+
+/**
+ * @tc.name: NativeNodeTest099
+ * @tc.desc: Test LazyForEach function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest099, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto listItemGroup = nodeAPI->createNode(ARKUI_NODE_LIST_ITEM_GROUP);
+    ASSERT_NE(listItemGroup, nullptr);
+    ArkUI_NumberValue value0[] = {};
+    ArkUI_AttributeItem item0 = { value0, 0, nullptr, nullptr };
+    auto ret = nodeAPI->setAttribute(listItemGroup, NODE_LIST_ITEM_GROUP_NODE_ADAPTER, &item0);
+    EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_EQ(nodeAPI->resetAttribute(listItemGroup, NODE_LIST_ITEM_GROUP_NODE_ADAPTER), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(listItemGroup, NODE_LIST_ITEM_GROUP_NODE_ADAPTER), nullptr);
+    nodeAPI->disposeNode(listItemGroup);
+}
 } // namespace OHOS::Ace
