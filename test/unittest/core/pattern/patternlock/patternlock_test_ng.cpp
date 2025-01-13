@@ -1772,8 +1772,10 @@ HWTEST_F(PatternLockTestNg, StartModifierCanceledAnimate, TestSize.Level1)
     patternLockPattern->patternLockModifier_ = AceType::MakeRefPtr<PatternLockModifier>();
     patternLockPattern->isMoveEventValid_ = true;
     patternLockPattern->StartModifierCanceledAnimate();
+    EXPECT_TRUE(patternLockPattern->isMoveEventValid_);
     patternLockPattern->isMoveEventValid_ = false;
     patternLockPattern->StartModifierCanceledAnimate();
+    EXPECT_FALSE(patternLockPattern->isMoveEventValid_);
 }
 
 /**
@@ -1818,7 +1820,12 @@ HWTEST_F(PatternLockTestNg, AddPassPointToChoosePoint, TestSize.Level1)
     choosePoint.push_back(PatternLockCell(1, 1));
     choosePoint.push_back(PatternLockCell(2, 2));
     patternLockPattern->AddPassPointToChoosePoint(2, 1, choosePoint);
+    EXPECT_EQ(patternLockPattern->choosePoint_.back().GetColumn(), 1);
+    EXPECT_EQ(patternLockPattern->choosePoint_.back().GetRow(), 1);
+
     patternLockPattern->AddPassPointToChoosePoint(1, 2, choosePoint);
+    EXPECT_EQ(patternLockPattern->choosePoint_.back().GetColumn(), 2);
+    EXPECT_EQ(patternLockPattern->choosePoint_.back().GetRow(), 2);
 }
 
 /**
