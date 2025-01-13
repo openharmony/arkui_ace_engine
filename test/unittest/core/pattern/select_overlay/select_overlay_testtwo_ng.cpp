@@ -561,7 +561,7 @@ HWTEST_F(SelectOverlayTestTwoNg, UpdateMoreOrBackSymbolOptions002, TestSize.Leve
     selectOverlayNode->isMoreOrBackSymbolIcon_ = true;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     EXPECT_NE(selectOverlayNode, nullptr);
     selectOverlayNode->UpdateMoreOrBackSymbolOptions(false, true);
     EXPECT_NE(selectOverlayNode->moreOrBackSymbol_, nullptr);
@@ -581,7 +581,7 @@ HWTEST_F(SelectOverlayTestTwoNg, UpdateMoreOrBackSymbolOptions003, TestSize.Leve
     selectOverlayNode->isMoreOrBackSymbolIcon_ = true;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     EXPECT_NE(selectOverlayNode, nullptr);
     selectOverlayNode->moreButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -607,7 +607,7 @@ HWTEST_F(SelectOverlayTestTwoNg, UpdateMoreOrBackSymbolOptions004, TestSize.Leve
     selectOverlayNode->isMoreOrBackSymbolIcon_ = true;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     EXPECT_NE(selectOverlayNode, nullptr);
     selectOverlayNode->moreButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
@@ -633,7 +633,7 @@ HWTEST_F(SelectOverlayTestTwoNg, UpdateMoreOrBackSymbolOptionsWithDelay001, Test
     selectOverlayNode->isMoreOrBackSymbolIcon_ = true;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     selectOverlayNode->UpdateMoreOrBackSymbolOptionsWithDelay();
     EXPECT_NE(selectOverlayNode, nullptr);
 }
@@ -656,7 +656,7 @@ HWTEST_F(SelectOverlayTestTwoNg, AddCreateMenuExtensionMenuParams001, TestSize.L
     selectOverlayNode->isMoreOrBackSymbolIcon_ = true;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextOverlayTheme>()));
     EXPECT_NE(selectOverlayNode, nullptr);
     std::vector<OptionParam> params;
     selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 1, params);
