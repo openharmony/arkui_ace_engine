@@ -51,18 +51,7 @@ public:
         axis_ = axis;
     }
 
-    void UpdateSlidingOffset(float x, float y)
-    {
-        OffsetToScrollContent_.AddX(x);
-        OffsetToScrollContent_.AddY(y);
-        markItemOffset_ = OffsetF(-x, -y);
-        fillAlgorithm_->OnSlidingOffsetUpdate(x, y);
-        itemRectMap_.clear();
-        if (updater_) {
-            // 01: mark the first loop item.
-            updater_(markIndex_, reinterpret_cast<void*>(0x01));
-        }
-    }
+    void UpdateSlidingOffset(float x, float y);
 
     FrameNode* InitPivotItem(FillDirection direction);
 
@@ -108,7 +97,7 @@ public:
 
 private:
     SizeF size_ = { 0.0f, 0.0f };
-    OffsetF OffsetToScrollContent_ = { 0.0f, 0.0f };
+    OffsetF offsetToScrollContent_ = { 0.0f, 0.0f };
     RefPtr<FillAlgorithm> fillAlgorithm_;
     FrameNode* container_ = nullptr;
 
@@ -120,6 +109,8 @@ private:
     std::unordered_map<int32_t, WeakPtr<FrameNode>> indexToNode_;
     std::unordered_map<FrameNode*, int32_t> nodeToIndex_;
     std::unordered_map<FrameNode*, RectF> itemRectMap_;
+    RectF startRect_;
+    RectF endRect_;
 
     Axis axis_ = Axis::VERTICAL;
 };

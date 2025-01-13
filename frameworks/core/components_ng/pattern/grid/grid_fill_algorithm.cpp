@@ -110,8 +110,6 @@ bool GridFillAlgorithm::CanFillMore(const SizeF& scrollWindowSize, const RectF& 
     if (direction == FillDirection::START) {
         return GreatOrEqual(markItemRect.Top(), -scrollWindowSize.Height());
     }
-    LOGI("LazyForEach backend current bottom = %{public}f, right = %{public}f", markItemRect.Bottom(),
-        markItemRect.Right());
     return LessNotEqual(markItemRect.Bottom(), scrollWindowSize.Height() * 2);
 }
 } // namespace OHOS::Ace::NG

@@ -113,6 +113,11 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
     } else {
         rect = iter->second;
     }
+    if (direction == FillDirection::START) {
+        startRect_ = rect;
+    } else {
+        endRect_ = rect;
+    }
     // 3: check if more space for new item.
     if (!fillAlgorithm_->CanFillMore(size_, rect, direction)) {
         LOGE("no more space left");
@@ -121,4 +126,30 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
     return pendingNode;
 }
 
+void ScrollWindowAdapter::UpdateSlidingOffset(float x, float y)
+{
+    offsetToScrollContent_.AddX(x);
+    offsetToScrollContent_.AddY(y);
+    markItemOffset_ = OffsetF(-x, -y);
+    fillAlgorithm_->OnSlidingOffsetUpdate(x, y);
+    for (auto& [node, rect] : itemRectMap_) {
+        rect.SetOffset(rect.GetOffset() + *markItemOffset_);
+    }
+    if (Positive(x) || Positive(y)) {
+        endRect_.SetOffset(endRect_.GetOffset() + *markItemOffset_);
+        if (!fillAlgorithm_->CanFillMore(size_, endRect_, FillDirection::END)) {
+            return;
+        }
+    } else {
+        if (!fillAlgorithm_->CanFillMore(size_, startRect_, FillDirection::START)) {
+            return;
+        }
+    }
+    LOGD("need to load");
+    if (updater_) {
+        // 01: mark the first loop item.
+        updater_(markIndex_, nullptr);
+    }
+    itemRectMap_.clear();
+}
 } // namespace OHOS::Ace::NG
