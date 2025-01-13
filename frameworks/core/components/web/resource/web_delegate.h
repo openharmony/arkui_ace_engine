@@ -609,7 +609,8 @@ private:
 
 enum class ScriptItemType {
     DOCUMENT_START = 0,
-    DOCUMENT_END
+    DOCUMENT_END = 1,
+    DOCUMENT_HEAD_READY
 };
 
 class NWebSystemConfigurationImpl : public OHOS::NWeb::NWebSystemConfiguration {
@@ -1028,6 +1029,7 @@ public:
     void SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type);
     void JavaScriptOnDocumentStartByOrder();
     void JavaScriptOnDocumentEndByOrder();
+    void JavaScriptOnHeadReadyByOrder();
     void SetJavaScriptItemsByOrder(const ScriptItems& scriptItems, const ScriptItemType& type,
         const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
@@ -1352,8 +1354,10 @@ private:
     float lowerFrameRateVisibleRatio_ = 0.1;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
+    std::optional<ScriptItems> onHeadReadyScriptItems_;
     std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onHeadReadyScriptItemsByOrder_;
     bool accessibilityState_ = false;
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;

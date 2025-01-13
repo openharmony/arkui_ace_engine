@@ -603,6 +603,9 @@ public:
     void UpdateJavaScriptOnDocumentEndByOrder();
     void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
         const ScriptItemsByOrder& scriptItemsByOrder);
+    void UpdateJavaScriptOnHeadReadyByOrder();
+    void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(const TouchEvent& touchEvent,
         TouchEventInfo& touchEventInfo, const std::string& embdedId);
     DragRet GetDragAcceptableStatus();
@@ -1172,8 +1175,10 @@ private:
     RefPtr<WebDelegateObserver> observer_;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
+    std::optional<ScriptItems> onHeadReadyScriptItems_;
     std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onHeadReadyScriptItemsByOrder_;
     bool offlineWebInited_ = false;
     bool offlineWebRendered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
