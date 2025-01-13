@@ -42,7 +42,11 @@ void IconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     CHECK_NULL_VOID(iconWrap);
     secCompProperty_ = property;
     iconWrap_ = iconWrap;
-    if (property->GetIconStyle().value_or(-1) ==
+    bool isSymbolIcon = iconWrap->GetHostTag() == V2::SYMBOL_ETS_TAG;
+    if (isSymbolIcon && 
+        property->GetSymbolIconStyle().value_or(-1) == static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
+        return;
+    } else if (!isSymbolIcon && property->GetIconStyle().value_or(-1) ==
         static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
         return;
     }
@@ -58,7 +62,8 @@ void IconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
         isSetSize_ = true;
         width_ = height_ = property->GetIconSize().value().ConvertToPx();
     } else {
-        width_ = height_ = theme->GetIconSize().ConvertToPx();
+        width_ = height_ = isSymbolIcon ? Dimension(DEFAULT_SIZE_24, DimensionUnit::VP).ConvertToPx() :
+                           theme->GetIconSize().ConvertToPx();
     }
 }
 
@@ -97,73 +102,6 @@ double IconLayoutElement::ShrinkHeight(double reduceSize)
     if (GreatNotEqual(minIconSize_, (height_ - reduceSize))) {
         double remain = reduceSize - (height_ - minIconSize_);
         width_ = height_ = minIconSize_;
-        return remain;
-    }
-    height_ -= reduceSize;
-    width_ = height_;
-    return 0.0;
-}
-
-void SymbolIconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty> &property,
-    RefPtr<LayoutWrapper> &symbolIconWrap)
-{
-    CHECK_NULL_VOID(property);
-    CHECK_NULL_VOID(symbolIconWrap);
-    secCompProperty_ = property;
-    symbolIconWrap_ = symbolIconWrap;
-    if (property->GetSymbolIconStyle().value_or(-1) == static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) {
-        return;
-    }
-    isExist_ = true;
-    
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SecurityComponentTheme>();
-    CHECK_NULL_VOID(theme);
-    minSymbolIconSize_ = theme->GetMinIconSize().ConvertToPx();
-
-    if (property->GetSymbolIconSize().has_value()) {
-        isSetSize_ = true;
-        width_ = height_ = property->GetSymbolIconSize().value().ConvertToPx();
-    } else {
-        width_ = height_ = Dimension(DEFAULT_SIZE_24, DimensionUnit::VP).ConvertToPx();
-    }
-}
-
-void SymbolIconLayoutElement::DoMeasure()
-{
-    if (!isExist_) {
-        return;
-    }
-    auto iconConstraint = secCompProperty_->CreateChildConstraint();
-    iconConstraint.selfIdealSize.SetWidth(width_);
-    iconConstraint.selfIdealSize.SetHeight(height_);
-    symbolIconWrap_->Measure(iconConstraint);
-}
-
-double SymbolIconLayoutElement::ShrinkWidth(double reduceSize)
-{
-    if (!isExist_ || isSetSize_) {
-        return reduceSize;
-    }
-    if (GreatNotEqual(minSymbolIconSize_, (width_ - reduceSize))) {
-        int remain = reduceSize - (width_ - minSymbolIconSize_);
-        height_ = width_ = minSymbolIconSize_;
-        return remain;
-    }
-    width_ -= reduceSize;
-    height_ = width_;
-    return 0.0;
-}
-
-double SymbolIconLayoutElement::ShrinkHeight(double reduceSize)
-{
-    if (!isExist_ || isSetSize_) {
-        return reduceSize;
-    }
-    if (GreatNotEqual(minSymbolIconSize_, (height_ - reduceSize))) {
-        double remain = reduceSize - (height_ - minSymbolIconSize_);
-        width_ = height_ = minSymbolIconSize_;
         return remain;
     }
     height_ -= reduceSize;
