@@ -1217,4 +1217,31 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest038, TestSize.Lev
     EXPECT_EQ(accessibilityProperty.onUserAccessibilityFocusCallbackImpl_, nullptr);
 }
 
+/**
+ * @tc.name: AccessibilityPropertyTest039
+ * @tc.desc: SetAccessibilityNextFocusInspectorKey and GetAccessibilityNextFocusInspectorKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest039, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    const std::string nextFocusId = "nextId";
+    accessibilityProperty.SetAccessibilityNextFocusInspectorKey(nextFocusId);
+    EXPECT_EQ(accessibilityProperty.GetAccessibilityNextFocusInspectorKey(), nextFocusId);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest040
+ * @tc.desc: SetAccessibilitySamePage, HasAccessibilitySamePage and GetAccessibilitySamePage
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest040, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    const std::string pageMode = "FULL_SILENT";
+    accessibilityProperty.SetAccessibilitySamePage(pageMode);
+    EXPECT_TRUE(accessibilityProperty.HasAccessibilitySamePage());
+    EXPECT_EQ(accessibilityProperty.GetAccessibilitySamePage(), pageMode);
+}
+
 } // namespace OHOS::Ace::NG
