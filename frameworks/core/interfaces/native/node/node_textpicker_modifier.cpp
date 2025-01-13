@@ -340,10 +340,14 @@ void SetTextPickerValue(ArkUINodeHandle node, ArkUI_CharPtr valueStr)
 
 void SetTextPickerColumnWidths(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 size)
 {
+    if (size <= 0) {
+        return;
+    }
+
     std::vector<Dimension> widths;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    for (uint32_t i = 0; i < size; i++) {
+    for (ArkUI_Int32 i = 0; i < size; i++) {
         widths.emplace_back(Dimension(values[i] * MAX_PERCENT, DimensionUnit::PERCENT));
     }
     TextPickerModelNG::SetColumnWidths(frameNode, widths);
@@ -354,9 +358,9 @@ void ResetTextPickerColumnWidths(ArkUINodeHandle node)
     std::vector<Dimension> widths;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto childCount = static_cast<float>(frameNode->GetChildren().size());
-    for (uint32_t i = 0; i < childCount; i++) {
-        widths.emplace_back(Dimension(MAX_PERCENT / childCount, DimensionUnit::PERCENT));
+    auto childCount =  frameNode->GetChildren().size();
+    for (size_t i = 0; i < childCount; i++) {
+        widths.emplace_back(Dimension(MAX_PERCENT / static_cast<float>(childCount), DimensionUnit::PERCENT));
     }
     TextPickerModelNG::SetColumnWidths(frameNode, widths);
 }

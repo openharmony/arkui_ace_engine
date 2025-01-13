@@ -1532,7 +1532,7 @@ float TextPickerPattern::CalculateColumnSize(int32_t index, float childCount, co
     }
 
     float widthSum = 0.0f;
-    for (uint32_t i = 0; i < columnWidths_.size(); i++) {
+    for (size_t i = 0; i < columnWidths_.size(); i++) {
         if (i < childCount) {
             widthSum += columnWidths_[i].Value();
         } else {
@@ -1543,7 +1543,7 @@ float TextPickerPattern::CalculateColumnSize(int32_t index, float childCount, co
         columnWidths_.clear();
     }
 
-    if (index >= columnWidths_.size()) {
+    if (static_cast<size_t>(index) >= columnWidths_.size()) {
         float unAssignedColumnWidth = MAX_PERCENT;
         for (const auto& width : columnWidths_) {
             unAssignedColumnWidth -= width.Value();
