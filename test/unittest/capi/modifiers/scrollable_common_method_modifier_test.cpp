@@ -244,4 +244,123 @@ HWTEST_F(ScrollableCommonMethodModifierTest, setOnWillScrollTest, TestSize.Level
     auto result = fireOnWillScroll(expectedOffset, expectedState, ScrollSource::SCROLL_BAR);
     EXPECT_EQ(result.offset, expectedOffset);
 }
+
+/*
+ * @tc.name: setOnReachStartTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCommonMethodModifierTest, setOnReachStartTest, TestSize.Level1)
+{
+    const int32_t contextId = 123;
+
+    static std::optional<int32_t> checkData;
+    auto checkCallback = [](const Ark_Int32 resourceId) { checkData = resourceId; };
+    ASSERT_FALSE(checkData.has_value());
+
+    // setup the callback object via C-API
+    auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+    modifier_->setOnReachStart(node_, &arkCallback);
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto onReachStart = eventHub->GetOnReachStart();
+    ASSERT_NE(onReachStart, nullptr);
+    onReachStart();
+
+    ASSERT_TRUE(checkData.has_value());
+    EXPECT_EQ(checkData.value(), contextId);
+}
+
+/*
+ * @tc.name: setOnReachEndTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCommonMethodModifierTest, setOnReachEndTest, TestSize.Level1)
+{
+    const int32_t contextId = 123;
+
+    static std::optional<int32_t> checkData;
+    auto checkCallback = [](const Ark_Int32 resourceId) { checkData = resourceId; };
+    ASSERT_FALSE(checkData.has_value());
+
+    // setup the callback object via C-API
+    auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+    modifier_->setOnReachEnd(node_, &arkCallback);
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto onReachEnd = eventHub->GetOnReachEnd();
+    onReachEnd();
+
+    ASSERT_TRUE(checkData.has_value());
+    EXPECT_EQ(checkData.value(), contextId);
+}
+
+/*
+ * @tc.name: setOnScrollStartTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCommonMethodModifierTest, setOnScrollStartTest, TestSize.Level1)
+{
+    const int32_t contextId = 123;
+
+    static std::optional<int32_t> checkData;
+    auto checkCallback = [](const Ark_Int32 resourceId) { checkData = resourceId; };
+    ASSERT_FALSE(checkData.has_value());
+
+    // setup the callback object via C-API
+    auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+    modifier_->setOnScrollStart(node_, &arkCallback);
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto onReachStart = eventHub->GetOnScrollStart();
+    ASSERT_NE(onReachStart, nullptr);
+    onReachStart();
+
+    ASSERT_TRUE(checkData.has_value());
+    EXPECT_EQ(checkData.value(), contextId);
+}
+
+/*
+ * @tc.name: setOnScrollStopTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCommonMethodModifierTest, setOnScrollStopTest, TestSize.Level1)
+{
+    const int32_t contextId = 123;
+
+    static std::optional<int32_t> checkData;
+    auto checkCallback = [](const Ark_Int32 resourceId) { checkData = resourceId; };
+    ASSERT_FALSE(checkData.has_value());
+
+    // setup the callback object via C-API
+    auto arkCallback = Converter::ArkValue<Callback_Void>(checkCallback, contextId);
+    modifier_->setOnScrollStop(node_, &arkCallback);
+
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<ScrollableEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    auto onReachStart = eventHub->GetOnScrollStop();
+    ASSERT_NE(onReachStart, nullptr);
+    onReachStart();
+
+    ASSERT_TRUE(checkData.has_value());
+    EXPECT_EQ(checkData.value(), contextId);
+}
 } // namespace OHOS::Ace::NG
