@@ -111,6 +111,8 @@ export struct TimePickerDialogBootcamp {
   @State dialogShadow: ShadowStyle = ShadowStyle.OUTER_FLOATING_SM;
   @State isEnableCascade: boolean = false;
   @State enableCascade: boolean = false;
+  @State enableHapticFeedback: boolean = false;
+  @State hapticFeedback: boolean = true;
 
   build() {
     NavDestination() {
@@ -138,6 +140,7 @@ export struct TimePickerDialogBootcamp {
           selected: this.selectTime,
           useMilitaryTime: useEnabled(this.enableUseMilitaryTime, this.useMilitaryTime),
           enableCascade: useEnabled(this.isEnableCascade, this.enableCascade),
+          enableHapticFeedback: useEnabled(this.enableHapticFeedback, this.hapticFeedback),
           disappearTextStyle: {
             color: useEnabled(this.enableDisappearTextStyleColor, this.disappearTextStyleColor),
             font: {
@@ -589,6 +592,16 @@ export struct TimePickerDialogBootcamp {
           dataSource: [
             { label: '跟随小时联动', value: false },
             { label: '不随小时联动', value: true }
+          ]
+        })
+
+        RadioBlock({
+          title: 'hapticFeedback',
+          isEnabled: this.enableHapticFeedback,
+          value: this.hapticFeedback,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
           ]
         })
       }.width('100%')
