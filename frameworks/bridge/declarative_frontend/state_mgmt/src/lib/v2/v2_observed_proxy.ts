@@ -186,10 +186,10 @@ class ArrayProxyHandler {
                     // so we must call "target" here to deal with the collections situations.
                     // But we also need to addref for each index.
                     ObserveV2.getObserve().addRef(conditionalTarget, index.toString());
-                    callbackFn(typeof value == 'object' ? RefInfo.get(value).proxy : value, index, receiver);
+                    callbackFn(typeof value === 'object' ? RefInfo.get(value).proxy : value, index, receiver);
                 });
                 return result;
-            }
+            };
         } else {
             return ret.bind(target); // SendableArray can't be bound -> functions not observed
         }
@@ -321,7 +321,7 @@ class SetMapProxyHandler {
                         target.add(val);
                     }
                     return receiver;
-                }
+                };
             }
 
             if (key === 'forEach') {
@@ -332,7 +332,7 @@ class SetMapProxyHandler {
                     // currently, just execute it in target because there is no Component need to iterate Set, only Array
                     const result = ret.call(target, callbackFn);
                     return result;
-                }
+                };
             }
             // Bind to receiver ==> functions are observed
             return (typeof ret === 'function') ? ret.bind(receiver) : ret;
@@ -370,7 +370,7 @@ class SetMapProxyHandler {
                     // currently, just execute it in target because there is no Component need to iterate Map, only Array
                     const result = ret.call(target, callbackFn);
                     return result;
-                }
+                };
             }
         }
         // Bind to receiver ==> functions are observed

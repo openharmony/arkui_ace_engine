@@ -572,7 +572,7 @@ class ObserveV2 {
         if (view.isViewActive()) {
           // FIXME need to call syncInstanceId before update?
           view.UpdateElement(elmtId);
-        } else {
+        } else if (view instanceof ViewV2) {
           // schedule delayed update once the view gets active
           view.scheduleDelayedUpdate(elmtId);
         }
@@ -596,7 +596,7 @@ class ObserveV2 {
         ((view instanceof ViewV2) || (view instanceof ViewPU))) {
         if (view.isViewActive()) {
           view.uiNodeNeedUpdateV3(elmtId);
-        } else if (view instanceof ViewV2) {
+        } else {
           // schedule delayed update once the view gets active
           view.scheduleDelayedUpdate(elmtId);
         }
