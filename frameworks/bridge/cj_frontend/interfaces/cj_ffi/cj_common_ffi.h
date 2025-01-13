@@ -242,6 +242,10 @@ struct CJGestureEvent {
     double velocityY;
     double velocity;
     double pressure;
+    float axisHorizontal;
+    float axisVertical;
+    int64_t deviceId;
+    const OHOS::Ace::BaseEventInfo* baseEventInfoPtr;
 };
 
 struct CJDragInfo {
@@ -263,6 +267,9 @@ struct CJBaseEvent {
     int64_t tiltX;
     int64_t tiltY;
     int32_t sourceTool;
+    float* axisHorizontal;
+    float* axisVertical;
+    int64_t deviceId;
 };
 
 struct AtCPackage;

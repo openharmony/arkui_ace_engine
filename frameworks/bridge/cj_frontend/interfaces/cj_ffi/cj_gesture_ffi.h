@@ -18,8 +18,8 @@
 
 #include <cstdint>
 
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_collection_ffi.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 
 extern "C" {
@@ -83,6 +83,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkGestureHandlerSetOnActionStart(int64_t id, voi
 CJ_EXPORT void FfiOHOSAceFrameworkGestureHandlerSetOnActionUpdate(int64_t id, void (*onActionCallback)(CJGestureEvent));
 CJ_EXPORT void FfiOHOSAceFrameworkGestureHandlerSetOnActionEnd(int64_t id, void (*onActionCallback)(CJGestureEvent));
 CJ_EXPORT void FfiOHOSAceFrameworkGestureHandlerSetOnActionCancel(int64_t id, void (*onCancel)());
+CJ_EXPORT bool FfiOHOSAceFrameworkGestureGetModifierKeyState(void* baseEventInfoPtr, VectorStringHandle vectorHandle);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetGestureHandler(
     int64_t elemId, int64_t gestureId, int32_t priority, int32_t mask);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetGestureGroupHandler(
