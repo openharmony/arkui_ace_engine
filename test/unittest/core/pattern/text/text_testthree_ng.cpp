@@ -870,15 +870,58 @@ HWTEST_F(TextTestThreeNg, BindSelectionMenu001, TestSize.Level1)
 
     std::function<void()> nullFunc = nullptr;
 
-    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK, nullFunc, onAppear, onDisappear);
+    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK, nullFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
     EXPECT_TRUE(pattern->selectionMenuMap_.empty());
 
     pattern->selectionMenuMap_[key] = params1;
-    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK, buildFunc, onAppear, onDisappear);
+    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
     EXPECT_FALSE(pattern->selectionMenuMap_.empty());
 
-    pattern->BindSelectionMenu(TextSpanType::IMAGE, TextResponseType::RIGHT_CLICK, buildFunc, onAppear, onDisappear);
+    pattern->BindSelectionMenu(TextSpanType::IMAGE, TextResponseType::RIGHT_CLICK, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
     EXPECT_FALSE(pattern->selectionMenuMap_.empty());
+    pattern->selectionMenuMap_.clear();
+
+    pattern->BindSelectionMenu(
+        TextSpanType::TEXT, TextResponseType::NONE, buildFunc, { .onAppear = onAppear, .onDisappear = onDisappear });
+    pattern->BindSelectionMenu(TextSpanType::NONE, TextResponseType::LONG_PRESS, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
+    auto params = pattern->GetMenuParams(TextSpanType::TEXT, TextResponseType::RIGHT_CLICK);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::IMAGE, TextResponseType::LONG_PRESS);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::IMAGE, TextResponseType::RIGHT_CLICK);
+    EXPECT_EQ(params, nullptr);
+
+    pattern->selectionMenuMap_.clear();
+    pattern->BindSelectionMenu(TextSpanType::TEXT, TextResponseType::LONG_PRESS, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
+    pattern->BindSelectionMenu(TextSpanType::IMAGE, TextResponseType::LONG_PRESS, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
+    params = pattern->GetMenuParams(TextSpanType::TEXT, TextResponseType::LONG_PRESS);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::TEXT, TextResponseType::RIGHT_CLICK);
+    EXPECT_EQ(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::IMAGE, TextResponseType::LONG_PRESS);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::IMAGE, TextResponseType::RIGHT_CLICK);
+    EXPECT_EQ(params, nullptr);
+
+    pattern->selectionMenuMap_.clear();
+    pattern->BindSelectionMenu(
+        TextSpanType::NONE, TextResponseType::NONE, buildFunc, { .onAppear = onAppear, .onDisappear = onDisappear });
+    params = pattern->GetMenuParams(TextSpanType::TEXT, TextResponseType::LONG_PRESS);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::TEXT, TextResponseType::RIGHT_CLICK);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::IMAGE, TextResponseType::NONE);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::IMAGE, TextResponseType::RIGHT_CLICK);
+    EXPECT_NE(params, nullptr);
+    params = pattern->GetMenuParams(TextSpanType::MIXED, TextResponseType::SELECTED_BY_MOUSE);
+    EXPECT_NE(params, nullptr);
 }
 
 /**
@@ -912,7 +955,8 @@ HWTEST_F(TextTestThreeNg, CloseSelectionMenu001, TestSize.Level1)
         callBack3 = 3;
         return;
     };
-    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::LONG_PRESS, buildFunc, onAppear, onDisappear);
+    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::LONG_PRESS, buildFunc,
+        { .onAppear = onAppear, .onDisappear = onDisappear });
     GestureEvent info;
     info.localLocation_ = Offset(1, 1);
     // copyOption = None

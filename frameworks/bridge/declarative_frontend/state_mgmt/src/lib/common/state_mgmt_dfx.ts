@@ -196,7 +196,7 @@ class stateMgmtDFX {
     } else {
       rawValue = ObserveV2.IsProxiedObservedV2(prop) ? prop[ObserveV2.SYMBOL_PROXY_GET_TARGET] : prop;
     }
-    if (typeof rawValue !== 'object') {
+    if (!rawValue || typeof rawValue !== 'object') {
       return rawValue;
     }
     if (rawValue instanceof Map) {

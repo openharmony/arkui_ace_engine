@@ -1652,4 +1652,10 @@ void ViewAbstractModelImpl::SetOnAccessibilityFocus(
 void ViewAbstractModelImpl::ResetOnAccessibilityFocus()
 {}
 
+void ViewAbstractModelImpl::SetAccessibilityDefaultFocus()
+{}
+
+void ViewAbstractModelImpl::SetAccessibilityUseSamePage(bool isFullSilent)
+{}
+
 } // namespace OHOS::Ace::Framework

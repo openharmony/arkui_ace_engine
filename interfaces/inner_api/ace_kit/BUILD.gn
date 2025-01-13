@@ -28,6 +28,7 @@ ohos_source_set("ace_kit") {
 
   sources = [
     "src/resource/resource_parser.cpp",
+    "src/view/extend_pattern.cpp",
     "src/view/frame_node_impl.cpp",
     "src/view/layout/box_layout_algorithm.cpp",
     "src/view/theme/theme_factory.cpp",

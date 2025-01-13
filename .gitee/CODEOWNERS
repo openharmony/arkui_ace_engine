@@ -301,8 +301,8 @@ frameworks/bridge/common/dom/dom_badge.cpp @arkui_image
 frameworks/bridge/common/dom/dom_badge.h @arkui_image
 frameworks/bridge/common/dom/dom_button.cpp @arkuipopupwindow
 frameworks/bridge/common/dom/dom_button.h @arkuipopupwindow
-frameworks/bridge/common/dom/dom_calendar.cpp @arkuipopupwindow
-frameworks/bridge/common/dom/dom_calendar.h @arkuipopupwindow
+frameworks/bridge/common/dom/dom_calendar.cpp @arkui_image
+frameworks/bridge/common/dom/dom_calendar.h @arkui_image
 frameworks/bridge/common/dom/dom_camera.cpp @arkuilayout
 frameworks/bridge/common/dom/dom_camera.h @arkuilayout
 frameworks/bridge/common/dom/dom_canvas.cpp @arkuilayout
@@ -1010,10 +1010,10 @@ frameworks/bridge/declarative_frontend/jsview/js_button.cpp @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/js_button.h @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/js_cached_image.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_cached_image.h @arkui_image
-frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.cpp @arkuipopupwindow
-frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h @arkuipopupwindow
-frameworks/bridge/declarative_frontend/jsview/js_calendar.cpp @arkuipopupwindow
-frameworks/bridge/declarative_frontend/jsview/js_calendar.h @arkuipopupwindow
+frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.cpp @arkui_image
+frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h @arkui_image
+frameworks/bridge/declarative_frontend/jsview/js_calendar.cpp @arkui_image
+frameworks/bridge/declarative_frontend/jsview/js_calendar.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.cpp @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/js_camera.cpp @arkuilayout
@@ -1355,10 +1355,10 @@ frameworks/bridge/declarative_frontend/jsview/models/blank_model_impl.cpp @arkui
 frameworks/bridge/declarative_frontend/jsview/models/blank_model_impl.h @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/button_model_impl.cpp @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/models/button_model_impl.h @arkuipopupwindow
-frameworks/bridge/declarative_frontend/jsview/models/calendar_controller_model_impl.cpp @arkuipopupwindow
-frameworks/bridge/declarative_frontend/jsview/models/calendar_controller_model_impl.h @arkuipopupwindow
-frameworks/bridge/declarative_frontend/jsview/models/calendar_model_impl.cpp @arkuipopupwindow
-frameworks/bridge/declarative_frontend/jsview/models/calendar_model_impl.h @arkuipopupwindow
+frameworks/bridge/declarative_frontend/jsview/models/calendar_controller_model_impl.cpp @arkui_image
+frameworks/bridge/declarative_frontend/jsview/models/calendar_controller_model_impl.h @arkui_image
+frameworks/bridge/declarative_frontend/jsview/models/calendar_model_impl.cpp @arkui_image
+frameworks/bridge/declarative_frontend/jsview/models/calendar_model_impl.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/models/calendar_picker_model_impl.h @arkui_image
 frameworks/bridge/declarative_frontend/jsview/models/canvas/  @arkuilayout
 frameworks/bridge/declarative_frontend/jsview/models/checkboxgroup_model_impl.cpp @arkuipopupwindow
@@ -1868,7 +1868,7 @@ frameworks/core/components/badge/ @arkui_image
 frameworks/core/components/box/ @arkuilayout
 frameworks/core/components/bubble/ @arkuipopupwindow
 frameworks/core/components/button/  @arkuipopupwindow
-frameworks/core/components/calendar/ @arkuipopupwindow
+frameworks/core/components/calendar/ @arkui_image
 frameworks/core/components/camera/ @arkuilayout
 frameworks/core/components/chart/ @arkui_image
 frameworks/core/components/checkable/ @arkuipopupwindow
@@ -2100,8 +2100,8 @@ frameworks/core/components_v2/inspector/blank_composed_element.h @arkuilayout
 frameworks/core/components_v2/inspector/BUILD.gn
 frameworks/core/components_v2/inspector/button_composed_element.cpp @arkuipopupwindow
 frameworks/core/components_v2/inspector/button_composed_element.h @arkuipopupwindow
-frameworks/core/components_v2/inspector/calendar_composed_element.cpp @arkuipopupwindow
-frameworks/core/components_v2/inspector/calendar_composed_element.h @arkuipopupwindow
+frameworks/core/components_v2/inspector/calendar_composed_element.cpp @arkui_image
+frameworks/core/components_v2/inspector/calendar_composed_element.h @arkui_image
 frameworks/core/components_v2/inspector/checkbox_composed_element.cpp @arkuipopupwindow
 frameworks/core/components_v2/inspector/checkbox_composed_element.h @arkuipopupwindow
 frameworks/core/components_v2/inspector/checkboxGroup_composed_element.cpp @arkuipopupwindow
@@ -2348,7 +2348,7 @@ frameworks/core/components_ng/pattern/blank/ @arkuilayout
 frameworks/core/components_ng/pattern/bubble/ @arkuipopupwindow
 frameworks/core/components_ng/pattern/BUILD.gn @arkui_architecture
 frameworks/core/components_ng/pattern/button/ @arkuipopupwindow
-frameworks/core/components_ng/pattern/calendar/ @arkuipopupwindow
+frameworks/core/components_ng/pattern/calendar/ @arkui_image
 frameworks/core/components_ng/pattern/calendar_picker/ @arkui_image
 frameworks/core/components_ng/pattern/canvas/ @arkuilayout
 frameworks/core/components_ng/pattern/checkbox/ @arkuipopupwindow
@@ -3056,7 +3056,7 @@ test/unittest/core/pattern/badge/ @arkui_image
 test/unittest/core/pattern/blank/ @arkuilayout
 test/unittest/core/pattern/bubble/ @arkuipopupwindow
 test/unittest/core/pattern/button/ @arkuipopupwindow
-test/unittest/core/pattern/calendar/ @arkuipopupwindow
+test/unittest/core/pattern/calendar/ @arkui_image
 test/unittest/core/pattern/calendar_picker/ @arkui_image
 test/unittest/core/pattern/canvas/ @arkuilayout
 test/unittest/core/pattern/checkbox/ @arkuipopupwindow

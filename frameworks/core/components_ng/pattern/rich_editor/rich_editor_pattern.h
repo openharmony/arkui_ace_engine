@@ -1128,6 +1128,7 @@ private:
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleBlurEvent();
     void HandleFocusEvent();
+    void OnFocusNodeChange(FocusReason focusReason) override;
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
     bool HandleClickSelection(const OHOS::Ace::GestureEvent& info);
@@ -1494,6 +1495,8 @@ private:
     std::vector<OperationRecord> operationRecords_;
     std::vector<OperationRecord> redoOperationRecords_;
     std::list<WeakPtr<ImageSpanNode>> hoverableNodes;
+    RefPtr<ImageSpanItem> lastHoverSpanItem_ = nullptr;
+    HoverInfo lastHoverInfo_;
 
     RefPtr<TouchEventImpl> touchListener_;
     RefPtr<PanEvent> panEvent_;
@@ -1575,6 +1578,7 @@ private:
     std::list<WeakPtr<ImageSpanNode>> imageNodes;
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
     bool isStopBackPress_ = true;
+    bool blockKbInFloatingWindow_ = false;
 };
 } // namespace OHOS::Ace::NG
 

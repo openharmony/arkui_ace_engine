@@ -249,6 +249,12 @@ public:
     virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
 
+    virtual void SendFrameNodeToAccessibility(const RefPtr<NG::FrameNode>& node, bool isExtensionComponent) {};
+
+    virtual void UpdateFrameNodeState(int32_t nodeId) {};
+
+    virtual void UpdatePageMode(const std::string& pageMode) {};
+
     virtual void RegisterAccessibilitySAObserverCallback(
         int64_t elementId, const std::shared_ptr<AccessibilitySAObserverCallback> &callback) {};
 

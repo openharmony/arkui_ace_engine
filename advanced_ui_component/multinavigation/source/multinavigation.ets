@@ -611,7 +611,7 @@ export class MultiNavPathStack extends NavPathStack {
       hilog.error(0x0000, 'MultiNavigation', 'replacePath fail stack is empty');
       return;
     }
-    let currentTopPolicy = this.totalStack[totalSize-1].policy;
+    let currentTopPolicy = this.totalStack[totalSize - 1].policy;
     if (currentTopPolicy === SplitPolicy.PlACE_HOLDER_PAGE) {
       hilog.warn(0x0000, 'MultiNavigation', 'replacePath fail, not support replace placeHolder');
       return;
@@ -723,14 +723,14 @@ export class MultiNavPathStack extends NavPathStack {
       return undefined;
     }
     let currentPath = this.totalStack[totalSize - 1].navInfo;
-    let allInfoLength = this.subStackList[subStackLength-1].getAllInfoLength();
+    let allInfoLength = this.subStackList[subStackLength - 1].getAllInfoLength();
     if (allInfoLength < 1) {
       hilog.error(0x0000, 'MultiNavigation', 'MultiNavPathStack pop fail sub stack is empty');
       return undefined;
     }
     let secondaryStackFirstPolice: SplitPolicy | undefined = undefined;
     if (allInfoLength > 1) {
-      secondaryStackFirstPolice = this.subStackList[subStackLength -1].getSecondaryInfoList()[0].policy;
+      secondaryStackFirstPolice = this.subStackList[subStackLength - 1].getSecondaryInfoList()[0].policy;
     }
     hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack pop allInfoLength=' + allInfoLength +
       ', secondaryStackFirstPolice' + secondaryStackFirstPolice);
@@ -746,7 +746,7 @@ export class MultiNavPathStack extends NavPathStack {
     } else {
       if (allInfoLength === 2) {
         if (this.placeHolderPolicyInfo !== undefined) {
-          if (secondaryStackFirstPolice ===SplitPolicy.PlACE_HOLDER_PAGE) {
+          if (secondaryStackFirstPolice === SplitPolicy.PlACE_HOLDER_PAGE) {
             this.outerStack.popInner(animated);
             let subStack = this.subStackList.pop();
             setTimeout(() => {
@@ -756,20 +756,20 @@ export class MultiNavPathStack extends NavPathStack {
             currentPath = this.totalStack.pop()?.navInfo;
           } else {
             if (this.needShowPlaceHolder()) {
-              this.subStackList[subStackLength-1].pop(animated);
-              this.pushPlaceHolder(subStackLength-1)
+              this.subStackList[subStackLength - 1].pop(animated);
+              this.pushPlaceHolder(subStackLength - 1)
             } else {
-              this.subStackList[subStackLength-1].pop(animated);
+              this.subStackList[subStackLength - 1].pop(animated);
             }
           }
         } else {
-          this.subStackList[subStackLength-1].pop(animated);
+          this.subStackList[subStackLength - 1].pop(animated);
         }
       } else {
-        this.subStackList[subStackLength-1].pop(animated);
+        this.subStackList[subStackLength - 1].pop(animated);
       }
     }
-    hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack pop currentPath.name = ' +currentPath?.name);
+    hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack pop currentPath.name = ' + currentPath?.name);
 
     if (result !== undefined && typeof result !== 'boolean' &&
       currentPath !== undefined && currentPath.onPop !== undefined) {
@@ -810,7 +810,7 @@ export class MultiNavPathStack extends NavPathStack {
           this.subStackList[i]?.secondaryStack.clear();
           this.subStackList[i].secondaryStack.policyInfoList.splice(0);
           this.totalStack.splice(index + 1);
-          this.clearTrashStack(i + 1,result,animated);
+          this.clearTrashStack(i + 1, result, animated);
           break;
         } else if (index > removeIndex - 1 && index < removeIndex + secondaryStackSize[i]) {
           this.subStackList[i].secondaryStack.popToIndex(index - removeIndex);
@@ -861,7 +861,7 @@ export class MultiNavPathStack extends NavPathStack {
         this.subStackList[i]?.secondaryStack.clear();
         this.subStackList[i].secondaryStack.policyInfoList.splice(0);
         this.totalStack.splice(index + 1);
-        this.clearTrashStack(i + 1,result,animated);
+        this.clearTrashStack(i + 1, result, animated);
         hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack popToIndex totalStack=' + this.totalStack.length);
         break;
       } else if (index > removeIndex - 1 && index < removeIndex + secondaryStackSize[i]) {
@@ -896,7 +896,7 @@ export class MultiNavPathStack extends NavPathStack {
     }
     this.subStackList.splice(index);
     hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack popToIndex subStackList.length=' + this.subStackList.length);
-    this.outerStack.popToIndex(index - 1,result,animated);
+    this.outerStack.popToIndex(index - 1, result, animated);
     hilog.info(0x0000, 'MultiNavigation', 'MultiNavPathStack popToIndex outerStack.size=' + this.outerStack.size());
   }
 
@@ -975,7 +975,7 @@ export class MultiNavPathStack extends NavPathStack {
         } else {
           this.subStackList[0].clearSecondary(animated);
           this.totalStack.splice(1);
-          if (this.needShowPlaceHolder()){
+          if (this.needShowPlaceHolder()) {
             this.subStackList[0].pushSecondaryPath(this.placeHolderPolicyInfo, animated);
             this.totalStack.push(this.placeHolderPolicyInfo);
           }
@@ -1124,10 +1124,10 @@ export class MultiNavPathStack extends NavPathStack {
     if (topStackPrimaryPolicy !== SplitPolicy.HOME_PAGE) {
       return;
     }
-    const subStackAllInfoLength = this.subStackList[subStackListLength -1].getAllInfoLength();
+    const subStackAllInfoLength = this.subStackList[subStackListLength - 1].getAllInfoLength();
     let secondaryStackFirstPolice: SplitPolicy | undefined = undefined;
     if (subStackAllInfoLength > 1) {
-      secondaryStackFirstPolice = this.subStackList[subStackListLength -1].getSecondaryInfoList()[0].policy;
+      secondaryStackFirstPolice = this.subStackList[subStackListLength - 1].getSecondaryInfoList()[0].policy;
     }
     if (this.needShowPlaceHolder()) {
       if (subStackAllInfoLength === 1) {
@@ -1284,7 +1284,7 @@ export class MyNavPathStack extends NavPathStack {
     if (typeof animated === 'boolean') {
       ret = super.pop(animated);
     } else {
-      ret =  super.pop(result, animated);
+      ret = super.pop(result, animated);
     }
     this.policyInfoList.pop();
     this.operates.forEach((item) => {
@@ -1294,11 +1294,11 @@ export class MyNavPathStack extends NavPathStack {
   }
 }
 
-interface NavPathStackOperate{
+interface NavPathStackOperate {
   onSystemPop: Function;
 }
 
-interface MultiNavPathStackOperate{
+interface MultiNavPathStackOperate {
   onPrimaryPop: Function;
   onSecondaryPop: Function;
 }

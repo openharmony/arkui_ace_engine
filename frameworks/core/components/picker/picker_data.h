@@ -134,6 +134,7 @@ public:
     }
 
     std::string ToString(bool jsonFormat, bool hasSecond, int32_t status = -1) const;
+    uint32_t ToMinutes() const;
 
 private:
     uint32_t hour_ = 0;

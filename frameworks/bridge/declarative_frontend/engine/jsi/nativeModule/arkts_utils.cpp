@@ -134,7 +134,7 @@ bool ArkTSUtils::ParseJsColorContent(const EcmaVM* vm, const Local<JSValueRef>& 
     auto obj = value->ToObject(vm);
     auto colorContentValue = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "colorContent_"));
     return !colorContentValue.IsEmpty() && colorContentValue->IsString(vm) &&
-           colorContentValue->ToString(vm)->ToString(vm) == "RESET";
+           colorContentValue->ToString(vm)->ToString(vm) == "ORIGIN";
 }
 
 bool ArkTSUtils::ParseJsColorAlpha(

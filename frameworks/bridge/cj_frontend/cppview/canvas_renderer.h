@@ -18,15 +18,16 @@
 
 #include <cstdint>
 #include <string>
+
 #include "ffi_remote_data.h"
 #include "pixel_map_impl.h"
 
 #include "base/memory/referenced.h"
 #include "bridge/cj_frontend/cppview/canvas_gradient.h"
+#include "bridge/cj_frontend/cppview/canvas_image_data.h"
+#include "bridge/cj_frontend/cppview/canvas_path.h"
 #include "bridge/cj_frontend/cppview/matrix2d.h"
 #include "bridge/cj_frontend/cppview/render_image.h"
-#include "bridge/cj_frontend/cppview/canvas_path.h"
-#include "bridge/cj_frontend/cppview/canvas_image_data.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/decoration.h"
@@ -110,6 +111,7 @@ public:
     int64_t CreateImageData(const sptr<NativeImageData> imageData);
     void PutImageData(const sptr<NativeImageData> imageData, const double dx, const double dy, const double dirtyX,
         const double dirtyY, const double dirtyWidth, const double dirtyHeight);
+    void PutImageData(const sptr<NativeImageData> imageData, const double dx, const double dy);
 
     void FillRect(const Rect& rect);
     void StrokeRect(const Rect& rect);
@@ -212,6 +214,7 @@ protected:
     RefPtr<RenderingContext2DModel> renderingContext2DModel_;
 
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
+
 private:
     double density_ = 1.0;
     std::vector<PaintState> savePaintState_;

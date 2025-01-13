@@ -3177,6 +3177,24 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundImageSize(ArkUIRuntimeCallIn
     return panda::JSValueRef::Undefined(vm);
 }
 
+bool ParseJsBackgroundImageOptions(
+    const EcmaVM* vm, const Local<JSValueRef>& value, int32_t& repeatIndex, bool& syncMode)
+{
+    if (!value->IsObject(vm)) {
+        return false;
+    }
+    auto jsObj = value->ToObject(vm);
+    auto repeat = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "repeat"));
+    if (repeat->IsNumber()) {
+        repeatIndex = repeat->ToNumber(vm)->Value();
+    }
+    auto syncLoad = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "syncLoad"));
+    if (syncLoad->IsBoolean()) {
+        syncMode = syncLoad->ToBoolean(vm)->Value();
+    }
+    return true;
+}
+
 ArkUINativeModuleValue CommonBridge::SetBackgroundImage(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM *vm = runtimeCallInfo->GetVM();
@@ -3189,9 +3207,15 @@ ArkUINativeModuleValue CommonBridge::SetBackgroundImage(ArkUIRuntimeCallInfo *ru
     std::string bundle;
     std::string module;
     int32_t repeatIndex = 0;
+    bool syncMode = false;
     RefPtr<PixelMap> pixmap = nullptr;
     if (repeatArg->IsNumber()) {
         repeatIndex = repeatArg->ToNumber(vm)->Value();
+    }
+    if (ParseJsBackgroundImageOptions(vm, repeatArg, repeatIndex, syncMode)) {
+        GetArkUINodeModifiers()->getCommonModifier()->setBackgroundImageSyncMode(nativeNode, syncMode);
+    } else {
+        GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImageSyncMode(nativeNode);
     }
     if (srcArg->IsString(vm)) {
         src = srcArg->ToString(vm)->ToString(vm);
@@ -3226,6 +3250,7 @@ ArkUINativeModuleValue CommonBridge::ResetBackgroundImage(ArkUIRuntimeCallInfo *
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImageSyncMode(nativeNode);
     GetArkUINodeModifiers()->getCommonModifier()->resetBackgroundImage(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -3978,13 +4003,16 @@ ArkUINativeModuleValue CommonBridge::SetAccessibilityRoleType(ArkUIRuntimeCallIn
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    if (!firstArg->IsNativePointer(vm)) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "set role first param is invalid");
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsInt()) {
         auto index = secondArg->Int32Value(vm);
         AccessibilityRoleType roleType = static_cast<AccessibilityRoleType>(index);
-        auto it = accessibilityRoleMap.find(roleType);
-        if (it != accessibilityRoleMap.end()) {
-            std::string role = it->second;
+        std::string role = JSAccessibilityAbstract::GetRoleByType(roleType);
+        if (!role.empty()) {
             GetArkUINodeModifiers()->getCommonModifier()->setAccessibilityCustomRole(nativeNode, role.c_str());
         } else {
             GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityCustomRole(nativeNode);
@@ -4004,6 +4032,10 @@ ArkUINativeModuleValue CommonBridge::ResetAccessibilityRoleType(ArkUIRuntimeCall
         return panda::NativePointerRef::New(vm, nullptr);
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNativePointer(vm)) {
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "reset role first param is invalid");
+        return panda::NativePointerRef::New(vm, nullptr);
+    }
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCommonModifier()->resetAccessibilityCustomRole(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -6208,7 +6240,7 @@ FrameNode* CommonBridge::GetFrameNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, nullptr);
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(!firstArg.IsNull(), nullptr);
+    CHECK_NULL_RETURN(!firstArg.IsNull() && firstArg->IsNativePointer(vm), nullptr);
     auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(nativeNode, nullptr);
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);

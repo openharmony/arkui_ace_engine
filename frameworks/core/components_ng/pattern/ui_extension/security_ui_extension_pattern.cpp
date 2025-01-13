@@ -297,7 +297,13 @@ void SecurityUIExtensionPattern::OnConnect()
             WeakClaim(this), sessionWrapper_);
     }
     InitializeAccessibility();
+    InitBusinessDataHandleCallback();
+}
+
+void SecurityUIExtensionPattern::InitBusinessDataHandleCallback()
+{
     RegisterEventProxyFlagCallback();
+    RegisterTransformParamGetCallback();
 }
 
 void SecurityUIExtensionPattern::OnExtensionEvent(UIExtCallbackEventId eventId)
@@ -911,6 +917,44 @@ void SecurityUIExtensionPattern::RegisterEventProxyFlagCallback()
             } else {
                 return -1;
             }
+        });
+}
+
+void SecurityUIExtensionPattern::RegisterTransformParamGetCallback()
+{
+    RegisterUIExtBusinessConsumeReplyCallback(UIContentBusinessCode::TRANSFORM_PARAM,
+        [weak = WeakClaim(this)](const AAFwk::Want& data, std::optional<AAFwk::Want>& reply) -> int32_t {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, -1);
+            auto host = pattern->GetHost();
+            CHECK_NULL_RETURN(host, -1);
+            auto rect = host->GetTransformRectRelativeToWindow();
+            VectorF finalScale = host->GetTransformScaleRelativeToWindow();
+            AccessibilityParentRectInfo parentRectInfo;
+            parentRectInfo.left = static_cast<int32_t>(rect.Left());
+            parentRectInfo.top = static_cast<int32_t>(rect.Top());
+            parentRectInfo.scaleX = finalScale.x;
+            parentRectInfo.scaleY = finalScale.y;
+            auto pipeline = host->GetContextRefPtr();
+            if (pipeline) {
+                auto accessibilityManager = pipeline->GetAccessibilityManager();
+                if (accessibilityManager) {
+                    auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
+                    parentRectInfo.left =
+                        parentRectInfo.left * windowInfo.scaleX + static_cast<int32_t>(windowInfo.left);
+                    parentRectInfo.top = parentRectInfo.top * windowInfo.scaleY + static_cast<int32_t>(windowInfo.top);
+                    parentRectInfo.scaleX *= windowInfo.scaleX;
+                    parentRectInfo.scaleY *= windowInfo.scaleY;
+                }
+            }
+            reply->SetParam("left", parentRectInfo.left);
+            reply->SetParam("top", parentRectInfo.top);
+            reply->SetParam("scaleX", parentRectInfo.scaleX);
+            reply->SetParam("scaleY", parentRectInfo.scaleY);
+            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+                "Transform rect param[left:%{public}d, top:%{public}d, scaleX:%{public}f, scaleY:%{public}f].",
+                parentRectInfo.left, parentRectInfo.top, parentRectInfo.scaleX, parentRectInfo.scaleY);
+            return 0;
         });
 }
 

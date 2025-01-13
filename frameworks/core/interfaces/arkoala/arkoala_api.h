@@ -1470,6 +1470,13 @@ struct ArkUIAccessibilityValue {
     ArkUIOptionalCharPtr text;
 };
 
+struct ArkUIProgressLinearStyleOption {
+    bool scanEffectEnable;
+    bool smoothEffectEnable;
+    float strokeWidth;
+    float strokeRadius;
+};
+
 struct ArkUITranslateOption {
     ArkUI_Float32 x;
     ArkUI_Float32 y;
@@ -1752,6 +1759,8 @@ struct ArkUICommonModifier {
     void (*setBackgroundImage)(
         ArkUINodeHandle node, ArkUI_CharPtr src, ArkUI_CharPtr bundle, ArkUI_CharPtr module, ArkUI_Int32 repeatIndex);
     void (*resetBackgroundImage)(ArkUINodeHandle node);
+    void (*setBackgroundImageSyncMode)(ArkUINodeHandle node, ArkUI_Bool syncMode);
+    void (*resetBackgroundImageSyncMode)(ArkUINodeHandle node);
     void (*setTranslate)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetTranslate)(ArkUINodeHandle node);
@@ -2831,6 +2840,12 @@ struct ArkUITimepickerModifier {
     ArkUI_CharPtr (*getTimepickerSelected)(ArkUINodeHandle node);
     void (*setTimepickerSelected)(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute);
     void (*resetTimepickerSelected)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getTimepickerStart)(ArkUINodeHandle node);
+    void (*setTimepickerStart)(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute);
+    void (*resetTimepickerStart)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getTimepickerEnd)(ArkUINodeHandle node);
+    void (*setTimepickerEnd)(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute);
+    void (*resetTimepickerEnd)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTimepickerBackgroundColor)(ArkUINodeHandle node);
     void (*setTimepickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     ArkUI_CharPtr (*getTimepickerDisappearTextStyle)(ArkUINodeHandle node);
@@ -3377,6 +3392,7 @@ struct ArkUIProgressModifier {
     void (*setProgressInitialize)(
         ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Float32 total, ArkUI_Int32 progressStyle);
     void (*resetProgressInitialize)(ArkUINodeHandle node);
+    void (*getProgressLinearStyle)(ArkUINodeHandle node, ArkUIProgressLinearStyleOption& option);
 };
 
 struct ArkUIPluginModifier {
@@ -4264,6 +4280,7 @@ struct ArkUIImageAnimatorModifier {
     void (*resetImages)(ArkUINodeHandle node);
     void (*setImageAnimatorIteration)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetImageAnimatorIteration)(ArkUINodeHandle node);
+    void (*setAutoMonitorInvisibleArea)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*setImageAnimatorSrc)(ArkUINodeHandle node, ArkUIImageFrameInfo* imageInfos, ArkUI_Int32 size);
     void (*resetDuration)(ArkUINodeHandle node);
     ArkUI_Bool (*getIsReverse)(ArkUINodeHandle node);
@@ -5235,6 +5252,10 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Int32 (*resetDrawCompleteEvent)(ArkUINodeHandle node);
     ArkUI_Int32 (*setLayoutEvent)(ArkUINodeHandle node, void* userData, void* onDraw);
     ArkUI_Int32 (*resetLayoutEvent)(ArkUINodeHandle node);
+    ArkUI_Int32 (*requestFocus)(ArkUINodeHandle node);
+    void (*clearFocus)(ArkUI_Int32 instanceId);
+    void (*focusActivate)(ArkUI_Int32 instanceId, bool isActive, bool isAutoInactive);
+    void (*setAutoFocusTransfer)(ArkUI_Int32 instanceId, bool isAutoFocusTransfer);
     ArkUI_Int32 (*getWindowInfoByNode)(ArkUINodeHandle node, char** name);
 };
 

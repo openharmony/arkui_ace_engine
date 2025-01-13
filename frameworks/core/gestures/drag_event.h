@@ -65,6 +65,12 @@ enum class PreDragStatus {
     PREVIEW_LANDING_STARTED,
     PREVIEW_LANDING_FINISHED,
     ACTION_CANCELED_BEFORE_DRAG,
+    PREPARING_FOR_DRAG_DETECTION,
+};
+
+enum class DragStartRequestStatus : int32_t {
+    WAITING = 0,
+    READY
 };
 
 enum class DragBehavior {

@@ -54,6 +54,12 @@ const RefPtr<FrameNode> UIExtensionManager::GetFocusUiExtensionNode()
     return nullptr;
 }
 
+bool UIExtensionManager::SendBusinessToHostSyncReply(
+    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+{
+    return true;
+}
+
 RefPtr<AccessibilityManagerNG> PipelineContext::GetAccessibilityManagerNG()
 {
     return nullptr;

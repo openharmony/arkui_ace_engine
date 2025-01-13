@@ -31,6 +31,8 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/render/drawing.h"
+#include "ui/view/draw/content_modifier.h"
+#include "ui/view/draw/modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -57,6 +59,9 @@ public:
     explicit ContentModifierAdapter(const RefPtr<Modifier>& modifier)
         : modifier_(AceType::DynamicCast<ContentModifier>(modifier))
     {}
+    explicit ContentModifierAdapter(const RefPtr<Kit::Modifier>& modifier)
+        : kitModifier_(AceType::DynamicCast<Kit::ContentModifier>(modifier))
+    {}
     ~ContentModifierAdapter() override = default;
 
     void Draw(RSDrawingContext& context) const override;
@@ -65,11 +70,13 @@ public:
 
 private:
     WeakPtr<ContentModifier> modifier_;
+    RefPtr<Kit::ContentModifier> kitModifier_ = nullptr;
     bool hasAttached_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ContentModifierAdapter);
 };
 
+std::shared_ptr<RSModifier> ConvertKitContentModifier(const RefPtr<Kit::Modifier>& modifier);
 std::shared_ptr<RSModifier> ConvertContentModifier(const RefPtr<Modifier>& modifier);
 std::shared_ptr<RSModifier> ConvertOverlayModifier(const RefPtr<Modifier>& modifier);
 std::shared_ptr<RSModifier> ConvertForegroundModifier(const RefPtr<Modifier>& modifier);

@@ -13,20 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef WEB_AREA_CHANGED_H
-#define WEB_AREA_CHANGED_H
-#include "core/components/web/resource/web_delegate.h"
+#include "interfaces/inner_api/ace_kit/src/view/extend_pattern.h"
 
-namespace OHOS::Ace {
-class WebAvoidAreaChangedListener : public Referenced, public OHOS::Rosen::IAvoidAreaChangedListener {
-public:
-    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
-    ~WebAvoidAreaChangedListener() = default;
-    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
+namespace OHOS::Ace::Kit {
 
-private:
-    WeakPtr<WebDelegate> webDelegate_;
-};
+ExtendPattern::ExtendPattern(const RefPtr<Kit::Pattern>& kitPattern) : kitPattern_(kitPattern) {}
+
+bool ExtendPattern::OnDirtyLayoutWrapperSwap(
+    const RefPtr<NG::LayoutWrapper>& dirty, const NG::DirtySwapConfig& changeConfig)
+{
+    if (kitPattern_) {
+        return kitPattern_->OnDirtyLayoutrSwap(changeConfig);
+    }
+    return false;
 }
 
-#endif
+} // namespace OHOS::Ace::Kit
