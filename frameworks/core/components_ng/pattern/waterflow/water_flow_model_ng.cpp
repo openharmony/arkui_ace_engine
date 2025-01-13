@@ -95,6 +95,15 @@ void WaterFlowModelNG::SetFooter(FrameNode* frameNode, std::function<RefPtr<NG::
     pattern->AddFooter(footerNode);
 }
 
+void WaterFlowModelNG::SetFooterWithFrameNode(const RefPtr<NG::UINode>& footer)
+{
+    auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddFooter(footer);
+}
+
 RefPtr<ScrollControllerBase> WaterFlowModelNG::CreateScrollController()
 {
     return AceType::MakeRefPtr<ScrollableController>();
@@ -346,9 +355,9 @@ int32_t WaterFlowModelNG::GetShowCached(FrameNode* frameNode)
     return show;
 }
 
-void WaterFlowModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void WaterFlowModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled, edge);
 }
 
 void WaterFlowModelNG::SetScrollBarMode(DisplayMode value)
@@ -601,9 +610,10 @@ NestedScrollOptions WaterFlowModelNG::GetNestedScroll(FrameNode* frameNode)
     return pattern->GetNestedScroll();
 }
 
-void WaterFlowModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled)
+void WaterFlowModelNG::SetEdgeEffect(
+    FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, edge);
 }
 float WaterFlowModelNG::GetFriction(FrameNode* frameNode)
 {
@@ -709,6 +719,14 @@ void WaterFlowModelNG::SetWaterflowFooter(FrameNode* frameNode, FrameNode* foote
     pattern->AddFooter(AceType::Claim<UINode>(footerNode));
 }
 
+void WaterFlowModelNG::SetWaterflowFooterWithFrameNode(FrameNode* frameNode, const RefPtr<NG::UINode>& footer)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddFooter(footer);
+}
+
 bool WaterFlowModelNG::hasFooter(FrameNode* frameNode)
 {
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
@@ -737,5 +755,13 @@ void WaterFlowModelNG::SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMode m
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetLayoutMode(mode);
+}
+
+WaterFlowLayoutMode WaterFlowModelNG::GetLayoutMode(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, WaterFlowLayoutMode::TOP_DOWN);
+    auto pattern = frameNode->GetPattern<WaterFlowPattern>();
+    CHECK_NULL_RETURN(pattern, WaterFlowLayoutMode::TOP_DOWN);
+    return pattern->GetLayoutMode();
 }
 } // namespace OHOS::Ace::NG

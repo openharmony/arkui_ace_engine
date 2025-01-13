@@ -21,6 +21,8 @@
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 
+#include "ui/view/theme/theme_style.h"
+
 namespace OHOS::Ace {
 class ACE_EXPORT ThemeManager : public AceType {
     DECLARE_ACE_TYPE(ThemeManager, AceType);
@@ -50,6 +52,8 @@ public:
 
     virtual RefPtr<Theme> GetTheme(ThemeType type) = 0;
 
+    virtual RefPtr<Theme> GetTheme(ThemeType type, int32_t themeScopeId) = 0;
+
     virtual void LoadResourceThemes() {}
 
     template<typename T>
@@ -58,10 +62,18 @@ public:
         return AceType::DynamicCast<T>(GetTheme(T::TypeId()));
     }
 
+    template<typename T>
+    RefPtr<T> GetTheme(int32_t themeScopeId)
+    {
+        return AceType::DynamicCast<T>(GetTheme(T::TypeId(), themeScopeId));
+    }
+
     virtual uint32_t GetResourceLimitKeys() const
     {
         return 0;
     }
+
+    virtual void RegisterThemeKit(ThemeType type, Ace::Kit::BuildFunc func) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_H

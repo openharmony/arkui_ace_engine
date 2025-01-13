@@ -73,6 +73,6 @@ void XComponentModelImpl::SetOnDestroy(DestroyEvent&& onDestroy)
         return;
     }
     xcomponentComponent->SetXComponentDestroyEventId(
-        EventMarker([func = std::move(onDestroy)](const std::string& param) { func(); }));
+        EventMarker([func = std::move(onDestroy)](const std::string& param) { func(""); }));
 }
 } // namespace OHOS::Ace::Framework

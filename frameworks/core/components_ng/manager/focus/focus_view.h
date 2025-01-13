@@ -56,10 +56,10 @@ public:
 
     RefPtr<FocusHub> GetFocusHub();
 
-    RefPtr<FocusHub> GetFocusLeaf(const RefPtr<FocusHub>& focusHub);
     static RefPtr<FocusView> GetCurrentFocusView();
     RefPtr<FocusView> GetEntryFocusView();
     RefPtr<FocusHub> GetViewRootScope();
+    bool IsViewRootScopeHasLastFocus();
     bool IsRootScopeCurrentFocus();
     bool IsChildFocusViewOf(const RefPtr<FocusView>& parent);
     bool HasParentFocusHub();

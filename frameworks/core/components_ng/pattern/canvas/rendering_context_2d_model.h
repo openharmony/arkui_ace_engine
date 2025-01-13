@@ -20,6 +20,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/canvas/canvas_renderer_type.h"
 #include <stdint.h>
@@ -29,7 +30,10 @@ class RenderingContext2DModel : public AceType {
     DECLARE_ACE_TYPE(RenderingContext2DModel, AceType)
 
 public:
-    RenderingContext2DModel() = default;
+    RenderingContext2DModel()
+    {
+        apiVersion_ = Container::GetCurrentApiTargetVersion();
+    }
     virtual ~RenderingContext2DModel() = default;
 
     virtual void SetPattern(RefPtr<AceType> pattern) = 0;
@@ -41,6 +45,7 @@ public:
     virtual void SetFontStyle(const FontStyle& fontStyle) = 0;
     virtual void SetFontFamilies(const std::vector<std::string>& families) = 0;
     virtual void SetFontSize(const Dimension& size) = 0;
+    virtual void SetLetterSpacing(const Dimension& letterSpacing) {};
     virtual std::vector<double> GetLineDash() = 0;
     virtual void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient) = 0;
     virtual void SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern) = 0;
@@ -131,6 +136,8 @@ public:
         pattern->SetTranslateY(transform.translateY);
     }
 
+protected:
+    int32_t apiVersion_ = 0;
     ACE_DISALLOW_COPY_AND_MOVE(RenderingContext2DModel);
 };
 

@@ -182,6 +182,9 @@ public:
     static void JsEnableAnalyzer(bool enable);
     static void JsRenderFit(const JSCallbackInfo& args);
     static void JsEnableSecure(const JSCallbackInfo& args);
+    static void JsHdrBrightness(const JSCallbackInfo& args);
+    static void JsBlendMode(const JSCallbackInfo& args);
+    static void JsEnableTransparentLayer(const JSCallbackInfo& args);
 
     // For xcomponent node
     static void* Create(const XComponentParams& params);

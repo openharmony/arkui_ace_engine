@@ -54,7 +54,7 @@ bool operator==(const RangeOptions& lhs, const RangeOptions& rhs)
 static constexpr int TEST_OFFSET = 5;
 static constexpr int TEST_START = 1;
 static constexpr int TEST_END = 3;
-static const auto TEST_VALUE = "test value";
+static const std::u16string TEST_VALUE = u"test value";
 static const std::vector<std::string> FONT_FAMILIES = { "Arial" };
 static constexpr double FONT_SIZE = 12.0;
 static constexpr OHOS::Ace::FontWeight FONT_WEIGHT = OHOS::Ace::FontWeight::BOLD;
@@ -275,7 +275,8 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTest, TestSize.Level1)
     TextSpanOptions textSpanOptions;
     textSpanOptions.offset = TEST_OFFSET;
     textSpanOptions.value = TEST_VALUE;
-    Ark_String value = Converter::ArkValue<Ark_String>(TEST_VALUE);
+    Converter::ConvContext ctx;
+    Ark_String value = Converter::ArkValue<Ark_String>(TEST_VALUE, &ctx);
     auto options = Converter::ArkValue<Opt_RichEditorTextSpanOptions>(textSpanOptions);
 
     EXPECT_CALL(*mockRichEditorController_, AddTextSpan(textSpanOptions)).Times(1);

@@ -37,6 +37,7 @@ inline constexpr ListChangeFlag LIST_UPDATE_LANES = 1 << 2;
 inline constexpr ListChangeFlag LIST_UPDATE_SPACE = 1 << 3;
 inline constexpr ListChangeFlag LIST_GROUP_UPDATE_HEADER_FOOTER = 1 << 4;
 inline constexpr ListChangeFlag LIST_UPDATE_ITEM_COUNT = 1 << 5;
+inline constexpr ListChangeFlag LIST_UPDATE_HEADER_FOOTER = 1 << 6;
 
 namespace {
 constexpr float DEFAULT_SIZE = -1.0f;

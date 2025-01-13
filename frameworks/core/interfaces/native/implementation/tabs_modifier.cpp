@@ -195,7 +195,6 @@ void BarMode1Impl(Ark_NativePointer node,
     if (value == ARK_BAR_MODE_SCROLLABLE) {
         ScrollableBarModeOptions barModeOptions;
         auto defaultMargin = barModeOptions.margin;
-        auto defaultStyle = barModeOptions.nonScrollableLayoutStyle;
         if (options) {
             auto optionsOpt = Converter::OptConvert<Ark_ScrollableBarModeOptions>(*options);
             if (optionsOpt) {
@@ -203,7 +202,7 @@ void BarMode1Impl(Ark_NativePointer node,
                 Validator::ValidateNonPercent(marginOpt);
                 auto styleOpt = Converter::OptConvert<LayoutStyle>(optionsOpt.value().nonScrollableLayoutStyle);
                 barModeOptions.margin = marginOpt.value_or(defaultMargin);
-                barModeOptions.nonScrollableLayoutStyle = styleOpt.value_or(defaultStyle);
+                barModeOptions.nonScrollableLayoutStyle = styleOpt;
             }
         }
         TabsModelNG::SetScrollableBarModeOptions(frameNode, barModeOptions);

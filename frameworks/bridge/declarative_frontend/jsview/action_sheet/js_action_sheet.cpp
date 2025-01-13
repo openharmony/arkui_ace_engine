@@ -32,6 +32,7 @@ std::mutex ActionSheetModel::mutex_;
 
 ActionSheetModel* ActionSheetModel::GetInstance()
 {
+#ifndef ARKUI_WAERABLE
     if (!instance_) {
         std::lock_guard<std::mutex> lock(mutex_);
         if (!instance_) {
@@ -47,6 +48,9 @@ ActionSheetModel* ActionSheetModel::GetInstance()
         }
     }
     return instance_.get();
+#else
+    return nullptr;
+#endif
 }
 } // namespace OHOS::Ace
 
@@ -62,14 +66,17 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
 
 static void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
 {
+#ifndef ARKUI_WAERABLE
     if (styleValue >= static_cast<int32_t>(DialogButtonStyle::DEFAULT) &&
         styleValue <= static_cast<int32_t>(DialogButtonStyle::HIGHTLIGHT)) {
         buttonInfo.dlgButtonStyle = static_cast<DialogButtonStyle>(styleValue);
     }
+#endif
 }
 
 ActionSheetInfo ParseSheetInfo(const JsiExecutionContext& execContext, JSRef<JSVal> val)
 {
+#ifndef ARKUI_WAERABLE
     ActionSheetInfo sheetInfo;
     if (!val->IsObject()) {
         LOGW("param is not an object.");
@@ -104,10 +111,12 @@ ActionSheetInfo ParseSheetInfo(const JsiExecutionContext& execContext, JSRef<JSV
         ActionSheetModel::GetInstance()->SetAction(eventFunc, sheetInfo);
     }
     return sheetInfo;
+#endif
 }
 
 void ParseTitleAndMessage(DialogProperties& properties, JSRef<JSObject> obj)
 {
+#ifndef ARKUI_WAERABLE
     // Parse title.
     auto titleValue = obj->GetProperty("title");
     std::string title;
@@ -128,10 +137,12 @@ void ParseTitleAndMessage(DialogProperties& properties, JSRef<JSObject> obj)
     if (JSActionSheet::ParseJsString(messageValue, message)) {
         properties.content = message;
     }
+#endif
 }
 
 void ParseConfirmButton(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSObject> obj)
 {
+#ifndef ARKUI_WAERABLE
     auto confirmVal = obj->GetProperty("confirm");
     if (!confirmVal->IsObject()) {
         return;
@@ -183,20 +194,24 @@ void ParseConfirmButton(const JsiExecutionContext& execContext, DialogProperties
             properties.buttons.emplace_back(buttonInfo);
         }
     }
+#endif
 }
 
 void ParseShadow(DialogProperties& properties, JSRef<JSObject> obj)
 {
+#ifndef ARKUI_WAERABLE
     // Parse shadow.
     auto shadowValue = obj->GetProperty("shadow");
     Shadow shadow;
     if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSActionSheet::ParseShadowProps(shadowValue, shadow)) {
         properties.shadow = shadow;
     }
+#endif
 }
 
 void ParseBorderWidthAndColor(DialogProperties& properties, JSRef<JSObject> obj)
 {
+#ifndef ARKUI_WAERABLE
     auto borderWidthValue = obj->GetProperty("borderWidth");
     NG::BorderWidthProperty borderWidth;
     if (JSActionSheet::ParseBorderWidthProps(borderWidthValue, borderWidth)) {
@@ -210,19 +225,23 @@ void ParseBorderWidthAndColor(DialogProperties& properties, JSRef<JSObject> obj)
             properties.borderColor = borderColor;
         }
     }
+#endif
 }
 
 void ParseRadius(DialogProperties& properties, JSRef<JSObject> obj)
 {
+#ifndef ARKUI_WAERABLE
     auto cornerRadiusValue = obj->GetProperty("cornerRadius");
     NG::BorderRadiusProperty radius;
     if (JSActionSheet::ParseBorderRadius(cornerRadiusValue, radius)) {
         properties.borderRadius = radius;
     }
+#endif
 }
 
 void UpdateDialogAlignment(DialogAlignment& alignment)
 {
+#ifndef ARKUI_WAERABLE
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (alignment == DialogAlignment::TOP_START) {
         if (isRtl) {
@@ -249,10 +268,12 @@ void UpdateDialogAlignment(DialogAlignment& alignment)
             alignment = DialogAlignment::BOTTOM_START;
         }
     }
+#endif
 }
 
 void ParseDialogAlignment(DialogProperties& properties, JSRef<JSObject> obj)
 {
+#ifndef ARKUI_WAERABLE
     // Parse alignment
     auto alignmentValue = obj->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
@@ -267,10 +288,12 @@ void ParseDialogAlignment(DialogProperties& properties, JSRef<JSObject> obj)
             properties.offset = ACTION_SHEET_OFFSET_DEFAULT_TOP;
         }
     }
+#endif
 }
 
 void ParseOffset(DialogProperties& properties, JSRef<JSObject> obj)
 {
+#ifndef ARKUI_WAERABLE
     // Parse offset
     auto offsetValue = obj->GetProperty("offset");
     if (offsetValue->IsObject()) {
@@ -286,10 +309,12 @@ void ParseOffset(DialogProperties& properties, JSRef<JSObject> obj)
         Dimension offsetX = isRtl ? properties.offset.GetX() * (-1) : properties.offset.GetX();
         properties.offset.SetX(offsetX);
     }
+#endif
 }
 
 void ParseMaskRect(DialogProperties& properties, JSRef<JSObject> obj)
 {
+#ifndef ARKUI_WAERABLE
     // Parse maskRect.
     auto maskRectValue = obj->GetProperty("maskRect");
     DimensionRect maskRect;
@@ -301,10 +326,12 @@ void ParseMaskRect(DialogProperties& properties, JSRef<JSObject> obj)
         offset.SetX(offsetX);
         properties.maskRect->SetOffset(offset);
     }
+#endif
 }
 
 void JSActionSheet::Show(const JSCallbackInfo& args)
 {
+#ifndef ARKUI_WAERABLE
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
@@ -443,12 +470,15 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
     JSViewAbstract::SetDialogHoverModeProperties(obj, properties);
     ActionSheetModel::GetInstance()->ShowActionSheet(properties);
     args.SetReturnValue(args.This());
+#endif
 }
 
 void JSActionSheet::JSBind(BindingTarget globalObj)
 {
+#ifndef ARKUI_WAERABLE
     JSClass<JSActionSheet>::Declare("ActionSheet");
     JSClass<JSActionSheet>::StaticMethod("show", &JSActionSheet::Show);
     JSClass<JSActionSheet>::InheritAndBind<JSViewAbstract>(globalObj);
+#endif
 }
 } // namespace OHOS::Ace::Framework

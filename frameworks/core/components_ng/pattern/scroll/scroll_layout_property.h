@@ -74,6 +74,16 @@ public:
         json->PutExtAttr("scrollSnapAlign", scrollSnapAlignMap[scrollSnapAlign].c_str(), filter);
     }
 
+    void ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const override
+    {
+        LayoutProperty::ToTreeJson(json, config);
+        if (config.contentOnly) {
+            return;
+        }
+        Axis axis = GetAxisValue(Axis::VERTICAL);
+        json->Put(TreeKey::SCROLLABLE, axis == Axis::VERTICAL || axis == Axis::HORIZONTAL);
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Axis, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollEnabled, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollSnapAlign, ScrollSnapAlign, PROPERTY_UPDATE_MEASURE);

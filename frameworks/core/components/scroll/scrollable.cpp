@@ -148,7 +148,7 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         }
     };
 
-    auto actionCancel = [weakScroll = AceType::WeakClaim(this)]() {
+    auto actionCancel = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (!scroll) {
             return;

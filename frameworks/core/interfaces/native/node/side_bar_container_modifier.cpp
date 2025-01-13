@@ -236,23 +236,73 @@ void ResetSideBarContainerDivider(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUISideBarContainerModifier* GetSideBarContainerModifier()
 {
-    static const ArkUISideBarContainerModifier modifier = { SetSideBarWidth, ResetSideBarWidth, SetMinSideBarWidth,
-        ResetMinSideBarWidth, SetControlButton, ResetControlButton, SetShowControlButton, ResetShowControlButton,
-        SetAutoHide, ResetAutoHide, SetSideBarContainerMaxSideBarWidth, ResetSideBarContainerMaxSideBarWidth,
-        SetSideBarContainerMinContentWidth, ResetSideBarContainerMinContentWidth, SetSideBarPosition,
-        ResetSideBarPosition, SetShowSideBar, ResetShowSideBar, SetSideBarContainerDivider,
-        ResetSideBarContainerDivider };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUISideBarContainerModifier modifier = {
+        SetSideBarWidth,
+        ResetSideBarWidth,
+        SetMinSideBarWidth,
+        ResetMinSideBarWidth,
+        SetControlButton,
+        ResetControlButton,
+        SetShowControlButton,
+        ResetShowControlButton,
+        SetAutoHide,
+        ResetAutoHide,
+        SetSideBarContainerMaxSideBarWidth,
+        ResetSideBarContainerMaxSideBarWidth,
+        SetSideBarContainerMinContentWidth,
+        ResetSideBarContainerMinContentWidth,
+        SetSideBarPosition,
+        ResetSideBarPosition,
+        SetShowSideBar,
+        ResetShowSideBar,
+        SetSideBarContainerDivider,
+        ResetSideBarContainerDivider,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUISideBarContainerModifier* GetCJUISideBarContainerModifier()
 {
-    static const CJUISideBarContainerModifier modifier = { SetSideBarWidth, ResetSideBarWidth, SetMinSideBarWidth,
-        ResetMinSideBarWidth, SetControlButton, ResetControlButton, SetShowControlButton, ResetShowControlButton,
-        SetAutoHide, ResetAutoHide, SetSideBarContainerMaxSideBarWidth, ResetSideBarContainerMaxSideBarWidth,
-        SetSideBarContainerMinContentWidth, ResetSideBarContainerMinContentWidth, SetSideBarPosition,
-        ResetSideBarPosition, SetShowSideBar, ResetShowSideBar, SetSideBarContainerDivider,
-        ResetSideBarContainerDivider };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUISideBarContainerModifier modifier = {
+        SetSideBarWidth,
+        ResetSideBarWidth,
+        SetMinSideBarWidth,
+        ResetMinSideBarWidth,
+        SetControlButton,
+        ResetControlButton,
+        SetShowControlButton,
+        ResetShowControlButton,
+        SetAutoHide,
+        ResetAutoHide,
+        SetSideBarContainerMaxSideBarWidth,
+        ResetSideBarContainerMaxSideBarWidth,
+        SetSideBarContainerMinContentWidth,
+        ResetSideBarContainerMinContentWidth,
+        SetSideBarPosition,
+        ResetSideBarPosition,
+        SetShowSideBar,
+        ResetShowSideBar,
+        SetSideBarContainerDivider,
+        ResetSideBarContainerDivider,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 }

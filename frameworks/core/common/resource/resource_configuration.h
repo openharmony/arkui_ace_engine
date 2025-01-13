@@ -27,11 +27,12 @@ struct ConfigurationChange {
     bool skinUpdate = false;
     bool fontScaleUpdate = false;
     bool fontWeightScaleUpdate = false;
+    bool hotReloadUpdate = false;
 
     bool IsNeedUpdate() const
     {
         return colorModeUpdate || languageUpdate || directionUpdate || dpiUpdate || fontUpdate || skinUpdate ||
-               fontScaleUpdate || fontWeightScaleUpdate;
+               fontScaleUpdate || fontWeightScaleUpdate || hotReloadUpdate;
     }
 
     void MergeConfig(const ConfigurationChange& config)

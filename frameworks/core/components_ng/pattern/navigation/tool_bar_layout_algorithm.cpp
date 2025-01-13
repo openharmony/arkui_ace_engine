@@ -30,8 +30,9 @@ constexpr uint32_t TOOLBAR_ITEMS_NUM_4 = 4;
 
 float GetToolbarContainerMaxWidth(const float& toolbarWidth, size_t toolbarItemNum)
 {
-    RefPtr<GridColumnInfo> columnInfo;
-    columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::NAVIGATION_TOOLBAR);
+    RefPtr<GridColumnInfo> columnInfo =
+        GridSystemManager::GetInstance().GetInfoByType(GridColumnType::NAVIGATION_TOOLBAR);
+    CHECK_NULL_RETURN(columnInfo, toolbarWidth);
     columnInfo->GetParent()->BuildColumnWidth();
 
     float fourGridWidth = static_cast<float>(columnInfo->GetWidth(GRID_COUNTS_4));
@@ -181,8 +182,8 @@ void ToolbarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(toolbarLayoutProperty);
     auto constraint = toolbarLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
-    auto toolbarWidth = constraint->selfIdealSize.Width().value();
-    auto toolbarHeight = constraint->selfIdealSize.Height().value();
+    auto toolbarWidth = constraint->selfIdealSize.Width().value_or(0.0f);
+    auto toolbarHeight = constraint->selfIdealSize.Height().value_or(0.0f);
     if (NearZero(toolbarWidth) || NearZero(toolbarHeight)) {
         return;
     }

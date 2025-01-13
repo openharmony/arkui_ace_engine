@@ -25,6 +25,7 @@ ArkUINativeModuleValue RefreshBridege::SetRefreshOffset(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension value(0.0f);
     if (valueArg->IsNull() || valueArg->IsUndefined() || !ArkTSUtils::ParseJsDimensionVp(vm, valueArg, value)) {
@@ -41,6 +42,7 @@ ArkUINativeModuleValue RefreshBridege::ResetRefreshOffset(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getRefreshModifier()->resetRefreshOffset(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -51,6 +53,7 @@ ArkUINativeModuleValue RefreshBridege::SetPullToRefresh(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (valueArg->IsBoolean()) {
         bool value = valueArg->ToBoolean(vm)->Value();
@@ -65,6 +68,7 @@ ArkUINativeModuleValue RefreshBridege::ResetPullToRefresh(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getRefreshModifier()->resetPullToRefresh(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -75,6 +79,7 @@ ArkUINativeModuleValue RefreshBridege::SetPullDownRatio(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (valueArg->IsNumber()) {
         float value = std::clamp(static_cast<float>(valueArg->ToNumber(vm)->Value()), 0.f, 1.f);
@@ -90,6 +95,7 @@ ArkUINativeModuleValue RefreshBridege::ResetPullDownRatio(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getRefreshModifier()->resetPullDownRatio(nativeNode);
     return panda::JSValueRef::Undefined(vm);

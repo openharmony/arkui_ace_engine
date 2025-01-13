@@ -29,6 +29,10 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/common/vibrator/vibrator_utils.h"
+#endif
+
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
@@ -60,6 +64,8 @@ public:
         auto layoutAlgorithm = MakeRefPtr<ScrollLayoutAlgorithm>(currentOffset_);
         return layoutAlgorithm;
     }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
@@ -179,7 +185,9 @@ public:
     Rect GetItemRect(int32_t index) const override;
 
     // scrollSnap
-    std::optional<float> CalcPredictSnapOffset(float delta, float dragDistance = 0.f, float velocity = 0.f) override;
+    std::optional<float> CalcPredictSnapOffset(float delta, float dragDistance = 0.f, float velocity = 0.f,
+        SnapDirection snapDirection = SnapDirection::NONE) override;
+    std::optional<float> CalcPredictNextSnapOffset(float delta, SnapDirection snapDirection);
     bool NeedScrollSnapToSide(float delta) override;
     void CaleSnapOffsets();
     void CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign);
@@ -306,6 +314,14 @@ public:
                (GetScrollSnapAlign() != ScrollSnapAlign::NONE || enablePagingStatus_ == ScrollPagingStatus::VALID);
     }
 
+    SnapType GetSnapType() override
+    {
+        return (!snapOffsets_.empty() &&
+                   (GetScrollSnapAlign() != ScrollSnapAlign::NONE || enablePagingStatus_ == ScrollPagingStatus::VALID))
+                   ? SnapType::SCROLL_SNAP
+                   : SnapType::NONE_SNAP;
+    }
+
     void TriggerModifyDone();
 
     void SetInitialOffset(const OffsetT<CalcDimension>& offset)
@@ -348,10 +364,9 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    bool StartSnapAnimation(
-        float snapDelta, float animationVelocity, float predictVelocity = 0.f, float dragDistance = 0.f) override;
+    bool StartSnapAnimation(SnapAnimationOptions snapAnimationOptions) override;
 
-    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity);
+    void StartScrollSnapAnimation(float scrollSnapDelta, float scrollSnapVelocity, bool fromScrollBar);
 
     SizeF GetChildrenExpandedSize() override;
 

@@ -187,7 +187,12 @@ bool RosenMediaPlayer::MediaPlay(const std::string& filePath)
         return false;
     }
     MediaFileInfo fileInfo;
-    std::string videoFilePath = mediaPath.substr(mediaPath.find("resources/base"));
+    size_t pos = mediaPath.find("resources/base");
+    if (pos == std::string::npos) {
+        LOGE("substring is not found in mediaPath.");
+        return false;
+    }
+    std::string videoFilePath = mediaPath.substr(pos);
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     if (!container->IsUseStageModel()) {
@@ -464,6 +469,12 @@ int32_t RosenMediaPlayer::SetSurface()
     return mediaPlayer_->SetVideoSurface(renderSurface->GetSurface());
 }
 
+int32_t RosenMediaPlayer::SetRenderFirstFrame(bool display)
+{
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
+    return mediaPlayer_->SetRenderFirstFrame(display);
+}
+
 int32_t RosenMediaPlayer::PrepareAsync()
 {
     CHECK_NULL_RETURN(mediaPlayer_, -1);
@@ -509,6 +520,15 @@ int32_t RosenMediaPlayer::SetPlayRange(int64_t startTime, int64_t endTime)
     LOGI("Media player start to SetPlayRange.");
     CHECK_NULL_RETURN(mediaPlayer_, -1);
     return mediaPlayer_->SetPlayRange(startTime, endTime);
+}
+
+int32_t RosenMediaPlayer::SetParameter(const std::string& key, int64_t value)
+{
+    LOGI("Media player start to SetParameter.");
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
+    Media::Format format;
+    (void)format.PutIntValue(key, value);
+    return mediaPlayer_->SetParameter(format);
 }
 
 } // namespace OHOS::Ace::NG

@@ -99,7 +99,7 @@ void OverlengthDotIndicatorModifier::PaintContent(DrawingContext& context, Conte
     leftCenter -= (centerDilateDistance - centerDistance) * HALF_FLOAT;
     rightCenter += (centerDilateDistance - centerDistance) * HALF_FLOAT;
     PaintSelectedIndicator(
-        canvas, leftCenter, rightCenter, contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio);
+        canvas, leftCenter, rightCenter, contentProperty.itemHalfSizes * contentProperty.longPointDilateRatio, true);
 }
 
 void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, ContentProperty& contentProperty)
@@ -107,6 +107,11 @@ void OverlengthDotIndicatorModifier::PaintBlackPoint(DrawingContext& context, Co
     RSCanvas& canvas = context.canvas;
     auto totalCount = contentProperty.vectorBlackPointCenterX.size();
     for (size_t i = 0; i < totalCount; ++i) {
+        if (i >= contentProperty.unselectedIndicatorWidth.size() ||
+            i >= contentProperty.unselectedIndicatorHeight.size()) {
+            break;
+        }
+
         OffsetF center = { contentProperty.vectorBlackPointCenterX[i], centerY_ };
         float width = contentProperty.unselectedIndicatorWidth[i];
         float height = contentProperty.unselectedIndicatorHeight[i];
@@ -201,13 +206,13 @@ void OverlengthDotIndicatorModifier::UpdateNormalPaintProperty(const OffsetF& ma
 }
 
 std::pair<float, float> OverlengthDotIndicatorModifier::CalcLongPointEndCenterXWithBlack(
-    int32_t index, const LinearVector<float>& itemHalfSizes)
+    size_t index, const LinearVector<float>& itemHalfSizes)
 {
     if (isHorizontalAndRTL_) {
-        index = maxDisplayCount_ - 1 - index;
+        index = static_cast<size_t>(maxDisplayCount_ - 1 - static_cast<int32_t>(index));
     }
 
-    if (static_cast<size_t>(index) >= animationEndCenterX_.size()) {
+    if (index >= animationEndCenterX_.size()) {
         return std::make_pair(0.0f, 0.0f);
     }
 
@@ -230,6 +235,29 @@ int32_t OverlengthDotIndicatorModifier::GetBlackPointsAnimationDuration() const
     return animationDuration_;
 }
 
+bool OverlengthDotIndicatorModifier::NeedUpdateWhenAnimationFinish() const
+{
+    if (NearZero(forceStopPageRate_) || NearEqual(forceStopPageRate_, -1.0f) ||
+        NearEqual(forceStopPageRate_, FLT_MAX)) {
+        return true;
+    }
+
+    if ((currentSelectedIndex_ == 0 && targetSelectedIndex_ == maxDisplayCount_ - 1) ||
+        (currentSelectedIndex_ == maxDisplayCount_ - 1 && targetSelectedIndex_ == 0)) {
+        return true;
+    }
+
+    if (std::abs(forceStopPageRate_) < HALF_FLOAT && currentSelectedIndex_ < targetSelectedIndex_) {
+        return false;
+    }
+
+    if (std::abs(forceStopPageRate_) >= HALF_FLOAT && currentSelectedIndex_ > targetSelectedIndex_) {
+        return false;
+    }
+
+    return true;
+}
+
 void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector<float>& itemHalfSizes)
 {
     AnimationOption blackPointOption;
@@ -245,7 +273,8 @@ void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector
     newPointOpacity_->Set(0);
     isSelectedColorAnimEnd_ = false;
     isTouchBottomLoop_ = true;
-    auto longPointEndCenterX = CalcLongPointEndCenterXWithBlack(targetSelectedIndex_, itemHalfSizes);
+    auto longPointEndCenterX =
+        CalcLongPointEndCenterXWithBlack(static_cast<size_t>(targetSelectedIndex_), itemHalfSizes);
     blackPointsAnimEnd_ = false;
     AnimationUtils::StartAnimation(blackPointOption, [&]() {
         vectorBlackPointCenterX_->Set(animationEndCenterX_);
@@ -261,6 +290,11 @@ void OverlengthDotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector
     }, [weak = WeakClaim(this)]() {
         auto modifier = weak.Upgrade();
         CHECK_NULL_VOID(modifier);
+
+        if (!modifier->NeedUpdateWhenAnimationFinish()) {
+            return;
+        }
+
         if (!modifier->blackPointsAnimEnd_ && (modifier->needUpdate_ || !modifier->isAutoPlay_)) {
             modifier->currentSelectedIndex_ = modifier->targetSelectedIndex_;
             modifier->currentOverlongType_ = modifier->targetOverlongType_;
@@ -360,7 +394,7 @@ void OverlengthDotIndicatorModifier::UpdateSelectedCenterXOnDrag(const LinearVec
         targetIndex = isHorizontalAndRTL_ ? currentSelectedIndex_ + 1 : currentSelectedIndex_ - 1;
     }
 
-    auto longPointEndCenterX = CalcLongPointEndCenterXWithBlack(targetIndex, itemHalfSizes);
+    auto longPointEndCenterX = CalcLongPointEndCenterXWithBlack(static_cast<size_t>(targetIndex), itemHalfSizes);
     if (touchBottomTypeLoop_ != TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE) {
         auto dragTargetCenterX = (overlongSelectedEndCenterX_.second + overlongSelectedEndCenterX_.first) * HALF_FLOAT;
         overlongSelectedEndCenterX_.first = overlongSelectedStartCenterX_.first +

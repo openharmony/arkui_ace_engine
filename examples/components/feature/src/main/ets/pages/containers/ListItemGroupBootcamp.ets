@@ -26,16 +26,49 @@ export struct ListItemGroupBootcamp {
   @State rating: number = 3.5;
   @State enableEdgeEffect: boolean = false;
   @State edgeEffect: EdgeEffect = EdgeEffect.Spring;
-  @State enableStrokeWidth: boolean  = false;
-  @State strokeWidth: string | number  = 1;
-  @State enableColor: boolean  = false;
-  @State color: ResourceColor  = $r('sys.color.ohos_id_color_text_primary_contrary');
-  @State enableStartMargin: boolean  = false;
-  @State startMargin: string | number  = 20;
-  @State enableEndMargin: boolean  = false;
-  @State endMargin: string | number  = 20;
+  @State enableDividerStrokeWidth: boolean  = false;
+  @State dividerStrokeWidth: string | number  = 0;
+  @State enableDividerColor: boolean  = false;
+  @State dividerColor: ResourceColor  = 0x08000000;
+  @State enableDividerStartMargin: boolean  = false;
+  @State dividerStartMargin: string | number  = 0;
+  @State enableDividerEndMargin: boolean  = false;
+  @State dividerEndMargin: string | number  = 0;
   @State enableScrollBar: boolean  = false;
   @State scrollBar: BarState = BarState.Auto;
+  @State enableSpace: boolean  = false;
+  @State space: number | string  = 0;
+  @State enableStyle: boolean  = false;
+  @State style: ListItemGroupStyle  = ListItemGroupStyle.NONE;
+  @State enableCompWidth: boolean = false;
+  @State compWidth: Length = 'auto';
+  @State enableCompHeight: boolean = false;
+  @State compHeight: Length = 'auto';
+  @State enableCompPadding: boolean = false;
+  @State compPadding: number = 0;
+  @State enableCompMargin: boolean = false;
+  @State compMargin: number = 0;
+  @State enableCompBackgroundColor: boolean = false;
+  @State compBackgroundColor: ResourceColor = '#ff000000';
+  @State enableCompBorderWidth: boolean = false;
+  @State compBorderWidth: number = 0;
+  @State enableCompBorderColor: boolean = false;
+  @State compBorderColor: ResourceColor = Color.Black;
+  @State enableCompBorderRadius: boolean = false;
+  @State compBorderRadius: number = 0;
+  @State enableCompBorderStyle: boolean = false;
+  @State compBorderStyle: BorderStyle = BorderStyle.Solid;
+  @State enableCompFlexBasis: boolean = false;
+  @State compFlexBasis: number | string = 'auto';
+  @State enableCompOpacity: boolean = false;
+  @State compOpacity: number = 1;
+  @State enableCompVisibility: boolean = false;
+  @State compVisibility: Visibility = Visibility.Visible;
+  @State enableCompDirection: boolean = false;
+  @State compDirection: Direction = Direction.Auto;
+  @State enableCompClip: boolean = false;
+  @State compClip: boolean = false;
+
   @State selection: string | null = null;
   @State routesChildren: Route[] =  [
     { name: 'Chinese', label: '语文'},
@@ -117,7 +150,8 @@ export struct ListItemGroupBootcamp {
         ForEach(this.routes, (routeGroup: RouteGroup) => {
           ListItemGroup({
             header: this.ListItemGroupHeader(routeGroup),
-            style: ListItemGroupStyle.CARD,
+            space: useEnabled(this.enableSpace, this.space),
+            style: useEnabled(this.enableStyle, this.style)
           }) {
             if (routeGroup.name === this.selection) {
               ForEach(routeGroup.children, (route: Route) => {
@@ -144,73 +178,240 @@ export struct ListItemGroupBootcamp {
                 .width('100%')
               })
             }
-          }.padding(4).divider({ strokeWidth: 0.5 })
+          }
+          .divider({
+            strokeWidth:useEnabled(this.enableDividerStrokeWidth, this.dividerStrokeWidth),
+            color: useEnabled(this.enableDividerColor, this.dividerColor),
+            startMargin: useEnabled(this.enableDividerStartMargin, this.dividerStartMargin),
+            endMargin: useEnabled(this.enableDividerEndMargin, this.dividerEndMargin)
+          })
+          .width(useEnabled(this.enableCompWidth, this.compWidth))
+          .height(useEnabled(this.enableCompHeight, this.compHeight))
+          .padding(useEnabled(this.enableCompPadding, this.compPadding))
+          .margin(useEnabled(this.enableCompMargin, this.compMargin))
+          .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
+          .borderWidth(useEnabled(this.enableCompBorderWidth, this.compBorderWidth))
+          .borderColor(useEnabled(this.enableCompBorderColor, this.compBorderColor))
+          .borderRadius(useEnabled(this.enableCompBorderRadius, this.compBorderRadius))
+          .borderStyle(useEnabled(this.enableCompBorderStyle, this.compBorderStyle))
+          .flexBasis(useEnabled(this.enableCompFlexBasis, this.compFlexBasis))
+          .opacity(useEnabled(this.enableCompOpacity, this.compOpacity))
+          .visibility(useEnabled(this.enableCompVisibility, this.compVisibility))
+          .direction(useEnabled(this.enableCompDirection, this.compDirection))
+          .clip(useEnabled(this.enableCompClip, this.compClip))
         })
       }
       .layoutWeight(1)
       .width('100%')
       .edgeEffect(useEnabled(this.enableEdgeEffect, this.edgeEffect))
       .divider({
-        strokeWidth:useEnabled(this.enableStrokeWidth, this.strokeWidth),
-        color: useEnabled(this.enableColor, this.color),
-        startMargin: useEnabled(this.enableStartMargin, this.startMargin),
-        endMargin: useEnabled(this.enableEndMargin, this.endMargin)
+        strokeWidth:useEnabled(this.enableDividerStrokeWidth, this.dividerStrokeWidth),
+        color: useEnabled(this.enableDividerColor, this.dividerColor),
+        startMargin: useEnabled(this.enableDividerStartMargin, this.dividerStartMargin),
+        endMargin: useEnabled(this.enableDividerEndMargin, this.dividerEndMargin)
       })
       .scrollBar(useEnabled(this.enableScrollBar, this.scrollBar))
     }
   }
+
   @Builder
   Parameters() {
     Scroll() {
       Column({ space: 8 }) {
+        SliderBlock({
+          title: 'space',
+          isEnabled: $enableSpace,
+          value: $space,
+          min: 0,
+          max: 10
+        })
+
         RadioBlock({
-          title: '滚动条状态',
+          title: 'style',
+          isEnabled: $enableStyle,
+          value: $style,
+          dataSource: [
+            { label: 'NONE', value: ListItemGroupStyle.NONE },
+            { label: 'CARD', value: ListItemGroupStyle.CARD }
+          ]
+        })
+
+        RadioBlock({
+          title: 'scrollBar',
           isEnabled: $enableScrollBar,
           value: $scrollBar,
           dataSource: [
-            { label: '按需显示', value: BarState.Auto },
-            { label: '不显示', value: BarState.Off },
-            { label: '常驻显示', value: BarState.On }
+            { label: 'Auto', value: BarState.Auto },
+            { label: 'Off', value: BarState.Off },
+            { label: 'On', value: BarState.On }
           ]
         })
+
         RadioBlock({
-          title: '边缘效果',
+          title: 'edgeEffect',
           isEnabled: $enableEdgeEffect,
           value: $edgeEffect,
           dataSource: [
-            { label: '弹性效果', value: EdgeEffect.Spring },
-            { label: '阴影效果', value: EdgeEffect.Fade },
-            { label: '无动态效果', value: EdgeEffect.None }
+            { label: 'Spring', value: EdgeEffect.Spring },
+            { label: 'Fade', value: EdgeEffect.Fade },
+            { label: 'None', value: EdgeEffect.None }
           ]
         })
+
         ColorBlock({
-          title: '分割线颜色',
-          isEnabled: this.enableColor,
-          color: this.color,
+          title: 'divider.color',
+          isEnabled: $enableDividerColor,
+          color: $dividerColor,
         })
+
         SliderBlock({
-          title: '分割线线宽(vp)',
-          isEnabled: $enableStrokeWidth,
-          value: $strokeWidth,
+          title: 'divider.strokeWidth',
+          isEnabled: $enableDividerStrokeWidth,
+          value: $dividerStrokeWidth,
           min: 0,
           max: 30
         })
+
         SliderBlock({
-          title: '分割线与列表侧边起始端的距离(vp)',
-          isEnabled: $enableStartMargin,
-          value: $startMargin,
+          title: 'divider.startMargin',
+          isEnabled: $enableDividerStartMargin,
+          value: $dividerStartMargin,
           min: 0,
           max: 30
         })
+
         SliderBlock({
-          title: '分割线与列表侧边结束端的距离(vp)',
-          isEnabled: $enableEndMargin,
-          value: $endMargin,
+          title: 'divider.endMargin',
+          isEnabled: $enableDividerEndMargin,
+          value: $dividerEndMargin,
           min: 0,
           max: 30
+        })
+
+        SliderBlock({
+          title: 'width',
+          isEnabled: $enableCompWidth,
+          value: $compWidth,
+          min: 100,
+          max: 600
+        })
+
+        SliderBlock({
+          title: 'height',
+          isEnabled: $enableCompHeight,
+          value: $compHeight,
+          min: 50,
+          max: 400
+        })
+
+        SliderBlock({
+          title: 'padding',
+          isEnabled: $enableCompPadding,
+          value: $compPadding,
+          min: 0,
+          max: 50
+        })
+
+        SliderBlock({
+          title: 'margin',
+          isEnabled: $enableCompMargin,
+          value: $compMargin,
+          min: 0,
+          max: 100
+        })
+
+        ColorBlock({
+          title: 'backgroundColor',
+          isEnabled: $enableCompBackgroundColor,
+          color: $compBackgroundColor
+        })
+
+        SliderBlock({
+          title: 'borderWidth',
+          isEnabled: $enableCompBorderWidth,
+          value: $compBorderWidth,
+          min: 0,
+          max: 20
+        })
+
+        ColorBlock({
+          title: 'borderColor',
+          isEnabled: $enableCompBorderColor,
+          color: $compBorderColor
+        })
+
+        SliderBlock({
+          title: 'borderRadius',
+          isEnabled: $enableCompBorderRadius,
+          value: $compBorderRadius,
+          min: 0,
+          max: 100
+        })
+
+        RadioBlock({
+          title: 'borderStyle',
+          isEnabled: $enableCompBorderStyle,
+          value: $compBorderStyle,
+          dataSource: [
+            { label: 'Solid', value: BorderStyle.Solid },
+            { label: 'Dotted', value: BorderStyle.Dotted },
+            { label: 'Dashed', value: BorderStyle.Dashed },
+          ]
+        })
+
+        SliderBlock({
+          title: 'flexBasis',
+          isEnabled: $enableCompFlexBasis,
+          value: $compFlexBasis,
+          min: 10,
+          max: 200
+        })
+
+        SliderBlock({
+          title: 'opacity',
+          isEnabled: $enableCompOpacity,
+          value: $compOpacity,
+          min: 0,
+          max: 1,
+          step: 0.1
+        })
+
+        RadioBlock({
+          title: 'visibility',
+          isEnabled: $enableCompVisibility,
+          value: $compVisibility,
+          dataSource: [
+            { label: 'None', value: Visibility.None },
+            { label: 'Hidden', value: Visibility.Hidden },
+            { label: 'Visible', value: Visibility.Visible }
+          ]
+        })
+
+        RadioBlock({
+          title: 'direction',
+          isEnabled: $enableCompDirection,
+          value: $compDirection,
+          dataSource: [
+            { label: 'Auto', value: Direction.Auto },
+            { label: 'Ltr', value: Direction.Ltr },
+            { label: 'Rtl', value: Direction.Rtl }
+          ]
+        })
+
+        RadioBlock({
+          title: 'clip',
+          isEnabled: $enableCompClip,
+          value: $compClip,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
         })
       }
-    }.width('100%')
+      .width('100%')
+    }
+    .align(Alignment.Top)
+    .height('50%')
   }
 }
 

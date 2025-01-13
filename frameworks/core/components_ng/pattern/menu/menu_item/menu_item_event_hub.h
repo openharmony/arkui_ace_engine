@@ -21,6 +21,9 @@
 #include "core/components_ng/event/event_hub.h"
 
 namespace OHOS::Ace::NG {
+using MenuJSCallback = std::function<void()>;
+using OnSelectEvent = std::function<void(int32_t)>;
+
 class MenuItemEventHub : public EventHub {
     DECLARE_ACE_TYPE(MenuItemEventHub, EventHub)
 
@@ -28,30 +31,53 @@ public:
     MenuItemEventHub() = default;
     ~MenuItemEventHub() override = default;
 
-    void SetOnChange(const std::function<void(bool)>& onChange)
+    inline void SetOnChange(const std::function<void(bool)>& onChange)
     {
         onChange_ = onChange;
     }
 
-    std::function<void(bool)>&& GetOnChange()
+    inline std::function<void(bool)>&& GetOnChange()
     {
         return std::move(onChange_);
     }
 
-    void SetSelectedChangeEvent(const std::function<void(bool)>& selectedChangeEvent)
+    inline void SetSelectedChangeEvent(const std::function<void(bool)>& selectedChangeEvent)
     {
         selectedChangeEvent_ = selectedChangeEvent;
     }
 
-    std::function<void(bool)>&& GetSelectedChangeEvent()
+    inline std::function<void(bool)>&& GetSelectedChangeEvent()
     {
         return std::move(selectedChangeEvent_);
+    }
+
+    inline void SetMenuOnClick(const std::function<void()>& onClickFunc)
+    {
+        menuOnClick_ = onClickFunc;
+    }
+
+    inline MenuJSCallback GetJsCallback()
+    {
+        return menuOnClick_;
+    }
+
+    inline void SetOnSelect(const OnSelectEvent& onSelect)
+    {
+        onSelect_ = onSelect;
+    }
+
+    inline OnSelectEvent GetOnSelect()
+    {
+        return onSelect_;
     }
 
 private:
     // callback of menuItem
     std::function<void(bool)> onChange_;
     std::function<void(bool)> selectedChangeEvent_;
+    MenuJSCallback menuOnClick_;
+    // callback of select component
+    OnSelectEvent onSelect_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemEventHub);
 };

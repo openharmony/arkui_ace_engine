@@ -2591,33 +2591,34 @@ void RenderList::CreateDragDropRecognizer()
         renderList->SetPreTargetRenderList(nullptr);
         renderList->scrollable_->MarkAvailable(true);
     });
-    panRecognizer->SetOnActionCancel([weakRenderList = AceType::WeakClaim(this), context = context_]() {
-        auto pipelineContext = context.Upgrade();
-        if (!pipelineContext) {
-            LOGE("Context is null.");
-            return;
-        }
+    panRecognizer->SetOnActionCancel(
+        [weakRenderList = AceType::WeakClaim(this), context = context_](const GestureEvent& info) {
+            auto pipelineContext = context.Upgrade();
+            if (!pipelineContext) {
+                LOGE("Context is null.");
+                return;
+            }
 
-        auto renderList = weakRenderList.Upgrade();
-        if (!renderList) {
-            LOGE("RenderList is null.");
-            return;
-        }
-        if (!renderList->selectedDragItem_ || !renderList->selectedDragItem_->IsMovable()) {
-            return;
-        }
+            auto renderList = weakRenderList.Upgrade();
+            if (!renderList) {
+                LOGE("RenderList is null.");
+                return;
+            }
+            if (!renderList->selectedDragItem_ || !renderList->selectedDragItem_->IsMovable()) {
+                return;
+            }
 
-        if (renderList->hasDragItem_) {
-            auto stackElement = pipelineContext->GetLastStack();
-            stackElement->PopComponent();
-            renderList->hasDragItem_ = false;
-        }
+            if (renderList->hasDragItem_) {
+                auto stackElement = pipelineContext->GetLastStack();
+                stackElement->PopComponent();
+                renderList->hasDragItem_ = false;
+            }
 
-        renderList->SetPreTargetRenderList(nullptr);
-        renderList->selectedDragItem_->SetHidden(false);
-        renderList->scrollable_->MarkAvailable(true);
-        renderList->MarkNeedLayout();
-    });
+            renderList->SetPreTargetRenderList(nullptr);
+            renderList->selectedDragItem_->SetHidden(false);
+            renderList->scrollable_->MarkAvailable(true);
+            renderList->MarkNeedLayout();
+        });
     std::vector<RefPtr<GestureRecognizer>> recognizers { longPressRecognizer, panRecognizer };
     dragDropGesture_ = AceType::MakeRefPtr<OHOS::Ace::SequencedRecognizer>(GetContext(), recognizers);
 }

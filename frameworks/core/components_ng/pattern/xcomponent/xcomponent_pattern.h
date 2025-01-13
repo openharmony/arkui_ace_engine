@@ -330,6 +330,8 @@ public:
     }
     void OnSurfaceCallbackModeChange(SurfaceCallbackMode mode);
     void EnableSecure(bool isSecure);
+    void HdrBrightness(float hdrBrightness);
+    void EnableTransparentLayer(bool isTransparentLayer);
 
 private:
     void OnAttachToFrameNode() override;
@@ -467,6 +469,8 @@ private:
     bool isNativeXComponent_ = false;
     bool hasLoadNativeDone_ = false;
     bool isEnableSecure_ = false;
+    float hdrBrightness_ = 1.0f;
+    bool isTransparentLayer_ = false;
     SurfaceCallbackMode surfaceCallbackMode_ = SurfaceCallbackMode::DEFAULT;
     std::function<void(SurfaceCallbackMode)> surfaceCallbackModeChangeEvent_;
 };

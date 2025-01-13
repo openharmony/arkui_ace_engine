@@ -124,6 +124,11 @@ void RosenWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
     rsWindow_->SetUiDvsyncSwitch(dvsyncSwitch);
 }
 
+bool RosenWindow::GetIsRequestFrame()
+{
+    return isRequestVsync_;
+}
+
 void RosenWindow::RequestFrame()
 {
     CHECK_NULL_VOID(onShow_);

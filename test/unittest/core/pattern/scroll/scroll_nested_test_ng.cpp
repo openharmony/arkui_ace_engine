@@ -46,7 +46,7 @@ ScrollModelNG ScrollNestedTestNg::CreateNestScroll()
 void ScrollNestedTestNg::ScrollAllToBottom()
 {
     nestPattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
 }
 
 /**
@@ -805,7 +805,7 @@ HWTEST_F(ScrollNestedTestNg, NestTest011, TestSize.Level1)
     EXPECT_TRUE(pattern_->IsScrollableSpringMotionRunning());
     EXPECT_TRUE(Position(dragDelta));
     EXPECT_TRUE(Position(nestNode_, 0));
-    EXPECT_TRUE(TickPosition(dragDelta/ TICK));
+    EXPECT_TRUE(TickPosition(dragDelta / TICK));
     EXPECT_TRUE(TickPosition(0));
     EXPECT_TRUE(pattern_->IsAtTop());
     EXPECT_EQ(nestStopCount, 1);

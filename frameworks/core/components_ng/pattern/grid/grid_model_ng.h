@@ -51,7 +51,7 @@ public:
     void SetMultiSelectable(bool value) override;
     void SetSupportAnimation(bool value) override;
     void SetSupportDragAnimation(bool value) override;
-    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge = EffectEdge::ALL) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
     void SetScrollEnabled(bool scrollEnabled) override;
     void SetFriction(double friction) override;
@@ -97,7 +97,8 @@ public:
     static void SetSupportAnimation(FrameNode* frameNode, bool supportAnimation);
 
     static void SetEdgeEffect(
-        FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled);
+        FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
+        EffectEdge edge = EffectEdge::ALL);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static void SetFriction(FrameNode* frameNode, const std::optional<double>& friction);
@@ -111,6 +112,12 @@ public:
     static void InitScroller(FrameNode* frameNode, const RefPtr<ScrollControllerBase>& positionController,
         const RefPtr<ScrollProxy>& scrollProxy);
     static void SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& options);
+    static void SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc&& value);
+    static void SetOnItemDragStart(FrameNode* frameNode, std::function<void(const ItemDragInfo&, int32_t)>&& value);
+    static void SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value);
+    static void SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& value);
+    static void SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value);
+    static void SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value);
 
     static void SetGridItemTotalCount(FrameNode* frameNode, int totalCount);
 
@@ -121,16 +128,10 @@ public:
 
     static void SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& onScrollFrameBegin);
-    static void SetOnScrollBarUpdate(FrameNode* frameNode, ScrollBarUpdateFunc&& value);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
-    static void SetOnItemDragStart(FrameNode* frameNode, std::function<void(const ItemDragInfo&, int32_t)>&& value);
-    static void SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value);
-    static void SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& value);
-    static void SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value);
-    static void SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value);
 
 private:
     static void AddDragFrameNodeToManager(FrameNode* frameNode);

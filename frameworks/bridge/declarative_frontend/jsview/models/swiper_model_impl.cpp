@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::Framework {
 
-RefPtr<SwiperController> SwiperModelImpl::Create()
+RefPtr<SwiperController> SwiperModelImpl::Create(bool isCreateArc)
 {
     std::list<RefPtr<OHOS::Ace::Component>> componentChildren;
     RefPtr<OHOS::Ace::SwiperComponent> component = AceType::MakeRefPtr<OHOS::Ace::SwiperComponent>(componentChildren);

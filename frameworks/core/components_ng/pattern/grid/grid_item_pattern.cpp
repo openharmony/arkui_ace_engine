@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
 
 #include "base/log/dump_log.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
@@ -44,6 +45,7 @@ void GridItemPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitFocusPaintRect(focusHub);
+    InitOnFocusEvent(focusHub);
     InitDisableStyle();
     if (gridItemStyle_ == GridItemStyle::PLAIN) {
         InitHoverEvent();
@@ -375,6 +377,37 @@ void GridItemPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
         default: {
             break;
         }
+    }
+}
+
+void GridItemPattern::InitOnFocusEvent(const RefPtr<FocusHub>& focusHub)
+{
+    focusHub->SetOnFocusInternal([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusEvent();
+        }
+    });
+}
+
+void GridItemPattern::HandleFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto uiNode = DynamicCast<UINode>(host);
+    while (uiNode->GetTag() != V2::GRID_ETS_TAG) {
+        uiNode = uiNode->GetParent();
+        CHECK_NULL_VOID(uiNode);
+    }
+    auto grid = DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_VOID(grid);
+    auto pattern = grid->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto property = GetLayoutProperty<GridItemLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto index = property->GetIndex();
+    if (index.has_value()) {
+        pattern->HandleOnItemFocus(index.value());
     }
 }
 } // namespace OHOS::Ace::NG

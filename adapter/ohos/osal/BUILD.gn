@@ -99,6 +99,11 @@ template("ace_osal_ohos_source_set") {
         "resource_convertor.cpp",
         "resource_theme_style.cpp",
       ]
+
+      if (ohos_indep_compiler_enable) {
+        include_dirs = indep_compile_includes
+      }
+
       deps = []
 
       if (defined(global_parts_info) &&

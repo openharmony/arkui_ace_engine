@@ -20,6 +20,7 @@ ohos_unittest("AnimationTest") {
   module_out_path = module_output_path
 
   sources = [
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/core/animation/mock_animation.cpp",
     "animation_framework_test.cpp",
 
@@ -55,6 +56,7 @@ ohos_unittest("AnimationTest") {
     "$ace_root/frameworks/core/common/font_loader.cpp",
     "$ace_root/frameworks/core/common/font_manager.cpp",
     "$ace_root/frameworks/core/common/frontend.cpp",
+    "$ace_root/frameworks/core/common/key_event_manager.cpp",
     "$ace_root/frameworks/core/common/thread_checker.cpp",
     "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
     "$ace_root/frameworks/core/common/window.cpp",
@@ -210,9 +212,10 @@ ohos_unittest("AnimationTest") {
     ":config_animation_test",
   ]
 
-  deps = [
-    "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//third_party/googletest:gtest_main",
+  deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+  external_deps += [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
   ]
   if (!is_ohos_standard_system) {
     external_deps = [

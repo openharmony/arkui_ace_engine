@@ -77,27 +77,47 @@ void ScrollTo(ArkUINodeHandle node, ArkUI_Float32* xOffsetArray, ArkUI_Float32* 
 namespace NodeModifier {
 const ArkUIScrollerModifier* GetScrollerModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUIScrollerModifier modifier = {
-        GetScroller,
-        GetScrollerProxy,
-        SetScrollToIndex,
-        ScrollBy,
-        GetCurrentOffset,
-        ScrollTo
+        .getScroller = GetScroller,
+        .getScrollerProxy = GetScrollerProxy,
+        .scrollToIndex = SetScrollToIndex,
+        .scrollBy = ScrollBy,
+        .getCurrentOffset = GetCurrentOffset,
+        .scrollTo = ScrollTo,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
+
     return &modifier;
 }
 
 const CJUIScrollerModifier* GetCJUIScrollerModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUIScrollerModifier modifier = {
-        GetScroller,
-        GetScrollerProxy,
-        SetScrollToIndex,
-        ScrollBy,
-        GetCurrentOffset,
-        ScrollTo
+        .getScroller = GetScroller,
+        .getScrollerProxy = GetScrollerProxy,
+        .scrollToIndex = SetScrollToIndex,
+        .scrollBy = ScrollBy,
+        .getCurrentOffset = GetCurrentOffset,
+        .scrollTo = ScrollTo,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
+
     return &modifier;
 }
 }

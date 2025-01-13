@@ -559,20 +559,20 @@ std::unique_ptr<JsonValue> BrightnessOption::GetJsonObject() const
     jsonBrightnessOption->Put("lightUpDegree", lightUpDegree);
     jsonBrightnessOption->Put("cubicCoeff", cubicCoeff);
     jsonBrightnessOption->Put("quadCoeff", quadCoeff);
-    auto posRGBstr = "[0.0,0.0,0.0]";
+    std::string posRGBstr = "[0.0,0.0,0.0]";
     if (posRGB.size() > 1) {
         posRGBstr = ("[" + std::to_string(posRGB[0]) + "," + std::to_string(posRGB[1]) + "," +
                      std::to_string(posRGB[2]) + "]")
                         .c_str();
     }
-    jsonBrightnessOption->Put("posRGB", posRGBstr);
-    auto negRGBstr = "[0.0,0.0,0.0]";
+    jsonBrightnessOption->Put("posRGB", posRGBstr.c_str());
+    std::string negRGBstr = "[0.0,0.0,0.0]";
     if (negRGB.size() > 1) {
         negRGBstr = ("[" + std::to_string(negRGB[0]) + "," + std::to_string(negRGB[1]) + "," +
                      std::to_string(negRGB[2]) + "]")
                         .c_str();
     }
-    jsonBrightnessOption->Put("negRGB", negRGBstr);
+    jsonBrightnessOption->Put("negRGB", negRGBstr.c_str());
     jsonBrightnessOption->Put("fraction", fraction);
     return jsonBrightnessOption;
 }

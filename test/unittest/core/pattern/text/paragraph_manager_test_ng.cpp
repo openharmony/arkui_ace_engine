@@ -12,18 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <ostream>
 
-#include "gmock/gmock-actions.h"
-#include "gtest/gtest.h"
 #include "test/mock/core/render/mock_paragraph.h"
 
-#include "base/geometry/offset.h"
-#include "base/memory/referenced.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
-
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;

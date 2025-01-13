@@ -1,0 +1,97 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/es2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+
+component_ext_path = "${ace_root}/component_ext"
+
+additional_include_dirs = [ "${ace_root}" ]
+
+es2abc_gen_abc("gen_arkui_arclist_abc") {
+  src_js = rebase_path("arkui_arclist.js")
+  dst_file = rebase_path(target_out_dir + "/arkui_arclist.abc")
+  in_puts = [ "arkui_arclist.js" ]
+  out_puts = [ target_out_dir + "/arkui_arclist.abc" ]
+  extra_args = [ "--module" ]
+}
+
+gen_obj("arkui_arclist_abc") {
+  input = get_label_info(":gen_arkui_arclist_abc", "target_out_dir") +
+          "/arkui_arclist.abc"
+  output = target_out_dir + "/arkui_arclist_abc.o"
+  if (use_mac || use_mingw_win || use_linux || target_os == "ios") {
+    output = target_out_dir + "arkui_arclist_abc.c"
+  }
+  snapshot_dep = [ ":gen_arkui_arclist_abc" ]
+}
+
+ohos_shared_library("arclist") {
+  defines = [ "USE_ARK_ENGINE" ]
+  sources = [
+    "${component_ext_path}/arc_list/arc_list_napi.cpp",
+    "${component_ext_path}/ext_common/ext_napi_utils.cpp",
+  ]
+
+  include_dirs = [
+    "${component_ext_path}/ext_common/",
+    "${component_ext_path}/arc_list/",
+    "${ace_root}/frameworks",
+    "$root_out_dir/arkui/framework",
+    "${ace_root}/interfaces/inner_api/ace_kit/include",
+  ]
+  include_dirs += additional_include_dirs
+
+  deps = [
+    ":gen_obj_src_arkui_arclist_abc",
+    "$ace_root/build:libace_compatible",
+  ]
+
+  external_deps = [
+    "bounds_checking_function:libsec_static",
+    "ets_runtime:libark_jsruntime",
+    "hilog:libhilog",
+    "napi:ace_napi",
+  ]
+
+  if (!use_mac) {
+    ldflags = [ "-Wl,--gc-sections" ]
+  }
+
+  cflags = [
+    "-fvisibility=hidden",
+    "-fdata-sections",
+    "-ffunction-sections",
+    "-Os",
+  ]
+
+  if (ace_engine_feature_enable_digital_crown) {
+    cflags += [ "-DSUPPORT_DIGITAL_CROWN" ]
+  }
+
+  cflags_cc = [
+    "-fvisibility-inlines-hidden",
+    "-Os",
+  ]
+
+  if (use_mingw_win || use_linux) {
+    cflags_cc += [ "-std=c++17" ]
+    defines += [ "_USE_MATH_DEFINES" ]
+  }
+
+  relative_install_dir = "module/arkui"
+  subsystem_name = ace_engine_subsystem
+  part_name = ace_engine_part
+}

@@ -41,6 +41,7 @@ public:
     MOCK_METHOD1(SetSecurityLayer, void(bool));
     MOCK_METHOD1(SetContentClip, void(const std::variant<RectF, RefPtr<ShapeRect>>&));
     MOCK_METHOD(void, UpdateBackgroundEffect, (const std::optional<EffectOption>&), (override));
+    MOCK_METHOD1(SetTransparentLayer, void(bool));
 
     void SetVisible(bool visible) override
     {

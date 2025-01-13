@@ -153,6 +153,19 @@ public:
     }
 
     void SetSliderValue(double value, int32_t mode);
+    void InitAccessibilityVirtualNodeTask();
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+    {
+        crownSensitivity_ = sensitivity;
+    }
+
+    CrownSensitivity GetDigitalCrownSensitivity()
+    {
+        return crownSensitivity_;
+    }
+#endif
 
 private:
     void OnAttachToFrameNode() override;
@@ -171,6 +184,8 @@ private:
     void UpdateBubbleSizeAndLayout();
     void UpdateBubble();
     void InitializeBubble();
+    void UpdatePaintRect(RefPtr<SliderTheme> theme, SliderModel::SliderMode& sliderMode, RoundRect& paintRect,
+        const RectF& rect, float rectRadius);
 
     bool AtMousePanArea(const Offset& offsetInFrame);
     bool AtTouchPanArea(const Offset& offsetInFrame);
@@ -203,7 +218,60 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState();
     bool MoveStep(int32_t stepCount);
+#ifdef SUPPORT_DIGITAL_CROWN
+    void InitDigitalCrownEvent(const RefPtr<FocusHub>& focusHub)
+    {
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto sliderTheme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_VOID(sliderTheme);
+        crownDisplayControlRatio_ = sliderTheme->GetCrownDisplayControlRatio();
 
+        auto onCrownEvent = [weak = WeakClaim(this)](const CrownEvent& event) -> bool {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, false);
+            pattern->HandleCrownEvent(event);
+            return true;
+        };
+        focusHub->SetOnCrownEventInternal(std::move(onCrownEvent));
+    }
+    void HandleCrownEvent(const CrownEvent& event)
+    {
+        TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT,
+            "slider HandleCrownEvent event.action %{public}d event.degree %{public}f",
+            event.action, event.degree);
+        double mainDelta = GetCrownRotatePx(event);
+        switch (event.action) {
+            case CrownAction::BEGIN:
+                crownMovingLength_ = valueRatio_ * sliderLength_;
+                crownEventNum_ = 0;
+                reachBoundary_ = false;
+                HandleCrownAction(mainDelta);
+                StartVibrateFeedback();
+                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                FireChangeEvent(SliderChangeMode::Begin);
+                OpenTranslateAnimation(SliderStatus::MOVE);
+                break;
+            case CrownAction::UPDATE:
+                HandleCrownAction(mainDelta);
+                StartVibrateFeedback();
+                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                FireChangeEvent(SliderChangeMode::Moving);
+                OpenTranslateAnimation(SliderStatus::MOVE);
+                break;
+            case CrownAction::END:
+            default:
+                bubbleFlag_ = false;
+                UpdateMarkDirtyNode(PROPERTY_UPDATE_RENDER);
+                FireChangeEvent(SliderChangeMode::End);
+                CloseTranslateAnimation();
+                break;
+        }
+    }
+    double GetCrownRotatePx(const CrownEvent& event) const;
+    void HandleCrownAction(double mainDelta);
+    void StartVibrateFeedback();
+#endif
     bool IsSliderVisible();
     void RegisterVisibleAreaChange();
     void OnWindowHide() override;
@@ -233,8 +301,9 @@ private:
     RefPtr<FrameNode> BuildContentModifierNode();
     float GetValueInValidRange(const RefPtr<SliderPaintProperty>& paintProperty, float value, float min, float max);
     void UpdateToValidValue();
+    void InitSliderAccessibilityEnabledRegister();
     void AccessibilityVirtualNodeRenderTask();
-    void InitAccessibilityVirtualNodeTask();
+    bool CheckCreateAccessibilityVirtualNode();
     void InitAccessibilityHoverEvent();
     void HandleAccessibilityHoverEvent(bool state, const AccessibilityHoverInfo& info);
     bool InitAccessibilityVirtualNode();
@@ -254,6 +323,7 @@ private:
         const RefPtr<FrameNode>& pointNode, const SizeF& size, const PointF& point, const std::string& txt);
     void SendAccessibilityValueEvent(int32_t mode);
     void InitOrRefreshSlipFactor();
+    RefPtr<PanEvent> CreatePanEvent();
 
     std::optional<SliderMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;
@@ -305,6 +375,13 @@ private:
     float trackThickness_ = 0.0f;
     SizeF blockHotSize_;
     SizeF blockSize_;
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
+    double crownDisplayControlRatio_ = 1.0;
+    double crownMovingLength_ = 0.0;
+    int32_t crownEventNum_ = 0;
+    bool reachBoundary_ = false;
+#endif
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ClickEvent> clickListener_;
@@ -323,6 +400,7 @@ private:
     std::function<void(bool)> isFocusActiveUpdateEvent_;
     bool isFocusActive_ = false;
 
+    std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
     RefPtr<FrameNode> parentAccessibilityNode_;
     std::vector<RefPtr<FrameNode>> pointAccessibilityNodeVec_;
     std::vector<GestureEventFunc> pointAccessibilityNodeEventVec_;

@@ -260,10 +260,10 @@ ArkUINativeModuleValue RadioBridge::SetRadioPadding(ArkUIRuntimeCallInfo *runtim
     Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(4);   //4 is left arguments
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
-    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
-    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP) };
+    struct ArkUISizeType top = { 0.0, static_cast<int8_t>(DimensionUnit::VP), "" };
+    struct ArkUISizeType right = { 0.0, static_cast<int8_t>(DimensionUnit::VP), "" };
+    struct ArkUISizeType bottom = { 0.0, static_cast<int8_t>(DimensionUnit::VP), "" };
+    struct ArkUISizeType left = { 0.0, static_cast<int8_t>(DimensionUnit::VP), "" };
 
     CalcDimension topDimen(0, DimensionUnit::VP);
     CalcDimension rightDimen(0, DimensionUnit::VP);

@@ -236,44 +236,62 @@ void ResetNavDestinationRecoverable(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUINavDestinationModifier* GetNavDestinationModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUINavDestinationModifier modifier = {
-        SetHideTitleBar,
-        ResetHideTitleBar,
-        SetNavDestinationHideToolBar,
-        ResetNavDestinationHideToolBar,
-        SetNavDestinationMode,
-        ResetNavDestinationMode,
-        SetIgnoreLayoutSafeArea,
-        ResetIgnoreLayoutSafeArea,
-        SetTitle,
-        ResetTitle,
-        SetMenus,
-        ResetMenus,
-        SetMenuItemAction,
-        SetMenuItemSymbol,
-        SetNavDestinationRecoverable,
-        ResetNavDestinationRecoverable,
-        SetNavDestinationSystemTransition,
-        ResetNavDestinationSystemTransition
+        .setHideTitleBar = SetHideTitleBar,
+        .resetHideTitleBar = ResetHideTitleBar,
+        .setNavDestinationHideToolBar = SetNavDestinationHideToolBar,
+        .resetNavDestinationHideToolBar = ResetNavDestinationHideToolBar,
+        .setNavDestinationMode = SetNavDestinationMode,
+        .resetNavDestinationMode = ResetNavDestinationMode,
+        .setIgnoreLayoutSafeArea = SetIgnoreLayoutSafeArea,
+        .resetIgnoreLayoutSafeArea = ResetIgnoreLayoutSafeArea,
+        .setTitle = SetTitle,
+        .resetTitle = ResetTitle,
+        .setMenus = SetMenus,
+        .resetMenus = ResetMenus,
+        .setMenuItemAction = SetMenuItemAction,
+        .setMenuItemSymbol = SetMenuItemSymbol,
+        .setRecoverable = SetNavDestinationRecoverable,
+        .resetRecoverable = ResetNavDestinationRecoverable,
+        .setNavDestinationSystemTransition = SetNavDestinationSystemTransition,
+        .resetNavDestinationSystemTransition = ResetNavDestinationSystemTransition,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUINavDestinationModifier* GetCJUINavDestinationModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUINavDestinationModifier modifier = {
-        SetHideTitleBar,
-        ResetHideTitleBar,
-        SetNavDestinationHideToolBar,
-        ResetNavDestinationHideToolBar,
-        SetNavDestinationMode,
-        ResetNavDestinationMode,
-        SetIgnoreLayoutSafeArea,
-        ResetIgnoreLayoutSafeArea,
-        SetNavDestinationSystemTransition,
-        ResetNavDestinationSystemTransition
+        .setHideTitleBar = SetHideTitleBar,
+        .resetHideTitleBar = ResetHideTitleBar,
+        .setNavDestinationHideToolBar = SetNavDestinationHideToolBar,
+        .resetNavDestinationHideToolBar = ResetNavDestinationHideToolBar,
+        .setNavDestinationMode = SetNavDestinationMode,
+        .resetNavDestinationMode = ResetNavDestinationMode,
+        .setIgnoreLayoutSafeArea = SetIgnoreLayoutSafeArea,
+        .resetIgnoreLayoutSafeArea = ResetIgnoreLayoutSafeArea,
+        .setNavDestinationSystemTransition = SetNavDestinationSystemTransition,
+        .resetNavDestinationSystemTransition = ResetNavDestinationSystemTransition,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

@@ -358,6 +358,7 @@ void PixelMapImage::DrawToRSCanvas(
     Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { static_cast<int32_t>(config.imageFit_),
         static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
         1.0, 0, 0, 0, static_cast<int32_t>(config.dynamicMode) };
+    rsImageInfo.fitMatrix = ToDrawingMatrix(config.imageMatrix_);
     rsImageInfo.rotateDegree = CalculateRotateDegree(config.orientation_);
     recordingCanvas.AttachBrush(brush);
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
@@ -383,7 +384,7 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
     auto recordingCanvas = static_cast<OHOS::Rosen::RSRecordingCanvas*>(skCanvas);
     CHECK_NULL_VOID(recordingCanvas);
     SkPaint paint;
-    SkSamplingOptions option;
+    SkSamplingOptions option { SkFilterMode::kLinear, SkMipmapMode::kLinear };
     SkRect dst { dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom() };
 
     CHECK_NULL_VOID(pixelMap_);
@@ -394,7 +395,7 @@ void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect)
 #ifdef ENABLE_ROSEN_BACKEND
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     RSBrush brush;
-    RSSamplingOptions options;
+    RSSamplingOptions options { RSFilterMode::LINEAR, RSMipmapMode::LINEAR };
     RSRect dst = RSRect(dstRect.GetLeft(), dstRect.GetTop(), dstRect.GetRight(), dstRect.GetBottom());
 
     auto pixelMap = pixelMap_->GetPixelMapSharedPtr();
@@ -459,5 +460,32 @@ RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
     auto data = DynamicCast<PixmapData>(cache->GetCacheImageData(key));
     CHECK_NULL_RETURN(data, nullptr);
     return MakeRefPtr<PixelMapImage>(data->GetPixmap());
+}
+
+RSMatrix PixelMapImage::ToDrawingMatrix(const Matrix4& matrix4)
+{
+    // Mappings from DrawingMatrix-index to input-index.
+    static const int32_t K_DRAWING_MATRIX_INDEX_TO_MATRIX4_INDEX[] = {
+        0,
+        4,
+        12,
+        1,
+        5,
+        13,
+        3,
+        7,
+        15,
+    };
+
+    RSMatrix matrix;
+    for (std::size_t i = 0; i < ArraySize(K_DRAWING_MATRIX_INDEX_TO_MATRIX4_INDEX); ++i) {
+        int32_t matrixIndex = K_DRAWING_MATRIX_INDEX_TO_MATRIX4_INDEX[i];
+        if (matrixIndex < matrix4.Count()) {
+            matrix.Set(static_cast<RSMatrix::Index>(i), matrix4[matrixIndex]);
+        } else {
+            matrix.Set(static_cast<RSMatrix::Index>(i), 0.0);
+        }
+    }
+    return matrix;
 }
 } // namespace OHOS::Ace::NG

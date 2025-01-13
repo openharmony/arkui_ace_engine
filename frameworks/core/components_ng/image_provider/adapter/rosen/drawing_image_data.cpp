@@ -93,10 +93,6 @@ RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
     if (SystemProperties::GetSvgMode() <= 0) {
         return SkiaSvgDom::CreateSkiaSvgDom(*svgStream, src.GetFillColor());
     }
-#ifdef NG_BUILD
-    LOGE("NG SvgDom not support!");
-    return nullptr;
-#else
     auto svgDom_ = SvgDom::CreateSvgDom(*svgStream, src);
     if (!svgDom_) {
         TAG_LOGW(AceLogTag::ACE_IMAGE,
@@ -114,7 +110,6 @@ RefPtr<SvgDomBase> DrawingImageData::MakeSvgDom(const ImageSourceInfo& src)
             return context->NormalizeToPx(value);
         });
     return svgDom_;
-#endif
 }
 
 ImageCodec DrawingImageData::Parse() const

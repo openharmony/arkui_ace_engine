@@ -55,6 +55,10 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::RATE_STAR_BIG_ON_SVG, "rate_star_big_on" },
     { InternalResource::ResourceId::RATE_STAR_SMALL_OFF_SVG, "rate_star_small_off" },
     { InternalResource::ResourceId::RATE_STAR_SMALL_ON_SVG, "rate_star_small_on" },
+    { InternalResource::ResourceId::TV_RATE_STAR_BIG_OFF_SVG, "rate_star_big_off" },
+    { InternalResource::ResourceId::TV_RATE_STAR_BIG_ON_SVG, "rate_star_big_on" },
+    { InternalResource::ResourceId::TV_RATE_STAR_SMALL_OFF_SVG, "rate_star_small_off" },
+    { InternalResource::ResourceId::TV_RATE_STAR_SMALL_ON_SVG, "rate_star_small_on" },
     { InternalResource::ResourceId::RIGHT_ARROW_SVG, "right_arrow" },
     { InternalResource::ResourceId::SEARCH_SVG, "search" },
     { InternalResource::ResourceId::SELECT_ARROW_DISABLED_PNG, "select_arrow_disabled" },
@@ -109,7 +113,8 @@ static std::unordered_map<InternalResource::ResourceId, std::string> RESOURCE_IC
     { InternalResource::ResourceId::IC_CANCEL_SVG, "ic_public_cancel" },
     { InternalResource::ResourceId::RADIO_TICK_SVG, "radio_tick_svg" },
     { InternalResource::ResourceId::RADIO_DOT_SVG, "radio_dot_svg" },
-    { InternalResource::ResourceId::IC_TAKEPHOTO_SVG, "ic_public_camera" }
+    { InternalResource::ResourceId::IC_TAKEPHOTO_SVG, "ic_public_camera" },
+    { InternalResource::ResourceId::APP_LOCK_SVG, "app_lock_picture"}
 };
 }
 

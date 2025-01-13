@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -370,6 +370,7 @@ void JSProgress::JsSetCapsuleStyle(const JSCallbackInfo& info)
     }
 
     JsSetFontStyle(info);
+    JsSetBorderRadius(paramObject);
 }
 
 void JSProgress::JsSetCommonOptions(const JSCallbackInfo& info)
@@ -549,4 +550,18 @@ void JSProgress::JsSetLinearStyleOptions(const JSCallbackInfo& info)
     ProgressModel::GetInstance()->SetStrokeRadius(strokeRadiusDimension);
 }
 
+void JSProgress::JsSetBorderRadius(const JSRef<JSObject>& paramObject)
+{
+    CalcDimension radiusDimension;
+    auto borderRadius = paramObject->GetProperty("borderRadius");
+    if (!borderRadius->IsObject() || !ParseJsLengthMetricsVp(JSRef<JSObject>::Cast(borderRadius), radiusDimension)) {
+        ProgressModel::GetInstance()->ResetBorderRadius();
+        return;
+    }
+    if (LessNotEqual(radiusDimension.Value(), 0.0f) || radiusDimension.Unit() == DimensionUnit::PERCENT) {
+        ProgressModel::GetInstance()->ResetBorderRadius();
+        return;
+    }
+    ProgressModel::GetInstance()->SetBorderRadius(radiusDimension);
+}
 } // namespace OHOS::Ace::Framework

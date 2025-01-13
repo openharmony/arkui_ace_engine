@@ -16,13 +16,14 @@
 #ifndef FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SCROLL_SCROLL_TEST_NG_H
 #define FOUNDATION_ACE_TEST_UNITTEST_CORE_PATTERN_SCROLL_SCROLL_TEST_NG_H
 
-#include "test/unittest/core/pattern/test_ng.h"
+#include "test/unittest/core/pattern/scrollable/scrollable_utils_test_ng.h"
 
 #define private public
 #define protected public
+#include "test/mock/core/animation/mock_animation_manager.h"
+
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
-#include "test/mock/core/animation/mock_animation_manager.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;
@@ -45,7 +46,7 @@ constexpr int32_t TICK = 2;
 constexpr float BAR_WIDTH = 10.f;
 constexpr char SCROLL_BAR_COLOR[] = "#66182431";
 
-class ScrollTestNg : public TestNG {
+class ScrollTestNg : public ScrollableUtilsTestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -56,23 +57,13 @@ public:
     ScrollModelNG CreateScroll();
     void CreateContent(float mainSize = CONTENT_MAIN_SIZE);
     void CreateContentChild(int32_t childNumber = 10);
-    void ScrollToEdge(ScrollEdgeType scrollEdgeType);
-    void ScrollTo(float offset);
-    void ScrollBy(float pixelX, float pixelY);
-    AssertionResult Position(const RefPtr<FrameNode>& frameNode, float expectOffset);
-    AssertionResult TickPosition(const RefPtr<FrameNode>& frameNode, float expectOffset);
-    AssertionResult TickByVelocityPosition(const RefPtr<FrameNode>& frameNode, float velocity, float expectOffset);
-    AssertionResult Position(float expectOffset);
-    AssertionResult TickPosition(float expectOffset);
-    AssertionResult TickByVelocityPosition(float velocity, float expectOffset);
+    void ScrollBy(double pixelX, double pixelY, bool smooth = false) override;
 
-    RefPtr<FrameNode> frameNode_;
     RefPtr<ScrollPattern> pattern_;
     RefPtr<ScrollEventHub> eventHub_;
     RefPtr<ScrollLayoutProperty> layoutProperty_;
     RefPtr<ScrollablePaintProperty> paintProperty_;
     RefPtr<ScrollAccessibilityProperty> accessibilityProperty_;
-    RefPtr<ScrollableController> positionController_;
     std::vector<RefPtr<FrameNode>> contentChildren_;
     RefPtr<ScrollBar> scrollBar_;
     RefPtr<Scrollable> scrollable_;

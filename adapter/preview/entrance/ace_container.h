@@ -33,6 +33,9 @@
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/platform_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 
 #include <refbase.h>
@@ -73,7 +76,8 @@ public:
         int32_t height, UIEnvCallback callback);
 #endif
 
-    static UIContentErrorCode RunPage(int32_t instanceId, const std::string& url, const std::string& params);
+    static UIContentErrorCode RunPage(
+        int32_t instanceId, const std::string& url, const std::string& params, bool isNamedRouter = false);
     static RefPtr<AceContainer> GetContainerInstance(int32_t instanceId);
     static void AddRouterChangeCallback(int32_t instanceId, const OnRouterChangeCallback& onRouterChangeCallback);
     static void NativeOnConfigurationUpdated(int32_t instanceId);
@@ -184,7 +188,7 @@ public:
         return type_;
     }
 
-    ResourceConfiguration GetResourceConfiguration() const
+    ResourceConfiguration GetResourceConfiguration() const override
     {
         return resourceInfo_.GetResourceConfiguration();
     }
@@ -306,6 +310,14 @@ public:
         moduleName_ = moduleName;
     }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+    void RegisterCrownEventCallback(CrownEventCallback&& callback)
+    {
+        ACE_DCHECK(callback);
+        crownEventCallback_ = std::move(callback);
+    }
+#endif
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -343,6 +355,10 @@ private:
     std::string bundleName_;
     std::string moduleName_;
     RefPtr<StagePkgContextInfo> PkgContextInfo_;
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    CrownEventCallback crownEventCallback_;
+#endif
 
     // Support to execute the ets code mocked by developer
     std::map<std::string, std::string> mockJsonInfo_;

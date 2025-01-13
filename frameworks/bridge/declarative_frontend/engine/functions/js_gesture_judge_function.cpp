@@ -111,6 +111,23 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateEventTargetObject(const std::share
     return target;
 }
 
+void JsGestureJudgeFunction::ParsePanGestureEvent(JSRef<JSObject>& obj, const std::shared_ptr<BaseGestureEvent>& info)
+{
+    auto panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(info.get());
+    if (panGestureEvent) {
+        obj->SetProperty<double>(
+            "offsetX", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetOffsetX()));
+        obj->SetProperty<double>(
+            "offsetY", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetOffsetY()));
+        obj->SetProperty<double>(
+            "velocityX", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityX()));
+        obj->SetProperty<double>(
+            "velocityY", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityY()));
+        obj->SetProperty<double>("velocity",
+            PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityValue()));
+    }
+}
+
 void JsGestureJudgeFunction::SetUniqueAttributes(
     JSRef<JSObject>& obj, GestureTypeName typeName, const std::shared_ptr<BaseGestureEvent>& info)
 {
@@ -123,19 +140,7 @@ void JsGestureJudgeFunction::SetUniqueAttributes(
             break;
         }
         case OHOS::Ace::GestureTypeName::PAN_GESTURE: {
-            auto panGestureEvent = TypeInfoHelper::DynamicCast<PanGestureEvent>(info.get());
-            if (panGestureEvent) {
-                obj->SetProperty<double>(
-                    "offsetX", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetOffsetX()));
-                obj->SetProperty<double>(
-                    "offsetY", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetOffsetY()));
-                obj->SetProperty<double>(
-                    "velocityX", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityX()));
-                obj->SetProperty<double>(
-                    "velocityY", PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityY()));
-                obj->SetProperty<double>("velocity",
-                    PipelineBase::Px2VpWithCurrentDensity(panGestureEvent->GetVelocity().GetVelocityValue()));
-            }
+            ParsePanGestureEvent(obj, info);
             break;
         }
         case OHOS::Ace::GestureTypeName::PINCH_GESTURE: {

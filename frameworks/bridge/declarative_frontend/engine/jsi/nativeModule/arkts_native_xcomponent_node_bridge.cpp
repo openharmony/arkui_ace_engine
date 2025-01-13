@@ -100,6 +100,9 @@ ArkUINativeModuleValue XComponentNodeBridge::GetFrameNode(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     Framework::JSXComponent* jsXComponent =
         reinterpret_cast<Framework::JSXComponent*>(firstArg->ToNativePointer(vm)->Value());
     if (jsXComponent) {
@@ -115,6 +118,9 @@ ArkUINativeModuleValue XComponentNodeBridge::RegisterOnCreateCallback(ArkUIRunti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     Framework::JSXComponent* jsXComponent =
         reinterpret_cast<Framework::JSXComponent*>(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
@@ -130,6 +136,9 @@ ArkUINativeModuleValue XComponentNodeBridge::RegisterOnDestroyCallback(ArkUIRunt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNativePointer(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
     Framework::JSXComponent* jsXComponent =
         reinterpret_cast<Framework::JSXComponent*>(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
@@ -146,6 +155,9 @@ ArkUINativeModuleValue XComponentNodeBridge::ChangeRenderType(ArkUIRuntimeCallIn
     auto defaultNativeModule = panda::BooleanRef::New(vm, false);
     CHECK_NULL_RETURN(vm, defaultNativeModule);
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (!firstArg->IsNativePointer(vm)) {
+        return defaultNativeModule;
+    }
     Framework::JSXComponent* jsXComponent =
         reinterpret_cast<Framework::JSXComponent*>(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);

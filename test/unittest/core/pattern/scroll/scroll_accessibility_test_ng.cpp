@@ -58,7 +58,7 @@ HWTEST_F(ScrollAccessibilityTestNg, AccessibilityProperty001, TestSize.Level1)
     /**
      * @tc.steps: step3. scroll to bottom
      */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
+    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     EXPECT_TRUE(pattern_->IsAtBottom());
     accessibilityProperty_->ResetSupportAction();
     expectActions = 0;
@@ -114,7 +114,7 @@ HWTEST_F(ScrollAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
      * @tc.expected: Scroll half page up
      */
     currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_EQ(currentOffset, -(SCROLL_HEIGHT / scrollHalf));
+    EXPECT_EQ(currentOffset, -SCROLL_HEIGHT / scrollHalf);
     accessibilityProperty_->ActActionScrollBackward(AccessibilityScrollType::SCROLL_HALF);
     EXPECT_TRUE(TickPosition(currentOffset / TICK));
     EXPECT_TRUE(TickPosition(0));

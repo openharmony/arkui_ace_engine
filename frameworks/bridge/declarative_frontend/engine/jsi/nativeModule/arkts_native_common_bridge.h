@@ -18,6 +18,7 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "core/components_ng/pattern/gesture/gesture_model.h"
+#include "core/event/focus_axis_event.h"
 
 namespace OHOS::Ace::NG {
 class CommonBridge {
@@ -158,6 +159,8 @@ public:
     static ArkUINativeModuleValue ResetPadding(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetSafeAreaPadding(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetSafeAreaPadding(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMarkAnchor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetMarkAnchor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetVisibility(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -373,6 +376,9 @@ public:
     static ArkUINativeModuleValue GetApiTargetVersion(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFocusBox(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetFocusBox(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static Local<panda::ObjectRef> CreateFocusAxisEventInfo(EcmaVM* vm, NG::FocusAxisEventInfo& info);
+    static ArkUINativeModuleValue SetOnFocusAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnFocusAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

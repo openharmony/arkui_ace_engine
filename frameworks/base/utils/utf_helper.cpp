@@ -21,6 +21,7 @@ namespace OHOS::Ace::UtfUtils {
 const std::string DEFAULT_STR = "error";
 const std::u16string DEFAULT_U16STR = u"error";
 const std::u32string DEFAULT_U32STR = U"error";
+const std::wstring DEFAULT_WSTR = L"error";
 
 constexpr size_t HI_SURROGATE_MIN = 0xd800;
 constexpr size_t HI_SURROGATE_MAX = 0xdbff;

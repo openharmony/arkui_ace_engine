@@ -46,6 +46,8 @@ export struct ListBootcamp {
   @State fadingEdgeLengthUnit: LengthUnit = LengthUnit.VP;
   @State enableAxis: boolean = false;
   @State axis: Axis = Axis.Vertical;
+  @State enableDragGray: boolean = false;
+  @State dragGray: DragPreviewMode = DragPreviewMode.AUTO;
 
   build() {
     NavDestination() {
@@ -123,6 +125,8 @@ export struct ListBootcamp {
           fadingEdgeLength: new LengthMetrics(this.fadingEdgeLengthValue, this.fadingEdgeLengthUnit)
         })
       )
+      .onDragStart(() => {})
+      .dragPreviewOptions({ mode: useEnabled(this.enableDragGray, this.dragGray)})
 
     }
   }
@@ -237,6 +241,15 @@ export struct ListBootcamp {
             max: 30
           })
         }
+        RadioBlock({
+          title: '拖拽背板图样式',
+          isEnabled: $enableDragGray,
+          value: $dragGray,
+          dataSource: [
+            { label: '默认', value: DragPreviewMode.AUTO },
+            { label: '灰显', value: DragPreviewMode.ENABLE_DRAG_ITEM_GRAY_EFFECT }
+          ]
+        })
       }
     }
     .align(Alignment.Top)

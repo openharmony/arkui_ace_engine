@@ -409,7 +409,7 @@ inline std::string ConvertWrapTextOverflowToString(TextOverflow textOverflow)
     };
 
     auto index = BinarySearchFindIndex(textOverflowTable, ArraySize(textOverflowTable), textOverflow);
-    return index < 0 ? "TextAlign.Start" : textOverflowTable[index].value;
+    return index < 0 ? "TextOverflow.Clip" : textOverflowTable[index].value;
 }
 
 inline TextOverflow ConvertWrapStringToTextOverflow(const std::string& str)
@@ -425,6 +425,26 @@ inline TextOverflow ConvertWrapStringToTextOverflow(const std::string& str)
         return iter->second;
     }
     return TextOverflow::CLIP;
+}
+
+inline MarqueeDirection ConvertWrapStringToMarqueeDirection(const std::string& str)
+{
+    static const std::unordered_map<std::string, MarqueeDirection> uMap {
+        { "MarqueeDirection.LEFT", MarqueeDirection::LEFT },
+        { "MarqueeDirection.RIGHT", MarqueeDirection::RIGHT },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : MarqueeDirection::LEFT;
+}
+
+inline MarqueeStartPolicy ConvertWrapStringToMarqueeStartPolicy(const std::string& str)
+{
+    static const std::unordered_map<std::string, MarqueeStartPolicy> uMap {
+        { "MarqueeStartPolicy.DEFAULT", MarqueeStartPolicy::DEFAULT },
+        { "MarqueeStartPolicy.ON_FOCUS", MarqueeStartPolicy::ON_FOCUS },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : MarqueeStartPolicy::DEFAULT;
 }
 
 inline std::string ConvertWrapFontStyleToStirng(FontStyle fontStyle)
@@ -508,6 +528,7 @@ inline std::string ConvertWrapWordBreakToString(WordBreak wordBreak)
         { WordBreak::NORMAL, "normal" },
         { WordBreak::BREAK_ALL, "break-all" },
         { WordBreak::BREAK_WORD, "break-word" },
+        { WordBreak::HYPHENATION, "hyphenation" },
     };
 
     auto index = BinarySearchFindIndex(wordBreakTable, ArraySize(wordBreakTable), wordBreak);

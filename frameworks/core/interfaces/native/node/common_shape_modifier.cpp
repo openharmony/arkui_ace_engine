@@ -244,23 +244,89 @@ void ResetShapeForegroundColor(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUICommonShapeModifier* GetCommonShapeModifier()
 {
-    static const ArkUICommonShapeModifier modifier = { SetStrokeDashArray, ResetStrokeDashArray, SetStrokeMiterLimit,
-        ResetStrokeMiterLimit, SetFillOpacity, ResetFillOpacity, SetStrokeOpacity, ResetStrokeOpacity, SetStrokeWidth,
-        ResetStrokeWidth, SetAntiAlias, ResetAntiAlias, SetStroke, ResetStroke, SetFill, ResetFill, SetStrokeDashOffset,
-        ResetStrokeDashOffset, SetStrokeLineCap, ResetStrokeLineCap, SetStrokeLineJoin, ResetStrokeLineJoin,
-        SetShapeWidth, ResetShapeWidth, SetShapeHeight, ResetShapeHeight, SetShapeForegroundColor,
-        ResetShapeForegroundColor };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUICommonShapeModifier modifier = {
+        .setStrokeDashArray = SetStrokeDashArray,
+        .resetStrokeDashArray = ResetStrokeDashArray,
+        .setStrokeMiterLimit = SetStrokeMiterLimit,
+        .resetStrokeMiterLimit = ResetStrokeMiterLimit,
+        .setFillOpacity = SetFillOpacity,
+        .resetFillOpacity = ResetFillOpacity,
+        .setStrokeOpacity = SetStrokeOpacity,
+        .resetStrokeOpacity = ResetStrokeOpacity,
+        .setStrokeWidth = SetStrokeWidth,
+        .resetStrokeWidth = ResetStrokeWidth,
+        .setAntiAlias = SetAntiAlias,
+        .resetAntiAlias = ResetAntiAlias,
+        .setStroke = SetStroke,
+        .resetStroke = ResetStroke,
+        .setFill = SetFill,
+        .resetFill = ResetFill,
+        .setStrokeDashOffset = SetStrokeDashOffset,
+        .resetStrokeDashOffset = ResetStrokeDashOffset,
+        .setStrokeLineCap = SetStrokeLineCap,
+        .resetStrokeLineCap = ResetStrokeLineCap,
+        .setStrokeLineJoin = SetStrokeLineJoin,
+        .resetStrokeLineJoin = ResetStrokeLineJoin,
+        .setShapeWidth = SetShapeWidth,
+        .resetShapeWidth = ResetShapeWidth,
+        .setShapeHeight = SetShapeHeight,
+        .resetShapeHeight = ResetShapeHeight,
+        .setShapeForegroundColor = SetShapeForegroundColor,
+        .resetShapeForegroundColor = ResetShapeForegroundColor,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUICommonShapeModifier* GetCJUICommonShapeModifier()
 {
-    static const CJUICommonShapeModifier modifier = { SetStrokeDashArray, ResetStrokeDashArray, SetStrokeMiterLimit,
-        ResetStrokeMiterLimit, SetFillOpacity, ResetFillOpacity, SetStrokeOpacity, ResetStrokeOpacity, SetStrokeWidth,
-        ResetStrokeWidth, SetAntiAlias, ResetAntiAlias, SetStroke, ResetStroke, SetFill, ResetFill, SetStrokeDashOffset,
-        ResetStrokeDashOffset, SetStrokeLineCap, ResetStrokeLineCap, SetStrokeLineJoin, ResetStrokeLineJoin,
-        SetShapeWidth, ResetShapeWidth, SetShapeHeight, ResetShapeHeight, SetShapeForegroundColor,
-        ResetShapeForegroundColor };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUICommonShapeModifier modifier = {
+        .setStrokeDashArray = SetStrokeDashArray,
+        .resetStrokeDashArray = ResetStrokeDashArray,
+        .setStrokeMiterLimit = SetStrokeMiterLimit,
+        .resetStrokeMiterLimit = ResetStrokeMiterLimit,
+        .setFillOpacity = SetFillOpacity,
+        .resetFillOpacity = ResetFillOpacity,
+        .setStrokeOpacity = SetStrokeOpacity,
+        .resetStrokeOpacity = ResetStrokeOpacity,
+        .setStrokeWidth = SetStrokeWidth,
+        .resetStrokeWidth = ResetStrokeWidth,
+        .setAntiAlias = SetAntiAlias,
+        .resetAntiAlias = ResetAntiAlias,
+        .setStroke = SetStroke,
+        .resetStroke = ResetStroke,
+        .setFill = SetFill,
+        .resetFill = ResetFill,
+        .setStrokeDashOffset = SetStrokeDashOffset,
+        .resetStrokeDashOffset = ResetStrokeDashOffset,
+        .setStrokeLineCap = SetStrokeLineCap,
+        .resetStrokeLineCap = ResetStrokeLineCap,
+        .setStrokeLineJoin = SetStrokeLineJoin,
+        .resetStrokeLineJoin = ResetStrokeLineJoin,
+        .setShapeWidth = SetShapeWidth,
+        .resetShapeWidth = ResetShapeWidth,
+        .setShapeHeight = SetShapeHeight,
+        .resetShapeHeight = ResetShapeHeight,
+        .setShapeForegroundColor = SetShapeForegroundColor,
+        .resetShapeForegroundColor = ResetShapeForegroundColor,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 }

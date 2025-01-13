@@ -89,8 +89,8 @@ private:
         const RefPtr<FrameNode>& calendarDialogNode, const RefPtr<FrameNode>& calendarNode);
     static void OnSelectedChangeEvent(int32_t calendarNodeId, const std::string& callbackInfo,
         const DialogEvent& onChange, const CalendarSettingData& settingData);
-    static void UpdateBackgroundStyle(
-        const RefPtr<RenderContext>& renderContext, const DialogProperties& dialogProperties);
+    static void UpdateBackgroundStyle(const RefPtr<RenderContext>& renderContext,
+        const DialogProperties& dialogProperties, const RefPtr<CalendarTheme>& calendarTheme);
     static void UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
         const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
         const RefPtr<ButtonTheme>& buttonTheme);

@@ -741,9 +741,10 @@ std::string AceResConfig::GetCurrentDeviceDeclarativeResTag()
     auto localeTag = Localization::GetInstance()->GetLanguageTag();
     std::string language, script, region;
     Localization::ParseLocaleTag(localeTag, language, script, region, false);
-
-    ResolutionType resolutionType = AceResConfig::GetResolutionType(PipelineBase::GetCurrentDensity());
-    LongScreenType longScreenType = AceResConfig::GetLongScreenType(PipelineBase::GetCurrentDensity());
+    
+    double density = PipelineBase::GetCurrentDensity();
+    ResolutionType resolutionType = AceResConfig::GetResolutionType(density);
+    LongScreenType longScreenType = AceResConfig::GetLongScreenType(density);
     AceResConfig deviceResConfig;
 
     deviceResConfig = AceResConfig(language, script, region, longScreenType, SystemProperties::GetScreenShape(),

@@ -64,6 +64,11 @@ public:
         dividerList_->Set(AceType::DynamicCast<CustomAnimatableArithmetic>(lda));
     }
 
+    void SetIsNeedDividerAnimation(bool isNeedDividerAnimation)
+    {
+        isNeedDividerAnimation_ = isNeedDividerAnimation;
+    }
+
 private:
     RefPtr<AnimatableArithmeticProperty> dividerList_;
     RefPtr<AnimatablePropertyOffsetF> clipOffset_;
@@ -74,6 +79,7 @@ private:
 
     float width_ = 0.0f;
     bool isVertical_ = true;
+    bool isNeedDividerAnimation_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListContentModifier);
 };

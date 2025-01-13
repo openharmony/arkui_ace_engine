@@ -504,4 +504,49 @@ HWTEST_F(GestureRecognizerTestNg, PanPressRecognizerHandleTouchMoveEventTest008,
     recognizerTest.SetResponseLinkRecognizers(responseLinkResult);
     EXPECT_NE(recognizerTest.Dump(), nullptr);
 }
+
+/**
+ * @tc.name: GestureRecognizerHandleEvent001
+ * @tc.desc: Test GestureRecognizer function: AboutToAddCurrentFingers AboutToMinusCurrentFingers
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureRecognizerTestNg, GestureRecognizerHandleEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ExclusiveRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizerPtr = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+    bool result = false;
+
+    /**
+     * @tc.steps: step3. set currentFinger = 0, add touchEvent to gestureRecognizer.
+     * @tc.steps: case1: touchPoints is in recognizer region.
+     * @tc.expected: step3. func success, clickRecognizer currentFingers add.
+     */
+    clickRecognizerPtr->currentFingers_ = 0;
+    result = clickRecognizerPtr->AboutToAddCurrentFingers(touchEvent);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(clickRecognizerPtr->currentFingers_, 1);
+
+    /**
+     * @tc.steps: step3. set currentFinger = 1, delete touchEvent to gestureRecognizer.
+     * @tc.steps: case2: fingersId not find touchEvent id.
+     * @tc.expected: step3. func fail.
+     */
+    clickRecognizerPtr->currentFingers_ = 1;
+    result = clickRecognizerPtr->AboutToMinusCurrentFingers(0);
+    EXPECT_EQ(result, false);
+    EXPECT_EQ(clickRecognizerPtr->currentFingers_, 1);
+
+    /**
+     * @tc.steps: step3. set currentFinger = 1, delete touchEvent to gestureRecognizer.
+     * @tc.steps: case3: fingersId find touchEvent id.
+     * @tc.expected: step3. func success, currentFingers delete.
+     */
+    clickRecognizerPtr->currentFingers_ = 1;
+    clickRecognizerPtr->fingersId_.insert(0);
+    result = clickRecognizerPtr->AboutToMinusCurrentFingers(0);
+    EXPECT_EQ(result, true);
+}
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,7 @@ import(
 build_component_ng("text_field_pattern_ng") {
   sources = [
     "content_controller.cpp",
+    "text_component_decorator.cpp",
     "text_field_accessibility_property.cpp",
     "text_field_content_modifier.cpp",
     "text_field_controller.cpp",

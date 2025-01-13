@@ -39,6 +39,7 @@
 #include "core/components/picker/picker_data.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -2051,15 +2052,19 @@ HWTEST_F(OverlayManagerTestUpdateNg, UpdateSheetRender001, TestSize.Level1)
     EXPECT_EQ(renderContext->GetBackShadow().has_value(), false);
     /**
      * @tc.steps: step3. Change the SheetTheme shadow.
-     * @tc.expected: the shadow is updated successfully
+     * @tc.expected: the shadow is updated successfully from shadow theme
      */
     auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
     sheetTheme->isOuterBorderEnable_ = true;
     sheetTheme->sheetShadowConfig_ = static_cast<int>(ShadowStyle::OuterFloatingMD);
     OverlayManagerTestUpdateNg::SetSheetTheme(sheetTheme);
-    Shadow shadow = ShadowConfig::FloatingShadowM;
+    auto themeManager = AceType::DynamicCast<MockThemeManager>(MockPipelineContext::GetCurrent()->GetThemeManager());
+    ASSERT_NE(themeManager, nullptr);
+    auto shadowTheme = AceType::MakeRefPtr<ShadowTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(ShadowTheme::TypeId())).WillRepeatedly(Return(shadowTheme));
     overlayManager->UpdateSheetRender(sheetNode, sheetStyle, false);
     EXPECT_EQ(renderContext->GetBackShadow().has_value(), true);
+    Shadow shadow = shadowTheme->GetShadow(ShadowStyle::OuterFloatingMD, SystemProperties::GetColorMode());
     EXPECT_EQ(renderContext->GetBackShadow().value(), shadow);
 }
 

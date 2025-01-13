@@ -93,7 +93,7 @@ bool MouseStyleOhos::SetPointerStyle(int32_t windowId, MouseFormat pointerStyle)
     }
     MMI::PointerStyle style;
     style.id = MMIPointStyle;
-    TAG_LOGI(AceLogTag::ACE_MOUSE, "SetPointerStyle windowId=%{public}d style=%{public}d isUIExtension=%{public}d",
+    TAG_LOGD(AceLogTag::ACE_MOUSE, "SetPointerStyle windowId=%{public}d style=%{public}d isUIExtension=%{public}d",
         windowId, static_cast<int32_t>(pointerStyle), isUIExtension);
     int32_t setResult = inputManager->SetPointerStyle(windowId, style, isUIExtension);
     if (setResult == -1) {
@@ -118,20 +118,6 @@ int32_t MouseStyleOhos::GetPointerStyle(int32_t windowId, int32_t& pointerStyle)
     }
     pointerStyle = style.id;
     return getResult;
-}
-
-bool MouseStyleOhos::ChangePointerStyle(int32_t windowId, MouseFormat mouseFormat) const
-{
-    int32_t curPointerStyle = -1;
-    if (GetPointerStyle(windowId, curPointerStyle) == -1) {
-        TAG_LOGW(AceLogTag::ACE_MOUSE, "ChangePointerStyle: GetPointerStyle return failed");
-        return false;
-    }
-    if (curPointerStyle == static_cast<int32_t>(mouseFormat)) {
-        return true;
-    }
-
-    return SetPointerStyle(windowId, mouseFormat);
 }
 
 void MouseStyleOhos::SetMouseIcon(

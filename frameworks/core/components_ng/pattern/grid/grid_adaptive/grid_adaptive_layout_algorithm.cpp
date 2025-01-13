@@ -75,13 +75,11 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     displayCount_ = std::min(childrenCount, mainCount_ * crossCount_);
 
     // Update frame size.
-    auto rowCount = axis == Axis::HORIZONTAL ? crossCount_ : mainCount_;
-    auto columnCount = axis == Axis::HORIZONTAL ? mainCount_ : crossCount_;
-    rowCount_ = rowCount;
-    columnCount_ = columnCount;
+    rowCount_ = axis == Axis::HORIZONTAL ? crossCount_ : mainCount_;
+    columnCount_ = axis == Axis::HORIZONTAL ? mainCount_ : crossCount_;
     idealSize.UpdateIllegalSizeWithCheck(
-        OptionalSizeF(columnCount * gridCellSize_.Width() + (columnCount - 1) * columnsGap,
-            rowCount * gridCellSize_.Height() + (rowCount - 1) * rowsGap));
+        OptionalSizeF(columnCount_ * gridCellSize_.Width() + (columnCount_ - 1) * columnsGap,
+            rowCount_ * gridCellSize_.Height() + (rowCount_ - 1) * rowsGap));
     AddPaddingToSize(padding, idealSize);
     layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.ConvertToSizeT());
 
@@ -145,11 +143,12 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             CHECK_NULL_VOID(layoutProperty);
             auto gridItemLayoutProperty = AceType::DynamicCast<GridItemLayoutProperty>(layoutProperty);
             CHECK_NULL_VOID(gridItemLayoutProperty);
+            gridItemLayoutProperty->UpdateIndex(itemIdex);
             gridItemLayoutProperty->UpdateMainIndex(mainLine.first);
             gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
         }
     }
-    info_.crossCount_ = columnCount_;
+    info_.crossCount_ = std::min(displayCount_, columnCount_);
     info_.endIndex_ = displayCount_ - 1;
     info_.startMainLineIndex_ = 0;
     info_.endMainLineIndex_ = rowCount_ - 1;

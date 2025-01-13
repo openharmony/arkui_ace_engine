@@ -17,8 +17,9 @@ ace_unittest("button_test_ng") {
   type = "new"
   sources = [
     "button_content_modifier_test_ng.cpp",
-    "button_extend_test_ng.cpp",
-    "button_test_ng.cpp",
+    "button_event_test_ng.cpp",
+    "button_function_test_ng.cpp",
+    "button_property_test_ng.cpp",
     "toggle_button_test_ng.cpp",
   ]
 }

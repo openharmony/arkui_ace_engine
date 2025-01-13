@@ -271,8 +271,10 @@ class __RepeatVirtualScrollImpl<T> {
     private initialRenderItem(repeatItem: __RepeatItemFactoryReturn<T>): void {
         // execute the itemGen function
         const itemType = this.typeGenFunc_(repeatItem.item, repeatItem.index);
+        const isTemplate: boolean = (itemType !== '');
         const itemFunc = this.itemGenFuncs_[itemType];
         itemFunc(repeatItem);
+        RepeatVirtualScrollNative.setCreateByTemplate(isTemplate);
     }
 
     private hasVisibleItemsChanged(): boolean {

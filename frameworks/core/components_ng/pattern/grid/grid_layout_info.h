@@ -366,7 +366,11 @@ struct GridLayoutInfo {
 
     void UpdateDefaultCachedCount();
 
-    int32_t FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, int32_t crossIndex);
+    int32_t FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, int32_t crossIndex) const;
+
+    // Only used for debugging.
+    void PrintMatrix();
+    void PrintLineHeight();
 
     Axis axis_ = Axis::VERTICAL;
 

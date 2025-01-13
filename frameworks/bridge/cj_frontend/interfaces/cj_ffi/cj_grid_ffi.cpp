@@ -15,8 +15,9 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_grid_ffi.h"
 
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_scroll_ffi.h"
 #include "cj_lambda.h"
+
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_scroll_ffi.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 
 using namespace OHOS::Ace;
@@ -28,7 +29,11 @@ void FfiOHOSAceFrameworkGridCreate()
 {
     RefPtr<ScrollControllerBase> positionController;
     RefPtr<ScrollProxy> scrollBarProxy;
-    GridModel::GetInstance()->Create(positionController, scrollBarProxy);
+    if (!GridModel::GetInstance()) {
+        GridModel::GetInstance()->Create(positionController, scrollBarProxy);
+    } else {
+        LOGE("Grid Instance is null");
+    }
 }
 
 void FfiOHOSAceFrameworkGridCreateScroller(int64_t scrollerID)

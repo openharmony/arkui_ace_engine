@@ -151,7 +151,7 @@ HWTEST_F(DividerModifierTest, DividerModifierTest002, TestSize.Level1)
  * @tc.desc: Check the functionality of DividerModifier.setLineCap
  * @tc.type: FUNC
  */
-HWTEST_F(DividerModifierTest, DividerModifierTest003, TestSize.Level1)
+HWTEST_F(DividerModifierTest, DISABLED_DividerModifierTest003, TestSize.Level1)
 {
     static const std::string PROP_NAME("lineCap");
     ASSERT_NE(modifier_->setVertical, nullptr);

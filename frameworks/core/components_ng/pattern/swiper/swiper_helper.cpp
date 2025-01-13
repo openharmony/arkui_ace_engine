@@ -40,6 +40,7 @@ void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controll
         auto swiperNode = swiper->GetHost();
         CHECK_NULL_VOID(swiperNode);
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowNext, id:%{public}d", swiperNode->GetId());
+        swiper->ResetAnimationParam();
         swiper->ShowNext();
     });
 
@@ -49,6 +50,7 @@ void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controll
         auto swiperNode = swiper->GetHost();
         CHECK_NULL_VOID(swiperNode);
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowPrevious, id:%{public}d", swiperNode->GetId());
+        swiper->ResetAnimationParam();
         swiper->ShowPrevious();
     });
 
@@ -227,6 +229,10 @@ void DumpIndicatorType(const std::optional<SwiperIndicatorType>& type)
                 DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DIGIT");
                 break;
             }
+            case SwiperIndicatorType::ARC_DOT: {
+                DumpLog::GetInstance().AddDesc("SwiperIndicatorType:ARC_DOT");
+                break;
+            }
             default: {
                 break;
             }
@@ -349,7 +355,7 @@ void SwiperHelper::DumpInfoAddAnimationDesc(SwiperPattern& swiper)
                               : DumpLog::GetInstance().AddDesc("isFinishAnimation:false");
     swiper.mainSizeIsMeasured_ ? DumpLog::GetInstance().AddDesc("mainSizeIsMeasured:true")
                                : DumpLog::GetInstance().AddDesc("mainSizeIsMeasured:false");
-    swiper.usePropertyAnimation_ ? DumpLog::GetInstance().AddDesc("usePropertyAnimation:true")
+    swiper.propertyAnimationIsRunning_ ? DumpLog::GetInstance().AddDesc("usePropertyAnimation:true")
                                  : DumpLog::GetInstance().AddDesc("usePropertyAnimation:false");
     swiper.isUserFinish_ ? DumpLog::GetInstance().AddDesc("isUserFinish:true")
                          : DumpLog::GetInstance().AddDesc("isUserFinish:false");

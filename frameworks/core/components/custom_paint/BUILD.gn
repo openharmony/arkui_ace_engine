@@ -26,4 +26,8 @@ build_component("custom_paint") {
     "rosen_render_custom_paint.cpp",
     "rosen_render_offscreen_canvas.cpp",
   ]
+
+  if (ohos_indep_compiler_enable) {
+    include_dirs = indep_compile_includes
+  }
 }

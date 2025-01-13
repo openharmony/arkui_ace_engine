@@ -85,7 +85,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     for (const auto& item : point.history) {
         auto historyInfo = CreateHistoryTouchItemInfo(item, point);
         event.AddHistoryLocationInfo(std::move(historyInfo));
-        event.AddHistoryPointerEvent(item.pointerEvent);
+        event.AddHistoryPointerEvent(item.GetTouchEventPointerEvent());
     }
     TriggerCallBacks(event);
     return !event.IsStopPropagation();
@@ -113,7 +113,7 @@ TouchEventInfo TouchEventActuator::CreateTouchEventInfo(const TouchEvent& lastPo
 {
     TouchEventInfo eventInfo("touchEvent");
     eventInfo.SetTimeStamp(lastPoint.time);
-    eventInfo.SetPointerEvent(lastPoint.pointerEvent);
+    eventInfo.SetPointerEvent(lastPoint.GetTouchEventPointerEvent());
     eventInfo.SetDeviceId(lastPoint.deviceId);
     eventInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
     auto frameNode = GetAttachedNode().Upgrade();

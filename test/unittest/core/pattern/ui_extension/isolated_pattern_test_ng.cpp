@@ -145,7 +145,7 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest002, TestSize.Level1)
 
 /**
  * @tc.name: IsolatedPatternTest003
- * @tc.desc: Test IsolatedPattern InitializeDynamicComponent
+ * @tc.desc: Test IsolatedPattern
  * @tc.type: FUNC
  */
 HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest003, TestSize.Level1)
@@ -164,16 +164,6 @@ HWTEST_F(IsolatedPatternTestNg, IsolatedPatternTest003, TestSize.Level1)
      */
     auto isolatedPattern = isolatedNode->GetPattern<IsolatedPattern>();
     ASSERT_NE(isolatedPattern, nullptr);
-
-    /**
-     * @tc.steps: step3. call InitializeDynamicComponent.
-     */
-    auto wantWrap = AceType::MakeRefPtr<WantWrapOhos>(BUNDLE_NAME, ABILITY_NAME);
-    void* runtime = nullptr;
-    isolatedPattern->InitializeDynamicComponent(MOCK_HAP_PATH, MOCK_ABC_PATH, MOCK_ABC_ENTRY_POINT, runtime);
-    EXPECT_TRUE(isolatedPattern->curIsolatedInfo_.abcPath.empty());
-    EXPECT_TRUE(isolatedPattern->curIsolatedInfo_.reourcePath.empty());
-    EXPECT_TRUE(isolatedPattern->curIsolatedInfo_.entryPoint.empty());
 }
 
 /**

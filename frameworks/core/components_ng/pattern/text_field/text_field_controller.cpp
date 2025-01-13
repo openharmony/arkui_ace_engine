@@ -74,7 +74,7 @@ void TextFieldController::SetTextSelection(
     }
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    auto wideText = textFieldPattern->GetWideText();
+    auto wideText = textFieldPattern->GetTextUtf16Value();
     int32_t length = static_cast<int32_t>(wideText.length());
     selectionStart = std::clamp(selectionStart, 0, length);
     selectionEnd = std::clamp(selectionEnd, 0, length);
@@ -93,7 +93,7 @@ Rect TextFieldController::GetTextContentRect()
         if (textFieldPattern->IsTextArea()) {
             textFieldPattern->UpdateRectByTextAlign(rect);
         }
-        if (textFieldPattern->IsOperation()) {
+        if (textFieldPattern->HasText()) {
             return { rect.GetX(), rect.GetY(), rect.Width(), rect.Height() };
         }
         auto controller = textFieldPattern->GetTextSelectController();
@@ -107,7 +107,7 @@ int32_t TextFieldController::GetTextContentLinesNum()
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     int32_t lines = 0;
     if (textFieldPattern) {
-        if (!textFieldPattern->IsOperation()) {
+        if (!textFieldPattern->HasText()) {
             return lines;
         }
         lines = static_cast<int32_t>(textFieldPattern->GetLineCount());

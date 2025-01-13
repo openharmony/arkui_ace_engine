@@ -304,7 +304,7 @@ HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodPaintGradient001, TestSize.Level
     std::vector<bool> gradientRegions = { true, true, true, true, true };
     auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
     auto paintMethod = AceType::MakeRefPtr<TabBarPaintMethod>(
-        tabBarModifier, gradientRegions, Color::BLACK, indicator, OffsetF(), true);
+        tabBarModifier, RectF(), gradientRegions, Color::BLACK, indicator, OffsetF(), true);
 
     PaintWrapper paintWrapper(tabBarNode_->GetRenderContext(), tabBarNode_->GetGeometryNode(), tabBarPaintProperty_);
     auto drawFunction = paintMethod->GetForegroundDrawFunction(&paintWrapper);
@@ -318,7 +318,7 @@ HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodPaintGradient001, TestSize.Level
 
     gradientRegions[0] = false;
     paintMethod = AceType::MakeRefPtr<TabBarPaintMethod>(
-        tabBarModifier, gradientRegions, Color::BLACK, indicator, OffsetF(), true);
+        tabBarModifier, RectF(), gradientRegions, Color::BLACK, indicator, OffsetF(), true);
     PaintWrapper paintWrapper2(tabBarNode_->GetRenderContext(), tabBarNode_->GetGeometryNode(), tabBarPaintProperty_);
     drawFunction = paintMethod->GetForegroundDrawFunction(&paintWrapper2);
     drawFunction(rsCanvas);

@@ -14,6 +14,7 @@
  */
 
 #include "utf.h"
+#include "base/log/log_wrapper.h"
 #include <memory>
 
 namespace OHOS::Ace {
@@ -206,68 +207,109 @@ size_t DebuggerConvertRegionUtf16ToUtf8(const uint16_t* utf16In, uint8_t* utf8Ou
     return utf8Pos;
 }
 
+bool IsContinuationByte(const std::string& input, size_t startIndex, uint8_t continueCount)
+{
+    uint8_t i = 0;
+    while (i < continueCount) {
+        unsigned char utfByte = input[startIndex + i];
+        if ((utfByte & MUTF8_2B_FIRST) != MUTF8_2B_SECOND) {
+            return false;
+        }
+        i++;
+    }
+    return true;
+}
+
 bool IsUTF8(std::string& data)
 {
     if (data.empty()) {
         return false;
     }
 
-    bool hasZeroByte = false;
-    bool hasMultiByteUTF8 = false;
-
-    for (size_t i = 0; i < data.size(); ++i) {
-        unsigned char c = data[i];
-
-        // Check for UTF-16LE byte order mark (BOM)
-        if (i == 0 && data.size() >= INDEX_TWO && data[INDEX_ONE] == UTF16LE_ZERO_BYTE &&
-            (c == UTF16LE_BOM_FF || c == UTF16LE_BOM_FE)) {
+    size_t i = 0;
+    while (i < data.size()) {
+        unsigned char byte = data[i];
+        if (byte <= MUTF8_1B_MAX) {
+            i++;
+        } else if ((byte & MUTF8_3B_FIRST) == MUTF8_2B_FIRST) {
+            if (i + INDEX_ONE >= data.size()) {
+                return false;
+            }
+            if (!IsContinuationByte(data, i + 1, 1)) {
+                return false;
+            }
+            i += CONST_2;
+        } else if ((byte & MUTF8_4B_FIRST) == MUTF8_3B_FIRST) {
+            if (i + INDEX_TWO >= data.size()) {
+                return false;
+            }
+            if (!IsContinuationByte(data, i + 1, CONST_2)) {
+                return false;
+            }
+            i += CONST_3;
+        } else if ((byte & MUTF8_4B_FIRST_MASK) == MUTF8_4B_FIRST) {
+            if (i + INDEX_THREE >= data.size()) {
+                return false;
+            }
+            if (!IsContinuationByte(data, i + 1, CONST_3)) {
+                return false;
+            }
+            i += CONST_4;
+        } else {
             return false;
         }
+    }
+    return true;
+}
 
-        // Check for zero bytes, which are common in UTF-16LE
-        if (c == UTF16LE_ZERO_BYTE) {
-            hasZeroByte = true;
-        }
+std::string RemoveInvalidUft8Bytes(const std::string& input)
+{
+    std::string result;
+    result.reserve(input.size());
+    size_t i = 0;
 
-        // Check for multi-byte UTF-8 sequences
-        if ((c & UTF8_HIGH_BIT) != 0) { // High bit is set, indicating a non-ASCII character
-            if ((c & UTF8_TWO_BYTE_MASK) == UTF8_TWO_BYTE_PATTERN && i + INDEX_ONE < data.size() &&
-                (data[i + INDEX_ONE ] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER) {
-                // Two-byte UTF-8 character
-                hasMultiByteUTF8 = true;
-                i += INDEX_ONE; // Skip the next byte
-            } else if ((c & UTF8_THREE_BYTE_MASK) == UTF8_THREE_BYTE_PATTERN && i + INDEX_TWO < data.size() &&
-                       (data[i + INDEX_ONE] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER &&
-                       (data[i + INDEX_TWO] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER) {
-                // Three-byte UTF-8 character
-                hasMultiByteUTF8 = true;
-                i += INDEX_TWO; // Skip the next two bytes
-            } else if ((c & UTF8_FOUR_BYTE_MASK) == UTF8_FOUR_BYTE_PATTERN && i + INDEX_THREE < data.size() &&
-                       (data[i + INDEX_ONE] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER &&
-                       (data[i + INDEX_TWO] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER &&
-                       (data[i + INDEX_THREE] & UTF8_HIGH_BIT) == UTF8_MULTIBYTE_FOLLOWER) {
-                // Four-byte UTF-8 character
-                hasMultiByteUTF8 = true;
-                i += INDEX_THREE; // Skip the next three bytes
+    while (i < input.size()) {
+        unsigned char byte = input[i];
+        if (byte <= MUTF8_1B_MAX) {
+            result += byte;
+            ++i;
+        } else if ((byte & MUTF8_3B_FIRST) == MUTF8_2B_FIRST) {
+            if (i + 1 < input.size() && IsContinuationByte(input, i + 1, 1)) {
+                result += input.substr(i, CONST_2);
+                i += CONST_2;
+            } else {
+                ++i;
             }
+        } else if ((byte & MUTF8_4B_FIRST) == MUTF8_3B_FIRST) {
+            if (i + CONST_2 < input.size() && IsContinuationByte(input, i + 1, CONST_2)) {
+                result += input.substr(i, CONST_3);
+                i += CONST_3;
+            } else {
+                ++i;
+            }
+        } else if ((byte & MUTF8_4B_FIRST) == MUTF8_3B_FIRST) {
+            if (i + CONST_3 < input.size() && IsContinuationByte(input, i + 1, CONST_3)) {
+                result += input.substr(i, CONST_4);
+                i += CONST_4;
+            } else {
+                ++i;
+            }
+        } else {
+            ++i;
         }
     }
-
-    if (hasZeroByte && !hasMultiByteUTF8) {
-        // If we found zero bytes and no multi-byte UTF-8 sequences, it's likely UTF-16LE
-        return false;
-    } else if (hasMultiByteUTF8) {
-        // If we found multi-byte UTF-8 sequences, it's likely UTF-8
-        return true;
-    } else {
-        // If all characters are ASCII, it's either pure ASCII or we don't have enough data to determine the encoding
-        return false;
-    }
+    return result;
 }
 
 void ConvertIllegalStr(std::string& str)
 {
-    if (IsUTF8(str)) {
+    bool isRemove = false;
+    if (!IsUTF8(str)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "the str is not valid utf-8 string");
+        str = RemoveInvalidUft8Bytes(str);
+        isRemove = true;
+    }
+    if (!isRemove || IsUTF8(str)) {
         uint8_t* buf8 =  reinterpret_cast<uint8_t*>(const_cast<char*>(str.c_str()));
         size_t utf8Len = str.size();
         auto utf16Len = MUtf8ToUtf16Size(buf8, utf8Len);
@@ -275,7 +317,12 @@ void ConvertIllegalStr(std::string& str)
         auto resultLen = ConvertRegionUtf8ToUtf16(buf8, buf16.get(), utf8Len, utf16Len, 0);
         if (resultLen == utf16Len) {
             DebuggerConvertRegionUtf16ToUtf8(buf16.get(), buf8, utf16Len, utf8Len, 0);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "resultLen is %{public}d, utf16Len is %{public}d",
+                static_cast<uint16_t>(resultLen), static_cast<uint16_t>(utf16Len));
         }
+    } else {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT_INSPECTOR, "the str is still not valid utf-8 string");
     }
 }
 

@@ -241,8 +241,9 @@ HWTEST_F(MenuItemPatternTestOneNg, RecordChangeEvent001, TestSize.Level1)
     auto menuItemPattern = frameNode->GetPattern<MenuItemPattern>();
     ASSERT_NE(menuItemPattern, nullptr);
 
-    Recorder::EventRecorder::Get().componentEnable_ = true;
-    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = true;
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().eventSwitch_[index] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
     menuItemPattern->RecordChangeEvent();
 
     ASSERT_EQ(!Recorder::EventRecorder::Get().IsComponentRecordEnable(), false);

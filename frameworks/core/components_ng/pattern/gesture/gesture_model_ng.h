@@ -25,7 +25,7 @@ public:
     void Create(int32_t priorityNum, int32_t gestureMaskNum) override;
     void Finish() override;
     void Pop() override;
-    void SetOnGestureEvent(const GestureEventNoParameter& gestureEventNoParameter) override;
+    void SetOnGestureEvent(const GestureEventFunc& gestureEventFunc) override;
     void SetOnActionFunc(const GestureEventFunc& gestureEventFunc, const Ace::GestureEventAction& action) override;
     void SetTag(const std::string& tag) override;
     void SetAllowedTypes(const std::set<SourceTool>& allowedTypes) override;

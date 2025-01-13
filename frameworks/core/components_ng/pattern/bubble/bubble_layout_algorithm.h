@@ -146,6 +146,11 @@ public:
         return dumpInfo_;
     }
 
+    const Placement& GetArrowBuildPlacement() const
+    {
+        return arrowBuildPlacement_;
+    }
+
 protected:
     OffsetF positionOffset_;
     SizeF wrapperSize_;
@@ -262,9 +267,12 @@ private:
     Border border_;
     Placement arrowPlacement_ = Placement::BOTTOM;
     Placement placement_ = Placement::BOTTOM;
+    Placement arrowBuildPlacement_ = Placement::BOTTOM;
     Dimension targetSpace_;
     Dimension borderRadius_;
     Dimension userSetTargetSpace_;
+    Dimension minHeight_;
+    uint32_t maxColumns_ = 0;
     bool showArrow_ = false;
     bool enableArrow_ = false;
     bool isCaretMode_ = true;

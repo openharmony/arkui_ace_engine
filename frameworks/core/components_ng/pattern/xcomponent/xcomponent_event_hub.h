@@ -22,12 +22,12 @@
 
 namespace OHOS::Ace::NG {
 using LoadEvent = std::function<void(const std::string&)>;
-using DestroyEvent = std::function<void()>;
+using DestroyEvent = std::function<void(const std::string&)>;
 using ExternalEvent = std::function<void(const std::string&, const uint32_t, const bool)>;
 using DetachEvent = std::function<void(const std::string&)>;
-using SurfaceCreatedEvent = std::function<void(const std::string&)>;
+using SurfaceCreatedEvent = std::function<void(const std::string&, const std::string&)>;
 using SurfaceChangedEvent = std::function<void(const std::string&, const RectF&)>;
-using SurfaceDestroyedEvent = std::function<void(const std::string&)>;
+using SurfaceDestroyedEvent = std::function<void(const std::string&, const std::string&)>;
 
 class XComponentEventHub : public EventHub {
     DECLARE_ACE_TYPE(XComponentEventHub, EventHub)
@@ -53,10 +53,10 @@ public:
         destroyEvent_ = std::move(destroyEvent);
     }
 
-    void FireDestroyEvent() const
+    void FireDestroyEvent(const std::string& xcomponentId) const
     {
         if (destroyEvent_) {
-            destroyEvent_();
+            destroyEvent_(xcomponentId);
         }
     }
 
@@ -89,10 +89,10 @@ public:
         controllerCreatedEvent_ = std::move(controllerCreatedEvent);
     }
 
-    void FireControllerCreatedEvent(const std::string& surfaceId) const
+    void FireControllerCreatedEvent(const std::string& surfaceId, const std::string& xcomponentId) const
     {
         if (controllerCreatedEvent_) {
-            controllerCreatedEvent_(surfaceId);
+            controllerCreatedEvent_(surfaceId, xcomponentId);
         }
     }
 
@@ -113,10 +113,10 @@ public:
         controllerDestroyedEvent_ = std::move(controllerDestroyedEvent);
     }
 
-    void FireControllerDestroyedEvent(const std::string& surfaceId) const
+    void FireControllerDestroyedEvent(const std::string& surfaceId, const std::string& xcomponentId) const
     {
         if (controllerDestroyedEvent_) {
-            controllerDestroyedEvent_(surfaceId);
+            controllerDestroyedEvent_(surfaceId, xcomponentId);
         }
     }
 

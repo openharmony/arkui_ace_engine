@@ -14,9 +14,8 @@
  */
 
 #include "text_input_base.h"
-#include "base/geometry/dimension.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/property/property.h"
+
+#include "test/mock/core/rosen/mock_canvas.h"
 
 namespace OHOS::Ace::NG {
 

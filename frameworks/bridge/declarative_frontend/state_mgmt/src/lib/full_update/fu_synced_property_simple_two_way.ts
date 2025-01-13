@@ -66,7 +66,7 @@ class SynchedPropertySimpleTwoWay<T> extends ObservedPropertySimpleAbstract<T>
   // set 'writes through` to the ObservedProperty
   public set(newValue: T): void {
     if (!this.source_) {
-      stateMgmtConsole.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || 'unknown'}'] source_ is undefined: set '${newValue}' ignoring.`);
+      stateMgmtConsole.error(`SynchedPropertySimpleTwoWay[${this.id__()}IP, '${this.info() || 'unknown'}'] source_ is undefined: set new value ignoring.`);
       return;
     }
     if (this.source_.get() === newValue) {

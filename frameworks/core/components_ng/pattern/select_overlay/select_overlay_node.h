@@ -29,6 +29,8 @@ namespace OHOS::Ace::NG {
 
 struct OptionParam;
 
+const std::string SelectOverlayRrightClickMenuWrapper = "select_overlay_right_click_menuWrapper";
+
 enum class FrameNodeType {
     SELECTMENU,
     EXTENSIONMENU,
@@ -115,9 +117,11 @@ private:
     void ShowCopy(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowPaste(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowCopyAll(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
+    void ShowSearch(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowShare(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowCamera(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
     void ShowAIWrite(float maxWidth, float& allocatedSize, std::shared_ptr<SelectOverlayInfo>& info);
+    bool IsShowOnTargetAPIVersion();
     std::function<void()> GetDefaultOptionCallback();
     std::vector<OptionParam> GetDefaultOptionsParams(const std::shared_ptr<SelectOverlayInfo>& info);
     void GetFlexibleOptionsParams(

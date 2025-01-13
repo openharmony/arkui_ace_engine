@@ -19,13 +19,13 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
 namespace OHOS::Ace::NG {
-void ScrollableModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void ScrollableModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetEdgeEffect(edgeEffect, alwaysEnabled);
+    pattern->SetEdgeEffect(edgeEffect, alwaysEnabled, effectEdge);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -61,6 +61,11 @@ void ScrollableModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optio
     }
 }
 
+void ScrollableModelNG::ResetScrollBarColor(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
+}
+
 void ScrollableModelNG::SetScrollBarWidth(const std::string& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
@@ -73,6 +78,11 @@ void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optio
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
     }
+}
+
+void ScrollableModelNG::ResetScrollBarWidth(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
 }
 
 void ScrollableModelNG::SetOnScroll(OnScrollEvent&& onScroll)
@@ -228,25 +238,26 @@ void ScrollableModelNG::SetFadingEdge(FrameNode* frameNode, const std::optional<
 }
 
 void ScrollableModelNG::SetEdgeEffect(
-    FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled)
+    FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
+    EffectEdge effectEdge)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetEdgeEffect(edgeEffect.value_or(EdgeEffect::NONE), alwaysEnabled.value_or(false));
+    pattern->SetEdgeEffect(edgeEffect.value_or(EdgeEffect::NONE), alwaysEnabled.value_or(false), effectEdge);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void ScrollableModelNG::SetScrollBarMode(FrameNode* frameNode, int32_t displayNumber)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode,
-        static_cast<DisplayMode>(displayNumber), frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(
+        ScrollablePaintProperty, ScrollBarMode, static_cast<DisplayMode>(displayNumber), frameNode);
 }
 
 void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::string& value)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth,
-        StringUtils::StringToDimensionWithUnit(value), frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(
+        ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value), frameNode);
 }
 
 void ScrollableModelNG::SetScrollBarColor(FrameNode* frameNode, const std::string& value)
@@ -295,14 +306,43 @@ void ScrollableModelNG::SetMaxFlingSpeed(FrameNode* frameNode, double max)
     pattern->SetMaxFlingVelocity(max);
 }
 
+float ScrollableModelNG::GetMaxFlingSpeed(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, 0.0f);
+    return static_cast<float>(pattern->GetMaxFlingVelocity() / PipelineBase::GetCurrentDensity());
+}
+
 void ScrollableModelNG::SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& shape)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, std::make_pair(mode, shape));
 }
 
+ContentClipMode ScrollableModelNG::GetContentClip(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ContentClipMode::CONTENT_ONLY);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, ContentClipMode::CONTENT_ONLY);
+    const auto& clip = paintProperty->GetContentClip();
+    const auto mode = clip ? clip->first : ContentClipMode::DEFAULT;
+    if (mode >= ContentClipMode::CUSTOM) {
+        return paintProperty->GetDefaultContentClip();
+    }
+    return mode;
+}
+
 void ScrollableModelNG::SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<ShapeRect>& rect)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ContentClip, std::make_pair(mode, rect), frameNode);
+}
+
+void ScrollableModelNG::ResetContentClip(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ScrollablePaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateContentClip({ paintProperty->GetDefaultContentClip(), nullptr });
 }
 
 bool ScrollableModelNG::GetFadingEdge(FrameNode* frameNode)
@@ -337,4 +377,14 @@ void ScrollableModelNG::SetFriction(FrameNode* frameNode, const std::optional<do
     pattern->SetFriction(value.value_or(invalidValue));
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+void ScrollableModelNG::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDigitalCrownSensitivity(sensitivity);
+}
+#endif
 } // namespace OHOS::Ace::NG

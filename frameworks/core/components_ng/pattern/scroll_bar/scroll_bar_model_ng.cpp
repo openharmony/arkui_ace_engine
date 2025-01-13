@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
+#ifdef ARKUI_CIRCLE_FEATURE
+#include "core/components_ng/pattern/arc_scroll_bar/arc_scroll_bar_pattern.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -30,15 +33,24 @@ RefPtr<ScrollProxy> ScrollBarModelNG::GetScrollBarProxy(const RefPtr<ScrollProxy
 }
 
 void ScrollBarModelNG::Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, bool proxyFlag,
-    int directionValue, int stateValue)
+    int directionValue, int stateValue, bool isCreateArc)
 {
     CHECK_NULL_VOID(proxy);
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SCROLL_BAR_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::SCROLL_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ScrollBarPattern>(); });
+    RefPtr<FrameNode> frameNode = nullptr;
+    if (isCreateArc) {
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::ARC_SCROLL_BAR_ETS_TAG, nodeId);
+        #ifdef ARKUI_CIRCLE_FEATURE
+        frameNode = FrameNode::GetOrCreateFrameNode(
+            V2::ARC_SCROLL_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ArcScrollBarPattern>(); });
+        #endif
+    } else {
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SCROLL_BAR_ETS_TAG, nodeId);
+        frameNode = FrameNode::GetOrCreateFrameNode(
+            V2::SCROLL_BAR_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ScrollBarPattern>(); });
+    }
     CHECK_NULL_VOID(frameNode);
     stack->Push(frameNode);
     auto scrollbarpattern = frameNode->GetPattern();

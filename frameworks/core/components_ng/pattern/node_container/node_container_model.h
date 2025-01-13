@@ -31,6 +31,12 @@ public:
     virtual void SetOnAppear(std::function<void()>&& onAppearCallback) = 0;
     virtual void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) = 0;
     virtual void SetOnTouchEvent(TouchEventFunc &&touchEventFunc) = 0;
+    virtual void SetOnAttach(std::function<void()>&& onAttachCallback) = 0;
+    virtual void SetOnDetach(std::function<void()>&& onDetachCallback) = 0;
+    virtual void SetOnWillBind(std::function<void(int32_t)>&& onWillBindCallback) = 0;
+    virtual void SetOnWillUnbind(std::function<void(int32_t)>&& onWillUnbindCallback) = 0;
+    virtual void SetOnBind(std::function<void(int32_t)>&& onBindCallback) = 0;
+    virtual void SetOnUnbind(std::function<void(int32_t)>&& onUnbindCallback) = 0;
     virtual void BindController(std::function<void()>&& resetFunc) = 0;
     virtual void ResetController() = 0;
     virtual void FireMakeNode() = 0;

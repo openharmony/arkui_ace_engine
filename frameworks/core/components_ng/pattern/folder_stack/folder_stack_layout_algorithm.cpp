@@ -332,7 +332,12 @@ void FolderStackLayoutAlgorithm::OnHoverStatusChange(LayoutWrapper* layoutWrappe
 void FolderStackLayoutAlgorithm::MeasureByStack(
     const RefPtr<FolderStackGroupNode>& hostNode, LayoutWrapper* layoutWrapper)
 {
-    PaddingProperty padding { CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f), CalcLength(0.0f) };
+    PaddingProperty padding { .left = CalcLength(0.0f),
+        .right = CalcLength(0.0f),
+        .top = CalcLength(0.0f),
+        .bottom = CalcLength(0.0f),
+        .start = std::nullopt,
+        .end = std::nullopt };
     auto controlPartsStackNode = hostNode->GetControlPartsStackNode();
     CHECK_NULL_VOID(controlPartsStackNode);
     auto index = hostNode->GetChildIndexById(controlPartsStackNode->GetId());

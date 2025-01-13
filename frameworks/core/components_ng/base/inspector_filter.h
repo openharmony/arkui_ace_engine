@@ -24,6 +24,15 @@
 #include "base/utils/macros.h"
 
 namespace OHOS::Ace::NG {
+namespace TreeKey {
+constexpr char ID[] = "id";
+constexpr char CLICKABLE[] = "clickable";
+constexpr char LONG_CLICKABLE[] = "longClickable";
+constexpr char SCROLLABLE[] = "scrollable";
+constexpr char CONTENT[] = "content";
+constexpr char PLACEHOLDER[] = "placeholder";
+constexpr char CHECKED[] = "checked";
+};
 
 enum FixedAttrBit : uint64_t {
     FIXED_ATTR_ID           = 0, /* "id"         */
@@ -56,6 +65,9 @@ private:
     std::vector<std::string> filterExt;
 };
 
+struct InspectorConfig {
+    bool contentOnly = false;
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_INSPECTOR_INSPECTOR_FILTER_H

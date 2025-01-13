@@ -446,9 +446,9 @@ int32_t ScrollModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
     return ScrollableModelNG::GetAlwaysEnabled(frameNode);
 }
 
-void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled, edge);
 }
 
 void ScrollModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
@@ -518,12 +518,10 @@ void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<
     }
 }
 
-void ScrollModelNG::SetEdgeEffect(
-    FrameNode* frameNode,
-    const std::optional<EdgeEffect>& edgeEffect,
-    const std::optional<bool>& alwaysEnabled)
+void ScrollModelNG::SetEdgeEffect(FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect,
+    const std::optional<bool>& alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, edge);
 }
 
 void ScrollModelNG::SetEnablePaging(FrameNode* frameNode, bool enablePaging)

@@ -32,4 +32,8 @@ build_component("text_field") {
     "imf:inputmethod_client",
     "input:libmmi-client",
   ]
+
+  if (ohos_indep_compiler_enable) {
+    include_dirs = indep_compile_includes
+  }
 }

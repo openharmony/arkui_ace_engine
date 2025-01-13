@@ -32,6 +32,7 @@ TxtFontCollection::TxtFontCollection()
 {
 #ifndef USE_GRAPHIC_TEXT_GINE
     auto rosenCollection = RSFontCollection::GetInstance(false);
+    CHECK_NULL_VOID(rosenCollection);
     auto collectionTxtBase = rosenCollection->GetFontCollection();
     auto collectionTxt = std::static_pointer_cast<rosen::FontCollectionTxt>(collectionTxtBase);
     if (collectionTxt) {

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_NATIVE_INTERFACE_ACCESSIBILITY_IMPL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ACCESSIBILITY_NATIVE_INTERFACE_ACCESSIBILITY_IMPL_H
 
+#include <list>
 #include <map>
 #include <mutex>
 #include <string>
@@ -559,7 +560,7 @@ public:
 
 private:
     std::mutex mutex_;
-    std::vector<ArkUI_AccessibilityElementInfo> elementInfos_;
+    std::list<ArkUI_AccessibilityElementInfo> elementInfos_;
 };
 
 struct ArkUI_AccessibilityActionArguments {

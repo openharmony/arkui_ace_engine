@@ -69,6 +69,11 @@ void SelectOverlayClient::InitMenuCallback()
         CHECK_NULL_VOID(client);
         client->OnSelectOverlayMenuClicked(SelectOverlayMenuId::PASTE);
     };
+    selectOverlayInfo_.menuCallback.onSearch = [weak = WeakClaim(this)]() {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID(client);
+        client->OnSelectOverlayMenuClicked(SelectOverlayMenuId::SEARCH);
+    };
     selectOverlayInfo_.menuCallback.onCameraInput = [weak = WeakClaim(this)]() {
         auto client = weak.Upgrade();
         CHECK_NULL_VOID(client);

@@ -28,11 +28,9 @@ std::string GetPageUrlByNode(const RefPtr<NG::FrameNode>& node)
     return pagePattern->GetPageUrl();
 }
 
-const std::string GetCurrentPageUrl()
+const std::string GetPageUrlByContainer(const RefPtr<Container>& container)
 {
     CHECK_RUN_ON(UI);
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, "");
     auto frontEnd = container->GetFrontend();
     CHECK_NULL_RETURN(frontEnd, "");
     auto pageUrl = frontEnd->GetCurrentPageUrl();
@@ -41,6 +39,20 @@ const std::string GetCurrentPageUrl()
         return pageUrl.substr(0, pageUrl.length() - PAGE_URL_SUFFIX_LENGTH);
     }
     return pageUrl;
+}
+
+std::string GetPageUrlByContainerId(const int32_t containerId)
+{
+    auto container = Container::GetContainer(containerId);
+    CHECK_NULL_RETURN(container, "");
+    return GetPageUrlByContainer(container);
+}
+
+std::string GetCurrentPageUrl()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, "");
+    return GetPageUrlByContainer(container);
 }
 
 NodeDataCache& NodeDataCache::Get()

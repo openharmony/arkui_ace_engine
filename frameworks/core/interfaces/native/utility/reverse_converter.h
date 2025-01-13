@@ -189,7 +189,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Number& dst, const uint32_t& src);
     void AssignArkValue(Ark_PanelMode& dst, const PanelMode& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
-    void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src);
+    void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);
     void AssignArkValue(Ark_RectResult& dst, const RectF& src);
     void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src);
     void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
@@ -221,6 +221,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_Sticky& dst, const V2::StickyMode& src);
     void AssignArkValue(Ark_StickyStyle& dst, const V2::StickyStyle& src);
     void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src);
+    void AssignArkValue(Ark_String& dst, const std::u16string& src, ConvContext *ctx);
     void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src);
     void AssignArkValue(Ark_StyledStringKey& dst, OHOS::Ace::SpanType src);
     void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src);

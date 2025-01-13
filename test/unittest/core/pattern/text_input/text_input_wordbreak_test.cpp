@@ -13,74 +13,16 @@
  * limitations under the License.
  */
 
-#include <array>
-#include <cstddef>
-#include <memory>
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-#ifdef WINDOWS_PLATFORM
-#include <Windows.h>
-#else
-#include <unistd.h>
-#endif
-
-#include "gtest/gtest.h"
-#include <unicode/uversion.h>
-#include <unicode/putil.h>
-#include <unicode/uclean.h>
-
-#define private public
-#define protected public
-
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/offset.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/type_definition.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/ai/data_detector_mgr.h"
-#include "core/common/ime/constant.h"
-#include "core/common/ime/text_editing_value.h"
-#include "core/common/ime/text_input_action.h"
-#include "core/common/ime/text_input_type.h"
-#include "core/common/ime/text_selection.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components/text_field/textfield_theme.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
-#include "core/components_ng/pattern/text_field/text_input_response_area.h"
-#include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
-#include "core/event/key_event.h"
-#include "core/event/touch_event.h"
-#include "core/gestures/gesture_info.h"
-#include "core/components/common/properties/text_style_parser.h"
-
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -97,6 +39,7 @@ constexpr int32_t WORD_LIMIT_RETURN = 2;
 constexpr int32_t BEYOND_LIMIT_RETURN = 4;
 constexpr int32_t DEFAULT_RETURN_VALUE = -1;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
+const std::u16string DEFAULT_TEXT_U16 = u"abcdefghijklmnopqrstuvwxyz";
 const InputStyle DEFAULT_INPUT_STYLE = InputStyle::INLINE;
 struct ExpectParagraphParams {
     float height = 50.f;
@@ -187,7 +130,7 @@ void TextInputWordBreak::CreateTextField(
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(DEFAULT_NODE_ID);
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextInput(placeHolder, text);
+    textFieldModelNG.CreateTextInput(StringUtils::Str8ToStr16(placeHolder), StringUtils::Str8ToStr16(text));
     if (callback) {
         callback(textFieldModelNG);
     }
@@ -409,7 +352,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout001, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::NORMAL);
@@ -445,7 +388,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout002, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::BREAK_ALL);
@@ -481,7 +424,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout003, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ(textStyle.GetWordBreak(), WordBreak::BREAK_WORD);
@@ -519,7 +462,7 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout004, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ((uint32_t)(textStyle.GetWordBreak()), invalidValue);
@@ -557,9 +500,117 @@ HWTEST_F(TextInputWordBreakTest, textInputLayout005, TestSize.Level1)
      * @tc.step: step4. Construct TextStyles object
      */
     TextStyle textStyle;
-    std::string textContent(DEFAULT_TEXT);
+    std::u16string textContent(DEFAULT_TEXT_U16);
     bool showPlaceHolder = false;
     textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
     EXPECT_EQ((int32_t)(textStyle.GetWordBreak()), invalidValue);
+}
+
+/**
+ * @tc.name: textInputLayout006
+ * @tc.desc: test textStyle, set the value to HEAD
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputWordBreakTest, textInputLayout006, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node
+     * @tc.expected: style is Inline
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+    });
+
+    /**
+     * @tc.step: step2. Set EllipsisMode
+     */
+    layoutProperty_->UpdateEllipsisMode(EllipsisMode::HEAD);
+    frameNode_->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. Create algorithm class
+     */
+    auto textInputLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextInputLayoutAlgorithm>();
+
+    /**
+     * @tc.step: step4. Construct TextStyles object
+     */
+    TextStyle textStyle;
+    std::u16string textContent(DEFAULT_TEXT_U16);
+    bool showPlaceHolder = false;
+    textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
+    EXPECT_EQ(textStyle.GetEllipsisMode(), EllipsisMode::HEAD);
+}
+
+/**
+ * @tc.name: textInputLayout007
+ * @tc.desc: test textStyle, set the value to MIDDLE
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputWordBreakTest, textInputLayout007, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node
+     * @tc.expected: style is Inline
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+    });
+
+    /**
+     * @tc.step: step2. Set EllipsisMode
+     */
+    layoutProperty_->UpdateEllipsisMode(EllipsisMode::MIDDLE);
+    frameNode_->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. Create algorithm class
+     */
+    auto textInputLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextInputLayoutAlgorithm>();
+
+    /**
+     * @tc.step: step4. Construct TextStyles object
+     */
+    TextStyle textStyle;
+    std::u16string textContent(DEFAULT_TEXT_U16);
+    bool showPlaceHolder = false;
+    textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
+    EXPECT_EQ(textStyle.GetEllipsisMode(), EllipsisMode::MIDDLE);
+}
+
+/**
+ * @tc.name: textInputLayout008
+ * @tc.desc: test textStyle, set the value to TAIL
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputWordBreakTest, textInputLayout008, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Text filed node
+     * @tc.expected: style is Inline
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+    });
+
+    /**
+     * @tc.step: step2. Set EllipsisMode
+     */
+    layoutProperty_->UpdateEllipsisMode(EllipsisMode::TAIL);
+    frameNode_->MarkModifyDone();
+
+    /**
+     * @tc.step: step3. Create algorithm class
+     */
+    auto textInputLayoutAlgorithm = AccessibilityManager::MakeRefPtr<TextInputLayoutAlgorithm>();
+
+    /**
+     * @tc.step: step4. Construct TextStyles object
+     */
+    TextStyle textStyle;
+    std::u16string textContent(DEFAULT_TEXT_U16);
+    bool showPlaceHolder = false;
+    textInputLayoutAlgorithm->ConstructTextStyles(frameNode_, textStyle, textContent, showPlaceHolder);
+    EXPECT_EQ(textStyle.GetEllipsisMode(), EllipsisMode::TAIL);
 }
 } // namespace OHOS::Ace::NG

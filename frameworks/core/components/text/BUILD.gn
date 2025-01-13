@@ -23,4 +23,8 @@ build_component("text") {
   ]
 
   rosen_sources = [ "rosen_render_text.cpp" ]
+
+  if (ohos_indep_compiler_enable) {
+    include_dirs = indep_compile_includes
+  }
 }

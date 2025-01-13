@@ -22,6 +22,7 @@
 #include "transaction/rs_interfaces.h"
 #endif // ARKUI_CAPI_UNITTEST
 
+#include "core/common/container.h"
 #include "core/common/ace_application_info.h"
 #include "core/components/form/resource/form_request_data.h"
 #include "core/components_ng/event/event_hub.h"
@@ -29,6 +30,8 @@
 #include "core/components_ng/pattern/form/form_event_hub.h"
 #include "core/components_ng/pattern/form/form_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/form/form_special_style.h"
+#include "core/components/common/properties/color.h"
 #include "form_skeleton_params.h"
 
 namespace OHOS {
@@ -71,7 +74,7 @@ enum class FormChildNodeType : int32_t {
     /**
      * forbidden form text node
     */
-    FORM_FORBIDDEN_TEXT_NODE,
+    FORM_SPECIAL_STYLE_NODE
 };
 
 class FormPattern : public Pattern {
@@ -124,7 +127,7 @@ public:
         formLinkInfos_ = infos;
     }
 
-    void GetRectRelativeToWindow(int32_t &top, int32_t &left);
+    void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo);
 
     bool IsJsCard() const
     {
@@ -149,6 +152,9 @@ public:
     void GetTimeLimitResource(std::string &content);
 
     void UnregisterAccessibility();
+
+    void DumpInfo() override;
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
 
 private:
     void OnAttachToFrameNode() override;
@@ -180,7 +186,9 @@ private:
     void AddFormComponentUI(bool isTransparencyEnabled, const RequestFormInfo& info);
     void UpdateFormComponent(const RequestFormInfo& info);
     void UpdateFormComponentSize(const RequestFormInfo& info);
+    void UpdateSpecialStyleCfg();
     void UpdateTimeLimitFontCfg();
+    void UpdateAppLockCfg();
 
     void HandleSnapshot(uint32_t delayTime, const std::string& nodeIdStr);
     void TakeSurfaceCaptureForUI();
@@ -210,6 +218,7 @@ private:
     int32_t GetFormDimensionHeight(int32_t dimension);
     RefPtr<FrameNode> CreateColumnNode(FormChildNodeType formChildNodeType);
     RefPtr<FrameNode> CreateTimeLimitNode();
+    RefPtr<FrameNode> CreateAppLockNode();
     RefPtr<FrameNode> CreateRectNode(const RefPtr<FrameNode>& parent, const CalcSize& idealSize,
         const MarginProperty& margin, uint32_t fillColor, double opacity);
     void CreateSkeletonView(const RefPtr<FrameNode>& parent, const std::shared_ptr<FormSkeletonParams>& params,
@@ -231,10 +240,16 @@ private:
     void RemoveDelayResetManuallyClickFlagTask();
 
     void InitAddFormUpdateAndErrorCallback(int32_t instanceId);
-    void InitAddFormUninstallAndSurfaceChangeCallback(int32_t instanceId);
-    void InitAddUnTrustAndEnableFormCallback(int32_t instanceId);
-    void InitAddFormSurfaceNodeAndDetachCallback(int32_t instanceId);
+    void InitAddUninstallAndSurfaceNodeCallback(int32_t instanceId);
+    void InitAddFormSurfaceChangeAndDetachCallback(int32_t instanceId);
+    void InitAddUnTrustAndSnapshotCallback(int32_t instanceId);
     void InitOtherCallback(int32_t instanceId);
+    bool IsFormBundleLocked(const std::string &bundleName, int64_t formId);
+    void HandleLockEvent(bool isLock);
+    void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle);
+    void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle, const RequestFormInfo& info);
+    RefPtr<FrameNode> CreateActionNode();
+    Color GetFormStyleBackGroundColor();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     void enhancesSubContainer(bool hasContainer);
     RefPtr<RenderContext> externalRenderContext_;
@@ -243,6 +258,7 @@ private:
     RefPtr<FormManagerDelegate> formManagerBridge_;
     RefPtr<AccessibilitySessionAdapterForm> accessibilitySessionAdapter_;
 
+    FormSpecialStyle formSpecialStyle_;
     RequestFormInfo cardInfo_;
     bool isLoaded_ = false;
     bool isVisible_ = true;
@@ -261,6 +277,7 @@ private:
     bool shouldResponseClick_ = false;
     Offset lastTouchLocation_;
     ColorMode colorMode = ColorMode::LIGHT;
+    int32_t instanceId_ = Container::CurrentId();
 
     bool isFormObscured_ = false;
     bool isJsCard_ = true;
@@ -269,6 +286,7 @@ private:
     std::unordered_map<FormChildNodeType, RefPtr<FrameNode>> formChildrenNodeMap_;
     bool isTibetanLanguage_ = false;
     bool isManuallyClick_ = false;
+    bool ShouldAddChildAtReuildFrame();
 };
 } // namespace NG
 } // namespace Ace

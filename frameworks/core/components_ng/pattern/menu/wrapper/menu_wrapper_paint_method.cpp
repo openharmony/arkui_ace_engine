@@ -87,6 +87,7 @@ void MenuWrapperPaintMethod::PaintDoubleBorder(RSCanvas& canvas, PaintWrapper* p
         auto frameNode = AceType::DynamicCast<FrameNode>(child);
         CHECK_NULL_VOID(frameNode);
         auto pattern = frameNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(pattern);
         auto params = pattern->GetMenuPathParams();
         if (params.has_value()) {
             PaintAndClipSinglePath(canvas, paintWrapper, params.value());

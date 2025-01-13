@@ -120,15 +120,45 @@ void ResetSelectable(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIListItemModifier* GetListItemModifier()
 {
-    static const ArkUIListItemModifier modifier = { SetListItemSelected, ResetListItemSelected, SetSelectable,
-        ResetSelectable, SetListItemSwiperAction, ResetListItemSwiperAction };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIListItemModifier modifier = {
+        .setListItemSelected = SetListItemSelected,
+        .resetListItemSelected = ResetListItemSelected,
+        .setSelectable = SetSelectable,
+        .resetSelectable = ResetSelectable,
+        .setListItemSwipeAction = SetListItemSwiperAction,
+        .resetListItemSwipeAction = ResetListItemSwiperAction,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIListItemModifier* GetCJUIListItemModifier()
 {
-    static const CJUIListItemModifier modifier = { SetListItemSelected, ResetListItemSelected, SetSelectable,
-        ResetSelectable, SetListItemSwiperAction, ResetListItemSwiperAction };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIListItemModifier modifier = {
+        .setListItemSelected = SetListItemSelected,
+        .resetListItemSelected = ResetListItemSelected,
+        .setSelectable = SetSelectable,
+        .resetSelectable = ResetSelectable,
+        .setListItemSwipeAction = SetListItemSwiperAction,
+        .resetListItemSwipeAction = ResetListItemSwiperAction,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
@@ -142,7 +172,7 @@ void SetListItemOnSelect(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_LIST_ITEM_SELECTED;
         event.componentAsyncEvent.data[0].i32 = static_cast<int32_t>(isSelected);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     ListItemModelNG::SetSelectCallback(frameNode, std::move(onEvent));
 }

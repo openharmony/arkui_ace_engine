@@ -15,9 +15,19 @@
 
 #include "text_base.h"
 
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components/common/properties/text_style_parser.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/typed_text.h"
+
+
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const std::list<std::pair<std::string, int32_t>> FONT_FEATURE_VALUE_0 = ParseFontFeatureSettings("\"ss01\" 0");
+} // namespace
 
 class TextTestFourNg : public TextBases {
 public:

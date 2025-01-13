@@ -282,10 +282,6 @@ HWTEST_F(MenuPattern2TestNg, GetPreviewMenuAnimationOffset, TestSize.Level1)
     ASSERT_NE(menuWrapperNode, nullptr);
     auto menuNode = AceType::DynamicCast<FrameNode>(menuWrapperNode->GetChildAtIndex(0));
     ASSERT_NE(menuNode, nullptr);
-    auto menuAlgorithmWrapper = menuNode->GetLayoutAlgorithm();
-    ASSERT_NE(menuAlgorithmWrapper, nullptr);
-    auto menuAlgorithm = AceType::DynamicCast<MenuLayoutAlgorithm>(menuAlgorithmWrapper->GetLayoutAlgorithm());
-    ASSERT_NE(menuAlgorithm, nullptr);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     ASSERT_NE(menuPattern, nullptr);
 
@@ -306,44 +302,44 @@ HWTEST_F(MenuPattern2TestNg, GetPreviewMenuAnimationOffset, TestSize.Level1)
     auto left = cx - size.Width() * scale / HALF;
     auto right = cx + size.Width() * scale / HALF;
 
-    menuAlgorithm->placement_ = Placement::TOP;
+    menuPattern->UpdateLastPlacement(Placement::TOP);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(cx - w / HALF, top - SPACE - h));
 
-    menuAlgorithm->placement_ = Placement::TOP_LEFT;
+    menuPattern->UpdateLastPlacement(Placement::TOP_LEFT);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(left, top - SPACE - h));
 
-    menuAlgorithm->placement_ = Placement::TOP_RIGHT;
+    menuPattern->UpdateLastPlacement(Placement::TOP_RIGHT);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(right - w, top - SPACE - h));
 
-    menuAlgorithm->placement_ = Placement::BOTTOM;
+    menuPattern->UpdateLastPlacement(Placement::BOTTOM);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(cx - w / HALF, bottom + SPACE));
 
-    menuAlgorithm->placement_ = Placement::BOTTOM_LEFT;
+    menuPattern->UpdateLastPlacement(Placement::BOTTOM_LEFT);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(left, bottom + SPACE));
 
-    menuAlgorithm->placement_ = Placement::BOTTOM_RIGHT;
+    menuPattern->UpdateLastPlacement(Placement::BOTTOM_RIGHT);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(right - w, bottom + SPACE));
 
-    menuAlgorithm->placement_ = Placement::LEFT;
+    menuPattern->UpdateLastPlacement(Placement::LEFT);
     EXPECT_EQ(
         menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(left - SPACE - w, cy - h / HALF));
 
-    menuAlgorithm->placement_ = Placement::LEFT_TOP;
+    menuPattern->UpdateLastPlacement(Placement::LEFT_TOP);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(left - SPACE - w, top));
 
-    menuAlgorithm->placement_ = Placement::LEFT_BOTTOM;
+    menuPattern->UpdateLastPlacement(Placement::LEFT_BOTTOM);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(left - SPACE - w, bottom - h));
 
-    menuAlgorithm->placement_ = Placement::RIGHT;
+    menuPattern->UpdateLastPlacement(Placement::RIGHT);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(right + SPACE, cy - h / HALF));
 
-    menuAlgorithm->placement_ = Placement::RIGHT_TOP;
+    menuPattern->UpdateLastPlacement(Placement::RIGHT_TOP);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(right + SPACE, top));
 
-    menuAlgorithm->placement_ = Placement::RIGHT_BOTTOM;
+    menuPattern->UpdateLastPlacement(Placement::RIGHT_BOTTOM);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(right + SPACE, bottom - h));
 
-    menuAlgorithm->placement_ = Placement::NONE;
+    menuPattern->UpdateLastPlacement(Placement::NONE);
     EXPECT_EQ(menuPattern->GetPreviewMenuAnimationOffset(center, size, scale), OffsetF(left, bottom + SPACE));
 }
 
@@ -388,5 +384,236 @@ HWTEST_F(MenuPattern2TestNg, InitPreviewMenuAnimationInfo, TestSize.Level1)
     menuPattern->previewMode_ = MenuPreviewMode::IMAGE;
     menuPattern->InitPreviewMenuAnimationInfo(menuTheme);
     EXPECT_TRUE(menuPattern->disappearOffset_.NonNegative());
+}
+
+/**
+ * @tc.name: GetFirstInnerMenu001
+ * @tc.desc: Test GetFirstInnerMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, GetFirstInnerMenu001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build frame node tree: outerMenuNode->jsViewNode->jsViewNode1->innerMenuNode
+     */
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    jsViewNode->MountToParent(outerMenuNode);
+    auto jsViewNode1 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode1, nullptr);
+    jsViewNode1->MountToParent(jsViewNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(jsViewNode1);
+
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+
+    /**
+     * @tc.steps: step2. Call GetFirstInnerMenu.
+     * @tc.expected: the function runs normally
+     */
+    auto foundInnerMenu = menuPattern->GetFirstInnerMenu();
+    ASSERT_NE(foundInnerMenu, nullptr);
+}
+
+/**
+ * @tc.name: GetInnerMenuCount001
+ * @tc.desc: Test GetInnerMenuCount.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuPattern2TestNg, GetInnerMenuCount001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build frame node tree: outerMenuNode->jsViewNode->jsViewNode1->innerMenuNode
+     */
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    jsViewNode->MountToParent(outerMenuNode);
+    auto jsViewNode1 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode1, nullptr);
+    jsViewNode1->MountToParent(jsViewNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(jsViewNode1);
+
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+
+    /**
+     * @tc.steps: step2. Call GetInnerMenuCount.
+     * @tc.expected: the function runs normally
+     */
+    auto innerMenuCount = menuPattern->GetInnerMenuCount();
+    ASSERT_EQ(innerMenuCount, 1);
+}
+
+/**
+ * @tc.name: OnTouchEvent001
+ * @tc.desc: Test OnTouchEvent.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(MenuPattern2TestNg, OnTouchEvent001, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. build frame node
+     */
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    
+    /**
+     * @tc.steps: step2. get pattern
+     */
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+
+    /**
+     * @tc.steps: step3. Call OnTouchEvent.
+     * @tc.expected: the function runs normally
+     */
+    TouchEventInfo info("unknown");
+    menuPattern->OnTouchEvent(info);
+    ASSERT_TRUE(info.GetTouches().empty());
+}
+
+/**
+ * @tc.name: RecordItemsAndGroups001
+ * @tc.desc: Test RecordItemsAndGroups.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(MenuPattern2TestNg, RecordItemsAndGroups001, TestSize.Level1)
+ {
+    /**
+     * @tc.steps: step1. build frame node tree: outerMenuNode->jsViewNode->jsViewNode1->innerMenuNode
+     * ->menuItemNode
+     */
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    jsViewNode->MountToParent(outerMenuNode);
+    auto jsViewNode1 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode1, nullptr);
+    jsViewNode1->MountToParent(jsViewNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(jsViewNode1);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(
+            V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+
+    /**
+     * @tc.steps: step2. get InnerMenuPattern
+     */
+    auto menuPattern = innerMenuNode->GetPattern<InnerMenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+
+    /**
+     * @tc.steps: step3. Call RecordItemsAndGroups.
+     * @tc.expected: the function runs normally
+     */
+    menuPattern->RecordItemsAndGroups();
+    ASSERT_FALSE(menuPattern->GetItemsAndGroups().empty());
+}
+
+/**
+ * @tc.name: GetIfElseMenuItem001
+ * @tc.desc: Test GetIfElseMenuItem.
+ * @tc.type: FUNC
+ */
+ HWTEST_F(MenuPattern2TestNg, GetIfElseMenuItem001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build frame node tree: outerMenuNode->jsViewNode->jsViewNode1->innerMenuNode
+     * ->menuItemNode
+     */
+    RefPtr<FrameNode> outerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(outerMenuNode, nullptr);
+    auto child = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
+
+    auto jsViewNode = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode, nullptr);
+    jsViewNode->MountToParent(outerMenuNode);
+    auto jsViewNode1 = FrameNode::CreateFrameNode(
+        V2::JS_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(jsViewNode1, nullptr);
+    jsViewNode1->MountToParent(jsViewNode);
+
+    RefPtr<FrameNode> innerMenuNode =
+        FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+            []() { return AceType::MakeRefPtr<InnerMenuPattern>(TARGET_ID, "", TYPE); });
+    ASSERT_NE(innerMenuNode, nullptr);
+    innerMenuNode->MountToParent(jsViewNode1);
+
+    auto menuItemNode =
+        FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<MenuItemPattern>());
+    ASSERT_NE(menuItemNode, nullptr);
+    menuItemNode->MountToParent(innerMenuNode);
+
+    /**
+     * @tc.steps: step2. get OuterMenuPattern
+     */
+    auto menuPattern = outerMenuNode->GetPattern<MenuPattern>();
+    ASSERT_NE(menuPattern, nullptr);
+    menuPattern->type_ = MenuType::CONTEXT_MENU;
+
+    /**
+     * @tc.steps: step3. Call GetIfElseMenuItem but param is nullptr.
+     * @tc.expected: the function runs normally
+     */
+    auto menuItem1 = menuPattern->GetIfElseMenuItem(nullptr, true);
+    ASSERT_EQ(menuItem1, nullptr);
+
+    /**
+     * @tc.steps: step3. Call GetIfElseMenuItem.
+     * @tc.expected: the function runs normally
+     */
+    auto menuItem2 = menuPattern->GetIfElseMenuItem(innerMenuNode, true);
+    ASSERT_EQ(menuItem2, menuItemNode);
 }
 } // namespace OHOS::Ace::NG

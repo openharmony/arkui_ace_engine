@@ -153,6 +153,9 @@ void CheckBoxGroupPattern::InitTouchEvent()
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto checkboxPattern = weak.Upgrade();
         CHECK_NULL_VOID(checkboxPattern);
+        if (info.GetTouches().empty()) {
+            return;
+        }
         if (info.GetSourceDevice() == SourceType::TOUCH && info.IsPreventDefault()) {
             checkboxPattern->isTouchPreventDefault_ = info.IsPreventDefault();
         }
@@ -439,6 +442,7 @@ void CheckBoxGroupPattern::UpdateRepeatedGroupStatus(const RefPtr<FrameNode>& fr
 
 void CheckBoxGroupPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
+    CHECK_NULL_VOID(focusHub);
     auto getInnerPaintRectCallback = [wp = WeakClaim(this)](RoundRect& paintRect) {
         auto pattern = wp.Upgrade();
         if (pattern) {
@@ -446,6 +450,24 @@ void CheckBoxGroupPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool CheckBoxGroupPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action == KeyAction::DOWN && event.code == KeyCode::KEY_FUNCTION) {
+        OnClick();
+        return true;
+    }
+    return false;
 }
 
 void CheckBoxGroupPattern::GetInnerFocusPaintRect(RoundRect& paintRect)

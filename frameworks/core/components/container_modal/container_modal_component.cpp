@@ -212,7 +212,6 @@ void ContainerModalComponent::BuildInnerChild()
     Border outerBorder;
     outerBorder.SetBorderRadius(Radius(CONTAINER_OUTER_RADIUS));
     outerBorder.SetColor(CONTAINER_BORDER_COLOR);
-    outerBorder.SetWidth(CONTAINER_BORDER_WIDTH);
     auto containerDecoration = AceType::MakeRefPtr<Decoration>();
     containerDecoration->SetBackgroundColor(CONTAINER_BACKGROUND_COLOR);
     containerDecoration->SetBorder(outerBorder);

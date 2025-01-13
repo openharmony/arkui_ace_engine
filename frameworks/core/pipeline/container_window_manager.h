@@ -31,8 +31,9 @@ using WindowSetMaximizeModeCallback = std::function<void(MaximizeMode)>;
 using WindowGetMaximizeModeCallback = std::function<MaximizeMode(void)>;
 using GetSystemBarStyleCallback = std::function<RefPtr<SystemBarStyle>(void)>;
 using SetSystemBarStyleCallback = std::function<void(const RefPtr<SystemBarStyle>&)>;
-using WindowGetStartMoveFlagCallback = std::function<uint32_t(void)>;
 using GetFreeMultiWindowModeEnabledStateCallback = std::function<bool(void)>;
+using WindowIsStartMovingCallback = std::function<bool(void)>;
+using WindowCallNativeCallback = std::function<void(const std::string&, const std::string&)>;
 
 class WindowManager : public virtual AceType {
     DECLARE_ACE_TYPE(WindowManager, AceType);
@@ -111,9 +112,9 @@ public:
         windowStartMoveCallback_ = std::move(callback);
     }
 
-    void SetGetWindowStartMoveFlagCallBack(WindowGetStartMoveFlagCallback&& callback)
+    void SetWindowIsStartMovingCallBack(WindowIsStartMovingCallback&& callback)
     {
-        WindowGetStartMoveFlagCallback_ = callback;
+        WindowIsStartMovingCallback_ = std::move(callback);
     }
 
     void SetWindowSetMaximizeModeCallBack(WindowSetMaximizeModeCallback&& callback)
@@ -144,6 +145,18 @@ public:
     void SetPerformBackCallback(WindowCallback&& callback)
     {
         windowPerformBackCallback_ = callback;
+    }
+
+    void SetWindowCallNativeCallback(WindowCallNativeCallback&& callback)
+    {
+        callNativeCallback_ = std::move(callback);
+    }
+
+    void FireWindowCallNativeCallback(const std::string& name, const std::string& value)
+    {
+        if (callNativeCallback_) {
+            callNativeCallback_(name, value);
+        }
     }
 
     void WindowMinimize() const
@@ -196,17 +209,19 @@ public:
         }
     }
 
-    void WindowPerformBack()
+    bool WindowIsStartMoving() const
     {
-        windowPerformBackCallback_();
-    }
-
-    bool GetWindowStartMoveFlag() const
-    {
-        if (WindowGetStartMoveFlagCallback_) {
-            return WindowGetStartMoveFlagCallback_();
+        if (WindowIsStartMovingCallback_) {
+            return WindowIsStartMovingCallback_();
         }
         return false;
+    }
+
+    void WindowPerformBack() const
+    {
+        if (windowPerformBackCallback_) {
+            windowPerformBackCallback_();
+        }
     }
 
     WindowMode GetWindowMode() const
@@ -283,8 +298,8 @@ private:
     WindowCallback windowSplitPrimaryCallback_;
     WindowCallback windowSplitSecondaryCallback_;
     WindowCallback windowStartMoveCallback_;
+    WindowIsStartMovingCallback WindowIsStartMovingCallback_;
     WindowCallback windowPerformBackCallback_;
-    WindowGetStartMoveFlagCallback WindowGetStartMoveFlagCallback_;
     WindowCallback windowMaximizeCallback_;
     WindowCallback windowMaximizeFloatingCallback_;
     WindowSetMaximizeModeCallback windowSetMaximizeModeCallback_;
@@ -294,6 +309,7 @@ private:
     GetSystemBarStyleCallback getSystemBarStyleCallback_;
     SetSystemBarStyleCallback setSystemBarStyleCallback_;
     GetFreeMultiWindowModeEnabledStateCallback getFreeMultiWindowModeEnabledStateCallback_;
+    WindowCallNativeCallback callNativeCallback_;
 };
 
 } // namespace OHOS::Ace

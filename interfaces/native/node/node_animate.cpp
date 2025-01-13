@@ -575,7 +575,7 @@ float OH_ArkUI_AnimatorOnFrameEvent_GetValue(ArkUI_AnimatorOnFrameEvent* event)
 int32_t OH_ArkUI_AnimatorOption_RegisterOnFrameCallback(
     ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorOnFrameEvent* event))
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !option || !callback) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -587,7 +587,7 @@ int32_t OH_ArkUI_AnimatorOption_RegisterOnFrameCallback(
 int32_t OH_ArkUI_AnimatorOption_RegisterOnFinishCallback(
     ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorEvent* event))
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !option || !callback) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -600,7 +600,7 @@ int32_t OH_ArkUI_AnimatorOption_RegisterOnFinishCallback(
 int32_t OH_ArkUI_AnimatorOption_RegisterOnCancelCallback(
     ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorEvent* event))
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !option || !callback) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }
@@ -613,7 +613,7 @@ int32_t OH_ArkUI_AnimatorOption_RegisterOnCancelCallback(
 int32_t OH_ArkUI_AnimatorOption_RegisterOnRepeatCallback(
     ArkUI_AnimatorOption* option, void* userData, void (*callback)(ArkUI_AnimatorEvent* event))
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !option || !callback) {
         return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
     }

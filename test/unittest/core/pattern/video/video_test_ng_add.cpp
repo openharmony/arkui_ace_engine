@@ -41,7 +41,6 @@
 #include "core/components/video/video_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"

@@ -53,6 +53,9 @@ public:
         const RefPtr<FrameNode>& textNode, int32_t badgeLength, int32_t childSize);
     static void UpdateGatherNodeToTop();
     static void ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& menuWrapperNode);
+    static void DoGrayedAnimation(const RefPtr<FrameNode>& frameNode, float opacity, RefPtr<InterpolatingSpring> cure);
+    static void SetPreOpacity(const RefPtr<FrameNode>& preNode);
+    static void DoDragStartGrayedAnimation(const RefPtr<FrameNode>& frameNode);
 };
 }
 #endif

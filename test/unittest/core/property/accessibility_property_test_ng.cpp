@@ -39,6 +39,7 @@ namespace OHOS::Ace::NG {
 namespace {
 const InspectorFilter filter;
 const size_t ARRAY_SIZE = 1;
+const OffsetF OFFSETF { 1.0, 1.0 };
 } // namespace
 
 class MockPattern : public Pattern {
@@ -1056,5 +1057,125 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest032, TestSize.Lev
     recursiveParam.ancestorGroupFlag = true;
     auto result = accessibilityProperty.ProcessHoverTestRecursive(hoverPoint, root, path, debugInfo, recursiveParam);
     EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest033
+ * @tc.desc: IsAccessibilityCompInResponseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest033, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    RectF rect1 = RectF(0.0f, 0.0f, 100.0f, 100.0f);
+    RectF rect2 = RectF(-10.0f, -10.0f, 100.0f, 100.0f);
+    RectF origRect1 = RectF(-10.0f, 0.0f, 100.0f, 100.0f);
+    RectF origRect2 = RectF(0.0f, -10.0f, 100.0f, 100.0f);
+    RectF origRect3 = RectF(0.0f, 0.0f, 200.0f, 100.0f);
+    RectF origRect4 = RectF(0.0f, 0.0f, 100.0f, 200.0f);
+    RectF origRect5 = RectF(0.0f, 0.0f, 50.0f, 50.0f);
+    RectF origRect6 = RectF(0.0f, 0.0f, 50.0f, 50.0f);
+    auto result = accessibilityProperty.IsAccessibilityCompInResponseRegion(rect1, origRect1);
+    EXPECT_EQ(result, false);
+
+    auto result1 = accessibilityProperty.IsAccessibilityCompInResponseRegion(rect1, origRect2);
+    EXPECT_EQ(result1, false);
+
+    auto result2 = accessibilityProperty.IsAccessibilityCompInResponseRegion(rect1, origRect3);
+    EXPECT_EQ(result2, false);
+
+    auto result3 = accessibilityProperty.IsAccessibilityCompInResponseRegion(rect1, origRect4);
+    EXPECT_EQ(result3, false);
+
+    auto result4 = accessibilityProperty.IsAccessibilityCompInResponseRegion(rect1, origRect5);
+    EXPECT_EQ(result4, true);
+
+    auto result5 = accessibilityProperty.IsAccessibilityCompInResponseRegion(rect2, origRect6);
+    EXPECT_EQ(result5, true);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest034
+ * @tc.desc: IsMatchAccessibilityResponseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest034, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    auto host = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    host->isActive_ = true;
+    DimensionRect responseRect(Dimension(-1), Dimension(-1), DimensionOffset(OFFSETF));
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.push_back(responseRect);
+    auto gestureEventHub = host->eventHub_->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegion(responseRegion);
+    auto paintRect = host->renderContext_->GetPaintRectWithoutTransform();
+    auto responseRegionList = host->GetResponseRegionList(paintRect, 2);
+    EXPECT_FALSE(responseRegionList.size() != 1);
+
+    auto rect = responseRegionList.back();
+    EXPECT_FALSE(rect == paintRect);
+
+    EXPECT_FALSE(!accessibilityProperty.IsAccessibilityCompInResponseRegion(rect, paintRect));
+
+    WeakPtr<FrameNode> hostBak = host;
+    accessibilityProperty.SetHost(hostBak);
+    auto result = accessibilityProperty.IsMatchAccessibilityResponseRegion(false);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest035
+ * @tc.desc: IsMatchAccessibilityResponseRegion
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest035, TestSize.Level1)
+{
+    AccessibilityProperty accessibilityProperty;
+    auto host = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    host->isActive_ = true;
+    auto paintRect = host->GetTransformRectRelativeToWindow();
+    DimensionRect responseRect(Dimension(-1), Dimension(-1), DimensionOffset(OFFSETF));
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.push_back(responseRect);
+    auto gestureEventHub = host->eventHub_->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegion(responseRegion);
+
+    auto responseRegionList = host->GetResponseRegionList(paintRect, 2);
+    EXPECT_FALSE(responseRegionList.size() != 1);
+
+    auto rect = responseRegionList.back();
+    EXPECT_FALSE(rect == paintRect);
+
+    EXPECT_FALSE(!accessibilityProperty.IsAccessibilityCompInResponseRegion(rect, paintRect));
+
+    WeakPtr<FrameNode> hostBak = host;
+    accessibilityProperty.SetHost(hostBak);
+    auto result = accessibilityProperty.IsMatchAccessibilityResponseRegion(false);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: AccessibilityPropertyTest036
+ * @tc.desc: GetAccessibilityResponseRegionRect
+ * @tc.type: FUNC
+ */
+HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest036, TestSize.Level1)
+{
+    NG::RectT<int32_t> rectInt = RectT<int32_t>(0, 0, 0, 0);
+    AccessibilityProperty accessibilityProperty;
+    auto host = FrameNode::GetOrCreateFrameNode(
+        V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    host->isActive_ = true;
+    WeakPtr<FrameNode> hostBak = host;
+    accessibilityProperty.SetHost(hostBak);
+
+    auto result = accessibilityProperty.GetAccessibilityResponseRegionRect(false);
+    EXPECT_EQ(result, rectInt);
+
+    auto result1 = accessibilityProperty.GetAccessibilityResponseRegionRect(true);
+    EXPECT_EQ(result1, rectInt);
 }
 } // namespace OHOS::Ace::NG

@@ -25,7 +25,7 @@ static void DragActionConvert(
 {
     CHECK_NULL_VOID(dragAction);
     CHECK_NULL_VOID(internalDragAction);
-    internalDragAction->pointer = dragAction->pointerId;
+    internalDragAction->dragPointerEvent.pointerId = dragAction->pointerId;
     internalDragAction->size = dragAction->size;
     internalDragAction->previewOption.isScaleEnabled = dragAction->dragPreviewOption.isScaleEnabled;
     if (!internalDragAction->previewOption.isScaleEnabled) {

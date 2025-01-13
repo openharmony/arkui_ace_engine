@@ -54,14 +54,14 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                                 windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
         OffsetF wrapperOffset;
-        if (!canExpandCurrentWindow_) {
-            if (isContainerModal) {
-                auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
-                                  static_cast<float>(CONTENT_PADDING.ConvertToPx());
-                auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
-                                  static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
-                wrapperOffset = OffsetF(newOffsetX, newOffsetY);
+        if ((!canExpandCurrentWindow_) && isContainerModal) {
+            auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
+            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+                newOffsetX += static_cast<float>(CONTENT_PADDING.ConvertToPx());
             }
+            auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
+                                static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
+            wrapperOffset = OffsetF(newOffsetX, newOffsetY);
         }
         parentPattern->AddHoverRegions(position + wrapperOffset, bottomRightPoint + wrapperOffset);
     }
@@ -137,14 +137,14 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& pare
     CHECK_NULL_RETURN(windowManager, OffsetF());
     auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
                             windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
-    if (!canExpandCurrentWindow_) {
-        if (isContainerModal) {
-            auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx()) +
-                              static_cast<float>(CONTENT_PADDING.ConvertToPx());
-            auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
-                              static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
-            position -= OffsetF(newOffsetX, newOffsetY);
+    if ((!canExpandCurrentWindow_) && isContainerModal) {
+        auto newOffsetX = static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            newOffsetX += static_cast<float>(CONTENT_PADDING.ConvertToPx());
         }
+        auto newOffsetY = static_cast<float>(pipelineContext->GetCustomTitleHeight().ConvertToPx()) +
+                            static_cast<float>(CONTAINER_BORDER_WIDTH.ConvertToPx());
+        position -= OffsetF(newOffsetX, newOffsetY);
     }
     auto parentMenu = AceType::DynamicCast<FrameNode>(parentMenuItem->GetParent());
     CHECK_NULL_RETURN(parentMenu, position);
@@ -161,9 +161,8 @@ OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& pare
     auto bottomOffset = scrollTop + scrollHeight;
     if (parentMenuItem->GetPaintRectOffset().GetY() > bottomOffset) {
         return scroll->GetPaintRectOffset() + OffsetF(parentItemFrameSize.Width(), 0.0);
-    } else {
-        return position;
     }
+    return position;
 }
 
 float SubMenuLayoutAlgorithm::VerticalLayoutSubMenuHalfScreen(

@@ -14,6 +14,8 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_span_ffi.h"
+
+#include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/pattern/text/span_model.h"
 #include "cj_lambda.h"
@@ -42,7 +44,7 @@ const std::vector<TextDecoration> TEXT_DECRATIONS = {
 extern "C" {
 void FfiOHOSAceFrameworkSpanCreate(const char* content)
 {
-    SpanModel::GetInstance()->Create(content);
+    SpanModel::GetInstance()->Create(UtfUtils::Str8ToStr16(content));
 }
 
 void FfiOHOSAceFrameworkSpanSetDecoration(int32_t type, uint32_t color)

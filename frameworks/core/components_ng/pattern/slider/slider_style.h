@@ -40,6 +40,8 @@ struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBackgroundColor, Gradient)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(TrackBackgroundIsResourceColor, bool)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectColor, Color)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectGradientColor, Gradient)
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(SelectIsResourceColor, bool)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ShowSteps, bool)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Direction, Axis)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BlockBorderColor, Color)
@@ -58,6 +60,9 @@ struct SliderPaintStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(SliderInteractionMode, SliderModel::SliderInteraction)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(MinResponsiveDistance, float)
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ValidSlideRange, RefPtr<SliderModel::SliderValidRange>)
+#ifdef SUPPORT_DIGITAL_CROWN
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(DigitalCrownSensitivity, CrownSensitivity)
+#endif
 };
 struct SliderTipStyle {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(ShowTips, bool)

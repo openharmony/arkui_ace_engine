@@ -79,7 +79,7 @@ public:
 
     bool canExpandCurrentWindow_ = false;
     void InitCanExpandCurrentWindow(bool isShowInSubWindow);
-    bool CheckIsEmbeddedMode(LayoutWrapper* layoutWrapper);
+    bool HoldEmbeddedMenuPosition(LayoutWrapper* layoutWrapper);
     Rect GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuPattern);
 
 protected:
@@ -143,6 +143,7 @@ private:
     void UpdateConstraintHeight(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);
     void UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>>& options, float width);
+    float GetMenuMaxBottom(const RefPtr<MenuPattern>& menuPattern);
 
     void ComputeMenuPositionByAlignType(const RefPtr<MenuLayoutProperty>& menuProp, const SizeF& menuSize);
     OffsetF ComputeMenuPositionByOffset(
@@ -199,7 +200,7 @@ private:
         RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
     void ModifyPreviewMenuPlacement(LayoutWrapper* layoutWrapper);
     void GetPreviewNodeTotalSize(const RefPtr<LayoutWrapper>& child, const Rect& menuWindowRect,
-        RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, bool isShowHoverImage);
+        RefPtr<LayoutWrapper>& previewLayoutWrapper, SizeF& size, const RefPtr<LayoutWrapper>& menuLayoutWrapper);
     SizeF GetPreviewNodeAndMenuNodeTotalSize(const RefPtr<FrameNode>& frameNode,
         RefPtr<LayoutWrapper>& previewLayoutWrapper, RefPtr<LayoutWrapper>& menuLayoutWrapper);
 
@@ -216,6 +217,8 @@ private:
     void LayoutNormalBottomPreviewTopMenuGreateThan(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize);
 
+    float CheckHorizontalLayoutPreviewOffsetX(
+        const RefPtr<GeometryNode>& previewGeometryNode, const RefPtr<GeometryNode>& menuGeometryNode, float offsetX);
     void LayoutOtherDeviceLeftPreviewRightMenu(const RefPtr<GeometryNode>& previewGeometryNode,
         const RefPtr<GeometryNode>& menuGeometryNode, SizeF& totalSize, float menuItemTotalHeight);
     void LayoutOtherDeviceLeftPreviewRightMenuLessThan(const RefPtr<GeometryNode>& previewGeometryNode,
@@ -238,6 +241,7 @@ private:
     void UpdateChildConstraintByDevice(const RefPtr<MenuPattern>& menuPattern,
         LayoutConstraintF& childConstraint, const LayoutConstraintF& layoutConstraint);
     void CheckPreviewConstraint(const RefPtr<FrameNode>& frameNode, const Rect& menuWindowRect);
+    void CheckPreviewSize(const RefPtr<LayoutWrapper>& previewLayoutWrapper, const RefPtr<MenuPattern>& menuPattern);
     void ModifyTargetOffset();
 
     std::string MoveTo(double x, double y);
@@ -325,6 +329,7 @@ private:
     SizeF childMarginFrameSize_;
     std::string clipPath_;
     bool isPreviewContainScale_ = false;
+    bool holdEmbeddedMenuPosition_ = false;
 
     using PlacementFunc = OffsetF (MenuLayoutAlgorithm::*)(const SizeF&, const OffsetF&, const OffsetF&);
     std::map<Placement, PlacementFunc> placementFuncMap_;

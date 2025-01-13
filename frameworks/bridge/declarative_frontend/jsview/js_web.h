@@ -175,7 +175,8 @@ protected:
         const JSRef<JSVal>& keyboardOpt, WebKeyboardOption& keyboardOption);
 
 private:
-    static void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems);
+    static void ParseScriptItems(const JSCallbackInfo& args, ScriptItems& scriptItems,
+        ScriptItemsByOrder& scriptItemsByOrder);
     static bool CheckNestedScrollMode(const int32_t& modeValue);
 };
 } // namespace OHOS::Ace::Framework

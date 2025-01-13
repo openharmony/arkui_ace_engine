@@ -175,7 +175,7 @@ void RenderSideBarContainer::InitializeDragAndAnimation()
             container->HandleDragEnd();
         }
     });
-    panRecognizer->SetOnActionCancel([weak]() {
+    panRecognizer->SetOnActionCancel([weak](const GestureEvent& info) {
         auto container = weak.Upgrade();
         if (container) {
             container->HandleDragEnd();

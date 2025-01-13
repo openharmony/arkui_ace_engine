@@ -30,6 +30,7 @@ enum class PlaceholderType : int32_t {
 enum class UIExtCallbackEventId : uint32_t {
     ON_AREA_CHANGED = 0,
     ON_UEA_ACCESSIBILITY_READY = 6,
+    ON_DRAW_FIRST = 7,
 };
 
 struct UIExtCallbackEvent {
@@ -40,6 +41,17 @@ struct UIExtCallbackEvent {
     {
         return eventId < other.eventId;
     }
+};
+
+enum class BusinessDataSendType : uint32_t {
+    ASYNC = 0,
+    SYNC,
+};
+
+enum class UIContentBusinessCode : uint32_t {
+    UNDEFINED = 0,
+    SEND_STATAUSBAR_TYPE = 1,
+    EVENT_PROXY = 1001,
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_UIEXTENSION_CONFIG_H

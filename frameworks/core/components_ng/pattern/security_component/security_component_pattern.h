@@ -87,6 +87,8 @@ public:
     void OnWindowHide() override;
     void OnWindowShow() override;
 
+    void OnLanguageConfigurationUpdate() override;
+
     SecurityComponentRegisterStatus regStatus_ = SecurityComponentRegisterStatus::UNREGISTERED;
     std::timed_mutex regMutex_;
     int32_t scId_ = -1;
@@ -117,6 +119,7 @@ private:
     void UpdateIconProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& iconNode);
     void UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode);
     void UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode);
+    void HandleEnabled();
 #ifdef SECURITY_COMPONENT_ENABLE
     void RegisterSecurityComponent();
     void RegisterSecurityComponentRetry();
@@ -124,7 +127,7 @@ private:
     int32_t ReportSecurityComponentClickEvent(GestureEvent& event);
     int32_t ReportSecurityComponentClickEvent(const KeyEvent& event);
     void DoTriggerOnclick(int32_t result);
-    void DelayReleaseNode(RefPtr<FrameNode>& node);
+    void DelayReleaseNode(uint64_t index);
     std::function<int32_t(int32_t)> CreateFirstUseDialogCloseFunc(
         RefPtr<FrameNode>& frameNode, RefPtr<PipelineContext>& pipeline, const std::string& taskName);
 #endif

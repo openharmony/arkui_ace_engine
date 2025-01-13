@@ -30,7 +30,9 @@ public:
 protected:
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
+        return RenderContext::ContextParam {
+            .type = RenderContext::ContextType::EXTERNAL,
+            .surfaceName = std::nullopt};
     }
 
     bool HasStartingPage() override

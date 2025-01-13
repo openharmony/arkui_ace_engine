@@ -68,6 +68,7 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     arrowHeight_ = bubbleLayoutAlgorithm->GetArrowHeight();
     border_ = bubbleLayoutAlgorithm->GetBorder();
     dumpInfo_ = bubbleLayoutAlgorithm->GetDumpInfo();
+    arrowBuildPlacement_ = bubbleLayoutAlgorithm->GetArrowBuildPlacement();
     paintProperty->UpdatePlacement(bubbleLayoutAlgorithm->GetArrowPlacement());
     if (delayShow_) {
         delayShow_ = false;
@@ -141,8 +142,7 @@ void BubblePattern::OnAttachToFrameNode()
 
 void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextRefPtr();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
@@ -260,6 +260,7 @@ void BubblePattern::ButtonOnHover(bool isHover, const RefPtr<NG::FrameNode>& but
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<PopupTheme>();
+    CHECK_NULL_VOID(theme);
     isHover_ = isHover;
     auto hoverColor = theme->GetButtonHoverColor();
     auto backgroundColor = theme->GetButtonBackgroundColor();
@@ -314,6 +315,9 @@ void BubblePattern::RegisterButtonOnTouch()
 
 void BubblePattern::ButtonOnPress(const TouchEventInfo& info, const RefPtr<NG::FrameNode>& buttonNode)
 {
+    if (info.GetTouches().empty()) {
+        return;
+    }
     auto touchType = info.GetTouches().front().GetTouchType();
     auto renderContext = buttonNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);

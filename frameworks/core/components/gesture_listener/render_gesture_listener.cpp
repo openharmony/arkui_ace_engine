@@ -365,7 +365,7 @@ void RenderGestureListener::SetOnPinchCancelCallback(const RefPtr<GestureListene
     if (onPinchCancelId.IsEmpty()) {
         return;
     }
-    SetOnPinchCancelCallback(AceAsyncEvent<void()>::Create(onPinchCancelId, context_));
+    SetOnPinchCancelCallback(AceAsyncEvent<void(const GestureEvent&)>::Create(onPinchCancelId, context_));
 }
 
 void RenderGestureListener::SetRemoteMessageCallback(const ClickCallback& callback)
@@ -452,7 +452,7 @@ void RenderGestureListener::SetOnPinchEndCallback(const GestureEventFunc& onPinc
     }
 }
 
-void RenderGestureListener::SetOnPinchCancelCallback(const GestureEventNoParameter& onPinchCancel)
+void RenderGestureListener::SetOnPinchCancelCallback(const GestureEventFunc& onPinchCancel)
 {
     if (onPinchCancel) {
         if (!pinchRecognizer_) {

@@ -17,6 +17,7 @@
 
 #include "pixel_map_impl.h"
 
+#include "base/utils/utf_helper.h"
 #include "bridge/common/utils/utils.h"
 
 using namespace OHOS::Ace;
@@ -99,13 +100,14 @@ void NativeRichEditorController::ParseRichEditorTextSpanResult(
     nativeTextResult.offsetInSpanStart = spanObject.offsetInSpan[0];
     nativeTextResult.offsetInSpanEnd = spanObject.offsetInSpan[1];
     nativeTextResult.spanPosition = spanPosition;
-    auto len = spanObject.valueString.size() + 1;
+    std::string u8ValueString = UtfUtils::Str16ToStr8(spanObject.valueString);
+    auto len = u8ValueString.size() + 1;
     char* cString = static_cast<char*>(malloc(sizeof(char) * len));
     if (cString == nullptr) {
         LOGE("ParseRichEditorTextSpanResult error, malloc cString failed");
         return;
     }
-    std::char_traits<char>::copy(cString, spanObject.valueString.c_str(), len);
+    std::char_traits<char>::copy(cString, u8ValueString.c_str(), len);
     nativeTextResult.value = cString;
 }
 
@@ -140,7 +142,7 @@ void NativeRichEditorController::ParseRichEditorAbstractTextSpanResult(
     nativeTextResult.offsetInSpanStart = spanObject.OffsetInSpan();
     nativeTextResult.offsetInSpanEnd = spanObject.OffsetInSpan() + spanObject.GetEraseLength();
     nativeTextResult.spanPosition = spanPosition;
-    nativeTextResult.value = spanObject.GetValue().c_str();
+    nativeTextResult.value = UtfUtils::Str16ToStr8(spanObject.GetValue()).c_str();
 }
 
 void NativeRichEditorController::ParseRichEditorAbstractImageSpanResult(
@@ -182,7 +184,7 @@ bool NativeRichEditorController::SetCaretOffset(int32_t value)
 int32_t NativeRichEditorController::AddTextSpan(std::string value, NativeRichEditorTextSpanOptions params)
 {
     TextSpanOptions options;
-    options.value = value;
+    options.value = UtfUtils::Str8ToStr16(value);
     options.offset = params.offset;
 
     auto pipelineContext = PipelineBase::GetCurrentContext();

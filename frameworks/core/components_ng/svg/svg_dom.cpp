@@ -131,6 +131,29 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
 
 RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& parent)
 {
+    auto root = CreateSvgNodeFromDom(dom, xmlNode, parent);
+    CHECK_NULL_RETURN(root, nullptr);
+    std::stack<SvgTranslateProcessInfo> translateTaskSt;
+    translateTaskSt.emplace(root, dom.getFirstChild(xmlNode, nullptr));
+    while (!translateTaskSt.empty()) {
+        auto& [currentNode, curXmlNode] = translateTaskSt.top();
+        if (!curXmlNode) {
+            translateTaskSt.pop();
+        } else {
+            const auto& childNode = CreateSvgNodeFromDom(dom, curXmlNode, currentNode);
+            if (childNode) {
+                translateTaskSt.emplace(childNode, dom.getFirstChild(curXmlNode, nullptr));
+                currentNode->AppendChild(childNode);
+            }
+            curXmlNode = dom.getNextSibling(curXmlNode);
+        }
+    }
+    return root;
+}
+
+RefPtr<SvgNode> SvgDom::CreateSvgNodeFromDom(
+    const SkDOM& dom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& parent)
+{
     const char* element = dom.getName(xmlNode);
     if (dom.getType(xmlNode) == SkDOM::kText_Type) {
         CHECK_NULL_RETURN(parent, nullptr);
@@ -151,12 +174,6 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
     node->SetContext(svgContext_);
     node->SetImagePath(path_);
     ParseAttrs(dom, xmlNode, node);
-    for (auto* child = dom.getFirstChild(xmlNode, nullptr); child; child = dom.getNextSibling(child)) {
-        const auto& childNode = TranslateSvgNode(dom, child, node);
-        if (childNode) {
-            node->AppendChild(childNode);
-        }
-    }
     return node;
 }
 

@@ -1662,10 +1662,6 @@ void CanvasPattern::OnAttachToMainTree()
 {
 }
 
-void CanvasPattern::OnDetachFromMainTree()
-{
-}
-
 void CanvasPattern::OnDetachFromFrameNode(FrameNode*)
 {
 }

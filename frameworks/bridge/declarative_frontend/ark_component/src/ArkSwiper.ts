@@ -28,8 +28,14 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperIndexModifier.identity, SwiperIndexModifier, value);
     return this;
   }
-  autoPlay(value: boolean): this {
-    modifierWithKey(this._modifiersWithKeys, SwiperAutoPlayModifier.identity, SwiperAutoPlayModifier, value);
+  autoPlay(autoPlay: boolean, options: AutoPlayOptions): this {
+    let arkAutoPlay = new ArkAutoPlay();
+    arkAutoPlay.autoPlay = autoPlay;
+
+    if (!isNull(options) && !isUndefined(options) && typeof options === 'object') {
+      arkAutoPlay.needStopWhenTouched = options.stopWhenTouched;
+    }
+    modifierWithKey(this._modifiersWithKeys, SwiperAutoPlayModifier.identity, SwiperAutoPlayModifier, arkAutoPlay);
     return this;
   }
   interval(value: number): this {
@@ -74,8 +80,16 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperDisplayModeModifier.identity, SwiperDisplayModeModifier, value);
     return this;
   }
-  cachedCount(value: number): this {
-    modifierWithKey(this._modifiersWithKeys, SwiperCachedCountModifier.identity, SwiperCachedCountModifier, value);
+  cachedCount(value: number, isShown?: boolean): this {
+    let arkCachedCount = new ArkSwiperCachedCount();
+    arkCachedCount.value = value;
+    arkCachedCount.isShown = isShown;
+    modifierWithKey(
+      this._modifiersWithKeys,
+      SwiperCachedCountModifier.identity,
+      SwiperCachedCountModifier,
+      arkCachedCount
+    );
     return this;
   }
   displayCount(value: string | number | SwiperAutoFill, swipeByGroup?: boolean | undefined): this {
@@ -148,6 +162,10 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
   }
   onContentDidScroll(handler: ContentDidScrollCallback): this {
     modifierWithKey(this._modifiersWithKeys, SwiperOnContentDidScrollModifier.identity, SwiperOnContentDidScrollModifier, handler);
+    return this;
+  }
+  pageFlipMode(value: PageFlipMode): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperPageFlipModeModifier.identity, SwiperPageFlipModeModifier, value);
     return this;
   }
 }
@@ -570,17 +588,20 @@ class SwiperEffectModeModifier extends ModifierWithKey<EdgeEffect> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class SwiperCachedCountModifier extends ModifierWithKey<number> {
+class SwiperCachedCountModifier extends ModifierWithKey<ArkSwiperCachedCount> {
   static identity: Symbol = Symbol('swiperCachedCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().swiper.resetSwiperCachedCount(node);
+      getUINativeModule().swiper.resetSwiperIsShown(node);
     } else {
-      getUINativeModule().swiper.setSwiperCachedCount(node, this.value);
+      getUINativeModule().swiper.setSwiperCachedCount(node, this.value.value);
+      getUINativeModule().swiper.setSwiperIsShown(node, this.value.isShown);
     }
   }
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    return (!isBaseOrResourceEqual(this.stageValue.value, this.value.value) ||
+      !isBaseOrResourceEqual(this.stageValue.isShown, this.value.isShown));
   }
 }
 class SwiperDisplayModeModifier extends ModifierWithKey<number> {
@@ -648,17 +669,18 @@ class SwiperIntervalModifier extends ModifierWithKey<number> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class SwiperAutoPlayModifier extends ModifierWithKey<boolean> {
+class SwiperAutoPlayModifier extends ModifierWithKey<ArkAutoPlay> {
   static identity: Symbol = Symbol('swiperAutoPlay');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().swiper.resetSwiperAutoPlay(node);
     } else {
-      getUINativeModule().swiper.setSwiperAutoPlay(node, this.value);
+      getUINativeModule().swiper.setSwiperAutoPlay(node, this.value.autoPlay, this.value.needStopWhenTouched);
     }
   }
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay)
+      || !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched);
   }
 }
 class SwiperIndexModifier extends ModifierWithKey<number> {
@@ -799,6 +821,22 @@ class SwiperOnContentDidScrollModifier extends ModifierWithKey<(selectedIndex: n
       getUINativeModule().swiper.resetSwiperOnContentDidScroll(node);
     } else {
       getUINativeModule().swiper.setSwiperOnContentDidScroll(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class SwiperPageFlipModeModifier extends ModifierWithKey<PageFlipMode> {
+  constructor(value: PageFlipMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperPageFlipMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperPageFlipMode(node);
+    } else {
+      getUINativeModule().swiper.setSwiperPageFlipMode(node, this.value);
     }
   }
   checkObjectDiff(): boolean {

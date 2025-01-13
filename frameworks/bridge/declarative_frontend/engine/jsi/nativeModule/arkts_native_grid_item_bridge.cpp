@@ -26,6 +26,7 @@ ArkUINativeModuleValue GridItemBridge::SetGridItemSelectable(ArkUIRuntimeCallInf
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> selectableArg = runtimeCallInfo->GetCallArgRef(NUM_1); // selectable value
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (selectableArg->IsBoolean()) {
         bool selectable = selectableArg->ToBoolean(vm)->Value();
@@ -41,6 +42,7 @@ ArkUINativeModuleValue GridItemBridge::ResetGridItemSelectable(ArkUIRuntimeCallI
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemSelectable(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -52,6 +54,7 @@ ArkUINativeModuleValue GridItemBridge::SetGridItemSelected(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> selectedArg = runtimeCallInfo->GetCallArgRef(NUM_1); // selected value
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (selectedArg->IsBoolean()) {
         bool selected = selectedArg->ToBoolean(vm)->Value();
@@ -67,6 +70,7 @@ ArkUINativeModuleValue GridItemBridge::ResetGridItemSelected(ArkUIRuntimeCallInf
     EcmaVM *vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemSelected(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -78,6 +82,7 @@ ArkUINativeModuleValue GridItemBridge::SetGridItemRowStart(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> rowStartArg = runtimeCallInfo->GetCallArgRef(NUM_1); // rowStart value
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (rowStartArg->IsNumber()) {
         int32_t stars = rowStartArg->Int32Value(vm);
@@ -93,6 +98,7 @@ ArkUINativeModuleValue GridItemBridge::ResetGridItemRowStart(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemRowStart(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -104,6 +110,7 @@ ArkUINativeModuleValue GridItemBridge::SetGridItemRowEnd(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> rowEndArg = runtimeCallInfo->GetCallArgRef(NUM_1); // rowEnd value
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (rowEndArg->IsNumber()) {
         int32_t end = rowEndArg->Int32Value(vm);
@@ -119,6 +126,7 @@ ArkUINativeModuleValue GridItemBridge::ResetGridItemRowEnd(ArkUIRuntimeCallInfo*
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemRowEnd(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -130,6 +138,7 @@ ArkUINativeModuleValue GridItemBridge::SetGridItemColumnStart(ArkUIRuntimeCallIn
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> columnStartArg = runtimeCallInfo->GetCallArgRef(NUM_1); // columnStart value
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (columnStartArg->IsNumber()) {
         int32_t stars = columnStartArg->Int32Value(vm);
@@ -145,6 +154,7 @@ ArkUINativeModuleValue GridItemBridge::ResetGridItemColumnStart(ArkUIRuntimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemColumnStart(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -156,6 +166,7 @@ ArkUINativeModuleValue GridItemBridge::SetGridItemColumnEnd(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> columnEndArg = runtimeCallInfo->GetCallArgRef(NUM_1); // columnEnd value
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (columnEndArg->IsNumber()) {
         int32_t columnEnd = columnEndArg->Int32Value(vm);
@@ -171,6 +182,7 @@ ArkUINativeModuleValue GridItemBridge::ResetGridItemColumnEnd(ArkUIRuntimeCallIn
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getGridItemModifier()->resetGridItemColumnEnd(nativeNode);
     return panda::JSValueRef::Undefined(vm);
@@ -182,6 +194,7 @@ ArkUINativeModuleValue GridItemBridge::SetGridItemOptions(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> styleVal = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(nodeVal->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
 
     int32_t gridItemStyle = DEFAULT_GRIDITEM_STYLE;

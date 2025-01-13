@@ -73,8 +73,6 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressRecognizerTest001, TestSize.Level1)
      * @tc.steps: case3: onLongPress, empty, !repeat
      * @tc.expected: step2. result equals.
      */
-    onLongPress = [](LongPressInfo) {};
-    longPressRecognizer.onLongPress_ = onLongPress;
     longPressRecognizer.touchPoints_.clear();
     longPressRecognizer.repeat_ = false;
     longPressRecognizer.OnAccepted();
@@ -680,7 +678,7 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressGestureTest001, TestSize.Level1)
      */
     std::unique_ptr<GestureEventFunc> onActionId;
     std::unique_ptr<GestureEventFunc> onActionEndId;
-    std::unique_ptr<GestureEventNoParameter> onActionCancelId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
     longPressGesture.onActionId_ = std::move(onActionId);
     longPressGesture.onActionEndId_ = std::move(onActionEndId);
     longPressGesture.onActionCancelId_ = std::move(onActionCancelId);
@@ -766,7 +764,7 @@ HWTEST_F(LongPressRecognizerTestNg, LongPressGestureCreateRecognizerTest002, Tes
     longPressGesture.duration_ = 0;
     auto onActionStart = [](GestureEvent& info) { return true; };
     auto onActionEnd = [](GestureEvent& info) { return true; };
-    auto onActionCancel = []() { return true; };
+    auto onActionCancel = [](GestureEvent& info) { return true; };
     longPressGesture.SetOnActionId(onActionStart);
     longPressGesture.SetOnActionEndId(onActionEnd);
     longPressGesture.SetOnActionCancelId(onActionCancel);
@@ -1262,6 +1260,6 @@ HWTEST_F(LongPressRecognizerTestNg, DeadlineTimerTest, TestSize.Level1)
     RefPtr<LongPressRecognizer> longPressRecognizerPtr = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION,
         FINGER_NUMBER, false);
     longPressRecognizerPtr->DeadlineTimer(1, true);
-    ASSERT_NE(longPressRecognizerPtr, nullptr);
+    EXPECT_NE(longPressRecognizerPtr, nullptr);
 }
 } // namespace OHOS::Ace::NG

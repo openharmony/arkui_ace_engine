@@ -67,7 +67,7 @@ public:
         AlignRule anchorTail;
         ChainStyle chainStyle;
         BiasPair bias;
-        float totalChainWeight;
+        float totalChainWeight = 0.0f; // default
         float remainingSpace = 0.0f; // default
         bool isCalculated = false;
         bool isWeightCalculated = false;
@@ -93,8 +93,7 @@ private:
     bool IsGuideline(const std::string& id);
     bool IsBarrier(const std::string& id);
     bool IsGuidelineOrBarrier(const std::string& id);
-    std::optional<float> GetOriginMarginLeft(
-        TextDirection textDirection, const std::unique_ptr<MarginPropertyF>& marginProp);
+    float GetOriginMarginLeft(TextDirection textDirection, const std::unique_ptr<MarginPropertyF>& marginProp);
     BarrierRect GetBarrierRectByReferencedIds(const std::vector<std::string>& referencedIds);
     void MeasureBarrier(const std::string& barrierName);
     void CheckNodeInHorizontalChain(std::string& currentNode,

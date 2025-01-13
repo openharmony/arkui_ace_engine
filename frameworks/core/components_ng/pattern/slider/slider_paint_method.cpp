@@ -41,7 +41,7 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     sliderContentModifier_->SetBackgroundSize(parameters_.backStart, parameters_.backEnd);
     sliderContentModifier_->SetSelectSize(parameters_.selectStart, parameters_.selectEnd);
     sliderContentModifier_->SetCircleCenter(parameters_.circleCenter);
-    sliderContentModifier_->SetSelectColor(parameters_.selectColor);
+    sliderContentModifier_->SetSelectColor(parameters_.selectGradientColor);
     sliderContentModifier_->SetTrackBackgroundColor(parameters_.trackBackgroundColor);
     sliderContentModifier_->SetBlockColor(parameters_.blockColor);
     sliderContentModifier_->SetTrackThickness(parameters_.trackThickness);
@@ -94,13 +94,18 @@ void SliderPaintMethod::UpdateBorderRadius(RefPtr<SliderPaintProperty>& paintPro
 void SliderPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(sliderTipModifier_);
-    auto pipeline = PipelineBase::GetCurrentContext();
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto host = renderContext->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
 
     auto paintProperty = DynamicCast<SliderPaintProperty>(paintWrapper->GetPaintProperty());
     CHECK_NULL_VOID(paintProperty);
+    sliderTipModifier_->UpdateThemeParams(theme);
     sliderTipModifier_->SetDirection(paintProperty->GetDirectionValue(Axis::HORIZONTAL));
     sliderTipModifier_->SetTipColor(paintProperty->GetTipColorValue(theme->GetTipColor()));
     sliderTipModifier_->SetTextFont(paintProperty->GetFontSizeValue(theme->GetTipFontSize()));

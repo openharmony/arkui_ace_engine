@@ -1494,7 +1494,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarLayoutAlgorithmMeasureFixedMode002, TestSize.
     ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(TABS_WIDTH));
     tabBarPattern_->visibleItemPosition_.clear();
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto itemWidth = TABS_WIDTH / 2 / childCount;
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->first, 0);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, TABS_WIDTH / 4);

@@ -34,6 +34,10 @@ public:
         const std::string& pageUrl, std::unordered_map<std::string, std::string>& nodeProperties);
 
     static void GetSimplifiedInspectorTree(std::string& tree);
+
+    static void GetSimplifiedInspectorTree(const TreeParams& params, std::string& tree);
+
+    static void GetSimplifiedInspectorTreeAsync(const TreeParams& params, OnInspectorTreeResult&& callback);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_UI_EVENT_H

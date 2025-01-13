@@ -18,23 +18,56 @@ import window from '@ohos.window'
 import common from '@ohos.app.ability.common'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
+import { SymbolGlyphModifier } from '@kit.ArkUI'
 
 export interface SelectTitleBarMenuItem {
   value: ResourceStr;
+  symbolStyle?: SymbolGlyphModifier;
   isEnabled?: boolean;
   action?: () => void;
   label?: ResourceStr;
+  accessibilityText?: ResourceStr;
+  accessibilityLevel?: string;
+  accessibilityDescription?: ResourceStr;
 }
 
-const PUBLIC_MORE: Resource = $r('sys.media.ohos_ic_public_more');
-
-const PUBLIC_BACK: Resource = $r('sys.media.ohos_ic_back');
+const PUBLIC_BACK: Resource = $r('sys.symbol.arrow_left')
+const PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2')
+const RESOURCE_TYPE_SYMBOL: number = 40000;
 
 const TEXT_EDITABLE_DIALOG = '18.3fp'
 const IMAGE_SIZE = '64vp'
 const MAX_DIALOG = '256vp'
 const MIN_DIALOG = '216vp'
 
+class ButtonGestureModifier implements GestureModifier {
+  public static readonly longPressTime: number = 500;
+  public static readonly minFontSize: number = 1.75;
+  public fontSize: number = 1;
+  public controller: CustomDialogController | null = null;
+
+  constructor(controller: CustomDialogController | null) {
+    this.controller = controller;
+  }
+
+  applyGesture(event: UIGestureEvent): void {
+    if (this.fontSize >= ButtonGestureModifier.minFontSize) {
+      event.addGesture(
+        new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
+          .onAction(() => {
+            if (event) {
+              this.controller?.open();
+            }
+          })
+          .onActionEnd(() => {
+            this.controller?.close();
+          })
+      )
+    } else {
+      event.clearGestures();
+    }
+  }
+}
 
 @Component
 export struct SelectTitleBar {
@@ -46,6 +79,7 @@ export struct SelectTitleBar {
   subtitle: ResourceStr = '';
   badgeValue: number = 0;
   hidesBackButton: boolean = false;
+  messageDesc: string = '';
 
   onSelected: ((index: number) => void) = () => {};
 
@@ -69,8 +103,10 @@ export struct SelectTitleBar {
       Row() {
         if (!this.hidesBackButton) {
           ImageMenuItem({ item: {
-            value: PUBLIC_BACK,
+            value: '',
+            symbolStyle: new SymbolGlyphModifier(PUBLIC_BACK),
             isEnabled: true,
+            label: $r('sys.string.icon_back'),
             action: () => this.getUIContext()?.getRouter()?.back()
           }, index: -1 });
         }
@@ -90,7 +126,7 @@ export struct SelectTitleBar {
                 Select(this.options)
                   .selected(this.selected)
                   .value(this.selected >= 0 && this.selected < this.options.length ?
-                    this.options[this.selected].value : '')
+                  this.options[this.selected].value : '')
                   .font({ size: this.hidesBackButton && !this.subtitle
                     ? $r('sys.float.ohos_id_text_size_headline7')
                     : $r('sys.float.ohos_id_text_size_headline8') })
@@ -98,17 +134,21 @@ export struct SelectTitleBar {
                   .backgroundColor(Color.Transparent)
                   .onSelect(this.onSelected)
                   .constraintSize({ maxWidth: this.selectMaxWidth })
-                  .offset({ x: -4 });
+                  .offset({ x: -4 })
+                  .accessibilityLevel('yes')
+                  .accessibilityDescription(this.messageDesc.replace('%s', this.badgeValue.toString()))
               }
               .justifyContent(FlexAlign.Start)
               .margin({ right: $r('sys.float.ohos_id_elements_margin_horizontal_l') });
             }
+            .accessibilityGroup(true)
+            .accessibilityLevel('no')
           } else {
             Row() {
               Select(this.options)
                 .selected(this.selected)
                 .value(this.selected >= 0 && this.selected < this.options.length ?
-                  this.options[this.selected].value : '')
+                this.options[this.selected].value : '')
                 .font({ size: this.hidesBackButton && !this.subtitle
                   ? $r('sys.float.ohos_id_text_size_headline7')
                   : $r('sys.float.ohos_id_text_size_headline8') })
@@ -171,17 +211,21 @@ export struct SelectTitleBar {
       }
     })
   }
+
+  aboutToAppear(): void {
+    let resourceManager = getContext().resourceManager;
+    this.messageDesc = resourceManager?.getStringByNameSync('selecttitlebar_accessibility_message_desc');
+  }
 }
 
 @Component
 struct CollapsibleMenuSection {
   menuItems: Array<SelectTitleBarMenuItem> = [];
   item: SelectTitleBarMenuItem = {
-    value: PUBLIC_MORE,
+    symbolStyle: new SymbolGlyphModifier(PUBLIC_MORE),
     label: $r('sys.string.ohos_toolbar_more'),
   } as SelectTitleBarMenuItem;
   index: number = 0;
-  longPressTime: number = 500;
   minFontSize: number = 1.75;
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
@@ -197,7 +241,7 @@ struct CollapsibleMenuSection {
   @State isMoreIconOnFocus: boolean = false
   @State isMoreIconOnHover: boolean = false
   @State isMoreIconOnClick: boolean = false
-  @State fontSize: number = 1
+  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
 
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: SelectTitleBarDialog({
@@ -213,6 +257,8 @@ struct CollapsibleMenuSection {
     isModal: true,
     customStyle: true,
   })
+
+  @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
 
   getMoreIconFgColor() {
     return this.isMoreIconOnClick
@@ -246,6 +292,7 @@ struct CollapsibleMenuSection {
         this.firstFocusableIndex = this.index * 1000 + index + 1
       }
     })
+    this.fontSize = this.decideFontScale()
   }
 
   decideFontScale(): number {
@@ -256,6 +303,11 @@ struct CollapsibleMenuSection {
     }
     return Math.min(this.systemFontScale, this.maxFontScale);
   }
+
+  onFontSizeUpdated(): void {
+    this.buttonGestureModifier.fontSize = this.fontSize;
+  }
+
 
   build() {
     Column() {
@@ -270,20 +322,19 @@ struct CollapsibleMenuSection {
               ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
             })
 
-          Row() {
-            Image(PUBLIC_MORE)
-              .width(ImageMenuItem.imageSize)
-              .height(ImageMenuItem.imageSize)
-              .focusable(true)
+          Button({ type: ButtonType.Normal, stateEffect: true }) {
+            SymbolGlyph(PUBLIC_MORE)
+              .fontSize(ImageMenuItem.imageSize)
               .draggable(false)
-              .fillColor($r('sys.color.icon_primary'))
+              .fontColor([$r('sys.color.icon_primary')])
+              .focusable(true)
           }
+          .accessibilityText($r('sys.string.ohos_toolbar_more'))
           .width(ImageMenuItem.imageHotZoneWidth)
           .height(ImageMenuItem.imageHotZoneWidth)
           .borderRadius(ImageMenuItem.buttonBorderRadius)
           .foregroundColor(this.getMoreIconFgColor())
           .backgroundColor(this.getMoreIconBgColor())
-          .justifyContent(FlexAlign.Center)
           .stateStyles({
             focused: {
               .border({
@@ -326,16 +377,7 @@ struct CollapsibleMenuSection {
             }
           })
           .onClick(() => this.isPopupShown = true)
-          .gesture(
-            LongPressGesture({ repeat: false, duration: this.longPressTime })
-              .onAction((event: GestureEvent) => {
-                this.fontSize = this.decideFontScale();
-                if (event) {
-                  if (this.fontSize >= this.minFontSize) {
-                    this.dialogController?.open()
-                  }
-                }
-              }))
+          .gestureModifier(this.buttonGestureModifier)
           .bindPopup(this.isPopupShown, {
             builder: this.popupBuilder,
             placement: Placement.Bottom,
@@ -377,14 +419,13 @@ struct CollapsibleMenuSection {
 struct ImageMenuItem {
   item: SelectTitleBarMenuItem = {} as SelectTitleBarMenuItem;
   index: number = 0;
-  longPressTime: number = 500;
   minFontSize: number = 1.75;
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
   systemFontScale?: number = 1;
   isPopup: boolean = false;
 
-  static readonly imageSize = 24
+  static readonly imageSize = '24vp'
   static readonly imageHotZoneWidth = 48
   static readonly buttonBorderRadius = 8
   static readonly focusBorderWidth = 2
@@ -394,7 +435,7 @@ struct ImageMenuItem {
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false
   @State isOnClick: boolean = false
-  @Prop fontSize: number = 1
+  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1
 
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: SelectTitleBarDialog({
@@ -410,6 +451,8 @@ struct ImageMenuItem {
     isModal: true,
     customStyle: true,
   })
+
+  @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
 
   private textDialog(): ResourceStr {
     if (this.item.value === PUBLIC_MORE) {
@@ -447,6 +490,7 @@ struct ImageMenuItem {
       let message: string = (exception as BusinessError).message;
       hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
+    this.fontSize = this.decideFontScale();
   }
 
   decideFontScale(): number {
@@ -458,24 +502,88 @@ struct ImageMenuItem {
     return Math.min(this.systemFontScale, this.maxFontScale);
   }
 
-  build() {
-    Row() {
-      Image(this.item.value)
-        .draggable(false)
-        .width(ImageMenuItem.imageSize)
-        .height(ImageMenuItem.imageSize)
-        .focusable(this.item.isEnabled)
-        .key(ImageMenuItem.focusablePrefix + this.index)
-        .fillColor($r('sys.color.icon_primary'))
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+    if (typeof resource === 'string') {
+      return resource;
+    } else if (typeof resource === 'undefined') {
+      return '';
+    } else {
+      let resourceString: string = '';
+      try {
+        resourceString = getContext()?.resourceManager?.getStringSync(resource);
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to SelectTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
+      return resourceString;
     }
+  }
+
+  private getAccessibilityReadText(): string | undefined {
+    if (this.item.value === PUBLIC_BACK) {
+      return getContext()?.resourceManager?.getStringByNameSync('icon_back');
+    } else if (this.item.value === PUBLIC_MORE) {
+      return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+    } else if (this.item.accessibilityText) {
+      return this.toStringFormat(this.item.accessibilityText);
+    } else if (this.item.label) {
+      return this.toStringFormat(this.item.label);
+    }
+    return ' ';
+  }
+
+  onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Layoutable[], constraint: ConstraintSizeOptions): void {
+    children.forEach((child) => {
+      child.layout({ x: 0, y: 0 });
+    })
+    this.fontSize = this.decideFontScale();
+  }
+
+  onFontSizeUpdated(): void {
+    this.buttonGestureModifier.fontSize = this.fontSize;
+  }
+
+  build() {
+    Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
+      if (this.item.symbolStyle) {
+        SymbolGlyph()
+          .fontColor([$r('sys.color.font_primary')])
+          .attributeModifier(this.item.symbolStyle)
+          .fontSize(ImageMenuItem.imageSize)
+          .draggable(false)
+          .focusable(this.item?.isEnabled)
+          .key(ImageMenuItem.focusablePrefix + this.index)
+          .symbolEffect(new SymbolEffect(), false)
+      } else {
+        if (Util.isSymbolResource(this.item.value)) {
+          SymbolGlyph(this.item.value as Resource)
+            .fontColor([$r('sys.color.font_primary')])
+            .fontSize(ImageMenuItem.imageSize)
+            .draggable(false)
+            .focusable(this.item?.isEnabled)
+            .key(ImageMenuItem.focusablePrefix + this.index)
+        } else {
+          Image(this.item.value)
+            .draggable(false)
+            .width(ImageMenuItem.imageSize)
+            .height(ImageMenuItem.imageSize)
+            .focusable(this.item.isEnabled)
+            .key(ImageMenuItem.focusablePrefix + this.index)
+            .fillColor($r('sys.color.icon_primary'))
+        }
+      }
+    }
+    .accessibilityText(this.getAccessibilityReadText())
+    .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
+    .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
     .borderRadius(ImageMenuItem.buttonBorderRadius)
     .foregroundColor(this.getFgColor())
     .backgroundColor(this.getBgColor())
-    .justifyContent(FlexAlign.Center)
     .opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity)
-    .enabled(this.item.isEnabled)
+    .enabled(this.item.isEnabled ? this.item.isEnabled : false)
     .stateStyles({
       focused: {
         .border({
@@ -534,16 +642,7 @@ struct ImageMenuItem {
       }
     })
     .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
-    .gesture(
-      LongPressGesture({ repeat: false, duration: this.longPressTime })
-        .onAction((event: GestureEvent) => {
-          this.fontSize = this.decideFontScale();
-          if (event) {
-            if (this.fontSize >= this.minFontSize && this.isPopup === false) {
-              this.dialogController?.open()
-            }
-          }
-        }))
+    .gestureModifier(this.buttonGestureModifier)
   }
 }
 
@@ -574,14 +673,40 @@ struct SelectTitleBarDialog {
   build() {
     if (this.selectTitleBarDialog) {
       Column() {
-        Image(this.selectTitleDialog.value)
-          .width(IMAGE_SIZE)
-          .height(IMAGE_SIZE)
-          .margin({
-            top: $r('sys.float.padding_level24'),
-            bottom: $r('sys.float.padding_level8'),
-          })
-          .fillColor($r('sys.color.icon_primary'))
+        if (this.selectTitleDialog.symbolStyle) {
+          SymbolGlyph()
+            .fontColor([$r('sys.color.font_primary')])
+            .attributeModifier(this.selectTitleDialog.symbolStyle)
+            .fontSize(IMAGE_SIZE)
+            .draggable(false)
+            .focusable(this.selectTitleDialog.isEnabled)
+            .margin({
+              top: $r('sys.float.padding_level24'),
+              bottom: $r('sys.float.padding_level8'),
+            })
+            .symbolEffect(new SymbolEffect(), false)
+        } else if (this.selectTitleDialog.value) {
+          if (Util.isSymbolResource(this.selectTitleDialog.value)) {
+            SymbolGlyph(this.selectTitleDialog.value as Resource)
+              .fontColor([$r('sys.color.font_primary')])
+              .fontSize(IMAGE_SIZE)
+              .draggable(false)
+              .focusable(this.selectTitleDialog.isEnabled)
+              .margin({
+                top: $r('sys.float.padding_level24'),
+                bottom: $r('sys.float.padding_level8'),
+              })
+          } else {
+            Image(this.selectTitleDialog.value)
+              .width(IMAGE_SIZE)
+              .height(IMAGE_SIZE)
+              .margin({
+                top: $r('sys.float.padding_level24'),
+                bottom: $r('sys.float.padding_level8'),
+              })
+              .fillColor($r('sys.color.icon_primary'))
+          }
+        }
         Column() {
           Text(this.selectTitleBarDialog)
             .fontSize(TEXT_EDITABLE_DIALOG)
@@ -605,10 +730,36 @@ struct SelectTitleBarDialog {
       .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
       Column() {
-        Image(this.selectTitleDialog.value)
-          .width(IMAGE_SIZE)
-          .height(IMAGE_SIZE)
-          .fillColor($r('sys.color.icon_primary'))
+        if (this.selectTitleDialog.symbolStyle) {
+          SymbolGlyph()
+            .fontColor([$r('sys.color.font_primary')])
+            .attributeModifier(this.selectTitleDialog.symbolStyle)
+            .fontSize(IMAGE_SIZE)
+            .draggable(false)
+            .focusable(this.selectTitleDialog.isEnabled)
+            .margin({
+              top: $r('sys.float.padding_level24'),
+              bottom: $r('sys.float.padding_level8'),
+            })
+            .symbolEffect(new SymbolEffect(), false)
+        } else if (this.selectTitleDialog.value) {
+          if (Util.isSymbolResource(this.selectTitleDialog.value)) {
+            SymbolGlyph(this.selectTitleDialog.value as Resource)
+              .fontColor([$r('sys.color.font_primary')])
+              .fontSize(IMAGE_SIZE)
+              .draggable(false)
+              .focusable(this.selectTitleDialog.isEnabled)
+              .margin({
+                top: $r('sys.float.padding_level24'),
+                bottom: $r('sys.float.padding_level8'),
+              })
+          } else {
+            Image(this.selectTitleDialog.value)
+              .width(IMAGE_SIZE)
+              .height(IMAGE_SIZE)
+              .fillColor($r('sys.color.icon_primary'))
+          }
+        }
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
@@ -629,5 +780,25 @@ struct SelectTitleBarDialog {
     } else {
       this.maxLines = this.horizontalsScreenLines;
     }
+  }
+}
+
+class Util {
+  public static isSymbolResource(resourceStr: ResourceStr | undefined): boolean {
+    if (!Util.isResourceType(resourceStr)) {
+      return false;
+    }
+    let resource = resourceStr as Resource;
+    return resource.type == RESOURCE_TYPE_SYMBOL;
+  }
+
+  public static isResourceType(resource: ResourceStr | Resource | undefined): boolean {
+    if (!resource) {
+      return false;
+    }
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
   }
 }

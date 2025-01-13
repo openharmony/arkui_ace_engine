@@ -423,13 +423,13 @@ void WaterFlowLayoutInfo::SetNextSegmentStartPos(int32_t itemIdx)
     }
 }
 
-void WaterFlowLayoutInfo::Sync(float mainSize, bool overScroll)
+void WaterFlowLayoutInfo::Sync(float mainSize, bool canOverScrollStart, bool canOverScrollEnd)
 {
     // adjust offset when it can't overScroll at top
-    if (!overScroll) {
+    if (!canOverScrollStart) {
         currentOffset_ = std::min(currentOffset_, 0.0f);
     }
-    endIndex_ = FastSolveEndIndex(mainSize);
+    endIndex_ = FastSolveEndIndex(mainSize + expandHeight_);
 
     maxHeight_ = GetMaxMainHeight();
 
@@ -437,11 +437,21 @@ void WaterFlowLayoutInfo::Sync(float mainSize, bool overScroll)
     itemEnd_ = endIndex_ >= 0 && endIndex_ == childrenCount_ - 1;
     offsetEnd_ = itemEnd_ && GreatOrEqual(mainSize - currentOffset_, maxHeight_);
     // adjust offset when it can't overScroll at bottom
-    if (offsetEnd_ && !overScroll) {
+    if (offsetEnd_ && Negative(currentOffset_) && !canOverScrollEnd) {
         currentOffset_ = std::min(-maxHeight_ + mainSize, 0.0f);
     }
 
     startIndex_ = FastSolveStartIndex();
+}
+
+bool WaterFlowLayoutInfo::OverScrollTop()
+{
+    return GreatOrEqual(currentOffset_, 0.0f);
+}
+
+bool WaterFlowLayoutInfo::OverScrollBottom()
+{
+    return itemEnd_ && GreatOrEqual(lastMainSize_ - currentOffset_, maxHeight_);
 }
 
 void WaterFlowLayoutInfo::InitSegments(const std::vector<WaterFlowSections::Section>& sections, int32_t start)
@@ -595,7 +605,7 @@ float WaterFlowLayoutInfo::CalcOverScroll(float mainSize, float delta) const
     return res;
 }
 
-float WaterFlowLayoutInfo::EstimateContentHeight() const
+float WaterFlowLayoutInfo::EstimateTotalHeight() const
 {
     auto childCount = 0;
     if (!itemInfos_.empty()) {

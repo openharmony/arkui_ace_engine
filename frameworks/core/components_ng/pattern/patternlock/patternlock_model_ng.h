@@ -36,6 +36,8 @@ public:
     void SetActiveCircleColor(const Color& activeCircleColor) override;
     void SetActiveCircleRadius(const Dimension& activeCircleRadius) override;
     void SetEnableWaveEffect(bool enableWaveEffect) override;
+    void SetEnableForeground(bool enableForeground) override;
+    void SetSkipUnselectedPoint(bool isSkipUnselectedPoint) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetActiveColor(FrameNode* frameNode, const std::optional<Color>& activeColor);
@@ -49,6 +51,8 @@ public:
     static void SetActiveCircleColor(FrameNode* frameNode, const std::optional<Color>& activeCircleColor);
     static void SetActiveCircleRadius(FrameNode* frameNode, const std::optional<Dimension>& activeCircleRadius);
     static void SetEnableWaveEffect(FrameNode* frameNode, const std::optional<bool>& enableWaveEffect);
+    static void SetEnableForeground(FrameNode* frameNode, bool enableForeground);
+    static void SetSkipUnselectedPoint(FrameNode* frameNode, bool isSkipUnselectedPoint);
     static const RefPtr<V2::PatternLockController> GetController(FrameNode* frameNode);
     static void SetDotConnect(FrameNode* frameNode, std::function<void(int32_t)>&& onDotConnect);
     static void SetPatternComplete(FrameNode* frameNode, NG::PatternLockCompleteEvent&& onComplete);

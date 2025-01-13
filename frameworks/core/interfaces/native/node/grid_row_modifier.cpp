@@ -192,16 +192,55 @@ void ResetOnBreakpointChange(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIGridRowModifier* GetGridRowModifier()
 {
-    static const ArkUIGridRowModifier modifier = { SetAlignItems, ResetAlignItems, SetDirection, ResetDirection,
-        SetBreakpoints, ResetBreakpoints, SetColumns, ResetColumns, SetGutter, ResetGutter,
-        SetOnBreakpointChange, ResetOnBreakpointChange };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIGridRowModifier modifier = {
+        .setAlignItems = SetAlignItems,
+        .resetAlignItems = ResetAlignItems,
+        .setDirection = SetDirection,
+        .resetDirection = ResetDirection,
+        .setBreakpoints = SetBreakpoints,
+        .resetBreakpoints = ResetBreakpoints,
+        .setColumns = SetColumns,
+        .resetColumns = ResetColumns,
+        .setGutter = SetGutter,
+        .resetGutter = ResetGutter,
+        .setOnBreakpointChange = SetOnBreakpointChange,
+        .resetOnBreakpointChange = ResetOnBreakpointChange,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIGridRowModifier* GetCJUIGridRowModifier()
 {
-    static const CJUIGridRowModifier modifier = { SetAlignItems, ResetAlignItems, SetDirection, ResetDirection,
-        SetBreakpoints, ResetBreakpoints, SetColumns, ResetColumns, SetGutter, ResetGutter };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIGridRowModifier modifier = {
+        .setAlignItems = SetAlignItems,
+        .resetAlignItems = ResetAlignItems,
+        .setDirection = SetDirection,
+        .resetDirection = ResetDirection,
+        .setBreakpoints = SetBreakpoints,
+        .resetBreakpoints = ResetBreakpoints,
+        .setColumns = SetColumns,
+        .resetColumns = ResetColumns,
+        .setGutter = SetGutter,
+        .resetGutter = ResetGutter,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 }

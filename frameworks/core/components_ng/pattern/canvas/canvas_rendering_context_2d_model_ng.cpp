@@ -60,6 +60,9 @@ void CanvasRenderingContext2DModelNG::OnDetachFromCanvas()
     if (onContext2DDetach_) {
         onContext2DDetach_();
     }
+    if (apiVersion_ > static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+        weakPattern_ = nullptr;
+    }
 }
 
 void CanvasRenderingContext2DModelNG::SetPattern(RefPtr<AceType> newPattern)
@@ -148,6 +151,13 @@ void CanvasRenderingContext2DModelNG::SetFontSize(const Dimension& size)
     auto pattern = weakPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateFontSize(size);
+}
+
+void CanvasRenderingContext2DModelNG::SetLetterSpacing(const Dimension& letterSpacing)
+{
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateLetterSpacing(letterSpacing);
 }
 
 std::vector<double> CanvasRenderingContext2DModelNG::GetLineDash()

@@ -19,6 +19,9 @@
 #include "mock_navigation_route.h"
 #include "mock_navigation_stack.h"
 
+#define private public
+#define protected public
+
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -50,6 +53,21 @@ const InspectorFilter filter;
 const std::string TEST_TAG = "test";
 constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 constexpr float DEFAULT_ROOT_WIDTH = 480.f;
+
+class MockNavigationPattern : public NavigationPattern {
+    DECLARE_ACE_TYPE(MockNavigationPattern, NavigationPattern);
+public:
+    MockNavigationPattern() : NavigationPattern() {}
+    ~MockNavigationPattern() = default;
+
+    void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode) override
+    {
+        NavigationPattern::MarkAllNavDestinationDirtyIfNeeded(hostNode);
+        callTime_++;
+    }
+
+    int32_t callTime_ = 0;
+};
 } // namespace
 
 class NavigationPatternTestTwoNg : public testing::Test {
@@ -2017,6 +2035,68 @@ HWTEST_F(NavigationPatternTestTwoNg, FollowStdNavdestinationAnimation008, TestSi
     EXPECT_EQ(newTopNavDestinationNode, nullptr);
     EXPECT_EQ(navigationPattern->navigationMode_, NavigationMode::STACK);
     navigationPattern->FollowStdNavdestinationAnimation(preTopNavDestinationNode, newTopNavDestinationNode, true);
+    NavigationPatternTestTwoNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: OnModifyDone001
+ * @tc.desc: Test branch if (preNavBarPosition_.has_value() && preNavBarPosition_.value() != curNavBarPosition)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, OnModifyDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create MockNavigationPattern & NavigationGroupNode.
+     */
+    NavigationPatternTestTwoNg::SetUpTestSuite();
+    auto mockPattern = AceType::MakeRefPtr<MockNavigationPattern>();
+    ASSERT_NE(mockPattern, nullptr);
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, [&mockPattern]() { return mockPattern; });
+    ASSERT_NE(navigation, nullptr);
+    auto property = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    auto pattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationStack(std::move(navigationStack));
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    navigation->navBarNode_ = navBarNode;
+
+    /**
+     * @tc.steps: step2. branch if (preNavBarPosition_.has_value() && preNavBarPosition_.value() != curNavBarPosition)
+     *                   Condition: preNavBarPosition_.has_value() => false
+     * @tc.expected: MarkAllNavDestinationDirtyIfNeeded won't be called.
+     */
+    ASSERT_FALSE(pattern->preNavBarPosition_.has_value());
+    property->UpdateNavBarPosition(NavBarPosition::START);
+    pattern->OnModifyDone();
+    ASSERT_EQ(mockPattern->callTime_, 0);
+    ASSERT_EQ(pattern->preNavBarPosition_, std::optional<NavBarPosition>(NavBarPosition::START));
+
+    /**
+     * @tc.steps: step3. branch if (preNavBarPosition_.has_value() && preNavBarPosition_.value() != curNavBarPosition)
+     *                   Condition: preNavBarPosition_.has_value() => true,
+     *                              preNavBarPosition_.value() != curNavBarPosition => true
+     * @tc.expected: MarkAllNavDestinationDirtyIfNeeded will be called.
+     */
+    property->UpdateNavBarPosition(NavBarPosition::END);
+    pattern->OnModifyDone();
+    ASSERT_EQ(mockPattern->callTime_, 1);
+    ASSERT_EQ(pattern->preNavBarPosition_, std::optional<NavBarPosition>(NavBarPosition::END));
+
+    /**
+     * @tc.steps: step3. branch if (preNavBarPosition_.has_value() && preNavBarPosition_.value() != curNavBarPosition)
+     *                   Condition: preNavBarPosition_.has_value() => true,
+     *                              preNavBarPosition_.value() != curNavBarPosition => false
+     * @tc.expected: MarkAllNavDestinationDirtyIfNeeded won't be called.
+     */
+    property->UpdateNavBarPosition(NavBarPosition::END);
+    pattern->OnModifyDone();
+    ASSERT_EQ(mockPattern->callTime_, 1);
+    ASSERT_EQ(pattern->preNavBarPosition_, std::optional<NavBarPosition>(NavBarPosition::END));
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 } // namespace OHOS::Ace::NG

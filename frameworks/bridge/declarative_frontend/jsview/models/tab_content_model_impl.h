@@ -29,6 +29,7 @@ public:
     void SetTabBar(const std::optional<std::string>& text, const std::optional<std::string>& icon,
         const std::optional<TabBarSymbol>& tabBarSymbol, std::function<void()>&& builder,
         bool useContentOnly) override;
+    void SetTabBarWithContent(const RefPtr<NG::UINode>& content) override {}
     void SetTabBarStyle(TabBarStyle tabBarStyle) override {}
     void SetIndicator(const IndicatorStyle& indicator) override {}
     void SetBoard(const BoardStyle& board) override {}

@@ -211,7 +211,7 @@ void OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndex(
 {
     CHECK_NULL_VOID(option);
     auto size = static_cast<int32_t>(option->sections.size());
-    if (size == 0 || size < index + 1) {
+    if (size == 0 || size < index + 1 || index < 0) {
         return;
     }
     option->sections[index].onGetItemMainSizeByIndex = reinterpret_cast<void*>(callback);
@@ -223,7 +223,7 @@ void OH_ArkUI_WaterFlowSectionOption_RegisterGetItemMainSizeCallbackByIndexWithU
 {
     CHECK_NULL_VOID(option);
     auto size = static_cast<int32_t>(option->sections.size());
-    if (size == 0 || size < index + 1) {
+    if (size == 0 || size < index + 1 || index < 0) {
         return;
     }
     option->sections[index].onGetItemMainSizeByIndex = reinterpret_cast<void*>(callback);

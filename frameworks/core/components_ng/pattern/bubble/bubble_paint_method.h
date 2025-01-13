@@ -54,6 +54,7 @@ public:
         return [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
             auto bubble = weak.Upgrade();
             if (bubble) {
+                bubble->PaintSingleBorder(canvas, paintWrapper);
                 bubble->PaintInnerBorder(canvas, paintWrapper);
                 bubble->PaintOuterBorder(canvas, paintWrapper);
             }
@@ -120,10 +121,16 @@ public:
         innerBorderWidth_ = innerBorderWidth.ConvertToPx();
     }
 
+    void SetArrowBuildPlacement(const Placement arrowBuildPlacement)
+    {
+        arrowBuildPlacement_ = arrowBuildPlacement;
+    }
+
     void PaintBubble(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintMask(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void ClipBubble(PaintWrapper* paintWrapper);
+    void PaintSingleBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintDoubleBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
     void PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWrapper);
@@ -186,6 +193,7 @@ private:
     bool showArrow_ = false;
     std::string clipPath_;
     RefPtr<FrameNode> clipFrameNode_;
+    Placement arrowBuildPlacement_ = Placement::BOTTOM;
     // Get from theme
     Border border_;
     Edge padding_;

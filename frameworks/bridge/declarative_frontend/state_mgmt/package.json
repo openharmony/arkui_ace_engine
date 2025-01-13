@@ -8,15 +8,15 @@
   },
   "devDependencies": {
     "@types/node": "^15.0.1",
+    "json5": "^2.2.3",
     "typescript": "^4.2.4"
   },
   "scripts": {
-    "build": "mkdir -p ./dist  &&  tsc --build tsconfig.json &&  node disableProfiler.js dist/stateMgmt.js",
-    "build_release": "rm -rf ./distRelease  &&  mkdir -p ./distRelease  &&  tsc --build tsconfig.release.json  &&  node disableLogs.js distRelease/stateMgmt.js && node disableProfiler.js distRelease/stateMgmt.js",
+    "build": "mkdir -p ./dist  &&  tsc --build tsconfig.debug.json &&  node disableProfiler.js dist/stateMgmt.js",
+    "build_release": "rm -rf ./distRelease  &&  mkdir -p ./distRelease  &&  tsc --build tsconfig.release.json  &&  node disableLogs.js distRelease/stateMgmt.js && node disableProfiler.js distRelease/stateMgmt.js && node generateGni.js",
     "build_profile": "rm -rf ./distProfile  &&  mkdir -p ./distProfile  &&  tsc --build tsconfig.profile.json  &&  node disableLogs.js distProfile/stateMgmt.js",
-    "build_sdk": "rm -rf ./distSdk   && mkdir -p ./distSdk  &&  tsc --build tsconfig.sdk.json",
     "test": "rm -rf ./distTest  &&  mkdir -p ./distTest  && tsc --build tsconfig.test.json  && node distTest/stateMgmt_test.js"
   },
   "author": "Guido Grassel",
-  "license": "See top of files"
+  "license": "Apache-2.0"
 }

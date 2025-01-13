@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t CONSTANT_DOUBLE = 2;
 RichEditorDragPaintMethod::RichEditorDragPaintMethod(const WeakPtr<Pattern>& pattern,
     const RefPtr<TextDragOverlayModifier>& overlayMod, const RefPtr<RichEditorDragContentModifier>& contentMod,
-    const RichEditorDragInfo& info)
+    const TextDragInfo& info)
     : TextDragPaintMethod(pattern, overlayMod), contentModifier_(contentMod), info_(info)
 {}
 

@@ -21,4 +21,8 @@ build_component("marquee") {
   ]
 
   rosen_sources = [ "rosen_render_marquee.cpp" ]
+
+  if (ohos_indep_compiler_enable) {
+    include_dirs = indep_compile_includes
+  }
 }

@@ -51,11 +51,11 @@ void AssignArkValue(Ark_RichEditorRange& dst, const BaseEventInfo& src)
     }
 }
 
-void AssignArkValue(Ark_RichEditorInsertValue& dst, const RichEditorInsertValue& src)
+void AssignArkValue(Ark_RichEditorInsertValue& dst, const RichEditorInsertValue& src, ConvContext *ctx)
 {
     dst.insertOffset = Converter::ArkValue<Ark_Number>(src.GetInsertOffset());
-    dst.insertValue = Converter::ArkValue<Ark_String>(src.GetInsertValue());
-    dst.previewText = Converter::ArkValue<Opt_String>(src.GetPreviewText());
+    dst.insertValue = Converter::ArkValue<Ark_String>(src.GetInsertValue(), ctx);
+    dst.previewText = Converter::ArkValue<Opt_String>(src.GetPreviewText(), ctx);
 }
 
 void AssignArkValue(Ark_RichEditorSpanPosition& dst, const RichEditorAbstractSpanResult& src)
@@ -265,7 +265,8 @@ void AboutToIMEInputImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onCallback = [frameNode](const RichEditorInsertValue& param) -> bool {
-        Ark_RichEditorInsertValue data = Converter::ArkValue<Ark_RichEditorInsertValue>(param);
+        Converter::ConvContext ctx;
+        Ark_RichEditorInsertValue data = Converter::ArkValue<Ark_RichEditorInsertValue>(param, &ctx);
         GetFullAPI()->getEventsAPI()->getRichEditorEventsReceiver()->aboutToIMEInput(frameNode->GetId(), data);
         LOGW("Richeditor modifier, AboutToIMEInputImpl :: callback should return bool value back to the aceEngine");
         return true;
@@ -590,7 +591,7 @@ void PlaceholderImpl(Ark_NativePointer node,
     if (auto value = Converter::OptConvert<PlaceholderOptions>(*style); value) {
         options = *value;
     }
-    options.value = Converter::OptConvert<std::string>(*value);
+    options.value = Converter::OptConvert<std::u16string>(*value);
     RichEditorModelNG::SetPlaceholder(frameNode, options);
 }
 } // RichEditorAttributeModifier

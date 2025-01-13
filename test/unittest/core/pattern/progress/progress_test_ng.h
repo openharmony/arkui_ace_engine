@@ -111,6 +111,7 @@ public:
     void TearDown() override;
     void GetProgress();
     ProgressModelNG CreateProgress(double value, double max, NG::ProgressType type);
+    RefPtr<ProgressModifier> CreateProgressModifier();
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<ProgressPattern> pattern_;

@@ -14,8 +14,33 @@
  */
 
 #include "storage_impl.h"
+#include "application_context.h"
 
 namespace OHOS::Ace {
+StorageImpl::StorageImpl(int areaMode) : Storage()
+{
+    std::string fileName = "";
+    // areaMode >= 0 means using global path
+    if (areaMode >= 0) {
+        auto appContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+        if (appContext != nullptr) {
+            auto defaultAreaMode = appContext->GetArea();
+            appContext->SwitchArea(areaMode);
+            fileName = appContext->GetFilesDir();
+            appContext->SwitchArea(defaultAreaMode);
+        } else {
+            LOGE("appContext get failed in StorageImpl.");
+        }
+    } else {
+        // areaMode < 0 means using module path
+        fileName = AceApplicationInfo::GetInstance().GetDataFileDirPath();
+    }
+    if (fileName.empty()) {
+        LOGE("Cannot get storage date file path.");
+    }
+    fileName_ = fileName + "/persistent_storage";
+};
+
 std::shared_ptr<NativePreferences::Preferences> StorageImpl::GetPreference(const std::string& fileName)
 {
     auto it = preferences_.find(fileName);
@@ -31,8 +56,6 @@ void StorageImpl::SetString(const std::string& key, const std::string& value)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_VOID(pref);
-    TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "Set preference with key %{public}s, value %{public}s",
-        key.c_str(), value.c_str());
     pref->PutString(key, value);
     pref->Flush();
 }
@@ -41,7 +64,6 @@ std::string StorageImpl::GetString(const std::string& key)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_RETURN(pref, "");
-    LOGD("Get preference with key %{public}s", key.c_str());
     return pref->GetString(key, "");
 }
 
@@ -50,7 +72,6 @@ void StorageImpl::Clear()
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_VOID(pref);
     pref->Clear();
-    LOGD("StorageImpl: Clear preferences");
     NativePreferences::PreferencesHelper::DeletePreferences(fileName_);
     preferences_.erase(fileName_);
 }
@@ -59,13 +80,12 @@ void StorageImpl::Delete(const std::string& key)
 {
     std::shared_ptr<NativePreferences::Preferences> pref = GetPreference(fileName_);
     CHECK_NULL_VOID(pref);
-    LOGD("StorageImpl: Delete preference with key %{public}s", key.c_str());
     pref->Delete(key);
     pref->FlushSync();
 }
 
-RefPtr<Storage> StorageProxyImpl::GetStorage() const
+RefPtr<Storage> StorageProxyImpl::GetStorage(int areaMode) const
 {
-    return AceType::MakeRefPtr<StorageImpl>();
+    return AceType::MakeRefPtr<StorageImpl>(areaMode);
 }
 } // namespace OHOS::Ace

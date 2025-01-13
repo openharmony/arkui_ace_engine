@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
+#include "bridge/declarative_frontend/ark_theme/theme_apply/js_lazy_foreach_theme.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach_actuator.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach_builder.h"
@@ -152,7 +153,6 @@ bool ParseAndVerifyParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX
 void JSLazyForEach::JSBind(BindingTarget globalObj)
 {
     JSClass<JSLazyForEach>::Declare("LazyForEach");
-    JSClass<JSLazyForEach>::StaticMethod("createInternal", &JSLazyForEach::Create);
     JSClass<JSLazyForEach>::StaticMethod("create", &JSLazyForEach::Create);
     JSClass<JSLazyForEach>::StaticMethod("pop", &JSLazyForEach::Pop);
     JSClass<JSLazyForEach>::StaticMethod("onMove", &JSLazyForEach::OnMove);
@@ -187,6 +187,7 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
 
     JSRef<JSObject> dataSourceObj = JSRef<JSObject>::Cast(params[PARAM_DATA_SOURCE]);
     JSRef<JSFunc> itemGenerator = JSRef<JSFunc>::Cast(params[PARAM_ITEM_GENERATOR]);
+    JSLazyForEachTheme::ObtainItemGeneratorForThemeSupport(info.GetVm(), itemGenerator);
     ItemKeyGenerator keyGenFunc;
     bool updateChangedNodeFlag = false;
 

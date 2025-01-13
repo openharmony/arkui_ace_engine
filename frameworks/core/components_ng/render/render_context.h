@@ -70,6 +70,16 @@ class FrameNode;
 class InspectorFilter;
 class Modifier;
 
+struct PaintFocusExtraInfo final {
+    PaintFocusExtraInfo() = default;
+    PaintFocusExtraInfo(bool isAccessibilityFocus, bool isFocusBoxGlow)
+        : isAccessibilityFocus(isAccessibilityFocus), isFocusBoxGlow(isFocusBoxGlow)
+    {}
+    ~PaintFocusExtraInfo() = default;
+    bool isAccessibilityFocus { false };
+    bool isFocusBoxGlow { false };
+};
+
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 using TransitionFinishCallback = std::function<void(bool)>;
 
@@ -214,14 +224,15 @@ public:
 
     // Paint focus state by component's setting. It will paint along the paintRect
     virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
-        bool isAccessibilityFocus = false)
+        bool isAccessibilityFocus = false, bool isFocusBoxGlow = false)
     {}
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     virtual void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth, bool isAccessibilityFocus = false)
+        const Dimension& paintWidth, const PaintFocusExtraInfo& paintFocusExtraInfo)
     {}
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
-    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
+    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth,
+        bool isFocusBoxGlow = false)
     {}
 
     virtual void ClearFocusState() {}
@@ -282,7 +293,9 @@ public:
     virtual void SetBounds(float positionX, float positionY, float width, float height) {}
     virtual void SetContentRectToFrame(RectF rect) {}
     virtual void SetSecurityLayer(bool isSecure) {}
-
+    virtual void SetHDRBrightness(float hdrBrightness) {}
+    virtual void SetTransparentLayer(bool isTransparentLayer) {}
+    
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
     virtual void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) {}
@@ -500,7 +513,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(DynamicDimDegree, float);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ParticleOptionArray, std::list<ParticleOption>);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ClickEffectLevel, ClickEffectInfo);
-    virtual RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false)
+    virtual RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false, bool isOffline = true)
     {
         return nullptr;
     }
@@ -734,6 +747,7 @@ public:
     {
         return 0;
     }
+    virtual void MarkUiFirstNode(bool isUiFirstNode) {}
 
 protected:
     RenderContext() = default;

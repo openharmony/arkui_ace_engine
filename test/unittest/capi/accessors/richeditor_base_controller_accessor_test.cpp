@@ -224,7 +224,7 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, setTypingStyleTest, TestSize.Leve
 HWTEST_F(RichEditorBaseControllerAccessorTest, DISABLED_GetPreviewTextTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPreviewText, nullptr);
-    PreviewTextInfo previewText = {.offset = 1, .value = "info"};
+    PreviewTextInfo previewText = {.offset = 1, .value = u"info"};
     EXPECT_CALL(*mockRichEditorController_, GetPreviewTextInfo()).Times(1).WillOnce(Return(previewText));
     accessor_->getPreviewText(peer_); // fix after updating a return value
     // check a return value

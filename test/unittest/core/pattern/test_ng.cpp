@@ -45,8 +45,30 @@ void TestNG::TearDownTestSuite()
     MockAnimationManager::Enable(false);
 }
 
+void TestNG::FlushUITasks()
+{
+    rootNode_->SetActive();
+    rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    MockPipelineContext::GetCurrent()->FlushUITasks();
+}
+
 RefPtr<PaintWrapper> TestNG::FlushLayoutTask(const RefPtr<FrameNode>& frameNode, bool markDirty)
 {
+    if (MockPipelineContext::GetCurrent()->UseFlushUITasks()) {
+        if (frameNode) {
+            frameNode->SetActive();
+            frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            MockPipelineContext::GetCurrent()->FlushUITasks();
+            return frameNode->CreatePaintWrapper();
+        }
+        if (rootNode_) {
+            rootNode_->SetActive();
+            rootNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            MockPipelineContext::GetCurrent()->FlushUITasks();
+            return rootNode_->CreatePaintWrapper();
+        }
+        return nullptr;
+    }
     if (markDirty) {
         frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
@@ -72,7 +94,7 @@ void TestNG::FlushExpandSafeAreaTask()
     safeAreaManager->ExpandSafeArea();
 }
 
-RefPtr<PaintWrapper> TestNG::CreateDone(const RefPtr<FrameNode>& frameNode)
+void TestNG::CreateDone()
 {
     auto& elementsStack = ViewStackProcessor::GetInstance()->elementsStack_;
     while (elementsStack.size() > 1) {
@@ -80,11 +102,9 @@ RefPtr<PaintWrapper> TestNG::CreateDone(const RefPtr<FrameNode>& frameNode)
         ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     }
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
-    auto rootNode = AceType::DynamicCast<FrameNode>(element);
+    rootNode_ = AceType::DynamicCast<FrameNode>(element);
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
-    auto layoutNode = frameNode ? frameNode : rootNode;
-    layoutNode->MarkModifyDone();
-    return FlushLayoutTask(layoutNode);
+    FlushUITasks();
 }
 
 void TestNG::CreateLayoutTask(const RefPtr<FrameNode>& frameNode)
@@ -175,86 +195,36 @@ void TestNG::SetSize(std::optional<Axis> axis, const CalcLength& crossSize, cons
     }
 }
 
-void TestNG::DragStart(const RefPtr<FrameNode>& frameNode, Offset startOffset)
+AssertionResult TestNG::IsExist(const RefPtr<FrameNode>& frameNode, int32_t index)
 {
-    rootNode_ = FindRootNode(frameNode);
-    dragNode_ = FindScrollableNode(frameNode);
-    GestureEvent gesture;
-    dragInfo_ = gesture;
-    auto pattern = dragNode_->GetPattern<ScrollablePattern>();
-    auto scrollable = pattern->GetScrollableEvent()->GetScrollable();
-    dragInfo_.SetSourceTool(SourceTool::FINGER);
-    dragInfo_.SetInputEventType(InputEventType::TOUCH_SCREEN);
-    dragInfo_.SetGlobalPoint(Point() + startOffset);
-    dragInfo_.SetGlobalLocation(startOffset);
-    dragInfo_.SetLocalLocation(startOffset);
-    scrollable->HandleTouchDown();
-    scrollable->isDragging_ = true;
-    scrollable->HandleDragStart(dragInfo_);
-}
-
-void TestNG::DragUpdate(float delta)
-{
-    auto pattern = dragNode_->GetPattern<ScrollablePattern>();
-    auto scrollable = pattern->GetScrollableEvent()->GetScrollable();
-    double velocity = delta > 0 ? 200 : -200;
-    dragInfo_.SetMainVelocity(velocity);
-    dragInfo_.SetMainDelta(delta);
-    dragInfo_.SetGlobalPoint(Point(0, delta));
-    dragInfo_.SetGlobalLocation(Offset(0, delta));
-    dragInfo_.SetLocalLocation(Offset(0, delta));
-    scrollable->HandleDragUpdate(dragInfo_);
-    FlushLayoutTask(rootNode_);
-    FlushLayoutTask(dragNode_);
-}
-
-void TestNG::DragEnd(float velocityDelta)
-{
-    auto pattern = dragNode_->GetPattern<ScrollablePattern>();
-    auto scrollable = pattern->GetScrollableEvent()->GetScrollable();
-    float velocity = velocityDelta * FRICTION * -FRICTION_SCALE;
-    dragInfo_.SetMainDelta(0);
-    dragInfo_.SetMainVelocity(velocity);
-    dragInfo_.SetGlobalPoint(dragInfo_.GetGlobalPoint());
-    dragInfo_.SetGlobalLocation(dragInfo_.GetGlobalLocation());
-    dragInfo_.SetLocalLocation(dragInfo_.GetLocalLocation());
-    scrollable->HandleTouchUp();
-    scrollable->HandleDragEnd(dragInfo_);
-    scrollable->isDragging_ = false;
-    FlushLayoutTask(rootNode_);
-    FlushLayoutTask(dragNode_);
-    rootNode_ = nullptr;
-    dragNode_ = nullptr;
-}
-
-void TestNG::DragAction(const RefPtr<FrameNode>& frameNode, Offset startOffset, float dragDelta, float velocityDelta)
-{
-    DragStart(frameNode, startOffset);
-    DragUpdate(dragDelta);
-    DragEnd(velocityDelta);
-}
-
-RefPtr<FrameNode> TestNG::FindRootNode(const RefPtr<FrameNode>& frameNode)
-{
-    auto rootNode = frameNode;
-    while (rootNode && !rootNode->IsRootNode()) {
-        if (!rootNode->GetParent()) {
-            break;
-        }
-        rootNode = AceType::DynamicCast<FrameNode>(rootNode->GetParent());
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index, true));
+    if (childNode) {
+        return AssertionSuccess();
     }
-    return rootNode;
+    return AssertionFailure();
 }
 
-RefPtr<FrameNode> TestNG::FindScrollableNode(const RefPtr<FrameNode>& frameNode)
+AssertionResult TestNG::IsExistAndActive(const RefPtr<FrameNode>& frameNode, int32_t index)
 {
-    auto scrollableNode = frameNode;
-    while (scrollableNode) {
-        if (AceType::InstanceOf<ScrollablePattern>(scrollableNode->GetPattern())) {
-            return scrollableNode;
-        }
-        scrollableNode = AceType::DynamicCast<FrameNode>(scrollableNode->GetParent());
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index, true));
+    if (!childNode) {
+        return AssertionFailure();
     }
-    return scrollableNode;
+    if (childNode->IsActive()) {
+        return AssertionSuccess();
+    }
+    return AssertionFailure();
+}
+
+AssertionResult TestNG::IsExistAndInActive(const RefPtr<FrameNode>& frameNode, int32_t index)
+{
+    auto childNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildByIndex(index, true));
+    if (!childNode) {
+        return AssertionFailure();
+    }
+    if (childNode->IsActive()) {
+        return AssertionFailure();
+    }
+    return AssertionSuccess();
 }
 } // namespace OHOS::Ace::NG

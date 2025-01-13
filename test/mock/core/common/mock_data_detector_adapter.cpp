@@ -20,7 +20,7 @@ void DataDetectorAdapter::SetTextDetectTypes(const std::string& types)
 {
     textDetectTypes_ = types;
 }
-bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::string& text)
+bool DataDetectorAdapter::ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::u16string& text)
 {
     return false;
 }

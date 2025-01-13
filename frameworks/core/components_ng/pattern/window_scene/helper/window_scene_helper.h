@@ -64,6 +64,9 @@ public:
     static void InjectPointerEvent(const RefPtr<FrameNode>& node,
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
 
+    // this method only for window scene inject cancel event, can't be used in other event.
+    static void InjectPointerEventForActionCancel(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
+
     static bool InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent, bool isPreIme = false);
 
     static bool IsWindowPattern(const RefPtr<FrameNode>& node);

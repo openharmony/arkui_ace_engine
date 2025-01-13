@@ -34,7 +34,7 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
   applyModifierPatch(): void {
     let expiringItemsWithKeys = [];
     this._modifiersWithKeys.forEach((value, key) => {
-      if (value.applyStage(this.nativePtr)) {
+      if (value.applyStage(this.nativePtr, this)) {
         expiringItemsWithKeys.push(key);
       }
     });
@@ -480,6 +480,14 @@ class ArkXComponentComponent extends ArkComponent implements XComponentAttribute
     modifierWithKey(this._modifiersWithKeys, XComponentEnableSecureModifier.identity, XComponentEnableSecureModifier, value);
     return this;
   }
+  hdrBrightness(value: number): this {
+    modifierWithKey(this._modifiersWithKeys, XComponentHdrBrightnessModifier.identity, XComponentHdrBrightnessModifier, value);
+    return this;
+  }
+  enableTransparentLayer(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, XComponentEnableTransparentLayerModifier.identity, XComponentEnableTransparentLayerModifier, value);
+    return this;
+  }
 }
 
 // @ts-ignore
@@ -875,6 +883,42 @@ class XComponentEnableSecureModifier extends ModifierWithKey<boolean> {
       getUINativeModule().xComponent.resetEnableSecure(node);
     } else {
       getUINativeModule().xComponent.setEnableSecure(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class XComponentHdrBrightnessModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentHdrBrightness');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetHdrBrightness(node);
+    } else {
+      getUINativeModule().xComponent.setHdrBrightness(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class XComponentEnableTransparentLayerModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentEnableTransparentLayer');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetEnableTransparentLayer(node);
+    } else {
+      getUINativeModule().xComponent.setEnableTransparentLayer(node, this.value);
     }
   }
 

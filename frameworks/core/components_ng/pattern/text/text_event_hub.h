@@ -30,12 +30,12 @@ public:
     TextEventHub() = default;
     ~TextEventHub() override = default;
 
-    void SetOnCopy(std::function<void(const std::string&)>&& func)
+    void SetOnCopy(std::function<void(const std::u16string&)>&& func)
     {
         onCopy_ = std::move(func);
     }
 
-    void FireOnCopy(const std::string& value)
+    void FireOnCopy(const std::u16string& value)
     {
         if (onCopy_) {
             onCopy_(value);
@@ -54,9 +54,22 @@ public:
         }
     }
 
+    void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func)
+    {
+        onMarqueeStateChange_ = std::move(func);
+    }
+
+    void FireOnMarqueeStateChange(int32_t marqueeState)
+    {
+        if (onMarqueeStateChange_) {
+            onMarqueeStateChange_(marqueeState);
+        }
+    }
+
 private:
-    std::function<void(const std::string&)> onCopy_;
+    std::function<void(const std::u16string&)> onCopy_;
     std::function<void(int32_t, int32_t)> onSelectionChange_;
+    std::function<void(int32_t)> onMarqueeStateChange_;
     ACE_DISALLOW_COPY_AND_MOVE(TextEventHub);
 };
 } // namespace OHOS::Ace::NG

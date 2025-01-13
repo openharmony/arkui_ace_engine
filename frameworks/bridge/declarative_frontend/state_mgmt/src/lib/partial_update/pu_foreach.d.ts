@@ -61,4 +61,5 @@ declare class RepeatVirtualScrollNative {
   static updateRenderState(totalCount: number, visibleItemsChanged: boolean): void;
   // drag and drop
   static onMove(handler: (from: number, to: number) => void);
+  static setCreateByTemplate(isCreatedByTemplate: boolean): void;
 }

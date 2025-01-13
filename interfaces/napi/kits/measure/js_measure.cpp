@@ -373,8 +373,7 @@ static napi_value JSMeasureTextSize(napi_env env, napi_callback_info info)
     napi_set_named_property(env, result, "width", resultArray[0]);
     napi_set_named_property(env, result, "height", resultArray[1]);
 
-    napi_value newResult = nullptr;
-    napi_escape_handle(env, scope, result, &newResult);
+    napi_escape_handle(env, scope, result, &result);
     napi_close_escapable_handle_scope(env, scope);
     return result;
 }

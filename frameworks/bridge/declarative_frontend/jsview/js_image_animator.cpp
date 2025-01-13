@@ -22,23 +22,20 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<ImageAnimatorModel> ImageAnimatorModel::instance_ = nullptr;
-std::mutex ImageAnimatorModel::mutex_;
 ImageAnimatorModel* ImageAnimatorModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
+    static std::once_flag onceFlag;
+    std::call_once(onceFlag, []() {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ImageAnimatorModelNG());
+        instance_.reset(new NG::ImageAnimatorModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ImageAnimatorModelNG());
-            } else {
-                instance_.reset(new Framework::ImageAnimatorModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::ImageAnimatorModelNG());
+        } else {
+            instance_.reset(new Framework::ImageAnimatorModelImpl());
         }
-    }
+#endif
+    });
     return instance_.get();
 }
 

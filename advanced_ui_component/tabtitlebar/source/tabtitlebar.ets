@@ -19,24 +19,60 @@ import window from '@ohos.window'
 import common from '@ohos.app.ability.common'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
+import { SymbolGlyphModifier } from '@kit.ArkUI'
 
 export interface TabTitleBarMenuItem {
   value: ResourceStr;
+  symbolStyle?: SymbolGlyphModifier;
   isEnabled?: boolean;
   action?: () => void;
   label?: ResourceStr;
+  accessibilityText?: ResourceStr;
+  accessibilityLevel?: string;
+  accessibilityDescription?: ResourceStr;
 }
 
 export interface TabTitleBarTabItem {
   title: ResourceStr;
   icon?: ResourceStr;
+  symbolStyle?: SymbolGlyphModifier;
 }
 
-const PUBLIC_MORE = $r('sys.media.ohos_ic_public_more')
+const PUBLIC_MORE = $r('sys.symbol.dot_grid_2x2')
 const TEXT_EDITABLE_DIALOG = '18.3fp'
 const IMAGE_SIZE = '64vp'
 const MAX_DIALOG = '256vp'
 const MIN_DIALOG = '216vp'
+const RESOURCE_TYPE_SYMBOL: number = 40000;
+
+class ButtonGestureModifier implements GestureModifier {
+  public static readonly longPressTime: number = 500;
+  public static readonly minFontSize: number = 1.75;
+  public fontSize: number = 1;
+  public controller: CustomDialogController | null = null;
+
+  constructor(controller: CustomDialogController | null) {
+    this.controller = controller;
+  }
+
+  applyGesture(event: UIGestureEvent): void {
+    if (this.fontSize >= ButtonGestureModifier.minFontSize) {
+      event.addGesture(
+        new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
+          .onAction(() => {
+            if (event) {
+              this.controller?.open();
+            }
+          })
+          .onActionEnd(() => {
+            this.controller?.close();
+          })
+      )
+    } else {
+      event.clearGestures();
+    }
+  }
+}
 
 @Component
 export struct TabTitleBar {
@@ -104,7 +140,7 @@ export struct TabTitleBar {
     tabOffset += TabContentItem.marginFirst
 
     this.tabItems.forEach((tabItem, index) => {
-      if (tabItem.icon !== undefined) {
+      if (tabItem.icon !== undefined || tabItem.symbolStyle !== undefined) {
         if (Math.abs(this.imageWidths[index]) > TabContentItem.imageHotZoneWidth) {
           tabOffset += this.imageWidths[index]
         } else {
@@ -213,9 +249,9 @@ struct CollapsibleMenuSection {
   index: number = 0;
   item: TabTitleBarMenuItem = {
     value: PUBLIC_MORE,
+    symbolStyle: new SymbolGlyphModifier(PUBLIC_MORE),
     label: $r('sys.string.ohos_toolbar_more'),
   } as TabTitleBarMenuItem;
-  longPressTime: number = 500;
   minFontSize: number = 1.75;
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
@@ -231,7 +267,7 @@ struct CollapsibleMenuSection {
   @State isMoreIconOnFocus: boolean = false
   @State isMoreIconOnHover: boolean = false
   @State isMoreIconOnClick: boolean = false
-  @Prop fontSize: number = 1
+  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
 
   dialogController: CustomDialogController | null = new CustomDialogController({
     builder: TabTitleBarDialog({
@@ -247,6 +283,8 @@ struct CollapsibleMenuSection {
     isModal: true,
     customStyle: true,
   })
+
+  @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
 
   getMoreIconFgColor() {
     return this.isMoreIconOnClick
@@ -277,9 +315,10 @@ struct CollapsibleMenuSection {
     this.menuItems.forEach((item, index) => {
       if (item.isEnabled && this.firstFocusableIndex === -1 &&
         index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-          this.firstFocusableIndex = this.index * 1000 + index + 1
+        this.firstFocusableIndex = this.index * 1000 + index + 1
       }
     })
+    this.fontSize = this.decideFontScale()
   }
 
   decideFontScale(): number {
@@ -289,6 +328,10 @@ struct CollapsibleMenuSection {
       return 1;
     }
     return Math.min(this.systemFontScale, this.maxFontScale);
+  }
+
+  onFontSizeUpdated(): void {
+    this.buttonGestureModifier.fontSize = this.fontSize;
   }
 
   build() {
@@ -301,23 +344,22 @@ struct CollapsibleMenuSection {
         } else {
           ForEach(this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1),
             (item: TabTitleBarMenuItem, index: number) => {
-             ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
+              ImageMenuItem({ item: item, index: this.index * 1000 + index + 1 })
             })
 
-          Row() {
-            Image(PUBLIC_MORE)
-              .width(ImageMenuItem.imageSize)
-              .height(ImageMenuItem.imageSize)
-              .focusable(true)
+          Button({ type: ButtonType.Normal, stateEffect: true }) {
+            SymbolGlyph(PUBLIC_MORE)
+              .fontSize(TabContentItem.symbolSize)
               .draggable(false)
-              .fillColor($r('sys.color.icon_primary'))
+              .fontColor([$r('sys.color.icon_primary')])
+              .focusable(true)
           }
+          .accessibilityText($r('sys.string.ohos_toolbar_more'))
           .width(ImageMenuItem.imageHotZoneWidth)
           .height(ImageMenuItem.imageHotZoneWidth)
           .borderRadius(ImageMenuItem.buttonBorderRadius)
           .foregroundColor(this.getMoreIconFgColor())
           .backgroundColor(this.getMoreIconBgColor())
-          .justifyContent(FlexAlign.Center)
           .stateStyles({
             focused: {
               .border({
@@ -360,16 +402,7 @@ struct CollapsibleMenuSection {
             }
           })
           .onClick(() => this.isPopupShown = true)
-          .gesture(
-            LongPressGesture({ repeat: false, duration: this.longPressTime })
-              .onAction((event: GestureEvent) => {
-                this.fontSize = this.decideFontScale();
-                if (event) {
-                  if (this.fontSize >= this.minFontSize) {
-                    this.dialogController?.open()
-                  }
-                }
-              }))
+          .gestureModifier(this.buttonGestureModifier)
           .bindPopup(this.isPopupShown, {
             builder: this.popupBuilder,
             placement: Placement.Bottom,
@@ -425,6 +458,7 @@ struct TabContentItem {
   @State imageHeight: number = 24
 
   static readonly imageSize = 24
+  static readonly symbolSize = '24vp'
   static readonly imageHotZoneWidth = 48
   static readonly imageMagnificationFactor = 1.4
   static readonly buttonBorderRadius = 8
@@ -463,11 +497,29 @@ struct TabContentItem {
     return TabContentItem.imageSize / Math.max(this.imageHeight, 1.0) * this.imageWidth
   }
 
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+    if (typeof resource === 'string') {
+      return resource;
+    } else if (typeof resource === 'undefined') {
+      return '';
+    } else {
+      let resourceString: string = '';
+      try {
+        resourceString = getContext()?.resourceManager?.getStringSync(resource);
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
+      return resourceString;
+    }
+  }
+
   build() {
     Stack() {
       Row() {
         Column() {
-          if (this.item.icon === undefined) {
+          if (this.item.icon === undefined && this.item.symbolStyle === undefined) {
             Text(this.item.title)
               .fontSize(this.index === this.currentIndex
                 ? $r('sys.float.ohos_id_text_size_headline7')
@@ -507,39 +559,75 @@ struct TabContentItem {
                 }
               })
               .onClick(() => this.onCustomClick && this.onCustomClick(this.index))
+              .accessibilitySelected(this.index === this.currentIndex)
           } else {
             Row() {
-              Image(this.item.icon)
-                .alt(this.item.title)
-                .width(this.getImageLayoutWidth())
-                .height(TabContentItem.imageSize)
-                .objectFit(ImageFit.Fill)
-                .scale({
-                  x: this.getImageScaleFactor(),
-                  y: this.getImageScaleFactor()
-                })
-                .animation({ duration: 300 })
-                .hitTestBehavior(HitTestMode.None)
-                .focusable(true)
-                .onComplete((event) => {
-                  if (!this.onImageComplete) {
-                    return
-                  }
-                  this.imageWidth = px2vp(event?.width);
-                  this.imageHeight = px2vp(event?.height);
-                  this.onImageComplete(px2vp(event?.componentWidth) +
-                    TabContentItem.paddingLeft + TabContentItem.paddingRight);
-                })
-                .onError((event) => {
-                  if (!this.onImageComplete) {
-                    return
-                  }
-                  this.onImageComplete(px2vp(event.componentWidth) +
-                    TabContentItem.paddingLeft + TabContentItem.paddingRight)
-                })
+              if (this.item.symbolStyle) {
+                SymbolGlyph()
+                  .fontColor([$r('sys.color.icon_primary')])
+                  .attributeModifier(this.item.symbolStyle)
+                  .fontSize(TabContentItem.symbolSize)
+                  .width(this.getImageLayoutWidth())
+                  .height(TabContentItem.imageSize)
+                  .accessibilityText(this.toStringFormat(this.item.title))
+                  .scale({
+                    x: this.getImageScaleFactor(),
+                    y: this.getImageScaleFactor()
+                  })
+                  .animation({ duration: 300 })
+                  .hitTestBehavior(HitTestMode.None)
+                  .focusable(true)
+                  .symbolEffect(new SymbolEffect(), false)
+              } else {
+                if (Util.isSymbolResource(this.item.icon)) {
+                  SymbolGlyph(this.item.icon as Resource)
+                    .fontColor([$r('sys.color.icon_primary')])
+                    .fontSize(TabContentItem.symbolSize)
+                    .width(this.getImageLayoutWidth())
+                    .height(TabContentItem.imageSize)
+                    .accessibilityText(this.toStringFormat(this.item.title))
+                    .scale({
+                      x: this.getImageScaleFactor(),
+                      y: this.getImageScaleFactor()
+                    })
+                    .animation({ duration: 300 })
+                    .hitTestBehavior(HitTestMode.None)
+                    .focusable(true)
+                } else {
+                  Image(this.item.icon)
+                    .alt(this.item.title)
+                    .width(this.getImageLayoutWidth())
+                    .height(TabContentItem.imageSize)
+                    .objectFit(ImageFit.Fill)
+                    .accessibilityText(this.toStringFormat(this.item.title))
+                    .scale({
+                      x: this.getImageScaleFactor(),
+                      y: this.getImageScaleFactor()
+                    })
+                    .animation({ duration: 300 })
+                    .hitTestBehavior(HitTestMode.None)
+                    .focusable(true)
+                    .onComplete((event) => {
+                      if (!this.onImageComplete) {
+                        return
+                      }
+                      this.imageWidth = px2vp(event?.width);
+                      this.imageHeight = px2vp(event?.height);
+                      this.onImageComplete(px2vp(event?.componentWidth) +
+                      TabContentItem.paddingLeft + TabContentItem.paddingRight);
+                    })
+                    .onError((event) => {
+                      if (!this.onImageComplete) {
+                        return
+                      }
+                      this.onImageComplete(px2vp(event.componentWidth) +
+                      TabContentItem.paddingLeft + TabContentItem.paddingRight)
+                    })
+                }
+              }
             }
             .width(this.getImageLayoutWidth() * this.getImageScaleFactor() +
-              TabContentItem.paddingLeft + TabContentItem.paddingRight)
+            TabContentItem.paddingLeft + TabContentItem.paddingRight)
             .constraintSize({
               minWidth: TabContentItem.imageHotZoneWidth,
               minHeight: TabContentItem.imageHotZoneWidth
@@ -569,6 +657,7 @@ struct TabContentItem {
               }
             })
             .onClick(() => this.onCustomClick && this.onCustomClick(this.index))
+            .accessibilitySelected(this.index === this.currentIndex)
           }
         }
         .justifyContent(FlexAlign.Center)
@@ -612,6 +701,11 @@ struct TabContentItem {
 struct ImageMenuItem {
   item: TabTitleBarMenuItem = { value: '' };
   index: number = 0;
+  minFontSize: number = 1.75;
+  isFollowingSystemFontScale: boolean = false;
+  maxFontScale: number = 1;
+  systemFontScale?: number = 1;
+  isPopup: boolean = false;
 
   static readonly imageSize = 24
   static readonly imageHotZoneWidth = 48
@@ -623,6 +717,30 @@ struct ImageMenuItem {
   @State isOnFocus: boolean = false
   @State isOnHover: boolean = false
   @State isOnClick: boolean = false
+  @Prop @Watch('onFontSizeUpdated') fontSize: number = 1;
+  dialogController: CustomDialogController | null = new CustomDialogController({
+    builder: TabTitleBarDialog({
+      cancel: () => {
+      },
+      confirm: () => {
+      },
+      tabTitleDialog: this.item,
+      tabTitleBarDialog: this.item.label ? this.item.label : '',
+      fontSize: this.fontSize,
+    }),
+    maskColor: Color.Transparent,
+    isModal: true,
+    customStyle: true,
+  })
+  @State buttonGestureModifier: ButtonGestureModifier = new ButtonGestureModifier(this.dialogController);
+
+  private textDialog(): ResourceStr {
+    if (this.item.value === PUBLIC_MORE) {
+      return $r('sys.string.ohos_toolbar_more');
+    } else {
+      return this.item.label ? this.item.label : '';
+    }
+  }
 
   getFgColor() {
     return this.isOnClick
@@ -640,21 +758,105 @@ struct ImageMenuItem {
     }
   }
 
-  build() {
-    Row() {
-      Image(this.item.value)
-        .width(ImageMenuItem.imageSize)
-        .height(ImageMenuItem.imageSize)
-        .focusable(this.item.isEnabled)
-        .key(ImageMenuItem.focusablePrefix + this.index)
-        .draggable(false)
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+    if (typeof resource === 'string') {
+      return resource;
+    } else if (typeof resource === 'undefined') {
+      return '';
+    } else {
+      let resourceString: string = '';
+      try {
+        resourceString = getContext()?.resourceManager?.getStringSync(resource);
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
+      }
+      return resourceString;
     }
+  }
+
+  private getAccessibilityReadText(): string | undefined {
+    if (this.item.value === PUBLIC_MORE) {
+      return getContext()?.resourceManager?.getStringByNameSync('ohos_toolbar_more');
+    } else if (this.item.accessibilityText) {
+      return this.toStringFormat(this.item.accessibilityText);
+    } else if (this.item.label) {
+      return this.toStringFormat(this.item.label);
+    }
+    return ' ';
+  }
+
+  onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Layoutable[], constraint: ConstraintSizeOptions): void {
+    children.forEach((child) => {
+      child.layout({ x: 0, y: 0 });
+    })
+    this.fontSize = this.decideFontScale();
+  }
+
+  onFontSizeUpdated(): void {
+    this.buttonGestureModifier.fontSize = this.fontSize;
+  }
+
+  aboutToAppear(): void {
+    try {
+      let uiContent: UIContext = this.getUIContext();
+      this.isFollowingSystemFontScale = uiContent.isFollowingSystemFontScale();
+      this.maxFontScale = uiContent.getMaxFontScale();
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+    }
+    this.fontSize = this.decideFontScale();
+  }
+
+  decideFontScale(): number {
+    let uiContent: UIContext = this.getUIContext();
+    this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
+    return Math.min(this.systemFontScale, this.maxFontScale);
+  }
+
+  build() {
+    Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
+      if (this.item.symbolStyle) {
+        SymbolGlyph()
+          .fontColor([$r('sys.color.font_primary')])
+          .attributeModifier(this.item.symbolStyle)
+          .fontSize(TabContentItem.symbolSize)
+          .draggable(false)
+          .focusable(this.item?.isEnabled)
+          .key(ImageMenuItem.focusablePrefix + this.index)
+          .symbolEffect(new SymbolEffect(), false)
+      } else {
+        if (Util.isSymbolResource(this.item.value)) {
+          SymbolGlyph(this.item.value as Resource)
+            .fontColor([$r('sys.color.font_primary')])
+            .fontSize(TabContentItem.symbolSize)
+            .draggable(false)
+            .focusable(this.item?.isEnabled)
+            .key(ImageMenuItem.focusablePrefix + this.index)
+        } else {
+          Image(this.item.value)
+            .width(ImageMenuItem.imageSize)
+            .height(ImageMenuItem.imageSize)
+            .focusable(this.item.isEnabled)
+            .key(ImageMenuItem.focusablePrefix + this.index)
+            .draggable(false)
+        }
+      }
+    }
+    .accessibilityText(this.getAccessibilityReadText())
+    .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
+    .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
     .width(ImageMenuItem.imageHotZoneWidth)
     .height(ImageMenuItem.imageHotZoneWidth)
     .borderRadius(ImageMenuItem.buttonBorderRadius)
     .foregroundColor(this.getFgColor())
     .backgroundColor(this.getBgColor())
-    .justifyContent(FlexAlign.Center)
     .opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity)
     .stateStyles({
       focused: {
@@ -708,9 +910,13 @@ struct ImageMenuItem {
       }
       if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
         this.isOnClick = false
+        if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+          this.dialogController?.close()
+        }
       }
     })
     .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
+    .gestureModifier(this.buttonGestureModifier)
   }
 }
 
@@ -741,14 +947,40 @@ struct TabTitleBarDialog {
   build() {
     if (this.tabTitleBarDialog) {
       Column() {
-        Image(this.tabTitleDialog.value)
-          .width(IMAGE_SIZE)
-          .height(IMAGE_SIZE)
-          .margin({
-            top: $r('sys.float.padding_level24'),
-            bottom: $r('sys.float.padding_level8'),
-          })
-          .fillColor($r('sys.color.icon_primary'))
+        if (this.tabTitleDialog.symbolStyle) {
+          SymbolGlyph()
+            .fontColor([$r('sys.color.font_primary')])
+            .attributeModifier(this.tabTitleDialog.symbolStyle)
+            .fontSize(IMAGE_SIZE)
+            .draggable(false)
+            .focusable(this.tabTitleDialog?.isEnabled)
+            .margin({
+              top: $r('sys.float.padding_level24'),
+              bottom: $r('sys.float.padding_level8'),
+            })
+            .symbolEffect(new SymbolEffect(), false)
+        } else if (this.tabTitleDialog.value) {
+          if (Util.isSymbolResource(this.tabTitleDialog.value)) {
+            SymbolGlyph(this.tabTitleDialog.value as Resource)
+              .fontColor([$r('sys.color.font_primary')])
+              .fontSize(IMAGE_SIZE)
+              .draggable(false)
+              .focusable(this.tabTitleDialog?.isEnabled)
+              .margin({
+                top: $r('sys.float.padding_level24'),
+                bottom: $r('sys.float.padding_level8'),
+              })
+          } else {
+            Image(this.tabTitleDialog.value)
+              .width(IMAGE_SIZE)
+              .height(IMAGE_SIZE)
+              .margin({
+                top: $r('sys.float.padding_level24'),
+                bottom: $r('sys.float.padding_level8'),
+              })
+              .fillColor($r('sys.color.icon_primary'))
+          }
+        }
         Column() {
           Text(this.tabTitleBarDialog)
             .fontSize(TEXT_EDITABLE_DIALOG)
@@ -772,10 +1004,32 @@ struct TabTitleBarDialog {
       .borderRadius($r('sys.float.corner_radius_level10'))
     } else {
       Column() {
-        Image(this.tabTitleDialog.value)
-          .width(IMAGE_SIZE)
-          .height(IMAGE_SIZE)
-          .fillColor($r('sys.color.icon_primary'))
+        if (this.tabTitleDialog.symbolStyle) {
+          SymbolGlyph()
+            .fontColor([$r('sys.color.font_primary')])
+            .attributeModifier(this.tabTitleDialog.symbolStyle)
+            .fontSize(IMAGE_SIZE)
+            .draggable(false)
+            .focusable(this.tabTitleDialog?.isEnabled)
+            .symbolEffect(new SymbolEffect(), false)
+        } else if (this.tabTitleDialog.value){
+          if (Util.isSymbolResource(this.tabTitleDialog.value)) {
+            SymbolGlyph(this.tabTitleDialog.value as Resource)
+              .fontColor([$r('sys.color.font_primary')])
+              .fontSize(IMAGE_SIZE)
+              .draggable(false)
+              .focusable(this.tabTitleDialog?.isEnabled)
+              .margin({
+                top: $r('sys.float.padding_level24'),
+                bottom: $r('sys.float.padding_level8'),
+              })
+          } else {
+            Image(this.tabTitleDialog.value)
+              .width(IMAGE_SIZE)
+              .height(IMAGE_SIZE)
+              .fillColor($r('sys.color.icon_primary'))
+          }
+        }
       }
       .width(this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG)
       .constraintSize({ minHeight: this.fontSize === this.maxFontSize ? MAX_DIALOG : MIN_DIALOG })
@@ -796,5 +1050,25 @@ struct TabTitleBarDialog {
     } else {
       this.maxLines = this.horizontalsScreenLines;
     }
+  }
+}
+
+class Util {
+  public static isSymbolResource(resourceStr: ResourceStr | undefined): boolean {
+    if (!Util.isResourceType(resourceStr)) {
+      return false;
+    }
+    let resource = resourceStr as Resource;
+    return resource.type === RESOURCE_TYPE_SYMBOL;
+  }
+  
+  public static isResourceType(resource: ResourceStr | Resource | undefined): boolean {
+    if (!resource) {
+      return false;
+    }
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
   }
 }

@@ -385,23 +385,33 @@ ArkUINativeModuleValue ImageSpanBridge::SetBorderRadius(ArkUIRuntimeCallInfo *ru
     CalcDimension bottomLeft;
     CalcDimension bottomRight;
 
-    ArkTSUtils::ParseAllBorder(vm, topLeftArgs, topLeft);
-    ArkTSUtils::ParseAllBorder(vm, topRightArgs, topRight);
-    ArkTSUtils::ParseAllBorder(vm, bottomLeftArgs, bottomLeft);
-    ArkTSUtils::ParseAllBorder(vm, bottomRightArgs, bottomRight);
-
+    bool isLengthMetrics = false;
+    isLengthMetrics |= ArkTSUtils::ParseJsLengthMetrics(vm, topLeftArgs, topLeft);
+    isLengthMetrics |= ArkTSUtils::ParseJsLengthMetrics(vm, topRightArgs, topRight);
+    isLengthMetrics |= ArkTSUtils::ParseJsLengthMetrics(vm, bottomLeftArgs, bottomLeft);
+    isLengthMetrics |= ArkTSUtils::ParseJsLengthMetrics(vm, bottomRightArgs, bottomRight);
+    if (!isLengthMetrics) {
+        ArkTSUtils::ParseAllBorder(vm, topLeftArgs, topLeft);
+        ArkTSUtils::ParseAllBorder(vm, topRightArgs, topRight);
+        ArkTSUtils::ParseAllBorder(vm, bottomLeftArgs, bottomLeft);
+        ArkTSUtils::ParseAllBorder(vm, bottomRightArgs, bottomRight);
+    }
+    auto directionChanged = false;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        directionChanged = isRightToLeft && isLengthMetrics;
+    }
     uint32_t size = SIZE_OF_FOUR;
     ArkUI_Float32 values[size];
     int units[size];
-
-    values[NUM_0] = topLeft.Value();
-    units[NUM_0] = static_cast<int>(topLeft.Unit());
-    values[NUM_1] = topRight.Value();
-    units[NUM_1] = static_cast<int>(topRight.Unit());
-    values[NUM_2] = bottomLeft.Value();
-    units[NUM_2] = static_cast<int>(bottomLeft.Unit());
-    values[NUM_3] = bottomRight.Value();
-    units[NUM_3] = static_cast<int>(bottomRight.Unit());
+    values[NUM_0] = directionChanged ? topRight.Value() : topLeft.Value();
+    units[NUM_0] = directionChanged ? static_cast<int>(topRight.Unit()) : static_cast<int>(topLeft.Unit());
+    values[NUM_1] = directionChanged ? topLeft.Value() : topRight.Value();
+    units[NUM_1] = directionChanged ? static_cast<int>(topLeft.Unit()) : static_cast<int>(topRight.Unit());
+    values[NUM_2] = directionChanged ? bottomRight.Value() : bottomLeft.Value();
+    units[NUM_2] = directionChanged ? static_cast<int>(bottomRight.Unit()) : static_cast<int>(bottomLeft.Unit());
+    values[NUM_3] = directionChanged ? bottomLeft.Value() : bottomRight.Value();
+    units[NUM_3] = directionChanged ? static_cast<int>(bottomLeft.Unit()) : static_cast<int>(bottomRight.Unit());
 
     GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanBorderRadius(nativeNode, values, units, SIZE_OF_FOUR);
 

@@ -514,6 +514,16 @@ public:
         return followTransformOfTarget_;
     }
 
+    void SetIsPartialUpdate(bool isPartialUpdate)
+    {
+        isPartialUpdate_ = isPartialUpdate;
+    }
+
+    bool IsPartialUpdate() const
+    {
+        return isPartialUpdate_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -531,6 +541,7 @@ private:
     bool isCaretMode_ = true;
     bool enableHoverMode_ = false;
     bool followTransformOfTarget_ = false;
+    bool isPartialUpdate_ = false;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;

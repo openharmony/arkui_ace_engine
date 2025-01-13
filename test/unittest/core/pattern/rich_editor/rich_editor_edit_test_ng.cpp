@@ -12,7 +12,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "test/unittest/core/pattern/rich_editor/rich_editor_common_test_ng.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -90,7 +98,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue002, TestSize.Level1)
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->InsertValue(TEST_INSERT_VALUE);
     auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
-    const std::string result1 = TEST_INSERT_VALUE;
+    const std::u16string result1 = TEST_INSERT_VALUE;
     EXPECT_EQ(result1, it1->spanItem_->content);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
@@ -102,17 +110,17 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue002, TestSize.Level1)
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->InsertValue(TEST_INSERT_VALUE);
     auto it3 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
-    const std::string result3 = INIT_VALUE_1 + TEST_INSERT_VALUE;
+    const std::u16string result3 = INIT_VALUE_1 + TEST_INSERT_VALUE;
     EXPECT_EQ(result3, it3->spanItem_->content);
     ClearSpan();
     AddImageSpan();
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->InsertValue(TEST_INSERT_VALUE);
     auto it4 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
-    const std::string result4 = TEST_INSERT_VALUE;
+    const std::u16string result4 = TEST_INSERT_VALUE;
     EXPECT_EQ(result4, it4->spanItem_->content);
     ClearSpan();
-    richEditorPattern->InsertValue(" ");
+    richEditorPattern->InsertValue(u" ");
     auto it5 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
     EXPECT_TRUE(it5);
 }
@@ -132,7 +140,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue003, TestSize.Level1)
     richEditorPattern->caretPosition_ = INIT_VALUE_1.size();
     richEditorPattern->InsertValue(TEST_INSERT_VALUE);
     auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetFirstChild());
-    const std::string result1 = INIT_VALUE_1 + TEST_INSERT_VALUE;
+    const std::u16string result1 = INIT_VALUE_1 + TEST_INSERT_VALUE;
     EXPECT_EQ(result1, it1->spanItem_->content);
 }
 
@@ -150,7 +158,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue004, TestSize.Level1)
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->InsertValue(TEST_INSERT_VALUE);
     auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetFirstChild());
-    const std::string result1 = TEST_INSERT_VALUE;
+    const std::u16string result1 = TEST_INSERT_VALUE;
     EXPECT_EQ(result1, it1->spanItem_->content);
 }
 
@@ -169,7 +177,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue005, TestSize.Level1)
     richEditorPattern->moveLength_ = 0;
     richEditorPattern->InsertValue(TEST_INSERT_LINE_SEP);
     auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetLastChild());
-    const std::string result1 = INIT_VALUE_1;
+    const std::u16string result1 = INIT_VALUE_1;
     EXPECT_EQ(result1, it1->spanItem_->content);
     ClearSpan();
     AddSpan(INIT_VALUE_1);
@@ -177,7 +185,7 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue005, TestSize.Level1)
     richEditorPattern->moveLength_ = 0;
     richEditorPattern->InsertValue(TEST_INSERT_LINE_SEP);
     auto it2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetFirstChild());
-    const std::string result2 = EXCEPT_VALUE;
+    const std::u16string result2 = EXCEPT_VALUE;
     EXPECT_EQ(result2, it2->spanItem_->content);
 }
 
@@ -529,7 +537,7 @@ HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj002, TestSize.Level1)
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     auto it = richEditorPattern->spans_.front();
     TextInsertValueInfo info;
-    it->content = "test123\n";
+    it->content = u"test123\n";
     it->position = 4;
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->moveLength_ = 2;
@@ -553,7 +561,7 @@ HWTEST_F(RichEditorEditTestNg, RedoDrag001, TestSize.Level1)
 
     RichEditorPattern::OperationRecord record;
     record.beforeCaretPosition = 0;
-    record.addText = "test123";
+    record.addText = u"test123";
     richEditorPattern->RedoDrag(record);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
@@ -574,7 +582,7 @@ HWTEST_F(RichEditorEditTestNg, UndoDrag001, TestSize.Level1)
 
     RichEditorPattern::OperationRecord record;
     record.deleteCaretPostion = 0;
-    record.addText = "test123";
+    record.addText = u"test123";
     richEditorPattern->UndoDrag(record);
     EXPECT_EQ(richEditorPattern->caretPosition_, 7);
 }
@@ -610,21 +618,19 @@ HWTEST_F(RichEditorEditTestNg, CalcInsertValueObj001, TestSize.Level1)
     AddSpan("test1");
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     auto it = richEditorPattern->spans_.front();
-    it->content = "test";
+    it->content = u"test";
     TextInsertValueInfo info;
     richEditorPattern->UpdateSpanPosition();
 
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->CalcInsertValueObj(info);
-    EXPECT_EQ(info.spanIndex_, 0);
-
-    richEditorPattern->caretPosition_ = 3;
-    richEditorPattern->CalcInsertValueObj(info);
-    EXPECT_EQ(info.spanIndex_, 0);
-
-    richEditorPattern->caretPosition_ = 5;
-    richEditorPattern->CalcInsertValueObj(info);
-    EXPECT_EQ(info.spanIndex_, 1);
+    std::vector<std::pair<int, int>> testPairs;
+    testPairs.push_back(std::make_pair(0, 0));
+    testPairs.push_back(std::make_pair(3, 0));
+    testPairs.push_back(std::make_pair(5, 1));
+    for (const auto& testCase : testPairs) {
+        richEditorPattern->caretPosition_ = testCase.first;
+        richEditorPattern->CalcInsertValueObj(info);
+        EXPECT_EQ(info.spanIndex_, testCase.second);
+    }
 }
 
 /**
@@ -811,7 +817,7 @@ HWTEST_F(RichEditorEditTestNg, RedoDrag002, TestSize.Level1)
 
     RichEditorPattern::OperationRecord record;
     record.deleteCaretPostion = 0;
-    record.addText = "test123";
+    record.addText = u"test123";
     richEditorPattern->RedoDrag(record);
     EXPECT_EQ(richEditorPattern->caretPosition_, 6);
 }
@@ -880,7 +886,7 @@ HWTEST_F(RichEditorEditTestNg, HandleOnDragInsertValueOperation001, TestSize.Lev
     struct UpdateSpanStyle typingStyle;
     TextStyle textStyle(5);
     richEditorPattern->SetTypingStyle(typingStyle, textStyle);
-    std::string insertValue = "test123";
+    std::u16string insertValue = u"test123";
     richEditorPattern->HandleOnDragInsertValueOperation(insertValue);
     EXPECT_TRUE(richEditorPattern->typingStyle_.has_value());
 }
@@ -1365,13 +1371,13 @@ HWTEST_F(RichEditorEditTestNg, GetParagraphNodes001, TestSize.Level1)
     EXPECT_EQ(nodes.size(), 0);
 
     // add multiple paragraphs
-    AddSpan(INIT_VALUE_1 + "\n"); // length 7
+    AddSpan(INIT_VALUE_1 + u"\n"); // length 7
     AddImageSpan();               // length 1
-    AddSpan(INIT_VALUE_2 + "\n"); // length 7
+    AddSpan(INIT_VALUE_2 + u"\n"); // length 7
     AddSpan(INIT_VALUE_1);        // length 6
-    AddSpan(INIT_VALUE_2 + "\n");
+    AddSpan(INIT_VALUE_2 + u"\n");
     AddSpan(INIT_VALUE_2);
-    AddSpan(INIT_VALUE_2 + "\n");
+    AddSpan(INIT_VALUE_2 + u"\n");
     AddSpan(INIT_VALUE_2);
     EXPECT_EQ(richEditorNode_->children_.size(), 8);
 
@@ -1476,7 +1482,7 @@ HWTEST_F(RichEditorEditTestNg, GetParagraphLength001, TestSize.Level1)
     AddImageSpan();
     length = richEditorPattern->GetParagraphLength(host->GetChildren());
     EXPECT_EQ(length, 3);
-    AddSpan(INIT_VALUE_1 + "\n"); // length 7
+    AddSpan(INIT_VALUE_1 + u"\n"); // length 7
     length = richEditorPattern->GetParagraphLength(host->GetChildren());
     EXPECT_EQ(length, 10);
     AddImageSpan();
@@ -1493,26 +1499,26 @@ HWTEST_F(RichEditorEditTestNg, GetLeftTextOfCursor001, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    richEditorPattern->textForDisplay_ = "tesol";
+    richEditorPattern->textForDisplay_ = u"tesol";
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->textSelector_.baseOffset = 2;
     richEditorPattern->textSelector_.destinationOffset = 3;
-    auto ret = StringUtils::Str16ToStr8(richEditorPattern->GetLeftTextOfCursor(1));
-    EXPECT_EQ(ret, "e");
+    auto ret = richEditorPattern->GetLeftTextOfCursor(1);
+    EXPECT_EQ(ret, u"e");
 
-    ret = StringUtils::Str16ToStr8(richEditorPattern->GetLeftTextOfCursor(2));
-    EXPECT_EQ(ret, "e");
+    ret = richEditorPattern->GetLeftTextOfCursor(2);
+    EXPECT_EQ(ret, u"e");
 
     richEditorPattern->textSelector_.baseOffset = 2;
     richEditorPattern->textSelector_.destinationOffset = 2;
-    ret = StringUtils::Str16ToStr8(richEditorPattern->GetLeftTextOfCursor(1));
-    EXPECT_EQ(ret, "t");
+    ret = richEditorPattern->GetLeftTextOfCursor(1);
+    EXPECT_EQ(ret, u"t");
 
     richEditorPattern->textSelector_.baseOffset = 3;
     richEditorPattern->textSelector_.destinationOffset = 2;
-    ret = StringUtils::Str16ToStr8(richEditorPattern->GetLeftTextOfCursor(1));
-    EXPECT_EQ(ret, "e");
+    ret = richEditorPattern->GetLeftTextOfCursor(1);
+    EXPECT_EQ(ret, u"e");
 }
 
 /**
@@ -1526,8 +1532,8 @@ HWTEST_F(RichEditorEditTestNg, GetLeftTextOfCursor002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     AddSpan(INIT_VALUE_1);
-    auto ret = StringUtils::Str16ToStr8(richEditorPattern->GetLeftTextOfCursor(3));
-    EXPECT_EQ(ret, "");
+    auto ret = richEditorPattern->GetLeftTextOfCursor(3);
+    EXPECT_EQ(ret, u"");
 }
 
 /**
@@ -1539,7 +1545,8 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder002, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<TextPattern>());
     PlaceholderOptions options;
-    options.value = "Placeholder text";
+    std::u16string value = u"Placeholder text";
+    options.value = value;
     options.fontSize = Dimension(12.0);
     options.fontStyle = OHOS::Ace::FontStyle::ITALIC;
     options.fontWeight = FontWeight::BOLD;
@@ -1548,7 +1555,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder002, TestSize.Level1)
     RichEditorModelNG::SetPlaceholder(frameNode.GetRawPtr(), options);
     auto textLayoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
-    EXPECT_EQ(textLayoutProperty->GetPlaceholder(), "Placeholder text");
+    EXPECT_EQ(textLayoutProperty->GetPlaceholder(), value);
     frameNode.Reset();
 }
 
@@ -1561,7 +1568,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder003, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<TextPattern>());
     PlaceholderOptions options;
-    options.value = "Placeholder text";
+    options.value = u"Placeholder text";
     options.fontSize = Dimension(12.0);
     options.fontStyle = OHOS::Ace::FontStyle::ITALIC;
     options.fontWeight = FontWeight::BOLD;
@@ -1583,7 +1590,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder004, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<TextPattern>());
     PlaceholderOptions options;
-    options.value = "Placeholder text";
+    options.value = u"Placeholder text";
     options.fontSize = Dimension(12.0);
     options.fontStyle = OHOS::Ace::FontStyle::ITALIC;
     options.fontWeight = FontWeight::BOLD;
@@ -1605,7 +1612,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder005, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<TextPattern>());
     PlaceholderOptions options;
-    options.value = "Placeholder text";
+    options.value = u"Placeholder text";
     options.fontSize = Dimension(12.0);
     options.fontStyle = OHOS::Ace::FontStyle::ITALIC;
     options.fontWeight = FontWeight::BOLD;
@@ -1627,7 +1634,7 @@ HWTEST_F(RichEditorEditTestNg, SetPlaceholder006, TestSize.Level1)
 {
     auto frameNode = AceType::MakeRefPtr<FrameNode>("frameNode", 1, AceType::MakeRefPtr<TextPattern>());
     PlaceholderOptions options;
-    options.value = "Placeholder text";
+    options.value = u"Placeholder text";
     options.fontSize = Dimension(12.0);
     options.fontStyle = OHOS::Ace::FontStyle::ITALIC;
     options.fontWeight = FontWeight::BOLD;

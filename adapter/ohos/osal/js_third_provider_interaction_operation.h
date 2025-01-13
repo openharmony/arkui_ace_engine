@@ -87,6 +87,11 @@ public:
         return host_.Upgrade();
     }
 
+    int32_t GetBelongTreeId() const
+    {
+        return belongTreeId_;
+    }
+
 private:
     void GetNodeConfig(NodeConfig& nodeConfig);
     void SetSearchElementInfoByAccessibilityIdResult(

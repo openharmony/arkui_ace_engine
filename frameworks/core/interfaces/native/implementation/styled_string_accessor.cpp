@@ -334,12 +334,12 @@ Ark_NativePointer CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* va
     if (value) {
         Converter::VisitUnion(*value,
             [&peer, styles](const Ark_String& arkText) {
-                std::string data = Converter::Convert<std::string>(arkText);
+                auto data = Converter::Convert<std::u16string>(arkText);
                 peer->spanString = AceType::MakeRefPtr<SpanString>(data);
                 CHECK_NULL_VOID(!data.empty() && styles);
                 auto spans = Converter::OptConvert<std::vector<RefPtr<SpanBase>>>(*styles);
                 CHECK_NULL_VOID(spans);
-                UpdateSpansRange(spans.value(), StringUtils::ToWstring(data).length());
+                UpdateSpansRange(spans.value(), data.length());
                 peer->spanString->BindWithSpans(spans.value());
             },
             [&peer](const Ark_ImageAttachment& arkImageAttachment) {
@@ -354,7 +354,7 @@ Ark_NativePointer CtorImpl(const Ark_Union_String_ImageAttachment_CustomSpan* va
         );
     }
     if (!peer->spanString) {
-        peer->spanString = AceType::MakeRefPtr<SpanString>(std::string());
+        peer->spanString = AceType::MakeRefPtr<SpanString>(std::u16string());
     }
     return peer;
 }

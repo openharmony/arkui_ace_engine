@@ -21,6 +21,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
+#include "core/components/common/properties/popup_param.h"
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/focus_hub.h"
@@ -74,6 +75,7 @@ public:
         bubbleMethod->SetArrowWidth(arrowWidth_);
         bubbleMethod->SetArrowHeight(arrowHeight_);
         bubbleMethod->SetBorder(border_);
+        bubbleMethod->SetArrowBuildPlacement(arrowBuildPlacement_);
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, bubbleMethod);
         auto theme = pipeline->GetTheme<PopupTheme>();
@@ -247,6 +249,26 @@ public:
         }
     }
 
+    void SetPopupParam(const RefPtr<PopupParam>& popupParam)
+    {
+        popupParam_ = popupParam;
+    }
+
+    const RefPtr<PopupParam>& GetPopupParam() const
+    {
+        return popupParam_;
+    }
+
+    void SetCustomNode(const WeakPtr<UINode>& customNode)
+    {
+        customNode_ = customNode;
+    }
+
+    const RefPtr<UINode> GetCustomNode() const
+    {
+        return customNode_.Upgrade();
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -309,6 +331,7 @@ private:
         = { {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f} };
     float arrowWidth_ = Dimension(16.0_vp).ConvertToPx();
     float arrowHeight_ = Dimension(8.0_vp).ConvertToPx();
+    Placement arrowBuildPlacement_ = Placement::BOTTOM;
 
     bool showArrow_ = false;
     ColorMode colorMode_ = ColorMode::COLOR_MODE_UNDEFINED;
@@ -336,6 +359,8 @@ private:
     int32_t halfFoldHoverCallbackId_ = -1;
     std::function<void(const std::string&)> onStateChangeCallback_ = nullptr;
     std::function<void(const std::string&)> doubleBindCallback_ = nullptr;
+    RefPtr<PopupParam> popupParam_ = nullptr;
+    WeakPtr<UINode> customNode_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 

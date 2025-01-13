@@ -548,20 +548,39 @@ HWTEST_F(DatePickerTestThree, DatePickerAccessibilityPropertyTestNg006, TestSize
 
     auto datePickerPattern = pickerFrameNode->GetPattern<DatePickerPattern>();
     ASSERT_NE(datePickerPattern, nullptr);
+
+    auto lunarDate = datePickerPattern->SolarToLunar(datePickerPattern->GetCurrentDate());
+    datePickerPattern->LunarColumnsBuilding(lunarDate);
+    std::string allColumnsText = "";
+    for (const auto& child : pickerFrameNode->GetChildren()) {
+        auto stackMonthDays = AceType::DynamicCast<FrameNode>(child);
+        ASSERT_NE(stackMonthDays, nullptr);
+        auto blendMonthDays = AceType::DynamicCast<FrameNode>(stackMonthDays->GetLastChild());
+        ASSERT_NE(blendMonthDays, nullptr);
+        auto monthDaysColumnNode = AceType::DynamicCast<FrameNode>(blendMonthDays->GetLastChild());
+        ASSERT_NE(monthDaysColumnNode, nullptr);
+        auto columnPattern = monthDaysColumnNode->GetPattern<DatePickerColumnPattern>();
+        ASSERT_NE(columnPattern, nullptr);
+        auto index = columnPattern->GetCurrentIndex();
+        auto options = columnPattern->GetOptions();
+        auto it = options.find(monthDaysColumnNode);
+        if (it != options.end() && index >= 0 && index < it->second.size()) {
+            auto date = it->second.at(index);
+            allColumnsText.append(DatePickerPattern::GetFormatString(date));
+        }
+    }
+
     datePickerPattern->SetShowLunar(false);
 
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
     auto accessibilityProperty = pickerFrameNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 
     datePickerPattern->SetShowLunar(true);
-    auto lunarDate = datePickerPattern->SolarToLunar(datePickerPattern->GetCurrentDate());
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(lunarDate.year) + CONNECTER +
-                                                    std::to_string(lunarDate.month) + CONNECTER +
-                                                    std::to_string(lunarDate.day));
+    EXPECT_EQ(accessibilityProperty->GetText(), allColumnsText);
 }
 
 /**

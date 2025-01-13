@@ -48,14 +48,16 @@ void BarItemLayoutAlgorithm::MeasureToolbarItemText(LayoutWrapper* layoutWrapper
 
     auto contentConstraint = textWrapper->GetLayoutProperty()->GetContentLayoutConstraint();
     textWrapper->Measure(contentConstraint);
-    auto textWidth = textWrapper->GetGeometryNode()->GetContentSize().Width();
+    auto geometryNode = textWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto textWidth = geometryNode->GetContentSize().Width();
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
 
     if (GreatOrEqual(textWidth, constraint.maxSize.Width())) {
         constraint.maxSize.SetWidth(textWidth);
     }
     auto barItemConstraint = barItemLayoutProperty->GetLayoutConstraint().value();
-    auto textHeight = textWrapper->GetGeometryNode()->GetContentSize().Height();
+    auto textHeight = geometryNode->GetContentSize().Height();
     float barItemChildrenTotalHeight = textHeight + (theme->GetToolbarIconSize() + TEXT_TOP_PADDING).ConvertToPx();
     if (GreatOrEqual(barItemChildrenTotalHeight, constraint.maxSize.Height())) {
         constraint.maxSize.SetHeight(barItemChildrenTotalHeight);
@@ -95,6 +97,7 @@ float BarItemLayoutAlgorithm::LayoutIcon(LayoutWrapper* layoutWrapper, const Ref
     auto iconWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(iconWrapper, 0.0f);
     auto geometryNode = iconWrapper->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
 
     const auto& constraint = barItemLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_RETURN(constraint, 0.0f);
@@ -119,6 +122,7 @@ void BarItemLayoutAlgorithm::LayoutText(LayoutWrapper* layoutWrapper, const RefP
     auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_VOID(textWrapper);
     auto geometryNode = textWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
     auto textOffsetY = iconSize_ + TEXT_TOP_PADDING;
 
     const auto& constraint = barItemLayoutProperty->GetLayoutConstraint();
@@ -155,7 +159,9 @@ void BarItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(constraint);
         size = constraint->maxSize;
     }
-    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+    auto geometryNode = layoutWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    geometryNode->SetFrameSize(size);
 }
 
 void BarItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -172,6 +178,7 @@ void BarItemLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto textWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         CHECK_NULL_VOID(textWrapper);
         auto geometryNode = textWrapper->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
         textHeight = geometryNode->GetFrameSize().Height();
     }
 

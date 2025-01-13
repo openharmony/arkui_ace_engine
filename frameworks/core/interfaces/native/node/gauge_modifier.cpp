@@ -240,24 +240,72 @@ void ResetGradientColors(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIGaugeModifier* GetGaugeModifier()
 {
-    static const ArkUIGaugeModifier modifier = { SetGaugeValue, ResetGaugeValue, SetGaugeStartAngle,
-        ResetGaugeStartAngle, SetGaugeEndAngle, ResetGaugeEndAngle, SetGaugeStrokeWidth, ResetGaugeStrokeWidth,
-        SetShadowOptions, ResetShadowOptions, SetIsShowIndicator,
-        SetIndicatorIconPath, ResetIndicatorIconPath, SetIndicatorSpace, ResetIndicatorSpace,
-        SetColors, ResetColors, SetGradientColors, ResetGradientColors
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIGaugeModifier modifier = {
+        .setGaugeValue = SetGaugeValue,
+        .resetGaugeValue = ResetGaugeValue,
+        .setGaugeStartAngle = SetGaugeStartAngle,
+        .resetGaugeStartAngle = ResetGaugeStartAngle,
+        .setGaugeEndAngle = SetGaugeEndAngle,
+        .resetGaugeEndAngle = ResetGaugeEndAngle,
+        .setGaugeStrokeWidth = SetGaugeStrokeWidth,
+        .resetGaugeStrokeWidth = ResetGaugeStrokeWidth,
+        .setShadowOptions = SetShadowOptions,
+        .resetShadowOptions = ResetShadowOptions,
+        .setIsShowIndicator = SetIsShowIndicator,
+        .setIndicatorIconPath = SetIndicatorIconPath,
+        .resetIndicatorIconPath = ResetIndicatorIconPath,
+        .setIndicatorSpace = SetIndicatorSpace,
+        .resetIndicatorSpace = ResetIndicatorSpace,
+        .setColors = SetColors,
+        .resetColors = ResetColors,
+        .setGradientColors = SetGradientColors,
+        .resetGradientColors = ResetGradientColors,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIGaugeModifier* GetCJUIGaugeModifier()
 {
-    static const CJUIGaugeModifier modifier = { SetGaugeValue, ResetGaugeValue, SetGaugeStartAngle,
-        ResetGaugeStartAngle, SetGaugeEndAngle, ResetGaugeEndAngle, SetGaugeStrokeWidth, ResetGaugeStrokeWidth,
-        SetShadowOptions, ResetShadowOptions, SetIsShowIndicator,
-        SetIndicatorIconPath, ResetIndicatorIconPath, SetIndicatorSpace, ResetIndicatorSpace,
-        SetColors, ResetColors, SetGradientColors, ResetGradientColors
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIGaugeModifier modifier = {
+        .setGaugeValue = SetGaugeValue,
+        .resetGaugeValue = ResetGaugeValue,
+        .setGaugeStartAngle = SetGaugeStartAngle,
+        .resetGaugeStartAngle = ResetGaugeStartAngle,
+        .setGaugeEndAngle = SetGaugeEndAngle,
+        .resetGaugeEndAngle = ResetGaugeEndAngle,
+        .setGaugeStrokeWidth = SetGaugeStrokeWidth,
+        .resetGaugeStrokeWidth = ResetGaugeStrokeWidth,
+        .setShadowOptions = SetShadowOptions,
+        .resetShadowOptions = ResetShadowOptions,
+        .setIsShowIndicator = SetIsShowIndicator,
+        .setIndicatorIconPath = SetIndicatorIconPath,
+        .resetIndicatorIconPath = ResetIndicatorIconPath,
+        .setIndicatorSpace = SetIndicatorSpace,
+        .resetIndicatorSpace = ResetIndicatorSpace,
+        .setColors = SetColors,
+        .resetColors = ResetColors,
+        .setGradientColors = SetGradientColors,
+        .resetGradientColors = ResetGradientColors,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

@@ -2235,11 +2235,60 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest008, TestSize.Level1)
      */
     auto contentNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
     ASSERT_NE(contentNode, nullptr);
+    RefPtr<CalendarTheme> theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
+    ASSERT_NE(theme, nullptr);
     /**
      * @tc.steps: step5. test dialogNode's RenderContext's BackBlurStyle value.
-     * @tc.expected: equal COMPONENT_ULTRA_THICK.
+     * @tc.expected: equal static_cast<BlurStyle>(theme->GetCalendarPickerDialogBlurStyle()).
      */
-    EXPECT_EQ(contentNode->GetRenderContext()->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
+    EXPECT_EQ(contentNode->GetRenderContext()->GetBackBlurStyle()->blurStyle,
+        static_cast<BlurStyle>(theme->GetCalendarPickerDialogBlurStyle()));
+}
+
+/**
+ * @tc.name: CalendarDialogViewTest009
+ * @tc.desc: Show Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
+     * @tc.expected: mock successfully.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    /**
+     * @tc.steps: step2. create dialogNodeProps.
+     * @tc.expected: the dialogNodeProps created successfully.
+     */
+    CalendarSettingData settingData;
+    DialogProperties properties;
+    properties.alignment = DialogAlignment::BOTTOM;
+    properties.customStyle = true;
+    properties.offset = DimensionOffset(Offset(0, -1.0f));
+    properties.backgroundBlurStyle = static_cast<int32_t>(BlurStyle::REGULAR);
+    auto selectedDate = PickerDate(2000, 1, 1);
+    settingData.selectedDate = selectedDate;
+    settingData.dayRadius = TEST_SETTING_RADIUS;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    /**
+     * @tc.steps: step3. execute CalendarDialogView::Show.
+     * @tc.expected: show successfully.
+     */
+    std::vector<ButtonInfo> buttonInfos;
+    auto dialogNode = CalendarDialogView::Show(properties, settingData, buttonInfos, dialogEvent, dialogCancelEvent);
+    /**
+     * @tc.steps: step4. get dialogNode's grandsonNode.
+     * @tc.expected: getNode successfully.
+     */
+    auto contentNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    ASSERT_NE(contentNode, nullptr);
+    /**
+     * @tc.steps: step5. test dialogNode's RenderContext's BackBlurStyle value.
+     * @tc.expected: equal REGULAR.
+     */
+    EXPECT_EQ(contentNode->GetRenderContext()->GetBackBlurStyle()->blurStyle, BlurStyle::REGULAR);
 }
 
 /**

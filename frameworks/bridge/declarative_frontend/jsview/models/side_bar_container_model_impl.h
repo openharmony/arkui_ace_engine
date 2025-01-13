@@ -27,8 +27,8 @@ public:
     void SetSideBarContainerType(SideBarContainerType type) override;
     void SetShowSideBar(bool isShow) override;
     void SetShowControlButton(bool showControlButton) override;
-    void ParseAndSetWidth(WidthType widthType, Dimension& width) override;
-    void SetSideBarWidth(const Dimension& sideBarWidth) override;
+    void ParseAndSetWidth(WidthType widthType, Dimension& width, bool isDoubleBind = false) override;
+    void SetSideBarWidth(const Dimension& sideBarWidth, bool isDoubleBind = false) override;
     void SetMinSideBarWidth(const Dimension& minSideBarWidth) override;
     void SetMaxSideBarWidth(const Dimension& maxSideBarWidth) override;
     void SetAutoHide(bool autoHide) override;
@@ -50,6 +50,7 @@ public:
     void SetDividerStartMargin(const Dimension& startMargin) override;
     void SetDividerEndMargin(const Dimension& endMargin) override;
     void SetOnChangeEvent(std::function<void(const bool)>&& onChange) override {};
+    void SetOnSideBarWidthChangeEvent(OnSideBarWidthChangeEvent&& event) override {};
     void SetMinContentWidth(const Dimension& minContentWidth) override;
     void ResetControlButton() override;
 

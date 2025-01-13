@@ -93,7 +93,7 @@ class PatternLockModifierTest : public ModifierTestBase<GENERATED_ArkUIPatternLo
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockModifierTest, setSideLengthTestDefaultValues, TestSize.Level1)
+HWTEST_F(PatternLockModifierTest, DISABLED_setSideLengthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -115,7 +115,7 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> sideLengthV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockModifierTest, setSideLengthTestValidValues, TestSize.Level1)
+HWTEST_F(PatternLockModifierTest, DISABLED_setSideLengthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;

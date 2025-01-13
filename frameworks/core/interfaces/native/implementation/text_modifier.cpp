@@ -503,8 +503,9 @@ void OnCopyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCopy = [frameNode](const std::string& value) {
-        auto stringValue = Converter::ArkValue<Ark_String>(value);
+    auto onCopy = [frameNode](const std::u16string& value) {
+        Converter::ConvContext ctx;
+        auto stringValue = Converter::ArkValue<Ark_String>(value, &ctx);
         GetFullAPI()->getEventsAPI()->getTextEventsReceiver()->onCopy(frameNode->GetId(), stringValue);
     };
 

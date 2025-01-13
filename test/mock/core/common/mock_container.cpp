@@ -117,8 +117,9 @@ RefPtr<Container> Container::GetContainer(int32_t containerId)
     return MockContainer::Current();
 }
 
-bool MockContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative)
+int32_t MockContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
+    bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative,
+    const std::function<void()>& onFinish, const std::function<void()>& onUIExtNodeBindingCompleted)
 {
     if (autoFillType == AceAutoFillType::ACE_USER_NAME) {
         isPopup = true; // if TextInputType::USER_NAME
@@ -126,9 +127,9 @@ bool MockContainer::RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFi
         isPopup = false; // if TextInputType::VISIBLE_PASSWORD or TextInputType::NEW_PASSWORD
     }
     if (autoFillType == AceAutoFillType::ACE_PASSWORD) {
-        return true; // cover DoProcessAutoFill
+        return AceAutoFillError::ACE_AUTO_FILL_SUCCESS; // cover DoProcessAutoFill
     }
-    return isPopup;
+    return isPopup ? AceAutoFillError::ACE_AUTO_FILL_SUCCESS : AceAutoFillError::ACE_AUTO_FILL_DEFAULT;
 }
 
 void MockContainer::SetDisplayInfo(RefPtr<DisplayInfo> displayInfo)

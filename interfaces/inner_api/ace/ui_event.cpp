@@ -16,6 +16,7 @@
 #include "interfaces/inner_api/ace/ui_event.h"
 
 #include "ui_event_func.h"
+#include "ui_event_observer.h"
 
 namespace OHOS::Ace {
 void UIEvent::RegisterUIEventObserver(const std::string& config, const std::shared_ptr<UIEventObserver>& observer)
@@ -36,6 +37,16 @@ void UIEvent::GetNodeProperty(
 
 void UIEvent::GetSimplifiedInspectorTree(std::string& tree)
 {
-    UIEventFunc::GetSimplifiedInspectorTree(tree);
+    UIEventFunc::GetSimplifiedInspectorTree({ false }, tree);
+}
+
+void UIEvent::GetSimplifiedInspectorTree(const TreeParams& params, std::string& tree)
+{
+    UIEventFunc::GetSimplifiedInspectorTree(params, tree);
+}
+
+void UIEvent::GetSimplifiedInspectorTreeAsync(const TreeParams& params, OnInspectorTreeResult&& callback)
+{
+    UIEventFunc::GetSimplifiedInspectorTreeAsync(params, std::move(callback));
 }
 } // namespace OHOS::Ace

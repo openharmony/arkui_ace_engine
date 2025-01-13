@@ -21,6 +21,7 @@ import { BusinessError } from '@ohos.base';
 import hilog from '@ohos.hilog';
 import common from '@ohos.app.ability.common';
 import { HashMap } from '@kit.ArkTS';
+import { KeyCode } from '@kit.InputKit';
 
 const INDEX_ZERO: number = 0;
 const INDEX_ONE: number = 1;
@@ -60,6 +61,10 @@ export enum OperationType {
 export declare class OperationOption {
   public value: ResourceStr;
   public action?: () => void;
+  public accessibilityLevel?: string;
+  public accessibilityText?: ResourceStr;
+  public accessibilityDescription?: ResourceStr;
+  public defaultFocus?: boolean;
 }
 
 export declare class SelectOptions {
@@ -67,6 +72,7 @@ export declare class SelectOptions {
   public selected?: number;
   public value?: string;
   public onSelect?: (index: number, value?: string) => void;
+  public defaultFocus?: boolean;
 }
 
 export declare class SymbolOptions {
@@ -87,6 +93,10 @@ class ContentIconOption {
   public subContent?: ResourceStr;
   public iconOptions?: IconOptions;
   public action?: () => void;
+  public accessibilityLevel?: string;
+  public accessibilityText?: ResourceStr;
+  public accessibilityDescription?: ResourceStr;
+  public defaultFocus?: boolean;
 }
 
 class FontStyle {
@@ -260,6 +270,19 @@ export struct SubHeader {
 
   @Styles
   private rightAreaClickEvent() {
+    .onKeyEvent((event: KeyEvent) => {
+      if (!event) {
+        return;
+      }
+      if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) &&
+        event.type === KeyType.Down) {
+        if ((this.operationType === OperationType.TEXT_ARROW || this.operationType === OperationType.BUTTON) &&
+        this.operationItem && this.operationItem.length > 0 && this.operationItem[0].action) {
+          this.operationItem[0].action();
+        }
+        event.stopPropagation();
+      }
+    })
     .onClick(() => {
       if ((this.operationType === OperationType.TEXT_ARROW || this.operationType === OperationType.BUTTON) &&
       this.operationItem && this.operationItem.length > 0 && this.operationItem[0].action) {
@@ -289,7 +312,7 @@ export struct SubHeader {
   updateFontScale(): number {
     try {
       let uiContext: UIContext = this.getUIContext();
-      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config.fontSizeScale ?? 1;
+      let systemFontScale = (uiContext.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
       if (!this.isFollowingSystemFontScale) {
         return 1;
       }
@@ -354,6 +377,7 @@ export struct SubHeader {
         })
         .width('100%')
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
+        .accessibilityDescription(this.select ? '' : Util.getStringByResource(125834353, ''))
 
         if (this.isRightAreaExists()) {
           this.rightAreaParentAging();
@@ -374,6 +398,7 @@ export struct SubHeader {
         .width('100%')
         .flexShrink(1)
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
+        .accessibilityDescription(this.select ? '' : Util.getStringByResource(125834353, ''))
 
         if (this.isRightAreaExists()) {
           this.rightAreaParent();
@@ -395,6 +420,29 @@ export struct SubHeader {
     return false;
   }
 
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return resource;
+    } else {
+      let resourceString: string = '';
+      try {
+        resourceString = getContext()?.resourceManager?.getStringSync(resource);
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to subHeader toStringFormat, code: ${code}, message: ${message}`)
+      }
+      return resourceString;
+    }
+  }
+
+  private getRightAreaAccessibilityLevel(): string {
+    if (this.operationItem![0].accessibilityLevel && this.operationItem![0].accessibilityLevel !== '') {
+      return this.operationItem![0].accessibilityLevel;
+    }
+    return 'yes';
+  }
+
   @Styles
   private rightAreaParentAgingStyles() {
     .margin({
@@ -409,16 +457,30 @@ export struct SubHeader {
       LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
     })
     .accessibilityLevel(this.operationType === OperationType.BUTTON || this.operationType === OperationType.TEXT_ARROW ?
-      'yes' : 'no')
+    this.getRightAreaAccessibilityLevel() : 'no')
   }
 
-  private getRightAreaAccessibilityText(): string {
-    if (this.operationType !== OperationType.TEXT_ARROW || !this.operationItem || this.operationItem.length <= 0) {
+  private getRightAreaAccessibilityText(): string | undefined {
+    if (!this.operationItem || this.operationItem.length <= 0) {
       return '';
     }
-    if (this.operationItem[0].value.toString().length <= 0) {
-      // 播报：更多、more等, 使用的字段是：sys.string.ohos_toolbar_more
-      return Util.getStringByResource(125833704, '');
+    if (this.operationItem[0].accessibilityText && this.operationItem[0].accessibilityText !== '') {
+      return this.toStringFormat(this.operationItem[0].accessibilityText);
+    } else {
+      if (this.operationType === OperationType.TEXT_ARROW && this.operationItem[0].value.toString().length <= 0) {
+        // 播报：更多、more等, 使用的字段是：sys.string.ohos_toolbar_more
+        return Util.getStringByResource(125833704, '');
+      }
+    }
+    return '';
+  }
+
+  private getAccessibilityDescription(): string | undefined {
+    if (!this.operationItem || this.operationItem.length <= 0) {
+      return '';
+    }
+    if (this.operationItem[0].accessibilityDescription && this.operationItem[0].accessibilityDescription !== '') {
+      return this.toStringFormat(this.operationItem[0].accessibilityDescription)
     }
     return '';
   }
@@ -435,7 +497,9 @@ export struct SubHeader {
       .rightAreaParentAgingStyles()
       .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
       .hoverEffect(HoverEffect.None)
+      .accessibilityGroup(true)
       .accessibilityText(this.getRightAreaAccessibilityText())
+      .accessibilityDescription(this.getAccessibilityDescription())
     } else {
       Row() {
         this.rightArea();
@@ -456,7 +520,7 @@ export struct SubHeader {
     })
     .flexShrink(0)
     .accessibilityLevel(this.operationType === OperationType.BUTTON || this.operationType === OperationType.TEXT_ARROW ?
-      'yes' : 'no')
+    this.getRightAreaAccessibilityLevel() : 'no')
   }
 
   @Builder
@@ -473,7 +537,9 @@ export struct SubHeader {
       .rightAreaParentStyles()
       .hoverEffect(HoverEffect.None)
       .backgroundColor($r('sys.color.ohos_id_color_sub_background_transparent'))
+      .accessibilityGroup(true)
       .accessibilityText(this.getRightAreaAccessibilityText())
+      .accessibilityDescription(this.getAccessibilityDescription())
     } else {
       Row() {
         this.rightArea();
@@ -695,6 +761,7 @@ export struct SubHeader {
       .width('auto')
       .selected(this.selectedIndex)
       .value(this.selectValue)
+      .defaultFocus(selectParam.defaultFocus)
       .onSelect((index: number, value?: string) => {
         this.selectedIndex = index;
         if (value) {
@@ -733,6 +800,7 @@ export struct SubHeader {
             maxLines: DOUBLE_LINE_NUM,
             fontColor: this.subHeaderTheme.fontButtonColor,
           })
+          .defaultFocus(button.defaultFocus)
           .focusable(true)
       }
       .focusable(true)
@@ -799,6 +867,8 @@ export struct SubHeader {
             alignment: Alignment.End,
             fontColor: this.subHeaderTheme.fontSecondaryColor,
           })
+          .focusable(true)
+          .defaultFocus(textArrow.defaultFocus)
           .margin({
             end: this.getTextArrowMarginRight(),
           })
@@ -822,7 +892,6 @@ export struct SubHeader {
         .fillColor(this.subHeaderTheme.iconArrowColor)
         .width(ARROW_ICON_WIDTH)
         .height(OPERATE_ITEM_LENGTH)
-        .focusable(true)
         .draggable(false)
         .matchTextDirection(true)
     }
@@ -932,6 +1001,10 @@ export struct SubHeader {
                   this.operationSymbolOptions[index] : null,
                 },
                 action: item.action,
+                defaultFocus: item.defaultFocus,
+                accessibilityLevel: item.accessibilityLevel,
+                accessibilityText: item.accessibilityText,
+                accessibilityDescription: item.accessibilityDescription,
               },
               isSingleIcon: this.operationItem?.length === SINGLE_ICON_NUMBER,
             })
@@ -982,17 +1055,60 @@ struct SingleIconStyle {
   @Consume subHeaderTheme: SubHeaderTheme;
   isSingleIcon: boolean = true;
 
+  private getRightIconAccessibilityText(): string | undefined {
+    if (this.item?.accessibilityText) {
+      let iconAccessibilityText = typeof this.item.accessibilityText === 'string' ? this.item.accessibilityText :
+      getContext()?.resourceManager?.getStringSync(this.item.accessibilityText)
+      return iconAccessibilityText;
+    }
+    return '';
+  }
+
+  private getRightIconAccessibilityLevel(): string {
+    if (this.item?.accessibilityLevel && this.item?.accessibilityLevel !== '') {
+      return this.item.accessibilityLevel;
+    }
+    return 'auto';
+  }
+
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return resource;
+    } else {
+      let resourceString: string = '';
+      try {
+        resourceString = getContext()?.resourceManager?.getStringSync(resource);
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to subHeader toStringFormat, code: ${code}, message: ${message}`)
+      }
+      return resourceString;
+    }
+  }
+
+  private  getRightIconAccessibilityDescription(): string | undefined {
+    if (this.item?.accessibilityDescription && this.item?.accessibilityDescription !== '') {
+      return this.toStringFormat(this.item?.accessibilityDescription);
+    }
+    return '';
+  }
+
   build() {
     if (this.item && this.item.iconOptions) {
       Button({ type: ButtonType.Normal, stateEffect: false }) {
         this.IconZone();
       }
       .focusable(true)
+      .defaultFocus(this.item.defaultFocus)
       .width(SINGLE_ICON_ZONE_SIZE)
       .height(SINGLE_ICON_ZONE_SIZE)
       .align(Alignment.Center)
       .backgroundColor(this.bgColor)
       .borderRadius(getResourceValue('sys.float.corner_radius_level4'))
+      .accessibilityLevel(this.getRightIconAccessibilityLevel())
+      .accessibilityText(this.getRightIconAccessibilityText())
+      .accessibilityDescription(this.getRightIconAccessibilityDescription())
       .focusBox({
         margin: { value: INDEX_ZERO, unit: LengthUnit.VP },
         strokeColor: ColorMetrics.resourceColor(this.subHeaderTheme.borderFocusColor),

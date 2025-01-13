@@ -151,7 +151,7 @@ void OnDestroyImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onDestroy =
-        [arkCallback = CallbackHelper(*value)]() {
+        [arkCallback = CallbackHelper(*value)](const std::string&) {
             arkCallback.Invoke();
         };
 #ifdef XCOMPONENT_SUPPORTED

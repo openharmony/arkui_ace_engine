@@ -56,6 +56,7 @@ private:
     void AddToReferee(size_t touchId, const RefPtr<GestureRecognizer>& recognizer) override;
     bool ReconcileFrom(const RefPtr<GestureRecognizer>& recognizer) override;
     void Reset();
+    void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback);
     void DeadlineTimer();
     void HandleOverdueDeadline();
 

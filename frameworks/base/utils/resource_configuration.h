@@ -147,6 +147,16 @@ public:
         return preferredLanguage_;
     }
 
+    void SetLanguage(const std::string& language)
+    {
+        language_ = language;
+    }
+
+    const std::string& GetLanguage() const
+    {
+        return language_;
+    }
+
 private:
     bool ParseJsonColorMode(const std::unique_ptr<JsonValue>& jsonConfig, uint32_t& updateFlags);
     bool ParseJsonFontRatio(const std::unique_ptr<JsonValue>& jsonConfig, uint32_t& updateFlags);
@@ -163,6 +173,7 @@ private:
     uint32_t mcc_ = 0;
     uint32_t mnc_ = 0;
     std::string preferredLanguage_;
+    std::string language_;
 };
 
 class ResourceInfo {

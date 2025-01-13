@@ -84,6 +84,7 @@ public:
                 theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("color_panel_bg", Color::TRANSPARENT);
                 theme->titlebarBackgroundBlurStyle_ = pattern->GetAttr<int>("titlebar_background_blur_style", 0);
                 theme->toolbarBackgroundBlurStyle_ = pattern->GetAttr<int>("toolbar_background_blur_style", 0);
+                theme->moreMessage_ = pattern->GetAttr<std::string>("navigation_general_more", "null");
             }
             ParsePattern(themeConstants, theme);
             return theme;
@@ -142,7 +143,9 @@ public:
                 pattern->GetAttr<Color>("icon_background_color", Color(0x0c000000));
             theme->iconColor_ = pattern->GetAttr<Color>("icon_color", Color(0xe5000000));
             theme->marginLeft_ = pattern->GetAttr<Dimension>("title_margin_left", 16.0_vp);
+            theme->marginLeftForBackButton_ = pattern->GetAttr<Dimension>("backbutton_margin_left", 16.0_vp);
             theme->marginRight_ = pattern->GetAttr<Dimension>("title_margin_right", 16.0_vp);
+            theme->marginRightForMenu_ = pattern->GetAttr<Dimension>("menu_margin_right", 16.0_vp);
             theme->mainTitleFontSizeL_ = pattern->GetAttr<Dimension>("title_primary_size", 30.0_fp);
             theme->mainTitleFontSizeM_ = pattern->GetAttr<Dimension>("title_secondary_size", 26.0_fp);
             theme->mainTitleFontSizeS_ = pattern->GetAttr<Dimension>("title_tertiary_size", 20.0_fp);
@@ -429,9 +432,17 @@ public:
     {
         return marginLeft_;
     }
+    const Dimension& GetMarginLeftForBackButton() const
+    {
+        return marginLeftForBackButton_;
+    }
     const Dimension& GetMarginRight() const
     {
         return marginRight_;
+    }
+    const Dimension& GetMarginRightForMenu() const
+    {
+        return marginRightForMenu_;
     }
     const Color& GetNavigationGroupColor() const
     {
@@ -585,6 +596,10 @@ public:
     {
         return dividerGradientDarkBlue_;
     }
+    const std::string& GetMoreMessage() const
+    {
+        return moreMessage_;
+    }
 protected:
     NavigationBarTheme() = default;
 
@@ -647,6 +662,7 @@ private:
     Dimension toolbarItemBottomPadding_ = 4.0_vp;
     Dimension toolbarItemMargin_ = 4.0_vp;
     Dimension toolbarItemSpecialMargin_ = 0.0_vp;
+    std::string moreMessage_ = "";
     uint32_t toolbarLimitGridCount_ = 8;
     uint32_t dividerShadowEnable_ = 0;
     Color navigationDividerColor_;
@@ -655,7 +671,9 @@ private:
     Color navBarUnfocusColor_ = Color::TRANSPARENT;
     Color backgroundBlurColor_;
     Dimension marginLeft_;
+    Dimension marginLeftForBackButton_;
     Dimension marginRight_;
+    Dimension marginRightForMenu_;
     Dimension mainTitleFontSizeL_;
     Dimension mainTitleFontSizeM_;
     Dimension mainTitleFontSizeS_;

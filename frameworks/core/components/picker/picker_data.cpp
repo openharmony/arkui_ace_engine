@@ -65,6 +65,36 @@ bool PickerDate::IsLeapYear(uint32_t year)
     return (year % 4 == 0); // other case, leap year equal that can divided by 4.
 }
 
+PickerDate PickerDate::AdjustDateToRange(const PickerDate& date, const PickerDate& start, const PickerDate& end)
+{
+    PickerDate adjustedDate = date;
+    if (start.ToDays() > date.ToDays()) {
+        adjustedDate = start;
+    } else if (end.GetYear() > 0 && end.ToDays() < date.ToDays()) {
+        adjustedDate = end;
+    }
+    return adjustedDate;
+}
+
+bool PickerDate::IsDateInRange(const PickerDate& date, const PickerDate& start, const PickerDate& end)
+{
+    if (start.GetYear() > 0 &&
+        (date.GetYear() < start.GetYear() ||
+            (date.GetYear() == start.GetYear() &&
+                (date.GetMonth() < start.GetMonth() ||
+                    (date.GetMonth() == start.GetMonth() && date.GetDay() < start.GetDay()))))) {
+        return false;
+    }
+    if (end.GetYear() > 0 &&
+        (date.GetYear() > end.GetYear() ||
+            (date.GetYear() == end.GetYear() &&
+                (date.GetMonth() > end.GetMonth() ||
+                    (date.GetMonth() == end.GetMonth() && date.GetDay() > end.GetDay()))))) {
+        return false;
+    }
+    return true;
+}
+
 std::string PickerDate::ToString(bool jsonFormat, int32_t status) const
 {
     if (!jsonFormat) {

@@ -21,6 +21,8 @@
 #include "core/components_ng/pattern/text_drag/text_drag_overlay_modifier.h"
 #include "core/components_ng/render/node_paint_method.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_info.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT TextDragPaintMethod : public NodePaintMethod {
@@ -32,7 +34,7 @@ public:
     ~TextDragPaintMethod() override = default;
 
     RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override;
-
+    void UpdateHandleInfo(const TextDragInfo& info);
 protected:
     WeakPtr<Pattern> pattern_;
     RefPtr<TextDragOverlayModifier> overlayModifier_;

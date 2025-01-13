@@ -331,6 +331,22 @@ class ImageObjectFitModifier extends ModifierWithKey<ImageFit> {
     return this.stageValue !== this.value;
   }
 }
+class ImageMatrixModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageMatrix');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetImageMatrix(node);
+    } else {
+      getUINativeModule().image.setImageMatrix(node, (this.value as Matrix).matrix4x4);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !deepCompareArrays((this.stageValue as Matrix).matrix4x4, (this.value as Matrix).matrix4x4);
+  }
+}
 class ImageBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses> {
   constructor(value: Length | BorderRadiuses) {
     super(value);
@@ -728,6 +744,10 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   objectFit(value: ImageFit): this {
     modifierWithKey(this._modifiersWithKeys, ImageObjectFitModifier.identity,
       ImageObjectFitModifier, value);
+    return this;
+  }
+  imageMatrix(value: object): this {
+    modifierWithKey(this._modifiersWithKeys, ImageMatrixModifier.identity, ImageMatrixModifier, value);
     return this;
   }
   objectRepeat(value: ImageRepeat): this {

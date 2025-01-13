@@ -53,10 +53,14 @@ public:
     virtual void RegisterTouchEventCallback(TouchEventCallback&& callback) = 0;
     virtual void RegisterDragEventCallback(DragEventCallBack&& callback) = 0;
     virtual void RegisterKeyEventCallback(KeyEventCallback&& callback) = 0;
+    virtual void RegisterNonPointerEventCallback(NonPointerEventCallback&& callback) = 0;
     virtual void RegisterMouseEventCallback(MouseEventCallback&& callback) = 0;
     virtual void RegisterAxisEventCallback(AxisEventCallback&& callback) = 0;
     virtual void RegisterRotationEventCallback(RotationEventCallBack&& callback) = 0;
     virtual void RegisterCardViewPositionCallback(CardViewPositionCallBack&& callback) = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void RegisterCrownEventCallback(CrownEventCallback&& callback) = 0;
+#endif
     virtual void Launch() = 0;
     virtual int32_t GetInstanceId() const = 0;
     virtual const RefPtr<PlatformResRegister>& GetPlatformResRegister() const = 0;

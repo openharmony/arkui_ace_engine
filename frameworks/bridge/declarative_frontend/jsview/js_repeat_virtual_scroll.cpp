@@ -205,12 +205,22 @@ void JSRepeatVirtualScroll::OnMove(const JSCallbackInfo& info)
     RepeatVirtualScrollModel::GetInstance()->OnMove(std::move(onMove));
 }
 
+void JSRepeatVirtualScroll::SetCreateByTemplate(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll::SetCreateByTemplate wrong parameter, internal error.");
+        return;
+    }
+    RepeatVirtualScrollModel::GetInstance()->SetCreateByTemplate(info[0]->ToBoolean());
+}
+
 void JSRepeatVirtualScroll::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRepeatVirtualScroll>::Declare("RepeatVirtualScrollNative");
     JSClass<JSRepeatVirtualScroll>::StaticMethod("create", &JSRepeatVirtualScroll::Create);
     JSClass<JSRepeatVirtualScroll>::StaticMethod("updateRenderState", &JSRepeatVirtualScroll::UpdateRenderState);
     JSClass<JSRepeatVirtualScroll>::StaticMethod("onMove", &JSRepeatVirtualScroll::OnMove);
+    JSClass<JSRepeatVirtualScroll>::StaticMethod("setCreateByTemplate", &JSRepeatVirtualScroll::SetCreateByTemplate);
     JSClass<JSRepeatVirtualScroll>::Bind<>(globalObj);
 }
 

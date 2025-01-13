@@ -439,6 +439,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder004, TestSize.Level1)
     textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-d-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -468,9 +469,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder004, TestSize.Level1)
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -495,6 +494,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder005, TestSize.Level1)
     textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-M-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -524,9 +524,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder005, TestSize.Level1)
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -551,6 +549,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder006, TestSize.Level1)
     textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-d-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -580,9 +579,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder006, TestSize.Level1)
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -607,6 +604,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder007, TestSize.Level1)
     textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-y-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -636,9 +634,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder007, TestSize.Level1)
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -663,6 +659,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder008, TestSize.Level1)
     textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-M-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -692,9 +689,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder008, TestSize.Level1)
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -719,6 +714,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder009, TestSize.Level1)
     textLayoutProperty->UpdateContent(Localization::GetInstance()->GetEntryLetters("common.ok"));
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-y-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -748,9 +744,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder009, TestSize.Level1)
     datePickerPattern->SetCancelNode(buttonCancelNode);
     datePickerPattern->OnLanguageConfigurationUpdate();
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -773,6 +767,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder010, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-d-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -804,8 +799,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder010, TestSize.Level1)
     auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear() + YEARINDEX) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear() + YEARINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -828,6 +822,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder011, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-d-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -859,8 +854,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder011, TestSize.Level1)
     auto monthColumnPattern = monthColumnNode->GetPattern<DatePickerColumnPattern>();
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth() + MONTHINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -883,6 +877,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder012, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-y-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -914,8 +909,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder012, TestSize.Level1)
     auto dayColumnPattern = dayColumnNode->GetPattern<DatePickerColumnPattern>();
     dayColumnPattern->SetCurrentIndex(DAYINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay() + DAYINDEX));
 }
@@ -938,6 +932,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder013, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-y-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -969,8 +964,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder013, TestSize.Level1)
     auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth() + YEARINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -993,6 +987,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder014, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-y-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1024,8 +1019,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder014, TestSize.Level1)
     auto monthColumnPattern = monthColumnNode->GetPattern<DatePickerColumnPattern>();
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear() + MONTHINDEX) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear() + MONTHINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1048,6 +1042,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder015, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("M-d-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1079,8 +1074,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder015, TestSize.Level1)
     auto dayColumnPattern = dayColumnNode->GetPattern<DatePickerColumnPattern>();
     dayColumnPattern->SetCurrentIndex(DAYINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay() + DAYINDEX));
 }
@@ -1103,6 +1097,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder016, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-M-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1134,8 +1129,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder016, TestSize.Level1)
     auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay() + YEARINDEX));
 }
@@ -1158,6 +1152,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder017, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-M-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1189,8 +1184,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder017, TestSize.Level1)
     auto monthColumnPattern = monthColumnNode->GetPattern<DatePickerColumnPattern>();
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth() + MONTHINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1213,6 +1207,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder018, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-M-y");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1244,8 +1239,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder018, TestSize.Level1)
     auto dayColumnPattern = dayColumnNode->GetPattern<DatePickerColumnPattern>();
     dayColumnPattern->SetCurrentIndex(DAYINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear() + DAYINDEX) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear() + DAYINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1268,6 +1262,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder019, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-y-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1299,8 +1294,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder019, TestSize.Level1)
     auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth() + YEARINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1323,6 +1317,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder020, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-y-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1354,8 +1349,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder020, TestSize.Level1)
     auto monthColumnPattern = monthColumnNode->GetPattern<DatePickerColumnPattern>();
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay() + MONTHINDEX));
 }
@@ -1378,6 +1372,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder021, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("d-y-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1409,8 +1404,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder021, TestSize.Level1)
     auto dayColumnPattern = dayColumnNode->GetPattern<DatePickerColumnPattern>();
     dayColumnPattern->SetCurrentIndex(DAYINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear() + DAYINDEX) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear() + DAYINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1433,6 +1427,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder022, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-d-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1464,8 +1459,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder022, TestSize.Level1)
     auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear() + YEARINDEX) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear() + YEARINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1488,6 +1482,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder023, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-d-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1519,8 +1514,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder023, TestSize.Level1)
     auto monthColumnPattern = monthColumnNode->GetPattern<DatePickerColumnPattern>();
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth() + MONTHINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1543,6 +1537,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder024, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-d-M");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1574,8 +1569,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder024, TestSize.Level1)
     auto dayColumnPattern = dayColumnNode->GetPattern<DatePickerColumnPattern>();
     dayColumnPattern->SetCurrentIndex(DAYINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay() + DAYINDEX));
 }
@@ -1598,6 +1592,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder025, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-M-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1629,8 +1624,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder025, TestSize.Level1)
     auto yearColumnPattern = yearColumnNode->GetPattern<DatePickerColumnPattern>();
     yearColumnPattern->SetCurrentIndex(YEARINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear() + YEARINDEX) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear() + YEARINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1653,6 +1647,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder026, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-M-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1684,8 +1679,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder026, TestSize.Level1)
     auto monthColumnPattern = monthColumnNode->GetPattern<DatePickerColumnPattern>();
     monthColumnPattern->SetCurrentIndex(MONTHINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth() + MONTHINDEX) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 }
@@ -1708,6 +1702,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder027, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->SetConfirmNode(buttonConfirmNode);
     datePickerPattern->SetDateOrder("y-M-d");
     bool hasYearNode = datePickerPattern->HasYearNode();
@@ -1739,8 +1734,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder027, TestSize.Level1)
     auto dayColumnPattern = dayColumnNode->GetPattern<DatePickerColumnPattern>();
     dayColumnPattern->SetCurrentIndex(DAYINDEX);
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
-    auto accessibilityProperty = datePickerNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay() + DAYINDEX));
 }
@@ -1822,6 +1816,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder029, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     bool hasYearNode = datePickerPattern->HasYearNode();
     bool hasMonthNode = datePickerPattern->HasMonthNode();
     bool hasDayNode = datePickerPattern->HasDayNode();
@@ -1879,6 +1874,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder030, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     bool hasYearNode = datePickerPattern->HasYearNode();
     bool hasMonthNode = datePickerPattern->HasMonthNode();
     bool hasDayNode = datePickerPattern->HasDayNode();
@@ -1931,6 +1927,7 @@ HWTEST_F(DatePickerOrderTest, DatePickerOrder031, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     textConfirmNode->MountToParent(buttonConfirmNode);
     auto datePickerPattern = datePickerNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(datePickerPattern, nullptr);
     bool hasYearNode = datePickerPattern->HasYearNode();
     bool hasMonthNode = datePickerPattern->HasMonthNode();
     bool hasDayNode = datePickerPattern->HasDayNode();

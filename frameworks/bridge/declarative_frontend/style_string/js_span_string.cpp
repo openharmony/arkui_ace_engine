@@ -142,7 +142,7 @@ void JSSpanString::Constructor(const JSCallbackInfo& args)
 {
     auto jsSpanString = Referenced::MakeRefPtr<JSSpanString>();
     jsSpanString->IncRefCount();
-    std::string data;
+    std::u16string data;
     RefPtr<SpanString> spanString;
     if (args.Length() == 0) {
         spanString = AceType::MakeRefPtr<SpanString>(data);
@@ -152,8 +152,7 @@ void JSSpanString::Constructor(const JSCallbackInfo& args)
             spanString = AceType::MakeRefPtr<SpanString>(data);
             if (args.Length() > 1) {
                 auto thisObj = args.This();
-                auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], StringUtils::ToWstring(data).length(),
-                    thisObj);
+                auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], data.length(), thisObj);
                 spanString->BindWithSpans(spanBases);
             }
         } else {
@@ -749,22 +748,22 @@ void JSSpanString::FromHtml(const JSCallbackInfo& info)
             auto container = AceEngine::Get().GetContainer(asyncContext->instanceId);
             CHECK_NULL_VOID(container);
             auto taskExecutor = container->GetTaskExecutor();
-            taskExecutor->PostTask(
-                [styledString, asyncContext]() mutable {
+            taskExecutor->PostTask([styledString, asyncContext]() mutable {
                     ContainerScope scope(asyncContext->instanceId);
                     if (!styledString) {
                         ProcessPromiseCallback(asyncContext, ERROR_CODE_FROM_HTML_CONVERT_ERROR);
                         return;
+                    }
+                    if (SystemProperties::GetDebugEnabled()) {
+                        TAG_LOGD(ACE_TEXT, "Get StyledString From Html: %{public}s", styledString->ToString().c_str());
                     }
                     JSRef<JSObject> obj = JSClass<JSSpanString>::NewInstance();
                     auto jsSpanString = Referenced::Claim(obj->Unwrap<JSSpanString>());
                     jsSpanString->SetController(styledString);
                     auto spanStrNapi = JsConverter::ConvertJsValToNapiValue(obj);
                     ProcessPromiseCallback(asyncContext, ERROR_CODE_NO_ERROR, spanStrNapi);
-                },
-                TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::IMMEDIATE);
-        },
-        TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
+                }, TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::VIP);
+        }, TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
     auto jsPromise = JsConverter::ConvertNapiValueToJsVal(result);
     CHECK_NULL_VOID(jsPromise->IsObject());
     info.SetReturnValue(JSRef<JSObject>::Cast(jsPromise));
@@ -783,6 +782,9 @@ void JSSpanString::ToHtml(const JSCallbackInfo& info)
     auto spanStringController = spanString->GetController();
     CHECK_NULL_VOID(spanStringController);
     auto html = HtmlUtils::ToHtml(spanStringController.GetRawPtr());
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGD(ACE_TEXT, "Transfer StyledString %{public}s To Html", spanStringController->ToString().c_str());
+    }
     auto ret = JSRef<JSVal>::Make(JSVal(ToJSValue(html)));
     info.SetReturnValue(ret);
 }
@@ -877,7 +879,7 @@ void JSMutableSpanString::Constructor(const JSCallbackInfo& args)
 {
     auto jsSpanString = Referenced::MakeRefPtr<JSMutableSpanString>();
     jsSpanString->IncRefCount();
-    std::string data;
+    std::u16string data;
 
     RefPtr<MutableSpanString> spanString;
     if (args.Length() == 0) {
@@ -888,8 +890,7 @@ void JSMutableSpanString::Constructor(const JSCallbackInfo& args)
             spanString = AceType::MakeRefPtr<MutableSpanString>(data);
             if (args.Length() > 1) {
                 auto thisObj = args.This();
-                auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1],
-                    StringUtils::ToWstring(data).length(), thisObj);
+                auto spanBases = JSSpanString::ParseJsSpanBaseVector(args[1], data.length(), thisObj);
                 spanString->BindWithSpans(spanBases);
             }
         } else {
@@ -955,7 +956,7 @@ void JSMutableSpanString::ReplaceString(const JSCallbackInfo& info)
     if (!CheckParameters(start, length)) {
         return;
     }
-    std::string data = info[2]->ToString();
+    std::u16string data = info[2]->ToU16String();
     controller->ReplaceString(start, length, data);
 }
 
@@ -966,7 +967,7 @@ void JSMutableSpanString::InsertString(const JSCallbackInfo& info)
         return;
     }
     auto start = info[0]->ToNumber<int32_t>();
-    std::string data = info[1]->ToString();
+    std::u16string data = info[1]->ToU16String();
     auto controller = GetMutableController().Upgrade();
     CHECK_NULL_VOID(controller);
     // The input parameter must not cross the boundary.

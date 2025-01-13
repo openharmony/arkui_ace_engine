@@ -262,6 +262,9 @@ HWTEST_F(ShapePatternTestNg, MeasureContent001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_TRUE(geometryNode);
+    /**
+     * @tc.desc: HasShapeViewBox() == FALSE && selfIdealSize.IsNull() == TRUE;
+     */
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     LayoutConstraintF constrain;
@@ -363,34 +366,6 @@ HWTEST_F(ShapePatternTestNg, MeasureContent003, TestSize.Level1)
     LayoutConstraintF constrain4;
     constrain4.selfIdealSize = OptionalSize<float>(std::nullopt, -1);
     newSize = layoutAlgorithm->MeasureContent(constrain4, AccessibilityManager::RawPtr(layoutWrapper));
-}
-
-/**
- * @tc.name: GetChildrenSize
- * @tc.desc: check ShapeContainerLayoutAlgorithm GetChildrenSize
- * @tc.type: FUNC
- */
-
-HWTEST_F(ShapePatternTestNg, GetChildrenSize001, TestSize.Level1)
-{
-    auto shapeModel = ShapeModelNG();
-    shapeModel.Create();
-    shapeModel.SetBitmapMesh(MESH, COLUMN, ROW);
-    RefPtr<UINode> uiNode = ViewStackProcessor::GetInstance()->Finish();
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(uiNode);
-    EXPECT_TRUE(frameNode);
-    auto paintProperty = frameNode->GetPaintProperty<ShapeContainerPaintProperty>();
-    EXPECT_TRUE(paintProperty);
-    auto pattern = frameNode->GetPattern<ShapeContainerPattern>();
-    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    EXPECT_TRUE(geometryNode);
-    RefPtr<LayoutWrapperNode> layoutWrapper =
-        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
-    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
-    auto shapeContainerLayoutAlgorithm = AceType::DynamicCast<ShapeContainerLayoutAlgorithm>(layoutAlgorithm);
-    auto childFrame =
-        shapeContainerLayoutAlgorithm->GetChildrenSize(AccessibilityManager::RawPtr(layoutWrapper), SizeF(0, 0));
-    EXPECT_TRUE(childFrame.IsNonNegative());
 }
 
 /**

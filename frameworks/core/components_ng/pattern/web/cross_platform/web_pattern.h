@@ -394,6 +394,10 @@ public:
     void UpdateJavaScriptOnDocumentStart();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
+    void JavaScriptOnDocumentStartByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder);
+    void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder);
     bool IsImageDrag();
     Offset GetDragOffset() const;
     void RemovePreviewMenuNode();

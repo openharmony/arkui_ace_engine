@@ -56,13 +56,13 @@ public:
     AIWriteAdapter() = default;
     ~AIWriteAdapter() override = default;
 
-    bool IsSentenceBoundary(const wchar_t value);
+    bool IsSentenceBoundary(const char16_t value);
     void CloseModalUIExtension();
     void ShowModalUIExtension(const AIWriteInfo& info,
         std::function<void(std::vector<uint8_t>&)> resultCallback);
     std::vector<uint8_t> GetBufferParam(const std::string& key, const AAFwk::WantParams& wantParams);
     bool GetBoolParam(const std::string& key, const AAFwk::WantParams& wantParams);
-    uint32_t GetSelectLengthOnlyText(const std::wstring& content);
+    uint32_t GetSelectLengthOnlyText(const std::u16string& content);
     void SetPipelineContext(const WeakPtr<NG::PipelineContext>& pipelineContext)
     {
         pipelineContext_ = pipelineContext;

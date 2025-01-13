@@ -91,6 +91,10 @@ class ComputedV2 {
     return this.prop_;
   }
 
+  public getComputedFuncName(): string {
+    return this.propertyComputeFunc_.name;
+  }
+
   // register current watchId while executing compute function
   private observeObjectAccess(): Object | undefined {
     ObserveV2.getObserve().startRecordDependencies(this, this.computedId_);
@@ -108,6 +112,36 @@ class ComputedV2 {
 
     return ret;
   }
+
+  public static clearComputedFromTarget(target: Object): void {
+    let meta: Object;
+    if (!target || typeof target !== 'object' ||
+        !(meta = target[ObserveV2.COMPUTED_REFS]) || typeof meta !== 'object') {
+      return;
+    }
+
+    stateMgmtConsole.debug(`ComputedV2: clearComputedFromTarget: from target ${target.constructor?.name} computedIds to clear ${JSON.stringify(Array.from(Object.values(meta)))}`);
+    Array.from(Object.values(meta)).forEach((computed: ComputedV2) => ObserveV2.getObserve().clearWatch(computed.computedId_));
+  }
+
+   /**
+   * @function resetComputed
+   * @description
+   * Recalculates the value of the specified computed property based on the current values
+   * of the input variables
+   *
+   * @param {string} computedName - The name of the computed property to be reset.
+  */
+   public resetComputed(computedName: string) : void {
+    let newVal = this.observeObjectAccess();
+
+    let cachedProp = ComputedV2.COMPUTED_CACHED_PREFIX + computedName;
+    if (this.target_[cachedProp] !== newVal) {
+      this.target_[cachedProp] = newVal;
+      ObserveV2.getObserve().fireChange(this.target_, computedName);
+    }
+  }
+
 }
 
 interface AsyncAddComputedJobEntryV2 {
