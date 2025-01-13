@@ -108,6 +108,11 @@ JSRef<JSObject> JsGestureJudgeFunction::CreateEventTargetObject(const std::share
     area->SetProperty<double>("width", info->GetTarget().area.GetWidth().ConvertToVp());
     area->SetProperty<double>("height", info->GetTarget().area.GetHeight().ConvertToVp());
     target->SetPropertyObject("area", area);
+    if (!info->GetTarget().id.empty()) {
+        target->SetProperty<const char*>("id", info->GetTarget().id.c_str());
+    } else {
+        target->SetPropertyObject("id", JsiValue::Undefined());
+    }
     return target;
 }
 
