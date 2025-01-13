@@ -93,6 +93,7 @@ protected:
     }
     void UpdateClipHandleViewPort(RectF& rect) override;
     bool AllowSearch() override;
+    bool AllowShare() override;
     bool selectTextUseTopHandle = false;
 
 private:

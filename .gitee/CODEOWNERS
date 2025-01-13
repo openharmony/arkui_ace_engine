@@ -161,6 +161,9 @@ adapter/ohos/osal/stylus_detector_callback.cpp @huawei_g_five
 adapter/ohos/osal/system_bar_style_ohos.cpp @arkuievent
 adapter/ohos/osal/system_bar_style_ohos.h @arkuievent
 adapter/ohos/osal/system_properties.cpp @arkuiframework
+adapter/ohos/osal/text_share_adapter.cpp @huawei_g_five
+adapter/ohos/osal/text_share_loader.cpp @huawei_g_five
+adapter/ohos/osal/text_share_mgr.cpp @huawei_g_five
 adapter/ohos/osal/trace_id_impl.cpp @arkuiframework
 adapter/ohos/osal/view_data_wrap_ohos.cpp @huawei_g_five
 adapter/ohos/osal/view_data_wrap_ohos.h @huawei_g_five
@@ -1763,6 +1766,10 @@ frameworks/core/common/ai/image_analyzer_default.h @arkui_image
 frameworks/core/common/ai/image_analyzer_loader.h @arkui_image
 frameworks/core/common/ai/image_analyzer_manager.h @arkui_image
 frameworks/core/common/ai/image_analyzer_mgr.h @arkui_image
+frameworks/core/common/share/text_share_adapter.h @huawei_g_five
+frameworks/core/common/share/text_share_default.h @huawei_g_five
+frameworks/core/common/share/text_share_loader.h @huawei_g_five
+frameworks/core/common/share/text_share_mgr.h @huawei_g_five
 frameworks/core/common/anr_thread.cpp @arkuiframework
 frameworks/core/common/anr_thread.h @arkuiframework
 frameworks/core/common/app_bar_helper.h @arkuiframework
@@ -2945,6 +2952,7 @@ interfaces/inner_api/ace/ace_forward_compatibility.h @arkuiframework
 interfaces/inner_api/ace/ai/data_detector_interface.h
 interfaces/inner_api/ace/ai/image_analyzer.h
 interfaces/inner_api/ace/ai/image_analyzer_interface.h
+interfaces/inner_api/ace/share/text_share_interface.h @huawei_g_five
 interfaces/inner_api/ace/arkui_log.h @arkuiframework
 interfaces/inner_api/ace/arkui_rect.h @arkui_superman
 interfaces/inner_api/ace/BUILD.gn @arkui_architecture

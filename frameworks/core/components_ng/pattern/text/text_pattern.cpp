@@ -852,6 +852,10 @@ void TextPattern::HandleOnSelectAll()
 
 bool TextPattern::IsShowSearch()
 {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        return false;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();

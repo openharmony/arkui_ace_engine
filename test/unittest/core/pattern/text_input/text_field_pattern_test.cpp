@@ -2452,6 +2452,26 @@ HWTEST_F(TextFieldPatternTest, HandleOnSearch001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleOnShare001
+ * @tc.desc: test testInput text HandleOnShare
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleOnShare001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto selectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    selectOverlay->HandleOnShare();
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 0);
+}
+
+/**
  * @tc.name: GetTextOrPlaceHolderFontSize001
  * @tc.desc: test testInput text GetTextOrPlaceHolderFontSize
  * @tc.type: FUNC

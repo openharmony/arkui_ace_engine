@@ -337,6 +337,13 @@ protected:
     {
         return false;
     }
+    bool IsSupportMenuShare();
+    bool IsNeedMenuShare();
+    void HandleOnShare();
+    virtual bool AllowShare()
+    {
+        return false;
+    }
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;

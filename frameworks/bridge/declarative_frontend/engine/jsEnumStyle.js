@@ -2101,6 +2101,10 @@ class TextMenuItemId {
     return new TextMenuItemId('OH_DEFAULT_SEARCH');
   }
 
+  static get SHARE() {
+    return new TextMenuItemId('OH_DEFAULT_SHARE');
+  }
+
   static get COLLABORATION_SERVICE() {
     return new TextMenuItemId('OH_DEFAULT_COLLABORATION_SERVICE');
   }
