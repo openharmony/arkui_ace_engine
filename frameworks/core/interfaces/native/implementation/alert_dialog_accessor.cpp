@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "alert_dialog_peer_impl.h"
 #include "arkoala_api_generated.h"
@@ -173,24 +174,7 @@ DialogProperties CreateDialogProperties(const Ark_DialogPropsForUpdate props)
     dialogProps.width = Converter::OptConvert<CalcDimension>(props.width);
     dialogProps.height = Converter::OptConvert<CalcDimension>(props.height);
 
-    auto willDismissCallbackOpt = Converter::OptConvert<Callback_DismissDialogAction_Void>(props.onWillDismiss);
-    if (willDismissCallbackOpt) {
-        auto onWillDismiss = [arkCallback = CallbackHelper(*willDismissCallbackOpt)](
-            const int32_t& info, const int32_t& instanceId) -> void {
-            Ark_DismissDialogAction action;
-            auto dismissReason = static_cast<DialogDismissReason>(info);
-            action.reason = Converter::ArkValue<Ark_DismissReason>(dismissReason);
-
-            auto dismissCallback = [](const Ark_Int32 resourceId) {
-                ViewAbstract::DismissDialog();
-            };
-            Callback_Void arkDismissCallback = Converter::ArkValue<Callback_Void>(dismissCallback, instanceId);
-
-            action.dismiss = arkDismissCallback;
-            arkCallback.Invoke(action);
-        };
-        dialogProps.onWillDismiss = std::move(onWillDismiss);
-    }
+    AddOnWillDismiss(dialogProps, props.onWillDismiss);
     auto cancelCallbackOpt = Converter::OptConvert<VoidCallback>(props.cancel);
     if (cancelCallbackOpt) {
         auto cancelFunc = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };

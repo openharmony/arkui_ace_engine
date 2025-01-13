@@ -14,6 +14,7 @@
  */
 
 #include "core/interfaces/native/implementation/custom_dialog_controller_peer_impl.h"
+#include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -201,21 +202,7 @@ void CustomDialogControllerPeerImpl::SetIsModal(Opt_Boolean isModal)
 
 void CustomDialogControllerPeerImpl::SetDismiss(Opt_Callback_DismissDialogAction_Void onWillDismiss)
 {
-    auto onWillDismissOpt = Converter::OptConvert<Callback_DismissDialogAction_Void>(onWillDismiss);
-    CHECK_NULL_VOID(onWillDismissOpt);
-    dialogProperties_.onWillDismiss = [callback = CallbackHelper(onWillDismissOpt.value())](
-        const int32_t& info, const int32_t& instanceId
-    ) {
-        const auto dismissReason = static_cast<BindSheetDismissReason>(info);
-        auto dismissCallback = [](const Ark_Int32 resourceId) {
-            ViewAbstract::DismissDialog();
-        };
-        Ark_DismissDialogAction action {
-            .dismiss = Converter::ArkValue<Callback_Void>(dismissCallback, instanceId),
-            .reason = Converter::ArkValue<Ark_DismissReason>(dismissReason)
-        };
-        callback.Invoke(action);
-    };
+    AddOnWillDismiss(dialogProperties_, onWillDismiss);
 }
 
 void CustomDialogControllerPeerImpl::SetWidth(Opt_Length width)

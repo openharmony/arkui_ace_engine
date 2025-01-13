@@ -17,6 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/implementation/dialog_common.h"
 #include "core/components_ng/pattern/action_sheet/action_sheet_model_ng.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/base/view_abstract.h"
@@ -140,24 +141,7 @@ void ShowImpl(const Ark_ActionSheetOptions* value)
     dialogProps.width = Converter::OptConvert<CalcDimension>(value->width);
     dialogProps.height = Converter::OptConvert<CalcDimension>(value->height);
 
-    auto willDismissCallbackOpt = Converter::OptConvert<Callback_DismissDialogAction_Void>(value->onWillDismiss);
-    if (willDismissCallbackOpt) {
-        auto onWillDismiss = [arkCallback = CallbackHelper(*willDismissCallbackOpt)](
-            const int32_t& info, const int32_t& instanceId) -> void {
-            Ark_DismissDialogAction action;
-            auto dismissReason = static_cast<BindSheetDismissReason>(info);
-            action.reason = Converter::ArkValue<Ark_DismissReason>(dismissReason);
-
-            auto dismissCallback = [](const Ark_Int32 resourceId) {
-                ViewAbstract::DismissDialog();
-            };
-            Callback_Void arkDismissCallback = Converter::ArkValue<Callback_Void>(dismissCallback, instanceId);
-
-            action.dismiss = arkDismissCallback;
-            arkCallback.Invoke(action);
-        };
-        dialogProps.onWillDismiss = std::move(onWillDismiss);
-    }
+    AddOnWillDismiss(dialogProps, value->onWillDismiss);
     auto cancelCallbackOpt = Converter::OptConvert<VoidCallback>(value->cancel);
     if (cancelCallbackOpt) {
         auto cancelFunc = [arkCallback = CallbackHelper(*cancelCallbackOpt)]() -> void { arkCallback.Invoke(); };
