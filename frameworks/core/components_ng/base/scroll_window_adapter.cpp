@@ -31,8 +31,8 @@ void ScrollWindowAdapter::UpdateMarkItem(int32_t index, FrameNode* node)
     markIndex_ = index;
     itemRectMap_.clear();
     if (updater_) {
-        // 01: mark the first loop item.
-        updater_(index, reinterpret_cast<void*>(0x01));
+        // nullptr to mark the first item
+        updater_(index, nullptr);
     }
 }
 
@@ -80,13 +80,8 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
     if (direction == FillDirection::END && (markIndex_ >= totalCount_ - 1)) {
         return nullptr;
     }
-    constexpr int32_t requestNewItemFlag = 0x01;
     if (markItem == nullptr) {
-        return reinterpret_cast<FrameNode*>(requestNewItemFlag);
-    }
-    if (markItem == reinterpret_cast<FrameNode*>(requestNewItemFlag)) {
         fillAlgorithm_->PreFill(size_, axis_, totalCount_);
-        // first iteration
         return InitPivotItem(direction);
     }
     auto* pendingNode = static_cast<FrameNode*>(

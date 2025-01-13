@@ -103,4 +103,15 @@ RectF GridFillAlgorithm::CalcItemRectBeforeMarkItem(
                                             : OffsetF(markItem.Left(), markItem.Top() - params_.crossGap - size.Height());
     return { offset, size };
 }
+
+bool GridFillAlgorithm::CanFillMore(const SizeF& scrollWindowSize, const RectF& markItemRect, FillDirection direction)
+{
+    // TODO: Axis::HORIZONTAL
+    if (direction == FillDirection::START) {
+        return GreatOrEqual(markItemRect.Top(), -scrollWindowSize.Height());
+    }
+    LOGI("LazyForEach backend current bottom = %{public}f, right = %{public}f", markItemRect.Bottom(),
+        markItemRect.Right());
+    return LessNotEqual(markItemRect.Bottom(), scrollWindowSize.Height() * 2);
+}
 } // namespace OHOS::Ace::NG

@@ -27,6 +27,7 @@
 namespace OHOS::Ace::NG {
 
 class GridFillAlgorithm : public FillAlgorithm {
+    DECLARE_ACE_TYPE(GridFillAlgorithm, FillAlgorithm);
 public:
     GridFillAlgorithm(const GridLayoutProperty& props, GridLayoutInfo& info) : props_(props), info_(info) {}
 
@@ -46,16 +47,7 @@ public:
         return true;
     }
 
-    bool CanFillMore(const SizeF& scrollWindowSize, const RectF& markItemRect, FillDirection direction) override
-    {
-        // TODO: Axis::HORIZONTAL
-        if (direction == FillDirection::START) {
-            return GreatOrEqual(markItemRect.Top(), -scrollWindowSize.Height());
-        }
-        LOGI("LazyForEach backend current bottom = %{public}f, right = %{public}f", markItemRect.Bottom(),
-            markItemRect.Right());
-        return LessNotEqual(markItemRect.Bottom(), scrollWindowSize.Height() * 2);
-    }
+    bool CanFillMore(const SizeF& scrollWindowSize, const RectF& markItemRect, FillDirection direction) override;
 
     void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
 
