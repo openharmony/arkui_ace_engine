@@ -509,6 +509,8 @@ HWTEST_F(TextFieldModifyTest, DoCallback003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     GetFocus();
     MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::PRESS);
+    pattern_->selectOverlay_->SetUsingMouse(false);
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
     EXPECT_TRUE(pattern_->IsUsingMouse());
 }
@@ -895,14 +897,16 @@ HWTEST_F(TextFieldModifyTest, MouseEvent002, TestSize.Level1)
 
     MouseInfo mouseInfo;
     mouseInfo.SetButton(MouseButton::RIGHT_BUTTON);
-    mouseInfo.SetAction(MouseAction::MOVE);
+    mouseInfo.SetAction(MouseAction::PRESS);
+    pattern_->selectOverlay_->SetUsingMouse(false);
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
     EXPECT_TRUE(pattern_->IsUsingMouse());
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
-    mouseInfo.SetAction(MouseAction::MOVE);
+    mouseInfo.SetAction(MouseAction::PRESS);
+    pattern_->selectOverlay_->SetUsingMouse(false);
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
     EXPECT_TRUE(pattern_->IsUsingMouse());
 }
