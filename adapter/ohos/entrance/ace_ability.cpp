@@ -698,11 +698,11 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
         pipelineContext->SetDisplayWindowRectInfo(
             Rect(Offset(rect.posX_, rect.posY_), Size(rect.width_, rect.height_)));
         pipelineContext->SetIsLayoutFullScreen(
-            Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+            Ability::GetWindow()->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
         auto isNeedAvoidWindowMode = SystemProperties::GetNeedAvoidWindow() &&
-            (Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
-            Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+            (Ability::GetWindow()->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
+            Ability::GetWindow()->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            Ability::GetWindow()->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
         pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
     }
     auto taskExecutor = container->GetTaskExecutor();
