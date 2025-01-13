@@ -619,9 +619,9 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         LOGI("ArkUi flush first frame messages.");
     }
     FlushMessages();
+    FlushWindowPatternInfo();
     InspectDrew();
     UIObserverHandler::GetInstance().HandleDrawCommandSendCallBack();
-    FlushWindowPatternInfo();
     if (onShow_ && onFocus_ && isWindowHasFocused_) {
         auto isDynamicRender = Container::Current() == nullptr ? false : Container::Current()->IsDynamicRender();
         if ((!isFormRender_) || isDynamicRender) {
