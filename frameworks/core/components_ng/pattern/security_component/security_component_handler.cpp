@@ -143,6 +143,67 @@ bool SecurityComponentHandler::CheckBlendMode(const RefPtr<FrameNode>& node,
     return false;
 }
 
+bool SecurityComponentHandler::GetBorderRect(const RefPtr<FrameNode>& parentNode, std::vector<RectF>& borderRects)
+{
+    auto renderContext = parentNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    auto borderWidth = renderContext->GetBorderWidth();
+    CHECK_NULL_RETURN(borderWidth, false);
+    auto parentRect = renderContext->GetPaintRectWithTransform();
+    parentRect.SetOffset(parentNode->GetPositionToScreenWithTransform());
+    auto borderColor = renderContext->GetBorderColor();
+    auto leftIsTransparent = borderColor && borderColor->leftColor.has_value() &&
+        (borderColor->leftColor.value() == Color::TRANSPARENT);
+    auto rightIsTransparent = borderColor && borderColor->rightColor.has_value() &&
+        (borderColor->rightColor.value() == Color::TRANSPARENT);
+    auto topIsTransparent = borderColor && borderColor->topColor.has_value() &&
+        (borderColor->topColor.value() == Color::TRANSPARENT);
+    auto bottomIsTransparent = borderColor && borderColor->bottomColor.has_value() &&
+        (borderColor->bottomColor.value() == Color::TRANSPARENT);
+
+    if (borderWidth->leftDimen.has_value() && GreatNotEqual(borderWidth->leftDimen.value().ConvertToPx(), 1.0) &&
+        !leftIsTransparent) {
+        auto leftWidth = borderWidth->leftDimen.value().ConvertToPx();
+        borderRects.emplace_back(RectF(parentRect.GetX(), parentRect.GetY(), leftWidth, parentRect.Height()));
+    }
+    if (borderWidth->rightDimen.has_value() && GreatNotEqual(borderWidth->rightDimen.value().ConvertToPx(), 1.0) &&
+        !rightIsTransparent) {
+        auto rightWidth = borderWidth->rightDimen.value().ConvertToPx();
+        borderRects.emplace_back(RectF(parentRect.GetX() + parentRect.Width() - rightWidth, parentRect.GetY(),
+            rightWidth, parentRect.Height()));
+    }
+    if (borderWidth->topDimen.has_value() && GreatNotEqual(borderWidth->topDimen.value().ConvertToPx(), 1.0) &&
+        !topIsTransparent) {
+        auto topWidth = borderWidth->topDimen.value().ConvertToPx();
+        borderRects.emplace_back(RectF(parentRect.GetX(), parentRect.GetY(), parentRect.Width(), topWidth));
+    }
+    if (borderWidth->bottomDimen.has_value() && GreatNotEqual(borderWidth->bottomDimen.value().ConvertToPx(), 1.0) &&
+        !bottomIsTransparent) {
+        auto bottomWidth = borderWidth->bottomDimen.value().ConvertToPx();
+        borderRects.emplace_back(RectF(parentRect.GetX(), parentRect.GetY() + parentRect.Height() - bottomWidth,
+            parentRect.Width(), bottomWidth));
+    }
+    return true;
+}
+
+bool SecurityComponentHandler::CheckParentBorder(const RefPtr<FrameNode>& parentNode, const RectF& scRect)
+{
+    std::vector<RectF> borderRects;
+    if (!GetBorderRect(parentNode, borderRects)) {
+        return false;
+    }
+    for (const auto& rect : borderRects) {
+        if (!rect.IsInnerIntersectWithRound(scRect)) {
+            continue;
+        }
+        SC_LOG_ERROR("SecurityComponentCheckFail: security component is covered by the border of parent" \
+            " %{public}s", parentNode->GetTag().c_str());
+        return true;
+    }
+
+    return false;
+}
+
 float SecurityComponentHandler::GetLinearGradientBlurRatio(std::vector<std::pair<float, float>>& fractionStops)
 {
     float ratio = 1.0;
@@ -488,6 +549,9 @@ bool SecurityComponentHandler::CheckParentNodesEffect(RefPtr<FrameNode>& node,
             continue;
         }
         if (CheckRenderEffect(parentNode)) {
+            return true;
+        }
+        if (CheckParentBorder(parentNode, frameRect)) {
             return true;
         }
         if (CheckLinearGradientBlur(parentNode, node)) {

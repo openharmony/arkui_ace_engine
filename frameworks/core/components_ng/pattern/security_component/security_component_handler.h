@@ -56,6 +56,8 @@ private:
     static bool CheckBlur(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckForegroundBlurStyle(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
     static bool CheckBlendMode(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
+    static bool CheckParentBorder(const RefPtr<FrameNode>& parentNode, const RectF& scRect);
+    static bool GetBorderRect(const RefPtr<FrameNode>& parentNode, std::vector<RectF>& borderRects);
     static float GetLinearGradientBlurRatio(std::vector<std::pair<float, float>>& fractionStops);
     static bool CheckDistance(const float& deltaY, const float& radius, const float& distance,
         const int32_t& multiplier);
