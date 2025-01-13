@@ -5330,8 +5330,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest082, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_NodeEvent_GetTextChangeEvent(&event), nullptr);
     ArkUINodeEvent origin = { 0, 0, 0};
     origin.textChangeEvent.subKind = ArkUIEventSubKind::ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT;
-    origin.textChangeEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
-    origin.textChangeEvent.extendStringPtr = reinterpret_cast<intptr_t>(str.c_str());
+    origin.textChangeEvent.nativeStringPtr = const_cast<char*>(str.c_str());
+    origin.textChangeEvent.extendStringPtr = const_cast<char*>(str.c_str());
     origin.textChangeEvent.numArgs = 0;
     event.origin = &origin;
     EXPECT_NE(OH_ArkUI_NodeEvent_GetTextChangeEvent(&event), nullptr);

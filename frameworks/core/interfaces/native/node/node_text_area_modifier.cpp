@@ -2127,8 +2127,8 @@ void SetOnTextAreaChangeWithPreviewText(ArkUINodeHandle node, void* extraParam)
         std::string utf8Str = UtfUtils::Str16ToStr8(previewText.value);
         eventWithPreview.extraParam = reinterpret_cast<intptr_t>(extraParam);
         eventWithPreview.textChangeEvent.subKind = ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT;
-        eventWithPreview.textChangeEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8StrValue.c_str());
-        eventWithPreview.textChangeEvent.extendStringPtr = reinterpret_cast<intptr_t>(utf8Str.c_str());
+        eventWithPreview.textChangeEvent.nativeStringPtr = const_cast<char*>(utf8StrValue.c_str());
+        eventWithPreview.textChangeEvent.extendStringPtr = const_cast<char*>(utf8Str.c_str());
         eventWithPreview.textChangeEvent.numArgs = previewText.offset;
         SendArkUISyncEvent(&eventWithPreview);
     };

@@ -1100,8 +1100,8 @@ struct ArkUIAPIEventTextInput {
 
 struct ArkUIAPIEventTextInputMixed {
     // used by c-api, should be the first place.
-    ArkUI_Int64 nativeStringPtr;
-    ArkUI_Int64 extendStringPtr;
+    void* nativeStringPtr;
+    void* extendStringPtr;
     ArkUI_Int32 numArgs;
     ArkUI_Int32 subKind; // ArkUIEventSubKind actually
 };
