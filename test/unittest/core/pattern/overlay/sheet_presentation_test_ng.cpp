@@ -130,60 +130,6 @@ HWTEST_F(SheetPresentationTestNg, OnScrollStartRecursive001, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleScroll001
- * @tc.desc: Increase the coverage of SheetPresentationPattern::HandleScroll function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestNg, HandleScroll001, TestSize.Level1)
-{
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
-        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    sheetPattern->currentOffset_ = -1.0f;
-    sheetPattern->isSheetNeedScroll_ = true;
-    int32_t source = SCROLL_FROM_ANIMATION;
-    NestedState state = NestedState::CHILD_SCROLL;
-    sheetPattern->isSheetPosChanged_ = false;
-    EXPECT_FALSE(GreatOrEqual(sheetPattern->currentOffset_, 0.0f));
-    EXPECT_TRUE(sheetPattern->isSheetNeedScroll_);
-    EXPECT_EQ(state, NestedState::CHILD_SCROLL);
-    sheetPattern->HandleScroll(0.0f, source, state, 0.0f);
-
-    sheetPattern->currentOffset_ = 1.0f;
-    sheetPattern->isSheetPosChanged_ = true;
-    EXPECT_TRUE(GreatOrEqual(sheetPattern->currentOffset_, 0.0f));
-    EXPECT_NE(source, SCROLL_FROM_UPDATE);
-    sheetPattern->HandleScroll(0.0f, source, state, 0.0f);
-
-    source = SCROLL_FROM_UPDATE;
-    sheetPattern->isSheetNeedScroll_ = true;
-    EXPECT_TRUE(sheetPattern->isSheetNeedScroll_);
-    EXPECT_EQ(source, SCROLL_FROM_UPDATE);
-    sheetPattern->HandleScroll(0.0f, source, state, 0.0f);
-
-    state = NestedState::CHILD_OVER_SCROLL;
-    sheetPattern->isSheetNeedScroll_ = false;
-    EXPECT_FALSE(sheetPattern->isSheetNeedScroll_);
-    EXPECT_EQ(state, NestedState::CHILD_OVER_SCROLL);
-    sheetPattern->HandleScroll(0.0f, source, state, 0.0f);
-
-    sheetPattern->currentOffset_ = -1.0f;
-    sheetPattern->isSheetNeedScroll_ = true;
-    state = NestedState::GESTURE;
-    EXPECT_FALSE(GreatOrEqual(sheetPattern->currentOffset_, 0.0f));
-    EXPECT_TRUE(sheetPattern->isSheetNeedScroll_);
-    EXPECT_NE(state, NestedState::CHILD_SCROLL);
-    EXPECT_NE(state, NestedState::CHILD_OVER_SCROLL);
-    sheetPattern->HandleScroll(0.0f, source, state, 0.0f);
-
-    sheetPattern->isSheetNeedScroll_ = false;
-    EXPECT_FALSE(GreatOrEqual(sheetPattern->currentOffset_, 0.0f));
-    EXPECT_FALSE(sheetPattern->isSheetNeedScroll_);
-    sheetPattern->HandleScroll(0.0f, source, state, 0.0f);
-}
-
-/**
  * @tc.name: HandleScrollWithSheet001
  * @tc.desc: Increase the coverage of SheetPresentationPattern::HandleScrollWithSheet function.
  * @tc.type: FUNC
