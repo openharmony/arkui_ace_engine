@@ -229,12 +229,14 @@ void RefreshPattern::InitProgressNode()
     CHECK_NULL_VOID(progressPaintProperty);
     progressPaintProperty->UpdateLoadingProgressOwner(LoadingProgressOwner::REFRESH);
     auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto theme = context->GetTheme<RefreshTheme>();
-    CHECK_NULL_VOID(theme);
-    loadingProgressSizeTheme_ = theme->GetProgressDiameter();
-    triggerLoadingDistanceTheme_ = theme->GetLoadingDistance();
-    progressPaintProperty->UpdateColor(theme->GetProgressColor());
+    if (context) {
+        auto theme = context->GetTheme<RefreshTheme>();
+        if (theme) {
+            loadingProgressSizeTheme_ = theme->GetProgressDiameter();
+            triggerLoadingDistanceTheme_ = theme->GetLoadingDistance();
+            progressPaintProperty->UpdateColor(theme->GetProgressColor());
+        }
+    }
     auto progressLayoutProperty = progressChild_->GetLayoutProperty<LoadingProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     progressLayoutProperty->UpdateUserDefinedIdealSize(
