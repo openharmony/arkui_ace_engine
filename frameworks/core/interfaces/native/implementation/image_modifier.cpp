@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/interfaces/native/generated/interface/node_api.h"
 #include "frameworks/core/components/common/layout/constants.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
@@ -261,7 +262,7 @@ void OnCompleteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onEvent = [frameNode](const LoadImageSuccessEvent& info) {
+    auto onEvent = [callback = CallbackHelper(*value)](const LoadImageSuccessEvent& info) {
         Ark_Type_ImageAttribute_onComplete_callback_event event;
         event.width = Converter::ArkValue<Ark_Number>(info.GetWidth());
         event.height = Converter::ArkValue<Ark_Number>(info.GetHeight());
@@ -273,7 +274,7 @@ void OnCompleteImpl(Ark_NativePointer node,
         event.contentWidth = Converter::ArkValue<Ark_Number>(info.GetContentWidth());
         event.contentHeight = Converter::ArkValue<Ark_Number>(info.GetContentHeight());
         auto optEvent = Converter::ArkValue<Opt_Type_ImageAttribute_onComplete_callback_event>(event);
-        GetFullAPI()->getEventsAPI()->getImageEventsReceiver()->onComplete(frameNode->GetId(), optEvent);
+        callback.Invoke(optEvent);
     };
     ImageModelNG::SetOnComplete(frameNode, std::move(onEvent));
 }

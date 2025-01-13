@@ -38,6 +38,23 @@ LoadImageFailEvent Convert(const Ark_ImageError& info)
     LoadImageFailEvent event(width, height, error);
     return event;
 }
+
+template<>
+LoadImageSuccessEvent Convert(const Ark_Type_ImageAttribute_onComplete_callback_event& event)
+{
+    LoadImageSuccessEvent info(
+        Convert<float>(event.width),
+        Convert<float>(event.height),
+        Convert<float>(event.componentWidth),
+        Convert<float>(event.componentHeight),
+        Convert<int>(event.loadingStatus),
+        Convert<float>(event.contentOffsetX),
+        Convert<float>(event.contentOffsetY),
+        Convert<float>(event.contentWidth),
+        Convert<float>(event.contentHeight)
+    );
+    return info;
+}
 } // OHOS::Ace::NG::Converter
 
 namespace  {
@@ -46,6 +63,17 @@ namespace  {
     const auto OPACITY_COLOR = "#FF000000";
     const auto ATTRIBUTE_AUTO_RESIZE_NAME = "autoResize";
     const auto ATTRIBUTE_AUTO_RESIZE_DEFAULT_VALUE = "false";
+    const auto ATTRIBUTE_DRAGGABLE_NAME = "draggable";
+    const auto ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE = "true";
+    const auto ATTRIBUTE_SOURCE_SIZE_NAME = "sourceSize";
+    const auto ATTRIBUTE_SOURCE_SIZE_DEFAULT_VALUE = "[0.00 x 0.00]";
+
+
+    // Valid values for boolean values
+    const std::vector<std::tuple<std::string, Ark_Boolean, std::string>> validBoolean = {
+        {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
+        {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
+    };
 
     struct EventsTracker {
         static inline GENERATED_ArkUIImageEventsReceiver getImageEventsReceiver {};
@@ -141,12 +169,6 @@ HWTEST_F(ImageModifierTest, setAutoResizeTestDefaultValues, TestSize.Level1)
     EXPECT_EQ(resultStr, ATTRIBUTE_AUTO_RESIZE_DEFAULT_VALUE);
 }
 
-// Valid values for attribute 'autoResize' of method 'autoResize'
-static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> autoResizeAutoResizeValidValues = {
-    {"true", Converter::ArkValue<Ark_Boolean>(true), "true"},
-    {"false", Converter::ArkValue<Ark_Boolean>(false), "false"},
-};
-
 /*
  * @tc.name: setAutoResizeTestValidValues
  * @tc.desc: Check set color functionality of setCancelButton
@@ -161,11 +183,11 @@ HWTEST_F(ImageModifierTest, setAutoResizeTestValidValues, TestSize.Level1)
     Ark_Boolean initValueAutoResize;
 
     // Initial setup
-    initValueAutoResize = std::get<1>(autoResizeAutoResizeValidValues[0]);
+    initValueAutoResize = std::get<1>(validBoolean[0]);
 
     // Verifying attribute's  values
     inputValueAutoResize = initValueAutoResize;
-    for (auto&& value: autoResizeAutoResizeValidValues) {
+    for (auto&& value: validBoolean) {
         inputValueAutoResize = std::get<1>(value);
         modifier_->setAutoResize(node_, inputValueAutoResize);
         jsonValue = GetJsonValue(node_);
@@ -435,5 +457,204 @@ HWTEST_F(ImageModifierTest, SetImageOptions_NullOptions, testing::ext::TestSize.
     json = GetJsonValue(node_);
     auto srcAfter = GetAttrValue<std::string>(json, "src");
     ASSERT_EQ(srcBefore, srcAfter);
+}
+
+/*
+ * @tc.name: setDraggableTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, DISABLED_setDraggableTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->OnModifyDone();
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DRAGGABLE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE) << "Default value for attribute 'draggable'";
+}
+
+/*
+ * @tc.name: setDraggableTestDraggableValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setDraggableTestDraggableValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueDraggable;
+
+    // Initial setup
+    initValueDraggable = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueDraggable](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueDraggable = initValueDraggable;
+
+        inputValueDraggable = value;
+        modifier_->setDraggable(node_, inputValueDraggable);
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        ASSERT_NE(frameNode, nullptr);
+        auto imagePattern = frameNode->GetPattern();
+        ASSERT_NE(imagePattern, nullptr);
+        imagePattern->OnModifyDone();
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DRAGGABLE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setDraggable, attribute: draggable";
+    };
+
+    for (auto& [input, value, expected] : validBoolean) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setSourceSizeTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setSourceSizeTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto resultSourceSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SOURCE_SIZE_NAME);
+    EXPECT_EQ(resultSourceSize, ATTRIBUTE_SOURCE_SIZE_DEFAULT_VALUE) <<
+        "Default value for attribute 'sourceSize'";
+}
+
+/*
+ * @tc.name: setSourceSizeTestSourceSizeWidthValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setSourceSizeTestSourceSizeWidthValues, TestSize.Level1)
+{
+    // Fixture 'NumberAnything' for type 'Ark_Number'
+    const std::vector<std::tuple<std::string, Ark_Number, std::string>> testPlan = {
+        { "100", Converter::ArkValue<Ark_Number>(100), "[100.00 x 100.00]" },
+        { "0", Converter::ArkValue<Ark_Number>(0), "[0.00 x 100.00]" },
+        { "-100", Converter::ArkValue<Ark_Number>(-100), "[0.00 x 0.00]" },
+        { "12.34", Converter::ArkValue<Ark_Number>(12.34), "[12.34 x 100.00]" },
+        { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "[0.00 x 0.00]" },
+    };
+
+    Ark_ImageSourceSize initValueSourceSize;
+
+    // Initial setup
+    initValueSourceSize.width = std::get<1>(testPlan[0]);
+    initValueSourceSize.height = std::get<1>(testPlan[0]);
+
+    auto checkValue = [this, &initValueSourceSize](
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
+        Ark_ImageSourceSize inputValueSourceSize = initValueSourceSize;
+
+        inputValueSourceSize.width = value;
+        modifier_->setSourceSize(node_, &inputValueSourceSize);
+        std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+        auto resultSourceSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SOURCE_SIZE_NAME);
+        EXPECT_EQ(resultSourceSize, expectedStr) <<
+            "Default value for attribute 'sourceSize'";
+    };
+
+    for (auto& [input, value, expected] : testPlan) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setSourceSizeTestSourceSizeHeightValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setSourceSizeTestSourceSizeHeightValues, TestSize.Level1)
+{
+    // Fixture 'NumberAnything' for type 'Ark_Number'
+    const std::vector<std::tuple<std::string, Ark_Number, std::string>> testPlan = {
+        { "100", Converter::ArkValue<Ark_Number>(100), "[100.00 x 100.00]" },
+        { "0", Converter::ArkValue<Ark_Number>(0), "[100.00 x 0.00]" },
+        { "-100", Converter::ArkValue<Ark_Number>(-100), "[0.00 x 0.00]" },
+        { "12.34", Converter::ArkValue<Ark_Number>(12.34), "[100.00 x 12.34]" },
+        { "-56.78", Converter::ArkValue<Ark_Number>(-56.78), "[0.00 x 0.00]" },
+    };
+
+    Ark_ImageSourceSize initValueSourceSize;
+
+    // Initial setup
+    initValueSourceSize.width = std::get<1>(testPlan[0]);
+    initValueSourceSize.height = std::get<1>(testPlan[0]);
+
+    auto checkValue = [this, &initValueSourceSize](
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
+        Ark_ImageSourceSize inputValueSourceSize = initValueSourceSize;
+
+        inputValueSourceSize.height = value;
+        modifier_->setSourceSize(node_, &inputValueSourceSize);
+        std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+        auto resultSourceSize = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SOURCE_SIZE_NAME);
+        EXPECT_EQ(resultSourceSize, expectedStr) <<
+            "Default value for attribute 'sourceSize'";
+    };
+
+    for (auto& [input, value, expected] : testPlan) {
+        checkValue(input, expected, value);
+    }
+}
+
+MATCHER_P2(CompareLoadImageSuccessEvent, event1, event2, "LoadImageSuccessEvent compare")
+{
+    return event1.width == event2.width &&
+        event1.height == event2.height &&
+        event1.componentWidth == event2.componentWidth &&
+        event1.componentHeight == event2.componentHeight &&
+        event1.loadingStatus == event2.loadingStatus &&
+        event1.contentOffsetX == event2.contentOffsetX &&
+        event1.contentOffsetY == event2.contentOffsetY &&
+        event1.contentWidth == event2.contentWidth &&
+        event1.contentHeight == event2.contentHeight;
+}
+/*
+ * @tc.name: setOnCompleteTest
+ * @tc.desc: Check functionality of ImageModifier.setOnComplete
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, setOnCompleteTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<ImageEventHub>();
+    auto widthHeight = 100.0f;
+    static constexpr int32_t contextId = 123;
+    const LoadImageSuccessEvent info (widthHeight, widthHeight, widthHeight, widthHeight, 0,
+        widthHeight, widthHeight, widthHeight, widthHeight);
+
+    struct CheckEvent {
+        int32_t resourceId;
+        LoadImageSuccessEvent info;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onComplete = [](
+        const Ark_Int32 resourceId, const Opt_Type_ImageAttribute_onComplete_callback_event event)
+    {
+        auto info = Converter::OptConvert<LoadImageSuccessEvent>(event);
+        if (info) {
+            checkEvent = {
+                .resourceId = resourceId,
+                .info = *info,
+            };
+        }
+    };
+
+    auto arkCallback =
+        Converter::ArkValue<Callback_Type_ImageAttribute_onComplete_callback_event_Void>(onComplete, contextId);
+
+    EXPECT_FALSE(checkEvent);
+    modifier_->setOnComplete(node_, &arkCallback);
+    eventHub->FireCompleteEvent(info);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    CompareLoadImageSuccessEvent(checkEvent->info, info);
 }
 } // namespace OHOS::Ace::NG
