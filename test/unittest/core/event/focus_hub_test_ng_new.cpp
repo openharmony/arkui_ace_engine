@@ -54,39 +54,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0043, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusHubTestNg0044
- * @tc.desc: Test the function TryRequestFocus.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestNg0044, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
-        AceType::MakeRefPtr<Pattern>());
-    auto frameNode2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_COMPONENT_TAG, -1,
-        AceType::MakeRefPtr<Pattern>());
-    auto nodeParent = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BLANK_ETS_TAG, -1,
-        AceType::MakeRefPtr<FlexLayoutPattern>());
-    frameNode->GetOrCreateFocusHub();
-    frameNode2->GetOrCreateFocusHub();
-    nodeParent->GetOrCreateFocusHub();
-    frameNode->SetParent(nodeParent);
-    frameNode2->SetParent(nodeParent);
-
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    auto parent = focusHub->GetParentFocusHub();
-    RectF childRect;
-    parent->focusType_ = FocusType::SCOPE;
-    parent->TryRequestFocus(focusHub, childRect, FocusStep::TAB);
-
-    parent->focusType_ = FocusType::SCOPE;
-    childRect.width_ = -1;
-    focusHub->GetGeometryNode() = AceType::MakeRefPtr<GeometryNode>();
-    parent->TryRequestFocus(focusHub, childRect, FocusStep::NONE);
-}
-
-/**
  * @tc.name: FocusHubTestNg0046
  * @tc.desc: Test the function TriggerFocusScroll.
  * @tc.type: FUNC

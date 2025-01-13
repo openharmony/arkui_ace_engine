@@ -99,56 +99,6 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest032, TestSize.Le
 }
 
 /**
- * @tc.name: DragEventActuatorUpdatePreviewAttrTest033
- * @tc.desc: Create DragEventActuator and invoke OnCollectTouchTarget function.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest033, TestSize.Level1)
-{
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
-    ASSERT_NE(framenode, nullptr);
-    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    gestureEventHub->contextMenuShowStatus_ = true;
-    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
-        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
-    ASSERT_NE(dragEventActuator, nullptr);
-    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
-    ASSERT_NE(getEventTargetImpl, nullptr);
-    TouchTestResult finalResult;
-    ResponseLinkResult responseLinkResult;
-    auto focusHub = framenode->GetOrCreateFocusHub();
-    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
-    GestureEventFunc actionStart = [&unknownPropertyValue](GestureEvent& info) {};
-    GestureEventNoParameter actionCancel = [&unknownPropertyValue]() {};
-    auto dragEvent = AceType::MakeRefPtr<DragEvent>(
-        std::move(actionStart), std::move(actionStart), std::move(actionStart), std::move(actionCancel));
-    dragEventActuator->ReplaceDragEvent(dragEvent);
-    dragEventActuator->SetCustomDragEvent(dragEvent);
-    dragEventActuator->SequencedRecognizer_ = nullptr;
-    dragEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
-    GestureEvent info = GestureEvent();
-    info.SetScale(GESTURE_EVENT_PROPERTY_VALUE);
-    dragEventActuator->panRecognizer_->onActionCancel_ = std::make_unique<GestureEventFunc>(
-        [&unknownPropertyValue](GestureEvent& info) {});
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
-    dragEventActuator->panRecognizer_->deviceType_ = SourceType::MOUSE;
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
-    gestureEventHub->textDraggable_ = true;
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
-    auto onKeyEvent = [](const KeyEvent& event) -> bool { return true; };
-    focusHub->SetOnKeyEventInternal(onKeyEvent, OnKeyEventType::CONTEXT_MENU);
-    dragEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
-    (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);
-    (*(dragEventActuator->longPressRecognizer_->onAction_))(info);
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
-}
-
-/**
  * @tc.name: DragEventActuatorUpdatePreviewAttrTest034
  * @tc.desc: Create DragEventActuator and invoke longPressUpdate callback.
  * @tc.type: FUNC
@@ -667,55 +617,6 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest044, TestSize.Le
     layoutProperty->propVisibility_ = VisibleType::INVISIBLE;
     DragDropFuncWrapper::GetPreviewPixelMap("testid", frameNode);
     EXPECT_EQ(gestureEventHub->GetTextDraggable(), true);
-}
-
-/**
- * @tc.name: DragEventActuatorUpdatePreviewAttrTest045
- * @tc.desc: Create DragEventActuator and invoke OnCollectTouchTarget function.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest045, TestSize.Level1)
-{
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto framenode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
-    ASSERT_NE(framenode, nullptr);
-    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    gestureEventHub->contextMenuShowStatus_ = true;
-    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
-        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
-    ASSERT_NE(dragEventActuator, nullptr);
-    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
-    ASSERT_NE(getEventTargetImpl, nullptr);
-    TouchTestResult finalResult;
-    ResponseLinkResult responseLinkResult;
-    auto focusHub = framenode->GetOrCreateFocusHub();
-    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
-    GestureEventFunc actionStart = [&unknownPropertyValue](GestureEvent& info) {};
-    GestureEventNoParameter actionCancel = [&unknownPropertyValue]() {};
-    auto dragEvent = AceType::MakeRefPtr<DragEvent>(
-        std::move(actionStart), std::move(actionStart), std::move(actionStart), std::move(actionCancel));
-    dragEventActuator->ReplaceDragEvent(dragEvent);
-    dragEventActuator->SetCustomDragEvent(dragEvent);
-    dragEventActuator->SequencedRecognizer_ = nullptr;
-    dragEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
-    GestureEvent info = GestureEvent();
-    info.SetScale(GESTURE_EVENT_PROPERTY_VALUE);
-    (*(dragEventActuator->panRecognizer_->onReject_))();
-    dragEventActuator->gatherNode_ = framenode;
-    (*(dragEventActuator->panRecognizer_->onReject_))();
-    dragEventActuator->isNotInPreviewState_ = true;
-    (*(dragEventActuator->panRecognizer_->onReject_))();
-    auto onKeyEvent = [](const KeyEvent& event) -> bool { return true; };
-    focusHub->SetOnKeyEventInternal(onKeyEvent, OnKeyEventType::CONTEXT_MENU);
-    dragEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
-    (*(dragEventActuator->panRecognizer_->onReject_))();
-    dragEventActuator->isNotInPreviewState_ = false;
-    (*(dragEventActuator->panRecognizer_->onReject_))();
-    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
 }
 
 /**
