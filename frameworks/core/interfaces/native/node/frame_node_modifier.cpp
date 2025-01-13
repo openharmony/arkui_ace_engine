@@ -339,8 +339,13 @@ ArkUI_Bool IsVisible(ArkUINodeHandle node)
     CHECK_NULL_RETURN(currentNode, false);
     auto isVisible = currentNode->IsVisible();
     auto parentNode = currentNode->GetParent();
-    while (isVisible && parentNode && AceType::InstanceOf<FrameNode>(*parentNode)) {
-        isVisible = isVisible && AceType::DynamicCast<FrameNode>(parentNode)->IsVisible();
+    while (isVisible && parentNode) {
+        if (AceType::InstanceOf<FrameNode>(*parentNode)) {
+            isVisible = isVisible && AceType::DynamicCast<FrameNode>(parentNode)->IsVisible();
+        } else if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
+            break;
+        }
+        
         parentNode = parentNode->GetParent();
     }
     return isVisible;
