@@ -117,7 +117,7 @@ struct CJTabsBarBackgroundBlurStyleOptions {
     int32_t colorMode;
     int32_t adaptiveColor;
     CJTabsBlurOptions blurOptions;
-    float scale;
+    double scale;
     int32_t policy;
     uint32_t inactiveColor;
 };
@@ -154,6 +154,92 @@ struct CJTabContentAnimatedTransition {
     int32_t timeout;
     TransitionFunc transition;
     bool isUndefined;
+};
+
+struct CJTabContentIndicatorStyle {
+    uint32_t color;
+    double height;
+    int32_t heightUnit;
+    double width;
+    int32_t widthUnit;
+    double borderRadius;
+    int32_t borderRadiusUnit;
+    double marginTop;
+    int32_t marginTopUnit;
+};
+
+struct CJBoardStyle {
+    double borderRadius;
+    int32_t borderRadiusUnit;
+};
+
+struct CJFont {
+    double size;
+    int32_t sizeUnit;
+    char* weight;
+    char* family;
+    int32_t style;
+};
+
+struct CJTabContentLabelStyle {
+    int32_t overflow;
+    int32_t maxLines;
+    double minFontSize;
+    int32_t minFontSizeUnit;
+    double maxFontSize;
+    int32_t maxFontSizeUnit;
+    int32_t heightAdaptivePolicy;
+    CJFont font;
+    uint32_t unselectedColor;
+    uint32_t selectedColor;
+};
+
+enum PaddingType { PADDING = 0, LENGTH = 1, LOCALIZEDPADDING = 2 };
+
+struct CJPadding {
+    int32_t paddingType;
+    double top;
+    int32_t topUnit;
+    double right;
+    int32_t rightUnit;
+    double bottom;
+    int32_t bottomUnit;
+    double left;
+    int32_t leftUnit;
+};
+
+struct CJSubTabBarStyle {
+    char* content;
+    CJTabContentIndicatorStyle indicator;
+    int32_t selectedMode;
+    CJBoardStyle board;
+    CJTabContentLabelStyle labelStyle;
+    CJPadding padding;
+    char* id;
+};
+
+struct CJTabBarIconStyle {
+    uint32_t unselectedColor;
+    uint32_t selectedColor;
+};
+
+// todo 支持SymbolGlyphModifier
+// struct CJTabBarSymbol {
+//     CJSymbolGlyphModifier normal;
+//     CJSymbolGlyphModifier selected;
+// };
+
+struct CJBottomTabBarStyle {
+    char* icon;
+    bool isTabBarSymbol;
+    char* text;
+    CJPadding padding;
+    int32_t verticalAlign;
+    int32_t layoutMode;
+    bool symmetricExtensible;
+    CJTabContentLabelStyle labelStyle;
+    char* id;
+    CJTabBarIconStyle iconStyle;
 };
 
 CJ_EXPORT void FfiOHOSAceFrameworkTabsCreate(int32_t barPosition, int64_t controllerId, int32_t index);
@@ -199,6 +285,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkTabContentPop();
 CJ_EXPORT void FfiOHOSAceFrameworkTabContentSetTabBar(const char* content);
 CJ_EXPORT void FfiOHOSAceFrameworkTabContentSetTabBarWithIcon(const char* icon, const char* text);
 CJ_EXPORT void FfiOHOSAceFrameworkTabContentSetTabBarWithComponent(void (*callback)());
+CJ_EXPORT void FfiOHOSAceFrameworkTabContentSetTabBarWithSubTabBarStyle(CJSubTabBarStyle subTabBarStyle);
+CJ_EXPORT void FfiOHOSAceFrameworkTabContentSetTabBarWithBottomTabBarStyle(CJBottomTabBarStyle bottomTabBarStyle);
 CJ_EXPORT void FfiOHOSAceFrameworkTabContentOnWillShow(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkTabContentOnWillHide(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkTabContentPUCreate(void (*callback)());

@@ -288,6 +288,69 @@ void FfiOHOSAceFrameworkViewAbstractSetLayoutPriority(int32_t value)
     ViewAbstractModel::GetInstance()->SetLayoutPriority(value);
 }
 
+void FfiOHOSAceFrameworkViewAbstractSetPixelRound(CJPixelRoundPolicy cjValue)
+{
+    uint16_t value = 0;
+    int32_t startValue = cjValue.start;
+    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(startValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
+    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(startValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(startValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START);
+    }
+
+    int32_t topValue = cjValue.top;
+    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(topValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(topValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(topValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP);
+    }
+
+    int32_t endValue = cjValue.end;
+    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(endValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
+    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(endValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(endValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END);
+    }
+
+    int32_t bottomValue = cjValue.bottom;
+    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
+    }
+
+    ViewAbstractModel::GetInstance()->SetPixelRound(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetMotionBlur(CJMotionBlurOptions value)
+{
+    MotionBlurOption option;
+    double radius = value.radius;
+    double x = value.anchor.x;
+    double y = value.anchor.y;
+    if (radius < 0.0) {
+        radius = 0.0;
+    }
+    if (x < 0.0) {
+        x = 0.0;
+    }
+    if (y < 0.0) {
+        y = 0.0;
+    }
+    option.radius = radius;
+    option.anchor.x = std::clamp(x, 0.0, 1.0);
+    option.anchor.y = std::clamp(y, 0.0, 1.0);
+    ViewAbstractModel::GetInstance()->SetMotionBlur(option);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetLayoutWeight(int32_t value)
 {
     ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
