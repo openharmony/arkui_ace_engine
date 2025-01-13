@@ -204,7 +204,7 @@ void ParseButtons(const JsiExecutionContext& execContext, DialogProperties& prop
     auto directionValue = obj->GetProperty("buttonDirection");
     if (directionValue->IsNumber()) {
         auto buttonDirection = directionValue->ToNumber<int32_t>();
-        if (buttonDirection >= 0 && buttonDirection <= static_cast<int32_t>(DIALOG_BUTTONS_DIRECTION.size())) {
+        if (buttonDirection >= 0 && buttonDirection < static_cast<int32_t>(DIALOG_BUTTONS_DIRECTION.size())) {
             properties.buttonDirection = DIALOG_BUTTONS_DIRECTION[buttonDirection];
         }
     }
@@ -324,7 +324,7 @@ void ParseAlertAlignment(DialogProperties& properties, JSRef<JSObject> obj)
     auto alignmentValue = obj->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
         auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             properties.alignment = DIALOG_ALIGNMENT[alignment];
             UpdateAlertAlignment(properties.alignment);
         }

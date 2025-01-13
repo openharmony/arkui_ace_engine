@@ -259,7 +259,7 @@ void ParseDialogAlignment(DialogProperties& properties, JSRef<JSObject> obj)
     auto alignmentValue = obj->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
         auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             properties.alignment = DIALOG_ALIGNMENT[alignment];
             UpdateDialogAlignment(properties.alignment);
         }
