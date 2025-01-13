@@ -155,12 +155,9 @@ auto g_onWillDismissPopup = [](
                     static_cast<BindSheetDismissReason>(reason));
                 parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
                     .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-                auto dismiss = []() {
-                    ViewAbstract::DismissPopup();
-                };
-                parameter.dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(dismiss));
+                const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstract::DismissPopup));
+                parameter.dismiss = keeper.ArkValue();
                 arkCallback.Invoke(parameter);
-                CallbackKeeper::Release(parameter.dismiss.resource.resourceId);
             };
             popupParam->SetOnWillDismiss(std::move(callback));
             popupParam->SetInteractiveDismiss(true);
@@ -261,12 +258,9 @@ auto g_contentCoverCallbacks = [](WeakPtr<FrameNode> weakNode, const Ark_Content
                 static_cast<BindSheetDismissReason>(reason));
             parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
                 .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-            auto dismiss = []() {
-                ViewAbstractModelNG::DismissContentCoverStatic();
-            };
-            parameter.dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(dismiss));
+            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::DismissContentCoverStatic));
+            parameter.dismiss = keeper.ArkValue();
             arkCallback.Invoke(parameter);
-            CallbackKeeper::Release(parameter.dismiss.resource.resourceId);
         };
     }
 };
@@ -393,12 +387,9 @@ auto g_bindSheetCallbacks1 = [](SheetCallbacks& callbacks, const Ark_SheetOption
     if (shouldDismiss) {
         callbacks.shouldDismissFunc = [arkCallback = CallbackHelper(shouldDismiss.value())]() {
             Ark_SheetDismiss parameter;
-            auto dismiss = []() {
-                ViewAbstractModelNG::DismissSheetStatic();
-            };
-            parameter.dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(dismiss));
+            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::DismissSheetStatic));
+            parameter.dismiss = keeper.ArkValue();
             arkCallback.Invoke(parameter);
-            CallbackKeeper::Release(parameter.dismiss.resource.resourceId);
         };
     }
     auto onTypeDidChange = Converter::OptConvert<Callback_SheetType_Void>(sheetOptions.onTypeDidChange);
@@ -416,10 +407,9 @@ auto g_bindSheetCallbacks2 = [](SheetCallbacks& callbacks, const Ark_SheetOption
             Ark_DismissSheetAction parameter;
             auto reasonOpt = ArkValue<Opt_DismissReason>(static_cast<BindSheetDismissReason>(reason));
             parameter.reason = OptConvert<Ark_DismissReason>(reasonOpt).value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-            auto dismiss = []() { ViewAbstractModelNG::DismissSheetStatic(); };
-            parameter.dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(dismiss));
+            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::DismissSheetStatic));
+            parameter.dismiss = keeper.ArkValue();
             arkCallback.Invoke(parameter);
-            CallbackKeeper::Release(parameter.dismiss.resource.resourceId);
         };
     }
     auto onWillSpringBackWhenDismiss = Converter::OptConvert<Callback_SpringBackAction_Void>(
@@ -427,12 +417,9 @@ auto g_bindSheetCallbacks2 = [](SheetCallbacks& callbacks, const Ark_SheetOption
     if (onWillSpringBackWhenDismiss) {
         callbacks.sheetSpringBackFunc = [arkCallback = CallbackHelper(onWillSpringBackWhenDismiss.value())]() {
             Ark_SpringBackAction parameter;
-            auto springBack = []() {
-                ViewAbstractModelNG::SheetSpringBackStatic();
-            };
-            parameter.springBack = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(springBack));
+            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::SheetSpringBackStatic));
+            parameter.springBack = keeper.ArkValue();
             arkCallback.Invoke(parameter);
-            CallbackKeeper::Release(parameter.springBack.resource.resourceId);
         };
     }
     auto onHeightDidChange = Converter::OptConvert<Callback_Number_Void>(sheetOptions.onHeightDidChange);
@@ -2793,13 +2780,11 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
         auto stopPropagationHandler = [&info]() {
             info.SetStopPropagation(true);
         };
-        auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(
-            std::move(stopPropagationHandler));
-        event.stopPropagation = stopPropagation;
+        const auto keeper = CallbackKeeper::Claim(std::move(stopPropagationHandler));
+        event.stopPropagation = keeper.ArkValue();
         LOGE("CommonMethodModifier::OnKeyPreImeImpl IntentionCode supporting is not implemented yet");
 
         auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event);
-        CallbackKeeper::Release(stopPropagation.resource.resourceId);
         return Converter::Convert<bool>(arkResult);
     };
     ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onKeyPreImeEvent));

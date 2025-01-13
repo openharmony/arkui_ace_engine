@@ -27,12 +27,12 @@ void AddOnWillDismiss(DialogProperties& properties, Opt_Callback_DismissDialogAc
         const int32_t& info, const int32_t& instanceId
     ) {
         const auto dismissReason = static_cast<BindSheetDismissReason>(info);
+        const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstract::DismissDialog));
         Ark_DismissDialogAction action {
-            .dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(ViewAbstract::DismissDialog)),
+            .dismiss = keeper.ArkValue(),
             .reason = Converter::ArkValue<Ark_DismissReason>(dismissReason)
         };
         callback.Invoke(action);
-        CallbackKeeper::Release(action.dismiss.resource.resourceId);
     };
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier
