@@ -523,6 +523,7 @@ struct MultiFilterRow {
         (this.isArrowIconDown?.value ? this.filterAccessibilityText.accessibilityExpand :
         this.filterAccessibilityText.accessibilityCollapse))
       .accessibilityDescription(this.isSendArrowAccessibility ? ' ' : '')
+      .accessibilityRole(this.isSendArrowAccessibility ? AccessibilityRoleType.ROLE_NONE : AccessibilityRoleType.BUTTON)
       .id(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`)
       .visibility(this.arrowShowStateRow.value ? Visibility.Visible : Visibility.Hidden)
       .onHover((isHover: boolean) => {
