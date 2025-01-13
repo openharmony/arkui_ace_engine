@@ -1131,6 +1131,7 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     TAG_LOGD(AceLogTag::ACE_WEB, "HandleScaleGestureChange ZoomOutAndIn return scale:%{public}f", scale);
 
     double newScale = GetNewScale(scale);
+    double newOriginScale = GetNewOriginScale(event.GetScale());
 
     double centerX = event.GetPinchCenter().GetX();
     double centerY = event.GetPinchCenter().GetY();
@@ -1139,16 +1140,13 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     auto offset = frameNode->GetOffsetRelativeToWindow();
     TAG_LOGD(AceLogTag::ACE_WEB,
         "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f"
-        " originScale: %{public}f centerX: %{public}f centerY: %{public}f offset X: %{public}f"
+        " newOriginScale: %{public}f centerX: %{public}f centerY: %{public}f offset X: %{public}f"
         " offset Y: %{public}f",
-        curScale, scale, newScale, event.GetScale(), centerX, centerY, offset.GetX(), offset.GetY());
-
-    // deprecated
-    delegate_->ScaleGestureChange(newScale, centerX - offset.GetX(), centerY - offset.GetY());
+        curScale, scale, newScale, newOriginScale, centerX, centerY, offset.GetX(), offset.GetY());
 
     // Plan two
     delegate_->ScaleGestureChangeV2(
-        PINCH_UPDATE_TYPE, newScale, event.GetScale(), centerX - offset.GetX(), centerY - offset.GetY());
+        PINCH_UPDATE_TYPE, newScale, newOriginScale, centerX - offset.GetX(), centerY - offset.GetY());
 
     preScale_ = curScale;
     if (LessNotEqual(scale, DEFAULT_PINCH_SCALE)) {
@@ -1227,6 +1225,18 @@ double WebPattern::GetNewScale(double& scale) const
         scale = DEFAULT_PINCH_SCALE;
 
         TAG_LOGE(AceLogTag::ACE_WEB, "GetNewScale newScale < DEFAULT_PINCH_SCALE_MIN");
+    }
+
+    return newScale;
+}
+
+double WebPattern::GetNewOriginScale(double originScale) const
+{
+    double newScale = 0.0;
+    if (zoomStatus_ == STATUS_ZOOMOUT) {
+        newScale = DEFAULT_PINCH_SCALE_MAX;
+    } else if (zoomStatus_ == STATUS_ZOOMIN) {
+        newScale = DEFAULT_PINCH_SCALE_MIN;
     }
 
     return newScale;
