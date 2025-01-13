@@ -1121,7 +1121,7 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
         textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
     }
     textLayoutProperty->UpdateMaxLines(1);
-    textLayoutProperty->UpdateTextOverflow(TextOverflow::CLIP);
+    textLayoutProperty->UpdateTextOverflow(isTextFadeOut_ ? TextOverflow::MARQUEE : TextOverflow::CLIP);
     AddAnimationTextProperties(currentIndex, textLayoutProperty);
 }
 
