@@ -216,6 +216,7 @@ constexpr int32_t OUTLINE_LEFT_WIDTH_INDEX = 0;
 constexpr int32_t OUTLINE_TOP_WIDTH_INDEX = 1;
 constexpr int32_t OUTLINE_RIGHT_WIDTH_INDEX = 2;
 constexpr int32_t OUTLINE_BOTTOM_WIDTH_INDEX = 3;
+constexpr uint32_t DEFAULT_ANIMATION_MODE = 0;
 constexpr uint32_t CONVERT_CONTENT_TYPE = 5;
 constexpr uint32_t DEFAULT_PICKER_STYLE_COLOR = 0xFF182431;
 constexpr uint32_t DEFAULT_PICKER_SELECTED_COLOR = 0xFF007DFF;
@@ -7245,8 +7246,13 @@ int32_t SetSwiperIndex(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     if (item->value[0].i32 < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
+
+    ArkUI_Int32 animationMode = DEFAULT_ANIMATION_MODE;
+    if (item->size > 1 && InRegion(NUM_0, NUM_2, item->value[1].i32)) {
+        animationMode = item->value[1].i32;
+    }
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperIndex(node->uiNodeHandle, item->value[0].i32);
+    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperIndex(node->uiNodeHandle, item->value[0].i32, animationMode);
     return ERROR_CODE_NO_ERROR;
 }
 

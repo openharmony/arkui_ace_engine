@@ -140,6 +140,7 @@ public:
 
     static int32_t RealTotalCount(FrameNode* frameNode);
     static void SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool useAnimation);
+    static void SetSwiperToIndex(FrameNode* frameNode, int32_t index, SwiperAnimationMode animationMode);
     static void GetPreviousMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options);
     static void GetNextMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options);
     static std::shared_ptr<SwiperParameters> GetDotIndicator(FrameNode* frameNode);

@@ -63,6 +63,7 @@ constexpr int32_t DOT_INDICATOR_RIGHT = 11;
 constexpr int32_t DOT_INDICATOR_BOTTOM = 12;
 constexpr int32_t DOT_INDICATOR_MAX_DISPLAY_COUNT = 13;
 constexpr double DEFAULT_PERCENT_VALUE = 100.0;
+constexpr int32_t DEFAULT_ANIMATION_MODE = 0;
 constexpr int32_t STOP_WHEN_TOUCHED = 2;
 } // namespace
 
@@ -638,7 +639,7 @@ ArkUINativeModuleValue SwiperBridge::SetSwiperIndex(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_VALUE_INDEX);
     if (valueArg->IsNumber()) {
         int32_t index = valueArg->Int32Value(vm);
-        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperIndex(nativeNode, index);
+        GetArkUINodeModifiers()->getSwiperModifier()->setSwiperIndex(nativeNode, index, DEFAULT_ANIMATION_MODE);
     } else {
         GetArkUINodeModifiers()->getSwiperModifier()->resetSwiperIndex(nativeNode);
     }

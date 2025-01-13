@@ -299,6 +299,7 @@ public:
     void ShowPrevious();
     void SwipeTo(int32_t index);
     void ChangeIndex(int32_t index, bool useAnimation);
+    void ChangeIndex(int32_t index, SwiperAnimationMode mode);
 
     void OnVisibleChange(bool isVisible) override;
 
@@ -678,6 +679,13 @@ public:
     {
         stopWhenTouched_ = stopWhenTouched;
     }
+
+    void SetJumpAnimationMode(TabAnimateMode tabAnimationMode)
+    {
+        tabAnimationMode_ = tabAnimationMode;
+    }
+
+    bool NeedFastAnimation() const;
 
     float CalcCurrentTurnPageRate() const;
     int32_t GetFirstIndexInVisibleArea() const;
@@ -1093,6 +1101,9 @@ private:
     void UpdateOverlongForceStopPageRate(float forceStopPageRate);
     bool IsCachedShow() const;
 
+    bool ComputeTargetIndex(int32_t index, int32_t& targetIndex) const;
+    void FastAnimation(int32_t targetIndex);
+
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1256,6 +1267,8 @@ private:
     bool requestLongPredict_ = false;
 
     PageFlipMode pageFlipMode_ = PageFlipMode::CONTINUOUS;
+    bool jumpOnChange_ = false;
+    TabAnimateMode tabAnimationMode_ = TabAnimateMode::NO_ANIMATION;
     bool isFirstAxisAction_ = true;
     bool stopWhenTouched_ = true;
 };

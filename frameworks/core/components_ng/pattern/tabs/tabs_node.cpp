@@ -313,6 +313,12 @@ std::string TabsNode::GetAnimationMode() const
         case TabAnimateMode::NO_ANIMATION:
             ret = "AnimationMode.NO_ANIMATION";
             break;
+        case TabAnimateMode::CONTENT_FIRST_WITH_JUMP:
+            ret = "AnimationMode.CONTENT_FIRST_WITH_JUMP";
+            break;
+        case TabAnimateMode::ACTION_FIRST_WITH_JUMP:
+            ret = "AnimationMode.ACTION_FIRST_WITH_JUMP";
+            break;
         default:
             ret = "AnimationMode.CONTENT_FIRST";
             break;

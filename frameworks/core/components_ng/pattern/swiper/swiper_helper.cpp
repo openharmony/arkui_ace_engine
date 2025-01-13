@@ -61,6 +61,8 @@ void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controll
         swiper->ChangeIndex(index, useAnimation);
     });
 
+    SetChangeIndexWithModeImpl(controller, weak);
+
     controller->SetFinishImpl([weak]() {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
@@ -71,6 +73,19 @@ void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controll
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
         swiper->PreloadItems(indexSet);
+    });
+}
+
+void SwiperHelper::SetChangeIndexWithModeImpl(const RefPtr<SwiperController>& controller,
+    const WeakPtr<SwiperPattern>& weak)
+{
+    CHECK_NULL_VOID(controller);
+    controller->SetChangeIndexWithModeImpl([weak](int32_t index, SwiperAnimationMode animationMode) {
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_VOID(swiper);
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ChangeIndex %{public}d, animationMode:%{public}d",
+            index, animationMode);
+        swiper->ChangeIndex(index, animationMode);
     });
 }
 

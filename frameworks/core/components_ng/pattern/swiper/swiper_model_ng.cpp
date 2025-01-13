@@ -925,6 +925,14 @@ void SwiperModelNG::SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool u
     pattern->ChangeIndex(index, useAnimation);
 }
 
+void SwiperModelNG::SetSwiperToIndex(FrameNode* frameNode, int32_t index, SwiperAnimationMode animationMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ChangeIndex(index, animationMode);
+}
+
 void SwiperModelNG::GetPreviousMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options)
 {
     CHECK_NULL_VOID(frameNode);

@@ -822,7 +822,16 @@ let AnimationMode;
   AnimationMode[AnimationMode.CONTENT_FIRST = 0] = 'CONTENT_FIRST';
   AnimationMode[AnimationMode.ACTION_FIRST = 1] = 'ACTION_FIRST';
   AnimationMode[AnimationMode.NO_ANIMATION = 2] = 'NO_ANIMATION';
+  AnimationMode[AnimationMode.CONTENT_FIRST_WITH_JUMP = 3] = 'CONTENT_FIRST_WITH_JUMP';
+  AnimationMode[AnimationMode.ACTION_FIRST_WITH_JUMP = 4] = 'ACTION_FIRST_WITH_JUMP';
 })(AnimationMode || (AnimationMode = {}));
+
+let SwiperAnimationMode;
+(function (SwiperAnimationMode) {
+  SwiperAnimationMode[SwiperAnimationMode.NO_ANIMATION = 0] = 'NO_ANIMATION';
+  SwiperAnimationMode[SwiperAnimationMode.DEFAULT_ANIMATION = 1] = 'DEFAULT_ANIMATION';
+  SwiperAnimationMode[SwiperAnimationMode.FAST_ANIMATION = 2] = 'FAST_ANIMATION';
+})(SwiperAnimationMode || (SwiperAnimationMode = {}));
 
 let SelectedMode;
 (function (SelectedMode) {

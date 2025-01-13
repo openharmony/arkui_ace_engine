@@ -5022,9 +5022,15 @@ typedef enum {
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: index value of the child component. \n
+     * .value[1]?.i32: animation mode, the parameter type is {@linkArkUI_SwiperAnimationMode}. \n
+     * The default value is ARKUI_SWIPER_NO_ANIMATION. This parameeter isvalidonlyforthecurrentcall. \n
+     * This parameter is supported since API version 16. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: index value of the child component. \n
+     * .value[1]?.i32: animation mode, the parameter type is {@linkArkUI_SwiperAnimationMode}. \n
+     * The default value is ARKUI_SWIPER_NO_ANIMATION. This parameeter isvalidonlyforthecurrentcall. \n
+     * This parameter is supported since API version 16. \n
      *
      */
     NODE_SWIPER_INDEX,

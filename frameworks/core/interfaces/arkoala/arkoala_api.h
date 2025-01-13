@@ -2680,7 +2680,7 @@ struct ArkUISwiperModifier {
     void (*resetSwiperAutoPlay)(ArkUINodeHandle node);
     void (*setSwiperStopWhenTouched)(ArkUINodeHandle node, ArkUI_Bool stopWhenTouched);
     void (*resetSwiperStopWhenTouched)(ArkUINodeHandle node);
-    void (*setSwiperIndex)(ArkUINodeHandle node, ArkUI_Int32 index);
+    void (*setSwiperIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animationMode);
     void (*resetSwiperIndex)(ArkUINodeHandle node);
     void (*setSwiperIndicator)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr);
     void (*resetSwiperIndicator)(ArkUINodeHandle node);

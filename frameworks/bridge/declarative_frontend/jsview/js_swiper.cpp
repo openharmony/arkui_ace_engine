@@ -81,6 +81,8 @@ namespace {
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
 const std::vector<SwiperDisplayMode> DISPLAY_MODE = { SwiperDisplayMode::STRETCH, SwiperDisplayMode::AUTO_LINEAR };
 const std::vector<SwiperIndicatorType> INDICATOR_TYPE = { SwiperIndicatorType::DOT, SwiperIndicatorType::DIGIT };
+const std::vector<SwiperAnimationMode> SWIPER_ANIMATION_MODE = { SwiperAnimationMode::NO_ANIMATION,
+    SwiperAnimationMode::DEFAULT_ANIMATION, SwiperAnimationMode::FAST_ANIMATION };
 const static int32_t DEFAULT_INTERVAL = 3000;
 const static int32_t DEFAULT_DURATION = 400;
 const static int32_t DEFAULT_DISPLAY_COUNT = 1;
@@ -1220,12 +1222,19 @@ void JSSwiperController::ChangeIndex(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsNumber()) {
         return;
     }
-    int32_t index = -1;
+    int32_t index = args[0]->ToNumber<int32_t>();
+    if (args.Length() > 1 && args[1]->IsNumber()) {
+        int32_t animationMode = args[1]->ToNumber<int32_t>();
+        if (animationMode < 0 || animationMode >= static_cast<int32_t>(SWIPER_ANIMATION_MODE.size())) {
+            animationMode = 0;
+        }
+        controller_->ChangeIndex(index, SWIPER_ANIMATION_MODE[animationMode]);
+        return;
+    }
     bool useAnimation = false;
     if (args.Length() > 1 && args[1]->IsBoolean()) {
         useAnimation = args[1]->ToBoolean();
     }
-    index = args[0]->ToNumber<int32_t>();
     controller_->ChangeIndex(index, useAnimation);
 }
 

@@ -112,7 +112,7 @@ public:
         auto tabsLayoutProperty = grandParentNode->GetLayoutProperty<TabsLayoutProperty>();
         CHECK_NULL_VOID(tabsLayoutProperty);
         TabAnimateMode mode = tabsPattern->GetAnimateMode();
-        if (mode == TabAnimateMode::ACTION_FIRST
+        if ((mode == TabAnimateMode::ACTION_FIRST || mode == TabAnimateMode::ACTION_FIRST_WITH_JUMP)
             && !tabsLayoutProperty->GetHeightAutoValue(false)
             && !tabsLayoutProperty->GetWidthAutoValue(false)) {
             ACE_SCOPED_TRACE("TabContentMarkRenderDone");
