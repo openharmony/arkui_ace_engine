@@ -396,7 +396,7 @@ private:
     std::list<GridPreloadItem> preloadItemList_; // list of GridItems to build preemptively in IdleTask
     std::shared_ptr<GridItemAdapter> adapter_; // need to delete?
     RefPtr<ScrollWindowAdapter> scrollWindowAdapter_;
-    RefPtr<GridFillAlgorithm> gridFillAlgorithm_;
+    RefPtr<GridFillAlgorithm> fillAlgo_;
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 

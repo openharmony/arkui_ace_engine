@@ -21,6 +21,7 @@ GridItemSize GridLayoutUtils::GetItemSize(const GridLayoutInfo* info, const Layo
 {
     GridItemSize size { 1, 1 };
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(props->GetLayoutOptions(), size);
     const auto& opts = *props->GetLayoutOptions();
     if (opts.irregularIndexes.find(idx) != opts.irregularIndexes.end()) {
         if (!opts.getSizeByIndex) {
