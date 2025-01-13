@@ -427,7 +427,6 @@ HWTEST_F(GridCacheLayoutTestNg, Cache003, TestSize.Level1)
     model.SetLayoutOptions({});
     CreateItemsInLazyForEach(50, [](uint32_t idx) { return 50.0f; });
     CreateDone();
-    frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
 
     GetItem(7, true)->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     EXPECT_EQ(pattern_->info_.startIndex_, 0);

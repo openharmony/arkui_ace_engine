@@ -771,7 +771,6 @@ HWTEST_F(GridLayoutRangeTest, Focus002, TestSize.Level1)
     model.SetLayoutOptions(options);
     model.SetCachedCount(1);
     CreateDone();
-    frameNode_->AttachToMainTree(false, PipelineContext::GetCurrentContextPtrSafely());
 
     auto algo = pattern_->GetScopeFocusAlgorithm();
     auto curFocus = GetChildFocusHub(frameNode_, 0);
