@@ -368,7 +368,7 @@ bool StateStyleManager::IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, 
     auto responseRegionList = node->GetResponseRegionList(paintRect, sourceType);
     Offset offset = { paintRect.GetOffset().GetX(), paintRect.GetOffset().GetY() };
     PointF current = { location.GetX(), location.GetY() };
-    Transform(current, node);
+    NGGestureRecognizer::Transform(current, node);
     PointF parentPoint = { current.GetX() + offset.GetX(), current.GetY() + offset.GetY() };
     if (!node->InResponseRegionList(parentPoint, responseRegionList)) {
         return true;
