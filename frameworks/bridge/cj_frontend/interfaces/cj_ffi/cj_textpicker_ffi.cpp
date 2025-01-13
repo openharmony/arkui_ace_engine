@@ -173,6 +173,78 @@ void FfiOHOSAceFrameworkTextPickerSetCanLoop(bool value)
     TextPickerModel::GetInstance()->SetCanLoop(value);
 }
 
+void FfiOHOSAceFrameworkTextPickerSetTextStyle(uint32_t color, double size, int32_t unit,
+    const char* weight, const char* family, uint32_t style)
+{
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    NG::PickerTextStyle textStyle;
+
+    textStyle.textColor = Color(color);
+    CalcDimension fontSize = CalcDimension(size, DimensionUnit(unit));
+    textStyle.fontSize = fontSize;
+
+    std::string weightVal = weight;
+    textStyle.fontWeight = ConvertStrToFontWeight(weightVal);
+
+    std::string familyVal = family;
+    textStyle.fontFamily = ConvertStrToFontFamilies(familyVal);
+    textStyle.fontStyle = static_cast<FontStyle>(style);
+
+    TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+}
+
+void FfiOHOSAceFrameworkTextPickerSetSelectedTextStyle(uint32_t color, double size, int32_t unit,
+    const char* weight, const char* family, uint32_t style)
+{
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    NG::PickerTextStyle textStyle;
+
+    textStyle.textColor = Color(color);
+    CalcDimension fontSize = CalcDimension(size, DimensionUnit(unit));
+    textStyle.fontSize = fontSize;
+
+    std::string weightVal = weight;
+    textStyle.fontWeight = ConvertStrToFontWeight(weightVal);
+
+    std::string familyVal = family;
+    textStyle.fontFamily = ConvertStrToFontFamilies(familyVal);
+    textStyle.fontStyle = static_cast<FontStyle>(style);
+
+    TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
+}
+
+void FfiOHOSAceFrameworkTextPickerSetGradientHeight(const Dimension& value)
+{
+    TextPickerModel::GetInstance()->SetGradientHeight(value);
+}
+
+void FfiOHOSAceFrameworkTextPickerSetDivider(DividerParams params)
+{
+    Dimension widthDime(params.width, static_cast<DimensionUnit>(params.widthUnit));
+    Dimension startMarginDime(params.startMargin, static_cast<DimensionUnit>(params.startMarginUnit));
+    Dimension endMarginDime(params.endMargin, static_cast<DimensionUnit>(params.endMarginUnit));
+
+    NG::ItemDivider divider;
+    divider.strokeWidth = widthDime;
+    divider.color = Color(params.color);
+    divider.startMargin = startMarginDime;
+    divider.endMargin = endMarginDime;
+
+    TextPickerModel::GetInstance()->SetDivider(divider);
+}
+
+void FfiOHOSAceFrameworkTextPickerSetSelectedIndexSingle(uint32_t value)
+{
+    TextPickerModel::GetInstance()->SetSelected(value);
+}
+
+void FfiOHOSAceFrameworkTextPickerSetSelectedIndexMulti(const std:: vector<uint32_t>& values)
+{
+    TextPickerModel::GetInstance()->SetSelecteds(values);
+}
+
 void FfiOHOSAceFrameworkTextPickerOnChange(void (*callback)(CJTextPickerResult pickerResult))
 {
     auto onChange = [lambda = CJLambda::Create(callback)](
