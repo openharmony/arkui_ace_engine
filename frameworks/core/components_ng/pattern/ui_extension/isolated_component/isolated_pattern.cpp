@@ -116,6 +116,7 @@ void IsolatedPattern::InitializeRender(void* runtime)
         dynamicComponentRenderer_->CreateContent();
         accessibilitySessionAdapter_ =
             AceType::MakeRefPtr<AccessibilitySessionAdapterIsolatedComponent>(dynamicComponentRenderer_);
+        SetContainerHostPattern(WeakClaim(this));
     }
 #else
     PLATFORM_LOGE("IsolatedComponent not support preview.");

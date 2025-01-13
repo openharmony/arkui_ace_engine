@@ -18,8 +18,9 @@
 
 #include "core/common/dynamic_component_renderer.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.h"
-#include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "core/components_ng/pattern/ui_extension/platform_accessibility_child_tree_callback.h"
+#include "core/components_ng/pattern/ui_extension/platform_container_handler.h"
+#include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 #include "core/components_ng/pattern/ui_extension/surface_proxy_node.h"
 
 namespace OHOS::Ace::NG {
@@ -35,8 +36,10 @@ struct DynamicDumpInfo {
     int64_t createLimitedWorkerTime = 0;
 };
 
-class DynamicPattern : public PlatformPattern, public PlatformAccessibilityBase, public SurfaceProxyNode {
-    DECLARE_ACE_TYPE(DynamicPattern, PlatformPattern, PlatformAccessibilityBase, SurfaceProxyNode);
+class DynamicPattern : public PlatformPattern, public PlatformAccessibilityBase,
+    public SurfaceProxyNode, public PlatformContainerHandler {
+    DECLARE_ACE_TYPE(DynamicPattern, PlatformPattern,
+    PlatformAccessibilityBase, SurfaceProxyNode, PlatformContainerHandler);
 
 public:
     DynamicPattern();

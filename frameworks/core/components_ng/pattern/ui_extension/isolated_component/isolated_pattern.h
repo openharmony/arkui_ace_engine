@@ -18,6 +18,7 @@
 
 #include "core/common/dynamic_component_renderer.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_isolated_component.h"
+#include "core/components_ng/pattern/ui_extension/platform_container_handler.h"
 #include "core/components_ng/pattern/ui_extension/platform_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -26,8 +27,8 @@ struct IsolatedDumpInfo {
     int64_t createLimitedWorkerTime = 0;
 };
 
-class IsolatedPattern : public PlatformPattern {
-    DECLARE_ACE_TYPE(IsolatedPattern, PlatformPattern);
+class IsolatedPattern : public PlatformPattern, public PlatformContainerHandler {
+    DECLARE_ACE_TYPE(IsolatedPattern, PlatformPattern, PlatformContainerHandler);
 
 public:
     IsolatedPattern();
