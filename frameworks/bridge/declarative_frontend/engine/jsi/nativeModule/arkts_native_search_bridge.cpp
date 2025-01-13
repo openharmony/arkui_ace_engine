@@ -23,7 +23,6 @@
 #include "base/utils/utils.h"
 #include "base/memory/ace_type.h"
 #include "frameworks/core/components_ng/pattern/search/search_model_ng.h"
-#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
@@ -80,7 +79,6 @@ ArkUINativeModuleValue SearchBridge::SetSearchInitialize(ArkUIRuntimeCallInfo* r
     }
     SearchModel::GetInstance()->SetFocusable(true);
     SearchModel::GetInstance()->SetFocusNode(true);
-    Framework::JSSeacrhTheme::ApplyTheme();
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -90,7 +88,6 @@ ArkUINativeModuleValue SearchBridge::ResetSearchInitialize(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     SearchModel::GetInstance()->SetFocusable(true);
     SearchModel::GetInstance()->SetFocusNode(true);
-    Framework::JSSeacrhTheme::ApplyTheme();
     return panda::JSValueRef::Undefined(vm);
 }
 

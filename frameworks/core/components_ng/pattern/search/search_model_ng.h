@@ -32,8 +32,10 @@ public:
     void SetSearchButton(const std::string& text) override;
     void SetCaretWidth(const Dimension& value) override;
     void SetCaretColor(const Color& color) override;
+    void ResetCaretColor() override;
     void SetSearchIconSize(const Dimension& value) override;
     void SetSearchIconColor(const Color& color) override;
+    void ResetSearchIconColor() override;
     void SetSearchSrcPath(
         const std::string& src, const std::string& bundleName, const std::string& moduleName) override;
     void SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol) override;
@@ -46,15 +48,21 @@ public:
     void SetCancelButtonStyle(CancelButtonStyle cancelButtonStyle) override;
     void SetCancelIconSize(const Dimension& value) override;
     void SetCancelIconColor(const Color& color) override;
+    void ResetCancelIconColor() override;
     void SetSearchButtonFontSize(const Dimension& value) override;
     void SetSearchButtonFontColor(const Color& color) override;
+    void ResetSearchButtonFontColor() override;
     void SetSearchButtonAutoDisable(bool needToDisable) override;
     void SetPlaceholderColor(const Color& color) override;
+    void ResetPlaceholderColor() override;
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& color) override;
+    void ResetTextColor() override;
+    void SetBackgroundColor(const Color& color) override;
+    void ResetBackgroundColor() override;
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
     void SetHeight(const Dimension& height) override;
@@ -93,6 +101,7 @@ public:
     void UpdateInspectorId(const std::string& key) override;
     void SetDragPreviewOptions(const NG::DragPreviewOption option) override;
     void SetSelectedBackgroundColor(const Color& value) override;
+    void ResetSelectedBackgroundColor() override;
     void SetSelectionMenuOptions(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetEnablePreviewText(bool enablePreviewText) override;
@@ -120,12 +129,15 @@ public:
     static void SetSearchButtonFontColor(FrameNode* frameNode, const Color& color);
     static void SetSearchButtonAutoDisable(FrameNode* frameNode, bool needToDisable);
     static void SetTextColor(FrameNode* frameNode, const Color& color);
+    static void ResetTextColor(FrameNode* frameNode);
     static void SetCopyOption(FrameNode* frameNode, const CopyOptions& copyOptions);
     static void SetTextFont(FrameNode* frameNode, const Font& font);
     static void SetPlaceholderColor(FrameNode* frameNode, const Color& color);
+    static void ResetPlaceholderColor(FrameNode* frameNode);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool selectionMenuHidden);
     static void SetCaretWidth(FrameNode* frameNode, const Dimension& value);
     static void SetCaretColor(FrameNode* frameNode, const Color& color);
+    static void ResetCaretColor(FrameNode* frameNode);
     static void SetTextAlign(FrameNode* frameNode, const TextAlign& textAlign);
     static void SetMinFontScale(FrameNode* frameNode, const float value);
     static void SetMaxFontScale(FrameNode* frameNode, const float value);
@@ -145,6 +157,7 @@ public:
     static void SetHalfLeading(FrameNode* frameNode, const bool& value);
     static void SetFontFeature(FrameNode* frameNode, const FONT_FEATURES_LIST& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
+    static void ResetSelectedBackgroundColor(FrameNode* frameNode);
     static void SetOnSubmit(FrameNode* frameNode,
         std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const std::u16string&, PreviewText&)>&& onChange);

@@ -182,6 +182,10 @@ public:
 
     void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    bool ButtonNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme);
+    bool TextNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme,
+        const RefPtr<TextFieldTheme>& textFieldTheme);
 
     void SetSearchIconSize(const Dimension& value);
     void SetSearchIconColor(const Color& color);

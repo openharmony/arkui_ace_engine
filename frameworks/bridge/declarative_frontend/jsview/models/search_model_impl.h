@@ -32,8 +32,10 @@ public:
     void SetSearchButton(const std::string& text) override;
     void SetCaretWidth(const Dimension& value) override {}
     void SetCaretColor(const Color& color) override {}
+    void ResetCaretColor() override {}
     void SetSearchIconSize(const Dimension& value) override {}
     void SetSearchIconColor(const Color& color) override {}
+    void ResetSearchIconColor() override {}
     void SetSearchSrcPath(
         const std::string& src, const std::string& bundleName, const std::string& moduleName) override {}
     void SetRightIconSrcPath(const std::string& src) override {}
@@ -46,15 +48,21 @@ public:
     void SetCancelButtonStyle(OHOS::Ace::CancelButtonStyle cancelButtonStyle) override {}
     void SetCancelIconSize(const Dimension& value) override {}
     void SetCancelIconColor(const Color& color) override {}
+    void ResetCancelIconColor() override {}
     void SetSearchButtonFontSize(const Dimension& value) override {}
     void SetSearchButtonFontColor(const Color& color) override {}
+    void ResetSearchButtonFontColor() override {}
     void SetSearchButtonAutoDisable(bool needToDisable) override {};
     void SetPlaceholderColor(const Color& color) override;
+    void ResetPlaceholderColor() override {};
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& color) override {}
+    void ResetTextColor() override {}
+    void SetBackgroundColor(const Color& color) override {}
+    void ResetBackgroundColor() override {}
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
     void SetFocusable(bool focusable) override;

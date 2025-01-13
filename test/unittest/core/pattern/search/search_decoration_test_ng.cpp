@@ -107,6 +107,15 @@ void SearchDecorationTestNg::SetUpTestSuite()
         }
         return textFieldTheme;
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly([=](ThemeType type, int id) -> RefPtr<Theme> {
+        if (type == SearchTheme::TypeId()) {
+            return searchTheme;
+        }
+        if (type == IconTheme::TypeId()) {
+            return iconTheme;
+        }
+        return textFieldTheme;
+    });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     SearchModelNG searchModelInstance;

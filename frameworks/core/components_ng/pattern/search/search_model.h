@@ -35,8 +35,10 @@ public:
     virtual void SetSearchButton(const std::string& text);
     virtual void SetCaretWidth(const Dimension& value);
     virtual void SetCaretColor(const Color& color);
+    virtual void ResetCaretColor();
     virtual void SetSearchIconSize(const Dimension& value);
     virtual void SetSearchIconColor(const Color& color);
+    virtual void ResetSearchIconColor();
     virtual void SetSearchSrcPath(const std::string& src, const std::string& bundleName, const std::string& moduleName);
     virtual void SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol);
     virtual void SetSearchDefaultIcon();
@@ -48,15 +50,21 @@ public:
     virtual void SetCancelButtonStyle(CancelButtonStyle cancelButtonStyle);
     virtual void SetCancelIconSize(const Dimension& value);
     virtual void SetCancelIconColor(const Color& color);
+    virtual void ResetCancelIconColor();
     virtual void SetSearchButtonFontSize(const Dimension& value);
     virtual void SetSearchButtonFontColor(const Color& color);
+    virtual void ResetSearchButtonFontColor();
     virtual void SetSearchButtonAutoDisable(bool needToDisable);
     virtual void SetPlaceholderColor(const Color& color);
+    virtual void ResetPlaceholderColor();
     virtual void SetPlaceholderFont(const Font& font);
     virtual void SetTextFont(const Font& font);
     virtual void SetMinFontScale(const float value) = 0;
     virtual void SetMaxFontScale(const float value) = 0;
     virtual void SetTextColor(const Color& color);
+    virtual void ResetTextColor();
+    virtual void SetBackgroundColor(const Color& color);
+    virtual void ResetBackgroundColor();
     virtual void SetTextAlign(const TextAlign& textAlign);
     virtual void SetCopyOption(const CopyOptions& copyOptions);
     virtual void SetFocusable(bool focusable) {};
@@ -95,6 +103,7 @@ public:
     virtual void UpdateInspectorId(const std::string& key) {};
     virtual void SetDragPreviewOptions(const NG::DragPreviewOption option) {};
     virtual void SetSelectedBackgroundColor(const Color& value) {};
+    virtual void ResetSelectedBackgroundColor() {};
 
     virtual void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>& onError) {};
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) {};

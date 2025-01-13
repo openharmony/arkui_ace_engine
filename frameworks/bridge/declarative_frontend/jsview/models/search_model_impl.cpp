@@ -87,7 +87,6 @@ void SearchModelImpl::SetPlaceholderColor(const Color& color)
         LOGE("text component error");
         return;
     }
-    textFieldComponent->SetPlaceholderColor(color);
     textFieldComponent->SetFocusPlaceholderColor(color);
 }
 
