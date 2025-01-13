@@ -1422,7 +1422,7 @@ void SelectOverlayNode::BackAnimation(bool noAnimation)
         CalcSize(CalcLength(menuWidth.value_or(toolbarHeight.ConvertToPx())), CalcLength(toolbarHeight.ConvertToPx()));
 
     FinishCallback callback = [selectMenuInnerProperty, extensionProperty, backButtonProperty,
-                                  id = Container::CurrentId(), textOverlayTheme, weak = WeakClaim(this)]() {
+                                  id = Container::CurrentId(), weak = WeakClaim(this)]() {
         ContainerScope scope(id);
         selectMenuInnerProperty->UpdateVisibility(VisibleType::VISIBLE);
         extensionProperty->UpdateVisibility(VisibleType::GONE);
@@ -1498,14 +1498,15 @@ void SelectOverlayNode::UpdateMoreOrBackSymbolOptionsWithDelay()
     auto textOverlayTheme = context->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
     CancelableCallback<void()> symbolReplaceTask_;
-    symbolReplaceTask_.Reset([textOverlayTheme, weak = WeakClaim(this)] {
+    auto moreSymbolId = textOverlayTheme->GetMoreSymbolId();
+    symbolReplaceTask_.Reset([moreSymbolId, weak = WeakClaim(this)] {
         auto selectOverlay = weak.Upgrade();
         CHECK_NULL_VOID(selectOverlay);
         if (!selectOverlay->moreOrBackSymbol_) {
             selectOverlay->moreOrBackSymbol_ = BuildMoreOrBackSymbol();
         }
         auto layoutProperty = selectOverlay->moreOrBackSymbol_->GetLayoutProperty<TextLayoutProperty>();
-        layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(textOverlayTheme->GetMoreSymbolId()));
+        layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(moreSymbolId));
         auto symbolEffectOptions = layoutProperty->GetSymbolEffectOptionsValue(SymbolEffectOptions());
         symbolEffectOptions.SetIsTxtActive(true);
         layoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);

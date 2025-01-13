@@ -543,6 +543,18 @@ HWTEST_F(SecurityComponentModelTestNg, PasteButtonModelNGCreateNode001, TestSize
 }
 
 /**
+ * @tc.name: PasteButtonModelNGCreateNode002
+ * @tc.desc: Test paste button create symbol Node
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, PasteButtonModelNGCreateNode002, TestSize.Level1)
+{
+    auto frameNode = PasteButtonModelNG::GetInstance()->CreateNode(0, 0, 0, false, 0);
+    ASSERT_NE(frameNode, nullptr);
+}
+
+/**
  * @tc.name: PasteButtonModelNGGetTextResource001
  * @tc.desc: Test paste button get text resource failed
  * @tc.type: FUNC
