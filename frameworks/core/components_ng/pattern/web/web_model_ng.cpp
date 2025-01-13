@@ -1342,4 +1342,11 @@ void WebModelNG::SetOptimizeParserBudgetEnabled(bool enable)
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateOptimizeParserBudgetEnabled(enable);
 }
+
+void WebModelNG::SetWebMediaAVSessionEnabled(bool isEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateWebMediaAVSessionEnabled(isEnabled);
+}
 } // namespace OHOS::Ace::NG
