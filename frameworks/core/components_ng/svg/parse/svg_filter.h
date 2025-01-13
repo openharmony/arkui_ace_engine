@@ -31,6 +31,7 @@ public:
     ~SvgFilter() override = default;
     static RefPtr<SvgNode> Create();
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+    void OnFilterEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) override;
 
 protected:
     void OnInitStyle() override;

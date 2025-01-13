@@ -858,6 +858,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect001, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     tabBarPattern_->SetEdgeEffect(gestureHub);
+    ASSERT_NE(frameNode_, nullptr);
 }
 
 /**
@@ -1258,15 +1259,15 @@ HWTEST_F(TabBarTestNg, TabBarPatternGetIndicatorStyle001, TestSize.Level1)
     tabBarPattern_->turnPageRate_ = -0.9f;
     IndicatorStyle indicator2;
     OffsetF indicatorOffset;
-    tabBarPattern_->GetIndicatorStyle(indicator2, indicatorOffset);
+    tabBarPattern_->GetIndicatorStyle(indicator2, indicatorOffset, firstRect);
     EXPECT_EQ(indicatorOffset.GetY(), 33.f);
     indicator1.width = 1.0_vp;
     tabBarPattern_->SetIndicatorStyle(indicator1, 1);
     EXPECT_EQ(tabBarPattern_->indicatorStyles_[1], indicator1);
-    tabBarPattern_->GetIndicatorStyle(indicator2, indicatorOffset);
+    tabBarPattern_->GetIndicatorStyle(indicator2, indicatorOffset, firstRect);
     tabBarPattern_->turnPageRate_ = 0.9f;
     IndicatorStyle indicator3;
-    tabBarPattern_->GetIndicatorStyle(indicator3, indicatorOffset);
+    tabBarPattern_->GetIndicatorStyle(indicator3, indicatorOffset, firstRect);
     tabBarPattern_->SetIndicatorStyle(indicator3, 0);
     EXPECT_EQ(tabBarPattern_->indicatorStyles_[0], indicator3);
 }

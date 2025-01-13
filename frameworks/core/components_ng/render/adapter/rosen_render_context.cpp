@@ -61,6 +61,7 @@
 #include "core/components_ng/render/border_image_painter.h"
 #include "core/components_ng/render/debug_boundary_painter.h"
 #include "core/components_ng/render/image_painter.h"
+#include "interfaces/inner_api/ace_kit/include/ui/view/draw/modifier.h"
 
 namespace OHOS::Ace::NG {
 
@@ -452,6 +453,7 @@ std::shared_ptr<Rosen::RSNode> RosenRenderContext::CreateHardwareSurface(
         } else {
             surfaceNode->SetHardwareEnabled(true, SelfDrawingNodeType::DEFAULT);
         }
+        surfaceNode->SetApiCompatibleVersion(Container::GetCurrentApiTargetVersion());
     }
     return surfaceNode;
 }
@@ -557,7 +559,11 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         ACE_LAYOUT_SCOPED_TRACE("SyncGeometryProperties [%s][self:%d] set bounds %s", host->GetTag().c_str(),
             host->GetId(), paintRect.ToString().c_str());
     }
-    SyncGeometryFrame(paintRect);
+    if (extraOffset_.has_value()) {
+        SyncGeometryFrame(paintRect + extraOffset_.value());
+    } else {
+        SyncGeometryFrame(paintRect);
+    }
 
     if (!isSynced_) {
         isSynced_ = true;
@@ -651,6 +657,7 @@ void RosenRenderContext::PaintDebugBoundary(bool flag)
     if (!debugBoundaryModifier_ && rsNode_->IsInstanceOf<Rosen::RSCanvasNode>()) {
         debugBoundaryModifier_ = std::make_shared<DebugBoundaryModifier>();
         debugBoundaryModifier_->SetPaintTask(std::move(paintTask));
+        debugBoundaryModifier_->SetNoNeedUICaptured(true);
         auto rect = GetPaintRectWithoutTransform();
         auto marginOffset = geometryNode->GetMarginFrameOffset();
         std::shared_ptr<Rosen::RectF> drawRect =
@@ -809,12 +816,19 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
         frameNode->SetColorModeUpdateCallback(std::move(callback));
     }
     LoadNotifier bgLoadNotifier(CreateBgImageDataReadyCallback(), CreateBgImageLoadSuccessCallback(), nullptr);
-    bgLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(bgLoadNotifier));
+    auto syncMode = GetBackgroundImageSyncMode().value_or(false);
+    bgLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(src, std::move(bgLoadNotifier), syncMode);
     CHECK_NULL_VOID(bgLoadingCtx_);
     bgLoadingCtx_->LoadImageData();
 }
 
 void RosenRenderContext::OnBackgroundImageRepeatUpdate(const ImageRepeat& /*imageRepeat*/)
+{
+    CHECK_NULL_VOID(rsNode_);
+    PaintBackground();
+}
+
+void RosenRenderContext::OnBackgroundImageSyncModeUpdate(bool /*syncMode*/)
 {
     CHECK_NULL_VOID(rsNode_);
     PaintBackground();
@@ -1628,7 +1642,7 @@ void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scal
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto parent = frameNode->GetAncestorNodeOfFrame();
+    auto parent = frameNode->GetAncestorNodeOfFrame(false);
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
         CHECK_NULL_VOID(parentRenderContext);
@@ -1637,7 +1651,7 @@ void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scal
             scale[0] *= parentScale.value().x;
             scale[1] *= parentScale.value().y;
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     scaleX = scale[0];
     scaleY = scale[1];
@@ -2471,6 +2485,11 @@ void RosenRenderContext::SetOuterBorderWidth(const BorderWidthProperty& value)
     RequestNextFrame();
 }
 
+void RosenRenderContext::SetExtraOffset(const std::optional<OffsetF>& offset)
+{
+    extraOffset_ = offset;
+}
+
 void RosenRenderContext::OnOuterBorderStyleUpdate(const BorderStyleProperty& value)
 {
     SetOuterBorderStyle(value);
@@ -2582,7 +2601,6 @@ void RosenRenderContext::PaintAccessibilityFocus()
     if (localRect != RectT<int32_t>()) {
         RectT<int32_t> containerRect;
         containerRect.SetRect(0, 0, bounds.z_, bounds.w_);
-        localRect = localRect.Constrain(containerRect);
         RectF globalRect = frameRect.GetRect();
         auto localRectWidth = localRect.Width() - 2 * lineWidth;
         auto localRectHeight = localRect.Height() - 2 * lineWidth;
@@ -2786,7 +2804,7 @@ void RosenRenderContext::CreateBackgroundPixelMap(const RefPtr<FrameNode>& custo
     firstParam.checkImageStatus = true;
     firstParam.options.waitUntilRenderFinished = true;
     NG::ComponentSnapshot::Create(customNode, std::move(firstCallback), false, firstParam, true);
-    
+
     SnapshotParam param;
     NG::ComponentSnapshot::Create(customNode, std::move(callback), false, param, false);
 }
@@ -3019,7 +3037,7 @@ OffsetF RosenRenderContext::GetRectOffsetWithPositionEdges(
     std::unique_ptr<MarginProperty> margin(
         marginOri ? std::make_unique<MarginProperty>(*marginOri) : std::make_unique<MarginProperty>());
 
-    auto parentNode = frameNode->GetAncestorNodeOfFrame();
+    auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
     CHECK_NULL_RETURN(parentNode, OffsetF {});
     auto parentLayoutProperty = parentNode->GetLayoutProperty();
     CHECK_NULL_RETURN(parentLayoutProperty, OffsetF {});
@@ -3407,7 +3425,7 @@ void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddi
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto frameNodeParent = frameNode->GetAncestorNodeOfFrame();
+    auto frameNodeParent = frameNode->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(frameNodeParent);
     auto layoutProperty = frameNodeParent->GetLayoutProperty();
     if (layoutProperty && layoutProperty->GetPaddingProperty()) {
@@ -3503,7 +3521,7 @@ void RosenRenderContext::OnZIndexUpdate(int32_t value)
     rsNode_->SetPositionZ(static_cast<float>(value));
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
-    auto parent = uiNode->GetAncestorNodeOfFrame();
+    auto parent = uiNode->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
@@ -3735,6 +3753,15 @@ void RosenRenderContext::FlushContentModifier(const RefPtr<Modifier>& modifier)
     rsNode_->SetIsCustomTextType(contentModifier->GetIsCustomFont());
     rsNode_->AddModifier(modifierAdapter);
     modifierAdapter->AttachProperties();
+}
+
+void RosenRenderContext::FlushKitContentModifier(const RefPtr<Kit::Modifier>& modifier)
+{
+    CHECK_NULL_VOID(rsNode_);
+    CHECK_NULL_VOID(modifier);
+
+    auto modifierAdapter = ConvertKitContentModifier(modifier);
+    rsNode_->AddModifier(modifierAdapter);
 }
 
 void RosenRenderContext::FlushForegroundDrawFunction(CanvasDrawFunction&& foregroundDraw)
@@ -3978,7 +4005,7 @@ void RosenRenderContext::AnimateHoverEffectBoard(bool isHovered)
 void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
 {
     const auto& groupProperty = GetOrCreateBackground();
-    if (groupProperty->CheckBlurRadius(radius)) {
+    if (groupProperty->CheckBlurRadiusChanged(radius)) {
         // Same with previous value
         return;
     }
@@ -3999,7 +4026,7 @@ void RosenRenderContext::UpdateBackBlur(const Dimension& radius, const BlurOptio
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateBackground();
-    if (groupProperty->CheckBlurRadius(radius)) {
+    if (groupProperty->CheckBlurRadiusChanged(radius)) {
         // Same with previous value
         return;
     }
@@ -4011,10 +4038,27 @@ void RosenRenderContext::UpdateBackBlur(const Dimension& radius, const BlurOptio
     }
 }
 
+void RosenRenderContext::UpdateNodeBackBlur(const Dimension& radius, const BlurOption& blurOption)
+{
+    CHECK_NULL_VOID(rsNode_);
+    const auto& groupProperty = GetOrCreateBackground();
+    groupProperty->propBackdropBlurOption = blurOption;
+    if (groupProperty->CheckBlurRadiusChanged(radius) && groupProperty->CheckBlurOptionChanged(blurOption)) {
+        // Same with previous value
+        return;
+    }
+    groupProperty->propBlurRadius = radius;
+    SetBackBlurFilter();
+    if (blurOption.grayscale.size() > 1) {
+        Rosen::Vector2f grayScale(blurOption.grayscale[0], blurOption.grayscale[1]);
+        rsNode_->SetGreyCoef(grayScale);
+    }
+}
+
 void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
 {
     const auto& groupProperty = GetOrCreateForeground();
-    if (groupProperty->CheckBlurRadius(radius)) {
+    if (groupProperty->CheckBlurRadiusChanged(radius)) {
         // Same with previous value
         return;
     }
@@ -4026,7 +4070,7 @@ void RosenRenderContext::UpdateFrontBlur(const Dimension& radius, const BlurOpti
 {
     CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateForeground();
-    if (groupProperty->CheckBlurRadius(radius)) {
+    if (groupProperty->CheckBlurRadiusChanged(radius)) {
         // Same with previous value
         return;
     }
@@ -4930,6 +4974,14 @@ void RosenRenderContext::SetHDRBrightness(float hdrBrightness)
     rsSurfaceNode->SetHDRBrightness(hdrBrightness);
 }
 
+void RosenRenderContext::SetTransparentLayer(bool isTransparentLayer)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_VOID(rsSurfaceNode);
+    rsSurfaceNode->SetHardwareEnableHint(isTransparentLayer);
+}
+
 void RosenRenderContext::SetFrameGravity(OHOS::Rosen::Gravity gravity)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -4988,6 +5040,7 @@ void RosenRenderContext::SetSurfaceRotation(bool isLock)
 void RosenRenderContext::SetRenderFit(RenderFit renderFit)
 {
     CHECK_NULL_VOID(rsNode_);
+    propRenderFit_ = renderFit;
     auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
     if (rsSurfaceNode) {
         rsSurfaceNode->SetFrameGravity(GetRosenGravity(renderFit));
@@ -5446,7 +5499,7 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
     } else {
         if (!transitionEffect_->HasDisappearTransition()) {
             if (frameNode->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
-                auto frameParent = frameNode->GetAncestorNodeOfFrame();
+                auto frameParent = frameNode->GetAncestorNodeOfFrame(false);
                 CHECK_NULL_VOID(frameParent);
                 // for window surfaceNode, remove surfaceNode explicitly
                 frameParent->GetRenderContext()->RemoveChild(Claim(this));
@@ -6256,6 +6309,12 @@ void RosenRenderContext::UpdateWindowBlur()
     WindowBlurModifier::AddOrChangeBrightnessModifier(
         rsNodeTmp, windowBlurModifier_->brightness, windowBlurModifier_->brightnessValue, blurParam->brightness);
     AnimationUtils::CloseImplicitAnimation();
+}
+
+void RosenRenderContext::MarkUiFirstNode(bool isUiFirstNode)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->MarkUifirstNode(isUiFirstNode);
 }
 
 void RosenRenderContext::BuildShadowInfo(std::unique_ptr<JsonValue>& json)

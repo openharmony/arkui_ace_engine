@@ -40,6 +40,7 @@ void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controll
         auto swiperNode = swiper->GetHost();
         CHECK_NULL_VOID(swiperNode);
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowNext, id:%{public}d", swiperNode->GetId());
+        swiper->ResetAnimationParam();
         swiper->ShowNext();
     });
 
@@ -49,19 +50,22 @@ void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controll
         auto swiperNode = swiper->GetHost();
         CHECK_NULL_VOID(swiperNode);
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ShowPrevious, id:%{public}d", swiperNode->GetId());
+        swiper->ResetAnimationParam();
         swiper->ShowPrevious();
     });
 
     controller->SetChangeIndexImpl([weak](int32_t index, bool useAnimation) {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
-        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ChangeIndex %{public}d, useAnimation:%{public}d", index, useAnimation);
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ChangeIndex %{public}d, useAnimation:%{public}d, id:%{public}d", index,
+            useAnimation, swiper->GetId());
         swiper->ChangeIndex(index, useAnimation);
     });
 
     controller->SetFinishImpl([weak]() {
         auto swiper = weak.Upgrade();
         CHECK_NULL_VOID(swiper);
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper user finish animation id:%{public}d", swiper->GetId());
         swiper->FinishAnimation();
     });
 
@@ -225,6 +229,10 @@ void DumpIndicatorType(const std::optional<SwiperIndicatorType>& type)
             }
             case SwiperIndicatorType::DIGIT: {
                 DumpLog::GetInstance().AddDesc("SwiperIndicatorType:DIGIT");
+                break;
+            }
+            case SwiperIndicatorType::ARC_DOT: {
+                DumpLog::GetInstance().AddDesc("SwiperIndicatorType:ARC_DOT");
                 break;
             }
             default: {

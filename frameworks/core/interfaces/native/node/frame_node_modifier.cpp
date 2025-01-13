@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/frame_node_modifier.h"
+#include <cstdlib>
 
+#include "base/error/error_code.h"
 #include "core/components_ng/base/inspector.h"
-#include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 
 namespace OHOS::Ace::NG {
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
@@ -337,8 +339,13 @@ ArkUI_Bool IsVisible(ArkUINodeHandle node)
     CHECK_NULL_RETURN(currentNode, false);
     auto isVisible = currentNode->IsVisible();
     auto parentNode = currentNode->GetParent();
-    while (isVisible && parentNode && AceType::InstanceOf<FrameNode>(*parentNode)) {
-        isVisible = isVisible && AceType::DynamicCast<FrameNode>(parentNode)->IsVisible();
+    while (isVisible && parentNode) {
+        if (AceType::InstanceOf<FrameNode>(*parentNode)) {
+            isVisible = isVisible && AceType::DynamicCast<FrameNode>(parentNode)->IsVisible();
+        } else if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
+            break;
+        }
+        
         parentNode = parentNode->GetParent();
     }
     return isVisible;
@@ -388,7 +395,13 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
 
 ArkUINodeHandle GetFrameNodeByKey(ArkUI_CharPtr key)
 {
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    if (!pipeline || !pipeline->CheckThreadSafe()) {
+        LOGF("GetFrameNodeByKey doesn't run on UI thread");
+        abort();
+    }
     auto node = NG::Inspector::GetFrameNodeByKey(key, true);
+    CHECK_NULL_RETURN(node, nullptr);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
@@ -646,7 +659,7 @@ void AddExtraCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key, void* extra
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
-        LOGW("AddCustomProperty doesn't run on UI thread");
+        LOGW("AddExtraCustomProperty doesn't run on UI thread");
         return;
     }
     frameNode->AddExtraCustomProperty(key, extraData);
@@ -658,7 +671,7 @@ void* GetExtraCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto pipeline = frameNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
-        LOGW("AddCustomProperty doesn't run on UI thread");
+        LOGW("GetExtraCustomProperty doesn't run on UI thread");
         return nullptr;
     }
     return frameNode->GetExtraCustomProperty(key);
@@ -670,16 +683,107 @@ void RemoveExtraCustomProperty(ArkUINodeHandle node, ArkUI_CharPtr key)
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContextRefPtr();
     if (pipeline && !pipeline->CheckThreadSafe()) {
-        LOGW("AddCustomProperty doesn't run on UI thread");
+        LOGW("RemoveExtraCustomProperty doesn't run on UI thread");
         return;
     }
     frameNode->RemoveExtraCustomProperty(key);
 }
 
+void GetCustomPropertyByKey(ArkUINodeHandle node, ArkUI_CharPtr key, char** value, ArkUI_Uint32* size)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("GetCustomPropertyByKey doesn't run on UI thread");
+        return;
+    }
+    std::string customProperty;
+    if (!frameNode->GetCustomPropertyByKey(key, customProperty)) {
+        return;
+    }
+    *size = customProperty.size();
+    *value = new char[*size + 1];
+    customProperty.copy(*value, *size);
+    (*value)[*size] = '\0';
+}
+
+void AddNodeDestroyCallback(ArkUINodeHandle node, ArkUI_CharPtr callbackKey, void (*onDestroy)(ArkUINodeHandle node))
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("AddNodeDestroyCallback doesn't run on UI thread");
+        return;
+    }
+    auto onDestroyCallback = [node, onDestroy]() {
+        onDestroy(node);
+    };
+    frameNode->AddNodeDestroyCallback(std::string(callbackKey), std::move(onDestroyCallback));
+}
+
+void RemoveNodeDestroyCallback(ArkUINodeHandle node, ArkUI_CharPtr callbackKey)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGW("RemoveNodeDestroyCallback doesn't run on UI thread");
+        return;
+    }
+    frameNode->RemoveNodeDestroyCallback(std::string(callbackKey));
+}
+
+ArkUI_Int32 RequestFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ARKUI_ERROR_CODE_FOCUS_NON_EXISTENT);
+    return static_cast<ArkUI_Int32>(ViewAbstract::RequestFocus(frameNode));
+}
+
+void ClearFocus(ArkUI_Int32 instanceId)
+{
+    ViewAbstract::ClearFocus(instanceId);
+}
+
+void FocusActivate(ArkUI_Int32 instanceId, bool isActive, bool isAutoInactive)
+{
+    ViewAbstract::FocusActivate(instanceId, isActive, isAutoInactive);
+}
+
+void SetAutoFocusTransfer(ArkUI_Int32 instanceId, bool isAutoFocusTransfer)
+{
+    ViewAbstract::SetAutoFocusTransfer(instanceId, isAutoFocusTransfer);
+}
+
+ArkUI_Int32 GetWindowInfoByNode(ArkUINodeHandle node, char** name)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    if (!frameNode->IsOnMainTree()) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
+    }
+    auto context = frameNode->GetAttachedContext();
+    CHECK_NULL_RETURN(context, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    if (!context->CheckThreadSafe()) {
+        LOGF("GetWindowInfoByNode doesn't run on UI thread");
+        abort();
+    }
+    auto window = context->GetWindow();
+    CHECK_NULL_RETURN(window, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    std::string windowName = window->GetWindowName();
+    size_t nameSize = windowName.size();
+    *name = new char[nameSize + 1];
+    windowName.copy(*name, nameSize);
+    (*name)[nameSize] = '\0';
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIFrameNodeModifier modifier = {
         .isModifiable = IsModifiable,
         .createFrameNode = CreateFrameNode,
@@ -733,25 +837,26 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .addExtraCustomProperty = AddExtraCustomProperty,
         .getExtraCustomProperty = GetExtraCustomProperty,
         .removeExtraCustomProperty = RemoveExtraCustomProperty,
+        .getCustomPropertyByKey = GetCustomPropertyByKey,
+        .addNodeDestroyCallback = AddNodeDestroyCallback,
+        .removeNodeDestroyCallback = RemoveNodeDestroyCallback,
+        .getWindowInfoByNode = GetWindowInfoByNode,
         .setDrawCompleteEvent = SetDrawCompleteEvent,
         .resetDrawCompleteEvent = ResetDrawCompleteEvent,
         .setLayoutEvent = SetLayoutEvent,
         .resetLayoutEvent = ResetLayoutEvent,
+        .requestFocus = RequestFocus,
+        .clearFocus = ClearFocus,
+        .focusActivate = FocusActivate,
+        .setAutoFocusTransfer = SetAutoFocusTransfer,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIFrameNodeModifier* GetCJUIFrameNodeModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIFrameNodeModifier modifier = {
         .isModifiable = IsModifiable,
         .createFrameNode = CreateFrameNode,
@@ -789,14 +894,7 @@ const CJUIFrameNodeModifier* GetCJUIFrameNodeModifier()
         .getLayoutSize = GetLayoutSize,
         .getLayoutPositionWithoutMargin = GetLayoutPositionWithoutMargin,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

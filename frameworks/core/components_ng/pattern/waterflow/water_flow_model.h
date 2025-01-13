@@ -28,7 +28,7 @@
 namespace OHOS::Ace {
 class WaterFlowModel {
 public:
-    static WaterFlowModel* GetInstance();
+    ACE_FORCE_EXPORT static WaterFlowModel* GetInstance();
     virtual ~WaterFlowModel() = default;
 
     virtual void Create() = 0;
@@ -66,7 +66,7 @@ public:
     virtual void SetFriction(double friction) = 0;
     virtual void SetCachedCount(int32_t value, bool show = false) = 0;
 
-    virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) = 0;
+    virtual void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL) = 0;
     EdgeEffect GetEdgeEffect() const
     {
         return EdgeEffect::NONE;

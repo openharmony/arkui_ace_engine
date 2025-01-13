@@ -70,9 +70,9 @@ public:
         CHECK_NULL_VOID(host);
         host->GetRenderContext()->UpdateClipEdge(true);
         FireWillShowEvent();
-        auto parentNode = host->GetAncestorNodeOfFrame();
+        auto parentNode = host->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parentNode);
-        auto grandParentNode = parentNode->GetAncestorNodeOfFrame();
+        auto grandParentNode = parentNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(grandParentNode);
         if (grandParentNode->GetTag() == V2::TABS_ETS_TAG) {
             auto tabLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(
@@ -84,7 +84,7 @@ public:
                     .edges = SAFE_AREA_EDGE_TOP + SAFE_AREA_EDGE_BOTTOM });
             }
         }
-        
+
     }
 
     void CheckTabAnimateMode()
@@ -96,12 +96,12 @@ public:
         // Check whether current tabcontent belongs to tab component.
         auto tabContentNode = GetHost();
         CHECK_NULL_VOID(tabContentNode);
-        auto parentNode = tabContentNode->GetAncestorNodeOfFrame();
+        auto parentNode = tabContentNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parentNode);
         if (parentNode->GetTag() != V2::SWIPER_ETS_TAG) {
             return;
         }
-        auto grandParentNode = parentNode->GetAncestorNodeOfFrame();
+        auto grandParentNode = parentNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(grandParentNode);
         if (grandParentNode->GetTag() != V2::TABS_ETS_TAG) {
             return;
@@ -126,17 +126,31 @@ public:
         }
     }
 
+    void CleanChildren()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        if (host->GetChildren().empty()) {
+            return;
+        }
+        host->Clean();
+        firstTimeLayout_ = true;
+        CHECK_NULL_VOID(shallowBuilder_);
+        shallowBuilder_->MarkIsExecuteDeepRenderDone(false);
+    }
+
     void BeforeCreateLayoutWrapper() override
     {
         if (firstTimeLayout_) {
             CheckTabAnimateMode();
-            firstTimeLayout_ = false;
         }
 
         if (shallowBuilder_ && !shallowBuilder_->IsExecuteDeepRenderDone()) {
             shallowBuilder_->ExecuteDeepRender();
-            shallowBuilder_.Reset();
-        } else if (shallowBuilder_ && shallowBuilder_->IsExecuteDeepRenderDone()) {
+            auto host = GetHost();
+            CHECK_NULL_VOID(host);
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        } else if (firstTimeLayout_ && shallowBuilder_ && shallowBuilder_->IsExecuteDeepRenderDone()) {
             auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
             if (!pipeline) {
                 shallowBuilder_->MarkIsExecuteDeepRenderDone(false);
@@ -153,6 +167,7 @@ public:
                 host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             });
         }
+        firstTimeLayout_ = false;
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -170,6 +185,11 @@ public:
             symbol_ = tabBarSymbol.value();
         }
         tabBarParam_.SetBuilder(move(builder));
+    }
+
+    void SetTabBarWithContent(const RefPtr<NG::UINode>& content)
+    {
+        tabBarParam_.SetContent(content);
     }
 
     const TabBarSymbol& GetSymbol()

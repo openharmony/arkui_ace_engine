@@ -20,6 +20,7 @@
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -267,6 +268,10 @@ MenuLayoutAlgorithm::MenuLayoutAlgorithm(int32_t id, const std::string& tag,
     if (LessOrEqual(previewScale_, 0.0f)) {
         previewScale_ = 1.0f;
     }
+
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    targetSecurity_ = static_cast<float>(theme->GetMenuTargetSecuritySpace().ConvertToPx());
 }
 
 MenuLayoutAlgorithm::~MenuLayoutAlgorithm()
@@ -323,13 +328,10 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     // user-set offset
     positionOffset_ = props->GetPositionOffset().value_or(OffsetF());
     dumpInfo_.offset = positionOffset_;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        InitializePaddingAPI12(layoutWrapper);
-    } else {
-        InitializePadding(layoutWrapper);
-    }
+    InitializePadding(layoutWrapper);
     InitializeParam(menuPattern);
-    if (canExpandCurrentWindow_ && isExpandDisplay_ && !menuPattern->IsSelectMenu()) {
+    if (canExpandCurrentWindow_ && isExpandDisplay_ && !menuPattern->IsSelectMenu() &&
+        !menuPattern->IsSelectOverlayRightClickMenu()) {
         position_ += NG::OffsetF { displayWindowRect_.Left(), displayWindowRect_.Top() };
         TAG_LOGI(AceLogTag::ACE_MENU, "original postion after applying displayWindowRect : %{public}s",
             position_.ToString().c_str());
@@ -359,7 +361,8 @@ void MenuLayoutAlgorithm::InitializeParam(const RefPtr<MenuPattern>& menuPattern
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
-    auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
+    CHECK_NULL_VOID(menuPattern);
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(menuPattern->GetHost());
     auto top = safeAreaInsets.top_.Length();
     auto props = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
     CHECK_NULL_VOID(props);
@@ -469,7 +472,8 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
     // system safeArea(AvoidAreaType.TYPE_SYSTEM) only include status bar,now the bottom is 0
-    auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
+    CHECK_NULL_VOID(menuPattern);
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(menuPattern->GetHost());
     bottom_ = static_cast<double>(GetBottomBySafeAreaManager(safeAreaManager, props, menuPattern));
     top_ = static_cast<double>(safeAreaInsets.top_.Length());
     left_ = static_cast<double>(safeAreaInsets.left_.Length());
@@ -488,12 +492,12 @@ void MenuLayoutAlgorithm::InitWrapperRect(
         if (!canExpandCurrentWindow_ && isContainerModal) {
             LimitContainerModalMenuRect(width_, height_);
         }
-        isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
-        if (isHalfFoldHover_ && menuPattern->GetHoverMode()) {
-            UpdateWrapperRectForHoverMode(props, menuPattern);
-        } else {
-            wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
-        }
+    }
+    isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
+    if (isHalfFoldHover_ && menuPattern->GetHoverMode()) {
+        UpdateWrapperRectForHoverMode(props, menuPattern);
+    } else {
+        wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
     }
     wrapperSize_ = SizeF(wrapperRect_.Width(), wrapperRect_.Height());
     dumpInfo_.wrapperRect = wrapperRect_;
@@ -534,14 +538,17 @@ void MenuLayoutAlgorithm::UpdateWrapperRectForHoverMode(
 uint32_t MenuLayoutAlgorithm::GetBottomBySafeAreaManager(const RefPtr<SafeAreaManager>& safeAreaManager,
     const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
 {
-    auto safeAreaInsets = safeAreaManager->GetSafeAreaWithoutProcess();
+    CHECK_NULL_RETURN(menuPattern, 0);
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(menuPattern->GetHost());
     auto bottom = safeAreaInsets.bottom_.Length();
+    CHECK_NULL_RETURN(safeAreaManager, 0);
     auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
     if ((menuPattern->IsSelectOverlayExtensionMenu() || menuPattern->IsSelectOverlayRightClickMenu()) &&
         GreatNotEqual(keyboardHeight, 0)) {
         bottom = keyboardHeight;
     }
 
+    CHECK_NULL_RETURN(props, 0);
     // Determine whether the menu is an AI menu
     if (props->GetIsRectInTargetValue(false)) {
         if (LessOrEqual(keyboardHeight, 0)) {
@@ -587,6 +594,10 @@ void MenuLayoutAlgorithm::InitSpace(const RefPtr<MenuLayoutProperty>& props, con
 
 void MenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
 {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        InitializePaddingAPI12(layoutWrapper);
+        return;
+    }
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
@@ -1448,14 +1459,19 @@ void MenuLayoutAlgorithm::UpdatePreviewPositionAndOffset(
     CHECK_NULL_VOID(previewHostNode);
     auto renderContext = previewHostNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(previewOffsetX), Dimension(previewOffsetY)));
 
     auto menuHostNode = menuLayoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuHostNode);
-    previewOriginOffset_ = targetCenterOffset_ - OffsetF(previewSize.Width() / HALF, previewSize.Height() / HALF);
-    previewSize_ = previewSize;
     auto menuPattern = menuHostNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
+
+    // only update when current position is not equal to last position, otherwise animation will be interrupted
+    if (previewOffset_ != menuPattern->GetPreviewRect().GetOffset()) {
+        renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(previewOffsetX), Dimension(previewOffsetY)));
+    }
+
+    previewOriginOffset_ = targetCenterOffset_ - OffsetF(previewSize.Width() / HALF, previewSize.Height() / HALF);
+    previewSize_ = previewSize;
     menuPattern->SetPreviewOriginOffset(previewOriginOffset_);
     menuPattern->SetPreviewRect(RectF(previewOffset_, previewSize_));
 }

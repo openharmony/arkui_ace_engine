@@ -137,6 +137,9 @@ public:
     virtual void Reset() = 0;
     virtual void ResetFooter() = 0;
 
+    virtual bool OverScrollTop() = 0;
+    virtual bool OverScrollBottom() = 0;
+
     // for compatibility
     virtual void UpdateStartIndex() {};
 
@@ -190,6 +193,7 @@ public:
         const std::vector<WaterFlowSections::Section>& sections, const ScaleProperty& scale, float percentWidth);
 
     virtual void NotifyDataChange(int32_t index, int32_t count) = 0;
+    virtual void NotifySectionChange(int32_t index) = 0;
     virtual void InitSegmentsForKeepPositionMode(const std::vector<WaterFlowSections::Section>& sections,
         const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) = 0;
 
@@ -220,6 +224,8 @@ public:
     // store offset for distributed migration
     float storedOffset_ = 0.0f;
     float restoreOffset_ = 0.0f;
+
+    float expandHeight_ = 0.0f;
 
     // Stores the tail item index of each segment.
     std::vector<int32_t> segmentTails_;

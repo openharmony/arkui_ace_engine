@@ -1412,6 +1412,7 @@ public:
         JSClass<JSFileSelectorParam>::CustomMethod("getMode", &JSFileSelectorParam::GetMode);
         JSClass<JSFileSelectorParam>::CustomMethod("getAcceptType", &JSFileSelectorParam::GetAcceptType);
         JSClass<JSFileSelectorParam>::CustomMethod("isCapture", &JSFileSelectorParam::IsCapture);
+        JSClass<JSFileSelectorParam>::CustomMethod("getMimeType", &JSFileSelectorParam::GetMimeType);
         JSClass<JSFileSelectorParam>::Bind(
             globalObj, &JSFileSelectorParam::Constructor, &JSFileSelectorParam::Destructor);
     }
@@ -1449,6 +1450,20 @@ public:
         std::vector<std::string>::iterator iterator;
         uint32_t index = 0;
         for (iterator = acceptTypes.begin(); iterator != acceptTypes.end(); ++iterator) {
+            auto valueStr = JSVal(ToJSValue(*iterator));
+            auto value = JSRef<JSVal>::Make(valueStr);
+            result->SetValueAt(index++, value);
+        }
+        args.SetReturnValue(result);
+    }
+
+    void GetMimeType(const JSCallbackInfo& args)
+    {
+        auto mimeTypes = param_->GetMimeType();
+        JSRef<JSArray> result = JSRef<JSArray>::New();
+        std::vector<std::string>::iterator iterator;
+        uint32_t index = 0;
+        for (iterator = mimeTypes.begin(); iterator != mimeTypes.end(); ++iterator) {
             auto valueStr = JSVal(ToJSValue(*iterator));
             auto value = JSRef<JSVal>::Make(valueStr);
             result->SetValueAt(index++, value);
@@ -2009,6 +2024,10 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("editMenuOptions", &JSWeb::EditMenuOptions);
     JSClass<JSWeb>::StaticMethod("enableHapticFeedback", &JSWeb::EnableHapticFeedback);
     JSClass<JSWeb>::StaticMethod("bindSelectionMenu", &JSWeb::BindSelectionMenu);
+    JSClass<JSWeb>::StaticMethod("optimizeParserBudget", &JSWeb::OptimizeParserBudgetEnabled);
+    JSClass<JSWeb>::StaticMethod("runJavaScriptOnHeadEnd", &JSWeb::RunJavaScriptOnHeadEnd);
+    JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentStart", &JSWeb::RunJavaScriptOnDocumentStart);
+    JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentEnd", &JSWeb::RunJavaScriptOnDocumentEnd);
 
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
@@ -5162,11 +5181,8 @@ void JSWeb::JavaScriptOnDocumentStart(const JSCallbackInfo& args)
     ScriptItems scriptItems;
     ScriptItemsByOrder scriptItemsByOrder;
     ParseScriptItems(args, scriptItems, scriptItemsByOrder);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
-        WebModel::GetInstance()->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
-    } else {
-        WebModel::GetInstance()->JavaScriptOnDocumentStart(scriptItems);
-    }
+
+    WebModel::GetInstance()->JavaScriptOnDocumentStart(scriptItems);
 }
 
 void JSWeb::JavaScriptOnDocumentEnd(const JSCallbackInfo& args)
@@ -5175,11 +5191,34 @@ void JSWeb::JavaScriptOnDocumentEnd(const JSCallbackInfo& args)
     ScriptItemsByOrder scriptItemsByOrder;
     ParseScriptItems(args, scriptItems, scriptItemsByOrder);
 
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
-        WebModel::GetInstance()->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
-    } else {
-        WebModel::GetInstance()->JavaScriptOnDocumentEnd(scriptItems);
-    }
+    WebModel::GetInstance()->JavaScriptOnDocumentEnd(scriptItems);
+}
+
+void JSWeb::RunJavaScriptOnDocumentStart(const JSCallbackInfo& args)
+{
+    ScriptItems scriptItems;
+    ScriptItemsByOrder scriptItemsByOrder;
+    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+
+    WebModel::GetInstance()->JavaScriptOnDocumentStartByOrder(scriptItems, scriptItemsByOrder);
+}
+
+void JSWeb::RunJavaScriptOnDocumentEnd(const JSCallbackInfo& args)
+{
+    ScriptItems scriptItems;
+    ScriptItemsByOrder scriptItemsByOrder;
+    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+
+    WebModel::GetInstance()->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
+}
+
+void JSWeb::RunJavaScriptOnHeadEnd(const JSCallbackInfo& args)
+{
+    ScriptItems scriptItems;
+    ScriptItemsByOrder scriptItemsByOrder;
+    ParseScriptItems(args, scriptItems, scriptItemsByOrder);
+
+    WebModel::GetInstance()->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
 }
 
 void JSWeb::OnOverrideUrlLoading(const JSCallbackInfo& args)
@@ -5578,4 +5617,8 @@ void JSWeb::EnableHapticFeedback(const JSCallbackInfo& args)
     WebModel::GetInstance()->SetEnabledHapticFeedback(isEnabled);
 }
 
+void JSWeb::OptimizeParserBudgetEnabled(bool enable)
+{
+    WebModel::GetInstance()->SetOptimizeParserBudgetEnabled(enable);
+}
 } // namespace OHOS::Ace::Framework

@@ -94,7 +94,7 @@ bool GestureEventHub::ProcessEventTouchTestHit(const OffsetF& coordinateOffset, 
         scrollableActuator_->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets,
             localPoint, host, targetComponent, responseLinkResult);
     }
-    if (dragEventActuator_) {
+    if (dragEventActuator_ && !dragEventActuator_->GetIsNewFwk()) {
         dragEventActuator_->AddTouchListener(touchRestrict);
     }
     if (touchEventActuator_) {
@@ -722,9 +722,12 @@ bool GestureEventHub::ActLongClick()
     return false;
 }
 
-std::string GestureEventHub::GetHitTestModeStr() const
+std::string GestureEventHub::GetHitTestModeStr(const RefPtr<GestureEventHub>& gestureEventHub)
 {
-    auto mode = static_cast<int32_t>(hitTestMode_);
+    if (!gestureEventHub) {
+        return HIT_TEST_MODE[0];
+    }
+    auto mode = static_cast<int32_t>(gestureEventHub->GetHitTestMode());
     if (mode < 0 || mode >= static_cast<int32_t>(std::size(HIT_TEST_MODE))) {
         return HIT_TEST_MODE[0];
     }
@@ -901,19 +904,6 @@ void GestureEventHub::SetJSFrameNodeOnTouchEvent(TouchEventFunc&& touchEventFunc
         touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
     }
     touchEventActuator_->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
-}
-
-bool GestureEventHub::IsNeedSwitchToSubWindow() const
-{
-    auto frameNode = GetFrameNode();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto focusHub = frameNode->GetFocusHub();
-    CHECK_NULL_RETURN(focusHub, false);
-    if (IsPixelMapNeedScale()) {
-        return true;
-    }
-    CHECK_NULL_RETURN(dragEventActuator_, false);
-    return dragEventActuator_->IsNeedGather();
 }
 
 void GestureEventHub::RemoveGesturesByTag(const std::string& gestureTag)
@@ -1254,6 +1244,12 @@ bool GestureEventHub::IsPanEventEmpty() const
         return panEventActuator_->IsPanEventEmpty();
     }
     return true;
+}
+
+void GestureEventHub::SetExcludedAxisForPanEvent(bool isExcludedAxis)
+{
+    CHECK_NULL_VOID(panEventActuator_);
+    panEventActuator_->SetExcludedAxis(isExcludedAxis);
 }
 
 } // namespace OHOS::Ace::NG

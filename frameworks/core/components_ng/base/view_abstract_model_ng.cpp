@@ -651,6 +651,27 @@ void ViewAbstractModelNG::SetAccessibilityImportance(const std::string& importan
     accessibilityProperty->SetAccessibilityLevel(importance);
 }
 
+void ViewAbstractModelNG::SetAccessibilityDefaultFocus()
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->SendFrameNodeToAccessibility(AceType::Claim(frameNode), false);
+}
+
+void ViewAbstractModelNG::SetAccessibilityUseSamePage(bool isFullSilent)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    std::string pageMode = isFullSilent ? "FULL_SILENT" : "SEMI_SILENT";
+    accessibilityProperty->SetAccessibilitySamePage(pageMode);
+}
+
 void ViewAbstractModelNG::SetAccessibilityText(FrameNode* frameNode, const std::string& text)
 {
     CHECK_NULL_VOID(frameNode);
@@ -717,6 +738,38 @@ void ViewAbstractModelNG::SetAccessibilityChecked(bool checked, bool resetValue)
     }
 }
 
+void ViewAbstractModelNG::SetAccessibilityRole(const std::string& role, bool resetValue)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (resetValue) {
+        accessibilityProperty->ResetAccessibilityCustomRole();
+    } else {
+        accessibilityProperty->SetAccessibilityCustomRole(role);
+    }
+}
+
+void ViewAbstractModelNG::SetOnAccessibilityFocus(
+    NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl)
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetUserOnAccessibilityFocusCallback(onAccessibilityFocusCallbackImpl);
+}
+
+void ViewAbstractModelNG::ResetOnAccessibilityFocus()
+{
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetUserOnAccessibilityFocusCallback();
+}
+
 void ViewAbstractModelNG::SetAccessibilityDescription(FrameNode* frameNode, const std::string& description)
 {
     CHECK_NULL_VOID(frameNode);
@@ -747,6 +800,30 @@ void ViewAbstractModelNG::SetAccessibilityTextPreferred(FrameNode* frameNode, bo
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetAccessibilityTextPreferred(accessibilityTextPreferred);
+}
+
+void ViewAbstractModelNG::SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus)
+{
+    if (!isFocus) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->SendFrameNodeToAccessibility(AceType::Claim(frameNode), false);
+}
+
+void ViewAbstractModelNG::SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode)
+{
+    if (pageMode.empty()) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilitySamePage(pageMode);
 }
 
 bool ViewAbstractModelNG::GetAccessibilityGroup(FrameNode* frameNode)
@@ -805,6 +882,35 @@ void ViewAbstractModelNG::SetAccessibilityChecked(FrameNode* frameNode, bool che
         accessibilityProperty->SetUserCheckedType(checked);
         accessibilityProperty->SetUserCheckable(true);
     }
+}
+
+void ViewAbstractModelNG::SetAccessibilityRole(FrameNode* frameNode, const std::string& role, bool resetValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    if (resetValue) {
+        accessibilityProperty->ResetAccessibilityCustomRole();
+    } else {
+        accessibilityProperty->SetAccessibilityCustomRole(role);
+    }
+}
+
+void ViewAbstractModelNG::SetOnAccessibilityFocus(
+    FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetUserOnAccessibilityFocusCallback(onAccessibilityFocusCallbackImpl);
+}
+
+void ViewAbstractModelNG::ResetOnAccessibilityFocus(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetUserOnAccessibilityFocusCallback();
 }
 
 } // namespace OHOS::Ace::NG

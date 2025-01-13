@@ -37,7 +37,10 @@ public:
 
     CustomNode(int32_t nodeId, const std::string& viewKey)
     : UINode(V2::JS_VIEW_ETS_TAG, nodeId, MakeRefPtr<CustomNodePattern>()), viewKey_(viewKey) {}
-    ~CustomNode() override = default;
+    ~CustomNode() override
+    {
+        ACE_SCOPED_TRACE("CustomNode:Destroy [%d]", GetId());
+    }
 
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
 
@@ -98,7 +101,7 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false) override;
     bool RenderCustomChild(int64_t deadline) override;
-    void SetJSViewActive(bool active, bool isLazyForEachNode = false) override;
+    void SetJSViewActive(bool active, bool isLazyForEachNode = false, bool isReuse = false) override;
 
     bool GetJsActive()
     {

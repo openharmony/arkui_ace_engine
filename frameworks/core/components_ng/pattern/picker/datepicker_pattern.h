@@ -20,6 +20,7 @@
 
 #include "core/components/common/layout/constants.h"
 #include "core/components/picker/picker_data.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
@@ -142,6 +143,10 @@ public:
     void HandleAddLunarDayChange(uint32_t index);
 
     void HandleSolarDayChange(bool isAdd, uint32_t index);
+
+    void IncreaseLinkageYearMonth(PickerDate& date);
+
+    void ReduceLinkageYearMonth(PickerDate& date);
 
     void HandleSolarMonthDaysChange(bool isAdd, uint32_t index);
 
@@ -418,6 +423,16 @@ public:
         return endDateSolar_;
     }
 
+    void SetMode(const DatePickerMode& value)
+    {
+        datePickerMode_ = value;
+    }
+
+    const DatePickerMode& GetMode()
+    {
+        return datePickerMode_;
+    }
+
     void AdjustSolarDate(PickerDate& date, const PickerDate& start, const PickerDate& end) const
     {
         if (SolarDateCompare(date, start) < 0) {
@@ -575,6 +590,8 @@ public:
 
     static const std::string& GetLunarDay(uint32_t day);
 
+    const std::string GetText();
+
     FocusPattern GetFocusPattern() const override
     {
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -584,11 +601,12 @@ public:
         auto focusColor = pickerTheme->GetFocusColor();
         FocusPaintParam focusPaintParams;
         focusPaintParams.SetPaintColor(focusColor);
-        focusPaintParams.SetPaintWidth(FOCUS_PAINT_WIDTH);
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
     void ShowTitle(int32_t titleId);
+    std::string GetVisibleColumnsText();
+    void GetColumnText(const RefPtr<FrameNode>& columnNode, std::string& result);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
     {
@@ -702,6 +720,22 @@ public:
         curOpacity_ = opacity;
     }
 
+    void SetEnableHapticFeedback(bool value)
+    {
+        if (isEnableHaptic_ != value) {
+            isHapticChanged_ = true;
+        }
+        isEnableHaptic_ = value;
+    }
+
+    bool GetEnableHapticFeedback() const
+    {
+        return isEnableHaptic_;
+    }
+
+    void ColumnPatternInitHapticController();
+    void ColumnPatternInitHapticController(const RefPtr<FrameNode>& columnNode);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -713,6 +747,16 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool HandleDirectionKey(KeyCode code);
+    void InitFocusEvent();
+    void InitSelectorProps();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void GetInnerFocusButtonPaintRect(RoundRect& paintRect, float focusButtonXOffset);
+    void UpdateFocusButtonState();
+    void SetHaveFocus(bool haveFocus);
+    void UpdateColumnButtonStyles(const RefPtr<FrameNode>& columnNode, bool haveFocus, bool needMarkDirty);
     PickerDate GetCurrentDateByMonthDaysColumn() const;
     PickerDate GetCurrentDateByYearMonthDayColumn() const;
     void OrderCurrentDateByYearMonthDayColumn(
@@ -726,6 +770,9 @@ private:
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
     void UpdateCancelButtonMargin(
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    void ShowColumnByDatePickMode();
+    void UpdateStackPropVisibility(const RefPtr<FrameNode>& stackNode,
+        const VisibleType visibleType, const int32_t weight);
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -749,6 +796,11 @@ private:
     double resizePickerItemHeight_ = 0.0;
     bool resizeFlag_ = false;
     bool isShowInDialog_ = false;
+    bool focusEventInitialized_ = false;
+    bool haveFocus_ = false;
+    bool useButtonFocusArea_ = false;
+    Dimension selectorItemRadius_ = 8.0_vp;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
     EventMarker OnDialogAccept_;
     EventMarker OnDialogCancel_;
     EventMarker OnDialogChange_;
@@ -797,6 +849,10 @@ private:
     float paintDividerSpacing_ = 1.0f;
     PickerTextProperties textProperties_;
     double curOpacity_ = 1.0;
+    DatePickerMode datePickerMode_ = DatePickerMode::DATE;
+    bool isFocus_ = true;
+    bool isEnableHaptic_ = true;
+    bool isHapticChanged_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };

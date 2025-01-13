@@ -14,7 +14,6 @@
  */
 
 #include "text_input_base.h"
-#include "base/utils/string_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -179,8 +178,10 @@ HWTEST_F(TextFieldAlgorithmTest, UpdateTextStyle001, TestSize.Level1)
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
+    layoutProperty_->UpdateTextIndent(Dimension(10));
     textInputLayoutAlgorithm->UpdateTextStyleMore(frameNode_, layoutProperty_, textStyle, true);
     textInputLayoutAlgorithm->UpdateTextStyle(frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
+    EXPECT_EQ(textStyle.GetTextIndent(), Dimension(10));
 }
 
 /**
@@ -225,6 +226,7 @@ HWTEST_F(TextFieldAlgorithmTest, UpdatePlaceholderTextStyle, TestSize.Level1)
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
     textInputLayoutAlgorithm->UpdatePlaceholderTextStyle(
         frameNode_, layoutProperty_, textFieldTheme, textStyle, true);
+    EXPECT_EQ(textStyle.GetTextOverflow(), TextOverflow::ELLIPSIS);
 }
 
 /**
@@ -367,6 +369,7 @@ HWTEST_F(TextFieldAlgorithmTest, CreateParagraph001, TestSize.Level1)
     textStyle.SetTextOverflow(OVERFLOW_ELLIPSIS);
     auto paragraphData = CreateParagraphData { true, textStyle.GetFontSize().ConvertToPx() };
     textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, u"content", true, paragraphData);
+    EXPECT_EQ(textInputLayoutAlgorithm->GetTextFieldDefaultHeight(), 0.0f);
 }
 
 /**
@@ -409,7 +412,7 @@ HWTEST_F(TextFieldAlgorithmTest, CreateParagraph003, TestSize.Level1)
     textStyle.SetMaxLines(1);
     auto paragraphData = CreateParagraphData { false, textStyle.GetFontSize().ConvertToPx() };
     textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, u"content", false, paragraphData);
-    textInputLayoutAlgorithm->GetTextFieldDefaultHeight();
+    EXPECT_EQ(textInputLayoutAlgorithm->GetTextFieldDefaultHeight(), 0.0f);
 }
 
 /**
@@ -628,8 +631,8 @@ HWTEST_F(TextFieldAlgorithmTest, AddAdaptFontSizeAndAnimations001, TestSize.Leve
     auto textInputLayoutAlgorithm =
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
     textInputLayoutAlgorithm->BuildInlineFocusLayoutConstraint(layoutConstraint, &layoutWrapper);
-    textInputLayoutAlgorithm->AddAdaptFontSizeAndAnimations(
-        textStyle, layoutProperty_, layoutConstraint, &layoutWrapper);
+    EXPECT_TRUE(textInputLayoutAlgorithm->AddAdaptFontSizeAndAnimations(
+        textStyle, layoutProperty_, layoutConstraint, &layoutWrapper));
 }
 
 /**

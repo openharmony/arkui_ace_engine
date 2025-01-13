@@ -44,7 +44,7 @@ public:
     void SetDisplayMode(int displayMode) override;
     void SetScrollBarWidth(const Dimension& dimension) override;
     void SetScrollBarColor(const Color& color) override;
-    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge) override;
     void SetHasWidth(bool hasWidth) override;
     void SetHasHeight(bool hasHeight) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override {};

@@ -54,6 +54,29 @@ RSRecordingPath SvgRect::AsPath(const Size& viewPort) const
     return path;
 }
 
+RSRecordingPath SvgRect::AsPath(const SvgLengthScaleRule& lengthRule)
+{
+    if (path_.has_value() && lengthRule_ == lengthRule) {
+        return path_.value();
+    }
+    auto rx = GreatNotEqual(rectAttr_.rx.Value(), 0.0) ?
+              GetMeasuredLength(rectAttr_.rx, lengthRule, SvgLengthType::HORIZONTAL) : 0.0;
+    auto ry = GreatNotEqual(rectAttr_.ry.Value(), 0.0) ?
+              GetMeasuredLength(rectAttr_.ry, lengthRule, SvgLengthType::VERTICAL) : 0.0;
+    rx = GreatNotEqual(rx, 0.0) ? rx : ry;
+    ry = GreatNotEqual(ry, 0.0) ? ry : rx;
+    RSScalar left, top;
+    left = GetMeasuredPosition(rectAttr_.x, lengthRule, SvgLengthType::HORIZONTAL) ;
+    top = GetMeasuredPosition(rectAttr_.y, lengthRule, SvgLengthType::VERTICAL) ;
+    RSScalar width = GetMeasuredLength(rectAttr_.width, lengthRule, SvgLengthType::HORIZONTAL);
+    RSScalar height = GetMeasuredLength(rectAttr_.height, lengthRule, SvgLengthType::VERTICAL);
+    RSRoundRect roundRect = RSRoundRect(RSRect(left, top, width + left, height + top), rx, ry);
+    RSRecordingPath path;
+    path.AddRoundRect(roundRect);
+    path_ = path;
+    return path;
+}
+
 bool SvgRect::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
 {
     static const LinearMapNode<void (*)(const std::string&, SvgRectAttribute&)> attrs[] = {

@@ -25,6 +25,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 
 namespace OHOS::Ace::NG {
 class SessionWrapperImpl : public SessionWrapper {
@@ -101,15 +102,24 @@ public:
     // The interface for UEC dump
     uint32_t GetReasonDump() const override;
     void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
-    WindowSizeChangeReason GetSizeChangeReason() const override;
     int32_t GetInstanceIdFromHost() const;
+    bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply) override;
+    bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type) override;
+
+    void NotifyHostWindowMode(int32_t mode) override;
 
 private:
+    int32_t GetFrameNodeId() const;
     void InitAllCallback();
     void UpdateSessionConfig();
+    RefPtr<SystemWindowScene> GetWindowScene();
     int32_t GetWindowSceneId();
+    Rosen::WSRect GetWindowSceneRcet();
     bool InnerNotifyOccupiedAreaChangeInfo(
         sptr<Rosen::OccupiedAreaChangeInfo> info, bool isWaitTask, int64_t occupiedAreaTime);
+    bool RegisterDataConsumer();
+    void PostBusinessDataConsumeAsync(uint32_t customId, AAFwk::Want&& data);
+    void PostBusinessDataConsumeSyncReply(uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
 
     WeakPtr<UIExtensionPattern> hostPattern_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -128,6 +138,7 @@ private:
     std::function<void((OHOS::Rosen::WSError))> backgroundCallback_;
     std::function<void((OHOS::Rosen::WSError))> destructionCallback_;
     std::weak_ptr<Rosen::RSTransaction> transaction_;
+    OHOS::Rosen::SubSystemId subSystemId_ = OHOS::Rosen::SubSystemId::ARKUI_UIEXT;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_IMPL_H

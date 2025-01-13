@@ -1405,11 +1405,12 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest002, TestSize.Level1)
     std::function<void()> onCancel = []() {};
     std::function<void(const std::string&)> onAccept = [](const std::string&) {};
     std::function<void(const std::string&)> onChange = [](const std::string&) {};
+    std::function<void(const std::string&)> onEnterSelectedArea = [](const std::string&) {};
     TimePickerDialogEvent timePickerDialogEvent;
     std::vector<ButtonInfo> buttonInfos;
 
     timePickerDialogModelNG.SetTimePickerDialogShow(pickerDialog, settingData, std::move(onCancel),
-        std::move(onAccept), std::move(onChange), timePickerDialogEvent, buttonInfos);
+        std::move(onAccept), std::move(onChange), std::move(onEnterSelectedArea), timePickerDialogEvent, buttonInfos);
     ASSERT_NE(frameNode, nullptr);
 }
 
@@ -1730,8 +1731,16 @@ HWTEST_F(TimePickerPatternTestUpdate, OnWindowHide001, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestUpdate, SetIsEnableHapticFeedback001, TestSize.Level1)
 {
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
     bool isEnableHapticFeedback = true;
     TimePickerModelNG::GetInstance()->SetIsEnableHapticFeedback(isEnableHapticFeedback);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(TimePickerModelNG::getEnableHapticFeedback(frameNode), isEnableHapticFeedback);
 }
 
 /**
@@ -1744,6 +1753,7 @@ HWTEST_F(TimePickerPatternTestUpdate, SetIsEnableHapticFeedback002, TestSize.Lev
     bool isEnableHapticFeedback = true;
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     TimePickerModelNG::SetIsEnableHapticFeedback(frameNode, isEnableHapticFeedback);
+    EXPECT_EQ(TimePickerModelNG::getEnableHapticFeedback(frameNode), isEnableHapticFeedback);
 }
 
 /**
@@ -1791,11 +1801,12 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest003, TestSize.Level1)
     std::function<void()> onCancel = []() {};
     std::function<void(const std::string&)> onAccept = [](const std::string&) {};
     std::function<void(const std::string&)> onChange = [](const std::string&) {};
+    std::function<void(const std::string&)> onEnterSelectedArea = [](const std::string&) {};
     TimePickerDialogEvent timePickerDialogEvent;
     std::vector<ButtonInfo> buttonInfos;
 
     timePickerDialogModelNG.SetTimePickerDialogShow(pickerDialog, settingData, std::move(onCancel), std::move(onAccept),
-        std::move(onChange), timePickerDialogEvent, buttonInfos);
+        std::move(onChange), std::move(onEnterSelectedArea), timePickerDialogEvent, buttonInfos);
     MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
     ASSERT_NE(frameNode, nullptr);
     pickerDialog.alignment = DialogAlignment::CENTER;
@@ -1805,7 +1816,7 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest003, TestSize.Level1)
     pickerDialog.offset = DimensionOffset(Offset(0, 1.0f));
     pickerDialog.isSelectedTime = true;
     timePickerDialogModelNG.SetTimePickerDialogShow(pickerDialog, settingData, std::move(onCancel), std::move(onAccept),
-        std::move(onChange), timePickerDialogEvent, buttonInfos);
+        std::move(onChange), std::move(onEnterSelectedArea), timePickerDialogEvent, buttonInfos);
     ASSERT_NE(frameNode, nullptr);
 }
 /**
@@ -1828,5 +1839,27 @@ HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest004, TestSize.Level1)
 
     ret = timepickerModel.ConvertFontScaleValue(FONT_VALUE_NOMARL);
     EXPECT_EQ(ret, FONT_VALUE_NOMARL);
+}
+/**
+ * @tc.name: TimePickerModelNGTest005
+ * @tc.desc: Test TimePickerModelNG SetEnableCascade.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestUpdate, TimePickerModelNGTest005, TestSize.Level1)
+{
+    int32_t nodeId = 0;
+    RefPtr<FrameNode> result = TimePickerModelNG::CreateFrameNode(nodeId);
+    EXPECT_NE(result, nullptr);
+    bool isEnableCascade = false;
+    auto timePickerRowPattern = result->GetPattern<TimePickerRowPattern>();
+    ASSERT_NE(timePickerRowPattern, nullptr);
+    timePickerRowPattern->SetEnableCascade(isEnableCascade);
+    bool ret = timePickerRowPattern->GetEnableCascade();
+    EXPECT_EQ(ret, false);
+
+    isEnableCascade = true;
+    timePickerRowPattern->SetEnableCascade(isEnableCascade);
+    ret = timePickerRowPattern->GetEnableCascade();
+    EXPECT_EQ(ret, true);
 }
 } // namespace OHOS::Ace::NG

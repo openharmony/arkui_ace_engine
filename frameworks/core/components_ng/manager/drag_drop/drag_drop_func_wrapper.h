@@ -24,6 +24,7 @@
 #include "core/components_ng/gestures/gesture_info.h"
 
 namespace OHOS::Ace::NG {
+using PixelMapFinishCallback = std::function<void(RefPtr<PixelMap>, bool)>;
 /* DragDropFuncWrapper as a utility class, all function calls must use containerId. */
 class FrameNode;
 class ACE_FORCE_EXPORT DragDropFuncWrapper {
@@ -34,7 +35,7 @@ public:
         const std::string& extraParams, int32_t currentPointerId, int32_t containerId);
     static void UpdateDragPreviewOptionsFromModifier(
         std::function<void(WeakPtr<FrameNode>)> applyOnNodeSync, DragPreviewOption& options);
-    static void UpdatePreviewOptionDefaultAttr(DragPreviewOption& option);
+    static void UpdatePreviewOptionDefaultAttr(DragPreviewOption& option, bool isMultiSelectionEnabled = false);
     static void UpdateExtraInfo(std::unique_ptr<JsonValue>& arkExtraInfoJson, DragPreviewOption& option);
     static void PrepareRadiusParametersForDragData(std::unique_ptr<JsonValue>& arkExtraInfoJson,
         DragPreviewOption& option);
@@ -44,7 +45,7 @@ public:
     static std::optional<Shadow> GetDefaultShadow();
     static std::optional<BorderRadiusProperty> GetDefaultBorderRadius();
     static float RadiusToSigma(float radius);
-    static std::optional<EffectOption> BrulStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
+    static std::optional<EffectOption> BlurStyleToEffection(const std::optional<BlurStyleOption>& blurStyleOp);
     [[maybe_unused]] static double GetScaleWidth(int32_t containerId);
     static std::string GetSummaryString(const std::map<std::string, int64_t>& summary);
     static void SetExtraInfo(int32_t containerId, std::string extraInfo);
@@ -59,10 +60,48 @@ public:
     static void UpdateNodePositionToWindow(const RefPtr<FrameNode>& frameNode, OffsetF offset);
     static void UpdatePositionFromFrameNode(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode,
         float width, float height);
+    static void SetDragStartRequestStatus(DragStartRequestStatus dragStartRequestStatus) noexcept;
     static void ConvertPointerEvent(const TouchEvent& touchPoint, DragPointerEvent& event);
     static RefPtr<FrameNode> GetFrameNodeByKey(const RefPtr<FrameNode>& root, const std::string& key);
     static OffsetF GetFrameNodeOffsetToWindow(
         const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode, float width, float height);
+    static OffsetF GetPointRelativeToMainWindow(const Point& point);
+    static void HandleOnDragEvent(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
+    static bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);
+    static bool IsBelongToMultiItemNode(const RefPtr<FrameNode>& frameNode);
+    static bool CheckIsNeedGather(const RefPtr<FrameNode>& frameNode);
+    static RefPtr<FrameNode> FindItemParentNode(const RefPtr<FrameNode>& frameNode);
+    static RefPtr<PixelMap> GetGatherNodePreviewPixelMap(const RefPtr<FrameNode>& frameNode);
+
+    // check global dragging status
+    static bool IsGlobalStatusSuitableForDragging();
+    static bool IsSelfAndParentDragForbidden(const RefPtr<FrameNode>& frameNode);
+    static bool IsCurrentNodeStatusSuitableForDragging(
+        const RefPtr<FrameNode>& frameNode, const TouchRestrict& touchRestrict);
+    static void RecordMenuWrapperNodeForDrag(int32_t targetId);
+    static RefPtr<FrameNode> GetFrameNodeByInspectorId(const std::string& inspectorId);
+
+    // modifier
+    static BorderRadiusProperty GetDragFrameNodeBorderRadius(const RefPtr<FrameNode>& frameNode);
+    static void ApplyNewestOptionExecutedFromModifierToNode(
+        const RefPtr<FrameNode>& optionHolderNode, const RefPtr<FrameNode>& targetNode);
+    static void ResetNode(const RefPtr<FrameNode>& frameNode);
+
+    // create snapshot from inspectorId
+    static RefPtr<PixelMap> GetPreviewPixelMap(const std::string& inspectorId, const RefPtr<FrameNode>& selfFrameNode);
+    static RefPtr<PixelMap> GetPreviewPixelMapByInspectorId(
+        const std::string& inspectorId, const RefPtr<FrameNode>& frameNode);
+    static RefPtr<PixelMap> GetScreenShotPixelMap(const RefPtr<FrameNode>& frameNode);
+
+    // create snapshot
+    static bool CheckIfNeedGetThumbnailPixelMap(const RefPtr<FrameNode>& frameNode, int32_t fingerId);
+    static void GetThumbnailPixelMap(
+        const RefPtr<GestureEventHub>& gestureHub, PixelMapFinishCallback pixelMapCallback, bool isSync);
+    static void GetThumbnailPixelMapAsync(const RefPtr<GestureEventHub>& gestureHub);
+    static void GetThumbnailPixelMapForCustomNode(
+        const RefPtr<GestureEventHub>& gestureHub, PixelMapFinishCallback pixelMapCallback);
+    static void GetThumbnailPixelMapForCustomNodeSync(
+        const RefPtr<GestureEventHub>& gestureHub, PixelMapFinishCallback pixelMapCallback);
 
 private:
     static void GetPointerEventAction(const TouchEvent& touchPoint, DragPointerEvent& event);

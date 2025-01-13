@@ -1601,6 +1601,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SetHolder, TestSize.Level1)
 
     content.selectionHoldId_ = 1;
     content.SetHolder(holder);
+    EXPECT_EQ(content.selectOverlayHolder_, holder);
 }
 
 /**

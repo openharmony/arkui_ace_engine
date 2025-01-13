@@ -266,7 +266,7 @@ struct CollapsibleMenuSection {
     }
     if (this.menuItems) {
       this.menuItems.forEach((item, index) => {
-        if (item.isEnabled && this.firstFocusableIndex == -1 &&
+        if (item.isEnabled && this.firstFocusableIndex === -1 &&
           index > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
           this.firstFocusableIndex = this.index * 1000 + index + 1;
         }
@@ -425,7 +425,7 @@ struct ImageMenuItem {
   static readonly imageHotZoneWidth = 48;
   static readonly buttonBorderRadius = 8;
   static readonly focusBorderWidth = 2;
-  static readonly focusablePrefix = "Id-ComposeTitleBar-ImageMenuItem-";
+  static readonly focusablePrefix = 'Id-ComposeTitleBar-ImageMenuItem-';
   @State isOnFocus: boolean = false;
   @State isOnHover: boolean = false;
   @State isOnClick: boolean = false;
@@ -551,6 +551,7 @@ struct ImageMenuItem {
     Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
       if (this.item?.symbolStyle) {
         SymbolGlyph()
+          .fontColor([$r('sys.color.ohos_id_color_text_primary')])
           .attributeModifier(this.item?.symbolStyle)
           .fontSize(`${ImageMenuItem.imageSize}vp`)
           .effectStrategy(SymbolEffectStrategy.NONE)
@@ -684,8 +685,9 @@ struct ComposeTitleBarDialog {
       Column() {
         if (this.itemComposeTitleDialog.symbolStyle) {
           SymbolGlyph()
+            .fontColor([$r('sys.color.icon_primary')])
             .attributeModifier(this.itemComposeTitleDialog.symbolStyle)
-            .fontSize(`${IMAGE_SIZE}vp`)
+            .fontSize(IMAGE_SIZE)
             .effectStrategy(SymbolEffectStrategy.NONE)
             .symbolEffect(new SymbolEffect(), false)
             .margin({
@@ -695,7 +697,7 @@ struct ComposeTitleBarDialog {
         } else {
           if (Util.isSymbolResource(this.itemComposeTitleDialog.value)) {
             SymbolGlyph(this.itemComposeTitleDialog.value as Resource)
-              .fontSize(`${IMAGE_SIZE}vp`)
+              .fontSize(IMAGE_SIZE)
               .fontColor([$r('sys.color.icon_primary')])
               .margin({
                 top: $r('sys.float.padding_level24'),
@@ -737,14 +739,15 @@ struct ComposeTitleBarDialog {
       Column() {
         if (this.itemComposeTitleDialog.symbolStyle) {
           SymbolGlyph()
+            .fontColor([$r('sys.color.icon_primary')])
             .attributeModifier(this.itemComposeTitleDialog.symbolStyle)
-            .fontSize(`${IMAGE_SIZE}vp`)
+            .fontSize(IMAGE_SIZE)
             .effectStrategy(SymbolEffectStrategy.NONE)
             .symbolEffect(new SymbolEffect(), false)
         } else {
           if (Util.isSymbolResource(this.itemComposeTitleDialog.value)) {
             SymbolGlyph(this.itemComposeTitleDialog.value as Resource)
-              .fontSize(`${IMAGE_SIZE}vp`)
+              .fontSize(IMAGE_SIZE)
               .fontColor([$r('sys.color.icon_primary')])
           } else {
             Image(this.itemComposeTitleDialog.value)

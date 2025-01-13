@@ -221,7 +221,7 @@ void SetSelectColor(ArkUINodeHandle node, uint32_t color)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    SliderModelNG::SetSelectColor(frameNode, Color(color));
+    SliderModelNG::SetSelectColor(frameNode, SliderModelNG::CreateSolidGradient(Color(color)), true);
 }
 
 void ResetSelectColor(ArkUINodeHandle node)
@@ -232,7 +232,8 @@ void ResetSelectColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(theme);
-    SliderModelNG::SetSelectColor(frameNode, theme->GetTrackSelectedColor());
+    SliderModelNG::SetSelectColor(
+        frameNode, SliderModelNG::CreateSolidGradient(theme->GetTrackSelectedColor()), true);
 }
 
 void SetShowSteps(ArkUINodeHandle node, int showSteps)
@@ -311,7 +312,7 @@ void SetSliderStyle(ArkUINodeHandle node, int value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (value >= static_cast<int32_t>(SLIDER_MODE.size())) {
+    if (value < 0 || value >= static_cast<int32_t>(SLIDER_MODE.size())) {
         return;
     }
     SliderModelNG::SetSliderMode(frameNode, SLIDER_MODE[value]);
@@ -447,6 +448,9 @@ void SetSliderBlockType(ArkUINodeHandle node, int value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (value < 0 || value >= static_cast<int32_t>(SLIDER_STYLE_TYPE.size())) {
+        return;
+    }
     SliderModelNG::SetBlockType(frameNode, SLIDER_STYLE_TYPE[value]);
 }
 
@@ -533,7 +537,8 @@ ArkUI_Uint32 GetSelectColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
-    return SliderModelNG::GetSelectColor(frameNode).GetValue();
+    NG::Gradient gradient = SliderModelNG::GetSelectColor(frameNode);
+    return gradient.GetColors().at(0).GetLinearColor().ToColor().GetValue();
 }
 
 ArkUI_Bool GetShowSteps(ArkUINodeHandle node)
@@ -662,7 +667,7 @@ ArkUISliderValidSlideRange GetSliderValidSlideRange(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUISliderModifier* GetSliderModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISliderModifier modifier = {
         .setShowTips = SliderModifier::SetShowTips,
         .resetShowTips = SliderModifier::ResetShowTips,
@@ -734,21 +739,14 @@ const ArkUISliderModifier* GetSliderModifier()
         .getThickness = SliderModifier::GetThickness,
         .getSliderValidSlideRange = SliderModifier::GetSliderValidSlideRange,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUISliderModifier* GetCJUISliderModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUISliderModifier modifier = {
         .setShowTips = SliderModifier::SetShowTips,
         .resetShowTips = SliderModifier::ResetShowTips,
@@ -820,14 +818,7 @@ const CJUISliderModifier* GetCJUISliderModifier()
         .getThickness = SliderModifier::GetThickness,
         .getSliderValidSlideRange = SliderModifier::GetSliderValidSlideRange,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

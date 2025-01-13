@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -69,35 +69,44 @@ foreach(module, advanced_ui_component_libs) {
 }
 
 group("advanced_ui_component") {
-  deps = advanced_ui_component_targets
+  deps = []
   deps += [
-    "chipgroup/interfaces:chipgroup",
-    "composelistitem/interfaces:composelistitem",
-    "composetitlebar/interfaces:composetitlebar",
+    "arcbutton/interfaces:arcbutton",
+    "arcslider/interfaces:arcslider",
     "counter/interfaces:counter",
     "dialog/interfaces:dialog",
+    "dialogv2/interfaces:dialogv2",
     "downloadfilebutton/interfaces:downloadfilebutton",
-    "editabletitlebar/interfaces:editabletitlebar",
-    "exceptionprompt/interfaces:exceptionprompt",
-    "filter/interfaces:filter",
     "foldsplitcontainer/interfaces:foldsplitcontainer",
     "formmenu/interfaces:formmenu",
     "fullscreenlaunchcomponent/interfaces:fullscreenlaunchcomponent",
-    "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
     "multinavigation/interfaces:multinavigation",
     "navpushpathhelper:navpushpathhelper",
-    "popup/interfaces:popup",
-    "progressbutton/interfaces:progressbutton",
-    "segmentbutton/interfaces:segmentbutton",
-    "selecttitlebar/interfaces:selecttitlebar",
-    "splitlayout/interfaces:splitlayout",
-    "subheader/interfaces:subheader",
-    "swiperefresher/interfaces:swiperefresher",
-    "tabtitlebar/interfaces:tabtitlebar",
-    "toolbar/interfaces:toolbar",
-    "treeview/interfaces:treeview",
   ]
   if (!ace_engine_feature_wearable) {
-    deps += [ "selectionmenu/interfaces:selectionmenu" ]
+    deps += advanced_ui_component_targets
+    deps += [
+      "chipgroup/interfaces:chipgroup",
+      "composelistitem/interfaces:composelistitem",
+      "composetitlebar/interfaces:composetitlebar",
+      "editabletitlebar/interfaces:editabletitlebar",
+      "exceptionprompt/interfaces:exceptionprompt",
+      "filter/interfaces:filter",
+      "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
+      "popup/interfaces:popup",
+      "progressbutton/interfaces:progressbutton",
+      "progressbuttonv2/interfaces:progressbuttonv2",
+      "segmentbutton/interfaces:segmentbutton",
+      "selectionmenu/interfaces:selectionmenu",
+      "selecttitlebar/interfaces:selecttitlebar",
+      "splitlayout/interfaces:splitlayout",
+      "subheader/interfaces:subheader",
+      "subheaderv2/interfaces:subheaderv2",
+      "swiperefresher/interfaces:swiperefresher",
+      "tabtitlebar/interfaces:tabtitlebar",
+      "toolbar/interfaces:toolbar",
+      "toolbarv2/interfaces:toolbarv2",
+      "treeview/interfaces:treeview",
+    ]
   }
 }

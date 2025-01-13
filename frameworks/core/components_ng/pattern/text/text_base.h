@@ -92,9 +92,9 @@ public:
         ResetGestureSelection();
     }
 
-    void EndGestureSelection()
+    void EndGestureSelection(const TouchLocationInfo& locationInfo)
     {
-        OnTextGenstureSelectionEnd();
+        OnTextGenstureSelectionEnd(locationInfo);
         ResetGestureSelection();
     }
 
@@ -106,7 +106,7 @@ protected:
         return -1;
     }
     virtual void OnTextGestureSelectionUpdate(int32_t start, int32_t end, const TouchEventInfo& info) {}
-    virtual void OnTextGenstureSelectionEnd() {}
+    virtual void OnTextGenstureSelectionEnd(const TouchLocationInfo& locationInfo) {}
     virtual void DoTextSelectionTouchCancel() {}
     int32_t GetSelectingFingerId()
     {
@@ -244,9 +244,11 @@ public:
     static void CalculateSelectedRect(
         std::vector<RectF>& selectedRect, float longestLine, TextDirection direction = TextDirection::LTR);
     static float GetSelectedBlankLineWidth();
-    static void CalculateSelectedRectEx(std::vector<RectF>& selectedRect, float lastLineBottom);
+    static void CalculateSelectedRectEx(std::vector<RectF>& selectedRect, float lastLineBottom,
+        const std::optional<TextDirection>& direction = std::nullopt);
     static bool UpdateSelectedBlankLineRect(RectF& rect, float blankWidth, TextAlign textAlign, float longestLine);
-    static void SelectedRectsToLineGroup(const std::vector<RectF>& selectedRect, std::map<float, RectF>& lineGroup);
+    static void SelectedRectsToLineGroup(const std::vector<RectF>& selectedRect,
+        std::map<float, std::pair<RectF, std::vector<RectF>>>& lineGroup);
     static TextAlign CheckTextAlignByDirection(TextAlign textAlign, TextDirection direction);
 
     static void RevertLocalPointWithTransform(const RefPtr<FrameNode>& targetNode, OffsetF& point);
@@ -264,7 +266,7 @@ public:
 protected:
     TextSelector textSelector_;
     bool showSelect_ = true;
-    bool needSelect_ = false;
+    bool afterDragSelect_ = false;
     bool releaseInDrop_ = false;
     SourceTool sourceTool_ = SourceTool::UNKNOWN;
     std::vector<std::u16string> dragContents_;

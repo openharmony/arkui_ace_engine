@@ -19,6 +19,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/font/constants_converter.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/interfaces/arkoala/arkoala_api.h"
@@ -88,7 +89,7 @@ void SetTextContent(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::u16string content = UtfUtils::Str8ToStr16(std::string(value));
+    std::u16string content = UtfUtils::Str8DebugToStr16(std::string(value));
     TextModelNG::InitText(frameNode, content);
 }
 
@@ -96,7 +97,7 @@ const char* GetTextContent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    g_strValue = UtfUtils::Str16ToStr8(TextModelNG::GetContent(frameNode));
+    g_strValue = UtfUtils::Str16DebugToStr8(TextModelNG::GetContent(frameNode));
     return g_strValue.c_str();
 }
 
@@ -121,6 +122,17 @@ void SetFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(weight));
+    TextModelNG::SetVariableFontWeight(frameNode, DEFAULT_VARIABLE_FONT_WEIGHT);
+    TextModelNG::SetEnableVariableFontWeight(frameNode, false);
+}
+
+void SetImmutableFontWeight(ArkUINodeHandle node, ArkUI_Int32 weight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetFontWeight(frameNode, static_cast<FontWeight>(weight));
+    TextModelNG::SetVariableFontWeight(frameNode, Constants::GetVariableFontWeight(static_cast<FontWeight>(weight)));
+    TextModelNG::SetEnableVariableFontWeight(frameNode, true);
 }
 
 void SetOnClick(ArkUINodeHandle node, void* callback)
@@ -232,11 +244,7 @@ void ResetFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Color textColor;
-    auto theme = GetTheme<TextTheme>();
-    CHECK_NULL_VOID(theme);
-    textColor = theme->GetTextStyle().GetTextColor();
-    TextModelNG::SetTextColor(frameNode, textColor);
+    TextModelNG::ResetTextColor(frameNode);
 }
 
 uint32_t GetFontColor(ArkUINodeHandle node)
@@ -1253,7 +1261,7 @@ void ResetOnMarqueeStateChange(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUITextModifier* GetTextModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITextModifier modifier = {
         .setContent = SetTextContent,
         .setFontWeight = SetFontWeight,
@@ -1384,22 +1392,16 @@ const ArkUITextModifier* GetTextModifier()
         .resetTextMarqueeOptions = ResetMarqueeOptions,
         .setOnMarqueeStateChange = SetOnMarqueeStateChange,
         .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
+        .setImmutableFontWeight = SetImmutableFontWeight,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUITextModifier* GetCJUITextModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITextModifier modifier = {
         .setContent = SetTextContent,
         .setFontWeight = SetFontWeight,
@@ -1522,14 +1524,7 @@ const CJUITextModifier* GetCJUITextModifier()
         .setTextResponseRegion = SetResponseRegion,
         .resetTextResponseRegion = ResetResponseRegion,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

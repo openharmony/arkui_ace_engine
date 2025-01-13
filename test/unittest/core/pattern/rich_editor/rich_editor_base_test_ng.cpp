@@ -185,8 +185,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel004, TestSize.Level1)
     auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     RichEditorInsertValue info;
-    eventHub->FireAboutToIMEInput(info);
-    EXPECT_EQ(testAboutToIMEInput, 1);
+    EXPECT_TRUE(eventHub->FireAboutToIMEInput(info));
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
@@ -238,8 +237,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel006, TestSize.Level1)
     auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     RichEditorDeleteValue info;
-    eventHub->FireAboutToDelete(info);
-    EXPECT_EQ(testAboutToDelete, 1);
+    EXPECT_TRUE(eventHub->FireAboutToDelete(info));
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
@@ -420,7 +418,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel011, TestSize.Level1)
     layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
     spanItemChildren = layoutAlgorithm->GetSpans();
     EXPECT_EQ(spanItemChildren.size(), 1);
-    EXPECT_EQ(StringUtils::Str16ToStr8(spanItemChildren.back()->GetSpanContent()), INIT_VALUE_2);
+    EXPECT_EQ(spanItemChildren.back()->GetSpanContent(), INIT_VALUE_2);
 
     // test when richEitor empty again,placeholder Appear again
     RangeOptions rangeoptions;
@@ -668,39 +666,6 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnDirtyLayoutWrapper001
- * @tc.desc: test on dirty layout wrapper
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestNg, OnDirtyLayoutWrapper001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
-        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
-    ASSERT_NE(layoutWrapper, nullptr);
-    auto layoutAlgorithm = richEditorPattern->CreateLayoutAlgorithm();
-    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
-    DirtySwapConfig config;
-    config.skipMeasure = true;
-    auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
-    focusHub->currentFocus_ = true;
-    auto ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(ret);
-    richEditorPattern->isRichEditorInit_ = true;
-    richEditorPattern->textSelector_.baseOffset = -1;
-    richEditorPattern->textSelector_.destinationOffset = 2;
-    ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(ret);
-
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = -1;
-    ret = richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    EXPECT_FALSE(ret);
-}
-
-/**
  * @tc.name: CreateImageSourceInfo001
  * @tc.desc: test CreateImageSourceInfo
  * @tc.type: FUNC
@@ -895,27 +860,6 @@ void RichEditorBaseTestNg::TestMagnifier(const RefPtr<RichEditorPattern>& richEd
     richEditorPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_FALSE(controller->GetShowMagnifier());
     EXPECT_FALSE(richEditorPattern->isCursorAlwaysDisplayed_);
-}
-
-/**
- * @tc.name: UpdateSpanStyle001
- * @tc.desc: test UpdateSpanStyle
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorBaseTestNg, UpdateSpanStyle001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    auto richEditorController = richEditorPattern->GetRichEditorController();
-    ASSERT_NE(richEditorController, nullptr);
-    richEditorPattern->isSpanStringMode_ = true;
-    richEditorController->updateSpanStyle_.useThemeFontColor = false;
-    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"UpdateSpanStyle");
-    TextStyle textStyle;
-    ImageSpanAttribute imageStyle;
-    richEditorController->UpdateSpanStyle(5, 10, textStyle, imageStyle);
-    EXPECT_FALSE(richEditorPattern->updateSpanStyle_.useThemeFontColor);
 }
 
 } // namespace OHOS::Ace::NG

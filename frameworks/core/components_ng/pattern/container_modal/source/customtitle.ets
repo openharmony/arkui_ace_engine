@@ -20,7 +20,7 @@ import image from '@ohos.multimedia.image';
 const TITLE_ICON_SIZE: string = '20vp'
 const TITLE_PADDING_START: string = '20vp'
 const TITLE_ELEMENT_MARGIN_HORIZONTAL: string = '12vp'
-const TITLE_TEXT_FONT_SIZE: string = '16fp'
+const TITLE_TEXT_FONT_SIZE: string = '16vp'
 const TITLE_TEXT_FONT_WEIGHT: string = '500px'
 const TITLE_ROW_HEIGHT: string = '37vp'
 

@@ -100,6 +100,8 @@ void TextPickerModelTestNg::SetUp()
             return AceType::MakeRefPtr<DialogTheme>();
         } else if (type == PickerTheme::TypeId()) {
             return MockThemeDefault::GetPickerTheme();
+        } else if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
         } else {
             return nullptr;
         }
@@ -345,6 +347,7 @@ HWTEST_F(TextPickerModelTestNg, SetTextPickerDialogShow001, TestSize.Level1)
     auto onAcceptFunc = [](const std::string&) {};
     auto onChangeFunc = [](const std::string&) {};
     auto onScrollStopFunc = [](const std::string&) {};
+    auto onEnterSelectedAreaFunc = [](const std::string&) {};
 
     TextPickerDialog textPickerDialog = {
         .height = 16.0_vp,
@@ -365,8 +368,8 @@ HWTEST_F(TextPickerModelTestNg, SetTextPickerDialogShow001, TestSize.Level1)
     };
     std::vector<ButtonInfo> buttonInfos;
     TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData,
-        onCancelFunc, onAcceptFunc, onChangeFunc, onScrollStopFunc, textPickerDialog, textPickerDialogEvent,
-        buttonInfos);
+        onCancelFunc, onAcceptFunc, onChangeFunc, onScrollStopFunc, onEnterSelectedAreaFunc, textPickerDialog,
+        textPickerDialogEvent, buttonInfos);
     EXPECT_EQ(textPickerDialog.alignment, DialogAlignment::CENTER);
 }
 
@@ -752,5 +755,84 @@ HWTEST_F(TextPickerModelTestNg, SetDisableTextStyleAnimation001, TestSize.Level1
 
     TextPickerModelNG::SetDisableTextStyleAnimation(AceType::RawPtr(frameNode), true);
     EXPECT_TRUE(pickerProperty->GetDisableTextStyleAnimation().value_or(false));
+}
+
+/**
+ * @tc.name: SetDefaultTextStyle001
+ * @tc.desc: Test SetDefaultTextStyle (set minFontSize and maxFontSize)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetDefaultTextStyle001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(Dimension(), pickerProperty->GetDefaultMinFontSize().value_or(Dimension()));
+    EXPECT_EQ(Dimension(), pickerProperty->GetDefaultMaxFontSize().value_or(Dimension()));
+
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    PickerTextStyle textStyle;
+    textStyle.minFontSize = Dimension(10.0_vp);
+    textStyle.maxFontSize = Dimension(30.0_vp);
+    TextPickerModelNG::GetInstance()->SetDefaultTextStyle(theme, textStyle);
+    EXPECT_EQ(Dimension(10.0_vp), pickerProperty->GetDefaultMinFontSize().value_or(Dimension()));
+    EXPECT_EQ(Dimension(30.0_vp), pickerProperty->GetDefaultMaxFontSize().value_or(Dimension()));
+}
+
+/**
+ * @tc.name: SetDefaultTextStyle002
+ * @tc.desc: Test SetDefaultTextStyle (set textOverflow)
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetDefaultTextStyle002, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    EXPECT_EQ(TextOverflow::CLIP, pickerProperty->GetDefaultTextOverflow().value_or(TextOverflow::CLIP));
+
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    PickerTextStyle textStyle;
+    textStyle.textOverflow = TextOverflow::ELLIPSIS;
+    TextPickerModelNG::GetInstance()->SetDefaultTextStyle(theme, textStyle);
+    EXPECT_EQ(TextOverflow::ELLIPSIS, pickerProperty->GetDefaultTextOverflow().value_or(TextOverflow::CLIP));
+}
+
+/**
+ * @tc.name: SetDefaultTextStyle003
+ * @tc.desc: Test SetDefaultTextStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetDefaultTextStyle003, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto pickerProperty = frameNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    PickerTextStyle textStyle;
+    textStyle.minFontSize = Dimension(-1);
+    textStyle.maxFontSize = Dimension(-1);
+    textStyle.textOverflow = TextOverflow::ELLIPSIS;
+    TextPickerModelNG::SetDefaultTextStyle(AceType::RawPtr(frameNode), theme, textStyle);
+    EXPECT_EQ(Dimension(), pickerProperty->GetDefaultMinFontSize().value_or(Dimension()));
+    EXPECT_EQ(Dimension(), pickerProperty->GetDefaultMaxFontSize().value_or(Dimension()));
+    EXPECT_EQ(TextOverflow::ELLIPSIS, pickerProperty->GetDefaultTextOverflow().value_or(TextOverflow::CLIP));
+
+    textStyle.minFontSize = Dimension(10.0_vp);
+    textStyle.maxFontSize = Dimension(30.0_vp);
+    textStyle.textOverflow = TextOverflow::NONE;
+    TextPickerModelNG::SetDefaultTextStyle(AceType::RawPtr(frameNode), theme, textStyle);
+    EXPECT_EQ(Dimension(10.0_vp), pickerProperty->GetDefaultMinFontSize().value_or(Dimension()));
+    EXPECT_EQ(Dimension(30.0_vp), pickerProperty->GetDefaultMaxFontSize().value_or(Dimension()));
+    EXPECT_EQ(TextOverflow::NONE, pickerProperty->GetDefaultTextOverflow().value_or(TextOverflow::CLIP));
 }
 } // namespace OHOS::Ace::NG

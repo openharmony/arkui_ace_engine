@@ -182,7 +182,7 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(pipelineContext);
     auto themeManager = pipelineContext->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto theme = themeManager->GetTheme<TextTheme>();
+    auto theme = themeManager->GetTheme<TextTheme>(host->GetThemeScopeId());
     CHECK_NULL_VOID(theme);
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -203,7 +203,7 @@ std::vector<RectF> TextPaintMethod::CalculateSelectedRect(
     float lastLineBottom = -1.0f;
     for (const auto& info : selectedRects) {
         auto rects = info.first;
-        TextBase::CalculateSelectedRectEx(rects, lastLineBottom);
+        TextBase::CalculateSelectedRectEx(rects, lastLineBottom, info.second.direction);
         auto textAlign = TextBase::CheckTextAlignByDirection(info.second.align, info.second.direction);
         for (auto& rect : rects) {
             TextBase::UpdateSelectedBlankLineRect(rect, blankWidth, textAlign, contentWidth);

@@ -1773,4 +1773,28 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage064, TestSi
     container->isScenceBoardWindow_ = false;
     EXPECT_NE(frameNode, nullptr);
 }
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage065
+ * @tc.desc: Test OnDragMoveOut
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage065, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    DragPointerEvent point;
+    bool isExecuted = false;
+    point.x = 1;
+    point.y = 1;
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_CANCEL, false, 0, DragBehavior::UNKNOWN, point);
+    EXPECT_FALSE(isExecuted);
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_CANCEL, true, 0, DragBehavior::UNKNOWN, point);
+    EXPECT_FALSE(isExecuted);
+    auto dropAnimationFun = [&isExecuted]() { isExecuted = true; };
+    dragEvent->SetDropAnimation(std::move(dropAnimationFun));
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_CANCEL, true, 0, DragBehavior::UNKNOWN, point);
+    EXPECT_TRUE(isExecuted);
+}
 } // namespace OHOS::Ace::NG

@@ -88,7 +88,7 @@ constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
 constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
 constexpr float KEYBOARD_HEIGHT = 600.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
-const Dimension CONTAINER_BORDER_WIDTH = 1.0_vp;
+const Dimension CONTAINER_BORDER_WIDTH = 0.0_vp;
 const Dimension CONTENT_PADDING = 4.0_vp;
 constexpr float OFFSET_FIRST = 50.0f;
 constexpr float OFFSET_SECOND = 100.0f;
@@ -416,13 +416,15 @@ HWTEST_F(MenuLayout3TestNg, InitWrapperRect001, TestSize.Level1)
         return WindowMode::WINDOW_MODE_FLOATING;
     });
 
-    int32_t backApiVersion = context->GetMinPlatformVersion();
-    context->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    int32_t backApiversion = container->GetApiTargetVersion();
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     menuAlgorithm->canExpandCurrentWindow_ = true;
     menuAlgorithm->InitWrapperRect(props, menuPattern);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Width(), FULL_SCREEN_WIDTH);
     EXPECT_EQ(menuAlgorithm->wrapperRect_.Height(), FULL_SCREEN_HEIGHT - KEYBOARD_HEIGHT);
-    context->SetMinPlatformVersion(backApiVersion);
+    container->SetApiTargetVersion(backApiversion);
 }
 
 /**

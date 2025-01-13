@@ -207,6 +207,24 @@ RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)
     return timePickerNode;
 }
 
+void TimePickerModelNG::SetStartTime(const PickerTime& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetStartTime(value);
+}
+
+void TimePickerModelNG::SetEndTime(const PickerTime& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetEndTime(value);
+}
+
 void TimePickerModelNG::SetSelectedTime(const PickerTime& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -229,6 +247,15 @@ void TimePickerModelNG::SetHour24(bool isUseMilitaryTime)
     auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
     timePickerRowPattern->ClearOptionsHour();
     timePickerRowPattern->SetHour24(isUseMilitaryTime);
+}
+
+void TimePickerModelNG::SetEnableCascade(bool isEnableCascade)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TimePickerLayoutProperty, IsEnableCascade, isEnableCascade);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    timePickerRowPattern->SetEnableCascade(isEnableCascade);
 }
 
 void TimePickerModelNG::SetDateTimeOptions(ZeroPrefixType& hourType,
@@ -278,6 +305,15 @@ void TimePickerModelNG::SetOnChange(FrameNode* frameNode, TimeChangeEvent&& onCh
     auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
+}
+
+void TimePickerModelNG::SetOnEnterSelectedArea(TimeChangeEvent&& onEnterSelectedArea)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnEnterSelectedArea(std::move(onEnterSelectedArea));
 }
 
 void TimePickerModelNG::SetDisappearTextStyle(const RefPtr<PickerTheme>& theme, const PickerTextStyle& value)
@@ -389,7 +425,8 @@ void TimePickerModelNG::SetChangeEvent(TimeChangeEvent&& onChange)
 void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDialog,
     NG::TimePickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
-    TimePickerDialogEvent& timePickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos)
+    std::function<void(const std::string&)>&& onEnterSelectedArea, TimePickerDialogEvent& timePickerDialogEvent,
+    const std::vector<ButtonInfo>& buttonInfos)
 {
     auto container = Container::Current();
     if (!container) {
@@ -409,6 +446,7 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     CHECK_NULL_VOID(theme);
     std::map<std::string, NG::DialogEvent> dialogEvent;
     dialogEvent["changeId"] = onChange;
+    dialogEvent["enterSelectedAreaId"] = onEnterSelectedArea;
     dialogEvent["acceptId"] = onAccept;
     std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
     auto func = [onCancel](const GestureEvent& /* info */) {
@@ -454,6 +492,8 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     }
 
     std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["start"] = pickerDialog.parseStartTime;
+    timePickerProperty["end"] = pickerDialog.parseEndTime;
     if (pickerDialog.isSelectedTime == true) {
         timePickerProperty["selected"] = pickerDialog.pickerTime;
     }
@@ -467,7 +507,24 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
             overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
                 dialogLifeCycleEvent, buttonInfos);
         },
-        TaskExecutor::TaskType::UI, "ArkUITimePickerShowTimeDialog");
+        TaskExecutor::TaskType::UI, "ArkUITimePickerShowTimeDialog",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+}
+
+void TimePickerModelNG::SetStartTime(FrameNode* frameNode, const PickerTime& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetStartTime(value);
+}
+
+void TimePickerModelNG::SetEndTime(FrameNode* frameNode, const PickerTime& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetEndTime(value);
 }
 
 void TimePickerModelNG::SetSelectedTime(FrameNode* frameNode, const PickerTime& value)
@@ -611,6 +668,14 @@ void TimePickerModelNG::SetHour24(FrameNode* frameNode, bool isUseMilitaryTime)
     timePickerRowPattern->SetHour24(isUseMilitaryTime);
 }
 
+void TimePickerModelNG::SetEnableCascade(FrameNode* frameNode, bool isEnableCascade)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, IsEnableCascade, isEnableCascade, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    timePickerRowPattern->SetEnableCascade(isEnableCascade);
+}
+
 void TimePickerModelNG::SetDateTimeOptions(FrameNode* frameNode, ZeroPrefixType& hourType,
     ZeroPrefixType& minuteType, ZeroPrefixType& secondType)
 {
@@ -695,6 +760,24 @@ PickerTextStyle TimePickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
     return pickerTextStyle;
 }
 
+PickerTime TimePickerModelNG::getTimepickerStart(FrameNode* frameNode)
+{
+    PickerTime pickerTime;
+    CHECK_NULL_RETURN(frameNode, pickerTime);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, pickerTime);
+    return timePickerRowPattern->GetStartTime();
+}
+
+PickerTime TimePickerModelNG::getTimepickerEnd(FrameNode* frameNode)
+{
+    PickerTime pickerTime;
+    CHECK_NULL_RETURN(frameNode, pickerTime);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, pickerTime);
+    return timePickerRowPattern->GetEndTime();
+}
+
 PickerTime TimePickerModelNG::getTimepickerSelected(FrameNode* frameNode)
 {
     PickerTime pickerTime;
@@ -723,6 +806,12 @@ int32_t TimePickerModelNG::getTimepickerUseMilitaryTime(FrameNode* frameNode)
 {
     CHECK_NULL_RETURN(frameNode, 0);
     return frameNode->GetLayoutProperty<TimePickerLayoutProperty>()->GetIsUseMilitaryTimeValue(false);
+}
+
+int32_t TimePickerModelNG::getTimepickerEnableCascade(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return frameNode->GetLayoutProperty<TimePickerLayoutProperty>()->GetIsEnableCascadeValue(false);
 }
 
 const Dimension TimePickerModelNG::ConvertFontScaleValue(const Dimension& fontSizeValue)

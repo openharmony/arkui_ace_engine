@@ -116,6 +116,7 @@ public:
                             const double& height,
                             const double& pre_height,
                             const double& pre_width) = 0;
+    virtual void UpdateOptimizeParserBudgetEnabled(const bool enable) = 0;
 };
 }
 #endif

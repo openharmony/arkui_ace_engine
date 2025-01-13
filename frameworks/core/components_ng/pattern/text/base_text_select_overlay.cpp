@@ -1045,6 +1045,7 @@ void BaseTextSelectOverlay::OnHandleScrolling(const WeakPtr<FrameNode>& scrollin
     if (SelectOverlayIsOn()) {
         HideMenu(true);
         auto taskExecutor = Container::CurrentTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [weak = WeakClaim(this), scrollingNode] {
                 auto overlay = weak.Upgrade();
@@ -1054,7 +1055,7 @@ void BaseTextSelectOverlay::OnHandleScrolling(const WeakPtr<FrameNode>& scrollin
                     overlay->RegisterScrollingListener(scrollingNode.Upgrade());
                 }
             },
-            TaskExecutor::TaskType::UI, "RegisterScrollingListener");
+            TaskExecutor::TaskType::UI, "RegisterScrollingListener", PriorityType::VIP);
     } else {
         hasRegisterListener_ = false;
     }
@@ -1067,7 +1068,7 @@ bool BaseTextSelectOverlay::CheckAndUpdateHostGlobalPaintRect()
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto framePaintRect = RectF(host->GetTransformRelativeOffset(), geometryNode->GetFrameSize());
-    auto changed = globalPaintRect_ != framePaintRect;
+    auto changed = globalPaintRect_.GetOffset() != framePaintRect.GetOffset();
     globalPaintRect_ = framePaintRect;
     return changed;
 }
@@ -1164,9 +1165,7 @@ bool BaseTextSelectOverlay::GetClipHandleViewPort(RectF& rect)
     }
     contentRect.SetOffset(contentRect.GetOffset() + host->GetPaintRectWithTransform().GetOffset());
     CHECK_NULL_RETURN(CalculateClippedRect(contentRect), false);
-    if (!contentRect.IsEmpty()) {
-        UpdateClipHandleViewPort(contentRect);
-    }
+    UpdateClipHandleViewPort(contentRect);
     rect = contentRect;
     return true;
 }
@@ -1184,11 +1183,7 @@ bool BaseTextSelectOverlay::CalculateClippedRect(RectF& contentRect)
         auto renderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, false);
         if (renderContext->GetClipEdge().value_or(false)) {
-            if (contentRect.IsIntersectWith(parentContentRect)) {
-                contentRect = contentRect.IntersectRectT(parentContentRect);
-            } else {
-                contentRect = parentContentRect;
-            }
+            contentRect = contentRect.IntersectRectT(parentContentRect);
         }
         contentRect.SetOffset(contentRect.GetOffset() + parent->GetPaintRectWithTransform().GetOffset());
         parent = parent->GetAncestorNodeOfFrame(true);
@@ -1255,7 +1250,8 @@ void BaseTextSelectOverlay::OnHandleMarkInfoChange(
     }
     if ((flag & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE ||
         (flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
-        if (info->menuInfo.showSearch != (isSupportMenuSearch_ && IsNeedMenuSearch())) {
+        if (isSupportMenuSearch_ && AllowSearch() &&
+            info->menuInfo.showSearch != IsNeedMenuSearch()) {
             info->menuInfo.showSearch = !info->menuInfo.showSearch;
             manager->NotifyUpdateToolBar(true);
         }
@@ -1384,7 +1380,7 @@ bool BaseTextSelectOverlay::IsHandleInParentSafeAreaPadding(const RectF& firstRe
         CHECK_NULL_RETURN(context, false);
         firstHandlePaint += context->GetPaintRectWithTransform().GetOffset();
         secondHandlePaint += context->GetPaintRectWithTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     return false;
 }

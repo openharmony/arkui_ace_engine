@@ -109,9 +109,14 @@ public:
         selectedColor_->Set(static_cast<int32_t>(selectedColor));
     }
 
-    void SetIsInline(bool isInline)
+    void SetIsFirstHandleAnimated(bool isFirstHandleAnimated)
     {
-        isInline_ = isInline;
+        isFirstHandleAnimated_ = isFirstHandleAnimated;
+    }
+
+    void SetIsSecondHandleAnimated(bool isSecondHandleAnimated)
+    {
+        isSecondHandleAnimated_ = isSecondHandleAnimated;
     }
 
     void PaintBackground(const RSPath& path, RSCanvas& canvas, RefPtr<TextDragPattern> textDragPattern);
@@ -130,7 +135,8 @@ protected:
     WeakPtr<Pattern> pattern_;
     bool isAnimating_ = false;
     bool isHandlesShow_ = false;
-    bool isInline_ = true;
+    bool isFirstHandleAnimated_ = true;
+    bool isSecondHandleAnimated_ = true;
     RefPtr<AnimatablePropertyFloat> backgroundOffset_;
     RefPtr<AnimatablePropertyFloat> selectedBackgroundOpacity_;
     RefPtr<AnimatablePropertyFloat> handleOpacity_;

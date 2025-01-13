@@ -64,6 +64,8 @@
 namespace OHOS::Ace {
 namespace {
 const Rect MIN_WINDOW_HOT_AREA = Rect(0.0f, 0.0f, 1.0f, 1.0f);
+constexpr uint32_t ENABLE_SYSTEM_WINDOW_AVOID_AREA = 1;
+constexpr uint32_t ENABLE_APP_SUB_WINDOW_AVOID_AREA = 1 << 1;
 #ifndef NG_BUILD
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 #endif
@@ -94,7 +96,7 @@ public:
                 CHECK_NULL_VOID(subWindow);
                 subWindow->OnFreeMultiWindowSwitch(enable);
             },
-            TaskExecutor::TaskType::UI, "ArkUIFreeMultiWindowSwitch");
+            TaskExecutor::TaskType::UI, "ArkUIFreeMultiWindowSwitch", PriorityType::VIP);
     }
 
 private:
@@ -298,6 +300,7 @@ bool SubwindowOhos::InitContainer()
     uiContentImpl->SetFontScaleAndWeightScale(container, childContainerId_);
     freeMultiWindowListener_ = new SwitchFreeMultiWindowListener(childContainerId_);
     window_->RegisterSwitchFreeMultiWindowListener(freeMultiWindowListener_);
+    window_->SetAvoidAreaOption(ENABLE_SYSTEM_WINDOW_AVOID_AREA | ENABLE_APP_SUB_WINDOW_AVOID_AREA);
 
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
@@ -430,7 +433,7 @@ void SubwindowOhos::ResizeDialogSubwindow()
             [this]() {
                 ResizeWindow();
             },
-            TaskExecutor::TaskType::UI, "ArkUIResizeDialogSubwindow");
+            TaskExecutor::TaskType::UI, "ArkUIResizeDialogSubwindow", PriorityType::VIP);
     }
 }
 
@@ -564,6 +567,7 @@ void SubwindowOhos::ShowWindow(bool needFocus)
         RequestFocus();
     }
 
+    InitializeSafeArea();
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = aceContainer->GetPipelineContext();
@@ -1392,7 +1396,8 @@ void SubwindowOhos::ShowToastForService(const NG::ToastInfo& toastInfo, std::fun
     }
 
     SubwindowManager::GetInstance()->SetCurrentDialogSubwindow(AceType::Claim(this));
-    if (!handler_->PostTask(GetInitToastDelayTask(toastInfo, std::move(callback)))) {
+    if (!handler_->PostTask(
+        GetInitToastDelayTask(toastInfo, std::move(callback)), AppExecFwk::EventHandler::Priority::VIP)) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create show dialog callback failed");
         return;
     }
@@ -1497,7 +1502,7 @@ void SubwindowOhos::ShowDialogForService(const std::string& title, const std::st
             std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)), callbacks);
     };
     isToastWindow_ = false;
-    if (!handler_->PostTask(showDialogCallback)) {
+    if (!handler_->PostTask(showDialogCallback, AppExecFwk::EventHandler::Priority::VIP)) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create show dialog callback failed");
         return;
     }
@@ -1560,7 +1565,7 @@ void SubwindowOhos::ShowDialogForService(const PromptDialogAttr& dialogAttr, con
             std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)), callbacks);
     };
     isToastWindow_ = false;
-    if (!handler_->PostTask(showDialogCallback)) {
+    if (!handler_->PostTask(showDialogCallback, AppExecFwk::EventHandler::Priority::VIP)) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create show dialog callback failed");
         return;
     }
@@ -1715,7 +1720,7 @@ void SubwindowOhos::ShowActionMenuForService(
             std::move(const_cast<std::function<void(int32_t, int32_t)>&&>(callbackParam)));
     };
     isToastWindow_ = false;
-    if (!handler_->PostTask(showDialogCallback)) {
+    if (!handler_->PostTask(showDialogCallback, AppExecFwk::EventHandler::Priority::VIP)) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "create show dialog callback failed");
         return;
     }
@@ -1882,7 +1887,7 @@ void SubwindowOhos::ResizeWindowForFoldStatus(int32_t parentContainerId)
         ResizeWindowForFoldStatus();
         return;
     }
-    if (!handler_->PostTask(callback)) {
+    if (!handler_->PostTask(callback, AppExecFwk::EventHandler::Priority::VIP)) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize Toast Window failed");
     }
 }
@@ -1987,5 +1992,40 @@ uint64_t SubwindowOhos::GetDisplayId()
         return window_->GetDisplayId();
     }
     return 0;
+}
+
+void SubwindowOhos::InitializeSafeArea()
+{
+    CHECK_NULL_VOID(window_);
+
+    auto container = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentContainer);
+
+    std::optional<NG::RectF> windowRect;
+    if (theme->GetExpandDisplay() || parentContainer->IsFreeMultiWindow()) {
+        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(window_->GetDisplayId());
+        CHECK_NULL_VOID(defaultDisplay);
+        windowRect = { 0.0, 0.0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() };
+    }
+
+    auto systemSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, windowRect);
+    auto navSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, windowRect);
+    pipeline->UpdateSystemSafeArea(systemSafeArea);
+    pipeline->UpdateNavSafeArea(navSafeArea);
+    if (pipeline->GetUseCutout()) {
+        auto cutoutSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, windowRect);
+        pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
+    }
+
+    auto safeAreaInsets = pipeline->GetScbSafeArea();
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "initializeSafeArea by windowRect: %{public}s, safeAreaInsets: %{public}s",
+        windowRect.value_or(NG::RectF()).ToString().c_str(), safeAreaInsets.ToString().c_str());
 }
 } // namespace OHOS::Ace

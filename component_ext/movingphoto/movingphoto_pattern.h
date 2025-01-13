@@ -172,6 +172,7 @@ private:
 
     void FireMediaPlayerImageComplete();
     void OnMediaPlayerStatusChanged(PlaybackStatus status);
+    void OnMediaPlayerIdle();
     void OnMediaPlayerInitialized();
     void OnMediaPlayerPrepared();
     void OnMediaPlayerStoped();

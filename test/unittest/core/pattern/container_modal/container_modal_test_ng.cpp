@@ -486,20 +486,6 @@ HWTEST_F(ContainerModelTestNg, Test006, TestSize.Level1)
     bool bResult = pattern_->CanShowFloatingTitle();
     EXPECT_FALSE(bResult);
 }
-/**
- * @tc.name: Test009
- * @tc.desc: AddButtonStyleMouseEvent.
- * @tc.type: FUNC
- */
-HWTEST_F(ContainerModelTestNg, Test009, TestSize.Level1)
-{
-    CreateContainerModal();
-    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AccessibilityManager::MakeRefPtr<ButtonPattern>());
-    auto imageIcon = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AccessibilityManager::MakeRefPtr<ImagePattern>());
-    ContainerModalView::AddButtonStyleMouseEvent(buttonNode, imageIcon, false);
-}
 
 /**
  * @tc.name: AccessibilityProperty001

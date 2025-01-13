@@ -679,6 +679,49 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementTextElement
 }
 
 /**
+ * @tc.name: SecurityComponentLayoutElementTextElement002
+ * @tc.desc: Test security component text element
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementTextElement002, TestSize.Level1)
+{
+    TextLayoutElement text;
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<SecurityComponentLayoutProperty> property =
+        AceType::MakeRefPtr<SecurityComponentLayoutProperty>();
+    RefPtr<TextLayoutProperty> textProp = AceType::MakeRefPtr<TextLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> wrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geoNode, textProp);
+    property->UpdateSecurityComponentDescription(-1);
+    text.Init(property, wrapper);
+    ASSERT_FALSE(text.isExist_);
+    std::optional<SizeF> currentTextSize;
+    ASSERT_FALSE(text.DidExceedMaxLines(currentTextSize));
+    property->UpdateSecurityComponentDescription(0);
+    property->UpdateFontSize(Dimension(15.0));
+    property->UpdateAdaptMaxFontSize(Dimension(20.0));
+    property->UpdateAdaptMinFontSize(Dimension(10.0));
+    text.Init(property, wrapper);
+    ASSERT_TRUE(text.isExist_);
+    ASSERT_TRUE(text.isSetSize_);
+
+    text.UpdateFontSize();
+    ASSERT_EQ(property->GetFontSize()->ConvertToFp(), 15.0);
+    property->UpdateBackgroundTopPadding(Dimension(0.0));
+    property->UpdateBackgroundBottomPadding(Dimension(0.0));
+    ASSERT_EQ(text.GetHeightConstraint(property, 30.0), 30.0);
+    property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
+    property->UpdateIconSize(Dimension(5.0));
+    property->UpdateTextIconSpace(Dimension(5.0));
+    ASSERT_EQ(text.GetHeightConstraint(property, 30.0), 20.0);
+    ASSERT_FALSE(text.DidExceedMaxLines(currentTextSize));
+}
+
+/**
  * @tc.name: SecurityComponentPatternOnDirtyLayoutWrapperSwap001
  * @tc.desc: Test security component OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC

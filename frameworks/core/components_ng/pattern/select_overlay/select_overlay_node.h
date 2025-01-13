@@ -29,6 +29,8 @@ namespace OHOS::Ace::NG {
 
 struct OptionParam;
 
+const std::string SelectOverlayRrightClickMenuWrapper = "select_overlay_right_click_menuWrapper";
+
 enum class FrameNodeType {
     SELECTMENU,
     EXTENSIONMENU,
@@ -99,6 +101,10 @@ public:
 
     void SwitchToOverlayMode();
     void UpdateSelectMenuBg();
+    void AddCustomMenuCallbacks(const std::shared_ptr<SelectOverlayInfo>& info);
+    void OnCustomSelectMenuAppear();
+    void FireCustomMenuChangeEvent(bool isMenuShow);
+    void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
 
 private:
     void CreateToolBar();
@@ -213,6 +219,8 @@ private:
     bool isShowInDefaultMenu_[9] = { false };
 
     bool isDefaultBtnOverMaxWidth_ = false;
+
+    bool isCustomMenuAppear_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayNode);
 };

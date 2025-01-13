@@ -30,7 +30,9 @@
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 #include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
+#endif
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/shape/circle_model_ng.h"
@@ -294,6 +296,13 @@ void* createXComponentNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createXComponentTextureNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, "", XComponentType::TEXTURE, "");
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
 {
     ArkUI_XComponent_Params* xcParams = (ArkUI_XComponent_Params*)(&params);
@@ -453,6 +462,14 @@ void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createArcAlphabetIndexerNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = IndexerModelNG::CreateFrameNode(nodeId, true);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createSearchNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = SearchModelNG::CreateFrameNode(nodeId);
@@ -515,6 +532,7 @@ void* createCustomSpanNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(customSpanNode);
 }
 
+#ifdef QRCODEGEN_SUPPORT
 void* createQRcodeNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = QRCodeModelNG::CreateFrameNode(nodeId);
@@ -522,6 +540,7 @@ void* createQRcodeNode(ArkUI_Int32 nodeId)
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
+#endif
 
 void* createBadgeNode(ArkUI_Int32 nodeId)
 {
@@ -583,7 +602,6 @@ void* GetOrCreateCustomNode(ArkUI_CharPtr tag)
 {
     auto frameNode = CustomNodeExtModelNG::GetOrCreateFrameNode(std::string(tag));
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
 }
 
@@ -630,37 +648,60 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createDatePickerNode,
     createTimePickerNode,
     createTextPickerNode,
+#ifndef ARKUI_WEARABLE
     createCalendarPickerNode,
+#else
+    nullptr,
+#endif
     createGridItemNode,
     createCustomNode,
+#ifndef ARKUI_WEARABLE
     createWaterFlowNode,
     createFlowItemNode,
+#else
+    nullptr, // createWaterFlowNode
+    nullptr, // createFlowItemNode
+#endif
     createRelativeContainerNode,
     createBlankNode,
     createDividerNode,
     createAlphabetIndexerNode,
+    createArcAlphabetIndexerNode,
     createSearchNode,
     createGridRowNode,
     createGridColNode,
+#ifndef ARKUI_WEARABLE
     createSelectNode,
+#else
+    nullptr, // createSelectNode
+#endif
     createImageAnimatorNode,
     createCircleNode,
     createTabContentNode,
     createNavigationNode,
     createCustomSpanNode,
     createSymbolNode,
+#ifdef QRCODEGEN_SUPPORT
     createQRcodeNode,
+#else
+    nullptr,
+#endif
     createBadgeNode,
     createTextClockNode,
     createTextTimerNode,
     createMarqueeNode,
     createCheckBoxGroupNode,
     createRatingNode,
+#ifdef XCOMPONENT_SUPPORTED
+    createXComponentTextureNode,
+#else
+    nullptr,
+#endif
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
-    if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
+    if (tag >= static_cast<ArkUINodeType>(sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*))) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
         return nullptr;
     }
@@ -673,7 +714,7 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 
 void* CreateNodeWithParams(ArkUINodeType tag, ArkUI_Int32 nodeId, const ArkUI_Params& params)
 {
-    if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
+    if (tag >= static_cast<ArkUINodeType>(sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*))) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
         return nullptr;
     }

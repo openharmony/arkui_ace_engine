@@ -20,6 +20,7 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 #include "display_manager.h"
 #include "dm_common.h"
@@ -40,6 +41,7 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
+#include "core/common/container_handler.h"
 #include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
@@ -61,6 +63,9 @@ namespace OHOS::Ace::Platform {
 using UIEnvCallback = std::function<void(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineContext>& context)>;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AbilityOnQueryCallback = std::function<void(const std::string& queryWord)>;
+using DataHandlerErr = OHOS::Rosen::DataHandlerErr;
+using SubSystemId = OHOS::Rosen::SubSystemId;
+using DataConsumeCallback = OHOS::Rosen::DataConsumeCallback;
 
 struct ParsedConfig {
     std::string colorMode;
@@ -314,6 +319,10 @@ public:
     void DispatchPluginError(int32_t callbackId, int32_t errorCode, std::string&& errorMessage) const override;
 
     bool Dump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+    bool DumpCommon(
+        const std::vector<std::string>& params, std::vector<std::string>& info);
+    bool DumpDynamicUiContent(
+        const std::vector<std::string>& params, std::vector<std::string>& info);
 
     bool DumpInfo(const std::vector<std::string>& params);
 
@@ -542,6 +551,8 @@ public:
 
     void BuildResConfig(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
+    void ProcessColorModeUpdate(
+        ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void UpdateConfiguration(
         const ParsedConfig& parsedConfig, const std::string& configuration);
     void UpdateConfigurationSyncForAll(
@@ -584,13 +595,20 @@ public:
         return webHapPath_;
     }
 
-    NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
+    NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type,
+        std::optional<NG::RectF> windowRect = std::nullopt);
 
     NG::SafeAreaInsets GetKeyboardSafeArea() override;
 
     Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
 
     uint32_t GetStatusBarHeight();
+
+    Rosen::WindowMode GetWindowMode() const
+    {
+        CHECK_NULL_RETURN(uiWindow_, Rosen::WindowMode::WINDOW_MODE_UNDEFINED);
+        return uiWindow_->GetWindowMode();
+    }
 
     // ArkTSCard
     void UpdateFormData(const std::string& data);
@@ -619,8 +637,7 @@ public:
     uint32_t GetParentMainWindowId(uint32_t currentWindowId) const override;
 
     void SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& currentEvent);
-    bool GetCurPointerEventInfo(int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback) override;
+    bool GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback) override;
 
     bool GetCurPointerEventSourceType(int32_t& sourceType) override;
 
@@ -728,6 +745,7 @@ public:
 
     void UpdateResourceOrientation(int32_t orientation);
     void UpdateResourceDensity(double density);
+    void SetDrawReadyEventCallback();
 
     bool IsFreeMultiWindow() const override
     {
@@ -746,7 +764,22 @@ public:
     bool IsFloatingWindow() const override
     {
         CHECK_NULL_RETURN(uiWindow_, false);
-        return uiWindow_->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
+        return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
+    }
+
+    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
+    {
+        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
+    }
+
+    void RegisterContainerHandler(const WeakPtr<ContainerHandler>& containerHandler)
+    {
+        containerHandler_ = containerHandler;
+    }
+
+    WeakPtr<ContainerHandler> GetContainerHandler()
+    {
+        return containerHandler_;
     }
 
 private:
@@ -773,6 +806,15 @@ private:
     DeviceOrientation ProcessDirectionUpdate(
         const ParsedConfig& parsedConfig, ConfigurationChange& configurationChange);
     void InitDragEventCallback();
+
+    void RegisterUIExtDataConsumer();
+    void UnRegisterUIExtDataConsumer();
+    void DispatchUIExtDataConsume(
+        NG::UIContentBusinessCode code, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply);
+    void RegisterUIExtDataSendToHost();
+    bool FireUIExtDataSendToHost(NG::UIContentBusinessCode code, AAFwk::Want&& data, NG::BusinessDataSendType type);
+    bool FireUIExtDataSendToHostReply(NG::UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+
     int32_t instanceId_ = 0;
     RefPtr<AceView> aceView_;
     RefPtr<TaskExecutor> taskExecutor_;
@@ -847,6 +889,10 @@ private:
 
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
+    std::optional<bool> isTouchEventsPassThrough_;
+
+    // for common handler
+    WeakPtr<ContainerHandler> containerHandler_;
 };
 
 } // namespace OHOS::Ace::Platform

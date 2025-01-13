@@ -21,6 +21,7 @@
 #include <list>
 #include <stdint.h>
 
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/log/log.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
@@ -84,6 +85,16 @@ void DatePickerColumnPattern::OnAttachToFrameNode()
     CreateAnimation();
     InitPanEvent(gestureHub);
     host->GetRenderContext()->SetClipToFrame(true);
+    InitHapticController();
+    RegisterWindowStateChangedCallback();
+}
+
+void DatePickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+    UnregisterWindowStateChangedCallback();
 }
 
 void DatePickerColumnPattern::OnModifyDone()
@@ -94,6 +105,8 @@ void DatePickerColumnPattern::OnModifyDone()
     CHECK_NULL_VOID(theme);
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
+    useButtonFocusArea_ = theme->NeedButtonFocusAreaType();
+    InitSelectorButtonProperties(theme);
     auto showCount = theme->GetShowOptionCount() + BUFFER_NODE_NUMBER;
     InitMouseAndPressEvent();
     SetAccessibilityAction();
@@ -130,6 +143,68 @@ void DatePickerColumnPattern::OnModifyDone()
         }
         SetOptionShiftDistance();
     }
+}
+
+void DatePickerColumnPattern::InitHapticController()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto datePickerPattern = parentNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    if (datePickerPattern->GetEnableHapticFeedback()) {
+        isEnableHaptic_ = true;
+        if (!hapticController_) {
+            auto context = parentNode->GetContext();
+            CHECK_NULL_VOID(context);
+            context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+            });
+        }
+    } else {
+        isEnableHaptic_ = false;
+        if (hapticController_) {
+            hapticController_->Stop();
+        }
+    }
+}
+
+void DatePickerColumnPattern::RegisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
+}
+
+void DatePickerColumnPattern::UnregisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(host->GetId());
+}
+
+void DatePickerColumnPattern::OnWindowHide()
+{
+    isShow_ = false;
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+}
+
+void DatePickerColumnPattern::OnWindowShow()
+{
+    isShow_ = true;
 }
 
 void DatePickerColumnPattern::ParseTouchListener()
@@ -256,10 +331,10 @@ void DatePickerColumnPattern::HandleMouseEvent(bool isHover)
 {
     if (isHover) {
         hoverd_ = true;
-        PlayHoverAnimation(hoverColor_);
+        PlayHoverAnimation(GetButtonHoverColor());
     } else {
         hoverd_ = false;
-        PlayHoverAnimation(Color::TRANSPARENT);
+        PlayHoverAnimation(buttonBgColor_);
     }
 }
 
@@ -271,7 +346,7 @@ void DatePickerColumnPattern::OnTouchDown()
 void DatePickerColumnPattern::OnTouchUp()
 {
     if (hoverd_) {
-        PlayPressAnimation(hoverColor_);
+        PlayPressAnimation(GetButtonHoverColor());
     } else {
         PlayPressAnimation(Color::TRANSPARENT);
     }
@@ -316,6 +391,94 @@ void DatePickerColumnPattern::PlayHoverAnimation(const Color& color)
         CHECK_NULL_VOID(picker);
         picker->SetButtonBackgroundColor(color);
     });
+}
+
+void DatePickerColumnPattern::InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme)
+{
+    CHECK_NULL_VOID(pickerTheme);
+    if (useButtonFocusArea_) {
+        buttonDefaultBgColor_ = pickerTheme->GetSelectorItemNormalBgColor();
+        buttonFocusBgColor_ = pickerTheme->GetSelectorItemFocusBgColor();
+        buttonDefaultBorderColor_ = pickerTheme->GetSelectorItemBorderColor();
+        buttonFocusBorderColor_ = pickerTheme->GetSelectorItemFocusBorderColor();
+        selectorTextFocusColor_ = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+        pressColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetPressColor());
+        hoverColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetHoverColor());
+
+        buttonFocusBorderWidth_ = pickerTheme->GetSelectorItemFocusBorderWidth();
+        buttonDefaultBorderWidth_ = pickerTheme->GetSelectorItemBorderWidth();
+    }
+}
+
+const Color& DatePickerColumnPattern::GetButtonHoverColor() const
+{
+    return useButtonFocusArea_ && isFocusColumn_ ? buttonFocusBgColor_ : hoverColor_;
+}
+
+void DatePickerColumnPattern::UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty)
+{
+    auto isInitUpdate = isFirstTimeUpdateButtonProps_ && !haveFocus;
+    auto isFocusChanged = isFocusColumn_ != haveFocus;
+
+    if (isFocusChanged || isInitUpdate) {
+        isFocusColumn_ = haveFocus;
+        UpdateSelectorButtonProps(isFocusColumn_, needMarkDirty);
+    }
+    if (isFocusChanged) {
+        FlushCurrentOptions();
+    }
+    if (isInitUpdate) {
+        isFirstTimeUpdateButtonProps_ = false;
+    }
+}
+
+void DatePickerColumnPattern::UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blend = host->GetParent();
+    CHECK_NULL_VOID(blend);
+    auto stack = blend->GetParent();
+    CHECK_NULL_VOID(stack);
+    auto buttonNode = DynamicCast<FrameNode>(stack->GetFirstChild());
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    BorderWidthProperty borderWidth;
+    BorderColorProperty borderColor;
+
+    if (haveFocus) {
+        buttonBgColor_ = buttonFocusBgColor_;
+        borderWidth.SetBorderWidth(buttonFocusBorderWidth_);
+        borderColor.SetColor(buttonFocusBorderColor_);
+    } else {
+        buttonBgColor_ = buttonDefaultBgColor_;
+        borderWidth.SetBorderWidth(buttonDefaultBorderWidth_);
+        borderColor.SetColor(buttonDefaultBorderColor_);
+    }
+
+    buttonLayoutProperty->UpdateBorderWidth(borderWidth);
+    renderContext->UpdateBorderColor(borderColor);
+    renderContext->UpdateBackgroundColor(buttonBgColor_);
+
+    if (needMarkDirty) {
+        buttonNode->MarkModifyDone();
+        buttonNode->MarkDirtyNode();
+    }
+}
+
+void DatePickerColumnPattern::UpdateTextAreaPadding(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    if (useButtonFocusArea_) {
+        auto padding = pickerTheme->GetSelectorItemSpace();
+        PaddingProperty defaultPadding = { CalcLength(padding), CalcLength(padding),
+            CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp) };
+        textLayoutProperty->UpdatePadding(defaultPadding);
+    }
 }
 
 bool DatePickerColumnPattern::OnDirtyLayoutWrapperSwap(
@@ -484,6 +647,7 @@ void DatePickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
 {
+    UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
     textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetDisappearColor().value_or(
         pickerTheme->GetOptionStyle(false, false).GetTextColor()));
@@ -505,6 +669,7 @@ void DatePickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
 {
+    UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
     textLayoutProperty->UpdateTextColor(
         dataPickerRowLayoutProperty->GetColor().value_or(pickerTheme->GetOptionStyle(false, false).GetTextColor()));
@@ -529,6 +694,7 @@ void DatePickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<DataPickerRowLayoutProperty>& dataPickerRowLayoutProperty)
 {
+    UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
     textLayoutProperty->UpdateTextColor(dataPickerRowLayoutProperty->GetSelectedColor().value_or(
         pickerTheme->GetOptionStyle(true, false).GetTextColor()));
@@ -750,6 +916,9 @@ bool DatePickerColumnPattern::InnerHandleScroll(
         currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
+    if (hapticController_ && isEnableHaptic_) {
+        hapticController_->PlayOnce();
+    }
     FlushCurrentOptions(isDown, isUpatePropertiesOnly, isUpdateAnimationProperties);
     HandleChangeCallback(isDown, true);
     HandleEventCallback(true);
@@ -837,6 +1006,9 @@ void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
 
 void DatePickerColumnPattern::HandleDragEnd()
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     pressed_ = false;
     CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
@@ -975,6 +1147,9 @@ void DatePickerColumnPattern::TossStoped()
 
 void DatePickerColumnPattern::TossAnimationStoped()
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     yLast_ = 0.0;
 }
 
@@ -1142,6 +1317,11 @@ void DatePickerColumnPattern::SetOptionShiftDistance()
 void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     int32_t dragDelta = offsetY - yLast_;
+    if (hapticController_ && isShow_) {
+        if (isEnableHaptic_) {
+            hapticController_->HandleDelta(dragDelta);
+        }
+    }
     yLast_ = offsetY;
     if (!CanMove(LessNotEqual(dragDelta, 0))) {
         return;

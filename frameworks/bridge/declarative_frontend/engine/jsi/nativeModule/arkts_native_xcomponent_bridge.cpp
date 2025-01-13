@@ -28,11 +28,11 @@ void SetControllerOnCreatedCallback(EcmaVM* vm, FrameNode* frameNode, const Loca
 {
     if (createdFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = createdFunc;
-        auto onSurfaceCreated = [vm, func = panda::CopyableGlobal(vm, func), frameNode](
+        auto onSurfaceCreated = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
                                     const std::string& surfaceId, const std::string& /* xcomponentId */) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             panda::Local<panda::JSValueRef> para[1] = { panda::StringRef::NewFromUtf8(vm, surfaceId.c_str()) };
             func->Call(vm, func.ToLocal(), para, 1);
         };
@@ -44,11 +44,11 @@ void SetControllerOnChangedCallback(EcmaVM* vm, FrameNode* frameNode, const Loca
 {
     if (changedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = changedFunc;
-        auto onSurfaceChanged = [vm, func = panda::CopyableGlobal(vm, func), frameNode](
+        auto onSurfaceChanged = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
                                     const std::string& surfaceId, const NG::RectF& rect) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             const char* keys[] = { "offsetX", "offsetY", "surfaceWidth", "surfaceHeight" };
             Local<JSValueRef> rectValues[] = { panda::NumberRef::New(vm, rect.Left()),
                 panda::NumberRef::New(vm, rect.Top()), panda::NumberRef::New(vm, rect.Width()),
@@ -65,15 +65,15 @@ void SetControllerOnDestroyedCallback(EcmaVM* vm, FrameNode* frameNode, const Lo
 {
     if (destroyedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = destroyedFunc;
-        auto ondestroyed = [vm, func = panda::CopyableGlobal(vm, func), frameNode](
-                               const std::string& surfaceId, const std::string& /* xcomponentId */) {
+        auto onSurfaceDestroyed = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
+                                      const std::string& surfaceId, const std::string& /* xcomponentId */) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             panda::Local<panda::JSValueRef> para[1] = { panda::StringRef::NewFromUtf8(vm, surfaceId.c_str()) };
             func->Call(vm, func.ToLocal(), para, 1);
         };
-        XComponentModelNG::SetControllerOnDestroyed(frameNode, std::move(ondestroyed));
+        XComponentModelNG::SetControllerOnDestroyed(frameNode, std::move(onSurfaceDestroyed));
     }
 }
 } // namespace
@@ -169,11 +169,11 @@ void XComponentBridge::SetControllerOnCreated(ArkUIRuntimeCallInfo* runtimeCallI
     auto createdFunc = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "onSurfaceCreated"));
     if (createdFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = createdFunc;
-        auto onSurfaceCreated = [vm, func = panda::CopyableGlobal(vm, func), frameNode](
+        auto onSurfaceCreated = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
                                     const std::string& surfaceId, const std::string& xcomponentId) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             panda::Local<panda::JSValueRef> para[1] = { panda::StringRef::NewFromUtf8(vm, surfaceId.c_str()) };
             func->Call(vm, func.ToLocal(), para, 1);
             TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponentNode[%{public}s] ControllerOnCreated surfaceId:%{public}s",
@@ -197,11 +197,11 @@ void XComponentBridge::SetControllerOnChanged(ArkUIRuntimeCallInfo* runtimeCallI
     auto changedFunc = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "onSurfaceChanged"));
     if (changedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = changedFunc;
-        auto onSurfaceChanged = [vm, func = panda::CopyableGlobal(vm, func), frameNode](
+        auto onSurfaceChanged = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
                                     const std::string& surfaceId, const NG::RectF& rect) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             const char* keys[] = { "offsetX", "offsetY", "surfaceWidth", "surfaceHeight" };
             Local<JSValueRef> rectValues[] = { panda::NumberRef::New(vm, rect.Left()),
                 panda::NumberRef::New(vm, rect.Top()), panda::NumberRef::New(vm, rect.Width()),
@@ -228,11 +228,11 @@ void XComponentBridge::SetControllerOnDestroyed(ArkUIRuntimeCallInfo* runtimeCal
     auto destroyedFunc = object->Get(vm, panda::StringRef::NewFromUtf8(vm, "onSurfaceDestroyed"));
     if (destroyedFunc->IsFunction(vm)) {
         panda::Local<panda::FunctionRef> func = destroyedFunc;
-        auto onDestroyed = [vm, func = panda::CopyableGlobal(vm, func), frameNode](
+        auto onDestroyed = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
                                const std::string& surfaceId, const std::string& xcomponentId) {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+            PipelineContext::SetCallBackNode(node);
             panda::Local<panda::JSValueRef> para[1] = { panda::StringRef::NewFromUtf8(vm, surfaceId.c_str()) };
             func->Call(vm, func.ToLocal(), para, 1);
             TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponentNode[%{public}s] ControllerOnDestroyed surfaceId:%{public}s",
@@ -404,138 +404,6 @@ ArkUINativeModuleValue XComponentBridge::ResetOpacity(ArkUIRuntimeCallInfo *runt
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue XComponentBridge::SetLinearGradientBlur(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetLinearGradientBlur(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetPixelStretchEffect(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetPixelStretchEffect(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetLightUpEffect(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetLightUpEffect(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetSphericalEffect(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetSphericalEffect(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetColorBlend(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetColorBlend(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetHueRotate(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetHueRotate(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetSepia(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetSepia(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetInvert(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetInvert(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetContrast(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetContrast(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetSaturate(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetSaturate(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetBrightness(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetBrightness(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
 ArkUINativeModuleValue XComponentBridge::SetGrayscale(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -543,66 +411,6 @@ ArkUINativeModuleValue XComponentBridge::SetGrayscale(ArkUIRuntimeCallInfo *runt
 }
 
 ArkUINativeModuleValue XComponentBridge::ResetGrayscale(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetBackdropBlur(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetBackdropBlur(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetBlur(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetBlur(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetBackgroundImagePosition(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetBackgroundImagePosition(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetBackgroundImageSize(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetBackgroundImageSize(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::SetBackgroundImage(ArkUIRuntimeCallInfo *runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue XComponentBridge::ResetBackgroundImage(ArkUIRuntimeCallInfo *runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     return panda::JSValueRef::Undefined(vm);
@@ -619,10 +427,11 @@ ArkUINativeModuleValue XComponentBridge::SetOnLoad(ArkUIRuntimeCallInfo *runtime
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto obj = secondArg->ToObject(vm);
     panda::Local<panda::FunctionRef> func = obj;
-    auto onLoad = [vm, func = panda::CopyableGlobal(vm, func), frameNode](const std::string& xcomponentId) {
+    auto onLoad = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
+                      const std::string& xcomponentId) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         std::vector<Local<JSValueRef>> argv;
         Framework::JSRef<Framework::JSVal> jsVal;
         if (Framework::XComponentClient::GetInstance().GetJSVal(xcomponentId, jsVal)) {
@@ -652,10 +461,11 @@ ArkUINativeModuleValue XComponentBridge::SetOnDestroy(ArkUIRuntimeCallInfo *runt
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     auto obj = secondArg->ToObject(vm);
     panda::Local<panda::FunctionRef> func = obj;
-    auto onDestroy = [vm, func = panda::CopyableGlobal(vm, func), frameNode](const std::string& xcomponentId) {
+    auto onDestroy = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
+                         const std::string& xcomponentId) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(node);
         func->Call(vm, func.ToLocal(), nullptr, 0);
         TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponentNode[%{public}s] onDestroy", xcomponentId.c_str());
     };
@@ -744,6 +554,35 @@ ArkUINativeModuleValue XComponentBridge::ResetHdrBrightness(ArkUIRuntimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentHdrBrightness(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue XComponentBridge::SetEnableTransparentLayer(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsBoolean()) {
+        bool enableTransparentLayer = secondArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getXComponentModifier()->setXComponentEnableTransparentLayer(
+            nativeNode, enableTransparentLayer);
+    } else {
+        GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableTransparentLayer(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue XComponentBridge::ResetEnableTransparentLayer(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableTransparentLayer(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

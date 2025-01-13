@@ -34,6 +34,12 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   // List of inactive components used for Dfx
   protected static readonly inactiveComponents_: Set<string> = new Set<string>();
+  protected get isReusable_(): boolean {
+    // property getter function are in the prototype
+    // @Reusable and @ReusableV2 decorators modify the function
+    // in decorated class' prototype to return true
+    return false;
+  }
 
   // Array.sort() converts array items to string to compare them!
   static readonly compareNumber = (a: number, b: number): number => {
@@ -76,12 +82,15 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   protected extraInfo_: ExtraInfo = undefined;
 
   // used by view createdBy BuilderNode. Indicated weather need to block the recylce or reuse events called by parentView;
-  protected __isBlockRecycleOrReuse__: boolean = false;
+  public __isBlockRecycleOrReuse__: boolean = false;
 
   // Set of elements for delayed update
   private elmtIdsDelayedUpdate_: Set<number> = new Set();
 
   protected static arkThemeScopeManager: ArkThemeScopeManager | undefined = undefined
+
+  static readonly doRecycle: boolean = true;
+  static readonly doReuse: boolean = false;
 
   constructor(parent: IView, elmtId: number = UINodeRegisterProxy.notRecordingDependencies, extraInfo: ExtraInfo = undefined) {
     super();
@@ -289,6 +298,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   protected abstract purgeVariableDependenciesOnElmtId(removedElmtId: number);
   protected abstract initialRender(): void;
   protected abstract rerender(): void;
+  protected abstract get isViewV2(): boolean;
 
   public abstract updateRecycleElmtId(oldElmtId: number, newElmtId: number): void;
   public abstract updateStateVars(params: Object);
@@ -776,5 +786,36 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       }
     }
     return dfxCommands;
+  }
+
+  // dump state var for v1 and v2 and send the dump value to ide to show in inspector
+  public onDumpInspector(): string {
+    const dumpInfo: DumpInfo = new DumpInfo();
+    dumpInfo.viewInfo = {
+      componentName: this.constructor.name, id: this.id__(), isV2: this.isViewV2,
+      isCompFreezeAllowed_:this.isCompFreezeAllowed_, isViewActive_: this.isViewActive()
+    };
+    stateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo);
+    let resInfo: string = '';
+    try {
+      resInfo = JSON.stringify(dumpInfo);
+    } catch (error) {
+      stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);
+    }
+    return resInfo;
+  }
+
+  public traverseChildDoRecycleOrReuse(recyleOrReuse: boolean): void {
+    this.childrenWeakrefMap_.forEach((weakRefChild) => {
+      const child = weakRefChild.deref();
+      if (
+        child &&
+        (child instanceof ViewPU || child instanceof ViewV2) &&
+        !child.hasBeenRecycled_ &&
+        !child.__isBlockRecycleOrReuse__
+      ) {
+        recyleOrReuse ? child.aboutToRecycleInternal() : child.aboutToReuseInternal();
+      } // if child
+    });
   }
 } // class PUV2ViewBase

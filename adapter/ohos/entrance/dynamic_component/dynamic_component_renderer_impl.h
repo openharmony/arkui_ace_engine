@@ -36,11 +36,14 @@ public:
     ~DynamicComponentRendererImpl() override = default;
 
     void SetAdaptiveSize(bool adaptiveWidth, bool adaptiveHeight) override;
+    void SetBackgroundTransparent(bool backgroundTransparent) override;
+    bool GetBackgroundTransparent() const override;
     void CreateContent() override;
     void DestroyContent() override;
 
     void UpdateViewportConfig(
-        const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt) override;
+        const SizeF& size, float density, int32_t orientation, AnimationOption animationOpt,
+        const OffsetF& offset) override;
 
     void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
     bool TransferKeyEvent(const KeyEvent& event) override;
@@ -73,6 +76,8 @@ public:
         const std::vector<std::string>& params, std::vector<std::string>& info) override;
     void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 
+    void UpdateParentOffsetToWindow(const OffsetF& offset) override;
+
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
     RefPtr<TaskExecutor> GetHostTaskExecutor();
@@ -85,9 +90,12 @@ private:
         const std::shared_ptr<Framework::JsValue>& jsContext);
 
     void AttachRenderContext();
+    void AttachRenderContextInIsolatedComponent();
+    void AttachRenderContextInDynamicComponent();
     void RegisterSizeChangedCallback();
     void RegisterConfigChangedCallback();
     void UnRegisterConfigChangedCallback();
+    void RegisterContainerHandler();
 
     SizeF ComputeAdaptiveSize(const SizeF& size) const;
     void HandleCardSizeChangeEvent(const SizeF& size);
@@ -107,6 +115,8 @@ private:
     SizeT<int32_t> viewport_;
     bool adaptiveWidth_ = true;
     bool adaptiveHeight_ = true;
+    bool backgroundTransparent_ = true;
+    float density_ = 0;
     static std::set<void *> usingWorkers_;
     static std::mutex usingWorkerMutex_;
     UIContentType uIContentType_ = UIContentType::UNDEFINED;

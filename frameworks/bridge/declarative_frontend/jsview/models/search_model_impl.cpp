@@ -47,10 +47,10 @@ RefPtr<TextFieldControllerBase> SearchModelImpl::Create(const std::optional<std:
     InitializeComponent(searchComponent, textFieldComponent, searchTheme, textFieldTheme);
     PrepareSpecializedComponent(searchComponent, textFieldComponent);
     if (value.has_value()) {
-        textFieldComponent->SetValue(UtfUtils::Str16ToStr8(value.value()));
+        textFieldComponent->SetValue(UtfUtils::Str16DebugToStr8(value.value()));
     }
     if (placeholder.has_value()) {
-        textFieldComponent->SetPlaceholder(UtfUtils::Str16ToStr8(placeholder.value()));
+        textFieldComponent->SetPlaceholder(UtfUtils::Str16DebugToStr8(placeholder.value()));
     }
     if (icon.has_value()) {
         textFieldComponent->SetIconImage(icon.value());
@@ -202,6 +202,10 @@ void SearchModelImpl::SetHeight(const Dimension& value)
     textFieldComponent->SetHeight(value);
 }
 
+void SearchModelImpl::SetMinFontScale(const float value) {}
+
+void SearchModelImpl::SetMaxFontScale(const float value) {}
+
 void SearchModelImpl::SetBackBorder()
 {
     auto stack = ViewStackProcessor::GetInstance();
@@ -239,7 +243,7 @@ void SearchModelImpl::SetOnChange(std::function<void(const std::u16string&, Prev
     auto onChangeImpl = [onChange] (const std::string& value) {
         if (!onChange) {
             PreviewText previewText {};
-            onChange(UtfUtils::Str8ToStr16(value), previewText);
+            onChange(UtfUtils::Str8DebugToStr16(value), previewText);
         }
     };
     component->SetOnChange(std::move(onChangeImpl));
@@ -256,7 +260,7 @@ void SearchModelImpl::SetOnCopy(std::function<void(const std::u16string&)>&& fun
     CHECK_NULL_VOID(textFieldComponent);
     auto onCopy = [func] (const std::string& value) {
         if (!func) {
-            func(UtfUtils::Str8ToStr16(value));
+            func(UtfUtils::Str8DebugToStr16(value));
         }
     };
     textFieldComponent->SetOnCopy(std::move(onCopy));
@@ -273,7 +277,7 @@ void SearchModelImpl::SetOnCut(std::function<void(const std::u16string&)>&& func
     CHECK_NULL_VOID(textFieldComponent);
     auto onCut = [func] (const std::string& value) {
         if (!func) {
-            func(UtfUtils::Str8ToStr16(value));
+            func(UtfUtils::Str8DebugToStr16(value));
         }
     };
     textFieldComponent->SetOnCut(std::move(onCut));
@@ -290,7 +294,7 @@ void SearchModelImpl::SetOnPaste(std::function<void(const std::u16string&)>&& fu
     CHECK_NULL_VOID(textFieldComponent);
     auto onPaste = [func] (const std::string& value) {
         if (!func) {
-            func(UtfUtils::Str8ToStr16(value));
+            func(UtfUtils::Str8DebugToStr16(value));
         }
     };
     textFieldComponent->SetOnPaste(std::move(onPaste));

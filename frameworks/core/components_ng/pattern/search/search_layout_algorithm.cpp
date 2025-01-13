@@ -44,6 +44,38 @@ bool SearchLayoutAlgorithm::IsFixedHeightMode(LayoutWrapper* layoutWrapper)
     return constraint->selfIdealSize.Height().has_value();
 }
 
+float SearchLayoutAlgorithm::CalculateMaxFontScale(LayoutWrapper* layoutWrapper)
+{
+    auto searchHost = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(searchHost, MAX_FONT_SCALE);
+    auto pipeline = searchHost->GetContext();
+    CHECK_NULL_RETURN(pipeline, MAX_FONT_SCALE);
+    auto textFieldWrapper = layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
+    CHECK_NULL_RETURN(textFieldWrapper, MAX_FONT_SCALE);
+    auto textFieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(textFieldWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textFieldLayoutProperty, MAX_FONT_SCALE);
+    auto maxScale = MAX_FONT_SCALE;
+    if (textFieldLayoutProperty->HasMaxFontScale()) {
+        maxScale = std::min(textFieldLayoutProperty->GetMaxFontScale().value(), maxScale);
+    } else {
+        maxScale = std::min(pipeline->GetMaxAppFontScale(), maxScale);
+    }
+    return maxScale;
+}
+
+float SearchLayoutAlgorithm::CalculateMinFontScale(LayoutWrapper* layoutWrapper)
+{
+    auto textFieldWrapper = layoutWrapper->GetOrCreateChildByIndex(TEXTFIELD_INDEX);
+    CHECK_NULL_RETURN(textFieldWrapper, 0.0f);
+    auto textFieldLayoutProperty = AceType::DynamicCast<TextFieldLayoutProperty>(textFieldWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textFieldLayoutProperty, 0.0f);
+    auto minScale = 0.0f;
+    if (textFieldLayoutProperty->HasMinFontScale()) {
+        minScale = textFieldLayoutProperty->GetMinFontScale().value();
+    }
+    return minScale;
+}
+
 void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
 {
     auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
@@ -62,9 +94,13 @@ void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(searchTheme);
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
-    auto defaultImageHeight = static_cast<float>(searchTheme->GetIconSize().ConvertToPx());
+    auto maxFontScale = CalculateMaxFontScale(layoutWrapper);
+    auto minFontScale = CalculateMinFontScale(layoutWrapper);
+    auto defaultImageHeight = static_cast<float>(searchTheme->GetIconSize().ConvertToPxDistribute(
+        minFontScale, maxFontScale));
     auto imageHeight = static_cast<float>(std::min(layoutProperty->HasCancelButtonUDSize() ?
-        layoutProperty->GetCancelButtonUDSizeValue().ConvertToPx() : defaultImageHeight,
+        layoutProperty->GetCancelButtonUDSizeValue().ConvertToPxDistribute(
+            minFontScale, maxFontScale) : defaultImageHeight,
         searchHeight));
     if (cancelImageWrapper->GetHostTag() == V2::SYMBOL_ETS_TAG) {
         imageHeight = CalcSymbolIconHeight(layoutWrapper, CANCEL_IMAGE_INDEX, defaultImageHeight);
@@ -265,6 +301,26 @@ void SearchLayoutAlgorithm::ImageMeasure(LayoutWrapper* layoutWrapper)
     searchIconSizeMeasure_ = imageGeometryNode->GetFrameSize();
 }
 
+CalcSize SearchLayoutAlgorithm::searchButtonCalcSize(const RefPtr<SearchTheme>& searchTheme,
+    RefPtr<SearchLayoutProperty> layoutProperty, LayoutWrapper* layoutWrapper, float maxFontScale, float minFontScale)
+{
+    // calculate theme space from search button to font
+    auto spaceHeight = searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx() -
+                       searchTheme->GetFontSize().ConvertToPxDistribute(minFontScale, maxFontScale);
+    // calculate search button height
+    auto defaultButtonHeight =
+        searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
+    auto searchButtonHeight = std::max(defaultButtonHeight,
+        layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetFontSize()).ConvertToPxDistribute(
+            minFontScale, maxFontScale) + spaceHeight);
+    auto constraint = layoutProperty->GetLayoutConstraint();
+    auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
+    searchButtonHeight = std::min(searchButtonHeight, searchHeight - 0.0f);
+    CalcSize searchButtonCalcSize;
+    searchButtonCalcSize.SetHeight(CalcLength(searchButtonHeight));
+    return searchButtonCalcSize;
+}
+
 void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
 {
     auto buttonWrapper = layoutWrapper->GetOrCreateChildByIndex(BUTTON_INDEX);
@@ -281,28 +337,16 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
-
-    // calculate theme space from search button to font
-    auto spaceHeight = searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx() -
-                       searchTheme->GetFontSize().ConvertToPx();
-
-    // calculate search button height
-    auto defaultButtonHeight =
-        searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
-    auto searchButtonHeight = std::max(defaultButtonHeight,
-        layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetFontSize()).ConvertToPx() + spaceHeight);
-    auto constraint = layoutProperty->GetLayoutConstraint();
-    auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
-    searchButtonHeight = std::min(searchButtonHeight, searchHeight - 0.0f);
-    CalcSize searchButtonCalcSize;
-    searchButtonCalcSize.SetHeight(CalcLength(searchButtonHeight));
-    buttonLayoutProperty->UpdateUserDefinedIdealSize(searchButtonCalcSize);
-
+    auto maxFontScale = CalculateMaxFontScale(layoutWrapper);
+    auto minFontScale = CalculateMinFontScale(layoutWrapper);
+    buttonLayoutProperty->UpdateUserDefinedIdealSize(searchButtonCalcSize(searchTheme, layoutProperty, layoutWrapper,
+        maxFontScale, minFontScale));
     auto textWrapper = buttonWrapper->GetChildByIndex(0);
     if (textWrapper) {
         auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(textWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
+        textLayoutProperty->UpdateMaxFontScale(maxFontScale);
+        textLayoutProperty->UpdateMinFontScale(minFontScale);
     }
     if (GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE)) {
         buttonLayoutProperty->ClearUserDefinedIdealSize(false, true);
@@ -318,7 +362,7 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
     buttonLayoutProperty->UpdatePixelRound(pixelRound);
 
     // compute searchButton width
-    auto searchWidthMax = CalcSearchWidth(constraint.value(), layoutWrapper);
+    auto searchWidthMax = CalcSearchWidth(layoutProperty->GetLayoutConstraint().value(), layoutWrapper);
     double searchButtonWidth = searchWidthMax * MAX_SEARCH_BUTTON_RATE;
     double curSearchButtonWidth = buttonGeometryNode->GetFrameSize().Width();
     searchButtonWidth = std::min(searchButtonWidth, curSearchButtonWidth);
@@ -375,38 +419,38 @@ double SearchLayoutAlgorithm::CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper
     CHECK_NULL_RETURN(searchBtnWrapper, 0);
     auto cancelBtnLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
     CHECK_NULL_RETURN(cancelBtnLayoutWrapper, 0);
-
+    auto minFontScale = CalculateMinFontScale(layoutWrapper);
+    auto maxFontScale = CalculateMaxFontScale(layoutWrapper);
     // search button height
     auto buttonNode = searchBtnWrapper->GetHostNode();
     CHECK_NULL_RETURN(buttonNode, true);
     auto searchButtonEvent = buttonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(searchButtonEvent, true);
-    auto searchButtonHeight = searchButtonSizeMeasure_.Height() + 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
+    auto searchButtonHeight = searchButtonSizeMeasure_.Height() + 2 *
+        searchTheme->GetSearchButtonSpace().ConvertToPxDistribute(minFontScale, maxFontScale);
     searchButtonHeight = (!searchButtonEvent->IsEnabled()) ? 0.0f : searchButtonHeight;
-
     // search icon height
     auto searchIconFrameHight = searchIconSizeMeasure_.Height();
-    auto searchIconHeight = layoutProperty->GetSearchIconUDSizeValue(Dimension(searchIconFrameHight)).ConvertToPx();
-    searchIconHeight += searchTheme->GetHeight().ConvertToPx() - searchTheme->GetIconHeight().ConvertToPx();
-
+    auto searchIconHeight = layoutProperty->GetSearchIconUDSizeValue(
+        Dimension(searchIconFrameHight)).ConvertToPxDistribute(minFontScale, maxFontScale);
+    searchIconHeight += searchTheme->GetHeight().ConvertToPxDistribute(minFontScale, maxFontScale) -
+    searchTheme->GetIconHeight().ConvertToPxDistribute(minFontScale, maxFontScale);;
     // cancel button height
     auto cancelButtonNode = cancelBtnLayoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(cancelButtonNode, 0);
     auto cancelButtonEvent = cancelButtonNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_RETURN(cancelButtonEvent, 0);
-    auto cancelBtnHight = cancelBtnSizeMeasure_.Height() + 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
+    auto cancelBtnHight = cancelBtnSizeMeasure_.Height() + 2 *
+        searchTheme->GetSearchButtonSpace().ConvertToPxDistribute(minFontScale, maxFontScale);
     cancelBtnHight = (!cancelButtonEvent->IsEnabled()) ? 0.0f : cancelBtnHight;
-
     // textfield height
     auto padding = layoutProperty->CreatePaddingAndBorder();
     auto verticalPadding = padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f);
     auto textfieldHeight = textFieldSizeMeasure_.Height() + verticalPadding;
-
     // calculate the highest
     searchHeightAdapt = std::max(searchIconHeight, searchButtonHeight);
     searchHeightAdapt = std::max(searchHeightAdapt, cancelBtnHight);
     searchHeightAdapt = std::max(searchHeightAdapt, static_cast<double>(textfieldHeight));
-
     return searchHeightAdapt;
 }
 
@@ -754,8 +798,11 @@ void SearchLayoutAlgorithm::LayoutDivider(const LayoutSearchParams& params)
 
 void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
 {
-    auto dividerSideSpace = params.searchTheme->GetDividerSideSpace().ConvertToPx();
-    auto dividerWidth = params.searchTheme->GetSearchDividerWidth().ConvertToPx();
+    auto searchTheme = params.searchTheme;
+    CHECK_NULL_VOID(searchTheme);
+    auto dividerSideSpace = searchTheme->GetDividerSideSpace().ConvertToPx();
+    auto dividerWidth = searchTheme->GetSearchDividerWidth().ConvertToPx();
+    auto borderWidth = searchTheme->GetBorderWidth().ConvertToPx();
 
     auto cancelButtonWrapper = params.layoutWrapper->GetOrCreateChildByIndex(CANCEL_BUTTON_INDEX);
     CHECK_NULL_VOID(cancelButtonWrapper);
@@ -793,7 +840,7 @@ void SearchLayoutAlgorithm::LayoutCancelButton(const LayoutSearchParams& params)
             cancelButtonHorizontalOffset =
                 std::max(searchButtonHorizontalOffset - cancelButtonOffsetToSearchButton, 0.0);
         } else {
-            cancelButtonHorizontalOffset = params.searchFrameWidth - cancelButtonFrameWidth - buttonSpace;
+            cancelButtonHorizontalOffset = params.searchFrameWidth - cancelButtonFrameWidth - buttonSpace - borderWidth;
         }
     }
     auto cancelButtonOffset = OffsetF(cancelButtonHorizontalOffset, cancelButtonVerticalOffset);
@@ -905,11 +952,14 @@ double SearchLayoutAlgorithm::CalcSymbolIconHeight(
     CHECK_NULL_RETURN(iconNode, defaultImageHeight);
     auto symbolLayoutProperty = iconNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(symbolLayoutProperty, defaultImageHeight);
-
+    auto minFontScale = CalculateMinFontScale(layoutWrapper);
+    auto maxFontScale = CalculateMaxFontScale(layoutWrapper);
+    symbolLayoutProperty->UpdateMaxFontScale(maxFontScale);
+    symbolLayoutProperty->UpdateMinFontScale(minFontScale);
     auto defaultSymbolIconSize =
         (index == IMAGE_INDEX ? searchNode->GetSearchSymbolIconSize() : searchNode->GetCancelSymbolIconSize());
     auto iconSize = symbolLayoutProperty->GetFontSize().value_or(defaultSymbolIconSize);
 
-    return iconSize.ConvertToPxDistribute(0.0f, MAX_FONT_SCALE);
+    return iconSize.ConvertToPxDistribute(minFontScale, maxFontScale);
 }
 } // namespace OHOS::Ace::NG

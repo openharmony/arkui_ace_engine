@@ -63,6 +63,12 @@ const ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE: string = 'gridobjectsortcomponent_a
 const ACCESSIBILITY_ILLEGAL_AREA: string = 'gridobjectsortcomponent_accessibility_illegal_area';
 const ACCESSIBILITY_SELECTED_ITEM_DRAG_START: string =
   'gridobjectsortcomponent_accessibility_selected_item_drag_start';
+const ACCESSIBILITY_DOUBLE_CLICK: string =
+  'gridobjectsortcomponent_accessibility_single_finger_double_click';
+const ACCESSIBILITY_COMPLETE_BUTTON: string =
+  'gridobjectsortcomponent_accessibility_complete_button';
+const ACCESSIBILITY_RESIDENT_AREA: string =
+  'gridobjectsortcomponent_accessibility_resident_area_edit_state';
 const ACCESSIBILITY_SELECTED_ITEM_DESC: string = 'gridobjectsortcomponent_accessibility_selected_item_desc';
 const ACCESSIBILITY_SELECTED_ITEM: string = 'gridobjectsortcomponent_accessibility_selected_item';
 const ACCESSIBILITY_SELECTED_ITEM_DRAG_STOP: string = 'gridobjectsortcomponent_accessibility_selected_item_drag_stop';
@@ -122,15 +128,17 @@ class MenuItem {
   public symbolStyle: SymbolGlyphModifier;
   public isEnabled: boolean;
   public action: () => void;
+  public label: ResourceStr; // 适老化弹窗描述文字
   accessibilityText?: ResourceStr;
 
   constructor(value: Resource, symbolStyle: SymbolGlyphModifier,
-    enabled: boolean, accessibilityText: ResourceStr, action: () => void) {
+    enabled: boolean, accessibilityText: ResourceStr, action: () => void, label: ResourceStr) {
     this.value = value;
     this.symbolStyle = symbolStyle;
     this.isEnabled = enabled;
     this.action = action;
     this.accessibilityText = accessibilityText;
+    this.label = label;
   }
 }
 
@@ -208,6 +216,7 @@ export struct GridObjectSortComponent {
   @State editGridHeight: number = 0;
   @State addGridHeight: number = 0;
   @State subTitleHeight: number = 0;
+  @State isOpenAccessibility: boolean = accessibility.isScreenReaderOpenSync();
   private callbackId: number | undefined = undefined;
   // current column, text: 4 column  , image_text: 3 column
   private colNum: number = COL_IMAGE_TEXT;
@@ -225,7 +234,8 @@ export struct GridObjectSortComponent {
       this.getStringByResource(ACCESSIBILITY_HEADER_EDIT_BUTTON),
       () => {
         this.goEdit();
-      })
+      },
+      this.getStringByResource(ACCESSIBILITY_COMPLETE_BUTTON))
   ];
   onSave?: (select: GridObjectSortComponentItem[], unselect: GridObjectSortComponentItem[]) => void;
   onCancel?: () => void;
@@ -276,6 +286,10 @@ export struct GridObjectSortComponent {
       this.firstIn = false;
     }, 500);
     this.bundleName = (getContext(this) as common.UIAbilityContext)?.abilityInfo?.bundleName;
+    accessibility.on('screenReaderStateChange', (state: boolean) => {
+      // 上面的state  就是无障碍的状态
+      this.isOpenAccessibility = state;
+    });
   }
 
   // get adaptive for symbol font size
@@ -436,7 +450,7 @@ export struct GridObjectSortComponent {
         type: 'requestFocusForAccessibility',
         bundleName: this.bundleName,
         triggerAction: 'common',
-        customId: `SaveMenuItem_${editableTittleBarUniqueId}`
+        customId: `ImageMenuItem_${editableTittleBarUniqueId}_0`
       });
       accessibility.sendAccessibilityEvent(eventInfo).then(() => {
         setTimeout(()=>{
@@ -969,19 +983,35 @@ export struct GridObjectSortComponent {
       .onVisibleAreaChange([0.0, 1.0], (isVisible: boolean, currentRatio: number) => {
         if (isVisible) {
           this.pointToAddTitleBarEditButton();
+        } else {
+          if (this.isPointToEditTitleBarSaveButton) {
+            let eventInfo: accessibility.EventInfo = ({
+              type: 'announceForAccessibility', // 表示主动播报的事件。
+              bundleName: this.bundleName, // 目标应用名；不可缺省。
+              triggerAction: 'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
+              textAnnouncedForAccessibility: getContext().resourceManager
+                .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE) // 主动播报的内容。
+            });
+            accessibility.sendAccessibilityEvent(eventInfo);
+          }
         }
       })
     EditableTitleBar({
       leftIconStyle: EditableLeftIconType.Cancel,
-      menuItems: [],
+      isSaveIconRequired: false,
+      menuItems: [{
+        value: $r('sys.symbol.checkmark'),
+        label: this.getStringByResource(ACCESSIBILITY_COMPLETE_BUTTON),
+        accessibilityText: this.getStringByResource(ACCESSIBILITY_COMPLETE_BUTTON),
+        action: () => {
+          this.saveClick = true;
+          this.onSaveEdit();
+        }
+      }],
       title: this.options.editTitle || $r('sys.string.ohos_grid_edit_title_edit'),
       onCancel: () => {
         this.cancelEdit();
       },
-      onSave: () => {
-        this.saveClick = true;
-        this.onSaveEdit();
-      }
     })
       .id(EDIT_TITLE_BAR_ID)
       .visibility(this.menuSwitch ? Visibility.Visible : Visibility.None)
@@ -1323,9 +1353,10 @@ export struct GridObjectSortComponent {
             bottom: this.imageText ? ROW_GAP : MARGIN_EIGHT
           })
           .clickEffect({ level: ClickEffectLevel.LIGHT })
-          .onTouch((event: TouchEvent) => {
+          .onTouch(this.isOpenAccessibility ? undefined : (event: TouchEvent) => {
             this.handleAddItemTouch(event, item);
           })
+          .onClick(this.isOpenAccessibility ? () => this.handleAddItemClick(item) : undefined)
           .gesture(
             LongPressGesture({ repeat: true })
               .onAction((event: GestureEvent) => {
@@ -1399,9 +1430,10 @@ export struct GridObjectSortComponent {
     .accessibilityLevel(NO)
   }
 
-  getAddTagGridItemAccessibilityDesc(): string {
+  getAddTagGridItemAccessibilityDesc(): string { // 图文在编辑态不播报描述 纯文字在编辑态不播报双击长按事件
     return this.options?.type === GridObjectSortComponentType.IMAGE_TEXT ?
-      this.getStringByResource(ACCESSIBILITY_UNSELECTED_IMAGE_ITEM_DESC) :
+      this.menuSwitch ? ' ' : this.getStringByResource(ACCESSIBILITY_UNSELECTED_IMAGE_ITEM_DESC) :
+      this.menuSwitch ? this.getStringByResource(ACCESSIBILITY_DOUBLE_CLICK) :
       this.getStringByResource(ACCESSIBILITY_UNSELECTED_TEXT_ITEM_DESC)
   }
 
@@ -1474,6 +1506,73 @@ export struct GridObjectSortComponent {
         this.readIndex4EditArea % this.colNum + 1
       );
     }
+  }
+
+  handleAddItemClick(item: GridObjectSortComponentItem): void {
+    if (this.clickAddBtn || this.clickRemoveBtn) {
+      return;
+    }
+    this.content = item;
+
+    this.isTouchDown = false;
+    if (this.addAreaLongPressGesture || this.longScaleOnePointTwo === 1.05 || this.imageText) {
+      return;
+    }
+    animateTo({
+      duration: ENTER_EXIT_ICON_DURATION,
+      curve: COMMON_BEZIER
+    }, () => {
+      this.addIconShow = true;
+    })
+    if (this.options.type === GridObjectSortComponentType.TEXT) {
+      this.scaleAddIcon = 1;
+    }
+    this.scaleIcon = 0;
+    const index = this.unSelected.findIndex(i => i.id === item.id);
+    this.editGridDataLength = this.selected.length + 1;
+    const endPosition = this.getEditItemGridPosition(this.selected, index);
+    this.content = item;
+    this.unSelectedIndex = index;
+    this.clickAddBtn = true;
+    this.arrayUnSelectIsChange = 1;
+    this.calcGridHeight();
+    animateTo({
+      curve: REMOVE_ADD_SPRING, onFinish: () => {
+        if (!this.selected.some(val => val.id === item.id)) {
+          this.scaleIcon = 1;
+          this.scaleAddIcon = 0;
+          this.selected.push(item);
+          this.unSelected.splice(index, 1);
+          this.calcGridHeight();
+          this.arrayUnSelectIsChange = 2;
+          this.addItemMoveX = 0;
+          this.addItemMoveY = 0;
+          if (!this.gridComState) {
+            this.onSaveEdit();
+          }
+          animateTo({
+            duration: ENTER_EXIT_ICON_DURATION,
+            curve: COMMON_BEZIER
+          }, () => {
+            this.addIconShow = false;
+          });
+          this.clickAddBtn = false;
+        }
+      }
+    }, () => {
+      this.addItemMoveX = endPosition.x;
+      this.addItemMoveY = endPosition.y;
+    })
+
+    this.readFlag = false;
+    this.readIndex4EditArea = this.editGridDataLength - 1;
+    this.textAnnouncedForAccessibility = this.getStringByResource(
+      ACCESSIBILITY_UNSELECTED_ITEM_ADD,
+      `${this.content?.text ?? ''}`,
+      Math.floor(this.readIndex4EditArea / this.colNum) + 1,
+      this.readIndex4EditArea % this.colNum + 1
+    );
+
   }
 
   @Builder
@@ -1633,7 +1732,26 @@ export struct GridObjectSortComponent {
         this.textAnnouncedForAccessibility = this.getStringByResource(ACCESSIBILITY_ILLEGAL_AREA);
         this.sendAccessibility();
       })
-    }.accessibilityLevel(NO)
+    }
+    .accessibilityLevel((this.selected.length === 0) ? YES : NO)
+    .parallelGesture(
+      LongPressGesture({ repeat: true })
+        .onAction(() => {
+          this.menuSwitch = true;
+        })
+        .onActionEnd(() => {
+          let eventInfo: accessibility.EventInfo = ({
+            type: 'announceForAccessibility', // 表示主动播报的事件。
+            bundleName: this.bundleName, // 目标应用名；不可缺省。
+            triggerAction: 'common', // 表示没有特定操作，用于主动聚焦、主动播报等场景。
+            textAnnouncedForAccessibility: getContext().resourceManager
+              .getStringByNameSync(ACCESSIBILITY_ITEM_LONG_PRESS_GESTURE) // 主动播报的内容。
+          });
+          accessibility.sendAccessibilityEvent(eventInfo);
+        }))
+    .accessibilityText(this.getStringByResource(ACCESSIBILITY_RESIDENT_AREA))
+    .accessibilityDescription(this.menuSwitch ? ' ' :
+    this.getStringByResource(ACCESSIBILITY_UNSELECTED_IMAGE_ITEM_DESC))
   }
 
   pointToRepeat(type: string): void {

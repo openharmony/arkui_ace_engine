@@ -13,63 +13,16 @@
  * limitations under the License.
  */
 
-#include <array>
-#include <cstddef>
-#include <memory>
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-
-#include "gtest/gtest.h"
-
-#define private public
-#define protected public
-
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "test/unittest/core/pattern/text_input/mock/mock_text_field_select_overlay.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/offset.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/type_definition.h"
-#include "core/common/ai/data_detector_mgr.h"
-#include "core/common/ime/constant.h"
-#include "core/common/ime/text_editing_value.h"
-#include "core/common/ime/text_input_action.h"
-#include "core/common/ime/text_input_type.h"
-#include "core/common/ime/text_selection.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components/text_field/textfield_theme.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_content_type.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
-#include "core/event/key_event.h"
-#include "core/event/touch_event.h"
-#include "core/gestures/gesture_info.h"
-
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -147,6 +100,13 @@ void TextInputModifyBase::SetUpTestSuite()
     textFieldTheme->textColor_ = Color::FromString("#ff182431");
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillRepeatedly([textFieldTheme = textFieldTheme](ThemeType type) -> RefPtr<Theme> {
+            if (type == ScrollBarTheme::TypeId()) {
+                return AceType::MakeRefPtr<ScrollBarTheme>();
+            }
+            return textFieldTheme;
+        });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([textFieldTheme = textFieldTheme](ThemeType type, int id) -> RefPtr<Theme> {
             if (type == ScrollBarTheme::TypeId()) {
                 return AceType::MakeRefPtr<ScrollBarTheme>();
             }
@@ -549,6 +509,8 @@ HWTEST_F(TextFieldModifyTest, DoCallback003, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     GetFocus();
     MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::PRESS);
+    pattern_->selectOverlay_->SetUsingMouse(false);
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
     EXPECT_TRUE(pattern_->IsUsingMouse());
 }
@@ -584,6 +546,7 @@ HWTEST_F(TextFieldModifyTest, DoCallback004, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     GetFocus();
     pattern_->HandleTouchEvent(touchEventInfo);
+    EXPECT_EQ(pattern_->moveCaretState_.touchDownOffset, Offset(0.0f, 0.0f));
 }
 
 /**
@@ -934,14 +897,16 @@ HWTEST_F(TextFieldModifyTest, MouseEvent002, TestSize.Level1)
 
     MouseInfo mouseInfo;
     mouseInfo.SetButton(MouseButton::RIGHT_BUTTON);
-    mouseInfo.SetAction(MouseAction::MOVE);
+    mouseInfo.SetAction(MouseAction::PRESS);
+    pattern_->selectOverlay_->SetUsingMouse(false);
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
     EXPECT_TRUE(pattern_->IsUsingMouse());
 
     FlushLayoutTask(frameNode_);
     GetFocus();
     mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
-    mouseInfo.SetAction(MouseAction::MOVE);
+    mouseInfo.SetAction(MouseAction::PRESS);
+    pattern_->selectOverlay_->SetUsingMouse(false);
     pattern_->mouseEvent_->GetOnMouseEventFunc()(mouseInfo);
     EXPECT_TRUE(pattern_->IsUsingMouse());
 }
@@ -1413,6 +1378,7 @@ HWTEST_F(TextFieldModifyTest, DumpViewDataPageNode001, TestSize.Level1)
      * @tc.steps: step3. call DumpViewDataPageNode.
      */
     pattern_->NotifyFillRequestSuccess(viewData, info, autoFillType);
+    EXPECT_EQ(pattern_->selectController_->caretInfo_.index, 26);
 }
 
 /**
@@ -1458,6 +1424,7 @@ HWTEST_F(TextFieldModifyTest, OnColorConfigurationUpdate001, TestSize.Level1)
      * @tc.steps: step2.call OnColorConfigurationUpdate.
      */
     pattern_->OnColorConfigurationUpdate();
+    EXPECT_EQ(pattern_->floatCaretState_.OriginCursorColor, Color(0x4D000000));
 }
 
 /**
@@ -1589,6 +1556,10 @@ HWTEST_F(TextFieldModifyTest, SetBackgroundColor001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetBackgroundColor(BUBBLE_PAINT_PROPERTY_MASK_COLOR, true);
     });
+    auto paintProperty = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetBackgroundColorValue(Color(0x00000000)), Color(0xFF000000));
+
     /**
      * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
      * @tc.expected: Check if the text draggable.
@@ -1596,8 +1567,11 @@ HWTEST_F(TextFieldModifyTest, SetBackgroundColor001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetBackgroundColor(BUBBLE_PAINT_PROPERTY_MASK_COLOR, false);
     });
+    auto paintProperty2 = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty2, nullptr);
+    EXPECT_EQ(paintProperty2->GetBackgroundColorValue(Color(0x00000000)), Color(0xFFFF0000));
 }
- 
+
 /**
  * @tc.name: SetPadding001
  * @tc.desc: Test the OnModifyDone.
@@ -1617,6 +1591,10 @@ HWTEST_F(TextFieldModifyTest, SetPadding001, TestSize.Level1)
         padding.bottom = CalcLength(PADDING_FIVE);
         model.SetPadding(padding, edge, true);
     });
+    auto paintProperty = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    auto padding = paintProperty->GetPaddingByUser();
+    EXPECT_EQ(padding->left, CalcLength(0.0f));
  
     /**
      * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
@@ -1631,6 +1609,10 @@ HWTEST_F(TextFieldModifyTest, SetPadding001, TestSize.Level1)
         padding.bottom = CalcLength(PADDING_FIVE);
         model.SetPadding(padding, edge, false);
     });
+    auto paintProperty2 = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty2, nullptr);
+    auto padding2 = paintProperty2->GetPaddingByUser();
+    EXPECT_EQ(padding2->left, CalcLength(5.0f));
 }
  
 /**
@@ -1795,6 +1777,9 @@ HWTEST_F(TextFieldModifyTest, SetPlaceholderFont001, TestSize.Level1)
         font.fontFamilies = families;
         model.SetPlaceholderFont(font);
     });
+    auto layoutProperty = frameNode_->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    ASSERT_EQ(layoutProperty->GetPlaceholderFontSizeValue(Dimension(0)), Dimension(2));
 }
  
 /**
@@ -1810,6 +1795,8 @@ HWTEST_F(TextFieldModifyTest, SetShowCounter001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetShowCounter(true);
     });
+    EXPECT_FALSE(pattern_->counterDecorator_);
+
     /**
      * @tc.steps: step2. Set CustomerDraggable true. Call function OnModifyDone.
      * @tc.expected: Check if the text draggable.
@@ -1817,6 +1804,7 @@ HWTEST_F(TextFieldModifyTest, SetShowCounter001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
         model.SetShowCounter(false);
     });
+    EXPECT_FALSE(pattern_->counterDecorator_);
 }
  
 /**
@@ -1876,7 +1864,10 @@ HWTEST_F(TextFieldModifyTest, SetCaretStyle001, TestSize.Level1)
         caretStyle.caretWidth = STROKE_DASH_1;
         model.SetCaretStyle(frameNode, caretStyle);
     });
- 
+    auto paintProperty = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetCursorWidthValue(Dimension(0.0f)), STROKE_DASH_1);
+
     /**
      * @tc.steps: step2. Initialize text input.
      */
@@ -1885,8 +1876,11 @@ HWTEST_F(TextFieldModifyTest, SetCaretStyle001, TestSize.Level1)
         CaretStyle caretStyle;
         model.SetCaretStyle(frameNode, caretStyle);
     });
+    auto paintProperty2 = frameNode_->GetPaintPropertyPtr<TextFieldPaintProperty>();
+    EXPECT_NE(paintProperty2, nullptr);
+    EXPECT_EQ(paintProperty2->GetCursorWidthValue(Dimension(123.0f)), Dimension(0.0f));
 }
- 
+
 /**
  * @tc.name: SetTextFieldText001
  * @tc.desc: Test the OnModifyDone.

@@ -78,7 +78,7 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     auto weekFrameNode = CreateWeekNode(calendarNode);
     CHECK_NULL_RETURN(weekFrameNode, nullptr);
 
-    auto titleNode = CreateTitleNode(calendarNode);
+    auto titleNode = CreateTitleNode(calendarNode, contentColumn);
     CHECK_NULL_RETURN(titleNode, nullptr);
     auto titleLayoutProperty = titleNode->GetLayoutProperty();
     CHECK_NULL_RETURN(titleLayoutProperty, nullptr);
@@ -254,7 +254,8 @@ void AddButtonAccessAbility(RefPtr<FrameNode>& leftYearArrowNode, RefPtr<FrameNo
     rightYearProperty->SetAccessibilityText(theme->GetCalendarTheme().nextYear);
 }
 
-RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& calendarNode)
+RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& calendarNode,
+    const RefPtr<FrameNode>& calendarDialogNode)
 {
     auto titleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
@@ -291,17 +292,7 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
     CHECK_NULL_RETURN(textTitleNode, nullptr);
     auto textLayoutProperty = textTitleNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
-    textLayoutProperty->UpdateContent(u"");
-    MarginProperty textMargin;
-    textMargin.left = CalcLength(theme->GetCalendarTitleTextPadding());
-    textMargin.right = CalcLength(theme->GetCalendarTitleTextPadding());
-    textLayoutProperty->UpdateMargin(textMargin);
-    textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleFontSize());
-    textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
-    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
-    textLayoutProperty->UpdateMaxLines(1);
-    textLayoutProperty->UpdateLayoutWeight(1);
-    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    UpdateTextLayoutProperty(textLayoutProperty, theme);
     textTitleNode->MarkModifyDone();
     textTitleNode->MountToParent(titleRow);
 
@@ -315,6 +306,10 @@ RefPtr<FrameNode> CalendarDialogView::CreateTitleNode(const RefPtr<FrameNode>& c
         CreateTitleImageNode(calendarNode, InternalResource::ResourceId::IC_PUBLIC_DOUBLE_ARROW_RIGHT_SVG);
     rightYearArrowNode->MountToParent(titleRow);
     AddButtonAccessAbility(leftYearArrowNode, leftDayArrowNode, rightDayArrowNode, rightYearArrowNode, theme);
+
+    auto pattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetTitleNode(textTitleNode);
     return titleRow;
 }
 
@@ -444,6 +439,8 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarNode(const RefPtr<FrameNode>
     calendarPattern->SetSelectedDay(date);
     CalendarMonth currentMonth { .year = date.GetYear(), .month = date.GetMonth() };
     UpdateCalendarMonthData(calendarDialogNode, calendarNode, currentMonth);
+    calendarPattern->SetStartDate(settingData.startDate);
+    calendarPattern->SetEndDate(settingData.endDate);
 
     CalendarDay calendarDay;
     PickerDate today = PickerDate::Current();
@@ -671,7 +668,7 @@ void CalendarDialogView::UpdateButtonLayoutProperty(const RefPtr<FrameNode>& but
             Localization::GetInstance()->GetEntryLetters(isConfirm ? "common.ok" : "common.cancel"));
     }
     buttonLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         buttonLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -1009,6 +1006,7 @@ void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& rend
     const DialogProperties& dialogProperties, const RefPtr<CalendarTheme>& calendarTheme)
 {
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
+        CHECK_NULL_VOID(calendarTheme);
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(
             dialogProperties.backgroundBlurStyle.value_or(calendarTheme->GetCalendarPickerDialogBlurStyle()));
@@ -1175,5 +1173,22 @@ void CalendarDialogView::UpdateButtons(
     CalendarDialogView::UpdateButtonStyles(
         buttonInfos, buttonIndex, buttonLayoutProperty, buttonNode->GetRenderContext());
     buttonNode->MarkModifyDone();
+}
+
+void CalendarDialogView::UpdateTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    RefPtr<CalendarTheme>& theme)
+{
+    textLayoutProperty->UpdateContent(u"");
+    MarginProperty textMargin;
+    textMargin.left = CalcLength(theme->GetCalendarTitleTextPadding());
+    textMargin.right = CalcLength(theme->GetCalendarTitleTextPadding());
+    textLayoutProperty->UpdateMargin(textMargin);
+    textLayoutProperty->UpdateFontSize(theme->GetCalendarTitleFontSize());
+    textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
+    textLayoutProperty->UpdateTextColorFlagByUser(true);
+    textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
+    textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateLayoutWeight(1);
+    textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
 }
 } // namespace OHOS::Ace::NG

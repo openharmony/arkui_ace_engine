@@ -16,6 +16,7 @@
 #include "core/components_ng/svg/svg_context.h"
 
 #include <sys/time.h>
+#include "core/components_ng/svg/base/svg_length_scale_rule.h"
 #include "core/components_ng/svg/parse/svg_node.h"
 
 namespace OHOS::Ace::NG {
@@ -132,6 +133,13 @@ void SvgContext::AnimateFlush()
             it = animateCallbacks_.erase(it);
         }
     }
+}
+
+Rect GetBoundingRect(RefPtr<SvgNode>& boxNode, const SvgLengthScaleRule& boxMeasureRule)
+{
+    CHECK_NULL_RETURN(boxNode, Rect());
+    auto boxRect = boxNode->AsPath(boxMeasureRule).GetBounds();
+    return Rect(boxRect.GetLeft(), boxRect.GetTop(), boxRect.GetWidth(), boxRect.GetHeight());
 }
 
 void SvgContext::SetFuncNormalizeToPx(const FuncNormalizeToPx& funcNormalizeToPx)

@@ -59,7 +59,7 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContextRefPtr();
+    auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(textLayoutProperty);
@@ -67,8 +67,10 @@ void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     CHECK_NULL_VOID(pattern);
     auto contentModifier = pattern->GetContentModifier();
 
+    auto themeScopeId = frameNode->GetThemeScopeId();
     textStyle = CreateTextStyleUsingTheme(
-        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(), pipeline->GetTheme<TextTheme>());
+        textLayoutProperty->GetFontStyle(), textLayoutProperty->GetTextLineStyle(),
+            pipeline->GetTheme<TextTheme>(themeScopeId));
     auto fontManager = pipeline->GetFontManager();
     if (fontManager && !(fontManager->GetAppCustomFont().empty()) &&
         !(textLayoutProperty->GetFontFamily().has_value())) {
@@ -160,7 +162,8 @@ void MultipleParagraphLayoutAlgorithm::GetChildrenPlaceholderIndex(std::vector<i
             if (!child) {
                 continue;
             }
-            if (AceType::InstanceOf<CustomSpanItem>(child) && isSpanStringMode_) {
+            auto customSpanItem = AceType::DynamicCast<CustomSpanItem>(child);
+            if (customSpanItem && !customSpanItem->isFrameNode) {
                 continue;
             }
             if (AceType::InstanceOf<ImageSpanItem>(child) || AceType::InstanceOf<PlaceholderSpanItem>(child)) {
@@ -201,6 +204,9 @@ void MultipleParagraphLayoutAlgorithm::GetSpanParagraphStyle(
     }
     if (lineStyle->HasLineHeight()) {
         pStyle.lineHeight = lineStyle->GetLineHeightValue();
+    }
+    if (lineStyle->HasHalfLeading()) {
+        pStyle.halfLeading = lineStyle->GetHalfLeadingValue();
     }
     if (layoutWrapper) {
         pStyle.direction = GetTextDirection(spanItem->content, layoutWrapper);
@@ -395,7 +401,8 @@ ParagraphStyle MultipleParagraphLayoutAlgorithm::GetParagraphStyle(
         .ellipsisMode = textStyle.GetEllipsisMode(),
         .lineBreakStrategy = textStyle.GetLineBreakStrategy(),
         .textOverflow = textStyle.GetTextOverflow(),
-        .indent = textStyle.GetTextIndent()
+        .indent = textStyle.GetTextIndent(),
+        .halfLeading = textStyle.GetHalfLeading()
         };
 }
 
@@ -485,7 +492,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
     auto maxLines = static_cast<int32_t>(paraStyle.maxLines);
     for (auto&& group : spans_) {
         ParagraphStyle spanParagraphStyle = paraStyle;
-        if (paraStyle.maxLines != UINT32_MAX && isSpanStringMode_) {
+        if (paraStyle.maxLines != UINT32_MAX) {
             if (!paragraphManager_->GetParagraphs().empty()) {
                 maxLines -= static_cast<int32_t>(paragraphManager_->GetParagraphs().back().paragraph->GetLineCount());
             }
@@ -540,7 +547,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
                     UpdateParagraphByCustomSpan(
                         customSpanItem, layoutWrapper, paragraph, spanTextLength, customSpanPlaceholder);
                     customSpanPlaceholderInfo.emplace_back(customSpanPlaceholder);
-                    if (!isSpanStringMode_) {
+                    if (customSpanItem->isFrameNode) {
                         iterItems++; // CAPI custom span is frameNode，need to move the iterator backwards
                     }
                     break;
@@ -569,7 +576,7 @@ bool MultipleParagraphLayoutAlgorithm::UpdateParagraphBySpan(LayoutWrapper* layo
         paragraph->Build();
         ApplyIndent(spanParagraphStyle, paragraph, maxWidth, textStyle);
         UpdateSymbolSpanEffect(frameNode, paragraph, group);
-        if (paraStyle.maxLines != UINT32_MAX && isSpanStringMode_) {
+        if (paraStyle.maxLines != UINT32_MAX) {
             paragraph->Layout(static_cast<float>(maxWidth));
         }
         paragraphManager_->AddParagraph({ .paragraph = paragraph,

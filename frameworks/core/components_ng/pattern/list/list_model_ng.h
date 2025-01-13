@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,15 +15,16 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_NG_H
+#include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model.h"
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT ListModelNG : public ListModel {
+class ACE_FORCE_EXPORT ListModelNG : public ListModel {
 public:
-    void Create() override;
+    void Create(bool isCreateArc = false) override;
     void SetSpace(const Dimension& space) override;
     void SetInitialIndex(int32_t initialIndex) override;
     RefPtr<ScrollControllerBase> CreateScrollController() override;
@@ -32,7 +33,7 @@ public:
     void SetScrollBar(DisplayMode scrollBar) override;
     void SetScrollBarColor(const std::string& value) override;
     void SetScrollBarWidth(const std::string& value) override;
-    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge = EffectEdge::ALL) override;
     void SetEditMode(bool editMode) override;
     void SetDivider(const V2::ItemDivider& divider) override;
     void SetChainAnimation(bool enableChainAnimation) override;
@@ -73,7 +74,6 @@ public:
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
     RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
 
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
     static void ScrollToEdge(FrameNode* frameNode, ScrollEdgeType scrollEdgeType, bool smooth);
     static void SetInitialIndex(FrameNode* frameNode, int32_t initialIndex);
@@ -88,12 +88,13 @@ public:
     static void SetScrollEnabled(FrameNode* frameNode, bool enableScrollInteraction);
     static int32_t GetSticky(FrameNode* frameNode);
     static void SetSticky(FrameNode* frameNode, int32_t stickyStyle);
-    static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool alwaysEnabled);
+    static void SetEdgeEffect(FrameNode* frameNode, int32_t edgeEffect, bool alwaysEnabled, EffectEdge edge);
     static int32_t GetListDirection(FrameNode* frameNode);
     static void SetListDirection(FrameNode* frameNode, int32_t axis);
     static float GetListFriction(FrameNode* frameNode);
     static void SetListFriction(FrameNode* frameNode, double friction);
     static void SetListMaintainVisibleContentPosition(FrameNode* frameNode, bool enabled);
+    static bool GetListMaintainVisibleContentPosition(FrameNode* frameNode);
     static void SetListNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static int32_t GetListScrollBar(FrameNode* frameNode);
     static void SetListScrollBar(FrameNode* frameNode, int32_t barState);
@@ -101,20 +102,26 @@ public:
     static void SetListScrollBarWidth(FrameNode* frameNode, const std::string& value);
     static uint32_t GetScrollBarColor(FrameNode* frameNode);
     static void SetListScrollBarColor(FrameNode* frameNode, const std::string& value);
-    static void SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed);
     static void SetLanes(FrameNode* frameNode, int32_t lanes);
+    static int32_t GetLanes(FrameNode* frameNode);
     static void SetLaneConstrain(FrameNode* frameNode, const Dimension& laneMinLength, const Dimension& laneMaxLength);
     static void SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength);
+    static float GetLaneMinLength(FrameNode* frameNode);
     static void SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength);
+    static float GetLaneMaxLength(FrameNode* frameNode);
     static void SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutter);
+    static float GetLaneGutter(FrameNode* frameNode);
     static int32_t GetListItemAlign(FrameNode* frameNode);
     static void SetListItemAlign(FrameNode* frameNode, V2::ListItemAlign listItemAlign);
     static float GetListSpace(FrameNode* frameNode);
     static void SetListSpace(FrameNode* frameNode, const Dimension& space);
     static int32_t GetEdgeEffectAlways(FrameNode* frameNode);
     static void SetScrollSnapAlign(FrameNode* frameNode, ScrollSnapAlign scrollSnapAlign);
+    static int32_t GetScrollSnapAlign(FrameNode* frameNode);
     static void SetContentStartOffset(FrameNode* frameNode, float startOffset);
+    static float GetContentStartOffset(FrameNode* frameNode);
     static void SetContentEndOffset(FrameNode* frameNode, float endOffset);
+    static float GetContentEndOffset(FrameNode* frameNode);
     static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
     static void SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options);
     static int32_t GetEdgeEffect(FrameNode* frameNode);
@@ -125,7 +132,16 @@ public:
     static void SetOnScrollIndex(FrameNode* frameNode, OnScrollIndexEvent&& onScrollIndex);
     static NestedScrollOptions GetListNestedScroll(FrameNode* frameNode);
     DisplayMode GetDisplayMode() const override;
-    static void SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment);
+    void SetHeader(const RefPtr<FrameNode>& headerNode) override;
+    void ResetListChildrenMainSize() override;
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) override;
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, CrownSensitivity sensitivity);
+    static CrownSensitivity GetDigitalCrownSensitivity(FrameNode* frameNode);
+#endif
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isCreateArc = false);
+    static void SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment,
+        std::optional<float> extraOffset = std::nullopt);
     static void SetScrollBy(FrameNode* frameNode, double x, double y);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
@@ -142,6 +158,9 @@ public:
     static void SetOnItemDragLeave(FrameNode* frameNode, OnItemDragLeaveFunc&& onItemDragLeave);
     static void SetOnItemDragMove(FrameNode* frameNode, OnItemDragMoveFunc&& onItemDragMove);
     static void SetOnItemDrop(FrameNode* frameNode, OnItemDropFunc&& onItemDrop);
+    static void ScrollToItemInGroup(
+        FrameNode* frameNode, int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align);
+    static void SetHeader(FrameNode* frameNode, FrameNode* headerNode);
 private:
     void AddDragFrameNodeToManager() const;
     static void AddDragFrameNodeToManager(FrameNode* frameNode);

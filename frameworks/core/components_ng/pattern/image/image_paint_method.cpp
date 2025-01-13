@@ -133,6 +133,21 @@ void ImagePaintMethod::UpdatePaintConfig(PaintWrapper* paintWrapper)
     if (renderProps->GetNeedBorderRadiusValue(false)) {
         UpdateBorderRadius(paintWrapper, canvasImage_->GetImageDfxConfig());
     }
+    auto ImageFit = renderProps->GetImageFit().value_or(ImageFit::COVER);
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    std::vector<float> matrix(matrix4Len);
+    const int32_t initPosition = 5;
+    for (int32_t i = 0; i < matrix4Len; i = i + initPosition) {
+        matrix[i] = 1.0f;
+    }
+    Matrix4 defaultValue = Matrix4(
+        matrix[0], matrix[4], matrix[8], matrix[12],
+        matrix[1], matrix[5], matrix[9], matrix[13],
+        matrix[2], matrix[6], matrix[10], matrix[14],
+        matrix[3], matrix[7], matrix[11], matrix[15]);
+    if (ImageFit == ImageFit::MATRIX) {
+        config.imageMatrix_ = renderProps->GetImageMatrix().value_or(defaultValue);
+    }
 }
 
 RefPtr<Modifier> ImagePaintMethod::GetOverlayModifier(PaintWrapper* paintWrapper)

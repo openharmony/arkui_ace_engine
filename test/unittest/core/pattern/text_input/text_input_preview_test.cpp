@@ -85,7 +85,11 @@ HWTEST_F(TextInputPreviewText, CheckPasswordAreaState, TestSize.Level1)
     });
     GetFocus();
 
+    pattern_->responseArea_ = AceType::MakeRefPtr<PasswordResponseArea>(pattern_, pattern_->GetTextObscured());
     pattern_->CheckPasswordAreaState();
+    auto passwordArea = AceType::DynamicCast<PasswordResponseArea>(pattern_->responseArea_);
+    EXPECT_NE(passwordArea, nullptr);
+    EXPECT_FALSE(passwordArea->IsObscured());
 }
 
 /**
@@ -300,7 +304,8 @@ HWTEST_F(TextInputPreviewText, OnObscuredChanged, TestSize.Level1)
     /**
      * @tc.steps: step2. Set textObscured_  true;
      */
-    pattern_->textObscured_  = true;
+    pattern_->textObscured_ = true;
     pattern_->OnObscuredChanged(false);
+    EXPECT_FALSE(pattern_->textObscured_);
 }
 } // namespace OHOS::Ace::NG

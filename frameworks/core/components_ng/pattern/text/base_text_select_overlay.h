@@ -51,7 +51,7 @@ public:
     static RectF GetVisibleRect(const RefPtr<FrameNode>& node, const RectF& visibleRect);
 
     template<class T>
-    RefPtr<T> GetPattern()
+    RefPtr<T> GetPattern() const
     {
         return DynamicCast<T>(hostTextBase_.Upgrade());
     }
@@ -333,6 +333,10 @@ protected:
     }
     bool IsNeedMenuSearch();
     void HandleOnSearch();
+    virtual bool AllowSearch()
+    {
+        return false;
+    }
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;

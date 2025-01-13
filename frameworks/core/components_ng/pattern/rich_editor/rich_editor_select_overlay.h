@@ -41,6 +41,7 @@ public:
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
     RectF GetSelectArea() override;
     std::string GetSelectedText() override;
+    bool IsStopBackPress() const override;
 
     // override SelectOverlayCallback
     void OnMenuItemAction(OptionMenuActionId id, OptionMenuType type) override;
@@ -65,6 +66,10 @@ public:
     {
         return isHandleMoving_;
     }
+    bool IsSingleHandleMoving()
+    {
+        return isHandleMoving_ && IsSingleHandle();
+    }
     void OnHandleIsHidden() override;
     void OnOverlayClick(const GestureEvent& event, bool isFirst) override;
     void OnHandleMouseEvent(const MouseInfo& event) override;
@@ -75,6 +80,7 @@ public:
         return true;
     }
     float GetHandleHotZoneRadius();
+    bool IsMenuShow();
 
 private:
     void RemoveAreaChangeInner();

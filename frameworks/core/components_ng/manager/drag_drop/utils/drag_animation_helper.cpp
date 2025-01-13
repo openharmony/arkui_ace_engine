@@ -15,7 +15,10 @@
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -42,6 +45,11 @@ constexpr float DEFAULT_INTERPOLATING_SPRING_VELOCITY = 10.0f;
 constexpr float DEFAULT_INTERPOLATING_SPRING_MASS = 1.0f;
 constexpr float DEFAULT_INTERPOLATING_SPRING_STIFFNESS = 410.0f;
 constexpr float DEFAULT_INTERPOLATING_SPRING_DAMPING = 38.0f;
+constexpr float DEFAULT_GRAYED = 0.4f;
+const RefPtr<InterpolatingSpring> DRAG_START_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 0.0f, 380.0f, 34.0f);
+const RefPtr<InterpolatingSpring> DRAG_END_ANIMATION_CURVE =
+    AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 0.0f, 228.0f, 29.0f);
 }
 
 void DragAnimationHelper::CalcDistanceBeforeLifting(bool isGrid, CalcResult& calcResult, OffsetF gatherNodeCenter,
@@ -87,16 +95,14 @@ OffsetF DragAnimationHelper::CalcOffsetToTarget(OffsetF curPos, OffsetF targetPo
     return { x, y };
 }
 
-void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<DragEventActuator>& actuator,
+void DragAnimationHelper::PlayGatherNodeTranslateAnimation(const RefPtr<FrameNode>& frameNode,
     const RefPtr<OverlayManager>& overlayManager)
 {
-    CHECK_NULL_VOID(actuator);
     CHECK_NULL_VOID(overlayManager);
+    CHECK_NULL_VOID(frameNode);
     AnimationOption option;
     option.SetDuration(BEFORE_LIFTING_TIME);
     option.SetCurve(Curves::SHARP);
-    auto frameNode = actuator->GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
     auto gatherNodeCenter = DragDropFuncWrapper::GetPaintRectCenterToScreen(frameNode);
     auto gatherNodeChildrenInfo = overlayManager->GetGatherNodeChildrenInfo();
 
@@ -159,7 +165,7 @@ void DragAnimationHelper::PlayGatherAnimationBeforeLifting(const RefPtr<DragEven
     pipeline->FlushSyncGeometryNodeTasks();
     manager->SetIsGatherWithMenu(false);
     PlayGatherNodeOpacityAnimation(manager);
-    PlayGatherNodeTranslateAnimation(actuator, manager);
+    PlayGatherNodeTranslateAnimation(frameNode, manager);
 }
 
 void DragAnimationHelper::PlayNodeAnimationBeforeLifting(const RefPtr<FrameNode>& frameNode)
@@ -403,4 +409,330 @@ void DragAnimationHelper::ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& m
         DragAnimationHelper::ShowBadgeAnimation(textNode);
     });
 }
+
+void DragAnimationHelper::SetPreOpacity(const RefPtr<FrameNode>& preNode)
+{
+    auto grayedOpacity = preNode->GetPreGrayedOpacity();
+    DoGrayedAnimation(preNode, grayedOpacity, DRAG_END_ANIMATION_CURVE);
 }
+
+void DragAnimationHelper::DoDragStartGrayedAnimation(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    float opacity = 1.0f;
+    if (renderContext->HasOpacity()) {
+        opacity = renderContext->GetOpacityValue();
+        frameNode->SetPreGrayedOpacity(opacity);
+    }
+    DoGrayedAnimation(frameNode, opacity * DEFAULT_GRAYED, DRAG_START_ANIMATION_CURVE);
+}
+
+void DragAnimationHelper::DoGrayedAnimation(
+    const RefPtr<FrameNode>& frameNode, float opacity, RefPtr<InterpolatingSpring> cure)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto frameTag = frameNode->GetTag();
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    if (gestureHub->IsTextCategoryComponent(frameTag)) {
+        return;
+    }
+    AnimationOption option;
+    option.SetCurve(cure);
+    AnimationUtils::Animate(
+        option, [frameNode, opacity]() { ACE_UPDATE_NODE_RENDER_CONTEXT(Opacity, opacity, frameNode); },
+        option.GetOnFinishEvent());
+}
+
+RefPtr<FrameNode> DragAnimationHelper::CreateImageNode(const RefPtr<PixelMap>& pixelMap)
+{
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+    auto width = pixelMap->GetWidth();
+    auto height = pixelMap->GetHeight();
+    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    CHECK_NULL_RETURN(imageNode, nullptr);
+    auto renderProps = imageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_RETURN(renderProps, nullptr);
+    renderProps->UpdateImageInterpolation(ImageInterpolation::HIGH);
+    renderProps->UpdateNeedBorderRadius(false);
+    auto props = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(props, nullptr);
+    props->UpdateAutoResize(false);
+    props->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+    auto targetSize = CalcSize(NG::CalcLength(width), NG::CalcLength(height));
+    props->UpdateUserDefinedIdealSize(targetSize);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_RETURN(imageContext, nullptr);
+    Vector5F rotate = Vector5F(0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+    imageContext->UpdateTransformRotate(rotate);
+    imageContext->UpdateClipEdge(true);
+    imageContext->UpdateBorderRadius(BorderRadiusProperty(Dimension()));
+    imageContext->UpdateOpacity(1.0f);
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    if (imagePattern) {
+        imagePattern->SetSyncLoad(true);
+    }
+    ClickEffectInfo clickEffectInfo;
+    clickEffectInfo.level = ClickEffectLevel::LIGHT;
+    clickEffectInfo.scaleNumber = DEFAULT_ANIMATION_SCALE;
+    imageContext->UpdateClickEffectLevel(clickEffectInfo);
+    return imageNode;
+}
+
+RefPtr<FrameNode> DragAnimationHelper::CreateGatherNode(const RefPtr<FrameNode>& frameNode,
+    std::vector<GatherNodeChildInfo>& gatherNodeInfo)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto parentNode = DragDropFuncWrapper::FindItemParentNode(frameNode);
+    CHECK_NULL_RETURN(parentNode, nullptr);
+    auto scrollPattern = parentNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(scrollPattern, nullptr);
+    auto children = scrollPattern->GetVisibleSelectedItems();
+    if (children.empty()) {
+        return nullptr;
+    }
+
+    auto stackNode = FrameNode::GetOrCreateFrameNode(V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<StackPattern>(); });
+    CHECK_NULL_RETURN(stackNode, nullptr);
+    auto geometryNode = stackNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, nullptr);
+    geometryNode->SetFrameOffset({0.0f, 0.0f});
+
+    for (auto iter = children.rbegin(); iter != children.rend(); iter++) {
+        auto itemFrameNode = (*iter);
+        if (itemFrameNode == frameNode) {
+            continue;
+        }
+        GatherNodeChildInfo gatherNodeChildInfo;
+        auto imageNode = CreateGatherImageNode(itemFrameNode, gatherNodeChildInfo);
+        CHECK_NULL_RETURN(imageNode, nullptr);
+        stackNode->AddChild(imageNode);
+        gatherNodeInfo.push_back(gatherNodeChildInfo);
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Create gather node success, count %{public}d",
+        static_cast<int32_t>(children.size()));
+    return stackNode;
+}
+
+RefPtr<FrameNode> DragAnimationHelper::CreateGatherImageNode(const RefPtr<FrameNode>& frameNode,
+    GatherNodeChildInfo& gatherNodeChildInfo)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pixelMap = DragDropFuncWrapper::GetGatherNodePreviewPixelMap(frameNode);
+    CHECK_NULL_RETURN(pixelMap, nullptr);
+    int32_t width = pixelMap->GetWidth();
+    int32_t height = pixelMap->GetHeight();
+    auto offset = DragDropFuncWrapper::GetPaintRectCenter(frameNode) - OffsetF(width / 2.0f, height / 2.0f);
+    auto imageNode = CreateImageNode(pixelMap);
+    CHECK_NULL_RETURN(imageNode, nullptr);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_RETURN(imageContext, nullptr);
+    imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
+
+    gatherNodeChildInfo = { imageNode,
+        offset + DragDropFuncWrapper::GetCurrentWindowOffset(frameNode->GetContextRefPtr()), width, height,
+        width / 2.0f, height / 2.0f, WeakPtr<FrameNode>(frameNode) };
+    return imageNode;
+}
+
+void DragAnimationHelper::MountGatherNode(const RefPtr<OverlayManager>& overlayManager,
+    const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& gatherNode,
+    const std::vector<GatherNodeChildInfo>& gatherNodeInfo)
+{
+    if (!overlayManager || !frameNode || !gatherNode) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Mount gather node");
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        auto windowScene = overlayManager->FindWindowScene(frameNode);
+        overlayManager->MountGatherNodeToWindowScene(gatherNode, gatherNodeInfo, windowScene);
+    } else {
+        overlayManager->MountGatherNodeToRootNode(gatherNode, gatherNodeInfo);
+    }
+}
+
+void DragAnimationHelper::MarkDirtyNode(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkModifyDone();
+    frameNode->SetLayoutDirtyMarked(true);
+    auto context = frameNode->GetContext();
+    if (context) {
+        context->FlushUITaskWithSingleDirtyNode(frameNode);
+    }
+
+    auto children = frameNode->GetChildren();
+    for (const auto& child : children) {
+        CHECK_NULL_VOID(child);
+        auto imageNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(imageNode);
+        imageNode->MarkModifyDone();
+        imageNode->SetLayoutDirtyMarked(true);
+        if (context) {
+            context->FlushUITaskWithSingleDirtyNode(imageNode);
+        }
+    }
+}
+
+void DragAnimationHelper::InitGatherNodeAttr(const RefPtr<FrameNode>& gatherNode,
+    const std::vector<GatherNodeChildInfo>& gatherNodeInfo)
+{
+    CHECK_NULL_VOID(gatherNode);
+    auto renderContext = gatherNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->UpdatePosition(OffsetT<Dimension>(Dimension(0.0f), Dimension(0.0f)));
+    }
+    for (auto childInfo : gatherNodeInfo) {
+        auto imageNode = childInfo.imageNode.Upgrade();
+        DragDropFuncWrapper::UpdateNodePositionToScreen(imageNode, childInfo.offset);
+    }
+}
+
+void DragAnimationHelper::ShowGatherNodeAnimation(const RefPtr<FrameNode>& frameNode)
+{
+    TAG_LOGI(AceLogTag::ACE_DRAG, "Show gather node animation");
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+
+    if (manager->GetHasGatherNode()) {
+        TAG_LOGW(AceLogTag::ACE_DRAG, "Not need create gather node, already have");
+        return;
+    }
+
+    //create gather node
+    std::vector<GatherNodeChildInfo> gatherNodeInfo;
+    auto gatherNode = CreateGatherNode(frameNode, gatherNodeInfo);
+    CHECK_NULL_VOID(gatherNode);
+    MountGatherNode(manager, frameNode, gatherNode, gatherNodeInfo);
+    InitGatherNodeAttr(gatherNode, gatherNodeInfo);
+    MarkDirtyNode(frameNode);
+    
+    pipeline->FlushSyncGeometryNodeTasks();
+    manager->SetIsGatherWithMenu(false);
+
+    //do gather animation before lifting
+    PlayGatherNodeOpacityAnimation(manager);
+    PlayGatherNodeTranslateAnimation(frameNode, manager);
+    PlayNodeAnimationBeforeLifting(frameNode);
+}
+
+void DragAnimationHelper::UpdateBadgeTextNodePosition(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<FrameNode>& textNode, int32_t childSize, float previewScale, OffsetF previewOffset)
+{
+    if (childSize <= 1) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(textNode);
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    auto pixelMap = frameNode->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    auto width = pixelMap->GetWidth();
+    auto height = pixelMap->GetHeight();
+    auto offset = previewOffset.NonOffset()
+                      ? DragDropFuncWrapper::GetFrameNodeOffsetToWindow(textNode, frameNode, width, height)
+                      : previewOffset;
+    auto badgeLength = std::to_string(childSize).size();
+    double textOffsetX = offset.GetX() + width * (previewScale + 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx() -
+                         (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
+    double textOffsetY = offset.GetY() - height * (previewScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
+    textRenderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+    textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(textOffsetX), Dimension(textOffsetY)));
+}
+
+RefPtr<FrameNode> DragAnimationHelper::CreateBadgeTextNode(int32_t childSize)
+{
+    if (childSize <= 1) {
+        return nullptr;
+    }
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_RETURN(textNode, nullptr);
+    auto badgeLength = std::to_string(childSize).size();
+    DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
+
+    textNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    textNode->MarkModifyDone();
+    textNode->SetLayoutDirtyMarked(true);
+    textNode->SetActive(true);
+    return textNode;
+}
+
+void DragAnimationHelper::ShowPreviewBadgeAnimation(
+    const RefPtr<GestureEventHub>& gestureHub, const RefPtr<OverlayManager>& manager)
+{
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto dragPreviewOptions = frameNode->GetDragPreviewOption();
+    auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+    int32_t childSize = badgeNumber.has_value() ? badgeNumber.value()
+                                                : static_cast<int32_t>(manager->GetGatherNodeChildrenInfo().size()) + 1;
+    auto textNode = DragAnimationHelper::CreateBadgeTextNode(childSize);
+    CHECK_NULL_VOID(textNode);
+    auto column = manager->GetPixelMapNode();
+    CHECK_NULL_VOID(column);
+    column->AddChild(textNode);
+
+    DragAnimationHelper::UpdateBadgeTextNodePosition(frameNode, textNode, childSize, PIXELMAP_DRAG_SCALE_MULTIPLE);
+    DragAnimationHelper::ShowBadgeAnimation(textNode);
+}
+
+// update ImageNode default attr before floating
+void DragAnimationHelper::SetImageNodeInitAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode)
+{
+    CHECK_NULL_VOID(imageNode);
+    CHECK_NULL_VOID(frameNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+
+    // update default scale
+    bool defaultAnimationBeforeLifting = dragPreviewOption.defaultAnimationBeforeLifting;
+    if (defaultAnimationBeforeLifting) {
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        if (layoutProperty) {
+            layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        }
+        imageContext->UpdateTransformScale({ DEFAULT_ANIMATION_SCALE, DEFAULT_ANIMATION_SCALE });
+    } else {
+        imageContext->UpdateTransformScale({ 1.0f, 1.0f });
+    }
+
+    // update shadow
+    auto shadow = Shadow::CreateShadow(ShadowStyle::None);
+    if (dragPreviewOption.options.shadow.has_value()) {
+        shadow = dragPreviewOption.options.shadow.value();
+        shadow.SetColor(Color(0x00000000));
+    }
+    imageContext->UpdateBackShadow(shadow);
+
+    // update radius
+    auto borderRadius = DragDropFuncWrapper::GetDragFrameNodeBorderRadius(frameNode);
+    imageContext->UpdateBorderRadius(borderRadius);
+
+    // update opacity
+    imageContext->UpdateOpacity(1.0f);
+}
+
+void DragAnimationHelper::SetImageNodeFinishAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode)
+{
+    CHECK_NULL_VOID(imageNode);
+    CHECK_NULL_VOID(frameNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    if (dragPreviewOption.options.shadow.has_value() && !dragPreviewOption.options.shadow->GetIsFilled()) {
+        imageContext->UpdateBackShadow(dragPreviewOption.options.shadow.value());
+    }
+}
+} // namespace OHOS::Ace::NG

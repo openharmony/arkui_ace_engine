@@ -40,9 +40,10 @@ public:
 
     AccessibilityValue GetAccessibilityValue() const override;
 
-private:
-    RefPtr<FrameNode> GetSwiperNode() const;
+protected:
+    virtual RefPtr<FrameNode> GetSwiperNode() const;
 
+private:
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorAccessibilityProperty);
 };
 } // namespace OHOS::Ace::NG

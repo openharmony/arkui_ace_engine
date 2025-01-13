@@ -25,7 +25,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 const uint32_t MAX_LINES = 3;
-constexpr uint32_t DEFAULT_CARET_COLOR = 0xFF007DFF;
 constexpr uint32_t DEFAULT_CARE_POSITION = 0;
 constexpr CopyOptions DEFAULT_TEXT_INPUT_COPY_OPTION = CopyOptions::Local;
 constexpr bool DEFAULT_SHOW_PASSWORD_ICON_VALUE = true;
@@ -42,6 +41,9 @@ constexpr int16_t DEFAULT_ALPHA = 255;
 constexpr double DEFAULT_OPACITY = 0.2;
 const std::vector<std::string> DEFAULT_FONT_FAMILY = { "HarmonyOS Sans" };
 const std::vector<TextAlign> TEXT_ALIGNS = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
+const std::vector<EllipsisMode> ELLIPSIS_MODALS = { EllipsisMode::HEAD, EllipsisMode::MIDDLE, EllipsisMode::TAIL };
+constexpr float DEFAULT_MIN_FONT_SCALE = 0.0f;
+constexpr float DEFAULT_MAX_FONT_SCALE = static_cast<float>(INT32_MAX);
 const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
@@ -58,6 +60,7 @@ constexpr bool DEFAULT_SELECT_ALL = false;
 constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 std::string g_strValue;
+constexpr int32_t ELLIPSIS_MODE_TAIL = 2;
 
 void SetTextInputCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color)
 {
@@ -70,7 +73,7 @@ void ResetTextInputCaretColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetCaretColor(frameNode, Color(DEFAULT_CARET_COLOR));
+    TextFieldModelNG::ResetCaretColor(frameNode);
 }
 
 void SetTextInputType(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -118,11 +121,7 @@ void ResetTextInputPlaceholderColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    TextFieldModelNG::SetPlaceholderColor(frameNode, theme->GetPlaceholderColor());
+    TextFieldModelNG::ResetPlaceholderColor(frameNode);
 }
 
 void SetTextInputCaretPosition(ArkUINodeHandle node, ArkUI_Int32 caretPosition)
@@ -523,6 +522,34 @@ void ResetTextInputFontSize(ArkUINodeHandle node)
     TextFieldModelNG::SetFontSize(frameNode, theme->GetFontSize());
 }
 
+void SetTextInputMinFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetMinFontScale(frameNode, number);
+}
+
+void ResetTextInputMinFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetMinFontScale(frameNode, DEFAULT_MIN_FONT_SCALE);
+}
+
+void SetTextInputMaxFontScale(ArkUINodeHandle node, ArkUI_Float32 number)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetMaxFontScale(frameNode, number);
+}
+
+void ResetTextInputMaxFontScale(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetMaxFontScale(frameNode, DEFAULT_MAX_FONT_SCALE);
+}
+
 void SetTextInputMaxLength(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -635,11 +662,7 @@ void ResetTextInputFontColor(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    TextFieldModelNG::SetTextColor(frameNode, theme->GetTextColor());
+    TextFieldModelNG::ResetTextColor(frameNode);
 }
 
 void SetTextInputFontStyle(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -686,7 +709,7 @@ void SetTextInputPlaceholderString(ArkUINodeHandle node, ArkUI_CharPtr value)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::string placeholderStr(value);
-    TextFieldModelNG::SetTextFieldPlaceHolder(frameNode, UtfUtils::Str8ToStr16(placeholderStr));
+    TextFieldModelNG::SetTextFieldPlaceHolder(frameNode, UtfUtils::Str8DebugToStr16(placeholderStr));
 }
 
 void SetTextInputTextString(ArkUINodeHandle node, ArkUI_CharPtr value)
@@ -694,7 +717,7 @@ void SetTextInputTextString(ArkUINodeHandle node, ArkUI_CharPtr value)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::string textStr(value);
-    TextFieldModelNG::SetTextFieldText(frameNode, UtfUtils::Str8ToStr16(textStr));
+    TextFieldModelNG::SetTextFieldText(frameNode, UtfUtils::Str8DebugToStr16(textStr));
 }
 
 void StopTextInputTextEditing(ArkUINodeHandle node)
@@ -769,7 +792,7 @@ ArkUI_CharPtr GetTextInputPlaceholder(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, "");
-    g_strValue = UtfUtils::Str16ToStr8(TextFieldModelNG::GetPlaceholderText(frameNode));
+    g_strValue = UtfUtils::Str16DebugToStr8(TextFieldModelNG::GetPlaceholderText(frameNode));
     return g_strValue.c_str();
 }
 
@@ -777,7 +800,7 @@ ArkUI_CharPtr GetTextInputText(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_RETURN(frameNode, "");
-    g_strValue = UtfUtils::Str16ToStr8(TextFieldModelNG::GetTextFieldText(frameNode));
+    g_strValue = UtfUtils::Str16DebugToStr8(TextFieldModelNG::GetTextFieldText(frameNode));
     return g_strValue.c_str();
 }
 
@@ -969,13 +992,7 @@ void ResetTextInputBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Color backgroundColor;
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto buttonTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(buttonTheme);
-    backgroundColor = buttonTheme->GetBgColor();
-    TextFieldModelNG::SetBackgroundColor(frameNode, backgroundColor);
+    TextFieldModelNG::ResetBackgroundColor(frameNode);
 }
 
 void SetTextInputNormalUnderlineColor(ArkUINodeHandle node, ArkUI_Uint32 normalColor)
@@ -1096,6 +1113,21 @@ void ResetTextInputLineHeight(ArkUINodeHandle node)
     CalcDimension value;
     value.Reset();
     TextFieldModelNG::SetLineHeight(frameNode, value);
+}
+
+void SetTextInputHalfLeading(ArkUINodeHandle node, ArkUI_Uint32 halfLeading)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetHalfLeading(frameNode, static_cast<bool>(halfLeading));
+}
+
+void ResetTextInputHalfLeading(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool value = false;
+    TextFieldModelNG::SetHalfLeading(frameNode, value);
 }
 
 void SetTextInputFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
@@ -1837,11 +1869,42 @@ void ResetTextInputEnableHapticFeedback(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE);
 }
+
+void SetEllipsisMode(ArkUINodeHandle node, ArkUI_Uint32 ellipsisMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (ellipsisMode < 0 || ellipsisMode >= ELLIPSIS_MODALS.size()) {
+        ellipsisMode = ELLIPSIS_MODE_TAIL;
+    }
+    TextFieldModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[ellipsisMode]);
+}
+
+void ResetEllipsisMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODALS[ELLIPSIS_MODE_TAIL]);
+}
+
+void SetStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStopBackPress(frameNode, static_cast<bool>(value));
+}
+
+void ResetStopBackPress(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetStopBackPress(frameNode, true);
+}
 } // namespace
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITextInputModifier modifier = {
         .setTextInputCaretColor = SetTextInputCaretColor,
         .resetTextInputCaretColor = ResetTextInputCaretColor,
@@ -1936,6 +1999,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .resetTextInputLetterSpacing = ResetTextInputLetterSpacing,
         .setTextInputLineHeight = SetTextInputLineHeight,
         .resetTextInputLineHeight = ResetTextInputLineHeight,
+        .setTextInputHalfLeading = SetTextInputHalfLeading,
+        .resetTextInputHalfLeading = ResetTextInputHalfLeading,
         .setTextInputFontFeature = SetTextInputFontFeature,
         .resetTextInputFontFeature = ResetTextInputFontFeature,
         .setTextInputWordBreak = SetTextInputWordBreak,
@@ -2035,21 +2100,22 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .resetTextInputEnableHapticFeedback = ResetTextInputEnableHapticFeedback,
         .getTextInputLetterSpacing = GetTextInputLetterSpacing,
         .getTextInputEnablePreviewText = GetTextInputEnablePreviewText,
+        .setEllipsisMode = SetEllipsisMode,
+        .resetEllipsisMode = ResetEllipsisMode,
+        .setTextInputMinFontScale = SetTextInputMinFontScale,
+        .resetTextInputMinFontScale = ResetTextInputMinFontScale,
+        .setTextInputMaxFontScale = SetTextInputMaxFontScale,
+        .resetTextInputMaxFontScale = ResetTextInputMaxFontScale,
+        .setStopBackPress = SetStopBackPress,
+        .resetStopBackPress = ResetStopBackPress,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUITextInputModifier* GetCJUITextInputModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITextInputModifier modifier = {
         .setTextInputCaretColor = SetTextInputCaretColor,
         .resetTextInputCaretColor = ResetTextInputCaretColor,
@@ -2234,14 +2300,7 @@ const CJUITextInputModifier* GetCJUITextInputModifier()
         .setTextInputEnablePreviewText = SetTextInputEnablePreviewText,
         .resetTextInputEnablePreviewText = ResetTextInputEnablePreviewText,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
@@ -2252,7 +2311,7 @@ void SetOnTextInputChange(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onChange = [node, extraParam](const std::u16string& str, PreviewText&) {
         ArkUINodeEvent event;
-        std::string utf8Str = UtfUtils::Str16ToStr8(str);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXT_INPUT_CHANGE;
@@ -2269,8 +2328,8 @@ void SetOnTextInputChangeWithPreviewText(ArkUINodeHandle node, void* extraParam)
     auto onChange = [node, extraParam](const std::u16string& value, PreviewText& previewText) {
         ArkUINodeEvent eventWithPreview;
         eventWithPreview.kind = TEXT_INPUT_CHANGE;
-        std::string utf8StrValue = UtfUtils::Str16ToStr8(value);
-        std::string utf8Str = UtfUtils::Str16ToStr8(previewText.value);
+        std::string utf8StrValue = UtfUtils::Str16DebugToStr8(value);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(previewText.value);
         eventWithPreview.extraParam = reinterpret_cast<intptr_t>(extraParam);
         eventWithPreview.textChangeEvent.subKind = ON_TEXT_INPUT_CHANGE_WITH_PREVIEW_TEXT;
         eventWithPreview.textChangeEvent.nativeStringPtr = reinterpret_cast<intptr_t>(utf8StrValue.c_str());
@@ -2302,7 +2361,7 @@ void SetOnTextInputCut(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onCut = [node, extraParam](const std::u16string& str) {
         ArkUINodeEvent event;
-        std::string utf8Str = UtfUtils::Str16ToStr8(str);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXT_INPUT_CUT;
@@ -2318,7 +2377,7 @@ void SetOnTextInputPaste(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onPaste = [node, extraParam](const std::u16string& str, NG::TextCommonEvent& commonEvent) {
         ArkUINodeEvent event;
-        std::string utf8Str = UtfUtils::Str16ToStr8(str);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXT_INPUT_PASTE;
@@ -2385,7 +2444,7 @@ void SetOnTextInputInputFilterError(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onInputFilterError = [node, extraParam](const std::u16string& str) {
         ArkUINodeEvent event;
-        std::string utf8Str = UtfUtils::Str16ToStr8(str);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXT_INPUT_INPUT_FILTER_ERROR;
@@ -2417,7 +2476,7 @@ void SetTextInputOnWillInsert(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onWillInsert = [node, extraParam](const InsertValueInfo& Info) -> bool {
         ArkUINodeEvent event;
-        std::string insertValueUtf8 = UtfUtils::Str16ToStr8(Info.insertValue);
+        std::string insertValueUtf8 = UtfUtils::Str16DebugToStr8(Info.insertValue);
         event.kind = MIXED_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.mixedEvent.subKind = ON_TEXT_INPUT_WILL_INSERT;
@@ -2437,7 +2496,7 @@ void SetTextInputOnDidInsert(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onDidInsert = [node, extraParam](const InsertValueInfo& Info) {
         ArkUINodeEvent event;
-        std::string insertValueUtf8 = UtfUtils::Str16ToStr8(Info.insertValue);
+        std::string insertValueUtf8 = UtfUtils::Str16DebugToStr8(Info.insertValue);
         event.kind = MIXED_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.mixedEvent.subKind = ON_TEXT_INPUT_DID_INSERT;
@@ -2456,7 +2515,7 @@ void SetTextInputOnWillDelete(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onWillDelete = [node, extraParam](const DeleteValueInfo& Info) -> bool {
         ArkUINodeEvent event;
-        std::string deleteValueUtf8 = UtfUtils::Str16ToStr8(Info.deleteValue);
+        std::string deleteValueUtf8 = UtfUtils::Str16DebugToStr8(Info.deleteValue);
         event.kind = MIXED_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.mixedEvent.subKind = ON_TEXT_INPUT_WILL_DELETE;
@@ -2477,7 +2536,7 @@ void SetTextInputOnDidDelete(ArkUINodeHandle node, void* extraParam)
     CHECK_NULL_VOID(frameNode);
     auto onDidDelete = [node, extraParam](const DeleteValueInfo& Info) {
         ArkUINodeEvent event;
-        std::string deleteValueUtf8 = UtfUtils::Str16ToStr8(Info.deleteValue);
+        std::string deleteValueUtf8 = UtfUtils::Str16DebugToStr8(Info.deleteValue);
         event.kind = MIXED_EVENT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.mixedEvent.subKind = ON_TEXT_INPUT_DID_DELETE;

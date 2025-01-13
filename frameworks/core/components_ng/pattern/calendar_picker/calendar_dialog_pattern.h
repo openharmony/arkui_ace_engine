@@ -113,6 +113,7 @@ public:
         currentSettingData_ = settingData;
     }
 
+    void OnColorConfigurationUpdate() override;
     void OnLanguageConfigurationUpdate() override;
 
     void UpdateCaretInfoToController();
@@ -130,6 +131,10 @@ public:
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight);
 
     void InitSurfaceChangedCallback();
+    inline void SetTitleNode(RefPtr<FrameNode>& titleNode)
+    {
+        titleNode_ = titleNode;
+    }
 
 private:
     void OnModifyDone() override;
@@ -198,6 +203,7 @@ private:
     std::vector<ButtonInfo> currentButtonInfos_;
     CalendarSettingData currentSettingData_;
     std::optional<int32_t> surfaceChangedCallbackId_;
+    WeakPtr<FrameNode> titleNode_;
 };
 } // namespace OHOS::Ace::NG
 

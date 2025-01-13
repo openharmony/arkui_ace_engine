@@ -1185,6 +1185,14 @@ void WebModelNG::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
     webPattern->JavaScriptOnDocumentEndByOrder(scriptItems, scriptItemsByOrder);
 }
 
+void WebModelNG::JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
+}
+
 void WebModelNG::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -1326,5 +1334,12 @@ void WebModelNG::SetEnabledHapticFeedback(bool isEnabled)
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateEnabledHapticFeedback(isEnabled);
+}
+
+void WebModelNG::SetOptimizeParserBudgetEnabled(bool enable)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateOptimizeParserBudgetEnabled(enable);
 }
 } // namespace OHOS::Ace::NG

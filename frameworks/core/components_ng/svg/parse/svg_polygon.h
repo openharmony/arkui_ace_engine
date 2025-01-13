@@ -31,7 +31,9 @@ public:
     static RefPtr<SvgNode> CreatePolyline();
 
     RSRecordingPath AsPath(const Size& viewPort) const override;
+    RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override;
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
+    void ConvertPoints(std::vector<RSPoint>& points, const SvgLengthScaleRule& lengthRule);
 
 private:
     SvgPolygonAttribute polyAttr_;

@@ -81,6 +81,7 @@ struct WebPatternProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(KeyboardAvoidMode, WebKeyboardAvoidMode);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(EnabledHapticFeedback, bool);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(OptimizeParserBudgetEnabled, bool);
 };
 
 } // namespace OHOS::Ace::NG

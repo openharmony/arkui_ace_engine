@@ -93,6 +93,7 @@ public:
     virtual void SetFont(const Font& value) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
+    virtual void ResetTextColor() = 0;
     virtual void SetTextShadow(const std::vector<Shadow>& value) = 0;
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
@@ -129,12 +130,6 @@ public:
     virtual void SetCopyOption(CopyOptions copyOption) = 0;
     virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func) = 0;
     virtual void SetEllipsisMode(EllipsisMode modal) = 0;
-
-    virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
-    virtual void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) = 0;
-    virtual void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) = 0;
-    virtual void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) = 0;
-    virtual void SetOnDrop(NG::OnDragDropFunc&& onDrop) = 0;
 
     virtual void SetTextSelection(int32_t startIndex, int32_t endIndex) = 0;
     virtual void SetTextSelectableMode(TextSelectableMode textSelectable) = 0;
