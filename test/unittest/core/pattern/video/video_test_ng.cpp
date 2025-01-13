@@ -327,7 +327,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      */
     auto videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
     auto videoSrcInfo = videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo());
-    videoSrcInfo.src = VIDEO_SRC;
+    videoSrcInfo.src_ = VIDEO_SRC;
     videoLayoutProperty->UpdateVideoSource(videoSrcInfo);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(5)
@@ -337,7 +337,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Call UpdateMediaPlayerOnBg
-     *            case: IsMediaPlayerValid is always true & has set VideoSource & has set videoSrcInfo_.src
+     *            case: IsMediaPlayerValid is always true & has set VideoSource & has set videoSrcInfo_.src_
      * @tc.expected: step5. IsMediaPlayerValid will be called 3 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
@@ -352,7 +352,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      *                      other function will be called once and return right value when preparing MediaPlayer
      *                      firstly
      */
-    pattern->videoSrcInfo_.src.clear();
+    pattern->videoSrcInfo_.src_.clear();
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(5)
         .WillOnce(Return(false))
@@ -390,11 +390,11 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(true))
         .WillOnce(Return(true))
         .WillOnce(Return(true));
-    pattern->videoSrcInfo_.src.clear();
+    pattern->videoSrcInfo_.src_.clear();
     pattern->UpdateMediaPlayerOnBg();
-    pattern->videoSrcInfo_.src.clear();
+    pattern->videoSrcInfo_.src_.clear();
     pattern->UpdateMediaPlayerOnBg();
-    pattern->videoSrcInfo_.src.clear();
+    pattern->videoSrcInfo_.src_.clear();
     pattern->UpdateMediaPlayerOnBg();
 
     // CreateMediaPlayer success but PrepareMediaPlayer fail for mediaPlayer is invalid
@@ -405,7 +405,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(false))
         .WillOnce(Return(false))
         .WillOnce(Return(false));
-    pattern->videoSrcInfo_.src.clear();
+    pattern->videoSrcInfo_.src_.clear();
     pattern->UpdateMediaPlayerOnBg();
 }
 
