@@ -7800,6 +7800,7 @@ void SetOnTouch(ArkUINodeHandle node, void* extraParam)
         if (changeTouch.size() > 0) {
             TouchLocationInfo front = changeTouch.front();
             event.touchEvent.action = static_cast<int32_t>(front.GetTouchType());
+            event.touchEvent.changedPointerId = front.GetFingerId();
             ConvertTouchLocationInfoToPoint(front, event.touchEvent.actionTouchPoint, usePx);
         }
         event.touchEvent.timeStamp = eventInfo.GetTimeStamp().time_since_epoch().count();
