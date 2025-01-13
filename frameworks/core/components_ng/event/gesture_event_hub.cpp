@@ -94,7 +94,7 @@ bool GestureEventHub::ProcessEventTouchTestHit(const OffsetF& coordinateOffset, 
         scrollableActuator_->CollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets,
             localPoint, host, targetComponent, responseLinkResult);
     }
-    if (dragEventActuator_) {
+    if (dragEventActuator_ && !dragEventActuator_->GetIsNewFwk()) {
         dragEventActuator_->AddTouchListener(touchRestrict);
     }
     if (touchEventActuator_) {

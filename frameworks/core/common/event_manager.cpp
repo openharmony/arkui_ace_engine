@@ -763,6 +763,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
         DispatchTouchEventAndCheck(point, sendOnTouch);
     }
     DispatchTouchEventInOldPipeline(point, dispatchSuccess);
+    NotifyDragTouchEventListener(point);
 
     CheckUpEvent(event);
     UpdateInfoWhenFinishDispatch(point, sendOnTouch);
@@ -918,6 +919,32 @@ void EventManager::CleanHoverStatusForDragBegin()
         DispatchMouseHoverEventNG(falsifyEvent);
     }
     mouseTestResults_.clear();
+}
+
+void EventManager::RegisterDragTouchEventListener(
+    int32_t uniqueIdentify, std::function<void(const TouchEvent&)> callback)
+{
+    dragTouchEventListener_[uniqueIdentify] = callback;
+}
+
+void EventManager::UnRegisterDragTouchEventListener(int32_t uniqueIdentify)
+{
+    auto it = dragTouchEventListener_.find(uniqueIdentify);
+    if (it != dragTouchEventListener_.end()) {
+        dragTouchEventListener_.erase(it);
+    }
+}
+
+void EventManager::NotifyDragTouchEventListener(const TouchEvent& touchEvent)
+{
+    if (dragTouchEventListener_.empty()) {
+        return;
+    }
+    for (const auto& pair : dragTouchEventListener_) {
+        if (pair.second) {
+            pair.second(touchEvent);
+        }
+    }
 }
 
 void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,

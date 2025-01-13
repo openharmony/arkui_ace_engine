@@ -408,6 +408,11 @@ bool IsTaskPriorityAdjustmentEnable()
     return appVsyncPriority != -1;
 }
 
+int32_t ReadDragDropFrameworkStatus()
+{
+    return system::GetIntParameter("debug.ace.drag.drop.framework.status", 0);
+}
+
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::developerModeOn_ = IsDeveloperModeOn();
 std::atomic<bool> SystemProperties::layoutTraceEnable_(IsLayoutTraceEnabled() && developerModeOn_);
@@ -486,6 +491,7 @@ float SystemProperties::fontScale_ = 1.0;
 float SystemProperties::fontWeightScale_ = 1.0;
 double SystemProperties::scrollableDistance_ = ReadScrollableDistance();
 bool SystemProperties::taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
+int32_t SystemProperties::dragDropFrameworkStatus_ = ReadDragDropFrameworkStatus();
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -1008,5 +1014,10 @@ bool SystemProperties::IsNeedResampleTouchPoints()
 bool SystemProperties::IsNeedSymbol()
 {
     return true;
+}
+
+int32_t SystemProperties::GetDragDropFrameworkStatus()
+{
+    return dragDropFrameworkStatus_;
 }
 } // namespace OHOS::Ace

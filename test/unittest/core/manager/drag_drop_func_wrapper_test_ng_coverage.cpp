@@ -239,7 +239,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage010
 
 /**
  * @tc.name: DragDropFuncWrapperTestNgCoverage011
- * @tc.desc: Test BrulStyleToEffection with invalid pipeline context
+ * @tc.desc: Test BlurStyleToEffection with invalid pipeline context
  * @tc.type: FUNC
  * @tc.author:
  */
@@ -250,13 +250,13 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage011
     blurStyleOp.scale = 0.5;
     blurStyleOp.colorMode = ThemeColorMode::LIGHT;
 
-    auto effection = DragDropFuncWrapper::BrulStyleToEffection(blurStyleOp);
+    auto effection = DragDropFuncWrapper::BlurStyleToEffection(blurStyleOp);
     EXPECT_FALSE(effection.has_value());
 }
 
 /**
  * @tc.name: DragDropFuncWrapperTestNgCoverage012
- * @tc.desc: Test BrulStyleToEffection with invalid blurStyleOp
+ * @tc.desc: Test BlurStyleToEffection with invalid blurStyleOp
  * @tc.type: FUNC
  * @tc.author:
  */
@@ -264,7 +264,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage012
 {
     std::optional<BlurStyleOption> blurStyleOp = std::nullopt;
 
-    auto effection = DragDropFuncWrapper::BrulStyleToEffection(blurStyleOp);
+    auto effection = DragDropFuncWrapper::BlurStyleToEffection(blurStyleOp);
     EXPECT_FALSE(effection.has_value());
 }
 
@@ -383,7 +383,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage018
 
 /**
  * @tc.name: DragDropFuncWrapperTestNgCoverage019
- * @tc.desc: Test BrulStyleToEffection with valid BlurStyleOption
+ * @tc.desc: Test BlurStyleToEffection with valid BlurStyleOption
  * @tc.type: FUNC
  * @tc.author:
  */
@@ -394,7 +394,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage019
     blurStyleOp.scale = 0.5;
     blurStyleOp.colorMode = ThemeColorMode::LIGHT;
 
-    auto effection = DragDropFuncWrapper::BrulStyleToEffection(blurStyleOp);
+    auto effection = DragDropFuncWrapper::BlurStyleToEffection(blurStyleOp);
     EXPECT_FALSE(effection.has_value());
 }
 

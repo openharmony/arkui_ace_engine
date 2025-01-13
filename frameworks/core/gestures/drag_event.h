@@ -48,6 +48,14 @@ private:
     std::string plainText_;
 };
 
+enum class DragDropInitiatingStatus : int32_t {
+    IDLE = 0,
+    READY,
+    PRESS,
+    LIFTING,
+    MOVING,
+};
+
 enum class DragRet {
     DRAG_DEFAULT = -1,
     DRAG_SUCCESS = 0,
