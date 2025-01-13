@@ -1048,6 +1048,7 @@ void WebDelegate::SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface)
 #endif
 void WebDelegate::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling) {}
 void WebDelegate::OnScrollState(bool scrollState) {}
+void WebDelegate::OnScrollStart(const float x, const float y) {}
 void WebDelegate::OnRootLayerChanged(int width, int height) {}
 bool WebDelegate::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {

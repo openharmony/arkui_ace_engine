@@ -1320,4 +1320,12 @@ bool WebClientImpl::IsCurrentFocus()
     ContainerScope scope(delegate->GetInstanceId());
     return delegate->IsCurrentFocus();
 }
+
+void WebClientImpl::OnScrollStart(const float x, const float y)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->OnScrollStart(x, y);
+}
 } // namespace OHOS::Ace

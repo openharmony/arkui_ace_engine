@@ -429,7 +429,7 @@ public:
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     bool HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity);
     void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) override;
-    void OnScrollStartRecursive(std::vector<float> positions);
+    void OnScrollStartRecursive(float position);
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
     void GetParentAxis();
@@ -614,6 +614,7 @@ public:
     void UpdateImagePreviewParam();
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
+    void OnScrollStart(const float x, const float y);
     void SetLayoutMode(WebLayoutMode mode);
     WebLayoutMode GetLayoutMode() const
     {
@@ -1159,7 +1160,6 @@ private:
     bool isMemoryLevelEnable_ = true;
     OffsetF fitContentOffset_;
     bool isFirstFlingScrollVelocity_ = true;
-    bool isNeedUpdateScrollAxis_ = true;
     bool isScrollStarted_ = false;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool isEmbedModeEnabled_ = false;
