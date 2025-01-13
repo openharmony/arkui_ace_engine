@@ -1693,6 +1693,13 @@ HWTEST_F(SearchTestTwoNg, CreateSearchNode, TestSize.Level1)
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     searchModelInstance.SetSearchDefaultIcon();
     searchModelInstance.CreateSearchNode(nodeId, u"", u"", "");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto searchNode = pattern->GetSearchNode();
+    ASSERT_NE(searchNode, nullptr);
+    EXPECT_EQ(searchNode->GetSearchSymbolIconSize(), Dimension(16.0f, DimensionUnit::FP));
 }
 
 /**

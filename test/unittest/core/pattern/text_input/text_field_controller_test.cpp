@@ -902,21 +902,25 @@ HWTEST_F(TextFieldControllerTest, HandleOnDeleteAction002, TestSize.Level1)
     // change line to aviod the line length exceed 120
     std::string result = std::string("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦")
         .append("👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦");
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(88);
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
     result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 14) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(0);
     pattern_->DeleteForward(2);
     FlushLayoutTask(frameNode_);
     result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(44);
     pattern_->DeleteForward(2);
     FlushLayoutTask(frameNode_);
     result = "👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦👨‍👩‍👦‍👦";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 }
 
 /**
@@ -1074,16 +1078,19 @@ HWTEST_F(TextFieldControllerTest, HandleOnDeleteAction006, TestSize.Level1)
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
     std::string result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(77);
     pattern_->DeleteBackward(2);
     FlushLayoutTask(frameNode_);
     result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 
     pattern_->SetCaretPosition(0);
     pattern_->DeleteForward(2);
     FlushLayoutTask(frameNode_);
     result = "👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️👁️‍🗨️";
+    EXPECT_EQ(pattern_->GetTextValue().compare(result), 1) << "Text is: " + pattern_->GetTextValue();
 }
 
 /**

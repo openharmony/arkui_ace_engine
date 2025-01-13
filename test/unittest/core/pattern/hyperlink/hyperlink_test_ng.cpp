@@ -182,11 +182,18 @@ HWTEST_F(HyperlinkTestNg, HyperlinkModelNGTest003, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     HyperlinkModelNG hyperlinkModelNG;
     auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+
     hyperlinkModelNG.SetDraggable(true);
+    EXPECT_TRUE(frameNode->draggable_);
+
     hyperlinkModelNG.SetDraggable(false);
+    EXPECT_FALSE(frameNode->draggable_);
+
     hyperlinkModelNG.SetDraggable(frameNode, false);
-    frameNode->draggable_ = false;
+    EXPECT_FALSE(frameNode->draggable_);
+
     hyperlinkModelNG.SetDraggable(frameNode, true);
+    EXPECT_TRUE(frameNode->draggable_);
 }
 
 /**
