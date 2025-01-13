@@ -8317,6 +8317,10 @@ void RichEditorPattern::BindSelectionMenu(TextResponseType type, TextSpanType ri
 {
     TextPattern::BindSelectionMenu(
         richEditorType, type, menuBuilder, { .onAppear = onAppear, .onDisappear = onDisappear });
+    if (!selectOverlay_->SelectOverlayIsCreating() && SelectOverlayIsOn()) {
+        selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(),
+            .requestCode = REQUEST_RECREATE });
+    }
 }
 
 RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()
