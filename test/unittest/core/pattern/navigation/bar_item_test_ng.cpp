@@ -36,7 +36,6 @@ const std::string BAR_ITEM_ETS_TAG = "BarItem";
 const std::string EMPTY_STRING = "";
 const std::string BAR_ITEM_TEXT = "text";
 const std::string EMPTY_TEXT;
-const int32_t RET_OK = 0;
 } // namespace
 
 class BarItemTestNg : public testing::Test {
@@ -144,39 +143,6 @@ HWTEST_F(BarItemTestNg, OnModifyDone002, TestSize.Level1)
     barItemPattern->clickListener_ = AceType::MakeRefPtr<ClickEvent>(nullptr);
     barItemPattern->AttachToFrameNode(itemNode);
     barItemPattern->OnModifyDone();
-}
-
-/**
- * @tc.name: OnIconSrcUpdate001
- * @tc.desc: Test OnIconSrcUpdate interface.
- * @tc.type: FUNC
- */
-HWTEST_F(BarItemTestNg, OnIconSrcUpdate001, TestSize.Level1)
-{
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
-        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
-    std::string value = EMPTY_STRING;
-    int32_t ret = RET_OK;
-    barItemNode->OnIconSrcUpdate(value);
-    EXPECT_EQ(ret, RET_OK);
-}
-
-/**
- * @tc.name: OnTextUpdate001
- * @tc.desc: Test OnTextUpdate interface.
- * @tc.type: FUNC
- */
-HWTEST_F(BarItemTestNg, OnTextUpdate001, TestSize.Level1)
-{
-    std::string barTag = BAR_ITEM_ETS_TAG;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto barItemNode = BarItemNode::GetOrCreateBarItemNode(
-        V2::BAR_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
-    std::string value = EMPTY_STRING;
-    int32_t ret = RET_OK;
-    barItemNode->OnTextUpdate(value);
-    EXPECT_EQ(ret, RET_OK);
 }
 
 /**

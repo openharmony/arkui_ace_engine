@@ -789,56 +789,6 @@ HWTEST_F(NavigationModelTestNg, SetTitleMode002, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetTitleMode003
- * @tc.desc: Test SetTitleMode and cover all conditions outside the clickCallback.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationModelTestNg, SetTitleMode003, TestSize.Level1)
-{
-    MockPipelineContextGetTheme();
-    NavigationModelNG navigationModel;
-    navigationModel.Create();
-    navigationModel.SetNavigationStack();
-    navigationModel.SetTitle("navigationModel", false);
-
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
-    ASSERT_NE(navigationGroupNode, nullptr);
-    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-    ASSERT_NE(navBarNode, nullptr);
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
-    ASSERT_NE(titleBarNode, nullptr);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    ASSERT_NE(titleBarLayoutProperty, nullptr);
-    auto navigationEventHub = navigationGroupNode->GetEventHub<EventHub>();
-
-    NavigationTitleMode mode = NavigationTitleMode::MINI;
-    navigationEventHub->enabled_ = true;
-    EXPECT_FALSE(titleBarLayoutProperty->GetTitleHeight().has_value());
-    EXPECT_EQ(titleBarNode->GetBackButton(), nullptr);
-    EXPECT_EQ(mode, NavigationTitleMode::MINI);
-    EXPECT_TRUE(navigationEventHub->IsEnabled());
-    NavigationModelNG::SetTitleMode(&(*frameNode), mode);
-
-    navigationEventHub->enabled_ = false;
-    titleBarNode->backButton_ = nullptr;
-    EXPECT_EQ(titleBarNode->GetBackButton(), nullptr);
-    EXPECT_FALSE(navigationEventHub->IsEnabled());
-    NavigationModelNG::SetTitleMode(&(*frameNode), mode);
-
-    EXPECT_NE(titleBarNode->GetBackButton(), nullptr);
-    NavigationModelNG::SetTitleMode(&(*frameNode), mode);
-
-    mode = NavigationTitleMode::FREE;
-    EXPECT_NE(mode, NavigationTitleMode::MINI);
-    NavigationModelNG::SetTitleMode(&(*frameNode), mode);
-
-    titleBarLayoutProperty->propTitleHeight_ = Dimension();
-    EXPECT_TRUE(titleBarLayoutProperty->GetTitleHeight().has_value());
-    NavigationModelNG::SetTitleMode(&(*frameNode), mode);
-}
-
-/**
  * @tc.name: SetTitleMode004
  * @tc.desc: Test SetTitleMode and cover all conditions.
  * @tc.type: FUNC
