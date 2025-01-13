@@ -77,7 +77,6 @@ constexpr double TEXT_TRANSPARENT_VAL = 0.9;
 constexpr int32_t FORM_DIMENSION_MIN_HEIGHT = 1;
 constexpr int32_t FORM_UNLOCK_ANIMATION_DUATION = 250;
 constexpr int32_t FORM_UNLOCK_ANIMATION_DELAY = 200;
-constexpr char NO_FORM_DUMP[] = "-noform";
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -2422,52 +2421,12 @@ bool FormPattern::ShouldAddChildAtReuildFrame()
 
 void FormPattern::DumpInfo()
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "dump form info in string format");
-    if (formManagerBridge_ == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
-        return;
-    }
-
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    std::vector<std::string> params = container->GetUieParams();
-    // Use -noform to choose not dump form info
-    if (std::find(params.begin(), params.end(), NO_FORM_DUMP) != params.end()) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "Not Support Dump Form Info");
-    } else {
-        params.push_back(std::to_string(getpid()));
-        std::vector<std::string> dumpInfo;
-        formManagerBridge_->NotifyFormDump(params, dumpInfo);
-        for (std::string& info : dumpInfo) {
-            std::string infoRes = std::regex_replace(info, std::regex(R"(\n)"), ";");
-            DumpLog::GetInstance().AddDesc(std::string("Form info: ").append(infoRes));
-        }
-    }
+    TAG_LOGW(AceLogTag::ACE_FORM, "not supported");
 }
 
 void FormPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "dump form info in json format");
-    if (formManagerBridge_ == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
-        return;
-    }
-
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    std::vector<std::string> params = container->GetUieParams();
-    // Use -noform to choose not dump form info
-    if (std::find(params.begin(), params.end(), NO_FORM_DUMP) != params.end()) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "Not Support Dump Form Info");
-    } else {
-        params.push_back(std::to_string(getpid()));
-        std::vector<std::string> dumpInfo;
-        formManagerBridge_->NotifyFormDump(params, dumpInfo);
-        for (std::string& info : dumpInfo) {
-            std::string infoRes = std::regex_replace(info, std::regex(R"(\n)"), ";");
-            json->Put("Form info: ", infoRes.c_str());
-        }
-    }
+    TAG_LOGW(AceLogTag::ACE_FORM, "not supported");
 }
 
 bool FormPattern::IsFormBundleLocked(const std::string& bundleName, int64_t formId)
