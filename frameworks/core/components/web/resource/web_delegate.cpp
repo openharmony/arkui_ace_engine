@@ -4997,25 +4997,35 @@ void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEve
     CHECK_NULL_VOID(webPattern);
     auto accessibilityManager = context->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
-    if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUSED) {
-        webPattern->UpdateFocusedAccessibilityId(accessibilityId);
-    } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED) {
-        webPattern->ClearFocusedAccessibilityId();
-    } else if (eventType == AccessibilityEventType::PAGE_CHANGE || eventType == AccessibilityEventType::SCROLL_END) {
-        webPattern->UpdateFocusedAccessibilityId();
+    if (accessibilityId != 0) {
+        if (accessibilityManager->IsScreenReaderEnabled()) {
+            if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUSED) {
+                webPattern->UpdateFocusedAccessibilityId(accessibilityId);
+            } else if (eventType == AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED) {
+                webPattern->ClearFocusedAccessibilityId();
+            } else if (eventType == AccessibilityEventType::CHANGE) {
+                webPattern->UpdateFocusedAccessibilityId();
+            }
+        }
+        if (eventType == AccessibilityEventType::FOCUS) {
+            TextBlurReportByFocusEvent(accessibilityId);
+        }
+        if (eventType == AccessibilityEventType::CLICK) {
+            WebComponentClickReport(accessibilityId);
+        }
+        if (eventType == AccessibilityEventType::BLUR) {
+            TextBlurReportByBlurEvent(accessibilityId);
+        }
+        event.nodeId = accessibilityId;
+        event.type = eventType;
+        accessibilityManager->SendWebAccessibilityAsyncEvent(event, webPattern);
+    } else {
+        auto webNode = webPattern->GetHost();
+        CHECK_NULL_VOID(webNode);
+        event.nodeId = webNode->GetAccessibilityId();
+        event.type = eventType;
+        accessibilityManager->SendAccessibilityAsyncEvent(event);
     }
-    if (eventType == AccessibilityEventType::FOCUS) {
-        TextBlurReportByFocusEvent(accessibilityId);
-    }
-    if (eventType == AccessibilityEventType::CLICK) {
-        WebComponentClickReport(accessibilityId);
-    }
-    if (eventType == AccessibilityEventType::BLUR) {
-        TextBlurReportByBlurEvent(accessibilityId);
-    }
-    event.nodeId = accessibilityId;
-    event.type = eventType;
-    accessibilityManager->SendWebAccessibilityAsyncEvent(event, webPattern);
 }
 
 void WebDelegate::TextBlurReportByFocusEvent(int64_t accessibilityId)
@@ -6943,18 +6953,19 @@ bool WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action,
     if (!accessibilityState_) {
         return false;
     }
-    auto context = context_.Upgrade();
-    CHECK_NULL_RETURN(context, false);
     uint32_t nwebAction = static_cast<uint32_t>(action);
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), accessibilityId, nwebAction, actionArguments]() {
-            auto delegate = weak.Upgrade();
-            CHECK_NULL_VOID(delegate);
-            CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->PerformAction(accessibilityId, nwebAction, actionArguments);
-        },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIWebExecuteAction");
-    return true;
+    CHECK_NULL_RETURN(nweb_, false);
+    return nweb_->PerformActionV2(accessibilityId, nwebAction, actionArguments);
+}
+
+bool WebDelegate::GetAccessibilityNodeRectById(
+    int64_t accessibilityId, int32_t* width, int32_t* height, int32_t* offsetX, int32_t* offsetY)
+{
+    if (!accessibilityState_) {
+        return false;
+    }
+    CHECK_NULL_RETURN(nweb_, false);
+    return nweb_->GetAccessibilityNodeRectById(accessibilityId, width, height, offsetX, offsetY);
 }
 
 void WebDelegate::SetAccessibilityState(bool state, bool isDelayed)
