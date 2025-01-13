@@ -68,6 +68,7 @@ struct OptionsAfterApplied {
     double opacity { 1.0f };
     std::optional<Shadow> shadow;
     std::string shadowPath;
+    bool isFilled = true;
     std::optional<BorderRadiusProperty> borderRadius;
     BlurBackGroundInfo blurbgEffect;
 };

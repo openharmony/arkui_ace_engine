@@ -650,7 +650,6 @@ public:
     void RemoveEmptySpanNodes();
     void RemoveEmptySpans();
     RefPtr<GestureEventHub> GetGestureEventHub();
-    float GetSelectedMaxWidth();
     void OnWindowHide() override;
     bool BeforeAddImage(RichEditorChangeValue& changeValue, const ImageSpanOptions& options, int32_t insertIndex);
     RefPtr<SpanString> ToStyledString(int32_t start, int32_t end);
@@ -712,6 +711,9 @@ public:
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void CreateDragNode();
+    float GetMaxSelectedWidth();
+    void InitDragShadow(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& dragNode, bool isDragShadowNeeded,
+        bool hasDragBackgroundColor);
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
     void ResetSelection();
@@ -1094,6 +1096,14 @@ public:
     bool IsDragging() const override
     {
         return status_ == Status::DRAGGING || status_ == Status::FLOATING;
+    }
+
+    const RefPtr<SpanItem> GetSpanItemByPosition(int32_t position)
+    {
+        CHECK_NULL_RETURN(position >= 0, nullptr);
+        auto it = GetSpanIter(position);
+        CHECK_NULL_RETURN(it != spans_.end(), nullptr);
+        return *it;
     }
 
 protected:

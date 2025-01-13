@@ -49,7 +49,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest031, TestSize.Leve
     shadow.SetColor(Color::FromARGB(255, 255, 0, 0));
     BorderRadiusProperty borderRadius;
     borderRadius.SetRadius(Dimension(0.1));
-    OptionsAfterApplied optionTmp = { 0, shadow, "test", borderRadius, { bgBackEffect } };
+    OptionsAfterApplied optionTmp = { 0, shadow, "test", true, borderRadius, { bgBackEffect } };
     NG::DragPreviewOption previewOptions;
     previewOptions.options = optionTmp;
     frameNode->SetDragPreviewOptions(previewOptions);
@@ -83,7 +83,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest032, TestSize.Le
     shadow.SetColor(Color::FromARGB(255, 255, 0, 0));
     BorderRadiusProperty borderRadius;
     borderRadius.radiusBottomRight = dimen;
-    OptionsAfterApplied optionTmp = { 0, shadow, "test", borderRadius, { bgBackEffect } };
+    OptionsAfterApplied optionTmp = { 0, shadow, "test", true, borderRadius, { bgBackEffect } };
     NG::DragPreviewOption previewOptions;
     previewOptions.options = optionTmp;
     frameNode->SetDragPreviewOptions(previewOptions);
@@ -91,7 +91,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest032, TestSize.Le
     dragEventActuator->PrepareRadiusParametersForDragData(frameNode, arkExtraInfoJson);
     BorderRadiusProperty borderRadiusTwo;
     borderRadiusTwo.radiusBottomLeft = dimen;
-    optionTmp = { 0, shadow, "test", borderRadiusTwo, { bgBackEffect } };
+    optionTmp = { 0, shadow, "test", true, borderRadiusTwo, { bgBackEffect } };
     previewOptions.options = optionTmp;
     frameNode->SetDragPreviewOptions(previewOptions);
     dragEventActuator->PrepareRadiusParametersForDragData(frameNode, arkExtraInfoJson);

@@ -553,6 +553,8 @@ public:
     int32_t placeholderSpanNodeId = -1;
     TextStyle textStyle;
     PlaceholderRun run_;
+    std::optional<Color> dragBackgroundColor_;
+    bool isDragShadowNeeded_ = true;
     PlaceholderSpanItem()
     {
         this->spanItemType = SpanItemType::PLACEHOLDER;
@@ -574,6 +576,12 @@ public:
     const RefPtr<UINode> GetCustomNode() const
     {
         return customNode_;
+    }
+
+    void UpdateColorByResourceId()
+    {
+        CHECK_NULL_VOID(dragBackgroundColor_.has_value());
+        dragBackgroundColor_.value().UpdateColorByResourceId();
     }
 
 private:

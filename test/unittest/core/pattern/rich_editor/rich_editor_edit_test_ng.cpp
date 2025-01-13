@@ -295,30 +295,6 @@ HWTEST_F(RichEditorEditTestNg, TestRichEditorGetAllChildren001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestRichEditorGetSelectedMaxWidth001
- * @tc.desc: test GetSelectedMaxWidth
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorEditTestNg, TestRichEditorGetSelectedMaxWidth001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. declare and init variables and call function.
-     */
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    richEditorPattern->CreateNodePaintMethod();
-    EXPECT_NE(richEditorPattern->contentMod_, nullptr);
-    EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
-    std::vector<RectF> rectList;
-    rectList.push_back(RectF(1.0f, 1.0f, 5.0f, 10.f));
-    auto overlayMod = AceType::DynamicCast<RichEditorOverlayModifier>(richEditorPattern->overlayMod_);
-    overlayMod->SetSelectedRects(rectList);
-    auto ret = richEditorPattern->GetSelectedMaxWidth();
-    EXPECT_NE(ret, 0.0f);
-}
-
-/**
  * @tc.name: TestRichEditorHandleSelectFontStyleWrapper001
  * @tc.desc: test HandleSelectFontStyleWrapper
  * @tc.type: FUNC

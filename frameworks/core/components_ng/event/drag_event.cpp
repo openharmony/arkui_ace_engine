@@ -1000,7 +1000,7 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable()) {
         if (dragPreviewOption.options.shadow.has_value()) {
             auto shadow = dragPreviewOption.options.shadow.value();
-            shadow.SetIsFilled(true);
+            shadow.SetIsFilled(dragPreviewOption.options.isFilled);
             imageContext->UpdateBackShadow(shadow);
         }
         return;

@@ -120,8 +120,6 @@ const std::u16string LINE_SEPARATOR = u"\n";
 constexpr static int32_t AI_TEXT_RANGE_LEFT = 50;
 constexpr static int32_t AI_TEXT_RANGE_RIGHT = 50;
 constexpr static int32_t NONE_SELECT_TYPE = -1;
-constexpr static int32_t FIRST_LINE = 1;
-constexpr static int32_t SECOND_LINE = 2;
 
 constexpr float RICH_DEFAULT_SHADOW_COLOR = 0x33000000;
 constexpr float RICH_DEFAULT_ELEVATION = 120.0f;
@@ -1068,20 +1066,18 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     builderNodes.push_back(WeakClaim(placeholderSpanNode.GetRawPtr()));
     placeholderSpanNode->MountToParent(host, spanIndex);
     auto renderContext = placeholderSpanNode->GetRenderContext();
-    if (renderContext) {
-        renderContext->SetNeedAnimateFlag(false);
-    }
+    IF_PRESENT(renderContext, SetNeedAnimateFlag(false));
     auto spanItem = placeholderSpanNode->GetSpanItem();
     spanItem->content = u" ";
     spanItem->SetCustomNode(customNode);
+    spanItem->dragBackgroundColor_ = options.dragBackgroundColor;
+    spanItem->isDragShadowNeeded_ = options.isDragShadowNeeded;
     AddSpanItem(spanItem, spanIndex);
     placeholderCount_++;
     SetCaretPosition(insertIndex + spanItem->content.length());
     ResetSelectionAfterAddSpan(false);
     auto placeholderPipelineContext = placeholderSpanNode->GetContext();
-    if (placeholderPipelineContext) {
-        placeholderPipelineContext->SetDoKeyboardAvoidAnimate(false);
-    }
+    IF_PRESENT(placeholderPipelineContext, SetDoKeyboardAvoidAnimate(false));
     SetNeedMoveCaretToContentRect();
     AddOnPlaceholderHoverEvent(placeholderSpanNode);
     placeholderSpanNode->MarkModifyDone();
@@ -4750,14 +4746,16 @@ void RichEditorPattern::OnColorConfigurationUpdate()
 
     const auto& spans = host->GetChildren();
     for (const auto& uiNode : spans) {
+        auto placeholderSpan = DynamicCast<PlaceholderSpanNode>(uiNode);
+        if (placeholderSpan) {
+            auto spanItem = placeholderSpan->GetSpanItem();
+            CHECK_NULL_CONTINUE(spanItem);
+            IF_PRESENT(spanItem, UpdateColorByResourceId());
+        }
         auto spanNode = DynamicCast<SpanNode>(uiNode);
-        if (!spanNode) {
-            continue;
-        }
+        CHECK_NULL_CONTINUE(spanNode);
         auto spanItem = spanNode->GetSpanItem();
-        if (!spanItem) {
-            continue;
-        }
+        CHECK_NULL_CONTINUE(spanItem);
         IF_TRUE(spanItem->useThemeFontColor, spanNode->UpdateTextColor(themeTextColor));
         IF_TRUE(spanItem->useThemeDecorationColor, spanNode->UpdateTextDecorationColor(themeTextDecorationColor));
         spanNode->UpdateColorByResourceId();
@@ -7758,45 +7756,68 @@ void RichEditorPattern::CreateDragNode()
     for (const auto& child : children) {
         auto node = DynamicCast<FrameNode>(child);
         CHECK_NULL_CONTINUE(node);
-        auto tag = node->GetTag();
-        if (tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        if (auto& tag = node->GetTag(); tag == V2::IMAGE_ETS_TAG || tag == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             imageChildren.emplace_back(node);
         }
     }
     TextDragInfo info;
-    auto boxes = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
-    if (!boxes.empty()) {
-        float startX = boxes.front().Left();
-        float endX = boxes.front().Right();
-        for (const auto& box : boxes) {
-            startX = std::min(startX, box.Left());
-            endX = std::max(endX, box.Right());
-        }
-        startX = std::min(0.0f, startX);
-        info.maxSelectedWidth = std::abs(startX - endX);
-    }
+    info.maxSelectedWidth = GetMaxSelectedWidth();
     info.handleColor = GetCaretColor();
     info.selectedBackgroundColor = GetSelectedBackgroundColor();
     CalculateHandleOffsetAndShowOverlay();
-    auto firstHandleInfo = GetFirstHandleInfo();
-    if (firstHandleInfo.has_value() && firstHandleInfo.value().isShow) {
+    if (auto firstHandleInfo = GetFirstHandleInfo(); firstHandleInfo.has_value() && firstHandleInfo.value().isShow) {
         info.firstHandle = textSelector_.firstHandle;
     }
     auto secondHandleInfo = GetSecondHandleInfo();
     if (secondHandleInfo.has_value() && secondHandleInfo.value().isShow) {
         info.secondHandle = textSelector_.secondHandle;
     }
+    if (textSelector_.GetTextEnd() - textSelector_.GetTextStart() == 1) {
+        auto spanItem = GetSpanItemByPosition(textSelector_.GetTextStart());
+        auto placeholderSpanItem = DynamicCast<PlaceholderSpanItem>(spanItem);
+        if (placeholderSpanItem) {
+            info.dragBackgroundColor = placeholderSpanItem->dragBackgroundColor_;
+            info.isDragShadowNeeded = placeholderSpanItem->isDragShadowNeeded_;
+        }
+    }
     dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren, info);
     CHECK_NULL_VOID(dragNode_);
-    auto textDragPattern = dragNode_->GetPattern<TextDragPattern>();
-    if (textDragPattern) {
-        auto option = host->GetDragPreviewOption();
+    InitDragShadow(host, dragNode_, info.isDragShadowNeeded, info.dragBackgroundColor.has_value());
+    FrameNode::ProcessOffscreenNode(dragNode_);
+}
+
+float RichEditorPattern::GetMaxSelectedWidth()
+{
+    auto boxes = paragraphs_.GetRects(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
+    CHECK_NULL_RETURN(!boxes.empty(), 0.0f);
+    float startX = boxes.front().Left();
+    float endX = boxes.front().Right();
+    for (const auto& box : boxes) {
+        startX = std::min(startX, box.Left());
+        endX = std::max(endX, box.Right());
+    }
+    startX = std::min(0.0f, startX);
+    return std::abs(startX - endX);
+}
+
+void RichEditorPattern::InitDragShadow(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& dragNode,
+    bool isDragShadowNeeded, bool hasDragBackgroundColor)
+{
+    CHECK_NULL_VOID(host && dragNode);
+    auto textDragPattern = dragNode->GetPattern<TextDragPattern>();
+    CHECK_NULL_VOID(textDragPattern);
+    auto option = host->GetDragPreviewOption();
+    if (isDragShadowNeeded) {
         option.options.shadowPath = textDragPattern->GetBackgroundPath()->ConvertToSVGString();
         option.options.shadow = Shadow(RICH_DEFAULT_ELEVATION, {0.0, 0.0}, Color(RICH_DEFAULT_SHADOW_COLOR),
             ShadowStyle::OuterFloatingSM);
-        host->SetDragPreviewOptions(option);
+        option.options.isFilled = !hasDragBackgroundColor;
+    } else {
+        option.options.shadowPath.clear();
+        option.options.shadow.reset();
+        option.options.isFilled = true;
     }
-    FrameNode::ProcessOffscreenNode(dragNode_);
+    host->SetDragPreviewOptions(option);
 }
 
 void RichEditorPattern::CreateHandles()
@@ -7885,6 +7906,8 @@ void RichEditorPattern::CloseHandleAndSelect()
 {
     selectOverlay_->CloseOverlay(false, CloseReason::CLOSE_REASON_DRAG_FLOATING);
     showSelect_ = false;
+    auto host = GetHost();
+    IF_PRESENT(host, MarkDirtyNode(PROPERTY_UPDATE_RENDER));
 }
 
 void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
@@ -10970,49 +10993,6 @@ bool RichEditorPattern::HandleOnDeleteComb(bool backward)
     CHECK_NULL_RETURN(host, false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
-}
-
-float RichEditorPattern::GetSelectedMaxWidth()
-{
-    std::vector<RectF> selecedRect;
-    auto overlayMod = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
-    CHECK_NULL_RETURN(overlayMod, 0.0f);
-    auto selectedRects = overlayMod->GetSelectedRects();
-    auto tempWidth = 0.0f;
-    auto top = 0.0f;
-    auto firstLineLeft = 0.0f;
-    auto firstLineWidth = 0.0f;
-    auto selectedWidth = 0.0f;
-    auto index = 0;
-    bool isCalculate = false;
-    auto left = 0.0f;
-    for (const auto& rect : selectedRects) {
-        if (NearZero(tempWidth) || !NearEqual(top, rect.GetY())) {
-            if (index == FIRST_LINE) {
-                selectedWidth = firstLineLeft - left + firstLineWidth;
-            }
-            selectedWidth = std::max(selectedWidth, tempWidth);
-            if (isCalculate && NearZero(firstLineWidth)) {
-                firstLineWidth = tempWidth;
-                firstLineLeft = left;
-            }
-            top = rect.GetY();
-            left = rect.GetX();
-            tempWidth = 0.0f;
-            index++;
-            isCalculate = true;
-        }
-        if (NearEqual(top, rect.GetY())) {
-            tempWidth += rect.Width();
-        }
-    }
-    if (index == FIRST_LINE) {
-        return tempWidth;
-    } else if (index == SECOND_LINE) {
-        return std::max(firstLineWidth + firstLineLeft - left, tempWidth);
-    } else {
-        return std::max(selectedWidth, tempWidth);
-    }
 }
 
 const std::list<RefPtr<UINode>>& RichEditorPattern::GetAllChildren() const
