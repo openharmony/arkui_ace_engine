@@ -270,6 +270,8 @@ public:
     void SetImageObjectFit(const JSCallbackInfo& info) {}
     void GetImageLayoutStyle(const JSCallbackInfo& info);
     void SetImageLayoutStyle(const JSCallbackInfo& info) {}
+    void GetImageColorFilter(const JSCallbackInfo& info);
+    void SetImageColorFilter(const JSCallbackInfo& info) {}
 
     const RefPtr<ImageSpan>& GetImageSpan();
     void SetImageSpan(const RefPtr<ImageSpan>& imageSpan);

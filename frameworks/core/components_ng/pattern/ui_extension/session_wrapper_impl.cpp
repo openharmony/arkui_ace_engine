@@ -604,15 +604,24 @@ bool SessionWrapperImpl::NotifyAxisEventAsync(const std::shared_ptr<OHOS::MMI::A
 /************************************************ Begin: The lifecycle interface **************************************/
 void SessionWrapperImpl::NotifyCreate() {}
 
+RefPtr<SystemWindowScene> SessionWrapperImpl::GetWindowScene()
+{
+    RefPtr<SystemWindowScene> hostPattern = nullptr;
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, hostPattern);
+    auto hostWindowNode = WindowSceneHelper::FindWindowScene(pattern->GetHost());
+    CHECK_NULL_RETURN(hostWindowNode, hostPattern);
+    auto hostNode = AceType::DynamicCast<FrameNode>(hostWindowNode);
+    CHECK_NULL_RETURN(hostNode, hostPattern);
+    hostPattern = hostNode->GetPattern<SystemWindowScene>();
+    return hostPattern;
+}
+
 int32_t SessionWrapperImpl::GetWindowSceneId()
 {
     auto pattern = hostPattern_.Upgrade();
     CHECK_NULL_RETURN(pattern, INVALID_WINDOW_ID);
-    auto hostWindowNode = WindowSceneHelper::FindWindowScene(pattern->GetHost());
-    CHECK_NULL_RETURN(hostWindowNode, INVALID_WINDOW_ID);
-    auto hostNode = AceType::DynamicCast<FrameNode>(hostWindowNode);
-    CHECK_NULL_RETURN(hostNode, INVALID_WINDOW_ID);
-    auto hostPattern = hostNode->GetPattern<SystemWindowScene>();
+    auto hostPattern = GetWindowScene();
     CHECK_NULL_RETURN(hostPattern, INVALID_WINDOW_ID);
     auto hostSession = hostPattern->GetSession();
     CHECK_NULL_RETURN(hostSession, INVALID_WINDOW_ID);
@@ -621,6 +630,16 @@ int32_t SessionWrapperImpl::GetWindowSceneId()
         pattern->RegisterWindowSceneVisibleChangeCallback(hostPattern);
     }
     return windowSceneId;
+}
+
+Rosen::WSRect SessionWrapperImpl::GetWindowSceneRcet()
+{
+    Rosen::WSRect rect = {0, 0, 0, 0};
+    auto hostPattern = GetWindowScene();
+    CHECK_NULL_RETURN(hostPattern, rect);
+    auto hostSession = hostPattern->GetSession();
+    CHECK_NULL_RETURN(hostSession, rect);
+    return hostSession->GetSessionRect();
 }
 
 void SessionWrapperImpl::NotifyForeground()
@@ -962,6 +981,12 @@ bool SessionWrapperImpl::InnerNotifyOccupiedAreaChangeInfo(
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto curWindow = pipeline->GetCurrentWindowRect();
+    auto container = Platform::AceContainer::GetContainer(GetInstanceIdFromHost());
+    CHECK_NULL_RETURN(container, false);
+    if (container->IsScenceBoardWindow()) {
+        Rosen::WSRect rect = GetWindowSceneRcet();
+        curWindow.SetRect(rect.posX_, rect.posY_, rect.width_, rect.height_);
+    }
     if (keyboardHeight > 0) {
         if (curWindow.Bottom() >= displayArea_.Bottom()) {
             int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea_.Bottom(), 0.0);

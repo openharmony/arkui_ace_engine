@@ -1731,8 +1731,16 @@ HWTEST_F(TimePickerPatternTestUpdate, OnWindowHide001, TestSize.Level1)
  */
 HWTEST_F(TimePickerPatternTestUpdate, SetIsEnableHapticFeedback001, TestSize.Level1)
 {
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TimePickerModelNG::GetInstance()->CreateTimePicker(theme);
+
     bool isEnableHapticFeedback = true;
     TimePickerModelNG::GetInstance()->SetIsEnableHapticFeedback(isEnableHapticFeedback);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(TimePickerModelNG::getEnableHapticFeedback(frameNode), isEnableHapticFeedback);
 }
 
 /**
@@ -1745,6 +1753,7 @@ HWTEST_F(TimePickerPatternTestUpdate, SetIsEnableHapticFeedback002, TestSize.Lev
     bool isEnableHapticFeedback = true;
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     TimePickerModelNG::SetIsEnableHapticFeedback(frameNode, isEnableHapticFeedback);
+    EXPECT_EQ(TimePickerModelNG::getEnableHapticFeedback(frameNode), isEnableHapticFeedback);
 }
 
 /**

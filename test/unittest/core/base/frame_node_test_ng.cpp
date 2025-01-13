@@ -582,7 +582,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeAdjustGridOffset0011, TestSize.Level1)
     EXPECT_TRUE(active);
 
     FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
-    FRAME_NODE2->GetAncestorNodeOfFrame();
+    FRAME_NODE2->GetAncestorNodeOfFrame(false);
 
     FRAME_NODE2->SetActive(false);
 
@@ -768,24 +768,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask0016, TestSize.Level1)
 
     FRAME_NODE2->CreateRenderTask(true);
     EXPECT_FALSE(FRAME_NODE2->isRenderDirtyMarked_);
-}
-
-/**
- * @tc.name: FrameNodeTestNg_GetParentGlobalOffset0017
- * @tc.desc: Test frame node method
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeGetParentGlobalOffset0017, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. SetParent for FRAME_NODE2 and callback GetParentGlobalOffset.
-     * @tc.expected: expect The parent is same with 1.
-     */
-    FRAME_NODE2->GetParentGlobalOffset();
-    FRAME_NODE2->SetParent(FRAME_NODE_PARENT);
-    auto parent = FRAME_NODE2->GetAncestorNodeOfFrame();
-    FRAME_NODE2->GetParentGlobalOffset();
-    EXPECT_EQ(parent, 1);
 }
 
 /**
@@ -2032,7 +2014,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg069, TestSize.Level1)
 {
     auto frameNode =
         FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    
+
     auto pattern_ = frameNode->GetPattern();
     EXPECT_NE(pattern_, nullptr);
     bool result = frameNode->CheckAutoSave();
@@ -2052,7 +2034,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg070, TestSize.Level1)
 {
     auto frameNode =
         FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    
+
     int64_t deadline = 1;
     bool result = frameNode->RenderCustomChild(deadline);
     bool res = frameNode->UINode::RenderCustomChild(deadline);
@@ -2127,7 +2109,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg083, TestSize.Level1)
     */
     auto frameNodeTemp =
         FrameNode::CreateFrameNode("root", 2, AceType::MakeRefPtr<Pattern>(), true);
-    
+
     /**
      * @tc.steps: step2. frameNodeTemp is a root node
      * @tc.expect: frameNodeTemp call RequestParentDirty
@@ -2204,7 +2186,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg085, TestSize.Level1)
         FrameNode::CreateFrameNode("main", 3, AceType::MakeRefPtr<Pattern>(), false);
     frameNode->AddChild(childNode2);
     childNode2->SetActive(false);
-    
+
     std::list<RefPtr<FrameNode>> list = frameNode->FrameNode::GetActiveChildren();
     EXPECT_EQ(list.size(), 1);
 }
@@ -2295,7 +2277,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg088, TestSize.Level1)
     */
     auto frameNode =
         FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
-    
+
     /**
      * @tc.steps: step2. make opts and safeAreaExpandOpts_
      * @tc.expect: SafeAreaExpandOpts is set to Json

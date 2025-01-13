@@ -28,6 +28,8 @@ constexpr uint32_t ARRAY_INDEX_RED = 0;
 constexpr uint32_t ARRAY_INDEX_GREEN = 1;
 constexpr uint32_t ARRAY_INDEX_BLUE = 2;
 constexpr uint32_t ARRAY_INDEX_ALPHA = 3;
+constexpr uint32_t ARRAY_INDEX_RESOURCE_ID = 4;
+constexpr uint32_t MAX_COLOR_ARRAY_COUNT_WITH_RESOURCE_ID = 5;
 constexpr uint32_t ARRAY_SIZE = 2;
 
 ArkUINativeModuleValue NativeUtilsBridge::CreateNativeWeakRef(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -154,11 +156,12 @@ ArkUINativeModuleValue NativeUtilsBridge::ParseResourceColor(ArkUIRuntimeCallInf
     if (!ArkTSUtils::ParseJsColorFromResource(vm, firstArg, color)) {
         return panda::JSValueRef::Undefined(vm);
     }
-    Local<panda::ArrayRef> chanels = panda::ArrayRef::New(vm, MAX_COLOR_ARRAY_COUNT);
+    Local<panda::ArrayRef> chanels = panda::ArrayRef::New(vm, MAX_COLOR_ARRAY_COUNT_WITH_RESOURCE_ID);
     panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_RED, panda::NumberRef::New(vm, color.GetRed()));
     panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_GREEN, panda::NumberRef::New(vm, color.GetGreen()));
     panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_BLUE, panda::NumberRef::New(vm, color.GetBlue()));
     panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_ALPHA, panda::NumberRef::New(vm, color.GetAlpha()));
+    panda::ArrayRef::SetValueAt(vm, chanels, ARRAY_INDEX_RESOURCE_ID, panda::NumberRef::New(vm, color.GetResourceId()));
     return chanels;
 }
 

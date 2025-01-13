@@ -168,7 +168,7 @@ export class GridObjectSortComponent extends ViewPU {
         this.__editGridHeight = new ObservedPropertySimplePU(0, this, 'editGridHeight');
         this.__addGridHeight = new ObservedPropertySimplePU(0, this, 'addGridHeight');
         this.__subTitleHeight = new ObservedPropertySimplePU(0, this, 'subTitleHeight');
-        this.__isOpenAccessibility = new ObservedPropertySimplePU(false, this, 'isOpenAccessibility');
+        this.__isOpenAccessibility = new ObservedPropertySimplePU(accessibility.isScreenReaderOpenSync(), this, 'isOpenAccessibility');
         this.callbackId = undefined;
         this.colNum = COL_IMAGE_TEXT;
         this.vibrationDone = false;
@@ -911,7 +911,7 @@ export class GridObjectSortComponent extends ViewPU {
             this.firstIn = false;
         }, 500);
         this.bundleName = getContext(this)?.abilityInfo?.bundleName;
-        accessibility.on('accessibilityStateChange', (a100) => {
+        accessibility.on('screenReaderStateChange', (a100) => {
             this.isOpenAccessibility = a100;
         });
     }
@@ -1577,13 +1577,13 @@ export class GridObjectSortComponent extends ViewPU {
                         menuItems: this.menuItems,
                     }, undefined, x94, () => { }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 977, col: 5 });
                     ViewPU.create(z94);
-                    let a95 = () => {
+                    let j = () => {
                         return {
                             title: this.options.normalTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_title_chanel'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
                             menuItems: this.menuItems
                         };
                     };
-                    z94.paramsGenerator_ = a95;
+                    z94.paramsGenerator_ = j;
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(x94, {});
@@ -1622,7 +1622,7 @@ export class GridObjectSortComponent extends ViewPU {
                         },
                     }, undefined, p94, () => { }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 999, col: 5 });
                     ViewPU.create(r94);
-                    let s94 = () => {
+                    let i = () => {
                         return {
                             leftIconStyle: EditableLeftIconType.Cancel,
                             isSaveIconRequired: false,
@@ -1641,7 +1641,7 @@ export class GridObjectSortComponent extends ViewPU {
                             }
                         };
                     };
-                    r94.paramsGenerator_ = s94;
+                    r94.paramsGenerator_ = i;
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(p94, {});
@@ -2023,10 +2023,10 @@ export class GridObjectSortComponent extends ViewPU {
         }, Grid);
         this.observeComponentCreation2((o91, p91) => {
             ForEach.create();
-            const q91 = (s91, t91) => {
+            const f = (s91, t91) => {
                 const u91 = s91;
                 {
-                    const v91 = (e92, f92) => {
+                    const g = (e92, f92) => {
                         GridItem.create(() => { }, false);
                         Context.animation({
                             curve: this.clickRemoveBtn ? DRAG_SPRING : t91 === this.unSelectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING
@@ -2035,8 +2035,8 @@ export class GridObjectSortComponent extends ViewPU {
                         GridItem.translate(this.getAddAreaItemTranslate(t91));
                         Context.animation(null);
                     };
-                    const w91 = () => {
-                        this.observeComponentCreation2(v91, GridItem);
+                    const h = () => {
+                        this.observeComponentCreation2(g, GridItem);
                         this.observeComponentCreation2((z91, a92) => {
                             Stack.create();
                             Stack.onHover((d92) => {
@@ -2118,10 +2118,10 @@ export class GridObjectSortComponent extends ViewPU {
                         Stack.pop();
                         GridItem.pop();
                     };
-                    w91();
+                    h();
                 }
             };
-            this.forEachUpdateFunction(o91, this.unSelected, q91, (r91) => r91.id.toString(), true, false);
+            this.forEachUpdateFunction(o91, this.unSelected, f, (r91) => r91.id.toString(), true, false);
         }, ForEach);
         ForEach.pop();
         Grid.pop();
@@ -2373,10 +2373,10 @@ export class GridObjectSortComponent extends ViewPU {
         }, Grid);
         this.observeComponentCreation2((s89, t89) => {
             ForEach.create();
-            const u89 = (w89, x89) => {
+            const c = (w89, x89) => {
                 const y89 = w89;
                 {
-                    const z89 = (j90, k90) => {
+                    const d = (j90, k90) => {
                         GridItem.create(() => { }, false);
                         Context.animation({
                             curve: this.isStartDrag ? DRAG_SPRING : x89 === this.selectedIndex ? REMOVE_ADD_SPRING : DRAG_SPRING,
@@ -2386,8 +2386,8 @@ export class GridObjectSortComponent extends ViewPU {
                         Context.animation(null);
                         GridItem.visibility(y89.visibility);
                     };
-                    const a90 = () => {
-                        this.observeComponentCreation2(z89, GridItem);
+                    const e = () => {
+                        this.observeComponentCreation2(d, GridItem);
                         this.observeComponentCreation2((d90, e90) => {
                             Stack.create();
                             Stack.onHover((i90) => {
@@ -2454,10 +2454,10 @@ export class GridObjectSortComponent extends ViewPU {
                         Stack.pop();
                         GridItem.pop();
                     };
-                    a90();
+                    e();
                 }
             };
-            this.forEachUpdateFunction(s89, this.selected, u89, (v89) => v89.id.toString(), true, false);
+            this.forEachUpdateFunction(s89, this.selected, c, (v89) => v89.id.toString(), true, false);
         }, ForEach);
         ForEach.pop();
         Grid.pop();
@@ -2580,7 +2580,7 @@ export class GridObjectSortComponent extends ViewPU {
                         operationType: OperationType.BUTTON
                     }, undefined, u88, () => { }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 1865, col: 11 });
                     ViewPU.create(w88);
-                    let x88 = () => {
+                    let b = () => {
                         return {
                             primaryTitle: '',
                             secondaryTitle: this.options.showAreaTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_subtitle_sort'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
@@ -2588,7 +2588,7 @@ export class GridObjectSortComponent extends ViewPU {
                             operationType: OperationType.BUTTON
                         };
                     };
-                    w88.paramsGenerator_ = x88;
+                    w88.paramsGenerator_ = b;
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(u88, {
@@ -2625,7 +2625,7 @@ export class GridObjectSortComponent extends ViewPU {
                         operationType: OperationType.BUTTON
                     }, undefined, m88, () => { }, { page: 'library/src/main/ets/components/GridObjectSortComponent.ets', line: 1874, col: 11 });
                     ViewPU.create(o88);
-                    let p88 = () => {
+                    let a = () => {
                         return {
                             primaryTitle: '',
                             secondaryTitle: this.options.addAreaTitle || { 'id': -1, 'type': 10003, params: ['sys.string.ohos_grid_edit_subtitle_add'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
@@ -2633,7 +2633,7 @@ export class GridObjectSortComponent extends ViewPU {
                             operationType: OperationType.BUTTON
                         };
                     };
-                    o88.paramsGenerator_ = p88;
+                    o88.paramsGenerator_ = a;
                 }
                 else {
                     this.updateStateVarsOfChildByElmtId(m88, {

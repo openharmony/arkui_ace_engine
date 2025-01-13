@@ -18,6 +18,8 @@
 
 #include <optional>
 
+#include "ui/view/layout/layout_algorithm.h"
+
 #include "base/memory/ace_type.h"
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/macros.h"
@@ -92,6 +94,14 @@ public:
     {}
     ~LayoutAlgorithmWrapper() override = default;
 
+    static RefPtr<LayoutAlgorithmWrapper> CreateLayoutAlgorithmWrapper(
+        const RefPtr<Kit::LayoutAlgorithm>& layoutAlgorithm)
+    {
+        auto layoutAlgorithmWrapper = MakeRefPtr<LayoutAlgorithmWrapper>(nullptr);
+        layoutAlgorithmWrapper->SetAbsLayoutAlgorithm(layoutAlgorithm);
+        return layoutAlgorithmWrapper;
+    }
+
     void OnReset() override
     {
         layoutAlgorithm_.Reset();
@@ -103,6 +113,9 @@ public:
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override
     {
         if (!layoutAlgorithm_) {
+            if (absLayoutAlgorithm_) {
+                absLayoutAlgorithm_->MeasureContent(contentConstraint);
+            }
             return std::nullopt;
         }
         return layoutAlgorithm_->MeasureContent(contentConstraint, layoutWrapper);
@@ -111,6 +124,9 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override
     {
         if (!layoutAlgorithm_) {
+            if (absLayoutAlgorithm_) {
+                absLayoutAlgorithm_->Measure();
+            }
             return;
         }
         layoutAlgorithm_->Measure(layoutWrapper);
@@ -121,6 +137,9 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override
     {
         if (!layoutAlgorithm_) {
+            if (absLayoutAlgorithm_) {
+                absLayoutAlgorithm_->Layout();
+            }
             return;
         }
         layoutAlgorithm_->Layout(layoutWrapper);
@@ -191,6 +210,11 @@ public:
         return percentHeight_;
     }
 
+    void SetAbsLayoutAlgorithm(const RefPtr<Kit::LayoutAlgorithm>& absLayoutAlgorithm)
+    {
+        absLayoutAlgorithm_ = absLayoutAlgorithm;
+    }
+
 private:
     RefPtr<LayoutAlgorithm> layoutAlgorithm_;
 
@@ -199,6 +223,7 @@ private:
     bool percentHeight_ = false;
     bool percentWidth_ = false;
     uint64_t frameId = UITaskScheduler::GetFrameId();
+    RefPtr<Kit::LayoutAlgorithm> absLayoutAlgorithm_;
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutAlgorithmWrapper);
 };

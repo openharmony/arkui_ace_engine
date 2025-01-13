@@ -66,6 +66,7 @@ struct TestProperty {
     std::optional<std::string> src;
     std::optional<double> progressRate;
     std::optional<std::string> posterUrl;
+    std::optional<bool> showFirstFrame;
     std::optional<bool> muted;
     std::optional<bool> autoPlay;
     std::optional<bool> controls;
@@ -79,6 +80,7 @@ constexpr bool MUTED_VALUE = false;
 constexpr bool AUTO_PLAY = false;
 constexpr bool CONTROL_VALUE = true;
 constexpr bool LOOP_VALUE = false;
+constexpr bool SHOW_FIRST_FRAME = false;
 const ImageFit VIDEO_IMAGE_FIT = ImageFit::COVER;
 const std::string VIDEO_SRC = "common/video.mp4";
 const std::string VIDEO_POSTER_URL = "common/img2.png";
@@ -130,6 +132,7 @@ protected:
 void VideoTestAddNg::SetUpTestSuite()
 {
     g_testProperty.progressRate = VIDEO_PROGRESS_RATE;
+    g_testProperty.showFirstFrame = SHOW_FIRST_FRAME;
     g_testProperty.muted = MUTED_VALUE;
     g_testProperty.autoPlay = AUTO_PLAY;
     g_testProperty.controls = CONTROL_VALUE;
@@ -190,6 +193,9 @@ RefPtr<FrameNode> VideoTestAddNg::CreateVideoNode(TestProperty& g_testProperty)
     }
     if (g_testProperty.objectFit.has_value()) {
         VideoModelNG().SetObjectFit(g_testProperty.objectFit.value());
+    }
+    if (g_testProperty.showFirstFrame.has_value()) {
+        VideoModelNG().SetShowFirstFrame(g_testProperty.showFirstFrame.value());
     }
 
     auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();

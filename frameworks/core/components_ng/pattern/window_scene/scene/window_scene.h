@@ -51,6 +51,8 @@ protected:
     void OnLayoutFinished() override;
     void OnDrawingCompleted() override;
     void OnRemoveBlank() override;
+    void OnAddSnapshot() override;
+    void OnRemoveSnapshot() override;
     void OnAppRemoveStartingWindow() override;
 
 private:

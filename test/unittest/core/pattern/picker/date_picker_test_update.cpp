@@ -2086,4 +2086,332 @@ HWTEST_F(DatePickerTestUpdate, HandleLunarDayChange002, TestSize.Level1)
     ASSERT_NE(datePickerPattern, nullptr);
     datePickerPattern->HandleLunarDayChange(isAdd, index);
 }
+
+/**
+ * @tc.name: DatePickerPatternTest019
+ * @tc.desc: Test SetMode method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerPatternTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create datePickerModelNG.
+     */
+    CreateDatePickerColumnNode();
+    DatePickerModelNG datePickerModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. Set DatePickerMode::DATE and ASSERT mode
+     */
+    DatePickerMode valueMode = DatePickerMode::DATE;
+    datePickerModelNG.SetMode(valueMode);
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto mode = datePickerModelNG.getMode(frameNode);
+    EXPECT_EQ(mode, valueMode);
+    /**
+     * @tc.steps: step3. Set DatePickerMode::YEAR_AND_MONTH and ASSERT mode
+     */
+    valueMode = DatePickerMode::YEAR_AND_MONTH;
+    datePickerModelNG.SetMode(valueMode);
+    mode = datePickerModelNG.getMode(frameNode);
+    EXPECT_EQ(mode, valueMode);
+    /**
+     * @tc.steps: step4. Set DatePickerMode::MONTH_AND_DAY and ASSERT mode
+     */
+    valueMode = DatePickerMode::MONTH_AND_DAY;
+    datePickerModelNG.SetMode(valueMode);
+    mode = datePickerModelNG.getMode(frameNode);
+    EXPECT_EQ(mode, valueMode);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest020
+ * @tc.desc: Test SetMode method with frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerPatternTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create datePickerModelNG.
+     */
+    CreateDatePickerColumnNode();
+    DatePickerModelNG datePickerModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set DatePickerMode::DATE and ASSERT mode
+     */
+    DatePickerMode valueMode = DatePickerMode::DATE;
+    datePickerModelNG.SetMode(frameNode, valueMode);
+    auto mode = datePickerModelNG.getMode(frameNode);
+    EXPECT_EQ(mode, valueMode);
+    /**
+     * @tc.steps: step3. Set DatePickerMode::YEAR_AND_MONTH and ASSERT mode
+     */
+    valueMode = DatePickerMode::YEAR_AND_MONTH;
+    datePickerModelNG.SetMode(frameNode, valueMode);
+    mode = datePickerModelNG.getMode(frameNode);
+    EXPECT_EQ(mode, valueMode);
+    /**
+     * @tc.steps: step4. Set DatePickerMode::MONTH_AND_DAY and ASSERT mode
+     */
+    valueMode = DatePickerMode::MONTH_AND_DAY;
+    datePickerModelNG.SetMode(frameNode, valueMode);
+    mode = datePickerModelNG.getMode(frameNode);
+    EXPECT_EQ(mode, valueMode);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest021
+ * @tc.desc: Test SetMode method abnormal value
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerPatternTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create datePickerModelNG.
+     */
+    CreateDatePickerColumnNode();
+    DatePickerModelNG datePickerModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set 0 and ASSERT mode
+     */
+    int32_t mockMode = 0;
+    DatePickerMode valueMode = static_cast<DatePickerMode>(mockMode);
+    datePickerModelNG.SetMode(frameNode, valueMode);
+    auto mode = datePickerModelNG.getMode(frameNode);
+    EXPECT_EQ(mode, valueMode);
+    /**
+     * @tc.steps: step3. Set 1 and ASSERT mode
+     */
+    mockMode = 1;
+    valueMode = static_cast<DatePickerMode>(mockMode);
+    datePickerModelNG.SetMode(frameNode, valueMode);
+    mode = datePickerModelNG.getMode(frameNode);
+    EXPECT_EQ(mode, valueMode);
+    /**
+     * @tc.steps: step4. Set 2 and ASSERT mode
+     */
+    mockMode = 2;
+    valueMode = static_cast<DatePickerMode>(mockMode);
+    datePickerModelNG.SetMode(frameNode, valueMode);
+    mode = datePickerModelNG.getMode(frameNode);
+    EXPECT_EQ(mode, valueMode);
+    /**
+     * @tc.steps: step5. Set 100 and ASSERT mode
+     */
+    mockMode = 100;
+    valueMode = static_cast<DatePickerMode>(mockMode);
+    datePickerModelNG.SetMode(frameNode, valueMode);
+    mode = datePickerModelNG.getMode(frameNode);
+    EXPECT_EQ(mode, valueMode);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest022
+ * @tc.desc: Test the ShowColumnByDatePickMode to correctly set the hidden column
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerPatternTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create datePickerNode.
+     */
+    CreateDatePickerColumnNode();
+    DatePickerModelNG datePickerModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetMode(DatePickerMode::DATE);
+    pattern->ShowColumnByDatePickMode();
+    /**
+     * @tc.steps: step2. Get year/month/day node.
+     */
+    RefPtr<FrameNode> stackYear;
+    RefPtr<FrameNode> stackMonth;
+    RefPtr<FrameNode> stackDay;
+    pattern->OrderAllChildNode(stackYear, stackMonth, stackDay);
+    ASSERT_NE(stackYear, nullptr);
+    ASSERT_NE(stackMonth, nullptr);
+    ASSERT_NE(stackDay, nullptr);
+    /**
+     * @tc.steps: step3. ASSERT all is VISIBLE.
+     */
+    auto yearBlendColumn = AceType::DynamicCast<FrameNode>(stackYear->GetLastChild());
+    ASSERT_NE(yearBlendColumn, nullptr);
+    auto yearColumnNodeLayoutProperty = yearBlendColumn->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(yearColumnNodeLayoutProperty, nullptr);
+    auto yearVisibility = yearColumnNodeLayoutProperty->GetVisibility();
+    EXPECT_EQ(yearVisibility, VisibleType::VISIBLE);
+
+    auto monthBlendColumn = AceType::DynamicCast<FrameNode>(stackMonth->GetLastChild());
+    ASSERT_NE(monthBlendColumn, nullptr);
+    auto monthColumnNodeLayoutProperty = monthBlendColumn->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(monthColumnNodeLayoutProperty, nullptr);
+    auto mouthVisibility = monthColumnNodeLayoutProperty->GetVisibility();
+    EXPECT_EQ(mouthVisibility, VisibleType::VISIBLE);
+
+    auto dayBlendColumn = AceType::DynamicCast<FrameNode>(stackDay->GetLastChild());
+    ASSERT_NE(dayBlendColumn, nullptr);
+    auto dayColumnNodeLayoutProperty = dayBlendColumn->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(dayColumnNodeLayoutProperty, nullptr);
+    auto dayVisibility = dayColumnNodeLayoutProperty->GetVisibility();
+    EXPECT_EQ(dayVisibility, VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest023
+ * @tc.desc: Test the ShowColumnByDatePickMode to correctly set the hidden column
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerPatternTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create datePickerNode.
+     */
+    CreateDatePickerColumnNode();
+    DatePickerModelNG datePickerModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetMode(DatePickerMode::YEAR_AND_MONTH);
+    pattern->ShowColumnByDatePickMode();
+    /**
+     * @tc.steps: step2. Get year/month/day node.
+     */
+    RefPtr<FrameNode> stackYear;
+    RefPtr<FrameNode> stackMonth;
+    RefPtr<FrameNode> stackDay;
+    pattern->OrderAllChildNode(stackYear, stackMonth, stackDay);
+    ASSERT_NE(stackYear, nullptr);
+    ASSERT_NE(stackMonth, nullptr);
+    ASSERT_NE(stackDay, nullptr);
+    /**
+     * @tc.steps: step3. ASSERT year is VISIBLE.
+     */
+    auto yearBlendColumn = AceType::DynamicCast<FrameNode>(stackYear->GetLastChild());
+    ASSERT_NE(yearBlendColumn, nullptr);
+    auto yearColumnNodeLayoutProperty = yearBlendColumn->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(yearColumnNodeLayoutProperty, nullptr);
+    auto yearVisibility = yearColumnNodeLayoutProperty->GetVisibility();
+    EXPECT_EQ(yearVisibility, VisibleType::VISIBLE);
+    /**
+     * @tc.steps: step4. ASSERT month is VISIBLE.
+     */
+    auto monthBlendColumn = AceType::DynamicCast<FrameNode>(stackMonth->GetLastChild());
+    ASSERT_NE(monthBlendColumn, nullptr);
+    auto monthColumnNodeLayoutProperty = monthBlendColumn->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(monthColumnNodeLayoutProperty, nullptr);
+    auto mouthVisibility = monthColumnNodeLayoutProperty->GetVisibility();
+    EXPECT_EQ(mouthVisibility, VisibleType::VISIBLE);
+    /**
+     * @tc.steps: step5. ASSERT month is GONE.
+     */
+    auto dayBlendColumn = AceType::DynamicCast<FrameNode>(stackDay->GetLastChild());
+    ASSERT_NE(dayBlendColumn, nullptr);
+    auto dayColumnNodeLayoutProperty = dayBlendColumn->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(dayColumnNodeLayoutProperty, nullptr);
+    auto dayVisibility = dayColumnNodeLayoutProperty->GetVisibility();
+    EXPECT_EQ(dayVisibility, VisibleType::GONE);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest024
+ * @tc.desc: Test the ShowColumnByDatePickMode to correctly set the hidden column
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerPatternTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create datePickerNode.
+     */
+    CreateDatePickerColumnNode();
+    DatePickerModelNG datePickerModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetMode(DatePickerMode::MONTH_AND_DAY);
+    pattern->ShowColumnByDatePickMode();
+    /**
+     * @tc.steps: step2. Get year/month/day node.
+     */
+    RefPtr<FrameNode> stackYear;
+    RefPtr<FrameNode> stackMonth;
+    RefPtr<FrameNode> stackDay;
+    pattern->OrderAllChildNode(stackYear, stackMonth, stackDay);
+    ASSERT_NE(stackYear, nullptr);
+    ASSERT_NE(stackMonth, nullptr);
+    ASSERT_NE(stackDay, nullptr);
+    /**
+     * @tc.steps: step3. ASSERT year is GONE.
+     */
+    auto yearBlendColumn = AceType::DynamicCast<FrameNode>(stackYear->GetLastChild());
+    ASSERT_NE(yearBlendColumn, nullptr);
+    auto yearColumnNodeLayoutProperty = yearBlendColumn->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(yearColumnNodeLayoutProperty, nullptr);
+    auto yearVisibility = yearColumnNodeLayoutProperty->GetVisibility();
+    EXPECT_EQ(yearVisibility, VisibleType::GONE);
+    /**
+     * @tc.steps: step4. ASSERT month is VISIBLE.
+     */
+    auto monthBlendColumn = AceType::DynamicCast<FrameNode>(stackMonth->GetLastChild());
+    ASSERT_NE(monthBlendColumn, nullptr);
+    auto monthColumnNodeLayoutProperty = monthBlendColumn->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(monthColumnNodeLayoutProperty, nullptr);
+    auto mouthVisibility = monthColumnNodeLayoutProperty->GetVisibility();
+    EXPECT_EQ(mouthVisibility, VisibleType::VISIBLE);
+    /**
+     * @tc.steps: step5. ASSERT month is VISIBLE.
+     */
+    auto dayBlendColumn = AceType::DynamicCast<FrameNode>(stackDay->GetLastChild());
+    ASSERT_NE(dayBlendColumn, nullptr);
+    auto dayColumnNodeLayoutProperty = dayBlendColumn->GetLayoutProperty<LayoutProperty>();
+    ASSERT_NE(dayColumnNodeLayoutProperty, nullptr);
+    auto dayVisibility = dayColumnNodeLayoutProperty->GetVisibility();
+    EXPECT_EQ(dayVisibility, VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: DatePickerPatternTest025
+ * @tc.desc: Test the GetVisibleColumnsText text is not null
+ * @tc.type: FUNC
+ */
+HWTEST_F(DatePickerTestUpdate, DatePickerPatternTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create datePickerNode.
+     */
+    CreateDatePickerColumnNode();
+    DatePickerModelNG datePickerModelNG;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<DatePickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. Set YEAR_AND_MONTH, GetColumnText is not null.
+     */
+    pattern->SetMode(DatePickerMode::YEAR_AND_MONTH);
+    auto str = pattern->GetVisibleColumnsText();
+    auto host = pattern->GetHost();
+    pattern->GetColumnText(host, str);
+    EXPECT_EQ(str.empty(), false);
+    /**
+     * @tc.steps: step3. Set MONTH_AND_DAY, GetColumnText is not null.
+     */
+    pattern->SetMode(DatePickerMode::MONTH_AND_DAY);
+    auto strOther = pattern->GetVisibleColumnsText();
+    pattern->GetColumnText(host, strOther);
+    EXPECT_EQ(strOther.empty(), false);
+}
 } // namespace OHOS::Ace::NG

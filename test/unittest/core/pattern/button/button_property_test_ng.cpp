@@ -67,6 +67,10 @@ const Color FONT_COLOR = Color(0XFFFF0000);
 const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 const Dimension DEFAULT_HEIGTH = 40.0_vp;
 const uint32_t MAX_LINE_VALUE = 10;
+const float MIN_SCALE_VALUE = 0.5f;
+const float MAX_SCALE_VALUE = 3.2f;
+const float NEGATIVE_SCALE_VALUE = -1.0f;
+const float MAX_SCALE_NORMAL = 1.0f;
 
 struct CreateWithPara createWithPara = { std::make_optional(true), std::make_optional(CREATE_VALUE),
     std::make_optional(true), std::make_optional(ButtonType::CAPSULE), std::make_optional(true), std::nullopt,
@@ -790,5 +794,254 @@ HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest016, TestSize.Level1)
     EXPECT_TRUE(sizeWidth.has_value());
     EXPECT_TRUE(sizeHeight.has_value());
     buttonModelNG.SetSize(std::nullopt, std::nullopt);
+}
+
+/**
+ * @tc.name: ButtonPropertyTest017
+ * @tc.desc: Test all the properties of button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest017, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(BUTTON_TYPE_CAPSULE_VALUE);
+    // create button without label
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    createWithPara.parseSuccess = false;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    buttonModelNG.SetType(static_cast<int32_t>(testProperty.typeValue.value()));
+    buttonModelNG.SetMinFontScale(MIN_SCALE_VALUE);
+    buttonModelNG.SetMaxFontScale(MAX_SCALE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->InitButtonLabel();
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(buttonLayoutProperty->GetMinFontScale(), MIN_SCALE_VALUE);
+    EXPECT_EQ(buttonLayoutProperty->GetMaxFontScale(), MAX_SCALE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetMinFontScale(), MIN_SCALE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetMaxFontScale(), MAX_SCALE_VALUE);
+}
+
+/**
+ * @tc.name: ButtonPropertyTest018
+ * @tc.desc: Test all the properties of button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest018, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(BUTTON_TYPE_CAPSULE_VALUE);
+    // create button without label
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    createWithPara.parseSuccess = false;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    buttonModelNG.SetType(static_cast<int32_t>(testProperty.typeValue.value()));
+    buttonModelNG.SetMinFontScale(NEGATIVE_SCALE_VALUE);
+    buttonModelNG.SetMaxFontScale(NEGATIVE_SCALE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->InitButtonLabel();
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(buttonLayoutProperty->GetMinFontScale(), NEGATIVE_SCALE_VALUE);
+    EXPECT_EQ(buttonLayoutProperty->GetMaxFontScale(), NEGATIVE_SCALE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetMinFontScale(), NEGATIVE_SCALE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetMaxFontScale(), NEGATIVE_SCALE_VALUE);
+}
+
+/**
+ * @tc.name: ButtonPropertyTest019
+ * @tc.desc: Test all the properties of button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest019, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(BUTTON_TYPE_CAPSULE_VALUE);
+    // create button without label
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    createWithPara.parseSuccess = false;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    buttonModelNG.SetType(static_cast<int32_t>(testProperty.typeValue.value()));
+    buttonModelNG.SetMinFontScale(MAX_SCALE_VALUE);
+    buttonModelNG.SetMaxFontScale(MIN_SCALE_VALUE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->InitButtonLabel();
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(buttonLayoutProperty->GetMinFontScale(), MAX_SCALE_VALUE);
+    EXPECT_EQ(buttonLayoutProperty->GetMaxFontScale(), MIN_SCALE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetMinFontScale(), MAX_SCALE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetMaxFontScale(), MIN_SCALE_VALUE);
+}
+
+/**
+ * @tc.name: ButtonPropertyTest020
+ * @tc.desc: Test all the properties of button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest020, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(BUTTON_TYPE_CAPSULE_VALUE);
+    // create button without label
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    createWithPara.parseSuccess = false;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    buttonModelNG.SetType(static_cast<int32_t>(testProperty.typeValue.value()));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    buttonModelNG.SetMinFontScale(frameNode, MIN_SCALE_VALUE);
+    buttonModelNG.SetMaxFontScale(frameNode, MAX_SCALE_VALUE);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->InitButtonLabel();
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(buttonLayoutProperty->GetMinFontScale(), MIN_SCALE_VALUE);
+    EXPECT_EQ(buttonLayoutProperty->GetMaxFontScale(), MAX_SCALE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetMinFontScale(), MIN_SCALE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetMaxFontScale(), MAX_SCALE_VALUE);
+    EXPECT_EQ(static_cast<float>(buttonModelNG.GetMinFontScale(frameNode)), MIN_SCALE_VALUE);
+    EXPECT_EQ(static_cast<float>(buttonModelNG.GetMaxFontScale(frameNode)), MAX_SCALE_VALUE);
+}
+
+/**
+ * @tc.name: ButtonPropertyTest021
+ * @tc.desc: Test all the properties of button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest021, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(BUTTON_TYPE_CAPSULE_VALUE);
+    // create button without label
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    createWithPara.parseSuccess = false;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    buttonModelNG.SetType(static_cast<int32_t>(testProperty.typeValue.value()));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    buttonModelNG.SetMinFontScale(frameNode, NEGATIVE_SCALE_VALUE);
+    buttonModelNG.SetMaxFontScale(frameNode, NEGATIVE_SCALE_VALUE);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->InitButtonLabel();
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(buttonLayoutProperty->GetMinFontScale(), NEGATIVE_SCALE_VALUE);
+    EXPECT_EQ(buttonLayoutProperty->GetMaxFontScale(), NEGATIVE_SCALE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetMinFontScale(), NEGATIVE_SCALE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetMaxFontScale(), NEGATIVE_SCALE_VALUE);
+    EXPECT_EQ(static_cast<float>(buttonModelNG.GetMinFontScale(frameNode)), NEGATIVE_SCALE_VALUE);
+    EXPECT_EQ(static_cast<float>(buttonModelNG.GetMaxFontScale(frameNode)), NEGATIVE_SCALE_VALUE);
+}
+
+/**
+ * @tc.name: ButtonPropertyTest022
+ * @tc.desc: Test all the properties of button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest022, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(BUTTON_TYPE_CAPSULE_VALUE);
+    // create button without label
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    createWithPara.parseSuccess = false;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    buttonModelNG.SetType(static_cast<int32_t>(testProperty.typeValue.value()));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    buttonModelNG.SetMinFontScale(frameNode, MAX_SCALE_VALUE);
+    buttonModelNG.SetMaxFontScale(frameNode, MIN_SCALE_VALUE);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->InitButtonLabel();
+    RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    RefPtr<ButtonLayoutProperty> buttonLayoutProperty = AceType::DynamicCast<ButtonLayoutProperty>(layoutProperty);
+    ASSERT_NE(buttonLayoutProperty, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(buttonLayoutProperty->GetMinFontScale(), MAX_SCALE_VALUE);
+    EXPECT_EQ(buttonLayoutProperty->GetMaxFontScale(), MIN_SCALE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetMinFontScale(), MAX_SCALE_VALUE);
+    EXPECT_EQ(textLayoutProperty->GetMaxFontScale(), MIN_SCALE_VALUE);
+    EXPECT_EQ(static_cast<float>(buttonModelNG.GetMinFontScale(frameNode)), MAX_SCALE_VALUE);
+    EXPECT_EQ(static_cast<float>(buttonModelNG.GetMaxFontScale(frameNode)), MIN_SCALE_VALUE);
+}
+
+/**
+ * @tc.name: ButtonPropertyTest023
+ * @tc.desc: Test all the properties of button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonPropertyTestNg, ButtonPropertyTest023, TestSize.Level1)
+{
+    TestProperty testProperty;
+    testProperty.typeValue = std::make_optional(BUTTON_TYPE_CIRCLE_VALUE);
+    // create button without label
+    ButtonModelNG buttonModelNG;
+    std::list<RefPtr<Component>> buttonChildren;
+    createWithPara.parseSuccess = false;
+    buttonModelNG.CreateWithLabel(CREATE_VALUE);
+    buttonModelNG.SetType(static_cast<int32_t>(testProperty.typeValue.value()));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonPattern = frameNode->GetPattern<ButtonPattern>();
+    ASSERT_NE(buttonPattern, nullptr);
+    buttonPattern->InitButtonLabel();
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+    EXPECT_EQ(textLayoutProperty->GetMaxFontScale(), MAX_SCALE_NORMAL);
 }
 }

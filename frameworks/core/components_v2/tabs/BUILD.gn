@@ -15,14 +15,11 @@ import(
     "//foundation/arkui/ace_engine/frameworks/core/components/components.gni")
 
 build_component("tabs_v2") {
-  sources = []
-  if (!ace_engine_feature_wearable) {
-    sources += [
-      "tab_content_item_component.cpp",
-      "tab_content_item_element.cpp",
-      "tab_content_proxy_element.cpp",
-      "tabs_component.cpp",
-      "tabs_element.cpp",
-    ]
-  }
+  sources = [
+    "tab_content_item_component.cpp",
+    "tab_content_item_element.cpp",
+    "tab_content_proxy_element.cpp",
+    "tabs_component.cpp",
+    "tabs_element.cpp",
+  ]
 }

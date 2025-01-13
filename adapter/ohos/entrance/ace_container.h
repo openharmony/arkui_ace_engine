@@ -617,7 +617,7 @@ public:
     Rosen::WindowMode GetWindowMode() const
     {
         CHECK_NULL_RETURN(uiWindow_, Rosen::WindowMode::WINDOW_MODE_UNDEFINED);
-        return uiWindow_->GetMode();
+        return uiWindow_->GetWindowMode();
     }
 
     // ArkTSCard
@@ -774,7 +774,7 @@ public:
     bool IsFloatingWindow() const override
     {
         CHECK_NULL_RETURN(uiWindow_, false);
-        return uiWindow_->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
+        return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
     }
 
     void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)

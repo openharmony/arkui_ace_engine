@@ -461,6 +461,18 @@ void ImageModelNG::SetImageFill(const Color &color)
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
 }
 
+void ImageModelNG::ResetImageFill()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ImageRenderProperty, SvgFillColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
+}
+
+void ImageModelNG::ResetImageFill(FrameNode *frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ImageRenderProperty, SvgFillColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
+}
+
 void ImageModelNG::SetImageInterpolation(ImageInterpolation interpolation)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageInterpolation, interpolation);

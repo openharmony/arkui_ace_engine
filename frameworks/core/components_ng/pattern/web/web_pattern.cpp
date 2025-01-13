@@ -1410,6 +1410,11 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
             "Set cursor to pointer when mouse pointer is hover exit.");
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
         isHoverExit_ = true;
+        MouseInfo changedInfo;
+        changedInfo.SetAction(MouseAction::HOVER_EXIT);
+        changedInfo.SetLocalLocation(Offset(mouseHoveredX_, mouseHoveredY_));
+        WebSendMouseEvent(changedInfo, SINGLE_CLICK_NUM);
+        return;
     } else if (info.GetAction() == MouseAction::HOVER && isMouseLocked_) {
         OnCursorChange(OHOS::NWeb::CursorType::CT_LOCK, nullptr);
     }
@@ -3182,13 +3187,12 @@ void WebPattern::OnModifyDone()
             }
         }
         RecordWebEvent(true);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
-            UpdateJavaScriptOnDocumentStartByOrder();
-            UpdateJavaScriptOnDocumentEndByOrder();
-        } else {
-            UpdateJavaScriptOnDocumentStart();
-            UpdateJavaScriptOnDocumentEnd();
-        }
+
+        UpdateJavaScriptOnDocumentStartByOrder();
+        UpdateJavaScriptOnDocumentEndByOrder();
+        UpdateJavaScriptOnDocumentStart();
+        UpdateJavaScriptOnDocumentEnd();
+        UpdateJavaScriptOnHeadReadyByOrder();
 
         bool isApiGteTwelve =
             AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
@@ -3400,6 +3404,7 @@ void WebPattern::InitInOfflineMode()
     if (offlineWebInited_) {
         return;
     }
+    ACE_SCOPED_TRACE("WebPattern::InitInOfflineMode");
     TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type, webId:%{public}d", GetWebId());
     delegate_->OnRenderToBackground();
     offlineWebInited_ = true;
@@ -6657,6 +6662,7 @@ RefPtr<NodePaintMethod> WebPattern::CreateNodePaintMethod()
 void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 {
     onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentStartScriptItemsByOrder_ = std::nullopt;
     if (delegate_) {
         UpdateJavaScriptOnDocumentStart();
         delegate_->JavaScriptOnDocumentStart();
@@ -6684,9 +6690,21 @@ void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
     }
 }
 
+void WebPattern::JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    onHeadReadyScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onHeadReadyScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    if (delegate_) {
+        UpdateJavaScriptOnHeadReadyByOrder();
+        delegate_->JavaScriptOnHeadReadyByOrder();
+    }
+}
+
 void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentEndScriptItemsByOrder_ = std::nullopt;
     EventRecorder::Get().SaveJavascriptItems(scriptItems);
     if (delegate_) {
         UpdateJavaScriptOnDocumentEnd();
@@ -6696,7 +6714,7 @@ void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 
 void WebPattern::UpdateJavaScriptOnDocumentStart()
 {
-    if (delegate_ && onDocumentStartScriptItems_.has_value()) {
+    if (delegate_ && onDocumentStartScriptItems_.has_value() && !onDocumentStartScriptItemsByOrder_.has_value()) {
         delegate_->SetJavaScriptItems(onDocumentStartScriptItems_.value(), ScriptItemType::DOCUMENT_START);
         onDocumentStartScriptItems_ = std::nullopt;
     }
@@ -6722,11 +6740,21 @@ void WebPattern::UpdateJavaScriptOnDocumentEndByOrder()
     }
 }
 
+void WebPattern::UpdateJavaScriptOnHeadReadyByOrder()
+{
+    if (delegate_ && onHeadReadyScriptItems_.has_value() && onHeadReadyScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onHeadReadyScriptItems_.value(), ScriptItemType::DOCUMENT_HEAD_READY,
+            onHeadReadyScriptItemsByOrder_.value());
+        onHeadReadyScriptItems_ = std::nullopt;
+        onHeadReadyScriptItemsByOrder_ = std::nullopt;
+    }
+}
+
 void WebPattern::UpdateJavaScriptOnDocumentEnd()
 {
     CHECK_NULL_VOID(delegate_);
     EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
-    if (onDocumentEndScriptItems_.has_value()) {
+    if (onDocumentEndScriptItems_.has_value() && !onDocumentEndScriptItemsByOrder_.has_value()) {
         delegate_->SetJavaScriptItems(onDocumentEndScriptItems_.value(), ScriptItemType::DOCUMENT_END);
         onDocumentEndScriptItems_ = std::nullopt;
     }
@@ -6821,6 +6849,7 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
     }
     RectT<int32_t> rect;
     if (focusedAccessibilityId_ <= 0 || !GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
+        focusedAccessibilityId_ = -1;
         renderContext->ResetAccessibilityFocusRect();
         renderContext->UpdateAccessibilityFocus(false);
         return;
@@ -6859,13 +6888,16 @@ bool WebPattern::GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t ac
         return false;
     }
     CHECK_NULL_RETURN(delegate_, false);
-    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
-        delegate_->GetAccessibilityNodeInfoById(accessibilityId);
-    if (!info) {
+    int32_t rectWidth = 0;
+    int32_t rectHeight = 0;
+    int32_t rectX = 0;
+    int32_t rectY = 0;
+    bool result = delegate_->GetAccessibilityNodeRectById(accessibilityId, &rectWidth, &rectHeight, &rectX, &rectY);
+    if (!result) {
         return false;
     }
 
-    paintRect.SetRect(info->GetRectX(), info->GetRectY(), info->GetRectWidth(), info->GetRectHeight());
+    paintRect.SetRect(rectX, rectY, rectWidth, rectHeight);
     return true;
 }
 

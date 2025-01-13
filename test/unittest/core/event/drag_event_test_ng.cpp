@@ -14,7 +14,7 @@
  */
 
 #include "test/unittest/core/event/drag_event_test_ng.h"
-
+#include "test/mock/base/mock_task_executor.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -775,6 +775,11 @@ HWTEST_F(DragEventTestNg, DragEventTestNg007, TestSize.Level1)
      * @tc.steps: step7. Invoke onActionCancel callback, GetIsBindOverlayValue is true.
      * @tc.expected: cover getDeviceType() == SourceType::MOUSE.
      */
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
     dragEventActuator->panRecognizer_->deviceType_ = SourceType::MOUSE;
     unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
     (*(dragEventActuator->panRecognizer_->onActionCancel_))(info);

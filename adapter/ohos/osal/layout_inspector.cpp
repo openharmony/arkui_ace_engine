@@ -129,10 +129,7 @@ constexpr static char RECNODE_NODEID[] = "nodeID";
 constexpr static char RECNODE_NAME[] = "value";
 constexpr static char RECNODE_DEBUGLINE[] = "debugLine";
 constexpr static char RECNODE_CHILDREN[] = "RSNode";
-constexpr static char KEY_METHOD[] = "method";
-constexpr static char KEY_PARAMS[] = "params";
 constexpr static char ARK_DEBUGGER_LIB_PATH[] = "libark_connect_inspector.z.so";
-constexpr static uint32_t INVALID_WINDOW_ID = 0;
 using SetArkUICallback = void (*)(const std::function<void(const char*)>& arkuiCallback);
 
 bool LayoutInspector::stateProfilerStatus_ = false;
@@ -302,6 +299,9 @@ void LayoutInspector::CreateLayoutInfo(int32_t containerId)
 void LayoutInspector::CreateLayoutInfoByWinId(uint32_t windId)
 {
     auto container = Container::GetByWindowId(windId);
+    if (container) {
+        TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "start get container %{public}d info", container->GetInstanceId());
+    }
     return CreateContainerLayoutInfo(container);
 }
 
@@ -386,24 +386,12 @@ void LayoutInspector::RegisterConnectCallback()
 
 void LayoutInspector::ProcessMessages(const std::string& message)
 {
-    auto json = JsonUtil::ParseJsonString(message);
-    if (json == nullptr || !json->IsValid() || !json->IsObject() || !json->Contains(KEY_METHOD) ||
-        !json->Contains(KEY_PARAMS)) {
+    uint32_t windowId = NG::Inspector::ParseWindowIdFromMsg(message);
+    if (windowId == OHOS::Ace::NG::INVALID_WINDOW_ID) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message: %{public}s", message.c_str());
         return;
     }
-    auto methodVal = json->GetString(KEY_METHOD);
-    auto paramObj = json->GetObject(KEY_PARAMS);
-    if (paramObj == nullptr || !paramObj->IsValid() || !paramObj->IsObject()) {
-        return;
-    }
-    if (methodVal == "ArkUI.tree") {
-        auto windId = StringUtils::StringToUint(paramObj->GetString("windowId"));
-        if (windId == INVALID_WINDOW_ID) {
-            TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message: %{public}s", message.c_str());
-            return;
-        }
-        CreateLayoutInfoByWinId(windId);
-    }
+    CreateLayoutInfoByWinId(windowId);
 }
 
 void LayoutInspector::HandleStopRecord()

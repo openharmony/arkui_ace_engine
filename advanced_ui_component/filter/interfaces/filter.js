@@ -1019,6 +1019,7 @@ class MultiFilterRow extends ViewPU {
                 (this.isArrowIconDown?.value ? this.filterAccessibilityText.accessibilityExpand :
                 this.filterAccessibilityText.accessibilityCollapse));
             Button.accessibilityDescription(this.isSendArrowAccessibility ? ' ' : '');
+            Button.accessibilityRole(this.isSendArrowAccessibility ? AccessibilityRoleType.ROLE_NONE : AccessibilityRoleType.BUTTON);
             Button.id(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`);
             Button.visibility(this.arrowShowStateRow.value ? Visibility.Visible : Visibility.Hidden);
             Button.onHover((n15) => {

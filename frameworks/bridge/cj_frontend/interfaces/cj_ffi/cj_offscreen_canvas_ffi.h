@@ -242,8 +242,10 @@ CJ_EXPORT int64_t FfiOHOSAceFrameworkOffscreenCanvasRenderingContextCreateImageD
 CJ_EXPORT void FfiOHOSAceFrameworkOffscreenCanvasRenderingContextSetPixelMap(int64_t contextId, int64_t pixelMapId);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkOffscreenCanvasRenderingContextGetImageData(
     int64_t contextId, const double left, const double top, const double width, const double height);
-CJ_EXPORT void FfiOHOSAceFrameworkOffscreenCanvasRenderingContextPutImageData(int64_t contextId, int64_t dataId,
-    double dx, double dy, double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight);
+CJ_EXPORT void FfiOHOSAceFrameworkOffscreenCanvasRenderingContextPutImageDataWithDirty(int64_t contextId,
+    int64_t dataId, double dx, double dy, double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight);
+CJ_EXPORT void FfiOHOSAceFrameworkOffscreenCanvasRenderingContextPutImageData(
+    int64_t contextId, int64_t dataId, double dx, double dy);
 CJ_EXPORT VectorFloat64Ptr FfiOHOSAceFrameworkOffscreenCanvasRenderingContextGetLineDash(int64_t contextId);
 CJ_EXPORT const char* FfiOHOSAceFrameworkOffscreenCanvasRenderingContextToDataURL(
     int64_t contextId, const char* type, double quality);

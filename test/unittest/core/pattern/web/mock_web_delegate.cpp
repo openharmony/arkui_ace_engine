@@ -18,7 +18,7 @@
 #include <gmock/gmock.h>
 #include <vector>
 
-#include "core/components/web/resource/web_area_changed.h"
+#include "core/components/web/resource/web_delegate.h"
 
 namespace OHOS::Ace {
 #define EGLCONFIG_VERSION 3
@@ -1071,8 +1071,14 @@ void WebDelegate::SetJavaScriptItemsByOrder(
     const ScriptItemsByOrder& scriptItemsByOrder) {}
 void WebDelegate::JavaScriptOnDocumentStartByOrder() {}
 void WebDelegate::JavaScriptOnDocumentEndByOrder() {}
+void WebDelegate::JavaScriptOnHeadReadyByOrder() {}
 bool WebDelegate::ExecuteAction(
     int64_t accessibilityId, AceAction action, const std::map<std::string, std::string>& actionArguments)
+{
+    return false;
+}
+bool WebDelegate::GetAccessibilityNodeRectById(
+    int64_t accessibilityId, int32_t* width, int32_t* height, int32_t* offsetX, int32_t* offsetY)
 {
     return false;
 }
