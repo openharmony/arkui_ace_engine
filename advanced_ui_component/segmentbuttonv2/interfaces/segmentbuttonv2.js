@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-var j =
-  (this && this.j) ||
-  function (m1, target, key, desc) {
+var o =
+  (this && this.o) ||
+  function (o1, target, key, desc) {
     var c = arguments.length,
       r =
         c < 3
@@ -24,11 +24,11 @@ var j =
           ? (desc = Object.getOwnPropertyDescriptor(target, key))
           : desc,
       d;
-    if (typeof Reflect === 'object' && typeof Reflect.h1 === 'function')
-      r = Reflect.h1(m1, target, key, desc);
+    if (typeof Reflect === 'object' && typeof Reflect.j1 === 'function')
+      r = Reflect.j1(o1, target, key, desc);
     else
-      for (var n1 = m1.length - 1; n1 >= 0; n1--)
-        if ((d = m1[n1]))
+      for (var p1 = o1.length - 1; p1 >= 0; p1--)
+        if ((d = o1[p1]))
           r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
   };
@@ -42,11 +42,12 @@ const curves = requireNativeModule('ohos.curves');
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const i18n = requireNapi('i18n');
-const m = 1;
-const o = 2;
-const t = 0;
-const u = 1;
-const a1 = {
+const util = requireNapi('util');
+const t = 1;
+const u = 2;
+const a1 = 0;
+const b1 = 1;
+const c1 = {
   buttonBackgroundColor: {
     id: -1,
     type: 10001,
@@ -68,7 +69,7 @@ const a1 = {
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
-  i1: {
+  l1: {
     id: -1,
     type: 10002,
     params: ['sys.float.segment_button_v2_doubleline_background_height'],
@@ -157,7 +158,7 @@ const a1 = {
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
-  j1: {
+  m1: {
     id: -1,
     type: 10002,
     params: ['sys.float.segment_button_v2_doubleline_selected_height'],
@@ -195,14 +196,14 @@ const a1 = {
     }),
   },
   itemShadow: ShadowStyle.OUTER_DEFAULT_XS,
-  itemMaxFontScale: m,
-  l1: m,
-  m1: o,
-  itemMinFontScale: t,
+  itemMaxFontScale: t,
   n1: t,
   o1: u,
+  itemMinFontScale: a1,
+  q1: a1,
+  s1: b1,
 };
-const b1 = {
+const d1 = {
   buttonBackgroundColor: {
     id: -1,
     type: 10001,
@@ -224,7 +225,7 @@ const b1 = {
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
-  i1: {
+  l1: {
     id: -1,
     type: 10002,
     params: ['sys.float.segment_button_v2_doubleline_background_height'],
@@ -313,7 +314,7 @@ const b1 = {
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
-  j1: {
+  m1: {
     id: -1,
     type: 10002,
     params: ['sys.float.segment_button_v2_doubleline_selected_height'],
@@ -351,12 +352,12 @@ const b1 = {
     }),
   },
   itemShadow: ShadowStyle.OUTER_DEFAULT_XS,
-  itemMaxFontScale: m,
-  l1: m,
-  m1: o,
-  itemMinFontScale: t,
+  itemMaxFontScale: t,
   n1: t,
   o1: u,
+  itemMinFontScale: a1,
+  q1: a1,
+  s1: b1,
 };
 let SegmentButtonV2Item = class SegmentButtonV2Item {
   constructor(options) {
@@ -375,24 +376,24 @@ let SegmentButtonV2Item = class SegmentButtonV2Item {
     return !!this.text && (!!this.icon || !!this.symbol);
   }
 };
-j([Trace], SegmentButtonV2Item.prototype, 'text', void 0);
-j([Trace], SegmentButtonV2Item.prototype, 'icon', void 0);
-j([Trace], SegmentButtonV2Item.prototype, 'symbol', void 0);
-j([Trace], SegmentButtonV2Item.prototype, 'enabled', void 0);
-j([Trace], SegmentButtonV2Item.prototype, 'textModifier', void 0);
-j([Trace], SegmentButtonV2Item.prototype, 'iconModifier', void 0);
-j([Trace], SegmentButtonV2Item.prototype, 'symbolModifier', void 0);
-j([Trace], SegmentButtonV2Item.prototype, 'accessibilityText', void 0);
-j([Trace], SegmentButtonV2Item.prototype, 'accessibilityDescription', void 0);
-j([Trace], SegmentButtonV2Item.prototype, 'accessibilityLevel', void 0);
-j([Computed], SegmentButtonV2Item.prototype, 'isHybrid', null);
-SegmentButtonV2Item = j([ObservedV2], SegmentButtonV2Item);
+o([Trace], SegmentButtonV2Item.prototype, 'text', void 0);
+o([Trace], SegmentButtonV2Item.prototype, 'icon', void 0);
+o([Trace], SegmentButtonV2Item.prototype, 'symbol', void 0);
+o([Trace], SegmentButtonV2Item.prototype, 'enabled', void 0);
+o([Trace], SegmentButtonV2Item.prototype, 'textModifier', void 0);
+o([Trace], SegmentButtonV2Item.prototype, 'iconModifier', void 0);
+o([Trace], SegmentButtonV2Item.prototype, 'symbolModifier', void 0);
+o([Trace], SegmentButtonV2Item.prototype, 'accessibilityText', void 0);
+o([Trace], SegmentButtonV2Item.prototype, 'accessibilityDescription', void 0);
+o([Trace], SegmentButtonV2Item.prototype, 'accessibilityLevel', void 0);
+o([Computed], SegmentButtonV2Item.prototype, 'isHybrid', null);
+SegmentButtonV2Item = o([ObservedV2], SegmentButtonV2Item);
 export { SegmentButtonV2Item };
 let SegmentButtonV2Items = class SegmentButtonV2Items extends Array {
-  constructor(l1) {
-    super(typeof l1 === 'number' ? l1 : 0);
-    if (typeof l1 !== 'number' && l1 && l1.length) {
-      for (let options of l1) {
+  constructor(n1) {
+    super(typeof n1 === 'number' ? n1 : 0);
+    if (typeof n1 !== 'number' && n1 && n1.length) {
+      for (let options of n1) {
         if (options) {
           this.push(new SegmentButtonV2Item(options));
         }
@@ -403,10 +404,10 @@ let SegmentButtonV2Items = class SegmentButtonV2Items extends Array {
     return this.some((item) => item.isHybrid);
   }
 };
-j([Computed], SegmentButtonV2Items.prototype, 'hasHybrid', null);
-SegmentButtonV2Items = j([ObservedV2], SegmentButtonV2Items);
+o([Computed], SegmentButtonV2Items.prototype, 'hasHybrid', null);
+SegmentButtonV2Items = o([ObservedV2], SegmentButtonV2Items);
 export { SegmentButtonV2Items };
-const c1 = new SegmentButtonV2Items([]);
+const e1 = new SegmentButtonV2Items([]);
 export class TabSegmentButtonV2 extends ViewV2 {
   constructor(
     parent,
@@ -585,10 +586,10 @@ export class TabSegmentButtonV2 extends ViewV2 {
       this.observeComponentCreation2(
         (elmtId, isInitialRender) => {
           if (isInitialRender) {
-            let componentCall = new d1(
+            let componentCall = new f1(
               this,
               {
-                theme: a1,
+                theme: c1,
                 items: this.items,
                 selectedIndex: this.selectedIndex,
                 $selectedIndex: (selectedIndex) => {
@@ -630,14 +631,14 @@ export class TabSegmentButtonV2 extends ViewV2 {
               () => {},
               {
                 page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                line: 294,
-                q1: 5,
+                line: 295,
+                t1: 5,
               }
             );
             ViewV2.create(componentCall);
             let paramsLambda = () => {
               return {
-                theme: a1,
+                theme: c1,
                 items: this.items,
                 selectedIndex: this.selectedIndex,
                 $selectedIndex: (selectedIndex) => {
@@ -678,7 +679,7 @@ export class TabSegmentButtonV2 extends ViewV2 {
             componentCall.paramsGenerator_ = paramsLambda;
           } else {
             this.updateStateVarsOfChildByElmtId(elmtId, {
-              theme: a1,
+              theme: c1,
               items: this.items,
               selectedIndex: this.selectedIndex,
               itemMinFontScale: this.itemMinFontScale,
@@ -834,43 +835,43 @@ export class TabSegmentButtonV2 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-j([Param], TabSegmentButtonV2.prototype, 'items', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'selectedIndex', void 0);
-j([Event], TabSegmentButtonV2.prototype, '$selectedIndex', void 0);
-j([Event], TabSegmentButtonV2.prototype, 'onItemClicked', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemSpace', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemFontSize', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontSize', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemFontColor', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontColor', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemFontWeight', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontWeight', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemSelectedBackgroundColor', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemIconSize', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemSelectedIconFillColor', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemSymbolFontColor', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemSelectedSymbolFontColor', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemMinHeight', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemPadding', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'itemShadow', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundColor', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundBlurStyle', void 0);
-j(
+o([Param], TabSegmentButtonV2.prototype, 'items', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'selectedIndex', void 0);
+o([Event], TabSegmentButtonV2.prototype, '$selectedIndex', void 0);
+o([Event], TabSegmentButtonV2.prototype, 'onItemClicked', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemSpace', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemFontSize', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontSize', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemFontColor', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontColor', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemFontWeight', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemSelectedFontWeight', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemSelectedBackgroundColor', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemIconSize', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemSelectedIconFillColor', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemSymbolFontColor', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemSelectedSymbolFontColor', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemMinHeight', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemPadding', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'itemShadow', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundColor', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundBlurStyle', void 0);
+o(
   [Param],
   TabSegmentButtonV2.prototype,
   'buttonBackgroundBlurStyleOptions',
   void 0
 );
-j([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundEffect', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'buttonBorderRadius', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'buttonMinHeight', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'buttonPadding', void 0);
-j([Param], TabSegmentButtonV2.prototype, 'languageDirection', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'buttonBackgroundEffect', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'buttonBorderRadius', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'buttonMinHeight', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'buttonPadding', void 0);
+o([Param], TabSegmentButtonV2.prototype, 'languageDirection', void 0);
 export class CapsuleSegmentButtonV2 extends ViewV2 {
   constructor(
     parent,
@@ -1049,10 +1050,10 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
       this.observeComponentCreation2(
         (elmtId, isInitialRender) => {
           if (isInitialRender) {
-            let componentCall = new d1(
+            let componentCall = new f1(
               this,
               {
-                theme: b1,
+                theme: d1,
                 items: this.items,
                 selectedIndex: this.selectedIndex,
                 $selectedIndex: (selectedIndex) => {
@@ -1094,14 +1095,14 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
               () => {},
               {
                 page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                line: 404,
-                q1: 5,
+                line: 405,
+                t1: 5,
               }
             );
             ViewV2.create(componentCall);
             let paramsLambda = () => {
               return {
-                theme: b1,
+                theme: d1,
                 items: this.items,
                 selectedIndex: this.selectedIndex,
                 $selectedIndex: (selectedIndex) => {
@@ -1142,7 +1143,7 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
             componentCall.paramsGenerator_ = paramsLambda;
           } else {
             this.updateStateVarsOfChildByElmtId(elmtId, {
-              theme: b1,
+              theme: d1,
               items: this.items,
               selectedIndex: this.selectedIndex,
               itemMinFontScale: this.itemMinFontScale,
@@ -1298,64 +1299,64 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-j([Param], CapsuleSegmentButtonV2.prototype, 'items', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'selectedIndex', void 0);
-j([Event], CapsuleSegmentButtonV2.prototype, '$selectedIndex', void 0);
-j([Event], CapsuleSegmentButtonV2.prototype, 'onItemClicked', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemSpace', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemFontColor', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontColor', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemFontSize', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontSize', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemFontWeight', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontWeight', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
-j(
+o([Param], CapsuleSegmentButtonV2.prototype, 'items', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'selectedIndex', void 0);
+o([Event], CapsuleSegmentButtonV2.prototype, '$selectedIndex', void 0);
+o([Event], CapsuleSegmentButtonV2.prototype, 'onItemClicked', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemSpace', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemFontColor', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontColor', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemFontSize', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontSize', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemFontWeight', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemSelectedFontWeight', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
+o(
   [Param],
   CapsuleSegmentButtonV2.prototype,
   'itemSelectedBackgroundColor',
   void 0
 );
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemIconSize', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
-j(
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemIconSize', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
+o(
   [Param],
   CapsuleSegmentButtonV2.prototype,
   'itemSelectedIconFillColor',
   void 0
 );
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemSymbolFontColor', void 0);
-j(
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemSymbolFontColor', void 0);
+o(
   [Param],
   CapsuleSegmentButtonV2.prototype,
   'itemSelectedSymbolFontColor',
   void 0
 );
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemMinHeight', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemPadding', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'itemShadow', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'buttonBackgroundColor', void 0);
-j(
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemMinHeight', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemPadding', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'itemShadow', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'buttonBackgroundColor', void 0);
+o(
   [Param],
   CapsuleSegmentButtonV2.prototype,
   'buttonBackgroundBlurStyle',
   void 0
 );
-j(
+o(
   [Param],
   CapsuleSegmentButtonV2.prototype,
   'buttonBackgroundBlurStyleOptions',
   void 0
 );
-j([Param], CapsuleSegmentButtonV2.prototype, 'buttonBackgroundEffect', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'buttonBorderRadius', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'buttonMinHeight', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'buttonPadding', void 0);
-j([Param], CapsuleSegmentButtonV2.prototype, 'languageDirection', void 0);
-class d1 extends ViewV2 {
+o([Param], CapsuleSegmentButtonV2.prototype, 'buttonBackgroundEffect', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'buttonBorderRadius', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'buttonMinHeight', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'buttonPadding', void 0);
+o([Param], CapsuleSegmentButtonV2.prototype, 'languageDirection', void 0);
+class f1 extends ViewV2 {
   constructor(
     parent,
     params,
@@ -1379,8 +1380,10 @@ class d1 extends ViewV2 {
           minWidth: '100%',
           minHeight: this.getButtonMinHeight(),
         });
-        Flex.padding(this.getButtonPadding());
+        Flex.clip(false);
         Flex.direction(this.languageDirection);
+        Flex.focusScopeId(this.focusGroupId, true);
+        Flex.padding(this.getButtonPadding());
         Gesture.create(GesturePriority.High);
         PanGesture.create();
         PanGesture.onActionStart((event) => {
@@ -1419,8 +1422,8 @@ class d1 extends ViewV2 {
           }
           if (this.isMouseWheelScroll) {
             const offset = event.offsetX !== 0 ? event.offsetX : event.offsetY;
-            const k1 = offset < 0 ? 1 : -1;
-            this.updateSelectedIndex(this.normalizedSelectedIndex + k1);
+            const m1 = offset < 0 ? 1 : -1;
+            this.updateSelectedIndex(this.normalizedSelectedIndex + m1);
             this.isMouseWheelScroll = false;
             return;
           }
@@ -1435,11 +1438,11 @@ class d1 extends ViewV2 {
           if (!finger) {
             return;
           }
-          let j1 = finger.globalX - this.panStartGlobalX < 0 ? -1 : 1;
+          let l1 = finger.globalX - this.panStartGlobalX < 0 ? -1 : 1;
           if (this.isRTL()) {
-            j1 = -j1;
+            l1 = -l1;
           }
-          this.updateSelectedIndex(this.normalizedSelectedIndex + j1);
+          this.updateSelectedIndex(this.normalizedSelectedIndex + l1);
         });
         PanGesture.onActionCancel(() => {
           this.isDragging = false;
@@ -1467,12 +1470,16 @@ class d1 extends ViewV2 {
               Button.borderRadius(this.getItemBorderRadius());
               Button.direction(this.languageDirection);
               Button.enabled(repeatItem.item.enabled);
+              Button.focusScopePriority(
+                this.focusGroupId,
+                this.getFocusPriority(repeatItem)
+              );
               Button.hoverEffect(HoverEffect.None);
               Button.layoutWeight(1);
               Button.padding(0);
               Button.scale(this.getItemScale(repeatItem.index));
               Button.stateEffect(false);
-              Button.onAreaChange((i1, area) => {
+              Button.onAreaChange((k1, area) => {
                 this.itemRects[repeatItem.index] = {
                   size: {
                     width: area.width,
@@ -1502,7 +1509,9 @@ class d1 extends ViewV2 {
                     this.updateItemScale(0.95);
                   }
                   this.updateTouchPressedItemIndex(repeatItem.index);
-                } else if (event.type === TouchType.Up) {
+                } else if (
+                  [TouchType.Up, TouchType.Cancel].includes(event.type)
+                ) {
                   this.updateItemScale(1);
                   this.updateTouchPressedItemIndex(-1);
                 }
@@ -1517,7 +1526,11 @@ class d1 extends ViewV2 {
               Button.onMouse((event) => {
                 if (event.action === MouseAction.Press) {
                   this.updateMousePressedItemIndex(repeatItem.index);
-                } else if (event.action === MouseAction.Release) {
+                } else if (
+                  [MouseAction.Release, MouseAction.CANCEL].includes(
+                    event.action
+                  )
+                ) {
                   this.updateMousePressedItemIndex(-1);
                 }
               });
@@ -1526,7 +1539,7 @@ class d1 extends ViewV2 {
               this.observeComponentCreation2(
                 (elmtId, isInitialRender) => {
                   if (isInitialRender) {
-                    let componentCall = new f1(
+                    let componentCall = new h1(
                       parent ? parent : this,
                       {
                         theme: this.theme,
@@ -1558,8 +1571,8 @@ class d1 extends ViewV2 {
                       () => {},
                       {
                         page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                        line: 582,
-                        q1: 13,
+                        line: 577,
+                        t1: 13,
                       }
                     );
                     ViewV2.create(componentCall);
@@ -1623,6 +1636,7 @@ class d1 extends ViewV2 {
             }
             Button.pop();
           })
+          .key(j(this.focusGroupId))
           .render(isInitialRender);
       }, Repeat);
       Flex.pop();
@@ -1663,7 +1677,7 @@ class d1 extends ViewV2 {
           ? PUV2ViewBase.contextStack[PUV2ViewBase.contextStack.length - 1]
           : null;
       this.observeComponentCreation2((elmtId, isInitialRender) => {
-        Repeat(this.itemRects, this)
+        Repeat(this.getItemRects(), this)
           .each((repeatItem) => {
             this.observeComponentCreation2((elmtId, isInitialRender) => {
               Stack.create();
@@ -1855,10 +1869,8 @@ class d1 extends ViewV2 {
     this.isDragging = false;
     this.panStartGlobalX = 0;
     this.panStartIndex = -1;
+    this.focusGroupId = util.generateRandomUUID();
     this.finalizeConstruction();
-  }
-  onItemsChange() {
-    this.itemRects = [];
   }
   get normalizedSelectedIndex() {
     const items = this.getItems();
@@ -1867,12 +1879,26 @@ class d1 extends ViewV2 {
   get selectedItemRect() {
     return this.itemRects[this.normalizedSelectedIndex];
   }
+  getFocusPriority(repeatItem) {
+    return this.normalizedSelectedIndex === repeatItem.index
+      ? FocusPriority.PREVIOUS
+      : FocusPriority.AUTO;
+  }
   isItemEnabled(index) {
     const items = this.getItems();
     if (index < 0 || index >= items.length) {
       return false;
     }
     return items[index].enabled;
+  }
+  getItemRects() {
+    if (!this.items) {
+      return [];
+    }
+    if (this.items.length === this.itemRects.length) {
+      return this.itemRects;
+    }
+    return this.itemRects.slice(0, this.items.length);
   }
   initialRender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
@@ -1881,6 +1907,7 @@ class d1 extends ViewV2 {
       Stack.backgroundColor(this.getButtonBackgroundColor());
       Stack.backgroundEffect(this.buttonBackgroundEffect);
       Stack.borderRadius(this.getButtonBorderRadius());
+      Stack.clip(false);
       Stack.constraintSize({
         minWidth: '100%',
         minHeight: this.getButtonMinHeight(),
@@ -1894,6 +1921,7 @@ class d1 extends ViewV2 {
         this.getButtonBackgroundBlurStyle(),
         this.getButtonBackgroundBlurStyleOptions()
       );
+      Stack.clip(false);
       Stack.direction(this.languageDirection);
     }, Stack);
     this.EffectLayer.bind(this)();
@@ -1904,7 +1932,7 @@ class d1 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
   getItems() {
-    return this.items ?? c1;
+    return this.items ?? e1;
   }
   getItemBackplateShadow() {
     return this.itemShadow ?? this.theme.itemShadow;
@@ -1981,8 +2009,8 @@ class d1 extends ViewV2 {
     return Color.Transparent;
   }
   getItemBorderRadius() {
-    if (this.itemBorderRadius && g1.getInstance().s1(this.itemBorderRadius)) {
-      return g1.getInstance().stringify(this.itemBorderRadius);
+    if (this.itemBorderRadius && i1.getInstance().u1(this.itemBorderRadius)) {
+      return i1.getInstance().stringify(this.itemBorderRadius);
     }
     return this.theme.itemBorderRadius;
   }
@@ -1996,7 +2024,7 @@ class d1 extends ViewV2 {
     if (
       this.itemSpace &&
       this.itemSpace.unit !== LengthUnit.PERCENT &&
-      g1.getInstance().s1(this.itemSpace)
+      i1.getInstance().u1(this.itemSpace)
     ) {
       return this.itemSpace;
     }
@@ -2056,17 +2084,17 @@ class d1 extends ViewV2 {
     return repeatItem.index === this.normalizedSelectedIndex;
   }
   getButtonPadding() {
-    if (this.buttonPadding && g1.getInstance().s1(this.buttonPadding)) {
-      return g1.getInstance().stringify(this.buttonPadding);
+    if (this.buttonPadding && i1.getInstance().u1(this.buttonPadding)) {
+      return i1.getInstance().stringify(this.buttonPadding);
     }
     return this.theme.buttonPadding;
   }
   getButtonBorderRadius() {
     if (
       this.buttonBorderRadius &&
-      g1.getInstance().s1(this.buttonBorderRadius)
+      i1.getInstance().u1(this.buttonBorderRadius)
     ) {
-      return g1.getInstance().stringify(this.buttonBorderRadius);
+      return i1.getInstance().stringify(this.buttonBorderRadius);
     }
     return this.theme.buttonBorderRadius;
   }
@@ -2077,11 +2105,11 @@ class d1 extends ViewV2 {
     return this.theme.buttonBackgroundColor;
   }
   getButtonMinHeight() {
-    if (this.buttonMinHeight && g1.getInstance().s1(this.buttonMinHeight)) {
-      return g1.getInstance().stringify(this.buttonMinHeight);
+    if (this.buttonMinHeight && i1.getInstance().u1(this.buttonMinHeight)) {
+      return i1.getInstance().stringify(this.buttonMinHeight);
     }
     const items = this.getItems();
-    return items.hasHybrid ? this.theme.i1 : this.theme.buttonMinHeight;
+    return items.hasHybrid ? this.theme.l1 : this.theme.buttonMinHeight;
   }
   updateStateVars(params) {
     if (params === undefined) {
@@ -2202,48 +2230,47 @@ class d1 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-j([Param], d1.prototype, 'items', void 0);
-j([Param], d1.prototype, 'selectedIndex', void 0);
-j([Event], d1.prototype, '$selectedIndex', void 0);
-j([Param], d1.prototype, 'theme', void 0);
-j([Event], d1.prototype, 'onItemClicked', void 0);
-j([Param], d1.prototype, 'itemMinFontScale', void 0);
-j([Param], d1.prototype, 'itemMaxFontScale', void 0);
-j([Param], d1.prototype, 'itemSpace', void 0);
-j([Param], d1.prototype, 'itemFontColor', void 0);
-j([Param], d1.prototype, 'itemSelectedFontColor', void 0);
-j([Param], d1.prototype, 'itemFontSize', void 0);
-j([Param], d1.prototype, 'itemSelectedFontSize', void 0);
-j([Param], d1.prototype, 'itemFontWeight', void 0);
-j([Param], d1.prototype, 'itemSelectedFontWeight', void 0);
-j([Param], d1.prototype, 'itemBorderRadius', void 0);
-j([Param], d1.prototype, 'itemSelectedBackgroundColor', void 0);
-j([Param], d1.prototype, 'itemIconSize', void 0);
-j([Param], d1.prototype, 'itemIconFillColor', void 0);
-j([Param], d1.prototype, 'itemSelectedIconFillColor', void 0);
-j([Param], d1.prototype, 'itemSymbolFontSize', void 0);
-j([Param], d1.prototype, 'itemSymbolFontColor', void 0);
-j([Param], d1.prototype, 'itemSelectedSymbolFontColor', void 0);
-j([Param], d1.prototype, 'itemMinHeight', void 0);
-j([Param], d1.prototype, 'itemPadding', void 0);
-j([Param], d1.prototype, 'itemShadow', void 0);
-j([Param], d1.prototype, 'buttonBackgroundColor', void 0);
-j([Param], d1.prototype, 'buttonBackgroundBlurStyle', void 0);
-j([Param], d1.prototype, 'buttonBackgroundBlurStyleOptions', void 0);
-j([Param], d1.prototype, 'buttonBackgroundEffect', void 0);
-j([Param], d1.prototype, 'buttonBorderRadius', void 0);
-j([Param], d1.prototype, 'buttonMinHeight', void 0);
-j([Param], d1.prototype, 'buttonPadding', void 0);
-j([Param], d1.prototype, 'languageDirection', void 0);
-j([Local], d1.prototype, 'itemRects', void 0);
-j([Local], d1.prototype, 'itemScale', void 0);
-j([Local], d1.prototype, 'hoveredItemIndex', void 0);
-j([Local], d1.prototype, 'mousePressedItemIndex', void 0);
-j([Local], d1.prototype, 'touchPressedItemIndex', void 0);
-j([Monitor('items')], d1.prototype, 'onItemsChange', null);
-j([Computed], d1.prototype, 'normalizedSelectedIndex', null);
-j([Computed], d1.prototype, 'selectedItemRect', null);
-const e1 = {
+o([Param], f1.prototype, 'items', void 0);
+o([Param], f1.prototype, 'selectedIndex', void 0);
+o([Event], f1.prototype, '$selectedIndex', void 0);
+o([Param], f1.prototype, 'theme', void 0);
+o([Event], f1.prototype, 'onItemClicked', void 0);
+o([Param], f1.prototype, 'itemMinFontScale', void 0);
+o([Param], f1.prototype, 'itemMaxFontScale', void 0);
+o([Param], f1.prototype, 'itemSpace', void 0);
+o([Param], f1.prototype, 'itemFontColor', void 0);
+o([Param], f1.prototype, 'itemSelectedFontColor', void 0);
+o([Param], f1.prototype, 'itemFontSize', void 0);
+o([Param], f1.prototype, 'itemSelectedFontSize', void 0);
+o([Param], f1.prototype, 'itemFontWeight', void 0);
+o([Param], f1.prototype, 'itemSelectedFontWeight', void 0);
+o([Param], f1.prototype, 'itemBorderRadius', void 0);
+o([Param], f1.prototype, 'itemSelectedBackgroundColor', void 0);
+o([Param], f1.prototype, 'itemIconSize', void 0);
+o([Param], f1.prototype, 'itemIconFillColor', void 0);
+o([Param], f1.prototype, 'itemSelectedIconFillColor', void 0);
+o([Param], f1.prototype, 'itemSymbolFontSize', void 0);
+o([Param], f1.prototype, 'itemSymbolFontColor', void 0);
+o([Param], f1.prototype, 'itemSelectedSymbolFontColor', void 0);
+o([Param], f1.prototype, 'itemMinHeight', void 0);
+o([Param], f1.prototype, 'itemPadding', void 0);
+o([Param], f1.prototype, 'itemShadow', void 0);
+o([Param], f1.prototype, 'buttonBackgroundColor', void 0);
+o([Param], f1.prototype, 'buttonBackgroundBlurStyle', void 0);
+o([Param], f1.prototype, 'buttonBackgroundBlurStyleOptions', void 0);
+o([Param], f1.prototype, 'buttonBackgroundEffect', void 0);
+o([Param], f1.prototype, 'buttonBorderRadius', void 0);
+o([Param], f1.prototype, 'buttonMinHeight', void 0);
+o([Param], f1.prototype, 'buttonPadding', void 0);
+o([Param], f1.prototype, 'languageDirection', void 0);
+o([Local], f1.prototype, 'itemRects', void 0);
+o([Local], f1.prototype, 'itemScale', void 0);
+o([Local], f1.prototype, 'hoveredItemIndex', void 0);
+o([Local], f1.prototype, 'mousePressedItemIndex', void 0);
+o([Local], f1.prototype, 'touchPressedItemIndex', void 0);
+o([Computed], f1.prototype, 'normalizedSelectedIndex', null);
+o([Computed], f1.prototype, 'selectedItemRect', null);
+const g1 = {
   itemBorderRadius: {
     id: -1,
     type: 10002,
@@ -2356,19 +2383,19 @@ const e1 = {
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
-  j1: {
+  m1: {
     id: -1,
     type: 10002,
     params: ['sys.float.segment_button_v2_multi_doubleline_height'],
     bundleName: '__harDefaultBundleName__',
     moduleName: '__harDefaultModuleName__',
   },
-  itemMaxFontScale: m,
-  l1: m,
-  m1: o,
-  itemMinFontScale: t,
+  itemMaxFontScale: t,
   n1: t,
   o1: u,
+  itemMinFontScale: a1,
+  q1: a1,
+  s1: b1,
 };
 export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
   constructor(
@@ -2522,7 +2549,8 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
         ? params.languageDirection
         : undefined
     );
-    this.theme = e1;
+    this.theme = g1;
+    this.focusGroupId = util.generateRandomUUID();
     this.finalizeConstruction();
   }
   initialRender() {
@@ -2532,7 +2560,9 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
         alignItems: ItemAlign.Stretch,
         space: { main: this.getItemSpace() },
       });
+      Flex.clip(false);
       Flex.direction(this.languageDirection);
+      Flex.focusScopeId(this.focusGroupId, true);
     }, Flex);
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Repeat(this.getItems(), this)
@@ -2552,6 +2582,10 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
             Button.constraintSize({ minHeight: this.getItemMinHeight() });
             Button.direction(this.languageDirection);
             Button.enabled(repeatItem.item.enabled);
+            Button.focusScopePriority(
+              this.focusGroupId,
+              this.getFocusPriority(repeatItem)
+            );
             Button.layoutWeight(1);
             Button.padding(0);
             Button.onClick(() => {
@@ -2581,12 +2615,13 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
               this.getItemBackgroundBlurStyle(),
               this.getItemBackgroundBlurStyleOptions()
             );
+            __Common__.direction(this.languageDirection);
           }, __Common__);
           {
             this.observeComponentCreation2(
               (elmtId, isInitialRender) => {
                 if (isInitialRender) {
-                  let componentCall = new f1(
+                  let componentCall = new h1(
                     this,
                     {
                       theme: this.theme,
@@ -2617,8 +2652,8 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
                     () => {},
                     {
                       page: 'advancedComponents/src/main/ets/components/SegmentButtonV2.ets',
-                      line: 1091,
-                      q1: 13,
+                      line: 1108,
+                      t1: 13,
                     }
                   );
                   ViewV2.create(componentCall);
@@ -2682,13 +2717,19 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
           __Common__.pop();
           Button.pop();
         })
+        .key(j(this.focusGroupId))
         .render(isInitialRender);
     }, Repeat);
     Flex.pop();
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
+  getFocusPriority(repeatItem) {
+    return Math.min(...this.selectedIndexes) === repeatItem.index
+      ? FocusPriority.PREVIOUS
+      : FocusPriority.AUTO;
+  }
   getItems() {
-    return this.items ?? c1;
+    return this.items ?? e1;
   }
   getItemBackgroundBlurStyleOptions() {
     if (this.itemBackgroundEffect) {
@@ -2712,15 +2753,15 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
     if (
       this.itemSpace &&
       this.itemSpace.unit !== LengthUnit.PERCENT &&
-      g1.getInstance().s1(this.itemSpace)
+      i1.getInstance().u1(this.itemSpace)
     ) {
       return this.itemSpace;
     }
     return this.theme.itemSpace;
   }
   getItemMinHeight() {
-    if (this.itemMinHeight && g1.getInstance().s1(this.itemMinHeight)) {
-      return g1.getInstance().stringify(this.itemMinHeight);
+    if (this.itemMinHeight && i1.getInstance().u1(this.itemMinHeight)) {
+      return i1.getInstance().stringify(this.itemMinHeight);
     }
     return this.theme.itemMinHeight;
   }
@@ -2739,12 +2780,12 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
   }
   getItemButtonBorderRadius(repeatItem) {
     const items = this.getItems();
-    const h1 = LengthMetrics.vp(0);
+    const j1 = LengthMetrics.vp(0);
     const borderRadiuses = {
-      topStart: h1,
-      bottomStart: h1,
-      topEnd: h1,
-      bottomEnd: h1,
+      topStart: j1,
+      bottomStart: j1,
+      topEnd: j1,
+      bottomEnd: j1,
     };
     if (repeatItem.index === 0) {
       const borderRadius =
@@ -2866,90 +2907,90 @@ export class MultiCapsuleSegmentButtonV2 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'items', void 0);
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'selectedIndexes', void 0);
-j([Event], MultiCapsuleSegmentButtonV2.prototype, '$selectedIndexes', void 0);
-j([Event], MultiCapsuleSegmentButtonV2.prototype, 'onItemClicked', void 0);
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemSpace', void 0);
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontColor', void 0);
-j(
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'items', void 0);
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'selectedIndexes', void 0);
+o([Event], MultiCapsuleSegmentButtonV2.prototype, '$selectedIndexes', void 0);
+o([Event], MultiCapsuleSegmentButtonV2.prototype, 'onItemClicked', void 0);
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMinFontScale', void 0);
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMaxFontScale', void 0);
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemSpace', void 0);
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontColor', void 0);
+o(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemSelectedFontColor',
   void 0
 );
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontSize', void 0);
-j(
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontSize', void 0);
+o(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemSelectedFontSize',
   void 0
 );
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontWeight', void 0);
-j(
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemFontWeight', void 0);
+o(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemSelectedFontWeight',
   void 0
 );
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
-j(
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemBorderRadius', void 0);
+o(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemBackgroundColor',
   void 0
 );
-j(
+o(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemBackgroundEffect',
   void 0
 );
-j(
+o(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemBackgroundBlurStyle',
   void 0
 );
-j(
+o(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemBackgroundBlurStyleOptions',
   void 0
 );
-j(
+o(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemSelectedBackgroundColor',
   void 0
 );
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemIconSize', void 0);
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
-j(
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemIconSize', void 0);
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemIconFillColor', void 0);
+o(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemSelectedIconFillColor',
   void 0
 );
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
-j(
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemSymbolFontSize', void 0);
+o(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemSymbolFontColor',
   void 0
 );
-j(
+o(
   [Param],
   MultiCapsuleSegmentButtonV2.prototype,
   'itemSelectedSymbolFontColor',
   void 0
 );
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMinHeight', void 0);
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemPadding', void 0);
-j([Param], MultiCapsuleSegmentButtonV2.prototype, 'languageDirection', void 0);
-class f1 extends ViewV2 {
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemMinHeight', void 0);
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'itemPadding', void 0);
+o([Param], MultiCapsuleSegmentButtonV2.prototype, 'languageDirection', void 0);
+class h1 extends ViewV2 {
   constructor(
     parent,
     params,
@@ -3152,33 +3193,33 @@ class f1 extends ViewV2 {
   getSymbolFontSize() {
     if (
       this.itemSymbolFontSize &&
-      g1.getInstance().s1(this.itemSymbolFontSize)
+      i1.getInstance().u1(this.itemSymbolFontSize)
     ) {
-      return g1.getInstance().stringify(this.itemSymbolFontSize);
+      return i1.getInstance().stringify(this.itemSymbolFontSize);
     }
     return this.theme.itemSymbolFontSize;
   }
   getItemMaxFontScale() {
     if (typeof this.itemMaxFontScale === 'number') {
-      return normalize(this.itemMaxFontScale, this.theme.l1, this.theme.m1);
+      return normalize(this.itemMaxFontScale, this.theme.n1, this.theme.o1);
     }
     if (typeof this.itemMaxFontScale === 'object') {
       const itemMaxFontScale =
-        i(this.getUIContext(), this.itemMaxFontScale) ?? m;
-      return normalize(itemMaxFontScale, this.theme.l1, this.theme.m1);
+        i(this.getUIContext(), this.itemMaxFontScale) ?? t;
+      return normalize(itemMaxFontScale, this.theme.n1, this.theme.o1);
     }
-    return m;
+    return t;
   }
   getItemMinFontScale() {
     if (typeof this.itemMinFontScale === 'number') {
-      return normalize(this.itemMinFontScale, this.theme.n1, this.theme.o1);
+      return normalize(this.itemMinFontScale, this.theme.q1, this.theme.s1);
     }
     if (typeof this.itemMinFontScale === 'object') {
       const itemMinFontScale =
-        i(this.getUIContext(), this.itemMinFontScale) ?? t;
-      return normalize(itemMinFontScale, this.theme.n1, this.theme.o1);
+        i(this.getUIContext(), this.itemMinFontScale) ?? a1;
+      return normalize(itemMinFontScale, this.theme.q1, this.theme.s1);
     }
-    return t;
+    return a1;
   }
   getItemPadding() {
     const itemPadding = {
@@ -3187,31 +3228,31 @@ class f1 extends ViewV2 {
       start: this.theme.itemPadding.start,
       end: this.theme.itemPadding.end,
     };
-    if (this.itemPadding?.top && g1.getInstance().s1(this.itemPadding.top)) {
+    if (this.itemPadding?.top && i1.getInstance().u1(this.itemPadding.top)) {
       itemPadding.top = this.itemPadding.top;
     }
     if (
       this.itemPadding?.bottom &&
-      g1.getInstance().s1(this.itemPadding.bottom)
+      i1.getInstance().u1(this.itemPadding.bottom)
     ) {
       itemPadding.bottom = this.itemPadding.bottom;
     }
     if (
       this.itemPadding?.start &&
-      g1.getInstance().s1(this.itemPadding.start)
+      i1.getInstance().u1(this.itemPadding.start)
     ) {
       itemPadding.start = this.itemPadding.start;
     }
-    if (this.itemPadding?.end && g1.getInstance().s1(this.itemPadding.end)) {
+    if (this.itemPadding?.end && i1.getInstance().u1(this.itemPadding.end)) {
       itemPadding.end = this.itemPadding.end;
     }
     return itemPadding;
   }
   getItemMinHeight() {
-    if (this.itemMinHeight && g1.getInstance().s1(this.itemMinHeight)) {
-      return g1.getInstance().stringify(this.itemMinHeight);
+    if (this.itemMinHeight && i1.getInstance().u1(this.itemMinHeight)) {
+      return i1.getInstance().stringify(this.itemMinHeight);
     }
-    return this.hasHybrid ? this.theme.j1 : this.theme.itemMinHeight;
+    return this.hasHybrid ? this.theme.m1 : this.theme.itemMinHeight;
   }
   getItemFontColor() {
     if (this.selected) {
@@ -3229,32 +3270,32 @@ class f1 extends ViewV2 {
     if (this.selected) {
       if (
         this.itemSelectedFontSize &&
-        g1.getInstance().s1(this.itemSelectedFontSize)
+        i1.getInstance().u1(this.itemSelectedFontSize)
       ) {
-        return g1.getInstance().stringify(this.itemSelectedFontSize);
+        return i1.getInstance().stringify(this.itemSelectedFontSize);
       }
       return this.theme.itemFontSize;
     }
-    if (this.itemFontSize && g1.getInstance().s1(this.itemFontSize)) {
-      return g1.getInstance().stringify(this.itemFontSize);
+    if (this.itemFontSize && i1.getInstance().u1(this.itemFontSize)) {
+      return i1.getInstance().stringify(this.itemFontSize);
     }
     return this.theme.itemFontSize;
   }
   getItemIconHeight() {
     if (
       this.itemIconSize?.height &&
-      g1.getInstance().s1(this.itemIconSize.height)
+      i1.getInstance().u1(this.itemIconSize.height)
     ) {
-      return g1.getInstance().stringify(this.itemIconSize.height);
+      return i1.getInstance().stringify(this.itemIconSize.height);
     }
     return this.theme.itemIconSize;
   }
   getItemIconWidth() {
     if (
       this.itemIconSize?.width &&
-      g1.getInstance().s1(this.itemIconSize.width)
+      i1.getInstance().u1(this.itemIconSize.width)
     ) {
-      return g1.getInstance().stringify(this.itemIconSize.width);
+      return i1.getInstance().stringify(this.itemIconSize.width);
     }
     return this.theme.itemIconSize;
   }
@@ -3350,34 +3391,34 @@ class f1 extends ViewV2 {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.pop();
   }
 }
-j([Param], f1.prototype, 'hasHybrid', void 0);
-j([Param], f1.prototype, 'item', void 0);
-j([Param], f1.prototype, 'selected', void 0);
-j([Param], f1.prototype, 'theme', void 0);
-j([Param], f1.prototype, 'itemMinFontScale', void 0);
-j([Param], f1.prototype, 'itemMaxFontScale', void 0);
-j([Param], f1.prototype, 'itemFontColor', void 0);
-j([Param], f1.prototype, 'itemSelectedFontColor', void 0);
-j([Param], f1.prototype, 'itemFontSize', void 0);
-j([Param], f1.prototype, 'itemSelectedFontSize', void 0);
-j([Param], f1.prototype, 'itemFontWeight', void 0);
-j([Param], f1.prototype, 'itemSelectedFontWeight', void 0);
-j([Param], f1.prototype, 'itemIconSize', void 0);
-j([Param], f1.prototype, 'itemIconFillColor', void 0);
-j([Param], f1.prototype, 'itemSelectedIconFillColor', void 0);
-j([Param], f1.prototype, 'itemSymbolFontSize', void 0);
-j([Param], f1.prototype, 'itemSymbolFontColor', void 0);
-j([Param], f1.prototype, 'itemSelectedSymbolFontColor', void 0);
-j([Param], f1.prototype, 'itemMinHeight', void 0);
-j([Param], f1.prototype, 'itemPadding', void 0);
-j([Param], f1.prototype, 'languageDirection', void 0);
-class g1 {
+o([Param], h1.prototype, 'hasHybrid', void 0);
+o([Param], h1.prototype, 'item', void 0);
+o([Param], h1.prototype, 'selected', void 0);
+o([Param], h1.prototype, 'theme', void 0);
+o([Param], h1.prototype, 'itemMinFontScale', void 0);
+o([Param], h1.prototype, 'itemMaxFontScale', void 0);
+o([Param], h1.prototype, 'itemFontColor', void 0);
+o([Param], h1.prototype, 'itemSelectedFontColor', void 0);
+o([Param], h1.prototype, 'itemFontSize', void 0);
+o([Param], h1.prototype, 'itemSelectedFontSize', void 0);
+o([Param], h1.prototype, 'itemFontWeight', void 0);
+o([Param], h1.prototype, 'itemSelectedFontWeight', void 0);
+o([Param], h1.prototype, 'itemIconSize', void 0);
+o([Param], h1.prototype, 'itemIconFillColor', void 0);
+o([Param], h1.prototype, 'itemSelectedIconFillColor', void 0);
+o([Param], h1.prototype, 'itemSymbolFontSize', void 0);
+o([Param], h1.prototype, 'itemSymbolFontColor', void 0);
+o([Param], h1.prototype, 'itemSelectedSymbolFontColor', void 0);
+o([Param], h1.prototype, 'itemMinHeight', void 0);
+o([Param], h1.prototype, 'itemPadding', void 0);
+o([Param], h1.prototype, 'languageDirection', void 0);
+class i1 {
   constructor() {}
   static getInstance() {
-    if (!g1.instance) {
-      g1.instance = new g1();
+    if (!i1.instance) {
+      i1.instance = new i1();
     }
-    return g1.instance;
+    return i1.instance;
   }
   stringify(metrics) {
     switch (metrics.unit) {
@@ -3393,7 +3434,7 @@ class g1 {
         return `${metrics.value}lpx`;
     }
   }
-  s1(metrics) {
+  u1(metrics) {
     return metrics.value >= 0;
   }
 }
@@ -3410,6 +3451,36 @@ function i(context, resource) {
 }
 function normalize(value, min, max) {
   return Math.min(Math.max(value, min), max);
+}
+function j(groupId) {
+  return (item, index) => {
+    let key = groupId;
+    if (item.text) {
+      if (typeof item.text === 'string') {
+        key += item.text;
+      } else {
+        key += m(item.text);
+      }
+    }
+    if (item.icon) {
+      if (typeof item.icon === 'string') {
+        key += item.icon;
+      } else {
+        key += m(item.icon);
+      }
+    }
+    if (item.symbol) {
+      key += m(item.symbol);
+    }
+    return key;
+  };
+}
+function m(resource) {
+  if (resource.id !== -1) {
+    return `${resource.id}`;
+  } else {
+    return JSON.stringify(resource);
+  }
 }
 
 export default {
