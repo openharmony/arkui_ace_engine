@@ -604,6 +604,28 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
+    void SetCurrentFocusKeyID(int32_t value)
+    {
+        focusKeyID_ = value;
+    }
+
+    int32_t GetCurrentFocusKeyID()
+    {
+        return focusKeyID_;
+    }
+
+    void SetCurrentPage(uint32_t value)
+    {
+        currentPage_ = value;
+    }
+
+    uint32_t GetCurrentPage()
+    {
+        return currentPage_;
+    }
+
+    bool NeedAdaptForAging();
+
     void ShowTitle(int32_t titleId);
     std::string GetVisibleColumnsText();
     void GetColumnText(const RefPtr<FrameNode>& columnNode, std::string& result);
@@ -776,6 +798,7 @@ private:
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
+    uint32_t currentPage_ = 0;
     std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>> options_;
     uint32_t showCount_ = 0;
     std::string dateOrder_ = "";
