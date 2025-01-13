@@ -2089,6 +2089,9 @@ HWTEST_F(RatingTestNg, RatingNGTest076, TestSize.Level1)
  */
 HWTEST_F(RatingTestNg, RatingPatternTest016, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create rating FrameNode and Pattern, and initialize rating modifier.
+     */
     RatingModelNG rating;
     rating.Create();
     rating.SetStars(DEFAULT_STAR_NUM);
@@ -2097,10 +2100,16 @@ HWTEST_F(RatingTestNg, RatingPatternTest016, TestSize.Level1)
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
     ratingPattern->OnModifyDone();
+    /**
+     * @tc.steps: step2. Create image canvas.
+     */
     ratingPattern->foregroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->secondaryImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->backgroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->backgroundImageFocusCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    /**
+     * @tc.steps: step3. Update PaintConfig and invoke CreateNodePaintMethod.
+     */
     auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod1, nullptr);
     ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
@@ -2162,14 +2171,23 @@ HWTEST_F(RatingTestNg, RatingPatternTest017, TestSize.Level1)
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
     ratingPattern->OnModifyDone();
+    /**
+     * @tc.steps: step2. Create image canvas.
+     */
     ratingPattern->foregroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->secondaryImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->backgroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->backgroundImageFocusCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    /**
+     * @tc.steps: step3. Create RatingPaintMethod, check ratingPattern->ratingModifier_.
+     */
     auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod1, nullptr);
     ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
-
+    /**
+     * @tc.steps: step4. Test OnFocusEvent && SetModifierFocus.
+     * @tc.expected: Check the param value when focus.
+     */
     ratingPattern->OnAttachToFrameNode();
     ratingPattern->OnFocusEvent();
     ratingPattern->AddIsFocusActiveUpdateEvent();
@@ -2208,14 +2226,23 @@ HWTEST_F(RatingTestNg, RatingPatternTest018, TestSize.Level1)
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
     ratingPattern->OnModifyDone();
+    /**
+     * @tc.steps: step2. Create image canvas.
+     */
     ratingPattern->foregroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->secondaryImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->backgroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->backgroundImageFocusCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    /**
+     * @tc.steps: step3. Create RatingPaintMethod, check ratingPattern->ratingModifier.
+     */
     auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod1, nullptr);
     ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
-
+    /**
+     * @tc.steps: step4. Test OnBlurEvent && SetModifierFocus.
+     * @tc.expected: Check the param value when blur.
+     */
     ratingPattern->OnAttachToFrameNode();
     ratingPattern->OnBlurEvent();
     ratingPattern->RemoveIsFocusActiveUpdateEvent();
@@ -2254,20 +2281,32 @@ HWTEST_F(RatingTestNg, RatingPatternTest019, TestSize.Level1)
     auto ratingPattern = frameNode->GetPattern<RatingPattern>();
     ASSERT_NE(ratingPattern, nullptr);
     ratingPattern->OnModifyDone();
+    /**
+     * @tc.steps: step2. Create image canvas.
+     */
     ratingPattern->foregroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->secondaryImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->backgroundImageCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
     ratingPattern->backgroundImageFocusCanvas_ = AceType::MakeRefPtr<MockCanvasImage>();
+    /**
+     * @tc.steps: step3. Create RatingPaintMethod, check ratingPattern->ratingModifier.
+     */
     auto paintMethod1 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod1, nullptr);
     ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
-    
+    /**
+     * @tc.steps: step4. Test HandleHoverEvent.
+     * @tc.expected: Check the param value when focus && hover.
+     */
     ratingPattern->isfocus_ = true;
     ratingPattern->HandleHoverEvent(true);
     EXPECT_EQ(ratingPattern->state_, RatingModifier::RatingAnimationType::FOCUS);
     ratingPattern->HandleHoverEvent(false);
     EXPECT_EQ(ratingPattern->state_, RatingModifier::RatingAnimationType::FOCUS);
-
+    /**
+     * @tc.steps: step5. Test HandleHoverEvent.
+     * @tc.expected: Check the param value when blur && hover.
+     */
     ratingPattern->isfocus_ = false;
     ratingPattern->HandleHoverEvent(true);
     EXPECT_EQ(ratingPattern->state_, RatingModifier::RatingAnimationType::HOVER);
