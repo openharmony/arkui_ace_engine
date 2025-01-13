@@ -1490,10 +1490,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     }
     auto eventHub = node->GetEventHub<NG::EventHub>();
     if (eventHub != nullptr) {
-        auto gestureEventHub = eventHub->GetGestureEventHub();
-        if (gestureEventHub != nullptr) {
-            nodeInfo.SetHitTestBehavior(gestureEventHub->GetHitTestModeStr());
-        }
+        nodeInfo.SetHitTestBehavior(NG::GestureEventHub::GetHitTestModeStr(eventHub->GetGestureEventHub()));
     }
 
     UpdateUserAccessibilityElementInfo(accessibilityProperty, nodeInfo);
