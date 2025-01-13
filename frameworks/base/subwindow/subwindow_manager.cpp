@@ -462,7 +462,7 @@ void SubwindowManager::ShowPopup(const RefPtr<Component>& newComponent, bool dis
             CHECK_NULL_VOID(newComponent);
             subwindow->ShowPopup(newComponent, disableTouchEvent);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowPopup");
+        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowPopup", PriorityType::VIP);
 }
 
 bool SubwindowManager::CancelPopup(const std::string& id)
@@ -492,7 +492,7 @@ void SubwindowManager::ShowMenu(const RefPtr<Component>& newComponent)
             }
             subwindow->ShowMenu(menu);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowMenu");
+        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowMenu", PriorityType::VIP);
 }
 
 void SubwindowManager::CloseMenu()
@@ -724,7 +724,7 @@ void SubwindowManager::ShowToastNG(const NG::ToastInfo& toastInfo, std::function
             TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
             subwindow->ShowToast(toastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToastNG");
+        TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToastNG", PriorityType::VIP);
 }
 
 ToastWindowType SubwindowManager::GetToastWindowType(int32_t instanceId)
@@ -782,12 +782,12 @@ void SubwindowManager::ShowToast(const NG::ToastInfo& toastInfo, std::function<v
         CHECK_NULL_VOID(taskExecutor);
         taskExecutor->PostTask(
             [containerId, toastInfo, callbackParam = std::move(callback)] {
-		auto subwindow = SubwindowManager::GetInstance()->GetOrCreateToastWindow(containerId, toastInfo.showMode);
+        auto subwindow = SubwindowManager::GetInstance()->GetOrCreateToastWindow(containerId, toastInfo.showMode);
                 CHECK_NULL_VOID(subwindow);
                 TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "before show toast : %{public}d", containerId);
                 subwindow->ShowToast(toastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
             },
-            TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToast");
+            TaskExecutor::TaskType::PLATFORM, "ArkUISubwindowShowToast", PriorityType::VIP);
     }
 }
 
@@ -1161,7 +1161,7 @@ void SubwindowManager::ClearToastInSystemSubwindow()
         }
     }
     RefPtr<Subwindow> subwindow;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         if (containerId != -1 && containerId < MIN_SUBCONTAINER_ID) {
             subwindow = GetSystemToastWindow(containerId);
         }
@@ -1191,6 +1191,17 @@ void SubwindowManager::OnWindowSizeChanged(int32_t instanceId, Rect windowRect, 
     CHECK_NULL_VOID(overlayManager);
     overlayManager->OnUIExtensionWindowSizeChange();
     uiExtensionWindowRect_ = windowRect;
+}
+
+void SubwindowManager::FlushSubWindowUITasks(int32_t instanceId)
+{
+    auto subwindowContainerId = GetSubContainerId(instanceId);
+    if (subwindowContainerId >= MIN_SUBCONTAINER_ID) {
+        auto subPipline = NG::PipelineContext::GetContextByContainerId(subwindowContainerId);
+        CHECK_NULL_VOID(subPipline);
+        ContainerScope scope(subwindowContainerId);
+        subPipline->FlushUITasks();
+    }
 }
 
 RefPtr<NG::FrameNode> SubwindowManager::GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node)

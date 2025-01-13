@@ -150,7 +150,7 @@ function isResource(variable: any): variable is Resource {
 }
 
 function isResourceEqual(stageValue: Resource, value: Resource): boolean {
-  if (Utils.isApiVersionEQAbove(14)) {
+  if (Utils.isApiVersionEQAbove(16)) {
     return false;
   }
   return (stageValue.bundleName === value.bundleName) &&
@@ -204,7 +204,7 @@ class ModifierWithKey<T extends number | string | boolean | object | Function> {
       this.applyPeer(node, true, component);
       return true;
     }
-    if (component._needDiff) {
+    if (component && component._needDiff) {
       const stageTypeInfo: string = typeof this.stageValue;
       const valueTypeInfo: string = typeof this.value;
       let different: boolean = false;
@@ -2398,6 +2398,34 @@ class AccessibilityTextModifier extends ModifierWithKey<string> {
   }
 }
 
+class AccessibilityRoleModifier extends ModifierWithKey<AccessibilityRoleType> {
+  constructor(value: AccessibilityRoleType) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('accessibilityRole');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityRoleType(node);
+    } else {
+      getUINativeModule().common.setAccessibilityRoleType(node, this.value);
+    }
+  }
+}
+
+class AccessibilityFocusCallbackModifier extends ModifierWithKey<AccessibilityFocusCallback> {
+  constructor(value: AccessibilityFocusCallback) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('onAccessibilityFocus');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetAccessibilityFocusCallback(node);
+    } else {
+      getUINativeModule().common.setAccessibilityFocusCallback(node, this.value);
+    }
+  }
+}
+
 class AllowDropModifier extends ModifierWithKey<Array<UniformDataType>> {
   constructor(value: Array<UniformDataType>) {
     super(value);
@@ -2775,7 +2803,7 @@ class DragPreviewOptionsModifier extends ModifierWithKey<ArkDragPreviewOptions> 
       getUINativeModule().common.resetDragPreviewOptions(node);
     } else {
       getUINativeModule().common.setDragPreviewOptions(node, this.value.mode, this.value.numberBadge,
-        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting);
+        this.value.isMultiSelectionEnabled, this.value.defaultAnimationBeforeLifting, this.value.enableEdgeAutoScroll, this.value.enableHapticFeedback);
     }
   }
 
@@ -2783,7 +2811,9 @@ class DragPreviewOptionsModifier extends ModifierWithKey<ArkDragPreviewOptions> 
     return !(this.value.mode === this.stageValue.mode
       && this.value.numberBadge === this.stageValue.numberBadge
       && this.value.isMultiSelectionEnabled === this.stageValue.isMultiSelectionEnabled
-      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting);
+      && this.value.defaultAnimationBeforeLifting === this.stageValue.defaultAnimationBeforeLifting
+      && this.value.enableEdgeAutoScroll === this.value.enableEdgeAutoScroll
+      && this.value.enableHapticFeedback === this.stageValue.enableHapticFeedback);
   }
 }
 
@@ -3533,6 +3563,8 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     if (typeof options === 'object') {
       arkDragPreviewOptions.isMultiSelectionEnabled = options.isMultiSelectionEnabled;
       arkDragPreviewOptions.defaultAnimationBeforeLifting = options.defaultAnimationBeforeLifting;
+      arkDragPreviewOptions.enableEdgeAutoScroll = options.enableEdgeAutoScroll;
+      arkDragPreviewOptions.enableHapticFeedback = options.enableHapticFeedback;
     }
     modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
       DragPreviewOptionsModifier, arkDragPreviewOptions);
@@ -3693,7 +3725,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  backgroundImage(src: ResourceStr | PixelMap, repeat?: ImageRepeat): this {
+  backgroundImage(src: ResourceStr | PixelMap, repeat?: ImageRepeat | BackgroundImageOptions): this {
     let arkBackgroundImage = new ArkBackgroundImage();
     arkBackgroundImage.src = src;
     arkBackgroundImage.repeat = repeat;
@@ -4681,6 +4713,16 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     } else {
       modifierWithKey(this._modifiersWithKeys, AccessibilityLevelModifier.identity, AccessibilityLevelModifier, value);
     }
+    return this;
+  }
+  
+  accessibilityRole(value: AccessibilityRoleType): this {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityRoleModifier.identity, AccessibilityRoleModifier, value);
+    return this;
+  }
+  
+  onAccessibilityFocus(value: AccessibilityFocusCallback): this {
+    modifierWithKey(this._modifiersWithKeys, AccessibilityFocusCallbackModifier.identity, AccessibilityFocusCallbackModifier, value);
     return this;
   }
 

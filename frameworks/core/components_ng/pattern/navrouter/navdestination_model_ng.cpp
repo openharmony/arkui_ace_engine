@@ -347,6 +347,9 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPt
             pattern->SetNavDestinationContext(context);
             return pattern;
         });
+    if (context) {
+        context->SetUniqueId(navDestinationNode->GetId());
+    }
     if (!navDestinationNode->GetTitleBarNode()) {
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
             CreateImageButton(navDestinationNode);
@@ -930,5 +933,22 @@ void NavDestinationModelNG::UpdateBindingWithScrollable(
     CHECK_NULL_VOID(pattern);
     auto processor = pattern->GetScrollableProcessor();
     callback(processor);
+}
+
+void NavDestinationModelNG::SetOnPop(std::function<void(const RefPtr<NavPathInfo>&)>&& onPop)
+{
+    if (!onPop) {
+        return;
+    }
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto context = pattern->GetNavDestinationContext();
+    CHECK_NULL_VOID(context);
+    auto navPathInfo = context->GetNavPathInfo();
+    CHECK_NULL_VOID(navPathInfo);
+    onPop(navPathInfo);
 }
 } // namespace OHOS::Ace::NG

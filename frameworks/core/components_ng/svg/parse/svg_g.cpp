@@ -34,4 +34,13 @@ RSRecordingPath SvgG::AsPath(const Size& viewPort) const
     return path;
 }
 
+RSRecordingPath SvgG::AsPath(const SvgLengthScaleRule& lengthRule)
+{
+    RSRecordingPath path;
+    for (const auto& child : children_) {
+        auto childPath = child->AsPath(lengthRule);
+        path.Op(path, childPath, RSPathOp::UNION);
+    }
+    return path;
+}
 } // namespace OHOS::Ace::NG

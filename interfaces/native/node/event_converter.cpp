@@ -37,6 +37,7 @@ constexpr int32_t ORIGIN_INPUT_EVENT_TOOL_TYPE_JOYSTICK = 10;
 constexpr int32_t ORIGIN_MOUSE_ACTION_PRESS = 1;
 constexpr int32_t ORIGIN_MOUSE_ACTION_RELEASE = 2;
 constexpr int32_t ORIGIN_MOUSE_ACTION_MOVE = 3;
+constexpr int32_t ORIGIN_MOUSE_ACTION_CANCEL = 13;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_LEFT = 1;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_RIGHT = 2;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_MIDDLE = 4;
@@ -220,6 +221,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_KEY_EVENT;
         case NODE_ON_KEY_PRE_IME:
             return ON_KEY_PREIME;
+        case NODE_DISPATCH_KEY_EVENT:
+            return ON_KEY_DISPATCH;
         case NODE_CHECKBOX_EVENT_ON_CHANGE:
             return ON_CHECKBOX_CHANGE;
         case NODE_SLIDER_EVENT_ON_CHANGE:
@@ -304,6 +307,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_WATER_FLOW_DID_SCROLL;
         case NODE_LIST_ON_SCROLL_INDEX:
             return ON_LIST_SCROLL_INDEX;
+        case NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE:
+            return ON_LIST_SCROLL_VISIBLE_CONTENT_CHANGE;
         case NODE_WATER_FLOW_ON_SCROLL_INDEX:
             return ON_WATER_FLOW_SCROLL_INDEX;
         case NODE_TEXT_ON_DETECT_RESULT_UPDATE:
@@ -340,6 +345,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TEXT_INPUT_CHANGE_WITH_PREVIEW_TEXT;
         case NODE_TEXT_AREA_ON_CHANGE_WITH_PREVIEW_TEXT:
             return ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT;
+        case NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE:
+            return ON_CHECKBOX_GROUP_CHANGE;
         default:
             return -1;
     }
@@ -424,6 +431,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_KEY_EVENT;
         case ON_KEY_PREIME:
             return NODE_ON_KEY_PRE_IME;
+        case ON_KEY_DISPATCH:
+            return NODE_DISPATCH_KEY_EVENT;
         case ON_CHECKBOX_CHANGE:
             return NODE_CHECKBOX_EVENT_ON_CHANGE;
         case ON_SLIDER_CHANGE:
@@ -502,6 +511,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_MOUSE;
         case ON_LIST_REACH_END:
             return NODE_SCROLL_EVENT_ON_REACH_END;
+        case ON_LIST_SCROLL_VISIBLE_CONTENT_CHANGE:
+            return NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE;
         case ON_WATER_FLOW_REACH_END:
             return NODE_SCROLL_EVENT_ON_REACH_END;
         case ON_SCROLL_REACH_END:
@@ -556,6 +567,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_INPUT_ON_CHANGE_WITH_PREVIEW_TEXT;
         case ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT:
             return NODE_TEXT_AREA_ON_CHANGE_WITH_PREVIEW_TEXT;
+        case ON_CHECKBOX_GROUP_CHANGE:
+            return NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE;
         default:
             return -1;
     }
@@ -711,6 +724,8 @@ int32_t ConvertToCMouseActionType(int32_t originActionType)
             return static_cast<int32_t>(UI_MOUSE_EVENT_ACTION_RELEASE);
         case ORIGIN_MOUSE_ACTION_MOVE:
             return static_cast<int32_t>(UI_MOUSE_EVENT_ACTION_MOVE);
+        case ORIGIN_MOUSE_ACTION_CANCEL:
+            return static_cast<int32_t>(UI_MOUSE_EVENT_ACTION_CANCEL);
         default:
             break;
     }

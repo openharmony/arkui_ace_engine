@@ -41,7 +41,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(pagePattern);
     auto eventHub = page->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         if (transitionType == PageTransitionType::EXIT_POP) {
             eventHub->SetEnabled(false);
         }
@@ -292,6 +292,7 @@ bool StageManager::PopPage(const RefPtr<FrameNode>& inPage, bool needShowNext, b
     }
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
     auto inPageNode = needShowNext ? inPage : nullptr;
+    pipeline->GetMemoryManager()->RebuildImageByPage(inPageNode);
     FireAutoSave(outPageNode, inPageNode);
     FirePageHide(pageNode, needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
     FirePageShow(inPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
@@ -356,6 +357,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         const auto& newPageNode = *iter;
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
+        pipeline->GetMemoryManager()->RebuildImageByPage(inPageNode);
     }
     PageChangeCloseKeyboard();
     AddPageTransitionTrace(outPageNode, inPageNode);
@@ -404,6 +406,7 @@ bool StageManager::CleanPageStack()
         pageNode->SetChildrenInDestroying();
         stageNode_->RemoveChild(pageNode);
     }
+    pipeline->GetMemoryManager()->RebuildImageByPage(AceType::DynamicCast<FrameNode>(children.back()));
     stageNode_->RebuildRenderContextTree();
     pipeline->RequestFrame();
     return true;
@@ -677,7 +680,7 @@ std::string StageManager::GetSrcPageInfo(const RefPtr<FrameNode>& srcPage)
 bool StageManager::CheckPageInTransition(const RefPtr<UINode>& pageNode)
 {
     auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
-    CHECK_NULL_RETURN(pageNode, false);
+    CHECK_NULL_RETURN(frameNode, false);
     auto pagePattern = frameNode->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     return pagePattern->GetPageInTransition();
@@ -696,11 +699,22 @@ void StageManager::ExpandSafeArea(const RefPtr<UINode>& pageNode)
 {
     auto node = AceType::DynamicCast<FrameNode>(pageNode);
     CHECK_NULL_VOID(node);
+    // check need avoid keyboard
+    auto pipelineContext = pageNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto manager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    auto isNeedAvoidKeyboard = manager->CheckPageNeedAvoidKeyboard(node);
+    if (!pipelineContext->CheckOverlayFocus() && isNeedAvoidKeyboard) {
+        TAG_LOGI(AceLogTag::ACE_ROUTER, "don't set safeArea when keyboard is need avoid");
+        return;
+    }
     auto layoutProperty = node->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
     SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
         .edges = SAFE_AREA_EDGE_ALL };
     layoutProperty->UpdateSafeAreaExpandOpts(opts);
+    node->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
 }
 
 void StageManager::StopPageTransition(bool needTransition)

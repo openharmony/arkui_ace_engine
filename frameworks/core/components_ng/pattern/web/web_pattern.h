@@ -501,6 +501,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverlayScrollbarEnabled, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OptimizeParserBudgetEnabled, bool);
 
     bool IsFocus() const
     {
@@ -601,6 +602,9 @@ public:
         const ScriptItemsByOrder& scriptItemsByOrder);
     void UpdateJavaScriptOnDocumentEndByOrder();
     void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder);
+    void UpdateJavaScriptOnHeadReadyByOrder();
+    void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
         const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(const TouchEvent& touchEvent,
         TouchEventInfo& touchEventInfo, const std::string& embdedId);
@@ -851,6 +855,7 @@ private:
     void OnOverlayScrollbarEnabledUpdate(bool enable);
     void OnKeyboardAvoidModeUpdate(const WebKeyboardAvoidMode& mode);
     void OnEnabledHapticFeedbackUpdate(bool enable);
+    void OnOptimizeParserBudgetEnabledUpdate(bool value);
     int GetWebId();
 
     void InitEvent();
@@ -895,6 +900,7 @@ private:
     void HandleScaleGestureChange(const GestureEvent& event);
     void HandleScaleGestureStart(const GestureEvent& event);
     void HandleScaleGestureEnd(const GestureEvent& event);
+    void HandleScaleGestureCancel(const GestureEvent& event);
     double getZoomOffset(double& scale) const;
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
@@ -1019,6 +1025,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
     double GetNewScale(double& scale) const;
+    double GetNewOriginScale(double originScale) const;
     void UpdateSlideOffset();
     void ClearKeyEventByKeyCode(int32_t keyCode);
     void SetRotation(uint32_t rotation);
@@ -1169,8 +1176,10 @@ private:
     RefPtr<WebDelegateObserver> observer_;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
+    std::optional<ScriptItems> onHeadReadyScriptItems_;
     std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onHeadReadyScriptItemsByOrder_;
     bool offlineWebInited_ = false;
     bool offlineWebRendered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
@@ -1232,6 +1241,9 @@ private:
     float touchPointX = 0;
     float touchPointY = 0;
     bool isUsingCustomKeyboardAvoid_ = false;
+    int64_t lastHeight_ = 0L;
+    int64_t lastWidth_ = 0L;
+    bool dragWindowFlag_ = false;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

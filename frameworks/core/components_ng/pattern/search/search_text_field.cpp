@@ -47,10 +47,7 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     if (event.IsKeepEditable()) {
         return;
     }
-    CloseKeyboard(forceCloseKeyboard);
-    if (HasFocus()) {
-        FocusHub::LostFocusToViewRoot();
-    }
+    HandleCloseKeyboard(forceCloseKeyboard);
 }
 
 TextInputAction SearchTextFieldPattern::GetDefaultTextInputAction() const
@@ -147,7 +144,7 @@ int32_t SearchTextFieldPattern::GetRequestKeyboardId()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
-    auto searchHost = host->GetAncestorNodeOfFrame();
+    auto searchHost = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_RETURN(searchHost, -1);
     return searchHost->GetId();
 }

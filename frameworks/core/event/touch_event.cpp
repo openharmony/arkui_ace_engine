@@ -15,6 +15,8 @@
 
 #include "core/event/touch_event.h"
 
+#include "base/input_manager/input_manager.h"
+
 namespace OHOS::Ace {
 TouchEvent& TouchEvent::SetId(int32_t id)
 {
@@ -135,10 +137,15 @@ TouchEvent& TouchEvent::SetPointers(std::vector<TouchPoint> pointers)
     return *this;
 }
 
-TouchEvent& TouchEvent::SetPointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent)
+TouchEvent& TouchEvent::SetPointerEvent(std::shared_ptr<const MMI::PointerEvent> pointerEvent)
 {
     this->pointerEvent = std::move(pointerEvent);
     return *this;
+}
+
+std::shared_ptr<MMI::PointerEvent> TouchEvent::GetTouchEventPointerEvent() const
+{
+    return InputManager::CreatePointerEvent(pointerEvent);
 }
 
 TouchEvent& TouchEvent::SetOriginalId(int32_t originalId)
@@ -168,6 +175,12 @@ TouchEvent& TouchEvent::SetInputYDeltaSlope(float inputYDeltaSlope)
 TouchEvent& TouchEvent::SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes)
 {
     this->pressedKeyCodes_ = pressedKeyCodes;
+    return *this;
+}
+
+TouchEvent& TouchEvent::SetIsPassThroughMode(bool isPassThroughMode)
+{
+    this->isPassThroughMode = isPassThroughMode;
     return *this;
 }
 
@@ -206,6 +219,7 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.inputXDeltaSlope = inputXDeltaSlope;
     event.inputYDeltaSlope = inputYDeltaSlope;
     event.eventType = UIInputEventType::TOUCH;
+    event.isPassThroughMode = isPassThroughMode;
     return event;
 }
 
@@ -342,7 +356,8 @@ TouchEvent TouchEvent::UpdatePointers() const
         .SetSourceType(sourceType)
         .SetIsInterpolated(isInterpolated)
         .SetPointerEvent(pointerEvent)
-        .SetOriginalId(originalId);
+        .SetOriginalId(originalId)
+        .SetIsPassThroughMode(isPassThroughMode);
     event.pointers.emplace_back(std::move(point));
     return event;
 }

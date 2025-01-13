@@ -612,7 +612,8 @@ void AceAbility::OnConfigurationUpdated(const Configuration& configuration)
                 configuration.GetItem(OHOS::AppExecFwk::ConfigurationInner::APPLICATION_DENSITYDPI);
             container->UpdateConfiguration(parsedConfig, configuration.GetName());
         },
-        TaskExecutor::TaskType::UI, "ArkUIAbilityUpdateConfiguration");
+        TaskExecutor::TaskType::UI, "ArkUIAbilityUpdateConfiguration",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     LOGI("AceAbility OnConfigurationUpdated called End, name:%{public}s", configuration.GetName().c_str());
 }
 
@@ -697,11 +698,11 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
         pipelineContext->SetDisplayWindowRectInfo(
             Rect(Offset(rect.posX_, rect.posY_), Size(rect.width_, rect.height_)));
         pipelineContext->SetIsLayoutFullScreen(
-            Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+            Ability::GetWindow()->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
         auto isNeedAvoidWindowMode = SystemProperties::GetNeedAvoidWindow() &&
-            (Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
-            Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-            Ability::GetWindow()->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
+            (Ability::GetWindow()->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
+            Ability::GetWindow()->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            Ability::GetWindow()->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY);
         pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
     }
     auto taskExecutor = container->GetTaskExecutor();
@@ -715,7 +716,8 @@ void AceAbility::OnSizeChange(const OHOS::Rosen::Rect& rect, OHOS::Rosen::Window
             Platform::AceViewOhos::SurfaceChanged(aceView, rect.width_, rect.height_,
                 rect.height_ >= rect.width_ ? 0 : 1, static_cast<WindowSizeChangeReason>(reason), rsTransaction);
         },
-        TaskExecutor::TaskType::PLATFORM, "ArkUIAbilitySurfaceChanged");
+        TaskExecutor::TaskType::PLATFORM, "ArkUIAbilitySurfaceChanged",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
@@ -732,7 +734,7 @@ void AceAbility::OnModeChange(OHOS::Rosen::WindowMode mode, bool hasDeco)
             CHECK_NULL_VOID(pipelineContext);
             pipelineContext->ShowContainerTitle(mode == OHOS::Rosen::WindowMode::WINDOW_MODE_FLOATING, hasDeco);
         },
-        TaskExecutor::TaskType::UI, "ArkUIWindowModeChange");
+        TaskExecutor::TaskType::UI, "ArkUIWindowModeChange", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& info,
@@ -754,7 +756,8 @@ void AceAbility::OnSizeChange(const sptr<OHOS::Rosen::OccupiedAreaChangeInfo>& i
                 CHECK_NULL_VOID(context);
                 context->OnVirtualKeyboardAreaChange(keyboardRect, rsTransaction);
             },
-            TaskExecutor::TaskType::UI, "ArkUIAbilityVirtualKeyboardAreaChange");
+            TaskExecutor::TaskType::UI, "ArkUIAbilityVirtualKeyboardAreaChange",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 }
 
@@ -896,7 +899,8 @@ void AceAbility::OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea& avoidArea, OHO
                 pipeline->UpdateCutoutSafeArea(safeArea);
             }
         },
-        TaskExecutor::TaskType::UI, "ArkUIAbilityAvoidAreaChanged");
+        TaskExecutor::TaskType::UI, "ArkUIAbilityAvoidAreaChanged",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 } // namespace Ace

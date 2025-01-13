@@ -34,7 +34,7 @@ RefPtr<ScrollProxy> ScrollBarModelImpl::GetScrollBarProxy(const RefPtr<ScrollPro
 }
 
 void ScrollBarModelImpl::Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, bool proxyFlag,
-    int directionValue, int stateValue)
+    int directionValue, int stateValue, bool isCreateArc)
 {
     RefPtr<Component> child;
     auto scrollBarComponent = AceType::MakeRefPtr<OHOS::Ace::ScrollBarComponent>(child);

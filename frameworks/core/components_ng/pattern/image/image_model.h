@@ -68,6 +68,7 @@ public:
     virtual void SetBorderRadius(const NG::BorderRadiusProperty& borderRadius) = 0;
     virtual void SetBackBorder() = 0;
     virtual void SetImageFit(ImageFit value) = 0;
+    virtual void SetImageMatrix(const Matrix4 &value) = 0;
     virtual void SetMatchTextDirection(bool value) = 0;
     virtual void SetFitOriginSize(bool value) = 0;
     virtual void SetOnComplete(std::function<void(const LoadImageSuccessEvent &info)> &&callback) = 0;
@@ -79,6 +80,7 @@ public:
         int32_t duration, int32_t iteration) = 0;
     virtual void SetImageSourceSize(const std::pair<Dimension, Dimension> &size) = 0;
     virtual void SetImageFill(const Color &color) = 0;
+    virtual void ResetImageFill() = 0;
     virtual void SetImageInterpolation(ImageInterpolation interpolation) = 0;
     virtual void SetImageRepeat(ImageRepeat imageRepeat) = 0;
     virtual void SetImageRenderMode(ImageRenderMode imageRenderMode) = 0;

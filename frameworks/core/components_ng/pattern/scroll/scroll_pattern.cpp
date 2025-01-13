@@ -27,6 +27,7 @@ constexpr int32_t COLUMN_NUM = 2;
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 constexpr int32_t SCROLL_LAYOUT_INFO_COUNT = 30;
 constexpr int32_t SCROLL_MEASURE_INFO_COUNT = 30;
+constexpr double SCROLL_SNAP_INTERVAL_SIZE_MIN_VALUE = 1.0;
 } // namespace
 
 void ScrollPattern::OnModifyDone()
@@ -45,6 +46,9 @@ void ScrollPattern::OnModifyDone()
     }
     if (!GetScrollableEvent()) {
         AddScrollEvent();
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetDigitalCrownEvent();
+#endif
     }
     SetEdgeEffect();
     SetScrollBar(paintProperty->GetScrollBarProperty());
@@ -77,7 +81,6 @@ RefPtr<NodePaintMethod> ScrollPattern::CreateNodePaintMethod()
     auto drawDirection = (layoutDirection == TextDirection::RTL);
     auto paint = MakeRefPtr<ScrollPaintMethod>(GetAxis() == Axis::HORIZONTAL, drawDirection);
     paint->SetScrollBar(GetScrollBar());
-    CreateScrollBarOverlayModifier();
     paint->SetScrollBarOverlayModifier(GetScrollBarOverlayModifier());
     auto scrollEffect = GetScrollEdgeEffect();
     if (scrollEffect && scrollEffect->IsFadeEffect()) {
@@ -554,10 +557,23 @@ bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
     ValidateOffset(source);
     HandleScrollPosition(userOffset);
     if (IsCrashTop()) {
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "UpdateCurrentOffset==>[HandleCrashTop();]");
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetReachBoundary(true);
+#endif
         HandleCrashTop();
     } else if (IsCrashBottom()) {
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "UpdateCurrentOffset==>[HandleCrashBottom();]");
+#ifdef SUPPORT_DIGITAL_CROWN
+        SetReachBoundary(true);
+#endif
         HandleCrashBottom();
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (!IsCrashBottom() && !IsCrashTop()) {
+        SetReachBoundary(false);
+    }
+#endif
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
@@ -925,7 +941,7 @@ void ScrollPattern::CaleSnapOffsets()
 
 void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign)
 {
-    CHECK_NULL_VOID(Positive(intervalSize_.Value()));
+    CHECK_NULL_VOID(GreatOrEqual(intervalSize_.Value(), SCROLL_SNAP_INTERVAL_SIZE_MIN_VALUE));
     auto mainSize = GetMainAxisSize(viewPort_, GetAxis());
     auto extentMainSize = GetMainAxisSize(viewPortExtent_, GetAxis());
     auto start = 0.0f;
@@ -1343,7 +1359,7 @@ void ScrollPattern::StartScrollSnapAnimation(float scrollSnapDelta, float scroll
     CHECK_NULL_VOID(scrollable);
     if (scrollable->IsSnapAnimationRunning()) {
         scrollable->UpdateScrollSnapEndWithOffset(
-            -(scrollSnapDelta + currentOffset_ - scrollable->GetSnapFinalPosition()));
+            -(scrollSnapDelta + scrollable->GetCurrentPos() - scrollable->GetSnapFinalPosition()));
     } else {
         scrollable->StartScrollSnapAnimation(scrollSnapDelta, scrollSnapVelocity, fromScrollBar);
         if (!IsScrolling()) {

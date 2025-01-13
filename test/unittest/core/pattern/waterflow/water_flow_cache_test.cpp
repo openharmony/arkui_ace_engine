@@ -153,7 +153,6 @@ HWTEST_F(WaterFlowTestNg, Cache007, TestSize.Level1)
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetCachedCount(2);
-    CreateItemsInRepeat(50, [](int32_t i) { return 50.0f; });
     CreateItemsInLazyForEach(50, [](uint32_t idx) { return 50.0f; });
     CreateDone();
 
@@ -175,6 +174,37 @@ HWTEST_F(WaterFlowTestNg, Cache007, TestSize.Level1)
     EXPECT_EQ(ctx, GetItem(32)->GetRenderContext());
 }
 
+/*
+ * @tc.name: ShowCache004
+ * @tc.desc: Test cache items active state
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, ShowCache004, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    CreateItemsInLazyForEach(50, [](uint32_t idx) { return 100.0f; });
+    model.SetCachedCount(1, true);
+    model.SetLayoutDirection(FlexDirection::COLUMN_REVERSE);
+    model.SetColumnsTemplate("1fr 1fr");
+    CreateDone();
+
+    UpdateCurrentOffset(-300.0f);
+    UpdateCurrentOffset(110.0f);
+    UpdateCurrentOffset(-200.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 6);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 23);
+        for (int i = 0; i < 50; ++i) {
+        if (i < 5 || i > 24) {
+            if (GetItem(i, true)) {
+                EXPECT_FALSE(GetItem(i, true)->IsActive());
+            }
+        } else {
+            EXPECT_TRUE(GetItem(i, true));
+            EXPECT_TRUE(GetItem(i, true)->IsActive());
+        }
+    }
+}
+
 /**
  * @tc.name: CacheScroll001
  * @tc.desc: Layout WaterFlow cache items
@@ -188,7 +218,6 @@ HWTEST_F(WaterFlowTestNg, CacheScroll001, TestSize.Level1)
     model.SetColumnsGap(Dimension(10));
     CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
     CreateDone();
-    frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
 
     pattern_->isAnimationStop_ = false;
     UpdateCurrentOffset(-2000.0f);
@@ -241,19 +270,21 @@ HWTEST_F(WaterFlowTestNg, LazyForEachJump001, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 7);
     EXPECT_EQ(GetChildY(frameNode_, 6), 600.0f);
     ScrollToIndex(6, false, ScrollAlign::START);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 6);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 13);
-    EXPECT_FALSE(GetItem(5, true)->IsOnMainTree());
+    EXPECT_FALSE(GetItem(5, true)->IsActive());
 
     AddItemInLazyForEach(17);
     FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 6);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 13);
     ScrollToIndex(17, false, ScrollAlign::START);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 17);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 24);
     EXPECT_EQ(GetChildY(frameNode_, 17), 0.0f);
-    EXPECT_FALSE(GetItem(5, true)->IsOnMainTree());
+    EXPECT_FALSE(GetItem(5, true));
 
     AddItemInLazyForEach(99);
     FlushUITasks();
@@ -274,7 +305,6 @@ HWTEST_F(WaterFlowTestNg, LazyForEachJump002, TestSize.Level1)
     model.SetCachedCount(10);
     RefPtr<WaterFlowMockLazy> mockLazy = CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
     CreateDone();
-    frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
 
     pattern_->ScrollToIndex(2, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);

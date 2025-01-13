@@ -60,6 +60,13 @@ public:
         mockRequestId = requestId;
     }
 
+    void SetSearchDefaultFocusByWindowIdResult(const std::list<Accessibility::AccessibilityElementInfo> &infos,
+        const int32_t requestId) override
+    {
+        mockInfos_ = infos;
+        mockRequestId = requestId;
+    }
+
     void SetFindFocusedElementInfoResult(
         const Accessibility::AccessibilityElementInfo &info,
         const int32_t requestId) override

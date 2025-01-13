@@ -22,23 +22,32 @@ import { SelectBootcamp } from './SelectBootcamp';
 import { MenuBootcamp } from './MenuBootcamp';
 import { BindSheetBootcamp } from './BindSheetBootcamp';
 import { MenuItemGroupBootcamp } from './MenuItemGroupBootcamp';
+
+import { promptActionCustomDialogBootcamp } from './promptActionCustomDialogBootcamp';
+import { ActionMenuBootcamp } from './ActionMenuBootcamp';
 import { DialogBootcamp } from './DialogBootcamp';
 import { ActionDialogBootcamp } from './ActionDialogBootcamp';
+import { CustomDialogBootcamp } from './CustomDialogBootcamp';
+import { AlertDialogBootcamp } from './AlertDialogBootcamp';
 
 export const operatesRoute: RouteGroup = {
   name: 'operates',
   label: '操作类',
   children: [
     { name: 'button', label: '按钮/Button' },
-    { name: 'Menu', label: '菜单/Menu' },
-    { name: 'BindContextMenu', label: '上下文菜单/BindContextMenu' },
+    { name: 'MenuItem', label: '菜单项/MenuItem' },
+    { name: 'BindConTextMenu', label: '上下文菜单/BindConTextMenu' },
     { name: 'chip', label: '操作块/Chip' },
     { name: 'select', label: '下拉按钮/Select' },
     { name: 'menu', label: '菜单/menu' },
     { name: 'bindsheet', label: '半模态/BindSheet' },
     { name: 'MenuItemGroup', label: '菜单分组/MenuItemGroup' },
+    { name: 'AlertDialog', label: '警告弹窗/AlertDialog' },
+    { name: 'promptActionCustomDialog', label: '打开自定义弹窗/promptActionCustomDialog' },
+    { name: 'ActionMenu', label: '菜单弹窗/ActionMenu' },
     { name: 'Dialog', label: '对话框/Dialog' },
     { name: 'ActionSheet', label: '列表选择弹窗/ActionSheet' },
+    { name: 'customDialog', label: '自定义弹窗/CustomDialog' },
   ]
 };
 
@@ -46,9 +55,9 @@ export const operatesRoute: RouteGroup = {
 export function OperatesDestination(name: string, route: Route) {
   if (name === 'operates/button') {
     ButtonBootcamp({ title: route.label })
-  } else if (name === 'operates/Menu') {
+  } else if (name === 'operates/MenuItem') {
     BindMenuBootcamp({ title: route.label })
-  } else if (name === 'operates/BindContextMenu') {
+  } else if (name === 'operates/BindConTextMenu') {
     BindContextMenuBootcamp({ title: route.label })
   } else if (name === 'operates/chip') {
     ChipBootcamp({ title: route.label })
@@ -60,10 +69,18 @@ export function OperatesDestination(name: string, route: Route) {
     BindSheetBootcamp({ title: route.label })
   } else if (name === 'operates/MenuItemGroup') {
     MenuItemGroupBootcamp({ title: route.label })
+  } else if (name === 'operates/AlertDialog') {
+    AlertDialogBootcamp({ title: route.label })
+  } else if (name === 'operates/promptActionCustomDialog') {
+    promptActionCustomDialogBootcamp({ title: route.label })
+  } else if (name === 'operates/ActionMenu') {
+    ActionMenuBootcamp({ title: route.label })
   } else if (name === 'operates/Dialog') {
     DialogBootcamp({ title: route.label })
   } else if (name === 'operates/ActionSheet') {
     ActionDialogBootcamp({ title: route.label })
+  } else if (name === 'operates/customDialog') {
+    CustomDialogBootcamp({ title: route.label })
   }
 }
 

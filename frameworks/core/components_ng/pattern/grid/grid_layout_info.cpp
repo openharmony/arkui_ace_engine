@@ -454,6 +454,10 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
         totalHeight += irregularHeight;
         lastIndex = idx;
     }
+    if (NonPositive(regularHeight)) {
+        startIndex_ = lastIndex;
+        return;
+    }
     int32_t lines = static_cast<int32_t>(std::floor((targetContent - totalHeight) / regularHeight));
     currentOffset_ = totalHeight + lines * regularHeight - targetContent;
     int32_t startIdx = lines * crossCount_ + lastIndex + 1;
@@ -759,78 +763,17 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
 
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
 {
-    if (hasMultiLineItem_) {
-        ClearMapsToEndContainsMultiLineItem(idx - 1);
-        return;
-    }
     auto gridIt = gridMatrix_.lower_bound(idx);
     gridMatrix_.erase(gridIt, gridMatrix_.end());
     ClearHeightsToEnd(idx);
 }
 
-void GridLayoutInfo::ClearMapsToEndContainsMultiLineItem(int32_t idx)
-{
-    int32_t maxIndex = INT_MIN;
-    for (const auto& col : gridMatrix_[idx]) {
-        maxIndex = std::max(maxIndex, col.second);
-    }
-
-    int targetLine = idx;
-    while (targetLine < gridMatrix_.rbegin()->first) {
-        int32_t minIndex = INT_MAX;
-        for (const auto& col : gridMatrix_[targetLine + 1]) {
-            minIndex = std::min(minIndex, col.second);
-        }
-        if (maxIndex < minIndex) {
-            break;
-        }
-        targetLine++;
-    }
-    gridMatrix_.erase(gridMatrix_.find(targetLine + 1), gridMatrix_.end());
-
-    auto lineIt = lineHeightMap_.find(targetLine + 1);
-    if (lineIt != lineHeightMap_.end()) {
-        lineHeightMap_.erase(lineIt, lineHeightMap_.end());
-    }
-}
-
 void GridLayoutInfo::ClearMapsFromStart(int32_t idx)
 {
-    if (hasMultiLineItem_) {
-        ClearMapsFromStartContainsMultiLineItem(idx);
-        return;
-    }
     auto gridIt = gridMatrix_.lower_bound(idx);
     gridMatrix_.erase(gridMatrix_.begin(), gridIt);
     auto lineIt = lineHeightMap_.lower_bound(idx);
     lineHeightMap_.erase(lineHeightMap_.begin(), lineIt);
-}
-
-void GridLayoutInfo::ClearMapsFromStartContainsMultiLineItem(int32_t idx)
-{
-    int32_t minIndex = INT_MAX;
-    for (const auto& col : gridMatrix_[idx]) {
-        minIndex = std::min(minIndex, col.second);
-    }
-
-    auto iter = gridMatrix_.begin();
-    int targetLine = idx;
-    while (targetLine > iter->first) {
-        int32_t maxIndex = INT_MIN;
-        for (const auto& col : gridMatrix_[targetLine - 1]) {
-            maxIndex = std::max(maxIndex, col.second);
-        }
-        if (maxIndex < minIndex) {
-            break;
-        }
-        targetLine--;
-    }
-    gridMatrix_.erase(gridMatrix_.begin(), gridMatrix_.find(targetLine));
-
-    auto lineIt = lineHeightMap_.find(targetLine);
-    if (lineIt != lineHeightMap_.end()) {
-        lineHeightMap_.erase(lineHeightMap_.begin(), lineIt);
-    }
 }
 
 void GridLayoutInfo::ClearHeightsToEnd(int32_t idx)
@@ -1061,5 +1004,34 @@ int32_t GridLayoutInfo::FindInMatrixByMainIndexAndCrossIndex(int32_t mainIndex, 
         return gridMatrix_.at(mainIndex).at(crossIndex);
     }
     return -1;
+}
+
+void GridLayoutInfo::PrintMatrix()
+{
+    TAG_LOGD(ACE_GRID, "-----------start print gridMatrix------------");
+    std::string res = std::string("");
+    for (auto item : gridMatrix_) {
+        res.append(std::to_string(item.first));
+        res.append(": ");
+        for (auto index : item.second) {
+            res.append("[")
+                .append(std::to_string(index.first))
+                .append(",")
+                .append(std::to_string(index.second))
+                .append("] ");
+        }
+        TAG_LOGD(ACE_GRID, "%{public}s", res.c_str());
+        res.clear();
+    }
+    TAG_LOGD(ACE_GRID, "-----------end print gridMatrix------------");
+}
+
+void GridLayoutInfo::PrintLineHeight()
+{
+    TAG_LOGD(ACE_GRID, "-----------start print lineHeightMap------------");
+    for (auto item : lineHeightMap_) {
+        TAG_LOGD(ACE_GRID, "%{public}d : %{public}f", item.first, item.second);
+    }
+    TAG_LOGD(ACE_GRID, "-----------end print lineHeightMap------------");
 }
 } // namespace OHOS::Ace::NG

@@ -279,6 +279,10 @@ void FontManager::RebuildFontNodeNG()
         auto uiNode = DynamicCast<NG::UINode>(fontNode);
         if (uiNode) {
             uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+            auto frameNode = DynamicCast<NG::FrameNode>(fontNode);
+            if (frameNode) {
+                frameNode->OnPropertyChangeMeasure();
+            }
             ++iter;
         } else {
             iter = fontNodesNG_.erase(iter);

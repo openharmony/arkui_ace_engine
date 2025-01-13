@@ -17,6 +17,7 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 
+#include "base/thread/task_executor.h"
 #include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace {
@@ -79,7 +80,8 @@ void NotifyCard(const RefPtr<TimeChangeListener>& listener)
                 ContainerScope scope(id);
                 listener->OnTimeChange();
             },
-            TaskExecutor::TaskType::UI, "ArkUINotifyCardTimeChange");
+            TaskExecutor::TaskType::UI, "ArkUINotifyCardTimeChange",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 }
 } // namespace

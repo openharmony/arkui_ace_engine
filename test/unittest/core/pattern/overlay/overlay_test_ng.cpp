@@ -750,6 +750,9 @@ HWTEST_F(OverlayTestNg, PopupTest006, TestSize.Level1)
     rootNode->isLayoutComplete_ = true;
     auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     popupPattern->SetHasTransition(true);
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    ASSERT_NE(popupParam, nullptr);
+    popupPattern->SetPopupParam(popupParam);
     overlayManager->ShowPopup(targetId, popupInfo);
     EXPECT_TRUE(popupPattern->GetHasTransition());
     auto layoutProp1 = popupInfo.popupNode->GetLayoutProperty();
@@ -844,6 +847,66 @@ HWTEST_F(OverlayTestNg, RemoveOverlayTest002, TestSize.Level1)
     overlayManager->OnBindContentCover(isShow, nullptr, std::move(builderFunc), modalStyle, nullptr, nullptr, nullptr,
         nullptr, ContentCoverParam(), targetNode);
     EXPECT_TRUE(overlayManager->RemoveModalInOverlay());
+}
+
+/**
+ * @tc.name: RemoveModalInOverlay001
+ * @tc.desc: Branch: if (modalStack_.empty())
+ *           Condition: CHECK_NULL_RETURN(topModalNode, false)
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, RemoveModalInOverlay001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and rootNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
+
+    /**
+     * @tc.steps: step2. create overlayManager, test RemoveModalInOverlay function.
+     * @tc.expected: modalstack_ is empty.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->modalStack_ = std::stack<WeakPtr<FrameNode>>();
+    EXPECT_FALSE(overlayManager->RemoveModalInOverlay());
+}
+
+/**
+ * @tc.name: GetModalStackTop001
+ * @tc.desc: Branch: if (modalStack_.empty())
+ *           Condition: modalStack_ = empty()
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestNg, GetModalStackTop001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and rootNode.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    MockPipelineContext::GetCurrent()->stageManager_ = stageManager;
+
+    /**
+     * @tc.steps: step2. create overlayManager, test GetModalStackTop function.
+     * @tc.expected: GetModalStackTop return nullptr.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->modalStack_ = std::stack<WeakPtr<FrameNode>>();
+    EXPECT_EQ(overlayManager->GetModalStackTop(), nullptr);
 }
 
 /**
@@ -1598,6 +1661,15 @@ HWTEST_F(OverlayTestNg, CreateOverlayNode001, TestSize.Level1)
      */
     overlayManager->CreateOverlayNode();
     EXPECT_EQ(rootNode->GetChildren().size(), childrenSize + 1);
+    
+    /**
+     * @tc.steps: step5.call CreateOverlayNode again.
+     * @tc.expected: the overlay node is layoutNode.
+     */
+    overlayManager->overlayNode_ = nullptr;
+    overlayManager->overlayInfo_ = NG::OverlayManagerInfo { .renderRootOverlay = false };
+    overlayManager->CreateOverlayNode();
+    EXPECT_EQ(overlayManager->overlayNode_->GetIsLayoutNode(), true);
 }
 
 /**

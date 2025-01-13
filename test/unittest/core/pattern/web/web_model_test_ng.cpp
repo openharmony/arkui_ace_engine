@@ -129,6 +129,7 @@ HWTEST_F(WebModelTestNg, WebFrameNodeCreator002, TestSize.Level1)
     webModelNG.SetZoomAccessEnabled(true);
     webModelNG.SetGeolocationAccessEnabled(true);
     webModelNG.SetUserAgent("123");
+    webModelNG.SetOptimizeParserBudgetEnabled(true);
 #endif
 }
 
@@ -1429,6 +1430,23 @@ HWTEST_F(WebModelTestNg, JavaScriptOnDocumentEnd031, TestSize.Level1)
 }
 
 /**
+ * @tc.name: JavaScriptOnHeadReady032
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, JavaScriptOnHeadReady032, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    WebModelNG webModelNG;
+    ScriptItems scriptItemsEnd;
+    ScriptItemsByOrder scriptItemsByOrder;
+    webModelNG.JavaScriptOnHeadReadyByOrder(scriptItemsEnd, scriptItemsByOrder);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    EXPECT_NE(webPattern->onHeadReadyScriptItems_, std::nullopt);
+#endif
+}
+
+/**
  * @tc.name: SetFirstMeaningfulPaintId001
  * @tc.desc: Test web_model_ng.cpp
  * @tc.type: FUNC
@@ -1793,6 +1811,28 @@ HWTEST_F(WebModelTestNg, SetScreenCaptureRequestEventId008, TestSize.Level1)
     AceType::DynamicCast<WebEventHub>(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>())
         ->propOnScreenCaptureRequestEvent_(nullptr);
     EXPECT_NE(callCount, 0);
+#endif
+}
+
+/**
+ * @tc.name: SetOptimizeParserBudgetEnabled
+ * @tc.desc: Test web_model_ng.cpp
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModelTestNg, SetOptimizeParserBudgetEnabled001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+
+    WebModelNG webModelNG;
+    webModelNG.SetOptimizeParserBudgetEnabled(true);
+    EXPECT_EQ(webPattern->GetOrCreateWebProperty()->CheckOptimizeParserBudgetEnabled(true), true);
 #endif
 }
 

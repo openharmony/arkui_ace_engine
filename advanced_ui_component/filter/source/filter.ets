@@ -465,19 +465,19 @@ struct MultiFilterRow {
   }
 
   private sendArrowAccessibility(id: string): void {
-    this.isSendArrowAccessibility = true;
-    setTimeout(() => {
+    if (this.isSendArrowAccessibility) {
       let eventInfo: accessibility.EventInfo = ({
         type: 'requestFocusForAccessibility',
         bundleName: this.bundleName,
         triggerAction: 'common',
         customId: id,
       });
-      accessibility.sendAccessibilityEvent(eventInfo);
-    }, 100);
-    setTimeout(() => {
-      this.isSendArrowAccessibility = false;
-    }, 200);
+      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+        setTimeout(() => {
+          this.isSendArrowAccessibility = false;
+        }, 200);
+      });
+    }
   }
 
   @Builder
@@ -523,6 +523,7 @@ struct MultiFilterRow {
         (this.isArrowIconDown?.value ? this.filterAccessibilityText.accessibilityExpand :
         this.filterAccessibilityText.accessibilityCollapse))
       .accessibilityDescription(this.isSendArrowAccessibility ? ' ' : '')
+      .accessibilityRole(this.isSendArrowAccessibility ? AccessibilityRoleType.ROLE_NONE : AccessibilityRoleType.BUTTON)
       .id(`filterDownAndUpArrow_${this.getUniqueId()}_${this.rowIndex}`)
       .visibility(this.arrowShowStateRow.value ? Visibility.Visible : Visibility.Hidden)
       .onHover((isHover: boolean) => {
@@ -557,6 +558,7 @@ struct MultiFilterRow {
         }
       })
       .onClick(() => {
+        this.isSendArrowAccessibility = true;
         this.replaceEffect += 1
         if (this.isArrowIconDown.value) {
           this.isArrowIconDown.value = false

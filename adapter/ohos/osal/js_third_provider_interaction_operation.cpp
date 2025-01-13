@@ -138,7 +138,7 @@ void CopyNativeInfosToAccessibilityElementInfos(
         infos.push_back(info);
     }
 }
-}
+} // namespace
 
 JsThirdProviderInteractionOperation::JsThirdProviderInteractionOperation(
     const WeakPtr<AccessibilityProvider>& accessibilityProvider,
@@ -252,6 +252,12 @@ void JsThirdProviderInteractionOperation::SearchElementInfosByText(
 
     // 3. Return result
     SetSearchElementInfoByTextResult(callback, std::move(infos), requestId);
+}
+
+void JsThirdProviderInteractionOperation::SearchDefaultFocusByWindowId(
+    const int32_t windowId, const int32_t requestId,
+    Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t pageId)
+{
 }
 
 bool JsThirdProviderInteractionOperation::FindAccessibilityNodeInfosByTextFromProvider(

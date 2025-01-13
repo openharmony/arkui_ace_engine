@@ -194,7 +194,7 @@ private:
     void PanOnActionStart(const GestureEvent& info) override;
     void PanOnActionUpdate(const GestureEvent& info) override;
     void PanOnActionEnd(const GestureEvent& info) override;
-    void PanOnActionCancel() override;
+    void PanOnActionCancel(const GestureEvent& info) override;
     DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) override;
     void CreateSelectRecognizer();
 

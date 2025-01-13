@@ -162,6 +162,8 @@ public:
     void ResizeDialogSubwindow() override;
     uint64_t GetDisplayId() override;
 
+    void InitializeSafeArea();
+
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);

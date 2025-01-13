@@ -27,7 +27,7 @@ public:
     SvgG();
     ~SvgG() override = default;
     static RefPtr<SvgNode> Create();
-
+    RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override;
     RSRecordingPath AsPath(const Size& viewPort) const override;
 };
 

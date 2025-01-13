@@ -241,6 +241,7 @@ template("declarative_js_engine") {
       "engine/functions/js_pan_function.cpp",
       "engine/functions/js_should_built_in_recognizer_parallel_with_function.cpp",
       "engine/functions/js_swiper_function.cpp",
+      "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
       "engine/functions/js_touch_intercept_function.cpp",
       "engine/functions/js_webview_function.cpp",
@@ -263,6 +264,7 @@ template("declarative_js_engine") {
       "jsview/canvas/js_rendering_context_settings.cpp",
       "jsview/dialog/js_alert_dialog.cpp",
       "jsview/dialog/js_custom_dialog_controller.cpp",
+      "jsview/js_accessibility.cpp",
       "jsview/js_animator.cpp",
       "jsview/js_badge.cpp",
       "jsview/js_base_node.cpp",
@@ -306,12 +308,15 @@ template("declarative_js_engine") {
       "jsview/js_image_animator.cpp",
       "jsview/js_image_span.cpp",
       "jsview/js_indexer.cpp",
+      "jsview/js_indicator.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
+      "jsview/js_linear_indicator.cpp",
+      "jsview/js_linear_indicator_controller.cpp",
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
@@ -343,8 +348,8 @@ template("declarative_js_engine") {
       "jsview/js_persistent.cpp",
       "jsview/js_polygon.cpp",
       "jsview/js_polyline.cpp",
+      "jsview/js_popups.cpp",
       "jsview/js_progress.cpp",
-      "jsview/js_qrcode.cpp",
       "jsview/js_radio.cpp",
       "jsview/js_rect.cpp",
       "jsview/js_rect_shape.cpp",
@@ -363,21 +368,21 @@ template("declarative_js_engine") {
       "jsview/js_scroller.cpp",
       "jsview/js_search.cpp",
       "jsview/js_sec_button_base.cpp",
-      "jsview/js_select.cpp",
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
       "jsview/js_sheet.cpp",
-      "jsview/js_side_bar.cpp",
       "jsview/js_slider.cpp",
       "jsview/js_sliding_panel.cpp",
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
       "jsview/js_state_mgmt_profiler.cpp",
-      "jsview/js_stepper.cpp",
-      "jsview/js_stepper_item.cpp",
       "jsview/js_swiper.cpp",
       "jsview/js_symbol.cpp",
       "jsview/js_symbol_span.cpp",
+      "jsview/js_tab_content.cpp",
+      "jsview/js_tabs.cpp",
+      "jsview/js_tabs_controller.cpp",
+      "jsview/js_tabs_feature.cpp",
       "jsview/js_text.cpp",
       "jsview/js_text_clock.cpp",
       "jsview/js_text_editable_controller.cpp",
@@ -458,7 +463,6 @@ template("declarative_js_engine") {
       "jsview/models/picker_model_impl.cpp",
       "jsview/models/polygon_model_impl.cpp",
       "jsview/models/progress_model_impl.cpp",
-      "jsview/models/qrcode_model_impl.cpp",
       "jsview/models/radio_model_impl.cpp",
       "jsview/models/rect_model_impl.cpp",
       "jsview/models/refresh_model_impl.cpp",
@@ -468,17 +472,15 @@ template("declarative_js_engine") {
       "jsview/models/scroll_bar_model_impl.cpp",
       "jsview/models/scroll_model_impl.cpp",
       "jsview/models/search_model_impl.cpp",
-      "jsview/models/select_model_impl.cpp",
       "jsview/models/shape_abstract_model_impl.cpp",
       "jsview/models/shape_model_impl.cpp",
-      "jsview/models/side_bar_container_model_impl.cpp",
       "jsview/models/slider_model_impl.cpp",
       "jsview/models/sliding_panel_model_impl.cpp",
       "jsview/models/span_model_impl.cpp",
       "jsview/models/stack_model_impl.cpp",
-      "jsview/models/stepper_item_model_impl.cpp",
-      "jsview/models/stepper_model_impl.cpp",
       "jsview/models/swiper_model_impl.cpp",
+      "jsview/models/tab_content_model_impl.cpp",
+      "jsview/models/tabs_model_impl.cpp",
       "jsview/models/text_clock_model_impl.cpp",
       "jsview/models/text_field_model_impl.cpp",
       "jsview/models/text_model_impl.cpp",
@@ -494,23 +496,35 @@ template("declarative_js_engine") {
 
     if (!ace_engine_feature_wearable) {
       sources += [
-        "engine/functions/js_tabs_function.cpp",
         "jsview/js_column_split.cpp",
         "jsview/js_content_slot.cpp",
         "jsview/js_folder_stack.cpp",
         "jsview/js_row_split.cpp",
-        "jsview/js_tab_content.cpp",
-        "jsview/js_tabs.cpp",
-        "jsview/js_tabs_controller.cpp",
-        "jsview/js_tabs_feature.cpp",
+        "jsview/js_select.cpp",
+        "jsview/js_side_bar.cpp",
+        "jsview/js_stepper.cpp",
+        "jsview/js_stepper_item.cpp",
         "jsview/js_water_flow.cpp",
         "jsview/js_water_flow_item.cpp",
         "jsview/js_water_flow_sections.cpp",
         "jsview/models/linear_split_model_impl.cpp",
-        "jsview/models/tab_content_model_impl.cpp",
-        "jsview/models/tabs_model_impl.cpp",
+        "jsview/models/select_model_impl.cpp",
+        "jsview/models/side_bar_container_model_impl.cpp",
+        "jsview/models/stepper_item_model_impl.cpp",
+        "jsview/models/stepper_model_impl.cpp",
         "jsview/models/water_flow_item_model_impl.cpp",
         "jsview/models/water_flow_model_impl.cpp",
+      ]
+    }
+
+    if (ace_engine_feature_enable_digital_crown) {
+      sources += [ "engine/functions/js_crown_function.cpp" ]
+    }
+
+    if (qrcodegen_support) {
+      sources += [
+        "jsview/js_qrcode.cpp",
+        "jsview/models/qrcode_model_impl.cpp",
       ]
     }
 
@@ -781,6 +795,7 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_pan_function.cpp",
       "engine/functions/js_should_built_in_recognizer_parallel_with_function.cpp",
       "engine/functions/js_swiper_function.cpp",
+      "engine/functions/js_tabs_function.cpp",
       "engine/functions/js_touch_function.cpp",
       "engine/functions/js_touch_intercept_function.cpp",
       "engine/functions/js_webview_function.cpp",
@@ -814,6 +829,7 @@ template("declarative_js_engine_ng") {
       "jsview/canvas/js_rendering_context_settings.cpp",
       "jsview/dialog/js_alert_dialog.cpp",
       "jsview/dialog/js_custom_dialog_controller.cpp",
+      "jsview/js_accessibility.cpp",
       "jsview/js_animator.cpp",
       "jsview/js_badge.cpp",
       "jsview/js_base_node.cpp",
@@ -855,12 +871,15 @@ template("declarative_js_engine_ng") {
       "jsview/js_image_animator.cpp",
       "jsview/js_image_span.cpp",
       "jsview/js_indexer.cpp",
+      "jsview/js_indicator.cpp",
       "jsview/js_interactable_view.cpp",
       "jsview/js_keyboard_avoid.cpp",
       "jsview/js_layout_manager.cpp",
       "jsview/js_lazy_foreach.cpp",
       "jsview/js_line.cpp",
       "jsview/js_linear_gradient.cpp",
+      "jsview/js_linear_indicator.cpp",
+      "jsview/js_linear_indicator_controller.cpp",
       "jsview/js_list.cpp",
       "jsview/js_list_item.cpp",
       "jsview/js_list_item_group.cpp",
@@ -887,6 +906,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_path_shape.cpp",
       "jsview/js_polygon.cpp",
       "jsview/js_polyline.cpp",
+      "jsview/js_popups.cpp",
       "jsview/js_progress.cpp",
       "jsview/js_radio.cpp",
       "jsview/js_rating.cpp",
@@ -906,19 +926,19 @@ template("declarative_js_engine_ng") {
       "jsview/js_scroller.cpp",
       "jsview/js_search.cpp",
       "jsview/js_sec_button_base.cpp",
-      "jsview/js_select.cpp",
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
-      "jsview/js_side_bar.cpp",
       "jsview/js_slider.cpp",
       "jsview/js_sliding_panel.cpp",
       "jsview/js_span.cpp",
       "jsview/js_stack.cpp",
-      "jsview/js_stepper.cpp",
-      "jsview/js_stepper_item.cpp",
       "jsview/js_swiper.cpp",
       "jsview/js_symbol.cpp",
       "jsview/js_symbol_span.cpp",
+      "jsview/js_tab_content.cpp",
+      "jsview/js_tabs.cpp",
+      "jsview/js_tabs_controller.cpp",
+      "jsview/js_tabs_feature.cpp",
       "jsview/js_text.cpp",
       "jsview/js_text_clock.cpp",
       "jsview/js_text_editable_controller.cpp",
@@ -947,25 +967,23 @@ template("declarative_js_engine_ng") {
         "jsview/js_content_slot.cpp",
         "jsview/js_folder_stack.cpp",
         "jsview/js_row_split.cpp",
-      ]
-    }
-
-    sources += [
-      "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
-    ]
-
-    if (!ace_engine_feature_wearable) {
-      sources += [
-        "engine/functions/js_tabs_function.cpp",
-        "jsview/js_tab_content.cpp",
-        "jsview/js_tabs.cpp",
-        "jsview/js_tabs_controller.cpp",
-        "jsview/js_tabs_feature.cpp",
+        "jsview/js_select.cpp",
+        "jsview/js_side_bar.cpp",
+        "jsview/js_stepper.cpp",
+        "jsview/js_stepper_item.cpp",
         "jsview/js_water_flow.cpp",
         "jsview/js_water_flow_item.cpp",
         "jsview/js_water_flow_sections.cpp",
       ]
     }
+
+    if (ace_engine_feature_enable_digital_crown) {
+      sources += [ "engine/functions/js_crown_function.cpp" ]
+    }
+
+    sources += [
+      "$ace_root/frameworks/bridge/js_frontend/engine/common/js_engine.cpp",
+    ]
 
     external_deps = [ "graphic_2d:drawing_napi_impl" ]
     if (use_hilog) {
@@ -975,9 +993,11 @@ template("declarative_js_engine_ng") {
     if (!defined(config.use_components_lib) || !config.use_components_lib) {
       sources += [
         "jsview/js_pattern_lock.cpp",
-        "jsview/js_qrcode.cpp",
         "jsview/js_relative_container.cpp",
       ]
+      if (qrcodegen_support) {
+        sources += [ "jsview/js_qrcode.cpp" ]
+      }
     }
 
     if (defined(config.video_components_support) &&

@@ -84,10 +84,19 @@ struct AccessibilityParentRectInfo {
     int32_t rotateDegree = 0;  // final rotate degree of parent interface
 };
 
+struct AccessibilityWindowInfo {
+    int32_t left = 0;
+    int32_t top = 0;
+    int32_t innerWindowId = -1;
+    float_t scaleX = 1.0f;
+    float_t scaleY = 1.0f;
+};
+
 enum class AccessibilityCallbackEventId : uint32_t {
     ON_LOAD_PAGE = 0,
     ON_SHOW = 1,
     ON_HIDE = 2,
+    ON_SEND_ELEMENT_INFO_CHANGE = 3,
 };
 
 struct AccessibilityCallbackEvent {
@@ -96,7 +105,7 @@ struct AccessibilityCallbackEvent {
     AccessibilityCallbackEvent(AccessibilityCallbackEventId id, int64_t para) : eventId(id), parameter(para) {}
     bool operator < (const AccessibilityCallbackEvent& other) const
     {
-        return eventId < other.eventId;
+        return std::tie(eventId, parameter) < std::tie(other.eventId, other.parameter);
     }
 };
 
@@ -154,6 +163,10 @@ public:
     virtual void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) = 0;
     virtual void SendWebAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<NG::WebPattern>& webPattern) {}
+    virtual bool IsScreenReaderEnabled()
+    {
+        return false;
+    }
     virtual void UpdateVirtualNodeFocus() = 0;
     virtual int64_t GenerateNextAccessibilityId() = 0;
     virtual RefPtr<AccessibilityNode> CreateSpecializedNode(
@@ -240,6 +253,12 @@ public:
     virtual void SendEventToAccessibilityWithNode(const AccessibilityEvent& accessibilityEvent,
         const RefPtr<AceType>& node, const RefPtr<PipelineBase>& context) {};
 
+    virtual void SendFrameNodeToAccessibility(const RefPtr<NG::FrameNode>& node, bool isExtensionComponent) {};
+
+    virtual void UpdateFrameNodeState(int32_t nodeId) {};
+
+    virtual void UpdatePageMode(const std::string& pageMode) {};
+
     virtual void RegisterAccessibilitySAObserverCallback(
         int64_t elementId, const std::shared_ptr<AccessibilitySAObserverCallback> &callback) {};
 
@@ -285,6 +304,12 @@ public:
     int64_t GetUiextensionId() const
     {
         return uiExtensionId_;
+    }
+
+    virtual AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
+        const RefPtr<PipelineBase>& context)
+    {
+        return AccessibilityWindowInfo();
     }
 
 protected:

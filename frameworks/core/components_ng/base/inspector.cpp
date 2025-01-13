@@ -510,6 +510,12 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     rectangle.windowOffset = frameNode->GetOffsetRelativeToWindow();
     auto pipeline = frameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender() &&
+        container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT) {
+        rectangle.windowOffset = rectangle.windowOffset + OffsetF(pipeline->GetHostParentOffsetToWindow().GetX(),
+            pipeline->GetHostParentOffsetToWindow().GetY());
+    }
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
     ACE_SCOPED_TRACE("Inspector::GetRectangleById_Id=%d_Tag=%s_Key=%s",
         frameNode->GetId(), frameNode->GetTag().c_str(), key.c_str());
@@ -1070,5 +1076,28 @@ void Inspector::GetOffScreenTreeNodes(InspectorTreeMap& nodes)
     for (const auto& item : offscreenNodes) {
         AddInspectorTreeNode(item, nodes);
     }
+}
+
+uint32_t Inspector::ParseWindowIdFromMsg(const std::string& message)
+{
+    TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "start process inspector get window msg");
+    uint32_t windowId = INVALID_WINDOW_ID;
+    auto json = JsonUtil::ParseJsonString(message);
+    if (json == nullptr || !json->IsValid() || !json->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message is invalid");
+        return windowId;
+    }
+    auto methodVal = json->GetString(KEY_METHOD);
+    if (methodVal != SUPPORT_METHOD) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "method is not supported");
+        return windowId;
+    }
+    auto paramObj = json->GetObject(KEY_PARAMS);
+    if (paramObj == nullptr || !paramObj->IsValid() || !paramObj->IsObject()) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message params is invalid");
+        return windowId;
+    }
+    windowId = StringUtils::StringToUint(paramObj->GetString("windowId"));
+    return windowId;
 }
 } // namespace OHOS::Ace::NG

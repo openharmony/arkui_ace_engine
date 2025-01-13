@@ -24,6 +24,9 @@
 #include "include/utils/SkBase64.h"
 
 #include "wm/window.h"
+#include "dm/display_manager.h"
+
+#include "connect_server_manager.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
 #include "adapter/ohos/entrance/ace_container.h"
@@ -40,8 +43,6 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_v2/inspector/inspector.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "dm/display_manager.h"
-#include "foundation/ability/ability_runtime/frameworks/native/runtime/connect_server_manager.h"
 
 namespace OHOS::Ace {
 
@@ -128,6 +129,8 @@ constexpr static char RECNODE_NODEID[] = "nodeID";
 constexpr static char RECNODE_NAME[] = "value";
 constexpr static char RECNODE_DEBUGLINE[] = "debugLine";
 constexpr static char RECNODE_CHILDREN[] = "RSNode";
+constexpr static char ARK_DEBUGGER_LIB_PATH[] = "libark_connect_inspector.z.so";
+using SetArkUICallback = void (*)(const std::function<void(const char*)>& arkuiCallback);
 
 bool LayoutInspector::stateProfilerStatus_ = false;
 bool LayoutInspector::layoutInspectorStatus_ = false;
@@ -199,7 +202,7 @@ void LayoutInspector::SetRsProfilerNodeMountCallback(RsProfilerNodeMountCallback
 
 void LayoutInspector::SendStateProfilerMessage(const std::string& message)
 {
-    OHOS::AbilityRuntime::ConnectServerManager::Get().SendArkUIStateProfilerMessage(message);
+    OHOS::AbilityRuntime::ConnectServerManager::Get().SendStateProfilerMessage(message);
 }
 
 void LayoutInspector::SetStateProfilerStatus(bool status)
@@ -226,14 +229,20 @@ void LayoutInspector::SetCallback(int32_t instanceId)
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
     if (container->IsUseStageModel()) {
-        OHOS::AbilityRuntime::ConnectServerManager::Get().SetLayoutInspectorCallback(
-            [](int32_t containerId) { return CreateLayoutInfo(containerId); },
-            [](bool status) { return SetStatus(status); });
+        AddInstanceCallBack addInstanceCallBack = [](int32_t id) {
+            OHOS::AbilityRuntime::ConnectServerManager::Get().SetProfilerCallBack(
+                [](bool status) { return SetStateProfilerStatus(status); });
+            OHOS::AbilityRuntime::ConnectServerManager::Get().SetSwitchCallback(
+                [](bool status) { return SetStatus(status); },
+                [](int32_t containerId) { return CreateLayoutInfo(containerId); }, id);
+        };
+        OHOS::AbilityRuntime::ConnectServerManager::Get().RegisterAddInstanceCallback(addInstanceCallBack);
         OHOS::AbilityRuntime::ConnectServerManager::Get().SetRecordCallback(
             LayoutInspector::HandleStartRecord, LayoutInspector::HandleStopRecord);
-        OHOS::AbilityRuntime::ConnectServerManager::Get().RegistConnectServerCallback(
+        OHOS::AbilityRuntime::ConnectServerManager::Get().RegisterConnectServerCallback(
             LayoutInspector::ConnectServerCallback);
         isUseStageModel_ = true;
+        RegisterConnectCallback();
     } else {
         OHOS::Ace::ConnectServerManager::Get().SetLayoutInspectorCallback(
             [](int32_t containerId) { return CreateLayoutInfo(containerId); },
@@ -241,19 +250,24 @@ void LayoutInspector::SetCallback(int32_t instanceId)
         isUseStageModel_ = false;
     }
 
-    OHOS::AbilityRuntime::ConnectServerManager::Get().SetStateProfilerCallback(
-        [](bool status) { return SetStateProfilerStatus(status); });
+    SendInstanceMessageCallBack sendInstanceMessageCallBack = [](int32_t id) {
+        OHOS::AbilityRuntime::ConnectServerManager::Get().SetProfilerCallBack(
+            [](bool status) { return SetStateProfilerStatus(status); });
+        OHOS::AbilityRuntime::ConnectServerManager::Get().SetSwitchCallback(
+            [](bool status) { return SetStatus(status); },
+            [](int32_t containerId) { return CreateLayoutInfo(containerId); }, id);
+    };
+    OHOS::AbilityRuntime::ConnectServerManager::Get().RegisterSendInstanceMessageCallback(sendInstanceMessageCallBack);
 }
 
-void LayoutInspector::CreateLayoutInfo(int32_t containerId)
+void LayoutInspector::CreateContainerLayoutInfo(RefPtr<Container>& container)
 {
-    auto container = Container::GetFoucsed();
     CHECK_NULL_VOID(container);
     if (container->IsDynamicRender()) {
         container = Container::CurrentSafely();
         CHECK_NULL_VOID(container);
     }
-    containerId = container->GetInstanceId();
+    int32_t containerId = container->GetInstanceId();
     ContainerScope socpe(containerId);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -274,6 +288,21 @@ void LayoutInspector::CreateLayoutInfo(int32_t containerId)
     };
     context->GetTaskExecutor()->PostTask(
         std::move(getInspectorTask), TaskExecutor::TaskType::UI, "ArkUIGetInspectorTreeJson");
+}
+
+void LayoutInspector::CreateLayoutInfo(int32_t containerId)
+{
+    auto container = Container::GetFoucsed();
+    return CreateContainerLayoutInfo(container);
+}
+
+void LayoutInspector::CreateLayoutInfoByWinId(uint32_t windId)
+{
+    auto container = Container::GetByWindowId(windId);
+    if (container) {
+        TAG_LOGD(AceLogTag::ACE_LAYOUT_INSPECTOR, "start get container %{public}d info", container->GetInstanceId());
+    }
+    return CreateContainerLayoutInfo(container);
 }
 
 void LayoutInspector::GetInspectorTreeJsonStr(std::string& treeJsonStr, int32_t containerId)
@@ -334,6 +363,35 @@ void LayoutInspector::GetSnapshotJson(int32_t containerId, std::unique_ptr<JsonV
     SkString info(encodeLength);
     SkBase64::Encode(data->data(), data->size(), info.writable_str());
     message->Put("pixelMapBase64", info.c_str());
+}
+
+void LayoutInspector::RegisterConnectCallback()
+{
+    auto handlerConnectServerSo = dlopen(ARK_DEBUGGER_LIB_PATH, RTLD_NOLOAD | RTLD_NOW);
+    if (handlerConnectServerSo == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "null handlerConnectServerSo: %{public}s", dlerror());
+        return;
+    }
+
+    auto setArkUICallback = reinterpret_cast<SetArkUICallback>(dlsym(handlerConnectServerSo, "SetArkUICallback"));
+    if (setArkUICallback == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "null setArkUICallback: %{public}s", dlerror());
+        return;
+    }
+
+    setArkUICallback([](const char* message) { ProcessMessages(message); });
+    dlclose(handlerConnectServerSo);
+    handlerConnectServerSo = nullptr;
+}
+
+void LayoutInspector::ProcessMessages(const std::string& message)
+{
+    uint32_t windowId = NG::Inspector::ParseWindowIdFromMsg(message);
+    if (windowId == OHOS::Ace::NG::INVALID_WINDOW_ID) {
+        TAG_LOGE(AceLogTag::ACE_LAYOUT_INSPECTOR, "input message: %{public}s", message.c_str());
+        return;
+    }
+    CreateLayoutInfoByWinId(windowId);
 }
 
 void LayoutInspector::HandleStopRecord()

@@ -67,28 +67,22 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 std::unique_ptr<TimePickerModel> TimePickerModel::timePickerInstance_ = nullptr;
 std::unique_ptr<TimePickerDialogModel> TimePickerDialogModel::timePickerDialogInstance_ = nullptr;
-std::mutex TimePickerModel::mutex_;
-std::mutex TimePickerDialogModel::mutex_;
+std::once_flag TimePickerModel::onceFlag_;
+std::once_flag TimePickerDialogModel::onceFlag_;
 
 TimePickerModel* TimePickerModel::GetInstance()
 {
-    if (!timePickerInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!timePickerInstance_) {
-            timePickerInstance_.reset(new NG::TimePickerModelNG());
-        }
-    }
+    std::call_once(onceFlag_, []() {
+        timePickerInstance_.reset(new NG::TimePickerModelNG());
+    });
     return timePickerInstance_.get();
 }
 
 TimePickerDialogModel* TimePickerDialogModel::GetInstance()
 {
-    if (!timePickerDialogInstance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!timePickerDialogInstance_) {
-            timePickerDialogInstance_.reset(new NG::TimePickerDialogModelNG());
-        }
-    }
+    std::call_once(onceFlag_, []() {
+        timePickerDialogInstance_.reset(new NG::TimePickerDialogModelNG());
+    });
     return timePickerDialogInstance_.get();
 }
 } // namespace OHOS::Ace
@@ -1737,7 +1731,8 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPattern006, TestSize.Level1)
 
     timePickerRowPattern->SetHour24(false);
     frameNode->RemoveChildAtIndex(0);
-    timePickerRowPattern->HandleHourColumnBuilding();
+    auto selectedTime = timePickerRowPattern->GetSelectedTime();
+    timePickerRowPattern->HandleHourColumnBuilding(selectedTime);
     auto allChildNode = timePickerRowPattern->GetAllChildNode();
     EXPECT_EQ(allChildNode["amPm"].Upgrade(), nullptr);
 }
@@ -5714,5 +5709,24 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerRowPatternCheckFocusID001, TestSize.
     res = timePickerRowPattern->CheckFocusID(childSize);
     EXPECT_NE(timePickerRowPattern->GetCurrentPage(), 1);
     EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: TimePickerColumnPatternScrollOption001
+ * @tc.desc: Test TimePickerColumnPattern ScrollOption and HandleEnterSelectedArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPatternScrollOption001, TestSize.Level1)
+{
+    CreateTimePickerColumnNode();
+    ASSERT_NE(columnPattern_, nullptr);
+    ASSERT_NE(columnNode_, nullptr);
+    auto childSize = static_cast<int32_t>(columnNode_->GetChildren().size());
+    auto midSize = childSize / MIDDLE_OF_COUNTS;
+    columnPattern_->optionProperties_[midSize].prevDistance = 5.0f;
+    columnPattern_->optionProperties_[midSize].nextDistance = 7.0f;
+    columnPattern_->SetCurrentIndex(2);
+    columnPattern_->ScrollOption(10.0f);
+    EXPECT_EQ(columnPattern_->GetEnterIndex(), 1);
 }
 } // namespace OHOS::Ace::NG

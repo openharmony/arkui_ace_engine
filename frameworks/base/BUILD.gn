@@ -48,6 +48,7 @@ template("ace_base_source_set") {
     sources = [
       "geometry/animatable_dimension.cpp",
       "geometry/animatable_matrix4.cpp",
+      "geometry/arc_round.cpp",
       "geometry/dimension.cpp",
       "geometry/least_square_impl.cpp",
       "geometry/matrix3.cpp",

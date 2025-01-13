@@ -230,7 +230,8 @@ HWTEST_F(GridIrregularLayoutTest, Measure004, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
 
     auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
-    algorithm->overScroll_ = false;
+    algorithm->canOverScrollStart_ = false;
+    algorithm->canOverScrollEnd_ = false;
     auto& info = algorithm->info_;
     info.currentOffset_ = 0.0f;
     info.childrenCount_ = 8;
@@ -426,7 +427,8 @@ HWTEST_F(GridIrregularLayoutTest, TestReset001, TestSize.Level1)
     layoutProperty_->layoutConstraint_ = constraint;
 
     auto algo = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(oldInfo);
-    algo->overScroll_ = true;
+    algo->canOverScrollStart_ = true;
+    algo->canOverScrollEnd_ = true;
     algo->wrapper_ = AceType::RawPtr(frameNode_);
 
     algo->Measure(AceType::RawPtr(frameNode_));
@@ -1478,7 +1480,7 @@ HWTEST_F(GridIrregularLayoutTest, TemplateChange002, TestSize.Level1)
     EXPECT_TRUE(info.offsetEnd_);
     EXPECT_EQ(info.startIndex_, 3);
     EXPECT_EQ(info.endIndex_, 8);
-    EXPECT_EQ(info.GetIrregularOffset(5.0f), 11 * 300.0f + 10 * 5.0f - GRID_HEIGHT);
+    EXPECT_EQ(info.GetIrregularOffset(5.0f), 11 * 300.0f + 10 * 5.0f - HEIGHT);
     EXPECT_EQ(info.GetIrregularHeight(5.0f), 11 * 300.0f + 10 * 5.0f);
 
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr 1fr 1fr");
@@ -1774,12 +1776,12 @@ HWTEST_F(GridIrregularLayoutTest, GetEndOffset000, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr");
     model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
     CreateFixedItems(20, GridItemStyle::NONE);
     CreateDone();
 
     int32_t targetIndex = 19;
     auto& info = pattern_->info_;
-    pattern_->SetEdgeEffect(EdgeEffect::SPRING);
     pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
     ScrollToIndex(targetIndex, false, ScrollAlign::END);
     for (int i = 0; i < 10; ++i) {
@@ -1822,7 +1824,7 @@ HWTEST_F(GridIrregularLayoutTest, GetEndOffset001, TestSize.Level1)
     EXPECT_EQ(info.startMainLineIndex_, 9);
     EXPECT_EQ(info.endMainLineIndex_, 9);
     // last item should match up with the bottom again
-    EXPECT_EQ(pattern_->GetEndOffset(), GRID_HEIGHT - ITEM_MAIN_SIZE);
+    EXPECT_EQ(pattern_->GetEndOffset(), HEIGHT - ITEM_MAIN_SIZE);
 }
 
 /**

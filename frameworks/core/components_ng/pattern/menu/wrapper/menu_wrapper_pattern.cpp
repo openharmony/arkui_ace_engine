@@ -346,7 +346,8 @@ RefPtr<FrameNode> MenuWrapperPattern::MenuFocusViewShow()
     }
     // SelectOverlay's custom menu does not need to be focused.
     auto isCustomMenu = IsSelectOverlayCustomMenu(focusMenu);
-    if (!isCustomMenu) {
+    auto isRightClickMenu = IsSelectOverlayRightClickMenu(focusMenu);
+    if (!isCustomMenu && !isRightClickMenu) {
         auto menuPattern = focusMenu->GetPattern<MenuPattern>();
         CHECK_NULL_RETURN(menuPattern, nullptr);
         menuPattern->FocusViewShow();
@@ -376,7 +377,7 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
                     menuWrapper->RemoveChild(subMenuNode);
                     menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
                 },
-                TaskExecutor::TaskType::UI, "HideStackExpandMenu");
+                TaskExecutor::TaskType::UI, "HideStackExpandMenu", PriorityType::VIP);
     });
     auto menuFrameNode = DynamicCast<FrameNode>(menuNode);
     CHECK_NULL_VOID(menuFrameNode);
@@ -736,6 +737,13 @@ bool MenuWrapperPattern::IsSelectOverlayCustomMenu(const RefPtr<FrameNode>& menu
     return menuPattern->IsSelectOverlayCustomMenu();
 }
 
+bool MenuWrapperPattern::IsSelectOverlayRightClickMenu(const RefPtr<FrameNode>& menu) const
+{
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_RETURN(menuPattern, false);
+    return menuPattern->IsSelectOverlayRightClickMenu();
+}
+
 void MenuWrapperPattern::RegisterMenuCallback(const RefPtr<FrameNode>& menuWrapperNode, const MenuParam& menuParam)
 {
     TAG_LOGD(AceLogTag::ACE_DIALOG, "register menu enter");
@@ -880,6 +888,24 @@ void MenuWrapperPattern::RequestPathRender()
     flag++;
     paintProperty->UpdateRenderFlag(flag);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+bool MenuWrapperPattern::IsMenuPreviewNode(const RefPtr<FrameNode>& frameNode) const
+{
+    if (GetPreviewMode() == MenuPreviewMode::NONE) {
+        return false;
+    }
+
+    CHECK_NULL_RETURN(frameNode, false);
+    auto tag = frameNode->GetTag();
+    auto isPreviewTag = tag == V2::IMAGE_ETS_TAG || tag == V2::MENU_PREVIEW_ETS_TAG || tag == V2::FLEX_ETS_TAG;
+    CHECK_NULL_RETURN(isPreviewTag, false);
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto preview = host->GetChildAtIndex(1);
+    CHECK_NULL_RETURN(preview, false);
+    return preview->GetId() == frameNode->GetId();
 }
 
 void MenuWrapperPattern::DumpInfo()

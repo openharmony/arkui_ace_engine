@@ -27,6 +27,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<CustomDialogControllerModel> CustomDialogControllerModel::instance_ = nullptr;
@@ -59,6 +60,7 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM_END };
 const std::vector<KeyboardAvoidMode> KEYBOARD_AVOID_MODE = { KeyboardAvoidMode::DEFAULT, KeyboardAvoidMode::NONE };
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
+constexpr float AVOID_DISTANCE = 16.0f;
 
 } // namespace
 
@@ -143,6 +145,27 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
             auto avoidMode = avoidModeValue->ToNumber<int32_t>();
             if (avoidMode >= 0 && avoidMode < static_cast<int32_t>(KEYBOARD_AVOID_MODE.size())) {
                 instance->dialogProperties_.keyboardAvoidMode = KEYBOARD_AVOID_MODE[avoidMode];
+            }
+        }
+
+        // Parse keyboardAvoidDistance
+        auto avoidDistance = constructorArg->GetProperty("keyboardAvoidDistance");
+        if (avoidDistance->IsObject()) {
+            JSRef<JSObject> avoidDistanceobj = JSRef<JSObject>::Cast(avoidDistance);
+            auto avoidDisValue = avoidDistanceobj->GetProperty(static_cast<int32_t>(ArkUIIndex::VALUE));
+            auto jsAvoidDisUnit = avoidDistanceobj->GetProperty(static_cast<int32_t>(ArkUIIndex::UNIT));
+            DimensionUnit avoidDisUnit = OHOS::Ace::DimensionUnit::VP;
+            if (jsAvoidDisUnit->IsNumber()) {
+                avoidDisUnit = static_cast<DimensionUnit>(jsAvoidDisUnit->ToNumber<int32_t>());
+            }
+            if (avoidDisValue->IsNumber() && avoidDisValue->ToNumber<double>() >= 0 &&
+                avoidDisUnit >= OHOS::Ace::DimensionUnit::PX && avoidDisUnit <= OHOS::Ace::DimensionUnit::CALC &&
+                avoidDisUnit != OHOS::Ace::DimensionUnit::PERCENT) {
+                Dimension avoidDistanceDimension(avoidDisValue->ToNumber<double>(), avoidDisUnit);
+                instance->dialogProperties_.keyboardAvoidDistance = avoidDistanceDimension;
+            } else {
+                Dimension avoidDistanceDimension(AVOID_DISTANCE, OHOS::Ace::DimensionUnit::VP);
+                instance->dialogProperties_.keyboardAvoidDistance = avoidDistanceDimension;
             }
         }
 

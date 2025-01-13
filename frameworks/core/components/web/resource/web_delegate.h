@@ -241,6 +241,7 @@ public:
     std::string GetDefaultFileName() override;
     std::vector<std::string> GetAcceptType() override;
     bool IsCapture() override;
+    std::vector<std::string> GetMimeType() override;
 
 private:
     std::shared_ptr<OHOS::NWeb::NWebFileSelectorParams> param_;
@@ -608,7 +609,8 @@ private:
 
 enum class ScriptItemType {
     DOCUMENT_START = 0,
-    DOCUMENT_END
+    DOCUMENT_END = 1,
+    DOCUMENT_HEAD_READY
 };
 
 class NWebSystemConfigurationImpl : public OHOS::NWeb::NWebSystemConfiguration {
@@ -910,6 +912,7 @@ public:
     void NotifyAutoFillViewData(const std::string& jsonStr);
     void AutofillCancel(const std::string& fillContent);
     bool HandleAutoFillEvent(const std::shared_ptr<OHOS::NWeb::NWebMessage>& viewDataJson);
+    void UpdateOptimizeParserBudgetEnabled(const bool enable);
 #endif
     void OnErrorReceive(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error);
@@ -1026,6 +1029,7 @@ public:
     void SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type);
     void JavaScriptOnDocumentStartByOrder();
     void JavaScriptOnDocumentEndByOrder();
+    void JavaScriptOnHeadReadyByOrder();
     void SetJavaScriptItemsByOrder(const ScriptItems& scriptItems, const ScriptItemType& type,
         const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(std::shared_ptr<OHOS::NWeb::NWebNativeEmbedTouchEvent> touchEvent,
@@ -1033,6 +1037,8 @@ public:
     void UpdateSmoothDragResizeEnabled(bool isSmoothDragResizeEnabled);
     bool GetIsSmoothDragResizeEnabled();
     void DragResize(const double& width, const double& height, const double& pre_height, const double& pre_width);
+    void SetDragResizeStartFlag(bool isDragResizeStart);
+    void SetDragResizePreSize(const double& pre_height, const double& pre_width);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
     bool CloseImageOverlaySelection();
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
@@ -1071,6 +1077,8 @@ public:
     void ScrollByRefScreen(float deltaX, float deltaY, float vx = 0, float vy = 0);
     bool ExecuteAction(int64_t accessibilityId, AceAction action,
         const std::map<std::string, std::string>& actionArguments);
+    bool GetAccessibilityNodeRectById(
+        int64_t accessibilityId, int32_t* width, int32_t* height, int32_t* offsetX, int32_t* offsetY);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetFocusedAccessibilityNodeInfo(
         int64_t accessibilityId, bool isAccessibilityFocus);
     std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> GetAccessibilityNodeInfoById(int64_t accessibilityId);
@@ -1348,8 +1356,10 @@ private:
     float lowerFrameRateVisibleRatio_ = 0.1;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
+    std::optional<ScriptItems> onHeadReadyScriptItems_;
     std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onHeadReadyScriptItemsByOrder_;
     bool accessibilityState_ = false;
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;
@@ -1374,6 +1384,9 @@ private:
     int64_t lastFocusReportId_ = 0;
     RefPtr<TaskExecutor> taskExecutor_;
     bool isEnableHardwareComposition_ = false;
+    bool isDragResizeStart_ = false;
+    double dragResize_preHight_ = 0.0;
+    double dragResize_preWidth_ = 0.0;
 #endif
 };
 

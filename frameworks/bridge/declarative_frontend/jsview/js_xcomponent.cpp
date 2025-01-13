@@ -197,6 +197,7 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("enableSecure", &JSXComponent::JsEnableSecure);
     JSClass<JSXComponent>::StaticMethod("hdrBrightness", &JSXComponent::JsHdrBrightness);
     JSClass<JSXComponent>::StaticMethod("blendMode", &JSXComponent::JsBlendMode);
+    JSClass<JSXComponent>::StaticMethod("enableTransparentLayer", &JSXComponent::JsEnableTransparentLayer);
 
     JSClass<JSXComponent>::InheritAndBind<JSContainerBase>(globalObj);
 }
@@ -747,5 +748,18 @@ void JSXComponent::JsBlendMode(const JSCallbackInfo& args)
     }
 
     JSViewAbstract::JsBlendMode(args);
+}
+
+void JSXComponent::JsEnableTransparentLayer(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::SURFACE || args.Length() != 1) {
+        return;
+    }
+    // set isTransparentLayer on SurfaceNode when type is SURFACE
+    if (args[0]->IsBoolean()) {
+        bool isTransparentLayer = args[0]->ToBoolean();
+        XComponentModel::GetInstance()->EnableTransparentLayer(isTransparentLayer);
+    }
 }
 } // namespace OHOS::Ace::Framework

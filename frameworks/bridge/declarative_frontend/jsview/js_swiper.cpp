@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
+#include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -230,9 +231,23 @@ void JSSwiper::SetIndicatorInteractive(const JSCallbackInfo& info)
     }
 }
 
-void JSSwiper::SetAutoPlay(bool autoPlay)
+void JSSwiper::SetAutoPlay(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    bool autoPlay = false;
+    if (info[0]->IsBoolean()) {
+        autoPlay = info[0]->ToBoolean();
+    }
     SwiperModel::GetInstance()->SetAutoPlay(autoPlay);
+    SwiperAutoPlayOptions swiperAutoPlayOptions;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[1]);
+        GetAutoPlayOptionsInfo(obj, swiperAutoPlayOptions);
+    }
+
+    SwiperModel::GetInstance()->SetAutoPlayOptions(swiperAutoPlayOptions);
 }
 
 void JSSwiper::SetEnabled(const JSCallbackInfo& info)
@@ -751,6 +766,22 @@ void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
     }
 }
 
+void JSSwiper::SetIndicatorController(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+
+    auto* jsIndicatorController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSIndicatorController>();
+    if (!jsIndicatorController) {
+        return;
+    }
+
+    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    jsIndicatorController->SetSwiperNode(targetNode);
+    SwiperModel::GetInstance()->SetBindIndicator(true);
+}
+
 void JSSwiper::SetIndicator(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -761,6 +792,7 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
         SwiperModel::GetInstance()->SetShowIndicator(true);
         return;
     }
+    SwiperModel::GetInstance()->SetBindIndicator(false);
     if (info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
         SwiperModel::GetInstance()->SetIndicatorIsBoolean(false);
@@ -779,6 +811,8 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
                 SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
                 SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
             }
+        } else if (typeParam->IsUndefined()) {
+            SetIndicatorController(info);
         } else {
             SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
             JSSwiperTheme::ApplyThemeToDotIndicatorForce(swiperParameters);
@@ -1402,5 +1436,13 @@ void JSSwiper::SetPageFlipMode(const JSCallbackInfo& info)
     }
     JSViewAbstract::ParseJsInt32(info[0], value);
     SwiperModel::GetInstance()->SetPageFlipMode(value);
+}
+
+void JSSwiper::GetAutoPlayOptionsInfo(const JSRef<JSObject>& obj, SwiperAutoPlayOptions& swiperAutoPlayOptions)
+{
+    auto stopWhenTouched = obj->GetProperty("stopWhenTouched");
+    if (stopWhenTouched->IsBoolean()) {
+        swiperAutoPlayOptions.stopWhenTouched = stopWhenTouched->ToBoolean();
+    }
 }
 } // namespace OHOS::Ace::Framework

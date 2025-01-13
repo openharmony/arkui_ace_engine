@@ -30,19 +30,13 @@
 
 namespace OHOS::Ace::NG {
 class FrameNode;
-enum class DragDropInitiatingStatus : int32_t {
-    IDLE = 0,
-    READY,
-    PRESS,
-    LIFTING,
-    MOVING,
-};
 class ACE_FORCE_EXPORT DragDropGlobalController {
 public:
     ~DragDropGlobalController();
 
     static DragDropGlobalController& GetInstance();
 
+    void PublishMenuStatusWithNode(bool isShowing, const RefPtr<FrameNode>& targetNode = nullptr);
     void UpdateMenuShowingStatus(bool isShowing);
     bool IsMenuShowing() const;
     bool IsInMoving() const;
@@ -53,17 +47,23 @@ public:
     const WeakPtr<FrameNode> GetPrepareDragFrameNode() const;
     void SetPreDragStatus(PreDragStatus preDragStatus);
     PreDragStatus GetPreDragStatus() const;
+    void UpdateDragFilterShowingStatus(bool isShowing);
+    bool IsDragFilterShowing() const;
 
 private:
     DragDropGlobalController() = default;
 
+private:
     mutable std::shared_mutex mutex_;
     // this is the real time menu show status flag, need to change to pair with menu target node in future
     bool isContextMenuShowing_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropGlobalController);
     RefPtr<FrameNode> currentDragNode_ = nullptr;
     WeakPtr<FrameNode> prepareDragFrameNode_;
+    WeakPtr<FrameNode> menuLiftingTargetNode_;
     PreDragStatus preDragStatus_ = PreDragStatus::ACTION_DETECTING_STATUS;
+
+    bool isDragFilterShowing_ = false;
 };
 
 } // namespace OHOS::Ace::NG

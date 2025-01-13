@@ -364,7 +364,10 @@ void TextFieldOverlayModifier::StartFloatingCaretLand(const OffsetF& originCaret
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
             modifier->SetFloatCaretLanding(false);
-            textField->SetFloatingCursorVisible(false);
+            textField->ResetFloatingCursorState();
+            auto textFieldHost = textField->GetHost();
+            CHECK_NULL_VOID(textFieldHost);
+            textFieldHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         });
 }
 

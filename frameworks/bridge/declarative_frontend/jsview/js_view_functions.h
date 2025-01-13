@@ -68,7 +68,7 @@ public:
     void ExecuteRecycle(const std::string& viewName);
     void ExecuteAboutToRecycle();
     void ExecuteAboutToReuse(void* params);
-    void ExecuteSetActive(bool active);
+    void ExecuteSetActive(bool active, bool isReuse = false);
     void ExecuteOnDumpInfo(const std::vector<std::string>& params);
     std::string ExecuteOnDumpInfo();
     std::string ExecuteOnFormRecycle();

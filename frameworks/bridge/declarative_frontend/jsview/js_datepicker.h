@@ -45,9 +45,12 @@ public:
     static void UseMilitaryTime(bool isUseMilitaryTime);
     static void IsUserDefinedFontFamily(const std::string& pos);
     static void JsOpacity(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
 
 private:
     static void CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
+    static void ParseStartEndDate(JSRef<JSVal> startDate, JSRef<JSVal> endDate);
+    static void ParseDatePickerMode(JSRef<JSVal> mode);
     // keep compatible, need remove after
     static void CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
@@ -98,6 +101,7 @@ public:
 
     static void JSBind(BindingTarget globalObj);
     static void OnChange(const JSCallbackInfo& info);
+    static void OnEnterSelectedArea(const JSCallbackInfo& info);
     static void Loop(const JSCallbackInfo& info);
     static void UseMilitaryTime(bool isUseMilitaryTime);
     static void EnableHapticFeedback(const JSCallbackInfo& info);
@@ -108,14 +112,16 @@ public:
     static void SetSelectedTextStyle(const JSCallbackInfo& info);
     static void DateTimeOptions(const JSCallbackInfo& info);
     static void JsOpacity(const JSCallbackInfo& info);
+    static void EnableCascade(const JSCallbackInfo& info);
 
 private:
     static void CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static void SetDefaultAttributes();
-    static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
+    static PickerTime ParseTime(
+        const JSRef<JSVal>& timeVal, PickerTime defaultTime = PickerTime(), bool useDefaultTime = false);
 };
 
-class JSTimePickerDialog {
+class JSTimePickerDialog : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Show(const JSCallbackInfo& info);
@@ -125,7 +131,8 @@ public:
 
 private:
     static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
-    static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
+    static PickerTime ParseTime(
+        const JSRef<JSVal>& timeVal, PickerTime defaultTime = PickerTime(), bool useDefaultTime = false);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
 };
 } // namespace OHOS::Ace::Framework

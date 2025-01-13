@@ -1582,6 +1582,42 @@ bool FFIOHOSAceFrameworkRequestFocus(const char* inspectorKey)
     return result;
 }
 
+void FFIOHOSAceFrameworkFocusBox(CJFocusBoxStyle cjStyle)
+{
+    NG::FocusBoxStyle style;
+
+    if (cjStyle.hasMargin) {
+        CalcDimension margin(cjStyle.margin, static_cast<DimensionUnit>(cjStyle.marginUnit));
+        style.margin = margin;
+    }
+
+    if (cjStyle.hasStrokeColor) {
+        style.strokeColor = Color(cjStyle.strokeColor);
+    }
+
+    if (cjStyle.hasStrokeWidth && GreatOrEqual(cjStyle.strokeWidth, 0.0f)) {
+        CalcDimension strokeWidth(cjStyle.strokeWidth, static_cast<DimensionUnit>(cjStyle.strokeWidthUnit));
+        style.strokeWidth = strokeWidth;
+    }
+
+    ViewAbstractModel::GetInstance()->SetFocusBoxStyle(style);
+}
+
+void FFIOHOSAceFrameworkFocusScopePriority(const char* scopeId, int32_t priority)
+{
+    ViewAbstractModel::GetInstance()->SetFocusScopePriority(scopeId, priority);
+}
+
+void FFIOHOSAceFrameworkFocusScopeId(const char* id, bool isGroup, bool arrowStepOut)
+{
+    ViewAbstractModel::GetInstance()->SetFocusScopeId(id, isGroup, arrowStepOut);
+}
+
+uint32_t FFIOHOSAceFrameworkBlendColor(uint32_t color, uint32_t overlayColor)
+{
+    return Color(color).BlendColor(Color(overlayColor)).GetValue();
+}
+
 void ParseModalTransition(CJContentCoverOptions options, NG::ModalStyle& modalStyle)
 {
     modalStyle.modalTransition = NG::ModalTransition::DEFAULT;
@@ -1633,6 +1669,15 @@ ExternalString FFIGetResourceMedia(NativeResourceObject obj)
         LOGE("Parse media failed.");
     }
     return ::Utils::MallocCString(result);
+}
+
+uint32_t FFIGetResourceSymbolId(NativeResourceObject obj)
+{
+    uint32_t symbolId;
+    if (!ViewAbstract::ParseCjSymbolId(obj, symbolId)) {
+        LOGE("Parse symbol id failed.");
+    }
+    return symbolId;
 }
 
 uint32_t FFIGetResourceColor(NativeResourceObject obj)

@@ -45,6 +45,11 @@ void ImageAnimatorModelNG::Create()
     stack->Push(frameNode);
 }
 
+void ImageAnimatorModelNG::SetAutoMonitorInvisibleArea(bool autoMonitorInvisibleArea)
+{
+    GetImageAnimatorPattern()->SetAutoMonitorInvisibleArea(autoMonitorInvisibleArea);
+}
+
 void ImageAnimatorModelNG::SetImages(const std::vector<ImageProperties>& images)
 {
     std::vector<ImageProperties> imageList = images;
@@ -201,6 +206,11 @@ void ImageAnimatorModelNG::SetFillMode(FrameNode* frameNode, int32_t fillMode)
 void ImageAnimatorModelNG::SetIteration(FrameNode* frameNode, int32_t iteration)
 {
     GetImageAnimatorPattern(frameNode)->SetIteration(iteration);
+}
+
+void ImageAnimatorModelNG::SetAutoMonitorInvisibleArea(FrameNode* frameNode, bool autoMonitorInvisibleArea)
+{
+    GetImageAnimatorPattern(frameNode)->SetAutoMonitorInvisibleArea(autoMonitorInvisibleArea);
 }
 
 bool ImageAnimatorModelNG::IsReverse(FrameNode* frameNode)

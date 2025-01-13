@@ -99,6 +99,8 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     MinusPaddingToSize(layoutProperty->CreatePaddingAndBorder(), idealSize);
 
+    GetExpandArea(layoutProperty, layoutInfo_);
+
     int32_t updateIdx = GetUpdateIdx(layoutWrapper, layoutInfo_->footerIndex_);
     if (updateIdx != -1) {
         layoutInfo_->Reset(updateIdx);
@@ -243,28 +245,25 @@ void WaterFlowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             } else {
                 currentOffset += OffsetF(mainOffset, crossOffset);
             }
-            const bool isCache =
-                !showCache && (item.first < layoutInfo_->startIndex_ || item.first > layoutInfo_->endIndex_);
+            const bool inRange = item.first >= layoutInfo_->startIndex_ && item.first <= layoutInfo_->endIndex_;
+            const bool isCache = !showCache && !inRange;
             auto wrapper = layoutWrapper->GetChildByIndex(GetChildIndexWithFooter(item.first), isCache);
             if (!wrapper) {
                 continue;
             }
             wrapper->GetGeometryNode()->SetMarginFrameOffset(currentOffset);
 
-            if (!isCache && wrapper->CheckNeedForceMeasureAndLayout()) {
+            if (CheckNeedLayout(wrapper, isCache)) {
                 wrapper->Layout();
             } else {
                 wrapper->GetHostNode()->ForceSyncGeometryNode();
-            }
-            if (isCache) {
-                continue;
             }
             // recode restore info
             if (item.first == layoutInfo_->startIndex_) {
                 layoutInfo_->storedOffset_ = mainOffset;
             }
 
-            if (NonNegative(mainOffset + item.second.second)) {
+            if (inRange && NonNegative(mainOffset + item.second.second)) {
                 firstIndex = std::min(firstIndex, item.first);
             }
             auto frameNode = AceType::DynamicCast<FrameNode>(wrapper);
@@ -322,7 +321,7 @@ FlowItemPosition WaterFlowLayoutAlgorithm::GetItemPosition(int32_t index)
 void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layoutWrapper)
 {
     if (layoutInfo_->currentOffset_ >= 0) {
-        if (!CanOverScroll()) {
+        if (!canOverScrollStart_) {
             layoutInfo_->currentOffset_ = 0;
         }
         layoutInfo_->itemStart_ = true;
@@ -332,11 +331,12 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
 
     layoutInfo_->UpdateStartIndex();
     auto layoutProperty = AceType::DynamicCast<WaterFlowLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    const float expandMainSize = mainSize + layoutInfo_->expandHeight_;
     auto currentIndex = layoutInfo_->startIndex_;
     auto position = GetItemPosition(currentIndex);
     bool fill = false;
-    while (
-        LessNotEqual(position.startMainPos + layoutInfo_->currentOffset_, mainSize) || layoutInfo_->jumpIndex_ >= 0) {
+    while (LessNotEqual(position.startMainPos + layoutInfo_->currentOffset_, expandMainSize) ||
+           layoutInfo_->jumpIndex_ >= 0) {
         auto itemWrapper = layoutWrapper->GetOrCreateChildByIndex(GetChildIndexWithFooter(currentIndex));
         if (!itemWrapper) {
             break;
@@ -407,7 +407,8 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
     layoutInfo_->maxHeight_ = maxItemHeight;
 
     if (mainSize >= maxItemHeight) {
-        if (!CanOverScroll()) {
+        if ((NonNegative(layoutInfo_->currentOffset_) && !canOverScrollStart_) ||
+            (NonPositive(layoutInfo_->currentOffset_) && !canOverScrollEnd_)) {
             layoutInfo_->currentOffset_ = 0;
         }
         layoutInfo_->itemStart_ = GreatOrEqual(layoutInfo_->currentOffset_, 0.0f);
@@ -417,7 +418,7 @@ void WaterFlowLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, L
 
     if (LessOrEqualCustomPrecision(layoutInfo_->currentOffset_ + maxItemHeight, mainSize, 0.1f)) {
         layoutInfo_->offsetEnd_ = true;
-        if (!CanOverScroll()) {
+        if (!canOverScrollEnd_) {
             layoutInfo_->currentOffset_ = mainSize - maxItemHeight;
         }
 

@@ -196,6 +196,7 @@ void RenderWeb::UpdateDelegate()
     delegate_->UpdateNativeVideoPlayerConfig(
         std::get<0>(web_->GetNativeVideoPlayerConfig()),
         std::get<1>(web_->GetNativeVideoPlayerConfig()));
+    delegate_->UpdateOptimizeParserBudgetEnabled(web_->GetOptimizeParserBudgetEnabled());
 }
 
 bool RenderWeb::ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard)
@@ -1212,7 +1213,7 @@ void RenderWeb::PanOnActionEnd(const GestureEvent& info)
     SetPreDragDropNode(nullptr);
 }
 
-void RenderWeb::PanOnActionCancel()
+void RenderWeb::PanOnActionCancel(const GestureEvent& info)
 {
     isDragging_ = false;
     auto pipelineContext = context_.Upgrade();

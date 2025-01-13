@@ -40,6 +40,7 @@ struct InnerModalUIExtensionConfig {
     bool isAsyncModalBinding = false;
     bool isModal = true;
     bool isDensityFollowHost = false;
+    bool isWindowModeFollowHost = false;
 };
 
 struct UIExtensionConfig {
@@ -48,7 +49,7 @@ struct UIExtensionConfig {
     bool transferringCaller = false;
     bool densityDpi = false;
     NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY;
-    bool backgroundTransparent = false;
+    bool backgroundTransparent = true;
 };
 }
 
@@ -59,7 +60,7 @@ public:
 
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
         const std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap,
-        bool transferringCaller = false, bool densityDpi = false);
+        bool transferringCaller = false, bool densityDpi = false, bool isWindowModeFollowHost = false);
     // for Embedded Component
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, NG::SessionType sessionType);
     virtual void Create(const NG::UIExtensionConfig& config) {}
@@ -88,6 +89,7 @@ public:
         NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY);
     virtual void SetPlatformOnError(
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError);
+    virtual void SetOnDrawReady(std::function<void()>&& onDrawReady);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MODEL_H

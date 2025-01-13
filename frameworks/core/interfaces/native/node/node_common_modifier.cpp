@@ -35,6 +35,9 @@
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/event/axis_event.h"
 #include "core/image/image_source_info.h"
@@ -2018,6 +2021,20 @@ void SetBackgroundImage(
     }
 }
 
+void SetBackgroundImageSyncMode(ArkUINodeHandle node, ArkUI_Bool syncMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBackgroundImageSyncMode(frameNode, syncMode);
+}
+
+void ResetBackgroundImageSyncMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBackgroundImageSyncMode(frameNode, false);
+}
+
 void SetBackgroundImagePixelMap(ArkUINodeHandle node, void* drawableDescriptor, ArkUI_Int32 repeatIndex)
 {
 #ifndef ACE_UNITTEST
@@ -2936,6 +2953,24 @@ void ResetAccessibilityLevel(ArkUINodeHandle node)
     ViewAbstractModelNG::SetAccessibilityImportance(frameNode, "");
 }
 
+void SetAccessibilityCustomRole(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->SetAccessibilityCustomRole(std::string(value));
+}
+
+void ResetAccessibilityCustomRole(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
+    CHECK_NULL_VOID(accessibilityProperty);
+    accessibilityProperty->ResetAccessibilityCustomRole();
+}
+
 void SetDirection(ArkUINodeHandle node, ArkUI_Int32 direction)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3630,18 +3665,27 @@ void ResetForegroundBrightness(ArkUINodeHandle node)
 
 void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValue, bool& isAuto)
 {
-    if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::AUTO)) {
-        previewOption.ResetDragPreviewMode();
-        isAuto = true;
-        return;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE)) {
-        previewOption.isScaleEnabled = false;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW)) {
-        previewOption.isDefaultShadowEnabled = true;
-    } else if (modeValue == static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS)) {
-        previewOption.isDefaultRadiusEnabled = true;
-    }
     isAuto = false;
+    switch (modeValue) {
+        case static_cast<int32_t>(NG::DragPreviewMode::AUTO):
+            previewOption.ResetDragPreviewMode();
+            isAuto = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE):
+            previewOption.isScaleEnabled = false;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_SHADOW):
+            previewOption.isDefaultShadowEnabled = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DEFAULT_RADIUS):
+            previewOption.isDefaultRadiusEnabled = true;
+            break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT):
+            previewOption.isDefaultDragItemGrayEffectEnabled = true;
+            break;
+        default:
+            break;
+    }
 }
 
 void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPreviewOptions,
@@ -3670,6 +3714,8 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPre
     option.isNumber = dragPreviewOptions.isBadgeNumber;
     option.isMultiSelectionEnabled = dragInteractionOptions.isMultiSelectionEnabled;
     option.defaultAnimationBeforeLifting = dragInteractionOptions.defaultAnimationBeforeLifting;
+    option.enableEdgeAutoScroll = dragInteractionOptions.enableEdgeAutoScroll;
+    option.enableHapticFeedback = dragInteractionOptions.enableHapticFeedback;
     ViewAbstract::SetDragPreviewOptions(frameNode, option);
 }
 
@@ -3677,8 +3723,8 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetDragPreviewOptions(frameNode,
-        { true, false, false, false, false, false, true, { .isShowBadge = true } });
+    ViewAbstract::SetDragPreviewOptions(
+        frameNode, { true, false, false, false, false, false, true, false, true, false, { .isShowBadge = true } });
 }
 
 void SetMouseResponseRegion(
@@ -6324,6 +6370,93 @@ ArkUI_Bool GetTabStop(ArkUINodeHandle node)
     return static_cast<ArkUI_Bool>(ViewAbstract::GetTabStop(frameNode));
 }
 
+void DispatchKeyEvent(ArkUINodeHandle node, ArkUIKeyEvent* arkUIkeyEvent)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(arkUIkeyEvent);
+    KeyEvent keyEvent;
+    keyEvent.action = static_cast<KeyAction>(arkUIkeyEvent->type);
+    keyEvent.code = static_cast<KeyCode>(arkUIkeyEvent->keyCode);
+    keyEvent.key.assign(arkUIkeyEvent->keyText);
+    keyEvent.sourceType = static_cast<SourceType>(arkUIkeyEvent->keySource);
+    keyEvent.deviceId = arkUIkeyEvent->deviceId;
+    keyEvent.unicode = arkUIkeyEvent->unicode;
+    std::chrono::nanoseconds nanoseconds(static_cast<int64_t>(arkUIkeyEvent->timestamp));
+    TimeStamp timeStamp(nanoseconds);
+    keyEvent.timeStamp = timeStamp;
+    for (int32_t i = 0; i < arkUIkeyEvent->keyCodesLength; i ++) {
+        keyEvent.pressedCodes.push_back(static_cast<KeyCode>(arkUIkeyEvent->pressedKeyCodes[i]));
+    }
+    keyEvent.keyIntention = static_cast<KeyIntention>(arkUIkeyEvent->intentionCode);
+    ViewAbstract::DispatchKeyEvent(frameNode, keyEvent);
+}
+
+void SetOnFocusExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onFocus = [node, eventReceiver]() {
+        eventReceiver(node);
+    };
+    ViewAbstract::SetOnFocus(reinterpret_cast<FrameNode*>(node), std::move(onFocus));
+}
+
+void SetOnBlurExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onBlur = [node, eventReceiver]() {
+        eventReceiver(node);
+    };
+    ViewAbstract::SetOnBlur(reinterpret_cast<FrameNode*>(node), std::move(onBlur));
+}
+
+void SetOnTouchExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onTouch = [node, eventReceiver](TouchEventInfo& eventInfo) {
+        ArkUINodeEvent event;
+        auto target = eventInfo.GetTarget();
+        event.touchEvent.target.id = target.id.c_str();
+        event.touchEvent.target.type = target.type.c_str();
+        const std::list<TouchLocationInfo>& changeTouch = eventInfo.GetChangedTouches();
+        if (changeTouch.size() > 0) {
+            TouchLocationInfo front = changeTouch.front();
+            event.touchEvent.action = static_cast<int32_t>(front.GetTouchType());
+        }
+        eventReceiver(node, event);
+    };
+    ViewAbstract::SetOnTouch(reinterpret_cast<FrameNode*>(node), std::move(onTouch));
+}
+
+void SetOnHoverExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isHover))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onHover = [node, eventReceiver](bool isHover, HoverInfo& info) {
+        eventReceiver(node, isHover);
+    };
+    ViewAbstract::SetOnHover(reinterpret_cast<FrameNode*>(node), std::move(onHover));
+}
+
+void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, bool isOn))
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    auto onChange = [node, eventReceiver](const bool isOn) {
+        eventReceiver(node, isOn);
+    };
+    if (uiNode->GetTag() == V2::SWITCH_ETS_TAG) {
+        ToggleModelNG::OnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+    } else if (uiNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
+        CheckBoxModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+    } else {
+        RadioModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+    }
+}
+
 void SetOnClickExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle node, ArkUINodeEvent event))
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
@@ -6379,6 +6512,36 @@ void SetOnAppearExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
     };
     ViewAbstract::SetOnAppear(frameNode, std::move(onAppear));
 }
+
+void SetNodeBackdropBlur(
+    ArkUINodeHandle node, ArkUI_Float32 value, const ArkUI_Float32* blurValues, ArkUI_Int32 blurValuesSize)
+{
+    ArkUI_Float32 blur = 0.0f;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    blur = value > 0 ? value : blur;
+    BlurOption blurOption;
+    blurOption.grayscale.assign(blurValues, blurValues + blurValuesSize);
+    CalcDimension dimensionRadius(blur, DimensionUnit::PX);
+    ViewAbstract::SetNodeBackdropBlur(frameNode, dimensionRadius, blurOption);
+}
+
+ArkUIBackdropBlur GetNodeBackdropBlur(ArkUINodeHandle node)
+{
+    ArkUIBackdropBlur backdropBlur;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, backdropBlur);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, backdropBlur);
+    auto blur = renderContext->GetBackBlurRadius();
+    backdropBlur.dimensionRadius = blur.has_value() ? blur.value().Value() : 0.0f;
+    auto propBackdropBlurOption = renderContext->GetBackdropBlurOption();
+    if (propBackdropBlurOption.has_value() && propBackdropBlurOption->grayscale.size() >= NUM_2) {
+        backdropBlur.brighteningBlur = propBackdropBlurOption->grayscale[NUM_0];
+        backdropBlur.darkeningBlur = propBackdropBlurOption->grayscale[NUM_1];
+    }
+    return backdropBlur;
+}
 } // namespace
 
 namespace NodeModifier {
@@ -6388,7 +6551,7 @@ OHOS::Ace::TouchEventInfo globalEventInfo("global");
 
 const ArkUICommonModifier* GetCommonModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUICommonModifier modifier = {
         .setBackgroundColor = SetBackgroundColor,
         .resetBackgroundColor = ResetBackgroundColor,
@@ -6465,6 +6628,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetBackgroundImageSize = ResetBackgroundImageSize,
         .setBackgroundImage = SetBackgroundImage,
         .resetBackgroundImage = ResetBackgroundImage,
+        .setBackgroundImageSyncMode = SetBackgroundImageSyncMode,
+        .resetBackgroundImageSyncMode = ResetBackgroundImageSyncMode,
         .setTranslate = SetTranslate,
         .resetTranslate = ResetTranslate,
         .setScale = SetScale,
@@ -6524,6 +6689,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .resetAllowDrop = ResetAllowDrop,
         .setAccessibilityLevel = SetAccessibilityLevel,
         .resetAccessibilityLevel = ResetAccessibilityLevel,
+        .setAccessibilityCustomRole = SetAccessibilityCustomRole,
+        .resetAccessibilityCustomRole = ResetAccessibilityCustomRole,
         .setDirection = SetDirection,
         .resetDirection = ResetDirection,
         .setLayoutWeight = SetLayoutWeight,
@@ -6777,26 +6944,27 @@ const ArkUICommonModifier* GetCommonModifier()
         .setTabStop = SetTabStop,
         .resetTabStop = ResetTabStop,
         .getTabStop = GetTabStop,
+        .setOnFocus = SetOnFocusExt,
+        .setOnBlur = SetOnBlurExt,
+        .setOnTouch = SetOnTouchExt,
+        .setOnHover = SetOnHoverExt,
+        .setOnChange = SetOnChangeExt,
         .setOnClick = SetOnClickExt,
         .setOnAppear = SetOnAppearExt,
+        .dispatchKeyEvent = DispatchKeyEvent,
         .resetEnableAnalyzer = nullptr,
         .setEnableAnalyzer = nullptr,
+        .setNodeBackdropBlur = SetNodeBackdropBlur,
+        .getNodeBackdropBlur = GetNodeBackdropBlur,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUICommonModifier* GetCJUICommonModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUICommonModifier modifier = {
         .setBackgroundColor = SetBackgroundColor,
         .resetBackgroundColor = ResetBackgroundColor,
@@ -6930,6 +7098,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .resetAllowDrop = ResetAllowDrop,
         .setAccessibilityLevel = SetAccessibilityLevel,
         .resetAccessibilityLevel = ResetAccessibilityLevel,
+        .setAccessibilityCustomRole = SetAccessibilityCustomRole,
+        .resetAccessibilityCustomRole = ResetAccessibilityCustomRole,
         .setDirection = SetDirection,
         .resetDirection = ResetDirection,
         .setLayoutWeight = SetLayoutWeight,
@@ -7174,14 +7344,7 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .setDragPreview = SetDragPreview,
         .resetDragPreview = ResetDragPreview,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
@@ -7457,6 +7620,41 @@ void SetOnKeyPreIme(ArkUINodeHandle node, void* extraParam)
     NG::ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onPreImeEvent));
 }
 
+void SetOnKeyEventDispatch(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onKeyEvent = [frameNode, nodeId, extraParam](KeyEventInfo& info) -> bool {
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::KEY_INPUT_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.keyEvent.subKind = ArkUIEventSubKind::ON_KEY_DISPATCH;
+        event.keyEvent.type = static_cast<int32_t>(info.GetKeyType());
+        event.keyEvent.keyCode = static_cast<int32_t>(info.GetKeyCode());
+        event.keyEvent.keyText = info.GetKeyText();
+        event.keyEvent.keySource = static_cast<int32_t>(info.GetKeySource());
+        event.keyEvent.deviceId = info.GetDeviceId();
+        event.keyEvent.unicode = info.GetUnicode();
+        event.keyEvent.timestamp = static_cast<double>(info.GetTimeStamp().time_since_epoch().count());
+
+        std::vector<int32_t> pressKeyCodeList;
+        auto pressedKeyCodes = info.GetPressedKeyCodes();
+        event.keyEvent.keyCodesLength = static_cast<int32_t>(pressedKeyCodes.size());
+        for (auto it = pressedKeyCodes.begin(); it != pressedKeyCodes.end(); it++) {
+            pressKeyCodeList.push_back(static_cast<int32_t>(*it));
+        }
+        event.keyEvent.pressedKeyCodes = pressKeyCodeList.data();
+        event.keyEvent.intentionCode = static_cast<int32_t>(info.GetKeyIntention());
+
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.keyEvent.stopPropagation);
+        return event.keyEvent.isConsumed;
+    };
+    ViewAbstract::SetOnKeyEventDispatch(frameNode, onKeyEvent);
+}
 void SetOnFocusAxisEvent(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

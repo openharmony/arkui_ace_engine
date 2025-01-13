@@ -144,6 +144,7 @@ public:
     static void SetBackgroundColor(const Color &color);
     static void SetBackgroundImage(const ImageSourceInfo &src);
     static void SetBackgroundImageRepeat(const ImageRepeat &imageRepeat);
+    static void SetBackgroundImageSyncMode(bool syncMode);
     static void SetBackgroundImageSize(const BackgroundImageSize &bgImgSize);
     static void SetBackgroundImagePosition(const BackgroundImagePosition &bgImgPosition);
     static void SetBackgroundBlurStyle(const BlurStyleOption &bgBlurStyle);
@@ -208,7 +209,7 @@ public:
     static void SetHasBorderImageOutset(bool tag);
     static void SetHasBorderImageRepeat(bool tag);
     static void SetBorderImageGradient(const NG::Gradient &gradient);
-
+    static void NotifyDragStartRequest(DragStartRequestStatus dragStatus);
     // customBackground
     static void SetBackgroundAlign(const Alignment &align);
 
@@ -295,6 +296,9 @@ public:
     static void SetOnFocus(OnFocusFunc &&onFocusCallback);
     static void SetOnBlur(OnBlurFunc &&onBlurCallback);
     static void SetOnKeyEvent(OnKeyConsumeFunc &&onKeyCallback);
+#ifdef SUPPORT_DIGITAL_CROWN
+    static void SetOnCrownEvent(OnCrownCallbackFunc &&onCrownCallback);
+#endif
     static void SetTabIndex(int32_t index);
     static void SetFocusOnTouch(bool isSet);
     static void SetDefaultFocus(bool isSet);
@@ -353,6 +357,11 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
+    static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
+    static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
+    static int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
+    static int32_t ClosePopup(const RefPtr<UINode>& customNode);
+    static int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
     static void DismissDialog();
     static void DismissPopup();
     static void BindMenuWithItems(std::vector<OptionParam> &&params, const RefPtr<FrameNode> &targetNode,
@@ -402,6 +411,10 @@ public:
     static void DisableOnClick();
     static void DisableOnTouch();
     static void DisableOnKeyEvent();
+    static void DisableOnKeyEventDispatch();
+#ifdef SUPPORT_DIGITAL_CROWN
+    static void DisableOnCrownEvent();
+#endif
     static void DisableOnHover();
     static void DisableOnAccessibilityHover();
     static void DisableOnMouse();
@@ -423,6 +436,10 @@ public:
     static void DisableOnDragEnd(FrameNode* frameNode);
     static void DisableOnTouch(FrameNode* frameNode);
     static void DisableOnKeyEvent(FrameNode* frameNode);
+    static void DisableOnKeyEventDispatch(FrameNode* frameNode);
+#ifdef SUPPORT_DIGITAL_CROWN
+    static void DisableOnCrownEvent(FrameNode* frameNode);
+#endif
     static void DisableOnHover(FrameNode* frameNode);
     static void DisableOnMouse(FrameNode* frameNode);
     static void DisableOnAppear(FrameNode* frameNode);
@@ -513,6 +530,7 @@ public:
     static void SetZIndex(FrameNode* frameNode, int32_t value);
     static void SetAlign(FrameNode* frameNode, Alignment alignment);
     static void SetBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
+    static void SetNodeBackdropBlur(FrameNode* frameNode, const Dimension& radius, const BlurOption &blurOption);
     static void SetInvert(FrameNode* frameNode, const InvertVariant& invert);
     static void SetSepia(FrameNode* frameNode, const Dimension& sepia);
     static void SetSaturate(FrameNode* frameNode, const Dimension& saturate);
@@ -542,6 +560,7 @@ public:
     static void SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize);
     static void SetBackgroundImage(FrameNode* frameNode, const ImageSourceInfo& src);
     static void SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRepeat& imageRepeat);
+    static void SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode);
     static void SetTranslate(FrameNode* frameNode, const NG::TranslateOptions& value);
     static void SetScale(FrameNode* frameNode, const NG::VectorF& value);
     static void SetPivot(FrameNode* frameNode, const DimensionOffset& value);
@@ -658,6 +677,9 @@ public:
     static void SetOnMouse(FrameNode* frameNode, OnMouseEventFunc &&onMouseEventFunc);
     static void SetOnHover(FrameNode* frameNode, OnHoverFunc &&onHoverEventFunc);
     static void SetOnKeyEvent(FrameNode* frameNode, OnKeyConsumeFunc &&onKeyCallback);
+    static void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyDispatchCallback);
+    static void SetOnKeyEventDispatch(FrameNode* frameNode, OnKeyEventDispatchFunc&& onKeyDispatchCallback);
+    static void DispatchKeyEvent(FrameNode* frameNode, KeyEvent& keyEvent);
     static void SetOnGestureJudgeBegin(FrameNode* frameNode, GestureJudgeFunc&& gestureJudgeFunc);
     static void SetOnSizeChanged(
         FrameNode* frameNode, std::function<void(const RectF& oldRect, const RectF& rect)>&& onSizeChanged);
@@ -672,6 +694,9 @@ public:
     static void SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style);
     static void SetClickDistance(FrameNode* frameNode, double clickDistance);
     static void SetOnFocusAxisEvent(FrameNode* frameNode, OnFocusAxisEventFunc &&onFocusAxisCallback);
+#ifdef SUPPORT_DIGITAL_CROWN
+    static void SetOnCrownEvent(FrameNode* frameNode, OnCrownCallbackFunc &&onCrownCallback);
+#endif
 
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetTabStop(FrameNode* frameNode);
@@ -680,6 +705,10 @@ public:
     static NG::OverlayOptions GetOverlay(FrameNode* frameNode);
     static void SetNeedFocus(FrameNode* frameNode, bool value);
     static bool GetNeedFocus(FrameNode* frameNode);
+    static int RequestFocus(FrameNode* frameNode);
+    static void ClearFocus(int32_t instanceId);
+    static void FocusActivate(int32_t instanceId, bool isActive, bool isAutoInactive);
+    static void SetAutoFocusTransfer(int32_t instanceId, bool isAutoFocusTransfer);
     static double GetOpacity(FrameNode* frameNode);
     static BorderWidthProperty GetBorderWidth(FrameNode* frameNode);
     static BorderWidthProperty GetLayoutBorderWidth(FrameNode* frameNode);
@@ -807,6 +836,8 @@ private:
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
+    static int32_t OpenBindPopup(
+        const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;

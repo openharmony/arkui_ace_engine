@@ -109,9 +109,16 @@ bool ConvertStringToUInt32(const std::string& idStr, uint32_t& result)
 DrawableItem LayeredDrawableDescriptor::PreGetDrawableItem(
     const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, const char* item)
 {
-    std::string itemStr = item;
-    std::string idStr = itemStr.substr(itemStr.find(':') + 1);
     DrawableItem resItem;
+    std::string itemStr = item;
+    std::string idStr;
+
+    size_t pos = itemStr.find(':');
+    if (pos != std::string::npos) {
+        idStr = itemStr.substr(pos + 1);
+    } else {
+        return resItem;
+    }
     if (!IsNumber(idStr)) {
         return resItem;
     }

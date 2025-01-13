@@ -191,6 +191,9 @@ public:
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) override;
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) override {};
+#endif
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override {};
@@ -247,6 +250,9 @@ public:
     void DisableOnClick() override {};
     void DisableOnTouch() override {};
     void DisableOnKeyEvent() override {};
+#ifdef SUPPORT_DIGITAL_CROWN
+    void DisableOnCrownEvent() override {};
+#endif
     void DisableOnHover() override {};
     void DisableOnAccessibilityHover() override {};
     void DisableOnMouse() override {};
@@ -261,6 +267,22 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
+    int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
+    {
+        return 0;
+    };
+    int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
+    {
+        return 0;
+    };
+    int32_t ClosePopup(const RefPtr<NG::UINode>& customNode) override
+    {
+        return 0;
+    };
+    int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
+    {
+        return 0;
+    };
     void DismissPopup() override {}
 
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
@@ -297,6 +319,11 @@ public:
     void SetAccessibilityChecked(bool checked, bool resetValue) override;
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
+    void SetAccessibilityRole(const std::string& role, bool resetValue) override;
+    void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
+    void ResetOnAccessibilityFocus() override;
+    void SetAccessibilityDefaultFocus() override;
+    void SetAccessibilityUseSamePage(bool isFullSilent) override;
 
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}
@@ -318,7 +345,6 @@ public:
     void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) override {};
     void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override {};
     void SetBackgroundImageResizableSlice(const ImageResizableSlice& Slice) override {};
-
     // global light
     void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ) override {};

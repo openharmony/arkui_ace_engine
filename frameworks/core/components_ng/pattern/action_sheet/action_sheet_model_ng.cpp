@@ -23,6 +23,7 @@
 namespace OHOS::Ace::NG {
 void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
 {
+#ifndef ARKUI_WAERABLE
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();
@@ -51,6 +52,7 @@ void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
     }
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
     UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "show");
+#endif
 #endif
 }
 

@@ -555,6 +555,7 @@ bool KeyEventManager::OnKeyEvent(const KeyEvent& event)
         auto overlayManager = GetOverlayManager(GetInstanceId());
         CHECK_NULL_RETURN(overlayManager, false);
         auto currentContainer = Container::Current();
+        CHECK_NULL_RETURN(currentContainer, false);
         if (currentContainer->IsSubContainer() || currentContainer->IsDialogContainer()) {
             return overlayManager->RemoveOverlayInSubwindow();
         } else {
@@ -577,6 +578,22 @@ bool KeyEventManager::OnFocusAxisEvent(const FocusAxisEvent& event)
     focusNodeHub->HandleEvent(event);
     return true;
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+bool KeyEventManager::OnCrownEvent(const CrownEvent& event)
+{
+    auto container = Container::GetContainer(GetInstanceId());
+    CHECK_NULL_RETURN(container, false);
+    auto pipeline = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipeline, false);
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    auto focusNodeHub = rootNode->GetFocusHub();
+    CHECK_NULL_RETURN(focusNodeHub, false);
+    focusNodeHub->HandleEvent(event);
+    return true;
+}
+#endif
 
 bool KeyEventManager::TriggerKeyEventDispatch(const KeyEvent& event)
 {

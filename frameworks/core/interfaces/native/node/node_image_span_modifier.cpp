@@ -211,6 +211,14 @@ void ResetImageSpanColorFilter(ArkUINodeHandle node)
     ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
 }
 
+/**
+ * @param values radius values
+ * value[0] : radius value for TopLeft，value[1] : radius value for TopRight
+ * value[2] : radius value for BottomLeft，value[3] : radius value for BottomRight
+ * @param units radius units
+ * units[0]: radius unit for TopLeft ,units[1] : radius unit for TopRight
+ * units[2]: radius unit for BottomLeft, units[3] : radius unit for TopRight
+ */
 void SetImageSpanBorderRadius(ArkUINodeHandle node, const ArkUI_Float32* values,
     const ArkUI_Int32* units, ArkUI_Int32 length)
 {
@@ -239,7 +247,7 @@ void ResetImageSpanBorderRadius(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIImageSpanModifier* GetImageSpanModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIImageSpanModifier modifier = {
         .setImageSpanVerticalAlign = SetImageSpanVerticalAlign,
         .resetImageSpanVerticalAlign = ResetImageSpanVerticalAlign,
@@ -262,20 +270,13 @@ const ArkUIImageSpanModifier* GetImageSpanModifier()
         .resetImageSpanBorderRadius = ResetImageSpanBorderRadius,
         .getImageSpanBaselineOffset = GetImageSpanBaselineOffset,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIImageSpanModifier* GetCJUIImageSpanModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIImageSpanModifier modifier = {
         .setImageSpanVerticalAlign = SetImageSpanVerticalAlign,
         .resetImageSpanVerticalAlign = ResetImageSpanVerticalAlign,
@@ -293,14 +294,7 @@ const CJUIImageSpanModifier* GetCJUIImageSpanModifier()
         .setImageSpanOnError = SetImageSpanOnError,
         .resetImageSpanOnError = ResetImageSpanOnError,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
