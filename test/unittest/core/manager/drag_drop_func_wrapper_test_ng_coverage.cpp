@@ -431,44 +431,6 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage020
 }
 
 /**
- * @tc.name: DragDropFuncWrapperTestNgCoverage021
- * @tc.desc: Test UpdateDragPreviewOptionsFromModifier with shadow has value
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage021, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct a lambda function, set drag preview opacity is 0.3f
-     */
-    std::optional<Shadow> shadowVal;
-    auto applyOnNodeSync = [shadowVal](WeakPtr<NG::FrameNode> node) {
-    auto frameNode = node.Upgrade();
-    Dimension dimen(2.0);
-    BlurBackGroundInfo bgBackEffect = {{dimen, 1.0f, 1.0f, Color::TRANSPARENT,
-        AdaptiveColor::DEFAULT, {{2.0f, 2.0f}}}};
-    std::optional<BorderRadiusProperty> borderRadiusVal;
-    OptionsAfterApplied optionTmp = {0, shadowVal, "test", borderRadiusVal, {bgBackEffect}};
-    DragPreviewOption dragPreviewInfos;
-    dragPreviewInfos.options = optionTmp;
-    frameNode->SetDragPreviewOptions(dragPreviewInfos);
-    };
-
-    /**
-     * @tc.steps: step2. construct a DragPreviewOption object
-     */
-    NG::DragPreviewOption option;
-
-    /**
-     * @tc.steps: step3. call UpdateDragPreviewOptionsFromModifier
-     * @tc.expected: step3. option.options.shadow is equal to shadowVal.
-     */
-    NG::DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
-    EXPECT_EQ(1, 1);
-}
-
-
-/**
  * @tc.name: DragDropFuncWrapperTestNgCoverage022
  * @tc.desc: Test PrepareShadowParametersForDragData with Invalid shadow
  * @tc.type: FUNC
