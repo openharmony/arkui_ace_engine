@@ -116,23 +116,23 @@ HWTEST_F(SvgNodeTestNg, svgMaskTest001, TestSize.Level1)
     CHECK_NULL_VOID(svgMask);
     svgMask->ParseAndSetSpecializedAttr("width", "30");
     svgMask->ParseAndSetSpecializedAttr("height", "40");
-    svgMask->ParseAndSetSpecializedAttr("maskUnits", "UseSpaceOnUse");
-    svgMask->ParseAndSetSpecializedAttr("maskContentUnits", "UseSpaceOnUse");
+    svgMask->ParseAndSetSpecializedAttr("maskUnits", "userSpaceOnUse");
+    svgMask->ParseAndSetSpecializedAttr("maskContentUnits", "userSpaceOnUse");
     svgMask->ParseAndSetSpecializedAttr("x", "20");
     svgMask->ParseAndSetSpecializedAttr("y", "20");
     EXPECT_FLOAT_EQ(svgMask->maskAttr_.x.Value(), 20);
     EXPECT_FLOAT_EQ(svgMask->maskAttr_.y.Value(), 20);
     EXPECT_FLOAT_EQ(svgMask->maskAttr_.width.Value(), 30);
     EXPECT_FLOAT_EQ(svgMask->maskAttr_.height.Value(), 40);
-    EXPECT_EQ(svgMask->maskAttr_.maskUnits, "UseSpaceOnUse");
-    EXPECT_EQ(svgMask->maskAttr_.maskContentUnits, "UseSpaceOnUse");
+    EXPECT_EQ(svgMask->maskAttr_.maskUnits, SvgLengthScaleUnit::USER_SPACE_ON_USE);
+    EXPECT_EQ(svgMask->maskAttr_.maskContentUnits, SvgLengthScaleUnit::USER_SPACE_ON_USE);
     svgMask->OnInitStyle();
     EXPECT_FLOAT_EQ(svgMask->x_.Value(), svgMask->maskAttr_.x.Value());
     EXPECT_FLOAT_EQ(svgMask->y_.Value(), svgMask->maskAttr_.y.Value());
     EXPECT_FLOAT_EQ(svgMask->height_.Value(), svgMask->maskAttr_.height.Value());
     EXPECT_FLOAT_EQ(svgMask->width_.Value(), svgMask->maskAttr_.width.Value());
     EXPECT_FLOAT_EQ(svgMask->isDefaultMaskUnits_, false);
-    EXPECT_FLOAT_EQ(svgMask->isDefaultMaskContentUnits_, false);
+    EXPECT_FLOAT_EQ(svgMask->isDefaultMaskContentUnits_, true);
 }
 
 /**

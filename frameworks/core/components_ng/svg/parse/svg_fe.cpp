@@ -36,6 +36,9 @@ static const LinearMapNode<void (*)(const std::string&, SvgFeCommonAttribute&)> 
     { SVG_HEIGHT,
         [](const std::string& val, SvgFeCommonAttribute& attr) {
             attr.height = SvgAttributesParser::ParseDimension(val);
+            if (attr.height.IsValid()) {
+                attr.isHeightValid = true;
+            }
         } },
     { SVG_FE_IN,
         [](const std::string& val, SvgFeCommonAttribute& attr) {
@@ -61,16 +64,29 @@ static const LinearMapNode<void (*)(const std::string&, SvgFeCommonAttribute&)> 
     { SVG_WIDTH,
         [](const std::string& val, SvgFeCommonAttribute& attr) {
             attr.width = SvgAttributesParser::ParseDimension(val);
+            if (attr.width.IsValid()) {
+                attr.isWidthValid = true;
+            }
         } },
     { SVG_X,
         [](const std::string& val, SvgFeCommonAttribute& attr) {
             attr.x = SvgAttributesParser::ParseDimension(val);
+            attr.isXValid = true;
         } },
     { SVG_Y,
         [](const std::string& val, SvgFeCommonAttribute& attr) {
             attr.y = SvgAttributesParser::ParseDimension(val);
+            attr.isYValid = true;
         } },
 };
+}
+
+SvgColorInterpolationType GetColorType(const SvgFeCommonAttribute& fe)
+{
+    if (fe.in.in == SvgFeInType::SOURCE_GRAPHIC) {
+        return SvgColorInterpolationType::SRGB;
+    }
+    return fe.colorInterpolationType;
 }
 
 void InitFilterColor(const SvgFeCommonAttribute& fe, SvgColorInterpolationType& currentColor)
@@ -116,6 +132,32 @@ void SvgFe::GetImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, SvgColor
     effectFilterArea_ = effectFilterArea.IntersectRect(effectFeArea);
     OnAsImageFilter(imageFilter, srcColor, currentColor, resultHash);
     currentColor = srcColor;
+}
+
+void SvgFe::GetImageFilter(std::shared_ptr<RSImageFilter>& imageFilter, std::unordered_map<std::string,
+                           std::shared_ptr<RSImageFilter>>& resultHash)
+{
+    OnInitStyle();
+    auto currentColorInterpolation = GetColorType(feAttr_);
+    effectFilterArea_ = ResolvePrimitiveSubRegion();
+    OnAsImageFilter(imageFilter, SvgColorInterpolationType::SRGB, currentColorInterpolation, resultHash, true);
+}
+
+Rect SvgFe::ResolvePrimitiveSubRegion()
+{
+    auto filterAreaContext = GetFilterContext();
+    // if dimension is invalid , just return filter effect area
+    if (!(feAttr_.isHeightValid && feAttr_.isWidthValid && feAttr_.isXValid && feAttr_.isYValid)) {
+        return filterAreaContext.GetFilterArea();
+    }
+    auto primitiveRule = filterAreaContext.GetPrimitiveRule();
+    auto measuredX = GetMeasuredPosition(feAttr_.x, primitiveRule, SvgLengthType::HORIZONTAL);
+    auto measuredY = GetMeasuredPosition(feAttr_.y, primitiveRule, SvgLengthType::VERTICAL);
+    auto measuredWidth = GetMeasuredLength(feAttr_.width, primitiveRule, SvgLengthType::HORIZONTAL);
+    auto measuredHeight = GetMeasuredLength(feAttr_.height, primitiveRule, SvgLengthType::VERTICAL);
+
+    Rect primitiveArea = {measuredX, measuredY, measuredWidth, measuredHeight};
+    return filterAreaContext.GetFilterArea().IntersectRect(primitiveArea);
 }
 
 void SvgFe::ConverImageFilterColor(std::shared_ptr<RSImageFilter>& imageFilter,

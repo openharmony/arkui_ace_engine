@@ -601,6 +601,16 @@ public:
         linearGradientInfo_ = linearGradientInfo;
     }
 
+    void SetHref(const std::string& href)
+    {
+        href_ = href;
+    }
+
+    std::string GetHref() const
+    {
+        return href_;
+    }
+
 private:
     GradientType type_ = GradientType::LINEAR;
     bool repeat_ = false;
@@ -623,6 +633,7 @@ private:
     std::string gradientTransform_;
     LinearGradientInfo linearGradientInfo_;
     RadialGradientInfo radialGradientInfo_;
+    std::string href_;
 };
 
 enum class ACE_EXPORT BackgroundImageSizeType {

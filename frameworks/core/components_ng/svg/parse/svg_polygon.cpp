@@ -33,6 +33,19 @@ RefPtr<SvgNode> SvgPolygon::CreatePolyline()
     return AceType::MakeRefPtr<SvgPolygon>(false);
 }
 
+void SvgPolygon::ConvertPoints(std::vector<RSPoint>& points, const SvgLengthScaleRule& lengthRule)
+{
+    for (auto& point : points) {
+        Dimension dx(point.GetX());
+        Dimension dy(point.GetY());
+        auto x = GetMeasuredPosition(dx, lengthRule, SvgLengthType::HORIZONTAL);
+        auto y = GetMeasuredPosition(dy, lengthRule, SvgLengthType::VERTICAL);;
+
+        point.SetX(x);
+        point.SetY(y);
+    }
+}
+
 RSRecordingPath SvgPolygon::AsPath(const Size& viewPort) const
 {
     RSRecordingPath path;
@@ -50,6 +63,31 @@ RSRecordingPath SvgPolygon::AsPath(const Size& viewPort) const
     }
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
         return path;
+    }
+    if (attributes_.fillState.IsEvenodd()) {
+        path.SetFillStyle(RSPathFillType::EVENTODD);
+    }
+    return path;
+}
+
+RSRecordingPath SvgPolygon::AsPath(const SvgLengthScaleRule& lengthRule)
+{
+    if (path_.has_value() && lengthRule_ == lengthRule) {
+        return path_.value();
+    }
+    RSRecordingPath path;
+    if (polyAttr_.points.empty()) {
+        return path;
+    }
+    std::vector<RSPoint> rsPoints;
+    RosenSvgPainter::StringToPoints(polyAttr_.points.c_str(), rsPoints);
+    if (rsPoints.empty()) {
+        return RSRecordingPath();
+    }
+    ConvertPoints(rsPoints, lengthRule);
+    path.AddPoly(rsPoints, rsPoints.size(), isClose_);
+    if (attributes_.clipState.IsEvenodd()) {
+        path.SetFillStyle(RSPathFillType::EVENTODD);
     }
     if (attributes_.fillState.IsEvenodd()) {
         path.SetFillStyle(RSPathFillType::EVENTODD);

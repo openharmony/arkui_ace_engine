@@ -41,6 +41,17 @@ public:
         return path;
     }
 
+    RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override
+    {
+        RSRecordingPath path;
+
+        for (const auto& child : children_) {
+            auto childPath = child->AsPath(lengthRule);
+            path.Op(path, childPath, RSPathOp::UNION);
+        }
+        return path;
+    }
+
     void Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) override
     {
         // render composition on other svg tags
@@ -52,10 +63,19 @@ public:
         OnDrawTraversedAfter(canvas, viewPort, color);
     }
 
+    void Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) override
+    {
+        // render composition on other svg tags
+        OnDrawTraversedBefore(canvas, lengthRule);
+        OnDrawTraversed(canvas, lengthRule);
+        OnDrawTraversedAfter(canvas, lengthRule);
+    }
+
 protected:
     virtual void OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) {}
     virtual void OnDrawTraversedAfter(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) {}
-
+    virtual void OnDrawTraversedBefore(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) {}
+    virtual void OnDrawTraversedAfter(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) {}
     // mask/pattern/filter/clipPath
     void InitHrefFlag()
     {
