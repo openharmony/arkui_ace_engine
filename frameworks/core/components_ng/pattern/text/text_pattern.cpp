@@ -2418,6 +2418,7 @@ void TextPattern::AddSubComponentInfoForAISpan(std::vector<SubComponentInfo>& su
 
 void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
+    json->PutFixedAttr("content", textForDisplay_.c_str(), filter, FIXED_ATTR_CONTENT);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         return;
