@@ -67,7 +67,13 @@ public:
     static void InitGatherNodeAttr(const RefPtr<FrameNode>& gatherNode,
         const std::vector<GatherNodeChildInfo>& gatherNodeInfo);
     static void ShowGatherNodeAnimation(const RefPtr<FrameNode>& frameNode);
-
+    static RefPtr<FrameNode> CreateBadgeTextNode(int32_t childSize);
+    static void UpdateBadgeTextNodePosition(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& textNode,
+        int32_t childSize, float previewScale, OffsetF previewOffset = { 0.0f, 0.0f });
+    static void ShowPreviewBadgeAnimation(
+        const RefPtr<GestureEventHub>& gestureHub, const RefPtr<OverlayManager>& manager);
+    static void SetImageNodeInitAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
+    static void SetImageNodeFinishAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode);
 };
-}
+} // namespace OHOS::Ace::NG
 #endif

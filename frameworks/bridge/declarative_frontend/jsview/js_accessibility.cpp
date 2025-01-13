@@ -17,6 +17,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "frameworks/base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/js_accessibility.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -89,6 +90,9 @@ const std::unordered_map<AccessibilityRoleType, std::string> accessibilityRoleMa
     { AccessibilityRoleType::WEB, "web" }, { AccessibilityRoleType::XCOMPONENT, "xcomponent" },
     { AccessibilityRoleType::ROLE_NONE, "NULL" }
 };
+
+const std::vector<AccessibilitySamePageMode> PAGE_MODE_TYPE = { AccessibilitySamePageMode::SEMI_SILENT,
+    AccessibilitySamePageMode::FULL_SILENT };
 }
 
 void JSViewAbstract::JsAccessibilityGroup(const JSCallbackInfo& info)
@@ -278,5 +282,34 @@ void JSViewAbstract::JsOnAccessibilityFocus(const JSCallbackInfo& info)
         func->ExecuteJS(1, &newJSVal);
     };
     ViewAbstractModel::GetInstance()->SetOnAccessibilityFocus(std::move(onAccessibilityFoucus));
+}
+
+void JSViewAbstract::JsAccessibilityDefaultFocus(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsBoolean() && arg->ToBoolean()) {
+        ViewAbstractModel::GetInstance()->SetAccessibilityDefaultFocus();
+    }
+}
+
+void JSViewAbstract::JsAccessibilityUseSamePage(const JSCallbackInfo& info)
+{
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsNumber()) {
+        auto pageMode = arg->ToNumber<int32_t>();
+        if (pageMode >= 0 && pageMode < static_cast<int32_t>(PAGE_MODE_TYPE.size())) {
+            bool isFullSilent = static_cast<bool>(PAGE_MODE_TYPE[pageMode]);
+            ViewAbstractModel::GetInstance()->SetAccessibilityUseSamePage(isFullSilent);
+        }
+    }
+}
+
+std::string JSAccessibilityAbstract::GetRoleByType(AccessibilityRoleType roleType)
+{
+    auto it = accessibilityRoleMap.find(roleType);
+    if (it != accessibilityRoleMap.end()) {
+        return it->second;
+    }
+    return "";
 }
 }

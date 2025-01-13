@@ -213,6 +213,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest003, TestSize.Level1)
     ViewAbstract::SetLayoutDirection(direction);
     ViewAbstract::SetLayoutDirection(AceType::RawPtr(FRAME_NODE_REGISTER), direction);
     ViewAbstract::GetAlignRules(AceType::RawPtr(FRAME_NODE_REGISTER));
+    ViewAbstract::SetBackgroundImageSyncMode(true);
 
     /**
      * @tc.expected: Return expected results..

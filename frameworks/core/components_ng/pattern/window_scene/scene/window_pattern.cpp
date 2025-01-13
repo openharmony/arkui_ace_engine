@@ -121,6 +121,20 @@ public:
         windowPattern->OnRemoveBlank();
     }
 
+    void OnAddSnapshot() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnAddSnapshot();
+    }
+
+    void OnRemoveSnapshot() override
+    {
+        auto windowPattern = windowPattern_.Upgrade();
+        CHECK_NULL_VOID(windowPattern);
+        windowPattern->OnRemoveSnapshot();
+    }
+
     void OnAppRemoveStartingWindow() override
     {
         auto windowPattern = windowPattern_.Upgrade();
@@ -492,10 +506,10 @@ bool WindowPattern::IsSnapshotSizeChanged()
     CHECK_EQUAL_RETURN(session_->GetSystemConfig().freeMultiWindowEnable_, true, false);
     Rosen::WSRect lastRect = session_->GetLastLayoutRect();
     Rosen::WSRect curRect = session_->GetLayoutRect();
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshot size changed id:%{public}d, last:%{public}s, cur:%{public}s",
+             session_->GetPersistentId(), lastRect.ToString().c_str(), curRect.ToString().c_str());
     if (!session_->GetShowRecent() && !lastRect.IsInvalid() &&
         NearEqual(lastRect.width_, curRect.width_, 1.0f) && NearEqual(lastRect.height_, curRect.height_, 1.0f)) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "snapshot size changed id: %{public}d, name: %{public}s",
-            session_->GetPersistentId(), session_->GetSessionInfo().bundleName_.c_str());
         return true;
     }
     return false;

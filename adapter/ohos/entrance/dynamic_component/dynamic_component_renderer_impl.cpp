@@ -224,6 +224,7 @@ void DynamicComponentRendererImpl::InitUiContent(
     }
 
     ContainerScope scope(uiContent_->GetInstanceId());
+    RegisterContainerHandler();
     RegisterErrorEventHandler();
     RegisterSizeChangedCallback();
     RegisterConfigChangedCallback();
@@ -245,6 +246,20 @@ void DynamicComponentRendererImpl::InitUiContent(
     }
     InitializeDynamicAccessibility();
     rendererDumpInfo_.loadAbcTime = GetCurrentTimestamp();
+}
+
+void DynamicComponentRendererImpl::RegisterContainerHandler()
+{
+    CHECK_NULL_VOID(uiContent_);
+    auto container = Container::GetContainer(uiContent_->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_VOID(aceContainer);
+    auto host = host_.Upgrade();
+    CHECK_NULL_VOID(host);
+    auto containerHandler = AceType::DynamicCast<ContainerHandler>(host->GetPattern());
+    CHECK_NULL_VOID(containerHandler);
+    aceContainer->RegisterContainerHandler(containerHandler);
 }
 
 void DynamicComponentRendererImpl::SetUIContentJsContext(
@@ -675,28 +690,14 @@ void DynamicComponentRendererImpl::SearchElementInfoByAccessibilityId(int64_t el
     int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(uiContent_);
-    auto size = output.size();
     uiContent_->SearchElementInfoByAccessibilityId(elementId, mode, baseParent, output);
-    if (output.size() > size) {
-        auto host = host_.Upgrade();
-        CHECK_NULL_VOID(host);
-        auto offset = host->GetTransformRectRelativeToWindow().GetOffset();
-        ApplyAccessibilityElementInfoOffset(output, size, offset);
-    }
 }
 
 void DynamicComponentRendererImpl::SearchElementInfosByText(int64_t elementId, const std::string& text,
     int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(uiContent_);
-    auto size = output.size();
     uiContent_->SearchElementInfosByText(elementId, text, baseParent, output);
-    if (output.size() > size) {
-        auto host = host_.Upgrade();
-        CHECK_NULL_VOID(host);
-        auto offset = host->GetTransformRectRelativeToWindow().GetOffset();
-        ApplyAccessibilityElementInfoOffset(output, size, offset);
-    }
 }
 
 void DynamicComponentRendererImpl::FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
@@ -704,10 +705,6 @@ void DynamicComponentRendererImpl::FindFocusedElementInfo(int64_t elementId, int
 {
     CHECK_NULL_VOID(uiContent_);
     uiContent_->FindFocusedElementInfo(elementId, focusType, baseParent, output);
-    auto host = host_.Upgrade();
-    CHECK_NULL_VOID(host);
-    auto offset = host->GetTransformRectRelativeToWindow().GetOffset();
-    ApplyAccessibilityElementInfoOffset(output, offset);
 }
 
 void DynamicComponentRendererImpl::FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
@@ -715,10 +712,6 @@ void DynamicComponentRendererImpl::FocusMoveSearch(int64_t elementId, int32_t di
 {
     CHECK_NULL_VOID(uiContent_);
     uiContent_->FocusMoveSearch(elementId, direction, baseParent, output);
-    auto host = host_.Upgrade();
-    CHECK_NULL_VOID(host);
-    auto offset = host->GetTransformRectRelativeToWindow().GetOffset();
-    ApplyAccessibilityElementInfoOffset(output, offset);
 }
 
 bool DynamicComponentRendererImpl::NotifyExecuteAction(int64_t elementId, const std::map<std::string,

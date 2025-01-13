@@ -631,7 +631,7 @@ public:
         return isMenuShow_;
     }
 
-    void SetIsMenuShow(bool isMenuShow);
+    void SetIsMenuShow(bool isMenuShow, const RefPtr<FrameNode>& menuNode = nullptr);
 
     void SetIsAttachToCustomNode(bool isAttachToCustomNode)
     {

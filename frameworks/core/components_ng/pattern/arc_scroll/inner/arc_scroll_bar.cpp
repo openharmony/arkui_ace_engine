@@ -122,11 +122,11 @@ void ArcScrollBar::SetRoundTrickRegion(
         TAG_LOGE(AceLogTag::ACE_SCROLL_BAR, "estimatedHeight:%{public}1f", estimatedHeight);
         return;
     } else {
-        activeSize = barRegionSize * (mainSize / estimatedHeight) - GetOutBoundary();
+        activeSize = barRegionSize * (mainSize / estimatedHeight) - GetOutBoundary() * HALF;
     }
     auto minHeight = GetMinAngle() * barRegionSize / GetNormaMaxOffsetAngle();
     if (!NearZero(GetOutBoundary())) {
-        activeSize = std::max(std::max(activeSize, minHeight - GetOutBoundary()),
+        activeSize = std::max(std::max(activeSize, minHeight - GetOutBoundary() * HALF),
             NormalizeToPx(GetMinDynamicHeight()));
     } else {
         activeSize = std::max(activeSize, minHeight);

@@ -181,7 +181,7 @@ public:
 
     const std::string& GetSrc() const
     {
-        return videoSrcInfo_.src;
+        return videoSrcInfo_.src_;
     }
 
     void UpdateMediaParam(const RefPtr<MediaPlayer>& mediaPlayer, const RefPtr<RenderSurface>& renderSurface,

@@ -596,7 +596,9 @@ void FrameNode::GetOneDepthVisibleFrame(std::list<RefPtr<FrameNode>>& children)
 
 void FrameNode::GetOneDepthVisibleFrameWithOffset(std::list<RefPtr<FrameNode>>& children, OffsetF& offset)
 {
-    offset += GetGeometryNode()->GetFrameOffset();
+    auto context = GetRenderContext();
+    CHECK_NULL_VOID(context);
+    offset += context->GetPaintRectWithoutTransform().GetOffset();
     GenerateOneDepthVisibleFrameWithOffset(children, offset);
     if (overlayNode_) {
         children.emplace_back(overlayNode_);
@@ -1097,7 +1099,7 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     std::vector<DimensionRect> mouseResponseRegion;
     if (gestureEventHub) {
         touchable = gestureEventHub->GetTouchable();
-        hitTestMode = gestureEventHub->GetHitTestModeStr();
+        hitTestMode = GestureEventHub::GetHitTestModeStr(gestureEventHub);
         responseRegion = gestureEventHub->GetResponseRegion();
         mouseResponseRegion = gestureEventHub->GetMouseResponseRegion();
         monopolizeEvents = gestureEventHub->GetMonopolizeEvents();

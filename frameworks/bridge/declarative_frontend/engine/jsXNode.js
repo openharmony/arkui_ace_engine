@@ -1729,7 +1729,10 @@ class ColorMetrics {
             const green = chanels[1];
             const blue = chanels[2];
             const alpha = chanels[3];
-            return new ColorMetrics(red, green, blue, alpha);
+            const resourceId = chanels[4];
+            const colorMetrics = new ColorMetrics(red, green, blue, alpha);
+            colorMetrics.setResourceId(resourceId);
+            return colorMetrics;
         }
         else if (typeof color === 'number') {
             return ColorMetrics.numeric(color);
@@ -1812,6 +1815,12 @@ class ColorMetrics {
     }
     get alpha() {
         return this.alpha_;
+    }
+    setResourceId(resourceId) {
+      this.resourceId_ = resourceId;
+    }
+    getResourceId() {
+      return this.resourceId_;
     }
 }
 class BaseShape {

@@ -52,6 +52,7 @@ enum class UIContentBusinessCode : uint32_t {
     UNDEFINED = 0,
     // uiextension session business begin
     EVENT_PROXY = 1001,
+    SEND_PAGE_MODE = 1002,
     // accessibility business begin
     TRANSFORM_PARAM = 2001,
 };

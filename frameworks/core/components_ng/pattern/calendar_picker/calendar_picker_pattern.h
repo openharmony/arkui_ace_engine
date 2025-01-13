@@ -175,6 +175,8 @@ public:
     bool IsContainerModal();
 
     void SetDate(const std::string& info);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
 private:
     void OnModifyDone() override;
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;

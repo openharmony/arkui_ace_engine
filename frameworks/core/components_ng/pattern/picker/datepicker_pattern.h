@@ -771,7 +771,8 @@ private:
     void UpdateCancelButtonMargin(
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
     void ShowColumnByDatePickMode();
-    void UpdateStackPropVisibility(VisibleType yearType, VisibleType monthType, VisibleType dayType);
+    void UpdateStackPropVisibility(const RefPtr<FrameNode>& stackNode,
+        const VisibleType visibleType, const int32_t weight);
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
