@@ -2119,6 +2119,10 @@ HWTEST_F(RatingTestNg, RatingPatternTest016, TestSize.Level1)
     auto paintMethod2 = ratingPattern->CreateNodePaintMethod();
     ASSERT_NE(paintMethod2, nullptr);
     ASSERT_NE(ratingPattern->ratingModifier_, nullptr);
+    /**
+     * @tc.steps: step4. calculate scale size.
+     * @tc.expected: get ImagePaintConfig and check scaleX && scaleY.
+     */
     auto scaleX = CONTAINER_SIZE.Height() / FRAME_WIDTH / DEFAULT_STAR_NUM;
     auto scaleY = CONTAINER_SIZE.Height() / FRAME_HEIGHT;
     EXPECT_EQ(ratingPattern->backgroundFocusConfig_.scaleX_, scaleX);
