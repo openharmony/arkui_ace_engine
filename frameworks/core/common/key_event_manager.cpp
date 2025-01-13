@@ -579,7 +579,6 @@ bool KeyEventManager::OnFocusAxisEvent(const FocusAxisEvent& event)
     return true;
 }
 
-#ifdef SUPPORT_DIGITAL_CROWN
 bool KeyEventManager::OnCrownEvent(const CrownEvent& event)
 {
     auto container = Container::GetContainer(GetInstanceId());
@@ -593,7 +592,6 @@ bool KeyEventManager::OnCrownEvent(const CrownEvent& event)
     focusNodeHub->HandleEvent(event);
     return true;
 }
-#endif
 
 bool KeyEventManager::TriggerKeyEventDispatch(const KeyEvent& event)
 {
