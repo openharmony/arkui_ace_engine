@@ -403,6 +403,7 @@ HWTEST_F(TabBarModifierTestNg, TabBarPatternOnModifyDone001, TestSize.Level1)
         tabBarPattern_->OnModifyDone();
         tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
     }
+    ASSERT_NE(frameNode_, nullptr);
 }
 
 /**

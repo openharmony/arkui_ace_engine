@@ -619,6 +619,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSwipeTo001, TestSize.Level1)
     pattern_->SwipeTo(1);
     pattern_->TriggerCustomContentTransitionEvent(0, 1);
     pattern_->OnCustomAnimationFinish(0, 1, false);
+    EXPECT_TRUE(frameNode_);
 }
 
 /**

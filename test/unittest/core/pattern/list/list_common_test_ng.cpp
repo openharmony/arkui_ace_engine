@@ -792,6 +792,7 @@ HWTEST_F(ListCommonTestNg, FRCCallback001, TestSize.Level1)
     CreateDone();
     // CalcExpectedFrameRate will be called
     pattern_->NotifyFRCSceneInfo("", 0.0f, SceneStatus::START);
+    EXPECT_TRUE(frameNode_);
 }
 
 /**
