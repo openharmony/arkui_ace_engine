@@ -685,6 +685,8 @@ void JSImageAttachment::JSBind(BindingTarget globalObj)
         "objectFit", &JSImageAttachment::GetImageObjectFit, &JSImageAttachment::SetImageObjectFit);
     JSClass<JSImageAttachment>::CustomProperty(
         "layoutStyle", &JSImageAttachment::GetImageLayoutStyle, &JSImageAttachment::SetImageLayoutStyle);
+    JSClass<JSImageAttachment>::CustomProperty(
+        "colorFilter", &JSImageAttachment::GetImageColorFilter, &JSImageAttachment::SetImageColorFilter);
     JSClass<JSImageAttachment>::Bind(globalObj, JSImageAttachment::Constructor, JSImageAttachment::Destructor);
 }
 
@@ -972,6 +974,35 @@ void JSImageAttachment::GetImageLayoutStyle(const JSCallbackInfo& info)
         layoutStyle->SetPropertyObject("borderRadius", CreateBorderRadius(imageAttr->borderRadius.value()));
     }
     info.SetReturnValue(layoutStyle);
+}
+
+void JSImageAttachment::GetImageColorFilter(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(imageSpan_);
+    auto imageAttr = imageSpan_->GetImageAttribute();
+    if (!imageAttr.has_value()) {
+        return;
+    }
+    if (imageAttr->colorFilterMatrix.has_value()) {
+        JSRef<JSArray> colorFilterArr = JSRef<JSArray>::New();
+        uint32_t othersIdx = 0;
+        for (auto filterFloat : imageAttr->colorFilterMatrix.value()) {
+            colorFilterArr->SetValueAt(othersIdx++, JSRef<JSVal>::Make(ToJSValue(filterFloat)));
+        }
+        info.SetReturnValue(colorFilterArr);
+        return;
+    }
+    if (imageAttr->drawingColorFilter.has_value()) {
+        auto engine = EngineHelper::GetCurrentEngine();
+        CHECK_NULL_VOID(engine);
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        CHECK_NULL_VOID(nativeEngine);
+        auto jsColorFilter = imageAttr->drawingColorFilter.value()->GetDrawingColorFilterNapiValue(nativeEngine);
+        CHECK_NULL_VOID(jsColorFilter);
+        auto colorFilterJsVal = JsConverter::ConvertNapiValueToJsVal(jsColorFilter);
+        CHECK_NULL_VOID(colorFilterJsVal->IsObject());
+        info.SetReturnValue(JSRef<JSObject>::Cast(colorFilterJsVal));
+    }
 }
 
 const RefPtr<ImageSpan>& JSImageAttachment::GetImageSpan()

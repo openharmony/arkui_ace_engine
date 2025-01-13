@@ -423,7 +423,7 @@ HWTEST_F(LayoutPropertyTestNg, BuildGridProperty001, TestSize.Level1)
      */
     layoutProperty->Reset();
     layoutProperty->BuildGridProperty(FRAME_NODE_ROOT);
-    auto parent = FRAME_NODE_ROOT->GetAncestorNodeOfFrame();
+    auto parent = FRAME_NODE_ROOT->GetAncestorNodeOfFrame(false);
     EXPECT_EQ(parent, nullptr);
 
     /**
@@ -434,7 +434,7 @@ HWTEST_F(LayoutPropertyTestNg, BuildGridProperty001, TestSize.Level1)
     FRAME_NODE_ROOT->SetParent(FRAME_NODE_TEST);
     FRAME_NODE_ROOT->NotifyVisibleChange(VisibleType::INVISIBLE, VisibleType::VISIBLE);
     layoutProperty->BuildGridProperty(FRAME_NODE_ROOT);
-    auto result = FRAME_NODE_ROOT->GetAncestorNodeOfFrame();
+    auto result = FRAME_NODE_ROOT->GetAncestorNodeOfFrame(false);
     ASSERT_NE(result, nullptr);
     EXPECT_EQ(result->GetTag(), VALUE_TEST);
 
@@ -534,7 +534,7 @@ HWTEST_F(LayoutPropertyTestNg, UpdateGridProperty002, TestSize.Level1)
     auto framenodeTemp = FrameNode::CreateFrameNode("root", 2, AceType::MakeRefPtr<Pattern>(), true);
     bool result1 = layoutProperty->UpdateGridOffset(framenodeTemp);
     EXPECT_NE(layoutProperty->gridProperty_->GetOffset(), UNDEFINED_DIMENSION);
-    EXPECT_EQ(framenodeTemp->GetAncestorNodeOfFrame(), nullptr);
+    EXPECT_EQ(framenodeTemp->GetAncestorNodeOfFrame(false), nullptr);
     EXPECT_FALSE(result1);
 }
 
@@ -616,7 +616,7 @@ HWTEST_F(LayoutPropertyTestNg, OnVisibilityUpdate001, TestSize.Level1)
     auto frameNodeHost = FrameNode::CreateFrameNode("host", 1, AceType::MakeRefPtr<Pattern>(), true);
     layoutProperty->SetHost(frameNodeHost);
     layoutProperty->OnVisibilityUpdate(VisibleType::INVISIBLE, true);
-    auto parent = layoutProperty->GetHost()->GetAncestorNodeOfFrame();
+    auto parent = layoutProperty->GetHost()->GetAncestorNodeOfFrame(false);
     EXPECT_EQ(parent, nullptr);
 
     /**
@@ -634,7 +634,7 @@ HWTEST_F(LayoutPropertyTestNg, OnVisibilityUpdate001, TestSize.Level1)
      * @tc.expected: expected parent_test is not null.
      */
     layoutProperty->OnVisibilityUpdate(VisibleType::GONE);
-    auto parent_test = layoutProperty->GetHost()->GetAncestorNodeOfFrame();
+    auto parent_test = layoutProperty->GetHost()->GetAncestorNodeOfFrame(false);
     ASSERT_NE(parent_test, nullptr);
 }
 

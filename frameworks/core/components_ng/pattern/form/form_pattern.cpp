@@ -52,7 +52,7 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
 constexpr uint32_t DELAY_TIME_FOR_SET_NON_TRANSPARENT = 70;
-constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 500;
+constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
 constexpr uint32_t DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG = 3000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
@@ -458,6 +458,10 @@ void FormPattern::SetNonTransparentAfterRecover()
     if (formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
         == formChildrenNodeMap_.end()) {
         UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, NON_TRANSPARENT_VAL);
+        //update form after updateChildNodeOpacity
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         TAG_LOGI(AceLogTag::ACE_FORM, "setOpacity:1");
     } else {
         TAG_LOGW(AceLogTag::ACE_FORM, "has forbidden node");
@@ -797,6 +801,7 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
 #if OHOS_STANDARD_SYSTEM
         AppExecFwk::FormInfo formInfo;
         FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo);
+        std::lock_guard<std::mutex> lock(formManagerBridge_->GetRecycleMutex());
         formManagerBridge_->SetParamForWant(info, formInfo);
 #endif
     }
@@ -940,12 +945,15 @@ void FormPattern::UpdateAppLockCfg()
     CHECK_NULL_VOID(node);
     auto imageLayoutProperty = node->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto info = ImageSourceInfo("");
-    info.SetResourceId(InternalResource::ResourceId::APP_LOCK_SVG);
-    info.SetFillColor(SystemProperties::GetColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK);
-    imageLayoutProperty->UpdateImageSourceInfo(info);
-    node->MarkModifyDone();
-    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    auto currentColor = sourceInfo->GetFillColor();
+    auto newColor = SystemProperties::GetColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK;
+    if (currentColor != newColor) {
+        sourceInfo->SetFillColor(newColor);
+        imageLayoutProperty->UpdateImageSourceInfo(sourceInfo.value());
+        node->MarkModifyDone();
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefresh)
@@ -1354,8 +1362,8 @@ void FormPattern::GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRec
         auto accessibilityManager = pipeline->GetAccessibilityManager();
         if (accessibilityManager) {
             auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
-            parentRectInfo.top = parentRectInfo.top * windowInfo.scaleX + static_cast<int32_t>(windowInfo.top);
-            parentRectInfo.left = parentRectInfo.left * windowInfo.scaleY + static_cast<int32_t>(windowInfo.left);
+            parentRectInfo.left = parentRectInfo.left * windowInfo.scaleX + static_cast<int32_t>(windowInfo.left);
+            parentRectInfo.top = parentRectInfo.top * windowInfo.scaleY + static_cast<int32_t>(windowInfo.top);
             parentRectInfo.scaleX *= windowInfo.scaleX;
             parentRectInfo.scaleY *= windowInfo.scaleY;
         } else {

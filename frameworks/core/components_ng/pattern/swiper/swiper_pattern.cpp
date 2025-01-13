@@ -1766,7 +1766,6 @@ void SwiperPattern::SwipeTo(int32_t index)
 
 void SwiperPattern::UpdateTabBarAnimationDuration(int32_t index)
 {
-#ifndef ARKUI_WEARABLE
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
@@ -1776,7 +1775,6 @@ void SwiperPattern::UpdateTabBarAnimationDuration(int32_t index)
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
     CHECK_NULL_VOID(tabBarPattern);
     tabBarPattern->UpdateAnimationDuration();
-#endif
 }
 
 int32_t SwiperPattern::CheckTargetIndex(int32_t targetIndex, bool isForceBackward)
@@ -1989,15 +1987,12 @@ void SwiperPattern::PreloadItems(const std::set<int32_t>& indexSet)
         auto host = swiperPattern->GetHost();
         CHECK_NULL_VOID(host);
         auto parent = host->GetParent();
-#ifndef ARKUI_WEARABLE
         if (AceType::InstanceOf<TabsNode>(parent)) {
             swiperPattern->DoTabsPreloadItems(indexSet);
         } else {
             swiperPattern->DoSwiperPreloadItems(indexSet);
         }
-#else
-        swiperPattern->DoSwiperPreloadItems(indexSet);
-#endif
+
         swiperPattern->FirePreloadFinishEvent(ERROR_CODE_NO_ERROR);
     };
 
@@ -2018,7 +2013,6 @@ void SwiperPattern::FirePreloadFinishEvent(int32_t errorCode, std::string messag
     }
 }
 
-#ifndef ARKUI_WEARABLE
 void SwiperPattern::DoTabsPreloadItems(const std::set<int32_t>& indexSet)
 {
     auto host = GetHost();
@@ -2053,7 +2047,6 @@ void SwiperPattern::DoTabsPreloadItems(const std::set<int32_t>& indexSet)
         }
     }
 }
-#endif
 
 void SwiperPattern::BuildForEachChild(const std::set<int32_t>& indexSet, const RefPtr<UINode>& child)
 {
@@ -5848,7 +5841,6 @@ bool SwiperPattern::ContentWillChange(int32_t comingIndex)
 
 bool SwiperPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
 {
-#ifndef ARKUI_WEARABLE
     auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
@@ -5866,7 +5858,6 @@ bool SwiperPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
         return ret.has_value() ? ret.value() : true;
     }
     tabBarPattern->ResetTabContentWillChangeFlag();
-#endif
     return true;
 }
 
@@ -6163,13 +6154,13 @@ void SwiperPattern::SetOnHiddenChangeForParent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     while (parent) {
         if (parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
             break;
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     auto onHiddenChange = [weak = WeakClaim(this)](bool isShow) {
         auto swiperPattern = weak.Upgrade();
@@ -6203,13 +6194,13 @@ void SwiperPattern::RemoveOnHiddenChange()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     while (parent) {
         if (parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
             break;
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     CHECK_NULL_VOID(parent);
     if (parent->GetTag() == V2::PAGE_ETS_TAG) {
@@ -6364,6 +6355,7 @@ void SwiperPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspecto
         nestedScroll == NestedScrollMode::SELF_ONLY ? "SwiperNestedScrollMode.SELF_ONLY"
                                                     : "SwiperNestedScrollMode.SELF_FIRST",
         filter);
+    json->PutExtAttr("stopWhenTouched", IsStopWhenTouched() ? "true" : "false", filter);
     json->PutExtAttr("currentIndex", currentIndex_, filter);
     json->PutExtAttr("currentOffset", currentOffset_, filter);
     json->PutExtAttr("uiCastJumpIndex", uiCastJumpIndex_.value_or(-1), filter);

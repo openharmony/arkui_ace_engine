@@ -341,6 +341,36 @@ public:
         return isPullMoveReceivedForCurrentDrag_;
     }
 
+    void RemoveDeadlineTimer();
+
+    void ExecuteDeadlineTimer();
+
+    void HandleSyncOnDragStart(DragStartRequestStatus dragStartRequestStatus);
+
+    void SetDragMoveLastPoint(Point point) noexcept;
+
+    void SetDelayDragCallBack(const std::function<void()>& cb) noexcept;
+
+    DragStartRequestStatus IsDragStartNeedToBePended() const
+    {
+        return dragStartRequestStatus_;
+    }
+
+    bool HasDelayDragCallBack() const
+    {
+        return asyncDragCallback_ != nullptr;
+    }
+
+    bool IsStartAnimationFInished() const
+    {
+        return isStartAnimationFinished_;
+    }
+
+    void SetStartAnimation(bool flag)
+    {
+        isStartAnimationFinished_ = flag;
+    }
+
     static OffsetF GetTouchOffsetRelativeToSubwindow(int32_t containerId, int32_t x = 0, int32_t y = 0);
     static RectF GetMenuPreviewRect();
     static void UpdateGatherNodeAttr(const RefPtr<OverlayManager>& overlayManager, const GatherAnimationInfo& info);
@@ -597,6 +627,11 @@ private:
     WeakPtr<FrameNode> menuWrapperNode_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
     bool grayedState_ = false;
+
+    Point dragMoveLastPoint_;
+    DragStartRequestStatus dragStartRequestStatus_{DragStartRequestStatus::READY};
+    std::function<void()> asyncDragCallback_;
+    bool isStartAnimationFinished_{};
 };
 } // namespace OHOS::Ace::NG
 

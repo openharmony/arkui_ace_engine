@@ -14,7 +14,7 @@
  */
 
 #include "test/unittest/core/event/drag_event_test_ng.h"
-
+#include "test/mock/base/mock_task_executor.h"
 using namespace testing;
 using namespace testing::ext;
 
@@ -759,6 +759,11 @@ HWTEST_F(DragEventTestNg, DragEventActuatorDragGestureTest001, TestSize.Level1)
     ASSERT_NE(dragEventActuator->longPressRecognizer_->onAction_, nullptr);
     ASSERT_NE(dragEventActuator->SequencedRecognizer_->onActionCancel_, nullptr);
 
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto taskExecutor = context->GetTaskExecutor();
+    ASSERT_NE(taskExecutor, nullptr);
     /**
      * @tc.steps: step2. call actionCancel function.
      */

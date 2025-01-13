@@ -15,9 +15,10 @@
 #include "core/interfaces/native/node/frame_node_modifier.h"
 #include <cstdlib>
 
+#include "base/error/error_code.h"
 #include "core/components_ng/base/inspector.h"
-#include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
 
 namespace OHOS::Ace::NG {
 ArkUI_Bool IsModifiable(ArkUINodeHandle node)
@@ -729,6 +730,51 @@ void RemoveNodeDestroyCallback(ArkUINodeHandle node, ArkUI_CharPtr callbackKey)
     frameNode->RemoveNodeDestroyCallback(std::string(callbackKey));
 }
 
+ArkUI_Int32 RequestFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ARKUI_ERROR_CODE_FOCUS_NON_EXISTENT);
+    return static_cast<ArkUI_Int32>(ViewAbstract::RequestFocus(frameNode));
+}
+
+void ClearFocus(ArkUI_Int32 instanceId)
+{
+    ViewAbstract::ClearFocus(instanceId);
+}
+
+void FocusActivate(ArkUI_Int32 instanceId, bool isActive, bool isAutoInactive)
+{
+    ViewAbstract::FocusActivate(instanceId, isActive, isAutoInactive);
+}
+
+void SetAutoFocusTransfer(ArkUI_Int32 instanceId, bool isAutoFocusTransfer)
+{
+    ViewAbstract::SetAutoFocusTransfer(instanceId, isAutoFocusTransfer);
+}
+
+ArkUI_Int32 GetWindowInfoByNode(ArkUINodeHandle node, char** name)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
+    if (!frameNode->IsOnMainTree()) {
+        return OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE;
+    }
+    auto context = frameNode->GetAttachedContext();
+    CHECK_NULL_RETURN(context, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    if (!context->CheckThreadSafe()) {
+        LOGF("GetWindowInfoByNode doesn't run on UI thread");
+        abort();
+    }
+    auto window = context->GetWindow();
+    CHECK_NULL_RETURN(window, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE);
+    std::string windowName = window->GetWindowName();
+    size_t nameSize = windowName.size();
+    *name = new char[nameSize + 1];
+    windowName.copy(*name, nameSize);
+    (*name)[nameSize] = '\0';
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -789,10 +835,15 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .getCustomPropertyByKey = GetCustomPropertyByKey,
         .addNodeDestroyCallback = AddNodeDestroyCallback,
         .removeNodeDestroyCallback = RemoveNodeDestroyCallback,
+        .getWindowInfoByNode = GetWindowInfoByNode,
         .setDrawCompleteEvent = SetDrawCompleteEvent,
         .resetDrawCompleteEvent = ResetDrawCompleteEvent,
         .setLayoutEvent = SetLayoutEvent,
         .resetLayoutEvent = ResetLayoutEvent,
+        .requestFocus = RequestFocus,
+        .clearFocus = ClearFocus,
+        .focusActivate = FocusActivate,
+        .setAutoFocusTransfer = SetAutoFocusTransfer,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

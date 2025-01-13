@@ -162,7 +162,7 @@ void PagePattern::ProcessHideState()
     host->SetActive(false);
     host->NotifyVisibleChange(VisibleType::VISIBLE, VisibleType::INVISIBLE);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
@@ -175,7 +175,7 @@ void PagePattern::ProcessShowState()
     host->SetActive(true);
     host->NotifyVisibleChange(VisibleType::INVISIBLE, VisibleType::VISIBLE);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);

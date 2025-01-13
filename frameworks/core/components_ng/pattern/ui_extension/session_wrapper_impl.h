@@ -25,6 +25,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 
 namespace OHOS::Ace::NG {
 class SessionWrapperImpl : public SessionWrapper {
@@ -111,7 +112,9 @@ private:
     int32_t GetFrameNodeId() const;
     void InitAllCallback();
     void UpdateSessionConfig();
+    RefPtr<SystemWindowScene> GetWindowScene();
     int32_t GetWindowSceneId();
+    Rosen::WSRect GetWindowSceneRcet();
     bool InnerNotifyOccupiedAreaChangeInfo(
         sptr<Rosen::OccupiedAreaChangeInfo> info, bool isWaitTask, int64_t occupiedAreaTime);
     bool RegisterDataConsumer();

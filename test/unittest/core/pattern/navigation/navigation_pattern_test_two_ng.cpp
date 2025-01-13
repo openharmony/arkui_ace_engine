@@ -1301,6 +1301,44 @@ HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_047, TestSize.Leve
 }
 
 /**
+ * @tc.name: NavigationPatternTestOne_048
+ * @tc.desc: Test Navigation Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create groupNode, stack and pattern.
+     */
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. configure parameters .
+     */
+    auto from = AceType::MakeRefPtr<NavDestinationContext>();
+    auto to = AceType::MakeRefPtr<NavDestinationContext>();
+    NavigationOperation operation = NavigationOperation::PUSH;
+    UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandle);
+
+    /**
+     * @tc.steps: step3. Notify NavDestination Switch .
+     * @tc.expected: navigationStack_ is not nullptr.
+     */
+    navigationPattern->NotifyNavDestinationSwitch(nullptr, to, operation);
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+    from->pathInfo_ = AceType::MakeRefPtr<NavPathInfo>();
+    navigationPattern->NotifyNavDestinationSwitch(from, to, operation);
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+    navigationPattern->NotifyNavDestinationSwitch(from, nullptr, operation);
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+}
+
+/**
  * @tc.name: UpdatePreNavDesZIndex001
  * @tc.desc: Increase the coverage of NavigationPattern::UpdatePreNavDesZIndex function.
  * @tc.type: FUNC

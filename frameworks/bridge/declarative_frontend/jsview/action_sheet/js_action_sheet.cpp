@@ -30,9 +30,9 @@ namespace OHOS::Ace {
 std::unique_ptr<ActionSheetModel> ActionSheetModel::instance_ = nullptr;
 std::mutex ActionSheetModel::mutex_;
 
+#ifndef ARKUI_WEARABLE
 ActionSheetModel* ActionSheetModel::GetInstance()
 {
-#ifndef ARKUI_WAERABLE
     if (!instance_) {
         std::lock_guard<std::mutex> lock(mutex_);
         if (!instance_) {
@@ -48,10 +48,8 @@ ActionSheetModel* ActionSheetModel::GetInstance()
         }
     }
     return instance_.get();
-#else
-    return nullptr;
-#endif
 }
+#endif
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {

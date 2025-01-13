@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -197,12 +197,18 @@ export class SegmentButtonV2Item {
 
 @ObservedV2
 export class SegmentButtonV2Items extends Array<SegmentButtonV2Item> {
-  constructor(items: SegmentButtonV2ItemOptions[]) {
-    super();
+  constructor(length: number);
 
-    for (let options of items) {
-      if (options) {
-        this.push(new SegmentButtonV2Item(options))
+  constructor(items: SegmentButtonV2ItemOptions[]);
+
+  constructor(lengthOrItemOptionsArray: number | SegmentButtonV2ItemOptions[]) {
+    super(typeof lengthOrItemOptionsArray === 'number' ? lengthOrItemOptionsArray : 0);
+
+    if (typeof lengthOrItemOptionsArray !== 'number' && lengthOrItemOptionsArray && lengthOrItemOptionsArray.length) {
+      for (let options of lengthOrItemOptionsArray) {
+        if (options) {
+          this.push(new SegmentButtonV2Item(options))
+        }
       }
     }
   }
@@ -212,6 +218,8 @@ export class SegmentButtonV2Items extends Array<SegmentButtonV2Item> {
     return this.some((item) => item.isHybrid);
   }
 }
+
+const EMPTY_ITEMS = new SegmentButtonV2Items([]);
 
 @ComponentV2
 export struct TabSegmentButtonV2 {
@@ -545,10 +553,19 @@ struct SimpleSegmentButtonV2 {
   private isMouseWheelScroll: boolean = false;
   private isDragging: boolean = false;
   private panStartGlobalX: number = 0;
+  private panStartIndex: number = -1;
+
+  @Monitor("items")
+  onItemsChange() {
+    // When the number of items changes, the item size information array needs to be cleared first
+    // and then the data should be updated again. Otherwise, there will be residual data.
+    this.itemRects = [];
+  }
 
   @Computed
   get normalizedSelectedIndex(): number {
-    return normalize(this.selectedIndex, 0, this.items.length - 1);
+    const items = this.getItems();
+    return normalize(this.selectedIndex, 0, items.length - 1);
   }
 
   @Computed
@@ -559,7 +576,7 @@ struct SimpleSegmentButtonV2 {
   @LocalBuilder
   private ContentLayer() {
     Flex({ alignItems: ItemAlign.Stretch, space: { main: this.getItemSpace() } }) {
-      Repeat(this.items)
+      Repeat(this.getItems())
         .each((repeatItem: RepeatItem<SegmentButtonV2Item>) => {
           Button({ type: ButtonType.Normal }) {
             SegmentButtonV2ItemContent({
@@ -583,7 +600,7 @@ struct SimpleSegmentButtonV2 {
               itemMinHeight: this.itemMinHeight,
               itemPadding: this.itemPadding,
               languageDirection: this.languageDirection,
-              hasHybrid: this.items.hasHybrid,
+              hasHybrid: this.getItems().hasHybrid,
             })
           }
           .accessibilityGroup(true)
@@ -658,20 +675,23 @@ struct SimpleSegmentButtonV2 {
     .priorityGesture(
       PanGesture()
         .onActionStart((event) => {
+          const finger = event.fingerList.find(Boolean);
+          if (!finger) {
+            return;
+          }
+          const index = this.getIndexByPosition(finger.globalX, finger.globalY);
+          if (!this.isItemEnabled(index)) {
+            return;
+          }
           if (event.axisHorizontal !== 0 || event.axisVertical !== 0) {
             this.isMouseWheelScroll = true;
             return;
           }
-          const finger = event.fingerList.find(Boolean);
-          if (!finger) {
-            // todo log error?
-            return;
-          }
-          const index = this.getIndexByPosition(finger.globalX, finger.globalY);
           if (index === this.normalizedSelectedIndex) {
             this.isDragging = true;
           }
           this.panStartGlobalX = finger.globalX;
+          this.panStartIndex = index;
         })
         .onActionUpdate((event) => {
           if (!this.isDragging) {
@@ -679,15 +699,15 @@ struct SimpleSegmentButtonV2 {
           }
           const finger = event.fingerList.find(Boolean);
           if (!finger) {
-            // todo log error?
             return;
           }
           const index = this.getIndexByPosition(finger.globalX, finger.globalY);
-          if (index !== -1) {
-            this.updateSelectedIndex(index);
-          }
+          this.updateSelectedIndex(index);
         })
         .onActionEnd((event) => {
+          if (!this.isItemEnabled(this.panStartIndex)) {
+            return;
+          }
           // handle mouse wheel scroll event
           if (this.isMouseWheelScroll) {
             const offset = event.offsetX !== 0 ? event.offsetX : event.offsetY;
@@ -702,9 +722,11 @@ struct SimpleSegmentButtonV2 {
             return;
           }
           // handle swipe event
+          if (!this.isItemEnabled(this.normalizedSelectedIndex)) {
+            return;
+          }
           const finger = event.fingerList.find(Boolean);
           if (!finger) {
-            // todo log error?
             return;
           }
           let deltaIndex = finger.globalX - this.panStartGlobalX < 0 ? -1 : 1;
@@ -716,8 +738,17 @@ struct SimpleSegmentButtonV2 {
         .onActionCancel(() => {
           this.isDragging = false;
           this.isMouseWheelScroll = false;
+          this.panStartIndex = -1;
         })
     )
+  }
+
+  private isItemEnabled(index: number): boolean {
+    const items = this.getItems();
+    if (index < 0 || index >= items.length) {
+      return false;
+    }
+    return items[index].enabled;
   }
 
   @LocalBuilder
@@ -773,6 +804,10 @@ struct SimpleSegmentButtonV2 {
       minHeight: this.getButtonMinHeight()
     })
     .direction(this.languageDirection)
+  }
+
+  private getItems(): SegmentButtonV2Items {
+    return this.items ?? EMPTY_ITEMS;
   }
 
   private getItemBackplateShadow(): ShadowOptions | ShadowStyle | undefined {
@@ -863,7 +898,8 @@ struct SimpleSegmentButtonV2 {
   }
 
   getItemSpace(): LengthMetrics {
-    if (this.itemSpace && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSpace)) {
+    if (this.itemSpace && this.itemSpace.unit !== LengthUnit.PERCENT
+      && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSpace)) {
       return this.itemSpace;
     }
     return this.theme.itemSpace;
@@ -887,7 +923,8 @@ struct SimpleSegmentButtonV2 {
   }
 
   private updateSelectedIndex(selectedIndex: number) {
-    if (selectedIndex < 0 || selectedIndex > this.items.length - 1 || selectedIndex === this.selectedIndex) {
+    if (!this.isItemEnabled(selectedIndex) || selectedIndex === this.selectedIndex
+    ) {
       return;
     }
     this.getUIContext().animateTo({ curve: curves.springMotion(0.347, 0.99) }, () => {
@@ -905,23 +942,11 @@ struct SimpleSegmentButtonV2 {
   }
 
   private getItemAccessibilityDescription(repeatItem: RepeatItem<SegmentButtonV2Item>): string | undefined {
-    if (typeof repeatItem.item.accessibilityDescription === 'object') {
-      return parseStringResource(this.getUIContext(), repeatItem.item.accessibilityDescription);
-    } else if (typeof repeatItem.item.accessibilityDescription === 'string') {
-      return repeatItem.item.accessibilityDescription;
-    } else {
-      return undefined;
-    }
+    return repeatItem.item.accessibilityDescription as ESObject as string;
   }
 
   private getItemAccessibilityText(repeatItem: RepeatItem<SegmentButtonV2Item>): string | undefined {
-    if (typeof repeatItem.item.accessibilityText === 'object') {
-      return parseStringResource(this.getUIContext(), repeatItem.item.accessibilityText);
-    } else if (typeof repeatItem.item.accessibilityText === 'string') {
-      return repeatItem.item.accessibilityText;
-    } else {
-      return undefined;
-    }
+    return repeatItem.item.accessibilityText as ESObject as string;
   }
 
   private isSelected(repeatItem: RepeatItem<SegmentButtonV2Item>): boolean | undefined {
@@ -953,7 +978,8 @@ struct SimpleSegmentButtonV2 {
     if (this.buttonMinHeight && LengthMetricsUtils.getInstance().isNaturalNumber(this.buttonMinHeight)) {
       return LengthMetricsUtils.getInstance().stringify(this.buttonMinHeight);
     }
-    return this.items.hasHybrid ? this.theme.hybridButtonMinHeight : this.theme.buttonMinHeight;
+    const items = this.getItems();
+    return items.hasHybrid ? this.theme.hybridButtonMinHeight : this.theme.buttonMinHeight;
   }
 }
 
@@ -1059,14 +1085,14 @@ export struct MultiCapsuleSegmentButtonV2 {
 
   build() {
     Flex({ alignItems: ItemAlign.Stretch, space: { main: this.getItemSpace() } }) {
-      Repeat(this.items)
+      Repeat(this.getItems())
         .each((repeatItem: RepeatItem<SegmentButtonV2Item>) => {
           Button({ type: ButtonType.Normal }) {
             SegmentButtonV2ItemContent({
               theme: this.theme,
               item: repeatItem.item,
               selected: this.isSelected(repeatItem),
-              hasHybrid: this.items.hasHybrid,
+              hasHybrid: this.getItems().hasHybrid,
               itemMinFontScale: this.itemMinFontScale,
               itemMaxFontScale: this.itemMaxFontScale,
               itemFontColor: this.itemFontColor,
@@ -1104,16 +1130,18 @@ export struct MultiCapsuleSegmentButtonV2 {
           .onClick(() => {
             this.onItemClicked?.(repeatItem.index);
             let selection: number[];
+            const items = this.getItems();
+            const selectedIndexes = this.selectedIndexes ?? [];
             if (this.isSelected(repeatItem)) {
-              selection = this.selectedIndexes.filter((index) => {
-                if (index < 0 || index > this.items.length - 1) {
+              selection = selectedIndexes.filter((index) => {
+                if (index < 0 || index > items.length - 1) {
                   return false;
                 }
                 return index !== repeatItem.index;
               });
             } else {
-              selection = this.selectedIndexes
-                .filter((index) => index >= 0 && index <= this.items.length - 1)
+              selection = selectedIndexes
+                .filter((index) => index >= 0 && index <= items.length - 1)
                 .concat(repeatItem.index);
             }
             this.$selectedIndexes(selection);
@@ -1121,6 +1149,10 @@ export struct MultiCapsuleSegmentButtonV2 {
         })
     }
     .direction(this.languageDirection)
+  }
+
+  getItems(): SegmentButtonV2Items {
+    return this.items ?? EMPTY_ITEMS;
   }
 
   getItemBackgroundBlurStyleOptions(): BackgroundBlurStyleOptions | undefined {
@@ -1138,27 +1170,16 @@ export struct MultiCapsuleSegmentButtonV2 {
   }
 
   private getItemAccessibilityDescription(repeatItem: RepeatItem<SegmentButtonV2Item>): string | undefined {
-    if (typeof repeatItem.item.accessibilityDescription === 'object') {
-      return parseStringResource(this.getUIContext(), repeatItem.item.accessibilityDescription);
-    } else if (typeof repeatItem.item.accessibilityDescription === 'string') {
-      return repeatItem.item.accessibilityDescription;
-    } else {
-      return undefined;
-    }
+    return repeatItem.item.accessibilityDescription as ESObject as string;
   }
 
   private getItemAccessibilityText(repeatItem: RepeatItem<SegmentButtonV2Item>): string | undefined {
-    if (typeof repeatItem.item.accessibilityText === 'object') {
-      return parseStringResource(this.getUIContext(), repeatItem.item.accessibilityText);
-    } else if (typeof repeatItem.item.accessibilityText === 'string') {
-      return repeatItem.item.accessibilityText;
-    } else {
-      return undefined;
-    }
+    return repeatItem.item.accessibilityText as ESObject as string;
   }
 
   private getItemSpace(): LengthMetrics {
-    if (this.itemSpace && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSpace)) {
+    if (this.itemSpace && this.itemSpace.unit !== LengthUnit.PERCENT
+      && LengthMetricsUtils.getInstance().isNaturalNumber(this.itemSpace)) {
       return this.itemSpace;
     }
     return this.theme.itemSpace;
@@ -1179,35 +1200,31 @@ export struct MultiCapsuleSegmentButtonV2 {
   }
 
   private isSelected(repeatItem: RepeatItem<SegmentButtonV2Item>): boolean {
-    return this.selectedIndexes.includes(repeatItem.index);
+    const selectedIndexes = this.selectedIndexes ?? [];
+    return selectedIndexes.includes(repeatItem.index);
   }
 
   private getItemButtonBorderRadius(repeatItem: RepeatItem<SegmentButtonV2Item>): LocalizedBorderRadiuses {
+    const items = this.getItems();
     const noneBorderRadius: LengthMetrics = LengthMetrics.vp(0);
-    if (repeatItem.index === 0) {
-      const borderRadius: LengthMetrics = this.itemBorderRadius ?? LengthMetrics.resource(this.theme.itemBorderRadius);
-      return {
-        topStart: borderRadius,
-        bottomStart: borderRadius,
-        topEnd: noneBorderRadius,
-        bottomEnd: noneBorderRadius,
-      };
-    }
-    if (repeatItem.index === Math.min(this.items.length - 1, 4)) {
-      const borderRadius: LengthMetrics = this.itemBorderRadius ?? LengthMetrics.resource(this.theme.itemBorderRadius);
-      return {
-        topStart: noneBorderRadius,
-        bottomStart: noneBorderRadius,
-        topEnd: borderRadius,
-        bottomEnd: borderRadius,
-      };
-    }
-    return {
+    const borderRadiuses: LocalizedBorderRadiuses = {
       topStart: noneBorderRadius,
       bottomStart: noneBorderRadius,
       topEnd: noneBorderRadius,
       bottomEnd: noneBorderRadius,
     };
+    if (repeatItem.index === 0) {
+      const borderRadius: LengthMetrics = this.itemBorderRadius ?? LengthMetrics.resource(this.theme.itemBorderRadius);
+      borderRadiuses.topStart = borderRadius;
+      borderRadiuses.bottomStart = borderRadius;
+
+    }
+    if (repeatItem.index === items.length - 1) {
+      const borderRadius: LengthMetrics = this.itemBorderRadius ?? LengthMetrics.resource(this.theme.itemBorderRadius);
+      borderRadiuses.topEnd = borderRadius;
+      borderRadiuses.bottomEnd = borderRadius;
+    }
+    return borderRadiuses;
   }
 }
 
@@ -1279,7 +1296,7 @@ struct SegmentButtonV2ItemContent {
 
   build() {
     Column({ space: 2 }) {
-      if (this.item.symbol) {
+      if (this.item.symbol || this.item.symbolModifier) {
         SymbolGlyph(this.item.symbol)
           .fontSize(this.getSymbolFontSize())
           .fontColor([this.getItemSymbolFillColor()])
@@ -1477,19 +1494,6 @@ class LengthMetricsUtils {
 
   isNaturalNumber(metrics: LengthMetrics): boolean {
     return metrics.value >= 0;
-  }
-}
-
-function parseStringResource(context: UIContext, resource: Resource): string | undefined {
-  const resourceManager = context.getHostContext()?.resourceManager;
-  if (!resourceManager) {
-    return undefined;
-  }
-  try {
-    return resourceManager.getStringSync(resource);
-  } catch (err) {
-    // todo log err
-    return undefined;
   }
 }
 

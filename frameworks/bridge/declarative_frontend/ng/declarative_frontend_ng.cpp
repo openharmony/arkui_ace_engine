@@ -375,7 +375,8 @@ UIContentErrorCode DeclarativeFrontendNG::RunPage(const std::string& url, const 
                 CHECK_NULL_VOID(frontend->jsEngine_);
                 frontend->jsEngine_->LoadFaAppSource();
             },
-            TaskExecutor::TaskType::JS, "ArkUILoadFaAppSource", PriorityType::VIP);
+            TaskExecutor::TaskType::JS, "ArkUILoadFaAppSource",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
     // Not use this pageId from backend, manage it in FrontendDelegateDeclarativeNg.
     if (delegate_) {

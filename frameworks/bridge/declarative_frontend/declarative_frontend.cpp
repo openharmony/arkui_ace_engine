@@ -673,7 +673,8 @@ UIContentErrorCode DeclarativeFrontend::RunPage(const std::string& url, const st
                 CHECK_NULL_VOID(frontend->jsEngine_);
                 frontend->jsEngine_->LoadFaAppSource();
             },
-            TaskExecutor::TaskType::JS, "ArkUILoadFaAppSource", PriorityType::VIP);
+            TaskExecutor::TaskType::JS, "ArkUILoadFaAppSource",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 
     if (delegate_) {

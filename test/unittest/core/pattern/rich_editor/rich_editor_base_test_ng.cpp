@@ -185,8 +185,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel004, TestSize.Level1)
     auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     RichEditorInsertValue info;
-    eventHub->FireAboutToIMEInput(info);
-    EXPECT_EQ(testAboutToIMEInput, 1);
+    EXPECT_TRUE(eventHub->FireAboutToIMEInput(info));
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
@@ -238,8 +237,7 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel006, TestSize.Level1)
     auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
     ASSERT_NE(eventHub, nullptr);
     RichEditorDeleteValue info;
-    eventHub->FireAboutToDelete(info);
-    EXPECT_EQ(testAboutToDelete, 1);
+    EXPECT_TRUE(eventHub->FireAboutToDelete(info));
     while (!ViewStackProcessor::GetInstance()->elementsStack_.empty()) {
         ViewStackProcessor::GetInstance()->elementsStack_.pop();
     }
