@@ -875,7 +875,7 @@ void JSViewContext::JSOpenBindSheet(const JSCallbackInfo& info)
 
     // parse SheetStyle and callbacks
     NG::SheetStyle sheetStyle;
-    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
     sheetStyle.showInPage = false;
     std::function<void()> onAppearCallback;
@@ -952,7 +952,7 @@ void JSViewContext::JSUpdateBindSheet(const JSCallbackInfo& info)
         JSViewAbstract::ParseSheetStyle(info[INDEX_ONE], sheetStyle, isPartialUpdate);
         JSViewAbstract::ParseSheetTitle(info[INDEX_ONE], sheetStyle, titleBuilderFunction);
     } else {
-        sheetStyle.sheetMode = NG::SheetMode::LARGE;
+        sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
         sheetStyle.showDragBar = true;
         sheetStyle.showInPage = false;
         isPartialUpdate = false;

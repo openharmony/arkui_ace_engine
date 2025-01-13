@@ -1746,7 +1746,7 @@ HWTEST_F(ScrollableCoverTestNg, CoordinateWithSheetTest001, TestSize.Level1)
         return frameNode;
     };
     SheetStyle sheetStyle;
-    sheetStyle.sheetMode = SheetMode::MEDIUM;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     sheetStyle.showDragBar = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OpenBindSheetByUIContext(sheetContentNode, std::move(buildTitleNodeFunc), sheetStyle, nullptr,

@@ -175,8 +175,12 @@ public:
     static void ParseBindSheetBorderRadius(const JSRef<JSVal>& args, NG::SheetStyle& sheetStyle);
     static bool ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
     static std::optional<CalcDimension> ParseBindSheetBorderRadiusProp(const JSRef<JSObject>& object, const char* prop);
+    static void ResetSheetHeight(NG::SheetHeight& detent, bool isReset);
+    static bool ParseHeight(const JSRef<JSVal>& args, const std::string heightStr,
+        NG::SheetHeight& detent, bool isReset);
+    static bool ParseSheetMode(const std::string heightStr, NG::SheetHeight& detent);
     static bool ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents);
-    static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
+    static bool ParseSheetHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent, bool isReset);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
     static bool ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
     static void ParseCallback(const JSRef<JSObject>& paramObj,
@@ -673,6 +677,7 @@ public:
     static NG::BorderRadiusProperty GetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopStart,
         const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
         const std::optional<Dimension>& radiusBottomEnd);
+    static void ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
 
 private:
     static bool ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result);

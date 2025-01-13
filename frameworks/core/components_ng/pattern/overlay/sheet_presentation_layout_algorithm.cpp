@@ -143,7 +143,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         scrollNode->Measure(childConstraint);
         if ((sheetType_ == SheetType::SHEET_CENTER || sheetType_ == SheetType::SHEET_POPUP ||
             (sheetType_ == SheetType::SHEET_BOTTOM_OFFSET))
-            && (sheetStyle_.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO)) {
+            && (sheetStyle_.sheetHeight.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO)) {
             auto&& children = layoutWrapper->GetAllChildrenWithBuild();
             auto secondIter = std::next(children.begin(), 1);
             auto secondChild = *secondIter;
@@ -440,10 +440,11 @@ float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle(LayoutWrapper* lay
 {
     float height = 0.0f;
     bool isMediumOrLargeMode = false;
-    if (sheetStyle_.sheetMode == SheetMode::MEDIUM || sheetStyle_.sheetMode == SheetMode::LARGE) {
+    if (sheetStyle_.sheetHeight.sheetMode == SheetMode::MEDIUM ||
+        sheetStyle_.sheetHeight.sheetMode == SheetMode::LARGE) {
         isMediumOrLargeMode =  true;
     }
-    if (sheetStyle_.height.has_value() || isMediumOrLargeMode) {
+    if (sheetStyle_.sheetHeight.height.has_value() || isMediumOrLargeMode) {
         float sheetMaxHeight = sheetMaxHeight_;
         if (SheetInSplitWindow()) {
             sheetMaxHeight = sheetMaxHeight_ - SHEET_SPLIT_STATUS_BAR.ConvertToPx()-
@@ -459,12 +460,12 @@ float SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle(LayoutWrapper* lay
             maxHeight = sheetMaxHeight - DOUBLE_SIZE *
                 (floatButtons.Height() + SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
         }
-        if (sheetStyle_.height->Unit() == DimensionUnit::PERCENT) {
-            height = sheetStyle_.height->ConvertToPxWithSize(maxHeight);
+        if (sheetStyle_.sheetHeight.height->Unit() == DimensionUnit::PERCENT) {
+            height = sheetStyle_.sheetHeight.height->ConvertToPxWithSize(maxHeight);
         } else if (isMediumOrLargeMode) {
             height = SHEET_BIG_WINDOW_HEIGHT.ConvertToPx();
         } else {
-            height = sheetStyle_.height->ConvertToPx();
+            height = sheetStyle_.sheetHeight.height->ConvertToPx();
         }
         maxHeight = SheetInSplitWindow()
             ? maxHeight : std::max(maxHeight, static_cast<float>(SHEET_BIG_WINDOW_MIN_HEIGHT.ConvertToPx()));

@@ -313,14 +313,14 @@ HWTEST_F(SheetPresentationTestNg, CheckBuilderChange001, TestSize.Level1)
     RectF oldRect, rect;
     OffsetF oldOrigin, origin;
     sheetPattern->CheckBuilderChange();
-    EXPECT_NE(sheetStyle.sheetMode, SheetMode::AUTO);
+    EXPECT_NE(sheetStyle.sheetHeight.sheetMode, SheetMode::AUTO);
     auto innerCallbackInfo = eventHub->onAreaChangedInnerCallbacks_[contentNode->GetId()];
     ASSERT_NE(innerCallbackInfo, nullptr);
     innerCallbackInfo(oldRect, oldOrigin, rect, origin);
 
-    sheetStyle.sheetMode = SheetMode::AUTO;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::AUTO;
     layoutProperty->propSheetStyle_ = sheetStyle;
-    EXPECT_EQ(sheetStyle.sheetMode, SheetMode::AUTO);
+    EXPECT_EQ(sheetStyle.sheetHeight.sheetMode, SheetMode::AUTO);
     innerCallbackInfo(oldRect, oldOrigin, rect, origin);
     SheetPresentationTestNg::TearDownTestCase();
 }
@@ -1092,20 +1092,20 @@ HWTEST_F(SheetPresentationTestNg, GetHeightBySheetStyle001, TestSize.Level1)
         AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
-    EXPECT_NE(algorithm->sheetStyle_.sheetMode, SheetMode::MEDIUM);
-    EXPECT_NE(algorithm->sheetStyle_.sheetMode, SheetMode::LARGE);
-    EXPECT_FALSE(algorithm->sheetStyle_.height.has_value());
+    EXPECT_NE(algorithm->sheetStyle_.sheetHeight.sheetMode, SheetMode::MEDIUM);
+    EXPECT_NE(algorithm->sheetStyle_.sheetHeight.sheetMode, SheetMode::LARGE);
+    EXPECT_FALSE(algorithm->sheetStyle_.sheetHeight.height.has_value());
     algorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
 
-    algorithm->sheetStyle_.sheetMode = SheetMode::MEDIUM;
-    EXPECT_EQ(algorithm->sheetStyle_.sheetMode, SheetMode::MEDIUM);
-    EXPECT_FALSE(algorithm->sheetStyle_.height.has_value());
+    algorithm->sheetStyle_.sheetHeight.sheetMode = SheetMode::MEDIUM;
+    EXPECT_EQ(algorithm->sheetStyle_.sheetHeight.sheetMode, SheetMode::MEDIUM);
+    EXPECT_FALSE(algorithm->sheetStyle_.sheetHeight.height.has_value());
     algorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
 
-    algorithm->sheetStyle_.sheetMode = SheetMode::LARGE;
-    algorithm->sheetStyle_.height = 100.0_vp;
-    EXPECT_EQ(algorithm->sheetStyle_.sheetMode, SheetMode::LARGE);
-    EXPECT_TRUE(algorithm->sheetStyle_.height.has_value());
+    algorithm->sheetStyle_.sheetHeight.sheetMode = SheetMode::LARGE;
+    algorithm->sheetStyle_.sheetHeight.height = 100.0_vp;
+    EXPECT_EQ(algorithm->sheetStyle_.sheetHeight.sheetMode, SheetMode::LARGE);
+    EXPECT_TRUE(algorithm->sheetStyle_.sheetHeight.height.has_value());
     EXPECT_FALSE(algorithm->SheetInSplitWindow());
     algorithm->GetHeightBySheetStyle(AceType::RawPtr(sheetNode));
 
@@ -1189,7 +1189,7 @@ HWTEST_F(SheetPresentationTestNg, CreateSheetChildConstraint002, TestSize.Level1
      */
     algorithm->sheetStyle_.isTitleBuilder = true;
     algorithm->sheetType_ = SheetType::SHEET_CENTER;
-    algorithm->sheetStyle_.sheetMode = SheetMode::AUTO;
+    algorithm->sheetStyle_.sheetHeight.sheetMode = SheetMode::AUTO;
     algorithm->sheetHeight_ = 1000.0f;
 
     /**
@@ -1245,7 +1245,7 @@ HWTEST_F(SheetPresentationTestNg, CreateSheetChildConstraint003, TestSize.Level1
      */
     algorithm->sheetStyle_.isTitleBuilder = true;
     algorithm->sheetType_ = SheetType::SHEET_POPUP;
-    algorithm->sheetStyle_.sheetMode = SheetMode::AUTO;
+    algorithm->sheetStyle_.sheetHeight.sheetMode = SheetMode::AUTO;
     algorithm->sheetHeight_ = 1000.0f;
 
     /**
@@ -1311,7 +1311,7 @@ HWTEST_F(SheetPresentationTestNg, GetTopAreaInWindow001, TestSize.Level1)
     auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     SheetStyle sheetStyle;
-    sheetStyle.sheetMode = SheetMode::LARGE;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::LARGE;
     sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
     layoutProperty->propSheetStyle_ = sheetStyle;
 
@@ -1804,9 +1804,9 @@ HWTEST_F(SheetPresentationTestNg, IsScrollOutOfBoundary, TestSize.Level1)
      * @tc.steps: step3. init sheetStyle.
      */
     SheetStyle sheetStyle;
-    sheetStyle.height = Dimension(0.0f, DimensionUnit::AUTO);
+    sheetStyle.sheetHeight.height = Dimension(0.0f, DimensionUnit::AUTO);
     sheetStyle.width = Dimension(0.0f, DimensionUnit::AUTO);
-    sheetStyle.sheetMode = SheetMode::AUTO;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::AUTO;
     sheetStyle.isTitleBuilder = false;
     sheetStyle.sheetTitle = "Title";
     sheetStyle.sheetSubtitle = "SubTitle";
@@ -2275,7 +2275,7 @@ HWTEST_F(SheetPresentationTestNg, IsSheetBottomStyle001, TestSize.Level1)
      */
     SheetStyle sheetStyle;
     sheetStyle.isTitleBuilder = false;
-    sheetStyle.sheetMode = SheetMode::LARGE;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::LARGE;
     sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
     layoutProperty->propSheetStyle_ = sheetStyle;
 
@@ -2352,7 +2352,7 @@ HWTEST_F(SheetPresentationTestNg, IsSheetBottomStyle002, TestSize.Level1)
      */
     SheetStyle sheetStyle;
     sheetStyle.isTitleBuilder = false;
-    sheetStyle.sheetMode = SheetMode::AUTO;
+    sheetStyle.sheetHeight.sheetMode = SheetMode::AUTO;
     sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
     layoutProperty->propSheetStyle_ = sheetStyle;
 

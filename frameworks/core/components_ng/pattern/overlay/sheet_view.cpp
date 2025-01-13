@@ -52,13 +52,13 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     sheetNode->SetDragHitTestBlock(true);
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(sheetLayoutProperty, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetPattern, nullptr);
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
     auto eventConfirmHub = sheetNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(
         [](const GestureEvent& /* info */) { TAG_LOGD(AceLogTag::ACE_SHEET, "The sheet hits the click event."); }));
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_RETURN(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
     auto operationColumn = CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
     CHECK_NULL_RETURN(operationColumn, nullptr);
