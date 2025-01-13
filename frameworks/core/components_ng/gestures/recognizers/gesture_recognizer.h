@@ -205,7 +205,7 @@ public:
 
     inline void SendCancelMsg()
     {
-        if (onActionCancel_ && *onActionCancel_) {
+        if (onActionCancel_ && *onActionCancel_ && (!gestureInfo_ || !gestureInfo_->GetDisposeTag())) {
             (*onActionCancel_)();
         }
     }

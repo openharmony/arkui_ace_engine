@@ -694,7 +694,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
 
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
-    if (callback && *callback && IsEnabled()) {
+    if (callback && *callback && IsEnabled() && (!gestureInfo_ || !gestureInfo_->GetDisposeTag())) {
         GestureEvent info = GetGestureEventInfo();
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
