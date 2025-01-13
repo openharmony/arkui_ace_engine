@@ -47,6 +47,11 @@ void CanvasPattern::DetachRenderContext()
 
 void CanvasPattern::SetOnContext2DAttach(std::function<void()>&& callback)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+    }
     onContext2DAttach_ = std::move(callback);
 }
 
@@ -58,6 +63,11 @@ void CanvasPattern::SetOnContext2DDetach(std::function<void()>&& callback)
 void CanvasPattern::FireOnContext2DAttach()
 {
     if (onContext2DAttach_) {
+        auto holder = TestHolder::GetInstance();
+        if (holder->request) {
+            holder->counter++;
+            holder->isCalled = true;
+        }
         onContext2DAttach_();
     }
 }
@@ -65,6 +75,11 @@ void CanvasPattern::FireOnContext2DAttach()
 void CanvasPattern::FireOnContext2DDetach()
 {
     if (onContext2DDetach_) {
+        auto holder = TestHolder::GetInstance();
+        if (holder->request) {
+            holder->counter++;
+            holder->isCalled = true;
+        }
         onContext2DDetach_();
     }
 }

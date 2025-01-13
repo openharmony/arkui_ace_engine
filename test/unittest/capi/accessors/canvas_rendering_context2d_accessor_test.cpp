@@ -185,7 +185,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, getHeightTest, TestSize.Level1)
 
 /**
  * @tc.name: getWidthTest
-    * @tc.desc:
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasRenderingContext2DAccessorTest, getWidthTest, TestSize.Level1)
@@ -203,5 +203,97 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, getWidthTest, TestSize.Level1)
     EXPECT_EQ(holder->counter, DOUBLE_VALUE_TEST_PLAN.size());
     holder->TearDown();
 }
+
+struct CheckEvent {
+    int32_t resourceId;
+    int32_t callbackId;
+};
+
+MATCHER_P3(CompareEvent, event, value1, value2, "Compare canvas event")
+{
+    return event.resourceId == value1 && event.callbackId == value2;
+}
+
+/**
+ * @tc.name: OnOnAttach
+ * @tc.desc: 
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRenderingContext2DAccessorTest, onOnAttach, TestSize.Level1) {
+    auto holder = TestHolder::GetInstance();
+    holder->SetUp();
+
+    ASSERT_TRUE(mockPatternKeeper_);
+    ASSERT_NE(accessor_->onOnAttach, nullptr);    
+    static std::optional<CheckEvent> checkEvent1 = std::nullopt;
+    static std::optional<CheckEvent> checkEvent2 = std::nullopt;
+    static constexpr int32_t contextId = 122;
+    static constexpr int32_t contextId1 = 123;
+    static constexpr int32_t contextId2 = 124;
+    auto callback1 = [](const Ark_Int32 resourceId) {
+        checkEvent1 = {
+            .resourceId = resourceId,
+            .callbackId = contextId1,
+        };
+    };
+    auto callback2 = [](const Ark_Int32 resourceId) {
+        checkEvent2 = {
+            .resourceId = resourceId,
+            .callbackId = contextId2,
+        };
+    };
+
+    auto arkCallback1 =
+        Converter::ArkValue<Callback_Void>(callback1, contextId);
+    auto arkCallback2 =
+        Converter::ArkValue<Callback_Void>(callback2, contextId);
+    accessor_->onOnAttach(peer_, &arkCallback1);
+    mockPatternKeeper_->AttachRenderContext();
+    EXPECT_EQ(holder->counter, 1);
+    CompareEvent(checkEvent1, contextId, contextId1);
+    EXPECT_FALSE(checkEvent2.has_value());
+    accessor_->onOnAttach(peer_, &arkCallback2);
+    mockPatternKeeper_->AttachRenderContext();
+    EXPECT_EQ(holder->counter, 2);
+    CompareEvent(checkEvent1, contextId, contextId1);
+    CompareEvent(checkEvent2, contextId, contextId2);
+    holder->TearDown();
+}
+// void OnOnAttachImpl(CanvasRenderingContext2DPeer* peer,
+//                     const Callback_Void* callback)
+// {
+//     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
+//     CHECK_NULL_VOID(peerImpl);
+//     CHECK_NULL_VOID(callback);
+//     auto arkCallback = CallbackHelper(*callback);
+//     peerImpl->On(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
+// }
+// void OffOnAttachImpl(CanvasRenderingContext2DPeer* peer,
+//                      const Opt_Callback_Void* callback)
+// {
+//     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
+//     CHECK_NULL_VOID(peerImpl);
+//     auto optCallback = Converter::OptConvert<Callback_Void>(*callback);
+//     auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
+//     peerImpl->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
+// }
+// void OnOnDetachImpl(CanvasRenderingContext2DPeer* peer,
+//                     const Callback_Void* callback)
+// {
+//     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
+//     CHECK_NULL_VOID(peerImpl);
+//     CHECK_NULL_VOID(callback);
+//     auto arkCallback = CallbackHelper(*callback);
+//     peerImpl->On(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
+// }
+// void OffOnDetachImpl(CanvasRenderingContext2DPeer* peer,
+//                      const Opt_Callback_Void* callback)
+// {
+//     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
+//     CHECK_NULL_VOID(peerImpl);
+//     auto optCallback = Converter::OptConvert<Callback_Void>(*callback);
+//     auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<Callback_Void>();
+//     peerImpl->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
+// }
 
 } // namespace OHOS::Ace::NG
