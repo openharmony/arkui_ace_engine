@@ -102,7 +102,7 @@ public:
                 theme->hoverColor_ = pattern->GetAttr<Color>("hover_color", Color::BLACK);
                 theme->focusColor_ = pattern->GetAttr<Color>("focus_color", Color::BLACK);
                 theme->passPointTxt_ = pattern->GetAttr<std::string>("pass_point", "");
-                theme->sideLength_ = pattern->GetAttr<Dimension>("side_length", DEFAULT_SIDE_LENGTH);
+                theme->sideLength_ = pattern->GetAttr<Dimension>("patternlock_side_length", DEFAULT_SIDE_LENGTH);
             }
         }
     };
