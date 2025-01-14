@@ -157,6 +157,7 @@ public:
     {
         isRootNode_ = isRoot;
     }
+    Offset CalcGlobalPivot(const std::pair<Dimension, Dimension>& transformOrigin, const Size& ReferenceBox);
     float GetMeasuredLength(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     float GetMeasuredPosition(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
     Rect GetSvgContainerRect() const;

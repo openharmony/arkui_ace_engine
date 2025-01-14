@@ -46,6 +46,7 @@ build_component_ng("svg_ng") {
     "parse/svg_stop.cpp",
     "parse/svg_style.cpp",
     "parse/svg_svg.cpp",
+    "parse/svg_transform.cpp",
     "parse/svg_use.cpp",
     "svg_context.cpp",
     "svg_dom.cpp",
