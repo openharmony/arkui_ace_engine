@@ -1419,6 +1419,10 @@ void TextFieldPattern::SetNeedToRequestKeyboardInner(bool needToRequestKeyboardI
         TAG_LOGI(ACE_TEXT_FIELD, "Set needToRequestKeyboardInner_ to %{public}d : reason %{public}d",
             needToRequestKeyboardInner, static_cast<int32_t>(reason));
     }
+    if (reason == RequestKeyboardInnerChangeReason::FOCUS && !needToRequestKeyboardInner) {
+        TAG_LOGI(ACE_TEXT_FIELD, "field focus but set needToRequestKeyboardInner to false "
+            "why: %{public}d %{public}d %{public}d", isLongPress_, dragRecipientStatus_, dragStatus_);
+    }
     needToRequestKeyboardInner_ = needToRequestKeyboardInner;
 }
 
