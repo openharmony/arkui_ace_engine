@@ -3332,6 +3332,7 @@ let DragPreviewMode;
   DragPreviewMode.ENABLE_DEFAULT_SHADOW = 3;
   DragPreviewMode.ENABLE_DEFAULT_RADIUS = 4;
   DragPreviewMode.ENABLE_DRAG_ITEM_GRAY_EFFECT = 5;
+  DragPreviewMode.ENABLE_MULTI_TILE_EFFECT  = 6;
 })(DragPreviewMode || (DragPreviewMode = {}));
 
 let FoldStatus;

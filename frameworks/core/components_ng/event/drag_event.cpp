@@ -157,6 +157,7 @@ void DragEventActuator::RestartDragTask(const GestureEvent& info)
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     UpdatePreviewOptionFromModifier(frameNode);
+    SetRestartDrag(true);
     auto gestureInfo = const_cast<GestureEvent&>(info);
     if (actionStart_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Restart drag for lifting status");
@@ -168,6 +169,7 @@ void DragEventActuator::RestartDragTask(const GestureEvent& info)
         TouchEvent touchEvent;
         eventManager->CleanRecognizersForDragBegin(touchEvent);
     }
+    SetRestartDrag(false);
 }
 
 bool DragEventActuator::IsNotNeedShowPreviewForWeb(const RefPtr<FrameNode>& frameNode)

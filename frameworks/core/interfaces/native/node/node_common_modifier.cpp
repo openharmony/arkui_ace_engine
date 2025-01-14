@@ -3683,6 +3683,9 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
         case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT):
             previewOption.isDefaultDragItemGrayEffectEnabled = true;
             break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
+            previewOption.isMultiTiled = true;
+            break;
         default:
             break;
     }
@@ -3723,8 +3726,8 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ViewAbstract::SetDragPreviewOptions(
-        frameNode, { true, false, false, false, false, false, true, false, true, false, { .isShowBadge = true } });
+    ViewAbstract::SetDragPreviewOptions(frameNode,
+        { true, false, false, false, false, false, true, false, true, false, false, { .isShowBadge = true } });
 }
 
 void SetMouseResponseRegion(
