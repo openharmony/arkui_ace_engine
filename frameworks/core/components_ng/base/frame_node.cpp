@@ -5261,6 +5261,9 @@ HitTestMode FrameNode::TriggerOnTouchIntercept(const TouchEvent& touchEvent)
         event.SetTiltY(touchEvent.tiltY.value());
     }
     event.SetSourceTool(touchEvent.sourceTool);
+    EventTarget eventTarget;
+    eventTarget.id = GetInspectorId().value_or("").c_str();
+    event.SetTarget(eventTarget);
     auto result = onTouchIntercept(event);
     SetHitTestMode(result);
     return result;
