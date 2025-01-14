@@ -1157,6 +1157,7 @@ public:
     void* GetExtraCustomProperty(const std::string& key) const;
     void RemoveExtraCustomProperty(const std::string& key);
     bool GetCustomPropertyByKey(const std::string& key, std::string& value);
+    void ExtraCustomPropertyToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void AddNodeDestroyCallback(const std::string& callbackKey, std::function<void()>&& callback);
     void RemoveNodeDestroyCallback(const std::string& callbackKey);
     void FireOnExtraNodeDestroyCallback();
