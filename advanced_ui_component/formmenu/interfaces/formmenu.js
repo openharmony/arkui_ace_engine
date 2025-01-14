@@ -24,8 +24,9 @@ const tag = 'AddFormMenuItem::js::';
 
 async function querySnapshotAsync(want, componentId) {
   let compInfo = componentUtils.getRectangleById(componentId);
+  let imagePackageApi = null;
   try {
-    const imagePackageApi = image.createImagePacker();
+    imagePackageApi = image.createImagePacker();
     const packOpts = {
       format: 'image/webp',
       quality: 50,
@@ -44,6 +45,8 @@ async function querySnapshotAsync(want, componentId) {
     hilog.info(0x3900, tag, 'pixelStr length:' + pixelStr.length);
   } catch (err) {
     hilog.error(0x3900, tag, 'get pixelmap string error:' + err);
+  } finally {
+    imagePackageApi?.release();
   }
 }
 
