@@ -184,6 +184,7 @@ public:
     void OnColorConfigurationUpdate() override;
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
     bool ButtonNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme);
+    bool IconNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme);
     bool TextNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme,
         const RefPtr<TextFieldTheme>& textFieldTheme);
 

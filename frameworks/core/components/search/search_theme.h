@@ -321,6 +321,7 @@ protected:
     Color searchIconColor_;
     Color searchButtonTextColor_;
     Color symbolIconColor_;
+    Color focusIconColor_;
 
 private:
     Color focusPlaceholderColor_;
@@ -354,7 +355,6 @@ private:
     Color borderColor_;
     Dimension borderWidth_;
     Color focusBgColor_;
-    Color focusIconColor_;
     bool needFocusBox_ = false;
     Dimension searchFocusPadding_;
 };

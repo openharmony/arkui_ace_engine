@@ -2019,14 +2019,8 @@ bool SearchPattern::OnThemeScopeUpdate(int32_t themeScopeId)
         return result;
     }
 
-    auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
-    CHECK_NULL_RETURN(searchLayoutProperty, false);
-
-    if (!searchLayoutProperty->HasSearchIconColor()) {
-        SetSearchIconColor(Color(searchTheme->GetSymbolIconColor()));
-    }
-    if (!searchLayoutProperty->HasCancelIconColor()) {
-        SetCancelIconColor(Color(searchTheme->GetSymbolIconColor()));
+    if (!IconNodeOnThemeScopeUpdate(searchTheme)) {
+        return result;
     }
 
     HandleBackgroundColor();
@@ -2054,6 +2048,31 @@ bool SearchPattern::ButtonNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& sear
             buttonNode->MarkModifyDone();
             buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
+    }
+    return true;
+}
+
+bool SearchPattern::IconNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme)
+{
+    CHECK_NULL_RETURN(searchTheme, false);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto iconFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(IMAGE_INDEX));
+    CHECK_NULL_RETURN(iconFrameNode, false);
+    auto cancelIconFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(CANCEL_IMAGE_INDEX));
+    CHECK_NULL_RETURN(cancelIconFrameNode, false);
+    auto searchLayoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_RETURN(searchLayoutProperty, false);
+
+    auto iconColor = Color(iconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG ?
+        searchTheme->GetSymbolIconColor() : searchTheme->GetSearchIconColor());
+    if (!searchLayoutProperty->HasSearchIconColor()) {
+        SetSearchIconColor(iconColor);
+    }
+    auto cancelIconColor = Color(cancelIconFrameNode->GetTag() == V2::SYMBOL_ETS_TAG ?
+        searchTheme->GetSymbolIconColor() : searchTheme->GetSearchIconColor());
+    if (!searchLayoutProperty->HasCancelIconColor()) {
+        SetCancelIconColor(cancelIconColor);
     }
     return true;
 }
@@ -2183,6 +2202,7 @@ void SearchPattern::UpdateSearchSymbolIconColor()
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(GetSearchNode());
     auto searchButtonFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(IMAGE_INDEX));
+    CHECK_NULL_VOID(searchButtonFrameNode);
     auto layoutProperty = searchButtonFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateSymbolColorList({ GetSearchNode()->GetSearchSymbolIconColor() });

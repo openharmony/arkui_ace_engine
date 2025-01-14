@@ -46,11 +46,12 @@ public:
 
     void ApplyTokenTheme(const TokenTheme& theme) override
     {
-        if (auto colors = theme.Colors(); colors) {
+        if (const auto& colors = theme.Colors(); colors) {
             textColor_ = colors->FontPrimary();
             placeholderColor_ = colors->FontSecondary();
             searchIconColor_ = colors->IconSecondary();
             symbolIconColor_ = colors->FontSecondary();
+            focusIconColor_ = colors->FontSecondary();
             searchButtonTextColor_ = colors->FontEmphasize();
 
             textStyle_.SetTextColor(textColor_);

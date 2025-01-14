@@ -76,6 +76,7 @@ RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::u
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SEARCH_ETS_TAG, nodeId);
     auto searchNode = CreateSearchNode(nodeId, value, placeholder, icon);
+    CHECK_NULL_RETURN(searchNode, nullptr);
     ViewStackProcessor::GetInstance()->Push(searchNode);
     auto pattern = searchNode->GetPattern<SearchPattern>();
     searchNode->SetNeedCallChildrenUpdate(false);
@@ -122,7 +123,8 @@ RefPtr<SearchNode> SearchModelNG::CreateSearchNode(int32_t nodeId, const std::op
 {
     auto frameNode =
         GetOrCreateSearchNode(V2::SEARCH_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<SearchPattern>(); });
-
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    ViewStackProcessor::GetInstance()->ApplyParentThemeScopeId(frameNode);
     auto pattern = frameNode->GetPattern<SearchPattern>();
     pattern->SetSearchNode(frameNode);
 
@@ -195,7 +197,7 @@ void SearchModelNG::SetCaretColor(const Color& color)
     CHECK_NULL_VOID(textPaintProperty);
     textPaintProperty->UpdateCursorColor(color);
     textPaintProperty->UpdateCaretColorFlagByUser(true);
-    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::ResetCaretColor()
@@ -208,7 +210,7 @@ void SearchModelNG::ResetCaretColor()
     CHECK_NULL_VOID(textPaintProperty);
     textPaintProperty->ResetCursorColor();
     textPaintProperty->ResetCaretColorFlagByUser();
-    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::SetSearchButton(const std::string& text)
@@ -406,7 +408,7 @@ void SearchModelNG::SetSearchButtonFontColor(const Color& color)
 
     buttonLayoutProperty->UpdateFontColor(color);
     buttonFrameNode->MarkModifyDone();
-    buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::ResetSearchButtonFontColor()
@@ -419,7 +421,7 @@ void SearchModelNG::ResetSearchButtonFontColor()
     CHECK_NULL_VOID(buttonLayoutProperty);
     buttonLayoutProperty->ResetFontColor();
     buttonFrameNode->MarkModifyDone();
-    buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    buttonFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::SetSearchButtonAutoDisable(bool needToDisable)
@@ -447,7 +449,7 @@ void SearchModelNG::SetPlaceholderColor(const Color& color)
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldLayoutProperty->UpdatePlaceholderTextColor(color);
     textFieldPaintProperty->UpdatePlaceholderColorFlagByUser(true);
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::ResetPlaceholderColor()
@@ -464,7 +466,7 @@ void SearchModelNG::ResetPlaceholderColor()
         textFieldLayoutProperty->GetPlaceholderFontStyle()->ResetTextColor();
     }
     textFieldPaintProperty->ResetPlaceholderColorFlagByUser();
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::SetPlaceholderFont(const Font& font)
@@ -551,7 +553,7 @@ void SearchModelNG::SetTextColor(const Color& color)
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldLayoutProperty->UpdateTextColor(color);
     textFieldPaintProperty->UpdateTextColorFlagByUser(color);
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::ResetTextColor()
@@ -566,7 +568,7 @@ void SearchModelNG::ResetTextColor()
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldLayoutProperty->ResetTextColor();
     textFieldPaintProperty->ResetTextColorFlagByUser();
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::SetBackgroundColor(const Color& color)
@@ -587,7 +589,7 @@ void SearchModelNG::SetBackgroundColor(const Color& color)
 void SearchModelNG::ResetBackgroundColor()
 {
     ACE_RESET_RENDER_CONTEXT(RenderContext, BackgroundColor);
-    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(SearchLayoutProperty, BackgroundColor, PROPERTY_UPDATE_MEASURE);
+    ACE_RESET_LAYOUT_PROPERTY_WITH_FLAG(SearchLayoutProperty, BackgroundColor, PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::SetInputFilter(
@@ -1439,7 +1441,7 @@ void SearchModelNG::SetTextColor(FrameNode* frameNode, const Color& color)
     CHECK_NULL_VOID(textFieldLayoutProperty);
     ACE_UPDATE_NODE_PAINT_PROPERTY(TextFieldPaintProperty, TextColorFlagByUser, color, textFieldChild);
     textFieldLayoutProperty->UpdateTextColor(color);
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::ResetTextColor(FrameNode* frameNode)
@@ -1453,7 +1455,7 @@ void SearchModelNG::ResetTextColor(FrameNode* frameNode)
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldLayoutProperty->ResetTextColor();
     textFieldPaintProperty->ResetTextColorFlagByUser();
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::SetCopyOption(FrameNode* frameNode, const CopyOptions& copyOptions)
@@ -1501,7 +1503,7 @@ void SearchModelNG::SetPlaceholderColor(FrameNode* frameNode, const Color& color
     CHECK_NULL_VOID(textFieldPaintProperty);
     textFieldLayoutProperty->UpdatePlaceholderTextColor(color);
     textFieldPaintProperty->UpdatePlaceholderColorFlagByUser(true);
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::ResetPlaceholderColor(FrameNode* frameNode)
@@ -1517,7 +1519,7 @@ void SearchModelNG::ResetPlaceholderColor(FrameNode* frameNode)
         textFieldLayoutProperty->GetPlaceholderFontStyle()->ResetTextColor();
     }
     textFieldPaintProperty->ResetPlaceholderColorFlagByUser();
-    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::SetSelectionMenuHidden(FrameNode* frameNode, bool selectionMenuHidden)
@@ -1551,7 +1553,7 @@ void SearchModelNG::SetCaretColor(FrameNode* frameNode, const Color& color)
     CHECK_NULL_VOID(textPaintProperty);
     textPaintProperty->UpdateCursorColor(color);
     textPaintProperty->UpdateCaretColorFlagByUser(true);
-    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::ResetCaretColor(FrameNode* frameNode)
@@ -1563,7 +1565,7 @@ void SearchModelNG::ResetCaretColor(FrameNode* frameNode)
     CHECK_NULL_VOID(textPaintProperty);
     textPaintProperty->ResetCursorColor();
     textPaintProperty->ResetCaretColorFlagByUser();
-    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void SearchModelNG::SetTextAlign(FrameNode* frameNode, const TextAlign& textAlign)
