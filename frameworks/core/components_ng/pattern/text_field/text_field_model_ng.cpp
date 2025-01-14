@@ -546,7 +546,7 @@ void TextFieldModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldComm
     eventHub->SetOnSubmit(std::move(func));
 }
 
-void TextFieldModelNG::SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func)
+void TextFieldModelNG::SetOnChange(std::function<void(const ChangeValueInfo&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -833,6 +833,13 @@ void TextFieldModelNG::SetDefaultPadding()
 void TextFieldModelNG::SetHoverEffect(HoverEffectType hoverEffect)
 {
     NG::ViewAbstract::SetHoverEffect(hoverEffect);
+}
+
+void TextFieldModelNG::SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillChangeEvent(std::move(func));
 }
 
 void TextFieldModelNG::SetOnChangeEvent(std::function<void(const std::u16string&)>&& func)
@@ -1408,8 +1415,15 @@ void TextFieldModelNG::SetCounterType(FrameNode* frameNode, int32_t value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, value, frameNode);
 }
 
-void TextFieldModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::u16string&,
-    PreviewText&)>&& func)
+void TextFieldModelNG::SetOnWillChangeEvent(FrameNode* frameNode, std::function<bool(const ChangeValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillChangeEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const ChangeValueInfo&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();

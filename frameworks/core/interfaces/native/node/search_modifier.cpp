@@ -572,7 +572,7 @@ void SetSearchOnChange(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onSubmit = reinterpret_cast<std::function<void(const std::u16string&, PreviewText&)>*>(callback);
+        auto onSubmit = reinterpret_cast<std::function<void(const ChangeValueInfo&)>*>(callback);
         SearchModelNG::SetOnChange(frameNode, std::move(*onSubmit));
     } else {
         SearchModelNG::SetOnChange(frameNode, nullptr);
@@ -1116,9 +1116,9 @@ void SetOnSearchChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const std::u16string& text, PreviewText&) {
+    auto onEvent = [extraParam](const ChangeValueInfo& info) {
         ArkUINodeEvent event;
-        std::string utf8Text = UtfUtils::Str16DebugToStr8(text);
+        std::string utf8Text = UtfUtils::Str16DebugToStr8(info.value);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_CHANGE;

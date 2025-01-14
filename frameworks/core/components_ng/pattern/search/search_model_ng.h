@@ -68,7 +68,8 @@ public:
     void SetHeight(const Dimension& height) override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override {};
     void SetOnSubmit(std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit) override;
-    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& onChange) override;
+    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& onChange) override {};
+    void SetOnChange(std::function<void(const ChangeValueInfo&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnScroll(std::function<void(float, float)>&& func) override;
     void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
@@ -79,6 +80,7 @@ public:
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override;
     void SetOnPaste(std::function<void(const std::u16string&)>&& func) override;
     void SetOnPasteWithEvent(std::function<void(const std::u16string&, NG::TextCommonEvent&)>&& func) override;
+    void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func) override;
     void SetOnChangeEvent(std::function<void(const std::u16string&)>&& onChangeEvent) override;
     void SetSelectionMenuHidden(bool selectionMenuHidden) override;
     void SetCustomKeyboard(const std::function<void ()> &&buildFunc, bool supportAvoidance = false) override;
@@ -161,7 +163,8 @@ public:
     static void ResetSelectedBackgroundColor(FrameNode* frameNode);
     static void SetOnSubmit(FrameNode* frameNode,
         std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit);
-    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::u16string&, PreviewText&)>&& onChange);
+    static void SetOnWillChangeEvent(FrameNode* frameNode, std::function<bool(const ChangeValueInfo&)>&& func);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const ChangeValueInfo&)>&& onChange);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::u16string&)>&& func);
     static void SetOnPasteWithEvent(FrameNode* frameNode,

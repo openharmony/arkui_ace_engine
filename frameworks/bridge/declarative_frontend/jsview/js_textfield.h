@@ -138,6 +138,8 @@ public:
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
     static void SetStopBackPress(const JSCallbackInfo& info);
     static void SetKeyboardAppearance(const JSCallbackInfo& info);
+    static JSRef<JSVal> CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo);
+    static void SetOnWillChange(const JSCallbackInfo& info);
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);
