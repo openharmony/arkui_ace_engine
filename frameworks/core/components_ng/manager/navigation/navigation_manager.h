@@ -159,6 +159,18 @@ public:
     void AddButtonsRectChangeListener(int32_t id, std::function<void()>&& listener);
     void RemoveButtonsRectChangeListener(int32_t id);
 
+    void AddNavigation(int32_t pageId, int32_t navigationId);
+
+    void RemoveNavigation(int32_t pageId);
+
+    std::vector<int32_t> FindNavigationInTargetParent(int32_t targetId);
+
+    void FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle);
+
+    void FireOverlayLifecycle(const RefPtr<UINode>& node, int32_t lifecycle, int32_t reason);
+
+    void FireLowerLayerLifecycle(const RefPtr<UINode>& node, int lifecycle, int32_t reason);
+
 private:
     struct DumpMapKey {
         int32_t nodeId;
@@ -173,8 +185,10 @@ private:
             return nodeId < o.nodeId;
         }
     };
+
     std::unordered_map<std::string, WeakPtr<AceType>> recoverableNavigationMap_;
     std::unordered_map<std::string, std::vector<NavdestinationRecoveryInfo>> navigationRecoveryInfo_;
+    std::unordered_map<int32_t, std::vector<int32_t>> navigationMaps_;
     std::map<DumpMapKey, DumpCallback> dumpMap_;
     std::vector<std::function<void()>> updateCallbacks_;
     bool isInteractive_ = false;
@@ -188,6 +202,7 @@ private:
     bool isInAnimation_ = false;
     bool isNodeAddAnimation_ = false;
     bool hasCacheNavigationNodeEnable_ = false;
+    bool lastWindowShow_ = true;
     int32_t interactiveAnimationId_ = -1;
 
     WeakPtr<PipelineContext> pipeline_;

@@ -1053,8 +1053,12 @@ void NavigationGroupNode::OnDetachFromMainTree(bool recursive, PipelineContext* 
         pattern->DetachNavigationStackFromParent();
         pattern->RemoveFromDumpManager();
     }
-
     GroupNode::OnDetachFromMainTree(recursive, context);
+    CHECK_NULL_VOID(context);
+    auto navigationManager = context->GetNavigationManager();
+    if (navigationManager) {
+        navigationManager->RemoveNavigation(GetId());
+    }
 }
 
 bool NavigationGroupNode::FindNavigationParent(const std::string& parentName)
@@ -1087,21 +1091,34 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
         pattern->AttachNavigationStackToParent();
         pattern->AddToDumpManager();
     }
-    auto parent = GetParent();
-    while (parent) {
-        if (parent->GetTag() == V2::JS_VIEW_ETS_TAG) {
+    RefPtr<UINode> parentCustomNode;
+    bool findParentNode = false;
+    auto curNode = GetParent();
+    while (curNode) {
+        auto curTag = curNode->GetTag();
+        // check parentCustomNode is nullptr, to avoid parentCustomNode re-assignment
+        if (!parentCustomNode && curTag == V2::JS_VIEW_ETS_TAG) {
+            parentCustomNode = curNode;
+        }
+        if (!findParentNode) {
+            findParentNode = CheckNeedUpdateParentNode(curNode);
+        }
+        if (parentCustomNode && findParentNode) {
             break;
         }
-        parent = parent->GetParent();
+        curNode = curNode->GetParent();
     }
-    if (parent) {
-        pattern->SetParentCustomNode(parent);
+    if (parentCustomNode) {
+        pattern->SetParentCustomNode(parentCustomNode);
     } else {
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "parent custom node is nullptr");
     }
-    bool findNavdestination = FindNavigationParent(V2::NAVDESTINATION_VIEW_ETS_TAG);
+    if (!findParentNode) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "current navigation has no parent page");
+    }
     auto pipelineContext = GetContextWithCheck();
     CHECK_NULL_VOID(pipelineContext);
+    bool findNavdestination = FindNavigationParent(V2::NAVDESTINATION_VIEW_ETS_TAG);
     auto stageManager = pipelineContext->GetStageManager();
     CHECK_NULL_VOID(stageManager);
     RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
@@ -1113,6 +1130,48 @@ void NavigationGroupNode::OnAttachToMainTree(bool recursive)
     if (!findNavdestination) {
         pipelineContext->AddNavigationNode(pageId, WeakClaim(this));
     }
+}
+
+bool NavigationGroupNode::CheckNeedUpdateParentNode(const RefPtr<UINode>& curNode)
+{
+    // only the first time need to be assigned
+    CHECK_NULL_RETURN(curNode, false);
+    bool isFindParent = false;
+    auto curTag = curNode->GetTag();
+    RefPtr<UINode> parentNode;
+    do {
+        if (curTag == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            auto curParent = curNode->GetParent();
+            // check whether current destination is redirected throut transition
+            if (curParent && curParent->GetTag() == V2::NAVIGATION_CONTENT_ETS_TAG) {
+                parentNode = curNode;
+                isFindParent = true;
+            }
+            break;
+        }
+        if (curTag == V2::PAGE_ETS_TAG || curTag == V2::MODAL_PAGE_TAG ||
+            curTag == V2::SHEET_PAGE_TAG) {
+            // check current navigation is in modal page, sheet page and page,
+            // dialog and overlay is not need recorded
+            parentNode = curNode;
+            isFindParent = true;
+            break;
+        }
+        if (curTag == V2::NAVBAR_ETS_TAG) {
+            // if navigation is under navBar node. don't need to record relationShip
+            isFindParent = true;
+        }
+    } while (0);
+    if (!isFindParent || !parentNode) {
+        return isFindParent;
+    }
+    auto pipelineContext = GetContextRefPtr();
+    CHECK_NULL_RETURN(pipelineContext, true);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    CHECK_NULL_RETURN(navigationManager, true);
+    // update navigation manager map <parentId, std::vector<navigationId>>
+    navigationManager->AddNavigation(parentNode->GetId(), GetId());
+    return true;
 }
 
 void NavigationGroupNode::FireHideNodeChange(NavDestinationLifecycle lifecycle)

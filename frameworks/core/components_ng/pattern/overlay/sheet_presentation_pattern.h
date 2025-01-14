@@ -143,13 +143,7 @@ public:
         onWillDisappear_ = std::move(onWillDisappear);
     }
 
-    void OnWillDisappear()
-    {
-        if (onWillDisappear_) {
-            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillDisappear state.");
-            onWillDisappear_();
-        }
-    }
+    void OnWillDisappear();
 
     void UpdateOnAppear(std::function<void()>&& onAppear)
     {

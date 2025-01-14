@@ -951,4 +951,22 @@ void NavDestinationModelNG::SetOnPop(std::function<void(const RefPtr<NavPathInfo
     CHECK_NULL_VOID(navPathInfo);
     onPop(navPathInfo);
 }
+
+void NavDestinationModelNG::SetOnActive(std::function<void(int32_t)>&& onActive)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnActive(onActive);
+}
+
+void NavDestinationModelNG::SetOnInactive(std::function<void(int32_t)>&& onInactive)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<NavDestinationEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnInactive(onInactive);
+}
 } // namespace OHOS::Ace::NG
