@@ -140,6 +140,47 @@ TextResponseType Convert(const Ark_TextResponseType& src)
     }
     return responseType;
 }
+
+template<>
+SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
+{
+    SelectMenuParam selectMenuParam = {.onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {},
+        .menuType = std::nullopt};
+    auto menuType = Converter::OptConvert<Ark_MenuType>(src.menuType);
+    if (menuType.has_value()) {
+        switch (menuType.value()) {
+            case Ark_MenuType::ARK_MENU_TYPE_SELECTION_MENU:
+                selectMenuParam.menuType = SelectionMenuType::SELECTION_MENU;
+                break;
+            case Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU:
+                selectMenuParam.menuType = SelectionMenuType::PREVIEW_MENU;
+                break;
+            default:
+                break;
+        }
+    }
+    auto optOnAppear = Converter::OptConvert<MenuOnAppearCallback>(src.onAppear);
+    if (optOnAppear.has_value()) {
+        selectMenuParam.onAppear = [&optOnAppear](int32_t start, int32_t end) {
+            if (optOnAppear.has_value()) {
+                Ark_Number arkStart = Converter::ArkValue<Ark_Number>(start);
+                Ark_Number arkEnd = Converter::ArkValue<Ark_Number>(end);
+                auto onAppearShared = std::make_shared<MenuOnAppearCallback>(optOnAppear.value());
+                CallbackHelper(*onAppearShared).Invoke(arkStart, arkEnd);
+            }
+        };
+    }
+    auto optOnDisappear = Converter::OptConvert<Callback_Void>(src.onDisappear);
+    if (optOnDisappear.has_value()) {
+        selectMenuParam.onDisappear = [&optOnDisappear]() {
+            if (optOnDisappear.has_value()) {
+                auto onDisappearShared = std::make_shared<Callback_Void>(optOnDisappear.value());
+                CallbackHelper(*onDisappearShared).Invoke();
+            }
+        };
+    }
+    return selectMenuParam;
+}
 }
 
 namespace OHOS::Ace::NG::GeneratedModifier {

@@ -246,6 +246,7 @@ enum class SelectionMenuType : int32_t {
 struct SelectMenuParam {
     std::function<void(int32_t, int32_t)> onAppear;
     std::function<void()> onDisappear;
+    std::optional<SelectionMenuType> menuType;
 };
 
 struct SelectionMenuParams {

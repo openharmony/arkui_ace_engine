@@ -22,6 +22,8 @@
 
 #include "core/interfaces/native/implementation/text_controller_peer_impl.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "generated/type_helpers.h"
 
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
@@ -33,6 +35,8 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
+    const auto ATTRIBUTE_BIND_SELECTION_MENU_NAME = "bindSelectionMenu";
+    const auto ATTRIBUTE_BIND_SELECTION_MENU_DEFAULT_VALUE = "[]";
 
     struct EventsTracker {
         static inline GENERATED_ArkUITextEventsReceiver textEventReceiver {};
@@ -45,7 +49,22 @@ namespace {
     };
 } // namespace
 
-class TextModifierTest : public ModifierTestBase<GENERATED_ArkUITextModifier,
+struct SelectionMenuOptions {
+    std::optional<MenuOnAppearCallback> onAppear;
+    std::optional<Callback_Void> onDisappear;
+    std::optional<Ark_MenuType> menuType;
+};
+
+namespace Converter {
+    void AssignArkValue(Ark_SelectionMenuOptions& dst, const SelectionMenuOptions& src, ConvContext *ctx = nullptr)
+    {
+        dst.onAppear = Converter::ArkValue<Opt_MenuOnAppearCallback>(src.onAppear);
+        dst.onDisappear = Converter::ArkValue<Opt_Callback_Void>(src.onDisappear);
+        dst.menuType = Converter::ArkValue<Opt_MenuType>(src.menuType);
+    }
+}
+
+class TextModifierTest2 : public ModifierTestBase<GENERATED_ArkUITextModifier,
     &GENERATED_ArkUINodeModifiers::getTextModifier, GENERATED_ARKUI_TEXT> {
 public:
     static void SetUpTestCase()
@@ -59,54 +78,84 @@ public:
             AddResource(strid, res);
         }
 
-        // AddResource(FLOAT_RES_0_ID, FLOAT_RES_0_VALUE);
-        // AddResource(FLOAT_RES_1_ID, FLOAT_RES_1_VALUE);
-        // AddResource(FLOAT_RES_2_ID, FLOAT_RES_2_STORED_VALUE);
-
         // setup the test event handler
         fullAPI_->setArkUIEventsAPI(&EventsTracker::eventsApiImpl);
     }
 };
 
 /*
- * @tc.name: setTextOptionsTestDefaultValues
+ * @tc.name: bindSelectionMenuTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, bindSelectionMenuTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextModifierTest2, bindSelectionMenuTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
-
-    std::cout << std::endl << jsonValue->ToString() << std::endl;
-
-    // resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
-    // EXPECT_EQ(resultStr, ATTRIBUTE_CONTENT_DEFAULT_VALUE) << "Default value for attribute 'content'";
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BIND_SELECTION_MENU_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_BIND_SELECTION_MENU_DEFAULT_VALUE) << "Default value for attribute 'BindSelectionMenu'";
 }
 
 /*
- * @tc.name: setTextOptionsTestContentValidValues
+ * @tc.name: bindSelectionMenuTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextModifierTest, bindSelectionMenuTestValidValues, TestSize.Level1)
+HWTEST_F(TextModifierTest2, bindSelectionMenuTestValidValues, TestSize.Level1)
 {
-    // auto checkValue = [this](const std::string& input, const std::string& expectedStr,
-    //                       const Opt_Union_String_Resource& value) {
-    //     auto textOptions = Converter::ArkValue<Opt_TextOptions>(Ark_Empty());
+    ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
 
-    //     modifier_->setTextOptions(node_, &value, &textOptions);
-    //     auto jsonValue = GetJsonValue(node_);
-    //     auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CONTENT_NAME);
-    //     EXPECT_EQ(resultStr, expectedStr) <<
-    //         "Input value is: " << input << ", method: setTextOptions, attribute: content";
-    // };
+    static auto expectedCustomNode = CreateNode();
+    static const FrameNode *expectedParentNode = frameNode;
 
-    // for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
-    //     checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_Resource>(value));
-    // }
-    // for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-    //     checkValue(input, expected, ArkUnion<Opt_Union_String_Resource, Ark_String>(value));
-    // }
+    static const CustomNodeBuilder builder = {
+        .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+            const Callback_Pointer_Void continuation) {
+            EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode);
+            CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
+        }
+    };
+
+    using OneTestStep = std::tuple<Ark_TextSpanType, CustomNodeBuilder, Ark_TextResponseType>;
+
+    static const std::vector<OneTestStep> testPlan = {
+        {ARK_TEXT_SPAN_TYPE_TEXT, builder, ARK_TEXT_RESPONSE_TYPE_SELECT},
+        {ARK_TEXT_SPAN_TYPE_MIXED, builder, ARK_TEXT_RESPONSE_TYPE_SELECT},
+        {ARK_TEXT_SPAN_TYPE_IMAGE, builder, ARK_TEXT_RESPONSE_TYPE_SELECT},
+        {ARK_TEXT_SPAN_TYPE_TEXT, builder, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
+        {ARK_TEXT_SPAN_TYPE_MIXED, builder, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
+        {ARK_TEXT_SPAN_TYPE_IMAGE, builder, ARK_TEXT_RESPONSE_TYPE_LONG_PRESS},
+        {ARK_TEXT_SPAN_TYPE_TEXT, builder, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
+        {ARK_TEXT_SPAN_TYPE_MIXED, builder, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
+        {ARK_TEXT_SPAN_TYPE_IMAGE, builder, ARK_TEXT_RESPONSE_TYPE_RIGHT_CLICK},
+    };
+
+    std::unique_ptr<JsonValue> fullJson;
+    std::string resultValue;
+    SelectionMenuOptions selectionMenuOptions1 = {.onAppear = std::nullopt, .onDisappear = std::nullopt,
+        .menuType = Ark_MenuType::ARK_MENU_TYPE_SELECTION_MENU};
+    auto options1 = Converter::ArkValue<Opt_SelectionMenuOptions>(selectionMenuOptions1);
+    SelectionMenuOptions selectionMenuOptions2 = {.onAppear = std::nullopt, .onDisappear = std::nullopt,
+        .menuType = Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU};
+    auto options2 = Converter::ArkValue<Opt_SelectionMenuOptions>(selectionMenuOptions2);
+    for (auto [spanType, content, responseType]: testPlan) {
+        modifier_->setBindSelectionMenu(node_, spanType, &content, responseType, &options1);
+        modifier_->setBindSelectionMenu(node_, spanType, &content, responseType, &options2);
+        fullJson = GetJsonValue(node_);
+        resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BIND_SELECTION_MENU_NAME);
+    }
+    std::string expectedValue =
+        "[{\"spanType\":0,\"responseType\":0,\"menuType\":0},"
+        "{\"spanType\":0,\"responseType\":1,\"menuType\":0},"
+        "{\"spanType\":0,\"responseType\":2,\"menuType\":0},"
+        "{\"spanType\":1,\"responseType\":0,\"menuType\":0},"
+        "{\"spanType\":1,\"responseType\":1,\"menuType\":0},"
+        "{\"spanType\":1,\"responseType\":2,\"menuType\":0},"
+        "{\"spanType\":2,\"responseType\":0,\"menuType\":0},"
+        "{\"spanType\":2,\"responseType\":1,\"menuType\":0},"
+        "{\"spanType\":2,\"responseType\":2,\"menuType\":0}]";
+    EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
 }
-
+}
