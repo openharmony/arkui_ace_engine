@@ -106,7 +106,7 @@ export struct SelectTitleBar {
             value: '',
             symbolStyle: new SymbolGlyphModifier(PUBLIC_BACK),
             isEnabled: true,
-            label: $r('sys.string.icon_back'),
+            label: getContext()?.resourceManager?.getStringByNameSync('icon_back'),
             action: () => this.getUIContext()?.getRouter()?.back()
           }, index: -1 });
         }
@@ -136,7 +136,7 @@ export struct SelectTitleBar {
                   .constraintSize({ maxWidth: this.selectMaxWidth })
                   .offset({ x: -4 })
                   .accessibilityLevel('yes')
-                  .accessibilityDescription(this.messageDesc.replace('%s', this.badgeValue.toString()))
+                  .accessibilityDescription(this.messageDesc.replace('%d', this.badgeValue.toString()))
               }
               .justifyContent(FlexAlign.Start)
               .margin({ right: $r('sys.float.ohos_id_elements_margin_horizontal_l') });
@@ -213,8 +213,15 @@ export struct SelectTitleBar {
   }
 
   aboutToAppear(): void {
-    let resourceManager = getContext().resourceManager;
-    this.messageDesc = resourceManager?.getStringByNameSync('selecttitlebar_accessibility_message_desc');
+    try {
+      let resourceManager = getContext().resourceManager;
+      this.messageDesc =
+        resourceManager?.getPluralStringByNameSync('selecttitlebar_accessibility_message_desc_new', this.badgeValue);
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to getPluralStringByNameSync,cause, code: ${code}, message: ${message}`);
+    }
   }
 }
 
@@ -398,13 +405,20 @@ struct CollapsibleMenuSection {
     .justifyContent(FlexAlign.Center)
   }
 
+  onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Layoutable[], constraint: ConstraintSizeOptions): void {
+    children.forEach((child) => {
+      child.layout({ x: 0, y: 0 });
+    })
+    this.fontSize = this.decideFontScale();
+  }
+
   @Builder
   popupBuilder() {
     Column() {
       ForEach(this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length),
         (item: SelectTitleBarMenuItem, index) => {
           ImageMenuItem({ item: item, index: this.index * 1000 +
-          CollapsibleMenuSection.maxCountOfVisibleItems + index, isPopup: true })
+          CollapsibleMenuSection.maxCountOfVisibleItems + index, isPopup: false })
         })
     }
     .width(ImageMenuItem.imageHotZoneWidth + CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum)
@@ -423,13 +437,12 @@ struct ImageMenuItem {
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
   systemFontScale?: number = 1;
-  isPopup: boolean = false;
+  isPopup: boolean = true;
 
   static readonly imageSize = '24vp'
   static readonly imageHotZoneWidth = 48
   static readonly buttonBorderRadius = 8
   static readonly focusBorderWidth = 2
-  static readonly disabledImageOpacity = 0.4
   static readonly focusablePrefix = 'Id-SelectTitleBar-ImageMenuItem-';
 
   @State isOnFocus: boolean = false
@@ -545,104 +558,202 @@ struct ImageMenuItem {
   }
 
   build() {
-    Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
-      if (this.item.symbolStyle) {
-        SymbolGlyph()
-          .fontColor([$r('sys.color.font_primary')])
-          .attributeModifier(this.item.symbolStyle)
-          .fontSize(ImageMenuItem.imageSize)
-          .draggable(false)
-          .focusable(this.item?.isEnabled)
-          .key(ImageMenuItem.focusablePrefix + this.index)
-          .symbolEffect(new SymbolEffect(), false)
-      } else {
-        if (Util.isSymbolResource(this.item.value)) {
-          SymbolGlyph(this.item.value as Resource)
+    if (this.isPopup) {
+      Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
+        if (this.item.symbolStyle) {
+          SymbolGlyph()
             .fontColor([$r('sys.color.font_primary')])
+            .attributeModifier(this.item.symbolStyle)
             .fontSize(ImageMenuItem.imageSize)
             .draggable(false)
             .focusable(this.item?.isEnabled)
             .key(ImageMenuItem.focusablePrefix + this.index)
+            .symbolEffect(new SymbolEffect(), false)
         } else {
-          Image(this.item.value)
+          if (Util.isSymbolResource(this.item.value)) {
+            SymbolGlyph(this.item.value as Resource)
+              .fontColor([$r('sys.color.font_primary')])
+              .fontSize(ImageMenuItem.imageSize)
+              .draggable(false)
+              .focusable(this.item?.isEnabled)
+              .key(ImageMenuItem.focusablePrefix + this.index)
+          } else {
+            Image(this.item.value)
+              .draggable(false)
+              .width(ImageMenuItem.imageSize)
+              .height(ImageMenuItem.imageSize)
+              .focusable(this.item.isEnabled)
+              .key(ImageMenuItem.focusablePrefix + this.index)
+              .fillColor($r('sys.color.icon_primary'))
+          }
+        }
+      }
+      .accessibilityText(this.getAccessibilityReadText())
+      .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
+      .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
+      .width(ImageMenuItem.imageHotZoneWidth)
+      .height(ImageMenuItem.imageHotZoneWidth)
+      .borderRadius(ImageMenuItem.buttonBorderRadius)
+      .foregroundColor(this.getFgColor())
+      .backgroundColor(this.getBgColor())
+      .enabled(this.item.isEnabled ? this.item.isEnabled : false)
+      .stateStyles({
+        focused: {
+          .border({
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: ImageMenuItem.focusBorderWidth,
+            color: $r('sys.color.ohos_id_color_focused_outline'),
+            style: BorderStyle.Solid
+          })
+        },
+        normal: {
+          .border({
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: 0
+          })
+        }
+      })
+      .onFocus(() => {
+        if (!this.item.isEnabled) {
+          return
+        }
+        this.isOnFocus = true
+      })
+      .onBlur(() => this.isOnFocus = false)
+      .onHover((isOn) => {
+        if (!this.item.isEnabled) {
+          return
+        }
+        this.isOnHover = isOn
+      })
+      .onKeyEvent((event) => {
+        if (!this.item.isEnabled) {
+          return
+        }
+        if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+          return
+        }
+        if (event.type === KeyType.Down) {
+          this.isOnClick = true
+        }
+        if (event.type === KeyType.Up) {
+          this.isOnClick = false
+        }
+      })
+      .onTouch((event) => {
+        if (!this.item.isEnabled) {
+          return
+        }
+        if (event.type === TouchType.Down) {
+          this.isOnClick = true
+        }
+        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+          this.isOnClick = false
+          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+            this.dialogController?.close()
+          }
+        }
+      })
+      .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
+      .gestureModifier(this.buttonGestureModifier)
+    } else {
+      Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
+        if (this.item.symbolStyle) {
+          SymbolGlyph()
+            .fontColor([$r('sys.color.font_primary')])
+            .attributeModifier(this.item.symbolStyle)
+            .fontSize(ImageMenuItem.imageSize)
             .draggable(false)
-            .width(ImageMenuItem.imageSize)
-            .height(ImageMenuItem.imageSize)
-            .focusable(this.item.isEnabled)
+            .focusable(this.item?.isEnabled)
             .key(ImageMenuItem.focusablePrefix + this.index)
-            .fillColor($r('sys.color.icon_primary'))
+            .symbolEffect(new SymbolEffect(), false)
+        } else {
+          if (Util.isSymbolResource(this.item.value)) {
+            SymbolGlyph(this.item.value as Resource)
+              .fontColor([$r('sys.color.font_primary')])
+              .fontSize(ImageMenuItem.imageSize)
+              .draggable(false)
+              .focusable(this.item?.isEnabled)
+              .key(ImageMenuItem.focusablePrefix + this.index)
+          } else {
+            Image(this.item.value)
+              .draggable(false)
+              .width(ImageMenuItem.imageSize)
+              .height(ImageMenuItem.imageSize)
+              .focusable(this.item.isEnabled)
+              .key(ImageMenuItem.focusablePrefix + this.index)
+              .fillColor($r('sys.color.icon_primary'))
+          }
         }
       }
+      .accessibilityText(this.getAccessibilityReadText())
+      .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
+      .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
+      .width(ImageMenuItem.imageHotZoneWidth)
+      .height(ImageMenuItem.imageHotZoneWidth)
+      .borderRadius(ImageMenuItem.buttonBorderRadius)
+      .foregroundColor(this.getFgColor())
+      .backgroundColor(this.getBgColor())
+      .enabled(this.item.isEnabled ? this.item.isEnabled : false)
+      .stateStyles({
+        focused: {
+          .border({
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: ImageMenuItem.focusBorderWidth,
+            color: $r('sys.color.ohos_id_color_focused_outline'),
+            style: BorderStyle.Solid
+          })
+        },
+        normal: {
+          .border({
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: 0
+          })
+        }
+      })
+      .onFocus(() => {
+        if (!this.item.isEnabled) {
+          return
+        }
+        this.isOnFocus = true
+      })
+      .onBlur(() => this.isOnFocus = false)
+      .onHover((isOn) => {
+        if (!this.item.isEnabled) {
+          return
+        }
+        this.isOnHover = isOn
+      })
+      .onKeyEvent((event) => {
+        if (!this.item.isEnabled) {
+          return
+        }
+        if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
+          return
+        }
+        if (event.type === KeyType.Down) {
+          this.isOnClick = true
+        }
+        if (event.type === KeyType.Up) {
+          this.isOnClick = false
+        }
+      })
+      .onTouch((event) => {
+        if (!this.item.isEnabled) {
+          return
+        }
+        if (event.type === TouchType.Down) {
+          this.isOnClick = true
+        }
+        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+          this.isOnClick = false
+          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+            this.dialogController?.close()
+          }
+        }
+      })
+      .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
     }
-    .accessibilityText(this.getAccessibilityReadText())
-    .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
-    .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
-    .width(ImageMenuItem.imageHotZoneWidth)
-    .height(ImageMenuItem.imageHotZoneWidth)
-    .borderRadius(ImageMenuItem.buttonBorderRadius)
-    .foregroundColor(this.getFgColor())
-    .backgroundColor(this.getBgColor())
-    .opacity(this.item.isEnabled ? 1 : ImageMenuItem.disabledImageOpacity)
-    .enabled(this.item.isEnabled ? this.item.isEnabled : false)
-    .stateStyles({
-      focused: {
-        .border({
-          radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-          width: ImageMenuItem.focusBorderWidth,
-          color: $r('sys.color.ohos_id_color_focused_outline'),
-          style: BorderStyle.Solid
-        })
-      },
-      normal: {
-        .border({
-          radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-          width: 0
-        })
-      }
-    })
-    .onFocus(() => {
-      if (!this.item.isEnabled) {
-        return
-      }
-      this.isOnFocus = true
-    })
-    .onBlur(() => this.isOnFocus = false)
-    .onHover((isOn) => {
-      if (!this.item.isEnabled) {
-        return
-      }
-      this.isOnHover = isOn
-    })
-    .onKeyEvent((event) => {
-      if (!this.item.isEnabled) {
-        return
-      }
-      if (event.keyCode !== KeyCode.KEYCODE_ENTER && event.keyCode !== KeyCode.KEYCODE_SPACE) {
-        return
-      }
-      if (event.type === KeyType.Down) {
-        this.isOnClick = true
-      }
-      if (event.type === KeyType.Up) {
-        this.isOnClick = false
-      }
-    })
-    .onTouch((event) => {
-      if (!this.item.isEnabled) {
-        return
-      }
-      if (event.type === TouchType.Down) {
-        this.isOnClick = true
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.isOnClick = false
-        if (this.fontSize >= this.minFontSize && this.isPopup === false) {
-          this.dialogController?.close()
-        }
-      }
-    })
-    .onClick(() => this.item.isEnabled && this.item.action && this.item.action())
-    .gestureModifier(this.buttonGestureModifier)
   }
 }
 

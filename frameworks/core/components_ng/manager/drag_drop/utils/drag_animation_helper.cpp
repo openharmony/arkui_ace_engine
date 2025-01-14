@@ -15,10 +15,10 @@
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
-#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -623,4 +623,116 @@ void DragAnimationHelper::ShowGatherNodeAnimation(const RefPtr<FrameNode>& frame
     PlayGatherNodeTranslateAnimation(frameNode, manager);
     PlayNodeAnimationBeforeLifting(frameNode);
 }
+
+void DragAnimationHelper::UpdateBadgeTextNodePosition(const RefPtr<FrameNode>& frameNode,
+    const RefPtr<FrameNode>& textNode, int32_t childSize, float previewScale, OffsetF previewOffset)
+{
+    if (childSize <= 1) {
+        return;
+    }
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(textNode);
+    auto textRenderContext = textNode->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
+    auto pixelMap = frameNode->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    auto width = pixelMap->GetWidth();
+    auto height = pixelMap->GetHeight();
+    auto offset = previewOffset.NonOffset()
+                      ? DragDropFuncWrapper::GetFrameNodeOffsetToWindow(textNode, frameNode, width, height)
+                      : previewOffset;
+    auto badgeLength = std::to_string(childSize).size();
+    double textOffsetX = offset.GetX() + width * (previewScale + 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx() -
+                         (BADGE_RELATIVE_OFFSET.ConvertToPx() * badgeLength);
+    double textOffsetY = offset.GetY() - height * (previewScale - 1) / 2 - BADGE_RELATIVE_OFFSET.ConvertToPx();
+    textRenderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
+    textRenderContext->UpdatePosition(OffsetT<Dimension>(Dimension(textOffsetX), Dimension(textOffsetY)));
 }
+
+RefPtr<FrameNode> DragAnimationHelper::CreateBadgeTextNode(int32_t childSize)
+{
+    if (childSize <= 1) {
+        return nullptr;
+    }
+    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    CHECK_NULL_RETURN(textNode, nullptr);
+    auto badgeLength = std::to_string(childSize).size();
+    DragAnimationHelper::UpdateBadgeLayoutAndRenderContext(textNode, badgeLength, childSize);
+
+    textNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    textNode->MarkModifyDone();
+    textNode->SetLayoutDirtyMarked(true);
+    textNode->SetActive(true);
+    return textNode;
+}
+
+void DragAnimationHelper::ShowPreviewBadgeAnimation(
+    const RefPtr<GestureEventHub>& gestureHub, const RefPtr<OverlayManager>& manager)
+{
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto dragPreviewOptions = frameNode->GetDragPreviewOption();
+    auto badgeNumber = dragPreviewOptions.GetCustomerBadgeNumber();
+    int32_t childSize = badgeNumber.has_value() ? badgeNumber.value()
+                                                : static_cast<int32_t>(manager->GetGatherNodeChildrenInfo().size()) + 1;
+    auto textNode = DragAnimationHelper::CreateBadgeTextNode(childSize);
+    CHECK_NULL_VOID(textNode);
+    auto column = manager->GetPixelMapNode();
+    CHECK_NULL_VOID(column);
+    column->AddChild(textNode);
+
+    DragAnimationHelper::UpdateBadgeTextNodePosition(frameNode, textNode, childSize, PIXELMAP_DRAG_SCALE_MULTIPLE);
+    DragAnimationHelper::ShowBadgeAnimation(textNode);
+}
+
+// update ImageNode default attr before floating
+void DragAnimationHelper::SetImageNodeInitAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode)
+{
+    CHECK_NULL_VOID(imageNode);
+    CHECK_NULL_VOID(frameNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+
+    // update default scale
+    bool defaultAnimationBeforeLifting = dragPreviewOption.defaultAnimationBeforeLifting;
+    if (defaultAnimationBeforeLifting) {
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        if (layoutProperty) {
+            layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        }
+        imageContext->UpdateTransformScale({ DEFAULT_ANIMATION_SCALE, DEFAULT_ANIMATION_SCALE });
+    } else {
+        imageContext->UpdateTransformScale({ 1.0f, 1.0f });
+    }
+
+    // update shadow
+    auto shadow = Shadow::CreateShadow(ShadowStyle::None);
+    if (dragPreviewOption.options.shadow.has_value()) {
+        shadow = dragPreviewOption.options.shadow.value();
+        shadow.SetColor(Color(0x00000000));
+    }
+    imageContext->UpdateBackShadow(shadow);
+
+    // update radius
+    auto borderRadius = DragDropFuncWrapper::GetDragFrameNodeBorderRadius(frameNode);
+    imageContext->UpdateBorderRadius(borderRadius);
+
+    // update opacity
+    imageContext->UpdateOpacity(1.0f);
+}
+
+void DragAnimationHelper::SetImageNodeFinishAttr(const RefPtr<FrameNode>& frameNode, const RefPtr<FrameNode>& imageNode)
+{
+    CHECK_NULL_VOID(imageNode);
+    CHECK_NULL_VOID(frameNode);
+    auto imageContext = imageNode->GetRenderContext();
+    CHECK_NULL_VOID(imageContext);
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    if (dragPreviewOption.options.shadow.has_value() && !dragPreviewOption.options.shadow->GetIsFilled()) {
+        imageContext->UpdateBackShadow(dragPreviewOption.options.shadow.value());
+    }
+}
+} // namespace OHOS::Ace::NG

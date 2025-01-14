@@ -1537,9 +1537,11 @@ HWTEST_F(CalendarPickerTestNg, CalendarPickerPatternTest036, TestSize.Level1)
     auto pickerPattern = AceType::MakeRefPtr<CalendarPickerPattern>();
 
     const std::string info = " ";
-    pickerPattern->GetEntryDateInfo();
+    auto oldInfo = pickerPattern->GetEntryDateInfo();
     pickerPattern->SetDate(info);
     pickerPattern->FlushTextStyle();
+    auto newInfo = pickerPattern->GetEntryDateInfo();
+    EXPECT_EQ(oldInfo, newInfo);
 }
 
 /**
@@ -3232,8 +3234,8 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest019, TestSize.Level1)
 {
     auto dialogPattern = AceType::MakeRefPtr<CalendarDialogPattern>();
 
-    dialogPattern->OnDirtyLayoutWrapperSwap(nullptr, true, true);
-    dialogPattern->OnDirtyLayoutWrapperSwap(nullptr, true, true);
+    EXPECT_TRUE(dialogPattern->OnDirtyLayoutWrapperSwap(nullptr, true, true));
+    EXPECT_TRUE(dialogPattern->OnDirtyLayoutWrapperSwap(nullptr, true, true));
 }
 
 /**

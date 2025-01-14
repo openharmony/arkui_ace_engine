@@ -844,9 +844,9 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex001, TestSize.Level1)
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
     FlushUITasks();
 
-    VerifyChangeIndex(2, false, 3);
-    VerifyChangeIndex(5, false, 5);
-    VerifyChangeIndex(2, false, 1);
+    EXPECT_TRUE(VerifyChangeIndex(2, false, 3));
+    EXPECT_TRUE(VerifyChangeIndex(5, false, 5));
+    EXPECT_TRUE(VerifyChangeIndex(2, false, 1));
 }
 
 /**
@@ -864,7 +864,7 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex002, TestSize.Level1)
     CreateSwiperItems(10);
     CreateSwiperDone();
 
-    VerifyChangeIndex(9, false, 9);
+    EXPECT_TRUE(VerifyChangeIndex(9, false, 9));
 }
 
 /**
@@ -879,8 +879,8 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex003, TestSize.Level1)
     CreateSwiperItems(8);
     CreateSwiperDone();
 
-    VerifyChangeIndex(3, true, 3);
-    VerifyChangeIndex(1, false, 1);
+    EXPECT_TRUE(VerifyChangeIndex(3, true, 3));
+    EXPECT_TRUE(VerifyChangeIndex(1, false, 1));
 }
 
 /**

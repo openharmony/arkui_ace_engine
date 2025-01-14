@@ -493,6 +493,16 @@ public:
         return defaultEndDate_;
     }
 
+    const PickerTime& GetDefaultStartTime() const
+    {
+        return defaultStartTime_;
+    }
+
+    const PickerTime& GetDefaultEndTime() const
+    {
+        return defaultEndTime_;
+    }
+
     uint32_t GetShowCountLandscape() const
     {
         return showCountLandscape_;
@@ -671,6 +681,8 @@ private:
 
     PickerDate defaultStartDate_ = PickerDate(1970, 1, 1);
     PickerDate defaultEndDate_ = PickerDate(2100, 12, 31);
+    PickerTime defaultStartTime_ = PickerTime(0, 0, 0);
+    PickerTime defaultEndTime_ = PickerTime(23, 59, 59);
 
     uint32_t showCountLandscape_ = 3;
     uint32_t showCountPortrait_ = 5;

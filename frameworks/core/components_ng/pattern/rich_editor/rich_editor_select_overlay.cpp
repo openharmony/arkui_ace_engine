@@ -82,7 +82,6 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     }
 
     auto visibleRect = GetVisibleRect();
-    CalculateClippedRect(visibleRect);
     if (visibleRect.IsEmpty()) {
         return false;
     }
@@ -107,7 +106,9 @@ RectF RichEditorSelectOverlay::GetVisibleRect()
     CHECK_NULL_RETURN(geometryNode, visibleRect);
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
     auto paintOffset = host->GetPaintRectWithTransform().GetOffset();
-    return RectF(paddingOffset + paintOffset, geometryNode->GetPaddingSize());
+    visibleRect = RectF(paddingOffset + paintOffset, geometryNode->GetPaddingSize());
+    CalculateClippedRect(visibleRect);
+    return visibleRect;
 }
 
 void RichEditorSelectOverlay::OnResetTextSelection()
@@ -425,9 +426,8 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     isHandleMoving_ = false;
     if (isSingleHandle) {
         pattern->floatingCaretState_.Reset();
-        ResumeTwinkling();
+        pattern->isCursorAlwaysDisplayed_ = false;
     }
-    IF_TRUE(isSingleHandle, pattern->floatingCaretState_.Reset());
     auto needResetSelection = pattern->GetTextDetectEnable() && !pattern->HasFocus() &&
         reason != CloseReason::CLOSE_REASON_DRAG_FLOATING;
     auto isBackPressed = reason == CloseReason::CLOSE_REASON_BACK_PRESSED;

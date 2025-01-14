@@ -1498,8 +1498,8 @@ void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
     NG::SheetHeight sheetDetent;
     if (option.height.hasValue) {
         ParseSheetDetentHeight(option.height.value, sheetDetent);
-        sheetStyle.sheetMode = sheetDetent.sheetMode;
-        sheetStyle.height = sheetDetent.height;
+        sheetStyle.sheetHeight.sheetMode = sheetDetent.sheetMode;
+        sheetStyle.sheetHeight.height = sheetDetent.height;
     }
 }
 
@@ -1513,7 +1513,7 @@ void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(
     auto buildFunc = CJLambda::Create(builder);
     NG::SheetStyle sheetStyle;
     DoubleBindCallback callback = nullptr;
-    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
     sheetStyle.showInPage = false;
     std::function<void()> onAppearCallback;

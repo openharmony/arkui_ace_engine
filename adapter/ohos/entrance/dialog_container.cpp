@@ -117,7 +117,6 @@ void DialogContainer::InitializeKeyEventCallback()
     aceView_->RegisterKeyEventCallback(keyEventCallback);
 }
 
-#ifdef SUPPORT_DIGITAL_CROWN
 void DialogContainer::InitializeCrownEventCallback()
 {
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
@@ -138,7 +137,6 @@ void DialogContainer::InitializeCrownEventCallback()
     };
     aceView_->RegisterCrownEventCallback(crownEventCallback);
 }
-#endif
 
 void DialogContainer::InitializeRotationEventCallback()
 {
@@ -237,9 +235,7 @@ void DialogContainer::InitializeCallback()
     InitializeSystemBarHeightChangeCallback();
     InitializeSurfaceDestroyCallback();
     InitializeDragEventCallback();
-#ifdef SUPPORT_DIGITAL_CROWN
     InitializeCrownEventCallback();
-#endif
 }
 
 RefPtr<DialogContainer> DialogContainer::GetContainer(int32_t instanceId)

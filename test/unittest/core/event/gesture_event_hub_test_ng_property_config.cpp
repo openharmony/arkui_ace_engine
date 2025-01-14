@@ -131,7 +131,7 @@ HWTEST_F(GestureEventHubTestNg, GetHitTestModeStr001, TestSize.Level1)
      * @tc.steps: step1. Calling the GetHitTestModeStr interface
      * @tc.expected: EventHub ->GetHitTestModeStr() is not equal to nullptr
      */
-    EXPECT_TRUE(testModeStr != EventHub->GetHitTestModeStr());
+    EXPECT_TRUE(testModeStr != GestureEventHub::GetHitTestModeStr(EventHub));
 }
 
 /**
@@ -940,7 +940,7 @@ HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoTest001, TestSize.Level1)
         AdaptiveColor::DEFAULT, {{2.0f, 2.0f}}}};
     std::optional<Shadow> shadowVal;
     std::optional<BorderRadiusProperty> borderRadiusVal;
-    OptionsAfterApplied optionTmp = {0, shadowVal, "test", borderRadiusVal, {bgBackEffect}};
+    OptionsAfterApplied optionTmp = {0, shadowVal, "test", true, borderRadiusVal, {bgBackEffect}};
     DragPreviewOption dragPreviewInfos;
     dragPreviewInfos.options = optionTmp;
     frameNode->SetDragPreviewOptions(dragPreviewInfos);

@@ -296,6 +296,10 @@
         "name": "OH_ArkUI_AxisEvent_GetPinchAxisScaleValue"
     },
     {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_AxisEvent_GetAxisAction"
+    },
+    {
         "first_introduced": "12",
         "name": "OH_NativeXComponent_SetNeedSoftKeyboard"
     },
@@ -2562,6 +2566,10 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_ProgressLinearStyleOption_SetStrokeRadius"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_PointerEvent_GetChangedPointerId"
     },
     {
         "first_introduced": "16",

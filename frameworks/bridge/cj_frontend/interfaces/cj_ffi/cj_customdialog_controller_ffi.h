@@ -27,8 +27,14 @@
 #include "core/components_ng/pattern/dialog/custom_dialog_controller_model.h"
 #include "ffi_remote_data.h"
 #include "cj_animate_param_ffi.h"
+#include "cj_action_sheet_ffi.h"
 
 extern "C" {
+struct NativeOptionShadow {
+    bool hasValue;
+    NativeShadowOptions options;
+};
+
 struct NativeCustomDialogControllerOptions {
     void(*cancel)();
     bool autoCancel;
@@ -43,6 +49,15 @@ struct NativeCustomDialogControllerOptions {
     bool showInSubWindow;
     NativeOptionUInt32 backgroundColor;
     NativeLength cornerRadius;
+    NativeOptionBool isModal;
+    NativeOptionCallback1Param onWillDismiss;
+    NativeOptionLength borderWidth;
+    NativeOptionUInt32 borderColor;
+    NativeOptionEdgeStyle borderStyle;
+    NativeOptionLength width;
+    NativeOptionLength height;
+    NativeOptionShadow shadow;
+    NativeOptionInt32 backgroundBlurStyle;
 };
 
 CJ_EXPORT int64_t FfiOHOSAceFrameworkCustomDialogControllerCtor(NativeCustomDialogControllerOptions options);

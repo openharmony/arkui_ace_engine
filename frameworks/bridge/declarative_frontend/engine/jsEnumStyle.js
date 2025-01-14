@@ -1779,6 +1779,19 @@ let KeyboardAvoidMode;
     KeyboardAvoidMode[KeyboardAvoidMode.NONE = 1] = 'NONE';
 })(KeyboardAvoidMode || (KeyboardAvoidMode = {}));
 
+let LevelMode;
+(function (LevelMode) {
+    LevelMode[LevelMode.OVERLAY = 0] = 'OVERLAY';
+    LevelMode[LevelMode.EMBEDDED = 1] = 'EMBEDDED';
+})(LevelMode || (LevelMode = {}));
+
+let ImmersiveMode;
+(function (ImmersiveMode) {
+    ImmersiveMode[ImmersiveMode.DEFAULT = 0] = 'DEFAULT';
+    ImmersiveMode[ImmersiveMode.PAGE = 1] = 'PAGE';
+    ImmersiveMode[ImmersiveMode.FULL = 2] = 'FULL';
+})(ImmersiveMode || (ImmersiveMode = {}));
+
 class SubTabBarStyle {
   constructor(content) {
     this.type = 'SubTabBarStyle';
@@ -3756,3 +3769,9 @@ let CrownAction;
   CrownAction[CrownAction.UPDATE = 1] = 'UPDATE';
   CrownAction[CrownAction.END = 2] = 'END';
 })(CrownAction || (CrownAction = {}));
+
+let AccessibilitySamePageMode;
+(function (AccessibilitySamePageMode) {
+  AccessibilitySamePageMode[AccessibilitySamePageMode.SEMI_SILENT = 0] = 'SEMI_SILENT';
+  AccessibilitySamePageMode[AccessibilitySamePageMode.FULL_SILENT = 1] = 'FULL_SILENT';
+})(AccessibilitySamePageMode || (AccessibilitySamePageMode = {}));

@@ -340,10 +340,6 @@ void SetTextPickerValue(ArkUINodeHandle node, ArkUI_CharPtr valueStr)
 
 void SetTextPickerColumnWidths(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32 size)
 {
-    if (size <= 0) {
-        return;
-    }
-
     std::vector<Dimension> widths;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
