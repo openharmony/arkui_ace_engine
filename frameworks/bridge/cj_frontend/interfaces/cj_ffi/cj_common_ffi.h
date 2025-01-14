@@ -88,6 +88,16 @@ struct NativeOptionCallBack {
     void (*value)();
 };
 
+struct NativeOptionCallback1Param {
+    bool hasValue;
+    void (*value)(int32_t reason);
+};
+
+struct NativeOptionCallback1FloatParam {
+    bool hasValue;
+    void (*value)(float reason);
+};
+
 struct NativeOptionBool {
     bool hasValue;
     bool value;

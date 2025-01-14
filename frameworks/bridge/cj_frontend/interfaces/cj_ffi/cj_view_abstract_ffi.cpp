@@ -1397,8 +1397,21 @@ void FfiOHOSAceFrameworkViewAbstractExpandSafeArea(uint32_t types, uint32_t edge
     ViewAbstractModel::GetInstance()->UpdateSafeAreaExpandOpts(opts);
 }
 
+void FfiOHOSAceFrameworkViewAbstractDismiss()
+{
+    ViewAbstractModel::GetInstance()->DismissSheet();
+}
+
+void FfiOHOSAceFrameworkViewAbstractSpringBack()
+{
+    ViewAbstractModel::GetInstance()->SheetSpringBack();
+}
+
 void ParseSheetCallback(CJSheetOptions options, std::function<void()>& onAppear, std::function<void()>& onDisappear,
-    std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear)
+    std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
+    std::function<void(const int32_t info)>& onWillDismiss, std::function<void()>& sheetSpringBack,
+    std::function<void(const float)>& onHeightDidChange, std::function<void(const float)>& onDetentsDidChange,
+    std::function<void(const float)>& onWidthDidChange, std::function<void(const float)>& onTypeDidChange)
 {
     if (options.onAppear.hasValue) {
         onAppear = CJLambda::Create(options.onAppear.value);
@@ -1414,6 +1427,28 @@ void ParseSheetCallback(CJSheetOptions options, std::function<void()>& onAppear,
     }
     if (options.onWillDisappear.hasValue) {
         onWillDisappear = CJLambda::Create(options.onWillDisappear.value);
+    }
+    if (options.onWillDismiss.hasValue) {
+        onWillDismiss = [lambda = CJLambda::Create(options.onWillDismiss.value)](const int32_t info) { lambda(info); };
+    }
+    if (options.onWillSpringBackWhenDismiss.hasValue) {
+        sheetSpringBack = CJLambda::Create(options.onWillSpringBackWhenDismiss.value);
+    }
+    if (options.onHeightDidChange.hasValue) {
+        onHeightDidChange =
+            [lambda = CJLambda::Create(options.onHeightDidChange.value)](const float value) { lambda(value); };
+    }
+    if (options.onDetentsDidChange.hasValue) {
+        onDetentsDidChange =
+            [lambda = CJLambda::Create(options.onDetentsDidChange.value)](const float value) { lambda(value); };
+    }
+    if (options.onWidthDidChange.hasValue) {
+        onWidthDidChange =
+            [lambda = CJLambda::Create(options.onWidthDidChange.value)](const float value) { lambda(value); };
+    }
+    if (options.onTypeDidChange.hasValue) {
+        onTypeDidChange =
+            [lambda = CJLambda::Create(options.onTypeDidChange.value)](const float value) { lambda(value); };
     }
 }
 
@@ -1453,6 +1488,91 @@ bool ParseSheetDetents(const CArrInt32 array, std::vector<NG::SheetHeight>& shee
     return true;
 }
 
+void ParseSheetBorderProps(CJSheetOptions option, NG::SheetStyle& sheetStyle)
+{
+    if (option.borderWidth.hasValue) {
+        auto nativeBorderWidth = option.borderWidth.value;
+        auto borderWidth = Dimension(nativeBorderWidth.value, static_cast<DimensionUnit>(nativeBorderWidth.unitType));
+        auto borderWidthProp = NG::BorderWidthProperty({ borderWidth, borderWidth, borderWidth, borderWidth });
+        sheetStyle.borderWidth = borderWidthProp;
+    }
+    if (option.borderColor.hasValue) {
+        NG::BorderColorProperty colorProperty;
+        Color borderColor = Color(ColorAlphaAdapt(option.borderColor.value));
+        colorProperty.SetColor(borderColor);
+        sheetStyle.borderColor = colorProperty;
+    }
+    if (option.borderStyle.hasValue) {
+        NG::BorderStyleProperty borderStyle;
+        auto nativeBorderSytle = option.borderStyle.value;
+        borderStyle.styleLeft = static_cast<BorderStyle>(nativeBorderSytle.left);
+        borderStyle.styleRight = static_cast<BorderStyle>(nativeBorderSytle.right);
+        borderStyle.styleTop = static_cast<BorderStyle>(nativeBorderSytle.top);
+        borderStyle.styleBottom = static_cast<BorderStyle>(nativeBorderSytle.bottom);
+        borderStyle.multiValued = true;
+        sheetStyle.borderStyle = borderStyle;
+    }
+}
+
+void ParseScrollSizeMode(const NativeOptionUInt32 scrollSizeMode, NG::SheetStyle& sheetStyle)
+{
+    if (!scrollSizeMode.hasValue) {
+        return;
+    }
+    sheetStyle.scrollSizeMode = NG::ScrollSizeMode::FOLLOW_DETENT;
+    if (scrollSizeMode.value >= static_cast<int>(NG::ScrollSizeMode::FOLLOW_DETENT) &&
+        scrollSizeMode.value <= static_cast<int>(NG::ScrollSizeMode::CONTINUOUS)) {
+        sheetStyle.scrollSizeMode = static_cast<NG::ScrollSizeMode>(scrollSizeMode.value);
+    }
+}
+
+void ParseShadow(NativeShadow nativeShadow, NG::SheetStyle& sheetStyle)
+{
+    if (!nativeShadow.hasValue) {
+        return;
+    }
+    Shadow shadow;
+    NativeShadowOptions shadowOptions = nativeShadow.value;
+    if (LessNotEqual(shadowOptions.radius, 0.0)) {
+        shadowOptions.radius = 0.0;
+    }
+    shadow.SetBlurRadius(shadowOptions.radius);
+    Color shadowColor = Color(ColorAlphaAdapt(shadowOptions.color));
+    shadow.SetColor(shadowColor);
+    shadow.SetShadowType(static_cast<ShadowType>(shadowOptions.shadowType));
+    shadow.SetIsFilled(shadowOptions.fill);
+    shadow.SetOffsetX(shadowOptions.offsetX);
+    shadow.SetOffsetY(shadowOptions.offsetY);
+    sheetStyle.shadow = shadow;
+}
+
+void ParseBlurStyle(const int32_t blurStyle, NG::SheetStyle& sheetStyle)
+{
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+        blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+        styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+    }
+    sheetStyle.backgroundBlurStyle = styleOption;
+}
+
+void ParsePreferType(const int32_t sheetType, NG::SheetStyle& sheetStyle)
+{
+    if (sheetType >= static_cast<int>(NG::SheetType::SHEET_BOTTOM) &&
+        sheetType <= static_cast<int>(NG::SheetType::SHEET_POPUP)) {
+        sheetStyle.sheetType = static_cast<NG::SheetType>(sheetType);
+    }
+}
+
+void ParseSheetHeight(const int height, NG::SheetStyle& sheetStyle)
+{
+    NG::SheetHeight sheetDetent;
+    ParseSheetDetentHeight(height, sheetDetent);
+    sheetStyle.sheetHeight.sheetMode = sheetDetent.sheetMode;
+    sheetStyle.sheetHeight.height = sheetDetent.height;
+}
+
 void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
 {
     std::vector<NG::SheetHeight> detents;
@@ -1460,13 +1580,7 @@ void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
         sheetStyle.detents = detents;
     }
     if (option.blurStyle.hasValue) {
-        BlurStyleOption styleOption;
-        int32_t blurStyle = option.blurStyle.value;
-        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-            styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
-            sheetStyle.backgroundBlurStyle = styleOption;
-        }
+        ParseBlurStyle(option.blurStyle.value, sheetStyle);
     }
     if (option.showClose.hasValue) {
         sheetStyle.showCloseIcon = option.showClose.value;
@@ -1483,11 +1597,7 @@ void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
         sheetStyle.interactive = option.enableOutsideInteractive.value;
     }
     if (option.preferType.hasValue) {
-        auto sheetType = option.preferType.value;
-        if (sheetType >= static_cast<int>(NG::SheetType::SHEET_BOTTOM) &&
-            sheetType <= static_cast<int>(NG::SheetType::SHEET_POPUP)) {
-            sheetStyle.sheetType = static_cast<NG::SheetType>(sheetType);
-        }
+        ParsePreferType(option.preferType.value, sheetStyle);
     }
     if (option.backgroundColor.hasValue) {
         sheetStyle.backgroundColor = Color(ColorAlphaAdapt(option.backgroundColor.value));
@@ -1501,6 +1611,17 @@ void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
         sheetStyle.sheetHeight.sheetMode = sheetDetent.sheetMode;
         sheetStyle.sheetHeight.height = sheetDetent.height;
     }
+    if (option.mode.hasValue) {
+        auto sheetLevel = option.mode.value;
+        sheetStyle.showInPage = (sheetLevel == static_cast<int>(NG::SheetLevel::EMBEDDED));
+    }
+    if (option.width.hasValue) {
+        sheetStyle.width =
+            CalcDimension(option.width.value.value, static_cast<DimensionUnit>(option.width.value.unitType));
+    }
+    ParseScrollSizeMode(option.scrollSizeMode, sheetStyle);
+    ParseShadow(option.shadow, sheetStyle);
+    ParseSheetBorderProps(option, sheetStyle);
 }
 
 void ParseSheetTitle(CJSheetOptions option, NG::SheetStyle& sheetStyle, std::function<void()>& titleBuilderFunction)
@@ -1508,6 +1629,7 @@ void ParseSheetTitle(CJSheetOptions option, NG::SheetStyle& sheetStyle, std::fun
     sheetStyle.isTitleBuilder = true;
     titleBuilderFunction = option.title.hasValue ? CJLambda::Create(option.title.value) : ([]() -> void {});
 }
+
 void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option)
 {
     auto buildFunc = CJLambda::Create(builder);
@@ -1529,7 +1651,8 @@ void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(
     std::function<void()> titleBuilderFunction;
     std::function<void()> sheetSpringBackFunc;
     ParseSheetCallback(option, onAppearCallback, onDisappearCallback, shouldDismissFunc, onWillAppearCallback,
-        onWillDisappearCallback);
+        onWillDisappearCallback, onWillDismissCallback, sheetSpringBackFunc, onHeightDidChangeCallback,
+        onDetentsDidChangeCallback, onWidthDidChangeCallback, onTypeDidChangeCallback);
     ParseSheetStyle(option, sheetStyle);
     ParseSheetTitle(option, sheetStyle, titleBuilderFunction);
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),
