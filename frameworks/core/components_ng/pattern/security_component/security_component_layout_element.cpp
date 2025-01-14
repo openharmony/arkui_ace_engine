@@ -62,8 +62,9 @@ void IconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
         isSetSize_ = true;
         width_ = height_ = property->GetIconSize().value().ConvertToPx();
     } else {
-        width_ = height_ = isSymbolIcon ? Dimension(DEFAULT_SIZE_24, DimensionUnit::VP).ConvertToPx() :
+        height_ = isSymbolIcon ? Dimension(DEFAULT_SIZE_24, DimensionUnit::VP).ConvertToPx() :
                            theme->GetIconSize().ConvertToPx();
+        width_ = height_;
     }
 }
 

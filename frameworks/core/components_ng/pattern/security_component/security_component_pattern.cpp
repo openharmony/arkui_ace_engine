@@ -303,6 +303,7 @@ void SecurityComponentPattern::ToJsonValueIconNode(std::unique_ptr<JsonValue>& j
 void SecurityComponentPattern::ToJsonValueSymbolIconNode(std::unique_ptr<JsonValue>& json,
     const RefPtr<FrameNode>& symbolIconNode, const InspectorFilter& filter) const
 {
+    CHECK_NULL_VOID(symbolIconNode);
     auto iconProp = symbolIconNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(iconProp);
     json->PutExtAttr("iconSize",

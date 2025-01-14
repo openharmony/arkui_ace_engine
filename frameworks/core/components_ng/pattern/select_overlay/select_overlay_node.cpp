@@ -108,25 +108,25 @@ const std::unordered_map<std::string, std::function<bool(const SelectMenuInfo&)>
 
 const std::unordered_map<std::string, std::function<uint32_t(RefPtr<OHOS::Ace::TextOverlayTheme>)>> getSymbolIdMap = {
     { OH_DEFAULT_CUT,
-        [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetCutSymbolId();}
+        [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) { return textOverlayTheme->GetCutSymbolId();}
     },
     { OH_DEFAULT_COPY,
-        [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetCopySymbolId();}
+        [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) { return textOverlayTheme->GetCopySymbolId();}
     },
-    { OH_DEFAULT_SELECT_ALL,
-        [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetCopyAllSymbolId();}
+    { OH_DEFAULT_SELECT_ALL, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetCopyAllSymbolId();}
     },
     { OH_DEFAULT_PASTE,
-        [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetPasteSymbolId();}
+        [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme) { return textOverlayTheme->GetPasteSymbolId();}
     },
-    { OH_DEFAULT_CAMERA_INPUT,
-        [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetCameraInputSymbolId();}
+    { OH_DEFAULT_CAMERA_INPUT, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetCameraInputSymbolId();}
     },
-    { OH_DEFAULT_AI_WRITE,
-        [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetAIWriteSymbolId();}
+    { OH_DEFAULT_AI_WRITE, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetAIWriteSymbolId();}
     },
-    { OH_DEFAULT_SEARCH,
-        [](RefPtr<OHOS::Ace::TextOverlayTheme> textOverlayTheme) { return textOverlayTheme->GetSearchSymbolId();}
+    { OH_DEFAULT_SEARCH, [](const RefPtr<OHOS::Ace::TextOverlayTheme>& textOverlayTheme)
+        { return textOverlayTheme->GetSearchSymbolId();}
     }
 };
 
@@ -558,10 +558,13 @@ RefPtr<FrameNode> BuildMoreOrBackSymbol()
     auto symbol = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
-    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(symbol, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, symbol);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_RETURN(textOverlayTheme, symbol);
     auto layoutProperty = symbol->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, symbol);
     layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(textOverlayTheme->GetMoreSymbolId()));
     layoutProperty->UpdateFontSize(textOverlayTheme->GetSymbolSize());
     layoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
@@ -1462,7 +1465,7 @@ void SelectOverlayNode::UpdateMoreOrBackSymbolOptions(bool isAttachToMoreButton,
     if (!isMoreOrBackSymbolIcon_) {
         return;
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
@@ -1491,7 +1494,7 @@ void SelectOverlayNode::UpdateMoreOrBackSymbolOptionsWithDelay()
     if (!isMoreOrBackSymbolIcon_) {
         return;
     }
-    auto context = PipelineContext::GetCurrentContext();
+    auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
@@ -1728,7 +1731,7 @@ void SelectOverlayNode::AddCreateMenuExtensionMenuParams(const std::vector<MenuO
     const auto systemCallback = GetSystemCallback(info);
     auto id = GetId();
     int32_t itemNum = 0;
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
@@ -2134,6 +2137,7 @@ void SelectOverlayNode::AddMenuItemByCreateMenuCallback(const std::shared_ptr<Se
     if (static_cast<size_t>(extensionOptionStartIndex) < createMenuItems.size()) {
         moreButton_ = BuildMoreOrBackButton(GetId(), true);
         moreButton_->MountToParent(selectMenuInner_);
+        CHECK_NULL_VOID(moreButton_);
         isMoreOrBackSymbolIcon_ = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
         if (isMoreOrBackSymbolIcon_) {
             moreOrBackSymbol_ = BuildMoreOrBackSymbol();
@@ -2378,7 +2382,9 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
 {
     CHECK_NULL_VOID(selectMenuInner_);
     selectMenuInner_->Clean();
-    selectMenuInner_->GetLayoutProperty()->ClearUserDefinedIdealSize(true, true);
+    auto selectMenuLayoutProperty = selectMenuInner_->GetLayoutProperty();
+    CHECK_NULL_VOID(selectMenuLayoutProperty);
+    selectMenuLayoutProperty->ClearUserDefinedIdealSize(true, true);
     SetSelectMenuInnerSize();
     selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     if (isExtensionMenu_) {

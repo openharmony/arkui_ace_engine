@@ -103,7 +103,7 @@ protected:
 private:
     static void SetDefaultIconStyle(const RefPtr<FrameNode>& imageNode, InternalResource::ResourceId id,
         bool isButtonVisible);
-    static void SetDefaultSymbolIconStyle(const RefPtr<FrameNode> &symbolNode, uint32_t symbolId,
+    static void SetDefaultSymbolIconStyle(const RefPtr<FrameNode>& symbolNode, uint32_t symbolId,
         bool isButtonVisible);
     static void SetInvisibleBackgroundButton(const RefPtr<FrameNode>& buttonNode);
     static bool IsBackgroundVisible();

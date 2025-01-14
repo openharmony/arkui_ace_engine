@@ -83,7 +83,7 @@ RefPtr<FrameNode> SecurityComponentModelNG::CreateNode(const std::string& tag, i
     property->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     property->UpdateIsArkuiComponent(isArkuiComponent);
     property->UpdateTextStyle(style.text);
-    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafely());
+    auto pipeline = AceType::DynamicCast<PipelineContext>(PipelineBase::GetCurrentContextSafelyWithCheck());
     CHECK_NULL_RETURN(pipeline, nullptr);
     pipeline->AddWindowStateChangedCallback(nodeId);
     return frameNode;
@@ -199,6 +199,7 @@ void SecurityComponentModelNG::SetDefaultIconStyle(const RefPtr<FrameNode>& imag
 void SecurityComponentModelNG::SetDefaultSymbolIconStyle(
     const RefPtr<FrameNode> &symbolNode, uint32_t symbolId, bool isButtonVisible)
 {
+    CHECK_NULL_VOID(symbolNode);
     auto secCompTheme = GetTheme();
     CHECK_NULL_VOID(secCompTheme);
     auto iconProp = symbolNode->GetLayoutProperty<TextLayoutProperty>();
