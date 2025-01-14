@@ -21,6 +21,7 @@
 #include "generated/type_helpers.h"
 
 #include "core/interfaces/native/implementation/text_controller_peer_impl.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
 #include "core/components/text/text_theme.h"
@@ -96,6 +97,7 @@ const auto ATTRIBUTE_TEXT_SHADOW_I_OFFSET_X_NAME = "offsetX";
 const auto ATTRIBUTE_TEXT_SHADOW_I_OFFSET_Y_NAME = "offsetY";
 const auto ATTRIBUTE_CONTENT_NAME = "content";
 const auto ATTRIBUTE_CONTENT_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_DATA_DETECTOR_CONFIG_NAME = "dataDetectorConfig";
 
     struct EventsTracker {
         static inline GENERATED_ArkUITextEventsReceiver textEventReceiver {};
@@ -1135,5 +1137,80 @@ HWTEST_F(TextModifierTest, setTextOptionsTestValueNull, TestSize.Level1)
     // no crash should happen
     auto text = ArkUnion<Opt_Union_String_Resource, Ark_String>("text");
     modifier_->setTextOptions(node_, &text, nullptr);
+}
+
+/*
+ * @tc.name: setDataDetectorConfigTestCallback
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setDataDetectorConfig, TestSize.Level1)
+{
+    Ark_TextDataDetectorConfig config;
+    config.color = ArkUnion<Opt_ResourceColor, Ark_String>("#FFAABBCC");
+    std::vector<Ark_TextDataDetectorType> types;
+    types.push_back(ARK_TEXT_DATA_DETECTOR_TYPE_PHONE_NUMBER);
+    types.push_back(ARK_TEXT_DATA_DETECTOR_TYPE_ADDRESS);
+    config.types.array = types.data();
+    config.types.length = types.size();
+
+    Ark_DecorationStyleInterface decoration;
+    decoration.type = ARK_TEXT_DECORATION_TYPE_LINE_THROUGH;
+    decoration.color = ArkUnion<Opt_ResourceColor, Ark_String>("#FF112233");
+    decoration.style = ArkValue<Opt_TextDecorationStyle>(ARK_TEXT_DECORATION_STYLE_WAVY);
+    config.decoration = ArkValue<Opt_DecorationStyleInterface>(decoration);
+
+    modifier_->setDataDetectorConfig(node_, &config);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+
+    auto json = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DATA_DETECTOR_CONFIG_NAME);
+    auto resultColor = GetAttrValue<std::string>(json, "color");
+    auto resultTypes = GetAttrValue<std::string>(json, "types");
+    auto jsonDecoration = GetAttrValue<std::unique_ptr<JsonValue>>(json, "decoration");
+    auto resultDecorationType = GetAttrValue<std::string>(jsonDecoration, "type");
+    auto resultDecorationColor = GetAttrValue<std::string>(jsonDecoration, "color");
+    auto resultDecorationStyle = GetAttrValue<std::string>(jsonDecoration, "style");
+    EXPECT_EQ(resultColor, "#FFAABBCC");
+    EXPECT_EQ(resultTypes, "phoneNum,location");
+    EXPECT_EQ(resultDecorationType, "3");
+    EXPECT_EQ(resultDecorationColor, "#FF112233");
+    EXPECT_EQ(resultDecorationStyle, "4");
+}
+
+/*
+ * @tc.name: setDataDetectorConfig
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setDataDetectorConfigTestCallback, TestSize.Level1)
+{
+    Ark_TextDataDetectorConfig config;
+    static const int32_t expectedResourceId = 123;
+    static const std::string expectedArg = "expected string value";
+    static int32_t actualResourceId = -1;
+    static std::string actualArg = "";
+
+    auto callSyncFunc = [](const Ark_Int32 resourceId,
+        const Ark_String breakpoints)
+    {
+        actualResourceId = Converter::Convert<int32_t>(resourceId);
+        actualArg = Converter::Convert<std::string>(breakpoints);
+    };
+
+    auto func = Converter::ArkValue<Callback_String_Void>(callSyncFunc, expectedResourceId);
+    auto funcOpt = Converter::ArkValue<Opt_Callback_String_Void>(func);
+    config.onDetectResultUpdate = funcOpt;
+
+    modifier_->setDataDetectorConfig(node_, &config);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto adapter = pattern->GetDataDetectorAdapter();
+    adapter->FireOnResult(expectedArg);
+
+    EXPECT_EQ(actualResourceId, expectedResourceId);
+    EXPECT_EQ(actualArg, expectedArg);
 }
 }
