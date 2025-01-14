@@ -1167,4 +1167,22 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTest045, TestSize.Level1)
     EXPECT_EQ(isOffScreen, isOffScreenVal);
 }
 
+/**
+ * @tc.name: RosenRenderContextTest046
+ * @tc.desc: Test SetRenderFit Func and GetRenderFit Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RosenRenderContextTest, RosenRenderContextTest046, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
+    ASSERT_NE(rosenRenderContext, nullptr);
+    ASSERT_NE(rosenRenderContext->rsNode_, nullptr);
+    rosenRenderContext->SetRenderFit(RenderFit::CENTER);
+    auto renderFit = rosenRenderContext->GetRenderFit();
+    ASSERT_NE(renderFit, std::nullopt);
+    EXPECT_EQ(renderFit.value(), RenderFit::CENTER);
+}
 } // namespace OHOS::Ace::NG
