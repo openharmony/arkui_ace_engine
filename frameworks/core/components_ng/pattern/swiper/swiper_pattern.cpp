@@ -2844,6 +2844,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset,
 
     if (IsVisibleChildrenSizeLessThanSwiper()) {
         turnPageRate_ = 0.0f;
+        groupTurnPageRate_ = 0.0f;
         gestureState_ = GestureState::GESTURE_STATE_NONE;
         touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     }
@@ -4550,6 +4551,9 @@ int32_t SwiperPattern::DisplayIndicatorTotalCount() const
 
     auto displayCount = GetDisplayCount();
     auto realTotalCount = RealTotalCount();
+    if (realTotalCount <= 0) {
+        return 0;
+    }
     if (realTotalCount <= displayCount) {
         return 1;
     }
@@ -6150,7 +6154,7 @@ void SwiperPattern::HandleTouchBottomLoopOnRTL()
         commTouchBottom = (currentFirstIndex >= totalCount - displayCount);
         releaseLeftTouchBottomStart = (currentIndex == totalCount - displayCount);
         releaseRightTouchBottom = (currentFirstIndex >= totalCount - displayCount);
-        releaseLeftTouchBottomEnd = (currentFirstIndex <= displayCount);
+        releaseLeftTouchBottomEnd = (currentFirstIndex < displayCount);
     }
     bool followTouchBottom = (commTouchBottom && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
                                                      gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT));
