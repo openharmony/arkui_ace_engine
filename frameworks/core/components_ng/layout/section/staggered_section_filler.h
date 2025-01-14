@@ -17,8 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLLABLE_STAGGERED_SECTION_FILLER_H
 #include <queue>
 
-#include "base/geometry/ng/rect_t.h"
 #include "item_measurer.h"
+
+#include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/layout/section/section_data_types.h"
 namespace OHOS::Ace::NG {
 class FrameNode;
@@ -29,6 +30,13 @@ using EndPosQ = std::priority_queue<lanePos, std::vector<lanePos>, std::greater<
 
 class SectionFiller {
 public:
+    /**
+     * @brief Fill one item into the section.
+     *
+     * @param index of the item
+     * @param viewportBound viewport limit to fill up to.
+     * @return true if the item is filled successfully.
+     */
     virtual bool Fill(const RefPtr<Measurer>& measurer, FrameNode* node, int32_t index, float viewportBound) = 0;
     virtual bool CanFill() const = 0;
 };
@@ -52,7 +60,7 @@ private:
 
     EndPosQ q_;
 
-   Section& section_;
+    Section& section_;
 };
 
 class SectionStartFiller : public SectionFiller {
@@ -77,7 +85,7 @@ private:
 
     StartPosQ q_;
 
-   Section& section_;
+    Section& section_;
 };
 } // namespace OHOS::Ace::NG
 #endif

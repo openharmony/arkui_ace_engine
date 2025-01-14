@@ -43,7 +43,7 @@ struct Section {
         return idx >= StartIdx() && idx <= EndIdx();
     }
     /**
-     * @return index of first item currently in the section. 
+     * @return index of first item currently in the section.
      */
     int32_t StartIdx() const;
 
@@ -78,6 +78,26 @@ struct Section {
      * @param end end position of the viewport.
      */
     void PruneBack(float end);
+
+    bool IsEmpty() const {
+        return std::all_of(lanes.begin(), lanes.end(), [](const Lane& lane) { return lane.items_.empty(); });
+    }
+
+    std::string ToString() const
+    {
+        std::string str = "Section: ";
+        str += "mainGap: " + std::to_string(mainGap) + ", ";
+        str += "crossGap: " + std::to_string(crossGap) + ", ";
+        str += "minItem: " + std::to_string(minItem) + ", ";
+        str += "maxItem: " + std::to_string(maxItem) + ", ";
+        str += "margin: " + margin.ToString() + ", ";
+        str += "lanes: [";
+        for (const auto& lane : lanes) {
+            str += lane.ToString() + ", ";
+        }
+        str += "]";
+        return str;
+    }
 
     float mainGap = 0.0f;
     float crossGap = 0.0f;

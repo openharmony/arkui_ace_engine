@@ -13,10 +13,19 @@
  * limitations under the License.
  */
 #include "sections_initializer.h"
+
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
+#include "core/components_ng/property/templates_parser.h"
+
 namespace OHOS::Ace::NG {
-std::vector<Section> WaterFlowSectionInitializer::Initialize(
-    const std::vector<WaterFlowSections::Section>& sections, const RefPtr<WaterFlowLayoutProperty>& props)
+std::vector<Section> WaterFlowSectionInitializer::Init(
+    const RefPtr<WaterFlowSections>& sectionData, const RefPtr<WaterFlowLayoutProperty>& props)
 {
+    if (!sectionData) {
+        return SingleInit(props);
+    }
+
+    const auto& sections = sectionData->GetSectionInfo();
     std::vector<Section> res(sections.size());
     int32_t itemIdx = 0;
     for (size_t i = 0; i < sections.size(); ++i) {
@@ -42,7 +51,7 @@ std::vector<Section> WaterFlowSectionInitializer::Initialize(
     return res;
 }
 
-bool WaterFlowSectionInitializer::Compare(const std::vector<Section>& prev, const std::vector<Section>& cur)
+bool SectionInitializer::Compare(const std::vector<Section>& prev, const std::vector<Section>& cur)
 {
     if (prev.size() != cur.size()) {
         return false;
@@ -56,5 +65,32 @@ bool WaterFlowSectionInitializer::Compare(const std::vector<Section>& prev, cons
         return false;
     }
     return true;
+}
+
+std::vector<Section> WaterFlowSectionInitializer::SingleInit(const RefPtr<WaterFlowLayoutProperty>& props)
+{
+    Section res;
+    auto scale = props->GetLayoutConstraint()->scaleProperty;
+    auto rowsGap = ConvertToPx(props->GetRowsGap().value_or(0.0_vp), scale, frameSize_.Height()).value_or(0);
+    auto columnsGap = ConvertToPx(props->GetColumnsGap().value_or(0.0_vp), scale, frameSize_.Width()).value_or(0);
+    res.mainGap = { axis_ == Axis::HORIZONTAL ? columnsGap : rowsGap };
+    res.crossGap = { axis_ == Axis::VERTICAL ? columnsGap : rowsGap };
+
+    float crossSize = frameSize_.CrossSize(axis_);
+    const auto args = axis_ == Axis::VERTICAL ? props->GetColumnsTemplate().value_or("1fr")
+                                              : props->GetRowsTemplate().value_or("1fr");
+    auto cross = ParseTemplateArgs(WaterFlowLayoutUtils::PreParseArgs(args), crossSize, res.crossGap, totalCnt_);
+    res.crossGap = static_cast<float>(cross.second);
+    if (cross.first.empty()) {
+        cross.first = { crossSize };
+    }
+    res.lanes = std::vector<Lane>(cross.first.size());
+    for (size_t i = 0; i < cross.first.size(); ++i) {
+        res.lanes[i].crossLen = static_cast<float>(cross.first[i]);
+    }
+
+    res.minItem = 0;
+    res.maxItem = totalCnt_ - 1;
+    return { res };
 }
 } // namespace OHOS::Ace::NG

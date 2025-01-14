@@ -76,7 +76,7 @@ bool SectionStartFiller::Fill(const RefPtr<Measurer>& measurer, FrameNode* node,
     lane.items_.push_front({ index, itemLen });
     section_.idxToLane[index] = laneIdx;
     float nextPos = lane.startPos - section_.mainGap;
-    if (GreatNotEqual(nextPos, viewportBound)) {
+    if (Positive(nextPos)) {
         q_.push({ nextPos, laneIdx });
     }
 

@@ -46,11 +46,17 @@ public:
 
     virtual void OnSlidingOffsetUpdate(float x, float y) {}
 
-    virtual bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, const RectF& markItemRect, FillDirection direction) = 0;
+    virtual bool CanFillMore(
+        Axis axis, const SizeF& scrollWindowSize, int32_t idx, const RectF& markItemRect, FillDirection direction) = 0;
 
     virtual bool IsReady() const
     {
         return false;
+    }
+
+    virtual int32_t GetMarkIndex()
+    {
+        return -1;
     }
 };
 } // namespace OHOS::Ace::NG

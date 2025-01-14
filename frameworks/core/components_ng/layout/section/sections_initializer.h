@@ -12,22 +12,39 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "base/geometry/axis.h"
 #include "core/components_ng/layout/section/section_data_types.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
 namespace OHOS::Ace::NG {
 class SectionInitializer {
-    virtual std::vector<Section> Initialize() = 0;
+public:
+    SectionInitializer(const SizeF& frameSize, Axis axis, int32_t totalCnt)
+        : frameSize_(frameSize), axis_(axis), totalCnt_(totalCnt)
+    {}
+
+    /**
+     * @brief compare two sections data.
+     * @return true if two sections are the same, otherwise false.
+     */
+    static bool Compare(const std::vector<Section>& prev, const std::vector<Section>& cur);
+
+protected:
+    SizeF frameSize_;
+    Axis axis_;
+    int32_t totalCnt_;
 };
 
-class WaterFlowSectionInitializer {
-    // WaterFlowSectionInitializer() {
-    // }
+class WaterFlowSectionInitializer : public SectionInitializer {
 public:
-    static std::vector<Section> Initialize(
-        const std::vector<WaterFlowSections::Section>& sections, const RefPtr<WaterFlowLayoutProperty>& props);
+    WaterFlowSectionInitializer(const SizeF& frameSize, Axis axis, int32_t totalCnt)
+        : SectionInitializer(frameSize, axis, totalCnt)
+    {}
+    std::vector<Section> Init(
+        const RefPtr<WaterFlowSections>& sectionData, const RefPtr<WaterFlowLayoutProperty>& props);
 
-    static bool Compare(const std::vector<Section>& prev, const std::vector<Section>& cur);
+private:
+    std::vector<Section> SingleInit(const RefPtr<WaterFlowLayoutProperty>& props);
 };
 } // namespace OHOS::Ace::NG

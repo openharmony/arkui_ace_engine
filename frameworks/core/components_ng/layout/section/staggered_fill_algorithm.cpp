@@ -14,29 +14,48 @@
  */
 
 #include "staggered_fill_algorithm.h"
+#include <cstdint>
 
 #include "staggered_section_filler.h"
 
+#include "core/components_ng/base/fill_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 #include "frameworks/core/components_ng/pattern/waterflow/water_flow_pattern.h"
 
 namespace OHOS::Ace::NG {
-bool StaggeredFillAlgorithm::CanFillMoreAtStart(Axis axis)
+std::optional<int32_t> StaggeredFillAlgorithm::StartIdx() const
 {
-    int32_t item = -1;
     for (const auto& section : sections_) {
-        if (!section.lanes.empty()) {
-            item = section.StartIdx();
-            break;
+        if (!section.IsEmpty()) {
+            return section.StartIdx();
         }
     }
-    if (item == 0) {
+    return std::nullopt;
+}
+
+std::optional<int32_t> StaggeredFillAlgorithm::EndIdx() const
+{
+    for (auto it = sections_.rbegin(); it != sections_.rend(); ++it) {
+        if (!it->IsEmpty()) {
+            return it->EndIdx();
+        }
+    }
+    return std::nullopt;
+}
+
+bool StaggeredFillAlgorithm::CanFillMoreAtStart(Axis axis)
+{
+    const auto item = StartIdx();
+    if (!item) {
+        return true;
+    }
+    if (*item == 0) {
         return false;
     }
-    auto& section = GetSection(item);
-    if (item == section.minItem) {
-        section.PreparePrevSection(axis, GetSection(item - 1));
-        section = GetSection(item - 1);
+    auto& section = GetSection(*item);
+    if (*item == section.minItem) {
+        section.PreparePrevSection(axis, GetSection(*item - 1));
+        section = GetSection(*item - 1);
     }
     SectionStartFiller filler(section);
     return filler.CanFill();
@@ -44,17 +63,12 @@ bool StaggeredFillAlgorithm::CanFillMoreAtStart(Axis axis)
 
 bool StaggeredFillAlgorithm::CanFillMoreAtEnd(float viewportBound, Axis axis)
 {
-    int32_t item = -1;
-    for (auto it = sections_.rbegin(); it != sections_.rend(); ++it) {
-        if (!it->lanes.empty()) {
-            item = it->EndIdx();
-            break;
-        }
-    }
-    auto& section = GetSection(item);
+    auto item = EndIdx();
+    CHECK_NULL_RETURN(item, true);
+    auto& section = GetSection(*item);
     if (item == section.maxItem) {
-        section.PrepareNextSection(axis, GetSection(item + 1));
-        section = GetSection(item + 1);
+        section.PrepareNextSection(axis, GetSection(*item + 1));
+        section = GetSection(*item + 1);
     }
     SectionEndFiller filler(section, viewportBound);
     return filler.CanFill();
@@ -62,12 +76,15 @@ bool StaggeredFillAlgorithm::CanFillMoreAtEnd(float viewportBound, Axis axis)
 
 void StaggeredFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt)
 {
-    InitSections();
+    InitSections(totalCnt, axis, viewport);
 
     if (InstanceOf<WaterFlowLayoutProperty>(props_)) {
-        measurer_ =
-            MakeRefPtr<FlowItemMeasurer>([this](int32_t index) { return GetSection(index).userDefMainLen(index); },
-                axis, viewport.MainSize(axis), DynamicCast<WaterFlowLayoutProperty>(props_));
+        measurer_ = MakeRefPtr<FlowItemMeasurer>(
+            [this](int32_t index) {
+                auto& section = GetSection(index);
+                return section.userDefMainLen ? section.userDefMainLen(index) : -1.0f;
+            },
+            axis, viewport.MainSize(axis), DynamicCast<WaterFlowLayoutProperty>(props_));
     }
 
     for (auto& section : sections_) {
@@ -77,8 +94,12 @@ void StaggeredFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t t
 }
 
 bool StaggeredFillAlgorithm::CanFillMore(
-    Axis axis, const SizeF& scrollWindowSize, const RectF& markItemRect, FillDirection direction)
+    Axis axis, const SizeF& scrollWindowSize, int32_t idx, const RectF& markItemRect, FillDirection direction)
 {
+    const bool isEdgeItem = direction == FillDirection::END ? idx == EndIdx() : idx == StartIdx();
+    if (GetSection(idx).Contains(idx) && !isEdgeItem) {
+        return true;
+    }
     return direction == FillDirection::END ? CanFillMoreAtEnd(scrollWindowSize.MainSize(axis), axis)
                                            : CanFillMoreAtStart(axis);
 }
@@ -87,7 +108,8 @@ RectF StaggeredFillAlgorithm::CalcItemRectBeforeMarkItem(
     const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem)
 {
     auto& section = GetSection(index);
-    if (section.StartIdx() <= index || section.EndIdx() >= index) {
+    if (section.Contains(index)) {
+        // measurer_->Measure(node, index, section.lanes[section.idxToLane[index]].crossLen);
         return {};
     }
 
@@ -95,7 +117,7 @@ RectF StaggeredFillAlgorithm::CalcItemRectBeforeMarkItem(
         GetSection(index + 1).PreparePrevSection(axis, section);
     }
     SectionStartFiller filler(section);
-    filler.Fill(measurer_, node, index, viewport.MainSize(axis));
+    filler.Fill(measurer_, node, index, 0.0f);
     return {};
 }
 
@@ -103,7 +125,8 @@ RectF StaggeredFillAlgorithm::CalcItemRectAfterMarkItem(
     const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem)
 {
     auto& section = GetSection(index);
-    if (!section.Contains(index)) {
+    if (section.Contains(index)) {
+        // measurer_->Measure(node, index, section.lanes[section.idxToLane[index]].crossLen);
         return {};
     }
     if (index == section.minItem) {
@@ -127,24 +150,25 @@ RectF StaggeredFillAlgorithm::CalcMarkItemRect(
         filler.Fill(measurer_, node, index, viewport.MainSize(axis));
     }
 
-    if (slidingOffset) {
-        float delta = slidingOffset->GetMainOffset(axis);
-        for (auto& lane : section.lanes) {
-            lane.startPos += delta;
-            lane.endPos += delta;
-        }
-    }
+    // if (slidingOffset) {
+    //     float delta = slidingOffset->GetMainOffset(axis);
+    //     for (auto& lane : section.lanes) {
+    //         lane.startPos += delta;
+    //         lane.endPos += delta;
+    //     }
+    // }
     return {};
 }
 
-void StaggeredFillAlgorithm::InitSections()
+void StaggeredFillAlgorithm::InitSections(int32_t totalCnt, Axis axis, const SizeF& frameSize)
 {
     // factory method
     if (InstanceOf<WaterFlowLayoutProperty>(props_)) {
-        auto newSections = WaterFlowSectionInitializer::Initialize(
-            props_->GetHost()->GetPattern<WaterFlowPattern>()->GetSections()->GetSectionInfo(),
-            DynamicCast<WaterFlowLayoutProperty>(props_));
-        if (WaterFlowSectionInitializer::Compare(sections_, newSections)) {
+        auto pattern = props_->GetHost()->GetPattern<WaterFlowPattern>();
+        CHECK_NULL_VOID(pattern);
+        WaterFlowSectionInitializer initializer(frameSize, axis, totalCnt);
+        auto newSections = initializer.Init(pattern->GetSections(), DynamicCast<WaterFlowLayoutProperty>(props_));
+        if (!SectionInitializer::Compare(sections_, newSections)) {
             sections_ = newSections;
         }
     }
@@ -157,7 +181,27 @@ Section& StaggeredFillAlgorithm::GetSection(int32_t item)
             return section;
         }
     }
+    LOGW("returning empty section for %{public}d", item);
     static Section emptySection;
     return emptySection;
+}
+
+void StaggeredFillAlgorithm::OnSlidingOffsetUpdate(float x, float y)
+{
+    float delta = NearZero(x) ? y : x;
+    std::for_each(sections_.begin(), sections_.end(), [delta](Section& section) {
+        for (auto& lane : section.lanes) {
+            lane.startPos += delta;
+            lane.endPos += delta;
+        }
+    });
+}
+
+int32_t StaggeredFillAlgorithm::GetMarkIndex()
+{
+    for (auto& section : sections_) {
+        section.PruneFront(0.0f);
+    }
+    return StartIdx().value_or(0);
 }
 } // namespace OHOS::Ace::NG

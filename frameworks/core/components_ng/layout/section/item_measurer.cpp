@@ -14,20 +14,21 @@
  */
 
 #include "item_measurer.h"
-#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
+
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/waterflow/layout/water_flow_layout_utils.h"
 
 namespace OHOS::Ace::NG {
 float FlowItemMeasurer::Measure(FrameNode* item, int32_t index, float crossLen) const
 {
     auto itemRefPtr = AceType::Claim(item);
     CHECK_NULL_RETURN(item && itemRefPtr, 0.0f);
-    float userHeight = getUserDefHeight_(index);
+    float userHeight = getUserDefHeight_ ? getUserDefHeight_(index) : -1.0f;
     if (NonNegative(userHeight)) {
         WaterFlowLayoutUtils::UpdateItemIdealSize(itemRefPtr, axis_, userHeight);
     }
-    item->Measure(WaterFlowLayoutUtils::CreateChildConstraint(
-        { crossLen, containerMainLen_, axis_ }, props_, itemRefPtr));
+    item->Measure(
+        WaterFlowLayoutUtils::CreateChildConstraint({ crossLen, containerMainLen_, axis_ }, props_, itemRefPtr));
     return item->GetGeometryNode()->GetMarginFrameSize().MainSize(axis_);
 }
 } // namespace OHOS::Ace::NG

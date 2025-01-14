@@ -48,7 +48,7 @@ public:
     }
 
     bool CanFillMore(
-        Axis axis, const SizeF& scrollWindowSize, const RectF& markItemRect, FillDirection direction) override;
+        Axis axis, const SizeF& scrollWindowSize, int32_t idx, const RectF& markItemRect, FillDirection direction) override;
 
     void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
 

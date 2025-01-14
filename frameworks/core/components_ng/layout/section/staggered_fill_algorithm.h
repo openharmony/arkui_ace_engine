@@ -19,13 +19,13 @@
 #include <algorithm>
 #include <cstdint>
 
+#include "item_measurer.h"
 #include "sections_initializer.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "core/components_ng/base/fill_algorithm.h"
 #include "core/components_ng/layout/layout_property.h"
-#include "item_measurer.h"
 #include "core/components_ng/layout/section/section_data_types.h"
 
 namespace OHOS::Ace::NG {
@@ -45,24 +45,29 @@ public:
     RectF CalcItemRectBeforeMarkItem(
         const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem) override;
 
-    void OnSlidingOffsetUpdate(float x, float y) override {}
+    void OnSlidingOffsetUpdate(float x, float y) override;
 
     bool IsReady() const override
     {
-        return !sections_.empty();
+        return true;
     }
 
-    bool CanFillMore(
-        Axis axis, const SizeF& scrollWindowSize, const RectF& markItemRect, FillDirection direction) override;
+    bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, const RectF& markItemRect,
+        FillDirection direction) override;
 
     void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
+
+    int32_t GetMarkIndex() override;
 
 private:
     bool CanFillMoreAtEnd(float viewportBound, Axis axis);
 
     bool CanFillMoreAtStart(Axis axis);
 
-    void InitSections();
+    void InitSections(int32_t totalCnt, Axis axis, const SizeF& frameSize);
+
+    std::optional<int32_t> StartIdx() const;
+    std::optional<int32_t> EndIdx() const;
 
     Section& GetSection(int32_t item);
 

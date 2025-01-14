@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H
 
+#include "core/components_ng/base/scroll_window_adapter.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
@@ -202,6 +203,23 @@ public:
         return layoutInfo_->defCachedCount_;
     }
 
+    RefPtr<FrameNode> GetOrCreateChildByIndex(uint32_t index) override
+    {
+        if (scrollWindowAdapter_) {
+            return scrollWindowAdapter_->GetChildByIndex(index);
+        }
+        return nullptr;
+    }
+
+    int32_t GetTotalChildCount() override
+    {
+        return scrollWindowAdapter_ ? scrollWindowAdapter_->GetTotalCount() : -1;
+    }
+
+    ScrollWindowAdapter* GetScrollWindowAdapter() override;
+
+    ScrollWindowAdapter* GetOrCreateScrollWindowAdapter() override;
+
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override
     {
@@ -252,6 +270,7 @@ private:
     RefPtr<WaterFlowLayoutBase> cacheLayout_;
 
     std::vector<int32_t> sectionChangeStartPos_;
+    RefPtr<ScrollWindowAdapter> scrollWindowAdapter_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_PATTERN_H

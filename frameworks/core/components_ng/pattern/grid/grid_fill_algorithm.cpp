@@ -105,7 +105,7 @@ RectF GridFillAlgorithm::CalcItemRectBeforeMarkItem(
 }
 
 bool GridFillAlgorithm::CanFillMore(
-    Axis axis, const SizeF& scrollWindowSize, const RectF& markItemRect, FillDirection direction)
+    Axis axis, const SizeF& scrollWindowSize, int32_t idx, const RectF& markItemRect, FillDirection direction)
 {
     // TODO: Axis::HORIZONTAL
     if (direction == FillDirection::START) {
