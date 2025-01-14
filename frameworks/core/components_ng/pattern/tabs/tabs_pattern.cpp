@@ -485,10 +485,10 @@ void TabsPattern::BeforeCreateLayoutWrapper()
         auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
         CHECK_NULL_VOID(swiperPattern);
         swiperPattern->SetOnHiddenChangeForParent();
-        auto parent = tabsNode->GetAncestorNodeOfFrame();
+        auto parent = tabsNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parent);
         while (parent && parent->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
-            parent = parent->GetAncestorNodeOfFrame();
+            parent = parent->GetAncestorNodeOfFrame(false);
         }
         if (!parent) {
             auto willShowIndex = tabsLayoutProperty->GetIndex().value_or(0);

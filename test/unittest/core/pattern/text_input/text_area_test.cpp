@@ -634,6 +634,8 @@ HWTEST_F(TextFieldUXTest, OnHandleMove004, TestSize.Level1)
     pattern_->SetIsSingleHandle(false);
     RectF handleRect;
     pattern_->selectOverlay_->OnHandleMove(handleRect, true);
+    EXPECT_EQ(pattern_->selectController_->GetStartIndex(), 0);
+    EXPECT_EQ(pattern_->selectController_->GetEndIndex(), 10);
 }
 
 /**
@@ -813,8 +815,8 @@ HWTEST_F(TextFieldUXTest, OnHandleMove008, TestSize.Level1)
      * tc.expected: step2. Check if the value is created.
      */
     pattern_->HandleSetSelection(5, 10, false);
-    pattern_->SetIsSingleHandle(false);
     pattern_->ProcessOverlay();
+    pattern_->SetIsSingleHandle(false);
     RectF handleRect(5, 5, 1, 1);
     pattern_->selectOverlay_->OnHandleMove(handleRect, true);
 

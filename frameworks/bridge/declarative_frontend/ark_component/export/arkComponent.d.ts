@@ -388,6 +388,7 @@ declare class ArkImageAnimatorComponent extends ArkComponent implements CommonMe
     preDecode(value: number): ImageAnimatorAttribute;
     fillMode(value: FillMode): ImageAnimatorAttribute;
     iterations(value: number): ImageAnimatorAttribute;
+    autoMonitorInvisibleArea(value: boolean): ImageAnimatorAttribute;
     onStart(event: () => void): ImageAnimatorAttribute;
     onPause(event: () => void): ImageAnimatorAttribute;
     onRepeat(event: () => void): ImageAnimatorAttribute;

@@ -66,7 +66,7 @@ const std::string END_ICON_PATH = "resource:///ohos_ic_public_cancel.svg";
 } // namespace
 
 void ServiceCollaborationMenuAceHelper::CreateText(
-    const std::string& value, const RefPtr<FrameNode>& parent, const Color& color, bool needMargin, bool hasEndIncon)
+    const std::string& value, const RefPtr<FrameNode>& parent, const Color& color, bool needMargin, bool hasEndIcon)
 {
     TAG_LOGI(AceLogTag::ACE_MENU, "text is %{public}s", value.c_str());
     auto textPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -89,7 +89,7 @@ void ServiceCollaborationMenuAceHelper::CreateText(
     if (needMargin) {
         MarginProperty margin;
         margin.right = CalcLength(
-            static_cast<float>(hasEndIncon ? TEXT_RIGHT_MARGIN : TEXT_RIGHT_MARGIN_NO_ENDICON), DimensionUnit::VP);
+            static_cast<float>(hasEndIcon ? TEXT_RIGHT_MARGIN : TEXT_RIGHT_MARGIN_NO_ENDICON), DimensionUnit::VP);
         margin.left = CalcLength(static_cast<float>(TEXT_LEFT_MARGIN));
         textProperty->UpdateMargin(margin);
     }
@@ -186,14 +186,24 @@ void ServiceCollaborationMenuAceHelper::CreateStartIcon(uint32_t iconId, const R
 RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     const std::string& value, const std::string& iconType, const Color& color, bool needEndIcon)
 {
-    auto iconPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(iconPipeline, nullptr);
-    auto iconTheme = iconPipeline->GetTheme<IconTheme>();
-    CHECK_NULL_RETURN(iconTheme, nullptr);
-    auto richTheme = iconPipeline->GetTheme<RichEditorTheme>();
+    auto textPipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(textPipeline, nullptr);
+    auto selectTheme = textPipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_RETURN(selectTheme, nullptr);
+    auto richTheme = textPipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(richTheme, nullptr);
-    return CreateMainMenuItem(
-        value, GetSymbolId(iconType), color == Color::BLACK ? richTheme->GetMenuTextColor() : color, needEndIcon);
+    auto mainMenuItem = CreateMainMenuItem(
+        value, GetSymbolId(iconType), richTheme->GetMenuTextColor(), needEndIcon);
+    CHECK_NULL_RETURN(mainMenuItem, nullptr);
+    if (!needEndIcon) {
+        auto leftRow = DynamicCast<FrameNode>(mainMenuItem->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(leftRow, nullptr);
+        auto textNode = DynamicCast<FrameNode>(leftRow->GetChildAtIndex(0));
+        CHECK_NULL_RETURN(textNode, nullptr);
+        textNode->GetRenderContext()->UpdateOpacity(selectTheme->GetDisabledFontColorAlpha());
+        textNode->MarkModifyDone();
+    }
+    return mainMenuItem;
 }
 RefPtr<FrameNode> ServiceCollaborationMenuAceHelper::CreateMainMenuItem(
     const std::string& value, uint32_t iconId, const Color& color, bool needEndIcon)

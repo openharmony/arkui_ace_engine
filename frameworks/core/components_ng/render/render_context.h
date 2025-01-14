@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+#include "base/geometry/ng/offset_t.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -52,6 +53,10 @@ class VisualEffect;
 class Filter;
 enum class Gravity;
 class BrightnessBlender;
+}
+
+namespace OHOS::Ace::Kit {
+class Modifier;
 }
 
 namespace OHOS::Ace::NG {
@@ -114,6 +119,7 @@ public:
     virtual void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) {}
 
     virtual void FlushContentModifier(const RefPtr<Modifier>& modifier) {}
+    virtual void FlushKitContentModifier(const RefPtr<Kit::Modifier>& modifier) {}
     virtual void FlushForegroundModifier(const RefPtr<Modifier>& modifier) {}
     virtual void FlushOverlayModifier(const RefPtr<Modifier>& modifier) {}
 
@@ -148,6 +154,8 @@ public:
     virtual void SetOuterBorderColor(const BorderColorProperty& value) {};
 
     virtual void SetOuterBorderWidth(const BorderWidthProperty& value) {};
+
+    virtual void SetExtraOffset(const std::optional<OffsetF>& offset) {};
 
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
@@ -296,6 +304,7 @@ public:
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
     virtual void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) {}
     virtual void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
+    virtual void UpdateNodeBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
     virtual void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) {}
     virtual void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) {}
     virtual void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) {}
@@ -456,6 +465,10 @@ public:
     {
         return GetBackground() ? GetBackground()->propEffectOption : std::nullopt;
     }
+    std::optional<BlurOption> GetBackdropBlurOption() const
+    {
+        return GetBackground() ? GetBackground()->propBackdropBlurOption : std::nullopt;
+    }
     std::optional<BlurStyleOption> GetFrontBlurStyle() const
     {
         return GetForeground() ? GetForeground()->propBlurStyleOption : std::nullopt;
@@ -542,6 +555,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImage, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageRepeat, ImageRepeat);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageSyncMode, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImagePosition, BackgroundImagePosition);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageResizableSlice, ImageResizableSlice);
@@ -756,6 +770,7 @@ protected:
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
+    virtual void OnBackgroundImageSyncModeUpdate(bool imageRepeat) {}
     virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}
     virtual void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) {}
     virtual void OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& slice) {}

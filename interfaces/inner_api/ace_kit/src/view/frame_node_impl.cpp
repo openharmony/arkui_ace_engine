@@ -29,7 +29,6 @@ FrameNodeImpl::FrameNodeImpl(const RefPtr<AceNode>& node, const RefPtr<Pattern>&
     : nodeRef_(node), pattern_(pattern)
 {
     frameNode_ = AceType::RawPtr(node);
-    node->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_RENDER);
 }
 
 FrameNodeImpl::~FrameNodeImpl()

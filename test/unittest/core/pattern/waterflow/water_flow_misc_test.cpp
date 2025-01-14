@@ -45,15 +45,20 @@ HWTEST_F(WaterFlowTestNg, Clip001, TestSize.Level1)
     rect->SetHeight(Dimension(200.0f));
     EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(rect))).Times(1);
     props->UpdateContentClip({ ContentClipMode::CUSTOM, rect });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
-    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(RectF(5, 5, 470, 790.0f)))).Times(1);
+    auto waterFlowRect = frameNode_->GetGeometryNode()->GetPaddingRect();
+    waterFlowRect.SetOffset(
+        frameNode_->GetGeometryNode()->GetPaddingOffset() - frameNode_->GetGeometryNode()->GetFrameOffset());
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(waterFlowRect))).Times(1);
     props->UpdateContentClip({ ContentClipMode::SAFE_AREA, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
-    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(frameNode_->GetGeometryNode()->GetFrameRect()))).Times(1);
+    waterFlowRect = frameNode_->GetGeometryNode()->GetFrameRect();
+    waterFlowRect.SetOffset({ 0.0f, 0.0f });
+    EXPECT_CALL(*ctx, SetContentClip(ClipRectEq(waterFlowRect))).Times(1);
     props->UpdateContentClip({ ContentClipMode::BOUNDARY, nullptr });
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 /**

@@ -545,6 +545,25 @@ export class SubHeaderV2 extends ViewV2 {
                 LEFT_TEXT_NUMBER) : LengthMetrics.vp(0);
         }
     }
+    onMeasureSize(f, g, h) {
+        let i = { width: f.width, height: f.height };
+        let j = this.getUIContext().getHostContext();
+        this.fontSize = this.updateFontScale();
+        if (this.isSuitableAging()) {
+            this.ageing = true;
+            this.subHeaderModifier.isAgeing = this.ageing;
+        }
+        else {
+            this.ageing = false;
+            this.subHeaderModifier.isAgeing = this.ageing;
+        }
+        g.forEach((k) => {
+            h.minHeight = Math.min(Number(this.getMinHeight()), Number(h.maxHeight));
+            i.height = k.measure(h).height;
+            i.width = Number(h.maxWidth);
+        });
+        return i;
+    }
     ButtonStyle(k12 = null) {
         this.observeComponentCreation2((m12, n12) => {
             If.create();

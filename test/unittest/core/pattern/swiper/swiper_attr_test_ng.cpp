@@ -2035,4 +2035,121 @@ HWTEST_F(SwiperAttrTestNg, ShowCachedItems023, TestSize.Level1)
     EXPECT_EQ(pattern_->itemPosition_[3].startPos, -460.0f);
     EXPECT_EQ(pattern_->itemPosition_[4].startPos, 0.0f);
 }
+
+/**
+ * @tc.name: CheckSwiperModelNG001
+ * @tc.desc: Test function about SwiperModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, CheckSwiperModelNG001, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set indicator type to DIGIT and  BIND mode.
+     * @tc.expected: call functions and check the result
+     */
+    SwiperDigitalParameters swiperDigitalParameters;
+    swiperDigitalParameters.dimEnd = std::make_optional(Dimension(10.0f));
+    SwiperModelNG swiperModel;
+    frameNode_ = swiperModel.CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_NE(frameNode_, nullptr);
+    FrameNode* frameNode = static_cast<FrameNode*>(Referenced::RawPtr(frameNode_));
+    swiperModel.SetBindIndicator(frameNode, true);
+    swiperModel.SetIndicatorType(frameNode, SwiperIndicatorType::DIGIT);
+    swiperModel.SetDigitIndicatorStyle(frameNode, swiperDigitalParameters);
+    swiperModel.SetCachedCount(frameNode, 2);
+    swiperModel.SetLoop(frameNode, false);
+    swiperModel.SetIndex(frameNode, 0);
+    swiperModel.SetDirection(frameNode, OHOS::Ace::Axis::HORIZONTAL);
+    swiperModel.SetAutoPlay(frameNode, false);
+    swiperModel.SetDigitIndicatorStyle(frameNode, swiperDigitalParameters);
+    swiperModel.SetIndicatorIsBoolean(frameNode, true);
+    swiperModel.SetIsIndicatorCustomSize(frameNode, true);
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
+    pattern_ = frameNode_->GetPattern<SwiperPattern>();
+    EXPECT_EQ(swiperModel.GetCachedCount(frameNode), 2);
+    EXPECT_EQ(swiperModel.GetIndicatorType(frameNode), static_cast<int32_t>(SwiperIndicatorType::DIGIT));
+    EXPECT_EQ(swiperModel.GetLoop(frameNode), false);
+    EXPECT_EQ(swiperModel.GetIndex(frameNode), 0);
+    EXPECT_EQ(swiperModel.GetDirection(frameNode), OHOS::Ace::Axis::HORIZONTAL);
+    EXPECT_EQ(swiperModel.GetAutoPlay(frameNode), false);
+    EXPECT_EQ(indicatorNode_, nullptr);
+    IndicatorModelNG model;
+    model.Create();
+    auto indicatorNode_ = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(indicatorNode_, nullptr);
+    auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    auto controller = indicatorPattern->GetIndicatorController();
+    ASSERT_NE(controller, nullptr);
+    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
+    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
+    controller->SetSwiperNode(targetNode, indicatorNode);
+    EXPECT_EQ(indicatorPattern->GetNonAutoLayoutDirection(), TextDirection::LTR);
+    auto overlongDotIndicatorPaintMethod = indicatorPattern->CreateOverlongDotIndicatorPaintMethod(pattern_);
+    EXPECT_NE(overlongDotIndicatorPaintMethod, nullptr);
+    auto indicatorPaintMethod = indicatorPattern->CreateDotIndicatorPaintMethodInSingleMode();
+    EXPECT_NE(indicatorPaintMethod, nullptr);
+    indicatorPattern->OnModifyDone();
+    auto dotIndicatorPaintMethod = indicatorPattern->CreateDotIndicatorPaintMethod(pattern_);
+    EXPECT_NE(dotIndicatorPaintMethod, nullptr);
+    overlongDotIndicatorPaintMethod = indicatorPattern->CreateOverlongDotIndicatorPaintMethod(pattern_);
+    EXPECT_NE(overlongDotIndicatorPaintMethod, nullptr);
+}
+
+/**
+ * @tc.name: CheckSwiperModelNG002
+ * @tc.desc: Test function about SwiperModelNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAttrTestNg, CheckSwiperModelNG002, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set indicator type to DOT and  BIND mode.
+     * @tc.expected: call functions and check the result
+     */
+    int32_t currentIndex = 0;
+    auto onChange = [&currentIndex](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        currentIndex = swiperInfo->GetIndex();
+    };
+    SwiperParameters swiperParameters;
+    SwiperModelNG swiperModel;
+    frameNode_ = swiperModel.CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    EXPECT_NE(frameNode_, nullptr);
+    FrameNode* frameNode = static_cast<FrameNode*>(Referenced::RawPtr(frameNode_));
+    swiperModel.SetBindIndicator(frameNode, true);
+    swiperModel.SetIndicatorType(frameNode, SwiperIndicatorType::DOT);
+    swiperModel.SetDotIndicatorStyle(frameNode, swiperParameters);
+    swiperModel.SetDuration(frameNode, 10);
+    swiperModel.ResetDisplayCount(frameNode);
+    swiperModel.SetDisplayCount(frameNode, 2);
+    swiperModel.SetAutoPlayInterval(frameNode, 10);
+    swiperModel.SetDisableSwipe(frameNode, false);
+    swiperModel.SetItemSpace(frameNode, Dimension { 10.f });
+    swiperModel.SetShowIndicator(frameNode, false);
+    swiperModel.SetDisplayArrow(frameNode, false);
+    swiperModel.SetEdgeEffect(frameNode, EdgeEffect::SPRING);
+    swiperModel.SetNestedScroll(frameNode, 0);
+    swiperModel.SetSwiperToIndex(frameNode, 1, false);
+    swiperModel.SetIndicatorInteractive(frameNode, true);
+    swiperModel.SetOnChange(frameNode, onChange);
+    ViewAbstract::SetWidth(CalcLength(SWIPER_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
+    pattern_ = frameNode_->GetPattern<SwiperPattern>();
+    controller_ = pattern_->GetSwiperController();
+    SwiperMarginOptions marginOptions;
+    swiperModel.GetPreviousMargin(frameNode, 1, &marginOptions);
+    swiperModel.GetNextMargin(frameNode, 2, &marginOptions);
+    RefPtr<Curve> curve = Curves::LINEAR;
+    swiperModel.SetCurve(frameNode, curve);
+    EXPECT_EQ(swiperModel.GetDuration(frameNode), 10);
+    EXPECT_EQ(swiperModel.GetDisplayCount(frameNode), 2);
+    EXPECT_EQ(swiperModel.GetAutoPlayInterval(frameNode), 10);
+    EXPECT_EQ(swiperModel.GetDisableSwipe(frameNode), false);
+    EXPECT_EQ(swiperModel.GetItemSpace(frameNode), 10.0f);
+    EXPECT_EQ(swiperModel.GetShowIndicator(frameNode), false);
+    EXPECT_EQ(swiperModel.GetShowDisplayArrow(frameNode), 0);
+    EXPECT_EQ(swiperModel.GetEffectMode(frameNode), EdgeEffect::SPRING);
+}
 } // namespace OHOS::Ace::NG

@@ -33,6 +33,7 @@ namespace {
     constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_START_INDEX = 6;
     constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_INDEX = 7;
     constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_END_INDEX = 8;
+    constexpr float AVOID_DISTANCE = 16.0f;
 } // namespace
 
 ArkUIDialogHandle CreateDialog()
@@ -187,7 +188,7 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
         auto unitEnum = controllerHandler->keyboardAvoidDistanceUnit;
         if (controllerHandler->keyboardAvoidDistanceValue.value() < 0 || unitEnum < OHOS::Ace::DimensionUnit::PX ||
             unitEnum > OHOS::Ace::DimensionUnit::CALC || unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
-            dialogProperties.keyboardAvoidDistance = Dimension(16.0f, OHOS::Ace::DimensionUnit::VP);
+            dialogProperties.keyboardAvoidDistance = Dimension(AVOID_DISTANCE, OHOS::Ace::DimensionUnit::VP);
         } else {
             dialogProperties.keyboardAvoidDistance = Dimension(controllerHandler->keyboardAvoidDistanceValue.value(),
                 unitEnum);

@@ -386,6 +386,7 @@ public:
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent,
         const std::function<void(bool)>& callback) override;
 
+    bool ConfigCustomWindowMask(bool enable) override;
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);

@@ -144,6 +144,16 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         stackMinuteNode->MountToParent(timePickerNode);
     }
     timePickerRowPattern->SetHasSecond(settingData.showSecond);
+    auto itStart = timePickerProperty.find("start");
+    if (itStart != timePickerProperty.end()) {
+        auto startTime = itStart->second;
+        SetStartTime(timePickerRowPattern, startTime);
+    }
+    auto itEnd = timePickerProperty.find("end");
+    if (itEnd != timePickerProperty.end()) {
+        auto endTime = itEnd->second;
+        SetEndTime(timePickerRowPattern, endTime);
+    }
     auto it = timePickerProperty.find("selected");
     if (it != timePickerProperty.end()) {
         auto selectedTime = it->second;
@@ -887,6 +897,19 @@ void TimePickerDialogView::UpdateButtonStyleAndRole(const std::vector<ButtonInfo
         buttonRenderContext->UpdateBackgroundColor(bgColor);
         buttonLayoutProperty->UpdateFontColor(textColor);
     }
+}
+
+void TimePickerDialogView::SetStartTime(
+    const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value)
+{
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetStartTime(value);
+}
+
+void TimePickerDialogView::SetEndTime(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value)
+{
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetEndTime(value);
 }
 
 void TimePickerDialogView::SetSelectedTime(

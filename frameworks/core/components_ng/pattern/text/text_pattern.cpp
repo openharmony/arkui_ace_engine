@@ -2867,11 +2867,7 @@ void TextPattern::OnModifyDone()
             renderContext->UpdateClipEdge(true);
             renderContext->SetClipToFrame(true);
         }
-        if (textLayoutProperty->GetTextMarqueeStartPolicyValue(MarqueeStartPolicy::DEFAULT) ==
-            MarqueeStartPolicy::ON_FOCUS) {
-            InitFocusEvent();
-            InitHoverEvent();
-        }
+        UpdateMarqueeStartPolicy();
     }
     const auto& children = host->GetChildren();
     if (children.empty()) {
@@ -2892,6 +2888,26 @@ void TextPattern::OnModifyDone()
         }
     }
     RecoverCopyOption();
+}
+
+void TextPattern::UpdateMarqueeStartPolicy()
+{
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (!textLayoutProperty->HasTextMarqueeStartPolicy()) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        auto theme = context->GetTheme<TextTheme>();
+        CHECK_NULL_VOID(theme);
+        textLayoutProperty->UpdateTextMarqueeStartPolicy(theme->GetMarqueeStartPolicy());
+    }
+    if (textLayoutProperty->GetTextMarqueeStartPolicyValue(MarqueeStartPolicy::DEFAULT) ==
+        MarqueeStartPolicy::ON_FOCUS) {
+        InitFocusEvent();
+        InitHoverEvent();
+    }
 }
 
 bool TextPattern::SetActionExecSubComponent()
@@ -3080,7 +3096,7 @@ std::string TextPattern::GetBindSelectionMenuInJson() const
     for (auto& [spanResponsePair, params] : selectionMenuMap_) {
         auto& [spanType, responseType] = spanResponsePair;
         auto jsonItem = JsonUtil::Create(true);
-        jsonItem->Put("spanType", static_cast<int32_t>(spanType));
+        jsonItem->Put("spanType", TextSpanTypeMapper::GetJsSpanType(spanType, params->isValid));
         jsonItem->Put("responseType", static_cast<int32_t>(responseType));
         jsonItem->Put("menuType", static_cast<int32_t>(SelectionMenuType::SELECTION_MENU));
         jsonArray->Put(jsonItem);
@@ -4220,8 +4236,7 @@ bool TextPattern::NeedShowAIDetect()
 }
 
 void TextPattern::BindSelectionMenu(TextSpanType spanType, TextResponseType responseType,
-    std::function<void()>& menuBuilder, std::function<void(int32_t, int32_t)>& onAppear,
-    std::function<void()>& onDisappear)
+    std::function<void()>& menuBuilder, const SelectMenuParam& menuParam)
 {
     auto key = std::make_pair(spanType, responseType);
     auto it = selectionMenuMap_.find(key);
@@ -4231,13 +4246,19 @@ void TextPattern::BindSelectionMenu(TextSpanType spanType, TextResponseType resp
             return;
         }
         it->second->buildFunc = menuBuilder;
-        it->second->onAppear = onAppear;
-        it->second->onDisappear = onDisappear;
+        it->second->onAppear = menuParam.onAppear;
+        it->second->onDisappear = menuParam.onDisappear;
+        it->second->onMenuShow = menuParam.onMenuShow;
+        it->second->onMenuHide = menuParam.onMenuHide;
+        it->second->isValid = menuParam.isValid;
         return;
     }
 
-    auto selectionMenuParams =
-        std::make_shared<SelectionMenuParams>(spanType, menuBuilder, onAppear, onDisappear, responseType);
+    auto selectionMenuParams = std::make_shared<SelectionMenuParams>(
+        spanType, menuBuilder, menuParam.onAppear, menuParam.onDisappear, responseType);
+    selectionMenuParams->onMenuShow = menuParam.onMenuShow;
+    selectionMenuParams->onMenuHide = menuParam.onMenuHide;
+    selectionMenuParams->isValid = menuParam.isValid;
     selectionMenuMap_[key] = selectionMenuParams;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -4252,12 +4273,22 @@ void TextPattern::CloseSelectionMenu()
 
 std::shared_ptr<SelectionMenuParams> TextPattern::GetMenuParams(TextSpanType spanType, TextResponseType responseType)
 {
-    auto key = std::make_pair(spanType, responseType);
-    auto it = selectionMenuMap_.find(key);
-    if (it != selectionMenuMap_.end()) {
-        return it->second;
+    // JS TextSpanType.DEFAULT = TextSpanType::NONE
+    // JS TextResponseType.DEFAULT = TextResponseType::NONE
+    std::vector<std::pair<TextSpanType, TextResponseType>> searchPairs = {
+        { spanType, responseType },
+        { spanType, TextResponseType::NONE },
+    };
+    if (spanType != TextSpanType::NONE) {
+        searchPairs.push_back({ TextSpanType::NONE, responseType });
+        searchPairs.push_back({ TextSpanType::NONE, TextResponseType::NONE });
     }
-
+    for (const auto& key : searchPairs) {
+        auto it = selectionMenuMap_.find(key);
+        if (it != selectionMenuMap_.end()) {
+            return it->second;
+        }
+    }
     TAG_LOGD(AceLogTag::ACE_TEXT, "The key not in selectionMenuMap_");
     return nullptr;
 }
@@ -4267,7 +4298,7 @@ void TextPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextRes
     auto currentSpanType = selectedType_.value_or(TextSpanType::NONE);
     std::shared_ptr<SelectionMenuParams> menuParams = nullptr;
     menuParams = GetMenuParams(currentSpanType, responseType);
-    if (menuParams == nullptr) {
+    if (menuParams == nullptr || !menuParams->isValid) {
         return;
     }
     CopyBindSelectionMenuParams(selectInfo, menuParams);
@@ -4277,21 +4308,46 @@ void TextPattern::CopyBindSelectionMenuParams(
     SelectOverlayInfo& selectInfo, std::shared_ptr<SelectionMenuParams> menuParams)
 {
     selectInfo.menuInfo.menuBuilder = menuParams->buildFunc;
-    if (menuParams->onAppear) {
-        auto weak = AceType::WeakClaim(this);
-        auto callback = [weak, menuParams]() {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            CHECK_NULL_VOID(menuParams->onAppear);
-
-            auto& textSelector = pattern->textSelector_;
-            auto selectStart = std::min(textSelector.baseOffset, textSelector.destinationOffset);
-            auto selectEnd = std::max(textSelector.baseOffset, textSelector.destinationOffset);
-            menuParams->onAppear(selectStart, selectEnd);
-        };
-        selectInfo.menuCallback.onAppear = std::move(callback);
-    }
+    auto weak = AceType::WeakClaim(this);
+    selectInfo.menuCallback.onAppear = [weak, menuParams]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_APPEAR, menuParams);
+    };
     selectInfo.menuCallback.onDisappear = menuParams->onDisappear;
+    selectInfo.menuCallback.onMenuShow = [weak, menuParams]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_SHOW, menuParams);
+    };
+    selectInfo.menuCallback.onMenuHide = [weak, menuParams]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnHandleSelectionMenuCallback(SelectionMenuCalblackId::MENU_HIDE, menuParams);
+    };
+}
+
+void TextPattern::OnHandleSelectionMenuCallback(
+    SelectionMenuCalblackId callbackId, std::shared_ptr<SelectionMenuParams> menuParams)
+{
+    std::function<void(int32_t, int32_t)> callback;
+    switch (callbackId) {
+        case SelectionMenuCalblackId::MENU_SHOW:
+            callback = menuParams->onMenuShow;
+            break;
+        case SelectionMenuCalblackId::MENU_HIDE:
+            callback = menuParams->onMenuHide;
+            break;
+        case SelectionMenuCalblackId::MENU_APPEAR:
+            callback = menuParams->onAppear;
+            break;
+        default:
+            callback = nullptr;
+    }
+    CHECK_NULL_VOID(callback);
+    auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
+    callback(selectStart, selectEnd);
 }
 
 void TextPattern::FireOnSelectionChange(int32_t start, int32_t end)

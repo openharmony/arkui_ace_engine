@@ -32,6 +32,7 @@ public:
     ~FrameNodeImpl();
 
     void Reset() override;
+
     void Measure(const std::optional<NG::LayoutConstraintT<float>>& parentContraint) override;
 
     void Layout() override;

@@ -178,6 +178,7 @@ void JSTextEditableController::AddText(const JSCallbackInfo& info)
             if (offset->IsNumber()) {
                 offsetIndex = offset->ToNumber<int32_t>();
             }
+            offsetIndex = std::max(0, offsetIndex);
         }
         // add text
         int32_t result = controller->AddText(textValue, offsetIndex);
@@ -204,10 +205,12 @@ void JSTextEditableController::DeleteText(const JSCallbackInfo& info)
         JSRef<JSVal> start = rangeObj->GetProperty("start");
         if (start->IsNumber()) {
             startIndex = start->ToNumber<int32_t>();
+            startIndex = std::max(0, startIndex);
         }
         JSRef<JSVal> end = rangeObj->GetProperty("end");
         if (end->IsNumber()) {
             endIndex = end->ToNumber<int32_t>();
+            endIndex = std::max(0, endIndex);
         }
         controller->DeleteText(startIndex, endIndex);
     } else {

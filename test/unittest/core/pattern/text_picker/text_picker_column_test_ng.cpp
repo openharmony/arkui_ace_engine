@@ -1874,6 +1874,36 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest012, TestSize.Level1
 }
 
 /**
+ * @tc.name: TextPickerColumnPatternTest013
+ * @tc.desc: Test TextPickerColumnPattern ScrollOption and HandleEnterSelectedArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest013, TestSize.Level1)
+{
+    InitTextPickerColumnTestNg();
+    auto textPickerColumnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    theme->showOptionCount_ = 4;
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
+    textPickerColumnPattern->SetOptions(range);
+    textPickerColumnPattern->SetCurrentIndex(SELECTED_INDEX_2);
+    textPickerColumnPattern->SetScrollDirection(true);
+    TextPickerOptionProperty prop;
+    prop.height = 4.0f;
+    prop.fontheight = 3.0f;
+    prop.prevDistance = 5.0f;
+    prop.nextDistance = 7.0f;
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->optionProperties_.emplace_back(prop);
+    textPickerColumnPattern->ScrollOption(10.0f);
+    EXPECT_EQ(textPickerColumnPattern->GetEnterIndex(), 1);
+}
+
+/**
  * @tc.name: TextPickerColumnPatternInitTextFontFamily001
  * @tc.desc: Test InitTextFontFamily.
  * @tc.type: FUNC

@@ -48,10 +48,12 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/calc_length.h"
@@ -224,6 +226,10 @@ void DialogPattern::HandleClick(const GestureEvent& info)
             CHECK_NULL_VOID(pipeline);
             auto overlayManager = pipeline->GetOverlayManager();
             CHECK_NULL_VOID(overlayManager);
+            auto embeddedOverlay = GetEmbeddedOverlay();
+            if (embeddedOverlay) {
+                overlayManager = embeddedOverlay;
+            }
             if (this->CallDismissInNDK(static_cast<int32_t>(DialogDismissReason::DIALOG_TOUCH_OUTSIDE))) {
                 return;
             } else if (this->ShouldDismiss()) {
@@ -249,6 +255,10 @@ void DialogPattern::PopDialog(int32_t buttonIdx = -1)
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+    auto embeddedOverlay = GetEmbeddedOverlay();
+    if (embeddedOverlay) {
+        overlayManager = embeddedOverlay;
+    }
     if (host->IsRemoving()) {
         return;
     }
@@ -931,19 +941,7 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
     textProps->UpdateContent(text);
     textProps->UpdateFontWeight(FontWeight::MEDIUM);
     textProps->UpdateMaxLines(1);
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto context = host->GetContext();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto textTheme = context->GetTheme<TextTheme>();
-    CHECK_NULL_RETURN(textTheme, nullptr);
-    if (textTheme->GetIsTextFadeout()) {
-        textProps->UpdateTextOverflow(TextOverflow::MARQUEE);
-        textProps->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
-        textProps->UpdateTextMarqueeFadeout(true);
-    } else {
-        textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    }
+    textProps->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     Dimension buttonTextSize = dialogTheme_->GetButtonTextSize().IsValid() ? dialogTheme_->GetButtonTextSize()
                                                                            : dialogTheme_->GetNormalButtonFontSize();
     textProps->UpdateFontSize(buttonTextSize);
@@ -954,6 +952,17 @@ RefPtr<FrameNode> DialogPattern::CreateButtonText(const std::string& text, const
         textProps->UpdateTextColor(color);
     } else {
         textProps->UpdateTextColor(DEFAULT_BUTTON_COLOR);
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, textNode);
+    auto context = host->GetContext();
+    CHECK_NULL_RETURN(context, textNode);
+    auto textTheme = context->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, textNode);
+    if (textTheme->GetIsTextFadeout()) {
+        textProps->UpdateTextOverflow(TextOverflow::MARQUEE);
+        textProps->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::ON_FOCUS);
+        textProps->UpdateTextMarqueeFadeout(true);
     }
     return textNode;
 }
@@ -2023,5 +2032,42 @@ void DialogPattern::DumpSimplifyObjectProperty(std::unique_ptr<JsonValue>& json)
     if (dialogProperties_.maskRect.has_value()) {
         json->Put("MaskRect", dialogProperties_.maskRect.value().ToString().c_str());
     }
+}
+
+RefPtr<OverlayManager> DialogPattern::GetEmbeddedOverlay()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto parent = host->GetParent();
+    CHECK_NULL_RETURN(parent, nullptr);
+    auto parentNode = AceType::DynamicCast<FrameNode>(parent);
+    CHECK_NULL_RETURN(parentNode, nullptr);
+    if (parentNode->GetTag() == V2::PAGE_ETS_TAG) {
+        auto pattern = parentNode->GetPattern<PagePattern>();
+        CHECK_NULL_RETURN(pattern, nullptr);
+        return pattern->GetOverlayManager();
+    } else if (parentNode->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        auto pattern = parentNode->GetPattern<NavDestinationPattern>();
+        CHECK_NULL_RETURN(pattern, nullptr);
+        return pattern->GetOverlayManager();
+    }
+    return nullptr;
+}
+
+void DialogPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parentNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    if (parentNode->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
+        return;
+    }
+    auto dialogRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(dialogRenderContext);
+    auto navDestinationPattern = parentNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto zIndex = navDestinationPattern->GetTitlebarZIndex();
+    dialogRenderContext->UpdateZIndex(zIndex + 1);
 }
 } // namespace OHOS::Ace::NG

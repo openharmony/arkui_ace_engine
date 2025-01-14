@@ -153,6 +153,8 @@ SelectOverlayInfo SelectContentOverlayManager::BuildSelectOverlayInfo(int32_t re
     RegisterHandleCallback(overlayInfo);
     selectOverlayHolder_->OnUpdateSelectOverlayInfo(overlayInfo, requestCode);
     UpdateSelectOverlayInfoInternal(overlayInfo);
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Build selectoverlay with menu info: %{public}s, requested by %{public}s",
+        overlayInfo.menuInfo.ToString().c_str(), GetOwnerDebugInfo().c_str());
     return overlayInfo;
 }
 
@@ -186,12 +188,15 @@ void SelectContentOverlayManager::RegisterHandleCallback(SelectOverlayInfo& info
     if (!callback->IsRegisterHandleCallback()) {
         return;
     }
-    info.onHandleMoveStart =
-        [weakCallback = WeakClaim(AceType::RawPtr(callback))](const GestureEvent& event, bool isFirst) {
-            auto overlayCallback = weakCallback.Upgrade();
-            CHECK_NULL_VOID(overlayCallback);
-            overlayCallback->OnHandleMoveStart(event, isFirst);
-        };
+    std::string ownerInfo = GetOwnerDebugInfo();
+    info.onHandleMoveStart = [weakCallback = WeakClaim(AceType::RawPtr(callback)), ownerInfo](
+                                 const GestureEvent& event, bool isFirst) {
+        auto overlayCallback = weakCallback.Upgrade();
+        CHECK_NULL_VOID(overlayCallback);
+        TAG_LOGI(
+            AceLogTag::ACE_SELECT_OVERLAY, "Start move %{public}d handle - %{public}s", isFirst, ownerInfo.c_str());
+        overlayCallback->OnHandleMoveStart(event, isFirst);
+    };
     info.onHandleMove = [weakCallback = WeakClaim(AceType::RawPtr(callback)), weakManager = WeakClaim(this)](
                             const RectF& rect, bool isFirst) {
         auto overlayCallback = weakCallback.Upgrade();
@@ -202,14 +207,15 @@ void SelectContentOverlayManager::RegisterHandleCallback(SelectOverlayInfo& info
         }
         overlayCallback->OnHandleMove(handle, isFirst);
     };
-    info.onHandleMoveDone = [weakCallback = WeakClaim(AceType::RawPtr(callback)), weakManager = WeakClaim(this)](
-                                const RectF& rect, bool isFirst) {
+    info.onHandleMoveDone = [weakCallback = WeakClaim(AceType::RawPtr(callback)), weakManager = WeakClaim(this),
+                                ownerInfo](const RectF& rect, bool isFirst) {
         auto overlayCallback = weakCallback.Upgrade();
         CHECK_NULL_VOID(overlayCallback);
         auto handle = rect;
         if (weakManager.Upgrade()) {
             weakManager.Upgrade()->RevertRectRelativeToRoot(handle);
         }
+        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Stop move %{public}d handle %{public}s", isFirst, ownerInfo.c_str());
         overlayCallback->OnHandleMoveDone(rect, isFirst);
     };
     info.onHandleReverse = [weakCallback = WeakClaim(AceType::RawPtr(callback))](bool isReverse) {
@@ -264,15 +270,20 @@ std::function<void()> SelectContentOverlayManager::MakeMenuCallback(
 {
     auto callback = selectOverlayHolder_->GetCallback();
     CHECK_NULL_RETURN(callback, nullptr);
-    return [actionId = id, weakCallback = WeakClaim(AceType::RawPtr(callback)), menuType = info.menuInfo.menuType]() {
+    return [actionId = id, weakCallback = WeakClaim(AceType::RawPtr(callback)), menuType = info.menuInfo.menuType,
+               logInfo = GetOwnerDebugInfo()]() {
         auto callback = weakCallback.Upgrade();
         CHECK_NULL_VOID(callback);
+        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY,
+            "OnMenuItemAction called, menu id %{public}d, menu type %{public}d, consumer %{public}s", actionId,
+            menuType, logInfo.c_str());
         callback->OnMenuItemAction(actionId, menuType);
     };
 }
 
 void SelectContentOverlayManager::UpdateExistOverlay(const SelectOverlayInfo& info, bool animation, int32_t requestCode)
 {
+    TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "UpdateExistOverlay called by %{public}s", GetOwnerDebugInfo().c_str());
     // update menu node
     auto menuPattern = GetSelectMenuPattern(WeakClaim(this));
     if (menuPattern) {
@@ -368,6 +379,8 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
         if ((dirty & DIRTY_ALL_MENU_ITEM) == DIRTY_ALL_MENU_ITEM) {
             SelectMenuInfo menuInfo;
             selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+            TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update all menu item: %{public}s - %{public}s",
+                menuInfo.ToString().c_str(), GetOwnerDebugInfo().c_str());
             menuPattern->UpdateSelectMenuInfo(menuInfo);
         }
         if ((dirty & DIRTY_COPY_ALL_ITEM) == DIRTY_COPY_ALL_ITEM) {
@@ -376,6 +389,8 @@ void SelectContentOverlayManager::MarkInfoChange(SelectOverlayDirtyFlag dirty)
             selectOverlayHolder_->OnUpdateMenuInfo(menuInfo, DIRTY_COPY_ALL_ITEM);
             oldMenuInfo.showCopyAll = menuInfo.showCopyAll;
             oldMenuInfo.showCopy = menuInfo.showCopy;
+            TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update select all menu: %{public}s - %{public}s",
+                oldMenuInfo.ToString().c_str(), GetOwnerDebugInfo().c_str());
             menuPattern->UpdateSelectMenuInfo(oldMenuInfo);
         }
         if ((dirty & DIRTY_SELECT_TEXT) == DIRTY_SELECT_TEXT) {
@@ -416,6 +431,8 @@ void SelectContentOverlayManager::UpdateHandleInfosWithFlag(int32_t updateFlag)
         if (firstHandleInfo) {
             ConvertHandleRelativeToParent(*firstHandleInfo);
         }
+        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update first handle info %{public}s - %{public}s",
+            firstHandleInfo->ToString().c_str(), GetOwnerDebugInfo().c_str());
     }
     std::optional<SelectHandleInfo> secondHandleInfo;
     if ((static_cast<uint32_t>(updateFlag) & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
@@ -423,6 +440,8 @@ void SelectContentOverlayManager::UpdateHandleInfosWithFlag(int32_t updateFlag)
         if (secondHandleInfo) {
             ConvertHandleRelativeToParent(*secondHandleInfo);
         }
+        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Update second handle info %{public}s - %{public}s",
+            firstHandleInfo->ToString().c_str(), GetOwnerDebugInfo().c_str());
     }
     if (!firstHandleInfo && !secondHandleInfo) {
         return;
@@ -676,6 +695,8 @@ bool SelectContentOverlayManager::CloseInternal(int32_t id, bool animation, Clos
         ClearAllStatus();
     }
     if (callback) {
+        TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "SelectOverlay is closed with reason %{public}d - %{public}s",
+            reason, GetOwnerDebugInfo().c_str());
         callback->OnCloseOverlay(menuType, reason, info);
     }
     return true;
@@ -921,7 +942,7 @@ bool SelectContentOverlayManager::IsTouchInHandleLevelOverlayArea(const PointF& 
     selectOverlayNode = DynamicCast<SelectOverlayNode>(handleNode_.Upgrade());
     CHECK_NULL_RETURN(selectOverlayNode, false);
     auto localPoint = point;
-    ConvertPointRelativeToNode(selectOverlayNode->GetAncestorNodeOfFrame(), localPoint);
+    ConvertPointRelativeToNode(selectOverlayNode->GetAncestorNodeOfFrame(false), localPoint);
     return selectOverlayNode->IsInSelectedOrSelectOverlayArea(localPoint);
 }
 
@@ -1010,7 +1031,7 @@ void SelectContentOverlayManager::ConvertPointRelativeToNode(const RefPtr<FrameN
     auto parent = node;
     while (parent && parent != rootNode) {
         nodeStack.push(parent);
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     CHECK_NULL_VOID(!nodeStack.empty());
     PointF temp(point.GetX(), point.GetY());
@@ -1161,5 +1182,16 @@ bool SelectContentOverlayManager::IsStopBackPress() const
 {
     CHECK_NULL_RETURN(selectOverlayHolder_, true);
     return selectOverlayHolder_->IsStopBackPress();
+}
+
+std::string SelectContentOverlayManager::GetOwnerDebugInfo()
+{
+    CHECK_NULL_RETURN(selectOverlayHolder_, "Holder NA");
+    std::stringstream ownerInfo;
+    if (selectOverlayHolder_->GetOwner()) {
+        ownerInfo << "[" << selectOverlayHolder_->GetOwner()->GetTag() << "," << selectOverlayHolder_->GetOwnerId()
+                  << "]";
+    }
+    return ownerInfo.str();
 }
 } // namespace OHOS::Ace::NG

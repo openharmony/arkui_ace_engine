@@ -603,6 +603,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onWillShow", &JSNavDestination::SetWillShow);
     JSClass<JSNavDestination>::StaticMethod("onWillHide", &JSNavDestination::SetWillHide);
     JSClass<JSNavDestination>::StaticMethod("onWillDisappear", &JSNavDestination::SetWillDisAppear);
+    JSClass<JSNavDestination>::StaticMethod("onResult", &JSNavDestination::SetResultCallback);
     JSClass<JSNavDestination>::StaticMethod("ignoreLayoutSafeArea", &JSNavDestination::SetIgnoreLayoutSafeArea);
     JSClass<JSNavDestination>::StaticMethod("systemBarStyle", &JSNavDestination::SetSystemBarStyle);
     JSClass<JSNavDestination>::StaticMethod("recoverable", &JSNavDestination::SetRecoverable);
@@ -636,5 +637,25 @@ void JSNavDestination::SetSystemTransition(const JSCallbackInfo& info)
     auto value = info[0]->ToNumber<int32_t>();
     NG::NavigationSystemTransitionType type = ParseTransitionType(value);
     NavDestinationModel::GetInstance()->SetSystemTransitionType(type);
+}
+
+void JSNavDestination::SetResultCallback(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(info[0]);
+    if (func->IsEmpty()) {
+        return;
+    }
+    auto setPopCallback = [func](const RefPtr<NG::NavPathInfo>& info) {
+        auto pathInfo = AceType::DynamicCast<JSNavPathInfo>(info);
+        CHECK_NULL_VOID(pathInfo);
+        pathInfo->SetNavDestinationPopCallback(func);
+    };
+    NavDestinationModel::GetInstance()->SetOnPop(setPopCallback);
 }
 } // namespace OHOS::Ace::Framework

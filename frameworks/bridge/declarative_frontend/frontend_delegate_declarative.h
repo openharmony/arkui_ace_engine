@@ -180,7 +180,7 @@ public:
     size_t GetComponentsCount() override;
     void TriggerPageUpdate(int32_t pageId, bool directExecute = false) override;
 
-    void PostJsTask(std::function<void()>&& task, const std::string& name) override;
+    void PostJsTask(std::function<void()>&& task, const std::string& name, PriorityType priority) override;
 
     const std::string& GetAppID() const override;
     const std::string& GetAppName() const override;
@@ -294,6 +294,10 @@ public:
 
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshotByUniqueId(int32_t uniqueId,
         const NG::SnapshotOptions& options) override;
+        
+    void CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        bool enableInspector, const NG::SnapshotParam& param) override;
 
     void AddFrameNodeToOverlay(
         const RefPtr<NG::FrameNode>& node, std::optional<int32_t> index = std::nullopt) override;

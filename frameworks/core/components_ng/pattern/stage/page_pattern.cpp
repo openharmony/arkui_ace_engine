@@ -162,7 +162,7 @@ void PagePattern::ProcessHideState()
     host->SetActive(false);
     host->NotifyVisibleChange(VisibleType::VISIBLE, VisibleType::INVISIBLE);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
@@ -175,7 +175,7 @@ void PagePattern::ProcessShowState()
     host->SetActive(true);
     host->NotifyVisibleChange(VisibleType::INVISIBLE, VisibleType::VISIBLE);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -542,14 +542,10 @@ void PagePattern::InitTransitionIn(const RefPtr<PageTransitionEffect>& effect, P
     renderContext->UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
     renderContext->UpdateTransformTranslate(translateOptions.value());
     renderContext->UpdateOpacity(effect->GetOpacityEffect().value());
-    if (type == PageTransitionType::ENTER_POP) {
-        renderContext->RemoveClipWithRRect();
-    } else {
-        auto context = hostNode->GetContext();
-        CHECK_NULL_VOID(context);
-        renderContext->UpdateBackgroundColor(context->GetAppBgColor());
-        renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-    }
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    renderContext->UpdateBackgroundColor(context->GetAppBgColor());
+    renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
 }
 
 void PagePattern::InitTransitionOut(const RefPtr<PageTransitionEffect> & effect, PageTransitionType type)
@@ -564,10 +560,6 @@ void PagePattern::InitTransitionOut(const RefPtr<PageTransitionEffect> & effect,
     renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     renderContext->UpdateOpacity(1.0);
-    if (type == PageTransitionType::EXIT_PUSH) {
-        renderContext->RemoveClipWithRRect();
-        return;
-    }
     renderContext->ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
     auto context = hostNode->GetContext();
     CHECK_NULL_VOID(context);
@@ -696,9 +688,7 @@ void PagePattern::TransitionInFinish(const RefPtr<PageTransitionEffect>& effect,
     renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     renderContext->UpdateOpacity(1.0);
-    if (type == PageTransitionType::ENTER_PUSH) {
-        renderContext->ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-    }
+    renderContext->ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
 }
 
 void PagePattern::TransitionOutFinish(const RefPtr<PageTransitionEffect>& effect, PageTransitionType type)
@@ -713,9 +703,7 @@ void PagePattern::TransitionOutFinish(const RefPtr<PageTransitionEffect>& effect
     renderContext->UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
     renderContext->UpdateTransformTranslate(translateOptions.value());
     renderContext->UpdateOpacity(effect->GetOpacityEffect().value());
-    if (type == PageTransitionType::EXIT_POP) {
-        renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-    }
+    renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
 }
 
 void PagePattern::MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor)
@@ -873,11 +861,6 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
     if (type == PageTransitionType::ENTER_PUSH) {
         auto renderContext = inPage->GetRenderContext();
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        auto layoutProperty = inPage->GetLayoutProperty();
-        CHECK_NULL_VOID(layoutProperty);
-        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_NONE, .edges = SAFE_AREA_EDGE_NONE };
-        layoutProperty->UpdateSafeAreaExpandOpts(opts);
-        inPage->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
     ResetPageTransitionEffect();
     auto stageManager = context->GetStageManager();

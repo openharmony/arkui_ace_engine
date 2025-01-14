@@ -525,6 +525,15 @@ void SearchPattern::InitTextFieldDragEvent()
     CHECK_NULL_VOID(textFieldEventHub);
 
     textFieldFrameNode->SetDragPreview(host->GetDragPreview());
+    if (host->GetDisallowDropForcedly()) {
+        textFieldFrameNode->SetDisallowDropForcedly(true);
+        textFieldFrameNode->SetAllowDrop(host->GetAllowDrop());
+    } else if (!host->GetAllowDrop().empty()) {
+        textFieldFrameNode->SetDisallowDropForcedly(false);
+        textFieldFrameNode->SetAllowDrop(host->GetAllowDrop());
+    } else {
+        textFieldFrameNode->SetDisallowDropForcedly(false);
+    }
 
     auto dragStart = searchEventHub->GetOnDragStart();
     if (dragStart != nullptr) {

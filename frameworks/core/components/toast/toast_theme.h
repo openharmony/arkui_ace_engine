@@ -46,7 +46,6 @@ public:
                 return theme;
             }
             ParsePattern(themeConstants, theme);
-            Parse(themeConstants, theme);
             return theme;
         }
     private:
@@ -70,6 +69,8 @@ public:
             constexpr double toastLimitHeightRatio = 0.65;
             theme->toastLimitHeightRatio_ =
                 toastPattern->GetAttr<double>("toast_limit_height_ratio", toastLimitHeightRatio);
+            theme->bgThemeColorMode_ =
+                static_cast<uint32_t>(toastPattern->GetAttr<double>("toast_bg_theme_color_mode", 0));
 
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
                 theme->padding_ = Edge(toastPattern->GetAttr<Dimension>("toast_padding_level8", 0.0_vp).Value(),
@@ -111,16 +112,6 @@ public:
             theme->toastInnerBorderColor_ =
                 toastPattern->GetAttr<Color>("toast_inner_border_color", Color::TRANSPARENT);
             theme->toastInnerBorderWidth_ = toastPattern->GetAttr<double>("toast_inner_border_width", 0.0f);
-        }
-        void Parse(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<ToastTheme>& theme) const
-        {
-            RefPtr<ThemeStyle> toastPattern = themeConstants->GetPatternByName(THEME_PATTERN_TOAST);
-            if (!toastPattern) {
-                return;
-            }
-
-            theme->bgThemeColorMode_ =
-                static_cast<uint32_t>(toastPattern->GetAttr<double>("toast_bg_theme_color_mode", 0));
             theme->toastShadowStyle_ = static_cast<ShadowStyle>(toastPattern->GetAttr<int>(
                 "toast_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
             theme->toastBackgroundBlurStyle_ = toastPattern->GetAttr<int>(

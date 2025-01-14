@@ -16,7 +16,7 @@
 let LogTag;
 (function (LogTag) {
   LogTag[LogTag['STATE_MGMT'] = 0] = 'STATE_MGMT';
-  LogTag[LogTag['JS_UI_CONTEXT'] = 1] = 'JS_UI_CONTEXT';
+  LogTag[LogTag['ARK_COMPONENT'] = 1] = 'ARK_COMPONENT';
 })(LogTag || (LogTag = {}));
 class JSUIContextLogConsole {
   static log(...args) {
@@ -153,6 +153,22 @@ class ComponentSnapshot {
         __JSScopeUtil__.restoreInstanceId();
         return pixelmap;
     }
+
+    createFromComponent(content, delay, checkImageStatus, options) {
+        if (content === undefined || content === null) {
+            let paramErrMsg =
+            'Parameter error. Possible causes: 1. Mandatory parameters are left unspecified;' +
+            ' 2. Incorrect parameter types; 3. Parameter verification failed.';
+            __JSScopeUtil__.restoreInstanceId();
+            return new Promise((resolve, reject) => {
+                reject({ message: paramErrMsg, code: 401 });
+            });
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let promise = this.ohos_componentSnapshot.createFromComponent(content.getFrameNode(), delay, checkImageStatus, options);
+        __JSScopeUtil__.restoreInstanceId();
+        return promise;
+    }
 }
 
 class DragController {
@@ -196,6 +212,12 @@ class DragController {
     setDragEventStrictReportingEnabled(enable) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         JSViewAbstract.setDragEventStrictReportingEnabled(enable);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+
+    notifyDragStartRequest(request) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.notifyDragStartRequest(request);
         __JSScopeUtil__.restoreInstanceId();
     }
 }
@@ -934,6 +956,15 @@ class FocusController {
         this.ohos_focusController.setAutoFocusTransfer(value);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    configWindowMask(enable) {
+        if (this.ohos_focusController === null || this.ohos_focusController === undefined) {
+            return;
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.ohos_focusController.configWindowMask(enable);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class CursorController {
@@ -1324,7 +1355,7 @@ class PromptAction {
                 reject({ message: paramErrMsg, code: 401 });
             });
         }
-        let result_
+        let result_;
         if (argLength === 2) {
             result_ = Context.updatePopup(content.getNodePtr(), options);
         } else {
@@ -1405,6 +1436,13 @@ class AtomicServiceBar {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.ohos_atomicServiceBar.setIconColor(color);
         __JSScopeUtil__.restoreInstanceId();
+    }
+
+    getBarRect() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let rect = this.ohos_atomicServiceBar.getBarRect();
+        __JSScopeUtil__.restoreInstanceId();
+        return rect;
     }
 }
 

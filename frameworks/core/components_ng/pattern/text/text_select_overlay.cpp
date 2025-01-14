@@ -170,22 +170,38 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     CHECK_NULL_VOID(textPattern);
     auto host = textPattern->GetHost();
     CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto contentRect = textPattern->GetTextContentRect();
-    auto contentOffset = contentRect.GetOffset();
     auto localHandleOffset = handleRect.GetOffset();
     if (IsOverlayMode()) {
-        contentOffset = contentOffset + GetPaintOffsetWithoutTransform();
         localHandleOffset -= GetPaintOffsetWithoutTransform();
     }
     localHandleOffset.SetY(localHandleOffset.GetY() + handleRect.Height() / 2.0f);
     if (textPattern->HasContent() && textPattern->GetOrCreateMagnifier()) {
         textPattern->GetMagnifierController()->SetLocalOffset(localHandleOffset);
     }
+    // the handle position is calculated based on the middle of the handle height.
+    auto handleOffset = GetHandleReferenceOffset(handleRect);
+    UpdateSelectorOnHandleMove(handleOffset, isFirst);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->MarkInfoChange(DIRTY_SELECT_TEXT);
+}
+
+OffsetF TextSelectOverlay::GetHandleReferenceOffset(const RectF& handleRect)
+{
     auto handleOffset = handleRect.GetOffset();
     handleOffset.SetY(handleOffset.GetY() + handleRect.Height() / 2.0f);
-
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, handleOffset);
+    auto host = textPattern->GetHost();
+    CHECK_NULL_RETURN(host, handleOffset);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, handleOffset);
+    auto contentRect = textPattern->GetTextContentRect();
+    auto contentOffset = contentRect.GetOffset();
+    if (IsOverlayMode()) {
+        contentOffset = contentOffset + GetPaintOffsetWithoutTransform();
+    }
     auto clip = false;
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         clip = true;
@@ -198,12 +214,7 @@ void TextSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst)
     }
     auto textPaintOffset = contentOffset - OffsetF(0.0f, std::min(textPattern->GetBaselineOffset(), 0.0f));
     handleOffset -= textPaintOffset;
-    // the handle position is calculated based on the middle of the handle height.
-    UpdateSelectorOnHandleMove(handleOffset, isFirst);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    auto overlayManager = GetManager<SelectContentOverlayManager>();
-    CHECK_NULL_VOID(overlayManager);
-    overlayManager->MarkInfoChange(DIRTY_SELECT_TEXT);
+    return handleOffset;
 }
 
 void TextSelectOverlay::UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle)
@@ -233,7 +244,9 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     textPattern->CalculateHandleOffsetAndShowOverlay();
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->ShowOptionMenu();
+    if (!textPattern->IsSelectedTypeChange()) {
+        overlayManager->ShowOptionMenu();
+    }
     overlayManager->MarkInfoChange((isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE) | DIRTY_SELECT_AREA |
                                    DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM);
     if (textPattern->CheckSelectedTypeChange()) {
@@ -359,6 +372,13 @@ void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo
             return deltaOffset;
         };
     }
+    overlayInfo.menuCallback.showMenuOnMoveDone = [weak = WeakClaim(this)]() {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_RETURN(overlay, true);
+        auto textPattern = overlay->GetPattern<TextPattern>();
+        CHECK_NULL_RETURN(textPattern, true);
+        return !textPattern->IsSelectedTypeChange();
+    };
 }
 
 void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type)

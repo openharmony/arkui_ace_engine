@@ -31,6 +31,7 @@ public:
     void SetPreDecode(int32_t preDecode) override;
     void SetIsReverse(bool isReverse) override;
     void SetFixedSize(bool fixedSize) override;
+    void SetAutoMonitorInvisibleArea(bool autoMonitorInvisibleArea = false) override;
     void SetOnStart(std::function<void()>&& OnStart) override;
     void SetOnPause(std::function<void()>&& OnPause) override;
     void SetOnRepeat(std::function<void()>&& OnRepeat) override;
@@ -52,6 +53,7 @@ public:
     static int32_t GetFillMode(FrameNode* frameNode);
     static int32_t GetIteration(FrameNode* frameNode);
     static int32_t GetImagesSize(FrameNode* frameNode);
+    static void SetAutoMonitorInvisibleArea(FrameNode* frameNode, bool autoMonitorInvisibleArea = false);
     static void SetOnStart(FrameNode* frameNode, std::function<void()>&& onStart);
     static void SetOnPause(FrameNode* frameNode, std::function<void()>&& onPause);
     static void SetOnRepeat(FrameNode* frameNode, std::function<void()>&& onRepeat);

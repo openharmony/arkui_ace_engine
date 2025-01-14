@@ -369,6 +369,7 @@ bool FocusHub::RequestFocusImmediatelyInner()
 
     if (!IsFocusableWholePath()) {
         focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_FOCUSABLE_ANCESTOR);
+        focusManager->SetRequestFocusResult(ERROR_CODE_NON_FOCUSABLE_ANCESTOR);
         return false;
     }
 
@@ -569,7 +570,7 @@ bool FocusHub::IsFocusableScope()
     if (focusDepend_ == FocusDependence::SELF || focusDepend_ == FocusDependence::AUTO) {
         return true;
     }
-    
+
     return AnyChildFocusHub([](const RefPtr<FocusHub>& focusHub) { return focusHub->IsFocusable(); });
 }
 
@@ -632,14 +633,17 @@ bool FocusHub::IsSyncRequestFocusableNode()
     CHECK_NULL_RETURN(focusManager, false);
     if (!IsEnabled() || !IsShow()) {
         focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_EXIST);
+        focusManager->SetRequestFocusResult(ERROR_CODE_NON_EXIST);
         return false;
     }
     if (!focusable_) {
         focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_FOCUSABLE);
+        focusManager->SetRequestFocusResult(ERROR_CODE_NON_FOCUSABLE);
         return false;
     }
     if (!parentFocusable_) {
         focusManager->TriggerRequestFocusCallback(RequestFocusResult::NON_FOCUSABLE_ANCESTOR);
+        focusManager->SetRequestFocusResult(ERROR_CODE_NON_FOCUSABLE_ANCESTOR);
         return false;
     }
     return true;
@@ -1844,10 +1848,10 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
     rect = frameNode->GetPaintRectWithTransform();
 
     //  Calculate currentNode -> childNode offset
-    auto parent = frameNode->GetAncestorNodeOfFrame();
+    auto parent = frameNode->GetAncestorNodeOfFrame(false);
     while (parent && parent != GetFrameNode()) {
         rect += parent->GetPaintRectWithTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     return true;
 }
@@ -2167,7 +2171,7 @@ bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event)
     if (!isDirectionKeyDown && !isTabDown) {
         return false;
     }
-    
+
     auto pipeline = node->GetContextRefPtr();
     if (pipeline && pipeline->IsTabJustTriggerOnKeyEvent()) {
         return false;

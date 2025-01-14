@@ -133,6 +133,7 @@ private:
         const RefPtr<FrameNode>& root, const std::list<RefPtr<UINode>>& children);
     RefPtr<FrameNode> GetContainerModalRoot();
     void UpdateSelectOverlayInfoInternal(SelectOverlayInfo& overlayInfo);
+    std::string GetOwnerDebugInfo();
 
     RefPtr<SelectOverlayHolder> selectOverlayHolder_;
     WeakPtr<FrameNode> selectOverlayNode_;

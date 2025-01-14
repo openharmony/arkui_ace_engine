@@ -25,6 +25,10 @@ const MAX_MAX_FONT_SCALE: number = 2
 const MIN_MAX_FONT_SCALE: number = 1
 
 interface SegmentButtonThemeInterface {
+  SEGMENT_TEXT_VERTICAL_PADDING: Resource;
+  SEGMENT_TEXT_HORIZONTAL_PADDING: Resource;
+  SEGMENT_TEXT_CAPSULE_VERTICAL_PADDING: Resource;
+  SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR: ResourceColor;
   FONT_COLOR: ResourceColor,
   TAB_SELECTED_FONT_COLOR: ResourceColor,
   CAPSULE_SELECTED_FONT_COLOR: ResourceColor,
@@ -37,21 +41,42 @@ interface SegmentButtonThemeInterface {
   HOVER_COLOR: ResourceColor,
   PRESS_COLOR: ResourceColor,
   BACKGROUND_BLUR_STYLE: BlurStyle,
+  SEGMENT_BUTTON_PADDING: number,
+  CONSTRAINT_SIZE_MIN_HEIGHT: DimensionNoPercentage,
+  SEGMENT_BUTTON_MIN_FONT_SIZE: DimensionNoPercentage,
+  SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: Length | BorderRadiuses | LocalizedBorderRadiuses,
+  SEGMENT_ITEM_TEXT_OVERFLOW: boolean,
+  SEGMENT_BUTTON_FOCUS_TEXT_COLOR: ResourceColor,
+  SEGMENT_BUTTON_SHADOW: ShadowStyle,
+  SEGMENT_FOCUS_STYLE_CUSTOMIZED: boolean
 }
 
 const segmentButtonTheme: SegmentButtonThemeInterface = {
-  FONT_COLOR: $r('sys.color.ohos_id_color_text_secondary'),
-  TAB_SELECTED_FONT_COLOR: $r('sys.color.ohos_id_color_text_primary'),
+  FONT_COLOR: $r('sys.color.segment_button_unselected_text_color'),
+  TAB_SELECTED_FONT_COLOR: $r('sys.color.segment_button_checked_text_color'),
   CAPSULE_SELECTED_FONT_COLOR: $r('sys.color.ohos_id_color_foreground_contrary'),
-  FONT_SIZE: $r('sys.float.ohos_id_text_size_body2'),
-  SELECTED_FONT_SIZE: $r('sys.float.ohos_id_text_size_body2'),
-  BACKGROUND_COLOR: $r('sys.color.ohos_id_color_button_normal'),
-  TAB_SELECTED_BACKGROUND_COLOR: $r('sys.color.ohos_id_color_foreground_contrary'),
+  FONT_SIZE: $r('sys.float.segment_button_unselected_text_size'),
+  SELECTED_FONT_SIZE: $r('sys.float.segment_button_checked_text_size'),
+  BACKGROUND_COLOR: $r('sys.color.segment_button_backboard_color'),
+  TAB_SELECTED_BACKGROUND_COLOR: $r('sys.color.segment_button_checked_foreground_color'),
   CAPSULE_SELECTED_BACKGROUND_COLOR: $r('sys.color.ohos_id_color_emphasize'),
   FOCUS_BORDER_COLOR: $r('sys.color.ohos_id_color_focused_outline'),
-  HOVER_COLOR: $r('sys.color.ohos_id_color_hover'),
-  PRESS_COLOR: $r('sys.color.ohos_id_color_click_effect'),
-  BACKGROUND_BLUR_STYLE: BlurStyle.NONE
+  HOVER_COLOR: $r('sys.color.segment_button_hover_color'),
+  PRESS_COLOR: $r('sys.color.segment_button_press_color'),
+  BACKGROUND_BLUR_STYLE: LengthMetrics.resource($r('sys.float.segment_button_background_blur_style'))
+    .value as BlurStyle,
+  SEGMENT_BUTTON_PADDING: LengthMetrics.resource($r('sys.float.segment_button_baseplate_padding')).value,
+  CONSTRAINT_SIZE_MIN_HEIGHT: $r('sys.float.segment_button_height'),
+  SEGMENT_BUTTON_MIN_FONT_SIZE: $r('sys.float.segment_button_min_font_size'),
+  SEGMENT_BUTTON_NORMAL_BORDER_RADIUS: $r('sys.float.segment_button_normal_border_radius'),
+  SEGMENT_ITEM_TEXT_OVERFLOW: LengthMetrics.resource($r('sys.float.segment_marquee')).value === 0.0,
+  SEGMENT_BUTTON_FOCUS_TEXT_COLOR: $r('sys.color.segment_button_focus_text_primary'),
+  SEGMENT_BUTTON_SHADOW: LengthMetrics.resource($r('sys.float.segment_button_shadow')).value as ShadowStyle,
+  SEGMENT_TEXT_HORIZONTAL_PADDING: $r('sys.float.segment_button_text_l_r_padding'),
+  SEGMENT_TEXT_VERTICAL_PADDING: $r('sys.float.segment_button_text_u_d_padding'),
+  SEGMENT_TEXT_CAPSULE_VERTICAL_PADDING: $r('sys.float.segment_button_text_capsule_u_d_padding'),
+  SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR: $r('sys.color.segment_button_focus_backboard_primary'),
+  SEGMENT_FOCUS_STYLE_CUSTOMIZED: LengthMetrics.resource($r('sys.float.segment_focus_control')).value === 0.0
 }
 
 interface Point {
@@ -319,7 +344,7 @@ export class SegmentButtonOptions {
     } else {
       this.showText = true
     }
-    this.componentPadding = this.multiply ? 0 : 2
+    this.componentPadding = this.multiply ? 0 : segmentButtonTheme.SEGMENT_BUTTON_PADDING;
   }
 
   public onButtonsUpdated() {
@@ -426,7 +451,7 @@ struct SelectItem {
           segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR))
         .position(this.selectedItemPosition)
         .scale({ x: this.zoomScaleArray[this.selectedIndexes[0]], y: this.zoomScaleArray[this.selectedIndexes[0]] })
-        .shadow(ShadowStyle.OUTER_DEFAULT_XS)
+        .shadow(segmentButtonTheme.SEGMENT_BUTTON_SHADOW)
     }
   }
 }
@@ -486,13 +511,19 @@ struct MultiSelectItemArray {
 @Component
 struct SegmentButtonItem {
   @Link selectedIndexes: number[]
-  @Link focusIndex: number
+  @Link @Watch('onFocusIndex') focusIndex: number;
   @Prop @Require maxFontScale: number | Resource
   @ObjectLink itemOptions: SegmentButtonItemOptions
   @ObjectLink options: SegmentButtonOptions;
   @ObjectLink property: ItemProperty
   @Prop index: number
+  @State isTextSupportMarquee: boolean = segmentButtonTheme.SEGMENT_ITEM_TEXT_OVERFLOW;
+  @Prop isMarqueeAndFadeout: boolean;
+  @Prop isSegmentFocusStyleCustomized: boolean;
+  @State isTextInMarqueeCondition: boolean = false;
+  @State isButtonTextFadeout?: boolean = false;
   private groupId: string = ''
+  @Prop @Watch('onFocusIndex') hover: boolean;
 
   private getTextPadding(): Padding | Dimension | LocalizedPadding {
     if (this.options.localizedTextPadding) {
@@ -513,17 +544,50 @@ struct SegmentButtonItem {
     }
     if (this.options.type === 'capsule' && this.options.showText && this.options.showIcon) {
       return {
-        top: LengthMetrics.vp(6),
-        bottom: LengthMetrics.vp(6),
-        start: LengthMetrics.vp(8),
-        end: LengthMetrics.vp(8)
+        top: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_CAPSULE_VERTICAL_PADDING),
+        bottom: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_CAPSULE_VERTICAL_PADDING),
+        start: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_HORIZONTAL_PADDING),
+        end: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_HORIZONTAL_PADDING)
       }
     }
     return {
-      top: LengthMetrics.vp(4),
-      bottom: LengthMetrics.vp(4),
-      start: LengthMetrics.vp(8),
-      end: LengthMetrics.vp(8)
+      top: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_VERTICAL_PADDING),
+      bottom: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_VERTICAL_PADDING),
+      start: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_HORIZONTAL_PADDING),
+      end: LengthMetrics.resource(segmentButtonTheme.SEGMENT_TEXT_HORIZONTAL_PADDING)
+    }
+  }
+
+  onFocusIndex(): void {
+    this.isTextInMarqueeCondition =
+      this.isSegmentFocusStyleCustomized && (this.focusIndex === this.index || this.hover);
+  }
+
+  aboutToAppear(): void {
+    this.isButtonTextFadeout = this.isSegmentFocusStyleCustomized;
+  }
+
+  isDefaultSelectedFontColor(): boolean {
+    if (this.options.type === 'tab') {
+      return this.options.selectedFontColor === segmentButtonTheme.TAB_SELECTED_FONT_COLOR;
+    } else if (this.options.type === 'capsule') {
+      return this.options.selectedFontColor === segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
+    }
+    return false;
+  }
+
+  private getFontColor(): ResourceColor {
+    if (this.property.isSelected) {
+      if (this.isDefaultSelectedFontColor() && this.isSegmentFocusStyleCustomized && this.focusIndex === this.index) {
+        return segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR;
+      }
+      return this.options.selectedFontColor ?? segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR;
+    } else {
+      if (this.options.fontColor === segmentButtonTheme.FONT_COLOR && this.isSegmentFocusStyleCustomized &&
+        this.focusIndex === this.index) {
+        return segmentButtonTheme.SEGMENT_BUTTON_FOCUS_TEXT_COLOR;
+      }
+      return this.options.fontColor ?? segmentButtonTheme.FONT_COLOR;
     }
   }
 
@@ -545,21 +609,26 @@ struct SegmentButtonItem {
           .direction(this.options.direction)
           .size(this.options.imageSize ?? { width: 24, height: 24 })
           .draggable(false)
-          .fillColor(this.property.isSelected ? (this.options.selectedFontColor ??
-          segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) : (this.options.fontColor ??
-          segmentButtonTheme.FONT_COLOR))
+          .fillColor(this.getFontColor())
           .accessibilityText(this.getAccessibilityText())
       }
       if (this.options.showText) {
         Text(this.itemOptions.text)
           .direction(this.options.direction)
-          .fontColor(this.property.fontColor)
+          .fontColor(this.getFontColor())
           .fontWeight(this.property.fontWeight)
           .fontSize(this.property.fontSize)
           .minFontSize(9)
           .maxFontSize(this.property.fontSize)
           .maxFontScale(this.maxFontScale)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .textOverflow({
+            overflow: this.isTextSupportMarquee ? TextOverflow.MARQUEE : TextOverflow.Ellipsis
+          })
+          .marqueeOptions({
+            start: this.isTextInMarqueeCondition,
+            fadeout: this.isButtonTextFadeout,
+            marqueeStartPolicy: MarqueeStartPolicy.DEFAULT
+          })
           .maxLines(1)
           .textAlign(TextAlign.Center)
           .padding(this.getTextPadding())
@@ -569,7 +638,7 @@ struct SegmentButtonItem {
     .focusScopePriority(this.groupId, Math.min(...this.selectedIndexes) === this.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO)
     .justifyContent(FlexAlign.Center)
     .padding(this.getButtonPadding())
-    .constraintSize({ minHeight: 28 })
+    .constraintSize({ minHeight: segmentButtonTheme.CONSTRAINT_SIZE_MIN_HEIGHT })
   }
 }
 
@@ -640,7 +709,7 @@ struct SegmentButtonItemArrayComponent {
   @Consume buttonBorderRadius: LocalizedBorderRadiuses[]
   @Consume @Watch('onButtonItemsSizeChange') buttonItemsSize: SizeOptions[]
   @Consume buttonItemsPosition: LocalizedEdges[]
-  @Consume focusIndex: number
+  @Consume @Watch('onFocusIndex') focusIndex: number;
   @Consume zoomScaleArray: number[]
   @Consume buttonItemProperty: ItemProperty[]
   @Consume buttonItemsSelected: boolean[]
@@ -650,9 +719,11 @@ struct SegmentButtonItemArrayComponent {
   @Prop @Require maxFontScale: number | Resource
   @State buttonWidth: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   @State buttonHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
+  @State isMarqueeAndFadeout: boolean = false;
   private buttonItemsRealHeight: number[] = Array.from({ length: MAX_ITEM_COUNT }, (_: Object, index) => 0)
   private groupId: string = util.generateRandomUUID(true)
   public onItemClicked?: Callback<number>
+  @Prop isSegmentFocusStyleCustomized: boolean;
 
   onButtonItemsSizeChange() {
     this.buttonItemsSize.forEach((value, index) => {
@@ -746,6 +817,10 @@ struct SegmentButtonItemArrayComponent {
     this.calculateBorderRadius()
   }
 
+  onFocusIndex(): void {
+    this.isMarqueeAndFadeout = this.isSegmentFocusStyleCustomized && !this.isMarqueeAndFadeout;
+  }
+
   aboutToAppear() {
     for (let index = 0; index < this.buttonItemsRealHeight.length; index++) {
       this.buttonItemsRealHeight[index] = 0
@@ -824,9 +899,17 @@ struct SegmentButtonItemArrayComponent {
     this.buttonBorderRadius = borderRadiusArray
   }
 
-
   getAccessibilityDescription(value?: ResourceStr): Resource | undefined {
     return (typeof value !== undefined) ? value as Resource : undefined
+  }
+
+  isDefaultSelectedBgColor(): boolean {
+    if (this.options.type === 'tab') {
+      return this.options.selectedBackgroundColor === segmentButtonTheme.TAB_SELECTED_BACKGROUND_COLOR;
+    } else if (this.options.type === 'capsule') {
+      return this.options.selectedBackgroundColor === segmentButtonTheme.CAPSULE_SELECTED_BACKGROUND_COLOR;
+    }
+    return true;
   }
 
   build() {
@@ -836,6 +919,8 @@ struct SegmentButtonItemArrayComponent {
           if (index < MAX_ITEM_COUNT) {
             Button() {
               SegmentButtonItem({
+                isMarqueeAndFadeout: this.isMarqueeAndFadeout,
+                isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized,
                 selectedIndexes: $selectedIndexes,
                 focusIndex: this.focusIndex,
                 index: index,
@@ -843,7 +928,8 @@ struct SegmentButtonItemArrayComponent {
                 options: this.options,
                 property: this.buttonItemProperty[index],
                 groupId: this.groupId,
-                maxFontScale: this.maxFontScale
+                maxFontScale: this.maxFontScale,
+                hover: this.hoverArray[index],
               })
                 .onSizeChange((_, newValue) => {
                   // Calculate height of items
@@ -895,7 +981,14 @@ struct SegmentButtonItemArrayComponent {
               }
             })
             .onFocus(() => {
-              this.focusIndex = index
+              this.focusIndex = index;
+              if (this.isSegmentFocusStyleCustomized) {
+                this.customizeSegmentFocusStyle(index);
+              }
+            })
+            .onBlur(() => {
+              this.focusIndex = -1;
+              this.hoverColorArray[index].hoverColor = Color.Transparent;
             })
             .gesture(TapGesture().onAction(() => {
               if (this.onItemClicked) {
@@ -912,6 +1005,9 @@ struct SegmentButtonItemArrayComponent {
               }
             }))
             .onTouch((event: TouchEvent) => {
+              if (this.isSegmentFocusStyleCustomized) {
+                this.getUIContext().getFocusController().clearFocus();
+              }
               if (event.source !== SourceType.TouchScreen) {
                 return
               }
@@ -929,11 +1025,15 @@ struct SegmentButtonItemArrayComponent {
               this.hoverArray[index] = isHover
               if (isHover) {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                  this.hoverColorArray[index].hoverColor = (segmentButtonTheme.HOVER_COLOR)
+                  this.hoverColorArray[index].hoverColor =
+                    this.isSegmentFocusStyleCustomized && this.focusIndex === index ?
+                    segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : segmentButtonTheme.HOVER_COLOR;
                 })
               } else {
                 animateTo({ duration: 250, curve: Curve.Friction }, () => {
-                  this.hoverColorArray[index].hoverColor = Color.Transparent
+                  this.hoverColorArray[index].hoverColor =
+                    this.isSegmentFocusStyleCustomized && this.focusIndex === index ?
+                    segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : Color.Transparent;
                 })
               }
             })
@@ -966,6 +1066,21 @@ struct SegmentButtonItemArrayComponent {
       .onSizeChange((_, newValue) => {
         this.componentSize = { width: newValue.width, height: newValue.height }
       })
+    }
+  }
+
+  /**
+   * 设置segmentbutton获焦时的样式
+   * @param index
+   */
+  private customizeSegmentFocusStyle(index: number) {
+    if (this.selectedIndexes !== void 0 && this.selectedIndexes.length !== 0 &&
+      this.selectedIndexes[0] === index) { // 选中态
+      this.hoverColorArray[index].hoverColor = this.isDefaultSelectedBgColor() ?
+      segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : this.options.selectedBackgroundColor;
+    } else { // 未选中态
+      this.hoverColorArray[index].hoverColor = this.options.backgroundColor === segmentButtonTheme.BACKGROUND_COLOR ?
+      segmentButtonTheme.SEGMENT_BUTTON_FOCUS_CUSTOMIZED_BG_COLOR : this.options.backgroundColor;
     }
   }
 }
@@ -1020,6 +1135,7 @@ export struct SegmentButton {
   private panGestureStartPoint: Point = { x: 0, y: 0 }
   private isPanGestureMoved: boolean = false
   @State shouldMirror: boolean = false
+  private isSegmentFocusStyleCustomized: boolean = segmentButtonTheme.SEGMENT_FOCUS_STYLE_CUSTOMIZED;
 
   onItemsPositionChange() {
     if (this.options === void 0 || this.options.buttons === void 0) {
@@ -1194,7 +1310,8 @@ export struct SegmentButton {
           options: this.options,
           selectedIndexes: $selectedIndexes,
           maxFontScale: this.getMaxFontSize(),
-          onItemClicked: this.onItemClicked
+          onItemClicked: this.onItemClicked,
+          isSegmentFocusStyleCustomized: this.isSegmentFocusStyleCustomized
         })
       }
     }

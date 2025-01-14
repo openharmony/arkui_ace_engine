@@ -16,15 +16,70 @@
 #include "list_test_ng.h"
 #include "test/mock/core/animation/mock_animation_manager.h"
 
+#define private public
+#define protected public
 #include "core/components_ng/pattern/list/list_item_group_paint_method.h"
+#undef private
+#undef protected
 
 namespace OHOS::Ace::NG {
+class ListScrollerTestNg : public ListTestNg {
+protected:
+    void CreateGroupWithSettingChildrenMainSize(int32_t groupNumber);
+    void CreateGroupChildrenMainSize(int32_t groupNumber);
+    void CreateGroupWithItem(int32_t groupNumber, Axis axis = Axis::VERTICAL);
+};
 
-namespace {
-const InspectorFilter filter;
-} // namespace
+void ListScrollerTestNg::CreateGroupWithSettingChildrenMainSize(int32_t groupNumber)
+{
+    for (int32_t index = 0; index < groupNumber; ++index) {
+        auto header = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+        auto footer = GetRowOrColBuilder(FILL_LENGTH, Dimension(GROUP_HEADER_LEN));
+        ListItemGroupModelNG groupModel = CreateListItemGroup();
+        groupModel.SetSpace(Dimension(SPACE));
+        groupModel.SetDivider(ITEM_DIVIDER);
+        groupModel.SetHeader(std::move(header));
+        groupModel.SetFooter(std::move(footer));
+        auto childrenSize = groupModel.GetOrCreateListChildrenMainSize();
+        childrenSize->UpdateDefaultSize(ITEM_MAIN_SIZE);
+        const int32_t itemNumber = 2;
+        childrenSize->ChangeData(1, itemNumber, { 50.f, 200.f });
+        CreateListItems(1);
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
+        CreateListItems(1);
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
 
-class ListScrollerTestNg : public ListTestNg {};
+void ListScrollerTestNg::CreateGroupChildrenMainSize(int32_t groupNumber)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        ListItemGroupModelNG groupModel = CreateListItemGroup();
+        auto childrenSize = groupModel.GetOrCreateListChildrenMainSize();
+        childrenSize->UpdateDefaultSize(ITEM_MAIN_SIZE);
+        const int32_t itemNumber = 2;
+        childrenSize->ChangeData(1, itemNumber, { 50.f, 200.f });
+        CreateListItems(1);
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(50.f)));
+        CreateItemWithSize(1, SizeT<Dimension>(FILL_LENGTH, Dimension(200.f)));
+        CreateListItems(1);
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
+}
+
+void ListScrollerTestNg::CreateGroupWithItem(int32_t groupNumber, Axis axis)
+{
+    for (int32_t index = 0; index < groupNumber; index++) {
+        if (index & 1) {
+            CreateListItems(1);
+        } else {
+            CreateListItemGroups(1);
+        }
+    }
+}
 
 /**
  * @tc.name: ScrollToIndex001
@@ -276,7 +331,7 @@ HWTEST_F(ListScrollerTestNg, ScrollToIndex006, TestSize.Level1)
     ScrollToIndex(-1, true, ScrollAlign::START, extraOffset);
     EXPECT_TRUE(TickPosition(0));
     EXPECT_FALSE(pattern_->extraOffset_.has_value());
-    
+
     ScrollToIndex(18, true, ScrollAlign::START, extraOffset);
     EXPECT_TRUE(TickPosition(-1600.0f));
     ScrollToIndex(20, true, ScrollAlign::START, extraOffset);
@@ -1066,6 +1121,7 @@ HWTEST_F(ListScrollerTestNg, Pattern012, TestSize.Level1)
     CreateListItems(TOTAL_ITEM_NUMBER);
     CreateDone();
     auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
     pattern_->ToJsonValue(json, filter);
     EXPECT_EQ(json->GetBool("multiSelectable"), false);
     EXPECT_EQ(json->GetInt("startIndex"), 0);
@@ -1096,28 +1152,28 @@ HWTEST_F(ListScrollerTestNg, Pattern013, TestSize.Level1)
     /**
      * @tc.steps: step2. swipe forward 3 listItem
      */
-    ScrollTo(3 * LIST_HEIGHT);
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(3), Rect(0, 0, LIST_WIDTH, LIST_HEIGHT)));
+    ScrollTo(3 * HEIGHT);
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(3), Rect(0, 0, WIDTH, HEIGHT)));
 
     /**
      * @tc.steps: step3. swipe backward 2.5 listItem
      */
-    pattern_->ScrollBy(-2.5 * LIST_HEIGHT);
+    pattern_->ScrollBy(-2.5 * HEIGHT);
     FlushUITasks();
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, -LIST_HEIGHT / 2.0, LIST_WIDTH, LIST_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, -HEIGHT / 2.0, WIDTH, HEIGHT)));
 
     /**
      * @tc.steps: step4. swipe forward 3 listItem
      */
-    pattern_->ScrollBy(3 * LIST_HEIGHT);
+    pattern_->ScrollBy(3 * HEIGHT);
     FlushUITasks();
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(3), Rect(0, -LIST_HEIGHT / 2.0, LIST_WIDTH, LIST_HEIGHT)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(3), Rect(0, -HEIGHT / 2.0, WIDTH, HEIGHT)));
 
     /**
      * @tc.steps: step5. swipe backward 2.5 listItem
      */
-    ScrollTo(LIST_HEIGHT);
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(0, 0, LIST_WIDTH, LIST_HEIGHT)));
+    ScrollTo(HEIGHT);
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(0, 0, WIDTH, HEIGHT)));
 
     /**
      * @tc.cases: bottomOffset == topOffset > 0
@@ -1163,7 +1219,7 @@ HWTEST_F(ListScrollerTestNg, Pattern014, TestSize.Level1)
     auto scrollBar = pattern_->GetScrollBar();
     Rect barRect = scrollBar->GetBarRect();
     Rect activeRectInit = scrollBar->GetActiveRect();
-    Rect activeRectBot = Rect(LIST_WIDTH, LIST_HEIGHT - activeRectInit.Height(), 0, activeRectInit.Height());
+    Rect activeRectBot = Rect(WIDTH, HEIGHT - activeRectInit.Height(), 0, activeRectInit.Height());
 
     std::vector<int32_t> scrollFromVector = { SCROLL_FROM_NONE, SCROLL_FROM_UPDATE, SCROLL_FROM_ANIMATION,
         SCROLL_FROM_JUMP, SCROLL_FROM_ANIMATION_SPRING, SCROLL_FROM_BAR, SCROLL_FROM_ANIMATION_CONTROLLER,
@@ -1171,7 +1227,7 @@ HWTEST_F(ListScrollerTestNg, Pattern014, TestSize.Level1)
 
     for (int32_t form : scrollFromVector) {
         bool isAtBottom = pattern_->IsAtBottom();
-        float offset = isAtBottom ? 3 * LIST_HEIGHT : -3 * LIST_HEIGHT;
+        float offset = isAtBottom ? 3 * HEIGHT : -3 * HEIGHT;
         EXPECT_TRUE(pattern_->UpdateCurrentOffset(offset, form));
         FlushUITasks();
         EXPECT_TRUE(IsEqual(scrollBar->GetBarRect(), barRect));
@@ -1202,7 +1258,7 @@ HWTEST_F(ListScrollerTestNg, Pattern015, TestSize.Level1)
     auto scrollBar = pattern_->GetScrollBar();
     Rect barRect = scrollBar->GetBarRect();
     Rect activeRectInit = scrollBar->GetActiveRect();
-    Rect activeRectBot = Rect(LIST_WIDTH, LIST_HEIGHT - activeRectInit.Height(), 0, activeRectInit.Height());
+    Rect activeRectBot = Rect(WIDTH, HEIGHT - activeRectInit.Height(), 0, activeRectInit.Height());
 
     std::vector<int32_t> scrollFromVector = { SCROLL_FROM_NONE, SCROLL_FROM_UPDATE, SCROLL_FROM_ANIMATION,
         SCROLL_FROM_JUMP, SCROLL_FROM_ANIMATION_SPRING, SCROLL_FROM_BAR, SCROLL_FROM_ANIMATION_CONTROLLER,
@@ -1210,7 +1266,7 @@ HWTEST_F(ListScrollerTestNg, Pattern015, TestSize.Level1)
 
     for (int32_t form : scrollFromVector) {
         bool isAtBottom = pattern_->IsAtBottom();
-        float offset = isAtBottom ? 3 * LIST_HEIGHT : -3 * LIST_HEIGHT;
+        float offset = isAtBottom ? 3 * HEIGHT : -3 * HEIGHT;
         EXPECT_TRUE(pattern_->UpdateCurrentOffset(offset, form));
         FlushUITasks();
         EXPECT_TRUE(IsEqual(scrollBar->GetBarRect(), barRect));
@@ -1241,14 +1297,14 @@ HWTEST_F(ListScrollerTestNg, Pattern016, TestSize.Level1)
     auto scrollBar = pattern_->GetScrollBar();
     Rect barRect = scrollBar->GetBarRect();
     Rect activeRectInit = scrollBar->GetActiveRect();
-    Rect activeRectBot = Rect(LIST_WIDTH, LIST_HEIGHT - activeRectInit.Height(), 0, activeRectInit.Height());
+    Rect activeRectBot = Rect(WIDTH, HEIGHT - activeRectInit.Height(), 0, activeRectInit.Height());
 
     std::vector<int32_t> scrollFromVector = { SCROLL_FROM_NONE, SCROLL_FROM_UPDATE, SCROLL_FROM_ANIMATION,
         SCROLL_FROM_JUMP, SCROLL_FROM_ANIMATION_SPRING, SCROLL_FROM_BAR, SCROLL_FROM_BAR_FLING };
 
     for (int32_t form : scrollFromVector) {
         bool isAtBottom = pattern_->IsAtBottom();
-        float offset = isAtBottom ? 3 * LIST_HEIGHT : -3 * LIST_HEIGHT;
+        float offset = isAtBottom ? 3 * HEIGHT : -3 * HEIGHT;
         EXPECT_TRUE(pattern_->UpdateCurrentOffset(offset, form));
         FlushUITasks();
         EXPECT_TRUE(IsEqual(scrollBar->GetBarRect(), barRect));

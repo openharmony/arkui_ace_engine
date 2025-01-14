@@ -51,6 +51,7 @@
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
+#include "core/event/event_info_convertor.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
@@ -296,6 +297,12 @@ void XComponentPattern::OnAttachToMainTree()
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceCreated();
     }
+    if (needRecoverDisplaySync_ && displaySync_ && !displaySync_->IsOnPipeline()) {
+        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnAttachToMainTree:recover displaySync: %{public}s(%{public}" PRIu64 ")",
+            GetId().c_str(), displaySync_->GetId());
+        displaySync_->AddToPipelineOnContainer();
+        needRecoverDisplaySync_ = false;
+    }
 }
 
 void XComponentPattern::OnDetachFromMainTree()
@@ -304,6 +311,12 @@ void XComponentPattern::OnDetachFromMainTree()
     ACE_SCOPED_TRACE("XComponent[%s] DetachFromMainTree", GetId().c_str());
     if (isTypedNode_ && surfaceCallbackMode_ == SurfaceCallbackMode::DEFAULT) {
         HandleSurfaceDestroyed();
+    }
+    if (displaySync_ && displaySync_->IsOnPipeline()) {
+        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "OnDetachFromMainTree:remove displaySync: %{public}s(%{public}" PRIu64 ")",
+            GetId().c_str(), displaySync_->GetId());
+        displaySync_->DelFromPipelineOnContainer();
+        needRecoverDisplaySync_ = true;
     }
 }
 
@@ -1038,6 +1051,9 @@ void XComponentPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
     CHECK_NULL_VOID(!touchEvent_);
 
     auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        if (EventInfoConvertor::IsTouchEventNeedAbandoned(info)) {
+            return;
+        }
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleTouchEvent(info);
@@ -1084,10 +1100,15 @@ void XComponentPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
     CHECK_NULL_VOID(!mouseEvent_);
 
     auto mouseTask = [weak = WeakClaim(this)](const MouseInfo& info) {
-        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "HandleMouseEvent[%{public}f,%{public}f,%{public}d,%{public}d]",
-            info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY(), info.GetAction(), info.GetButton());
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        TouchEventInfo touchEventInfo("touchEvent");
+        if (EventInfoConvertor::ConvertMouseToTouchIfNeeded(info, touchEventInfo)) {
+            pattern->HandleTouchEvent(touchEventInfo);
+            return;
+        }
+        TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "HandleMouseEvent[%{public}f,%{public}f,%{public}d,%{public}d]",
+            info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY(), info.GetAction(), info.GetButton());
         pattern->HandleMouseEvent(info);
     };
 
@@ -1440,6 +1461,7 @@ void XComponentPattern::HandleUnregisterOnFrameEvent()
     TAG_LOGD(AceLogTag::ACE_XCOMPONENT, "Id: %{public}" PRIu64 " UnregisterOnFrame",
         displaySync_->GetId());
     displaySync_->DelFromPipelineOnContainer();
+    needRecoverDisplaySync_ = false;
 }
 
 bool XComponentPattern::DoTextureExport()
@@ -1495,7 +1517,7 @@ bool XComponentPattern::ExportTextureAvailable()
     auto host = GetHost();
     auto parnetNodeContainer = host->GetNodeContainer();
     CHECK_NULL_RETURN(parnetNodeContainer, false);
-    auto parent = parnetNodeContainer->GetAncestorNodeOfFrame();
+    auto parent = parnetNodeContainer->GetAncestorNodeOfFrame(false);
     CHECK_NULL_RETURN(parent, false);
     auto ancestorNodeContainer = parent->GetNodeContainer();
     CHECK_NULL_RETURN(ancestorNodeContainer, true);

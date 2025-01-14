@@ -68,6 +68,7 @@ struct OptionsAfterApplied {
     double opacity { 1.0f };
     std::optional<Shadow> shadow;
     std::string shadowPath;
+    bool isFilled = true;
     std::optional<BorderRadiusProperty> borderRadius;
     BlurBackGroundInfo blurbgEffect;
 };
@@ -82,6 +83,7 @@ struct DragPreviewOption {
     bool isDragPreviewEnabled = true;
     bool isDefaultDragItemGrayEffectEnabled = false;
     bool enableEdgeAutoScroll = true;
+    bool enableHapticFeedback = false;
     union {
         int32_t badgeNumber;
         bool isShowBadge;

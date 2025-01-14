@@ -779,6 +779,10 @@ void SetSwiperIndicator(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr)
     std::string indicatorValues = std::string(indicatorStr);
     StringUtils::StringSplitter(indicatorValues, '|', res);
     std::string type = res[INDICATOR_TYPE_INDEX];
+    if (type == "IndicatorComponentController") {
+        SwiperModelNG::SetBindIndicator(frameNode, true);
+        return;
+    }
     if (type == "ArkDigitIndicator") {
         SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
         SwiperDigitalParameters digitalParameters = GetDigitIndicatorInfo(res);

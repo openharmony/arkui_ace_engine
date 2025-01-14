@@ -858,6 +858,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternSetEdgeEffect001, TestSize.Level1)
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     tabBarPattern_->SetEdgeEffect(gestureHub);
+    ASSERT_NE(frameNode_, nullptr);
 }
 
 /**

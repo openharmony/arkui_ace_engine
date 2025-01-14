@@ -74,6 +74,7 @@ void WaterFlowTestNg::SetUp()
 
 void WaterFlowTestNg::TearDown()
 {
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;

@@ -14,12 +14,12 @@
  */
 
 #include "tabs_test_ng.h"
+#include "test/mock/base/mock_task_executor.h"
 
 #include "base/error/error_code.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "test/mock/base/mock_task_executor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -892,7 +892,7 @@ HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest005, TestSize.Level1)
      * @tc.steps: step2. first display.
      * @tc.expected: isShowCount and isHideCount equal to 0.
      */
-    EXPECT_EQ(isShowCount, 0);
+    EXPECT_EQ(isShowCount, 1);
     EXPECT_EQ(isHideCount, 0);
 
     /**
@@ -902,7 +902,7 @@ HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest005, TestSize.Level1)
     swiperController_->SwipeTo(2);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushUITasks();
-    EXPECT_EQ(isShowCount, 1);
+    EXPECT_EQ(isShowCount, 2);
     EXPECT_EQ(isHideCount, 1);
 
     /**
@@ -912,7 +912,7 @@ HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest005, TestSize.Level1)
     swiperController_->SwipeToWithoutAnimation(3);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE); // for update swiper
     FlushUITasks();
-    EXPECT_EQ(isShowCount, 2);
+    EXPECT_EQ(isShowCount, 3);
     EXPECT_EQ(isHideCount, 2);
 }
 

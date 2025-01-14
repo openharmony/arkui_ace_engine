@@ -30,13 +30,10 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t TICK = 2;
-constexpr float CONTENT_MAIN_SIZE = 1000.f;
 constexpr float LIST_HEIGHT = 400.f;
 constexpr float SWIPER_HEIGHT = 400.f;
 constexpr int32_t TEXT_NUMBER = 5;
 constexpr float TOP_CONTENT_HEIGHT = 200.f;
-constexpr float VERTICAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - SCROLL_HEIGHT;
 } // namespace
 
 class RefreshNestedTestNg : public RefreshTestNg {
@@ -78,8 +75,8 @@ ScrollModelNG RefreshNestedTestNg::CreateScroll()
     model.Create();
     auto proxy = model.CreateScrollBarProxy();
     model.SetScrollBarProxy(proxy);
-    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
     scrollNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     scrollPattern_ = scrollNode_->GetPattern<ScrollPattern>();
     return model;
@@ -91,8 +88,8 @@ ScrollModelNG RefreshNestedTestNg::CreateNestScroll()
     model.Create();
     auto proxy = model.CreateScrollBarProxy();
     model.SetScrollBarProxy(proxy);
-    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
     nestNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     nestPattern_ = nestNode_->GetPattern<ScrollPattern>();
     return model;
@@ -112,7 +109,7 @@ void RefreshNestedTestNg::CreateNestedSwiper()
     model.Create();
     model.SetDirection(Axis::VERTICAL);
     model.SetLoop(false);
-    ViewAbstract::SetWidth(CalcLength(REFRESH_WIDTH));
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
     ViewAbstract::SetHeight(CalcLength(SWIPER_HEIGHT));
     swiperNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     swiperPattern_ = swiperNode_->GetPattern<SwiperPattern>();
@@ -127,7 +124,7 @@ ListModelNG RefreshNestedTestNg::CreateNestedList()
     ListModelNG listModel;
     listModel.Create();
     listModel.SetEdgeEffect(EdgeEffect::NONE, true);
-    ViewAbstract::SetWidth(CalcLength(REFRESH_WIDTH));
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
     ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
     {
         ListItemModelNG itemModel;
@@ -465,7 +462,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshScrollNest001, TestSize.Level1)
     {
         CreateScroll();
         {
-            CreateContent(TOP_CONTENT_HEIGHT + SCROLL_HEIGHT);
+            CreateContent(TOP_CONTENT_HEIGHT + HEIGHT);
             {
                 CreateContent(TOP_CONTENT_HEIGHT);
                 ViewStackProcessor::GetInstance()->Pop();
@@ -521,7 +518,7 @@ HWTEST_F(RefreshNestedTestNg, DISABLED_RefreshScrollNest002, TestSize.Level1)
     };
     CreateRefresh();
     CreateScroll();
-    CreateContent(TOP_CONTENT_HEIGHT + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_HEIGHT + HEIGHT);
     CreateContent(TOP_CONTENT_HEIGHT);
     ViewStackProcessor::GetInstance()->Pop();
     ScrollModelNG nestModel = CreateNestScroll();
@@ -579,7 +576,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshScrollNest003, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     int32_t stopCount = 0;
     model.SetOnScrollStop([&stopCount]() { ++stopCount; });
-    CreateContent(TOP_CONTENT_HEIGHT + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_HEIGHT + HEIGHT);
     CreateContent(TOP_CONTENT_HEIGHT);
     ViewStackProcessor::GetInstance()->Pop();
     ScrollModelNG nestModel = CreateNestScroll();
@@ -620,7 +617,7 @@ HWTEST_F(RefreshNestedTestNg, ScrollRefreshNest001, TestSize.Level1)
     };
     CreateScroll();
     {
-        CreateContent(TOP_CONTENT_HEIGHT + SCROLL_HEIGHT);
+        CreateContent(TOP_CONTENT_HEIGHT + HEIGHT);
         {
             CreateContent(TOP_CONTENT_HEIGHT);
             ViewStackProcessor::GetInstance()->Pop();
@@ -702,7 +699,7 @@ HWTEST_F(RefreshNestedTestNg, ScrollRefreshNest002, TestSize.Level1)
         .backward = NestedScrollMode::SELF_FIRST,
     };
     CreateScroll();
-    CreateContent(TOP_CONTENT_HEIGHT + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_HEIGHT + HEIGHT);
     CreateContent(TOP_CONTENT_HEIGHT);
     ViewStackProcessor::GetInstance()->Pop();
     CreateRefresh();
@@ -861,7 +858,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshListListNested001, TestSize.Level1)
             .forward = NestedScrollMode::PARENT_FIRST,
             .backward = NestedScrollMode::SELF_FIRST,
         });
-        ViewAbstract::SetWidth(CalcLength(REFRESH_WIDTH));
+        ViewAbstract::SetWidth(CalcLength(WIDTH));
         ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT));
         {
             ListItemModelNG itemModel;
@@ -875,7 +872,7 @@ HWTEST_F(RefreshNestedTestNg, RefreshListListNested001, TestSize.Level1)
                     .forward = NestedScrollMode::PARENT_FIRST,
                     .backward = NestedScrollMode::SELF_FIRST,
                 });
-                ViewAbstract::SetWidth(CalcLength(REFRESH_WIDTH));
+                ViewAbstract::SetWidth(CalcLength(WIDTH));
                 ViewAbstract::SetHeight(CalcLength(LIST_HEIGHT / 2));
                 {
                     ListItemModelNG itemModelTwo;

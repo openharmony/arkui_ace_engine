@@ -40,6 +40,7 @@ class ArkThemeWhiteList {
         'Select',
         'Slider',
         'Swiper',
+        'Text',
         'TextClock',
         'TextPicker',
         'TimePicker',

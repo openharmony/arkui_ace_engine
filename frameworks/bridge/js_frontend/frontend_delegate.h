@@ -138,6 +138,8 @@ public:
 
     virtual void SetAutoFocusTransfer(bool autoFocusTransfer);
 
+    virtual bool ConfigWindowMask(bool enable);
+
     // restore
     virtual std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
         const std::string& contentInfo, ContentInfoType type)
@@ -152,8 +154,10 @@ public:
     virtual void TriggerPageUpdate(int32_t pageId, bool directExecute = false) = 0;
 
     // posting js task from jsengine
-    virtual void PostJsTask(std::function<void()>&& task, const std::string& name) = 0;
-    virtual void PostUITask(std::function<void()>&& task, const std::string& name) {}
+    virtual void PostJsTask(std::function<void()>&& task, const std::string& name, PriorityType priority) = 0;
+    virtual void PostUITask(
+        std::function<void()>&& task, const std::string& name, PriorityType priority = PriorityType::LOW)
+    {}
 
     // ----------------
     // system.app
@@ -258,6 +262,11 @@ public:
     {
         return {};
     }
+
+    virtual void CreateSnapshotFromComponent(const RefPtr<NG::UINode>& nodeWk,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        bool enableInspector, const NG::SnapshotParam& param)
+    {}
 
     virtual bool GetAssetContent(const std::string& url, std::string& content) = 0;
     virtual bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) = 0;

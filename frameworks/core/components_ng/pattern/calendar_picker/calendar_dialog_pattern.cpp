@@ -1420,4 +1420,18 @@ void CalendarDialogPattern::UpdateCaretInfoToController()
     dialogNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     CalendarDialogView::SetPreviousOrientation();
 }
+
+void CalendarDialogPattern::OnColorConfigurationUpdate()
+{
+    auto titleNode = titleNode_.Upgrade();
+    CHECK_NULL_VOID(titleNode);
+    auto pipelineContext = titleNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
+    CHECK_NULL_VOID(theme);
+    auto textLayoutProperty = titleNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    
+    textLayoutProperty->UpdateTextColor(theme->GetCalendarTitleFontColor());
+}
 } // namespace OHOS::Ace::NG

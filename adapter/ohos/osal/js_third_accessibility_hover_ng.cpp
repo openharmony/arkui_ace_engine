@@ -475,6 +475,11 @@ public:
     {
     }
 
+    void SetSearchDefaultFocusByWindowIdResult(const std::list<Accessibility::AccessibilityElementInfo> &infos,
+        const int32_t requestId) override
+    {
+    }
+
     void SetFindFocusedElementInfoResult(
         const Accessibility::AccessibilityElementInfo &info,
         const int32_t requestId) override

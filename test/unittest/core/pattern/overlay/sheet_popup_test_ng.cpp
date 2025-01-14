@@ -133,9 +133,9 @@ void SheetPopupTestNg::CreateSheetStyle(SheetStyle& sheetStyle, const Dimension&
     if (!sheetStyle.sheetType.has_value()) {
         sheetStyle.sheetType = SheetType::SHEET_POPUP;
     }
-    sheetStyle.sheetMode.reset();
+    sheetStyle.sheetHeight.sheetMode.reset();
     sheetStyle.width = width;
-    sheetStyle.height = height;
+    sheetStyle.sheetHeight.height = height;
 }
 
 void SheetPopupTestNg::CreateSheetBuilder(float builderHeight, float titleHeight)

@@ -190,6 +190,11 @@ enum class AccessibilityRoleType {
     ROLE_NONE = 124,
 };
 
+enum class AccessibilitySamePageMode {
+    SEMI_SILENT = 0,
+    FULL_SILENT = 1,
+};
+
 enum class ButtonStyleMode { NORMAL, EMPHASIZE, TEXT };
 
 enum class ControlSize { SMALL, NORMAL };

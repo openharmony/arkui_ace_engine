@@ -633,7 +633,7 @@ public:
     }
 
     bool IsTypeNeedAvoidAiBar();
-    bool IsCustomHeightOrDetentsChanged(const SheetStyle& sheetStyle);
+    void IsNeedPlayTransition(const SheetStyle& sheetStyle);
 
     RefPtr<FrameNode> GetFirstFrameNodeOfBuilder() const;
     void GetBuilderInitHeight();
@@ -706,6 +706,13 @@ public:
         return sheetPopupInfo_;
     }
 
+    bool UpdateIndexByDetentSelection(const SheetStyle& sheetStyle, bool isFirstTransition);
+
+    bool GetIsPlayTransition() const
+    {
+        return isPlayTransition_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
@@ -733,6 +740,8 @@ private:
     float GetWrapperHeight();
     bool SheetHeightNeedChanged();
     void InitSheetDetents();
+    void InitDetents(SheetStyle sheetStyle, float height, double mediumSize, float largeHeightOfTheme,
+        double largeHeight);
     void HandleFitContontChange(float height);
     void ChangeSheetHeight(float height);
     void StartSheetTransitionAnimation(const AnimationOption& option, bool isTransitionIn, float offset);
@@ -880,6 +889,7 @@ private:
     Color sheetMaskColor_ = Color::TRANSPARENT;
     SheetKeyboardAvoidMode keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
     float resizeDecreasedHeight_ = 0.f;
+    bool isPlayTransition_ = false;
     Placement finalPlacement_ = Placement::BOTTOM;
     bool showArrow_ = true;
     SheetArrowPosition arrowPosition_ = SheetArrowPosition::NONE;

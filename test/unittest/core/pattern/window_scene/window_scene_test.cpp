@@ -383,4 +383,25 @@ HWTEST_F(WindowSceneTest, OnAppRemoveStartingWindow04, TestSize.Level1)
     usleep(WAIT_SYNC_IN_NS);
     EXPECT_NE(windowScene->startingWindow_, nullptr);
 }
+
+/**
+ * @tc.name: OnAddRemoveSnapshot
+ * @tc.desc: add and remove snapshot
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowSceneTest, OnAddRemoveSnapshot, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create windowScene.
+     */
+    auto windowScene = CreateWindowSceneForStartingWindowTest();
+    ASSERT_NE(windowScene, nullptr);
+    /**
+     * @tc.steps: step2. Test and check
+     */
+    windowScene->OnAddSnapshot();
+    windowScene->OnRemoveSnapshot();
+    usleep(WAIT_SYNC_IN_NS);
+    EXPECT_NE(windowScene->IsSnapshotSizeChanged(), false);
+}
 } // namespace OHOS::Ace::NG

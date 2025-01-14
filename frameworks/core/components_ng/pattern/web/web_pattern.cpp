@@ -451,6 +451,7 @@ WebPattern::WebPattern(const std::string& webSrc, const SetWebIdCallback& setWeb
 WebPattern::~WebPattern()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "NWEB ~WebPattern start");
+    ACE_SCOPED_TRACE("WebPattern::~WebPattern, web id = %d", GetWebId());
     UninitTouchEventListener();
     if (delegate_) {
         TAG_LOGD(AceLogTag::ACE_WEB, "NWEB ~WebPattern delegate_ start SetAudioMuted");
@@ -1130,6 +1131,7 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     TAG_LOGD(AceLogTag::ACE_WEB, "HandleScaleGestureChange ZoomOutAndIn return scale:%{public}f", scale);
 
     double newScale = GetNewScale(scale);
+    double newOriginScale = GetNewOriginScale(event.GetScale());
 
     double centerX = event.GetPinchCenter().GetX();
     double centerY = event.GetPinchCenter().GetY();
@@ -1138,16 +1140,13 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     auto offset = frameNode->GetOffsetRelativeToWindow();
     TAG_LOGD(AceLogTag::ACE_WEB,
         "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f"
-        " originScale: %{public}f centerX: %{public}f centerY: %{public}f offset X: %{public}f"
+        " newOriginScale: %{public}f centerX: %{public}f centerY: %{public}f offset X: %{public}f"
         " offset Y: %{public}f",
-        curScale, scale, newScale, event.GetScale(), centerX, centerY, offset.GetX(), offset.GetY());
-
-    // deprecated
-    delegate_->ScaleGestureChange(newScale, centerX - offset.GetX(), centerY - offset.GetY());
+        curScale, scale, newScale, newOriginScale, centerX, centerY, offset.GetX(), offset.GetY());
 
     // Plan two
     delegate_->ScaleGestureChangeV2(
-        PINCH_UPDATE_TYPE, newScale, event.GetScale(), centerX - offset.GetX(), centerY - offset.GetY());
+        PINCH_UPDATE_TYPE, newScale, newOriginScale, centerX - offset.GetX(), centerY - offset.GetY());
 
     preScale_ = curScale;
     if (LessNotEqual(scale, DEFAULT_PINCH_SCALE)) {
@@ -1226,6 +1225,18 @@ double WebPattern::GetNewScale(double& scale) const
         scale = DEFAULT_PINCH_SCALE;
 
         TAG_LOGE(AceLogTag::ACE_WEB, "GetNewScale newScale < DEFAULT_PINCH_SCALE_MIN");
+    }
+
+    return newScale;
+}
+
+double WebPattern::GetNewOriginScale(double originScale) const
+{
+    double newScale = 0.0;
+    if (zoomStatus_ == STATUS_ZOOMOUT) {
+        newScale = DEFAULT_PINCH_SCALE_MAX;
+    } else if (zoomStatus_ == STATUS_ZOOMIN) {
+        newScale = DEFAULT_PINCH_SCALE_MIN;
     }
 
     return newScale;
@@ -1409,6 +1420,11 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
             "Set cursor to pointer when mouse pointer is hover exit.");
         OnCursorChange(OHOS::NWeb::CursorType::CT_POINTER, nullptr);
         isHoverExit_ = true;
+        MouseInfo changedInfo;
+        changedInfo.SetAction(MouseAction::HOVER_EXIT);
+        changedInfo.SetLocalLocation(Offset(mouseHoveredX_, mouseHoveredY_));
+        WebSendMouseEvent(changedInfo, SINGLE_CLICK_NUM);
+        return;
     } else if (info.GetAction() == MouseAction::HOVER && isMouseLocked_) {
         OnCursorChange(OHOS::NWeb::CursorType::CT_LOCK, nullptr);
     }
@@ -3181,13 +3197,12 @@ void WebPattern::OnModifyDone()
             }
         }
         RecordWebEvent(true);
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
-            UpdateJavaScriptOnDocumentStartByOrder();
-            UpdateJavaScriptOnDocumentEndByOrder();
-        } else {
-            UpdateJavaScriptOnDocumentStart();
-            UpdateJavaScriptOnDocumentEnd();
-        }
+
+        UpdateJavaScriptOnDocumentStartByOrder();
+        UpdateJavaScriptOnDocumentEndByOrder();
+        UpdateJavaScriptOnDocumentStart();
+        UpdateJavaScriptOnDocumentEnd();
+        UpdateJavaScriptOnHeadReadyByOrder();
 
         bool isApiGteTwelve =
             AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE);
@@ -3247,6 +3262,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateTextAutosizing(GetTextAutosizingValue(true));
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(isApiGteTwelve ? false : true));
         delegate_->UpdateOptimizeParserBudgetEnabled(GetOptimizeParserBudgetEnabledValue(false));
+        delegate_->UpdateWebMediaAVSessionEnabled(GetWebMediaAVSessionEnabledValue(false));
         if (GetMetaViewport()) {
             delegate_->UpdateMetaViewport(GetMetaViewport().value());
         }
@@ -3399,6 +3415,7 @@ void WebPattern::InitInOfflineMode()
     if (offlineWebInited_) {
         return;
     }
+    ACE_SCOPED_TRACE("WebPattern::InitInOfflineMode");
     TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type, webId:%{public}d", GetWebId());
     delegate_->OnRenderToBackground();
     offlineWebInited_ = true;
@@ -6174,24 +6191,20 @@ bool WebPattern::HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, fl
 void WebPattern::OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity)
 {
     // If only one position value is passed, it will be notified to the nearest nested scrollable parent.
-    OnScrollStartRecursive(std::vector({ position }));
+    OnScrollStartRecursive(position);
 }
 
-void WebPattern::OnScrollStartRecursive(std::vector<float> positions)
+void WebPattern::OnScrollStartRecursive(float position)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollStartRecursive");
     SetIsNestedInterrupt(false);
-    auto it = positions.begin();
-    for (auto parentMap : parentsMap_) {
-        auto parent = parentMap.second.Upgrade();
-        if (parent && it < positions.end()) {
-            parent->OnScrollStartRecursive(WeakClaim(this), *it);
-        }
-        it++;
-    }
     isFirstFlingScrollVelocity_ = true;
-    isNeedUpdateScrollAxis_ = true;
     isScrollStarted_ = true;
+    auto it = parentsMap_.find(expectedScrollAxis_);
+    CHECK_EQUAL_VOID(it, parentsMap_.end());
+    auto parent = it->second;
+    parent.Upgrade()->OnScrollStartRecursive(WeakClaim(this), position);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollStartRecursive parent OnScrollStartRecursive");
 }
 
 void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
@@ -6206,10 +6219,13 @@ void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollEndRecursive");
     CHECK_EQUAL_VOID(isScrollStarted_, false);
-    for (auto parentMap : parentsMap_) {
-        auto parent = parentMap.second.Upgrade();
+    auto it = parentsMap_.find(expectedScrollAxis_);
+    if (parentsMap_.find(expectedScrollAxis_) != parentsMap_.end()) {
+        auto parent = it->second.Upgrade();
         if (parent) {
+            OnParentScrollDragEndRecursive(parent);
             parent->OnScrollEndRecursive(std::nullopt);
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollEndRecursive parent OnScrollEndRecursive");
         }
     }
     isScrollStarted_ = false;
@@ -6218,10 +6234,6 @@ void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 
 void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
 {
-    if (isNeedUpdateScrollAxis_) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::OnOverScrollFlingVelocity scrollAxis has not been updated");
-        return;
-    }
     float velocity = (expectedScrollAxis_ == Axis::HORIZONTAL) ? xVelocity : yVelocity;
     OnOverScrollFlingVelocityHandler(velocity, isFling);
 }
@@ -6260,17 +6272,23 @@ void WebPattern::OnScrollState(bool scrollState)
     scrollState_ = scrollState;
     if (!scrollState) {
         OnScrollEndRecursive(std::nullopt);
-    } else {
-        GetParentAxis();
-        OnScrollStartRecursive(std::vector<float>({ 0.0, 0.0 }));
-        if (imageAnalyzerManager_) {
-            imageAnalyzerManager_->UpdateOverlayStatus(
-                false,
-                0,
-                0,
-                0,
-                0);
-        }
+    }
+}
+
+void WebPattern::OnScrollStart(const float x, const float y)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollStart  x=%{public}f, y=%{public}f", x, y);
+    scrollState_ = true;
+    GetParentAxis();
+    expectedScrollAxis_ =(abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL);
+    OnScrollStartRecursive(0.0);
+    if (imageAnalyzerManager_) {
+        imageAnalyzerManager_->UpdateOverlayStatus(
+            false,
+            0,
+            0,
+            0,
+            0);
     }
 }
 
@@ -6415,23 +6433,6 @@ void WebPattern::ReleaseResizeHold()
 }
 bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
-    if (isNeedUpdateScrollAxis_) {
-        expectedScrollAxis_ = (x != 0 || y != 0)
-            ? (abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL)
-            : (abs(xVelocity) > abs(yVelocity) ? Axis::HORIZONTAL : Axis::VERTICAL);
-        // if there is a parent component in the sliding direction, there is no need to update the direction.
-        if (parentsMap_.find(expectedScrollAxis_) != parentsMap_.end()) {
-            isNeedUpdateScrollAxis_ = false;
-            TAG_LOGI(AceLogTag::ACE_WEB,
-                "WebPattern::FilterScrollEvent updateScrollAxis, x=%{public}f, y=%{public}f, "
-                "vx=%{public}f, vy=%{public}f, scrolAxis=%{public}d",
-                x,
-                y,
-                xVelocity,
-                yVelocity,
-                static_cast<int32_t>(expectedScrollAxis_));
-        }
-    }
     float offset = expectedScrollAxis_ == Axis::HORIZONTAL ? x : y;
     float velocity = expectedScrollAxis_ == Axis::HORIZONTAL ? xVelocity : yVelocity;
     bool isConsumed = offset != 0 ? FilterScrollEventHandleOffset(offset) : FilterScrollEventHandlevVlocity(velocity);
@@ -6656,6 +6657,7 @@ RefPtr<NodePaintMethod> WebPattern::CreateNodePaintMethod()
 void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 {
     onDocumentStartScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentStartScriptItemsByOrder_ = std::nullopt;
     if (delegate_) {
         UpdateJavaScriptOnDocumentStart();
         delegate_->JavaScriptOnDocumentStart();
@@ -6683,9 +6685,21 @@ void WebPattern::JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
     }
 }
 
+void WebPattern::JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+    const ScriptItemsByOrder& scriptItemsByOrder)
+{
+    onHeadReadyScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onHeadReadyScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    if (delegate_) {
+        UpdateJavaScriptOnHeadReadyByOrder();
+        delegate_->JavaScriptOnHeadReadyByOrder();
+    }
+}
+
 void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 {
     onDocumentEndScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    onDocumentEndScriptItemsByOrder_ = std::nullopt;
     EventRecorder::Get().SaveJavascriptItems(scriptItems);
     if (delegate_) {
         UpdateJavaScriptOnDocumentEnd();
@@ -6695,7 +6709,7 @@ void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 
 void WebPattern::UpdateJavaScriptOnDocumentStart()
 {
-    if (delegate_ && onDocumentStartScriptItems_.has_value()) {
+    if (delegate_ && onDocumentStartScriptItems_.has_value() && !onDocumentStartScriptItemsByOrder_.has_value()) {
         delegate_->SetJavaScriptItems(onDocumentStartScriptItems_.value(), ScriptItemType::DOCUMENT_START);
         onDocumentStartScriptItems_ = std::nullopt;
     }
@@ -6721,11 +6735,21 @@ void WebPattern::UpdateJavaScriptOnDocumentEndByOrder()
     }
 }
 
+void WebPattern::UpdateJavaScriptOnHeadReadyByOrder()
+{
+    if (delegate_ && onHeadReadyScriptItems_.has_value() && onHeadReadyScriptItemsByOrder_.has_value()) {
+        delegate_->SetJavaScriptItemsByOrder(onHeadReadyScriptItems_.value(), ScriptItemType::DOCUMENT_HEAD_READY,
+            onHeadReadyScriptItemsByOrder_.value());
+        onHeadReadyScriptItems_ = std::nullopt;
+        onHeadReadyScriptItemsByOrder_ = std::nullopt;
+    }
+}
+
 void WebPattern::UpdateJavaScriptOnDocumentEnd()
 {
     CHECK_NULL_VOID(delegate_);
     EventRecorder::Get().FillWebJsCode(onDocumentEndScriptItems_);
-    if (onDocumentEndScriptItems_.has_value()) {
+    if (onDocumentEndScriptItems_.has_value() && !onDocumentEndScriptItemsByOrder_.has_value()) {
         delegate_->SetJavaScriptItems(onDocumentEndScriptItems_.value(), ScriptItemType::DOCUMENT_END);
         onDocumentEndScriptItems_ = std::nullopt;
     }
@@ -6820,6 +6844,7 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
     }
     RectT<int32_t> rect;
     if (focusedAccessibilityId_ <= 0 || !GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
+        focusedAccessibilityId_ = -1;
         renderContext->ResetAccessibilityFocusRect();
         renderContext->UpdateAccessibilityFocus(false);
         return;
@@ -6858,13 +6883,16 @@ bool WebPattern::GetAccessibilityFocusRect(RectT<int32_t>& paintRect, int64_t ac
         return false;
     }
     CHECK_NULL_RETURN(delegate_, false);
-    std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> info =
-        delegate_->GetAccessibilityNodeInfoById(accessibilityId);
-    if (!info) {
+    int32_t rectWidth = 0;
+    int32_t rectHeight = 0;
+    int32_t rectX = 0;
+    int32_t rectY = 0;
+    bool result = delegate_->GetAccessibilityNodeRectById(accessibilityId, &rectWidth, &rectHeight, &rectX, &rectY);
+    if (!result) {
         return false;
     }
 
-    paintRect.SetRect(info->GetRectX(), info->GetRectY(), info->GetRectWidth(), info->GetRectHeight());
+    paintRect.SetRect(rectX, rectY, rectWidth, rectHeight);
     return true;
 }
 
@@ -7592,6 +7620,13 @@ void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
 {
     if (delegate_) {
         delegate_->UpdateOptimizeParserBudgetEnabled(value);
+    }
+}
+
+void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool enable)
+{
+    if (delegate_) {
+        delegate_->UpdateWebMediaAVSessionEnabled(enable);
     }
 }
 } // namespace OHOS::Ace::NG

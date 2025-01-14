@@ -61,14 +61,14 @@ constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 #endif
 
 #ifdef SUPPORT_DIGITAL_CROWN
-constexpr double ANGULAR_VELOCITY_FACTOR  = 532 / 360.0 * 0.013;
-constexpr float ANGULAR_VELOCITY_SLOW = 0.1f;
-constexpr float ANGULAR_VELOCITY_MEDIUM = 0.3f;
-constexpr float ANGULAR_VELOCITY_FAST = 0.8f;
-constexpr float DISPLAY_CONTROL_RATIO_VERY_SLOW = 3.24f;
-constexpr float DISPLAY_CONTROL_RATIO_SLOW = 3.39f;
-constexpr float DISPLAY_CONTROL_RATIO_MEDIUM = 3.08f;
-constexpr float DISPLAY_CONTROL_RATIO_FAST = 2.90f;
+constexpr double ANGULAR_VELOCITY_FACTOR  = 0.001f;
+constexpr float ANGULAR_VELOCITY_SLOW = 0.07f;
+constexpr float ANGULAR_VELOCITY_MEDIUM = 0.2f;
+constexpr float ANGULAR_VELOCITY_FAST = 0.54f;
+constexpr float DISPLAY_CONTROL_RATIO_VERY_SLOW = 2.97f;
+constexpr float DISPLAY_CONTROL_RATIO_SLOW = 3.11f;
+constexpr float DISPLAY_CONTROL_RATIO_MEDIUM = 2.82f;
+constexpr float DISPLAY_CONTROL_RATIO_FAST = 2.65f;
 constexpr float CROWN_SENSITIVITY_LOW = 0.8f;
 constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float CROWN_SENSITIVITY_HIGH = 1.2f;

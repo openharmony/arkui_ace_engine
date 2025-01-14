@@ -20,7 +20,7 @@
 #include "frameworks/core/components/common/properties/paint_state.h"
 
 namespace OHOS::Ace::NG {
-class Matrix2D final {
+class ACE_FORCE_EXPORT Matrix2D final {
 public:
     static bool Invert(TransformParam& param);
     static void Identity(TransformParam& param);
