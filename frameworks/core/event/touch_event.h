@@ -122,6 +122,7 @@ struct TouchEvent final : public UIInputEvent {
     // Save historical touch point slope.
     float inputXDeltaSlope = 0.0f;
     float inputYDeltaSlope = 0.0f;
+    bool isPassThroughMode = false;
 
     TouchEvent() {}
 
@@ -280,6 +281,12 @@ struct TouchEvent final : public UIInputEvent {
         return *this;
     }
 
+    TouchEvent& SetIsPassThroughMode(bool isPassThroughMode)
+    {
+        this->isPassThroughMode = isPassThroughMode;
+        return *this;
+    }
+
     TouchEvent CloneWith(float scale) const
     {
         return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
@@ -314,6 +321,7 @@ struct TouchEvent final : public UIInputEvent {
         event.isPrivacyMode = isPrivacyMode;
         event.inputXDeltaSlope = inputXDeltaSlope;
         event.inputYDeltaSlope = inputYDeltaSlope;
+        event.isPassThroughMode = isPassThroughMode;
         return event;
     }
 
@@ -450,7 +458,8 @@ struct TouchEvent final : public UIInputEvent {
             .SetSourceType(sourceType)
             .SetIsInterpolated(isInterpolated)
             .SetPointerEvent(pointerEvent)
-            .SetOriginalId(originalId);
+            .SetOriginalId(originalId)
+            .SetIsPassThroughMode(isPassThroughMode);
         event.pointers.emplace_back(std::move(point));
         return event;
     }
