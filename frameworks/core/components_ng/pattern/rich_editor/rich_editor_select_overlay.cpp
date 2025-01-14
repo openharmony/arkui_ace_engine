@@ -342,6 +342,19 @@ void RichEditorSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& selec
         };
     }
 }
+
+void RichEditorSelectOverlay::OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo)
+{
+    BaseTextSelectOverlay::OnUpdateOnCreateMenuCallback(selectInfo);
+    selectInfo.menuCallback.showMenuOnMoveDone = [weak = WeakClaim(this)]() {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_RETURN(overlay, true);
+        auto pattern = overlay->GetPattern<RichEditorPattern>();
+        CHECK_NULL_RETURN(pattern, true);
+        return !pattern->IsSelectedTypeChange();
+    };
+}
+
 void RichEditorSelectOverlay::CheckMenuParamChange(SelectOverlayInfo& selectInfo,
     TextSpanType selectType, TextResponseType responseType)
 {

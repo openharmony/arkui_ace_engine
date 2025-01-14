@@ -85,6 +85,7 @@ private:
     void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle) override;
     void CheckMenuParamChange(SelectOverlayInfo& selectInfo, TextSpanType selectType, TextResponseType responseType);
     void SwitchCaretState();
+    void OnUpdateOnCreateMenuCallback(SelectOverlayInfo& selectInfo);
     void ResumeTwinkling();
     std::shared_ptr<SelectionMenuParams> lastMenuParams_ = nullptr;
     std::pair<TextSpanType, TextResponseType> lastSelectResponseComb_;
