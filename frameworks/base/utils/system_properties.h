@@ -640,6 +640,8 @@ public:
         return taskPriorityAdjustmentEnable_;
     }
 
+    static int32_t GetDragDropFrameworkStatus();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -719,6 +721,7 @@ private:
     static FoldScreenType foldScreenType_;
     static double scrollableDistance_;
     static bool taskPriorityAdjustmentEnable_;
+    static int32_t dragDropFrameworkStatus_;
 };
 
 } // namespace OHOS::Ace

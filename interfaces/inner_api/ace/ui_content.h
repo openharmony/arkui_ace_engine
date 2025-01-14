@@ -484,6 +484,11 @@ public:
         return false;
     }
 
+    virtual bool ConfigCustomWindowMask(bool enable)
+    {
+        return false;
+    }
+
     virtual void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) {};
 };
 

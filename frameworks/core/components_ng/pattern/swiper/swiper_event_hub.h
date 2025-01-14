@@ -166,7 +166,9 @@ public:
         // animationEnd callback need to be fired after animationStart callback, use flag for protection.
         ++aniStartCalledCount_;
         if (delayCallback_) {
-            TAG_LOGI(AceLogTag::ACE_SWIPER, "the timing of the animation callback has been corrected");
+            auto frameNode = GetFrameNode();
+            TAG_LOGI(AceLogTag::ACE_SWIPER, "the timing of the animation callback has been corrected id:%{public}d",
+                frameNode ? frameNode->GetId() : -1);
             delayCallback_();
             delayCallback_ = nullptr;
         }

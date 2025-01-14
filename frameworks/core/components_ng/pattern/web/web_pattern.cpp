@@ -1131,6 +1131,7 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     TAG_LOGD(AceLogTag::ACE_WEB, "HandleScaleGestureChange ZoomOutAndIn return scale:%{public}f", scale);
 
     double newScale = GetNewScale(scale);
+    double newOriginScale = GetNewOriginScale(event.GetScale());
 
     double centerX = event.GetPinchCenter().GetX();
     double centerY = event.GetPinchCenter().GetY();
@@ -1139,16 +1140,13 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     auto offset = frameNode->GetOffsetRelativeToWindow();
     TAG_LOGD(AceLogTag::ACE_WEB,
         "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f"
-        " originScale: %{public}f centerX: %{public}f centerY: %{public}f offset X: %{public}f"
+        " newOriginScale: %{public}f centerX: %{public}f centerY: %{public}f offset X: %{public}f"
         " offset Y: %{public}f",
-        curScale, scale, newScale, event.GetScale(), centerX, centerY, offset.GetX(), offset.GetY());
-
-    // deprecated
-    delegate_->ScaleGestureChange(newScale, centerX - offset.GetX(), centerY - offset.GetY());
+        curScale, scale, newScale, newOriginScale, centerX, centerY, offset.GetX(), offset.GetY());
 
     // Plan two
     delegate_->ScaleGestureChangeV2(
-        PINCH_UPDATE_TYPE, newScale, event.GetScale(), centerX - offset.GetX(), centerY - offset.GetY());
+        PINCH_UPDATE_TYPE, newScale, newOriginScale, centerX - offset.GetX(), centerY - offset.GetY());
 
     preScale_ = curScale;
     if (LessNotEqual(scale, DEFAULT_PINCH_SCALE)) {
@@ -1227,6 +1225,18 @@ double WebPattern::GetNewScale(double& scale) const
         scale = DEFAULT_PINCH_SCALE;
 
         TAG_LOGE(AceLogTag::ACE_WEB, "GetNewScale newScale < DEFAULT_PINCH_SCALE_MIN");
+    }
+
+    return newScale;
+}
+
+double WebPattern::GetNewOriginScale(double originScale) const
+{
+    double newScale = 0.0;
+    if (zoomStatus_ == STATUS_ZOOMOUT) {
+        newScale = DEFAULT_PINCH_SCALE_MAX;
+    } else if (zoomStatus_ == STATUS_ZOOMIN) {
+        newScale = DEFAULT_PINCH_SCALE_MIN;
     }
 
     return newScale;
@@ -6180,24 +6190,20 @@ bool WebPattern::HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, fl
 void WebPattern::OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity)
 {
     // If only one position value is passed, it will be notified to the nearest nested scrollable parent.
-    OnScrollStartRecursive(std::vector({ position }));
+    OnScrollStartRecursive(position);
 }
 
-void WebPattern::OnScrollStartRecursive(std::vector<float> positions)
+void WebPattern::OnScrollStartRecursive(float position)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollStartRecursive");
     SetIsNestedInterrupt(false);
-    auto it = positions.begin();
-    for (auto parentMap : parentsMap_) {
-        auto parent = parentMap.second.Upgrade();
-        if (parent && it < positions.end()) {
-            parent->OnScrollStartRecursive(WeakClaim(this), *it);
-        }
-        it++;
-    }
     isFirstFlingScrollVelocity_ = true;
-    isNeedUpdateScrollAxis_ = true;
     isScrollStarted_ = true;
+    auto it = parentsMap_.find(expectedScrollAxis_);
+    CHECK_EQUAL_VOID(it, parentsMap_.end());
+    auto parent = it->second;
+    parent.Upgrade()->OnScrollStartRecursive(WeakClaim(this), position);
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollStartRecursive parent OnScrollStartRecursive");
 }
 
 void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
@@ -6212,10 +6218,13 @@ void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollEndRecursive");
     CHECK_EQUAL_VOID(isScrollStarted_, false);
-    for (auto parentMap : parentsMap_) {
-        auto parent = parentMap.second.Upgrade();
+    auto it = parentsMap_.find(expectedScrollAxis_);
+    if (parentsMap_.find(expectedScrollAxis_) != parentsMap_.end()) {
+        auto parent = it->second.Upgrade();
         if (parent) {
+            OnParentScrollDragEndRecursive(parent);
             parent->OnScrollEndRecursive(std::nullopt);
+            TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollEndRecursive parent OnScrollEndRecursive");
         }
     }
     isScrollStarted_ = false;
@@ -6224,10 +6233,6 @@ void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 
 void WebPattern::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling)
 {
-    if (isNeedUpdateScrollAxis_) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "WebPattern::OnOverScrollFlingVelocity scrollAxis has not been updated");
-        return;
-    }
     float velocity = (expectedScrollAxis_ == Axis::HORIZONTAL) ? xVelocity : yVelocity;
     OnOverScrollFlingVelocityHandler(velocity, isFling);
 }
@@ -6266,17 +6271,23 @@ void WebPattern::OnScrollState(bool scrollState)
     scrollState_ = scrollState;
     if (!scrollState) {
         OnScrollEndRecursive(std::nullopt);
-    } else {
-        GetParentAxis();
-        OnScrollStartRecursive(std::vector<float>({ 0.0, 0.0 }));
-        if (imageAnalyzerManager_) {
-            imageAnalyzerManager_->UpdateOverlayStatus(
-                false,
-                0,
-                0,
-                0,
-                0);
-        }
+    }
+}
+
+void WebPattern::OnScrollStart(const float x, const float y)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollStart  x=%{public}f, y=%{public}f", x, y);
+    scrollState_ = true;
+    GetParentAxis();
+    expectedScrollAxis_ =(abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL);
+    OnScrollStartRecursive(0.0);
+    if (imageAnalyzerManager_) {
+        imageAnalyzerManager_->UpdateOverlayStatus(
+            false,
+            0,
+            0,
+            0,
+            0);
     }
 }
 
@@ -6421,23 +6432,6 @@ void WebPattern::ReleaseResizeHold()
 }
 bool WebPattern::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
-    if (isNeedUpdateScrollAxis_) {
-        expectedScrollAxis_ = (x != 0 || y != 0)
-            ? (abs(x) > abs(y) ? Axis::HORIZONTAL : Axis::VERTICAL)
-            : (abs(xVelocity) > abs(yVelocity) ? Axis::HORIZONTAL : Axis::VERTICAL);
-        // if there is a parent component in the sliding direction, there is no need to update the direction.
-        if (parentsMap_.find(expectedScrollAxis_) != parentsMap_.end()) {
-            isNeedUpdateScrollAxis_ = false;
-            TAG_LOGI(AceLogTag::ACE_WEB,
-                "WebPattern::FilterScrollEvent updateScrollAxis, x=%{public}f, y=%{public}f, "
-                "vx=%{public}f, vy=%{public}f, scrolAxis=%{public}d",
-                x,
-                y,
-                xVelocity,
-                yVelocity,
-                static_cast<int32_t>(expectedScrollAxis_));
-        }
-    }
     float offset = expectedScrollAxis_ == Axis::HORIZONTAL ? x : y;
     float velocity = expectedScrollAxis_ == Axis::HORIZONTAL ? xVelocity : yVelocity;
     bool isConsumed = offset != 0 ? FilterScrollEventHandleOffset(offset) : FilterScrollEventHandlevVlocity(velocity);

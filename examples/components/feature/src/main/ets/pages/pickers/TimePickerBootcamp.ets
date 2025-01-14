@@ -53,7 +53,7 @@ export struct TimePickerBootcamp {
           .useMilitaryTime(useEnabled(this.enableIsMilitaryTime, this.isMilitaryTime))
           .enableCascade(useEnabled(this.isEnableCascade, this.enableCascade))
           .onChange((value: TimePickerResult) => {
-            if(value.hour >= 0) {
+            if (value.hour >= 0) {
               this.selectedTime.setHours(value.hour, value.minute)
               console.info('select current date is: ' + JSON.stringify(value))
             }

@@ -873,12 +873,12 @@ HWTEST_F(VideoTestExtraAddNg, OnModifyDone001, TestSize.Level1)
     EXPECT_TRUE(videoPattern->isInitialState_);
 
     auto videoSrcInfo = layoutProperty->GetVideoSourceValue(VideoSourceInfo());
-    videoSrcInfo.src = VIDEO_SRC;
+    videoSrcInfo.src_ = VIDEO_SRC;
     layoutProperty->UpdateVideoSource(videoSrcInfo);
     videoPattern->OnModifyDone();
     EXPECT_TRUE(videoPattern->isInitialState_);
 
-    videoPattern->videoSrcInfo_.src = VIDEO_SRC;
+    videoPattern->videoSrcInfo_.src_ = VIDEO_SRC;
     videoPattern->OnModifyDone();
     EXPECT_TRUE(videoPattern->isInitialState_);
 

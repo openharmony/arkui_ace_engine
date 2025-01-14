@@ -96,6 +96,7 @@ const char SVG_OFFSET[] = "offset";
 const char SVG_STOP_COLOR[] = "stopColor";
 const char SVG_STOP_OPACITY[] = "stopOpacity";
 const char SVG_GRADIENT_TRANSFORM[] = "gradienttransform";
+const char SVG_GRADIENT_UNITS[] = "gradientunits";
 const char SVG_SPREAD_METHOD[] = "spreadmethod";
 const char SVG_FX[] = "fx";
 const char SVG_FY[] = "fy";
@@ -103,6 +104,8 @@ const char SVG_FR[] = "fr";
 const char SVG_HREF[] = "href";
 const char SVG_XLINK_HREF[] = "xlink:href";
 const char SVG_CLIP_RULE[] = "clipRule";
+const char SVG_FILTER_UNITS[] = "filterunits";
+const char SVG_PRIMITIVE_UNITS[] = "primitiveunits";
 const char SVG_FE_IN[] = "in";
 const char SVG_FE_IN2[] = "in2";
 const char SVG_FE_MODE[] = "mode";
@@ -126,5 +129,5 @@ const char SVG_FE_K4[] = "k4";
 const char SVG_FE_OPERATOR_TYPE[] = "operator";
 const char SVG_TRANSFORM[] = "transform";
 const char SVG_CLIP_PATH[] = "clipPath";
-
+const char SVG_CLIP_PATH_UNITS[] = "clipPathUnits";
 } // namespace OHOS::Ace::NG

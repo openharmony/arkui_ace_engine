@@ -285,8 +285,6 @@ bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
         return false;
     }
 
-    static std::mutex fdMutex_;
-    std::lock_guard lock(fdMutex_);
     auto hapFd = open(realPath, O_RDONLY);
     if (hapFd < 0) {
         LOGE("Open hap file failed");

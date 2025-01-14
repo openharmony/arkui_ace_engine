@@ -386,6 +386,7 @@ public:
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent,
         const std::function<void(bool)>& callback) override;
 
+    bool ConfigCustomWindowMask(bool enable) override;
     void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override;
 private:
     UIContentErrorCode InitializeInner(

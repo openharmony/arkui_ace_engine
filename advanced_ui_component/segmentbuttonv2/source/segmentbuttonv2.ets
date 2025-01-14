@@ -25,6 +25,7 @@ import {
 } from '@kit.ArkUI';
 import { SizeT } from '@ohos.arkui.node';
 import { i18n } from '@kit.LocalizationKit';
+import util from '@ohos.util';
 
 export interface SegmentButtonV2ItemOptions {
   text?: ResourceStr;
@@ -554,13 +555,7 @@ struct SimpleSegmentButtonV2 {
   private isDragging: boolean = false;
   private panStartGlobalX: number = 0;
   private panStartIndex: number = -1;
-
-  @Monitor("items")
-  onItemsChange() {
-    // When the number of items changes, the item size information array needs to be cleared first
-    // and then the data should be updated again. Otherwise, there will be residual data.
-    this.itemRects = [];
-  }
+  private focusGroupId: string = util.generateRandomUUID();
 
   @Computed
   get normalizedSelectedIndex(): number {
@@ -612,6 +607,7 @@ struct SimpleSegmentButtonV2 {
           .borderRadius(this.getItemBorderRadius())
           .direction(this.languageDirection)
           .enabled(repeatItem.item.enabled)
+          .focusScopePriority(this.focusGroupId, this.getFocusPriority(repeatItem))
           .hoverEffect(HoverEffect.None)
           .layoutWeight(1)
           .padding(0)
@@ -645,7 +641,7 @@ struct SimpleSegmentButtonV2 {
                 this.updateItemScale(0.95);
               }
               this.updateTouchPressedItemIndex(repeatItem.index);
-            } else if (event.type === TouchType.Up) {
+            } else if ([TouchType.Up, TouchType.Cancel].includes(event.type)) {
               this.updateItemScale(1)
               this.updateTouchPressedItemIndex(-1);
             }
@@ -660,18 +656,21 @@ struct SimpleSegmentButtonV2 {
           .onMouse((event) => {
             if (event.action === MouseAction.Press) {
               this.updateMousePressedItemIndex(repeatItem.index);
-            } else if (event.action === MouseAction.Release) {
+            } else if ([MouseAction.Release, MouseAction.CANCEL].includes(event.action)) {
               this.updateMousePressedItemIndex(-1);
             }
           })
         })
+        .key(generateUniqueKye(this.focusGroupId))
     }
     .constraintSize({
       minWidth: '100%',
       minHeight: this.getButtonMinHeight()
     })
-    .padding(this.getButtonPadding())
+    .clip(false)
     .direction(this.languageDirection)
+    .focusScopeId(this.focusGroupId, true)
+    .padding(this.getButtonPadding())
     .priorityGesture(
       PanGesture()
         .onActionStart((event) => {
@@ -743,6 +742,10 @@ struct SimpleSegmentButtonV2 {
     )
   }
 
+  private getFocusPriority(repeatItem: RepeatItem<SegmentButtonV2Item>): FocusPriority | undefined {
+    return this.normalizedSelectedIndex === repeatItem.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO;
+  }
+
   private isItemEnabled(index: number): boolean {
     const items = this.getItems();
     if (index < 0 || index >= items.length) {
@@ -770,7 +773,7 @@ struct SimpleSegmentButtonV2 {
 
   @LocalBuilder
   EffectLayer() {
-    Repeat(this.itemRects)
+    Repeat(this.getItemRects())
       .each((repeatItem) => {
         Stack()
           .backgroundColor(this.getEffectBackgroundColor(repeatItem))
@@ -785,6 +788,17 @@ struct SimpleSegmentButtonV2 {
       })
   }
 
+  private getItemRects(): SegmentButtonV2ItemRect[] {
+    if (!this.items) {
+      return [];
+    }
+    if (this.items.length === this.itemRects.length) {
+      return this.itemRects;
+    }
+
+    return this.itemRects.slice(0, this.items.length);
+  }
+
   build() {
     Stack() {
       Stack() {
@@ -794,11 +808,13 @@ struct SimpleSegmentButtonV2 {
       }
       .borderRadius(this.getButtonBorderRadius())
       .backgroundBlurStyle(this.getButtonBackgroundBlurStyle(), this.getButtonBackgroundBlurStyleOptions())
+      .clip(false)
       .direction(this.languageDirection)
     }
     .backgroundColor(this.getButtonBackgroundColor())
     .backgroundEffect(this.buttonBackgroundEffect)
     .borderRadius(this.getButtonBorderRadius())
+    .clip(false)
     .constraintSize({
       minWidth: '100%',
       minHeight: this.getButtonMinHeight()
@@ -1082,6 +1098,7 @@ export struct MultiCapsuleSegmentButtonV2 {
   @Param
   languageDirection?: Direction = undefined;
   private theme: MultiplySegmentButtonV2Theme = multiplyCapsuleTheme;
+  private focusGroupId: string = util.generateRandomUUID();
 
   build() {
     Flex({ alignItems: ItemAlign.Stretch, space: { main: this.getItemSpace() } }) {
@@ -1113,6 +1130,7 @@ export struct MultiCapsuleSegmentButtonV2 {
             })
               .borderRadius(this.getItemButtonBorderRadius(repeatItem))
               .backgroundBlurStyle(this.getItemBackgroundBlurStyle(), this.getItemBackgroundBlurStyleOptions())
+              .direction(this.languageDirection)
           }
           .accessibilityGroup(true)
           .accessibilityChecked(this.isSelected(repeatItem))
@@ -1125,6 +1143,7 @@ export struct MultiCapsuleSegmentButtonV2 {
           .constraintSize({ minHeight: this.getItemMinHeight() })
           .direction(this.languageDirection)
           .enabled(repeatItem.item.enabled)
+          .focusScopePriority(this.focusGroupId, this.getFocusPriority(repeatItem))
           .layoutWeight(1)
           .padding(0)
           .onClick(() => {
@@ -1147,8 +1166,15 @@ export struct MultiCapsuleSegmentButtonV2 {
             this.$selectedIndexes(selection);
           })
         })
+        .key(generateUniqueKye(this.focusGroupId))
     }
+    .clip(false)
     .direction(this.languageDirection)
+    .focusScopeId(this.focusGroupId, true)
+  }
+
+  private getFocusPriority(repeatItem: RepeatItem<SegmentButtonV2Item>): FocusPriority | undefined {
+    return Math.min(...this.selectedIndexes) === repeatItem.index ? FocusPriority.PREVIOUS : FocusPriority.AUTO;
   }
 
   getItems(): SegmentButtonV2Items {
@@ -1512,4 +1538,36 @@ function parseNumericResource(context: UIContext, resource: Resource): number | 
 
 function normalize(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+function generateUniqueKye(groupId: string) {
+  return (item: SegmentButtonV2Item, index: number): string => {
+    let key = groupId;
+    if (item.text) {
+      if (typeof item.text === 'string') {
+        key += item.text;
+      } else {
+        key += getResourceUniqueId(item.text);
+      }
+    }
+    if (item.icon) {
+      if (typeof item.icon === 'string') {
+        key += item.icon;
+      } else {
+        key += getResourceUniqueId(item.icon);
+      }
+    }
+    if (item.symbol) {
+      key += getResourceUniqueId(item.symbol);
+    }
+    return key;
+  }
+}
+
+function getResourceUniqueId(resource: Resource): string {
+  if (resource.id !== -1) {
+    return `${resource.id}`;
+  } else {
+    return JSON.stringify(resource);
+  }
 }
