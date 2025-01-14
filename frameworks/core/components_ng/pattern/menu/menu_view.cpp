@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 
 namespace OHOS::Ace::NG {
@@ -1488,16 +1489,19 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
 void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
     const std::function<void()>& onClickFunc, const std::string& icon)
 {
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto overlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(overlayTheme);
     RefPtr<FrameNode> pasteNode;
-    if (optionsHasIcon) {
-        pasteNode =
-            PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-                static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE), static_cast<int32_t>(ButtonType::NORMAL), true);
-    } else {
-        pasteNode =
-            PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-                static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL), true);
-    }
+    pasteNode = PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
+        optionsHasIcon ? static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE) :
+        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
+        static_cast<int32_t>(ButtonType::NORMAL),
+        true,
+        optionsHasIcon ? overlayTheme->GetPasteSymbolId() : static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL));
     CHECK_NULL_VOID(pasteNode);
     auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -1505,10 +1509,6 @@ void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& o
     CHECK_NULL_VOID(pasteLayoutProperty);
     auto pastePaintProperty = pasteNode->GetPaintProperty<SecurityComponentPaintProperty>();
     CHECK_NULL_VOID(pastePaintProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
 
     pasteLayoutProperty->UpdateFontSize(theme->GetMenuFontSize());
     pasteLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
