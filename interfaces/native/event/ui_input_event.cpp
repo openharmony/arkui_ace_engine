@@ -953,6 +953,26 @@ float OH_ArkUI_PointerEvent_GetTouchAreaHeight(const ArkUI_UIInputEvent* event, 
     return 0.0f;
 }
 
+int32_t OH_ArkUI_PointerEvent_GetChangedPointerId(const ArkUI_UIInputEvent* event, uint32_t* pointerIndex)
+{
+    if (!event || !pointerIndex) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    switch (event->eventTypeId) {
+        case C_TOUCH_EVENT_ID: {
+            const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
+            if (!touchEvent || touchEvent->touchPointSize <= 0) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            *pointerIndex = touchEvent->changedPointerId;
+            return ARKUI_ERROR_CODE_NO_ERROR;
+        }
+        default:
+            break;
+    }
+    return ARKUI_ERROR_CODE_PARAM_INVALID;
+}
+
 uint32_t OH_ArkUI_PointerEvent_GetHistorySize(const ArkUI_UIInputEvent* event)
 {
     if (!event) {

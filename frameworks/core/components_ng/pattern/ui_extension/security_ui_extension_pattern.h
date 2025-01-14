@@ -139,7 +139,9 @@ private:
     void HandleTouchEvent(const TouchEventInfo& info) override;
     void DispatchFocusState(bool focusState);
     void ResetAccessibilityChildTreeCallback();
+    void InitBusinessDataHandleCallback();
     void RegisterEventProxyFlagCallback();
+    void RegisterTransformParamGetCallback();
 
     enum class AbilityState {
         NONE = 0,

@@ -95,6 +95,7 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void DumpInfo() override;
 
+    void InitArrayValue(bool& autoCollapseModeChanged);
     void BuildArrayValueItems();
     void BuildFullArrayValue();
     void CollapseArrayValue();

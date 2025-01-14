@@ -157,6 +157,7 @@ public:
 
     void NotifyWindowMode(Rosen::WindowMode mode);
 
+    void SendPageModeToUEA(const RefPtr<PipelineContext>& pipeline);
 private:
     bool UIExtBusinessDataSendValid();
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;

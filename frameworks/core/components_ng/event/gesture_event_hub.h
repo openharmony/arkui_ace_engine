@@ -24,7 +24,7 @@
 #include "core/common/interaction/interaction_data.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/click_event.h"
-#include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/drag_drop_event.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/event/pan_event.h"
@@ -193,6 +193,7 @@ public:
     void SetPanEventType(GestureTypeName typeName);
     // Set by user define, which will replace old one.
     void SetDragEvent(const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, Dimension distance);
+    void SetDragDropEvent();
     void SetCustomDragEvent(
         const RefPtr<DragEvent>& dragEvent, PanDirection direction, int32_t fingers, Dimension distance);
     bool HasDragEvent() const;
@@ -208,7 +209,7 @@ public:
         const RefPtr<TargetComponent>& targetComponent, ResponseLinkResult& responseLinkResult);
     RefPtr<FrameNode> GetFrameNode() const;
     void OnContextAttached() {}
-    std::string GetHitTestModeStr() const;
+    static std::string GetHitTestModeStr(const RefPtr<GestureEventHub>& GestureEventHub);
     HitTestMode GetHitTestMode() const;
     void SetHitTestMode(HitTestMode hitTestMode);
     void RemoveDragEvent();
@@ -303,6 +304,10 @@ public:
     void SetNotMouseDragGatherPixelMaps();
     void FireCustomerOnDragEnd(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
     void SetMouseDragMonitorState(bool state);
+    void DoOnDragStartHandling(const GestureEvent& info, const RefPtr<FrameNode> frameNode,
+        DragDropInfo dragDropInfo, const RefPtr<OHOS::Ace::DragEvent>& event,
+        DragDropInfo dragPreviewInfo, const RefPtr<PipelineContext>& pipeline);
+    void HideMenu();
 #if defined(PIXEL_MAP_SUPPORTED)
     static void PrintBuilderNode(const RefPtr<UINode>& customNode);
     static void PrintIfImageNode(

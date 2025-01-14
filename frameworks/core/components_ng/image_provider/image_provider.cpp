@@ -51,12 +51,18 @@ std::unordered_map<std::string, ImageProvider::Task> ImageProvider::tasks_;
 bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
 {
     CHECK_NULL_RETURN(imageObj, false);
+    auto&& dfxConfig = imageObj->GetImageDfxConfig();
+    // Attempt to acquire a timed lock (maximum wait time: 1000ms)
+    auto lock = imageObj->GetPrepareImageDataLock();
+    if (!lock.owns_lock()) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "Failed to acquire lock within timeout. %{private}s-%{public}s.",
+            dfxConfig.imageSrc_.c_str(), dfxConfig.ToStringWithoutSrc().c_str());
+        return false;
+    }
     // data already loaded
     if (imageObj->GetData()) {
         return true;
     }
-
-    auto&& dfxConfig = imageObj->GetImageDfxConfig();
 
     auto container = Container::Current();
     if (container && container->IsSubContainer()) {

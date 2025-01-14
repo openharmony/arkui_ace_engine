@@ -183,6 +183,8 @@ private:
     OffsetF AdjustPositionNew(const OffsetF& position, float width, float height);
     OffsetF GetBubblePosition(const OffsetF& position, float xMin, float xMax, float yMin, float yMax);
     void CheckArrowPosition(OffsetF& position, float width, float height);
+    bool IsUIExtensionWindow();
+    void HandleUIExtensionKeyboard(bool showInSubWindow);
     OffsetF GetAdjustPosition(std::vector<Placement>& currentPlacementStates, size_t step, const SizeF& childSize,
         const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
     void InitTargetSizeAndPosition(bool showInSubWindow, LayoutWrapper* layoutWrapper);

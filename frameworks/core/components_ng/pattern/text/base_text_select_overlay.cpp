@@ -1380,7 +1380,7 @@ bool BaseTextSelectOverlay::IsHandleInParentSafeAreaPadding(const RectF& firstRe
         CHECK_NULL_RETURN(context, false);
         firstHandlePaint += context->GetPaintRectWithTransform().GetOffset();
         secondHandlePaint += context->GetPaintRectWithTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     return false;
 }

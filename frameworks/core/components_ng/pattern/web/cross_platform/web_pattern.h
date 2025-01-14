@@ -316,6 +316,8 @@ public:
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
 
     void SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt);
+
+    void OnScrollStart(const float x, const float y);
     /**
      *  End of NestableScrollContainer implementations
      */
@@ -491,6 +493,8 @@ public:
 
     bool IsPreviewMenuNotNeedShowPreview();
 
+    void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder);
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);

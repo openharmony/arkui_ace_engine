@@ -512,6 +512,7 @@ ohos_unittest("native_node_napi_test") {
     "$ace_root/interfaces/native/node/node_model.cpp",
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
+    "$ace_root/interfaces/native/node/node_utils.cpp",
     "$ace_root/interfaces/native/node/progress_option.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
     "native_gesture_test.cpp",

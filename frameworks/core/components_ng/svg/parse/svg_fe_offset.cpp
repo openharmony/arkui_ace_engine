@@ -28,12 +28,28 @@ SvgFeOffset::SvgFeOffset() : SvgFe() {}
 
 void SvgFeOffset::OnAsImageFilter(std::shared_ptr<RSImageFilter>& imageFilter,
     const SvgColorInterpolationType& srcColor, SvgColorInterpolationType& currentColor,
-    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash) const
+    std::unordered_map<std::string, std::shared_ptr<RSImageFilter>>& resultHash, bool cropRect) const
 {
     imageFilter = MakeImageFilter(feAttr_.in, imageFilter, resultHash);
-    imageFilter =
-        RSRecordingImageFilter::CreateOffsetImageFilter(feOffsetAttr_.dx.Value(),
-        feOffsetAttr_.dy.Value(), imageFilter);
+    if (cropRect) {
+        float dx = 0.0;
+        float dy = 0.0;
+        auto filterContext = GetFilterContext();
+        auto primitiveRule = filterContext.GetPrimitiveRule();
+        if (primitiveRule.GetLengthScaleUnit() == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) {
+            dx = feOffsetAttr_.dx.Value() * primitiveRule.GetBaseRect().Width();
+            dy = feOffsetAttr_.dy.Value() * primitiveRule.GetBaseRect().Height();
+        } else {
+            dx = feOffsetAttr_.dx.Value();
+            dy = feOffsetAttr_.dy.Value();
+        }
+        RSRect filterRect(effectFilterArea_.Left(), effectFilterArea_.Top(),
+            effectFilterArea_.Right(), effectFilterArea_.Bottom());
+        imageFilter = RSRecordingImageFilter::CreateOffsetImageFilter(dx, dy, imageFilter, filterRect);
+    } else {
+        imageFilter = RSRecordingImageFilter::CreateOffsetImageFilter(feOffsetAttr_.dx.Value(),
+            feOffsetAttr_.dy.Value(), imageFilter);
+    }
     ConverImageFilterColor(imageFilter, srcColor, currentColor);
     RegisterResult(feAttr_.result, imageFilter, resultHash);
 }

@@ -274,7 +274,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // update child layout constraint
     LayoutConstraintF childLayoutConstraint = bubbleLayoutProperty->CreateChildConstraint();
     if (avoidKeyboard_) {
-        childLayoutConstraint.maxSize.SetHeight(wrapperSize_.Height());
+        childLayoutConstraint.maxSize.SetHeight(wrapperSize_.Height() - marginTop_ - KEYBOARD_SPACE.ConvertToPx());
         childLayoutConstraint.maxSize.SetWidth(wrapperSize_.Width());
     }
     float minHeight = minHeight_.ConvertToPx();
@@ -562,6 +562,22 @@ void BubbleLayoutAlgorithm::SetHotAreas(bool showInSubWindow, bool isBlock,
     }
 }
 
+bool BubbleLayoutAlgorithm::IsUIExtensionWindow()
+{
+    auto currentId = Container::CurrentId();
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        CHECK_NULL_RETURN(container, false);
+    }
+    if (container->IsUIExtensionWindow()) {
+        return true;
+    }
+    return false;
+}
+
 bool BubbleLayoutAlgorithm::GetIfNeedArrow(const RefPtr<BubbleLayoutProperty>& bubbleProp, const SizeF& childSize)
 {
     auto enableArrow = bubbleProp->GetEnableArrow().value_or(true);
@@ -655,6 +671,10 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
     if (!avoidKeyboard_) {
         return;
     }
+    if (IsUIExtensionWindow()) {
+        HandleUIExtensionKeyboard(showInSubWindow);
+        return;
+    }
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
@@ -662,9 +682,7 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
     auto keyboardHeight = safeAreaManager->GetKeyboardInset().Length();
     if (GreatNotEqual(keyboardHeight, 0)) {
         marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
-        if (showInSubWindow) {
-            wrapperSize_.SetHeight(wrapperSize_.Height() - keyboardHeight);
-        }
+        wrapperSize_.SetHeight(wrapperSize_.Height() - keyboardHeight);
     } else if (showInSubWindow) {
         auto currentContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(currentContext);
@@ -673,6 +691,50 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
         auto currentKeyboardHeight = currentSafeAreaManager->GetKeyboardInset().Length();
         if (GreatNotEqual(currentKeyboardHeight, 0)) {
             marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
+            wrapperSize_.SetHeight(wrapperSize_.Height() - currentKeyboardHeight);
+        }
+    }
+}
+
+void BubbleLayoutAlgorithm::HandleUIExtensionKeyboard(bool showInSubWindow)
+{
+    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    auto keyboardInset = safeAreaManager->GetKeyboardInset();
+    auto keyboardHeight = keyboardInset.Length();
+    auto wrapperRect = pipelineContext->GetDisplayWindowRectInfo();
+    if (showInSubWindow) {
+        if (GreatNotEqual(keyboardHeight, 0)) {
+            keyboardHeight = wrapperSize_.Height() - wrapperRect.Top() - wrapperRect.Height() + keyboardHeight;
+            wrapperSize_.SetHeight(wrapperSize_.Height() - keyboardHeight);
+            marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
+        } else {
+            auto currentContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(currentContext);
+            auto currentSafeAreaManager = currentContext->GetSafeAreaManager();
+            CHECK_NULL_VOID(currentSafeAreaManager);
+            auto currentKeyboardHeight = currentSafeAreaManager->GetKeyboardInset().Length();
+            if (GreatNotEqual(currentKeyboardHeight, 0)) {
+                marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
+                wrapperSize_.SetHeight(wrapperSize_.Height() - currentKeyboardHeight);
+            }
+        }
+    } else {
+        auto topInset = safeAreaManager->GetSafeAreaWithoutProcess().top_;
+        auto bottomInset = safeAreaManager->GetSafeAreaWithoutProcess().bottom_;
+        marginTop_ = DRAW_EDGES_SPACE.ConvertToPx();
+        if (topInset.Length() > 0 && LessNotEqual(wrapperRect.Top(), topInset.end)) {
+            marginTop_ = topInset.end - wrapperRect.Top() + marginTop_;
+        }
+        marginBottom_ = DRAW_EDGES_SPACE.ConvertToPx();
+        if (keyboardHeight > 0) {
+            marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
+            wrapperSize_.SetHeight(wrapperSize_.Height() - keyboardHeight);
+        } else if (bottomInset.Length() > 0 && GreatNotEqual(wrapperRect.Top() + wrapperRect.Height(),
+            bottomInset.start)) {
+            marginBottom_ = wrapperRect.Top() + wrapperRect.Height() - bottomInset.start + marginBottom_;
         }
     }
 }
@@ -1203,7 +1265,7 @@ void BubbleLayoutAlgorithm::CheckArrowPosition(OffsetF& position, float width, f
         }
     } else if (simplePlacement == Placement::TOP) {
         xMin = position.GetX() + cornerDistance;
-        xMax = position.GetX() + height - cornerDistance;
+        xMax = position.GetX() + width - cornerDistance;
         if (GreatNotEqual(xMin, targetOffset_.GetX() + targetSize_.Width()) ||
             LessNotEqual(xMax, targetOffset_.GetX())) {
             showArrow_ = false;
@@ -1211,7 +1273,7 @@ void BubbleLayoutAlgorithm::CheckArrowPosition(OffsetF& position, float width, f
         }
     } else if (simplePlacement == Placement::BOTTOM) {
         xMin = position.GetX() + cornerDistance;
-        xMax = position.GetX() + height - cornerDistance;
+        xMax = position.GetX() + width - cornerDistance;
         if (GreatNotEqual(xMin, targetOffset_.GetX() + targetSize_.Width()) ||
             LessNotEqual(xMax, targetOffset_.GetX())) {
             showArrow_ = false;

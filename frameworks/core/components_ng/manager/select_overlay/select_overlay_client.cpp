@@ -318,7 +318,7 @@ RectF SelectOverlayClient::GetVisibleContentRect(WeakPtr<FrameNode> parent, Rect
             return RectF(0, 0, 0, 0);
         }
     }
-    parentNode = parentNode->GetAncestorNodeOfFrame();
+    parentNode = parentNode->GetAncestorNodeOfFrame(false);
     return GetVisibleContentRect(parentNode, intersectRect);
 }
 } // namespace OHOS::Ace::NG

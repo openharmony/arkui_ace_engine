@@ -987,7 +987,9 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     CHECK_NULL_VOID(sliderLayoutProperty);
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
-    const auto& content = host->GetGeometryNode()->GetContent();
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    const auto& content = geometryNode->GetContent();
     CHECK_NULL_VOID(content);
     auto contentOffset = content->GetRect().GetOffset();
     float length = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
@@ -1769,6 +1771,7 @@ void SliderPattern::OnRestoreInfo(const std::string& restoreInfo)
     auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
     auto info = JsonUtil::ParseJsonString(restoreInfo);
+    CHECK_NULL_VOID(info);
     if (!info->IsValid() || !info->IsObject()) {
         return;
     }

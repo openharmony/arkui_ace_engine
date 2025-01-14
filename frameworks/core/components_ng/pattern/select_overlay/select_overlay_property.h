@@ -220,6 +220,9 @@ struct SelectMenuCallback {
 
     std::function<void()> onAppear;
     std::function<void()> onDisappear;
+    std::function<void()> onMenuShow;
+    std::function<void()> onMenuHide;
+    std::function<bool()> showMenuOnMoveDone;
 };
 
 struct SelectedByMouseInfo {

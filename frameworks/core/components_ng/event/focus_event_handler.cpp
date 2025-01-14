@@ -19,9 +19,7 @@
 #include "core/event/focus_axis_event.h"
 #include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
-#endif
 namespace OHOS::Ace::NG {
 FocusIntension FocusEvent::GetFocusIntension(const NonPointerEvent& event)
 {
@@ -148,12 +146,10 @@ bool FocusEventHandler::OnFocusEventNode(const FocusEvent& focusEvent)
         const FocusAxisEvent& focusAxisEvent = static_cast<const FocusAxisEvent&>(focusEvent.event);
         return HandleFocusAxisEvent(focusAxisEvent);
     }
-#ifdef SUPPORT_DIGITAL_CROWN
     if (focusEvent.event.eventType == UIInputEventType::CROWN) {
         const CrownEvent& crownEvent = static_cast<const CrownEvent&>(focusEvent.event);
         return HandleCrownEvent(crownEvent);
     }
-#endif
     return ret ? true : HandleFocusTravel(focusEvent);
 }
 
@@ -217,7 +213,6 @@ bool FocusEventHandler::HandleFocusAxisEvent(const FocusAxisEvent& event)
     return info.IsStopPropagation();
 }
 
-#ifdef SUPPORT_DIGITAL_CROWN
 bool FocusEventHandler::HandleCrownEvent(const CrownEvent& CrownEvent)
 {
     ACE_DCHECK(IsCurrentFocus());
@@ -249,8 +244,6 @@ bool FocusEventHandler::ProcessOnCrownEventInternal(const CrownEvent& event)
     }
     return result;
 }
-
-#endif
 
 bool FocusEventHandler::OnKeyPreIme(KeyEventInfo& info, const KeyEvent& keyEvent)
 {

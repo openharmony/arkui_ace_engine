@@ -1661,6 +1661,15 @@ HWTEST_F(OverlayTestNg, CreateOverlayNode001, TestSize.Level1)
      */
     overlayManager->CreateOverlayNode();
     EXPECT_EQ(rootNode->GetChildren().size(), childrenSize + 1);
+    
+    /**
+     * @tc.steps: step5.call CreateOverlayNode again.
+     * @tc.expected: the overlay node is layoutNode.
+     */
+    overlayManager->overlayNode_ = nullptr;
+    overlayManager->overlayInfo_ = NG::OverlayManagerInfo { .renderRootOverlay = false };
+    overlayManager->CreateOverlayNode();
+    EXPECT_EQ(overlayManager->overlayNode_->GetIsLayoutNode(), true);
 }
 
 /**
