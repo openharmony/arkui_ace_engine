@@ -471,6 +471,36 @@ void TouchLocationInfo::SetTouchType(TouchType type)
     touchType_ = type;
 }
 
+void TouchLocationInfo::SetPressedTime(TimeStamp pressedTime)
+{
+    pressedTime_ = pressedTime;
+}
+
+TimeStamp TouchLocationInfo::GetPressedTime() const
+{
+    return pressedTime_;
+}
+
+void TouchLocationInfo::SetWidth(int32_t width)
+{
+    width_ = width;
+}
+
+int32_t TouchLocationInfo::GetWidth() const
+{
+    return width_;
+}
+
+void TouchLocationInfo::SetHeight(int32_t height)
+{
+    height_ = height;
+}
+
+int32_t TouchLocationInfo::GetHeight() const
+{
+    return height_;
+}
+
 void StateRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
 {
     std::stringstream oss;
