@@ -55,6 +55,13 @@ enum class SheetAccessibilityDetents {
     LOW,
 };
 
+enum class SheetEffectEdge {
+    NONE = 0,
+    START = 1,
+    END = 2,
+    ALL = 3,
+};
+
 struct SheetKey {
     SheetKey() {}
     explicit SheetKey(int32_t inputTargetId) : targetId(inputTargetId) {}
@@ -141,6 +148,7 @@ struct SheetStyle {
     std::optional<int32_t> instanceId; // uiContext instanceId
     std::optional<bool> enableHoverMode;
     std::optional<HoverModeAreaType> hoverModeArea;
+    std::optional<SheetEffectEdge> sheetEffectEdge;
     std::optional<NG::BorderRadiusProperty> radius;
     std::optional<SheetHeight> detentSelection;
 
@@ -159,7 +167,7 @@ struct SheetStyle {
                 sheetKeyboardAvoidMode == sheetStyle.sheetKeyboardAvoidMode &&
                 bottomOffset == sheetStyle.bottomOffset && enableHoverMode == sheetStyle.enableHoverMode &&
                 hoverModeArea == sheetStyle.hoverModeArea && radius == sheetStyle.radius &&
-                detentSelection == sheetStyle.detentSelection);
+                detentSelection == sheetStyle.detentSelection && sheetEffectEdge == sheetStyle.sheetEffectEdge);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -199,6 +207,7 @@ struct SheetStyle {
         hoverModeArea = sheetStyle.hoverModeArea.has_value() ? sheetStyle.hoverModeArea : hoverModeArea;
         radius = sheetStyle.radius.has_value() ? sheetStyle.radius : radius;
         detentSelection = sheetStyle.detentSelection.has_value() ? sheetStyle.detentSelection : detentSelection;
+        sheetEffectEdge = sheetStyle.sheetEffectEdge.has_value() ? sheetStyle.sheetEffectEdge : sheetEffectEdge;
     }
 };
 } // namespace OHOS::Ace::NG
