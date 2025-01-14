@@ -514,11 +514,24 @@ void GridModelNG::SetSupportAnimation(FrameNode* frameNode, bool supportAnimatio
     pattern->SetSupportAnimation(supportAnimation);
 }
 
+EdgeEffect GridModelNG::GetEdgeEffect(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, EdgeEffect::NONE);
+    return static_cast<EdgeEffect>(ScrollableModelNG::GetEdgeEffect(frameNode));
+}
+
+bool GridModelNG::GetAlwaysEnabled(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    return static_cast<bool>(ScrollableModelNG::GetAlwaysEnabled(frameNode));
+}
+
 void GridModelNG::SetEdgeEffect(
     FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled,
     EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, edge);
+    ScrollableModelNG::SetEdgeEffect(frameNode,
+        edgeEffect.value_or(GetEdgeEffect(frameNode)), alwaysEnabled.value_or(GetAlwaysEnabled(frameNode)), edge);
 }
 
 void GridModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
@@ -541,7 +554,7 @@ void GridModelNG::SetFriction(FrameNode* frameNode, const std::optional<double>&
     if (friction.has_value() && LessOrEqual(friction.value(), 0.0)) {
         friction.reset();
     }
-    pattern->SetFriction(friction.value_or(FRICTION));
+    pattern->SetFriction(friction.value_or(-1.0));
 }
 
 void GridModelNG::SetAlignItems(FrameNode* frameNode, const std::optional<GridItemAlignment>& itemAlign)
