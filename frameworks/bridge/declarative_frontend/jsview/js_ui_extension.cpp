@@ -374,7 +374,6 @@ void JSUIExtension::ResolveAreaPlaceholderParams(const JSRef<JSObject>& obj,
             if (!(nodePtr->GetLocalHandle()->IsNativePointer(vm))) {
                 continue;
             }
-            CHECK_NULL_VOID(nodePtr->GetLocalHandle()->IsNativePointer(vm));
             auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
             auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
             if (!frameNode) {
@@ -410,7 +409,6 @@ void InsertPlaceholderObj(JsiRef<JsiObject>& obj,
         if (!(nodePtr->GetLocalHandle()->IsNativePointer(vm))) {
             break;
         }
-        CHECK_NULL_VOID(nodePtr->GetLocalHandle()->IsNativePointer(vm));
         auto* node = nodePtr->GetLocalHandle()->ToNativePointer(vm)->Value();
         auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
         if (!frameNode) {
