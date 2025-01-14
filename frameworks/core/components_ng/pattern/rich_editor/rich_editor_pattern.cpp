@@ -11339,6 +11339,31 @@ void RichEditorPattern::DeleteRange(int32_t start, int32_t end, bool isIME)
     AfterContentChange(changeValue);
 }
 
+void RichEditorPattern::HandleOnPageUp()
+{
+    HandlePageScroll(true);
+}
+
+void RichEditorPattern::HandleOnPageDown()
+{
+    HandlePageScroll(false);
+}
+
+void RichEditorPattern::HandlePageScroll(bool isPageUp)
+{
+    auto visibleRect = selectOverlay_->GetVisibleRect();
+    float distance = isPageUp ? visibleRect.Height() : -visibleRect.Height();
+    RectF curCaretRect = GetCaretRect();
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "PageScroll isPageUp:%{public}d distance:%{public}f", isPageUp, distance);
+    OnScrollCallback(distance, SCROLL_FROM_JUMP);
+    auto paintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
+    float offsetY = isPageUp ? visibleRect.Top() : visibleRect.Bottom();
+    auto localOffset = Offset(curCaretRect.GetX(), offsetY - paintOffset.GetY());
+    auto textOffset = ConvertTouchOffsetToTextOffset(localOffset);
+    auto positionWithAffinity = paragraphs_.GetGlyphPositionAtCoordinate(textOffset);
+    SetCaretPositionWithAffinity(positionWithAffinity);
+}
+
 TextStyle RichEditorPattern::GetDefaultTextStyle()
 {
     auto theme = GetTheme<RichEditorTheme>();
