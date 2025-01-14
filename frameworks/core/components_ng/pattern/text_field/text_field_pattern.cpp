@@ -8672,7 +8672,7 @@ void TextFieldPattern::PasswordResponseKeyEvent()
 
 void TextFieldPattern::UnitResponseKeyEvent()
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     auto unitArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
     CHECK_NULL_VOID(unitArea);
     auto frameNode = unitArea->GetFrameNode();
