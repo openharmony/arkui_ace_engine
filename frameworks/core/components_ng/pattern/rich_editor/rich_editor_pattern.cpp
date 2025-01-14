@@ -2828,7 +2828,7 @@ bool RichEditorPattern::IsShowSingleHandleByClick(
     CHECK_NULL_RETURN(isCaretTwinkling && (info.GetSourceDevice() != SourceType::MOUSE), false);
     auto offset = info.GetLocalLocation();
     Offset textOffset = ConvertTouchOffsetToTextOffset(offset);
-    auto position = paragraphs_.GetIndex(textOffset);
+    auto position = (GetTextContentLength() == 0) ? 0 : paragraphs_.GetIndex(textOffset);
     if (position != lastCaretPosition) {
         TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "clickCaretPosition=%{public}d but lastCaretPosition=%{public}d",
             position, lastCaretPosition);
