@@ -26,6 +26,7 @@
 #include "core/components_ng/event/input_event.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -45,6 +46,8 @@ namespace {
     const auto ATTRIBUTE_CHECKED_DEFAULT_VALUE_TEST = "";
     const auto ATTRIBUTE_SELECTED_NAME_TEST = "accessibilitySelected";
     const auto ATTRIBUTE_SELECTED_DEFAULT_VALUE_TEST = "";
+    const auto ATTRIBUTE_BACKGROUND_NAME = "background";
+    const auto ATTRIBUTE_BACKGROUND_DEFAULT_VALUE = "";
 }
 
 namespace Converter {
@@ -54,6 +57,11 @@ namespace Converter {
         dst.type = Converter::ArkValue<Opt_Number>(static_cast<uint32_t>(ResourceType::STRING));
         dst.bundleName = Converter::ArkValue<Ark_String>(src);
         LOGE("this converter is disabled");
+    }
+    template<>
+    void AssignArkValue(Ark_Literal_Alignment_align& dst, const Ark_Alignment& src, ConvContext *ctx)
+    {
+        dst.align = Converter::ArkValue<Opt_Alignment>(src);
     }
 }
 
@@ -655,4 +663,58 @@ HWTEST_F(CommonMethodModifierTest9, SetOnDetachTest, TestSize.Level1)
     test();
 }
 
+//////// Background
+/*
+ * @tc.name: setBackgroundTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest9, setBackgroundTestDefaultValues, TestSize.Level1)
+{
+    std::string strResult = GetStringAttribute(node_, ATTRIBUTE_BACKGROUND_NAME);
+    EXPECT_EQ(strResult, ATTRIBUTE_BACKGROUND_DEFAULT_VALUE);
+}
+
+/*
+ * @tc.name: setBackgroundTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest9, setBackgroundTestValidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackground, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    using OneTestStep = std::tuple<Ark_Alignment, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Ark_Alignment::ARK_ALIGNMENT_TOP_START, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_TOP, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_TOP_END, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_START, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_CENTER, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_END, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_START, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_END, ""},
+    };
+
+    static auto expectedCustomNode = CreateNode();
+    static const FrameNode *expectedParentNode = frameNode;
+    static const CustomNodeBuilder builder = {
+        .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+            const Callback_Pointer_Void continuation) {
+            EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode);
+            CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
+        }
+    };
+
+    for (auto [inputValue, expectedValue]: testPlan) {
+        auto optInputValue = Converter::ArkValue<Opt_Literal_Alignment_align>(inputValue);
+        modifier_->setBackground(node_, &builder, &optInputValue);
+        auto fullJson = GetJsonValue(node_);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BACKGROUND_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
+}
 }
