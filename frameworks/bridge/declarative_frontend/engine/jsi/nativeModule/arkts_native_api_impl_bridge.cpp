@@ -3312,6 +3312,10 @@ void ArkUINativeModule::RegisterSelectAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetDivider));
     select->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOptions"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetOptions));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetSelectDirection));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectDirection"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetSelectDirection));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "select"), select);
 }
 #endif

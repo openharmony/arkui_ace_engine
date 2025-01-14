@@ -19528,6 +19528,10 @@ class ArkSelectComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SelectDividerModifier.identity, SelectDividerModifier, value);
     return this;
   }
+  direction(value) {
+    modifierWithKey(this._modifiersWithKeys, SelectDirectionModifier.identity, SelectDirectionModifier, value);
+    return this;
+  }
 }
 
 class SelectOptionsModifier extends ModifierWithKey {
@@ -19969,6 +19973,23 @@ class SelectSizeModifier extends ModifierWithKey {
   }
 }
 SelectSizeModifier.identity = Symbol('selectSize');
+class SelectDirectionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetSelectDirection(node);
+    }
+    else {
+      getUINativeModule().select.setSelectDirection(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SelectDirectionModifier.identity = Symbol('selectDirection');
 // @ts-ignore
 if (globalThis.Select !== undefined) {
   globalThis.Select.attributeModifier = function (modifier) {

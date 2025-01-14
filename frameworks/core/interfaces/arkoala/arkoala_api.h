@@ -4802,6 +4802,8 @@ struct ArkUISelectModifier {
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetSelectDivider)(ArkUINodeHandle node);
     void (*resetSelectDividerNull)(ArkUINodeHandle node);
+    void (*setSelectDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
+    void (*resetSelectDirection)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/
