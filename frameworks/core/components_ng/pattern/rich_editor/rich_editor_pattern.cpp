@@ -8312,11 +8312,10 @@ void RichEditorPattern::ProcessOverlayOnSetSelection(const std::optional<Selecti
 }
 
 void RichEditorPattern::BindSelectionMenu(TextResponseType type, TextSpanType richEditorType,
-    std::function<void()>& menuBuilder, std::function<void(int32_t, int32_t)>& onAppear,
-    std::function<void()>& onDisappear)
+    std::function<void()>& menuBuilder, const SelectMenuParam& menuParam)
 {
     TextPattern::BindSelectionMenu(
-        richEditorType, type, menuBuilder, { .onAppear = onAppear, .onDisappear = onDisappear });
+        richEditorType, type, menuBuilder, menuParam);
     if (!selectOverlay_->SelectOverlayIsCreating() && SelectOverlayIsOn()) {
         selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(),
             .requestCode = REQUEST_RECREATE });
