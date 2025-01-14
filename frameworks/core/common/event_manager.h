@@ -293,6 +293,11 @@ public:
 
     void ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent);
 
+    inline const std::unordered_map<int32_t, int32_t>& GetDownFingerIds() const
+    {
+        return downFingerIds_;
+    }
+
     TouchEvent ConvertAxisEventToTouchEvent(const AxisEvent& axisEvent);
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
@@ -307,6 +312,7 @@ private:
         bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
     void CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
     void LogTouchTestResultRecognizers(const TouchTestResult& result, int32_t touchEventId);
+    void LogTouchTestRecognizerStates(int32_t touchEventId);
     void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
     void CleanRecognizersForDragBegin(TouchEvent& touchEvent);

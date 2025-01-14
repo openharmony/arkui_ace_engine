@@ -56,6 +56,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
         if (offset.GetDistance() > distanceThreshold_) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "Click move distance is larger than distanceThreshold_, "
             "distanceThreshold_ is %{public}f", distanceThreshold_);
+            extraInfo_ += "move distance out of distanceThreshold.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return false;
         } else {
@@ -76,6 +77,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
             TAG_LOGI(AceLogTag::ACE_GESTURE,
                 "InputTracking id:%{public}d, this MOVE/UP event is out of region, try to reject click gesture",
                 event.touchEventId);
+            extraInfo_ += "move/up event out of region.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return false;
         }
@@ -213,6 +215,7 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
         "Id:%{public}d, click %{public}d down, ETF: %{public}d, CTP: %{public}d, state: %{public}d",
         event.touchEventId, event.id, equalsToFingers_, currentTouchPointsNum_, refereeState_);
+    extraInfo_ = "ETF: " + std::to_string(equalsToFingers_) + " CFP: " + std::to_string(currentTouchPointsNum_);
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -341,6 +344,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         if (fingersNumberSatisfied) {
             Adjudicate(AceType::Claim(this), GestureDisposal::PENDING);
         } else {
+            extraInfo_ += "finger number not satisfied.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     }
@@ -365,6 +369,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         Offset offset = event.GetScreenOffset() - touchPoints_[event.id].GetScreenOffset();
         if (offset.GetDistance() > MAX_THRESHOLD) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "This gesture is out of offset, try to reject it");
+            extraInfo_ += "offset is out of region.";
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     }
@@ -375,6 +380,7 @@ void ClickRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
 void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d cancel", event.touchEventId, event.id);
+    extraInfo_ += "receive cancel event.";
     if (IsRefereeFinished()) {
         return;
     }
