@@ -4127,10 +4127,11 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     getChildViewV2ForElmtId(elmtId) {
         const optComp = this.childrenWeakrefMap_.get(elmtId);
-        return (optComp === null || optComp === void 0 ? void 0 : optComp.deref()) && (optComp.deref() instanceof ViewV2) ? optComp === null || optComp === void 0 ? void 0 : optComp.deref() : undefined;
+        return (optComp === null || optComp === void 0 ? void 0 : optComp.deref()) && (optComp.deref() instanceof ViewV2) ?
+            optComp === null || optComp === void 0 ? void 0 : optComp.deref() : undefined;
     }
     purgeVariableDependenciesOnElmtIdOwnFunc(elmtId) {
-        // ViewPU overrides to unregister ViewPU from variables, 
+        // ViewPU overrides to unregister ViewPU from variables,
         // not in use in ViewV2
     }
     // overwritten by sub classes
@@ -6216,6 +6217,7 @@ class ViewPU extends PUV2ViewBase {
         this.runReuse_ = false;
         this.watchedProps = new Map();
         this.recycleManager_ = undefined;
+        // Internal variable to keep track is component recycled or not.
         this.hasBeenRecycled_ = false;
         this.preventRecursiveRecycle_ = false;
         this.delayRecycleNodeRerender = false;
@@ -6373,9 +6375,8 @@ class ViewPU extends PUV2ViewBase {
         
         // it will unregister removed elmtIds from all ViewPu, equals purgeDeletedElmtIdsRecursively
         this.purgeDeletedElmtIds();
-        // un-registers its own id once its children are unregistered above
-        //FIXME: Uncomment once photos app avoids rerendering of removed elementIds
-        //UINodeRegisterProxy unregisterRemovedElmtsFromViewPUs([this id__()]);
+        // unregisters its own id once its children are unregistered above
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
         
         // in case this ViewPU is currently frozen
         PUV2ViewBase.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
@@ -7546,7 +7547,7 @@ class ArrayProxyHandler {
                     // so we must call "target" here to deal with the collections situations.
                     // But we also need to addref for each index.
                     ObserveV2.getObserve().addRef(conditionalTarget, index.toString());
-                    callbackFn(typeof value == 'object' ? RefInfo.get(value).proxy : value, index, receiver);
+                    callbackFn(typeof value === 'object' ? RefInfo.get(value).proxy : value, index, receiver);
                 });
                 return result;
             };
@@ -8249,7 +8250,7 @@ class ObserveV2 {
                     // FIXME need to call syncInstanceId before update?
                     view.UpdateElement(elmtId);
                 }
-                else {
+                else if (view instanceof ViewV2) {
                     // schedule delayed update once the view gets active
                     view.scheduleDelayedUpdate(elmtId);
                 }
@@ -8273,7 +8274,7 @@ class ObserveV2 {
                 if (view.isViewActive()) {
                     view.uiNodeNeedUpdateV3(elmtId);
                 }
-                else if (view instanceof ViewV2) {
+                else {
                     // schedule delayed update once the view gets active
                     view.scheduleDelayedUpdate(elmtId);
                 }
