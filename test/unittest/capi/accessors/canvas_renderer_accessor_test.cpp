@@ -232,8 +232,6 @@ std::vector<std::tuple<Ark_String, LineJoinStyle>> LINE_JOIN_TEST_PLAN = {
 
 class MockPixelMap : public PixelMap {
 public:
-    // MOCK_METHOD(int32_t, GetWidth, (), (const override));
-    // MOCK_METHOD(int32_t, GetHeight, (), (const override));
     MOCK_METHOD(bool, GetPixelsVec, (std::vector<uint8_t> & data), (const override));
     MOCK_METHOD(const uint8_t*, GetPixels, (), (const override));
     MOCK_METHOD(PixelFormat, GetPixelFormat, (), (const override));
@@ -265,8 +263,7 @@ public:
         return height;
     }
 
-
-public:    
+public:
     int32_t width = 0;
     int32_t height = 0;
 };
@@ -2102,64 +2099,7 @@ HWTEST_F(CanvasRendererAccessorTest, setLineJoinTest, TestSize.Level1)
     holder->TearDown();
 }
 
-#ifndef PIXEL_MAP_SUPPORTED
-/**
- * @tc.name: setPixelMapTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, setPixelMapTest, TestSize.Level1) {
-   
-    std::printf("pixelMap: start pixelmap support\n");
-    
-    auto holder = TestHolder::GetInstance();
-    ASSERT_NE(accessor_->setPixelMap, nullptr);
-    
-    Ark_PixelMap arkPixelMap;
-    auto peer = new PixelMapPeer();
-    arkPixelMap.ptr = peer;
-    auto optPixelMap = Converter::ArkValue<Opt_PixelMap>(arkPixelMap);
-    
-    for (const auto& width : NUMBER_TEST_PLAN) {
-        for (const auto& height : NUMBER_TEST_PLAN) {
-        auto ptr = AceType::MakeRefPtr<MockPixelMap>();
-        uint32_t expectedWidth = std::round(width);
-        uint32_t expectedHeight = std::round(height);
-        ptr->width = expectedWidth;
-        ptr->height = expectedHeight;
-        peer->pixelMap = ptr;
-
-        std::printf("pixelMap: const width: %d height: %d\n", peer->pixelMap->GetWidth(), peer->pixelMap->GetHeight());
-
-                
-        holder->SetUp();
-        accessor_->setPixelMap(peer_, &optPixelMap);
-
-        std::printf("pixelMap: holder width: %d height: %d\n", holder->pixelMap->GetWidth(), holder->pixelMap->GetHeight());
-
-        EXPECT_TRUE(holder->isCalled);
-        EXPECT_EQ(holder->pixelMap->GetWidth(), expectedWidth);
-        EXPECT_EQ(holder->pixelMap->GetHeight(), expectedHeight);
-        
-}
-    }
-    holder->TearDown();
-
-    std::printf("pixelMap: start pixelmap support\n");
-    ASSERT_NE(accessor_->setPixelMap, nullptr);
-
-    
-    // auto arkD = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
-    // auto arkR = Converter::ArkValue<Ark_Number>(DEFAULT_SCALE_VALUE);
-    // auto ptr = accessor_->getPixelMap(peer_, &arkD, &arkR, &arkD, &arkR);
-    // EXPECT_EQ(ptr, nullptr);
-    // ptr = accessor_->getPixelMap(peer_, &arkR, &arkD, &arkR, &arkD);
-    // EXPECT_EQ(ptr, nullptr);
-
-
-}
-#else
-
+#ifdef PIXEL_MAP_SUPPORTED
 /**
  * @tc.name: setPixelMapTest
  * @tc.desc:
@@ -2167,24 +2107,40 @@ HWTEST_F(CanvasRendererAccessorTest, setPixelMapTest, TestSize.Level1) {
  */
 HWTEST_F(CanvasRendererAccessorTest, setPixelMapTest, TestSize.Level1)
 {
-    std::printf("pixelMap: start pixelmap common\n");
+    auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->setPixelMap, nullptr);
-    // auto arkD = Converter::ArkValue<Ark_Number>(DEFAULT_DOUBLE_VALUE);
-    // auto arkR = Converter::ArkValue<Ark_Number>(DEFAULT_SCALE_VALUE);
-    // auto ptr = accessor_->getPixelMap(peer_, &arkD, &arkR, &arkD, &arkR);
-    // EXPECT_EQ(ptr, nullptr);
-    // ptr = accessor_->getPixelMap(peer_, &arkR, &arkD, &arkR, &arkD);
-    // EXPECT_EQ(ptr, nullptr);
-
-
+    Ark_PixelMap arkPixelMap;
+    auto peer = new PixelMapPeer();
+    arkPixelMap.ptr = peer;
+    auto optPixelMap = Converter::ArkValue<Opt_PixelMap>(arkPixelMap);
+    for (const auto& width : NUMBER_TEST_PLAN) {
+        for (const auto& height : NUMBER_TEST_PLAN) {
+            auto ptr = AceType::MakeRefPtr<MockPixelMap>();
+            uint32_t expectedWidth = std::round(width);
+            uint32_t expectedHeight = std::round(height);
+            ptr->width = expectedWidth;
+            ptr->height = expectedHeight;
+            peer->pixelMap = ptr;
+            holder->SetUp();
+            accessor_->setPixelMap(peer_, &optPixelMap);
+            EXPECT_TRUE(holder->isCalled);
+            EXPECT_EQ(holder->pixelMap->GetWidth(), expectedWidth);
+            EXPECT_EQ(holder->pixelMap->GetHeight(), expectedHeight);
+        }
+    }
+    holder->TearDown();
+}
+#else
+/**
+ * @tc.name: setPixelMapTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setPixelMapTest, TestSize.Level1)
+{
+    ASSERT_NE(accessor_->setPixelMap, nullptr);
+    accessor_->setPixelMap(peer_, nullptr);
+    EXPECT_TRUE(true);
 }
 #endif
-
-HWTEST_F(CanvasRendererAccessorTest, setPixelMapTest2, TestSize.Level1) {
-char *p = nullptr;
-*p= '\0';
-
-}
-
-
 } // namespace OHOS::Ace::NG

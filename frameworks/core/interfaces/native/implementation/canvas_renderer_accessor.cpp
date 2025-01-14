@@ -815,7 +815,7 @@ void TranslateImpl(CanvasRendererPeer* peer,
 void SetPixelMapImpl(CanvasRendererPeer* peer,
                      const Opt_PixelMap* value)
 {
-#ifndef PIXEL_MAP_SUPPORTED
+#ifdef PIXEL_MAP_SUPPORTED
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(value);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -826,8 +826,8 @@ void SetPixelMapImpl(CanvasRendererPeer* peer,
     CHECK_NULL_VOID(pixelMapPeer);
     peerImpl->SetPixelMap(pixelMapPeer->pixelMap);
 #else
-     LOGE("ARKOALA CanvasRendererAccessor::SetPixelMapImpl function 'setPixelMap'"
-          " is not supported on the current platform.");
+    LOGE("ARKOALA CanvasRendererAccessor::SetPixelMapImpl function 'setPixelMap'"
+         " is not supported on the current platform.");
 #endif
 }
 void TransferFromImageBitmapImpl(CanvasRendererPeer* peer,
