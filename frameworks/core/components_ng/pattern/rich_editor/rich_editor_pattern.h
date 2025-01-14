@@ -757,7 +757,7 @@ public:
         customKeyboardBuilder_ = keyboardBuilder;
     }
     void BindSelectionMenu(TextResponseType type, TextSpanType richEditorType, std::function<void()>& menuBuilder,
-        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear);
+        const SelectMenuParam& menuParam);
     void ClearSelectionMenu()
     {
         selectionMenuMap_.clear();
