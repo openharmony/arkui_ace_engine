@@ -54,7 +54,8 @@ void ParseCjAnimation(NativeAnimateParam animationValue, AnimationOption& result
         result.SetTempo(tempo);
     }
 
-    if (animationValue.playMode.hasValue) {
+    if (animationValue.playMode.hasValue && animationValue.playMode.value >= 0 &&
+        animationValue.playMode.value < static_cast<int32_t>(ANIMATION_DIRECTION.size())) {
         result.SetAnimationDirection(ANIMATION_DIRECTION[animationValue.playMode.value]);
     }
 
@@ -63,7 +64,8 @@ void ParseCjAnimation(NativeAnimateParam animationValue, AnimationOption& result
         result.SetCurve(curve);
     }
 
-    if (animationValue.finishCallbackType.hasValue) {
+    if (animationValue.finishCallbackType.hasValue && animationValue.finishCallbackType.value >= 0 &&
+        animationValue.finishCallbackType.value < static_cast<int32_t>(FINISH_CALLBACK_TYPE.size())) {
         result.SetFinishCallbackType(FINISH_CALLBACK_TYPE[animationValue.finishCallbackType.value]);
     }
 
