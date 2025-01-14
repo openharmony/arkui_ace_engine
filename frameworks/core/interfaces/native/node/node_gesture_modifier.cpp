@@ -263,6 +263,7 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
     }
     touchEvent.touchPointSize = tempTouchEvent.pointers.size() < MAX_POINTS ?
     tempTouchEvent.pointers.size() : MAX_POINTS;
+    touchEvent.targetDisplayId = info.GetTargetDisplayId();
 }
 
 void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
@@ -279,6 +280,7 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
     ret.pinchCenterY = info.GetPinchCenter().GetY();
     ret.speed = info.GetSpeed();
     ret.source = static_cast<int32_t>(info.GetSourceDevice());
+    ret.targetDisplayId = info.GetTargetDisplayId();
     switch (info.GetInputEventType()) {
         case InputEventType::TOUCH_SCREEN :
             ret.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_TOUCH);
@@ -306,6 +308,8 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
     std::array<ArkUITouchPoint, MAX_POINTS> points;
     auto fingerList = info->GetFingerList();
     auto fingureIterator = std::begin(fingerList);
+    rawInputEvent.targetDisplayId = info->GetTargetDisplayId();
+
     for (size_t i = 0; i < fingerList.size(); i++) {
         points[i].id = fingureIterator->fingerId_;
         points[i].windowX = fingureIterator->globalLocation_.GetX();
@@ -403,6 +407,7 @@ void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent
     mouseEvent.actionTouchPoint.screenX = tempMouseEvent.screenX;
     mouseEvent.actionTouchPoint.screenY = tempMouseEvent.screenY;
     mouseEvent.actionTouchPoint.toolType = static_cast<int32_t>(tempMouseEvent.sourceTool);
+    mouseEvent.targetDisplayId = info.GetTargetDisplayId();
 }
 
 void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
@@ -425,6 +430,7 @@ void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
     axisEvent.actionTouchPoint.screenX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->screenLocation_.GetX();
     axisEvent.actionTouchPoint.screenY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->screenLocation_.GetY();
     axisEvent.actionTouchPoint.toolType = static_cast<int32_t>(tempAxisEvent.sourceTool);
+    axisEvent.targetDisplayId = info.GetTargetDisplayId();
 }
 
 void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam)

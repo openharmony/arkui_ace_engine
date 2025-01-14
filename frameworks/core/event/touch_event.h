@@ -72,6 +72,8 @@ struct TouchPoint final {
     SourceTool sourceTool = SourceTool::UNKNOWN;
     bool isPressed = false;
     int32_t originalId = 0;
+    int32_t width;
+    int32_t height;
 };
 
 /**
@@ -119,6 +121,9 @@ struct TouchEvent final : public PointerEvent {
     // Save historical touch point slope.
     float inputXDeltaSlope = 0.0f;
     float inputYDeltaSlope = 0.0f;
+    TimeStamp pressedTime;
+    int32_t width;
+    int32_t height;
 
     TouchEvent()
     {
@@ -286,6 +291,24 @@ struct TouchEvent final : public PointerEvent {
         return *this;
     }
 
+    TouchEvent& SetPressedTime(TimeStamp pressedTime)
+    {
+        this->pressedTime = pressedTime;
+        return *this;
+    }
+
+    TouchEvent& SetWidth(int32_t width)
+    {
+        this->width = width;
+        return *this;
+    }
+
+    TouchEvent& SetHeight(int32_t height)
+    {
+        this->height = height;
+        return *this;
+    }
+
     TouchEvent CloneWith(float scale) const
     {
         return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
@@ -321,6 +344,9 @@ struct TouchEvent final : public PointerEvent {
         event.inputXDeltaSlope = inputXDeltaSlope;
         event.inputYDeltaSlope = inputYDeltaSlope;
         event.isPassThroughMode = isPassThroughMode;
+        event.width = width;
+        event.height = height;
+        event.pressedTime = pressedTime;
         return event;
     }
 
@@ -651,6 +677,30 @@ public:
     {
         touchType_ = type;
     }
+    void SetPressedTime(TimeStamp pressedTime)
+    {
+        pressedTime_ = pressedTime;
+    }
+    TimeStamp GetPressedTime() const
+    {
+        return pressedTime_;
+    }
+    void SetWidth(int32_t width)
+    {
+        width_ = width;
+    }
+    int32_t GetWidth() const
+    {
+        return width_;
+    }
+    void SetHeight(int32_t height)
+    {
+        height_ = height;
+    }
+    int32_t GetHeight() const
+    {
+        return height_;
+    }
 
 private:
     // The finger id is used to identify the point of contact between the finger and the screen. Different fingers have
@@ -673,6 +723,9 @@ private:
 
     // touch type
     TouchType touchType_ = TouchType::UNKNOWN;
+    TimeStamp pressedTime_;
+    int32_t width_;
+    int32_t height_;
 };
 
 using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
@@ -1004,6 +1057,9 @@ public:
             touchEvent.type = changedTouches_.front().GetTouchType();
             touchEvent.tiltX = changedTouches_.front().GetTiltX();
             touchEvent.tiltY = changedTouches_.front().GetTiltY();
+            touchEvent.width = changedTouches_.front().GetWidth();
+            touchEvent.height = changedTouches_.front().GetHeight();
+            touchEvent.pressedTime = changedTouches_.front().GetPressedTime();
         }
         touchEvent.time = timeStamp_;
         return touchEvent;
