@@ -8553,4 +8553,39 @@ ArkUINativeModuleValue CommonBridge::ResetOnFocusAxisEvent(ArkUIRuntimeCallInfo*
     ViewAbstract::DisableOnFocusAxisEvent(frameNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue CommonBridge::RegisterFrameNodeDestructorCallback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto* nativeNode = GetFrameNode(runtimeCallInfo);
+    CHECK_NULL_RETURN(nativeNode, panda::JSValueRef::Undefined(vm));
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> secondeArg = runtimeCallInfo->GetCallArgRef(1);
+    if (secondeArg->IsUndefined()) {
+        frameNode->SetFrameNodeDestructorCallback(nullptr);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    CHECK_NULL_RETURN(secondeArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
+    auto obj = secondeArg->ToObject(vm);
+    auto containerId = Container::CurrentId();
+    CHECK_NULL_RETURN(containerId != -1, panda::JSValueRef::Undefined(vm));
+    panda::Local<panda::FunctionRef> func = obj;
+    auto frameNodeDestructorCallback = [vm, func = JsWeak(panda::CopyableGlobal(vm, func)),
+                                           node = AceType::WeakClaim(frameNode), containerId](int32_t frameNodeId) {
+        panda::LocalScope pandaScope(vm);
+        panda::TryCatch trycatch(vm);
+        ContainerScope scope(containerId);
+        auto function = func.Lock();
+        CHECK_NULL_VOID(!function.IsEmpty());
+        CHECK_NULL_VOID(function->IsFunction(vm));
+        PipelineContext::SetCallBackNode(node);
+        auto frameNodeIdParam = panda::NumberRef::New(vm, frameNodeId);
+        panda::Local<panda::JSValueRef> params[] = { frameNodeIdParam };
+        function->Call(vm, function.ToLocal(), params, 1);
+    };
+    frameNode->SetFrameNodeDestructorCallback(std::move(frameNodeDestructorCallback));
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG
