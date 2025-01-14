@@ -26,6 +26,8 @@
 #include "core/components_ng/svg/base/svg_length_scale_rule.h"
 
 namespace OHOS::Ace::NG {
+struct TransformInfo;
+
 class SvgAttributesParser {
 public:
     static Color GetColor(const std::string& str);
@@ -37,6 +39,8 @@ public:
     static Dimension ParseDimension(const std::string& value, bool useVp = false);
     static double ParseDouble(const std::string& value);
     static bool CheckColorAlpha(const std::string& colorStr, Color& result);
+    static std::pair<Dimension, Dimension> GetTransformOrigin(const std::string& transformOrigin);
+    static std::vector<NG::TransformInfo> GetTransformInfo(const std::string& transform);
 };
 enum class SvgFeColorMatrixType {
     MATRIX,
@@ -97,6 +101,11 @@ struct SvgAttributes {
     Dimension width = -1.0_px;
     Dimension height = -1.0_px;
     bool autoMirror = false;
+};
+
+struct TransformInfo {
+    std::string funcType;
+    std::vector<std::string> paramVec;
 };
 
 enum SvgRuleType {
@@ -175,7 +184,8 @@ struct SvgBaseAttribute {
     StrokeState strokeState;
     SvgTextStyle textStyle;
     std::string transform;
-    std::string transformOrigin;
+    std::vector<NG::TransformInfo> transformVec;
+    std::pair<Dimension, Dimension> transformOrigin;
     std::string filterId;
     std::string maskId;
     std::string href;

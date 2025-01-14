@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "core/components_ng/svg/parse/svg_mask.h"
 #include "core/components_ng/svg/parse/svg_clip_path.h"
 #include "core/components_ng/svg/parse/svg_gradient.h"
+#include "core/components_ng/svg/parse/svg_transform.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -335,10 +336,14 @@ void SvgNode::SetAttr(const std::string& name, const std::string& value)
         { SVG_TRANSFORM,
             [](const std::string& val, SvgBaseAttribute& attrs) {
                 attrs.transform = val;
+                attrs.transformVec = SvgAttributesParser::GetTransformInfo(val);
+                if (attrs.transformVec.empty()) {
+                    TAG_LOGW(AceLogTag::ACE_IMAGE, "Set transformVec failed. transform:[%{public}s]", val.c_str());
+                }
             } },
         { DOM_SVG_SRC_TRANSFORM_ORIGIN,
             [](const std::string& val, SvgBaseAttribute& attrs) {
-                attrs.transformOrigin = val;
+                attrs.transformOrigin = SvgAttributesParser::GetTransformOrigin(val);
             } },
         { SVG_XLINK_HREF,
             [](const std::string& val, SvgBaseAttribute& attrs) {
@@ -451,7 +456,7 @@ void SvgNode::Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
         }
     }
     if (!transform_.empty() || !animateTransform_.empty()) {
-        OnTransform(canvas);
+        OnTransform(canvas, lengthRule);
     }
     if (!hrefMaskId_.empty()) {
         OnMask(canvas, svgCoordinateSystemContext);
@@ -584,12 +589,13 @@ void SvgNode::OnTransform(RSCanvas& canvas, const Size& viewPort)
 {
     auto matrix = (animateTransform_.empty()) ? SvgTransform::CreateMatrix4(transform_)
                                               : SvgTransform::CreateMatrixFromMap(animateTransform_);
-    rsCanvas_->ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(matrix));
+    canvas.ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(matrix));
 }
 
-void SvgNode::OnTransform(RSCanvas& canvas)
+void SvgNode::OnTransform(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
 {
-    auto matrix = (animateTransform_.empty()) ? SvgTransform::CreateMatrix4(transform_)
+    Offset globalPivot = CalcGlobalPivot(attributes_.transformOrigin, lengthRule.GetBaseRect());
+    auto matrix = (animateTransform_.empty()) ? NGSvgTransform::CreateMatrix4(attributes_.transformVec, globalPivot)
                                               : SvgTransform::CreateMatrixFromMap(animateTransform_);
     canvas.ConcatMatrix(RosenSvgPainter::ToDrawingMatrix(matrix));
 }
@@ -868,6 +874,25 @@ void SvgNode::AnimateFromToTransform(const RefPtr<SvgAnimation>& animate, double
         context->AnimateFlush();
     };
     animate->CreatePropertyAnimation(originalValue, std::move(callback));
+}
+
+Offset SvgNode::CalcGlobalPivot(const std::pair<Dimension, Dimension>& transformOrigin, const Rect& baseRect)
+{
+    Rect RectForX = baseRect;
+    Rect RectForY = baseRect;
+    Rect ReferenceBox = GetRootViewBox();
+    if (ReferenceBox == Rect(0, 0, 0, 0)) {
+        ReferenceBox = baseRect;
+    }
+    if (transformOrigin.first.Unit() == DimensionUnit::PERCENT) {
+        RectForX = ReferenceBox;
+    }
+    if (transformOrigin.second.Unit() == DimensionUnit::PERCENT) {
+        RectForY = ReferenceBox;
+    }
+    double x = ConvertDimensionToPx(transformOrigin.first, RectForX.GetSize(), SvgLengthType::HORIZONTAL);
+    double y = ConvertDimensionToPx(transformOrigin.second, RectForY.GetSize(), SvgLengthType::VERTICAL);
+    return Offset(x, y);
 }
 
 } // namespace OHOS::Ace::NG
