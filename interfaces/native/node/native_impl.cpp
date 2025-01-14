@@ -113,6 +113,9 @@ ArkUI_NativeDialogAPI_1 dialogImpl_1 = {
 ArkUI_NativeDialogAPI_2 dialogImpl_2 = {
     dialogImpl_1,
     OHOS::Ace::DialogModel::SetKeyboardAvoidDistance,
+    OHOS::Ace::DialogModel::SetLevelMode,
+    OHOS::Ace::DialogModel::SetLevelUniqueId,
+    OHOS::Ace::DialogModel::SetImmersiveMode,
 };
 
 constexpr int32_t CURRENT_NATIVE_GESTURE_API_VERSION = 1;

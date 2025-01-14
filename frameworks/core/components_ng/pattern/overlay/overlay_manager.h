@@ -661,6 +661,7 @@ public:
     OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
     BorderRadiusProperty GetPrepareDragFrameNodeBorderRadius() const;
     static SafeAreaInsets GetSafeAreaInsets(const RefPtr<FrameNode>& frameNode, bool useCurrentWindow = false);
+    RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
@@ -841,7 +842,6 @@ private:
     void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
     void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode);
     void SetDragNodeNeedClean();
-    RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
     void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
 
     RefPtr<FrameNode> overlayNode_;

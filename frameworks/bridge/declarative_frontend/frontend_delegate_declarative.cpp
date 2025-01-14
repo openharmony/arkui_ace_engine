@@ -55,13 +55,17 @@ const char I18N_FILE_SUFFIX[] = "/properties/string.json";
 
 // helper function to run OverlayManager task
 // ensures that the task runs in subwindow instead of main Window
-void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name)
+void MainWindowOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task, const std::string& name,
+    const RefPtr<NG::OverlayManager>& overlay)
 {
     auto currentId = Container::CurrentId();
     ContainerScope scope(currentId);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
+    if (overlay) {
+        overlayManager = overlay;
+    }
     context->GetTaskExecutor()->PostTask(
         [task = std::move(task), weak = WeakPtr<NG::OverlayManager>(overlayManager)] {
             auto overlayManager = weak.Upgrade();
@@ -1623,7 +1627,7 @@ void FrontendDelegateDeclarative::ShowToast(const NG::ToastInfo& toastInfo, std:
             overlayManager->ShowToast(
                 updatedToastInfo, std::move(const_cast<std::function<void(int32_t)>&&>(callbackParam)));
         };
-        MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast");
+        MainWindowOverlay(std::move(task), "ArkUIOverlayShowToast", nullptr);
         return;
     }
     auto pipeline = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
@@ -1699,7 +1703,7 @@ void FrontendDelegateDeclarative::ShowDialogInner(DialogProperties& dialogProper
             NG::DialogManager::ShowInEmbeddedOverlay(
                 std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
         } else {
-            MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog");
+            MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog", nullptr);
         }
         return;
     }
@@ -1925,7 +1929,7 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
             NG::DialogManager::ShowInEmbeddedOverlay(
                 std::move(task), "ArkUIOverlayShowDialog", dialogProperties.dialogLevelUniqueId);
         } else {
-            MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog");
+            MainWindowOverlay(std::move(task), "ArkUIOverlayShowDialog", nullptr);
         }
         return;
     } else {
@@ -1941,7 +1945,9 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const int32_t dialogId)
         overlayManager->CloseCustomDialog(dialogId);
         SubwindowManager::GetInstance()->CloseCustomDialogNG(dialogId);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog");
+    auto dialogNode = NG::FrameNode::GetFrameNode(V2::DIALOG_ETS_TAG, dialogId);
+    auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(dialogNode);
+    MainWindowOverlay(std::move(task), "ArkUIOverlayCloseCustomDialog", currentOverlay);
     return;
 }
 
@@ -1953,6 +1959,13 @@ void FrontendDelegateDeclarative::CloseCustomDialog(const WeakPtr<NG::UINode>& n
     auto context = nodePtr->GetContextWithCheck();
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
+    auto parent = NG::DialogManager::GetInstance().GetDialogNodeByContentNode(nodePtr);
+    if (parent) {
+        auto currentOverlay = NG::DialogManager::GetInstance().GetEmbeddedOverlayWithNode(parent);
+        if (currentOverlay) {
+            overlayManager = currentOverlay;
+        }
+    }
     context->GetTaskExecutor()->PostTask(
         [node, callback, weak = WeakPtr<NG::OverlayManager>(overlayManager)]() mutable {
             auto overlayManager = weak.Upgrade();
@@ -3531,7 +3544,7 @@ void FrontendDelegateDeclarative::AddFrameNodeToOverlay(const RefPtr<NG::FrameNo
         ContainerScope scope(containerId);
         overlayManager->AddFrameNodeToOverlay(node, index);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayAddFrameNode");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayAddFrameNode", nullptr);
 }
 
 void FrontendDelegateDeclarative::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -3541,7 +3554,7 @@ void FrontendDelegateDeclarative::RemoveFrameNodeOnOverlay(const RefPtr<NG::Fram
         ContainerScope scope(containerId);
         overlayManager->RemoveFrameNodeOnOverlay(node);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayRemoveFrameNode", nullptr);
 }
 
 void FrontendDelegateDeclarative::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -3551,7 +3564,7 @@ void FrontendDelegateDeclarative::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>&
         ContainerScope scope(containerId);
         overlayManager->ShowNodeOnOverlay(node);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayShowNode");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayShowNode", nullptr);
 }
 
 void FrontendDelegateDeclarative::HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -3561,7 +3574,7 @@ void FrontendDelegateDeclarative::HideNodeOnOverlay(const RefPtr<NG::FrameNode>&
         ContainerScope scope(containerId);
         overlayManager->HideNodeOnOverlay(node);
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayHideNode");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayHideNode", nullptr);
 }
 
 void FrontendDelegateDeclarative::ShowAllNodesOnOverlay()
@@ -3571,7 +3584,7 @@ void FrontendDelegateDeclarative::ShowAllNodesOnOverlay()
         ContainerScope scope(containerId);
         overlayManager->ShowAllNodesOnOverlay();
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayShowAllNodes");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayShowAllNodes", nullptr);
 }
 
 void FrontendDelegateDeclarative::HideAllNodesOnOverlay()
@@ -3581,7 +3594,7 @@ void FrontendDelegateDeclarative::HideAllNodesOnOverlay()
         ContainerScope scope(containerId);
         overlayManager->HideAllNodesOnOverlay();
     };
-    MainWindowOverlay(std::move(task), "ArkUIOverlayHideAllNodes");
+    MainWindowOverlay(std::move(task), "ArkUIOverlayHideAllNodes", nullptr);
 }
 
 RefPtr<NG::ChainedTransitionEffect> FrontendDelegateDeclarative::GetTransitionEffect(void* value)
