@@ -16,9 +16,9 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_textpicker_ffi.h"
 
 #include "cj_lambda.h"
+
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -194,6 +194,26 @@ void FfiOHOSAceFrameworkTextPickerSetTextStyle(uint32_t color, double size, int3
     TextPickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
+void FfiOHOSAceFrameworkTextPickerSetDisappearTextStyle(uint32_t color, double size, int32_t unit,
+    const char* weight, const char* family, uint32_t style)
+{
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    NG::PickerTextStyle textStyle;
+
+    textStyle.textColor = Color(color);
+    CalcDimension fontSize = CalcDimension(size, DimensionUnit(unit));
+    textStyle.fontSize = fontSize;
+
+    std::string weightVal = weight;
+    textStyle.fontWeight = ConvertStrToFontWeight(weightVal);
+
+    std::string familyVal = family;
+    textStyle.fontFamily = ConvertStrToFontFamilies(familyVal);
+    textStyle.fontStyle = static_cast<FontStyle>(style);
+
+    TextPickerModel::GetInstance()->SetDisappearTextStyle(theme, textStyle);
+}
 
 void FfiOHOSAceFrameworkTextPickerSetSelectedTextStyle(uint32_t color, double size, int32_t unit,
     const char* weight, const char* family, uint32_t style)
@@ -216,9 +236,10 @@ void FfiOHOSAceFrameworkTextPickerSetSelectedTextStyle(uint32_t color, double si
     TextPickerModel::GetInstance()->SetSelectedTextStyle(theme, textStyle);
 }
 
-void FfiOHOSAceFrameworkTextPickerSetGradientHeight(const Dimension& value)
+void FfiOHOSAceFrameworkTextPickerSetGradientHeight(double length, int32_t unit)
 {
-    TextPickerModel::GetInstance()->SetGradientHeight(value);
+    Dimension gradientDime(length, static_cast<DimensionUnit>(unit));
+    TextPickerModel::GetInstance()->SetGradientHeight(gradientDime);
 }
 
 void FfiOHOSAceFrameworkTextPickerSetDivider(DividerParams params)
@@ -241,9 +262,10 @@ void FfiOHOSAceFrameworkTextPickerSetSelectedIndexSingle(uint32_t value)
     TextPickerModel::GetInstance()->SetSelected(value);
 }
 
-void FfiOHOSAceFrameworkTextPickerSetSelectedIndexMulti(const std:: vector<uint32_t>& values)
+void FfiOHOSAceFrameworkTextPickerSetSelectedIndexMulti(VectorUInt32Handle values)
 {
-    TextPickerModel::GetInstance()->SetSelecteds(values);
+    const auto& indexarray = * reinterpret_cast<std::vector<uint32_t>*>(values)
+    TextPickerModel::GetInstance()->SetSelecteds(indexarray);
 }
 
 void FfiOHOSAceFrameworkTextPickerOnChange(void (*callback)(CJTextPickerResult pickerResult))
