@@ -672,7 +672,7 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
         return;
     }
     if (IsUIExtensionWindow()) {
-        HandleUIExtensionKeyboard(showInSubWindow);
+        HandleUIExtensionKeyboard(layoutWrapper, showInSubWindow);
         return;
     }
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
@@ -684,7 +684,7 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
         marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
         wrapperSize_.SetHeight(wrapperSize_.Height() - keyboardHeight);
     } else if (showInSubWindow) {
-        auto currentContext = PipelineContext::GetCurrentContext();
+        auto currentContext = bubbleNode->GetContextRefPtr();
         CHECK_NULL_VOID(currentContext);
         auto currentSafeAreaManager = currentContext->GetSafeAreaManager();
         CHECK_NULL_VOID(currentSafeAreaManager);
@@ -696,7 +696,7 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
     }
 }
 
-void BubbleLayoutAlgorithm::HandleUIExtensionKeyboard(bool showInSubWindow)
+void BubbleLayoutAlgorithm::HandleUIExtensionKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow)
 {
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -711,7 +711,9 @@ void BubbleLayoutAlgorithm::HandleUIExtensionKeyboard(bool showInSubWindow)
             wrapperSize_.SetHeight(wrapperSize_.Height() - keyboardHeight);
             marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
         } else {
-            auto currentContext = PipelineContext::GetCurrentContext();
+            auto bubbleNode = layoutWrapper->GetHostNode();
+            CHECK_NULL_VOID(bubbleNode);
+            auto currentContext = bubbleNode->GetContextRefPtr();
             CHECK_NULL_VOID(currentContext);
             auto currentSafeAreaManager = currentContext->GetSafeAreaManager();
             CHECK_NULL_VOID(currentSafeAreaManager);
