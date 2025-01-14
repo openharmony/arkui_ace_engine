@@ -130,6 +130,5 @@ const char SVG_FE_OPERATOR_TYPE[] = "operator";
 const char SVG_TRANSFORM[] = "transform";
 const char SVG_CLIP_PATH[] = "clipPath";
 const char SVG_PRESERVE_ASPECT_RATIO[] = "preserveAspectRatio";
-
 const char SVG_CLIP_PATH_UNITS[] = "clipPathUnits";
 } // namespace OHOS::Ace::NG

@@ -42,7 +42,6 @@ const char SVG_ALIGN_XMAX_YMAX[] = "xMaxYMax";
 const char SVG_ALIGN_NONE[] = "none";
 const char SVG_ALIGN_MEET[] = "meet";
 const char SVG_ALIGN_SLICE[] = "slice";
-constexpr float HALF = 0.5f;
 }
 
 LineCapStyle SvgAttributesParser::GetLineCapStyle(const std::string& val)
@@ -343,7 +342,7 @@ void SvgAttributesParser::ComputeTranslate(const Size& viewBox, const Size& view
             break;
         /*translate x eq 0.0f*/
         case SvgAlign::ALIGN_XMIN_YMID:
-            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF;
+            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF_FLOAT;
             break;
         /*translate x eq 0.0f*/
         case SvgAlign::ALIGN_XMIN_YMAX:
@@ -351,10 +350,10 @@ void SvgAttributesParser::ComputeTranslate(const Size& viewBox, const Size& view
             break;
         /*translate y eq 0.0f*/
         case SvgAlign::ALIGN_XMID_YMIN:
-            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF;
+            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF_FLOAT;
             break;
         case SvgAlign::ALIGN_XMID_YMAX:
-            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF;
+            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF_FLOAT;
             translateY = viewPort.Height() - viewBox.Height() * scaleY;
             break;
         /*translate y eq 0.0f*/
@@ -363,7 +362,7 @@ void SvgAttributesParser::ComputeTranslate(const Size& viewBox, const Size& view
             break;
         case SvgAlign::ALIGN_XMAX_YMID:
             translateX = viewPort.Width() - viewBox.Width() * scaleX;
-            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF;
+            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF_FLOAT;
             break;
         case SvgAlign::ALIGN_XMAX_YMAX:
             translateX = viewPort.Width() - viewBox.Width() * scaleX;
@@ -371,8 +370,8 @@ void SvgAttributesParser::ComputeTranslate(const Size& viewBox, const Size& view
             break;
         case SvgAlign::ALIGN_XMID_YMID:
         default:
-            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF;
-            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF;
+            translateX = (viewPort.Width() - viewBox.Width() * scaleX) * HALF_FLOAT;
+            translateY = (viewPort.Height() - viewBox.Height() * scaleY) * HALF_FLOAT;
             break;
     }
 }

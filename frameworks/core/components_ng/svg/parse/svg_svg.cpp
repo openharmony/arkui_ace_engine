@@ -22,10 +22,10 @@ namespace OHOS::Ace::NG {
 namespace {
 const char DOM_SVG_SRC_VIEW_BOX[] = "viewBox";
 constexpr float HALF = 0.5f;
-constexpr int32_t INDEX_ZERO = 0;
-constexpr int32_t INDEX_ONE = 1;
-constexpr int32_t INDEX_TWO = 2;
-constexpr int32_t INDEX_THREE = 3;
+constexpr int32_t INDEX_VIEWBOX_X = 0;
+constexpr int32_t INDEX_VIEWBOX_Y = 1;
+constexpr int32_t INDEX_VIEWBOX_WIDTH = 2;
+constexpr int32_t INDEX_VIEWBOX_HEIGHT = 3;
 constexpr int32_t VIEWBOX_PARAM_COUNT = 4;
 constexpr int32_t PRESERVEASPECTRATIO_PARAM_COUNT_MAX = 2;
 }
@@ -157,7 +157,8 @@ void ParsePreserveAspectRatio(const std::string& val, SvgAttributes& attr)
     }
     std::vector<std::string> tmpValue;
     StringUtils::StringSplitter(val, ' ', tmpValue);
-    if (tmpValue.size() > PRESERVEASPECTRATIO_PARAM_COUNT_MAX) {
+    if (tmpValue.empty() || tmpValue.size() > PRESERVEASPECTRATIO_PARAM_COUNT_MAX) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "ParsePreserveAspectRatio parameter count error");
         return;
     }
     attr.preserveAspectRatio.svgAlign = SvgAttributesParser::ParseSvgAlign(tmpValue[0]);
@@ -177,9 +178,11 @@ void ParseViewBox(const std::string& val, SvgAttributes& attr)
     std::vector<double> viewBox;
     StringUtils::StringSplitter(val, ' ', viewBox);
     if (viewBox.size() != VIEWBOX_PARAM_COUNT) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "ParseViewBox parameter count != 4");
         return;
     }
-    attr.viewBox = Rect(viewBox[INDEX_ZERO], viewBox[INDEX_ONE], viewBox[INDEX_TWO], viewBox[INDEX_THREE]);
+    attr.viewBox = Rect(viewBox[INDEX_VIEWBOX_X], viewBox[INDEX_VIEWBOX_Y], viewBox[INDEX_VIEWBOX_WIDTH],
+        viewBox[INDEX_VIEWBOX_HEIGHT]);
 }
 
 bool SvgSvg::ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
