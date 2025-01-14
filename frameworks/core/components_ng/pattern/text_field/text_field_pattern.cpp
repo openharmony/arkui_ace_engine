@@ -2107,7 +2107,9 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
         previewTextTouchOffset.SetY(std::clamp(touchOffset.GetY(), limitT, limitB));
         selectController_->UpdateCaretInfoByOffset(previewTextTouchOffset, true, true);
     } else {
-        UpdateContentScroller(touchOffset);
+        if (HasText()) {
+            UpdateContentScroller(touchOffset);
+        }
         auto touchCaretX = std::clamp(
             touchOffset.GetX(), static_cast<double>(contentRect_.Left()), static_cast<double>(contentRect_.Right()));
         // 1/4 line height.
