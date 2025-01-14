@@ -7053,20 +7053,25 @@ void WebPattern::SuggestionSelected(int32_t index)
 }
 
 void WebPattern::OnShowAutofillPopup(
-    const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
+    const float offsetX, const float offsetY, const float height, const float width,
+    const std::vector<std::string>& menu_items)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnShowAutofillPopup");
     isShowAutofillPopup_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto id = host->GetId();
-    std::vector<SelectParam> selectParam;
+    std::vector<OptionParam> optionParam;
     for (auto& item : menu_items) {
-        selectParam.push_back({ item, "" });
+        optionParam.push_back({ item, "", nullptr });
     }
-    auto menu = MenuView::Create(selectParam, id, host->GetTag());
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
+    NG::MenuParam menuParam;
+    menuParam.isShow = true;
+    menuParam.setShow = true;
+    menuParam.placement = Placement::BOTTOM_LEFT;
+    auto dataListNode = CreateDataListFrameNode(OffsetF(offsetX, offsetY), height, width);
+
+    auto menu = MenuView::Create(std::move(optionParam), dataListNode->GetId(), dataListNode->GetTag(),
+        MenuType::MENU, menuParam);
     auto menuContainer = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
     CHECK_NULL_VOID(menuContainer);
     auto menuPattern = menuContainer->GetPattern<MenuPattern>();
@@ -7089,14 +7094,15 @@ void WebPattern::OnShowAutofillPopup(
             optionNode->MarkModifyDone();
         }
     }
+    auto context = dataListNode->GetContext();
+    CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     auto offset = GetCoordinatePoint().value_or(OffsetF());
     offset.AddX(offsetX);
     offset.AddY(offsetY);
     menu->GetOrCreateFocusHub()->SetFocusable(false);
-    overlayManager->DeleteMenu(id);
-    overlayManager->ShowMenu(id, offset, menu);
+    overlayManager->ShowMenu(dataListNode->GetId(), offset, menu);
 }
 
 void WebPattern::OnHideAutofillPopup()
@@ -7113,7 +7119,75 @@ void WebPattern::OnHideAutofillPopup()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->DeleteMenu(id);
+    RemoveDataListNode();
     isShowAutofillPopup_ = false;
+}
+
+RefPtr<FrameNode> WebPattern::CreateDataListFrameNode(const OffsetF& offfset, const float height, const float width)
+{
+    RemoveDataListNode();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(host, nullptr);
+    dataListNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dataListNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, dataListNodeId_.value(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    CHECK_NULL_RETURN(dataListNode, nullptr);
+    auto dataListRenderContext = dataListNode->GetRenderContext();
+    CHECK_NULL_RETURN(dataListRenderContext, nullptr);
+    auto dataListGesture = dataListNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(dataListGesture, nullptr);
+
+    dataListNode->SetDraggable(false);
+    dataListGesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
+
+    if (width <= 0 || height <= 0) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "CreateDataListFrameNode get size(%{public}f, %{public}f) error",
+            width, height);
+        return nullptr;
+    }
+    dataListRenderContext->UpdatePosition(
+        OffsetT<Dimension>(Dimension(offfset.GetX()), Dimension(offfset.GetY() - height)));
+
+    SizeF dataListSize;
+    dataListSize.SetWidth(width);
+    dataListSize.SetHeight(height / pipeline->GetDipScale());
+    auto dataListProperty = dataListNode->GetLayoutProperty<ImageLayoutProperty>();
+    dataListProperty->UpdateMarginSelfIdealSize(dataListSize);
+    MeasureProperty layoutConstraint;
+    CalcSize idealSize = { CalcLength(Dimension(dataListSize.Width(), DimensionUnit::VP).ConvertToPx()),
+        CalcLength(Dimension(dataListSize.Height(), DimensionUnit::VP).ConvertToPx()) };
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    dataListNode->UpdateLayoutConstraint(layoutConstraint);
+    host->AddChild(dataListNode);
+    dataListNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    dataListNode->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
+    return dataListNode;
+}
+
+void WebPattern::RemoveDataListNode()
+{
+    if (!dataListNodeId_.has_value()) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "RemoveDataListNode");
+    auto dataListNode = FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, dataListNodeId_.value());
+    CHECK_NULL_VOID(dataListNode);
+    auto context = dataListNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->DeleteMenu(dataListNode->GetId());
+    
+    auto parent = dataListNode->GetParent();
+    CHECK_NULL_VOID(parent);
+    parent->RemoveChild(dataListNode);
+    dataListNodeId_.reset();
+    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void WebPattern::CloseKeyboard()

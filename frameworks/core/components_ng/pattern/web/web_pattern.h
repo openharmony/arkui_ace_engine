@@ -548,8 +548,11 @@ public:
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
-    void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
+    void OnShowAutofillPopup(const float offsetX, const float offsetY, const float height, const float width,
+        const std::vector<std::string>& menu_items);
     void OnHideAutofillPopup();
+    RefPtr<FrameNode> CreateDataListFrameNode(const OffsetF& offfset, const float height, const float width);
+    void RemoveDataListNode();
     void UpdateTouchHandleForOverlay(bool fromOverlay = false);
     bool IsSelectOverlayDragging()
     {
@@ -1247,6 +1250,8 @@ private:
     int64_t lastHeight_ = 0L;
     int64_t lastWidth_ = 0L;
     bool dragWindowFlag_ = false;
+
+    std::optional<int32_t> dataListNodeId_ = std::nullopt;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

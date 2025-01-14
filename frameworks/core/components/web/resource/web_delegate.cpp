@@ -7276,11 +7276,12 @@ Offset WebDelegate::GetPosition(const std::string& embedId)
 }
 
 void WebDelegate::OnShowAutofillPopup(
-    const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
+    const float offsetX, const float offsetY, const float height, const float width,
+    const std::vector<std::string>& menu_items)
 {
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
-    webPattern->OnShowAutofillPopup(offsetX, offsetY, menu_items);
+    webPattern->OnShowAutofillPopup(offsetX, offsetY, height, width, menu_items);
 }
 
 void WebDelegate::SuggestionSelected(int32_t index)

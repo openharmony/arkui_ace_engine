@@ -242,7 +242,8 @@ public:
     bool OnOpenAppLink(const std::string& url,
                        std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback) override;
     void OnShowAutofillPopup(
-        const float offsetX, const float offsetY, const std::vector<std::string>& menu_items) override;
+        const float offsetX, const float offsetY, const float height, const float width,
+        const std::vector<std::string>& menu_items) override;
     void OnHideAutofillPopup() override;
     void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked) override;
 
