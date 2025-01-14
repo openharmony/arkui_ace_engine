@@ -1016,7 +1016,7 @@ inline bool OneLineMovesOffViewportFromAbove(float mainLength, float lineHeight)
 }
 } // namespace
 
-bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx, bool& cacheValid)
+bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx)
 {
     auto it = gridLayoutInfo_.gridMatrix_.find(line);
     if (it == gridLayoutInfo_.gridMatrix_.end() ||
@@ -1053,12 +1053,6 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLen
     }
 
     if (NonNegative(cellAveLength_)) { // Means at least one item has been measured
-        auto it = gridLayoutInfo_.lineHeightMap_.find(line);
-        if (it != gridLayoutInfo_.lineHeightMap_.end() && it->second != cellAveLength_) {
-            // Invalidate cache when item height changes, so that a future line jump would correctly
-            // recalculate lineHeights instead of using bad cache values.
-            cacheValid = false;
-        }
         gridLayoutInfo_.lineHeightMap_[line] = cellAveLength_;
         mainLength += cellAveLength_ + mainGap_;
     }
@@ -1075,13 +1069,11 @@ bool GridScrollLayoutAlgorithm::MeasureExistingLine(int32_t line, float& mainLen
 bool GridScrollLayoutAlgorithm::UseCurrentLines(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength)
 {
-    auto& info = gridLayoutInfo_;
-    bool cacheValid = true;
     bool runOutOfRecord = false;
     // Measure grid items row by row
     int32_t tempEndIndex = -1;
     while (LessNotEqual(mainLength, mainSize)) {
-        if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex, cacheValid)) {
+        if (!MeasureExistingLine(++currentMainLineIndex_, mainLength, tempEndIndex)) {
             runOutOfRecord = true;
             break;
         }
@@ -1097,14 +1089,6 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     gridLayoutInfo_.reachEnd_ = gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1;
     if (!gridLayoutInfo_.reachEnd_) {
         gridLayoutInfo_.offsetEnd_ = false;
-    }
-    if (!cacheValid) {
-        info.ClearMapsToEnd(info.endMainLineIndex_ + 1);
-        // run out of record, startMainLineIndex is larger by 1 than real start main line index, so reduce 1
-        info.ClearMapsFromStart(info.startMainLineIndex_ > info.endMainLineIndex_ ? info.startMainLineIndex_ - 1
-                                                                                  : info.startMainLineIndex_);
-        // If only the height of the GridItem is changed, keep the prevOffset_ and currentOffset_ equal.
-        ResetOffsetWhenHeightChanged();
     }
     return runOutOfRecord;
 }
@@ -2087,9 +2071,8 @@ void GridScrollLayoutAlgorithm::SyncPreload(
 
         float len = 0.0f;
         int32_t endIdx = gridLayoutInfo_.endIndex_;
-        bool cache = true;
         int32_t line = scope.subEndLine_ + i + 1;
-        if (!MeasureExistingLine(line, len, endIdx, cache)) {
+        if (!MeasureExistingLine(line, len, endIdx)) {
             currentMainLineIndex_ = line - 1;
             FillNewLineBackward(crossSize, mainSize, wrapper, false);
         }
