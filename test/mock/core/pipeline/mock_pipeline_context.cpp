@@ -999,6 +999,10 @@ bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF&
 
 // pipeline_base ===============================================================
 namespace OHOS::Ace {
+namespace {
+const int32_t IGNORE_POSITION_TRANSITION_SWITCH = -990;
+} // namespace
+
 class ManagerInterface : public AceType {
     DECLARE_ACE_TYPE(ManagerInterface, AceType);
 };
@@ -1114,6 +1118,9 @@ void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, const std::stri
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
+    if (instanceId_ == IGNORE_POSITION_TRANSITION_SWITCH) {
+        return nullptr;
+    }
     return AceType::MakeRefPtr<MockAccessibilityManager>();
 }
 
