@@ -74,7 +74,7 @@ private:
     bool IsTextOutOfOneColumn(RefPtr<FrameNode>& frameNode, float threshold);
     Alignment ParseAlignmentRTL(LayoutWrapper* layoutWrapper, Alignment align);
     void InitLayoutWrapper(LayoutWrapper* layoutWrapper,
-        RefPtr<SecurityComponentLayoutProperty> securityComponentLayoutProperty);
+        const RefPtr<SecurityComponentLayoutProperty>& securityComponentLayoutProperty);
 
     void UpdateTextSize();
 

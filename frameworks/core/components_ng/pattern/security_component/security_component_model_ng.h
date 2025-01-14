@@ -114,7 +114,7 @@ private:
     static void SetDefaultBackgroundButton(const RefPtr<FrameNode>& buttonNode,
         int32_t type);
     static void SetDefaultTextStyle(const RefPtr<FrameNode>& textNode, const std::string& text, bool isButtonVisible);
-    static void InitLayoutProperty(RefPtr<FrameNode> &node, int32_t text, int32_t icon, uint32_t symbolIcon,
+    static void InitLayoutProperty(RefPtr<FrameNode>& node, int32_t text, int32_t icon, uint32_t symbolIcon,
         int32_t backgroundType);
     RefPtr<FrameNode> InitChild(const std::string& tag, int32_t nodeId,
         SecurityComponentElementStyle& style, const std::function<RefPtr<Pattern>(void)>& patternCreator);

@@ -813,7 +813,7 @@ void SecurityComponentLayoutAlgorithm::UpdateTextFlags(LayoutWrapper* layoutWrap
 }
 
 void SecurityComponentLayoutAlgorithm::InitLayoutWrapper(LayoutWrapper* layoutWrapper,
-    RefPtr<SecurityComponentLayoutProperty> securityComponentLayoutProperty)
+    const RefPtr<SecurityComponentLayoutProperty>& securityComponentLayoutProperty)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto iconWrapper = GetChildWrapper(layoutWrapper, V2::IMAGE_ETS_TAG);

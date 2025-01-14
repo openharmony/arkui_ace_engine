@@ -35,7 +35,7 @@ namespace OHOS::Ace::NG {
 
 constexpr double DEFAULT_SIZE_24 = 24;
 
-void IconLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
+void IconLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& property,
     RefPtr<LayoutWrapper>& iconWrap)
 {
     CHECK_NULL_VOID(property);
@@ -125,7 +125,7 @@ void TextLayoutElement::UpdateFontSize()
     }
 }
 
-float TextLayoutElement::GetHeightConstraint(RefPtr<SecurityComponentLayoutProperty>& property, float height)
+float TextLayoutElement::GetHeightConstraint(const RefPtr<SecurityComponentLayoutProperty>& property, float height)
 {
     CHECK_NULL_RETURN(property, 0.0f);
     auto isVertical = (property->GetTextIconLayoutDirection().value_or(
@@ -148,7 +148,7 @@ float TextLayoutElement::GetHeightConstraint(RefPtr<SecurityComponentLayoutPrope
     return height - topPadding.Value() - bottomPadding.Value();
 }
 
-void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
+void TextLayoutElement::Init(const RefPtr<SecurityComponentLayoutProperty>& property,
     RefPtr<LayoutWrapper>& textWrap)
 {
     secCompProperty_ = property;
