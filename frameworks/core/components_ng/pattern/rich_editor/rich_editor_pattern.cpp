@@ -7062,6 +7062,7 @@ bool RichEditorPattern::IsScrollBarPressed(const MouseInfo& info)
 void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
 {
     ACE_SCOPED_TRACE("RichEditorHandleMouseLeftButtonMove");
+    CHECK_NULL_VOID(!IsPreviewTextInputting());
     if (blockPress_) {
         ACE_SCOPED_TRACE("RichEditorUpdateDragBoxes");
         dragBoxes_ = GetTextBoxes();
@@ -7123,7 +7124,8 @@ void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
     auto frameNodeRange = GetSpanRangeByLocalOffset(info.GetLocalLocation());
     bool frameNodeSelected = textSelector_.ContainsRange(frameNodeRange);
     bool pressFrameNode = !frameNodeSelected && InRangeRect(info.GetGlobalLocation(), frameNodeRange);
-    if (IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation()) || pressFrameNode) {
+    if (IsPreviewTextInputting() || IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation()) ||
+        pressFrameNode) {
         blockPress_ = true;
         return;
     }
@@ -7172,6 +7174,7 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
 {
     blockPress_ = false;
     leftMousePress_ = false;
+    CHECK_NULL_VOID(!IsPreviewTextInputting());
     auto oldMouseStatus = mouseStatus_;
     mouseStatus_ = MouseStatus::RELEASED;
     isMouseSelect_ = false;
@@ -7209,7 +7212,6 @@ void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
 
 void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
 {
-    CHECK_NULL_VOID(!IsPreviewTextInputting());
     if (info.GetAction() == MouseAction::MOVE) {
         HandleMouseLeftButtonMove(info);
     } else if (info.GetAction() == MouseAction::PRESS) {
