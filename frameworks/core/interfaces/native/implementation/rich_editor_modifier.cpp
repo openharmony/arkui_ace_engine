@@ -69,7 +69,7 @@ void AssignArkValue(Ark_DecorationStyleResult& dst, const RichEditorAbstractSpan
 {
     dst.type = Converter::ArkValue<Ark_TextDecorationType>(src.GetTextDecoration());
     dst.color = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(src.GetColor());
-    dst.style.value = Converter::ArkValue<Ark_TextDecorationStyle>(src.GetTextDecorationStyle());
+    dst.style = Converter::ArkValue<Opt_TextDecorationStyle>(src.GetTextDecorationStyle());
 }
 
 void AssignArkValue(Ark_String& dst, const FONT_FEATURES_LIST& src)
@@ -95,7 +95,7 @@ void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const RichEditorAbstract
     LOGW("RichEditor modifier :: textShadow conversion is not implemented yet.");
     dst.letterSpacing = Converter::ArkValue<Opt_Number>(src.GetLetterspacing());
     dst.lineHeight = Converter::ArkValue<Opt_Number>(src.GetLineHeight());
-    dst.fontFeature.value = Converter::ArkValue<Ark_String>(src.GetFontFeatures());
+    dst.fontFeature = Converter::ArkValue<Opt_String>(src.GetFontFeatures());
 }
 
 void AssignArkValue(Ark_RichEditorSymbolSpanStyle& dst, const SymbolSpanStyle& src)
@@ -117,13 +117,15 @@ void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *c
 void AssignArkValue(Ark_RichEditorTextSpanResult& dst, const RichEditorAbstractSpanResult& src, ConvContext *ctx)
 {
     dst.spanPosition = Converter::ArkValue<Ark_RichEditorSpanPosition>(src);
-    dst.value = Converter::ArkValue<Ark_String>(src.GetValue());
+    dst.value = Converter::ArkValue<Ark_String>(src.GetValue(), ctx);
     dst.textStyle = Converter::ArkValue<Ark_RichEditorTextStyleResult>(src);
-    dst.symbolSpanStyle.value = Converter::ArkValue<Ark_RichEditorSymbolSpanStyle>(src.GetSymbolSpanStyle(), ctx);
+    dst.symbolSpanStyle = Converter::ArkValue<Opt_RichEditorSymbolSpanStyle>(src.GetSymbolSpanStyle(), ctx);
     if (src.GetValueResource()) {
-        dst.valueResource.value = Converter::ArkValue<Ark_Resource>(*src.GetValueResource(), ctx);
+        dst.valueResource = Converter::ArkValue<Opt_Resource>(*src.GetValueResource(), ctx);
+    } else {
+        dst.valueResource = Converter::ArkValue<Opt_Resource>();
     }
-    dst.previewText = Converter::ArkValue<Opt_String>(src.GetPreviewText());
+    dst.previewText = Converter::ArkValue<Opt_String>(src.GetPreviewText(), ctx);
 }
 
 void AssignArkValue(Ark_TextRange& dst, const TextRange& src)

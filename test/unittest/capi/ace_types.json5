@@ -3622,6 +3622,13 @@
                     "default": "false"
                 }
             ],
+            "remove": [
+                "setDraggableTestDefaultValues",
+                "setDraggableTestDraggableValidValues",
+                "setSourceSizeTestDefaultValues",
+                "setSourceSizeTestSourceSizeWidthValidValues",
+                "setSourceSizeTestSourceSizeHeightValidValues",
+            ],
             "disable": [
                 "setImageOptions0TestSrcValidValues", // No fixture is defined for type Ark_CustomObject
                 "setImageOptions0TestSrcInvalidValues", // No fixture is defined for type Ark_CustomObject
@@ -3634,12 +3641,8 @@
                 "setDynamicRangeModeTestDefaultValues", // Invalid enum in JSON. Need investigate it in the ace_engine
                 "setDynamicRangeModeTestDynamicRangeModeValidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
                 "setDynamicRangeModeTestDynamicRangeModeInvalidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
-                "setSourceSizeTestDefaultValues", // values possibly double or integer
-                "setSourceSizeTestSourceSizeWidthValidValues", // values possibly double or integer
-                "setSourceSizeTestSourceSizeHeightValidValues",  // values possibly double or integer
                 "setColorFilterTestValidValues", // Need to properly configure fixtures in configuration file for proper test generation!
                 "setCopyOptionTestCopyOptionValidValues", // Invalid enum in JSON. Need investigate it in the ace_engine
-                "setDraggableTestDefaultValues", // Wrong default value. Need investigate it in the ace_engine
                 "setPointLightTestDefaultValues", // No values in the JSON. Need investigate it in the ace_engine
                 "setPointLightTestPointLightLightSourcePositionXValidValues",  // No values in the JSON
                 "setPointLightTestPointLightLightSourcePositionXInvalidValues", // No values in the JSON
@@ -3665,8 +3668,6 @@
                 "setResizableTestResizableSliceBottomInvalidValues", // No values in the JSON
                 "setResizableTestResizableSliceLeftValidValues", // No values in the JSON
                 "setResizableTestResizableSliceLeftInvalidValues", // No values in the JSON
-
-                "setDraggableTestDraggableValidValues", // Failed after upmerge, need to check
 
                 // New attr in API 105?
                 "setOrientationTestDefaultValues",

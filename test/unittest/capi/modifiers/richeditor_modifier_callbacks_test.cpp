@@ -365,7 +365,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnAboutToInputCallbackTest, TestSize.L
  * @tc.desc: setOnIMEInputComplete test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_OnIMEInputCompleteTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, OnIMEInputCompleteTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     Callback_RichEditorTextSpanResult_Void func{};

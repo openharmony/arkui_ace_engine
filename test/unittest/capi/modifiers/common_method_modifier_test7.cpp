@@ -21,6 +21,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "generated/type_helpers.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -513,5 +514,171 @@ HWTEST_F(CommonMethodModifierTest7, SetOnDragStartTest, TestSize.Level1)
     EXPECT_EQ(ddInfo.extraInfo, expectedInfo);
 
     DisposeNode(expectedCustomNode);
+}
+
+/*
+ * @tc.name: SetOnChildTouchTest
+ * @tc.desc: Checking the callback operation for a change in breakpoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest7, SetOnChildTouchTest, TestSize.Level1)
+{
+    using namespace Converter;
+    ASSERT_NE(modifier_->setOnChildTouchTest, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    static const int32_t expectedResourceId = 123;
+
+    auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Array_TouchTestInfo value,
+        const Callback_TouchResult_Void continuation)
+    {
+        EXPECT_EQ(Convert<int32_t>(resourceId), expectedResourceId);
+        auto isCompetition = value.length > 0;
+        auto fakeId = std::to_string(value.length);
+        Ark_TouchResult arkResult = {
+            .strategy = isCompetition ? ARK_TOUCH_TEST_STRATEGY_FORWARD_COMPETITION : ARK_TOUCH_TEST_STRATEGY_FORWARD,
+            .id = ArkValue<Opt_String>(fakeId)
+        };
+        CallbackHelper(continuation).Invoke(arkResult);
+    };
+    auto arkCallback = Converter::ArkValue<Callback_Array_TouchTestInfo_TouchResult>(nullptr,
+        callSyncFunc, expectedResourceId);
+
+    // expect default when nothing callback
+    auto result = frameNode->GetOnChildTouchTestRet({});
+    EXPECT_EQ(result.strategy, TouchTestStrategy::DEFAULT);
+
+    // set callback func
+    modifier_->setOnChildTouchTest(node_, &arkCallback);
+
+    // expect different results depending on input data
+    result = frameNode->GetOnChildTouchTestRet({});
+    EXPECT_EQ(result.strategy, TouchTestStrategy::FORWARD);
+    EXPECT_EQ(result.id, "0");
+
+    std::vector<TouchTestInfo> touchInfo = { TouchTestInfo() };
+    result = frameNode->GetOnChildTouchTestRet(touchInfo);
+    EXPECT_EQ(result.strategy, TouchTestStrategy::FORWARD_COMPETITION);
+    EXPECT_EQ(result.id, "1");
+}
+
+/*
+ * @tc.name: SetOnOnGestureJudgeBeginTest
+ * @tc.desc: Checking the callback operation for a change in breakpoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest7, SetOnOnGestureJudgeBeginTest, TestSize.Level1)
+{
+    using namespace Converter;
+    ASSERT_NE(modifier_->setOnGestureJudgeBegin, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    static const int32_t expectedResourceId = 123;
+
+    auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_GestureInfo gestureInfo,
+        const Ark_BaseGestureEvent event, const Callback_GestureJudgeResult_Void continuation)
+    {
+        EXPECT_EQ(Convert<int32_t>(resourceId), expectedResourceId);
+        auto isOk = Convert<bool>(gestureInfo.isSystemGesture);
+        Ark_GestureJudgeResult arkResult = isOk ? ARK_GESTURE_JUDGE_RESULT_CONTINUE : ARK_GESTURE_JUDGE_RESULT_REJECT;
+        CallbackHelper(continuation).Invoke(arkResult);
+    };
+    auto arkCallback = Converter::ArkValue<Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult>(nullptr,
+        callSyncFunc, expectedResourceId);
+
+    // set callback func
+    modifier_->setOnGestureJudgeBegin(node_, &arkCallback);
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto fireOnGestureJudgeBeginCallback = gestureHub->GetOnGestureJudgeBeginCallback();
+    ASSERT_NE(fireOnGestureJudgeBeginCallback, nullptr);
+
+    auto baseEvent = std::make_shared<BaseGestureEvent>();
+    auto gestInfo = AceType::MakeRefPtr<GestureInfo>();
+    gestInfo->SetIsSystemGesture(true);
+    GestureJudgeResult gjResult = fireOnGestureJudgeBeginCallback(gestInfo, baseEvent);
+    EXPECT_EQ(gjResult, GestureJudgeResult::CONTINUE);
+
+    gestInfo->SetIsSystemGesture(false);
+    gjResult = fireOnGestureJudgeBeginCallback(gestInfo, baseEvent);
+    EXPECT_EQ(gjResult, GestureJudgeResult::REJECT);
+}
+
+/*
+ * @tc.name: SetOnGestureRecognizerJudgeBegin1Test
+ * @tc.desc: Checking the callback operation for a change in breakpoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest7, SetOnGestureRecognizerJudgeBegin1Test, TestSize.Level1)
+{
+    using namespace Converter;
+    ASSERT_NE(modifier_->setOnGestureRecognizerJudgeBegin1, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_BaseGestureEvent event,
+        const Ark_GestureRecognizer current, const Array_GestureRecognizer recognizers,
+        const Callback_GestureJudgeResult_Void continuation)
+    {
+        auto isOk = event.source != ARK_SOURCE_TYPE_UNKNOWN;
+        Ark_GestureJudgeResult arkResult = isOk ? ARK_GESTURE_JUDGE_RESULT_CONTINUE : ARK_GESTURE_JUDGE_RESULT_REJECT;
+        CallbackHelper(continuation).Invoke(arkResult);
+    };
+    auto arkCallback = Converter::ArkValue<GestureRecognizerJudgeBeginCallback>(nullptr, callSyncFunc);
+    modifier_->setOnGestureRecognizerJudgeBegin1(node_, &arkCallback, ArkValue<Ark_Boolean>(false));
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto fireOnGestureRecognizerJudgeBegin = gestureHub->GetOnGestureRecognizerJudgeBegin();
+    ASSERT_NE(fireOnGestureRecognizerJudgeBegin, nullptr);
+
+    auto info = std::make_shared<BaseGestureEvent>();
+    auto current = AceType::MakeRefPtr<ClickRecognizer>();
+    info->SetSourceDevice(SourceType::MOUSE);
+    GestureJudgeResult gjResult = fireOnGestureRecognizerJudgeBegin(info, current, {});
+    EXPECT_EQ(gjResult, GestureJudgeResult::CONTINUE);
+
+    info->SetSourceDevice(SourceType::NONE);
+    gjResult = fireOnGestureRecognizerJudgeBegin(info, current, {});
+    EXPECT_EQ(gjResult, GestureJudgeResult::REJECT);
+}
+
+/*
+ * @tc.name: SetShouldBuiltInRecognizerParallelWithTest
+ * @tc.desc: Checking the callback operation for a change in breakpoint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest7, SetShouldBuiltInRecognizerParallelWithTest, TestSize.Level1)
+{
+    using namespace Converter;
+    ASSERT_NE(modifier_->setShouldBuiltInRecognizerParallelWith, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
+        const Ark_GestureRecognizer current, const Array_GestureRecognizer others,
+        const Callback_GestureRecognizer_Void continuation)
+    {
+        Ark_GestureRecognizer arkResult = others.length > 0 && others.array ? *(others.array) : current;
+        CallbackHelper(continuation).Invoke(arkResult);
+    };
+    auto arkCallback = Converter::ArkValue<ShouldBuiltInRecognizerParallelWithCallback>(nullptr, callSyncFunc);
+    modifier_->setShouldBuiltInRecognizerParallelWith(node_, &arkCallback);
+
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto shouldBuiltInRecognizerParallelWithFunc = gestureHub->GetParallelInnerGestureToFunc();
+    ASSERT_NE(shouldBuiltInRecognizerParallelWithFunc, nullptr);
+
+    auto current = AceType::MakeRefPtr<ClickRecognizer>();
+    auto response = AceType::MakeRefPtr<ClickRecognizer>();
+    RefPtr<NGGestureRecognizer> final = shouldBuiltInRecognizerParallelWithFunc(current, {response});
+    EXPECT_EQ(final, response);
+
+    final = shouldBuiltInRecognizerParallelWithFunc(current, {});
+    EXPECT_EQ(final, current);
 }
 }

@@ -63,6 +63,7 @@ generated_sources = [
   "implementation/data_resubmission_handler_accessor.cpp",
   "implementation/date_picker_dialog_accessor.cpp",
   "implementation/date_picker_modifier.cpp",
+  "implementation/dialog_common.cpp",
   "implementation/divider_modifier.cpp",
   "implementation/draw_modifier_accessor.cpp",
   "implementation/drawing_canvas_accessor.cpp",

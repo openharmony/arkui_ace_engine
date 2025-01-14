@@ -677,9 +677,10 @@ void OnWillInsertImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onWillInsert = [callback = CallbackHelper(*value, frameNode)](const InsertValueInfo& value) -> bool {
+        Converter::ConvContext ctx;
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
-            .insertValue = Converter::ArkValue<Ark_String>(value.insertValue)
+            .insertValue = Converter::ArkValue<Ark_String>(value.insertValue, &ctx)
         };
         return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(insertValue)
             .value_or(true);
@@ -693,9 +694,10 @@ void OnDidInsertImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onDidInsert = [arkCallback = CallbackHelper(*value)](const InsertValueInfo& insertValueInfo) {
+        Converter::ConvContext ctx;
         arkCallback.Invoke(Ark_InsertValue {
                 .insertOffset = Converter::ArkValue<Ark_Number>(insertValueInfo.insertOffset),
-                .insertValue = Converter::ArkValue<Ark_String>(insertValueInfo.insertValue)
+                .insertValue = Converter::ArkValue<Ark_String>(insertValueInfo.insertValue, &ctx)
         });
     };
     TextFieldModelNG::SetOnDidInsertValueEvent(frameNode, onDidInsert);
@@ -707,10 +709,11 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onWillDelete = [callback = CallbackHelper(*value, frameNode)](const DeleteValueInfo& value) -> bool {
+        Converter::ConvContext ctx;
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
-            .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue)
+            .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue, &ctx)
         };
         return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(deleteValue)
             .value_or(true);

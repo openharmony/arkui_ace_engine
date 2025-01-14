@@ -328,11 +328,12 @@ void FixValue(std::string& value)
  * @tc.desc: Check the functionality of setPlaceholder
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierTest, DISABLED_setPlaceholderTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierTest, setPlaceholderTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholder, nullptr);
 
-    Ark_ResourceStr value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEST_VALUE);
+    Converter::ConvContext ctx;
+    Ark_ResourceStr value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEST_VALUE, &ctx);
     Ark_Font label;
     label.size = Converter::ArkValue<Opt_Length>(TEST_FONT_SIZE);
     label.weight = Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(TEST_FONT_WEIGHT);

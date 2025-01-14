@@ -442,7 +442,7 @@ HWTEST_F(MarqueeModifierTest, setMarqueeOptionsTestDefaultValues, TestSize.Level
  * @tc.desc: Check the functionality of MarqueeModifier.SetScrollAmount
  * @tc.type: FUNC
  */
-HWTEST_F(MarqueeModifierTest, DISABLED_SetMarqueeOptionsValidTest, TestSize.Level1)
+HWTEST_F(MarqueeModifierTest, SetMarqueeOptionsValidTest, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     Ark_MarqueeOptions inputValueOptions;

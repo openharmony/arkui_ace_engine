@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,106 @@
  * limitations under the License.
  */
 
-#include "image_modifier_test.h"
+#include <gtest/gtest.h>
+
+#include "modifier_test_base.h"
+#include "modifiers_test_utils.h"
+#include "test_fixtures.h"
+#include "type_helpers.h"
+
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
-using namespace TestConst::Image;
+using namespace testing;
+using namespace testing::ext;
+using namespace Converter;
+using namespace TypeHelper;
+namespace {
+const auto ATTRIBUTE_IMAGE_AIOPTIONS_NAME = "imageAIOptions";
+const auto ATTRIBUTE_POINT_LIGHT_NAME = "pointLight";
+const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_NAME = "lightSource";
+const auto ATTRIBUTE_ANALYZER_CONFIG_NAME = "analyzerConfig";
+const auto ATTRIBUTE_RESIZABLE_NAME = "resizable";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_NAME = "slice";
+const auto ATTRIBUTE_SRC_NAME = "src";
+const auto ATTRIBUTE_SRC_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_IMAGE_AIOPTIONS_I_TYPES_NAME = "types";
+const auto ATTRIBUTE_IMAGE_AIOPTIONS_I_TYPES_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_IMAGE_AIOPTIONS_I_AI_CONTROLLER_NAME = "aiController";
+const auto ATTRIBUTE_IMAGE_AIOPTIONS_I_AI_CONTROLLER_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ALT_NAME = "alt";
+const auto ATTRIBUTE_ALT_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_MATCH_TEXT_DIRECTION_NAME = "matchTextDirection";
+const auto ATTRIBUTE_MATCH_TEXT_DIRECTION_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_FIT_ORIGINAL_SIZE_NAME = "fitOriginalSize";
+const auto ATTRIBUTE_FIT_ORIGINAL_SIZE_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_FILL_COLOR_NAME = "fillColor";
+const auto ATTRIBUTE_FILL_COLOR_DEFAULT_VALUE = "#FF000000";
+const auto ATTRIBUTE_OBJECT_FIT_NAME = "objectFit";
+const auto ATTRIBUTE_OBJECT_FIT_DEFAULT_VALUE = "ImageFit.Cover";
+const auto ATTRIBUTE_OBJECT_REPEAT_NAME = "objectRepeat";
+const auto ATTRIBUTE_OBJECT_REPEAT_DEFAULT_VALUE = "ImageRepeat.NoRepeat";
+const auto ATTRIBUTE_AUTO_RESIZE_NAME = "autoResize";
+const auto ATTRIBUTE_AUTO_RESIZE_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_RENDER_MODE_NAME = "renderMode";
+const auto ATTRIBUTE_RENDER_MODE_DEFAULT_VALUE = "ImageRenderMode.Original";
+const auto ATTRIBUTE_DYNAMIC_RANGE_MODE_NAME = "dynamicRangeMode";
+const auto ATTRIBUTE_DYNAMIC_RANGE_MODE_DEFAULT_VALUE = "dynamicRangeMode.Standard";
+const auto ATTRIBUTE_INTERPOLATION_NAME = "interpolation";
+const auto ATTRIBUTE_INTERPOLATION_DEFAULT_VALUE = "ImageInterpolation.None";
+const auto ATTRIBUTE_SYNC_LOAD_NAME = "syncLoad";
+const auto ATTRIBUTE_SYNC_LOAD_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_COLOR_FILTER_NAME = "colorFilter";
+const auto ATTRIBUTE_COLOR_FILTER_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_COPY_OPTION_NAME = "copyOption";
+const auto ATTRIBUTE_COPY_OPTION_DEFAULT_VALUE = "CopyOptions.None";
+const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_NAME = "positionX";
+const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_X_DEFAULT_VALUE = "0.00vp";
+const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_NAME = "positionY";
+const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Y_DEFAULT_VALUE = "0.00vp";
+const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_NAME = "positionZ";
+const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_POSITION_Z_DEFAULT_VALUE = "0.00vp";
+const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_NAME = "intensity";
+const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_INTENSITY_DEFAULT_VALUE = "0";
+const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_NAME = "color";
+const auto ATTRIBUTE_POINT_LIGHT_I_LIGHT_SOURCE_I_COLOR_DEFAULT_VALUE = "#FFFFFFFF";
+const auto ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_NAME = "illuminated";
+const auto ATTRIBUTE_POINT_LIGHT_I_ILLUMINATED_DEFAULT_VALUE = "IlluminatedType.NONE";
+const auto ATTRIBUTE_POINT_LIGHT_I_BLOOM_NAME = "bloom";
+const auto ATTRIBUTE_POINT_LIGHT_I_BLOOM_DEFAULT_VALUE = "0";
+const auto ATTRIBUTE_EDGE_ANTIALIASING_NAME = "edgeAntialiasing";
+const auto ATTRIBUTE_EDGE_ANTIALIASING_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_ENABLE_ANALYZER_NAME = "enableAnalyzer";
+const auto ATTRIBUTE_ENABLE_ANALYZER_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_ANALYZER_CONFIG_I_TYPES_NAME = "types";
+const auto ATTRIBUTE_ANALYZER_CONFIG_I_TYPES_DEFAULT_VALUE = "";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_TOP_NAME = "top";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_TOP_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_RIGHT_NAME = "right";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_RIGHT_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_BOTTOM_NAME = "bottom";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_BOTTOM_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_LEFT_NAME = "left";
+const auto ATTRIBUTE_RESIZABLE_I_SLICE_I_LEFT_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_PRIVACY_SENSITIVE_NAME = "privacySensitive";
+const auto ATTRIBUTE_PRIVACY_SENSITIVE_DEFAULT_VALUE = "false";
+const auto ATTRIBUTE_ORIENTATION_NAME = "orientation";
+const auto ATTRIBUTE_ORIENTATION_DEFAULT_VALUE = "!NOT-DEFINED!";
+} // namespace
+
+class ImageModifierTest : public ModifierTestBase<GENERATED_ArkUIImageModifier,
+                              &GENERATED_ArkUINodeModifiers::getImageModifier, GENERATED_ARKUI_IMAGE> {
+public:
+    static void SetUpTestCase()
+    {
+        ModifierTestBase::SetUpTestCase();
+
+        for (auto& [id, strid, res] : Fixtures::resourceInitTable) {
+            AddResource(id, res);
+            AddResource(strid, res);
+        }
+    }
+};
 
 /*
  * @tc.name: setImageOptions0TestDefaultValues
@@ -892,89 +988,6 @@ HWTEST_F(ImageModifierTest, setInterpolationTestInterpolationInvalidValues, Test
 }
 
 /*
- * @tc.name: setSourceSizeTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, DISABLED_setSourceSizeTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::unique_ptr<JsonValue> resultSourceSize =
-        GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SOURCE_SIZE_NAME);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(resultSourceSize, ATTRIBUTE_SOURCE_SIZE_I_WIDTH_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SOURCE_SIZE_I_WIDTH_DEFAULT_VALUE) <<
-        "Default value for attribute 'sourceSize.width'";
-
-    resultStr = GetAttrValue<std::string>(resultSourceSize, ATTRIBUTE_SOURCE_SIZE_I_HEIGHT_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_SOURCE_SIZE_I_HEIGHT_DEFAULT_VALUE) <<
-        "Default value for attribute 'sourceSize.height'";
-}
-
-/*
- * @tc.name: setSourceSizeTestSourceSizeWidthValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, DISABLED_setSourceSizeTestSourceSizeWidthValidValues, TestSize.Level1)
-{
-    Ark_ImageSourceSize initValueSourceSize;
-
-    // Initial setup
-    initValueSourceSize.width = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
-    initValueSourceSize.height = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
-
-    auto checkValue = [this, &initValueSourceSize](
-                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
-        Ark_ImageSourceSize inputValueSourceSize = initValueSourceSize;
-
-        inputValueSourceSize.width = value;
-        modifier_->setSourceSize(node_, &inputValueSourceSize);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultSourceSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SOURCE_SIZE_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultSourceSize, ATTRIBUTE_SOURCE_SIZE_I_WIDTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setSourceSize, attribute: sourceSize.width";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setSourceSizeTestSourceSizeHeightValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, DISABLED_setSourceSizeTestSourceSizeHeightValidValues, TestSize.Level1)
-{
-    Ark_ImageSourceSize initValueSourceSize;
-
-    // Initial setup
-    initValueSourceSize.width = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
-    initValueSourceSize.height = std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]);
-
-    auto checkValue = [this, &initValueSourceSize](
-                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
-        Ark_ImageSourceSize inputValueSourceSize = initValueSourceSize;
-
-        inputValueSourceSize.height = value;
-        modifier_->setSourceSize(node_, &inputValueSourceSize);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultSourceSize = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_SOURCE_SIZE_NAME);
-        auto resultStr = GetAttrValue<std::string>(resultSourceSize, ATTRIBUTE_SOURCE_SIZE_I_HEIGHT_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setSourceSize, attribute: sourceSize.height";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
  * @tc.name: setSyncLoadTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -1110,49 +1123,6 @@ HWTEST_F(ImageModifierTest, setCopyOptionTestCopyOptionInvalidValues, TestSize.L
 
     for (auto& [input, value] : Fixtures::testFixtureEnumCopyOptionsInvalidValues) {
         checkValue(input, value);
-    }
-}
-
-/*
- * @tc.name: setDraggableTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, DISABLED_setDraggableTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DRAGGABLE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_DRAGGABLE_DEFAULT_VALUE) << "Default value for attribute 'draggable'";
-}
-
-/*
- * @tc.name: setDraggableTestDraggableValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(ImageModifierTest, DISABLED_setDraggableTestDraggableValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueDraggable;
-
-    // Initial setup
-    initValueDraggable = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-
-    auto checkValue = [this, &initValueDraggable](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueDraggable = initValueDraggable;
-
-        inputValueDraggable = value;
-        modifier_->setDraggable(node_, inputValueDraggable);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DRAGGABLE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setDraggable, attribute: draggable";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
     }
 }
 
@@ -2273,4 +2243,75 @@ HWTEST_F(ImageModifierTest, setPrivacySensitiveTestPrivacySensitiveValidValues, 
     }
 }
 
+/*
+ * @tc.name: setOrientationTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, DISABLED_setOrientationTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ORIENTATION_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ORIENTATION_DEFAULT_VALUE) << "Default value for attribute 'orientation'";
+}
+
+/*
+ * @tc.name: setOrientationTestOrientationValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, DISABLED_setOrientationTestOrientationValidValues, TestSize.Level1)
+{
+    Ark_ImageRotateOrientation initValueOrientation;
+
+    // Initial setup
+    initValueOrientation = std::get<1>(Fixtures::testFixtureEnumImageRotateOrientationValidValues[0]);
+
+    auto checkValue = [this, &initValueOrientation](const std::string& input, const std::string& expectedStr,
+                          const Ark_ImageRotateOrientation& value) {
+        Ark_ImageRotateOrientation inputValueOrientation = initValueOrientation;
+
+        inputValueOrientation = value;
+        modifier_->setOrientation(node_, inputValueOrientation);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ORIENTATION_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setOrientation, attribute: orientation";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumImageRotateOrientationValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setOrientationTestOrientationInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageModifierTest, DISABLED_setOrientationTestOrientationInvalidValues, TestSize.Level1)
+{
+    Ark_ImageRotateOrientation initValueOrientation;
+
+    // Initial setup
+    initValueOrientation = std::get<1>(Fixtures::testFixtureEnumImageRotateOrientationValidValues[0]);
+
+    auto checkValue = [this, &initValueOrientation](const std::string& input, const Ark_ImageRotateOrientation& value) {
+        Ark_ImageRotateOrientation inputValueOrientation = initValueOrientation;
+
+        modifier_->setOrientation(node_, inputValueOrientation);
+        inputValueOrientation = value;
+        modifier_->setOrientation(node_, inputValueOrientation);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ORIENTATION_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_ORIENTATION_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setOrientation, attribute: orientation";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumImageRotateOrientationInvalidValues) {
+        checkValue(input, value);
+    }
+}
 } // namespace OHOS::Ace::NG

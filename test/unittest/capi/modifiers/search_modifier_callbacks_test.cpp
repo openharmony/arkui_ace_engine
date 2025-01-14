@@ -364,7 +364,7 @@ HWTEST_F(SearchModifierCallbackTest, setOnChangeTest, TestSize.Level1)
  * @tc.desc: Test Seacrh setOnWillInsert event.
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierCallbackTest, DISABLED_setOnWillInsertTest, TestSize.Level1)
+HWTEST_F(SearchModifierCallbackTest, setOnWillInsertTest, TestSize.Level1)
 {
     static const Ark_Int32 expectedResId = 123;
     auto onWillInsertHandler = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_InsertValue data,
@@ -400,7 +400,7 @@ HWTEST_F(SearchModifierCallbackTest, DISABLED_setOnWillInsertTest, TestSize.Leve
  * @tc.desc: Test Seacrh setOnDidInsert event.
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierCallbackTest, DISABLED_setOnDidInsertTest, TestSize.Level1)
+HWTEST_F(SearchModifierCallbackTest, setOnDidInsertTest, TestSize.Level1)
 {
     g_EventTestString = u"";
     g_EventTestOffset = 0;
@@ -431,7 +431,7 @@ HWTEST_F(SearchModifierCallbackTest, DISABLED_setOnDidInsertTest, TestSize.Level
  * @tc.desc: Test Seacrh setOnWillDelete event.
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierCallbackTest, DISABLED_setOnWillDeleteTest, TestSize.Level1)
+HWTEST_F(SearchModifierCallbackTest, setOnWillDeleteTest, TestSize.Level1)
 {
     static const Ark_Int32 expectedResId = 123;
     static const Ark_Int32 expectedOffset = AINT32_POS;
@@ -477,7 +477,7 @@ HWTEST_F(SearchModifierCallbackTest, DISABLED_setOnWillDeleteTest, TestSize.Leve
  * @tc.desc: Test Seacrh setOnDidlDelete event.
  * @tc.type: FUNC
  */
-HWTEST_F(SearchModifierCallbackTest, DISABLED_setOnDidDeleteTest, TestSize.Level1)
+HWTEST_F(SearchModifierCallbackTest, setOnDidDeleteTest, TestSize.Level1)
 {
     g_EventTestString = u"";
     g_EventTestOffset = 0;

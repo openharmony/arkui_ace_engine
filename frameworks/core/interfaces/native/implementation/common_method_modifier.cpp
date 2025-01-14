@@ -155,12 +155,9 @@ auto g_onWillDismissPopup = [](
                     static_cast<BindSheetDismissReason>(reason));
                 parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
                     .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-                auto dismiss = []() {
-                    ViewAbstract::DismissPopup();
-                };
-                parameter.dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(dismiss));
+                const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstract::DismissPopup));
+                parameter.dismiss = keeper.ArkValue();
                 arkCallback.Invoke(parameter);
-                CallbackKeeper::Release(parameter.dismiss.resource.resourceId);
             };
             popupParam->SetOnWillDismiss(std::move(callback));
             popupParam->SetInteractiveDismiss(true);
@@ -261,12 +258,9 @@ auto g_contentCoverCallbacks = [](WeakPtr<FrameNode> weakNode, const Ark_Content
                 static_cast<BindSheetDismissReason>(reason));
             parameter.reason = Converter::OptConvert<Ark_DismissReason>(reasonOpt)
                 .value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-            auto dismiss = []() {
-                ViewAbstractModelNG::DismissContentCoverStatic();
-            };
-            parameter.dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(dismiss));
+            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::DismissContentCoverStatic));
+            parameter.dismiss = keeper.ArkValue();
             arkCallback.Invoke(parameter);
-            CallbackKeeper::Release(parameter.dismiss.resource.resourceId);
         };
     }
 };
@@ -364,6 +358,10 @@ auto g_bindContextMenuParams = [](MenuParam& menuParam, const Opt_ContextMenuOpt
         []() {});
 };
 
+namespace GeneratedModifier {
+const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor();
+}
+
 auto g_bindSheetCallbacks1 = [](SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions) {
     auto onAppear = Converter::OptConvert<Callback_Void>(sheetOptions.onAppear);
     if (onAppear) {
@@ -393,12 +391,9 @@ auto g_bindSheetCallbacks1 = [](SheetCallbacks& callbacks, const Ark_SheetOption
     if (shouldDismiss) {
         callbacks.shouldDismissFunc = [arkCallback = CallbackHelper(shouldDismiss.value())]() {
             Ark_SheetDismiss parameter;
-            auto dismiss = []() {
-                ViewAbstractModelNG::DismissSheetStatic();
-            };
-            parameter.dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(dismiss));
+            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::DismissSheetStatic));
+            parameter.dismiss = keeper.ArkValue();
             arkCallback.Invoke(parameter);
-            CallbackKeeper::Release(parameter.dismiss.resource.resourceId);
         };
     }
     auto onTypeDidChange = Converter::OptConvert<Callback_SheetType_Void>(sheetOptions.onTypeDidChange);
@@ -416,10 +411,9 @@ auto g_bindSheetCallbacks2 = [](SheetCallbacks& callbacks, const Ark_SheetOption
             Ark_DismissSheetAction parameter;
             auto reasonOpt = ArkValue<Opt_DismissReason>(static_cast<BindSheetDismissReason>(reason));
             parameter.reason = OptConvert<Ark_DismissReason>(reasonOpt).value_or(ARK_DISMISS_REASON_CLOSE_BUTTON);
-            auto dismiss = []() { ViewAbstractModelNG::DismissSheetStatic(); };
-            parameter.dismiss = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(dismiss));
+            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::DismissSheetStatic));
+            parameter.dismiss = keeper.ArkValue();
             arkCallback.Invoke(parameter);
-            CallbackKeeper::Release(parameter.dismiss.resource.resourceId);
         };
     }
     auto onWillSpringBackWhenDismiss = Converter::OptConvert<Callback_SpringBackAction_Void>(
@@ -427,12 +421,9 @@ auto g_bindSheetCallbacks2 = [](SheetCallbacks& callbacks, const Ark_SheetOption
     if (onWillSpringBackWhenDismiss) {
         callbacks.sheetSpringBackFunc = [arkCallback = CallbackHelper(onWillSpringBackWhenDismiss.value())]() {
             Ark_SpringBackAction parameter;
-            auto springBack = []() {
-                ViewAbstractModelNG::SheetSpringBackStatic();
-            };
-            parameter.springBack = CallbackKeeper::DefineReverseCallback<Callback_Void>(std::move(springBack));
+            const auto keeper = CallbackKeeper::Claim(std::move(ViewAbstractModelNG::SheetSpringBackStatic));
+            parameter.springBack = keeper.ArkValue();
             arkCallback.Invoke(parameter);
-            CallbackKeeper::Release(parameter.springBack.resource.resourceId);
         };
     }
     auto onHeightDidChange = Converter::OptConvert<Callback_Number_Void>(sheetOptions.onHeightDidChange);
@@ -1669,7 +1660,7 @@ template<>
 void AssignCast(std::optional<NG::TouchResult> &dst, const Ark_TouchResult& src)
 {
     if (auto strategy = OptConvert<TouchTestStrategy>(src.strategy); strategy) {
-        dst->strategy = *strategy;
+        dst = { .strategy = *strategy };
         if (auto id = OptConvert<std::string>(src.id); id) {
             dst->id = *id;
         }
@@ -1705,8 +1696,12 @@ void AssignArkValue(Ark_TouchTestInfo& dst, const OHOS::Ace::NG::TouchTestInfo& 
     dst.rect = ArkValue<Ark_RectResult>(src.subRect);
     dst.id = ArkValue<Ark_String>(src.id);
 }
+// this creates the peer for Materialized object. DO NOT FORGET TO RELEASE IT
 void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src)
 {
+    auto accessor = GeneratedModifier::GetGestureRecognizerAccessor();
+    CHECK_NULL_VOID(accessor);
+    dst.ptr = accessor->ctor();
     if (auto peer = reinterpret_cast<GestureRecognizerPeer *>(dst.ptr); peer) {
         peer->SetRecognizer(src);
     }
@@ -2793,13 +2788,11 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
         auto stopPropagationHandler = [&info]() {
             info.SetStopPropagation(true);
         };
-        auto stopPropagation = CallbackKeeper::DefineReverseCallback<Callback_Void>(
-            std::move(stopPropagationHandler));
-        event.stopPropagation = stopPropagation;
+        const auto keeper = CallbackKeeper::Claim(std::move(stopPropagationHandler));
+        event.stopPropagation = keeper.ArkValue();
         LOGE("CommonMethodModifier::OnKeyPreImeImpl IntentionCode supporting is not implemented yet");
 
         auto arkResult = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(event);
-        CallbackKeeper::Release(stopPropagation.resource.resourceId);
         return Converter::Convert<bool>(arkResult);
     };
     ViewAbstractModelNG::SetOnKeyPreIme(frameNode, std::move(onKeyPreImeEvent));
@@ -4140,6 +4133,12 @@ void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
         auto arkValOthers = holderOthers.ArkValue();
         auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
             Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers);
+        if (auto accessor = GetGestureRecognizerAccessor(); accessor) {
+            accessor->destroyPeer(reinterpret_cast<GestureRecognizerPeer*>(arkValCurrent.ptr));
+            holderOthers.Release([accessor](Ark_GestureRecognizer& item) {
+                accessor->destroyPeer(reinterpret_cast<GestureRecognizerPeer*>(item.ptr));
+            });
+        }
         return resultOpt.value_or(defVal);
     };
     ViewAbstract::SetOnGestureRecognizerJudgeBegin(frameNode,
@@ -4162,6 +4161,12 @@ void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,
         auto arkValOthers = holderOthers.ArkValue();
         auto resultOpt = callback.InvokeWithOptConvertResult<RefPtr<NG::NGGestureRecognizer>, Ark_GestureRecognizer,
             Callback_GestureRecognizer_Void>(arkValCurrent, arkValOthers);
+        if (auto accessor = GetGestureRecognizerAccessor(); accessor) {
+            accessor->destroyPeer(reinterpret_cast<GestureRecognizerPeer*>(arkValCurrent.ptr));
+            holderOthers.Release([accessor](Ark_GestureRecognizer& item) {
+                accessor->destroyPeer(reinterpret_cast<GestureRecognizerPeer*>(item.ptr));
+            });
+        }
         return resultOpt.value_or(nullptr);
     };
     ViewAbstract::SetShouldBuiltInRecognizerParallelWith(frameNode, std::move(shouldBuiltInRecognizerParallelWithFunc));

@@ -1065,7 +1065,7 @@ HWTEST_F(TextAreaModifierTest, setFontFeatureTest, TestSize.Level1)
  * @tc.desc: Test Seacrh setOnWillInsert event.
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setOnWillInsertTest, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setOnWillInsertTest, TestSize.Level1)
 {
     static const Ark_Int32 expectedResId = 123;
     auto onWillInsertHandler = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_InsertValue data,
@@ -1100,7 +1100,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setOnWillInsertTest, TestSize.Level1)
  * @tc.desc: Test Seacrh setOnDidInsert event.
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setOnDidInsertTest, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setOnDidInsertTest, TestSize.Level1)
 {
     g_EventTestString = u"";
     g_EventTestOffset = 0;
@@ -1126,7 +1126,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setOnDidInsertTest, TestSize.Level1)
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setOnWillDelete.
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setOnWillDeleteTest, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setOnWillDeleteTest, TestSize.Level1)
 {
     static const Ark_Int32 expectedResId = 123;
     static const Ark_Int32 expectedOffset = AINT32_POS;
@@ -1170,7 +1170,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setOnWillDeleteTest, TestSize.Level1)
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setOnDidlDelete.
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setOnDidDeleteTest, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setOnDidDeleteTest, TestSize.Level1)
 {
     g_EventTestString = u"";
     g_EventTestOffset = 0;
