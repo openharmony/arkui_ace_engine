@@ -36,6 +36,23 @@ void DragDropGlobalController::UpdateMenuShowingStatus(bool isShowing)
     isContextMenuShowing_ = isShowing;
 }
 
+void DragDropGlobalController::PublishMenuStatusWithNode(bool isShowing, const RefPtr<FrameNode>& targetNode)
+{
+    UpdateMenuShowingStatus(isShowing);
+    if (isShowing) {
+        menuLiftingTargetNode_ = targetNode;
+    }
+    auto frameNode = menuLiftingTargetNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto gestureHub = eventHub->GetGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto dragEventActuator = gestureHub->GetDragEventActuator();
+    CHECK_NULL_VOID(dragEventActuator);
+    dragEventActuator->NotifyMenuShow(isShowing);
+}
+
 bool DragDropGlobalController::IsMenuShowing() const
 {
     std::shared_lock<std::shared_mutex> lock(mutex_);

@@ -59,6 +59,9 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
 const std::vector<KeyboardAvoidMode> KEYBOARD_AVOID_MODE = { KeyboardAvoidMode::DEFAULT, KeyboardAvoidMode::NONE };
+const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
+const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = {
+    ImmersiveMode::DEFAULT, ImmersiveMode::PAGE, ImmersiveMode::FULL };
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
 constexpr float AVOID_DISTANCE = 16.0f;
 
@@ -245,6 +248,27 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
 #else
             instance->dialogProperties_.isShowInSubWindow = showInSubWindowValue->ToBoolean();
 #endif
+        }
+
+        auto dialogLevelMode = constructorArg->GetProperty("levelMode");
+        if (dialogLevelMode->IsNumber() && !instance->dialogProperties_.isShowInSubWindow) {
+            auto levelMode = dialogLevelMode->ToNumber<int32_t>();
+            if (levelMode >= 0 && levelMode < static_cast<int32_t>(DIALOG_LEVEL_MODE.size())) {
+                instance->dialogProperties_.dialogLevelMode = DIALOG_LEVEL_MODE[levelMode];
+            }
+        }
+
+        auto dialogLevelUniqueId = constructorArg->GetProperty("levelUniqueId");
+        if (dialogLevelUniqueId->IsNumber()) {
+            instance->dialogProperties_.dialogLevelUniqueId = dialogLevelUniqueId->ToNumber<int32_t>();
+        }
+
+        auto immersiveMode = constructorArg->GetProperty("immersiveMode");
+        if (immersiveMode->IsNumber()) {
+            auto immersiveVal = immersiveMode->ToNumber<int32_t>();
+            if (immersiveVal >= 0 && immersiveVal < static_cast<int32_t>(DIALOG_IMMERSIVE_MODE.size())) {
+                instance->dialogProperties_.dialogImmersiveMode = DIALOG_IMMERSIVE_MODE[immersiveVal];
+            }
         }
 
         // Parse isModal.

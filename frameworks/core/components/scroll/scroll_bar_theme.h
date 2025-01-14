@@ -28,6 +28,8 @@ inline constexpr double NORMAL_START_ANGLE = -30;
 inline constexpr double ACTIVE_START_ANGLE = -60;
 inline constexpr double NORMAL_MAX_OFFSET_ANGLE = 60.0;
 inline constexpr double ACTIVE_MAX_OFFSET_ANGLE = 120.0;
+inline constexpr double ARC_SCROLL_BAR_FOREGROUND_OPACITY = 0.66;
+inline constexpr uint32_t ARC_SCROLL_BAR_BACKGROUND_COLOR = 0x7F7F7F7F;
 } // namespace
 #endif // ARKUI_CIRCLE_FEATURE
 
@@ -85,9 +87,12 @@ public:
                 ACTIVE_MAX_OFFSET_ANGLE);
             theme->normalScrollBarWidth_ = pattern->GetAttr<Dimension>("scroll_bar_normal_scroll_bar_width", 3.0_vp);
             theme->activeScrollBarWidth_ = pattern->GetAttr<Dimension>("scroll_bar_active_scroll_bar_width", 22.0_vp);
+            auto blendOpacity = pattern->GetAttr<double>("arc_scroll_bar_foreground_opacity",
+                ARC_SCROLL_BAR_FOREGROUND_OPACITY);
             theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,
-                Color::TRANSPARENT).BlendOpacity(0.66f);
-            theme->backgroundColor_ = Color(0x7F7F7F7F);
+                Color::TRANSPARENT).BlendOpacity(blendOpacity);
+            theme->backgroundColor_ = pattern->GetAttr<Color>("arc_scroll_bar_background_color",
+                Color(ARC_SCROLL_BAR_BACKGROUND_COLOR));
 #else
             auto blendOpacity = pattern->GetAttr<double>("scroll_bar_foreground_opacity", 0.4f);
             theme->foregroundColor_ = pattern->GetAttr<Color>(PATTERN_FG_COLOR,

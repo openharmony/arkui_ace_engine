@@ -37,6 +37,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/dom/dom_type.h"
 #include "frameworks/core/components_ng/pattern/ui_extension/ui_extension_config.h"
+#include "frameworks/core/components_ng/pattern/ui_extension/platform_container_handler.h"
 #include "frameworks/core/components_ng/pattern/web/web_pattern.h"
 #include "js_third_provider_interaction_operation.h"
 #include "nlohmann/json.hpp"
@@ -249,6 +250,8 @@ ActionType ConvertAceAction(AceAction aceAction)
         { AceAction::ACTION_SET_SELECTION, ActionType::ACCESSIBILITY_ACTION_SET_SELECTION },
         { AceAction::ACTION_SET_CURSOR_POSITION, ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION },
         { AceAction::ACTION_EXEC_SUB_COMPONENT, ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK },
+        { AceAction::ACTION_NEXT_HTML_ITEM, ActionType::ACCESSIBILITY_ACTION_NEXT_HTML_ITEM },
+        { AceAction::ACTION_PREVIOUS_HTML_ITEM, ActionType::ACCESSIBILITY_ACTION_PREVIOUS_HTML_ITEM },
     };
     for (const auto& item : actionTable) {
         if (aceAction == item.aceAction) {
@@ -1488,10 +1491,7 @@ void JsAccessibilityManager::UpdateAccessibilityElementInfo(
     }
     auto eventHub = node->GetEventHub<NG::EventHub>();
     if (eventHub != nullptr) {
-        auto gestureEventHub = eventHub->GetGestureEventHub();
-        if (gestureEventHub != nullptr) {
-            nodeInfo.SetHitTestBehavior(gestureEventHub->GetHitTestModeStr());
-        }
+        nodeInfo.SetHitTestBehavior(NG::GestureEventHub::GetHitTestModeStr(eventHub->GetGestureEventHub()));
     }
 
     UpdateUserAccessibilityElementInfo(accessibilityProperty, nodeInfo);
@@ -2272,6 +2272,8 @@ static std::string ConvertActionTypeToString(ActionType action)
         { ActionType::ACCESSIBILITY_ACTION_PREVIOUS_TEXT, "ACCESSIBILITY_ACTION_PREVIOUS_TEXT" },
         { ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION, "ACCESSIBILITY_ACTION_SET_CURSOR_POSITION" },
         { ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK, "ACCESSIBILITY_ACTION_SPAN_CLICK" },
+        { ActionType::ACCESSIBILITY_ACTION_NEXT_HTML_ITEM, "ACCESSIBILITY_ACTION_NEXT_HTML_ITEM" },
+        { ActionType::ACCESSIBILITY_ACTION_PREVIOUS_HTML_ITEM, "ACCESSIBILITY_ACTION_PREVIOUS_HTML_ITEM" },
     };
     for (const auto& item : actionStrTable) {
         if (action == item.action) {
@@ -2303,6 +2305,8 @@ static AceAction ConvertAccessibilityAction(ActionType accessibilityAction)
         { AceAction::ACTION_SET_SELECTION, ActionType::ACCESSIBILITY_ACTION_SET_SELECTION },
         { AceAction::ACTION_SET_CURSOR_POSITION, ActionType::ACCESSIBILITY_ACTION_SET_CURSOR_POSITION },
         { AceAction::ACTION_EXEC_SUB_COMPONENT, ActionType::ACCESSIBILITY_ACTION_SPAN_CLICK },
+        { AceAction::ACTION_NEXT_HTML_ITEM, ActionType::ACCESSIBILITY_ACTION_NEXT_HTML_ITEM },
+        { AceAction::ACTION_PREVIOUS_HTML_ITEM, ActionType::ACCESSIBILITY_ACTION_PREVIOUS_HTML_ITEM },
     };
     for (const auto& item : actionTable) {
         if (accessibilityAction == item.action) {
@@ -2663,11 +2667,16 @@ void JsAccessibilityManager::InitializeCallback()
     client->IsEnabled(isEnabled);
     AceApplicationInfo::GetInstance().SetAccessibilityEnabled(isEnabled);
 
+    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
+    if (container != nullptr && container->IsDynamicRender()) {
+        RegisterDynamicRenderGetParentRectHandler();
+        return;
+    }
+
     if (pipelineContext->IsFormRender() || pipelineContext->IsJsCard() || pipelineContext->IsJsPlugin()) {
         return;
     }
 
-    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
     if (container != nullptr && container->IsUIExtensionWindow()) {
         pipelineContext->AddUIExtensionCallbackEvent(OHOS::Ace::NG::UIExtCallbackEventId::ON_UEA_ACCESSIBILITY_READY);
         RegisterGetParentRectHandler();
@@ -2678,6 +2687,35 @@ void JsAccessibilityManager::InitializeCallback()
     if (isEnabled) {
         RegisterInteractionOperation(windowId_);
     }
+}
+
+void JsAccessibilityManager::RegisterDynamicRenderGetParentRectHandler()
+{
+    auto accessibilityGetParentRect = [weak = WeakClaim(this)](AccessibilityParentRectInfo& parentRectInfo) {
+        auto jsAccessibilityManager = weak.Upgrade();
+        CHECK_NULL_VOID(jsAccessibilityManager);
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(jsAccessibilityManager->context_.Upgrade());
+        CHECK_NULL_VOID(ngPipeline);
+        auto container = Platform::AceContainer::GetContainer(ngPipeline->GetInstanceId());
+        CHECK_NULL_VOID(container);
+        auto containerHandler = container->GetContainerHandler().Upgrade();
+        CHECK_NULL_VOID(containerHandler);
+        
+        HandlerData data = {
+            .actionCode = static_cast<int32_t>(NG::DynamicContainerHandleAction::ACCESSIBILITY_GET_RECT) };
+        HandlerReply reply;
+
+        containerHandler->SendDataToHost(data, reply);
+
+        parentRectInfo.left = reply.GetParam<int32_t>("left", 0);
+        parentRectInfo.top = reply.GetParam<int32_t>("top", 0);
+        parentRectInfo.scaleX = reply.GetParam<float>("scaleX", 1.0f);
+        parentRectInfo.scaleY = reply.GetParam<float>("scaleY", 1.0f);
+        TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY,
+            "Get DC host rect [left:%{public}d, top:%{public}d, scaleX:%{public}f, scaleY:%{public}f].",
+            parentRectInfo.left, parentRectInfo.top, parentRectInfo.scaleX, parentRectInfo.scaleY);
+    };
+    SetAccessibilityGetParentRectHandler(accessibilityGetParentRect);
 }
 
 void JsAccessibilityManager::RegisterGetParentRectHandler()
@@ -5447,14 +5485,17 @@ void JsAccessibilityManager::WebFocusMoveSearchNG(int64_t elementId, int32_t dir
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_VOID(ngPipeline);
 
-    auto node = webPattern->GetAccessibilityNodeByFocusMove(elementId, direction);
-    if (!node) {
-        info.SetValidElement(false);
-        return;
-    }
     CommonProperty commonProperty;
     GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
-    UpdateWebAccessibilityElementInfo(node, commonProperty, info, webPattern);
+    CHECK_NULL_VOID(webPattern);
+    auto node = webPattern->GetAccessibilityNodeByFocusMove(elementId, direction);
+    if (node) {
+        UpdateWebAccessibilityElementInfo(node, commonProperty, info, webPattern);
+    } else {
+        auto webNode = webPattern->GetHost();
+        CHECK_NULL_VOID(webNode);
+        UpdateAccessibilityElementInfo(webNode, commonProperty, info, ngPipeline);
+    }
 }
 
 bool JsAccessibilityManager::ExecuteWebActionNG(int64_t elementId, ActionType action,
@@ -5937,7 +5978,16 @@ void JsAccessibilityManager::JsInteractionOperation::SetChildTreeIdAndWinId(
         splitElementId, treeId);
     auto jsAccessibilityManager = GetHandler().Upgrade();
     CHECK_NULL_VOID(jsAccessibilityManager);
-    jsAccessibilityManager->NotifySetChildTreeIdAndWinId(splitElementId, treeId, childWindowId);
+    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = GetHandler(), splitElementId, treeId, childWindowId] {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID(jsAccessibilityManager);
+            ACE_SCOPED_TRACE("SetChildTreeIdAndWinId");
+            jsAccessibilityManager->NotifySetChildTreeIdAndWinId(splitElementId, treeId, childWindowId);
+        },
+        TaskExecutor::TaskType::UI, "ArkUISetChildTreeIdAndWinId");
 }
 
 void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32_t treeId)
@@ -6873,5 +6923,14 @@ void JsAccessibilityManager::FireAccessibilityEventCallback(uint32_t eventId, in
         default:
             break;
     }
+}
+
+bool JsAccessibilityManager::IsScreenReaderEnabled()
+{
+    auto client = AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, false);
+    bool isEnabled = false;
+    client->IsScreenReaderEnabled(isEnabled);
+    return isEnabled;
 }
 } // namespace OHOS::Ace::Framework

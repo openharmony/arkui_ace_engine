@@ -4547,6 +4547,13 @@ bool JSViewAbstract::ParseColorMetricsToColor(const JSRef<JSVal>& jsValue, Color
     if (toNumericProp->IsFunction()) {
         auto colorVal = JSRef<JSFunc>::Cast(toNumericProp)->Call(colorObj, 0, nullptr);
         result.SetValue(colorVal->ToNumber<uint32_t>());
+
+        auto resourceIdProp = colorObj->GetProperty("getResourceId");
+        if (resourceIdProp->IsFunction()) {
+            auto resourceIdVal = JSRef<JSFunc>::Cast(resourceIdProp)->Call(colorObj, 0, nullptr);
+            result.SetResourceId(resourceIdVal->ToNumber<uint32_t>());
+        }
+
         return true;
     }
     return false;

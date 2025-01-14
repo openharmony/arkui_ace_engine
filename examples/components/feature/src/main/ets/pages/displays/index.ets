@@ -29,6 +29,7 @@ import { CounterBootcamp } from './CounterBootcamp';
 import { AdvancedCounterBootcamp } from './AdvancedCounterBootcamp';
 import { DataPanelBootcamp } from './DataPanelBootcamp';
 import { GaugeBootcamp } from './GaugeBootcamp';
+import { TextClockBootcamp } from './TextClockBootcamp';
 import { PatternLockBootcamp } from './PatternLockBootcamp'
 import { QRCodeBootcamp } from './QRCodeBootcamp'
 
@@ -55,6 +56,7 @@ export const displaysRoute: RouteGroup = {
     { name: 'advancedCounter', label: '计数器/advanced.Counter' },
     { name: 'dataPanel', label: '数据面板/DataPanel' },
     { name: 'gauge', label: '数据量规图/gauge' },
+    { name: 'textClock', label: '文本时钟/TextClock' },
     { name: 'textTimer', label: '文本计时器/TextTimer' },
     { name: 'textTimer', label: '文本计时器/TextTimer' },
     { name: 'alphabetIndexer', label: '索引条/AlphabetIndexer' },
@@ -70,6 +72,7 @@ export const displaysRoute: RouteGroup = {
     { name: 'QRCode', label: '二维码/QRCode' },
     { name: 'Progress', label: '进度条/Progress' },
     { name: 'imageAnimator', label: '帧动画/ImageAnimator' },
+    { name: 'Progress', label: '进度条/Progress' }
   ]
 };
 
@@ -106,6 +109,8 @@ export function DisplaysDestination(name: string, route: Route) {
     DataPanelBootcamp({ title: route.label })
   } else if (name === 'displays/gauge') {
     GaugeBootcamp({ title: route.label })
+  } else if (name === 'displays/textClock') {
+    TextClockBootcamp({ title: route.label })
   } else if (name === 'displays/PatternLock') {
     PatternLockBootcamp({ title: route.label })
   } else if (name === 'displays/popup') {

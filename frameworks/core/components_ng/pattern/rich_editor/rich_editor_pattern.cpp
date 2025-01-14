@@ -440,6 +440,7 @@ void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length,
         "isPreviewTextInputting=%{public}d",
         start, length, isPreventChange, IsPreviewTextInputting());
     CHECK_NULL_VOID(!isPreventChange || IsPreviewTextInputting());
+    bool isSingleHandleMoving = selectOverlay_->IsSingleHandleMoving();
     if (textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();
@@ -448,7 +449,7 @@ void RichEditorPattern::DeleteValueInStyledString(int32_t start, int32_t length,
     if (isUpdateCaret) {
         SetCaretPosition(start);
     }
-    if (!caretVisible_ && HasFocus()) {
+    if ((!caretVisible_ || isSingleHandleMoving) && HasFocus()) {
         StartTwinkling();
         if (!isEditing_ && isIME) {
             TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "previewLongPress_ is true, before RequestKeyboard");
@@ -2691,7 +2692,11 @@ void RichEditorPattern::StopTwinkling()
 
 void RichEditorPattern::HandleClickEvent(GestureEvent& info)
 {
-    CHECK_NULL_VOID(!selectOverlay_->GetIsHandleMoving());
+    if (selectOverlay_->GetIsHandleMoving() || isMouseSelect_) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "click rejected, isHandleMoving=%{public}d, isMouseSelect=%{public}d",
+            selectOverlay_->GetIsHandleMoving(), isMouseSelect_);
+        return;
+    }
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (!focusHub->IsFocusable()) {
@@ -5238,10 +5243,11 @@ void RichEditorPattern::InsertValueOperation(const std::u16string& insertValue, 
     } else if (previewTextRecord_.needReplacePreviewText || previewTextRecord_.needReplaceText) {
         DeleteByRange(record, previewTextRecord_.replacedRange.start, previewTextRecord_.replacedRange.end);
     }
+    bool isSingleHandleMoving = selectOverlay_->IsSingleHandleMoving();
     CloseSelectOverlay();
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
-    IF_TRUE(!caretVisible_ && HasFocus(), StartTwinkling());
+    IF_TRUE((!caretVisible_ || isSingleHandleMoving) && HasFocus(), StartTwinkling());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     bool isIME = IsIMEOperation(operationType);
@@ -5504,10 +5510,11 @@ bool RichEditorPattern::DoDeleteActions(int32_t currentPosition, int32_t length,
     CalcDeleteValueObj(currentPosition, length, info);
     bool doDelete = allowDelete || IsPreviewTextInputting();
     if (doDelete) {
+        bool isSingleHandleMoving = selectOverlay_->IsSingleHandleMoving();
         CloseSelectOverlay();
         ResetSelection();
         DeleteByDeleteValueInfo(info);
-        IF_TRUE(!caretVisible_ && HasFocus(), StartTwinkling());
+        IF_TRUE((!caretVisible_ || isSingleHandleMoving) && HasFocus(), StartTwinkling());
         eventHub->FireOnDeleteComplete();
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "RichEditor.OnDeleteComplete");
@@ -6969,7 +6976,7 @@ void RichEditorPattern::UpdateCaretByTouchMove(const Offset& offset)
     auto [caretOffset, caretHeight] = CalculateCaretOffsetAndHeight();
     auto floatingCaretCenter =
         Offset(floatingCaretState_.touchMoveOffset->GetX(), caretOffset.GetY() + caretHeight / 2);
-    SetMagnifierOffsetWithAnimation(offset);
+    SetMagnifierOffsetWithAnimation(floatingCaretCenter);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -7817,6 +7824,7 @@ void RichEditorPattern::ShowHandles()
         showSelect_ = true;
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         CHECK_NULL_VOID(textSelector_.IsValid());
+        CHECK_NULL_VOID(!isMouseSelect_);
         CalculateHandleOffsetAndShowOverlay();
         selectOverlay_->ProcessOverlay({.menuIsShow = false, .animation = false});
     }
@@ -8309,6 +8317,10 @@ void RichEditorPattern::BindSelectionMenu(TextResponseType type, TextSpanType ri
 {
     TextPattern::BindSelectionMenu(
         richEditorType, type, menuBuilder, { .onAppear = onAppear, .onDisappear = onDisappear });
+    if (!selectOverlay_->SelectOverlayIsCreating() && SelectOverlayIsOn()) {
+        selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(),
+            .requestCode = REQUEST_RECREATE });
+    }
 }
 
 RefPtr<NodePaintMethod> RichEditorPattern::CreateNodePaintMethod()

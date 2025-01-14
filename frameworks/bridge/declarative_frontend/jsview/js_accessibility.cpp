@@ -17,6 +17,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "frameworks/base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/js_accessibility.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -301,5 +302,14 @@ void JSViewAbstract::JsAccessibilityUseSamePage(const JSCallbackInfo& info)
             ViewAbstractModel::GetInstance()->SetAccessibilityUseSamePage(isFullSilent);
         }
     }
+}
+
+std::string JSAccessibilityAbstract::GetRoleByType(AccessibilityRoleType roleType)
+{
+    auto it = accessibilityRoleMap.find(roleType);
+    if (it != accessibilityRoleMap.end()) {
+        return it->second;
+    }
+    return "";
 }
 }

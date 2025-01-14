@@ -101,6 +101,7 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
@@ -179,7 +180,7 @@ bool IsNeedAvoidWindowMode(OHOS::Rosen::Window* rsWindow)
         return false;
     }
 
-    auto mode = rsWindow->GetMode();
+    auto mode = rsWindow->GetWindowMode();
     return mode == Rosen::WindowMode::WINDOW_MODE_FLOATING || mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
             mode == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY;
 }
@@ -2874,7 +2875,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 pipelineContext->GetDisplayWindowRectInfo().ToString().c_str());
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(
-                    rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
+                    rsWindow->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
                 auto isNeedAvoidWindowMode = IsNeedAvoidWindowMode(rsWindow);
                 pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
             }
@@ -4481,4 +4482,12 @@ void UIContentImpl::ExecuteUITask(std::function<void()> task, const std::string&
     }
 }
 
+bool UIContentImpl::ConfigCustomWindowMask(bool enable)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipelineContext, false);
+    return NG::ContainerModalView::ConfigCustomWindowMask(pipelineContext, enable);
+}
 } // namespace OHOS::Ace

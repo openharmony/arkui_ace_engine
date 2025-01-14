@@ -904,14 +904,14 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
  */
 HWTEST_F(DragEventTestNg, DragEventTestNg010, TestSize.Level1)
 {
-    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(NO_COMPONENT_ID, nullptr), nullptr);
-    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(COMPONENT_ID, nullptr), nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, nullptr), nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, nullptr), nullptr);
 
     auto frameNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     
-    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(NO_COMPONENT_ID, frameNode), nullptr);
-    EXPECT_EQ(DragEventActuator::GetPreviewPixelMap(COMPONENT_ID, frameNode), nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(NO_COMPONENT_ID, frameNode), nullptr);
+    EXPECT_EQ(DragDropFuncWrapper::GetPreviewPixelMap(COMPONENT_ID, frameNode), nullptr);
 }
 
 /**
@@ -1069,7 +1069,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest01, TestSize.Level1)
     dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     EXPECT_NE(imageNode, nullptr);
     const int32_t childSize = 3; // selected item count.
-    auto textNode = dragEventActuator->CreateBadgeTextNode(childSize);
+    auto textNode = DragAnimationHelper::CreateBadgeTextNode(childSize);
     EXPECT_NE(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     EXPECT_NE(textLayoutProperty, nullptr);
@@ -1143,7 +1143,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest02, TestSize.Level1)
      * @tc.expected: MountPixelMapToRootNode success, overlayManager has badgeNode, badge size is correct.
      */
     dragEventActuator->MountPixelMap(overlayManager, gestureHub, imageNode, nullptr);
-    dragEventActuator->ShowPreviewBadgeAnimation(dragEventActuator, overlayManager);
+    DragAnimationHelper::ShowPreviewBadgeAnimation(gestureHub, overlayManager);
     auto textNode = overlayManager->GetPixelMapBadgeNode();
     EXPECT_NE(textNode, nullptr);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -1419,7 +1419,7 @@ HWTEST_F(DragEventTestNg, TestResetNode001, TestSize.Level1)
     /**
      * @tc.steps: step3. Reset frameNode scale.
      */
-    DragEventActuator::ResetNode(frameNode);
+    DragDropFuncWrapper::ResetNode(frameNode);
     auto resetScale = renderContext->GetTransformScaleValue({ 0.0f, 0.0f });
     EXPECT_EQ(resetScale.x, 1.0f);
     EXPECT_EQ(resetScale.y, 1.0f);
@@ -1818,7 +1818,7 @@ HWTEST_F(DragEventTestNg, TestApplyShadow, TestSize.Level1)
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     EXPECT_NE(imageNode, nullptr);
     imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
-    DragEventActuator::ApplyNewestOptionExecutedFromModifierToNode(frameNode, imageNode);
+    DragDropFuncWrapper::ApplyNewestOptionExecutedFromModifierToNode(frameNode, imageNode);
     auto imageContext = imageNode->GetRenderContext();
     EXPECT_NE(imageContext, nullptr);
     auto shadow = imageContext->GetBackShadow();
@@ -1826,11 +1826,11 @@ HWTEST_F(DragEventTestNg, TestApplyShadow, TestSize.Level1)
 }
 
 /**
- * @tc.name: TestBrulStyleToEffection001
- * @tc.desc: Test BrulStyleToEffection.
+ * @tc.name: TestBlurStyleToEffection001
+ * @tc.desc: Test BlurStyleToEffection.
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventTestNg, TestBrulStyleToEffection001, TestSize.Level1)
+HWTEST_F(DragEventTestNg, TestBlurStyleToEffection001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create DragEventActuator.
@@ -1843,13 +1843,13 @@ HWTEST_F(DragEventTestNg, TestBrulStyleToEffection001, TestSize.Level1)
     auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
         AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
     /**
-     * @tc.steps: step2. Invoke BrulStyleToEffection function.
+     * @tc.steps: step2. Invoke BlurStyleToEffection function.
      */
     std::vector<float> vecGrayScale = {0.0f, 0.0f};
     BlurStyleOption blurStyleInfo = {BlurStyle::NO_MATERIAL, ThemeColorMode::SYSTEM,
      AdaptiveColor::DEFAULT, 1.0, {vecGrayScale}};
     std::optional<BlurStyleOption> optBlurStyleInfo(blurStyleInfo);
-    auto optEffectOption = dragEventActuator->BrulStyleToEffection(optBlurStyleInfo);
+    auto optEffectOption = DragDropFuncWrapper::BlurStyleToEffection(optBlurStyleInfo);
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     EXPECT_EQ(optEffectOption.has_value(), false);
@@ -1873,9 +1873,9 @@ HWTEST_F(DragEventTestNg, TestBrulStyleToEffection001, TestSize.Level1)
     auto blThemeInstance = BlurStyleTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(BlurStyleTheme::TypeId())).WillRepeatedly(Return(blThemeInstance));
     /**
-     * @tc.steps: step4. Invoke BrulStyleToEffection function.
+     * @tc.steps: step4. Invoke BlurStyleToEffection function.
      */
-    optEffectOption = dragEventActuator->BrulStyleToEffection(optBlurStyleInfo);
+    optEffectOption = DragDropFuncWrapper::BlurStyleToEffection(optBlurStyleInfo);
     ASSERT_NE(optEffectOption.has_value(), true);
 }
 
@@ -1900,7 +1900,7 @@ HWTEST_F(DragEventTestNg, TestRadiusToSigma001, TestSize.Level1)
      * @tc.steps: step2. Invoke RadiusToSigma function invalid.
      */
     float radius = -1.0f;
-    auto sigMa = dragEventActuator->RadiusToSigma(radius);
+    auto sigMa = DragDropFuncWrapper::RadiusToSigma(radius);
     EXPECT_EQ(sigMa, 0.0f);
      /**
      * @tc.steps: step3. Invoke RadiusToSigma function.
@@ -1909,7 +1909,7 @@ HWTEST_F(DragEventTestNg, TestRadiusToSigma001, TestSize.Level1)
     float blurSigmaScale = 0.57735f;
     radius = 2.0f;
     float retSigMa = blurSigmaScale * radius + scaleHalf;
-    sigMa = dragEventActuator->RadiusToSigma(radius);
+    sigMa = DragDropFuncWrapper::RadiusToSigma(radius);
     EXPECT_EQ(sigMa, retSigMa);
 }
 

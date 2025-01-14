@@ -425,9 +425,8 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     isHandleMoving_ = false;
     if (isSingleHandle) {
         pattern->floatingCaretState_.Reset();
-        ResumeTwinkling();
+        pattern->isCursorAlwaysDisplayed_ = false;
     }
-    IF_TRUE(isSingleHandle, pattern->floatingCaretState_.Reset());
     auto needResetSelection = pattern->GetTextDetectEnable() && !pattern->HasFocus() &&
         reason != CloseReason::CLOSE_REASON_DRAG_FLOATING;
     auto isBackPressed = reason == CloseReason::CLOSE_REASON_BACK_PRESSED;
