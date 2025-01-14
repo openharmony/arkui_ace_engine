@@ -82,7 +82,6 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     }
 
     auto visibleRect = GetVisibleRect();
-    CalculateClippedRect(visibleRect);
     if (visibleRect.IsEmpty()) {
         return false;
     }
@@ -107,7 +106,9 @@ RectF RichEditorSelectOverlay::GetVisibleRect()
     CHECK_NULL_RETURN(geometryNode, visibleRect);
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
     auto paintOffset = host->GetPaintRectWithTransform().GetOffset();
-    return RectF(paddingOffset + paintOffset, geometryNode->GetPaddingSize());
+    visibleRect = RectF(paddingOffset + paintOffset, geometryNode->GetPaddingSize());
+    CalculateClippedRect(visibleRect);
+    return visibleRect;
 }
 
 void RichEditorSelectOverlay::OnResetTextSelection()

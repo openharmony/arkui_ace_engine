@@ -279,6 +279,12 @@ void WindowScene::BufferAvailableCallback()
                 self->session_->GetPersistentId(), isWindowSizeEqual);
             return;
         }
+        if (self->session_->GetSystemConfig().IsPcWindow()) {
+            auto leashSurfaceNode = self->session_->GetLeashWinSurfaceNode();
+            if (leashSurfaceNode) {
+                leashSurfaceNode->MarkUifirstNode(false);
+            }
+        }
         CHECK_NULL_VOID(self->startingWindow_);
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
@@ -296,8 +302,14 @@ void WindowScene::BufferAvailableCallback()
             effect->SetAnimationOption(std::make_shared<AnimationOption>(curve, config.duration_));
             context->UpdateChainedTransition(effect);
             AceAsyncTraceBegin(0, "StartingWindowExitAnimation");
-            context->SetTransitionUserCallback([](bool) {
+            context->SetTransitionUserCallback([weakSession = wptr(self->session_)](bool) {
                 AceAsyncTraceEnd(0, "StartingWindowExitAnimation");
+                auto session = weakSession.promote();
+                CHECK_NULL_VOID(session);
+                CHECK_EQUAL_VOID(session->GetSystemConfig().IsPcWindow(), false);
+                auto leashSurfaceNode = session->GetLeashWinSurfaceNode();
+                CHECK_NULL_VOID(leashSurfaceNode);
+                leashSurfaceNode->MarkUifirstNode(true);
             });
         }
 

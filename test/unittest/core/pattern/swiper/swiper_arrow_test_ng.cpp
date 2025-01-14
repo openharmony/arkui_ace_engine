@@ -1043,4 +1043,60 @@ HWTEST_F(SwiperArrowTestNg, ArrowButtonType001, TestSize.Level1)
     auto rightButtonType = rightButtonNode->GetLayoutProperty<ButtonLayoutProperty>()->GetType();
     EXPECT_EQ(rightButtonType, ButtonType::CIRCLE);
 }
+
+/**
+ * @tc.name: Arrow005
+ * @tc.desc: Test arrow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperArrowTestNg, Arrow005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. swiper type is DOT, BIND mode and Show set value arrow
+     * @tc.expected: check properties
+     */
+    SwiperArrowParameters swiperArrowParameters;
+    swiperArrowParameters.isShowBackground = true;
+    swiperArrowParameters.isSidebarMiddle = false;
+    swiperArrowParameters.backgroundSize = Dimension(32.f);
+    swiperArrowParameters.backgroundColor = Color::FromString("#19182431");
+    swiperArrowParameters.arrowSize = Dimension(24.f);
+    swiperArrowParameters.arrowColor = Color::GREEN;
+    /**
+     * @tc.steps: step2. VERTICAL and isShowIndicatorArrow
+     * @tc.expected: check arrow rect
+     */
+    SwiperModelNG model = CreateSwiper();
+    model.SetBindIndicator(true);
+    model.SetDirection(Axis::VERTICAL);
+    model.SetDisplayArrow(true); // show arrow
+    model.SetHoverShow(false);
+    model.SetArrowStyle(swiperArrowParameters);
+    model.SetShowIndicator(false);
+    CreateSwiperItems();
+    CreateSwiperDone();
+    EXPECT_NE(frameNode_, nullptr);
+    EXPECT_EQ(indicatorNode_, nullptr);
+    indicatorNode_ = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<IndicatorPattern>(); });
+    EXPECT_NE(indicatorNode_, nullptr);
+    EXPECT_NE(rightArrowNode_, nullptr);
+    auto swiperArrowPattern = rightArrowNode_->GetPattern<SwiperArrowPattern>();
+    EXPECT_NE(swiperArrowPattern, nullptr);
+    EXPECT_EQ(swiperArrowPattern->TotalCount(), 3);
+    KeyEvent keyEvent(KeyCode::KEY_ENTER, KeyAction::DOWN);
+    swiperArrowPattern->OnKeyEvent(keyEvent);
+    swiperArrowPattern->DumpAdvanceInfo();
+    auto indicatorPattern = indicatorNode_->GetPattern<IndicatorPattern>();
+    ASSERT_NE(indicatorPattern, nullptr);
+    auto controller = indicatorPattern->GetIndicatorController();
+    ASSERT_NE(controller, nullptr);
+    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(AceType::RawPtr(frameNode_));
+    WeakPtr<NG::UINode> indicatorNode = AceType::WeakClaim(AceType::RawPtr(indicatorNode_));
+    controller->SetSwiperNode(targetNode, indicatorNode);
+    EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameRect(), RectF(0.f, 0.f, 0.f, 0.f)));
+    indicatorPattern->SaveDotIndicatorProperty();
+    FlushLayoutTask(indicatorNode_);
+    EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameRect(), RectF(0.0f, 0.f, 31.98f, 87.9f)));
+}
 } // namespace OHOS::Ace::NG

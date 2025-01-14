@@ -3262,6 +3262,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateTextAutosizing(GetTextAutosizingValue(true));
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(isApiGteTwelve ? false : true));
         delegate_->UpdateOptimizeParserBudgetEnabled(GetOptimizeParserBudgetEnabledValue(false));
+        delegate_->UpdateWebMediaAVSessionEnabled(GetWebMediaAVSessionEnabledValue(false));
         if (GetMetaViewport()) {
             delegate_->UpdateMetaViewport(GetMetaViewport().value());
         }
@@ -7619,6 +7620,13 @@ void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
 {
     if (delegate_) {
         delegate_->UpdateOptimizeParserBudgetEnabled(value);
+    }
+}
+
+void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool enable)
+{
+    if (delegate_) {
+        delegate_->UpdateWebMediaAVSessionEnabled(enable);
     }
 }
 } // namespace OHOS::Ace::NG

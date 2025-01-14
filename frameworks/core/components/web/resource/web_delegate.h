@@ -1170,6 +1170,8 @@ public:
 
     bool IsActivePolicyDisable();
 
+    void UpdateWebMediaAVSessionEnabled(bool isEnabled);
+
 private:
     void InitWebEvent();
     void RegisterWebEvent();

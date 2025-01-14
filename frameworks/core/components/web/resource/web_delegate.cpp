@@ -7598,4 +7598,24 @@ void WebDelegate::UpdateOptimizeParserBudgetEnabled(const bool enable)
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateOptimizeParserBudget");
 }
+
+void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutWebMediaAVSessionEnabled(isEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateWebMediaAVSessionEnabled");
+}
+
 } // namespace OHOS::Ace

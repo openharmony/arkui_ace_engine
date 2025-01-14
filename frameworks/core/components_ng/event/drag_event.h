@@ -242,6 +242,16 @@ public:
     {
         return lastTouchFingerId_;
     }
+    
+    void SetRestartDrag(bool isRestartDrag)
+    {
+        isRestartDrag_ = isRestartDrag;
+    }
+
+    bool GetRestartDrag() const
+    {
+        return isRestartDrag_;
+    }
 
     void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
 
@@ -353,6 +363,7 @@ private:
     bool isRedragStart_ = false;
     int32_t lastTouchFingerId_ = 0;
     bool isNewFwk_ = false;
+    bool isRestartDrag_ = false;
 };
 
 } // namespace OHOS::Ace::NG

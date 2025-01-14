@@ -461,4 +461,89 @@ HWTEST_F(RichEditorDragTestNG, CreateDragNode003, TestSize.Level1)
     auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
     EXPECT_EQ(richEditorDragPattern->rectsForPlaceholders_.size(), 4);
 }
+
+/**
+ * @tc.name: CreateDragNode004
+ * @tc.desc: test CreateDragNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, CreateDragNode004, TestSize.Level1)
+{
+    auto hostNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(hostNode, nullptr);
+    auto richPattern = hostNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richPattern, nullptr);
+    std::list<RefPtr<FrameNode>> imageChildren;
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto imageNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imageNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    imageChildren.push_back(imageNode);
+    imageChildren.push_back(imageNode1);
+    richPattern->placeholderIndex_ = { 1, 2, 3 };
+    richPattern->rectsForPlaceholders_ = { RectF(0.0f, 0.0f, 100.0f, 100.0f), RectF(20.0f, 20.0f, 200.0f, 200.0f),
+        RectF(0.0f, 0.0f, 50.0f, 50.0f) };
+    richPattern->textSelector_.baseOffset = 0;
+    richPattern->textSelector_.destinationOffset = 10;
+    ParagraphManager::ParagraphInfo paragraphInfo;
+    ParagraphManager::ParagraphInfo paragraphInfo1;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    EXPECT_CALL(*mockParagraph, GetRectsForRange(_, _, _))
+        .WillRepeatedly(Invoke([](int32_t start, int32_t end, std::vector<RectF>& selectedRects) {
+            selectedRects.emplace_back(RectF(10, 10, 250, 250));
+        }));
+    const OHOS::Ace::NG::ParagraphStyle expectedStyle;
+    EXPECT_CALL(*mockParagraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(expectedStyle));
+    paragraphInfo.paragraph = mockParagraph;
+    paragraphInfo1.paragraph = mockParagraph;
+    paragraphInfo.start = 0;
+    paragraphInfo.end = 10;
+    paragraphInfo1.end = 10;
+    richPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo);
+    richPattern->paragraphs_.paragraphs_.emplace_back(paragraphInfo1);
+    TextDragInfo info;
+    info.isDragShadowNeeded = false;
+    auto dragNode = RichEditorDragPattern::CreateDragNode(hostNode, imageChildren, info);
+    ASSERT_NE(dragNode, nullptr);
+    auto richEditorDragPattern = dragNode->GetPattern<RichEditorDragPattern>();
+    EXPECT_FALSE(richEditorDragPattern->info_->dragBackgroundColor.has_value());
+    EXPECT_FALSE(richEditorDragPattern->info_->isDragShadowNeeded);
+}
+
+/**
+ * @tc.name: InitDragShadow001
+ * @tc.desc: test InitDragShadow
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, InitDragShadow001, TestSize.Level1)
+{
+    auto hostNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(hostNode, nullptr);
+    auto richPattern = hostNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richPattern, nullptr);
+    richPattern->InitDragShadow(hostNode, nullptr, false, false);
+    auto option = hostNode->GetDragPreviewOption();
+    EXPECT_TRUE(option.options.shadowPath.empty());
+    EXPECT_FALSE(option.options.shadow.has_value());
+}
+
+/**
+ * @tc.name: GetMaxSelectedWidth001
+ * @tc.desc: test GetMaxSelectedWidth
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorDragTestNG, GetMaxSelectedWidth001, TestSize.Level1)
+{
+    auto hostNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<RichEditorPattern>(); });
+    ASSERT_NE(hostNode, nullptr);
+    auto richPattern = hostNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richPattern, nullptr);
+    auto ret = richPattern->GetMaxSelectedWidth();
+    EXPECT_EQ(ret, 0.0f);
+}
 } // namespace OHOS::Ace::NG

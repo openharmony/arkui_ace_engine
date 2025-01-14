@@ -1083,6 +1083,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternInitOnKeyEvent001, TestSize.Level1)
     tabBarPattern_->InitOnKeyEvent(focusHub);
     focusHub->ProcessOnKeyEventInternal(event);
     focusHub->getInnerFocusRectFunc_(paintRect);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1115,6 +1116,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternOnKeyEvent003, TestSize.Level1)
     tabBarLayoutProperty_->UpdateIndicator(1);
     auto event = KeyEvent(code, action, pressedCodes, repeatTime, time, metaKey, deviceId, sourceType, {});
     tabBarPattern_->OnKeyEvent(event);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1261,6 +1263,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternInitTurnPageRateEvent001, TestSize.Level1
     tabBarPattern_->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
     tabBarPattern_->turnPageRate_ = 0.5f;
     tabBarPattern_->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1303,6 +1306,7 @@ HWTEST_F(TabsEventTestNg, TabBarPatternInitTurnPageRateEvent002, TestSize.Level1
     (*(tabBarPattern_->animationEndEvent_))(testswipingIndex, info);
     tabBarPattern_->turnPageRate_ = -1.0f;
     (*(tabBarPattern_->animationEndEvent_))(testswipingIndex, info);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
