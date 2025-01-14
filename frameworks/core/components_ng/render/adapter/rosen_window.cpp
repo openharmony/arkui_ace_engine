@@ -221,6 +221,12 @@ void RosenWindow::FlushTasks()
     JankFrameReport::GetInstance().JsAnimationToRsRecord();
 }
 
+void RosenWindow::FlushLayoutSize(int32_t width, int32_t height)
+{
+    CHECK_NULL_VOID(rsWindow_);
+    rsWindow_->FlushLayoutSize(width, height);
+}
+
 float RosenWindow::GetRefreshRate() const
 {
 #ifdef PREVIEW
