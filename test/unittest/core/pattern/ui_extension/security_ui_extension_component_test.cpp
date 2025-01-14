@@ -1306,33 +1306,4 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, RegisterEventProxyFlagCallback, Tes
     EXPECT_EQ(pattern->businessDataUECConsumeCallbacks_.size(), 1);
 #endif
 }
-
-/**
- * @tc.name: SecurityUIExtensionComponentTestNg
- * @tc.desc: Test the method of pattern RegisterTransformParamGetCallback
- * @tc.type: FUNC
- */
-HWTEST_F(SecurityUIExtensionComponentTestNg, RegisterTransformParamGetCallback, TestSize.Level1)
-{
-#ifdef OHOS_STANDARD_SYSTEM
-    /**
-     * @tc.steps: step1. construct a UIExtensionComponent Node
-     */
-    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(
-        V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId,
-        []() { return AceType::MakeRefPtr<SecurityUIExtensionPattern>(); });
-    ASSERT_NE(uiExtensionNode, nullptr);
-    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
-    auto pattern = uiExtensionNode->GetPattern<SecurityUIExtensionPattern>();
-    ASSERT_NE(pattern, nullptr);
-
-    /**
-     * @tc.steps: step2. test RegisterTransformParamGetCallback
-     */
-    EXPECT_EQ(pattern->businessDataUECConsumeReplyCallbacks_.size(), 0);
-    pattern->RegisterTransformParamGetCallback();
-    EXPECT_EQ(pattern->businessDataUECConsumeReplyCallbacks_.size(), 1);
-#endif
-}
 } //namespace OHOS::Ace::NG

@@ -312,6 +312,11 @@ public:
     AccessibilityWindowInfo GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
         const RefPtr<PipelineBase>& context) override;
 
+    AccessibilityParentRectInfo GetUECAccessibilityParentRectInfo() const;
+    void UpdateUECAccessibilityParentRectInfo(const AccessibilityParentRectInfo& info);
+    void RegisterUIExtBusinessConsumeCallback();
+    void RegisterGetParentRectHandler();
+
     bool IsScreenReaderEnabled() override;
 
 protected:
@@ -610,7 +615,6 @@ private:
     void UpdateChildrenNodeInCache(std::list<AccessibilityElementInfo>& infos,
         const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
         const SearchParameter& searchParam, std::list<RefPtr<NG::FrameNode>>& children);
-    void RegisterGetParentRectHandler();
     void RegisterDynamicRenderGetParentRectHandler();
 
     std::string callbackKey_;
@@ -641,6 +645,7 @@ private:
     std::list<WeakPtr<NG::FrameNode>> defaultFocusList_;
     std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>> extensionComponentStatusVec_;
     std::unordered_map<int32_t, std::optional<Accessibility::AccessibilityEventInfo>> pageIdEventMap_;
+    AccessibilityParentRectInfo uecRectInfo_;
 };
 
 } // namespace OHOS::Ace::Framework
