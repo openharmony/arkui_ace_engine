@@ -492,7 +492,8 @@ export struct SubHeaderV2 {
       }
       if ((event.keyCode === KeyCode.KEYCODE_SPACE || event.keyCode === KeyCode.KEYCODE_ENTER) &&
         event.type === KeyType.Down) {
-        if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW || this.operationType === SubHeaderV2OperationType.BUTTON) &&
+        if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW ||
+          this.operationType === SubHeaderV2OperationType.BUTTON) &&
         this.operationItems && this.operationItems.length > 0 && this.operationItems[0].action) {
           this.operationItems[0].action();
         }
