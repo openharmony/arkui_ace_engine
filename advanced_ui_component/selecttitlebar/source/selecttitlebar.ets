@@ -213,8 +213,15 @@ export struct SelectTitleBar {
   }
 
   aboutToAppear(): void {
-    let resourceManager = getContext().resourceManager;
-    this.messageDesc = resourceManager?.getPluralStringByNameSync('selecttitlebar_accessibility_message_desc',this.badgeValue);
+    try {
+      let resourceManager = getContext().resourceManager;
+      this.messageDesc =
+        resourceManager?.getPluralStringByNameSync('selecttitlebar_accessibility_message_desc_new', this.badgeValue);
+    } catch (exception) {
+      let code: number = (exception as BusinessError).code;
+      let message: string = (exception as BusinessError).message;
+      hilog.error(0x3900, 'Ace', `Faild to getPluralStringByNameSync,cause, code: ${code}, message: ${message}`);
+    }
   }
 }
 
