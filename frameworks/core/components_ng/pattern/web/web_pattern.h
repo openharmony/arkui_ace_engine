@@ -502,6 +502,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OptimizeParserBudgetEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
 
     bool IsFocus() const
     {
@@ -765,6 +766,8 @@ public:
     bool IsPreviewMenuNotNeedShowPreview();
 
     bool GetAccessibilityVisible(int64_t accessibilityId);
+
+    void OnWebMediaAVSessionEnabledUpdate(bool enable);
 
 private:
     friend class WebContextSelectOverlay;
