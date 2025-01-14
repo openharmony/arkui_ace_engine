@@ -432,7 +432,7 @@ void GridModelNG::SetScrollBarMode(FrameNode* frameNode, const std::optional<Dis
 void GridModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& scrollBarWidth)
 {
     if (scrollBarWidth &&
-        GreatOrEqual(scrollBarWidth.value().Value(), 0.0) &&
+        GreatOrEqual(scrollBarWidth.value().Value(), 0.0f) &&
         scrollBarWidth.value().Unit() != DimensionUnit::PERCENT) {
         ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, scrollBarWidth.value(), frameNode);
     } else {
@@ -551,10 +551,10 @@ void GridModelNG::SetFriction(FrameNode* frameNode, const std::optional<double>&
     auto pattern = frameNode->GetPattern<GridPattern>();
     CHECK_NULL_VOID(pattern);
     std::optional<double> friction = value;
-    if (friction.has_value() && LessOrEqual(friction.value(), 0.0)) {
+    if (friction.has_value() && LessOrEqual(friction.value(), 0.0f)) {
         friction.reset();
     }
-    pattern->SetFriction(friction.value_or(-1.0));
+    pattern->SetFriction(friction.value_or(-1.0f));
 }
 
 void GridModelNG::SetAlignItems(FrameNode* frameNode, const std::optional<GridItemAlignment>& itemAlign)
