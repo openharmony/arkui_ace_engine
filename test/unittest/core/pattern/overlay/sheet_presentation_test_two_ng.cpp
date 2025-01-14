@@ -940,11 +940,11 @@ HWTEST_F(SheetPresentationTestTwoNg, AvoidKeyboardBySheetMode007, TestSize.Level
 }
 
 /**
- * @tc.name: IsCustomHeightOrDetentsChanged001
+ * @tc.name: IsNeedPlayTransition001
  * @tc.desc: Test update detents of sheetStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged001, TestSize.Level1)
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create sheet page.
@@ -972,11 +972,11 @@ HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged001, TestSize
     ASSERT_NE(layoutProperty, nullptr);
 
     /**
-     * @tc.steps: step3. excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step3. excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
-    auto customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
      * @tc.steps: step4. change detents of SheetStyle.
@@ -990,22 +990,22 @@ HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged001, TestSize
     style.detents.emplace_back(detent);
 
     /**
-     * @tc.steps: step5. excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step5. excute the IsNeedPlayTransition function.
      * @tc.expected: true
      */
     layoutProperty->UpdateSheetStyle(style);
-    style.sheetMode = SheetMode::LARGE;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, true);
+    style.sheetHeight.sheetMode = SheetMode::LARGE;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_TRUE(sheetPattern->GetIsPlayTransition());
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
 /**
- * @tc.name: IsCustomHeightOrDetentsChanged002
+ * @tc.name: IsNeedPlayTransition002
  * @tc.desc: Test update sheetStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged002, TestSize.Level1)
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create sheet page.
@@ -1015,8 +1015,8 @@ HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged002, TestSize
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};
     SheetStyle style;
-    style.height = Dimension(100.0f, DimensionUnit::AUTO);
-    style.sheetMode = SheetMode::MEDIUM;
+    style.sheetHeight.height = Dimension(100.0f, DimensionUnit::AUTO);
+    style.sheetHeight.sheetMode = SheetMode::MEDIUM;
     style.showDragBar = false;
     style.showCloseIcon = false;
     style.isTitleBuilder = false;
@@ -1035,85 +1035,85 @@ HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged002, TestSize
     ASSERT_NE(layoutProperty, nullptr);
 
     /**
-     * @tc.steps: step3. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step3. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: true
      */
     layoutProperty->UpdateSheetStyle(style);
-    style.height = Dimension(200.0f, DimensionUnit::AUTO);
-    auto customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, true);
+    style.sheetHeight.height = Dimension(200.0f, DimensionUnit::AUTO);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_TRUE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step4. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step4. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: true
      */
     layoutProperty->UpdateSheetStyle(style);
-    style.sheetMode = SheetMode::LARGE;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, true);
+    style.sheetHeight.sheetMode = SheetMode::LARGE;
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_TRUE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step5. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step5. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.showDragBar = true;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step6. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step6. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.showCloseIcon = true;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step7. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step7. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.isTitleBuilder = true;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step8. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step8. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.backgroundColor = Color::BLACK;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step9. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step9. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.maskColor = Color::BLACK;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step10. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step10. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.bottomOffset = OffsetF(200.0, 200.0);
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
 /**
- * @tc.name: IsCustomHeightOrDetentsChanged003
+ * @tc.name: IsNeedPlayTransition003
  * @tc.desc: Test update sheetStyle.
  * @tc.type: FUNC
  */
-HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged003, TestSize.Level1)
+HWTEST_F(SheetPresentationTestTwoNg, IsNeedPlayTransition003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create sheet page.
@@ -1149,88 +1149,88 @@ HWTEST_F(SheetPresentationTestTwoNg, IsCustomHeightOrDetentsChanged003, TestSize
     ASSERT_NE(layoutProperty, nullptr);
 
     /**
-     * @tc.steps: step3. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step3. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     styleOption.blurStyle = BlurStyle::THICK;
     style.backgroundBlurStyle = styleOption;
-    auto customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step4. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step4. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.sheetTitle = "title2";
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step5. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step5. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.sheetSubtitle = "subtile2";
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step6. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step6. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.scrollSizeMode = ScrollSizeMode::CONTINUOUS;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step7. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step7. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     BorderWidth.SetBorderWidth(Dimension(20.0));
     style.borderWidth = BorderWidth;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step8. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step8. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.borderColor = { Color::BLACK, Color::BLACK, Color::BLACK, Color::BLACK };
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step9. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step9. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.borderStyle = { BorderStyle::DASHED, BorderStyle::DASHED, BorderStyle::DASHED, BorderStyle::DASHED };
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step10. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step10. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     shadow = ShadowConfig::NoneShadow;
     style.shadow = shadow;
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
 
     /**
-     * @tc.steps: step11. change style and excute the IsCustomHeightOrDetentsChanged function.
+     * @tc.steps: step11. change style and excute the IsNeedPlayTransition function.
      * @tc.expected: false
      */
     layoutProperty->UpdateSheetStyle(style);
     style.width = Dimension(200.0f, DimensionUnit::AUTO);
-    customHeightOrDetentsChanged = sheetPattern->IsCustomHeightOrDetentsChanged(style);
-    EXPECT_EQ(customHeightOrDetentsChanged, false);
+    sheetPattern->IsNeedPlayTransition(style);
+    EXPECT_FALSE(sheetPattern->GetIsPlayTransition());
     SheetPresentationTestTwoNg::TearDownTestCase();
 }
 
@@ -1274,7 +1274,7 @@ HWTEST_F(SheetPresentationTestTwoNg, FireOnHeightDidChange001, TestSize.Level1)
      * @tc.expected: Make sure the modalStack holds the sheetNode.
      */
     SheetStyle sheetStyle;
-    sheetStyle.height = Dimension(100.0f, DimensionUnit::AUTO);
+    sheetStyle.sheetHeight.height = Dimension(100.0f, DimensionUnit::AUTO);
     bool isShow = true;
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
     overlayManager->OnBindSheet(isShow, nullptr, std::move(builderFunc), std::move(buildTitleNodeFunc), sheetStyle,
