@@ -1748,4 +1748,17 @@ void AssignCast(std::optional<SessionType>& dst, const Ark_EmbeddedType& src)
         default: LOGE("Unexpected enum value in Ark_EmbeddedType: %{public}d", src);
     }
 }
+
+template<>
+void AssignCast(std::optional<SwipeActionState>& dst, const Ark_SwipeActionState& src)
+{
+    switch (src) {
+        case ARK_SWIPE_ACTION_STATE_COLLAPSED: dst = SwipeActionState::COLLAPSED; break;
+        case ARK_SWIPE_ACTION_STATE_EXPANDED: dst = SwipeActionState::EXPANDED; break;
+        case ARK_SWIPE_ACTION_STATE_ACTIONING: dst = SwipeActionState::ACTIONING; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_SwipeActionState: %{public}d", src);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG::Converter
