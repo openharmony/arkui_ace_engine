@@ -721,7 +721,7 @@ HWTEST_F(ImageModifierTest, SetImageOptions1_SetResourceUrl, testing::ext::TestS
     };
 
     for (auto & v: tests) {
-        auto imageRc = 
+        auto imageRc =
             Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
             Ark_ResourceStr>(v.first);
         modifier_->setImageOptions1(node_, &imageRc);
@@ -745,8 +745,8 @@ HWTEST_F(ImageModifierTest, SetImageOptions1_SetUndefinedResourceUrl, testing::e
     // set initial nondefault state
     std::string urlString = "https://www.example.com/xxx.jpg";
     auto image = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(urlString));
-    auto imageBefore = 
-        Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent, 
+    auto imageBefore =
+        Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr_DrawableDescriptor_ImageContent,
             Ark_ResourceStr>(image);
     modifier_->setImageOptions1(node_, &imageBefore);
     // verify the change

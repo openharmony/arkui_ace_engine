@@ -47,7 +47,8 @@ void AssignCast(std::optional<std::pair<CalcDimension, CalcDimension>>& dst,
     }
 }
 template<>
-void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ImageContent& src) {
+void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_ImageContent& src)
+{
     dst.reset();
 }
 } // Converter
