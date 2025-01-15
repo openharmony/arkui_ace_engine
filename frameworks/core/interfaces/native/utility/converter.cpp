@@ -1914,4 +1914,25 @@ KeyboardOptions Convert(const Ark_KeyboardOptions& src)
     keyboardOptions.supportAvoidance = supportAvoidance.has_value() ? supportAvoidance.value() : false;
     return keyboardOptions;
 }
+
+template<>
+SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
+{
+    SelectMenuParam selectMenuParam = {.onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {}};
+    auto optOnAppear = Converter::OptConvert<MenuOnAppearCallback>(src.onAppear);
+    if (optOnAppear.has_value()) {
+        selectMenuParam.onAppear =
+            [arkCallback = CallbackHelper(optOnAppear.value())](int32_t start, int32_t end) {
+                arkCallback.Invoke(Converter::ArkValue<Ark_Number>(start), Converter::ArkValue<Ark_Number>(end));
+        };
+    }
+    auto optOnDisappear = Converter::OptConvert<Callback_Void>(src.onDisappear);
+    if (optOnDisappear.has_value()) {
+        selectMenuParam.onDisappear =
+            [arkCallback = CallbackHelper(optOnDisappear.value())]() {
+                arkCallback.Invoke();
+        };
+    }
+    return selectMenuParam;
+}
 } // namespace OHOS::Ace::NG::Converter

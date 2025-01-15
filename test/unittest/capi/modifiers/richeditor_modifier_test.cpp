@@ -39,6 +39,7 @@ static constexpr int TEST_FONT_SIZE = 30;
 static constexpr int TEST_FONT_WEIGHT = static_cast<int>(FontWeight::BOLD);
 static const std::string COLOR_TRANSPARENT = "#00000000";
 static constexpr int TEST_RESOURCE_ID = 1000;
+static constexpr int32_t NODE_ID = 555;
 
 static const auto ATTRIBUTE_COPY_OPTIONS_NAME = "CopyOption";
 static const auto ATTRIBUTE_COPY_OPTIONS_DEFAULT_VALUE = "CopyOptions.None";
@@ -94,15 +95,12 @@ struct CheckEvent {
     Ark_NativePointer parentNode;
 };
 static std::optional<CheckEvent> checkEvent = std::nullopt;
+static std::optional<RefPtr<UINode>> uiNode = std::nullopt;
 class RichEditorModifierTest : public ModifierTestBase<GENERATED_ArkUIRichEditorModifier,
     &GENERATED_ArkUINodeModifiers::getRichEditorModifier, GENERATED_ARKUI_RICH_EDITOR> {
 public:
     CustomNodeBuilder getBuilderCb()
     {
-        int32_t nodeId = 555;
-        auto node = BlankModelNG::CreateFrameNode(nodeId);
-        EXPECT_NE(node, nullptr);
-        static std::optional<RefPtr<UINode>> uiNode = node;
         auto checkCallback = [](
             Ark_VMContext context,
             const Ark_Int32 resourceId,
@@ -518,11 +516,10 @@ HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     auto onDisappearCb = Converter::ArkValue<Callback_Void>(onDisappearCallback, TEST_RESOURCE_ID);
     value.onDisappear = Converter::ArkValue<Opt_Callback_Void>(onDisappearCb);
     auto options = Converter::ArkValue<Opt_SelectionMenuOptions>(value);
+    uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto buildFunc = getBuilderCb();
     modifier_->setBindSelectionMenu(node_,
         Ark_RichEditorSpanType::ARK_RICH_EDITOR_SPAN_TYPE_TEXT, &buildFunc, &responseType, &options);
-
-    // The testing part begins here:
     EXPECT_FALSE(g_onAppear);
     EXPECT_FALSE(g_onDisappear);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
@@ -530,6 +527,7 @@ HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     pattern->SetSelectedType(TextSpanType::TEXT); // Needed for logic of CopySelectionMenuParams()
     SelectOverlayInfo selectInfo;
     pattern->CopySelectionMenuParams(selectInfo, TextResponseType::LONG_PRESS);
+    ASSERT_NE(selectInfo.menuInfo.menuBuilder, nullptr);
     checkEvent = std::nullopt;
     selectInfo.menuInfo.menuBuilder();
     ASSERT_EQ(checkEvent.has_value(), true);
@@ -538,6 +536,8 @@ HWTEST_F(RichEditorModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     EXPECT_TRUE(g_onAppear);
     selectInfo.menuCallback.onDisappear();
     EXPECT_TRUE(g_onDisappear);
+    checkEvent = std::nullopt;
+    uiNode = std::nullopt;
 }
 
 /**
@@ -557,6 +557,7 @@ HWTEST_F(RichEditorModifierTest, setCustomKeyboardTest, TestSize.Level1)
     Ark_KeyboardOptions keyboardOptions;
     keyboardOptions.supportAvoidance = Converter::ArkValue<Opt_Boolean>(true);
     auto options = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
+    uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto buildFunc = getBuilderCb();
     modifier_->setCustomKeyboard(node_, &buildFunc, &options);
 
@@ -573,6 +574,8 @@ HWTEST_F(RichEditorModifierTest, setCustomKeyboardTest, TestSize.Level1)
     jsonValue = GetJsonValue(node_);
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CUSTOM_KB_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_CUSTOM_KB_VALUE);
+    checkEvent = std::nullopt;
+    uiNode = std::nullopt;
 }
 
 } // namespace OHOS::Ace::NG
