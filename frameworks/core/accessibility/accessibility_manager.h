@@ -312,6 +312,7 @@ public:
         return AccessibilityWindowInfo();
     }
 
+    virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo) {}
 protected:
     int32_t treeId_ = 0;
 
