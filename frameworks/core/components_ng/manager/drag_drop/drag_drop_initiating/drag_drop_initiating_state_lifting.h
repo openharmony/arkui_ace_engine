@@ -54,6 +54,9 @@ private:
     void SetEventColumn();
     void ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& frameNode);
     void SetPixelMap();
+    void SetGatherAnimation(const RefPtr<PipelineBase>& context);
+    void SetGatherAnimation();
+    void ResetNodeInMultiDrag();
 };
 } // namespace OHOS::Ace::NG
 

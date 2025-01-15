@@ -121,7 +121,9 @@ void DragDropEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     if (!DragDropFuncWrapper::IsGlobalStatusSuitableForDragging() ||
-        !DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(frameNode, touchRestrict)) {
+        !DragDropFuncWrapper::IsCurrentNodeStatusSuitableForDragging(frameNode, touchRestrict) ||
+        (DragDropFuncWrapper::IsBelongToMultiItemNode(frameNode) &&
+        !DragDropFuncWrapper::IsSelectedItemNode(frameNode))) {
         return;
     }
     auto touchEvent = touchRestrict.touchEvent;
@@ -254,5 +256,13 @@ void DragDropEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool is
         touchEvent.id = info.GetTouches().front().GetFingerId();
         dragDropInitiatingHandler_->NotifyTouchEvent(touchEvent);
     }
+}
+
+bool DragDropEventActuator::IsNeedGather() const
+{
+    if (dragDropInitiatingHandler_) {
+        return dragDropInitiatingHandler_->IsNeedGather();
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG
