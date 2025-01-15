@@ -1956,7 +1956,7 @@ bool AceContainer::DumpInfo(const std::vector<std::string>& params)
 
 bool AceContainer::DumpRSNodeByStringID(const std::vector<std::string>& params)
 {
-    if (!params.empty() && params[0] == "-resnodebyid" && (params.size() > 1)) {
+    if (!params.empty() && params[0] == "-rsnodebyid" && (params.size() > 1)) {
         DumpLog::GetInstance().Print("------------DumpRSNodeByStringID------------");
         DumpLog::GetInstance().Print(1, "Query by stringid: " + params[1]);
         auto frameNode = NG::Inspector::GetFrameNodeByKey(params[1], true, true);
