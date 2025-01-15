@@ -203,6 +203,11 @@ struct CJAlignRuleOption {
     float* verticalBias;
 };
 
+struct CJChainInfo {
+    int32_t direction;
+    int32_t style;
+};
+
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetWidth(double width, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetHeight(double height, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSize(
@@ -270,6 +275,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetPosition(double x, int32_t xUni
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetMarkAnchor(double x, int32_t xUnit, double y, int32_t yUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOffset(double x, int32_t xUnit, double y, int32_t yUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAlignRules(CJAlignRuleOption option);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetChainMode(CJChainInfo option);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetEnabled(bool value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAspectRatio(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDisplayPriority(int32_t value);
