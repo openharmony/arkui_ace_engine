@@ -98,6 +98,8 @@ constexpr Dimension ERROR_UNDERLINE_WIDTH = 2.0_px;
 constexpr Dimension UNDERLINE_WIDTH = 1.0_px;
 constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 constexpr Dimension SCROLL_BAR_MIN_HEIGHT = 4.0_vp;
+constexpr float MINFONTSCALE = 0.85f;
+constexpr float MAXFONTSCALE = 3.20f;
 #if defined(ENABLE_STANDARD_INPUT)
 constexpr Dimension AVOID_OFFSET = 24.0_vp;
 #endif
@@ -6743,6 +6745,28 @@ std::string TextFieldPattern::GetMaxFontSize() const
     return layoutProperty->GetAdaptMaxFontSize()->ToString();
 }
 
+std::string TextFieldPattern::GetMinFontScale() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, std::to_string(MINFONTSCALE));
+    return std::to_string(layoutProperty->GetMinFontScale().value_or(MINFONTSCALE));
+}
+
+std::string TextFieldPattern::GetMaxFontScale() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, std::to_string(MAXFONTSCALE));
+    return std::to_string(layoutProperty->GetMaxFontScale().value_or(MAXFONTSCALE));
+}
+
+std::string TextFieldPattern::GetEllipsisMode() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, V2::ConvertEllipsisModeToString(EllipsisMode::TAIL));
+    return V2::ConvertEllipsisModeToString(layoutProperty->GetEllipsisMode().value_or(
+        EllipsisMode::TAIL));
+}
+
 std::string TextFieldPattern::GetTextIndent() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -7417,6 +7441,9 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
     json->PutExtAttr("enablePreviewText", GetSupportPreviewText(), filter);
+    json->PutExtAttr("minFontScale", GetMinFontScale().c_str(), filter);
+    json->PutExtAttr("maxFontScale", GetMaxFontScale().c_str(), filter);
+    json->PutExtAttr("ellipsisMode",GetEllipsisMode().c_str(), filter);
     ToJsonValueForOption(json, filter);
     ToJsonValueSelectOverlay(json, filter);
 }

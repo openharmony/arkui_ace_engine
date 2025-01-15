@@ -950,6 +950,9 @@ public:
     std::string GetFontSize() const;
     std::string GetMinFontSize() const;
     std::string GetMaxFontSize() const;
+    std::string GetMinFontScale() const;
+    std::string GetMaxFontScale() const;
+    std::string GetEllipsisMode() const;
     std::string GetTextIndent() const;
     Ace::FontStyle GetItalicFontStyle() const;
     FontWeight GetFontWeight() const;
