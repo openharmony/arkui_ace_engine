@@ -29,10 +29,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 137
+#define ARKUI_FULL_API_VERSION 138
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 137
+#define ARKUI_NODE_API_VERSION 138
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -2791,6 +2791,8 @@ struct ArkUISwiperModifier {
     void (*setSwiperPageFlipMode)(ArkUINodeHandle node, ArkUI_Int32 pageFlipMode);
     void (*resetSwiperPageFlipMode)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperPageFlipMode)(ArkUINodeHandle node);
+    void (*setSwiperOnContentWillScroll)(ArkUINodeHandle node, bool* callback);
+    void (*resetSwiperOnContentWillScroll)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {

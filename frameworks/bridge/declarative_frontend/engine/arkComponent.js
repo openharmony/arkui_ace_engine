@@ -29423,6 +29423,10 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperPageFlipModeModifier.identity, SwiperPageFlipModeModifier, value);
     return this;
   }
+  onContentWillScroll(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnContentWillScrollModifier.identity, SwiperOnContentWillScrollModifier, value);
+    return this;
+  }
 }
 class SwiperInitializeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -30019,6 +30023,22 @@ class SwiperPageFlipModeModifier extends ModifierWithKey {
   }
 }
 SwiperPageFlipModeModifier.identity = Symbol('swiperPageFlipMode');
+class SwiperOnContentWillScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnContentWillScroll(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnContentWillScroll(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperOnContentWillScrollModifier.identity = Symbol('swiperOnContentWillScroll');
 // @ts-ignore
 if (globalThis.Swiper !== undefined) {
   globalThis.Swiper.attributeModifier = function (modifier) {
