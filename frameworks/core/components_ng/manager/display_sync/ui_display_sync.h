@@ -29,6 +29,7 @@
 #include "base/log/log.h"
 #include "base/utils/base_id.h"
 #include "base/log/ace_trace.h"
+#include "ui/animation/frame_rate_range.h"
 
 namespace OHOS::Ace {
 enum class RefreshRateMode : int32_t {
@@ -42,73 +43,6 @@ enum class UIObjectType : int32_t {
 constexpr int32_t INVALID_ANIMATOR_EXPECTED_RATE = -1;
 
 class PipelineBase;
-
-class FrameRateRange : public AceType {
-    DECLARE_ACE_TYPE(FrameRateRange, AceType)
-public:
-    FrameRateRange() : min_(0), max_(0), preferred_(0), componentScene_(0) {}
-
-    FrameRateRange(int min, int max, int preferred) : min_(min), max_(max), preferred_(preferred) {}
-
-    FrameRateRange(int min, int max, int preferred, int componentScene)
-        : min_(min), max_(max), preferred_(preferred), componentScene_(componentScene) {}
-
-    bool IsZero() const
-    {
-        return this->preferred_ == 0;
-    }
-
-    bool IsValid() const
-    {
-        return !this->IsZero() && this->min_ <= this->preferred_ && this->preferred_ <= this->max_ &&
-            this->min_ >= 0 && this->max_ <= rangeMaxRefreshrate;
-    }
-
-    bool IsDynamic() const
-    {
-        return IsValid() && this->min_ != this->max_;
-    }
-
-    void Reset()
-    {
-        this->min_ = 0;
-        this->max_ = 0;
-        this->preferred_ = 0;
-        this->componentScene_ = 0;
-    }
-
-    void Set(int min, int max, int preferred)
-    {
-        this->min_ = min;
-        this->max_ = max;
-        this->preferred_ = preferred;
-    }
-
-    void Merge(const FrameRateRange& other)
-    {
-        if (this->preferred_ < other.preferred_) {
-            this->Set(other.min_, other.max_, other.preferred_);
-        }
-    }
-
-    bool operator==(const FrameRateRange& other)
-    {
-        return this->min_ == other.min_ && this->max_ == other.max_ &&
-            this->preferred_ == other.preferred_;
-    }
-
-    bool operator!=(const FrameRateRange& other)
-    {
-        return this->min_ != other.min_ || this->max_ != other.max_ ||
-            this->preferred_ != other.preferred_;
-    }
-
-    int min_ = 0;
-    int max_ = 0;
-    int preferred_ = 0;
-    int componentScene_ = 0;
-    const int32_t rangeMaxRefreshrate = 144;
-};
 
 class DisplaySyncData;
 using OnFrameCallBack = std::function<void()>;

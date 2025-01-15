@@ -16,38 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CURVES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CURVES_H
 
-#include "base/utils/macros.h"
-#include "core/animation/anticipate_curve.h"
-#include "core/animation/cubic_curve.h"
-
-namespace OHOS::Ace {
-
-class ACE_FORCE_EXPORT Curves {
-public:
-    Curves() = delete;
-    ~Curves() = default;
-    static const RefPtr<DecelerationCurve> DECELE;
-    static const RefPtr<LinearCurve> LINEAR;
-    static const RefPtr<SineCurve> SINE;
-    static const RefPtr<CubicCurve> EASE;
-    static const RefPtr<CubicCurve> EASE_IN;
-    static const RefPtr<CubicCurve> EASE_OUT;
-    static const RefPtr<CubicCurve> EASE_IN_OUT;
-    static const RefPtr<CubicCurve> FAST_OUT_SLOW_IN;
-    static const RefPtr<CubicCurve> LINEAR_OUT_SLOW_IN;
-    static const RefPtr<CubicCurve> FAST_OUT_LINEAR_IN;
-    static const RefPtr<CubicCurve> FRICTION;
-    static const RefPtr<CubicCurve> EXTREME_DECELERATION;
-    static const RefPtr<CubicCurve> SHARP;
-    static const RefPtr<CubicCurve> RHYTHM;
-    static const RefPtr<CubicCurve> SMOOTH;
-    static const RefPtr<AnticipateCurve> ANTICIPATE;
-    static const RefPtr<CubicCurve> MAGNETIC;
-    static const RefPtr<ElasticsCurve> ELASTICS;
-    static const std::string DEFAULT_CURVE_NAME;
-    static std::string ToString(const RefPtr<Curve>& curve);
-};
-
-} // namespace OHOS::Ace
+#include "ui/animation/curves.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_ANIMATION_CURVES_H
