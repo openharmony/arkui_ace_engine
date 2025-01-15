@@ -254,6 +254,9 @@ public:
      */
     virtual void CloseModalUIExtension(int32_t sessionId) = 0;
 
+    virtual void UpdateModalUIExtensionConfig(
+        int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config) {};
+
     /**
      * @description: Set parent ability token.
      * @param token ability token.
