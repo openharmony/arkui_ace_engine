@@ -522,7 +522,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnDetachTest, TestSize.Level1)
 
 /*
  * @tc.name: SetOnTouchIntercept
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
@@ -538,7 +538,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
 
     auto onTouchInterceptFunc = [](const Ark_Int32 resourceId,
-                                const Ark_TouchEvent parameter, 
+                                const Ark_TouchEvent parameter,
                                 const Callback_HitTestMode_Void continuation) {
         checkEvent = { .nodeId = resourceId };
     };
