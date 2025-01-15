@@ -183,6 +183,17 @@ void AddResConfigInfo(
         aceResCfg.SetPreferredLanguage(preferredLanguage);
     }
 }
+
+std::string StringifyAvoidAreas(const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
+{
+    std::stringstream ss;
+    ss << "[";
+    std::for_each(avoidAreas.begin(), avoidAreas.end(), [&ss](const auto& avoidArea) {
+        ss << "(" << static_cast<int32_t>(avoidArea.first) << "," << avoidArea.second.ToString() << ")";
+    });
+    ss << "]";
+    return ss.str();
+}
 } // namespace
 
 const std::string SUBWINDOW_PREFIX = "ARK_APP_SUBWINDOW_";
@@ -2434,8 +2445,12 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     const std::shared_ptr<OHOS::Rosen::RSTransaction>& rsTransaction,
     const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas)
 {
-    LOGI("[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s", bundleName_.c_str(),
-        moduleName_.c_str(), instanceId_, config.ToString().c_str());
+    std::string stringifiedMap = StringifyAvoidAreas(avoidAreas);
+    TAG_LOGI(ACE_LAYOUT,
+        "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d, is "
+        "rsTransaction nullptr %{public}d, updateAvoidAreas size %{public}zu, %{public}s",
+        bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
+        rsTransaction == nullptr, avoidAreas.size(), stringifiedMap.c_str());
     SystemProperties::SetDeviceOrientation(config.Orientation());
     TAG_LOGI(
         AceLogTag::ACE_WINDOW, "Update orientation to : %{public}d", static_cast<uint32_t>(config.Orientation()));
