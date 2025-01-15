@@ -723,7 +723,7 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
         SetClickMenuItemId(host->GetId());
         subMenu->MountToParent(menuWrapper);
         menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-        menuPattern->SetSubMenuShow();
+        menuPattern->SetSubMenuShow(true);
         RegisterWrapperMouseEvent();
     } else {
         subMenu->MountToParent(menuWrapper);
