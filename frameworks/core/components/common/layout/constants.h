@@ -524,6 +524,11 @@ enum class PixelRoundCalcPolicy {
     FORCE_FLOOR = 2,
 };
 
+enum class LayoutCalPolicy {
+    NO_MATCH = 0,
+    MATCH_PARENT = 1,
+};
+
 const ImageRepeat IMAGE_REPEATS[] = {
     ImageRepeat::REPEAT,
     ImageRepeat::REPEAT_X,
