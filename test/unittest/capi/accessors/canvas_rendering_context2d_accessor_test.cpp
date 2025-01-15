@@ -330,7 +330,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnAttachTest, TestSize.Level1)
 
 /**
  * @tc.name: offOnAttachTestAll
- * @tc.desc: check remove all callbacks using offOnAttachTest 
+ * @tc.desc: check remove all callbacks using offOnAttachTest
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnAttachTestAll, TestSize.Level1) {
@@ -366,7 +366,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnAttachTestAll, TestSize.Leve
 
 /**
  * @tc.name: offOnDetachTest
- * @tc.desc: check remove single callback using offOnDetach 
+ * @tc.desc: check remove single callback using offOnDetach
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnDetachTest, TestSize.Level1) {
@@ -411,7 +411,7 @@ HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnDetachTest, TestSize.Level1)
 
 /**
  * @tc.name: offOnDetachTestAll
- * @tc.desc: check remove all callbacks using offOnDetach 
+ * @tc.desc: check remove all callbacks using offOnDetach
  * @tc.type: FUNC
  */
 HWTEST_F(CanvasRenderingContext2DAccessorTest, offOnDetachTestAll, TestSize.Level1) {
