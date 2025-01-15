@@ -19,17 +19,14 @@
 
 #include "item_measurer.h"
 
-#include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/layout/section/section_data_types.h"
 namespace OHOS::Ace::NG {
 class FrameNode;
-// [lane start/end position, lane index]
-using LanePos = std::pair<float, size_t>;
-using StartPosQ = std::priority_queue<LanePos>;
-using EndPosQ = std::priority_queue<LanePos, std::vector<LanePos>, std::greater<>>;
 
 class SectionFiller {
 public:
+    SectionFiller() = default;
+    virtual ~SectionFiller() = default;
     /**
      * @brief Fill one item into the section.
      *
@@ -39,6 +36,11 @@ public:
      */
     virtual bool Fill(const RefPtr<Measurer>& measurer, FrameNode* node, int32_t index, float viewportBound) = 0;
     virtual bool CanFill() const = 0;
+
+    // [lane start/end position, lane index]
+    using LanePos = std::pair<float, size_t>;
+
+    ACE_DISALLOW_COPY_AND_MOVE(SectionFiller);
 };
 
 class SectionEndFiller : public SectionFiller {
@@ -58,6 +60,7 @@ public:
 private:
     void PrepareEndPosQueue(const std::vector<Lane>& lanes, float mainGap, float viewportBound);
 
+    using EndPosQ = std::priority_queue<LanePos, std::vector<LanePos>, std::greater<>>;
     EndPosQ q_;
 
     Section& section_;
@@ -80,9 +83,7 @@ public:
 private:
     void PrepareStartPosQueue(const std::vector<Lane>& lanes, float mainGap, float viewportBound);
 
-    // [lane start/end position, lane index]
-    using lanePos = std::pair<float, size_t>;
-
+    using StartPosQ = std::priority_queue<LanePos>;
     StartPosQ q_;
 
     Section& section_;
