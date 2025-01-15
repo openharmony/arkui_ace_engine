@@ -146,6 +146,7 @@ public:
     int32_t GetUiExtensionId() override;
     bool IsModalUec();
     bool IsForeground();
+    void OnExtensionDetachToDisplay();
     RefPtr<SessionWrapper> GetSessionWrapper()
     {
         return sessionWrapper_;
