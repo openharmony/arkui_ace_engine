@@ -2353,9 +2353,9 @@ bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason rea
     return true;
 }
 
-void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
+void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe, bool isEventsPassThrough)
 {
-    OnTouchEvent(point, rootNode_, isSubPipe);
+    OnTouchEvent(point, rootNode_, isSubPipe, isEventsPassThrough);
 }
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event)
@@ -2368,7 +2368,8 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event)
     OnAxisEvent(event, rootNode_);
 }
 
-void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe)
+void PipelineContext::OnTouchEvent(
+    const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe, bool isEventsPassThrough)
 {
     CHECK_RUN_ON(UI);
 
@@ -2515,6 +2516,13 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 
     if (scalePoint.type == TouchType::MOVE) {
+        if (isEventsPassThrough) {
+            scalePoint.isPassThroughMode = true;
+            eventManager_->DispatchTouchEvent(scalePoint);
+            hasIdleTasks_ = true;
+            RequestFrame();
+            return;
+        }
         if (!eventManager_->GetInnerFlag()) {
             auto mockPoint = point;
             mockPoint.type = TouchType::CANCEL;

@@ -20,6 +20,7 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 #include "display_manager.h"
 #include "dm_common.h"
@@ -702,6 +703,11 @@ public:
     void FireUIExtensionEventCallback(uint32_t eventId);
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter);
 
+    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
+    {
+        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
+    }
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -797,6 +803,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
+    std::optional<bool> isTouchEventsPassThrough_;
 };
 
 } // namespace OHOS::Ace::Platform

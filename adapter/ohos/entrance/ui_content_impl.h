@@ -53,6 +53,7 @@ public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
     ~UIContentImpl()
     {
+        UnSubscribeEventsPassThroughMode();
         DestroyUIDirector();
         DestroyCallback();
     }
@@ -380,6 +381,8 @@ private:
     void AddWatchSystemParameter();
     void StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     void UnregisterDisplayManagerCallback();
+    void SubscribeEventsPassThroughMode();
+    void UnSubscribeEventsPassThroughMode();
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
