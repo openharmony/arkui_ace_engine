@@ -2154,12 +2154,16 @@ HWTEST_F(CanvasRendererAccessorTest, clip0Test, TestSize.Level1)
         holder->SetUp();
 
         accessor_->clip0(peer_, &actual);
+      
+        auto rule = *holder->fillRule;
         auto value = static_cast<std::underlying_type_t<CanvasFillRule>>(*holder->fillRule);
 
         std::printf("clip: holder value: %d == %d isCalled: %d %d\n", value, expected, holder->isCalled, holder->isCalled2);
       
-        // EXPECT_TRUE(holder->isCalled);
-        // EXPECT_EQ(holder->lineJoin, expected);
+      
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_TRUE(holder->isCalled2);
+        EXPECT_EQ(rule, expected);
     }
     holder->TearDown();
 }
