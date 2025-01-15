@@ -29,8 +29,8 @@ void GridFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t totalC
     params_.mainGap = GridUtils::GetMainGap(props_, viewport, axis);
 
     std::string args = (axis == Axis::VERTICAL ? props_.GetColumnsTemplate() : props_.GetRowsTemplate()).value_or("");
-    auto res = ParseTemplateArgs(GridUtils::ParseArgs(args), viewport.CrossSize(axis),
-        GridUtils::GetCrossGap(props_, viewport, axis), totalCnt);
+    auto res = ParseTemplateArgs(
+        GridUtils::ParseArgs(args), viewport.CrossSize(axis), GridUtils::GetCrossGap(props_, viewport, axis), totalCnt);
 
     params_.crossLens = std::vector<float>(res.first.begin(), res.first.end());
     params_.crossGap = static_cast<float>(res.second);
@@ -94,13 +94,15 @@ RectF GridFillAlgorithm::CalcItemRectBeforeMarkItem(
     const auto size = node->GetGeometryNode()->GetMarginFrameSize();
     if (pivotRow->first > pos.second) {
         // new line.
-        OffsetF offset = axis == Axis::VERTICAL
-                             ? OffsetF(viewport.Width() - size.Width(), markItem.Top() - params_.mainGap - size.Height())
-                             : OffsetF(markItem.Left() - params_.mainGap - size.Width(), viewport.Height() - size.Height());
+        OffsetF offset =
+            axis == Axis::VERTICAL
+                ? OffsetF(viewport.Width() - size.Width(), markItem.Top() - params_.mainGap - size.Height())
+                : OffsetF(markItem.Left() - params_.mainGap - size.Width(), viewport.Height() - size.Height());
         return { offset, size };
     }
-    OffsetF offset = axis == Axis::VERTICAL ? OffsetF(markItem.Left() - params_.crossGap - size.Width(), markItem.Top())
-                                            : OffsetF(markItem.Left(), markItem.Top() - params_.crossGap - size.Height());
+    OffsetF offset = axis == Axis::VERTICAL
+                         ? OffsetF(markItem.Left() - params_.crossGap - size.Width(), markItem.Top())
+                         : OffsetF(markItem.Left(), markItem.Top() - params_.crossGap - size.Height());
     return { offset, size };
 }
 

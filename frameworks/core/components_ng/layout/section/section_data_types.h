@@ -79,25 +79,12 @@ struct Section {
      */
     void PruneBack(float end);
 
-    bool IsEmpty() const {
+    bool IsEmpty() const
+    {
         return std::all_of(lanes.begin(), lanes.end(), [](const Lane& lane) { return lane.items_.empty(); });
     }
 
-    std::string ToString() const
-    {
-        std::string str = "Section: ";
-        str += "mainGap: " + std::to_string(mainGap) + ", ";
-        str += "crossGap: " + std::to_string(crossGap) + ", ";
-        str += "minItem: " + std::to_string(minItem) + ", ";
-        str += "maxItem: " + std::to_string(maxItem) + ", ";
-        str += "margin: " + margin.ToString() + ", ";
-        str += "lanes: [";
-        for (const auto& lane : lanes) {
-            str += lane.ToString() + ", ";
-        }
-        str += "]";
-        return str;
-    }
+    std::string ToString() const;
 
     float mainGap = 0.0f;
     float crossGap = 0.0f;

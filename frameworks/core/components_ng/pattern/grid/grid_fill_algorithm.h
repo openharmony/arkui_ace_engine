@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 
 class GridFillAlgorithm : public FillAlgorithm {
     DECLARE_ACE_TYPE(GridFillAlgorithm, FillAlgorithm);
+
 public:
     GridFillAlgorithm(const GridLayoutProperty& props, GridLayoutInfo& info) : props_(props), info_(info) {}
 
@@ -47,8 +48,8 @@ public:
         return true;
     }
 
-    bool CanFillMore(
-        Axis axis, const SizeF& scrollWindowSize, int32_t idx, const RectF& markItemRect, FillDirection direction) override;
+    bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, const RectF& markItemRect,
+        FillDirection direction) override;
 
     void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
 

@@ -12,6 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_SECTION_INITIALIZER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_SECTION_INITIALIZER_H
+
 #include "base/geometry/axis.h"
 #include "core/components_ng/layout/section/section_data_types.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
@@ -48,3 +52,5 @@ private:
     std::vector<Section> SingleInit(const RefPtr<WaterFlowLayoutProperty>& props);
 };
 } // namespace OHOS::Ace::NG
+
+#endif

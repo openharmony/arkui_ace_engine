@@ -40,7 +40,8 @@ public:
 
     void UpdateMarkItem(int32_t index, FrameNode* node);
 
-    void UpdateSize(const SizeF& size) {
+    void UpdateSize(const SizeF& size)
+    {
         size_ = size;
     }
     void UpdateSize(float width, float height)

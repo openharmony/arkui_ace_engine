@@ -24,9 +24,9 @@
 namespace OHOS::Ace::NG {
 class FrameNode;
 // [lane start/end position, lane index]
-using lanePos = std::pair<float, size_t>;
-using StartPosQ = std::priority_queue<lanePos>;
-using EndPosQ = std::priority_queue<lanePos, std::vector<lanePos>, std::greater<>>;
+using LanePos = std::pair<float, size_t>;
+using StartPosQ = std::priority_queue<LanePos>;
+using EndPosQ = std::priority_queue<LanePos, std::vector<LanePos>, std::greater<>>;
 
 class SectionFiller {
 public:

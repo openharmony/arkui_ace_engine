@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- #include "section_data_types.h"
- namespace OHOS::Ace::NG {
+#include "section_data_types.h"
+namespace OHOS::Ace::NG {
 int32_t Section::StartIdx() const
 {
     int32_t minIdx = std::numeric_limits<int32_t>::max();
@@ -60,18 +60,18 @@ inline float Section::EndPos() const
     })->endPos;
 }
 
-void Section::PrepareNextSection(Axis axis,Section& nextSection) const
+void Section::PrepareNextSection(Axis axis, Section& nextSection) const
 {
     float pos = EndPos();
     pos += axis == Axis::VERTICAL ? margin.bottom.value_or(0.0f) + nextSection.margin.top.value_or(0.0f)
                                   : margin.right.value_or(0.0f) + nextSection.margin.left.value_or(0.0f);
-    std::for_each(nextSection.lanes.begin(), nextSection.lanes.end(), [pos]( Lane& lane) {
+    std::for_each(nextSection.lanes.begin(), nextSection.lanes.end(), [pos](Lane& lane) {
         lane.startPos = lane.endPos = pos;
         lane.items_.clear();
     });
 }
 
-void Section::PreparePrevSection(Axis axis,Section& prevSection) const
+void Section::PreparePrevSection(Axis axis, Section& prevSection) const
 {
     float pos = StartPos();
     pos -= axis == Axis::VERTICAL ? margin.top.value_or(0.0f) + prevSection.margin.bottom.value_or(0.0f)
@@ -81,7 +81,7 @@ void Section::PreparePrevSection(Axis axis,Section& prevSection) const
         return;
     }
     // use subtraction to keep the end positions staggered
-    std::for_each(prevSection.lanes.begin(), prevSection.lanes.end(), [diff]( Lane& lane) {
+    std::for_each(prevSection.lanes.begin(), prevSection.lanes.end(), [diff](Lane& lane) {
         lane.endPos -= diff;
         lane.startPos = lane.endPos;
         lane.items_.clear();
@@ -156,5 +156,21 @@ std::string Lane::ToString() const
     }
     res += "}";
     return res;
+}
+
+std::string Section::ToString() const
+{
+    std::string str = "Section: ";
+    str += "mainGap: " + std::to_string(mainGap) + ", ";
+    str += "crossGap: " + std::to_string(crossGap) + ", ";
+    str += "minItem: " + std::to_string(minItem) + ", ";
+    str += "maxItem: " + std::to_string(maxItem) + ", ";
+    str += "margin: " + margin.ToString() + ", ";
+    str += "lanes: [";
+    for (const auto& lane : lanes) {
+        str += lane.ToString() + ", ";
+    }
+    str += "]";
+    return str;
 }
 } // namespace OHOS::Ace::NG

@@ -24,7 +24,7 @@ build_component_ng("layout_ng") {
     "section/item_measurer.cpp",
     "section/section_data_types.cpp",
     "section/sections_initializer.cpp",
-    "section/staggered_section_filler.cpp",
     "section/staggered_fill_algorithm.cpp",
+    "section/staggered_section_filler.cpp",
   ]
 }

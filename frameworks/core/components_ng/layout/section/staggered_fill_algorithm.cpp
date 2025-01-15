@@ -109,7 +109,6 @@ RectF StaggeredFillAlgorithm::CalcItemRectBeforeMarkItem(
 {
     auto& section = GetSection(index);
     if (section.Contains(index)) {
-        // measurer_->Measure(node, index, section.lanes[section.idxToLane[index]].crossLen);
         return {};
     }
 
@@ -126,7 +125,6 @@ RectF StaggeredFillAlgorithm::CalcItemRectAfterMarkItem(
 {
     auto& section = GetSection(index);
     if (section.Contains(index)) {
-        // measurer_->Measure(node, index, section.lanes[section.idxToLane[index]].crossLen);
         return {};
     }
     if (index == section.minItem) {
@@ -149,14 +147,6 @@ RectF StaggeredFillAlgorithm::CalcMarkItemRect(
         auto filler = SectionEndFiller(section, viewport.MainSize(axis));
         filler.Fill(measurer_, node, index, viewport.MainSize(axis));
     }
-
-    // if (slidingOffset) {
-    //     float delta = slidingOffset->GetMainOffset(axis);
-    //     for (auto& lane : section.lanes) {
-    //         lane.startPos += delta;
-    //         lane.endPos += delta;
-    //     }
-    // }
     return {};
 }
 
