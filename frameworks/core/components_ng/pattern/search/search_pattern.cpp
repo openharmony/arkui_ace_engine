@@ -2492,6 +2492,7 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto symbolLayoutProperty = iconFrameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(symbolLayoutProperty);
     symbolLayoutProperty->UpdateSymbolSourceInfo(index == IMAGE_INDEX
                                                      ? SymbolSourceInfo(searchTheme->GetSearchSymbolId())
                                                      : SymbolSourceInfo(searchTheme->GetCancelSymbolId()));
@@ -2518,7 +2519,8 @@ void SearchPattern::UpdateSymbolIconProperties(RefPtr<FrameNode>& iconFrameNode,
     symbolEffectOptions.SetIsTxtActive(false);
     symbolLayoutProperty->UpdateSymbolEffectOptions(symbolEffectOptions);
     auto fontSize = symbolLayoutProperty->GetFontSize().value_or(defaultSymbolIconSize);
-    if (GreatOrEqualCustomPrecision(fontSize.ConvertToPx(), ICON_MAX_SIZE.ConvertToPx())) {
+    if (GreatOrEqualCustomPrecision(fontSize.ConvertToPxDistribute(GetMinFontScale(), GetMaxFontScale()),
+        ICON_MAX_SIZE.ConvertToPx())) {
         symbolLayoutProperty->UpdateFontSize(ICON_MAX_SIZE);
     }
 }
@@ -2544,23 +2546,8 @@ const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSi
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, iconSizeValue);
-    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
-    CHECK_NULL_RETURN(textFieldFrameNode, iconSizeValue);
-    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_RETURN(textFieldLayoutProperty, iconSizeValue);
-    auto pipeline = host->GetContext();
-    CHECK_NULL_RETURN(pipeline, iconSizeValue);
-    auto maxFontScale = MAX_FONT_SCALE;
-    auto minFontScale = 0.0f;
-    if (textFieldLayoutProperty->HasMaxFontScale()) {
-        maxFontScale = std::min(textFieldLayoutProperty->GetMaxFontScale().value(), maxFontScale);
-    }
-    if (pipeline->GetMaxAppFontScale()) {
-        maxFontScale = std::min(pipeline->GetMaxAppFontScale(), maxFontScale);
-    }
-    if (textFieldLayoutProperty->HasMinFontScale()) {
-        minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
-    }
+    auto maxFontScale = GetMaxFontScale();
+    auto minFontScale = GetMinFontScale();
     if (GreatOrEqualCustomPrecision(iconSizeValue.ConvertToPxDistribute(minFontScale, maxFontScale),
         ICON_MAX_SIZE.ConvertToPx())) {
         return ICON_MAX_SIZE;
@@ -2570,6 +2557,41 @@ const Dimension SearchPattern::ConvertImageIconSizeValue(const Dimension& iconSi
     } else {
         return iconSizeValue;
     }
+}
+
+float SearchPattern::GetMaxFontScale()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, MAX_FONT_SCALE);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, MAX_FONT_SCALE);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, MAX_FONT_SCALE);
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, MAX_FONT_SCALE);
+
+    auto maxFontScale = MAX_FONT_SCALE;
+    if (textFieldLayoutProperty->HasMaxFontScale()) {
+        maxFontScale = std::min(textFieldLayoutProperty->GetMaxFontScale().value(), maxFontScale);
+    } else if (pipeline->GetMaxAppFontScale()) {
+        maxFontScale = std::min(pipeline->GetMaxAppFontScale(), maxFontScale);
+    }
+    return maxFontScale;
+}
+
+float SearchPattern::GetMinFontScale()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 0.0f);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_RETURN(textFieldFrameNode, 0.0f);
+    auto textFieldLayoutProperty = textFieldFrameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, 0.0f);
+    auto minFontScale = 0.0f;
+    if (textFieldLayoutProperty->HasMinFontScale()) {
+        minFontScale = textFieldLayoutProperty->GetMinFontScale().value();
+    }
+    return minFontScale;
 }
 
 } // namespace OHOS::Ace::NG
