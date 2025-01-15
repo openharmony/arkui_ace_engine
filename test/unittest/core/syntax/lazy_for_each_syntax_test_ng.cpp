@@ -283,7 +283,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxReloadDataFunctionTest005, TestSi
      * @tc.steps: step1. Create Text and push it to view stack processor.
      * @tc.expected: Make Text as LazyForEach parent.
      */
-    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+    auto frameNode = CreateNode(V2::LIST_ETS_TAG);
 
     /**
      * @tc.steps: step2. Invoke lazyForEach Create function.
@@ -358,7 +358,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxDeleteDataFunctionTest006, TestSi
      * @tc.steps: step5. Delete index which is equal with start index.
      * @tc.expected: LazyForEachNode ids_ will be deleted the item.
      */
-    lazyForEachNode->OnDataDeleted(INDEX_EQUAL_WITH_START_INDEX_DELETED);
+    lazyForEachNode->OnDataDeleted(INDEX_1);
     EXPECT_EQ(lazyForEachNode->ids_.size(), DEFAULT_SIZE);
 
     /**
@@ -1260,6 +1260,13 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxGetChildrenTest001, TestSize.Leve
     lazyForEachNode->needPredict_ = true;
     lazyForEachNode->GetChildren();
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
+
+    /**
+     * @tc.steps: step3. Invoke GetChildren.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    lazyForEachNode->GetChildren(true);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
 
 /**
@@ -1286,9 +1293,17 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxOnDataBulkAddedTest001, TestSize.
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
 
     /**
-     * @tc.steps: step3. Invoke GetChildren.
+     * @tc.steps: step3. Invoke OnDataBulkAdded.
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
+    lazyForEachNode->OnDataBulkAdded(INDEX_0, INDEX_0);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+
+    /**
+     * @tc.steps: step4. Invoke OnDataBulkAdded.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    lazyForEachNode->builder_=nullptr;
     lazyForEachNode->OnDataBulkAdded(INDEX_0, INDEX_0);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
@@ -1329,6 +1344,21 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxOnDataBulkDeletedTest001, TestSiz
      * @tc.steps: step3. Invoke OnDataBulkDeleted.
      * @tc.expected: LazyForEachNode ids_ will be cleared.
      */
+    lazyForEachNode->OnDataBulkDeleted(INDEX_0, INDEX_0);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+
+    /**
+     * @tc.steps: step3. Invoke OnDataBulkDeleted.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    lazyForEachNode->OnDataBulkDeleted(INDEX_5, INDEX_5);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+
+    /**
+     * @tc.steps: step3. Invoke OnDataBulkDeleted.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    lazyForEachNode->builder_=nullptr;
     lazyForEachNode->OnDataBulkDeleted(INDEX_0, INDEX_0);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
@@ -1519,20 +1549,39 @@ HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxOnConfigurationUpdateTest001, Tes
     EXPECT_TRUE(lazyForEachNode != nullptr && lazyForEachNode->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG);
     ConfigurationChange configurationChange;
 
+    auto lazyForEachBuilder = lazyForEachNode->builder_;
+
     UpdateItems(lazyForEachNode, mockLazyForEachActuator);
 
     /**
-     * @tc.steps: step3. Invoke OnConfigurationUpdate.
-     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     * @tc.steps: step3. Invoke configurationChange.IsNeedUpdate() = true and builder_ is not null
      */
+    lazyForEachBuilder->expiringItem_["0"] = LazyForEachCacheChild(0, nullptr);
+    configurationChange.colorModeUpdate = true;
+    lazyForEachNode->OnConfigurationUpdate(configurationChange);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+
+
+    /**
+     * @tc.steps: step4. configurationChange.IsNeedUpdate() = false and builder_ is not null
+     */
+    configurationChange.colorModeUpdate = false;
+    lazyForEachNode->OnConfigurationUpdate(configurationChange);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+
+    lazyForEachNode->builder_=nullptr;
+
+    /**
+     * @tc.steps: step5. configurationChange.IsNeedUpdate() = true and builder_ is null
+     */
+    configurationChange.colorModeUpdate = true;
     lazyForEachNode->OnConfigurationUpdate(configurationChange);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 
     /**
-     * @tc.steps: step3. Invoke OnConfigurationUpdate.
-     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     * @tc.steps: step6. configurationChange.IsNeedUpdate() = true and builder_ is null
      */
-    configurationChange.colorModeUpdate = true;
+    configurationChange.colorModeUpdate = false;
     lazyForEachNode->OnConfigurationUpdate(configurationChange);
     EXPECT_TRUE(lazyForEachNode->ids_.empty());
 }
@@ -2006,4 +2055,110 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachSyntaxRecycleChildByIndexTest001, T
     }
     lazyForEachBuilder->RecycleChildByIndex(INDEX_1);
 }
+
+/**
+ * @tc.name: ForEachSyntaxInitDragManagerTest001
+ * @tc.desc: Create LazyForEach, update its Items and invoke InitDragManager function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxInitDragManagerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text and push it to view stack processor.
+     * @tc.expected: Make Text as LazyForEach parent.
+     */
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(lazyForEachNode != nullptr && lazyForEachNode->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG);
+
+    UpdateItems(lazyForEachNode, mockLazyForEachActuator);
+
+    /**
+     * @tc.steps: step3. Invoke NotifyCountChange.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    auto frameChild = AceType::DynamicCast<FrameNode>(lazyForEachNode->GetFrameChildByIndex(0, true));
+    lazyForEachNode->InitDragManager(frameChild);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+}
+
+/**
+ * @tc.name: ForEachSyntaxGetFrameNodeIndexTest001
+ * @tc.desc: Create LazyForEach, update its Items and invoke GetFrameNodeIndex function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxGetFrameNodeIndexTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text and push it to view stack processor.
+     * @tc.expected: Make Text as LazyForEach parent.
+     */
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(lazyForEachNode != nullptr && lazyForEachNode->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG);
+
+    UpdateItems(lazyForEachNode, mockLazyForEachActuator);
+
+    /**
+     * @tc.steps: step3. Invoke NotifyCountChange.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    auto frameChild = AceType::DynamicCast<FrameNode>(lazyForEachNode->GetFrameChildByIndex(0, true));
+    lazyForEachNode->GetFrameNodeIndex(frameChild, true);
+    lazyForEachNode->GetFrameNodeIndex(frameChild, false);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+}
+
+/**
+ * @tc.name: ForEachSyntaxNotifyCountChangeTest001
+ * @tc.desc: Create LazyForEach, update its Items and invoke NotifyCountChange function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LazyForEachSyntaxTestNg, ForEachSyntaxNotifyCountChangeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Text and push it to view stack processor.
+     * @tc.expected: Make Text as LazyForEach parent.
+     */
+    auto frameNode = CreateNode(V2::TEXT_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke lazyForEach Create function.
+     * @tc.expected: Create LazyForEachNode and can be pop from ViewStackProcessor.
+     */
+    LazyForEachModelNG lazyForEach;
+    const RefPtr<LazyForEachActuator> mockLazyForEachActuator =
+        AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
+    lazyForEach.Create(mockLazyForEachActuator);
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_TRUE(lazyForEachNode != nullptr && lazyForEachNode->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG);
+
+    UpdateItems(lazyForEachNode, mockLazyForEachActuator);
+
+    /**
+     * @tc.steps: step3. Invoke NotifyCountChange.
+     * @tc.expected: LazyForEachNode ids_ will be cleared.
+     */
+    lazyForEachNode->NotifyChangeWithCount(0, 0, UINode::NotificationType::END_CHANGE_POSITION);
+    EXPECT_TRUE(lazyForEachNode->ids_.empty());
+}
+
 } // namespace OHOS::Ace::NG
