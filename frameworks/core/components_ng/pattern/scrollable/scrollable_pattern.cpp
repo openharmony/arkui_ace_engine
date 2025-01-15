@@ -728,7 +728,9 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     SetDragFRCSceneCallback(scrollable);
     SetOnContinuousSliding(scrollable);
     SetGetSnapTypeCallback(scrollable);
-    scrollable->SetUnstaticVelocityScale(velocityScale_);
+    if (!NearZero(velocityScale_)) {
+        scrollable->SetUnstaticVelocityScale(velocityScale_);
+    }
     scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
     if (friction_ != -1) {
         scrollable->SetUnstaticFriction(friction_);
