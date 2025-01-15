@@ -485,7 +485,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAttachTest, TestSize.Level1)
 
 /*
  * @tc.name: SetOnDetach
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CommonMethodModifierTest9, SetOnDetachTest, TestSize.Level1)
@@ -561,7 +561,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
 
 /*
  * @tc.name: SetOnMouse
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CommonMethodModifierTest9, SetOnMouseTest, TestSize.Level1)
