@@ -18,6 +18,7 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "pixel_map_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -69,7 +70,10 @@ ImageProperties Convert(const Ark_ImageFrameInfo& src)
             }
         } else if (auto srcArkPixelMap = std::get_if<Ark_PixelMap>(&imageSrc.value());
             srcArkPixelMap != nullptr) {
-            LOGE("Convert Ark_ImageFrameInfo, the PixelMap support not implemented");
+            auto pixelMapPeer = reinterpret_cast<PixelMapPeer*>(srcArkPixelMap->ptr);
+            if (pixelMapPeer) {
+                options.pixelMap = pixelMapPeer->pixelMap;
+            }
         }
 
         options.width =  OptConvert<CalcDimension>(src.width).value_or(CalcDimension(0));
