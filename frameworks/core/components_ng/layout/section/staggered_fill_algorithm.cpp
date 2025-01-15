@@ -94,7 +94,7 @@ void StaggeredFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t t
 }
 
 bool StaggeredFillAlgorithm::CanFillMore(
-    Axis axis, const SizeF& scrollWindowSize, int32_t idx, const RectF& markItemRect, FillDirection direction)
+    Axis axis, const SizeF& scrollWindowSize, uint32_t idx, const RectF& markItemRect, FillDirection direction)
 {
     const bool isEdgeItem = direction == FillDirection::END ? idx == EndIdx() : idx == StartIdx();
     if (GetSection(idx).Contains(idx) && !isEdgeItem) {
@@ -105,7 +105,7 @@ bool StaggeredFillAlgorithm::CanFillMore(
 }
 
 RectF StaggeredFillAlgorithm::CalcItemRectBeforeMarkItem(
-    const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem)
+    const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const RectF& markItem)
 {
     auto& section = GetSection(index);
     if (section.Contains(index)) {
@@ -121,7 +121,7 @@ RectF StaggeredFillAlgorithm::CalcItemRectBeforeMarkItem(
 }
 
 RectF StaggeredFillAlgorithm::CalcItemRectAfterMarkItem(
-    const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem)
+    const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const RectF& markItem)
 {
     auto& section = GetSection(index);
     if (section.Contains(index)) {
@@ -136,7 +136,7 @@ RectF StaggeredFillAlgorithm::CalcItemRectAfterMarkItem(
 }
 
 RectF StaggeredFillAlgorithm::CalcMarkItemRect(
-    const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const std::optional<OffsetF>& slidingOffset)
+    const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const std::optional<OffsetF>& slidingOffset)
 {
     auto& section = GetSection(index);
     if (!section.Contains(index)) {

@@ -63,7 +63,7 @@ public:
 
     FrameNode* InitPivotItem(FillDirection direction);
 
-    RefPtr<FrameNode> GetChildByIndex(int32_t index)
+    RefPtr<FrameNode> GetChildByIndex(uint32_t index)
     {
         auto iter = indexToNode_.find(index);
         if (iter != indexToNode_.end()) {
@@ -72,7 +72,7 @@ public:
         return nullptr;
     }
 
-    FrameNode* GetChildPtrByIndex(int32_t index)
+    FrameNode* GetChildPtrByIndex(uint32_t index)
     {
         FrameNode* node = nullptr;
         auto iter = indexToNode_.find(index);
@@ -113,8 +113,8 @@ private:
     int32_t totalCount_ = 0;
 
     std::function<void(int32_t, void*)> updater_;
-    std::unordered_map<int32_t, WeakPtr<FrameNode>> indexToNode_;
-    std::unordered_map<FrameNode*, int32_t> nodeToIndex_;
+    std::unordered_map<uint32_t, WeakPtr<FrameNode>> indexToNode_;
+    std::unordered_map<FrameNode*, uint32_t> nodeToIndex_;
     std::unordered_map<FrameNode*, RectF> itemRectMap_;
     RectF startRect_;
     RectF endRect_;

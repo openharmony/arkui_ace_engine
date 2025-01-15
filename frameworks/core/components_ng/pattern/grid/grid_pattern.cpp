@@ -92,7 +92,7 @@ void GridPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    info_.childrenCount_ = scrollWindowAdapter_ ? scrollWindowAdapter_->GetTotalCount() : host->GetTotalChildCount();
+    info_.childrenCount_ = host->GetTotalChildCount();
 }
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
@@ -129,8 +129,7 @@ void GridPattern::OnModifyDone()
     info_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
     isConfigScrollable_ = gridLayoutProperty->IsConfiguredScrollable();
     if (!isConfigScrollable_) {
-        fillAlgo_.Reset();
-        scrollWindowAdapter_.Reset();
+        ResetAdapter();
         return;
     }
     SetAxis(info_.axis_);
@@ -161,21 +160,6 @@ void GridPattern::OnModifyDone()
     if (!overlayNode && paintProperty->GetFadingEdge().value_or(false)) {
         CreateAnalyzerOverlay(host);
     }
-}
-
-ScrollWindowAdapter* GridPattern::GetOrCreateScrollWindowAdapter()
-{
-    auto gridLayoutProperty = GetLayoutProperty<GridLayoutProperty>();
-    CHECK_NULL_RETURN(gridLayoutProperty, nullptr);
-    if (!gridLayoutProperty->IsConfiguredScrollable()) {
-        return nullptr;
-    }
-    // initialize ArkUI2.0 scrollWindowAdapter.
-    if (!scrollWindowAdapter_) {
-        fillAlgo_ = MakeRefPtr<GridFillAlgorithm>(*gridLayoutProperty, info_);
-        scrollWindowAdapter_ = MakeRefPtr<ScrollWindowAdapter>(GetUnsafeHostPtr(), fillAlgo_);
-    }
-    return scrollWindowAdapter_.GetRawPtr();
 }
 
 void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
@@ -447,13 +431,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     auto userOffset = FireOnWillScroll(-offset);
     info_.currentOffset_ -= userOffset;
-    if (scrollWindowAdapter_) {
-        if (info_.axis_ == Axis::VERTICAL) {
-            scrollWindowAdapter_->UpdateSlidingOffset(0, -userOffset);
-        } else {
-            scrollWindowAdapter_->UpdateSlidingOffset(-userOffset, 0);
-        }
-    }
+    UpdateOffset(-userOffset, info_.axis_);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
@@ -476,16 +454,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (!isInitialized_ || info_.startIndex_ != gridLayoutInfo.startIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
     }
-    if (scrollWindowAdapter_) {
-        auto* node = static_cast<FrameNode*>(GetHost()->GetChildByIndex(gridLayoutInfo.startIndex_).GetRawPtr());
-        scrollWindowAdapter_->UpdateMarkItem(gridLayoutInfo.startIndex_, node);
-        if (gridLayoutInfo.axis_ == Axis::HORIZONTAL) {
-            scrollWindowAdapter_->UpdateSize(gridLayoutInfo.lastMainSize_, gridLayoutInfo.lastCrossSize_);
-        } else {
-            scrollWindowAdapter_->UpdateSize(gridLayoutInfo.lastCrossSize_, gridLayoutInfo.lastMainSize_);
-        }
-        scrollWindowAdapter_->UpdateAxis(gridLayoutInfo.axis_);
-    }
+    UpdateViewport(info_.axis_);
 
     bool indexChanged =
         (gridLayoutInfo.startIndex_ != info_.startIndex_) || (gridLayoutInfo.endIndex_ != info_.endIndex_);

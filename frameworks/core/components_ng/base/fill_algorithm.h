@@ -35,19 +35,19 @@ public:
      */
     virtual void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) {}
 
-    virtual RectF CalcMarkItemRect(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index,
+    virtual RectF CalcMarkItemRect(const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index,
         const std::optional<OffsetF>& slidingOffset) = 0;
 
     virtual RectF CalcItemRectAfterMarkItem(
-        const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem) = 0;
+        const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const RectF& markItem) = 0;
 
     virtual RectF CalcItemRectBeforeMarkItem(
-        const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem) = 0;
+        const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const RectF& markItem) = 0;
 
     virtual void OnSlidingOffsetUpdate(float x, float y) {}
 
     virtual bool CanFillMore(
-        Axis axis, const SizeF& scrollWindowSize, int32_t idx, const RectF& markItemRect, FillDirection direction) = 0;
+        Axis axis, const SizeF& scrollWindowSize, uint32_t idx, const RectF& markItemRect, FillDirection direction) = 0;
 
     virtual bool IsReady() const
     {

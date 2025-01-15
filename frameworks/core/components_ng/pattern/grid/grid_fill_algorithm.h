@@ -32,14 +32,14 @@ class GridFillAlgorithm : public FillAlgorithm {
 public:
     GridFillAlgorithm(const GridLayoutProperty& props, GridLayoutInfo& info) : props_(props), info_(info) {}
 
-    RectF CalcMarkItemRect(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index,
+    RectF CalcMarkItemRect(const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index,
         const std::optional<OffsetF>& slidingOffset) override;
 
     RectF CalcItemRectAfterMarkItem(
-        const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem) override;
+        const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const RectF& markItem) override;
 
     RectF CalcItemRectBeforeMarkItem(
-        const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem) override;
+        const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const RectF& markItem) override;
 
     void OnSlidingOffsetUpdate(float x, float y) override {}
 
@@ -48,7 +48,7 @@ public:
         return true;
     }
 
-    bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, const RectF& markItemRect,
+    bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, uint32_t idx, const RectF& markItemRect,
         FillDirection direction) override;
 
     void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;

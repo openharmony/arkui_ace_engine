@@ -43,7 +43,7 @@ void GridFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t totalC
 }
 
 RectF GridFillAlgorithm::CalcMarkItemRect(
-    const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const std::optional<OffsetF>& slidingOffset)
+    const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const std::optional<OffsetF>& slidingOffset)
 {
     GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
     filler.FillMatrixOnly(index);
@@ -56,7 +56,7 @@ RectF GridFillAlgorithm::CalcMarkItemRect(
 }
 
 RectF GridFillAlgorithm::CalcItemRectAfterMarkItem(
-    const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem)
+    const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const RectF& markItem)
 {
     GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
     filler.FillMatrixOnly(index);
@@ -79,7 +79,7 @@ RectF GridFillAlgorithm::CalcItemRectAfterMarkItem(
 }
 
 RectF GridFillAlgorithm::CalcItemRectBeforeMarkItem(
-    const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem)
+    const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const RectF& markItem)
 {
     // matrix is ready
     GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
@@ -107,7 +107,7 @@ RectF GridFillAlgorithm::CalcItemRectBeforeMarkItem(
 }
 
 bool GridFillAlgorithm::CanFillMore(
-    Axis axis, const SizeF& scrollWindowSize, int32_t idx, const RectF& markItemRect, FillDirection direction)
+    Axis axis, const SizeF& scrollWindowSize, uint32_t idx, const RectF& markItemRect, FillDirection direction)
 {
     // TODO: Axis::HORIZONTAL
     if (direction == FillDirection::START) {
