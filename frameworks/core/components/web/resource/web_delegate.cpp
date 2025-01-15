@@ -7283,6 +7283,15 @@ void WebDelegate::OnShowAutofillPopup(
     webPattern->OnShowAutofillPopup(offsetX, offsetY, menu_items);
 }
 
+void WebDelegate::OnShowAutofillPopupV2(
+    const float offsetX, const float offsetY, const float height, const float width,
+    const std::vector<std::string>& menu_items)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnShowAutofillPopupV2(offsetX, offsetY, height, width, menu_items);
+}
+
 void WebDelegate::SuggestionSelected(int32_t index)
 {
     CHECK_NULL_VOID(nweb_);
