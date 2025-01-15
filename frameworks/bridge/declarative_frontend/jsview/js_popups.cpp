@@ -1354,6 +1354,19 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
         std::move(onWidthDidChangeCallback), std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc));
 }
 
+NG::SheetEffectEdge JSViewAbstract::ParseSheetEffectEdge(const JSRef<JSObject>& paramObj)
+{
+    auto sheetEffectEdge = static_cast<int32_t>(NG::SheetEffectEdge::ALL);
+    JSRef<JSVal> effectEdgedParam = paramObj->GetProperty("effectEdge");
+    if (effectEdgedParam->IsNull() || effectEdgedParam->IsUndefined() ||
+        !JSViewAbstract::ParseJsInt32(effectEdgedParam, sheetEffectEdge) ||
+        sheetEffectEdge < static_cast<int32_t>(NG::SheetEffectEdge::NONE) ||
+        sheetEffectEdge > static_cast<int32_t>(NG::SheetEffectEdge::END)) {
+        sheetEffectEdge = static_cast<int32_t>(NG::SheetEffectEdge::ALL);
+    }
+    return static_cast<NG::SheetEffectEdge>(sheetEffectEdge);
+}
+
 void JSViewAbstract::ParseSheetStyle(
     const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, bool isPartialUpdate)
 {
@@ -1516,6 +1529,9 @@ void JSViewAbstract::ParseSheetStyle(
     if ((shadowValue->IsObject() || shadowValue->IsNumber()) && ParseShadowProps(shadowValue, shadow)) {
         sheetStyle.shadow = shadow;
     }
+
+    //parse effectEdge
+    sheetStyle.sheetEffectEdge = ParseSheetEffectEdge(paramObj);
 
     // Parse hoverMode
     auto enableHoverModeValue = paramObj->GetProperty("enableHoverMode");

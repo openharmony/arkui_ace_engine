@@ -832,6 +832,7 @@ private:
     bool isDirectionUp_ = true;
     bool topSafeAreaChanged_ = false;
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
+    SheetEffectEdge sheetEffectEdge_ = SheetEffectEdge::ALL;
 
     //record sheet sored detent index
     uint32_t detentsIndex_ = 0;
