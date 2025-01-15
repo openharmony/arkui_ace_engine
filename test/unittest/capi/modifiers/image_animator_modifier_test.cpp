@@ -77,12 +77,12 @@ public:
         pattern->SetImages(std::move(images));
     }
 
-    RefPtr<PixelMap> CreatePixelMap(const std::string& src);
+    RefPtr<PixelMap> CreatePixelMap(std::string& src);
 };
 
-RefPtr<PixelMap> ImageAnimatorModifierTest::CreatePixelMap(const std::string& src)
+RefPtr<PixelMap> ImageAnimatorModifierTest::CreatePixelMap(std::string& src)
 {
-    auto voidChar = const_cast<char*>(src.c_str());
+    auto voidChar = src.data();
     void* voidPtr = static_cast<void*>(voidChar);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     return pixelMap;
@@ -167,11 +167,11 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestPixelMap, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    RefPtr<PixelMap> pixelMap = CreatePixelMap(ATTRIBUTE_IMAGES_NAME);
+    std::string imagesSrc = "test";
+    RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
     PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = pixelMap;
-    Ark_Materialized px;
-    px.ptr = &pixelMapPeer;
+    Ark_Materialized px { .ptr = &pixelMapPeer };
     auto array = new Ark_ImageFrameInfo[] {
         {
             .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_PixelMap>(px),
