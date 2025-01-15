@@ -18,10 +18,6 @@
 #define PI_NUM 3.14f
 #endif
 
-#ifndef TWO_PI
-#define TWO_PI (2 * PI_NUM)
-#endif
-
 namespace OHOS::Ace {
 ArcRound::ArcRound(const ArcRound& other)
 {
@@ -110,7 +106,7 @@ void ArcRound::SetWidth(float width)
 double ArcRound::Get2PIRadians(double radian) const
 {
     if (radian < 0) {
-        return TWO_PI + radian;
+        return 2 * PI_NUM + radian; // 2 * PI: 360度
     }
     return radian;
 }
