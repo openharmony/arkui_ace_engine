@@ -40,6 +40,8 @@ const std::vector<TabBarMode> TAB_BAR_MODES = {
 };
 const std::vector<TabAnimateMode> TAB_ANIMATE_MODES = { TabAnimateMode::CONTENT_FIRST, TabAnimateMode::ACTION_FIRST,
     TabAnimateMode::NO_ANIMATION };
+const std::vector<TextOverflow> TEXT_OVER_FLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE,
+    TextOverflow::MARQUEE };
 } // namespace
 
 namespace OHOS::Ace::Framework {
@@ -154,7 +156,7 @@ void FfiOHOSAceFrameworkTabsSetBarModeWithOptions(int32_t barMode, CJTabsScrolla
     }
     TabBarMode barModeEnum = TabBarMode::FIXED;
     barModeEnum = TAB_BAR_MODES[barMode];
-    if (barMode == static_cast<int32_t>(TabBarMode::SCROLLABLE)) {
+    if (barModeEnum == TabBarMode::SCROLLABLE) {
         ScrollableBarModeOptions option;
         Dimension margin(options.margin, static_cast<DimensionUnit>(options.marginUnit));
         if (margin.IsNegative() || margin.Unit() == DimensionUnit::PERCENT) {
@@ -649,7 +651,7 @@ void SetLayoutMode(int32_t layoutMode)
         layoutMode <= static_cast<int32_t>(LayoutMode::HORIZONTAL)) {
         mode = static_cast<LayoutMode>(layoutMode);
     }
-    TabContentModel::GetInstance()->SetLayoutMode(static_cast<LayoutMode>(mode));
+    TabContentModel::GetInstance()->SetLayoutMode(mode);
 }
 
 void SetVerticalAlign(int32_t verticalAlign)
@@ -730,9 +732,8 @@ void SetLabelStyle(CJTabContentLabelStyle cjLabelStyle, bool isSubTabStyle)
     auto tabTheme = GetTheme<TabTheme>();
 
     LabelStyle labelStyle;
-    if (cjLabelStyle.overflow >= static_cast<int32_t>(TextOverflow::NONE) &&
-        cjLabelStyle.overflow <= static_cast<int32_t>(TextOverflow::MARQUEE)) {
-        labelStyle.textOverflow = static_cast<TextOverflow>(cjLabelStyle.overflow);
+    if (Utils::CheckParamsValid(cjLabelStyle.overflow, TEXT_OVER_FLOWS.size())) {
+        labelStyle.textOverflow = TEXT_OVER_FLOWS[cjLabelStyle.overflow]
     }
 
     if (cjLabelStyle.maxLines > 0) {
@@ -871,15 +872,15 @@ void FfiOHOSAceFrameworkTabContentSetTabBarWithBottomTabBarStyle(CJBottomTabBarS
 {
     std::optional<std::string> textOpt = std::nullopt;
     if (bottomTabBarStyle.text != nullptr) {
-        textOpt = bottomTabBarStyle.text;
+        textOpt = std::optional<std::string>(bottomTabBarStyle.text);
     }
 
     std::optional<std::string> iconOpt = std::nullopt;
     std::optional<TabBarSymbol> tabBarSymbol = std::nullopt;
     if (bottomTabBarStyle.isTabBarSymbol) {
-        // todo 支持SymbolGlyphModifier
+        LOGW("Not support tab bar symbol.");
     } else {
-        iconOpt = bottomTabBarStyle.icon;
+        iconOpt = std::optional<std::string>(bottomTabBarStyle.icon);
     }
 
     SetPadding(bottomTabBarStyle.padding, false);
