@@ -203,6 +203,8 @@ public:
     const Dimension ConvertImageIconSizeValue(const Dimension& fontSizeValue);
     void UpdateDisable(const std::u16string& textValue);
     void UpdateEnable(bool needToenable);
+    float GetMaxFontScale();
+    float GetMinFontScale();
 
 private:
     void OnModifyDone() override;

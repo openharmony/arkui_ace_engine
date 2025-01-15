@@ -67,6 +67,21 @@ void UpdateInnerInspector(FrameNode* frameNode, const std::string& key)
     updateInspectorCallback(frameNode, BUTTON_INDEX);
     updateInspectorCallback(frameNode, DIVIDER_INDEX);
 }
+
+void InitSearchMaxFontScale(const RefPtr<FrameNode>& frameNode)
+{
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto maxFontScale = MAX_FONT_SCALE;
+    if (textFieldLayoutProperty->HasMaxFontScale()) {
+        maxFontScale = std::min(textFieldLayoutProperty->GetMaxFontScale().value(), maxFontScale);
+    } else if (pipeline->GetMaxAppFontScale()) {
+        maxFontScale = std::min(pipeline->GetMaxAppFontScale(), maxFontScale);
+    }
+    textFieldLayoutProperty->UpdateMaxFontScale(maxFontScale);
+}
 } // namespace
 
 RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::u16string>& value,
@@ -264,7 +279,7 @@ void SearchModelNG::SetSearchImageIcon(IconOptions &iconOptions)
     CHECK_NULL_VOID(pattern);
     pattern->SetSearchImageIcon(iconOptions);
     ACE_UPDATE_LAYOUT_PROPERTY(
-        SearchLayoutProperty, SearchIconUDSize, pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value()));
+        SearchLayoutProperty, SearchIconUDSize, iconOptions.GetSize().value());
 }
 
 void SearchModelNG::SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol)
@@ -323,7 +338,7 @@ void SearchModelNG::SetCancelImageIcon(IconOptions &iconOptions)
     CHECK_NULL_VOID(pattern);
     pattern->SetCancelImageIcon(iconOptions);
     ACE_UPDATE_LAYOUT_PROPERTY(
-        SearchLayoutProperty, CancelButtonUDSize, pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value()));
+        SearchLayoutProperty, CancelButtonUDSize, iconOptions.GetSize().value());
 }
 
 void SearchModelNG::SetCancelSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol)
@@ -851,7 +866,7 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode,
         pattern->SetTextFieldNode(frameNode);
         frameNode->MountToParent(parentNode);
     }
-    textFieldLayoutProperty->UpdateMaxFontScale(MAX_FONT_SCALE);
+    InitSearchMaxFontScale(frameNode);
 }
 
 void SearchModelNG::TextFieldUpdateContext(const RefPtr<FrameNode>& frameNode)
@@ -1242,7 +1257,7 @@ void SearchModelNG::SetSearchImageIcon(FrameNode *frameNode, IconOptions &iconOp
     CHECK_NULL_VOID(pattern);
     pattern->SetSearchImageIcon(iconOptions);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize,
-        pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)), frameNode);
+        iconOptions.GetSize().value_or(ICON_HEIGHT), frameNode);
 }
 
 void SearchModelNG::SetSearchButton(FrameNode* frameNode, const std::string& text)
@@ -1459,7 +1474,7 @@ void SearchModelNG::SetCancelImageIcon(FrameNode *frameNode, IconOptions &iconOp
     CHECK_NULL_VOID(pattern);
     pattern->SetCancelImageIcon(iconOptions);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize,
-        pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)), frameNode);
+        iconOptions.GetSize().value_or(ICON_HEIGHT), frameNode);
 }
 
 void SearchModelNG::SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value)
