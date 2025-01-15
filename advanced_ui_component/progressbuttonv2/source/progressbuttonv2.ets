@@ -167,8 +167,8 @@ export struct ProgressButtonV2 {
         ? this.colorOptions?.backgroundColor?.color
         : this.containerBackgroundColor)
     .padding({ top: 0, bottom: 0 })
-    .width((!this.progressButtonWidth || this.progressButtonWidth.value < 0)
-      ? BUTTON_NORMARL_WIDTH : this.toLengthString(this.progressButtonWidth))
+    .width((!this.progressButtonWidth || this.progressButtonWidth.value < 0) ?
+      BUTTON_NORMARL_WIDTH : this.toLengthString(this.progressButtonWidth))
     .constraintSize({ minWidth: BUTTON_NORMARL_WIDTH })
     .stateEffect(this.isEnabled)
     .onClick(() => {
