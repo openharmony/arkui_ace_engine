@@ -8270,7 +8270,7 @@ void RichEditorPattern::UpdateSelectionInfo(int32_t start, int32_t end)
     textResponseType_ = selectOverlayInfo
                         ? static_cast<TextResponseType>(selectOverlayInfo->menuInfo.responseType.value_or(0))
                         : TextResponseType::LONG_PRESS;
-    if (IsShowHandle() && !selectOverlay_->IsUsingMouse()) {
+    if (IsShowHandle() && !IsUsingMouse()) {
         ResetIsMousePressed();
         sourceType_ = SourceType::TOUCH;
     }
