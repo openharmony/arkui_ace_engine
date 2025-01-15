@@ -3571,12 +3571,12 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll(bool isShowMenu)
     auto textSize = GetTextContentLength();
     textSelector_.Update(0, textSize);
     CalculateHandleOffsetAndShowOverlay();
-    if (IsUsingMouse()) {
+    if (selectOverlay_->IsUsingMouse()) {
         CloseSelectOverlay();
     }
     IF_TRUE(IsSelected(), StopTwinkling());
     auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
-    if (selectOverlayInfo && IsUsingMouse()) {
+    if (selectOverlayInfo && selectOverlay_->IsUsingMouse()) {
         textResponseType_ = static_cast<TextResponseType>(selectOverlayInfo->menuInfo.responseType.value_or(0));
     } else {
         textResponseType_ = TextResponseType::LONG_PRESS;
@@ -3586,7 +3586,7 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll(bool isShowMenu)
     CHECK_NULL_VOID(host);
     FireOnSelect(textSelector_.GetTextStart(), textSelector_.GetTextEnd());
     showSelect_ = true;
-    if (!IsUsingMouse()) {
+    if (!selectOverlay_->IsUsingMouse()) {
         selectOverlay_->ProcessOverlay({ .menuIsShow = isShowMenu, .animation = true });
     }
     SetCaretPosition(textSize);
@@ -8174,7 +8174,7 @@ void RichEditorPattern::UpdateSelectionInfo(int32_t start, int32_t end)
     textResponseType_ = selectOverlayInfo
                         ? static_cast<TextResponseType>(selectOverlayInfo->menuInfo.responseType.value_or(0))
                         : TextResponseType::LONG_PRESS;
-    if (IsShowHandle() && !selectOverlay_->IsUsingMouse()) {
+    if (IsShowHandle() && !IsUsingMouse()) {
         ResetIsMousePressed();
         sourceType_ = SourceType::TOUCH;
     }
