@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_SECTION_INITIALIZER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_SECTION_INITIALIZER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_LAYOUT_SECTION_INITIALIZER_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_LAYOUT_SECTION_INITIALIZER_H
 
 #include "base/geometry/axis.h"
 #include "core/components_ng/layout/section/section_data_types.h"
