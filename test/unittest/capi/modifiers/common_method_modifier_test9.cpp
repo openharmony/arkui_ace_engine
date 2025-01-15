@@ -364,7 +364,6 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    // OHOS::Ace::NG::EventHub
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -409,7 +408,6 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    // OHOS::Ace::NG::EventHub
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -455,7 +453,6 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAttachTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    // OHOS::Ace::NG::EventHub
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -492,7 +489,6 @@ HWTEST_F(CommonMethodModifierTest9, SetOnDetachTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    // OHOS::Ace::NG::EventHub
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -529,7 +525,6 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    // OHOS::Ace::NG::EventHub
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
@@ -568,7 +563,6 @@ HWTEST_F(CommonMethodModifierTest9, SetOnMouseTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    // OHOS::Ace::NG::EventHub
     ASSERT_NE(eventHub, nullptr);
 
     struct CheckEvent {
