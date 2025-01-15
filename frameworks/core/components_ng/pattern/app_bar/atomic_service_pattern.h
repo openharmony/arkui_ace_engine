@@ -60,6 +60,8 @@ public:
 private:
     void UpdateLayoutMargin();
     void UpdateOverlayLayout();
+    double safeAreaLeft_ = 0;
+    double safeAreaRight_ = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H
