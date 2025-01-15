@@ -762,16 +762,18 @@ void PipelineBase::OnVirtualKeyboardAreaChange(Rect keyboardArea,
     bool forceChange)
 {
     auto currentContainer = Container::Current();
+    double keyboardHeight = keyboardArea.Height();
     if (currentContainer && !currentContainer->IsSubContainer()) {
 #ifdef OHOS_STANDARD_SYSTEM
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
-        if (subwindow && subwindow->GetShown()) {
+        if (subwindow && subwindow->GetShown() && subwindow->IsFocused() && !CheckNeedAvoidInSubWindow()) {
             // subwindow is shown, main window no need to handle the keyboard event
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "subwindow is shown and pageOffset is zero, main window doesn't lift");
+            CheckAndUpdateKeyboardInset(keyboardHeight);
             return;
         }
 #endif
     }
-    double keyboardHeight = keyboardArea.Height();
     if (NotifyVirtualKeyBoard(rootWidth_, rootHeight_, keyboardHeight, true)) {
         return;
     }
