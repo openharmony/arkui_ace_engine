@@ -141,9 +141,9 @@ export class ProgressButtonV2 extends ViewV2 {
       Progress.constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT });
       Progress.borderRadius(this.buttonBorderRadius);
       Progress.width('100%');
+      Progress.hoverEffect(HoverEffect.None);
       Progress.style(this.progressButtonRadius ?
         { borderRadius: new LengthMetrics(Math.max(this.progressButtonRadius.value, 0)) } : {});
-      Progress.hoverEffect(HoverEffect.None);
       Progress.padding({
         top: 0.6,
         left: 0.6,

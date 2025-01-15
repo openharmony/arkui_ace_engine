@@ -104,9 +104,9 @@ export struct ProgressButtonV2 {
           .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
           .borderRadius(this.buttonBorderRadius)
           .width('100%')
+          .hoverEffect(HoverEffect.None)
           .style(this.progressButtonRadius ?
             { borderRadius: new LengthMetrics(Math.max(this.progressButtonRadius.value, 0)) } : {})
-          .hoverEffect(HoverEffect.None)
           .padding({
             top: 0.6,
             left: 0.6,
