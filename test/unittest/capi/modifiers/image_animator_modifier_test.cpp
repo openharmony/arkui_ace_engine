@@ -197,7 +197,7 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestPixelMap, TestSize.Level1)
 
     modifier_->setImages(node_, &initValueImages);
 
-    auto imageAnimatorPattern_ = frameNode->GetPattern<ImageA nimatorPattern>();
+    auto imageAnimatorPattern_ = frameNode->GetPattern<ImageAnimatorPattern>();
     EXPECT_NE(imageAnimatorPattern_, nullptr);
     EXPECT_EQ(imageAnimatorPattern_->GetImagesSize(), size);
     auto imageProperties = imageAnimatorPattern_->GetImage(0);
