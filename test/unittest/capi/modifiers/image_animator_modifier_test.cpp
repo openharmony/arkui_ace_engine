@@ -88,8 +88,6 @@ RefPtr<PixelMap> ImageAnimatorModifierTest::CreatePixelMap(const std::string& sr
     return pixelMap;
 }
 
-
-
 /*
  * @tc.name: setImagesTestDefaultValues
  * @tc.desc:
