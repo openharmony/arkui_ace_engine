@@ -280,8 +280,6 @@ public:
     using ImageBitmapPeer::SetHeight;
     using ImageBitmapPeer::SetWidth;
 };
-
-
 } // namespace
 
 class CanvasRendererAccessorTest
@@ -2099,7 +2097,6 @@ HWTEST_F(CanvasRendererAccessorTest, setLineJoinTest, TestSize.Level1)
     holder->TearDown();
 }
 
-#ifdef PIXEL_MAP_SUPPORTED
 /**
  * @tc.name: setPixelMapTest
  * @tc.desc:
@@ -2107,6 +2104,7 @@ HWTEST_F(CanvasRendererAccessorTest, setLineJoinTest, TestSize.Level1)
  */
 HWTEST_F(CanvasRendererAccessorTest, setPixelMapTest, TestSize.Level1)
 {
+#ifdef PIXEL_MAP_SUPPORTED
     auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->setPixelMap, nullptr);
     Ark_PixelMap arkPixelMap;
@@ -2129,18 +2127,10 @@ HWTEST_F(CanvasRendererAccessorTest, setPixelMapTest, TestSize.Level1)
         }
     }
     holder->TearDown();
-}
 #else
-/**
- * @tc.name: setPixelMapTest
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(CanvasRendererAccessorTest, setPixelMapTest, TestSize.Level1)
-{
     ASSERT_NE(accessor_->setPixelMap, nullptr);
     accessor_->setPixelMap(peer_, nullptr);
     EXPECT_TRUE(true);
-}
 #endif
+}
 } // namespace OHOS::Ace::NG
