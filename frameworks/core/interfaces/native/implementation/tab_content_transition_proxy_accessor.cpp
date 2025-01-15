@@ -84,7 +84,4 @@ const GENERATED_ArkUITabContentTransitionProxyAccessor* GetTabContentTransitionP
     return &TabContentTransitionProxyAccessorImpl;
 }
 
-struct TabContentTransitionProxyPeer {
-    virtual ~TabContentTransitionProxyPeer() = default;
-};
 }
