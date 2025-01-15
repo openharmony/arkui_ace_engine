@@ -388,6 +388,8 @@ public:
 
     bool ConfigCustomWindowMask(bool enable) override;
     void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override;
+
+    std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
