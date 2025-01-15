@@ -6838,6 +6838,7 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
         HandleTouchMove(touchInfo);
     } else if (touchType == TouchType::CANCEL) {
         IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
+        HandleTouchCancelAfterLongPress();
         ResetTouchAndMoveCaretState();
     }
 }
@@ -6933,6 +6934,20 @@ void RichEditorPattern::HandleTouchUpAfterLongPress()
     selectOverlay_->ProcessOverlay({ .animation = true });
     FireOnSelectionChange(selectStart, selectEnd);
     IF_TRUE(IsSingleHandle(), ForceTriggerAvoidOnCaretChange());
+}
+
+void RichEditorPattern::HandleTouchCancelAfterLongPress()
+{
+    CHECK_NULL_VOID(editingLongPress_ || previewLongPress_);
+    auto selectStart = std::min(textSelector_.GetTextStart(), GetTextContentLength());
+    auto selectEnd = std::min(textSelector_.GetTextEnd(), GetTextContentLength());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "touch canceled, textSelector=[%{public}d, %{public}d] isEditing=%{public}d",
+        selectStart, selectEnd, isEditing_);
+    textSelector_.Update(selectStart, selectEnd);
+    SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
+    CalculateHandleOffsetAndShowOverlay();
+    selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
+    FireOnSelectionChange(selectStart, selectEnd);
 }
 
 void RichEditorPattern::HandleTouchMove(const TouchLocationInfo& info)
