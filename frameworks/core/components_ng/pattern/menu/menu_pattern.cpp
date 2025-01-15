@@ -1539,10 +1539,6 @@ void MenuPattern::ShowStackMenuDisappearOpacityAndBlurAnimation(const RefPtr<Fra
         if (scrollContext) {
             scrollContext->UpdateBackBlur(0.0_vp, {{0, 0}});
         }
-        auto subMenuPattern = subMenuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(subMenuPattern);
-        std::cout << "----setSubMenuShow false" << std::endl;
-        subMenuPattern->SetSubMenuShow(false);
     }, option.GetOnFinishEvent());
 }
 
