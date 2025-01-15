@@ -1152,6 +1152,9 @@ Offset WebDelegate::GetPosition(const std::string& embedId)
     return Offset();
 }
 void WebDelegate::OnShowAutofillPopup(
+    const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
+{}
+void WebDelegate::OnShowAutofillPopupV2(
     const float offsetX, const float offsetY, const float height, const float width,
     const std::vector<std::string>& menu_items)
 {}

@@ -548,7 +548,8 @@ public:
         const std::vector<std::shared_ptr<OHOS::NWeb::NWebDateTimeSuggestion>>& suggestions,
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
-    void OnShowAutofillPopup(const float offsetX, const float offsetY, const float height, const float width,
+    void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
+    void OnShowAutofillPopupV2(const float offsetX, const float offsetY, const float height, const float width,
         const std::vector<std::string>& menu_items);
     void OnHideAutofillPopup();
     RefPtr<FrameNode> CreateDataListFrameNode(const OffsetF& offfset, const float height, const float width);

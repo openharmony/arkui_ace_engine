@@ -7053,10 +7053,57 @@ void WebPattern::SuggestionSelected(int32_t index)
 }
 
 void WebPattern::OnShowAutofillPopup(
+    const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnShowAutofillPopup");
+    isShowAutofillPopup_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto id = host->GetId();
+    std::vector<SelectParam> selectParam;
+    for (auto& item : menu_items) {
+        selectParam.push_back({ item, "" });
+    }
+    auto menu = MenuView::Create(selectParam, id, host->GetTag());
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto menuContainer = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
+    CHECK_NULL_VOID(menuContainer);
+    auto menuPattern = menuContainer->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto options = menuPattern->GetOptions();
+    for (auto && option : options) {
+        auto selectCallback = [weak = WeakClaim(this)](int32_t index) {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->SuggestionSelected(index);
+        };
+        auto optionNode = AceType::DynamicCast<FrameNode>(option);
+        if (optionNode) {
+            auto hub = optionNode->GetEventHub<MenuItemEventHub>();
+            auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
+            if (!hub || !optionPattern) {
+                continue;
+            }
+            hub->SetOnSelect(std::move(selectCallback));
+            optionNode->MarkModifyDone();
+        }
+    }
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto offset = GetCoordinatePoint().value_or(OffsetF());
+    offset.AddX(offsetX);
+    offset.AddY(offsetY);
+    menu->GetOrCreateFocusHub()->SetFocusable(false);
+    overlayManager->DeleteMenu(id);
+    overlayManager->ShowMenu(id, offset, menu);
+}
+
+void WebPattern::OnShowAutofillPopupV2(
     const float offsetX, const float offsetY, const float height, const float width,
     const std::vector<std::string>& menu_items)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnShowAutofillPopup");
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnShowAutofillPopupV2");
     isShowAutofillPopup_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);

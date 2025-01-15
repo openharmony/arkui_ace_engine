@@ -970,7 +970,8 @@ public:
     void OnTooltip(const std::string& tooltip);
     void OnPopupSize(int32_t x, int32_t y, int32_t width, int32_t height);
     void OnPopupShow(bool show);
-    void OnShowAutofillPopup(const float offsetX, const float offsetY, const float height, const float width,
+    void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
+    void OnShowAutofillPopupV2(const float offsetX, const float offsetY, const float height, const float width,
         const std::vector<std::string>& menu_items);
     void SuggestionSelected(int32_t index);
     void OnHideAutofillPopup();
