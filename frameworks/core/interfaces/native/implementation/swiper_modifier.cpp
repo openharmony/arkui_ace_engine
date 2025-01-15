@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,13 +45,23 @@ void IndexImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //SwiperModelNG::SetIndex(frameNode, convValue);
 }
-void AutoPlayImpl(Ark_NativePointer node,
-                  Ark_Boolean value)
+void AutoPlay0Impl(Ark_NativePointer node,
+                   Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //SwiperModelNG::SetAutoPlay(frameNode, convValue);
+    //SwiperModelNG::SetAutoPlay0(frameNode, convValue);
+}
+void AutoPlay1Impl(Ark_NativePointer node,
+                   Ark_Boolean autoPlay,
+                   const Ark_AutoPlayOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(autoPlay);
+    //auto convValue = Converter::OptConvert<type>(autoPlay); // for enums
+    //SwiperModelNG::SetAutoPlay1(frameNode, convValue);
 }
 void IntervalImpl(Ark_NativePointer node,
                   const Ark_Number* value)
@@ -62,23 +72,14 @@ void IntervalImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //SwiperModelNG::SetInterval(frameNode, convValue);
 }
-void Indicator0Impl(Ark_NativePointer node,
-                    const Ark_Union_DotIndicator_DigitIndicator_Boolean* value)
+void IndicatorImpl(Ark_NativePointer node,
+                   const Ark_Union_DotIndicator_DigitIndicator_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SwiperModelNG::SetIndicator0(frameNode, convValue);
-}
-void Indicator1Impl(Ark_NativePointer node,
-                    const Ark_IndicatorComponentController* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SwiperModelNG::SetIndicator1(frameNode, convValue);
+    //SwiperModelNG::SetIndicator(frameNode, convValue);
 }
 void LoopImpl(Ark_NativePointer node,
               Ark_Boolean value)
@@ -123,14 +124,24 @@ void DisplayModeImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //SwiperModelNG::SetDisplayMode(frameNode, convValue);
 }
-void CachedCountImpl(Ark_NativePointer node,
-                     const Ark_Number* value)
+void CachedCount0Impl(Ark_NativePointer node,
+                      const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SwiperModelNG::SetCachedCount(frameNode, convValue);
+    //SwiperModelNG::SetCachedCount0(frameNode, convValue);
+}
+void CachedCount1Impl(Ark_NativePointer node,
+                      const Ark_Number* count,
+                      Ark_Boolean isShown)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(count);
+    //auto convValue = Converter::OptConvert<type>(count); // for enums
+    //SwiperModelNG::SetCachedCount1(frameNode, convValue);
 }
 void EffectModeImpl(Ark_NativePointer node,
                     Ark_EdgeEffect value)
@@ -237,6 +248,14 @@ void IndicatorInteractiveImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<bool>(value);
     //SwiperModelNG::SetIndicatorInteractive(frameNode, convValue);
 }
+void PageFlipModeImpl(Ark_NativePointer node,
+                      const Opt_PageFlipMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SwiperModelNG::SetPageFlipMode(frameNode, convValue);
+}
 void DisplayArrowImpl(Ark_NativePointer node,
                       const Ark_Union_ArrowStyle_Boolean* value,
                       const Opt_Boolean* isHoverShow)
@@ -284,16 +303,17 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperModifier::ConstructImpl,
         SwiperInterfaceModifier::SetSwiperOptionsImpl,
         SwiperAttributeModifier::IndexImpl,
-        SwiperAttributeModifier::AutoPlayImpl,
+        SwiperAttributeModifier::AutoPlay0Impl,
+        SwiperAttributeModifier::AutoPlay1Impl,
         SwiperAttributeModifier::IntervalImpl,
-        SwiperAttributeModifier::Indicator0Impl,
-        SwiperAttributeModifier::Indicator1Impl,
+        SwiperAttributeModifier::IndicatorImpl,
         SwiperAttributeModifier::LoopImpl,
         SwiperAttributeModifier::DurationImpl,
         SwiperAttributeModifier::VerticalImpl,
         SwiperAttributeModifier::ItemSpaceImpl,
         SwiperAttributeModifier::DisplayModeImpl,
-        SwiperAttributeModifier::CachedCountImpl,
+        SwiperAttributeModifier::CachedCount0Impl,
+        SwiperAttributeModifier::CachedCount1Impl,
         SwiperAttributeModifier::EffectModeImpl,
         SwiperAttributeModifier::DisableSwipeImpl,
         SwiperAttributeModifier::CurveImpl,
@@ -306,6 +326,7 @@ const GENERATED_ArkUISwiperModifier* GetSwiperModifier()
         SwiperAttributeModifier::CustomContentTransitionImpl,
         SwiperAttributeModifier::OnContentDidScrollImpl,
         SwiperAttributeModifier::IndicatorInteractiveImpl,
+        SwiperAttributeModifier::PageFlipModeImpl,
         SwiperAttributeModifier::DisplayArrowImpl,
         SwiperAttributeModifier::DisplayCountImpl,
         SwiperAttributeModifier::PrevMarginImpl,

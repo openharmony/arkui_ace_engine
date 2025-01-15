@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -157,14 +157,22 @@ void MarginImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetMargin(frameNode, convValue);
 }
-void BackgroundColorImpl(Ark_NativePointer node,
-                         const Ark_ResourceColor* value)
+void BackgroundColor0Impl(Ark_NativePointer node,
+                          const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetBackgroundColor(frameNode, convValue);
+    //CommonMethodModelNG::SetBackgroundColor0(frameNode, convValue);
+}
+void BackgroundColor1Impl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetBackgroundColor1(frameNode, convValue);
 }
 void PixelRoundImpl(Ark_NativePointer node,
                     const Ark_PixelRoundPolicy* value)
@@ -193,14 +201,22 @@ void BackgroundImagePositionImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetBackgroundImagePosition(frameNode, convValue);
 }
-void BackgroundEffectImpl(Ark_NativePointer node,
-                          const Ark_BackgroundEffectOptions* value)
+void BackgroundEffect0Impl(Ark_NativePointer node,
+                           const Ark_BackgroundEffectOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetBackgroundEffect(frameNode, convValue);
+    //CommonMethodModelNG::SetBackgroundEffect0(frameNode, convValue);
+}
+void BackgroundEffect1Impl(Ark_NativePointer node,
+                           const Opt_BackgroundEffectOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetBackgroundEffect1(frameNode, convValue);
 }
 void BackgroundImageResizableImpl(Ark_NativePointer node,
                                   const Ark_ResizableOptions* value)
@@ -256,14 +272,22 @@ void CompositingFilterImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetCompositingFilter(frameNode, convValue);
 }
-void OpacityImpl(Ark_NativePointer node,
-                 const Ark_Union_Number_Resource* value)
+void Opacity0Impl(Ark_NativePointer node,
+                  const Ark_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOpacity(frameNode, convValue);
+    //CommonMethodModelNG::SetOpacity0(frameNode, convValue);
+}
+void Opacity1Impl(Ark_NativePointer node,
+                  const Opt_Union_Number_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetOpacity1(frameNode, convValue);
 }
 void BorderImpl(Ark_NativePointer node,
                 const Ark_BorderOptions* value)
@@ -319,59 +343,107 @@ void BorderImageImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetBorderImage(frameNode, convValue);
 }
-void OutlineImpl(Ark_NativePointer node,
-                 const Ark_OutlineOptions* value)
+void Outline0Impl(Ark_NativePointer node,
+                  const Ark_OutlineOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOutline(frameNode, convValue);
+    //CommonMethodModelNG::SetOutline0(frameNode, convValue);
 }
-void OutlineStyleImpl(Ark_NativePointer node,
-                      const Ark_Union_OutlineStyle_EdgeOutlineStyles* value)
+void Outline1Impl(Ark_NativePointer node,
+                  const Opt_OutlineOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOutlineStyle(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetOutline1(frameNode, convValue);
 }
-void OutlineWidthImpl(Ark_NativePointer node,
-                      const Ark_Union_Dimension_EdgeOutlineWidths* value)
+void OutlineStyle0Impl(Ark_NativePointer node,
+                       const Ark_Union_OutlineStyle_EdgeOutlineStyles* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOutlineWidth(frameNode, convValue);
+    //CommonMethodModelNG::SetOutlineStyle0(frameNode, convValue);
 }
-void OutlineColorImpl(Ark_NativePointer node,
-                      const Ark_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
+void OutlineStyle1Impl(Ark_NativePointer node,
+                       const Opt_Union_OutlineStyle_EdgeOutlineStyles* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOutlineColor(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetOutlineStyle1(frameNode, convValue);
 }
-void OutlineRadiusImpl(Ark_NativePointer node,
-                       const Ark_Union_Dimension_OutlineRadiuses* value)
+void OutlineWidth0Impl(Ark_NativePointer node,
+                       const Ark_Union_Dimension_EdgeOutlineWidths* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOutlineRadius(frameNode, convValue);
+    //CommonMethodModelNG::SetOutlineWidth0(frameNode, convValue);
 }
-void ForegroundColorImpl(Ark_NativePointer node,
-                         const Ark_Union_ResourceColor_ColoringStrategy* value)
+void OutlineWidth1Impl(Ark_NativePointer node,
+                       const Opt_Union_Dimension_EdgeOutlineWidths* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetOutlineWidth1(frameNode, convValue);
+}
+void OutlineColor0Impl(Ark_NativePointer node,
+                       const Ark_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetForegroundColor(frameNode, convValue);
+    //CommonMethodModelNG::SetOutlineColor0(frameNode, convValue);
+}
+void OutlineColor1Impl(Ark_NativePointer node,
+                       const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetOutlineColor1(frameNode, convValue);
+}
+void OutlineRadius0Impl(Ark_NativePointer node,
+                        const Ark_Union_Dimension_OutlineRadiuses* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetOutlineRadius0(frameNode, convValue);
+}
+void OutlineRadius1Impl(Ark_NativePointer node,
+                        const Opt_Union_Dimension_OutlineRadiuses* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetOutlineRadius1(frameNode, convValue);
+}
+void ForegroundColor0Impl(Ark_NativePointer node,
+                          const Ark_Union_ResourceColor_ColoringStrategy* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetForegroundColor0(frameNode, convValue);
+}
+void ForegroundColor1Impl(Ark_NativePointer node,
+                          const Opt_Union_ResourceColor_ColoringStrategy* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetForegroundColor1(frameNode, convValue);
 }
 void OnClick0Impl(Ark_NativePointer node,
                   const Callback_ClickEvent_Void* value)
@@ -437,14 +509,31 @@ void OnTouchImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetOnTouch(frameNode, convValue);
 }
-void OnKeyEventImpl(Ark_NativePointer node,
-                    const Callback_KeyEvent_Void* value)
+void OnKeyEvent0Impl(Ark_NativePointer node,
+                     const Callback_KeyEvent_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetOnKeyEvent(frameNode, convValue);
+    //CommonMethodModelNG::SetOnKeyEvent0(frameNode, convValue);
+}
+void OnKeyEvent1Impl(Ark_NativePointer node,
+                     const Callback_KeyEvent_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetOnKeyEvent1(frameNode, convValue);
+}
+void OnDigitalCrownImpl(Ark_NativePointer node,
+                        const Opt_Callback_CrownEvent_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetOnDigitalCrown(frameNode, convValue);
 }
 void OnKeyPreImeImpl(Ark_NativePointer node,
                      const Callback_KeyEvent_Boolean* value)
@@ -454,6 +543,24 @@ void OnKeyPreImeImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetOnKeyPreIme(frameNode, convValue);
+}
+void OnKeyEventDispatchImpl(Ark_NativePointer node,
+                            const Callback_KeyEvent_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetOnKeyEventDispatch(frameNode, convValue);
+}
+void OnFocusAxisEventImpl(Ark_NativePointer node,
+                          const Callback_FocusAxisEvent_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetOnFocusAxisEvent(frameNode, convValue);
 }
 void FocusableImpl(Ark_NativePointer node,
                    Ark_Boolean value)
@@ -559,94 +666,174 @@ void Transition1Impl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(effect); // for enums
     //CommonMethodModelNG::SetTransition1(frameNode, convValue);
 }
-void MotionBlurImpl(Ark_NativePointer node,
-                    const Ark_MotionBlurOptions* value)
+void MotionBlur0Impl(Ark_NativePointer node,
+                     const Ark_MotionBlurOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetMotionBlur(frameNode, convValue);
+    //CommonMethodModelNG::SetMotionBlur0(frameNode, convValue);
 }
-void BrightnessImpl(Ark_NativePointer node,
-                    const Ark_Number* value)
+void MotionBlur1Impl(Ark_NativePointer node,
+                     const Opt_MotionBlurOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetMotionBlur1(frameNode, convValue);
+}
+void Brightness0Impl(Ark_NativePointer node,
+                     const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetBrightness(frameNode, convValue);
+    //CommonMethodModelNG::SetBrightness0(frameNode, convValue);
 }
-void ContrastImpl(Ark_NativePointer node,
-                  const Ark_Number* value)
+void Brightness1Impl(Ark_NativePointer node,
+                     const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetContrast(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetBrightness1(frameNode, convValue);
 }
-void GrayscaleImpl(Ark_NativePointer node,
+void Contrast0Impl(Ark_NativePointer node,
                    const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetGrayscale(frameNode, convValue);
+    //CommonMethodModelNG::SetContrast0(frameNode, convValue);
 }
-void ColorBlendImpl(Ark_NativePointer node,
-                    const Ark_Union_Color_String_Resource* value)
+void Contrast1Impl(Ark_NativePointer node,
+                   const Opt_Number* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetContrast1(frameNode, convValue);
+}
+void Grayscale0Impl(Ark_NativePointer node,
+                    const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetColorBlend(frameNode, convValue);
+    //CommonMethodModelNG::SetGrayscale0(frameNode, convValue);
 }
-void SaturateImpl(Ark_NativePointer node,
-                  const Ark_Number* value)
+void Grayscale1Impl(Ark_NativePointer node,
+                    const Opt_Number* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetGrayscale1(frameNode, convValue);
+}
+void ColorBlend0Impl(Ark_NativePointer node,
+                     const Ark_Union_Color_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetSaturate(frameNode, convValue);
+    //CommonMethodModelNG::SetColorBlend0(frameNode, convValue);
 }
-void SepiaImpl(Ark_NativePointer node,
-               const Ark_Number* value)
+void ColorBlend1Impl(Ark_NativePointer node,
+                     const Opt_Union_Color_String_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetColorBlend1(frameNode, convValue);
+}
+void Saturate0Impl(Ark_NativePointer node,
+                   const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetSepia(frameNode, convValue);
+    //CommonMethodModelNG::SetSaturate0(frameNode, convValue);
 }
-void InvertImpl(Ark_NativePointer node,
-                const Ark_Union_Number_InvertOptions* value)
+void Saturate1Impl(Ark_NativePointer node,
+                   const Opt_Number* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetSaturate1(frameNode, convValue);
+}
+void Sepia0Impl(Ark_NativePointer node,
+                const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetInvert(frameNode, convValue);
+    //CommonMethodModelNG::SetSepia0(frameNode, convValue);
 }
-void HueRotateImpl(Ark_NativePointer node,
-                   const Ark_Union_Number_String* value)
+void Sepia1Impl(Ark_NativePointer node,
+                const Opt_Number* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetSepia1(frameNode, convValue);
+}
+void Invert0Impl(Ark_NativePointer node,
+                 const Ark_Union_Number_InvertOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetHueRotate(frameNode, convValue);
+    //CommonMethodModelNG::SetInvert0(frameNode, convValue);
 }
-void UseShadowBatchingImpl(Ark_NativePointer node,
-                           Ark_Boolean value)
+void Invert1Impl(Ark_NativePointer node,
+                 const Opt_Union_Number_InvertOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetInvert1(frameNode, convValue);
+}
+void HueRotate0Impl(Ark_NativePointer node,
+                    const Ark_Union_Number_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetHueRotate0(frameNode, convValue);
+}
+void HueRotate1Impl(Ark_NativePointer node,
+                    const Opt_Union_Number_String* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetHueRotate1(frameNode, convValue);
+}
+void UseShadowBatching0Impl(Ark_NativePointer node,
+                            Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetUseShadowBatching(frameNode, convValue);
+    //CommonMethodModelNG::SetUseShadowBatching0(frameNode, convValue);
+}
+void UseShadowBatching1Impl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetUseShadowBatching1(frameNode, convValue);
 }
 void UseEffect0Impl(Ark_NativePointer node,
                     Ark_Boolean value)
@@ -666,39 +853,81 @@ void UseEffect1Impl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(useEffect); // for enums
     //CommonMethodModelNG::SetUseEffect1(frameNode, convValue);
 }
-void RenderGroupImpl(Ark_NativePointer node,
-                     Ark_Boolean value)
+void UseEffect2Impl(Ark_NativePointer node,
+                    const Opt_Boolean* useEffect,
+                    const Opt_EffectType* effectType)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(useEffect);
+    //auto convValue = Converter::OptConvert<type>(useEffect); // for enums
+    //CommonMethodModelNG::SetUseEffect2(frameNode, convValue);
+}
+void RenderGroup0Impl(Ark_NativePointer node,
+                      Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetRenderGroup(frameNode, convValue);
+    //CommonMethodModelNG::SetRenderGroup0(frameNode, convValue);
 }
-void FreezeImpl(Ark_NativePointer node,
-                Ark_Boolean value)
+void RenderGroup1Impl(Ark_NativePointer node,
+                      const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetRenderGroup1(frameNode, convValue);
+}
+void Freeze0Impl(Ark_NativePointer node,
+                 Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CommonMethodModelNG::SetFreeze(frameNode, convValue);
+    //CommonMethodModelNG::SetFreeze0(frameNode, convValue);
 }
-void TranslateImpl(Ark_NativePointer node,
-                   const Ark_TranslateOptions* value)
+void Freeze1Impl(Ark_NativePointer node,
+                 const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetFreeze1(frameNode, convValue);
+}
+void Translate0Impl(Ark_NativePointer node,
+                    const Ark_TranslateOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetTranslate(frameNode, convValue);
+    //CommonMethodModelNG::SetTranslate0(frameNode, convValue);
 }
-void ScaleImpl(Ark_NativePointer node,
-               const Ark_ScaleOptions* value)
+void Translate1Impl(Ark_NativePointer node,
+                    const Opt_TranslateOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetTranslate1(frameNode, convValue);
+}
+void Scale0Impl(Ark_NativePointer node,
+                const Ark_ScaleOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetScale(frameNode, convValue);
+    //CommonMethodModelNG::SetScale0(frameNode, convValue);
+}
+void Scale1Impl(Ark_NativePointer node,
+                const Opt_ScaleOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetScale1(frameNode, convValue);
 }
 void GridSpanImpl(Ark_NativePointer node,
                   const Ark_Number* value)
@@ -718,23 +947,39 @@ void GridOffsetImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetGridOffset(frameNode, convValue);
 }
-void RotateImpl(Ark_NativePointer node,
-                const Ark_RotateOptions* value)
+void Rotate0Impl(Ark_NativePointer node,
+                 const Ark_RotateOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetRotate(frameNode, convValue);
+    //CommonMethodModelNG::SetRotate0(frameNode, convValue);
 }
-void TransformImpl(Ark_NativePointer node,
-                   const Ark_CustomObject* value)
+void Rotate1Impl(Ark_NativePointer node,
+                 const Opt_RotateOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetRotate1(frameNode, convValue);
+}
+void Transform0Impl(Ark_NativePointer node,
+                    const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetTransform(frameNode, convValue);
+    //CommonMethodModelNG::SetTransform0(frameNode, convValue);
+}
+void Transform1Impl(Ark_NativePointer node,
+                    const Opt_CustomObject* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetTransform1(frameNode, convValue);
 }
 void OnAppearImpl(Ark_NativePointer node,
                   const Callback_Void* value)
@@ -933,13 +1178,21 @@ void AspectRatioImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetAspectRatio(frameNode, convValue);
 }
-void ClickEffectImpl(Ark_NativePointer node,
-                     const Opt_ClickEffect* value)
+void ClickEffect0Impl(Ark_NativePointer node,
+                      const Opt_ClickEffect* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //CommonMethodModelNG::SetClickEffect(frameNode, convValue);
+    //CommonMethodModelNG::SetClickEffect0(frameNode, convValue);
+}
+void ClickEffect1Impl(Ark_NativePointer node,
+                      const Opt_ClickEffect* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetClickEffect1(frameNode, convValue);
 }
 void OnDragStartImpl(Ark_NativePointer node,
                      const Callback_DragEvent_String_Union_CustomBuilder_DragItemInfo* value)
@@ -1029,32 +1282,56 @@ void OnPreDragImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetOnPreDrag(frameNode, convValue);
 }
-void LinearGradientImpl(Ark_NativePointer node,
-                        const Ark_Type_CommonMethod_linearGradient_value* value)
+void LinearGradient0Impl(Ark_NativePointer node,
+                         const Ark_LinearGradientOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetLinearGradient(frameNode, convValue);
+    //CommonMethodModelNG::SetLinearGradient0(frameNode, convValue);
 }
-void SweepGradientImpl(Ark_NativePointer node,
-                       const Ark_Type_CommonMethod_sweepGradient_value* value)
+void LinearGradient1Impl(Ark_NativePointer node,
+                         const Opt_LinearGradientOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetSweepGradient(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetLinearGradient1(frameNode, convValue);
 }
-void RadialGradientImpl(Ark_NativePointer node,
-                        const Ark_Type_CommonMethod_radialGradient_value* value)
+void SweepGradient0Impl(Ark_NativePointer node,
+                        const Ark_SweepGradientOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetRadialGradient(frameNode, convValue);
+    //CommonMethodModelNG::SetSweepGradient0(frameNode, convValue);
+}
+void SweepGradient1Impl(Ark_NativePointer node,
+                        const Opt_SweepGradientOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetSweepGradient1(frameNode, convValue);
+}
+void RadialGradient0Impl(Ark_NativePointer node,
+                         const Ark_RadialGradientOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetRadialGradient0(frameNode, convValue);
+}
+void RadialGradient1Impl(Ark_NativePointer node,
+                         const Opt_RadialGradientOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetRadialGradient1(frameNode, convValue);
 }
 void MotionPathImpl(Ark_NativePointer node,
                     const Ark_MotionPathOptions* value)
@@ -1065,14 +1342,22 @@ void MotionPathImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetMotionPath(frameNode, convValue);
 }
-void ShadowImpl(Ark_NativePointer node,
-                const Ark_Union_ShadowOptions_ShadowStyle* value)
+void Shadow0Impl(Ark_NativePointer node,
+                 const Ark_Union_ShadowOptions_ShadowStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetShadow(frameNode, convValue);
+    //CommonMethodModelNG::SetShadow0(frameNode, convValue);
+}
+void Shadow1Impl(Ark_NativePointer node,
+                 const Opt_Union_ShadowOptions_ShadowStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetShadow1(frameNode, convValue);
 }
 void Clip0Impl(Ark_NativePointer node,
                Ark_Boolean value)
@@ -1083,22 +1368,38 @@ void Clip0Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetClip0(frameNode, convValue);
 }
 void Clip1Impl(Ark_NativePointer node,
+               const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetClip1(frameNode, convValue);
+}
+void Clip2Impl(Ark_NativePointer node,
                const Ark_Type_CommonMethod_clip_value* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetClip1(frameNode, convValue);
+    //CommonMethodModelNG::SetClip2(frameNode, convValue);
 }
-void ClipShapeImpl(Ark_NativePointer node,
-                   const Ark_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
+void ClipShape0Impl(Ark_NativePointer node,
+                    const Ark_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetClipShape(frameNode, convValue);
+    //CommonMethodModelNG::SetClipShape0(frameNode, convValue);
+}
+void ClipShape1Impl(Ark_NativePointer node,
+                    const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetClipShape1(frameNode, convValue);
 }
 void Mask0Impl(Ark_NativePointer node,
                const Ark_ProgressMask* value)
@@ -1110,22 +1411,38 @@ void Mask0Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetMask0(frameNode, convValue);
 }
 void Mask1Impl(Ark_NativePointer node,
+               const Opt_ProgressMask* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetMask1(frameNode, convValue);
+}
+void Mask2Impl(Ark_NativePointer node,
                const Ark_Type_CommonMethod_mask_value* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetMask1(frameNode, convValue);
+    //CommonMethodModelNG::SetMask2(frameNode, convValue);
 }
-void MaskShapeImpl(Ark_NativePointer node,
-                   const Ark_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
+void MaskShape0Impl(Ark_NativePointer node,
+                    const Ark_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetMaskShape(frameNode, convValue);
+    //CommonMethodModelNG::SetMaskShape0(frameNode, convValue);
+}
+void MaskShape1Impl(Ark_NativePointer node,
+                    const Opt_Union_CircleShape_EllipseShape_PathShape_RectShape* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetMaskShape1(frameNode, convValue);
 }
 void KeyImpl(Ark_NativePointer node,
              const Ark_String* value)
@@ -1182,32 +1499,56 @@ void RestoreIdImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetRestoreId(frameNode, convValue);
 }
-void SphericalEffectImpl(Ark_NativePointer node,
-                         const Ark_Number* value)
+void SphericalEffect0Impl(Ark_NativePointer node,
+                          const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetSphericalEffect(frameNode, convValue);
+    //CommonMethodModelNG::SetSphericalEffect0(frameNode, convValue);
 }
-void LightUpEffectImpl(Ark_NativePointer node,
-                       const Ark_Number* value)
+void SphericalEffect1Impl(Ark_NativePointer node,
+                          const Opt_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetLightUpEffect(frameNode, convValue);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetSphericalEffect1(frameNode, convValue);
 }
-void PixelStretchEffectImpl(Ark_NativePointer node,
-                            const Ark_PixelStretchEffectOptions* value)
+void LightUpEffect0Impl(Ark_NativePointer node,
+                        const Ark_Number* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetPixelStretchEffect(frameNode, convValue);
+    //CommonMethodModelNG::SetLightUpEffect0(frameNode, convValue);
+}
+void LightUpEffect1Impl(Ark_NativePointer node,
+                        const Opt_Number* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetLightUpEffect1(frameNode, convValue);
+}
+void PixelStretchEffect0Impl(Ark_NativePointer node,
+                             const Ark_PixelStretchEffectOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetPixelStretchEffect0(frameNode, convValue);
+}
+void PixelStretchEffect1Impl(Ark_NativePointer node,
+                             const Opt_PixelStretchEffectOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetPixelStretchEffect1(frameNode, convValue);
 }
 void AccessibilityGroup0Impl(Ark_NativePointer node,
                              Ark_Boolean value)
@@ -1244,6 +1585,24 @@ void AccessibilityText1Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetAccessibilityText1(frameNode, convValue);
+}
+void AccessibilityRoleImpl(Ark_NativePointer node,
+                           Ark_AccessibilityRoleType value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //CommonMethodModelNG::SetAccessibilityRole(frameNode, convValue);
+}
+void OnAccessibilityFocusImpl(Ark_NativePointer node,
+                              const AccessibilityFocusCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetOnAccessibilityFocus(frameNode, convValue);
 }
 void AccessibilityTextHintImpl(Ark_NativePointer node,
                                const Ark_String* value)
@@ -1282,7 +1641,7 @@ void AccessibilityLevelImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetAccessibilityLevel(frameNode, convValue);
 }
 void AccessibilityVirtualNodeImpl(Ark_NativePointer node,
-                                  const Callback_Any* value)
+                                  const CustomNodeBuilder* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1324,14 +1683,31 @@ void ReuseIdImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<std::string>(*value);
     //CommonMethodModelNG::SetReuseId(frameNode, convValue);
 }
-void RenderFitImpl(Ark_NativePointer node,
-                   Ark_RenderFit value)
+void ReuseImpl(Ark_NativePointer node,
+               const Ark_ReuseOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //CommonMethodModelNG::SetReuse(frameNode, convValue);
+}
+void RenderFit0Impl(Ark_NativePointer node,
+                    Ark_RenderFit value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetRenderFit(frameNode, convValue);
+    //CommonMethodModelNG::SetRenderFit0(frameNode, convValue);
+}
+void RenderFit1Impl(Ark_NativePointer node,
+                    const Opt_RenderFit* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetRenderFit1(frameNode, convValue);
 }
 void GestureModifierImpl(Ark_NativePointer node,
                          const Ark_GestureModifier* value)
@@ -1342,14 +1718,22 @@ void GestureModifierImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //CommonMethodModelNG::SetGestureModifier(frameNode, convValue);
 }
-void BackgroundBrightnessImpl(Ark_NativePointer node,
-                              const Ark_BackgroundBrightnessOptions* value)
+void BackgroundBrightness0Impl(Ark_NativePointer node,
+                               const Ark_BackgroundBrightnessOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CommonMethodModelNG::SetBackgroundBrightness(frameNode, convValue);
+    //CommonMethodModelNG::SetBackgroundBrightness0(frameNode, convValue);
+}
+void BackgroundBrightness1Impl(Ark_NativePointer node,
+                               const Opt_BackgroundBrightnessOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CommonMethodModelNG::SetBackgroundBrightness1(frameNode, convValue);
 }
 void OnGestureJudgeBeginImpl(Ark_NativePointer node,
                              const Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult* value)
@@ -1435,7 +1819,7 @@ void ExpandSafeAreaImpl(Ark_NativePointer node,
     //CommonMethodModelNG::SetExpandSafeArea(frameNode, convValue);
 }
 void BackgroundImpl(Ark_NativePointer node,
-                    const Callback_Any* builder,
+                    const CustomNodeBuilder* builder,
                     const Opt_Literal_Alignment_align* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1454,25 +1838,45 @@ void BackgroundImageImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(src); // for enums
     //CommonMethodModelNG::SetBackgroundImage(frameNode, convValue);
 }
-void BackgroundBlurStyleImpl(Ark_NativePointer node,
-                             Ark_BlurStyle value,
-                             const Opt_BackgroundBlurStyleOptions* options)
+void BackgroundBlurStyle0Impl(Ark_NativePointer node,
+                              Ark_BlurStyle value,
+                              const Opt_BackgroundBlurStyleOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetBackgroundBlurStyle(frameNode, convValue);
+    //CommonMethodModelNG::SetBackgroundBlurStyle0(frameNode, convValue);
 }
-void ForegroundBlurStyleImpl(Ark_NativePointer node,
-                             Ark_BlurStyle value,
-                             const Opt_ForegroundBlurStyleOptions* options)
+void BackgroundBlurStyle1Impl(Ark_NativePointer node,
+                              const Opt_BlurStyle* style,
+                              const Opt_BackgroundBlurStyleOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(style);
+    //auto convValue = Converter::OptConvert<type>(style); // for enums
+    //CommonMethodModelNG::SetBackgroundBlurStyle1(frameNode, convValue);
+}
+void ForegroundBlurStyle0Impl(Ark_NativePointer node,
+                              Ark_BlurStyle value,
+                              const Opt_ForegroundBlurStyleOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetForegroundBlurStyle(frameNode, convValue);
+    //CommonMethodModelNG::SetForegroundBlurStyle0(frameNode, convValue);
+}
+void ForegroundBlurStyle1Impl(Ark_NativePointer node,
+                              const Opt_BlurStyle* style,
+                              const Opt_ForegroundBlurStyleOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(style);
+    //auto convValue = Converter::OptConvert<type>(style); // for enums
+    //CommonMethodModelNG::SetForegroundBlurStyle1(frameNode, convValue);
 }
 void FocusScopeId0Impl(Ark_NativePointer node,
                        const Ark_String* id,
@@ -1535,25 +1939,45 @@ void ParallelGestureImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(gesture); // for enums
     //CommonMethodModelNG::SetParallelGesture(frameNode, convValue);
 }
-void BlurImpl(Ark_NativePointer node,
-              const Ark_Number* value,
-              const Opt_BlurOptions* options)
+void Blur0Impl(Ark_NativePointer node,
+               const Ark_Number* value,
+               const Opt_BlurOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetBlur(frameNode, convValue);
+    //CommonMethodModelNG::SetBlur0(frameNode, convValue);
 }
-void LinearGradientBlurImpl(Ark_NativePointer node,
-                            const Ark_Number* value,
-                            const Ark_LinearGradientBlurOptions* options)
+void Blur1Impl(Ark_NativePointer node,
+               const Opt_Number* blurRadius,
+               const Opt_BlurOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(blurRadius);
+    //auto convValue = Converter::OptConvert<type>(blurRadius); // for enums
+    //CommonMethodModelNG::SetBlur1(frameNode, convValue);
+}
+void LinearGradientBlur0Impl(Ark_NativePointer node,
+                             const Ark_Number* value,
+                             const Ark_LinearGradientBlurOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetLinearGradientBlur(frameNode, convValue);
+    //CommonMethodModelNG::SetLinearGradientBlur0(frameNode, convValue);
+}
+void LinearGradientBlur1Impl(Ark_NativePointer node,
+                             const Opt_Number* blurRadius,
+                             const Opt_LinearGradientBlurOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(blurRadius);
+    //auto convValue = Converter::OptConvert<type>(blurRadius); // for enums
+    //CommonMethodModelNG::SetLinearGradientBlur1(frameNode, convValue);
 }
 void SystemBarEffectImpl(Ark_NativePointer node)
 {
@@ -1563,15 +1987,25 @@ void SystemBarEffectImpl(Ark_NativePointer node)
     //auto convValue = Converter::OptConvert<type>(undefined); // for enums
     //CommonMethodModelNG::SetSystemBarEffect(frameNode, convValue);
 }
-void BackdropBlurImpl(Ark_NativePointer node,
-                      const Ark_Number* value,
-                      const Opt_BlurOptions* options)
+void BackdropBlur0Impl(Ark_NativePointer node,
+                       const Ark_Number* value,
+                       const Opt_BlurOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetBackdropBlur(frameNode, convValue);
+    //CommonMethodModelNG::SetBackdropBlur0(frameNode, convValue);
+}
+void BackdropBlur1Impl(Ark_NativePointer node,
+                       const Opt_Number* radius,
+                       const Opt_BlurOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(radius);
+    //auto convValue = Converter::OptConvert<type>(radius); // for enums
+    //CommonMethodModelNG::SetBackdropBlur1(frameNode, convValue);
 }
 void SharedTransitionImpl(Ark_NativePointer node,
                           const Ark_String* id,
@@ -1613,15 +2047,25 @@ void OverlayImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //CommonMethodModelNG::SetOverlay(frameNode, convValue);
 }
-void BlendModeImpl(Ark_NativePointer node,
-                   Ark_BlendMode value,
-                   const Opt_BlendApplyType* type)
+void BlendMode0Impl(Ark_NativePointer node,
+                    Ark_BlendMode value,
+                    const Opt_BlendApplyType* type)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CommonMethodModelNG::SetBlendMode(frameNode, convValue);
+    //CommonMethodModelNG::SetBlendMode0(frameNode, convValue);
+}
+void BlendMode1Impl(Ark_NativePointer node,
+                    const Opt_BlendMode* mode,
+                    const Opt_BlendApplyType* type)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(mode);
+    //auto convValue = Converter::OptConvert<type>(mode); // for enums
+    //CommonMethodModelNG::SetBlendMode1(frameNode, convValue);
 }
 void AdvancedBlendModeImpl(Ark_NativePointer node,
                            const Ark_Union_BlendMode_Blender* effect,
@@ -1665,7 +2109,7 @@ void BindMenu1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetBindMenu1(frameNode, convValue);
 }
 void BindContextMenu0Impl(Ark_NativePointer node,
-                          const Callback_Any* content,
+                          const CustomNodeBuilder* content,
                           Ark_ResponseType responseType,
                           const Opt_ContextMenuOptions* options)
 {
@@ -1677,7 +2121,7 @@ void BindContextMenu0Impl(Ark_NativePointer node,
 }
 void BindContextMenu1Impl(Ark_NativePointer node,
                           Ark_Boolean isShown,
-                          const Callback_Any* content,
+                          const CustomNodeBuilder* content,
                           const Opt_ContextMenuOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1687,8 +2131,8 @@ void BindContextMenu1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetBindContextMenu1(frameNode, convValue);
 }
 void BindContentCover0Impl(Ark_NativePointer node,
-                           const Opt_Boolean* isShow,
-                           const Callback_Any* builder,
+                           Ark_Boolean isShow,
+                           const CustomNodeBuilder* builder,
                            const Opt_ModalTransition* type)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1698,8 +2142,8 @@ void BindContentCover0Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetBindContentCover0(frameNode, convValue);
 }
 void BindContentCover1Impl(Ark_NativePointer node,
-                           const Opt_Boolean* isShow,
-                           const Callback_Any* builder,
+                           Ark_Boolean isShow,
+                           const CustomNodeBuilder* builder,
                            const Opt_ContentCoverOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1709,8 +2153,8 @@ void BindContentCover1Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetBindContentCover1(frameNode, convValue);
 }
 void BindSheetImpl(Ark_NativePointer node,
-                   const Opt_Boolean* isShow,
-                   const Callback_Any* builder,
+                   Ark_Boolean isShow,
+                   const CustomNodeBuilder* builder,
                    const Opt_SheetOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1760,30 +2204,39 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::PaddingImpl,
         CommonMethodModifier::SafeAreaPaddingImpl,
         CommonMethodModifier::MarginImpl,
-        CommonMethodModifier::BackgroundColorImpl,
+        CommonMethodModifier::BackgroundColor0Impl,
+        CommonMethodModifier::BackgroundColor1Impl,
         CommonMethodModifier::PixelRoundImpl,
         CommonMethodModifier::BackgroundImageSizeImpl,
         CommonMethodModifier::BackgroundImagePositionImpl,
-        CommonMethodModifier::BackgroundEffectImpl,
+        CommonMethodModifier::BackgroundEffect0Impl,
+        CommonMethodModifier::BackgroundEffect1Impl,
         CommonMethodModifier::BackgroundImageResizableImpl,
         CommonMethodModifier::ForegroundEffectImpl,
         CommonMethodModifier::VisualEffectImpl,
         CommonMethodModifier::BackgroundFilterImpl,
         CommonMethodModifier::ForegroundFilterImpl,
         CommonMethodModifier::CompositingFilterImpl,
-        CommonMethodModifier::OpacityImpl,
+        CommonMethodModifier::Opacity0Impl,
+        CommonMethodModifier::Opacity1Impl,
         CommonMethodModifier::BorderImpl,
         CommonMethodModifier::BorderStyleImpl,
         CommonMethodModifier::BorderWidthImpl,
         CommonMethodModifier::BorderColorImpl,
         CommonMethodModifier::BorderRadiusImpl,
         CommonMethodModifier::BorderImageImpl,
-        CommonMethodModifier::OutlineImpl,
-        CommonMethodModifier::OutlineStyleImpl,
-        CommonMethodModifier::OutlineWidthImpl,
-        CommonMethodModifier::OutlineColorImpl,
-        CommonMethodModifier::OutlineRadiusImpl,
-        CommonMethodModifier::ForegroundColorImpl,
+        CommonMethodModifier::Outline0Impl,
+        CommonMethodModifier::Outline1Impl,
+        CommonMethodModifier::OutlineStyle0Impl,
+        CommonMethodModifier::OutlineStyle1Impl,
+        CommonMethodModifier::OutlineWidth0Impl,
+        CommonMethodModifier::OutlineWidth1Impl,
+        CommonMethodModifier::OutlineColor0Impl,
+        CommonMethodModifier::OutlineColor1Impl,
+        CommonMethodModifier::OutlineRadius0Impl,
+        CommonMethodModifier::OutlineRadius1Impl,
+        CommonMethodModifier::ForegroundColor0Impl,
+        CommonMethodModifier::ForegroundColor1Impl,
         CommonMethodModifier::OnClick0Impl,
         CommonMethodModifier::OnClick1Impl,
         CommonMethodModifier::OnHoverImpl,
@@ -1791,8 +2244,12 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::HoverEffectImpl,
         CommonMethodModifier::OnMouseImpl,
         CommonMethodModifier::OnTouchImpl,
-        CommonMethodModifier::OnKeyEventImpl,
+        CommonMethodModifier::OnKeyEvent0Impl,
+        CommonMethodModifier::OnKeyEvent1Impl,
+        CommonMethodModifier::OnDigitalCrownImpl,
         CommonMethodModifier::OnKeyPreImeImpl,
+        CommonMethodModifier::OnKeyEventDispatchImpl,
+        CommonMethodModifier::OnFocusAxisEventImpl,
         CommonMethodModifier::FocusableImpl,
         CommonMethodModifier::TabStopImpl,
         CommonMethodModifier::OnFocusImpl,
@@ -1805,26 +2262,43 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::AnimationImpl,
         CommonMethodModifier::Transition0Impl,
         CommonMethodModifier::Transition1Impl,
-        CommonMethodModifier::MotionBlurImpl,
-        CommonMethodModifier::BrightnessImpl,
-        CommonMethodModifier::ContrastImpl,
-        CommonMethodModifier::GrayscaleImpl,
-        CommonMethodModifier::ColorBlendImpl,
-        CommonMethodModifier::SaturateImpl,
-        CommonMethodModifier::SepiaImpl,
-        CommonMethodModifier::InvertImpl,
-        CommonMethodModifier::HueRotateImpl,
-        CommonMethodModifier::UseShadowBatchingImpl,
+        CommonMethodModifier::MotionBlur0Impl,
+        CommonMethodModifier::MotionBlur1Impl,
+        CommonMethodModifier::Brightness0Impl,
+        CommonMethodModifier::Brightness1Impl,
+        CommonMethodModifier::Contrast0Impl,
+        CommonMethodModifier::Contrast1Impl,
+        CommonMethodModifier::Grayscale0Impl,
+        CommonMethodModifier::Grayscale1Impl,
+        CommonMethodModifier::ColorBlend0Impl,
+        CommonMethodModifier::ColorBlend1Impl,
+        CommonMethodModifier::Saturate0Impl,
+        CommonMethodModifier::Saturate1Impl,
+        CommonMethodModifier::Sepia0Impl,
+        CommonMethodModifier::Sepia1Impl,
+        CommonMethodModifier::Invert0Impl,
+        CommonMethodModifier::Invert1Impl,
+        CommonMethodModifier::HueRotate0Impl,
+        CommonMethodModifier::HueRotate1Impl,
+        CommonMethodModifier::UseShadowBatching0Impl,
+        CommonMethodModifier::UseShadowBatching1Impl,
         CommonMethodModifier::UseEffect0Impl,
         CommonMethodModifier::UseEffect1Impl,
-        CommonMethodModifier::RenderGroupImpl,
-        CommonMethodModifier::FreezeImpl,
-        CommonMethodModifier::TranslateImpl,
-        CommonMethodModifier::ScaleImpl,
+        CommonMethodModifier::UseEffect2Impl,
+        CommonMethodModifier::RenderGroup0Impl,
+        CommonMethodModifier::RenderGroup1Impl,
+        CommonMethodModifier::Freeze0Impl,
+        CommonMethodModifier::Freeze1Impl,
+        CommonMethodModifier::Translate0Impl,
+        CommonMethodModifier::Translate1Impl,
+        CommonMethodModifier::Scale0Impl,
+        CommonMethodModifier::Scale1Impl,
         CommonMethodModifier::GridSpanImpl,
         CommonMethodModifier::GridOffsetImpl,
-        CommonMethodModifier::RotateImpl,
-        CommonMethodModifier::TransformImpl,
+        CommonMethodModifier::Rotate0Impl,
+        CommonMethodModifier::Rotate1Impl,
+        CommonMethodModifier::Transform0Impl,
+        CommonMethodModifier::Transform1Impl,
         CommonMethodModifier::OnAppearImpl,
         CommonMethodModifier::OnDisAppearImpl,
         CommonMethodModifier::OnAttachImpl,
@@ -1847,7 +2321,8 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::AlignRules0Impl,
         CommonMethodModifier::AlignRules1Impl,
         CommonMethodModifier::AspectRatioImpl,
-        CommonMethodModifier::ClickEffectImpl,
+        CommonMethodModifier::ClickEffect0Impl,
+        CommonMethodModifier::ClickEffect1Impl,
         CommonMethodModifier::OnDragStartImpl,
         CommonMethodModifier::OnDragEnterImpl,
         CommonMethodModifier::OnDragMoveImpl,
@@ -1858,30 +2333,43 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::DraggableImpl,
         CommonMethodModifier::DragPreviewImpl,
         CommonMethodModifier::OnPreDragImpl,
-        CommonMethodModifier::LinearGradientImpl,
-        CommonMethodModifier::SweepGradientImpl,
-        CommonMethodModifier::RadialGradientImpl,
+        CommonMethodModifier::LinearGradient0Impl,
+        CommonMethodModifier::LinearGradient1Impl,
+        CommonMethodModifier::SweepGradient0Impl,
+        CommonMethodModifier::SweepGradient1Impl,
+        CommonMethodModifier::RadialGradient0Impl,
+        CommonMethodModifier::RadialGradient1Impl,
         CommonMethodModifier::MotionPathImpl,
-        CommonMethodModifier::ShadowImpl,
+        CommonMethodModifier::Shadow0Impl,
+        CommonMethodModifier::Shadow1Impl,
         CommonMethodModifier::Clip0Impl,
         CommonMethodModifier::Clip1Impl,
-        CommonMethodModifier::ClipShapeImpl,
+        CommonMethodModifier::Clip2Impl,
+        CommonMethodModifier::ClipShape0Impl,
+        CommonMethodModifier::ClipShape1Impl,
         CommonMethodModifier::Mask0Impl,
         CommonMethodModifier::Mask1Impl,
-        CommonMethodModifier::MaskShapeImpl,
+        CommonMethodModifier::Mask2Impl,
+        CommonMethodModifier::MaskShape0Impl,
+        CommonMethodModifier::MaskShape1Impl,
         CommonMethodModifier::KeyImpl,
         CommonMethodModifier::IdImpl,
         CommonMethodModifier::GeometryTransition0Impl,
         CommonMethodModifier::GeometryTransition1Impl,
         CommonMethodModifier::StateStylesImpl,
         CommonMethodModifier::RestoreIdImpl,
-        CommonMethodModifier::SphericalEffectImpl,
-        CommonMethodModifier::LightUpEffectImpl,
-        CommonMethodModifier::PixelStretchEffectImpl,
+        CommonMethodModifier::SphericalEffect0Impl,
+        CommonMethodModifier::SphericalEffect1Impl,
+        CommonMethodModifier::LightUpEffect0Impl,
+        CommonMethodModifier::LightUpEffect1Impl,
+        CommonMethodModifier::PixelStretchEffect0Impl,
+        CommonMethodModifier::PixelStretchEffect1Impl,
         CommonMethodModifier::AccessibilityGroup0Impl,
         CommonMethodModifier::AccessibilityGroup1Impl,
         CommonMethodModifier::AccessibilityText0Impl,
         CommonMethodModifier::AccessibilityText1Impl,
+        CommonMethodModifier::AccessibilityRoleImpl,
+        CommonMethodModifier::OnAccessibilityFocusImpl,
         CommonMethodModifier::AccessibilityTextHintImpl,
         CommonMethodModifier::AccessibilityDescription0Impl,
         CommonMethodModifier::AccessibilityDescription1Impl,
@@ -1891,9 +2379,12 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::AccessibilitySelectedImpl,
         CommonMethodModifier::ObscuredImpl,
         CommonMethodModifier::ReuseIdImpl,
-        CommonMethodModifier::RenderFitImpl,
+        CommonMethodModifier::ReuseImpl,
+        CommonMethodModifier::RenderFit0Impl,
+        CommonMethodModifier::RenderFit1Impl,
         CommonMethodModifier::GestureModifierImpl,
-        CommonMethodModifier::BackgroundBrightnessImpl,
+        CommonMethodModifier::BackgroundBrightness0Impl,
+        CommonMethodModifier::BackgroundBrightness1Impl,
         CommonMethodModifier::OnGestureJudgeBeginImpl,
         CommonMethodModifier::OnGestureRecognizerJudgeBegin0Impl,
         CommonMethodModifier::OnGestureRecognizerJudgeBegin1Impl,
@@ -1905,23 +2396,29 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::ExpandSafeAreaImpl,
         CommonMethodModifier::BackgroundImpl,
         CommonMethodModifier::BackgroundImageImpl,
-        CommonMethodModifier::BackgroundBlurStyleImpl,
-        CommonMethodModifier::ForegroundBlurStyleImpl,
+        CommonMethodModifier::BackgroundBlurStyle0Impl,
+        CommonMethodModifier::BackgroundBlurStyle1Impl,
+        CommonMethodModifier::ForegroundBlurStyle0Impl,
+        CommonMethodModifier::ForegroundBlurStyle1Impl,
         CommonMethodModifier::FocusScopeId0Impl,
         CommonMethodModifier::FocusScopeId1Impl,
         CommonMethodModifier::FocusScopePriorityImpl,
         CommonMethodModifier::GestureImpl,
         CommonMethodModifier::PriorityGestureImpl,
         CommonMethodModifier::ParallelGestureImpl,
-        CommonMethodModifier::BlurImpl,
-        CommonMethodModifier::LinearGradientBlurImpl,
+        CommonMethodModifier::Blur0Impl,
+        CommonMethodModifier::Blur1Impl,
+        CommonMethodModifier::LinearGradientBlur0Impl,
+        CommonMethodModifier::LinearGradientBlur1Impl,
         CommonMethodModifier::SystemBarEffectImpl,
-        CommonMethodModifier::BackdropBlurImpl,
+        CommonMethodModifier::BackdropBlur0Impl,
+        CommonMethodModifier::BackdropBlur1Impl,
         CommonMethodModifier::SharedTransitionImpl,
         CommonMethodModifier::ChainModeImpl,
         CommonMethodModifier::DragPreviewOptionsImpl,
         CommonMethodModifier::OverlayImpl,
-        CommonMethodModifier::BlendModeImpl,
+        CommonMethodModifier::BlendMode0Impl,
+        CommonMethodModifier::BlendMode1Impl,
         CommonMethodModifier::AdvancedBlendModeImpl,
         CommonMethodModifier::BindPopupImpl,
         CommonMethodModifier::BindMenu0Impl,

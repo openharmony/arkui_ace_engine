@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,37 +18,37 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace IPropertySubscriberAccessor {
-void DestroyPeerImpl(IPropertySubscriberPeer* peer)
+namespace FocusAxisEventAccessor {
+void DestroyPeerImpl(FocusAxisEventPeer* peer)
 {
 }
 Ark_NativePointer CtorImpl()
 {
-    return new IPropertySubscriberPeer();
+    return new FocusAxisEventPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 IdImpl(IPropertySubscriberPeer* peer)
-{
-    return 0;
-}
-void AboutToBeDeletedImpl(IPropertySubscriberPeer* peer,
-                          const Opt_IPropertySubscriber* owningView)
+void SetAxisMapImpl(FocusAxisEventPeer* peer,
+                    const Map_AxisModel_Number* axisMap)
 {
 }
-} // IPropertySubscriberAccessor
-const GENERATED_ArkUIIPropertySubscriberAccessor* GetIPropertySubscriberAccessor()
+void SetStopPropagationImpl(FocusAxisEventPeer* peer,
+                            const Callback_Void* stopPropagation)
 {
-    static const GENERATED_ArkUIIPropertySubscriberAccessor IPropertySubscriberAccessorImpl {
-        IPropertySubscriberAccessor::DestroyPeerImpl,
-        IPropertySubscriberAccessor::CtorImpl,
-        IPropertySubscriberAccessor::GetFinalizerImpl,
-        IPropertySubscriberAccessor::IdImpl,
-        IPropertySubscriberAccessor::AboutToBeDeletedImpl,
+}
+} // FocusAxisEventAccessor
+const GENERATED_ArkUIFocusAxisEventAccessor* GetFocusAxisEventAccessor()
+{
+    static const GENERATED_ArkUIFocusAxisEventAccessor FocusAxisEventAccessorImpl {
+        FocusAxisEventAccessor::DestroyPeerImpl,
+        FocusAxisEventAccessor::CtorImpl,
+        FocusAxisEventAccessor::GetFinalizerImpl,
+        FocusAxisEventAccessor::SetAxisMapImpl,
+        FocusAxisEventAccessor::SetStopPropagationImpl,
     };
-    return &IPropertySubscriberAccessorImpl;
+    return &FocusAxisEventAccessorImpl;
 }
 
 }

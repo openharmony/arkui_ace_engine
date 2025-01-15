@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,10 @@ Ark_Int32 GetChildDefaultSizeImpl(ChildrenMainSizePeer* peer)
 {
     return 0;
 }
+void SetChildDefaultSizeImpl(ChildrenMainSizePeer* peer,
+                             const Ark_Number* childDefaultSize)
+{
+}
 } // ChildrenMainSizeAccessor
 const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()
 {
@@ -55,6 +59,7 @@ const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor()
         ChildrenMainSizeAccessor::SpliceImpl,
         ChildrenMainSizeAccessor::UpdateImpl,
         ChildrenMainSizeAccessor::GetChildDefaultSizeImpl,
+        ChildrenMainSizeAccessor::SetChildDefaultSizeImpl,
     };
     return &ChildrenMainSizeAccessorImpl;
 }

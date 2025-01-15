@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -271,6 +271,10 @@ void RestoreLayerImpl(CanvasRendererPeer* peer)
 void ResetImpl(CanvasRendererPeer* peer)
 {
 }
+void SetLetterSpacingImpl(CanvasRendererPeer* peer,
+                          const Ark_Union_LengthMetrics_String* letterSpacing)
+{
+}
 Ark_Int32 GetGlobalAlphaImpl(CanvasRendererPeer* peer)
 {
     return 0;
@@ -469,6 +473,7 @@ const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
         CanvasRendererAccessor::SaveLayerImpl,
         CanvasRendererAccessor::RestoreLayerImpl,
         CanvasRendererAccessor::ResetImpl,
+        CanvasRendererAccessor::SetLetterSpacingImpl,
         CanvasRendererAccessor::GetGlobalAlphaImpl,
         CanvasRendererAccessor::SetGlobalAlphaImpl,
         CanvasRendererAccessor::GetGlobalCompositeOperationImpl,

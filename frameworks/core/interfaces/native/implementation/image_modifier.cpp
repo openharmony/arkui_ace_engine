@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,6 +98,15 @@ void ObjectFitImpl(Ark_NativePointer node,
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //ImageModelNG::SetObjectFit(frameNode, convValue);
+}
+void ImageMatrixImpl(Ark_NativePointer node,
+                     const Ark_ImageMatrix* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ImageModelNG::SetImageMatrix(frameNode, convValue);
 }
 void ObjectRepeatImpl(Ark_NativePointer node,
                       Ark_ImageRepeat value)
@@ -296,6 +305,7 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::FitOriginalSizeImpl,
         ImageAttributeModifier::FillColorImpl,
         ImageAttributeModifier::ObjectFitImpl,
+        ImageAttributeModifier::ImageMatrixImpl,
         ImageAttributeModifier::ObjectRepeatImpl,
         ImageAttributeModifier::AutoResizeImpl,
         ImageAttributeModifier::RenderModeImpl,

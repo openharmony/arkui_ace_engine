@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,22 +37,38 @@ void SetRadioOptionsImpl(Ark_NativePointer node,
 }
 } // RadioInterfaceModifier
 namespace RadioAttributeModifier {
-void CheckedImpl(Ark_NativePointer node,
-                 Ark_Boolean value)
+void Checked0Impl(Ark_NativePointer node,
+                  Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //RadioModelNG::SetChecked(frameNode, convValue);
+    //RadioModelNG::SetChecked0(frameNode, convValue);
 }
-void OnChangeImpl(Ark_NativePointer node,
-                  const Callback_Boolean_Void* value)
+void Checked1Impl(Ark_NativePointer node,
+                  const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RadioModelNG::SetChecked1(frameNode, convValue);
+}
+void OnChange0Impl(Ark_NativePointer node,
+                   const Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RadioModelNG::SetOnChange(frameNode, convValue);
+    //RadioModelNG::SetOnChange0(frameNode, convValue);
+}
+void OnChange1Impl(Ark_NativePointer node,
+                   const Opt_OnRadioChangeCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RadioModelNG::SetOnChange1(frameNode, convValue);
 }
 void RadioStyleImpl(Ark_NativePointer node,
                     const Opt_RadioStyle* value)
@@ -62,14 +78,22 @@ void RadioStyleImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //RadioModelNG::SetRadioStyle(frameNode, convValue);
 }
-void ContentModifierImpl(Ark_NativePointer node,
-                         const Ark_CustomObject* value)
+void ContentModifier0Impl(Ark_NativePointer node,
+                          const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //RadioModelNG::SetContentModifier(frameNode, convValue);
+    //RadioModelNG::SetContentModifier0(frameNode, convValue);
+}
+void ContentModifier1Impl(Ark_NativePointer node,
+                          const Opt_CustomObject* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RadioModelNG::SetContentModifier1(frameNode, convValue);
 }
 } // RadioAttributeModifier
 const GENERATED_ArkUIRadioModifier* GetRadioModifier()
@@ -77,10 +101,13 @@ const GENERATED_ArkUIRadioModifier* GetRadioModifier()
     static const GENERATED_ArkUIRadioModifier ArkUIRadioModifierImpl {
         RadioModifier::ConstructImpl,
         RadioInterfaceModifier::SetRadioOptionsImpl,
-        RadioAttributeModifier::CheckedImpl,
-        RadioAttributeModifier::OnChangeImpl,
+        RadioAttributeModifier::Checked0Impl,
+        RadioAttributeModifier::Checked1Impl,
+        RadioAttributeModifier::OnChange0Impl,
+        RadioAttributeModifier::OnChange1Impl,
         RadioAttributeModifier::RadioStyleImpl,
-        RadioAttributeModifier::ContentModifierImpl,
+        RadioAttributeModifier::ContentModifier0Impl,
+        RadioAttributeModifier::ContentModifier1Impl,
     };
     return &ArkUIRadioModifierImpl;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -313,6 +313,22 @@ void MaxFontSizeImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //TextAreaModelNG::SetMaxFontSize(frameNode, convValue);
 }
+void MinFontScaleImpl(Ark_NativePointer node,
+                      const Opt_Union_Number_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextAreaModelNG::SetMinFontScale(frameNode, convValue);
+}
+void MaxFontScaleImpl(Ark_NativePointer node,
+                      const Opt_Union_Number_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextAreaModelNG::SetMaxFontScale(frameNode, convValue);
+}
 void HeightAdaptivePolicyImpl(Ark_NativePointer node,
                               Ark_TextHeightAdaptivePolicy value)
 {
@@ -481,6 +497,30 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<bool>(value);
     //TextAreaModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
+void HalfLeadingImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextAreaModelNG::SetHalfLeading(frameNode, convValue);
+}
+void EllipsisModeImpl(Ark_NativePointer node,
+                      const Opt_EllipsisMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextAreaModelNG::SetEllipsisMode(frameNode, convValue);
+}
+void StopBackPressImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextAreaModelNG::SetStopBackPress(frameNode, convValue);
+}
 void InputFilterImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,
                      const Opt_Callback_String_Void* error)
@@ -502,7 +542,7 @@ void ShowCounterImpl(Ark_NativePointer node,
     //TextAreaModelNG::SetShowCounter(frameNode, convValue);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
-                        const Callback_Any* value,
+                        const CustomNodeBuilder* value,
                         const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -548,6 +588,8 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::SelectionMenuHiddenImpl,
         TextAreaAttributeModifier::MinFontSizeImpl,
         TextAreaAttributeModifier::MaxFontSizeImpl,
+        TextAreaAttributeModifier::MinFontScaleImpl,
+        TextAreaAttributeModifier::MaxFontScaleImpl,
         TextAreaAttributeModifier::HeightAdaptivePolicyImpl,
         TextAreaAttributeModifier::MaxLinesImpl,
         TextAreaAttributeModifier::WordBreakImpl,
@@ -567,6 +609,9 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::EditMenuOptionsImpl,
         TextAreaAttributeModifier::EnablePreviewTextImpl,
         TextAreaAttributeModifier::EnableHapticFeedbackImpl,
+        TextAreaAttributeModifier::HalfLeadingImpl,
+        TextAreaAttributeModifier::EllipsisModeImpl,
+        TextAreaAttributeModifier::StopBackPressImpl,
         TextAreaAttributeModifier::InputFilterImpl,
         TextAreaAttributeModifier::ShowCounterImpl,
         TextAreaAttributeModifier::CustomKeyboardImpl,

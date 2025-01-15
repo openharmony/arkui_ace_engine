@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -186,6 +186,15 @@ void OverScrollModeImpl(Ark_NativePointer node,
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //WebModelNG::SetOverScrollMode(frameNode, convValue);
+}
+void BlurOnKeyboardHideModeImpl(Ark_NativePointer node,
+                                Ark_BlurOnKeyboardHideMode value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(value);
+    //auto convValue = Converter::OptConvert<type>(value); // for enums
+    //WebModelNG::SetBlurOnKeyboardHideMode(frameNode, convValue);
 }
 void TextZoomAtioImpl(Ark_NativePointer node,
                       const Ark_Number* value)
@@ -1082,6 +1091,22 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<bool>(value);
     //WebModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
+void EnableFollowSystemFontWeightImpl(Ark_NativePointer node,
+                                      Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //WebModelNG::SetEnableFollowSystemFontWeight(frameNode, convValue);
+}
+void EnableWebAVSessionImpl(Ark_NativePointer node,
+                            Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //WebModelNG::SetEnableWebAVSession(frameNode, convValue);
+}
 void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
                                  const Ark_String* tag,
                                  const Ark_String* type)
@@ -1094,7 +1119,7 @@ void RegisterNativeEmbedRuleImpl(Ark_NativePointer node,
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_WebElementType elementType,
-                           const Callback_Any* content,
+                           const CustomNodeBuilder* content,
                            Ark_WebResponseType responseType,
                            const Opt_SelectionMenuOptionsExt* options)
 {
@@ -1128,6 +1153,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::WideViewModeAccessImpl,
         WebAttributeModifier::OverviewModeAccessImpl,
         WebAttributeModifier::OverScrollModeImpl,
+        WebAttributeModifier::BlurOnKeyboardHideModeImpl,
         WebAttributeModifier::TextZoomAtioImpl,
         WebAttributeModifier::TextZoomRatioImpl,
         WebAttributeModifier::DatabaseAccessImpl,
@@ -1229,6 +1255,8 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::KeyboardAvoidModeImpl,
         WebAttributeModifier::EditMenuOptionsImpl,
         WebAttributeModifier::EnableHapticFeedbackImpl,
+        WebAttributeModifier::EnableFollowSystemFontWeightImpl,
+        WebAttributeModifier::EnableWebAVSessionImpl,
         WebAttributeModifier::RegisterNativeEmbedRuleImpl,
         WebAttributeModifier::BindSelectionMenuImpl,
     };

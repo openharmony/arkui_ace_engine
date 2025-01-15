@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,58 +36,106 @@ void SetCheckboxGroupOptionsImpl(Ark_NativePointer node,
 }
 } // CheckboxGroupInterfaceModifier
 namespace CheckboxGroupAttributeModifier {
-void SelectAllImpl(Ark_NativePointer node,
-                   Ark_Boolean value)
+void SelectAll0Impl(Ark_NativePointer node,
+                    Ark_Boolean value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::Convert<bool>(value);
-    //CheckboxGroupModelNG::SetSelectAll(frameNode, convValue);
+    //CheckboxGroupModelNG::SetSelectAll0(frameNode, convValue);
 }
-void SelectedColorImpl(Ark_NativePointer node,
-                       const Ark_ResourceColor* value)
+void SelectAll1Impl(Ark_NativePointer node,
+                    const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CheckboxGroupModelNG::SetSelectAll1(frameNode, convValue);
+}
+void SelectedColor0Impl(Ark_NativePointer node,
+                        const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CheckboxGroupModelNG::SetSelectedColor(frameNode, convValue);
+    //CheckboxGroupModelNG::SetSelectedColor0(frameNode, convValue);
 }
-void UnselectedColorImpl(Ark_NativePointer node,
-                         const Ark_ResourceColor* value)
+void SelectedColor1Impl(Ark_NativePointer node,
+                        const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CheckboxGroupModelNG::SetSelectedColor1(frameNode, convValue);
+}
+void UnselectedColor0Impl(Ark_NativePointer node,
+                          const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CheckboxGroupModelNG::SetUnselectedColor(frameNode, convValue);
+    //CheckboxGroupModelNG::SetUnselectedColor0(frameNode, convValue);
 }
-void MarkImpl(Ark_NativePointer node,
-              const Ark_MarkStyle* value)
+void UnselectedColor1Impl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CheckboxGroupModelNG::SetUnselectedColor1(frameNode, convValue);
+}
+void Mark0Impl(Ark_NativePointer node,
+               const Ark_MarkStyle* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CheckboxGroupModelNG::SetMark(frameNode, convValue);
+    //CheckboxGroupModelNG::SetMark0(frameNode, convValue);
 }
-void OnChangeImpl(Ark_NativePointer node,
-                  const OnCheckboxGroupChangeCallback* value)
+void Mark1Impl(Ark_NativePointer node,
+               const Opt_MarkStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CheckboxGroupModelNG::SetMark1(frameNode, convValue);
+}
+void OnChange0Impl(Ark_NativePointer node,
+                   const OnCheckboxGroupChangeCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //CheckboxGroupModelNG::SetOnChange(frameNode, convValue);
+    //CheckboxGroupModelNG::SetOnChange0(frameNode, convValue);
 }
-void CheckboxShapeImpl(Ark_NativePointer node,
-                       Ark_CheckBoxShape value)
+void OnChange1Impl(Ark_NativePointer node,
+                   const Opt_OnCheckboxGroupChangeCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CheckboxGroupModelNG::SetOnChange1(frameNode, convValue);
+}
+void CheckboxShape0Impl(Ark_NativePointer node,
+                        Ark_CheckBoxShape value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //CheckboxGroupModelNG::SetCheckboxShape(frameNode, convValue);
+    //CheckboxGroupModelNG::SetCheckboxShape0(frameNode, convValue);
+}
+void CheckboxShape1Impl(Ark_NativePointer node,
+                        const Opt_CheckBoxShape* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //CheckboxGroupModelNG::SetCheckboxShape1(frameNode, convValue);
 }
 } // CheckboxGroupAttributeModifier
 const GENERATED_ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
@@ -95,12 +143,18 @@ const GENERATED_ArkUICheckboxGroupModifier* GetCheckboxGroupModifier()
     static const GENERATED_ArkUICheckboxGroupModifier ArkUICheckboxGroupModifierImpl {
         CheckboxGroupModifier::ConstructImpl,
         CheckboxGroupInterfaceModifier::SetCheckboxGroupOptionsImpl,
-        CheckboxGroupAttributeModifier::SelectAllImpl,
-        CheckboxGroupAttributeModifier::SelectedColorImpl,
-        CheckboxGroupAttributeModifier::UnselectedColorImpl,
-        CheckboxGroupAttributeModifier::MarkImpl,
-        CheckboxGroupAttributeModifier::OnChangeImpl,
-        CheckboxGroupAttributeModifier::CheckboxShapeImpl,
+        CheckboxGroupAttributeModifier::SelectAll0Impl,
+        CheckboxGroupAttributeModifier::SelectAll1Impl,
+        CheckboxGroupAttributeModifier::SelectedColor0Impl,
+        CheckboxGroupAttributeModifier::SelectedColor1Impl,
+        CheckboxGroupAttributeModifier::UnselectedColor0Impl,
+        CheckboxGroupAttributeModifier::UnselectedColor1Impl,
+        CheckboxGroupAttributeModifier::Mark0Impl,
+        CheckboxGroupAttributeModifier::Mark1Impl,
+        CheckboxGroupAttributeModifier::OnChange0Impl,
+        CheckboxGroupAttributeModifier::OnChange1Impl,
+        CheckboxGroupAttributeModifier::CheckboxShape0Impl,
+        CheckboxGroupAttributeModifier::CheckboxShape1Impl,
     };
     return &ArkUICheckboxGroupModifierImpl;
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -276,9 +276,25 @@ void BarStateImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(value); // for enums
     //RichEditorModelNG::SetBarState(frameNode, convValue);
 }
+void MaxLengthImpl(Ark_NativePointer node,
+                   const Opt_Number* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RichEditorModelNG::SetMaxLength(frameNode, convValue);
+}
+void MaxLinesImpl(Ark_NativePointer node,
+                  const Opt_Number* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RichEditorModelNG::SetMaxLines(frameNode, convValue);
+}
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_RichEditorSpanType spanType,
-                           const Callback_Any* content,
+                           const CustomNodeBuilder* content,
                            const Ark_Union_ResponseType_RichEditorResponseType* responseType,
                            const Opt_SelectionMenuOptions* options)
 {
@@ -289,7 +305,7 @@ void BindSelectionMenuImpl(Ark_NativePointer node,
     //RichEditorModelNG::SetBindSelectionMenu(frameNode, convValue);
 }
 void CustomKeyboardImpl(Ark_NativePointer node,
-                        const Callback_Any* value,
+                        const CustomNodeBuilder* value,
                         const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -341,6 +357,8 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
         RichEditorAttributeModifier::EnableKeyboardOnFocusImpl,
         RichEditorAttributeModifier::EnableHapticFeedbackImpl,
         RichEditorAttributeModifier::BarStateImpl,
+        RichEditorAttributeModifier::MaxLengthImpl,
+        RichEditorAttributeModifier::MaxLinesImpl,
         RichEditorAttributeModifier::BindSelectionMenuImpl,
         RichEditorAttributeModifier::CustomKeyboardImpl,
         RichEditorAttributeModifier::PlaceholderImpl,

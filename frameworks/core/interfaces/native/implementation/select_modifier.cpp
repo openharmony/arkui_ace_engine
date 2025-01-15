@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,176 +37,328 @@ void SetSelectOptionsImpl(Ark_NativePointer node,
 }
 } // SelectInterfaceModifier
 namespace SelectAttributeModifier {
-void SelectedImpl(Ark_NativePointer node,
-                  const Ark_Union_Number_Resource* value)
+void Selected0Impl(Ark_NativePointer node,
+                   const Ark_Union_Number_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetSelected(frameNode, convValue);
+    //SelectModelNG::SetSelected0(frameNode, convValue);
 }
-void ValueImpl(Ark_NativePointer node,
-               const Ark_ResourceStr* value)
+void Selected1Impl(Ark_NativePointer node,
+                   const Opt_Union_Number_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetSelected1(frameNode, convValue);
+}
+void Value0Impl(Ark_NativePointer node,
+                const Ark_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetValue(frameNode, convValue);
+    //SelectModelNG::SetValue0(frameNode, convValue);
 }
-void FontImpl(Ark_NativePointer node,
-              const Ark_Font* value)
+void Value1Impl(Ark_NativePointer node,
+                const Opt_ResourceStr* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetValue1(frameNode, convValue);
+}
+void Font0Impl(Ark_NativePointer node,
+               const Ark_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetFont(frameNode, convValue);
+    //SelectModelNG::SetFont0(frameNode, convValue);
 }
-void FontColorImpl(Ark_NativePointer node,
-                   const Ark_ResourceColor* value)
+void Font1Impl(Ark_NativePointer node,
+               const Opt_Font* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetFont1(frameNode, convValue);
+}
+void FontColor0Impl(Ark_NativePointer node,
+                    const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetFontColor(frameNode, convValue);
+    //SelectModelNG::SetFontColor0(frameNode, convValue);
 }
-void SelectedOptionBgColorImpl(Ark_NativePointer node,
-                               const Ark_ResourceColor* value)
+void FontColor1Impl(Ark_NativePointer node,
+                    const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetFontColor1(frameNode, convValue);
+}
+void SelectedOptionBgColor0Impl(Ark_NativePointer node,
+                                const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetSelectedOptionBgColor(frameNode, convValue);
+    //SelectModelNG::SetSelectedOptionBgColor0(frameNode, convValue);
 }
-void SelectedOptionFontImpl(Ark_NativePointer node,
-                            const Ark_Font* value)
+void SelectedOptionBgColor1Impl(Ark_NativePointer node,
+                                const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetSelectedOptionBgColor1(frameNode, convValue);
+}
+void SelectedOptionFont0Impl(Ark_NativePointer node,
+                             const Ark_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetSelectedOptionFont(frameNode, convValue);
+    //SelectModelNG::SetSelectedOptionFont0(frameNode, convValue);
 }
-void SelectedOptionFontColorImpl(Ark_NativePointer node,
-                                 const Ark_ResourceColor* value)
+void SelectedOptionFont1Impl(Ark_NativePointer node,
+                             const Opt_Font* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetSelectedOptionFont1(frameNode, convValue);
+}
+void SelectedOptionFontColor0Impl(Ark_NativePointer node,
+                                  const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetSelectedOptionFontColor(frameNode, convValue);
+    //SelectModelNG::SetSelectedOptionFontColor0(frameNode, convValue);
 }
-void OptionBgColorImpl(Ark_NativePointer node,
-                       const Ark_ResourceColor* value)
+void SelectedOptionFontColor1Impl(Ark_NativePointer node,
+                                  const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetSelectedOptionFontColor1(frameNode, convValue);
+}
+void OptionBgColor0Impl(Ark_NativePointer node,
+                        const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetOptionBgColor(frameNode, convValue);
+    //SelectModelNG::SetOptionBgColor0(frameNode, convValue);
 }
-void OptionFontImpl(Ark_NativePointer node,
-                    const Ark_Font* value)
+void OptionBgColor1Impl(Ark_NativePointer node,
+                        const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetOptionBgColor1(frameNode, convValue);
+}
+void OptionFont0Impl(Ark_NativePointer node,
+                     const Ark_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetOptionFont(frameNode, convValue);
+    //SelectModelNG::SetOptionFont0(frameNode, convValue);
 }
-void OptionFontColorImpl(Ark_NativePointer node,
-                         const Ark_ResourceColor* value)
+void OptionFont1Impl(Ark_NativePointer node,
+                     const Opt_Font* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetOptionFont1(frameNode, convValue);
+}
+void OptionFontColor0Impl(Ark_NativePointer node,
+                          const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetOptionFontColor(frameNode, convValue);
+    //SelectModelNG::SetOptionFontColor0(frameNode, convValue);
 }
-void OnSelectImpl(Ark_NativePointer node,
-                  const Callback_Number_String_Void* value)
+void OptionFontColor1Impl(Ark_NativePointer node,
+                          const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetOptionFontColor1(frameNode, convValue);
+}
+void OnSelect0Impl(Ark_NativePointer node,
+                   const Callback_Number_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetOnSelect(frameNode, convValue);
+    //SelectModelNG::SetOnSelect0(frameNode, convValue);
 }
-void SpaceImpl(Ark_NativePointer node,
-               const Ark_Length* value)
+void OnSelect1Impl(Ark_NativePointer node,
+                   const Opt_OnSelectCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetOnSelect1(frameNode, convValue);
+}
+void Space0Impl(Ark_NativePointer node,
+                const Ark_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetSpace(frameNode, convValue);
+    //SelectModelNG::SetSpace0(frameNode, convValue);
 }
-void ArrowPositionImpl(Ark_NativePointer node,
-                       Ark_ArrowPosition value)
+void Space1Impl(Ark_NativePointer node,
+                const Opt_Length* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetSpace1(frameNode, convValue);
+}
+void ArrowPosition0Impl(Ark_NativePointer node,
+                        Ark_ArrowPosition value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SelectModelNG::SetArrowPosition(frameNode, convValue);
+    //SelectModelNG::SetArrowPosition0(frameNode, convValue);
 }
-void OptionWidthImpl(Ark_NativePointer node,
-                     const Ark_Union_Dimension_OptionWidthMode* value)
+void ArrowPosition1Impl(Ark_NativePointer node,
+                        const Opt_ArrowPosition* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetArrowPosition1(frameNode, convValue);
+}
+void OptionWidth0Impl(Ark_NativePointer node,
+                      const Ark_Union_Dimension_OptionWidthMode* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetOptionWidth(frameNode, convValue);
+    //SelectModelNG::SetOptionWidth0(frameNode, convValue);
 }
-void OptionHeightImpl(Ark_NativePointer node,
-                      const Ark_Length* value)
+void OptionWidth1Impl(Ark_NativePointer node,
+                      const Opt_Union_Dimension_OptionWidthMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetOptionWidth1(frameNode, convValue);
+}
+void OptionHeight0Impl(Ark_NativePointer node,
+                       const Ark_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetOptionHeight(frameNode, convValue);
+    //SelectModelNG::SetOptionHeight0(frameNode, convValue);
 }
-void MenuBackgroundColorImpl(Ark_NativePointer node,
-                             const Ark_ResourceColor* value)
+void OptionHeight1Impl(Ark_NativePointer node,
+                       const Opt_Length* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetOptionHeight1(frameNode, convValue);
+}
+void MenuBackgroundColor0Impl(Ark_NativePointer node,
+                              const Ark_ResourceColor* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetMenuBackgroundColor(frameNode, convValue);
+    //SelectModelNG::SetMenuBackgroundColor0(frameNode, convValue);
 }
-void MenuBackgroundBlurStyleImpl(Ark_NativePointer node,
-                                 Ark_BlurStyle value)
+void MenuBackgroundColor1Impl(Ark_NativePointer node,
+                              const Opt_ResourceColor* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetMenuBackgroundColor1(frameNode, convValue);
+}
+void MenuBackgroundBlurStyle0Impl(Ark_NativePointer node,
+                                  Ark_BlurStyle value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SelectModelNG::SetMenuBackgroundBlurStyle(frameNode, convValue);
+    //SelectModelNG::SetMenuBackgroundBlurStyle0(frameNode, convValue);
 }
-void ControlSizeImpl(Ark_NativePointer node,
-                     Ark_ControlSize value)
+void MenuBackgroundBlurStyle1Impl(Ark_NativePointer node,
+                                  const Opt_BlurStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetMenuBackgroundBlurStyle1(frameNode, convValue);
+}
+void ControlSize0Impl(Ark_NativePointer node,
+                      Ark_ControlSize value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(value);
     //auto convValue = Converter::OptConvert<type>(value); // for enums
-    //SelectModelNG::SetControlSize(frameNode, convValue);
+    //SelectModelNG::SetControlSize0(frameNode, convValue);
 }
-void MenuItemContentModifierImpl(Ark_NativePointer node,
-                                 const Ark_CustomObject* value)
+void ControlSize1Impl(Ark_NativePointer node,
+                      const Opt_ControlSize* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetControlSize1(frameNode, convValue);
+}
+void MenuItemContentModifier0Impl(Ark_NativePointer node,
+                                  const Ark_CustomObject* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SelectModelNG::SetMenuItemContentModifier(frameNode, convValue);
+    //SelectModelNG::SetMenuItemContentModifier0(frameNode, convValue);
+}
+void MenuItemContentModifier1Impl(Ark_NativePointer node,
+                                  const Opt_CustomObject* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetMenuItemContentModifier1(frameNode, convValue);
 }
 void DividerImpl(Ark_NativePointer node,
                  const Opt_DividerOptions* value)
@@ -216,15 +368,41 @@ void DividerImpl(Ark_NativePointer node,
     //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
     //SelectModelNG::SetDivider(frameNode, convValue);
 }
-void MenuAlignImpl(Ark_NativePointer node,
-                   Ark_MenuAlignType alignType,
-                   const Opt_Offset* offset)
+void TextModifierImpl(Ark_NativePointer node,
+                      const Opt_TextModifier* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetTextModifier(frameNode, convValue);
+}
+void ArrowModifierImpl(Ark_NativePointer node,
+                       const Opt_SymbolGlyphModifier* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SelectModelNG::SetArrowModifier(frameNode, convValue);
+}
+void MenuAlign0Impl(Ark_NativePointer node,
+                    Ark_MenuAlignType alignType,
+                    const Opt_Offset* offset)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = Converter::Convert<type>(alignType);
     //auto convValue = Converter::OptConvert<type>(alignType); // for enums
-    //SelectModelNG::SetMenuAlign(frameNode, convValue);
+    //SelectModelNG::SetMenuAlign0(frameNode, convValue);
+}
+void MenuAlign1Impl(Ark_NativePointer node,
+                    const Opt_MenuAlignType* alignType,
+                    const Opt_Offset* offset)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(alignType);
+    //auto convValue = Converter::OptConvert<type>(alignType); // for enums
+    //SelectModelNG::SetMenuAlign1(frameNode, convValue);
 }
 } // SelectAttributeModifier
 const GENERATED_ArkUISelectModifier* GetSelectModifier()
@@ -232,27 +410,49 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
     static const GENERATED_ArkUISelectModifier ArkUISelectModifierImpl {
         SelectModifier::ConstructImpl,
         SelectInterfaceModifier::SetSelectOptionsImpl,
-        SelectAttributeModifier::SelectedImpl,
-        SelectAttributeModifier::ValueImpl,
-        SelectAttributeModifier::FontImpl,
-        SelectAttributeModifier::FontColorImpl,
-        SelectAttributeModifier::SelectedOptionBgColorImpl,
-        SelectAttributeModifier::SelectedOptionFontImpl,
-        SelectAttributeModifier::SelectedOptionFontColorImpl,
-        SelectAttributeModifier::OptionBgColorImpl,
-        SelectAttributeModifier::OptionFontImpl,
-        SelectAttributeModifier::OptionFontColorImpl,
-        SelectAttributeModifier::OnSelectImpl,
-        SelectAttributeModifier::SpaceImpl,
-        SelectAttributeModifier::ArrowPositionImpl,
-        SelectAttributeModifier::OptionWidthImpl,
-        SelectAttributeModifier::OptionHeightImpl,
-        SelectAttributeModifier::MenuBackgroundColorImpl,
-        SelectAttributeModifier::MenuBackgroundBlurStyleImpl,
-        SelectAttributeModifier::ControlSizeImpl,
-        SelectAttributeModifier::MenuItemContentModifierImpl,
+        SelectAttributeModifier::Selected0Impl,
+        SelectAttributeModifier::Selected1Impl,
+        SelectAttributeModifier::Value0Impl,
+        SelectAttributeModifier::Value1Impl,
+        SelectAttributeModifier::Font0Impl,
+        SelectAttributeModifier::Font1Impl,
+        SelectAttributeModifier::FontColor0Impl,
+        SelectAttributeModifier::FontColor1Impl,
+        SelectAttributeModifier::SelectedOptionBgColor0Impl,
+        SelectAttributeModifier::SelectedOptionBgColor1Impl,
+        SelectAttributeModifier::SelectedOptionFont0Impl,
+        SelectAttributeModifier::SelectedOptionFont1Impl,
+        SelectAttributeModifier::SelectedOptionFontColor0Impl,
+        SelectAttributeModifier::SelectedOptionFontColor1Impl,
+        SelectAttributeModifier::OptionBgColor0Impl,
+        SelectAttributeModifier::OptionBgColor1Impl,
+        SelectAttributeModifier::OptionFont0Impl,
+        SelectAttributeModifier::OptionFont1Impl,
+        SelectAttributeModifier::OptionFontColor0Impl,
+        SelectAttributeModifier::OptionFontColor1Impl,
+        SelectAttributeModifier::OnSelect0Impl,
+        SelectAttributeModifier::OnSelect1Impl,
+        SelectAttributeModifier::Space0Impl,
+        SelectAttributeModifier::Space1Impl,
+        SelectAttributeModifier::ArrowPosition0Impl,
+        SelectAttributeModifier::ArrowPosition1Impl,
+        SelectAttributeModifier::OptionWidth0Impl,
+        SelectAttributeModifier::OptionWidth1Impl,
+        SelectAttributeModifier::OptionHeight0Impl,
+        SelectAttributeModifier::OptionHeight1Impl,
+        SelectAttributeModifier::MenuBackgroundColor0Impl,
+        SelectAttributeModifier::MenuBackgroundColor1Impl,
+        SelectAttributeModifier::MenuBackgroundBlurStyle0Impl,
+        SelectAttributeModifier::MenuBackgroundBlurStyle1Impl,
+        SelectAttributeModifier::ControlSize0Impl,
+        SelectAttributeModifier::ControlSize1Impl,
+        SelectAttributeModifier::MenuItemContentModifier0Impl,
+        SelectAttributeModifier::MenuItemContentModifier1Impl,
         SelectAttributeModifier::DividerImpl,
-        SelectAttributeModifier::MenuAlignImpl,
+        SelectAttributeModifier::TextModifierImpl,
+        SelectAttributeModifier::ArrowModifierImpl,
+        SelectAttributeModifier::MenuAlign0Impl,
+        SelectAttributeModifier::MenuAlign1Impl,
     };
     return &ArkUISelectModifierImpl;
 }

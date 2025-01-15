@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -185,6 +185,23 @@ void AnalyzerConfigImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //VideoModelNG::SetAnalyzerConfig(frameNode, convValue);
 }
+void SurfaceBackgroundColorImpl(Ark_NativePointer node,
+                                const Ark_ColorMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //VideoModelNG::SetSurfaceBackgroundColor(frameNode, convValue);
+}
+void EnableShortcutKeyImpl(Ark_NativePointer node,
+                           Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //VideoModelNG::SetEnableShortcutKey(frameNode, convValue);
+}
 } // VideoAttributeModifier
 const GENERATED_ArkUIVideoModifier* GetVideoModifier()
 {
@@ -208,6 +225,8 @@ const GENERATED_ArkUIVideoModifier* GetVideoModifier()
         VideoAttributeModifier::OnStopImpl,
         VideoAttributeModifier::EnableAnalyzerImpl,
         VideoAttributeModifier::AnalyzerConfigImpl,
+        VideoAttributeModifier::SurfaceBackgroundColorImpl,
+        VideoAttributeModifier::EnableShortcutKeyImpl,
     };
     return &ArkUIVideoModifierImpl;
 }

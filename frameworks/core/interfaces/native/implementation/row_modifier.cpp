@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,13 +26,21 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // RowModifier
 namespace RowInterfaceModifier {
-void SetRowOptionsImpl(Ark_NativePointer node,
-                       const Opt_RowOptions* options)
+void SetRowOptions0Impl(Ark_NativePointer node,
+                        const Opt_RowOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
-    //RowModelNG::SetSetRowOptions(frameNode, convValue);
+    //RowModelNG::SetSetRowOptions0(frameNode, convValue);
+}
+void SetRowOptions1Impl(Ark_NativePointer node,
+                        const Opt_Union_RowOptions_RowOptionsV2* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //RowModelNG::SetSetRowOptions1(frameNode, convValue);
 }
 } // RowInterfaceModifier
 namespace RowAttributeModifier {
@@ -76,7 +84,8 @@ const GENERATED_ArkUIRowModifier* GetRowModifier()
 {
     static const GENERATED_ArkUIRowModifier ArkUIRowModifierImpl {
         RowModifier::ConstructImpl,
-        RowInterfaceModifier::SetRowOptionsImpl,
+        RowInterfaceModifier::SetRowOptions0Impl,
+        RowInterfaceModifier::SetRowOptions1Impl,
         RowAttributeModifier::AlignItemsImpl,
         RowAttributeModifier::JustifyContentImpl,
         RowAttributeModifier::PointLightImpl,

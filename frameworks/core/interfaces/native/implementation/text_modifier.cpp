@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -362,6 +362,23 @@ void FontFeatureImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<std::string>(*value);
     //TextModelNG::SetFontFeature(frameNode, convValue);
 }
+void MarqueeOptionsImpl(Ark_NativePointer node,
+                        const Opt_TextMarqueeOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextModelNG::SetMarqueeOptions(frameNode, convValue);
+}
+void OnMarqueeStateChangeImpl(Ark_NativePointer node,
+                              const Callback_MarqueeState_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TextModelNG::SetOnMarqueeStateChange(frameNode, convValue);
+}
 void PrivacySensitiveImpl(Ark_NativePointer node,
                           Ark_Boolean value)
 {
@@ -416,7 +433,7 @@ void SelectionImpl(Ark_NativePointer node,
 }
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_TextSpanType spanType,
-                           const Callback_Any* content,
+                           const CustomNodeBuilder* content,
                            Ark_TextResponseType responseType,
                            const Opt_SelectionMenuOptions* options)
 {
@@ -468,6 +485,8 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::DataDetectorConfigImpl,
         TextAttributeModifier::OnTextSelectionChangeImpl,
         TextAttributeModifier::FontFeatureImpl,
+        TextAttributeModifier::MarqueeOptionsImpl,
+        TextAttributeModifier::OnMarqueeStateChangeImpl,
         TextAttributeModifier::PrivacySensitiveImpl,
         TextAttributeModifier::TextSelectableImpl,
         TextAttributeModifier::EditMenuOptionsImpl,

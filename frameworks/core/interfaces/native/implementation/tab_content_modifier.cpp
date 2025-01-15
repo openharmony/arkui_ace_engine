@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,15 @@ void TabBar1Impl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //TabContentModelNG::SetTabBar1(frameNode, convValue);
 }
+void TabBar2Impl(Ark_NativePointer node,
+                 const Ark_Type_TabContentAttribute_tabBar_content* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //TabContentModelNG::SetTabBar2(frameNode, convValue);
+}
 void OnWillShowImpl(Ark_NativePointer node,
                     const VoidCallback* value)
 {
@@ -80,6 +89,7 @@ const GENERATED_ArkUITabContentModifier* GetTabContentModifier()
         TabContentInterfaceModifier::SetTabContentOptionsImpl,
         TabContentAttributeModifier::TabBar0Impl,
         TabContentAttributeModifier::TabBar1Impl,
+        TabContentAttributeModifier::TabBar2Impl,
         TabContentAttributeModifier::OnWillShowImpl,
         TabContentAttributeModifier::OnWillHideImpl,
     };

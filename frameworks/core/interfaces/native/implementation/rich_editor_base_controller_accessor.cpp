@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,6 +71,10 @@ Ark_NativePointer GetPreviewTextImpl(RichEditorBaseControllerPeer* peer)
 {
     return nullptr;
 }
+Ark_NativePointer GetCaretRectImpl(RichEditorBaseControllerPeer* peer)
+{
+    return 0;
+}
 } // RichEditorBaseControllerAccessor
 const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControllerAccessor()
 {
@@ -88,6 +92,7 @@ const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControll
         RichEditorBaseControllerAccessor::StopEditingImpl,
         RichEditorBaseControllerAccessor::GetLayoutManagerImpl,
         RichEditorBaseControllerAccessor::GetPreviewTextImpl,
+        RichEditorBaseControllerAccessor::GetCaretRectImpl,
     };
     return &RichEditorBaseControllerAccessorImpl;
 }

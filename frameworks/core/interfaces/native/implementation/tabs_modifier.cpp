@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -247,6 +247,14 @@ void BarBackgroundEffectImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type_name>(*value);
     //TabsModelNG::SetBarBackgroundEffect(frameNode, convValue);
 }
+void PageFlipModeImpl(Ark_NativePointer node,
+                      const Opt_PageFlipMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TabsModelNG::SetPageFlipMode(frameNode, convValue);
+}
 void OnContentWillChangeImpl(Ark_NativePointer node,
                              const OnTabsContentWillChangeCallback* value)
 {
@@ -295,6 +303,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::BarBackgroundBlurStyle0Impl,
         TabsAttributeModifier::BarBackgroundBlurStyle1Impl,
         TabsAttributeModifier::BarBackgroundEffectImpl,
+        TabsAttributeModifier::PageFlipModeImpl,
         TabsAttributeModifier::OnContentWillChangeImpl,
         TabsAttributeModifier::BarModeScrollableImpl,
     };

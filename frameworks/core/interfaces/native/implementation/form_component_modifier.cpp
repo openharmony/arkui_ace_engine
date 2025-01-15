@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ void SetFormComponentOptionsImpl(Ark_NativePointer node,
 } // FormComponentInterfaceModifier
 namespace FormComponentAttributeModifier {
 void SizeImpl(Ark_NativePointer node,
-              const Ark_Literal_Number_height_width* value)
+              const Ark_SizeOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

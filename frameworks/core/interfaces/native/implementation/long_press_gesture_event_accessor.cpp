@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,40 +18,37 @@
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace AbstractPropertyAccessor {
-void DestroyPeerImpl(AbstractPropertyPeer* peer)
+namespace LongPressGestureEventAccessor {
+void DestroyPeerImpl(LongPressGestureEventPeer* peer)
 {
 }
 Ark_NativePointer CtorImpl()
 {
-    return new AbstractPropertyPeer();
+    return new LongPressGestureEventPeer();
 }
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void GetImpl(AbstractPropertyPeer* peer)
+Ark_Boolean GetRepeatImpl(LongPressGestureEventPeer* peer)
+{
+    return 0;
+}
+void SetRepeatImpl(LongPressGestureEventPeer* peer,
+                   Ark_Boolean repeat)
 {
 }
-void SetImpl(AbstractPropertyPeer* peer,
-             const Ark_CustomObject* newValue)
+} // LongPressGestureEventAccessor
+const GENERATED_ArkUILongPressGestureEventAccessor* GetLongPressGestureEventAccessor()
 {
-}
-void InfoImpl(AbstractPropertyPeer* peer)
-{
-}
-} // AbstractPropertyAccessor
-const GENERATED_ArkUIAbstractPropertyAccessor* GetAbstractPropertyAccessor()
-{
-    static const GENERATED_ArkUIAbstractPropertyAccessor AbstractPropertyAccessorImpl {
-        AbstractPropertyAccessor::DestroyPeerImpl,
-        AbstractPropertyAccessor::CtorImpl,
-        AbstractPropertyAccessor::GetFinalizerImpl,
-        AbstractPropertyAccessor::GetImpl,
-        AbstractPropertyAccessor::SetImpl,
-        AbstractPropertyAccessor::InfoImpl,
+    static const GENERATED_ArkUILongPressGestureEventAccessor LongPressGestureEventAccessorImpl {
+        LongPressGestureEventAccessor::DestroyPeerImpl,
+        LongPressGestureEventAccessor::CtorImpl,
+        LongPressGestureEventAccessor::GetFinalizerImpl,
+        LongPressGestureEventAccessor::GetRepeatImpl,
+        LongPressGestureEventAccessor::SetRepeatImpl,
     };
-    return &AbstractPropertyAccessorImpl;
+    return &LongPressGestureEventAccessorImpl;
 }
 
 }
