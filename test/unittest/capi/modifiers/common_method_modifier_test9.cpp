@@ -357,7 +357,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilitySelectedTestValidVa
 
 /*
  * @tc.name: SetOnHover
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
