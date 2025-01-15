@@ -24,6 +24,18 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/form/resource/form_request_data.h"
 namespace OHOS::Ace::NG {
+struct OptRequestFormInfo {
+    std::optional<int64_t> id = std::nullopt;
+    std::string name;
+    std::string bundle;
+    std::string ability;
+    std::string module;
+    std::optional<int32_t> dimension = std::nullopt;
+    std::optional<bool> temporary = std::nullopt;
+    RefPtr<WantWrap> want = nullptr;
+    std::optional<int32_t> renderingMode = std::nullopt;
+    std::optional<int32_t> shape = std::nullopt;
+};
 struct LiteralDimension {
     Dimension width;
     Dimension height;
@@ -55,32 +67,24 @@ const int32_t MAX_SIGNED_NUMBER_OF_ARK = INT_MAX;
 } // namespace
 namespace Converter {
 template<>
-RequestFormInfo Convert(const Ark_FormInfo& src)
+OptRequestFormInfo Convert(const Ark_FormInfo& src)
 {
-    RequestFormInfo dst;
-    auto id = Converter::Convert<Dimension>(src.id);
-    dst.id = (int64_t)id.Value();
-    dst.cardName = Converter::Convert<std::string>(src.name);
-    dst.bundleName = Converter::Convert<std::string>(src.bundle);
-    dst.abilityName = Converter::Convert<std::string>(src.ability);
-    dst.moduleName = Converter::Convert<std::string>(src.module);
-    auto dimension = Converter::OptConvert<int32_t>(src.dimension);
-    if (dimension) {
-        dst.dimension = *dimension;
+    std::printf("set: modifier convert\n");
+    OptRequestFormInfo dst;
+    auto id = Converter::OptConvert<Dimension>(src.id);
+    if(id) {
+        dst.id = (int64_t)(*id).Value();
     }
-    auto temporary = Converter::OptConvert<boolean>(src.temporary);
-    if (temporary) {
-        dst.temporary = *temporary;
-    }
-    dst.wantWrap = nullptr;
-    auto renderingMode = Converter::OptConvert<int32_t>(src.renderingMode);
-    if (renderingMode) {
-        dst.renderingMode = *renderingMode;
-    }
-    auto shape = Converter::OptConvert<int32_t>(src.shape);
-    if (shape) {
-        dst.shape = *shape;
-    }
+    dst.name = Converter::Convert<std::string>(src.name);
+    dst.bundle = Converter::Convert<std::string>(src.bundle);
+    dst.ability = Converter::Convert<std::string>(src.ability);
+    dst.module = Converter::Convert<std::string>(src.module);
+    dst.dimension = Converter::OptConvert<int32_t>(src.dimension);
+    dst.temporary = Converter::OptConvert<bool>(src.temporary);
+    dst.want = nullptr;
+    dst.renderingMode = Converter::OptConvert<int32_t>(src.renderingMode);
+    dst.shape = Converter::OptConvert<int32_t>(src.shape);
+    std::printf("set: modifier convert2\n");
     return dst;
 }
 template<>
@@ -154,16 +158,20 @@ namespace FormComponentInterfaceModifier {
 void SetFormComponentOptionsImpl(Ark_NativePointer node,
                                  const Ark_FormInfo* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+#ifdef FORM_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto formInfo = Converter::Convert<RequestFormInfo>(*value);
-    std::printf("set: %zu\n", formInfo.id);
-
+    auto formInfo = Converter::Convert<OptRequestFormInfo>(*value);
+    FormModelNG::SetModuleName(frameNode, formInfo.module);
+    if(formInfo.dimension) {
+        FormModelNG::SetDimension(frameNode, *formInfo.dimension);
+    }
     LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
-        "for implementation of int64_t functionality.");
+         "for implementation of int64_t functionality.");
     LOGE("ARKOALA FormComponentInterfaceModifier::SetFormComponentOptionsImpl - CustomObject is not supported "
-        "the type Ark_FormInfo::Opt_Want::Opt_Map_String_CustomObject::Ark_CustomObject.");
+         "the type Ark_FormInfo::Opt_Want::Opt_Map_String_CustomObject::Ark_CustomObject.");
+#endif
 }
 } // FormComponentInterfaceModifier
 namespace FormComponentAttributeModifier {
