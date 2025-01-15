@@ -402,7 +402,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
 }
 /*
  * @tc.name: SetOnAccessibilityHover
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1)
@@ -448,7 +448,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
 
 /*
  * @tc.name: SetOnAttach
- * @tc.desc: 
+ * @tc.desc:
  * @tc.type: FUNC
  */
 HWTEST_F(CommonMethodModifierTest9, SetOnAttachTest, TestSize.Level1)
