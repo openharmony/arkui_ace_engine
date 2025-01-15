@@ -7116,7 +7116,7 @@ void WebPattern::OnShowAutofillPopupV2(
     menuParam.setShow = true;
     menuParam.placement = Placement::BOTTOM_LEFT;
     auto dataListNode = CreateDataListFrameNode(OffsetF(offsetX, offsetY), height, width);
-
+    CHECK_NULL_VOID(dataListNode);
     auto menu = MenuView::Create(std::move(optionParam), dataListNode->GetId(), dataListNode->GetTag(),
         MenuType::MENU, menuParam);
     auto menuContainer = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
