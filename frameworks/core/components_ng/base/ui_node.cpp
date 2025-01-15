@@ -33,6 +33,11 @@ UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
         nodeInfo_->codeRow = pos.first;
         nodeInfo_->codeCol = pos.second;
     }
+    apiVersion_ = Container::GetCurrentApiTargetVersion();
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        depth_ = 1;
+        hostPageId_ = INT32_MAX;
+    }
 #ifdef UICAST_COMPONENT_SUPPORTED
     do {
         auto container = Container::Current();
@@ -364,7 +369,7 @@ void UINode::MountToParent(const RefPtr<UINode>& parent,
     if (parent->IsInDestroying()) {
         parent->SetChildrenInDestroying();
     }
-    if (parent->GetPageId() != 0) {
+    if (parent->GetPageId() != 0 && parent->GetPageId() != INT32_MAX) {
         SetHostPageId(parent->GetPageId());
     }
     AfterMountToParent();
@@ -402,7 +407,11 @@ bool UINode::OnRemoveFromParent(bool allowTransition)
 void UINode::ResetParent()
 {
     parent_.Reset();
-    SetDepth(1);
+    depth_ = -1;
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        SetDepth(1);
+        SetHostPageIdByParent(INT32_MAX);
+    }
     UpdateThemeScopeId(0);
 }
 
@@ -495,6 +504,9 @@ void UINode::DoAddChild(
         child->UpdateThemeScopeId(themeScopeId);
     }
     child->SetDepth(GetDepth() + 1);
+    if (GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        child->SetHostPageIdByParent(hostPageId_);
+    }
     if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
         child->UpdateNodeStatus(nodeStatus_);
     }
