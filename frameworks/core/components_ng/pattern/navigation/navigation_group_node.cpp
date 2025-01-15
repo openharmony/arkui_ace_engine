@@ -1194,6 +1194,10 @@ void NavigationGroupNode::RemoveDialogDestination(bool isReplace)
             continue;
         }
         if (!iter->second) {
+            auto type = navDestination->GetTransitionType();
+            if (type == PageTransitionType::ENTER_PUSH || type == PageTransitionType::ENTER_POP) {
+                continue;
+            }
             // navDestination node don't need to remove, update visibility invisible
             navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
             navDestination->SetJSViewActive(false);
@@ -1323,7 +1327,11 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
                 if (preNavDesNode->SystemTransitionPopCallback(preNavDesNode->GetAnimationId())) {
                     auto parent = preNavDesNode->GetParent();
                     CHECK_NULL_VOID(parent);
-                    parent->RemoveChild(preNavDesNode);
+                    auto pattern = navigation->GetPattern<NavigationPattern>();
+                    bool isIncurStack = pattern->FindInCurStack(preNode);
+                    if (!isIncurStack) {
+                        parent->RemoveChild(preNavDesNode);
+                    }
                 }
                 navigation->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
             }
@@ -1512,6 +1520,7 @@ void NavigationGroupNode::DialogTransitionPushAnimation(const RefPtr<FrameNode>&
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation dialog push animation end");
         auto navigation = weakNavigation.Upgrade();
         CHECK_NULL_VOID(navigation);
+        navigation->RemoveDialogDestination();
         navigation->CleanPushAnimations();
         auto curNode = weakCurNode.Upgrade();
         auto preNode = weakPreNode.Upgrade();
@@ -1598,8 +1607,13 @@ void NavigationGroupNode::DialogTransitionPopAnimation(const RefPtr<FrameNode>& 
                 CHECK_NULL_VOID(preNode);
                 auto parent = preNode->GetParent();
                 CHECK_NULL_VOID(parent);
-                parent->RemoveChild(preNode);
-                parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                
+                auto pattern = navigation->GetPattern<NavigationPattern>();
+                bool isIncurStack = pattern->FindInCurStack(preNode);
+                if (!isIncurStack) {
+                    parent->RemoveChild(preNode);
+                    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                }
             }
             auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
