@@ -29,7 +29,7 @@ namespace WindowSceneModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-#ifdef WINDOW_SCENE_SUPPORTED
+#if defined(WINDOW_SCENE_SUPPORTED) || defined(ARKUI_CAPI_UNITTEST)
     auto frameNode = WindowSceneModel::CreateNode(id);
     if (frameNode) {
         frameNode->IncRefCount();
@@ -44,7 +44,7 @@ void SetWindowSceneOptionsImpl(Ark_NativePointer node,
                                const Ark_Number* persistentId)
 {
     CHECK_NULL_VOID(persistentId);
-#ifdef WINDOW_SCENE_SUPPORTED
+#if defined(WINDOW_SCENE_SUPPORTED) || defined(ARKUI_CAPI_UNITTEST)
     auto persistId = Converter::Convert<int32_t>(*persistentId);
     WindowSceneModel::Create(persistId);
 #endif
@@ -69,7 +69,7 @@ void AttractionEffectImpl(Ark_NativePointer node,
     if (auto y = Converter::OptConvert<Dimension>(destination->y); y) {
         effect.destinationY = y.value();
     }
-#ifdef WINDOW_SCENE_SUPPORTED
+#if defined(WINDOW_SCENE_SUPPORTED) || defined(ARKUI_CAPI_UNITTEST)
     WindowSceneModel::SetAttractionEffect(effect);
 #endif
 }
