@@ -369,6 +369,7 @@ public:
 
     void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
 
+    std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);

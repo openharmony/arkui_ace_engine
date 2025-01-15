@@ -80,9 +80,11 @@
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/event/axis_event.h"
 #include "core/event/mouse_event.h"
@@ -1793,8 +1795,34 @@ bool AceContainer::DumpInfo(const std::vector<std::string>& params)
     if (OnDumpInfo(params)) {
         return true;
     }
+
+    if (DumpRSNodeByStringID(params)) {
+        return true;
+    }
     CHECK_NULL_RETURN(pipelineContext_, false);
     return pipelineContext_->Dump(params);
+}
+
+bool AceContainer::DumpRSNodeByStringID(const std::vector<std::string>& params)
+{
+    if (!params.empty() && params[0] == "-resnodebyid" && (params.size() > 1)) {
+        DumpLog::GetInstance().Print("------------DumpRSNodeByStringID------------");
+        DumpLog::GetInstance().Print(1, "Query by stringid: " + params[1]);
+        auto frameNode = NG::Inspector::GetFrameNodeByKey(params[1], true, true);
+        if (!frameNode) {
+            DumpLog::GetInstance().Print(1, "RSNode Not Found.");
+            return true;
+        }
+        auto renderContext =
+            AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+        CHECK_NULL_RETURN(renderContext, true);
+        auto rsNode = renderContext->GetRSNode();
+        DumpLog::GetInstance().Print(1, "RSNode " + (rsNode ?
+            ("name: " + rsNode->GetNodeName() + ", nodeId: " + std::to_string(rsNode->GetId())) :
+            "Not Found."));
+        return true;
+    }
+    return false;
 }
 
 bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
