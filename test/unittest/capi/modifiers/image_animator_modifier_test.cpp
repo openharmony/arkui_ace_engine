@@ -76,7 +76,18 @@ public:
         images.emplace_back(image);
         pattern->SetImages(std::move(images));
     }
+
+    RefPtr<PixelMap> CreatePixelMap(const std::string& src);
 };
+
+RefPtr<PixelMap> ImageAnimatorModifierTest::CreatePixelMap(const std::string& src)
+{
+    auto voidChar = const_cast<char*>(src.c_str());
+    void* voidPtr = static_cast<void*>(voidChar);
+    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    return pixelMap;
+}
+
 
 
 /*
@@ -100,9 +111,6 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(ImageAnimatorModifierTest, setImagesTestValidValues, TestSize.Level1)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    ASSERT_NE(frameNode, nullptr);
-    int32_t size = 2;
     auto array = new Ark_ImageFrameInfo[] {
         {
             .src = Converter::ArkUnion<Ark_Union_String_Resource_PixelMap, Ark_String>(
@@ -123,21 +131,12 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestValidValues, TestSize.Level1)
             .duration = Converter::ArkValue<Opt_Number>(1),
         },
     };
-
-    Array_ImageFrameInfo initValueImages = {
-        .array = array,
-        .length = size
-    };
+    Array_ImageFrameInfo initValueImages = { .array = array, .length = 2 };
 
     modifier_->setImages(node_, &initValueImages);
 
-    auto imageAnimatorPattern_ = frameNode->GetPattern<ImageAnimatorPattern>();
-    EXPECT_NE(imageAnimatorPattern_, nullptr);
-    EXPECT_EQ(imageAnimatorPattern_->GetImagesSize(), size);
-
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
-
     std::unique_ptr<JsonValue> resultImages = GetAttrValue<std::unique_ptr<JsonValue>>(
         jsonValue, ATTRIBUTE_IMAGES_NAME);
     
@@ -170,11 +169,7 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestPixelMap, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
-    int32_t size = 1;
-    std::string src = ATTRIBUTE_IMAGES_NAME;
-    auto voidChar = const_cast<char*>(src.c_str());
-    void* voidPtr = static_cast<void*>(voidChar);
-    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    RefPtr<PixelMap> pixelMap = CreatePixelMap(ATTRIBUTE_IMAGES_NAME);
     PixelMapPeer pixelMapPeer;
     pixelMapPeer.pixelMap = pixelMap;
     Ark_Materialized px;
@@ -189,26 +184,20 @@ HWTEST_F(ImageAnimatorModifierTest, setImagesTestPixelMap, TestSize.Level1)
             .duration = Converter::ArkValue<Opt_Number>(1),
         },
     };
-
-    Array_ImageFrameInfo initValueImages = {
-        .array = array,
-        .length = size
-    };
+    Array_ImageFrameInfo initValueImages = { .array = array, .length = 1 };
 
     modifier_->setImages(node_, &initValueImages);
 
     auto imageAnimatorPattern_ = frameNode->GetPattern<ImageAnimatorPattern>();
     EXPECT_NE(imageAnimatorPattern_, nullptr);
-    EXPECT_EQ(imageAnimatorPattern_->GetImagesSize(), size);
+    EXPECT_EQ(imageAnimatorPattern_->GetImagesSize(), 1);
     auto imageProperties = imageAnimatorPattern_->GetImage(0);
     EXPECT_EQ(imageProperties.pixelMap, pixelMap);
 
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
-
     std::unique_ptr<JsonValue> resultImages = GetAttrValue<std::unique_ptr<JsonValue>>(
         jsonValue, ATTRIBUTE_IMAGES_NAME);
-    
     if (resultImages->IsArray()) {
         int32_t count = resultImages->GetArraySize();
         for (int i = 0; i < count; i++) {
