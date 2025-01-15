@@ -81,7 +81,7 @@ bool StartWith(const std::string &source, const std::string &prefix)
 
 class UIExtensionAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
 public:
-    UIExtensionAccessibilityChildTreeCallback(const WeakPtr<UIExtensionPattern> &weakPattern, int64_t accessibilityId)
+    UIExtensionAccessibilityChildTreeCallback(const WeakPtr<UIExtensionPattern>& weakPattern, int64_t accessibilityId)
         : AccessibilityChildTreeCallback(accessibilityId), weakPattern_(weakPattern)
     {}
 
@@ -426,7 +426,6 @@ void UIExtensionPattern::OnConnect()
 void UIExtensionPattern::InitBusinessDataHandleCallback()
 {
     RegisterEventProxyFlagCallback();
-    RegisterTransformParamGetCallback();
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -682,13 +681,36 @@ void UIExtensionPattern::NotifyDestroy()
     }
 }
 
+class UECAccessibilitySAObserverCallback : public AccessibilitySAObserverCallback {
+public:
+    UECAccessibilitySAObserverCallback(
+        const WeakPtr<UIExtensionPattern>& weakPattern, int64_t accessibilityId)
+        : AccessibilitySAObserverCallback(accessibilityId), weakUECPattern_(weakPattern)
+    {}
+
+    ~UECAccessibilitySAObserverCallback() override = default;
+
+    bool OnState(bool state) override
+    {
+        auto pattern = weakUECPattern_.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        if (state) {
+            // first time turn on Accessibility, add TransferAccessibilityRectInfo
+            pattern->TransferAccessibilityRectInfo();
+        }
+        return true;
+    }
+private:
+    WeakPtr<UIExtensionPattern> weakUECPattern_;
+};
+
 void UIExtensionPattern::OnAttachToFrameNode()
 {
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
@@ -720,6 +742,11 @@ void UIExtensionPattern::OnAttachToFrameNode()
     auto accessibilityManager = frontend->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->SendFrameNodeToAccessibility(host, true);
+    host->RegisterNodeChangeListener();
+    accessibilitySAObserverCallback_ = std::make_shared<UECAccessibilitySAObserverCallback>(
+        WeakClaim(this), host->GetAccessibilityId());
+    accessibilityManager->RegisterAccessibilitySAObserverCallback(host->GetAccessibilityId(),
+        accessibilitySAObserverCallback_);
     UIEXT_LOGI("OnAttachToFrameNode");
 }
 
@@ -728,13 +755,17 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto id = frameNode->GetId();
     UnRegisterWindowSceneVisibleChangeCallback(id);
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveOnAreaChangeNode(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->UnregisterSurfacePositionChangedCallback(surfacePositionCallBackId_);
     pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayCallBackId_);
+    frameNode->UnregisterNodeChangeListener();
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
 }
 
 void UIExtensionPattern::OnModifyDone()
@@ -1733,44 +1764,6 @@ void UIExtensionPattern::RegisterEventProxyFlagCallback()
         });
 }
 
-void UIExtensionPattern::RegisterTransformParamGetCallback()
-{
-    RegisterUIExtBusinessConsumeReplyCallback(UIContentBusinessCode::TRANSFORM_PARAM,
-        [weak = WeakClaim(this)](const AAFwk::Want& data, std::optional<AAFwk::Want>& reply) -> int32_t {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_RETURN(pattern, -1);
-            auto host = pattern->GetHost();
-            CHECK_NULL_RETURN(host, -1);
-            auto rect = host->GetTransformRectRelativeToWindow();
-            VectorF finalScale = host->GetTransformScaleRelativeToWindow();
-            AccessibilityParentRectInfo parentRectInfo;
-            parentRectInfo.left = static_cast<int32_t>(rect.Left());
-            parentRectInfo.top = static_cast<int32_t>(rect.Top());
-            parentRectInfo.scaleX = finalScale.x;
-            parentRectInfo.scaleY = finalScale.y;
-            auto pipeline = host->GetContextRefPtr();
-            if (pipeline) {
-                auto accessibilityManager = pipeline->GetAccessibilityManager();
-                if (accessibilityManager) {
-                    auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
-                    parentRectInfo.left =
-                        parentRectInfo.left * windowInfo.scaleX + static_cast<int32_t>(windowInfo.left);
-                    parentRectInfo.top = parentRectInfo.top * windowInfo.scaleY + static_cast<int32_t>(windowInfo.top);
-                    parentRectInfo.scaleX *= windowInfo.scaleX;
-                    parentRectInfo.scaleY *= windowInfo.scaleY;
-                }
-            }
-            reply->SetParam("left", parentRectInfo.left);
-            reply->SetParam("top", parentRectInfo.top);
-            reply->SetParam("scaleX", parentRectInfo.scaleX);
-            reply->SetParam("scaleY", parentRectInfo.scaleY);
-            TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
-                "Transform rect param[left:%{public}d, top:%{public}d, scaleX:%{public}f, scaleY:%{public}f].",
-                parentRectInfo.left, parentRectInfo.top, parentRectInfo.scaleX, parentRectInfo.scaleY);
-            return 0;
-        });
-}
-
 void UIExtensionPattern::RegisterReplyPageModeCallback()
 {
     auto callback = [weak = WeakClaim(this)](const AAFwk::Want& data, std::optional<AAFwk::Want>& reply) -> int32_t {
@@ -1873,5 +1866,69 @@ void UIExtensionPattern::NotifyHostWindowMode(Rosen::WindowMode mode)
         int32_t windowMode = static_cast<int32_t>(mode);
         sessionWrapper_->NotifyHostWindowMode(windowMode);
     }
+}
+
+bool UIExtensionPattern::IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag)
+{
+    return ((flag & FRAME_NODE_CHANGE_GEOMETRY_CHANGE) == FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
+}
+
+bool UIExtensionPattern::IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag)
+{
+    return ((flag & FRAME_NODE_CHANGE_TRANSFORM_CHANGE) == FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
+}
+
+void UIExtensionPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
+{
+    if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeTransformChange(flag))) {
+        return;
+    }
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        return;
+    }
+    TransferAccessibilityRectInfo();
+}
+
+AccessibilityParentRectInfo UIExtensionPattern::GetAccessibilityRectInfo() const
+{
+    ACE_SCOPED_TRACE("GetAccessibilityRectInfo");
+    AccessibilityParentRectInfo rectInfo;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, rectInfo);
+    auto rect = host->GetTransformRectRelativeToWindow();
+    VectorF finalScale = host->GetTransformScaleRelativeToWindow();
+    
+    rectInfo.left = static_cast<int32_t>(rect.Left());
+    rectInfo.top = static_cast<int32_t>(rect.Top());
+    rectInfo.scaleX = finalScale.x;
+    rectInfo.scaleY = finalScale.y;
+    auto pipeline = host->GetContextRefPtr();
+    if (pipeline) {
+        auto accessibilityManager = pipeline->GetAccessibilityManager();
+        if (accessibilityManager) {
+            auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
+            rectInfo.left =
+                rectInfo.left * windowInfo.scaleX + static_cast<int32_t>(windowInfo.left);
+            rectInfo.top = rectInfo.top * windowInfo.scaleY + static_cast<int32_t>(windowInfo.top);
+            rectInfo.scaleX *= windowInfo.scaleX;
+            rectInfo.scaleY *= windowInfo.scaleY;
+        }
+    }
+    return rectInfo;
+}
+
+// Once enter this function, must calculate and transfer data to provider
+void UIExtensionPattern::TransferAccessibilityRectInfo()
+{
+    auto parentRectInfo = GetAccessibilityRectInfo();
+    AAFwk::Want data;
+    data.SetParam("left", parentRectInfo.left);
+    data.SetParam("top", parentRectInfo.top);
+    data.SetParam("scaleX", parentRectInfo.scaleX);
+    data.SetParam("scaleY", parentRectInfo.scaleY);
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "UEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f].",
+        parentRectInfo.scaleX, parentRectInfo.scaleY);
+    SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, std::move(data), BusinessDataSendType::ASYNC);
 }
 } // namespace OHOS::Ace::NG

@@ -82,6 +82,7 @@ struct AccessibilityParentRectInfo {
     int32_t centerX = 0;       // center X of parent interface relative to real window
     int32_t centerY = 0;       // center Y scale of parent interface relative to real window
     int32_t rotateDegree = 0;  // final rotate degree of parent interface
+    bool isChanged = false;    // only for uiextension, true means uec transfered translate params to uiextension
 };
 
 struct AccessibilityWindowInfo {
