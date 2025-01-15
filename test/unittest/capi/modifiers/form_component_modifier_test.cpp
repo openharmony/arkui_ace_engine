@@ -604,7 +604,7 @@ HWTEST_F(FormComponentModifierTest, setOnLoadTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setFormComponentOptions
+ * @tc.name: setFormComponentOptionsModuleNameValues
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -640,7 +640,7 @@ HWTEST_F(FormComponentModifierTest, setFormComponentOptionsModuleNameValues, Tes
 }
 
 /*
- * @tc.name: setFormComponentOptions
+ * @tc.name: setFormComponentOptionsDimensionValues
  * @tc.desc:
  * @tc.type: FUNC
  */
