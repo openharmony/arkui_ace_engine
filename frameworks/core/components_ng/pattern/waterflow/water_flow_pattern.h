@@ -217,6 +217,8 @@ private:
 
     void TriggerPostLayoutEvents();
 
+    RefPtr<FillAlgorithm> CreateFillAlgorithm() override;
+
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
     SizeF GetContentSize() const;
     void MarkDirtyNodeSelf();

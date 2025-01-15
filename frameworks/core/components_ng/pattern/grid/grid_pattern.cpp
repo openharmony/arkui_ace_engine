@@ -454,7 +454,6 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     if (!isInitialized_ || info_.startIndex_ != gridLayoutInfo.startIndex_) {
         eventhub->FireOnScrollToIndex(gridLayoutInfo.startIndex_);
     }
-    UpdateViewport(info_.axis_);
 
     bool indexChanged =
         (gridLayoutInfo.startIndex_ != info_.startIndex_) || (gridLayoutInfo.endIndex_ != info_.endIndex_);
@@ -482,6 +481,11 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckRestartSpring(false);
     CheckScrollable();
     MarkSelectedItems();
+
+    if (!isInitialized_)  {
+        JumpToItem(gridLayoutInfo.startIndex_); // notify 2.0 adapter after first layout
+    }
+    UpdateLayoutRange(info_.axis_, gridLayoutInfo.startIndex_);
     isInitialized_ = true;
     if (AceType::InstanceOf<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)) {
         CheckGridItemRange(DynamicCast<GridScrollLayoutAlgorithm>(gridLayoutAlgorithm)->GetItemAdapterRange());

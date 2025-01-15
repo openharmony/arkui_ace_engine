@@ -27,18 +27,19 @@ void LazyContainer::UpdateOffset(float delta, Axis axis)
     }
 }
 
-void LazyContainer::UpdateViewport(Axis axis)
+void LazyContainer::UpdateLayoutRange(Axis axis, int32_t markIdx)
 {
     if (adapter_) {
         adapter_->UpdateSize(GetHost()->GetGeometryNode()->GetFrameSize());
         adapter_->UpdateAxis(axis);
+        adapter_->UpdateMarkItem(markIdx, false);
     }
 }
 
 void LazyContainer::JumpToItem(int32_t index)
 {
     if (adapter_) {
-        adapter_->UpdateMarkItem(index, nullptr);
+        adapter_->UpdateMarkItem(index, true);
     }
 }
 

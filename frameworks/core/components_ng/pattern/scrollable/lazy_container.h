@@ -41,8 +41,15 @@ protected:
         adapter_.Reset();
     }
     void JumpToItem(int32_t index);
-    void UpdateViewport(Axis axis);
 
+    /**
+     * @brief Pass latest layout range info to adapter.
+     */
+    void UpdateLayoutRange(Axis axis, int32_t markIdx);
+
+    /**
+     * @brief Pass scroll offset to adapter.
+     */
     void UpdateOffset(float delta, Axis axis);
 
 private:

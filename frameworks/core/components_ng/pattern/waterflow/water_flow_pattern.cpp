@@ -322,6 +322,10 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     layoutInfo_->extraOffset_.reset();
     UpdateScrollBarOffset();
     CheckScrollable();
+    if (!isInitialized_) {
+        JumpToItem(0);
+    }
+    UpdateLayoutRange(layoutInfo_->axis_, -1);
 
     isInitialized_ = true;
 
@@ -330,7 +334,6 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
 
     GetHost()->ChildrenUpdatedFrom(-1);
-    UpdateViewport(layoutInfo_->axis_);
 
     return NeedRender();
 }
@@ -837,5 +840,10 @@ void WaterFlowPattern::DumpInfoAddSections()
         index++;
     }
     DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
+}
+
+RefPtr<FillAlgorithm> WaterFlowPattern::CreateFillAlgorithm()
+{
+    return MakeRefPtr<StaggeredFillAlgorithm>(GetLayoutProperty<LayoutProperty>());
 }
 } // namespace OHOS::Ace::NG

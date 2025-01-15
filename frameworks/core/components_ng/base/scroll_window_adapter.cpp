@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 
-void ScrollWindowAdapter::UpdateMarkItem(int32_t index, FrameNode* node)
+void ScrollWindowAdapter::UpdateMarkItem(int32_t index, bool notify)
 {
     if (index == -1) {
         index = fillAlgorithm_->GetMarkIndex();
@@ -32,8 +32,8 @@ void ScrollWindowAdapter::UpdateMarkItem(int32_t index, FrameNode* node)
         return;
     }
     markIndex_ = index;
-    itemRectMap_.clear();
-    if (updater_) {
+    if (updater_ && notify) {
+        itemRectMap_.clear();
         // nullptr to mark the first item
         updater_(index, nullptr);
     }

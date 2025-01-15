@@ -38,7 +38,11 @@ public:
     {}
     ~ScrollWindowAdapter() override = default;
 
-    void UpdateMarkItem(int32_t index, FrameNode* node);
+    /**
+     * @param index of the latest pivot item.
+     * @param notify true if need to notify frontend of pivot change.
+     */
+    void UpdateMarkItem(int32_t index, bool notify);
 
     void UpdateSize(const SizeF& size)
     {
