@@ -26,10 +26,7 @@ class ACE_EXPORT SheetWrapperLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(SheetWrapperLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
-    SheetWrapperLayoutAlgorithm() = default;
-    SheetWrapperLayoutAlgorithm(
-        int32_t id, const std::string& tag, const SheetStyle& sheetStyle, const SheetType& sheetType)
-        : targetNodeId_(id), targetTag_(tag), sheetStyle_(sheetStyle), sheetType_(sheetType)
+    SheetWrapperLayoutAlgorithm()
     {
         placementCheckFunc_[Placement::BOTTOM] = &SheetWrapperLayoutAlgorithm::CheckPlacementBottom;
         placementCheckFunc_[Placement::BOTTOM_LEFT] = &SheetWrapperLayoutAlgorithm::CheckPlacementBottomLeft;
@@ -67,17 +64,15 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    void CalculateSheetRadius(const RefPtr<FrameNode>& host);
-    void CalculateAloneSheetRadius(const RefPtr<FrameNode>& host, std::optional<Dimension>& sheetRadius,
-        const std::optional<Dimension>& sheetStyleRadius);
     void InitParameter(LayoutWrapper* layoutWrapper);
     void GetSheetPageSize(LayoutWrapper* layoutWrapper);
+    void DecreaseArrowHeightWhenArrowIsShown(const RefPtr<FrameNode>& sheetNode);
     OffsetF GetPopupStyleSheetOffset(LayoutWrapper* layoutWrapper);
     OffsetF GetOffsetInAvoidanceRule(
         LayoutWrapper* layoutWrapper, const SizeF& targetSize, const OffsetF& targetOffset);
-    Placement AvoidanceRuleOfPlacement(
+    Placement AvoidanceRuleBottom(
         const Placement& currentPlacement, const SizeF& targetSize, const OffsetF& targetOffset);
-    Placement AvoidanceRuleOfPlacementInSixteen(
+    Placement AvoidanceRuleOfPlacement(
         LayoutWrapper* layoutWrapper, const SizeF& targetSize, const OffsetF& targetOffset);
     Placement RecheckBestPlacementWithInsufficientSpace(const SizeF&, const OffsetF&, SizeF&);
     SizeF GetLeftSpaceWithPlacement(const Placement& placement, const SizeF& targetSize, const OffsetF& targetOffset);
@@ -115,8 +110,6 @@ private:
     void RemeasureForPopup(LayoutWrapper* layoutWrapper);
     void UpdateSheetNodePopupInfo(LayoutWrapper* layoutWrapper);
 
-    int32_t targetNodeId_ = -1;
-    std::string targetTag_;
     using DirectionCheckFunc = bool (SheetWrapperLayoutAlgorithm::*)(const SizeF&, const OffsetF&);
     std::unordered_map<Placement, DirectionCheckFunc> directionCheckFunc_;
     using OffsetGetFunc = OffsetF (SheetWrapperLayoutAlgorithm::*)(const SizeF&, const OffsetF&);
@@ -124,8 +117,6 @@ private:
     using PlacementCheckFunc = bool (SheetWrapperLayoutAlgorithm::*)(const SizeF&, const OffsetF&);
     std::unordered_map<Placement, PlacementCheckFunc> placementCheckFunc_;
 
-    SheetStyle sheetStyle_;
-    SheetType sheetType_;
     SheetPopupInfo sheetPopupInfo_;
     Placement placement_ = Placement::BOTTOM;
     Rect windowGlobalRect_;

@@ -40,17 +40,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, nullptr);
-        auto sheetNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-        CHECK_NULL_RETURN(sheetNode, nullptr);
-        auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
-        CHECK_NULL_RETURN(sheetLayoutProperty, nullptr);
-        auto sheetStyle = sheetLayoutProperty->GetSheetStyleValue();
-        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-        CHECK_NULL_RETURN(sheetPattern, nullptr);
-        return MakeRefPtr<SheetWrapperLayoutAlgorithm>(
-            targetId_, targetTag_, sheetStyle, sheetPattern->GetSheetType());
+        return MakeRefPtr<SheetWrapperLayoutAlgorithm>();
     }
 
     void OnAttachToMainTree() override
@@ -75,6 +65,11 @@ public:
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         return MakeRefPtr<SheetWrapperPaintMethod>();
+    }
+
+    RefPtr<FrameNode> GetTargetNode() const
+    {
+        return FrameNode::GetFrameNode(targetTag_, targetId_);
     }
 
 protected:

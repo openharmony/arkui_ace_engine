@@ -103,6 +103,7 @@ public:
 
 namespace OHOS::Ace::NG {
 namespace {
+    const int32_t IGNORE_POSITION_TRANSITION_SWITCH = -990;
 } // namespace
 
 class JsThirdProviderInteractionOperationTest : public testing::Test {
@@ -118,6 +119,8 @@ void JsThirdProviderInteractionOperationTest::SetUpTestCase()
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
     MockContainer::Current()->pipelineContext_->taskExecutor_ = MockContainer::Current()->taskExecutor_;
+    auto context = NG::PipelineContext::GetCurrentContext();
+    context->instanceId_ = IGNORE_POSITION_TRANSITION_SWITCH;
 }
 
 void JsThirdProviderInteractionOperationTest::TearDownTestCase()

@@ -45,7 +45,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
-namespace{
+namespace {
 const Dimension WINDOW_EDGE_SPACE = 6.0_vp;
 } // namespace
 class SheetPopupTestNg : public testing::Test {
@@ -204,6 +204,7 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset001, TestSize.Level1)
     auto pipelineContext = MockPipelineContext::GetCurrentContext();
     ASSERT_NE(pipelineContext, nullptr);
     pipelineContext->SetDisplayWindowRectInfo(Rect(0.f, 0.f, 3000.f, 3000.f));
+    MockPipelineContext::GetCurrent()->SetCurrentWindowRect(Rect(0.f, 0.f, 3000.f, 3000.f));
     MockPipelineContext::GetCurrent()->SetRootSize(rootSize.Width(), rootSize.Height());
 
     auto containerId = Container::CurrentId();
@@ -253,7 +254,6 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset001, TestSize.Level1)
     EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetHeight_, sheetPageHeight.ConvertToPx()));
     EXPECT_EQ(sheetWrapperLayoutAlgorithm->placement_, Placement::BOTTOM);
     EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.placementOnTarget, true);
-    EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetType_, SheetType::SHEET_POPUP);
 
     sheetWrapperNode->Layout();
     EXPECT_EQ(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.finalPlacement, Placement::BOTTOM);
@@ -265,8 +265,6 @@ HWTEST_F(SheetPopupTestNg, GetPopupStyleSheetOffset001, TestSize.Level1)
     EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetX, expectedOffsetX));
     auto expectedOffsetY = targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx();
     EXPECT_TRUE(NearEqual(sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetY, expectedOffsetY));
-    std::cout << "sxy::" << expectedOffsetX << " " << sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetX <<
-        " " << expectedOffsetY << " " << sheetWrapperLayoutAlgorithm->sheetPopupInfo_.sheetOffsetY << std::endl;
 
     /**
      * @tc.steps: step4. recover container and pipeline info.
@@ -344,13 +342,14 @@ HWTEST_F(SheetPopupTestNg, GetOffsetInAvoidanceRule001, TestSize.Level1)
      * @tc.expected: get offset correctly
      */
     auto targetPlacement =
-        sheetWrapperLayoutAlgorithm->AvoidanceRuleOfPlacement(Placement::BOTTOM, targetSize, targetOffset);
+        sheetWrapperLayoutAlgorithm->AvoidanceRuleBottom(Placement::BOTTOM, targetSize, targetOffset);
     EXPECT_NE(sheetWrapperLayoutAlgorithm->getOffsetFunc_.find(targetPlacement),
         sheetWrapperLayoutAlgorithm->getOffsetFunc_.end());
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
         sheetWrapperNode, sheetWrapperNode->GetGeometryNode(), sheetWrapperNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
-    auto realOffset = sheetWrapperLayoutAlgorithm->GetOffsetInAvoidanceRule(layoutWrapper.rawPtr_, targetSize, targetOffset);
+    auto realOffset =
+        sheetWrapperLayoutAlgorithm->GetOffsetInAvoidanceRule(layoutWrapper.rawPtr_, targetSize, targetOffset);
     auto expectedOffset = OffsetF(
         targetOffset.GetX() + (targetSize.Width() - sheetWrapperLayoutAlgorithm->sheetWidth_) / 2.0,
         targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
@@ -549,13 +548,11 @@ HWTEST_F(SheetPopupTestNg, GetOffsetWithBottomRight001, TestSize.Level1)
     sheetWrapperLayoutAlgorithm->sheetWidth_ = 200;
     EXPECT_FALSE(GreatNotEqual(arrowOffsetX + sheetWrapperLayoutAlgorithm->sheetRadius_.radiusTopRight->ConvertToPx() +
         arrowVertical.ConvertToPx(), sheetWrapperLayoutAlgorithm->sheetWidth_));
-    std::cout << sheetWrapperLayoutAlgorithm->sheetWidth_ << std::endl;
 
     auto realOffset = sheetWrapperLayoutAlgorithm->GetOffsetWithBottomRight(targetSize, targetOffset);
     auto expectedOffset = OffsetF(targetOffset.GetX(),
         targetOffset.GetY() + targetSize.Height() + SHEET_TARGET_SPACE.ConvertToPx());
     EXPECT_EQ(realOffset, expectedOffset);
-    std::cout << realOffset.GetX() << " " << realOffset.GetY() << "   " << expectedOffset.GetX() << " " << expectedOffset.GetY() << std::endl;
 
     sheetWrapperLayoutAlgorithm->sheetRadius_ = BorderRadiusProperty(Dimension(200));
     EXPECT_TRUE(GreatNotEqual(arrowOffsetX + sheetWrapperLayoutAlgorithm->sheetRadius_.radiusTopRight->ConvertToPx() +
@@ -571,13 +568,13 @@ HWTEST_F(SheetPopupTestNg, GetOffsetWithBottomRight001, TestSize.Level1)
 }
 
 /**
- * @tc.name: AvoidanceRuleOfPlacement001
+ * @tc.name: AvoidanceRuleBottom001
  * @tc.desc: Branch: if (LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) &&
  *                  getOffsetFunc == GetOffsetWithBottomRight001()
  *           Condition: sheetType == Popup
  * @tc.type: FUNC
  */
-HWTEST_F(SheetPopupTestNg, AvoidanceRuleOfPlacement001, TestSize.Level1)
+HWTEST_F(SheetPopupTestNg, AvoidanceRuleBottom001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1: create root and target node, init builder func, set api version 12
@@ -645,17 +642,17 @@ HWTEST_F(SheetPopupTestNg, AvoidanceRuleOfPlacement001, TestSize.Level1)
         &SheetWrapperLayoutAlgorithm::CheckPlacementBottomLeft;
     targetOffset = OffsetF(WINDOW_EDGE_SPACE.ConvertToPx() - 1.0f, 1.0f);
     EXPECT_FALSE(sheetWrapperLayoutAlgorithm->CheckPlacementBottomLeft(SizeF(), targetOffset));
-    sheetWrapperLayoutAlgorithm->AvoidanceRuleOfPlacement(Placement::BOTTOM, SizeF(), targetOffset);
+    sheetWrapperLayoutAlgorithm->AvoidanceRuleBottom(Placement::BOTTOM, SizeF(), targetOffset);
 
     targetOffset.x_ = WINDOW_EDGE_SPACE.ConvertToPx() + 1.0f;
     pipelineContext->displayWindowRectInfo_.width_ = 2 * WINDOW_EDGE_SPACE.ConvertToPx() +
         sheetWrapperLayoutAlgorithm->sheetWidth_ + 1.0f;
     EXPECT_FALSE(sheetWrapperLayoutAlgorithm->CheckPlacementBottomLeft(SizeF(), targetOffset));
-    sheetWrapperLayoutAlgorithm->AvoidanceRuleOfPlacement(Placement::BOTTOM, SizeF(), targetOffset);
+    sheetWrapperLayoutAlgorithm->AvoidanceRuleBottom(Placement::BOTTOM, SizeF(), targetOffset);
 
     sheetWrapperLayoutAlgorithm->directionCheckFunc_[Placement::BOTTOM] = nullptr;
     sheetWrapperLayoutAlgorithm->placementCheckFunc_[Placement::BOTTOM] = nullptr;
-    sheetWrapperLayoutAlgorithm->AvoidanceRuleOfPlacement(Placement::BOTTOM, SizeF(), OffsetF());
+    sheetWrapperLayoutAlgorithm->AvoidanceRuleBottom(Placement::BOTTOM, SizeF(), OffsetF());
     
     /**
      * @tc.steps: step5. recover api version info.

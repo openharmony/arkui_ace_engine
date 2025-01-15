@@ -49,7 +49,8 @@ private:
         float borderWidth, const BorderRadiusProperty& sheetRadius);
     void GetBorderDrawPathNew(RSPath& path, const RefPtr<FrameNode> sheetNode,
         float borderWidth, const BorderRadiusProperty& sheetRadius);
-    void DrawClipPathBottom(RSPath&, const RefPtr<FrameNode>, const BorderRadiusProperty&, float, const SheetPopupInfo&);
+    void DrawClipPathBottom(
+        RSPath&, const RefPtr<FrameNode>, const BorderRadiusProperty&, float, const SheetPopupInfo&);
     void DrawClipPathTop(RSPath&, const RefPtr<FrameNode>, const BorderRadiusProperty&, float, const SheetPopupInfo&);
     void DrawClipPathLeft(RSPath&, const RefPtr<FrameNode>, const BorderRadiusProperty&, float, const SheetPopupInfo&);
     void DrawClipPathRight(RSPath&, const RefPtr<FrameNode>, const BorderRadiusProperty&, float, const SheetPopupInfo&);

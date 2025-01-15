@@ -15,6 +15,9 @@
 
 #include "test/unittest/core/event/drag_event_test_ng.h"
 #include "test/mock/base/mock_task_executor.h"
+#include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
+
 using namespace testing;
 using namespace testing::ext;
 
@@ -617,6 +620,163 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest044, TestSize.Le
     layoutProperty->propVisibility_ = VisibleType::INVISIBLE;
     DragDropFuncWrapper::GetPreviewPixelMap("testid", frameNode);
     EXPECT_EQ(gestureEventHub->GetTextDraggable(), true);
+}
+
+/**
+ * @tc.name: DragEventActuatorUpdatePreviewAttrTest045
+ * @tc.desc: Create DragEventActuator and invoke CreateTiledPixelMap function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest045, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto framenode = FrameNode::CreateFrameNode(
+        "test", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(framenode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    gestureEventHub->contextMenuShowStatus_ = true;
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+    ResponseLinkResult responseLinkResult;
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    GestureEventFunc actionStart = [&unknownPropertyValue](GestureEvent& info) {};
+    GestureEventNoParameter actionCancel = [&unknownPropertyValue]() {};
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>(
+        std::move(actionStart), std::move(actionStart), std::move(actionStart), std::move(actionCancel));
+    dragEventActuator->ReplaceDragEvent(dragEvent);
+    dragEventActuator->SetCustomDragEvent(dragEvent);
+    dragEventActuator->SequencedRecognizer_ = nullptr;
+    auto parentNode = FrameNode::CreateFrameNode(
+        "test", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(parentNode, nullptr);
+    dragEventActuator->itemParentNode_ = parentNode;
+    auto scrollablePatternDummy =
+        FrameNode::GetOrCreateFrameNode(V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<PartiallyMockedScrollable>(); });
+    ASSERT_NE(scrollablePatternDummy, nullptr);
+    auto scrollablePatternDummyPattern = scrollablePatternDummy->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(scrollablePatternDummyPattern, nullptr);
+    std::vector<RefPtr<FrameNode>> childrenNull;
+    std::vector<RefPtr<FrameNode>> children;
+    children.emplace_back(framenode);
+    children.emplace_back(framenode);
+    parentNode->pattern_ = scrollablePatternDummy->GetPattern();
+    NG::DragPreviewOption previewOptions;
+    previewOptions.isMultiTiled = true;
+    framenode->SetDragPreviewOptions(previewOptions);
+    DragDropFuncWrapper::CreateTiledPixelMap(framenode);
+    auto gestureHub = dragEventActuator->gestureEventHub_.Upgrade();
+    ASSERT_NE(gestureHub, nullptr);
+    previewOptions.isMultiTiled = false;
+    framenode->SetDragPreviewOptions(previewOptions);
+    dragEventActuator->isSelectedItemNode_ = true;
+    DragDropFuncWrapper::CreateTiledPixelMap(framenode);
+    EXPECT_EQ(gestureHub->pixelMap_, nullptr);
+}
+
+/**
+ * @tc.name: DragEventActuatorUpdatePreviewAttrTest046
+ * @tc.desc: Create DragEventActuator and invoke CreateTiledPixelMap function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest046, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto framenode = FrameNode::CreateFrameNode(
+        "test", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(framenode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    gestureEventHub->contextMenuShowStatus_ = true;
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    ASSERT_NE(getEventTargetImpl, nullptr);
+    TouchTestResult finalResult;
+    ResponseLinkResult responseLinkResult;
+    auto focusHub = framenode->GetOrCreateFocusHub();
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    GestureEventFunc actionStart = [&unknownPropertyValue](GestureEvent& info) {};
+    GestureEventNoParameter actionCancel = [&unknownPropertyValue]() {};
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>(
+        std::move(actionStart), std::move(actionStart), std::move(actionStart), std::move(actionCancel));
+    dragEventActuator->ReplaceDragEvent(dragEvent);
+    dragEventActuator->SetCustomDragEvent(dragEvent);
+    dragEventActuator->SequencedRecognizer_ = nullptr;
+    auto parentNode = FrameNode::CreateFrameNode(
+        "test", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(parentNode, nullptr);
+    dragEventActuator->itemParentNode_ = parentNode;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> tiledPixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(tiledPixelMap, nullptr);
+    std::vector<RefPtr<FrameNode>> children;
+    Rect pixelMapRect;
+    DragDropFuncWrapper::DrawTiledPixelMap(tiledPixelMap, children, pixelMapRect);
+    EXPECT_TRUE(children.empty());
+    children.emplace_back(framenode);
+    children.emplace_back(framenode);
+    for (auto& node : children) {
+        auto gestureHub = node->GetOrCreateGestureEventHub();
+        ASSERT_NE(gestureHub, nullptr);
+        gestureHub->dragPreviewPixelMap_ = tiledPixelMap;
+    }
+    DragDropFuncWrapper::DrawTiledPixelMap(tiledPixelMap, children, pixelMapRect);
+    EXPECT_FALSE(children.empty());
+}
+
+/**
+ * @tc.name: DragEventActuatorUpdatePreviewAttrTest047
+ * @tc.desc: Create DragEventActuator and invoke CreateTiledPixelMap function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest048, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto framenode = FrameNode::CreateFrameNode(
+        "test", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(framenode, nullptr);
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(framenode));
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    gestureEventHub->contextMenuShowStatus_ = true;
+    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(dragEventActuator, nullptr);
+    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
+    ASSERT_NE(getEventTargetImpl, nullptr);
+    TouchTestResult finalResult;
+    ResponseLinkResult responseLinkResult;
+    auto focusHub = framenode->GetOrCreateFocusHub();
+    double unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    GestureEventFunc actionStart = [&unknownPropertyValue](GestureEvent& info) {};
+    GestureEventNoParameter actionCancel = [&unknownPropertyValue]() {};
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>(
+        std::move(actionStart), std::move(actionStart), std::move(actionStart), std::move(actionCancel));
+    dragEventActuator->ReplaceDragEvent(dragEvent);
+    dragEventActuator->SetCustomDragEvent(dragEvent);
+    dragEventActuator->SequencedRecognizer_ = nullptr;
+    auto parentNode = FrameNode::CreateFrameNode(
+        "test", ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(parentNode, nullptr);
+    dragEventActuator->itemParentNode_ = parentNode;
+    void* voidPtr = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> tiledPixelMap = PixelMap::CreatePixelMap(voidPtr);
+    ASSERT_NE(tiledPixelMap, nullptr);
+    std::vector<RefPtr<FrameNode>> children;
+    children.emplace_back(framenode);
+    children.emplace_back(framenode);
+    for (auto& node : children) {
+        auto gestureHub = node->GetOrCreateGestureEventHub();
+        ASSERT_NE(gestureHub, nullptr);
+        gestureHub->SetDragPreviewPixelMap(tiledPixelMap);
+    }
+    EXPECT_EQ(DragDropFuncWrapper::GetTiledPixelMapInfo(children), nullptr);
 }
 
 /**

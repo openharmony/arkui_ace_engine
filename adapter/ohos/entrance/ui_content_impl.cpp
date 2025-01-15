@@ -2775,6 +2775,11 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
          "rsTransaction nullptr %{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
         rsTransaction == nullptr);
+    if (lastReason_ == OHOS::Rosen::WindowSizeChangeReason::UNDEFINED) {
+        lastReason_ = reason;
+    }
+    bool reasonDragFlag = GetWindowSizeChangeReason(lastReason_, reason);
+    lastReason_ = reason;
     std::string stringifiedMap = StringifyAvoidAreas(avoidAreas);
     TAG_LOGI(ACE_LAYOUT, "updateAvoidAreas size %{public}zu, %{public}s", avoidAreas.size(), stringifiedMap.c_str());
     bool isOrientationChanged = static_cast<int32_t>(SystemProperties::GetDeviceOrientation()) != config.Orientation();
@@ -2848,7 +2853,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         context->FireSizeChangeByRotateCallback(isOrientationChanged, rsTransaction);
     }
 
-    if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr)) {
+    if (viewportConfigMgr_->IsConfigsEqual(config) && (rsTransaction == nullptr) && reasonDragFlag) {
         taskExecutor->PostTask(
             [context, config, avoidAreas] {
                 if (avoidAreas.empty()) {
@@ -4482,6 +4487,22 @@ void UIContentImpl::ExecuteUITask(std::function<void()> task, const std::string&
     }
 }
 
+void UIContentImpl::UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+    CHECK_NULL_VOID(aceContainer);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [aceContainer, singleHandTransform = Platform::SingleHandTransform(transform.posX,
+            transform.posY, transform.scaleX, transform.scaleY)]() {
+            aceContainer->SetSingleHandTransform(singleHandTransform);
+        }, TaskExecutor::TaskType::UI, "ArkUISetSingleHandTransform");
+}
+
 bool UIContentImpl::ConfigCustomWindowMask(bool enable)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -4490,4 +4511,24 @@ bool UIContentImpl::ConfigCustomWindowMask(bool enable)
     CHECK_NULL_RETURN(pipelineContext, false);
     return NG::ContainerModalView::ConfigCustomWindowMask(pipelineContext, enable);
 }
+
+bool UIContentImpl::GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason lastReason,
+    OHOS::Rosen::WindowSizeChangeReason reason)
+{
+    bool reasonDragFlag = true;
+    if (lastReason == OHOS::Rosen::WindowSizeChangeReason::DRAG_START &&
+            reason == OHOS::Rosen::WindowSizeChangeReason::DRAG) {
+        reasonDragFlag = false;
+    }
+    if (lastReason == OHOS::Rosen::WindowSizeChangeReason::DRAG &&
+            reason == OHOS::Rosen::WindowSizeChangeReason::DRAG) {
+        reasonDragFlag = false;
+    }
+    if (lastReason == OHOS::Rosen::WindowSizeChangeReason::DRAG &&
+            reason == OHOS::Rosen::WindowSizeChangeReason::DRAG_END) {
+        reasonDragFlag = false;
+    }
+    return reasonDragFlag;
+}
+
 } // namespace OHOS::Ace

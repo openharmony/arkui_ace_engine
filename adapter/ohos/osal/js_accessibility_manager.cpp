@@ -1888,10 +1888,10 @@ void JsAccessibilityManager::UpdateWebAccessibilityElementInfo(
         auto webNode = webPattern->GetHost();
         CHECK_NULL_VOID(webNode);
         auto webRect = webNode->GetTransformRectRelativeToWindow();
-        auto left = webRect.Left() + node->GetRectX() + commonProperty.windowLeft;
-        auto top = webRect.Top() + node->GetRectY() + commonProperty.windowTop;
-        auto right = webRect.Left() + node->GetRectX() + node->GetRectWidth() + commonProperty.windowLeft;
-        auto bottom = webRect.Top() + node->GetRectY() + node->GetRectHeight() + commonProperty.windowTop;
+        auto left = (webRect.Left() + node->GetRectX()) * scaleX_ + commonProperty.windowLeft;
+        auto top = (webRect.Top() + node->GetRectY()) * scaleY_ + commonProperty.windowTop;
+        auto right = left + node->GetRectWidth() * scaleX_;
+        auto bottom = top + node->GetRectHeight() * scaleY_;
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
     }
@@ -6672,6 +6672,19 @@ void JsAccessibilityManager::UpdateElementInfoInnerWindowId(
     }
 }
 
+void JsAccessibilityManager::UpdateWindowInfo(AccessibilityWindowInfo& windowInfo)
+{
+    auto pipelineContext = GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(pipelineContext);
+    auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto singleHandTransform = container->GetSingleHandTransform();
+    windowInfo.top += singleHandTransform.y_;
+    windowInfo.left += singleHandTransform.x_;
+    windowInfo.scaleX *= singleHandTransform.scaleX_;
+    windowInfo.scaleY *= singleHandTransform.scaleY_;
+}
+
 AccessibilityWindowInfo JsAccessibilityManager::GenerateWindowInfo(const RefPtr<NG::FrameNode>& node,
     const RefPtr<PipelineBase>& context)
 {
@@ -6711,6 +6724,7 @@ AccessibilityWindowInfo JsAccessibilityManager::GenerateWindowInfo(const RefPtr<
             windowInfo.scaleX = windowScale;
             windowInfo.scaleY = windowScale;
         }
+        UpdateWindowInfo(windowInfo);
     }
     return windowInfo;
 }

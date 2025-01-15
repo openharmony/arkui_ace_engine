@@ -793,7 +793,6 @@ private:
     std::string DrawClipPathTop(const SizeF&, const BorderRadiusProperty&);
     std::string DrawClipPathLeft(const SizeF&, const BorderRadiusProperty&);
     std::string DrawClipPathRight(const SizeF&, const BorderRadiusProperty&);
-    std::string DrawClipPathWithoutArrow(const SizeF&, const BorderRadiusProperty&);
 
     uint32_t broadcastPreDetentsIndex_ = 0;
     SheetAccessibilityDetents sheetDetents_ = SheetAccessibilityDetents::HIGH;
@@ -850,6 +849,7 @@ private:
     bool isDirectionUp_ = true;
     bool topSafeAreaChanged_ = false;
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
+    SheetEffectEdge sheetEffectEdge_ = SheetEffectEdge::ALL;
 
     //record sheet sored detent index
     uint32_t detentsIndex_ = 0;

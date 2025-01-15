@@ -35,7 +35,6 @@ void SheetPresentationLayoutAlgorithm::InitParameter()
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
     isKeyBoardShow_ = keyboardInsert.IsValid();
     isHoverMode_ = enableHoverMode ? pipeline->IsHalfFoldHoverStatus() : false;
-    isRemeasureForPopup_ = false;
 }
 
 void SheetPresentationLayoutAlgorithm::CalculateSheetHeightInOtherScenes(LayoutWrapper* layoutWrapper)
@@ -112,6 +111,7 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             sheetWidth_ = width;
         }
         CalculateSheetHeightInOtherScenes(layoutWrapper);
+        AddArrowHeightToSheetSize();
         SizeF idealSize(sheetWidth_, sheetHeight_);
         layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize);
         layoutWrapper->GetGeometryNode()->SetContentSize(idealSize);
@@ -370,7 +370,7 @@ LayoutConstraintF SheetPresentationLayoutAlgorithm::CreateSheetChildConstraint(
     if (sheetType_ == SheetType::SHEET_POPUP) {
         UpdateMaxSizeWithPlacement(maxWidth, maxHeight);
     }
-    if (isRemeasureForPopup_) {
+    if (sheetPopupInfo_.finalPlacement != Placement::NONE) {
         childConstraint.maxSize.SetWidth(maxWidth);
     }
     childConstraint.maxSize.SetHeight(maxHeight);
@@ -383,10 +383,6 @@ void SheetPresentationLayoutAlgorithm::UpdateMaxSizeWithPlacement(float& maxWidt
 {
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         maxHeight -= SHEET_ARROW_HEIGHT.ConvertToPx();
-        return;
-    }
-
-    if (!isRemeasureForPopup_) {
         return;
     }
 
@@ -458,7 +454,6 @@ void SheetPresentationLayoutAlgorithm::UpdatePopupInfoAndRemeasure(LayoutWrapper
     }
     sheetWidth_ = sheetWidth;
     sheetHeight_ = sheetHeight;
-    isRemeasureForPopup_ = true;
     auto sheetPageWrapper = layoutWrapper->GetChildByIndex(0);
     CHECK_NULL_VOID(sheetPageWrapper);
     RemeasureForPopup(sheetPageWrapper);
@@ -466,7 +461,8 @@ void SheetPresentationLayoutAlgorithm::UpdatePopupInfoAndRemeasure(LayoutWrapper
 
 void SheetPresentationLayoutAlgorithm::AddArrowHeightToSheetSize()
 {
-    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ||
+        sheetType_ != SheetType::SHEET_POPUP) {
         return;
     }
 
@@ -521,7 +517,6 @@ void SheetPresentationLayoutAlgorithm::RemeasureForPopup(const RefPtr<LayoutWrap
         auto layoutProperty = AceType::DynamicCast<SheetPresentationProperty>(layoutWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateLayoutConstraint(layoutConstraint);
-        // SizeF lastSize(sheetWidth_, sheetHeight_);
         AddArrowHeightToSheetSize();
         TAG_LOGI(AceLogTag::ACE_SHEET, "remeasure size:(%{public}f, %{public}f)", sheetWidth_, sheetHeight_);
         SizeF idealSize(sheetWidth_, sheetHeight_);
@@ -536,14 +531,6 @@ void SheetPresentationLayoutAlgorithm::RemeasureForPopup(const RefPtr<LayoutWrap
         CHECK_NULL_VOID(scrollNode);
         childConstraint.selfIdealSize.SetWidth(childConstraint.maxSize.Width());
         scrollNode->Measure(childConstraint);
-        if (sheetStyle_.sheetHeight.sheetMode.value_or(SheetMode::LARGE) == SheetMode::AUTO) {
-            auto&& children = layoutWrapper->GetAllChildrenWithBuild();
-            auto secondIter = std::next(children.begin(), 1);
-            auto secondChild = *secondIter;
-            CHECK_NULL_VOID(secondChild);
-            childConstraint = CreateSheetChildConstraint(layoutProperty, layoutWrapper.GetRawPtr());
-            secondChild->Measure(childConstraint);
-        }
     }
 }
 } // namespace OHOS::Ace::NG

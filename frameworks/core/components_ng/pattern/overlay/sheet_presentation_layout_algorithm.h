@@ -107,7 +107,6 @@ private:
     std::unordered_map<Placement, OffsetGetFunc> getOffsetFunc_;
     ACE_DISALLOW_COPY_AND_MOVE(SheetPresentationLayoutAlgorithm);
     SheetPopupInfo sheetPopupInfo_;
-    bool isRemeasureForPopup_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_OVERLAY_SHEET_PRESENTATION_LAYOUT_ALGORITHM_H

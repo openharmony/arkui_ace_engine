@@ -1465,7 +1465,7 @@ private:
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
     DragPreviewOption previewOption_ { true, false, false, false, false, false, true,
-        false, true, false, { .isShowBadge = true } };
+        false, true, false, false, { .isShowBadge = true } };
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
 

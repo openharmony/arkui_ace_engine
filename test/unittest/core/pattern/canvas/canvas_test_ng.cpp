@@ -18,8 +18,6 @@
 #include <optional>
 #include <utility>
 
-#include "base/image/image_source.h"
-#include "base/image/pixel_map.h"
 #include "gtest/gtest.h"
 
 #define protected public
@@ -38,6 +36,9 @@
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 #undef private
 #undef protected
+
+#include "base/image/image_source.h"
+#include "base/image/pixel_map.h"
 
 using namespace testing;
 using namespace testing::ext;

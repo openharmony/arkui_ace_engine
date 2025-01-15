@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_property.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
+#include "core/components_ng/pattern/overlay/sheet_wrapper_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -144,48 +145,6 @@ void SheetWrapperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     GetSheetPageSize(layoutWrapper);
 }
 
-void SheetWrapperLayoutAlgorithm::CalculateSheetRadius(const RefPtr<FrameNode>& host)
-{
-    CHECK_NULL_VOID(host);
-    auto sheetPage = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-    CHECK_NULL_VOID(sheetPage);
-    auto geometryNode = sheetPage->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto sheetSize = geometryNode->GetFrameSize();
-    auto layoutProperty = sheetPage->GetLayoutProperty<SheetPresentationProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (sheetSize.IsPositive()) {
-        CalculateAloneSheetRadius(host, sheetRadius_.radiusTopLeft, sheetStyle.radius->radiusTopLeft);
-        CalculateAloneSheetRadius(host, sheetRadius_.radiusTopRight, sheetStyle.radius->radiusTopRight);
-        CalculateAloneSheetRadius(host, sheetRadius_.radiusBottomLeft, sheetStyle.radius->radiusBottomLeft);
-        CalculateAloneSheetRadius(host, sheetRadius_.radiusBottomRight, sheetStyle.radius->radiusBottomRight);
-    }
-}
-
-void SheetWrapperLayoutAlgorithm::CalculateAloneSheetRadius(const RefPtr<FrameNode>& host,
-    std::optional<Dimension>& sheetRadius, const std::optional<Dimension>& sheetStyleRadius)
-{
-    CHECK_NULL_VOID(host);
-    auto sheetPage = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-    CHECK_NULL_VOID(sheetPage);
-    auto geometryNode = sheetPage->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto sheetSize = geometryNode->GetFrameSize();
-    float half = 0.5f;
-    if (sheetStyleRadius.has_value() && GreatOrEqual(sheetStyleRadius->Value(), 0.0f)) {
-        if (sheetStyleRadius->Unit() == DimensionUnit::PERCENT) {
-            sheetRadius = Dimension(sheetStyleRadius->Value() * sheetSize.Width());
-        } else {
-            sheetRadius = sheetStyleRadius;
-        }
-    }
-    // The maximum value of radius is half the width of the page.
-    if (sheetSize.Width() * half < sheetRadius->ConvertToPx()) {
-        sheetRadius = Dimension(sheetSize.Width() * half);
-    }
-}
-
 void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
 {
     auto host = layoutWrapper->GetHostNode();
@@ -194,11 +153,19 @@ void SheetWrapperLayoutAlgorithm::InitParameter(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
+    
+    auto sheetPage = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_VOID(sheetPage);
+    auto sheetPattern = DynamicCast<SheetPresentationPattern>(sheetPage->GetPattern());
+    CHECK_NULL_VOID(sheetPattern);
     sheetRadius_ = BorderRadiusProperty(sheetTheme->GetSheetRadius());
-    CalculateSheetRadius(host);
-    placement_ = sheetStyle_.placement.value_or(Placement::BOTTOM);
+    sheetPattern->CalculateSheetRadius(sheetRadius_);
+    auto layoutProperty = sheetPage->GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto sheetStyle = layoutProperty->GetSheetStyleValue();
+    placement_ = sheetStyle.placement.value_or(Placement::BOTTOM);
     sheetPopupInfo_.finalPlacement = placement_;
-    sheetPopupInfo_.placementOnTarget = sheetStyle_.placementOnTarget.value_or(true);
+    sheetPopupInfo_.placementOnTarget = sheetStyle.placementOnTarget.value_or(true);
     windowGlobalRect_ = pipeline->GetDisplayWindowRectInfo();
     windowEdgeWidth_ = WINDOW_EDGE_SPACE.ConvertToPx();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
@@ -227,19 +194,74 @@ void SheetWrapperLayoutAlgorithm::GetSheetPageSize(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(sheetGeometryNode);
     sheetWidth_ = sheetGeometryNode->GetFrameSize().Width();
     sheetHeight_ = sheetGeometryNode->GetFrameSize().Height();
+    DecreaseArrowHeightWhenArrowIsShown(sheetPage);
     // when sheetWidth > global rect - 2 * windowEdgeSpace, windowEdgeSpace is set to the half of left space
     if (GreatNotEqual(sheetWidth_, windowGlobalRect_.Width() - DOUBLE_SIZE * WINDOW_EDGE_SPACE.ConvertToPx())) {
         windowEdgeWidth_ = (windowGlobalRect_.Width() - sheetWidth_) / DOUBLE_SIZE;
     }
 }
 
+void SheetWrapperLayoutAlgorithm::DecreaseArrowHeightWhenArrowIsShown(const RefPtr<FrameNode>& sheetNode)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPattern);
+    auto prePopupInfo = sheetPattern->GetSheetPopupInfo();
+    if (!prePopupInfo.showArrow) {
+        return;
+    }
+
+    switch (prePopupInfo.finalPlacement) {
+        case Placement::BOTTOM_LEFT:
+            [[fallthrough]];
+        case Placement::BOTTOM_RIGHT:
+            [[fallthrough]];
+        case Placement::BOTTOM:
+            [[fallthrough]];
+        case Placement::TOP_LEFT:
+            [[fallthrough]];
+        case Placement::TOP_RIGHT:
+            [[fallthrough]];
+        case Placement::TOP: {
+            sheetHeight_ -= SHEET_ARROW_HEIGHT.ConvertToPx();
+            break;
+        }
+        case Placement::RIGHT_TOP:
+            [[fallthrough]];
+        case Placement::RIGHT_BOTTOM:
+            [[fallthrough]];
+        case Placement::RIGHT:
+            [[fallthrough]];
+        case Placement::LEFT_TOP:
+            [[fallthrough]];
+        case Placement::LEFT_BOTTOM:
+            [[fallthrough]];
+        case Placement::LEFT: {
+            sheetWidth_ -= SHEET_ARROW_HEIGHT.ConvertToPx();
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 OffsetF SheetWrapperLayoutAlgorithm::GetPopupStyleSheetOffset(LayoutWrapper* layoutWrapper)
 {
-    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, OffsetF());
+    auto sheetWrapperPattern = host->GetPattern<SheetWrapperPattern>();
+    CHECK_NULL_RETURN(sheetWrapperPattern, OffsetF());
+    auto targetNode = sheetWrapperPattern->GetTargetNode();
     CHECK_NULL_RETURN(targetNode, OffsetF());
     auto geometryNode = targetNode->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, OffsetF());
     auto targetSize = geometryNode->GetFrameSize();
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        targetSize = targetNode->GetPaintRectWithTransform().GetSize();
+    }
     auto targetOffset = targetNode->GetPaintRectOffset();
     return GetOffsetInAvoidanceRule(layoutWrapper, targetSize, targetOffset);
 }
@@ -248,10 +270,10 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetInAvoidanceRule(
     LayoutWrapper* layoutWrapper, const SizeF& targetSize, const OffsetF& targetOffset)
 {
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        sheetPopupInfo_.finalPlacement = AvoidanceRuleOfPlacementInSixteen(layoutWrapper, targetSize, targetOffset);
+        sheetPopupInfo_.finalPlacement = AvoidanceRuleOfPlacement(layoutWrapper, targetSize, targetOffset);
     } else {
         // before api 16, only placement bottom is used
-        sheetPopupInfo_.finalPlacement = AvoidanceRuleOfPlacement(Placement::BOTTOM, targetSize, targetOffset);
+        sheetPopupInfo_.finalPlacement = AvoidanceRuleBottom(Placement::BOTTOM, targetSize, targetOffset);
     }
     TAG_LOGI(AceLogTag::ACE_SHEET, "finalPlacement %{public}s",
         PlacementUtils::ConvertPlacementToString(sheetPopupInfo_.finalPlacement).c_str());
@@ -261,10 +283,15 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetInAvoidanceRule(
     }
     auto offsetFunc = getOffsetFunc_[sheetPopupInfo_.finalPlacement];
     CHECK_NULL_RETURN(offsetFunc, OffsetF());
+    /*
+     * steps 1. get sheet offset and restrict in window global rect
+     * steps 2. check whether need to show arrow
+     * steps 3. get arrow offset and check whether it is overlap sheet radius
+     */
     return (this->*offsetFunc)(targetSize, targetOffset);
 }
 
-Placement SheetWrapperLayoutAlgorithm::AvoidanceRuleOfPlacement(
+Placement SheetWrapperLayoutAlgorithm::AvoidanceRuleBottom(
     const Placement& currentPlacement, const SizeF& targetSize, const OffsetF& targetOffset)
 {
     static std::map<Placement, std::vector<Placement>> PLACEMENT_STATES_BOTTOM = {
@@ -295,7 +322,7 @@ Placement SheetWrapperLayoutAlgorithm::AvoidanceRuleOfPlacement(
     return targetPlacement;
 }
 
-Placement SheetWrapperLayoutAlgorithm::AvoidanceRuleOfPlacementInSixteen(
+Placement SheetWrapperLayoutAlgorithm::AvoidanceRuleOfPlacement(
     LayoutWrapper* layoutWrapper, const SizeF& targetSize, const OffsetF& targetOffset)
 {
     auto finalPlacement = placement_;
@@ -325,6 +352,8 @@ Placement SheetWrapperLayoutAlgorithm::AvoidanceRuleOfPlacementInSixteen(
             finalPlacement = RecheckBestPlacementWithInsufficientSpace(targetSize, targetOffset, bestSize);
             sheetHeight_ = bestSize.Height();
         }
+    } else {
+        sheetPopupInfo_.placementRechecked = false;
     }
     return finalPlacement;
 }
@@ -336,7 +365,7 @@ bool SheetWrapperLayoutAlgorithm::CheckDirectionBottom(const SizeF& targetSize, 
      * so that arrowHeight is no need to avoid.
      */
     if (GreatOrEqual(sheetWidth_, sheetRadius_.radiusTopLeft->ConvertToPx() +
-        sheetRadius_.radiusTopRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusTopRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPageAvoidHeight += SHEET_ARROW_HEIGHT.ConvertToPx();
     }
     return GreatOrEqual(windowGlobalRect_.Width(), sheetWidth_ + DOUBLE_SIZE * windowEdgeWidth_) &&
@@ -351,7 +380,7 @@ bool SheetWrapperLayoutAlgorithm::CheckDirectionTop(const SizeF& targetSize, con
      * so that arrowHeight is no need to avoid.
      */
     if (GreatOrEqual(sheetWidth_, sheetRadius_.radiusBottomLeft->ConvertToPx() +
-        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPageAvoidHeight += SHEET_ARROW_HEIGHT.ConvertToPx();
     }
     return GreatOrEqual(windowGlobalRect_.Width(), sheetWidth_ + DOUBLE_SIZE * windowEdgeWidth_) &&
@@ -366,13 +395,12 @@ bool SheetWrapperLayoutAlgorithm::CheckDirectionRight(const SizeF& targetSize, c
      * so that arrowHeight is no need to avoid.
      */
     if (GreatOrEqual(sheetHeight_, sheetRadius_.radiusTopLeft->ConvertToPx() +
-        sheetRadius_.radiusBottomLeft->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusBottomLeft->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPageAvoidWidth += SHEET_ARROW_HEIGHT.ConvertToPx();
     }
     return GreatOrEqual(windowGlobalRect_.Width() - targetOffset.GetX() - targetSize.Width(),
-            sheetWidth_ + sheetPageAvoidWidth) &&
-        GreatOrEqual(windowGlobalRect_.Height(),
-            sheetHeight_ + DOUBLE_SIZE * WINDOW_EDGE_SPACE.ConvertToPx());
+        sheetWidth_ + sheetPageAvoidWidth) &&
+           GreatOrEqual(windowGlobalRect_.Height(), sheetHeight_ + DOUBLE_SIZE * WINDOW_EDGE_SPACE.ConvertToPx());
 }
 
 bool SheetWrapperLayoutAlgorithm::CheckDirectionLeft(const SizeF& targetSize, const OffsetF& targetOffset)
@@ -382,7 +410,7 @@ bool SheetWrapperLayoutAlgorithm::CheckDirectionLeft(const SizeF& targetSize, co
      * so that arrowHeight is no need to avoid.
      */
     if (GreatOrEqual(sheetHeight_, sheetRadius_.radiusTopRight->ConvertToPx() +
-        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPageAvoidWidth += SHEET_ARROW_HEIGHT.ConvertToPx();
     }
     return GreatOrEqual(targetOffset.GetX(), sheetWidth_ + sheetPageAvoidWidth) &&
@@ -442,14 +470,14 @@ SizeF SheetWrapperLayoutAlgorithm::GetLeftSpaceWithPlacement(
     float height = 0.f;
     float sheetPageAvoidHeight = (SHEET_TARGET_SPACE + WINDOW_EDGE_SPACE).ConvertToPx();
     float sheetPageAvoidWidth = (SHEET_TARGET_SPACE + WINDOW_EDGE_SPACE).ConvertToPx();
-    switch(placement) {
+    switch (placement) {
         case Placement::BOTTOM_LEFT:
             [[fallthrough]];
         case Placement::BOTTOM_RIGHT:
             [[fallthrough]];
         case Placement::BOTTOM: {
             if (GreatOrEqual(sheetWidth_, sheetRadius_.radiusTopLeft->ConvertToPx() +
-                sheetRadius_.radiusTopRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+                sheetRadius_.radiusTopRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
                 sheetPageAvoidHeight += SHEET_ARROW_HEIGHT.ConvertToPx();
             }
             width = windowGlobalRect_.Width() - DOUBLE_SIZE * windowEdgeWidth_;
@@ -463,7 +491,7 @@ SizeF SheetWrapperLayoutAlgorithm::GetLeftSpaceWithPlacement(
             [[fallthrough]];
         case Placement::TOP: {
             if (GreatOrEqual(sheetWidth_, sheetRadius_.radiusBottomLeft->ConvertToPx() +
-                sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+                sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
                 sheetPageAvoidHeight += SHEET_ARROW_HEIGHT.ConvertToPx();
             }
             width = windowGlobalRect_.Width() - DOUBLE_SIZE * windowEdgeWidth_;
@@ -476,7 +504,7 @@ SizeF SheetWrapperLayoutAlgorithm::GetLeftSpaceWithPlacement(
             [[fallthrough]];
         case Placement::RIGHT: {
             if (GreatOrEqual(sheetHeight_, sheetRadius_.radiusTopLeft->ConvertToPx() +
-                sheetRadius_.radiusBottomLeft->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+                sheetRadius_.radiusBottomLeft->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
                 sheetPageAvoidWidth += SHEET_ARROW_HEIGHT.ConvertToPx();
             }
             width = windowGlobalRect_.Width() - targetOffset.GetX() - targetSize.Width() - sheetPageAvoidWidth;
@@ -489,7 +517,7 @@ SizeF SheetWrapperLayoutAlgorithm::GetLeftSpaceWithPlacement(
             [[fallthrough]];
         case Placement::LEFT: {
             if (GreatOrEqual(sheetHeight_, sheetRadius_.radiusTopRight->ConvertToPx() +
-                sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+                sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
                 sheetPageAvoidWidth += SHEET_ARROW_HEIGHT.ConvertToPx();
             }
             width = targetOffset.GetX() - sheetPageAvoidWidth;
@@ -519,7 +547,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithBottom(
     }
     // if sheetWidth < sheetRadius * 2 + sheetArrowWidth, arrow is no need to show
     if (LessNotEqual(sheetWidth_, sheetRadius_.radiusTopLeft->ConvertToPx() +
-        sheetRadius_.radiusTopRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusTopRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPopupInfo_.showArrow = false;
         return OffsetF(finalOffsetX, finalOffsetY);
     }
@@ -560,7 +588,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithBottomLeft(
     }
     // if sheetWidth < sheetRadius * 2 + sheetArrowWidth, arrow is no need to show
     if (LessNotEqual(sheetWidth_, sheetRadius_.radiusTopLeft->ConvertToPx() +
-        sheetRadius_.radiusTopRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusTopRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPopupInfo_.showArrow = false;
         return OffsetF(finalOffsetX, finalOffsetY);
     }
@@ -601,7 +629,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithBottomRight(
     }
     // if sheetWidth < sheetRadius * 2 + sheetArrowWidth, arrow is no need to show
     if (LessNotEqual(sheetWidth_, sheetRadius_.radiusTopLeft->ConvertToPx() +
-        sheetRadius_.radiusTopRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusTopRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPopupInfo_.showArrow = false;
         return OffsetF(finalOffsetX, finalOffsetY);
     }
@@ -621,7 +649,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithTop(const SizeF& targetSize, c
     }
     // if sheetWidth < sheetRadius * 2 + sheetArrowWidth, arrow is no need to show
     if (LessNotEqual(sheetWidth_, sheetRadius_.radiusBottomLeft->ConvertToPx() +
-        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPopupInfo_.showArrow = false;
         return OffsetF(finalOffsetX, finalOffsetY);
     }
@@ -641,7 +669,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithTopLeft(const SizeF& targetSiz
     }
     // if sheetWidth < sheetRadius * 2 + sheetArrowWidth, arrow is no need to show
     if (LessNotEqual(sheetWidth_, sheetRadius_.radiusBottomLeft->ConvertToPx() +
-        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPopupInfo_.showArrow = false;
         return OffsetF(finalOffsetX, finalOffsetY);
     }
@@ -662,7 +690,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithTopRight(
     }
     // if sheetWidth < sheetRadius * 2 + sheetArrowWidth, arrow is no need to show
     if (LessNotEqual(sheetWidth_, sheetRadius_.radiusBottomLeft->ConvertToPx() +
-        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPopupInfo_.showArrow = false;
         return OffsetF(finalOffsetX, finalOffsetY);
     }
@@ -682,7 +710,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithLeft(const SizeF& targetSize, 
     }
     // if sheetHeight < sheetRadius * 2 + sheetArrowWidth, arrow is no need to show
     if (LessNotEqual(sheetHeight_, sheetRadius_.radiusTopRight->ConvertToPx() +
-        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPopupInfo_.showArrow = false;
         return OffsetF(finalOffsetX, finalOffsetY);
     }
@@ -702,7 +730,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithLeftTop(const SizeF& targetSiz
     }
     // if sheetHeight < sheetRadius * 2 + sheetArrowWidth, arrow is no need to show
     if (LessNotEqual(sheetHeight_, sheetRadius_.radiusTopRight->ConvertToPx() +
-        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPopupInfo_.showArrow = false;
         return OffsetF(finalOffsetX, finalOffsetY);
     }
@@ -723,7 +751,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithLeftBottom(
     }
     // if sheetHeight < sheetRadius * 2 + sheetArrowWidth, arrow is no need to show
     if (LessNotEqual(sheetHeight_, sheetRadius_.radiusTopRight->ConvertToPx() +
-        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusBottomRight->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPopupInfo_.showArrow = false;
         return OffsetF(finalOffsetX, finalOffsetY);
     }
@@ -742,7 +770,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithRight(const SizeF& targetSize,
     }
     // if sheetHeight < sheetRadius * 2 + sheetArrowWidth, arrow is no need to show
     if (LessNotEqual(sheetHeight_, sheetRadius_.radiusTopLeft->ConvertToPx() +
-        sheetRadius_.radiusBottomLeft->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusBottomLeft->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPopupInfo_.showArrow = false;
         return OffsetF(finalOffsetX, finalOffsetY);
     }
@@ -761,7 +789,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithRightTop(const SizeF& targetSi
     }
     // if sheetHeight < sheetRadius * 2 + sheetArrowWidth, arrow is no need to show
     if (LessNotEqual(sheetHeight_, sheetRadius_.radiusTopLeft->ConvertToPx() +
-        sheetRadius_.radiusBottomLeft->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusBottomLeft->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPopupInfo_.showArrow = false;
         return OffsetF(finalOffsetX, finalOffsetY);
     }
@@ -781,7 +809,7 @@ OffsetF SheetWrapperLayoutAlgorithm::GetOffsetWithRightBottom(
     }
     // if sheetHeight < sheetRadius * 2 + sheetArrowWidth, arrow is no need to show
     if (LessNotEqual(sheetHeight_, sheetRadius_.radiusTopLeft->ConvertToPx() +
-        sheetRadius_.radiusBottomLeft->ConvertToPx() + SHEET_ARROW_WIDTH_NEW.ConvertToPx())) {
+        sheetRadius_.radiusBottomLeft->ConvertToPx() + SHEET_ARROW_WIDTH.ConvertToPx())) {
         sheetPopupInfo_.showArrow = false;
         return OffsetF(finalOffsetX, finalOffsetY);
     }
@@ -815,6 +843,9 @@ void SheetWrapperLayoutAlgorithm::RestrictOffsetInSpaceBottom(float& offsetX, fl
     offsetX = std::clamp(static_cast<double>(offsetX), static_cast<double>(windowEdgeWidth_),
         windowGlobalRect_.Width() - sheetWidth_ - windowEdgeWidth_);
 
+    offsetY = std::clamp(static_cast<double>(offsetY), windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx(),
+        windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx());
+
     if (sheetPopupInfo_.placementRechecked && sheetPopupInfo_.placementOnTarget) {
         sheetPopupInfo_.showArrow = false;
         offsetY =
@@ -827,6 +858,9 @@ void SheetWrapperLayoutAlgorithm::RestrictOffsetInSpaceTop(float& offsetX, float
     offsetX = std::clamp(static_cast<double>(offsetX), static_cast<double>(windowEdgeWidth_),
         windowGlobalRect_.Width() - sheetWidth_ - windowEdgeWidth_);
 
+    offsetY = std::clamp(static_cast<double>(offsetY), windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx(),
+        windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx());
+
     if (sheetPopupInfo_.placementRechecked && sheetPopupInfo_.placementOnTarget) {
         sheetPopupInfo_.showArrow = false;
         offsetY = windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx();
@@ -835,6 +869,9 @@ void SheetWrapperLayoutAlgorithm::RestrictOffsetInSpaceTop(float& offsetX, float
 
 void SheetWrapperLayoutAlgorithm::RestrictOffsetInSpaceLeft(float& offsetX, float& offsetY)
 {
+    offsetX = std::clamp(static_cast<double>(offsetX), static_cast<double>(windowEdgeWidth_),
+        windowGlobalRect_.Width() - sheetWidth_ - windowEdgeWidth_);
+
     offsetY = std::clamp(static_cast<double>(offsetY), windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx(),
         windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx());
     
@@ -846,6 +883,9 @@ void SheetWrapperLayoutAlgorithm::RestrictOffsetInSpaceLeft(float& offsetX, floa
 
 void SheetWrapperLayoutAlgorithm::RestrictOffsetInSpaceRight(float& offsetX, float& offsetY)
 {
+    offsetX = std::clamp(static_cast<double>(offsetX), static_cast<double>(windowEdgeWidth_),
+        windowGlobalRect_.Width() - sheetWidth_ - windowEdgeWidth_);
+
     offsetY = std::clamp(static_cast<double>(offsetY), windowGlobalRect_.Top() + WINDOW_EDGE_SPACE.ConvertToPx(),
         windowGlobalRect_.Height() + windowGlobalRect_.Top() - sheetHeight_ - WINDOW_EDGE_SPACE.ConvertToPx());
         
@@ -924,7 +964,14 @@ void SheetWrapperLayoutAlgorithm::CheckIsArrowOverlapSheetRadius()
 void SheetWrapperLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     BoxLayoutAlgorithm::PerformLayout(layoutWrapper);
-    if (sheetType_ == SheetType::SHEET_POPUP) {
+    auto sheetPageWrapper = layoutWrapper->GetChildByIndex(0);
+    CHECK_NULL_VOID(sheetPageWrapper);
+    auto sheetPageNode = sheetPageWrapper->GetHostNode();
+    CHECK_NULL_VOID(sheetPageNode);
+    auto sheetPagePattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_VOID(sheetPagePattern);
+    auto sheetType = sheetPagePattern->GetSheetType();
+    if (sheetType == SheetType::SHEET_POPUP) {
         TAG_LOGI(AceLogTag::ACE_SHEET, "before popup sheet page, origin size [%{public}f, %{public}f]",
             sheetWidth_, sheetHeight_);
         OffsetF popupOffset = GetPopupStyleSheetOffset(layoutWrapper);

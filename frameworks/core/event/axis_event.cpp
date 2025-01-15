@@ -231,6 +231,7 @@ AxisEvent AxisInfo::ConvertToAxisEvent() const
     axisEvent.horizontalAxis = horizontalAxis_;
     axisEvent.verticalAxis = verticalAxis_;
     axisEvent.pinchAxisScale = pinchAxisScale_;
+    axisEvent.action = action_;
     axisEvent.rotateAxisAngle = rotateAxisAngle_;
     axisEvent.time = timeStamp_;
     axisEvent.localX = static_cast<float>(localLocation_.GetX());

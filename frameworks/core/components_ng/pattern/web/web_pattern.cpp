@@ -177,6 +177,8 @@ constexpr Color SELECTED_OPTION_BACKGROUND_COLOR = Color(0x19254FF7);
 constexpr Dimension SELECT_HANDLE_DEFAULT_HEIGHT = 16.0_vp;
 constexpr int32_t HALF = 2;
 constexpr int32_t AI_TIMEOUT_LIMIT = 200;
+constexpr int32_t CHECK_PRE_SIZE = 5;
+constexpr int32_t ADJUST_RATIO = 10;
 
 bool ParseDateTimeJson(const std::string& timeJson, NWeb::DateTime& result)
 {
@@ -5902,6 +5904,11 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
         case WindowSizeChangeReason::DRAG_END:
         default:
             delegate_->SetDragResizeStartFlag(false);
+            auto frameNode = GetHost();
+            CHECK_NULL_VOID(frameNode);
+            auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+            delegate_->SetBoundsOrResize(drawSize_, offset, false);
+            delegate_->ResizeVisibleViewport(visibleViewportSize_, false);
             dragWindowFlag_ = false;
             lastHeight_ = 0;
             lastWidth_ = 0;
@@ -5919,9 +5926,18 @@ void WebPattern::WindowDrag(int32_t width, int32_t height)
         if (!GetPendingSizeStatus() && dragWindowFlag_) {
             int64_t pre_height = height - lastHeight_;
             int64_t pre_width = width - lastWidth_;
-            delegate_->SetDragResizePreSize(pre_height, pre_width);
+            if (pre_height <= CHECK_PRE_SIZE && pre_height > 0) {
+                pre_height = 0;
+            }
+            if (pre_width <= CHECK_PRE_SIZE && pre_width > 0) {
+                pre_width = 0;
+            }
             lastHeight_ = height;
             lastWidth_ = width;
+            if (pre_width == 0 && pre_height == 0) {
+                return;
+            }
+            delegate_->SetDragResizePreSize(pre_height * ADJUST_RATIO, pre_width * ADJUST_RATIO);
         }
     }
 }

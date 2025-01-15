@@ -269,9 +269,9 @@ void SheetWrapperPaintMethod::DrawClipPathBottom(RSPath& path, const RefPtr<Fram
             targetOffsetY + (SHEET_ARROW_HEIGHT - ARROW_CORNER_P4_OFFSET_Y).ConvertToPx()); // P4
         path.ArcTo(ARROW_RADIUS.ConvertToPx() + borderOffset, ARROW_RADIUS.ConvertToPx() + borderOffset,
             0.f, RSPathDirection::CW_DIRECTION,
-            (SHEET_ARROW_WIDTH_NEW - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() + targetOffsetX + borderOffset,
+            (SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() + targetOffsetX + borderOffset,
             (SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx() + targetOffsetY); // P2
-        path.LineTo(SHEET_ARROW_WIDTH_NEW.ConvertToPx() + targetOffsetX,
+        path.LineTo(SHEET_ARROW_WIDTH.ConvertToPx() + targetOffsetX,
             SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffsetY - borderOffset);  // P1
     } else {
         path.MoveTo(targetOffsetX - borderOffset, SHEET_ARROW_HEIGHT.ConvertToPx() + radiusTopLeft + targetOffsetY);
@@ -291,9 +291,9 @@ void SheetWrapperPaintMethod::DrawClipPathBottom(RSPath& path, const RefPtr<Fram
             SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffsetY - borderOffset);  // P5
     }
     if (arrowPosition == SheetArrowPosition::BOTTOM_RIGHT) {
-        path.LineTo(sheetSize.Width() - SHEET_ARROW_WIDTH_NEW.ConvertToPx() + targetOffsetX,
+        path.LineTo(sheetSize.Width() - SHEET_ARROW_WIDTH.ConvertToPx() + targetOffsetX,
             SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffsetY - borderOffset);  // P1
-        path.LineTo(sheetSize.Width() - (SHEET_ARROW_WIDTH_NEW - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() +
+        path.LineTo(sheetSize.Width() - (SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() +
             targetOffsetX - borderOffset,
             (SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx() + targetOffsetY); // P2
         path.ArcTo(ARROW_RADIUS.ConvertToPx() + borderOffset, ARROW_RADIUS.ConvertToPx() + borderOffset, 0.0f,
@@ -350,10 +350,10 @@ void SheetWrapperPaintMethod::DrawClipPathTop(RSPath& path, const RefPtr<FrameNo
             (SHEET_ARROW_HEIGHT - ARROW_CORNER_P4_OFFSET_Y).ConvertToPx() + targetOffsetY);    // P4
         path.ArcTo(ARROW_RADIUS.ConvertToPx() + borderOffset, ARROW_RADIUS.ConvertToPx() + borderOffset, 0.f,
             RSPathDirection::CW_DIRECTION,
-            sheetSize.Width() - (SHEET_ARROW_WIDTH_NEW - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() + targetOffsetX -
+            sheetSize.Width() - (SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() + targetOffsetX -
             borderOffset, sheetSize.Height() - (SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx() +
             targetOffsetY);    // P2
-        path.LineTo(sheetSize.Width() - SHEET_ARROW_WIDTH_NEW.ConvertToPx() + targetOffsetX,
+        path.LineTo(sheetSize.Width() - SHEET_ARROW_WIDTH.ConvertToPx() + targetOffsetX,
             sheetSize.Height() - SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffsetY + borderOffset); // P1
     } else {
         path.LineTo(sheetSize.Width() + targetOffsetX + borderOffset,
@@ -377,9 +377,9 @@ void SheetWrapperPaintMethod::DrawClipPathTop(RSPath& path, const RefPtr<FrameNo
             sheetSize.Height() - SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffsetY + borderOffset); // P5
     }
     if (arrowPosition == SheetArrowPosition::TOP_LEFT) {
-        path.LineTo(SHEET_ARROW_WIDTH_NEW.ConvertToPx() + targetOffsetX,
+        path.LineTo(SHEET_ARROW_WIDTH.ConvertToPx() + targetOffsetX,
             sheetSize.Height() - SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffsetY + borderOffset); // P1
-        path.LineTo((SHEET_ARROW_WIDTH_NEW - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() + targetOffsetX + borderOffset,
+        path.LineTo((SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() + targetOffsetX + borderOffset,
             sheetSize.Height() - (SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx() + targetOffsetY);  // P2
         path.ArcTo(ARROW_RADIUS.ConvertToPx() + borderOffset, ARROW_RADIUS.ConvertToPx() + borderOffset, 0.f,
             RSPathDirection::CW_DIRECTION, targetOffsetX - borderOffset,
@@ -422,9 +422,9 @@ void SheetWrapperPaintMethod::DrawClipPathLeft(RSPath& path, const RefPtr<FrameN
         path.ArcTo(ARROW_RADIUS.ConvertToPx() + borderOffset, ARROW_RADIUS.ConvertToPx() + borderOffset, 0.f,
             RSPathDirection::CW_DIRECTION,
             sheetSize.Width() - (SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx() + targetOffsetX,
-            (SHEET_ARROW_WIDTH_NEW - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() + targetOffsetY + borderOffset);  // P2
+            (SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() + targetOffsetY + borderOffset);  // P2
         path.LineTo(sheetSize.Width() - SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffsetX + borderOffset,
-            SHEET_ARROW_WIDTH_NEW.ConvertToPx() + targetOffsetY);  // P1
+            SHEET_ARROW_WIDTH.ConvertToPx() + targetOffsetY);  // P1
     } else {
         path.LineTo(sheetSize.Width() - radiusTopRight - SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffsetX,
             targetOffsetY - borderOffset);
@@ -447,9 +447,9 @@ void SheetWrapperPaintMethod::DrawClipPathLeft(RSPath& path, const RefPtr<FrameN
     }
     if (arrowPosition == SheetArrowPosition::LEFT_BOTTOM) {
         path.LineTo(sheetSize.Width() - SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffsetX + borderOffset,
-            sheetSize.Height() - SHEET_ARROW_WIDTH_NEW.ConvertToPx() + targetOffsetY);  // P1
+            sheetSize.Height() - SHEET_ARROW_WIDTH.ConvertToPx() + targetOffsetY);  // P1
         path.LineTo(sheetSize.Width() - (SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx() + targetOffsetX,
-            sheetSize.Height() - (SHEET_ARROW_WIDTH_NEW - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() +
+            sheetSize.Height() - (SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() +
             targetOffsetY - borderOffset); // P2
         path.ArcTo(ARROW_RADIUS.ConvertToPx() + borderOffset, ARROW_RADIUS.ConvertToPx() + borderOffset, 0.f,
             RSPathDirection::CW_DIRECTION,
@@ -490,9 +490,9 @@ void SheetWrapperPaintMethod::DrawClipPathRight(RSPath& path, const RefPtr<Frame
     path.Reset();
     if (arrowPosition == SheetArrowPosition::RIGHT_TOP) {
         path.MoveTo(SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffsetX - borderOffset,
-            SHEET_ARROW_WIDTH_NEW.ConvertToPx() + targetOffsetY);  // P1
+            SHEET_ARROW_WIDTH.ConvertToPx() + targetOffsetY);  // P1
         path.LineTo((SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx() + targetOffsetX,
-            (SHEET_ARROW_WIDTH_NEW - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() + targetOffsetY + borderOffset);  // P2
+            (SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() + targetOffsetY + borderOffset);  // P2
         path.ArcTo(ARROW_RADIUS.ConvertToPx() + borderOffset, ARROW_RADIUS.ConvertToPx() + borderOffset, 0.f,
             RSPathDirection::CW_DIRECTION,
             (SHEET_ARROW_HEIGHT - ARROW_CORNER_P4_OFFSET_Y).ConvertToPx() + targetOffsetX,
@@ -519,10 +519,10 @@ void SheetWrapperPaintMethod::DrawClipPathRight(RSPath& path, const RefPtr<Frame
         path.ArcTo(ARROW_RADIUS.ConvertToPx() + borderOffset, ARROW_RADIUS.ConvertToPx() + borderOffset, 0.f,
             RSPathDirection::CW_DIRECTION,
             (SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx() + targetOffsetX,
-            sheetSize.Height() - (SHEET_ARROW_WIDTH_NEW - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() +
+            sheetSize.Height() - (SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx() +
             targetOffsetY - borderOffset); // P2
         path.LineTo(SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffsetX - borderOffset,
-            sheetSize.Height() - SHEET_ARROW_WIDTH_NEW.ConvertToPx() + targetOffsetY); // P1
+            sheetSize.Height() - SHEET_ARROW_WIDTH.ConvertToPx() + targetOffsetY); // P1
     } else {
         path.LineTo(radiusBottomLeft + SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffsetX,
             sheetSize.Height() + targetOffsetY + borderOffset);
@@ -544,7 +544,7 @@ void SheetWrapperPaintMethod::DrawClipPathRight(RSPath& path, const RefPtr<Frame
     }
     if (arrowPosition == SheetArrowPosition::RIGHT_TOP) {
         path.LineTo(SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffsetX - borderOffset,
-            SHEET_ARROW_WIDTH_NEW.ConvertToPx() + targetOffsetY);
+            SHEET_ARROW_WIDTH.ConvertToPx() + targetOffsetY);
     } else {
         path.LineTo(SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffsetX - borderOffset, radiusTopLeft + targetOffsetY);
     }
