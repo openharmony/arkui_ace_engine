@@ -560,6 +560,7 @@ void RichEditorPattern::OnModifyDone()
     ProcessInnerPadding();
     InitScrollablePattern();
     SetAccessibilityAction();
+    selectOverlay_->SetMenuTranslateIsSupport(IsShowTranslate());
     selectOverlay_->SetIsSupportMenuSearch(IsShowSearch());
     if (host->IsDraggable()) {
         InitDragDropEvent();
@@ -8729,7 +8730,7 @@ bool RichEditorPattern::IsSelectAreaVisible()
     auto safeAreaManager = pipeline->GetSafeAreaManager();
     CHECK_NULL_RETURN(safeAreaManager, false);
     auto keyboardInsert = safeAreaManager->GetKeyboardInset();
-    auto selectArea = GetSelectArea();
+    auto selectArea = GetSelectArea(SelectRectsType::ALL_LINES);
 
     return !selectArea.IsEmpty() && LessNotEqual(selectArea.Top(), keyboardInsert.start);
 }
@@ -9349,7 +9350,18 @@ void RichEditorPattern::ResetDragOption()
     }
 }
 
-RectF RichEditorPattern::GetSelectArea()
+void RichEditorPattern::AdjustSelectRects(SelectRectsType pos, std::vector<RectF>& selectRects)
+{
+    if (pos == SelectRectsType::LEFT_TOP_POINT) {
+        selectRects.erase(std::next(selectRects.begin()), selectRects.end());
+        selectRects.front().SetSize({0, 0});
+    } else if (pos == SelectRectsType::RIGHT_BOTTOM_POINT) {
+        selectRects.erase(selectRects.begin(), std::prev(selectRects.end()));
+        selectRects.front().SetRect({selectRects.front().Right(), selectRects.front().Bottom()}, {0, 0});
+    }
+}
+
+RectF RichEditorPattern::GetSelectArea(SelectRectsType pos)
 {
     RectF rect;
     auto paintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
@@ -9370,6 +9382,7 @@ RectF RichEditorPattern::GetSelectArea()
         auto selectRect = RectF(caretOffset + paintOffset, SizeF(caretWidth, caretHeight));
         return selectRect.IntersectRectT(contentRect);
     }
+    AdjustSelectRects(pos, selectRects);
     auto frontRect = selectRects.front();
     auto backRect = selectRects.back();
     float selectAreaRight = frontRect.Right();
@@ -11312,6 +11325,13 @@ TextStyle RichEditorPattern::GetDefaultTextStyle()
     style.SetFontFeatures(ParseFontFeatureSettings("\"pnum\" 1"));
     style.SetFontFamilies({ "HarmonyOS Sans" });
     return style;
+}
+
+bool RichEditorPattern::IsShowTranslate()
+{
+    auto richEditorTheme = GetTheme<RichEditorTheme>();
+    CHECK_NULL_RETURN(richEditorTheme, false);
+    return richEditorTheme->GetTranslateIsSupport();
 }
 
 bool RichEditorPattern::IsShowSearch()

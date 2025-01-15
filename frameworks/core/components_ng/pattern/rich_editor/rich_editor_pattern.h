@@ -851,6 +851,7 @@ public:
     void ReplacePlaceholderWithRawSpans(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
     SymbolSpanOptions GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem);
+    bool IsShowTranslate();
     bool IsShowSearch();
     bool IsShowAIWrite();
     RefPtr<FocusHub> GetFocusHub() const;
@@ -1363,7 +1364,8 @@ private:
     RefPtr<SpanItem> GetSameSpanItem(const RefPtr<SpanItem>& spanItem);
     RefPtr<ImageSpanNode> GetImageSpanNodeBySpanItem(const RefPtr<ImageSpanItem>& spanItem);
 
-    RectF GetSelectArea();
+    void AdjustSelectRects(SelectRectsType pos, std::vector<RectF>& selectRects);
+    RectF GetSelectArea(SelectRectsType pos);
     void AppendSelectRect(std::vector<RectF>& selectRects);
     bool IsTouchInFrameArea(const PointF& touchPoint);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);

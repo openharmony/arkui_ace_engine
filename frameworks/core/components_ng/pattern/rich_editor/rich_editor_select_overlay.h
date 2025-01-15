@@ -39,7 +39,6 @@ public:
     std::optional<SelectHandleInfo> GetSecondHandleInfo() override;
     void OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlayDirtyFlag dirtyFlag) override;
     void OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo, int32_t requestCode) override;
-    RectF GetSelectArea() override;
     std::string GetSelectedText() override;
     bool IsStopBackPress() const override;
 
@@ -77,6 +76,9 @@ public:
     }
     float GetHandleHotZoneRadius();
     bool IsMenuShow();
+
+protected:
+    RectF GetSelectAreaFromRects(SelectRectsType pos) override;
 
 private:
     void RemoveAreaChangeInner();
