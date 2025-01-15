@@ -368,15 +368,19 @@ HWTEST_F(MenuLayout3TestNg, InitializeParam001, TestSize.Level1)
 
     int32_t backApiVersion = context->GetMinPlatformVersion();
     context->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    menuAlgorithm->InitializeParam(menuPattern);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = new LayoutWrapperNode(menuNode, geometryNode, menuNode->GetLayoutProperty());
+    menuAlgorithm->InitializeParam(layoutWrapper, menuPattern);
     EXPECT_EQ(menuAlgorithm->param_.topSecurity, PORTRAIT_TOP_SECURITY_API12.ConvertToPx());
     EXPECT_EQ(menuAlgorithm->param_.bottomSecurity, PORTRAIT_BOTTOM_SECURITY_API12.ConvertToPx());
     context->SetMinPlatformVersion(backApiVersion);
 
     SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
-    menuAlgorithm->InitializeParam(menuPattern);
+    menuAlgorithm->InitializeParam(layoutWrapper, menuPattern);
     EXPECT_EQ(menuAlgorithm->param_.topSecurity, LANDSCAPE_TOP_SECURITY.ConvertToPx());
     EXPECT_EQ(menuAlgorithm->param_.bottomSecurity, LANDSCAPE_BOTTOM_SECURITY.ConvertToPx());
+    delete layoutWrapper;
+    layoutWrapper = nullptr;
 }
 
 /**
