@@ -502,6 +502,7 @@ FrameNode::~FrameNode()
     }
     FireOnNodeDestroyCallback();
     FireOnExtraNodeDestroyCallback();
+    FireFrameNodeDestructorCallback();
     if (kitNode_) {
         kitNode_->Reset();
     }
@@ -6299,6 +6300,18 @@ void FrameNode::FireOnExtraNodeDestroyCallback()
 {
     for (const auto& callback : destroyCallbacks_) {
         callback.second();
+    }
+}
+
+void FrameNode::SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback)
+{
+    frameNodeDestructorCallback_ = callback;
+}
+
+void FrameNode::FireFrameNodeDestructorCallback()
+{
+    if (frameNodeDestructorCallback_) {
+        frameNodeDestructorCallback_(GetId());
     }
 }
 } // namespace OHOS::Ace::NG
