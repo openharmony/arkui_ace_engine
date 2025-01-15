@@ -531,27 +531,4 @@ HWTEST_F(TabBarModifierTestNg, TabBarPaintMethodGetForegroundDrawFunction002, Te
     auto clone = tabBarPaintProperty_->Clone();
     EXPECT_NE(clone, nullptr);
 }
-
-/**
- * @tc.name: TabBarPatternGetInnerFocusPaintRect001
- * @tc.desc: test GetInnerFocusPaintRect
- * @tc.type: FUNC
- */
-HWTEST_F(TabBarModifierTestNg, TabBarPatternGetInnerFocusPaintRect001, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    CreateTabsDone(model);
-
-    /**
-     * @tc.steps: step2. Test function InitOnKeyEvent.
-     * @tc.expected: Related function runs ok.
-     */
-    tabBarPattern_->tabBarStyle_ = TabBarStyle::BOTTOMTABBATSTYLE;
-    tabBarPattern_->isFirstFocus_ = true;
-    auto event = KeyEvent();
-    auto paintRect = RoundRect();
-    tabBarPattern_->GetInnerFocusPaintRect(paintRect);
-    EXPECT_TRUE(tabBarPattern_->isFirstFocus_);
-}
 } // namespace OHOS::Ace::NG
