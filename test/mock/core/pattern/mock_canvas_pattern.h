@@ -73,6 +73,7 @@ public:
         lineCap = std::nullopt;
         lineJoin = std::nullopt;
         canvasImage = std::nullopt;
+        fillRule = std::nullopt;
     }
 
     void TearDown()
@@ -88,6 +89,7 @@ public:
         lineCap = std::nullopt;
         lineJoin = std::nullopt;
         canvasImage = std::nullopt;
+        fillRule = std::nullopt;
     }
 
     void* config = nullptr;
@@ -130,6 +132,7 @@ public:
     std::optional<OHOS::Ace::LineCapStyle> lineCap = std::nullopt;
     std::optional<OHOS::Ace::LineJoinStyle> lineJoin = std::nullopt;
     std::optional<Ace::CanvasImage> canvasImage = std::nullopt;
+    std::optional<Ace::CanvasFillRule> fillRule = std::nullopt;
 };
 
 } // namespace OHOS::Ace::NG

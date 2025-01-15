@@ -709,4 +709,40 @@ void CanvasRendererPeerImpl::SetLineJoin(const std::string& joinStr)
     }
     pattern_->UpdateLineJoin(join);
 }
+void CanvasRendererPeerImpl::Clip(const Ace::CanvasFillRule& fillRule)
+{
+if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetClip pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillRuleForPath(fillRule);
+    pattern_->Clip();
+}
+void CanvasRendererPeerImpl::Clip(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetClip pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillRuleForPath(fillRule);
+    pattern_->Clip(path);
+}
+void CanvasRendererPeerImpl::Fill(const Ace::CanvasFillRule& fillRule)
+{
+if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetFill pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillRuleForPath(fillRule);
+    pattern_->Fill();
+}
+void CanvasRendererPeerImpl::Fill(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetFill pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillRuleForPath(fillRule);
+    pattern_->Fill(path);
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier

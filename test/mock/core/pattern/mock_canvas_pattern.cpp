@@ -231,6 +231,11 @@ void CanvasPattern::ClearRect(const Rect& rect)
 
 void CanvasPattern::Fill()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled2 = true;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Fill();
@@ -243,6 +248,12 @@ void CanvasPattern::Fill()
 
 void CanvasPattern::Fill(const RefPtr<CanvasPath2D>& path)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled2 = true;
+        holder->path = path;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [path](CanvasPaintMethod& paintMethod) {
         paintMethod.Fill(path);
@@ -294,6 +305,12 @@ void CanvasPattern::Stroke(const RefPtr<CanvasPath2D>& path)
 
 void CanvasPattern::Clip()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled2 = true;
+        return;
+    }
+    
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Clip();
@@ -306,6 +323,12 @@ void CanvasPattern::Clip()
 
 void CanvasPattern::Clip(const RefPtr<CanvasPath2D>& path)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled2 = true;
+        holder->path = path;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [path](CanvasPaintMethod& paintMethod) {
         paintMethod.Clip(path);
@@ -1074,6 +1097,12 @@ void CanvasPattern::UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern
 
 void CanvasPattern::UpdateFillRuleForPath(const CanvasFillRule rule)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->fillRule = rule;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [rule](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillRuleForPath(rule);
