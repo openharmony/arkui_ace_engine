@@ -52,6 +52,7 @@ export class ProgressButtonV2 extends ViewV2 {
     });
     this.initParam("isEnabled", (d1 && "isEnabled" in d1) ? d1.isEnabled : true);
     this.initParam("colorOptions", (d1 && "colorOptions" in d1) ? d1.colorOptions : undefined);
+    this.initParam("progressButtonRadius", (d1 && "progressButtonRadius" in d1) ? d1.progressButtonRadius : undefined);
     this.textProgress = EMPTY_STRING;
     this.isLoading = false;
     this.progressColor = '#330A59F7';
@@ -105,7 +106,8 @@ export class ProgressButtonV2 extends ViewV2 {
   initialRender() {
     this.observeComponentCreation2((y, z) => {
       Button.createWithChild();
-      Button.borderRadius(this.buttonBorderRadius);
+      Button.borderRadius(this.progressButtonRadius ? this.toLengthString(this.progressButtonRadius) :
+        this.buttonBorderRadius);
       Button.clip(false);
       Button.hoverEffect(HoverEffect.None);
       Button.key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY);
@@ -113,7 +115,8 @@ export class ProgressButtonV2 extends ViewV2 {
         ? this.colorOptions?.backgroundColor?.color
         : this.containerBackgroundColor);
       Button.padding({ top: 0, bottom: 0 });
-      Button.width(this.toLengthString(this.progressButtonWidth));
+      Button.width((!this.progressButtonWidth || this.progressButtonWidth.value < 0)
+        ? BUTTON_NORMARL_WIDTH : this.toLengthString(this.progressButtonWidth));
       Button.constraintSize({ minWidth: BUTTON_NORMARL_WIDTH });
       Button.stateEffect(this.isEnabled);
       Button.onClick(() => {
@@ -138,7 +141,15 @@ export class ProgressButtonV2 extends ViewV2 {
       Progress.constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT });
       Progress.borderRadius(this.buttonBorderRadius);
       Progress.width('100%');
+      Progress.style(this.progressButtonRadius ?
+        { borderRadius: new LengthMetrics(Math.max(this.progressButtonRadius.value, 0)) } : {});
       Progress.hoverEffect(HoverEffect.None);
+      Progress.padding({
+        top: 0.6,
+        left: 0.6,
+        right: 0.6,
+        bottom: 0.6
+      });
       Progress.clip(false);
       Progress.enabled(this.isEnabled);
       Progress.key(PROGRESS_BUTTON_PROGRESS_KEY);
@@ -184,7 +195,8 @@ export class ProgressButtonV2 extends ViewV2 {
       });
       Row.height(this.textHeight);
       Row.constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT });
-      Row.borderRadius(this.buttonBorderRadius);
+      Row.borderRadius(this.progressButtonRadius ? this.toLengthString(this.progressButtonRadius) :
+        this.buttonBorderRadius);
       Row.width('100%');
     }, Row);
     Row.pop();
@@ -233,6 +245,9 @@ export class ProgressButtonV2 extends ViewV2 {
     if ("colorOptions" in b) {
       this.updateParam("colorOptions", b.colorOptions);
     }
+    if ("progressButtonRadius" in b) {
+      this.updateParam("progressButtonRadius", b.progressButtonRadius);
+    }
   }
   rerender() {
     this.updateDirtyElements();
@@ -257,6 +272,9 @@ __decorate([
 __decorate([
   Param
 ], ProgressButtonV2.prototype, "colorOptions", void 0);
+__decorate([
+    Param
+], ProgressButtonV2.prototype, "progressButtonRadius", void 0);
 __decorate([
   Local
 ], ProgressButtonV2.prototype, "textProgress", void 0);
