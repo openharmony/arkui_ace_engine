@@ -39,6 +39,7 @@ void JsHoverFunction::HoverExecute(bool isHover, HoverInfo& hoverInfo)
     hoverObj->SetProperty<double>("tiltX", hoverInfo.GetTiltX().value_or(0.0f));
     hoverObj->SetProperty<double>("tiltY", hoverInfo.GetTiltY().value_or(0.0f));
     hoverObj->SetProperty<double>("deviceId", hoverInfo.GetDeviceId());
+    hoverObj->SetProperty<int32_t>("targetDisplayId", hoverInfo.GetTargetDisplayId());
     hoverObj->Wrap<HoverInfo>(&hoverInfo);
     JSRef<JSVal> hoverVal = JSRef<JSObject>::Cast(hoverObj);
     JSRef<JSVal> params[] = { isHoverParam, hoverVal };
@@ -75,6 +76,7 @@ void JsHoverFunction::AccessibilityHoverExecute(bool isHover, AccessibilityHover
     hoverObj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
     hoverObj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
     hoverObj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
+    hoverObj->SetProperty<int32_t>("targetDisplayId", hoverInfo.GetTargetDisplayId());
 
     hoverObj->Wrap<AccessibilityHoverInfo>(&hoverInfo);
     JSRef<JSVal> hoverVal = JSRef<JSObject>::Cast(hoverObj);
