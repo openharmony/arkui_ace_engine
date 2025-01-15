@@ -24,6 +24,7 @@
 #include "core/interfaces/native/implementation/canvas_gradient_peer.h"
 #include "core/interfaces/native/implementation/matrix2d_peer.h"
 #include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 
 namespace OHOS::Ace::NG {
 
@@ -227,6 +228,44 @@ std::vector<std::tuple<Ark_String, LineJoinStyle>> LINE_JOIN_TEST_PLAN = {
     { Converter::ArkValue<Ark_String>("round"), LineJoinStyle::ROUND },
     { Converter::ArkValue<Ark_String>(""), LineJoinStyle::MITER },
     { Converter::ArkValue<Ark_String>("invalid"), LineJoinStyle::MITER }
+};
+
+class MockPixelMap : public PixelMap {
+public:
+    MOCK_METHOD(bool, GetPixelsVec, (std::vector<uint8_t> & data), (const override));
+    MOCK_METHOD(const uint8_t*, GetPixels, (), (const override));
+    MOCK_METHOD(PixelFormat, GetPixelFormat, (), (const override));
+    MOCK_METHOD(AlphaType, GetAlphaType, (), (const override));
+    MOCK_METHOD(int32_t, GetRowStride, (), (const override));
+    MOCK_METHOD(int32_t, GetRowBytes, (), (const override));
+    MOCK_METHOD(int32_t, GetByteCount, (), (const override));
+    MOCK_METHOD(void*, GetPixelManager, (), (const override));
+    MOCK_METHOD(void*, GetRawPixelMapPtr, (), (const override));
+    MOCK_CONST_METHOD0(GetWritablePixels, void*());
+    MOCK_METHOD(void, Scale, (float xAxis, float yAxis), (override));
+    MOCK_METHOD(void, Scale, (float xAxis, float yAxis, const AceAntiAliasingOption &option), (override));
+    MOCK_METHOD(std::string, GetId, (), (override));
+    MOCK_METHOD(std::string, GetModifyId, (), (override));
+    MOCK_METHOD0(GetPixelMapSharedPtr, std::shared_ptr<Media::PixelMap>());
+    MOCK_METHOD(void, SavePixelMapToFile, (const std::string& dst), (const override));
+    MOCK_METHOD(RefPtr<PixelMap>, GetCropPixelMap, (const Rect& srcRect), (override));
+    MOCK_METHOD(bool, EncodeTlv, (std::vector<uint8_t>& buff), (override));
+    MOCK_METHOD(AllocatorType, GetAllocatorType, (), (const override));
+    MOCK_METHOD(bool, IsHdr, (), (const override));
+
+    int32_t GetWidth() const override
+    {
+        return width;
+    }
+
+    int32_t GetHeight() const override
+    {
+        return height;
+    }
+
+public:
+    int32_t width = 0;
+    int32_t height = 0;
 };
 
 class MockCanvasPattern : public CanvasPattern {
@@ -2056,5 +2095,42 @@ HWTEST_F(CanvasRendererAccessorTest, setLineJoinTest, TestSize.Level1)
         EXPECT_EQ(holder->lineJoin, expected);
     }
     holder->TearDown();
+}
+
+/**
+ * @tc.name: setPixelMapTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setPixelMapTest, TestSize.Level1)
+{
+#ifdef PIXEL_MAP_SUPPORTED
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->setPixelMap, nullptr);
+    Ark_PixelMap arkPixelMap;
+    auto peer = new PixelMapPeer();
+    arkPixelMap.ptr = peer;
+    auto optPixelMap = Converter::ArkValue<Opt_PixelMap>(arkPixelMap);
+    for (const auto& width : NUMBER_TEST_PLAN) {
+        for (const auto& height : NUMBER_TEST_PLAN) {
+            auto ptr = AceType::MakeRefPtr<MockPixelMap>();
+            uint32_t expectedWidth = std::round(width);
+            uint32_t expectedHeight = std::round(height);
+            ptr->width = expectedWidth;
+            ptr->height = expectedHeight;
+            peer->pixelMap = ptr;
+            holder->SetUp();
+            accessor_->setPixelMap(peer_, &optPixelMap);
+            EXPECT_TRUE(holder->isCalled);
+            EXPECT_EQ(holder->pixelMap->GetWidth(), expectedWidth);
+            EXPECT_EQ(holder->pixelMap->GetHeight(), expectedHeight);
+        }
+    }
+    holder->TearDown();
+#else
+    ASSERT_NE(accessor_->setPixelMap, nullptr);
+    accessor_->setPixelMap(peer_, nullptr);
+    EXPECT_TRUE(true);
+#endif
 }
 } // namespace OHOS::Ace::NG

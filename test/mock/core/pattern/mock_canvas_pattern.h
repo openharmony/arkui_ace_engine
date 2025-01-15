@@ -72,6 +72,7 @@ public:
         lineDash = nullptr;
         lineCap = std::nullopt;
         lineJoin = std::nullopt;
+        canvasImage = std::nullopt;
     }
 
     void TearDown()
@@ -86,6 +87,7 @@ public:
         lineDash = nullptr;
         lineCap = std::nullopt;
         lineJoin = std::nullopt;
+        canvasImage = std::nullopt;
     }
 
     void* config = nullptr;
@@ -127,6 +129,7 @@ public:
     std::shared_ptr<OHOS::Ace::LineDashParam> lineDash = nullptr;
     std::optional<OHOS::Ace::LineCapStyle> lineCap = std::nullopt;
     std::optional<OHOS::Ace::LineJoinStyle> lineJoin = std::nullopt;
+    std::optional<Ace::CanvasImage> canvasImage = std::nullopt;
 };
 
 } // namespace OHOS::Ace::NG

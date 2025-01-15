@@ -521,6 +521,14 @@ void CanvasPattern::DrawSvgImage(
 
 void CanvasPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->pixelMap = pixelMap;
+        holder->canvasImage = image;
+        holder->isCalled = true;
+        return;
+    }
+
 #ifndef USE_FAST_TASKPOOL
     auto task = [pixelMap, image](CanvasPaintMethod& paintMethod) {
         paintMethod.DrawPixelMap(pixelMap, image);

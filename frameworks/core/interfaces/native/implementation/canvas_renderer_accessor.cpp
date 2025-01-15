@@ -815,7 +815,7 @@ void TranslateImpl(CanvasRendererPeer* peer,
 void SetPixelMapImpl(CanvasRendererPeer* peer,
                      const Opt_PixelMap* value)
 {
-#if !defined(PREVIEW)
+#ifdef PIXEL_MAP_SUPPORTED
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(value);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
