@@ -118,7 +118,8 @@ public:
 
     bool operator == (const CallbackHelper<CallbackType> &other) const
     {
-        return callback_.call == other.callback_.call;
+        return callback_.call == other.callback_.call &&
+            callback_.resource.resourceId == other.callback_.resource.resourceId;
     }
 
     static Ark_VMContext GetVMContext(const FrameNode *frameNode)
