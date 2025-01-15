@@ -7766,13 +7766,14 @@ void RichEditorPattern::CreateDragNode()
     info.maxSelectedWidth = GetMaxSelectedWidth();
     info.handleColor = GetCaretColor();
     info.selectedBackgroundColor = GetSelectedBackgroundColor();
-    CalculateHandleOffsetAndShowOverlay();
-    if (auto firstHandleInfo = GetFirstHandleInfo(); firstHandleInfo.has_value() && firstHandleInfo.value().isShow) {
-        info.firstHandle = textSelector_.firstHandle;
-    }
-    auto secondHandleInfo = GetSecondHandleInfo();
-    if (secondHandleInfo.has_value() && secondHandleInfo.value().isShow) {
-        info.secondHandle = textSelector_.secondHandle;
+    auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
+    if (selectOverlayInfo.has_value()) {
+        if (selectOverlayInfo->firstHandle.isShow) {
+            info.firstHandle = selectOverlayInfo->firstHandle.paintRect;
+        }
+        if (selectOverlayInfo->secondHandle.isShow) {
+            info.secondHandle =  selectOverlayInfo->secondHandle.paintRect;
+        }
     }
     if (textSelector_.GetTextEnd() - textSelector_.GetTextStart() == 1) {
         auto spanItem = GetSpanItemByPosition(textSelector_.GetTextStart());
