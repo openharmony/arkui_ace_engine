@@ -699,6 +699,7 @@ HWTEST_F(CommonMethodModifierTest9, setBackgroundTestValidValues, TestSize.Level
         {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_END, ""},
     };
 
+    static const int32_t expectedResourceId = 123;
     static auto expectedCustomNode = CreateNode();
     static const FrameNode *expectedParentNode = frameNode;
     static const CustomNodeBuilder builder = {
@@ -713,8 +714,10 @@ HWTEST_F(CommonMethodModifierTest9, setBackgroundTestValidValues, TestSize.Level
         auto optInputValue = Converter::ArkValue<Opt_Literal_Alignment_align>(inputValue);
         modifier_->setBackground(node_, &builder, &optInputValue);
         auto fullJson = GetJsonValue(node_);
+        std::cout << std::endl << fullJson->ToString() << std::endl;
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BACKGROUND_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
+    DisposeNode(expectedCustomNode);
 }
 }
