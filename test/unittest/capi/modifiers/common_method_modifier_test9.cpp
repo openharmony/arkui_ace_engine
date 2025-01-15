@@ -20,6 +20,9 @@
 #include "core/interfaces/native/implementation/draw_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "generated/type_helpers.h"
+#include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -350,5 +353,247 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilitySelectedTestValidVa
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_SELECTED_NAME_TEST);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
+}
+
+/*
+ * @tc.name: SetOnHover
+ * @tc.desc: 
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    // OHOS::Ace::NG::EventHub
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        bool isHover;
+        int32_t pressure;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onHoverFunc = [](const Ark_Int32 resourceId,
+                          const Ark_Boolean isHover,
+                          const Ark_HoverEvent event) {
+        checkEvent = {
+            .nodeId = resourceId,
+            .isHover = isHover,
+            .pressure = Converter::Convert<int32_t>(event.pressure)
+        };
+    };
+
+    Callback_Boolean_HoverEvent_Void callBackValue = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onHoverFunc
+    };
+
+    auto test = [this, &callBackValue, eventHub, frameNode](bool isHover) {
+        checkEvent = std::nullopt;
+        modifier_->setOnHover(node_, &callBackValue);
+        ASSERT_TRUE(checkEvent.has_value());
+        EXPECT_EQ(checkEvent->isHover, isHover);
+    };
+}
+/*
+ * @tc.name: SetOnAccessibilityHover
+ * @tc.desc: 
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    // OHOS::Ace::NG::EventHub
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+        bool isHover;
+        int32_t pressure;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onAccessibilityHoverFunc = [](const Ark_Int32 resourceId,
+                          const Ark_Boolean isHover,
+                          const Ark_AccessibilityHoverEvent event) {
+        checkEvent = {
+            .nodeId = resourceId,
+            .isHover = isHover,
+            .pressure = Converter::Convert<int32_t>(event.pressure)
+        };
+    };
+
+    AccessibilityCallback callBackValue = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onAccessibilityHoverFunc
+    };
+
+    auto test = [this, &callBackValue, eventHub, frameNode](bool isHover) {
+        checkEvent = std::nullopt;
+        modifier_->setOnAccessibilityHover(node_, &callBackValue);
+        ASSERT_TRUE(checkEvent.has_value());
+        EXPECT_EQ(checkEvent->isHover, isHover);
+    };
+}
+
+/*
+ * @tc.name: SetOnAttach
+ * @tc.desc: 
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest9, SetOnAttachTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    // OHOS::Ace::NG::EventHub
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onAttachFunc = [](const Ark_Int32 resourceId) {
+        checkEvent = { .nodeId = resourceId };
+    };
+
+    Callback_Void callBackValue = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr
+        },
+        .call = onAttachFunc
+    };
+
+    auto test = [this, &callBackValue, eventHub, frameNode]() {
+        checkEvent = std::nullopt;
+        modifier_->setOnAttach(node_, &callBackValue);
+        ASSERT_TRUE(checkEvent.has_value());
+    };
+}
+
+/*
+ * @tc.name: SetOnDetach
+ * @tc.desc: 
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest9, SetOnDetachTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    // OHOS::Ace::NG::EventHub
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onDetachFunc = [](const Ark_Int32 resourceId) {
+        checkEvent = { .nodeId = resourceId };
+    };
+
+    Callback_Void callBackValue = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr
+        },
+        .call = onDetachFunc
+    };
+
+    auto test = [this, &callBackValue, eventHub, frameNode]() {
+        checkEvent = std::nullopt;
+        modifier_->setOnDetach(node_, &callBackValue);
+        ASSERT_TRUE(checkEvent.has_value());
+    };
+}
+
+/*
+ * @tc.name: SetOnTouchIntercept
+ * @tc.desc: 
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    // OHOS::Ace::NG::EventHub
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onTouchInterceptFunc = [](const Ark_Int32 resourceId,
+                                const Ark_TouchEvent parameter, 
+                                const Callback_HitTestMode_Void continuation) {
+        checkEvent = { .nodeId = resourceId };
+    };
+
+    Callback_TouchEvent_HitTestMode callBackValue = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr
+        },
+        .call = onTouchInterceptFunc
+    };
+
+    auto test = [this, &callBackValue, eventHub, frameNode]() {
+        checkEvent = std::nullopt;
+        modifier_->setOnTouchIntercept(node_, &callBackValue);
+        ASSERT_TRUE(checkEvent.has_value());
+    };
+}
+
+/*
+ * @tc.name: SetOnMouse
+ * @tc.desc: 
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest9, SetOnMouseTest, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    // OHOS::Ace::NG::EventHub
+    ASSERT_NE(eventHub, nullptr);
+
+    struct CheckEvent {
+        int32_t nodeId;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+
+    auto onMouseFunc = [](const Ark_Int32 resourceId,
+                                const Ark_MouseEvent event) {
+        checkEvent = { .nodeId = resourceId };
+    };
+
+    Callback_MouseEvent_Void callBackValue = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr
+        },
+        .call = onMouseFunc
+    };
+
+    auto test = [this, &callBackValue, eventHub, frameNode]() {
+        checkEvent = std::nullopt;
+        modifier_->setOnMouse(node_, &callBackValue);
+        ASSERT_TRUE(checkEvent.has_value());
+    };
 }
 }
