@@ -1335,6 +1335,8 @@ RectF TextPattern::CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandl
     textSelector_.Update(baseOffset, destinationOffset);
     if (calculateHandleFunc == nullptr) {
         CalculateHandleOffsetAndShowOverlay();
+    } else {
+        calculateHandleFunc();
     }
     return aiRect;
 }
