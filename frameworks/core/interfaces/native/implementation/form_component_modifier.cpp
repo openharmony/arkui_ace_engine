@@ -69,10 +69,9 @@ namespace Converter {
 template<>
 OptRequestFormInfo Convert(const Ark_FormInfo& src)
 {
-    std::printf("set: modifier convert\n");
     OptRequestFormInfo dst;
     auto id = Converter::OptConvert<Dimension>(src.id);
-    if(id) {
+    if (id) {
         dst.id = (int64_t)(*id).Value();
     }
     dst.name = Converter::Convert<std::string>(src.name);
@@ -84,7 +83,6 @@ OptRequestFormInfo Convert(const Ark_FormInfo& src)
     dst.want = nullptr;
     dst.renderingMode = Converter::OptConvert<int32_t>(src.renderingMode);
     dst.shape = Converter::OptConvert<int32_t>(src.shape);
-    std::printf("set: modifier convert2\n");
     return dst;
 }
 template<>
@@ -164,14 +162,14 @@ void SetFormComponentOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto formInfo = Converter::Convert<OptRequestFormInfo>(*value);
     FormModelNG::SetModuleName(frameNode, formInfo.module);
-    if(formInfo.dimension) {
+    if (formInfo.dimension) {
         FormModelNG::SetDimension(frameNode, *formInfo.dimension);
     }
     LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
          "for implementation of int64_t functionality.");
     LOGE("ARKOALA FormComponentInterfaceModifier::SetFormComponentOptionsImpl - CustomObject is not supported "
          "the type Ark_FormInfo::Opt_Want::Opt_Map_String_CustomObject::Ark_CustomObject.");
-#endif
+#endif // FORM_SUPPORTED
 }
 } // FormComponentInterfaceModifier
 namespace FormComponentAttributeModifier {

@@ -602,6 +602,7 @@ HWTEST_F(FormComponentModifierTest, setOnLoadTest, TestSize.Level1)
     EXPECT_TRUE(formInfo.has_value());
     EXPECT_TRUE(*formInfo);
 }
+
 /*
  * @tc.name: setFormComponentOptions
  * @tc.desc:
@@ -622,22 +623,14 @@ HWTEST_F(FormComponentModifierTest, setFormComponentOptionsModuleNameValues, Tes
     initValue.want = Converter::ArkValue<Opt_Want>(Ark_Empty());
     initValue.renderingMode = Converter::ArkValue<Opt_FormRenderingMode>(Ark_Empty());
     initValue.shape = Converter::ArkValue<Opt_FormShape>(Ark_Empty());
-
     auto checkValue = [this, &initValue](
                           const std::string& input, const Ark_String& value, const std::string& expected) {
         Ark_FormInfo inputValue = initValue;
         inputValue.module = value;
-
-        std::printf("set: const input: %s\n", input.c_str());
-
         modifier_->setFormComponentOptions(node_, &inputValue);
-        
         auto jsonValue = GetJsonValue(node_);
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto result = GetAttrValue<std::string>(resultConstructor, ATTRIBUTE_MODULE_NAME_NAME);
-        
-        std::printf("set: holder constructor: %s result: %s expected: %s\n", resultConstructor->ToString().c_str(), result.c_str(), expected.c_str());
-
         EXPECT_EQ(result, expected) <<
             "Input value is: " << input << ", method: setFormComponentOptions, attribute: module";
     };
@@ -666,46 +659,27 @@ HWTEST_F(FormComponentModifierTest, setFormComponentOptionsDimensionValues, Test
     initValue.want = Converter::ArkValue<Opt_Want>(Ark_Empty());
     initValue.renderingMode = Converter::ArkValue<Opt_FormRenderingMode>(Ark_Empty());
     initValue.shape = Converter::ArkValue<Opt_FormShape>(Ark_Empty());
-
     auto checkValue = [this, &initValue](
                           const std::string& input, const Ark_FormDimension& value, const std::string& expected) {
-
         Ark_FormInfo inputValue = initValue;
         inputValue.dimension = Converter::ArkValue<Opt_FormDimension>(value);
-
-        std::printf("set: const input: %s\n", input.c_str());
-
         modifier_->setFormComponentOptions(node_, &inputValue);
-        
         auto jsonValue = GetJsonValue(node_);
         auto resultConstructor = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_CONSTRUCTOR_NAME);
         auto result = GetAttrValue<std::string>(resultConstructor, ATTRIBUTE_DIMENSION_NAME);
-        
-        std::printf("set: holder constructor: %s result: %s expected: %s\n", resultConstructor->ToString().c_str(), result.c_str(), expected.c_str());
-
         EXPECT_EQ(result, expected) <<
             "Input value is: " << input << ", method: setFormComponentOptions, attribute: dimension";
     };
-    std::printf("set: test ===== valid =====\n");
     for (auto& [input, value, expected] : testFixtureEnumFormDimensionValidValues) {
         checkValue(input, value, expected);
     }
-    std::printf("set: test ===== invalid =====\n");
     auto presetValue = initValue;
     auto input = std::get<1>(testFixtureEnumFormDimensionValidValues[0]);
     auto expected = std::get<2>(testFixtureEnumFormDimensionValidValues[0]);
     presetValue.dimension = Converter::ArkValue<Opt_FormDimension>(input);
-
     modifier_->setFormComponentOptions(node_, &presetValue);
-    
     for (auto& [input, value] : testFixtureEnumFormDimensionInvalidValues) {
         checkValue(input, value, expected);
     }
-}
-
-HWTEST_F(FormComponentModifierTest, setFormComponentOptions2, TestSize.Level1)
-{
-    char *p = nullptr;
-    *p = '\0';
 }
 } // namespace OHOS::Ace::NG
