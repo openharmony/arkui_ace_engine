@@ -54,7 +54,7 @@ const std::vector<BorderStyle> BORDER_STYLES = { BorderStyle::SOLID, BorderStyle
 const std::vector<ImageRepeat> IMAGES_REPEATS = { ImageRepeat::NO_REPEAT, ImageRepeat::REPEAT_X, ImageRepeat::REPEAT_Y,
     ImageRepeat::REPEAT };
 const std::vector<BackgroundImageSizeType> IMAGE_SIZES = { BackgroundImageSizeType::CONTAIN,
-    BackgroundImageSizeType::COVER, BackgroundImageSizeType::AUTO };
+    BackgroundImageSizeType::COVER, BackgroundImageSizeType::AUTO, BackgroundImageSizeType::FILL };
 const std::vector<TextDirection> TEXT_DIRECTIONS = { TextDirection::LTR, TextDirection::RTL, TextDirection::AUTO };
 const std::vector<WindowBlurStyle> WINDOW_BLUR_STYLES = { WindowBlurStyle::STYLE_BACKGROUND_SMALL_LIGHT,
     WindowBlurStyle::STYLE_BACKGROUND_MEDIUM_LIGHT, WindowBlurStyle::STYLE_BACKGROUND_LARGE_LIGHT,
