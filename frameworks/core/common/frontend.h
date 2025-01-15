@@ -333,6 +333,11 @@ public:
 
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {}
 
+    virtual std::string GetPagePathByUrl(const std::string& url) const
+    {
+        return "";
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     FrontendType type_ = FrontendType::JS;
