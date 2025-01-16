@@ -243,7 +243,6 @@ struct CJForegroundBlurStyle {
     int32_t colorMode;
     int32_t adaptiveColor;
     CJBlurOptions blurOptions;
-    float scale;
 };
 
 struct CJAlignRuleOption {
@@ -373,8 +372,6 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBrightness(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSaturate(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetContrast(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetInvert(double value);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetInvertWithOptions(
-    double low, double high, double threshold, double thresholdRange);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSepia(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetHueRotate(float deg);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBlendMode(int32_t value, int32_t type);
@@ -492,15 +489,6 @@ CJ_EXPORT void FFIOHOSAceFrameworkDefaultFocus(bool isDefaultFocus);
 CJ_EXPORT void FFIOHOSAceFrameworkGroupDefaultFocus(bool isGroupDefaultFocus);
 CJ_EXPORT void FFIOHOSAceFrameworkFocusOnTouch(bool isFocusOnTouch);
 CJ_EXPORT bool FFIOHOSAceFrameworkRequestFocus(const char* inspectorKey);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityDescription(const char* value);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityText(const char* value);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityGroup(bool value);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityLevel(const char* value);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityTextHint(const char* value);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetRenderGroup(bool value);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityVirtualNode(void (*builder)());
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetClickEffect(int32_t level, float scale);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetMotionPath(CJMotionPathOptions options);
 
 struct CJFocusBoxStyle {
     bool hasMargin;
