@@ -395,19 +395,19 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
 
 ArkUINodeHandle GetFrameNodeByKey(ArkUI_CharPtr key)
 {
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    if (!pipeline || !pipeline->CheckThreadSafe()) {
-        LOGF("GetFrameNodeByKey doesn't run on UI thread");
-        abort();
-    }
     auto node = NG::Inspector::GetFrameNodeByKey(key, true);
-    CHECK_NULL_RETURN(node, nullptr);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
 ArkUINodeHandle GetAttachedFrameNodeById(ArkUI_CharPtr key)
 {
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGF("GetAttachedNodeHandleById doesn't run on UI thread");
+        abort();
+    }
     auto node = ElementRegister::GetInstance()->GetAttachedFrameNodeById(key);
+    CHECK_NULL_RETURN(node, nullptr);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
