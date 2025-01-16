@@ -716,9 +716,6 @@ void CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle)
     if (!labelStyle.fontStyle.has_value()) {
         labelStyle.fontStyle = FontStyle::NORMAL;
     }
-    if (!labelStyle.fontFamily.has_value()) {
-        labelStyle.fontFamily = { "HarmonyOS Sans" };
-    }
     if (!labelStyle.heightAdaptivePolicy.has_value()) {
         labelStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
     }
@@ -733,7 +730,7 @@ void SetLabelStyle(CJTabContentLabelStyle cjLabelStyle, bool isSubTabStyle)
 
     LabelStyle labelStyle;
     if (Utils::CheckParamsValid(cjLabelStyle.overflow, TEXT_OVER_FLOWS.size())) {
-        labelStyle.textOverflow = TEXT_OVER_FLOWS[cjLabelStyle.overflow]
+        labelStyle.textOverflow = TEXT_OVER_FLOWS[cjLabelStyle.overflow];
     }
 
     if (cjLabelStyle.maxLines > 0) {

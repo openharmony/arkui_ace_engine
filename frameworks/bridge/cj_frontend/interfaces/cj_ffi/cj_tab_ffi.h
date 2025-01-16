@@ -117,7 +117,7 @@ struct CJTabsBarBackgroundBlurStyleOptions {
     int32_t colorMode;
     int32_t adaptiveColor;
     CJTabsBlurOptions blurOptions;
-    double scale;
+    float scale;
     int32_t policy;
     uint32_t inactiveColor;
 };
@@ -222,12 +222,6 @@ struct CJTabBarIconStyle {
     uint32_t unselectedColor;
     uint32_t selectedColor;
 };
-
-// todo 支持SymbolGlyphModifier
-// struct CJTabBarSymbol {
-//     CJSymbolGlyphModifier normal;
-//     CJSymbolGlyphModifier selected;
-// };
 
 struct CJBottomTabBarStyle {
     char* icon;
