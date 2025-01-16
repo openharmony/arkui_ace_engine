@@ -1127,9 +1127,9 @@ export struct ChipComponent {
         if (resource.id !== -1) {
           return resourceManager.getNumber(resource);
         }
-        if (resource.params && resource.params.length > 0 && resource.params[0] && resource.params[0].split(".") > 2 &&
-        resource.params[0].split(".")[2]) {
-          let param = resource.params[0].split(".")[2] as string;
+        if (resource.params && resource.params.length > 0 && resource.params[0] && resource.params[0].split('.') > 2 &&
+        resource.params[0].split('.')[2]) {
+          let param = resource.params[0].split('.')[2] as string;
           return resourceManager.getNumberByName(param);
         }
         return defaultValue;
