@@ -526,8 +526,9 @@ public:
     bool CursorMoveRight();
     bool CursorMoveUp();
     bool CursorMoveDown();
-    bool CursorMoveLeftWord();
-    bool CursorMoveRightWord();
+    void CursorMoveToNextWord(CaretMoveIntent direction);
+    int32_t GetLeftWordIndex();
+    int32_t GetRightWordIndex();
     bool CursorMoveToParagraphBegin();
     bool CursorMoveToParagraphEnd();
     bool CursorMoveHome();
@@ -553,6 +554,8 @@ public:
     int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
     void AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosition, bool direction);
     bool HandleOnDeleteComb(bool backward) override;
+    void DeleteBackwardWord();
+    void DeleteForwardWord();
     int32_t GetLeftWordPosition(int32_t caretPosition);
     int32_t GetRightWordPosition(int32_t caretPosition);
     int32_t GetParagraphBeginPosition(int32_t caretPosition);
@@ -952,6 +955,7 @@ public:
     void UpdateSelector(int32_t start, int32_t end);
     void UpdateSelectionType(const SelectionInfo& textSelectInfo);
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
+    SpanItemType GetSpanType(int32_t index);
 
     void DumpAdvanceInfo() override {}
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override  {}
@@ -1426,6 +1430,7 @@ private:
     std::pair<int32_t, SelectType> JudgeSelectType(const Offset& pos);
     bool IsSelectEmpty(int32_t start, int32_t end);
     bool AdjustIndexSkipLineSeparator(int32_t& currentPosition);
+    bool AdjustIndexSkipSpace(int32_t& currentPosition, const MoveDirection direction);
     void RequestKeyboardToEdit();
     void HandleTasksOnLayoutSwap()
     {
