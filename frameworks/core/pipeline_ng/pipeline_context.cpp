@@ -589,7 +589,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     UIObserverHandler::GetInstance().HandleLayoutDoneCallBack();
     // flush correct rect again
     taskScheduler_->FlushPersistAfterLayoutTask();
-    taskScheduler_->FlushLatestFrameLayoutFinishTask();
     taskScheduler_->FinishRecordFrameInfo();
     FlushNodeChangeFlag();
     FlushAnimationClosure();
@@ -642,6 +641,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     needRenderNode_.clear();
     taskScheduler_->FlushAfterRenderTask();
+    window_->FlushLayoutSize(width_, height_);
     if (IsFocusWindowIdSetted()) {
         FireAllUIExtensionEvents();
     }
@@ -1247,6 +1247,8 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
+    width_ = width;
+    height_ = height;
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
         type == WindowSizeChangeReason::CUSTOM_ANIMATION && !isDensityChanged_) {
         TryCallNextFrameLayoutCallback();
@@ -4031,11 +4033,6 @@ void PipelineContext::AddAfterLayoutTask(std::function<void()>&& task, bool isFl
 void PipelineContext::AddPersistAfterLayoutTask(std::function<void()>&& task)
 {
     taskScheduler_->AddPersistAfterLayoutTask(std::move(task));
-}
-
-void PipelineContext::AddLatestFrameLayoutFinishTask(std::function<void()>&& task)
-{
-    taskScheduler_->AddLatestFrameLayoutFinishTask(std::move(task));
 }
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)

@@ -75,6 +75,8 @@ public:
         return nullptr;
     }
 
+    virtual void FlushLayoutSize(int32_t width, int32_t height) {}
+
     virtual bool FlushAnimation(uint64_t timeStamp)
     {
         return false;
