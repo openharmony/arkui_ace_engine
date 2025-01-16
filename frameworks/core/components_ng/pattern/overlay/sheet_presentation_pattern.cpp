@@ -1034,8 +1034,8 @@ float SheetPresentationPattern::GetSheetHeightChange()
             textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight() - sheetHeightUp_ -
             scrollHeight_ : 0.f;
     } else {
-        inputH = textFieldManager ? (pipelineContext->GetRootHeight() - textFieldManager->GetClickPosition().GetY() -
-                                    textFieldManager->GetHeight()) : 0.f;
+        inputH = textFieldManager ? (pipelineContext->GetRootHeight() -
+            textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight()) : 0.f;
     }
     // keyboardH : keyboard height + height of the bottom navigation bar
     auto keyboardH = keyboardInsert.Length() + manager->GetSystemSafeArea().bottom_.Length();
