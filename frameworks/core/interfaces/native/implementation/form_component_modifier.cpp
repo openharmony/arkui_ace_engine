@@ -55,8 +55,8 @@ LiteralDimension Convert(const Ark_SizeOptions& src)
     auto dstWidth = Converter::OptConvert<Dimension>(src.width);
     auto dstHeight = Converter::OptConvert<Dimension>(src.height);
     if (!(dstWidth.has_value() && dstHeight.has_value())) {
-        dstWidth.reset();
-        dstHeight.reset();
+        dstWidth = Dimension();
+        dstHeight = Dimension();
     }
     return LiteralDimension {
         .width = dstWidth.value(),
