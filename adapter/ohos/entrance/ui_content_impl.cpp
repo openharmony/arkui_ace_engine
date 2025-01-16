@@ -3045,12 +3045,12 @@ void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDecor)
     std::lock_guard<std::mutex> lock(updateDecorVisibleMutex_);
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateWindowVisible: %{public}d, hasDecor: %{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, visible, hasDecor);
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto task = [container, visible, hasDecor]() {
+    auto task = [instanceId = instanceId_, visible, hasDecor]() {
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        CHECK_NULL_VOID(container);
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->ShowContainerTitle(visible, hasDecor);
