@@ -1562,7 +1562,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setCopyOptionTestCopyOptionValidValues, 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setCopyOptionTestCopyOptionInvalidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setCopyOptionTestCopyOptionInvalidValues, TestSize.Level1)
 {
     Ark_CopyOptions initValueCopyOption;
 
