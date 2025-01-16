@@ -556,6 +556,9 @@ class FrameNode {
         this._gestureEvent.setNodePtr(this.nodePtr_);
         let weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nodePtr_);
         this._gestureEvent.setWeakNodePtr(weakPtr);
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this._gestureEvent.registerFrameNodeDeletedCallback(this.nodePtr_);
+        __JSScopeUtil__.restoreInstanceId();
     }
     return this._gestureEvent;
   }

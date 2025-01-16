@@ -1223,6 +1223,9 @@ public:
         return lastHostParentOffsetToWindow_;
     }
 
+    void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
+    void FireFrameNodeDestructorCallback();
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1493,6 +1496,7 @@ private:
     int32_t childrenUpdatedFrom_ = -1;
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
     float preOpacity_ = 1.0f;
+    std::function<void(int32_t)> frameNodeDestructorCallback_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

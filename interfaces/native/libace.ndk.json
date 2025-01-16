@@ -2614,5 +2614,25 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_HostWindowInfo_Destroy"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_PointerEvent_GetPressedTimeByIndex"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_MouseEvent_GetRawDeltaX"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_MouseEvent_GetRawDeltaY"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_MouseEvent_GetPressedButtons"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_UIInputEvent_GetTargetDisplayId"
     }
 ]

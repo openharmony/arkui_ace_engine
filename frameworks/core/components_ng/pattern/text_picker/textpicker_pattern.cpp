@@ -1504,7 +1504,7 @@ int32_t TextPickerPattern::CalculateIndex(RefPtr<FrameNode>& frameNode)
 float TextPickerPattern::CalculateColumnSize(int32_t index, float childCount, const SizeF& pickerContentSize)
 {
     float widthSum = 0.0f;
-    for (uint32_t i = 0; i < std::min(columnWidths_.size(), static_cast<size_t>(childCount)); i++) {
+    for (size_t i = 0; i < std::min(columnWidths_.size(), static_cast<size_t>(childCount)); i++) {
         columnWidths_[i] = columnWidths_[i].Unit() != DimensionUnit::PERCENT ?
             Dimension(columnWidths_[i].ConvertToPx(), DimensionUnit::PX) :
             Dimension(pickerContentSize.Width() * columnWidths_[i].Value() / MAX_PERCENT, DimensionUnit::PX);
@@ -1520,7 +1520,7 @@ float TextPickerPattern::CalculateColumnSize(int32_t index, float childCount, co
         return pickerContentSize.Width() / std::max(childCount, 1.0f);
     }
 
-    if (index >= columnWidths_.size()) {
+    if (static_cast<size_t>(index) >= columnWidths_.size()) {
         columnWidths_.emplace_back(Dimension((pickerContentSize.Width() - widthSum) /
             (childCount - columnWidths_.size()), DimensionUnit::PX));
     }

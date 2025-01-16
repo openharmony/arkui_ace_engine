@@ -113,6 +113,7 @@ void JsSaveButtonClickFunction::Execute(GestureEvent& info)
     clickEventParam->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     auto target = CreateEventTargetObject(info);
     clickEventParam->SetPropertyObject("target", target);
+    clickEventParam->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
 
     int32_t res = static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED);
 #ifdef SECURITY_COMPONENT_ENABLE

@@ -40,7 +40,8 @@ public:
         const std::function<void(const std::string& fromKey, uint32_t forIndex)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t from, uint32_t to)>& onGetTypes4Range,
-        const std::function<void(int32_t from, int32_t to)>& onSetActiveRange) = 0;
+        const std::function<void(int32_t from, int32_t to)>& onSetActiveRange,
+        bool reusable = true) = 0;
     virtual void UpdateRenderState(uint32_t totalCount, bool visibleItemsChanged) = 0;
     virtual void OnMove(std::function<void(int32_t, int32_t)>&& onMove) = 0;
     virtual void SetCreateByTemplate(bool isCreatedByTemplate) = 0;

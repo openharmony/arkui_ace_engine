@@ -26,7 +26,8 @@ RefPtr<RepeatVirtualScrollNode> RepeatVirtualScrollNode::GetOrCreateRepeatNode(i
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-    const std::function<void(int32_t, int32_t)>& onSetActiveRange)
+    const std::function<void(int32_t, int32_t)>& onSetActiveRange,
+    bool reusable)
 {
     auto node = ElementRegister::GetInstance()->GetSpecificItemById<RepeatVirtualScrollNode>(nodeId);
     if (node) {
@@ -37,7 +38,7 @@ RefPtr<RepeatVirtualScrollNode> RepeatVirtualScrollNode::GetOrCreateRepeatNode(i
     }
     node = MakeRefPtr<RepeatVirtualScrollNode>(
         nodeId, totalCount, templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range,
-        onSetActiveRange);
+        onSetActiveRange, reusable);
 
     ElementRegister::GetInstance()->AddUINode(node);
     return node;
@@ -49,11 +50,13 @@ RepeatVirtualScrollNode::RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCo
     const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
     const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-    const std::function<void(int32_t, int32_t)>& onSetActiveRange)
+    const std::function<void(int32_t, int32_t)>& onSetActiveRange,
+    bool reusable)
     : ForEachBaseNode(V2::JS_REPEAT_ETS_TAG, nodeId), totalCount_(totalCount),
-      caches_(templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range),
+      caches_(templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range, reusable),
       onSetActiveRange_(onSetActiveRange),
-      postUpdateTaskHasBeenScheduled_(false)
+      postUpdateTaskHasBeenScheduled_(false),
+      reusable_(reusable)
 {
 }
 
@@ -67,6 +70,13 @@ void RepeatVirtualScrollNode::UpdateTotalCount(uint32_t totalCount)
 void RepeatVirtualScrollNode::DoSetActiveChildRange(
     int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
+    // cacheStart and cacheEnd are not always equal to the cacheCount of container when sliding screen,
+    // when disabling reuse, nodes may move out of L1 and then move in again, which causes extra construction and
+    // destruction. So set cacheStart and cacheEnd equal to the cacheCount of container.
+    if (!reusable_) {
+        cacheStart = containerCacheCount_;
+        cacheEnd = containerCacheCount_;
+    }
     if (showCache) {
         start -= cacheStart;
         end += cacheEnd;
@@ -325,9 +335,11 @@ RefPtr<UINode> RepeatVirtualScrollNode::GetFrameChildByIndex(
             "not in caches && needBuild==true", static_cast<int32_t>(GetId()), static_cast<int32_t>(index),
             key->c_str());
 
-        // ask TS to update a Node, if possible
-        // if no suitable node, request to crete a new node
-        node4Index = caches_.UpdateFromL2(index);
+        // ask TS to update a Node when enable reuse, if possible
+        // if no suitable node, request to create a new node
+        if (reusable_) {
+            node4Index = caches_.UpdateFromL2(index);
+        }
         if (!node4Index) {
             node4Index = caches_.CreateNewNode(index);
             isChildReused = false;

@@ -462,4 +462,23 @@ void UIExtensionManager::SendPageModeToUEA(const RefPtr<PipelineContext>& pipeli
         accessibilityManager->UpdatePageMode(pageMode);
     }
 }
+
+void UIExtensionManager::TransferAccessibilityRectInfo()
+{
+    {
+        std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
+        for (const auto& it : aliveUIExtensions_) {
+            auto uiExtension = it.second.Upgrade();
+            if (uiExtension) {
+                uiExtension->TransferAccessibilityRectInfo();
+            }
+        }
+    }
+    for (const auto& it : aliveSecurityUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->TransferAccessibilityRectInfo();
+        }
+    }
+}
 } // namespace OHOS::Ace::NG

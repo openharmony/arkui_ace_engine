@@ -166,4 +166,13 @@ void DragDropInitiatingHandler::SetThumbnailCallback(std::function<void(Offset)>
     CHECK_NULL_VOID(initiatingFlow_);
     return initiatingFlow_->SetThumbnailCallback(std::move(callback));
 }
+
+bool DragDropInitiatingHandler::IsNeedGather()
+{
+    if (initiatingFlow_) {
+        auto params = initiatingFlow_->GetDragDropInitiatingParams();
+        return params.isNeedGather;
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

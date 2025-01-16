@@ -137,6 +137,7 @@ TouchEventInfo TouchEventActuator::CreateTouchEventInfo(const TouchEvent& lastPo
         eventInfo.SetTouchEventsEnd(true);
         isFlushTouchEventsEnd_ = false;
     }
+    eventInfo.SetTargetDisplayId(lastPoint.targetDisplayId);
     return eventInfo;
 }
 
@@ -179,6 +180,9 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
     info.SetScreenLocation(Offset(screenX, screenY));
     info.SetTouchType(type);
     info.SetForce(pointItem.force);
+    info.SetPressedTime(pointItem.downTime);
+    info.SetWidth(pointItem.width);
+    info.SetHeight(pointItem.height);
     if (pointItem.tiltX.has_value()) {
         info.SetTiltX(pointItem.tiltX.value());
     }

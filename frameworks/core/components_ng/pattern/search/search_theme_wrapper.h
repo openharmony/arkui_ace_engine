@@ -13,23 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_THEME_WRAPPER_H
-#define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_FIELD_TEXT_FIELD_THEME_WRAPPER_H
+#ifndef FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SEARCH_SEARCH_THEME_WRAPPER_H
+#define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SEARCH_SEARCH_THEME_WRAPPER_H
 
-#include <memory>
-
-#include "base/memory/ace_type.h"
-#include "core/components/text_field/textfield_theme.h"
+#include "core/components/search/search_theme.h"
 #include "core/components_ng/token_theme/token_theme_wrapper.h"
 
 namespace OHOS::Ace::NG {
 
-/**
- * TextThemeWrapper defines color and styles of TextComponent basing on TokenTheme's data.
- * TextThemeWrapper should be built using TextThemeWrapper::Builder.
- */
-class TextFieldThemeWrapper : public TextFieldTheme, public TokenThemeWrapper {
-    DECLARE_ACE_TYPE(TextFieldThemeWrapper, TextFieldTheme);
+class SearchThemeWrapper : public SearchTheme, public TokenThemeWrapper {
+    DECLARE_ACE_TYPE(SearchThemeWrapper, SearchTheme);
 
 public:
     class WrapperBuilder : public Builder {
@@ -39,33 +32,34 @@ public:
 
         RefPtr<TokenThemeWrapper> BuildWrapper(const RefPtr<ThemeConstants>& themeConstants) const
         {
-            auto wrapper = AceType::Claim(new TextFieldThemeWrapper());
-            auto theme = AceType::DynamicCast<TextFieldTheme>(wrapper);
+            auto themeWrapper = AceType::Claim(new SearchThemeWrapper());
+            auto theme = AceType::DynamicCast<SearchTheme>(themeWrapper);
             if (!themeConstants) {
-                return wrapper;
+                return themeWrapper;
             }
             ParsePattern(themeConstants, theme);
-            return wrapper;
+            return themeWrapper;
         }
     };
 
-    ~TextFieldThemeWrapper() override = default;
+    ~SearchThemeWrapper() override = default;
 
     void ApplyTokenTheme(const TokenTheme& theme) override
     {
         if (const auto& colors = theme.Colors(); colors) {
             textColor_ = colors->FontPrimary();
             placeholderColor_ = colors->FontSecondary();
-            bgColor_ = colors->CompBackgroundTertiary();
-            focusBgColor_ = colors->CompBackgroundTertiary();
-            cursorColor_ =  colors->Brand();
-            symbolColor_ = colors->IconPrimary();
-            textColorDisable_ = colors->IconTertiary();
+            searchIconColor_ = colors->IconSecondary();
+            symbolIconColor_ = colors->FontSecondary();
+            focusIconColor_ = colors->FontSecondary();
+            searchButtonTextColor_ = colors->FontEmphasize();
+
+            textStyle_.SetTextColor(textColor_);
         }
     }
 
 protected:
-    TextFieldThemeWrapper() = default;
+    SearchThemeWrapper() = default;
 };
-} // namespace
-#endif
+} // namespace OHOS::Ace::NG
+#endif // FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SEARCH_SEARCH_THEME_WRAPPER_H

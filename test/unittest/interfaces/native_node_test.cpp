@@ -5296,7 +5296,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest080, TestSize.Level1)
 }
 
 /**
- * @tc.name: NativeNodeTest080
+ * @tc.name: NativeNodeTest081
  * @tc.desc: Test native style string.
  * @tc.type: FUNC
  */
@@ -5311,14 +5311,15 @@ HWTEST_F(NativeNodeTest, NativeNodeTest081, TestSize.Level1)
 
     OH_Drawing_DestroyTextStyle(textStyle);
     delete placeholder;
-    EXPECT_EQ(placeholder, nullptr);
     OH_ArkUI_StyledString_PushTextStyle(styleString, textStyle);
     OH_ArkUI_StyledString_AddPlaceholder(styleString, placeholder);
     EXPECT_NE(styleString, nullptr);
+    EXPECT_NE(textStyle, nullptr);
+    EXPECT_NE(placeholder, nullptr);
 }
 
 /**
- * @tc.name: NativeNodeTest081
+ * @tc.name: NativeNodeTest082
  * @tc.desc: Test OH_ArkUI_NodeEvent_GetTextChangeEvent function.
  * @tc.type: FUNC
  */

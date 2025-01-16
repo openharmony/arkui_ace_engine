@@ -50,6 +50,7 @@ private:
     void ResetStateForHitTest(const RefPtr<FrameNode>& frameNode);
     void StartCreateSnapshotTask(int32_t fingerId);
     void StartPreDragDetectingStartTask();
+    void StartGatherTask();
 };
 } // namespace OHOS::Ace::NG
 

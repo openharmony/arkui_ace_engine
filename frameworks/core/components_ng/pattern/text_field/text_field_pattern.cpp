@@ -4837,7 +4837,7 @@ int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertVa
     TwinklingByFocus();
     CloseSelectOverlay(true);
     ScrollToSafeArea();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     return selectController_->GetCaretIndex();
 }
 

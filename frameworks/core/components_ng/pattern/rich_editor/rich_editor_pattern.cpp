@@ -3214,7 +3214,7 @@ void RichEditorPattern::UseHostToUpdateTextFieldManager()
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto globalOffset = host->GetPaintRectOffsetNG() - context->GetRootRect().GetOffset();
+    auto globalOffset = host->GetPaintRectOffsetNG(false, true) - context->GetRootRect().GetOffset();
     UpdateTextFieldManager(Offset(globalOffset.GetX(), globalOffset.GetY()), frameRect_.Height());
 }
 
@@ -7766,13 +7766,14 @@ void RichEditorPattern::CreateDragNode()
     info.maxSelectedWidth = GetMaxSelectedWidth();
     info.handleColor = GetCaretColor();
     info.selectedBackgroundColor = GetSelectedBackgroundColor();
-    CalculateHandleOffsetAndShowOverlay();
-    if (auto firstHandleInfo = GetFirstHandleInfo(); firstHandleInfo.has_value() && firstHandleInfo.value().isShow) {
-        info.firstHandle = textSelector_.firstHandle;
-    }
-    auto secondHandleInfo = GetSecondHandleInfo();
-    if (secondHandleInfo.has_value() && secondHandleInfo.value().isShow) {
-        info.secondHandle = textSelector_.secondHandle;
+    auto selectOverlayInfo = selectOverlay_->GetSelectOverlayInfo();
+    if (selectOverlayInfo.has_value()) {
+        if (selectOverlayInfo->firstHandle.isShow) {
+            info.firstHandle = selectOverlayInfo->firstHandle.paintRect;
+        }
+        if (selectOverlayInfo->secondHandle.isShow) {
+            info.secondHandle =  selectOverlayInfo->secondHandle.paintRect;
+        }
     }
     if (textSelector_.GetTextEnd() - textSelector_.GetTextStart() == 1) {
         auto spanItem = GetSpanItemByPosition(textSelector_.GetTextStart());
@@ -7968,7 +7969,7 @@ OffsetF RichEditorPattern::GetGlobalOffset() const
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, OffsetF());
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    auto richEditorPaintOffset = host->GetPaintRectOffsetNG();
+    auto richEditorPaintOffset = host->GetPaintRectOffsetNG(false, true);
     if (selectOverlay_->HasRenderTransform()) {
         richEditorPaintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
     }
@@ -8012,7 +8013,7 @@ bool RichEditorPattern::InRangeRect(const Offset& globalOffset, const std::pair<
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     CHECK_NULL_RETURN(0 <= range.first && range.first < range.second, false);
-    auto offset = host->GetPaintRectOffsetNG();
+    auto offset = host->GetPaintRectOffsetNG(false, true);
     auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
     if (selectOverlay_->HasRenderTransform()) {
         localOffset = ConvertGlobalToLocalOffset(globalOffset);
@@ -8071,7 +8072,7 @@ void RichEditorPattern::DumpInfo()
                                        : GetCaretRect().Height())));
     dumpLog.AddDesc(std::string("text rect: ").append(richTextRect_.ToString()));
     dumpLog.AddDesc(std::string("content rect: ").append(contentRect_.ToString()));
-    auto richEditorPaintOffset = host->GetPaintRectOffsetNG();
+    auto richEditorPaintOffset = host->GetPaintRectOffsetNG(false, true);
     bool hasRenderTransform = selectOverlay_->HasRenderTransform();
     if (hasRenderTransform) {
         richEditorPaintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
@@ -8270,7 +8271,7 @@ void RichEditorPattern::UpdateSelectionInfo(int32_t start, int32_t end)
     textResponseType_ = selectOverlayInfo
                         ? static_cast<TextResponseType>(selectOverlayInfo->menuInfo.responseType.value_or(0))
                         : TextResponseType::LONG_PRESS;
-    if (IsShowHandle() && !selectOverlay_->IsUsingMouse()) {
+    if (IsShowHandle() && !IsUsingMouse()) {
         ResetIsMousePressed();
         sourceType_ = SourceType::TOUCH;
     }
@@ -9390,7 +9391,7 @@ void RichEditorPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
     OffsetF caretOffset = CalcCursorOffsetByPosition(caretPosition_, caretHeight);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto offset = host->GetPaintRectOffsetNG();
+    auto offset = host->GetPaintRectOffsetNG(false, true);
     caretOffset += offset;
     caretCaretMetric.offset = caretOffset;
     caretCaretMetric.height = caretHeight;
@@ -10428,7 +10429,7 @@ OffsetF RichEditorPattern::GetPaintRectGlobalOffset() const
     auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_RETURN(pipeline, OffsetF(0.0f, 0.0f));
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    auto textPaintOffset = host->GetPaintRectOffsetNG();
+    auto textPaintOffset = host->GetPaintRectOffsetNG(false, true);
     return textPaintOffset - rootOffset;
 }
 
@@ -11659,7 +11660,7 @@ void RichEditorPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
             .c_str());
     json->Put("text rect", richTextRect_.ToString().c_str());
     json->Put("content rect", contentRect_.ToString().c_str());
-    auto richEditorPaintOffset = host->GetPaintRectOffsetNG();
+    auto richEditorPaintOffset = host->GetPaintRectOffsetNG(false, true);
     bool hasRenderTransform = selectOverlay_->HasRenderTransform();
     if (hasRenderTransform) {
         richEditorPaintOffset = selectOverlay_->GetPaintOffsetWithoutTransform();
