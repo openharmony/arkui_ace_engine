@@ -116,6 +116,7 @@ public:
                 "toast_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
             theme->toastBackgroundBlurStyle_ = toastPattern->GetAttr<int>(
                 "toast_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            theme->defaultBGColor_ = toastPattern->GetAttr<Color>("toast_default_bg_color", Color::TRANSPARENT);
         }
     };
 
@@ -236,6 +237,11 @@ public:
         return toastLimitHeightRatio_;
     }
 
+    Color GetDefaultBGColor() const
+    {
+        return defaultBGColor_;
+    }
+
 protected:
     ToastTheme() = default;
 
@@ -263,6 +269,7 @@ private:
     int32_t toastAlign_ = 0;
     double toastLimitHeightRatio_ = 0.65;
     int toastBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
+    Color defaultBGColor_ = Color::TRANSPARENT;
 };
 
 } // namespace OHOS::Ace
