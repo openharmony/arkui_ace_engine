@@ -50,7 +50,7 @@ protected:
     /**
      * @brief Pass scroll offset to adapter.
      */
-    void UpdateOffset(float delta, Axis axis);
+    void UpdateOffset(float delta);
 
 private:
     virtual RefPtr<FillAlgorithm> CreateFillAlgorithm() = 0;

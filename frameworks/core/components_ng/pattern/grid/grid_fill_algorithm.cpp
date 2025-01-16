@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,7 +16,6 @@
 #include "core/components_ng/pattern/grid/grid_fill_algorithm.h"
 
 #include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
@@ -40,79 +39,86 @@ void GridFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t totalC
 
     info_.axis_ = axis;
     info_.childrenCount_ = totalCnt;
+
+    range_.startLine = info_.startMainLineIndex_;
+    // range_.offset = info_.currentOffset_;
+    range_.endLine = info_.endMainLineIndex_;
 }
 
-RectF GridFillAlgorithm::CalcMarkItemRect(
-    const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const std::optional<OffsetF>& slidingOffset)
+void GridFillAlgorithm::FillMarkItem(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
+{
+    FillNext(viewport, axis, node, index);
+}
+
+void GridFillAlgorithm::FillNext(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
 {
     GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
     filler.FillMatrixOnly(index);
     const auto pos = info_.GetItemPos(index);
     filler.MeasureItem(params_, node, index, pos.first, pos.second);
-    auto offset = slidingOffset.has_value() ? node->GetGeometryNode()->GetMarginFrameOffset() + slidingOffset.value()
-                                            : node->GetGeometryNode()->GetMarginFrameOffset();
-    auto size = node->GetGeometryNode()->GetMarginFrameSize();
-    return { offset, size };
 }
 
-RectF GridFillAlgorithm::CalcItemRectAfterMarkItem(
-    const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const RectF& markItem)
-{
-    GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
-    filler.FillMatrixOnly(index);
-    const auto pos = info_.GetItemPos(index);
-    filler.MeasureItem(params_, node, index, pos.first, pos.second);
-
-    auto pivotRow = info_.FindInMatrix(index - 1);
-    if (pivotRow == info_.gridMatrix_.end() || pivotRow->first > pos.second) {
-        LOGW("grid matrix is corrupted");
-        return {};
-    }
-    if (pivotRow->first < pos.second) {
-        OffsetF offset = axis == Axis::VERTICAL ? OffsetF(0.0f, markItem.Bottom() + params_.mainGap)
-                                                : OffsetF(markItem.Right() + params_.mainGap, 0.0f);
-        return { offset, node->GetGeometryNode()->GetMarginFrameSize() };
-    }
-    OffsetF offset = axis == Axis::VERTICAL ? OffsetF(markItem.Right() + params_.crossGap, markItem.Top())
-                                            : OffsetF(markItem.Left(), markItem.Bottom() + params_.crossGap);
-    return { offset, node->GetGeometryNode()->GetMarginFrameSize() };
-}
-
-RectF GridFillAlgorithm::CalcItemRectBeforeMarkItem(
-    const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const RectF& markItem)
+void GridFillAlgorithm::FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
 {
     // matrix is ready
     GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
     const auto pos = info_.GetItemPos(index);
     filler.MeasureItem(params_, node, index, pos.first, pos.second);
-
-    auto pivotRow = info_.FindInMatrix(index + 1);
-    if (pivotRow == info_.gridMatrix_.end() || pivotRow->first < pos.second) {
-        LOGW("grid matrix is corrupted");
-        return {};
-    }
-    const auto size = node->GetGeometryNode()->GetMarginFrameSize();
-    if (pivotRow->first > pos.second) {
-        // new line.
-        OffsetF offset =
-            axis == Axis::VERTICAL
-                ? OffsetF(viewport.Width() - size.Width(), markItem.Top() - params_.mainGap - size.Height())
-                : OffsetF(markItem.Left() - params_.mainGap - size.Width(), viewport.Height() - size.Height());
-        return { offset, size };
-    }
-    OffsetF offset = axis == Axis::VERTICAL
-                         ? OffsetF(markItem.Left() - params_.crossGap - size.Width(), markItem.Top())
-                         : OffsetF(markItem.Left(), markItem.Top() - params_.crossGap - size.Height());
-    return { offset, size };
 }
 
-bool GridFillAlgorithm::CanFillMore(
-    Axis axis, const SizeF& scrollWindowSize, uint32_t idx, const RectF& markItemRect, FillDirection direction)
+bool GridFillAlgorithm::CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, FillDirection direction)
 {
-    // TODO: Axis::HORIZONTAL
-    if (direction == FillDirection::START) {
-        return GreatOrEqual(markItemRect.Top(), -scrollWindowSize.Height());
+    auto [col, row] = info_.GetItemPos(idx);
+    if (idx < 0) {
+        row = direction == FillDirection::START ? range_.startLine : range_.endLine + 1;
+        col = 0;
     }
-    return LessNotEqual(markItemRect.Bottom(), scrollWindowSize.Height() * 2);
+    if (row == -1 || col == -1) {
+        LOGW("grid matrix is corrupted");
+        return false;
+    }
+    if (col > 0) {
+        // always fill by full lines
+        return true;
+    }
+    if (direction == FillDirection::START) {
+        range_.AdjustBackward(info_.lineHeightMap_, params_.mainGap, row);
+        return Positive(range_.offset);
+    }
+
+    range_.endLine = row - 1;
+    range_.AdjustForward(info_.lineHeightMap_, params_.mainGap);
+    float contentHeight = info_.GetHeightInRange(range_.startLine, row, params_.mainGap) + range_.offset;
+
+    return LessNotEqual(contentHeight, scrollWindowSize.MainSize(axis));
+}
+
+void GridFillAlgorithm::LayoutRange::AdjustBackward(
+    const decltype(info_.lineHeightMap_)& lineHeights, float gap, int32_t firstRow)
+{
+    while (startLine > firstRow && Positive(offset)) {
+        auto height = lineHeights.find(--startLine);
+        if (height == lineHeights.end()) {
+            LOGW("line heights data is corrupted");
+            break;
+        }
+        offset -= height->second + gap;
+    }
+}
+
+void GridFillAlgorithm::LayoutRange::AdjustForward(const decltype(info_.lineHeightMap_)& lineHeights, float gap)
+{
+    while (startLine <= endLine) {
+        auto height = lineHeights.find(startLine);
+        if (height == lineHeights.end()) {
+            LOGW("line heights data is corrupted");
+            break;
+        }
+        if (LessOrEqual(-offset, height->second + gap)) {
+            break;
+        }
+        offset += height->second + gap;
+        ++startLine;
+    }
 }
 } // namespace OHOS::Ace::NG

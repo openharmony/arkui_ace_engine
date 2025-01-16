@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,10 +15,10 @@
 
 #pragma once
 
+#include <algorithm>
 #include <cstdint>
 
 #include "base/geometry/axis.h"
-#include "base/geometry/ng/offset_t.h"
 #include "core/components_ng/base/fill_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -32,24 +32,26 @@ class GridFillAlgorithm : public FillAlgorithm {
 public:
     GridFillAlgorithm(const GridLayoutProperty& props, GridLayoutInfo& info) : props_(props), info_(info) {}
 
-    RectF CalcMarkItemRect(const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index,
-        const std::optional<OffsetF>& slidingOffset) override;
+    void FillMarkItem(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
 
-    RectF CalcItemRectAfterMarkItem(
-        const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const RectF& markItem) override;
+    void FillNext(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
 
-    RectF CalcItemRectBeforeMarkItem(
-        const SizeF& viewport, Axis axis, FrameNode* node, uint32_t index, const RectF& markItem) override;
+    void FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
 
-    void OnSlidingOffsetUpdate(float x, float y) override {}
+    void OnSlidingOffsetUpdate(float delta) override
+    {
+        range_.offset += delta;
+        if (range_.startLine == 0) {
+            range_.offset = std::min(range_.offset, 0.0f);
+        }
+    }
 
     bool IsReady() const override
     {
         return true;
     }
 
-    bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, uint32_t idx, const RectF& markItemRect,
-        FillDirection direction) override;
+    bool CanFillMore(Axis axis, const SizeF& scrollWindowSize, int32_t idx, FillDirection direction) override;
 
     void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
 
@@ -57,6 +59,25 @@ private:
     const GridLayoutProperty& props_;
     GridLayoutInfo& info_;
 
+    struct LayoutRange {
+        /**
+         * @brief consume @c offset to adjust @c startLine when scrolling backward.
+         * REQUIRES: @c lineHeights in range [row, startLine] are ready
+         * @param gap gap between rows.
+         */
+        void AdjustBackward(const decltype(info_.lineHeightMap_)& lineHeights, float gap, int32_t firstRow);
+
+        /**
+         * @brief consume @c offset to adjust @c startLine when scrolling forward.
+         * REQUIRES: @c lineHeights in range [startLine, endLine] are ready
+         */
+        void AdjustForward(const decltype(info_.lineHeightMap_)& lineHeights, float gap);
+
+        int32_t startLine = 0; // first line in viewport
+        float offset = 0.0f;   // main-axis offset of the first line in viewport
+        int32_t endLine = 0;   // last line in viewport
+    };
+    LayoutRange range_;
     GridIrregularFiller::FillParameters params_;
 };
 

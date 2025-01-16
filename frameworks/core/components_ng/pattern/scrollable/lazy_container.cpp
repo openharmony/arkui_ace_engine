@@ -16,14 +16,10 @@
 #include "lazy_container.h"
 
 namespace OHOS::Ace::NG {
-void LazyContainer::UpdateOffset(float delta, Axis axis)
+void LazyContainer::UpdateOffset(float delta)
 {
     if (adapter_) {
-        if (axis == Axis::VERTICAL) {
-            adapter_->UpdateSlidingOffset(0, delta);
-        } else {
-            adapter_->UpdateSlidingOffset(delta, 0);
-        }
+        adapter_->UpdateSlidingOffset(delta);
     }
 }
 

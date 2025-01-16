@@ -209,6 +209,7 @@ void GridIrregularFiller::MeasureItem(
         LOGW("input error");
         return;
     }
+    CHECK_NULL_VOID(child && info_ && wrapper_);
     MeasureItemInner(params, child, itemIdx, col, row);
 }
 
@@ -216,6 +217,7 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItemInner(
     const FillParameters& params, LayoutWrapper* node, int32_t itemIdx, int32_t col, int32_t row)
 {
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
+    CHECK_NULL_RETURN(props, {});
     auto constraint = props->CreateChildConstraint();
     const auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);
     float crossLen = 0.0f;

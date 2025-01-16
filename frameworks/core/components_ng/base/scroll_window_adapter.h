@@ -63,7 +63,7 @@ public:
      * @param x positive if scrolling right, negative if scrolling left
      * @param y positive if scrolling down, negative if scrolling up
      */
-    void UpdateSlidingOffset(float x, float y);
+    void UpdateSlidingOffset(float delta);
 
     FrameNode* InitPivotItem(FillDirection direction);
 
@@ -108,20 +108,18 @@ public:
     }
 
 private:
+    void RequestRecompose();
+
     SizeF size_ = { 0.0f, 0.0f };
     RefPtr<FillAlgorithm> fillAlgorithm_;
     FrameNode* container_ = nullptr;
 
     int32_t markIndex_ = -1;
-    std::optional<OffsetF> markItemOffset_;
     int32_t totalCount_ = 0;
 
     std::function<void(int32_t, void*)> updater_;
-    std::unordered_map<uint32_t, WeakPtr<FrameNode>> indexToNode_;
-    std::unordered_map<FrameNode*, uint32_t> nodeToIndex_;
-    std::unordered_map<FrameNode*, RectF> itemRectMap_;
-    RectF startRect_;
-    RectF endRect_;
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> indexToNode_;
+    std::unordered_map<FrameNode*, int32_t> nodeToIndex_;
 
     Axis axis_ = Axis::VERTICAL;
 };

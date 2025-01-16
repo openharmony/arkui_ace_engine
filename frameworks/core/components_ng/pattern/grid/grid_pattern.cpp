@@ -431,7 +431,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     auto userOffset = FireOnWillScroll(-offset);
     info_.currentOffset_ -= userOffset;
-    UpdateOffset(-userOffset, info_.axis_);
+    UpdateOffset(-userOffset);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 }
