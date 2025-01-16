@@ -23,7 +23,7 @@ constexpr int32_t PUBLISHER_UID = 7800;
 
 void EventPassThroughSubscribeProxy::SubscribeEvent(int32_t instanceId)
 {
-    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Subscribe touch.events.pass.through event");
+    TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Subscribe touch.events.pass.through Event");
     if (eventPassThroughReceiver_ == nullptr) {
         // create subscribe info
         MatchingSkills matchingSkills;
@@ -70,7 +70,7 @@ void EventPassThroughSubscriber::OnReceiveEvent(const CommonEventData& data)
     auto want = data.GetWant();
     std::string action = want.GetAction();
     if (action == TOUCH_EVENTS_PASS_THROUGH) {
-        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "OnReceiveEvent touch.events.pass.through event");
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "OnReceiveEvent touch.events.pass.through Event");
         AceApplicationInfo::GetInstance().SetTouchEventsPassThroughMode(true);
         for (const auto& instanceId : instanceMap_) {
             auto container = Platform::AceContainer::GetContainer(instanceId);

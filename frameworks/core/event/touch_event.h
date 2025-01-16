@@ -102,6 +102,7 @@ struct TouchEvent final : public UIInputEvent {
     bool isInterpolated = false;
     bool isMouseTouchTest = false;
     bool isFalsified = false;
+    bool isPassThroughMode = false;
 
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
@@ -122,7 +123,6 @@ struct TouchEvent final : public UIInputEvent {
     // Save historical touch point slope.
     float inputXDeltaSlope = 0.0f;
     float inputYDeltaSlope = 0.0f;
-    bool isPassThroughMode = false;
 
     TouchEvent() {}
 
