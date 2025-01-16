@@ -99,6 +99,15 @@ struct CJBorder {
     int32_t style;
 };
 
+struct CJOutline {
+    double width;
+    int32_t widthUnit;
+    uint32_t color;
+    double radius;
+    int32_t radiusUnit;
+    int32_t style;
+};
+
 struct CJBorderWithId {
     double width;
     int32_t widthUnit;
@@ -125,6 +134,17 @@ struct RetDimension {
 };
 
 struct CJBorderRadius {
+    double topLeft;
+    int32_t topLeftUnit;
+    double topRight;
+    int32_t topRightUnit;
+    double bottomLeft;
+    int32_t bottomLeftUnit;
+    double bottomRight;
+    int32_t bottomRightUnit;
+};
+
+struct CJOutlineRadius {
     double topLeft;
     int32_t topLeftUnit;
     double topRight;
@@ -313,6 +333,25 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetContrast(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetInvert(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSepia(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetHueRotate(float deg);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBlendMode(int32_t value, int32_t type);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetUseShadowBatching(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSphericalEffect(double value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetLightUpEffect(double value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetPixelStretchEffect(CJEdge params);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSystemBarEffect();
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetFreeze(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetRenderGroup(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOutline(CJOutline params);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOutlineStyle(int32_t style);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOutlineStyles(
+    int32_t styleTop, int32_t styleRight, int32_t styleBottom, int32_t styleLeft);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOutlineWidth(double width, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOutlineWidths(CJEdge params);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOutlineColor(uint32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOutlineColors(
+    uint32_t colorTop, uint32_t colorRight, uint32_t colorBottom, uint32_t colorLeft);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOutlineRadius(double radius, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOutlineRadiuses(CJOutlineRadius params);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetFlexBasis(double value, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetFlexGrow(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetFlexShrink(double value);
