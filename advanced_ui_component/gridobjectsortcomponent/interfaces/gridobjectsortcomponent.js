@@ -180,7 +180,7 @@ export class GridObjectSortComponent extends ViewPU {
         this.menuItems = [
             new MenuItem({ 'id': -1, 'type': 20000, params: ['sys.media.ohos_ic_public_edit'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, (new SymbolGlyphModifier({ 'id': -1, 'type': 40000, params: ['sys.symbol.square_and_pencil'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' })), true, this.getStringByResource(ACCESSIBILITY_HEADER_EDIT_BUTTON), () => {
                 this.goEdit();
-            }, this.getStringByResource(ACCESSIBILITY_COMPLETE_BUTTON))
+            }, this.getStringByResource(ACCESSIBILITY_HEADER_EDIT_BUTTON))
         ];
         this.onSave = undefined;
         this.onCancel = undefined;
