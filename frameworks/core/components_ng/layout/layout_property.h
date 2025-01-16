@@ -158,7 +158,7 @@ public:
 
     void UpdateLayoutWeight(float value);
 
-    void UpdateChainWeight(const LayoutWeightPair& value);
+    void UpdateChainWeight(const ChainWeightPair& value);
 
     void UpdatePixelRound(uint16_t value)
     {

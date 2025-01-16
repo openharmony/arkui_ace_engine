@@ -62,6 +62,7 @@
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
+#include "bridge/declarative_frontend/jsview/js_layoutable_view.h"
 #include "core/event/focus_axis_event.h"
 #include "canvas_napi/js_canvas.h"
 #ifdef SUPPORT_DIGITAL_CROWN
@@ -139,7 +140,6 @@ constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
-constexpr float DEFAULT_LAYOUT_WEIGHT = 0.0f;
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 const std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 const std::string BLOOM_RADIUS_SYS_RES_NAME = "sys.float.ohos_id_point_light_bloom_radius";
@@ -1814,61 +1814,6 @@ void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetLayoutPriority(priority);
 }
 
-void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
-{
-    uint16_t value = 0;
-    JSRef<JSVal> arg = info[0];
-    if (!arg->IsObject()) {
-        return;
-    }
-    JSRef<JSObject> object = JSRef<JSObject>::Cast(arg);
-    JSRef<JSVal> jsStartValue = object->GetProperty("start");
-    if (jsStartValue->IsNumber()) {
-        int32_t startValue = jsStartValue->ToNumber<int32_t>();
-        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(startValue)) {
-            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
-        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(startValue)) {
-            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START);
-        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(startValue)) {
-            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START);
-        }
-    }
-    JSRef<JSVal> jsTopValue = object->GetProperty("top");
-    if (jsTopValue->IsNumber()) {
-        int32_t topValue = jsTopValue->ToNumber<int32_t>();
-        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(topValue)) {
-            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
-        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(topValue)) {
-            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
-        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(topValue)) {
-            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP);
-        }
-    }
-    JSRef<JSVal> jsEndValue = object->GetProperty("end");
-    if (jsEndValue->IsNumber()) {
-        int32_t endValue = jsEndValue->ToNumber<int32_t>();
-        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(endValue)) {
-            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
-        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(endValue)) {
-            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
-        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(endValue)) {
-            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END);
-        }
-    }
-    JSRef<JSVal> jsBottomValue = object->GetProperty("bottom");
-    if (jsBottomValue->IsNumber()) {
-        int32_t bottomValue = jsBottomValue->ToNumber<int32_t>();
-        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
-        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
-        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
-        }
-    }
-    ViewAbstractModel::GetInstance()->SetPixelRound(value);
-}
-
 void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 {
     float value = 0.0f;
@@ -1895,24 +1840,6 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
     }
 
     ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
-}
-
-void JSViewAbstract::JsChainWeight(const JSCallbackInfo& info)
-{
-    NG::LayoutWeightPair layoutWeightPair(DEFAULT_LAYOUT_WEIGHT, DEFAULT_LAYOUT_WEIGHT);
-    auto jsVal = info[0];
-    if (jsVal->IsObject()) {
-        JSRef<JSObject> val = JSRef<JSObject>::Cast(jsVal);
-        auto weightX = val->GetProperty("horizontal");
-        auto weightY = val->GetProperty("vertical");
-        if (weightX->IsNumber()) {
-            layoutWeightPair.first = weightX->ToNumber<float>();
-        }
-        if (weightY->IsNumber()) {
-            layoutWeightPair.second = weightY->ToNumber<float>();
-        }
-    }
-    ViewAbstractModel::GetInstance()->SetLayoutWeight(layoutWeightPair);
 }
 
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
@@ -6817,9 +6744,9 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("size", &JSViewAbstract::JsSize);
     JSClass<JSViewAbstract>::StaticMethod("constraintSize", &JSViewAbstract::JsConstraintSize);
     JSClass<JSViewAbstract>::StaticMethod("layoutPriority", &JSViewAbstract::JsLayoutPriority);
-    JSClass<JSViewAbstract>::StaticMethod("pixelRound", &JSViewAbstract::JsPixelRound);
+    JSClass<JSViewAbstract>::StaticMethod("pixelRound", &JSLayoutableView::JsPixelRound);
     JSClass<JSViewAbstract>::StaticMethod("layoutWeight", &JSViewAbstract::JsLayoutWeight);
-    JSClass<JSViewAbstract>::StaticMethod("chainWeight", &JSViewAbstract::JsChainWeight);
+    JSClass<JSViewAbstract>::StaticMethod("chainWeight", &JSLayoutableView::JsChainWeight);
 
     JSClass<JSViewAbstract>::StaticMethod("margin", &JSViewAbstract::JsMargin);
     JSClass<JSViewAbstract>::StaticMethod("marginTop", &JSViewAbstract::SetMarginTop, opt);
