@@ -1185,7 +1185,7 @@ struct CustomDialogContentComponent {
     this.secondaryTitleFontColorWithTheme = this.theme?.colors?.fontSecondary ?
     this.theme.colors.fontSecondary : $r('sys.color.font_secondary');
     this.initTitleTextAlign();
-    this.setDefaultFocusState();
+    this.setDefaultFocusState(this.buttons);
   }
 
   private updateFontSize(): void {
