@@ -62,11 +62,6 @@ struct NativeRectangle {
     int32_t heightUnit;
 };
 
-struct NativeOptionCallback1Param {
-    bool hasValue;
-    void (*value)(int32_t reason);
-};
-
 struct CJBindPopupParams {
     char* message;
     bool placementOnTop;
