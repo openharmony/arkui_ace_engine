@@ -18,7 +18,6 @@
 #include "core/interfaces/native/utility/validators.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-#include "pixel_map_peer.h"
 #include "arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::Converter {
@@ -48,40 +47,36 @@ void AssignCast(std::optional<int32_t>& dst, const Ark_FillMode& src)
 template<>
 ImageProperties Convert(const Ark_ImageFrameInfo& src)
 {
-    using UnionStringResourcePixelMap = std::variant<Ark_String, Ark_Resource, Ark_PixelMap>;
     ImageProperties options;
-    auto imageSrc = Converter::OptConvert<UnionStringResourcePixelMap>(src.src);
-    if (imageSrc.has_value()) {
-        if (auto srcArkStr = std::get_if<Ark_String>(&imageSrc.value());
-                    srcArkStr != nullptr) {
-            auto srcStr = Converter::Convert<std::string>(*srcArkStr);
+    Converter::VisitUnion(src.src,
+        [&options](const Ark_String& srcArkStr) {
+            auto srcStr = Converter::Convert<std::string>(srcArkStr);
             if (!srcStr.empty()) {
                 options.src = srcStr;
             }
-        } else if (auto srcArkRes = std::get_if<Ark_Resource>(&imageSrc.value());
-            srcArkRes != nullptr) {
-            auto srcStr = Converter::OptConvert<std::string>(*srcArkRes);
-            auto moduleName = Converter::Convert<std::string>(srcArkRes->moduleName);
-            auto bundleName = Converter::Convert<std::string>(srcArkRes->bundleName);
+        },
+        [&options](const Ark_Resource& srcArkRes) {
+            auto srcStr = Converter::OptConvert<std::string>(srcArkRes);
+            auto moduleName = Converter::Convert<std::string>(srcArkRes.moduleName);
+            auto bundleName = Converter::Convert<std::string>(srcArkRes.bundleName);
             if (!srcStr->empty()) {
                 options.src = *srcStr;
                 options.moduleName = moduleName;
                 options.bundleName = bundleName;
             }
-        } else if (auto srcArkPixelMap = std::get_if<Ark_PixelMap>(&imageSrc.value());
-            srcArkPixelMap != nullptr) {
-            auto pixelMapPeer = reinterpret_cast<PixelMapPeer*>(srcArkPixelMap->ptr);
-            if (pixelMapPeer) {
-                options.pixelMap = pixelMapPeer->pixelMap;
-            }
-        }
+        },
+        [&options](const Ark_PixelMap& srcArkPixelMap) {
+            options.pixelMap = Converter::Convert<RefPtr<PixelMap>>(srcArkPixelMap);
+        },
+        []() {}
+    );
 
-        options.width =  OptConvert<CalcDimension>(src.width).value_or(CalcDimension(0));
-        options.height = OptConvert<Dimension>(src.height).value_or(CalcDimension(0));
-        options.top = OptConvert<CalcDimension>(src.top).value_or(CalcDimension(0));
-        options.left = OptConvert<CalcDimension>(src.left).value_or(CalcDimension(0));
-        options.duration = Converter::OptConvert<int32_t>(src.duration).value_or(0);
-    }
+    options.width =  OptConvert<CalcDimension>(src.width).value_or(CalcDimension(0));
+    options.height = OptConvert<Dimension>(src.height).value_or(CalcDimension(0));
+    options.top = OptConvert<CalcDimension>(src.top).value_or(CalcDimension(0));
+    options.left = OptConvert<CalcDimension>(src.left).value_or(CalcDimension(0));
+    options.duration = Converter::OptConvert<int32_t>(src.duration).value_or(0);
+
     return options;
 }
 } // OHOS::Ace::NG::Converter
