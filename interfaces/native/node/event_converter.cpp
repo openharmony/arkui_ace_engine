@@ -868,10 +868,7 @@ ArkUI_NodeHandle OH_ArkUI_NodeEvent_GetNodeHandle(ArkUI_NodeEvent* event)
 
 ArkUI_UIInputEvent* OH_ArkUI_NodeEvent_GetInputEvent(ArkUI_NodeEvent* event)
 {
-    if (!event ||
-        (event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT) &&
-            (event->kind != ArkUI_NodeEventType::NODE_ON_CLICK && event->kind != ArkUI_NodeEventType::NODE_ON_HOVER &&
-                event->kind != ArkUI_NodeEventType::NODE_ON_MOUSE))) {
+    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT)) {
         return nullptr;
     }
     return reinterpret_cast<ArkUI_UIInputEvent*>(event->origin);

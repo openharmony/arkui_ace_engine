@@ -154,8 +154,8 @@ void JsClickFunction::Execute(MouseInfo& info)
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
-    obj->SetProperty<int32_t>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
-    obj->SetProperty<int32_t>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
+    obj->SetProperty<double>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
+    obj->SetProperty<double>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
     JSRef<JSArray> pressedButtonArr = JSRef<JSArray>::New();
     auto pressedButtons = info.GetPressedButtons();
     uint32_t idx = 0;
@@ -282,8 +282,8 @@ void JsWeakClickFunction::Execute(MouseInfo& info)
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
-    obj->SetProperty<int32_t>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
-    obj->SetProperty<int32_t>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
+    obj->SetProperty<double>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
+    obj->SetProperty<double>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
     JSRef<JSArray> pressedButtonArr = JSRef<JSArray>::New();
     auto pressedButtons = info.GetPressedButtons();
     uint32_t idx = 0;

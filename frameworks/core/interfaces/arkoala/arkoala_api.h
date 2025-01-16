@@ -1177,6 +1177,7 @@ struct ArkUIAPIEventGestureAsyncEvent {
     ArkUI_Float32 velocityY;
     ArkUI_Float32 velocity;
     ArkUI_Int32 inputEventType;
+    ArkUI_Int32 targetDisplayId;
     void* rawPointerEvent;
 };
 

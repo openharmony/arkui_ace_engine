@@ -279,6 +279,7 @@ void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
     ret.pinchCenterY = info.GetPinchCenter().GetY();
     ret.speed = info.GetSpeed();
     ret.source = static_cast<int32_t>(info.GetSourceDevice());
+    ret.targetDisplayId = info.GetTargetDisplayId();
     switch (info.GetInputEventType()) {
         case InputEventType::TOUCH_SCREEN :
             ret.inputEventType = static_cast<int32_t>(ARKUI_UIINPUTEVENT_TYPE_TOUCH);

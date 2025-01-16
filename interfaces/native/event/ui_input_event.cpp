@@ -1566,10 +1566,6 @@ int32_t OH_ArkUI_UIInputEvent_GetTargetDisplayId(const ArkUI_UIInputEvent* event
             return getTargetDisplayId(reinterpret_cast<ArkUIAxisEvent*>(event->inputEvent));
         case C_FOCUS_AXIS_EVENT_ID:
             return getTargetDisplayId(reinterpret_cast<ArkUIFocusAxisEvent*>(event->inputEvent));
-        case C_CLICK_EVENT_ID:
-            return getTargetDisplayId(reinterpret_cast<ArkUIClickEvent*>(event->inputEvent));
-        case C_HOVER_EVENT_ID:
-            return getTargetDisplayId(reinterpret_cast<ArkUIHoverEvent*>(event->inputEvent));
         case TOUCH_EVENT_ID: {
             return getTargetDisplayId(reinterpret_cast<OHOS::Ace::TouchEvent*>(event->inputEvent));
         }

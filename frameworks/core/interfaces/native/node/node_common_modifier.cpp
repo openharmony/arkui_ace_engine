@@ -7590,7 +7590,6 @@ void SetOnClick(ArkUINodeHandle node, void* extraParam)
         Offset localOffset = info.GetLocalLocation();
         Offset screenOffset = info.GetScreenLocation();
         bool usePx = NodeModel::UsePXUnit(reinterpret_cast<ArkUI_Node*>(extraParam));
-        event.clickEvent.targetDisplayId = info.GetTargetDisplayId();
         //x
         event.componentAsyncEvent.data[0].f32 =
             usePx ? PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()) : localOffset.GetX();
@@ -8017,7 +8016,6 @@ void SetOnHover(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_HOVER;
         event.componentAsyncEvent.data[0].i32 = isHover;
-        event.hoverEvent.targetDisplayId = info.GetTargetDisplayId();
         SendArkUISyncEvent(&event);
     };
     ViewAbstract::SetOnHover(frameNode, onEvent);

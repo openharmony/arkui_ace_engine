@@ -172,7 +172,10 @@ TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
         .SetSourceTool(touchPoint.sourceTool)
         .SetOriginalId(touchPoint.originalId)
         .SetSourceType(SourceType::NONE)
-        .SetOperatingHand(touchPoint.operatingHand);
+        .SetOperatingHand(touchPoint.operatingHand)
+        .SetPressedTime(touchPoint.downTime)
+        .SetWidth(touchPoint.width)
+        .SetHeight(touchPoint.height);
     return event;
 }
 
