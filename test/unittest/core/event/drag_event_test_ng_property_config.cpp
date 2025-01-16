@@ -1479,7 +1479,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorMountGatherNodeTest020, TestSize.Leve
     ASSERT_NE(pipeline, nullptr);
     auto overlayManager = pipeline->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
-    frameNode->eventHub_->SetEnabled(true);
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureHub, nullptr);
     void* voidPtr = static_cast<void*>(new char[0]);

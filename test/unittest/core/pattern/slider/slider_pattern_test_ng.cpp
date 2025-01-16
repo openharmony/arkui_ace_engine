@@ -1218,9 +1218,10 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest021, TestSize.Level1)
     sliderPattern->InitTouchEvent(gestureHub);
     sliderPattern->InitPanEvent(gestureHub);
     RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(
+        AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(eventHub)), FocusType::DISABLE, false);
     sliderPattern->InitOnKeyEvent(focusHub);
-    auto inputEventHub = eventHub->GetInputEventHub();
+    auto inputEventHub = eventHub->GetOrCreateInputEventHub();
     sliderPattern->InitMouseEvent(inputEventHub);
     EXPECT_EQ(sliderPattern->hoverEvent_, nullptr);
     EXPECT_EQ(sliderPattern->mouseEvent_, nullptr);

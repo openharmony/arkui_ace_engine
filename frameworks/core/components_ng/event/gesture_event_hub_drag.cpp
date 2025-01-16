@@ -1535,7 +1535,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     CHECK_NULL_RETURN(subWindowOverlayManager, false);
     DragEventActuator::MountGatherNode(subWindowOverlayManager, frameNode, gatherNode, childrenInfo);
     DragEventActuator::MountPixelMap(
-        subWindowOverlayManager, eventHub->GetGestureEventHub(), data.imageNode, textNode, true);
+        subWindowOverlayManager, eventHub->GetOrCreateGestureEventHub(), data.imageNode, textNode, true);
 
     // update position
     DragAnimationHelper::UpdateBadgeTextNodePosition(frameNode, textNode, data.badgeNumber, data.previewScale,
@@ -1556,7 +1556,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     CHECK_NULL_RETURN(dragDropManager, false);
 
     dragDropManager->DoDragStartAnimation(
-        subWindowOverlayManager, info, eventHub->GetGestureEventHub(), data.isMenuShow);
+        subWindowOverlayManager, info, eventHub->GetOrCreateGestureEventHub(), data.isMenuShow);
     return true;
 }
 

@@ -847,7 +847,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxPatternTest014, TestSize.Level1)
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     EXPECT_NE(pattern, nullptr);
     RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(
+        AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(eventHub)), FocusType::DISABLE, false);
     pattern->InitOnKeyEvent(focusHub);
     RoundRect paintRect;
     pattern->GetInnerFocusPaintRect(paintRect);
@@ -1781,7 +1782,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest025, TestSize.Level1)
      * @tc.expected: Get successfully.
      */
     RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(
+        AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(eventHub)), FocusType::DISABLE, false);
     checkBoxGroupPattern->InitOnKeyEvent(focusHub);
     auto getInnerPaintRectCallback = focusHub->getInnerFocusRectFunc_;
 

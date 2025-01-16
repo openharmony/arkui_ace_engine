@@ -323,8 +323,22 @@ public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
         : FocusState(eventHub, type), FocusEventHandler(), focusable_(focusable)
     {}
+    explicit FocusHub(const WeakPtr<FrameNode>& frameNode, FocusType type = FocusType::DISABLE, bool focusable = false)
+        : FocusState(frameNode, type), FocusEventHandler(), focusable_(focusable)
+    {}
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, const FocusPattern& focusPattern)
         : FocusState(eventHub), FocusEventHandler()
+    {
+        focusable_ = focusPattern.GetFocusable();
+        focusType_ = focusPattern.GetFocusType();
+        focusStyleType_ = focusPattern.GetStyleType();
+        if (focusPattern.GetFocusPaintParams()) {
+            SetFocusPaintParamsPtr(focusPattern.GetFocusPaintParams());
+        }
+        isFocusActiveWhenFocused_ = focusPattern.GetIsFocusActiveWhenFocused();
+    }
+    explicit FocusHub(const WeakPtr<FrameNode>& frameNode, const FocusPattern& focusPattern)
+        : FocusState(frameNode), FocusEventHandler()
     {
         focusable_ = focusPattern.GetFocusable();
         focusType_ = focusPattern.GetFocusType();

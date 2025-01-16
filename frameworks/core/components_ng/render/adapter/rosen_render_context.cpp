@@ -265,7 +265,10 @@ void RosenRenderContext::OnNodeAppear(bool recursive)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // restore eventHub state when node appears.
-    host->GetEventHub<EventHub>()->RestoreEnabled();
+    auto eventHub = host->GetEventHubOnly<EventHub>();
+    if (eventHub) {
+        eventHub->RestoreEnabled();
+    }
     if (recursive && !propTransitionAppearing_ && !transitionEffect_) {
         // recursive and has no transition, no need to handle transition.
         return;
