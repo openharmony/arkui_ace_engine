@@ -48,6 +48,27 @@ RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(const std::string& tag,
         }
     }
 
+    auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(sessionId);
+    if (sceneSession == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "sessionId: %{public}d", sessionId);
+        return nullptr;
+    }
+    auto screenId = static_cast<int>(sceneSession->GetScreenId());
+    auto screenIter = g_windowNodeMap.find(screenId);
+    if (screenIter != g_windowNodeMap.end()) {
+        auto sessionMap = screenIter->second;
+        auto iter = sessionMap.find(sessionId);
+        if (iter != sessionMap.end()) {
+            auto node = iter->second.Upgrade();
+            if (node) {
+                TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+                    "screenId: %{public}d, node id: %{public}d, sessionId: %{public}d",
+                    screenId, node->GetId(), sessionId);
+                return node;
+            }
+        }
+    }
+
     auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
     windowNode = AceType::MakeRefPtr<WindowNode>(tag, nodeId, pattern, false);
     windowNode->InitializePatternAndContext();
