@@ -729,7 +729,7 @@ void CanvasRendererPeerImpl::Clip(const Ace::CanvasFillRule& fillRule, const Ref
 }
 void CanvasRendererPeerImpl::Fill(const Ace::CanvasFillRule& fillRule)
 {
-if (!pattern_) {
+    if (!pattern_) {
         LOGE("ARKOALA CanvasRendererPeerImpl::SetFill pattern not bound to component.");
         return;
     }
