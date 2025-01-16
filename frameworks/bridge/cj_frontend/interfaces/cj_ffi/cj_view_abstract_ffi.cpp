@@ -56,6 +56,7 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 const std::vector<BorderStyle> BORDER_STYLES = { BorderStyle::SOLID, BorderStyle::DASHED, BorderStyle::DOTTED };
 const std::vector<ImageRepeat> IMAGES_REPEATS = { ImageRepeat::NO_REPEAT, ImageRepeat::REPEAT_X, ImageRepeat::REPEAT_Y,
     ImageRepeat::REPEAT };
+const std::vector<FontStyle> FONT_STYLES = {FontStyle::NORMAL, FontStyle:: ITALIC};
 const std::vector<BackgroundImageSizeType> IMAGE_SIZES = { BackgroundImageSizeType::CONTAIN,
     BackgroundImageSizeType::COVER, BackgroundImageSizeType::AUTO, BackgroundImageSizeType::FILL };
 const std::vector<TextDirection> TEXT_DIRECTIONS = { TextDirection::LTR, TextDirection::RTL, TextDirection::AUTO };
@@ -162,7 +163,6 @@ void SetPopupParams(CJBindPopupParams bindPopupParams, RefPtr<OHOS::Ace::PopupPa
         static_cast<DimensionUnit>(bindPopupParams.arrowHeightUnit));
     CalcDimension radiusDim(bindPopupParams.radius, static_cast<DimensionUnit>(bindPopupParams.radiusUnit));
     Offset offset(bindPopupParams.offsetX, bindPopupParams.offsetY);
-
     popupParam->SetArrowOffset(arrowOffsetDim);
     popupParam->SetTargetSpace(targetSpaceDim);
     popupParam->SetBackgroundColor(Color(bindPopupParams.popupColor));
@@ -180,6 +180,15 @@ void SetPopupParams(CJBindPopupParams bindPopupParams, RefPtr<OHOS::Ace::PopupPa
     popupParam->SetShadow(Shadow::CreateShadow(static_cast<ShadowStyle>(bindPopupParams.shadow)));
     popupParam->SetTargetOffset(offset);
     popupParam->SetFollowTransformOfTarget(bindPopupParams.followTransformOfTarget);
+    if (std::strcmp(bindPopupParams.arrowPointPosition, "Start") == 0) {
+        popupParam->SetArrowOffset(ARROW_ZERO_PERCENT_VALUE);
+    }
+    if (std::strcmp(bindPopupParams.arrowPointPosition, "Center") == 0) {
+        popupParam->SetArrowOffset(ARROW_HALF_PERCENT_VALUE);
+    }
+    if (std::strcmp(bindPopupParams.arrowPointPosition, "End") == 0) {
+        popupParam->SetArrowOffset(ARROW_FULL_PERCENT_VALUE);
+    }
 }
 
 void DealBindPopupParams(bool isShow, const CJBindPopupParams& bindPopupParams,
@@ -189,23 +198,12 @@ void DealBindPopupParams(bool isShow, const CJBindPopupParams& bindPopupParams,
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetIsShow(isShow);
     popupParam->SetMessage(bindPopupParams.message);
+    SetPopupParams(bindPopupParams, popupParam)
     auto onStateChangeCallback = [onStateChangeFunc](const std::string& param) {
         auto paramData = JsonUtil::ParseJsonString(param);
         onStateChangeFunc(paramData->GetBool("isVisible"));
     };
     popupParam->SetOnStateChange(onStateChangeCallback);
-    if (std::strcmp(bindPopupParams.arrowPointPosition, "Start") == 0) {
-        popupParam->SetArrowOffset(ARROW_ZERO_PERCENT_VALUE);
-    }
-
-    if (std::strcmp(bindPopupParams.arrowPointPosition, "Center") == 0) {
-        popupParam->SetArrowOffset(ARROW_HALF_PERCENT_VALUE);
-    }
-
-    if (std::strcmp(bindPopupParams.arrowPointPosition, "End") == 0) {
-        popupParam->SetArrowOffset(ARROW_FULL_PERCENT_VALUE);
-    }
-
     if (bindPopupParams.onWillDismiss.hasValue) {
         std::function<void(const int32_t& info)> onWillDismissFunc =
             [nativeFunc = CJLambda::Create(bindPopupParams.onWillDismiss.value)]
@@ -213,7 +211,6 @@ void DealBindPopupParams(bool isShow, const CJBindPopupParams& bindPopupParams,
         
         popupParam->SetOnWillDismiss(onWillDismissFunc);
     }
-
     if (bindPopupParams.transition.hasValue) {
         auto nativeTransitionEffect = FFIData::GetData<NativeTransitionEffect>(bindPopupParams.transition.value);
         if (nativeTransitionEffect) {
@@ -221,12 +218,10 @@ void DealBindPopupParams(bool isShow, const CJBindPopupParams& bindPopupParams,
             popupParam->SetTransitionEffects(nativeTransitionEffect->effect);
         }
     }
-
     if (bindPopupParams.backgroundBlurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
         bindPopupParams.backgroundBlurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
         popupParam->SetBlurStyle(static_cast<BlurStyle>(bindPopupParams.backgroundBlurStyle));
     }
-
     std::string primaryString = bindPopupParams.primaryValue;
     if (!primaryString.empty()) {
         ButtonProperties propertiesPrimary;
@@ -238,7 +233,6 @@ void DealBindPopupParams(bool isShow, const CJBindPopupParams& bindPopupParams,
         propertiesPrimary.showButton = true;
         popupParam->SetPrimaryButtonProperties(propertiesPrimary);
     }
-
     std::string secondaryString = bindPopupParams.secondaryValue;
     if (!secondaryString.empty()) {
         ButtonProperties propertiesSecondary;
@@ -1159,7 +1153,8 @@ void FfiOHOSAceFrameworkViewAbstractKeyShortcutByChar(
     FfiOHOSAceFrameworkViewAbstractKeyShortcut(keyValue, keysArray, size, callback);
 }
 
-void SetCustomPopupParams(CJBindCustomPopup value, RefPtr<OHOS::Ace::PopupParam> popupParam){
+void SetCustomPopupParams(CJBindCustomPopup value, RefPtr<OHOS::Ace::PopupParam> popupParam) 
+{
     popupParam->SetPlacement(static_cast<Placement>(value.placement));
     popupParam->SetMaskColor(Color(value.maskColor));
     popupParam->SetBackgroundColor(Color(value.backgroundColor));
@@ -1175,7 +1170,6 @@ void SetCustomPopupParams(CJBindCustomPopup value, RefPtr<OHOS::Ace::PopupParam>
     CalcDimension arrowHeightDim(value.arrowHeight, static_cast<DimensionUnit>(value.arrowHeightUnit));
     CalcDimension radiusDim(value.radius, static_cast<DimensionUnit>(value.radiusUnit));
     Offset offset(value.offsetX, value.offsetY);
-
     popupParam->SetArrowOffset(arrowOffsetDim);
     popupParam->SetTargetSpace(targetSpaceDim);
     popupParam->SetBackgroundColor(Color(value.popupColor));
@@ -1183,28 +1177,28 @@ void SetCustomPopupParams(CJBindCustomPopup value, RefPtr<OHOS::Ace::PopupParam>
     popupParam->SetMaskColor(Color(value.mask));
     popupParam->SetArrowWidth(arrowWidthDim);
     popupParam->SetArrowHeight(arrowHeightDim);
-
     if (value.width > 0) {
         popupParam->SetChildWidth(widthDim);
     }
-
     if (value.radius > 0) {
         popupParam->SetRadius(radiusDim);
     }
     popupParam->SetShadow(Shadow::CreateShadow(static_cast<ShadowStyle>(value.shadow)));
     popupParam->SetTargetOffset(offset);
     popupParam->SetFocusable(value.focusable);
-    popupParam->SetFollowTransformOfTarget(value.followTransformOfTarget); 
+    popupParam->SetFollowTransformOfTarget(value.followTransformOfTarget);
     if (std::strcmp(value.arrowPointPosition, "Start") == 0) {
         popupParam->SetArrowOffset(ARROW_ZERO_PERCENT_VALUE);
     }
-
     if (std::strcmp(value.arrowPointPosition, "Center") == 0) {
         popupParam->SetArrowOffset(ARROW_HALF_PERCENT_VALUE);
     }
-
     if (std::strcmp(value.arrowPointPosition, "End") == 0) {
         popupParam->SetArrowOffset(ARROW_FULL_PERCENT_VALUE);
+    }
+    if (value.backgroundBlurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
+        value.backgroundBlurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+        popupParam->SetBlurStyle(static_cast<BlurStyle>(value.backgroundBlurStyle));
     }
 }
 
@@ -1216,11 +1210,11 @@ void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetIsShow(value.isShow);
     popupParam->SetUseCustomComponent(true);
+    SetCustomPopupParams(value, popupParam);
     auto onStateChangeCallback = [onStateChangeFunc](const std::string& param) {
         auto paramData = JsonUtil::ParseJsonString(param);
         onStateChangeFunc(paramData->GetBool("isVisible"));
     };
-
     if (value.onWillDismiss.hasValue) {
         std::function<void(const int32_t& info)> onWillDismissFunc =
             [nativeFunc = CJLambda::Create(value.onWillDismiss.value)]
@@ -1228,18 +1222,12 @@ void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
         
         popupParam->SetOnWillDismiss(onWillDismissFunc);
     }
-
     if (value.transition.hasValue) {
         auto nativeTransitionEffect = FFIData::GetData<NativeTransitionEffect>(value.transition.value);
         if (nativeTransitionEffect) {
             popupParam->SetHasTransition(true);
             popupParam->SetTransitionEffects(nativeTransitionEffect->effect);
         }
-    }
-
-    if (value.backgroundBlurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
-        value.backgroundBlurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-        popupParam->SetBlurStyle(static_cast<BlurStyle>(value.backgroundBlurStyle));
     }
     popupParam->SetOnStateChange(onStateChangeCallback);
     if (popupParam->IsShow()) {
