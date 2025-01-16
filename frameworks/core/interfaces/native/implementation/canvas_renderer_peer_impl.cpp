@@ -711,7 +711,7 @@ void CanvasRendererPeerImpl::SetLineJoin(const std::string& joinStr)
 }
 void CanvasRendererPeerImpl::Clip(const Ace::CanvasFillRule& fillRule)
 {
-if (!pattern_) {
+    if (!pattern_) {
         LOGE("ARKOALA CanvasRendererPeerImpl::SetClip pattern not bound to component.");
         return;
     }
