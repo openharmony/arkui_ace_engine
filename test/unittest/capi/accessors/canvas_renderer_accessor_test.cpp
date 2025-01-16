@@ -2154,7 +2154,6 @@ HWTEST_F(CanvasRendererAccessorTest, clip0Test, TestSize.Level1)
         holder->SetUp();
         accessor_->clip0(peer_, &actual);
         auto rule = *holder->fillRule;
-        auto value = static_cast<std::underlying_type_t<CanvasFillRule>>(*holder->fillRule);
         EXPECT_TRUE(holder->isCalled);
         EXPECT_TRUE(holder->isCalled2);
         EXPECT_EQ(rule, expected);
@@ -2218,7 +2217,6 @@ HWTEST_F(CanvasRendererAccessorTest, fill0Test, TestSize.Level1)
         holder->SetUp();
         accessor_->fill0(peer_, &actual);
         auto rule = *holder->fillRule;
-        auto value = static_cast<std::underlying_type_t<CanvasFillRule>>(*holder->fillRule);
         EXPECT_TRUE(holder->isCalled);
         EXPECT_TRUE(holder->isCalled2);
         EXPECT_EQ(rule, expected);
