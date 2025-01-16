@@ -12938,36 +12938,6 @@ void ResetSliderTrackThickness(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getSliderModifier()->resetThickness(node->uiNodeHandle);
 }
 
-int32_t SetSliderValidSlideRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    if (!item || std::isnan(item->value[NUM_0].f32) || std::isnan(item->value[NUM_1].f32)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getSliderModifier()->setSliderValidSlideRange(
-        node->uiNodeHandle, item->value[NUM_0].f32, item->value[NUM_1].f32);
-    return ERROR_CODE_NO_ERROR;
-}
-
-const ArkUI_AttributeItem* GetSliderValidSlideRange(ArkUI_NodeHandle node)
-{
-    auto modifier = GetFullImpl()->getNodeModifiers()->getSliderModifier();
-    ArkUISliderValidSlideRange validRange = modifier->getSliderValidSlideRange(node->uiNodeHandle);
-    if (std::isnan(validRange.from) || std::isnan(validRange.to)) {
-        return nullptr;
-    }
-    g_numberValues[NUM_0].f32 = validRange.from;
-    g_numberValues[NUM_1].f32 = validRange.to;
-    return &g_attributeItem;
-}
-
-void ResetSliderValidSlideRange(ArkUI_NodeHandle node)
-{
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getSliderModifier()->resetSliderValidSlideRange(node->uiNodeHandle);
-}
-
 const ArkUI_AttributeItem* GetSliderEnableHapticFeedback(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
@@ -14960,7 +14930,6 @@ int32_t SetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetSliderReverse,
         SetSliderStyle,
         SetSliderTrackThickness,
-        SetSliderValidSlideRange,
         SetSliderEnableHapticFeedback,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
@@ -14986,7 +14955,6 @@ const ArkUI_AttributeItem* GetSliderAttribute(ArkUI_NodeHandle node, int32_t sub
         GetSliderReverse,
         GetSliderStyle,
         GetSliderTrackThickness,
-        GetSliderValidSlideRange,
         GetSliderEnableHapticFeedback,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
@@ -15013,7 +14981,6 @@ void ResetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetSliderReverse,
         ResetSliderStyle,
         ResetSliderTrackThickness,
-        ResetSliderValidSlideRange,
         ResetSliderEnableHapticFeedback,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
