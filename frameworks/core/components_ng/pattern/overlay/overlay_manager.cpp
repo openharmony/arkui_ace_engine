@@ -5581,7 +5581,7 @@ CustomKeyboardOffsetInfo OverlayManager::CalcCustomKeyboardOffset(const RefPtr<F
         pageHeight = rootGeo->GetFrameSize().Height();
         finalOffset = (pageHeight - keyboardHeight) - (pageHeight - keyboardHeight) / NUM_FLOAT_2;
     } else if (!pageNode) {
-        auto fatherNode = customKeyboard->GetAncestorNodeOfFrame(false);
+        auto fatherNode = customKeyboard->GetAncestorNodeOfFrame(true);
         CHECK_NULL_RETURN(fatherNode, keyboardOffsetInfo);
         auto fatherGeoNode = fatherNode->GetGeometryNode();
         CHECK_NULL_RETURN(fatherGeoNode, keyboardOffsetInfo);

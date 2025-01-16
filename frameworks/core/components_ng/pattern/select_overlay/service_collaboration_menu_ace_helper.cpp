@@ -490,7 +490,7 @@ void ServiceCollaborationMenuAceHelper::AddHoverEventToMainMenu(
                 subMenu->MountToParent(menuWrapper);
                 auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
                 auto frameSize = menuItemNode->GetGeometryNode()->GetMarginFrameSize();
-                OffsetF position = menuItemNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), 0.0);
+                OffsetF position = menuItemNode->GetPaintRectOffset(false, true) + OffsetF(frameSize.Width(), 0.0);
                 menuProps->UpdateMenuOffset(position);
                 subMenu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
                 helper->subMenuIsShow_ = true;
@@ -546,7 +546,7 @@ void ServiceCollaborationMenuAceHelper::AddClickEventToMainMenu(
             subMenu->MountToParent(menuWrapper);
             auto menuProps = subMenu->GetLayoutProperty<MenuLayoutProperty>();
             auto frameSize = menuItemNode->GetGeometryNode()->GetMarginFrameSize();
-            OffsetF position = menuItemNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), 0.0);
+            OffsetF position = menuItemNode->GetPaintRectOffset(false, true) + OffsetF(frameSize.Width(), 0.0);
             menuProps->UpdateMenuOffset(position);
             subMenu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
             helper->subMenuIsShow_ = true;
