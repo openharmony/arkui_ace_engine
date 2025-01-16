@@ -443,6 +443,10 @@ void FormPattern::SetNonTransparentAfterRecover()
     if (formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
         == formChildrenNodeMap_.end()) {
         UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, NON_TRANSPARENT_VAL);
+        //update form after updateChildNodeOpacity
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         TAG_LOGI(AceLogTag::ACE_FORM, "setOpacity:1");
     } else {
         TAG_LOGW(AceLogTag::ACE_FORM, "has forbidden node");
