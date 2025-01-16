@@ -540,9 +540,7 @@ void RichEditorPattern::OnModifyDone()
     }
     instanceId_ = context->GetInstanceId();
     InitMouseEvent();
-    if (CanStartAITask()) {
-        InitAISpanHoverEvent();
-    }
+    InitAISpanHoverEvent();
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitFocusEvent(focusHub);
