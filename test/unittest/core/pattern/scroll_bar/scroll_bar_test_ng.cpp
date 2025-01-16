@@ -63,6 +63,7 @@ void ScrollBarTestNg::SetUp() {}
 
 void ScrollBarTestNg::TearDown()
 {
+    RemoveFromStageNode();
     stackNode_ = nullptr;
     scrollNode_ = nullptr;
     scrollPattern_ = nullptr;
@@ -239,7 +240,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarProxy001, TestSize.Level1)
     scrollBarProxy->NotifyScrollBarNode(0, 1);
     scrollBarProxy->NotifyScrollStart();
     scrollBarProxy->NotifyScrollStop();
-    scrollBarProxy->NotifyScrollBar();
+    scrollBarProxy->NotifyScrollBar(SCROLL_FROM_NONE);
     scrollBarProxy->StartScrollBarAnimator();
     scrollBarProxy->StopScrollBarAnimator();
     scrollBarProxy->NotifySnapScroll(0, 0, 0, 0);

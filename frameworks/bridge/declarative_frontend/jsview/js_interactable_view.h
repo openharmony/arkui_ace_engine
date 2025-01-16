@@ -36,6 +36,7 @@ public:
     static void JsOnHover(const JSCallbackInfo& info);
     static void JsOnKey(const JSCallbackInfo& args);
     static void JsOnKeyPreIme(const JSCallbackInfo& args);
+    static void JsOnKeyEventDispatch(const JSCallbackInfo& args);
     static void SetFocusable(bool focusable);
     static void SetFocusNode(bool isFocusNode);
     static void JsMonopolizeEvents(const JSCallbackInfo& info);
@@ -50,7 +51,7 @@ public:
 
     static std::function<void()> GetRemoteMessageEventCallback(const JSCallbackInfo& info);
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-    static void ReportClickEvent(const WeakPtr<NG::FrameNode>& node, const std::u16string text = u"");
+    static void ReportClickEvent(const WeakPtr<NG::FrameNode>& weakNode, const std::u16string text = u"");
 #endif
 
 protected:

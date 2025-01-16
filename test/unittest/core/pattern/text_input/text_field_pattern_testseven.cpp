@@ -13,17 +13,7 @@
  * limitations under the License.
  */
 
-#include <memory>
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
-#include "test/mock/base/mock_task_executor.h"
 #include "text_input_base.h"
-
-#include "base/memory/referenced.h"
-#include "base/thread/task_executor.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {
 

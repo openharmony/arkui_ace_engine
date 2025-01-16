@@ -20,6 +20,7 @@ ohos_unittest("SvgAnimateTest") {
   module_out_path = module_output_path
 
   sources = [
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/core/animation/mock_animation.cpp",
     "svg_animate_test.cpp",
 

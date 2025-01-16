@@ -62,13 +62,27 @@ void ResetEndPoint(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUILineModifier* GetLineModifier()
 {
-    static const ArkUILineModifier modifier = {SetStartPoint, ResetStartPoint, SetEndPoint, ResetEndPoint};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUILineModifier modifier = {
+        .setStartPoint = SetStartPoint,
+        .resetStartPoint = ResetStartPoint,
+        .setEndPoint = SetEndPoint,
+        .resetEndPoint = ResetEndPoint,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUILineModifier* GetCJUILineModifier()
 {
-    static const CJUILineModifier modifier = {SetStartPoint, ResetStartPoint, SetEndPoint, ResetEndPoint};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUILineModifier modifier = {
+        .setStartPoint = SetStartPoint,
+        .resetStartPoint = ResetStartPoint,
+        .setEndPoint = SetEndPoint,
+        .resetEndPoint = ResetEndPoint,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

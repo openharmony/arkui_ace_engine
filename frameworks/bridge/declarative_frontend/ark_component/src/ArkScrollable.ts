@@ -38,7 +38,8 @@ class EdgeEffectModifier extends ModifierWithKey<ArkEdgeEffect> {
     if (reset) {
       getUINativeModule().scrollable.resetEdgeEffect(node);
     } else {
-      getUINativeModule().scrollable.setEdgeEffect(node, this.value?.value, this.value.options?.alwaysEnabled);
+      getUINativeModule().scrollable.setEdgeEffect(node, this.value?.value, this.value.options?.alwaysEnabled,
+        this.value.options?.effectEdge);
     }
   }
 

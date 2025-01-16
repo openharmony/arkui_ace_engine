@@ -151,6 +151,16 @@ public:
         return info_.offsetEnd_;
     }
 
+    bool IsAtTopWithDelta() const override
+    {
+        return info_.reachStart_ || EstimateHeight() < 0;
+    }
+
+    bool IsAtBottomWithDelta() const override
+    {
+        return info_.offsetEnd_ || (EstimateHeight() + info_.lastMainSize_ > GetTotalHeight());
+    }
+
     bool IsFadingBottom() const override;
 
     OverScrollOffset GetOverScrollOffset(double delta) const override;
@@ -297,7 +307,7 @@ private:
     bool supportAnimation_ = false;
     bool isConfigScrollable_ = false;
     bool scrollable_ = true;
-    bool forceOverScroll_ = false;
+    bool preSpring_ = false; // true if during SyncLayoutBeforeSpring task.
     bool isSmoothScrolling_ = false;
     bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
 

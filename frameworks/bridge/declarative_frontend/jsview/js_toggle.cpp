@@ -132,6 +132,9 @@ void JSToggle::Create(const JSCallbackInfo& info)
         changeEventVal = isOnObj->GetProperty("changeEvent");
         auto isOnProperty = isOnObj->GetProperty("value");
         isOn = isOnProperty->IsBoolean() ? isOnProperty->ToBoolean() : false;
+    } else if (paramObject->HasProperty("$isOn")) {
+        changeEventVal = paramObject->GetProperty("$isOn");
+        isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
     } else {
         isOn = tempIsOn->IsBoolean() ? tempIsOn->ToBoolean() : false;
     }

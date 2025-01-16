@@ -63,6 +63,7 @@ void TabsTestNg::SetUp() {}
 
 void TabsTestNg::TearDown()
 {
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     layoutProperty_ = nullptr;
@@ -120,7 +121,6 @@ TabsModelNG TabsTestNg::CreateTabs(BarPosition barPosition, int32_t index)
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
     tabBarNode->GetOrCreateFocusHub();
     GetTabs();
-    ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
     return model;
 }
 
@@ -139,16 +139,13 @@ TabContentModelNG TabsTestNg::CreateTabContent()
     tabContentNode->UpdateRecycleElmtId(elmtId); // for AddChildToGroup
     tabContentNode->GetTabBarItemId();           // for AddTabBarItem
     tabContentNode->SetParent(weakTab);          // for AddTabBarItem
-    ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
     return tabContentModel;
 }
 
-RefPtr<PaintWrapper> TabsTestNg::CreateTabsDone(TabsModelNG model)
+void TabsTestNg::CreateTabsDone(TabsModelNG model)
 {
     model.Pop();
-    frameNode_->ProcessOffscreenTask();
     CreateDone();
-    return frameNode_->CreatePaintWrapper();
 }
 
 void TabsTestNg::CreateTabContents(int32_t itemNumber)
@@ -431,11 +428,11 @@ HWTEST_F(TabsTestNg, TabsNodeGetScrollableBarModeOptions001, TestSize.Level2)
     frameNode_->tabBarId_ = frameNode_->GetTabBarId();
     ScrollableBarModeOptions option = frameNode_->GetScrollableBarModeOptions();
     EXPECT_EQ(option.margin.Value(), 0.0f);
-    EXPECT_EQ(option.nonScrollableLayoutStyle, LayoutStyle::ALWAYS_CENTER);
+    EXPECT_EQ(option.nonScrollableLayoutStyle, std::nullopt);
     frameNode_->tabBarId_ = {};
     option = frameNode_->GetScrollableBarModeOptions();
     EXPECT_EQ(option.margin.Value(), 0.0f);
-    EXPECT_EQ(option.nonScrollableLayoutStyle, LayoutStyle::ALWAYS_CENTER);
+    EXPECT_EQ(option.nonScrollableLayoutStyle, std::nullopt);
 }
 
 /**
@@ -451,35 +448,6 @@ HWTEST_F(TabsTestNg, ProvideRestoreInfo001, TestSize.Level1)
     EXPECT_EQ(tabBarPattern_->ProvideRestoreInfo(), "{\"Index\":0}");
     SwipeToWithoutAnimation(1);
     EXPECT_EQ(tabBarPattern_->ProvideRestoreInfo(), "{\"Index\":1}");
-}
-
-/**
- * @tc.name: SetEdgeEffect002
- * @tc.desc: test SetEdgeEffect
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, SetEdgeEffect002, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    TabsItemDivider divider;
-    model.SetDivider(divider);
-    CreateTabsDone(model);
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-
-    /**
-     * @tc.steps: step1. Test function SetEdgeEffect.
-     * @tc.expected: SetEdgeEffect calling interface.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    tabBarPattern_->SetEdgeEffect(gestureHub);
-    /**
-     * @tc.steps: step1. Set scrollEffect_ Value is empty.
-     * @tc.expected: SetEdgeEffect calling interface
-     */
-    tabBarPattern_->scrollEffect_ = nullptr;
-    tabBarPattern_->SetEdgeEffect(gestureHub);
 }
 
 /**

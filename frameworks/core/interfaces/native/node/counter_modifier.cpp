@@ -71,18 +71,40 @@ void ResetCounterBackgroundColor(ArkUINodeHandle node) {}
 namespace NodeModifier {
 const ArkUICounterModifier* GetCounterModifier()
 {
-    static const ArkUICounterModifier modifier = { SetEnableInc, ResetEnableInc, SetEnableDec, ResetEnableDec,
-        SetCounterHeight, ResetCounterHeight, SetCounterWidth, ResetCounterWidth, SetCounterBackgroundColor,
-        ResetCounterBackgroundColor };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUICounterModifier modifier = {
+        .setEnableInc = SetEnableInc,
+        .resetEnableInc = ResetEnableInc,
+        .setEnableDec = SetEnableDec,
+        .resetEnableDec = ResetEnableDec,
+        .setCounterHeight = SetCounterHeight,
+        .resetCounterHeight = ResetCounterHeight,
+        .setCounterWidth = SetCounterWidth,
+        .resetCounterWidth = ResetCounterWidth,
+        .setCounterBackgroundColor = SetCounterBackgroundColor,
+        .resetCounterBackgroundColor = ResetCounterBackgroundColor,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUICounterModifier* GetCJUICounterModifier()
 {
-    static const CJUICounterModifier modifier = { SetEnableInc, ResetEnableInc, SetEnableDec, ResetEnableDec,
-        SetCounterHeight, ResetCounterHeight, SetCounterWidth, ResetCounterWidth, SetCounterBackgroundColor,
-        ResetCounterBackgroundColor };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUICounterModifier modifier = {
+        .setEnableInc = SetEnableInc,
+        .resetEnableInc = ResetEnableInc,
+        .setEnableDec = SetEnableDec,
+        .resetEnableDec = ResetEnableDec,
+        .setCounterHeight = SetCounterHeight,
+        .resetCounterHeight = ResetCounterHeight,
+        .setCounterWidth = SetCounterWidth,
+        .resetCounterWidth = ResetCounterWidth,
+        .setCounterBackgroundColor = SetCounterBackgroundColor,
+        .resetCounterBackgroundColor = ResetCounterBackgroundColor,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

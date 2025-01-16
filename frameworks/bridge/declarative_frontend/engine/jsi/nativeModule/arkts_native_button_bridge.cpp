@@ -787,4 +787,65 @@ ArkUINativeModuleValue ButtonBridge::ResetButtonSize(ArkUIRuntimeCallInfo* runti
     GetArkUINodeModifiers()->getButtonModifier()->resetButtonSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ButtonBridge::SetMinFontScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    double minFontScale;
+    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, minFontScale)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        GetArkUINodeModifiers()->getButtonModifier()->setButtonMinFontScale(
+            nativeNode, static_cast<float>(minFontScale));
+        minFontScale = 0.0f;
+    } else if (GreatOrEqual(minFontScale, 1.0f)) {
+        minFontScale = 1.0f;
+    }
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonMinFontScale(nativeNode, static_cast<float>(minFontScale));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::ResetMinFontScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonMinFontScale(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::SetMaxFontScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    double maxFontScale;
+    if (!ArkTSUtils::ParseJsDouble(vm, secondArg, maxFontScale)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        maxFontScale = 1.0f;
+    }
+    GetArkUINodeModifiers()->getButtonModifier()->setButtonMaxFontScale(nativeNode, static_cast<float>(maxFontScale));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::ResetMaxFontScale(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getButtonModifier()->resetButtonMaxFontScale(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 } // namespace OHOS::Ace::NG

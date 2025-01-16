@@ -58,7 +58,7 @@ public:
     void CreateContainerModal();
     void GetInstance();
     RefPtr<PaintWrapper> FlushLayoutTask(const RefPtr<FrameNode>& frameNode);
-    ContainerModalViewEnhance* viewEnhance_;
+    std::unique_ptr<ContainerModalViewEnhance> viewEnhance_;
     RefPtr<FrameNode> frameNode_;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<ContainerModalAccessibilityProperty> accessibilityProperty_;
@@ -83,8 +83,10 @@ void ContainerModalPatternEnhanceTestNg::GetInstance()
 {
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
-    viewEnhance_ = new ContainerModalViewEnhance();
+    CHECK_NULL_VOID(frameNode_);
+    viewEnhance_ = std::make_unique<ContainerModalViewEnhance>();
     pattern_ = frameNode_->GetPattern<ContainerModalPatternEnhance>();
+    CHECK_NULL_VOID(pattern_);
     pattern_->AttachToFrameNode(frameNode_);
     layoutProperty_ = frameNode_->GetLayoutProperty();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ContainerModalAccessibilityProperty>();

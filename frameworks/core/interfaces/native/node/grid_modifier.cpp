@@ -274,11 +274,12 @@ void ResetGridSupportAnimation(ArkUINodeHandle node)
     GridModelNG::SetSupportAnimation(frameNode, DEFAULT_SUPPORT_ANIMATION);
 }
 
-void SetEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, ArkUI_Bool alwaysEnabled)
+void SetEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, ArkUI_Bool alwaysEnabled, ArkUI_Int32 edge)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    GridModelNG::SetEdgeEffect(frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled);
+    GridModelNG::SetEdgeEffect(
+        frameNode, static_cast<EdgeEffect>(edgeEffect), alwaysEnabled, static_cast<EffectEdge>(edge));
 }
 
 void ResetEdgeEffect(ArkUINodeHandle node)
@@ -287,7 +288,7 @@ void ResetEdgeEffect(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     EdgeEffect edgeEffect = EdgeEffect::NONE;
     ArkUI_Bool alwaysEnabled = false;
-    GridModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+    GridModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, EffectEdge::ALL);
 }
 
 void SetNestedScroll(ArkUINodeHandle node, int32_t forward, int32_t backward)
@@ -485,33 +486,138 @@ void ResetGridFadingEdge(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIGridModifier* GetGridModifier()
 {
-    static const ArkUIGridModifier modifier = { SetGridColumnsTemplate, ResetGridColumnsTemplate, SetGridRowsTemplate,
-        ResetGridRowsTemplate, SetGridColumnsGap, ResetGridColumnsGap, SetGridRowsGap, ResetGridRowsGap,
-        SetGridScrollBar, ResetGridScrollBar, SetGridScrollBarWidth, ResetGridScrollBarWidth, SetGridScrollBarColor,
-        ResetGridScrollBarColor, SetGridCachedCount, ResetGridCachedCount, SetShowCached, ResetShowCached,
-        GetShowCached, SetGridEditMode, ResetGridEditMode, SetGridMultiSelectable, ResetGridMultiSelectable,
-        SetGridMaxCount, ResetGridMaxCount, SetGridMinCount, ResetGridMinCount, SetGridCellLength, ResetGridCellLength,
-        SetGridLayoutDirection, ResetGridLayoutDirection, SetGridSupportAnimation, ResetGridSupportAnimation,
-        SetEdgeEffect, ResetEdgeEffect, SetNestedScroll, ResetNestedScroll, SetEnableScroll, ResetEnableScroll,
-        SetFriction, ResetFriction, GetColumnsTemplate, GetRowsTemplate, GetColumnsGap, GetRowsGap, SetNodeAdapter,
-        ResetNodeAdapter, GetNodeAdapter, SetCachedCount, ResetCachedCount, GetCachedCount, SetFlingSpeedLimit,
-        ResetFlingSpeedLimit, SetGridAlignItems, ResetGridAlignItems, SetGridFadingEdge, ResetGridFadingEdge };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIGridModifier modifier = {
+        .setGridColumnsTemplate = SetGridColumnsTemplate,
+        .resetGridColumnsTemplate = ResetGridColumnsTemplate,
+        .setGridRowsTemplate = SetGridRowsTemplate,
+        .resetGridRowsTemplate = ResetGridRowsTemplate,
+        .setGridColumnsGap = SetGridColumnsGap,
+        .resetGridColumnsGap = ResetGridColumnsGap,
+        .setGridRowsGap = SetGridRowsGap,
+        .resetGridRowsGap = ResetGridRowsGap,
+        .setGridScrollBar = SetGridScrollBar,
+        .resetGridScrollBar = ResetGridScrollBar,
+        .setGridScrollBarWidth = SetGridScrollBarWidth,
+        .resetGridScrollBarWidth = ResetGridScrollBarWidth,
+        .setGridScrollBarColor = SetGridScrollBarColor,
+        .resetGridScrollBarColor = ResetGridScrollBarColor,
+        .setGridCachedCount = SetGridCachedCount,
+        .resetGridCachedCount = ResetGridCachedCount,
+        .setShowCached = SetShowCached,
+        .resetShowCached = ResetShowCached,
+        .getShowCached = GetShowCached,
+        .setGridEditMode = SetGridEditMode,
+        .resetGridEditMode = ResetGridEditMode,
+        .setGridMultiSelectable = SetGridMultiSelectable,
+        .resetGridMultiSelectable = ResetGridMultiSelectable,
+        .setGridMaxCount = SetGridMaxCount,
+        .resetGridMaxCount = ResetGridMaxCount,
+        .setGridMinCount = SetGridMinCount,
+        .resetGridMinCount = ResetGridMinCount,
+        .setGridCellLength = SetGridCellLength,
+        .resetGridCellLength = ResetGridCellLength,
+        .setGridLayoutDirection = SetGridLayoutDirection,
+        .resetGridLayoutDirection = ResetGridLayoutDirection,
+        .setGridSupportAnimation = SetGridSupportAnimation,
+        .resetGridSupportAnimation = ResetGridSupportAnimation,
+        .setEdgeEffect = SetEdgeEffect,
+        .resetEdgeEffect = ResetEdgeEffect,
+        .setNestedScroll = SetNestedScroll,
+        .resetNestedScroll = ResetNestedScroll,
+        .setEnableScroll = SetEnableScroll,
+        .resetEnableScroll = ResetEnableScroll,
+        .setFriction = SetFriction,
+        .resetFriction = ResetFriction,
+        .getGridColumnsTemplate = GetColumnsTemplate,
+        .getGridRowsTemplate = GetRowsTemplate,
+        .getGridColumnsGap = GetColumnsGap,
+        .getGridRowsGap = GetRowsGap,
+        .setNodeAdapter = SetNodeAdapter,
+        .resetNodeAdapter = ResetNodeAdapter,
+        .getNodeAdapter = GetNodeAdapter,
+        .setCachedCount = SetCachedCount,
+        .resetCachedCount = ResetCachedCount,
+        .getCachedCount = GetCachedCount,
+        .setGridAlignItems = SetGridAlignItems,
+        .resetGridAlignItems = ResetGridAlignItems,
+        .setGridFadingEdge = SetGridFadingEdge,
+        .resetGridFadingEdge = ResetGridFadingEdge,
+        .setOnGridScrollIndexCallBack = SetOnGridScrollIndexCallBack,
+        .resetOnGridScrollIndex = ResetOnGridScrollIndex,
+        .setOnGridScrollBarUpdateCallBack = SetOnGridScrollBarUpdateCallBack,
+        .resetOnGridScrollBarUpdate = ResetOnGridScrollBarUpdate,
+        .setOnGridItemDragStart = SetOnGridItemDragStart,
+        .resetOnGridItemDragStart = ResetOnGridItemDragStart,
+        .setOnGridItemDragEnter = SetOnGridItemDragEnter,
+        .resetOnGridItemDragEnter = ResetOnGridItemDragEnter,
+        .setOnGridItemDragMove = SetOnGridItemDragMove,
+        .resetOnGridItemDragMove = ResetOnGridItemDragMove,
+        .setOnGridItemDragLeave = SetOnGridItemDragLeave,
+        .resetOnGridItemDragLeave = ResetOnGridItemDragLeave,
+        .setOnGridItemDrop = SetOnGridItemDrop,
+        .resetOnGridItemDrop = ResetOnGridItemDrop,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIGridModifier* GetCJUIGridModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIGridModifier modifier = {
-        SetGridColumnsTemplate, ResetGridColumnsTemplate, SetGridRowsTemplate, ResetGridRowsTemplate,
-        SetGridColumnsGap, ResetGridColumnsGap, SetGridRowsGap, ResetGridRowsGap,
-        SetGridScrollBar, ResetGridScrollBar, SetGridScrollBarWidth, ResetGridScrollBarWidth, SetGridScrollBarColor,
-        ResetGridScrollBarColor, SetGridCachedCount, ResetGridCachedCount, SetGridEditMode, ResetGridEditMode,
-        SetGridMultiSelectable, ResetGridMultiSelectable, SetGridMaxCount, ResetGridMaxCount, SetGridMinCount,
-        ResetGridMinCount, SetGridCellLength, ResetGridCellLength, SetGridLayoutDirection, ResetGridLayoutDirection,
-        SetGridSupportAnimation, ResetGridSupportAnimation, SetEdgeEffect, ResetEdgeEffect, SetNestedScroll,
-        ResetNestedScroll, SetEnableScroll, ResetEnableScroll, SetFriction, ResetFriction, GetColumnsTemplate,
-        GetRowsTemplate, GetColumnsGap, GetRowsGap, SetNodeAdapter, ResetNodeAdapter, GetNodeAdapter, SetCachedCount,
-        ResetCachedCount, GetCachedCount, SetFlingSpeedLimit, ResetFlingSpeedLimit };
+        .setGridColumnsTemplate = SetGridColumnsTemplate,
+        .resetGridColumnsTemplate = ResetGridColumnsTemplate,
+        .setGridRowsTemplate = SetGridRowsTemplate,
+        .resetGridRowsTemplate = ResetGridRowsTemplate,
+        .setGridColumnsGap = SetGridColumnsGap,
+        .resetGridColumnsGap = ResetGridColumnsGap,
+        .setGridRowsGap = SetGridRowsGap,
+        .resetGridRowsGap = ResetGridRowsGap,
+        .setGridScrollBar = SetGridScrollBar,
+        .resetGridScrollBar = ResetGridScrollBar,
+        .setGridScrollBarWidth = SetGridScrollBarWidth,
+        .resetGridScrollBarWidth = ResetGridScrollBarWidth,
+        .setGridScrollBarColor = SetGridScrollBarColor,
+        .resetGridScrollBarColor = ResetGridScrollBarColor,
+        .setGridCachedCount = SetGridCachedCount,
+        .resetGridCachedCount = ResetGridCachedCount,
+        .setGridEditMode = SetGridEditMode,
+        .resetGridEditMode = ResetGridEditMode,
+        .setGridMultiSelectable = SetGridMultiSelectable,
+        .resetGridMultiSelectable = ResetGridMultiSelectable,
+        .setGridMaxCount = SetGridMaxCount,
+        .resetGridMaxCount = ResetGridMaxCount,
+        .setGridMinCount = SetGridMinCount,
+        .resetGridMinCount = ResetGridMinCount,
+        .setGridCellLength = SetGridCellLength,
+        .resetGridCellLength = ResetGridCellLength,
+        .setGridLayoutDirection = SetGridLayoutDirection,
+        .resetGridLayoutDirection = ResetGridLayoutDirection,
+        .setGridSupportAnimation = SetGridSupportAnimation,
+        .resetGridSupportAnimation = ResetGridSupportAnimation,
+        .setEdgeEffect = SetEdgeEffect,
+        .resetEdgeEffect = ResetEdgeEffect,
+        .setNestedScroll = SetNestedScroll,
+        .resetNestedScroll = ResetNestedScroll,
+        .setEnableScroll = SetEnableScroll,
+        .resetEnableScroll = ResetEnableScroll,
+        .setFriction = SetFriction,
+        .resetFriction = ResetFriction,
+        .getGridColumnsTemplate = GetColumnsTemplate,
+        .getGridRowsTemplate = GetRowsTemplate,
+        .getGridColumnsGap = GetColumnsGap,
+        .getGridRowsGap = GetRowsGap,
+        .setNodeAdapter = SetNodeAdapter,
+        .resetNodeAdapter = ResetNodeAdapter,
+        .getNodeAdapter = GetNodeAdapter,
+        .setCachedCount = SetCachedCount,
+        .resetCachedCount = ResetCachedCount,
+        .getCachedCount = GetCachedCount,
+        .setFlingSpeedLimit = SetFlingSpeedLimit,
+        .resetFlingSpeedLimit = ResetFlingSpeedLimit,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
@@ -536,6 +642,132 @@ void ResetOnGridScrollIndex(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     GridModelNG::SetOnScrollIndex(frameNode, nullptr);
+}
+
+void SetOnGridScrollIndexCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onScrollIndex = reinterpret_cast<ScrollIndexFunc*>(extraParam);
+        GridModelNG::SetOnScrollIndex(frameNode, std::move(*onScrollIndex));
+    } else {
+        GridModelNG::SetOnScrollIndex(frameNode, nullptr);
+    }
+}
+
+void SetOnGridScrollBarUpdateCallBack(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onScrollBarUpdate = reinterpret_cast<ScrollBarUpdateFunc*>(extraParam);
+        GridModelNG::SetOnScrollBarUpdate(frameNode, std::move(*onScrollBarUpdate));
+    } else {
+        GridModelNG::SetOnScrollBarUpdate(frameNode, nullptr);
+    }
+}
+
+void ResetOnGridScrollBarUpdate(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetOnScrollBarUpdate(frameNode, nullptr);
+}
+
+void SetOnGridItemDragStart(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onItemDragStart = reinterpret_cast<std::function<void(const ItemDragInfo&, int32_t)>*>(extraParam);
+        GridModelNG::SetOnItemDragStart(frameNode, std::move(*onItemDragStart));
+    } else {
+        GridModelNG::SetOnItemDragStart(frameNode, nullptr);
+    }
+}
+
+void ResetOnGridItemDragStart(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetOnItemDragStart(frameNode, nullptr);
+}
+
+void SetOnGridItemDragEnter(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onItemDragEnter = reinterpret_cast<ItemDragEnterFunc*>(extraParam);
+        GridModelNG::SetOnItemDragEnter(frameNode, std::move(*onItemDragEnter));
+    } else {
+        GridModelNG::SetOnItemDragEnter(frameNode, nullptr);
+    }
+}
+
+void ResetOnGridItemDragEnter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetOnItemDragEnter(frameNode, nullptr);
+}
+
+void SetOnGridItemDragMove(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onItemDragMove = reinterpret_cast<ItemDragMoveFunc*>(extraParam);
+        GridModelNG::SetOnItemDragMove(frameNode, std::move(*onItemDragMove));
+    } else {
+        GridModelNG::SetOnItemDragMove(frameNode, nullptr);
+    }
+}
+
+void ResetOnGridItemDragMove(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetOnItemDragMove(frameNode, nullptr);
+}
+
+void SetOnGridItemDragLeave(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onItemDragLeave = reinterpret_cast<ItemDragLeaveFunc*>(extraParam);
+        GridModelNG::SetOnItemDragLeave(frameNode, std::move(*onItemDragLeave));
+    } else {
+        GridModelNG::SetOnItemDragLeave(frameNode, nullptr);
+    }
+}
+
+void ResetOnGridItemDragLeave(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetOnItemDragLeave(frameNode, nullptr);
+}
+
+void SetOnGridItemDrop(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (extraParam) {
+        auto onItemDrop = reinterpret_cast<ItemDropFunc*>(extraParam);
+        GridModelNG::SetOnItemDrop(frameNode, std::move(*onItemDrop));
+    } else {
+        GridModelNG::SetOnItemDrop(frameNode, nullptr);
+    }
+}
+
+void ResetOnGridItemDrop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridModelNG::SetOnItemDrop(frameNode, nullptr);
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

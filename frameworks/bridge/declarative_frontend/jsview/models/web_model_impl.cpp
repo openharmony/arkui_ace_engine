@@ -681,4 +681,11 @@ void WebModelImpl::SetAdsBlockedEventId(std::function<void(const BaseEventInfo* 
 void WebModelImpl::SetUpdateInstanceIdCallback(std::function<void(int32_t)>&& callback)
 {
 }
+
+void WebModelImpl::SetOptimizeParserBudgetEnabled(bool enable)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetOptimizeParserBudgetEnabled(enable);
+}
 } // namespace OHOS::Ace::Framework

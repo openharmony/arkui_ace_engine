@@ -75,6 +75,7 @@ void GridTestNg::SetUp()
 
 void GridTestNg::TearDown()
 {
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -107,8 +108,8 @@ GridModelNG GridTestNg::CreateGrid()
     RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
     RefPtr<ScrollProxy> scrollBarProxy = model.CreateScrollBarProxy();
     model.Create(positionController, scrollBarProxy);
-    ViewAbstract::SetWidth(CalcLength(GRID_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(GRID_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
     GetGrid();
     return model;
 }
@@ -130,6 +131,43 @@ GridItemModelNG GridTestNg::CreateGridItem(float width, float height, GridItemSt
     }
     ViewAbstract::SetFocusable(true);
     return itemModel;
+}
+
+ColumnModelNG GridTestNg::CreateColumn(float width, float height)
+{
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    ColumnModelNG columnModel;
+    columnModel.Create(std::nullopt, nullptr, "");
+    if (width == FILL_VALUE) {
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    } else if (width != NULL_VALUE) {
+        ViewAbstract::SetWidth(CalcLength(width));
+    }
+    if (height == FILL_VALUE) {
+        ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+    } else if (height != NULL_VALUE) {
+        ViewAbstract::SetHeight(CalcLength(height));
+    } else {
+        ViewAbstract::SetHeight(CalcLength(ITEM_MAIN_SIZE));
+    }
+    ViewAbstract::SetFocusable(true);
+    return columnModel;
+}
+
+void GridTestNg::CreateColumns(int32_t itemNumber, float width, float height)
+{
+    for (int32_t i = 0; i < itemNumber; i++) {
+        CreateColumn(width, height);
+        {
+            ButtonModelNG buttonModelNG;
+            buttonModelNG.CreateWithLabel("label");
+            ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->GetMainElementNode()->onMainTree_ = true;
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    }
 }
 
 void GridTestNg::CreateGridItems(int32_t itemNumber, float width, float height, GridItemStyle gridItemStyle)

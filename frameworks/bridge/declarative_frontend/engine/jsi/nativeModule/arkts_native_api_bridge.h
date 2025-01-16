@@ -73,13 +73,18 @@ private:
     static void RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGaugeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+#ifndef ARKUI_WEARABLE
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+#endif
     static void RegisterRadioAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSliderAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRatingAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTimepickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+#ifndef ARKUI_WEARABLE
     static void RegisterWaterFlowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+#endif
     static void RegisterCheckboxAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDataPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -105,6 +110,7 @@ private:
     static void RegisterFlexAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterBadgeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterScrollBarAttributes(Local<panda::ObjectRef> object, EcmaVM *vm);
+    static void RegisterIndicatorComponentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_API_BRIDGE_H

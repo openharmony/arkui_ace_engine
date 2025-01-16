@@ -24,7 +24,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string INIT_STRING_1 = "初始属性字符串";
+const std::u16string INIT_STRING_1 = u"初始属性字符串";
 const std::u16string INIT_U16STRING_1 = u"初始属性字符串";
 const int32_t TEST_MAX_LINE = 10;
 const Dimension TEST_BASELINE_OFFSET = Dimension(5, DimensionUnit::PX);
@@ -236,7 +236,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos002, TestSize.Level1
      */
     styledStringController->SetStyledString(mutableStr);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 7);
-    EXPECT_EQ(StringUtils::Str16ToStr8(richEditorPattern->dataDetectorAdapter_->textForAI_), INIT_STRING_1);
+    EXPECT_EQ(richEditorPattern->dataDetectorAdapter_->textForAI_, INIT_STRING_1);
     auto spanItem = richEditorPattern->spans_.front();
     auto& fontStyle = spanItem->fontStyle;
     ASSERT_NE(fontStyle, nullptr);
@@ -304,7 +304,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, GetSubComponentInfos003, TestSize.Level1
      */
     styledStringController->SetStyledString(mutableStr);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 7);
-    EXPECT_EQ(StringUtils::Str16ToStr8(richEditorPattern->dataDetectorAdapter_->textForAI_), INIT_STRING_1);
+    EXPECT_EQ(richEditorPattern->dataDetectorAdapter_->textForAI_, INIT_STRING_1);
     auto spanItem = richEditorPattern->spans_.front();
     auto& fontStyle = spanItem->fontStyle;
     ASSERT_NE(fontStyle, nullptr);
@@ -421,7 +421,7 @@ HWTEST_F(RichEditorAccessibilityTestNg, ExecSubComponent001, TestSize.Level1)
      */
     styledStringController->SetStyledString(mutableStr);
     EXPECT_EQ(richEditorPattern->GetTextContentLength(), 7);
-    EXPECT_EQ(StringUtils::Str16ToStr8(richEditorPattern->dataDetectorAdapter_->textForAI_), INIT_STRING_1);
+    EXPECT_EQ(richEditorPattern->dataDetectorAdapter_->textForAI_, INIT_STRING_1);
     auto spanItem = richEditorPattern->spans_.front();
     auto& fontStyle = spanItem->fontStyle;
     ASSERT_NE(fontStyle, nullptr);

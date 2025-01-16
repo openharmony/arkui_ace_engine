@@ -182,11 +182,14 @@ private:
     void InitRealSideBarWidth(LayoutWrapper* layoutWrapper, float parentWidth);
     void AutoMode(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, float parentWidth);
     void AutoChangeSideBarWidth(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, float parentWidth);
-    void UpdateDefaultValueByVersion();
+    void UpdateDefaultValueByVersion(LayoutWrapper* layoutWrapper);
     SideBarPosition GetSideBarPositionWithRtl(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
     void AdjustMinAndMaxSideBarWidth(LayoutWrapper* layoutWrapper);
     RefPtr<LayoutWrapper> GetSideBarLayoutWrapper(LayoutWrapper* layoutWrapper) const;
-    void GetAllPropertyValue(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, float parentWidth);
+    void GetAllPropertyValue(
+        const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, LayoutWrapper* layoutWrapper, float parentWidth);
+    Dimension GetSideBarWidth(
+        const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, LayoutWrapper* layoutWrapper);
     void InitSideBarWidth(float parentWidth);
     void MeasureRealSideBarWidth(float parentWidth);
     void MeasureTypeUpdateWidth();

@@ -813,6 +813,18 @@ void CanvasPattern::UpdateFontSize(const Dimension& size)
     paintMethod_->SetMeasureFontSize(size);
 }
 
+void CanvasPattern::UpdateLetterSpacing(const Dimension& letterSpacing)
+{
+#ifndef USE_FAST_TASKPOOL
+    auto task = [letterSpacing](CanvasPaintMethod& paintMethod) {
+        paintMethod.SetLetterSpacing(letterSpacing);
+    };
+    paintMethod_->PushTask(task);
+#else
+    paintMethod_->PushTask<SetLetterSpacingOp>(letterSpacing);
+#endif
+}
+
 void CanvasPattern::UpdateFillColor(const Color& color)
 {
 #ifndef USE_FAST_TASKPOOL
@@ -1147,11 +1159,13 @@ void CanvasPattern::StartImageAnalyzer(void* config, OnAnalyzedCallback& onAnaly
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->CreateAnalyzerOverlay();
-    }, "ArkUICanvasStartImageAnalyzer");
+    uiTaskExecutor.PostTask(
+        [weak = WeakClaim(this)] {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->CreateAnalyzerOverlay();
+        },
+        "ArkUICanvasStartImageAnalyzer", PriorityType::VIP);
 }
 
 void CanvasPattern::StopImageAnalyzer()

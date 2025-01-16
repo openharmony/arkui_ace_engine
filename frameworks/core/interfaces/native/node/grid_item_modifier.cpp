@@ -116,19 +116,44 @@ void SetGridItemOptions(ArkUINodeHandle node, ArkUI_Int32 style)
 namespace NodeModifier {
 const ArkUIGridItemModifier* GetGridItemModifier()
 {
-    static const ArkUIGridItemModifier modifier = { SetGridItemSelectable, ResetGridItemSelectable,
-        SetGridItemSelected, ResetGridItemSelected, SetGridItemRowStart, ResetGridItemRowStart,
-        SetGridItemRowEnd, ResetGridItemRowEnd, SetGridItemColumnStart, ResetGridItemColumnStart,
-        SetGridItemColumnEnd, ResetGridItemColumnEnd, SetGridItemOptions };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIGridItemModifier modifier = {
+        .setGridItemSelectable = SetGridItemSelectable,
+        .resetGridItemSelectable = ResetGridItemSelectable,
+        .setGridItemSelected = SetGridItemSelected,
+        .resetGridItemSelected = ResetGridItemSelected,
+        .setGridItemRowStart = SetGridItemRowStart,
+        .resetGridItemRowStart = ResetGridItemRowStart,
+        .setGridItemRowEnd = SetGridItemRowEnd,
+        .resetGridItemRowEnd = ResetGridItemRowEnd,
+        .setGridItemColumnStart = SetGridItemColumnStart,
+        .resetGridItemColumnStart = ResetGridItemColumnStart,
+        .setGridItemColumnEnd = SetGridItemColumnEnd,
+        .resetGridItemColumnEnd = ResetGridItemColumnEnd,
+        .setGridItemOptions = SetGridItemOptions,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIGridItemModifier* GetCJUIGridItemModifier()
 {
-    static const CJUIGridItemModifier modifier = { SetGridItemSelectable, ResetGridItemSelectable,
-        SetGridItemSelected, ResetGridItemSelected, SetGridItemRowStart, ResetGridItemRowStart,
-        SetGridItemRowEnd, ResetGridItemRowEnd, SetGridItemColumnStart, ResetGridItemColumnStart,
-        SetGridItemColumnEnd, ResetGridItemColumnEnd };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIGridItemModifier modifier = {
+        .setGridItemSelectable = SetGridItemSelectable,
+        .resetGridItemSelectable = ResetGridItemSelectable,
+        .setGridItemSelected = SetGridItemSelected,
+        .resetGridItemSelected = ResetGridItemSelected,
+        .setGridItemRowStart = SetGridItemRowStart,
+        .resetGridItemRowStart = ResetGridItemRowStart,
+        .setGridItemRowEnd = SetGridItemRowEnd,
+        .resetGridItemRowEnd = ResetGridItemRowEnd,
+        .setGridItemColumnStart = SetGridItemColumnStart,
+        .resetGridItemColumnStart = ResetGridItemColumnStart,
+        .setGridItemColumnEnd = SetGridItemColumnEnd,
+        .resetGridItemColumnEnd = ResetGridItemColumnEnd,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

@@ -191,7 +191,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan001, TestSize.Level1)
     EXPECT_EQ(index1, 0);
     auto index2 = richEditorController->AddTextSpan(options);
     EXPECT_EQ(index2, 1);
-    options.value = "hello\n";
+    options.value = u"hello\n";
     auto index3 = richEditorController->AddTextSpan(options);
     EXPECT_EQ(index3, 1);
 }
@@ -522,5 +522,35 @@ HWTEST_F(RichEditorAddSpanTestNg, AddSpanByPasteData001, TestSize.Level1)
     richEditorPattern->isSpanStringMode_ = false;
     richEditorPattern->AddSpanByPasteData(spanString);
     EXPECT_EQ(richEditorPattern->spans_.size(), 2);
+}
+
+/**
+ * @tc.name: AddSpansByPaste001
+ * @tc.desc: test RichEditorPattern AddSpansByPaste
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAddSpanTestNg, AddSpansByPaste001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get richEditor pattern and controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. add span and select text
+     */
+    AddSpan("test");
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 4);
+    richEditorPattern->textSelector_.Update(3, 4);
+    std::list<RefPtr<NG::SpanItem>> spans;
+    OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem1 = AceType::MakeRefPtr<ImageSpanItem>();
+    spans.push_back(spanItem1);
+    richEditorPattern->AddSpansByPaste(spans);
+    ASSERT_EQ(richEditorPattern->textSelector_.IsValid(), false);
 }
 } // namespace OHOS::Ace::NG

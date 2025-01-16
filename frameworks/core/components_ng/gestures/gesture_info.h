@@ -40,6 +40,8 @@ enum class DragPreviewMode : int32_t {
     DISABLE_SCALE = 2,
     ENABLE_DEFAULT_SHADOW = 3,
     ENABLE_DEFAULT_RADIUS = 4,
+    ENABLE_DRAG_ITEM_GRAY_EFFECT = 5,
+    ENABLE_MULTI_TILE_EFFECT  = 6,
 };
 
 struct BlurBackGroundInfo {
@@ -67,6 +69,7 @@ struct OptionsAfterApplied {
     double opacity { 1.0f };
     std::optional<Shadow> shadow;
     std::string shadowPath;
+    bool isFilled = true;
     std::optional<BorderRadiusProperty> borderRadius;
     BlurBackGroundInfo blurbgEffect;
 };
@@ -79,6 +82,10 @@ struct DragPreviewOption {
     bool isDefaultShadowEnabled = false;
     bool isDefaultRadiusEnabled = false;
     bool isDragPreviewEnabled = true;
+    bool isDefaultDragItemGrayEffectEnabled = false;
+    bool enableEdgeAutoScroll = true;
+    bool enableHapticFeedback = false;
+    bool isMultiTiled = false;
     union {
         int32_t badgeNumber;
         bool isShowBadge;
@@ -99,6 +106,8 @@ struct DragPreviewOption {
         isScaleEnabled = true;
         isDefaultShadowEnabled = false;
         isDefaultRadiusEnabled = false;
+        isDefaultDragItemGrayEffectEnabled = false;
+        isMultiTiled = false;
     }
 };
 
@@ -130,9 +139,9 @@ public:
     {
         onActionEndId_ = std::make_unique<GestureEventFunc>(onActionEndId);
     }
-    void SetOnActionCancelId(const GestureEventNoParameter& onActionCancelId)
+    void SetOnActionCancelId(const GestureEventFunc& onActionCancelId)
     {
-        onActionCancelId_ = std::make_unique<GestureEventNoParameter>(onActionCancelId);
+        onActionCancelId_ = std::make_unique<GestureEventFunc>(onActionCancelId);
     }
     void SetPriority(GesturePriority priority)
     {
@@ -241,7 +250,7 @@ protected:
     std::unique_ptr<GestureEventFunc> onActionStartId_;
     std::unique_ptr<GestureEventFunc> onActionUpdateId_;
     std::unique_ptr<GestureEventFunc> onActionEndId_;
-    std::unique_ptr<GestureEventNoParameter> onActionCancelId_;
+    std::unique_ptr<GestureEventFunc> onActionCancelId_;
     RefPtr<GestureInfo> gestureInfo_;
     void* userData_ = nullptr;
 };

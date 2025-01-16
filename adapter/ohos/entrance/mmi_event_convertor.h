@@ -30,6 +30,7 @@
 #include "core/event/focus_axis_event.h"
 #include "core/event/touch_event.h"
 #include "core/event/pointer_event.h"
+#include "core/event/crown_event.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -66,6 +67,9 @@ void GetEventDevice(int32_t sourceType, E& event)
         case OHOS::MMI::PointerEvent::SOURCE_TYPE_JOYSTICK:
             event.sourceType = SourceType::MOUSE;
             break;
+        case OHOS::MMI::PointerEvent::SOURCE_TYPE_CROWN:
+            event.sourceType = SourceType::CROWN;
+            break;
         default:
             event.sourceType = SourceType::NONE;
             break;
@@ -79,6 +83,8 @@ void SetTouchEventType(int32_t orgAction, TouchEvent& event);
 // when the event didn't do touchtest, useRealtimeMatrix need to set true to get current matrix.
 void CalculatePointerEvent(const std::shared_ptr<MMI::PointerEvent>& point, const RefPtr<NG::FrameNode>& frameNode,
     bool useRealtimeMatrix = false);
+
+void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, CrownEvent& event);
 
 void CalculatePointerEvent(const NG::OffsetF& offsetF, const std::shared_ptr<MMI::PointerEvent>& point,
     const NG::VectorF& scale, int32_t udegree = 0);

@@ -39,13 +39,23 @@ void Clean(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUINodeContainerModifier* GetNodeContainerModifier()
 {
-    static const ArkUINodeContainerModifier modifier = { Rebuild, Clean };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUINodeContainerModifier modifier = {
+        .rebuild = Rebuild,
+        .clean = Clean,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUINodeContainerModifier* GetCJUINodeContainerModifier()
 {
-    static const CJUINodeContainerModifier modifier = { Rebuild, Clean };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUINodeContainerModifier modifier = {
+        .rebuild = Rebuild,
+        .clean = Clean,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

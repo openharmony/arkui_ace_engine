@@ -111,6 +111,7 @@ public:
     static constexpr int32_t SOURCE_TYPE_TOUCHSCREEN = 2;
     static constexpr int32_t SOURCE_TYPE_TOUCHPAD = 3;
     static constexpr int32_t SOURCE_TYPE_JOYSTICK = 4;
+    static constexpr int32_t SOURCE_TYPE_CROWN = 5;
 
     // buttonId_
     static constexpr int32_t BUTTON_NONE = -1;

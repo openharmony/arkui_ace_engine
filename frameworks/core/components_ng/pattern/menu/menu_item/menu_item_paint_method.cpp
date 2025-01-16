@@ -34,13 +34,17 @@ CanvasDrawFunction MenuItemPaintMethod::GetOverlayDrawFunction(PaintWrapper* pai
         bool needDivider = props->GetNeedDivider().value_or(true);
         bool press = props->GetPress().value_or(false);
         bool hover = props->GetHover().value_or(false);
-        if (!needDivider || press || hover) {
+        if (!needDivider) {
             return;
         }
     
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto selectTheme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(selectTheme);
+        if (!selectTheme->GetDefaultShowDivider() && (press || hover)) {
+            return;
+        }
         RSPath path;
         if (isOption) {
             menuItem->HandleOption(paintWrapper, props, selectTheme, path, canvas);
@@ -95,8 +99,7 @@ void MenuItemPaintMethod::HandleOption(PaintWrapper* paintWrapper, const RefPtr<
     CHECK_NULL_VOID(layoutProperty);
 
     auto optionSize = paintWrapper->GetGeometryNode()->GetFrameSize();
-    auto horInterval = static_cast<float>(selectTheme->GetMenuIconPadding().ConvertToPx()) -
-                       static_cast<float>(selectTheme->GetOutPadding().ConvertToPx());
+    auto horInterval = static_cast<float>(selectTheme->GetMenuItemHorIntervalPadding().ConvertToPx());
     auto hasIcon = props->GetHasIcon().value_or(false);
     float iconHorInterval = 0.0f;
     auto textDirection = layoutProperty->GetNonAutoLayoutDirection();

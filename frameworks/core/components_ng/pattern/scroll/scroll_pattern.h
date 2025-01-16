@@ -29,6 +29,10 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/common/vibrator/vibrator_utils.h"
+#endif
+
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
@@ -210,6 +214,7 @@ public:
     {
         if (intervalSize_ != intervalSize) {
             intervalSize_ = intervalSize;
+            TAG_LOGI(AceLogTag::ACE_SCROLL, "scroll setIntervalSize:%{public}f", intervalSize.Value());
             scrollSnapUpdate_ = true;
         }
     }

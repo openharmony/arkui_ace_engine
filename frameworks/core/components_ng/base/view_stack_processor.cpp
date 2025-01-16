@@ -52,8 +52,22 @@ const RefPtr<UINode>& ViewStackProcessor::GetMainElementNode() const
     return elementsStack_.top();
 }
 
+void ViewStackProcessor::ApplyParentThemeScopeId(const RefPtr<UINode>& element)
+{
+    auto parent = GetMainElementNode();
+    int32_t elementThemeScopeId = element->GetThemeScopeId();
+    if (parent && elementThemeScopeId == 0) {
+        int32_t themeScopeId = parent->GetThemeScopeId();
+        if (elementThemeScopeId != themeScopeId) {
+            element->SetThemeScopeId(themeScopeId);
+        }
+    }
+}
+
 void ViewStackProcessor::Push(const RefPtr<UINode>& element, bool /*isCustomView*/)
 {
+    ApplyParentThemeScopeId(element);
+
     if (ShouldPopImmediately()) {
         Pop();
     }

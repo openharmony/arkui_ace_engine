@@ -57,12 +57,8 @@ void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
     contentNode->AddChild(child);
 }
 
-void NavBarNode::InitSystemTransitionPop(bool transitionIn)
+void NavBarNode::InitSystemTransitionPop()
 {
-    if (!transitionIn) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "pop navBar is not supported");
-        return;
-    }
     // navabr do enter pop initialization
     float isRTL = GetLanguageDirection();
     SetTransitionType(PageTransitionType::ENTER_POP);
@@ -75,21 +71,22 @@ void NavBarNode::InitSystemTransitionPop(bool transitionIn)
         { curFrameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
 }
 
-void NavBarNode::FinishSystemTransitionPush()
+void NavBarNode::SystemTransitionPushAction(bool isStart)
 {
-    GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
+    // initialization or finish callBack
+    if (isStart) {
+        SetTransitionType(PageTransitionType::EXIT_PUSH);
+    } else {
+        GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);
+    }
     GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     CHECK_NULL_VOID(titleNode);
     titleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
 }
 
-void NavBarNode::EndSystemTransitionPush(bool transitionIn)
+void NavBarNode::StartSystemTransitionPush()
 {
-    if (transitionIn) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "push navBar is not supported");
-        return;
-    }
     // start EXIT_PUSH transition animation
     float isRTL = GetLanguageDirection();
     auto frameSize = GetGeometryNode()->GetFrameSize();
@@ -101,31 +98,13 @@ void NavBarNode::EndSystemTransitionPush(bool transitionIn)
         { frameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
 }
 
-void NavBarNode::EndSystemTransitionPop(bool transitionIn)
+void NavBarNode::StartSystemTransitionPop()
 {
-    if (!transitionIn) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "pop navBar is not supported");
-        return;
-    }
     // navabr start to do ENTER_POP animation
     GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     titleBarNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-}
-
-void NavBarNode::InitSystemTransitionPush(bool transitionIn)
-{
-    if (transitionIn) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "push navBar is not supported");
-        return;
-    }
-    SetTransitionType(PageTransitionType::EXIT_PUSH);
-    GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-    auto titleNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
- 
-    titleNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
 }
 
 bool NavBarNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
@@ -135,28 +114,5 @@ bool NavBarNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
     auto lastStandardIndex = navigation->GetLastStandardIndex();
     bool isInvisible = navigation->GetNavigationMode() == NavigationMode::STACK && lastStandardIndex >= 0;
     return isInvisible;
-}
-
-void NavBarNode::FinishSystemTransitionAnimationPush(RefPtr<FrameNode>& preNode, RefPtr<FrameNode>& naviagtionNode,
-    bool transitionIn, const int32_t animationId)
-{
-    if (transitionIn) {
-        TAG_LOGE(AceLogTag::ACE_NAVIGATION, "push navBar is not supported animationId: %{public}d", animationId);
-        return;
-    }
-
-    auto navigation = DynamicCast<NavigationGroupNode>(naviagtionNode);
-    CHECK_NULL_VOID(navigation);
-
-    FinishSystemTransitionPush();
-    bool needSetInvisible = GetTransitionType() == PageTransitionType::EXIT_PUSH;
-    navigation->SetNeedSetInvisible(needSetInvisible);
-    bool isInvisible = IsNodeInvisible(navigation);
-    if (needSetInvisible && isInvisible) {
-        preNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-        preNode->SetJSViewActive(false);
-        navigation->NotifyPageHide();
-    }
-    GetRenderContext()->SetOpacity(1.0f);
 }
 } // namespace OHOS::Ace::NG

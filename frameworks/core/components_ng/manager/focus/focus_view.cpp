@@ -197,6 +197,46 @@ RefPtr<FocusHub> FocusView::GetViewRootScope()
     return rootScope;
 }
 
+bool FocusView::IsViewRootScopeHasLastFocus()
+{
+    /*
+    * - Page1(FocusView)
+    *     - Column(rootScope)
+    *     - SheetPage(lastFocus)
+    * - *Page2(FocusView)
+    *     - *Column(rootScope)
+    *
+    * SheetPage is the last focused child of Page1, Page2 gets focus now.
+    * When Page1 shows again, SheetPage should get focus rather than Column gets focus.
+    */
+    auto focusViewHub = GetFocusHub();
+    CHECK_NULL_RETURN(focusViewHub, false);
+    auto weakLastFocusHub = focusViewHub->GetLastWeakFocusNode();
+    auto lastFocusHub = weakLastFocusHub.Upgrade();
+    CHECK_NULL_RETURN(lastFocusHub, true);
+
+    std::list<int32_t> rootScopeDeepth = GetRouteOfFirstScope();
+    RefPtr<FocusHub> rootScope = focusViewHub;
+    for (auto index : rootScopeDeepth) {
+        bool hit = rootScope->AnyChildFocusHub([&rootScope, &index](const RefPtr<FocusHub>& focusNode) {
+            if (--index < 0) {
+                rootScope = focusNode;
+                return true;
+            }
+            return false;
+        });
+        if (!hit) {
+            TAG_LOGD(AceLogTag::ACE_FOCUS, "Index: %{public}d of %{public}s/%{public}d 's children is invalid.", index,
+                rootScope->GetFrameName().c_str(), rootScope->GetFrameId());
+            return false;
+        }
+        if (rootScope == lastFocusHub) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void FocusView::SetIsViewRootScopeFocused(bool isViewRootScopeFocused)
 {
     isViewRootScopeFocused_ = isViewRootScopeFocused;
@@ -290,7 +330,7 @@ bool FocusView::RequestDefaultFocus()
     if (pair.first) {
         return pair.second;
     }
-    if (isViewRootScopeFocused_ && viewRootScope) {
+    if (isViewRootScopeFocused_ && IsViewRootScopeHasLastFocus()) {
         SetIsViewRootScopeFocused(true);
         auto ret = viewRootScope->RequestFocusImmediatelyInner();
         // set neverShown_ false when request focus on focus view success

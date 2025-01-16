@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 constexpr int32_t CONSTANT_DOUBLE = 2;
 RichEditorDragPaintMethod::RichEditorDragPaintMethod(const WeakPtr<Pattern>& pattern,
     const RefPtr<TextDragOverlayModifier>& overlayMod, const RefPtr<RichEditorDragContentModifier>& contentMod,
-    const RichEditorDragInfo& info)
+    const TextDragInfo& info)
     : TextDragPaintMethod(pattern, overlayMod), contentModifier_(contentMod), info_(info)
 {}
 
@@ -64,5 +64,7 @@ void RichEditorDragPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper
     CHECK_NULL_VOID(textTheme);
     auto selectorColor = info_.selectedBackgroundColor.value_or(textTheme->GetSelectedColor());
     modifier->SetSelectedColor(selectorColor.GetValue());
+    modifier->SetDragBackgroundColor(info_.dragBackgroundColor);
+    modifier->SetIsDragShadowNeeded(info_.isDragShadowNeeded);
 }
 } // namespace OHOS::Ace::NG

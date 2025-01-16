@@ -97,14 +97,35 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     if (ParseJsString(tabBarInfo, infoStr)) {
         TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
         TabContentModel::GetInstance()->SetTabBar(infoStr, std::nullopt, std::nullopt, nullptr, true);
+        TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
         return;
     }
 
     if (!tabBarInfo->IsObject()) {
+        TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
+        TabContentModel::GetInstance()->SetTabBar(std::nullopt, std::nullopt, std::nullopt, nullptr, false);
+        TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
         return;
     }
 
     auto paramObject = JSRef<JSObject>::Cast(tabBarInfo);
+    JSRef<JSVal> contentParam = paramObject->GetProperty("builderNode_");
+    if (contentParam->IsObject()) {
+        auto builderNodeObject = JSRef<JSObject>::Cast(contentParam);
+        JSRef<JSVal> nodeptr = builderNodeObject->GetProperty("nodePtr_");
+        if (!nodeptr.IsEmpty()) {
+            const auto* vm = nodeptr->GetEcmaVM();
+            auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
+            auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
+            CHECK_NULL_VOID(frameNode);
+            RefPtr<NG::FrameNode> refPtrFrameNode = AceType::Claim(frameNode);
+            CHECK_NULL_VOID(refPtrFrameNode);
+            TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
+            TabContentModel::GetInstance()->SetTabBar(std::nullopt, std::nullopt, std::nullopt, nullptr, false);
+            TabContentModel::GetInstance()->SetTabBarWithContent(refPtrFrameNode);
+            return;
+        }
+    }
     JSRef<JSVal> builderFuncParam = paramObject->GetProperty("builder");
     if (builderFuncParam->IsFunction()) {
         auto tabBarBuilder = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builderFuncParam));
@@ -119,6 +140,7 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
         TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
         TabContentModel::GetInstance()->SetTabBar(
             std::nullopt, std::nullopt, std::nullopt, std::move(tabBarBuilderFunc), false);
+        TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
         return;
     }
     JSRef<JSVal> typeParam = paramObject->GetProperty("type");
@@ -155,6 +177,7 @@ void JSTabContent::SetTabBar(const JSCallbackInfo& info)
     }
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
     TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, std::nullopt, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
 void JSTabContent::Pop()
@@ -581,6 +604,7 @@ void JSTabContent::SetSubTabBarStyle(const JSRef<JSObject>& paramObject)
 
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, std::nullopt, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
 void JSTabContent::SetLayoutMode(const JSRef<JSVal>& info)
@@ -665,6 +689,7 @@ void JSTabContent::SetBottomTabBarStyle(const JSCallbackInfo& info)
 
     TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
     TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, tabBarSymbol, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
 void JSTabContent::SetOnWillShow(const JSCallbackInfo& info)

@@ -15,13 +15,13 @@
 
 #include "text_input_base.h"
 
-#include "core/components/text_overlay/text_overlay_theme.h"
-#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
-#include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/pattern/text/span/span_string.h"
-#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_resource_adapter_v2.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_udmf.h"
+#include "test/mock/core/render/mock_paragraph.h"
+
+#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -294,6 +294,8 @@ HWTEST_F(TextFieldPatternTestTwo, HandleClickEvent002, TestSize.Level0)
     themeConstants->currentThemeStyle_ = AceType::MakeRefPtr<ThemeStyle>();
     themeConstants->currentThemeStyle_->SetAttributes(attributes);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(TextOverlayTheme::Builder().Build(themeConstants)));
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly(Return(TextOverlayTheme::Builder().Build(themeConstants)));
 
     auto selectOverlayPattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
     ASSERT_NE(selectOverlayPattern, nullptr);
@@ -339,6 +341,7 @@ HWTEST_F(TextFieldPatternTestTwo, HandleDoubleClickEvent001, TestSize.Level0)
     auto resourceAdapter = AceType::MakeRefPtr<MockResourceAdapterV2>();
     auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(resourceAdapter);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(TextFieldTheme::Builder().Build(themeConstants)));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(TextFieldTheme::Builder().Build(themeConstants)));
 
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
@@ -375,6 +378,7 @@ HWTEST_F(TextFieldPatternTestTwo, HandleTripleClickEvent001, TestSize.Level0)
     auto resourceAdapter = AceType::MakeRefPtr<MockResourceAdapterV2>();
     auto themeConstants = AceType::MakeRefPtr<ThemeConstants>(resourceAdapter);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(TextFieldTheme::Builder().Build(themeConstants)));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(TextFieldTheme::Builder().Build(themeConstants)));
 
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);

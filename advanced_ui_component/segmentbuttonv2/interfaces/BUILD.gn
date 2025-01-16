@@ -1,0 +1,96 @@
+# Copyright (c) 2025 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/config/components/ets_frontend/es2abc_config.gni")
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/build/ace_gen_obj.gni")
+
+es2abc_gen_abc("gen_segmentbuttonv2_abc") {
+  src_js = rebase_path("segmentbuttonv2.js")
+  dst_file = rebase_path(target_out_dir + "/segmentbuttonv2.abc")
+  in_puts = [ "segmentbuttonv2.js" ]
+  out_puts = [ target_out_dir + "/segmentbuttonv2.abc" ]
+  extra_args = [ "--module" ]
+}
+
+gen_js_obj("segmentbuttonv2_abc") {
+  input = get_label_info(":gen_segmentbuttonv2_abc", "target_out_dir") +
+          "/segmentbuttonv2.abc"
+  output = target_out_dir + "/segmentbuttonv2_abc.o"
+  dep = ":gen_segmentbuttonv2_abc"
+}
+
+gen_obj("segmentbuttonv2_abc_preview") {
+  input = get_label_info(":gen_segmentbuttonv2_abc", "target_out_dir") +
+          "/segmentbuttonv2.abc"
+  output = target_out_dir + "/segmentbuttonv2_abc.c"
+  snapshot_dep = [ ":gen_segmentbuttonv2_abc" ]
+}
+
+template("segmentbuttonv2_static") {
+  forward_variables_from(invoker, "*")
+
+  ohos_source_set(target_name) {
+    defines += invoker.defines
+    cflags_cc += invoker.cflags_cc
+    configs = [ "$ace_root/interfaces/napi/kits:ace_napi_config" ]
+
+    sources = [ "segmentbuttonv2.cpp" ]
+    deps =
+        [ "$ace_root/interfaces/napi/kits/utils:napi_utils_static_${platform}" ]
+    external_deps = []
+
+    if (platform != "" && is_arkui_x) {
+      deps += [ "//plugins/libs/napi:napi_$platform" ]
+      include_dirs = [ "//commonlibrary/c_utils/base/include" ]
+    } else {
+      external_deps += [ "napi:ace_napi" ]
+    }
+
+    if (defined(config.libace_target)) {
+      deps += [ config.libace_target ]
+    }
+
+    if (use_mingw_win || use_mac || use_linux) {
+      deps += [ ":gen_obj_src_segmentbuttonv2_abc_preview" ]
+    } else {
+      deps += [ ":segmentbuttonv2_abc" ]
+    }
+
+    subsystem_name = ace_engine_subsystem
+    part_name = ace_engine_part
+  }
+}
+
+foreach(item, ace_platforms) {
+  segmentbuttonv2_static("segmentbuttonv2_static_" + item.name) {
+    defines = []
+    cflags_cc = []
+    config = {
+    }
+    platform = item.name
+
+    if (defined(item.config)) {
+      config = item.config
+    }
+
+    if (defined(config.defines)) {
+      defines = config.defines
+    }
+
+    if (defined(config.cflags_cc)) {
+      cflags_cc = config.cflags_cc
+    }
+  }
+}

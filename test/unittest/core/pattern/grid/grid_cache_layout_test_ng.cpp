@@ -121,7 +121,7 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines001, TestSize.Level1)
     for (int32_t index = 29; index >= 0; index--) {
         RectF childRect = GetChildRect(frameNode_, index);
         float offsetX = index % colsNumber * itemWidth;
-        float offsetY = -totalHeight + floor(index / colsNumber) * ITEM_MAIN_SIZE + GRID_HEIGHT;
+        float offsetY = -totalHeight + floor(index / colsNumber) * ITEM_MAIN_SIZE + HEIGHT;
         RectF expectRect = RectF(offsetX, offsetY, itemWidth, ITEM_MAIN_SIZE);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
@@ -150,14 +150,14 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines002, TestSize.Level1)
         auto child = frameNode_->GetChildByIndex(index);
         auto childProps = AceType::DynamicCast<GridItemLayoutProperty>(child->GetLayoutProperty());
         RectF childRect = GetChildRect(frameNode_, index);
-        float width = childProps->GetCrossSpan(Axis::VERTICAL) * GRID_WIDTH / 4;
+        float width = childProps->GetCrossSpan(Axis::VERTICAL) * WIDTH / 4;
         float height = childProps->GetMainSpan(Axis::VERTICAL) * ITEM_MAIN_SIZE;
-        float offsetY = -totalHeight + childProps->GetMainIndex().value_or(0) * ITEM_MAIN_SIZE + GRID_HEIGHT;
+        float offsetY = -totalHeight + childProps->GetMainIndex().value_or(0) * ITEM_MAIN_SIZE + HEIGHT;
         // multi-line item's mainIndex may be translated to its last line during scrolling.
         if (index == 4) {
             offsetY -= ITEM_MAIN_SIZE;
         }
-        float offsetX = childProps->GetCrossIndex().value_or(0) * GRID_WIDTH / 4;
+        float offsetX = childProps->GetCrossIndex().value_or(0) * WIDTH / 4;
         RectF expectRect = RectF(offsetX, offsetY, width, height);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
@@ -186,14 +186,14 @@ HWTEST_F(GridCacheLayoutTestNg, LayoutForwardCachedLines003, TestSize.Level1)
         auto child = frameNode_->GetChildByIndex(index);
         auto childProps = AceType::DynamicCast<GridItemLayoutProperty>(child->GetLayoutProperty());
         RectF childRect = GetChildRect(frameNode_, index);
-        float width = childProps->GetCrossSpan(Axis::VERTICAL) * GRID_WIDTH / 6;
+        float width = childProps->GetCrossSpan(Axis::VERTICAL) * WIDTH / 6;
         float height = childProps->GetMainSpan(Axis::VERTICAL) * ITEM_MAIN_SIZE;
-        float offsetY = -totalHeight + childProps->GetMainIndex().value_or(0) * ITEM_MAIN_SIZE + GRID_HEIGHT;
+        float offsetY = -totalHeight + childProps->GetMainIndex().value_or(0) * ITEM_MAIN_SIZE + HEIGHT;
         // multi-line item's mainIndex may be translated to its last line during scrolling.
         if (index == 2) {
             offsetY -= ITEM_MAIN_SIZE;
         }
-        float offsetX = childProps->GetCrossIndex().value_or(0) * GRID_WIDTH / 6;
+        float offsetX = childProps->GetCrossIndex().value_or(0) * WIDTH / 6;
         RectF expectRect = RectF(offsetX, offsetY, width, height);
         EXPECT_TRUE(IsEqual(childRect, expectRect)) << "index: " << index;
     }
@@ -427,8 +427,8 @@ HWTEST_F(GridCacheLayoutTestNg, Cache003, TestSize.Level1)
     model.SetLayoutOptions({});
     CreateItemsInLazyForEach(50, [](uint32_t idx) { return 50.0f; });
     CreateDone();
-    frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
 
+    GetItem(7, true)->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     EXPECT_EQ(pattern_->info_.startIndex_, 0);
     EXPECT_EQ(pattern_->info_.endIndex_, 23);
     UpdateCurrentOffset(-200.0f);
@@ -483,6 +483,63 @@ HWTEST_F(GridCacheLayoutTestNg, Cache004, TestSize.Level1)
     EXPECT_EQ(item->GetGeometryNode()->GetFrameRect().ToString(), "RectT (0.00, 400.00) - [80.00 x 50.00]");
     EXPECT_EQ(ctx->paintRect_, item->GetGeometryNode()->GetFrameRect()); // should be synced with layout
     EXPECT_EQ(GetChildFrameNode(frameNode_, 24), item);
+}
+
+/**
+ * @tc.name: ShowCache004
+ * @tc.desc: Test Grid layout cache
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, ShowCache004, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr");
+    model.SetCachedCount(2, true);
+    model.SetLayoutOptions({});
+    CreateItemsInLazyForEach(50, [](uint32_t idx) { return 50.0f; });
+    CreateDone();
+    UpdateCurrentOffset(-200.0f);
+    UpdateCurrentOffset(60.0f);
+    EXPECT_EQ(pattern_->info_.startIndex_, 6);
+    EXPECT_EQ(pattern_->info_.endIndex_, 32);
+    for (int i = 0; i < 50; ++i) {
+        if (i > 38) {
+            if (GetItem(i, true)) {
+                EXPECT_FALSE(GetItem(i, true)->IsActive());
+            }
+        } else {
+            EXPECT_TRUE(GetItem(i, true));
+            EXPECT_TRUE(GetItem(i, true)->IsActive());
+        }
+    }
+}
+
+/**
+ * @tc.name: ShowCache005
+ * @tc.desc: Test Grid layout cache
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCacheLayoutTestNg, ShowCache005, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(2, true);
+    model.SetLayoutOptions({});
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateItemsInLazyForEach(10, [](uint32_t idx) { return 50.0f; });
+    CreateDone();
+
+    pattern_->scrollableEvent_->scrollable_->isTouching_ = true;
+    for (int i = 0; i < 20; ++i) {
+        UpdateCurrentOffset(-300.0f);
+    }
+    EXPECT_TRUE(GetItem(9, true)->IsActive());
+    EXPECT_LT(GetChildY(frameNode_, 9), -50.0f);
+    EXPECT_TRUE(GetItem(8, true)->IsActive());
+    EXPECT_TRUE(GetItem(7, true)->IsActive());
+    EXPECT_TRUE(GetItem(6, true)->IsActive());
+    EXPECT_FALSE(GetItem(3, true)->IsActive());
+    EXPECT_FALSE(GetItem(2, true)->IsActive());
 }
 
 /**

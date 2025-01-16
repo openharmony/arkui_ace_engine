@@ -65,7 +65,7 @@ UIContentErrorCode FormFrontendDeclarative::RunDynamicPage(
 UIContentErrorCode FormFrontendDeclarative::InnerRunCardPage(
     const std::string& url, const std::string& params, const std::string& entryPoint)
 {
-    LOGI("InnerRunCardPage");
+    TAG_LOGI(AceLogTag::ACE_FORM, "InnerRunCardPage");
     std::string urlPath = GetFormSrcPath(url, FILE_TYPE_BIN);
     if (urlPath.empty()) {
         return UIContentErrorCode::NULL_URL;
@@ -88,14 +88,20 @@ UIContentErrorCode FormFrontendDeclarative::InnerRunCardPage(
 UIContentErrorCode FormFrontendDeclarative::InnerRunDynamicPage(
     const std::string& url, const std::string& params, const std::string& entryPoint)
 {
-    LOGI("InnerRunDynamicPage");
+    TAG_LOGI(AceLogTag::ACE_FORM, "InnerRunDynamicPage");
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, UIContentErrorCode::NULL_POINTER);
     container->SetCardFrontend(AceType::WeakClaim(this), cardId_);
     CHECK_NULL_RETURN(delegate_, UIContentErrorCode::NULL_POINTER);
     auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);
     CHECK_NULL_RETURN(delegate, UIContentErrorCode::NULL_POINTER);
-    return delegate->RunCard(url, params, "", cardId_, entryPoint);
+    auto errorCode = delegate->RunCard(url, params, "", cardId_, entryPoint);
+    if (errorCode == NO_ERRORS) {
+        auto jsAccessibility = delegate_->GetJSAccessibilityManager();
+        CHECK_NULL_RETURN(jsAccessibility, errorCode);
+        jsAccessibility->InitializeCallback();
+    }
+    return errorCode;
 }
 
 void FormFrontendDeclarative::UpdateData(const std::string& dataList)

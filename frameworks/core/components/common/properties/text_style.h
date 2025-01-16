@@ -142,7 +142,7 @@ inline std::string ToString(const EllipsisMode& ellipsisMode)
 }
 } // namespace StringUtils
 
-enum class WordBreak { NORMAL = 0, BREAK_ALL, BREAK_WORD };
+enum class WordBreak { NORMAL = 0, BREAK_ALL, BREAK_WORD, HYPHENATION };
 extern const std::vector<WordBreak> WORD_BREAK_TYPES;
 extern const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES;
 namespace StringUtils {
@@ -152,6 +152,7 @@ inline std::string ToString(const WordBreak& wordBreak)
         { WordBreak::NORMAL, "NORMAL" },
         { WordBreak::BREAK_ALL, "BREAK_ALL" },
         { WordBreak::BREAK_WORD, "BREAK_WORD" },
+        { WordBreak::HYPHENATION, "HYPHENATION" },
     };
     auto iter = BinarySearchFindIndex(table, ArraySize(table), wordBreak);
     return iter != -1 ? table[iter].value : "";
@@ -231,14 +232,23 @@ struct TextBackgroundStyle {
     std::optional<Color> backgroundColor;
     std::optional<NG::BorderRadiusProperty> backgroundRadius;
     int32_t groupId = 0;
+    bool needCompareGroupId = true;
+
+    void UpdateColorByResourceId()
+    {
+        CHECK_NULL_VOID(backgroundColor);
+        backgroundColor->UpdateColorByResourceId();
+    }
 
     static void ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextBackgroundStyle>& style,
         const NG::InspectorFilter& filter);
 
     bool operator==(const TextBackgroundStyle& value) const
     {
+        // Only compare groupId if both styles require it.
+        bool bothNeedCompareGroupId = needCompareGroupId && value.needCompareGroupId;
         return backgroundColor == value.backgroundColor && backgroundRadius == value.backgroundRadius &&
-               groupId == value.groupId;
+               (!bothNeedCompareGroupId || groupId == value.groupId);
     }
 };
 
@@ -856,6 +866,7 @@ inline FontWeight StringToFontWeight(const std::string& weight, FontWeight defau
 inline WordBreak StringToWordBreak(const std::string& wordBreak)
 {
     static const LinearMapNode<WordBreak> wordBreakTable[] = {
+        { "hyphenation", WordBreak::HYPHENATION },
         { "break-all", WordBreak::BREAK_ALL },
         { "break-word", WordBreak::BREAK_WORD },
         { "normal", WordBreak::NORMAL },

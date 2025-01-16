@@ -162,9 +162,10 @@ float ScrollableUtils::GetMoveOffset(
     CHECK_NULL_RETURN(curFrameNode, notMove);
     auto parentGeometryNode = parentFrameNode->GetGeometryNode();
     CHECK_NULL_RETURN(parentGeometryNode, notMove);
-    auto parentFrameSize = parentGeometryNode->GetFrameSize();
+    auto parentFrameSize = parentGeometryNode->GetPaddingSize();
+    auto parentPaddingOffset = parentGeometryNode->GetPaddingOffset(true) - parentGeometryNode->GetFrameOffset();
     auto curFrameOffsetToWindow = curFrameNode->GetTransformRelativeOffset();
-    auto parentFrameOffsetToWindow = parentFrameNode->GetTransformRelativeOffset();
+    auto parentFrameOffsetToWindow = parentFrameNode->GetTransformRelativeOffset() + parentPaddingOffset;
     auto offsetToTarFrame = curFrameOffsetToWindow - parentFrameOffsetToWindow;
     auto curGeometry = curFrameNode->GetGeometryNode();
     CHECK_NULL_RETURN(curGeometry, notMove);

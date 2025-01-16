@@ -462,7 +462,7 @@ export struct ToolBar {
             .flexShrink(1)
           }
         }, (item: ToolBarOption, index: number) => {
-          return `${this.getUniqueId}__${index}}`;
+          return `${this.getUniqueId()}__${index}}`;
         })
         if (this.refreshData() && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
           Row() {

@@ -196,7 +196,7 @@ HWTEST_F(PanEventTestNg, PanEventOnCollectTouchTargetTest002, TestSize.Level1)
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
     (*(panEventActuator->panRecognizer_->onActionEnd_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
-    (*(panEventActuator->panRecognizer_->onActionCancel_))();
+    (*(panEventActuator->panRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
 
     /**
@@ -210,7 +210,7 @@ HWTEST_F(PanEventTestNg, PanEventOnCollectTouchTargetTest002, TestSize.Level1)
     (*(panEventActuator->panRecognizer_->onActionStart_))(info);
     (*(panEventActuator->panRecognizer_->onActionUpdate_))(info);
     (*(panEventActuator->panRecognizer_->onActionEnd_))(info);
-    (*(panEventActuator->panRecognizer_->onActionCancel_))();
+    (*(panEventActuator->panRecognizer_->onActionCancel_))(info);
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_DEFAULT_VALUE);
 }
 } // namespace OHOS::Ace::NG

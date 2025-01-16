@@ -55,7 +55,7 @@ public:
         return frontend_;
     }
 
-    ResourceConfiguration GetResourceConfiguration() const
+    ResourceConfiguration GetResourceConfiguration() const override
     {
         return resourceInfo_.GetResourceConfiguration();
     }
@@ -208,7 +208,7 @@ private:
     void InitializeSystemBarHeightChangeCallback();
     void InitializeSurfaceDestroyCallback();
     void InitializeDragEventCallback();
-
+    void InitializeCrownEventCallback();
     void AttachView(std::shared_ptr<Window> window, const RefPtr<AceView>& view, double density, int32_t width,
         int32_t height, uint32_t windowId);
     void SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow);

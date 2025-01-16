@@ -370,7 +370,11 @@ void UIObserver::UnRegisterDrawCallback(int32_t uiContextInstanceId, napi_value 
     }
     auto& holder = specifiedDrawListeners_[uiContextInstanceId];
     if (callback == nullptr) {
-        holder.clear();
+        auto container = Container::GetContainer(uiContextInstanceId);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([&holder]() { holder.clear(); }, TaskExecutor::TaskType::UI, "ArkUIClearListener");
         return;
     }
     holder.erase(
@@ -413,7 +417,11 @@ void UIObserver::UnRegisterLayoutCallback(int32_t uiContextInstanceId, napi_valu
     }
     auto& holder = specifiedLayoutListeners_[uiContextInstanceId];
     if (callback == nullptr) {
-        holder.clear();
+        auto container = Container::GetContainer(uiContextInstanceId);
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask([&holder]() { holder.clear(); }, TaskExecutor::TaskType::UI, "ArkUIClearListener");
         return;
     }
     holder.erase(

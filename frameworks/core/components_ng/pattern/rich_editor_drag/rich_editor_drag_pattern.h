@@ -34,14 +34,14 @@ class RichEditorDragPattern : public TextDragPattern {
 
 public:
     explicit RichEditorDragPattern(const RefPtr<TextPattern>& hostPattern,
-        const std::shared_ptr<RichEditorDragInfo> info) : info_(info), hostPattern_(hostPattern) {};
+        const std::shared_ptr<TextDragInfo>& info) : info_(info), hostPattern_(hostPattern) {};
     ~RichEditorDragPattern() override = default;
 
     static RefPtr<FrameNode> CreateDragNode(
         const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren);
 
     static RefPtr<FrameNode> CreateDragNode(
-        const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren, const RichEditorDragInfo& info);
+        const RefPtr<FrameNode>& hostNode, std::list<RefPtr<FrameNode>>& imageChildren, const TextDragInfo& info);
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
@@ -78,10 +78,10 @@ public:
 
 protected:
     void AdjustMaxWidth(float& width, const RectF& contentRect, const std::vector<RectF>& boxes) override;
-    std::shared_ptr<RichEditorDragInfo> info_;
+    std::shared_ptr<TextDragInfo> info_;
 
 private:
-    static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode, const RichEditorDragInfo& info);
+    static RefPtr<FrameNode> CreateDragNode(const RefPtr<FrameNode>& hostNode, const TextDragInfo& info);
 
     WeakPtr<TextPattern> hostPattern_;
     RefPtr<RichEditorDragContentModifier> contentModifier_;

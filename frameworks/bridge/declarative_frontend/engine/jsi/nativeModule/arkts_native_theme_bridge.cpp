@@ -48,7 +48,9 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
         return panda::JSValueRef::Undefined(vm);
     }
     std::vector<ArkUI_Uint32> colors;
-    HandleThemeColorsArg(vm, colorsArg, colors);
+    if (!HandleThemeColorsArg(vm, colorsArg, colors)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
 
     // handle color mode argument
     if (!colorModeArg->IsNumber()) {
@@ -84,12 +86,15 @@ ArkUINativeModuleValue ThemeBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo
     return panda::JSValueRef::Undefined(vm);
 }
 
-void ThemeBridge::HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>& colorsArg,
+bool ThemeBridge::HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>& colorsArg,
     std::vector<ArkUI_Uint32>& colors)
 {
     auto basisTheme = TokenThemeStorage::GetInstance()->GetDefaultTheme();
     if (!basisTheme) {
         basisTheme = TokenThemeStorage::GetInstance()->ObtainSystemTheme();
+    }
+    if (!basisTheme) {
+        return false;
     }
     for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
         Color color;
@@ -99,6 +104,7 @@ void ThemeBridge::HandleThemeColorsArg(const EcmaVM* vm, const Local<JSValueRef>
         }
         colors.push_back(static_cast<ArkUI_Uint32>(color.GetValue()));
     }
+    return true;
 }
 
 ArkUINodeHandle ThemeBridge::CreateWithThemeNode(ArkUI_Int32 themeScopeId)
@@ -126,6 +132,12 @@ ArkUINativeModuleValue ThemeBridge::SetDefaultTheme(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> colorsArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> isDarkArg = runtimeCallInfo->GetCallArgRef(1);
 
+    // handle color mode argument
+    if (!isDarkArg->IsBoolean()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    ArkUI_Bool isDark = static_cast<ArkUI_Bool>(isDarkArg->BooleaValue(vm));
+
     // handle colors argument
     if (!colorsArg->IsArray(vm)) {
         return panda::JSValueRef::Undefined(vm);
@@ -135,17 +147,19 @@ ArkUINativeModuleValue ThemeBridge::SetDefaultTheme(ArkUIRuntimeCallInfo* runtim
     for (size_t i = 0; i < TokenColors::TOTAL_NUMBER; i++) {
         Color color;
         auto colorParams = panda::ArrayRef::GetValueAt(vm, colorsArg, i);
+        bool isColorAvailable = false;
         if (!ArkTSUtils::ParseJsColorAlpha(vm, colorParams, color)) {
-            color = basisTheme->Colors()->GetByIndex(i);
+            if (basisTheme) {
+                color = basisTheme->Colors()->GetByIndex(i);
+                isColorAvailable = true;
+            }
+        } else {
+            isColorAvailable = true;
         }
+        TokenThemeStorage::GetInstance()->SetIsThemeColorAvailable(isDark, i, isColorAvailable);
+        
         colors.push_back(static_cast<ArkUI_Uint32>(color.GetValue()));
     }
-
-    // handle color mode argument
-    if (!isDarkArg->IsBoolean()) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    ArkUI_Bool isDark = static_cast<ArkUI_Bool>(isDarkArg->BooleaValue(vm));
 
     // execute C-API
     GetArkUINodeModifiers()->getThemeModifier()->setDefaultTheme(colors.data(), isDark);

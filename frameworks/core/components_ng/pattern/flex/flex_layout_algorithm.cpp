@@ -266,13 +266,11 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
     const auto& layoutProperty = layoutWrapper->GetLayoutProperty();
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
-    childrenCount_ = 0;
     for (const auto& child : children) {
         if (child->IsOutOfLayout()) {
             outOfLayoutChildren_.emplace_back(child);
             continue;
         }
-        childrenCount_++;
         const auto& childLayoutProperty = child->GetLayoutProperty();
         const auto& childMagicItemProperty = childLayoutProperty->GetMagicItemProperty();
         const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
@@ -469,12 +467,9 @@ void FlexLayoutAlgorithm::PopOutOfDispayMagicNodesInPriorityMode(const std::list
     }
 }
 
-void FlexLayoutAlgorithm::MeasureInPriorityMode(LayoutWrapper* layoutWrapper, FlexItemProperties& flexItemProperties)
+void FlexLayoutAlgorithm::MeasureInPriorityMode(FlexItemProperties& flexItemProperties)
 {
     bool outOfDisplay = false;
-    CHECK_NULL_VOID(layoutWrapper);
-    ApplyPatternOperation(layoutWrapper, FlexOperatorType::RESTORE_CHILDREN_COUNT);
-    bool flexChildrenCountChangeFlag = preChildrenCount_ != childrenCount_;
     auto iter = magicNodes_.rbegin();
     while (iter != magicNodes_.rend()) {
         auto childList = iter->second;
@@ -492,9 +487,7 @@ void FlexLayoutAlgorithm::MeasureInPriorityMode(LayoutWrapper* layoutWrapper, Fl
         float crossAxisSize = crossAxisSize_;
         for (auto& child : childList) {
             const auto& childLayoutWrapper = child.layoutWrapper;
-            if (flexChildrenCountChangeFlag) {
-                childLayoutWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
-            }
+            childLayoutWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
             UpdateChildLayoutConstrainByFlexBasis(direction_, childLayoutWrapper, child.layoutConstraint);
             childLayoutWrapper->Measure(child.layoutConstraint);
             UpdateAllocatedSize(childLayoutWrapper, crossAxisSize);
@@ -531,7 +524,7 @@ void FlexLayoutAlgorithm::MeasureAndCleanMagicNodes(
         SecondMeasureInWeightMode(firstLoopIter);
         FinalMeasureInWeightMode();
     } else if (GreatNotEqual(maxDisplayPriority_, 1) && !isInfiniteLayout_) {
-        MeasureInPriorityMode(containerLayoutWrapper, flexItemProperties);
+        MeasureInPriorityMode(flexItemProperties);
     } else {
         auto magicNodeSize = magicNodes_.size();
         auto iter = magicNodes_.rbegin();
@@ -1027,8 +1020,6 @@ void FlexLayoutAlgorithm::ApplyPatternOperation(
     if (operation == FlexOperatorType::RESTORE_MEASURE_RESULT) {
         allocatedSize_ = measureResult.allocatedSize;
         validSizeCount_ = measureResult.validSizeCount;
-    } else if (operation == FlexOperatorType::RESTORE_CHILDREN_COUNT) {
-        preChildrenCount_ = measureResult.childrenCount;
     }
 }
 

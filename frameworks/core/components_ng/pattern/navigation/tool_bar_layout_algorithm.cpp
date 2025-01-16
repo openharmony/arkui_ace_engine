@@ -182,8 +182,8 @@ void ToolbarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(toolbarLayoutProperty);
     auto constraint = toolbarLayoutProperty->GetLayoutConstraint();
     CHECK_NULL_VOID(constraint);
-    auto toolbarWidth = constraint->selfIdealSize.Width().value();
-    auto toolbarHeight = constraint->selfIdealSize.Height().value();
+    auto toolbarWidth = constraint->selfIdealSize.Width().value_or(0.0f);
+    auto toolbarHeight = constraint->selfIdealSize.Height().value_or(0.0f);
     if (NearZero(toolbarWidth) || NearZero(toolbarHeight)) {
         return;
     }

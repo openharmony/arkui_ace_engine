@@ -37,6 +37,8 @@ public:
     static ArkUINativeModuleValue ResetTransition(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetVideoSurfaceBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetVideoSurfaceBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetShortcutKeyEnabled(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetShortcutKeyEnabled(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

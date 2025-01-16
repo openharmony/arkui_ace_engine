@@ -228,17 +228,42 @@ void ResetSubMenuExpandingMode(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIMenuModifier* GetMenuModifier()
 {
-    static const ArkUIMenuModifier modifier = { SetMenuFontColor, ResetMenuFontColor, SetMenuFont, ResetMenuFont,
-        SetRadius, ResetRadius, SetMenuWidth, ResetMenuWidth, SetMenuItemDivider, ResetMenuItemDivider,
-        SetMenuItemGroupDivider, ResetMenuItemGroupDivider, SetSubMenuExpandingMode, ResetSubMenuExpandingMode };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIMenuModifier modifier = {
+        .setMenuFontColor = SetMenuFontColor,
+        .resetMenuFontColor = ResetMenuFontColor,
+        .setFont = SetMenuFont,
+        .resetFont = ResetMenuFont,
+        .setRadius = SetRadius,
+        .resetRadius = ResetRadius,
+        .setMenuWidth = SetMenuWidth,
+        .resetMenuWidth = ResetMenuWidth,
+        .setMenuItemDivider = SetMenuItemDivider,
+        .resetMenuItemDivider = ResetMenuItemDivider,
+        .setMenuItemGroupDivider = SetMenuItemGroupDivider,
+        .resetMenuItemGroupDivider = ResetMenuItemGroupDivider,
+        .setSubMenuExpandingMode = SetSubMenuExpandingMode,
+        .resetSubMenuExpandingMode = ResetSubMenuExpandingMode,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIMenuModifier* GetCJUIMenuModifier()
 {
-    static const CJUIMenuModifier modifier = { SetMenuFontColor, ResetMenuFontColor, SetMenuFont, ResetMenuFont,
-        SetRadius, ResetRadius, SetMenuWidth, ResetMenuWidth };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIMenuModifier modifier = {
+        .setMenuFontColor = SetMenuFontColor,
+        .resetMenuFontColor = ResetMenuFontColor,
+        .setFont = SetMenuFont,
+        .resetFont = ResetMenuFont,
+        .setRadius = SetRadius,
+        .resetRadius = ResetRadius,
+        .setMenuWidth = SetMenuWidth,
+        .resetMenuWidth = ResetMenuWidth,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

@@ -28,6 +28,12 @@ public:
     void SetOnDisAppear(std::function<void()>&& onDisAppearCallback) override;
     void BindController(std::function<void()>&& resetFunc) override;
     void SetOnTouchEvent(TouchEventFunc &&touchEventFunc) override;
+    void SetOnAttach(std::function<void()>&& onAttachCallback) override;
+    void SetOnDetach(std::function<void()>&& onDetachCallback) override;
+    void SetOnWillBind(std::function<void(int32_t)>&& onWillBindCallback) override;
+    void SetOnWillUnbind(std::function<void(int32_t)>&& onWillUnbindCallback) override;
+    void SetOnBind(std::function<void(int32_t)>&& onBindCallback) override;
+    void SetOnUnbind(std::function<void(int32_t)>&& onUnbindCallback) override;
     void ResetController() override;
     void FireMakeNode() override;
 };

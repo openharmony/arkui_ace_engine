@@ -245,6 +245,11 @@ void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacit
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
     if (opacityAnimationType == OpacityAnimationType::DISAPPEAR) {
+        if (!isNavDestinationShow_) {
+            opacityAnimatingType_ = OpacityAnimationType::NONE;
+            opacity_->Set(0);
+            return;
+        }
         option.SetFrameRateRange(AceType::MakeRefPtr<FrameRateRange>(
             BAR_DISAPPEAR_MIN_FRAME_RATE, BAR_DISAPPEAR_MAX_FRAME_RATE, BAR_DISAPPEAR_FRAME_RATE));
         option.SetDuration(BAR_DISAPPEAR_DURATION);

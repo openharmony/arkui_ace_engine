@@ -152,6 +152,11 @@ public:
         imageInfo_ = imageInfo;
     }
 
+    bool GetIsInDividerDrag() const
+    {
+        return isInDividerDrag_;
+    }
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
@@ -172,6 +177,7 @@ private:
     void HandleDragStart();
     void HandleDragUpdate(float xOffset);
     void HandleDragEnd();
+    void FireSideBarWidthChangeEvent();
     void HandlePanEventEnd();
     void OnUpdateShowSideBar(const RefPtr<SideBarContainerLayoutProperty>& layoutProperty);
     void OnUpdateShowControlButton(

@@ -90,6 +90,8 @@ public:
         selectedTextStyle->Put("color", GetSelectedColor().value_or(Color::BLACK).ColorToString().c_str());
         selectedTextStyle->Put("font", selectedFont);
         json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
+        json->PutExtAttr("enableCascade",
+            V2::ConvertBoolToString(GetIsEnableCascade().value_or(false)).c_str(), filter);
 
         auto options = JsonUtil::Create(true);
         options->Put("hour", TimeFormat::GetHourFormat(
@@ -106,6 +108,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrefixHour, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrefixMinute, int32_t, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PrefixSecond, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsEnableCascade, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_GROUP(DisappearTextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(
         DisappearTextStyle, FontSize, DisappearFontSize, Dimension, PROPERTY_UPDATE_MEASURE);

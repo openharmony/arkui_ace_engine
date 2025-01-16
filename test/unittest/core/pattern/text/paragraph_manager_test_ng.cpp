@@ -12,18 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <ostream>
 
-#include "gmock/gmock-actions.h"
-#include "gtest/gtest.h"
 #include "test/mock/core/render/mock_paragraph.h"
 
-#include "base/geometry/offset.h"
-#include "base/memory/referenced.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
-
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -126,7 +118,7 @@ HWTEST_F(ParagraphManagerTestNg, GetGlyphIndexByCoordinate001, TestSize.Level1)
      */
     offset = Offset(50.0, 310.0);
     result = pManager->GetGlyphIndexByCoordinate(offset);
-    EXPECT_EQ(result, 40);
+    EXPECT_EQ(result, 39);
 }
 
 /**

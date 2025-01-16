@@ -38,6 +38,7 @@
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/progress_mask_property.h"
+#include "core/components_ng/render/adapter/focus_animation_modifier.h"
 #include "core/components_ng/render/adapter/graphic_modifier.h"
 #include "core/components_ng/render/adapter/moon_progress_modifier.h"
 #include "core/components_ng/render/adapter/rosen_modifier_property.h"
@@ -99,6 +100,8 @@ public:
 
     void SetOuterBorderWidth(const BorderWidthProperty& value) override;
 
+    void SetExtraOffset(const std::optional<OffsetF>& offset) override;
+
     void SetSandBox(const std::optional<OffsetF>& parentPosition, bool force = false) override;
 
     bool HasSandBox() const override
@@ -136,13 +139,13 @@ public:
 
     // Paint focus state by component's setting. It will paint along the paintRect
     void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
-        bool isAccessibilityFocus = false) override;
+        bool isAccessibilityFocus = false, bool isFocusBoxGlow = false) override;
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth, bool isAccessibilityFocus = false) override;
+        const Dimension& paintWidth, const PaintFocusExtraInfo& paintFocusExtraInfo) override;
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
-    void PaintFocusState(
-        const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth) override;
+    void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth,
+        bool isFocusBoxGlow = false) override;
 
     void ClearFocusState() override;
 
@@ -200,6 +203,7 @@ public:
     void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) override;
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override;
     void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
+    void UpdateNodeBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void UpdateFrontBlurRadius(const Dimension& radius) override;
     void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) override;
@@ -265,6 +269,7 @@ public:
     static SizeF GetPercentReference(const RefPtr<FrameNode>& frameNode);
 
     void FlushContentModifier(const RefPtr<Modifier>& modifier) override;
+    void FlushKitContentModifier(const RefPtr<Kit::Modifier>& modifier) override;
     void FlushOverlayModifier(const RefPtr<Modifier>& modifier) override;
     void FlushForegroundModifier(const RefPtr<Modifier>& modifier) override;
 
@@ -274,6 +279,7 @@ public:
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void SetSecurityLayer(bool isSecure) override;
     void SetHDRBrightness(float hdrBrightness) override;
+    void SetTransparentLayer(bool isTransparentLayer) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
     Vector3F MarshallTranslate(const TranslateOptions& translate);
     bool DoTextureExport(uint64_t surfaceId) override;
@@ -424,10 +430,13 @@ public:
         return isDisappearing_;
     }
     void UpdateWindowBlur() override;
+    void MarkUiFirstNode(bool isUiFirstNode) override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
+    void OnBackgroundImageSyncModeUpdate(bool imageRepeat) override;
+
     void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) override;
     void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) override;
     void OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& slice) override;
@@ -629,6 +638,9 @@ protected:
     // Use rect to update the drawRegion rect at index.
     void UpdateDrawRegion(uint32_t index, const std::shared_ptr<Rosen::RectF>& rect);
     void NotifyHostTransformUpdated(bool changed = true);
+    void InitAccessibilityFocusModidifer(const RoundRect&, const Color&, float);
+    void InitFocusStateModidifer(const RoundRect&, const Color&, float);
+    void InitFocusAnimationModidifer(const RoundRect&, const Color&, float);
 
     std::shared_ptr<Rosen::RSNode> CreateHardwareSurface(
         const std::optional<ContextParam>& param, bool isTextureExportNode);
@@ -694,6 +706,7 @@ protected:
     std::shared_ptr<Rosen::RSScaleModifier> scaleXYUserModifier_;
     std::shared_ptr<Rosen::RectF> drawRegionRects_[DRAW_REGION_RECT_COUNT] = { nullptr };
     std::shared_ptr<Rosen::RSAlphaModifier> alphaModifier_;
+    RefPtr<FocusAnimationModifier> focusAnimationModifier_;
 
     // translate modifiers for interruption
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
@@ -721,8 +734,11 @@ protected:
 
     bool useContentRectForRSFrame_;
     bool adjustRSFrameByContentRect_ = false;
+    bool isFocusBoxGlow_ = false;
 
     RectF paintRect_;
+    // offset generated by layout node
+    std::optional<OffsetF> extraOffset_;
     std::unique_ptr<RectF> contentClip_;
 
     std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;

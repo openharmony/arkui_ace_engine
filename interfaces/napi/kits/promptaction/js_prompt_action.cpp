@@ -13,7 +13,19 @@
  * limitations under the License.
  */
 
+#include "interfaces/napi/kits/promptaction/js_prompt_controller.h"
 #include "interfaces/napi/kits/promptaction/prompt_action.h"
+#include "interfaces/napi/kits/utils/napi_utils.h"
+
+extern const char _binary_promptaction_js_start[];
+extern const char _binary_promptaction_abc_start[];
+#if !defined(IOS_PLATFORM)
+extern const char _binary_promptaction_js_end[];
+extern const char _binary_promptaction_abc_end[];
+#else
+extern const char* _binary_promptaction_js_end;
+extern const char* _binary_promptaction_abc_end;
+#endif
 
 namespace OHOS::Ace::Napi {
 static constexpr uint32_t DEFAULT = 0;
@@ -38,42 +50,51 @@ static napi_value PromptActionExport(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("showDialog", JSPromptShowDialog),
         DECLARE_NAPI_FUNCTION("showActionMenu", JSPromptShowActionMenu),
         DECLARE_NAPI_FUNCTION("openCustomDialog", JSPromptOpenCustomDialog),
+        DECLARE_NAPI_FUNCTION("openCustomDialogWithController", JSPromptOpenCustomDialogWithController),
+        DECLARE_NAPI_FUNCTION("presentCustomDialog", JSPromptPresentCustomDialog),
         DECLARE_NAPI_FUNCTION("updateCustomDialog", JSPromptUpdateCustomDialog),
         DECLARE_NAPI_FUNCTION("closeCustomDialog", JSPromptCloseCustomDialog),
         DECLARE_NAPI_PROPERTY("ToastShowMode", showMode),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(promptDesc) / sizeof(promptDesc[0]), promptDesc));
+    NAPI_CALL(env, JSPromptController::Define(env, exports));
     return exports;
 }
 
-static napi_module promptActionModule = {
+extern "C" __attribute__((visibility("default"))) void NAPI_promptaction_GetJSCode(const char** buf, int* bufLen)
+{
+    if (buf != nullptr) {
+        *buf = _binary_promptaction_js_start;
+    }
+
+    if (bufLen != nullptr) {
+        *bufLen = _binary_promptaction_js_end - _binary_promptaction_js_start;
+    }
+}
+
+extern "C" __attribute__((visibility("default"))) void NAPI_promptaction_GetABCCode(const char** buf, int* buflen)
+{
+    if (buf != nullptr) {
+        *buf = _binary_promptaction_abc_start;
+    }
+    if (buflen != nullptr) {
+        *buflen = _binary_promptaction_abc_end - _binary_promptaction_abc_start;
+    }
+}
+
+static napi_module_with_js promptActionModule = {
     .nm_version = 1,
     .nm_flags = 0,
     .nm_filename = nullptr,
     .nm_register_func = PromptActionExport,
     .nm_modname = "promptAction",
     .nm_priv = ((void*)0),
-    .reserved = { 0 },
+    .nm_get_abc_code = NAPI_promptaction_GetABCCode,
+    .nm_get_js_code = NAPI_promptaction_GetJSCode,
 };
 
 extern "C" __attribute__((constructor)) void PromptActionRegister()
 {
-    napi_module_register(&promptActionModule);
-}
-
-// compatible with api8
-static napi_module promptModule = {
-    .nm_version = 1,
-    .nm_flags = 0,
-    .nm_filename = nullptr,
-    .nm_register_func = PromptActionExport,
-    .nm_modname = "prompt",
-    .nm_priv = ((void*)0),
-    .reserved = { 0 },
-};
-
-extern "C" __attribute__((constructor)) void PromptRegister()
-{
-    napi_module_register(&promptModule);
+    napi_module_with_js_register(&promptActionModule);
 }
 } // namespace OHOS::Ace::Napi

@@ -427,6 +427,26 @@ inline TextOverflow ConvertWrapStringToTextOverflow(const std::string& str)
     return TextOverflow::CLIP;
 }
 
+inline MarqueeDirection ConvertWrapStringToMarqueeDirection(const std::string& str)
+{
+    static const std::unordered_map<std::string, MarqueeDirection> uMap {
+        { "MarqueeDirection.LEFT", MarqueeDirection::LEFT },
+        { "MarqueeDirection.RIGHT", MarqueeDirection::RIGHT },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : MarqueeDirection::LEFT;
+}
+
+inline MarqueeStartPolicy ConvertWrapStringToMarqueeStartPolicy(const std::string& str)
+{
+    static const std::unordered_map<std::string, MarqueeStartPolicy> uMap {
+        { "MarqueeStartPolicy.DEFAULT", MarqueeStartPolicy::DEFAULT },
+        { "MarqueeStartPolicy.ON_FOCUS", MarqueeStartPolicy::ON_FOCUS },
+    };
+
+    return uMap.count(str) ? uMap.at(str) : MarqueeStartPolicy::DEFAULT;
+}
+
 inline std::string ConvertWrapFontStyleToStirng(FontStyle fontStyle)
 {
     static const LinearEnumMapNode<FontStyle, std::string> fontStyleTable[] = {
@@ -508,6 +528,7 @@ inline std::string ConvertWrapWordBreakToString(WordBreak wordBreak)
         { WordBreak::NORMAL, "normal" },
         { WordBreak::BREAK_ALL, "break-all" },
         { WordBreak::BREAK_WORD, "break-word" },
+        { WordBreak::HYPHENATION, "hyphenation" },
     };
 
     auto index = BinarySearchFindIndex(wordBreakTable, ArraySize(wordBreakTable), wordBreak);
@@ -630,6 +651,20 @@ inline std::string ConvertWrapMarqueeUpdateStrategyToStirng(MarqueeUpdateStrateg
     auto index = BinarySearchFindIndex(
         marqueeUpdateStrategyTable, ArraySize(marqueeUpdateStrategyTable), marqueeUpdateStrategy);
     return index < 0 ? "MarqueeUpdateStrategy.DEFAULT" : marqueeUpdateStrategyTable[index].value;
+}
+
+inline std::string ConvertSymbolColorToString(const std::vector<Color>& colors)
+{
+    if (colors.size() <= 0) {
+        return "";
+    }
+    auto colorStr = std::string("[");
+    for (auto color : colors) {
+        colorStr.append(color.ColorToString());
+        colorStr.append(",");
+    }
+    colorStr.append("]");
+    return colorStr;
 }
 
 } // namespace OHOS::Ace::V2

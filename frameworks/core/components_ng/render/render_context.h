@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+#include "base/geometry/ng/offset_t.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/matrix4.h"
@@ -54,6 +55,10 @@ enum class Gravity;
 class BrightnessBlender;
 }
 
+namespace OHOS::Ace::Kit {
+class Modifier;
+}
+
 namespace OHOS::Ace::NG {
 
 typedef enum {
@@ -69,6 +74,16 @@ class RenderPropertyNode;
 class FrameNode;
 class InspectorFilter;
 class Modifier;
+
+struct PaintFocusExtraInfo final {
+    PaintFocusExtraInfo() = default;
+    PaintFocusExtraInfo(bool isAccessibilityFocus, bool isFocusBoxGlow)
+        : isAccessibilityFocus(isAccessibilityFocus), isFocusBoxGlow(isFocusBoxGlow)
+    {}
+    ~PaintFocusExtraInfo() = default;
+    bool isAccessibilityFocus { false };
+    bool isFocusBoxGlow { false };
+};
 
 using CanvasDrawFunction = std::function<void(RSCanvas& canvas)>;
 using TransitionFinishCallback = std::function<void(bool)>;
@@ -104,6 +119,7 @@ public:
     virtual void FlushOverlayDrawFunction(CanvasDrawFunction&& overlayDraw) {}
 
     virtual void FlushContentModifier(const RefPtr<Modifier>& modifier) {}
+    virtual void FlushKitContentModifier(const RefPtr<Kit::Modifier>& modifier) {}
     virtual void FlushForegroundModifier(const RefPtr<Modifier>& modifier) {}
     virtual void FlushOverlayModifier(const RefPtr<Modifier>& modifier) {}
 
@@ -138,6 +154,8 @@ public:
     virtual void SetOuterBorderColor(const BorderColorProperty& value) {};
 
     virtual void SetOuterBorderWidth(const BorderWidthProperty& value) {};
+
+    virtual void SetExtraOffset(const std::optional<OffsetF>& offset) {};
 
     // draw self and children in sandbox origin at parent's absolute position in root, drawing in sandbox
     // will be unaffected by parent's transition.
@@ -210,14 +228,15 @@ public:
 
     // Paint focus state by component's setting. It will paint along the paintRect
     virtual void PaintFocusState(const RoundRect& paintRect, const Color& paintColor, const Dimension& paintWidth,
-        bool isAccessibilityFocus = false)
+        bool isAccessibilityFocus = false, bool isFocusBoxGlow = false)
     {}
     // Paint focus state by component's setting. It will paint along the frameRect(padding: focusPaddingVp)
     virtual void PaintFocusState(const RoundRect& paintRect, const Dimension& focusPaddingVp, const Color& paintColor,
-        const Dimension& paintWidth, bool isAccessibilityFocus = false)
+        const Dimension& paintWidth, const PaintFocusExtraInfo& paintFocusExtraInfo)
     {}
     // Paint focus state by default. It will paint along the component rect(padding: focusPaddingVp)
-    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
+    virtual void PaintFocusState(const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth,
+        bool isFocusBoxGlow = false)
     {}
 
     virtual void ClearFocusState() {}
@@ -279,11 +298,13 @@ public:
     virtual void SetContentRectToFrame(RectF rect) {}
     virtual void SetSecurityLayer(bool isSecure) {}
     virtual void SetHDRBrightness(float hdrBrightness) {}
-
+    virtual void SetTransparentLayer(bool isTransparentLayer) {}
+    
     virtual void UpdateBackBlurRadius(const Dimension& radius) {}
     virtual void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle) {}
     virtual void UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption) {}
     virtual void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
+    virtual void UpdateNodeBackBlur(const Dimension& radius, const BlurOption& blurOption) {}
     virtual void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) {}
     virtual void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption) {}
     virtual void UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle) {}
@@ -444,6 +465,10 @@ public:
     {
         return GetBackground() ? GetBackground()->propEffectOption : std::nullopt;
     }
+    std::optional<BlurOption> GetBackdropBlurOption() const
+    {
+        return GetBackground() ? GetBackground()->propBackdropBlurOption : std::nullopt;
+    }
     std::optional<BlurStyleOption> GetFrontBlurStyle() const
     {
         return GetForeground() ? GetForeground()->propBlurStyleOption : std::nullopt;
@@ -530,6 +555,7 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(Background, BackgroundProperty);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImage, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageRepeat, ImageRepeat);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageSyncMode, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImagePosition, BackgroundImagePosition);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Background, BackgroundImageResizableSlice, ImageResizableSlice);
@@ -730,6 +756,7 @@ public:
     {
         return 0;
     }
+    virtual void MarkUiFirstNode(bool isUiFirstNode) {}
 
 protected:
     RenderContext() = default;
@@ -743,6 +770,7 @@ protected:
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
+    virtual void OnBackgroundImageSyncModeUpdate(bool imageRepeat) {}
     virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}
     virtual void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) {}
     virtual void OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& slice) {}

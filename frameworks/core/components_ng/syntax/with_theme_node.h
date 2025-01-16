@@ -45,6 +45,11 @@ public:
         return false;
     }
 
+    bool IsSyntaxNode() const override
+    {
+        return true;
+    }
+
     void UpdateThemeScopeId(int32_t themeScopeId) override;
     void UpdateThemeScopeUpdate(int32_t themeScopeId) override;
     void NotifyThemeScopeUpdate();

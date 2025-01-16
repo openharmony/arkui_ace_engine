@@ -48,6 +48,8 @@ public:
     void SetSmoothEffect(bool value) override;
     void SetStrokeRadius(const Dimension& value) override;
     void ResetStrokeRadius() override;
+    void SetBorderRadius(const Dimension& value) override;
+    void ResetBorderRadius() override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, double value, double max, NG::ProgressType type);
     static void SetValue(FrameNode* frameNode, double value);
@@ -83,6 +85,8 @@ public:
     static void SetBuilderFunc(FrameNode* frameNode, ProgressMakeCallback&& jsMake);
     static void ProgressInitialize(
         FrameNode* frameNode, double min, double value, double cachedValue, double max, NG::ProgressType type);
+    static void SetBorderRadius(FrameNode* frameNode, const Dimension& value);
+    static void ResetBorderRadius(FrameNode* frameNode);
 
 private:
     static void SetTextDefaultStyle(const RefPtr<FrameNode>& textNode, double value, double maxValue);

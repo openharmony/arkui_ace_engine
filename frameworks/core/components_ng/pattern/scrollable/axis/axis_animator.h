@@ -24,14 +24,16 @@
 namespace OHOS::Ace::NG {
 
 using AxisAnimationCallback = std::function<void(float)>;
+using AxisAnimationStartCallback = std::function<void(float)>;
 using AxisAnimationFinishCallback = std::function<void()>;
 
 class AxisAnimator : public AceType {
 public:
     AxisAnimator() = default;
-    AxisAnimator(
-        AxisAnimationCallback&& axisAnimationCallback, AxisAnimationFinishCallback&& axisAnimationFinishCallback)
+    AxisAnimator(AxisAnimationCallback&& axisAnimationCallback, AxisAnimationStartCallback&& axisAnimationStartCallback,
+        AxisAnimationFinishCallback&& axisAnimationFinishCallback)
         : axisAnimationCallback_(std::move(axisAnimationCallback)),
+          axisAnimationStartCallback_(std::move(axisAnimationStartCallback)),
           axisAnimationFinishCallback_(std::move(axisAnimationFinishCallback))
     {
         CreateAnimator();
@@ -66,6 +68,7 @@ private:
     WeakPtr<PipelineBase> context_;
 
     AxisAnimationCallback axisAnimationCallback_;
+    AxisAnimationStartCallback axisAnimationStartCallback_;
     AxisAnimationFinishCallback axisAnimationFinishCallback_;
 
     RefPtr<AxisScrollMotion> axisScrollMotion_;

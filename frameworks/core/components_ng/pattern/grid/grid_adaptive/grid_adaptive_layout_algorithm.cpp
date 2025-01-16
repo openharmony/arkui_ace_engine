@@ -73,8 +73,6 @@ void GridAdaptiveLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto maxCrossCount = std::max(static_cast<int32_t>(std::ceil(static_cast<float>(childrenCount) / mainCount_)), 1);
     crossCount_ = std::clamp(crossCount_, 1, maxCrossCount);
     displayCount_ = std::min(childrenCount, mainCount_ * crossCount_);
-    crossCount_ = std::min(displayCount_, crossCount_);
-    mainCount_ = std::min(displayCount_, mainCount_);
 
     // Update frame size.
     rowCount_ = axis == Axis::HORIZONTAL ? crossCount_ : mainCount_;
@@ -150,7 +148,7 @@ void GridAdaptiveLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             gridItemLayoutProperty->UpdateCrossIndex(crossLine.first);
         }
     }
-    info_.crossCount_ = columnCount_;
+    info_.crossCount_ = std::min(displayCount_, columnCount_);
     info_.endIndex_ = displayCount_ - 1;
     info_.startMainLineIndex_ = 0;
     info_.endMainLineIndex_ = rowCount_ - 1;

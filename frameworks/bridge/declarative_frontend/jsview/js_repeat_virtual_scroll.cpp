@@ -44,7 +44,8 @@ enum {
     PARAM_TOTAL_COUNT = 0,
     PARAM_TEMPLATE_OPTS = 1,
     PARAM_HANDLERS = 2,
-    MIN_PARAM_SIZE = 3,
+    PARAM_REUSABLE = 3,
+    MIN_PARAM_SIZE = 4,
 };
 
 bool ParseAndVerifyParams(const JSCallbackInfo& info)
@@ -60,6 +61,9 @@ bool ParseAndVerifyParams(const JSCallbackInfo& info)
         return false;
     }
     if (!info[PARAM_HANDLERS]->IsObject()) {
+        return false;
+    }
+    if (!info[PARAM_REUSABLE]->IsBoolean()) {
         return false;
     }
 
@@ -174,9 +178,12 @@ void JSRepeatVirtualScroll::Create(const JSCallbackInfo& info)
         func->Call(JSRef<JSObject>(), params.size(), params.data());
     };
 
+    // arg 3
+    auto reusable = info[PARAM_REUSABLE]->ToBoolean();
+
     RepeatVirtualScrollModel::GetInstance()->Create(
         totalCount, templateCachedCountMap, onCreateNode, onUpdateNode, onGetKeys4Range, onGetTypes4Range,
-        onSetActiveRange);
+        onSetActiveRange, reusable);
 }
 
 void JSRepeatVirtualScroll::UpdateRenderState(const JSCallbackInfo& info)
@@ -205,12 +212,22 @@ void JSRepeatVirtualScroll::OnMove(const JSCallbackInfo& info)
     RepeatVirtualScrollModel::GetInstance()->OnMove(std::move(onMove));
 }
 
+void JSRepeatVirtualScroll::SetCreateByTemplate(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        TAG_LOGE(AceLogTag::ACE_REPEAT, "JSRepeatVirtualScroll::SetCreateByTemplate wrong parameter, internal error.");
+        return;
+    }
+    RepeatVirtualScrollModel::GetInstance()->SetCreateByTemplate(info[0]->ToBoolean());
+}
+
 void JSRepeatVirtualScroll::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRepeatVirtualScroll>::Declare("RepeatVirtualScrollNative");
     JSClass<JSRepeatVirtualScroll>::StaticMethod("create", &JSRepeatVirtualScroll::Create);
     JSClass<JSRepeatVirtualScroll>::StaticMethod("updateRenderState", &JSRepeatVirtualScroll::UpdateRenderState);
     JSClass<JSRepeatVirtualScroll>::StaticMethod("onMove", &JSRepeatVirtualScroll::OnMove);
+    JSClass<JSRepeatVirtualScroll>::StaticMethod("setCreateByTemplate", &JSRepeatVirtualScroll::SetCreateByTemplate);
     JSClass<JSRepeatVirtualScroll>::Bind<>(globalObj);
 }
 

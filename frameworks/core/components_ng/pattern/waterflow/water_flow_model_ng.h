@@ -25,6 +25,7 @@ class ACE_EXPORT WaterFlowModelNG : public WaterFlowModel {
 public:
     void Create() override;
     void SetFooter(std::function<void()>&& footer) override;
+    void SetFooterWithFrameNode(const RefPtr<NG::UINode>& footer) override;
     RefPtr<ScrollControllerBase> CreateScrollController() override;
     RefPtr<ScrollProxy> CreateScrollBarProxy() override;
     void SetScroller(RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy) override;
@@ -55,7 +56,7 @@ public:
 
     void SetFriction(double friction) override;
     void SetCachedCount(int32_t value, bool show = false) override;
-    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
+    void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge = EffectEdge::ALL) override;
 
     void SetScrollBarMode(DisplayMode value) override;
     void SetScrollBarColor(const std::string& value) override;
@@ -87,7 +88,7 @@ public:
     static int32_t GetCachedCount(FrameNode* frameNode);
     static void SetShowCached(FrameNode* frameNode, bool show);
     static int32_t GetShowCached(FrameNode* frameNode);
-    static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
+    static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge);
     static float GetFriction(FrameNode* frameNode);
     static void SetScrollBarMode(FrameNode* frameNode, DisplayMode value);
     static int32_t GetScrollBarMode(FrameNode* frameNode);
@@ -113,10 +114,12 @@ public:
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetWaterflowFooter(FrameNode* frameNode, FrameNode* footerNode);
+    static void SetWaterflowFooterWithFrameNode(FrameNode* frameNode, const RefPtr<NG::UINode>& footer);
     static bool hasFooter(FrameNode* frameNode);
     static void SetFlingSpeedLimit(FrameNode* frameNode, double maxSpeed);
     static void SetScroller(FrameNode* frameNode, RefPtr<ScrollControllerBase> scroller, RefPtr<ScrollProxy> proxy);
     static void SetLayoutMode(FrameNode* frameNode, WaterFlowLayoutMode mode);
+    static WaterFlowLayoutMode GetLayoutMode(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_MODEL_NG_H

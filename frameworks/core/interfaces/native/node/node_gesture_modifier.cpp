@@ -249,6 +249,7 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
     }
     touchEvent.touchPointSize = tempTouchEvent.pointers.size() < MAX_POINTS ?
     tempTouchEvent.pointers.size() : MAX_POINTS;
+    touchEvent.targetDisplayId = info.GetTargetDisplayId();
 }
 
 void GetGestureEvent(ArkUIAPIEventGestureAsyncEvent& ret, GestureEvent& info)
@@ -292,6 +293,8 @@ void GetBaseGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, ArkUITouchEvent& r
     std::array<ArkUITouchPoint, MAX_POINTS> points;
     auto fingerList = info->GetFingerList();
     auto fingureIterator = std::begin(fingerList);
+    rawInputEvent.targetDisplayId = info->GetTargetDisplayId();
+
     for (size_t i = 0; i < fingerList.size(); i++) {
         points[i].id = fingureIterator->fingerId_;
         points[i].windowX = fingureIterator->globalLocation_.GetX();
@@ -358,19 +361,6 @@ void GetUniqueGestureEvent(ArkUIAPIEventGestureAsyncEvent* ret, GestureTypeName 
     }
 }
 
-void setCancelActionFunc(Gesture* gestureRef, void* extraParam)
-{
-    auto onActionCancel = [extraParam]() {
-        ArkUINodeEvent eventData;
-        eventData.kind = GESTURE_ASYNC_EVENT;
-        eventData.nodeId = 0;
-        eventData.extraParam = reinterpret_cast<ArkUI_Int64>(extraParam);
-        eventData.gestureAsyncEvent.subKind = ON_ACTION_CANCEL;
-        SendArkUISyncEvent(&eventData);
-    };
-    gestureRef->SetOnActionCancelId(onActionCancel);
-}
-
 void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent)
 {
     CHECK_NULL_VOID(info.GetPointerEvent());
@@ -389,6 +379,7 @@ void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent
     mouseEvent.actionTouchPoint.screenX = tempMouseEvent.screenX;
     mouseEvent.actionTouchPoint.screenY = tempMouseEvent.screenY;
     mouseEvent.actionTouchPoint.toolType = static_cast<int32_t>(tempMouseEvent.sourceTool);
+    mouseEvent.targetDisplayId = info.GetTargetDisplayId();
 }
 
 void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
@@ -411,6 +402,7 @@ void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
     axisEvent.actionTouchPoint.screenX = fingureBegin == fingureEnd ? 0.0f : fingureBegin->screenLocation_.GetX();
     axisEvent.actionTouchPoint.screenY = fingureBegin == fingureEnd ? 0.0f : fingureBegin->screenLocation_.GetY();
     axisEvent.actionTouchPoint.toolType = static_cast<int32_t>(tempAxisEvent.sourceTool);
+    axisEvent.targetDisplayId = info.GetTargetDisplayId();
 }
 
 void SendGestureEvent(GestureEvent& info, int32_t eventKind, void* extraParam)
@@ -465,7 +457,10 @@ void registerGestureEvent(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask, vo
         gestureRef->SetOnActionEndId(onActionEnd);
     }
     if (actionTypeMask & ARKUI_GESTURE_EVENT_ACTION_CANCEL) {
-        setCancelActionFunc(gestureRef, extraParam);
+        auto onActionCancel = [extraParam](GestureEvent& info) {
+            SendGestureEvent(info, static_cast<int32_t>(ON_ACTION_CANCEL), extraParam);
+        };
+        gestureRef->SetOnActionCancelId(onActionCancel);
     }
 }
 
@@ -783,64 +778,70 @@ ArkUI_Int32 setArkUIGestureRecognizerDisposeNotify(ArkUIGestureRecognizer* recog
 namespace NodeModifier {
 const ArkUIGestureModifier* GetGestureModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIGestureModifier modifier = {
-        createTapGesture,
-        createTapGestureWithDistanceThreshold,
-        createLongPressGesture,
-        createPanGesture,
-        createPinchGesture,
-        createRotationGesture,
-        createSwipeGesture,
-        createSwipeGestureByModifier,
-        createGestureGroup,
-        addGestureToGestureGroup,
-        removeGestureFromGestureGroup,
-        dispose,
-        registerGestureEvent,
-        addGestureToNode,
-        removeGestureFromNode,
-        removeGestureFromNodeByTag,
-        clearGestures,
-        setGestureInterrupterToNode,
-        setInnerGestureParallelTo,
-        setGestureRecognizerEnabled,
-        getGestureRecognizerEnabled,
-        getGestureRecognizerState,
-        gestureEventTargetInfoIsScrollBegin,
-        gestureEventTargetInfoIsScrollEnd,
-        getPanGestureDirectionMask,
-        isBuiltInGesture,
-        getGestureTag,
-        getGestureBindNodeId,
-        isGestureRecognizerValid,
-        setArkUIGestureRecognizerDisposeNotify,
-        addGestureToGestureGroupWithRefCountDecrease,
-        addGestureToNodeWithRefCountDecrease,
-        };
+        .createTapGesture = createTapGesture,
+        .createTapGestureWithDistanceThreshold = createTapGestureWithDistanceThreshold,
+        .createLongPressGesture = createLongPressGesture,
+        .createPanGesture = createPanGesture,
+        .createPinchGesture = createPinchGesture,
+        .createRotationGesture = createRotationGesture,
+        .createSwipeGesture = createSwipeGesture,
+        .createSwipeGestureByModifier = createSwipeGestureByModifier,
+        .createGestureGroup = createGestureGroup,
+        .addGestureToGestureGroup = addGestureToGestureGroup,
+        .removeGestureFromGestureGroup = removeGestureFromGestureGroup,
+        .dispose = dispose,
+        .registerGestureEvent = registerGestureEvent,
+        .addGestureToNode = addGestureToNode,
+        .removeGestureFromNode = removeGestureFromNode,
+        .removeGestureFromNodeByTag = removeGestureFromNodeByTag,
+        .clearGestures = clearGestures,
+        .setGestureInterrupterToNode = setGestureInterrupterToNode,
+        .setInnerGestureParallelTo = setInnerGestureParallelTo,
+        .setGestureRecognizerEnabled = setGestureRecognizerEnabled,
+        .getGestureRecognizerEnabled = getGestureRecognizerEnabled,
+        .getGestureRecognizerState = getGestureRecognizerState,
+        .gestureEventTargetInfoIsScrollBegin = gestureEventTargetInfoIsScrollBegin,
+        .gestureEventTargetInfoIsScrollEnd = gestureEventTargetInfoIsScrollEnd,
+        .getPanGestureDirectionMask = getPanGestureDirectionMask,
+        .isBuiltInGesture = isBuiltInGesture,
+        .getGestureTag = getGestureTag,
+        .getGestureBindNodeId = getGestureBindNodeId,
+        .isGestureRecognizerValid = isGestureRecognizerValid,
+        .setArkUIGestureRecognizerDisposeNotify = setArkUIGestureRecognizerDisposeNotify,
+        .addGestureToGestureGroupWithRefCountDecrease = addGestureToGestureGroupWithRefCountDecrease,
+        .addGestureToNodeWithRefCountDecrease = addGestureToNodeWithRefCountDecrease,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     return &modifier;
 }
 
 const CJUIGestureModifier* GetCJUIGestureModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIGestureModifier modifier = {
-        createTapGesture,
-        createLongPressGesture,
-        createPanGesture,
-        createPinchGesture,
-        createRotationGesture,
-        createSwipeGesture,
-        createSwipeGestureByModifier,
-        createGestureGroup,
-        addGestureToGestureGroup,
-        removeGestureFromGestureGroup,
-        dispose,
-        registerGestureEvent,
-        addGestureToNode,
-        removeGestureFromNode,
-        removeGestureFromNodeByTag,
-        clearGestures,
-        setGestureInterrupterToNode,
+        .createTapGesture = createTapGesture,
+        .createLongPressGesture = createLongPressGesture,
+        .createPanGesture = createPanGesture,
+        .createPinchGesture = createPinchGesture,
+        .createRotationGesture = createRotationGesture,
+        .createSwipeGesture = createSwipeGesture,
+        .createSwipeGestureByModifier = createSwipeGestureByModifier,
+        .createGestureGroup = createGestureGroup,
+        .addGestureToGestureGroup = addGestureToGestureGroup,
+        .removeGestureFromGestureGroup = removeGestureFromGestureGroup,
+        .dispose = dispose,
+        .registerGestureEvent = registerGestureEvent,
+        .addGestureToNode = addGestureToNode,
+        .removeGestureFromNode = removeGestureFromNode,
+        .removeGestureFromNodeByTag = removeGestureFromNodeByTag,
+        .clearGestures = clearGestures,
+        .setGestureInterrupterToNode = setGestureInterrupterToNode,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     return &modifier;
 }
 

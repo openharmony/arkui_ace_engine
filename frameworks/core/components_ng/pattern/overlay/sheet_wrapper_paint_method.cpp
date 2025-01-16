@@ -36,6 +36,7 @@ constexpr Dimension ARROW_VERTICAL_P4_OFFSET_Y = 7.32_vp;
 constexpr Dimension ARROW_VERTICAL_P5_OFFSET_X = 8.0_vp;
 constexpr Dimension ARROW_RADIUS = 2.0_vp;
 constexpr float BLUR_MASK_FILTER = 0.55f;
+constexpr float HALF = 0.5f;
 } // namespace
 
 void SheetWrapperPaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* paintWrapper)
@@ -50,7 +51,11 @@ void SheetWrapperPaintMethod::PaintOuterBorder(RSCanvas& canvas, PaintWrapper* p
     CHECK_NULL_VOID(sheetTheme);
     RSPath path;
     auto outerBorderWidth = sheetTheme->GetSheetOuterBorderWidth().ConvertToPx();
-    GetBorderDrawPath(path, sheetNode, sheetTheme, outerBorderWidth);
+    auto sheetPattern = DynamicCast<SheetPresentationPattern>(sheetNode->GetPattern());
+    CHECK_NULL_VOID(sheetPattern);
+    BorderRadiusProperty sheetRadius(sheetTheme->GetSheetRadius());
+    sheetPattern->CalculateSheetRadius(sheetRadius);
+    GetBorderDrawPath(path, sheetNode, sheetTheme, outerBorderWidth, sheetRadius);
     RSPen pen;
     SetBorderPenStyle(pen, sheetTheme->GetSheetOuterBorderWidth(), sheetTheme->GetSheetOuterBorderColor());
     canvas.Save();
@@ -73,58 +78,59 @@ RefPtr<FrameNode> SheetWrapperPaintMethod::GetSheetNode(PaintWrapper* paintWrapp
     return sheetNode;
 }
 
-Dimension SheetWrapperPaintMethod::GetSheetRadius(const SizeF& sheetSize, const Dimension& radius)
-{
-    float half = 0.5f;
-    auto sheetRadius = radius;
-    if (GreatNotEqual(radius.ConvertToPx(), sheetSize.Width() * half)) {
-        sheetRadius = Dimension(sheetSize.Width() * half);
-    }
-    return sheetRadius;
-}
-
-void SheetWrapperPaintMethod::GetBorderDrawPath(
-    RSPath& path, const RefPtr<FrameNode> sheetNode, const RefPtr<SheetTheme>& sheetTheme, float borderWidth)
+void SheetWrapperPaintMethod::GetBorderDrawPath(RSPath& path, const RefPtr<FrameNode> sheetNode,
+    const RefPtr<SheetTheme>& sheetTheme, float borderWidth, const BorderRadiusProperty& sheetRadius)
 {
     auto sheetPattern = DynamicCast<SheetPresentationPattern>(sheetNode->GetPattern());
     CHECK_NULL_VOID(sheetPattern);
     auto geometryNode = sheetNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto sheetSize = geometryNode->GetFrameSize();
-    auto targetOffset = sheetNode->GetPositionToParentWithTransform();
-    auto sheetRadius = GetSheetRadius(sheetSize, sheetTheme->GetSheetRadius()).ConvertToPx();
-    auto borderRadius = sheetRadius + borderWidth * 0.5f;
-    auto borderOffset = borderWidth * 0.5f;
+    auto radiusTopLeft = sheetRadius.radiusTopLeft->ConvertToPx();
+    auto radiusTopRight = sheetRadius.radiusTopRight->ConvertToPx();
+    auto radiusBottomRight = sheetRadius.radiusBottomRight->ConvertToPx();
+    auto radiusBottomLeft = sheetRadius.radiusBottomLeft->ConvertToPx();
+    auto borderOffset = borderWidth * HALF;
     auto arrowOffset = sheetPattern->GetSheetArrowOffset().GetX();
+    auto targetOffsetX = sheetNode->GetPositionToParentWithTransform().GetX();
+    auto targetOffsetY = sheetNode->GetPositionToParentWithTransform().GetY();
+    auto arrowHeight = SHEET_ARROW_HEIGHT.ConvertToPx();
     path.Reset();
-    path.MoveTo(
-        targetOffset.GetX() - borderOffset, SHEET_ARROW_HEIGHT.ConvertToPx() + sheetRadius + targetOffset.GetY());
-    path.ArcTo(borderRadius, borderRadius, 0.0f, RSPathDirection::CW_DIRECTION, sheetRadius + targetOffset.GetX(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - borderOffset);
-    path.LineTo(arrowOffset - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx() + targetOffset.GetX(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - borderOffset); // P1
-    path.LineTo(arrowOffset - ARROW_VERTICAL_P2_OFFSET_X.ConvertToPx() + targetOffset.GetX() - borderOffset,
-        SHEET_ARROW_HEIGHT.ConvertToPx() - ARROW_VERTICAL_P2_OFFSET_Y.ConvertToPx() + targetOffset.GetY()); // P2
+    path.MoveTo(targetOffsetX - borderOffset, arrowHeight + radiusTopLeft + targetOffsetY);
+    if (LessNotEqual(radiusTopLeft, sheetSize.Width() * HALF - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx())) {
+        // When radius is less than half the page width, draw radius and P1
+        path.ArcTo(radiusTopLeft + borderOffset, radiusTopLeft + borderOffset, 0.0f, RSPathDirection::CW_DIRECTION,
+            radiusTopLeft + targetOffsetX, arrowHeight + targetOffsetY - borderOffset);
+        path.LineTo(arrowOffset - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx() + targetOffsetX,
+            arrowHeight + targetOffsetY - borderOffset); // P1
+    } else {
+        // Change the end point of radius, skip P1 and draw P2 to P3 directly
+        path.ArcTo(radiusTopLeft + borderOffset, radiusTopLeft + borderOffset, 0.0f, RSPathDirection::CW_DIRECTION,
+            sheetSize.Width() * HALF - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx() + targetOffsetX,
+            arrowHeight + targetOffsetY - borderOffset);
+    }
+    path.LineTo(arrowOffset - ARROW_VERTICAL_P2_OFFSET_X.ConvertToPx() + targetOffsetX - borderOffset,
+        arrowHeight - ARROW_VERTICAL_P2_OFFSET_Y.ConvertToPx() + targetOffsetY); // P2
     path.ArcTo(ARROW_RADIUS.ConvertToPx() + borderOffset, ARROW_RADIUS.ConvertToPx() + borderOffset, 0.0f,
         RSPathDirection::CW_DIRECTION,
-        arrowOffset + ARROW_VERTICAL_P4_OFFSET_X.ConvertToPx() + targetOffset.GetX() + borderOffset,
-        SHEET_ARROW_HEIGHT.ConvertToPx() - ARROW_VERTICAL_P4_OFFSET_Y.ConvertToPx() + targetOffset.GetY()); // P4
-    path.LineTo(arrowOffset + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx() + targetOffset.GetX(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - borderOffset); // P5
-    path.LineTo(sheetSize.Width() - sheetRadius + targetOffset.GetX(),
-        SHEET_ARROW_HEIGHT.ConvertToPx() + targetOffset.GetY() - borderOffset);
-    path.ArcTo(borderRadius, borderRadius, 0.0f, RSPathDirection::CW_DIRECTION,
-        sheetSize.Width() + targetOffset.GetX() + borderOffset,
-        SHEET_ARROW_HEIGHT.ConvertToPx() + sheetRadius + targetOffset.GetY());
+        arrowOffset + ARROW_VERTICAL_P4_OFFSET_X.ConvertToPx() + targetOffsetX + borderOffset,
+        arrowHeight - ARROW_VERTICAL_P4_OFFSET_Y.ConvertToPx() + targetOffsetY); // P4
+    path.LineTo(arrowOffset + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx() + targetOffsetX,
+        arrowHeight + targetOffsetY - borderOffset); // P5
+    if (LessNotEqual(radiusTopRight, sheetSize.Width() * HALF - ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx())) {
+        // When radius is less than half the page width, draw P5
+        path.LineTo(sheetSize.Width() - radiusTopRight + targetOffsetX, arrowHeight + targetOffsetY - borderOffset);
+    }
+    path.ArcTo(radiusTopRight + borderOffset, radiusTopRight + borderOffset, 0.0f, RSPathDirection::CW_DIRECTION,
+        sheetSize.Width() + targetOffsetX + borderOffset, arrowHeight + radiusTopRight + targetOffsetY);
     path.LineTo(
-        sheetSize.Width() + targetOffset.GetX() + borderOffset, sheetSize.Height() - sheetRadius + targetOffset.GetY());
-    path.ArcTo(borderRadius, borderRadius, 0.0f, RSPathDirection::CW_DIRECTION,
-        sheetSize.Width() - sheetRadius + targetOffset.GetX(), sheetSize.Height() + targetOffset.GetY() + borderOffset);
-    path.LineTo(sheetRadius + targetOffset.GetX(), sheetSize.Height() + targetOffset.GetY() + borderOffset);
-    path.ArcTo(borderRadius, borderRadius, 0.0f, RSPathDirection::CW_DIRECTION, targetOffset.GetX() - borderOffset,
-        sheetSize.Height() - sheetRadius + targetOffset.GetY());
-    path.LineTo(
-        targetOffset.GetX() - borderOffset, SHEET_ARROW_HEIGHT.ConvertToPx() + sheetRadius + targetOffset.GetY());
+        sheetSize.Width() + targetOffsetX + borderOffset, sheetSize.Height() - radiusBottomRight + targetOffsetY);
+    path.ArcTo(radiusBottomRight + borderOffset, radiusBottomRight + borderOffset, 0.0f, RSPathDirection::CW_DIRECTION,
+        sheetSize.Width() - radiusBottomRight + targetOffsetX, sheetSize.Height() + targetOffsetY + borderOffset);
+    path.LineTo(radiusBottomLeft + targetOffsetX, sheetSize.Height() + targetOffsetY + borderOffset);
+    path.ArcTo(radiusBottomLeft + borderOffset, radiusBottomLeft + borderOffset, 0.0f, RSPathDirection::CW_DIRECTION,
+        targetOffsetX - borderOffset, sheetSize.Height() - radiusBottomLeft + targetOffsetY);
+    path.LineTo(targetOffsetX - borderOffset, arrowHeight + radiusTopLeft + targetOffsetY);
 }
 
 void SheetWrapperPaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* paintWrapper)
@@ -139,7 +145,11 @@ void SheetWrapperPaintMethod::PaintInnerBorder(RSCanvas& canvas, PaintWrapper* p
     CHECK_NULL_VOID(sheetTheme);
     RSPath path;
     auto innerBorderWidth = -(sheetTheme->GetSheetInnerBorderWidth().ConvertToPx());
-    GetBorderDrawPath(path, sheetNode, sheetTheme, innerBorderWidth);
+    auto sheetPattern = DynamicCast<SheetPresentationPattern>(sheetNode->GetPattern());
+    CHECK_NULL_VOID(sheetPattern);
+    BorderRadiusProperty sheetRadius(sheetTheme->GetSheetRadius());
+    sheetPattern->CalculateSheetRadius(sheetRadius);
+    GetBorderDrawPath(path, sheetNode, sheetTheme, innerBorderWidth, sheetRadius);
     RSPen pen;
     SetBorderPenStyle(pen, sheetTheme->GetSheetInnerBorderWidth(), sheetTheme->GetSheetInnerBorderColor());
     canvas.Save();

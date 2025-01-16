@@ -64,7 +64,8 @@ public:
         TestingPathDirection dir = TestingPathDirection::CW_DIRECTION)
     {}
 
-    virtual void AddRoundRect(const TestingRoundRect& roundRect, PathDirection dir = PathDirection::CW_DIRECTION) {}
+    virtual void AddRoundRect(const TestingRoundRect& roundRect,
+        TestingPathDirection dir = TestingPathDirection::CW_DIRECTION) {}
 
     virtual void AddPath(const TestingPath& src) {}
 
@@ -124,6 +125,9 @@ public:
     {
         return "";
     }
+
+    virtual void TransformWithPerspectiveClip(const TestingMatrix& matrix, TestingPath* dst,
+        bool applyPerspectiveClip) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_PATH_H

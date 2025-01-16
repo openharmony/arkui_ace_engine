@@ -236,6 +236,29 @@ typedef struct {
 } ArkUI_NativeDialogAPI_1;
 
 /**
+ * @brief Provides the custom dialog box APIs for the native side.
+ *
+ * @version 2
+ * @since 16
+ */
+typedef struct {
+    ArkUI_NativeDialogAPI_1 nativeDialogAPI1;
+    /**
+     * @brief Defines the distance between the customDialog and system keyboard.
+     *
+	 * @note This method must be called before the <b>show</b> method.
+     * @param handle Indicates the pointer to the custom dialog box controller.
+     * @param distance distance, in vp.
+     * @param unit  Indicates the unit, which is an enumerated value of {@link ArkUI_LengthMetricUnit}
+     * @return Returns the result code.
+     *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+     * @since 16
+     */
+    int32_t (*setKeyboardAvoidDistance)(ArkUI_NativeDialogHandle handle, float distance, ArkUI_LengthMetricUnit unit);
+} ArkUI_NativeDialogAPI_2;
+
+/**
  * @brief Sets whether to block the system behavior of dismissing a dialog box.
  *
  * @param event Indicates the pointer to a dialog box dismiss event object.

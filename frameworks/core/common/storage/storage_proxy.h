@@ -26,7 +26,7 @@ public:
     ACE_EXPORT static StorageProxy* GetInstance();
     void SetDelegate(std::unique_ptr<StorageInterface>&& delegate);
     void SetDistributedDelegate(std::unique_ptr<StorageInterface>&& delegate);
-    RefPtr<Storage> GetStorage() const override;
+    RefPtr<Storage> GetStorage(int areaMode = -1) const override;
     RefPtr<Storage> GetStorage(const std::string& sessionId, std::function<void(const std::string&)>&& notifier,
         const RefPtr<TaskExecutor>& taskExecutor) const override;
     StorageProxy() = default;

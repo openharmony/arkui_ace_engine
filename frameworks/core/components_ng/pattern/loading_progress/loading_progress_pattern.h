@@ -44,6 +44,7 @@ public:
                 paintProperty->GetLoadingProgressOwner().value_or(LoadingProgressOwner::SELF);
             loadingProgressModifier_ = AceType::MakeRefPtr<LoadingProgressModifier>(loadingOwner);
             loadingProgressModifier_->SetUseContentModifier(UseContentModifier());
+            InitThemeValues();
         }
         return MakeRefPtr<LoadingProgressPaintMethod>(loadingProgressModifier_);
     }
@@ -106,6 +107,19 @@ private:
     void StopAnimation();
     void FireBuilder();
     RefPtr<FrameNode> BuildContentModifierNode();
+    void InitThemeValues();
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void SetFocusStyle();
+    void ClearFocusStyle();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+
+    Color defaultColor_;
+    Color focusedColor_;
+    bool isFocusColorSet_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     std::optional<LoadingProgressMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;

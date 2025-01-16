@@ -40,7 +40,8 @@ RefPtr<FrameNode> ToastView::CreateToastNode(const ToastInfo& toastInfo)
     CHECK_NULL_RETURN(toastContext, nullptr);
     auto toastAccessibilityProperty = toastNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_RETURN(toastAccessibilityProperty, nullptr);
-    toastAccessibilityProperty->SetText(toastInfo.message);
+    toastAccessibilityProperty->SetUserTextValue(toastInfo.message);
+    toastAccessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_HIDE_DESCENDANTS);
     // create text in toast
     auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
@@ -159,7 +160,9 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto toastInfo = pattern->GetToastInfo();
-    auto shadow = toastInfo.shadow.value_or(Shadow::CreateShadow(ShadowStyle::OuterDefaultMD));
+    auto shadowStyle = toastTheme->GetToastShadowStyle();
+    auto shadow = toastInfo.shadow.value_or(Shadow::CreateShadow(shadowStyle));
+
     if (toastInfo.isTypeStyleShadow) {
         auto colorMode = SystemProperties::GetColorMode();
         auto shadowStyle = shadow.GetStyle();
@@ -173,8 +176,11 @@ void ToastView::UpdateToastNodeStyle(const RefPtr<FrameNode>& toastNode)
         toastContext->UpdateBackgroundColor(toastInfo.backgroundColor.value_or(Color::TRANSPARENT));
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(
-            toastInfo.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+            toastInfo.backgroundBlurStyle.value_or(toastTheme->GetToastBackgroundBlurStyle()));
         styleOption.policy = BlurStyleActivePolicy::ALWAYS_ACTIVE;
+        if (!toastInfo.backgroundColor.has_value()) {
+            styleOption.colorMode = static_cast<ThemeColorMode>(toastTheme->GetBgThemeColorMode());
+        }
         toastContext->UpdateBackBlurStyle(styleOption);
     } else {
         auto toastBackgroundColor = toastTheme->GetBackgroundColor();

@@ -180,6 +180,11 @@ private:
     OffsetF AddOffset(const OffsetF& position);
     bool CheckPositionInPlacementRect(const Rect& rect, const OffsetF& position, const SizeF& childSize);
     OffsetF AdjustPosition(const OffsetF& position, float width, float height, float space);
+    OffsetF AdjustPositionNew(const OffsetF& position, float width, float height);
+    OffsetF GetBubblePosition(const OffsetF& position, float xMin, float xMax, float yMin, float yMax);
+    void CheckArrowPosition(OffsetF& position, float width, float height);
+    bool IsUIExtensionWindow();
+    void HandleUIExtensionKeyboard(bool showInSubWindow);
     OffsetF GetAdjustPosition(std::vector<Placement>& currentPlacementStates, size_t step, const SizeF& childSize,
         const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
     void InitTargetSizeAndPosition(bool showInSubWindow, LayoutWrapper* layoutWrapper);
@@ -226,6 +231,7 @@ private:
     void SetHotAreas(bool showInSubWindow, bool isBlock, RefPtr<FrameNode> frameNode, int32_t containerId);
     void SetBubbleRadius();
     void UpdateHostWindowRect();
+    void HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);
 
     OffsetF GetChildPosition(
         const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
@@ -235,7 +241,7 @@ private:
         OffsetF& childPosition, OffsetF& arrowPosition, const SizeF& childSize, Placement placement);
     ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
     OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
-    SizeF GetPopupMaxWidthAndHeight(bool showInSubWindow, const float& width);
+    SizeF GetPopupMaxWidthAndHeight(bool showInSubWindow, const RefPtr<FrameNode>& frameNode);
     void UpdateDumpInfo();
     ArrowOfTargetOffset arrowOfTargetOffset_ = ArrowOfTargetOffset::NONE;
     Dimension arrowOffset_;
@@ -271,6 +277,8 @@ private:
     Dimension targetSpace_;
     Dimension borderRadius_;
     Dimension userSetTargetSpace_;
+    Dimension minHeight_;
+    uint32_t maxColumns_ = 0;
     bool showArrow_ = false;
     bool enableArrow_ = false;
     bool isCaretMode_ = true;
@@ -287,6 +295,7 @@ private:
     float marginBottom_ = 0.0f;
     float top_ = 0.0f;
     float bottom_ = 0.0f;
+    bool avoidKeyboard_ = false;
     bool bHorizontal_ = false;
     bool bVertical_ = false;
     std::unordered_set<Placement> setHorizontal_;

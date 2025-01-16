@@ -111,8 +111,7 @@ void Gesture::HandlerOnGestureEvent(
     auto impl = inspector->GetInspectorFunctionImpl();
 
     if (action == CJGestureEvent::CANCEL) {
-        auto onActionCancelFunc = [callback = std::move(callback), impl]() {
-            auto info = GestureEvent();
+        auto onActionCancelFunc = [callback = std::move(callback), impl](GestureEvent& info) {
             if (impl) {
                 impl->UpdateEventInfo(info);
             }

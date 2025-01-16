@@ -79,16 +79,36 @@ void ResetParams(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUINavigatorModifier* GetNavigatorModifier()
 {
-    static const ArkUINavigatorModifier modifier = {SetTarget, ResetTarget, SetType, ResetType, SetActive,
-        ResetActive, SetParams, ResetParams };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUINavigatorModifier modifier = {
+        .setTarget = SetTarget,
+        .resetTarget = ResetTarget,
+        .setType = SetType,
+        .resetType = ResetType,
+        .setActive = SetActive,
+        .resetActive = ResetActive,
+        .setParams = SetParams,
+        .resetParams = ResetParams,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUINavigatorModifier* GetCJUINavigatorModifier()
 {
-    static const CJUINavigatorModifier modifier = {SetTarget, ResetTarget, SetType, ResetType, SetActive,
-        ResetActive, SetParams, ResetParams };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUINavigatorModifier modifier = {
+        .setTarget = SetTarget,
+        .resetTarget = ResetTarget,
+        .setType = SetType,
+        .resetType = ResetType,
+        .setActive = SetActive,
+        .resetActive = ResetActive,
+        .setParams = SetParams,
+        .resetParams = ResetParams,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

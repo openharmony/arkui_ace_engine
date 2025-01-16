@@ -33,7 +33,7 @@
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/platform_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
-
+#include "core/event/crown_event.h"
 
 #include <refbase.h>
 
@@ -185,7 +185,7 @@ public:
         return type_;
     }
 
-    ResourceConfiguration GetResourceConfiguration() const
+    ResourceConfiguration GetResourceConfiguration() const override
     {
         return resourceInfo_.GetResourceConfiguration();
     }
@@ -307,6 +307,12 @@ public:
         moduleName_ = moduleName;
     }
 
+    void RegisterCrownEventCallback(CrownEventCallback&& callback)
+    {
+        ACE_DCHECK(callback);
+        crownEventCallback_ = std::move(callback);
+    }
+
 private:
     void InitializeFrontend();
     void InitializeCallback();
@@ -344,6 +350,8 @@ private:
     std::string bundleName_;
     std::string moduleName_;
     RefPtr<StagePkgContextInfo> PkgContextInfo_;
+
+    CrownEventCallback crownEventCallback_;
 
     // Support to execute the ets code mocked by developer
     std::map<std::string, std::string> mockJsonInfo_;

@@ -174,7 +174,7 @@ ArkUINativeModuleValue ImageBridge::SetImageShowSrc(ArkUIRuntimeCallInfo* runtim
     std::string moduleName;
     ArkTSUtils::GetJsMediaBundleInfo(vm, secondArg, bundleName, moduleName);
     RefPtr<PixelMap> pixmap = nullptr;
-    if (!srcValid && !isCard) {
+    if (!srcValid) {
 #if defined(PIXEL_MAP_SUPPORTED)
         if (Framework::IsDrawable(info[1])) {
             pixmap = Framework::GetDrawablePixmap(info[1]);
@@ -528,6 +528,41 @@ ArkUINativeModuleValue ImageBridge::ResetSyncLoad(ArkUIRuntimeCallInfo* runtimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ImageBridge::SetImageMatrix(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
+
+    if (!jsValue->IsArray(vm)) {
+        GetArkUINodeModifiers()->getImageModifier()->resetImageMatrix(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    const auto matrix4Len = Matrix4::DIMENSION * Matrix4::DIMENSION;
+    float matrix[matrix4Len];
+    Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(jsValue);
+    for (size_t i = 0; i < transArray->Length(vm); i++) {
+        Local<JSValueRef> value = transArray->GetValueAt(vm, jsValue, i);
+        matrix[i] = value->ToNumber(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getImageModifier()->setImageMatrix(nativeNode, matrix);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::ResetImageMatrix(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+
+    GetArkUINodeModifiers()->getImageModifier()->resetImageMatrix(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ImageBridge::SetObjectFit(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -674,6 +709,8 @@ ArkUINativeModuleValue ImageBridge::SetFillColor(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
         nodeModifiers->getImageModifier()->setFillColor(nativeNode, color.GetValue());
+    } else if (ArkTSUtils::ParseJsColorContent(vm, colorArg)) {
+        nodeModifiers->getImageModifier()->resetImageFill(nativeNode);
     } else {
         nodeModifiers->getImageModifier()->resetFillColor(nativeNode);
     }

@@ -30,6 +30,9 @@ namespace OHOS::Ace {
 
 std::unique_ptr<GaugeModel> GaugeModel::instance_ = nullptr;
 std::mutex GaugeModel::mutex_;
+constexpr double DEFAULT_GAUGE_VALUE = 0;
+constexpr double DEFAULT_GAUGE_MIN = 0;
+constexpr double DEFAULT_GAUGE_MAX = 100;
 
 GaugeModel* GaugeModel::GetInstance()
 {
@@ -84,6 +87,8 @@ void JSGauge::JSBind(BindingTarget globalObj)
 void JSGauge::Create(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject()) {
+        GaugeModel::GetInstance()->Create(DEFAULT_GAUGE_VALUE, DEFAULT_GAUGE_MIN, DEFAULT_GAUGE_MAX);
+        GaugeModel::GetInstance()->SetIsShowLimitValue(true);
         return;
     }
 
@@ -92,9 +97,9 @@ void JSGauge::Create(const JSCallbackInfo& info)
     auto min = paramObject->GetProperty("min");
     auto max = paramObject->GetProperty("max");
 
-    double gaugeMin = min->IsNumber() ? min->ToNumber<double>() : 0;
-    double gaugeMax = max->IsNumber() ? max->ToNumber<double>() : 100;
-    double gaugeValue = value->IsNumber() ? value->ToNumber<double>() : 0;
+    double gaugeMin = min->IsNumber() ? min->ToNumber<double>() : DEFAULT_GAUGE_MIN;
+    double gaugeMax = max->IsNumber() ? max->ToNumber<double>() : DEFAULT_GAUGE_MAX;
+    double gaugeValue = value->IsNumber() ? value->ToNumber<double>() : DEFAULT_GAUGE_VALUE;
     if (LessNotEqual(gaugeMax, gaugeMin)) {
         gaugeMin = NG::DEFAULT_MIN_VALUE;
         gaugeMax = NG::DEFAULT_MAX_VALUE;

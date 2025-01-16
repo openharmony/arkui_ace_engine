@@ -38,6 +38,12 @@ struct ModalUIExtensionConfig {
     bool isAllowAddChildBelowModalUec = false;
     bool isDensityFollowHost = false;
     bool prohibitedRemoveByNavigation = true;
+    bool isWindowModeFollowHost = false;
+};
+
+struct ModalUIExtensionAllowedUpdateConfig {
+    bool prohibitedRemoveByRouter = false;
+    bool prohibitedRemoveByNavigation = true;
 };
 
 struct ModalUIExtensionCallbacks {
@@ -47,6 +53,7 @@ struct ModalUIExtensionCallbacks {
     std::function<void(int32_t, const std::string&, const std::string&)> onError;
     std::function<void(const std::shared_ptr<ModalUIExtensionProxy>&)> onRemoteReady;
     std::function<void()> onDestroy;
+    std::function<void()> onDrawReady;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_MODAL_CONFIG_H

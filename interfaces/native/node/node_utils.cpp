@@ -132,6 +132,54 @@ void OH_ArkUI_UnregisterSystemColorModeChangeEvent(ArkUI_NodeHandle node)
     impl->getNodeModifiers()->getFrameNodeModifier()->resetSystemColorModeChangeEvent(node->uiNodeHandle);
 }
 
+int32_t OH_ArkUI_RegisterDrawCallbackOnNodeHandle(
+    ArkUI_NodeHandle node, void* userData, void (*onDrawCompleted)(void* userData))
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->setDrawCompleteEvent(
+        node->uiNodeHandle, userData, reinterpret_cast<void*>(onDrawCompleted));
+
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+
+int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->resetDrawCompleteEvent(node->uiNodeHandle);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_RegisterLayoutCallbackOnNodeHandle(
+    ArkUI_NodeHandle node, void* userData, void (*onLayoutCompleted)(void* userData))
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->setLayoutEvent(
+        node->uiNodeHandle, userData, reinterpret_cast<void*>(onLayoutCompleted));
+
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
+
+int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node)
+{
+    if (node == nullptr) {
+        return OHOS::Ace::ERROR_CODE_PARAM_INVALID;
+    }
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    impl->getNodeModifiers()->getFrameNodeModifier()->resetLayoutEvent(node->uiNodeHandle);
+    return OHOS::Ace::ERROR_CODE_NO_ERROR;
+}
+
 int32_t OH_ArkUI_RegisterSystemFontStyleChangeEvent(
     ArkUI_NodeHandle node, void* userData, void (*onFontStyleChange)(ArkUI_SystemFontStyleEvent* event, void* userData))
 {
@@ -322,6 +370,35 @@ int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node)
     return -1;
 }
 
+int32_t OH_ArkUI_NodeUtils_GetWindowInfo(ArkUI_NodeHandle node, ArkUI_HostWindowInfo** info)
+{
+    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(info, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    char* name = nullptr;
+    int32_t error = impl->getNodeModifiers()->getFrameNodeModifier()->getWindowInfoByNode(node->uiNodeHandle, &name);
+    *info = new ArkUI_HostWindowInfo({ .name = name });
+    return error;
+}
+
+const char* OH_ArkUI_HostWindowInfo_GetName(ArkUI_HostWindowInfo* info)
+{
+    if (!info) {
+        LOGF("HostWindowInfo is nullptr");
+        abort();
+    }
+    return info->name;
+}
+
+void OH_ArkUI_HostWindowInfo_Destroy(ArkUI_HostWindowInfo* info)
+{
+    delete[] info->name;
+    info->name = nullptr;
+    delete info;
+    info = nullptr;
+}
+
 void OH_ArkUI_CustomProperty_Destroy(ArkUI_CustomProperty* handle)
 {
     delete[] handle->value;
@@ -366,6 +443,17 @@ int32_t OH_ArkUI_ActiveChildrenInfo_GetCount(ArkUI_ActiveChildrenInfo* handle)
         abort();
     }
     return handle->nodeCount;
+}
+
+int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeHandle* node)
+{
+    CHECK_NULL_RETURN(id, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    auto nodePtr = impl->getNodeModifiers()->getFrameNodeModifier()->getFrameNodeByKey(id);
+    CHECK_NULL_RETURN(nodePtr, ARKUI_ERROR_CODE_PARAM_INVALID);
+    *node = GetArkUINode(nodePtr);
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 #ifdef __cplusplus

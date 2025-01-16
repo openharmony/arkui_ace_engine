@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 
 #include "base/log/dump_log.h"
+#include "core/common/vibrator/vibrator_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -25,6 +26,9 @@ constexpr double BAR_ADAPT_EPSLION = 1.0;
 constexpr int32_t LONG_PRESS_PAGE_INTERVAL_MS = 100;
 constexpr int32_t LONG_PRESS_TIME_THRESHOLD_MS = 500;
 constexpr int32_t SCROLL_BAR_LAYOUT_INFO_COUNT = 30;
+#ifdef ARKUI_WEARABLE
+constexpr char SCROLL_BAR_VIBRATOR_WEAK[] = "watchhaptic.feedback.crown.strength3";
+#endif
 } // namespace
 
 ScrollBar::ScrollBar()
@@ -56,6 +60,16 @@ void ScrollBar::InitTheme()
     SetForegroundColor(theme->GetForegroundColor());
     SetPadding(theme->GetPadding());
     SetHoverWidth(theme);
+#ifdef ARKUI_CIRCLE_FEATURE
+    SetNormalBackgroundWidth(theme->GetNormalBackgroundWidth());
+    SetActiveBackgroundWidth(theme->GetActiveBackgroundWidth());
+    SetNormalStartAngle(theme->GetNormalStartAngle());
+    SetActiveStartAngle(theme->GetActiveStartAngle());
+    SetNormaMaxOffsetAngle(theme->GetNormaMaxOffsetAngle());
+    SetActiveMaxOffsetAngle(theme->GetActiveMaxOffsetAngle());
+    SetNormalScrollBarWidth(theme->GetNormalScrollBarWidth());
+    SetActiveScrollBarWidth(theme->GetActiveScrollBarWidth());
+#endif // ARKUI_CIRCLE_FEATURE
 }
 
 bool ScrollBar::InBarTouchRegion(const Point& point) const
@@ -104,7 +118,7 @@ BarDirection ScrollBar::CheckBarDirection(const Point& point)
 void ScrollBar::FlushBarWidth()
 {
     if (shapeMode_ == ShapeMode::RECT) {
-        SetRectTrickRegion(paintOffset_, viewPortSize_, lastOffset_, estimatedHeight_);
+        SetRectTrickRegion(paintOffset_, viewPortSize_, lastOffset_, estimatedHeight_, SCROLL_FROM_NONE);
     } else {
         SetRoundTrickRegion(paintOffset_, viewPortSize_, lastOffset_, estimatedHeight_);
     }
@@ -112,7 +126,7 @@ void ScrollBar::FlushBarWidth()
 }
 
 void ScrollBar::UpdateScrollBarRegion(
-    const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
+    const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight, int32_t scrollSource)
 {
     // return if nothing changes to avoid changing opacity
     if (!positionModeUpdate_ && !normalWidthUpdate_ && paintOffset_ == offset && viewPortSize_ == size &&
@@ -128,7 +142,7 @@ void ScrollBar::UpdateScrollBarRegion(
         lastOffset_ = lastOffset;
         estimatedHeight_ = estimatedHeight;
         if (shapeMode_ == ShapeMode::RECT) {
-            SetRectTrickRegion(offset, size, lastOffset, estimatedHeight);
+            SetRectTrickRegion(offset, size, lastOffset, estimatedHeight, scrollSource);
         } else {
             SetRoundTrickRegion(offset, size, lastOffset, estimatedHeight);
         }
@@ -189,7 +203,7 @@ void ScrollBar::SetBarRegion(const Offset& offset, const Size& size)
 }
 
 void ScrollBar::SetRectTrickRegion(
-    const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight)
+    const Offset& offset, const Size& size, const Offset& lastOffset, double estimatedHeight, int32_t scrollSource)
 {
     double mainSize = (positionMode_ == PositionMode::BOTTOM ? size.Width() : size.Height());
     barRegionSize_ = std::max(mainSize - NormalizeToPx(endReservedHeight_) - NormalizeToPx(startReservedHeight_), 0.0);
@@ -223,7 +237,7 @@ void ScrollBar::SetRectTrickRegion(
     double activeMainOffset =
         std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize) + NormalizeToPx(startReservedHeight_);
     activeMainOffset = !isReverse_ ? activeMainOffset : barRegionSize_ - activeSize - activeMainOffset;
-    bool canUseAnimation = !isOutOfBoundary_ && !positionModeUpdate_;
+    bool canUseAnimation = !isOutOfBoundary_ && !positionModeUpdate_ && scrollSource != SCROLL_FROM_JUMP;
     double inactiveSize = 0.0;
     double inactiveMainOffset = 0.0;
     scrollableOffset_ = activeMainOffset;
@@ -541,7 +555,7 @@ void ScrollBar::InitPanRecognizer()
             scrollBar->HandleDragStart(info);
         }
     });
-    panRecognizer_->SetOnActionCancel([weakBar = AceType::WeakClaim(this)]() {
+    panRecognizer_->SetOnActionCancel([weakBar = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scrollBar = weakBar.Upgrade();
         if (scrollBar) {
             GestureEvent info;
@@ -992,6 +1006,9 @@ void ScrollBar::PlayScrollBarAppearAnimation()
 
 void ScrollBar::PlayScrollBarGrowAnimation()
 {
+#ifdef ARKUI_WEARABLE
+    VibratorUtils::StartVibraFeedback(SCROLL_BAR_VIBRATOR_WEAK);
+#endif
     PlayScrollBarAppearAnimation();
     normalWidth_ = activeWidth_;
     FlushBarWidth();
@@ -1001,6 +1018,9 @@ void ScrollBar::PlayScrollBarGrowAnimation()
 
 void ScrollBar::PlayScrollBarShrinkAnimation()
 {
+#ifdef ARKUI_WEARABLE
+    VibratorUtils::StartVibraFeedback(SCROLL_BAR_VIBRATOR_WEAK);
+#endif
     normalWidth_ = inactiveWidth_;
     FlushBarWidth();
     hoverAnimationType_ = HoverAnimationType::SHRINK;

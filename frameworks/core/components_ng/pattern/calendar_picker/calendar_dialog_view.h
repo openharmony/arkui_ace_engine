@@ -58,7 +58,8 @@ public:
     }
 
 private:
-    static RefPtr<FrameNode> CreateTitleNode(const RefPtr<FrameNode>& calendarNode);
+    static RefPtr<FrameNode> CreateTitleNode(const RefPtr<FrameNode>& calendarNode,
+        const RefPtr<FrameNode>& calendarDialogNode);
     static RefPtr<FrameNode> CreateWeekNode(const RefPtr<FrameNode>& calendarNode);
     static RefPtr<FrameNode> CreateScrollNode();
     static RefPtr<FrameNode> CreateTitleImageNode(
@@ -89,8 +90,8 @@ private:
         const RefPtr<FrameNode>& calendarDialogNode, const RefPtr<FrameNode>& calendarNode);
     static void OnSelectedChangeEvent(int32_t calendarNodeId, const std::string& callbackInfo,
         const DialogEvent& onChange, const CalendarSettingData& settingData);
-    static void UpdateBackgroundStyle(
-        const RefPtr<RenderContext>& renderContext, const DialogProperties& dialogProperties);
+    static void UpdateBackgroundStyle(const RefPtr<RenderContext>& renderContext,
+        const DialogProperties& dialogProperties, const RefPtr<CalendarTheme>& calendarTheme);
     static void UpdateButtonStyleAndRole(const std::vector<ButtonInfo>& buttonInfos, size_t index,
         const RefPtr<ButtonLayoutProperty>& buttonLayoutProperty, const RefPtr<RenderContext>& buttonRenderContext,
         const RefPtr<ButtonTheme>& buttonTheme);
@@ -118,6 +119,8 @@ private:
     static void SetWeekTextDirection(const TextDirection& dialogDirection, const TextDirection& calendarDirection,
         const RefPtr<FrameNode>& weekNode);
     static constexpr double deviceHeightLimit = 640.0;
+    static void UpdateTextLayoutProperty(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+        RefPtr<CalendarTheme>& theme);
     static DeviceOrientation previousOrientation_;
 };
 } // namespace OHOS::Ace::NG

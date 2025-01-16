@@ -77,27 +77,33 @@ void ScrollTo(ArkUINodeHandle node, ArkUI_Float32* xOffsetArray, ArkUI_Float32* 
 namespace NodeModifier {
 const ArkUIScrollerModifier* GetScrollerModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIScrollerModifier modifier = {
-        GetScroller,
-        GetScrollerProxy,
-        SetScrollToIndex,
-        ScrollBy,
-        GetCurrentOffset,
-        ScrollTo
+        .getScroller = GetScroller,
+        .getScrollerProxy = GetScrollerProxy,
+        .scrollToIndex = SetScrollToIndex,
+        .scrollBy = ScrollBy,
+        .getCurrentOffset = GetCurrentOffset,
+        .scrollTo = ScrollTo,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     return &modifier;
 }
 
 const CJUIScrollerModifier* GetCJUIScrollerModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIScrollerModifier modifier = {
-        GetScroller,
-        GetScrollerProxy,
-        SetScrollToIndex,
-        ScrollBy,
-        GetCurrentOffset,
-        ScrollTo
+        .getScroller = GetScroller,
+        .getScrollerProxy = GetScrollerProxy,
+        .scrollToIndex = SetScrollToIndex,
+        .scrollBy = ScrollBy,
+        .getCurrentOffset = GetCurrentOffset,
+        .scrollTo = ScrollTo,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     return &modifier;
 }
 }

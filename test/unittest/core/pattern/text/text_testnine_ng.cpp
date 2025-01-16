@@ -12,16 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
 #include "text_base.h"
-#include "test/mock/core/render/mock_canvas_image.h"
-#include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/text/text_content_modifier.h"
-#include "core/components_ng/render/adapter/pixelmap_image.h"
-#include "test/mock/core/pattern/mock_nestable_scroll_container.h"
-#include "test/mock/core/common/mock_font_manager.h"
-#include "core/components/hyperlink/hyperlink_theme.h"
 
 namespace OHOS::Ace::NG {
 

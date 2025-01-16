@@ -16,40 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_MEMORY_MONITOR_DEF_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_MEMORY_MONITOR_DEF_H
 
-#include <string>
+#include "ui/base/memory_monitor_def.h"
 
-#include "base/utils/macros.h"
-
-
-#define VERIFY_CLASSNAME(classname, p) \
-    OHOS::Ace::VerifyClass<std::is_same_v<classname, std::remove_cv_t<std::remove_pointer_t<decltype(p)>>>>::Success()
-
-#define VERIFY_DECLARED_CLASS(classname) \
-    OHOS::Ace::VerifyClass<std::is_same_v<classname, typename classname::SelfType>>::Success()
-
-#define DECLARE_CLASS_TYPE_SIZE(classname)                              \
-    typedef classname SelfType;                                         \
-    static size_t TypeSize()                                            \
-    {                                                                   \
-        return sizeof(classname);                                       \
-    }
-
-#define DECLARE_CLASS_GET_TYPE_SIZE(classname)                          \
-    size_t GetTypeSize() const override                                 \
-    {                                                                   \
-        VERIFY_CLASSNAME(classname, this);                              \
-        return TypeSize();                                              \
-    }
-
-namespace OHOS::Ace {
-
-template<bool>
-struct VerifyClass;
-
-template<>
-struct VerifyClass<true> {
-    static void Success() {}
-};
-
-} // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_MEMORY_MEMORY_MONITOR_DEF_H

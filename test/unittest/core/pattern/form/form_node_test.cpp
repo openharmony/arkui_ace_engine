@@ -450,4 +450,41 @@ HWTEST_F(FormNodeTest, FormNodeTest_014, TestSize.Level1)
     EXPECT_EQ(res, HitTestResult::OUT_OF_REGION);
     pattern->subContainer_ = subContainer;
 }
+
+/**
+ * @tc.name: FormNodeTest_015
+ * @tc.desc: DumpInfo in string format
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormNodeTest, FormNodeTest_015, TestSize.Level1)
+{
+    RefPtr<FrameNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    pattern->DumpInfo();
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+    pattern->UpdateStaticCard();
+    auto retRef = pattern->GetAccessibilitySessionAdapter();
+    ASSERT_NE(retRef, nullptr);
+}
+
+/**
+ * @tc.name: FormNodeTest_016
+ * @tc.desc: DumpInfo in json format
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormNodeTest, FormNodeTest_016, TestSize.Level1)
+{
+    RefPtr<FrameNode> formNode = CreateFromNode();
+    auto pattern = formNode->GetPattern<FormPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    std::unique_ptr<JsonValue> dumpJson;
+    pattern->DumpInfo(dumpJson);
+    ASSERT_NE(pattern->formManagerBridge_, nullptr);
+    pattern->UpdateStaticCard();
+    auto retRef = pattern->GetAccessibilitySessionAdapter();
+    ASSERT_NE(retRef, nullptr);
+}
 } // namespace OHOS::Ace::NG

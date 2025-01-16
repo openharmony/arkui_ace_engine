@@ -51,7 +51,7 @@ public:
     static RectF GetVisibleRect(const RefPtr<FrameNode>& node, const RectF& visibleRect);
 
     template<class T>
-    RefPtr<T> GetPattern()
+    RefPtr<T> GetPattern() const
     {
         return DynamicCast<T>(hostTextBase_.Upgrade());
     }
@@ -272,6 +272,10 @@ public:
     bool IsHiddenHandle();
 
     bool IsHandleVisible(bool isFirst);
+    void SetIsSupportMenuSearch(bool isSupportMenuSearch)
+    {
+        isSupportMenuSearch_ = isSupportMenuSearch;
+    }
 
 protected:
     RectF MergeSelectedBoxes(
@@ -327,6 +331,12 @@ protected:
     {
         enableContainerModal_ = true;
     }
+    bool IsNeedMenuSearch();
+    void HandleOnSearch();
+    virtual bool AllowSearch()
+    {
+        return false;
+    }
     std::optional<OverlayRequest> latestReqeust_;
     bool hasTransform_ = false;
     HandleLevelMode handleLevelMode_ = HandleLevelMode::OVERLAY;
@@ -358,6 +368,7 @@ private:
     RectF globalPaintRect_;
     bool originalMenuIsShow_ = true;
     bool enableContainerModal_ = false;
+    bool isSupportMenuSearch_ = false;
 };
 
 } // namespace OHOS::Ace::NG

@@ -143,7 +143,7 @@ void TextClockPattern::UpdateTextLayoutProperty(
 
 void TextClockPattern::OnModifyDone()
 {
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         Pattern::OnModifyDone();
     }
     auto host = GetHost();
@@ -461,7 +461,7 @@ void TextClockPattern::ParseInputFormat()
             formatElementMap_[j] = tempFormatElement;
         }
     }
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) && is12h) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && is12h) {
         is24H_ = false;
     }
 }
@@ -757,7 +757,7 @@ std::string TextClockPattern::GetFormat() const
     auto textClockLayoutProperty = GetLayoutProperty<TextClockLayoutProperty>();
     if (isForm_) {
         auto defaultFormFormat = FORM_FORMAT;
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) && is24H_) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && is24H_) {
             defaultFormFormat = FORM_FORMAT_24H;
         }
         CHECK_NULL_RETURN(textClockLayoutProperty, defaultFormFormat);
@@ -768,7 +768,7 @@ std::string TextClockPattern::GetFormat() const
         return result;
     }
     auto defaultFormat = DEFAULT_FORMAT;
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) && is24H_) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && is24H_) {
         defaultFormat = DEFAULT_FORMAT_24H;
     }
     CHECK_NULL_RETURN(textClockLayoutProperty, defaultFormat);

@@ -19,6 +19,7 @@
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
 #include "frameworks/core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1746,7 +1747,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest029, TestSize.Level1)
      * @tc.expected: retStr is equal to "HitTestMode.Default".
      */
     gestureEventHub->SetHitTestMode(HitTestMode(-1));
-    std::string retStr = gestureEventHub->GetHitTestModeStr();
+    std::string retStr = GestureEventHub::GetHitTestModeStr(gestureEventHub);
     EXPECT_EQ(retStr, "HitTestMode.Default");
 
     /**
@@ -1754,7 +1755,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest029, TestSize.Level1)
      * @tc.expected: retStr is equal to "HitTestMode.Default".
      */
     gestureEventHub->SetHitTestMode(HitTestMode(4));
-    retStr = gestureEventHub->GetHitTestModeStr();
+    retStr = GestureEventHub::GetHitTestModeStr(gestureEventHub);
     EXPECT_EQ(retStr, "HitTestMode.Default");
 }
 
@@ -1972,5 +1973,71 @@ HWTEST_F(GestureEventHubTestNg, SetJSFrameNodeOnTouchEvent001, TestSize.Level1)
     TouchEventFunc touchEventFunc = [](TouchEventInfo& info) {};
     guestureEventHub->SetJSFrameNodeOnTouchEvent(std::move(touchEventFunc));
     EXPECT_NE(guestureEventHub->touchEventActuator_, nullptr);
+}
+
+/**
+ * @tc.name: SetDropAnimationTest
+ * @tc.desc: Test SetDropAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, SetDropAnimation, TestSize.Level1)
+{
+    auto dropAnimationFun = []() {};
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    EXPECT_FALSE(dragEvent->HasDropAnimation());
+    dragEvent->SetDropAnimation(std::move(dropAnimationFun));
+    EXPECT_TRUE(dragEvent->HasDropAnimation());
+}
+
+/**
+ * @tc.name: ExecuteDropAnimation
+ * @tc.desc: Test ExecuteDropAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, ExecuteDropAnimation, TestSize.Level1)
+{
+    bool isExecuted = false;
+    auto dropAnimationFun = [&isExecuted]() { isExecuted = true; };
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    EXPECT_FALSE(isExecuted);
+    dragEvent->SetDropAnimation(std::move(dropAnimationFun));
+    dragEvent->ExecuteDropAnimation();
+    EXPECT_TRUE(isExecuted);
+}
+
+/**
+ * @tc.name: StartVibratorByDrag001
+ * @tc.desc: Test StartVibratorByDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, StartVibratorByDrag001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::WEB_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    NG::DragPreviewOption previewOption;
+    previewOption.enableHapticFeedback = true;
+    frameNode->SetDragPreviewOptions(previewOption, false);
+    DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
+    guestureEventHub->StartVibratorByDrag(frameNode);
+    bool dragFilter = DragDropGlobalController::GetInstance().IsDragFilterShowing();
+    EXPECT_FALSE(dragFilter);
+}
+
+/**
+ * @tc.name: StartVibratorByDrag002
+ * @tc.desc: Test StartVibratorByDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, StartVibratorByDrag002, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::RICH_EDITOR_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    NG::DragPreviewOption previewOption;
+    previewOption.enableHapticFeedback = true;
+    frameNode->SetDragPreviewOptions(previewOption, false);
+    DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
+    guestureEventHub->StartVibratorByDrag(frameNode);
+    bool dragFilter = DragDropGlobalController::GetInstance().IsDragFilterShowing();
+    EXPECT_FALSE(dragFilter);
 }
 } // namespace OHOS::Ace::NG

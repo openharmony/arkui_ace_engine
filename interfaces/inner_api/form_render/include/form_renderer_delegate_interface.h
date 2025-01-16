@@ -99,6 +99,12 @@ public:
      */
     virtual int32_t OnGetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) = 0;
 
+    /**
+     * @brief OnCheckManagerDelegate.
+     * @param rectF
+     */
+    virtual int32_t OnCheckManagerDelegate(bool &checkFlag) = 0;
+
     enum Message : uint32_t {
         ON_SURFACE_CREATE = 1,
         ON_SURFACE_REUSE,
@@ -109,6 +115,7 @@ public:
         ON_FORM_LINK_INFO_UPDATE,
         ON_FORMSURFACE_DETACH,
         ON_GET_RECT_RELATIVE_TO_WINDOW,
+        ON_CHECK_MANAGER_DELEGATE,
     };
 };
 } // namespace Ace

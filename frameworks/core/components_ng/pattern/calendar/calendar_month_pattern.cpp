@@ -77,7 +77,11 @@ Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
     auto pipeline = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipeline, theme->GetCalendarPickerDayWidthOrHeight());
     auto fontSizeScale = pipeline->GetFontScale();
+#ifndef ARKUI_WEARABLE
     if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
+#else
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale()) {
+#endif
         return theme->GetCalendarPickerDayWidthOrHeight();
     } else {
         return theme->GetCalendarPickerDayLargeWidthOrHeight();
@@ -89,8 +93,13 @@ bool CalendarMonthPattern::IsLargeSize(const RefPtr<CalendarTheme>& theme)
     auto pipeline = GetHost()->GetContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto fontSizeScale = pipeline->GetFontScale();
+#ifndef ARKUI_WEARABLE
     if ((fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange())
         && theme->GetCalendarPickerDayLargeWidthOrHeight() > theme->GetCalendarPickerDayWidthOrHeight()) {
+#else
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale()
+        && theme->GetCalendarPickerDayLargeWidthOrHeight() > theme->GetCalendarPickerDayWidthOrHeight()) {
+#endif
         return false;
     } else {
         return true;
@@ -442,6 +451,15 @@ void CalendarMonthPattern::InitHoverEvent()
     inputHub->SetMouseEvent(std::move(mouseCallback));
 }
 
+bool CalendarMonthPattern::IsDateInRange(const CalendarDay& day)
+{
+    PickerDate date;
+    date.SetYear(day.month.year);
+    date.SetMonth(day.month.month);
+    date.SetDay(day.day);
+    return PickerDate::IsDateInRange(date, startDate_, endDate_);
+}
+
 void CalendarMonthPattern::OnClick(Offset& localLocation, const ObtainedMonth& obtainedMonth)
 {
     auto host = GetHost();
@@ -451,6 +469,9 @@ void CalendarMonthPattern::OnClick(Offset& localLocation, const ObtainedMonth& o
     auto index = JudgeArea(localLocation);
     pattern->obtainedMonth_ = obtainedMonth;
     if (!obtainedMonth_.days.empty()) {
+        if (!IsDateInRange(obtainedMonth_.days[index])) {
+            return;
+        }
         for (auto& day : pattern->obtainedMonth_.days) {
             day.focused = false;
         }
@@ -474,7 +495,8 @@ void CalendarMonthPattern::OnTouchEvent(const Offset& localLocation, bool isPres
         return;
     }
     auto index = JudgeArea(localLocation);
-    if (!((index < 0 || index >= static_cast<int32_t>(obtainedMonth_.days.size()))) && isPressed) {
+    if (!(index < 0 || index >= static_cast<int32_t>(obtainedMonth_.days.size())) && isPressed &&
+        IsDateInRange(obtainedMonth_.days[index])) {
         obtainedMonth_.days[index].isPressing = true;
     } else {
         for (auto& day : obtainedMonth_.days) {
@@ -499,7 +521,7 @@ void CalendarMonthPattern::OnHoverEvent(const Offset& localLocation, bool state)
     for (auto& day : obtainedMonth_.days) {
         day.isHovering = false;
     }
-    if (state) {
+    if (state && IsDateInRange(obtainedMonth_.days[index])) {
         obtainedMonth_.days[index].isHovering = true;
     }
 

@@ -27,6 +27,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/animation/animator.h"
 #include "core/components_ng/render/canvas_image.h"
+#include "core/components_ng/svg/base/svg_length_scale_rule.h"
 
 namespace OHOS::Ace::NG {
 using AttrMap = std::unordered_map<std::string, std::string>;
@@ -117,6 +118,15 @@ public:
     }
     SvgDumpInfo& GetDumpInfo();
     std::string GetCurrentTimeString();
+    void SetFillColor(std::optional<Color>& fillColor)
+    {
+        fillColor_ = fillColor;
+    }
+    std::optional<Color>& GetFillColor()
+    {
+        return fillColor_;
+    }
+    Rect GetBoundingRect(RefPtr<SvgNode>& boxNode, SvgLengthScaleRule& boxMeasureRule);
 private:
     std::unordered_map<std::string, WeakPtr<SvgNode>> idMapper_;
     // weak references to animators in svgDom
@@ -130,6 +140,7 @@ private:
     std::list<std::function<void()>> onFinishCallbacks_;
     Size contentSize_;
     SvgDumpInfo dumpInfo_;
+    std::optional<Color> fillColor_;
     ACE_DISALLOW_COPY_AND_MOVE(SvgContext);
 };
 } // namespace OHOS::Ace::NG

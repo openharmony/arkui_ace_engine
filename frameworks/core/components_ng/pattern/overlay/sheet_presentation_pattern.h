@@ -633,7 +633,7 @@ public:
     }
 
     bool IsTypeNeedAvoidAiBar();
-    bool IsCustomHeightOrDetentsChanged(const SheetStyle& sheetStyle);
+    void IsNeedPlayTransition(const SheetStyle& sheetStyle);
 
     RefPtr<FrameNode> GetFirstFrameNodeOfBuilder() const;
     void GetBuilderInitHeight();
@@ -653,6 +653,8 @@ public:
         sheetType_ = GetSheetType();
     }
 
+    // Used for isolation of SHEET_BOTTOMLANDSPACE after version 12, such as support for height setting callback,
+    // support for detents setting and callback for SHEET_BOTTOMLANDSPACE
     bool IsSheetBottomStyle()
     {
         // sheetType_ is invalid before onModifyDone
@@ -661,6 +663,14 @@ public:
                    sheetType_ == SheetType::SHEET_BOTTOMLANDSPACE;
         }
         return sheetType_ == SheetType::SHEET_BOTTOM || sheetType_ == SheetType::SHEET_BOTTOM_FREE_WINDOW;
+    }
+
+    // If has dispute about version isolation, suggest use the following. And it does not support SHEET_BOTTOM_OFFSET
+    bool IsSheetBottom()
+    {
+        auto sheetType = GetSheetType();
+        return !(sheetType == SheetType::SHEET_CENTER || sheetType == SheetType::SHEET_POPUP ||
+                 sheetType == SheetType::SHEET_BOTTOM_OFFSET);
     }
 
     // Nestable Scroll
@@ -675,6 +685,8 @@ public:
     void OnScrollEndRecursive (const std::optional<float>& velocity) override;
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     ScrollResult HandleScrollWithSheet(float scrollOffset);
+    Shadow GetShadowFromTheme(ShadowStyle shadowStyle);
+    void SetShadowStyle(bool isFocused);
     bool IsCurSheetNeedHalfFoldHover();
     float GetMaxSheetHeightBeforeDragUpdate();
     float GetSheetHeightBeforeDragUpdate();
@@ -682,6 +694,15 @@ public:
     void InitFoldCreaseRegion();
     Rect GetFoldScreenRect() const;
     void RecoverHalfFoldOrAvoidStatus();
+    bool UpdateAccessibilityDetents(float height);
+    void CalculateSheetRadius(BorderRadiusProperty& sheetRadius);
+
+    bool UpdateIndexByDetentSelection(const SheetStyle& sheetStyle, bool isFirstTransition);
+
+    bool GetIsPlayTransition() const
+    {
+        return isPlayTransition_;
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -710,6 +731,8 @@ private:
     float GetWrapperHeight();
     bool SheetHeightNeedChanged();
     void InitSheetDetents();
+    void InitDetents(SheetStyle sheetStyle, float height, double mediumSize, float largeHeightOfTheme,
+        double largeHeight);
     void HandleFitContontChange(float height);
     void ChangeSheetHeight(float height);
     void StartSheetTransitionAnimation(const AnimationOption& option, bool isTransitionIn, float offset);
@@ -719,7 +742,9 @@ private:
     void ComputeDetentsPos(float currentSheetHeight, float& upHeight, float& downHeight, uint32_t& detentsLowerPos,
         uint32_t& detentsUpperPos);
     void IsCustomDetentsChanged(SheetStyle sheetStyle);
-    std::string GetPopupStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
+    void CalculateAloneSheetRadius(
+        std::optional<Dimension>& sheetRadius, const std::optional<Dimension>& sheetStyleRadius);
+    std::string GetPopupStyleSheetClipPath(const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius);
     std::string GetCenterStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string GetBottomStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string MoveTo(double x, double y);
@@ -744,6 +769,16 @@ private:
     void GetCurrentScrollHeight();
     void RecoverAvoidKeyboardStatus();
     void RecoverScrollOrResizeAvoidStatus();
+
+    // broadcast
+    void SendTextUpdateEvent();
+    void SendSelectedEvent();
+    void HandleFollowAccessibilityEvent(float currHeight);
+    void HandleDragEndAccessibilityEvent();
+    void RegisterElementInfoCallBack();
+    uint32_t GetCurrentBroadcastDetentsIndex();
+    uint32_t broadcastPreDetentsIndex_ = 0;
+    SheetAccessibilityDetents sheetDetents_ = SheetAccessibilityDetents::HIGH;
 
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
@@ -797,6 +832,7 @@ private:
     bool isDirectionUp_ = true;
     bool topSafeAreaChanged_ = false;
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
+    SheetEffectEdge sheetEffectEdge_ = SheetEffectEdge::ALL;
 
     //record sheet sored detent index
     uint32_t detentsIndex_ = 0;
@@ -836,6 +872,7 @@ private:
     Color sheetMaskColor_ = Color::TRANSPARENT;
     SheetKeyboardAvoidMode keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
     float resizeDecreasedHeight_ = 0.f;
+    bool isPlayTransition_ = false;
 };
 } // namespace OHOS::Ace::NG
 

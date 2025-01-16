@@ -233,9 +233,6 @@ void OneStepDragController::CopyDragCallback(TextSpanType spanType, const RefPtr
     auto oneStepDragEnd = [end, weakPattern = pattern_, scopeId = Container::CurrentId()]
         (const RefPtr<OHOS::Ace::DragEvent>& event) {
         ContainerScope scope(scopeId);
-        auto pattern = weakPattern.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->isDragging_ = false;
         IF_TRUE(end, end(event));
     };
     frameNodeEventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, std::move(oneStepDragEnd));
@@ -263,6 +260,33 @@ void OneStepDragController::SetEnableEventResponse(bool isEnable)
         hub->SetHitTestMode(isEnable ? HitTestMode::HTMDEFAULT : HitTestMode::HTMNONE);
     }
     isEnableEventResponse_ = isEnable;
+}
+
+void OneStepDragController::SetEnableEventResponse(const TextSelector& selector,
+    std::list<WeakPtr<ImageSpanNode>>& imageNodes, std::list<WeakPtr<PlaceholderSpanNode>>& builderNodes)
+{
+    auto start = selector.GetTextStart();
+    auto end = selector.GetTextEnd();
+    IF_TRUE(imageDragParam_, SetEnableEventResponse(start, end, imageNodes));
+    IF_TRUE(placeholderDragParam_, SetEnableEventResponse(start, end, builderNodes));
+}
+
+template<typename T>
+void OneStepDragController::SetEnableEventResponse(int32_t start, int32_t end, std::list<WeakPtr<T>>& builderNodes)
+{
+    for (auto it = builderNodes.begin(); it != builderNodes.end();) {
+        auto builderNode = it->Upgrade();
+        if (!builderNode) {
+            it = builderNodes.erase(it);
+            continue;
+        }
+        ++it;
+        auto hub = builderNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_CONTINUE(hub);
+        auto spanItem = builderNode->GetSpanItem();
+        bool enableResponse = start > spanItem->rangeStart || spanItem->position > end;
+        hub->SetHitTestMode(enableResponse ? HitTestMode::HTMDEFAULT : HitTestMode::HTMNONE);
+    }
 }
 
 void OneStepDragController::FillJsonValue(const std::unique_ptr<JsonValue>& jsonValue)

@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
 
 namespace OHOS::Ace::NG {
+static constexpr float CHECK_BOX_GROUP_MARK_SIZE_INVALID_VALUE = -1.0f;
 void CheckBoxGroupModelNG::Create(const std::optional<std::string>& groupName)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -182,9 +183,106 @@ void CheckBoxGroupModelNG::SetCheckboxGroupName(FrameNode* frameNode, const std:
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
     if (groupName.has_value()) {
         eventHub->SetGroupName(groupName.value());
     }
+}
+
+std::string CheckBoxGroupModelNG::GetCheckboxGroupName(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    CHECK_NULL_RETURN(eventHub, "");
+    return eventHub->GetGroupName();
+}
+
+bool CheckBoxGroupModelNG::GetSelect(FrameNode* frameNode)
+{
+    bool value = false;
+    CHECK_NULL_RETURN(frameNode, value);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        CheckBoxGroupPaintProperty, CheckBoxGroupSelect, value, frameNode, value);
+    return value;
+}
+
+Color CheckBoxGroupModelNG::GetSelectedColor(FrameNode* frameNode)
+{
+    Color value = Color(0xff000000);
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(theme, value);
+    value = theme->GetActiveColor();
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        CheckBoxGroupPaintProperty, CheckBoxGroupSelectedColor, value, frameNode, value);
+    return value;
+}
+
+Color CheckBoxGroupModelNG::GetUnSelectedColor(FrameNode* frameNode)
+{
+    Color value = Color(0xff000000);
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(theme, value);
+    value = theme->GetInactiveColor();
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        CheckBoxGroupPaintProperty, CheckBoxGroupUnSelectedColor, value, frameNode, value);
+    return value;
+}
+
+Color CheckBoxGroupModelNG::GetCheckMarkColor(FrameNode* frameNode)
+{
+    Color value = Color(0xff000000);
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(theme, value);
+    value = theme->GetPointColor();
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkColor, value, frameNode, value);
+    return value;
+}
+
+Dimension CheckBoxGroupModelNG::GetCheckMarkSize(FrameNode* frameNode)
+{
+    Dimension value = Dimension(CHECK_BOX_GROUP_MARK_SIZE_INVALID_VALUE);
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkSize, value, frameNode, value);
+    return value;
+}
+
+Dimension CheckBoxGroupModelNG::GetCheckMarkWidth(FrameNode* frameNode)
+{
+    Dimension value = Dimension(0.0);
+    CHECK_NULL_RETURN(frameNode, value);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, value);
+    auto theme = pipelineContext->GetTheme<CheckboxTheme>();
+    CHECK_NULL_RETURN(theme, value);
+    value = theme->GetCheckStroke();
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        CheckBoxGroupPaintProperty, CheckBoxGroupCheckMarkWidth, value, frameNode, value);
+    return value;
+}
+
+CheckBoxStyle CheckBoxGroupModelNG::GetCheckboxGroupStyle(FrameNode* frameNode)
+{
+    CheckBoxStyle value = CheckBoxStyle::CIRCULAR_STYLE;
+    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
+        CheckBoxGroupPaintProperty, CheckBoxGroupSelectedStyle, value, frameNode, value);
+    return value;
+}
+
+void CheckBoxGroupModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
+{
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
 }
 
 } // namespace OHOS::Ace::NG

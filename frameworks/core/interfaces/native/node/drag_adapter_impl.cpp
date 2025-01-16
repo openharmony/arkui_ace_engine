@@ -25,7 +25,7 @@ static void DragActionConvert(
 {
     CHECK_NULL_VOID(dragAction);
     CHECK_NULL_VOID(internalDragAction);
-    internalDragAction->pointer = dragAction->pointerId;
+    internalDragAction->dragPointerEvent.pointerId = dragAction->pointerId;
     internalDragAction->size = dragAction->size;
     internalDragAction->previewOption.isScaleEnabled = dragAction->dragPreviewOption.isScaleEnabled;
     if (!internalDragAction->previewOption.isScaleEnabled) {
@@ -34,7 +34,9 @@ static void DragActionConvert(
     }
     internalDragAction->previewOption.defaultAnimationBeforeLifting =
         dragAction->dragPreviewOption.defaultAnimationBeforeLifting;
+    internalDragAction->previewOption.enableHapticFeedback = dragAction->dragPreviewOption.enableHapticFeedback;
     internalDragAction->previewOption.isMultiSelectionEnabled = dragAction->dragPreviewOption.isMultiSelectionEnabled;
+    internalDragAction->previewOption.enableEdgeAutoScroll = dragAction->dragPreviewOption.enableEdgeAutoScroll;
     internalDragAction->previewOption.isNumber = dragAction->dragPreviewOption.isNumberBadgeEnabled;
     if (dragAction->dragPreviewOption.badgeNumber > 1) {
         internalDragAction->previewOption.badgeNumber = dragAction->dragPreviewOption.badgeNumber;

@@ -15,6 +15,14 @@
 
 #include "core/components_ng/pattern/list/list_paint_method.h"
 
+#include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
+#include "core/components_ng/render/divider_painter.h"
+
+#ifdef ARKUI_CIRCLE_FEATURE
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
+#endif // ARKUI_CIRCLE_FEATURE
+
 namespace OHOS::Ace::NG {
 void ListPaintMethod::PaintEdgeEffect(PaintWrapper* paintWrapper, RSCanvas& canvas)
 {
@@ -91,17 +99,18 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         dividerInfo.startMargin = 0.0f;
         dividerInfo.endMargin = 0.0f;
     }
-    UpdateDividerList(dividerInfo);
+    bool clip = !renderContext || renderContext->GetClipEdge().value_or(true);
+    UpdateDividerList(dividerInfo, clip);
 }
 
-void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
+void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo, bool clip)
 {
     listContentModifier_->SetDividerPainter(
         dividerInfo.constrainStrokeWidth, dividerInfo.isVertical, dividerInfo.color);
     int32_t lanes = dividerInfo.lanes;
     int32_t laneIdx = 0;
     bool lastIsItemGroup = false;
-    bool isFirstItem = (itemPosition_.begin()->first == 0);
+    bool isFirstItem = (itemPosition_.begin()->first == 0) || !clip;
     std::map<int32_t, int32_t> lastLineIndex;
     ListDividerMap dividerMap;
     bool nextIsPressed = false;
@@ -119,7 +128,7 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
         laneIdx = (lanes <= 1 || (laneIdx + 1) >= lanes || child.second.isGroup) ? 0 : laneIdx + 1;
         isFirstItem = isFirstItem ? laneIdx > 0 : false;
     }
-    if (!lastLineIndex.empty() && lastLineIndex.rbegin()->first < dividerInfo.totalItemCount - 1) {
+    if (clip && !lastLineIndex.empty() && lastLineIndex.rbegin()->first < dividerInfo.totalItemCount - 1) {
         int32_t laneIdx = 0;
         for (auto index : lastLineIndex) {
             if (index.first + lanes >= dividerInfo.totalItemCount) {
@@ -197,9 +206,26 @@ void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     if (scrollBar->GetPositionModeUpdate()) {
         scrollBarOverlayModifier->SetPositionMode(scrollBar->GetPositionMode());
     }
-    OffsetF fgOffset(scrollBar->GetActiveRect().Left(), scrollBar->GetActiveRect().Top());
+
+#ifdef ARKUI_CIRCLE_FEATURE
+    auto shapeMode = scrollBar->GetShapeMode();
+    if (shapeMode == ShapeMode::ROUND) {
+        auto arcScrollBarOverlayModifier = AceType::DynamicCast<ArcScrollBarOverlayModifier>(scrollBarOverlayModifier);
+        CHECK_NULL_VOID(arcScrollBarOverlayModifier);
+        auto arcScrollBar = AceType::DynamicCast<ArcScrollBar>(scrollBar);
+        CHECK_NULL_VOID(arcScrollBar);
+        arcScrollBarOverlayModifier->SetBackgroundBarColor(arcScrollBar->GetBackgroundColor());
+        arcScrollBarOverlayModifier->StartArcBarAnimation(arcScrollBar->GetHoverAnimationType(),
+            arcScrollBar->GetOpacityAnimationType(), arcScrollBar->GetNeedAdaptAnimation(),
+            arcScrollBar->GetArcActiveRect(), arcScrollBar->GetArcBarRect());
+    } else {
+        scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
+            scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
+    }
+#else
     scrollBarOverlayModifier->StartBarAnimation(scrollBar->GetHoverAnimationType(),
         scrollBar->GetOpacityAnimationType(), scrollBar->GetNeedAdaptAnimation(), scrollBar->GetActiveRect());
+#endif // ARKUI_CIRCLE_FEATURE
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);

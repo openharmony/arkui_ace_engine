@@ -65,6 +65,7 @@ void PagePattern::OnAttachToFrameNode()
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+    pipelineContext->GetMemoryManager()->AddRecyclePageNode(host);
 }
 
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& /* config */)
@@ -161,7 +162,7 @@ void PagePattern::ProcessHideState()
     host->SetActive(false);
     host->NotifyVisibleChange(VisibleType::VISIBLE, VisibleType::INVISIBLE);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
@@ -174,7 +175,7 @@ void PagePattern::ProcessShowState()
     host->SetActive(true);
     host->NotifyVisibleChange(VisibleType::INVISIBLE, VisibleType::VISIBLE);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -229,6 +230,7 @@ void PagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    pipelineContext->GetMemoryManager()->RemoveRecyclePageNode(frameNode->GetId());
 }
 
 void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason /*type*/)
@@ -352,7 +354,7 @@ bool PagePattern::OnBackPressed()
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "page removes it's overlay when on backpressed");
         return true;
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN) && isPageInTransition_) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && isPageInTransition_) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "page is in transition");
         return true;
     }
@@ -540,14 +542,10 @@ void PagePattern::InitTransitionIn(const RefPtr<PageTransitionEffect>& effect, P
     renderContext->UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
     renderContext->UpdateTransformTranslate(translateOptions.value());
     renderContext->UpdateOpacity(effect->GetOpacityEffect().value());
-    if (type == PageTransitionType::ENTER_POP) {
-        renderContext->RemoveClipWithRRect();
-    } else {
-        auto context = hostNode->GetContext();
-        CHECK_NULL_VOID(context);
-        renderContext->UpdateBackgroundColor(context->GetAppBgColor());
-        renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-    }
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    renderContext->UpdateBackgroundColor(context->GetAppBgColor());
+    renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
 }
 
 void PagePattern::InitTransitionOut(const RefPtr<PageTransitionEffect> & effect, PageTransitionType type)
@@ -562,10 +560,6 @@ void PagePattern::InitTransitionOut(const RefPtr<PageTransitionEffect> & effect,
     renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     renderContext->UpdateOpacity(1.0);
-    if (type == PageTransitionType::EXIT_PUSH) {
-        renderContext->RemoveClipWithRRect();
-        return;
-    }
     renderContext->ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
     auto context = hostNode->GetContext();
     CHECK_NULL_VOID(context);
@@ -694,9 +688,7 @@ void PagePattern::TransitionInFinish(const RefPtr<PageTransitionEffect>& effect,
     renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     renderContext->UpdateOpacity(1.0);
-    if (type == PageTransitionType::ENTER_PUSH) {
-        renderContext->ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-    }
+    renderContext->ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
 }
 
 void PagePattern::TransitionOutFinish(const RefPtr<PageTransitionEffect>& effect, PageTransitionType type)
@@ -711,9 +703,7 @@ void PagePattern::TransitionOutFinish(const RefPtr<PageTransitionEffect>& effect
     renderContext->UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
     renderContext->UpdateTransformTranslate(translateOptions.value());
     renderContext->UpdateOpacity(effect->GetOpacityEffect().value());
-    if (type == PageTransitionType::EXIT_POP) {
-        renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-    }
+    renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
 }
 
 void PagePattern::MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor)
@@ -825,7 +815,7 @@ void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType ty
         return;
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s finish out page transition.", GetPageUrl().c_str());
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         FocusViewHide();
     }
     auto context = PipelineContext::GetCurrentContext();
@@ -862,7 +852,7 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s push animation finished", GetPageUrl().c_str());
     isPageInTransition_ = false;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         FocusViewShow();
     }
     auto context = PipelineContext::GetCurrentContext();
@@ -871,11 +861,6 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
     if (type == PageTransitionType::ENTER_PUSH) {
         auto renderContext = inPage->GetRenderContext();
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        auto layoutProperty = inPage->GetLayoutProperty();
-        CHECK_NULL_VOID(layoutProperty);
-        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_NONE, .edges = SAFE_AREA_EDGE_NONE };
-        layoutProperty->UpdateSafeAreaExpandOpts(opts);
-        inPage->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
     ResetPageTransitionEffect();
     auto stageManager = context->GetStageManager();
@@ -938,14 +923,19 @@ void PagePattern::UpdateAnimationOption(const RefPtr<PageTransitionEffect>& tran
     effect = GetDefaultPageTransition(type);
     const RefPtr<InterpolatingSpring> springCurve =
         AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        const float defaultAmplitudePx = 0.005f;
-        springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudePx);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        CHECK_NULL_VOID(pipeline);
+        auto appTheme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_VOID(appTheme);
+        float defaultAmplitudeRatio = appTheme->GetPageTransitionAmplitudeRatio();
+        springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudeRatio);
     }
     option.SetCurve(springCurve);
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
 #ifdef QUICK_PUSH_TRANSITION
-    auto pipeline = PipelineBase::GetCurrentContext();
     if (pipeline) {
         const int32_t nanoToMilliSeconds = 1000000;
         const int32_t minTransitionDuration = DEFAULT_ANIMATION_DURATION / 2;

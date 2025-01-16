@@ -61,6 +61,8 @@ public:
         int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
     std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> GetTextBoxesForSelect(
         int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
+    std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> GetRichEditorBoxesForSelect(
+        int32_t start, int32_t end, RectHeightPolicy rectHeightPolicy = RectHeightPolicy::COVER_LINE) const;
     std::vector<RectF> GetPlaceholderRects() const;
     OffsetF ComputeCursorOffset(int32_t index, float& selectLineHeight, bool downStreamFirst = false,
             bool needLineHighest = true) const;
@@ -106,6 +108,8 @@ private:
         int32_t relativeEnd = 0;
     };
     static void MakeBlankLineRectsInParagraph(std::vector<RectF>& result, const ParagraphInfo& info,
+        const SelectData& selectData);
+    static void MakeBlankRectsInRichEditor(std::vector<RectF>& result, const ParagraphInfo& info,
         const SelectData& selectData);
     static void RemoveBlankLineRectByHandler(std::vector<RectF>& rects, const SelectData& selectData);
     static bool IsRectOutByHandler(const RectF& rect, const SelectData& selectData);

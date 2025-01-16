@@ -58,6 +58,7 @@ void JsClickFunction::Execute(const ClickInfo& info)
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
+    obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
 
     JSRef<JSVal> param = obj;
     JsFunction::ExecuteJS(1, &param);
@@ -91,6 +92,7 @@ void JsClickFunction::Execute(GestureEvent& info)
     obj->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     obj->SetProperty<double>("axisVertical", 0.0f);
     obj->SetProperty<double>("axisHorizontal", 0.0f);
+    obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
     obj->Wrap<GestureEvent>(&info);
@@ -131,6 +133,17 @@ void JsClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<double>("axisHorizontal", 0.0f);
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
+    obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
+    obj->SetProperty<int32_t>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
+    obj->SetProperty<int32_t>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
+    JSRef<JSArray> pressedButtonArr = JSRef<JSArray>::New();
+    auto pressedButtons = info.GetPressedButtons();
+    uint32_t idx = 0;
+    for (const auto& button : pressedButtons) {
+        auto jsButton = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(button)));
+        pressedButtonArr->SetValueAt(idx++, jsButton);
+    }
+    obj->SetPropertyObject("pressedButtons", pressedButtonArr);
     obj->Wrap<MouseInfo>(&info);
 
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);
@@ -248,6 +261,17 @@ void JsWeakClickFunction::Execute(MouseInfo& info)
     obj->SetProperty<double>("axisHorizontal", 0.0f);
     auto target = CreateEventTargetObject(info);
     obj->SetPropertyObject("target", target);
+    obj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
+    obj->SetProperty<int32_t>("rawDeltaX", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaX()));
+    obj->SetProperty<int32_t>("rawDeltaY", PipelineBase::Px2VpWithCurrentDensity(info.GetRawDeltaY()));
+    JSRef<JSArray> pressedButtonArr = JSRef<JSArray>::New();
+    auto pressedButtons = info.GetPressedButtons();
+    uint32_t idx = 0;
+    for (const auto& button : pressedButtons) {
+        auto jsButton = JSRef<JSVal>::Make(ToJSValue(static_cast<int32_t>(button)));
+        pressedButtonArr->SetValueAt(idx++, jsButton);
+    }
+    obj->SetPropertyObject("pressedButtons", pressedButtonArr);
     obj->Wrap<MouseInfo>(&info);
 
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);

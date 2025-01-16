@@ -105,7 +105,6 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto badgeHeight = badgeCircleDiameter;
     auto countLimit =
         layoutProperty->HasBadgeMaxCount() ? layoutProperty->GetBadgeMaxCountValue() : badgeTheme->GetMaxCount();
-    auto badgeCircleRadius = badgeCircleDiameter / 2;
 
     std::u16string textData;
     if (textLayoutProperty->HasContent()) {
@@ -121,7 +120,6 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
                 badgeCircleDiameter = std::max(static_cast<double>(textSize.Height()), badgeCircleDiameter);
                 badgeHeight = std::max(badgeCircleDiameter, badgeHeight);
             }
-            badgeCircleRadius = badgeCircleDiameter / 2;
             badgeWidth = badgeCircleDiameter;
         } else if (textData.size() > 1 || messageCount > static_cast<size_t>(countLimit)) {
             if (hasFontSize_) {
@@ -133,7 +131,6 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
             badgeWidth = textSize.Width() + badgeTheme->GetNumericalBadgePadding().ConvertToPx() * 2;
             badgeWidth = badgeCircleDiameter > badgeWidth ? badgeCircleDiameter : badgeWidth;
-            badgeCircleRadius = badgeCircleDiameter / 2;
         }
     }
     if (LessOrEqual(circleSize->ConvertToPx(), 0)) {
@@ -314,6 +311,10 @@ void BadgeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     textGeometryNode->SetFrameSize(textFrameSize);
     textWrapper->Layout();
+
+    if (layoutProperty->GetBadgeCount().has_value()) {
+        textLayoutProperty->UpdateLayoutDirection(TextDirection::LTR);
+    }
 
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childrenSize - 2);
     CHECK_NULL_VOID(childWrapper);

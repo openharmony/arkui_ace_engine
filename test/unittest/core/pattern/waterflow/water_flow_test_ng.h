@@ -39,7 +39,6 @@ constexpr float WATER_FLOW_WIDTH = 480.f;
 constexpr float WATER_FLOW_HEIGHT = 800.f;
 constexpr int32_t TOTAL_LINE_NUMBER = 10;
 constexpr int32_t VIEW_LINE_NUMBER = 8;
-constexpr float ITEM_MAIN_SIZE = 100.f;
 constexpr float BIG_ITEM_MAIN_SIZE = ITEM_MAIN_SIZE * 2;
 
 class WaterFlowMockLazy : public Framework::MockLazyForEachBuilder {
@@ -60,14 +59,7 @@ protected:
     }
 
     std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
-        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems) override
-    {
-        auto node = AceType::MakeRefPtr<WaterFlowItemNode>(
-            V2::FLOW_ITEM_ETS_TAG, -1, AceType::MakeRefPtr<WaterFlowItemPattern>());
-        node->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-            CalcSize(CalcLength(FILL_LENGTH), CalcLength(getHeight_(index))));
-        return { std::to_string(index), node };
-    }
+        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems) override;
 
 private:
     int32_t itemCnt_ = 0;

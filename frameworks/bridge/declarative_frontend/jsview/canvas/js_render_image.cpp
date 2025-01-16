@@ -35,25 +35,16 @@ void BindNativeFunction(napi_env env, napi_value object, const char* name, napi_
 {
     std::string funcName(name);
     napi_value result = nullptr;
-    napi_status status = napi_create_function(env, funcName.c_str(), funcName.length(), func, nullptr, &result);
-    if (status != napi_ok) {
-        return;
-    }
+    NAPI_CALL_RETURN_VOID(env, napi_create_function(env, funcName.c_str(), funcName.length(), func, nullptr, &result));
     napi_set_named_property(env, object, name, result);
 }
 
 void* GetNapiCallbackInfoAndThis(napi_env env, napi_callback_info info)
 {
     napi_value value = nullptr;
-    napi_status status = napi_get_cb_info(env, info, nullptr, nullptr, &value, nullptr);
-    if (status != napi_ok) {
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_get_cb_info(env, info, nullptr, nullptr, &value, nullptr));
     void* result = nullptr;
-    status = napi_unwrap(env, value, &result);
-    if (status != napi_ok) {
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_unwrap(env, value, &result));
     return result;
 }
 

@@ -21,6 +21,7 @@ build_component_ng("form_pattern_ng") {
     "form_model_ng.cpp",
     "form_node.cpp",
     "form_pattern.cpp",
+    "form_special_style.cpp",
   ]
 
   if (is_ohos_standard_system) {

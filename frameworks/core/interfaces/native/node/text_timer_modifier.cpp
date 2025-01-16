@@ -180,45 +180,49 @@ void setTextTimerOptions(ArkUINodeHandle node, ArkUI_Bool isCountDown, ArkUI_Flo
 namespace NodeModifier {
 const ArkUITextTimerModifier* GetTextTimerModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUITextTimerModifier modifier = {
-        TextTimerModifier::SetFontColor,
-        TextTimerModifier::ResetFontColor,
-        TextTimerModifier::SetFontSize,
-        TextTimerModifier::ResetFontSize,
-        TextTimerModifier::SetFontStyle,
-        TextTimerModifier::ResetFontStyle,
-        TextTimerModifier::SetFontWeight,
-        TextTimerModifier::ResetFontWeight,
-        TextTimerModifier::SetFontFamily,
-        TextTimerModifier::ResetFontFamily,
-        TextTimerModifier::SetFormat,
-        TextTimerModifier::ResetFormat,
-        TextTimerModifier::SetTextShadow,
-        TextTimerModifier::ResetTextShadow,
-        TextTimerModifier::setTextTimerOptions
+        .setFontColor = TextTimerModifier::SetFontColor,
+        .resetFontColor = TextTimerModifier::ResetFontColor,
+        .setFontSize = TextTimerModifier::SetFontSize,
+        .resetFontSize = TextTimerModifier::ResetFontSize,
+        .setFontStyle = TextTimerModifier::SetFontStyle,
+        .resetFontStyle = TextTimerModifier::ResetFontStyle,
+        .setFontWeight = TextTimerModifier::SetFontWeight,
+        .resetFontWeight = TextTimerModifier::ResetFontWeight,
+        .setFontFamily = TextTimerModifier::SetFontFamily,
+        .resetFontFamily = TextTimerModifier::ResetFontFamily,
+        .setFormat = TextTimerModifier::SetFormat,
+        .resetFormat = TextTimerModifier::ResetFormat,
+        .setTextShadow = TextTimerModifier::SetTextShadow,
+        .resetTextShadow = TextTimerModifier::ResetTextShadow,
+        .setTextTimerOptions = TextTimerModifier::setTextTimerOptions,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUITextTimerModifier* GetCJUITextTimerModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUITextTimerModifier modifier = {
-        TextTimerModifier::SetFontColor,
-        TextTimerModifier::ResetFontColor,
-        TextTimerModifier::SetFontSize,
-        TextTimerModifier::ResetFontSize,
-        TextTimerModifier::SetFontStyle,
-        TextTimerModifier::ResetFontStyle,
-        TextTimerModifier::SetFontWeight,
-        TextTimerModifier::ResetFontWeight,
-        TextTimerModifier::SetFontFamily,
-        TextTimerModifier::ResetFontFamily,
-        TextTimerModifier::SetFormat,
-        TextTimerModifier::ResetFormat,
-        TextTimerModifier::SetTextShadow,
-        TextTimerModifier::ResetTextShadow
+        .setFontColor = TextTimerModifier::SetFontColor,
+        .resetFontColor = TextTimerModifier::ResetFontColor,
+        .setFontSize = TextTimerModifier::SetFontSize,
+        .resetFontSize = TextTimerModifier::ResetFontSize,
+        .setFontStyle = TextTimerModifier::SetFontStyle,
+        .resetFontStyle = TextTimerModifier::ResetFontStyle,
+        .setFontWeight = TextTimerModifier::SetFontWeight,
+        .resetFontWeight = TextTimerModifier::ResetFontWeight,
+        .setFontFamily = TextTimerModifier::SetFontFamily,
+        .resetFontFamily = TextTimerModifier::ResetFontFamily,
+        .setFormat = TextTimerModifier::SetFormat,
+        .resetFormat = TextTimerModifier::ResetFormat,
+        .setTextShadow = TextTimerModifier::SetTextShadow,
+        .resetTextShadow = TextTimerModifier::ResetTextShadow,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

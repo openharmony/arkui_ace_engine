@@ -285,8 +285,6 @@ bool RosenMediaPlayer::RawFilePlay(const std::string& filePath)
         return false;
     }
 
-    static std::mutex fdMutex_;
-    std::lock_guard lock(fdMutex_);
     auto hapFd = open(realPath, O_RDONLY);
     if (hapFd < 0) {
         LOGE("Open hap file failed");
@@ -467,6 +465,12 @@ int32_t RosenMediaPlayer::SetSurface()
     auto renderSurface = renderSurface_.Upgrade();
     CHECK_NULL_RETURN(renderSurface, -1);
     return mediaPlayer_->SetVideoSurface(renderSurface->GetSurface());
+}
+
+int32_t RosenMediaPlayer::SetRenderFirstFrame(bool display)
+{
+    CHECK_NULL_RETURN(mediaPlayer_, -1);
+    return mediaPlayer_->SetRenderFirstFrame(display);
 }
 
 int32_t RosenMediaPlayer::PrepareAsync()

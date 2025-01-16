@@ -50,6 +50,7 @@ public:
     int32_t SetLooping(bool loop) override;
     int32_t SetPlaybackSpeed(float speed) override;
     int32_t SetSurface() override;
+    int32_t SetRenderFirstFrame(bool display) override;
     int32_t PrepareAsync() override;
     bool IsPlaying() override;
     int32_t Play() override;

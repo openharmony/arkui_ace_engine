@@ -97,18 +97,40 @@ void ResetFormSize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIFormComponentModifier* GetFormComponentModifier()
 {
-    static const ArkUIFormComponentModifier modifier = { SetFormVisibility, AllowUpdate, SetDimension,
-        SetModuleName, SetFormSize, ResetFormVisibility, DisallowUpdate, ResetDimension, ResetModuleName,
-        ResetFormSize };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIFormComponentModifier modifier = {
+        .setFormVisibility = SetFormVisibility,
+        .allowUpdate = AllowUpdate,
+        .setDimension = SetDimension,
+        .setModuleName = SetModuleName,
+        .setFormSize = SetFormSize,
+        .resetFormVisibility = ResetFormVisibility,
+        .disallowUpdate = DisallowUpdate,
+        .resetDimension = ResetDimension,
+        .resetModuleName = ResetModuleName,
+        .resetFormSize = ResetFormSize,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIFormComponentModifier* GetCJUIFormComponentModifier()
 {
-    static const CJUIFormComponentModifier modifier = { SetFormVisibility, AllowUpdate, SetDimension,
-        SetModuleName, SetFormSize, ResetFormVisibility, DisallowUpdate, ResetDimension, ResetModuleName,
-        ResetFormSize };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIFormComponentModifier modifier = {
+        .setFormVisibility = SetFormVisibility,
+        .allowUpdate = AllowUpdate,
+        .setDimension = SetDimension,
+        .setModuleName = SetModuleName,
+        .setFormSize = SetFormSize,
+        .resetFormVisibility = ResetFormVisibility,
+        .disallowUpdate = DisallowUpdate,
+        .resetDimension = ResetDimension,
+        .resetModuleName = ResetModuleName,
+        .resetFormSize = ResetFormSize,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

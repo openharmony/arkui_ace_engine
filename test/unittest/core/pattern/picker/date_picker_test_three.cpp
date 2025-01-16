@@ -575,7 +575,7 @@ HWTEST_F(DatePickerTestThree, DatePickerAccessibilityPropertyTestNg006, TestSize
     PickerDate pickerDate = datePickerPattern->startDateSolar_;
     auto accessibilityProperty = pickerFrameNode->GetAccessibilityProperty<DatePickerAccessibilityProperty>();
     ASSERT_NE(accessibilityProperty, nullptr);
-    EXPECT_EQ(accessibilityProperty->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
+    EXPECT_EQ(datePickerPattern->GetText(), std::to_string(pickerDate.GetYear()) + CONNECTER +
                                                     std::to_string(pickerDate.GetMonth()) + CONNECTER +
                                                     std::to_string(pickerDate.GetDay()));
 

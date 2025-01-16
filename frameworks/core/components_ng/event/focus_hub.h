@@ -572,11 +572,8 @@ public:
 
     std::list<RefPtr<FocusHub>>::iterator FlushChildrenFocusHub(std::list<RefPtr<FocusHub>>& focusNodes);
     /* Manipulation on node-tree is forbidden in operation. */
-    template<bool isReverse = false>
-    bool AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&)>& operation);
-    bool AnyChildFocusHub(bool isReverse, const std::function<bool(const RefPtr<FocusHub>&)>& operation);
-    template<bool isReverse = false>
-    void AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation);
+    bool AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&)>& operation, bool isReverse = false);
+    bool AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation, bool isReverse = false);
 
     bool IsChild() const
     {
@@ -712,7 +709,7 @@ public:
     void GetPaintPaddingVp(Dimension& focusPaddingVp);
     bool PaintAllFocusState();
     bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
-    void ClearFocusState(bool isNeedStateStyles = true);
+    void ClearFocusState(bool isNeedStateStyles = true, bool isNeedClearCallBack = true);
     void ClearAllFocusState();
 
     void SetInnerFocusPaintRectCallback(const std::function<void(RoundRect&)>& callback)
@@ -924,6 +921,8 @@ private:
     bool SkipFocusMoveBeforeRemove();
 
     bool IsArrowKeyStepOut(FocusStep moveStep);
+
+    bool IsLastWeakNodeFocused() const;
 
     OnFocusFunc onFocusInternal_;
     OnBlurFunc onBlurInternal_;

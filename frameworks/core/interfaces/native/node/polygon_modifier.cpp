@@ -45,14 +45,24 @@ void ResetPolygonPoints(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIPolygonModifier* GetPolygonModifier()
 {
-    static const ArkUIPolygonModifier modifier = {SetPolygonPoints, ResetPolygonPoints};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIPolygonModifier modifier = {
+        .setPolygonPoints = SetPolygonPoints,
+        .resetPolygonPoints = ResetPolygonPoints,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIPolygonModifier* GetCJUIPolygonModifier()
 {
-    static const CJUIPolygonModifier modifier = {SetPolygonPoints, ResetPolygonPoints};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIPolygonModifier modifier = {
+        .setPolygonPoints = SetPolygonPoints,
+        .resetPolygonPoints = ResetPolygonPoints,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

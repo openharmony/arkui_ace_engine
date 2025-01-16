@@ -49,6 +49,7 @@ public:
     void SetScrollableBarModeOptions(const ScrollableBarModeOptions& option) override {};
     void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) override {};
     void SetAnimateMode(TabAnimateMode mode) override {};
+    void ResetScrollableBarModeOptions() override {};
 
 private:
     RefPtr<TabTheme> GetTheme() const;

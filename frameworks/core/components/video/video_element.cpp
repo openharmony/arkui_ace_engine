@@ -1484,7 +1484,7 @@ const RefPtr<Component> VideoElement::CreateFullScreenBtn()
     button->SetType(ButtonType::ICON);
 
     if (IsDeclarativePara()) {
-        button->SetClickFunction([weak = WeakClaim(this), isFullScreen = isFullScreen_]() {
+        button->SetClickFunction([weak = WeakClaim(this)]() {
             auto videoElement = weak.Upgrade();
             if (videoElement) {
                 videoElement->OnFullScreenBtnClick();

@@ -45,6 +45,7 @@ public:
     virtual void SetFontStyle(const FontStyle& fontStyle) = 0;
     virtual void SetFontFamilies(const std::vector<std::string>& families) = 0;
     virtual void SetFontSize(const Dimension& size) = 0;
+    virtual void SetLetterSpacing(const Dimension& letterSpacing) {};
     virtual std::vector<double> GetLineDash() = 0;
     virtual void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient) = 0;
     virtual void SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern) = 0;

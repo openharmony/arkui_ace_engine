@@ -41,7 +41,7 @@ void FirePageTransition(const RefPtr<FrameNode>& page, PageTransitionType transi
     CHECK_NULL_VOID(pagePattern);
     auto eventHub = page->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         if (transitionType == PageTransitionType::EXIT_POP) {
             eventHub->SetEnabled(false);
         }
@@ -211,7 +211,6 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     PageChangeCloseKeyboard();
     AddPageTransitionTrace(outPageNode, node);
     if (needTransition) {
-        ExpandSafeArea(node);
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
                                          weakOut = WeakPtr<FrameNode>(outPageNode)]() {
             auto stage = weakStage.Upgrade();
@@ -287,11 +286,11 @@ bool StageManager::PopPage(const RefPtr<FrameNode>& inPage, bool needShowNext, b
     const size_t transitionPageSize = 2;
     needTransition &= (children.size() >= transitionPageSize);
     if (needTransition) {
-        ExpandSafeArea(pageNode);
         pipeline->FlushPipelineImmediately();
     }
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
     auto inPageNode = needShowNext ? inPage : nullptr;
+    pipeline->GetMemoryManager()->RebuildImageByPage(inPageNode);
     FireAutoSave(outPageNode, inPageNode);
     FirePageHide(pageNode, needTransition ? PageTransitionType::EXIT_POP : PageTransitionType::NONE);
     FirePageShow(inPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
@@ -335,7 +334,6 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     }
     auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     if (needTransition) {
-        ExpandSafeArea(outPageNode);
         pipeline->FlushPipelineImmediately();
     }
     bool firstPageTransition = true;
@@ -356,6 +354,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         const auto& newPageNode = *iter;
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
+        pipeline->GetMemoryManager()->RebuildImageByPage(inPageNode);
     }
     PageChangeCloseKeyboard();
     AddPageTransitionTrace(outPageNode, inPageNode);
@@ -404,6 +403,7 @@ bool StageManager::CleanPageStack()
         pageNode->SetChildrenInDestroying();
         stageNode_->RemoveChild(pageNode);
     }
+    pipeline->GetMemoryManager()->RebuildImageByPage(AceType::DynamicCast<FrameNode>(children.back()));
     stageNode_->RebuildRenderContextTree();
     pipeline->RequestFrame();
     return true;
@@ -424,7 +424,6 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
         return true;
     }
     if (needTransition) {
-        ExpandSafeArea(node);
         pipeline->FlushPipelineImmediately();
     }
     if (needHideLast) {
@@ -677,7 +676,7 @@ std::string StageManager::GetSrcPageInfo(const RefPtr<FrameNode>& srcPage)
 bool StageManager::CheckPageInTransition(const RefPtr<UINode>& pageNode)
 {
     auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
-    CHECK_NULL_RETURN(pageNode, false);
+    CHECK_NULL_RETURN(frameNode, false);
     auto pagePattern = frameNode->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     return pagePattern->GetPageInTransition();
@@ -690,17 +689,6 @@ void StageManager::UpdatePageNeedRemove(const RefPtr<UINode>& pageNode)
     auto pagePattern = frameNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
     pagePattern->SetIsNeedRemove(true);
-}
-
-void StageManager::ExpandSafeArea(const RefPtr<UINode>& pageNode)
-{
-    auto node = AceType::DynamicCast<FrameNode>(pageNode);
-    CHECK_NULL_VOID(node);
-    auto layoutProperty = node->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
-        .edges = SAFE_AREA_EDGE_ALL };
-    layoutProperty->UpdateSafeAreaExpandOpts(opts);
 }
 
 void StageManager::StopPageTransition(bool needTransition)

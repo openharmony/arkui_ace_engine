@@ -35,7 +35,7 @@ class CanvasPaintMethod;
 class OffscreenCanvasPattern;
 class CanvasModifier;
 // CanvasPattern is the base class for custom paint render node to perform paint canvas.
-class ACE_EXPORT CanvasPattern : public Pattern {
+class ACE_FORCE_EXPORT CanvasPattern : public Pattern {
     DECLARE_ACE_TYPE(CanvasPattern, Pattern);
 
 public:
@@ -58,7 +58,8 @@ public:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::INCREMENTAL_CANVAS };
+        return RenderContext::ContextParam { .type = RenderContext::ContextType::INCREMENTAL_CANVAS,
+            .surfaceName = std::nullopt };
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -168,6 +169,7 @@ public:
     void UpdateFontStyle(FontStyle style);
     void UpdateFontFamilies(const std::vector<std::string>& families);
     void UpdateFontSize(const Dimension& size);
+    void UpdateLetterSpacing(const Dimension& letterSpacing);
     void UpdateLineJoin(LineJoinStyle join);
     void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient);
     void UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern);

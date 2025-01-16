@@ -120,7 +120,6 @@ protected:
     std::string GetSrcPageInfo(const RefPtr<FrameNode>& srcPage);
     void UpdatePageNeedRemove(const RefPtr<UINode>& pageNode);
     bool CheckPageInTransition(const RefPtr<UINode>& pageNode);
-    void ExpandSafeArea(const RefPtr<UINode>& frameNode);
     void StopPageTransition(bool needTransition);
 
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;

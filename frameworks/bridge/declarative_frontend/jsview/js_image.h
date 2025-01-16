@@ -41,7 +41,10 @@ public:
     static void SetFitOriginalSize(bool value);
     static void SetSourceSize(const JSCallbackInfo& info);
     static void SetObjectFit(const JSCallbackInfo& args);
+    static void SetImageMatrix(const JSCallbackInfo& args);
+    static void SetDefaultImageMatrix();
     static void SetImageFill(const JSCallbackInfo& info);
+    static bool ParseColorContent(const JSRef<JSVal>& jsValue);
     static void SetImageInterpolation(int32_t imageInterpolation);
     static void SetImageRenderMode(const JSCallbackInfo& info);
     static void SetImageRepeat(int32_t imageRepeat);

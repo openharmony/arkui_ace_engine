@@ -22,6 +22,7 @@ ohos_unittest("form_manager_test") {
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/common/form_manager.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/unittest/core/pattern/form/mock/mock_sub_container.cpp",
     "form_manager_test.cpp",
   ]

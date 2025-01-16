@@ -52,16 +52,36 @@ void resetScrollBarEnableNestedScroll(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIScrollBarModifier* GetScrollBarModifier()
 {
-    static const ArkUIScrollBarModifier modifier = { nullptr, nullptr, nullptr, nullptr, nullptr,
-        setScrollBarEnableNestedScroll, resetScrollBarEnableNestedScroll };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIScrollBarModifier modifier = {
+        .setScrollBarDirection = nullptr,
+        .resetScrollBarDirection = nullptr,
+        .setScrollBarState = nullptr,
+        .resetScrollBarState = nullptr,
+        .setScrollBarScroller = nullptr,
+        .setScrollBarEnableNestedScroll = setScrollBarEnableNestedScroll,
+        .resetScrollBarEnableNestedScroll = resetScrollBarEnableNestedScroll,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     /* clang-format on */
     return &modifier;
 }
 
 const CJUIScrollBarModifier* GetCJUIScrollBarModifier()
 {
-    static const CJUIScrollBarModifier modifier = { nullptr, nullptr, nullptr, nullptr, nullptr,
-        setScrollBarEnableNestedScroll, resetScrollBarEnableNestedScroll };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIScrollBarModifier modifier = {
+        .setScrollBarDirection = nullptr,
+        .resetScrollBarDirection = nullptr,
+        .setScrollBarState = nullptr,
+        .resetScrollBarState = nullptr,
+        .setScrollBarScroller = nullptr,
+        .setScrollBarEnableNestedScroll = setScrollBarEnableNestedScroll,
+        .resetScrollBarEnableNestedScroll = resetScrollBarEnableNestedScroll,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     /* clang-format on */
     return &modifier;
 }

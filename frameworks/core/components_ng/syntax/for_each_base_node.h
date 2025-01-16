@@ -34,6 +34,11 @@ public:
         }
     }
 
+    bool IsSyntaxNode() const override
+    {
+        return true;
+    }
+
 protected:
     std::function<void(int32_t, int32_t)> onMoveEvent_;
 };

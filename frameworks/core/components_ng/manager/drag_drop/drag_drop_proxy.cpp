@@ -44,7 +44,10 @@ void DragDropProxy::OnDragStart(
     pointerEvent.UpdatePressedKeyCodes(info.GetPressedKeyCodes());
     manager->OnDragStart(point, frameNode);
     manager->SetExtraInfo(extraInfo);
-    manager->OnDragMove(pointerEvent, extraInfo);
+    auto container = Container::Current();
+    if (!(container && container->IsUIExtensionWindow())) {
+        manager->OnDragMove(pointerEvent, extraInfo);
+    }
 }
 
 void DragDropProxy::OnDragMove(const GestureEvent& info)

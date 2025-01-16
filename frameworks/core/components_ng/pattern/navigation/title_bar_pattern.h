@@ -108,6 +108,15 @@ public:
         isInitialSubtitle_ = isInitialSubtitle;
     }
 
+    void SetIsFirstTimeSetSystemTitle(bool isFirstTime)
+    {
+        isFirstTimeSetSystemTitle_ = isFirstTime;
+    }
+    bool IsFirstTimeSetSystemTitle() const
+    {
+        return isFirstTimeSetSystemTitle_;
+    }
+
     void ProcessTitleDragUpdate(float offset);
 
     void OnColorConfigurationUpdate() override;
@@ -388,6 +397,7 @@ private:
     double opacityRatio_ = 0.0f;
 
     float initialTitleOffsetY_ = 0.0f;
+    bool isFirstTimeSetSystemTitle_ = true;
     bool isInitialTitle_ = true;
     float initialSubtitleOffsetY_ = 0.0f;
     bool isInitialSubtitle_ = true;

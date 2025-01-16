@@ -23,6 +23,11 @@
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t LAND_DURATION = 100;
+const RefPtr<CubicCurve> LAND_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2, 0, 0.2, 1.0f);
+} // namespace
+
 RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG::Pattern>& pattern,
     const WeakPtr<ScrollBarOverlayModifier>& scrollbarOverlayModifier, WeakPtr<ScrollEdgeEffect>&& edgeEffect)
     : TextOverlayModifier(), pattern_(pattern), edgeEffect_(edgeEffect),
@@ -30,14 +35,22 @@ RichEditorOverlayModifier::RichEditorOverlayModifier(const WeakPtr<OHOS::Ace::NG
 {
     caretVisible_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(caretVisible_);
+    floatingCaretVisible_ = AceType::MakeRefPtr<PropertyBool>(false);
+    AttachProperty(floatingCaretVisible_);
+    originCaretVisible_ = AceType::MakeRefPtr<PropertyBool>(false);
+    AttachProperty(originCaretVisible_);
     caretOffset_ = AceType::MakeRefPtr<PropertyOffsetF>(OffsetF());
     AttachProperty(caretOffset_);
+    floatingCaretOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF());
+    AttachProperty(floatingCaretOffset_);
     caretHeight_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     AttachProperty(caretHeight_);
     caretWidth_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     AttachProperty(caretWidth_);
     caretColor_ = AceType::MakeRefPtr<PropertyInt>(0);
     AttachProperty(caretColor_);
+    originCaretColor_ = AceType::MakeRefPtr<PropertyInt>(0);
+    AttachProperty(originCaretColor_);
     scrollOffset_ = AceType::MakeRefPtr<PropertyFloat>(0.0f);
     AttachProperty(scrollOffset_);
     frameSize_ = AceType::MakeRefPtr<PropertySizeF>(SizeF());
@@ -82,10 +95,20 @@ void RichEditorOverlayModifier::SetCaretOffsetAndHeight(const OffsetF& cursorOff
     }
 }
 
+void RichEditorOverlayModifier::SetFloatingCaretOffset(const OffsetF& cursorOffset)
+{
+    floatingCaretOffset_->Set(cursorOffset);
+}
+
 void RichEditorOverlayModifier::SetCaretColor(uint32_t caretColor)
 {
     CHECK_NULL_VOID(caretColor_);
     caretColor_->Set(static_cast<int32_t>(caretColor));
+}
+
+void RichEditorOverlayModifier::SetOriginCaretColor(uint32_t caretColor)
+{
+    originCaretColor_->Set(static_cast<int32_t>(caretColor));
 }
 
 void RichEditorOverlayModifier::SetCaretWidth(float width)
@@ -104,6 +127,21 @@ float RichEditorOverlayModifier::GetCaretWidth() const
 void RichEditorOverlayModifier::SetCaretVisible(bool value)
 {
     caretVisible_->Set(value);
+}
+
+void RichEditorOverlayModifier::SetOriginCaretVisible(bool value)
+{
+    originCaretVisible_->Set(value);
+}
+
+void RichEditorOverlayModifier::SetFloatingCaretVisible(bool value)
+{
+    floatingCaretVisible_->Set(value);
+}
+
+void RichEditorOverlayModifier::SetFloatCaretLanding(bool caretLanding)
+{
+    caretLanding_ = caretLanding;
 }
 
 void RichEditorOverlayModifier::SetScrollOffset(float value)
@@ -136,6 +174,11 @@ OffsetF RichEditorOverlayModifier::GetCaretOffset() const
     return caretOffset_->Get();
 }
 
+bool RichEditorOverlayModifier::GetFloatCaretLanding() const
+{
+    return caretLanding_;
+}
+
 void RichEditorOverlayModifier::PaintPreviewTextDecoration(DrawingContext& drawingContext) const
 {
     CHECK_NULL_VOID(showPreviewTextDecoration_->Get());
@@ -156,8 +199,9 @@ void RichEditorOverlayModifier::PaintPreviewTextDecoration(DrawingContext& drawi
     brush.SetColor(previewTextDecorationColor);
     drawingContext.canvas.AttachBrush(brush);
     for (const auto& previewTextRect : previewTextRects) {
+        auto padding = &previewTextRect == &previewTextRects.back() ? 0 : roundRectRadius;
         RSRect rect(previewTextRect.Left(), previewTextRect.Bottom() - previewTextUnderlineWidth,
-            previewTextRect.Right(), previewTextRect.Bottom());
+            previewTextRect.Right() + padding, previewTextRect.Bottom());
         drawingContext.canvas.DrawRoundRect(RSRoundRect(rect, roundRectRadius, roundRectRadius));
     }
     drawingContext.canvas.DetachBrush();
@@ -169,19 +213,44 @@ void RichEditorOverlayModifier::PaintCaret(DrawingContext& drawingContext) const
     if (!caretVisible_->Get()) {
         return;
     }
+    bool isShowOriginCaret = floatingCaretVisible_->Get() && originCaretVisible_->Get();
+    CHECK_NULL_VOID(!floatingCaretVisible_->Get() || isShowOriginCaret);
     auto& canvas = drawingContext.canvas;
     auto offset = caretOffset_->Get();
     canvas.Save();
     RSPen pen;
     pen.SetAntiAlias(true);
-    float caretWidth = static_cast<float>(caretWidth_->Get());
-    float caretHeight = static_cast<float>(caretHeight_->Get());
+    float caretWidth = caretWidth_->Get();
+    float caretHeight = caretHeight_->Get();
+    pen.SetWidth(caretWidth);
+    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    pen.SetColor(isShowOriginCaret ? originCaretColor_->Get() : caretColor_->Get());
+    canvas.AttachPen(pen);
+    float midPosX = offset.GetX() + caretWidth / 2;
+    float startPosY = offset.GetY();
+    float endPosY = startPosY + caretHeight;
+    float roundCapRadius = caretWidth / 2;
+    canvas.DrawLine(RSPoint(midPosX, startPosY + roundCapRadius), RSPoint(midPosX, endPosY - roundCapRadius));
+    canvas.DetachPen();
+    canvas.Restore();
+}
+
+void RichEditorOverlayModifier::PaintFloatingCaret(DrawingContext& drawingContext) const
+{
+    CHECK_NULL_VOID(floatingCaretVisible_->Get());
+    auto& canvas = drawingContext.canvas;
+    auto floatingCaretOffset = floatingCaretOffset_->Get();
+    canvas.Save();
+    RSPen pen;
+    pen.SetAntiAlias(true);
+    float caretWidth = caretWidth_->Get();
+    float caretHeight = caretHeight_->Get();
     pen.SetWidth(caretWidth);
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     pen.SetColor(caretColor_->Get());
     canvas.AttachPen(pen);
-    float midPosX = offset.GetX() + caretWidth / 2;
-    float startPosY = offset.GetY();
+    float midPosX = floatingCaretOffset.GetX() + caretWidth / 2;
+    float startPosY = floatingCaretOffset.GetY();
     float endPosY = startPosY + caretHeight;
     float roundCapRadius = caretWidth / 2;
     canvas.DrawLine(RSPoint(midPosX, startPosY + roundCapRadius), RSPoint(midPosX, endPosY - roundCapRadius));
@@ -215,6 +284,7 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
 
     drawingContext.canvas.ClipRect(ToRSRect(contentRect), RSClipOp::INTERSECT);
     PaintCaret(drawingContext);
+    PaintFloatingCaret(drawingContext);
     PaintPreviewTextDecoration(drawingContext);
     SetSelectedColor(richEditorPattern->GetSelectedBackgroundColor().GetValue());
     TextOverlayModifier::onDraw(drawingContext);
@@ -243,5 +313,28 @@ void RichEditorOverlayModifier::UpdateScrollBar(PaintWrapper* paintWrapper)
     scrollBar->SetHoverAnimationType(HoverAnimationType::NONE);
     scrollBarOverlayModifier->SetBarColor(scrollBar->GetForegroundColor());
     scrollBar->SetOpacityAnimationType(OpacityAnimationType::NONE);
+}
+
+void RichEditorOverlayModifier::StartFloatingCaretLand(const OffsetF& originCaretOffset)
+{
+    AnimationOption option = AnimationOption();
+    option.SetDuration(LAND_DURATION);
+    option.SetCurve(LAND_CURVE);
+    caretLanding_ = true;
+    AnimationUtils::Animate(
+        option,
+        [weak = WeakClaim(this), originCaretOffset]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->SetFloatingCaretOffset(originCaretOffset);
+        },
+        [weak = WeakClaim(this), pattern = pattern_]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->SetFloatCaretLanding(false);
+            auto richEditorPattern = AceType::DynamicCast<RichEditorPattern>(pattern.Upgrade());
+            CHECK_NULL_VOID(richEditorPattern);
+            richEditorPattern->ResetFloatingCaretState();
+        });
 }
 } // namespace OHOS::Ace::NG

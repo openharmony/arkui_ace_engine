@@ -16,6 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("dialog_test_ng") {
   type = "new"
   sources = [
+    "dialog_layout_test_ng.cpp",
     "dialog_model_test_ng.cpp",
     "dialog_test_ng.cpp",
   ]

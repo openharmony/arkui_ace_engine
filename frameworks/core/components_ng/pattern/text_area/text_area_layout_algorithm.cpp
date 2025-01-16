@@ -78,7 +78,8 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
 
     // Paragraph layout.}
     if (isInlineStyle) {
-        auto fontSize = pattern->FontSizeConvertToPx(textStyle.GetFontSize());
+        auto fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         auto paragraphData = CreateParagraphData { false, fontSize };
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), paragraphData);
         return InlineMeasureContent(textFieldContentConstraint, layoutWrapper);
@@ -215,7 +216,8 @@ bool TextAreaLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, cons
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, false);
     auto isInlineStyle = pattern->IsNormalInlineState();
-    auto fontSize = pattern->FontSizeConvertToPx(textStyle.GetFontSize());
+    auto fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     auto paragraphData = CreateParagraphData { false, fontSize };
     if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
         CreateParagraph(textStyle, pattern->GetDragContents(), content, false, paragraphData);

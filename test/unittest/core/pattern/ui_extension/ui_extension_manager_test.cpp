@@ -74,7 +74,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager001, TestSize.Level1)
      */
     auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
     ASSERT_NE(uiExtensionManager, nullptr);
-    
+
     /**
      * @tc.steps: step2. call RegisterUIExtensionInFocus
      * @tc.expected: expect uiExtensionFocused_ and sessionWrapper_ is not nullptr
@@ -128,7 +128,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager002, TestSize.Level1)
      */
     auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
     ASSERT_NE(uiExtensionManager, nullptr);
-    
+
     /**
      * @tc.steps: step2. call IsWrapExtensionAbilityId
      */
@@ -179,7 +179,7 @@ HWTEST_F(UIExtensionManagerNg, UIExtensionManager003, TestSize.Level1)
      */
     auto uiExtensionManager = AceType::MakeRefPtr<UIExtensionManager>();
     ASSERT_NE(uiExtensionManager, nullptr);
-    
+
     /**
      * @tc.steps: step2. call AddAliveUIExtension
      * @tc.expected: size of aliveUIExtensions_ is 1.

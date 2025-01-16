@@ -50,6 +50,8 @@ struct TouchPoint final {
     SourceTool sourceTool = SourceTool::UNKNOWN;
     bool isPressed = false;
     int32_t originalId = 0;
+    int32_t width;
+    int32_t height;
 };
 
 /**
@@ -78,7 +80,7 @@ struct TouchEvent final : public PointerEvent {
     bool isFalsified = false;
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
-    std::shared_ptr<MMI::PointerEvent> pointerEvent { nullptr };
+    std::shared_ptr<const MMI::PointerEvent> pointerEvent { nullptr };
     // historical points
     std::vector<TouchEvent> history;
     std::vector<KeyCode> pressedKeyCodes_;
@@ -92,6 +94,7 @@ struct TouchEvent final : public PointerEvent {
     // Save historical touch point slope.
     float inputXDeltaSlope = 0.0f;
     float inputYDeltaSlope = 0.0f;
+    bool isPassThroughMode = false;
 
     TouchEvent()
     {
@@ -117,12 +120,13 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetTouchEventId(int32_t touchEventId);
     TouchEvent& SetIsInterpolated(bool isInterpolated);
     TouchEvent& SetPointers(std::vector<TouchPoint> pointers);
-    TouchEvent& SetPointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
+    TouchEvent& SetPointerEvent(std::shared_ptr<const MMI::PointerEvent> pointerEvent);
     TouchEvent& SetOriginalId(int32_t originalId);
     TouchEvent& SetIsInjected(bool isInjected);
     TouchEvent& SetInputXDeltaSlope(float inputXDeltaSlope);
     TouchEvent& SetInputYDeltaSlope(float inputYDeltaSlope);
     TouchEvent& SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes);
+    TouchEvent& SetIsPassThroughMode(bool isPassThroughMode);
     TouchEvent CloneWith(float scale) const;
     TouchEvent CloneWith(float scale, float offsetX, float offsetY, std::optional<int32_t> pointId) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
@@ -134,6 +138,7 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const;
     TouchEvent UpdatePointers() const;
     bool IsPenHoverEvent() const;
+    std::shared_ptr<MMI::PointerEvent> GetTouchEventPointerEvent() const;
 };
 
 namespace Platform {
@@ -240,6 +245,13 @@ public:
     }
     void SetTouchType(TouchType type);
 
+    void SetPressedTime(TimeStamp pressedTime);
+    TimeStamp GetPressedTime() const;
+    void SetWidth(int32_t width);
+    int32_t GetWidth() const;
+    void SetHeight(int32_t height);
+    int32_t GetHeight() const;
+
 private:
     // The finger id is used to identify the point of contact between the finger and the screen. Different fingers have
     // different ids.
@@ -256,6 +268,9 @@ private:
     int64_t touchDeviceId_ = 0;
     // touch type
     TouchType touchType_ = TouchType::UNKNOWN;
+    TimeStamp pressedTime_;
+    int32_t width_;
+    int32_t height_;
 };
 
 using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;

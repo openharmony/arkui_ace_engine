@@ -279,6 +279,10 @@ void FontManager::RebuildFontNodeNG()
         auto uiNode = DynamicCast<NG::UINode>(fontNode);
         if (uiNode) {
             uiNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+            auto frameNode = DynamicCast<NG::FrameNode>(fontNode);
+            if (frameNode) {
+                frameNode->OnPropertyChangeMeasure();
+            }
             ++iter;
         } else {
             iter = fontNodesNG_.erase(iter);
@@ -397,6 +401,11 @@ void FontManager::AddFontObserver(WeakPtr<FontChangeObserver> node)
 void FontManager::RemoveFontChangeObserver(WeakPtr<FontChangeObserver> node)
 {
     observers_.erase(node);
+}
+
+std::vector<std::string> FontManager::GetFontNames()
+{
+    return fontNames_;
 }
 
 } // namespace OHOS::Ace

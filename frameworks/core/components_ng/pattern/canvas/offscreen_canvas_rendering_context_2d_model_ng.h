@@ -22,7 +22,8 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT OffscreenCanvasRenderingContext2DModelNG : public OHOS::Ace::OffscreenCanvasRenderingContext2DModel {
+class ACE_FORCE_EXPORT OffscreenCanvasRenderingContext2DModelNG
+    : public OHOS::Ace::OffscreenCanvasRenderingContext2DModel {
     DECLARE_ACE_TYPE(OffscreenCanvasRenderingContext2DModelNG, OffscreenCanvasRenderingContext2DModel)
 
 public:
@@ -37,6 +38,7 @@ public:
     void SetFontStyle(const Ace::FontStyle& fontStyle) override;
     void SetFontFamilies(const std::vector<std::string>& families) override;
     void SetFontSize(const Dimension& size) override;
+    void SetLetterSpacing(const Dimension& letterSpacing) override;
     std::vector<double> GetLineDash() override;
     void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient) override;
     void SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern) override;

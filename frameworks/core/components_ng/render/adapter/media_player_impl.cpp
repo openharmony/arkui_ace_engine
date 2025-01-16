@@ -70,15 +70,19 @@ void MediaPlayerImpl::InitListener()
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
 
-    auto onPrepared = [uiTaskExecutor, weak = WeakClaim(this)](uint32_t width, uint32_t height, bool isPlaying,
-                          uint32_t duration, uint32_t currentPos, bool needFireEvent) {
-        uiTaskExecutor.PostSyncTask([weak, width, height, isPlaying, duration, currentPos, needFireEvent] {
+    auto onPrepared = [uiTaskExecutor, weak = WeakClaim(this)]([[maybe_unused]] uint32_t width,
+                          [[maybe_unused]] uint32_t height, [[maybe_unused]] bool isPlaying,
+                          [[maybe_unused]] uint32_t duration, [[maybe_unused]] uint32_t currentPos,
+                          [[maybe_unused]] bool needFireEvent) {
+        uiTaskExecutor.PostSyncTask(
+            [weak] {
                 auto player = weak.Upgrade();
                 CHECK_NULL_VOID(player);
                 if (player->stateChangeCallback_) {
                     player->stateChangeCallback_(PlaybackStatus::PREPARED);
                 }
-            }, "ArkUIVideoPlayerPrepared");
+            },
+            "ArkUIVideoPlayerPrepared");
     };
 
     auto onPlayerStatus = [weak = WeakClaim(this), uiTaskExecutor](bool isPlaying) {

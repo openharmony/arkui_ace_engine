@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/gestures/gesture_referee.h"
 
+#include "core/common/ace_application_info.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
 namespace OHOS::Ace::NG {
@@ -264,6 +265,16 @@ void GestureScope::CleanGestureScopeState()
     }
 }
 
+void GestureScope::CleanGestureScopeStateVoluntarily()
+{
+    for (const auto& weak : recognizers_) {
+        auto recognizer = weak.Upgrade();
+        if (recognizer) {
+            recognizer->CleanRecognizerStateVoluntarily();
+        }
+    }
+}
+
 void GestureReferee::AddGestureToScope(size_t touchId, const TouchTestResult& result)
 {
     RefPtr<GestureScope> scope;
@@ -296,6 +307,16 @@ void GestureReferee::CleanGestureScope(size_t touchId)
     }
 }
 
+void GestureReferee::CleanGestureStateVoluntarily(size_t touchId)
+{
+    const auto iter = gestureScopes_.find(touchId);
+    if (iter != gestureScopes_.end()) {
+        const auto& scope = iter->second;
+        CHECK_NULL_VOID(scope);
+        scope->CleanGestureScopeStateVoluntarily();
+    }
+}
+
 bool GestureReferee::QueryAllDone(size_t touchId)
 {
     bool ret = true;
@@ -319,11 +340,14 @@ bool GestureReferee::QueryAllDone()
 
 bool GestureReferee::CheckEventTypeChange(SourceType type, bool isAxis) const
 {
-    bool ret = false;
-    if (!isAxis && lastIsAxis_ && type == SourceType::TOUCH) {
-        ret = true;
+    if (!isAxis && lastIsAxis_) {
+        if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            return (type == SourceType::TOUCH || type == SourceType::MOUSE);
+        } else {
+            return (type == SourceType::TOUCH);
+        }
     }
-    return ret;
+    return false;
 }
 
 bool GestureReferee::CheckSourceTypeChange(SourceType type, bool isAxis_)

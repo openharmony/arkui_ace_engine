@@ -279,7 +279,7 @@ private:
     void PanOnActionStart(const GestureEvent& info) override;
     void PanOnActionUpdate(const GestureEvent& info) override;
     void PanOnActionEnd(const GestureEvent& info) override;
-    void PanOnActionCancel() override;
+    void PanOnActionCancel(const GestureEvent& info) override;
     void SetSelectedIndex(const GestureEvent& info);
     void SetInsertIndex(const RefPtr<DragDropEvent>& targetDragDropNode, const GestureEvent& info);
     OnTouchEventCallback onTouchUpId_;

@@ -24,7 +24,7 @@ class ACE_EXPORT ScrollBarModelNG : public OHOS::Ace::ScrollBarModel {
 public:
     RefPtr<ScrollProxy> GetScrollBarProxy(const  RefPtr<ScrollProxy>& scrollProxy) override;
     void Create(const RefPtr<ScrollProxy>& proxy, bool infoflag, bool proxyFlag,
-        int directionValue, int stateValue) override;
+        int directionValue, int stateValue, bool isCreateArc = false) override;
     void SetEnableNestedScroll(bool enableNestedSroll) override;
     static void SetEnableNestedScroll(FrameNode* frameNode, bool enableNestedSroll);
     static void SetNestedScroll(RefPtr<FrameNode>& frameNode, RefPtr<ScrollablePattern>& pattern);

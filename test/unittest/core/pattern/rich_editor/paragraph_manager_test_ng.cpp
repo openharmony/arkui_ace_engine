@@ -300,6 +300,169 @@ HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankLineRectsInParagraph004, Tes
 }
 
 /**
+ * @tc.name: GetRichEditorBoxesForSelect001
+ * @tc.desc: test GetRichEditorBoxesForSelect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ParagraphManager::ParagraphInfo info;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    info.paragraph = mockParagraph;
+    info.start = 10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+    std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> result =
+        richEditorPattern->paragraphs_.GetRichEditorBoxesForSelect(1, 2);
+    EXPECT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.name: GetRichEditorBoxesForSelect002
+ * @tc.desc: test GetRichEditorBoxesForSelect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ParagraphManager::ParagraphInfo info;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    info.paragraph = mockParagraph;
+    info.end = 10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+    std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> result =
+        richEditorPattern->paragraphs_.GetRichEditorBoxesForSelect(1, 2, RectHeightPolicy::COVER_TEXT);
+    EXPECT_EQ(result.size(), 1);
+}
+
+/**
+ * @tc.name: GetRichEditorBoxesForSelect003
+ * @tc.desc: test GetRichEditorBoxesForSelect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ParagraphManager::ParagraphInfo info;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    info.paragraph = mockParagraph;
+    info.end = 10;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+    std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> result =
+        richEditorPattern->paragraphs_.GetRichEditorBoxesForSelect(1, 2);
+    EXPECT_EQ(result.size(), 1);
+}
+
+/**
+ * @tc.name: GetRichEditorBoxesForSelect004
+ * @tc.desc: test GetRichEditorBoxesForSelect
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, GetRichEditorBoxesForSelect004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ParagraphManager::ParagraphInfo info;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    info.paragraph = mockParagraph;
+    richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+    std::vector<std::pair<std::vector<RectF>, ParagraphStyle>> result =
+        richEditorPattern->paragraphs_.GetRichEditorBoxesForSelect(1, 2);
+    EXPECT_EQ(result.size(), 0);
+}
+
+/**
+ * @tc.name: MakeBlankRectsInRichEditor001
+ * @tc.desc: test MakeBlankRectsInRichEditor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ParagraphManager::ParagraphInfo info;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    info.paragraph = mockParagraph;
+    ParagraphManager::SelectData selectData;
+    selectData.secondResult = true;
+    RectF rectF;
+    std::vector<RectF> rects;
+    rects.push_back(rectF);
+    richEditorPattern->paragraphs_.MakeBlankRectsInRichEditor(rects, info, selectData);
+    EXPECT_EQ(rects.size(), 0);
+}
+
+/**
+ * @tc.name: MakeBlankRectsInRichEditor002
+ * @tc.desc: test MakeBlankRectsInRichEditor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ParagraphManager::ParagraphInfo info;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    info.paragraph = mockParagraph;
+    ParagraphManager::SelectData selectData;
+    selectData.relativeEnd = 1;
+    RectF rectF;
+    std::vector<RectF> rects;
+    rects.push_back(rectF);
+    richEditorPattern->paragraphs_.MakeBlankRectsInRichEditor(rects, info, selectData);
+    EXPECT_EQ(rects.size(), 1);
+}
+
+/**
+ * @tc.name: MakeBlankRectsInRichEditor003
+ * @tc.desc: test MakeBlankRectsInRichEditor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor003, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ParagraphManager::ParagraphInfo info;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    info.paragraph = mockParagraph;
+    ParagraphManager::SelectData selectData;
+    std::vector<RectF> rects;
+    richEditorPattern->paragraphs_.MakeBlankRectsInRichEditor(rects, info, selectData);
+    EXPECT_EQ(rects.size(), 0);
+}
+
+/**
+ * @tc.name: MakeBlankRectsInRichEditor004
+ * @tc.desc: test MakeBlankRectsInRichEditor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorParagraphManagetTestNg, MakeBlankRectsInRichEditor004, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ParagraphManager::ParagraphInfo info;
+    RefPtr<MockParagraph> mockParagraph = AceType::MakeRefPtr<MockParagraph>();
+    info.paragraph = mockParagraph;
+    ParagraphManager::SelectData selectData;
+    RectF rectF;
+    std::vector<RectF> rects;
+    rects.push_back(rectF);
+    richEditorPattern->paragraphs_.MakeBlankRectsInRichEditor(rects, info, selectData);
+    EXPECT_EQ(rects.size(), 1);
+}
+
+/**
  * @tc.name: RemoveBlankLineRectByHandler001
  * @tc.desc: test RemoveBlankLineRectByHandler
  * @tc.type: FUNC

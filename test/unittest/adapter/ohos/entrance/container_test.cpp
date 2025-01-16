@@ -51,16 +51,16 @@ HWTEST_F(ContainerTest, ContainerTest001, TestSize.Level1)
     bool isPopup = false;
     uint32_t autoFillSessionId = 0;
     AceAutoFillType type = AceAutoFillType::ACE_USER_NAME;
-    bool ret = MockContainer::Current()->RequestAutoFill(nullptr, type, false, isPopup, autoFillSessionId, isNative);
-    EXPECT_EQ(ret, true);
+    int32_t autoFillRet =
+        MockContainer::Current()->RequestAutoFill(nullptr, type, false, isPopup, autoFillSessionId, isNative);
+    EXPECT_EQ(autoFillRet, AceAutoFillError::ACE_AUTO_FILL_SUCCESS);
 
-    ret = MockContainer::Current()->UpdatePopupUIExtension(nullptr, autoFillSessionId, isNative);
-    EXPECT_EQ(ret, false);
+    bool updateRet = MockContainer::Current()->UpdatePopupUIExtension(nullptr, autoFillSessionId, isNative);
+    EXPECT_EQ(updateRet, false);
 
-    ret = MockContainer::Current()->ClosePopupUIExtension(autoFillSessionId);
-    EXPECT_EQ(ret, false);
+    bool closeRet = MockContainer::Current()->ClosePopupUIExtension(autoFillSessionId);
+    EXPECT_EQ(closeRet, false);
 }
-
 
 /**
  * @tc.name: ContainerTest002
@@ -73,13 +73,14 @@ HWTEST_F(ContainerTest, ContainerTest002, TestSize.Level1)
     bool isPopup = false;
     uint32_t autoFillSessionId = 0;
     AceAutoFillType type = AceAutoFillType::ACE_USER_NAME;
-    bool ret = MockContainer::Current()->RequestAutoFill(nullptr, type, false, isPopup, autoFillSessionId, isNative);
-    EXPECT_EQ(ret, true);
+    int32_t autoFillRet =
+        MockContainer::Current()->RequestAutoFill(nullptr, type, false, isPopup, autoFillSessionId, isNative);
+    EXPECT_EQ(autoFillRet, AceAutoFillError::ACE_AUTO_FILL_SUCCESS);
 
-    ret = MockContainer::Current()->UpdatePopupUIExtension(nullptr, autoFillSessionId, isNative);
-    EXPECT_EQ(ret, false);
+    bool updateRet = MockContainer::Current()->UpdatePopupUIExtension(nullptr, autoFillSessionId, isNative);
+    EXPECT_EQ(updateRet, false);
 
-    ret = MockContainer::Current()->ClosePopupUIExtension(autoFillSessionId);
-    EXPECT_EQ(ret, false);
+    bool closeRet = MockContainer::Current()->ClosePopupUIExtension(autoFillSessionId);
+    EXPECT_EQ(closeRet, false);
 }
 } // namespace OHOS::Ace::NG

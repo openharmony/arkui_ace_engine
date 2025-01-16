@@ -75,7 +75,13 @@ public:
         ACE_DCHECK(callback);
         rotationEventCallBack_ = std::move(callback);
     }
-    
+
+    void RegisterCrownEventCallback(CrownEventCallback&& callback) override
+    {
+        ACE_DCHECK(callback);
+        crownEventCallBack_ = std::move(callback);
+    }
+
     void RegisterDragEventCallback(DragEventCallBack&& callback) override {}
 
     void RegisterCardViewPositionCallback(CardViewPositionCallBack&& callback) override
@@ -208,6 +214,7 @@ private:
     SurfaceDestroyCallback surfaceDestroyCallback_;
     IdleCallback idleCallback_;
     KeyEventCallback keyEventCallback_;
+    CrownEventCallback crownEventCallBack_;
     KeyEventRecognizer keyEventRecognizer_;
     std::unique_ptr<ThreadModelImpl> threadModelImpl_;
 

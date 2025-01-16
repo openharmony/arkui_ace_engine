@@ -60,10 +60,11 @@ public:
     static bool IsIndexAfterOrInEmoji(int32_t index, const std::u16string& content,
         int32_t& startIndex, int32_t& endIndex);
     static std::u16string SubU16string(int32_t index, int32_t length,
-        const std::u16string& content, bool includeHalf = false);
+        const std::u16string& content, bool includeStartHalf = false, bool includeEndHalf = false);
     static TextEmojiSubStringRange CalSubU16stringRange(int32_t index, int32_t length,
-        const std::u16string& content, bool includeHalf);
+        const std::u16string& content, bool includeStartHalf, bool includeEndHalf);
     static int32_t GetCharacterNum(const std::string& content);
+    static int32_t GetCharacterNum(const std::u16string& content);
     static std::string ConvertU8stringUnpairedSurrogates(const std::string& value);
 
 private:
@@ -88,7 +89,6 @@ private:
         int32_t& startIndex, const std::u16string& u16Content);
     static int32_t GetEmojiLengthAtEnd(const std::u32string& u32Content, bool isCountNonEmoji);
     static int32_t GetEmojiLengthAtFront(const std::u32string& u32Content, bool isCountNonEmoji);
-    static std::u16string U32ToU16string(const std::u32string& u32str);
 };
 
 } // namespace OHOS::Ace

@@ -18,6 +18,7 @@
 #include <cstdint>
 #include <cstdlib>
 
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/measure_util.h"
@@ -31,6 +32,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"
+#include "core/components_ng/pattern/button/button_layout_property.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -74,6 +76,16 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
     CreateAnimation();
     InitPanEvent(gestureHub);
     host->GetRenderContext()->SetClipToFrame(true);
+    InitHapticController(host);
+    RegisterWindowStateChangedCallback();
+}
+
+void TextPickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+    UnregisterWindowStateChangedCallback();
 }
 
 bool TextPickerColumnPattern::OnDirtyLayoutWrapperSwap(
@@ -99,13 +111,16 @@ void TextPickerColumnPattern::OnModifyDone()
     auto theme = pipeline->GetTheme<PickerTheme>();
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
+    useButtonFocusArea_ = theme->NeedButtonFocusAreaType();
+    InitTextFadeOut();
+    InitSelectorButtonProperties(theme);
     auto showCount = GetShowOptionCount();
     InitMouseAndPressEvent();
     SetAccessibilityAction();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     if (optionProperties_.size() <= 0) {
         auto midIndex = showCount / HALF_NUMBER;
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         dividerSpacing_ = pipeline->NormalizeToPx(theme->GetDividerSpacing());
         gradientHeight_ = static_cast<float>(pipeline->NormalizeToPx(theme->GetGradientHeight()));
         MeasureContext measureContext;
@@ -138,6 +153,71 @@ void TextPickerColumnPattern::OnModifyDone()
         }
         SetOptionShiftDistance();
     }
+    InitHapticController(host);
+}
+
+void TextPickerColumnPattern::InitHapticController(const RefPtr<FrameNode>& host)
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto textPickerPattern = parentNode->GetPattern<TextPickerPattern>();
+    CHECK_NULL_VOID(textPickerPattern);
+    if (textPickerPattern->GetIsEnableHaptic()) {
+        isEnableHaptic_ = true;
+        if (!hapticController_) {
+            auto context = parentNode->GetContext();
+            CHECK_NULL_VOID(context);
+            context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+            });
+        }
+    } else {
+        isEnableHaptic_ = false;
+        if (hapticController_) {
+            hapticController_->Stop();
+        }
+    }
+}
+
+void TextPickerColumnPattern::RegisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
+}
+
+void TextPickerColumnPattern::UnregisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(host->GetId());
+}
+
+void TextPickerColumnPattern::OnWindowHide()
+{
+    isShow_ = false;
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+}
+
+void TextPickerColumnPattern::OnWindowShow()
+{
+    isShow_ = true;
 }
 
 void TextPickerColumnPattern::OnMiddleButtonTouchDown()
@@ -152,7 +232,120 @@ void TextPickerColumnPattern::OnMiddleButtonTouchMove()
 
 void TextPickerColumnPattern::OnMiddleButtonTouchUp()
 {
-    PlayPressAnimation(Color::TRANSPARENT);
+    PlayPressAnimation(isHover_ ? GetButtonHoverColor() : buttonBgColor_);
+
+    if (useButtonFocusArea_) {
+        FlushCurrentOptions();
+    }
+}
+
+void TextPickerColumnPattern::InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme)
+{
+    CHECK_NULL_VOID(pickerTheme);
+    if (useButtonFocusArea_) {
+        buttonDefaultBgColor_ = pickerTheme->GetSelectorItemNormalBgColor();
+        buttonFocusBgColor_ = pickerTheme->GetSelectorItemFocusBgColor();
+        buttonDefaultBorderColor_ = pickerTheme->GetSelectorItemBorderColor();
+        buttonFocusBorderColor_ = pickerTheme->GetSelectorItemFocusBorderColor();
+        selectorTextFocusColor_ = pickerTheme->GetOptionStyle(true, true).GetTextColor();
+        pressColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetPressColor());
+        hoverColor_ = buttonDefaultBgColor_.BlendColor(pickerTheme->GetHoverColor());
+
+        buttonFocusBorderWidth_ = pickerTheme->GetSelectorItemFocusBorderWidth();
+        buttonDefaultBorderWidth_ = pickerTheme->GetSelectorItemBorderWidth();
+    }
+}
+
+const Color& TextPickerColumnPattern::GetButtonHoverColor() const
+{
+    return useButtonFocusArea_ && isFocusColumn_ ? buttonFocusBgColor_ : hoverColor_;
+}
+
+void TextPickerColumnPattern::UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty)
+{
+    auto isInitUpdate = isFirstTimeUpdateButtonProps_ && !haveFocus;
+    auto isFocusChanged = isFocusColumn_ != haveFocus;
+
+    if (isFocusChanged || isInitUpdate) {
+        isFocusColumn_ = haveFocus;
+        UpdateSelectorButtonProps(isFocusColumn_, needMarkDirty);
+    }
+    if (isFocusChanged) {
+        FlushCurrentOptions();
+    }
+    if (isInitUpdate) {
+        isFirstTimeUpdateButtonProps_ = false;
+    }
+}
+
+void TextPickerColumnPattern::UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blend = host->GetParent();
+    CHECK_NULL_VOID(blend);
+    auto stack = blend->GetParent();
+    CHECK_NULL_VOID(stack);
+    auto buttonNode = DynamicCast<FrameNode>(stack->GetFirstChild());
+    CHECK_NULL_VOID(buttonNode);
+    auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+    auto renderContext = buttonNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+
+    BorderWidthProperty borderWidth;
+    BorderColorProperty borderColor;
+
+    if (haveFocus) {
+        buttonBgColor_ = buttonFocusBgColor_;
+        borderWidth.SetBorderWidth(buttonFocusBorderWidth_);
+        borderColor.SetColor(buttonFocusBorderColor_);
+    } else {
+        buttonBgColor_ = buttonDefaultBgColor_;
+        borderWidth.SetBorderWidth(buttonDefaultBorderWidth_);
+        borderColor.SetColor(buttonDefaultBorderColor_);
+    }
+
+    buttonLayoutProperty->UpdateBorderWidth(borderWidth);
+    renderContext->UpdateBorderColor(borderColor);
+    renderContext->UpdateBackgroundColor(buttonBgColor_);
+
+    if (needMarkDirty) {
+        buttonNode->MarkModifyDone();
+        buttonNode->MarkDirtyNode();
+    }
+}
+
+void TextPickerColumnPattern::UpdateTextAreaPadding(const RefPtr<PickerTheme>& pickerTheme,
+    const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    if (useButtonFocusArea_) {
+        auto padding = pickerTheme->GetSelectorItemSpace();
+        PaddingProperty defaultPadding = { CalcLength(padding), CalcLength(padding),
+            CalcLength(0.0_vp), CalcLength(0.0_vp) };
+        textLayoutProperty->UpdatePadding(defaultPadding);
+    }
+}
+
+void TextPickerColumnPattern::InitTextFadeOut()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto textTheme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(textTheme);
+    isTextFadeOut_ = textTheme->GetIsTextFadeout();
+}
+
+void TextPickerColumnPattern::UpdateTextOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty)
+{
+    if (isTextFadeOut_) {
+        textLayoutProperty->UpdateTextOverflow(TextOverflow::MARQUEE);
+        textLayoutProperty->UpdateTextMarqueeStartPolicy(MarqueeStartPolicy::DEFAULT);
+        textLayoutProperty->UpdateTextMarqueeFadeout(true);
+        textLayoutProperty->UpdateTextMarqueeStart(isSel && (isFocusColumn_ || isHover_));
+    }
 }
 
 int32_t TextPickerColumnPattern::GetMiddleButtonIndex()
@@ -309,12 +502,13 @@ void TextPickerColumnPattern::InitMouseAndPressEvent()
 
 void TextPickerColumnPattern::HandleMouseEvent(bool isHover)
 {
-    if (isHover) {
-        PlayPressAnimation(hoverColor_);
-    } else {
-        PlayPressAnimation(Color::TRANSPARENT);
-    }
+    PlayPressAnimation(isHover ? GetButtonHoverColor() : buttonBgColor_);
+    auto needUpdate = isHover_ != isHover;
     isHover_ = isHover;
+
+    if (useButtonFocusArea_ && needUpdate) {
+        FlushCurrentOptions();
+    }
 }
 
 void TextPickerColumnPattern::SetButtonBackgroundColor(const Color& pressColor)
@@ -512,6 +706,7 @@ void TextPickerColumnPattern::FlushCurrentTextOptions(
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
+        UpdateTextOverflow(index == middleIndex, textLayoutProperty);
         if (!isUpateTextContentOnly) {
             UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty, index, middleIndex, showCount);
         }
@@ -665,6 +860,7 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
         CHECK_NULL_VOID(textPattern);
         auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
+        UpdateTextOverflow(index == middleIndex, textLayoutProperty);
         if (!isUpateTextContentOnly) {
             UpdatePickerTextProperties(textLayoutProperty, textPickerLayoutProperty, index, middleIndex, showCount);
         }
@@ -745,11 +941,14 @@ void TextPickerColumnPattern::UpdateDisappearTextProperties(const RefPtr<PickerT
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
+    UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto normalOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize();
     textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetDisappearColor().value_or(
         pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (textPickerLayoutProperty->HasDisappearFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetDisappearFontSize().value());
+        textLayoutProperty->UpdateAdaptMaxFontSize(Dimension());
+        textLayoutProperty->UpdateAdaptMinFontSize(Dimension());
     } else {
         textLayoutProperty->UpdateAdaptMaxFontSize(normalOptionSize);
         textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(false, false).GetAdaptMinFontSize());
@@ -767,11 +966,14 @@ void TextPickerColumnPattern::UpdateCandidateTextProperties(const RefPtr<PickerT
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
+    UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto focusOptionSize = pickerTheme->GetOptionStyle(false, false).GetFontSize() + FONT_SIZE;
     textLayoutProperty->UpdateTextColor(
         textPickerLayoutProperty->GetColor().value_or(pickerTheme->GetOptionStyle(false, false).GetTextColor()));
     if (textPickerLayoutProperty->HasFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetFontSize().value());
+        textLayoutProperty->UpdateAdaptMaxFontSize(Dimension());
+        textLayoutProperty->UpdateAdaptMinFontSize(Dimension());
     } else {
         textLayoutProperty->UpdateAdaptMaxFontSize(focusOptionSize);
         textLayoutProperty->UpdateAdaptMinFontSize(
@@ -790,11 +992,14 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     const RefPtr<TextLayoutProperty>& textLayoutProperty,
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
 {
+    UpdateTextAreaPadding(pickerTheme, textLayoutProperty);
     auto selectedOptionSize = pickerTheme->GetOptionStyle(true, false).GetFontSize();
     textLayoutProperty->UpdateTextColor(
         textPickerLayoutProperty->GetSelectedColor().value_or(pickerTheme->GetOptionStyle(true, false).GetTextColor()));
     if (textPickerLayoutProperty->HasSelectedFontSize()) {
         textLayoutProperty->UpdateFontSize(textPickerLayoutProperty->GetSelectedFontSize().value());
+        textLayoutProperty->UpdateAdaptMaxFontSize(Dimension());
+        textLayoutProperty->UpdateAdaptMinFontSize(Dimension());
     } else {
         textLayoutProperty->UpdateAdaptMaxFontSize(selectedOptionSize);
         textLayoutProperty->UpdateAdaptMinFontSize(pickerTheme->GetOptionStyle(true, false).GetAdaptMinFontSize());
@@ -806,6 +1011,39 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
     textLayoutProperty->UpdateFontFamily(fontFamilyVector.empty() ? FONT_FAMILY_DEFAULT : fontFamilyVector);
     textLayoutProperty->UpdateItalicFontStyle(textPickerLayoutProperty->GetSelectedFontStyle().value_or(
         pickerTheme->GetOptionStyle(true, false).GetFontStyle()));
+}
+
+void TextPickerColumnPattern::UpdateDefaultTextProperties(const RefPtr<TextLayoutProperty>& textLayoutProperty,
+    const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty)
+{
+    CHECK_NULL_VOID(textLayoutProperty);
+    CHECK_NULL_VOID(textPickerLayoutProperty);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    auto textStyle = theme->GetTextStyle();
+    textLayoutProperty->UpdateFontSize(
+        textPickerLayoutProperty->GetDefaultFontSize().value_or(textStyle.GetFontSize()));
+    textLayoutProperty->UpdateFontWeight(
+        textPickerLayoutProperty->GetDefaultWeight().value_or(textStyle.GetFontWeight()));
+    textLayoutProperty->UpdateTextColor(textPickerLayoutProperty->GetDefaultColor().value_or(textStyle.GetTextColor()));
+    textLayoutProperty->UpdateFontFamily(
+        textPickerLayoutProperty->GetDefaultFontFamily().value_or(textStyle.GetFontFamilies()));
+    textLayoutProperty->UpdateItalicFontStyle(
+        textPickerLayoutProperty->GetDefaultFontStyle().value_or(textStyle.GetFontStyle()));
+    textLayoutProperty->UpdateAdaptMinFontSize(textPickerLayoutProperty->GetDefaultMinFontSize().value_or(Dimension()));
+    textLayoutProperty->UpdateAdaptMaxFontSize(textPickerLayoutProperty->GetDefaultMaxFontSize().value_or(Dimension()));
+    if (textPickerLayoutProperty->GetDefaultTextOverflow().has_value() &&
+        textPickerLayoutProperty->GetDefaultTextOverflow().value() != TextOverflow::MARQUEE) {
+        textLayoutProperty->UpdateTextOverflow(textPickerLayoutProperty->GetDefaultTextOverflow().value());
+    } else {
+        textLayoutProperty->UpdateTextOverflow(textStyle.GetTextOverflow());
+    }
+    textLayoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    textLayoutProperty->UpdateMaxLines(1);
 }
 
 void TextPickerColumnPattern::AddAnimationTextProperties(
@@ -859,6 +1097,10 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
     const RefPtr<TextPickerLayoutProperty>& textPickerLayoutProperty, uint32_t currentIndex, uint32_t middleIndex,
     uint32_t showCount)
 {
+    if (textPickerLayoutProperty && textPickerLayoutProperty->GetDisableTextStyleAnimation().value_or(false)) {
+        UpdateDefaultTextProperties(textLayoutProperty, textPickerLayoutProperty);
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
@@ -879,6 +1121,7 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
         textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
     }
     textLayoutProperty->UpdateMaxLines(1);
+    textLayoutProperty->UpdateTextOverflow(isTextFadeOut_ ? TextOverflow::MARQUEE : TextOverflow::CLIP);
     AddAnimationTextProperties(currentIndex, textLayoutProperty);
 }
 
@@ -959,6 +1202,7 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     uint32_t showCount = GetShowOptionCount();
+    auto middleIndex = showCount / 2;
     auto child = host->GetChildren();
     auto iter = child.begin();
     if (child.size() != showCount) {
@@ -973,6 +1217,7 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
             CHECK_NULL_VOID(textPattern);
             textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
+            UpdateTextOverflow(index == middleIndex, textLayoutProperty);
             TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
         } else if (columnkind_ == MIXTURE) {
             auto children = rangeNode->GetChildren();
@@ -983,6 +1228,7 @@ void TextPickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double sca
             auto textPattern = textNode->GetPattern<TextPattern>();
             textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(textLayoutProperty);
+            UpdateTextOverflow(index == middleIndex, textLayoutProperty);
             TextPropertiesLinearAnimation(textLayoutProperty, index, showCount, isDown, scale);
             textNode->MarkModifyDone();
             textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1088,8 +1334,7 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
         return;
     }
     if (event.GetInputEventType() == InputEventType::AXIS && event.GetSourceTool() == SourceTool::MOUSE) {
-        SetScrollDirection(LessNotEqual(event.GetDelta().GetY(), 0.0));
-        if (InnerHandleScroll(isDownScroll_, true)) {
+        if (InnerHandleScroll(LessNotEqual(event.GetDelta().GetY(), 0.0), true)) {
             HandleScrollStopEventCallback(true);
         }
         return;
@@ -1105,7 +1350,6 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
         return;
     }
     toss->SetEnd(offsetY);
-    SetScrollDirection(GreatNotEqual(GetMainVelocity(), 0.0));
     UpdateColumnChildPosition(offsetY);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -1114,6 +1358,9 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
 
 void TextPickerColumnPattern::HandleDragEnd()
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     pressed_ = false;
     CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
@@ -1139,17 +1386,17 @@ void TextPickerColumnPattern::HandleDragEnd()
         return;
     }
     int32_t middleIndex = static_cast<int32_t>(GetShowOptionCount()) / HALF_NUMBER;
-    auto shiftDistance = isDownScroll_ ? optionProperties_[middleIndex].nextDistance
-                                       : optionProperties_[middleIndex].prevDistance;
+    ScrollDirection dir = GreatNotEqual(scrollDelta_, 0.0) ? ScrollDirection::DOWN : ScrollDirection::UP;
+    auto shiftDistance = (dir == ScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
+                                                      : optionProperties_[middleIndex].nextDistance;
     auto shiftThreshold = shiftDistance / HALF_NUMBER;
     if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
-        InnerHandleScroll(!isDownScroll_, true, false);
-        scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (isDownScroll_ ? 1 : -1);
+        InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
+        scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == ScrollDirection::UP ? -1 : 1);
         if (NearZero(scrollDelta_)) {
             HandleScrollStopEventCallback(true);
         }
     }
-    SetScrollDirection(GreatNotEqual(scrollDelta_, 0.0));
     CreateAnimation(scrollDelta_, 0.0);
     frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
     if (!NearZero(scrollDelta_)) {
@@ -1219,17 +1466,41 @@ void TextPickerColumnPattern::CreateReboundAnimation(double from, double to)
     });
 }
 
+void TextPickerColumnPattern::HandleEnterSelectedArea(double scrollDelta, float shiftDistance, ScrollDirection dir)
+{
+    auto shiftThreshold = shiftDistance / HALF_NUMBER;
+    uint32_t totalOptionCount = GetOptionCount();
+    uint32_t currentEnterIndex = GetCurrentIndex();
+    auto isOverScroll = NotLoopOptions() && overscroller_.IsOverScroll();
+    if (totalOptionCount == 0) {
+        return;
+    }
+    if (dir == ScrollDirection::UP) {
+        currentEnterIndex = (totalOptionCount + currentEnterIndex + 1) % totalOptionCount;
+    } else {
+        auto totalCountAndIndex = totalOptionCount + currentEnterIndex;
+        currentEnterIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount;
+    }
+    if (GreatOrEqual(std::abs(scrollDelta), std::abs(shiftThreshold)) && GetEnterIndex() != currentEnterIndex &&
+        !isOverScroll) {
+        SetEnterIndex(currentEnterIndex);
+        HandleEnterSelectedAreaEventCallback(true);
+    }
+}
+
 void TextPickerColumnPattern::ScrollOption(double delta)
 {
     scrollDelta_ = delta;
     auto midIndex = GetShowOptionCount() / HALF_NUMBER;
-    auto shiftDistance = isDownScroll_ ? optionProperties_[midIndex].nextDistance
-                                       : optionProperties_[midIndex].prevDistance;
+    ScrollDirection dir = GreatNotEqual(delta, 0.0) ? ScrollDirection::DOWN : ScrollDirection::UP;
+    auto shiftDistance = (dir == ScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
+                                                      : optionProperties_[midIndex].nextDistance;
+    HandleEnterSelectedArea(scrollDelta_, shiftDistance, dir);
     distancePercent_ = delta / shiftDistance;
     auto textLinearPercent = 0.0;
     textLinearPercent = (std::abs(delta)) / (optionProperties_[midIndex].height);
-    UpdateTextPropertiesLinear(isDownScroll_, textLinearPercent);
-    CalcAlgorithmOffset(distancePercent_);
+    UpdateTextPropertiesLinear(LessNotEqual(delta, 0.0), textLinearPercent);
+    CalcAlgorithmOffset(dir, distancePercent_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
@@ -1253,15 +1524,15 @@ void TextPickerColumnPattern::UpdateScrollDelta(double delta)
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void TextPickerColumnPattern::CalcAlgorithmOffset(double distancePercent)
+void TextPickerColumnPattern::CalcAlgorithmOffset(ScrollDirection dir, double distancePercent)
 {
     algorithmOffset_.clear();
 
     uint32_t counts = GetShowOptionCount();
 
     for (uint32_t i = 0; i < counts; i++) {
-        double distance = isDownScroll_ ? optionProperties_[i].nextDistance
-                                        : optionProperties_[i].prevDistance;
+        auto distance = (dir == ScrollDirection::UP) ? optionProperties_[i].prevDistance
+                                                     : optionProperties_[i].nextDistance;
         auto val  = std::trunc(distance * distancePercent);
         algorithmOffset_.emplace_back(static_cast<int32_t>(val));
     }
@@ -1431,7 +1702,6 @@ void TextPickerColumnPattern::SetOptionShiftDistance()
 
 void TextPickerColumnPattern::UpdateToss(double offsetY)
 {
-    isTossing_ = true;
     UpdateColumnChildPosition(offsetY);
 }
 
@@ -1444,8 +1714,10 @@ void TextPickerColumnPattern::TossStoped()
 
 void TextPickerColumnPattern::TossAnimationStoped()
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     yLast_ = 0.0;
-    isTossing_ = false;
     ScrollOption(0.0);
 }
 
@@ -1512,15 +1784,46 @@ void TextPickerColumnPattern::SpringCurveTailEndProcess(bool useRebound, bool st
 void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     double dragDelta = offsetY - yLast_;
+    if (hapticController_ && isShow_) {
+        if (isEnableHaptic_) {
+            hapticController_->HandleDelta(dragDelta);
+        }
+    }
     auto midIndex = GetShowOptionCount() / HALF_NUMBER;
-    auto shiftDistance = isDownScroll_ ? optionProperties_[midIndex].nextDistance
-                                       : optionProperties_[midIndex].prevDistance;
+    ScrollDirection dir = GreatNotEqual(dragDelta, 0.0) ? ScrollDirection::DOWN : ScrollDirection::UP;
+    auto shiftDistance = (dir == ScrollDirection::UP) ? optionProperties_[midIndex].prevDistance
+                                                      : optionProperties_[midIndex].nextDistance;
     auto useRebound = NotLoopOptions();
     auto stopMove = SpringCurveTailMoveProcess(useRebound, dragDelta);
     offsetCurSet_ = 0.0;
 
     // the abs of drag delta is less than jump interval.
-    dragDelta = dragDelta + yOffset_;
+    dragDelta = GetDragDeltaLessThanJumpInterval(offsetY, dragDelta, useRebound, shiftDistance);
+
+    // Set options position
+    ScrollOption(dragDelta);
+    offsetCurSet_ = dragDelta;
+    yOffset_ = dragDelta;
+    yLast_ = offsetY;
+
+    if (useRebound && !pressed_ && isTossStatus_ && !isReboundInProgress_ && overscroller_.IsOverScroll()) {
+        overscroller_.UpdateTossSpring(offsetY);
+        if (overscroller_.ShouldStartRebound()) {
+            auto toss = GetToss();
+            CHECK_NULL_VOID(toss);
+            toss->StopTossAnimation(); // Stop fling animation and start rebound animation implicitly
+            if (hapticController_) {
+                hapticController_->Stop();
+            }
+        }
+    }
+    SpringCurveTailEndProcess(useRebound, stopMove);
+}
+
+double TextPickerColumnPattern::GetDragDeltaLessThanJumpInterval(
+    double offsetY, float originalDragDelta, bool useRebound, float shiftDistance)
+{
+    double dragDelta = originalDragDelta + yOffset_;
     auto isOverScroll = useRebound && overscroller_.IsOverScroll();
     if (NearEqual(std::abs(dragDelta), std::abs(shiftDistance)) && !NearZero(dragDelta)) {
         dragDelta = std::abs(dragDelta) / dragDelta * std::abs(shiftDistance);
@@ -1546,22 +1849,7 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
                 overscroller_.IsBackOverScroll() ? overscroller_.GetBackScroll() : overscroller_.GetOverScroll();
         }
     }
-
-    // Set options position
-    ScrollOption(dragDelta);
-    offsetCurSet_ = dragDelta;
-    yOffset_ = dragDelta;
-    yLast_ = offsetY;
-
-    if (useRebound && !pressed_ && isTossStatus_ && !isReboundInProgress_ && overscroller_.IsOverScroll()) {
-        overscroller_.UpdateTossSpring(offsetY);
-        if (overscroller_.ShouldStartRebound()) {
-            auto toss = GetToss();
-            CHECK_NULL_VOID(toss);
-            toss->StopTossAnimation(); // Stop fling animation and start rebound animation implicitly
-        }
-    }
-    SpringCurveTailEndProcess(useRebound, stopMove);
+    return dragDelta;
 }
 
 bool TextPickerColumnPattern::CanMove(bool isDown) const
@@ -1607,6 +1895,9 @@ bool TextPickerColumnPattern::InnerHandleScroll(
         currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
+    if (hapticController_ && isEnableHaptic_) {
+        hapticController_->PlayOnce();
+    }
     FlushCurrentOptions(isDown, isUpatePropertiesOnly, isUpdateAnimationProperties);
     HandleChangeCallback(isDown, true);
     HandleEventCallback(true);
@@ -1633,23 +1924,21 @@ bool TextPickerColumnPattern::HandleDirectionKey(KeyCode code)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto currernIndex = GetCurrentIndex();
+    auto currentIndex = GetCurrentIndex();
     auto totalOptionCount = GetOptionCount();
     if (totalOptionCount == 0) {
         return false;
     }
     if (code == KeyCode::KEY_DPAD_UP) {
-        auto totalCountAndIndex = totalOptionCount + currernIndex;
+        auto totalCountAndIndex = totalOptionCount + currentIndex;
         SetCurrentIndex((totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount);
-        SetScrollDirection(false);
         FlushCurrentOptions();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;
     }
     if (code == KeyCode::KEY_DPAD_DOWN) {
-        SetCurrentIndex((totalOptionCount + currernIndex + 1) % totalOptionCount);
-        SetScrollDirection(true);
-        FlushCurrentOptions(isDownScroll_);
+        SetCurrentIndex((totalOptionCount + currentIndex + 1) % totalOptionCount);
+        FlushCurrentOptions(true);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return true;
     }
@@ -1668,7 +1957,6 @@ void TextPickerColumnPattern::SetAccessibilityAction()
         if (!pattern->CanMove(true)) {
             return;
         }
-        pattern->SetScrollDirection(true);
         pattern->InnerHandleScroll(true);
         pattern->CreateAnimation(0.0 - pattern->jumpInterval_, 0.0);
         pattern->HandleScrollStopEventCallback(true);
@@ -1682,7 +1970,6 @@ void TextPickerColumnPattern::SetAccessibilityAction()
         if (!pattern->CanMove(false)) {
             return;
         }
-        pattern->SetScrollDirection(false);
         pattern->InnerHandleScroll(false);
         pattern->CreateAnimation(pattern->jumpInterval_, 0.0);
         pattern->HandleScrollStopEventCallback(true);
@@ -1719,8 +2006,6 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
         animation_ = AnimationUtils::StartAnimation(option, [weak = AceType::WeakClaim(this), step, distance]() {
             auto column = weak.Upgrade();
             CHECK_NULL_VOID(column);
-            auto isDown = step < 0;
-            column->SetScrollDirection(isDown);
             column->aroundClickProperty_->Set(step > 0 ? 0.0 - std::abs(distance) : std::abs(distance));
         });
         auto host = GetHost();
@@ -1734,19 +2019,17 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
 void TextPickerColumnPattern::PlayResetAnimation()
 {
     int32_t middleIndex = static_cast<int32_t>(GetShowOptionCount()) / HALF_NUMBER;
-    double shiftDistance = isDownScroll_ ? optionProperties_[middleIndex].nextDistance
-                                         : optionProperties_[middleIndex].prevDistance;
-
+    ScrollDirection dir = GreatNotEqual(scrollDelta_, 0.0) ? ScrollDirection::DOWN : ScrollDirection::UP;
+    double shiftDistance = (dir == ScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
+                                                        : optionProperties_[middleIndex].nextDistance;
     double shiftThreshold = shiftDistance / HALF_NUMBER;
     if (std::abs(scrollDelta_) >= std::abs(shiftThreshold)) {
-        InnerHandleScroll(!isDownScroll_, true, false);
-        scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (isDownScroll_ ? 1 : -1);
+        InnerHandleScroll(LessNotEqual(scrollDelta_, 0.0), true, false);
+        scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == ScrollDirection::UP ? -1 : 1);
         if (NearZero(scrollDelta_)) {
             HandleScrollStopEventCallback(true);
         }
     }
-
-    SetScrollDirection(GreatNotEqual(scrollDelta_, 0.0));
     CreateAnimation(scrollDelta_, 0.0);
     if (!NearZero(scrollDelta_)) {
         HandleScrollStopEventCallback(true);

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/image_animator/image_animator_pattern.h"
 
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components/image/image_theme.h"
 
 namespace OHOS::Ace::NG {
 
@@ -308,6 +309,7 @@ void ImageAnimatorPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     Pattern::OnModifyDone();
+    UpdateBorderRadius();
     auto size = static_cast<int32_t>(images_.size());
     if (size <= 0) {
         LOGE("image size is less than 0.");
@@ -336,13 +338,65 @@ void ImageAnimatorPattern::OnModifyDone()
     RunAnimatorByStatus(index);
 }
 
+void ImageAnimatorPattern::UpdateBorderRadius()
+{
+    auto host = GetHost();
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto imageTheme = context->GetTheme<ImageTheme>();
+    CHECK_NULL_VOID(imageTheme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!renderContext->HasBorderRadius() && imageTheme->GetCornerRadius() > 0.0_vp) {
+        renderContext->UpdateBorderRadius(BorderRadiusProperty(imageTheme->GetCornerRadius()));
+    }
+    if (!renderContext->HasClipEdge() && imageTheme->GetClipEdge()) {
+        renderContext->UpdateClipEdge(imageTheme->GetClipEdge());
+    }
+}
+
+void ImageAnimatorPattern::RegisterVisibleAreaChange()
+{
+    auto pipeline = GetContext();
+    // register to onVisibleAreaChange
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto self = weak.Upgrade();
+        CHECK_NULL_VOID(self);
+        if (self->CheckIfNeedVisibleAreaChange()) {
+            self->OnVisibleAreaChange(visible, ratio);
+        }
+    };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    // add visibleAreaChangeNode(inner callback)
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
+}
+
+void ImageAnimatorPattern::OnVisibleAreaChange(bool visible, double ratio)
+{
+    ACE_SCOPED_TRACE("ImageAnimator OnVisibleAreaChange visible: [%d]", visible);
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "ImageAnimator OnVisibleAreaChange visible:%{public}d", visible);
+    }
+    if (!visible) {
+        OnInActive();
+    } else {
+        OnActive();
+    }
+}
+
 void ImageAnimatorPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    context->SetClipToFrame(true);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetClipToFrame(true);
+
+    UpdateBorderRadius();
+    RegisterVisibleAreaChange();
 }
 
 void ImageAnimatorPattern::UpdateEventCallback()
@@ -394,6 +448,7 @@ void ImageAnimatorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const I
     json->PutExtAttr("fillMode", FILL_MODE[static_cast<int32_t>(animator_->GetFillMode())], filter);
     json->PutExtAttr("iterations", std::to_string(animator_->GetIteration()).c_str(), filter);
     json->PutExtAttr("images", ImagesToString().c_str(), filter);
+    json->PutExtAttr("autoMonitorInvisibleArea", isAutoMonitorInvisibleArea_ ? "true" : "false", filter);
 }
 
 std::string ImageAnimatorPattern::ImagesToString() const

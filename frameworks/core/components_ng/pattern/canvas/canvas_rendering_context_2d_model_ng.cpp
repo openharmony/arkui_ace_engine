@@ -153,6 +153,13 @@ void CanvasRenderingContext2DModelNG::SetFontSize(const Dimension& size)
     pattern->UpdateFontSize(size);
 }
 
+void CanvasRenderingContext2DModelNG::SetLetterSpacing(const Dimension& letterSpacing)
+{
+    auto pattern = weakPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateLetterSpacing(letterSpacing);
+}
+
 std::vector<double> CanvasRenderingContext2DModelNG::GetLineDash()
 {
     auto pattern = weakPattern_.Upgrade();

@@ -57,6 +57,10 @@ public:
     static RefPtr<FrameNode> CreateDateTextNode(const std::string& textContent);
     static void SetHintRadiusWithNode(FrameNode* frameNode, Dimension& radius);
     static void SetSelectDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day);
+    static PickerDate GetStartDateWithNode(FrameNode* frameNode);
+    static PickerDate GetEndDateWithNode(FrameNode* frameNode);
+    static void SetStartDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day);
+    static void SetEndDateWithNode(FrameNode* frameNode, uint32_t year, uint32_t month, uint32_t day);
     static Dimension GetHintRadius(FrameNode* frameNode);
     static PickerDate GetSelectDateWithNode(FrameNode* frameNode);
     static RefPtr<FrameNode> GetYearNode(FrameNode* calendarPickerNode);
@@ -67,6 +71,8 @@ public:
     static DimensionOffset GetEdgeOffset(FrameNode* frameNode);
     static void SetOnChangeWithNode(FrameNode* frameNode, SelectedChangeEvent&& onChange);
     static std::map<std::size_t, std::string> GetDateNodeOrder(const CalendarSettingData& settingData);
+private:
+    static void UpdateSelectedDateContent(FrameNode* frameNode, const PickerDate& selectedDate);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_MODEL_NG_H

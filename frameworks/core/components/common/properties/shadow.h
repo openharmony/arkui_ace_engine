@@ -47,7 +47,7 @@ enum class ShadowColorStrategy : char {
     PRIMARY,
 };
 // A style class indicates the way to render shadow effect
-class Shadow final {
+class ACE_FORCE_EXPORT Shadow final {
 public:
     static Shadow Blend(const Shadow& to, const Shadow& from, float progress);
 

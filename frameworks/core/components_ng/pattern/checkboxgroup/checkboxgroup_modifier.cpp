@@ -57,6 +57,7 @@ CheckBoxGroupModifier::CheckBoxGroupModifier(const Parameters& parameters)
     hoverRadius_ = parameters.hoverRadius;
     hotZoneHorizontalPadding_ = parameters.hotZoneHorizontalPadding;
     defaultPaddingSize_ = parameters.defaultPaddingSize;
+    hoverPaddingSize_ = parameters.hoverPaddingSize;
     hotZoneVerticalPadding_ = parameters.hotZoneVerticalPadding;
     shadowWidth_ = parameters.shadowWidth;
     hoverDuration_ = parameters.hoverDuration;
@@ -268,11 +269,14 @@ void CheckBoxGroupModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF
     float originY;
     float endX;
     float endY;
+    auto paddingPx = hoverPaddingSize_.ConvertToPx();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        originX = offset.GetX() - defaultPaddingSize_.ConvertToPx();
-        originY = offset.GetY() - defaultPaddingSize_.ConvertToPx();
-        endX = size.Width() + originX + CHECKBOX_GROUP_DOUBLE_RATIO * defaultPaddingSize_.ConvertToPx();
-        endY = size.Height() + originY + CHECKBOX_GROUP_DOUBLE_RATIO * defaultPaddingSize_.ConvertToPx();
+        originX = offset.GetX() - paddingPx;
+        originY = offset.GetY() - paddingPx;
+        endX = size.Width() + originX +
+            CHECKBOX_GROUP_DOUBLE_RATIO * paddingPx;
+        endY = size.Height() + originY +
+            CHECKBOX_GROUP_DOUBLE_RATIO * paddingPx;
     } else {
         originX = offset.GetX() - hotZoneHorizontalPadding_.ConvertToPx();
         originY = offset.GetY() - hotZoneVerticalPadding_.ConvertToPx();

@@ -240,6 +240,13 @@ void NavDestinationPattern::MountTitleBar(
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
 
+    auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    if (backButtonNode) {
+        auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty();
+        CHECK_NULL_VOID(backButtonLayoutProperty);
+        backButtonLayoutProperty->UpdateVisibility(
+            navDestinationLayoutProperty->GetHideBackButtonValue(false) ? VisibleType::GONE : VisibleType::VISIBLE);
+    }
     if (navDestinationLayoutProperty->HasNoPixMap()) {
         if (navDestinationLayoutProperty->HasImageSource()) {
             titleBarLayoutProperty->UpdateImageSource(navDestinationLayoutProperty->GetImageSourceValue());
@@ -311,6 +318,9 @@ bool NavDestinationPattern::GetBackButtonState()
     auto index = stack->FindIndex(name_, customNode_, true);
     bool showBackButton = true;
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    if (navDestinationLayoutProperty->GetHideBackButtonValue(false)) {
+        showBackButton = false;
+    }
     if (index == 0 && (pattern->GetNavigationMode() == NavigationMode::SPLIT ||
         navigationLayoutProperty->GetHideNavBarValue(false))) {
         showBackButton = false;
@@ -352,8 +362,10 @@ void NavDestinationPattern::OnAttachToFrameNode()
     auto id = host->GetId();
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
+
     pipeline->AddWindowStateChangedCallback(id);
     pipeline->AddWindowSizeChangeCallback(id);
+    pipeline->GetMemoryManager()->AddRecyclePageNode(host);
 }
 
 void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -364,6 +376,7 @@ void NavDestinationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
+    pipeline->GetMemoryManager()->RemoveRecyclePageNode(id);
 }
 
 void NavDestinationPattern::DumpInfo()

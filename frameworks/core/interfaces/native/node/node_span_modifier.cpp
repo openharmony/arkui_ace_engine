@@ -40,14 +40,14 @@ void SetSpanContent(ArkUINodeHandle node, const char* value)
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     std::string content(value);
-    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8ToStr16(content));
+    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8DebugToStr16(content));
 }
 
 const char* GetSpanContent(ArkUINodeHandle node)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_RETURN(uiNode, nullptr);
-    g_strValue = UtfUtils::Str16ToStr8(SpanModelNG::GetContent(uiNode));
+    g_strValue = UtfUtils::Str16DebugToStr8(SpanModelNG::GetContent(uiNode));
     return g_strValue.c_str();
 }
 
@@ -56,7 +56,7 @@ void SetSpanSrc(ArkUINodeHandle node, ArkUI_CharPtr src)
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
     std::string content(src);
-    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8ToStr16(content));
+    SpanModelNG::InitSpan(uiNode, UtfUtils::Str8DebugToStr16(content));
 }
 
 void SetSpanTextCase(ArkUINodeHandle node, int32_t value)
@@ -486,31 +486,108 @@ ArkUI_CharPtr GetSpanFontFamily(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUISpanModifier* GetSpanModifier()
 {
-    static const ArkUISpanModifier modifier = { SetSpanSrc, SetSpanContent, SetSpanTextCase, ResetSpanTextCase,
-        SetSpanFontWeight, ResetSpanFontWeight, SetSpanLineHeight, ResetSpanLineHeight, SetSpanFontStyle,
-        ResetSpanFontStyle, SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily,
-        SetSpanDecoration, ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing,
-        ResetSpanLetterSpacing, SetSpanBaselineOffset, ResetSpanBaselineOffset, SetSpanFont, ResetSpanFont,
-        SetSpanFontWeightStr, GetSpanContent, GetSpanDecoration, GetSpanFontColor, GetSpanFontSize, GetSpanFontStyle,
-        GetSpanFontWeight, GetSpanLineHeight, GetSpanTextCase, GetSpanLetterSpacing, GetSpanBaselineOffset,
-        SetSpanTextBackgroundStyle, ResetSpanTextBackgroundStyle, GetSpanTextBackgroundStyle, SetTextTextShadow,
-        ResetTextTextShadow, GetTextShadow, GetSpanFontFamily,
-        SetAccessibilityText, ResetAccessibilityText, SetAccessibilityDescription, ResetAccessibilityDescription,
-        SetAccessibilityLevel, ResetAccessibilityLevel };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUISpanModifier modifier = {
+        .setSpanSrc = SetSpanSrc,
+        .setContent = SetSpanContent,
+        .setSpanTextCase = SetSpanTextCase,
+        .resetSpanTextCase = ResetSpanTextCase,
+        .setSpanFontWeight = SetSpanFontWeight,
+        .resetSpanFontWeight = ResetSpanFontWeight,
+        .setSpanLineHeight = SetSpanLineHeight,
+        .resetSpanLineHeight = ResetSpanLineHeight,
+        .setSpanFontStyle = SetSpanFontStyle,
+        .resetSpanFontStyle = ResetSpanFontStyle,
+        .setSpanFontSize = SetSpanFontSize,
+        .resetSpanFontSize = ResetSpanFontSize,
+        .setSpanFontFamily = SetSpanFontFamily,
+        .resetSpanFontFamily = ResetSpanFontFamily,
+        .setSpanDecoration = SetSpanDecoration,
+        .resetSpanDecoration = ResetSpanDecoration,
+        .setSpanFontColor = SetSpanFontColor,
+        .resetSpanFontColor = ResetSpanFontColor,
+        .setSpanLetterSpacing = SetSpanLetterSpacing,
+        .resetSpanLetterSpacing = ResetSpanLetterSpacing,
+        .setSpanBaselineOffset = SetSpanBaselineOffset,
+        .resetSpanBaselineOffset = ResetSpanBaselineOffset,
+        .setSpanFont = SetSpanFont,
+        .resetSpanFont = ResetSpanFont,
+        .setSpanFontWeightStr = SetSpanFontWeightStr,
+        .getSpanContent = GetSpanContent,
+        .getSpanDecoration = GetSpanDecoration,
+        .getSpanFontColor = GetSpanFontColor,
+        .getSpanFontSize = GetSpanFontSize,
+        .getSpanFontStyle = GetSpanFontStyle,
+        .getSpanFontWeight = GetSpanFontWeight,
+        .getSpanLineHeight = GetSpanLineHeight,
+        .getSpanTextCase = GetSpanTextCase,
+        .getSpanLetterSpacing = GetSpanLetterSpacing,
+        .getSpanBaselineOffset = GetSpanBaselineOffset,
+        .setSpanTextBackgroundStyle = SetSpanTextBackgroundStyle,
+        .resetSpanTextBackgroundStyle = ResetSpanTextBackgroundStyle,
+        .getSpanTextBackgroundStyle = GetSpanTextBackgroundStyle,
+        .setTextShadow = SetTextTextShadow,
+        .resetTextShadow = ResetTextTextShadow,
+        .getTextShadows = GetTextShadow,
+        .getSpanFontFamily = GetSpanFontFamily,
+        .setAccessibilityText = SetAccessibilityText,
+        .resetAccessibilityText = ResetAccessibilityText,
+        .setAccessibilityDescription = SetAccessibilityDescription,
+        .resetAccessibilityDescription = ResetAccessibilityDescription,
+        .setAccessibilityLevel = SetAccessibilityLevel,
+        .resetAccessibilityLevel = ResetAccessibilityLevel,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUISpanModifier* GetCJUISpanModifier()
 {
-    static const CJUISpanModifier modifier = { SetSpanSrc, SetSpanContent, SetSpanTextCase, ResetSpanTextCase,
-        SetSpanFontWeight, ResetSpanFontWeight, SetSpanLineHeight, ResetSpanLineHeight, SetSpanFontStyle,
-        ResetSpanFontStyle, SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily,
-        SetSpanDecoration, ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing,
-        ResetSpanLetterSpacing, SetSpanBaselineOffset, ResetSpanBaselineOffset, SetSpanFont, ResetSpanFont,
-        SetSpanFontWeightStr, GetSpanContent, GetSpanDecoration, GetSpanFontColor, GetSpanFontSize, GetSpanFontStyle,
-        GetSpanFontWeight, GetSpanLineHeight, GetSpanTextCase, GetSpanLetterSpacing, GetSpanBaselineOffset,
-        SetSpanTextBackgroundStyle, ResetSpanTextBackgroundStyle, GetSpanTextBackgroundStyle, SetTextTextShadow,
-        ResetTextTextShadow, GetTextShadow };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUISpanModifier modifier = {
+        .setSpanSrc = SetSpanSrc,
+        .setContent = SetSpanContent,
+        .setSpanTextCase = SetSpanTextCase,
+        .resetSpanTextCase = ResetSpanTextCase,
+        .setSpanFontWeight = SetSpanFontWeight,
+        .resetSpanFontWeight = ResetSpanFontWeight,
+        .setSpanLineHeight = SetSpanLineHeight,
+        .resetSpanLineHeight = ResetSpanLineHeight,
+        .setSpanFontStyle = SetSpanFontStyle,
+        .resetSpanFontStyle = ResetSpanFontStyle,
+        .setSpanFontSize = SetSpanFontSize,
+        .resetSpanFontSize = ResetSpanFontSize,
+        .setSpanFontFamily = SetSpanFontFamily,
+        .resetSpanFontFamily = ResetSpanFontFamily,
+        .setSpanDecoration = SetSpanDecoration,
+        .resetSpanDecoration = ResetSpanDecoration,
+        .setSpanFontColor = SetSpanFontColor,
+        .resetSpanFontColor = ResetSpanFontColor,
+        .setSpanLetterSpacing = SetSpanLetterSpacing,
+        .resetSpanLetterSpacing = ResetSpanLetterSpacing,
+        .setSpanBaselineOffset = SetSpanBaselineOffset,
+        .resetSpanBaselineOffset = ResetSpanBaselineOffset,
+        .setSpanFont = SetSpanFont,
+        .resetSpanFont = ResetSpanFont,
+        .setSpanFontWeightStr = SetSpanFontWeightStr,
+        .getSpanContent = GetSpanContent,
+        .getSpanDecoration = GetSpanDecoration,
+        .getSpanFontColor = GetSpanFontColor,
+        .getSpanFontSize = GetSpanFontSize,
+        .getSpanFontStyle = GetSpanFontStyle,
+        .getSpanFontWeight = GetSpanFontWeight,
+        .getSpanLineHeight = GetSpanLineHeight,
+        .getSpanTextCase = GetSpanTextCase,
+        .getSpanLetterSpacing = GetSpanLetterSpacing,
+        .getSpanBaselineOffset = GetSpanBaselineOffset,
+        .setSpanTextBackgroundStyle = SetSpanTextBackgroundStyle,
+        .resetSpanTextBackgroundStyle = ResetSpanTextBackgroundStyle,
+        .getSpanTextBackgroundStyle = GetSpanTextBackgroundStyle,
+        .setTextShadow = SetTextTextShadow,
+        .resetTextShadow = ResetTextTextShadow,
+        .getTextShadows = GetTextShadow,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 

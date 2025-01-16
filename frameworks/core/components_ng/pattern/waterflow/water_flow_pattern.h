@@ -34,6 +34,8 @@ public:
     bool IsScrollable() const override;
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
+    bool IsAtTopWithDelta() const override;
+    bool IsAtBottomWithDelta() const override;
     bool IsReverse() const override;
     bool IsVerticalReverse() const;
     bool hasFooter()

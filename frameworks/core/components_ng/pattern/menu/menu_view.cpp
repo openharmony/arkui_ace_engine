@@ -39,6 +39,8 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 
 namespace OHOS::Ace::NG {
 
@@ -145,8 +147,21 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, con
     auto renderContext = menuNode->GetRenderContext();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
         BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
-        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        auto pipeLineContext = menuNode->GetContextWithCheck();
+        if (!pipeLineContext) {
+            return { wrapperNode, menuNode };
+        }
+        auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
+        if (!selectTheme) {
+            return { wrapperNode, menuNode };
+        }
+        if (selectTheme->GetMenuBlendBgColor()) {
+            styleOption.blurStyle = static_cast<BlurStyle>(selectTheme->GetMenuNormalBackgroundBlurStyle());
+            renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
+        } else {
+            styleOption.blurStyle = static_cast<BlurStyle>(selectTheme->GetMenuBackgroundBlurStyle());
+            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        }
         renderContext->UpdateBackBlurStyle(styleOption);
     }
 
@@ -167,8 +182,7 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    auto padding = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
-                   static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    auto padding = static_cast<float>(theme->GetMenuItemHorIntervalPadding().ConvertToPx());
     PaddingProperty textPadding;
     textPadding.left = CalcLength(padding);
     textPadding.right = CalcLength(padding);
@@ -204,7 +218,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto theme = pipeline->GetTheme<SelectTheme>();
     float contentPadding = 0.0f;
     if (theme) {
-        contentPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+        contentPadding = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
     }
     PaddingProperty padding;
     padding.left = padding.right = padding.top = padding.bottom = CalcLength(contentPadding);
@@ -595,16 +609,7 @@ void InitPanEvent(const RefPtr<GestureEventHub>& targetGestureHub, const RefPtr<
     auto touchTask = [actuator = AceType::WeakClaim(AceType::RawPtr(dragEventActuator))](const TouchEventInfo& info) {
         auto dragEventActuator = actuator.Upgrade();
         CHECK_NULL_VOID(dragEventActuator);
-        if (info.GetTouches().empty()) {
-            return;
-        }
-        auto touchPoint = Point(
-            info.GetTouches().front().GetGlobalLocation().GetX(), info.GetTouches().front().GetGlobalLocation().GetY());
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-            dragEventActuator->SetDragDampStartPointInfo(touchPoint, info.GetTouches().front().GetFingerId());
-        } else if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
-            dragEventActuator->HandleDragDampingMove(touchPoint, info.GetTouches().front().GetFingerId(), true);
-        }
+        dragEventActuator->HandleTouchEvent(info, true);
     };
     auto touchListener = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddTouchEvent(touchListener);
@@ -822,6 +827,7 @@ void SetPreviewInfoToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<Fram
         }
     }
     if (menuParam.previewMode != MenuPreviewMode::NONE || isAllowedDrag) {
+        DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
         SetFilter(targetNode, wrapperNode);
     }
     if (menuParam.previewMode == MenuPreviewMode::IMAGE ||
@@ -880,6 +886,31 @@ void SetMenuFocusRule(const RefPtr<FrameNode>& menuNode)
     auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
     CHECK_NULL_VOID(menuTheme);
     focusHub->SetDirectionalKeyFocus(menuTheme->GetEnableDirectionalKeyFocus());
+}
+
+Alignment ConvertTxtTextAlign(bool IsRightToLeft, TextAlign textAlign)
+{
+    Alignment convertValue;
+    switch (textAlign) {
+        case TextAlign::LEFT:
+            convertValue = Alignment::CENTER_LEFT;
+            break;
+        case TextAlign::CENTER:
+            convertValue = Alignment::CENTER;
+            break;
+        case TextAlign::RIGHT:
+            convertValue = Alignment::CENTER_RIGHT;
+            break;
+        case TextAlign::START:
+            convertValue = IsRightToLeft ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT;
+            break;
+        case TextAlign::END:
+            convertValue = IsRightToLeft ? Alignment::CENTER_LEFT : Alignment::CENTER_RIGHT;
+            break;
+        default:
+            break;
+    }
+    return convertValue;
 }
 } // namespace
 
@@ -1233,6 +1264,16 @@ RefPtr<FrameNode> MenuView::Create(
     return wrapperNode;
 }
 
+EffectOption CreateEffectOption(Dimension radius, double saturation, double brightness, Color color)
+{
+    EffectOption option;
+    option.radius = radius;
+    option.saturation = saturation;
+    option.brightness = brightness;
+    option.color = color;
+    return option;
+}
+
 void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
 {
     CHECK_NULL_VOID(menuNode);
@@ -1247,7 +1288,7 @@ void MenuView::UpdateMenuBackgroundEffect(const RefPtr<FrameNode>& menuNode)
         auto brightness = menuTheme->GetBgEffectBrightness();
         auto radius = menuTheme->GetBgEffectRadius();
         auto color = menuTheme->GetBgEffectColor();
-        EffectOption option = { radius, saturation, brightness, color };
+        EffectOption option = CreateEffectOption(radius, saturation, brightness, color);
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
         renderContext->UpdateBackgroundEffect(option);
     }
@@ -1296,11 +1337,47 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
     auto menuNodeRenderContext = menuNode->GetRenderContext();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
         menuNodeRenderContext->IsUniRenderEnabled()) {
+        auto pipeLineContext = menuNode->GetContextWithCheck();
+        CHECK_NULL_VOID(pipeLineContext);
+        auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(selectTheme);
         BlurStyleOption styleOption;
-        styleOption.blurStyle = static_cast<BlurStyle>(
-            menuParam.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+        if (menuParam.blurStyleOption.has_value()) {
+            styleOption = menuParam.blurStyleOption.value();
+            if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeLineContext->AddWindowFocusChangedCallback(menuNode->GetId());
+            } else {
+                pipeLineContext->RemoveWindowFocusChangedCallback(menuNode->GetId());
+            }
+        }
+        Color color;
+        if (selectTheme->GetMenuBlendBgColor()) {
+            styleOption.blurStyle = static_cast<BlurStyle>(
+                menuParam.backgroundBlurStyle.value_or(selectTheme->GetMenuNormalBackgroundBlurStyle()));
+            color = menuParam.backgroundColor.value_or(selectTheme->GetBackgroundColor());
+        } else {
+            auto menuTheme = pipeLineContext->GetTheme<NG::MenuTheme>();
+            CHECK_NULL_VOID(menuTheme);
+            styleOption.blurStyle = static_cast<BlurStyle>(
+                menuParam.backgroundBlurStyle.value_or(menuTheme->GetMenuBackgroundBlurStyle()));
+            color = menuParam.backgroundColor.value_or(Color::TRANSPARENT);
+        }
+        if (menuParam.blurStyleOption.has_value() && menuNodeRenderContext->GetBackgroundEffect().has_value()) {
+            menuNodeRenderContext->UpdateBackgroundEffect(std::nullopt);
+        }
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
-        menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
+        menuNodeRenderContext->UpdateBackgroundColor(color);
+        if (menuParam.effectOption.has_value()) {
+            if (menuParam.effectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeLineContext->AddWindowFocusChangedCallback(menuNode->GetId());
+            } else {
+                pipeLineContext->RemoveWindowFocusChangedCallback(menuNode->GetId());
+            }
+            if (menuNodeRenderContext->GetBackBlurStyle().has_value()) {
+                menuNodeRenderContext->UpdateBackBlurStyle(std::nullopt);
+            }
+            menuNodeRenderContext->UpdateBackgroundEffect(menuParam.effectOption.value());
+        }
     } else if (menuParam.backgroundColor.has_value()) {
         menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value());
     }
@@ -1411,16 +1488,19 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
 void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
     const std::function<void()>& onClickFunc, const std::string& icon)
 {
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto overlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(overlayTheme);
     RefPtr<FrameNode> pasteNode;
-    if (optionsHasIcon) {
-        pasteNode =
-            PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-                static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE), static_cast<int32_t>(ButtonType::NORMAL), true);
-    } else {
-        pasteNode =
-            PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-                static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL), true);
-    }
+    pasteNode = PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
+        optionsHasIcon ? static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE) :
+        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
+        static_cast<int32_t>(ButtonType::NORMAL),
+        true,
+        optionsHasIcon ? overlayTheme->GetPasteSymbolId() : static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL));
     CHECK_NULL_VOID(pasteNode);
     auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -1428,10 +1508,6 @@ void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& o
     CHECK_NULL_VOID(pasteLayoutProperty);
     auto pastePaintProperty = pasteNode->GetPaintProperty<SecurityComponentPaintProperty>();
     CHECK_NULL_VOID(pastePaintProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
 
     pasteLayoutProperty->UpdateFontSize(theme->GetMenuFontSize());
     pasteLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);
@@ -1520,6 +1596,16 @@ RefPtr<FrameNode> MenuView::CreateText(const std::string& value, const RefPtr<Fr
     auto textRenderContext = textNode->GetRenderContext();
     textRenderContext->UpdateForegroundColor(theme->GetMenuFontColor());
     textProperty->UpdateContent(value);
+    auto padding = theme->GetOptionContentNormalLeftRightPadding();
+    PaddingProperty textPadding;
+    textPadding.left = CalcLength(padding);
+    textPadding.right = CalcLength(padding);
+    textProperty->UpdatePadding(textPadding);
+    auto layoutDirection = textProperty->GetNonAutoLayoutDirection();
+    auto IsRightToLeft = layoutDirection == TextDirection::RTL;
+    auto textAlign = static_cast<TextAlign>(theme->GetOptionContentNormalAlign());
+    auto convertValue = ConvertTxtTextAlign(IsRightToLeft, textAlign);
+    textProperty->UpdateAlignment(convertValue);
     textNode->MountToParent(parent);
     textNode->MarkModifyDone();
 
@@ -1604,6 +1690,14 @@ RefPtr<FrameNode> MenuView::Create(int32_t index)
     CHECK_NULL_RETURN(props, nullptr);
     props->UpdateHover(false);
     props->UpdatePress(false);
+
+    auto layoutProp = node->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProp, nullptr);
+    MarginProperty margin;
+    auto verticalMargin = CalcLength(theme->GetOptionNormalTopBottomMargin());
+    auto leftRightMargin = CalcLength(theme->GetOptionFocusedLeftRightMargin());
+    margin.SetEdges(leftRightMargin, leftRightMargin, verticalMargin, verticalMargin);
+    layoutProp->UpdateMargin(margin);
     return node;
 }
 } // namespace OHOS::Ace::NG

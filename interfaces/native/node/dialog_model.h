@@ -59,6 +59,7 @@ int32_t Show(ArkUI_NativeDialogHandle handle, bool showInSubWindow);
 int32_t Close(ArkUI_NativeDialogHandle handle);
 int32_t RegisterOnWillDismissWithUserData(
     ArkUI_NativeDialogHandle handle, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
+int32_t SetKeyboardAvoidDistance(ArkUI_NativeDialogHandle handle, float distance, ArkUI_LengthMetricUnit unit);
 } // namespace OHOS::Ace::NG::DialogModel
 
 #endif // ARKUI_NATIVE_NODE_DIALOG_MODEL_H

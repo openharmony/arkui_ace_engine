@@ -14,9 +14,15 @@
  */
 
 #include "text_base.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/pattern/text/text_layout_algorithm.h"
-#include "core/components_ng/property/layout_constraint.h"
+
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/render/mock_paragraph.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
+#include "core/components_ng/pattern/root/root_pattern.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 
 namespace OHOS::Ace::NG {
 

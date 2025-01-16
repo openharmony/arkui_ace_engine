@@ -21,6 +21,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_attributes.h"
 #include "core/components/theme/theme_constants.h"
@@ -174,6 +175,16 @@ public:
         return defaultTextMaxLines_;
     }
 
+    const TextStyle& GetTextStyle() const
+    {
+        return textStyle_;
+    }
+
+    float GetBgDisabledAlpha() const
+    {
+        return bgDisabledAlpha_;
+    }
+
 private:
     SecurityComponentTheme() = default;
     static void ParseLocationDescriptions(RefPtr<ThemeStyle> securityComponentPattern,
@@ -298,6 +309,8 @@ private:
     Color borderColor_;
 
     uint32_t defaultTextMaxLines_ = 1000000; // Infinity
+    TextStyle textStyle_;
+    float bgDisabledAlpha_ = 0.4f;
 
     std::vector<std::string> locationDescriptions_;
     std::vector<std::string> pasteDescriptions_;

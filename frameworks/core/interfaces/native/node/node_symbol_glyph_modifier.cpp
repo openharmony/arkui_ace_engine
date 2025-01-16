@@ -160,42 +160,46 @@ void ResetSymbolGlyphInitialize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISymbolGlyphModifier modifier = {
-        SetFontColor,
-        ResetFontColor,
-        SetFontSize,
-        ResetFontSize,
-        SetFontWeightStr,
-        SetFontWeight,
-        ResetFontWeight,
-        SetRenderingStrategy,
-        ResetRenderingStrategy,
-        SetEffectStrategy,
-        ResetEffectStrategy,
-        SetSymbolGlyphInitialize,
-        ResetSymbolGlyphInitialize,
+        .setFontColor = SetFontColor,
+        .resetFontColor = ResetFontColor,
+        .setFontSize = SetFontSize,
+        .resetFontSize = ResetFontSize,
+        .setFontWeightStr = SetFontWeightStr,
+        .setFontWeight = SetFontWeight,
+        .resetFontWeight = ResetFontWeight,
+        .setRenderingStrategy = SetRenderingStrategy,
+        .resetRenderingStrategy = ResetRenderingStrategy,
+        .setEffectStrategy = SetEffectStrategy,
+        .resetEffectStrategy = ResetEffectStrategy,
+        .setSymbolGlyphInitialize = SetSymbolGlyphInitialize,
+        .resetSymbolGlyphInitialize = ResetSymbolGlyphInitialize,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUISymbolGlyphModifier modifier = {
-        SetFontColor,
-        ResetFontColor,
-        SetFontSize,
-        ResetFontSize,
-        SetFontWeightStr,
-        SetFontWeight,
-        ResetFontWeight,
-        SetRenderingStrategy,
-        ResetRenderingStrategy,
-        SetEffectStrategy,
-        ResetEffectStrategy,
-        SetSymbolGlyphInitialize,
-        ResetSymbolGlyphInitialize,
+        .setFontColor = SetFontColor,
+        .resetFontColor = ResetFontColor,
+        .setFontSize = SetFontSize,
+        .resetFontSize = ResetFontSize,
+        .setFontWeightStr = SetFontWeightStr,
+        .setFontWeight = SetFontWeight,
+        .resetFontWeight = ResetFontWeight,
+        .setRenderingStrategy = SetRenderingStrategy,
+        .resetRenderingStrategy = ResetRenderingStrategy,
+        .setEffectStrategy = SetEffectStrategy,
+        .resetEffectStrategy = ResetEffectStrategy,
+        .setSymbolGlyphInitialize = SetSymbolGlyphInitialize,
+        .resetSymbolGlyphInitialize = ResetSymbolGlyphInitialize,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

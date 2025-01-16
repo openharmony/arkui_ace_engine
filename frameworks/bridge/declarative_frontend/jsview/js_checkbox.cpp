@@ -139,14 +139,23 @@ void JSCheckbox::SetSelect(const JSCallbackInfo& info)
         return;
     }
     bool select = false;
-    auto jsSelect = info[0];
-    if (length > 0 && jsSelect->IsBoolean()) {
-        select = jsSelect->ToBoolean();
+
+    JSRef<JSVal> changeEventVal;
+    auto selectedVal = info[0];
+    if (selectedVal->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(selectedVal);
+        selectedVal = obj->GetProperty("value");
+        changeEventVal = obj->GetProperty("$value");
+    } else if (info.Length() > 1) {
+        changeEventVal = info[1];
+    }
+    if (selectedVal->IsBoolean()) {
+        select = selectedVal->ToBoolean();
     }
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "checkbox set select %{public}d", select);
     CheckBoxModel::GetInstance()->SetSelect(select);
-    if (length > 1 && info[1]->IsFunction()) {
-        ParseSelectObject(info, info[1]);
+    if (changeEventVal->IsFunction()) {
+        ParseSelectObject(info, changeEventVal);
     }
 }
 

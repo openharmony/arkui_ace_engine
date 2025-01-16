@@ -35,6 +35,11 @@ public:
     bool PreloadItem(LayoutWrapper* host, int32_t itemIdx, int64_t deadline) override;
     void EndCacheLayout() override;
 
+    void EnableSkip(bool value)
+    {
+        canSkip_ = value;
+    }
+
 private:
     void Init(const SizeF& frameSize);
     /* init WaterFlow without Sections */
@@ -197,6 +202,8 @@ private:
     int32_t itemCnt_ = 0; // total number of FlowItems (excluding footer)
     float mainLen_ = 0.0f;
     std::optional<int64_t> cacheDeadline_; // cache layout deadline
+
+    bool canSkip_ = false; // try converting large delta to jump if true.
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_SW_LAYOUT_H

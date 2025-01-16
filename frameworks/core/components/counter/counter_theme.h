@@ -136,9 +136,10 @@ private:
     Dimension contentWidth_ = 36.0_vp;
     double alphaDisabled_ = 0.4;
     NG::BorderRadiusProperty borderRadius_ = { 4.0_vp, 4.0_vp, 4.0_vp, 4.0_vp };
-    NG::BorderWidthProperty borderWidth_ = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp };
-    NG::BorderWidthProperty contentBorderWidth_ = { 0.0_vp, 1.0_vp, 0.0_vp, 1.0_vp };
-    NG::BorderColorProperty borderColor_ = { Color::GRAY, Color::GRAY, Color::GRAY, Color::GRAY };
+    NG::BorderWidthProperty borderWidth_ = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp, std::nullopt, std::nullopt };
+    NG::BorderWidthProperty contentBorderWidth_ = { 0.0_vp, 1.0_vp, 0.0_vp, 1.0_vp, std::nullopt, std::nullopt };
+    NG::BorderColorProperty borderColor_ = { Color::GRAY, Color::GRAY, Color::GRAY, Color::GRAY,
+        std::nullopt, std::nullopt };
     NG::BorderStyleProperty borderStyle_ = { BorderStyle::SOLID, BorderStyle::SOLID, BorderStyle::SOLID,
         BorderStyle::SOLID };
 };

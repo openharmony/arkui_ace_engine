@@ -104,33 +104,37 @@ void ResetColumnReverse(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIColumnModifier* GetColumnModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIColumnModifier modifier = {
-        SetColumnJustifyContent,
-        ResetColumnJustifyContent,
-        SetColumnAlignItems,
-        ResetColumnAlignItems,
-        GetColumnJustifyContent,
-        GetColumnAlignItems,
-        SetColumnSpace,
-        ResetColumnSpace,
-        SetColumnReverse,
-        ResetColumnReverse,
+        .setColumnJustifyContent = SetColumnJustifyContent,
+        .resetColumnJustifyContent = ResetColumnJustifyContent,
+        .setColumnAlignItems = SetColumnAlignItems,
+        .resetColumnAlignItems = ResetColumnAlignItems,
+        .getColumnJustifyContent = GetColumnJustifyContent,
+        .getColumnAlignItems = GetColumnAlignItems,
+        .setColumnSpace = SetColumnSpace,
+        .resetColumnSpace = ResetColumnSpace,
+        .setColumnReverse = SetColumnReverse,
+        .resetColumnReverse = ResetColumnReverse,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIColumnModifier* GetCJUIColumnModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIColumnModifier modifier = {
-        SetColumnJustifyContent,
-        ResetColumnJustifyContent,
-        SetColumnAlignItems,
-        ResetColumnAlignItems,
-        GetColumnJustifyContent,
-        GetColumnAlignItems,
-        SetColumnSpace,
-        ResetColumnSpace,
+        .setColumnJustifyContent = SetColumnJustifyContent,
+        .resetColumnJustifyContent = ResetColumnJustifyContent,
+        .setColumnAlignItems = SetColumnAlignItems,
+        .resetColumnAlignItems = ResetColumnAlignItems,
+        .getColumnJustifyContent = GetColumnJustifyContent,
+        .getColumnAlignItems = GetColumnAlignItems,
+        .setColumnSpace = SetColumnSpace,
+        .resetColumnSpace = ResetColumnSpace,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

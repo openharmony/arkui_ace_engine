@@ -16,6 +16,7 @@
 #include "pixel_map_ohos.h"
 
 #include "drawable_descriptor.h"
+#include "media_errors.h"
 #include "pixel_map_manager.h"
 
 #include "core/image/image_file_cache.h"
@@ -54,6 +55,38 @@ PixelFormat PixelMapOhos::PixelFormatConverter(Media::PixelFormat pixelFormat)
     }
 }
 
+Media::PixelFormat PixelMapOhos::ConvertToMediaPixelFormat(Ace::PixelFormat pixelFormat)
+{
+    switch (pixelFormat) {
+        case PixelFormat::RGB_565:
+            return Media::PixelFormat::RGB_565;
+        case PixelFormat::RGBA_8888:
+            return Media::PixelFormat::RGBA_8888;
+        case PixelFormat::RGBA_1010102:
+            return Media::PixelFormat::RGBA_1010102;
+        case PixelFormat::BGRA_8888:
+            return Media::PixelFormat::BGRA_8888;
+        case PixelFormat::ALPHA_8:
+            return Media::PixelFormat::ALPHA_8;
+        case PixelFormat::RGBA_F16:
+            return Media::PixelFormat::RGBA_F16;
+        case PixelFormat::UNKNOWN:
+            return Media::PixelFormat::UNKNOWN;
+        case PixelFormat::ARGB_8888:
+            return Media::PixelFormat::ARGB_8888;
+        case PixelFormat::RGB_888:
+            return Media::PixelFormat::RGB_888;
+        case PixelFormat::NV21:
+            return Media::PixelFormat::NV21;
+        case PixelFormat::NV12:
+            return Media::PixelFormat::NV12;
+        case PixelFormat::CMYK:
+            return Media::PixelFormat::CMYK;
+        default:
+            return Media::PixelFormat::UNKNOWN;
+    }
+}
+
 AlphaType PixelMapOhos::AlphaTypeConverter(Media::AlphaType alphaType)
 {
     switch (alphaType) {
@@ -67,6 +100,22 @@ AlphaType PixelMapOhos::AlphaTypeConverter(Media::AlphaType alphaType)
             return AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
         default:
             return AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+    }
+}
+
+Media::AlphaType PixelMapOhos::ConvertToMediaAlphaType(Ace::AlphaType alphaType)
+{
+    switch (alphaType) {
+        case AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+        case AlphaType::IMAGE_ALPHA_TYPE_OPAQUE:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_OPAQUE;
+        case AlphaType::IMAGE_ALPHA_TYPE_PREMUL:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
+        case AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_UNPREMUL;
+        default:
+            return Media::AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
     }
 }
 
@@ -88,8 +137,38 @@ AllocatorType PixelMapOhos::AllocatorTypeConverter(Media::AllocatorType allocato
     }
 }
 
+Media::ScaleMode PixelMapOhos::ConvertToMediaScaleMode(Ace::ScaleMode scaleMode)
+{
+    switch (scaleMode) {
+        case ScaleMode::CENTER_CROP:
+            return Media::ScaleMode::CENTER_CROP;
+        case ScaleMode::FIT_TARGET_SIZE:
+            return Media::ScaleMode::FIT_TARGET_SIZE;
+        default:
+            return Media::ScaleMode::FIT_TARGET_SIZE;
+    }
+}
+
 RefPtr<PixelMap> PixelMap::Create(std::unique_ptr<Media::PixelMap>&& pixmap)
 {
+    return AceType::MakeRefPtr<PixelMapOhos>(std::move(pixmap));
+}
+
+RefPtr<PixelMap> PixelMap::Create(const InitializationOptions& opts)
+{
+    Media::InitializationOptions options;
+    opts.size.Width();
+    options.size.width = opts.size.Width();
+    options.size.height = opts.size.Height();
+    options.srcPixelFormat = PixelMapOhos::ConvertToMediaPixelFormat(opts.srcPixelFormat);
+    options.pixelFormat = PixelMapOhos::ConvertToMediaPixelFormat(opts.pixelFormat);
+    options.editable = opts.editable;
+    options.alphaType = PixelMapOhos::ConvertToMediaAlphaType(opts.alphaType);
+    options.scaleMode = PixelMapOhos::ConvertToMediaScaleMode(opts.scaleMode);
+    options.srcRowStride = opts.srcRowStride;
+    options.useSourceIfMatch = opts.useSourceIfMatch;
+    options.useDMA = opts.useDMA;
+    std::unique_ptr<Media::PixelMap> pixmap = Media::PixelMap::Create(options);
     return AceType::MakeRefPtr<PixelMapOhos>(std::move(pixmap));
 }
 
@@ -351,6 +430,20 @@ RefPtr<PixelMap> PixelMapOhos::GetCropPixelMap(const Rect& srcRect)
     Media::Rect rect {srcRect.Left(), srcRect.Top(), srcRect.Width(), srcRect.Height()};
     auto resPixelmap = OHOS::Media::PixelMap::Create(*pixmap_, rect, options);
     return AceType::MakeRefPtr<PixelMapOhos>(std::move(resPixelmap));
+}
+
+uint32_t PixelMapOhos::WritePixels(const WritePixelsOptions& opts)
+{
+    CHECK_NULL_RETURN(pixmap_, Media::ERR_IMAGE_WRITE_PIXELMAP_FAILED);
+    Media::Rect rect { opts.region.Left(), opts.region.Top(), opts.region.Width(), opts.region.Height() };
+    Media::WritePixelsOptions options;
+    options.source = opts.source;
+    options.bufferSize = opts.bufferSize;
+    options.offset = opts.offset;
+    options.stride = opts.stride;
+    options.region = rect;
+    options.srcPixelFormat = PixelMapOhos::ConvertToMediaPixelFormat(opts.srcPixelFormat);
+    return pixmap_->WritePixels(options);
 }
 
 } // namespace OHOS::Ace

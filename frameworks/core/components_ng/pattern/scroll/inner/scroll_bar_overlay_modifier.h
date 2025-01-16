@@ -129,6 +129,10 @@ public:
 
     void SetBarColor(Color barColor);
 
+    RefPtr<PropertyColor> GetBarColor()
+    {
+        return barColor_;
+    }
     void SetPositionMode(const PositionMode& positionMode)
     {
         positionMode_ = positionMode;
@@ -138,6 +142,21 @@ public:
     {
         isScrollable_ = isScrollable;
     }
+
+    void SetNavDestinationShow(bool isNavDestinationShow)
+    {
+        isNavDestinationShow_ = isNavDestinationShow;
+    }
+
+protected:
+    std::shared_ptr<AnimationUtils::Animation> hoverAnimation_;
+
+#ifdef ARKUI_CIRCLE_FEATURE
+    bool GetScrollable()
+    {
+        return isScrollable_;
+    }
+#endif
 
 private:
     Offset GetHoverOffset(const Size& size) const;
@@ -156,7 +175,6 @@ private:
     float lastMainModeOffset_ = 0.f;
     ACE_DISALLOW_COPY_AND_MOVE(ScrollBarOverlayModifier);
 
-    std::shared_ptr<AnimationUtils::Animation> hoverAnimation_;
     std::shared_ptr<AnimationUtils::Animation> opacityAnimation_;
     std::shared_ptr<AnimationUtils::Animation> adaptAnimation_;
     HoverAnimationType hoverAnimatingType_ = HoverAnimationType::NONE;
@@ -164,6 +182,7 @@ private:
     PositionMode positionMode_ = PositionMode::RIGHT;
 
     bool isScrollable_ = true;
+    bool isNavDestinationShow_ = true;
 };
 } // namespace OHOS::Ace::NG
 

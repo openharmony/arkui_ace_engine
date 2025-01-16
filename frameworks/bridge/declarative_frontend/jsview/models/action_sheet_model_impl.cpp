@@ -21,6 +21,7 @@
 namespace OHOS::Ace::Framework {
 void ActionSheetModelImpl::ShowActionSheet(const DialogProperties& arg)
 {
+#ifndef ARKUI_WAERABLE
     LOGE("ActionSheetModelImpl::ShowActionSheet");
     auto container = Container::Current();
     if (container) {
@@ -33,9 +34,10 @@ void ActionSheetModelImpl::ShowActionSheet(const DialogProperties& arg)
                         context->ShowDialog(arg, false, "ActionSheet");
                     }
                 },
-                TaskExecutor::TaskType::UI, "ArkUIDialogShowActionSheet");
+                TaskExecutor::TaskType::UI, "ArkUIDialogShowActionSheet", PriorityType::VIP);
         }
     }
+#endif
 }
 
 void ActionSheetModelImpl::SetAction(GestureEventFunc&& eventFunc, ActionSheetInfo& sheetInfo)

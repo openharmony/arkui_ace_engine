@@ -114,6 +114,9 @@ public:
         const std::string& udKey, int32_t count = 0);
     void OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefPtr<FrameNode>& dragFrameNode,
         const OHOS::Ace::DragPointerEvent& pointerEvent);
+    void ExecuteStopDrag(const RefPtr<OHOS::Ace::DragEvent>& event, DragRet dragResult, bool useCustomAnimation,
+        int32_t windowId, DragBehavior dragBehavior, const OHOS::Ace::DragPointerEvent& pointerEvent);
+    void ExecuteCustomDropAnimation(const RefPtr<OHOS::Ace::DragEvent>& dragEvent, DragDropRet dragDropRet);
     void ResetDragDropStatus(const Point& point, const DragDropRet& dragDropRet, int32_t windowId);
     bool CheckRemoteData(
         const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent, const std::string& udKey);
@@ -133,6 +136,8 @@ public:
     void SetExtraInfo(const std::string& extraInfo);
     void ClearExtraInfo();
     float GetWindowScale() const;
+    void UpdateDragCursorStyle(const RefPtr<FrameNode>& frameNode, const RefPtr<OHOS::Ace::DragEvent>& event,
+        const int32_t eventId = -1);
     void UpdateDragStyle(
         const DragCursorStyleCore& dragCursorStyleCore = DragCursorStyleCore::DEFAULT, const int32_t eventId = -1);
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const DragBehavior dragBehavior,
@@ -249,6 +254,12 @@ public:
         nodesForDragNotify_.erase(nodeId);
     }
 
+    void RegisterPullEventListener(int32_t uniqueIdentify, std::function<void(const DragPointerEvent&)> callback);
+
+    void UnRegisterPullEventListener(int32_t uniqueIdentify);
+
+    void NotifyPullEventListener(const DragPointerEvent& dragPointerEvent);
+
     void SetNotifyInDraggedCallback(const std::function<void(void)>& callback)
     {
         notifyInDraggedCallback_ = callback;
@@ -334,6 +345,36 @@ public:
     bool IsPullMoveReceivedForCurrentDrag() const
     {
         return isPullMoveReceivedForCurrentDrag_;
+    }
+
+    void RemoveDeadlineTimer();
+
+    void ExecuteDeadlineTimer();
+
+    void HandleSyncOnDragStart(DragStartRequestStatus dragStartRequestStatus);
+
+    void SetDragMoveLastPoint(Point point) noexcept;
+
+    void SetDelayDragCallBack(const std::function<void()>& cb) noexcept;
+
+    DragStartRequestStatus IsDragStartNeedToBePended() const
+    {
+        return dragStartRequestStatus_;
+    }
+
+    bool HasDelayDragCallBack() const
+    {
+        return asyncDragCallback_ != nullptr;
+    }
+
+    bool IsStartAnimationFInished() const
+    {
+        return isStartAnimationFinished_;
+    }
+
+    void SetStartAnimation(bool flag)
+    {
+        isStartAnimationFinished_ = flag;
     }
 
     static OffsetF GetTouchOffsetRelativeToSubwindow(int32_t containerId, int32_t x = 0, int32_t y = 0);
@@ -466,6 +507,23 @@ public:
 
     void ResetDraggingStatus(const TouchEvent& touchPoint);
 
+    void SetGrayedState(bool state)
+    {
+        grayedState_ = state;
+    }
+
+    bool GetGrayedState() const
+    {
+        return grayedState_;
+    }
+    
+    void SetIsAnyDraggableHit(bool isAnyDraggableHit = false)
+    {
+        isAnyDraggableHit_ = isAnyDraggableHit;
+    }
+
+    bool IsAnyDraggableHit(const RefPtr<PipelineBase>& pipeline, int32_t pointId);
+
 private:
     double CalcDragPreviewDistanceWithPoint(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
@@ -531,6 +589,7 @@ private:
     bool isDragCancel_ = false;
     std::unordered_map<int32_t, WeakPtr<FrameNode>> nodesForDragNotify_;
     std::unordered_set<int32_t> parentHitNodes_;
+    std::unordered_map<int32_t, std::function<void(const DragPointerEvent&)>> pullEventListener_;
     DragCursorStyleCore dragCursorStyleCore_ = DragCursorStyleCore::DEFAULT;
     std::map<std::string, int64_t> summaryMap_;
     uint32_t recordSize_ = 0;
@@ -548,6 +607,7 @@ private:
     bool isPullMoveReceivedForCurrentDrag_ = false;
     bool isDragWindowSubWindow_ = false;
     bool isDragNodeNeedClean_ = false;
+    bool isAnyDraggableHit_ = false;
     VelocityTracker velocityTracker_;
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     Rect previewRect_ { -1, -1, -1, -1 };
@@ -573,6 +633,12 @@ private:
     RefPtr<GridColumnInfo> columnInfo_;
     WeakPtr<FrameNode> menuWrapperNode_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
+    bool grayedState_ = false;
+
+    Point dragMoveLastPoint_;
+    DragStartRequestStatus dragStartRequestStatus_{DragStartRequestStatus::READY};
+    std::function<void()> asyncDragCallback_;
+    bool isStartAnimationFinished_{};
 };
 } // namespace OHOS::Ace::NG
 

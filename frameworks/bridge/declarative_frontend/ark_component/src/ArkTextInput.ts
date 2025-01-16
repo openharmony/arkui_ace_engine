@@ -126,6 +126,24 @@ class TextInputLineHeightModifier extends ModifierWithKey<number | string | Reso
   }
 }
 
+class TextInputHalfLeadingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputHalfLeading');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetHalfLeading(node);
+    } else {
+      getUINativeModule().textInput.setHalfLeading(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextInputUnderlineColorModifier extends ModifierWithKey<ResourceColor | UnderlineColor | undefined> {
   constructor(value: ResourceColor | UnderlineColor | undefined) {
     super(value);
@@ -222,6 +240,42 @@ class TextInputMaxFontSizeModifier extends ModifierWithKey<number | string | Res
       getUINativeModule().textInput.setMaxFontSize(node, this.value!);
     }
   }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputMinFontScaleModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputMinFontScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetMinFontScale(node);
+    } else {
+      getUINativeModule().textInput.setMinFontScale(node, this.value!);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class TextInputMaxFontScaleModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputMaxFontScale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetMaxFontScale(node);
+    } else {
+      getUINativeModule().textInput.setMaxFontScale(node, this.value!);
+    }
+  }
+
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
@@ -998,7 +1052,10 @@ class TextInputBorderModifier extends ModifierWithKey<ArkBorder> {
         this.value.arkWidth.left, this.value.arkWidth.right, this.value.arkWidth.top, this.value.arkWidth.bottom,
         this.value.arkColor.leftColor, this.value.arkColor.rightColor, this.value.arkColor.topColor, this.value.arkColor.bottomColor,
         this.value.arkRadius.topLeft, this.value.arkRadius.topRight, this.value.arkRadius.bottomLeft, this.value.arkRadius.bottomRight,
-        this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left);
+        this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left,
+        this.value.arkDashGap.left, this.value.arkDashGap.right, this.value.arkDashGap.top, this.value.arkDashGap.bottom,
+        this.value.arkDashWidth.left, this.value.arkDashWidth.right, this.value.arkDashWidth.top, this.value.arkDashWidth.bottom,
+        this.value.arkDashGap.start, this.value.arkDashGap.end, this.value.arkDashWidth.start, this.value.arkDashWidth.end);
     }
   }
   checkObjectDiff(): boolean {
@@ -1382,6 +1439,23 @@ class TextInputEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextInputEllipsisModeModifier extends ModifierWithKey<EllipsisMode> {
+  constructor(value: EllipsisMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputEllipsisMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetEllipsisMode(node);
+    } else {
+      getUINativeModule().textInput.setEllipsisMode(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 interface TextInputParam {
   placeholder?: ResourceStr;
   text?: ResourceStr;
@@ -1655,6 +1729,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     modifierWithKey(this._modifiersWithKeys, TextInputLineHeightModifier.identity, TextInputLineHeightModifier, value);
     return this;
   }
+  halfLeading(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputHalfLeadingModifier.identity, TextInputHalfLeadingModifier, value);
+    return this;
+  }
   underlineColor(value: ResourceColor | UnderlineColor | undefined): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputUnderlineColorModifier.identity, TextInputUnderlineColorModifier, value);
     return this;
@@ -1676,6 +1754,14 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     modifierWithKey(this._modifiersWithKeys, TextInputMaxFontSizeModifier.identity, TextInputMaxFontSizeModifier, value);
     return this;
   }
+  minFontScale(value: number | Resource): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputMinFontScaleModifier.identity, TextInputMinFontScaleModifier, value);
+    return this;
+  }
+  maxFontScale(value: number | Resource): TextInputAttribute {
+    modifierWithKey(this._modifiersWithKeys, TextInputMaxFontScaleModifier.identity, TextInputMaxFontScaleModifier, value);
+    return this;
+  }
   heightAdaptivePolicy(value: TextHeightAdaptivePolicy): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputHeightAdaptivePolicyModifier.identity, TextInputHeightAdaptivePolicyModifier, value);
     return this;
@@ -1686,6 +1772,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
   }
   textIndent(value: Dimension): this {
     modifierWithKey(this._modifiersWithKeys, TextInputTextIndentModifier.identity, TextInputTextIndentModifier, value);
+    return this;
+  }
+  ellipsisMode(value: EllipsisMode): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputEllipsisModeModifier.identity, TextInputEllipsisModeModifier, value);
     return this;
   }
   padding(value: Padding | Length): this {
@@ -1783,6 +1873,38 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
           borderValue.arkStyle.bottom = arkBorderStyle.bottom;
           borderValue.arkStyle.right = arkBorderStyle.right;
         }
+      }
+    }
+    if (!isUndefined(value?.dashGap) && value?.dashGap !== null) {
+      if (isNumber(value.dashGap) || isString(value.dashGap) || isResource(value.dashGap) ||
+        isObject(value.dashGap) && isNumber(value.dashGap.value)) {
+        borderValue.arkDashGap.left = value.dashGap;
+        borderValue.arkDashGap.right = value.dashGap;
+        borderValue.arkDashGap.top = value.dashGap;
+        borderValue.arkDashGap.bottom = value.dashGap;
+      } else {
+        borderValue.arkDashGap.left = (value.dashGap as EdgeWidths).left;
+        borderValue.arkDashGap.right = (value.dashGap as EdgeWidths).right;
+        borderValue.arkDashGap.top = (value.dashGap as EdgeWidths).top;
+        borderValue.arkDashGap.bottom = (value.dashGap as EdgeWidths).bottom;
+        borderValue.arkDashGap.start = (value.dashGap as LocalizedEdgeWidths).start;
+        borderValue.arkDashGap.end = (value.dashGap as LocalizedEdgeWidths).end;
+      }
+    }
+    if (!isUndefined(value?.dashWidth) && value?.dashWidth !== null) {
+      if (isNumber(value.dashWidth) || isString(value.dashWidth) || isResource(value.dashWidth) ||
+        isObject(value.dashWidth) && isNumber(value.dashWidth.value)) {
+        borderValue.arkDashWidth.left = value.dashWidth;
+        borderValue.arkDashWidth.right = value.dashWidth;
+        borderValue.arkDashWidth.top = value.dashWidth;
+        borderValue.arkDashWidth.bottom = value.dashWidth;
+      } else {
+        borderValue.arkDashWidth.left = (value.dashWidth as EdgeWidths).left;
+        borderValue.arkDashWidth.right = (value.dashWidth as EdgeWidths).right;
+        borderValue.arkDashWidth.top = (value.dashWidth as EdgeWidths).top;
+        borderValue.arkDashWidth.bottom = (value.dashWidth as EdgeWidths).bottom;
+        borderValue.arkDashWidth.start = (value.dashWidth as EdgeWidths).start;
+        borderValue.arkDashWidth.end = (value.dashWidth as EdgeWidths).end;
       }
     }
     modifierWithKey(this._modifiersWithKeys, TextInputBorderModifier.identity, TextInputBorderModifier, borderValue);

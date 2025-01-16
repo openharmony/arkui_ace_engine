@@ -193,6 +193,7 @@ class ColorMetrics {
   private green_: number;
   private blue_: number;
   private alpha_: number;
+  private resourceId_: number;
   private static clamp(value: number): number {
     return Math.min(Math.max(value, 0), MAX_CHANNEL_VALUE);
   }
@@ -257,7 +258,10 @@ class ColorMetrics {
       const green = chanels[1];
       const blue = chanels[2];
       const alpha = chanels[3];
-      return new ColorMetrics(red, green, blue, alpha);
+      const resourceId = chanels[4];
+      const colorMetrics = new ColorMetrics(red, green, blue, alpha);
+      colorMetrics.setResourceId(resourceId);
+      return colorMetrics;
     } else if (typeof color === 'number') {
       return ColorMetrics.numeric(color);
     } else if (typeof color === 'string') {
@@ -334,6 +338,12 @@ class ColorMetrics {
   }
   get alpha(): number {
     return this.alpha_;
+  }
+  setResourceId(resourceId: number): void {
+    this.resourceId_ = resourceId;
+  }
+  getResourceId(): number {
+    return this.resourceId_;
   }
 }
 

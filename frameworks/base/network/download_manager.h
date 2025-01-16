@@ -58,7 +58,8 @@ public:
         DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
     virtual bool DownloadSync(
         DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId, int32_t nodeId);
-    virtual bool RemoveDownloadTask(const std::string& url, int32_t nodeId);
+    virtual bool RemoveDownloadTask(const std::string& url, int32_t nodeId, bool isCancel = true);
+    virtual bool RemoveDownloadTaskWithPreload(const std::string& url, int32_t nodeId, bool isCancel = true);
 
     // use preload module to download the url
     virtual bool DownloadAsyncWithPreload(

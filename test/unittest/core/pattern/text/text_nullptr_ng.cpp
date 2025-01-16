@@ -15,6 +15,8 @@
 
 #include "text_base.h"
 
+#include "core/components_ng/pattern/text/text_model_ng.h"
+
 namespace OHOS::Ace::NG {
 
 class TextNullptrNg : public TextBases {

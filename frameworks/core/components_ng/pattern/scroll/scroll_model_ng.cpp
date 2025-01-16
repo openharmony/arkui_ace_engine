@@ -350,7 +350,9 @@ void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSn
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, scrollSnapAlign, frameNode);
         pattern->SetScrollSnapUpdate(true);
     }
-    pattern->SetIntervalSize(intervalSize);
+    if (scrollSnapAlign != ScrollSnapAlign::NONE) {
+        pattern->SetIntervalSize(intervalSize);
+    }
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
 }
@@ -407,9 +409,9 @@ int32_t ScrollModelNG::GetEdgeEffectAlways(FrameNode* frameNode)
     return ScrollableModelNG::GetAlwaysEnabled(frameNode);
 }
 
-void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void ScrollModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled, edge);
 }
 
 void ScrollModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
@@ -446,7 +448,9 @@ void ScrollModelNG::SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimensi
         ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, scrollSnapAlign);
         pattern->SetScrollSnapUpdate(true);
     }
-    pattern->SetIntervalSize(intervalSize);
+    if (scrollSnapAlign != ScrollSnapAlign::NONE) {
+        pattern->SetIntervalSize(intervalSize);
+    }
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
 }
@@ -470,9 +474,10 @@ void ScrollModelNG::SetScrollBarWidth(FrameNode* frameNode, const Dimension& dim
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, dimension, frameNode);
 }
 
-void ScrollModelNG::SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled)
+void ScrollModelNG::SetEdgeEffect(
+    FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, edge);
 }
 
 void ScrollModelNG::SetEnablePaging(FrameNode* frameNode, bool enablePaging)

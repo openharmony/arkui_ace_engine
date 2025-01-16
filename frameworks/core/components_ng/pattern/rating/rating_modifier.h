@@ -39,8 +39,11 @@ public:
         HOVERTOPRESS,
         PRESSTOHOVER,
         PRESS,
+        FOCUS,
     };
 
+    int32_t GetTouchStar();
+    double GetDistanceFromTheme();
     void PaintBoard(DrawingContext& context);
     void PaintStar(DrawingContext& context);
     void PaintReverseStar(DrawingContext& context);
@@ -49,16 +52,19 @@ public:
 
     void UpdateCanvasImage(const RefPtr<CanvasImage>& foregroundImageCanvas,
         const RefPtr<CanvasImage>& secondaryImageCanvas, const RefPtr<CanvasImage>& backgroundImageCanvas,
+        const RefPtr<CanvasImage>& backgroundImageFocusCanvas,
         const ImagePaintConfig& foregroundConfig, const ImagePaintConfig& secondaryConfig,
-        const ImagePaintConfig& backgroundConfig)
+        const ImagePaintConfig& backgroundConfig, const ImagePaintConfig& backgroundFocusConfig)
     {
         SetNeedDraw(true);
         foregroundImageCanvas_ = foregroundImageCanvas;
         secondaryImageCanvas_ = secondaryImageCanvas;
         backgroundImageCanvas_ = backgroundImageCanvas;
+        backgroundImageFocusCanvas_ = backgroundImageFocusCanvas;
         foregroundImageCanvas_->SetPaintConfig(foregroundConfig);
         secondaryImageCanvas_->SetPaintConfig(secondaryConfig);
         backgroundImageCanvas_->SetPaintConfig(backgroundConfig);
+        backgroundImageFocusCanvas_->SetPaintConfig(backgroundFocusConfig);
     }
 
     void UpdateImageSourceInfo(
@@ -100,6 +106,16 @@ public:
         }
     }
 
+    void SetIndicator(bool indicator)
+    {
+        indicator_ = indicator;
+    }
+
+    void SetImageInfoFromTheme(bool isImageInfoFromTheme)
+    {
+        isImageInfoFromTheme_ = isImageInfoFromTheme;
+    }
+
     void SetBoardColor(LinearColor color, int32_t duratuion, const RefPtr<CubicCurve>& curve)
     {
         if (boardColor_) {
@@ -107,6 +123,13 @@ public:
             option.SetDuration(duratuion);
             option.SetCurve(curve);
             AnimationUtils::Animate(option, [&]() { boardColor_->Set(color); });
+        }
+    }
+
+    void SetFocusOrBlurColor(const Color& color)
+    {
+        if (boardColor_) {
+            boardColor_->Set(LinearColor(color));
         }
     }
 
@@ -122,6 +145,11 @@ public:
         if (contentSize_) {
             contentSize_->Set(contentSize);
         }
+    }
+
+    RefPtr<PropertySizeF> GetContentSize()
+    {
+        return contentSize_;
     }
 
     void SetDrawScore(double drawScore)
@@ -162,6 +190,12 @@ public:
         }
     }
 
+    void SetIsFocus(bool isFocus)
+    {
+        isFocus_ = isFocus;
+        SetHoverState(state_);
+    }
+
     void SetHoverState(const RatingAnimationType& state)
     {
         if (state_ == state) {
@@ -177,6 +211,9 @@ public:
         switch (state) {
             case RatingAnimationType::HOVER:
                 SetBoardColor(LinearColor(ratingTheme->GetHoverColor()), hoverDuration, Curves::FRICTION);
+                break;
+            case RatingAnimationType::FOCUS:
+                SetBoardColor(LinearColor(ratingTheme->GetFocusColor()), hoverDuration, Curves::FRICTION);
                 break;
             case RatingAnimationType::HOVERTOPRESS:
                 SetBoardColor(LinearColor(ratingTheme->GetPressColor()), pressDuration, Curves::SHARP);
@@ -205,9 +242,14 @@ public:
 private:
     // others
     RatingAnimationType state_ = RatingAnimationType::NONE;
+    bool isFocus_ = false;
+    bool indicator_ = false;
+    bool isImageInfoFromTheme_ = false;
+    Dimension distance_ = 4.0_vp;
     RefPtr<CanvasImage> foregroundImageCanvas_;
     RefPtr<CanvasImage> secondaryImageCanvas_;
     RefPtr<CanvasImage> backgroundImageCanvas_;
+    RefPtr<CanvasImage> backgroundImageFocusCanvas_;
     ImageSourceInfo foreground_;
     ImageSourceInfo secondary_;
     ImageSourceInfo background_;
@@ -223,6 +265,8 @@ private:
     // animatable property
     RefPtr<AnimatablePropertyColor> boardColor_;
     RefPtr<PropertyBool> reverse_;
+    RefPtr<RatingTheme> ratingTheme_;
+    static constexpr int32_t NUMBER_TWO = 2;
     ACE_DISALLOW_COPY_AND_MOVE(RatingModifier);
 };
 } // namespace OHOS::Ace::NG

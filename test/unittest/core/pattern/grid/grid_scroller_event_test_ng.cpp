@@ -29,8 +29,8 @@ GridModelNG GridScrollerEventTestNg::CreateWithNoProxy()
     GridModelNG model;
     RefPtr<ScrollControllerBase> positionController = model.CreatePositionController();
     model.Create(positionController, nullptr);
-    ViewAbstract::SetWidth(CalcLength(GRID_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(GRID_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
     GetGrid();
     return model;
 }

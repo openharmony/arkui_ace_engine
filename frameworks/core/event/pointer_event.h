@@ -75,6 +75,8 @@ struct DragPointerEvent final : public PointerEvent {
     std::vector<KeyCode> pressedKeyCodes_;
     PointerAction action = PointerAction::UNKNOWN;
     std::vector<DragPointerEvent> history;
+    int32_t displayId = 0;
+    int32_t sourceType = 0;
 
     DragPointerEvent() = default;
     DragPointerEvent(float x, float y)

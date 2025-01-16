@@ -33,8 +33,7 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {
-RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
+RefPtr<ImageData> ImageLoadingContext::QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
 {
     ACE_FUNCTION_TRACE();
 #ifndef USE_ROSEN_DRAWING
@@ -68,13 +67,12 @@ RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit)
 #endif
     return nullptr;
 }
-} // namespace
 
 ImageLoadingContext::ImageLoadingContext(
     const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad, const ImageDfxConfig& imageDfxConfig)
     : src_(src), notifiers_(std::move(loadNotifier)), containerId_(Container::CurrentId()), syncLoad_(syncLoad),
       imageDfxConfig_(imageDfxConfig),
-      usePreload_(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN))
+      usePreload_(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN))
 {
     stateManager_ = MakeRefPtr<ImageStateManager>(WeakClaim(this));
     src_.SetImageDfxConfig(imageDfxConfig_);
@@ -93,7 +91,10 @@ ImageLoadingContext::~ImageLoadingContext()
             // cancel CreateImgObj task
             ImageProvider::CancelTask(src_.GetKey(), WeakClaim(this));
             if (Downloadable()) {
-                DownloadManager::GetInstance()->RemoveDownloadTask(src_.GetSrc(), imageDfxConfig_.nodeId_);
+                usePreload_
+                    ? DownloadManager::GetInstance()->RemoveDownloadTaskWithPreload(
+                          src_.GetSrc(), imageDfxConfig_.nodeId_)
+                    : DownloadManager::GetInstance()->RemoveDownloadTask(src_.GetSrc(), imageDfxConfig_.nodeId_);
             }
         } else if (state == ImageLoadingState::MAKE_CANVAS_IMAGE) {
             // cancel MakeCanvasImage task

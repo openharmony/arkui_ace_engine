@@ -81,6 +81,16 @@ void SymbolModelNG::SetSymbolEffectOptions(SymbolEffectOptions& symbolEffectOpti
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions);
 }
 
+void SymbolModelNG::SetMinFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value);
+}
+
+void SymbolModelNG::SetMaxFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value);
+}
+
 void SymbolModelNG::SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor, frameNode);
@@ -128,5 +138,15 @@ void SymbolModelNG::SetSymbolEffectOptions(FrameNode* frameNode, SymbolEffectOpt
 void SymbolModelNG::SetSymbolGlyphInitialize(FrameNode* frameNode, const std::uint32_t& symbolId)
 {
     InitialSymbol(frameNode, symbolId);
+}
+
+void SymbolModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value, frameNode);
+}
+
+void SymbolModelNG::SetMaxFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

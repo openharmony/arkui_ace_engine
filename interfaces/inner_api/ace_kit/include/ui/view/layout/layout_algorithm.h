@@ -17,8 +17,10 @@
 #define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_VIEW_LAYOUT_LAYOUT_ALGORITHM_H
 
 #include <functional>
+#include <optional>
 
 #include "ui/base/ace_type.h"
+#include "ui/base/geometry/ng/size_t.h"
 #include "ui/base/referenced.h"
 #include "ui/view/frame_node.h"
 
@@ -40,7 +42,10 @@ public:
 
     virtual void Layout() {}
 
-    virtual void MeasureContent(const NG::LayoutConstraintT<float>& contentConstraint) {}
+    virtual std::optional<NG::SizeF> MeasureContent(const NG::LayoutConstraintT<float>& contentConstraint)
+    {
+        return std::nullopt;
+    }
 
 protected:
     WeakPtr<FrameNode> host_;

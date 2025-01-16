@@ -37,7 +37,9 @@
             "https://gitee.com/ileft2019",
             "https://gitee.com/jinweiliu",
             "https://gitee.com/lexiaoyao2",
-            "https://gitee.com/liyujie43"
+            "https://gitee.com/liyujie43",
+            "https://gitee.com/luoying_ace_admin",
+            "https://gitee.com/xiaoxiaohuang9"
         ],
         "https://gitee.com/arkuistatemgmt": [
             "https://gitee.com/seaside_wu",
@@ -74,9 +76,13 @@
         ],
         "https://gitee.com/arkuilayout": [
             "https://gitee.com/ZhangYu-Home",
-            "https://gitee.com/xiexiyun",
+            "https://gitee.com/lanshouren",
             "https://gitee.com/keerecles",
-            "https://gitee.com/sunbees"
+            "https://gitee.com/sunbees",
+            "https://gitee.com/little-bear-sleeps",
+            "https://gitee.com/zju_ljz",
+            "https://gitee.com/camlostshi",
+            "https://gitee.com/fenglinbailu"
         ],
         "https://gitee.com/arkwebinarkuireview": [
             "https://gitee.com/libing23",
@@ -207,6 +213,14 @@
             "info": "[Image能力 liyujie]",
             "group": "https://gitee.com/arkui_image"
         },
+        "https://gitee.com/luoying_ace_admin": {
+            "info": "[picker类组件 luoying]",
+            "group": "https://gitee.com/arkui_image"
+        },
+        "https://gitee.com/xiaoxiaohuang9": {
+            "info": "[picker类组件 huangxiaoxiao]",
+            "group": "https://gitee.com/arkui_image"
+        },
         "https://gitee.com/lixingchi1": {
             "info": "[逻辑组件 lixingchi]",
             "group": "https://gitee.com/arkuistatemgmt"
@@ -283,10 +297,6 @@
             "info": "Popup/Toast相关 miaoyu",
             "group": "https://gitee.com/arkuipopupwindow"
         },
-        "https://gitee.com/luoying_ace_admin": {
-            "info": "Dialog相关 luoying",
-            "group": "https://gitee.com/arkuipopupwindow"
-        },
         "https://gitee.com/houguobiao": {
             "info": "[Picker类组件 houguobiao]",
             "group": "https://gitee.com/arkuipopupwindow"
@@ -311,8 +321,8 @@
             "info": "[绘制类组件/布局 zhangyu]",
             "group": "https://gitee.com/arkuilayout"
         },
-        "https://gitee.com/xiexiyun": {
-            "info": "[布局组件相关 xiexiyun]",
+        "https://gitee.com/lanshouren": {
+            "info": "[布局组件相关 lanshouren]",
             "group": "https://gitee.com/arkuilayout"
         },
         "https://gitee.com/keerecles": {
@@ -321,6 +331,22 @@
         },
         "https://gitee.com/sunbees": {
             "info": "[绘制类组件 sunqinjia]",
+            "group": "https://gitee.com/arkuilayout"
+        },
+        "https://gitee.com/little-bear-sleeps": {
+            "info": "[自定义布局相关 linhu]",
+            "group": "https://gitee.com/arkuilayout"
+        },
+        "https://gitee.com/zju_ljz": {
+            "info": "[栅格、分栏布局相关 lijiazhi]",
+            "group": "https://gitee.com/arkuilayout"
+        },
+        "https://gitee.com/camlostshi": {
+            "info": "[弹性、线性布局相关 shibofan]",
+            "group": "https://gitee.com/arkuilayout"
+        },
+        "https://gitee.com/fenglinbailu": {
+            "info": "[堆叠、相对布局相关 liubin]",
             "group": "https://gitee.com/arkuilayout"
         },
         "https://gitee.com/libing23": {

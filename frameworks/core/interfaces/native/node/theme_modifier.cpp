@@ -52,6 +52,7 @@ RefPtr<TokenColors> ConvertColorArrayToTokenColors(const ArkUI_Uint32* colorsArr
 
 ArkUINodeHandle CreateWithThemeNode(ArkUI_Int32 id)
 {
+    TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "WithTheme CreateWithThemeNode id:%{public}d", id);
     auto withThemeNode = WithThemeNode::CreateWithThemeNode(id);
     withThemeNode->IncRefCount();
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(withThemeNode));
@@ -67,6 +68,8 @@ ArkUINodeHandle CreateTheme(ArkUI_Int32 themeId, const ArkUI_Uint32* colors, Ark
 {
     auto theme = TokenThemeStorage::GetInstance()->CacheGet(themeId);
     if (!theme) {
+        TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "WithTheme CreateTheme themeId:%{public}d colorMode num:%{public}d",
+            themeId, colorMode);
         ColorMode themeScopeColorMode = MapNumberToColorMode(colorMode);
         auto themeColors = ConvertColorArrayToTokenColors(colors);
         theme = AceType::MakeRefPtr<TokenTheme>(themeId);
@@ -84,11 +87,14 @@ void CreateThemeScope(ArkUINodeHandle node, ArkUINodeHandle theme)
     RefPtr<TokenTheme> tokenTheme = AceType::Claim(reinterpret_cast<TokenTheme*>(theme));
     CHECK_NULL_VOID(tokenTheme);
     TokenThemeStorage::GetInstance()->StoreThemeScope(withThemeNode->GetId(), tokenTheme->GetId());
+    TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "WithTheme CreateThemeScope and notify node:%{public}d theme:%{public}d",
+        withThemeNode->GetId(), tokenTheme->GetId());
     withThemeNode->NotifyThemeScopeUpdate();
 }
 
 void SetDefaultTheme(const ArkUI_Uint32* colors, ArkUI_Bool isDark)
 {
+    TAG_LOGD(AceLogTag::ACE_DEFAULT_DOMAIN, "WithTheme SetDefaultTheme isDark:%{public}d", isDark);
     auto themeColors = ConvertColorArrayToTokenColors(colors);
     auto theme = AceType::MakeRefPtr<TokenTheme>(0);
     theme->SetColors(themeColors);

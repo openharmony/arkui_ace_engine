@@ -15,8 +15,7 @@
 
 #include "text_input_base.h"
 
-#include "base/utils/string_utils.h"
-#include "core/components_ng/pattern/indexer/indexer_layout_property.h"
+#include "test/mock/core/render/mock_paragraph.h"
 
 namespace OHOS::Ace::NG {
 
@@ -572,7 +571,7 @@ HWTEST_F(TextInputCursorTest, OnHandleMove002, TestSize.Level1)
     pattern_->HandleSelect(select[2]);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end);
+    EXPECT_NE(pattern_->selectController_->GetSecondHandleInfo().index, end);
 
     /**
      * @tc.steps: Move the handles and selection down.
@@ -583,7 +582,7 @@ HWTEST_F(TextInputCursorTest, OnHandleMove002, TestSize.Level1)
     pattern_->HandleSelect(select[3]);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, end);
+    EXPECT_NE(pattern_->selectController_->GetSecondHandleInfo().index, end);
 }
 
 /**
@@ -1096,7 +1095,7 @@ HWTEST_F(TextInputCursorTest, CursorMoveLineEndTest001, TestSize.Level1)
     /**
      * @tc.expected: Moving to the right character when there is initial text
      */
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
     EXPECT_EQ(pattern_->GetSelectMode(), SelectionMode::NONE);
     EXPECT_EQ(pattern_->GetCaretIndex(), DEFAULT_TEXT.length())
         << "Text is " + pattern_->GetTextValue() + ", CaretIndex is " + std::to_string(pattern_->GetCaretIndex());

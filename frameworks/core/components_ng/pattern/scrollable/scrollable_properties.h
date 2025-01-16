@@ -53,6 +53,11 @@ enum class ScrollSnapAlign {
     END,
 };
 
+enum class ScrollBarShape {
+    RECT = 0,
+    ARC,
+};
+
 enum class ScrollPagingStatus {
     // no enablePaging set
     NONE = 0,

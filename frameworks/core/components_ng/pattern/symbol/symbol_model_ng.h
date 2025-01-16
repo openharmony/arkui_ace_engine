@@ -31,6 +31,8 @@ public:
     void SetSymbolEffect(const std::uint32_t effectStrategy) override;
     void SetClipEdge() override;
     void SetSymbolEffectOptions(NG::SymbolEffectOptions& symbolEffectOptions) override;
+    void SetMinFontScale(const float value) override;
+    void SetMaxFontScale(const float value) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor);
@@ -41,6 +43,8 @@ public:
     static void InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode);
     static void SetSymbolEffectOptions(FrameNode* frameNode, NG::SymbolEffectOptions& symbolEffectOptions);
     static void SetSymbolGlyphInitialize(FrameNode* framwNode, const std::uint32_t& symbolId);
+    static void SetMinFontScale(FrameNode* frameNode, const float value);
+    static void SetMaxFontScale(FrameNode* frameNode, const float value);
 };
 } // namespace OHOS::Ace::NG
 

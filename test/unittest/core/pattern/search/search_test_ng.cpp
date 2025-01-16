@@ -15,6 +15,7 @@
 
 #include "search_base.h"
 #include "core/components_ng/pattern/search/search_node.h"
+#include "core/components_ng/pattern/button/button_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -1080,6 +1081,96 @@ HWTEST_F(SearchTestNg, SetSearchButtonFontSize001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetSearchButtonAutodisable001
+ * @tc.desc: Set search button autodisable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchButtonAutodisable001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    searchModelInstance.SetSearchButtonAutoDisable(true);
+    EXPECT_EQ(buttonLayoutProperty->GetAutoDisableValue(), true);
+}
+
+/**
+ * @tc.name: SetSearchButtonAutodisable002
+ * @tc.desc: Set search button autodisable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchButtonAutodisable002, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    searchModelInstance.SetSearchButtonAutoDisable(true);
+
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+
+    auto textStr = "";
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    textFieldPattern->UpdateEditingValue(textStr, 0);
+    auto buttonEventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->UpdateDisable(textFieldPattern->GetTextUtf16Value());
+    EXPECT_EQ(buttonEventHub->IsEnabled(), false);
+}
+
+/**
+ * @tc.name: SetSearchButtonAutodisable003
+ * @tc.desc: Set search button autodisable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchButtonAutodisable003, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    auto buttonLayoutProperty = buttonFrameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    searchModelInstance.SetSearchButtonAutoDisable(false);
+    EXPECT_EQ(buttonLayoutProperty->GetAutoDisableValue(), false);
+}
+
+/**
+ * @tc.name: SetSearchButtonAutodisable004
+ * @tc.desc: Set search button autodisable
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchButtonAutodisable004, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    auto frameNode = AceType::DynamicCast<SearchNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto buttonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(BUTTON_INDEX));
+    ASSERT_NE(buttonFrameNode, nullptr);
+    auto buttonEventHub = buttonFrameNode->GetEventHub<ButtonEventHub>();
+    ASSERT_NE(buttonEventHub, nullptr);
+
+    auto textStr = "a";
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    textFieldPattern->UpdateEditingValue(textStr, 0);
+    searchModelInstance.SetSearchButtonAutoDisable(true);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->UpdateDisable(textFieldPattern->GetTextUtf16Value());
+    EXPECT_EQ(buttonEventHub->IsEnabled(), true);
+}
+
+/**
  * @tc.name: SetTextColor001
  * @tc.desc: Set text color
  * @tc.type: FUNC
@@ -1266,6 +1357,7 @@ HWTEST_F(SearchTestNg, SetOnSubmit001, TestSize.Level1)
     });
     TextFieldCommonEvent event;
     eventHub->FireOnSubmit(u"SetOnSubmit", event);
+    EXPECT_EQ(event.GetText(), u"SetOnSubmit");
 }
 
 /**
@@ -1977,6 +2069,7 @@ HWTEST_F(SearchTestNg, SetTextAlign002, TestSize.Level1)
         }
     }
 }
+
 /**
  * @tc.name: SetSearchEnterKeyType001
  * @tc.desc: SetSearchEnterKeyType
@@ -1992,7 +2085,9 @@ HWTEST_F(SearchTestNg, SetSearchEnterKeyType001, TestSize.Level1)
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     searchModelInstance.SetSearchEnterKeyType(TextInputAction::UNSPECIFIED);
+    EXPECT_EQ(textFieldPattern->GetTextInputAction(), TextInputAction::SEARCH);
 }
+
 /**
  * @tc.name: SetSearchEnterKeyType002
  * @tc.desc: SetSearchEnterKeyType
@@ -2009,7 +2104,9 @@ HWTEST_F(SearchTestNg, SetSearchEnterKeyType002, TestSize.Level1)
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     searchModelInstance.SetTextIndent(DEFAULT_INDENT_SIZE);
     searchModelInstance.SetSearchEnterKeyType(TextInputAction::GO);
+    EXPECT_EQ(textFieldPattern->GetTextInputAction(), TextInputAction::GO);
 }
+
 /**
  * @tc.name: SetEnablePreviewText
  * @tc.desc: Test SetEnablePreviewText
@@ -2026,5 +2123,32 @@ HWTEST_F(SearchTestNg, SetEnablePreviewText, TestSize.Level1)
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     searchModelInstance.SetEnablePreviewText(true);
     EXPECT_TRUE(textFieldPattern->GetSupportPreviewText());
+}
+
+/**
+ * @tc.name: SetSearchIcon001
+ * @tc.desc: Test SetIcon works fine for a second or more use
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SetSearchIcon001, TestSize.Level1)
+{
+    SearchModelNG searchModelInstance;
+    searchModelInstance.Create(EMPTY_VALUE_U16, PLACEHOLDER_U16, SEARCH_SVG);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkModifyDone();
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    searchModelInstance.SetIcon(frameNode, "");
+    auto searchIconFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(IMAGE_INDEX));
+    ASSERT_NE(searchIconFrameNode, nullptr);
+    auto imageLayoutProperty = searchIconFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto searchIconPath1 = imageLayoutProperty->GetImageSourceInfo()->GetSrc();
+    EXPECT_NE(searchIconPath1.c_str(), "");
+    searchModelInstance.SetIcon(frameNode, "sys.media.wifi_router_fill");
+    auto searchIconPath2 = imageLayoutProperty->GetImageSourceInfo()->GetSrc();
+    EXPECT_NE(searchIconPath1.c_str(), searchIconPath2.c_str());
 }
 } // namespace OHOS::Ace::NG

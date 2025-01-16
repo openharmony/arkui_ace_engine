@@ -13,18 +13,12 @@
  * limitations under the License.
  */
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
 #include "text_base.h"
 
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/pattern/text/typed_text.h"
-#define private public
-#define protected public
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#undef protected
-#undef private
+#include "test/mock/core/render/mock_paragraph.h"
 
+#include "core/components_ng/pattern/text/typed_text.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -41,6 +35,19 @@ public:
 class TextPatternNg : public TextBases {
 public:
 };
+
+class MockTextBase : public TextBase {
+public:
+    MOCK_METHOD1(BetweenSelectedPosition, bool(const Offset& globalOffset));
+};
+
+class MockBaseTextSelectOverlay : public BaseTextSelectOverlay {
+public:
+    explicit MockBaseTextSelectOverlay(const WeakPtr<TextBase>& textBase) : BaseTextSelectOverlay(textBase) {}
+    ~MockBaseTextSelectOverlay() = default;
+    MOCK_METHOD1(CheckHandleVisible, bool(const RectF& paintRect));
+};
+
 
 /**
  * @tc.name: GetUTF8OneCharacterSize
@@ -553,5 +560,131 @@ HWTEST_F(TextPatternNg, TextPatternHandleAISpanHoverEvent008, TestSize.Level1)
     textPattern.frameNode_ = frameNodeRef;
     textPattern.HandleAISpanHoverEvent(info);
     EXPECT_EQ(MouseFormat::DEFAULT, textPattern.currentMouseStyle_);
+}
+
+/**
+ * @tc.name: TextPatternHandleUrlTouchEvent001
+ * @tc.desc: test HandleUrlTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternNg, TextPatternHandleUrlTouchEvent001, TestSize.Level1)
+{
+    TextPattern textPattern;
+    const std::string type = "start";
+    TouchEventInfo info = TouchEventInfo(type);
+    RefPtr<TextOverlayModifier> modifier = AIWriteAdapter::MakeRefPtr<TextOverlayModifier>();
+    textPattern.overlayMod_ = modifier;
+    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    WeakPtr<MockTextBase> textBase = mockBase;
+    RefPtr<TextSelectOverlay> overlay = AIWriteAdapter::MakeRefPtr<TextSelectOverlay>(textBase);
+    textPattern.selectOverlay_ = overlay;
+    MockBaseTextSelectOverlay baseOverlay = MockBaseTextSelectOverlay(textBase);
+    int32_t fingerId1 = 1;
+    int32_t fingerId2 = 2;
+    TouchLocationInfo touchInfo1(fingerId1);
+    RectF rectF = RectF(20.0f, 30.0f, 120.0f, 180.0f);
+    mockBase->contentRect_ = rectF;
+    Offset offset = Offset(100.0, 100.0);
+    touchInfo1.localLocation_ = offset;
+    touchInfo1.touchType_ = TouchType::DOWN;
+    TouchLocationInfo touchInfo2(fingerId2);
+    info.touches_.push_back(touchInfo1);
+    info.touches_.push_back(touchInfo2);
+    textPattern.overlayMod_->selectedUrlRects_.emplace_back(rectF);
+    const std::string tag = "xyz";
+    int32_t nodeId = 4;
+    RefPtr<Pattern> pattern = AIWriteAdapter::MakeRefPtr<Pattern>();
+    bool isRoot = false;
+    bool isLayoutNode = false;
+    RefPtr<FrameNode> frameNodeRef = AIWriteAdapter::MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot, isLayoutNode);
+    textPattern.frameNode_ = frameNodeRef;
+    Property property = Property();
+    property.propertyChangeFlag_ = PROPERTY_UPDATE_DIFF;
+    textPattern.HandleUrlTouchEvent(info);
+    EXPECT_FALSE(textPattern.overlayMod_->selectedUrlRects_.empty());
+}
+
+/**
+ * @tc.name: TextPatternHandleUrlTouchEvent002
+ * @tc.desc: test HandleUrlTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternNg, TextPatternHandleUrlTouchEvent002, TestSize.Level1)
+{
+    TextPattern textPattern;
+    const std::string type = "start";
+    TouchEventInfo info = TouchEventInfo(type);
+    RefPtr<TextOverlayModifier> modifier = AIWriteAdapter::MakeRefPtr<TextOverlayModifier>();
+    textPattern.overlayMod_ = modifier;
+    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    WeakPtr<MockTextBase> textBase = mockBase;
+    RefPtr<TextSelectOverlay> overlay = AIWriteAdapter::MakeRefPtr<TextSelectOverlay>(textBase);
+    textPattern.selectOverlay_ = overlay;
+    MockBaseTextSelectOverlay baseOverlay = MockBaseTextSelectOverlay(textBase);
+    int32_t fingerId1 = 1;
+    int32_t fingerId2 = 2;
+    TouchLocationInfo touchInfo1(fingerId1);
+    RectF rectF = RectF(20.0f, 30.0f, 120.0f, 180.0f);
+    mockBase->contentRect_ = rectF;
+    Offset offset = Offset(100.0, 100.0);
+    touchInfo1.localLocation_ = offset;
+    touchInfo1.touchType_ = TouchType::UP;
+    TouchLocationInfo touchInfo2(fingerId2);
+    info.touches_.push_back(touchInfo1);
+    info.touches_.push_back(touchInfo2);
+    textPattern.overlayMod_->selectedUrlRects_.emplace_back(rectF);
+    const std::string tag = "xyz";
+    int32_t nodeId = 4;
+    RefPtr<Pattern> pattern = AIWriteAdapter::MakeRefPtr<Pattern>();
+    bool isRoot = false;
+    bool isLayoutNode = false;
+    RefPtr<FrameNode> frameNodeRef = AIWriteAdapter::MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot, isLayoutNode);
+    textPattern.frameNode_ = frameNodeRef;
+    Property property = Property();
+    property.propertyChangeFlag_ = PROPERTY_UPDATE_DIFF;
+    textPattern.HandleUrlTouchEvent(info);
+    EXPECT_TRUE(textPattern.overlayMod_->selectedUrlRects_.empty());
+}
+
+/**
+ * @tc.name: TextPatternHandleUrlTouchEvent003
+ * @tc.desc: test HandleUrlTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPatternNg, TextPatternHandleUrlTouchEvent003, TestSize.Level1)
+{
+    TextPattern textPattern;
+    const std::string type = "start";
+    TouchEventInfo info = TouchEventInfo(type);
+    RefPtr<TextOverlayModifier> modifier = AIWriteAdapter::MakeRefPtr<TextOverlayModifier>();
+    textPattern.overlayMod_ = modifier;
+    RefPtr<MockTextBase> mockBase = AIWriteAdapter::MakeRefPtr<MockTextBase>();
+    WeakPtr<MockTextBase> textBase = mockBase;
+    RefPtr<TextSelectOverlay> overlay = AIWriteAdapter::MakeRefPtr<TextSelectOverlay>(textBase);
+    textPattern.selectOverlay_ = overlay;
+    MockBaseTextSelectOverlay baseOverlay = MockBaseTextSelectOverlay(textBase);
+    int32_t fingerId1 = 1;
+    int32_t fingerId2 = 2;
+    TouchLocationInfo touchInfo1(fingerId1);
+    RectF rectF = RectF(20.0f, 30.0f, 120.0f, 180.0f);
+    mockBase->contentRect_ = rectF;
+    Offset offset = Offset(100.0, 100.0);
+    touchInfo1.localLocation_ = offset;
+    touchInfo1.touchType_ = TouchType::PULL_UP;
+    TouchLocationInfo touchInfo2(fingerId2);
+    info.touches_.push_back(touchInfo1);
+    info.touches_.push_back(touchInfo2);
+    textPattern.overlayMod_->selectedUrlRects_.emplace_back(rectF);
+    const std::string tag = "xyz";
+    int32_t nodeId = 4;
+    RefPtr<Pattern> pattern = AIWriteAdapter::MakeRefPtr<Pattern>();
+    bool isRoot = false;
+    bool isLayoutNode = false;
+    RefPtr<FrameNode> frameNodeRef = AIWriteAdapter::MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot, isLayoutNode);
+    textPattern.frameNode_ = frameNodeRef;
+    Property property = Property();
+    property.propertyChangeFlag_ = PROPERTY_UPDATE_DIFF;
+    textPattern.HandleUrlTouchEvent(info);
+    EXPECT_FALSE(textPattern.overlayMod_->selectedUrlRects_.empty());
 }
 } // namespace OHOS::Ace::NG

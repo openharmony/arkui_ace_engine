@@ -101,16 +101,30 @@ void ResetHyperlinkResponseRegion(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIHyperlinkModifier* GetHyperlinkModifier()
 {
-    static const ArkUIHyperlinkModifier modifier = { SetHyperlinkColor, ResetHyperlinkColor, SetHyperlinkDraggable,
-        ResetHyperlinkDraggable, SetHyperlinkResponseRegion, ResetHyperlinkResponseRegion };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIHyperlinkModifier modifier = {
+        .setHyperlinkColor = SetHyperlinkColor,
+        .resetHyperlinkColor = ResetHyperlinkColor,
+        .setHyperlinkDraggable = SetHyperlinkDraggable,
+        .resetHyperlinkDraggable = ResetHyperlinkDraggable,
+        .setHyperlinkResponseRegion = SetHyperlinkResponseRegion,
+        .resetHyperlinkResponseRegion = ResetHyperlinkResponseRegion,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIHyperlinkModifier* GetCJUIHyperlinkModifier()
 {
-    static const CJUIHyperlinkModifier modifier = { SetHyperlinkColor, ResetHyperlinkColor, SetHyperlinkDraggable,
-        ResetHyperlinkDraggable };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIHyperlinkModifier modifier = {
+        .setHyperlinkColor = SetHyperlinkColor,
+        .resetHyperlinkColor = ResetHyperlinkColor,
+        .setHyperlinkDraggable = SetHyperlinkDraggable,
+        .resetHyperlinkDraggable = ResetHyperlinkDraggable,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

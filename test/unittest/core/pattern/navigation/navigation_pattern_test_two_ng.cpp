@@ -19,6 +19,9 @@
 #include "mock_navigation_route.h"
 #include "mock_navigation_stack.h"
 
+#define private public
+#define protected public
+
 #include "core/components/button/button_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -50,6 +53,21 @@ const InspectorFilter filter;
 const std::string TEST_TAG = "test";
 constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 constexpr float DEFAULT_ROOT_WIDTH = 480.f;
+
+class MockNavigationPattern : public NavigationPattern {
+    DECLARE_ACE_TYPE(MockNavigationPattern, NavigationPattern);
+public:
+    MockNavigationPattern() : NavigationPattern() {}
+    ~MockNavigationPattern() = default;
+
+    void MarkAllNavDestinationDirtyIfNeeded(const RefPtr<FrameNode>& hostNode) override
+    {
+        NavigationPattern::MarkAllNavDestinationDirtyIfNeeded(hostNode);
+        callTime_++;
+    }
+
+    int32_t callTime_ = 0;
+};
 } // namespace
 
 class NavigationPatternTestTwoNg : public testing::Test {
@@ -1283,6 +1301,44 @@ HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_047, TestSize.Leve
 }
 
 /**
+ * @tc.name: NavigationPatternTestOne_048
+ * @tc.desc: Test Navigation Function
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestTwoNg, NavigationPatternTestOne_048, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create groupNode, stack and pattern.
+     */
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigation->GetPattern<NavigationPattern>()->SetNavigationStack(std::move(navigationStack));
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. configure parameters .
+     */
+    auto from = AceType::MakeRefPtr<NavDestinationContext>();
+    auto to = AceType::MakeRefPtr<NavDestinationContext>();
+    NavigationOperation operation = NavigationOperation::PUSH;
+    UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFunc(NavDestinationSwitchHandle);
+
+    /**
+     * @tc.steps: step3. Notify NavDestination Switch .
+     * @tc.expected: navigationStack_ is not nullptr.
+     */
+    navigationPattern->NotifyNavDestinationSwitch(nullptr, to, operation);
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+    from->pathInfo_ = AceType::MakeRefPtr<NavPathInfo>();
+    navigationPattern->NotifyNavDestinationSwitch(from, to, operation);
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+    navigationPattern->NotifyNavDestinationSwitch(from, nullptr, operation);
+    EXPECT_TRUE(navigationPattern->navigationStack_ != nullptr);
+}
+
+/**
  * @tc.name: UpdatePreNavDesZIndex001
  * @tc.desc: Increase the coverage of NavigationPattern::UpdatePreNavDesZIndex function.
  * @tc.type: FUNC
@@ -1302,55 +1358,6 @@ HWTEST_F(NavigationPatternTestTwoNg, UpdatePreNavDesZIndex001, TestSize.Level1)
     RefPtr<FrameNode> newTopNavDestinationNode = nullptr;
     EXPECT_EQ(navigationPattern->navigationStack_->GetReplaceValue(), 0);
     navigationPattern->UpdatePreNavDesZIndex(nullptr, nullptr, 0);
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: UpdatePreNavDesZIndex002
- * @tc.desc: Increase the coverage of NavigationPattern::UpdatePreNavDesZIndex function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, UpdatePreNavDesZIndex002, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationStack->mockReplace_->isReplace_ = 1;
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    RefPtr<FrameNode> preTopNavDestinationNode = nullptr;
-
-    EXPECT_NE(navigationPattern->navigationStack_->GetReplaceValue(), 0);
-    EXPECT_EQ(preTopNavDestinationNode, nullptr);
-    navigationPattern->UpdatePreNavDesZIndex(preTopNavDestinationNode, nullptr, 0);
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: UpdatePreNavDesZIndex003
- * @tc.desc: Increase the coverage of NavigationPattern::UpdatePreNavDesZIndex function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, UpdatePreNavDesZIndex003, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationStack->mockReplace_->isReplace_ = 1;
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    RefPtr<FrameNode> preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    RefPtr<FrameNode> newTopNavDestinationNode = nullptr;
-
-    EXPECT_NE(navigationPattern->navigationStack_->GetReplaceValue(), 0);
-    EXPECT_NE(preTopNavDestinationNode, nullptr);
-    EXPECT_EQ(newTopNavDestinationNode, nullptr);
-    navigationPattern->UpdatePreNavDesZIndex(preTopNavDestinationNode, newTopNavDestinationNode, 0);
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 
@@ -1802,55 +1809,6 @@ HWTEST_F(NavigationPatternTestTwoNg, DumpInfo004, TestSize.Level1)
 }
 
 /**
- * @tc.name: FollowStdNavdestinationAnimation001
- * @tc.desc: Increase the coverage of NavigationPattern::FollowStdNavdestinationAnimation function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, FollowStdNavdestinationAnimation001, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    // Make preTopNavDestination nullptr
-    auto preTopNavDestinationNode = nullptr;
-    auto newTopNavDestinationNode = nullptr;
-
-    EXPECT_EQ(preTopNavDestinationNode, nullptr);
-    navigationPattern->FollowStdNavdestinationAnimation(preTopNavDestinationNode, newTopNavDestinationNode, true);
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: FollowStdNavdestinationAnimation002
- * @tc.desc: Increase the coverage of NavigationPattern::FollowStdNavdestinationAnimation function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, FollowStdNavdestinationAnimation002, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    // Make preTopNavDestination not nullptr
-    auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    // Make newTopNavDestination nullptr
-    auto newTopNavDestinationNode = nullptr;
-
-    EXPECT_NE(preTopNavDestinationNode, nullptr);
-    EXPECT_EQ(newTopNavDestinationNode, nullptr);
-    navigationPattern->FollowStdNavdestinationAnimation(preTopNavDestinationNode, newTopNavDestinationNode, true);
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
  * @tc.name: FollowStdNavdestinationAnimation003
  * @tc.desc: Increase the coverage of NavigationPattern::FollowStdNavdestinationAnimation function.
  * @tc.type: FUNC
@@ -1909,114 +1867,64 @@ HWTEST_F(NavigationPatternTestTwoNg, FollowStdNavdestinationAnimation004, TestSi
 }
 
 /**
- * @tc.name: FollowStdNavdestinationAnimation005
- * @tc.desc: Increase the coverage of NavigationPattern::FollowStdNavdestinationAnimation function.
+ * @tc.name: OnModifyDone001
+ * @tc.desc: Test branch if (preNavBarPosition_.has_value() && preNavBarPosition_.value() != curNavBarPosition)
  * @tc.type: FUNC
  */
-HWTEST_F(NavigationPatternTestTwoNg, FollowStdNavdestinationAnimation005, TestSize.Level1)
+HWTEST_F(NavigationPatternTestTwoNg, OnModifyDone001, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Create MockNavigationPattern & NavigationGroupNode.
+     */
     NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto preTopNavDestinationNode = nullptr;
-    // Make newTopNavDestination not nullptr
-    auto newTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 202, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    // Make navigationMode_ not STACK
-    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
+    auto mockPattern = AceType::MakeRefPtr<MockNavigationPattern>();
+    ASSERT_NE(mockPattern, nullptr);
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 11, [&mockPattern]() { return mockPattern; });
+    ASSERT_NE(navigation, nullptr);
+    auto property = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    ASSERT_NE(navigationStack, nullptr);
+    auto pattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetNavigationStack(std::move(navigationStack));
+    auto navBarNode =
+        NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    navigation->navBarNode_ = navBarNode;
 
-    EXPECT_EQ(preTopNavDestinationNode, nullptr);
-    EXPECT_NE(newTopNavDestinationNode, nullptr);
-    EXPECT_EQ(navigationPattern->navigationMode_, NavigationMode::SPLIT);
-    navigationPattern->FollowStdNavdestinationAnimation(preTopNavDestinationNode, newTopNavDestinationNode, true);
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
+    /**
+     * @tc.steps: step2. branch if (preNavBarPosition_.has_value() && preNavBarPosition_.value() != curNavBarPosition)
+     *                   Condition: preNavBarPosition_.has_value() => false
+     * @tc.expected: MarkAllNavDestinationDirtyIfNeeded won't be called.
+     */
+    ASSERT_FALSE(pattern->preNavBarPosition_.has_value());
+    property->UpdateNavBarPosition(NavBarPosition::START);
+    pattern->OnModifyDone();
+    ASSERT_EQ(mockPattern->callTime_, 0);
+    ASSERT_EQ(pattern->preNavBarPosition_, std::optional<NavBarPosition>(NavBarPosition::START));
 
-/**
- * @tc.name: FollowStdNavdestinationAnimation006
- * @tc.desc: Increase the coverage of NavigationPattern::FollowStdNavdestinationAnimation function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, FollowStdNavdestinationAnimation006, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto preTopNavDestinationNode = nullptr;
-    // Make newTopNavDestination not nullptr
-    auto newTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 202, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    // Make navigationMode_ STACK
-    navigationPattern->navigationMode_ = NavigationMode::STACK;
+    /**
+     * @tc.steps: step3. branch if (preNavBarPosition_.has_value() && preNavBarPosition_.value() != curNavBarPosition)
+     *                   Condition: preNavBarPosition_.has_value() => true,
+     *                              preNavBarPosition_.value() != curNavBarPosition => true
+     * @tc.expected: MarkAllNavDestinationDirtyIfNeeded will be called.
+     */
+    property->UpdateNavBarPosition(NavBarPosition::END);
+    pattern->OnModifyDone();
+    ASSERT_EQ(mockPattern->callTime_, 1);
+    ASSERT_EQ(pattern->preNavBarPosition_, std::optional<NavBarPosition>(NavBarPosition::END));
 
-    EXPECT_EQ(preTopNavDestinationNode, nullptr);
-    EXPECT_NE(newTopNavDestinationNode, nullptr);
-    EXPECT_EQ(navigationPattern->navigationMode_, NavigationMode::STACK);
-    navigationPattern->FollowStdNavdestinationAnimation(preTopNavDestinationNode, newTopNavDestinationNode, true);
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: FollowStdNavdestinationAnimation007
- * @tc.desc: Increase the coverage of NavigationPattern::FollowStdNavdestinationAnimation function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, FollowStdNavdestinationAnimation007, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    // Make preTopNavDestination not nullptr
-    auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto newTopNavDestinationNode = nullptr;
-    // Make navigationMode_ SPLIT
-    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
-
-    EXPECT_NE(preTopNavDestinationNode, nullptr);
-    EXPECT_EQ(newTopNavDestinationNode, nullptr);
-    EXPECT_EQ(navigationPattern->navigationMode_, NavigationMode::SPLIT);
-    navigationPattern->FollowStdNavdestinationAnimation(preTopNavDestinationNode, newTopNavDestinationNode, true);
-    NavigationPatternTestTwoNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: FollowStdNavdestinationAnimation008
- * @tc.desc: Increase the coverage of NavigationPattern::FollowStdNavdestinationAnimation function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestTwoNg, FollowStdNavdestinationAnimation008, TestSize.Level1)
-{
-    NavigationPatternTestTwoNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<MockNavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    // Make preTopNavDestination not nullptr
-    auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto newTopNavDestinationNode = nullptr;
-    // Make navigationMode_ STACK
-    navigationPattern->navigationMode_ = NavigationMode::STACK;
-
-    EXPECT_NE(preTopNavDestinationNode, nullptr);
-    EXPECT_EQ(newTopNavDestinationNode, nullptr);
-    EXPECT_EQ(navigationPattern->navigationMode_, NavigationMode::STACK);
-    navigationPattern->FollowStdNavdestinationAnimation(preTopNavDestinationNode, newTopNavDestinationNode, true);
+    /**
+     * @tc.steps: step3. branch if (preNavBarPosition_.has_value() && preNavBarPosition_.value() != curNavBarPosition)
+     *                   Condition: preNavBarPosition_.has_value() => true,
+     *                              preNavBarPosition_.value() != curNavBarPosition => false
+     * @tc.expected: MarkAllNavDestinationDirtyIfNeeded won't be called.
+     */
+    property->UpdateNavBarPosition(NavBarPosition::END);
+    pattern->OnModifyDone();
+    ASSERT_EQ(mockPattern->callTime_, 1);
+    ASSERT_EQ(pattern->preNavBarPosition_, std::optional<NavBarPosition>(NavBarPosition::END));
     NavigationPatternTestTwoNg::TearDownTestSuite();
 }
 } // namespace OHOS::Ace::NG

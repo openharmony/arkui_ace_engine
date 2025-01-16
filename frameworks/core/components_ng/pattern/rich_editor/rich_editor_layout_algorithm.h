@@ -67,6 +67,8 @@ private:
     void AppendNewLineSpan();
     std::optional<SizeF> MeasureContentSize(const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
     std::optional<SizeF> MeasureEmptyContentSize(const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
+    LayoutConstraintF ReMeasureContent(
+        SizeF& textSize, const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper);
     std::string SpansToString();
 
     const std::list<RefPtr<SpanItem>>& GetSpans() const

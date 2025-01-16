@@ -15,32 +15,30 @@
 
 // @ts-ignore
 if (globalThis.WithTheme !== undefined) {
+    // @ts-ignore
     globalThis.WithTheme.create = function (themeOptions) {
         const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-        // get theme instance from ThemeMap by CustomTheme instance
-        const theme: ThemeInternal = ArkThemeScopeManager.getInstance().makeTheme(themeOptions?.theme);
-    
-        // set local color mode if need
-        const colorMode = themeOptions?.colorMode;
-        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
-            ArkThemeScopeManager.getInstance().onEnterLocalColorMode(colorMode);
-        }
-    
-        ArkThemeNativeHelper.sendThemeToNative(theme, elmtId);
-    
-        // reset local color mode if need
-        if (colorMode && colorMode !== ThemeColorMode.SYSTEM) {
-            ArkThemeScopeManager.getInstance().onExitLocalColorMode();
+        const colorMode = themeOptions?.colorMode ?? ThemeColorMode.SYSTEM;
+        const cloneTheme = ArkThemeScopeManager.cloneCustomThemeWithExpand(themeOptions?.theme);
+        const theme: ArkThemeBase = ArkThemeScopeManager.getInstance().makeTheme(cloneTheme, colorMode);
+        // bind theme to theme scope with elmtId
+        theme.bindToScope(elmtId);
+
+        // prepare on theme scope destroy callback
+        const onThemeScopeDestroy = () => {
+            ArkThemeScopeManager.getInstance().onScopeDestroy(elmtId);
         }
 
-        if (themeOptions) {
-            ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions, theme);
-        } else {
-            ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, {}, theme);
-        }
+        // keep for backward compatibility
+        ArkThemeNativeHelper.sendThemeToNative(theme, elmtId);
+        // new approach to apply theme in native side
+        ArkThemeNativeHelper.createInternal(elmtId, theme.id, cloneTheme, colorMode, onThemeScopeDestroy);
+
+        ArkThemeScopeManager.getInstance().onScopeEnter(elmtId, themeOptions ?? {}, theme);
     }
     // @ts-ignore
     globalThis.WithTheme.pop = function () {
         ArkThemeScopeManager.getInstance().onScopeExit();
+        getUINativeModule().theme.pop();
     }
 }

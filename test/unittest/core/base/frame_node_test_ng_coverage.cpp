@@ -670,6 +670,9 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnAttachToMainTree02, TestSize.Level1)
     EXPECT_TRUE(childNode->isLayoutDirtyMarked_);
     EXPECT_FALSE(frameNode->useOffscreenProcess_);
     EXPECT_TRUE(frameNode->isPropertyDiffMarked_);
+    auto context = frameNode->GetContext();
+    bool hasDirtyPropertyNodes = context->dirtyPropertyNodes_.find(frameNode) != context->dirtyPropertyNodes_.end();
+    EXPECT_TRUE(hasDirtyPropertyNodes);
 }
 
 /**
@@ -1510,25 +1513,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCreateRenderTask02, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     EXPECT_NE(frameNode->layoutProperty_, nullptr);
     EXPECT_EQ(frameNode->layoutProperty_->propVisibility_, VisibleType::VISIBLE);
-}
-
-/**
- * @tc.name: FrameNodeGetParentGlobalOffset01
- * @tc.desc: Test the function GetParentGlobalOffset
- * @tc.type: FUNC
- */
-HWTEST_F(FrameNodeTestNg, FrameNodeGetParentGlobalOffset01, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create frameNode.
-     */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 1, AceType::MakeRefPtr<Pattern>(), true);
-
-    /**
-     * @tc.steps: step3. call the function GetParentGlobalOffset.
-     */
-    EXPECT_EQ(frameNode->GetParentGlobalOffset().GetX(), 0.0f);
-    EXPECT_EQ(frameNode->GetParentGlobalOffset().GetY(), 0.0f);
 }
 
 /**

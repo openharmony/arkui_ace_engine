@@ -307,11 +307,16 @@ public:
         return jumpIndex_;
     }
 
+    void SetCachedShow(bool cachedShow)
+    {
+        cachedShow_ = cachedShow;
+    }
+
 private:
-    void LayoutForward(
-        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos);
-    void LayoutBackward(
-        LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex, float endPos);
+    void LayoutForward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex,
+        float startPos, bool cachedLayout = false);
+    void LayoutBackward(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t endIndex,
+        float endPos, bool cachedLayout = false);
     bool LayoutForwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
         int32_t& currentIndex, float startPos, float& endPos);
     bool LayoutBackwardItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint,
@@ -324,6 +329,7 @@ private:
         const PaddingPropertyF& padding);
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
     void MeasureTabsCustomAnimation(LayoutWrapper* layoutWrapper);
+    void HandleTabsCachedMaxCount(LayoutWrapper* layoutWrapper, int32_t startIndex, int32_t endIndex);
     void MeasureSwiperCustomAnimation(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint);
     void LayoutCustomAnimation(LayoutWrapper* layoutWrapper) const;
     void LayoutItem(LayoutWrapper* layoutWrapper, OffsetF offset, std::pair<int32_t, SwiperItemInfo> pos);
@@ -355,6 +361,17 @@ private:
 
     void CheckCachedItem(int32_t startIndex, int32_t endIndex, LayoutWrapper* layoutWrapper);
     void MeasureSwiperOnJump(LayoutWrapper* layoutWrapper, const LayoutConstraintF& constraint, int32_t jumpIndex);
+    bool NeedMeasureForward(int32_t currentIndex, float currentEndPos, float forwardEndPos, bool cachedLayout) const;
+    bool NeedMeasureBackward(
+        int32_t currentIndex, float currentStartPos, float backwardStartPos, bool isStretch, bool cachedLayout) const;
+    void CalcCachedItemIndex(LayoutWrapper* layoutWrapper);
+    int32_t GetCurrentFirstIndexInWindow(LayoutWrapper* layoutWrapper) const;
+    int32_t GetCurrentLastIndexInWindow(LayoutWrapper* layoutWrapper) const;
+    void LayoutCachedItem(LayoutWrapper* layoutWrapper, const LayoutConstraintF& constraint);
+    int32_t GetUserSetCachedCount(LayoutWrapper* layoutWrapper) const;
+    void AdjustItemPositionOnCachedShow();
+    void AdjustOffsetOnForward(float currentEndPos);
+    void AdjustOffsetOnBackward(float currentStartPos);
 
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
@@ -415,6 +432,9 @@ private:
     // only be used in AutoLinear mode
     float targetStartPos_ = 0.0f;
     int32_t cachedCount_ = 0;
+    bool cachedShow_ = false;
+    int32_t cachedStartIndex_ = 0;
+    int32_t cachedEndIndex_ = 0;
     LayoutConstraintF childLayoutConstraint_;
     Axis axis_ = Axis::HORIZONTAL;
 

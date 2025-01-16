@@ -26,7 +26,6 @@
 #include "interfaces/inner_api/ace/navigation_controller.h"
 
 #include "base/memory/ace_type.h"
-#include "base/view_data/hint_to_type_wrap.h"
 #include "base/resource/asset_manager.h"
 #include "base/resource/shared_image_manager.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -35,6 +34,8 @@
 #include "base/utils/noncopyable.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "base/view_data/ace_auto_fill_error.h"
+#include "base/view_data/hint_to_type_wrap.h"
 #include "core/common/ace_application_info.h"
 #include "core/common/container_consts.h"
 #include "core/common/display_info.h"
@@ -60,7 +61,7 @@ using PageTask = std::function<void()>;
 using TouchEventCallback = std::function<void(const TouchEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using KeyEventCallback = std::function<bool(const KeyEvent&)>;
-using NonPointerEventCallback = std::function<bool(const NonPointerEvent&)>;
+using NonPointerEventCallback = std::function<bool(const NonPointerEvent&, const std::function<void()>&)>;
 using MouseEventCallback = std::function<void(const MouseEvent&, const std::function<void()>&,
     const RefPtr<NG::FrameNode>&)>;
 using AxisEventCallback = std::function<void(const AxisEvent&, const std::function<void()>&,
@@ -70,6 +71,7 @@ using CardViewPositionCallBack = std::function<void(int id, float offsetX, float
 using DragEventCallBack = std::function<void(const DragPointerEvent&, const DragEventAction&,
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
+using CrownEventCallback = std::function<bool(const CrownEvent&, const std::function<void()>&)>;
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
@@ -323,6 +325,7 @@ public:
     static RefPtr<Container> GetActive();
     static RefPtr<Container> GetDefault();
     static RefPtr<Container> GetFoucsed();
+    static RefPtr<Container> GetByWindowId(uint32_t windowId);
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
@@ -498,9 +501,7 @@ public:
         return false;
     }
 
-    virtual bool GetCurPointerEventInfo(
-        int32_t& pointerId, int32_t& globalX, int32_t& globalY, int32_t& sourceType,
-        int32_t& sourceTool, int32_t& displayId, StopDragCallback&& stopDragCallback)
+    virtual bool GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, StopDragCallback&& stopDragCallback)
     {
         return false;
     }
@@ -510,10 +511,12 @@ public:
         return false;
     }
 
-    virtual bool RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType,
-        bool isNewPassWord, bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true)
+    virtual int32_t RequestAutoFill(const RefPtr<NG::FrameNode>& node, AceAutoFillType autoFillType, bool isNewPassWord,
+        bool& isPopup, uint32_t& autoFillSessionId, bool isNative = true,
+        const std::function<void()>& onFinish = nullptr,
+        const std::function<void()>& onUIExtNodeBindingCompleted = nullptr)
     {
-        return false;
+        return AceAutoFillError::ACE_AUTO_FILL_DEFAULT;
     }
 
     virtual bool IsNeedToCreatePopupWindow(const AceAutoFillType& autoFillType)
@@ -540,7 +543,7 @@ public:
      */
     static bool LessThanAPIVersion(PlatformVersion version)
     {
-        return static_cast<int32_t>(version) < 14
+        return static_cast<int32_t>(version) < 15
                    ? PipelineBase::GetCurrentContext() &&
                          PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
                    : LessThanAPITargetVersion(version);
@@ -552,7 +555,7 @@ public:
      */
     static bool GreatOrEqualAPIVersion(PlatformVersion version)
     {
-        return static_cast<int32_t>(version) < 14
+        return static_cast<int32_t>(version) < 15
                    ? PipelineBase::GetCurrentContext() &&
                          PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
                    : GreatOrEqualAPITargetVersion(version);
@@ -678,6 +681,9 @@ public:
     {
         return currentDisplayId_;
     }
+
+    virtual ResourceConfiguration GetResourceConfiguration() const = 0;
+
 protected:
     bool IsFontFileExistInPath(const std::string& path);
     std::string GetFontFamilyName(std::string path);

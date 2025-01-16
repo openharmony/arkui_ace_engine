@@ -87,6 +87,11 @@ void NavDestinationEventHub::FireOnShownEvent(const std::string& name, const std
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnNavDstShow(std::move(builder));
     }
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetMemoryManager()->RebuildImageByPage(AceType::DynamicCast<FrameNode>(navDestination));
 }
 
 void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name)

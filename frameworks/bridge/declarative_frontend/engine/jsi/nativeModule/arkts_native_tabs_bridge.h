@@ -33,6 +33,8 @@ public:
     static ArkUINativeModuleValue SetBarOverlap(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetIsVertical(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTabBarPosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetTabsOptionsIndex(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetTabsOptionsController(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetScrollable(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTabBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetTabBarHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -50,6 +52,8 @@ public:
     static ArkUINativeModuleValue ResetBarOverlap(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetIsVertical(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTabBarPosition(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTabsOptionsIndex(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTabsOptionsController(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetScrollable(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTabBarWidth(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTabBarHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);

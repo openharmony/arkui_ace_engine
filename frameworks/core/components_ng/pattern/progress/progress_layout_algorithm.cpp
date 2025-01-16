@@ -44,7 +44,7 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     auto pattern = host->GetPattern<ProgressPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
     if (pattern->UseContentModifier()) {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
             host->GetGeometryNode()->ResetContent();
         } else {
             host->GetGeometryNode()->Reset();
@@ -60,9 +60,15 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
     auto progressLayoutProperty = DynamicCast<ProgressLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(progressLayoutProperty, std::nullopt);
     type_ = progressLayoutProperty->GetType().value_or(ProgressType::LINEAR);
-    strokeWidth_ = progressLayoutProperty->GetStrokeWidth().
-                        value_or(progressTheme ? progressTheme->GetTrackThickness() : Dimension(strokeWidth_)).
-                            ConvertToPx();
+    Dimension defaultThickness;
+    if (progressTheme) {
+        defaultThickness = (type_ == ProgressType::RING) ? Dimension(progressTheme->GetRingThickness())
+                                                         : Dimension(progressTheme->GetTrackThickness());
+    } else {
+        defaultThickness = Dimension(strokeWidth_);
+    }
+    strokeWidth_ = progressLayoutProperty->GetStrokeWidth().value_or(defaultThickness).ConvertToPx();
+
     float diameter =
         progressTheme ? progressTheme->GetRingDiameter().ConvertToPx() : DEFALT_RING_DIAMETER.ConvertToPx();
     auto selfIdealWidth = contentConstraint.selfIdealSize.Width();
@@ -88,6 +94,10 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
         if (!selfIdealHeight) {
             height_ = contentConstraint.parentIdealSize.Height().value_or(GetChildHeight(layoutWrapper, width_));
         }
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, std::nullopt);
+        float minSize = std::min(width_, height_);
+        renderContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(minSize / 2.0f)));
     } else if (type_ == ProgressType::LINEAR) {
         if (width_ >= height_) {
             height_ = std::min(height_, strokeWidth_);

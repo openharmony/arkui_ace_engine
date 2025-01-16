@@ -104,6 +104,11 @@ public:
         return -1;
     }
 
+    virtual int32_t SetRenderFirstFrame(bool /*display*/)
+    {
+        return -1;
+    }
+
     virtual int32_t PrepareAsync()
     {
         return -1;

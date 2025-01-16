@@ -33,7 +33,9 @@ public:
 
     std::optional<RenderContext::ContextParam> GetContextParam() const override
     {
-        return RenderContext::ContextParam { RenderContext::ContextType::EXTERNAL };
+        return RenderContext::ContextParam {
+            .type = RenderContext::ContextType::EXTERNAL,
+            .surfaceName = std::nullopt};
     }
 
     sptr<Rosen::Session> GetSession();
@@ -46,6 +48,10 @@ public:
     }
 
     void LostViewFocus() override;
+
+    void RegisterVisibleChangeCallback(int32_t nodeId, std::function<void(bool)> callback);
+    void UnRegisterVisibleChangeCallback(int32_t nodeId);
+    void HandleVisibleChangeCallback(bool visible);
 
     void CreateOverlayManager(bool isShow, const RefPtr<FrameNode>& target)
     {
@@ -88,6 +94,7 @@ private:
 
     CancelableCallback<void()> checkContextTransparentTask_;
     RefPtr<OverlayManager> overlayManager_;
+    std::map<int32_t, std::function<void(bool)>> visibleChangeCallbackMap_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SystemWindowScene);
 };

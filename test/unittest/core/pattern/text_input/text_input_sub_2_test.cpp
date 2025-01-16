@@ -14,6 +14,9 @@
  */
 
 #include "text_input_base.h"
+
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 namespace OHOS::Ace::NG {

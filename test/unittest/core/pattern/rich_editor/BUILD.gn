@@ -27,6 +27,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_click_testone_ng.cpp",
     "rich_editor_common_test_ng.cpp",
     "rich_editor_content_modifier_test_ng.cpp",
+    "rich_editor_double_click_or_long_press_test_ng.cpp",
     "rich_editor_drag_test_ng.cpp",
     "rich_editor_edit_test_ng.cpp",
     "rich_editor_edit_testone_ng.cpp",
@@ -43,6 +44,7 @@ ace_unittest("rich_editor_test_ng") {
     "rich_editor_pattern_testtwo_ng.cpp",
     "rich_editor_preview_text_test_ng.cpp",
     "rich_editor_select_overlay_test_ng.cpp",
+    "rich_editor_selection_test_ng.cpp",
     "rich_editor_span_test.cpp",
     "rich_editor_styled_string_test_ng.cpp",
   ]

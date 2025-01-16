@@ -58,6 +58,7 @@ public:
     virtual void RegisterAxisEventCallback(AxisEventCallback&& callback) = 0;
     virtual void RegisterRotationEventCallback(RotationEventCallBack&& callback) = 0;
     virtual void RegisterCardViewPositionCallback(CardViewPositionCallBack&& callback) = 0;
+    virtual void RegisterCrownEventCallback(CrownEventCallback&& callback) = 0;
     virtual void Launch() = 0;
     virtual int32_t GetInstanceId() const = 0;
     virtual const RefPtr<PlatformResRegister>& GetPlatformResRegister() const = 0;

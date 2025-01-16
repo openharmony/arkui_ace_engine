@@ -39,11 +39,15 @@ struct PickerTextStyle {
     std::optional<FontWeight> fontWeight;
     std::optional<std::vector<std::string>> fontFamily;
     std::optional<Ace::FontStyle> fontStyle;
+    std::optional<Dimension> minFontSize;
+    std::optional<Dimension> maxFontSize;
+    std::optional<Ace::TextOverflow> textOverflow;
 };
 struct PickerTextProperties {
     PickerTextStyle disappearTextStyle_;
     PickerTextStyle normalTextStyle_;
     PickerTextStyle selectedTextStyle_;
+    PickerTextStyle defaultTextStyle_;
 };
 
 // textpicker column kind
@@ -78,10 +82,12 @@ struct DatePickerSettingData {
     CheckboxSettingData checkboxSettingData;
     bool showTime;
     bool useMilitary;
+    DatePickerMode mode;
     std::map<std::string, PickerDate> datePickerProperty;
     std::map<std::string, PickerTime> timePickerProperty;
     PickerTextProperties properties;
     DateTimeType dateTimeOptions;
+    bool isEnableHapticFeedback = true;
 };
 
 struct TextPickerSettingData {
@@ -95,6 +101,8 @@ struct TextPickerSettingData {
     std::vector<std::string> values;
     std::vector<NG::TextCascadePickerOptions> options;
     NG::TextCascadePickerOptionsAttr attr;
+    bool isDisableTextStyleAnimation = false;
+    bool isEnableHapticFeedback = true;
 };
 
 struct TimePickerSettingData {
@@ -102,7 +110,9 @@ struct TimePickerSettingData {
     PickerDate dialogTitleDate;
     PickerTextProperties properties;
     DateTimeType dateTimeOptions;
+    bool isEnableHapticFeedback;
     bool showSecond;
+    bool isEnableCascade;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PICKER_PICKER_TYPE_DEFINE_H

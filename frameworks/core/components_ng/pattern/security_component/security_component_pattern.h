@@ -109,6 +109,8 @@ protected:
     void InitAppearCallback(RefPtr<FrameNode>& frameNode);
     void ToJsonValueIconNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& iconNode,
         const InspectorFilter& filter) const;
+    void ToJsonValueSymbolIconNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& symbolIconNode,
+        const InspectorFilter& filter) const;
     void ToJsonValueTextNode(std::unique_ptr<JsonValue>& json, const RefPtr<FrameNode>& textNode,
         const InspectorFilter& filter) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -119,6 +121,7 @@ private:
     void UpdateIconProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& iconNode);
     void UpdateTextProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& textNode);
     void UpdateButtonProperty(RefPtr<FrameNode>& scNode, RefPtr<FrameNode>& buttonNode);
+    void HandleEnabled();
 #ifdef SECURITY_COMPONENT_ENABLE
     void RegisterSecurityComponent();
     void RegisterSecurityComponentRetry();

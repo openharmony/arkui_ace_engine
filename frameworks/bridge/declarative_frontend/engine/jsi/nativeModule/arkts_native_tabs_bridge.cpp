@@ -16,6 +16,8 @@
 
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "bridge/declarative_frontend/jsview/js_tabs.h"
+#include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "core/components/common/properties/color.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -612,6 +614,66 @@ ArkUINativeModuleValue TabsBridge::ResetTabBarPosition(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTabsModifier()->resetTabBarPosition(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabsOptionsIndex(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> indexValArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (indexValArg->IsNull() || indexValArg->IsUndefined()) {
+        GetArkUINodeModifiers()->getTabsModifier()->resetTabsOptionsIndex(nativeNode);
+    } else {
+        int32_t indexVal = indexValArg->Int32Value(vm);
+        GetArkUINodeModifiers()->getTabsModifier()->setTabsOptionsIndex(nativeNode, indexVal);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabsOptionsIndex(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getTabsModifier()->resetTabsOptionsIndex(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::SetTabsOptionsController(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    RefPtr<NG::TabsControllerNG> tabsController = AceType::MakeRefPtr<NG::TabsControllerNG>();
+    if (info[1]->IsObject()) {
+        auto* jsTabsController =
+            Framework::JSRef<Framework::JSObject>::Cast(info[1])->Unwrap<Framework::JSTabsController>();
+            if (jsTabsController) {
+                jsTabsController->SetInstanceId(Container::CurrentId());
+                jsTabsController->SetTabsController(tabsController);
+            }
+    }
+    GetArkUINodeModifiers()->getTabsModifier()->setTabsOptionsController(nativeNode,
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(tabsController)));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabsOptionsController(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    RefPtr<NG::TabsControllerNG> tabsController = AceType::MakeRefPtr<NG::TabsControllerNG>();
+    GetArkUINodeModifiers()->getTabsModifier()->setTabsOptionsController(nativeNode,
+        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(tabsController)));
     return panda::JSValueRef::Undefined(vm);
 }
 

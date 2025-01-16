@@ -155,16 +155,31 @@ void SetMainSpace(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
 namespace NodeModifier {
 const ArkUIFlexModifier* GetFlexModifier()
 {
-    static const ArkUIFlexModifier modifier = { SetFlexOptions, ResetFlexOptions, GetFlexOptions, setFlexCrossSpace,
-        SetMainSpace };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIFlexModifier modifier = {
+        .setFlexOptions = SetFlexOptions,
+        .resetFlexOptions = ResetFlexOptions,
+        .getFlexOptions = GetFlexOptions,
+        .setFlexCrossSpace = setFlexCrossSpace,
+        .setFlexMainSpace = SetMainSpace,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     return &modifier;
 }
 
 const CJUIFlexModifier* GetCJUIFlexModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIFlexModifier modifier = {
-        SetFlexOptions, ResetFlexOptions, GetFlexOptions, setFlexCrossSpace, SetMainSpace
+        .setFlexOptions = SetFlexOptions,
+        .resetFlexOptions = ResetFlexOptions,
+        .getFlexOptions = GetFlexOptions,
+        .setFlexCrossSpace = setFlexCrossSpace,
+        .setFlexMainSpace = SetMainSpace,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+
     return &modifier;
 }
 }

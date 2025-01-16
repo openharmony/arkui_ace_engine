@@ -18,6 +18,7 @@ ohos_shared_library("plugincomponent") {
   include_dirs = [
     "$ace_root",
     "$ace_root/frameworks",
+    "$ace_root/interfaces/inner_api/ace_kit/include",
     "$ace_root/interfaces/inner_api/ui_service_manager/include",
     "$root_out_dir/arkui/framework",
   ]

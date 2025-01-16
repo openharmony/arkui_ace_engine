@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "test/unittest/core/event/focus_hub_test_ng.h"
+#include "core/event/focus_axis_event.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2098,4 +2099,70 @@ HWTEST_F(FocusHubTestNg, FocusHubRequestNextFocusOfKeyEscTest001, TestSize.Level
     focusHub1->SetTabStop(true);
     EXPECT_EQ(focusHub1->RequestNextFocusOfKeyEsc(), false);
 }
+
+/**
+ * @tc.name: FocusHubOnFocusAxisEvent001
+ * @tc.desc: Test the function OnFocusKeyEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubOnFocusAxisEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps2: create eventHub and focusHub.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    FocusAxisEvent focusAxisEvent;
+    focusAxisEvent.absXValue = 0.5;
+    focusAxisEvent.absYValue = 0.5;
+    focusAxisEvent.absZValue = 0.5;
+    focusAxisEvent.absRzValue = 0.5;
+    focusAxisEvent.absHat0XValue = 1;
+    focusAxisEvent.absHat0YValue = 1;
+    focusAxisEvent.absBrakeValue = 0.5;
+    focusAxisEvent.absGasValue = 0.5;
+    focusAxisEvent.sourceType = SourceType::MOUSE;
+    focusAxisEvent.sourceTool = SourceTool::JOYSTICK;
+    focusAxisEvent.deviceId = 10;
+    std::chrono::microseconds microseconds(GetSysTimestamp());
+    TimeStamp time(microseconds);
+    focusAxisEvent.time = time;
+    focusAxisEvent.pressedCodes.emplace_back(KeyCode::KEY_CTRL_LEFT);
+
+    /**
+     * @tc.steps3: call the function OnKeyEvent with FocusType::NODE.
+     * @tc.expected: The return value of OnKeyEvent is true.
+     */
+    focusHub->SetFocusType(FocusType::NODE);
+    focusHub->currentFocus_ = true;
+    FocusAxisEventInfo axisEventInfo({});
+    auto onFocusAxisEventCallback = [&axisEventInfo](FocusAxisEventInfo& eventInfo) {
+        eventInfo.SetStopPropagation(true);
+        axisEventInfo = eventInfo;
+    };
+    focusHub->SetOnFocusAxisCallback(std::move(onFocusAxisEventCallback));
+    EXPECT_TRUE(focusHub->HandleEvent(focusAxisEvent));
+    EXPECT_EQ(axisEventInfo.GetAbsXValue(), 0.5);
+    EXPECT_EQ(axisEventInfo.GetAbsYValue(), 0.5);
+    EXPECT_EQ(axisEventInfo.GetAbsZValue(), 0.5);
+    EXPECT_EQ(axisEventInfo.GetAbsRzValue(), 0.5);
+    EXPECT_EQ(axisEventInfo.GetAbsHat0XValue(), 1);
+    EXPECT_EQ(axisEventInfo.GetAbsHat0YValue(), 1);
+    EXPECT_EQ(axisEventInfo.GetAbsBrakeValue(), 0.5);
+    EXPECT_EQ(axisEventInfo.GetAbsGasValue(), 0.5);
+    EXPECT_EQ(axisEventInfo.GetSourceDevice(), SourceType::MOUSE);
+    EXPECT_EQ(axisEventInfo.GetSourceTool(), SourceTool::JOYSTICK);
+    EXPECT_EQ(axisEventInfo.GetDeviceId(), 10);
+    EXPECT_EQ(axisEventInfo.GetTimeStamp().time_since_epoch().count(), time.time_since_epoch().count());
+    EXPECT_EQ(axisEventInfo.GetPressedKeyCodes().size(), 1);
+    EXPECT_EQ(axisEventInfo.IsStopPropagation(), true);
+}
+
 } // namespace OHOS::Ace::NG

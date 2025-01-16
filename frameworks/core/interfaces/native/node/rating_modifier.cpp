@@ -93,15 +93,32 @@ void SetRatingOptions(ArkUINodeHandle node, ArkUI_Float64 rating, ArkUI_Bool ind
 namespace NodeModifier {
 const ArkUIRatingModifier* GetRatingModifier()
 {
-    static const ArkUIRatingModifier modifier = {SetStars, SetRatingStepSize, SetStarStyle,
-        ResetStars, ResetRatingStepSize, ResetStarStyle, SetRatingOptions};
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIRatingModifier modifier = {
+        .setStars = SetStars,
+        .setRatingStepSize = SetRatingStepSize,
+        .setStarStyle = SetStarStyle,
+        .resetStars = ResetStars,
+        .resetRatingStepSize = ResetRatingStepSize,
+        .resetStarStyle = ResetStarStyle,
+        .setRatingOptions = SetRatingOptions,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIRatingModifier* GetCJUIRatingModifier()
 {
-    static const CJUIRatingModifier modifier = {SetStars, SetRatingStepSize, SetStarStyle,
-        ResetStars, ResetRatingStepSize, ResetStarStyle };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIRatingModifier modifier = {
+        .setStars = SetStars,
+        .setRatingStepSize = SetRatingStepSize,
+        .setStarStyle = SetStarStyle,
+        .resetStars = ResetStars,
+        .resetRatingStepSize = ResetRatingStepSize,
+        .resetStarStyle = ResetStarStyle,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

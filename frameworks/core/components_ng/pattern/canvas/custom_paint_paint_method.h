@@ -218,7 +218,7 @@ public:
 
     void SetDefaultTextAlign()
     {
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_THIRTEEN)) {
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
             // The default value of TextAlign is TextAlign::START.
             SetTextAlign(TextAlign::START);
         }
@@ -269,6 +269,12 @@ public:
     {
         state_.fillState.SetFontSize(size);
         state_.strokeState.SetFontSize(size);
+    }
+
+    void SetLetterSpacing(const Dimension& letterSpacing)
+    {
+        state_.fillState.SetLetterSpacing(letterSpacing);
+        state_.strokeState.SetLetterSpacing(letterSpacing);
     }
 
     void SetMeasureFontSize(const Dimension& size)

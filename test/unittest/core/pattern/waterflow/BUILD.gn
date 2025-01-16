@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,16 +13,21 @@
 
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
+COMMON_SRC = [
+  "water_flow_test_ng.cpp",
+  "water_flow_scroller_test_ng.cpp",
+  "water_flow_cache_test.cpp",
+]
+
 # Test original top-down WaterFlow
 ace_unittest("water_flow_test_original") {
   type = "new"
   sources = [
     "water_flow_misc_test.cpp",
     "water_flow_regular_test.cpp",
-    "water_flow_scroller_test_ng.cpp",
-    "water_flow_test_ng.cpp",
     "water_flow_top_down_test.cpp",
   ]
+  sources += COMMON_SRC
 }
 
 # Test segmented top-down WaterFlow
@@ -31,14 +36,13 @@ ace_unittest("water_flow_test_segmented") {
   defines = [ "TEST_SEGMENTED_WATER_FLOW" ]
   sources = [
     "water_flow_layout_info_test.cpp",
-    "water_flow_scroller_test_ng.cpp",
     "water_flow_section_test.cpp",
     "water_flow_segment_common_test.cpp",
     "water_flow_segment_integrated.cpp",
     "water_flow_segment_layout_test.cpp",
-    "water_flow_test_ng.cpp",
     "water_flow_top_down_test.cpp",
   ]
+  sources += COMMON_SRC
 }
 
 # ----------- Test in Sliding Window LayoutMode
@@ -48,9 +52,8 @@ ace_unittest("water_flow_test_sw") {
   sources = [
     "water_flow_estimation_test.cpp",
     "water_flow_regular_test.cpp",
-    "water_flow_scroller_test_ng.cpp",
     "water_flow_segment_common_test.cpp",
     "water_flow_sw_layout_test.cpp",
-    "water_flow_test_ng.cpp",
   ]
+  sources += COMMON_SRC
 }

@@ -327,7 +327,7 @@ void ListItemDragManager::HandleAutoScroll(int32_t index, const PointF& point, c
     CHECK_NULL_VOID(parent);
     auto pattern = parent->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    if (IsInHotZone(index, frameRect)) {
+    if (IsInHotZone(index, frameRect) && parent->GetDragPreviewOption().enableEdgeAutoScroll) {
         pattern->HandleMoveEventInComp(point);
         if (!scrolling_) {
             pattern->SetHotZoneScrollCallback([weak = WeakClaim(this)]() {

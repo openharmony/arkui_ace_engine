@@ -1108,7 +1108,7 @@ void RenderImage::PanOnActionEnd(const GestureEvent& info)
     SetPreDragDropNode(nullptr);
 }
 
-void RenderImage::PanOnActionCancel()
+void RenderImage::PanOnActionCancel(const GestureEvent& info)
 {
     auto pipelineContext = context_.Upgrade();
     if (!pipelineContext) {

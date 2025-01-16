@@ -47,6 +47,9 @@ void AxisAnimator::OnAxis(float mainDelta, float scrollablePos)
         }
         axisScrollMotion_->Reset(scrollablePos, mainDelta);
         axisScrollAnimator_->PlayMotion(axisScrollMotion_);
+        if (axisAnimationStartCallback_) {
+            axisAnimationStartCallback_(scrollablePos);
+        }
     }
 }
 

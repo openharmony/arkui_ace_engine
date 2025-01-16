@@ -187,20 +187,42 @@ void ResetTrackShadow(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIDataPanelModifier* GetDataPanelModifier()
 {
-    static const ArkUIDataPanelModifier modifier = { SetCloseEffect, ResetCloseEffect,
-        SetDataPanelTrackBackgroundColor, ResetDataPanelTrackBackgroundColor, SetDataPanelStrokeWidth,
-        ResetDataPanelStrokeWidth, SetValueColors, ResetValueColors, SetTrackShadow, SetNullTrackShadow,
-        ResetTrackShadow };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIDataPanelModifier modifier = {
+        .setCloseEffect = SetCloseEffect,
+        .resetCloseEffect = ResetCloseEffect,
+        .setDataPanelTrackBackgroundColor = SetDataPanelTrackBackgroundColor,
+        .resetDataPanelTrackBackgroundColor = ResetDataPanelTrackBackgroundColor,
+        .setDataPanelStrokeWidth = SetDataPanelStrokeWidth,
+        .resetDataPanelStrokeWidth = ResetDataPanelStrokeWidth,
+        .setValueColors = SetValueColors,
+        .resetValueColors = ResetValueColors,
+        .setTrackShadow = SetTrackShadow,
+        .setNullTrackShadow = SetNullTrackShadow,
+        .resetTrackShadow = ResetTrackShadow,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIDataPanelModifier* GetCJUIDataPanelModifier()
 {
-    static const CJUIDataPanelModifier modifier = { SetCloseEffect, ResetCloseEffect,
-        SetDataPanelTrackBackgroundColor, ResetDataPanelTrackBackgroundColor, SetDataPanelStrokeWidth,
-        ResetDataPanelStrokeWidth, SetValueColors, ResetValueColors, SetTrackShadow, SetNullTrackShadow,
-        ResetTrackShadow };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIDataPanelModifier modifier = {
+        .setCloseEffect = SetCloseEffect,
+        .resetCloseEffect = ResetCloseEffect,
+        .setDataPanelTrackBackgroundColor = SetDataPanelTrackBackgroundColor,
+        .resetDataPanelTrackBackgroundColor = ResetDataPanelTrackBackgroundColor,
+        .setDataPanelStrokeWidth = SetDataPanelStrokeWidth,
+        .resetDataPanelStrokeWidth = ResetDataPanelStrokeWidth,
+        .setValueColors = SetValueColors,
+        .resetValueColors = ResetValueColors,
+        .setTrackShadow = SetTrackShadow,
+        .setNullTrackShadow = SetNullTrackShadow,
+        .resetTrackShadow = ResetTrackShadow,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

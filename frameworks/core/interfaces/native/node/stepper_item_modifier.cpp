@@ -64,28 +64,32 @@ void ResetStatus(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIStepperItemModifier* GetStepperItemModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIStepperItemModifier modifier = {
-        SetNextLabel,
-        ResetNextLabel,
-        SetPrevLabel,
-        ResetPrevLabel,
-        SetStatus,
-        ResetStatus,
+        .setNextLabel = SetNextLabel,
+        .resetNextLabel = ResetNextLabel,
+        .setPrevLabel = SetPrevLabel,
+        .resetPrevLabel = ResetPrevLabel,
+        .setStatus = SetStatus,
+        .resetStatus = ResetStatus,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIStepperItemModifier* GetCJUIStepperItemModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIStepperItemModifier modifier = {
-        SetNextLabel,
-        ResetNextLabel,
-        SetPrevLabel,
-        ResetPrevLabel,
-        SetStatus,
-        ResetStatus,
+        .setNextLabel = SetNextLabel,
+        .resetNextLabel = ResetNextLabel,
+        .setPrevLabel = SetPrevLabel,
+        .resetPrevLabel = ResetPrevLabel,
+        .setStatus = SetStatus,
+        .resetStatus = ResetStatus,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

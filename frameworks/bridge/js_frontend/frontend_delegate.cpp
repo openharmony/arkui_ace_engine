@@ -15,6 +15,7 @@
 
 #include "frameworks/bridge/js_frontend/frontend_delegate.h"
 
+#include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "frameworks/core/components_ng/base/inspector.h"
@@ -164,6 +165,13 @@ void FrontendDelegate::SetAutoFocusTransfer(bool isAutoFocusTransfer)
     auto focusManager = pipeline->GetOrCreateFocusManager();
     CHECK_NULL_VOID(focusManager);
     focusManager->SetIsAutoFocusTransfer(isAutoFocusTransfer);
+}
+
+bool FrontendDelegate::ConfigWindowMask(bool enable)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return NG::ContainerModalView::ConfigCustomWindowMask(pipeline, enable);
 }
 
 template<typename T>

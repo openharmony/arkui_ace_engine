@@ -33,7 +33,7 @@
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT SymbolModel {
+class ACE_FORCE_EXPORT SymbolModel {
 public:
     static SymbolModel* GetInstance();
     virtual ~SymbolModel() = default;
@@ -46,6 +46,8 @@ public:
     virtual void SetSymbolEffect(const std::uint32_t effectStrategy) = 0;
     virtual void SetClipEdge() = 0;
     virtual void SetSymbolEffectOptions(NG::SymbolEffectOptions& symbolEffectOptions) = 0;
+    virtual void SetMinFontScale(const float value) = 0;
+    virtual void SetMaxFontScale(const float value) = 0;
 
 private:
     static std::unique_ptr<SymbolModel> instance_;

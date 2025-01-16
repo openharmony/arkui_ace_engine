@@ -18,6 +18,7 @@
 
 #include "focus_state.h"
 #include "core/event/focus_axis_event.h"
+#include "core/event/crown_event.h"
 #include "core/event/key_event.h"
 #include "core/gestures/gesture_event.h"
 namespace OHOS::Ace::NG {
@@ -81,6 +82,9 @@ public:
     OnKeyConsumeFunc onKeyPreImeCallback_;
     GestureEventFunc onClickEventCallback_;
     OnFocusAxisEventFunc onFocusAxisEventCallback_;
+    OnKeyEventDispatchFunc onKeyEventDispatchCallback_;
+    OnCrownCallbackFunc onCrownEventCallback_;
+    OnCrownEventFunc onCrownEventsInternal_;
 
     WeakPtr<FocusHub> defaultFocusNode_;
     bool isDefaultFocus_ = { false };
@@ -113,7 +117,10 @@ public:
     }
     bool OnClick(const KeyEvent& event);
 
+    bool ProcessOnCrownEventInternal(const CrownEvent& event);
+
 protected:
+    bool OnCrownEvent(const CrownEvent& CrownEvent);
     bool OnFocusEvent(const FocusEvent& event);
     virtual bool HandleFocusTravel(const FocusEvent& event) = 0; // bad design which need to be deleted
 
@@ -126,7 +133,9 @@ protected:
     ACE_DEFINE_FOCUS_EVENT(OnKeyPreIme, OnKeyConsumeFunc, onKeyPreImeCallback)
     ACE_DEFINE_FOCUS_EVENT(OnClickCallback, GestureEventFunc, onClickEventCallback)
     ACE_DEFINE_FOCUS_EVENT(OnFocusAxisCallback, OnFocusAxisEventFunc, onFocusAxisEventCallback)
-
+    ACE_DEFINE_FOCUS_EVENT(OnKeyEventDispatchCallback, OnKeyEventDispatchFunc, onKeyEventDispatchCallback)
+    ACE_DEFINE_FOCUS_EVENT(OnCrownCallback, OnCrownCallbackFunc, onCrownEventCallback)
+    ACE_DEFINE_FOCUS_EVENT(OnCrownEventInternal, OnCrownEventFunc, onCrownEventsInternal)
     std::unordered_map<OnKeyEventType, OnKeyEventFunc> onKeyEventsInternal_;
     bool isNodeNeedKey_ { false }; // extension use only
     RefPtr<FocusCallbackEvents> focusCallbackEvents_;
@@ -141,6 +150,9 @@ private:
     bool OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& keyEvent);
     bool ProcessOnKeyEventInternal(const KeyEvent& event);
     bool HandleFocusAxisEvent(const FocusAxisEvent& event);
+    bool HasCustomKeyEventDispatch(const FocusEvent& event);
+    bool HandleCustomEventDispatch(const FocusEvent& event);
+    bool HandleCrownEvent(const CrownEvent& CrownEvent);
 
     void PrintOnKeyEventUserInfo(const KeyEvent& keyEvent, bool retCallback);
 };

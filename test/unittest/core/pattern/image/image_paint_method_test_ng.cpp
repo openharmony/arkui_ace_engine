@@ -146,6 +146,122 @@ HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig, TestS
 }
 
 /**
+ * @tc.name: ImagePaintMethodTestNg_UpdatePaintConfig_ImageMatrix001
+ * @tc.desc: Create UpdatePaintConfig.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig_ImageMatrix001, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create image object
+     */
+    ImageModelNG image;
+    auto frameNode = ImagePaintMethodTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. create ImagePaintMethod.
+     */
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_NE(pattern->loadingCtx_, nullptr);
+    pattern->image_ = pattern->loadingCtx_->MoveCanvasImage();
+    EXPECT_NE(pattern->image_, nullptr);
+    pattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    pattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethodConfig imagePaintMethodConfig_;
+    imagePaintMethodConfig_.selected = true;
+    RefPtr<ImagePaintMethod> imagePaintMethod_ =
+        AceType::MakeRefPtr<ImagePaintMethod>(pattern->image_, imagePaintMethodConfig_);
+    EXPECT_NE(imagePaintMethod_, nullptr);
+    RefPtr<ImageRenderProperty> imagePaintProperty_ = frameNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_NE(imagePaintProperty_, nullptr);
+    imagePaintProperty_->UpdateImageRepeat(ImageRepeat::REPEAT_X);
+    imagePaintProperty_->UpdateNeedBorderRadius(true);
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
+    geometryNode->SetFrameOffset(OffsetF(WIDTH, HEIGHT));
+    geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
+    RefPtr<PaintWrapper> paintWrapper =
+        AceType::MakeRefPtr<PaintWrapper>(frameNode->GetRenderContext(), geometryNode, imagePaintProperty_);
+    auto imagePaintWrapper_ = frameNode->CreatePaintWrapper();
+    EXPECT_NE(imagePaintWrapper_, nullptr);
+    EXPECT_NE(imagePaintWrapper_, paintWrapper);
+    /**
+     * @tc.steps: step3. call function.
+     */
+    PaintWrapper* imagePaintWrapperRaw_ = AceType::RawPtr(imagePaintWrapper_);
+    EXPECT_NE(imagePaintWrapperRaw_, nullptr);
+    Matrix4 defaultMatrix4Value = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    image.SetImageMatrix(defaultMatrix4Value);
+    image.SetImageFit(ImageFit::MATRIX);
+    imagePaintMethod_->UpdatePaintConfig(imagePaintWrapperRaw_);
+    auto& config = imagePaintMethod_->canvasImage_->paintConfig_;
+    auto matrix4 = config->imageMatrix_;
+    EXPECT_EQ(matrix4, defaultMatrix4Value);
+}
+
+/**
+ * @tc.name: ImagePaintMethodTestNg_UpdatePaintConfig_ImageMatrix002
+ * @tc.desc: Create UpdatePaintConfig.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePaintMethodTestNg, ImagePaintMethodTestNg_UpdatePaintConfig_ImageMatrix002, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. create image object
+     */
+    ImageModelNG image;
+    auto frameNode = ImagePaintMethodTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    /**
+     * @tc.steps: step2. create ImagePaintMethod.
+     */
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_NE(pattern->loadingCtx_, nullptr);
+    pattern->image_ = pattern->loadingCtx_->MoveCanvasImage();
+    EXPECT_NE(pattern->image_, nullptr);
+    pattern->image_ = AceType::MakeRefPtr<MockCanvasImage>();
+    pattern->image_->SetPaintConfig(ImagePaintConfig());
+    ImagePaintMethodConfig imagePaintMethodConfig_;
+    imagePaintMethodConfig_.selected = true;
+    RefPtr<ImagePaintMethod> imagePaintMethod_ =
+        AceType::MakeRefPtr<ImagePaintMethod>(pattern->image_, imagePaintMethodConfig_);
+    EXPECT_NE(imagePaintMethod_, nullptr);
+    RefPtr<ImageRenderProperty> imagePaintProperty_ = frameNode->GetPaintProperty<ImageRenderProperty>();
+    EXPECT_NE(imagePaintProperty_, nullptr);
+    imagePaintProperty_->UpdateImageRepeat(ImageRepeat::REPEAT_X);
+    imagePaintProperty_->UpdateNeedBorderRadius(true);
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetFrameSize(SizeF(WIDTH, HEIGHT));
+    geometryNode->SetFrameOffset(OffsetF(WIDTH, HEIGHT));
+    geometryNode->SetContentSize(SizeF(WIDTH, HEIGHT));
+    RefPtr<PaintWrapper> paintWrapper =
+        AceType::MakeRefPtr<PaintWrapper>(frameNode->GetRenderContext(), geometryNode, imagePaintProperty_);
+    auto imagePaintWrapper_ = frameNode->CreatePaintWrapper();
+    EXPECT_NE(imagePaintWrapper_, nullptr);
+    EXPECT_NE(imagePaintWrapper_, paintWrapper);
+    /**
+     * @tc.steps: step3. call function.
+     */
+    PaintWrapper* imagePaintWrapperRaw_ = AceType::RawPtr(imagePaintWrapper_);
+    EXPECT_NE(imagePaintWrapperRaw_, nullptr);
+    Matrix4 defaultMatrix4Value = Matrix4(1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f, 0, 0, 0, 0, 1.0f);
+    image.SetImageMatrix(defaultMatrix4Value);
+    image.SetImageFit(ImageFit::CENTER);
+    imagePaintMethod_->UpdatePaintConfig(imagePaintWrapperRaw_);
+    auto& config = imagePaintMethod_->canvasImage_->paintConfig_;
+    auto matrix4 = config->imageMatrix_;
+    EXPECT_EQ(matrix4, defaultMatrix4Value);
+}
+
+/**
  * @tc.name: ImagePaintMethodTestNg_NormalizeRadius
  * @tc.desc: Create NormalizeRadius.
  * @tc.type: FUNC

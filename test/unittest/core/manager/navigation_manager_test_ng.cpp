@@ -365,7 +365,7 @@ HWTEST_F(NavigationManagerTestNg, NavigationManagerTest007, TestSize.Level1)
     auto preNode = AceType::DynamicCast<FrameNode>(navigationNode->GetNavBarNode());
     auto curNode = AceType::DynamicCast<FrameNode>(navigationNode->GetTopDestination());
     navigationManager->hasCacheNavigationNodeEnable_ = true;
-    navigationNode->UnconfigureNavigationAndDisableAnimation(preNode, curNode);
+    navigationNode->ResetTransitionAnimationNodeState(preNode, curNode);
 
     auto managerCurNode = navigationManager->curNavNode_;
     auto managerPreNode = navigationManager->preNavNode_;

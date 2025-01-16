@@ -23,6 +23,7 @@
 #include "base/thread/cancelable_callback.h"
 #include "base/utils/noncopyable.h"
 #include "base/log/log.h"
+#include "base/utils/system_properties.h"
 
 namespace OHOS::Ace {
 
@@ -283,6 +284,13 @@ public:
         return 0;
     }
 
+    static PriorityType GetPriorityTypeWithCheck(
+        PriorityType priorityType, PriorityType defaultPriority = PriorityType::LOW)
+    {
+        // Temporary interface, used to control whether priority adjustment takes effect.
+        return SystemProperties::GetTaskPriorityAdjustmentEnable() ? priorityType : defaultPriority;
+    }
+
 protected:
     TaskExecutor() = default;
 
@@ -359,6 +367,19 @@ public:
     bool PostTask(Task&& task, const std::string& name) const
     {
         return taskExecutor_ ? taskExecutor_->PostTask(std::move(task), type_, name) : false;
+    }
+
+    /**
+     * Post a task to the specified thread with priority.
+     *
+     * @param task Task which need execution.
+     * @param name Name of the task.
+     * @param priorityType Priority of the task.
+     * @return Returns 'true' whether task has been post successfully.
+     */
+    bool PostTask(Task&& task, const std::string& name, PriorityType priorityType) const
+    {
+        return taskExecutor_ ? taskExecutor_->PostTask(std::move(task), type_, name, priorityType) : false;
     }
 
     /**

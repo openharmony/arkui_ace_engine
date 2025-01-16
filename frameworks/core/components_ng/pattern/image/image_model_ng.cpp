@@ -406,6 +406,11 @@ void ImageModelNG::SetImageFit(ImageFit value)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageFit, value);
 }
 
+void ImageModelNG::SetImageMatrix(const Matrix4 &value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix, value);
+}
+
 void ImageModelNG::SetMatchTextDirection(bool value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, MatchTextDirection, value);
@@ -454,6 +459,18 @@ void ImageModelNG::SetImageFill(const Color &color)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, SvgFillColor, color);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, color);
+}
+
+void ImageModelNG::ResetImageFill()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ImageRenderProperty, SvgFillColor, PROPERTY_UPDATE_RENDER);
+    ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColor);
+}
+
+void ImageModelNG::ResetImageFill(FrameNode *frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ImageRenderProperty, SvgFillColor, PROPERTY_UPDATE_RENDER, frameNode);
+    ACE_RESET_NODE_RENDER_CONTEXT(RenderContext, ForegroundColor, frameNode);
 }
 
 void ImageModelNG::SetImageInterpolation(ImageInterpolation interpolation)
@@ -688,6 +705,11 @@ void ImageModelNG::SetImageRepeat(FrameNode *frameNode, ImageRepeat imageRepeat)
 void ImageModelNG::SetImageRenderMode(FrameNode *frameNode, ImageRenderMode imageRenderMode)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRenderMode, imageRenderMode, frameNode);
+}
+
+void ImageModelNG::SetImageMatrix(FrameNode *frameNode, const Matrix4 &value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix, value, frameNode);
 }
 
 void ImageModelNG::SetImageFit(FrameNode *frameNode, ImageFit value)

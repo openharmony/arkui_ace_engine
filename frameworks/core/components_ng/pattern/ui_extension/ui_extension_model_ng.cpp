@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,8 +15,9 @@
 
 #include "core/components_ng/pattern/ui_extension/ui_extension_model_ng.h"
 
-#include "core/components_ng/pattern/ui_extension/dynamic_pattern.h"
-#include "core/components_ng/pattern/ui_extension/isolated_pattern.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_node.h"
+#include "core/components_ng/pattern/ui_extension/dynamic_component/dynamic_pattern.h"
+#include "core/components_ng/pattern/ui_extension/isolated_component/isolated_pattern.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -53,6 +54,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
     pattern->SetDensityDpi(config.isDensityFollowHost);
+    pattern->SetIsWindowModeFollowHost(config.isWindowModeFollowHost);
     pattern->UpdateWant(want);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, frameNode);
@@ -71,7 +73,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
 
 void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
     const std::map<PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap,
-    bool transferringCaller, bool densityDpi)
+    bool transferringCaller, bool densityDpi, bool isWindowModeFollowHost)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -81,6 +83,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
     CHECK_NULL_VOID(pattern);
     pattern->SetPlaceholderMap(placeholderMap);
     pattern->SetDensityDpi(densityDpi);
+    pattern->SetIsWindowModeFollowHost(isWindowModeFollowHost);
     pattern->UpdateWant(wantWrap);
     stack->Push(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -135,10 +138,11 @@ void UIExtensionModelNG::CreateDynamicComponent(const UIExtensionConfig& config)
     TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "CreateDynamicComponent");
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::ISOLATED_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DynamicPattern>(); });
+    auto frameNode = DynamicNode::GetOrCreateDynamicNode(
+        V2::DYNAMIC_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DynamicPattern>(); });
     auto pattern = frameNode->GetPattern<DynamicPattern>();
     CHECK_NULL_VOID(pattern);
+    pattern->SetBackgroundTransparent(config.backgroundTransparent);
     stack->Push(frameNode);
 }
 
@@ -317,8 +321,17 @@ void UIExtensionModelNG::SetPlatformOnError(
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<IsolatedPattern>();
+    auto pattern = frameNode->GetPattern<PlatformPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnErrorCallback(std::move(onError));
+}
+
+void UIExtensionModelNG::SetOnDrawReady(std::function<void()>&& onDrawReady)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnDrawReadyCallback(std::move(onDrawReady));
 }
 } // namespace OHOS::Ace::NG

@@ -240,24 +240,58 @@ void ResetGradientColors(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIGaugeModifier* GetGaugeModifier()
 {
-    static const ArkUIGaugeModifier modifier = { SetGaugeValue, ResetGaugeValue, SetGaugeStartAngle,
-        ResetGaugeStartAngle, SetGaugeEndAngle, ResetGaugeEndAngle, SetGaugeStrokeWidth, ResetGaugeStrokeWidth,
-        SetShadowOptions, ResetShadowOptions, SetIsShowIndicator,
-        SetIndicatorIconPath, ResetIndicatorIconPath, SetIndicatorSpace, ResetIndicatorSpace,
-        SetColors, ResetColors, SetGradientColors, ResetGradientColors
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIGaugeModifier modifier = {
+        .setGaugeValue = SetGaugeValue,
+        .resetGaugeValue = ResetGaugeValue,
+        .setGaugeStartAngle = SetGaugeStartAngle,
+        .resetGaugeStartAngle = ResetGaugeStartAngle,
+        .setGaugeEndAngle = SetGaugeEndAngle,
+        .resetGaugeEndAngle = ResetGaugeEndAngle,
+        .setGaugeStrokeWidth = SetGaugeStrokeWidth,
+        .resetGaugeStrokeWidth = ResetGaugeStrokeWidth,
+        .setShadowOptions = SetShadowOptions,
+        .resetShadowOptions = ResetShadowOptions,
+        .setIsShowIndicator = SetIsShowIndicator,
+        .setIndicatorIconPath = SetIndicatorIconPath,
+        .resetIndicatorIconPath = ResetIndicatorIconPath,
+        .setIndicatorSpace = SetIndicatorSpace,
+        .resetIndicatorSpace = ResetIndicatorSpace,
+        .setColors = SetColors,
+        .resetColors = ResetColors,
+        .setGradientColors = SetGradientColors,
+        .resetGradientColors = ResetGradientColors,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIGaugeModifier* GetCJUIGaugeModifier()
 {
-    static const CJUIGaugeModifier modifier = { SetGaugeValue, ResetGaugeValue, SetGaugeStartAngle,
-        ResetGaugeStartAngle, SetGaugeEndAngle, ResetGaugeEndAngle, SetGaugeStrokeWidth, ResetGaugeStrokeWidth,
-        SetShadowOptions, ResetShadowOptions, SetIsShowIndicator,
-        SetIndicatorIconPath, ResetIndicatorIconPath, SetIndicatorSpace, ResetIndicatorSpace,
-        SetColors, ResetColors, SetGradientColors, ResetGradientColors
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIGaugeModifier modifier = {
+        .setGaugeValue = SetGaugeValue,
+        .resetGaugeValue = ResetGaugeValue,
+        .setGaugeStartAngle = SetGaugeStartAngle,
+        .resetGaugeStartAngle = ResetGaugeStartAngle,
+        .setGaugeEndAngle = SetGaugeEndAngle,
+        .resetGaugeEndAngle = ResetGaugeEndAngle,
+        .setGaugeStrokeWidth = SetGaugeStrokeWidth,
+        .resetGaugeStrokeWidth = ResetGaugeStrokeWidth,
+        .setShadowOptions = SetShadowOptions,
+        .resetShadowOptions = ResetShadowOptions,
+        .setIsShowIndicator = SetIsShowIndicator,
+        .setIndicatorIconPath = SetIndicatorIconPath,
+        .resetIndicatorIconPath = ResetIndicatorIconPath,
+        .setIndicatorSpace = SetIndicatorSpace,
+        .resetIndicatorSpace = ResetIndicatorSpace,
+        .setColors = SetColors,
+        .resetColors = ResetColors,
+        .setGradientColors = SetGradientColors,
+        .resetGradientColors = ResetGradientColors,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

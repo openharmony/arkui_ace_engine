@@ -73,15 +73,18 @@ void JSRating::Create(const JSCallbackInfo& info)
         auto paramObject = JSRef<JSObject>::Cast(info[0]);
         auto getRating = paramObject->GetProperty("rating");
         auto getIndicator = paramObject->GetProperty("indicator");
-        if (getRating->IsNumber()) {
-            rating = getRating->ToNumber<double>();
-        } else if (getRating->IsObject()) {
+        if (getRating->IsObject()) {
             JSRef<JSObject> ratingObj = JSRef<JSObject>::Cast(getRating);
             changeEventVal = ratingObj->GetProperty("changeEvent");
             auto ratingValue = ratingObj->GetProperty("value");
             if (ratingValue->IsNumber()) {
                 rating = ratingValue->ToNumber<double>();
             }
+        } else if (paramObject->HasProperty("$rating")) {
+            changeEventVal = paramObject->GetProperty("$rating");
+            rating = getRating->ToNumber<double>();
+        } else if (getRating->IsNumber()) {
+            rating = getRating->ToNumber<double>();
         }
         if (rating < 0) {
             rating = RATING_SCORE_DEFAULT;

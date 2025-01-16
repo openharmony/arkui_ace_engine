@@ -45,20 +45,15 @@ struct ArkUIInternalDragAndDropInfo {
 
 struct ArkUIInteralDragAction {
     int32_t instanceId;
-    int32_t pointer;
     void** pixelMapArray;
     int32_t size;
-    int32_t x;
-    int32_t y;
     void* data;
-    int32_t displayId = 0;
     OHOS::Ace::NG::ArkUIInternalDragAndDropInfo* dropInfo;
     OHOS::Ace::NG::DragPreviewOption previewOption;
     DragAdapterState dragState = DragAdapterState::INIT;
     RefPtr<OHOS::Ace::UnifiedData> unifiedData;
     std::string extraParams;
-    int32_t sourceType = 0;
-    int32_t toolType = -1;
+    DragPointerEvent dragPointerEvent;
     float dipScale = 0.0;
     void* userData;
     std::function<void(const OHOS::Ace::DragNotifyMsg& info, int32_t status)> callback;

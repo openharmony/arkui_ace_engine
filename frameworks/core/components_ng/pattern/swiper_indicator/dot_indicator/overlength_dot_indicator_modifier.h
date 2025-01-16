@@ -131,6 +131,11 @@ public:
         turnPageRate_ = turnPageRate;
     }
 
+    void SetForceStopPageRate(float forceStopPageRate)
+    {
+        forceStopPageRate_ = forceStopPageRate;
+    }
+
     void SetBlackPointCenterMoveRate(float blackPointCenterMoveRate)
     {
         blackPointCenterMoveRate_ = blackPointCenterMoveRate;
@@ -220,6 +225,7 @@ private:
     std::pair<float, float> GetTouchBottomCenterX(ContentProperty& contentProperty);
     OverlongType RevertOverlongType(OverlongType overlongType) const;
     void StopBlackAnimation();
+    bool NeedUpdateWhenAnimationFinish() const;
 
     RefPtr<AnimatablePropertyUint8> firstPointOpacity_;
     RefPtr<AnimatablePropertyUint8> newPointOpacity_;
@@ -245,6 +251,7 @@ private:
     OverlongType currentOverlongType_ = OverlongType::NONE;
     OverlongType targetOverlongType_ = OverlongType::NONE;
     float turnPageRate_ = 0.0f;
+    float forceStopPageRate_ = FLT_MAX;
     float blackPointCenterMoveRate_ = 0.0f;
     float longPointLeftCenterMoveRate_ = 0.0f;
     float longPointRightCenterMoveRate_ = 0.0f;

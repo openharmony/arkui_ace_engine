@@ -107,7 +107,7 @@ private:
     std::map<int32_t, std::list<MagicLayoutNode>>::reverse_iterator FirstMeasureInWeightMode();
     void SecondMeasureInWeightMode(std::map<int32_t, std::list<MagicLayoutNode>>::reverse_iterator firstLoopIter);
     void FinalMeasureInWeightMode();
-    void MeasureInPriorityMode(LayoutWrapper* layoutWrapper, FlexItemProperties& flexItemProperties);
+    void MeasureInPriorityMode(FlexItemProperties& flexItemProperties);
     void SecondMeasureInGrowOrShrink();
     void PopOutOfDispayMagicNodesInPriorityMode(const std::list<MagicLayoutNode>& childList,
         FlexItemProperties& flexItemProperties);
@@ -118,13 +118,11 @@ private:
     {
         switch (operation) {
             case FlexOperatorType::RESTORE_MEASURE_RESULT:
-            case FlexOperatorType::RESTORE_CHILDREN_COUNT:
                 measureResult = pattern->GetFlexMeasureResult();
                 break;
             case FlexOperatorType::UPDATE_MEASURE_RESULT:
                 pattern->SetFlexMeasureResult(
-                    { .allocatedSize = allocatedSize_, .validSizeCount = validSizeCount_,
-                        .childrenCount = childrenCount_ }, addr);
+                    { .allocatedSize = allocatedSize_, .validSizeCount = validSizeCount_ }, addr);
                 break;
             case FlexOperatorType::UPDATE_LAYOUT_RESULT:
                 pattern->SetFlexLayoutResult(layoutResult, addr);
@@ -159,8 +157,6 @@ private:
     bool selfAdaptive_ = false;
     TextDirection textDir_ = TextDirection::LTR;
     bool childrenHasAlignSelfBaseLine_ = false;
-    int32_t preChildrenCount_ = 0;
-    int32_t childrenCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(FlexLayoutAlgorithm);
 };

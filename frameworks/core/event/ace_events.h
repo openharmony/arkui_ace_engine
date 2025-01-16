@@ -37,6 +37,7 @@ enum class SourceType : int32_t {
     TOUCH_PAD = 3,
     KEYBOARD = 4,
     JOYSTICK = 5,
+    CROWN = 6,
 };
 
 enum class SourceTool : int32_t {

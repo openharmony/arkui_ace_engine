@@ -13,28 +13,10 @@
  * limitations under the License.
  */
 
-#include <functional>
-#include <memory>
-#include <optional>
-
-#include "gtest/gtest.h"
 #include "test/mock/core/render/mock_paragraph.h"
 
-#include "base/json/json_util.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
-#include "core/components_ng/pattern/text/span_node.h"
-#include "core/components_ng/pattern/text/symbol_span_model_ng.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
-#include "frameworks/core/components_ng/pattern/image/image_layout_property.h"
-#include "frameworks/core/common/ai/data_detector_mgr.h"
 
 using namespace testing;
 using namespace testing::ext;

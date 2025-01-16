@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/search/search_text_field.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
@@ -181,9 +182,15 @@ public:
 
     void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    bool ButtonNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme);
+    bool IconNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme);
+    bool TextNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme,
+        const RefPtr<TextFieldTheme>& textFieldTheme);
 
     void SetSearchIconSize(const Dimension& value);
     void SetSearchIconColor(const Color& color);
+    void SetSymbolSearchIconColor(const Color& color);
     void SetSearchSrcPath(const std::string& src, const std::string& bundleName, const std::string& moduleName);
     void SetSearchSymbolIcon();
     void SetSearchImageIcon(IconOptions& iconOptions);
@@ -200,6 +207,9 @@ public:
     void CreateCancelIcon();
     const Dimension ConvertImageIconSizeValue(const Dimension& fontSizeValue);
     void UpdateDisable(const std::u16string& textValue);
+    void UpdateEnable(bool needToenable);
+    float GetMaxFontScale();
+    float GetMinFontScale();
 
 private:
     void OnModifyDone() override;
@@ -226,6 +236,8 @@ private:
     bool OnKeyEvent(const KeyEvent& event);
     void PaintFocusState(bool recoverFlag = false);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void PaintSearchFocusState();
+    void GetSearchFocusPaintRect(RoundRect& paintRect);
     void RequestKeyboard();
     // Init touch and hover event
     void InitTextFieldValueChangeEvent();
@@ -254,6 +266,8 @@ private:
 
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
         int32_t duration, const RefPtr<Curve>& curve);
+    void AnimateSearchTouchAndHover(RefPtr<RenderContext>& renderContext, Color& blendColorFrom, Color& blendColorTo,
+        int32_t duration, const RefPtr<Curve>& curve);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
     void HandleFocusEvent(bool forwardFocusMovement, bool backwardFocusMovement);
     void HandleBlurEvent();
@@ -261,6 +275,12 @@ private:
     void HandleClickEvent(GestureEvent& info);
     void UpdateIconChangeEvent();
     bool IsEventEnabled(const std::u16string& textValue, int16_t style);
+    void InitAllEvent();
+    void InitHoverEvent();
+    void InitTouchEvent();
+    void InitSearchTheme();
+    void OnTouchDownOrUp(bool isDown);
+    void HandleHoverEvent(bool isHover);
 
     void UpdateSearchSymbolIconColor();
     void UpdateCancelSymbolIconColor();
@@ -288,8 +308,13 @@ private:
     void UpdateDividerColorMode();
     void UpdateCancelButtonColorMode();
     void UpdateCancelButtonStatus(const std::u16string& value, int16_t style = -1);
+    Color GetDefaultIconColor(int32_t index);
+    bool IsConsumeEvent();
+    void HandleFocusChoiceSearch(const RefPtr<TextFieldPattern>& textFieldPattern, bool recoverFlag,
+        const RefPtr<SearchTextFieldPattern>& searchTextFieldPattern);
 
     bool IsSearchAttached();
+    RefPtr<SearchTheme> GetTheme() const;
 
     uint32_t GetMaxLength() const;
     std::string SearchTypeToString() const;
@@ -309,16 +334,27 @@ private:
     RefPtr<TextFieldController> searchController_;
     FocusChoice focusChoice_ = FocusChoice::SEARCH;
 
+    RefPtr<TouchEventImpl> searchTouchListener_;
     RefPtr<TouchEventImpl> searchButtonTouchListener_;
     RefPtr<TouchEventImpl> cancelButtonTouchListener_;
+    RefPtr<InputEvent> searchHoverListener_;
     RefPtr<InputEvent> searchButtonMouseEvent_;
     RefPtr<InputEvent> cancelButtonMouseEvent_;
     RefPtr<InputEvent> textFieldHoverEvent_ = nullptr;
     RefPtr<ClickEvent> clickListener_;
 
+    bool isSearchHover_ = false;
+    bool isSearchPress_ = false;
     bool isCancelButtonHover_ = false;
     bool isSearchButtonHover_ = false;
     bool isSearchButtonEnabled_ = false;
+    bool isFocusPlaceholderColorSet_ = false;
+    bool isFocusBgColorSet_ = false;
+    bool isFocusIconColorSet_ = false;
+    bool isFocusTextColorSet_ = false;
+    bool directionKeysMoveFocusOut_ = false;
+    Color searchNormalColor_;
+    Color transparentColor_ = Color::TRANSPARENT;
 
     WeakPtr<FrameNode> cancelButtonNode_;
     WeakPtr<FrameNode> buttonNode_;
@@ -326,6 +362,7 @@ private:
     WeakPtr<FrameNode> searchIcon_;
     WeakPtr<FrameNode> cancelIcon_;
     WeakPtr<SearchNode> searchNode_;
+    WeakPtr<SearchTheme> searchTheme_;
 };
 
 } // namespace OHOS::Ace::NG

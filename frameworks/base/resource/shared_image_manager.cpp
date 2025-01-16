@@ -111,7 +111,8 @@ void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& s
                     sharedImageManager->PostDelayedTaskToClearImageData(name, dataSize);
                 }
             },
-            TaskExecutor::TaskType::UI, "ArkUIImageAddSharedImageData");
+            TaskExecutor::TaskType::UI, "ArkUIImageAddSharedImageData",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 bool SharedImageManager::UpdateImageMap(const std::string& name, const SharedImage& sharedImage)

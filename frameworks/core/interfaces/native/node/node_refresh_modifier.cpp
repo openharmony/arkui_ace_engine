@@ -120,17 +120,43 @@ namespace NodeModifier {
 
 const ArkUIRefreshModifier* GetRefreshModifier()
 {
-    static const ArkUIRefreshModifier modifier = { SetRefreshing, GetRefreshing, SetRefreshOffset, ResetRefreshOffset,
-        SetPullToRefresh, ResetPullToRefresh, SetRefreshContent, SetPullDownRatio, ResetPullDownRatio,
-        GetPullDownRatio, GetRefreshOffset, GetPullToRefresh };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIRefreshModifier modifier = {
+        .setRefreshing = SetRefreshing,
+        .getRefreshing = GetRefreshing,
+        .setRefreshOffset = SetRefreshOffset,
+        .resetRefreshOffset = ResetRefreshOffset,
+        .setPullToRefresh = SetPullToRefresh,
+        .resetPullToRefresh = ResetPullToRefresh,
+        .setRefreshContent = SetRefreshContent,
+        .setPullDownRatio = SetPullDownRatio,
+        .resetPullDownRatio = ResetPullDownRatio,
+        .getPullDownRatio = GetPullDownRatio,
+        .getRefreshOffset = GetRefreshOffset,
+        .getPullToRefresh = GetPullToRefresh,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIRefreshModifier* GetCJUIRefreshModifier()
 {
-    static const CJUIRefreshModifier modifier = { SetRefreshing, GetRefreshing, SetRefreshContent, SetRefreshOffset,
-        ResetRefreshOffset, SetPullToRefresh, ResetPullToRefresh, SetPullDownRatio, ResetPullDownRatio,
-        GetPullDownRatio, GetRefreshOffset, GetPullToRefresh };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIRefreshModifier modifier = {
+        .setRefreshing = SetRefreshing,
+        .getRefreshing = GetRefreshing,
+        .setRefreshContent = SetRefreshContent,
+        .setRefreshOffset = SetRefreshOffset,
+        .resetRefreshOffset = ResetRefreshOffset,
+        .setPullToRefresh = SetPullToRefresh,
+        .resetPullToRefresh = ResetPullToRefresh,
+        .setPullDownRatio = SetPullDownRatio,
+        .resetPullDownRatio = ResetPullDownRatio,
+        .getPullDownRatio = GetPullDownRatio,
+        .getRefreshOffset = GetRefreshOffset,
+        .getPullToRefresh = GetPullToRefresh,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 

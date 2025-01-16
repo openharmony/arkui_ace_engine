@@ -99,6 +99,7 @@ public:
     void ConvertRectRelativeToParent(RectF& rect);
     void RevertRectRelativeToRoot(RectF& rect);
     OffsetF GetContainerModalOffset();
+    bool IsStopBackPress() const;
 
 private:
     void SetHolder(const RefPtr<SelectOverlayHolder>& holder);
@@ -132,6 +133,7 @@ private:
         const RefPtr<FrameNode>& root, const std::list<RefPtr<UINode>>& children);
     RefPtr<FrameNode> GetContainerModalRoot();
     void UpdateSelectOverlayInfoInternal(SelectOverlayInfo& overlayInfo);
+    std::string GetOwnerDebugInfo();
 
     RefPtr<SelectOverlayHolder> selectOverlayHolder_;
     WeakPtr<FrameNode> selectOverlayNode_;

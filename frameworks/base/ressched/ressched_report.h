@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_REPORT_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_RESSCHED_RESSCHED_REPORT_H
 
+#include <chrono>
 #include <string>
 #include <unordered_map>
 
@@ -30,6 +31,7 @@ namespace OHOS::Ace {
 namespace ResDefine {
 constexpr int32_t LOAD_PAGE_START_EVENT = 0;
 constexpr int32_t LOAD_PAGE_COMPLETE_EVENT = 1;
+constexpr int32_t LOAD_PAGE_NO_REQUEST_FRAME_EVENT = 2;
 constexpr double JUDGE_DISTANCE = 3.125;
 }
 
@@ -55,6 +57,10 @@ private:
     ~ResSchedReport() {}
     void HandleTouchDown(const TouchEvent& touchEvent);
     void HandleTouchUp(const TouchEvent& touchEvent);
+    bool IsRateLimit(int64_t maxCount, std::chrono::seconds durTime,
+        int64_t& keyEventCount, std::chrono::steady_clock::time_point& startTime);
+    bool IsPerSecRateLimit();
+    bool IsPerMinRateLimit();
     void HandleKeyDown(const KeyEvent& event);
     void HandleKeyUp(const KeyEvent& event);
     void HandleTouchMove(const TouchEvent& touchEvent);
@@ -75,6 +81,7 @@ private:
 
     ReportDataFunc reportDataFunc_ = nullptr;
     bool loadPageOn_ = false;
+    bool loadPageRequestFrameOn_ = false;
     TouchEvent curTouchEvent_;
     TouchEvent lastTouchEvent_;
     AxisEvent curAxisEvent_;
@@ -83,6 +90,10 @@ private:
     bool isInSlide_ = false;
     bool isInTouch_ = false;
     double dpi_ = PipelineBase::GetCurrentDensity();
+    std::chrono::steady_clock::time_point startTimeMS = std::chrono::steady_clock::now();
+    std::chrono::steady_clock::time_point startTimeS = std::chrono::steady_clock::now();
+    int64_t keyEventCountMS = -1;
+    int64_t keyEventCountS = -1;
 };
 
 class ACE_EXPORT ResSchedReportScope final {

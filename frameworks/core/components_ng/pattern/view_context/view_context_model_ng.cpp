@@ -42,6 +42,14 @@ void ViewContextModelNG::openAnimation(const AnimationOption& option)
     auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->OpenFrontendAnimation(option, option.GetCurve(), option.GetOnFinishEvent());
+    bool isDirtyLayoutNodesEmpty = pipelineContext->IsDirtyLayoutNodesEmpty();
+    bool isDirtyPropertyNodesEmpty = pipelineContext->IsDirtyPropertyNodesEmpty();
+    if (option.GetIteration() == ANIMATION_REPEAT_INFINITE && !pipelineContext->IsLayouting()
+        && (!isDirtyLayoutNodesEmpty || !isDirtyPropertyNodesEmpty)) {
+        TAG_LOGW(AceLogTag::ACE_ANIMATION, "openAnimation: option:%{public}s,"
+            "dirtyLayoutNodes is empty:%{public}d, dirtyPropertyNodes is empty:%{public}d",
+            option.ToString().c_str(), isDirtyLayoutNodesEmpty, isDirtyPropertyNodesEmpty);
+    }
 }
 
 int32_t ViewContextModelNG::OpenBindSheet(

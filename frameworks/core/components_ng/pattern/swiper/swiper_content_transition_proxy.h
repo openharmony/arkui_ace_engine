@@ -18,6 +18,7 @@
 
 #include <cstdint>
 #include <functional>
+#include <memory>
 
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"

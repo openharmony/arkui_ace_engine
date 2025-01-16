@@ -316,19 +316,24 @@ export class FoldSplitContainer extends ViewPU {
         }
         this.windowInstance = f4;
         this.updatePreferredOrientation();
-        try {
-          this.windowInstance.on('windowStatusChange', (i4) => {
-            this.windowStatusType = i4;
-          });
-        } catch (exception) {
-          Logger.error('Failed windowInstance.on windowStatusChange. code:%{public}d, message:%{public}s',
-            exception.code, exception.message);
-        }
+        this.dealWindowStatusChange();
       });
     } catch (exception) {
       Logger.error('Failed getLastWindow code:%{public}d, message:%{public}s', exception.code, exception.message);
     }
   }
+  
+  dealWindowStatusChange() {
+    try {
+      this.windowInstance.on('windowStatusChange', (i4) => {
+        this.windowStatusType = i4;
+      });
+    } catch (exception) {
+      Logger.error('Failed windowInstance.on windowStatusChange. code:%{public}d, message:%{public}s',
+        exception.code, exception.message);
+    }
+  }
+
   aboutToDisappear() {
     if (this.listener) {
       this.listener.off('change');

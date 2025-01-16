@@ -38,6 +38,7 @@ public:
     void Pop() override;
     void SetTabBar(const std::optional<std::string> &text, const std::optional<std::string> &icon,
         const std::optional<TabBarSymbol> &tabBarSymbol, TabBarBuilderFunc &&builder, bool useContentOnly) override;
+    void SetTabBarWithContent(const RefPtr<NG::UINode>& content) override;
     void SetTabBarStyle(TabBarStyle tabBarStyle) override;
     void SetIndicator(const IndicatorStyle& indicator) override;
     void SetBoard(const BoardStyle& board) override;

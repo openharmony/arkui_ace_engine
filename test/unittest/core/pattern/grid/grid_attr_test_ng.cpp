@@ -263,7 +263,7 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate002, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone();
     float parts = 1 + 2 + 3 + 1; // 7
-    float firstItemWidth = GRID_WIDTH / parts;
+    float firstItemWidth = WIDTH / parts;
     EXPECT_EQ(GetChildWidth(frameNode_, 0), firstItemWidth * 1);
     EXPECT_EQ(GetChildWidth(frameNode_, 1), firstItemWidth * 2);
     EXPECT_EQ(GetChildWidth(frameNode_, 2), firstItemWidth * 3);
@@ -309,9 +309,9 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate004, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone();
     float minItemWidth = 90.f;
-    int32_t cols = floor(GRID_WIDTH / minItemWidth); // 5
+    int32_t cols = floor(WIDTH / minItemWidth); // 5
     EXPECT_EQ(pattern_->GetCrossCount(), cols);
-    float expectItemWidth = GRID_WIDTH / cols; // 96.f
+    float expectItemWidth = WIDTH / cols; // 96.f
     EXPECT_EQ(GetChildWidth(frameNode_, 0), expectItemWidth);
 }
 
@@ -331,7 +331,7 @@ HWTEST_F(GridAttrTestNg, ColumnsTemplate005, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone();
     float itemWidth = 90.f;
-    int32_t cols = floor(GRID_WIDTH / itemWidth); // 5
+    int32_t cols = floor(WIDTH / itemWidth); // 5
     EXPECT_EQ(pattern_->GetCrossCount(), cols);
     EXPECT_EQ(GetChildWidth(frameNode_, 0), itemWidth);
 }
@@ -401,7 +401,7 @@ HWTEST_F(GridAttrTestNg, RowsTemplate002, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone();
     float parts = 1 + 2 + 3 + 1; // 7
-    float firstItemHeight = GRID_HEIGHT / parts;
+    float firstItemHeight = HEIGHT / parts;
     EXPECT_EQ(GetChildHeight(frameNode_, 0), firstItemHeight * 1);
     EXPECT_EQ(GetChildHeight(frameNode_, 1), firstItemHeight * 2);
     EXPECT_EQ(GetChildHeight(frameNode_, 2), firstItemHeight * 3);
@@ -447,9 +447,9 @@ HWTEST_F(GridAttrTestNg, RowsTemplate004, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone();
     float minItemHeight = 90.f;
-    int32_t rows = floor(GRID_HEIGHT / minItemHeight); // 8
+    int32_t rows = floor(HEIGHT / minItemHeight); // 8
     EXPECT_EQ(pattern_->GetCrossCount(), rows);
-    float expectItemHeight = GRID_HEIGHT / rows; // 100.f
+    float expectItemHeight = HEIGHT / rows; // 100.f
     EXPECT_EQ(GetChildHeight(frameNode_, 0), expectItemHeight);
 }
 
@@ -469,7 +469,7 @@ HWTEST_F(GridAttrTestNg, RowsTemplate005, TestSize.Level1)
     CreateFixedItems(10);
     CreateDone();
     float itemHeight = 90.f;
-    int32_t rows = floor(GRID_HEIGHT / itemHeight); // 5
+    int32_t rows = floor(HEIGHT / itemHeight); // 5
     EXPECT_EQ(pattern_->GetCrossCount(), rows);
     EXPECT_EQ(GetChildHeight(frameNode_, 0), itemHeight);
 }
@@ -554,7 +554,7 @@ HWTEST_F(GridAttrTestNg, LayoutDirection002, TestSize.Level1)
      * @tc.expected: Has minCount cols, gridItem from right to left
      */
     float minCount = 2;
-    float itemWidth = GRID_WIDTH / minCount + 100.f; // greater than half of GRID_WIDTH
+    float itemWidth = WIDTH / minCount + 100.f; // greater than half of WIDTH
     GridModelNG model = CreateGrid();
     model.SetLayoutDirection(FlexDirection::ROW_REVERSE);
     model.SetCellLength(ITEM_MAIN_SIZE);
@@ -579,7 +579,7 @@ HWTEST_F(GridAttrTestNg, LayoutDirection003, TestSize.Level1)
      * @tc.expected: Has maxCount rows, gridItem from top to bottom
      */
     float maxCount = 4;
-    float itemHeight = GRID_HEIGHT / maxCount - 50.0f; // less than quarter of GRID_HEIGHT
+    float itemHeight = HEIGHT / maxCount - 50.0f; // less than quarter of HEIGHT
     GridModelNG model = CreateGrid();
     model.SetLayoutDirection(FlexDirection::COLUMN);
     model.SetCellLength(ITEM_MAIN_SIZE);
@@ -854,8 +854,8 @@ HWTEST_F(GridAttrTestNg, Gap004, TestSize.Level1)
     GridModelNG model = CreateGrid();
     model.SetRowsTemplate("1fr 1fr 1fr 1fr");
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    model.SetColumnsGap(Dimension(GRID_WIDTH / 3));
-    model.SetRowsGap(Dimension(GRID_HEIGHT / 3 + 1));
+    model.SetColumnsGap(Dimension(WIDTH / 3));
+    model.SetRowsGap(Dimension(HEIGHT / 3 + 1));
     CreateGridItems(16, NULL_VALUE, NULL_VALUE);
     CreateDone();
     EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0);
@@ -875,13 +875,13 @@ HWTEST_F(GridAttrTestNg, Gap005, TestSize.Level1)
      */
     GridModelNG model = CreateGrid();
     model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-    model.SetColumnsGap(Dimension(GRID_WIDTH / 3));
-    model.SetRowsGap(Dimension(GRID_HEIGHT / 3));
+    model.SetColumnsGap(Dimension(WIDTH / 3));
+    model.SetRowsGap(Dimension(HEIGHT / 3));
     CreateFixedItems(16);
     CreateDone();
     EXPECT_TRUE(layoutProperty_->IsConfiguredScrollable());
     EXPECT_EQ(GetChildX(frameNode_, 1) - GetChildWidth(frameNode_, 1), 0);
-    EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), GRID_HEIGHT / 3);
+    EXPECT_EQ(GetChildY(frameNode_, 4) - GetChildHeight(frameNode_, 1), HEIGHT / 3);
 }
 
 /**

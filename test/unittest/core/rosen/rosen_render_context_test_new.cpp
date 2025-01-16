@@ -749,7 +749,7 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew023, TestSize.Level1)
     RoundRect roundRect;
     roundRect.SetRect(rect);
     roundRect.SetCornerRadius(1.0);
-    rosenRenderContext->PaintFocusState(roundRect, Color::BLUE, 1.0_vp, true);
+    rosenRenderContext->PaintFocusState(roundRect, Color::BLUE, 1.0_vp, true, true);
     rosenRenderContext->SetShadowRadius(1.0);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetShadowRadius(), 1.0);
     rosenRenderContext->SetShadowElevation(1.0);
@@ -759,12 +759,12 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew023, TestSize.Level1)
     rosenRenderContext->FlushContentModifier(contentModifier);
     rosenRenderContext->FlushContentDrawFunction(std::move(func));
     rosenRenderContext->ClearFocusState();
-    rosenRenderContext->PaintFocusState(1.0_vp, Color::BLACK, 0.0_vp);
+    rosenRenderContext->PaintFocusState(1.0_vp, Color::BLACK, 0.0_vp, false);
     EXPECT_FALSE(rosenRenderContext->IsUniRenderEnabled());
     rosenRenderContext->SetOpacity(1.0);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetAlpha(), 1.0);
     rosenRenderContext->PaintAccessibilityFocus();
-    rosenRenderContext->PaintFocusState(1.0_vp, Color::BLACK, 0.0_vp);
+    rosenRenderContext->PaintFocusState(1.0_vp, Color::BLACK, 0.0_vp, true);
     rosenRenderContext->SetFrame(0.0, 1.0, 0.0, 1.0);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetFrame().data_[1], 1.0);
     rosenRenderContext->SetRenderPivot(1.0, 0.0);

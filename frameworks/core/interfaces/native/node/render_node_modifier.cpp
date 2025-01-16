@@ -104,7 +104,7 @@ void SetRotation(ArkUINodeHandle node, ArkUI_Float32 rotationX, ArkUI_Float32 ro
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
         renderContext->SetRotation(rotationX, rotationY, rotationZ);
     } else {
         DimensionUnit unit = ConvertLengthMetricsUnitToDimensionUnit(unitValue, DimensionUnit::VP);
@@ -530,23 +530,86 @@ void SetMarkNodeGroup(ArkUINodeHandle node, ArkUI_Bool isNodeGroup)
 namespace NodeModifier {
 const ArkUIRenderNodeModifier* GetRenderNodeModifier()
 {
-    static const ArkUIRenderNodeModifier modifier = { AppendChild, InsertChildAfter, RemoveChild, ClearChildren,
-        SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetLabel, SetShadowAlpha, SetShadowElevation,
-        SetShadowRadius, Invalidate, SetScale, SetRenderNodeBackgroundColor, SetPivot, SetFrame, SetSize, SetOpacity,
-        SetTranslate, SetBorderStyle, SetBorderWidth, SetBorderColor, SetBorderRadius, SetRectMask, SetCircleMask,
-        SetRoundRectMask, SetOvalMask, SetCommandPathMask, SetRectClip, SetCircleClip, SetRoundRectClip, SetOvalClip,
-        SetCommandPathClip, SetPosition, SetMarkNodeGroup };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIRenderNodeModifier modifier = {
+        .appendChild = AppendChild,
+        .insertChildAfter = InsertChildAfter,
+        .removeChild = RemoveChild,
+        .clearChildren = ClearChildren,
+        .setClipToFrame = SetClipToFrame,
+        .setRotation = SetRotation,
+        .setShadowColor = SetShadowColor,
+        .setShadowOffset = SetShadowOffset,
+        .setLabel = SetLabel,
+        .setShadowAlpha = SetShadowAlpha,
+        .setShadowElevation = SetShadowElevation,
+        .setShadowRadius = SetShadowRadius,
+        .invalidate = Invalidate,
+        .setScale = SetScale,
+        .setRenderNodeBackgroundColor = SetRenderNodeBackgroundColor,
+        .setPivot = SetPivot,
+        .setFrame = SetFrame,
+        .setSize = SetSize,
+        .setOpacity = SetOpacity,
+        .setTranslate = SetTranslate,
+        .setBorderStyle = SetBorderStyle,
+        .setBorderWidth = SetBorderWidth,
+        .setBorderColor = SetBorderColor,
+        .setBorderRadius = SetBorderRadius,
+        .setRectMask = SetRectMask,
+        .setCircleMask = SetCircleMask,
+        .setRoundRectMask = SetRoundRectMask,
+        .setOvalMask = SetOvalMask,
+        .setCommandPathMask = SetCommandPathMask,
+        .setRectClip = SetRectClip,
+        .setCircleClip = SetCircleClip,
+        .setRoundRectClip = SetRoundRectClip,
+        .setOvalClip = SetOvalClip,
+        .setCommandPathClip = SetCommandPathClip,
+        .setPosition = SetPosition,
+        .setMarkNodeGroup = SetMarkNodeGroup,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }
 
 const CJUIRenderNodeModifier* GetCJUIRenderNodeModifier()
 {
-    static const CJUIRenderNodeModifier modifier = { AppendChild, InsertChildAfter, RemoveChild, ClearChildren,
-        SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetShadowAlpha, SetShadowElevation,
-        SetShadowRadius, Invalidate, SetScale, SetRenderNodeBackgroundColor, SetPivot, SetFrame, SetSize, SetOpacity,
-        SetTranslate, SetBorderStyle, SetBorderWidth, SetBorderColor, SetBorderRadius, SetRectMask, SetCircleMask,
-        SetRoundRectMask, SetOvalMask, SetCommandPathMask, SetPosition, SetMarkNodeGroup };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIRenderNodeModifier modifier = {
+        .appendChild = AppendChild,
+        .insertChildAfter = InsertChildAfter,
+        .removeChild = RemoveChild,
+        .clearChildren = ClearChildren,
+        .setClipToFrame = SetClipToFrame,
+        .setRotation = SetRotation,
+        .setShadowColor = SetShadowColor,
+        .setShadowOffset = SetShadowOffset,
+        .setShadowAlpha = SetShadowAlpha,
+        .setShadowElevation = SetShadowElevation,
+        .setShadowRadius = SetShadowRadius,
+        .invalidate = Invalidate,
+        .setScale = SetScale,
+        .setRenderNodeBackgroundColor = SetRenderNodeBackgroundColor,
+        .setPivot = SetPivot,
+        .setFrame = SetFrame,
+        .setSize = SetSize,
+        .setOpacity = SetOpacity,
+        .setTranslate = SetTranslate,
+        .setBorderStyle = SetBorderStyle,
+        .setBorderWidth = SetBorderWidth,
+        .setBorderColor = SetBorderColor,
+        .setBorderRadius = SetBorderRadius,
+        .setRectMask = SetRectMask,
+        .setCircleMask = SetCircleMask,
+        .setRoundRectMask = SetRoundRectMask,
+        .setOvalMask = SetOvalMask,
+        .setCommandPathMask = SetCommandPathMask,
+        .setPosition = SetPosition,
+        .setMarkNodeGroup = SetMarkNodeGroup,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
     return &modifier;
 }

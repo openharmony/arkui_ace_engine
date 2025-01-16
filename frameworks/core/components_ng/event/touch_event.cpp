@@ -85,7 +85,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     for (const auto& item : point.history) {
         auto historyInfo = CreateHistoryTouchItemInfo(item, point);
         event.AddHistoryLocationInfo(std::move(historyInfo));
-        event.AddHistoryPointerEvent(item.pointerEvent);
+        event.AddHistoryPointerEvent(item.GetTouchEventPointerEvent());
     }
     TriggerCallBacks(event);
     return !event.IsStopPropagation();
@@ -113,7 +113,7 @@ TouchEventInfo TouchEventActuator::CreateTouchEventInfo(const TouchEvent& lastPo
 {
     TouchEventInfo eventInfo("touchEvent");
     eventInfo.SetTimeStamp(lastPoint.time);
-    eventInfo.SetPointerEvent(lastPoint.pointerEvent);
+    eventInfo.SetPointerEvent(lastPoint.GetTouchEventPointerEvent());
     eventInfo.SetDeviceId(lastPoint.deviceId);
     eventInfo.SetTarget(GetEventTarget().value_or(EventTarget()));
     auto frameNode = GetAttachedNode().Upgrade();
@@ -137,6 +137,7 @@ TouchEventInfo TouchEventActuator::CreateTouchEventInfo(const TouchEvent& lastPo
         eventInfo.SetTouchEventsEnd(true);
         isFlushTouchEventsEnd_ = false;
     }
+    eventInfo.SetTargetDisplayId(lastPoint.targetDisplayId);
     return eventInfo;
 }
 
@@ -179,6 +180,9 @@ TouchLocationInfo TouchEventActuator::CreateTouchItemInfo(
     info.SetScreenLocation(Offset(screenX, screenY));
     info.SetTouchType(type);
     info.SetForce(pointItem.force);
+    info.SetPressedTime(pointItem.downTime);
+    info.SetWidth(pointItem.width);
+    info.SetHeight(pointItem.height);
     if (pointItem.tiltX.has_value()) {
         info.SetTiltX(pointItem.tiltX.value());
     }

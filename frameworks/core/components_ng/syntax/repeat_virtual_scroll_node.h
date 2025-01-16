@@ -43,7 +43,8 @@ public:
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-        const std::function<void(int32_t, int32_t)>& onSetActiveRange);
+        const std::function<void(int32_t, int32_t)>& onSetActiveRange,
+        bool reusable = true);
 
     RepeatVirtualScrollNode(int32_t nodeId, int32_t totalCount,
         const std::map<std::string, std::pair<bool, uint32_t>>& templateCacheCountMap,
@@ -51,7 +52,8 @@ public:
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
-        const std::function<void(int32_t, int32_t)>& onSetActiveRange);
+        const std::function<void(int32_t, int32_t)>& onSetActiveRange,
+        bool reusable = true);
 
     ~RepeatVirtualScrollNode() override = default;
 
@@ -142,7 +144,7 @@ public:
 
     void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override;
 
-    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false) override
+    void SetJSViewActive(bool active = true, bool isLazyForEachNode = false, bool isReuse = false) override
     {
         const auto& children = caches_.GetAllNodes();
         for (const auto& [key, child] : children) {
@@ -160,6 +162,10 @@ public:
     void SetIsLoop(bool isLoop)
     {
         isLoop_ = isLoop;
+    }
+    void OnSetCacheCount(int32_t cacheCount, const std::optional<LayoutConstraintF>& itemConstraint) override
+    {
+        containerCacheCount_ = cacheCount;
     }
 protected:
     void UpdateChildrenFreezeState(bool isFreeze, bool isForceUpdateFreezeVaule = false) override;
@@ -214,6 +220,10 @@ private:
     // STATE_MGMT_NOTE: What are these?
     OffscreenItems offscreenItems_;
     int32_t startIndex_ = 0;
+
+    // reuse node in L2 cache or not
+    bool reusable_ = true;
+    int32_t containerCacheCount_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(RepeatVirtualScrollNode);
 };

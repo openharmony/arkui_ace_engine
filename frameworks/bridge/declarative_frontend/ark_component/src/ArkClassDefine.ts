@@ -614,7 +614,7 @@ class ArkBackgroundImageSize {
 
 class ArkBackgroundImage {
   src: string | undefined | Resource | PixelMap;
-  repeat: number | undefined;
+  repeat: number | undefined | object;
   constructor() {
     this.src = undefined;
     this.repeat = undefined;
@@ -1221,6 +1221,20 @@ class ArkDisplayCount {
   }
 }
 
+class ArkSwiperCachedCount {
+  value: number;
+  isShown: boolean;
+
+  constructor() {
+    this.value = undefined;
+    this.isShown = undefined;
+  }
+
+  isEqual(another: ArkSwiperCachedCount): boolean {
+    return this.value === another.value && this.isShown === another.isShown;
+  }
+}
+
 class ArkPlaceholder {
   value: ResourceStr | undefined;
   style?: PlaceholderStyle | undefined;
@@ -1415,12 +1429,16 @@ class ArkDragPreviewOptions {
   numberBadge: boolean | number | undefined;
   isMultiSelectionEnabled: boolean | undefined;
   defaultAnimationBeforeLifting: boolean | undefined;
+  enableEdgeAutoScroll: boolean | undefined;
+  enableHapticFeedback: boolean | undefined;
 
   constructor() {
     this.mode = undefined;
     this.numberBadge = undefined;
     this.isMultiSelectionEnabled = undefined;
     this.defaultAnimationBeforeLifting = undefined;
+    this.enableEdgeAutoScroll = undefined;
+    this.enableHapticFeedback = undefined;
   }
 
   isEqual(another: ArkDragPreviewOptions): boolean {
@@ -1428,7 +1446,9 @@ class ArkDragPreviewOptions {
       this.mode === another.mode &&
       this.numberBadge === another.numberBadge &&
       this.isMultiSelectionEnabled === another.isMultiSelectionEnabled &&
-      this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting
+      this.defaultAnimationBeforeLifting === another.defaultAnimationBeforeLifting && 
+      this.enableEdgeAutoScroll === another.enableEdgeAutoScroll &&
+      this.enableHapticFeedback === another.enableHapticFeedback
     );
   }
 }
@@ -1570,5 +1590,19 @@ class ArkNavHideTitleBarOrToolBar {
   }
   isEqual(another: ArkNavHideTitleBarOrToolBar): boolean {
     return (this.isHide === another.isHide) && (this.animated === another.animated);
+  }
+}
+
+class ArkAutoPlay {
+  autoPlay: boolean;
+  needStopWhenTouched: boolean;
+
+  constructor() {
+    this.autoPlay = undefined;
+    this.needStopWhenTouched = undefined;
+  }
+
+  isEqual(another: ArkAutoPlay): boolean {
+    return this.autoPlay === another.autoPlay && this.needStopWhenTouched === another.needStopWhenTouched;
   }
 }

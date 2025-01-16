@@ -63,15 +63,31 @@ void ResetBlankMin(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIBlankModifier* GetBlankModifier()
 {
-    static const ArkUIBlankModifier modifier = { SetColor, ResetColor, SetBlankHeight, ResetBlankHeight,
-        SetBlankMin, ResetBlankMin };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const ArkUIBlankModifier modifier = {
+        .setColor = SetColor,
+        .resetColor = ResetColor,
+        .setBlankHeight = SetBlankHeight,
+        .resetBlankHeight = ResetBlankHeight,
+        .setBlankMin = SetBlankMin,
+        .resetBlankMin = ResetBlankMin,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIBlankModifier* GetCJUIBlankModifier()
 {
-    static const CJUIBlankModifier modifier = { SetColor, ResetColor, SetBlankHeight, ResetBlankHeight,
-        SetBlankMin, ResetBlankMin };
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+    static const CJUIBlankModifier modifier = {
+        .setColor = SetColor,
+        .resetColor = ResetColor,
+        .setBlankHeight = SetBlankHeight,
+        .resetBlankHeight = ResetBlankHeight,
+        .setBlankMin = SetBlankMin,
+        .resetBlankMin = ResetBlankMin,
+    };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

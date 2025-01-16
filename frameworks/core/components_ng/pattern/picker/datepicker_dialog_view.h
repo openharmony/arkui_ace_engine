@@ -92,16 +92,24 @@ private:
     static RefPtr<FrameNode> CreateAndMountMonthDaysNode(const DatePickerSettingData& settingData,
         const RefPtr<FrameNode>& dateNode, const RefPtr<FrameNode>& pickerRow,
         std::function<void(bool)>&& lunarChangeEvent);
+    static bool SetSelectedDateAndFocus(const RefPtr<FrameNode>& monthDaysNode, const RefPtr<FrameNode>& dateNode);
     static RefPtr<FrameNode> CreateAndMountTimeNode(const DatePickerSettingData& settingData,
         const RefPtr<FrameNode>& monthDaysNode, const RefPtr<FrameNode>& pickerRow);
     static std::function<void()> CreateAndSetDialogSwitchEvent(const RefPtr<FrameNode>& pickerStack,
         const RefPtr<FrameNode>& contentColumn, const DatePickerSettingData& settingData);
     static void SwitchPickerPage(const RefPtr<FrameNode>& pickerStack, const RefPtr<FrameNode>& contentColumn,
         const RefPtr<DateTimeAnimationController>& animationController, bool useMilitary = false);
-    static void SwitchDatePickerPage(const RefPtr<FrameNode>& dateNode, bool IsSwitchByTitle = false);
+    static void SwitchDatePickerPage(const RefPtr<FrameNode>& dateNode, bool isSwitchByTitle = false);
+    static bool UpdateVisibilityForNode(const RefPtr<FrameNode>& dateStackNode, bool isSwitchByTitle, uint32_t index);
+    static void UpdateDateStackNodeVisibility(const RefPtr<LayoutProperty>& layoutProperty,
+        bool isSwitchByTitle, uint32_t index);
+    static void UpdateDateStackNodeWeight(const RefPtr<LayoutProperty>& layoutProperty,
+        bool isSwitchByTitle, uint32_t index);
     static void HideContentChildrenButton(const RefPtr<FrameNode>& contentRow);
     static void SwitchContentRowButton(const RefPtr<FrameNode>& contentRow, bool useMilitary = false);
     static void ShowContentRowButton(const RefPtr<FrameNode>& contentRow, bool isFirstPage = true);
+    static bool InitContentRowVisibility(const RefPtr<FrameNode>& contentRow);
+    static bool UpdateButtonVisibility(const RefPtr<FrameNode>& buttonNode);
     static void CreateAndAddTitleClickEvent(
         std::function<void()>& titleSwitchEvent, const RefPtr<FrameNode>& buttonTitleNode);
     static void BuildDialogAcceptAndCancelButton(const std::vector<ButtonInfo>& buttonInfos,
@@ -173,9 +181,11 @@ private:
     static bool switchDatePickerFlag_;
     static bool isShowTime_;
     static bool isUserSetFont_;
+    static bool isEnableHapticFeedback_;
     static Dimension selectedTextStyleFont_;
     static Dimension normalTextStyleFont_;
     static Dimension disappearTextStyleFont_;
+    static DatePickerMode datePickerMode_;
 };
 } // namespace OHOS::Ace::NG
 

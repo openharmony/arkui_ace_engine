@@ -53,7 +53,8 @@ public:
         const std::function<void(uint32_t)>& onCreateNode,
         const std::function<void(const std::string&, uint32_t)>& onUpdateNode,
         const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetKeys4Range,
-        const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range);
+        const std::function<std::list<std::string>(uint32_t, uint32_t)>& onGetTypes4Range,
+        bool reusable = true);
 
     /** scenario:
      *         Repeat gets updated due to data change.
@@ -315,6 +316,12 @@ private:
 
     // for tracking reused/recycled nodes
     std::unordered_set<int32_t> reusedNodeIds_;
+
+    // used to record whether a PostIdleTask is requeired after RebuildL1WithKey
+    bool isModified_ = false;
+
+    // reuse node in L2 cache or not
+    bool reusable_ = true;
 }; // class NodeCache
 
 } // namespace OHOS::Ace::NG

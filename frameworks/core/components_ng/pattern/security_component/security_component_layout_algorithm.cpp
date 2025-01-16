@@ -17,6 +17,7 @@
 
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
+#include "core/components_ng/pattern/security_component/security_component_log.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "unicode/uchar.h"
 
@@ -122,12 +123,6 @@ void SecurityComponentLayoutAlgorithm::InitPadding(RefPtr<SecurityComponentLayou
         property->GetBackgroundBottomPadding().has_value(), size, borderWidth);
 
     size = property->GetTextIconSpace().value_or(theme->GetTextIconSpace()).ConvertToPx();
-    if (!property->GetTextIconSpace().has_value() ||
-        LessNotEqual(property->GetTextIconSpace().value().ConvertToPx(), 0.0)) {
-        size = theme->GetTextIconSpace().ConvertToPx();
-    } else {
-        size = property->GetTextIconSpace().value().ConvertToPx();
-    }
     middle_.Init(isVertical_, property->GetTextIconSpace().has_value(), size, 0.0);
 }
 
@@ -411,6 +406,7 @@ void SecurityComponentLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 
     UpdateChildPosition(layoutWrapper, V2::IMAGE_ETS_TAG, offsetIcon);
+    UpdateChildPosition(layoutWrapper, V2::SYMBOL_ETS_TAG, offsetIcon);
     UpdateChildPosition(layoutWrapper, V2::TEXT_ETS_TAG, offsetText);
 
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -758,8 +754,18 @@ bool SecurityComponentLayoutAlgorithm::IsTextOutOfOneColumn(RefPtr<FrameNode>& f
     return false;
 }
 
+bool SecurityComponentLayoutAlgorithm::GetMaxLineLimitExceededFlag(std::optional<SizeF>& currentTextSize)
+{
+    auto res = text_.DidExceedMaxLines(currentTextSize);
+    if (res) {
+        SC_LOG_INFO("MaxLine limit exceeded.");
+        return true;
+    }
+    return false;
+}
+
 bool SecurityComponentLayoutAlgorithm::GetTextLimitExceededFlag(RefPtr<SecurityComponentLayoutProperty>& property,
-    LayoutWrapper* layoutWrapper)
+    LayoutWrapper* layoutWrapper, std::optional<SizeF>& currentTextSize)
 {
     CHECK_NULL_RETURN(layoutWrapper, false);
     auto frameNode = layoutWrapper->GetHostNode();
@@ -769,7 +775,6 @@ bool SecurityComponentLayoutAlgorithm::GetTextLimitExceededFlag(RefPtr<SecurityC
     buttonLayoutProperty_ = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_RETURN(buttonLayoutProperty_, false);
 
-    std::optional<SizeF> currentTextSize;
     auto res = text_.GetCurrentTextSize(currentTextSize, currentFontSize_);
     if (!res) {
         return false;
@@ -795,21 +800,47 @@ bool SecurityComponentLayoutAlgorithm::GetTextLimitExceededFlag(RefPtr<SecurityC
     return res;
 }
 
+void SecurityComponentLayoutAlgorithm::UpdateTextFlags(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto securityComponentLayoutProperty =
+        AceType::DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(securityComponentLayoutProperty);
+    std::optional<SizeF> currentTextSize;
+    securityComponentLayoutProperty->UpdateIsTextLimitExceeded(GetTextLimitExceededFlag(securityComponentLayoutProperty,
+        layoutWrapper, currentTextSize));
+    securityComponentLayoutProperty->UpdateIsMaxLineLimitExceeded(GetMaxLineLimitExceededFlag(currentTextSize));
+}
+
+void SecurityComponentLayoutAlgorithm::InitLayoutWrapper(LayoutWrapper* layoutWrapper,
+    const RefPtr<SecurityComponentLayoutProperty>& securityComponentLayoutProperty)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto iconWrapper = GetChildWrapper(layoutWrapper, V2::IMAGE_ETS_TAG);
+    iconWrapper = iconWrapper ? iconWrapper : GetChildWrapper(layoutWrapper, V2::SYMBOL_ETS_TAG);
+    icon_.Init(securityComponentLayoutProperty, iconWrapper);
+
+    auto textWrapper = GetChildWrapper(layoutWrapper, V2::TEXT_ETS_TAG);
+    text_.Init(securityComponentLayoutProperty, textWrapper);
+}
+
 void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
     auto securityComponentLayoutProperty =
         AceType::DynamicCast<SecurityComponentLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(securityComponentLayoutProperty);
-
-    auto iconWrapper = GetChildWrapper(layoutWrapper, V2::IMAGE_ETS_TAG);
-    icon_.Init(securityComponentLayoutProperty, iconWrapper);
-
-    auto textWrapper = GetChildWrapper(layoutWrapper, V2::TEXT_ETS_TAG);
-    text_.Init(securityComponentLayoutProperty, textWrapper);
+    InitLayoutWrapper(layoutWrapper, securityComponentLayoutProperty);
 
     constraint_ = securityComponentLayoutProperty->GetContentLayoutConstraint();
     CHECK_NULL_VOID(constraint_);
+
+    // has value and less equal 0.0
+    if (LessOrEqual(constraint_->selfIdealSize.Width().value_or(1.0), 0.0) &&
+        LessOrEqual(constraint_->selfIdealSize.Height().value_or(1.0), 0.0)) {
+        return;
+    }
+
     isVertical_ = (securityComponentLayoutProperty->GetTextIconLayoutDirection().value_or(
         SecurityComponentLayoutDirection::HORIZONTAL) == SecurityComponentLayoutDirection::VERTICAL);
     isNobg_ = (securityComponentLayoutProperty->GetBackgroundType().value_or(
@@ -839,14 +870,12 @@ void SecurityComponentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     // fill blank when all paddings can not be enlarged because it has been set
     FillBlank();
-
     icon_.DoMeasure();
     MeasureButton(layoutWrapper, securityComponentLayoutProperty);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetFrameSize(SizeF(componentWidth_, componentHeight_));
-    securityComponentLayoutProperty->UpdateIsTextLimitExceeded(GetTextLimitExceededFlag(securityComponentLayoutProperty,
-        layoutWrapper));
+    UpdateTextFlags(layoutWrapper);
 }
 
 TextDirection SecurityComponentLayoutAlgorithm::GetTextDirection(LayoutWrapper* layoutWrapper)

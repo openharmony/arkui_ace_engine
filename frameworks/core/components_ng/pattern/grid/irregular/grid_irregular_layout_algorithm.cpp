@@ -239,8 +239,11 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
     info_.endMainLineIndex_ = endMainLineIdx;
     info_.endIndex_ = endIdx;
 
+    if (info_.startIndex_ == 0 && NonNegative(info_.currentOffset_)) {
+        return;
+    }
     // adjust offset
-    if (!overScroll_ && info_.endIndex_ == info_.childrenCount_ - 1) {
+    if (!canOverScrollEnd_ && info_.endIndex_ == info_.childrenCount_ - 1) {
         float overDis =
             -info_.GetDistanceToBottom(mainSize, info_.GetTotalHeightOfItemsInView(mainGap_, true), mainGap_);
         if (Negative(overDis)) {
@@ -248,12 +251,12 @@ void GridIrregularLayoutAlgorithm::MeasureForward(float mainSize)
         }
         info_.currentOffset_ += overDis;
         if (Positive(info_.currentOffset_)) {
-            MeasureBackward(mainSize);
+            MeasureBackward(mainSize, true);
         }
     }
 }
 
-void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize)
+void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize, bool toAdjust)
 {
     // skip adding starting lines that are outside viewport in LayoutIrregular
     auto [it, offset] = info_.SkipLinesAboveView(mainGap_);
@@ -262,7 +265,7 @@ void GridIrregularLayoutAlgorithm::MeasureBackward(float mainSize)
 
     GridLayoutRangeSolver solver(&info_, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
-    if (!overScroll_ && res.row == 0) {
+    if ((toAdjust || !canOverScrollStart_) && res.row == 0) {
         res.pos = std::min(res.pos, 0.0f);
     }
     UpdateStartInfo(info_, res);
@@ -659,6 +662,10 @@ void GridIrregularLayoutAlgorithm::PreloadItems(int32_t cacheCnt)
             CHECK_NULL_RETURN(item, false);
             item->GetGeometryNode()->SetParentLayoutConstraint(constraint);
             item->Layout();
+            auto pipeline = pattern->GetContext();
+            if (pipeline) {
+                pipeline->FlushSyncGeometryNodeTasks();
+            }
             item->SetActive(false);
             return true;
         });

@@ -17,12 +17,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
-class ListScrollerEventTestNg : public ListTestNg {
-public:
-};
+class ListScrollerEventTestNg : public ListTestNg {};
 
 /**
  * @tc.name: Event001

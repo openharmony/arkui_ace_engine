@@ -878,4 +878,9 @@ bool NavigationTitleUtil::IsTitleBarHasOffsetY(const RefPtr<FrameNode>& titleBar
 {
     return titleBarNode && titleBarNode->IsVisible() && !NearZero(CalculateTitlebarOffset(titleBarNode));
 }
+
+bool NavigationTitleUtil::NeedAvoidContainerModal(PipelineContext* pipeline)
+{
+    return pipeline && !pipeline->GetContainerCustomTitleVisible() && pipeline->GetContainerControlButtonVisible();
+}
 } // namespace OHOS::Ace::NG

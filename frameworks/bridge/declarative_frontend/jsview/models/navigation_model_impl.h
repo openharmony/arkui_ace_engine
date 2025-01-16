@@ -50,7 +50,7 @@ public:
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo) override;
     void SetUsrNavigationMode(NG::NavigationMode mode) override;
     void SetNavBarPosition(NG::NavBarPosition mode) override;
-    void SetNavBarWidth(const Dimension& value) override;
+    void SetNavBarWidth(const Dimension& value, bool isDoubleBind = false) override;
     void SetMinNavBarWidth(const Dimension& value) override {}
     void SetMaxNavBarWidth(const Dimension& value) override {}
     void SetMinContentWidth(const Dimension& value) override {}

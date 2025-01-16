@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,7 +68,9 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
         CHECK_NULL_VOID(textHost);
         SetTextDefaultStyle(textHost, value, max);
         textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        eventHub->SetHoverEffect(HoverEffectType::SCALE);
+        RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>();
+        CHECK_NULL_VOID(theme);
+        eventHub->SetHoverEffect(static_cast<HoverEffectType>(theme->GetCapsuleHoverEffectType()));
     } else {
         if (!frameNode->GetChildren().empty()) {
             frameNode->RemoveChildAtIndex(0);
@@ -616,6 +618,7 @@ void ProgressModelNG::ProgressInitialize(
         SetTextDefaultStyle(textHost, value, max);
         textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         eventHub->SetHoverEffect(HoverEffectType::SCALE);
+        eventHub->SetHoverEffect(static_cast<HoverEffectType>(theme->GetCapsuleHoverEffectType()));
     } else {
         if (!frameNode->GetChildren().empty()) {
             frameNode->RemoveChildAtIndex(0);
@@ -623,4 +626,25 @@ void ProgressModelNG::ProgressInitialize(
         eventHub->SetHoverEffect(HoverEffectType::NONE);
     }
 }
+
+void ProgressModelNG::SetBorderRadius(const Dimension& value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderRadius, value);
+}
+
+void ProgressModelNG::ResetBorderRadius()
+{
+    ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderRadius, PROPERTY_UPDATE_RENDER);
+}
+
+void ProgressModelNG::SetBorderRadius(FrameNode* frameNode, const Dimension& value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ProgressPaintProperty, BorderRadius, value, frameNode);
+}
+
+void ProgressModelNG::ResetBorderRadius(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BorderRadius, PROPERTY_UPDATE_RENDER, frameNode);
+}
+
 } // namespace OHOS::Ace::NG
