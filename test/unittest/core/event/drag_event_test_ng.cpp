@@ -869,7 +869,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
     void* voidPtr = static_cast<void*>(new char[0]);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     gestureHub->SetPixelMap(pixelMap);
-    EXPECT_NE(frameNode->GetPixelMap(), nullptr);
+    EXPECT_NE(frameNode->GetDragPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
     dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     auto imageContext = imageNode->GetRenderContext();
@@ -1064,7 +1064,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest01, TestSize.Level1)
     void* voidPtr = static_cast<void*>(new char[0]);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     gestureHub->SetPixelMap(pixelMap);
-    EXPECT_NE(frameNode->GetPixelMap(), nullptr);
+    EXPECT_NE(frameNode->GetDragPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = nullptr;
     dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     EXPECT_NE(imageNode, nullptr);
@@ -1133,7 +1133,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest02, TestSize.Level1)
     void* voidPtr = static_cast<void*>(new char[0]);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     gestureHub->SetPixelMap(pixelMap);
-    EXPECT_NE(frameNode->GetPixelMap(), nullptr);
+    EXPECT_NE(frameNode->GetDragPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = nullptr;
     dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     EXPECT_NE(imageNode, nullptr);

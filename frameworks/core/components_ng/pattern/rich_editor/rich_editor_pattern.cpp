@@ -4183,7 +4183,7 @@ RefPtr<SpanItem> RichEditorPattern::GetSameSpanItem(const RefPtr<SpanItem>& span
             CHECK_NULL_RETURN(image, nullptr);
             auto pixelMap = image->GetPixelMap();
             if (!pixelMap) {
-                pixelMap = imageNode->GetPixelMap();
+                pixelMap = imageNode->GetDragPixelMap();
             }
             options.imagePixelMap = pixelMap;
         }

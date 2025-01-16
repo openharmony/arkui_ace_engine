@@ -2257,7 +2257,7 @@ void TextPattern::ProcessNormalUdmfData(const RefPtr<UnifiedData>& unifiedData)
                 // builder span, fill pixelmap data
                 auto builderNode = DynamicCast<FrameNode>(pattern->GetChildByIndex(result.spanPosition.spanIndex));
                 CHECK_NULL_VOID(builderNode);
-                pattern->AddPixelMapToUdmfData(builderNode->GetPixelMap(), unifiedData);
+                pattern->AddPixelMapToUdmfData(builderNode->GetDragPixelMap(), unifiedData);
             }
         }
     };

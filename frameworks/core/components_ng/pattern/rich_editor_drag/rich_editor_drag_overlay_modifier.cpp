@@ -147,7 +147,7 @@ void RichEditorDragOverlayModifier::PaintFrameNode(DrawingContext& context, cons
     const RefPtr<Pattern>& pattern, const OffsetF& offset)
 {
     auto& canvas = context.canvas;
-    auto pixelMap = frameNode->GetPixelMap();
+    auto pixelMap = frameNode->GetDragPixelMap();
     CHECK_NULL_VOID(pixelMap);
     auto canvasImage = CanvasImage::Create(pixelMap);
     auto layoutProperty = pattern->GetLayoutProperty<LayoutProperty>();
