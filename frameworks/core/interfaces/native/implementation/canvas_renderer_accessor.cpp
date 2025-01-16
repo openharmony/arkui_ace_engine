@@ -83,6 +83,7 @@ TextDirection Convert(const Ark_String& src)
 {
     auto val = Converter::Convert<std::string>(src);
     const LinearMapNode<TextDirection> textDirectionTable[] = {
+        { "auto", TextDirection::AUTO },
         { "inherit", TextDirection::INHERIT },
         { "ltr", TextDirection::LTR },
         { "rtl", TextDirection::RTL },

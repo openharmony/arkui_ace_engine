@@ -237,9 +237,10 @@ std::vector<std::tuple<Opt_String, Ace::CanvasFillRule>> FILL_RULE_TEST_PLAN = {
     { Converter::ArkValue<Opt_String>(Ark_Empty()), Ace::CanvasFillRule::NONZERO }
 };
 std::vector<std::tuple<Ark_String, Ace::TextDirection>> DIRECTION_TEST_PLAN = {
-    { Converter::ArkValue<Ark_String>("inherit"), Ace::TextDirection::INHERIT },
     { Converter::ArkValue<Ark_String>("ltr"), Ace::TextDirection::LTR },
     { Converter::ArkValue<Ark_String>("rtl"), Ace::TextDirection::RTL },
+    { Converter::ArkValue<Ark_String>("inherit"), Ace::TextDirection::INHERIT },
+    { Converter::ArkValue<Ark_String>("auto"), Ace::TextDirection::AUTO },
     { Converter::ArkValue<Ark_String>("invalid"), Ace::TextDirection::LTR },
     { Converter::ArkValue<Ark_String>(""), Ace::TextDirection::LTR },
 };
