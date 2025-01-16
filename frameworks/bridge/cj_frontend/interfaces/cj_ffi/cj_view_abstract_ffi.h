@@ -62,7 +62,7 @@ struct NativeRectangle {
     int32_t heightUnit;
 };
 
-struct NativeOptionCallback1Param{
+struct NativeOptionCallback1Param {
     bool hasValue;
     void (*value)(int32_t reason);
 };
@@ -74,7 +74,7 @@ struct CJBindPopupParams {
     void (*primaryAction)();
     char* secondaryValue;
     void (*secondaryAction)();
-    void (*onStateChange)(bool); 
+    void (*onStateChange)(bool);
     uint32_t textColor;
     char* fontWeight;
     double fontSize;
@@ -394,17 +394,6 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractKeyShortcutByFuncKey(
     int32_t value, int32_t* keysArray, int64_t size, void (*callback)(void));
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractKeyShortcutByChar(
     const char* value, int32_t* keysArray, int64_t size, void (*callback)(void));
-
-struct CJBindCustomPopup {
-    bool isShow;
-    void (*builder)();
-    int32_t placement;
-    uint32_t maskColor;
-    uint32_t backgroundColor;
-    bool enableArrow;
-    bool autoCancel;
-    void (*onStateChange)(bool);
-};
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindMenu(
     VectorMenuValuePtr vectorMenuValue, void (*menuActionCallback)(const char*));
