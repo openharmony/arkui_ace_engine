@@ -2343,7 +2343,7 @@ class NavPathStack {
         if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
           this.moveIndexToTop(index, animated);
         } else {
-          this.popToIndex(index, undefined, animated);
+          this.innerPopToIndex(index, undefined, animated, false);
         }
         let promise = null;
         if (createPromise) {
@@ -2510,15 +2510,12 @@ class NavPathStack {
     let pathInfo = this.pathArray.pop();
     this.popArray.push(pathInfo);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean') {
-      if (currentPathInfo.onPop !== undefined) {
-        let popInfo = {
-          info: currentPathInfo,
-          result: result,
-        };
-        currentPathInfo.onPop(popInfo);
-      }
-      this.nativeStack.onPopCallback(result);
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
+      let popInfo = {
+        info: currentPathInfo,
+        result: result,
+      };
+      currentPathInfo.onPop(popInfo);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
@@ -2527,6 +2524,7 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
+    this.nativeStack.onPopCallback(typeof result === 'boolean' ? undefined : result);
     this.nativeStack?.onStateChanged();
     return pathInfo;
   }
@@ -2541,15 +2539,12 @@ class NavPathStack {
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean') {
-      if (currentPathInfo.onPop !== undefined) {
-        let popInfo = {
-          info: currentPathInfo,
-          result: result,
-        };
-        currentPathInfo.onPop(popInfo);
-      }
-      this.nativeStack.onPopCallback(result);
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
+      let popInfo = {
+        info: currentPathInfo,
+        result: result,
+      };
+      currentPathInfo.onPop(popInfo);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
@@ -2558,25 +2553,23 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
+    this.nativeStack.onPopCallback(typeof result == 'boolean' ? undefined : result);
     this.nativeStack?.onStateChanged();
     return index;
   }
-  popToIndex(index, result, animated) {
+  innerPopToIndex(index, result, animated, needFireOnResult) {
     if (index >= this.pathArray.length) {
       return;
     }
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean') {
-      if (currentPathInfo.onPop !== undefined) {
-        let popInfo = {
-          info: currentPathInfo,
-          result: result,
-        };
-        currentPathInfo.onPop(popInfo);
-      }
-      this.nativeStack.onPopCallback(result);
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
+      let popInfo = {
+        info: currentPathInfo,
+        result: result,
+      };
+      currentPathInfo.onPop(popInfo);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
@@ -2585,7 +2578,13 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
+    if (needFireOnResult) {
+      this.nativeStack.onPopCallback(typeof result == 'boolean' ? undefined : result);
+    }
     this.nativeStack?.onStateChanged();
+  }
+  popToIndex(index, result, animated) {
+    this.innerPopToIndex(index, result, animated, true);
   }
   moveToTop(name, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
