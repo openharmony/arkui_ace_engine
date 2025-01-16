@@ -2152,9 +2152,7 @@ HWTEST_F(CanvasRendererAccessorTest, clip0Test, TestSize.Level1)
     ASSERT_NE(accessor_->clip0, nullptr);
     for (const auto& [actual, expected] : FILL_RULE_TEST_PLAN) {
         holder->SetUp();
-
         accessor_->clip0(peer_, &actual);
-      
         auto rule = *holder->fillRule;
         auto value = static_cast<std::underlying_type_t<CanvasFillRule>>(*holder->fillRule);
 
@@ -2177,7 +2175,6 @@ HWTEST_F(CanvasRendererAccessorTest, clip1Test, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->clip1, nullptr);
-    
     auto peerImpl = Referenced::MakeRefPtr<GeneratedModifier::CanvasPathPeerImpl>();
     Ark_Materialized arkPath = {
         .ptr = reinterpret_cast<CanvasPathPeer*>(Referenced::RawPtr(peerImpl))
@@ -2189,16 +2186,13 @@ HWTEST_F(CanvasRendererAccessorTest, clip1Test, TestSize.Level1)
             auto cmd = std::get<0>(actual);
             auto x = std::get<1>(actual);
             auto y = std::get<2>(actual);
-
             if (cmd == PathCmd::MOVE_TO) {
                 path->MoveTo(x, y);
             } else {
                 path->LineTo(x, y);
             }
             peerImpl->path = path;
-
             accessor_->clip1(peer_, &arkPath, &arkRule);
-
             auto result = holder->path->GetCaches();
             auto rcmd = result[0].first;
             auto rx = result[0].second.para1;
@@ -2219,7 +2213,6 @@ HWTEST_F(CanvasRendererAccessorTest, clip1Test, TestSize.Level1)
             EXPECT_TRUE(LessOrEqualCustomPrecision(ry, y));
         }
     }
-
     holder->TearDown();
 }
 
@@ -2232,12 +2225,19 @@ HWTEST_F(CanvasRendererAccessorTest, fill0Test, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->fill0, nullptr);
-    // for (const auto& [actual, expected] : LINE_JOIN_TEST_PLAN) {
-    //     holder->SetUp();
-    //     accessor_->fill0(peer_, &actual);
-    //     EXPECT_TRUE(holder->isCalled);
-    //     EXPECT_EQ(holder->lineJoin, expected);
-    // }
+    for (const auto& [actual, expected] : FILL_RULE_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->fill0(peer_, &actual);
+        auto rule = *holder->fillRule;
+        auto value = static_cast<std::underlying_type_t<CanvasFillRule>>(*holder->fillRule);
+
+        std::printf("fill: holder value: %d == %d isCalled: %d %d\n", value, expected, holder->isCalled, holder->isCalled2);
+      
+      
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_TRUE(holder->isCalled2);
+        EXPECT_EQ(rule, expected);
+    }
     holder->TearDown();
 }
 
@@ -2250,12 +2250,44 @@ HWTEST_F(CanvasRendererAccessorTest, fill1Test, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->fill1, nullptr);
-    // for (const auto& [actual, expected] : LINE_JOIN_TEST_PLAN) {
-    //     holder->SetUp();
-    //     accessor_->fill1(peer_, &actual);
-    //     EXPECT_TRUE(holder->isCalled);
-    //     EXPECT_EQ(holder->lineJoin, expected);
-    // }
+    auto peerImpl = Referenced::MakeRefPtr<GeneratedModifier::CanvasPathPeerImpl>();
+    Ark_Materialized arkPath = {
+        .ptr = reinterpret_cast<CanvasPathPeer*>(Referenced::RawPtr(peerImpl))
+    };
+    for (const auto& [arkRule, expected] : FILL_RULE_TEST_PLAN) {
+        for (const auto& actual : PATH2D_TEST_PLAN) {
+            holder->SetUp();
+            auto path = AceType::MakeRefPtr<CanvasPath2D>();
+            auto cmd = std::get<0>(actual);
+            auto x = std::get<1>(actual);
+            auto y = std::get<2>(actual);
+            if (cmd == PathCmd::MOVE_TO) {
+                path->MoveTo(x, y);
+            } else {
+                path->LineTo(x, y);
+            }
+            peerImpl->path = path;
+            accessor_->fill1(peer_, &arkPath, &arkRule);
+            auto result = holder->path->GetCaches();
+            auto rcmd = result[0].first;
+            auto rx = result[0].second.para1;
+            auto ry = result[0].second.para2;
+            auto rule = *holder->fillRule;
+
+            std::printf("fill1: holder  rule: %s==%s, cmd: %s==%s x:%.2f==%.2f  y: %.2f==%.2f isCalled: %d %d \n",
+            rule == CanvasFillRule::EVENODD?"evenodd":"nonzero",
+            expected == CanvasFillRule::EVENODD?"evenodd":"nonzero",
+            rcmd == PathCmd::MOVE_TO ? "move" : "line", cmd == PathCmd::MOVE_TO ? "move" : "line",
+             rx, x, ry, y, holder->isCalled, holder->isCalled2);
+
+            EXPECT_TRUE(holder->isCalled);
+            EXPECT_TRUE(holder->isCalled2);
+            EXPECT_EQ(rule, expected);
+            EXPECT_EQ(rcmd, cmd);
+            EXPECT_TRUE(LessOrEqualCustomPrecision(rx, x));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(ry, y));
+        }
+    }
     holder->TearDown();
 }
 

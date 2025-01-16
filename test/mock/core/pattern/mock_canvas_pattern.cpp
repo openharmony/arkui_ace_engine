@@ -310,7 +310,6 @@ void CanvasPattern::Clip()
         holder->isCalled2 = true;
         return;
     }
-    
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Clip();
