@@ -1394,6 +1394,12 @@ void CanvasPattern::SetInvalidate()
 
 void CanvasPattern::SetTextDirection(TextDirection direction)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->direction = direction;
+        return;
+    }
     currentSetTextDirection_ = direction;
     auto host = GetHost();
     CHECK_NULL_VOID(host);

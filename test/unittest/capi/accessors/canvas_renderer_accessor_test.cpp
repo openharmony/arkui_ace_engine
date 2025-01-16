@@ -236,7 +236,13 @@ std::vector<std::tuple<Opt_String, Ace::CanvasFillRule>> FILL_RULE_TEST_PLAN = {
     { Converter::ArkValue<Opt_String>(""), Ace::CanvasFillRule::NONZERO },
     { Converter::ArkValue<Opt_String>(Ark_Empty()), Ace::CanvasFillRule::NONZERO }
 };
-
+std::vector<std::tuple<Ark_String, Ace::TextDirection>> DIRECTION_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("inherit"), Ace::TextDirection::INHERIT },
+    { Converter::ArkValue<Ark_String>("ltr"), Ace::TextDirection::LTR },
+    { Converter::ArkValue<Ark_String>("rtl"), Ace::TextDirection::RTL },
+    { Converter::ArkValue<Ark_String>("invalid"), Ace::TextDirection::LTR },
+    { Converter::ArkValue<Ark_String>(""), Ace::TextDirection::LTR },
+};
 class MockPixelMap : public PixelMap {
 public:
     MOCK_METHOD(bool, GetPixelsVec, (std::vector<uint8_t> & data), (const override));
@@ -2263,6 +2269,24 @@ HWTEST_F(CanvasRendererAccessorTest, fill1Test, TestSize.Level1)
             EXPECT_TRUE(LessOrEqualCustomPrecision(rx, x));
             EXPECT_TRUE(LessOrEqualCustomPrecision(ry, y));
         }
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setDirectionTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setDirectionTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->setDirection, nullptr);
+    for (const auto& [actual, expected] : DIRECTION_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->setDirection(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(*holder->direction, expected);
     }
     holder->TearDown();
 }

@@ -121,6 +121,7 @@ public:
     void Clip(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path);
     void Fill(const Ace::CanvasFillRule& fillRule);
     void Fill(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path);
+    void SetTextDirection(const Ace::TextDirection& direction);
     void SetUnit(CanvasUnit unit)
     {
         unit_ = unit;

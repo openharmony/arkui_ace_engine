@@ -79,6 +79,19 @@ std::optional<double> ConvertDimension(
 } // namespace
 namespace Converter {
 template<>
+TextDirection Convert(const Ark_String& src)
+{
+    auto val = Converter::Convert<std::string>(src);
+    const LinearMapNode<TextDirection> textDirectionTable[] = {
+        { "inherit", TextDirection::INHERIT },
+        { "ltr", TextDirection::LTR },
+        { "rtl", TextDirection::RTL },
+    };
+    auto index = BinarySearchFindIndex(textDirectionTable, ArraySize(textDirectionTable), val.c_str());
+    return index < 0 ? TextDirection::LTR : textDirectionTable[index].value;
+}
+
+template<>
 std::vector<uint32_t> Convert(const Ark_Buffer& src)
 {
     std::vector<uint32_t> dst;
@@ -1177,8 +1190,12 @@ Ark_NativePointer GetDirectionImpl(CanvasRendererPeer* peer)
 void SetDirectionImpl(CanvasRendererPeer* peer,
                       const Ark_String* direction)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::SetDirectionImpl Ark_String type parameter "
-        "should be replaced with a valid ark enum for CanvasDirection type.");
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(direction);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto dir = Converter::Convert<TextDirection>(*direction);
+    peerImpl->SetTextDirection(dir);
 }
 void GetFontImpl(CanvasRendererPeer* peer)
 {
