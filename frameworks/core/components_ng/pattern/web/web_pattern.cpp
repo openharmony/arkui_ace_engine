@@ -6859,15 +6859,19 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
         focusedAccessibilityId_ = accessibilityId;
     }
     RectT<int32_t> rect;
-    if (focusedAccessibilityId_ <= 0 || !GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
+    if (focusedAccessibilityId_ <= 0) {
         focusedAccessibilityId_ = -1;
         renderContext->ResetAccessibilityFocusRect();
         renderContext->UpdateAccessibilityFocus(false);
         return;
     }
-
-    renderContext->UpdateAccessibilityFocusRect(rect);
-    renderContext->UpdateAccessibilityFocus(true);
+    if (GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
+        renderContext->UpdateAccessibilityFocusRect(rect);
+        renderContext->UpdateAccessibilityFocus(true);
+    } else {
+        renderContext->ResetAccessibilityFocusRect();
+        renderContext->UpdateAccessibilityFocus(false);
+    }
 }
 
 void WebPattern::ClearFocusedAccessibilityId()
