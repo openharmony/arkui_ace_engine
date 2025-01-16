@@ -2330,7 +2330,7 @@ void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintRect)
     auto renderContext = stageNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto rect = renderContext->GetPaintRectWithoutTransform();
-    auto offset = stageNode->GetPaintRectOffset(false);
+    auto offset = stageNode->GetPaintRectOffset(false, true);
     paintRect.posX_ = static_cast<int32_t>(offset.GetX());
     paintRect.posY_ = static_cast<int32_t>(offset.GetY());
     paintRect.width_ = static_cast<uint32_t>(rect.Width());
@@ -4177,6 +4177,9 @@ std::shared_ptr<Rosen::RSNode> UIContentImpl::GetRSNodeByStringID(const std::str
         },
         TaskExecutor::TaskType::UI, "ArkUIGetRSNodeByStringID",
         TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+    if (!rsNode) {
+        LOGE("Cannot find RSNode by stringId: %{public}s", stringId.c_str());
+    }
     return rsNode;
 }
 
