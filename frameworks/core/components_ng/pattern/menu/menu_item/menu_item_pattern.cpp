@@ -1399,15 +1399,15 @@ void MenuItemPattern::AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode)
     OffsetF topLeftPoint;
     OffsetF bottomRightPoint;
     auto frameSize = targetNode->GetGeometryNode()->GetMarginFrameSize();
-    topLeftPoint = targetNode->GetPaintRectOffset();
-    bottomRightPoint = targetNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), frameSize.Height());
+    topLeftPoint = targetNode->GetPaintRectOffset(false, true);
+    bottomRightPoint = targetNode->GetPaintRectOffset(false, true) + OffsetF(frameSize.Width(), frameSize.Height());
     AddHoverRegions(topLeftPoint, bottomRightPoint);
 }
 
 OffsetF MenuItemPattern::GetSubMenuPosition(const RefPtr<FrameNode>& targetNode)
 { // show menu at left top point of targetNode
     auto frameSize = targetNode->GetGeometryNode()->GetMarginFrameSize();
-    OffsetF position = targetNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), 0.0);
+    OffsetF position = targetNode->GetPaintRectOffset(false, true) + OffsetF(frameSize.Width(), 0.0);
     return position;
 }
 
@@ -2179,7 +2179,7 @@ RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const OffsetF& po
         return host;
     }
     CHECK_NULL_RETURN(clickableArea_, host);
-    auto clickableAreaOffset = clickableArea_->GetPaintRectOffset();
+    auto clickableAreaOffset = clickableArea_->GetPaintRectOffset(false, true);
     auto clickableAreaSize = clickableArea_->GetGeometryNode()->GetFrameSize();
     auto clickableAreaZone = RectF(clickableAreaOffset.GetX(), clickableAreaOffset.GetY(),
         clickableAreaSize.Width(), clickableAreaSize.Height());
@@ -2192,7 +2192,7 @@ RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const OffsetF& po
             menuItem = AceType::DynamicCast<FrameNode>(child);
         }
         if (menuItem) {
-            auto menuItemOffset = menuItem->GetPaintRectOffset();
+            auto menuItemOffset = menuItem->GetPaintRectOffset(false, true);
             auto menuItemSize = menuItem->GetGeometryNode()->GetFrameSize();
             auto menuItemZone = RectF(menuItemOffset.GetX(), menuItemOffset.GetY(),
                 menuItemSize.Width(), menuItemSize.Height());

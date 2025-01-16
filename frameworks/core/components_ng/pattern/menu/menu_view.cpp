@@ -278,7 +278,7 @@ bool GetHasSymbol(const std::vector<OptionParam>& params)
 
 OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
 {
-    auto offsetToWindow = frameNode->GetPaintRectOffset();
+    auto offsetToWindow = frameNode->GetPaintRectOffset(false, true);
     auto offsetX = offsetToWindow.GetX();
     auto offsetY = offsetToWindow.GetY();
     return OffsetF(offsetX, offsetY);
