@@ -652,7 +652,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
         }                                                       \
     } while (false)
 
-RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem() const
+RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
     auto sameSpan = MakeRefPtr<SpanItem>();
     COPY_TEXT_STYLE(fontStyle, FontSize, UpdateFontSize);
@@ -1037,22 +1037,26 @@ void ImageSpanItem::ResetImageSpanOptions()
     options.imageAttribute.reset();
 }
 
-RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem() const
+RefPtr<SpanItem> ImageSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
     auto sameSpan = MakeRefPtr<ImageSpanItem>();
-    if (options.HasValue()) {
-        sameSpan->SetImageSpanOptions(options);
-    } else {
-        // 用与Text控件复制ImageSpan子控件，生成并保存options数据
-        sameSpan->SetImageSpanOptions(GetImageSpanOptionsFromImageNode());
-        if (!(sameSpan->options.imagePixelMap.value())) {
-            /*
-                ImageSpan子控件，存在resource和pixelMap两种来源。
-                ImageSpan(resource)场景，复制图片为属性字符串为空格。
-                因此设置为NORMAL。在ImageSpanItem::EncodeTlv时，SpanItemType为NORMAL时，组装SpanItem。
-            */
-            sameSpan->spanItemType = SpanItemType::NORMAL;
+    if (isEncodeTlvS) {
+        if (options.HasValue()) {
+            sameSpan->SetImageSpanOptions(options);
+        } else {
+            // 用与Text控件复制ImageSpan子控件，生成并保存options数据
+            sameSpan->SetImageSpanOptions(GetImageSpanOptionsFromImageNode());
+            if (!(sameSpan->options.imagePixelMap.value_or(nullptr))) {
+                /*
+                    ImageSpan子控件，存在resource和pixelMap两种来源。
+                    ImageSpan(resource)场景，复制图片为属性字符串为空格。
+                    因此设置为NORMAL。在ImageSpanItem::EncodeTlv时，SpanItemType为NORMAL时，组装SpanItem。
+                */
+                sameSpan->spanItemType = SpanItemType::NORMAL;
+            }
         }
+    } else {
+        sameSpan->SetImageSpanOptions(options);
     }
     sameSpan->urlOnRelease = urlOnRelease;
     sameSpan->onClick = onClick;
@@ -1247,7 +1251,7 @@ void PlaceholderSpanItem::DumpInfo() const
         dumpLog.AddDesc(std::string("TextBaseline: ").append(StringUtils::ToString(textStyle.GetTextBaseline())));
 }
 
-RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem() const
+RefPtr<SpanItem> CustomSpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
     auto sameSpan = MakeRefPtr<CustomSpanItem>();
     sameSpan->onMeasure = onMeasure;
