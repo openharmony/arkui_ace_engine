@@ -71,6 +71,7 @@ config("ace_config") {
     cflags -= [
       "-Werror=deprecated-copy",
       "-Werror=anon-enum-enum-conversion",
+      "-Werror=incompatible-pointer-types",
     ]
   }
 
