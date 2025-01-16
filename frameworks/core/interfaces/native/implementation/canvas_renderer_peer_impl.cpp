@@ -745,7 +745,7 @@ void CanvasRendererPeerImpl::Fill(const Ace::CanvasFillRule& fillRule, const Ref
     pattern_->UpdateFillRuleForPath(fillRule);
     pattern_->Fill(path);
 }
-void CanvasRendererPeerImpl::SetTextDirection(const Ace::TextDirection& direction) 
+void CanvasRendererPeerImpl::SetTextDirection(const Ace::TextDirection& direction)
 {
     if (!pattern_) {
         LOGE("ARKOALA CanvasRendererPeerImpl::SetFill pattern not bound to component.");

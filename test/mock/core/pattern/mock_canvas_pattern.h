@@ -136,7 +136,6 @@ public:
     std::optional<Ace::CanvasImage> canvasImage = std::nullopt;
     std::optional<Ace::CanvasFillRule> fillRule = std::nullopt;
     std::optional<Ace::TextDirection> direction = std::nullopt;
-    
 };
 
 } // namespace OHOS::Ace::NG
