@@ -278,6 +278,7 @@ typedef struct {
      * @param unit  Indicates the unit, which is an enumerated value of {@link ArkUI_LengthMetricUnit}
      * @return Returns the result code.
      *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+     *         Returns {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
      *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
      * @since 16
      */
