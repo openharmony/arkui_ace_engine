@@ -109,6 +109,7 @@ struct CheckCBEvent {
 };
 static std::optional<CheckCBEvent> checkCBEvent = std::nullopt;
 static std::optional<RefPtr<UINode>> uiNode = std::nullopt;
+
 struct EventsTracker {
     static inline GENERATED_ArkUITextEventsReceiver textEventReceiver {};
 
@@ -117,6 +118,11 @@ struct EventsTracker {
             return &textEventReceiver;
         }
     };
+};
+
+struct SelectionRange {
+    int32_t start;
+    int32_t end;
 };
 } // namespace
 
@@ -1169,7 +1175,7 @@ HWTEST_F(TextModifierTest, setTextOptionsTestValueNull, TestSize.Level1)
 }
 
 /*
- * @tc.name: setDataDetectorConfigTestCallback
+ * @tc.name: setDataDetectorConfig
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1207,7 +1213,7 @@ HWTEST_F(TextModifierTest, setDataDetectorConfig, TestSize.Level1)
 }
 
 /*
- * @tc.name: setDataDetectorConfig
+ * @tc.name: setDataDetectorConfigTestCallback
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -1294,5 +1300,46 @@ HWTEST_F(TextModifierTest, setBindSelectionMenuTest, TestSize.Level1)
     ASSERT_NE(selectInfo.menuCallback.onDisappear, nullptr);
     selectInfo.menuCallback.onDisappear();
     EXPECT_TRUE(g_isCalled);
+}
+
+/*
+ * @tc.name: setSelectionTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextModifierTest, setSelectionTest, TestSize.Level1)
+{
+    static std::list<SelectionRange> range;
+
+    auto textOptions = ArkValue<Opt_TextOptions>();
+    auto value = ArkUnion<Opt_Union_String_Resource, Ark_String>("Some text value");
+    modifier_->setTextOptions(node_, &value, &textOptions);
+
+    modifier_->setTextSelectable(node_, ARK_TEXT_SELECTABLE_MODE_SELECTABLE_UNFOCUSABLE);
+    modifier_->setCopyOption(node_, ARK_COPY_OPTIONS_IN_APP);
+    Ark_TextOverflowOptions overflowOptions = {
+        .overflow = ARK_TEXT_OVERFLOW_CLIP
+    };
+    modifier_->setTextOverflow(node_, &overflowOptions);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<TextEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->SetOnSelectionChange([](int32_t start, int32_t end) {
+        range.push_back({ .start = start, .end = end });
+    });
+    auto pattern = frameNode->GetPattern();
+    ASSERT_NE(pattern, nullptr);
+    pattern->OnModifyDone();
+
+    const int32_t expectedStart = 4;
+    const int32_t expectedEnd = 10;
+    auto start = ArkValue<Ark_Number>(expectedStart);
+    auto end = ArkValue<Ark_Number>(expectedEnd);
+    modifier_->setSelection(node_, &start, &end);
+    ASSERT_FALSE(range.empty());
+    EXPECT_EQ(range.front().start, expectedStart);
+    EXPECT_EQ(range.front().end, expectedEnd);
 }
 }
