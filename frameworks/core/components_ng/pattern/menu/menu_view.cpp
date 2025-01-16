@@ -997,48 +997,10 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     }
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
     SetMenuFocusRule(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(menuPattern, nullptr);
-    bool optionsHasIcon = GetHasIcon(params);
-    bool optionsHasSymbol = GetHasSymbol(params);
-    RefPtr<FrameNode> optionNode = nullptr;
-    // append options to menu
-    for (size_t i = 0; i < params.size(); ++i) {
-        if (params[i].symbol != nullptr) {
-            optionNode = CreateMenuOption(optionsHasSymbol, params, i);
-        } else {
-            optionNode = CreateMenuOption(
-                optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
-            if (optionNode) {
-                auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
-                optionPattern->SetBlockClick(params[i].disableSystemClick);
-            }
-        }
-        if (!optionNode) {
-            continue;
-        }
-        NeedAgingUpdateNode(optionNode);
-        menuPattern->AddOptionNode(optionNode);
-        auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
-        auto eventHub = optionNode->GetEventHub<EventHub>();
-        CHECK_NULL_RETURN(eventHub, nullptr);
-        eventHub->SetEnabled(params[i].enabled);
-        auto focusHub = optionNode->GetFocusHub();
-        CHECK_NULL_RETURN(focusHub, nullptr);
-        focusHub->SetEnabled(params[i].enabled);
-
-        OptionKeepMenu(optionNode, menuWeak);
-        // first node never paints divider
-        auto props = optionNode->GetPaintProperty<MenuItemPaintProperty>();
-        if (i == 0 && menuParam.title.empty()) {
-            props->UpdateNeedDivider(false);
-        }
-        if (optionsHasIcon) {
-            props->UpdateHasIcon(true);
-        }
-        optionNode->MountToParent(column);
-        optionNode->MarkModifyDone();
-    }
+    MountOptionToColumn(params, menuNode, menuParam, column);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode);
     }
@@ -1153,11 +1115,9 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     menuWrapperPattern->SetMenuParam(menuParam);
+    menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
 
     CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(menuPattern, nullptr);
-    menuPattern->SetHoverMode(menuParam.enableHoverMode);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
@@ -1483,6 +1443,53 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
     CreateOption(optionsHasIcon, value.value, icon, row, option, onClickFunc);
 #endif
     return option;
+}
+
+void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
+    const MenuParam& menuParam, RefPtr<FrameNode> column)
+{
+    bool optionsHasIcon = GetHasIcon(params);
+    bool optionsHasSymbol = GetHasSymbol(params);
+    RefPtr<FrameNode> optionNode = nullptr;
+    // append options to menu
+    for (size_t i = 0; i < params.size(); ++i) {
+        if (params[i].symbol != nullptr) {
+            optionNode = CreateMenuOption(optionsHasSymbol, params, i);
+        } else {
+            optionNode = CreateMenuOption(
+                optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
+            if (optionNode) {
+                auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
+                optionPattern->SetBlockClick(params[i].disableSystemClick);
+            }
+        }
+        if (!optionNode) {
+            continue;
+        }
+        NeedAgingUpdateNode(optionNode);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        menuPattern->AddOptionNode(optionNode);
+        auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
+        auto eventHub = optionNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetEnabled(params[i].enabled);
+        auto focusHub = optionNode->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetEnabled(params[i].enabled);
+
+        OptionKeepMenu(optionNode, menuWeak);
+        // first node never paints divider
+        auto props = optionNode->GetPaintProperty<MenuItemPaintProperty>();
+        if (i == 0 && menuParam.title.empty()) {
+            props->UpdateNeedDivider(false);
+        }
+        if (optionsHasIcon) {
+            props->UpdateHasIcon(true);
+        }
+        optionNode->MountToParent(column);
+        optionNode->MarkModifyDone();
+    }
 }
 
 void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,

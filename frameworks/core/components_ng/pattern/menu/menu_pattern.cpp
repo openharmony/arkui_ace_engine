@@ -231,6 +231,13 @@ int32_t MenuPattern::RegisterHalfFoldHover(const RefPtr<FrameNode>& menuNode)
         auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
         optionPosition.SetDuration(HALF_FOLD_HOVER_DURATION);
         optionPosition.SetCurve(motion);
+        auto menuWrapperNode = pattern->GetMenuWrapper();
+        CHECK_NULL_VOID(menuWrapperNode);
+        auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+        CHECK_NULL_VOID(menuWrapperPattern);
+        if (menuWrapperPattern->GetHoverMode() && pattern->IsSubMenu()) {
+            menuWrapperPattern->HideSubMenu();
+        }
         pipelineContext->FlushUITasks();
         pipelineContext->Animate(optionPosition, motion, [host, pipelineContext]() {
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
