@@ -780,9 +780,9 @@ void JSSwiper::SetIndicatorController(const JSCallbackInfo& info)
         return;
     }
 
+    SwiperModel::GetInstance()->SetBindIndicator(true);
     WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     jsIndicatorController->SetSwiperNode(targetNode);
-    SwiperModel::GetInstance()->SetBindIndicator(true);
 }
 
 void JSSwiper::SetIndicator(const JSCallbackInfo& info)
