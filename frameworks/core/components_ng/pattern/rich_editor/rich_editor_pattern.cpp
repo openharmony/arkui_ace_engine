@@ -3743,6 +3743,15 @@ std::list<RefPtr<SpanItem>>::iterator RichEditorPattern::GetSpanIter(int32_t ind
     });
 }
 
+SpanItemType RichEditorPattern::GetSpanType(int32_t index)
+{
+    auto it = GetSpanIter(index);
+    CHECK_NULL_RETURN((it != spans_.end()), SpanItemType::NORMAL);
+    auto spanItem = *it;
+    CHECK_NULL_RETURN(spanItem, SpanItemType::NORMAL);
+    return spanItem->spanItemType;
+}
+
 PositionWithAffinity RichEditorPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_t y)
 {
     Offset offset(x, y);
@@ -5946,44 +5955,39 @@ bool RichEditorPattern::CursorMoveDown()
     return true;
 }
 
-bool RichEditorPattern::CursorMoveLeftWord()
+void RichEditorPattern::CursorMoveToNextWord(CaretMoveIntent direction)
 {
+    CHECK_NULL_VOID(direction == CaretMoveIntent::LeftWord || direction == CaretMoveIntent::RightWord);
     CloseSelectOverlay();
     ResetSelection();
-    int32_t newPos = 0;
-    int32_t index = GetCaretPosition();
-    auto aiContentStart = std::clamp(index - RICH_DEFAULT_AI_WORD, 0, GetTextContentLength());
-    AIDeleteComb(aiContentStart, index, newPos, true);
-    if (newPos == caretPosition_) {
-        return false;
-    }
+    auto newPos = direction == CaretMoveIntent::LeftWord ? GetLeftWordIndex() : GetRightWordIndex();
+    CHECK_NULL_VOID(newPos != caretPosition_);
     SetCaretPosition(newPos);
     MoveCaretToContentRect();
     StartTwinkling();
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
+    CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    return true;
 }
 
-bool RichEditorPattern::CursorMoveRightWord()
+int32_t RichEditorPattern::GetLeftWordIndex()
 {
-    CloseSelectOverlay();
-    ResetSelection();
-    int32_t newPos = 0;
-    int32_t index = GetCaretPosition();
-    auto aiContentEnd = std::clamp(index + RICH_DEFAULT_AI_WORD, 0, GetTextContentLength());
-    AIDeleteComb(index, aiContentEnd, newPos, false);
-    if (newPos == caretPosition_) {
-        return false;
-    }
-    SetCaretPosition(newPos);
-    MoveCaretToContentRect();
-    StartTwinkling();
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    return true;
+    int32_t index = caretPosition_;
+    AdjustIndexSkipSpace(index, MoveDirection::BACKWARD);
+    int32_t newPos = std::max(0, index - 1);
+    AdjustWordSelection(newPos, index);
+    AdjustSelector(newPos, HandleType::FIRST);
+    return newPos;
+}
+
+int32_t RichEditorPattern::GetRightWordIndex()
+{
+    int32_t index = caretPosition_;
+    int32_t newPos = std::min(index + 1, GetTextContentLength());
+    AdjustWordSelection(index, newPos);
+    AdjustSelector(newPos, HandleType::SECOND);
+    AdjustIndexSkipSpace(newPos, MoveDirection::FORWARD);
+    return newPos;
 }
 
 bool RichEditorPattern::CursorMoveToParagraphBegin()
@@ -6719,10 +6723,10 @@ void RichEditorPattern::CursorMove(CaretMoveIntent direction)
             CursorMoveDown();
             break;
         case CaretMoveIntent::LeftWord:
-            CursorMoveLeftWord();
+            CursorMoveToNextWord(direction);
             break;
         case CaretMoveIntent::RightWord:
-            CursorMoveRightWord();
+            CursorMoveToNextWord(direction);
             break;
         case CaretMoveIntent::ParagraghBegin:
             CursorMoveToParagraphBegin();
@@ -8240,6 +8244,32 @@ bool RichEditorPattern::AdjustIndexSkipLineSeparator(int32_t& currentPosition)
     if (index != currentPosition - 1) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "skip lineSeparator %{public}d->%{public}d", currentPosition, index + 1);
         currentPosition = index + 1;
+        return true;
+    }
+    return false;
+}
+
+bool RichEditorPattern::AdjustIndexSkipSpace(int32_t& currentPosition, const MoveDirection direction)
+{
+    bool isBackward = (direction == MoveDirection::BACKWARD);
+    std::u16string contentText;
+    GetContentBySpans(contentText);
+    auto contentLength = static_cast<int32_t>(contentText.length());
+    bool isPositionInvalid = (isBackward && currentPosition == 0) || (!isBackward && currentPosition == contentLength);
+    if (isPositionInvalid) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "AdjustIndexSkipSpace position=%{public}d but contentLength=%{public}d",
+            currentPosition, contentLength);
+        return false;
+    }
+    int32_t index = isBackward ? (currentPosition - 1) : currentPosition;
+    while (isBackward ? index >= 0 : index < contentLength) {
+        CHECK_NULL_BREAK(contentText[index] == u' ' && GetSpanType(index) == SpanItemType::NORMAL);
+        isBackward ? index-- : index++;
+    }
+    int32_t adjustedIndex = isBackward ? (index + 1) : index;
+    if (adjustedIndex != currentPosition) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "skip space %{public}d->%{public}d", currentPosition, adjustedIndex);
+        currentPosition = adjustedIndex;
         return true;
     }
     return false;
@@ -10959,35 +10989,13 @@ void RichEditorPattern::AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosi
 
 bool RichEditorPattern::HandleOnDeleteComb(bool backward)
 {
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleOnDeleteComb backward=%{public}d", backward);
     CloseSelectOverlay();
     ResetSelection();
-    int32_t startPosition = 0;
-    int32_t endPosition = 0;
-    int32_t index = GetCaretPosition();
-    int32_t aiContentStart = 0;
-    int32_t aiContentEnd = GetTextContentLength();
-
     if (backward) {
-        int32_t currentCaretPosition = caretPosition_ - 1;
-        AdjustSelector(currentCaretPosition, HandleType::FIRST);
-        if (caretPosition_ - currentCaretPosition > 1) {
-            DeleteBackward(1);
-            return true;
-        }
-        aiContentStart = std::clamp(index - RICH_DEFAULT_AI_WORD, 0, GetTextContentLength());
-        AIDeleteComb(aiContentStart, index, startPosition, backward);
-        if (startPosition == caretPosition_) {
-            return false;
-        }
-        DeleteBackward(caretPosition_ - startPosition);
-        SetCaretPosition(startPosition);
+        DeleteBackwardWord();
     } else {
-        aiContentEnd = std::clamp(index + RICH_DEFAULT_AI_WORD, 0, GetTextContentLength());
-        AIDeleteComb(index, aiContentEnd, endPosition, backward);
-        if (endPosition == caretPosition_) {
-            return false;
-        }
-        DeleteForward(endPosition - caretPosition_);
+        DeleteForwardWord();
     }
     MoveCaretToContentRect();
     StartTwinkling();
@@ -10995,6 +11003,28 @@ bool RichEditorPattern::HandleOnDeleteComb(bool backward)
     CHECK_NULL_RETURN(host, false);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return true;
+}
+
+void RichEditorPattern::DeleteBackwardWord()
+{
+    CHECK_NULL_VOID(caretPosition_ != 0);
+    int32_t startIndex = caretPosition_;
+    int32_t spaceEndIndex = startIndex;
+    AdjustIndexSkipSpace(spaceEndIndex, MoveDirection::BACKWARD);
+    int32_t wordEndIndex = std::max(0, spaceEndIndex - 1);
+    AdjustWordSelection(wordEndIndex, spaceEndIndex);
+    DeleteBackward(startIndex - wordEndIndex);
+}
+
+void RichEditorPattern::DeleteForwardWord()
+{
+    CHECK_NULL_VOID(caretPosition_ != GetTextContentLength());
+    int32_t startIndex = caretPosition_;
+    int32_t spaceEndIndex = startIndex;
+    AdjustIndexSkipSpace(spaceEndIndex, MoveDirection::FORWARD);
+    int32_t wordEndIndex = std::min(spaceEndIndex + 1, GetTextContentLength());
+    AdjustWordSelection(spaceEndIndex, wordEndIndex);
+    DeleteForward(wordEndIndex - startIndex);
 }
 
 const std::list<RefPtr<UINode>>& RichEditorPattern::GetAllChildren() const
