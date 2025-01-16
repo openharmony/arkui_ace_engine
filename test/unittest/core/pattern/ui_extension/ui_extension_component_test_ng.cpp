@@ -289,6 +289,9 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
     RefPtr<WantWrap> want2 = AceType::MakeRefPtr<WantWrapOhos>("1234", "1234");
     UIExtensionModelNG uecNG;
     std::map<PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap;
+    /**
+     * @tc.steps: step1. test Create without return
+     */
     uecNG.Create(want, placeholderMap);
     uecNG.Create(want2, placeholderMap);
     uecNG.SetOnError(onError);
@@ -304,6 +307,14 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentNgTest, TestSize.Level1
     uecNG.Create(config);
     config.sessionType = NG::SessionType::SECURITY_UI_EXTENSION_ABILITY;
     uecNG.Create(config);
+    /**
+     * @tc.steps: step2. test Create with return FrameNode
+     */
+    OHOS::AAFwk::Want want3;
+    want3.SetElementName("com.example", "testuea");
+    want3.SetParam("ability.want.params.uiExtensionType", std::string("sys/CommonUI"));
+    InnerModalUIExtensionConfig innerConfig;
+    EXPECT_NE(uecNG.Create(want3, callbacks, innerConfig), nullptr);
 #endif
 }
 

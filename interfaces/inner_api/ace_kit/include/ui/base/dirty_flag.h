@@ -13,15 +13,20 @@
  * limitations under the License.
  */
 
-#include "core/components/web/resource/web_area_changed.h"
+#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_DIRTY_FLAG_H
+#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_DIRTY_FLAG_H
 
-namespace OHOS::Ace {
-void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
-    const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
-{
-    auto delegate = Referenced::WeakClaim(this).Upgrade();
-    if (delegate) {
-        delegate->OnAvoidAreaChanged(avoidArea, type);
-    }
-}
-}
+namespace OHOS::Ace::NG {
+
+struct DirtySwapConfig {
+    bool frameSizeChange = false;
+    bool frameOffsetChange = false;
+    bool contentSizeChange = false;
+    bool contentOffsetChange = false;
+    bool skipMeasure = false;
+    bool skipLayout = false;
+};
+
+} // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_DIRTY_FLAG_H

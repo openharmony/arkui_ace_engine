@@ -88,7 +88,7 @@ constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
 constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
 constexpr float KEYBOARD_HEIGHT = 600.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
-const Dimension CONTAINER_BORDER_WIDTH = 1.0_vp;
+const Dimension CONTAINER_BORDER_WIDTH = 0.0_vp;
 const Dimension CONTENT_PADDING = 4.0_vp;
 constexpr float OFFSET_FIRST = 50.0f;
 constexpr float OFFSET_SECOND = 100.0f;
@@ -368,15 +368,19 @@ HWTEST_F(MenuLayout3TestNg, InitializeParam001, TestSize.Level1)
 
     int32_t backApiVersion = context->GetMinPlatformVersion();
     context->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
-    menuAlgorithm->InitializeParam(menuPattern);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapper = new LayoutWrapperNode(menuNode, geometryNode, menuNode->GetLayoutProperty());
+    menuAlgorithm->InitializeParam(layoutWrapper, menuPattern);
     EXPECT_EQ(menuAlgorithm->param_.topSecurity, PORTRAIT_TOP_SECURITY_API12.ConvertToPx());
     EXPECT_EQ(menuAlgorithm->param_.bottomSecurity, PORTRAIT_BOTTOM_SECURITY_API12.ConvertToPx());
     context->SetMinPlatformVersion(backApiVersion);
 
     SystemProperties::orientation_ = DeviceOrientation::LANDSCAPE;
-    menuAlgorithm->InitializeParam(menuPattern);
+    menuAlgorithm->InitializeParam(layoutWrapper, menuPattern);
     EXPECT_EQ(menuAlgorithm->param_.topSecurity, LANDSCAPE_TOP_SECURITY.ConvertToPx());
     EXPECT_EQ(menuAlgorithm->param_.bottomSecurity, LANDSCAPE_BOTTOM_SECURITY.ConvertToPx());
+    delete layoutWrapper;
+    layoutWrapper = nullptr;
 }
 
 /**

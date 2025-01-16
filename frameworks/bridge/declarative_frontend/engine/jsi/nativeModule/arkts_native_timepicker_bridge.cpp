@@ -362,8 +362,8 @@ ArkUINativeModuleValue TimepickerBridge::SetTimepickerEnableCascade(ArkUIRuntime
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> enableCascadeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0: index of parameter frameNode
+    Local<JSValueRef> enableCascadeArg = runtimeCallInfo->GetCallArgRef(1); // 1: index of parameter enableCascade
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     if (enableCascadeArg->IsBoolean()) {
         bool value = enableCascadeArg->ToBoolean(vm)->Value();
@@ -378,7 +378,7 @@ ArkUINativeModuleValue TimepickerBridge::ResetTimepickerEnableCascade(ArkUIRunti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0: index of parameter frameNode
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTimepickerModifier()->resetTimepickerEnableCascade(nativeNode);
     return panda::JSValueRef::Undefined(vm);

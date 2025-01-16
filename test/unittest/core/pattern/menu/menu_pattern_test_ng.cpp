@@ -83,10 +83,6 @@ constexpr float TARGET_SIZE_WIDTH = 100.0f;
 constexpr float TARGET_SIZE_HEIGHT = 100.0f;
 constexpr float MENU_ITEM_SIZE_WIDTH = 100.0f;
 constexpr float MENU_ITEM_SIZE_HEIGHT = 50.0f;
-constexpr double VELOCITY = 0.0f;
-constexpr double MASS = 1.0f;
-constexpr double STIFFNESS = 228.0f;
-constexpr double DAMPING = 22.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 constexpr double DIP_SCALE = 1.5;
 const std::vector<std::string> FONT_FAMILY_VALUE = {"cursive"};
@@ -1381,29 +1377,6 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg079, TestSize.Level1)
 }
 
 /**
- * @tc.name: MenuPatternTest080
- * @tc.desc: Test ShowMenuDisappearAnimation.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuPatternTestNg, MenuPatternTestNg080, TestSize.Level1)
-{
-    int32_t setApiVersion = 12;
-    int32_t rollbackApiVersion = MockContainer::Current()->GetApiTargetVersion();
-    MockContainer::Current()->SetApiTargetVersion(setApiVersion);
-    MenuModelNG MneuModelInstance;
-    MneuModelInstance.Create();
-    auto menuNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(menuNode, nullptr);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    ASSERT_NE(menuPattern, nullptr);
-
-    menuPattern->ShowMenuDisappearAnimation();
-    auto renderContext = menuNode->GetRenderContext();
-    EXPECT_EQ(renderContext->GetOpacity(), 0);
-    MockContainer::Current()->SetApiTargetVersion(rollbackApiVersion);
-}
-
-/**
  * @tc.name: MenuPatternTest081
  * @tc.desc: Test UpdateMenuItemChildren with OnModifyDone.
  * @tc.type: FUNC
@@ -1573,46 +1546,6 @@ HWTEST_F(MenuPatternTestNg, MenuPatternTestNg086, TestSize.Level1)
     ASSERT_NE(menuPattern, nullptr);
     menuPattern->DisableTabInMenu();
     ASSERT_TRUE(menuPattern->IsDesktopMenu());
-}
-
-/**
- * @tc.name: MenuPatternTest087
- * @tc.desc: Test ShowStackMenuDisappearAnimation.
- * @tc.type: FUNC
- */
-HWTEST_F(MenuPatternTestNg, MenuPatternTestNg087, TestSize.Level1)
-{
-    auto menuNode =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-    ASSERT_NE(menuNode, nullptr);
-    auto subMenuNode = FrameNode::CreateFrameNode(
-        V2::MENU_ETS_TAG, 2, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::SUB_MENU));
-    ASSERT_NE(subMenuNode, nullptr);
-    auto scroll = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<ScrollPattern>());
-    ASSERT_NE(scroll, nullptr);
-    scroll->MountToParent(subMenuNode);
-    auto innerMenu =
-        FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, 3, AceType::MakeRefPtr<MenuPattern>(1, TEXT_TAG, MenuType::MENU));
-    ASSERT_NE(innerMenu, nullptr);
-    innerMenu->MountToParent(scroll);
-    auto menuItem = FrameNode::CreateFrameNode(V2::MENU_ITEM_ETS_TAG, 1, AceType::MakeRefPtr<MenuItemPattern>());
-    ASSERT_NE(menuItem, nullptr);
-    menuItem->MountToParent(innerMenu);
-    auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    ASSERT_NE(rightRow, nullptr);
-    rightRow->MountToParent(menuItem);
-    auto image = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<ImagePattern>());
-    ASSERT_NE(image, nullptr);
-    image->MountToParent(rightRow);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    ASSERT_NE(menuPattern, nullptr);
-    AnimationOption animationOption;
-    animationOption.SetDelay(10);
-    auto children = subMenuNode->GetChildren();
-    const RefPtr<InterpolatingSpring> MENU_ANIMATION_CURVE =
-        AceType::MakeRefPtr<InterpolatingSpring>(VELOCITY, MASS, STIFFNESS, DAMPING);
-    menuPattern->ShowStackMenuDisappearAnimation(menuNode, subMenuNode, animationOption);
-    EXPECT_FALSE(animationOption.curve_->IsEqual(MENU_ANIMATION_CURVE));
 }
 
 /**

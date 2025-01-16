@@ -232,7 +232,7 @@ void MultiMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     OffsetF translate(0.0f, 0.0f);
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
-    auto outPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    auto outPadding = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
     if (!pattern->IsEmbedded()) {
         translate.AddX(padding.left.value_or(outPadding));
         translate.AddY(padding.top.value_or(outPadding));

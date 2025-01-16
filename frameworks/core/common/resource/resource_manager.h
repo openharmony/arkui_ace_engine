@@ -116,7 +116,10 @@ public:
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
         auto key = MakeCacheKey("", "");
-        return resourceAdapters_.at(key);
+        if (resourceAdapters_.find(key) != resourceAdapters_.end()) {
+            return resourceAdapters_.at(key);
+        }
+        return nullptr;
     }
 
     void UpdateResourceConfig(const ResourceConfiguration& config, bool themeFlag = false)

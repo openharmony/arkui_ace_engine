@@ -643,7 +643,7 @@ HWTEST_P(ListControllerTestNg, AnimateTo002, TestSize.Level1)
     EXPECT_EQ(pattern_->GetScrollableDistance(), HORIZONTAL_SCROLLABLE_DISTANCE);
 
     /**
-     * @tc.steps: step1. AnimateTo the position without animation
+     * @tc.steps: step1. AnimateTo the position in the scroll
      * @tc.expected: AnimateTo the position
      */
     bool smooth = GetParam();
@@ -651,8 +651,15 @@ HWTEST_P(ListControllerTestNg, AnimateTo002, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE));
 
     /**
-     * @tc.steps: step2. AnimateTo the position with animation
+     * @tc.steps: step2. AnimateTo the position over the scroll
      * @tc.expected: AnimateTo the bottom, can not over scroll
+     */
+    AnimateTo(Dimension(10000.0f), 0, nullptr, smooth);
+    EXPECT_TRUE(TickPosition(-HORIZONTAL_SCROLLABLE_DISTANCE));
+
+    /**
+     * @tc.steps: step3. AnimateTo the top
+     * @tc.expected: AnimateTo the top
      */
     AnimateTo(Dimension(0), 0, nullptr, smooth);
     EXPECT_TRUE(TickPosition(0));
@@ -671,10 +678,9 @@ HWTEST_P(ListControllerTestNg, AnimateTo003, TestSize.Level1)
     CreateListItems();
     CreateDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), HORIZONTAL_SCROLLABLE_DISTANCE);
-    EXPECT_TRUE(TickPosition(0));
 
     /**
-     * @tc.steps: step1. AnimateTo the position without animation
+     * @tc.steps: step1. AnimateTo the position in the scroll
      * @tc.expected: AnimateTo the position
      */
     bool smooth = GetParam();
@@ -682,8 +688,15 @@ HWTEST_P(ListControllerTestNg, AnimateTo003, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE));
 
     /**
-     * @tc.steps: step2. AnimateTo the position with animation
+     * @tc.steps: step2. AnimateTo the position over the scroll
      * @tc.expected: AnimateTo the bottom, can not over scroll
+     */
+    AnimateTo(Dimension(10000.0f), 0, nullptr, smooth);
+    EXPECT_TRUE(TickPosition(-HORIZONTAL_SCROLLABLE_DISTANCE));
+
+    /**
+     * @tc.steps: step3. AnimateTo the top
+     * @tc.expected: AnimateTo the top
      */
     AnimateTo(Dimension(0), 0, nullptr, smooth);
     EXPECT_TRUE(TickPosition(0));

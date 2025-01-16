@@ -489,10 +489,10 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
         return sections_;
     }
     sections_ = AceType::MakeRefPtr<WaterFlowSections>();
-    auto sectionChangeCallback = [weakPattern = WeakClaim(this)](int32_t start, int32_t count) {
+    auto sectionChangeCallback = [weakPattern = WeakClaim(this)](int32_t start) {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->NotifyDataChange(start, count);
+        pattern->layoutInfo_->NotifySectionChange(start);
     };
     auto callback = [weakPattern = WeakClaim(this)](int32_t start) {
         auto pattern = weakPattern.Upgrade();
@@ -500,7 +500,7 @@ RefPtr<WaterFlowSections> WaterFlowPattern::GetOrCreateWaterFlowSections()
         pattern->AddSectionChangeStartPos(start);
     };
     sections_->SetOnDataChange(callback);
-    sections_->SetNotifyDataChange(sectionChangeCallback);
+    sections_->SetNotifySectionChange(sectionChangeCallback);
     return sections_;
 }
 

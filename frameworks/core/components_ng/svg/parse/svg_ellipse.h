@@ -28,7 +28,7 @@ public:
     SvgEllipse();
     ~SvgEllipse() override = default;
     static RefPtr<SvgNode> Create();
-
+    RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override;
     RSRecordingPath AsPath(const Size& viewPort) const override;
     bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value) override;
 

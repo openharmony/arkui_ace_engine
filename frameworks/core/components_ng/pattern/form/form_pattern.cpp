@@ -52,7 +52,7 @@ constexpr uint32_t DELAY_TIME_FOR_FORM_SUBCONTAINER_CACHE = 30000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_3S = 3000;
 constexpr uint32_t DELAY_TIME_FOR_FORM_SNAPSHOT_EXTRA = 200;
 constexpr uint32_t DELAY_TIME_FOR_SET_NON_TRANSPARENT = 70;
-constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 500;
+constexpr uint32_t DELAY_TIME_FOR_DELETE_IMAGE_NODE = 100;
 constexpr uint32_t DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG = 3000;
 constexpr double ARC_RADIUS_TO_DIAMETER = 2.0;
 constexpr double NON_TRANSPARENT_VAL = 1.0;
@@ -77,7 +77,6 @@ constexpr double TEXT_TRANSPARENT_VAL = 0.9;
 constexpr int32_t FORM_DIMENSION_MIN_HEIGHT = 1;
 constexpr int32_t FORM_UNLOCK_ANIMATION_DUATION = 250;
 constexpr int32_t FORM_UNLOCK_ANIMATION_DELAY = 200;
-constexpr char NO_FORM_DUMP[] = "-noform";
 
 class FormSnapshotCallback : public Rosen::SurfaceCaptureCallback {
 public:
@@ -458,6 +457,10 @@ void FormPattern::SetNonTransparentAfterRecover()
     if (formChildrenNodeMap_.find(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE)
         == formChildrenNodeMap_.end()) {
         UpdateChildNodeOpacity(FormChildNodeType::FORM_SURFACE_NODE, NON_TRANSPARENT_VAL);
+        //update form after updateChildNodeOpacity
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         TAG_LOGI(AceLogTag::ACE_FORM, "setOpacity:1");
     } else {
         TAG_LOGW(AceLogTag::ACE_FORM, "has forbidden node");
@@ -734,6 +737,7 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
         formInfo.uiSyntax == AppExecFwk::FormType::ETS) {
         isJsCard_ = false;
     }
+    formSpecialStyle_.SetIsMultiAppForm(formInfo);
 #endif
 
     AddFormComponentUI(formInfo.transparencyEnabled, info);
@@ -748,22 +752,26 @@ void FormPattern::AddFormComponentTask(const RequestFormInfo& info, RefPtr<Pipel
     formManagerBridge_->AddForm(pipeline, info);
 #endif
 
-    if (formInfo.transparencyEnabled) {
+    bool isFormBundleForbidden = CheckFormBundleForbidden(info.bundleName);
+    if (formInfo.transparencyEnabled && isFormBundleForbidden) {
         TAG_LOGI(AceLogTag::ACE_FORM, "transparencyEnabled.");
+        formSpecialStyle_.SetInitDone();
         return;
     }
-    bool isFormBundleLocked = IsFormBundleLocked(info.bundleName, info.id);
-    bool isFormBundleForbidden = CheckFormBundleForbidden(info.bundleName);
-    if (isFormBundleLocked || isFormBundleForbidden)  {
+    bool isFormLocked = IsFormBundleLocked(info.bundleName, info.id);
+    if (isFormLocked || isFormBundleForbidden)  {
         auto newFormSpecialStyle = formSpecialStyle_;
-        newFormSpecialStyle.SetIsLockedByAppLock(isFormBundleLocked);
+        newFormSpecialStyle.SetIsLockedByAppLock(isFormLocked);
         newFormSpecialStyle.SetIsForbiddenByParentControl(isFormBundleForbidden);
+        newFormSpecialStyle.SetInitDone();
         PostUITask([weak = WeakClaim(this), info, newFormSpecialStyle] {
             ACE_SCOPED_TRACE("ArkUILoadDisableFormStyle");
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->HandleFormStyleOperation(newFormSpecialStyle, info);
             }, "ArkUILoadDisableFormStyle");
+    } else {
+        formSpecialStyle_.SetInitDone();
     }
 }
 
@@ -797,6 +805,7 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
 #if OHOS_STANDARD_SYSTEM
         AppExecFwk::FormInfo formInfo;
         FormManagerDelegate::GetFormInfo(info.bundleName, info.moduleName, info.cardName, formInfo);
+        std::lock_guard<std::mutex> lock(formManagerBridge_->GetRecycleMutex());
         formManagerBridge_->SetParamForWant(info, formInfo);
 #endif
     }
@@ -940,12 +949,15 @@ void FormPattern::UpdateAppLockCfg()
     CHECK_NULL_VOID(node);
     auto imageLayoutProperty = node->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
-    auto info = ImageSourceInfo("");
-    info.SetResourceId(InternalResource::ResourceId::APP_LOCK_SVG);
-    info.SetFillColor(SystemProperties::GetColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK);
-    imageLayoutProperty->UpdateImageSourceInfo(info);
-    node->MarkModifyDone();
-    node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    auto sourceInfo = imageLayoutProperty->GetImageSourceInfo();
+    auto currentColor = sourceInfo->GetFillColor();
+    auto newColor = SystemProperties::GetColorMode() == ColorMode::DARK ? Color::WHITE : Color::BLACK;
+    if (currentColor != newColor) {
+        sourceInfo->SetFillColor(newColor);
+        imageLayoutProperty->UpdateImageSourceInfo(sourceInfo.value());
+        node->MarkModifyDone();
+        node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 void FormPattern::LoadDisableFormStyle(const RequestFormInfo& info, bool isRefresh)
@@ -1354,8 +1366,8 @@ void FormPattern::GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRec
         auto accessibilityManager = pipeline->GetAccessibilityManager();
         if (accessibilityManager) {
             auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
-            parentRectInfo.top = parentRectInfo.top * windowInfo.scaleX + static_cast<int32_t>(windowInfo.top);
-            parentRectInfo.left = parentRectInfo.left * windowInfo.scaleY + static_cast<int32_t>(windowInfo.left);
+            parentRectInfo.left = parentRectInfo.left * windowInfo.scaleX + static_cast<int32_t>(windowInfo.left);
+            parentRectInfo.top = parentRectInfo.top * windowInfo.scaleY + static_cast<int32_t>(windowInfo.top);
             parentRectInfo.scaleX *= windowInfo.scaleX;
             parentRectInfo.scaleY *= windowInfo.scaleY;
         } else {
@@ -1637,6 +1649,7 @@ void FormPattern::FireOnUninstallEvent(int64_t id) const
     auto json = JsonUtil::Create(true);
     json->Put("id", std::to_string(uninstallFormId).c_str());
     json->Put("idString", std::to_string(id).c_str());
+    json->Put("isLocked", formSpecialStyle_.IsLockedByAppLock());
     eventHub->FireOnUninstall(json->ToString());
 }
 
@@ -1650,6 +1663,10 @@ void FormPattern::FireOnAcquiredEvent(int64_t id) const
     auto json = JsonUtil::Create(true);
     json->Put("id", std::to_string(onAcquireFormId).c_str());
     json->Put("idString", std::to_string(id).c_str());
+    bool isLocked = formSpecialStyle_.IsInited() ?
+        formSpecialStyle_.IsLockedByAppLock() :
+        (IsFormBundleLocked(cardInfo_.bundleName, id) && !formSpecialStyle_.IsMultiAppForm());
+    json->Put("isLocked", isLocked);
     eventHub->FireOnAcquired(json->ToString());
 }
 
@@ -2414,55 +2431,15 @@ bool FormPattern::ShouldAddChildAtReuildFrame()
 
 void FormPattern::DumpInfo()
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "dump form info in string format");
-    if (formManagerBridge_ == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
-        return;
-    }
-
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    std::vector<std::string> params = container->GetUieParams();
-    // Use -noform to choose not dump form info
-    if (std::find(params.begin(), params.end(), NO_FORM_DUMP) != params.end()) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "Not Support Dump Form Info");
-    } else {
-        params.push_back(std::to_string(getpid()));
-        std::vector<std::string> dumpInfo;
-        formManagerBridge_->NotifyFormDump(params, dumpInfo);
-        for (std::string& info : dumpInfo) {
-            std::string infoRes = std::regex_replace(info, std::regex(R"(\n)"), ";");
-            DumpLog::GetInstance().AddDesc(std::string("Form info: ").append(infoRes));
-        }
-    }
+    TAG_LOGW(AceLogTag::ACE_FORM, "not supported");
 }
 
 void FormPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "dump form info in json format");
-    if (formManagerBridge_ == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "formManagerBridge_ is null");
-        return;
-    }
-
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
-    std::vector<std::string> params = container->GetUieParams();
-    // Use -noform to choose not dump form info
-    if (std::find(params.begin(), params.end(), NO_FORM_DUMP) != params.end()) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "Not Support Dump Form Info");
-    } else {
-        params.push_back(std::to_string(getpid()));
-        std::vector<std::string> dumpInfo;
-        formManagerBridge_->NotifyFormDump(params, dumpInfo);
-        for (std::string& info : dumpInfo) {
-            std::string infoRes = std::regex_replace(info, std::regex(R"(\n)"), ";");
-            json->Put("Form info: ", infoRes.c_str());
-        }
-    }
+    TAG_LOGW(AceLogTag::ACE_FORM, "not supported");
 }
 
-bool FormPattern::IsFormBundleLocked(const std::string& bundleName, int64_t formId)
+bool FormPattern::IsFormBundleLocked(const std::string& bundleName, int64_t formId) const
 {
     CHECK_NULL_RETURN(formManagerBridge_, false);
     return formManagerBridge_->IsFormBundleLocked(bundleName, formId);

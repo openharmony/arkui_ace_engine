@@ -728,11 +728,16 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     SetDragFRCSceneCallback(scrollable);
     SetOnContinuousSliding(scrollable);
     SetGetSnapTypeCallback(scrollable);
-    scrollable->SetUnstaticVelocityScale(velocityScale_);
+    if (!NearZero(velocityScale_)) {
+        scrollable->SetUnstaticVelocityScale(velocityScale_);
+    }
     scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
     if (friction_ != -1) {
         scrollable->SetUnstaticFriction(friction_);
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    scrollable->ListenDigitalCrownEvent(host);
+#endif
     return scrollable;
 }
 
@@ -758,9 +763,6 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
         CHECK_NULL_VOID(child);
         child->StopScrollAnimation();
     }
-#ifdef SUPPORT_DIGITAL_CROWN
-    scrollable->ListenDigitalCrownEvent(host);
-#endif
 }
 
 void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -2782,7 +2784,7 @@ void ScrollablePattern::SuggestOpIncGroup(bool flag)
     flag = flag && isVertical();
     if (flag) {
         ACE_SCOPED_TRACE("SuggestOpIncGroup %s", host->GetHostTag().c_str());
-        auto parent = host->GetAncestorNodeOfFrame();
+        auto parent = host->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parent);
         parent->SetSuggestOpIncActivatedOnce();
         // get 1st layer
@@ -4038,13 +4040,13 @@ void ScrollablePattern::SetOnHiddenChangeForParent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     while (parent) {
         if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
             break;
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     if (parent && parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
         auto navDestinationPattern = parent->GetPattern<NavDestinationPattern>();

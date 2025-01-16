@@ -87,8 +87,7 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
     if (!eventInfo) {
         return JSValueRef::Undefined(info->GetVM());
     }
-    std::list<TouchLocationInfo> history;
-    history = eventInfo->GetHistory();
+    std::list<TouchLocationInfo> history = eventInfo->GetHistory();
     Local<ArrayRef> valueArray = ArrayRef::New(info->GetVM(), history.size());
     auto index = 0;
     for (auto const &point : history) {
@@ -114,6 +113,13 @@ Local<JSValueRef> JsGetHistoricalPoints(panda::JsiRuntimeCallInfo *info)
             ToJSValue("displayX"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX())));
         touchObject->Set(info->GetVM(),
             ToJSValue("displayY"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY())));
+        touchObject->Set(info->GetVM(), ToJSValue("pressedTime"),
+            ToJSValue(static_cast<double>(point.GetPressedTime().time_since_epoch().count())));
+        touchObject->Set(info->GetVM(), ToJSValue("pressure"), ToJSValue(point.GetForce()));
+        touchObject->Set(info->GetVM(),
+            ToJSValue("width"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.GetWidth())));
+        touchObject->Set(info->GetVM(),
+            ToJSValue("height"), ToJSValue(PipelineBase::Px2VpWithCurrentDensity(point.GetHeight())));
 
         Local<ObjectRef> objRef = ObjectRef::New(info->GetVM());
         objRef->Set(info->GetVM(), ToJSValue("touchObject"), (touchObject));

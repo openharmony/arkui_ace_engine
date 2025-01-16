@@ -51,6 +51,10 @@ MovingPhotoPattern::MovingPhotoPattern(const RefPtr<MovingPhotoController>& cont
 void MovingPhotoPattern::OnModifyDone()
 {
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto onModifydone start.");
+    if (isRefreshMovingPhoto_) {
+        TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "movingphoto onModifydone isRefreshing return.");
+        return;
+    }
     Pattern::OnModifyDone();
     UpdateImageNode();
     UpdateVideoNode();
@@ -1185,17 +1189,13 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_, host);
     isRefreshMovingPhoto_ = true;
     isSetAutoPlayPeriod_ = false;
+    autoAndRepeatLevel_ = PlaybackMode::NONE;
+    historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     if (historyAutoAndRepeatLevel_ == PlaybackMode::REPEAT) {
-        autoAndRepeatLevel_ = PlaybackMode::NONE;
-        historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
         Pause();
-        StopAnimation();
     }
     ResetMediaPlayer();
     currentPlayStatus_ = PlaybackStatus::IDLE;
-    if (historyAutoAndRepeatLevel_ == PlaybackMode::AUTO) {
-        autoAndRepeatLevel_ = PlaybackMode::AUTO;
-    }
     if (IsSupportImageAnalyzer() && isEnableAnalyzer_ && imageAnalyzerManager_) {
         UpdateAnalyzerOverlay();
     }

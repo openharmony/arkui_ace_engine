@@ -38,6 +38,8 @@ public:
     virtual ~TimePickerModel() = default;
 
     virtual void CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond = false) = 0;
+    virtual void SetStartTime(const PickerTime& value) = 0;
+    virtual void SetEndTime(const PickerTime& value) = 0;
     virtual void SetSelectedTime(const PickerTime& value) = 0;
     virtual void SetOnChange(ChangeEvent&& onChange) = 0;
     virtual void SetOnEnterSelectedArea(ChangeEvent&& onEnterSelectedArea) = 0;

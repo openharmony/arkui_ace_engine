@@ -210,7 +210,13 @@ void SheetPresentationPattern::InitScrollProps()
 
     // When sheet content height is larger than sheet height,
     // the sheet height should set scroll always enabled.
-    scrollPattern->SetAlwaysEnabled(scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && IsScrollable());
+    auto edgeEffectAlwaysEnabled = scrollSizeMode_ == ScrollSizeMode::CONTINUOUS && IsScrollable();
+    if (sheetEffectEdge_ == SheetEffectEdge::NONE) {
+        scrollPattern->SetEdgeEffect(EdgeEffect::NONE, edgeEffectAlwaysEnabled);
+    } else {
+        scrollPattern->SetEdgeEffect(EdgeEffect::SPRING,
+            edgeEffectAlwaysEnabled, static_cast<EffectEdge>(sheetEffectEdge_));
+    }
 }
 
 bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
@@ -281,7 +287,7 @@ void SheetPresentationPattern::CheckBuilderChange()
         auto layoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
         CHECK_NULL_VOID(layoutProperty);
         auto sheetStyle = layoutProperty->GetSheetStyleValue();
-        if (sheetStyle.sheetMode == SheetMode::AUTO) {
+        if (sheetStyle.sheetHeight.sheetMode == SheetMode::AUTO) {
             sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
@@ -908,20 +914,20 @@ float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetSty
     float sheetHeight = largeHeight;
     auto sheetNode = GetHost();
     CHECK_NULL_RETURN(sheetNode, sheetHeight);
-    if (sheetStyle.sheetMode.has_value()) {
+    if (sheetStyle.sheetHeight.sheetMode.has_value()) {
         auto pipelineContext = sheetNode->GetContext();
         CHECK_NULL_RETURN(pipelineContext, sheetHeight);
         auto sheetTheme = pipelineContext->GetTheme<SheetTheme>();
         CHECK_NULL_RETURN(sheetTheme, sheetHeight);
-        if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
+        if (sheetStyle.sheetHeight.sheetMode == SheetMode::MEDIUM) {
             sheetHeight = pageHeight_ * sheetTheme->GetMediumPercent();
             if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 sheetHeight = pageHeight_ * MEDIUM_SIZE_PRE;
             }
-        } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
+        } else if (sheetStyle.sheetHeight.sheetMode == SheetMode::LARGE) {
             sheetHeight = sheetTheme->GetHeightApplyFullScreen() ? pageHeight_ : largeHeight;
             sheetHeight *= sheetTheme->GetLargePercent();
-        } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
+        } else if (sheetStyle.sheetHeight.sheetMode == SheetMode::AUTO) {
             sheetHeight = GetFitContentHeight();
             if (sheetHeight > largeHeight) {
                 sheetHeight = largeHeight;
@@ -930,10 +936,10 @@ float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetSty
         }
     } else {
         float height = 0.0f;
-        if (sheetStyle.height->Unit() == DimensionUnit::PERCENT) {
-            height = sheetStyle.height->ConvertToPxWithSize(sheetMaxHeight_);
+        if (sheetStyle.sheetHeight.height->Unit() == DimensionUnit::PERCENT) {
+            height = sheetStyle.sheetHeight.height->ConvertToPxWithSize(sheetMaxHeight_);
         } else {
-            height = sheetStyle.height->ConvertToPx();
+            height = sheetStyle.sheetHeight.height->ConvertToPx();
         }
         if (GreatNotEqual(height, largeHeight)) {
             sheetHeight = largeHeight;
@@ -1837,6 +1843,7 @@ void SheetPresentationPattern::InitSheetMode()
     auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     scrollSizeMode_ = sheetStyle.scrollSizeMode.value_or(ScrollSizeMode::FOLLOW_DETENT);
     keyboardAvoidMode_ = sheetStyle.sheetKeyboardAvoidMode.value_or(SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL);
+    sheetEffectEdge_ = sheetStyle.sheetEffectEdge.value_or(SheetEffectEdge::ALL);
 }
 
 void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
@@ -2609,10 +2616,11 @@ void SheetPresentationPattern::DumpAdvanceInfo()
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
     DumpLog::GetInstance().AddDesc(
-        std::string("height: ").append(sheetStyle.height.has_value() ? sheetStyle.height->ToString() : "None"));
+        std::string("height: ").append(sheetStyle.sheetHeight.height.has_value() ?
+        sheetStyle.sheetHeight.height->ToString() : "None"));
     DumpLog::GetInstance().AddDesc(
-        ("sheetMode: ") + (sheetStyle.sheetMode.has_value()
-                                  ? std::to_string(static_cast<int32_t>(sheetStyle.sheetMode.value()))
+        ("sheetMode: ") + (sheetStyle.sheetHeight.sheetMode.has_value()
+                                  ? std::to_string(static_cast<int32_t>(sheetStyle.sheetHeight.sheetMode.value()))
                                   : "None"));
     DumpLog::GetInstance().AddDesc(std::string("detents' Size: ").append(std::to_string(sheetStyle.detents.size())));
     DumpLog::GetInstance().AddDesc(std::string("IsShouldDismiss: ").append(shouldDismiss_ ? "true" : "false"));
@@ -2823,16 +2831,53 @@ bool SheetPresentationPattern::IsTypeNeedAvoidAiBar()
            sheetType_ == SheetType::SHEET_BOTTOM_OFFSET;
 }
 
-bool SheetPresentationPattern::IsCustomHeightOrDetentsChanged(const SheetStyle& sheetStyle)
+void SheetPresentationPattern::IsNeedPlayTransition(const SheetStyle& inputStyle)
 {
+    isPlayTransition_ = false;
+    auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto preStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (preStyle.sheetHeight.height != inputStyle.sheetHeight.height) {
+        isPlayTransition_ = true;
+        return;
+    }
+    if (preStyle.detents != inputStyle.detents) {
+        isPlayTransition_ = true;
+        return;
+    }
+    if (preStyle.sheetHeight.sheetMode != inputStyle.sheetHeight.sheetMode) {
+        isPlayTransition_ = true;
+        return;
+    }
+    isPlayTransition_ = UpdateIndexByDetentSelection(inputStyle, false) || isPlayTransition_;
+}
+
+bool SheetPresentationPattern::UpdateIndexByDetentSelection(const SheetStyle& inputStyle, bool isFirstTransition)
+{
+    if (!inputStyle.detentSelection.has_value() || inputStyle.detents.size() == 0) {
+        // when input detentSelection or detent selection is invalid
+        return false;
+    }
+    auto selection = inputStyle.detentSelection.value();
+    if ((selection.sheetMode.has_value() && selection.sheetMode.value() == NG::SheetMode::AUTO) ||
+        (selection.height.has_value() && selection.height.value().IsNegative())) {
+        return false;
+    }
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
     auto preStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
-    if (preStyle.height == sheetStyle.height && preStyle.detents == sheetStyle.detents &&
-        preStyle.sheetMode == sheetStyle.sheetMode) {
+    if (!isFirstTransition && preStyle.detentSelection == inputStyle.detentSelection) {
+        // only when sheet is first pulled up or pre-detents equal to current detents, otherwise false
         return false;
     }
-    return true;
+    for (uint32_t index = 0; index < inputStyle.detents.size(); index++) {
+        if (inputStyle.detents[index] == inputStyle.detentSelection.value()) {
+            detentsFinalIndex_ = index;
+            TAG_LOGI(AceLogTag::ACE_SHEET, "find detent selection is %u", index);
+            return true;
+        }
+    }
+    return false;
 }
 
 void SheetPresentationPattern::OverlayDismissSheet()
@@ -2954,9 +2999,10 @@ void SheetPresentationPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
-    json->Put("height", sheetStyle.height.has_value() ? sheetStyle.height->ToString().c_str() : "None");
-    json->Put("sheetMode", sheetStyle.sheetMode.has_value()
-                               ? std::to_string(static_cast<int32_t>(sheetStyle.sheetMode.value())).c_str()
+    json->Put("height", sheetStyle.sheetHeight.height.has_value() ?
+        sheetStyle.sheetHeight.height->ToString().c_str() : "None");
+    json->Put("sheetMode", sheetStyle.sheetHeight.sheetMode.has_value()
+                               ? std::to_string(static_cast<int32_t>(sheetStyle.sheetHeight.sheetMode.value())).c_str()
                                : "None");
     json->Put("detents Size", static_cast<int32_t>(sheetStyle.detents.size()));
     json->Put("IsShouldDismiss", shouldDismiss_ ? "true" : "false");

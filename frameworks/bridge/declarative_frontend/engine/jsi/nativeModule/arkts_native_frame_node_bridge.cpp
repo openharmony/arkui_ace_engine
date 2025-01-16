@@ -61,10 +61,11 @@ ArkUINodeHandle FrameNodeBridge::GetFrameNode(ArkUIRuntimeCallInfo* runtimeCallI
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, nullptr);
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    CHECK_NULL_RETURN(!firstArg.IsNull(), nullptr);
+    CHECK_NULL_RETURN(!firstArg.IsNull() && firstArg->IsNativePointer(vm), nullptr);
     auto* nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     return nativeNode;
 }
+
 int FrameNodeBridge::GetInstanceId(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -96,6 +97,12 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateEventTargetObject(EcmaVM* vm, con
     auto area = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keysOfArea), keysOfArea, valuesOfArea);
     auto target = panda::ObjectRef::New(vm);
     target->Set(vm, panda::StringRef::NewFromUtf8(vm, "area"), area);
+    if (info.GetTarget().id.empty()) {
+        target->Set(vm, panda::StringRef::NewFromUtf8(vm, "id"), panda::JSValueRef().Undefined(vm));
+    } else {
+        target->Set(vm, panda::StringRef::NewFromUtf8(vm, "id"),
+            panda::StringRef::NewFromUtf8(vm, info.GetTarget().id.c_str()));
+    }
     return target;
 }
 
@@ -106,7 +113,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
     const Offset& globalOffset = touchInfo.GetGlobalLocation();
     const Offset& localOffset = touchInfo.GetLocalLocation();
     const Offset& screenOffset = touchInfo.GetScreenLocation();
-    const char* keys[] = { "type", "id", "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x", "y" };
+    const char* keys[] = { "type", "id", "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x", "y",
+        "pressedTime", "pressure", "width", "height" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(touchInfo.GetTouchType())),
         panda::NumberRef::New(vm, touchInfo.GetFingerId()), panda::NumberRef::New(vm, screenOffset.GetX() / density),
         panda::NumberRef::New(vm, screenOffset.GetY() / density),
@@ -115,7 +123,11 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
         panda::NumberRef::New(vm, globalOffset.GetX() / density),
         panda::NumberRef::New(vm, globalOffset.GetY() / density),
         panda::NumberRef::New(vm, localOffset.GetX() / density),
-        panda::NumberRef::New(vm, localOffset.GetY() / density) };
+        panda::NumberRef::New(vm, localOffset.GetY() / density),
+        panda::NumberRef::New(vm, static_cast<double>(touchInfo.GetPressedTime().time_since_epoch().count())),
+        panda::NumberRef::New(vm, touchInfo.GetForce()),
+        panda::NumberRef::New(vm, touchInfo.GetWidth() / density),
+        panda::NumberRef::New(vm, touchInfo.GetHeight() / density) };
     auto touchInfoObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     touchInfoObj->SetNativePointerFieldCount(vm, 1);
     touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
@@ -526,6 +538,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateGestureEventInfo(EcmaVM* vm, Gest
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
         panda::NumberRef::New(vm, info.GetForce()), panda::NumberRef::New(vm, info.GetDeviceId()) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
+    obj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"), panda::NumberRef::New(vm, info.GetTargetDisplayId()));
     if (info.GetTiltX().has_value()) {
         obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "tiltX"),
             panda::NumberRef::New(vm, static_cast<int32_t>(info.GetTiltX().value())));
@@ -623,6 +637,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchEventInfo(EcmaVM* vm, TouchE
         panda::FunctionRef::New(vm, Framework::JsTouchPreventDefault));
     eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "getModifierKeyState"),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState));
+    eventObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "targetDisplayId"),
+        panda::NumberRef::New(vm, info.GetTargetDisplayId()));
     eventObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
     return eventObj;
 }
@@ -900,7 +916,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo& 
     const Offset& screenOffset = info.GetScreenLocation();
     double density = PipelineBase::GetCurrentDensity();
     const char* keys[] = { "button", "action", "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x",
-        "y", "timestamp", "stopPropagation", "getModifierKeyState", "source", "pressure", "deviceId" };
+        "y", "timestamp", "stopPropagation", "getModifierKeyState", "source", "pressure", "deviceId", "rawDeltaX",
+        "rawDeltaY", "targetDisplayId" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(info.GetButton())),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetAction())),
         panda::NumberRef::New(vm, screenOffset.GetX() / density),
@@ -915,7 +932,10 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo& 
         panda::FunctionRef::New(vm, Framework::JsStopPropagation),
         panda::FunctionRef::New(vm, ArkTSUtils::JsGetModifierKeyState),
         panda::NumberRef::New(vm, static_cast<int32_t>(info.GetSourceDevice())),
-        panda::NumberRef::New(vm, info.GetForce()), panda::NumberRef::New(vm, info.GetDeviceId()) };
+        panda::NumberRef::New(vm, info.GetForce()), panda::NumberRef::New(vm, info.GetDeviceId()),
+        panda::NumberRef::New(vm, info.GetRawDeltaX() / density),
+        panda::NumberRef::New(vm, info.GetRawDeltaY() / density),
+        panda::NumberRef::New(vm, info.GetTargetDisplayId()) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     obj->SetNativePointerFieldCount(vm, 1);
     if (info.GetTiltX().has_value()) {
@@ -930,6 +950,13 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateMouseInfo(EcmaVM* vm, MouseInfo& 
         panda::NumberRef::New(vm, static_cast<int32_t>(static_cast<int32_t>(info.GetSourceTool()))));
     obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "target"), CreateEventTargetObject(vm, info));
     obj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
+    auto pressedButtonArr = panda::ArrayRef::New(vm);
+    uint32_t idx = 0;
+    for (const auto& button : info.GetPressedButtons()) {
+        panda::ArrayRef::SetValueAt(
+            vm, pressedButtonArr, idx++, panda::NumberRef::New(vm, static_cast<int32_t>(button)));
+    }
+    obj->Set(vm, panda::StringRef::NewFromUtf8(vm, "pressedButtons"), pressedButtonArr);
     return obj;
 }
 

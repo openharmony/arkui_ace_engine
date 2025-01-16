@@ -177,8 +177,8 @@ void JSTextEditableController::AddText(const JSCallbackInfo& info)
             JSRef<JSVal> offset = optionObj->GetProperty("offset");
             if (offset->IsNumber()) {
                 offsetIndex = offset->ToNumber<int32_t>();
+                offsetIndex = std::max(0, offsetIndex);
             }
-            offsetIndex = std::max(0, offsetIndex);
         }
         // add text
         int32_t result = controller->AddText(textValue, offsetIndex);

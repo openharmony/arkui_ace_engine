@@ -98,6 +98,8 @@ constexpr Dimension ERROR_UNDERLINE_WIDTH = 2.0_px;
 constexpr Dimension UNDERLINE_WIDTH = 1.0_px;
 constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 constexpr Dimension SCROLL_BAR_MIN_HEIGHT = 4.0_vp;
+constexpr float MINFONTSCALE = 0.85f;
+constexpr float MAXFONTSCALE = 3.20f;
 #if defined(ENABLE_STANDARD_INPUT)
 constexpr Dimension AVOID_OFFSET = 24.0_vp;
 #endif
@@ -1419,6 +1421,10 @@ void TextFieldPattern::SetNeedToRequestKeyboardInner(bool needToRequestKeyboardI
         TAG_LOGI(ACE_TEXT_FIELD, "Set needToRequestKeyboardInner_ to %{public}d : reason %{public}d",
             needToRequestKeyboardInner, static_cast<int32_t>(reason));
     }
+    if (reason == RequestKeyboardInnerChangeReason::FOCUS && !needToRequestKeyboardInner) {
+        TAG_LOGI(ACE_TEXT_FIELD, "field focus but set needToRequestKeyboardInner to false "
+            "why: %{public}d %{public}d %{public}d", isLongPress_, dragRecipientStatus_, dragStatus_);
+    }
     needToRequestKeyboardInner_ = needToRequestKeyboardInner;
 }
 
@@ -2103,7 +2109,9 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchLocationInfo& info)
         previewTextTouchOffset.SetY(std::clamp(touchOffset.GetY(), limitT, limitB));
         selectController_->UpdateCaretInfoByOffset(previewTextTouchOffset, true, true);
     } else {
-        UpdateContentScroller(touchOffset);
+        if (HasText()) {
+            UpdateContentScroller(touchOffset);
+        }
         auto touchCaretX = std::clamp(
             touchOffset.GetX(), static_cast<double>(contentRect_.Left()), static_cast<double>(contentRect_.Right()));
         // 1/4 line height.
@@ -2479,7 +2487,8 @@ void TextFieldPattern::InitDragDropCallBack()
             }
         }
         auto textPaintOffset = pattern->GetPaintRectGlobalOffset();
-        Offset localOffset = Offset(event->GetX(), event->GetY()) - Offset(textPaintOffset.GetX(), textPaintOffset.GetY());
+        Offset localOffset =
+            Offset(event->GetX(), event->GetY()) - Offset(textPaintOffset.GetX(), textPaintOffset.GetY());
         if (host->GetDragPreviewOption().enableEdgeAutoScroll) {
             pattern->UpdateContentScroller(localOffset);
         } else {
@@ -2790,7 +2799,7 @@ bool TextFieldPattern::CheckAutoFillType(const AceAutoFillType& autoFillType, bo
     if (isFromKeyBoard) {
         return true;
     }
-    
+
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     auto isTriggerPassword = IsTriggerAutoFillPassword();
@@ -4154,7 +4163,9 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
     ChangeMouseState(info.GetLocalLocation(), frameId, info.GetAction() == MouseAction::WINDOW_LEAVE);
 
-    selectOverlay_->SetUsingMouse(true);
+    if (info.GetAction() == OHOS::Ace::MouseAction::PRESS) {
+        selectOverlay_->SetUsingMouse(true);
+    }
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleRightMouseEvent(info);
     } else if (info.GetButton() == MouseButton::LEFT_BUTTON) {
@@ -6734,6 +6745,28 @@ std::string TextFieldPattern::GetMaxFontSize() const
     return layoutProperty->GetAdaptMaxFontSize()->ToString();
 }
 
+std::string TextFieldPattern::GetMinFontScale() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, std::to_string(MINFONTSCALE));
+    return std::to_string(layoutProperty->GetMinFontScale().value_or(MINFONTSCALE));
+}
+
+std::string TextFieldPattern::GetMaxFontScale() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, std::to_string(MAXFONTSCALE));
+    return std::to_string(layoutProperty->GetMaxFontScale().value_or(MAXFONTSCALE));
+}
+
+std::string TextFieldPattern::GetEllipsisMode() const
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, V2::ConvertEllipsisModeToString(EllipsisMode::TAIL));
+    return V2::ConvertEllipsisModeToString(layoutProperty->GetEllipsisMode().value_or(
+        EllipsisMode::TAIL));
+}
+
 std::string TextFieldPattern::GetTextIndent() const
 {
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
@@ -7408,6 +7441,9 @@ void TextFieldPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspe
     json->PutExtAttr("barState", GetBarStateString().c_str(), filter);
     json->PutExtAttr("caretPosition", std::to_string(GetCaretIndex()).c_str(), filter);
     json->PutExtAttr("enablePreviewText", GetSupportPreviewText(), filter);
+    json->PutExtAttr("minFontScale", GetMinFontScale().c_str(), filter);
+    json->PutExtAttr("maxFontScale", GetMaxFontScale().c_str(), filter);
+    json->PutExtAttr("ellipsisMode",GetEllipsisMode().c_str(), filter);
     ToJsonValueForOption(json, filter);
     ToJsonValueSelectOverlay(json, filter);
 }
@@ -7477,8 +7513,8 @@ void TextFieldPattern::ToJsonValueSelectOverlay(std::unique_ptr<JsonValue>& json
     auto menuNode = manager->GetSelectOverlayNode();
     CHECK_NULL_VOID(menuNode);
     json->PutExtAttr("MenuNode", menuNode->GetTag().c_str(), filter);
-    if (menuNode->GetAncestorNodeOfFrame()) {
-        json->PutExtAttr("MountOn", menuNode->GetAncestorNodeOfFrame()->GetTag().c_str(), filter);
+    if (menuNode->GetAncestorNodeOfFrame(false)) {
+        json->PutExtAttr("MountOn", menuNode->GetAncestorNodeOfFrame(false)->GetTag().c_str(), filter);
     }
     auto menuLayoutProperty = menuNode->GetLayoutProperty();
     CHECK_NULL_VOID(menuLayoutProperty);
@@ -8663,6 +8699,7 @@ void TextFieldPattern::PasswordResponseKeyEvent()
 
 void TextFieldPattern::UnitResponseKeyEvent()
 {
+#ifndef ARKUI_WAERABLE
     auto unitArea = AceType::DynamicCast<UnitResponseArea>(responseArea_);
     CHECK_NULL_VOID(unitArea);
     auto frameNode = unitArea->GetFrameNode();
@@ -8672,6 +8709,7 @@ void TextFieldPattern::UnitResponseKeyEvent()
         CHECK_NULL_VOID(selectPattern);
         selectPattern->ShowSelectMenu();
     }
+#endif
 }
 
 void TextFieldPattern::ScrollToSafeArea() const

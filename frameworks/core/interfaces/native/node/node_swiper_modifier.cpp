@@ -84,6 +84,8 @@ constexpr bool DEFAULT_STOP_WHEN_TOUCHED = true;
 const std::vector<SwiperDisplayMode> DISPLAY_MODE = { SwiperDisplayMode::STRETCH, SwiperDisplayMode::AUTO_LINEAR };
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
 const std::vector<SwiperIndicatorType> INDICATOR_TYPE = { SwiperIndicatorType::DOT, SwiperIndicatorType::DIGIT };
+const std::vector<SwiperAnimationMode> ANIMATION_MODE = { SwiperAnimationMode::NO_ANIMATION,
+    SwiperAnimationMode::DEFAULT_ANIMATION, SwiperAnimationMode::FAST_ANIMATION };
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -755,12 +757,17 @@ void ResetSwiperStopWhenTouched(ArkUINodeHandle node)
     SwiperModelNG::SetAutoPlayOptions(frameNode, swiperAutoPlayOptions);
 }
 
-void SetSwiperIndex(ArkUINodeHandle node, ArkUI_Int32 index)
+void SetSwiperIndex(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animationMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     index = index < 0 ? 0 : index;
-    SwiperModelNG::SetIndex(frameNode, index);
+    if (animationMode <= static_cast<int32_t>(SwiperAnimationMode::NO_ANIMATION) ||
+        animationMode >= static_cast<int32_t>(ANIMATION_MODE.size())) {
+        SwiperModelNG::SetIndex(frameNode, index);
+        return;
+    }
+    SwiperModelNG::SetSwiperToIndex(frameNode, index, static_cast<SwiperAnimationMode>(animationMode));
 }
 
 void ResetSwiperIndex(ArkUINodeHandle node)
@@ -1010,6 +1017,7 @@ void SetSwiperToIndex(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::SetSwiperToIndex(frameNode, (*values)[0], (*values)[1]);
 }
+
 void GetSwiperPrevMargin(ArkUINodeHandle node, ArkUI_Int32 unit, ArkUISwiperMarginOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1207,6 +1215,25 @@ ArkUI_Int32 GetSwiperSwiperPageFlipMode(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     return SwiperModelNG::GetPageFlipMode(frameNode);
 }
+
+void SetSwiperOnContentWillScroll(ArkUINodeHandle node, bool* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<bool(const SwiperContentWillScrollResult&)>*>(callback);
+        SwiperModelNG::SetOnContentWillScroll(frameNode, std::move(*onEvent));
+    } else {
+        SwiperModelNG::SetOnContentWillScroll(frameNode, nullptr);
+    }
+}
+
+void ResetSwiperOnContentWillScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnContentWillScroll(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -1300,6 +1327,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setSwiperPageFlipMode = SetSwiperPageFlipMode,
         .resetSwiperPageFlipMode = ResetSwiperPageFlipMode,
         .getSwiperPageFlipMode = GetSwiperSwiperPageFlipMode,
+        .setSwiperOnContentWillScroll = SetSwiperOnContentWillScroll,
+        .resetSwiperOnContentWillScroll = ResetSwiperOnContentWillScroll,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

@@ -370,6 +370,35 @@ int32_t OH_ArkUI_NodeUtils_GetNodeType(ArkUI_NodeHandle node)
     return -1;
 }
 
+int32_t OH_ArkUI_NodeUtils_GetWindowInfo(ArkUI_NodeHandle node, ArkUI_HostWindowInfo** info)
+{
+    CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(info, ARKUI_ERROR_CODE_PARAM_INVALID);
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    CHECK_NULL_RETURN(impl, ARKUI_ERROR_CODE_CAPI_INIT_ERROR);
+    char* name = nullptr;
+    int32_t error = impl->getNodeModifiers()->getFrameNodeModifier()->getWindowInfoByNode(node->uiNodeHandle, &name);
+    *info = new ArkUI_HostWindowInfo({ .name = name });
+    return error;
+}
+
+const char* OH_ArkUI_HostWindowInfo_GetName(ArkUI_HostWindowInfo* info)
+{
+    if (!info) {
+        LOGF("HostWindowInfo is nullptr");
+        abort();
+    }
+    return info->name;
+}
+
+void OH_ArkUI_HostWindowInfo_Destroy(ArkUI_HostWindowInfo* info)
+{
+    delete[] info->name;
+    info->name = nullptr;
+    delete info;
+    info = nullptr;
+}
+
 void OH_ArkUI_CustomProperty_Destroy(ArkUI_CustomProperty* handle)
 {
     delete[] handle->value;

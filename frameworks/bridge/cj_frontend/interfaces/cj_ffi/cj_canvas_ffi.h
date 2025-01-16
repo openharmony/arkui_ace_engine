@@ -18,9 +18,9 @@
 
 #include <cstdint>
 
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_collection_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_polygon_ffi.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_collection_ffi.h"
 
 using VectorDoublePtr = void*;
 using VectorUInt8Prt = void*;
@@ -240,8 +240,9 @@ CJ_EXPORT int64_t FfiOHOSAceFrameworkRenderingContextCreateImageData(int64_t con
 CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextSetPixelMap(int64_t contextId, int64_t pixelMapId);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkRenderingContextGetImageData(
     int64_t contextId, const double left, const double top, const double width, const double height);
-CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextPutImageData(int64_t contextId, int64_t dataId, double dx, double dy,
-    double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight);
+CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextPutImageDataWithDirty(int64_t contextId, int64_t dataId, double dx,
+    double dy, double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight);
+CJ_EXPORT void FfiOHOSAceFrameworkRenderingContextPutImageData(int64_t contextId, int64_t dataId, double dx, double dy);
 CJ_EXPORT VectorFloat64Ptr FfiOHOSAceFrameworkRenderingContextGetLineDash(int64_t contextId);
 CJ_EXPORT const char* FfiOHOSAceFrameworkRenderingContextToDataURL(int64_t contextId, const char* type, double quality);
 CJ_EXPORT int64_t FfiOHOSAceFrameworkRenderingContextCreateCanvasPattern(
@@ -270,15 +271,23 @@ CJ_EXPORT void FfiOHOSAceFrameworkCanvasPathClosePath(int64_t selfId);
 
 // Canvas Matrix2d
 CJ_EXPORT int64_t FfiOHOSAceFrameworkCanvasMatrixCtor(int32_t unit);
-CJ_EXPORT TransformParams FfiOHOSAceFrameworkCanvasMatrixIdentity(int64_t selfId, TransformParams transParams);
-CJ_EXPORT TransformParams FfiOHOSAceFrameworkCanvasMatrixInvert(int64_t selfId, TransformParams transParams);
-CJ_EXPORT TransformParams FfiOHOSAceFrameworkCanvasMatrixRotate(
-    int64_t selfId, TransformParams transParams, double degree, double rx, double ry);
-CJ_EXPORT TransformParams FfiOHOSAceFrameworkCanvasMatrixTranslate(
-    int64_t selfId, TransformParams transParams, double tx, double ty);
-CJ_EXPORT TransformParams FfiOHOSAceFrameworkCanvasMatrixScale(
-    int64_t selfId, TransformParams transParams, double sx, double sy);
-CJ_EXPORT void FfiOHOSAceFrameworkCanvasMatrixUpdate(int64_t selfId, TransformParams transParams);
+CJ_EXPORT double FfiOHOSAceFrameworkCanvasMatrixGetScaleX(int64_t selfId);
+CJ_EXPORT double FfiOHOSAceFrameworkCanvasMatrixGetScaleY(int64_t selfId);
+CJ_EXPORT double FfiOHOSAceFrameworkCanvasMatrixGetRotateX(int64_t selfId);
+CJ_EXPORT double FfiOHOSAceFrameworkCanvasMatrixGetRotateY(int64_t selfId);
+CJ_EXPORT double FfiOHOSAceFrameworkCanvasMatrixGetTranslateX(int64_t selfId);
+CJ_EXPORT double FfiOHOSAceFrameworkCanvasMatrixGetTranslateY(int64_t selfId);
+CJ_EXPORT void FfiOHOSAceFrameworkCanvasMatrixSetScaleX(int64_t selfId, double value);
+CJ_EXPORT void FfiOHOSAceFrameworkCanvasMatrixSetScaleY(int64_t selfId, double value);
+CJ_EXPORT void FfiOHOSAceFrameworkCanvasMatrixSetRotateX(int64_t selfId, double value);
+CJ_EXPORT void FfiOHOSAceFrameworkCanvasMatrixSetRotateY(int64_t selfId, double value);
+CJ_EXPORT void FfiOHOSAceFrameworkCanvasMatrixSetTranslateX(int64_t selfId, double value);
+CJ_EXPORT void FfiOHOSAceFrameworkCanvasMatrixSetTranslateY(int64_t selfId, double value);
+CJ_EXPORT void FfiOHOSAceFrameworkCanvasMatrixIdentity(int64_t selfId);
+CJ_EXPORT void FfiOHOSAceFrameworkCanvasMatrixInvert(int64_t selfId);
+CJ_EXPORT void FfiOHOSAceFrameworkCanvasMatrixRotate(int64_t selfId, double degree, double rx, double ry);
+CJ_EXPORT void FfiOHOSAceFrameworkCanvasMatrixTranslate(int64_t selfId, double tx, double ty);
+CJ_EXPORT void FfiOHOSAceFrameworkCanvasMatrixScale(int64_t selfId, double sx, double sy);
 
 // Canvas ImageData
 CJ_EXPORT int64_t FfiOHOSAceFrameworkCanvasImageDataCtor(

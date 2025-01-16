@@ -485,10 +485,10 @@ void TabsPattern::BeforeCreateLayoutWrapper()
         auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
         CHECK_NULL_VOID(swiperPattern);
         swiperPattern->SetOnHiddenChangeForParent();
-        auto parent = tabsNode->GetAncestorNodeOfFrame();
+        auto parent = tabsNode->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parent);
         while (parent && parent->GetTag() != V2::NAVDESTINATION_VIEW_ETS_TAG) {
-            parent = parent->GetAncestorNodeOfFrame();
+            parent = parent->GetAncestorNodeOfFrame(false);
         }
         if (!parent) {
             auto willShowIndex = tabsLayoutProperty->GetIndex().value_or(0);
@@ -545,6 +545,18 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
         tabBarPattern->SetMaskAnimationByCreate(true);
         UpdateSelectedState(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, indexSetByUser);
     }
+}
+
+void TabsPattern::SetAnimateMode(TabAnimateMode mode)
+{
+    animateMode_ = mode;
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetJumpAnimationMode(mode);
 }
 
 /**
