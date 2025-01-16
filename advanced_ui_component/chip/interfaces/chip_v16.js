@@ -1,20 +1,5 @@
-/*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-if (!('finalizeConstruction' in ViewPU.prototype)) {
-    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => {
+if (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => {
     });
 }
 const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
@@ -24,144 +9,137 @@ const mediaquery = requireNapi('mediaquery');
 
 export var ChipSize;
 (function (r5) {
-    r5['NORMAL'] = 'NORMAL';
-    r5['SMALL'] = 'SMALL';
+    r5["NORMAL"] = "NORMAL";
+    r5["SMALL"] = "SMALL";
 })(ChipSize || (ChipSize = {}));
 var IconType;
 (function (q5) {
-    q5['PREFIX_ICON'] = 'PREFIXICON';
-    q5['SUFFIX_ICON'] = 'SUFFIXICON';
-    q5['PREFIX_SYMBOL'] = 'PREFIXSYMBOL';
-    q5['SUFFIX_SYMBOL'] = 'SUFFIXSYMBOL';
+    q5["PREFIX_ICON"] = "PREFIXICON";
+    q5["SUFFIX_ICON"] = "SUFFIXICON";
+    q5["PREFIX_SYMBOL"] = "PREFIXSYMBOL";
+    q5["SUFFIX_SYMBOL"] = "SUFFIXSYMBOL";
 })(IconType || (IconType = {}));
 var BreakPointsType;
 (function (p5) {
-    p5['SM'] = 'SM';
-    p5['MD'] = 'MD';
-    p5['LG'] = 'LG';
+    p5["SM"] = "SM";
+    p5["MD"] = "MD";
+    p5["LG"] = "LG";
 })(BreakPointsType || (BreakPointsType = {}));
 
 export var AccessibilitySelectedType;
 (function (o5) {
-    o5[o5['CLICKED'] = 0] = 'CLICKED';
-    o5[o5['CHECKED'] = 1] = 'CHECKED';
-    o5[o5['SELECTED'] = 2] = 'SELECTED';
+    o5[o5["CLICKED"] = 0] = "CLICKED";
+    o5[o5["CHECKED"] = 1] = "CHECKED";
+    o5[o5["SELECTED"] = 2] = "SELECTED";
 })(AccessibilitySelectedType || (AccessibilitySelectedType = {}));
 
 export const defaultTheme = {
     prefixIcon: {
         normalSize: {
             width: {
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_normal_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             },
             height: {
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_normal_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             }
         },
         smallSize: {
             width: {
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_small_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             },
             height: {
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_small_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             }
         },
         fillColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_usually_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         activatedFillColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_active_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         focusFillColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_icon_focus_fill'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         focusActivatedColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_icon_activated_focus_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
     },
     label: {
         normalFontSize: {
-            'id': -1,
-            'type': 10002,
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_normal_font_size'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         smallFontSize: {
-            'id': -1,
-            'type': 10002,
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_small_font_size'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         focusFontColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_focus_text'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         focusActiveFontColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_activated_focus_font_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         fontColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_font_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         activatedFontColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_activated_fontcolor'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         fontFamily: 'HarmonyOS Sans',
-        fontWeight: LengthMetrics.resource({
-            'id': -1,
-            'type': 10002,
-            params: ['sys.float.chip_text_font_weight'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }).value,
         normalMargin: {
             left: 6,
             right: 6,
@@ -177,36 +155,36 @@ export const defaultTheme = {
         defaultFontSize: 14,
         localizedNormalMargin: {
             start: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_normal_text_margin'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             }),
             end: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_normal_text_margin'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             }),
             top: LengthMetrics.vp(0),
             bottom: LengthMetrics.vp(0)
         },
         localizedSmallMargin: {
             start: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_small_text_margin'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             }),
             end: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_small_text_margin'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             }),
             top: LengthMetrics.vp(0),
             bottom: LengthMetrics.vp(0),
@@ -215,281 +193,281 @@ export const defaultTheme = {
     suffixIcon: {
         normalSize: {
             width: {
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_normal_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             },
             height: {
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_normal_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             }
         },
         smallSize: {
             width: {
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_small_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             },
             height: {
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_small_icon_size'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             }
         },
         fillColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_usually_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         activatedFillColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_active_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         focusFillColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_icon_focus_fill'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         focusActivatedColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_icon_activated_focus_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         defaultDeleteIcon: {
-            'id': -1,
-            'type': 20000,
+            "id": -1,
+            "type": 20000,
             params: ['sys.media.ohos_ic_public_cancel', 16, 16],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         focusable: false,
-        isShowMargin: LengthMetrics.resource({
-            'id': -1,
-            'type': 10002,
+        isShowMargin: {
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_show_close_icon_margin'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }).value !== 0,
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
     },
     defaultSymbol: {
         normalFontColor: [{
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_usually_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         }],
         activatedFontColor: [{
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_active_icon_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         }],
-        normalSymbolFontSize: LengthMetrics.resource({
-            'id': -1,
-            'type': 10002,
+        normalSymbolFontSize: {
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_normal_icon_size'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }).value,
-        smallSymbolFontSize: LengthMetrics.resource({
-            'id': -1,
-            'type': 10002,
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
+        smallSymbolFontSize: {
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_small_icon_size'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }).value,
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
         defaultEffect: -1,
     },
     chipNode: {
         suitAgeScale: 1.75,
         minLabelWidth: 12,
         normalHeight: {
-            'id': -1,
-            'type': 10002,
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_normal_height'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         smallHeight: {
-            'id': -1,
-            'type': 10002,
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_small_height'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         enabled: true,
         activated: false,
         backgroundColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_background_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         activatedBackgroundColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_container_activated_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         focusOutlineColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.ohos_id_color_focused_outline'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         focusOutlineMargin: 2,
         borderColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_border_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         defaultBorderWidth: {
-            'id': -1,
-            'type': 10002,
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_border_width'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         activatedBorderColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_activated_border_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         normalBorderRadius: {
-            'id': -1,
-            'type': 10002,
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_border_radius_normal'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         smallBorderRadius: {
-            'id': -1,
-            'type': 10002,
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_border_radius_small'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         borderWidth: 2,
         focusBtnScaleX: LengthMetrics.resource({
-            'id': -1,
-            'type': 10002,
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_focused_btn_scale'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         }).value,
         focusBtnScaleY: LengthMetrics.resource({
-            'id': -1,
-            'type': 10002,
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_focused_btn_scale'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         }).value,
         localizedNormalPadding: {
             start: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_normal_text_padding'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             }),
             end: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_normal_text_padding'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             }),
             top: LengthMetrics.vp(4),
             bottom: LengthMetrics.vp(4)
         },
         localizedSmallPadding: {
             start: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_small_text_padding'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             }),
             end: LengthMetrics.resource({
-                'id': -1,
-                'type': 10002,
+                "id": -1,
+                "type": 10002,
                 params: ['sys.float.chip_small_text_padding'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             }),
             top: LengthMetrics.vp(4),
             bottom: LengthMetrics.vp(4)
         },
         hoverBlendColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_hover_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         pressedBlendColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_press_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         focusBgColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_focus_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         focusActivatedBgColor: {
-            'id': -1,
-            'type': 10001,
+            "id": -1,
+            "type": 10001,
             params: ['sys.color.chip_container_activated_focus_color'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
         },
         opacity: { normal: 1, hover: 0.95, pressed: 0.9 },
-        normalShadowStyle: LengthMetrics.resource({
-            'id': -1,
-            'type': 10002,
+        normalShadowStyle: {
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_normal_shadow_style'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }).value,
-        smallShadowStyle: LengthMetrics.resource({
-            'id': -1,
-            'type': 10002,
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
+        smallShadowStyle: {
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_small_shadow_style'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }).value,
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        },
         breakPointConstraintWidth: {
             breakPointMinWidth: 128,
             breakPointSmMaxWidth: 156,
@@ -529,9 +507,9 @@ export function Chip(d5, e5 = null) {
                     onClose: j5.onClose,
                     onClicked: j5.onClicked,
                 }, undefined, h5, () => {
-                }, { page: 'library/src/main/ets/components/chip_v16.ets', line: 345, col: 3 });
+                }, { page: "library/src/main/ets/components/chip_v16.ets", line: 343, col: 3 });
                 ViewPU.create(k5);
-                let o = () => {
+                let t1 = () => {
                     return {
                         chipSize: j5.size,
                         prefixIcon: j5.prefixIcon,
@@ -555,7 +533,7 @@ export function Chip(d5, e5 = null) {
                         onClicked: j5.onClicked
                     };
                 };
-                k5.paramsGenerator_ = o;
+                k5.paramsGenerator_ = t1;
             } else {
                 (e5 ? e5 : this).updateStateVarsOfChildByElmtId(h5, {
                     chipSize: j5.size,
@@ -578,68 +556,65 @@ export function Chip(d5, e5 = null) {
                     chipAccessibilityLevel: j5.accessibilityLevel
                 });
             }
-        }, { name: 'ChipComponent' });
+        }, { name: "ChipComponent" });
     }
 }
 
 export class ChipComponent extends ViewPU {
     constructor(w4, x4, y4, z4 = -1, a5 = undefined, b5) {
         super(w4, y4, z4, b5);
-        if (typeof a5 === 'function') {
+        if (typeof a5 === "function") {
             this.paramsGenerator_ = a5;
         }
         this.theme = defaultTheme;
-        this.__chipSize = new SynchedPropertyObjectOneWayPU(x4.chipSize, this, 'chipSize');
-        this.__allowClose = new SynchedPropertySimpleOneWayPU(x4.allowClose, this, 'allowClose');
-        this.__closeOptions = new SynchedPropertyObjectOneWayPU(x4.closeOptions, this, 'closeOptions');
-        this.__chipDirection = new SynchedPropertySimpleOneWayPU(x4.chipDirection, this, 'chipDirection');
-        this.__prefixIcon = new SynchedPropertyObjectOneWayPU(x4.prefixIcon, this, 'prefixIcon');
-        this.__prefixSymbol = new SynchedPropertyObjectOneWayPU(x4.prefixSymbol, this, 'prefixSymbol');
-        this.__label = new SynchedPropertyObjectOneWayPU(x4.label, this, 'label');
-        this.__suffixIcon = new SynchedPropertyObjectOneWayPU(x4.suffixIcon, this, 'suffixIcon');
-        this.__suffixSymbol = new SynchedPropertyObjectOneWayPU(x4.suffixSymbol, this, 'suffixSymbol');
+        this.__chipSize = new SynchedPropertyObjectOneWayPU(x4.chipSize, this, "chipSize");
+        this.__allowClose = new SynchedPropertySimpleOneWayPU(x4.allowClose, this, "allowClose");
+        this.__closeOptions = new SynchedPropertyObjectOneWayPU(x4.closeOptions, this, "closeOptions");
+        this.__chipDirection = new SynchedPropertySimpleOneWayPU(x4.chipDirection, this, "chipDirection");
+        this.__prefixIcon = new SynchedPropertyObjectOneWayPU(x4.prefixIcon, this, "prefixIcon");
+        this.__prefixSymbol = new SynchedPropertyObjectOneWayPU(x4.prefixSymbol, this, "prefixSymbol");
+        this.__label = new SynchedPropertyObjectOneWayPU(x4.label, this, "label");
+        this.__suffixIcon = new SynchedPropertyObjectOneWayPU(x4.suffixIcon, this, "suffixIcon");
+        this.__suffixSymbol = new SynchedPropertyObjectOneWayPU(x4.suffixSymbol, this, "suffixSymbol");
         this.__suffixSymbolOptions =
-            new SynchedPropertyObjectOneWayPU(x4.suffixSymbolOptions, this, 'suffixSymbolOptions');
+            new SynchedPropertyObjectOneWayPU(x4.suffixSymbolOptions, this, "suffixSymbolOptions");
         this.__chipNodeBackgroundColor =
-            new SynchedPropertyObjectOneWayPU(x4.chipNodeBackgroundColor, this, 'chipNodeBackgroundColor');
+            new SynchedPropertyObjectOneWayPU(x4.chipNodeBackgroundColor, this, "chipNodeBackgroundColor");
         this.__chipNodeActivatedBackgroundColor =
             new SynchedPropertyObjectOneWayPU(x4.chipNodeActivatedBackgroundColor, this,
-                'chipNodeActivatedBackgroundColor');
-        this.__chipNodeRadius = new SynchedPropertyObjectOneWayPU(x4.chipNodeRadius, this, 'chipNodeRadius');
-        this.__chipEnabled = new SynchedPropertySimpleOneWayPU(x4.chipEnabled, this, 'chipEnabled');
-        this.__chipActivated = new SynchedPropertySimpleOneWayPU(x4.chipActivated, this, 'chipActivated');
+                "chipNodeActivatedBackgroundColor");
+        this.__chipNodeRadius = new SynchedPropertyObjectOneWayPU(x4.chipNodeRadius, this, "chipNodeRadius");
+        this.__chipEnabled = new SynchedPropertySimpleOneWayPU(x4.chipEnabled, this, "chipEnabled");
+        this.__chipActivated = new SynchedPropertySimpleOneWayPU(x4.chipActivated, this, "chipActivated");
         this.__chipAccessibilitySelectedType =
-            new SynchedPropertySimpleOneWayPU(x4.chipAccessibilitySelectedType, this, 'chipAccessibilitySelectedType');
+            new SynchedPropertySimpleOneWayPU(x4.chipAccessibilitySelectedType, this, "chipAccessibilitySelectedType");
         this.__chipAccessibilityDescription =
-            new SynchedPropertyObjectOneWayPU(x4.chipAccessibilityDescription, this, 'chipAccessibilityDescription');
+            new SynchedPropertyObjectOneWayPU(x4.chipAccessibilityDescription, this, "chipAccessibilityDescription");
         this.__chipAccessibilityLevel =
-            new SynchedPropertySimpleOneWayPU(x4.chipAccessibilityLevel, this, 'chipAccessibilityLevel');
-        this.__isChipExist = new ObservedPropertySimplePU(true, this, 'isChipExist');
-        this.__chipScale = new ObservedPropertyObjectPU({ x: 1, y: 1 }, this, 'chipScale');
-        this.__chipOpacity = new ObservedPropertySimplePU(1, this, 'chipOpacity');
-        this.__suffixSymbolHeight = new ObservedPropertySimplePU(0, this, 'suffixSymbolHeight');
-        this.__suffixSymbolWidth = new ObservedPropertySimplePU(0, this, 'suffixSymbolWidth');
-        this.__breakPoint = new ObservedPropertySimplePU(BreakPointsType.SM, this, 'breakPoint');
-        this.__fontSizeScale = new ObservedPropertySimplePU(1, this, 'fontSizeScale');
-        this.__isSetBg = new ObservedPropertySimplePU(false, this, 'isSetBg');
-        this.__isSetActiveBg = new ObservedPropertySimplePU(false, this, 'isSetActiveBg');
-        this.__isHovering = new ObservedPropertySimplePU(false, this, 'isHovering');
-        this.isSuffixIconFocusStyleCustomized = this.theme.suffixIcon.isShowMargin;
+            new SynchedPropertySimpleOneWayPU(x4.chipAccessibilityLevel, this, "chipAccessibilityLevel");
+        this.__isChipExist = new ObservedPropertySimplePU(true, this, "isChipExist");
+        this.__chipScale = new ObservedPropertyObjectPU({ x: 1, y: 1 }, this, "chipScale");
+        this.__chipOpacity = new ObservedPropertySimplePU(1, this, "chipOpacity");
+        this.__suffixSymbolHeight = new ObservedPropertySimplePU(0, this, "suffixSymbolHeight");
+        this.__suffixSymbolWidth = new ObservedPropertySimplePU(0, this, "suffixSymbolWidth");
+        this.__breakPoint = new ObservedPropertySimplePU(BreakPointsType.SM, this, "breakPoint");
+        this.__fontSizeScale = new ObservedPropertySimplePU(1, this, "fontSizeScale");
+        this.isSuffixIconFocusStyleCustomized = this.resoureToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
         this.onClose = undefined;
         this.onClicked = undefined;
-        this.__chipNodeInFocus = new ObservedPropertySimplePU(false, this, 'chipNodeInFocus');
+        this.__chipNodeInFocus = new ObservedPropertySimplePU(false, this, "chipNodeInFocus");
         this.smListener = mediaquery.matchMediaSync('(0vp<width) and (width<600vp)');
         this.mdListener = mediaquery.matchMediaSync('(600vp<=width) and (width<840vp)');
         this.lgListener = mediaquery.matchMediaSync('(840vp<=width)');
         this.symbolEffect = new SymbolEffect();
         this.environmentCallbackID = undefined;
-        this.isSuffixIconFocusable = LengthMetrics.resource({
-            'id': -1,
-            'type': 10002,
+        this.isSuffixIconFocusable = this.resoureToNumber({
+            "id": -1,
+            "type": 10002,
             params: ['sys.float.chip_show_close_icon_margin'],
-            'bundleName': '__harDefaultBundleName__',
-            'moduleName': '__harDefaultModuleName__'
-        }).value !== 1;
+            "bundleName": "__harDefaultBundleName__",
+            "moduleName": "__harDefaultModuleName__"
+        }, 0) !== 1;
         this.environmentCallback = {
             onConfigurationUpdated: (c5) => {
                 this.fontSizeScale = c5.fontSizeScale ?? 1;
@@ -684,15 +659,6 @@ export class ChipComponent extends ViewPU {
         }
         if (v4.fontSizeScale !== undefined) {
             this.fontSizeScale = v4.fontSizeScale;
-        }
-        if (v4.isSetBg !== undefined) {
-            this.isSetBg = v4.isSetBg;
-        }
-        if (v4.isSetActiveBg !== undefined) {
-            this.isSetActiveBg = v4.isSetActiveBg;
-        }
-        if (v4.isHovering !== undefined) {
-            this.isHovering = v4.isHovering;
         }
         if (v4.isSuffixIconFocusStyleCustomized !== undefined) {
             this.isSuffixIconFocusStyleCustomized = v4.isSuffixIconFocusStyleCustomized;
@@ -776,9 +742,6 @@ export class ChipComponent extends ViewPU {
         this.__suffixSymbolWidth.purgeDependencyOnElmtId(t4);
         this.__breakPoint.purgeDependencyOnElmtId(t4);
         this.__fontSizeScale.purgeDependencyOnElmtId(t4);
-        this.__isSetBg.purgeDependencyOnElmtId(t4);
-        this.__isSetActiveBg.purgeDependencyOnElmtId(t4);
-        this.__isHovering.purgeDependencyOnElmtId(t4);
         this.__chipNodeInFocus.purgeDependencyOnElmtId(t4);
     }
 
@@ -808,9 +771,6 @@ export class ChipComponent extends ViewPU {
         this.__suffixSymbolWidth.aboutToBeDeleted();
         this.__breakPoint.aboutToBeDeleted();
         this.__fontSizeScale.aboutToBeDeleted();
-        this.__isSetBg.aboutToBeDeleted();
-        this.__isSetActiveBg.aboutToBeDeleted();
-        this.__isHovering.aboutToBeDeleted();
         this.__chipNodeInFocus.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
@@ -1016,30 +976,6 @@ export class ChipComponent extends ViewPU {
         this.__fontSizeScale.set(u3);
     }
 
-    get isSetBg() {
-        return this.__isSetBg.get();
-    }
-
-    set isSetBg(t3) {
-        this.__isSetBg.set(t3);
-    }
-
-    get isSetActiveBg() {
-        return this.__isSetActiveBg.get();
-    }
-
-    set isSetActiveBg(s3) {
-        this.__isSetActiveBg.set(s3);
-    }
-
-    get isHovering() {
-        return this.__isHovering.get();
-    }
-
-    set isHovering(r3) {
-        this.__isHovering.set(r3);
-    }
-
     get chipNodeInFocus() {
         return this.__chipNodeInFocus.get();
     }
@@ -1068,15 +1004,6 @@ export class ChipComponent extends ViewPU {
         if (j3) {
             this.fontSizeScale = j3.config?.fontSizeScale ?? 1;
             this.environmentCallbackID = j3.getApplicationContext().on('environment', this.environmentCallback);
-            if (this.chipNodeBackgroundColor &&
-                this.chipNodeBackgroundColor.toString() !== this.theme.chipNode.backgroundColor.toString()) {
-                this.isSetBg = true;
-            }
-            if (this.chipNodeActivatedBackgroundColor &&
-                this.chipNodeActivatedBackgroundColor.toString() !==
-                this.theme.chipNode.activatedBackgroundColor.toString()) {
-                this.isSetActiveBg = true;
-            }
         }
     }
 
@@ -1091,20 +1018,29 @@ export class ChipComponent extends ViewPU {
         }
     }
 
-    isSetBackgroundColor() {
-        return this.isSetBg || (this.isSetActiveBg && this.chipActivated);
+    isSetActiveChipBgColor() {
+        if (this.chipNodeActivatedBackgroundColor == null) {
+            return false;
+        }
+        return ColorMetrics.resourceColor(this.chipNodeActivatedBackgroundColor).color !==
+        ColorMetrics.resourceColor(this.theme.chipNode.activatedBackgroundColor).color;
+    }
+
+    isSetNormalChipBgColor() {
+        if (this.chipNodeBackgroundColor == null) {
+            return false;
+        }
+        return ColorMetrics.resourceColor(this.chipNodeBackgroundColor).color !==
+        ColorMetrics.resourceColor(this.theme.chipNode.backgroundColor).color;
     }
 
     getShadowStyles() {
-        if (this.isSmallChipSize()) {
-            return this.theme.chipNode.smallShadowStyle ?? -1;
-        } else {
-            return this.theme.chipNode.normalShadowStyle ?? -1;
+        let n1 = this.isSmallChipSize() ? this.theme.chipNode.smallShadowStyle :
+        this.theme.chipNode.normalShadowStyle;
+        if (this.resoureToNumber(n1, -1) === -1) {
+            return undefined;
         }
-    }
-
-    getfocusBox() {
-        return this.chipNodeInFocus ? { strokeWidth: LengthMetrics.vp(2) } : { strokeWidth: LengthMetrics.vp(0) };
+        return this.resoureToNumber(n1, -1);
     }
 
     ChipBuilder(j1 = null) {
@@ -1118,6 +1054,8 @@ export class ChipComponent extends ViewPU {
             Button.enabled(this.isChipEnabled());
             Button.direction(this.chipDirection);
             Button.backgroundColor(this.getChipBackgroundColor());
+            Button.borderWidth(this.theme.chipNode.defaultBorderWidth);
+            Button.borderColor(this.getChipNodeBorderColor());
             Button.borderRadius(this.getChipBorderRadius());
             Button.scale(ObservedObject.GetRawObject(this.chipScale));
             Button.opacity(this.chipOpacity);
@@ -1127,11 +1065,8 @@ export class ChipComponent extends ViewPU {
             Button.accessibilityChecked(this.getAccessibilityChecked());
             Button.accessibilitySelected(this.getAccessibilitySelected());
             Button.onClick(this.getChipOnClicked());
-            Button.onKeyEvent((event) => {
-                if (
-                    event.type === KeyType.Down &&
-                        event.keyCode === KeyCode.KEYCODE_FORWARD_DEL
-                ) {
+            Button.onKeyEvent((m1) => {
+                if (m1.type === KeyType.Down && m1.keyCode === KeyCode.KEYCODE_FORWARD_DEL) {
                     this.deleteChip();
                 }
             });
@@ -1159,9 +1094,6 @@ export class ChipComponent extends ViewPU {
             Flex.padding(this.getChipPadding());
             Flex.size(this.getChipSize());
             Flex.constraintSize(this.getChipConstraintSize());
-            Flex.borderWidth(this.getChipNodeBorderWidth());
-            Flex.borderColor(this.getChipNodeBorderColor());
-            Flex.borderRadius(this.isSuffixIconFocusStyleCustomized ? this.getChipBorderRadius() : undefined);
         }, Flex);
         this.observeComponentCreation2((q2, r2) => {
             If.create();
@@ -1293,11 +1225,11 @@ export class ChipComponent extends ViewPU {
                     }, Button);
                     this.observeComponentCreation2((v1, w1) => {
                         SymbolGlyph.create({
-                            'id': -1,
-                            'type': 40000,
+                            "id": -1,
+                            "type": 40000,
                             params: ['sys.symbol.xmark'],
-                            'bundleName': '__harDefaultBundleName__',
-                            'moduleName': '__harDefaultModuleName__'
+                            "bundleName": "__harDefaultBundleName__",
+                            "moduleName": "__harDefaultModuleName__"
                         });
                         SymbolGlyph.fontSize(this.defaultSymbolFontsize());
                         SymbolGlyph.fontColor(this.getDefaultSymbolColor(IconType.SUFFIX_SYMBOL));
@@ -1332,11 +1264,11 @@ export class ChipComponent extends ViewPU {
     getCloseIconAccessibilityText() {
         if (typeof this.closeOptions?.accessibilityText === 'undefined') {
             return {
-                'id': -1,
-                'type': 10003,
+                "id": -1,
+                "type": 10003,
                 params: ['sys.string.delete_used_for_accessibility_text'],
-                'bundleName': '__harDefaultBundleName__',
-                'moduleName': '__harDefaultModuleName__'
+                "bundleName": "__harDefaultBundleName__",
+                "moduleName": "__harDefaultModuleName__"
             };
         }
         return this.closeOptions.accessibilityText;
@@ -1527,34 +1459,29 @@ export class ChipComponent extends ViewPU {
     }
 
     getSymbolActiveColor(b1) {
-        if (this.chipNodeInFocus) {
-            if (b1 === IconType.PREFIX_SYMBOL) {
-                return [this.theme.prefixIcon.focusActivatedColor];
-            }
-            if (b1 === IconType.SUFFIX_SYMBOL) {
-                return [this.theme.suffixIcon.focusActivatedColor];
-            }
+        if (!this.chipNodeInFocus) {
+            return this.theme.defaultSymbol.activatedFontColor;
+        }
+        if (b1 === IconType.PREFIX_SYMBOL) {
+            return [this.theme.prefixIcon.focusActivatedColor];
+        }
+        if (b1 === IconType.SUFFIX_SYMBOL) {
+            return [this.theme.suffixIcon.focusActivatedColor];
         }
         return this.theme.defaultSymbol.activatedFontColor;
     }
 
     getSymbolFillColor(a1) {
-        if (this.chipNodeInFocus) {
-            if (a1 === IconType.PREFIX_SYMBOL) {
-                return [this.theme.prefixIcon.focusFillColor];
-            }
-            if (a1 === IconType.SUFFIX_SYMBOL) {
-                return [this.theme.suffixIcon.focusFillColor];
-            }
+        if (!this.chipNodeInFocus) {
+            return this.theme.defaultSymbol.normalFontColor;
+        }
+        if (a1 === IconType.PREFIX_SYMBOL) {
+            return [this.theme.prefixIcon.focusFillColor];
+        }
+        if (a1 === IconType.SUFFIX_SYMBOL) {
+            return [this.theme.suffixIcon.focusFillColor];
         }
         return this.theme.defaultSymbol.normalFontColor;
-    }
-
-    getColorArray(x, y, z) {
-        if (x) {
-            return [x];
-        }
-        return this.chipNodeInFocus ? [y] : [z];
     }
 
     hasPrefixSymbol() {
@@ -1680,11 +1607,8 @@ export class ChipComponent extends ViewPU {
     }
 
     defaultSymbolFontsize() {
-        if (this.isSmallChipSize()) {
-            return this.theme.defaultSymbol.smallSymbolFontSize;
-        } else {
-            return this.theme.defaultSymbol.normalSymbolFontSize;
-        }
+        return this.isSmallChipSize() ? this.theme.defaultSymbol.smallSymbolFontSize :
+        this.theme.defaultSymbol.normalSymbolFontSize;
     }
 
     getActiveFontColor() {
@@ -1693,10 +1617,6 @@ export class ChipComponent extends ViewPU {
 
     getFontColor() {
         return this.chipNodeInFocus ? this.theme.label.focusFontColor : this.theme.label.fontColor;
-    }
-
-    getChipNodeBorderWidth() {
-        return this.isSetBackgroundColor() ? 0 : this.theme.chipNode.defaultBorderWidth;
     }
 
     getChipNodeBorderColor() {
@@ -1797,10 +1717,10 @@ export class ChipComponent extends ViewPU {
     getChipBackgroundColor() {
         let n = this.theme.chipNode;
         if (this.isChipActivated()) {
-            return this.chipNodeInFocus && !this.isSetBackgroundColor() ? n.focusActivatedBgColor :
+            return this.chipNodeInFocus && !this.isSetActiveChipBgColor() ? n.focusActivatedBgColor :
             this.getColor(this.chipNodeActivatedBackgroundColor, n.activatedBackgroundColor);
         }
-        return this.chipNodeInFocus && !this.isSetBackgroundColor() ? n.focusBgColor :
+        return this.chipNodeInFocus && !this.isSetNormalChipBgColor() ? n.focusBgColor :
         this.getColor(this.chipNodeBackgroundColor, this.theme.chipNode.backgroundColor);
     }
 
@@ -1819,6 +1739,25 @@ export class ChipComponent extends ViewPU {
 
     isChipActivated() {
         return this.chipActivated ?? false;
+    }
+
+    resoureToNumber(o, k1) {
+        if (!o || !o.type) {
+            console.error('[Chip] failed: resource get fail.');
+            return k1;
+        }
+        const l1 = this.getUIContext().getHostContext()?.resourceManager;
+        if (!l1) {
+            console.error('[Chip] failed to get resourceManager.');
+            return k1;
+        }
+        switch (o.type) {
+            case RESOURCE_TYPE_FLOAT:
+            case RESOURCE_TYPE_INTEGER:
+                return l1.getNumber(o);
+            default:
+                return k1;
+        }
     }
 
     isValidLength(h) {
