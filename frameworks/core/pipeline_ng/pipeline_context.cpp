@@ -5304,7 +5304,8 @@ void PipelineContext::UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t win
 
 void PipelineContext::OnHalfFoldHoverChangedCallback()
 {
-    for (auto&& [id, callback] : halfFoldHoverChangedCallbackMap_) {
+    auto tempHalfFoldHoverChangedCallbackMap = halfFoldHoverChangedCallbackMap_;
+    for (auto&& [id, callback] : tempHalfFoldHoverChangedCallbackMap) {
         if (callback) {
             callback(isHalfFoldHoverStatus_);
         }
