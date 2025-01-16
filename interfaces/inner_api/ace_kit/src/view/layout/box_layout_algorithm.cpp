@@ -25,7 +25,6 @@ void BoxLayoutAlgorithm::Measure(const Kit::LayoutConstraintInfo& contentConstra
 {
     auto frameNode = host_.Upgrade();
     if (frameNode) {
-        frameNode->Measure(contentConstraint);
         frameNode->MeasureChildren();
         BoxLayoutAlgorithm::PerformMeasureSelf(AceType::RawPtr(frameNode));
     }
