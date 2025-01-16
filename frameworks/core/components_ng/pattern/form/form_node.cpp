@@ -315,12 +315,12 @@ OffsetF FormNode::GetFormOffset() const
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
     auto offset = context->GetPaintRectWithoutTransform().GetOffset();
-    auto parent = GetAncestorNodeOfFrame(false);
+    auto parent = GetAncestorNodeOfFrame(true);
 
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
         offset += parentRenderContext->GetPaintRectWithTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame(false);
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
 
     return offset;
