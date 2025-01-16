@@ -27,6 +27,14 @@ namespace OHOS::Ace::NG {
 using PixelMapFinishCallback = std::function<void(RefPtr<PixelMap>, bool)>;
 /* DragDropFuncWrapper as a utility class, all function calls must use containerId. */
 class FrameNode;
+
+struct PixelMapInfo {
+    Rect pixelMapRect;
+    PixelFormat srcPixelFormat = PixelFormat::BGRA_8888;
+    PixelFormat pixelFormat = PixelFormat::UNKNOWN;
+    AlphaType alphaType = AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
+};
+
 class ACE_FORCE_EXPORT DragDropFuncWrapper {
 public:
     static int32_t StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
@@ -67,11 +75,19 @@ public:
         const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& frameNode, float width, float height);
     static OffsetF GetPointRelativeToMainWindow(const Point& point);
     static void HandleOnDragEvent(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
+
+    // multi drag
     static bool IsSelectedItemNode(const RefPtr<UINode>& uiNode);
     static bool IsBelongToMultiItemNode(const RefPtr<FrameNode>& frameNode);
     static bool CheckIsNeedGather(const RefPtr<FrameNode>& frameNode);
     static RefPtr<FrameNode> FindItemParentNode(const RefPtr<FrameNode>& frameNode);
     static RefPtr<PixelMap> GetGatherNodePreviewPixelMap(const RefPtr<FrameNode>& frameNode);
+    static RefPtr<PixelMap> CreateTiledPixelMap(const RefPtr<FrameNode>& frameNode);
+    static std::shared_ptr<PixelMapInfo> GetTiledPixelMapInfo(const std::vector<RefPtr<FrameNode>>& children);
+    static void DrawTiledPixelMap(const RefPtr<PixelMap>& tiledPixelMap, const std::vector<RefPtr<FrameNode>>& children,
+        const Rect& pixelMapRect);
+    static bool IsNeedCreateTiledPixelMap(const RefPtr<FrameNode>& frameNode,
+        const RefPtr<DragEventActuator> dragEventActuator, SourceType type = SourceType::NONE);
 
     // check global dragging status
     static bool IsGlobalStatusSuitableForDragging();

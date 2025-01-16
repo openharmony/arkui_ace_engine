@@ -16,6 +16,8 @@
 if (!('finalizeConstruction' in ViewPU.prototype)) {
   Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const LengthUnit = requireNapi('arkui.node').LengthUnit;
 const EMPTY_STRING = '';
 const MAX_PROGRESS = 100;
 const MAX_PERCENTAGE = '100%';
@@ -30,83 +32,91 @@ const PROGRESS_BUTTON_PRIMARY_FONT_KEY = 'progress_button_primary_font_key';
 const PROGRESS_BUTTON_CONTAINER_BACKGROUND_COLOR_KEY = 'progress_button_container_background_color_key';
 const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasize_secondary_button_key';
 export class ProgressButton extends ViewPU {
-  constructor(c1, d1, e1, f1 = -1, g1 = undefined, h1) {
-    super(c1, e1, f1, h1);
-    if (typeof g1 === 'function') {
-      this.paramsGenerator_ = g1;
+  constructor(h1, i1, j1, k1 = -1, l1 = undefined, m1) {
+    super(h1, j1, k1, m1);
+    if (typeof l1 === 'function') {
+      this.paramsGenerator_ = l1;
     }
-    this.__progress = new SynchedPropertySimpleOneWayPU(d1.progress, this, 'progress');
+    this.__progress = new SynchedPropertySimpleOneWayPU(i1.progress, this, 'progress');
     this.__textProgress = new ObservedPropertySimplePU(EMPTY_STRING, this, 'textProgress');
-    this.__content = new SynchedPropertySimpleOneWayPU(d1.content, this, 'content');
+    this.__content = new SynchedPropertySimpleOneWayPU(i1.content, this, 'content');
     this.__isLoading = new ObservedPropertySimplePU(false, this, 'isLoading');
     this.progressButtonWidth = BUTTON_NORMARL_WIDTH;
     this.clickCallback = () => { };
-    this.__enable = new SynchedPropertySimpleOneWayPU(d1.enable, this, 'enable');
-    this.colorOptions = undefined;
+    this.__enable = new SynchedPropertySimpleOneWayPU(i1.enable, this, 'enable');
+    this.__colorOptions = new SynchedPropertyObjectOneWayPU(i1.colorOptions, this, 'colorOptions');
+    this.__progressButtonRadius = new SynchedPropertyObjectOneWayPU(i1.progressButtonRadius, this, 'progressButtonRadius');
     this.__progressColor = new ObservedPropertyObjectPU('#330A59F7', this, 'progressColor');
     this.__containerBorderColor = new ObservedPropertyObjectPU('#330A59F7', this, 'containerBorderColor');
     this.__containerBackgroundColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_foreground_contrary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'containerBackgroundColor');
     this.__textHeight = new ObservedPropertyObjectPU(BUTTON_NORMARL_HEIGHT, this, 'textHeight');
     this.__buttonBorderRadius = new ObservedPropertySimplePU(BUTTON_BORDER_RADIUS, this, 'buttonBorderRadius');
-    this.setInitiallyProvidedValue(d1);
+    this.setInitiallyProvidedValue(i1);
     this.declareWatch('progress', this.getProgressContext);
     this.declareWatch('isLoading', this.getLoadingProgress);
     this.finalizeConstruction();
   }
-  setInitiallyProvidedValue(b1) {
-    if (b1.textProgress !== undefined) {
-      this.textProgress = b1.textProgress;
+  setInitiallyProvidedValue(g1) {
+    if (g1.textProgress !== undefined) {
+      this.textProgress = g1.textProgress;
     }
-    if (b1.content === undefined) {
+    if (g1.content === undefined) {
       this.__content.set(EMPTY_STRING);
     }
-    if (b1.isLoading !== undefined) {
-      this.isLoading = b1.isLoading;
+    if (g1.isLoading !== undefined) {
+      this.isLoading = g1.isLoading;
     }
-    if (b1.progressButtonWidth !== undefined) {
-      this.progressButtonWidth = b1.progressButtonWidth;
+    if (g1.progressButtonWidth !== undefined) {
+      this.progressButtonWidth = g1.progressButtonWidth;
     }
-    if (b1.clickCallback !== undefined) {
-      this.clickCallback = b1.clickCallback;
+    if (g1.clickCallback !== undefined) {
+      this.clickCallback = g1.clickCallback;
     }
-    if (b1.enable === undefined) {
+    if (g1.enable === undefined) {
       this.__enable.set(true);
     }
-    if (b1.colorOptions !== undefined) {
-      this.colorOptions = b1.colorOptions;
+    if (g1.colorOptions === undefined) {
+      this.__colorOptions.set(undefined);
     }
-    if (b1.progressColor !== undefined) {
-      this.progressColor = b1.progressColor;
+    if (g1.progressButtonRadius === undefined) {
+      this.__progressButtonRadius.set(undefined);
     }
-    if (b1.containerBorderColor !== undefined) {
-      this.containerBorderColor = b1.containerBorderColor;
+    if (g1.progressColor !== undefined) {
+      this.progressColor = g1.progressColor;
     }
-    if (b1.containerBackgroundColor !== undefined) {
-      this.containerBackgroundColor = b1.containerBackgroundColor;
+    if (g1.containerBorderColor !== undefined) {
+      this.containerBorderColor = g1.containerBorderColor;
     }
-    if (b1.textHeight !== undefined) {
-      this.textHeight = b1.textHeight;
+    if (g1.containerBackgroundColor !== undefined) {
+      this.containerBackgroundColor = g1.containerBackgroundColor;
     }
-    if (b1.buttonBorderRadius !== undefined) {
-      this.buttonBorderRadius = b1.buttonBorderRadius;
+    if (g1.textHeight !== undefined) {
+      this.textHeight = g1.textHeight;
+    }
+    if (g1.buttonBorderRadius !== undefined) {
+      this.buttonBorderRadius = g1.buttonBorderRadius;
     }
   }
-  updateStateVars(a1) {
-    this.__progress.reset(a1.progress);
-    this.__content.reset(a1.content);
-    this.__enable.reset(a1.enable);
+  updateStateVars(f1) {
+    this.__progress.reset(f1.progress);
+    this.__content.reset(f1.content);
+    this.__enable.reset(f1.enable);
+    this.__colorOptions.reset(f1.colorOptions);
+    this.__progressButtonRadius.reset(f1.progressButtonRadius);
   }
-  purgeVariableDependenciesOnElmtId(z) {
-    this.__progress.purgeDependencyOnElmtId(z);
-    this.__textProgress.purgeDependencyOnElmtId(z);
-    this.__content.purgeDependencyOnElmtId(z);
-    this.__isLoading.purgeDependencyOnElmtId(z);
-    this.__enable.purgeDependencyOnElmtId(z);
-    this.__progressColor.purgeDependencyOnElmtId(z);
-    this.__containerBorderColor.purgeDependencyOnElmtId(z);
-    this.__containerBackgroundColor.purgeDependencyOnElmtId(z);
-    this.__textHeight.purgeDependencyOnElmtId(z);
-    this.__buttonBorderRadius.purgeDependencyOnElmtId(z);
+  purgeVariableDependenciesOnElmtId(e1) {
+    this.__progress.purgeDependencyOnElmtId(e1);
+    this.__textProgress.purgeDependencyOnElmtId(e1);
+    this.__content.purgeDependencyOnElmtId(e1);
+    this.__isLoading.purgeDependencyOnElmtId(e1);
+    this.__enable.purgeDependencyOnElmtId(e1);
+    this.__colorOptions.purgeDependencyOnElmtId(e1);
+    this.__progressButtonRadius.purgeDependencyOnElmtId(e1);
+    this.__progressColor.purgeDependencyOnElmtId(e1);
+    this.__containerBorderColor.purgeDependencyOnElmtId(e1);
+    this.__containerBackgroundColor.purgeDependencyOnElmtId(e1);
+    this.__textHeight.purgeDependencyOnElmtId(e1);
+    this.__buttonBorderRadius.purgeDependencyOnElmtId(e1);
   }
   aboutToBeDeleted() {
     this.__progress.aboutToBeDeleted();
@@ -114,6 +124,8 @@ export class ProgressButton extends ViewPU {
     this.__content.aboutToBeDeleted();
     this.__isLoading.aboutToBeDeleted();
     this.__enable.aboutToBeDeleted();
+    this.__colorOptions.aboutToBeDeleted();
+    this.__progressButtonRadius.aboutToBeDeleted();
     this.__progressColor.aboutToBeDeleted();
     this.__containerBorderColor.aboutToBeDeleted();
     this.__containerBackgroundColor.aboutToBeDeleted();
@@ -125,67 +137,79 @@ export class ProgressButton extends ViewPU {
   get progress() {
     return this.__progress.get();
   }
-  set progress(y) {
-    this.__progress.set(y);
+  set progress(d1) {
+    this.__progress.set(d1);
   }
   get textProgress() {
     return this.__textProgress.get();
   }
-  set textProgress(x) {
-    this.__textProgress.set(x);
+  set textProgress(c1) {
+    this.__textProgress.set(c1);
   }
   get content() {
     return this.__content.get();
   }
-  set content(w) {
-    this.__content.set(w);
+  set content(b1) {
+    this.__content.set(b1);
   }
   get isLoading() {
     return this.__isLoading.get();
   }
-  set isLoading(v) {
-    this.__isLoading.set(v);
+  set isLoading(a1) {
+    this.__isLoading.set(a1);
   }
   get enable() {
     return this.__enable.get();
   }
-  set enable(u) {
-    this.__enable.set(u);
+  set enable(z) {
+    this.__enable.set(z);
+  }
+  get colorOptions() {
+    return this.__colorOptions.get();
+  }
+  set colorOptions(y) {
+    this.__colorOptions.set(y);
+  }
+  get progressButtonRadius() {
+    return this.__progressButtonRadius.get();
+  }
+  set progressButtonRadius(x) {
+    this.__progressButtonRadius.set(x);
   }
   get progressColor() {
     return this.__progressColor.get();
   }
-  set progressColor(t) {
-    this.__progressColor.set(t);
+  set progressColor(w) {
+    this.__progressColor.set(w);
   }
   get containerBorderColor() {
     return this.__containerBorderColor.get();
   }
-  set containerBorderColor(s) {
-    this.__containerBorderColor.set(s);
+  set containerBorderColor(v) {
+    this.__containerBorderColor.set(v);
   }
   get containerBackgroundColor() {
     return this.__containerBackgroundColor.get();
   }
-  set containerBackgroundColor(r) {
-    this.__containerBackgroundColor.set(r);
+  set containerBackgroundColor(u) {
+    this.__containerBackgroundColor.set(u);
   }
   get textHeight() {
     return this.__textHeight.get();
   }
-  set textHeight(q) {
-    this.__textHeight.set(q);
+  set textHeight(t) {
+    this.__textHeight.set(t);
   }
   get buttonBorderRadius() {
     return this.__buttonBorderRadius.get();
   }
-  set buttonBorderRadius(p) {
-    this.__buttonBorderRadius.set(p);
+  set buttonBorderRadius(s) {
+    this.__buttonBorderRadius.set(s);
   }
-  onWillApplyTheme(o) {
-    this.progressColor = o.colors.compEmphasizeSecondary;
-    this.containerBorderColor = o.colors.compEmphasizeSecondary;
-    this.containerBackgroundColor = o.colors.iconOnFourth;
+  onWillApplyTheme(r) {
+    this.progressColor = r.colors.compEmphasizeSecondary;
+    this.containerBorderColor = r.colors.compEmphasizeSecondary;
+    this.containerBackgroundColor = r.colors.iconOnFourth;
   }
   getButtonProgress() {
     if (this.progress < 0) {
@@ -210,6 +234,17 @@ export class ProgressButton extends ViewPU {
       this.textProgress = Math.floor(this.progress / MAX_PROGRESS * MAX_PROGRESS).toString() + '%';
     }
   }
+  getProgressButtonRadius() {
+    if (!this.progressButtonRadius || this.progressButtonRadius.unit == LengthUnit.PERCENT) {
+      return LengthMetrics.vp(this.buttonBorderRadius);
+    }
+    else if (this.progressButtonRadius.value < 0) {
+      return LengthMetrics.vp(0);
+    }
+    else {
+      return this.progressButtonRadius;
+    }
+  }
   getLoadingProgress() {
     if (this.isLoading) {
       if (this.progress < 0) {
@@ -223,10 +258,39 @@ export class ProgressButton extends ViewPU {
       }
     }
   }
+  toLengthString(o) {
+    if (o === void (0)) {
+      return '';
+    }
+    const p = o.value;
+    let q = '';
+    switch (o.unit) {
+      case LengthUnit.PX:
+        q = `${p}px`;
+        break;
+      case LengthUnit.FP:
+        q = `${p}fp`;
+        break;
+      case LengthUnit.LPX:
+        q = `${p}lpx`;
+        break;
+      case LengthUnit.PERCENT:
+        q = `${p * 100}%`;
+        break;
+      case LengthUnit.VP:
+        q = `${p}vp`;
+        break;
+      default:
+        q = `${p}vp`;
+        break;
+    }
+    return q;
+  }
   initialRender() {
     this.observeComponentCreation2((m, n) => {
       Button.createWithChild();
-      Button.borderRadius(this.buttonBorderRadius);
+      Button.borderRadius(this.progressButtonRadius ? this.toLengthString(this.getProgressButtonRadius()) :
+      this.buttonBorderRadius);
       Button.clip(false);
       Button.hoverEffect(HoverEffect.None);
       Button.key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY);
@@ -259,7 +323,8 @@ export class ProgressButton extends ViewPU {
       Progress.borderRadius(this.buttonBorderRadius);
       Progress.width('100%');
       Progress.hoverEffect(HoverEffect.None);
-      Progress.padding({ top: 0.6, left: 0.6, right: 0.6, bottom: 0.6 });
+      Progress.style(this.progressButtonRadius ?
+        { borderRadius: this.getProgressButtonRadius() } : {});
       Progress.clip(false);
       Progress.key(PROGRESS_BUTTON_PROGRESS_KEY);
       Progress.color(this.colorOptions?.progressColor ? this.colorOptions?.progressColor : this.progressColor);
@@ -298,7 +363,8 @@ export class ProgressButton extends ViewPU {
       });
       Row.height(ObservedObject.GetRawObject(this.textHeight));
       Row.constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT });
-      Row.borderRadius(this.buttonBorderRadius);
+      Row.borderRadius(this.progressButtonRadius ? this.toLengthString(this.getProgressButtonRadius()) :
+      this.buttonBorderRadius);
       Row.width('100%');
     }, Row);
     Row.pop();

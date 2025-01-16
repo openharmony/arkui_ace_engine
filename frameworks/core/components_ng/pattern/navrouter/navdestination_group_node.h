@@ -164,16 +164,14 @@ public:
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(bool isTransitionIn);
     std::shared_ptr<AnimationUtils::Animation> TitleOpacityAnimation(bool isTransitionOut);
 
-    void InitSystemTransitionPush(bool transitionIn) override;
-    void EndSystemTransitionPush(bool transitionIn) override;
-    void FinishSystemTransitionPush(bool transitionIn, const int32_t animationId);
-    void InitSystemTransitionPop(bool transitionIn) override;
-    void EndSystemTransitionPop(bool transitionIn) override;
+    void InitSystemTransitionPush(bool transitionIn);
+    void StartSystemTransitionPush(bool transitionIn);
+    void SystemTransitionPushCallback(bool transitionIn, const int32_t animationId);
+    void InitSystemTransitionPop(bool isTransitionIn);
+    void StartSystemTransitionPop(bool transitionIn);
     bool SystemTransitionPopCallback(const int32_t animationId);
     void InitDialogTransition(bool isZeroY);
     bool IsNodeInvisible(const RefPtr<FrameNode>& node) override;
-    void FinishSystemTransitionAnimationPush(RefPtr<FrameNode>& preNode, RefPtr<FrameNode>& naviagtionNode,
-        bool transitionIn, const int32_t animationId) override;
 
     void SetRecoverable(bool recoverable)
     {

@@ -147,29 +147,23 @@ int32_t FocusState::GetFrameId() const
     return frameNode ? frameNode->GetId() : -1;
 }
 
-template <bool isReverse>
-bool FocusHub::AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&)>& operation)
+bool FocusHub::AnyChildFocusHub(const std::function<bool(const RefPtr<FocusHub>&)>& operation, bool isReverse)
 {
     RefPtr<UINode> node = GetFrameNode();
     CHECK_NULL_RETURN(node, false);
-    return AnyOfUINode<isReverse>(node, operation);
+    return isReverse ? AnyOfUINode<true>(node, operation) : AnyOfUINode<false>(node, operation);
 }
 
-bool FocusHub::AnyChildFocusHub(bool isReverse, const std::function<bool(const RefPtr<FocusHub>&)>& operation)
+bool FocusHub::AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation, bool isReverse)
 {
-    return isReverse ? AnyChildFocusHub<true>(operation) : AnyChildFocusHub<false>(operation);
-}
-
-template <bool isReverse>
-void FocusHub::AllChildFocusHub(const std::function<void(const RefPtr<FocusHub>&)>& operation)
-{
-    AnyChildFocusHub<isReverse>([&operation](const RefPtr<FocusHub>& focusHub) {
+    RefPtr<UINode> node = GetFrameNode();
+    CHECK_NULL_RETURN(node, false);
+    auto wrappedOpration = [&operation](const RefPtr<FocusHub>& focusHub) {
         operation(focusHub);
         return false;
-    });
+    };
+    return isReverse ? AnyOfUINode<true>(node, wrappedOpration) : AnyOfUINode<false>(node, wrappedOpration);
 }
-template void FocusHub::AllChildFocusHub<true>(const std::function<void(const RefPtr<FocusHub>&)>&);
-template void FocusHub::AllChildFocusHub<false>(const std::function<void(const RefPtr<FocusHub>&)>&);
 
 bool FocusHub::SkipFocusMoveBeforeRemove()
 {
@@ -1067,7 +1061,7 @@ bool FocusHub::FocusToHeadOrTailChild(bool isHead)
 
     bool canChildBeFocused = false;
     canChildBeFocused = AnyChildFocusHub(
-        !isHead, [isHead](const RefPtr<FocusHub>& node) { return node->FocusToHeadOrTailChild(isHead); });
+        [isHead](const RefPtr<FocusHub>& node) { return node->FocusToHeadOrTailChild(isHead); }, !isHead);
     if (focusDepend_ == FocusDependence::CHILD) {
         return canChildBeFocused;
     }
@@ -1750,9 +1744,9 @@ bool FocusHub::AcceptFocusOfSpecifyChild(FocusStep step)
     };
     bool canChildBeFocused = false;
     if (step == FocusStep::TAB) {
-        canChildBeFocused = AnyChildFocusHub<false>(operation);
+        canChildBeFocused = AnyChildFocusHub(operation, false);
     } else if (step == FocusStep::SHIFT_TAB) {
-        canChildBeFocused = AnyChildFocusHub<true>(operation);
+        canChildBeFocused = AnyChildFocusHub(operation, true);
     } else {
         LOGI("Invalid focus step: %{public}d for %{public}s/%{public}d specify focus child.", step,
             GetFrameName().c_str(), GetFrameId());
@@ -2038,14 +2032,14 @@ RefPtr<FocusView> FocusHub::GetFirstChildFocusView()
     if (focusView) {
         return focusView;
     }
-    AnyChildFocusHub<true>(
+    AnyChildFocusHub(
         [&focusView](const RefPtr<FocusHub>& childFocusHub) {
             if (!childFocusHub) {
                 return false;
             }
             focusView = childFocusHub->GetFirstChildFocusView();
             return focusView ? true : false;
-        });
+        }, true);
     return focusView;
 }
 

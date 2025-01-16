@@ -18,8 +18,8 @@
 
 #include <cstdint>
 
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
-#include "bridge/cj_frontend/interfaces/cj_ffi/cj_alert_dialog_ffi.h"
 #include "core/components_ng/property/transition_property.h"
 
 extern "C" {
@@ -50,6 +50,17 @@ struct NativeShadowOptions {
     double offsetX;
     double offsetY;
     bool fill;
+};
+
+struct NativeRectangle {
+    double x;
+    int32_t xUnit;
+    double y;
+    int32_t yUnit;
+    double width;
+    int32_t widthUnit;
+    double height;
+    int32_t heightUnit;
 };
 
 struct CBorderRadiuses {
@@ -160,15 +171,15 @@ using ShowActionMenuCallBack = void (*)(int32_t, int32_t);
 
 CJ_EXPORT void* FfiPromptMallocButtons(int64_t size);
 CJ_EXPORT void FfiPromptShowToast(const char* message, int32_t duration, const char* bottom, int32_t mode);
-CJ_EXPORT void FfiPromptShowDialog(const char* title, const char* message, int32_t size,
-    CButtonInfo* buttonsInfo, ShowDialogCallBack callback);
+CJ_EXPORT void FfiPromptShowDialog(
+    const char* title, const char* message, int32_t size, CButtonInfo* buttonsInfo, ShowDialogCallBack callback);
 CJ_EXPORT void FfiPromptShowActionMenu(
     const char* title, int32_t buttonSize, CButtonInfo* buttonsInfo, ShowActionMenuCallBack callback);
-CJ_EXPORT void FfiPromptOpenCustomDialog(void(*builder)(), NativeBaseOption options, void(*callback)(int32_t id));
+CJ_EXPORT void FfiPromptOpenCustomDialog(void (*builder)(), NativeBaseOption options, void (*callback)(int32_t id));
 CJ_EXPORT void FfiPromptCloseCustomDialog(int32_t id);
 
 CJ_EXPORT void FfiPromptShowToastWithOption(NativeShowToastOptions options);
-CJ_EXPORT void FfiPromptOpenCustomDialogWithOption(NativeCustomDialogOptions options, void(*callback)(int32_t));
+CJ_EXPORT void FfiPromptOpenCustomDialogWithOption(NativeCustomDialogOptions options, void (*callback)(int32_t));
 CJ_EXPORT void FfiPromptShowActionMenuWithOption(NativeActionMenuOptions options, ShowActionMenuCallBack callbackRef);
 CJ_EXPORT void FfiPromptShowDialogWithOption(NativeShowDialogOptions options, ShowDialogCallBack callbackRef);
 }

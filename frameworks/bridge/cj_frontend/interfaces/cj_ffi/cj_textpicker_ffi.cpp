@@ -264,7 +264,7 @@ void FfiOHOSAceFrameworkTextPickerSetSelectedIndexSingle(uint32_t value)
 
 void FfiOHOSAceFrameworkTextPickerSetSelectedIndexMulti(VectorUInt32Handle values)
 {
-    const auto& indexarray = * reinterpret_cast<std::vector<uint32_t>*>(values)
+    const auto& indexarray = * reinterpret_cast<std::vector<uint32_t>*>(values);
     TextPickerModel::GetInstance()->SetSelecteds(indexarray);
 }
 

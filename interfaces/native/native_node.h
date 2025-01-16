@@ -3424,6 +3424,19 @@ typedef enum {
      * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
      *
      */
+    /**
+     * @brief Sets the button type. This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
+     * The default value change to  <b>ARKUI_BUTTON_ROUNDED_RECTANGLE</b>. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
+     * The default value change to  <b>ARKUI_BUTTON_ROUNDED_RECTANGLE</b>. \n
+     *
+     * @since 16
+     */
     NODE_BUTTON_TYPE,
 
     /**
@@ -4434,6 +4447,21 @@ typedef enum {
     NODE_SLIDER_TRACK_THICKNESS,
 
     /**
+     * @brief Defines whether haptic feedback.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to feedback. The value <b>true</b> means to feedback, and
+     * <b>false</b> means the opposite.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: whether to feedback.\n
+     *
+     * @since 16
+     */
+    NODE_SLIDER_ENABLE_HAPTIC_FEEDBACK = 17013,
+
+    /**
      * @brief Sets whether the radio button is selected.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -5233,9 +5261,15 @@ typedef enum {
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: index value of the child component. \n
+     * .value[1]?.i32: animation mode, the parameter type is {@linkArkUI_SwiperAnimationMode}. \n
+     * The default value is ARKUI_SWIPER_NO_ANIMATION. This parameeter isvalidonlyforthecurrentcall. \n
+     * This parameter is supported since API version 16. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: index value of the child component. \n
+     * .value[1]?.i32: animation mode, the parameter type is {@linkArkUI_SwiperAnimationMode}. \n
+     * The default value is ARKUI_SWIPER_NO_ANIMATION. This parameeter isvalidonlyforthecurrentcall. \n
+     * This parameter is supported since API version 16. \n
      *
      */
     NODE_SWIPER_INDEX,

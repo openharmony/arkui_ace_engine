@@ -1412,7 +1412,7 @@ public:
         JSClass<JSFileSelectorParam>::CustomMethod("getMode", &JSFileSelectorParam::GetMode);
         JSClass<JSFileSelectorParam>::CustomMethod("getAcceptType", &JSFileSelectorParam::GetAcceptType);
         JSClass<JSFileSelectorParam>::CustomMethod("isCapture", &JSFileSelectorParam::IsCapture);
-        JSClass<JSFileSelectorParam>::CustomMethod("getMimeType", &JSFileSelectorParam::GetMimeType);
+        JSClass<JSFileSelectorParam>::CustomMethod("getMimeTypes", &JSFileSelectorParam::GetMimeType);
         JSClass<JSFileSelectorParam>::Bind(
             globalObj, &JSFileSelectorParam::Constructor, &JSFileSelectorParam::Destructor);
     }
@@ -2028,7 +2028,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnHeadEnd", &JSWeb::RunJavaScriptOnHeadEnd);
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentStart", &JSWeb::RunJavaScriptOnDocumentStart);
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentEnd", &JSWeb::RunJavaScriptOnDocumentEnd);
-
+    JSClass<JSWeb>::StaticMethod("enableWebMediaAVSession", &JSWeb::EnableWebMediaAVSession);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -5620,5 +5620,14 @@ void JSWeb::EnableHapticFeedback(const JSCallbackInfo& args)
 void JSWeb::OptimizeParserBudgetEnabled(bool enable)
 {
     WebModel::GetInstance()->SetOptimizeParserBudgetEnabled(enable);
+}
+
+void JSWeb::EnableWebMediaAVSession(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsBoolean()) {
+        return;
+    }
+    bool isEnabled = args[0]->ToBoolean();
+    WebModel::GetInstance()->SetWebMediaAVSessionEnabled(isEnabled);
 }
 } // namespace OHOS::Ace::Framework

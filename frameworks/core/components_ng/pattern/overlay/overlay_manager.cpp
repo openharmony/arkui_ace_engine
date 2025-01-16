@@ -4781,6 +4781,9 @@ void OverlayManager::UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode,
         UpdateSheetMask(maskNode, sheetNode, currentStyle, isPartialUpdate);
     }
     sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto sheetWrapper = sheetNode->GetParent();
+    CHECK_NULL_VOID(sheetWrapper);
+    sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     pipeline->FlushUITasks();
     ComputeSheetOffset(currentStyle, sheetNode);
 }
@@ -4801,7 +4804,7 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
     }
     auto sheetNodePattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetNodePattern);
-    auto customHeightOrDetentsChanged = sheetNodePattern->IsCustomHeightOrDetentsChanged(sheetStyle);
+    sheetNodePattern->IsNeedPlayTransition(sheetStyle);
     if (isStartByUIContext) {
         auto currentStyle = UpdateSheetStyle(sheetNode, sheetStyle, isPartialUpdate);
         UpdateSheetProperty(sheetNode, currentStyle, isPartialUpdate);
@@ -4823,7 +4826,8 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, NG::She
     sheetNodePattern->SetBottomOffset(sheetStyle);
     sheetNode->MarkModifyDone();
     auto sheetType = sheetNodePattern->GetSheetType();
-    if (sheetType != SheetType::SHEET_POPUP && !sheetNodePattern->GetDismissProcess() && customHeightOrDetentsChanged) {
+    if (sheetType != SheetType::SHEET_POPUP && !sheetNodePattern->GetDismissProcess() &&
+        sheetNodePattern->GetIsPlayTransition()) {
         PlaySheetTransition(sheetNode, true, false);
     }
 }
@@ -4971,7 +4975,7 @@ RefPtr<FrameNode> OverlayManager::CreateSheetMask(const RefPtr<FrameNode>& sheet
 {
     // create maskColor node(sheetWrapper)
     auto maskNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetWrapperPattern>());
+        AceType::MakeRefPtr<SheetWrapperPattern>(targetNode->GetId(), targetNode->GetTag()));
     CHECK_NULL_RETURN(maskNode, nullptr);
     auto maskLayoutProps = maskNode->GetLayoutProperty();
     CHECK_NULL_RETURN(maskLayoutProps, nullptr);
@@ -4991,6 +4995,9 @@ RefPtr<FrameNode> OverlayManager::CreateSheetMask(const RefPtr<FrameNode>& sheet
     CHECK_NULL_RETURN(pipeline, nullptr);
     pipeline->FlushUITasks();
     PlaySheetMaskTransition(maskNode, true);
+    auto pattern = sheetPageNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->UpdateIndexByDetentSelection(sheetStyle, true);
     ComputeSheetOffset(sheetStyle, sheetPageNode);
     return maskNode;
 }
@@ -5255,20 +5262,20 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
     auto sheetTopSafeArea = sheetPattern->GetSheetTopSafeArea();
 
     auto largeHeight = sheetMaxHeight - SHEET_BLANK_MINI_HEIGHT.ConvertToPx() - sheetTopSafeArea;
-    if (sheetStyle.sheetMode.has_value()) {
+    if (sheetStyle.sheetHeight.sheetMode.has_value()) {
         auto context = sheetNode->GetContext();
         CHECK_NULL_VOID(context);
         auto sheetTheme = context->GetTheme<SheetTheme>();
         CHECK_NULL_VOID(sheetTheme);
-        if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
+        if (sheetStyle.sheetHeight.sheetMode == SheetMode::MEDIUM) {
             sheetHeight_ = sheetMaxHeight * sheetTheme->GetMediumPercent();
             if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
                 sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE_PRE;
             }
-        } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
+        } else if (sheetStyle.sheetHeight.sheetMode == SheetMode::LARGE) {
             sheetHeight_ = sheetTheme->GetHeightApplyFullScreen() ? sheetMaxHeight : largeHeight;
             sheetHeight_ *= sheetTheme->GetLargePercent();
-        } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
+        } else if (sheetStyle.sheetHeight.sheetMode == SheetMode::AUTO) {
             sheetHeight_ = sheetPattern->GetFitContentHeight();
             if (GreatNotEqual(sheetHeight_, largeHeight)) {
                 sheetHeight_ = largeHeight;
@@ -5276,10 +5283,10 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
         }
     } else {
         float height = 0.0f;
-        if (sheetStyle.height->Unit() == DimensionUnit::PERCENT) {
-            height = sheetStyle.height->ConvertToPxWithSize(sheetMaxHeight - sheetTopSafeArea);
+        if (sheetStyle.sheetHeight.height->Unit() == DimensionUnit::PERCENT) {
+            height = sheetStyle.sheetHeight.height->ConvertToPxWithSize(sheetMaxHeight - sheetTopSafeArea);
         } else {
-            height = sheetStyle.height->ConvertToPx();
+            height = sheetStyle.sheetHeight.height->ConvertToPx();
         }
         if (height > largeHeight) {
             sheetHeight_ = largeHeight;
@@ -5657,6 +5664,10 @@ void OverlayManager::CloseKeyboard(int32_t targetId)
     customKeyboard->MarkRemoving();
     PlayKeyboardTransition(customKeyboard, false);
     Rect keyboardRect = Rect(0.0f, 0.0f, 0.0f, 0.0f);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    if (safeAreaManager) {
+        safeAreaManager->SetRawKeyboardHeight(0.0f);
+    }
     pipeline->OnVirtualKeyboardAreaChange(keyboardRect);
 }
 

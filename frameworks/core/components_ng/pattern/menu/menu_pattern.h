@@ -376,9 +376,9 @@ public:
         return hasAnimation_;
     }
 
-    void SetSubMenuShow()
+    void SetSubMenuShow(bool subMenuShowed)
     {
-        isSubMenuShow_ = true;
+        isSubMenuShow_ = subMenuShowed;
     }
 
     void SetMenuShow()

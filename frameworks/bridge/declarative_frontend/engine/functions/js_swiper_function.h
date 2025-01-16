@@ -42,6 +42,7 @@ public:
     void Execute(int32_t errorCode);
     void Execute(const RefPtr<SwiperContentTransitionProxy>& proxy);
     void Execute(int32_t selectedIndex, int32_t index, float position, float mainAxisLength);
+    JSRef<JSVal> Execute(const SwiperContentWillScrollResult& result);
 };
 
 class JsSwiperContentTransitionProxy : public Referenced {

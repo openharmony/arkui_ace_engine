@@ -7283,6 +7283,15 @@ void WebDelegate::OnShowAutofillPopup(
     webPattern->OnShowAutofillPopup(offsetX, offsetY, menu_items);
 }
 
+void WebDelegate::OnShowAutofillPopupV2(
+    const float offsetX, const float offsetY, const float height, const float width,
+    const std::vector<std::string>& menu_items)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->OnShowAutofillPopupV2(offsetX, offsetY, height, width, menu_items);
+}
+
 void WebDelegate::SuggestionSelected(int32_t index)
 {
     CHECK_NULL_VOID(nweb_);
@@ -7598,4 +7607,24 @@ void WebDelegate::UpdateOptimizeParserBudgetEnabled(const bool enable)
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateOptimizeParserBudget");
 }
+
+void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->PutWebMediaAVSessionEnabled(isEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebUpdateWebMediaAVSessionEnabled");
+}
+
 } // namespace OHOS::Ace

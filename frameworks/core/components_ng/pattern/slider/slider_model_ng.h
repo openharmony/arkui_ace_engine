@@ -82,6 +82,7 @@ public:
     void ResetSliderInteractionMode() override;
     void ResetMinResponsiveDistance() override;
     void ResetValidSlideRange() override;
+    void SetEnableHapticFeedback(bool isEnableHapticFeedback) override;
 #ifdef SUPPORT_DIGITAL_CROWN
     void ResetDigitalCrownSensitivity() override;
 #endif
@@ -157,6 +158,8 @@ public:
     static void SetChangeValue(FrameNode* frameNode, double value, int32_t mode);
     static Dimension GetThickness(FrameNode* frameNode);
     static RefPtr<SliderModel::SliderValidRange> GetValidSlideRange(FrameNode* frameNode);
+    static bool GetEnableHapticFeedback(FrameNode* frameNode);
+    static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
 #ifdef SUPPORT_DIGITAL_CROWN
     static CrownSensitivity GetDigitalCrownSensitivity(FrameNode* frameNode);
 #endif

@@ -157,6 +157,7 @@ void DragEventActuator::RestartDragTask(const GestureEvent& info)
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     UpdatePreviewOptionFromModifier(frameNode);
+    SetRestartDrag(true);
     auto gestureInfo = const_cast<GestureEvent&>(info);
     if (actionStart_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Restart drag for lifting status");
@@ -168,6 +169,7 @@ void DragEventActuator::RestartDragTask(const GestureEvent& info)
         TouchEvent touchEvent;
         eventManager->CleanRecognizersForDragBegin(touchEvent);
     }
+    SetRestartDrag(false);
 }
 
 bool DragEventActuator::IsNotNeedShowPreviewForWeb(const RefPtr<FrameNode>& frameNode)
@@ -1000,7 +1002,7 @@ void DragEventActuator::UpdatePreviewAttr(const RefPtr<FrameNode>& frameNode, co
     if (gestureHub->IsTextCategoryComponent(frameTag) && gestureHub->GetTextDraggable()) {
         if (dragPreviewOption.options.shadow.has_value()) {
             auto shadow = dragPreviewOption.options.shadow.value();
-            shadow.SetIsFilled(true);
+            shadow.SetIsFilled(dragPreviewOption.options.isFilled);
             imageContext->UpdateBackShadow(shadow);
         }
         return;
@@ -1376,6 +1378,17 @@ void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode
     CHECK_NULL_VOID(frameNode);
     frameNode->SetOptionsAfterApplied(optionsAfterApplied_);
     DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
+    // update scale
+    auto dragPreviewOption = frameNode->GetDragPreviewOption();
+    bool defaultAnimationBeforeLifting = dragPreviewOption.defaultAnimationBeforeLifting;
+    if (defaultAnimationBeforeLifting) {
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        if (layoutProperty) {
+            layoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+        }
+        imageContext->UpdateTransformScale({ SCALE_NUMBER, SCALE_NUMBER });
+    }
+
     // pixel map animation
     AnimationOption option;
     option.SetDuration(PIXELMAP_ANIMATION_DURATION);

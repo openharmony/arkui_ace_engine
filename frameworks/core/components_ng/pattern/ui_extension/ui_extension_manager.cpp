@@ -280,6 +280,14 @@ bool UIExtensionManager::IsShowPlaceholder(int32_t nodeId)
             return uiExtension->IsShowPlaceholder();
         }
     }
+
+    auto itSec = aliveSecurityUIExtensions_.find(nodeId);
+    if (itSec != aliveSecurityUIExtensions_.end()) {
+        auto secExtension = itSec->second.Upgrade();
+        if (secExtension) {
+            return secExtension->IsShowPlaceholder();
+        }
+    }
     return true;
 }
 
@@ -460,6 +468,25 @@ void UIExtensionManager::SendPageModeToUEA(const RefPtr<PipelineContext>& pipeli
         auto accessibilityManager = pipeline->GetAccessibilityManager();
         CHECK_NULL_VOID(accessibilityManager);
         accessibilityManager->UpdatePageMode(pageMode);
+    }
+}
+
+void UIExtensionManager::TransferAccessibilityRectInfo()
+{
+    {
+        std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
+        for (const auto& it : aliveUIExtensions_) {
+            auto uiExtension = it.second.Upgrade();
+            if (uiExtension) {
+                uiExtension->TransferAccessibilityRectInfo();
+            }
+        }
+    }
+    for (const auto& it : aliveSecurityUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->TransferAccessibilityRectInfo();
+        }
     }
 }
 } // namespace OHOS::Ace::NG

@@ -212,7 +212,7 @@ void DialogPattern::HandleClick(const GestureEvent& info)
     CHECK_NULL_VOID(host);
     auto props = host->GetLayoutProperty<DialogLayoutProperty>();
     CHECK_NULL_VOID(props);
-    auto globalOffset = host->GetPaintRectOffset();
+    auto globalOffset = host->GetPaintRectOffset(false, true);
     auto autoCancel = props->GetAutoCancel().value_or(true);
     if (autoCancel) {
         auto content = DynamicCast<FrameNode>(host->GetChildAtIndex(0));

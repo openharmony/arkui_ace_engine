@@ -171,6 +171,7 @@ public:
     static void KeyboardAvoidMode(int32_t mode);
     static void EditMenuOptions(const JSCallbackInfo& info);
     static void EnableHapticFeedback(const JSCallbackInfo& args);
+    static void EnableWebMediaAVSession(const JSCallbackInfo& args);
 
 protected:
     static void OnCommonDialog(const JSCallbackInfo& args, int dialogEventType);

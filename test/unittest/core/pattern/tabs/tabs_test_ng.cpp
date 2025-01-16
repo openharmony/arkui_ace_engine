@@ -451,35 +451,6 @@ HWTEST_F(TabsTestNg, ProvideRestoreInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetEdgeEffect002
- * @tc.desc: test SetEdgeEffect
- * @tc.type: FUNC
- */
-HWTEST_F(TabsTestNg, SetEdgeEffect002, TestSize.Level1)
-{
-    TabsModelNG model = CreateTabs();
-    CreateTabContents(TABCONTENT_NUMBER);
-    TabsItemDivider divider;
-    model.SetDivider(divider);
-    CreateTabsDone(model);
-    tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::SCROLLABLE);
-
-    /**
-     * @tc.steps: step1. Test function SetEdgeEffect.
-     * @tc.expected: SetEdgeEffect calling interface.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto gestureHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    tabBarPattern_->SetEdgeEffect(gestureHub);
-    /**
-     * @tc.steps: step1. Set scrollEffect_ Value is empty.
-     * @tc.expected: SetEdgeEffect calling interface
-     */
-    tabBarPattern_->scrollEffect_ = nullptr;
-    tabBarPattern_->SetEdgeEffect(gestureHub);
-}
-
-/**
  * @tc.name: Create003
  * @tc.desc: test SetEdgeEffect
  * @tc.type: FUNC

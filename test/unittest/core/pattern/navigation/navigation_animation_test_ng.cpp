@@ -922,7 +922,7 @@ HWTEST_F(NavigationAnimationTest, SystemAnimation001, TestSize.Level1)
      */
     navBarNode->InitSystemTransitionPop();
     EXPECT_EQ(navBarNode->GetTransitionType(), PageTransitionType::ENTER_POP);
-    navBarNode->InitSystemTransitionPush(false);
+    navBarNode->SystemTransitionPushAction(true);
     EXPECT_EQ(navBarNode->GetTransitionType(), PageTransitionType::EXIT_PUSH);
 }
 
@@ -951,7 +951,7 @@ HWTEST_F(NavigationAnimationTest, SystemAnimation002, TestSize.Level1)
     navdestination->InitSystemTransitionPush(true);
     EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::ENTER_PUSH);
     EXPECT_TRUE(navdestination->IsOnAnimation());
-    navdestination->FinishSystemTransitionPush(true, -1);
+    navdestination->SystemTransitionPushCallback(true, -1);
     EXPECT_FALSE(navdestination->IsOnAnimation());
 
     /**
@@ -961,7 +961,7 @@ HWTEST_F(NavigationAnimationTest, SystemAnimation002, TestSize.Level1)
     navdestination->InitSystemTransitionPush(false);
     EXPECT_EQ(navdestination->GetTransitionType(), PageTransitionType::EXIT_PUSH);
     EXPECT_TRUE(navdestination->IsOnAnimation());
-    navdestination->FinishSystemTransitionPush(false, -1);
+    navdestination->SystemTransitionPushCallback(false, -1);
     EXPECT_FALSE(navdestination->IsOnAnimation());
     auto navdestinationLayoutProperty = navdestination->GetLayoutProperty();
     ASSERT_NE(navdestinationLayoutProperty, nullptr);

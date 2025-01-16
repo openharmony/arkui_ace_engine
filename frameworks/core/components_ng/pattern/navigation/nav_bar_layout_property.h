@@ -41,7 +41,6 @@ public:
         copy->NavDestinationLayoutPropertyBase::UpdateBaseLayoutProperty(
             DynamicCast<NavDestinationLayoutPropertyBase>(this));
         copy->propTitleMode_ = CloneTitleMode();
-        copy->propHideBackButton_ = CloneHideBackButton();
         return copy;
     }
 
@@ -49,7 +48,6 @@ public:
     {
         NavDestinationLayoutPropertyBase::Reset();
         ResetTitleMode();
-        ResetHideBackButton();
     }
 
     std::string GetTitleModeString() const
@@ -66,7 +64,6 @@ public:
         }
     }
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TitleMode, NavigationTitleMode, PROPERTY_UPDATE_MEASURE);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HideBackButton, bool, PROPERTY_UPDATE_MEASURE);
 };
 
 } // namespace OHOS::Ace::NG

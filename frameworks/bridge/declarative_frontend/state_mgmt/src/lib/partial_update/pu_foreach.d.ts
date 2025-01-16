@@ -55,7 +55,8 @@ declare class RepeatVirtualScrollNative {
       onGetKeys4Range: (from: number, toNumber: number) => Array<string>;
       onGetTypes4Range: (from: number, toNumber: number) => Array<string>;
       onSetActiveRange: (from: number, to: number) => void;
-    }
+    },
+    reusable: boolean
   ): void;
   // invalidate caches in C++ side, trigger render if needed
   static updateRenderState(totalCount: number, visibleItemsChanged: boolean): void;
