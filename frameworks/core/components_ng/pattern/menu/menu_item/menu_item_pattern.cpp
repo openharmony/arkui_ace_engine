@@ -1660,12 +1660,12 @@ void MenuItemPattern::AddClickableArea()
         clickableArea_ = clickableArea;
         clickableArea_->MountToParent(host, CLICKABLE_AREA_VIEW_INDEX);
         if (content_) {
-            auto nodeAccessibilityProps = content_->>GetAccessibilityProperty<AccessibilityProperty>();
+            auto nodeAccessibilityProps = content_->GetAccessibilityProperty<AccessibilityProperty>();
             CHECK_NULL_VOID(nodeAccessibilityProps);
             nodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         }
         if (label_) {
-            auto nodeAccessibilityProps = label_->>GetAccessibilityProperty<AccessibilityProperty>();
+            auto nodeAccessibilityProps = label_->GetAccessibilityProperty<AccessibilityProperty>();
             CHECK_NULL_VOID(nodeAccessibilityProps);
             nodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
         }
