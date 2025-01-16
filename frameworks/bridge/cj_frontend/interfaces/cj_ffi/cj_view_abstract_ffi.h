@@ -62,6 +62,11 @@ struct NativeRectangle {
     int32_t heightUnit;
 };
 
+struct NativeOptionCallback1Param{
+    bool hasValue;
+    void (*value)(int32_t reason);
+};
+
 struct CJBindPopupParams {
     char* message;
     bool placementOnTop;
@@ -69,7 +74,73 @@ struct CJBindPopupParams {
     void (*primaryAction)();
     char* secondaryValue;
     void (*secondaryAction)();
+    void (*onStateChange)(bool); 
+    uint32_t textColor;
+    char* fontWeight;
+    double fontSize;
+    int32_t fontSizeUnit;
+    int32_t fontStyle;
+    double arrowOffset;
+    int32_t arrowOffsetUnit;
+    bool showInSubWindow;
+    uint32_t mask;
+    double targetSpace;
+    int32_t targetSpaceUnit;
+    int32_t placement;
+    double offsetX;
+    double offsetY;
+    bool enableArrow;
+    uint32_t popupColor;
+    bool autoCancel;
+    double width;
+    int32_t widthUnit;
+    char* arrowPointPosition;
+    double arrowWidth;
+    int32_t arrowWidthUnit;
+    double arrowHeight;
+    int32_t arrowHeightUnit;
+    double radius;
+    int32_t radiusUnit;
+    int32_t shadow;
+    int32_t backgroundBlurStyle;
+    NativeOptionInt64 transition;
+    NativeOptionCallback1Param onWillDismiss;
+    bool followTransformOfTarget;
+};
+
+struct CJBindCustomPopup {
+    bool isShow;
+    void (*builder)();
+    int32_t placement;
+    uint32_t maskColor;
+    uint32_t backgroundColor;
+    bool enableArrow;
+    bool autoCancel;
     void (*onStateChange)(bool);
+    double arrowOffset;
+    int32_t arrowOffsetUnit;
+    bool showInSubWindow;
+    uint32_t mask;
+    double targetSpace;
+    int32_t targetSpaceUnit;
+    double offsetX;
+    double offsetY;
+    uint32_t popupColor;
+    double width;
+    int32_t widthUnit;
+    char* arrowPointPosition;
+    double arrowWidth;
+    int32_t arrowWidthUnit;
+    double arrowHeight;
+    int32_t arrowHeightUnit;
+    double radius;
+    int32_t radiusUnit;
+    int32_t shadow;
+    int32_t backgroundBlurStyle;
+    bool focusable;
+    NativeOptionInt64 transition;
+    NativeOptionCallback1Param onWillDismiss;
+    bool followTransformOfTarget;
 };
 
 struct CJSheetOptions {
@@ -443,6 +514,7 @@ CJ_EXPORT uint32_t FFIGetResourceUInt32(NativeResourceObject obj);
 CJ_EXPORT bool FFIGetResourceBool(NativeResourceObject obj);
 CJ_EXPORT VectorUInt32Handle FFIGetResourceVectorUInt32(NativeResourceObject obj);
 CJ_EXPORT VectorStringHandle FFIGetResourceVectorString(NativeResourceObject obj);
+CJ_EXPORT void FfiOHOSAceFrameworkPopupDismiss();
 }
 
 namespace OHOS::Ace {
