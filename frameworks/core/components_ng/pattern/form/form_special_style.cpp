@@ -14,7 +14,7 @@
  */
 
 #include "form_special_style.h"
-
+#include "form_constants.h"
 namespace OHOS::Ace::NG {
 constexpr char TIME_LIMIT_RESOURCE_NAME[] = "form_disable_time_limit";
 constexpr char APP_LOCK_RESOURCE_NAME[] = "ohos_app_has_locked";
@@ -62,7 +62,7 @@ FormStyleAttribution FormSpecialStyle::GetFormStyleAttribution() const
     if (isForbiddenByParentControl_) {
         return FormStyleAttribution::PARENT_CONTROL;
     }
-    if (isLockedByAppLock_) {
+    if (isLockedByAppLock_ && !isMultiAppForm_) {
         return FormStyleAttribution::APP_LOCK;
     }
     return FormStyleAttribution::NORMAL;
@@ -71,5 +71,39 @@ FormStyleAttribution FormSpecialStyle::GetFormStyleAttribution() const
 bool FormSpecialStyle::IsNeedToShowSpecialStyle()
 {
     return GetFormStyleAttribution() != FormStyleAttribution::NORMAL;
+}
+
+bool FormSpecialStyle::IsLockedByAppLock() const
+{
+    return isLockedByAppLock_ && !isMultiAppForm_;
+}
+
+void FormSpecialStyle::SetInitDone()
+{
+    isInited_ = true;
+}
+
+bool FormSpecialStyle::IsInited() const
+{
+    return isInited_;
+}
+
+void FormSpecialStyle::SetIsMultiAppForm(AppExecFwk::FormInfo &formInfo)
+{
+    bool isMultiAppForm = false;
+    for (auto dataIter = formInfo.customizeDatas.begin(); dataIter != formInfo.customizeDatas.end();) {
+        if (OHOS::AppExecFwk::Constants::IS_MULTI_APP_FORM == dataIter->name &&
+            OHOS::AppExecFwk::Constants::IS_MULTI_APP_FORM_TRUE == dataIter->value) {
+            isMultiAppForm = true;
+            break;
+        }
+        ++dataIter;
+    }
+    isMultiAppForm_ = isMultiAppForm;
+}
+
+bool FormSpecialStyle::IsMultiAppForm() const
+{
+    return isMultiAppForm_;
 }
 } // namespace OHOS::Ace::NG

@@ -54,7 +54,7 @@ const std::vector<BorderStyle> BORDER_STYLES = { BorderStyle::SOLID, BorderStyle
 const std::vector<ImageRepeat> IMAGES_REPEATS = { ImageRepeat::NO_REPEAT, ImageRepeat::REPEAT_X, ImageRepeat::REPEAT_Y,
     ImageRepeat::REPEAT };
 const std::vector<BackgroundImageSizeType> IMAGE_SIZES = { BackgroundImageSizeType::CONTAIN,
-    BackgroundImageSizeType::COVER, BackgroundImageSizeType::AUTO };
+    BackgroundImageSizeType::COVER, BackgroundImageSizeType::AUTO, BackgroundImageSizeType::FILL };
 const std::vector<TextDirection> TEXT_DIRECTIONS = { TextDirection::LTR, TextDirection::RTL, TextDirection::AUTO };
 const std::vector<WindowBlurStyle> WINDOW_BLUR_STYLES = { WindowBlurStyle::STYLE_BACKGROUND_SMALL_LIGHT,
     WindowBlurStyle::STYLE_BACKGROUND_MEDIUM_LIGHT, WindowBlurStyle::STYLE_BACKGROUND_LARGE_LIGHT,
@@ -763,6 +763,14 @@ void FfiOHOSAceFrameworkViewAbstractSetAlignRules(CJAlignRuleOption option)
     ViewAbstractModel::GetInstance()->SetBias(biasPair);
 }
 
+void FfiOHOSAceFrameworkViewAbstractSetChainMode(CJChainInfo option)
+{
+    ChainInfo chainInfo;
+    chainInfo.direction = static_cast<LineDirection>(option.direction);
+    chainInfo.style = static_cast<ChainStyle>(option.style);
+    ViewAbstractModel::GetInstance()->SetChainStyle(chainInfo);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetEnabled(bool value)
 {
     ViewAbstractModel::GetInstance()->SetEnabled(value);
@@ -935,6 +943,180 @@ void FfiOHOSAceFrameworkViewAbstractSetHueRotate(float deg)
         deg += ROUND_UNIT;
     }
     ViewAbstractModel::GetInstance()->SetHueRotate(deg);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetBlendMode(int32_t value, int32_t type)
+{
+    BlendMode blendMode = BlendMode::NONE;
+    BlendApplyType blendApplyType = BlendApplyType::FAST;
+    // for backward compatible, we temporary add a magic number to trigger offscreen, will remove soon
+    constexpr int backwardCompatMagicNumberOffscreen = 1000;
+    constexpr int backwardCompatSourceInNumberOffscreen = 2000;
+    constexpr int backwardCompatDestinationInNumberOffscreen = 3000;
+    constexpr int backwardCompatMagicNumberSrcIn = 5000;
+   
+    if (value >= 0 && value < static_cast<int>(BlendMode::MAX)) {
+        blendMode = static_cast<BlendMode>(value);
+    } else if (value == backwardCompatMagicNumberOffscreen) {
+        // backward compatibility code, will remove soon
+        blendMode = BlendMode::SRC_OVER;
+        blendApplyType = BlendApplyType::OFFSCREEN;
+    } else if (value == backwardCompatSourceInNumberOffscreen) {
+        // backward compatibility code, will remove soon
+        blendMode = BlendMode::SRC_IN;
+        blendApplyType = BlendApplyType::OFFSCREEN;
+    } else if (value == backwardCompatDestinationInNumberOffscreen) {
+        // backward compatibility code, will remove soon
+        blendMode = BlendMode::DST_IN;
+        blendApplyType = BlendApplyType::OFFSCREEN;
+    } else if (value == backwardCompatMagicNumberSrcIn) {
+        blendMode = BlendMode::BACK_COMPAT_SOURCE_IN;
+    }
+    blendApplyType = static_cast<BlendApplyType>(type);
+
+    ViewAbstractModel::GetInstance()->SetBlendMode(blendMode);
+    ViewAbstractModel::GetInstance()->SetBlendApplyType(blendApplyType);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetUseShadowBatching(bool value)
+{
+    ViewAbstractModel::GetInstance()->SetUseShadowBatching(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetSphericalEffect(double value)
+{
+    ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(value, 0.0, 1.0));
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetLightUpEffect(double value)
+{
+    ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(value, 0.0, 1.0));
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetPixelStretchEffect(CJEdge params)
+{
+    Dimension top(params.top, static_cast<DimensionUnit>(params.topUnit));
+    Dimension right(params.right, static_cast<DimensionUnit>(params.rightUnit));
+    Dimension bottom(params.bottom, static_cast<DimensionUnit>(params.bottomUnit));
+    Dimension left(params.left, static_cast<DimensionUnit>(params.leftUnit));
+
+    PixStretchEffectOption option;
+    if ((left.IsNonNegative() && top.IsNonNegative() && right.IsNonNegative() && bottom.IsNonNegative()) ||
+        (left.IsNonPositive() && top.IsNonPositive() && right.IsNonPositive() && bottom.IsNonPositive())) {
+        option.top = top;
+        option.right = right;
+        option.bottom = bottom;
+        option.left = left;
+    } else {
+        option.ResetValue();
+    }
+    ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetSystemBarEffect()
+{
+    ViewAbstractModel::GetInstance()->SetSystemBarEffect(true);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetFreeze(bool value)
+{
+    ViewAbstractModel::GetInstance()->SetFreeze(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetRenderGroup(bool value)
+{
+    ViewAbstractModel::GetInstance()->SetRenderGroup(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineStyle(int32_t style)
+{
+    ViewAbstractModel::GetInstance()->SetOuterBorderStyle(BORDER_STYLES[style]);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineStyles(int32_t styleTop, int32_t styleRight,
+    int32_t styleBottom, int32_t styleLeft)
+{
+    ViewAbstractModel::GetInstance()->SetOuterBorderStyle(BORDER_STYLES[styleLeft],
+        BORDER_STYLES[styleRight], BORDER_STYLES[styleTop], BORDER_STYLES[styleBottom]);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineWidth(double width, int32_t unit)
+{
+    Dimension value(width, static_cast<DimensionUnit>(unit));
+    CalcDimension outlineWidth = CalcDimension(value);
+    if (!outlineWidth.IsNegative() && outlineWidth.Unit() != DimensionUnit::PERCENT) {
+        ViewAbstractModel::GetInstance()->SetOuterBorderWidth(value);
+    }
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineWidths(CJEdge params)
+{
+    Dimension topDimen(params.top, static_cast<DimensionUnit>(params.topUnit));
+    CalcDimension top = CalcDimension(topDimen);
+    if (top.IsNegative() || top.Unit() == DimensionUnit::PERCENT) {
+        topDimen = Dimension(0);
+    }
+    Dimension rightDimen(params.right, static_cast<DimensionUnit>(params.rightUnit));
+    CalcDimension right = CalcDimension(rightDimen);
+    if (right.IsNegative() || right.Unit() == DimensionUnit::PERCENT) {
+        rightDimen = Dimension(0);
+    }
+    Dimension bottomDimen(params.bottom, static_cast<DimensionUnit>(params.bottomUnit));
+    CalcDimension bottom = CalcDimension(bottomDimen);
+    if (bottom.IsNegative() || bottom.Unit() == DimensionUnit::PERCENT) {
+        bottomDimen = Dimension(0);
+    }
+    Dimension leftDimen(params.left, static_cast<DimensionUnit>(params.leftUnit));
+    CalcDimension left = CalcDimension(leftDimen);
+    if (left.IsNegative() || left.Unit() == DimensionUnit::PERCENT) {
+        leftDimen = Dimension(0);
+    }
+    ViewAbstractModel::GetInstance()->SetOuterBorderWidth(leftDimen, rightDimen, topDimen, bottomDimen);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineColor(uint32_t value)
+{
+    ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color(value));
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineColors(uint32_t colorTop, uint32_t colorRight,
+    uint32_t colorBottom, uint32_t colorLeft)
+{
+    ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color(colorLeft), Color(colorRight),
+        Color(colorTop), Color(colorBottom));
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineRadius(double radius, int32_t unit)
+{
+    Dimension value(radius, static_cast<DimensionUnit>(unit));
+    CalcDimension outlineRadius = CalcDimension(value);
+    if (outlineRadius.Unit() != DimensionUnit::PERCENT) {
+        ViewAbstractModel::GetInstance()->SetOuterBorderRadius(value);
+    }
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineRadiuses(CJOutlineRadius params)
+{
+    CalcDimension topLeft(params.topLeft, static_cast<DimensionUnit>(params.topLeftUnit));
+    CalcDimension topRight(params.topRight, static_cast<DimensionUnit>(params.topRightUnit));
+    CalcDimension bottomLeft(params.bottomLeft, static_cast<DimensionUnit>(params.bottomLeftUnit));
+    CalcDimension bottomRight(params.bottomRight, static_cast<DimensionUnit>(params.bottomRightUnit));
+    ViewAbstractModel::GetInstance()->SetOuterBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutline(CJOutline params)
+{
+    Dimension widthDime(params.width, static_cast<DimensionUnit>(params.widthUnit));
+    Dimension radiusDime(params.radius, static_cast<DimensionUnit>(params.radiusUnit));
+    if (!Utils::CheckParamsValid(params.style, BORDER_STYLES.size())) {
+        LOGE("invalid value for outline style");
+        return;
+    }
+
+    ViewAbstractModel::GetInstance()->SetOuterBorderStyle(BORDER_STYLES[params.style]);
+    ViewAbstractModel::GetInstance()->SetOuterBorderWidth(widthDime);
+    ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color(params.color));
+    ViewAbstractModel::GetInstance()->SetOuterBorderRadius(radiusDime);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetFlexBasis(double value, int32_t unit)
@@ -1498,8 +1680,8 @@ void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
     NG::SheetHeight sheetDetent;
     if (option.height.hasValue) {
         ParseSheetDetentHeight(option.height.value, sheetDetent);
-        sheetStyle.sheetMode = sheetDetent.sheetMode;
-        sheetStyle.height = sheetDetent.height;
+        sheetStyle.sheetHeight.sheetMode = sheetDetent.sheetMode;
+        sheetStyle.sheetHeight.height = sheetDetent.height;
     }
 }
 
@@ -1513,7 +1695,7 @@ void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(
     auto buildFunc = CJLambda::Create(builder);
     NG::SheetStyle sheetStyle;
     DoubleBindCallback callback = nullptr;
-    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
     sheetStyle.showInPage = false;
     std::function<void()> onAppearCallback;

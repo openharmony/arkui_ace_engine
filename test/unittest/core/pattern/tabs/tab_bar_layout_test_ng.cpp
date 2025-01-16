@@ -943,6 +943,7 @@ HWTEST_F(TabBarLayoutTestNg, TabBarPatternBeforeCreateLayoutWrapper003, TestSize
     model.SetDivider(divider);
     CreateTabsDone(model);
     tabBarPattern_->BeforeCreateLayoutWrapper();
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**

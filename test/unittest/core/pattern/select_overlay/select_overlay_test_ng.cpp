@@ -3228,6 +3228,7 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions001, TestSize.Level1)
     selectInfo.menuInfo.showPaste = true;
     selectInfo.menuInfo.showCopyAll = true;
     selectInfo.menuInfo.showSearch = true;
+    selectInfo.menuInfo.showShare = true;
     selectInfo.menuInfo.showCameraInput = true;
     float maxWidth = 2.0f;
     float allocatedSize = 3.0f;
@@ -3251,6 +3252,7 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions002, TestSize.Level1)
     selectInfo.menuInfo.showPaste = true;
     selectInfo.menuInfo.showCopyAll = true;
     selectInfo.menuInfo.showSearch = false;
+    selectInfo.menuInfo.showShare = false;
     selectInfo.menuInfo.showCameraInput = true;
     float maxWidth = 2.0f;
     float allocatedSize = 3.0f;
@@ -3274,6 +3276,7 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions003, TestSize.Level1)
     selectInfo.menuInfo.showPaste = false;
     selectInfo.menuInfo.showCopyAll = true;
     selectInfo.menuInfo.showSearch = false;
+    selectInfo.menuInfo.showShare = false;
     selectInfo.menuInfo.showCameraInput = true;
     float maxWidth = 2.0f;
     float allocatedSize = 3.0f;
@@ -3297,6 +3300,7 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions004, TestSize.Level1)
     selectInfo.menuInfo.showPaste = false;
     selectInfo.menuInfo.showCopyAll = false;
     selectInfo.menuInfo.showSearch = false;
+    selectInfo.menuInfo.showShare = false;
     selectInfo.menuInfo.showCameraInput = true;
     float maxWidth = 2.0f;
     float allocatedSize = 3.0f;
@@ -3320,6 +3324,7 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions005, TestSize.Level1)
     selectInfo.menuInfo.showPaste = false;
     selectInfo.menuInfo.showCopyAll = false;
     selectInfo.menuInfo.showSearch = false;
+    selectInfo.menuInfo.showShare = false;
     selectInfo.menuInfo.showCameraInput = false;
     float maxWidth = 2.0f;
     float allocatedSize = 3.0f;
@@ -3346,6 +3351,7 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions006, TestSize.Level1)
     selectInfo.menuInfo.showPaste = false;
     selectInfo.menuInfo.showCopyAll = false;
     selectInfo.menuInfo.showSearch = false;
+    selectInfo.menuInfo.showShare = false;
     selectInfo.menuInfo.showCameraInput = false;
     float maxWidth = 3.0f;
     float allocatedSize = 2.0f;
@@ -3429,6 +3435,7 @@ HWTEST_F(SelectOverlayTestNg, CreateSelectOverlayNode001, TestSize.Level1)
     selectInfo.menuInfo.showCut = false;
     selectInfo.menuInfo.showPaste = false;
     selectInfo.menuInfo.showSearch = false;
+    selectInfo.menuInfo.showShare = false;
     auto menuOptionItems = GetMenuOptionItems();
     selectInfo.menuOptionItems = menuOptionItems;
     selectInfo.singleLineHeight = NODE_ID;
@@ -3468,6 +3475,7 @@ HWTEST_F(SelectOverlayTestNg, DispatchVisibleToGoneState001, TestSize.Level1)
     selectInfo.menuInfo.showCut = false;
     selectInfo.menuInfo.showPaste = false;
     selectInfo.menuInfo.showSearch = false;
+    selectInfo.menuInfo.showShare = false;
     auto menuOptionItems = GetMenuOptionItems();
     selectInfo.menuOptionItems = menuOptionItems;
     selectInfo.singleLineHeight = NODE_ID;
@@ -3895,6 +3903,7 @@ HWTEST_F(SelectOverlayTestNg, AddSystemDefaultOptions008, TestSize.Level1)
     selectInfo.menuInfo.showCut = true;
     selectInfo.menuInfo.showCopy = true;
     selectInfo.menuInfo.showSearch = true;
+    selectInfo.menuInfo.showShare = true;
     selectInfo.menuInfo.menuDisable = true;
     selectInfo.menuInfo.showCameraInput = true;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
@@ -3924,6 +3933,7 @@ HWTEST_F(SelectOverlayTestNg, ShowShare002, TestSize.Level1)
     selectInfo.menuInfo.showCut = true;
     selectInfo.menuInfo.showCopy = true;
     selectInfo.menuInfo.showSearch = true;
+    selectInfo.menuInfo.showShare = true;
     selectInfo.menuInfo.menuDisable = true;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
@@ -3946,6 +3956,7 @@ HWTEST_F(SelectOverlayTestNg, ShowShare003, TestSize.Level1)
     selectInfo.menuInfo.showCut = true;
     selectInfo.menuInfo.showCopy = true;
     selectInfo.menuInfo.showSearch = true;
+    selectInfo.menuInfo.showShare = true;
     selectInfo.menuInfo.menuDisable = true;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
@@ -3968,6 +3979,7 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera001, TestSize.Level1)
     selectInfo.menuInfo.showCut = true;
     selectInfo.menuInfo.showCopy = true;
     selectInfo.menuInfo.showSearch = true;
+    selectInfo.menuInfo.showShare = true;
     selectInfo.menuInfo.menuDisable = true;
     selectInfo.menuInfo.showCameraInput = true;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
@@ -3997,6 +4009,7 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera002, TestSize.Level1)
     selectInfo.menuInfo.showCut = true;
     selectInfo.menuInfo.showCopy = true;
     selectInfo.menuInfo.showSearch = true;
+    selectInfo.menuInfo.showShare = true;
     selectInfo.menuInfo.menuDisable = true;
     selectInfo.menuInfo.showCameraInput = true;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
@@ -4026,6 +4039,7 @@ HWTEST_F(SelectOverlayTestNg, ShowCamera003, TestSize.Level1)
     selectInfo.menuInfo.showCut = true;
     selectInfo.menuInfo.showCopy = true;
     selectInfo.menuInfo.showSearch = true;
+    selectInfo.menuInfo.showShare = true;
     selectInfo.menuInfo.menuDisable = true;
     selectInfo.menuInfo.showCameraInput = true;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
@@ -4059,6 +4073,7 @@ HWTEST_F(SelectOverlayTestNg, SetSelectMenuHeight001, TestSize.Level1)
     selectInfo.menuInfo.showCut = false;
     selectInfo.menuInfo.showPaste = false;
     selectInfo.menuInfo.showSearch = false;
+    selectInfo.menuInfo.showShare = false;
     auto menuOptionItems = GetMenuOptionItems();
     selectInfo.menuOptionItems = menuOptionItems;
     auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
@@ -4361,6 +4376,7 @@ HWTEST_F(SelectOverlayTestNg, GetSystemMenuItemParams001, TestSize.Level1)
     info.menuInfo.showCut = true;
     info.menuInfo.showCopyAll = true;
     info.menuInfo.showSearch = false;
+    info.menuInfo.showShare = false;
     info.menuInfo.showCameraInput = true;
     auto params = SelectOverlayNode::GetSystemMenuItemParams(std::make_shared<SelectOverlayInfo>(info));
     EXPECT_EQ(params.size(), 5);
@@ -4382,6 +4398,7 @@ HWTEST_F(SelectOverlayTestNg, GetSystemMenuItemParams002, TestSize.Level1)
     info.menuInfo.showCut = false;
     info.menuInfo.showCopyAll = false;
     info.menuInfo.showSearch = false;
+    info.menuInfo.showShare = false;
     info.menuInfo.showCameraInput = false;
     auto params = SelectOverlayNode::GetSystemMenuItemParams(std::make_shared<SelectOverlayInfo>(info));
     EXPECT_EQ(params.size(), 0);
@@ -4403,6 +4420,7 @@ HWTEST_F(SelectOverlayTestNg, GetSystemMenuItemParams003, TestSize.Level1)
     info.menuInfo.showCut = true;
     info.menuInfo.showCopyAll = false;
     info.menuInfo.showSearch = false;
+    info.menuInfo.showShare = false;
     info.menuInfo.showCameraInput = true;
     auto params = SelectOverlayNode::GetSystemMenuItemParams(std::make_shared<SelectOverlayInfo>(info));
     EXPECT_EQ(params.size(), 3);
@@ -4424,6 +4442,7 @@ HWTEST_F(SelectOverlayTestNg, GetSystemMenuItemParams004, TestSize.Level1)
     info.menuInfo.showCut = false;
     info.menuInfo.showCopyAll = true;
     info.menuInfo.showSearch = false;
+    info.menuInfo.showShare = false;
     info.menuInfo.showCameraInput = false;
     auto params = SelectOverlayNode::GetSystemMenuItemParams(std::make_shared<SelectOverlayInfo>(info));
     EXPECT_EQ(params.size(), 2);
@@ -4445,6 +4464,7 @@ HWTEST_F(SelectOverlayTestNg, GetSystemMenuItemParams005, TestSize.Level1)
     info.menuInfo.showCut = false;
     info.menuInfo.showCopyAll = false;
     info.menuInfo.showSearch = false;
+    info.menuInfo.showShare = false;
     info.menuInfo.showCameraInput = false;
     auto params = SelectOverlayNode::GetSystemMenuItemParams(std::make_shared<SelectOverlayInfo>(info));
     EXPECT_EQ(params.size(), 1);
@@ -4466,6 +4486,7 @@ HWTEST_F(SelectOverlayTestNg, GetSystemMenuItemParams006, TestSize.Level1)
     info.menuInfo.showCut = true;
     info.menuInfo.showCopyAll = true;
     info.menuInfo.showSearch = false;
+    info.menuInfo.showShare = false;
     info.menuInfo.showCameraInput = true;
     auto params = SelectOverlayNode::GetSystemMenuItemParams(std::make_shared<SelectOverlayInfo>(info));
     EXPECT_EQ(params.size(), 4);

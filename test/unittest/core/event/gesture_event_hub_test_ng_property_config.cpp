@@ -940,7 +940,7 @@ HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoTest001, TestSize.Level1)
         AdaptiveColor::DEFAULT, {{2.0f, 2.0f}}}};
     std::optional<Shadow> shadowVal;
     std::optional<BorderRadiusProperty> borderRadiusVal;
-    OptionsAfterApplied optionTmp = {0, shadowVal, "test", borderRadiusVal, {bgBackEffect}};
+    OptionsAfterApplied optionTmp = {0, shadowVal, "test", true, borderRadiusVal, {bgBackEffect}};
     DragPreviewOption dragPreviewInfos;
     dragPreviewInfos.options = optionTmp;
     frameNode->SetDragPreviewOptions(dragPreviewInfos);
@@ -949,7 +949,8 @@ HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoTest001, TestSize.Level1)
      * @tc.steps: step2. Test UpdateExtraInfo
     */
     auto arkExtraInfoJson = JsonUtil::Create(true);
-    guestureEventHub->UpdateExtraInfo(frameNode, arkExtraInfoJson, 1.0f);
+    PreparedInfoForDrag data;
+    guestureEventHub->UpdateExtraInfo(frameNode, arkExtraInfoJson, 1.0f, data);
     auto radiusJs = arkExtraInfoJson->GetDouble("blur_radius", -1);
     EXPECT_EQ(radiusJs, 2.0);
     /**
@@ -958,7 +959,7 @@ HWTEST_F(GestureEventHubTestNg, UpdateExtraInfoTest001, TestSize.Level1)
     dragPreviewInfos.options.blurbgEffect.backGroundEffect.radius.SetValue(0);
     frameNode->SetDragPreviewOptions(dragPreviewInfos);
     auto jsInfos = JsonUtil::Create(true);
-    guestureEventHub->UpdateExtraInfo(frameNode, jsInfos, 1.0f);
+    guestureEventHub->UpdateExtraInfo(frameNode, jsInfos, 1.0f, data);
     radiusJs = jsInfos->GetDouble("blur_radius", -1);
     EXPECT_EQ(radiusJs, -1);
 }
@@ -1139,7 +1140,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubIsNeedSwitchToSubWindowTest001, T
     frameNode2->GetOrCreateFocusHub();
     auto focusHub = frameNode2->GetFocusHub();
     EXPECT_NE(focusHub, nullptr);
-    gestureEventHub->IsNeedSwitchToSubWindow();
+    PreparedInfoForDrag data;
+    gestureEventHub->IsNeedSwitchToSubWindow(data);
     EXPECT_FALSE(gestureEventHub->IsPixelMapNeedScale());
 }
 
@@ -1321,7 +1323,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset001, TestSize.Le
     constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
     GestureEvent info = GestureEvent();
     auto size = SizeF(1, 1);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
+    PreparedInfoForDrag data;
+    gestureEventHub->GetPixelMapOffset(info, size, data, 1.0f);
     auto frameNode2 = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode2, nullptr);
     OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
@@ -1338,7 +1341,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset001, TestSize.Le
      * NearZero(size.Width()) is true.
      */
     size = SizeF(0, 0);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
+    gestureEventHub->GetPixelMapOffset(info, size, data, 1.0f);
     result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     EXPECT_TRUE(NearZero(gestureEventHub->frameNodeSize_.Width()));
     EXPECT_TRUE(NearZero(size.Width()));
@@ -1354,7 +1357,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset001, TestSize.Le
      */
     size = SizeF(500, 600);
     gestureEventHub->frameNodeSize_ = SizeF(1, 1);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
+    gestureEventHub->GetPixelMapOffset(info, size, data, 1.0f);
     result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     EXPECT_FALSE(NearZero(gestureEventHub->frameNodeSize_.Width()));
     EXPECT_FALSE(NearZero(size.Width()));
@@ -1366,7 +1369,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset001, TestSize.Le
      */
     size = SizeF(0, 0);
     gestureEventHub->frameNodeSize_ = SizeF(1, 1);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
+    gestureEventHub->GetPixelMapOffset(info, size, data, 1.0f);
     result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     EXPECT_FALSE(NearZero(gestureEventHub->frameNodeSize_.Width()));
     EXPECT_TRUE(NearZero(size.Width()));
@@ -1397,7 +1400,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapScaleTest002, TestSize
     int32_t width = 600;
     GestureEvent info = GestureEvent();
     auto size = SizeF(1, 1);
-    gestureEventHub->GetPixelMapOffset(info, size, 1.0f);
+    PreparedInfoForDrag data;
+    gestureEventHub->GetPixelMapOffset(info, size, data, 1.0f);
     auto frameNode2 = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode2, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();

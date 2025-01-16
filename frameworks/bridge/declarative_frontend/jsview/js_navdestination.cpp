@@ -191,6 +191,15 @@ void JSNavDestination::SetHideTitleBar(const JSCallbackInfo& info)
     NavDestinationModel::GetInstance()->SetHideTitleBar(isHide, isAnimated);
 }
 
+void JSNavDestination::SetHideBackButton(const JSCallbackInfo& info)
+{
+    bool isHide = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isHide = info[0]->ToBoolean();
+    }
+    NavDestinationModel::GetInstance()->SetHideBackButton(isHide);
+}
+
 void JSNavDestination::SetTitle(const JSCallbackInfo& info)
 {
     // Resource and string type.
@@ -585,6 +594,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("create", &JSNavDestination::Create);
     JSClass<JSNavDestination>::StaticMethod("title", &JSNavDestination::SetTitle);
     JSClass<JSNavDestination>::StaticMethod("hideTitleBar", &JSNavDestination::SetHideTitleBar);
+    JSClass<JSNavDestination>::StaticMethod("hideBackButton", &JSNavDestination::SetHideBackButton);
     JSClass<JSNavDestination>::StaticMethod("backButtonIcon", &JSNavDestination::SetBackButtonIcon);
     JSClass<JSNavDestination>::StaticMethod("backgroundColor", &JSNavDestination::SetBackgroundColor);
     JSClass<JSNavDestination>::StaticMethod("onShown", &JSNavDestination::SetOnShown);

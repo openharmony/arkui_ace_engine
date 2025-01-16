@@ -58,6 +58,7 @@ bool ConvertEventResult(ArkUI_CompatibleNodeEvent* event, ArkUINodeEvent* origin
 
 int32_t ConvertToCMouseActionType(int32_t originActionType);
 int32_t ConvertToCMouseEventButtonType(int32_t originButtonType);
+int32_t ConvertToCAxisActionType(int32_t originActionType);
 
 }; // namespace OHOS::Ace::NodeModel
 #endif // ARKUI_NATIVE_NODE_EVENT_CONVERTER_H

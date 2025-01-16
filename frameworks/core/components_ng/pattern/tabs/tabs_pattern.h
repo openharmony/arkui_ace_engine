@@ -139,10 +139,7 @@ public:
         return interceptStatus_;
     }
 
-    void SetAnimateMode(TabAnimateMode mode)
-    {
-        animateMode_ = mode;
-    }
+    void SetAnimateMode(TabAnimateMode mode);
 
     TabAnimateMode GetAnimateMode() const
     {

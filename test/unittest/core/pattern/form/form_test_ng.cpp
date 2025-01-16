@@ -687,6 +687,7 @@ HWTEST_F(FormTestNg, FireOnEvent, TestSize.Level1)
         auto json = JsonUtil::Create(true);
         json->Put("id", std::to_string(FORM_ID_OF_TDD).c_str());
         json->Put("idString", FORM_ID_STRING_OF_TDD.c_str());
+        json->Put("isLocked", false);
         ASSERT_EQ(string, json->ToString());
     });
     pattern->FireOnUninstallEvent(FORM_ID_OF_TDD);
@@ -699,6 +700,7 @@ HWTEST_F(FormTestNg, FireOnEvent, TestSize.Level1)
         auto json = JsonUtil::Create(true);
         json->Put("id", std::to_string(FORM_ID_OF_TDD).c_str());
         json->Put("idString", FORM_ID_STRING_OF_TDD.c_str());
+        json->Put("isLocked", false);
         ASSERT_EQ(string, json->ToString());
     });
     pattern->FireOnAcquiredEvent(FORM_ID_OF_TDD);

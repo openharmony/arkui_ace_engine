@@ -83,6 +83,10 @@ void WindowSceneModel::Create(int32_t persistentId)
         V2::WINDOW_SCENE_ETS_TAG, nodeId, sceneSession->GetSessionInfo().bundleName_.c_str());
     auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId, persistentId,
         [sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
+    if (windowNode == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "windowNode is nullptr, persistentId: %{public}d", persistentId);
+        return;
+    }
     stack->Push(windowNode);
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
 

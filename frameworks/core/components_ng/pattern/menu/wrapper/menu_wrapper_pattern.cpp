@@ -83,7 +83,7 @@ RectF MenuWrapperPattern::GetMenuZone(RefPtr<UINode>& innerMenuNode)
         if (!innerMenuNode) {
             innerMenuNode = child;
         }
-        return geometryNode->GetFrameRect() + host->GetPaintRectOffset();
+        return geometryNode->GetFrameRect() + host->GetPaintRectOffset(false, true);
     }
     return RectF();
 }
@@ -105,7 +105,7 @@ RefPtr<FrameNode> MenuWrapperPattern::FindTouchedMenuItem(const RefPtr<UINode>& 
             menuItem = FindTouchedMenuItem(child, position);
         }
         if (menuItem) {
-            auto menuItemOffset = menuItem->GetPaintRectOffset();
+            auto menuItemOffset = menuItem->GetPaintRectOffset(false, true);
             auto geometryNode = menuItem->GetGeometryNode();
             CHECK_NULL_RETURN(geometryNode, nullptr);
             auto menuItemSize = geometryNode->GetFrameSize();
@@ -383,9 +383,14 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
     CHECK_NULL_VOID(menuFrameNode);
     auto menuNodePattern = menuFrameNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuNodePattern);
+    auto subMenuFrameNode = DynamicCast<FrameNode>(subMenu);
+    CHECK_NULL_VOID(subMenuFrameNode);
     menuNodePattern->ShowStackMenuDisappearAnimation(menuFrameNode,
-        DynamicCast<FrameNode>(subMenu), option);
+        subMenuFrameNode, option);
     menuNodePattern->SetDisappearAnimation(true);
+    auto subMenuPattern = subMenuFrameNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(subMenuPattern);
+    subMenuPattern->SetSubMenuShow(false);
 }
 
 void MenuWrapperPattern::RegisterOnTouch()
@@ -423,7 +428,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
 
     auto position = OffsetF(
         static_cast<float>(touch.GetGlobalLocation().GetX()), static_cast<float>(touch.GetGlobalLocation().GetY()));
-    position -= host->GetPaintRectOffset();
+    position -= host->GetPaintRectOffset(false, true);
     auto children = host->GetChildren();
     if (touch.GetTouchType() == TouchType::DOWN) {
         // Record the latest touch finger ID. If other fingers are pressed, the latest one prevails
@@ -436,7 +441,7 @@ void MenuWrapperPattern::OnTouchEvent(const TouchEventInfo& info)
             // get menuWrapperChildNode's touch region
             auto menuWrapperChildGeometryNode = menuWrapperChildNode->GetGeometryNode();
             CHECK_NULL_VOID(menuWrapperChildGeometryNode);
-            auto childOffset = menuWrapperChildNode->GetPaintRectOffset();
+            auto childOffset = menuWrapperChildNode->GetPaintRectOffset(false, true);
             auto childSize = menuWrapperChildGeometryNode->GetFrameSize();
             auto menuWrapperChildZone = RectF(childOffset.GetX(), childOffset.GetY(),
                 childSize.Width(), childSize.Height());

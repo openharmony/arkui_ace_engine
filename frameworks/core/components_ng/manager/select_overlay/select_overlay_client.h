@@ -70,6 +70,7 @@ enum class SelectOverlayMenuId {
     PASTE,
     SELECT_ALL,
     SEARCH,
+    SHARE,
     CAMERA_INPUT,
     AI_WRITE
 };

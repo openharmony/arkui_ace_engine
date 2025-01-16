@@ -1138,8 +1138,8 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg020, TestSize.Level1)
         return frameNode;
     };
     SheetStyle sheetStyle;
-    if (!sheetStyle.sheetMode.has_value()) {
-        sheetStyle.sheetMode = SheetMode::MEDIUM;
+    if (!sheetStyle.sheetHeight.sheetMode.has_value()) {
+        sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     }
     if (!sheetStyle.showDragBar.has_value()) {
         sheetStyle.showDragBar = true;
@@ -1234,8 +1234,8 @@ HWTEST_F(ViewAbstractModelTestNg, ViewAbstractModelTestNg021, TestSize.Level1)
         return frameNode;
     };
     SheetStyle sheetStyle;
-    if (!sheetStyle.sheetMode.has_value()) {
-        sheetStyle.sheetMode = SheetMode::MEDIUM;
+    if (!sheetStyle.sheetHeight.sheetMode.has_value()) {
+        sheetStyle.sheetHeight.sheetMode = SheetMode::MEDIUM;
     }
     if (!sheetStyle.showDragBar.has_value()) {
         sheetStyle.showDragBar = true;

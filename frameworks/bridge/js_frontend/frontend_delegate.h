@@ -138,6 +138,8 @@ public:
 
     virtual void SetAutoFocusTransfer(bool autoFocusTransfer);
 
+    virtual bool ConfigWindowMask(bool enable);
+
     // restore
     virtual std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
         const std::string& contentInfo, ContentInfoType type)

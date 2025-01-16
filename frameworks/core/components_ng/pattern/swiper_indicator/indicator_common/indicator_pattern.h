@@ -188,6 +188,9 @@ public:
     void GetTextContentSub(std::string& firstContent, std::string& lastContent) const override;
     void SwipeTo(std::optional<int32_t> mouseClickIndex) override;
     void OnModifyDone() override;
+    void HandleLongDragUpdate(const TouchLocationInfo& info) override;
+    void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
+    bool OnKeyEvent(const KeyEvent& event);
     int32_t currentIndexInSingleMode_ = 0;
     int32_t hasSetInitialIndex_ = false;
 

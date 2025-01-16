@@ -29,10 +29,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 137
+#define ARKUI_FULL_API_VERSION 138
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 137
+#define ARKUI_NODE_API_VERSION 138
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -220,6 +220,7 @@ struct ArkUITouchEvent {
     ArkUI_Int32 subKind; // ArkUIEventSubKind actually
     ArkUI_Int32 interceptResult;
     ArkUI_Int32 changedPointerId;
+    ArkUI_Int32 targetDisplayId;
 };
 
 struct ArkUIMouseEvent {
@@ -230,6 +231,11 @@ struct ArkUIMouseEvent {
     ArkUI_Int32 subKind;
     ArkUI_Int32 sourceType;
     ArkUI_Int32 interceptResult;
+    ArkUI_Float32 rawDeltaX;
+    ArkUI_Float32 rawDeltaY;
+    ArkUI_Int32* pressedButtons;
+    ArkUI_Int32 pressedButtonsLength;
+    ArkUI_Int32 targetDisplayId;
 };
 
 struct ArkUIAxisEvent {
@@ -240,6 +246,7 @@ struct ArkUIAxisEvent {
     ArkUI_Float64 horizontalAxis;
     ArkUI_Float64 verticalAxis;
     ArkUI_Float64 pinchAxisScale;
+    ArkUI_Int32 targetDisplayId;
 };
 
 struct ArkUIDragEvent {
@@ -289,6 +296,7 @@ struct ArkUIFocusAxisEvent {
     ArkUI_Int64 deviceId;
     ArkUI_Int32* pressedKeyCodes;
     ArkUI_Int32 keyCodesLength;
+    ArkUI_Int32 targetDisplayId;
     bool stopPropagation;
 };
 
@@ -1108,8 +1116,8 @@ struct ArkUIAPIEventTextInput {
 
 struct ArkUIAPIEventTextInputMixed {
     // used by c-api, should be the first place.
-    ArkUI_Int64 nativeStringPtr;
-    ArkUI_Int64 extendStringPtr;
+    void* nativeStringPtr;
+    void* extendStringPtr;
     ArkUI_Int32 numArgs;
     ArkUI_Int32 subKind; // ArkUIEventSubKind actually
 };
@@ -1187,6 +1195,14 @@ struct ArkUIKeyEvent {
     bool stopPropagation;
 };
 
+struct ArkUIClickEvent {
+    ArkUI_Int32 targetDisplayId;
+};
+
+struct ArkUIHoverEvent {
+    ArkUI_Int32 targetDisplayId;
+};
+
 struct ArkUINodeEvent {
     ArkUI_Int32 kind; // Actually ArkUIEventCategory.
     ArkUI_Int32 nodeId;
@@ -1206,6 +1222,8 @@ struct ArkUINodeEvent {
         ArkUIKeyEvent keyEvent;
         ArkUIFocusAxisEvent focusAxisEvent;
         ArkUIAPIEventTextInputMixed textChangeEvent;
+        ArkUIClickEvent clickEvent;
+        ArkUIHoverEvent hoverEvent;
     };
 };
 
@@ -2739,7 +2757,7 @@ struct ArkUISwiperModifier {
     void (*resetSwiperAutoPlay)(ArkUINodeHandle node);
     void (*setSwiperStopWhenTouched)(ArkUINodeHandle node, ArkUI_Bool stopWhenTouched);
     void (*resetSwiperStopWhenTouched)(ArkUINodeHandle node);
-    void (*setSwiperIndex)(ArkUINodeHandle node, ArkUI_Int32 index);
+    void (*setSwiperIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animationMode);
     void (*resetSwiperIndex)(ArkUINodeHandle node);
     void (*setSwiperIndicator)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr);
     void (*resetSwiperIndicator)(ArkUINodeHandle node);
@@ -2791,6 +2809,8 @@ struct ArkUISwiperModifier {
     void (*setSwiperPageFlipMode)(ArkUINodeHandle node, ArkUI_Int32 pageFlipMode);
     void (*resetSwiperPageFlipMode)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperPageFlipMode)(ArkUINodeHandle node);
+    void (*setSwiperOnContentWillScroll)(ArkUINodeHandle node, bool* callback);
+    void (*resetSwiperOnContentWillScroll)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
@@ -3375,6 +3395,9 @@ struct ArkUISliderModifier {
     ArkUI_CharPtr (*getSliderBlockShape)(ArkUINodeHandle node, ArkUI_Float32 (*value)[5]);
     ArkUI_Float32 (*getThickness)(ArkUINodeHandle node, ArkUI_Int32 unit);
     ArkUISliderValidSlideRange (*getSliderValidSlideRange)(ArkUINodeHandle node);
+    ArkUI_Bool (*getEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool enableHapticFeedback);
+    void (*resetEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct ArkUIProgressModifier {
@@ -3417,6 +3440,8 @@ struct ArkUINavDestinationModifier {
     void (*resetHideTitleBar)(ArkUINodeHandle node);
     void (*setNavDestinationHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated);
     void (*resetNavDestinationHideToolBar)(ArkUINodeHandle node);
+    void (*setNavDestinationHideBackButton)(ArkUINodeHandle node, ArkUI_Bool hideBackButton);
+    void (*resetNavDestinationHideBackButton)(ArkUINodeHandle node);
     void (*setNavDestinationMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetNavDestinationMode)(ArkUINodeHandle node);
     void (*setIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);

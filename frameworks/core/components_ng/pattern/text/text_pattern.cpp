@@ -736,7 +736,7 @@ void TextPattern::EncodeTlvSpanItems(const std::string& pasteData, std::vector<u
         }
         auto spanStart = oldStart <= start ? 0 : oldStart - start;
         auto spanEnd = oldEnd < end ? oldEnd - start : end - start;
-        auto newSpanItem = spanItem->GetSameStyleSpanItem();
+        auto newSpanItem = spanItem->GetSameStyleSpanItem(true);
         newSpanItem->interval = { spanStart - ignoreLength, spanEnd - ignoreLength };
         newSpanItem->content = spanItem->content
                 .substr(std::max(start - oldStart, 0), std::min(end, oldEnd) - std::max(start, oldStart));
@@ -852,6 +852,10 @@ void TextPattern::HandleOnSelectAll()
 
 bool TextPattern::IsShowSearch()
 {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        return false;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
@@ -1335,6 +1339,8 @@ RectF TextPattern::CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandl
     textSelector_.Update(baseOffset, destinationOffset);
     if (calculateHandleFunc == nullptr) {
         CalculateHandleOffsetAndShowOverlay();
+    } else {
+        calculateHandleFunc();
     }
     return aiRect;
 }

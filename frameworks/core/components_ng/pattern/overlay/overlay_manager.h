@@ -587,6 +587,14 @@ public:
     {
         return gatherNodeWeak_.Upgrade();
     }
+    void SetDragNodeCopy(const RefPtr<FrameNode>& dragNodeCopy)
+    {
+        dragNodeCopyWeak_ = dragNodeCopy;
+    }
+    RefPtr<FrameNode> GetDragNodeCopy()
+    {
+        return dragNodeCopyWeak_.Upgrade();
+    }
     const std::vector<GatherNodeChildInfo>& GetGatherNodeChildrenInfo()
     {
         return gatherNodeChildrenInfo_;
@@ -905,6 +913,7 @@ private:
     bool hasGatherNode_ { false };
     bool isGatherWithMenu_ { false };
     WeakPtr<FrameNode> gatherNodeWeak_;
+    WeakPtr<FrameNode> dragNodeCopyWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isMenuShow_ = false;
     bool isAttachToCustomNode_ = false;

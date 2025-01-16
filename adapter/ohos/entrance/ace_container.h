@@ -91,6 +91,17 @@ struct ParsedConfig {
     }
 };
 
+struct SingleHandTransform {
+    SingleHandTransform() = default;
+    SingleHandTransform(float x, float y, float scaleX, float scaleY)
+        : x_(x), y_(y), scaleX_(scaleX), scaleY_(scaleY) {}
+ 
+    float x_ = 0.0f;
+    float y_ = 0.0f;
+    float scaleX_ = 1.0f;
+    float scaleY_ = 1.0f;
+};
+
 using ConfigurationChangedCallback = std::function<void(const ParsedConfig& config, const std::string& configuration)>;
 
 class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatcher {
@@ -325,6 +336,8 @@ public:
         const std::vector<std::string>& params, std::vector<std::string>& info);
 
     bool DumpInfo(const std::vector<std::string>& params);
+
+    bool DumpRSNodeByStringID(const std::vector<std::string>& params);
 
     bool OnDumpInfo(const std::vector<std::string>& params);
 
@@ -782,6 +795,15 @@ public:
         return containerHandler_;
     }
 
+    void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
+    {
+        singleHandTransform_ = singleHandTransform;
+    }
+
+    const SingleHandTransform& GetSingleHandTransform() const
+    {
+        return singleHandTransform_;
+    }
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
@@ -893,6 +915,7 @@ private:
 
     // for common handler
     WeakPtr<ContainerHandler> containerHandler_;
+    SingleHandTransform singleHandTransform_;
 };
 
 } // namespace OHOS::Ace::Platform
