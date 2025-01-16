@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_DATA_URL_ANALYZER_LOADER_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_DATA_URL_ANALYZER_LOADER_H
 
+#include <functional>
 #include <memory>
 
 #include "interfaces/inner_api/ace/ai/data_url_analyzer.h"

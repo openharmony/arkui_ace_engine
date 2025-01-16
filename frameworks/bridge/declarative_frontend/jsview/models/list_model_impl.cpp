@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::Framework {
 
-void ListModelImpl::Create()
+void ListModelImpl::Create(bool isCreateArc)
 {
     auto listComponent = AceType::MakeRefPtr<V2::ListComponent>();
     ViewStackProcessor::GetInstance()->ClaimElementId(listComponent);
@@ -65,7 +65,7 @@ void ListModelImpl::SetScrollBar(DisplayMode scrollBar)
     JSViewSetProperty(&V2::ListComponent::SetScrollBar, scrollBar);
 }
 
-void ListModelImpl::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void ListModelImpl::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge)
 {
     JSViewSetProperty(&V2::ListComponent::SetEdgeEffect, edgeEffect);
 }

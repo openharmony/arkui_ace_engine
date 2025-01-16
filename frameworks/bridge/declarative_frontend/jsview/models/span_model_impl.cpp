@@ -30,6 +30,11 @@ void SpanModelImpl::Create(const std::string& content)
     spanComponent->SetTextStyle(textStyle);
 }
 
+void SpanModelImpl::Create(const std::u16string& content)
+{
+    Create(UtfUtils::Str16ToStr8(content));
+}
+
 void SpanModelImpl::SetFont(const Font& value) {}
 
 void SpanModelImpl::SetFontSize(const Dimension& value)

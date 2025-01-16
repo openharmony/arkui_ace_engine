@@ -17,6 +17,7 @@
 
 #include "base/error/error_code.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #endif
@@ -277,5 +278,25 @@ RefPtr<OverlayManager> SheetManager::GetOverlayFromPage(int32_t rootNodeId, Root
     }
 #endif
     return nullptr;
+}
+
+bool SheetManager::RemoveSheetByESC()
+{
+    if (!sheetFocusId_.has_value()) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "focus sheet id is null, can't respond to esc");
+        return false;
+    }
+    auto sheetNode = FrameNode::GetFrameNode(V2::SHEET_PAGE_TAG, sheetFocusId_.value());
+    CHECK_NULL_RETURN(sheetNode, false);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetPattern, false);
+    if (sheetPattern->GetAnimationProcess()) {
+        TAG_LOGW(AceLogTag::ACE_SHEET, "sheet is closing by esc");
+        return false;
+    }
+    auto overlayManager = sheetPattern->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, false);
+    TAG_LOGI(AceLogTag::ACE_SHEET, "sheet will colse by esc, id is : %{public}d", sheetFocusId_.value());
+    return overlayManager->RemoveModalInOverlay();
 }
 } // namespace OHOS::Ace::NG

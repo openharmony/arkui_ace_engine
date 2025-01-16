@@ -143,7 +143,7 @@ const std::string CHECK_NEGATIVE_VALUE_FLOAT("-5.68vp");
 
 // check text
 const auto CHECK_TEXT("test_text");
-PreviewText PREVIEW_TEXT = { .offset = 1234, .value = "test_offset" };
+PreviewText PREVIEW_TEXT = { .offset = 1234, .value = u"test_offset" };
 const auto EMPTY_TEXT("");
 const auto ICON_DEFAULT_TEXT("0");
 const auto ICON_DEFAULT_SRC("resource:///ohos_test_image.svg");

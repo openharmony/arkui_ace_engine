@@ -125,7 +125,8 @@ CheckBoxGroupModifier::Parameters CheckBoxGroupCreateDefModifierParam()
     CheckBoxGroupModifier::Parameters parameters = { BORDER_WIDTH, BORDER_RADIUS, CHECK_STROKE, CHECKMARK_PAINTSIZE,
         HOVER_DURATION, HOVER_TO_TOUCH_DURATION, POINT_COLOR, ACTIVE_COLOR, INACTIVE_COLOR, SHADOW_COLOR,
         CLICK_EFFECT_COLOR, HOVER_COLOR, INACTIVE_POINT_COLOR, HOVER_RADIUS, HORIZONTAL_PADDING, VERTICAL_PADDING,
-        SHADOW_WIDTH_FORUPDATE, UIStatus::UNSELECTED, PADDING_SIZE, CheckBoxGroupPaintProperty::SelectStatus::NONE };
+        SHADOW_WIDTH_FORUPDATE, UIStatus::UNSELECTED, PADDING_SIZE, PADDING_SIZE,
+        CheckBoxGroupPaintProperty::SelectStatus::NONE };
 
     return parameters;
 }
@@ -2038,5 +2039,66 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupNGTest031, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_EQ(eventHub->GetGroupName(), "testGroupName");
+}
+
+/**
+ * @tc.name: CheckBoxGroupNGTest032
+ * @tc.desc: Test retrieval of group、selectall、selectedcolor、unselectedcoulor、mark and shape values.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupNGTest032, TestSize.Level1)
+{
+    auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(0);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    CheckBoxGroupModelNG::SetCheckboxGroupName(node, GROUP_NAME);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetCheckboxGroupName(node), GROUP_NAME);
+
+    CheckBoxGroupModelNG::SetSelectAll(node, SELECTED);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetSelect(node), SELECTED);
+
+    CheckBoxGroupModelNG::SetSelectedColor(node, SELECTED_COLOR);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetSelectedColor(node), SELECTED_COLOR);
+
+    CheckBoxGroupModelNG::SetUnSelectedColor(node, UNSELECTED_COLOR);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetUnSelectedColor(node), UNSELECTED_COLOR);
+
+    CheckBoxGroupModelNG::SetCheckMarkColor(node, CHECK_MARK_COLOR);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetCheckMarkColor(node), CHECK_MARK_COLOR);
+
+    CheckBoxGroupModelNG::SetCheckMarkSize(node, CHECK_MARK_SIZE);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetCheckMarkSize(node), CHECK_MARK_SIZE);
+
+    CheckBoxGroupModelNG::SetCheckMarkWidth(node, CHECK_MARK_WIDTH);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetCheckMarkWidth(node), CHECK_MARK_WIDTH);
+
+    CheckBoxGroupModelNG::SetCheckboxGroupStyle(node, CheckBoxStyle::SQUARE_STYLE);
+    EXPECT_EQ(CheckBoxGroupModelNG::GetCheckboxGroupStyle(node),  CheckBoxStyle::SQUARE_STYLE);
+}
+
+/**
+ * @tc.name: CheckBoxGroupEventTest003
+ * @tc.desc: Test CheckBoxGroup onChange event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupEventTest003, TestSize.Level1)
+{
+    auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(0);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+
+    bool isSelected = false;
+    auto onChange = [&isSelected](bool select) { isSelected = select; };
+    CheckBoxGroupModelNG::SetOnChange(node, onChange);
+
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxGroupEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    CheckboxGroupResult groupResult(
+        std::vector<std::string> {}, int(CheckBoxGroupPaintProperty::SelectStatus::ALL));
+    eventHub->UpdateChangeEvent(&groupResult);
+    EXPECT_EQ(isSelected, true);
 }
 } // namespace OHOS::Ace::NG

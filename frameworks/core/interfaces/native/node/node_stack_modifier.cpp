@@ -106,14 +106,40 @@ int32_t GetAlignContent(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIStackModifier* GetStackModifier()
 {
-    static const ArkUIStackModifier modifier = { SetAlignContent, ResetAlignContent, GetAlignContent };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIStackModifier modifier = {
+        .setAlignContent = SetAlignContent,
+        .resetAlignContent = ResetAlignContent,
+        .getAlignContent = GetAlignContent,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIStackModifier* GetCJUIStackModifier()
 {
-    static const CJUIStackModifier modifier = { SetAlignContent, ResetAlignContent, GetAlignContent };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIStackModifier modifier = {
+        .setAlignContent = SetAlignContent,
+        .resetAlignContent = ResetAlignContent,
+        .getAlignContent = GetAlignContent,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

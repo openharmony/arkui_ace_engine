@@ -553,7 +553,7 @@ HWTEST_F(PinchRecognizerTestNg, PinchGestureTest002, TestSize.Level1)
     auto onActionStart = [](GestureEvent& info) { return true; };
     auto onActionUpdate = [](GestureEvent& info) { return true; };
     auto onActionEnd = [](GestureEvent& info) { return true; };
-    auto onActionCancel = []() { return true; };
+    auto onActionCancel = [](GestureEvent& info) { return true; };
     pinchGesture->SetOnActionStartId(onActionStart);
     pinchGesture->SetOnActionUpdateId(onActionUpdate);
     pinchGesture->SetOnActionEndId(onActionEnd);

@@ -58,7 +58,7 @@ void ReplaceStringImpl(MutableStyledStringPeer* peer,
     const auto convStart = Converter::Convert<int32_t>(*start);
     const auto convLength = Converter::Convert<int32_t>(*length);
     if (mutableString->CheckRange(convStart, convLength)) {
-        const auto string = Converter::Convert<std::string>(*other);
+        const auto string = Converter::Convert<std::u16string>(*other);
         mutableString->ReplaceString(convStart, convLength, string);
     } else {
         // throw exception.
@@ -76,7 +76,7 @@ void InsertStringImpl(MutableStyledStringPeer* peer,
     auto strLength = mutableString->GetLength();
     const auto convStart = Converter::Convert<int32_t>(*start);
     if (convStart >= 0 && convStart <= strLength) {
-        const auto string = Converter::Convert<std::string>(*other);
+        const auto string = Converter::Convert<std::u16string>(*other);
         mutableString->InsertString(convStart, string);
     } else {
         // throw exception.

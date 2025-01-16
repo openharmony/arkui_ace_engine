@@ -32,6 +32,8 @@ constexpr float CURVE_DAMPING = 36.0f;
 constexpr float MEDIUM_SIZE = 0.6f;
 constexpr float MEDIUM_SIZE_PRE = 0.5f;
 constexpr float POPUP_LARGE_SIZE = 0.9f;
+constexpr int32_t SHEET_ANIMATION_DURATION = 580;
+
 enum SheetMode {
     MEDIUM,
     LARGE,
@@ -134,6 +136,7 @@ struct SheetStyle {
     std::optional<int32_t> instanceId; // uiContext instanceId
     std::optional<bool> enableHoverMode;
     std::optional<HoverModeAreaType> hoverModeArea;
+    std::optional<NG::BorderRadiusProperty> radius;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
@@ -149,7 +152,7 @@ struct SheetStyle {
                 instanceId == sheetStyle.instanceId && scrollSizeMode == sheetStyle.scrollSizeMode &&
                 sheetKeyboardAvoidMode == sheetStyle.sheetKeyboardAvoidMode &&
                 bottomOffset == sheetStyle.bottomOffset && enableHoverMode == sheetStyle.enableHoverMode &&
-                hoverModeArea == sheetStyle.hoverModeArea);
+                hoverModeArea == sheetStyle.hoverModeArea && radius == sheetStyle.radius);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -186,6 +189,7 @@ struct SheetStyle {
         bottomOffset = sheetStyle.bottomOffset.has_value() ? sheetStyle.bottomOffset : bottomOffset;
         enableHoverMode = sheetStyle.enableHoverMode.has_value() ? sheetStyle.enableHoverMode : enableHoverMode;
         hoverModeArea = sheetStyle.hoverModeArea.has_value() ? sheetStyle.hoverModeArea : hoverModeArea;
+        radius = sheetStyle.radius.has_value() ? sheetStyle.radius : radius;
     }
 };
 } // namespace OHOS::Ace::NG

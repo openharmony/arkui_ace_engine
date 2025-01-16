@@ -204,7 +204,7 @@ void Container::SetFontWeightScale(int32_t instanceId, float fontWeightScale)
 
 RefPtr<DisplayInfo> Container::GetDisplayInfo()
 {
-    return DisplayInfoUtils::GetInstance().GetDisplayInfo();
+    return DisplayInfoUtils::GetInstance().GetDisplayInfo(currentDisplayId_);
 }
 
 void Container::InitIsFoldable()

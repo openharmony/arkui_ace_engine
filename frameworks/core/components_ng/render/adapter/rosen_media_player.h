@@ -50,6 +50,7 @@ public:
     int32_t SetLooping(bool loop) override;
     int32_t SetPlaybackSpeed(float speed) override;
     int32_t SetSurface() override;
+    int32_t SetRenderFirstFrame(bool display) override;
     int32_t PrepareAsync() override;
     bool IsPlaying() override;
     int32_t Play() override;
@@ -57,6 +58,7 @@ public:
     int32_t Stop() override;
     int32_t Seek(int32_t mSeconds, OHOS::Ace::SeekMode mode) override;
     int32_t SetPlayRange(int64_t startTime, int64_t endTime) override;
+    int32_t SetParameter(const std::string& key, int64_t value) override;
 
 private:
     // Interim programme

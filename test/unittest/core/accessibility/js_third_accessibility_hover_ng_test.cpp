@@ -436,4 +436,5 @@ HWTEST_F(JsThirdAccessibilityHoverNgTest, JsThirdAccessibilityHoverNgTest007, Te
     // tbm  make sure check method;
     EXPECT_NE(frameNode, nullptr);
 }
+
 } // namespace OHOS::Ace::NG

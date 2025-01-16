@@ -30,7 +30,7 @@ constexpr uint32_t MAX_NUM_OF_IMAGE = 5;
 
 std::function<void()> SharedImageManager::GenerateClearImageDataCallback(const std::string& name, size_t dataSize)
 {
-    auto clearImageDataCallback = [wp = AceType::WeakClaim(this), picName = name, dataSize]() {
+    auto clearImageDataCallback = [wp = AceType::WeakClaim(this), picName = name]() {
         auto sharedImageManager = wp.Upgrade();
         if (!sharedImageManager) {
             return;

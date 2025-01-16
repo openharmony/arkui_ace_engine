@@ -46,9 +46,7 @@ public:
         return UIContentErrorCode::NO_ERRORS;
     }
     UIContentErrorCode InitializeByName(OHOS::Rosen::Window *window, const std::string &name,
-        napi_value storage) override {
-        return UIContentErrorCode::NO_ERRORS;
-    }
+        napi_value storage) override;
     void InitializeDynamic(int32_t hostInstanceId, const std::string& hapPath, const std::string& abcPath,
         const std::string& entryPoint, const std::vector<std::string>& registerComponents) override {}
     void Initialize(
@@ -173,6 +171,8 @@ public:
     }
 
 private:
+    UIContentErrorCode InitializeInner(
+        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
     UIContentErrorCode CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo,
         napi_value storage);
     void DestroyCallback() const;
@@ -181,6 +181,7 @@ private:
     int32_t instanceId_ = -1;
     void* runtime_ = nullptr;
     // All parameters that need to be passed.
+    std::string startUrl_;
     std::string assetPath_;
     std::string systemResourcesPath_;
     std::string appResourcesPath_;

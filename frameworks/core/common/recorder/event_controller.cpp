@@ -13,14 +13,20 @@
  * limitations under the License.
  */
 #include "core/common/recorder/event_controller.h"
+#include <cstdint>
+#include <vector>
 
 #include "base/thread/background_task_executor.h"
+#include "core/common/recorder/event_definition.h"
+#include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/common/recorder/web_event_recorder.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Recorder {
-constexpr int32_t PAGE_URL_SUFFIX_LENGTH = 3;
 constexpr uint32_t EXPOSURE_REGISTER_DELAY = 500;
+constexpr int32_t MAX_CACHE_SIZE = 5;
 
 struct ExposureWrapper {
     WeakPtr<NG::FrameNode> node;
@@ -46,15 +52,24 @@ void EventController::Register(const std::string& config, const std::shared_ptr<
         return;
     }
     client.observer = observer;
+    bool isWebEnable = client.config.IsCategoryEnable(static_cast<int32_t>(EventCategory::CATEGORY_WEB)) &&
+                       !client.config.GetWebJsCode().empty();
     std::unique_lock<std::shared_mutex> lock(cacheLock_);
     clientList_.emplace_back(std::move(client));
     lock.unlock();
-    bool isOriginEnable = EventRecorder::Get().IsExposureRecordEnable();
+    bool isOriginExposureEnable = EventRecorder::Get().IsExposureRecordEnable();
     NotifyConfigChange();
-    bool isCurrentEnable = EventRecorder::Get().IsExposureRecordEnable();
-    if (!isOriginEnable && isCurrentEnable) {
-        ApplyNewestConfig();
+    bool isExposureChanged = EventRecorder::Get().IsExposureRecordEnable() && !isOriginExposureEnable;
+    bool isWebChanged = false;
+    if (!hasWebProcessed_ && isWebEnable) {
+        isWebChanged = true;
+        hasWebProcessed_ = true;
+        cacheJsCode_ = client.config.GetWebJsCode();
     }
+    if (isExposureChanged || isWebChanged) {
+        ApplyNewestConfig(isExposureChanged, isWebChanged);
+    }
+    NotifyCacheEventsIfNeed();
     TAG_LOGI(AceLogTag::ACE_UIEVENT, "Register config end");
 }
 
@@ -62,18 +77,18 @@ void EventController::NotifyConfigChange()
 {
     std::shared_lock<std::shared_mutex> lock(cacheLock_);
     auto mergedConfig = std::make_shared<MergedConfig>();
-    EventSwitch eventSwitch;
+    int32_t size = static_cast<int32_t>(EventCategory::CATEGORY_END);
+    std::vector<bool> eventSwitch;
+    eventSwitch.resize(size, false);
+    eventSwitch[static_cast<int32_t>(EventCategory::CATEGORY_PAGE)] = true;
+    std::unordered_map<std::string, std::string> webIdentifierMap;
     for (auto&& client : clientList_) {
         if (!client.config.IsEnable()) {
             continue;
         }
-        eventSwitch.pageEnable = eventSwitch.pageEnable || client.config.IsCategoryEnable(EventCategory::CATEGORY_PAGE);
-        eventSwitch.exposureEnable =
-            eventSwitch.exposureEnable || client.config.IsCategoryEnable(EventCategory::CATEGORY_EXPOSURE);
-        eventSwitch.componentEnable =
-            eventSwitch.componentEnable || client.config.IsCategoryEnable(EventCategory::CATEGORY_COMPONENT);
-        eventSwitch.pageParamEnable =
-            eventSwitch.pageParamEnable || client.config.IsCategoryEnable(EventCategory::CATEGORY_PAGE_PARAM);
+        for (int32_t i = 0; i < size; i++) {
+            eventSwitch[i] = eventSwitch[i] || client.config.IsCategoryEnable(i);
+        }
         for (auto iter = client.config.GetConfig()->begin(); iter != client.config.GetConfig()->end(); iter++) {
             auto nodeIt = mergedConfig->shareNodes.find(iter->first);
             if (nodeIt != mergedConfig->shareNodes.end()) {
@@ -98,29 +113,57 @@ void EventController::NotifyConfigChange()
                 mergedConfig->exposureNodes.emplace(iter->first, std::move(exposureSet));
             }
         }
+        if (!client.config.GetWebCategory().empty()) {
+            webIdentifierMap[client.config.GetWebCategory()] = client.config.GetWebIdentifier();
+        }
     }
     NodeDataCache::Get().UpdateConfig(std::move(mergedConfig));
     EventRecorder::Get().UpdateEventSwitch(eventSwitch);
+    EventRecorder::Get().UpdateWebIdentifier(webIdentifierMap);
 }
 
-std::string GetPageUrlByContainerId(const int32_t containerId)
+bool IsAllowNotify(const EventConfig& config, EventCategory category, int32_t eventType,
+    const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
 {
-    auto container = Container::GetContainer(containerId);
-    CHECK_NULL_RETURN(container, "");
-    if (!container->IsUseNewPipeline()) {
-        return "";
+    auto enable = config.IsEnable() && config.IsCategoryEnable(static_cast<int32_t>(category));
+    if (!enable) {
+        return false;
     }
-    auto frontEnd = container->GetFrontend();
-    CHECK_NULL_RETURN(frontEnd, "");
-    auto pageUrl = frontEnd->GetCurrentPageUrl();
-    if (StringUtils::EndWith(pageUrl, ".js")) {
-        pageUrl = pageUrl.substr(0, pageUrl.length() - PAGE_URL_SUFFIX_LENGTH);
+    if (eventType == EventType::WEB_ACTION) {
+        return eventParams->count(KEY_WEB_CATEGORY) > 0 && eventParams->at(KEY_WEB_CATEGORY) == config.GetWebCategory();
     }
-    return pageUrl;
+    return true;
+}
+
+void EventController::NotifyCacheEventsIfNeed() const
+{
+    std::shared_lock<std::shared_mutex> lock(cacheLock_);
+    if (cacheEvents_.empty()) {
+        return;
+    }
+    BackgroundTaskExecutor::GetInstance().PostTask([events = cacheEvents_, client = clientList_.back()]() {
+        for (const auto& event : events) {
+            if (IsAllowNotify(client.config, event.category, event.eventType, event.eventParams)) {
+                client.observer->NotifyUIEvent(event.eventType, *event.eventParams);
+            }
+        }
+    });
+}
+
+inline void RecordWebEvent(const RefPtr<NG::UINode>& uiNode)
+{
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NG::Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto recorder = AceType::DynamicCast<WebEventRecorder>(pattern);
+    CHECK_NULL_VOID(recorder);
+    recorder->RecordWebEvent(false);
 }
 
 void GetMatchedNodes(const std::string& pageUrl, const RefPtr<NG::UINode>& root,
-    const std::unordered_set<ExposureCfg, ExposureCfgHash>& exposureSet, std::list<ExposureWrapper>& outputList)
+    const std::unordered_set<ExposureCfg, ExposureCfgHash>& exposureSet, std::list<ExposureWrapper>& outputList,
+    bool isWebChanged)
 {
     std::queue<RefPtr<NG::UINode>> elements;
     ExposureCfg targetCfg = { "", 0.0, 0 };
@@ -138,41 +181,44 @@ void GetMatchedNodes(const std::string& pageUrl, const RefPtr<NG::UINode>& root,
                         pageUrl, targetCfg.id, cfgIter->ratio, cfgIter->duration)));
             }
         }
+        if (isWebChanged && current->GetTag() == V2::WEB_ETS_TAG) {
+            RecordWebEvent(current);
+        }
         for (const auto& child : current->GetChildren()) {
             elements.push(child);
         }
     }
 }
 
-void EventController::ApplyNewestConfig() const
+void EventController::ApplyNewestConfig(bool isExposureChanged, bool isWebChanged) const
 {
+    TAG_LOGI(AceLogTag::ACE_UIEVENT, "ApplyNewestConfig isExposureChanged:%{public}d, isWebChanged:%{public}d",
+        isExposureChanged, isWebChanged);
     std::shared_lock<std::shared_mutex> lock(cacheLock_);
     if (clientList_.empty()) {
         return;
     }
     auto containerId = EventRecorder::Get().GetContainerId();
     auto config = clientList_.back().config.GetConfig();
- 
+
     auto context = NG::PipelineContext::GetContextByContainerId(containerId);
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask([config]() { EventController::Get().ApplyExposureCfgInner(config); },
+    taskExecutor->PostDelayedTask(
+        [config, isExposureChanged, isWebChanged]() {
+            EventController::Get().ApplyExposureCfgInner(config, isExposureChanged, isWebChanged);
+            EventController::Get().cacheJsCode_ = "";
+        },
         TaskExecutor::TaskType::UI, EXPOSURE_REGISTER_DELAY, "EventController");
 }
- 
-void EventController::ApplyExposureCfgInner(const std::shared_ptr<Config>& config) const
+
+void EventController::ApplyExposureCfgInner(
+    const std::shared_ptr<Config>& config, bool isExposureChanged, bool isWebChanged) const
 {
     auto containerId = EventRecorder::Get().GetContainerId();
     auto pageUrl = GetPageUrlByContainerId(containerId);
     if (pageUrl.empty()) {
-        return;
-    }
-    auto pageIter = config->find(pageUrl);
-    if (pageIter == config->end()) {
-        return;
-    }
-    if (pageIter->second.exposureCfgs.empty()) {
         return;
     }
     auto context = NG::PipelineContext::GetContextByContainerId(containerId);
@@ -180,10 +226,16 @@ void EventController::ApplyExposureCfgInner(const std::shared_ptr<Config>& confi
     auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
     std::unordered_set<ExposureCfg, ExposureCfgHash> exposureSet;
-    std::for_each(pageIter->second.exposureCfgs.begin(), pageIter->second.exposureCfgs.end(),
-        [&exposureSet](const std::list<ExposureCfg>::value_type& cfg) { exposureSet.emplace(cfg); });
     std::list<ExposureWrapper> targets;
-    GetMatchedNodes(pageUrl, rootNode, exposureSet, targets);
+
+    if (isExposureChanged) {
+        auto pageIter = config->find(pageUrl);
+        if (pageIter != config->end() && pageIter->second.exposureCfgs.size() > 0) {
+            std::for_each(pageIter->second.exposureCfgs.begin(), pageIter->second.exposureCfgs.end(),
+                [&exposureSet](const std::list<ExposureCfg>::value_type& cfg) { exposureSet.emplace(cfg); });
+        }
+    }
+    GetMatchedNodes(pageUrl, rootNode, exposureSet, targets, isWebChanged);
     for (auto& item : targets) {
         item.processor->SetContainerId(containerId);
         auto node = item.node.Upgrade();
@@ -196,7 +248,7 @@ void EventController::Unregister(const std::shared_ptr<UIEventObserver>& observe
 {
     std::unique_lock<std::shared_mutex> lock(cacheLock_);
     auto iter = std::remove_if(clientList_.begin(), clientList_.end(),
-        [&observer](UIEventClient client) { return client.observer == observer; });
+        [&observer](const UIEventClient& client) { return client.observer == observer; });
     bool change = iter != clientList_.end();
     clientList_.erase(iter, clientList_.end());
     lock.unlock();
@@ -205,11 +257,29 @@ void EventController::Unregister(const std::shared_ptr<UIEventObserver>& observe
     }
 }
 
+void EventController::CacheEventIfNeed(EventCategory category, int32_t eventType,
+    const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
+{
+    if (cacheEvents_.empty()) {
+        if (hasCached_) {
+            return;
+        } else {
+            cacheEvents_.emplace_back(CacheEvent { category, eventType, eventParams });
+        }
+    } else if (cacheEvents_.size() < MAX_CACHE_SIZE) {
+        cacheEvents_.emplace_back(CacheEvent { category, eventType, eventParams });
+    } else {
+        hasCached_ = true;
+        cacheEvents_.clear();
+    }
+}
+
 void EventController::NotifyEvent(EventCategory category, int32_t eventType,
     const std::shared_ptr<std::unordered_map<std::string, std::string>>& eventParams)
 {
     {
         std::shared_lock<std::shared_mutex> lock(cacheLock_);
+        CacheEventIfNeed(category, eventType, eventParams);
         if (clientList_.empty()) {
             return;
         }
@@ -224,9 +294,22 @@ void EventController::NotifyEventSync(EventCategory category, int32_t eventType,
 {
     std::shared_lock<std::shared_mutex> lock(cacheLock_);
     for (auto&& client : clientList_) {
-        if (client.config.IsEnable() && client.config.IsCategoryEnable(category)) {
+        if (IsAllowNotify(client.config, category, eventType, eventParams)) {
             client.observer->NotifyUIEvent(eventType, *eventParams);
         }
     }
+}
+
+std::vector<std::string> EventController::GetWebJsCodeList()
+{
+    std::vector<std::string> codeList;
+    std::shared_lock<std::shared_mutex> lock(cacheLock_);
+    for (auto&& client : clientList_) {
+        if (client.config.IsCategoryEnable(static_cast<int32_t>(EventCategory::CATEGORY_WEB)) &&
+            !client.config.GetWebJsCode().empty()) {
+            codeList.emplace_back(client.config.GetWebJsCode());
+        }
+    }
+    return codeList;
 }
 } // namespace OHOS::Ace::Recorder

@@ -17,12 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_POPUP_POPUP_THEME_H
 
 #include "base/geometry/dimension.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_constants_defines.h"
+#include "core/components/common/properties/decoration.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -80,8 +82,8 @@ public:
             theme->buttonHoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->buttonPressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
             theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
-            auto popupBorderRadius = pattern->GetAttr<Dimension>("popup_border_radius", BORDER_RADIUS_POPUP);
-            theme->radius_ = Radius(popupBorderRadius, popupBorderRadius);
+            auto popupBorderRadius = pattern->GetAttr<Dimension>(POPUP_BORDER_RADIUS, BORDER_RADIUS_POPUP);
+            theme->radius_ = Radius(popupBorderRadius);
             theme->padding_ = Edge(pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_VERTICAL_PADDING, 12.0_vp),
                 pattern->GetAttr<Dimension>(POPUP_HORIZONTAL_PADDING, 16.0_vp),
@@ -95,6 +97,24 @@ public:
             theme->buttonFontColor_ = pattern->GetAttr<Color>("text_primary_activated_color", Color::WHITE);
             theme->fontPrimaryColor_ = pattern->GetAttr<Color>("text_primary_color", Color::WHITE);
             theme->fontSecondaryColor_ = pattern->GetAttr<Color>("text_secondary_color", Color::WHITE);
+            theme->popupShadowStyle_ = static_cast<ShadowStyle>(
+                pattern->GetAttr<int>("popup_default_shadow_style", static_cast<int>(ShadowStyle::OuterDefaultMD)));
+            theme->popupBackgroundBlurStyle_ = pattern->GetAttr<int>(
+                "popup_background_blur_style", static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK));
+            ParseAdditionalStylePattern(pattern, theme);
+        }
+        void ParseAdditionalStylePattern(
+            const RefPtr<ThemeStyle>& pattern, const RefPtr<PopupTheme>& theme) const
+        {
+            theme->targetSpace_ = pattern->GetAttr<Dimension>("popup_target_space", TARGET_SPACE);
+            theme->defaultBGColor_ = pattern->GetAttr<Color>("popup_default_bg_color", Color::TRANSPARENT);
+            theme->borderColor_ = pattern->GetAttr<Color>("popup_border_color", Color::BLACK);
+            theme->borderWidth_ = pattern->GetAttr<Dimension>("popup_border_width", 0.0_vp);
+            theme->minHeight_ = pattern->GetAttr<Dimension>("popup_min_height", 0.0_vp);
+            theme->popupMaxColumns_ = static_cast<uint32_t>(pattern->GetAttr<double>("popup_max_columns", 0));
+            theme->bgThemeColorMode_ = static_cast<uint32_t>(pattern->GetAttr<double>("popup_bg_theme_color_mode", 0));
+            theme->bubbleMiniMumHeight_ =
+                pattern->GetAttr<Dimension>("bubble_min_mum_height", theme->bubbleMiniMumHeight_);
         }
     };
 
@@ -328,6 +348,46 @@ public:
         return fontSecondaryColor_;
     }
 
+    ShadowStyle GetPopupShadowStyle() const
+    {
+        return popupShadowStyle_;
+    }
+
+    int GetPopupBackgroundBlurStyle() const
+    {
+        return popupBackgroundBlurStyle_;
+    }
+
+    const Color& GetDefaultBGColor() const
+    {
+        return defaultBGColor_;
+    }
+
+    const Color& GetBorderColor() const
+    {
+        return borderColor_;
+    }
+
+    const Dimension& GetBorderWidth() const
+    {
+        return borderWidth_;
+    }
+
+    const Dimension& GetMinHeight() const
+    {
+        return minHeight_;
+    }
+
+    uint32_t GetMaxColumns() const
+    {
+        return popupMaxColumns_;
+    }
+
+    uint32_t GetBgThemeColorMode() const
+    {
+        return bgThemeColorMode_;
+    }
+
 protected:
     PopupTheme() = default;
 
@@ -379,6 +439,14 @@ private:
     Color buttonFontColor_;
     Color fontPrimaryColor_;
     Color fontSecondaryColor_;
+    ShadowStyle popupShadowStyle_ = ShadowStyle::OuterDefaultMD;
+    int popupBackgroundBlurStyle_ = static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK);
+    Color defaultBGColor_;
+    Color borderColor_;
+    Dimension borderWidth_ = 0.0_vp;
+    Dimension minHeight_ = 0.0_vp;
+    uint32_t popupMaxColumns_ = 0;
+    uint32_t bgThemeColorMode_ = 0;
 };
 
 } // namespace OHOS::Ace

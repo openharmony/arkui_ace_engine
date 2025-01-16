@@ -17,8 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_TOGGLE_CHECKBOX_ACCESSIBILITY_PROPERTY_H
 
 #include "core/components_ng/pattern/checkbox/checkbox_accessibility_property.h"
-
+#if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+#include "accessibility_element_info.h"
+#endif
 namespace OHOS::Ace::NG {
+const std::string CHECKBOX = "0";
 class ToggleCheckBoxAccessibilityProperty : public CheckBoxAccessibilityProperty {
     DECLARE_ACE_TYPE(ToggleCheckBoxAccessibilityProperty, CheckBoxAccessibilityProperty);
 
@@ -27,9 +30,11 @@ public:
 
     ~ToggleCheckBoxAccessibilityProperty() override = default;
 
-    std::string GetHintText() const override
+    void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) override
     {
-        return V2::CHECK_BOX_ETS_TAG;
+    #if defined(OHOS_STANDARD_SYSTEM) and !defined(ACE_UNITTEST)
+        extraElementInfo.SetExtraElementInfo("ToggleType", CHECKBOX);
+    #endif
     }
 
 private:

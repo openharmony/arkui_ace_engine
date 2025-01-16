@@ -675,4 +675,55 @@ HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest012, TestSize.Level1)
     EXPECT_FALSE(togglebuttonPattern->isOn_);
 }
 
+/**
+ * @tc.name: ToggleButtonPatternTest013
+ * @tc.desc: test ToggleButtonPattern::SetFocusButtonStyle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleButtonTestNg, ToggleButtonPatternTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create bubble and get frameNode.
+     */
+    TestProperty testProperty;
+    testProperty.isOn = std::make_optional(IS_ON);
+    RefPtr<FrameNode> frameNode = CreateToggleButtonFrameNode(testProperty);
+    ASSERT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. get pattern and update frameNode.
+     * @tc.expected: step2. related function is called.
+     */
+    auto togglePattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    ASSERT_NE(togglePattern, nullptr);
+
+    // set toggleTheme to themeManager before using themeManager to get toggleTheme
+    auto themeManagerSecond = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerSecond);
+    EXPECT_CALL(*themeManagerSecond, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<ToggleTheme>()));
+
+    /**
+     * @tc.steps: step3. test toggleButtonPattern SetFocusButtonStyle function.
+     * @tc.expected: step3. check whether the function is executed.
+     */
+    RefPtr<FrameNode> childrenNode =
+        FrameNode::GetOrCreateFrameNode("childTag", 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    frameNode->children_.emplace_back(childrenNode);
+    togglePattern->OnModifyDone();
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<ToggleTheme>();
+    ASSERT_NE(theme, nullptr);
+    auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    ASSERT_NE(textNode, nullptr);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    togglePattern->SetFocusButtonStyle(textNode, textLayoutProperty, true, renderContext);
+
+    EXPECT_EQ(textLayoutProperty->GetTextColor(), theme->GetTextColorFocus());
+    EXPECT_EQ(renderContext->GetBackgroundColor(), theme->GetCheckedColor());
+}
 } // namespace OHOS::Ace::NG

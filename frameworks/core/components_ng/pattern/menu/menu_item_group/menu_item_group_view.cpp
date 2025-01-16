@@ -23,6 +23,7 @@ namespace OHOS::Ace::NG {
 namespace {
 void UpdateRowPadding(const RefPtr<FrameNode>& row)
 {
+    CHECK_NULL_VOID(row);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
@@ -31,7 +32,8 @@ void UpdateRowPadding(const RefPtr<FrameNode>& row)
 
     auto layoutProps = row->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
-    layoutProps->UpdatePadding(PaddingProperty { padding, padding, std::nullopt, std::nullopt });
+    layoutProps->UpdatePadding(PaddingProperty { padding, padding, std::nullopt, std::nullopt, std::nullopt,
+        std::nullopt });
 }
 } // namespace
 
@@ -56,6 +58,7 @@ RefPtr<FrameNode> MenuItemGroupView::CreateFrameNode(int32_t nodeId)
 
 void MenuItemGroupView::SetHeader(const RefPtr<UINode>& header)
 {
+    CHECK_NULL_VOID(header);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
@@ -86,6 +89,7 @@ void MenuItemGroupView::SetHeader(FrameNode* frameNode, const std::optional<std:
     UpdateRowPadding(row);
     content->MountToParent(row);
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
     layoutProps->UpdateContent(header.value_or(""));
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -107,6 +111,7 @@ void MenuItemGroupView::SetHeader(FrameNode* frameNode, const std::optional<std:
 
 void MenuItemGroupView::SetFooter(const RefPtr<UINode>& footer)
 {
+    CHECK_NULL_VOID(footer);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<MenuItemGroupPattern>();
@@ -137,6 +142,7 @@ void MenuItemGroupView::SetFooter(FrameNode* frameNode, const std::optional<std:
     UpdateRowPadding(row);
     content->MountToParent(row);
     auto layoutProps = content->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
     layoutProps->UpdateContent(footer.value_or(""));
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

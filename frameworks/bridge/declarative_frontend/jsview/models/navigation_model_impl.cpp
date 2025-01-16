@@ -78,6 +78,11 @@ void NavigationModelImpl::SetSubtitle(const std::string& subtitle)
     navigationContainer->GetDeclaration()->subTitle = subtitle;
 }
 
+void NavigationModelImpl::SetEnableModeChangeAnimation(bool isEnable)
+{
+    return;
+}
+
 void NavigationModelImpl::SetHideTitleBar(bool hideTitleBar, bool animated)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
@@ -219,7 +224,7 @@ void NavigationModelImpl::SetNavBarPosition(NG::NavBarPosition mode)
     return;
 }
 
-void NavigationModelImpl::SetNavBarWidth(const Dimension& value)
+void NavigationModelImpl::SetNavBarWidth(const Dimension& value, bool isDoubleBind)
 {
     return;
 }

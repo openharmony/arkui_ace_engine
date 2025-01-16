@@ -41,6 +41,11 @@ public:
         return true;
     }
 
+    bool IsSyntaxNode() const override
+    {
+        return true;
+    }
+
     void AttachNodeContent(NodeContent* content)
     {
         CHECK_NULL_VOID(content);

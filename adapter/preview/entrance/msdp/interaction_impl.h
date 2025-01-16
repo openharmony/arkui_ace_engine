@@ -59,6 +59,8 @@ public:
     int32_t RegisterCoordinationListener(std::function<void()> dragOutCallback) override;
 
     int32_t UnRegisterCoordinationListener() override;
+
+    int32_t SetDraggableState(bool state) override;
 };
 
 } // namespace OHOS::Ace

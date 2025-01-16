@@ -31,6 +31,16 @@
 #include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
+
+struct SvgTranslateProcessInfo {
+    SvgTranslateProcessInfo() = default;
+    SvgTranslateProcessInfo(RefPtr<SvgNode> currentNode, const SkDOM::Node* xmlNode)
+        : currentNode(currentNode), xmlNode(xmlNode)
+    {}
+    RefPtr<SvgNode> currentNode = nullptr; // The SVG node currently being processed
+    const SkDOM::Node* xmlNode = nullptr;
+};
+
 class SvgDom : public SvgDomBase {
     DECLARE_ACE_TYPE(SvgDom, SvgDomBase);
 
@@ -66,6 +76,7 @@ protected:
 
 private:
     RefPtr<SvgNode> TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& parent);
+    RefPtr<SvgNode> CreateSvgNodeFromDom(const SkDOM& dom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& parent);
     void ParseAttrs(const SkDOM& xmlDom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& svgNode);
     void SetAttrValue(const std::string& name, const std::string& value, const RefPtr<SvgNode>& svgNode);
     void ParseIdAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::string& value);

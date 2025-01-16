@@ -856,7 +856,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeGestureTest001, TestSize.Level1)
      */
     std::unique_ptr<GestureEventFunc> onActionId;
     std::unique_ptr<GestureEventFunc> onActionEndId;
-    std::unique_ptr<GestureEventNoParameter> onActionCancelId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
     swipeGesture.onActionId_ = std::move(onActionId);
     swipeGesture.onActionEndId_ = std::move(onActionEndId);
     swipeGesture.onActionCancelId_ = std::move(onActionCancelId);
@@ -899,7 +899,7 @@ HWTEST_F(SwipeRecognizerTestNg, SwipeGestureCreateRecognizerTest001, TestSize.Le
      */
     std::unique_ptr<GestureEventFunc> onActionId;
     std::unique_ptr<GestureEventFunc> onActionEndId;
-    std::unique_ptr<GestureEventNoParameter> onActionCancelId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
     swipeGesture.onActionId_ = std::move(onActionId);
     swipeGesture.onActionEndId_ = std::move(onActionEndId);
     swipeGesture.onActionCancelId_ = std::move(onActionCancelId);

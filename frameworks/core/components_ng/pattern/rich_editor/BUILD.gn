@@ -15,6 +15,7 @@ import("../../components.gni")
 
 build_component_ng("rich_editor_pattern_ng") {
   sources = [
+    "one_step_drag_controller.cpp",
     "paragraph_manager.cpp",
     "rich_editor_accessibility_property.cpp",
     "rich_editor_base_controller.cpp",

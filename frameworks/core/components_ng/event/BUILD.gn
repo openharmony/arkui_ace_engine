@@ -20,6 +20,7 @@ build_component_ng("event_ng") {
     "drag_event.cpp",
     "event_hub.cpp",
     "focus_box.cpp",
+    "focus_event_handler.cpp",
     "focus_hub.cpp",
     "gesture_event_hub.cpp",
     "gesture_event_hub_drag.cpp",

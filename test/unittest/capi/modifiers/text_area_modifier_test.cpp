@@ -258,14 +258,15 @@ std::vector<DecorationStyleTestStep> TEXT_DECORATION_STYLE_TEST_PLAN = {
 };
 
 // events
-const auto CHECK_TEXT("test_text");
-const auto ERROR_TEXT("test_error_text");
-PreviewText PREVIEW_TEXT = { .offset = 1234, .value = "test_offset" };
-const auto EMPTY_TEXT("");
+const auto CHECK_TEXT(u"test_text");
+const auto ERROR_TEXT(u"test_error_text");
+PreviewText PREVIEW_TEXT = { .offset = 1234, .value = u"test_offset" };
+const auto EMPTY_TEXT(u"");
 
 bool g_isEditChangeTest(true);
-std::string g_EventTestString("");
-std::string g_EventErrorTestString("");
+std::u16string g_EventTestString(u"");
+std::u16string g_EventErrorTestString(u"");
+Ark_EnterKeyType g_EventTestKey{};
 int32_t g_EventTestOffset(0);
 int32_t g_startValue(0);
 int32_t g_endValue(0);
@@ -280,7 +281,7 @@ GENERATED_ArkUITextAreaEventsReceiver recv {
         },
     .onSubmit0 =
         [](Ark_Int32 nodeId, const Ark_EnterKeyType enterKey) {
-            g_EventTestString = std::to_string(enterKey);
+            g_EventTestKey = enterKey;
         },
     .onChange =
         [](Ark_Int32 nodeId, const Ark_String value, const Opt_PreviewText previewText) {
@@ -299,26 +300,26 @@ GENERATED_ArkUITextAreaEventsReceiver recv {
         },
     .onCopy =
         [](Ark_Int32 nodeId, Ark_String value) {
-            auto textString = Converter::Convert<std::string>(value);
+            auto textString = Converter::Convert<std::u16string>(value);
             g_EventTestString = textString;
         },
     .onCut =
         [](Ark_Int32 nodeId, Ark_String value) {
-            g_EventTestString = Converter::Convert<std::string>(value);
+            g_EventTestString = Converter::Convert<std::u16string>(value);
         },
     .onWillInsert =
         [](Ark_Int32 nodeId, const Ark_InsertValue data) {
-            g_EventTestString = Converter::Convert<std::string>(data.insertValue);
+            g_EventTestString = Converter::Convert<std::u16string>(data.insertValue);
             g_EventTestOffset = Converter::Convert<int32_t>(data.insertOffset);
         },
     .onDidInsert =
         [](Ark_Int32 nodeId, const Ark_InsertValue data) {
-            g_EventTestString = Converter::Convert<std::string>(data.insertValue);
+            g_EventTestString = Converter::Convert<std::u16string>(data.insertValue);
             g_EventTestOffset = Converter::Convert<int32_t>(data.insertOffset);
         },
     .onWillDelete =
         [](Ark_Int32 nodeId, const Ark_DeleteValue data) {
-            g_EventTestString = Converter::Convert<std::string>(data.deleteValue);
+            g_EventTestString = Converter::Convert<std::u16string>(data.deleteValue);
             g_EventTestOffset = Converter::Convert<int32_t>(data.deleteOffset);
             auto willDeleteDirection = Converter::OptConvert<TextDeleteDirection>(data.direction);
             if (willDeleteDirection) {
@@ -327,7 +328,7 @@ GENERATED_ArkUITextAreaEventsReceiver recv {
         },
     .onDidDelete =
         [](Ark_Int32 nodeId, const Ark_DeleteValue data) {
-            g_EventTestString = Converter::Convert<std::string>(data.deleteValue);
+            g_EventTestString = Converter::Convert<std::u16string>(data.deleteValue);
             g_EventTestOffset = Converter::Convert<int32_t>(data.deleteOffset);
             auto didDeleteDirection = Converter::OptConvert<TextDeleteDirection>(data.direction);
             if (didDeleteDirection) {
@@ -337,7 +338,7 @@ GENERATED_ArkUITextAreaEventsReceiver recv {
 #ifdef WRONG_CALLBACK
     .inputFilter =
         [](Ark_Int32 nodeId, const Ark_String data) {
-            g_EventErrorTestString = Converter::Convert<std::string>(data);
+            g_EventErrorTestString = Converter::Convert<std::u16string>(data);
             g_EventTestString = g_EventErrorTestString;
         }
 #endif
@@ -655,23 +656,23 @@ HWTEST_F(TextAreaModifierTest, setOnSubmitTest, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     TextFieldCommonEvent event;
     eventHub->FireOnSubmit(111, event);
-    EXPECT_EQ(g_EventTestString, "-1");
+    EXPECT_EQ(g_EventTestKey, -1);
     eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEXT, event);
-    EXPECT_EQ(g_EventTestString, "5");
+    EXPECT_EQ(g_EventTestKey, 5);
     eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_GO, event);
-    EXPECT_EQ(g_EventTestString, "2");
+    EXPECT_EQ(g_EventTestKey, 2);
     eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_SEARCH, event);
-    EXPECT_EQ(g_EventTestString, "3");
+    EXPECT_EQ(g_EventTestKey, 3);
     eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_SEND, event);
-    EXPECT_EQ(g_EventTestString, "4");
+    EXPECT_EQ(g_EventTestKey, 4);
     eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEXT, event);
-    EXPECT_EQ(g_EventTestString, "5");
+    EXPECT_EQ(g_EventTestKey, 5);
     eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_DONE, event);
-    EXPECT_EQ(g_EventTestString, "6");
+    EXPECT_EQ(g_EventTestKey, 6);
     eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_PREVIOUS, event);
-    EXPECT_EQ(g_EventTestString, "7");
+    EXPECT_EQ(g_EventTestKey, 7);
     eventHub->FireOnSubmit(ARK_ENTER_KEY_TYPE_NEW_LINE, event);
-    EXPECT_EQ(g_EventTestString, "8");
+    EXPECT_EQ(g_EventTestKey, 8);
 }
 
 /**
@@ -681,7 +682,7 @@ HWTEST_F(TextAreaModifierTest, setOnSubmitTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setOnChangeTest, TestSize.Level1)
 {
-    g_EventTestString = "";
+    g_EventTestString = u"";
     g_EventTestOffset = 0;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
@@ -691,7 +692,7 @@ HWTEST_F(TextAreaModifierTest, setOnChangeTest, TestSize.Level1)
     EditableTextOnChangeCallback func{};
     modifier_->setOnChange(node_, &func);
     textFieldEventHub->FireOnChange(CHECK_TEXT, PREVIEW_TEXT);
-    std::string checkString = CHECK_TEXT;
+    std::u16string checkString = CHECK_TEXT;
     checkString.append(PREVIEW_TEXT.value);
     EXPECT_EQ(g_EventTestString, checkString);
     EXPECT_EQ(g_EventTestOffset, PREVIEW_TEXT.offset);
@@ -1070,7 +1071,7 @@ HWTEST_F(TextAreaModifierTest, setOnWillInsertTest, TestSize.Level1)
     auto onWillInsertHandler = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_InsertValue data,
         const Callback_Boolean_Void cbReturn) {
         EXPECT_EQ(resourceId, expectedResId);
-        EXPECT_EQ(Converter::Convert<std::string>(data.insertValue), CHECK_TEXT);
+        EXPECT_EQ(Converter::Convert<std::u16string>(data.insertValue), CHECK_TEXT);
         auto result = Converter::Convert<int32_t>(data.insertOffset) > 0;
         CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
     };
@@ -1101,7 +1102,7 @@ HWTEST_F(TextAreaModifierTest, setOnWillInsertTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setOnDidInsertTest, TestSize.Level1)
 {
-    g_EventTestString = "";
+    g_EventTestString = u"";
     g_EventTestOffset = 0;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
@@ -1134,7 +1135,7 @@ HWTEST_F(TextAreaModifierTest, setOnWillDeleteTest, TestSize.Level1)
     auto onWillDeleteHandler = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_DeleteValue data, const Callback_Boolean_Void cbReturn) {
         EXPECT_EQ(resourceId, expectedResId);
-        EXPECT_EQ(Converter::Convert<std::string>(data.deleteValue), CHECK_TEXT);
+        EXPECT_EQ(Converter::Convert<std::u16string>(data.deleteValue), CHECK_TEXT);
         EXPECT_EQ(Converter::Convert<int32_t>(data.deleteOffset), expectedOffset);
         auto willDeleteDirection = Converter::OptConvert<TextDeleteDirection>(data.direction);
         auto result = willDeleteDirection == TextDeleteDirection::FORWARD;
@@ -1171,7 +1172,7 @@ HWTEST_F(TextAreaModifierTest, setOnWillDeleteTest, TestSize.Level1)
  */
 HWTEST_F(TextAreaModifierTest, setOnDidDeleteTest, TestSize.Level1)
 {
-    g_EventTestString = "";
+    g_EventTestString = u"";
     g_EventTestOffset = 0;
     g_deleteDirection = TextDeleteDirection::FORWARD;
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -1321,8 +1322,8 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setCopyOptionTest, TestSize.Level1)
 HWTEST_F(TextAreaModifierTest, DISABLED_setInputFilterTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("inputFilter");
-    g_EventTestString = "";
-    g_EventErrorTestString = "";
+    g_EventTestString = u"";
+    g_EventErrorTestString = u"";
     ASSERT_NE(modifier_->setInputFilter, nullptr);
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -1330,12 +1331,13 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setInputFilterTest, TestSize.Level1)
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
 
-    auto sendString = Converter::ArkValue<Ark_String>(ERROR_TEXT);
+    Converter::ConvContext ctx;
+    auto sendString = Converter::ArkValue<Ark_String>(std::u16string(ERROR_TEXT), &ctx);
     auto sendResource = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(sendString);
     modifier_->setInputFilter(node_, &sendResource, &func);
     textFieldEventHub->FireOnInputFilterError(ERROR_TEXT);
     auto filterValue = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(filterValue, ERROR_TEXT);
+    EXPECT_EQ(StringUtils::Str8ToStr16(filterValue), ERROR_TEXT);
     EXPECT_EQ(g_EventTestString, ERROR_TEXT);
     EXPECT_EQ(g_EventErrorTestString, ERROR_TEXT);
 }

@@ -24,7 +24,7 @@ namespace SpanModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto spanNode = SpanModelNG::CreateSpanNode(id, "");
+    auto spanNode = SpanModelNG::CreateSpanNode(id, u"");
     CHECK_NULL_RETURN(spanNode, nullptr);
     spanNode->IncRefCount();
     return AceType::RawPtr(spanNode);
@@ -37,7 +37,7 @@ void SetSpanOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto text = Converter::OptConvert<std::string>(*value);
+    auto text = Converter::OptConvert<std::u16string>(*value);
     SpanModelNG::InitSpan(frameNode, text);
 }
 } // SpanInterfaceModifier

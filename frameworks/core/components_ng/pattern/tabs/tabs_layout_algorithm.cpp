@@ -93,9 +93,7 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
-    if (!frameSize.IsPositive()) {
-        return;
-    }
+
     auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
@@ -145,6 +143,12 @@ std::vector<OffsetF> TabsLayoutAlgorithm::LayoutOffsetList(
     OffsetF tabBarOffset;
     OffsetF dividerOffset;
     OffsetF swiperOffset;
+    if (!frameSize.IsPositive()) {
+        offsetList.emplace_back(swiperOffset);
+        offsetList.emplace_back(dividerOffset);
+        offsetList.emplace_back(tabBarOffset);
+        return offsetList;
+    }
     auto axis = GetAxis(layoutWrapper);
     auto barPosition = GetBarPosition(layoutWrapper);
     auto divider = GetDivider(layoutWrapper);

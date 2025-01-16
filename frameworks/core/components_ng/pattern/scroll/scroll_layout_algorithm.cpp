@@ -108,7 +108,6 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID((scrollNode && geometryNode && childWrapper));
-    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scrollNode->GetPattern());
     auto childGeometryNode = childWrapper->GetGeometryNode();
     CHECK_NULL_VOID(childGeometryNode);
     auto size = geometryNode->GetFrameSize();
@@ -120,11 +119,11 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto childSize = childGeometryNode->GetMarginFrameSize();
     auto contentEndOffset = layoutProperty->GetScrollContentEndOffsetValue(.0f);
     scrollableDistance_ = GetMainAxisSize(childSize, axis) - GetMainAxisSize(viewPort_, axis) + contentEndOffset;
-    if (!scrollPattern->CanOverScroll(scrollPattern->GetScrollSource())) {
+    if (UnableOverScroll(layoutWrapper)) {
         if (scrollableDistance_ > 0.0f) {
             currentOffset_ = std::clamp(currentOffset_, -scrollableDistance_, 0.0f);
         } else {
-            currentOffset_ = std::clamp(currentOffset_, 0.0f, -scrollableDistance_);
+            currentOffset_ = Positive(currentOffset_) ? 0.0f : std::clamp(currentOffset_, 0.0f, -scrollableDistance_);
         }
     }
     viewPortExtent_ = childSize;
@@ -148,6 +147,16 @@ void ScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     childGeometryNode->SetMarginFrameOffset(padding.Offset() + currentOffset + alignmentPosition);
     childWrapper->Layout();
     UpdateOverlay(layoutWrapper);
+}
+
+bool ScrollLayoutAlgorithm::UnableOverScroll(LayoutWrapper* layoutWrapper) const
+{
+    auto scrollNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(scrollNode, false);
+    auto scrollPattern = AceType::DynamicCast<ScrollPattern>(scrollNode->GetPattern());
+    return (Positive(currentOffset_) && !scrollPattern->CanOverScrollStart(scrollPattern->GetScrollSource())) ||
+           (Negative(currentOffset_) && GreatNotEqual(-currentOffset_, scrollableDistance_) &&
+               !scrollPattern->CanOverScrollEnd(scrollPattern->GetScrollSource()));
 }
 
 void ScrollLayoutAlgorithm::UpdateOverlay(LayoutWrapper* layoutWrapper)

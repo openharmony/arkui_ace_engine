@@ -105,8 +105,10 @@ private:
         Recorder::EventParamsBuilder builder;
         auto host = GetFrameNode();
         if (host) {
-            auto id = host->GetInspectorIdValue("");
-            builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
+            builder.SetId(host->GetInspectorIdValue(""))
+                .SetType(host->GetHostTag())
+                .SetHost(host)
+                .SetDescription(host->GetAutoEventParamValue(""));
         }
         builder.SetEventType(eventType).SetIndex(index);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));

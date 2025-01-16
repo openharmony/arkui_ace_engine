@@ -37,7 +37,7 @@ void OnTextChangedListenerImpl::InsertText(const std::u16string& text)
         auto client = textFieldPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        client->InsertValue(StringUtils::Str16ToStr8(text), true);
+        client->InsertValue(text, true);
     };
     PostTaskToUI(task, "ArkUITextFieldInsertText");
 }
@@ -298,10 +298,13 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task, 
     CHECK_NULL_VOID(task);
     ContainerScope scope(patternInstanceId_);
     auto context = PipelineBase::GetCurrentContext();
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "When name:%{public}s PostTaskToUI, context is null", name.c_str());
+    }
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name, PriorityType::VIP);
 }
 
 void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info)
@@ -393,7 +396,7 @@ int32_t OnTextChangedListenerImpl::SetPreviewText(const std::u16string &text, co
         auto client = textFieldPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        client->SetPreviewText(StringUtils::Str16ToStr8(text), {range.start, range.end});
+        client->SetPreviewText(text, {range.start, range.end});
     };
     PostTaskToUI(task, "ArkUITextFieldSetPreviewText");
     return ret;
@@ -460,7 +463,7 @@ int32_t OnTextChangedListenerImpl::CheckPreviewTextParams(const std::u16string &
         auto client = textFieldPattern.Upgrade();
         CHECK_NULL_VOID(client);
         ContainerScope scope(client->GetInstanceId());
-        ret = client->CheckPreviewTextValidate(StringUtils::Str16ToStr8(text), {range.start, range.end});
+        ret = client->CheckPreviewTextValidate(text, {range.start, range.end});
     };
     PostSyncTaskToUI(task, "ArkUICheckPreviewTextParams");
     return ret;

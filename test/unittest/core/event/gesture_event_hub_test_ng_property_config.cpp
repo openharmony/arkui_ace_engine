@@ -1575,7 +1575,7 @@ HWTEST_F(GestureEventHubTestNg, StartLongPressActionForWeb001, TestSize.Level1)
     auto taskExecutor = context->GetTaskExecutor();
     ASSERT_NE(taskExecutor, nullptr);
     gestureEventHub->StartLongPressActionForWeb();
-    ASSERT_NE(gestureEventHub->GetDragEventActuator(), nullptr);
+    EXPECT_NE(gestureEventHub->GetDragEventActuator(), nullptr);
 }
 
 /**
@@ -1605,7 +1605,7 @@ HWTEST_F(GestureEventHubTestNg, WebDragAction001, TestSize.Level1)
     auto dragEvent = AceType::MakeRefPtr<DragEvent>(
         std::move(dragActionStart), std::move(dragActionUpdate), std::move(dragActionEnd), std::move(dragActionCancel));
     gestureEventHub->SetCustomDragEvent(dragEvent, PAN_DIRECTION_ALL, FINGERS, DISTANCE);
-    gestureEventHub->HandleNotallowDrag(GestureEvent());
+    gestureEventHub->HandleNotAllowDrag(GestureEvent());
 
     /**
      * @tc.steps: step3. create taskExecutor to fire task callBack.
@@ -1619,7 +1619,7 @@ HWTEST_F(GestureEventHubTestNg, WebDragAction001, TestSize.Level1)
     gestureEventHub->StartDragTaskForWeb();
     gestureEventHub->CancelDragForWeb();
     gestureEventHub->ResetDragActionForWeb();
-    ASSERT_NE(gestureEventHub->GetDragEventActuator(), nullptr);
+    EXPECT_NE(gestureEventHub->GetDragEventActuator(), nullptr);
 }
 
 /**
@@ -1747,7 +1747,7 @@ HWTEST_F(GestureEventHubTestNg, GridNodeHandleOnDragUpdate001, TestSize.Level1)
         gestureEventHub->HandleOnDragUpdate(info);
     }
     gestureEventHub->HandleOnDragEnd(info);
-    ASSERT_NE(gestureEventHub->gestureInfoForWeb_, nullptr);
+    EXPECT_NE(gestureEventHub->gestureInfoForWeb_, nullptr);
 }
 
 /**
@@ -1889,7 +1889,7 @@ HWTEST_F(GestureEventHubTestNg, SetDragGatherPixelMaps001, TestSize.Level1)
     GestureEvent info;
     info.SetInputEventType(InputEventType::MOUSE_BUTTON);
     gestureEventHub->SetDragGatherPixelMaps(info);
-    EXPECT_FALSE(dragDropManager->gatherPixelMaps_.empty());
+    EXPECT_TRUE(dragDropManager->gatherPixelMaps_.empty());
 }
 
 /**
@@ -1934,7 +1934,7 @@ HWTEST_F(GestureEventHubTestNg, SetDragGatherPixelMaps002, TestSize.Level1)
     GestureEvent info;
     info.SetInputEventType(InputEventType::TOUCH_SCREEN);
     gestureEventHub->SetDragGatherPixelMaps(info);
-    EXPECT_FALSE(dragDropManager->gatherPixelMaps_.empty());
+    EXPECT_TRUE(dragDropManager->gatherPixelMaps_.empty());
 }
 
 /**

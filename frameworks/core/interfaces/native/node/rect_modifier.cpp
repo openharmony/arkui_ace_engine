@@ -93,16 +93,48 @@ void ResetRectRadius(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIRectModifier* GetRectModifier()
 {
-    static const ArkUIRectModifier modifier = { SetRectRadiusWidth, ResetRectRadiusWidth, SetRectRadiusHeight,
-        ResetRectRadiusHeight, SetRectRadiusWithArray, SetRectRadiusWithValue, ResetRectRadius };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIRectModifier modifier = {
+        .setRectRadiusWidth = SetRectRadiusWidth,
+        .resetRectRadiusWidth = ResetRectRadiusWidth,
+        .setRectRadiusHeight = SetRectRadiusHeight,
+        .resetRectRadiusHeight = ResetRectRadiusHeight,
+        .setRectRadiusWithArray = SetRectRadiusWithArray,
+        .setRectRadiusWithValue = SetRectRadiusWithValue,
+        .resetRectRadius = ResetRectRadius,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIRectModifier* GetCJUIRectModifier()
 {
-    static const CJUIRectModifier modifier = { SetRectRadiusWidth, ResetRectRadiusWidth, SetRectRadiusHeight,
-        ResetRectRadiusHeight, SetRectRadiusWithArray, SetRectRadiusWithValue, ResetRectRadius };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIRectModifier modifier = {
+        .setRectRadiusWidth = SetRectRadiusWidth,
+        .resetRectRadiusWidth = ResetRectRadiusWidth,
+        .setRectRadiusHeight = SetRectRadiusHeight,
+        .resetRectRadiusHeight = ResetRectRadiusHeight,
+        .setRectRadiusWithArray = SetRectRadiusWithArray,
+        .setRectRadiusWithValue = SetRectRadiusWithValue,
+        .resetRectRadius = ResetRectRadius,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

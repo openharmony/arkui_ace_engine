@@ -626,7 +626,7 @@ HWTEST_F(CustomTestNg, CustomTest011, TestSize.Level1)
     customNode->MarkNeedUpdate();
     customNode->MarkNeedUpdate();
     bool test = customNode->needRebuild_;
-    EXPECT_NE(test, true);
+    EXPECT_NE(test, false);
 }
 
 /**

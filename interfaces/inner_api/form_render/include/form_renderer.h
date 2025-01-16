@@ -25,6 +25,7 @@
 #include "ui_content.h"
 #include "event_handler.h"
 #include "form_constants.h"
+#include "core/accessibility/accessibility_manager.h"
 
 namespace OHOS {
 namespace AppExecFwk {
@@ -63,7 +64,7 @@ public:
     void AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
     void RecycleForm(std::string& statusData);
     void RecoverForm(const std::string& statusData);
-    void GetRectRelativeToWindow(int32_t &top, int32_t &left) const;
+    void GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) const;
     void SetVisibleChange(bool isVisible);
     void UpdateFormSize(float width, float height, float borderWidth);
 

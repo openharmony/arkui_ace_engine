@@ -33,6 +33,16 @@ public:
         scrollBar_ = scrollBar;
     }
 
+    RefPtr<ScrollBar> GetScrollBar()
+    {
+        return scrollBar_.Upgrade();
+    }
+
+    RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier()
+    {
+        return scrollBarOverlayModifier_.Upgrade();
+    }
+
     void SetScrollBarOverlayModifier(WeakPtr<ScrollBarOverlayModifier>&& scrollBarOverlayModifier)
     {
         scrollBarOverlayModifier_ = scrollBarOverlayModifier;

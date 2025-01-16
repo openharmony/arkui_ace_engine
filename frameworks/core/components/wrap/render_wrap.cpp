@@ -457,7 +457,6 @@ void RenderWrap::TraverseContent(const Offset& startPosition, const Offset& betw
 {
     // determine the content start position by main axis
     Offset accumulateOffset = startPosition;
-    int32_t startItemIndex = 0;
     double currentMainSpaceLength = 0.0;
     for (const auto& content : contentList_) {
         // dfs positioned item in each content
@@ -521,7 +520,6 @@ void RenderWrap::TraverseContent(const Offset& startPosition, const Offset& betw
             }
         }
         auto contentSpace = NormalizeToPx(contentSpace_);
-        startItemIndex += itemNum;
         accumulateOffset += betweenPosition;
         accumulateOffset += (direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE)
                                 ? Offset(0.0, content.crossLength_ + contentSpace)

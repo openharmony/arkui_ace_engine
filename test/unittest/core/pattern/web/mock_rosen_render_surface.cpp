@@ -45,4 +45,5 @@ namespace OHOS::Ace::NG {
     void RosenRenderSurface::Connect() const {}
     void RosenRenderSurface::Disconnect() const {}
     void RosenRenderSurface::RegisterBufferCallback() {}
+    void RosenRenderSurface::OnWindowStateChange(bool isShow) {}
 }

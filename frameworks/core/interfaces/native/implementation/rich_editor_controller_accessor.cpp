@@ -305,7 +305,7 @@ Ark_Int32 AddTextSpanImpl(RichEditorControllerPeer* peer,
         locOptions = Converter::OptConvert<TextSpanOptions>(*options);
     }
     if (value && locOptions) {
-        locOptions->value = Converter::Convert<std::string>(*value);
+        locOptions->value = Converter::Convert<std::u16string>(*value);
     }
     if (locOptions) {
         result = peerImpl->AddTextSpanImpl(locOptions.value());

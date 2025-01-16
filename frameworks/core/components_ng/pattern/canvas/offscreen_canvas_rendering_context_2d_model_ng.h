@@ -37,6 +37,7 @@ public:
     void SetFontStyle(const Ace::FontStyle& fontStyle) override;
     void SetFontFamilies(const std::vector<std::string>& families) override;
     void SetFontSize(const Dimension& size) override;
+    void SetLetterSpacing(const Dimension& letterSpacing) override;
     std::vector<double> GetLineDash() override;
     void SetFillGradient(const std::shared_ptr<Ace::Gradient>& gradient) override;
     void SetFillPattern(const std::shared_ptr<Ace::Pattern>& pattern) override;

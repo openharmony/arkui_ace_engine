@@ -52,6 +52,7 @@ private:
     int32_t HandleOnAccessibilityChildTreeDeregister(MessageParcel &data, MessageParcel &reply);
     int32_t HandleOnAccessibilityDumpChildInfo(MessageParcel &data, MessageParcel &reply);
     int32_t HandleOnAccessibilityTransferHoverEvent(MessageParcel &data, MessageParcel &reply);
+    int32_t HandleOnNotifyDumpInfo(MessageParcel &data, MessageParcel &reply);
     using FormRendererDispatcherFunc =
         int32_t (FormRendererDispatcherStub::*)(MessageParcel &data, MessageParcel &reply);
     std::map<uint32_t, FormRendererDispatcherFunc> memberFuncMap_;

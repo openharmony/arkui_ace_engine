@@ -100,15 +100,13 @@ private:
     float GetTitleWidth(const RefPtr<TitleBarNode>& titleBarNode,
     const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty, const SizeF& titleBarSize);
 
-    float WidthAfterAvoidMenubar(const RefPtr<TitleBarNode>& titleBarNode, float width);
-    float WidthAfterAvoidSideBar(const RefPtr<TitleBarNode>& titleBarNode, float width);
+    float WidthAfterAvoidMenuBarAndContainerModal(const RefPtr<TitleBarNode>& titleBarNode, float width);
 
     void MeasureMenu(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
 
-    void ShowBackButtonLayout(LayoutWrapper* layoutWrapper,
-        const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty,
-        RefPtr<GeometryNode>& geometryNode, const RefPtr<LayoutWrapper>& backButtonWrapper);
+    void ShowBackButtonLayout(LayoutWrapper* layoutWrapper, RefPtr<GeometryNode>& geometryNode,
+        const RefPtr<LayoutWrapper>& backButtonWrapper, float titleBarHeight);
 
     void LayoutBackButton(LayoutWrapper* layoutWrapper, const RefPtr<TitleBarNode>& titleBarNode,
         const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty);
@@ -127,8 +125,6 @@ private:
 
     // set variables from theme
     void InitializeTheme(const RefPtr<TitleBarNode>& titleBarNode, const SizeF& titleBarSize);
-
-    void GetSideBarButtonInfo(const RefPtr<TitleBarNode>& titleBarNode);
 
     Dimension maxPaddingStart_;
     Dimension maxPaddingEnd_;
@@ -158,12 +154,12 @@ private:
     float doubleLineTitleBarHeight_ = 0.0f;
     float navTitleSpaceVertical_ = 0.0f;
     float paddingLeft_ = 0.0f;
+    float paddingLeftForBackButton_ = 0.0f;
     float paddingRight_ = 0.0f;
+    float paddingRightForMenu_ = 0.0f;
     float navBackIconWidth_ = 0.0f;
     float navButtonPadding_ = 0.0f;
     float navHorizontalMargin_ = 0.0f;
-    bool needToAvoidSideBar_ = false;
-    float sideBarAvoidY_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(TitleBarLayoutAlgorithm);
 };

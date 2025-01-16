@@ -57,6 +57,7 @@ public:
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
         lastPointEvent_.reset();
+        backupTouchPointsForSucceedBlock_.reset();
     }
 
     void CleanRecognizerState() override;
@@ -70,6 +71,16 @@ public:
     int32_t GetTouchPointsSize() const
     {
         return static_cast<int32_t>(touchPoints_.size());
+    }
+
+    void SetTouchPointsForSucceedBlock()
+    {
+        backupTouchPointsForSucceedBlock_ = touchPoints_;
+    }
+
+    void ResetTouchPointsForSucceedBlock()
+    {
+        backupTouchPointsForSucceedBlock_.reset();
     }
 
 protected:
@@ -100,6 +111,7 @@ protected:
         currentFingers_ = 0;
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
+        backupTouchPointsForSucceedBlock_.reset();
     }
 
     bool IsNeedResetStatus();
@@ -116,6 +128,7 @@ protected:
     std::list<int32_t> activeFingers_;
     std::shared_ptr<MMI::PointerEvent> lastPointEvent_;
     int32_t fingers_ = 1;
+    std::optional<std::map<int32_t, TouchEvent>> backupTouchPointsForSucceedBlock_;
 };
 
 } // namespace OHOS::Ace::NG

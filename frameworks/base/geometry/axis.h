@@ -16,21 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_AXIS_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_AXIS_H
 
-namespace OHOS::Ace {
-
-enum class Axis {
-    VERTICAL = 0,
-    HORIZONTAL,
-    FREE,
-    NONE,
-};
-
-enum class RotateAxis {
-    AXIS_X,
-    AXIS_Y,
-    AXIS_Z,
-};
-
-} // namespace OHOS::Ace
+#include "ui/base/geometry/axis.h"
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_GEOMETRY_AXIS_H

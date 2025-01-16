@@ -159,14 +159,14 @@ source_set("capi_deps") {
   public_configs = [ ":capi_config" ]
   sources = [ "modifiers_test_utils.cpp" ]
   configs += [ "../..:ace_unittest_config" ]
-  deps = [
-    "..:ace_core_interfaces_native_node_linux_unittest",
-    "//third_party/googletest:gmock_main",
-    "//third_party/googletest:gtest_main",
+  deps = [ "..:ace_core_interfaces_native_node_linux_unittest" ]
+  external_deps = [
+    "googletest:gmock_main",
+    "googletest:gtest_main",
   ]
   if (capi_theme_debug) {
     sources += [ "unwind_utils.cpp" ]
-    external_deps = [ "libunwind:libunwind" ]
+    external_deps += [ "libunwind:libunwind" ]
     deps += [
       ":copy_libunwind",
       ":copy_libunwind_unstripped",

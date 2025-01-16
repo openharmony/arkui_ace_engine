@@ -180,10 +180,10 @@ protected:
     static const size_t EVENT_DUMP_PARAM_LENGTH_UPPER;
     static const size_t EVENT_DUMP_PARAM_LENGTH_LOWER;
     static const size_t PROPERTY_DUMP_PARAM_LENGTH;
-    static const int32_t EVENT_DUMP_ORDER_INDEX;
-    static const int32_t EVENT_DUMP_ID_INDEX;
-    static const int32_t EVENT_DUMP_ACTION_INDEX;
-    static const int32_t EVENT_DUMP_ACTION_PARAM_INDEX;
+    static const size_t EVENT_DUMP_ORDER_INDEX;
+    static const size_t EVENT_DUMP_ID_INDEX;
+    static const size_t EVENT_DUMP_ACTION_INDEX;
+    static const size_t EVENT_DUMP_ACTION_PARAM_INDEX;
 
 private:
     RefPtr<AccessibilityNode> CreateCommonAccessibilityNode(

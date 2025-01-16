@@ -266,7 +266,11 @@ public:
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) = 0;
     virtual void SetOnTouch(TouchEventFunc&& touchEventFunc) = 0;
     virtual void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) = 0;
+#endif
     virtual void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) {}
+    virtual void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyCallback) {}
     virtual void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) = 0;
     virtual void SetOnHover(OnHoverFunc&& onHoverEventFunc) = 0;
     virtual void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) = 0;
@@ -280,6 +284,7 @@ public:
     virtual void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) = 0;
     virtual void SetOnFocus(OnFocusFunc&& onFocusCallback) = 0;
     virtual void SetOnBlur(OnBlurFunc&& onBlurCallback) = 0;
+    virtual void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback) = 0;
     virtual void SetDraggable(bool draggable) = 0;
     virtual void SetDragPreviewOptions(const NG::DragPreviewOption& previewOption) = 0;
     virtual void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) = 0;
@@ -306,6 +311,7 @@ public:
     virtual void DisableOnTouch() = 0;
     virtual void DisableOnKeyEvent() = 0;
     virtual void DisableOnKeyPreIme() {}
+    virtual void DisableOnKeyEventDispatch() {}
     virtual void DisableOnHover() = 0;
     virtual void DisableOnAccessibilityHover() = 0;
     virtual void DisableOnMouse() = 0;
@@ -316,6 +322,10 @@ public:
     virtual void DisableOnAreaChange() = 0;
     virtual void DisableOnFocus() = 0;
     virtual void DisableOnBlur() = 0;
+    virtual void DisableOnFocusAxisEvent() = 0;
+#ifdef SUPPORT_DIGITAL_CROWN
+    virtual void DisableOnCrownEvent() = 0;
+#endif
 
     // interact
     virtual void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) = 0;
@@ -353,6 +363,10 @@ public:
 
     // popup and menu
     virtual void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) = 0;
+    virtual int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t ClosePopup(const RefPtr<NG::UINode>& customNode) = 0;
+    virtual int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) = 0;
     virtual void DismissPopup() = 0;
     virtual void BindMenu(
         std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc, const NG::MenuParam& menuParam) = 0;
@@ -389,6 +403,10 @@ public:
     virtual void SetAccessibilitySelected(bool selected, bool resetValue) = 0;
     virtual void SetAccessibilityChecked(bool checked, bool resetValue) = 0;
     virtual void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) = 0;
+    virtual void SetAccessibilityNextFocusId(const std::string& nextFocusId) = 0;
+    virtual void SetAccessibilityRole(const std::string& role, bool resetValue) = 0;
+    virtual void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) = 0;
+    virtual void ResetOnAccessibilityFocus() = 0;
 
     // progress mask
     virtual void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) = 0;

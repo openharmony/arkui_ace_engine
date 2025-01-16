@@ -168,6 +168,8 @@ public:
     virtual bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
+    virtual void CallContainerModalNative(const std::string& name, const std::string& value) {};
+    virtual void OnContainerModalEvent(const std::string& name, const std::string& value) {};
     void GetWindowPaintRectWithoutMeasureAndLayout(RectInt& rect);
     void GetWindowPaintRectWithoutMeasureAndLayout(Rect& rect, bool isContainerModal);
     void CallButtonsRectChange();
@@ -235,6 +237,7 @@ protected:
     bool floatingTitleSettedShow_ = true;
     std::function<void(RectF&, RectF&)> controlButtonsRectChangeCallback_;
     RectF buttonsRect_;
+    bool isInitButtonsRect_ = false;
     Dimension titleHeight_ = CONTAINER_TITLE_HEIGHT;
     Color activeColor_;
     Color inactiveColor_;
@@ -251,7 +254,8 @@ protected:
     void InitContainerColor();
 
     virtual void InitButtonsLayoutProperty();
-    
+    virtual void NotifyButtonsRectChange(const RectF& containerModal, const RectF& buttonsRect) {}
+
     std::string appLabel_;
     RefPtr<PanEvent> panEvent_ = nullptr;
 

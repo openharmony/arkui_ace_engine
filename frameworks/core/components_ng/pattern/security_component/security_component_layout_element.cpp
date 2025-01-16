@@ -12,11 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "ui/base/ace_type.h"
+#include "ui/base/utils/utils.h"
+#include "base/geometry/dimension.h"
 #include "base/utils/utf_helper.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_element.h"
 
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/security_component/security_component_theme.h"
+#include "core/components_ng/pattern/text/text_layout_algorithm.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_property.h"
@@ -95,6 +101,44 @@ double IconLayoutElement::ShrinkHeight(double reduceSize)
     return 0.0;
 }
 
+void TextLayoutElement::UpdateFontSize()
+{
+    auto layoutAlgorithmWrap = textWrap_->GetLayoutAlgorithm();
+    CHECK_NULL_VOID(layoutAlgorithmWrap);
+    auto layoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrap->GetLayoutAlgorithm());
+    CHECK_NULL_VOID(layoutAlgorithm);
+    auto textStyle = layoutAlgorithm->GetTextStyle();
+    auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
+    CHECK_NULL_VOID(textProp);
+    if (!NearEqual(textStyle->GetFontSize().Value(), 0.0f)) {
+        Dimension fontSize(textStyle->GetFontSize().ConvertToFp(), DimensionUnit::FP);
+        textProp->UpdateFontSize(fontSize);
+    }
+}
+
+float TextLayoutElement::GetHeightConstraint(RefPtr<SecurityComponentLayoutProperty>& property, float height)
+{
+    CHECK_NULL_RETURN(property, 0.0f);
+    auto isVertical = (property->GetTextIconLayoutDirection().value_or(
+        SecurityComponentLayoutDirection::HORIZONTAL) == SecurityComponentLayoutDirection::VERTICAL);
+
+    auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
+    CHECK_NULL_RETURN(textProp, 0.0f);
+    auto context = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_RETURN(context, 0.0f);
+    auto theme = context->GetTheme<SecurityComponentTheme>();
+    CHECK_NULL_RETURN(theme, 0.0f);
+    auto topPadding = property->GetBackgroundTopPadding().value_or(theme->GetBackgroundTopPadding());
+    auto bottomPadding = property->GetBackgroundBottomPadding().value_or(theme->GetBackgroundBottomPadding());
+    if (isVertical) {
+        auto iconSize = (property->GetIconSize().value_or(theme->GetIconSize()));
+        auto textIconSpace = (property->GetTextIconSpace().value_or(theme->GetTextIconSpace()));
+        return height - topPadding.Value() - bottomPadding.Value() - iconSize.Value() - textIconSpace.Value();
+    }
+
+    return height - topPadding.Value() - bottomPadding.Value();
+}
+
 void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     RefPtr<LayoutWrapper>& textWrap)
 {
@@ -115,7 +159,8 @@ void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
     auto theme = context->GetTheme<SecurityComponentTheme>();
     CHECK_NULL_VOID(theme);
     minFontSize_ = theme->GetMinFontSize();
-    if (property->GetFontSize().has_value()) {
+    if (property->GetFontSize().has_value() ||
+        (property->GetAdaptMaxFontSize().has_value() && property->GetAdaptMinFontSize().has_value())) {
         isSetSize_ = true;
     } else {
         defaultFontSize_ = theme->GetFontSize();
@@ -124,8 +169,18 @@ void TextLayoutElement::Init(RefPtr<SecurityComponentLayoutProperty>& property,
 
     auto textConstraint = property->CreateChildConstraint();
     SizeT<float> maxSize { textConstraint.maxSize.Width(), Infinity<float>() };
+    if (property->GetHeightAdaptivePolicy().has_value() &&
+        property->GetHeightAdaptivePolicy() == TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST) {
+        SC_LOG_DEBUG("Component height constrained.");
+        auto heightConstraint = GetHeightConstraint(property, textConstraint.maxSize.Height());
+        if (LessOrEqual(heightConstraint, 0.0f)) {
+            heightConstraint = 0.0f;
+        }
+        maxSize.SetHeight(heightConstraint);
+    }
     textConstraint.maxSize = maxSize;
     textWrap_->Measure(std::optional<LayoutConstraintF>(textConstraint));
+    UpdateFontSize();
     auto geometryNode = textWrap->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto textSizeF = geometryNode->GetFrameSize();
@@ -141,6 +196,7 @@ void TextLayoutElement::MeasureForWidth(float width)
     CHECK_NULL_VOID(textConstraint);
     textConstraint->selfIdealSize.SetWidth(width);
     textWrap_->Measure(textConstraint);
+    UpdateFontSize();
     auto textSizeF = textWrap_->GetGeometryNode()->GetFrameSize();
     width_ = textSizeF.Width();
     height_ = textSizeF.Height();
@@ -217,11 +273,37 @@ void TextLayoutElement::UpdateSize(bool isWidth)
     }
 
     textWrap_->Measure(textConstraint);
+    UpdateFontSize();
     auto geometryNode = textWrap_->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto textSizeF = geometryNode->GetFrameSize();
     width_ = textSizeF.Width();
     height_ = textSizeF.Height();
+}
+
+bool TextLayoutElement::DidExceedMaxLines(std::optional<SizeF>& currentTextSize)
+{
+    if (!isExist_) {
+        return false;
+    }
+
+    auto textNode = textWrap_->GetHostNode();
+    CHECK_NULL_RETURN(textNode, false);
+    auto textPattern = textNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    if (textPattern->DidExceedMaxLines()) {
+        return true;
+    }
+
+    auto textProp = AceType::DynamicCast<TextLayoutProperty>(textWrap_->GetLayoutProperty());
+    CHECK_NULL_RETURN(textProp, false);
+    auto textConstraint = textProp->GetContentLayoutConstraint();
+    CHECK_NULL_RETURN(textConstraint, false);
+
+    if (currentTextSize.has_value() && GreatNotEqual(currentTextSize->Height(), textConstraint->maxSize.Height())) {
+        return true;
+    }
+    return false;
 }
 
 bool TextLayoutElement::GetCurrentTextSize(std::optional<SizeF>& currentTextSize, Dimension& currentFontSize)

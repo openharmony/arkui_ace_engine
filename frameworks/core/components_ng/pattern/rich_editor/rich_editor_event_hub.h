@@ -63,15 +63,15 @@ public:
     ~RichEditorInsertValue() override = default;
     void SetInsertOffset(int32_t insertOffset);
     int32_t GetInsertOffset() const;
-    void SetInsertValue(const std::string& insertValue);
-    void SetPreviewText(const std::string& previewText);
-    const std::string& GetInsertValue() const;
-    const std::string& GetPreviewText() const;
+    void SetInsertValue(const std::u16string& insertValue);
+    void SetPreviewText(const std::u16string& previewText);
+    const std::u16string& GetInsertValue() const;
+    const std::u16string& GetPreviewText() const;
 
 private:
     int32_t insertOffset_ = 0;
-    std::string insertValue_;
-    std::string previewText_;
+    std::u16string insertValue_;
+    std::u16string previewText_;
 };
 
 enum class SpanResultType { TEXT, IMAGE, SYMBOL };
@@ -92,10 +92,10 @@ public:
     int32_t OffsetInSpan() const;
     void SetEraseLength(int32_t eraseLength);
     int32_t GetEraseLength() const;
-    void SetValue(const std::string& value);
-    const std::string& GetValue() const;
-    void SetPreviewText(const std::string& previewText);
-    const std::string& GetPreviewText() const;
+    void SetValue(const std::u16string& value);
+    const std::u16string& GetValue() const;
+    void SetPreviewText(const std::u16string& previewText);
+    const std::u16string& GetPreviewText() const;
     void SetFontColor(const std::string& fontColor);
     const std::string& GetFontColor() const;
     void SetFontFeature(const FONT_FEATURES_LIST& fontFeature);
@@ -110,6 +110,8 @@ public:
     const SymbolSpanStyle GetSymbolSpanStyle() const;
     void SetLineHeight(double lineHeight);
     double GetLineHeight() const;
+    void SetHalfLeading(bool halfLeading);
+    bool GetHalfLeading() const;
     void SetLetterspacing(double letterSpacing);
     double GetLetterspacing() const;
     void SetTextStyle(TextStyleResult textStyle);
@@ -166,6 +168,7 @@ public:
 private:
     TextStyleResult textStyle_;
     double lineHeight_ = 0.0;
+    bool halfLeading_ = false;
     double letterSpacing_ = 0.0;
     int32_t spanIndex_ = 0;
     int32_t spanRangeStart_ = 0;
@@ -173,8 +176,8 @@ private:
     SpanResultType spanType_;
     int32_t offsetInSpan_ = 0;
     int32_t eraseLength_ = 0;
-    std::string value_;
-    std::string previewText_;
+    std::u16string value_;
+    std::u16string previewText_;
     std::string fontColor_;
     FONT_FEATURES_LIST fontFeature_;
     double fontSize_ = 0.0;
@@ -279,10 +282,14 @@ public:
     void SetReplacementString(const RefPtr<SpanStringBase>& styledString);
     const RefPtr<SpanStringBase> GetReplacementString() const;
 
+    void SetPreviewText(const std::u16string& previewText);
+    const std::u16string& GetPreviewText() const;
+
 private:
     TextRange rangeBefore_;
     TextRange rangeAfter_;
     RefPtr<SpanStringBase> replacementString_;
+    std::u16string previewText_;
 };
 
 class RichEditorEventHub : public EventHub {

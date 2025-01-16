@@ -36,6 +36,7 @@ public:
     static void JsOnHover(const JSCallbackInfo& info);
     static void JsOnKey(const JSCallbackInfo& args);
     static void JsOnKeyPreIme(const JSCallbackInfo& args);
+    static void JsOnKeyEventDispatch(const JSCallbackInfo& args);
     static void SetFocusable(bool focusable);
     static void SetFocusNode(bool isFocusNode);
     static void JsMonopolizeEvents(const JSCallbackInfo& info);

@@ -282,7 +282,12 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
         uiContent_->SetFormWidth(resizedWidth);
         uiContent_->SetFormHeight(resizedHeight);
         lastBorderWidth_ = borderWidth_;
-        uiContent_->OnFormSurfaceChange(resizedWidth, resizedHeight);
+        std::shared_ptr<EventHandler> eventHandler = eventHandler_.lock();
+        if (eventHandler) {
+            eventHandler->PostTask([uiContent = uiContent_, resizedWidth, resizedHeight]() {
+                uiContent->OnFormSurfaceChange(resizedWidth, resizedHeight);
+            });
+        }
         rsSurfaceNode->SetBounds(borderWidth_, borderWidth_, resizedWidth, resizedHeight);
     }
 }
@@ -396,7 +401,18 @@ void FormRenderer::SetRenderDelegate(const sptr<IRemoteObject>& remoteObj)
         return;
     }
 
-    formRendererDelegate_ = renderRemoteObj;
+    if (!formRendererDelegate_) {
+        formRendererDelegate_ = renderRemoteObj;
+    } else {
+        auto formRendererDelegate = renderRemoteObj;
+        bool checkFlag = true;
+        formRendererDelegate->OnCheckManagerDelegate(checkFlag);
+        if (checkFlag) {
+            formRendererDelegate_ = renderRemoteObj;
+        } else {
+            HILOG_ERROR("EventHandle - SetRenderDelegate error  checkFlag is false");
+        }
+    }
 
     if (renderDelegateDeathRecipient_ == nullptr) {
         renderDelegateDeathRecipient_ = new FormRenderDelegateRecipient(
@@ -499,13 +515,13 @@ void FormRenderer::AttachUIContent(const OHOS::AAFwk::Want& want, const OHOS::Ap
     uiContent_->Foreground();
 }
 
-void FormRenderer::GetRectRelativeToWindow(int32_t &top, int32_t &left) const
+void FormRenderer::GetRectRelativeToWindow(AccessibilityParentRectInfo& parentRectInfo) const
 {
     if (!formRendererDelegate_) {
         HILOG_ERROR("form renderer delegate is null!");
         return;
     }
-    formRendererDelegate_->OnGetRectRelativeToWindow(top, left);
+    formRendererDelegate_->OnGetRectRelativeToWindow(parentRectInfo);
 }
 
 void FormRenderer::RecycleForm(std::string& statusData)

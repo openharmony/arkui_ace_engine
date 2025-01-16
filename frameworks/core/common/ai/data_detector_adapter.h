@@ -68,7 +68,7 @@ public:
             onResult_(result);
         }
     }
-    bool ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::string& text);
+    bool ParseOriText(const std::unique_ptr<JsonValue>& entityJson, std::u16string& text);
     void PreprocessTextDetect();
     void InitTextDetect(int32_t startPos, std::string detectText);
     void HandleTextUrlDetect();
@@ -88,6 +88,7 @@ public:
         bool isShowCopy = true, bool isShowSelectText = true);
     void ResponseBestMatchItem(const AISpan& aiSpan);
     void GetAIEntityMenu();
+    void MarkDirtyNode() const;
 
 private:
     friend class NG::TextPattern;
@@ -108,8 +109,8 @@ private:
     std::vector<NG::RectF> aiSpanRects_;
     AISpan clickedAISpan_;
     std::string textDetectTypes_;
-    std::string textForAI_;
-    std::string lastTextForAI_;
+    std::u16string textForAI_;
+    std::u16string lastTextForAI_;
     std::set<std::string> textDetectTypesSet_;
     TextDataDetectResult textDetectResult_;
     std::function<void(const std::string&)> onResult_;

@@ -1324,6 +1324,10 @@ HWTEST_F(SelectOverlayManagerTestNg, InitSelectOverlay, TestSize.Level1)
     EXPECT_FALSE(client.SelectOverlayIsOn());
 
     client.InitSelectOverlay();
+    client.selectOverlayInfo_.menuCallback.onSearch();
+    EXPECT_FALSE(client.SelectOverlayIsOn());
+
+    client.InitSelectOverlay();
     client.selectOverlayInfo_.menuCallback.onCameraInput();
     EXPECT_FALSE(client.SelectOverlayIsOn());
 
@@ -1764,7 +1768,7 @@ HWTEST_F(SelectOverlayManagerTestNg, MountNodeToRoot, TestSize.Level1)
      */
     auto content = SelectContentOverlayManager(root_);
     bool animation = true;
-    content.MountNodeToRoot(root_, animation);
+    content.MountNodeToRoot(root_, animation, NodeType::HANDLE);
     EXPECT_EQ(content.selectionHoldId_, -1);
 }
 

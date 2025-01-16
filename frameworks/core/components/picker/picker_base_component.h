@@ -198,6 +198,15 @@ public:
         OnDialogChange_ = value;
     }
 
+    const EventMarker& GetDialogEnterSelectedAreaEvent() const
+    {
+        return OnDialogEnterSelectedArea_;
+    }
+    void SetDialogEnterSelectedAreaEvent(const EventMarker& value)
+    {
+        OnDialogEnterSelectedArea_ = value;
+    }
+
     void ClearColumns();
 
     void AppendColumn(const RefPtr<PickerColumnComponent>& column);
@@ -472,6 +481,7 @@ private:
     EventMarker OnDialogAccept_;
     EventMarker OnDialogCancel_;
     EventMarker OnDialogChange_;
+    EventMarker OnDialogEnterSelectedArea_;
 
     Dimension columnHeight_;
     bool defaultHeight_ = false;

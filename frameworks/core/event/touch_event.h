@@ -55,7 +55,7 @@ struct TouchPoint final {
 /**
  * @brief TouchEvent contains the active change point and a list of all touch points.
  */
-struct TouchEvent final : public UIInputEvent {
+struct TouchEvent final : public PointerEvent {
     ~TouchEvent() = default;
     // the active changed point info
     // The ID is used to identify the point of contact between the finger and the screen. Different fingers have
@@ -78,7 +78,7 @@ struct TouchEvent final : public UIInputEvent {
     bool isFalsified = false;
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
-    std::shared_ptr<MMI::PointerEvent> pointerEvent { nullptr };
+    std::shared_ptr<const MMI::PointerEvent> pointerEvent { nullptr };
     // historical points
     std::vector<TouchEvent> history;
     std::vector<KeyCode> pressedKeyCodes_;
@@ -93,7 +93,10 @@ struct TouchEvent final : public UIInputEvent {
     float inputXDeltaSlope = 0.0f;
     float inputYDeltaSlope = 0.0f;
 
-    TouchEvent() {}
+    TouchEvent()
+    {
+        eventType = UIInputEventType::TOUCH;
+    }
     TouchEvent& SetId(int32_t id);
     TouchEvent& SetX(float x);
     TouchEvent& SetY(float y);
@@ -114,7 +117,7 @@ struct TouchEvent final : public UIInputEvent {
     TouchEvent& SetTouchEventId(int32_t touchEventId);
     TouchEvent& SetIsInterpolated(bool isInterpolated);
     TouchEvent& SetPointers(std::vector<TouchPoint> pointers);
-    TouchEvent& SetPointerEvent(std::shared_ptr<MMI::PointerEvent> pointerEvent);
+    TouchEvent& SetPointerEvent(std::shared_ptr<const MMI::PointerEvent> pointerEvent);
     TouchEvent& SetOriginalId(int32_t originalId);
     TouchEvent& SetIsInjected(bool isInjected);
     TouchEvent& SetInputXDeltaSlope(float inputXDeltaSlope);
@@ -131,6 +134,7 @@ struct TouchEvent final : public UIInputEvent {
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const;
     TouchEvent UpdatePointers() const;
     bool IsPenHoverEvent() const;
+    std::shared_ptr<MMI::PointerEvent> GetTouchEventPointerEvent() const;
 };
 
 namespace Platform {
@@ -160,7 +164,7 @@ struct TouchRestrict final {
     SourceType sourceType = SourceType::NONE;
     SourceType hitTestType = SourceType::TOUCH;
     InputEventType inputEventType = InputEventType::TOUCH_SCREEN;
-    TouchEvent touchEvent;
+    TouchEvent touchEvent = {};
     std::list<std::string> childTouchTestList;
     // use to dump event tree
     NG::EventTreeType touchTestType = NG::EventTreeType::TOUCH;
@@ -259,12 +263,14 @@ using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
 
 struct StateRecord {
     std::string procedure;
+    std::string extraInfo;
     std::string state;
     std::string disposal;
     int64_t timestamp = 0;
 
-    StateRecord(const std::string& procedure, const std::string& state, const std::string& disposal, int64_t timestamp)
-        : procedure(procedure), state(state), disposal(disposal), timestamp(timestamp)
+    StateRecord(const std::string& procedure, const std::string& extraInfo, const std::string& state,
+        const std::string& disposal, int64_t timestamp) : procedure(procedure), extraInfo(extraInfo),
+        state(state), disposal(disposal), timestamp(timestamp)
     {}
     void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const;
     void Dump(std::unique_ptr<JsonValue>& json) const;
@@ -274,8 +280,8 @@ struct GestureSnapshot : public virtual AceType {
     DECLARE_ACE_TYPE(GestureSnapshot, AceType);
 
 public:
-    void AddProcedure(
-        const std::string& procedure, const std::string& state, const std::string& disposal, int64_t timestamp);
+    void AddProcedure(const std::string& procedure, const std::string& extraInfo,
+        const std::string& state, const std::string& disposal, int64_t timestamp);
     bool CheckNeedAddMove(const std::string& state, const std::string& disposal);
     void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const;
     static std::string TransTouchType(TouchType type);

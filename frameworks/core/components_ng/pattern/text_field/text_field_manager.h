@@ -271,6 +271,26 @@ public:
     void UpdateTextFieldInfo(const TextFieldInfo& textFieldInfo);
     bool HasAutoFillPasswordNodeInContainer(const int32_t& autoFillContainerNodeId, const int32_t& nodeId);
 
+
+    bool GetFocusFieldAlreadyTriggerWsCallback() const
+    {
+        return focusFieldAlreadyTriggerWsCallback_;
+    }
+
+    void SetFocusFieldAlreadyTriggerWsCallback(bool focusFieldAlreadyTriggerWsCallback) {
+        focusFieldAlreadyTriggerWsCallback_ = focusFieldAlreadyTriggerWsCallback;
+    }
+
+    int32_t GetFocusFieldOrientation() const
+    {
+        return focusFieldOrientation_;
+    }
+
+    void SetFocusFieldOrientation(int32_t focusFieldOrientation)
+    {
+        focusFieldOrientation_ = focusFieldOrientation;
+    }
+
     void SetIsImeAttached(bool isImeAttached)
     {
         isImeAttached_ = isImeAttached;
@@ -320,6 +340,8 @@ private:
     bool usingCustomKeyboardAvoid_ = false;
     bool uiExtensionImeShow_ = false;
     bool prevHasTextFieldPattern_ = true;
+    bool focusFieldAlreadyTriggerWsCallback_ = false;
+    int32_t focusFieldOrientation_ = -1;
     Offset position_;
     float clickPositionOffset_ = 0.0f;
     std::optional<Offset> optionalPosition_;

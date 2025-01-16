@@ -117,8 +117,7 @@ void HandlerOnGestureEvent(
     }
 
     if (action == GestureEventType::CANCEL) {
-        auto onActionCancelFunc = [callback = std::move(callback)]() {
-            auto info = GestureEvent();
+        auto onActionCancelFunc = [callback = std::move(callback)](GestureEvent& info) {
             callback(info);
         };
         gesture->SetOnActionCancelId(onActionCancelFunc);

@@ -191,6 +191,9 @@ public:
         NG::GestureRecognizerJudgeFunc&& gestureRecognizerJudgeFunc, bool exposeInnerGestureFlag) override {}
     void SetOnTouch(TouchEventFunc&& touchEventFunc) override;
     void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) override;
+#ifdef SUPPORT_DIGITAL_CROWN
+    void SetOnCrownEvent(OnCrownCallbackFunc&& onCrownCallback) override {};
+#endif
     void SetOnMouse(OnMouseEventFunc&& onMouseEventFunc) override;
     void SetOnHover(OnHoverFunc&& onHoverEventFunc) override;
     void SetOnAccessibilityHover(OnAccessibilityHoverFunc&& onAccessibilityHoverEventFunc) override {};
@@ -204,6 +207,7 @@ public:
     void SetOnFocusMove(std::function<void(int32_t)>&& onFocusMoveCallback) override;
     void SetOnFocus(OnFocusFunc&& onFocusCallback) override;
     void SetOnBlur(OnBlurFunc&& onBlurCallback) override;
+    void SetOnFocusAxisEvent(OnFocusAxisEventFunc&& onFocusAxisCallback) override {}
     void SetDraggable(bool draggable) override {}
     void SetDragPreviewOptions(const NG::DragPreviewOption& previewOption) override {};
     void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
@@ -246,6 +250,9 @@ public:
     void DisableOnClick() override {};
     void DisableOnTouch() override {};
     void DisableOnKeyEvent() override {};
+#ifdef SUPPORT_DIGITAL_CROWN
+    void DisableOnCrownEvent() override {};
+#endif
     void DisableOnHover() override {};
     void DisableOnAccessibilityHover() override {};
     void DisableOnMouse() override {};
@@ -256,9 +263,26 @@ public:
     void DisableOnAreaChange() override {};
     void DisableOnFocus() override {};
     void DisableOnBlur() override {};
+    void DisableOnFocusAxisEvent() override {};
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void BindPopup(const RefPtr<PopupParam>& param, const RefPtr<AceType>& customNode) override;
+    int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
+    {
+        return 0;
+    };
+    int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
+    {
+        return 0;
+    };
+    int32_t ClosePopup(const RefPtr<NG::UINode>& customNode) override
+    {
+        return 0;
+    };
+    int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
+    {
+        return 0;
+    };
     void DismissPopup() override {}
 
     void BindMenu(std::vector<NG::OptionParam>&& params, std::function<void()>&& buildFunc,
@@ -294,6 +318,10 @@ public:
     void SetAccessibilitySelected(bool selected, bool resetValue) override;
     void SetAccessibilityChecked(bool checked, bool resetValue) override;
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
+    void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
+    void SetAccessibilityRole(const std::string& role, bool resetValue) override;
+    void SetOnAccessibilityFocus(NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl) override;
+    void ResetOnAccessibilityFocus() override;
 
     void SetProgressMask(const RefPtr<NG::ProgressMaskProperty>& progress) override {}
     void SetForegroundColor(const Color& color) override {}

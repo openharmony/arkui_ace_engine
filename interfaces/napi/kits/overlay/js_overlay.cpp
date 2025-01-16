@@ -131,6 +131,59 @@ static napi_value JSHideAllFrameNodes(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
+static napi_value JSSetOverlayManagerOptions(napi_env env, napi_callback_info info)
+{
+    size_t argc = 1;
+    napi_value argv = nullptr;
+    napi_value thisVar = nullptr;
+    void* data = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, &argv, &thisVar, &data));
+    NAPI_ASSERT(env, argc >= 1, "wrong number of argument\n");
+
+    auto overlayInfo = NG::OverlayManagerInfo { .renderRootOverlay = true };
+    napi_value renderRootOverlayNApi = nullptr;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, argv, &valueType);
+    if (valueType == napi_object) {
+        napi_get_named_property(env, argv, "renderRootOverlay", &renderRootOverlayNApi);
+        napi_get_value_bool(env, renderRootOverlayNApi, &overlayInfo.renderRootOverlay);
+    } else if (valueType != napi_undefined) {
+        NapiThrow(env, "The type of parameters is incorrect.", ERROR_CODE_PARAM_INVALID);
+        return nullptr;
+    }
+
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        NapiThrow(env, "Can not get delegate.", ERROR_CODE_INTERNAL_ERROR);
+        return nullptr;
+    }
+    napi_value result = nullptr;
+    if (delegate->SetOverlayManagerOptions(overlayInfo)) {
+        napi_get_boolean(env, true, &result);
+        return result;
+    }
+    napi_get_boolean(env, false, &result);
+    return result;
+}
+
+static napi_value JSGetOverlayManagerOptions(napi_env env, napi_callback_info info)
+{
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        NapiThrow(env, "Can not get delegate.", ERROR_CODE_INTERNAL_ERROR);
+        return nullptr;
+    }
+    napi_value result = nullptr;
+    std::optional<NG::OverlayManagerInfo> options = delegate->GetOverlayManagerOptions();
+    napi_create_object(env, &result);
+    if (options.has_value()) {
+        napi_value renderRootOverlay = nullptr;
+        napi_get_boolean(env, options.value().renderRootOverlay, &renderRootOverlay);
+        napi_set_named_property(env, result, "renderRootOverlay", renderRootOverlay);
+    }
+    return result;
+}
+
 static napi_value OverlayManagerExport(napi_env env, napi_value exports)
 {
     napi_property_descriptor overlayManagerDesc[] = {
@@ -139,7 +192,9 @@ static napi_value OverlayManagerExport(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("showNode", JSShowNode),
         DECLARE_NAPI_FUNCTION("hideNode", JSHideNode),
         DECLARE_NAPI_FUNCTION("showAllFrameNodes", JSShowAllFrameNodes),
-        DECLARE_NAPI_FUNCTION("hideAllFrameNodes", JSHideAllFrameNodes)
+        DECLARE_NAPI_FUNCTION("hideAllFrameNodes", JSHideAllFrameNodes),
+        DECLARE_NAPI_FUNCTION("setOverlayManagerOptions", JSSetOverlayManagerOptions),
+        DECLARE_NAPI_FUNCTION("getOverlayManagerOptions", JSGetOverlayManagerOptions)
     };
     NAPI_CALL(env, napi_define_properties(
         env, exports, sizeof(overlayManagerDesc) / sizeof(overlayManagerDesc[0]), overlayManagerDesc));

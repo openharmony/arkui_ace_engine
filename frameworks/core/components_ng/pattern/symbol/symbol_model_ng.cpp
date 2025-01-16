@@ -22,6 +22,7 @@ namespace OHOS::Ace::NG {
 void SymbolModelNG::Create(const std::uint32_t& unicode)
 {
     auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
     auto symbolNode = FrameNode::GetOrCreateFrameNode(
         V2::SYMBOL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
@@ -78,6 +79,16 @@ void SymbolModelNG::SetSymbolEffectOptions(SymbolEffectOptions& symbolEffectOpti
     auto lastSymbolEffectOptions = property->GetSymbolEffectOptionsValue(SymbolEffectOptions());
     symbolEffectOptions.UpdateFlags(lastSymbolEffectOptions);
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions);
+}
+
+void SymbolModelNG::SetMinFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value);
+}
+
+void SymbolModelNG::SetMaxFontScale(const float value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value);
 }
 
 void SymbolModelNG::SetFontColor(FrameNode* frameNode, const std::vector<Color>& symbolColor)
@@ -167,5 +178,15 @@ void SymbolModelNG::SetSymbolEffectOptions(FrameNode* frameNode, SymbolEffectOpt
 void SymbolModelNG::SetSymbolGlyphInitialize(FrameNode* frameNode, const std::uint32_t& symbolId)
 {
     InitialSymbol(frameNode, symbolId);
+}
+
+void SymbolModelNG::SetMinFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MinFontScale, value, frameNode);
+}
+
+void SymbolModelNG::SetMaxFontScale(FrameNode* frameNode, const float value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, MaxFontScale, value, frameNode);
 }
 } // namespace OHOS::Ace::NG

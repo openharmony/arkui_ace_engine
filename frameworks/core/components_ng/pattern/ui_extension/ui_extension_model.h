@@ -48,6 +48,7 @@ struct UIExtensionConfig {
     bool transferringCaller = false;
     bool densityDpi = false;
     NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY;
+    bool backgroundTransparent = true;
 };
 }
 
@@ -61,8 +62,6 @@ public:
         bool transferringCaller = false, bool densityDpi = false);
     // for Embedded Component
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, NG::SessionType sessionType);
-    // for DynamicComponent
-    virtual void Create();
     virtual void Create(const NG::UIExtensionConfig& config) {}
     virtual void InitializeDynamicComponent(const RefPtr<NG::FrameNode>& frameNode, const std::string& hapPath,
         const std::string& abcPath, const std::string& entryPoint, void* runtime);
@@ -89,6 +88,7 @@ public:
         NG::SessionType sessionType = NG::SessionType::UI_EXTENSION_ABILITY);
     virtual void SetPlatformOnError(
         std::function<void(int32_t code, const std::string& name, const std::string& message)>&& onError);
+    virtual void SetOnDrawReady(std::function<void()>&& onDrawReady);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UI_EXTENSION_MODEL_H

@@ -523,7 +523,7 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorAcceptCallbackTes
     ASSERT_NE(accessor_->show, nullptr);
 
     Ark_TextPickerDialogOptions arkOptions;
-    auto strValue = TextPickerPattern::GetSelectedObjectMulti(testValues, testIndexes);
+    auto strValue = TextPickerPattern::GetSelectedObjectMulti(testValues, testIndexes, 0);
     static uint32_t contextId = 123;
 
     auto onAcceptCallback = [](const Ark_Int32 resourceId, const Ark_TextPickerResult info) {
@@ -595,7 +595,7 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorChangeCallbackTes
     ASSERT_NE(accessor_->show, nullptr);
 
     Ark_TextPickerDialogOptions arkOptions;
-    auto strValue = TextPickerPattern::GetSelectedObjectMulti(testValues, testIndexes);
+    auto strValue = TextPickerPattern::GetSelectedObjectMulti(testValues, testIndexes, 0);
     static uint32_t contextId = 123;
 
     auto onChangeCallback = [](const Ark_Int32 resourceId, const Ark_TextPickerResult info) {

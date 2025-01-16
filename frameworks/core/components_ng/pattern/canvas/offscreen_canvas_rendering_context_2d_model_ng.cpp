@@ -70,6 +70,12 @@ void OffscreenCanvasRenderingContext2DModelNG::SetFontSize(const Dimension& size
     pattern_->SetFontSize(size);
 }
 
+void OffscreenCanvasRenderingContext2DModelNG::SetLetterSpacing(const Dimension& letterSpacing)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->SetLetterSpacing(letterSpacing);
+}
+
 std::vector<double> OffscreenCanvasRenderingContext2DModelNG::GetLineDash()
 {
     return pattern_ ? pattern_->GetLineDash().lineDash : std::vector<double> {};

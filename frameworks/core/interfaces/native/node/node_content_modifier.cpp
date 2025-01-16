@@ -88,15 +88,45 @@ void* GetUserData(ArkUINodeContentHandle content)
 namespace NodeModifier {
 const ArkUINodeContentModifier* GetNodeContentModifier()
 {
-    static const ArkUINodeContentModifier modifier = { AddChild, InsertChild, RemoveChild, RegisterEvent, SetUserData,
-        GetUserData };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUINodeContentModifier modifier = {
+        .addChild = AddChild,
+        .insertChild = InsertChild,
+        .removeChild = RemoveChild,
+        .registerEvent = RegisterEvent,
+        .setUserData = SetUserData,
+        .getUserData = GetUserData,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUINodeContentModifier* GetCJUINodeContentModifier()
 {
-    static const CJUINodeContentModifier modifier = { AddChild, InsertChild, RemoveChild, RegisterEvent, SetUserData,
-        GetUserData };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUINodeContentModifier modifier = {
+        .addChild = AddChild,
+        .insertChild = InsertChild,
+        .removeChild = RemoveChild,
+        .registerEvent = RegisterEvent,
+        .setUserData = SetUserData,
+        .getUserData = GetUserData,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 } // namespace NodeModifier

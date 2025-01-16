@@ -28,6 +28,7 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void UpdateRenderState(const JSCallbackInfo& info);
     static void OnMove(const JSCallbackInfo& info);
+    static void SetCreateByTemplate(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

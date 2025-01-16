@@ -54,12 +54,19 @@ class WindowSceneTest : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    void SetUp() override;
+    void TearDown() override;
+    static sptr<Rosen::SceneSessionManager> ssm_;
 
     RefPtr<WindowScene> CreateWindowSceneForStartingWindowTest();
 };
 
+sptr<Rosen::SceneSessionManager> WindowSceneTest::ssm_ = nullptr;
+
 void WindowSceneTest::SetUpTestSuite()
 {
+    ssm_ = &Rosen::SceneSessionManager::GetInstance();
+    ASSERT_NE(ssm_, nullptr);
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
@@ -71,8 +78,20 @@ void WindowSceneTest::SetUpTestSuite()
 
 void WindowSceneTest::TearDownTestSuite()
 {
+    ssm_ = nullptr;
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+void WindowSceneTest::SetUp()
+{
+    ssm_->sceneSessionMap_.clear();
+}
+
+void WindowSceneTest::TearDown()
+{
+    usleep(WAIT_SYNC_IN_NS);
+    ssm_->sceneSessionMap_.clear();
 }
 
 RefPtr<WindowScene> WindowSceneTest::CreateWindowSceneForStartingWindowTest()
@@ -82,7 +101,7 @@ RefPtr<WindowScene> WindowSceneTest::CreateWindowSceneForStartingWindowTest()
         .bundleName_ = BUNDLE_NAME,
         .moduleName_ = MODULE_NAME,
     };
-    auto session = Rosen::SceneSessionManager::GetInstance().RequestSceneSession(sessionInfo);
+    auto session = ssm_->RequestSceneSession(sessionInfo);
     CHECK_EQUAL_RETURN(session, nullptr, nullptr);
     auto windowScene = AceType::MakeRefPtr<WindowScene>(session);
     CHECK_EQUAL_RETURN(windowScene, nullptr, nullptr);

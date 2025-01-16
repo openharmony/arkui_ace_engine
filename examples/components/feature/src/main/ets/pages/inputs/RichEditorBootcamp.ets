@@ -15,7 +15,7 @@
 import pasteboard from '@ohos.pasteboard';
 import { BusinessError } from '@ohos.base';
 import { Drawer } from 'common/src/main/ets/components/Drawer';
-import { RadioBlock, useEnabled, ColorBlock } from 'common';
+import { RadioBlock, useEnabled, ColorBlock, SliderBlock } from 'common';
 
 @Component
 export struct RichEditorBootcamp {
@@ -36,12 +36,42 @@ export struct RichEditorBootcamp {
   @State enableSystemSelectionMenu: boolean = true;
   @State enableDirection: boolean = false;
   @State compDirection: Direction = Direction.Auto;
-  @State enableCaretColor: boolean = false;
-  @State caretColor: ResourceColor | undefined = undefined;
-  @State enableSelectedBackgroundColor: boolean = false;
-  @State selectedBackgroundColor: ResourceColor | undefined = undefined;
   @State enableCompBackgroundColor: boolean = false;
   @State compBackgroundColor: ResourceColor | undefined = undefined;
+  @State enableCustomKeyboardOption: boolean = false;
+  @State customKeyboardOption: boolean = false;
+  @State enableBindSelectionMenuSpanType: boolean = false;
+  @State bindSelectionMenuSpanType: RichEditorSpanType = RichEditorSpanType.TEXT;
+  @State enableBindSelectionMenuResponseType: boolean = false;
+  @State bindSelectionMenuResponseType: ResponseType = ResponseType.LongPress;
+  @State enableCopyOptions: boolean = false;
+  @State copyOptions: CopyOptions = CopyOptions.LocalDevice;
+  @State enableEnableDataDetector: boolean = false;
+  @State enableDataDetector: boolean = false;
+  @State enableDataDetectorConfigTypes: boolean = false;
+  @State dataDetectorConfigTypes:　TextDataDetectorType|undefined = undefined
+  @State enableEnablePreviewText: boolean = false;
+  @State enablePreviewText: boolean = true;
+  @State enablePlaceholderFontValue: boolean = false;
+  @State placeholderFontValue: string | undefined = undefined;
+  @State enablePlaceholderStyleFontSize: boolean = false;
+  @State placeholderStyleFontSize: number = 16.0;
+  @State enablePlaceholderStyleFontWeight: boolean = false;
+  @State placeholderStyleFontWeight: FontWeight | number | string = FontWeight.Normal;
+  @State enablePlaceholderStyleFontStyle: boolean = false;
+  @State placeholderStyleFontStyle: FontStyle = FontStyle.Normal;
+  @State enablePlaceholderStyleFontColor: boolean = false
+  @State placeholderStyleFontColor: ResourceColor|undefined = undefined;
+  @State enableCaretColor: boolean = false;
+  @State caretColor: ResourceColor | undefined = '#007DFF';
+  @State enableSelectedBackgroundColor: boolean = false;
+  @State selectedBackgroundColor: ResourceColor | undefined = undefined;
+  @State enableEnterKeyType: boolean = false;
+  @State enterKeyType: EnterKeyType = EnterKeyType.NEW_LINE;
+  @State enableBarState: boolean = false;
+  @State barState: BarState = BarState.Auto;
+  @State enableEnableHapticFeedback: boolean = false;
+  @State enableHapticFeedback: boolean = true;
 
   build() {
     NavDestination() {
@@ -77,20 +107,37 @@ export struct RichEditorBootcamp {
                 this.sliderShow = false;
               }
             } : undefined)
+          .customKeyboard((result: void) => {},
+            { supportAvoidance: useEnabled(this.enableCustomKeyboardOption, this.customKeyboardOption) })
           .bindSelectionMenu(
             useEnabled(this.customSelectionMenu, RichEditorSpanType.TEXT),
             this.customSelectionMenu ? this.MySelectionMenu() : undefined,
             useEnabled(this.customSelectionMenu, RichEditorResponseType.LONG_PRESS),
-            this.customSelectionMenu ? {
-              onDisappear: () => {
-                this.sliderShow = false;
-              }
-            } : undefined)
+            this.customSelectionMenu ? { onDisappear: () => {this.sliderShow = false;} } : undefined)
           .height('100%')
           .direction(useEnabled(this.enableDirection, this.compDirection))
+          .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
+          .bindSelectionMenu(useEnabled(this.enableBindSelectionMenuSpanType, this.bindSelectionMenuSpanType),
+            (result: void)=>{},
+            useEnabled(this.enableBindSelectionMenuResponseType, this.bindSelectionMenuResponseType),
+          )
+          .copyOptions(useEnabled(this.enableCopyOptions,this.copyOptions))
+          .enableDataDetector(useEnabled(this.enableEnableDataDetector,this.enableDataDetector))
+          .dataDetectorConfig({
+            types: [useEnabled(this.enableDataDetectorConfigTypes, this.dataDetectorConfigTypes)],
+            onDetectResultUpdate: (result: string)=>{}
+          })
+          .enablePreviewText(useEnabled(this.enableEnablePreviewText,this.enablePreviewText))
+          .placeholder(useEnabled(this.enablePlaceholderFontValue,this.placeholderFontValue),
+            {font:{size:useEnabled(this.enablePlaceholderStyleFontSize,this.placeholderStyleFontSize),
+            weight:useEnabled(this.enablePlaceholderStyleFontWeight,this.placeholderStyleFontWeight),
+            style:useEnabled(this.enablePlaceholderStyleFontStyle,this.placeholderStyleFontStyle)},
+              fontColor:useEnabled(this.enablePlaceholderStyleFontColor,this.placeholderStyleFontColor)
+            })
           .caretColor(useEnabled(this.enableCaretColor, this.caretColor))
           .selectedBackgroundColor(useEnabled(this.enableSelectedBackgroundColor, this.selectedBackgroundColor))
-          .backgroundColor(useEnabled(this.enableCompBackgroundColor, this.compBackgroundColor))
+          .enterKeyType(useEnabled(this.enableEnterKeyType,this.enterKeyType))
+
       }
     }
   }
@@ -100,60 +147,207 @@ export struct RichEditorBootcamp {
     Scroll() {
       Column({ space: 8 }) {
         RadioBlock({
-          title: '布局方式',
+          title: 'compDirection',
           isEnabled: this.enableDirection,
           value: this.compDirection,
           dataSource: [
-            { label: '默认布局', value: Direction.Auto },
-            { label: '从右到左', value: Direction.Rtl },
-            { label: '从左到右', value: Direction.Ltr }
+            { label: 'Auto', value: Direction.Auto },
+            { label: 'Rtl', value: Direction.Rtl },
+            { label: 'Ltr', value: Direction.Ltr }
           ]
         })
         RadioBlock({
-          title: '是否设置自定义选择菜单',
+          title: 'customSelectionMenu',
           isEnabled: this.enableCustomSelectionMenu,
           value: this.customSelectionMenu,
           dataSource: [
-            { label: '自定义', value: true },
-            { label: '默认', value: false }
+            { label: 'true', value: true },
+            { label: 'false', value: false }
           ]
         })
         if (this.customSelectionMenu) {
           RadioBlock({
-            title: '是否显示文本菜单1',
+            title: 'textSelectionMenu',
             isEnabled: this.enableTextSelectionMenu,
             value: this.textSelectionMenu,
             dataSource: [
-              { label: '显示', value: true },
-              { label: '隐藏', value: false }
+              { label: 'true', value: true },
+              { label: 'false', value: false }
             ]
           })
           RadioBlock({
-            title: '是否显示文本菜单2',
+            title: 'systemSelectionMenu',
             isEnabled: this.enableSystemSelectionMenu,
             value: this.systemSelectionMenu,
             dataSource: [
-              { label: '显示', value: true },
-              { label: '隐藏', value: false }
+              { label: 'true', value: true },
+              { label: 'false', value: false }
             ]
           })
         }
+
         ColorBlock({
-          title: '光标颜色',
-          isEnabled: this.enableCaretColor,
-          color: this.caretColor,
-        })
-        ColorBlock({
-          title: '选中背景颜色',
+          title: 'selectedBackgroundColor',
           isEnabled: this.enableSelectedBackgroundColor,
           color: this.selectedBackgroundColor,
         })
         ColorBlock({
-          title: '背景颜色',
+          title: 'compBackgroundColor',
           isEnabled: this.enableCompBackgroundColor,
           color: this.compBackgroundColor,
         })
 
+        RadioBlock({
+          title: 'customKeyboard.option',
+          isEnabled: this.enableCustomKeyboardOption,
+          value: this.customKeyboardOption,
+          dataSource: [
+            { label: 'false', value: false },
+            { label: 'true', value: true },
+          ]
+        })
+
+        RadioBlock({
+          title:'bindSelectionMenu.spanType',
+          isEnabled: this.enableBindSelectionMenuSpanType,
+          value: this.bindSelectionMenuSpanType,
+          dataSource: [
+            {label: 'TEXT', value: TextSpanType.TEXT },
+            {label: 'IMAGE', value: TextSpanType.IMAGE },
+            {label: 'MIXED', value: TextSpanType.MIXED },
+          ]
+        })
+
+        RadioBlock({
+          title:'bindSelectionMenu.responseType',
+          isEnabled: this.enableBindSelectionMenuResponseType,
+          value: this.bindSelectionMenuResponseType,
+          dataSource: [
+            {label: 'RIGHT_CLICK', value: TextResponseType.RIGHT_CLICK },
+            {label: 'LONG_PRESS', value: TextResponseType.LONG_PRESS },
+            {label: 'SELECT', value: TextResponseType.SELECT },
+          ]
+        })
+
+        RadioBlock({
+          title: 'copyOptions',
+          isEnabled: this.enableCopyOptions,
+          value: this.copyOptions,
+          dataSource: [
+            { label: 'None', value: CopyOptions.None },
+            { label: 'InApp', value: CopyOptions.InApp },
+            { label: 'LocalDevice', value: CopyOptions.LocalDevice },
+          ]
+        })
+
+        RadioBlock({
+          title: 'enableDataDetector',
+          isEnabled: this.enableEnableDataDetector,
+          value: this.enableDataDetector,
+          dataSource: [
+            { label: 'false', value: false },
+            { label: 'true', value: true },
+          ]
+        })
+
+        RadioBlock({
+          title:'textDataDetectorConfig.types',
+          isEnabled: this.enableDataDetectorConfigTypes,
+          value: this.dataDetectorConfigTypes,
+          dataSource: [
+            {label: 'NULL', value: [] },
+            {label: 'PHONE_NUMBER', value: TextDataDetectorType.PHONE_NUMBER },
+            {label: 'URL', value: TextDataDetectorType.URL },
+            {label: 'EMAIL', value: TextDataDetectorType.EMAIL },
+            {label: 'ADDRESS', value: TextDataDetectorType.ADDRESS },
+            {label: 'DATE_TIME', value: TextDataDetectorType.DATE_TIME },
+          ]
+        })
+
+        RadioBlock({
+          title: 'enablePreviewText',
+          isEnabled: this.enableEnablePreviewText,
+          value: this.enablePreviewText,
+          dataSource: [
+            { label: 'false', value: false },
+            { label: 'true', value: true },
+          ]
+        })
+
+
+        SliderBlock({
+          title: 'placeholderStyle.font.size',
+          isEnabled: this.enablePlaceholderStyleFontSize,
+          value: this.placeholderStyleFontSize,
+          min: 1,
+          max: 200
+        })
+
+        RadioBlock({
+          title:'placeholderStyle.font.weight',
+          isEnabled: this.enablePlaceholderStyleFontWeight,
+          value: this.placeholderStyleFontWeight,
+          dataSource: [
+            {label: '100', value: 100},
+            {label: '200', value: 200},
+            {label: '300', value: 300},
+            {label: '400', value: 400},
+            {label: '500', value: 500},
+            {label: '600', value: 600},
+            {label: '700', value: 700},
+            {label: '800', value: 800},
+            {label: '900', value: 900},
+            {label: 'Lighter', value: FontWeight.Lighter },
+            {label: 'Normal', value: FontWeight.Normal },
+            {label: 'Regular', value: FontWeight.Regular },
+            {label: 'Medium', value: FontWeight.Medium },
+            {label: 'Bold', value: FontWeight.Bold },
+            {label: 'Bolder', value: FontWeight.Bolder },
+          ]
+        })
+
+        RadioBlock({
+          title:'placeholderStyle.font.style',
+          isEnabled: this.enablePlaceholderStyleFontStyle,
+          value: this.placeholderStyleFontStyle,
+          dataSource: [
+            {label: 'Normal', value: FontStyle.Normal },
+            {label: 'Italic', value: FontStyle.Italic },
+          ]
+        })
+
+        ColorBlock({
+          title: 'placeholderStyle.fontColor',
+          isEnabled: this.enablePlaceholderStyleFontColor,
+          color: this.placeholderStyleFontColor,
+        })
+
+        ColorBlock({
+          title: 'caretColor',
+          isEnabled: this.enableCaretColor,
+          color: this.caretColor,
+        })
+
+        ColorBlock({
+          title: 'selectedBackgroundColor',
+          isEnabled: this.enableSelectedBackgroundColor,
+          color: this.selectedBackgroundColor
+        })
+
+        RadioBlock({
+          title: 'enterKeyType',
+          isEnabled: this.enableEnterKeyType,
+          value: this.enterKeyType,
+          dataSource: [
+            { label: 'Go', value: EnterKeyType.Go },
+            { label: 'Search', value: EnterKeyType.Search },
+            { label: 'Send', value: EnterKeyType.Send },
+            { label: 'Next', value: EnterKeyType.Next },
+            { label: 'Done', value: EnterKeyType.Done },
+            { label: 'PREVIOUS', value: EnterKeyType.PREVIOUS },
+            { label: 'NEW_LINE', value: EnterKeyType.NEW_LINE },
+          ]
+        })
 
       }
     }

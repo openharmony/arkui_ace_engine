@@ -116,7 +116,7 @@ HWTEST_F(TextEditControllerExAccessorTest, StopEditingTest, TestSize.Level1)
 HWTEST_F(TextEditControllerExAccessorTest, DISABLED_GetPreviewTextTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->getPreviewText, nullptr);
-    PreviewTextInfo previewText = {.offset = OFFSET, .value = "info"};
+    PreviewTextInfo previewText = {.offset = OFFSET, .value = u"info"};
     EXPECT_CALL(*peer_, GetPreviewText()).Times(1).WillOnce(Return(previewText));
     accessor_->getPreviewText(peer_); // fix after updating a return value
     // check a return value

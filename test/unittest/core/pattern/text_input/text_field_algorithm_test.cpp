@@ -227,27 +227,27 @@ HWTEST_F(TextFieldAlgorithmTest, UpdatePlaceholderTextStyle, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateCounterNode
- * @tc.desc: Test the function UpdateCounterNode.
+ * @tc.name: LayoutRectTest001
+ * @tc.desc: Test the function LayoutRectTest001
  * @tc.type: FUNC
  */
-HWTEST_F(TextFieldAlgorithmTest, UpdateCounterNode, TestSize.Level1)
+HWTEST_F(TextFieldAlgorithmTest, LayoutRectTest001, TestSize.Level1)
 {
-    /**
-     * @tc.steps: step1. Initialize text input.
-     */
     CreateTextField(DEFAULT_TEXT);
-    pattern_->AddCounterNode();
-    FlushLayoutTask(frameNode_);
+    LayoutConstraintF constraint;
+    constraint.minSize = SizeF(100, 100);
+    constraint.maxSize = SizeF(100, 100);
+    constraint.percentReference = SizeF(100, 100);
+    frameNode_->GetLayoutProperty()->SetLayoutRect(RectF(0, 0, 100, 100));
+    frameNode_->GetLayoutProperty()->UpdateCalcMinSize(CalcSize(CalcLength(200), CalcLength(200)));
     auto textInputLayoutAlgorithm =
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
-    LayoutConstraintF layoutConstraint;
-    layoutProperty_->UpdateTextAlign(TextAlign::END);
-    textInputLayoutAlgorithm->UpdateCounterNode(50, 460, layoutConstraint, &layoutWrapper);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(layoutProperty_->GetTextAlign(), TextAlign::END);
+    std::vector<std::u16string> strVec = { u"0", u"1", u"2" };
+    TextStyle textStyle;
+    auto paragraphData = CreateParagraphData { false, textStyle.GetFontSize().ConvertToPx() };
+    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, u"content", false, paragraphData);
+    float width = textInputLayoutAlgorithm->CalculateContentWidth(constraint, AceType::RawPtr(frameNode_), 0);
+    EXPECT_EQ(width, 100);
 }
 
 /**
@@ -327,54 +327,6 @@ HWTEST_F(TextFieldAlgorithmTest, CounterLayout003, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleTextArea001
- * @tc.desc: Test the function HandleTextArea
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldAlgorithmTest, HandleTextArea001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize text input.
-     */
-    CreateTextField(DEFAULT_TEXT);
-    pattern_->AddCounterNode();
-    FlushLayoutTask(frameNode_);
-
-    auto textInputLayoutAlgorithm =
-        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
-    layoutWrapper.GetGeometryNode()->SetContentSize({ 40.0f, 40.0f });
-    RefPtr<LayoutWrapper> counterNode = pattern_->GetCounterNode().Upgrade();
-    float countX = 0;
-    textInputLayoutAlgorithm->HandleTextArea(&layoutWrapper, counterNode, pattern_, true, countX);
-}
-
-/**
- * @tc.name: HandleTextArea002
- * @tc.desc: Test the function HandleTextArea
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldAlgorithmTest, HandleTextArea002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Initialize text input.
-     */
-    CreateTextField(DEFAULT_TEXT);
-    pattern_->AddCounterNode();
-    FlushLayoutTask(frameNode_);
-
-    auto textInputLayoutAlgorithm =
-        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
-    layoutWrapper.GetGeometryNode()->SetContentSize({ 40.0f, 40.0f });
-    RefPtr<LayoutWrapper> counterNode = pattern_->GetCounterNode().Upgrade();
-    float countX = 0;
-    textInputLayoutAlgorithm->HandleTextArea(&layoutWrapper, counterNode, pattern_, false, countX);
-}
-
-/**
  * @tc.name: CounterNodeMeasure
  * @tc.desc: Test the function CounterNodeMeasure.
  * @tc.type: FUNC
@@ -409,11 +361,11 @@ HWTEST_F(TextFieldAlgorithmTest, CreateParagraph001, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT);
     auto textInputLayoutAlgorithm =
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    std::vector<std::string> strVec = { "0", "1", "2" };
+    std::vector<std::u16string> strVec = { u"0", u"1", u"2" };
     TextStyle textStyle;
     textStyle.SetTextOverflow(OVERFLOW_ELLIPSIS);
     auto paragraphData = CreateParagraphData { true, textStyle.GetFontSize().ConvertToPx() };
-    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, "content", true, paragraphData);
+    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, u"content", true, paragraphData);
 }
 
 /**
@@ -429,11 +381,11 @@ HWTEST_F(TextFieldAlgorithmTest, CreateParagraph002, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT);
     auto textInputLayoutAlgorithm =
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    std::vector<std::string> strVec = { "0", "1", "2" };
+    std::vector<std::u16string> strVec = { u"0", u"1", u"2" };
     TextStyle textStyle;
     textStyle.SetTextAlign(TextAlign::LEFT);
     auto paragraphData = CreateParagraphData { false, textStyle.GetFontSize().ConvertToPx() };
-    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, "content", false, paragraphData);
+    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, u"content", false, paragraphData);
     EXPECT_NE(textInputLayoutAlgorithm->paragraph_, nullptr);
 }
 
@@ -450,12 +402,12 @@ HWTEST_F(TextFieldAlgorithmTest, CreateParagraph003, TestSize.Level1)
     CreateTextField(DEFAULT_TEXT);
     auto textInputLayoutAlgorithm =
         AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    std::vector<std::string> strVec = {"0", "1", "2"};
+    std::vector<std::u16string> strVec = { u"0", u"1", u"2" };
     TextStyle textStyle;
     textStyle.SetTextAlign(TextAlign::LEFT);
     textStyle.SetMaxLines(1);
     auto paragraphData = CreateParagraphData { false, textStyle.GetFontSize().ConvertToPx() };
-    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, "content", false, paragraphData);
+    textInputLayoutAlgorithm->CreateParagraph(textStyle, strVec, u"content", false, paragraphData);
     textInputLayoutAlgorithm->GetTextFieldDefaultHeight();
 }
 
@@ -481,9 +433,9 @@ HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusFontSize001, TestSize.Level1)
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
     LayoutConstraintF layoutConstraint;
-    auto content = "content";
+    auto content = u"content";
     textInputLayoutAlgorithm->AdaptInlineFocusFontSize(textStyle, content, 1.0_px, layoutConstraint, &layoutWrapper);
-    EXPECT_EQ(content, "content");
+    EXPECT_EQ(StringUtils::Str16ToStr8(content), "content");
 }
 
 /**
@@ -508,9 +460,9 @@ HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusFontSize002, TestSize.Level1)
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
     LayoutConstraintF layoutConstraint;
-    auto content = "content";
+    auto content = u"content";
     textInputLayoutAlgorithm->AdaptInlineFocusFontSize(textStyle, content, 1.0_px, layoutConstraint, &layoutWrapper);
-    EXPECT_EQ(content, "content");
+    EXPECT_EQ(StringUtils::Str16ToStr8(content), "content");
 }
 
 /**
@@ -537,9 +489,9 @@ HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusFontSize003, TestSize.Level1)
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize.SetWidth(10);
     layoutConstraint.selfIdealSize.SetHeight(10);
-    auto content = "content";
+    auto content = u"content";
     textInputLayoutAlgorithm->AdaptInlineFocusFontSize(textStyle, content, 1.0_px, layoutConstraint, &layoutWrapper);
-    EXPECT_EQ(content, "content");
+    EXPECT_EQ(StringUtils::Str16ToStr8(content), "content");
 }
 
 /**
@@ -566,9 +518,9 @@ HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusFontSize004, TestSize.Level1)
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize.SetWidth(0);
     layoutConstraint.selfIdealSize.SetHeight(0);
-    auto content = "content";
+    auto content = u"content";
     textInputLayoutAlgorithm->AdaptInlineFocusFontSize(textStyle, content, 1.0_px, layoutConstraint, &layoutWrapper);
-    EXPECT_EQ(content, "content");
+    EXPECT_EQ(StringUtils::Str16ToStr8(content), "content");
 }
 
 /**
@@ -595,9 +547,9 @@ HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusMinFontSize001, TestSize.Level1
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize.SetWidth(0);
     layoutConstraint.selfIdealSize.SetHeight(0);
-    auto content = "content";
+    auto content = u"content";
     textInputLayoutAlgorithm->AdaptInlineFocusMinFontSize(textStyle, content, 1.0_px, layoutConstraint, &layoutWrapper);
-    EXPECT_EQ(content, "content");
+    EXPECT_EQ(StringUtils::Str16ToStr8(content), "content");
 }
 
 /**
@@ -624,9 +576,9 @@ HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusMinFontSize002, TestSize.Level1
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize.SetWidth(0);
     layoutConstraint.selfIdealSize.SetHeight(0);
-    auto content = "content";
+    auto content = u"content";
     textInputLayoutAlgorithm->AdaptInlineFocusMinFontSize(textStyle, content, 1.0_px, layoutConstraint, &layoutWrapper);
-    EXPECT_EQ(content, "content");
+    EXPECT_EQ(StringUtils::Str16ToStr8(content), "content");
 }
 
 /**
@@ -653,24 +605,9 @@ HWTEST_F(TextFieldAlgorithmTest, AdaptInlineFocusMinFontSize003, TestSize.Level1
     LayoutConstraintF layoutConstraint;
     layoutConstraint.selfIdealSize.SetWidth(10);
     layoutConstraint.selfIdealSize.SetHeight(10);
-    auto content = "content";
+    auto content = u"content";
     textInputLayoutAlgorithm->AdaptInlineFocusMinFontSize(textStyle, content, 1.0_px, layoutConstraint, &layoutWrapper);
-    EXPECT_EQ(content, "content");
-}
-
-/**
- * @tc.name: GetCounterNodeAlignment001
- * @tc.desc: Test the function GetCounterNodeAlignment.
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldAlgorithmTest, GetCounterNodeAlignment001, TestSize.Level1)
-{
-    CreateTextField(DEFAULT_TEXT);
-    auto textInputLayoutAlgorithm =
-        AceType::DynamicCast<TextInputLayoutAlgorithm>(pattern_->CreateLayoutAlgorithm());
-    LayoutWrapperNode layoutWrapper =
-        LayoutWrapperNode(frameNode_, AceType::MakeRefPtr<GeometryNode>(), layoutProperty_);
-    textInputLayoutAlgorithm->GetCounterNodeAlignment(&layoutWrapper);
+    EXPECT_EQ(StringUtils::Str16ToStr8(content), "content");
 }
 
 /**

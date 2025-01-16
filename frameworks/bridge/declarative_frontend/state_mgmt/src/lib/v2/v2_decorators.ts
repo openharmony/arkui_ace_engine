@@ -206,8 +206,6 @@ const Consumer = (aliasName?: string) => {
     const providerName = (aliasName === undefined || aliasName === null ||
       (typeof aliasName === 'string' && aliasName.trim() === '')
     ) ? varName : aliasName;
-    const storeProp = ObserveV2.CONSUMER_PREFIX + varName;
-    proto[storeProp] = providerName;
 
     Reflect.defineProperty(proto, varName, {
       get() {
@@ -250,6 +248,7 @@ const Consumer = (aliasName?: string) => {
 const Monitor = function (key : string, ...keys: string[]): (target: any, _: any, descriptor: any) => void {
   const pathsUniqueString = keys ? [key, ...keys].join(' ') : key;
   return function (target, _, descriptor): void {
+    ObserveV2.addVariableDecoMeta(target, descriptor.value.name, '@Monitor');
     stateMgmtConsole.debug(`@Monitor('${pathsUniqueString}')`);
     let watchProp = Symbol.for(MonitorV2.WATCH_PREFIX + target.constructor.name);
     const monitorFunc = descriptor.value;
@@ -295,6 +294,7 @@ interface IMonitor {
    */
 const Computed = (target: Object, propertyKey: string, descriptor: PropertyDescriptor): void => {
   stateMgmtConsole.debug(`@Computed ${propertyKey}`);
+  ObserveV2.addVariableDecoMeta(target, propertyKey, '@Computed');
   let watchProp = Symbol.for(ComputedV2.COMPUTED_PREFIX + target.constructor.name);
   const computeFunction = descriptor.get;
   target[watchProp] ? target[watchProp][propertyKey] = computeFunction

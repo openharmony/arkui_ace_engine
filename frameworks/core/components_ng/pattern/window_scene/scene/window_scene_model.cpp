@@ -90,7 +90,7 @@ RefPtr<FrameNode> CreateNodeHelper(int32_t persistentId, int32_t inNodeId)
     auto nodeId = inNodeId >= 0 ? inNodeId : stack->ClaimNodeId();
     ACE_SCOPED_TRACE("Create[%s][self:%d][%s]",
         V2::WINDOW_SCENE_ETS_TAG, nodeId, sceneSession->GetSessionInfo().bundleName_.c_str());
-    auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId, persistentId,
+    auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId,
         [sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
     stack->Push(windowNode);
     UpdateAlignmentProperty();

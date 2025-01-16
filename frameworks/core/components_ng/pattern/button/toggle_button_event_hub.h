@@ -53,7 +53,10 @@ public:
             auto host = GetFrameNode();
             if (host) {
                 auto id = host->GetInspectorIdValue("");
-                builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
+                builder.SetId(id)
+                    .SetType(host->GetHostTag())
+                    .SetDescription(host->GetAutoEventParamValue(""))
+                    .SetHost(host);
                 if (!id.empty()) {
                     Recorder::NodeDataCache::Get().PutBool(host, id, select);
                 }

@@ -40,6 +40,7 @@
 #include "core/components_ng/syntax/for_each_node.h"
 #include "core/components_ng/syntax/if_else_node.h"
 #include "core/components_ng/syntax/syntax_item.h"
+#include "core/components_ng/syntax/with_theme_node.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -491,6 +492,7 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
                     return FrameNode::GetOrCreateFrameNode(
                         type, nodeId, []() { return AceType::MakeRefPtr<FlexLayoutPattern>(); });
                 } },
+#ifndef ARKUI_WEARABLE
             { V2::TABS_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
                     return TabsModelNG::GetOrCreateTabsNode(
@@ -501,16 +503,19 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
                     return FrameNode::GetOrCreateFrameNode(
                         type, nodeId, []() { return AceType::MakeRefPtr<TabBarPattern>(); });
                 } },
+#endif
             { V2::SWIPER_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
                     return FrameNode::GetOrCreateFrameNode(
                         type, nodeId, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
                 } },
+#ifndef ARKUI_WEARABLE
             { V2::TAB_CONTENT_ITEM_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
                     return TabContentNode::GetOrCreateTabContentNode(
                         type, nodeId, []() { return AceType::MakeRefPtr<TabContentPattern>(nullptr); });
                 } },
+#endif
             { V2::COMMON_VIEW_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
                     return FrameNode::GetOrCreateFrameNode(
@@ -526,6 +531,10 @@ RefPtr<UINode> DistributedUI::RestoreNode(const std::unique_ptr<NodeObject>& nod
                 } },
             { V2::JS_IF_ELSE_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) { return IfElseNode::GetOrCreateIfElseNode(nodeId); } },
+            { V2::JS_WITH_THEME_ETS_TAG,
+                [](const std::string& type, int32_t nodeId) {
+                    return WithThemeNode::GetOrCreateWithThemeNode(nodeId);
+                } },
             { V2::TEXTINPUT_ETS_TAG,
                 [](const std::string& type, int32_t nodeId) {
                     return FrameNode::GetOrCreateFrameNode(

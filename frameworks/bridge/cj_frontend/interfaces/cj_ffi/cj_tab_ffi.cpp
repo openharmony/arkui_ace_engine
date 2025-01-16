@@ -71,6 +71,7 @@ void TabsController::ChangeIndex(int32_t index)
 extern "C" {
 void FfiOHOSAceFrameworkTabsCreate(int32_t barPosition, int64_t controllerId, int32_t index)
 {
+#ifndef ARKUI_WEARABLE
     if (!Utils::CheckParamsValid(barPosition, BAR_POSITIONS.size())) {
         LOGE("invalid value for bar position");
         return;
@@ -86,56 +87,74 @@ void FfiOHOSAceFrameworkTabsCreate(int32_t barPosition, int64_t controllerId, in
     swiperController = nativeTabsController->GetSwiperController();
     tabController->SetInitialIndex(index);
     TabsModel::GetInstance()->Create(BAR_POSITIONS[barPosition], index, tabController, swiperController);
+#endif
 }
 
 void FfiOHOSAceFrameworkTabsPop()
 {
+#ifndef ARKUI_WEARABLE
     TabsModel::GetInstance()->Pop();
+#endif
 }
 
 void FfiOHOSAceFrameworkTabsSetBarWidth(double width, int32_t unit)
 {
+#ifndef ARKUI_WEARABLE
     Dimension value(width, static_cast<DimensionUnit>(unit));
     TabsModel::GetInstance()->SetTabBarWidth(value);
+#endif
 }
 
 void FfiOHOSAceFrameworkTabsSetBarHeight(double height, int32_t unit)
 {
+#ifndef ARKUI_WEARABLE
     Dimension value(height, static_cast<DimensionUnit>(unit));
     TabsModel::GetInstance()->SetTabBarHeight(value);
+#endif
 }
 
 void FfiOHOSAceFrameworkTabsSetBarMode(int32_t barMode)
 {
+#ifndef ARKUI_WEARABLE
     if (!Utils::CheckParamsValid(barMode, TAB_BAR_MODES.size())) {
         LOGE("invalid value for tab bar mode");
         return;
     }
     TabsModel::GetInstance()->SetTabBarMode(TAB_BAR_MODES[barMode]);
+#endif
 }
 
 void FfiOHOSAceFrameworkTabsSetIndex(int32_t index)
 {
+#ifndef ARKUI_WEARABLE
     TabsModel::GetInstance()->SetIndex(index);
+#endif
 }
 
 void FfiOHOSAceFrameworkTabsSetVertical(bool isVertical)
 {
+#ifndef ARKUI_WEARABLE
     TabsModel::GetInstance()->SetIsVertical(isVertical);
+#endif
 }
 
 void FfiOHOSAceFrameworkTabsSetScrollable(bool isScrollable)
 {
+#ifndef ARKUI_WEARABLE
     TabsModel::GetInstance()->SetScrollable(isScrollable);
+#endif
 }
 
 void FfiOHOSAceFrameworkTabsSetAnimationDuration(float duration)
 {
+#ifndef ARKUI_WEARABLE
     TabsModel::GetInstance()->SetAnimationDuration(duration);
+#endif
 }
 
 void FfiOHOSAceFrameworkTabsOnChange(void (*callback)(int32_t index))
 {
+#ifndef ARKUI_WEARABLE
     auto onChange = [lambda = CJLambda::Create(callback)](const BaseEventInfo* info) {
         const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
         if (!tabsInfo) {
@@ -145,51 +164,70 @@ void FfiOHOSAceFrameworkTabsOnChange(void (*callback)(int32_t index))
         lambda(tabsInfo->GetIndex());
     };
     TabsModel::GetInstance()->SetOnChange(std::move(onChange));
+#endif
 }
 
 int64_t FfiOHOSAceFrameworkTabsControllerCtor()
 {
+#ifndef ARKUI_WEARABLE
     auto ret_ = FFIData::Create<TabsController>();
     return ret_->GetID();
+#else
+    return 0;
+#endif
 }
 
 void FfiOHOSAceFrameworkTabsControllerChangeIndex(int64_t selfId, int32_t index)
 {
+#ifndef ARKUI_WEARABLE
     auto self_ = FFIData::GetData<TabsController>(selfId);
     if (self_ != nullptr) {
         self_->ChangeIndex(index);
     }
+#endif
 }
 
 void FfiOHOSAceFrameworkTabContentCreate()
 {
+#ifndef ARKUI_WEARABLE
     TabContentModel::GetInstance()->Create();
+#endif
 }
 
 void FfiOHOSAceFrameworkTabContentPop()
 {
+#ifndef ARKUI_WEARABLE
     TabContentModel::GetInstance()->Pop();
+#endif
 }
 
 void FfiOHOSAceFrameworkTabContentSetTabBar(const char* content)
 {
+#ifndef ARKUI_WEARABLE
     TabContentModel::GetInstance()->SetTabBar(content, std::nullopt, std::nullopt, nullptr, true);
+#endif
 }
 
 void FfiOHOSAceFrameworkTabContentSetTabBarWithIcon(const char* icon, const char* text)
 {
+#ifndef ARKUI_WEARABLE
     TabContentModel::GetInstance()->SetTabBar(text, icon, std::nullopt, nullptr, false);
+#endif
 }
 
 void FfiOHOSAceFrameworkTabContentSetTabBarWithComponent(void (*callback)())
 {
+#ifndef ARKUI_WEARABLE
     TabContentModel::GetInstance()->SetTabBar(
         std::nullopt, std::nullopt, std::nullopt, CJLambda::Create(callback), false);
+#endif
 }
 
 void FfiOHOSAceFrameworkTabContentPUCreate(void (*callback)())
 {
+#ifndef ARKUI_WEARABLE
     auto childBuild = CJLambda::Create(callback);
     TabContentModel::GetInstance()->Create(std::move(childBuild));
+#endif
 }
 }

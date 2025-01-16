@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
+#include "base/utils/utf_helper.h"
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #endif
@@ -30,22 +31,22 @@ int32_t RichEditorInsertValue::GetInsertOffset() const
     return insertOffset_;
 }
 
-void RichEditorInsertValue::SetInsertValue(const std::string& insertValue)
+void RichEditorInsertValue::SetInsertValue(const std::u16string& insertValue)
 {
     insertValue_ = insertValue;
 }
 
-void RichEditorInsertValue::SetPreviewText(const std::string& previewText)
+void RichEditorInsertValue::SetPreviewText(const std::u16string& previewText)
 {
     previewText_ = previewText;
 }
 
-const std::string& RichEditorInsertValue::GetInsertValue() const
+const std::u16string& RichEditorInsertValue::GetInsertValue() const
 {
     return insertValue_;
 }
 
-const std::string& RichEditorInsertValue::GetPreviewText() const
+const std::u16string& RichEditorInsertValue::GetPreviewText() const
 {
     return previewText_;
 }
@@ -110,22 +111,22 @@ int32_t RichEditorAbstractSpanResult::GetEraseLength() const
     return eraseLength_;
 }
 
-void RichEditorAbstractSpanResult::SetValue(const std::string& value)
+void RichEditorAbstractSpanResult::SetValue(const std::u16string& value)
 {
     value_ = value;
 }
 
-const std::string& RichEditorAbstractSpanResult::GetValue() const
+const std::u16string& RichEditorAbstractSpanResult::GetValue() const
 {
     return value_;
 }
 
-void RichEditorAbstractSpanResult::SetPreviewText(const std::string& previewText)
+void RichEditorAbstractSpanResult::SetPreviewText(const std::u16string& previewText)
 {
     previewText_ = previewText;
 }
 
-const std::string& RichEditorAbstractSpanResult::GetPreviewText() const
+const std::u16string& RichEditorAbstractSpanResult::GetPreviewText() const
 {
     return previewText_;
 }
@@ -163,6 +164,16 @@ void RichEditorAbstractSpanResult::SetLineHeight(double lineHeight)
 double RichEditorAbstractSpanResult::GetLineHeight() const
 {
     return lineHeight_;
+}
+
+void RichEditorAbstractSpanResult::SetHalfLeading(bool halfLeading)
+{
+    halfLeading_ = halfLeading;
+}
+
+bool RichEditorAbstractSpanResult::GetHalfLeading() const
+{
+    return halfLeading_;
 }
 
 void RichEditorAbstractSpanResult::SetLetterspacing(double letterSpacing)
@@ -463,6 +474,16 @@ void StyledStringChangeValue::SetReplacementString(const RefPtr<SpanStringBase>&
 const RefPtr<SpanStringBase> StyledStringChangeValue::GetReplacementString() const
 {
     return replacementString_;
+}
+
+void StyledStringChangeValue::SetPreviewText(const std::u16string& previewText)
+{
+    previewText_ = previewText;
+}
+
+const std::u16string& StyledStringChangeValue::GetPreviewText() const
+{
+    return previewText_;
 }
 
 void RichEditorEventHub::SetOnReady(std::function<void()>&& func)

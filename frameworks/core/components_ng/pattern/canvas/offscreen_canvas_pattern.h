@@ -90,6 +90,7 @@ public:
     void SetFontStyle(FontStyle style);
     void SetFontFamilies(const std::vector<std::string>& fontFamilies);
     void SetFontSize(const Dimension& size);
+    void SetLetterSpacing(const Dimension& letterSpacing);
     void SetFillColor(const Color& color);
     int32_t GetWidth();
     int32_t GetHeight();

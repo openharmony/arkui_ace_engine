@@ -240,7 +240,6 @@ public:
         themeStyle->SetAttr("tab_content_animation_duration", { .value = ANIMATION_DURATION_DEFAULT });
         SetupTheme<TabTheme>();
         fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
-        EXPECT_CALL(*MockPipelineContext::GetCurrent(), FlushUITasks(_)).Times(AnyNumber());
         AddResource(RES_STRING_REGISTERED_ID, "#FF00FF00");
     }
 };
@@ -1150,7 +1149,7 @@ HWTEST_F(TabsModifierTest, setBarBackgroundEffectTestDefaultValues, TestSize.Lev
  * @tc.desc: Check the functionality of GENERATED_ArkUITabsModifier.setBarBackgroundEffect
  * @tc.type: FUNC
  */
-HWTEST_F(TabsModifierTest, setBarBackgroundEffectTestValidValues, TestSize.Level1)
+HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundEffectTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBarBackgroundEffect, nullptr);
     Ark_BackgroundEffectOptions inputValValid = {

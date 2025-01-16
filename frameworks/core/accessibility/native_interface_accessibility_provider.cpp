@@ -15,6 +15,8 @@
 
 #include "core/accessibility/native_interface_accessibility_provider.h"
 
+#include "base/log/log.h"
+
 using namespace OHOS::Ace;
 namespace {
 constexpr int32_t NOT_REGISTERED = -1;

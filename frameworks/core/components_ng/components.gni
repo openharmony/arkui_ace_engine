@@ -95,6 +95,9 @@ template("build_component_ng") {
         cflags_cc += invoker.cflags_cc
       }
       include_dirs = []
+      if (ohos_indep_compiler_enable) {
+        include_dirs += indep_compile_includes
+      }
       if (is_arkui_x) {
         include_dirs += [
           "//foundation/graphic/graphic_2d/interfaces/inner_api/common",

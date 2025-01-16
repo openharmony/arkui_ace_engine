@@ -20,12 +20,22 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
+#include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace::NG {
 class ACE_EXPORT ContainerModalViewEnhance : public ContainerModalView {
 public:
+    static void OnContainerModalEvent(
+        RefPtr<PipelineContext> pipelineContext, const std::string& name, const std::string& value);
     static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
     static RefPtr<FrameNode> BuildMenuItemIcon(InternalResource::ResourceId resourceId);
     static RefPtr<FrameNode> BuildGestureRow(RefPtr<FrameNode>& containerNode);
+    static bool GetContainerModalComponentRect(PipelineContext *pipelineContext,
+        RectF& floatContainerModal, RectF& floatButtons);
+    static void SetContainerButtonStyle(RefPtr<PipelineContext> pipeline, uint32_t buttonsize,
+        uint32_t spacingBetweenButtons, uint32_t closeButtonRightMargin, int32_t colorMode);
+    static int32_t AddButtonsRectChangeListener(PipelineContext* context, ButtonsRectChangeListener&& listener);
+    static void RemoveButtonsRectChangeListener(PipelineContext* context, int32_t id);
 
 protected:
     static RefPtr<FrameNode> BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle = false);

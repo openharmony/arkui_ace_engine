@@ -416,6 +416,11 @@ void ImageModelNG::SetImageFit(ImageFit value)
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageFit, value);
 }
 
+void ImageModelNG::SetImageMatrix(const Matrix4 &value)
+{
+    ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix, value);
+}
+
 void ImageModelNG::SetMatchTextDirection(bool value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ImageRenderProperty, MatchTextDirection, value);
@@ -709,6 +714,11 @@ void ImageModelNG::SetImageRenderMode(FrameNode *frameNode, const std::optional<
     } else {
         ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageRenderMode, frameNode);
     }
+}
+
+void ImageModelNG::SetImageMatrix(FrameNode *frameNode, const Matrix4 &value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ImageMatrix, value, frameNode);
 }
 
 void ImageModelNG::SetImageFit(FrameNode *frameNode, ImageFit value)

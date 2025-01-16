@@ -15,9 +15,15 @@
 
 #include "core/components_ng/pattern/text/text_paint_method.h"
 
+#include "core/components/common/properties/marquee_option.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
+
+namespace {
+constexpr Dimension DEFAULT_MARQUEE_STEP_VP = 4.0_vp;
+} // namespace
+
 TextPaintMethod::TextPaintMethod(const WeakPtr<Pattern>& pattern, float baselineOffset,
     RefPtr<TextContentModifier> textContentModifier, RefPtr<TextOverlayModifier> textOverlayModifier)
     : pattern_(pattern), baselineOffset_(baselineOffset),
@@ -27,6 +33,44 @@ TextPaintMethod::TextPaintMethod(const WeakPtr<Pattern>& pattern, float baseline
 RefPtr<Modifier> TextPaintMethod::GetContentModifier(PaintWrapper* paintWrapper)
 {
     return textContentModifier_;
+}
+
+void TextPaintMethod::DoStartTextRace()
+{
+    CHECK_NULL_VOID(textContentModifier_);
+
+    auto textPattern = DynamicCast<TextPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPattern);
+    auto frameNode = textPattern->GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto pManager = textPattern->GetParagraphManager();
+    CHECK_NULL_VOID(pManager);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!layoutProperty->HasTextMarqueeFadeout()) {
+        layoutProperty->UpdateTextMarqueeFadeout(theme->GetIsTextFadeout());
+    }
+    if (!layoutProperty->HasTextMarqueeStartPolicy()) {
+        layoutProperty->UpdateTextMarqueeStartPolicy(theme->GetMarqueeStartPolicy());
+    }
+
+    MarqueeOption option;
+    option.start = layoutProperty->GetTextMarqueeStart().value_or(true);
+    option.step = layoutProperty->GetTextMarqueeStep().value_or(DEFAULT_MARQUEE_STEP_VP.ConvertToPx());
+    if (GreatNotEqual(option.step, pManager->GetTextWidth())) {
+        option.step = DEFAULT_MARQUEE_STEP_VP.ConvertToPx();
+    }
+    option.loop = layoutProperty->GetTextMarqueeLoop().value_or(-1);
+    option.direction = layoutProperty->GetTextMarqueeDirection().value_or(MarqueeDirection::DEFAULT);
+    option.delay = layoutProperty->GetTextMarqueeDelay().value_or(0);
+    option.fadeout = layoutProperty->GetTextMarqueeFadeout().value_or(theme->GetIsTextFadeout());
+    option.startPolicy = layoutProperty->GetTextMarqueeStartPolicy().value_or(theme->GetMarqueeStartPolicy());
+
+    textContentModifier_->StartTextRace(option);
 }
 
 void TextPaintMethod::UpdateParagraphAndImageSpanNodeList()
@@ -60,10 +104,11 @@ void TextPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto textOverflow = layoutProperty->GetTextOverflow();
-    textContentModifier_->StopTextRace();
     if (textOverflow.has_value() && textOverflow.value() == TextOverflow::MARQUEE &&
-        pManager->GetLongestLineWithIndent() > paintWrapper->GetContentSize().Width()) {
-        textContentModifier_->StartTextRace();
+        pManager->GetLongestLine() > contentSize.Width()) {
+        DoStartTextRace();
+    } else {
+        textContentModifier_->StopTextRace();
     }
 
     // Privacy masking.
@@ -158,7 +203,7 @@ std::vector<RectF> TextPaintMethod::CalculateSelectedRect(
     float lastLineBottom = -1.0f;
     for (const auto& info : selectedRects) {
         auto rects = info.first;
-        TextBase::CalculateSelectedRectEx(rects, lastLineBottom);
+        TextBase::CalculateSelectedRectEx(rects, lastLineBottom, info.second.direction);
         auto textAlign = TextBase::CheckTextAlignByDirection(info.second.align, info.second.direction);
         for (auto& rect : rects) {
             TextBase::UpdateSelectedBlankLineRect(rect, blankWidth, textAlign, contentWidth);

@@ -92,10 +92,16 @@ public:
     static void JsGetAndPushFrameNode(const JSCallbackInfo& info);
 
     /*
-     move deleted elmtIds from C+ ElementRegistry to this component.
-     JS caller must allocate empty Array<number> and provide as param
-    */
+     * move deleted elmtIds from C+ ElementRegistry to this component.
+     * JS caller must allocate empty Array<number> and provide as param
+     */
     static void JsMoveDeletedElmtIds(const JSCallbackInfo& info);
+
+    /**
+     * Send state info profiler when state var changed
+     * Used in V2.
+     */
+    static void JsSendStateInfo(const std::string& stateInfo);
 
 private:
     static void JSVisualState(const JSCallbackInfo& info);

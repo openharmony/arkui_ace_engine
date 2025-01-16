@@ -62,12 +62,16 @@ public:
     void OnAccessibilityDumpChildInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
     void OnAccessibilityTransferHoverEvent(float pointX, float pointY, int32_t sourceType,
         int32_t eventType, int64_t timeMs) override;
+    void OnNotifyDumpInfo(const std::vector<std::string>& params, std::vector<std::string>& info) override;
 private:
     std::weak_ptr<UIContent> uiContent_;
     std::weak_ptr<FormRenderer> formRenderer_;
     std::weak_ptr<OHOS::AppExecFwk::EventHandler> eventHandler_;
     bool allowUpdate_ = true;
     bool isVisible_ = true;
+    static std::recursive_mutex globalLock_;
+    void HandleSurfaceChangeEvent(const std::shared_ptr<UIContent>& uiContent, float width, float height,
+        uint32_t reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction, float borderWidth);
 };
 } // namespace Ace
 } // namespace OHOS

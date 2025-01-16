@@ -97,18 +97,54 @@ void ResetFormSize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIFormComponentModifier* GetFormComponentModifier()
 {
-    static const ArkUIFormComponentModifier modifier = { SetFormVisibility, AllowUpdate, SetDimension,
-        SetModuleName, SetFormSize, ResetFormVisibility, DisallowUpdate, ResetDimension, ResetModuleName,
-        ResetFormSize };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIFormComponentModifier modifier = {
+        .setFormVisibility = SetFormVisibility,
+        .allowUpdate = AllowUpdate,
+        .setDimension = SetDimension,
+        .setModuleName = SetModuleName,
+        .setFormSize = SetFormSize,
+        .resetFormVisibility = ResetFormVisibility,
+        .disallowUpdate = DisallowUpdate,
+        .resetDimension = ResetDimension,
+        .resetModuleName = ResetModuleName,
+        .resetFormSize = ResetFormSize,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIFormComponentModifier* GetCJUIFormComponentModifier()
 {
-    static const CJUIFormComponentModifier modifier = { SetFormVisibility, AllowUpdate, SetDimension,
-        SetModuleName, SetFormSize, ResetFormVisibility, DisallowUpdate, ResetDimension, ResetModuleName,
-        ResetFormSize };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIFormComponentModifier modifier = {
+        .setFormVisibility = SetFormVisibility,
+        .allowUpdate = AllowUpdate,
+        .setDimension = SetDimension,
+        .setModuleName = SetModuleName,
+        .setFormSize = SetFormSize,
+        .resetFormVisibility = ResetFormVisibility,
+        .disallowUpdate = DisallowUpdate,
+        .resetDimension = ResetDimension,
+        .resetModuleName = ResetModuleName,
+        .resetFormSize = ResetFormSize,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

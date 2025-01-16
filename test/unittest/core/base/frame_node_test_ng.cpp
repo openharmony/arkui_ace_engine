@@ -19,6 +19,7 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+const NG::BorderWidthProperty BORDER_WIDTH_TEST = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp };
 void FrameNodeTestNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
@@ -401,7 +402,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg006, TestSize.Level1)
 
     FRAME_NODE->ProcessOffscreenNode(FRAME_NODE3);
     FRAME_NODE->GetTransformRectRelativeToWindow();
-    FRAME_NODE->GetPaintRectOffsetToPage();
+    FRAME_NODE->GetPaintRectOffsetToStage();
 
     float x = 1.0;
     float y = 1.0;
@@ -1961,4 +1962,510 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTestNg_OnAutoEventParamUpdate, TestSize.Level
     node->OnAutoEventParamUpdate("{\"$origin\":\"Tom\",\"$exposureCfg\":{\"ratio\":0.8,\"duration\":3000}}");
     EXPECT_EQ(parentNode->GetTag(), "RelativeContainer");
 }
+
+/**
+ * @tc.name: FrameNodeTestNg065
+ * @tc.desc: Test GetIsLayoutNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg065, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    bool isLayoutNode = false;
+    frameNode->isLayoutNode_ = isLayoutNode;
+    bool result = frameNode->GetIsLayoutNode();
+    EXPECT_EQ(result, isLayoutNode);
+
+    isLayoutNode = false;
+    frameNode->isLayoutNode_ = isLayoutNode;
+    result = frameNode->GetIsLayoutNode();
+    EXPECT_EQ(result, isLayoutNode);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg066
+ * @tc.desc: Test GetIsFind.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg066, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    bool isFind = true;
+    frameNode->isFind_ = isFind;
+    bool result = frameNode->GetIsFind();
+    EXPECT_EQ(result, isFind);
+
+    isFind = false;
+    frameNode->isFind_ = isFind;
+    result = frameNode->GetIsFind();
+    EXPECT_EQ(result, isFind);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg067
+ * @tc.desc: Test SetIsFind.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg067, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    bool isFind = true;
+    frameNode->SetIsFind(isFind);
+    bool result = frameNode->GetIsFind();
+    EXPECT_EQ(result, isFind);
+
+    isFind = false;
+    frameNode->SetIsFind(isFind);
+    result = frameNode->GetIsFind();
+    EXPECT_EQ(result, isFind);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg069
+ * @tc.desc: Test CheckAutoSave.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg069, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    
+    auto pattern_ = frameNode->GetPattern();
+    EXPECT_NE(pattern_, nullptr);
+    bool result = frameNode->CheckAutoSave();
+    EXPECT_EQ(result, pattern_->CheckAutoSave());
+
+    pattern_ = nullptr;
+    result = frameNode->CheckAutoSave();
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg070
+ * @tc.desc: Test RenderCustomChild.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg070, TestSize.Level1)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    
+    int64_t deadline = 1;
+    bool result = frameNode->RenderCustomChild(deadline);
+    bool res = frameNode->UINode::RenderCustomChild(deadline);
+    EXPECT_EQ(result, res);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg081
+ * @tc.desc: Test GetOrCreateCommonNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg081, TestSize.Level1)
+{
+    bool isLayoutNode = true;
+    auto commonOne =
+        FrameNode::GetOrCreateCommonNode("commonOne", 1, isLayoutNode, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto commonTwo = FrameNode::GetFrameNode("commonTwo", 1);
+    EXPECT_NE(commonOne, nullptr);
+    EXPECT_EQ(commonTwo, nullptr);
+
+    /**
+     * @tc.steps: step2. create FrameNode and set a callback
+     * @tc.expect: call DestroyCallback while object is destroyed
+     */
+    bool flag = true;
+    auto commonThree = FrameNode::GetOrCreateFrameNode("commonOne", 1, nullptr);
+    ASSERT_NE(commonThree, nullptr);
+    commonThree->PushDestroyCallbackWithTag([&flag]() { flag = !flag; }, "");
+    commonThree = nullptr;
+    EXPECT_FALSE(flag);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg082
+ * @tc.desc: Test CreateCommonNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg082, TestSize.Level1)
+{
+    /* @tc.steps: step1. create commonNode and initialize the params used in Test.
+      */
+    bool isLayoutNode = false;
+    auto commonNode =
+        FrameNode::CreateCommonNode("CommonChildNode", 20, isLayoutNode, AceType::MakeRefPtr<Pattern>(), true);
+    commonNode->AttachToMainTree();
+    commonNode->GetRenderContext()->RequestNextFrame();
+    EXPECT_TRUE(commonNode->IsOnMainTree());
+
+    int32_t commonNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const RefPtr<FrameNode> commonParentNode =
+        FrameNode::CreateCommonNode("CommonRelativeContainer", commonNodeId, isLayoutNode,
+        AceType::MakeRefPtr<Pattern>(), true);
+    commonNode->SetParent(AceType::WeakClaim(AceType::RawPtr(commonParentNode)));
+
+    /**
+     * @tc.steps: step2. call OnInspectorIdUpdate .
+     * @tc.expect: this commonParentNode is MarkDirtyNode, but this Tag() != "RelativeContainer"
+     * this commonParentNode is not MarkDirtyNode
+     */
+    commonNode->OnInspectorIdUpdate("CommonRelativeContainer");
+    EXPECT_EQ(commonParentNode->GetTag(), "CommonRelativeContainer");
+}
+
+/**
+ * @tc.name: FrameNodeTestNg083
+ * @tc.desc: Test RequestParentDirty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg083, TestSize.Level1)
+{
+    /* @tc.steps: step1. create frameNodeTemp and initialize the params used in Test.
+    */
+    auto frameNodeTemp =
+        FrameNode::CreateFrameNode("root", 2, AceType::MakeRefPtr<Pattern>(), true);
+    
+    /**
+     * @tc.steps: step2. frameNodeTemp is a root node
+     * @tc.expect: frameNodeTemp call RequestParentDirty
+    */
+    bool result = frameNodeTemp->FrameNode::RequestParentDirty();
+    EXPECT_FALSE(result);
+
+    /**
+     * @tc.steps: step3. create childNode and  added to frameNodeTemp
+     * @tc.expect: childNode call RequestParentDirty
+     */
+    auto childNode =
+        FrameNode::CreateFrameNode("main", 3, AceType::MakeRefPtr<Pattern>(), false);
+    frameNodeTemp->AddChild(childNode);
+    result = childNode->FrameNode::RequestParentDirty();
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg084
+ * @tc.desc: Test AddCustomProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg084, TestSize.Level1)
+{
+    /* @tc.steps: step1. create frameNode and initialize the params used in Test.
+    */
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. setIsCNode true
+     * @tc.expect: frameNode call AddCustomProperty
+    */
+    frameNode->setIsCNode(true);
+    frameNode->AddCustomProperty("key1", "value1");
+    std::string value;
+    bool result = frameNode->GetCapiCustomProperty("key1", value);
+    EXPECT_EQ(result, true);
+    EXPECT_EQ(value, "value1");
+
+    /**
+     * @tc.steps: step2. setIsCNode false
+     * @tc.expect: frameNode call AddCustomProperty
+    */
+    frameNode->setIsCNode(false);
+    result = frameNode->GetCapiCustomProperty("key1", value);
+    EXPECT_EQ(result, false);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg085
+ * @tc.desc: Test GetActiveChildren.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg085, TestSize.Level1)
+{
+    /* @tc.steps: step1. create frameNode and initialize the params used in Test.
+    */
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. create childNode1 and added to frameNode
+     * @tc.expect: childNode1 setActive true
+    */
+    auto childNode1 =
+        FrameNode::CreateFrameNode("main", 2, AceType::MakeRefPtr<Pattern>(), false);
+    frameNode->AddChild(childNode1);
+    childNode1->SetActive(true);
+    /**
+     * @tc.steps: step3. create childNode2 and added to frameNode
+     * @tc.expect: childNode2 setActive false
+    */
+    auto childNode2 =
+        FrameNode::CreateFrameNode("main", 3, AceType::MakeRefPtr<Pattern>(), false);
+    frameNode->AddChild(childNode2);
+    childNode2->SetActive(false);
+    
+    std::list<RefPtr<FrameNode>> list = frameNode->FrameNode::GetActiveChildren();
+    EXPECT_EQ(list.size(), 1);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg086
+ * @tc.desc: Test ChildrenUpdatedFrom.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg086, TestSize.Level1)
+{
+    /* @tc.steps: step1. create frameNode and initialize the params used in Test.
+    */
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. childrenUpdatedFrom_ >= 0 and index > childrenUpdatedFrom_
+     * @tc.expect: childrenUpdatedFrom_ do not change
+    */
+    frameNode->childrenUpdatedFrom_ = 0;
+    int32_t index = 2;
+    frameNode->FrameNode::ChildrenUpdatedFrom(index);
+    int32_t currentIndex = frameNode->childrenUpdatedFrom_;
+    EXPECT_EQ(currentIndex, 0);
+
+    /**
+     * @tc.steps: step3. childrenUpdatedFrom_ >= 0 and index < childrenUpdatedFrom_
+     * @tc.expect: childrenUpdatedFrom_ is set to index
+    */
+    frameNode->childrenUpdatedFrom_ = 3;
+    frameNode->FrameNode::ChildrenUpdatedFrom(index);
+    currentIndex = frameNode->childrenUpdatedFrom_;
+    EXPECT_EQ(currentIndex, 2);
+
+    /**
+     * @tc.steps: step3. childrenUpdatedFrom_ < 0
+     * @tc.expect: childrenUpdatedFrom_ is set to index
+    */
+    frameNode->childrenUpdatedFrom_ = -1;
+    frameNode->FrameNode::ChildrenUpdatedFrom(index);
+    currentIndex = frameNode->childrenUpdatedFrom_;
+    EXPECT_EQ(currentIndex, 2);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg087
+ * @tc.desc: Test DumpBorder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg087, TestSize.Level1)
+{
+    /* @tc.steps: step1. create frameNode and initialize the params used in Test.
+    */
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    /**
+     * @tc.steps: step2. set border, up、right、down、left is 0
+     * @tc.expect: frameNode call FrameNode::DumpBorder
+    */
+    const std::unique_ptr<NG::BorderWidthProperty>& border =
+        std::make_unique<NG::BorderWidthProperty>();
+    std::string label = "Border";
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(border, nullptr);
+    frameNode->FrameNode::DumpBorder(border, label, json);
+    std::string result = json->ToString();
+    EXPECT_EQ(result, "{}");
+
+    /**
+     * @tc.steps: step2. set border, up、right、down、left is 1.0vp
+     * @tc.expect: frameNode call FrameNode::DumpBorder
+    */
+    const std::unique_ptr<NG::BorderWidthProperty>& border2 =
+        std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST);
+    frameNode->FrameNode::DumpBorder(border2, label, json);
+    result = json->ToString();
+    EXPECT_EQ(result, "{\"Border\":\"[1.00vp,1.00vp,1.00vp,1.00vp]\"}");
+}
+
+/**
+ * @tc.name: FrameNodeTestNg088
+ * @tc.desc: Test DumpSimplifySafeAreaInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg088, TestSize.Level1)
+{
+    /* @tc.steps: step1. create frameNode and initialize the params used in Test.
+    */
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    
+    /**
+     * @tc.steps: step2. make opts and safeAreaExpandOpts_
+     * @tc.expect: SafeAreaExpandOpts is set to Json
+    */
+    SafeAreaExpandOpts opts;
+    opts.type = SAFE_AREA_TYPE_SYSTEM;
+    opts.edges = SAFE_AREA_EDGE_TOP;
+    frameNode->GetLayoutProperty()->safeAreaExpandOpts_ = std::make_unique<SafeAreaExpandOpts>(opts);
+
+    /**
+     * @tc.steps: step3. make safeAreaInsets_
+     * @tc.expect: safeAreaInsets is set to Json
+    */
+    SafeAreaInsets::Inset inset = {
+        .start = 0,
+        .end = 1,
+    };
+    SafeAreaInsets safeAreaInset(inset, inset, inset, inset);
+    frameNode->GetLayoutProperty()->safeAreaInsets_ = std::make_unique<SafeAreaInsets>(safeAreaInset);
+
+    /**
+     * @tc.steps: step4. make SelfOrParentExpansive() true
+     * and geometryNode_->GetSelfAdjust() is not defaultValue, geometryNode_->GetParentAdjust() is not defaultValue
+     * @tc.expect: SelfAdjust  is set to Json, ParentSelfAdjust is set to Json
+    */
+    RectF selfAdjust(1.0, 1.0, 1.0, 1.0);
+    frameNode->geometryNode_->SetSelfAdjust(selfAdjust);
+    frameNode->geometryNode_->parentAdjust_.SetRect(0, 0, 10, 10);
+
+    ASSERT_NE(frameNode->GetTag(), V2::PAGE_ETS_TAG);
+
+    auto pipe = MockPipelineContext::GetCurrent();
+    frameNode->context_ = AceType::RawPtr(pipe);
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+
+    pipeline->safeAreaManager_ = AceType::MakeRefPtr<SafeAreaManager>();
+    auto manager = pipeline->GetSafeAreaManager();
+    ASSERT_NE(manager, nullptr);
+
+    /**
+     * @tc.steps: step5. make manager->KeyboardSafeAreaEnabled() true
+     * @tc.expect: KeyboardInset  is set to Json
+    */
+    manager->keyboardSafeAreaEnabled_ = true;
+
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    frameNode->DumpSimplifySafeAreaInfo(json);
+    std::string result = json->ToString();
+    const std::string expectStr = "{\"SafeAreaExpandOpts\":\"SafeAreaExpandOpts: type:SAFE_AREA_TYPE_SYSTEM, " \
+                                "edges: SAFE_AREA_EDGE_TOP\",\"SafeAreaInsets\":\"SafeAreaInsets left_: [start: " \
+                                "0, end: 1], top_: [start: 0, end: 1], right_: [start: 0, end: 1], " \
+                                "bottom_: [start: 0, end: 1]\",\"SelfAdjust\":\"RectT (1.00, 1.00) - " \
+                                "[1.00 x 1.00]\",\"ParentSelfAdjust\":\"RectT (0.00, 0.00) - [10.00 x 10.00]\"}";
+    EXPECT_EQ(result, expectStr);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg089
+ * @tc.desc: Test DumpSimplifyCommonInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg089, TestSize.Level1)
+{
+    /* @tc.steps: step1. create frameNode and initialize the params used in Test.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. make geometryNode_->GetFrameRect()
+     * @tc.expect: FrameRect is set to Json
+     */
+    const NG::RectF rect = { 10.0f, 20.0f, 30.0f, 40.0f };
+    frameNode->geometryNode_->frame_.rect_ = rect;
+    /**
+     * @tc.steps: step3. make renderContext_->GetBackgroundColor()
+     * @tc.expect: BackgroundColor is set to Json
+     */
+    frameNode->renderContext_->UpdateBackgroundColor(Color::BLUE);
+
+    /**
+     * @tc.steps: step4. make layoutProperty_->GetVisibility()
+     * @tc.expect: Visible is set to Json
+     */
+    frameNode->layoutProperty_->UpdateVisibility(VisibleType::INVISIBLE);
+
+    /**
+     * @tc.steps: step5. make layoutProperty_->GetLayoutRect()
+     * @tc.expect: LayoutRect is set to Json
+     */
+    frameNode->layoutProperty_->SetLayoutRect(rect);
+
+    /**
+     * @tc.steps: step6. make layoutProperty_->GetCalcLayoutConstraint()
+     * @tc.expect: UserDefinedConstraint is set to Json
+     */
+    frameNode->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+
+    /**
+     * @tc.steps: step7. make layoutProperty_->GetPaddingProperty() and layoutProperty_->GetContentLayoutConstraint()
+     * @tc.expect: ContentConstraint is set to Json
+     */
+    frameNode->layoutProperty_->padding_ = std::make_unique<PaddingProperty>();
+    LayoutConstraintF constraint;
+    constraint.selfIdealSize.width_ = 20.0f;
+    constraint.selfIdealSize.height_ = 30.0f;
+    frameNode->layoutProperty_->contentConstraint_ = constraint;
+
+    /**
+     * @tc.steps: step8. make geometryNode_->GetParentLayoutConstraint()
+     * @tc.expect: ParentLayoutConstraint is set to Json
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.percentReference.width_ = 10.0;
+    frameNode->geometryNode_->SetParentLayoutConstraint(layoutConstraint);
+
+    /**
+     * @tc.steps: step9. call DumpSimplifyCommonInfo
+     * @tc.expect: check each key
+     */
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    frameNode->DumpSimplifyCommonInfo(json);
+
+    EXPECT_TRUE(json->IsObject());
+    EXPECT_TRUE(json->Contains("FrameRect"));
+    EXPECT_FALSE(json->Contains("PaintRectWithoutTransform"));
+    EXPECT_TRUE(json->Contains("BackgroundColor"));
+    EXPECT_TRUE(json->Contains("Offset"));
+    EXPECT_TRUE(json->Contains("Visible"));
+    EXPECT_EQ(json->GetInt64("Visible"), 1);
+    EXPECT_TRUE(json->Contains("LayoutRect"));
+    EXPECT_TRUE(json->Contains("UserDefinedConstraint"));
+    EXPECT_TRUE(json->Contains("ContentConstraint"));
+    EXPECT_FALSE(json->Contains("ZIndex"));
+    EXPECT_TRUE(json->Contains("ParentLayoutConstraint"));
+}
+
+/**
+ * @tc.name: FrameNodeTestNg090
+ * @tc.desc: Test DumpPadding.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeTestNg090, TestSize.Level1)
+{
+    /* @tc.steps: step1. create frameNode and initialize the params used in Test.
+     */
+    auto frameNode =
+        FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+
+    /**
+     * @tc.steps: step2. set padding value is not 0
+     * @tc.expect: check each key
+     */
+    std::unique_ptr<NG::PaddingProperty> padding = std::make_unique<NG::PaddingProperty>();
+    padding->top = CalcLength(1.0, DimensionUnit::PX);
+    padding->right = CalcLength("2.0vp");
+    padding->bottom = NG::CalcLength::FromString("3.0vp");
+    padding->left = CalcLength(4.0, DimensionUnit::PX);
+
+    std::string label = "Padding";
+    std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
+    ASSERT_NE(padding, nullptr);
+
+    /**
+     * @tc.steps: step3. call DumpPadding
+     * @tc.expect: Padding is set to Json
+     */
+    frameNode->DumpPadding(padding, label, json);
+    EXPECT_TRUE(json->Contains(label));
+}
+
 } // namespace OHOS::Ace::NG

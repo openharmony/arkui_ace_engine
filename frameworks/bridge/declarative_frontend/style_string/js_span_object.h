@@ -281,6 +281,8 @@ private:
     static JSRef<JSObject> CreateEdge(const NG::PaddingPropertyT<NG::CalcLength>& edge);
     static JSRef<JSObject> CreateBorderRadius(const NG::BorderRadiusProperty& borderRadius);
     static void ParseJsImageSpanSizeAttribute(const JSRef<JSObject>& obj, ImageSpanAttribute& imageStyle);
+    static void ParseJsImageSpanColorFilterAttribute(const JSRef<JSObject>& obj, ImageSpanAttribute& imageStyle);
+    static void SetImageSpanColorFilterAttribute(ImageSpanAttribute& imageStyle, const std::vector<float>& matrix);
 
     ACE_DISALLOW_COPY_AND_MOVE(JSImageAttachment);
     RefPtr<ImageSpan> imageSpan_;

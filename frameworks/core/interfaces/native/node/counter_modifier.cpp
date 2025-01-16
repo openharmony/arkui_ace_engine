@@ -71,18 +71,54 @@ void ResetCounterBackgroundColor(ArkUINodeHandle node) {}
 namespace NodeModifier {
 const ArkUICounterModifier* GetCounterModifier()
 {
-    static const ArkUICounterModifier modifier = { SetEnableInc, ResetEnableInc, SetEnableDec, ResetEnableDec,
-        SetCounterHeight, ResetCounterHeight, SetCounterWidth, ResetCounterWidth, SetCounterBackgroundColor,
-        ResetCounterBackgroundColor };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUICounterModifier modifier = {
+        .setEnableInc = SetEnableInc,
+        .resetEnableInc = ResetEnableInc,
+        .setEnableDec = SetEnableDec,
+        .resetEnableDec = ResetEnableDec,
+        .setCounterHeight = SetCounterHeight,
+        .resetCounterHeight = ResetCounterHeight,
+        .setCounterWidth = SetCounterWidth,
+        .resetCounterWidth = ResetCounterWidth,
+        .setCounterBackgroundColor = SetCounterBackgroundColor,
+        .resetCounterBackgroundColor = ResetCounterBackgroundColor,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUICounterModifier* GetCJUICounterModifier()
 {
-    static const CJUICounterModifier modifier = { SetEnableInc, ResetEnableInc, SetEnableDec, ResetEnableDec,
-        SetCounterHeight, ResetCounterHeight, SetCounterWidth, ResetCounterWidth, SetCounterBackgroundColor,
-        ResetCounterBackgroundColor };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUICounterModifier modifier = {
+        .setEnableInc = SetEnableInc,
+        .resetEnableInc = ResetEnableInc,
+        .setEnableDec = SetEnableDec,
+        .resetEnableDec = ResetEnableDec,
+        .setCounterHeight = SetCounterHeight,
+        .resetCounterHeight = ResetCounterHeight,
+        .setCounterWidth = SetCounterWidth,
+        .resetCounterWidth = ResetCounterWidth,
+        .setCounterBackgroundColor = SetCounterBackgroundColor,
+        .resetCounterBackgroundColor = ResetCounterBackgroundColor,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

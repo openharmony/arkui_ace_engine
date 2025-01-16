@@ -93,15 +93,46 @@ void SetRatingOptions(ArkUINodeHandle node, ArkUI_Float64 rating, ArkUI_Bool ind
 namespace NodeModifier {
 const ArkUIRatingModifier* GetRatingModifier()
 {
-    static const ArkUIRatingModifier modifier = {SetStars, SetRatingStepSize, SetStarStyle,
-        ResetStars, ResetRatingStepSize, ResetStarStyle, SetRatingOptions};
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIRatingModifier modifier = {
+        .setStars = SetStars,
+        .setRatingStepSize = SetRatingStepSize,
+        .setStarStyle = SetStarStyle,
+        .resetStars = ResetStars,
+        .resetRatingStepSize = ResetRatingStepSize,
+        .resetStarStyle = ResetStarStyle,
+        .setRatingOptions = SetRatingOptions,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUIRatingModifier* GetCJUIRatingModifier()
 {
-    static const CJUIRatingModifier modifier = {SetStars, SetRatingStepSize, SetStarStyle,
-        ResetStars, ResetRatingStepSize, ResetStarStyle };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIRatingModifier modifier = {
+        .setStars = SetStars,
+        .setRatingStepSize = SetRatingStepSize,
+        .setStarStyle = SetStarStyle,
+        .resetStars = ResetStars,
+        .resetRatingStepSize = ResetRatingStepSize,
+        .resetStarStyle = ResetStarStyle,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 }

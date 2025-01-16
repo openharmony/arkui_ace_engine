@@ -87,4 +87,12 @@ RefPtr<AccessibilitySessionAdapter> FormPattern::GetAccessibilitySessionAdapter(
 void FormPattern::OnAttachToFrameNode()
 {
 }
+
+void FormPattern::DumpInfo()
+{
+}
+
+void FormPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
+{
+}
 } // namespace OHOS::Ace::NG

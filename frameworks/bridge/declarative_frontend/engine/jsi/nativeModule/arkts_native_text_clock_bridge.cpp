@@ -82,15 +82,18 @@ ArkUINativeModuleValue TextClockBridge::SetFormat(ArkUIRuntimeCallInfo* runtimeC
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> formatArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     std::string format;
     ArkTSUtils::GetStringFromJS(vm, formatArg, format);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (0 == format.length() || DEFAULT_STR == format) {
-        GetArkUINodeModifiers()->getTextClockModifier()->resetFormat(nativeNode);
+        nodeModifiers->getTextClockModifier()->resetFormat(nativeNode);
     } else if (!StringUtils::IsAscii(format) && Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        GetArkUINodeModifiers()->getTextClockModifier()->resetFormat(nativeNode);
+        nodeModifiers->getTextClockModifier()->resetFormat(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getTextClockModifier()->setFormat(nativeNode, format.c_str());
+        nodeModifiers->getTextClockModifier()->setFormat(nativeNode, format.c_str());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -100,8 +103,11 @@ ArkUINativeModuleValue TextClockBridge::ResetFormat(ArkUIRuntimeCallInfo* runtim
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getTextClockModifier()->resetFormat(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getTextClockModifier()->resetFormat(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -111,12 +117,15 @@ ArkUINativeModuleValue TextClockBridge::SetFontColor(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> fontColorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     Color color;
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (!ArkTSUtils::ParseJsColorAlpha(vm, fontColorArg, color)) {
-        GetArkUINodeModifiers()->getTextClockModifier()->resetFontColor(nativeNode);
+        nodeModifiers->getTextClockModifier()->resetFontColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getTextClockModifier()->setFontColor(nativeNode, color.GetValue());
+        nodeModifiers->getTextClockModifier()->setFontColor(nativeNode, color.GetValue());
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -126,8 +135,11 @@ ArkUINativeModuleValue TextClockBridge::ResetFontColor(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getTextClockModifier()->resetFontColor(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getTextClockModifier()->resetFontColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -137,13 +149,16 @@ ArkUINativeModuleValue TextClockBridge::SetFontSize(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> fontSizeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     CalcDimension fontSize;
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (!ArkTSUtils::ParseJsDimensionNG(vm, fontSizeArg, fontSize, DimensionUnit::FP, false)
         || fontSize.Value() < 0 || fontSize.Unit() == DimensionUnit::PERCENT) {
-        GetArkUINodeModifiers()->getTextClockModifier()->resetFontSize(nativeNode);
+        nodeModifiers->getTextClockModifier()->resetFontSize(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getTextClockModifier()->setFontSize(
+        nodeModifiers->getTextClockModifier()->setFontSize(
             nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
@@ -154,8 +169,11 @@ ArkUINativeModuleValue TextClockBridge::ResetFontSize(ArkUIRuntimeCallInfo* runt
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getTextClockModifier()->resetFontSize(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getTextClockModifier()->resetFontSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -165,16 +183,19 @@ ArkUINativeModuleValue TextClockBridge::SetFontStyle(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> fontStyleArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (fontStyleArg->IsNumber()) {
         uint32_t fontStyle = fontStyleArg->Uint32Value(vm);
         if (fontStyle < static_cast<uint32_t>(OHOS::Ace::FontStyle::NORMAL) ||
             fontStyle > static_cast<uint32_t>(OHOS::Ace::FontStyle::ITALIC)) {
             fontStyle = static_cast<uint32_t>(OHOS::Ace::FontStyle::NORMAL);
         }
-        GetArkUINodeModifiers()->getTextClockModifier()->setFontStyle(nativeNode, fontStyle);
+        nodeModifiers->getTextClockModifier()->setFontStyle(nativeNode, fontStyle);
     } else {
-        GetArkUINodeModifiers()->getTextClockModifier()->resetFontStyle(nativeNode);
+        nodeModifiers->getTextClockModifier()->resetFontStyle(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -184,8 +205,11 @@ ArkUINativeModuleValue TextClockBridge::ResetFontStyle(ArkUIRuntimeCallInfo* run
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getTextClockModifier()->resetFontStyle(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getTextClockModifier()->resetFontStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -195,6 +219,7 @@ ArkUINativeModuleValue TextClockBridge::SetFontWeight(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> fontWeightArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     std::string fontWeight;
     if (!fontWeightArg->IsNull()) {
@@ -204,7 +229,9 @@ ArkUINativeModuleValue TextClockBridge::SetFontWeight(ArkUIRuntimeCallInfo* runt
             fontWeight = fontWeightArg->ToString(vm)->ToString(vm);
         }
     }
-    GetArkUINodeModifiers()->getTextClockModifier()->setFontWeight(nativeNode, fontWeight.c_str());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getTextClockModifier()->setFontWeight(nativeNode, fontWeight.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -213,8 +240,11 @@ ArkUINativeModuleValue TextClockBridge::ResetFontWeight(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getTextClockModifier()->resetFontWeight(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getTextClockModifier()->resetFontWeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -224,14 +254,17 @@ ArkUINativeModuleValue TextClockBridge::SetFontFamily(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> fontFamilyArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
     std::string fontFamilyStr;
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, fontFamilyArg, fontFamilyStr)) {
-        GetArkUINodeModifiers()->getTextClockModifier()->resetFontFamily(nativeNode);
+        nodeModifiers->getTextClockModifier()->resetFontFamily(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    GetArkUINodeModifiers()->getTextClockModifier()->setFontFamily(nativeNode, fontFamilyStr.c_str());
+    nodeModifiers->getTextClockModifier()->setFontFamily(nativeNode, fontFamilyStr.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -240,9 +273,12 @@ ArkUINativeModuleValue TextClockBridge::ResetFontFamily(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
 
-    GetArkUINodeModifiers()->getTextClockModifier()->resetFontFamily(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getTextClockModifier()->resetFontFamily(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -252,12 +288,15 @@ ArkUINativeModuleValue TextClockBridge::SetFontFeature(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (secondArg->IsString(vm)) {
         auto value = secondArg->ToString(vm)->ToString(vm);
-        GetArkUINodeModifiers()->getTextClockModifier()->setFontFeature(nativeNode, value.c_str());
+        nodeModifiers->getTextClockModifier()->setFontFeature(nativeNode, value.c_str());
     } else {
-        GetArkUINodeModifiers()->getTextClockModifier()->resetFontFeature(nativeNode);
+        nodeModifiers->getTextClockModifier()->resetFontFeature(nativeNode);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -267,8 +306,11 @@ ArkUINativeModuleValue TextClockBridge::ResetFontFeature(ArkUIRuntimeCallInfo* r
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getTextClockModifier()->resetFontFeature(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getTextClockModifier()->resetFontFeature(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -278,6 +320,7 @@ ArkUINativeModuleValue TextClockBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(NUM_7);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (!lengthArg->IsNumber() || lengthArg->Uint32Value(vm) == 0) {
         return panda::JSValueRef::Undefined(vm);
@@ -315,7 +358,9 @@ ArkUINativeModuleValue TextClockBridge::SetTextShadow(ArkUIRuntimeCallInfo* runt
         textShadowArray[i].offsetY = offsetYArray[i];
         textShadowArray[i].fill = fillArray[i];
     }
-    GetArkUINodeModifiers()->getTextClockModifier()->setTextShadow(nativeNode, textShadowArray.get(), length);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getTextClockModifier()->setTextShadow(nativeNode, textShadowArray.get(), length);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -324,8 +369,11 @@ ArkUINativeModuleValue TextClockBridge::ResetTextShadow(ArkUIRuntimeCallInfo* ru
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getTextClockModifier()->resetTextShadow(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getTextClockModifier()->resetTextShadow(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -335,6 +383,7 @@ ArkUINativeModuleValue TextClockBridge::SetContentModifierBuilder(ArkUIRuntimeCa
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     if (!secondArg->IsObject(vm)) {
@@ -382,6 +431,7 @@ ArkUINativeModuleValue TextClockBridge::SetDateTimeOptions(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> hourArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     ZeroPrefixType hourType = ZeroPrefixType::AUTO;
     std::string hour = TEXTCLOCK_DATE_TIME_OPTIONS_HOUR;
@@ -393,7 +443,9 @@ ArkUINativeModuleValue TextClockBridge::SetDateTimeOptions(ArkUIRuntimeCallInfo*
             hourType = ZeroPrefixType::HIDE;
         }
     }
-    GetArkUINodeModifiers()->getTextClockModifier()->setDateTimeOptions(
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getTextClockModifier()->setDateTimeOptions(
         nativeNode, static_cast<ArkUI_Int32>(hourType));
     return panda::JSValueRef::Undefined(vm);
 }
@@ -403,8 +455,11 @@ ArkUINativeModuleValue TextClockBridge::ResetDateTimeOptions(ArkUIRuntimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getTextClockModifier()->resetDateTimeOptions(nativeNode);
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getTextClockModifier()->resetDateTimeOptions(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -414,17 +469,20 @@ ArkUINativeModuleValue TextClockBridge::SetTextClockTimeZoneOffset(ArkUIRuntimeC
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> hourWestVal = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(nodeVal->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
     auto themeColors = Framework::JSThemeUtils::GetThemeColors();
     float hourWest = NAN;
     if (hourWestVal->IsNumber() && HoursWestIsValid(hourWestVal->Int32Value(vm))) {
         hourWest = GetHoursWest(hourWestVal->ToNumber(vm)->Value());
     }
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     if (themeColors.has_value()) {
-        GetArkUINodeModifiers()->getTextClockModifier()->setFontColor(
+        nodeModifiers->getTextClockModifier()->setFontColor(
             nativeNode, themeColors->FontSecondary().GetValue());
     }
-    GetArkUINodeModifiers()->getTextClockModifier()->setTextClockTimeZoneOffset(nativeNode, hourWest);
+    nodeModifiers->getTextClockModifier()->setTextClockTimeZoneOffset(nativeNode, hourWest);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -434,10 +492,13 @@ ArkUINativeModuleValue TextClockBridge::SetTextClockController(ArkUIRuntimeCallI
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> controllerVal = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(nodeVal->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
     auto themeColors = Framework::JSThemeUtils::GetThemeColors();
     if (themeColors.has_value()) {
-        GetArkUINodeModifiers()->getTextClockModifier()->setFontColor(
+        auto nodeModifiers = GetArkUINodeModifiers();
+        CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+        nodeModifiers->getTextClockModifier()->setFontColor(
             nativeNode, themeColors->FontSecondary().GetValue());
     }
 

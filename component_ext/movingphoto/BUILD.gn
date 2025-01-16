@@ -60,6 +60,8 @@ ohos_shared_library("movingphotoview") {
   ]
   include_dirs += additional_include_dirs
 
+  configs = [ "$ace_root/interfaces/inner_api/ace_kit:ace_kit_config" ]
+
   deps = [
     ":gen_obj_src_multimedia_movingphotoview_abc",
     ":gen_obj_src_multimedia_movingphotoview_js",

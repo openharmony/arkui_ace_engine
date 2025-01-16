@@ -192,51 +192,69 @@ void SetTextClockTimeZoneOffset(ArkUINodeHandle node, ArkUI_Float32 timeZoneOffs
 namespace NodeModifier {
 const ArkUITextClockModifier* GetTextClockModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUITextClockModifier modifier = {
-        TextClockModifier::SetFormat,
-        TextClockModifier::ResetFormat,
-        TextClockModifier::SetFontColor,
-        TextClockModifier::ResetFontColor,
-        TextClockModifier::SetFontSize,
-        TextClockModifier::ResetFontSize,
-        TextClockModifier::SetFontStyle,
-        TextClockModifier::ResetFontStyle,
-        TextClockModifier::SetFontWeight,
-        TextClockModifier::ResetFontWeight,
-        TextClockModifier::SetFontFamily,
-        TextClockModifier::ResetFontFamily,
-        TextClockModifier::SetTextShadow,
-        TextClockModifier::ResetTextShadow,
-        TextClockModifier::SetFontFeature,
-        TextClockModifier::ResetFontFeature,
-        TextClockModifier::SetDateTimeOptions,
-        TextClockModifier::ResetDateTimeOptions,
-        TextClockModifier::SetTextClockTimeZoneOffset
+        .setFormat = TextClockModifier::SetFormat,
+        .resetFormat = TextClockModifier::ResetFormat,
+        .setFontColor = TextClockModifier::SetFontColor,
+        .resetFontColor = TextClockModifier::ResetFontColor,
+        .setFontSize = TextClockModifier::SetFontSize,
+        .resetFontSize = TextClockModifier::ResetFontSize,
+        .setFontStyle = TextClockModifier::SetFontStyle,
+        .resetFontStyle = TextClockModifier::ResetFontStyle,
+        .setFontWeight = TextClockModifier::SetFontWeight,
+        .resetFontWeight = TextClockModifier::ResetFontWeight,
+        .setFontFamily = TextClockModifier::SetFontFamily,
+        .resetFontFamily = TextClockModifier::ResetFontFamily,
+        .setTextShadow = TextClockModifier::SetTextShadow,
+        .resetTextShadow = TextClockModifier::ResetTextShadow,
+        .setFontFeature = TextClockModifier::SetFontFeature,
+        .resetFontFeature = TextClockModifier::ResetFontFeature,
+        .setDateTimeOptions = TextClockModifier::SetDateTimeOptions,
+        .resetDateTimeOptions = TextClockModifier::ResetDateTimeOptions,
+        .setTextClockTimeZoneOffset = TextClockModifier::SetTextClockTimeZoneOffset,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUITextClockModifier* GetCJUITextClockModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUITextClockModifier modifier = {
-        TextClockModifier::SetFormat,
-        TextClockModifier::ResetFormat,
-        TextClockModifier::SetFontColor,
-        TextClockModifier::ResetFontColor,
-        TextClockModifier::SetFontSize,
-        TextClockModifier::ResetFontSize,
-        TextClockModifier::SetFontStyle,
-        TextClockModifier::ResetFontStyle,
-        TextClockModifier::SetFontWeight,
-        TextClockModifier::ResetFontWeight,
-        TextClockModifier::SetFontFamily,
-        TextClockModifier::ResetFontFamily,
-        TextClockModifier::SetTextShadow,
-        TextClockModifier::ResetTextShadow,
-        TextClockModifier::SetFontFeature,
-        TextClockModifier::ResetFontFeature
+        .setFormat = TextClockModifier::SetFormat,
+        .resetFormat = TextClockModifier::ResetFormat,
+        .setFontColor = TextClockModifier::SetFontColor,
+        .resetFontColor = TextClockModifier::ResetFontColor,
+        .setFontSize = TextClockModifier::SetFontSize,
+        .resetFontSize = TextClockModifier::ResetFontSize,
+        .setFontStyle = TextClockModifier::SetFontStyle,
+        .resetFontStyle = TextClockModifier::ResetFontStyle,
+        .setFontWeight = TextClockModifier::SetFontWeight,
+        .resetFontWeight = TextClockModifier::ResetFontWeight,
+        .setFontFamily = TextClockModifier::SetFontFamily,
+        .resetFontFamily = TextClockModifier::ResetFontFamily,
+        .setTextShadow = TextClockModifier::SetTextShadow,
+        .resetTextShadow = TextClockModifier::ResetTextShadow,
+        .setFontFeature = TextClockModifier::SetFontFeature,
+        .resetFontFeature = TextClockModifier::ResetFontFeature,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

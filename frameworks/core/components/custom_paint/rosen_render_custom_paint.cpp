@@ -711,7 +711,7 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
     using namespace Constants;
     auto fontCollection = RosenFontCollection::GetInstance().GetFontCollection();
     if (!fontCollection) {
-        LOGW("fontCollection is null");
+        TAG_LOGW(AceLogTag::ACE_FONT, "fontCollection is null");
         return Size(0.0, 0.0);
     }
     ACE_TEXT_SCOPED_TRACE("MeasureTextSizeInner");
@@ -874,6 +874,10 @@ Size RosenRenderCustomPaint::MeasureTextSizeInner(const MeasureContext& context)
         baselineOffset = static_cast<float>(context.baselineOffset.value().ConvertToPx());
     }
     float heightFinal = static_cast<float>(paragraph->GetHeight()) + std::fabs(baselineOffset);
+    if (SystemProperties::GetDebugEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_FONT, "MeasureTextSize [maxW:%{public}f, H:%{public}f],[w:%{public}f, h:%{public}f]",
+            paragraph->GetMaxWidth(), paragraph->GetHeight(), sizeWidth, heightFinal);
+    }
 
     return Size(sizeWidth, heightFinal);
 }

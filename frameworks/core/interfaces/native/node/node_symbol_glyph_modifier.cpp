@@ -160,42 +160,60 @@ void ResetSymbolGlyphInitialize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUISymbolGlyphModifier modifier = {
-        SetFontColor,
-        ResetFontColor,
-        SetFontSize,
-        ResetFontSize,
-        SetFontWeightStr,
-        SetFontWeight,
-        ResetFontWeight,
-        SetRenderingStrategy,
-        ResetRenderingStrategy,
-        SetEffectStrategy,
-        ResetEffectStrategy,
-        SetSymbolGlyphInitialize,
-        ResetSymbolGlyphInitialize,
+        .setFontColor = SetFontColor,
+        .resetFontColor = ResetFontColor,
+        .setFontSize = SetFontSize,
+        .resetFontSize = ResetFontSize,
+        .setFontWeightStr = SetFontWeightStr,
+        .setFontWeight = SetFontWeight,
+        .resetFontWeight = ResetFontWeight,
+        .setRenderingStrategy = SetRenderingStrategy,
+        .resetRenderingStrategy = ResetRenderingStrategy,
+        .setEffectStrategy = SetEffectStrategy,
+        .resetEffectStrategy = ResetEffectStrategy,
+        .setSymbolGlyphInitialize = SetSymbolGlyphInitialize,
+        .resetSymbolGlyphInitialize = ResetSymbolGlyphInitialize,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUISymbolGlyphModifier modifier = {
-        SetFontColor,
-        ResetFontColor,
-        SetFontSize,
-        ResetFontSize,
-        SetFontWeightStr,
-        SetFontWeight,
-        ResetFontWeight,
-        SetRenderingStrategy,
-        ResetRenderingStrategy,
-        SetEffectStrategy,
-        ResetEffectStrategy,
-        SetSymbolGlyphInitialize,
-        ResetSymbolGlyphInitialize,
+        .setFontColor = SetFontColor,
+        .resetFontColor = ResetFontColor,
+        .setFontSize = SetFontSize,
+        .resetFontSize = ResetFontSize,
+        .setFontWeightStr = SetFontWeightStr,
+        .setFontWeight = SetFontWeight,
+        .resetFontWeight = ResetFontWeight,
+        .setRenderingStrategy = SetRenderingStrategy,
+        .resetRenderingStrategy = ResetRenderingStrategy,
+        .setEffectStrategy = SetEffectStrategy,
+        .resetEffectStrategy = ResetEffectStrategy,
+        .setSymbolGlyphInitialize = SetSymbolGlyphInitialize,
+        .resetSymbolGlyphInitialize = ResetSymbolGlyphInitialize,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

@@ -15,6 +15,8 @@
 
 #include "frameworks/bridge/common/utils/source_map.h"
 
+#include "base/log/log.h"
+
 namespace OHOS::Ace::Framework {
 
 const char SOURCES[] = "sources";

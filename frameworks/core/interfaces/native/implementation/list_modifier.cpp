@@ -275,7 +275,7 @@ void ScrollSnapAlignImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    ListModelNG::SetScrollSnapAlign(frameNode, Converter::OptConvert<V2::ScrollSnapAlign>(value));
+    ListModelNG::SetScrollSnapAlign(frameNode, Converter::OptConvert<ScrollSnapAlign>(value));
 }
 void NestedScrollImpl(Ark_NativePointer node,
                       const Ark_NestedScrollOptions* value)

@@ -388,7 +388,9 @@ void NavigationLayoutAlgorithm::UpdateNavigationMode(const RefPtr<NavigationLayo
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(hostNode->GetPattern());
     bool modeChange = navigationPattern->GetNavigationMode() != usrNavigationMode;
     bool isFirstTimeLayout = (navigationPattern->GetNavigationMode() == INITIAL_MODE);
-    bool doModeSwitchAnimationInAnotherTask = modeChange && !isFirstTimeLayout && !hostNode->IsOnModeSwitchAnimation();
+    bool enableModeChangeAnimation = navigationLayoutProperty->GetEnableModeChangeAnimation().value_or(true);
+    bool doModeSwitchAnimationInAnotherTask =
+        enableModeChangeAnimation && modeChange && !isFirstTimeLayout && !hostNode->IsOnModeSwitchAnimation();
     if (doModeSwitchAnimationInAnotherTask) {
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
@@ -588,6 +590,8 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_VOID(hostNode);
+    auto pattern = hostNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(navigationLayoutProperty);
     const auto& constraint = navigationLayoutProperty->GetLayoutConstraint();
@@ -596,6 +600,7 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto size =
         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT).ConvertToSizeT();
     FitScrollFullWindow(size);
+    pattern->SetNavigationSize(size);
 
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);

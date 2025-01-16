@@ -68,7 +68,7 @@ class LongPressGestureHandler extends GestureHandler {
     allowedTypes?: Array<SourceTool>;
     onActionCallback?: Callback<GestureEvent>;
     onActionEndCallback?: Callback<GestureEvent>;
-    onActionCancelCallback?: Callback<void>;
+    onActionCancelCallback?: Callback<GestureEvent>;
     constructor(options?: LongPressGestureHandlerOptions) {
         super(CommonGestureType.LONG_PRESS_GESTURE);
         if (options !== undefined) {
@@ -88,7 +88,7 @@ class LongPressGestureHandler extends GestureHandler {
         return this;
     }
 
-    onActionCancel(event: Callback<void>) {
+    onActionCancel(event: Callback<GestureEvent>) {
         this.onActionCancelCallback = event;
         return this;
     }
@@ -113,7 +113,7 @@ class PanGestureHandler extends GestureHandler {
     onActionStartCallback?: Callback<GestureEvent>;
     onActionUpdateCallback?: Callback<GestureEvent>;
     onActionEndCallback?: Callback<GestureEvent>;
-    onActionCancelCallback?: Callback<void>;
+    onActionCancelCallback?: Callback<GestureEvent>;
     constructor(options?: PanGestureHandlerOptions) {
         super(CommonGestureType.PAN_GESTURE);
         if (options !== undefined) {
@@ -138,7 +138,7 @@ class PanGestureHandler extends GestureHandler {
         return this;
     }
 
-    onActionCancel(event: Callback<void>) {
+    onActionCancel(event: Callback<GestureEvent>) {
         this.onActionCancelCallback = event;
         return this;
     }
@@ -194,7 +194,7 @@ class PinchGestureHandler extends GestureHandler {
     onActionStartCallback?: Callback<GestureEvent>;
     onActionUpdateCallback?: Callback<GestureEvent>;
     onActionEndCallback?: Callback<GestureEvent>;
-    onActionCancelCallback?: Callback<void>;
+    onActionCancelCallback?: Callback<GestureEvent>;
     constructor(options?: PinchGestureHandlerOptions) {
         super(CommonGestureType.PINCH_GESTURE);
         if (options !== undefined) {
@@ -218,7 +218,7 @@ class PinchGestureHandler extends GestureHandler {
         return this;
     }
 
-    onActionCancel(event: Callback<void>) {
+    onActionCancel(event: Callback<GestureEvent>) {
         this.onActionCancelCallback = event;
         return this;
     }
@@ -242,7 +242,7 @@ class RotationGestureHandler extends GestureHandler {
     onActionStartCallback?: Callback<GestureEvent>;
     onActionUpdateCallback?: Callback<GestureEvent>;
     onActionEndCallback?: Callback<GestureEvent>;
-    onActionCancelCallback?: Callback<void>;
+    onActionCancelCallback?: Callback<GestureEvent>;
     constructor(options?: RotationGestureHandlerOptions) {
         super(CommonGestureType.ROTATION_GESTURE);
         if (options !== undefined) {
@@ -266,7 +266,7 @@ class RotationGestureHandler extends GestureHandler {
         return this;
     }
 
-    onActionCancel(event: Callback<void>) {
+    onActionCancel(event: Callback<GestureEvent>) {
         this.onActionCancelCallback = event;
         return this;
     }

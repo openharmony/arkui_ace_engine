@@ -1596,8 +1596,9 @@ HWTEST_F(OverlayManagerTestOneNG, CustomDialogRecordEvent001, TestSize.Level1)
 {
     auto overlayNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(overlayNode);
-    Recorder::EventRecorder::Get().componentEnable_ = true;
-    Recorder::EventRecorder::Get().eventSwitch_.componentEnable = true;
+    auto index = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    Recorder::EventRecorder::Get().eventSwitch_[index] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[index] = true;
     DialogProperties dialogProps;
     overlayManager->CustomDialogRecordEvent(dialogProps);
     Recorder::EventParamsBuilder builder;

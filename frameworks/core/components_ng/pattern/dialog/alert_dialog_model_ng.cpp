@@ -76,8 +76,8 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
                     Maskarg.onWillDismiss = arg.onWillDismiss;
                     Maskarg.shadow = arg.shadow;
                     auto mask = overlayManager->ShowDialog(Maskarg, nullptr, false);
-                    overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
                     CHECK_NULL_VOID(mask);
+                    overlayManager->SetMaskNodeId(dialog->GetId(), mask->GetId());
                 }
             } else {
                 dialog = overlayManager->ShowDialog(arg, nullptr, false);
@@ -87,6 +87,7 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
             UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "show");
 #endif
             auto hub = dialog->GetEventHub<NG::DialogEventHub>();
+            CHECK_NULL_VOID(hub);
             hub->SetOnCancel(arg.onCancel);
             auto pattern = dialog->GetPattern<DialogPattern>();
             CHECK_NULL_VOID(pattern);

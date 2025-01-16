@@ -21,6 +21,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_layout_algorithm.h"
+#include "core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_paint_method.h"
 #include "core/components_ng/pattern/swiper_indicator/digit_indicator/digit_indicator_layout_algorithm.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.h"
 #include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_layout_algorithm.h"
@@ -36,6 +38,8 @@ class SwiperIndicatorPattern : public Pattern {
 public:
     SwiperIndicatorPattern() = default;
     ~SwiperIndicatorPattern() override = default;
+    SwiperIndicatorPattern(SwiperIndicatorType indicatorType): swiperIndicatorType_(indicatorType)
+    {}
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -46,6 +50,8 @@ public:
     {
         if (SwiperIndicatorUtils::GetSwiperIndicatorType() == SwiperIndicatorType::DOT) {
             return MakeRefPtr<DotIndicatorPaintProperty>();
+        } else if (SwiperIndicatorUtils::GetSwiperIndicatorType() == SwiperIndicatorType::ARC_DOT) {
+            return MakeRefPtr<CircleDotIndicatorPaintProperty>();
         } else {
             return MakeRefPtr<PaintProperty>();
         }
@@ -62,7 +68,7 @@ public:
         CHECK_NULL_RETURN(swiperNode, nullptr);
         auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
         CHECK_NULL_RETURN(swiperPattern, nullptr);
-        if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+        if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::DOT) {
             auto indicatorLayoutAlgorithm = MakeRefPtr<DotIndicatorLayoutAlgorithm>();
             indicatorLayoutAlgorithm->SetIsHoverOrPress(isHover_ || isPressed_);
             indicatorLayoutAlgorithm->SetHoverPoint(hoverPoint_);
@@ -72,6 +78,9 @@ public:
             auto maxDisplayCount = swiperPattern->GetMaxDisplayCount();
             maxDisplayCount > 0 ? indicatorLayoutAlgorithm->SetIndicatorDisplayCount(maxDisplayCount)
                                 : indicatorLayoutAlgorithm->SetIndicatorDisplayCount(indicatorDisplayCount);
+            return indicatorLayoutAlgorithm;
+        } else if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
+            auto indicatorLayoutAlgorithm = MakeRefPtr<CircleDotIndicatorLayoutAlgorithm>();
             return indicatorLayoutAlgorithm;
         } else {
             auto indicatorLayoutAlgorithm = MakeRefPtr<DigitIndicatorLayoutAlgorithm>();
@@ -112,7 +121,33 @@ public:
         paintMethod->SetMouseClickIndex(mouseClickIndex_);
         paintMethod->SetIsTouchBottom(touchBottomType_);
         paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
+        paintMethod->SetTouchBottomPageRate(swiperPattern->CalcCurrentTurnPageRate());
+        paintMethod->SetFirstIndex(swiperPattern->GetLoopIndex(swiperPattern->GetFirstIndexInVisibleArea()));
         mouseClickIndex_ = std::nullopt;
+    }
+
+    RefPtr<CircleDotIndicatorPaintMethod> CreateCircleDotIndicatorPaintMethod(RefPtr<SwiperPattern> swiperPattern)
+    {
+        auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
+        auto paintMethod = MakeRefPtr<CircleDotIndicatorPaintMethod>(circleDotIndicatorModifier_);
+        paintMethod->SetAxis(swiperPattern->GetDirection());
+        paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
+        paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
+        paintMethod->SetNextValidIndex(swiperPattern->GetNextValidIndex());
+        paintMethod->SetItemCount(swiperPattern->RealTotalCount());
+        paintMethod->SetGestureState(swiperPattern->GetGestureState());
+        paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
+        paintMethod->SetTouchBottomTypeLoop(swiperPattern->GetTouchBottomTypeLoop());
+        paintMethod->SetIsLongPressed(isLongPressed_);
+        if (mouseClickIndex_) {
+            mouseClickIndex_ = swiperPattern->GetLoopIndex(mouseClickIndex_.value());
+        }
+        paintMethod->SetIsTouchBottom(touchBottomType_);
+        paintMethod->SetMouseClickIndex(mouseClickIndex_);
+        paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
+        mouseClickIndex_ = std::nullopt;
+        return paintMethod;
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
@@ -121,7 +156,7 @@ public:
         CHECK_NULL_RETURN(swiperNode, nullptr);
         auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
         CHECK_NULL_RETURN(swiperPattern, nullptr);
-        if (GetIndicatorType() == SwiperIndicatorType::DOT) {
+        if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::DOT) {
             if (swiperPattern->GetMaxDisplayCount() > 0) {
                 SetIndicatorInteractive(false);
                 return CreateOverlongDotIndicatorPaintMethod(swiperPattern);
@@ -129,11 +164,19 @@ public:
 
             SetIndicatorInteractive(swiperPattern->IsIndicatorInteractive());
             return CreateDotIndicatorPaintMethod(swiperPattern);
+        } else if (swiperPattern->GetIndicatorType() == SwiperIndicatorType::ARC_DOT) {
+            if (!circleDotIndicatorModifier_) {
+                circleDotIndicatorModifier_ = AceType::MakeRefPtr<CircleDotIndicatorModifier>();
+                circleDotIndicatorModifier_->SetLongPointHeadCurve(swiperPattern->GetCurveIncludeMotion());
+            }
+
+            auto paintMethod = CreateCircleDotIndicatorPaintMethod(swiperPattern);
+            return paintMethod;
         }
         return nullptr;
     }
 
-    virtual RefPtr<FrameNode> GetSwiperNode() const
+    RefPtr<FrameNode> GetSwiperNode() const
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
@@ -144,6 +187,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, FocusPattern());
         auto swiperTheme = pipelineContext->GetTheme<SwiperIndicatorTheme>();
@@ -151,7 +195,13 @@ public:
         FocusPaintParam paintParam;
         paintParam.SetPaintWidth(swiperTheme->GetFocusedBorderWidth());
         paintParam.SetPaintColor(swiperTheme->GetFocusedColor());
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER, paintParam };
+        focusPattern.SetFocusPaintParams(paintParam);
+        if (swiperIndicatorType_ != SwiperIndicatorType::DOT) {
+            return focusPattern;
+        }
+        auto focusStyleType = static_cast<FocusStyleType>(swiperTheme->GetFocusStyleType());
+        focusPattern.SetStyleType(focusStyleType);
+        return focusPattern;
     }
 
     void SetChangeIndexWithAnimation(bool withAnimation)
@@ -172,97 +222,22 @@ public:
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
     void SetIndicatorInteractive(bool isInteractive);
-    virtual Axis GetDirection() const;
-    virtual bool GetDotCurrentOffset(OffsetF& offset, float indicatorWidth, float indicatorHeight);
-    void OnModifyDone() override;
-    void SetIndicatorOnChange();
-    void IndicatorOnChange();
-    virtual bool GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& frameSize) const;
-    virtual int32_t RealTotalCount() const;
-    virtual int32_t GetCurrentIndex() const;
-
-protected:
-    virtual void FireChangeEvent() const {}
-    virtual void SwipeTo(std::optional<int32_t> mouseClickIndex);
-    virtual void ShowPrevious();
-    virtual void ShowNext();
-    virtual void ChangeIndex(int32_t index, bool useAnimation);
-    virtual bool IsHorizontalAndRightToLeft() const;
-    virtual TextDirection GetNonAutoLayoutDirection() const;
-    virtual void GetTextContentSub(std::string& firstContent, std::string& lastContent) const;
-    virtual int32_t GetCurrentShownIndex() const;
-    virtual int32_t DisplayIndicatorTotalCount() const;
-    virtual bool IsLoop() const;
-
-    RefPtr<SwiperPattern> GetSwiperPattern() const
+    virtual bool SetArcIndicatorHotRegion(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
     {
-        auto swiperNode = GetSwiperNode();
-        CHECK_NULL_RETURN(swiperNode, nullptr);
-        return swiperNode->GetPattern<SwiperPattern>();
+        return false;
     }
-
-    virtual SwiperIndicatorType GetIndicatorType() const
+    virtual PointF GetCenterPointF()
     {
-        auto swiperPattern = GetSwiperPattern();
-        CHECK_NULL_RETURN(swiperPattern, SwiperIndicatorType::DOT);
-        return swiperPattern->GetIndicatorType();
+        return PointF(0.0, 0.0);
     }
-
-    const bool& IsHover() const
+    virtual float GetAngleWithPoint(const PointF& conter, const PointF& point)
     {
-        return isHover_;
+        return 0.0;
     }
+    virtual void InitAccessibilityFocusEvent(){};
 
-    const bool& IsPressed() const
-    {
-        return isPressed_;
-    }
-
-    const PointF& GetHoverPoint() const
-    {
-        return hoverPoint_;
-    }
-
-    std::optional<int32_t> GetOptinalMouseClickIndex() const
-    {
-        return mouseClickIndex_;
-    }
-
-    void SetMouseClickIndex(int32_t mouseClickIndex)
-    {
-        if (mouseClickIndex_) {
-            mouseClickIndex_ = mouseClickIndex;
-        }
-    }
-
-    const TouchBottomType& GetTouchBottomType() const
-    {
-        return touchBottomType_;
-    }
-
-    const RefPtr<DotIndicatorModifier>& GetDotIndicatorModifier() const
-    {
-        return dotIndicatorModifier_;
-    }
-
-    void SetDotIndicatorModifier(RefPtr<DotIndicatorModifier> dotIndicatorModifier)
-    {
-        dotIndicatorModifier_ = dotIndicatorModifier;
-    }
-
-    const RefPtr<OverlengthDotIndicatorModifier>& GetOverlengthDotIndicatorModifier() const
-    {
-        return overlongDotIndicatorModifier_;
-    }
-
-    void SetOverlengthDotIndicatorModifier(RefPtr<OverlengthDotIndicatorModifier> overlongDotIndicatorModifier)
-    {
-        overlongDotIndicatorModifier_ = overlongDotIndicatorModifier;
-    }
-    RectF CalcBoundsRect() const;
-    int32_t GetLoopIndex(int32_t originalIndex) const;
-    void ResetOverlongModifier();
 private:
+    void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -292,20 +267,30 @@ private:
     void HandleLongDragUpdate(const TouchLocationInfo& info);
     bool CheckIsTouchBottom(const TouchLocationInfo& info);
     float HandleTouchClickMargin();
-    int32_t GetInitialIndex() const;
+    int32_t GetCurrentIndex() const;
+    void GetInnerFocusPaintRect(RoundRect& paintRect);
+    void InitFocusEvent();
+    void HandleFocusEvent();
+    void HandleBlurEvent();
+    void AddIsFocusActiveUpdateEvent();
+    void RemoveIsFocusActiveUpdateEvent();
+    void OnIsFocusActiveUpdate(bool isFocusAcitve);
     RefPtr<OverlengthDotIndicatorPaintMethod> CreateOverlongDotIndicatorPaintMethod(
         RefPtr<SwiperPattern> swiperPattern);
     RefPtr<DotIndicatorPaintMethod> CreateDotIndicatorPaintMethod(RefPtr<SwiperPattern> swiperPattern);
+    RectF CalcBoundsRect() const;
     void UpdateOverlongPaintMethod(
         const RefPtr<SwiperPattern>& swiperPattern, RefPtr<OverlengthDotIndicatorPaintMethod>& overlongPaintMethod);
     int32_t GetDisplayCurrentIndex() const;
     void UpdateDigitalIndicator();
     void RegisterIndicatorChangeEvent();
-    std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
-    std::pair<int32_t, int32_t> CalculateStepAndItemCountDefault() const;
     void ResetDotModifier();
+    void ResetOverlongModifier();
     void UpdateFocusable() const;
+    void CheckDragAndUpdate(
+        const RefPtr<SwiperPattern>& swiperPattern, int32_t animationStartIndex, int32_t animationEndIndex);
 
+    double GetIndicatorDragAngleThreshold(bool isMaxAngle);
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -313,21 +298,30 @@ private:
     RefPtr<LongPressEvent> longPressEvent_;
     bool isHover_ = false;
     bool isPressed_ = false;
+    bool isLongPressed_ = false;
     PointF hoverPoint_;
     PointF dragStartPoint_;
     TouchBottomType touchBottomType_ = TouchBottomType::NONE;
     bool isClicked_ = false;
     bool isRepeatClicked_ = false;
+    bool focusEventInitialized_ = false;
+    std::function<void(bool)> isFocusActiveUpdateEvent_;
 
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
+    RefPtr<CircleDotIndicatorModifier> circleDotIndicatorModifier_;
     RefPtr<OverlengthDotIndicatorModifier> overlongDotIndicatorModifier_;
+    SwiperIndicatorType swiperIndicatorType_ = SwiperIndicatorType::DOT;
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> startIndex_;
     std::optional<bool> changeIndexWithAnimation_;
     GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     ACE_DISALLOW_COPY_AND_MOVE(SwiperIndicatorPattern);
+
+protected:
+    OffsetF CalculateAngleOffset(float centerX, float centerY, float radius, double angle);
+    OffsetF CalculateRectLayout(double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height);
 };
 } // namespace OHOS::Ace::NG
 

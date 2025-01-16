@@ -91,6 +91,9 @@ export class ToolBarOption {
   public textColor?: ResourceColor = $r('sys.color.font_primary');
   public activatedTextColor?: ResourceColor = $r('sys.color.font_emphasize');
   public toolBarSymbolOptions?: ToolBarSymbolGlyphOptions = undefined;
+  public accessibilityText?: ResourceStr = '';
+  public accessibilityDescription?: ResourceStr = '';
+  public accessibilityLevel?: string = 'auto';
 }
 
 @Observed
@@ -140,7 +143,7 @@ export struct ToolBar {
     .stateEffect(true)
     .height(LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT))
     .backgroundColor('sys.color.ohos_id_color_toolbar_bg');
-  @Prop moreText: ResourceStr = $r('sys.string.ohos_toolbar_more');
+  @Prop moreText: Resource = $r('sys.string.ohos_toolbar_more');
   @State menuContent: MenuController[] = [];
   @State toolBarItemBackground: ResourceColor[] = [];
   @State iconPrimaryColor: ResourceColor = $r('sys.color.icon_primary');
@@ -166,45 +169,40 @@ export struct ToolBar {
 
   @Builder
   MoreTabBuilder(index: number) {
-    Button({ type: ButtonType.Normal, stateEffect: false }) {
-      Column() {
-        Image(PUBLIC_MORE)
-          .width(IMAGE_SIZE)
-          .height(IMAGE_SIZE)
-          .fillColor(this.iconPrimaryColor)
-          .margin({ bottom: $r('sys.float.padding_level1') })
-          .objectFit(ImageFit.Contain)
-          .draggable(false)
-        Text(this.moreText)
-          .fontColor(this.fontPrimaryColor)
-          .fontSize($r('sys.float.ohos_id_text_size_caption'))
-          .fontWeight(FontWeight.Medium)
-          .maxLines(1)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .textAlign(TextAlign.Center)
-          .focusable(true)
-          .focusOnTouch(true)
-      }
-      .width('100%')
-      .height('100%')
-      .justifyContent(FlexAlign.Center)
-      .padding({
-        start: LengthMetrics.resource($r('sys.float.padding_level2')),
-        end: LengthMetrics.resource($r('sys.float.padding_level2')),
-      })
-      .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
+    Column() {
+      Image(PUBLIC_MORE)
+        .width(IMAGE_SIZE)
+        .height(IMAGE_SIZE)
+        .fillColor(this.iconPrimaryColor)
+        .margin({ bottom: $r('sys.float.padding_level1') })
+        .objectFit(ImageFit.Contain)
+        .draggable(false)
+      Text(this.moreText)
+        .fontColor(this.fontPrimaryColor)
+        .fontSize($r('sys.float.ohos_id_text_size_caption'))
+        .fontWeight(FontWeight.Medium)
+        .maxLines(1)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .textAlign(TextAlign.Center)
     }
+    .width('100%')
+    .height('100%')
+    .justifyContent(FlexAlign.Center)
+    .padding({
+      start: LengthMetrics.resource($r('sys.float.padding_level2')),
+      end: LengthMetrics.resource($r('sys.float.padding_level2')),
+    })
+    .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
+    .accessibilityText(this.moreText)
     .focusable(true)
     .focusOnTouch(true)
+    .accessibilityGroup(true)
     .focusBox({
       margin: LengthMetrics.vp(FOCUS_BOX_MARGIN),
       strokeWidth: LengthMetrics.vp(FOCUS_BOX_BORDER_WIDTH),
       strokeColor: ColorMetrics.resourceColor($r('sys.color.ohos_id_color_focused_outline'))
     })
-    .width('100%')
-    .height('100%')
-    .bindMenu(this.menuContent, { placement: Placement.TopRight, offset: { x: -12, y : -10 } })
-    .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
+    .bindMenu(this.menuContent, { placement: Placement.TopRight, offset: { x: -12, y: -10 } })
     .backgroundColor(this.toolBarItemBackground[index])
     .onHover((isHover: boolean) => {
       if (isHover) {
@@ -224,49 +222,48 @@ export struct ToolBar {
 
   @Builder
   TabBuilder(index: number) {
-    Button({ type: ButtonType.Normal, stateEffect: false }) {
-      Column() {
-        if (this.toolBarList[index]?.toolBarSymbolOptions?.normal ||
-          this.toolBarList[index]?.toolBarSymbolOptions?.activated) {
-          SymbolGlyph()
-            .fontSize(IMAGE_SIZE)
-            .symbolEffect(this.symbolEffect, false)
-            .attributeModifier(this.getToolBarSymbolModifier(index))
-            .margin({ bottom: $r('sys.float.padding_level1') })
-        } else {
-          Image(this.toolBarList[index]?.icon)
-            .width(IMAGE_SIZE)
-            .height(IMAGE_SIZE)
-            .fillColor(this.getIconColor(index))
-            .margin({ bottom: $r('sys.float.padding_level1') })
-            .objectFit(ImageFit.Contain)
-            .draggable(false)
-        }
-        Text(this.toolBarList[index]?.content)
-          .fontColor(this.getTextColor(index))
-          .fontSize($r('sys.float.ohos_id_text_size_caption'))
-          .maxFontSize($r('sys.float.ohos_id_text_size_caption'))
-          .minFontSize(9)
-          .fontWeight(FontWeight.Medium)
-          .maxLines(1)
-          .textOverflow({ overflow: TextOverflow.Ellipsis })
-          .textAlign(TextAlign.Center)
-          .focusable(!(this.toolBarList[index]?.state === ItemState.DISABLE))
-          .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
+    Column() {
+      if (this.toolBarList[index]?.toolBarSymbolOptions?.normal ||
+        this.toolBarList[index]?.toolBarSymbolOptions?.activated) {
+        SymbolGlyph()
+          .fontSize(IMAGE_SIZE)
+          .symbolEffect(this.symbolEffect, false)
+          .attributeModifier(this.getToolBarSymbolModifier(index))
+          .margin({ bottom: $r('sys.float.padding_level1') })
+      } else {
+        Image(this.toolBarList[index]?.icon)
+          .width(IMAGE_SIZE)
+          .height(IMAGE_SIZE)
+          .fillColor(this.getIconColor(index))
+          .margin({ bottom: $r('sys.float.padding_level1') })
+          .objectFit(ImageFit.Contain)
+          .draggable(false)
       }
-      .justifyContent(FlexAlign.Center)
-      .width('100%')
-      .height('100%')
-      .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
-      .padding({
-        start: LengthMetrics.resource($r('sys.float.padding_level2')),
-        end: LengthMetrics.resource($r('sys.float.padding_level2')),
-      })
+      Text(this.toolBarList[index]?.content)
+        .fontColor(this.getTextColor(index))
+        .fontSize($r('sys.float.ohos_id_text_size_caption'))
+        .maxFontSize($r('sys.float.ohos_id_text_size_caption'))
+        .minFontSize(9)
+        .fontWeight(FontWeight.Medium)
+        .maxLines(1)
+        .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .textAlign(TextAlign.Center)
     }
-    .enabled(this.toolBarList[index]?.state !== ItemState.DISABLE)
+    .justifyContent(FlexAlign.Center)
     .width('100%')
     .height('100%')
     .borderRadius($r('sys.float.ohos_id_corner_radius_clicked'))
+    .padding({
+      start: LengthMetrics.resource($r('sys.float.padding_level2')),
+      end: LengthMetrics.resource($r('sys.float.padding_level2')),
+    })
+    .opacity(this.toolBarList[index]?.state !== ItemState.DISABLE ? 1 : 0.4)
+    .enabled(this.toolBarList[index]?.state !== ItemState.DISABLE)
+    .accessibilityGroup(true)
+    .accessibilityText(this.toStringFormat(this.toolBarList[index]?.accessibilityText) ??
+    this.toStringFormat(this.toolBarList[index]?.content))
+    .accessibilityDescription(this.toStringFormat(this.toolBarList[index]?.accessibilityDescription) ?? '')
+    .accessibilityLevel(this.toStringFormat(this.toolBarList[index]?.accessibilityLevel) ?? 'auto')
     .focusable(!(this.toolBarList[index]?.state === ItemState.DISABLE))
     .focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE))
     .focusBox({
@@ -328,6 +325,22 @@ export struct ToolBar {
       return this.toolBarList[index]?.activatedTextColor ?? this.fontActivatedPrimaryColor;
     }
     return this.toolBarList[index]?.textColor ?? this.fontPrimaryColor;
+  }
+
+  private toStringFormat(resource: ResourceStr | undefined): string | undefined {
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return resource;
+    } else {
+      let resourceString: string = '';
+      try {
+        resourceString = getContext()?.resourceManager?.getStringSync(resource?.id);
+      } catch (err) {
+        let code: number = (err as BusinessError)?.code;
+        let message: string = (err as BusinessError)?.message;
+        hilog.error(0x3900, 'Ace', `Faild to toolBar toStringFormat, code: ${code}, message: ${message}`);
+      }
+      return resourceString;
+    }
   }
 
   private toLengthString(value: LengthMetrics | undefined): string {
@@ -448,6 +461,8 @@ export struct ToolBar {
             .height('100%')
             .flexShrink(1)
           }
+        }, (item: ToolBarOption, index: number) => {
+          return `${this.getUniqueId()}__${index}}`;
         })
         if (this.refreshData() && this.toolBarList.length > TOOLBAR_MAX_LENGTH) {
           Row() {

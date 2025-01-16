@@ -149,16 +149,15 @@ HWTEST_F(TextInputModifierTest, setShowUnitTest, TestSize.Level1)
  */
 HWTEST_F(TextInputModifierTest, setOnWillInsertTest, TestSize.Level1)
 {
-    static const auto CHECK_TEXT("test_text");
+    static const auto CHECK_TEXT(u"test_text");
     static const Ark_Int32 AINT32_POS(1234);
-const Ark_Int32 AINT32_NEG(INT_MIN);
-
+    const Ark_Int32 AINT32_NEG(INT_MIN);
 
     static const Ark_Int32 expectedResId = 123;
     auto onWillInsertHandler = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_InsertValue data,
         const Callback_Boolean_Void cbReturn) {
         EXPECT_EQ(resourceId, expectedResId);
-        EXPECT_EQ(Converter::Convert<std::string>(data.insertValue), CHECK_TEXT);
+        EXPECT_EQ(Converter::Convert<std::u16string>(data.insertValue), CHECK_TEXT);
         auto result = Converter::Convert<int32_t>(data.insertOffset) > 0;
         CallbackHelper(cbReturn).Invoke(Converter::ArkValue<Ark_Boolean>(result));
     };
@@ -188,7 +187,7 @@ const Ark_Int32 AINT32_NEG(INT_MIN);
  */
 HWTEST_F(TextInputModifierTest, setOnWillDeleteTest, TestSize.Level1)
 {
-    static const auto CHECK_TEXT("test_text");
+    static const auto CHECK_TEXT(u"test_text");
     static const Ark_Int32 AINT32_POS(1234);
 
     static const Ark_Int32 expectedResId = 123;
@@ -198,7 +197,7 @@ HWTEST_F(TextInputModifierTest, setOnWillDeleteTest, TestSize.Level1)
     auto callbackSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId,
         const Ark_DeleteValue data, const Callback_Boolean_Void cbReturn) {
         EXPECT_EQ(resourceId, expectedResId);
-        EXPECT_EQ(Converter::Convert<std::string>(data.deleteValue), CHECK_TEXT);
+        EXPECT_EQ(Converter::Convert<std::u16string>(data.deleteValue), CHECK_TEXT);
         EXPECT_EQ(Converter::Convert<int32_t>(data.deleteOffset), expectedOffset);
         auto willDeleteDirection = Converter::OptConvert<TextDeleteDirection>(data.direction);
         auto result = willDeleteDirection == TextDeleteDirection::FORWARD;

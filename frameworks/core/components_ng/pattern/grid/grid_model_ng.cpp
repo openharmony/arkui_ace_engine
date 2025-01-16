@@ -190,9 +190,9 @@ void GridModelNG::SetSupportAnimation(bool value)
 
 void GridModelNG::SetSupportDragAnimation(bool value) {}
 
-void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled)
+void GridModelNG::SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(edgeEffect, alwaysEnabled, edge);
 }
 
 void GridModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
@@ -282,7 +282,7 @@ void GridModelNG::SetOnItemDragMove(ItemDragMoveFunc&& value)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragMove(std::move(value));
 
-    GridModelNG::AddDragFrameNodeToManager(frameNode);
+    AddDragFrameNodeToManager(frameNode);
 }
 
 void GridModelNG::SetOnItemDragLeave(ItemDragLeaveFunc&& value)
@@ -293,7 +293,7 @@ void GridModelNG::SetOnItemDragLeave(ItemDragLeaveFunc&& value)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragLeave(std::move(value));
 
-    GridModelNG::AddDragFrameNodeToManager(frameNode);
+    AddDragFrameNodeToManager(frameNode);
 }
 
 void GridModelNG::SetOnItemDrop(ItemDropFunc&& value)
@@ -304,18 +304,7 @@ void GridModelNG::SetOnItemDrop(ItemDropFunc&& value)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDrop(std::move(value));
 
-    GridModelNG::AddDragFrameNodeToManager(frameNode);
-}
-
-void GridModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
-{
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-
-    dragDropManager->AddGridDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
+    AddDragFrameNodeToManager(frameNode);
 }
 
 void GridModelNG::SetOnScroll(OnScrollEvent&& onScroll)
@@ -525,10 +514,10 @@ void GridModelNG::SetSupportAnimation(FrameNode* frameNode, bool supportAnimatio
     pattern->SetSupportAnimation(supportAnimation);
 }
 
-void GridModelNG::SetEdgeEffect(
-    FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect, const std::optional<bool>& alwaysEnabled)
+void GridModelNG::SetEdgeEffect(FrameNode* frameNode, const std::optional<EdgeEffect>& edgeEffect,
+    const std::optional<bool>& alwaysEnabled, EffectEdge edge)
 {
-    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
+    ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled, edge);
 }
 
 void GridModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
@@ -756,7 +745,7 @@ void GridModelNG::SetOnItemDragStart(FrameNode* frameNode, std::function<void(co
     CHECK_NULL_VOID(gestureEventHub);
     eventHub->InitItemDragEvent(gestureEventHub);
 
-    GridModelNG::AddDragFrameNodeToManager(frameNode);
+    AddDragFrameNodeToManager(frameNode);
 }
 
 void GridModelNG::SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& value)
@@ -766,7 +755,7 @@ void GridModelNG::SetOnItemDragEnter(FrameNode* frameNode, ItemDragEnterFunc&& v
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragEnter(std::move(value));
 
-    GridModelNG::AddDragFrameNodeToManager(frameNode);
+    AddDragFrameNodeToManager(frameNode);
 }
 
 void GridModelNG::SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& value)
@@ -776,7 +765,7 @@ void GridModelNG::SetOnItemDragMove(FrameNode* frameNode, ItemDragMoveFunc&& val
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragMove(std::move(value));
 
-    GridModelNG::AddDragFrameNodeToManager(frameNode);
+    AddDragFrameNodeToManager(frameNode);
 }
 
 void GridModelNG::SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& value)
@@ -786,7 +775,7 @@ void GridModelNG::SetOnItemDragLeave(FrameNode* frameNode, ItemDragLeaveFunc&& v
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDragLeave(std::move(value));
 
-    GridModelNG::AddDragFrameNodeToManager(frameNode);
+    AddDragFrameNodeToManager(frameNode);
 }
 
 void GridModelNG::SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value)
@@ -796,7 +785,7 @@ void GridModelNG::SetOnItemDrop(FrameNode* frameNode, ItemDropFunc&& value)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnItemDrop(std::move(value));
 
-    GridModelNG::AddDragFrameNodeToManager(frameNode);
+    AddDragFrameNodeToManager(frameNode);
 }
 
 void GridModelNG::SetOnScroll(FrameNode* frameNode, OnScrollEvent&& onScroll)
@@ -813,5 +802,17 @@ void GridModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBegin
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnScrollFrameBegin(std::move(onScrollFrameBegin));
+    AddDragFrameNodeToManager(frameNode);
+}
+
+void GridModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+
+    dragDropManager->AddGridDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
 }
 } // namespace OHOS::Ace::NG

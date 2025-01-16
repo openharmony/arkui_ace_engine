@@ -248,6 +248,17 @@ public:
         return {};
     }
 
+    virtual void GetSnapshotByUniqueId(int32_t uniqueId,
+        std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+        const NG::SnapshotOptions& options)
+    {}
+
+    virtual std::pair<int32_t, std::shared_ptr<Media::PixelMap>> GetSyncSnapshotByUniqueId(int32_t uniqueId,
+        const NG::SnapshotOptions& options)
+    {
+        return {};
+    }
+
     virtual bool GetAssetContent(const std::string& url, std::string& content) = 0;
     virtual bool GetAssetContent(const std::string& url, std::vector<uint8_t>& content) = 0;
     virtual std::string GetAssetPath(const std::string& url) = 0;
@@ -287,6 +298,14 @@ public:
     virtual void HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node) {}
     virtual void ShowAllNodesOnOverlay() {}
     virtual void HideAllNodesOnOverlay() {}
+    virtual bool SetOverlayManagerOptions(const NG::OverlayManagerInfo& overlayInfo)
+    {
+        return false;
+    }
+    virtual std::optional<NG::OverlayManagerInfo> GetOverlayManagerOptions()
+    {
+        return std::nullopt;
+    }
 
     virtual SingleTaskExecutor GetAnimationJsTask() = 0;
 

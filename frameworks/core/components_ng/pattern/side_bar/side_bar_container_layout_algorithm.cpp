@@ -41,7 +41,8 @@ constexpr Dimension CONTROL_BUTTON_PADDING = 12.0_vp;
 void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     autoHide_ = false;
-    UpdateDefaultValueByVersion();
+    CHECK_NULL_VOID(layoutWrapper);
+    UpdateDefaultValueByVersion(layoutWrapper);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild(layoutWrapper->IsActive());
     if (children.size() < DEFAULT_MIN_CHILDREN_SIZE) {
         return;
@@ -49,7 +50,9 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     const auto& constraint = layoutProperty->GetLayoutConstraint();
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto idealSize = pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
     CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
@@ -131,9 +134,12 @@ void SideBarContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 }
 
-void SideBarContainerLayoutAlgorithm::UpdateDefaultValueByVersion()
+void SideBarContainerLayoutAlgorithm::UpdateDefaultValueByVersion(LayoutWrapper* layoutWrapper)
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(layoutWrapper);
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
@@ -165,10 +171,13 @@ void SideBarContainerLayoutAlgorithm::AdjustMinAndMaxSideBarWidth(LayoutWrapper*
 {
     adjustMinSideBarWidth_ = DEFAULT_MIN_SIDE_BAR_WIDTH;
     adjustMaxSideBarWidth_ = DEFAULT_MAX_SIDE_BAR_WIDTH;
+    CHECK_NULL_VOID(layoutWrapper);
     auto layoutProperty = AceType::DynamicCast<SideBarContainerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
 
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
 
     if (pipeline->GetMinPlatformVersion() < PLATFORM_VERSION_TEN) {
@@ -407,8 +416,12 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
     const RefPtr<SideBarContainerLayoutProperty>& layoutProperty, const RefPtr<LayoutWrapper>& sideBarLayoutWrapper)
 {
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto sideBarIdealSize =
-        PipelineContext::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
+    CHECK_NULL_VOID(sideBarLayoutWrapper);
+    auto hostNode = sideBarLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto sideBarIdealSize = pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT():
         CreateIdealSize(constraint.value(), Axis::HORIZONTAL,
@@ -421,8 +434,6 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBar(
     sideBarIdealSize.SetWidth(realSideBarWidth_);
     sideBarIdealSize.SetHeight(realSideBarHeight_);
 
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
     if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN) {
         auto sideBarLayoutProperty = sideBarLayoutWrapper->GetLayoutProperty();
         CHECK_NULL_VOID(sideBarLayoutProperty);
@@ -499,8 +510,12 @@ void SideBarContainerLayoutAlgorithm::MeasureSideBarContent(
     }
     contentWidth = std::max(contentWidth, minContentWidth_);
 
-    auto contentIdealSize =
-    PipelineContext::GetCurrentContextSafelyWithCheck()->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
+    CHECK_NULL_VOID(contentLayoutWrapper);
+    auto contentNode = contentLayoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(contentNode);
+    auto pipeline = contentNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto contentIdealSize = pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_TEN ?
     CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL,
         layoutProperty->GetMeasureType(MeasureType::MATCH_PARENT)).ConvertToSizeT() :
     CreateIdealSize(
@@ -582,13 +597,6 @@ void SideBarContainerLayoutAlgorithm::LayoutControlButton(
     }
     auto controlButtonLeft = controlImageLeft - CONTROL_BUTTON_PADDING;
     auto controlButtonTop = controlImageTop - CONTROL_BUTTON_PADDING;
-    auto sideBarPattern = AceType::DynamicCast<SideBarContainerPattern>(pattern_.Upgrade());
-    CHECK_NULL_VOID(sideBarPattern);
-    if (controlImageLeft != DEFAULT_CONTROL_BUTTON_LEFT || controlImageTop != DEFAULT_CONTROL_BUTTON_TOP) {
-        sideBarPattern->SetControlButtonPosCustom(true);
-    } else {
-        sideBarPattern->SetControlButtonPosCustom(false);
-    }
 
     auto controlButtonLeftPx = ConvertToPx(controlButtonLeft, scaleProperty, parentWidth).value_or(0);
     auto controlButtonTopPx = ConvertToPx(controlButtonTop, scaleProperty, parentWidth).value_or(0);

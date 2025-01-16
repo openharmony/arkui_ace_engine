@@ -220,6 +220,10 @@ public:
             "alignSelf", ITEM_ALIGN[static_cast<int32_t>(propAlignSelf.value_or(FlexAlign::AUTO))], filter);
         json->PutExtAttr("displayPriority", propDisplayIndex.value_or(1), filter);
         AlignRulesToJson(json);
+        auto res = JsonUtil::Create(true);
+        res->Put("horizontal", propChainWeight->first.value_or(0.0f));
+        res->Put("vertical", propChainWeight->second.value_or(0.0f));
+        json->PutExtAttr("chainWeight", res, filter);
     }
 
     std::string AlignRulesToString()

@@ -334,7 +334,7 @@ void AceContainer::InitializeCallback()
         }
         bool result = false;
         context->GetTaskExecutor()->PostSyncTask(
-            [context, event, &result]() { result = context->OnKeyEvent(event); },
+            [context, event, &result]() { result = context->OnNonPointerEvent(event); },
             TaskExecutor::TaskType::UI, "ArkUIAceContainerKeyEvent");
         return result;
     };
@@ -367,6 +367,25 @@ void AceContainer::InitializeCallback()
             TaskExecutor::TaskType::UI, "ArkUIAceContainerAxisEvent");
     };
     aceView_->RegisterAxisEventCallback(axisEventCallback);
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    auto&& crownEventCallback = [weak, id = instanceId_](
+        const CrownEvent& event, const std::function<void()>& ignoreMark) {
+        ContainerScope scope(id);
+        auto context = weak.Upgrade();
+        if (context == nullptr) {
+            return false;
+        }
+        context->GetTaskExecutor()->PostTask(
+            [context, event, id]() {
+                ContainerScope scope(id);
+                context->OnNonPointerEvent(event);
+            },
+            TaskExecutor::TaskType::UI, "ArkUIAceContainerCrownEvent");
+        return true;
+    };
+    aceView_->RegisterCrownEventCallback(crownEventCallback);
+#endif
 
     auto&& rotationEventCallback = [weak, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
@@ -507,7 +526,8 @@ void AceContainer::DestroyContainer(int32_t instanceId)
     AceEngine::Get().RemoveContainer(instanceId);
 }
 
-UIContentErrorCode AceContainer::RunPage(int32_t instanceId, const std::string& url, const std::string& params)
+UIContentErrorCode AceContainer::RunPage(
+    int32_t instanceId, const std::string& url, const std::string& params, bool isNamedRouter)
 {
     ACE_FUNCTION_TRACE();
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -517,14 +537,16 @@ UIContentErrorCode AceContainer::RunPage(int32_t instanceId, const std::string& 
 
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    if (front) {
-        auto type = front->GetType();
-        if ((type == FrontendType::JS) || (type == FrontendType::DECLARATIVE_JS) || (type == FrontendType::JS_CARD) ||
-            (type == FrontendType::ETS_CARD)) {
-            return front->RunPage(url, params);
-        } else {
-            LOGE("Frontend type not supported when runpage");
+    CHECK_NULL_RETURN(front, UIContentErrorCode::NULL_POINTER);
+    auto type = front->GetType();
+    if ((type == FrontendType::JS) || (type == FrontendType::DECLARATIVE_JS) || (type == FrontendType::JS_CARD) ||
+        (type == FrontendType::ETS_CARD)) {
+        if (isNamedRouter) {
+            return front->RunPageByNamedRouter(url, params);
         }
+        return front->RunPage(url, params);
+    } else {
+        LOGE("Frontend type not supported when runpage");
     }
     return UIContentErrorCode::NULL_POINTER;
 }

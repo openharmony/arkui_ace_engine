@@ -33,7 +33,9 @@
 #include "frameworks/bridge/common/dom/dom_panel.h"
 #include "frameworks/bridge/common/dom/dom_picker_view.h"
 #include "frameworks/bridge/common/dom/dom_progress.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "frameworks/bridge/common/dom/dom_qrcode.h"
+#endif
 #include "frameworks/bridge/common/dom/dom_refresh.h"
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/common/dom/dom_rich_text.h"
@@ -85,7 +87,7 @@
 #include "frameworks/bridge/common/dom/dom_tab_bar.h"
 #include "frameworks/bridge/common/dom/dom_tab_content.h"
 #include "frameworks/bridge/common/dom/dom_tool_bar.h"
-#if defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
+#if defined(PLAYER_FRAMEWORK_EXISTS)
 #include "frameworks/bridge/common/dom/dom_video.h"
 #endif
 #if !defined(PREVIEW)
@@ -189,7 +191,9 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_POPUP, &DOMNodeCreator<DOMPopup> },
 #endif
         { DOM_NODE_TAG_PROGRESS, &DOMNodeCreator<DOMProgress> },
+#ifdef QRCODEGEN_SUPPORT
         { DOM_NODE_TAG_QRCODE, &DOMNodeCreator<DOMQrcode> },
+#endif
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_RATING, &DOMNodeCreator<DOMRating> },
 #endif
@@ -229,7 +233,7 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_TSPAN, &DOMNodeCreator<DOMSvgTspan> },
         { DOM_NODE_TAG_USE, &DOMNodeCreator<DOMSvgUse> },
 #ifndef WEARABLE_PRODUCT
-#if defined(PLAYER_FRAMEWORK_EXISTS) && defined(VIDEO_SUPPORTED)
+#if defined(PLAYER_FRAMEWORK_EXISTS)
         { DOM_NODE_TAG_VIDEO, &DOMNodeCreator<DOMVideo> },
 #endif
 #ifdef WEB_SUPPORTED

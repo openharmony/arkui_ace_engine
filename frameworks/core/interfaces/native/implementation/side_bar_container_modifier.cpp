@@ -32,7 +32,7 @@ struct ControlButtonStyleIcons {
     ControlButtonStyleIcon hiddenIcon;
     ControlButtonStyleIcon switchIcon;
 };
-struct ControlButtonStyle {
+struct LocalControlButtonStyle {
     std::optional<Dimension> left;
     std::optional<Dimension> top;
     std::optional<Dimension> width;
@@ -72,15 +72,15 @@ void AssignCast(std::optional<SideBarContainerType>& dst, const Ark_SideBarConta
 }
 
 template<>
-ControlButtonStyle Convert(const Ark_ButtonStyle& src)
+LocalControlButtonStyle Convert(const Ark_ButtonStyle& src)
 {
-    ControlButtonStyle style;
+    LocalControlButtonStyle style;
     style.left = OptConvert<Dimension>(src.left);
     style.top = OptConvert<Dimension>(src.top);
     style.width = OptConvert<Dimension>(src.width);
     style.height = OptConvert<Dimension>(src.height);
     LOGE("SideBarContainerInterfaceModifier::converter "
-        "Ark_ButtonStyle -> ControlButtonStyle  is not fully "
+        "Ark_ButtonStyle -> LocalControlButtonStyle  is not fully "
         "implemented. Need get style.icons");
     return style;
 }
@@ -135,7 +135,7 @@ void ControlButtonImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    ControlButtonStyle style = Converter::Convert<ControlButtonStyle>(*value);
+    LocalControlButtonStyle style = Converter::Convert<LocalControlButtonStyle>(*value);
     if (style.left.has_value()) {
         SideBarContainerModelNG::SetControlButtonLeft(frameNode, style.left.value());
     }

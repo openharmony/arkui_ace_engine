@@ -61,6 +61,8 @@ struct ListMainSizeValues {
     std::optional<float> layoutStartMainPos;
     std::optional<float> layoutEndMainPos;
     float referencePos = 0.0f;
+    float contentStartOffset = 0.0f;
+    float contentEndOffset = 0.0f;
     bool forward = true;
     bool backward = false;
 };
@@ -314,11 +316,6 @@ public:
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
 private:
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
     void SetListItemGroupDefaultAttributes(const RefPtr<FrameNode>& itemGroupNode);

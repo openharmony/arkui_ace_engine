@@ -54,6 +54,15 @@ public:
 
     void OnDetachFromFrameNode(FrameNode* node) override;
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
+    {
+        return { false, true, ScopeType::OTHERS };
+    }
 private:
     std::optional<int32_t> callbackId_;
 

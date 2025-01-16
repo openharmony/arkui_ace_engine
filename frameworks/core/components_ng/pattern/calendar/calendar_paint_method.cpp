@@ -455,9 +455,18 @@ void CalendarPaintMethod::SetDayTextStyle(
     }
 }
 
+bool CalendarPaintMethod::IsDateInRange(const CalendarDay& day)
+{
+    PickerDate date;
+    date.SetYear(day.month.year);
+    date.SetMonth(day.month.month);
+    date.SetDay(day.day);
+    return PickerDate::IsDateInRange(date, startDate_, endDate_);
+}
+
 void CalendarPaintMethod::SetCalendarPickerDayTextStyle(RSTextStyle& dateTextStyle, const CalendarDay& day)
 {
-    if (day.month.month != currentMonth_.month) {
+    if (day.month.month != currentMonth_.month || !IsDateInRange(day)) {
 #ifndef USE_GRAPHIC_TEXT_GINE
         dateTextStyle.color_ = textNonCurrentMonthColor_;
 #else

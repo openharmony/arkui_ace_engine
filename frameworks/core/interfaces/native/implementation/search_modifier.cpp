@@ -281,8 +281,9 @@ void OnSubmit0Impl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onSubmit = [frameNode](const std::string& value, NG::TextFieldCommonEvent&) {
-        auto arkStringValue = Converter::ArkValue<Ark_String>(value);
+    auto onSubmit = [frameNode](const std::u16string& value, NG::TextFieldCommonEvent&) {
+        Converter::ConvContext ctx;
+        auto arkStringValue = Converter::ArkValue<Ark_String>(value, &ctx);
         GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onSubmit0(frameNode->GetId(), arkStringValue);
     };
     SearchModelNG::SetOnSubmit(frameNode, std::move(onSubmit));
@@ -302,9 +303,10 @@ void OnChangeImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onChange = [frameNode](const std::string& text, PreviewText& prevText) {
-        auto textArkString = Converter::ArkValue<Ark_String>(text);
-        auto textArkPrevText = Converter::ArkValue<Opt_PreviewText>(prevText);
+    auto onChange = [frameNode](const std::u16string& text, PreviewText& prevText) {
+        Converter::ConvContext ctx;
+        auto textArkString = Converter::ArkValue<Ark_String>(text, &ctx);
+        auto textArkPrevText = Converter::ArkValue<Opt_PreviewText>(prevText, &ctx);
         GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onChange(frameNode->GetId(),
             textArkString, textArkPrevText);
     };
@@ -345,8 +347,9 @@ void OnCopyImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCopy = [frameNode](const std::string& value) {
-        auto textArkString = Converter::ArkValue<Ark_String>(value);
+    auto onCopy = [frameNode](const std::u16string& value) {
+        Converter::ConvContext ctx;
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
         GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onCopy(frameNode->GetId(), textArkString);
     };
     SearchModelNG::SetOnCopy(frameNode, std::move(onCopy));
@@ -357,8 +360,9 @@ void OnCutImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onCut = [frameNode](const std::string& value) {
-        auto textArkString = Converter::ArkValue<Ark_String>(value);
+    auto onCut = [frameNode](const std::u16string& value) {
+        Converter::ConvContext ctx;
+        auto textArkString = Converter::ArkValue<Ark_String>(value, &ctx);
         GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onCut(frameNode->GetId(), textArkString);
     };
     SearchModelNG::SetOnCut(frameNode, std::move(onCut));
@@ -492,9 +496,10 @@ void OnWillInsertImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onWillInsert = [callback = CallbackHelper(*value, frameNode)](const InsertValueInfo& value) -> bool {
+        Converter::ConvContext ctx;
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
-            .insertValue = Converter::ArkValue<Ark_String>(value.insertValue)
+            .insertValue = Converter::ArkValue<Ark_String>(value.insertValue, &ctx)
         };
         return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(insertValue)
             .value_or(true);
@@ -508,9 +513,10 @@ void OnDidInsertImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onDidInsert = [frameNode](const InsertValueInfo& value) {
+        Converter::ConvContext ctx;
         Ark_InsertValue insertValue = {
             .insertOffset = Converter::ArkValue<Ark_Number>(value.insertOffset),
-            .insertValue = Converter::ArkValue<Ark_String>(value.insertValue)
+            .insertValue = Converter::ArkValue<Ark_String>(value.insertValue, &ctx)
         };
         GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onDidInsert(frameNode->GetId(), insertValue);
     };
@@ -523,10 +529,11 @@ void OnWillDeleteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onWillDelete = [callback = CallbackHelper(*value, frameNode)](const DeleteValueInfo& value) -> bool {
+        Converter::ConvContext ctx;
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
-            .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue)
+            .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue, &ctx)
         };
         return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(deleteValue)
             .value_or(true);
@@ -540,10 +547,11 @@ void OnDidDeleteImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onDidDelete = [frameNode](const DeleteValueInfo& value) {
+        Converter::ConvContext ctx;
         Ark_DeleteValue deleteValue = {
             .deleteOffset = Converter::ArkValue<Ark_Number>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
-            .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue)
+            .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue, &ctx)
         };
         GetFullAPI()->getEventsAPI()->getSearchEventsReceiver()->onDidDelete(frameNode->GetId(), deleteValue);
     };
@@ -601,8 +609,9 @@ void InputFilterImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     CHECK_NULL_VOID(error);
     auto valueString = Converter::OptConvert<std::string>(*value);
-    auto errorEvent = [frameNode](const std::string& val) {
-        auto errortArkString = Converter::ArkValue<Ark_String>(val);
+    auto errorEvent = [frameNode](const std::u16string& val) {
+        Converter::ConvContext ctx;
+        auto errortArkString = Converter::ArkValue<Ark_String>(val, &ctx);
     };
     SearchModelNG::SetInputFilter(frameNode, valueString.value_or(""), errorEvent);
 }

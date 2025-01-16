@@ -23,6 +23,10 @@ extern "C" {
 void FfiOHOSAceFrameworkGridItemCreate()
 {
     NG::GridItemStyle style {};
+    if (GridItemModel::GetInstance() == nullptr) {
+        LOGE("GridItem Instance is null");
+        return;
+    }
     GridItemModel::GetInstance()->Create(style);
 }
 

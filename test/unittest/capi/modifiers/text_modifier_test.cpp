@@ -654,7 +654,7 @@ HWTEST_F(TextModifierTest, setOnCopyTest, TestSize.Level1)
 
     // check true value
     EXPECT_EQ(checkEvent.has_value(), false);
-    eventHub->FireOnCopy("test_string");
+    eventHub->FireOnCopy(u"test_string");
     EXPECT_EQ(checkEvent.has_value(), true);
     EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
     EXPECT_EQ(checkEvent->value, "test_string");

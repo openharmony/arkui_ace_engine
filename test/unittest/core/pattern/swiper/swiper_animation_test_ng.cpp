@@ -38,7 +38,7 @@ public:
         pattern_->HandleTouchDown({ touch });
         pattern_->panEvent_->actionStart_(event);
         pattern_->panEvent_->actionUpdate_(event);
-        FlushLayoutTask(frameNode_);
+        FlushUITasks();
 
         pattern_->HandleTouchUp();
         pattern_->panEvent_->actionEnd_(event);
@@ -92,7 +92,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation002, TestSize.Level1
     CreateSwiperItems();
     CreateSwiperDone();
     SimulateSwipe(200.0f, 2000.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto visibleSize = pattern_->CalculateVisibleSize();
     auto realOffset = 0.0f;
     if (visibleSize > 0.0f) {
@@ -101,7 +101,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation002, TestSize.Level1
     EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 0), realOffset));
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 0), realOffset / 2));
 
     // change attribute during animation
@@ -109,7 +109,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation002, TestSize.Level1
     pattern_->OnModifyDone();
     MockAnimationManager::GetInstance().Tick();
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
 }
 
@@ -158,14 +158,14 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation004, TestSize.Level1
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
     pattern_->StopSpringAnimation();
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(NearZero(GetChildX(frameNode_, 0)));
 
     pattern_->springOffset_ = 0.0f;
     SimulateSwipe(100.0f, 1000.0f);
     EXPECT_TRUE(pattern_->springAnimationIsRunning_);
     pattern_->StopSpringAnimationImmediately();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 0), realOffset));
     EXPECT_FALSE(pattern_->springAnimationIsRunning_);
 }
@@ -185,7 +185,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation005, TestSize.Level1
     EXPECT_EQ(GetChildWidth(frameNode_, 9), 40.0f);
     EXPECT_EQ(GetChildX(frameNode_, 9), 360.0f);
     pattern_->UpdateCurrentOffset(-200.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 9), 160.0f);
     pattern_->PlaySpringAnimation(200.0f);
     // left align because children total size < swiper
@@ -209,7 +209,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation006, TestSize.Level1
     EXPECT_EQ(GetChildWidth(frameNode_, 9), 40.0f);
     EXPECT_EQ(GetChildX(frameNode_, 9), 360.0f);
     pattern_->UpdateCurrentOffset(200.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), 200.0f);
     pattern_->PlaySpringAnimation(200.0f);
     EXPECT_EQ(
@@ -218,17 +218,58 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation006, TestSize.Level1
 }
 
 /**
- * @tc.name: SwiperPatternPlayFadeAnimation001
- * @tc.desc: PlayFadeAnimation
+ * @tc.name: SwiperPatternSpringAnimation007
+ * @tc.desc: Test spring animation multiple interupting and restart.
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayFadeAnimation001, TestSize.Level1)
+HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation007, TestSize.Level1)
 {
-    CreateDefaultSwiper();
-    pattern_->fadeOffset_ = 0.0f;
-    pattern_->fadeAnimationIsRunning_ = true;
-    pattern_->PlayFadeAnimation();
-    EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems(5);
+    CreateSwiperDone();
+    controller_->ChangeIndex(4, false);
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(frameNode_, 4), 0.0f);
+    // swiper to left, trigger spring animation
+    SimulateSwipe(-100.0f, -100.0f);
+    FlushUITasks();
+    auto visibleSize = pattern_->CalculateVisibleSize();
+    ASSERT_TRUE(visibleSize > 0.0f);
+    auto realOffset = -100.0f * SwiperHelper::CalculateFriction(100.0f / visibleSize);
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 4), realOffset));
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 4), realOffset / 2));
+
+    // swipe again during spring animation
+    auto tempSpringOffset = pattern_->EstimateSpringOffset(realOffset / 2) - 100;
+    SimulateSwipe(-100.0f, -100.0f);
+    FlushUITasks();
+    realOffset = tempSpringOffset * SwiperHelper::CalculateFriction(std::abs(tempSpringOffset) / visibleSize);
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 4), realOffset));
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 4), realOffset / 2));
+
+    // swipe again during spring animation
+    tempSpringOffset = pattern_->EstimateSpringOffset(realOffset / 2) - 100;
+    SimulateSwipe(-100.0f, -100.0f);
+    FlushUITasks();
+    realOffset = tempSpringOffset * SwiperHelper::CalculateFriction(std::abs(tempSpringOffset) / visibleSize);
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 4), realOffset));
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 4), realOffset / 2));
+
+    // check offset after spring animation finished
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+    FlushUITasks();
+    EXPECT_TRUE(NearEqual(GetChildX(frameNode_, 4), 0.0f));
 }
 
 /**
@@ -253,431 +294,6 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayFadeAnimation002, TestSize.Leve
     MockAnimationManager::GetInstance().Tick();
     EXPECT_EQ(pattern_->fadeOffset_, 0.0f);
     EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
-}
-
-/**
- * @tc.name: SwiperPatternStopFadeAnimation001
- * @tc.desc: StopFadeAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternStopFadeAnimation001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    pattern_->fadeAnimationIsRunning_ = true;
-    pattern_->StopFadeAnimation();
-    EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
-}
-
-/**
- * @tc.name: SwiperPatternPlayPropertyTranslateAnimation001
- * @tc.desc: PlayPropertyTranslateAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayPropertyTranslateAnimation001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    layoutProperty_->UpdateDirection(Axis::HORIZONTAL);
-    float translate = 0.1f;
-    int32_t nextIndex = 1;
-    float velocity = 0.2f;
-    struct SwiperItemInfo swiperItemInfo1;
-    swiperItemInfo1.startPos = -1.0f;
-    swiperItemInfo1.endPos = -1.0f;
-    swiperItemInfo1.node = nullptr;
-    struct SwiperItemInfo swiperItemInfo2;
-    swiperItemInfo2.startPos = -1.0f;
-    swiperItemInfo2.endPos = -1.0f;
-    swiperItemInfo2.node =
-        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-    pattern_->itemPosition_.emplace(std::make_pair(2, swiperItemInfo2));
-
-    /**
-     * @tc.steps: step2. call PlayPropertyTranslateAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->PlayPropertyTranslateAnimation(translate, nextIndex, velocity);
-        layoutProperty_->UpdateDirection(Axis::VERTICAL);
-    }
-}
-
-/**
- * @tc.name: SwiperPatternUpdateOffsetAfterPropertyAnimation001
- * @tc.desc: UpdateOffsetAfterPropertyAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternUpdateOffsetAfterPropertyAnimation001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    float offset = 0.1f;
-
-    /**
-     * @tc.steps: step2. call UpdateOffsetAfterPropertyAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->UpdateOffsetAfterPropertyAnimation(offset);
-}
-
-/**
- * @tc.name: SwiperPatternOnPropertyTranslateAnimationFinish001
- * @tc.desc: OnPropertyTranslateAnimationFinish
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnPropertyTranslateAnimationFinish001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    auto offset = OffsetF(0.1f, 0.2f);
-    pattern_->usePropertyAnimation_ = false;
-    struct SwiperItemInfo swiperItemInfo1;
-    swiperItemInfo1.startPos = -1.0f;
-    swiperItemInfo1.endPos = -1.0f;
-    swiperItemInfo1.node = nullptr;
-    struct SwiperItemInfo swiperItemInfo2;
-    swiperItemInfo2.startPos = -1.0f;
-    swiperItemInfo2.endPos = -1.0f;
-    swiperItemInfo2.node =
-        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-    pattern_->itemPosition_.emplace(std::make_pair(2, swiperItemInfo2));
-    ASSERT_NE(pattern_->itemPosition_.rbegin()->second.node, nullptr);
-
-    /**
-     * @tc.steps: step2. call OnPropertyTranslateAnimationFinish.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->OnPropertyTranslateAnimationFinish(offset);
-        pattern_->usePropertyAnimation_ = true;
-    }
-}
-
-/**
- * @tc.name: SwiperPatternStopPropertyTranslateAnimation001
- * @tc.desc: StopPropertyTranslateAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternStopPropertyTranslateAnimation001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    pattern_->usePropertyAnimation_ = false;
-    struct SwiperItemInfo swiperItemInfo1;
-    swiperItemInfo1.startPos = -1.0f;
-    swiperItemInfo1.endPos = -1.0f;
-    swiperItemInfo1.node = nullptr;
-    struct SwiperItemInfo swiperItemInfo2;
-    swiperItemInfo2.startPos = -1.0f;
-    swiperItemInfo2.endPos = -1.0f;
-    swiperItemInfo2.node =
-        FrameNode::GetOrCreateFrameNode("Swiper", 0, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
-    pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-    pattern_->itemPosition_.emplace(std::make_pair(2, swiperItemInfo2));
-    ASSERT_NE(pattern_->itemPosition_.rbegin()->second.node, nullptr);
-
-    /**
-     * @tc.steps: step2. call StopPropertyTranslateAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->StopPropertyTranslateAnimation(false);
-        pattern_->usePropertyAnimation_ = true;
-    }
-}
-
-/**
- * @tc.name: SwiperPatternGetCurveIncludeMotion001
- * @tc.desc: GetCurveIncludeMotion
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternGetCurveIncludeMotion001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateCurve(nullptr);
-    float velocity = 0.1f;
-    float mass = 0.1f;
-    float stiffness = 0.2f;
-    float damping = 0.3f;
-    auto curve1 = AceType::MakeRefPtr<SpringCurve>(velocity, mass, stiffness, damping);
-    auto curve2 = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
-
-    /**
-     * @tc.steps: step2. call GetCurveIncludeMotion.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                pattern_->GetCurveIncludeMotion();
-                if (i == 1) {
-                    curve2->UpdateVelocity(-0.1f);
-                    continue;
-                }
-                frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateCurve(curve1);
-                curve1->UpdateVelocity(-0.1f);
-            }
-            curve1->UpdateVelocity(0.1f);
-        }
-        frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateCurve(curve2);
-        curve2->UpdateVelocity(0.1f);
-    }
-}
-
-/**
- * @tc.name: SwiperPatternPlayTranslateAnimation001
- * @tc.desc: PlayTranslateAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayTranslateAnimation001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    float startPos = 0.1f;
-    float endPos = 0.2f;
-    int32_t nextIndex = 1;
-    bool restartAutoPlay = true;
-    float velocity = 0.1f;
-    float mass = 0.1f;
-    float stiffness = 0.2f;
-    float damping = 0.3f;
-    pattern_->controller_ = nullptr;
-    auto curve1 = AceType::MakeRefPtr<SpringCurve>(velocity, mass, stiffness, damping);
-
-    /**
-     * @tc.steps: step2. call PlayTranslateAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->PlayTranslateAnimation(startPos, endPos, nextIndex, restartAutoPlay, velocity);
-        pattern_->controller_ = AceType::MakeRefPtr<Animator>();
-        frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateCurve(curve1);
-    }
-    pattern_->PlayTranslateAnimation(startPos, startPos, nextIndex, restartAutoPlay, velocity);
-    pattern_->translateAnimationIsRunning_ = true;
-    pattern_->PlayTranslateAnimation(startPos, endPos, nextIndex, restartAutoPlay, velocity);
-}
-
-/**
- * @tc.name: SwiperPatternUpdateAnimationProperty001
- * @tc.desc: UpdateAnimationProperty
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternUpdateAnimationProperty001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    struct SwiperItemInfo swiperItemInfo1 {
-        0.1f, 0.2f
-    };
-    pattern_->isDragging_ = true;
-    float velocity = 0.1f;
-
-    /**
-     * @tc.steps: step2. call UpdateAnimationProperty.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j >= 1; j++) {
-            for (int k = 0; k <= 1; k++) {
-                pattern_->UpdateAnimationProperty(velocity);
-                pattern_->itemPosition_.emplace(std::make_pair(1, swiperItemInfo1));
-                if (i == 1) {
-                    velocity = -1300;
-                    continue;
-                }
-                if (i == 1 && j == 1) {
-                    break;
-                }
-                velocity = 0.0f;
-            }
-            if (i == 1) {
-                pattern_->isDragging_ = false;
-                continue;
-            }
-            velocity = 0.1f;
-        }
-        velocity = 1300;
-    }
-}
-
-/**
- * @tc.name: SwiperPatternTriggerAnimationEndOnSwipeToLeft001
- * @tc.desc: TriggerAnimationEndOnSwipeToLeft
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternTriggerAnimationEndOnSwipeToLeft001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    pattern_->itemPosition_.clear();
-
-    /**
-     * @tc.steps: step2. call TriggerAnimationEndOnSwipeToLeft.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->TriggerAnimationEndOnSwipeToLeft();
-        pattern_->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 4 }));
-    }
-}
-
-/**
- * @tc.name: SwiperPatternTriggerAnimationEndOnSwipeToRight001
- * @tc.desc: TriggerAnimationEndOnSwipeToRight
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternTriggerAnimationEndOnSwipeToRight001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    pattern_->itemPosition_.clear();
-
-    /**
-     * @tc.steps: step2. call TriggerAnimationEndOnSwipeToRight.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->TriggerAnimationEndOnSwipeToRight();
-        pattern_->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1, 4 }));
-    }
-}
-
-/**
- * @tc.name: SwiperPatternOnSpringAnimationStart001
- * @tc.desc: OnSpringAnimationStart
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnSpringAnimationStart001, TestSize.Level1)
-{
-    CreateWithArrow();
-    layoutProperty_->UpdateShowIndicator(false);
-    pattern_->leftButtonId_.reset();
-    pattern_->rightButtonId_.reset();
-    float velocity = 200.0f;
-    pattern_->itemPosition_.emplace(std::make_pair(-1, SwiperItemInfo { -1, 1 }));
-    pattern_->currentIndex_ = 1;
-
-    /**
-     * @tc.steps: step2. call OnSpringAnimationStart.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->OnSpringAnimationStart(velocity);
-        pattern_->currentIndex_ = 0;
-    }
-}
-
-/**
- * @tc.name: SwiperPatternOnSpringAndFadeAnimationFinish001
- * @tc.desc: OnSpringAndFadeAnimationFinish
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnSpringAndFadeAnimationFinish001, TestSize.Level1)
-{
-    CreateWithArrow();
-    pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { -1, 1 }));
-    pattern_->currentIndex_ = 1;
-
-    /**
-     * @tc.steps: step2. call OnSpringAndFadeAnimationFinish.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->fadeAnimationIsRunning_ = true;
-        pattern_->OnSpringAndFadeAnimationFinish();
-        EXPECT_FALSE(pattern_->fadeAnimationIsRunning_);
-        pattern_->currentIndex_ = 0;
-    }
-}
-
-/**
- * @tc.name: SwiperPatternOnFadeAnimationStart001
- * @tc.desc: OnFadeAnimationStart
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternOnFadeAnimationStart001, TestSize.Level1)
-{
-    CreateWithArrow();
-    pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { -1, 1 }));
-    pattern_->currentIndex_ = 1;
-
-    /**
-     * @tc.steps: step2. call OnFadeAnimationStart.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        pattern_->fadeAnimationIsRunning_ = false;
-        pattern_->OnFadeAnimationStart();
-        EXPECT_TRUE(pattern_->fadeAnimationIsRunning_);
-        pattern_->currentIndex_ = 0;
-    }
-}
-
-/**
- * @tc.name: SwiperPatternTriggerAnimationEndOnForceStop001
- * @tc.desc: TriggerAnimationEndOnForceStop
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternTriggerAnimationEndOnForceStop001, TestSize.Level1)
-{
-    CreateWithArrow();
-    pattern_->UpdateIndexOnSwipePageStop(1);
-    pattern_->currentIndex_ = 0;
-    pattern_->pauseTargetIndex_ = 2;
-    pattern_->itemPosition_.clear();
-
-    /**
-     * @tc.steps: step2. call TriggerAnimationEndOnForceStop.
-     * @tc.expected: Related function runs ok.
-     */
-    for (int i = 0; i <= 1; i++) {
-        for (int j = 0; j <= 1; j++) {
-            pattern_->TriggerAnimationEndOnForceStop();
-            pattern_->currentIndex_ = 1;
-        }
-        frameNode_->AddChild(rightArrowNode_);
-        pattern_->currentIndex_ = 0;
-    }
-}
-
-/**
- * @tc.name: SwiperPatternPlayPropertyTranslateAnimation002
- * @tc.desc: PlayPropertyTranslateAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlayPropertyTranslateAnimation002, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    float translate = 0.1f;
-    int32_t nextIndex = 1;
-    float velocity = 0.1f;
-    pattern_->usePropertyAnimation_ = true;
-    pattern_->targetIndex_ = 1;
-    pattern_->itemPositionInAnimation_ = pattern_->itemPosition_;
-    pattern_->PlayPropertyTranslateAnimation(translate, nextIndex, velocity);
-
-    /**
-     * @tc.steps: step2. call HandleTouchDown.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->itemPositionInAnimation_.clear();
-    pattern_->PlayPropertyTranslateAnimation(translate, nextIndex, velocity);
-}
-
-/**
- * @tc.name: SwiperPatternPlaySpringAnimation001
- * @tc.desc: PlaySpringAnimation
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternPlaySpringAnimation001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    pattern_->contentMainSize_ = 1.0f;
-    pattern_->itemPosition_.clear();
-    layoutProperty_->UpdatePrevMargin(Dimension(0.0f));
-    layoutProperty_->UpdateNextMargin(Dimension(0.0f));
-    double dragVelocity = 0.1f;
-
-    /**
-     * @tc.steps: step2. call PlaySpringAnimation.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->PlaySpringAnimation(dragVelocity);
 }
 
 /**
@@ -895,14 +511,14 @@ HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest003, TestSize.Level1)
      */
     auto offset1 = -10.0f;
     pattern_->UpdateCurrentOffset(offset1);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), offset1);
     EXPECT_TRUE(isTrigger);
 
     isTrigger = false;
     auto offset2 = 20.0f;
     pattern_->UpdateCurrentOffset(offset2);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
     EXPECT_TRUE(isTrigger);
 
@@ -912,11 +528,11 @@ HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest003, TestSize.Level1)
     paintProperty_->UpdateEdgeEffect(EdgeEffect::NONE);
 
     pattern_->UpdateCurrentOffset(offset1);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), offset1);
 
     pattern_->UpdateCurrentOffset(offset2);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.f);
 
     /**
@@ -925,45 +541,13 @@ HWTEST_F(SwiperAnimationTestNg, SwipeCustomAnimationTest003, TestSize.Level1)
     paintProperty_->UpdateEdgeEffect(EdgeEffect::SPRING);
 
     pattern_->UpdateCurrentOffset(offset1);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildX(frameNode_, 0), offset1);
 
     pattern_->UpdateCurrentOffset(offset2);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_GT(GetChildX(frameNode_, 0), 0.f);
     EXPECT_LT(GetChildX(frameNode_, 0), offset2 + offset1);
-}
-
-/**
- * @tc.name: SwiperPattern0009
- * @tc.desc: Test pattern StopAndResetSpringAnimation.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPattern0009, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Default value
-     */
-    CreateDefaultSwiper();
-    pattern_->springAnimationIsRunning_ = true;
-    pattern_->StopAndResetSpringAnimation();
-    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
-}
-
-/**
- * @tc.name: SwiperPattern0010
- * @tc.desc: Test pattern SetIsIndicatorCustomSize.
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPattern0010, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Default value
-     */
-    CreateDefaultSwiper();
-    bool isCustomSize = true;
-    pattern_->SetIsIndicatorCustomSize(isCustomSize);
-    EXPECT_TRUE(pattern_->isCustomSize_);
 }
 
 /**
@@ -1029,58 +613,12 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSwipeTo001, TestSize.Level1)
         pattern_->currentIndex_ = 1;
     }
 
-    pattern_->usePropertyAnimation_ = true;
+    pattern_->propertyAnimationIsRunning_ = true;
     pattern_->SwipeTo(index);
     layoutProperty_->UpdateIsCustomAnimation(true);
     pattern_->SwipeTo(1);
     pattern_->TriggerCustomContentTransitionEvent(0, 1);
     pattern_->OnCustomAnimationFinish(0, 1, false);
-}
-
-/**
- * @tc.name: SwiperPatternAutoPlay001
- * @tc.desc: StopAutoPlay and StartAutoPlay
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternAutoPlay001, TestSize.Level1)
-{
-    CreateDefaultSwiper();
-    frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateAutoPlay(true);
-    layoutProperty_->UpdateLoop(true);
-    pattern_->isVisible_ = true;
-
-    /**
-     * @tc.steps: step2. call InitTouchEvent.
-     * @tc.expected: Related function runs ok.
-     */
-    pattern_->StopAutoPlay();
-    pattern_->StartAutoPlay();
-}
-
-/**
- * @tc.name: SwiperPatternAutoPlay002
- * @tc.desc: StartAutoPlay
- * @tc.type: FUNC
- */
-HWTEST_F(SwiperAnimationTestNg, SwiperPatternAutoPlay002, TestSize.Level1)
-{
-    CreateWithArrow();
-    frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateAutoPlay(true);
-    layoutProperty_->UpdateLoop(true);
-    layoutProperty_->ResetDisplayCount();
-    layoutProperty_->ResetMinSize();
-    layoutProperty_->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
-    pattern_->isVisible_ = true;
-    pattern_->isIndicatorLongPress_ = false;
-    pattern_->leftButtonId_.reset();
-    pattern_->rightButtonId_.reset();
-    layoutProperty_->UpdateShowIndicator(false);
-
-    /**
-     * @tc.steps: step2. call StartAutoPlay.
-     * @tc.expected: Related functions run ok.
-     */
-    pattern_->StartAutoPlay();
 }
 
 /**
@@ -1101,22 +639,18 @@ HWTEST_F(SwiperAnimationTestNg, StopTranslateAnimation001, TestSize.Level1)
      * @tc.steps: step1. ShowPrevious with animate, than forceStop animation
      */
     pattern_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(pattern_->usePropertyAnimation_);
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
     EXPECT_EQ(GetChildX(frameNode_, 2), -480.0f);
     EXPECT_EQ(GetChildX(frameNode_, 3), -240.0f);
     MockAnimationManager::GetInstance().Tick();
-    EXPECT_TRUE(pattern_->usePropertyAnimation_);
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
     for (int i = 0; i < 4; ++i) {
         EXPECT_EQ(
             GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(), OffsetF(240.0f, 0.0f));
     }
     pattern_->FinishAnimation();
-    EXPECT_FALSE(pattern_->usePropertyAnimation_);
-    EXPECT_EQ(GetChildX(frameNode_, 0), 240.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 3), 0.0f);
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
     // jumped to final position
-    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->currentIndex_, -2);
     EXPECT_EQ(GetChildX(frameNode_, 2), 0.0f);
     EXPECT_EQ(GetChildX(frameNode_, 3), 240.0f);
@@ -1125,20 +659,556 @@ HWTEST_F(SwiperAnimationTestNg, StopTranslateAnimation001, TestSize.Level1)
      * @tc.steps: step2. ShowNext with animate
      */
     pattern_->ShowNext();
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(pattern_->usePropertyAnimation_);
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
     MockAnimationManager::GetInstance().Tick();
-    EXPECT_TRUE(pattern_->usePropertyAnimation_);
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
     for (int i = 0; i < 4; ++i) {
         EXPECT_EQ(
             GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(), OffsetF(-240.0f, 0.0f));
     }
     MockAnimationManager::GetInstance().Tick();
-    EXPECT_FALSE(pattern_->usePropertyAnimation_);
-    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
+    FlushUITasks();
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 3)->IsActive());
     EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
     EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
     EXPECT_EQ(pattern_->currentIndex_, 0);
+}
+
+/**
+ * @tc.name: ShowNextAnimation
+ * @tc.desc: Start property animation with showNext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, ShowNextAnimation001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(2);
+    CreateSwiperDone();
+    float margin = 20.0f;
+    layoutProperty_->UpdatePrevMargin(Dimension(margin));
+    layoutProperty_->UpdateNextMargin(Dimension(margin));
+    layoutProperty_->UpdateLoop(true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->isVisibleArea_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 20.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 460.0f);
+
+    controller_->ShowNext();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -200.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->translateAnimationIsRunning_);
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(frameNode_, 0), -420.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 20.0f);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+}
+
+/**
+ * @tc.name: ShowNextAnimation
+ * @tc.desc: Start frame animation with showNext when has capture nodes, and interupt with showNext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, ShowNextAnimation002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(2);
+    CreateSwiperDone();
+    float margin = 20.0f;
+    layoutProperty_->UpdatePrevMargin(Dimension(margin));
+    layoutProperty_->UpdateNextMargin(Dimension(margin));
+    layoutProperty_->UpdateLoop(true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->isVisibleArea_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 20.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 460.0f);
+
+    // has capture nodes, use frame animation.
+    controller_->ShowNext();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -200.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
+
+    // interupt animation with another showNext
+    controller_->ShowNext();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 460.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 20.0f);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+
+    // expecting restart frame animation from index 1
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(frameNode_, 0), 240.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), -200.0f);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->translateAnimationIsRunning_);
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(frameNode_, 0), 20.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), -420.0f);
+    EXPECT_EQ(pattern_->currentIndex_, 2);
+}
+
+/**
+ * @tc.name: ShowNextAnimation
+ * @tc.desc: Start frame animation with showNext when targetIndex not available in itemPosition,
+ *           and interupt with showNext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, ShowNextAnimation003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(3);
+    CreateSwiperDone();
+    float margin = 20.0f;
+    layoutProperty_->UpdatePrevMargin(Dimension(margin));
+    layoutProperty_->UpdateNextMargin(Dimension(margin));
+    layoutProperty_->UpdateLoop(true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->isVisibleArea_);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 3);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 20.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 460.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 2), -420.0f);
+
+    // swiper has 3 child nodes and margin value, use frame animation also.
+    controller_->ShowNext();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 2);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -200.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
+
+    // interupt animation with another showNext
+    controller_->ShowNext();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 3);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 20.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 2), 460.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -420.0f);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+
+    // expecting restart frame animation from index 1
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->itemPosition_.size(), 3); // should be 2, don't know why is 3
+    EXPECT_EQ(GetChildX(frameNode_, 1), -200.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 2), 240.0f);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->translateAnimationIsRunning_);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->itemPosition_.size(), 3);
+    EXPECT_EQ(GetChildX(frameNode_, 1), -420.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 2), 20.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 460.0f);
+    EXPECT_EQ(pattern_->currentIndex_, 2);
+}
+
+/**
+ * @tc.name: ShowNextAnimation
+ * @tc.desc: Change to last item with showNext and interupt it with partly refresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, ShowNextAnimation004, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    layoutProperty_->UpdateLoop(false);
+    layoutProperty_->UpdateIndex(0);
+    CreateSwiperItems(2);
+    CreateSwiperDone();
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->isVisibleArea_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
+
+    controller_->ShowNext();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    for (int i = 0; i < 2; ++i) {
+        EXPECT_EQ(
+            GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(), OffsetF(-240.0f, 0.0f));
+    }
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    TouchLocationInfo touch(0);
+    pattern_->HandleTouchDown({ touch });
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -240.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
+
+    // stop animation with partly refresh
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(400.0f), CalcLength(SWIPER_HEIGHT)));
+    layoutProperty_->UpdateLoop(false);
+    layoutProperty_->UpdateIndex(0);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+    pattern_->HandleTouchUp();
+
+    // check showNext function
+    controller_->ShowNext();
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 0.0f);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+}
+
+/**
+ * @tc.name: ShowPreviousAnimation
+ * @tc.desc: Start property animation with showPrevious.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, ShowPreviousAnimation001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(2);
+    CreateSwiperDone();
+    float margin = 20.0f;
+    layoutProperty_->UpdatePrevMargin(Dimension(margin));
+    layoutProperty_->UpdateNextMargin(Dimension(margin));
+    layoutProperty_->UpdateLoop(true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->isVisibleArea_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 20.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 460.0f);
+
+    controller_->ShowPrevious();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 240.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 680.0f);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->translateAnimationIsRunning_);
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(frameNode_, 0), 460.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 20.0f);
+    EXPECT_EQ(pattern_->currentIndex_, -1);
+}
+
+/**
+ * @tc.name: ShowPreviousAnimation
+ * @tc.desc: Start frame animation with showPrevious when has capture nodes, and interupt with showPrevious.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, ShowPreviousAnimation002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(2);
+    CreateSwiperDone();
+    float margin = 20.0f;
+    layoutProperty_->UpdatePrevMargin(Dimension(margin));
+    layoutProperty_->UpdateNextMargin(Dimension(margin));
+    layoutProperty_->UpdateLoop(true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->isVisibleArea_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 20.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 460.0f);
+
+    // has capture nodes, use frame animation.
+    controller_->ShowPrevious();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 240.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 680.0f);
+
+    // interupt animation with another ShowPrevious
+    controller_->ShowPrevious();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 460.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 20.0f);
+    EXPECT_EQ(pattern_->currentIndex_, -1);
+
+    // expecting restart frame animation from index -1
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(frameNode_, 0), 680.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
+
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(pattern_->translateAnimationIsRunning_);
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(frameNode_, 0), 20.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 460.0f);
+    EXPECT_EQ(pattern_->currentIndex_, -2);
+}
+
+/**
+ * @tc.name: ShowPreviousAnimation
+ * @tc.desc: Start frame animation with showPrevious when targetIndex not available in itemPosition,
+ *           and interupt with showPrevious.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, ShowPreviousAnimation003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems(3);
+    CreateSwiperDone();
+    float margin = 20.0f;
+    layoutProperty_->UpdatePrevMargin(Dimension(margin));
+    layoutProperty_->UpdateNextMargin(Dimension(margin));
+    layoutProperty_->UpdateLoop(true);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->isVisibleArea_);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 3);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 20.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 460.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 2), -420.0f);
+
+    // swiper has 3 child nodes and margin value, use frame animation also.
+    controller_->ShowPrevious();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 3); // should be 2, don't know why is 3
+    EXPECT_EQ(GetChildX(frameNode_, 0), 240.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 2), -200.0f);
+
+    // interupt animation with another ShowPrevious
+    controller_->ShowPrevious();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    EXPECT_EQ(pattern_->itemPosition_.size(), 3);
+    EXPECT_EQ(GetChildX(frameNode_, 2), 20.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 460.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), -420.0f);
+    EXPECT_EQ(pattern_->currentIndex_, -1);
+
+    // expecting restart frame animation from index -1
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(pattern_->translateAnimationIsRunning_);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->itemPosition_.size(), 3); // should be 2, don't know why is 3
+    EXPECT_EQ(GetChildX(frameNode_, 1), -200.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 2), 240.0f);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->translateAnimationIsRunning_);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->itemPosition_.size(), 3);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -420.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 20.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 2), 460.0f);
+    EXPECT_EQ(pattern_->currentIndex_, -2);
+}
+
+/**
+ * @tc.name: ShowPreviousAnimation
+ * @tc.desc: Change to last item with showPrevious and interupt it with partly refresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, ShowPreviousAnimation004, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    layoutProperty_->UpdateLoop(false);
+    layoutProperty_->UpdateIndex(1);
+    CreateSwiperItems(2);
+    CreateSwiperDone();
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+
+    EXPECT_TRUE(pattern_->isVisibleArea_);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 0.0f);
+
+    controller_->ShowPrevious();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    for (int i = 0; i < 2; ++i) {
+        EXPECT_EQ(
+            GetChildFrameNode(frameNode_, i)->GetRenderContext()->GetTranslateXYProperty(), OffsetF(240.0f, 0.0f));
+    }
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+
+    TouchLocationInfo touch(0);
+    pattern_->HandleTouchDown({ touch });
+    FlushUITasks();
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), -240.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 1), 240.0f);
+
+    // stop animation with partly refresh
+    layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(400.0f), CalcLength(SWIPER_HEIGHT)));
+    layoutProperty_->UpdateLoop(false);
+    layoutProperty_->UpdateIndex(1);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    frameNode_->MarkModifyDone();
+    FlushUITasks();
+    EXPECT_EQ(GetChildX(frameNode_, 1), 0);
+    EXPECT_EQ(pattern_->currentIndex_, 1);
+    pattern_->HandleTouchUp();
+
+    // check ShowPrevious function
+    controller_->ShowPrevious();
+    EXPECT_TRUE(pattern_->propertyAnimationIsRunning_);
+    MockAnimationManager::GetInstance().Tick();
+    MockAnimationManager::GetInstance().Tick();
+    EXPECT_FALSE(pattern_->propertyAnimationIsRunning_);
+    EXPECT_EQ(GetChildX(frameNode_, 0), 0.0f);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+}
+
+/**
+ * @tc.name: StopAnimate001
+ * @tc.desc: Test change index with animate, and force stop when animate running
+ * @tc.desc: Would change index decided by currentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, StopAnimate001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(true);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step1. ShowNext and force stop animate when currentOffset not more than half of swiper width
+     * @tc.expected: The currentIndex would not change
+     */
+    MockAnimationManager::GetInstance().SetTicks(3);
+    controller_->ShowNext();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    TouchLocationInfo touch(0);
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+
+    /**
+     * @tc.steps: step2. ShowNext and force stop animate when currentOffset more than half of swiper width
+     * @tc.expected: The currentIndex would change
+     */
+    controller_->ShowNext();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+
+    /**
+     * @tc.steps: step3. ShowPrevious and force stop animate when currentOffset not more than half of swiper width
+     * @tc.expected: The currentIndex would not change
+     */
+    controller_->ShowPrevious();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+
+    /**
+     * @tc.steps: step4. ShowPrevious and force stop animate when currentOffset more than half of swiper width
+     * @tc.expected: The currentIndex would change
+     */
+    controller_->ShowPrevious();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+}
+
+/**
+ * @tc.name: StopAnimate002
+ * @tc.desc: Test change index with animate, and force stop when animate running
+ * @tc.desc: Would change index decided by currentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, StopAnimate002, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step1. ShowNext and force stop animate when currentOffset not more than half of swiper width
+     * @tc.expected: The currentIndex would not change
+     */
+    MockAnimationManager::GetInstance().SetTicks(3);
+    controller_->ShowNext();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    TouchLocationInfo touch(0);
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+
+    /**
+     * @tc.steps: step2. ShowNext and force stop animate when currentOffset more than half of swiper width
+     * @tc.expected: The currentIndex would change
+     */
+    controller_->ShowNext();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+
+    /**
+     * @tc.steps: step3. ShowPrevious and force stop animate when currentOffset not more than half of swiper width
+     * @tc.expected: The currentIndex would not change
+     */
+    controller_->ShowPrevious();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+
+    /**
+     * @tc.steps: step4. ShowPrevious and force stop animate when currentOffset more than half of swiper width
+     * @tc.expected: The currentIndex would change
+     */
+    controller_->ShowPrevious();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
 }
 } // namespace OHOS::Ace::NG

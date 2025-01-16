@@ -51,6 +51,7 @@ public:
             theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
             theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
             ParsePattern(themeConstants->GetThemeStyle(), theme);
+            ParseMenuPattern(themeConstants->GetThemeStyle(), theme);
             return theme;
         }
 
@@ -105,6 +106,17 @@ public:
             } else {
                 LOGW("find pattern of textoverlay fail");
             }
+        }
+        void ParseMenuPattern(const RefPtr<ThemeStyle>& themeStyle, const RefPtr<TextOverlayTheme>& theme) const
+        {
+            CHECK_NULL_VOID(themeStyle && theme);
+            auto pattern = themeStyle->GetAttr<RefPtr<ThemeStyle>>("text_overlay_pattern", nullptr);
+            CHECK_NULL_VOID(pattern);
+            theme->copyLabelInfo_ = pattern->GetAttr<std::string>("text_overlay_menu_copy", "Ctrl+C");
+            theme->pasteLabelInfo_ = pattern->GetAttr<std::string>("text_overlay_menu_paste", "Ctrl+V");
+            theme->selectAllLabelInfo_ = pattern->GetAttr<std::string>("text_overlay_menu_select_all", "Ctrl+A");
+            theme->cutLabelInfo_ = pattern->GetAttr<std::string>("text_overlay_menu_cut", "Ctrl+X");
+            theme->showShortcut_ = static_cast<bool>(pattern->GetAttr<double>("text_overlay_menu_show_shortcut", 0.0));
         }
     };
 
@@ -249,6 +261,31 @@ public:
     {
         return aiWrite_;
     }
+
+    const std::string& GetCopyLabelInfo() const
+    {
+        return copyLabelInfo_;
+    }
+
+    const std::string& GetPasteLabelInfo() const
+    {
+        return pasteLabelInfo_;
+    }
+
+    const std::string& GetSelectAllLabelInfo() const
+    {
+        return selectAllLabelInfo_;
+    }
+
+    const std::string& GetCutLabelInfo() const
+    {
+        return cutLabelInfo_;
+    }
+
+    bool GetShowShortcut() const
+    {
+        return showShortcut_;
+    }
 protected:
     TextOverlayTheme() = default;
 
@@ -274,6 +311,11 @@ private:
     double alphaDisabled_ = 0.0;
     std::string cameraInput_;
     std::string aiWrite_;
+    std::string copyLabelInfo_;
+    std::string pasteLabelInfo_;
+    std::string selectAllLabelInfo_;
+    std::string cutLabelInfo_;
+    bool showShortcut_ = false;
 
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;

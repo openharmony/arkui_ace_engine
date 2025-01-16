@@ -33,27 +33,27 @@ public:
     AssertionResult VerifyShowPrevious(int32_t expectIndex);
     AssertionResult VerifyChangeIndex(int32_t targetIndex, bool useAnimation, int32_t expectIndex);
     void CreateForEachSwiper(int32_t itemNumber = ITEM_NUMBER);
-    void CreateLazyForEachSwiper(int32_t itemNumber = ITEM_NUMBER);
+    void CreateItemsInLazyForEach(int32_t itemNumber = ITEM_NUMBER);
 };
 
 AssertionResult SwiperControllerTestNg::VerifyShowNext(int32_t expectIndex)
 {
     controller_->ShowNext();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
 }
 
 AssertionResult SwiperControllerTestNg::VerifyShowPrevious(int32_t expectIndex)
 {
     controller_->ShowPrevious();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
 }
 
 AssertionResult SwiperControllerTestNg::VerifyChangeIndex(int32_t targetIndex, bool useAnimation, int32_t expectIndex)
 {
     controller_->ChangeIndex(targetIndex, useAnimation);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
 }
 
@@ -81,27 +81,34 @@ void SwiperControllerTestNg::CreateForEachSwiper(int32_t itemNumber)
     CreateSwiperDone();
 }
 
-void SwiperControllerTestNg::CreateLazyForEachSwiper(int32_t itemNumber)
-{
-    SwiperModelNG model = CreateSwiper();
-    model.SetIndicatorType(SwiperIndicatorType::DOT);
-    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    auto weakSwiper = AceType::WeakClaim(AceType::RawPtr(swiperNode));
-    const RefPtr<LazyForEachActuator> lazyForEachActuator = AceType::MakeRefPtr<Framework::MockLazyForEachBuilder>();
-    LazyForEachModelNG lazyForEachModelNG;
-    lazyForEachModelNG.Create(lazyForEachActuator);
-    auto node = ViewStackProcessor::GetInstance()->GetMainElementNode();
-    node->SetParent(weakSwiper); // for InitAllChildrenDragManager
-    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(node);
-    for (int32_t index = 0; index < itemNumber; index++) {
+class SwiperItemMockLazy : public Framework::MockLazyForEachBuilder {
+public:
+    explicit SwiperItemMockLazy(int32_t itemCnt) : itemCnt_(itemCnt) {}
+
+protected:
+    int32_t OnGetTotalCount() override
+    {
+        return itemCnt_;
+    }
+
+    std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
+        int32_t index, std::unordered_map<std::string, NG::LazyForEachCacheChild>& expiringItems) override
+    {
         ButtonModelNG buttonModelNG;
         buttonModelNG.CreateWithLabel("label");
-        auto swiperItemNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
-        lazyForEachNode->builder_->cachedItems_.try_emplace(
-            index, LazyForEachChild(std::to_string(index), swiperItemNode));
-        ViewStackProcessor::GetInstance()->Pop();
+        auto node = ViewStackProcessor::GetInstance()->Finish();
+        return { std::to_string(index), node };
     }
-    CreateSwiperDone();
+
+private:
+    int32_t itemCnt_ = 0;
+};
+
+void SwiperControllerTestNg::CreateItemsInLazyForEach(int32_t itemNumber)
+{
+    RefPtr<LazyForEachActuator> mockLazy = AceType::MakeRefPtr<SwiperItemMockLazy>(itemNumber);
+    LazyForEachModelNG lazyForEachModelNG;
+    lazyForEachModelNG.Create(mockLazy);
 }
 
 /**
@@ -199,7 +206,7 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex004, TestSize.Le
     CreateDefaultSwiper();
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step2. Call ShowNext
@@ -301,7 +308,7 @@ HWTEST_F(SwiperControllerTestNg, ShowNextShowPreviousChangeIndex006, TestSize.Le
      */
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step2. Call ShowNext
@@ -489,7 +496,7 @@ HWTEST_F(SwiperControllerTestNg, ShowNext005, TestSize.Level1)
      */
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step3. Call ShowNext
@@ -530,7 +537,7 @@ HWTEST_F(SwiperControllerTestNg, ShowNext006, TestSize.Level1)
      */
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step3. Call ShowNext
@@ -577,7 +584,7 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious005, TestSize.Level1)
      */
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step3. Call ShowPrevious
@@ -619,7 +626,7 @@ HWTEST_F(SwiperControllerTestNg, ShowPrevious006, TestSize.Level1)
      */
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 1)->UpdateVisibility(VisibleType::INVISIBLE);
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     /**
      * @tc.steps: step3. Call ShowPrevious
@@ -659,7 +666,7 @@ HWTEST_F(SwiperControllerTestNg, FinishAnimation001, TestSize.Level1)
     EXPECT_TRUE(pattern_->isUserFinish_);
     EXPECT_FALSE(pattern_->isFinishAnimation_);
 
-    pattern_->usePropertyAnimation_ = true;
+    pattern_->propertyAnimationIsRunning_ = true;
     controller_->SetFinishCallback([]() {});
     controller_->FinishAnimation();
     EXPECT_EQ(controller_->GetFinishCallback(), nullptr);
@@ -677,24 +684,143 @@ HWTEST_F(SwiperControllerTestNg, PreloadItems001, TestSize.Level1)
     const std::set<int32_t>& indexSet = { 1, 2 };
     controller_->PreloadItems(indexSet);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto forEachNode = AceType::DynamicCast<ForEachNode>(frameNode_->GetChildAtIndex(0));
     EXPECT_EQ(forEachNode->TotalChildCount(), 4);
 }
 
 /**
  * @tc.name: PreloadItems002
- * @tc.desc: Test SwiperPattern ChangeIndex On SwipeByGroup
+ * @tc.desc: Test LazyForEach
  * @tc.type: FUNC
  */
 HWTEST_F(SwiperControllerTestNg, PreloadItems002, TestSize.Level1)
 {
-    CreateLazyForEachSwiper();
-    const std::set<int32_t>& indexSet = { 1, 2 };
-    controller_->PreloadItems(indexSet);
-    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
-    EXPECT_EQ(frameNode_->TotalChildCount(), 5);
+    SwiperModelNG model = CreateSwiper();
+    model.SetCachedCount(1);
+    CreateItemsInLazyForEach();
+    CreateSwiperDone();
+
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 0));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 1));
+    EXPECT_FALSE(IsExist(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 3));
+
+    ShowNext();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 0));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
+    EXPECT_FALSE(IsExist(frameNode_, 3));
+
+    ShowNext();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_FALSE(IsExist(frameNode_, 0));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 3));
+
+    ShowPrevious();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 0));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
+    EXPECT_FALSE(IsExist(frameNode_, 3));
+
+    ShowPrevious();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 0));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 1));
+    EXPECT_FALSE(IsExist(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 3));
+
+    ChangeIndex(2);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_FALSE(IsExist(frameNode_, 0));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 3));
+}
+
+/**
+ * @tc.name: PreloadItems003
+ * @tc.desc: Test LazyForEach with SwipeByGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, PreloadItems003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetCachedCount(1);
+    model.SetDisplayCount(2);
+    model.SetSwipeByGroup(true);
+    CreateItemsInLazyForEach(8);
+    CreateSwiperDone();
+
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 0));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 3));
+    EXPECT_FALSE(IsExist(frameNode_, 4));
+    EXPECT_FALSE(IsExist(frameNode_, 5));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 6));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 7));
+
+    ShowNext();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 0));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 3));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 4));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 5));
+    EXPECT_FALSE(IsExist(frameNode_, 6));
+    EXPECT_FALSE(IsExist(frameNode_, 7));
+
+    ShowNext();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_FALSE(IsExist(frameNode_, 0));
+    EXPECT_FALSE(IsExist(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 3));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 4));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 5));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 6));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 7));
+
+    ShowPrevious();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 0));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 3));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 4));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 5));
+    EXPECT_FALSE(IsExist(frameNode_, 6));
+    EXPECT_FALSE(IsExist(frameNode_, 7));
+
+    ShowPrevious();
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 0));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 3));
+    EXPECT_FALSE(IsExist(frameNode_, 4));
+    EXPECT_FALSE(IsExist(frameNode_, 5));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 6));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 7));
+
+    ChangeIndex(4);
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    EXPECT_FALSE(IsExist(frameNode_, 0));
+    EXPECT_FALSE(IsExist(frameNode_, 1));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 2));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 3));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 4));
+    EXPECT_TRUE(IsExistAndActive(frameNode_, 5));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 6));
+    EXPECT_TRUE(IsExistAndInActive(frameNode_, 7));
 }
 
 /**
@@ -716,7 +842,7 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex001, TestSize.Level1)
     CreateSwiperDone();
 
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     VerifyChangeIndex(2, false, 3);
     VerifyChangeIndex(5, false, 5);
@@ -739,6 +865,22 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex002, TestSize.Level1)
     CreateSwiperDone();
 
     VerifyChangeIndex(9, false, 9);
+}
+
+/**
+ * @tc.name: ChangeIndex003
+ * @tc.desc: Test ChangeIndex with animation and without animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, ChangeIndex003, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems(8);
+    CreateSwiperDone();
+
+    VerifyChangeIndex(3, true, 3);
+    VerifyChangeIndex(1, false, 1);
 }
 
 /**
@@ -766,7 +908,7 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndexWithLoopChange001, TestSize.Level1)
     controller_->ChangeIndex(1, false);
     layoutProperty_->UpdateLoop(false);
     pattern_->OnModifyDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
 }
 } // namespace OHOS::Ace::NG

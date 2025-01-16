@@ -19,7 +19,7 @@ For every debug build
 The output is one JS file:
 `./dist/stateMgmt.js`
 
-For every release build
+For every release build (default by build system)
 `npm run build_release`
 
 The output is one JS file:
@@ -34,8 +34,15 @@ The output is one JS file:
 The difference between debug build and release build is the removal
 of all `stateMgmtConsole.log`/`.debug`/`.info` statements from the
 release version JS output code.
-
-NOTE: After compiling with npm run X command. You need to copy stateMgmt.js from output folder to ../engine/. Then build the device SW again. Output folder is on of following (dist, distRelease or distProfile).
+NOTE: Output folder is one of following (dist, distRelease or distProfile). In ace_engine build distRelease output is copied to
+```bash
+./out/rk3568/obj/foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/stateMgmt.js
+```
+## To get all logs
+Change selected aceConsole.debug to aceConsole.error. At least from public statig debug. In file state_mgmt_console_trace.ts 
+Enable debug: hdc shell param set persist.ace.debug.enabled 1
+Build debug version npm run build
+Generate .abc from dist/stateMgmt.js and copy to device and reboot.
 
 ## File Organising into Directories
 
@@ -44,9 +51,28 @@ NOTE: After compiling with npm run X command. You need to copy stateMgmt.js from
     * `./src/lib/common/*.ts` - common files that do not include any SDK functionality
     * `./src/lib/full_update/*.ts` - files specific to the older version of state mgmt for full Component to Element update
     * `./src/lib/partial_update/*.ts` - files specfic to the newer version of state mgmt for NG UINode minimal scope updates
+    * `./src/lib/v2/*.ts` - files specfic to V2 implementation
 -`./src/index.ts` - implementation 'main' creates singletons.
 
-## StateMgmt Profiler
+## How to Develop - StateMgmt
+* Change files .ts in src/lib folder
+* Do npm install once after repo sync in state_mgmt folder... Then after that 'npm run build_release'
+* Output file is in distRelease/stateMgmt.js
+* Do script to convers stateMgmt.js to .abc and copy that to device.
+
+```bash
+# Make target RK3568 writable
+hdc target mount
+# Remove old file
+hdc shell rm -rf /etc/abc/framework/stateMgmt.abc
+# Use es2abc.exe with output parameter --output stateMgmt.abc
+# Then copy stateMgmt.abc from build server to local disk and send to /etc/abc/framework
+hdc file send stateMgmt.abc /etc/abc/framework
+# Reboot device and it will load stateMgmt.abc at start up
+hdc shell reboot
+```
+
+## StateMgmt Profiling
 
 ### Building
 
@@ -55,7 +81,7 @@ Execute follwing commands in framework/bridge/declarative_frontend/state_mgmt.
 ```bash
 npm install
 npm run build_profile
-cp ./distProfile/stateMgmt.js ../engine/
+Adjust your script to copy stateMgmt.js from distProfile folder.
 ```
 
 Then compile SW and flash / update .so

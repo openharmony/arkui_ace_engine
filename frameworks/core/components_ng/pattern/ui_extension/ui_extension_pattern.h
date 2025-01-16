@@ -29,6 +29,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/ui_extension/platform_event_proxy.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/accessibility_session_adapter_ui_extension.h"
@@ -79,6 +80,8 @@ struct SessionViewportConfig {
     int32_t orientation_ = 0;
     uint32_t transform_ = 0;
 };
+using BusinessDataUECConsumeCallback = std::function<int32_t(const AAFwk::Want&)>;
+using BusinessDataUECConsumeReplyCallback = std::function<int32_t(const AAFwk::Want&, std::optional<AAFwk::Want>&)>;
 
 class UIExtensionProxy;
 class UIExtensionPattern : public Pattern {
@@ -108,10 +111,13 @@ public:
     void OnMountToParentDone() override;
     void AfterMountToParent() override;
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
+    void RegisterWindowSceneVisibleChangeCallback(const RefPtr<Pattern>& windowScenePattern);
+    void UnRegisterWindowSceneVisibleChangeCallback(int32_t nodeId);
+    void OnWindowSceneVisibleChange(bool visible);
 
     void OnConnect();
     void OnDisconnect(bool isAbnormal);
-    void HandleDragEvent(const PointerEvent& info) override;
+    void HandleDragEvent(const DragPointerEvent& info) override;
 
     void SetModalOnDestroy(const std::function<void()>&& callback);
     void FireModalOnDestroy();
@@ -143,7 +149,7 @@ public:
     void NotifySizeChangeReason(
         WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction);
     void NotifyForeground();
-    void NotifyBackground();
+    void NotifyBackground(bool isHandleError = true);
     void NotifyDestroy();
     int32_t GetInstanceId() const;
     bool GetIsTransferringCaller();
@@ -172,6 +178,7 @@ public:
         curPlaceholderType_ = type;
     }
     void PostDelayRemovePlaceholder(uint32_t delay);
+    void SetEventProxyFlag(int32_t flag);
     void ReplacePlaceholderByContent();
     void OnExtensionEvent(UIExtCallbackEventId eventId);
     void OnUeaAccessibilityEventAsync();
@@ -212,20 +219,29 @@ public:
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
     void DumpOthers();
-    int32_t GetInstanceIdFromHost();
     void UpdateSessionType(SessionType type)
     {
         sessionType_ = type;
         UpdateSessionWraper(isTransferringCaller_);
     }
 
+    int32_t GetInstanceIdFromHost() const;
+    bool SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply);
+    bool SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type);
+    void OnUIExtBusinessReceiveReply(
+        UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply);
+    void OnUIExtBusinessReceive(UIContentBusinessCode code, const AAFwk::Want& data);
+    void RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode code, BusinessDataUECConsumeCallback callback);
+    void RegisterUIExtBusinessConsumeReplyCallback(
+        UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback);
+    void SetOnDrawReadyCallback(const std::function<void()>&& callback);
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual void DispatchKeyEvent(const KeyEvent& event);
 
     int32_t uiExtensionId_ = 0;
     int32_t instanceId_ = Container::CurrentId();
-
+    void FireOnDrawReadyCallback();
 private:
     enum class AbilityState {
         NONE = 0,
@@ -248,6 +264,11 @@ private:
     void OnModifyDone() override;
     bool CheckConstraint();
 
+    void InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnBlur(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnClearFocusState(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnPaintFocusState(const RefPtr<FocusHub>& focusHub);
+    void InitKeyEventOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     void InitKeyEvent(const RefPtr<FocusHub>& focusHub);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitMouseEvent(const RefPtr<InputEventHub>& inputHub);
@@ -288,6 +309,15 @@ private:
     UIExtensionUsage GetUIExtensionUsage(const AAFwk::Want& want);
     void ReDispatchDisplayArea();
     void ResetAccessibilityChildTreeCallback();
+    bool GetForceProcessOnKeyEventInternal() const
+    {
+        return forceProcessOnKeyEventInternal_;
+    }
+    void SetForceProcessOnKeyEventInternal(bool forceProcessOnKeyEventInternal)
+    {
+        forceProcessOnKeyEventInternal_ = forceProcessOnKeyEventInternal;
+    }
+    void RegisterEventProxyFlagCallback();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -307,11 +337,13 @@ private:
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onAsyncOnCallbackList_;
     std::function<void()> bindModalCallback_;
     std::map<PlaceholderType, RefPtr<NG::FrameNode>> placeholderMap_;
+    std::function<void()> onDrawReadyCallback_;
 
     RefPtr<OHOS::Ace::WantWrap> curWant_;
     RefPtr<FrameNode> contentNode_;
     RefPtr<SessionWrapper> sessionWrapper_;
     RefPtr<AccessibilitySessionAdapterUIExtension> accessibilitySessionAdapter_;
+    RefPtr<PlatformEventProxy> platformEventProxy_;
     ErrorMsg lastError_;
     AbilityState state_ = AbilityState::NONE;
     bool isTransferringCaller_ = false;
@@ -322,6 +354,7 @@ private:
     bool isFoldStatusChanged_ = false;
     bool isRotateStatusChanged_ = false;
     bool densityDpi_ = false;
+    WeakPtr<Pattern> weakSystemWindowScene_;
     SessionViewportConfig sessionViewportConfig_;
     bool viewportConfigChanged_ = false;
     bool displayAreaChanged_ = false;
@@ -346,6 +379,9 @@ private:
     uint32_t focusWindowId_ = 0;
     uint32_t realHostWindowId_ = 0;
     std::string want_;
+    bool forceProcessOnKeyEventInternal_ = false;
+    std::map<UIContentBusinessCode, BusinessDataUECConsumeCallback> businessDataUECConsumeCallbacks_;
+    std::map<UIContentBusinessCode, BusinessDataUECConsumeReplyCallback> businessDataUECConsumeReplyCallbacks_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

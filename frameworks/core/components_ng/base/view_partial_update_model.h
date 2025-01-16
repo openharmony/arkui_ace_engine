@@ -51,6 +51,8 @@ struct NodeInfoPU {
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
     std::function<std::string()> onDumpInspectorFunc;
     std::function<void*()> getThisFunc;
+    std::function<void()> recycleFunc;
+    std::function<void(void*)> reuseFunc;
 
     bool hasMeasureOrLayout = false;
     bool isStatic = false;
@@ -75,6 +77,7 @@ public:
     virtual void FlushUpdateTask(const UpdateTask& task) = 0;
     virtual void FinishUpdate(
         const WeakPtr<AceType>& viewNode, int32_t id, std::function<void(const UpdateTask&)>&& emplaceTaskFunc) = 0;
+    virtual bool AllowReusableV2Descendant(const WeakPtr<AceType>& viewNode) = 0;
 };
 
 } // namespace OHOS::Ace

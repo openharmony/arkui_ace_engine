@@ -15,6 +15,8 @@
 
 #include "text_base.h"
 
+#include "core/components_ng/pattern/text/text_model_ng.h"
+
 namespace OHOS::Ace::NG {
 
 class TextNullptrNg : public TextBases {
@@ -34,7 +36,7 @@ HWTEST_F(TextNullptrNg, PipelineContextNullptr001, TestSize.Level0)
      * step2. call OnDetachFromFrameNode, not carsh
     */
     TextModelNG textModelNg;
-    textModelNg.Create(u"123");
+    textModelNg.Create("123");
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();

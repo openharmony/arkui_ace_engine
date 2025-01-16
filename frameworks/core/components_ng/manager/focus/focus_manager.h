@@ -31,6 +31,7 @@ using FocusViewMap = std::unordered_map<int32_t, std::pair<WeakPtr<FocusView>, s
 using RequestFocusCallback = std::function<void(NG::RequestFocusResult result)>;
 using FocusHubScopeMap = std::unordered_map<std::string, std::pair<WeakPtr<FocusHub>, std::list<WeakPtr<FocusHub>>>>;
 using FocusChangeCallback = std::function<void(const WeakPtr<FocusHub>& last, const RefPtr<FocusHub>& current)>;
+using FocusActiveChangeCallback = std::function<void(bool isFocusActive)>;
 
 enum class FocusActiveReason : int32_t {
     POINTER_EVENT = 0,
@@ -158,6 +159,9 @@ public:
     }
     int32_t AddFocusListener(FocusChangeCallback&& callback);
     void RemoveFocusListener(int32_t id);
+    int32_t AddFocusActiveChangeListener(const FocusActiveChangeCallback& callback);
+    void RemoveFocusActiveChangeListener(int32_t handler);
+    void TriggerFocusActiveChangeCallback(bool isFocusActive);
     void FocusSwitchingStart(const RefPtr<FocusHub>& focusHub, SwitchingStartReason reason);
     void FocusSwitchingEnd(SwitchingEndReason reason = SwitchingEndReason::FOCUS_GUARD_DESTROY);
     void WindowFocusMoveStart();
@@ -187,6 +191,7 @@ private:
     FocusHubScopeMap focusHubScopeMap_;
 
     std::map<int32_t, FocusChangeCallback> listeners_;
+    ValueListenable<bool> focusActiveChangeCallback_;
     int32_t nextListenerHdl_ = -1;
     std::optional<bool> isSwitchingFocus_;
     bool isSwitchingWindow_ = false;

@@ -43,6 +43,7 @@ public:
         const std::function<void(int32_t from, int32_t to)>& onSetActiveRange) = 0;
     virtual void UpdateRenderState(uint32_t totalCount, bool visibleItemsChanged) = 0;
     virtual void OnMove(std::function<void(int32_t, int32_t)>&& onMove) = 0;
+    virtual void SetCreateByTemplate(bool isCreatedByTemplate) = 0;
 
 private:
     static std::unique_ptr<RepeatVirtualScrollModel> instance_;

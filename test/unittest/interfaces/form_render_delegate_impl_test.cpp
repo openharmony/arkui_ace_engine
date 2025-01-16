@@ -192,15 +192,16 @@ HWTEST_F(FormRenderDelegateImplTest, FormRenderDelegateImplTest_007, TestSize.Le
 {
     GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_007 start";
     sptr<FormRendererDelegateImpl> renderDelegate = new FormRendererDelegateImpl();
-    int32_t top = 1;
-    int32_t left = 1;
-    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(top, left), ERR_INVALID_DATA);
+    AccessibilityParentRectInfo parentRectInfo;
+    parentRectInfo.top = 1;
+    parentRectInfo.left = 1;
+    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(parentRectInfo), ERR_INVALID_DATA);
 
     std::string OnGetRectRelativeToWindowEventKey;
     auto onGetRectRelativeToWindow = [&OnGetRectRelativeToWindowEventKey](
-        int32_t& /* top */, int32_t& /* left */) { OnGetRectRelativeToWindowEventKey = CHECK_KEY; };
+        AccessibilityParentRectInfo&) { OnGetRectRelativeToWindowEventKey = CHECK_KEY; };
     renderDelegate->SetGetRectRelativeToWindowHandler(std::move(onGetRectRelativeToWindow));
-    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(top, left), ERR_OK);
+    EXPECT_EQ(renderDelegate->OnGetRectRelativeToWindow(parentRectInfo), ERR_OK);
     GTEST_LOG_(INFO) << "FormRenderDelegateImplTest_007 end";
 }
 

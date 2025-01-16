@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
+
 #include "text_input_base.h"
+
+#include "test/unittest/core/pattern/text_input/mock/mock_text_field_select_overlay.h"
 
 namespace OHOS::Ace::NG {
 

@@ -56,6 +56,15 @@ public:
         hour24_ = value;
     }
 
+    bool GetEnableCascade() const
+    {
+        return isEnableCascade_;
+    }
+    void SetEnableCascade(bool value)
+    {
+        isEnableCascade_ = value;
+    }
+
     void OnTitleBuilding() override;
 
     void OnColumnsBuilding() override;
@@ -102,6 +111,7 @@ private:
     bool hasSecond_ = false;
     // true, use 24 hours style; false, use 12 hours style.
     bool hour24_ = !Localization::GetInstance()->IsAmPmHour();
+    bool isEnableCascade_ = false;
     std::vector<std::string> vecAmPm_;
 };
 

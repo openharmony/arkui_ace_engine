@@ -65,6 +65,8 @@ void JSSymbol::JSBind(BindingTarget globalObj)
     JSClass<JSSymbol>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSymbol>::StaticMethod("clip", &JSSymbol::JsClip);
     JSClass<JSSymbol>::StaticMethod("symbolEffect", &JSSymbol::SetSymbolEffectOptions, opt);
+    JSClass<JSSymbol>::StaticMethod("minFontScale", &JSSymbol::SetMinFontScale);
+    JSClass<JSSymbol>::StaticMethod("maxFontScale", &JSSymbol::SetMaxFontScale);
     JSClass<JSSymbol>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -151,6 +153,36 @@ void JSSymbol::SetSymbolEffectOptions(const JSCallbackInfo& info)
     }
 
     SymbolModel::GetInstance()->SetSymbolEffectOptions(symbolEffectOptions);
+}
+
+void JSSymbol::SetMinFontScale(const JSCallbackInfo& info)
+{
+    double minFontScale;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+        return;
+    }
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        SymbolModel::GetInstance()->SetMinFontScale(0.0f);
+        return;
+    }
+    if (GreatOrEqual(minFontScale, 1.0f)) {
+        SymbolModel::GetInstance()->SetMinFontScale(1.0f);
+        return;
+    }
+    SymbolModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+}
+
+void JSSymbol::SetMaxFontScale(const JSCallbackInfo& info)
+{
+    double maxFontScale;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+        return;
+    }
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        SymbolModel::GetInstance()->SetMaxFontScale(1.0f);
+        return;
+    }
+    SymbolModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
 }
 
 void JSSymbol::parseSymbolEffect(const JSRef<JSObject> symbolEffectObj, NG::SymbolEffectOptions& symbolEffectOptions)

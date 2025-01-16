@@ -39,13 +39,37 @@ void Clean(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUINodeContainerModifier* GetNodeContainerModifier()
 {
-    static const ArkUINodeContainerModifier modifier = { Rebuild, Clean };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUINodeContainerModifier modifier = {
+        .rebuild = Rebuild,
+        .clean = Clean,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 
 const CJUINodeContainerModifier* GetCJUINodeContainerModifier()
 {
-    static const CJUINodeContainerModifier modifier = { Rebuild, Clean };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUINodeContainerModifier modifier = {
+        .rebuild = Rebuild,
+        .clean = Clean,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
     return &modifier;
 }
 }

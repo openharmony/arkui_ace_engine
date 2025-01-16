@@ -91,7 +91,6 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_circle_ffi.cpp",
       "interfaces/cj_ffi/cj_collection_ffi.cpp",
       "interfaces/cj_ffi/cj_column_ffi.cpp",
-      "interfaces/cj_ffi/cj_column_split_ffi.cpp",
       "interfaces/cj_ffi/cj_common_ffi.cpp",
       "interfaces/cj_ffi/cj_component_id_ffi.cpp",
       "interfaces/cj_ffi/cj_container_base_ffi.cpp",
@@ -139,7 +138,6 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_polygon_ffi.cpp",
       "interfaces/cj_ffi/cj_polyline_ffi.cpp",
       "interfaces/cj_ffi/cj_progress_ffi.cpp",
-      "interfaces/cj_ffi/cj_qrcode_ffi.cpp",
       "interfaces/cj_ffi/cj_radio_ffi.cpp",
       "interfaces/cj_ffi/cj_rating_ffi.cpp",
       "interfaces/cj_ffi/cj_rect_ffi.cpp",
@@ -148,18 +146,13 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_richeditor_controller_ffi.cpp",
       "interfaces/cj_ffi/cj_richeditor_ffi.cpp",
       "interfaces/cj_ffi/cj_row_ffi.cpp",
-      "interfaces/cj_ffi/cj_row_split_ffi.cpp",
       "interfaces/cj_ffi/cj_scroll_ffi.cpp",
       "interfaces/cj_ffi/cj_scrollbar_ffi.cpp",
       "interfaces/cj_ffi/cj_search_ffi.cpp",
-      "interfaces/cj_ffi/cj_select_ffi.cpp",
       "interfaces/cj_ffi/cj_shape_ffi.cpp",
-      "interfaces/cj_ffi/cj_side_bar_container_ffi.cpp",
       "interfaces/cj_ffi/cj_slider_ffi.cpp",
       "interfaces/cj_ffi/cj_span_ffi.cpp",
       "interfaces/cj_ffi/cj_stack_ffi.cpp",
-      "interfaces/cj_ffi/cj_stepper_ffi.cpp",
-      "interfaces/cj_ffi/cj_stepper_item_ffi.cpp",
       "interfaces/cj_ffi/cj_swiper_ffi.cpp",
       "interfaces/cj_ffi/cj_tab_ffi.cpp",
       "interfaces/cj_ffi/cj_text_clock_ffi.cpp",
@@ -176,7 +169,8 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_view_context_ffi.cpp",
       "interfaces/cj_ffi/cj_view_stack_processor_ffi.cpp",
       "interfaces/cj_ffi/concurrency/cj_concurrency_ffi.cpp",
-      "interfaces/cj_ffi/curves/cj_curves_ffi.cpp",
+      "interfaces/cj_ffi/displaySync/display_sync_ffi.cpp",
+      "interfaces/cj_ffi/displaySync/display_sync_impl.cpp",
       "interfaces/cj_ffi/font/cj_font_ffi.cpp",
       "interfaces/cj_ffi/measure/cj_measure_ffi.cpp",
       "interfaces/cj_ffi/prompt/cj_prompt_ffi.cpp",
@@ -186,6 +180,17 @@ template("cj_frontend") {
       "interfaces/cj_ffi/utils.cpp",
       "runtime/cj_runtime_delegate.cpp",
     ]
+
+    if (!ace_engine_feature_wearable) {
+      sources += [
+        "interfaces/cj_ffi/cj_column_split_ffi.cpp",
+        "interfaces/cj_ffi/cj_row_split_ffi.cpp",
+        "interfaces/cj_ffi/cj_select_ffi.cpp",
+        "interfaces/cj_ffi/cj_side_bar_container_ffi.cpp",
+        "interfaces/cj_ffi/cj_stepper_ffi.cpp",
+        "interfaces/cj_ffi/cj_stepper_item_ffi.cpp",
+      ]
+    }
 
     deps += [ "$ace_root/build:libace_compatible" ]
 
@@ -199,6 +204,10 @@ template("cj_frontend") {
       "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility",
     ]
 
+    if (qrcodegen_support) {
+      sources += [ "interfaces/cj_ffi/cj_qrcode_ffi.cpp" ]
+    }
+
     if (platform_config.is_ohos) {
       external_deps += [
         "c_utils:utils",
@@ -209,12 +218,15 @@ template("cj_frontend") {
     } else {
       sources -= [
         "interfaces/cj_ffi/cj_richeditor_controller_ffi.cpp",
+        "interfaces/cj_ffi/displaySync/display_sync_ffi.cpp",
+        "interfaces/cj_ffi/displaySync/display_sync_impl.cpp",
         "interfaces/cj_ffi/state_manage/cj_environment.cpp",
         "interfaces/cj_ffi/state_manage/cj_persistent_storage_ffi.cpp",
       ]
 
       # add mock sources for ohos-sdk
       sources += [
+        "interfaces/cj_ffi/displaySync/display_sync_mock.cpp",
         "interfaces/cj_ffi/mock/cj_richtext.cpp",
         "interfaces/cj_ffi/state_manage/mock/cj_state_manage_mock.cpp",
       ]

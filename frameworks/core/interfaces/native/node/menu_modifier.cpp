@@ -228,17 +228,56 @@ void ResetSubMenuExpandingMode(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIMenuModifier* GetMenuModifier()
 {
-    static const ArkUIMenuModifier modifier = { SetMenuFontColor, ResetMenuFontColor, SetMenuFont, ResetMenuFont,
-        SetRadius, ResetRadius, SetMenuWidth, ResetMenuWidth, SetMenuItemDivider, ResetMenuItemDivider,
-        SetMenuItemGroupDivider, ResetMenuItemGroupDivider, SetSubMenuExpandingMode, ResetSubMenuExpandingMode };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIMenuModifier modifier = {
+        .setMenuFontColor = SetMenuFontColor,
+        .resetMenuFontColor = ResetMenuFontColor,
+        .setFont = SetMenuFont,
+        .resetFont = ResetMenuFont,
+        .setRadius = SetRadius,
+        .resetRadius = ResetRadius,
+        .setMenuWidth = SetMenuWidth,
+        .resetMenuWidth = ResetMenuWidth,
+        .setMenuItemDivider = SetMenuItemDivider,
+        .resetMenuItemDivider = ResetMenuItemDivider,
+        .setMenuItemGroupDivider = SetMenuItemGroupDivider,
+        .resetMenuItemGroupDivider = ResetMenuItemGroupDivider,
+        .setSubMenuExpandingMode = SetSubMenuExpandingMode,
+        .resetSubMenuExpandingMode = ResetSubMenuExpandingMode,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIMenuModifier* GetCJUIMenuModifier()
 {
-    static const CJUIMenuModifier modifier = { SetMenuFontColor, ResetMenuFontColor, SetMenuFont, ResetMenuFont,
-        SetRadius, ResetRadius, SetMenuWidth, ResetMenuWidth };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIMenuModifier modifier = {
+        .setMenuFontColor = SetMenuFontColor,
+        .resetMenuFontColor = ResetMenuFontColor,
+        .setFont = SetMenuFont,
+        .resetFont = ResetMenuFont,
+        .setRadius = SetRadius,
+        .resetRadius = ResetRadius,
+        .setMenuWidth = SetMenuWidth,
+        .resetMenuWidth = ResetMenuWidth,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

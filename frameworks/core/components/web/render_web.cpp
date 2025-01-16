@@ -125,7 +125,7 @@ void RenderWeb::RegistVirtualKeyBoardListener()
         return;
     }
     pipelineContext->SetVirtualKeyBoardCallback(
-        [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard) {
+        [weak = AceType::WeakClaim(this)](int32_t width, int32_t height, double keyboard, bool isCustomKeyboard) {
             auto renderWeb = weak.Upgrade();
             if (renderWeb) {
                 return renderWeb->ProcessVirtualKeyBoard(width, height, keyboard);
@@ -1212,7 +1212,7 @@ void RenderWeb::PanOnActionEnd(const GestureEvent& info)
     SetPreDragDropNode(nullptr);
 }
 
-void RenderWeb::PanOnActionCancel()
+void RenderWeb::PanOnActionCancel(const GestureEvent& info)
 {
     isDragging_ = false;
     auto pipelineContext = context_.Upgrade();

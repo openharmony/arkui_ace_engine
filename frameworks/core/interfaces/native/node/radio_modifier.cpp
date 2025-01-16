@@ -313,22 +313,83 @@ void SetRadioOptions(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_CharPtr gr
 namespace NodeModifier {
 const ArkUIRadioModifier* GetRadioModifier()
 {
-    static const ArkUIRadioModifier modifier = { SetRadioChecked, ResetRadioChecked, SetRadioStyle, ResetRadioStyle,
-        SetRadioWidth, ResetRadioWidth, SetRadioHeight, ResetRadioHeight, SetRadioSize, ResetRadioSize,
-        SetRadioHoverEffect, ResetRadioHoverEffect, SetRadioPadding, ResetRadioPadding, SetRadioResponseRegion,
-        ResetRadioResponseRegion, GetRadioChecked, GetRadioStyle, SetRadioValue, ResetRadioValue, GetSetRadioValue,
-        SetRadioGroup, ResetRadioGroup, GetRadioGroup, SetRadioOptions };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const ArkUIRadioModifier modifier = {
+        SetRadioChecked,
+        ResetRadioChecked,
+        SetRadioStyle,
+        ResetRadioStyle,
+        SetRadioWidth,
+        ResetRadioWidth,
+        SetRadioHeight,
+        ResetRadioHeight,
+        SetRadioSize,
+        ResetRadioSize,
+        SetRadioHoverEffect,
+        ResetRadioHoverEffect,
+        SetRadioPadding,
+        ResetRadioPadding,
+        SetRadioResponseRegion,
+        ResetRadioResponseRegion,
+        GetRadioChecked,
+        GetRadioStyle,
+        SetRadioValue,
+        ResetRadioValue,
+        GetSetRadioValue,
+        SetRadioGroup,
+        ResetRadioGroup,
+        GetRadioGroup,
+        SetRadioOptions,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIRadioModifier* GetCJUIRadioModifier()
 {
-    static const CJUIRadioModifier modifier = { SetRadioChecked, ResetRadioChecked, SetRadioStyle, ResetRadioStyle,
-        SetRadioWidth, ResetRadioWidth, SetRadioHeight, ResetRadioHeight, SetRadioSize, ResetRadioSize,
-        SetRadioHoverEffect, ResetRadioHoverEffect, SetRadioPadding, ResetRadioPadding, SetRadioResponseRegion,
-        ResetRadioResponseRegion, GetRadioChecked, GetRadioStyle, SetRadioValue, ResetRadioValue, GetSetRadioValue,
-        SetRadioGroup, ResetRadioGroup, GetRadioGroup };
+    constexpr auto lineBegin = __LINE__; // don't move this line
+    static const CJUIRadioModifier modifier = {
+        SetRadioChecked,
+        ResetRadioChecked,
+        SetRadioStyle,
+        ResetRadioStyle,
+        SetRadioWidth,
+        ResetRadioWidth,
+        SetRadioHeight,
+        ResetRadioHeight,
+        SetRadioSize,
+        ResetRadioSize,
+        SetRadioHoverEffect,
+        ResetRadioHoverEffect,
+        SetRadioPadding,
+        ResetRadioPadding,
+        SetRadioResponseRegion,
+        ResetRadioResponseRegion,
+        GetRadioChecked,
+        GetRadioStyle,
+        SetRadioValue,
+        ResetRadioValue,
+        GetSetRadioValue,
+        SetRadioGroup,
+        ResetRadioGroup,
+        GetRadioGroup,
+    };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
@@ -343,7 +404,7 @@ void SetOnRadioChange(ArkUINodeHandle node, void* extraParam)
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.componentAsyncEvent.subKind = ON_RADIO_CHANGE;
         event.componentAsyncEvent.data[0].i32 = static_cast<int>(value);
-        SendArkUIAsyncEvent(&event);
+        SendArkUISyncEvent(&event);
     };
     RadioModelNG::SetOnChange(frameNode, std::move(onChange));
 }

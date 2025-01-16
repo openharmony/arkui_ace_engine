@@ -131,6 +131,8 @@ public:
     bool GetIsRequestVsync() override;
 
     void NotifyExtensionTimeout(int32_t errorCode) override;
+
+    bool GetIsRequestFrame() override;
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;

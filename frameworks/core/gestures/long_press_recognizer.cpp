@@ -47,7 +47,7 @@ void LongPressRecognizer::OnAccepted()
         SendCallbackMsg(onActionEnd_, false);
         Reset();
     } else if (pendingCancel_) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_, false);
         Reset();
     }
 }
@@ -144,12 +144,12 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 {
     if (state_ == DetectState::READY || state_ == DetectState::DETECTING) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_, false);
         return;
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_, false);
         Reset();
     } else {
         pendingCancel_ = true;

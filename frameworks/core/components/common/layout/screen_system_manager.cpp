@@ -23,8 +23,10 @@ namespace {
     constexpr Dimension MAX_SCREEN_WIDTH_XL = 1024.0_vp;
 } // namespace
 
+std::mutex ScreenSystemManager::lock;
 void ScreenSystemManager::OnSurfaceChanged(double width)
 {
+    std::lock_guard<std::mutex> guard(lock);
     screenWidth_ = width;
     if (width < MAX_SCREEN_WIDTH_SM.Value() * density_) {
         currentSize_ = ScreenSizeType::XS;
@@ -41,6 +43,7 @@ void ScreenSystemManager::OnSurfaceChanged(double width)
 
 ScreenSizeType ScreenSystemManager::GetSize(double width) const
 {
+    std::lock_guard<std::mutex> guard(lock);
     ScreenSizeType size = ScreenSizeType::UNDEFINED;
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(context, size);

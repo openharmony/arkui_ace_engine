@@ -49,11 +49,6 @@ public:
         return { FocusType::SCOPE, true };
     }
 
-    bool IsNeedInitClickEventRecorder() const override
-    {
-        return true;
-    }
-
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
     {
         return ScopeFocusAlgorithm(ScopeFocusDirection::UNIVERSAL, false, true,

@@ -110,43 +110,98 @@ void ResetVideoOpacity(ArkUINodeHandle node)
     ViewAbstract::SetOpacity(frameNode, 1.0f);
 }
 
+void SetVideoSurfaceBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color backgroundColor = Color(color);
+    if (backgroundColor != Color::TRANSPARENT) {
+        backgroundColor = Color::BLACK;
+    }
+
+    VideoModelNG::SetSurfaceBackgroundColor(frameNode, backgroundColor);
+}
+
+void ResetVideoSurfaceBackgroundColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    VideoModelNG::SetSurfaceBackgroundColor(frameNode, Color::BLACK);
+}
+
+void SetVideoShortcutKeyEnabled(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    VideoModelNG::SetShortcutKeyEnabled(frameNode, static_cast<ArkUI_Bool>(value));
+}
+
+void ResetVideoShortcutKeyEnabled(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    VideoModelNG::SetShortcutKeyEnabled(frameNode, false);
+}
+
 namespace NodeModifier {
 const ArkUIVideoModifier* GetVideoModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const ArkUIVideoModifier modifier = {
-        SetAutoPlay,
-        ResetAutoPlay,
-        SetVideoObjectFit,
-        ResetVideoObjectFit,
-        SetVideoControls,
-        ResetVideoControls,
-        SetVideoLoop,
-        ResetVideoLoop,
-        SetVideoMuted,
-        ResetVideoMuted,
-        SetVideoOpacity,
-        ResetVideoOpacity
+        .setAutoPlay = SetAutoPlay,
+        .resetAutoPlay = ResetAutoPlay,
+        .setVideoObjectFit = SetVideoObjectFit,
+        .resetVideoObjectFit = ResetVideoObjectFit,
+        .setVideoControls = SetVideoControls,
+        .resetVideoControls = ResetVideoControls,
+        .setVideoLoop = SetVideoLoop,
+        .resetVideoLoop = ResetVideoLoop,
+        .setVideoMuted = SetVideoMuted,
+        .resetVideoMuted = ResetVideoMuted,
+        .setVideoOpacity = SetVideoOpacity,
+        .resetVideoOpacity = ResetVideoOpacity,
+        .setVideoSurfaceBackgroundColor = SetVideoSurfaceBackgroundColor,
+        .resetVideoSurfaceBackgroundColor = ResetVideoSurfaceBackgroundColor,
+        .setVideoShortcutKeyEnabled = SetVideoShortcutKeyEnabled,
+        .resetVideoShortcutKeyEnabled = ResetVideoShortcutKeyEnabled,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }
 
 const CJUIVideoModifier* GetCJUIVideoModifier()
 {
+    constexpr auto lineBegin = __LINE__; // don't move this line
     static const CJUIVideoModifier modifier = {
-        SetAutoPlay,
-        ResetAutoPlay,
-        SetVideoObjectFit,
-        ResetVideoObjectFit,
-        SetVideoControls,
-        ResetVideoControls,
-        SetVideoLoop,
-        ResetVideoLoop,
-        SetVideoMuted,
-        ResetVideoMuted,
-        SetVideoOpacity,
-        ResetVideoOpacity
+        .setAutoPlay = SetAutoPlay,
+        .resetAutoPlay = ResetAutoPlay,
+        .setVideoObjectFit = SetVideoObjectFit,
+        .resetVideoObjectFit = ResetVideoObjectFit,
+        .setVideoControls = SetVideoControls,
+        .resetVideoControls = ResetVideoControls,
+        .setVideoLoop = SetVideoLoop,
+        .resetVideoLoop = ResetVideoLoop,
+        .setVideoMuted = SetVideoMuted,
+        .resetVideoMuted = ResetVideoMuted,
+        .setVideoOpacity = SetVideoOpacity,
+        .resetVideoOpacity = ResetVideoOpacity,
     };
+    constexpr auto lineEnd = __LINE__; // don't move this line
+    constexpr auto ifdefOverhead = 4; // don't modify this line
+    constexpr auto overHeadLines = 3; // don't modify this line
+    constexpr auto blankLines = 0; // modify this line accordingly
+    constexpr auto ifdefs = 0; // modify this line accordingly
+    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
+    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
+        "ensure all fields are explicitly initialized");
 
     return &modifier;
 }

@@ -679,6 +679,49 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementTextElement
 }
 
 /**
+ * @tc.name: SecurityComponentLayoutElementTextElement002
+ * @tc.desc: Test security component text element
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutElementTextElement002, TestSize.Level1)
+{
+    TextLayoutElement text;
+    RefPtr<FrameNode> frameNode = CreateSecurityComponent(0, 0,
+        BUTTON_TYPE_NULL, V2::LOCATION_BUTTON_ETS_TAG);
+    ASSERT_NE(frameNode, nullptr);
+    RefPtr<SecurityComponentLayoutProperty> property =
+        AceType::MakeRefPtr<SecurityComponentLayoutProperty>();
+    RefPtr<TextLayoutProperty> textProp = AceType::MakeRefPtr<TextLayoutProperty>();
+    RefPtr<GeometryNode> geoNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapper> wrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geoNode, textProp);
+    property->UpdateSecurityComponentDescription(-1);
+    text.Init(property, wrapper);
+    ASSERT_FALSE(text.isExist_);
+    std::optional<SizeF> currentTextSize;
+    ASSERT_FALSE(text.DidExceedMaxLines(currentTextSize));
+    property->UpdateSecurityComponentDescription(0);
+    property->UpdateFontSize(Dimension(15.0));
+    property->UpdateAdaptMaxFontSize(Dimension(20.0));
+    property->UpdateAdaptMinFontSize(Dimension(10.0));
+    text.Init(property, wrapper);
+    ASSERT_TRUE(text.isExist_);
+    ASSERT_TRUE(text.isSetSize_);
+
+    text.UpdateFontSize();
+    ASSERT_EQ(property->GetFontSize()->ConvertToFp(), 15.0);
+    property->UpdateBackgroundTopPadding(Dimension(0.0));
+    property->UpdateBackgroundBottomPadding(Dimension(0.0));
+    ASSERT_EQ(text.GetHeightConstraint(property, 30.0), 30.0);
+    property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
+    property->UpdateIconSize(Dimension(5.0));
+    property->UpdateTextIconSpace(Dimension(5.0));
+    ASSERT_EQ(text.GetHeightConstraint(property, 30.0), 20.0);
+    ASSERT_FALSE(text.DidExceedMaxLines(currentTextSize));
+}
+
+/**
  * @tc.name: SecurityComponentPatternOnDirtyLayoutWrapperSwap001
  * @tc.desc: Test security component OnDirtyLayoutWrapperSwap
  * @tc.type: FUNC
@@ -1347,18 +1390,19 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateVer
 
     OffsetF offsetIcon(0.0, 0.0);
     OffsetF offsetText(0.0, 0.0);
+    SizeF childSize(0.0, 0.0);
     buttonAlgorithm->icon_.height_ = 2.0;
     buttonAlgorithm->middle_.height_ = 2.0;
     buttonAlgorithm->icon_.width_ = 2.0;
     buttonAlgorithm->text_.width_ = 1.0;
-    buttonAlgorithm->UpdateVerticalOffset(offsetIcon, offsetText);
+    buttonAlgorithm->UpdateVerticalOffset(offsetIcon, offsetText, childSize);
     EXPECT_EQ(offsetText.GetX(), 0.5); // (icon_.width_ - text_.width_) / 2
     EXPECT_EQ(offsetText.GetY(), 4.0); // icon_.height_ + middle_.height_
 
     OffsetF offsetIcon1(0.0, 0.0);
     OffsetF offsetText1(0.0, 0.0);
     buttonAlgorithm->text_.width_ = 3.0;
-    buttonAlgorithm->UpdateVerticalOffset(offsetIcon1, offsetText1);
+    buttonAlgorithm->UpdateVerticalOffset(offsetIcon1, offsetText1, childSize);
     EXPECT_EQ(offsetText1.GetX(), 0);
     EXPECT_EQ(offsetText1.GetY(), 4.0); // icon_.height_ + middle_.height_
     EXPECT_EQ(offsetIcon1.GetX(), 0.5); // (text_.width_ - icon_.width_) / 2
@@ -1383,18 +1427,19 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLayoutAlgorithmUpdateHor
 
     OffsetF offsetIcon(0.0, 0.0);
     OffsetF offsetText(0.0, 0.0);
+    SizeF childSize(0.0, 0.0);
     buttonAlgorithm->icon_.width_ = 2.0;
     buttonAlgorithm->middle_.width_ = 2.0;
     buttonAlgorithm->icon_.height_ = 2.0;
     buttonAlgorithm->text_.height_ = 1.0;
-    buttonAlgorithm->UpdateHorizontalOffset(layoutWrapper, offsetIcon, offsetText);
+    buttonAlgorithm->UpdateHorizontalOffset(layoutWrapper, offsetIcon, offsetText, childSize);
     EXPECT_EQ(offsetText.GetX(), 4.0); // icon_.width_ + middle_.width_
     EXPECT_EQ(offsetText.GetY(), 0.5); // (icon_.height_ - text_.height_) / 2
 
     OffsetF offsetIcon1(0.0, 0.0);
     OffsetF offsetText1(0.0, 0.0);
     buttonAlgorithm->text_.height_ = 3.0;
-    buttonAlgorithm->UpdateHorizontalOffset(layoutWrapper, offsetIcon1, offsetText1);
+    buttonAlgorithm->UpdateHorizontalOffset(layoutWrapper, offsetIcon1, offsetText1, childSize);
     EXPECT_EQ(offsetText1.GetX(), 4.0); // icon_.height_ + middle_.height_
     EXPECT_EQ(offsetText1.GetY(), 0);
     EXPECT_EQ(offsetIcon1.GetY(), 0.5); // (text_.width_ - icon_.width_) / 2

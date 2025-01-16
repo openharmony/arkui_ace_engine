@@ -23,6 +23,7 @@
 #include "core/animation/animator_info.h"
 #include "core/animation/page_transition_common.h"
 #include "core/common/autofill/auto_fill_trigger_state_holder.h"
+#include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/stage/content_root_pattern.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/page_info.h"
@@ -181,6 +182,8 @@ public:
         isRenderDone_ = true;
     }
 
+    void StopPageTransition();
+
     void SetDynamicPageSizeCallback(DynamicPageSizeCallback&& dynamicPageSizeCallback)
     {
         dynamicPageSizeCallback_ = std::move(dynamicPageSizeCallback);
@@ -267,37 +270,32 @@ public:
         return animationId_;
     }
 
-    void InitTransitionIn(const RefPtr<PageTransitionEffect>& effect);
+    void InitTransitionIn(const RefPtr<PageTransitionEffect>& effect, PageTransitionType type);
 
-    void InitTransitionOut(const RefPtr<PageTransitionEffect>& effect);
+    void InitTransitionOut(const RefPtr<PageTransitionEffect>& effect, PageTransitionType type);
 
-    void TransitionInFinish(const RefPtr<PageTransitionEffect>& effect);
+    void TransitionInFinish(const RefPtr<PageTransitionEffect>& effect, PageTransitionType type);
 
-    void TransitionOutFinish(const RefPtr<PageTransitionEffect>& effect);
+    void TransitionOutFinish(const RefPtr<PageTransitionEffect>& effect, PageTransitionType type);
 
-    void FinishOutPage(const int32_t animationId);
+    void FinishOutPage(const int32_t animationId, PageTransitionType type);
 
-    void FinishInPage(const int32_t animationId);
+    void FinishInPage(const int32_t animationId, PageTransitionType type);
 
     RefPtr<PageTransitionEffect> GetDefaultPageTransition(PageTransitionType type);
 
-    void SetPageTransitionType(PageTransitionType type)
-    {
-        type_ = type;
-    }
-
-    PageTransitionType GetPageTransitionType() const
-    {
-        return type_;
-    }
-
     void ResetPageTransitionEffect();
 
-    void TriggerPageTransition(const std::function<void()>& onFinish);
+    void TriggerPageTransition(const std::function<void()>& onFinish, PageTransitionType type);
 
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
+
+    void SetIsNeedRemove(bool isNeedRemove)
+    {
+        isNeedRemove_ = isNeedRemove;
+    }
 
 protected:
     void OnAttachToFrameNode() override;
@@ -337,9 +335,9 @@ protected:
     void UpdateExitPushEffect(RefPtr<PageTransitionEffect>& effect, float statusHeight);
 
     void UpdateAnimationOption(const RefPtr<PageTransitionEffect>& transition,
-        RefPtr<PageTransitionEffect>& effect, AnimationOption& option);
+        RefPtr<PageTransitionEffect>& effect, AnimationOption& option, PageTransitionType type);
 
-    void TriggerDefaultTransition(const std::function<void()>& onFinish);
+    virtual void TriggerDefaultTransition(const std::function<void()>& onFinish, PageTransitionType type);
 
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
 
@@ -364,6 +362,7 @@ protected:
     bool isPageInTransition_ = false;
     bool isRenderDone_ = false;
     bool isModalCovered_ = false;
+    bool isNeedRemove_ = false;
 
 #if defined(ENABLE_SPLIT_MODE)
     bool needFireObserver_ = true;
@@ -372,7 +371,7 @@ protected:
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;
     RouterPageState state_ = RouterPageState::ABOUT_TO_APPEAR;
-    PageTransitionType type_ = PageTransitionType::NONE;
+    std::shared_ptr<AnimationUtils::Animation> currCustomAnimation_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };

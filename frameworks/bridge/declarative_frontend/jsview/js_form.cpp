@@ -71,19 +71,19 @@ void JSForm::Create(const JSCallbackInfo& info)
     RequestFormInfo formInfo;
     if (id->IsString()) {
         if (!StringUtils::IsNumber(id->ToString())) {
-            LOGE("Invalid form id : %{public}s", id->ToString().c_str());
+            TAG_LOGE(AceLogTag::ACE_FORM, "Invalid form id : %{public}s", id->ToString().c_str());
             return;
         }
         int64_t inputFormId = StringUtils::StringToLongInt(id->ToString().c_str(), -1);
         if (inputFormId == -1) {
-            LOGE("StringToLongInt failed : %{public}s", id->ToString().c_str());
+            TAG_LOGE(AceLogTag::ACE_FORM, "StringToLongInt failed : %{public}s", id->ToString().c_str());
             return;
         }
         formInfo.id = inputFormId;
-    }
-    if (id->IsNumber()) {
+    } else if (id->IsNumber()) {
         formInfo.id = id->ToNumber<int64_t>();
     }
+    TAG_LOGI(AceLogTag::ACE_FORM, "JSForm Create, info.id: %{public}" PRId64, formInfo.id);
     formInfo.cardName = name->ToString();
     formInfo.bundleName = bundle->ToString();
     formInfo.abilityName = ability->ToString();
@@ -243,11 +243,11 @@ void JSForm::JsOnLoad(const JSCallbackInfo& info)
 void JSForm::JsObscured(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined()) {
-        LOGE("Obscured reasons undefined");
+        TAG_LOGE(AceLogTag::ACE_FORM, "Obscured reasons undefined");
         return;
     }
     if (!info[0]->IsArray()) {
-        LOGE("Obscured reasons not Array");
+        TAG_LOGE(AceLogTag::ACE_FORM, "Obscured reasons not Array");
         return;
     }
     auto obscuredArray = JSRef<JSArray>::Cast(info[0]);

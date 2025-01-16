@@ -227,10 +227,12 @@ Axis ScrollBarProxy::GetScrollableAxis(const RefPtr<RenderNode>& node) const
     if (renderList) {
         return renderList->GetAxis();
     }
+#ifndef ARKUI_WEARABLE
     auto renderWaterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(node);
     if (renderWaterFlow) {
         return renderWaterFlow->GetAxis();
     }
+#endif
     return Axis::NONE;
 }
 
@@ -256,12 +258,14 @@ Size ScrollBarProxy::GetScrollableChildSize(
                                         : result.SetWidth(renderList->GetEstimatedHeight());
         return result;
     }
+#ifndef ARKUI_WEARABLE
     auto renderWaterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(scrollable);
     if (renderWaterFlow) {
         scrollBarAxis == Axis::VERTICAL ? result.SetHeight(renderWaterFlow->GetEstimatedHeight())
                                         : result.SetWidth(renderWaterFlow->GetEstimatedHeight());
         return result;
     }
+#endif
     return result;
 }
 
@@ -294,6 +298,7 @@ void ScrollBarProxy::AdjustParam(const RefPtr<RenderNode>& scrollable, Axis scro
         scrollableChildPosition = renderList->GetLastOffset();
     }
 
+#ifndef ARKUI_WEARABLE
     auto renderWaterFlow = AceType::DynamicCast<V2::RenderWaterFlow>(scrollable);
     if (renderWaterFlow) {
         scrollBarAxis == Axis::VERTICAL ? scrollableChildSize.SetHeight(renderWaterFlow->GetEstimatedHeight())
@@ -302,6 +307,7 @@ void ScrollBarProxy::AdjustParam(const RefPtr<RenderNode>& scrollable, Axis scro
         scrollableChildPosition = renderWaterFlow->GetLastOffset();
         return;
     }
+#endif
 }
 
 } // namespace OHOS::Ace

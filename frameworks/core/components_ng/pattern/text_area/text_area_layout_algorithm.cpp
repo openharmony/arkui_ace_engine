@@ -78,7 +78,8 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
 
     // Paragraph layout.}
     if (isInlineStyle) {
-        auto fontSize = pattern->FontSizeConvertToPx(textStyle.GetFontSize());
+        auto fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
+            textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
         auto paragraphData = CreateParagraphData { false, fontSize };
         CreateInlineParagraph(textStyle, textContent_, false, pattern->GetNakedCharPosition(), paragraphData);
         return InlineMeasureContent(textFieldContentConstraint, layoutWrapper);
@@ -105,10 +106,9 @@ void TextAreaLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         contentHeight = contentSize.Height();
     }
     // Add children height;
-    auto counterNode = pattern->GetCounterNode().Upgrade();
-    if (counterNode && !pattern->IsNormalInlineState()) {
-        auto counterSize = counterNode->GetGeometryNode()->GetFrameSize();
-        contentHeight += counterSize.Height();
+    auto counterDecorator = pattern->GetCounterDecorator();
+    if (counterDecorator && !pattern->IsNormalInlineState()) {
+        contentHeight += counterDecorator->GetDecoratorHeight();
     }
 
     auto finalWidth = 0;
@@ -166,10 +166,9 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
                 SizeF(pattern->GetHorizontalPaddingAndBorderSum(), pattern->GetVerticalPaddingAndBorderSum());
 
     // Remove counterNode height.
-    auto counterNodeLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(0);
-    if (counterNodeLayoutWrapper && !pattern->IsNormalInlineState()) {
-        auto counterHeight = counterNodeLayoutWrapper->GetGeometryNode()->GetFrameSize().Height();
-        size.SetHeight(size.Height() - counterHeight);
+    auto counterDecorator = pattern->GetCounterDecorator();
+    if (counterDecorator && !pattern->IsNormalInlineState()) {
+        size.SetHeight(size.Height() - counterDecorator->GetDecoratorHeight());
     }
 
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
@@ -208,7 +207,7 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
 }
 
-bool TextAreaLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, const std::string& content,
+bool TextAreaLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, const std::u16string& content,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
     // update child position.
@@ -217,7 +216,8 @@ bool TextAreaLayoutAlgorithm::CreateParagraphEx(const TextStyle& textStyle, cons
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, false);
     auto isInlineStyle = pattern->IsNormalInlineState();
-    auto fontSize = pattern->FontSizeConvertToPx(textStyle.GetFontSize());
+    auto fontSize = textStyle.GetFontSize().ConvertToPxDistribute(
+        textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
     auto paragraphData = CreateParagraphData { false, fontSize };
     if (pattern->IsDragging() && !showPlaceHolder_ && !isInlineStyle) {
         CreateParagraph(textStyle, pattern->GetDragContents(), content, false, paragraphData);

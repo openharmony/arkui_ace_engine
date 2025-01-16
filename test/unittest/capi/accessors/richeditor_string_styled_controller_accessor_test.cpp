@@ -22,7 +22,7 @@
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "gmock/gmock.h"
 
-static constexpr auto TEST_TEXT = "test text";
+static constexpr auto TEST_TEXT = u"test text";
 static constexpr int TEST_RESOURCE_ID = 1000;
 
 namespace OHOS::Ace::NG {

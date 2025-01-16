@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
 
+#include "base/utils/utf_helper.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/common/font_manager.h"
 #include "core/common/udmf/udmf_client.h"
@@ -52,7 +53,7 @@ void HyperlinkPattern::EnableDrag()
         auto hyperlinkLayoutProperty = host->GetLayoutProperty<HyperlinkLayoutProperty>();
         CHECK_NULL_RETURN(hyperlinkLayoutProperty, info);
         std::string address = hyperlinkLayoutProperty->GetAddress().value_or("");
-        std::string content = hyperlinkPattern->GetTextForDisplay();
+        std::string content = UtfUtils::Str16ToStr8(hyperlinkPattern->GetTextForDisplay());
         auto json = JsonUtil::Create(true);
         json->Put("url", address.c_str());
         json->Put("title", content.c_str());

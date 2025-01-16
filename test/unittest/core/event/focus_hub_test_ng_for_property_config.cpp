@@ -717,21 +717,21 @@ HWTEST_F(FocusHubTestNg, OnKeyEventNode001, TestSize.Level1)
      * @tc.steps2: call the function OnKeyEvent with FocusType::NODE.
      */
     focusHub->SetFocusType(FocusType::NODE);
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     /**
      * @tc.steps3: call the function OnKeyEvent with FocusType::SCOPE.
      * @tc.expected: The return value of OnKeyEvent is false.
      */
     focusHub->SetFocusType(FocusType::SCOPE);
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 
     /**
      * @tc.steps4: call the function OnKeyEvent with FocusType::DISABLE.
      * @tc.expected: The return value of OnKeyEvent is false.
      */
     focusHub->SetFocusType(FocusType::DISABLE);
-    EXPECT_FALSE(focusHub->OnKeyEvent(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 }
 
 /**
@@ -921,7 +921,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest005, TestSize.Level1)
     focusHub->onPreFocusCallback_ = []() {};
     frameNode->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE, true);
     bool result = true;
-    focusHub->RequestFocusImmediately(false);
+    focusHub->RequestFocusImmediately();
     EXPECT_TRUE(result);
 }
 
@@ -968,35 +968,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest006, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusHubTestNgtest007
- * @tc.desc: Test the function RequestFocusImmediately.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestNgtest007, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(frameNode, nullptr);
-    frameNode->GetOrCreateFocusHub();
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
-    ASSERT_NE(focusHub, nullptr);
-    auto context = NG::PipelineContext::GetCurrentContextSafely();
-    ASSERT_NE(context, nullptr);
-    context->isFocusingByTab_ = false;
-    focusHub->currentFocus_ = false;
-    focusHub->focusType_ = FocusType::NODE;
-    focusHub->focusable_ = true;
-    focusHub->parentFocusable_ = true;
-    eventHub->enabled_ = true;
-    focusHub->onPreFocusCallback_ = []() {};
-    frameNode->layoutProperty_->UpdateVisibility(VisibleType::VISIBLE, true);
-    bool result = true;
-    focusHub->RequestFocusImmediately(true);
-    EXPECT_TRUE(result);
-}
-/**
  * @tc.name: FocusHubTestNgtest008
  * @tc.desc: Test the function OnKeyPreIme.
  * @tc.type: FUNC
@@ -1022,7 +993,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest008, TestSize.Level1)
     focusHub->focusCallbackEvents_ = nullptr;
     focusHub->OnKeyPreIme(info, keyEvent);
     OnKeyConsumeFunc onKeyCallback = [](KeyEventInfo& event) -> bool { return true; };
-    focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
+    focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
     focusHub->OnKeyPreIme(info, keyEvent);
     EXPECT_TRUE(result);
 }
@@ -1117,21 +1088,21 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest011, TestSize.Level1)
     keyEvent.code = KeyCode::KEY_TAB;
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_HOME);
     keyEvent.code = KeyCode::TV_CONTROL_UP;
-    focusHub->OnKeyEventScope(keyEvent);
+    focusHub->HandleEvent(keyEvent);
     keyEvent.code = KeyCode::TV_CONTROL_DOWN;
-    focusHub->OnKeyEventScope(keyEvent);
+    focusHub->HandleEvent(keyEvent);
     keyEvent.code = KeyCode::TV_CONTROL_LEFT;
-    focusHub->OnKeyEventScope(keyEvent);
+    focusHub->HandleEvent(keyEvent);
     keyEvent.code = KeyCode::TV_CONTROL_RIGHT;
-    focusHub->OnKeyEventScope(keyEvent);
+    focusHub->HandleEvent(keyEvent);
     keyEvent.code = KeyCode::KEY_TAB;
-    focusHub->OnKeyEventScope(keyEvent);
+    focusHub->HandleEvent(keyEvent);
     keyEvent.code = KeyCode::KEY_MOVE_HOME;
-    focusHub->OnKeyEventScope(keyEvent);
+    focusHub->HandleEvent(keyEvent);
     keyEvent.code = KeyCode::KEY_MOVE_END;
-    focusHub->OnKeyEventScope(keyEvent);
+    focusHub->HandleEvent(keyEvent);
     keyEvent.code = KeyCode::KEY_MEDIA_PLAY;
-    EXPECT_FALSE(focusHub->OnKeyEventScope(keyEvent));
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
 }
 
 /**
@@ -1152,15 +1123,16 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest012, TestSize.Level1)
     bool result = true;
     KeyEvent keyEvent;
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_HOME);
-    focusHub->RequestNextFocusOfKeyTab(keyEvent);
+    FocusEvent focusEvent(keyEvent);
+    focusHub->RequestNextFocusOfKeyTab(focusEvent);
     MockContainer::SetUp();
     MockContainer::Current()->isDynamicRender_ = true;
-    focusHub->RequestNextFocusOfKeyTab(keyEvent);
+    focusHub->RequestNextFocusOfKeyTab(focusEvent);
     auto* context = frameNode->GetContext();
     context->focusWindowId_ = 1;
-    focusHub->RequestNextFocusOfKeyTab(keyEvent);
+    focusHub->RequestNextFocusOfKeyTab(focusEvent);
     MockContainer::Current()->isDynamicRender_ = false;
-    focusHub->RequestNextFocusOfKeyTab(keyEvent);
+    focusHub->RequestNextFocusOfKeyTab(focusEvent);
     context->focusWindowId_.reset();
     MockContainer::TearDown();
     EXPECT_TRUE(result);
@@ -1185,16 +1157,17 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNgtest013, TestSize.Level1)
     KeyEvent keyEvent;
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
     keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
+    FocusEvent focusEvent(keyEvent);
     auto* context = frameNode->GetContext();
     context->focusWindowId_.reset();
-    focusHub->RequestNextFocusOfKeyTab(keyEvent);
+    focusHub->RequestNextFocusOfKeyTab(focusEvent);
     MockContainer::SetUp();
     MockContainer::Current()->isDynamicRender_ = true;
-    focusHub->RequestNextFocusOfKeyTab(keyEvent);
+    focusHub->RequestNextFocusOfKeyTab(focusEvent);
     context->focusWindowId_ = 1;
-    focusHub->RequestNextFocusOfKeyTab(keyEvent);
+    focusHub->RequestNextFocusOfKeyTab(focusEvent);
     MockContainer::Current()->isDynamicRender_ = false;
-    focusHub->RequestNextFocusOfKeyTab(keyEvent);
+    focusHub->RequestNextFocusOfKeyTab(focusEvent);
     context->focusWindowId_.reset();
     MockContainer::TearDown();
     EXPECT_TRUE(result);

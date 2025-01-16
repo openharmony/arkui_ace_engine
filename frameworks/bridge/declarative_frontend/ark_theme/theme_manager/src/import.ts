@@ -47,7 +47,6 @@ declare class PUV2ViewBase {
 
 // own public interfaces
 declare type Theme = import('../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme').Theme;
-declare type CustomTheme = import('../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme').CustomTheme;
 declare type Colors = import('../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme').Colors;
 declare type CustomColors = import('../../../../../../../../../out/sdk/ohos-sdk/windows/ets/api/@ohos.arkui.theme').CustomColors;
 

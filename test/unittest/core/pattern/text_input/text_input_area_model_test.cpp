@@ -13,73 +13,15 @@
  * limitations under the License.
  */
 
-#include <array>
-#include <cstddef>
-#include <memory>
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <utility>
-#include <vector>
-#ifdef WINDOWS_PLATFORM
-#include <Windows.h>
-#else
-#include <unistd.h>
-#endif
-
-#include "gtest/gtest.h"
-#include <unicode/uversion.h>
-#include <unicode/putil.h>
-#include <unicode/uclean.h>
-
-#define private public
-#define protected public
-
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_data_detector_mgr.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/offset.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/string_utils.h"
-#include "base/utils/type_definition.h"
-#include "core/common/ace_application_info.h"
-#include "core/common/ai/data_detector_mgr.h"
-#include "core/common/ime/constant.h"
-#include "core/common/ime/text_editing_value.h"
-#include "core/common/ime/text_input_action.h"
-#include "core/common/ime/text_input_type.h"
-#include "core/common/ime/text_selection.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/color.h"
-#include "core/components/common/properties/text_style.h"
-#include "core/components/scroll/scroll_bar_theme.h"
-#include "core/components/text_field/textfield_theme.h"
-#include "core/components/theme/theme_manager.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/text_field/text_field_model.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
-#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
-#include "core/components_ng/pattern/text_field/text_input_response_area.h"
-#include "core/event/key_event.h"
-#include "core/event/touch_event.h"
-#include "core/gestures/gesture_info.h"
-#include "core/components/common/properties/text_style_parser.h"
-
-#undef private
-#undef protected
 
 using namespace testing;
 using namespace testing::ext;
@@ -93,8 +35,10 @@ constexpr int32_t DEFAULT_NODE_ID = 1;
 constexpr int32_t MIN_PLATFORM_VERSION = 10;
 const std::string WORLD_TEXT = "world";
 const std::string TEXTCASE_TEXT = "textcase";
+const std::u16string TEXTCASE_TEXT_U16 = u"textcase";
 const std::string HELLO_TEXT = "hello";
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
+const std::u16string DEFAULT_TEXT_U16 = u"abcdefghijklmnopqrstuvwxyz";
 const InputStyle DEFAULT_INPUT_STYLE = InputStyle::INLINE;
 const Dimension DEFAULT_INDENT_SIZE = Dimension(5, DimensionUnit::VP);
 const Dimension DEFAULT_INDENT_SIZE2 = Dimension(6, DimensionUnit::VP);
@@ -193,7 +137,7 @@ void TextInputAreaBase::CreateTextField(
     auto* stack = ViewStackProcessor::GetInstance();
     stack->StartGetAccessRecordingFor(DEFAULT_NODE_ID);
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextInput(placeHolder, text);
+    textFieldModelNG.CreateTextInput(StringUtils::Str8ToStr16(placeHolder), StringUtils::Str8ToStr16(text));
     if (callback) {
         callback(textFieldModelNG);
     }
@@ -756,7 +700,7 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg001, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
 
     /**
      * @tc.step: step2. Set TextInputType
@@ -784,7 +728,7 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg002, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
 
     /**
      * @tc.step: step2. Set SetContentType
@@ -812,7 +756,7 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg003, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
 
     /**
      * @tc.step: step2. Set SetPasswordIcon
@@ -841,7 +785,7 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg004, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
 
     /**
      * @tc.step: step2. Set SetPlaceholderFont
@@ -872,7 +816,7 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg005, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
 
     /**
      * @tc.step: step2. Set SetTextFieldText
@@ -881,11 +825,11 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg005, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     EXPECT_NE(layoutProperty, nullptr);
-    textFieldModelNG.SetTextFieldText(frameNode, DEFAULT_TEXT);
+    textFieldModelNG.SetTextFieldText(frameNode, DEFAULT_TEXT_U16);
     RefPtr<TextFieldPattern> pattern = frameNode->GetPattern<TextFieldPattern>();
     EXPECT_NE(pattern, nullptr);
-    pattern->contentController_->SetTextValue(TEXTCASE_TEXT);
-    textFieldModelNG.SetTextFieldText(frameNode, TEXTCASE_TEXT);
+    pattern->contentController_->SetTextValue(TEXTCASE_TEXT_U16);
+    textFieldModelNG.SetTextFieldText(frameNode, TEXTCASE_TEXT_U16);
     textFieldModelNG.StopTextFieldEditing(frameNode);
     textFieldModelNG.ResetNumberOfLines(frameNode);
     textFieldModelNG.GetMargin(frameNode);
@@ -912,7 +856,7 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg006, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
 
     /**
      * @tc.step: step2. Set Action
@@ -948,7 +892,7 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg007, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
 
     /**
      * @tc.step: step2. Set Action
@@ -991,7 +935,7 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg008, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextInput(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
 
     /**
      * @tc.step: step2. Set Action
@@ -1018,7 +962,7 @@ HWTEST_F(TextInputAreaTest, testFieldModelNg009, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
 
     /**
      * @tc.step: step2. Set Action
@@ -1041,7 +985,7 @@ HWTEST_F(TextInputAreaTest, accessibilityProperty001, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
 
     /**
      * @tc.step: step2. Set Action
@@ -1085,7 +1029,7 @@ HWTEST_F(TextInputAreaTest, accessibilityProperty002, TestSize.Level1)
      * @tc.steps: step1. Initialize text area.
      */
     TextFieldModelNG textFieldModelNG;
-    textFieldModelNG.CreateTextArea(DEFAULT_TEXT, "");
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
 
     /**
      * @tc.step: step2. Set Action

@@ -63,7 +63,8 @@ void SystemWindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
     windowRect.posY_ = std::round(bounds.y_ + session_->GetOffsetY());
     auto ret = session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED, "OnBoundsChanged");
     if (ret != Rosen::WSError::WS_OK) {
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Update rect failed, ret: %{public}d", static_cast<int32_t>(ret));
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Update rect failed, id: %{public}d, ret: %{public}d",
+            session_->GetPersistentId(), static_cast<int32_t>(ret));
     }
 }
 
@@ -80,6 +81,7 @@ void SystemWindowScene::OnVisibleChange(bool visible)
     if (SystemProperties::GetFaultInjectEnabled() && session_->NeedCheckContextTransparent()) {
         PostFaultInjectTask();
     }
+    HandleVisibleChangeCallback(visible);
 }
 
 void SystemWindowScene::OnAttachToFrameNode()
@@ -140,14 +142,15 @@ void SystemWindowScene::SetWindowScenePosition()
     auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
     accessibilityProperty->SetGetWindowScenePosition([weakSession = wptr(session_)] (
-        int32_t& left, int32_t& top, float_t& scaleX, float_t& scaleY) {
+        NG::WindowSceneInfo& windowSceneInfo) {
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
         auto windowRect = session->GetSessionGlobalRect();
-        left = windowRect.posX_;
-        top = windowRect.posY_;
-        scaleX = session->GetScaleX();
-        scaleY = session->GetScaleY();
+        windowSceneInfo.left = windowRect.posX_;
+        windowSceneInfo.top = windowRect.posY_;
+        windowSceneInfo.scaleX = session->GetScaleX();
+        windowSceneInfo.scaleY = session->GetScaleY();
+        windowSceneInfo.innerWindowId = session->GetPersistentId();
     });
 }
 
@@ -208,14 +211,16 @@ void SystemWindowScene::RegisterEventCallback()
             if (!self) {
                 TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
                     "weakThis Upgrade null,id:%{public}d", PointerEvent->GetId());
-                PointerEvent->MarkProcessed();
+                PointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+                WindowSceneHelper::InjectPointerEventForActionCancel(PointerEvent);
                 return;
             }
                 auto host = self->GetHost();
             if (!host) {
                 TAG_LOGE(AceLogTag::ACE_INPUTTRACKING,
                     "GetHost null,id:%{public}d", PointerEvent->GetId());
-                PointerEvent->MarkProcessed();
+                PointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_CANCEL);
+                WindowSceneHelper::InjectPointerEventForActionCancel(PointerEvent);
                 return;
             }
                 WindowSceneHelper::InjectPointerEvent(host, PointerEvent);
@@ -327,6 +332,38 @@ void SystemWindowScene::LostViewFocus()
     auto screenNodeFocusHub = screenNode->GetFocusHub();
     CHECK_NULL_VOID(screenNodeFocusHub);
     screenNodeFocusHub->LostFocus(BlurReason::VIEW_SWITCH);
+}
+
+void SystemWindowScene::RegisterVisibleChangeCallback(
+    int32_t nodeId, std::function<void(bool)> callback)
+{
+    CHECK_NULL_VOID(callback);
+    CHECK_NULL_VOID(session_);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "RegisterVisibleChangeCallback %{public}s[id:%{public}d]"
+        " nodeId: %{public}d, mapSize: %{public}zu", session_->GetSessionInfo().bundleName_.c_str(),
+        session_->GetPersistentId(), nodeId, visibleChangeCallbackMap_.size());
+    visibleChangeCallbackMap_[nodeId] = callback;
+}
+
+void SystemWindowScene::UnRegisterVisibleChangeCallback(int32_t nodeId)
+{
+    CHECK_NULL_VOID(session_);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "UnRegisterVisibleChangeCallback %{public}s[id:%{public}d]"
+        " nodeId: %{public}d, mapSize: %{public}zu", session_->GetSessionInfo().bundleName_.c_str(),
+        session_->GetPersistentId(), nodeId, visibleChangeCallbackMap_.size());
+    auto iter = visibleChangeCallbackMap_.find(nodeId);
+    if (iter == visibleChangeCallbackMap_.end()) {
+        return;
+    }
+
+    visibleChangeCallbackMap_.erase(nodeId);
+}
+
+void SystemWindowScene::HandleVisibleChangeCallback(bool visible)
+{
+    for (const auto& item : visibleChangeCallbackMap_) {
+        item.second(visible);
+    }
 }
 
 void SystemWindowScene::PostCheckContextTransparentTask()

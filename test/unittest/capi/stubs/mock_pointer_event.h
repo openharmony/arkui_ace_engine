@@ -40,6 +40,15 @@ public:
     static constexpr int32_t SOURCE_TYPE_UNKNOWN = 0;
     static constexpr int32_t SOURCE_TYPE_TOUCHSCREEN = 2;
     static constexpr int32_t SOURCE_TYPE_TOUCHPAD = 3;
+
+    enum AxisType {
+        AXIS_TYPE_UNKNOWN,
+        AXIS_TYPE_SCROLL_VERTICAL,
+        AXIS_TYPE_SCROLL_HORIZONTAL,
+        AXIS_TYPE_PINCH,
+        AXIS_TYPE_ROTATE,
+    };
+
 public:
     class PointerItem {
     public:
@@ -54,6 +63,9 @@ public:
         void SetWindowXPos(double x);
         void SetWindowY(int32_t y);
         void SetWindowYPos(double y);
+        int32_t GetToolType() const {return 0;}
+        void SetToolType(int32_t toolType) {}
+        void SetOriginPointerId(int32_t originPointerId) {}
     };
 public:
     PointerEvent(const PointerEvent& other);
@@ -63,6 +75,14 @@ public:
     void SetPointerId(int32_t pointerId);
     void AddPointerItem(PointerItem &pointerItem);
     void SetSourceType(int32_t sourceType);
+    double GetAxisValue(AxisType axis) const {return 0.;}
+    void SetAxisValue(AxisType axis, double axisValue) {}
+    bool GetPointerItem(int32_t pointerId, PointerItem &pointerItem) const {return false;}
+    int32_t GetSourceType() const {return 0;}
+    int32_t GetPointerAction() const {return 0;}
+    void SetDeviceId(int32_t deviceId) {}
+    void SetTargetDisplayId(int32_t displayId) {}
+    void SetId(int32_t id) {}
 };
 } // namespace MMI
 } // namespace OHOS

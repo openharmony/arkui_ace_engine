@@ -20,26 +20,19 @@ namespace OHOS::Ace::NG {
 RefPtr<FrameNode> DialogView::CreateDialogNode(
     const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
 {
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    return CreateDialogNode(nodeId, param, customNode);
+}
+
+RefPtr<FrameNode> DialogView::CreateDialogNode(
+    const int32_t nodeId, const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
+{
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_RETURN(dialogTheme, nullptr);
 
-    std::string tag;
-    switch (param.type) {
-        case DialogType::ALERT_DIALOG: {
-            tag = V2::ALERT_DIALOG_ETS_TAG;
-            break;
-        }
-        case DialogType::ACTION_SHEET: {
-            tag = V2::ACTION_SHEET_DIALOG_ETS_TAG;
-            break;
-        }
-        default:
-            tag = V2::DIALOG_ETS_TAG;
-            break;
-    }
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    std::string tag = GetDialogTag(param);
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);
     RefPtr<FrameNode> dialog = FrameNode::CreateFrameNode(tag, nodeId,
         AceType::MakeRefPtr<DialogPattern>(dialogTheme, customNode));
@@ -51,7 +44,12 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     // update layout and render props
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialog->GetLayoutProperty());
     CHECK_NULL_RETURN(dialogLayoutProp, dialog);
-    dialogLayoutProp->UpdateDialogAlignment(param.alignment);
+    DialogAlignment align = static_cast<DialogAlignment>(dialogTheme->GetAlignDialog());
+    if (param.alignment == DialogAlignment::DEFAULT && align == DialogAlignment::CENTER) {
+        dialogLayoutProp->UpdateDialogAlignment(align);
+    } else {
+        dialogLayoutProp->UpdateDialogAlignment(param.alignment);
+    }
     dialogLayoutProp->UpdateDialogOffset(param.offset);
     dialogLayoutProp->UpdateUseCustomStyle(param.customStyle);
     dialogLayoutProp->UpdateAutoCancel(param.autoCancel);
@@ -108,6 +106,25 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
 
     dialog->MarkModifyDone();
     return dialog;
+}
+
+std::string DialogView::GetDialogTag(const DialogProperties& param)
+{
+    std::string tag;
+    switch (param.type) {
+        case DialogType::ALERT_DIALOG: {
+            tag = V2::ALERT_DIALOG_ETS_TAG;
+            break;
+        }
+        case DialogType::ACTION_SHEET: {
+            tag = V2::ACTION_SHEET_DIALOG_ETS_TAG;
+            break;
+        }
+        default:
+            tag = V2::DIALOG_ETS_TAG;
+            break;
+    }
+    return tag;
 }
 
 } // namespace OHOS::Ace::NG

@@ -77,7 +77,7 @@ class VariableUtilV2 {
   }
 
   class ProviderConsumerUtilV2 {
-    private static readonly ALIAS_PREFIX = '___pc_alias_';
+    public static readonly ALIAS_PREFIX = '___pc_alias_';
 
     /**
      *  meta added to the ViewV2

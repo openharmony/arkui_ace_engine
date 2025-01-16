@@ -32,8 +32,8 @@ static constexpr int TEST_OFFSET = 5;
 static constexpr int TEST_OFFSET_2 = 7;
 static constexpr int TEST_INDEX = 1;
 static constexpr auto TEST_COLOR = "#FFFF0000";
-static const auto TEST_VALUE = "test value";
-static const auto TEST_VALUE_2 = "test value 2";
+static const std::u16string TEST_VALUE = u"test value";
+static const auto TEST_VALUE_2 = u"test value 2";
 static constexpr int TEST_INDEX_2 = 2;
 static constexpr int TEST_FONT_SIZE = 30;
 static constexpr int TEST_FONT_WEIGHT = static_cast<int>(FontWeight::BOLD);
@@ -330,7 +330,8 @@ HWTEST_F(RichEditorModifierTest, setPlaceholderTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholder, nullptr);
 
-    Ark_ResourceStr value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEST_VALUE);
+    Converter::ConvContext ctx;
+    Ark_ResourceStr value = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(TEST_VALUE, &ctx);
     Ark_Font label;
     label.size = Converter::ArkValue<Opt_Length>(TEST_FONT_SIZE);
     label.weight = Converter::ArkUnion<Opt_Union_FontWeight_Number_String, Ark_Number>(TEST_FONT_WEIGHT);
@@ -348,7 +349,7 @@ HWTEST_F(RichEditorModifierTest, setPlaceholderTest, TestSize.Level1)
     std::unique_ptr<JsonValue> placeholderValue = JsonUtil::ParseJsonData(resultStr.c_str());
 
     resultStr = GetAttrValue<std::string>(placeholderValue, ATTRIBUTE_PLACEHOLDER_VALUE_NAME);
-    EXPECT_EQ(resultStr, TEST_VALUE);
+    EXPECT_EQ(StringUtils::Str8ToStr16(resultStr), TEST_VALUE);
 
     std::unique_ptr<JsonValue> styleValue = placeholderValue->GetObject(ATTRIBUTE_PLACEHOLDER_STYLE_NAME);
     resultStr = GetAttrValue<std::string>(styleValue, ATTRIBUTE_PLACEHOLDER_FONT_COLOR_NAME);

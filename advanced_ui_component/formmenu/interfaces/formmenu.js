@@ -23,9 +23,10 @@ const util = requireNapi('util');
 const tag = 'AddFormMenuItem::js::';
 
 async function querySnapshotAsync(want, componentId, uiContext) {
-  let compInfo = uiContext.getComponentUtils().getRectangleById(componentId);  
+  let compInfo = uiContext.getComponentUtils().getRectangleById(componentId); 
+  let imagePackageApi = null;
   try {
-    const imagePackageApi = image.createImagePacker();
+    imagePackageApi = image.createImagePacker();
     const packOpts = {
       format: 'image/webp',
       quality: 50,
@@ -45,6 +46,8 @@ async function querySnapshotAsync(want, componentId, uiContext) {
     want.parameters['ohos.extra.param.key.add_form_to_host_snapshot'] = pixelStr;
   } catch (err) {
     hilog.error(0x3900, tag, 'get pixelmap string error:' + err);
+  } finally {
+    imagePackageApi?.release();
   }
 }
 

@@ -34,6 +34,8 @@ public:
         OnAccessibilityDumpChildInfo, void(const std::vector<std::string>& params, std::vector<std::string>& info));
     MOCK_METHOD5(OnAccessibilityTransferHoverEvent,
         void(float pointX, float pointY, int32_t sourceType, int32_t eventType, int64_t timeMs));
+    MOCK_METHOD2(
+        OnNotifyDumpInfo, void(const std::vector<std::string>& params, std::vector<std::string>& info));
     int SendRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option)
     {
         SendRequest_called = true;

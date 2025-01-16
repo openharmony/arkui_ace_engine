@@ -29,7 +29,7 @@ class ACE_EXPORT IndexerLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(IndexerLayoutAlgorithm, LayoutAlgorithm);
 
 public:
-    IndexerLayoutAlgorithm(int32_t itemCount_) : itemCount_(itemCount_) {}
+    IndexerLayoutAlgorithm() = default;
 
     float GetItemHeight() const
     {
@@ -52,7 +52,6 @@ private:
     float GetMaxItemWidth(LayoutWrapper* layoutWrapper);
     void MeasurePopup(LayoutWrapper* layoutWrapper, uint32_t childCount);
     uint32_t popupSize_ = 0;
-    int32_t itemCount_ = 0;
     float itemSize_ = 0.0f;
     float itemWidth_ = 0.0f;
     float itemHeight_ = 0.0f;

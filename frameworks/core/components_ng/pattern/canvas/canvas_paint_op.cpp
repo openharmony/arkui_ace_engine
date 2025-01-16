@@ -315,6 +315,11 @@ void SetFontSizeOp::Draw(CanvasPaintMethod* method) const
     method->SetFontSize(size);
 }
 
+void SetLetterSpacingOp::Draw(CanvasPaintMethod* method) const
+{
+    method->SetLetterSpacing(letterSpacing);
+}
+
 void SetFontStyleOp::Draw(CanvasPaintMethod* method) const
 {
     method->SetFontStyle(style);

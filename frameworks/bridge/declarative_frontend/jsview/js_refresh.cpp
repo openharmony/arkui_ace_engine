@@ -59,9 +59,8 @@ RefreshModel* RefreshModel::GetInstance()
 
 namespace OHOS::Ace::Framework {
 
-void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSObject>& refreshing)
+void ParseRefreshingObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
-    JSRef<JSVal> changeEventVal = refreshing->GetProperty("changeEvent");
     CHECK_NULL_VOID(changeEventVal->IsFunction());
 
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(changeEventVal));
@@ -156,13 +155,17 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     auto jsOffset = paramObject->GetProperty("offset");
     auto friction = paramObject->GetProperty("friction");
     auto promptText = paramObject->GetProperty("promptText");
+    JSRef<JSVal> changeEventVal;
     RefreshModel::GetInstance()->Create();
 
     if (refreshing->IsBoolean()) {
         RefreshModel::GetInstance()->SetRefreshing(refreshing->ToBoolean());
+        changeEventVal = paramObject->GetProperty("$refreshing");
+        ParseRefreshingObject(info, changeEventVal);
     } else if (refreshing->IsObject()) {
         JSRef<JSObject> refreshingObj = JSRef<JSObject>::Cast(refreshing);
-        ParseRefreshingObject(info, refreshingObj);
+        changeEventVal = refreshingObj->GetProperty("changeEvent");
+        ParseRefreshingObject(info, changeEventVal);
         RefreshModel::GetInstance()->SetRefreshing(refreshingObj->GetProperty("value")->ToBoolean());
     } else {
         RefreshModel::GetInstance()->SetRefreshing(false);
@@ -206,6 +209,7 @@ bool JSRefresh::ParseRefreshingContent(const JSRef<JSObject>& paramObject)
         return false;
     }
     const auto* vm = nodeptr->GetEcmaVM();
+    CHECK_NULL_RETURN(nodeptr->GetLocalHandle()->IsNativePointer(vm), false);
     auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
     auto* frameNode = reinterpret_cast<NG::FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, false);

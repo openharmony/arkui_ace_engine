@@ -14,6 +14,8 @@
  */
 
 #include "reverse_converter.h"
+
+#include "base/utils/string_utils.h"
 #include "validators.h"
 
 namespace OHOS::Ace {
@@ -42,6 +44,11 @@ Ark_String ConvContext::Store(const std::string_view& src)
     result.chars = ptr;
     result.length = src.length();
     return result;
+}
+
+void AssignArkValue(Ark_String& dst, const std::u16string& src, ConvContext *ctx)
+{
+    AssignArkValue(dst, StringUtils::Str16ToStr8(src), ctx);
 }
 
 void AssignArkValue(Ark_Area& dst, const BaseEventInfo& src)
@@ -176,10 +183,10 @@ void AssignArkValue(Ark_Number& dst, const double& src)
     dst.f32 = static_cast<float>(src);
 }
 
-void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src)
+void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx)
 {
     dst.offset = ArkValue<Ark_Number>(src.offset);
-    dst.value = ArkValue<Ark_String>(src.value);
+    dst.value = ArkValue<Ark_String>(src.value, ctx);
 }
 
 void AssignArkValue(Ark_Length& dst, const int& src)

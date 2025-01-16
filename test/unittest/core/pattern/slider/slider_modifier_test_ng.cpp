@@ -111,6 +111,7 @@ constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_WIDTH = 48.0_vp;
 constexpr Dimension BUBBLE_HORIZONTAL_SUITABLEAGING_LEVEL_2_HEIGHT = 64.0_vp;
 constexpr Dimension SUITABLEAGING_LEVEL_1_TEXT_FONT_SIZE = 25.0_vp;
 constexpr Dimension SUITABLEAGING_LEVEL_2_TEXT_FONT_SIZE = 28.0_vp;
+constexpr float SCALE_VALUE = 1.5f;
 } // namespace
 class SliderModifierTestNg : public testing::Test {
 public:
@@ -161,7 +162,7 @@ void SliderModifierTestNg::SetSliderContentModifier(SliderContentModifier& slide
     sliderContentModifier.SetStepColor(TEST_COLOR);
     sliderContentModifier.SetStepRatio(SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     sliderContentModifier.SetBackgroundSize(POINTF_START, POINTF_END);
-    sliderContentModifier.SetSelectColor(TEST_COLOR);
+    sliderContentModifier.SetSelectColor(SliderModelNG::CreateSolidGradient(TEST_COLOR));
     sliderContentModifier.SetBlockColor(TEST_COLOR);
     SizeF blockSize;
     sliderContentModifier.SetBlockSize(blockSize);
@@ -258,7 +259,8 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest001, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::HORIZONTAL));
-    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
+        SliderModelNG::CreateSolidGradient(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::DEFAULT));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
@@ -315,7 +317,8 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest002, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::HORIZONTAL));
-    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
+        SliderModelNG::CreateSolidGradient(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::SHAPE));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
@@ -370,7 +373,8 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest003, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::FREE));
-    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
+        SliderModelNG::CreateSolidGradient(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::SHAPE));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
@@ -430,7 +434,8 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest004, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::HORIZONTAL));
-    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
+        SliderModelNG::CreateSolidGradient(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::SHAPE));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::INSET));
@@ -483,7 +488,8 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest005, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::FREE));
-    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
+        SliderModelNG::CreateSolidGradient(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::SHAPE));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
@@ -538,7 +544,8 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest006, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::FREE));
-    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
+        SliderModelNG::CreateSolidGradient(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::SHAPE));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
@@ -593,7 +600,8 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest007, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::FREE));
-    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
+        SliderModelNG::CreateSolidGradient(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::SHAPE));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::INSET));
@@ -646,7 +654,8 @@ HWTEST_F(SliderModifierTestNg, SliderContentModifierTest008, TestSize.Level1)
     EXPECT_EQ(sliderContentModifier.stepColor_->Get(), LinearColor(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.stepRatio_->Get(), SLIDER_CONTENT_MODIFIER_STEP_RATIO);
     EXPECT_EQ(sliderContentModifier.directionAxis_->Get(), static_cast<int>(Axis::FREE));
-    EXPECT_EQ(sliderContentModifier.selectColor_->Get(), LinearColor(TEST_COLOR));
+    EXPECT_EQ(sliderContentModifier.selectGradientColor_->Get().GetGradient(),
+        SliderModelNG::CreateSolidGradient(TEST_COLOR));
     EXPECT_EQ(sliderContentModifier.blockType_->Get(), static_cast<int>(SliderModelNG::BlockStyleType::SHAPE));
     EXPECT_EQ(sliderContentModifier.shape_, basicShape);
     EXPECT_EQ(sliderContentModifier.sliderMode_->Get(), static_cast<int>(SliderModelNG::SliderMode::OUTSET));
@@ -1688,4 +1697,126 @@ HWTEST_F(SliderModifierTestNg, SliderTipModifierTest005, TestSize.Level1)
     EXPECT_EQ(sliderTipModifier.bubbleSize_, SizeF(bubbleSizeHeight, bubbleSizeWidth));
 }
 
+/**
+ * @tc.name: SliderContentModifierTest029
+ * @tc.desc: TEST SliderContentModifier DrawDefaultBlock
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Mock track background default value
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    sliderTheme->focusedScaleValue_ = 1.5;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    /**
+     * @tc.steps: step2. set sliderContentModifier attribute and call DrawDefaultBlock function.
+     */
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderContentModifier.DrawDefaultBlock(context);
+    /**
+     * @tc.steps: step2. set BlockSize attribute and call DrawDefaultBlock function.
+     */
+    sliderContentModifier.SetBlockSize(BLOCK_SIZE_F);
+    auto blockSize = sliderContentModifier.blockSize_->Get();
+    float blockRadius = std::min(blockSize.Width(), blockSize.Height()) * HALF;
+    float radius = blockRadius;
+    sliderContentModifier.isEnlarge_ = true;
+    sliderContentModifier.DrawDefaultBlock(context);
+    EXPECT_TRUE(GreatOrEqual(radius * SCALE_VALUE, radius * sliderTheme->focusedScaleValue_));
+}
+
+/**
+ * @tc.name: SliderContentModifierTest030
+ * @tc.desc: TEST SliderContentModifier DrawDefaultBlock
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Mock track background default value
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    sliderTheme->focusedScaleValue_ = 1.5;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    /**
+     * @tc.steps: step2. set sliderContentModifier attribute and call DrawDefaultBlock function.
+     */
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderContentModifier.DrawDefaultBlock(context);
+    /**
+     * @tc.steps: step2. set BlockSize attribute and call DrawDefaultBlock function.
+     */
+    sliderContentModifier.SetBlockSize(BLOCK_SIZE_F);
+    auto blockSize = sliderContentModifier.blockSize_->Get();
+    float diameter = std::min(blockSize.Width(), blockSize.Height());
+    auto penRadius = (diameter + parameters.hotCircleShadowWidth) * HALF;
+    sliderContentModifier.isEnlarge_ = true;
+    sliderContentModifier.DrawHoverOrPress(context);
+    EXPECT_TRUE(GreatOrEqual(penRadius * SCALE_VALUE, penRadius * sliderTheme->focusedScaleValue_));
+}
+
+/**
+ * @tc.name: SliderContentModifierTest031
+ * @tc.desc: TEST SliderContentModifier SetBoardColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderModifierTestNg, SliderContentModifierTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step0. Mock track background default value
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto sliderTheme = AceType::MakeRefPtr<SliderTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(sliderTheme));
+    /**
+     * @tc.steps: step1. create frameNode and sliderContentModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(sliderPaintProperty, nullptr);
+    SliderContentModifier::Parameters parameters;
+    SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
+    /**
+     * @tc.steps: step2. set sliderContentModifier attribute and call SetBoardColor function.
+     */
+    sliderContentModifier.SetIsHovered(false);
+    sliderContentModifier.SetBoardColor();
+    EXPECT_FALSE(sliderContentModifier.mouseHoverFlag_);
+}
 } // namespace OHOS::Ace::NG

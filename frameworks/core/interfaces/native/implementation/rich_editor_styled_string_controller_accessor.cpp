@@ -28,12 +28,12 @@ void AssignArkValue(Ark_Materialized& dst, const std::string& src)
     auto str2 = const_cast<std::string&>(src);
     dst.ptr = &str2;
 }
-void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeValue& src)
+void AssignArkValue(Ark_StyledStringChangeValue& dst, const StyledStringChangeValue& src, ConvContext *ctx)
 {
     auto str = src.GetReplacementString();
     auto replacementString = reinterpret_cast<MutableSpanString*>(str.GetRawPtr());
     if (replacementString) {
-        dst.replacementString = Converter::ArkValue<Ark_StyledString>(replacementString->GetString());
+        dst.replacementString = Converter::ArkValue<Ark_StyledString>(replacementString->GetString(), ctx);
     }
     dst.range.start = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().start);
     dst.range.end = Converter::ArkValue<Opt_Number>(src.GetRangeAfter().end);
@@ -87,7 +87,8 @@ void OnContentChangedImpl(RichEditorStyledStringControllerPeer* peer,
     auto onWillChangeCapture = std::make_shared<Callback_StyledStringChangeValue_Boolean>(*onWillChangeArk);
     auto onWillChange = [onWillChangeCapture, arkCallback = CallbackHelper(*onWillChangeCapture)](
         const StyledStringChangeValue& value) {
-        auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value);
+        Converter::ConvContext ctx;
+        auto changeValue = Converter::ArkValue<Ark_StyledStringChangeValue>(value, &ctx);
         Callback_Boolean_Void continuation;
         arkCallback.Invoke(changeValue, continuation);
         return true;

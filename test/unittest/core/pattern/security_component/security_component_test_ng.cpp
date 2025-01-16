@@ -691,6 +691,7 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentLocationLayoutAlgoTest00
 
     property->UpdateBackgroundType(static_cast<int32_t>(ButtonType::CAPSULE));
     property->UpdateTextIconLayoutDirection(SecurityComponentLayoutDirection::VERTICAL);
+    property->UpdateAlignment(Alignment::CENTER_LEFT);
     pattern->OnModifyDone();
 
     layoutAlgo->Measure(layoutWrapper.rawPtr_);

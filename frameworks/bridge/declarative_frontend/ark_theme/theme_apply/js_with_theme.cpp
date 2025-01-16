@@ -27,6 +27,7 @@ void JSWithTheme::JSBind(BindingTarget globalObj)
     JSClass<JSWithTheme>::Declare("WithTheme");
     JSClass<JSWithTheme>::StaticMethod("sendThemeToNative", &JSWithTheme::SendThemeToNative, MethodOptions::NONE);
     JSClass<JSWithTheme>::StaticMethod("removeThemeInNative", &JSWithTheme::RemoveThemeInNative, MethodOptions::NONE);
+    JSClass<JSWithTheme>::StaticMethod("setThemeScopeId", &JSWithTheme::SetThemeScopeId, MethodOptions::NONE);
     JSClass<JSWithTheme>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -58,10 +59,25 @@ void JSWithTheme::SendThemeToNative(const JSCallbackInfo& info)
     colors.SetColors(jsColorsArray);
 
     JSThemeScope::jsThemes[themeScopeId].SetColors(colors);
-    // keep info about WithTheme containers usage
-    if (themeScopeId > 0) {
-        JSThemeScope::jsThemeScopeEnabled = true;
+    // save the current theme when Theme was created by WithTheme container
+    if (JSThemeScope::isCurrentThemeDefault || themeScopeId > 0) {
+        std::optional<JSTheme> themeOpt = std::make_optional(JSThemeScope::jsThemes[themeScopeId]);
+        JSThemeScope::jsCurrentTheme.swap(themeOpt);
     }
+}
+
+void JSWithTheme::SetThemeScopeId(const JSCallbackInfo& info)
+{
+    auto jsThemeScopeId = info[0];
+    if (!jsThemeScopeId->IsNumber()) {
+        return;
+    }
+    auto themeScopeId = jsThemeScopeId->ToNumber<int32_t>();
+    JSThemeScope::isCurrentThemeDefault = themeScopeId == 0;
+    auto theme = JSThemeScope::jsThemes.find(themeScopeId);
+    std::optional<JSTheme> themeOpt = (theme != JSThemeScope::jsThemes.end()) ?
+        std::make_optional(theme->second) : std::nullopt;
+    JSThemeScope::jsCurrentTheme.swap(themeOpt);
 }
 
 } // namespace OHOS::Ace::Framework
