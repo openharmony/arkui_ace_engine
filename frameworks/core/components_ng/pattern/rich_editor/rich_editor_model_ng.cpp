@@ -611,4 +611,19 @@ void RichEditorModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPr
     CHECK_NULL_VOID(pattern);
     pattern->SetStopBackPress(isStopBackPress);
 }
+
+void RichEditorModelNG::SetKeyboardAppearance(KeyboardAppearance value)
+{
+    auto richEditorPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<RichEditorPattern>();
+    CHECK_NULL_VOID(richEditorPattern);
+    richEditorPattern->SetKeyboardAppearance(value);
+}
+
+void RichEditorModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetKeyboardAppearance(value);
+}
 } // namespace OHOS::Ace::NG
