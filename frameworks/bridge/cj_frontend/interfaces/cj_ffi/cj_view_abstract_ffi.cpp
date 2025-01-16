@@ -56,7 +56,7 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 const std::vector<BorderStyle> BORDER_STYLES = { BorderStyle::SOLID, BorderStyle::DASHED, BorderStyle::DOTTED };
 const std::vector<ImageRepeat> IMAGES_REPEATS = { ImageRepeat::NO_REPEAT, ImageRepeat::REPEAT_X, ImageRepeat::REPEAT_Y,
     ImageRepeat::REPEAT };
-const std::vector<FontStyle> FONT_STYLES = {FontStyle::NORMAL, FontStyle:: ITALIC};
+const std::vector<FontStyle> FONT_STYLES = {FontStyle::NORMAL, FontStyle::ITALIC};
 const std::vector<BackgroundImageSizeType> IMAGE_SIZES = { BackgroundImageSizeType::CONTAIN,
     BackgroundImageSizeType::COVER, BackgroundImageSizeType::AUTO, BackgroundImageSizeType::FILL };
 const std::vector<TextDirection> TEXT_DIRECTIONS = { TextDirection::LTR, TextDirection::RTL, TextDirection::AUTO };
@@ -171,7 +171,6 @@ void SetPopupParams(CJBindPopupParams bindPopupParams, RefPtr<OHOS::Ace::PopupPa
     if (bindPopupParams.width > 0) {
         popupParam->SetChildWidth(widthDim);
     }
-
     if (bindPopupParams.radius > 0) {
         popupParam->SetRadius(radiusDim);
     }
@@ -198,7 +197,7 @@ void DealBindPopupParams(bool isShow, const CJBindPopupParams& bindPopupParams,
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetIsShow(isShow);
     popupParam->SetMessage(bindPopupParams.message);
-    SetPopupParams(bindPopupParams, popupParam)
+    SetPopupParams(bindPopupParams, popupParam);
     auto onStateChangeCallback = [onStateChangeFunc](const std::string& param) {
         auto paramData = JsonUtil::ParseJsonString(param);
         onStateChangeFunc(paramData->GetBool("isVisible"));
@@ -208,7 +207,6 @@ void DealBindPopupParams(bool isShow, const CJBindPopupParams& bindPopupParams,
         std::function<void(const int32_t& info)> onWillDismissFunc =
             [nativeFunc = CJLambda::Create(bindPopupParams.onWillDismiss.value)]
             (const int32_t& info) {nativeFunc(info);};
-        
         popupParam->SetOnWillDismiss(onWillDismissFunc);
     }
     if (bindPopupParams.transition.hasValue) {
@@ -1153,7 +1151,7 @@ void FfiOHOSAceFrameworkViewAbstractKeyShortcutByChar(
     FfiOHOSAceFrameworkViewAbstractKeyShortcut(keyValue, keysArray, size, callback);
 }
 
-void SetCustomPopupParams(CJBindCustomPopup value, RefPtr<OHOS::Ace::PopupParam> popupParam) 
+void SetCustomPopupParams(CJBindCustomPopup value, RefPtr<OHOS::Ace::PopupParam> popupParam)
 {
     popupParam->SetPlacement(static_cast<Placement>(value.placement));
     popupParam->SetMaskColor(Color(value.maskColor));
