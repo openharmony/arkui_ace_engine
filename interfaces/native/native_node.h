@@ -6864,13 +6864,18 @@ typedef enum {
     NODE_RADIO_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RADIO,
 
     /**
-     * @brief Defines the event triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX_GROOUP</b>
-     * component changes.
+     * @brief Defines the callback triggered when the selected status of the <b>ARKUI_NODE_CHECKBOX_GROOUP</b>
+     * or checkbox changes.
      *
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
-     * {@link ArkUI_NodeComponentEvent}. \n
-     * <b>ArkUI_NodeComponentEvent.data[0].i32</b><b>1</b>: selected; <b>0</b>: not selected.\n
-     * 
+     * {@link ArkUI_StringAsyncEvent}. \n
+     * <b>ArkUI_StringAsyncEvent.pStr</b>
+     * Name: The names of the selected checkboxes;
+     * Status:
+     * 0: All checkboxes are selected.
+     * 1: Some checkboxes are selected.
+     * 2: No checkboxes are selected. \n
+     *
      * @since 16
      */
     NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX_GROUP,
