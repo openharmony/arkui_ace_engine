@@ -5773,12 +5773,13 @@ bool RichEditorPattern::OnBackPressed()
 {
     auto tmpHost = GetHost();
     CHECK_NULL_RETURN(tmpHost, false);
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "RichEditor %{public}d receives back press event", tmpHost->GetId());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "RichEditor %{public}d receives back press event, isStopBackPress=%{public}d",
+        tmpHost->GetId(), isStopBackPress_);
     if (SelectOverlayIsOn()) {
         CloseSelectOverlay();
         textSelector_.Update(textSelector_.destinationOffset);
         StartTwinkling();
-        return IsStopBackPress();
+        return isStopBackPress_;
     }
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (!imeShown_ && !isCustomKeyboardAttached_) {
@@ -5794,7 +5795,7 @@ bool RichEditorPattern::OnBackPressed()
 #if defined(ANDROID_PLATFORM)
     return false;
 #else
-    return IsStopBackPress();
+    return isStopBackPress_;
 #endif
 }
 
