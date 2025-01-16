@@ -34,26 +34,26 @@ const PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY = 'progress_button_emphasiz
 export class ProgressButton extends ViewPU {
   constructor(h1, i1, j1, k1 = -1, l1 = undefined, m1) {
     super(h1, j1, k1, m1);
-    if (typeof l1 === 'function') {
+    if (typeof l1 === "function") {
       this.paramsGenerator_ = l1;
     }
-    this.__progress = new SynchedPropertySimpleOneWayPU(i1.progress, this, 'progress');
-    this.__textProgress = new ObservedPropertySimplePU(EMPTY_STRING, this, 'textProgress');
-    this.__content = new SynchedPropertySimpleOneWayPU(i1.content, this, 'content');
-    this.__isLoading = new ObservedPropertySimplePU(false, this, 'isLoading');
+    this.__progress = new SynchedPropertySimpleOneWayPU(i1.progress, this, "progress");
+    this.__textProgress = new ObservedPropertySimplePU(EMPTY_STRING, this, "textProgress");
+    this.__content = new SynchedPropertySimpleOneWayPU(i1.content, this, "content");
+    this.__isLoading = new ObservedPropertySimplePU(false, this, "isLoading");
     this.progressButtonWidth = BUTTON_NORMARL_WIDTH;
     this.clickCallback = () => { };
-    this.__enable = new SynchedPropertySimpleOneWayPU(i1.enable, this, 'enable');
-    this.__colorOptions = new SynchedPropertyObjectOneWayPU(i1.colorOptions, this, 'colorOptions');
-    this.__progressButtonRadius = new SynchedPropertyObjectOneWayPU(i1.progressButtonRadius, this, 'progressButtonRadius');
-    this.__progressColor = new ObservedPropertyObjectPU('#330A59F7', this, 'progressColor');
-    this.__containerBorderColor = new ObservedPropertyObjectPU('#330A59F7', this, 'containerBorderColor');
-    this.__containerBackgroundColor = new ObservedPropertyObjectPU({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_foreground_contrary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }, this, 'containerBackgroundColor');
-    this.__textHeight = new ObservedPropertyObjectPU(BUTTON_NORMARL_HEIGHT, this, 'textHeight');
-    this.__buttonBorderRadius = new ObservedPropertySimplePU(BUTTON_BORDER_RADIUS, this, 'buttonBorderRadius');
+    this.__enable = new SynchedPropertySimpleOneWayPU(i1.enable, this, "enable");
+    this.__colorOptions = new SynchedPropertyObjectOneWayPU(i1.colorOptions, this, "colorOptions");
+    this.__progressButtonRadius = new SynchedPropertyObjectOneWayPU(i1.progressButtonRadius, this, "progressButtonRadius");
+    this.__progressColor = new ObservedPropertyObjectPU('#330A59F7', this, "progressColor");
+    this.__containerBorderColor = new ObservedPropertyObjectPU('#330A59F7', this, "containerBorderColor");
+    this.__containerBackgroundColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_foreground_contrary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "containerBackgroundColor");
+    this.__textHeight = new ObservedPropertyObjectPU(BUTTON_NORMARL_HEIGHT, this, "textHeight");
+    this.__buttonBorderRadius = new ObservedPropertySimplePU(BUTTON_BORDER_RADIUS, this, "buttonBorderRadius");
     this.setInitiallyProvidedValue(i1);
-    this.declareWatch('progress', this.getProgressContext);
-    this.declareWatch('isLoading', this.getLoadingProgress);
+    this.declareWatch("progress", this.getProgressContext);
+    this.declareWatch("isLoading", this.getLoadingProgress);
     this.finalizeConstruction();
   }
   setInitiallyProvidedValue(g1) {
@@ -335,7 +335,7 @@ export class ProgressButton extends ViewPU {
     }, Row);
     this.observeComponentCreation2((c, d) => {
       Text.create(this.isLoading ? this.textProgress : this.content);
-      Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_button3'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+      Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_button3'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
       Text.fontWeight(FontWeight.Medium);
       Text.key(PROGRESS_BUTTON_PRIMARY_FONT_KEY);
       Text.fontColor(this.colorOptions?.textColor);

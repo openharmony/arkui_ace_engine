@@ -86,7 +86,7 @@ export struct ProgressButton {
   }
 
   private getProgressButtonRadius(): LengthMetrics {
-    if (!this.progressButtonRadius || this.progressButtonRadius.unit == LengthUnit.PERCENT) {
+    if (!this.progressButtonRadius || this.progressButtonRadius.unit === LengthUnit.PERCENT) {
       return LengthMetrics.vp(this.buttonBorderRadius);
     } else if (this.progressButtonRadius.value < 0) {
       return LengthMetrics.vp(0);
