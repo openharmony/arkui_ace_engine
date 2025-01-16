@@ -1374,11 +1374,11 @@ struct CustomDialogContentComponent {
       if (button.defaultFocus === false) {
         falseNum++;
       }
-      // 所有按钮defaultFocus都设置为false
-      if (falseNum === buttonList.length) {
-        this.isAllFocusFalse = true;
-      }
-    })
+    });
+    // 所有按钮defaultFocus都设置为false
+    if (falseNum === buttonList.length) {
+      this.isAllFocusFalse = true;
+    }
   }
 
   @Builder
