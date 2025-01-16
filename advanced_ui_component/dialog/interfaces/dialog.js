@@ -3316,10 +3316,10 @@ class CustomDialogContentComponent extends ViewPU {
             if (button.defaultFocus === false) {
                 falseNum++;
             }
-            if (falseNum === buttonList.length) {
-                this.isAllFocusFalse = true;
-            }
         });
+        if (falseNum === buttonList.length) {
+            this.isAllFocusFalse = true;
+        }
     }
 
     ButtonBuilder(g6 = null) {
