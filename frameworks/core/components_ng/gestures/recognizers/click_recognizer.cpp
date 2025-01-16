@@ -46,6 +46,7 @@ void ClickRecognizer::ForceCleanRecognizer()
     tapDeadlineTimer_.Cancel();
     currentTouchPointsNum_ = 0;
     responseRegionBuffer_.clear();
+    paintRect_ = RectF();
 }
 
 bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
@@ -68,10 +69,7 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
         auto host = frameNode.Upgrade();
         CHECK_NULL_RETURN(host, false);
         NGGestureRecognizer::Transform(localPoint, frameNode, false, isPostEventResult_, event.postEventNodeId);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
-        auto paintRect = renderContext->GetPaintRectWithoutTransform();
-        localPoint = localPoint + paintRect.GetOffset();
+        localPoint = localPoint + paintRect_.GetOffset();
         if (!host->InResponseRegionList(localPoint, responseRegionBuffer_)) {
             TAG_LOGI(AceLogTag::ACE_GESTURE,
                 "InputTracking id:%{public}d, this MOVE/UP event is out of region, try to reject click gesture",
@@ -241,10 +239,6 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
     InitGlobalValue(event.sourceType);
-    if (!IsInAttachedNode(event, false)) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
     UpdateInfoWithDownEvent(event);
 }
 
@@ -253,6 +247,7 @@ void ClickRecognizer::UpdateInfoWithDownEvent(const TouchEvent& event)
     // The last recognition sequence has been completed, reset the timer.
     if (tappedCount_ > 0 && currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();
+        paintRect_ = RectF();
         tapDeadlineTimer_.Cancel();
     }
     if (currentTouchPointsNum_ == 0) {
@@ -260,6 +255,9 @@ void ClickRecognizer::UpdateInfoWithDownEvent(const TouchEvent& event)
         if (!frameNode.Invalid()) {
             auto host = frameNode.Upgrade();
             responseRegionBuffer_ = host->GetResponseRegionListForRecognizer(static_cast<int32_t>(event.sourceType));
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
+            paintRect_ = renderContext->GetPaintRectWithoutTransform();
         }
     }
     if (fingersId_.find(event.id) == fingersId_.end()) {
@@ -338,6 +336,7 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     }
     if (currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();
+        paintRect_ = RectF();
     }
     bool fingersNumberSatisfied = equalsToFingers_;
     // Check whether multi-finger taps are completed in count_ times

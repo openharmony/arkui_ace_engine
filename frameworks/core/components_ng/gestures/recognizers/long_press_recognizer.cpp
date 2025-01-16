@@ -117,11 +117,6 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
 
-    if (!IsInAttachedNode(event)) {
-        extraInfo_ += "Reject: not in attached node.";
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
     int32_t curDuration = duration_;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (!IsPostEventResult()) {
