@@ -144,6 +144,7 @@ void UpdateBackgroundImagePosition(const Align& align, BackgroundImagePosition& 
 
 void SetPopupParams(CJBindPopupParams bindPopupParams, RefPtr<OHOS::Ace::PopupParam> popupParam)
 {
+    popupParam->SetMessage(bindPopupParams.message);
     popupParam->SetPlacement(static_cast<Placement>(bindPopupParams.placement));
     popupParam->SetShowInSubWindow(bindPopupParams.showInSubWindow);
     popupParam->SetTextColor(Color(bindPopupParams.textColor));
@@ -196,7 +197,6 @@ void DealBindPopupParams(bool isShow, const CJBindPopupParams& bindPopupParams,
 {
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetIsShow(isShow);
-    popupParam->SetMessage(bindPopupParams.message);
     SetPopupParams(bindPopupParams, popupParam);
     auto onStateChangeCallback = [onStateChangeFunc](const std::string& param) {
         auto paramData = JsonUtil::ParseJsonString(param);
