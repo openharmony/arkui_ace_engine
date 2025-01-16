@@ -923,7 +923,7 @@ public:
     }
     OffsetF GetOffsetInScreen();
     OffsetF GetOffsetInSubwindow(const OffsetF& subwindowOffset);
-    RefPtr<PixelMap> GetPixelMap();
+    RefPtr<PixelMap> GetDragPixelMap();
     RefPtr<FrameNode> GetPageNode();
     RefPtr<FrameNode> GetFirstAutoFillContainerNode();
     RefPtr<FrameNode> GetNodeContainer();
