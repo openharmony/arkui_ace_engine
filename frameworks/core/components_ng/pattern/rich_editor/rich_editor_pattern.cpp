@@ -3747,7 +3747,7 @@ SpanItemType RichEditorPattern::GetSpanType(int32_t index)
 {
     auto it = GetSpanIter(index);
     CHECK_NULL_RETURN((it != spans_.end()), SpanItemType::NORMAL);
-    auto spanItem = *it;
+    auto& spanItem = *it;
     CHECK_NULL_RETURN(spanItem, SpanItemType::NORMAL);
     return spanItem->spanItemType;
 }
