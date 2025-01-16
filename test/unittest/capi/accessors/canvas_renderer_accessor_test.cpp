@@ -2155,10 +2155,6 @@ HWTEST_F(CanvasRendererAccessorTest, clip0Test, TestSize.Level1)
         accessor_->clip0(peer_, &actual);
         auto rule = *holder->fillRule;
         auto value = static_cast<std::underlying_type_t<CanvasFillRule>>(*holder->fillRule);
-
-        std::printf("clip: holder value: %d == %d isCalled: %d %d\n", value, expected, holder->isCalled, holder->isCalled2);
-      
-      
         EXPECT_TRUE(holder->isCalled);
         EXPECT_TRUE(holder->isCalled2);
         EXPECT_EQ(rule, expected);
@@ -2198,13 +2194,6 @@ HWTEST_F(CanvasRendererAccessorTest, clip1Test, TestSize.Level1)
             auto rx = result[0].second.para1;
             auto ry = result[0].second.para2;
             auto rule = *holder->fillRule;
-
-            std::printf("clip1: holder  rule: %s==%s, cmd: %s==%s x:%.2f==%.2f  y: %.2f==%.2f isCalled: %d %d \n",
-            rule == CanvasFillRule::EVENODD?"evenodd":"nonzero",
-            expected == CanvasFillRule::EVENODD?"evenodd":"nonzero",
-            rcmd == PathCmd::MOVE_TO ? "move" : "line", cmd == PathCmd::MOVE_TO ? "move" : "line",
-             rx, x, ry, y, holder->isCalled, holder->isCalled2);
-
             EXPECT_TRUE(holder->isCalled);
             EXPECT_TRUE(holder->isCalled2);
             EXPECT_EQ(rule, expected);
@@ -2230,10 +2219,6 @@ HWTEST_F(CanvasRendererAccessorTest, fill0Test, TestSize.Level1)
         accessor_->fill0(peer_, &actual);
         auto rule = *holder->fillRule;
         auto value = static_cast<std::underlying_type_t<CanvasFillRule>>(*holder->fillRule);
-
-        std::printf("fill: holder value: %d == %d isCalled: %d %d\n", value, expected, holder->isCalled, holder->isCalled2);
-      
-      
         EXPECT_TRUE(holder->isCalled);
         EXPECT_TRUE(holder->isCalled2);
         EXPECT_EQ(rule, expected);
@@ -2273,13 +2258,6 @@ HWTEST_F(CanvasRendererAccessorTest, fill1Test, TestSize.Level1)
             auto rx = result[0].second.para1;
             auto ry = result[0].second.para2;
             auto rule = *holder->fillRule;
-
-            std::printf("fill1: holder  rule: %s==%s, cmd: %s==%s x:%.2f==%.2f  y: %.2f==%.2f isCalled: %d %d \n",
-            rule == CanvasFillRule::EVENODD?"evenodd":"nonzero",
-            expected == CanvasFillRule::EVENODD?"evenodd":"nonzero",
-            rcmd == PathCmd::MOVE_TO ? "move" : "line", cmd == PathCmd::MOVE_TO ? "move" : "line",
-             rx, x, ry, y, holder->isCalled, holder->isCalled2);
-
             EXPECT_TRUE(holder->isCalled);
             EXPECT_TRUE(holder->isCalled2);
             EXPECT_EQ(rule, expected);
@@ -2289,12 +2267,5 @@ HWTEST_F(CanvasRendererAccessorTest, fill1Test, TestSize.Level1)
         }
     }
     holder->TearDown();
-}
-
-
-HWTEST_F(CanvasRendererAccessorTest, fill1Test2, TestSize.Level1)
-{
-    int *p = nullptr;
-    *p = 0;
 }
 } // namespace OHOS::Ace::NG
