@@ -735,7 +735,7 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest046, TestSize.Le
  * @tc.desc: Create DragEventActuator and invoke CreateTiledPixelMap function.
  * @tc.type: FUNC
  */
-HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest048, TestSize.Level1)
+HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest047, TestSize.Level1)
 {
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     ASSERT_NE(eventHub, nullptr);
