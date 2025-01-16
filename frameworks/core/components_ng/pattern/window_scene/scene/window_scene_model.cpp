@@ -84,8 +84,7 @@ void WindowSceneModel::Create(int32_t persistentId)
     auto windowNode = WindowNode::GetOrCreateWindowNode(V2::WINDOW_SCENE_ETS_TAG, nodeId, persistentId,
         [sceneSession]() { return AceType::MakeRefPtr<WindowScene>(sceneSession); });
     if (windowNode == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE,
-            "session is nullptr, persistentId: %{public}d", persistentId);
+        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "windowNode is nullptr, persistentId: %{public}d", persistentId);
         return;
     }
     stack->Push(windowNode);
