@@ -545,6 +545,12 @@ HWTEST_F(MenuItemPatternBasicTestNg, AddClickableArea001, TestSize.Level1)
     ASSERT_NE(subMenuPattern, nullptr);
     subMenuPattern->SetParentMenuItem(subMenuParent);
     menuItemPattern->expandingMode_ = SubMenuExpandingMode::EMBEDDED;
+    auto contentNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    auto labelNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    menuItemPattern->content_ = contentNode;
+    menuItemPattern->label_ = labelNode;
     menuItemPattern->AddClickableArea();
 }
 
@@ -612,6 +618,7 @@ HWTEST_F(MenuItemPatternBasicTestNg, UpdateText001, TestSize.Level1)
     MenuItemModelNG MenuItemModelInstance;
     MenuItemProperties itemOption;
     itemOption.content = "content";
+    itemOption.labelInfo = "labelInfo";
     MenuItemModelInstance.Create(itemOption);
     auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(itemNode, nullptr);
@@ -627,7 +634,7 @@ HWTEST_F(MenuItemPatternBasicTestNg, UpdateText001, TestSize.Level1)
     // call UpdateText
     itemPattern->OnModifyDone();
 
-    EXPECT_EQ(rightRow->GetChildren().size(), 0u);
+    EXPECT_EQ(rightRow->GetChildren().size(), 1u);
     ASSERT_EQ(leftRow->GetChildren().size(), 1u);
     auto contentNode = AceType::DynamicCast<FrameNode>(leftRow->GetChildAtIndex(0));
     ASSERT_NE(contentNode, nullptr);
