@@ -65,11 +65,6 @@ struct NativeOptionRect {
     NativeRectangle value;
 };
 
-struct NativeOptionCallback1Param {
-    bool hasValue;
-    void (*value)(int32_t reason);
-};
-
 struct NativeBorderRadiuses {
     double topLeftRadiuses;
     int32_t topLeftUnit;
