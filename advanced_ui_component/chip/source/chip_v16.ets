@@ -393,7 +393,8 @@ export struct ChipComponent {
   @State suffixSymbolWidth: number = 0;
   @State breakPoint: BreakPointsType = BreakPointsType.SM;
   @State fontSizeScale: number = 1;
-  private isSuffixIconFocusStyleCustomized = this.resoureToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
+  private isSuffixIconFocusStyleCustomized = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 0;
+  private isSuffixIconFocusable = this.resourceToNumber(this.theme.suffixIcon.isShowMargin, 0) !== 1;
   public onClose?: VoidCallback;
   public onClicked?: VoidCallback;
   @State chipNodeInFocus: boolean = false;
@@ -402,7 +403,6 @@ export struct ChipComponent {
   private lgListener: mediaquery.MediaQueryListener = mediaquery.matchMediaSync('(840vp<=width)');
   private symbolEffect: SymbolEffect = new SymbolEffect();
   private environmentCallbackID?: number = undefined;
-  private isSuffixIconFocusable = this.resoureToNumber($r('sys.float.chip_show_close_icon_margin'), 0) !== 1;
   private environmentCallback: EnvironmentCallback = {
     onConfigurationUpdated: (configuration) => {
       this.fontSizeScale = configuration.fontSizeScale ?? 1;
@@ -463,10 +463,10 @@ export struct ChipComponent {
   private getShadowStyles(): ShadowStyle | undefined {
     let shadowStyle = this.isSmallChipSize() ? this.theme.chipNode.smallShadowStyle :
     this.theme.chipNode.normalShadowStyle;
-    if (this.resoureToNumber(shadowStyle, -1) === -1) {
+    if (this.resourceToNumber(shadowStyle, -1) === -1) {
       return undefined;
     }
-    return this.resoureToNumber(shadowStyle, -1) as ShadowStyle;
+    return this.resourceToNumber(shadowStyle, -1) as ShadowStyle;
   }
 
   @Builder
@@ -1111,7 +1111,7 @@ export struct ChipComponent {
     return this.chipActivated ?? false;
   }
 
-  resoureToNumber(resource: Resource, defaultValue: number): number | undefined {
+  resourceToNumber(resource: Resource, defaultValue: number): number | undefined {
     if (!resource || !resource.type) {
       console.error('[Chip] failed: resource get fail.');
       return defaultValue;
@@ -1124,7 +1124,15 @@ export struct ChipComponent {
     switch (resource.type) {
       case RESOURCE_TYPE_FLOAT:
       case RESOURCE_TYPE_INTEGER:
-        return resourceManager.getNumber(resource);
+        if (resource.id !== -1) {
+          return resourceManager.getNumber(resource);
+        }
+        if (resource.params && resource.params.length > 0 && resource.params[0] && resource.params[0].split(".") > 2 &&
+        resource.params[0].split(".")[2]) {
+          let param = resource.params[0].split(".")[2] as string;
+          return resourceManager.getNumberByName(param);
+        }
+        return defaultValue;
       default:
         return defaultValue;
     }
