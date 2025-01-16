@@ -763,6 +763,14 @@ void FfiOHOSAceFrameworkViewAbstractSetAlignRules(CJAlignRuleOption option)
     ViewAbstractModel::GetInstance()->SetBias(biasPair);
 }
 
+void FfiOHOSAceFrameworkViewAbstractSetChainMode(CJChainInfo option)
+{
+    ChainInfo chainInfo;
+    chainInfo.direction = static_cast<LineDirection>(option.direction);
+    chainInfo.style = static_cast<ChainStyle>(option.style);
+    ViewAbstractModel::GetInstance()->SetChainStyle(chainInfo);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetEnabled(bool value)
 {
     ViewAbstractModel::GetInstance()->SetEnabled(value);
