@@ -705,11 +705,12 @@ ScopeFocusAlgorithm WaterFlowPattern::GetScopeFocusAlgorithm()
 {
     return { layoutInfo_->axis_ == Axis::VERTICAL, true, ScopeType::OTHERS,
         [wp = WeakClaim(this)](
-            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
             auto self = wp.Upgrade();
             if (self) {
                 nextFocusNode = self->GetNextFocusNode(step, currFocusNode);
             }
+            return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
         } };
 }
 
