@@ -225,6 +225,23 @@ struct CJConstraintSize {
     int32_t maxHeightUnit;
 };
 
+struct CJPixelRoundPolicy {
+    int32_t start;
+    int32_t top;
+    int32_t end;
+    int32_t bottom;
+};
+
+struct CJMotionBlurAnchor {
+    double x;
+    double y;
+};
+
+struct CJMotionBlurOptions {
+    double radius;
+    CJMotionBlurAnchor anchor;
+};
+
 struct CJSetScale {
     float scaleX;
     float scaleY;
@@ -275,6 +292,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetResponseRegion(CJResponseRegion
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetResponseRegionArray(VectorStringPtr vecContent);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetConstraintSize(CJConstraintSize value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetLayoutPriority(int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetPixelRound(CJPixelRoundPolicy cjValue);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetMotionBlur(CJMotionBlurOptions value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetLayoutWeight(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorder(CJBorder params);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorderWidth(double width, int32_t unit);
