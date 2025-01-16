@@ -2986,8 +2986,6 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.bottom = NG::CalcLength(bottom.value());
         }
-    } else {
-        paddings.bottom = NG::CalcLength(0.0);
     }
     if (end.has_value()) {
         if (end.value().Unit() == DimensionUnit::CALC) {
@@ -3002,8 +3000,6 @@ NG::PaddingProperty JSViewAbstract::GetLocalizedPadding(const std::optional<Calc
         } else {
             paddings.top = NG::CalcLength(top.value());
         }
-    } else {
-        paddings.top = NG::CalcLength(0.0);
     }
     return paddings;
 }
