@@ -720,6 +720,20 @@ void FfiOHOSAceFrameworkViewAbstractTransition(int64_t id)
     ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect);
 }
 
+void FfiOHOSAceFrameworkViewAbstractTransitionWithBack(int64_t id, void (*onFinish)(bool transitionIn))
+{
+    auto nativeTransitionEffect = FFIData::GetData<NativeTransitionEffect>(id);
+    if (nativeTransitionEffect == nullptr) {
+        return;
+    }
+    auto chainedEffect = nativeTransitionEffect->effect;
+    auto lambda = CJLambda::Create(onFinish);
+    auto finishCallback = [lambda](bool isTransitionIn) {
+        lambda(isTransitionIn);
+    };
+    ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect, std::move(finishCallback));
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetTransform(int64_t id)
 {
     auto nativeMatrix = FFIData::GetData<NativeMatrix>(id);
@@ -2015,6 +2029,30 @@ void FFIOHOSAceFrameworkBindContentCover(bool isShow, void (*builder)(), CJConte
         options.onAppear.hasValue ? CJLambda::Create(options.onAppear.value) : ([]() -> void {});
     std::function<void()> onDismissCallback =
         options.onDisappear.hasValue ? CJLambda::Create(options.onDisappear.value) : ([]() -> void {});
+
+    auto transitionEffectValue = options.transition;
+    if (transitionEffectValue.hasValue) {
+        auto nativeTransitionEffect = FFIData::GetData<NativeTransitionEffect>(transitionEffectValue.value);
+        if (nativeTransitionEffect != nullptr) {
+            auto chainedEffect = nativeTransitionEffect->effect;
+            contentCoverParam.transitionEffect = chainedEffect;
+        }
+    }
+    auto onWillDismiss = options.onWillDismiss;
+    if (onWillDismiss.hasValue) {
+        auto callback = onWillDismiss.value;
+        auto lambda = CJLambda::Create(callback);
+        auto onWillDismissFunc = [lambda](const int32_t& info) {
+            auto dismissContentCoverLambda = []() {
+                ViewAbstractModel::GetInstance()->DismissContentCover();
+            };
+            CJDismissContentCoverAction dismissAction = {
+                .reason = info,
+                .dismissContentCover = dismissContentCoverLambda };
+            lambda(dismissAction);
+        };
+        contentCoverParam.onWillDismiss = std::move(onWillDismissFunc);
+    }
 
     ViewAbstractModel::GetInstance()->BindContentCover(isShow, nullptr, std::move(buildFunc), modalStyle,
         std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
