@@ -1387,6 +1387,14 @@ let WebKeyboardAvoidMode;
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.OVERLAYS_CONTENT = 2] = 'OVERLAYS_CONTENT';
 })(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
+let KeyboardAppearance;
+(function (KeyboardAppearance) {
+  KeyboardAppearance[KeyboardAppearance.NONE_IMMERSIVE = 0] = 'NONE_IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.IMMERSIVE = 1] = 'IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.LIGHT_IMMERSIVE = 2] = 'LIGHT_IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.DARK_IMMERSIVE = 3] = 'DARK_IMMERSIVE';
+})(KeyboardAppearance || (KeyboardAppearance = {}));
+
 class SymbolEffect {
 }
 

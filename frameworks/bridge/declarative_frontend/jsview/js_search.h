@@ -101,6 +101,7 @@ public:
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
     static void CreateJsSearchCommonEvent(const JSCallbackInfo& info);
     static void SetStopBackPress(const JSCallbackInfo& info);
+    static void SetKeyboardAppearance(const JSCallbackInfo& info);
 };
 
 class JSSearchController final : public Referenced {

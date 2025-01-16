@@ -114,6 +114,7 @@ public:
     virtual void SetEnableHapticFeedback(bool state) = 0;
     virtual void SetBackBorderRadius() {};
     virtual void SetStopBackPress(bool isStopBackPress) {};
+    virtual void SetKeyboardAppearance(KeyboardAppearance value) = 0;
 
 private:
     static std::unique_ptr<SearchModel> instance_;
