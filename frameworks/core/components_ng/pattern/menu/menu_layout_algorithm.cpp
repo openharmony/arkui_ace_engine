@@ -502,7 +502,11 @@ void MenuLayoutAlgorithm::InitWrapperRect(
         }
     }
     isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
-    if (isHalfFoldHover_ && menuPattern->GetHoverMode()) {
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (isHalfFoldHover_ && menuWrapperPattern->GetHoverMode()) {
         UpdateWrapperRectForHoverMode(props, menuPattern);
     } else {
         wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
