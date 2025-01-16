@@ -1113,6 +1113,7 @@ let RichEditorResponseType;
   RichEditorResponseType[RichEditorResponseType.RIGHT_CLICK = 0] = 'RIGHT_CLICK';
   RichEditorResponseType[RichEditorResponseType.LONG_PRESS = 1] = 'LONG_PRESS';
   RichEditorResponseType[RichEditorResponseType.SELECT = 2] = 'SELECT';
+  RichEditorResponseType[RichEditorResponseType.DEFAULT = 3] = 'DEFAULT';
 })(RichEditorResponseType || (RichEditorResponseType = {}));
 
 let MenuType;
@@ -1480,6 +1481,7 @@ let RichEditorSpanType;
   RichEditorSpanType[RichEditorSpanType.IMAGE = 1] = 'IMAGE';
   RichEditorSpanType[RichEditorSpanType.MIXED = 2] = 'MIXED';
   RichEditorSpanType[RichEditorSpanType.BUILDER = 3] = 'BUILDER';
+  RichEditorSpanType[RichEditorSpanType.DEFAULT = 4] = 'DEFAULT';
 })(RichEditorSpanType || (RichEditorSpanType = {}));
 
 let ListItemAlign;
