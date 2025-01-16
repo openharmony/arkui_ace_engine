@@ -142,7 +142,7 @@ void UpdateBackgroundImagePosition(const Align& align, BackgroundImagePosition& 
     }
 }
 
-void SetPopupParams(CJBindPopupParams bindPopupParams, RefPtr<OHOS::Ace::PopupParam> popupParam)
+void SetPopupParams(CJBindPopupParams& bindPopupParams, RefPtr<OHOS::Ace::PopupParam>& popupParam)
 {
     popupParam->SetMessage(bindPopupParams.message);
     popupParam->SetPlacement(static_cast<Placement>(bindPopupParams.placement));
@@ -1151,7 +1151,7 @@ void FfiOHOSAceFrameworkViewAbstractKeyShortcutByChar(
     FfiOHOSAceFrameworkViewAbstractKeyShortcut(keyValue, keysArray, size, callback);
 }
 
-void SetCustomPopupParams(CJBindCustomPopup value, RefPtr<OHOS::Ace::PopupParam> popupParam)
+void SetCustomPopupParams(CJBindCustomPopup& value, RefPtr<OHOS::Ace::PopupParam>& popupParam)
 {
     popupParam->SetPlacement(static_cast<Placement>(value.placement));
     popupParam->SetMaskColor(Color(value.maskColor));
