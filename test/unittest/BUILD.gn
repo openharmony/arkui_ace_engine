@@ -263,6 +263,11 @@ ohos_source_set("ace_components_layout") {
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_builder.cpp",
     "$ace_root/frameworks/core/components_ng/layout/layout_wrapper_node.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/section/item_measurer.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/section/section_data_types.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/section/sections_initializer.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/section/staggered_fill_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/layout/section/staggered_section_filler.cpp",
   ]
   deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
   configs = [ ":ace_unittest_config" ]

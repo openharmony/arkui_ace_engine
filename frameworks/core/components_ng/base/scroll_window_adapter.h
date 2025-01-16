@@ -40,6 +40,10 @@ public:
 
     void UpdateMarkItem(int32_t index, FrameNode* node);
 
+    void UpdateSize(const SizeF& size)
+    {
+        size_ = size;
+    }
     void UpdateSize(float width, float height)
     {
         size_.SetWidth(width);
@@ -51,6 +55,10 @@ public:
         axis_ = axis;
     }
 
+    /**
+     * @param x positive if scrolling right, negative if scrolling left
+     * @param y positive if scrolling down, negative if scrolling up
+     */
     void UpdateSlidingOffset(float x, float y);
 
     FrameNode* InitPivotItem(FillDirection direction);
@@ -97,7 +105,6 @@ public:
 
 private:
     SizeF size_ = { 0.0f, 0.0f };
-    OffsetF offsetToScrollContent_ = { 0.0f, 0.0f };
     RefPtr<FillAlgorithm> fillAlgorithm_;
     FrameNode* container_ = nullptr;
 

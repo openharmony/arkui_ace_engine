@@ -25,6 +25,9 @@ namespace OHOS::Ace::NG {
 
 void ScrollWindowAdapter::UpdateMarkItem(int32_t index, FrameNode* node)
 {
+    if (index == -1) {
+        index = fillAlgorithm_->GetMarkIndex();
+    }
     if (markIndex_ == index) {
         return;
     }
@@ -38,14 +41,14 @@ void ScrollWindowAdapter::UpdateMarkItem(int32_t index, FrameNode* node)
 
 FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
 {
-    // get the really item.
     // TODO: LazyForEach has initial offset index.
     auto* item = GetChildPtrByIndex(markIndex_);
     if (!item) {
         item = static_cast<FrameNode*>(container_->GetLastChild().GetRawPtr());
     }
     if (!item) {
-        LOGE("current node of %{public}d is nullptr", markIndex_);
+        LOGE("current node of %{public}d is nullptr, childrenCount = %{public}d", markIndex_,
+            container_->TotalChildCount());
         return nullptr;
     }
     RectF rect;
@@ -63,7 +66,7 @@ FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
     indexToNode_[markIndex_] = WeakClaim(item);
     nodeToIndex_[item] = markIndex_;
     // 2: check if more space for new item.
-    if (!fillAlgorithm_->CanFillMore(size_, rect, direction)) {
+    if (!fillAlgorithm_->CanFillMore(axis_, size_, markIndex_, rect, direction)) {
         LOGI("no more space left");
         return nullptr;
     }
@@ -119,7 +122,7 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
         endRect_ = rect;
     }
     // 3: check if more space for new item.
-    if (!fillAlgorithm_->CanFillMore(size_, rect, direction)) {
+    if (!fillAlgorithm_->CanFillMore(axis_, size_, index, rect, direction)) {
         LOGE("no more space left");
         return nullptr;
     }
@@ -128,20 +131,19 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
 
 void ScrollWindowAdapter::UpdateSlidingOffset(float x, float y)
 {
-    offsetToScrollContent_.AddX(x);
-    offsetToScrollContent_.AddY(y);
-    markItemOffset_ = OffsetF(-x, -y);
+    markItemOffset_ = OffsetF(x, y);
     fillAlgorithm_->OnSlidingOffsetUpdate(x, y);
     for (auto& [node, rect] : itemRectMap_) {
         rect.SetOffset(rect.GetOffset() + *markItemOffset_);
     }
-    if (Positive(x) || Positive(y)) {
+    if (Negative(x) || Negative(y)) {
         endRect_.SetOffset(endRect_.GetOffset() + *markItemOffset_);
-        if (!fillAlgorithm_->CanFillMore(size_, endRect_, FillDirection::END)) {
+        if (!fillAlgorithm_->CanFillMore(axis_, size_, -1, endRect_, FillDirection::END)) {
             return;
         }
     } else {
-        if (!fillAlgorithm_->CanFillMore(size_, startRect_, FillDirection::START)) {
+        startRect_.SetOffset(startRect_.GetOffset() + *markItemOffset_);
+        if (!fillAlgorithm_->CanFillMore(axis_, size_, -1, startRect_, FillDirection::START)) {
             return;
         }
     }

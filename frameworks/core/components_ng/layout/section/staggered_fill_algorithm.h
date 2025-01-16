@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,28 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_LAYOUT_STAGGERED_FILL_ALGORITHM_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_LAYOUT_STAGGERED_FILL_ALGORITHM_H
 
+#include <algorithm>
 #include <cstdint>
+
+#include "item_measurer.h"
+#include "sections_initializer.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "core/components_ng/base/fill_algorithm.h"
-#include "core/components_ng/pattern/grid/grid_layout_info.h"
-#include "core/components_ng/pattern/grid/grid_layout_property.h"
-#include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
+#include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/layout/section/section_data_types.h"
 
 namespace OHOS::Ace::NG {
 
-class GridFillAlgorithm : public FillAlgorithm {
-    DECLARE_ACE_TYPE(GridFillAlgorithm, FillAlgorithm);
+class StaggeredFillAlgorithm : public FillAlgorithm {
+    DECLARE_ACE_TYPE(StaggeredFillAlgorithm, FillAlgorithm);
 
 public:
-    GridFillAlgorithm(const GridLayoutProperty& props, GridLayoutInfo& info) : props_(props), info_(info) {}
+    explicit StaggeredFillAlgorithm(const RefPtr<LayoutProperty>& props) : props_(props) {}
 
     RectF CalcMarkItemRect(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index,
         const std::optional<OffsetF>& slidingOffset) override;
@@ -41,7 +45,7 @@ public:
     RectF CalcItemRectBeforeMarkItem(
         const SizeF& viewport, Axis axis, FrameNode* node, int32_t index, const RectF& markItem) override;
 
-    void OnSlidingOffsetUpdate(float x, float y) override {}
+    void OnSlidingOffsetUpdate(float x, float y) override;
 
     bool IsReady() const override
     {
@@ -53,11 +57,24 @@ public:
 
     void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
 
+    int32_t GetMarkIndex() override;
+
 private:
-    const GridLayoutProperty& props_;
-    GridLayoutInfo& info_;
+    bool CanFillMoreAtEnd(float viewportBound, Axis axis);
 
-    GridIrregularFiller::FillParameters params_;
+    bool CanFillMoreAtStart(Axis axis);
+
+    void InitSections(int32_t totalCnt, Axis axis, const SizeF& frameSize);
+
+    std::optional<int32_t> StartIdx() const;
+    std::optional<int32_t> EndIdx() const;
+
+    Section& GetSection(int32_t item);
+
+    std::vector<Section> sections_;
+    const RefPtr<LayoutProperty> props_;
+    RefPtr<Measurer> measurer_;
 };
-
 } // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_LAYOUT_STAGGERED_FILL_ALGORITHM_H

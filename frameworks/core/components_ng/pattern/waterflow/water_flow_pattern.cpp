@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/components/scroll/scroll_controller_base.h"
+#include "core/components_ng/layout/section/staggered_fill_algorithm.h"
 #include "core/components_ng/pattern/waterflow/layout/sliding_window/water_flow_layout_sw.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/layout/top_down/water_flow_layout_info.h"
@@ -71,6 +72,9 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     }
     delta = -FireOnWillScroll(-delta);
     layoutInfo_->UpdateOffset(delta);
+    if (scrollWindowAdapter_) {
+        scrollWindowAdapter_->UpdateSlidingOffset(0, delta);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     return true;
 };
@@ -328,6 +332,11 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     }
 
     GetHost()->ChildrenUpdatedFrom(-1);
+    if (scrollWindowAdapter_) {
+        scrollWindowAdapter_->UpdateMarkItem(-1, nullptr);
+        scrollWindowAdapter_->UpdateSize(GetHost()->GetGeometryNode()->GetFrameSize());
+        scrollWindowAdapter_->UpdateAxis(layoutInfo_->axis_);
+    }
 
     return NeedRender();
 }
@@ -834,5 +843,20 @@ void WaterFlowPattern::DumpInfoAddSections()
         index++;
     }
     DumpLog::GetInstance().AddDesc("-----------end print sections_------------");
+}
+ScrollWindowAdapter* WaterFlowPattern::GetOrCreateScrollWindowAdapter()
+{
+    if (!scrollWindowAdapter_) {
+        scrollWindowAdapter_ = MakeRefPtr<ScrollWindowAdapter>(
+            GetUnsafeHostPtr(), MakeRefPtr<StaggeredFillAlgorithm>(GetLayoutProperty<LayoutProperty>()));
+    }
+    return scrollWindowAdapter_.GetRawPtr();
+}
+ScrollWindowAdapter* WaterFlowPattern::GetScrollWindowAdapter()
+{
+    if (scrollWindowAdapter_) {
+        return scrollWindowAdapter_.GetRawPtr();
+    }
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG

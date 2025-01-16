@@ -449,9 +449,9 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     info_.currentOffset_ -= userOffset;
     if (scrollWindowAdapter_) {
         if (info_.axis_ == Axis::VERTICAL) {
-            scrollWindowAdapter_->UpdateSlidingOffset(0, userOffset);
+            scrollWindowAdapter_->UpdateSlidingOffset(0, -userOffset);
         } else {
-            scrollWindowAdapter_->UpdateSlidingOffset(userOffset, 0);
+            scrollWindowAdapter_->UpdateSlidingOffset(-userOffset, 0);
         }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
