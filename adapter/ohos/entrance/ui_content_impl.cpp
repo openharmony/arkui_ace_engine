@@ -2820,8 +2820,16 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     };
     auto updateDisplayIdAndAreaTask = [container, context, rsWindow = window_]() {
         CHECK_NULL_VOID(rsWindow);
+        if (!rsWindow) {
+            TAG_LOGE(AceLogTag::ACE_WINDOW, "Current container has invalid window data.");
+            return;
+        }
         auto displayId = rsWindow->GetDisplayId();
-        if (displayId != DISPLAY_ID_INVALID && container->GetCurrentDisplayId() != displayId) {
+        if (displayId == DISPLAY_ID_INVALID) {
+            TAG_LOGE(AceLogTag::ACE_WINDOW, "Invalid display id.");
+            return;
+        }
+        if (container->GetCurrentDisplayId() != displayId) {
             container->SetCurrentDisplayId(displayId);
             auto currentDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
             if (context && currentDisplay) {
