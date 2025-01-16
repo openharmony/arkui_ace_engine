@@ -1802,6 +1802,10 @@ void TextFieldPattern::HandleOnPaste()
 
 bool TextFieldPattern::IsShowSearch()
 {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        return false;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto textFieldTheme = GetTheme();
