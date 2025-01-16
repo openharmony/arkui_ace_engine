@@ -571,7 +571,6 @@ void RichEditorPattern::OnModifyDone()
         enabled_ = enabledCache;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
-    IF_TRUE(!isModifyingContent_, TriggerAvoidOnCaretChangeImmediately());
 }
 
 void RichEditorPattern::HandleEnabled()
@@ -639,6 +638,7 @@ void RichEditorPattern::ClearOnFocusTextField(FrameNode* node)
 bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN(!config.skipMeasure && !dirty->SkipMeasureContent(), false);
+    auto originalFrameRect = frameRect_;
     frameRect_ = dirty->GetGeometryNode()->GetFrameRect();
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
@@ -651,15 +651,15 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     UpdateScrollStateAfterLayout(config.frameSizeChange);
     UpdateMagnifierStateAfterLayout(config.frameSizeChange);
-    if (!isRichEditorInit_) {
-        FireOnReady();
-    }
+    IF_TRUE(!isRichEditorInit_, FireOnReady());
     MoveCaretOnLayoutSwap();
     HandleTasksOnLayoutSwap();
     HandleSelectOverlayOnLayoutSwap();
-    if (!isModifyingContent_) {
-        UpdateCaretInfoToController();
-    }
+    IF_TRUE(originalFrameRect.GetSize() != frameRect_.GetSize(), {
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "frame size change");
+        TriggerAvoidOnCaretChangeNextFrame();
+    });
+    IF_TRUE(!isModifyingContent_, UpdateCaretInfoToController());
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ret);
     auto context = host->GetRenderContext();
@@ -3373,17 +3373,7 @@ void RichEditorPattern::UpdateModifierCaretOffsetAndHeight()
 void RichEditorPattern::NotifyCaretChange()
 {
     CHECK_NULL_VOID(!IsSelected());
-    auto context = GetContext();
-    CHECK_NULL_VOID(context);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this)] {
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            pattern->TriggerAvoidOnCaretChange();
-        },
-        TaskExecutor::TaskType::UI, "ArkUIRichEditorNotifyCaretChange", PriorityType::VIP);
+    TriggerAvoidOnCaretChange();
 }
 
 TextAlign RichEditorPattern::GetTextAlignByDirection()
@@ -3482,7 +3472,7 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     }
     HandleDoubleClickOrLongPress(info, host);
     if (IsSelected()) {
-        TriggerAvoidOnCaretChangeImmediately();
+        TriggerAvoidOnCaretChangeNextFrame();
     } else {
         ForceTriggerAvoidOnCaretChange(true);
     }
@@ -3612,7 +3602,7 @@ void RichEditorPattern::HandleMenuCallbackOnSelectAll(bool isShowMenu)
     }
     SetCaretPosition(textSize);
     MoveCaretToContentRect();
-    TriggerAvoidOnCaretChangeImmediately();
+    TriggerAvoidOnCaretChangeNextFrame();
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -7426,7 +7416,13 @@ void RichEditorPattern::TriggerAvoidOnCaretChange()
         return;
     }
     textFieldManager->SetHeight(GetCaretRect().Height());
-    textFieldManager->TriggerAvoidOnCaretChange();
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask([manager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
+        auto textFieldManager = manager.Upgrade();
+        CHECK_NULL_VOID(textFieldManager);
+        textFieldManager->TriggerAvoidOnCaretChange();
+    }, TaskExecutor::TaskType::UI, "ArkUIRichEditorTriggerAvoidOnCaretChange", PriorityType::VIP);
 }
 
 void RichEditorPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
