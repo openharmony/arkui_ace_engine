@@ -383,9 +383,14 @@ void MenuWrapperPattern::HideStackExpandMenu(const RefPtr<UINode>& subMenu)
     CHECK_NULL_VOID(menuFrameNode);
     auto menuNodePattern = menuFrameNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuNodePattern);
+    auto subMenuFrameNode = DynamicCast<FrameNode>(subMenu);
+    CHECK_NULL_VOID(subMenuFrameNode);
     menuNodePattern->ShowStackMenuDisappearAnimation(menuFrameNode,
-        DynamicCast<FrameNode>(subMenu), option);
+        subMenuFrameNode, option);
     menuNodePattern->SetDisappearAnimation(true);
+    auto subMenuPattern = subMenuFrameNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(subMenuPattern);
+    subMenuPattern->SetSubMenuShow(false);
 }
 
 void MenuWrapperPattern::RegisterOnTouch()
