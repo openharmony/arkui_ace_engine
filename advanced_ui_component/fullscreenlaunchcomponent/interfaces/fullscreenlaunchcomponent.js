@@ -19,6 +19,7 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 const hilog = requireNapi('hilog');
 const abilityManager = requireNapi('app.ability.abilityManager');
 const commonEventManager = requireNapi('commonEventManager');
+const j = 100014;
 
 export class FullScreenLaunchComponent extends ViewPU {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
@@ -189,10 +190,12 @@ export class FullScreenLaunchComponent extends ViewPU {
                     this.onError(err);
                 }
                 this.isShow = false;
-                hilog.error(0x3900, 'FullScreenLaunchComponent', 'call up UIExtension error!%{public}s', err.message);
-                this.getUIContext().showAlertDialog({
-                    message: err.message
-                });
+                hilog.error(0x3900, 'FullScreenLaunchComponent', 'call up UIExtension error:%{public}d!%{public}s', err.code, err.message);
+                if (err.code != j) {
+                    this.getUIContext().showAlertDialog({
+                        message: err.message
+                    });
+                }
             });
             UIExtensionComponent.onTerminated(info => {
                 this.isShow = false;
