@@ -120,6 +120,22 @@ struct CJRectResult {
     double height;
 };
 
+struct CJTouchTestInfo {
+    float windowX;
+    float windowY;
+    float parentX;
+    float parentY;
+    float x;
+    float y;
+    CJRectResult rect;
+    ExternalString id;
+};
+
+struct CJTouchResult {
+    int32_t strategy;
+    ExternalString id;
+};
+
 struct CJTouchInfo {
     uint8_t type;
     int32_t fingerId;
