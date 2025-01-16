@@ -72,6 +72,32 @@ struct CJBindPopupParams {
     void (*onStateChange)(bool);
 };
 
+struct NativeShadowOptions {
+    double radius;
+    int32_t shadowType;
+    uint32_t color;
+    double offsetX;
+    double offsetY;
+    bool fill;
+};
+
+struct NativeShadow {
+    bool hasValue;
+    NativeShadowOptions value;
+};
+
+struct NativeEdgeStyle {
+    int32_t top;
+    int32_t right;
+    int32_t bottom;
+    int32_t left;
+};
+
+struct NativeOptionEdgeStyle {
+    bool hasValue;
+    NativeEdgeStyle value;
+};
+
 struct CJSheetOptions {
     NativeOptionUInt32 backgroundColor;
     NativeOptionCallBack onAppear;
@@ -88,6 +114,19 @@ struct CJSheetOptions {
     NativeOptionCallBack title;
     NativeOptionBool enableOutsideInteractive;
     NativeOptionCallBack shouldDismiss;
+    NativeOptionCallback1Param onWillDismiss;
+    NativeOptionCallBack onWillSpringBackWhenDismiss;
+    NativeOptionCallback1FloatParam onHeightDidChange;
+    NativeOptionCallback1FloatParam onDetentsDidChange;
+    NativeOptionCallback1FloatParam onWidthDidChange;
+    NativeOptionCallback1FloatParam onTypeDidChange;
+    NativeOptionLength borderWidth;
+    NativeOptionUInt32 borderColor;
+    NativeOptionEdgeStyle borderStyle;
+    NativeOptionLength width;
+    NativeShadow shadow;
+    NativeOptionUInt32 mode;
+    NativeOptionUInt32 scrollSizeMode;
 };
 
 struct CJBorder {
@@ -267,6 +306,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetScaleX(float scaleVal);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetScaleY(float scaleVal);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOpacity(double opacity);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractDismiss();
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSpringBack();
 
 struct CJSetRotate {
     float dx;
