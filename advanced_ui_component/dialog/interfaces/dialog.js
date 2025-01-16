@@ -3012,7 +3012,7 @@ class CustomDialogContentComponent extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             };
         this.initTitleTextAlign();
-        this.setDefaultFocusState();
+        this.setDefaultFocusState(this.buttons);
     }
     updateFontSize() {
         if (this.fontSizeScale > MAX_FONT_SCALE) {
