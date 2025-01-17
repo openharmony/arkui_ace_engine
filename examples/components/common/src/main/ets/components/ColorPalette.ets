@@ -47,12 +47,13 @@ export struct ColorPalette {
         .backgroundColor(Color.Transparent)
         .width(32)
         .height(32)
+        .enabled(this.isEnabled)
+        .clipShape(this.isEnabled?undefined : new Circle({ width: 32, height: 32 }))
         .onClick(() => {
           this.onChange?.(color);
         })
       })
     }
-    .enabled(this.isEnabled)
     .width('100%')
     .grayscale(this.isEnabled ? 0 : 1)
   }
