@@ -86,7 +86,7 @@ class stateMgmtDFX {
       .filter((varName: string) => varName.startsWith('__') && !varName.startsWith(ObserveV2.OB_PREFIX))
       .forEach((varName) => {
         const prop: any = Reflect.get(view, varName);
-        if (typeof prop === 'object' && 'debugInfoDecorator' in prop) {
+        if (prop && typeof prop === 'object' && 'debugInfoDecorator' in prop) {
           const observedProp: ObservedPropertyAbstractPU<any> = prop as ObservedPropertyAbstractPU<any>;
           dumpInfo.observedPropertiesInfo.push(stateMgmtDFX.getObservedPropertyInfo(observedProp, false));
         }
@@ -159,7 +159,7 @@ class stateMgmtDFX {
     if (arr.length > stateMgmtDFX.DUMP_MAX_LENGTH) {
       dumpArr.splice(stateMgmtDFX.DUMP_MAX_LENGTH - stateMgmtDFX.DUMP_LAST_LENGTH, stateMgmtDFX.DUMP_LAST_LENGTH, '...', ...arr.slice(-stateMgmtDFX.DUMP_LAST_LENGTH));
     }
-    return dumpArr.map(item => typeof item === 'object' ? this.getType(item) : item);
+    return dumpArr.map(item => (item && typeof item === 'object') ? this.getType(item) : item);
   }
 
   private static dumpMap(map: Map<RawValue, RawValue>): Array<DumpBuildInType> {
@@ -176,7 +176,7 @@ class stateMgmtDFX {
         .slice(0, stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT)
         .forEach((varName: string) => {
           const propertyValue = Reflect.get(value as Object, varName);
-          tempObj[varName] = typeof propertyValue === 'object' ? this.getType(propertyValue) : propertyValue;
+          tempObj[varName] = (propertyValue && typeof propertyValue === 'object') ? this.getType(propertyValue) : propertyValue;
         });
       if (properties.length > stateMgmtDFX.DUMP_MAX_PROPERTY_COUNT) {
         tempObj['...'] = '...';
@@ -214,7 +214,7 @@ class stateMgmtDFX {
 
   private static getRawValueLength<T>(observedProp: ObservedPropertyAbstractPU<T>): number {
     let wrappedValue: T = observedProp.getUnmonitored();
-    if (typeof wrappedValue !== 'object') {
+    if (!wrappedValue || typeof wrappedValue !== 'object') {
       return -1;
     }
     let rawObject: T = ObservedObject.GetRawObject(wrappedValue);

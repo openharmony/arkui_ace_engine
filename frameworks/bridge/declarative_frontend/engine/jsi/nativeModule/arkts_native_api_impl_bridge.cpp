@@ -1087,6 +1087,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetAdvancedBlendMode));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAdvancedBlendMode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetAdvancedBlendMode));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerFrameNodeDestructorCallback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::RegisterFrameNodeDestructorCallback));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "common"), common);
 
     auto nativeUtils = panda::ObjectRef::New(vm);
@@ -3997,6 +3999,8 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetPreviousSibling));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getParent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetParent));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "moveTo"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::MoveTo));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getIdByNodePtr"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetIdByNodePtr));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPositionToParent"),

@@ -24,7 +24,7 @@
 namespace OHOS::Ace::NG {
 void ActionSheetModelNG::ShowActionSheet(const DialogProperties& arg)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto pipelineContext = container->GetPipelineContext();

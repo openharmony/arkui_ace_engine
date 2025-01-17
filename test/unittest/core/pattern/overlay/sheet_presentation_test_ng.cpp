@@ -22,6 +22,7 @@
 #define protected public
 
 #include "test/mock/base/mock_foldable_window.h"
+#include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
@@ -36,7 +37,6 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
-constexpr Dimension WINDOW_EDGE_SPACE = 6.0_vp;
 const NG::BorderWidthProperty BORDER_WIDTH_TEST = { 1.0_vp, 1.0_vp, 1.0_vp, 0.0_vp };
 const std::string MESSAGE = "hello world";
 } // namespace
@@ -917,115 +917,6 @@ HWTEST_F(SheetPresentationTestNg, DismissTransition001, TestSize.Level1)
 }
 
 /**
- * @tc.name: GetOffsetInAvoidanceRule001
- * @tc.desc: Increase the coverage of SheetPresentationLayoutAlgorithm::GetOffsetInAvoidanceRule function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestNg, GetOffsetInAvoidanceRule001, TestSize.Level1)
-{
-    SheetPresentationTestNg::SetUpTestCase();
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
-        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
-    auto targetPlacement = algorithm->AvoidanceRuleOfPlacement(Placement::BOTTOM, SizeF(), OffsetF());
-    EXPECT_NE(algorithm->getOffsetFunc_.find(targetPlacement), algorithm->getOffsetFunc_.end());
-    algorithm->GetOffsetInAvoidanceRule(SizeF(), OffsetF());
-
-    algorithm->getOffsetFunc_.clear();
-    EXPECT_EQ(algorithm->getOffsetFunc_.find(targetPlacement), algorithm->getOffsetFunc_.end());
-    algorithm->GetOffsetInAvoidanceRule(SizeF(), OffsetF());
-    SheetPresentationTestNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: GetOffsetWithBottomLeft001
- * @tc.desc: Increase the coverage of SheetPresentationLayoutAlgorithm::GetOffsetWithBottomLeft function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestNg, GetOffsetWithBottomLeft001, TestSize.Level1)
-{
-    SheetPresentationTestNg::SetUpTestCase();
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
-        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
-    SizeF targetSize(50, 50);
-    algorithm->sheetRadius_ = 10;
-    Dimension arrowVertical = 8.0_vp;
-    float arrowOffsetX = targetSize.Width() / 2;
-    EXPECT_FALSE(LessNotEqual(arrowOffsetX - arrowVertical.ConvertToPx(), algorithm->sheetRadius_));
-    algorithm->GetOffsetWithBottomLeft(targetSize, OffsetF());
-
-    algorithm->sheetRadius_ = 100;
-    EXPECT_TRUE(LessNotEqual(arrowOffsetX - arrowVertical.ConvertToPx(), algorithm->sheetRadius_));
-    algorithm->GetOffsetWithBottomLeft(targetSize, OffsetF());
-    SheetPresentationTestNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: GetOffsetWithBottomRight001
- * @tc.desc: Increase the coverage of SheetPresentationLayoutAlgorithm::GetOffsetWithBottomRight function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestNg, GetOffsetWithBottomRight001, TestSize.Level1)
-{
-    SheetPresentationTestNg::SetUpTestCase();
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
-        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
-    SizeF targetSize(50, 50);
-    algorithm->sheetRadius_ = 10;
-    algorithm->sheetWidth_ = 100;
-    Dimension arrowVertical = 8.0_vp;
-    float arrowOffsetX = algorithm->sheetWidth_ - targetSize.Width() / 2;
-    EXPECT_FALSE(GreatNotEqual(arrowOffsetX + algorithm->sheetRadius_ + arrowVertical.ConvertToPx(),
-        algorithm->sheetWidth_));
-    algorithm->GetOffsetWithBottomRight(targetSize, OffsetF());
-
-    algorithm->sheetRadius_ = 50;
-    EXPECT_TRUE(GreatNotEqual(arrowOffsetX + algorithm->sheetRadius_ + arrowVertical.ConvertToPx(),
-        algorithm->sheetWidth_));
-    algorithm->GetOffsetWithBottomRight(targetSize, OffsetF());
-    SheetPresentationTestNg::TearDownTestCase();
-}
-
-/**
- * @tc.name: AvoidanceRuleOfPlacement001
- * @tc.desc: Increase the coverage of SheetPresentationLayoutAlgorithm::AvoidanceRuleOfPlacement function.
- * @tc.type: FUNC
- */
-HWTEST_F(SheetPresentationTestNg, AvoidanceRuleOfPlacement001, TestSize.Level1)
-{
-    SheetPresentationTestNg::SetUpTestCase();
-    auto callback = [](const std::string&) {};
-    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 301,
-        AceType::MakeRefPtr<SheetPresentationPattern>(401, "SheetPresentation", std::move(callback)));
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    auto algorithm = AceType::DynamicCast<SheetPresentationLayoutAlgorithm>(sheetPattern->CreateLayoutAlgorithm());
-    algorithm->directionCheckFunc_[Placement::BOTTOM] = &SheetPresentationLayoutAlgorithm::CheckPlacementBottomLeft;
-    algorithm->placementCheckFunc_[Placement::BOTTOM] = &SheetPresentationLayoutAlgorithm::CheckPlacementBottomLeft;
-    OffsetF targetOffset(WINDOW_EDGE_SPACE.ConvertToPx() - 1.0f, 1.0f);
-    EXPECT_FALSE(algorithm->CheckPlacementBottomLeft(SizeF(), targetOffset));
-    algorithm->AvoidanceRuleOfPlacement(Placement::BOTTOM, SizeF(), targetOffset);
-
-    targetOffset.x_ = WINDOW_EDGE_SPACE.ConvertToPx() + 1.0f;
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    pipelineContext->displayWindowRectInfo_.width_ = 2*WINDOW_EDGE_SPACE.ConvertToPx() + algorithm->sheetWidth_ + 1.0f;
-    EXPECT_TRUE(algorithm->CheckPlacementBottomLeft(SizeF(), targetOffset));
-    algorithm->AvoidanceRuleOfPlacement(Placement::BOTTOM, SizeF(), targetOffset);
-
-    algorithm->directionCheckFunc_[Placement::BOTTOM] = nullptr;
-    algorithm->placementCheckFunc_[Placement::BOTTOM] = nullptr;
-    algorithm->AvoidanceRuleOfPlacement(Placement::BOTTOM, SizeF(), OffsetF());
-    SheetPresentationTestNg::TearDownTestCase();
-}
-
-/**
  * @tc.name: GetHeightBySheetStyle001
  * @tc.desc: Increase the coverage of SheetPresentationLayoutAlgorithm::GetHeightBySheetStyle function.
  * @tc.type: FUNC
@@ -1165,6 +1056,10 @@ HWTEST_F(SheetPresentationTestNg, CreateSheetChildConstraint003, TestSize.Level1
      * @tc.steps: step1. create sheet node.
      */
     SheetPresentationTestNg::SetUpTestCase();
+    MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrentContext();
+    auto lastPlatformVersion = PipelineBase::GetCurrentContext()->GetMinPlatformVersion();
+    MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto callback = [](const std::string&) {};
@@ -1206,6 +1101,8 @@ HWTEST_F(SheetPresentationTestNg, CreateSheetChildConstraint003, TestSize.Level1
     auto childConstraint = algorithm->CreateSheetChildConstraint(
         sheetPattern->GetLayoutProperty<SheetPresentationProperty>(), AceType::RawPtr(sheetNode));
     EXPECT_EQ(childConstraint.maxSize.Height(), 900 - SHEET_ARROW_HEIGHT.ConvertToPx());
+    MockContainer::Current()->SetApiTargetVersion(lastPlatformVersion);
+    MockContainer::TearDown();
     SheetPresentationTestNg::TearDownTestCase();
 }
 

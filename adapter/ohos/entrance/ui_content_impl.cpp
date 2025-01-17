@@ -2504,7 +2504,7 @@ void UIContentImpl::GetAppPaintSize(OHOS::Rosen::Rect& paintRect)
     auto renderContext = stageNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto rect = renderContext->GetPaintRectWithoutTransform();
-    auto offset = stageNode->GetPaintRectOffset(false);
+    auto offset = stageNode->GetPaintRectOffset(false, true);
     paintRect.posX_ = static_cast<int32_t>(offset.GetX());
     paintRect.posY_ = static_cast<int32_t>(offset.GetY());
     paintRect.width_ = static_cast<uint32_t>(rect.Width());
@@ -2820,8 +2820,16 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
     };
     auto updateDisplayIdAndAreaTask = [container, context, rsWindow = window_]() {
         CHECK_NULL_VOID(rsWindow);
+        if (!rsWindow) {
+            TAG_LOGE(AceLogTag::ACE_WINDOW, "Current container has invalid window data.");
+            return;
+        }
         auto displayId = rsWindow->GetDisplayId();
-        if (displayId != DISPLAY_ID_INVALID && container->GetCurrentDisplayId() != displayId) {
+        if (displayId == DISPLAY_ID_INVALID) {
+            TAG_LOGE(AceLogTag::ACE_WINDOW, "Invalid display id.");
+            return;
+        }
+        if (container->GetCurrentDisplayId() != displayId) {
             container->SetCurrentDisplayId(displayId);
             auto currentDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
             if (context && currentDisplay) {
@@ -3037,12 +3045,12 @@ void UIContentImpl::UpdateDecorVisible(bool visible, bool hasDecor)
     std::lock_guard<std::mutex> lock(updateDecorVisibleMutex_);
     LOGI("[%{public}s][%{public}s][%{public}d]: UpdateWindowVisible: %{public}d, hasDecor: %{public}d",
         bundleName_.c_str(), moduleName_.c_str(), instanceId_, visible, hasDecor);
-    auto container = Platform::AceContainer::GetContainer(instanceId_);
-    CHECK_NULL_VOID(container);
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto task = [container, visible, hasDecor]() {
+    auto task = [instanceId = instanceId_, visible, hasDecor]() {
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        CHECK_NULL_VOID(container);
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->ShowContainerTitle(visible, hasDecor);
@@ -4531,4 +4539,27 @@ bool UIContentImpl::GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReaso
     return reasonDragFlag;
 }
 
+std::shared_ptr<Rosen::RSNode> UIContentImpl::GetRSNodeByStringID(const std::string& stringId)
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, nullptr);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, nullptr);
+    std::shared_ptr<Rosen::RSNode> rsNode;
+    taskExecutor->PostSyncTask(
+        [id = instanceId_, &rsNode, stringId]() {
+            ContainerScope scope(id);
+            auto frameNode = NG::Inspector::GetFrameNodeByKey(stringId, true, true);
+            CHECK_NULL_VOID(frameNode);
+            auto renderContext = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+            CHECK_NULL_VOID(renderContext);
+            rsNode = renderContext->GetRSNode();
+        },
+        TaskExecutor::TaskType::UI, "ArkUIGetRSNodeByStringID",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+    if (!rsNode) {
+        LOGE("Cannot find RSNode by stringId: %{public}s", stringId.c_str());
+    }
+    return rsNode;
+}
 } // namespace OHOS::Ace

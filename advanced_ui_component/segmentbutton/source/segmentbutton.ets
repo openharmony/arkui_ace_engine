@@ -1244,7 +1244,7 @@ export struct SegmentButton {
     // 获取系统语言
     try {
       let systemLanguage: string = I18n.System.getSystemLanguage();
-      if (systemLanguage === 'ug' && this.options.direction != Direction.Ltr) { // 维吾尔语 非ltr模式
+      if (I18n.isRTL(systemLanguage) && this.options.direction != Direction.Ltr) {
         return true
       }
     } catch (error) {

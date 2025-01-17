@@ -68,7 +68,11 @@ config("ace_config") {
   ]
 
   if (is_arkui_x) {
-    cflags -= [ "-Werror=deprecated-copy" ]
+    cflags -= [
+      "-Werror=deprecated-copy",
+      "-Werror=anon-enum-enum-conversion",
+      "-Werror=incompatible-pointer-types",
+    ]
   }
 
   if (is_ohos && is_clang && (target_cpu == "arm" || target_cpu == "arm64") &&

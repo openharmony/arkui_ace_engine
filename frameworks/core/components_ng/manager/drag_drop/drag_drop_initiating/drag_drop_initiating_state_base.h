@@ -30,10 +30,12 @@ struct DragDropInitiatingParams {
     int32_t idleFingerId = -1;
     float preScaleValue = 1.0f;
     bool isThumbnailCallbackTriggered = false;
+    bool isNeedGather = false;
     RefPtr<PixelMap> preScaledPixelMap;
     std::function<void(Offset)> getTextThumbnailPixelMapCallback;
     CancelableCallback<void()> getThumbnailPixelMapCallback;
     CancelableCallback<void()> notifyPreDragCallback;
+    CancelableCallback<void()> showGatherCallback;
     OptionsAfterApplied optionsAfterApplied;
     WeakPtr<FrameNode> frameNode;
 
@@ -48,9 +50,11 @@ struct DragDropInitiatingParams {
         preScaleValue = 1.0f;
         preScaledPixelMap = nullptr;
         isThumbnailCallbackTriggered = false;
+        isNeedGather = false;
         getTextThumbnailPixelMapCallback = nullptr;
         getThumbnailPixelMapCallback.Cancel();
         notifyPreDragCallback.Cancel();
+        showGatherCallback.Cancel();
     }
 };
 

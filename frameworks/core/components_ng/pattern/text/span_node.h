@@ -239,7 +239,7 @@ public:
     virtual void EndDrag();
     virtual bool IsDragging();
     virtual ResultObject GetSpanResultObject(int32_t start, int32_t end);
-    virtual RefPtr<SpanItem> GetSameStyleSpanItem() const;
+    virtual RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
     std::function<void()> urlOnRelease;
     void SetUrlOnReleaseEvent(std::function<void()>&& onRelease)
@@ -656,7 +656,7 @@ public:
         this->spanItemType = SpanItemType::CustomSpan;
     }
     ~CustomSpanItem() override = default;
-    RefPtr<SpanItem> GetSameStyleSpanItem() const override;
+    RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const override;
     ResultObject GetSpanResultObject(int32_t start, int32_t end) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override {};
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
@@ -736,7 +736,7 @@ public:
     void SetImageSpanOptions(const ImageSpanOptions& options);
     void ResetImageSpanOptions();
     ResultObject GetSpanResultObject(int32_t start, int32_t end) override;
-    RefPtr<SpanItem> GetSameStyleSpanItem() const override;
+    RefPtr<SpanItem> GetSameStyleSpanItem(bool isEncodeTlvS = false) const override;
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
 
     bool EncodeTlv(std::vector<uint8_t>& buff) override;

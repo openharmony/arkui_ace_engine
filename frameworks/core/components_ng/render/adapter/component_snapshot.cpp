@@ -416,21 +416,13 @@ void ComponentSnapshot::BuilerTask(JsCallback&& callback, const RefPtr<FrameNode
         param.options.scale, param.options.scale, param.options.waitUntilRenderFinished);
 }
 
-std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(const std::string& componentId,
-    const SnapshotOptions& options)
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
+    RefPtr<FrameNode>& node, const SnapshotOptions& options)
 {
     CHECK_RUN_ON(UI);
-    ACE_SCOPED_TRACE("ComponentSnapshot::GetSyncStart_%s", componentId.c_str());
+    ACE_SCOPED_TRACE("ComponentSnapshot::GetSyncStart_%s", node->GetInspectorIdValue("").c_str());
     std::pair<int32_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
-    auto node = Inspector::GetFrameNodeByKey(componentId);
-    if (!node) {
-        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
-            "Can't find a component that id or key are " SEC_PLD(%{public}s)
-            ", Please check your parameters are correct",
-            SEC_PARAM(componentId.c_str()));
-        return result;
-    }
-
+    CHECK_NULL_RETURN(node, result);
     auto rsNode = GetRsNode(node);
 
     if (node->GetIsLayoutNode()) {
@@ -460,12 +452,29 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(
     auto& rsInterface = Rosen::RSInterfaces::GetInstance();
     auto syncCallback = std::make_shared<SyncCustomizedCallback>();
     {
-        ACE_SCOPED_TRACE("ComponentSnapshot::GetSync_TakeSurfaceCaptureForUI_%s_%d_%" PRIu64 "", componentId.c_str(),
-            node->GetId(), rsNode->GetId());
+        ACE_SCOPED_TRACE("ComponentSnapshot::GetSync_TakeSurfaceCaptureForUI_%s_%d_%" PRIu64 "",
+            node->GetInspectorIdValue("").c_str(), node->GetId(), rsNode->GetId());
     }
     rsInterface.TakeSurfaceCaptureForUI(rsNode, syncCallback,
         options.scale, options.scale, options.waitUntilRenderFinished);
     return syncCallback->GetPixelMap(SNAPSHOT_TIMEOUT_DURATION);
+}
+
+std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSync(const std::string& componentId,
+    const SnapshotOptions& options)
+{
+    CHECK_RUN_ON(UI);
+    std::pair<int32_t, std::shared_ptr<Media::PixelMap>> result(ERROR_CODE_INTERNAL_ERROR, nullptr);
+    auto node = Inspector::GetFrameNodeByKey(componentId);
+    if (!node) {
+        TAG_LOGW(AceLogTag::ACE_COMPONENT_SNAPSHOT,
+            "Can't find a component that id or key are " SEC_PLD(%{public}s)
+            ", Please check your parameters are correct",
+            SEC_PARAM(componentId.c_str()));
+        return result;
+    }
+
+    return GetSync(node, options);
 }
 
 std::pair<int32_t, std::shared_ptr<Media::PixelMap>> ComponentSnapshot::GetSyncByUniqueId(int32_t uniqueId,

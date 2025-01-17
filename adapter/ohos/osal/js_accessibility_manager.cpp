@@ -2679,6 +2679,7 @@ void JsAccessibilityManager::InitializeCallback()
 
     if (container != nullptr && container->IsUIExtensionWindow()) {
         pipelineContext->AddUIExtensionCallbackEvent(OHOS::Ace::NG::UIExtCallbackEventId::ON_UEA_ACCESSIBILITY_READY);
+        RegisterUIExtBusinessConsumeCallback();
         RegisterGetParentRectHandler();
         return;
     }
@@ -2687,6 +2688,78 @@ void JsAccessibilityManager::InitializeCallback()
     if (isEnabled) {
         RegisterInteractionOperation(windowId_);
     }
+}
+
+void JsAccessibilityManager::RegisterGetParentRectHandler()
+{
+    auto accessibilityGetParentRect = [weak = WeakClaim(this)](AccessibilityParentRectInfo& parentRectInfo) {
+        auto jsAccessibilityManager = weak.Upgrade();
+        CHECK_NULL_VOID(jsAccessibilityManager);
+        auto uecRectInfo = jsAccessibilityManager->GetUECAccessibilityParentRectInfo();
+        if (uecRectInfo.isChanged) {
+            parentRectInfo.left = uecRectInfo.left;
+            parentRectInfo.top = uecRectInfo.top;
+            parentRectInfo.scaleX = uecRectInfo.scaleX;
+            parentRectInfo.scaleY = uecRectInfo.scaleY;
+        } else {
+            auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(jsAccessibilityManager->context_.Upgrade());
+            CHECK_NULL_VOID(ngPipeline);
+            parentRectInfo.left = jsAccessibilityManager->GetWindowLeft(ngPipeline->GetWindowId());
+            parentRectInfo.top = jsAccessibilityManager->GetWindowTop(ngPipeline->GetWindowId());
+            auto container = Container::CurrentSafely();
+            if (container) {
+                auto windowScale = container->GetWindowScale();
+                parentRectInfo.scaleX = windowScale;
+                parentRectInfo.scaleY = windowScale;
+            }
+        }
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+            "Get host rect [scaleX:%{public}f, scaleY:%{public}f].", parentRectInfo.scaleX, parentRectInfo.scaleY);
+    };
+    SetAccessibilityGetParentRectHandler(accessibilityGetParentRect);
+}
+
+void JsAccessibilityManager::RegisterUIExtBusinessConsumeCallback()
+{
+    auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context_.Upgrade());
+    CHECK_NULL_VOID(ngPipeline);
+    auto uiExtManager = ngPipeline->GetUIExtensionManager();
+    CHECK_NULL_VOID(uiExtManager);
+    auto updateAccessibilityParentRectCallback = [weak = WeakClaim(this)](const AAFwk::Want& data) -> int32_t {
+        auto jsAccessibilityManager = weak.Upgrade();
+        CHECK_NULL_RETURN(jsAccessibilityManager, -1);
+        AccessibilityParentRectInfo info;
+        info.left = data.GetIntParam("left", 0);
+        info.top = data.GetIntParam("top", 0);
+        info.scaleX = data.GetFloatParam("scaleX", 1.0f);
+        info.scaleY = data.GetFloatParam("scaleY", 1.0f);
+        info.centerX = data.GetIntParam("centerX", 0);
+        info.centerY = data.GetIntParam("centerY", 0);
+        info.rotateDegree = data.GetIntParam("rotateDegree", 0);
+        info.isChanged = true;
+        jsAccessibilityManager->UpdateUECAccessibilityParentRectInfo(info);
+        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
+            "Update UIExt Accessiblity [scaleX:%{public}f, scaleY:%{public}f].", info.scaleX, info.scaleY);
+        // go on transfer info to next uiextension
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(jsAccessibilityManager->context_.Upgrade());
+        CHECK_NULL_RETURN(ngPipeline, -1);
+        auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
+        CHECK_NULL_RETURN(uiExtensionManager, -1);
+        uiExtensionManager->TransferAccessibilityRectInfo();
+        return 0;
+    };
+    uiExtManager->RegisterBusinessDataConsumeCallback(
+        Ace::NG::UIContentBusinessCode::TRANSFORM_PARAM, updateAccessibilityParentRectCallback);
+}
+
+AccessibilityParentRectInfo JsAccessibilityManager::GetUECAccessibilityParentRectInfo() const
+{
+    return uecRectInfo_;
+}
+
+void JsAccessibilityManager::UpdateUECAccessibilityParentRectInfo(const AccessibilityParentRectInfo& info)
+{
+    uecRectInfo_ = info;
 }
 
 void JsAccessibilityManager::RegisterDynamicRenderGetParentRectHandler()
@@ -2718,32 +2791,6 @@ void JsAccessibilityManager::RegisterDynamicRenderGetParentRectHandler()
     SetAccessibilityGetParentRectHandler(accessibilityGetParentRect);
 }
 
-void JsAccessibilityManager::RegisterGetParentRectHandler()
-{
-    auto accessibilityGetParentRect = [weak = WeakClaim(this)](AccessibilityParentRectInfo& parentRectInfo) {
-        auto jsAccessibilityManager = weak.Upgrade();
-        CHECK_NULL_VOID(jsAccessibilityManager);
-        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(jsAccessibilityManager->context_.Upgrade());
-        CHECK_NULL_VOID(ngPipeline);
-        auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
-        CHECK_NULL_VOID(uiExtensionManager);
-        AAFwk::Want data;
-        AAFwk::Want reply;
-        bool ret = uiExtensionManager->SendBusinessToHostSyncReply(
-            Ace::NG::UIContentBusinessCode::TRANSFORM_PARAM, std::move(data), reply);
-        if (!ret) {
-            TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY, "Get host rect fail.");
-        }
-        parentRectInfo.left = reply.GetIntParam("left", 0);
-        parentRectInfo.top = reply.GetIntParam("top", 0);
-        parentRectInfo.scaleX = reply.GetFloatParam("scaleX", 1.0f);
-        parentRectInfo.scaleY = reply.GetFloatParam("scaleY", 1.0f);
-        TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
-            "Get host rect [left:%{public}d, top:%{public}d, scaleX:%{public}f, scaleY:%{public}f].",
-            parentRectInfo.left, parentRectInfo.top, parentRectInfo.scaleX, parentRectInfo.scaleY);
-    };
-    SetAccessibilityGetParentRectHandler(accessibilityGetParentRect);
-}
 
 namespace {
     const char FULL_SILENT[] = "FULL_SILENT";

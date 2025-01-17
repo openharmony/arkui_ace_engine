@@ -795,9 +795,9 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       componentName: this.constructor.name, id: this.id__(), isV2: this.isViewV2,
       isCompFreezeAllowed_:this.isCompFreezeAllowed_, isViewActive_: this.isViewActive()
     };
-    stateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo);
     let resInfo: string = '';
     try {
+      stateMgmtDFX.getDecoratedVariableInfo(this, dumpInfo);
       resInfo = JSON.stringify(dumpInfo);
     } catch (error) {
       stateMgmtConsole.applicationError(`${this.debugInfo__()} has error in getInspector: ${(error as Error).message}`);

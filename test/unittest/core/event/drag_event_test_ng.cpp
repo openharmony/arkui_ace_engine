@@ -869,7 +869,7 @@ HWTEST_F(DragEventTestNg, DragEventTestNg009, TestSize.Level1)
     void* voidPtr = static_cast<void*>(new char[0]);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     gestureHub->SetPixelMap(pixelMap);
-    EXPECT_NE(frameNode->GetPixelMap(), nullptr);
+    EXPECT_NE(frameNode->GetDragPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
     dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     auto imageContext = imageNode->GetRenderContext();
@@ -1064,7 +1064,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest01, TestSize.Level1)
     void* voidPtr = static_cast<void*>(new char[0]);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     gestureHub->SetPixelMap(pixelMap);
-    EXPECT_NE(frameNode->GetPixelMap(), nullptr);
+    EXPECT_NE(frameNode->GetDragPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = nullptr;
     dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     EXPECT_NE(imageNode, nullptr);
@@ -1133,7 +1133,7 @@ HWTEST_F(DragEventTestNg, DragEventShowBadgeTest02, TestSize.Level1)
     void* voidPtr = static_cast<void*>(new char[0]);
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     gestureHub->SetPixelMap(pixelMap);
-    EXPECT_NE(frameNode->GetPixelMap(), nullptr);
+    EXPECT_NE(frameNode->GetDragPixelMap(), nullptr);
     RefPtr<FrameNode> imageNode = nullptr;
     dragEventActuator->CreatePreviewNode(frameNode, imageNode, DEFALUT_DRAG_PPIXELMAP_SCALE);
     EXPECT_NE(imageNode, nullptr);
@@ -2013,5 +2013,29 @@ HWTEST_F(DragEventTestNg, ReSetResponseRegion, TestSize.Level1)
     ASSERT_EQ(gestureEventHub->responseRegion_.size(), 1);
     EXPECT_EQ(gestureEventHub->responseRegion_[0].width_, originRect.width_);
     EXPECT_EQ(gestureEventHub->responseRegion_[0].height_, originRect.height_);
+}
+
+/**
+ * @tc.name: SetResponseRegionFullTest
+ * @tc.desc: Test DragClog001 function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNg, DragClog001, TestSize.Level1)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    ASSERT_NE(dragDropManager, nullptr);
+    dragDropManager->asyncDragCallback_ = []() {};
+    dragDropManager->RemoveDeadlineTimer();
+    EXPECT_EQ(dragDropManager->asyncDragCallback_, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("MyButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::MOUSE);
+    guestureEventHub->HandleOnDragStart(info);
+    dragDropManager->HandleSyncOnDragStart(DragStartRequestStatus::READY);
+    EXPECT_EQ(dragDropManager->asyncDragCallback_, nullptr);
 }
 } // namespace OHOS::Ace::NG

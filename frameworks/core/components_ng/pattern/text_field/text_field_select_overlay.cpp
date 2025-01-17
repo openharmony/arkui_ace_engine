@@ -306,6 +306,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     menuInfo.showCut = menuInfo.showCopy;
     menuInfo.showCopyAll = hasText && !pattern->IsSelectAll();
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
+    menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
     menuInfo.showAIWrite = pattern->IsShowAIWrite() && pattern->IsSelected();
 }
 
@@ -390,6 +391,9 @@ void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuT
             return;
         case OptionMenuActionId::SEARCH:
             HandleOnSearch();
+            return;
+        case OptionMenuActionId::SHARE:
+            HandleOnShare();
             return;
         case OptionMenuActionId::CAMERA_INPUT:
             pattern->HandleOnCameraInput();
@@ -689,6 +693,13 @@ void TextFieldSelectOverlay::UpdateSecondHandleOffset()
 }
 
 bool TextFieldSelectOverlay::AllowSearch()
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->AllowCopy();
+}
+
+bool TextFieldSelectOverlay::AllowShare()
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, false);

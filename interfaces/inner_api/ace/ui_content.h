@@ -53,6 +53,7 @@ struct Rect;
 enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 enum class MaximizeMode : uint32_t;
+class RSNode;
 class RSSurfaceNode;
 class RSTransaction;
 class Transform;
@@ -490,6 +491,11 @@ public:
     }
 
     virtual void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) {};
+
+    virtual std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId)
+    {
+        return nullptr;
+    }
 };
 
 } // namespace OHOS::Ace

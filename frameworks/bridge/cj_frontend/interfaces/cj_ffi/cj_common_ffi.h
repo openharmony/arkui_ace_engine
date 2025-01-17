@@ -88,6 +88,16 @@ struct NativeOptionCallBack {
     void (*value)();
 };
 
+struct NativeOptionCallback1Param {
+    bool hasValue;
+    void (*value)(int32_t reason);
+};
+
+struct NativeOptionCallback1FloatParam {
+    bool hasValue;
+    void (*value)(float reason);
+};
+
 struct NativeOptionBool {
     bool hasValue;
     bool value;
@@ -118,6 +128,22 @@ struct CJRectResult {
     double y;
     double width;
     double height;
+};
+
+struct CJTouchTestInfo {
+    float windowX;
+    float windowY;
+    float parentX;
+    float parentY;
+    float x;
+    float y;
+    CJRectResult rect;
+    ExternalString id;
+};
+
+struct CJTouchResult {
+    int32_t strategy;
+    ExternalString id;
 };
 
 struct CJTouchInfo {

@@ -49,6 +49,15 @@ std::pair<int64_t, int64_t> UIExtensionManager::UnWrapExtensionAbilityId(
     return std::pair<int64_t, int64_t>(index, abilityId);
 }
 
+void UIExtensionManager::TransferAccessibilityRectInfo()
+{
+}
+
+void UIExtensionManager::RegisterBusinessDataConsumeCallback(
+    UIContentBusinessCode code, UIExtBusinessDataConsumeCallback callback)
+{
+}
+
 const RefPtr<FrameNode> UIExtensionManager::GetFocusUiExtensionNode()
 {
     return nullptr;

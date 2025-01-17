@@ -337,6 +337,8 @@ public:
 
     bool DumpInfo(const std::vector<std::string>& params);
 
+    bool DumpRSNodeByStringID(const std::vector<std::string>& params);
+
     bool OnDumpInfo(const std::vector<std::string>& params);
 
     void TriggerGarbageCollection() override;
