@@ -4834,14 +4834,15 @@ int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertVa
             static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>())));
     }
     int32_t newCaretIndex = offset + caretMoveLength;
-    selectController_->UpdateCaretIndex(offset + caretMoveLength);
+    selectController_->UpdateCaretIndex(newCaretIndex);
+    selectController_->MoveCaretToContentRect(newCaretIndex);
     UpdateObscure(insertValue, hasInsertValue);
     UpdateEditingValueToRecord();
     TwinklingByFocus();
     CloseSelectOverlay(true);
     ScrollToSafeArea();
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    return newCaretIndex;
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
+    return selectController_->GetCaretIndex();
 }
 
 void TextFieldPattern::InsertValueOperation(const SourceAndValueInfo& info)
