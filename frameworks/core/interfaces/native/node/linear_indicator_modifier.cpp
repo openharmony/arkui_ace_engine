@@ -167,10 +167,8 @@ const ArkUILinearIndicatorModifier* GetLinearIndicatorModifier()
         .resetLinearIndicatorIndicatorStyleStrokeWidth = ResetLinearIndicatorIndicatorStyleStrokeWidth,
         .setLinearIndicatorIndicatorStyleStrokeRadius = SetLinearIndicatorIndicatorStyleStrokeRadius,
         .resetLinearIndicatorIndicatorStyleStrokeRadius = ResetLinearIndicatorIndicatorStyleStrokeRadius,
-        .setLinearIndicatorIndicatorStyleTrackBackgroundColor =
-        SetLinearIndicatorIndicatorStyleTrackBackgroundColor,
-        .resetLinearIndicatorIndicatorStyleTrackBackgroundColor =
-        ResetLinearIndicatorIndicatorStyleTrackBackgroundColor,
+        .setLinearIndicatorIndicatorStyleTrackBackgroundColor = SetLinearIndicatorIndicatorStyleTrackBackgroundColor,
+        .resetLinearIndicatorIndicatorStyleTrackBackgroundColor = ResetLinearIndicatorIndicatorStyleTrackBackgroundColor,
         .setLinearIndicatorIndicatorStyleTrackColor = SetLinearIndicatorIndicatorStyleTrackColor,
         .resetLinearIndicatorIndicatorStyleTrackColor = ResetLinearIndicatorIndicatorStyleTrackColor,
         .setLinearIndicatorIndicatorLoop = SetLinearIndicatorIndicatorLoop,
