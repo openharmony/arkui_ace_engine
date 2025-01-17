@@ -51,7 +51,7 @@ constexpr float ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO = 0.4f;
 constexpr float FLOAT_TWO = 2.0f;
 #ifdef SUPPORT_DIGITAL_CROWN
 constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
-constexpr const char* HAPTIC_STRENGTH5 = "watchhaptic.feedback.crown.impact";
+constexpr const char* HAPTIC_STRENGTH5 = "watchhaptic.base.short.6";
 #endif
 } // namespace
 

@@ -353,6 +353,7 @@ void Scrollable::HandleCrownActionBegin(const TimeStamp& timeStamp, double mainD
     info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
     isDragging_ = true;
     isCrownEventDragging_ = true;
+    crownTask_.Cancel();
     HandleDragStart(info);
 }
 
@@ -381,7 +382,16 @@ void Scrollable::HandleCrownActionEnd(const TimeStamp& timeStamp, double mainDel
             event(gestureInfo);
         });
     isDragging_ = false;
-    isCrownEventDragging_ = false;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    crownTask_.Reset([weak = WeakClaim(this)] {
+        auto scrollable = weak.Upgrade();
+        if (scrollable) {
+            scrollable->SetCrownEventDragging(false);
+        }
+    });
+    taskExecutor.PostDelayedTask(crownTask_, CUSTOM_SPRING_ANIMATION_DURATION, "ArkUIUpdateCrownEventDrag");
 }
 
 void Scrollable::HandleCrownActionCancel(GestureEvent& info)
