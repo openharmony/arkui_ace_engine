@@ -871,7 +871,20 @@ void SetHasCustomRadius(
         CHECK_NULL_VOID(menuProperty);
         menuProperty->UpdateBorderRadius(menuParam.borderRadius.value());
     } else {
+        auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+        CHECK_NULL_VOID(menuProperty);
         menuWrapperPattern->SetHasCustomRadius(false);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<SelectTheme>();
+        CHECK_NULL_VOID(theme);
+        Dimension defaultDimension(0);
+        BorderRadiusProperty radius = { defaultDimension, defaultDimension, defaultDimension, defaultDimension };
+        auto defaultRadius = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)
+                                 ? theme->GetMenuDefaultRadius()
+                                 : theme->GetMenuBorderRadius();
+        radius.SetRadius(defaultRadius);
+        menuProperty->UpdateBorderRadius(radius);
     }
 }
 
@@ -981,6 +994,23 @@ void MenuView::ShowPixelMapAnimation(const RefPtr<FrameNode>& menuNode)
         ShowPixelMapScaleAnimationProc(menuTheme, imageNode, menuPattern);
     }
     ShowBorderRadiusAndShadowAnimation(menuTheme, imageNode, isShowHoverImage);
+}
+
+void MenuView::GetMenuPixelMap(
+    const RefPtr<FrameNode>& targetNode, const MenuParam& menuParam, const RefPtr<FrameNode>& wrapperNode)
+{
+    CHECK_NULL_VOID(targetNode);
+    CHECK_NULL_VOID(wrapperNode);
+    MenuType type = MenuType::MENU;
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    CHECK_NULL_VOID(previewNode);
+    auto menuNode = FrameNode::CreateFrameNode(
+        V2::MENU_ETS_TAG, nodeId, AceType::MakeRefPtr<MenuPattern>(targetNode->GetId(), targetNode->GetTag(), type));
+    CHECK_NULL_VOID(menuNode);
+    ContextMenuChildMountProc(targetNode, wrapperNode, previewNode, menuNode, menuParam);
+    MountTextNode(wrapperNode, nullptr);
 }
 
 // create menu with MenuElement array
@@ -1128,7 +1158,37 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     auto scroll = CreateMenuScroll(customNode);
     CHECK_NULL_RETURN(scroll, nullptr);
     MountScrollToMenu(customNode, scroll, type, menuNode);
+    UpdateMenuProperties(wrapperNode, menuNode, menuParam, type);
 
+    if (type == MenuType::SUB_MENU || type == MenuType::SELECT_OVERLAY_SUB_MENU || !withWrapper) {
+        wrapperNode->RemoveChild(menuNode);
+        wrapperNode.Reset();
+        return menuNode;
+    }
+    if (type == MenuType::CONTEXT_MENU) {
+        auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
+        ContextMenuChildMountProc(targetNode, wrapperNode, previewNode, menuNode, menuParam);
+        MountTextNode(wrapperNode, previewCustomNode);
+    }
+    return wrapperNode;
+}
+
+void MenuView::UpdateMenuParam(
+    const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    UpdateMenuBackgroundStyle(menuNode, menuParam);
+    SetPreviewTransitionEffect(wrapperNode, menuParam);
+    SetHasCustomRadius(wrapperNode, menuNode, menuParam);
+}
+
+void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const RefPtr<FrameNode>& menuNode,
+    const MenuParam& menuParam, const MenuType& type)
+{
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode);
     }
@@ -1144,17 +1204,6 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         menuProperty->UpdateShowInSubWindow(menuParam.isShowInSubWindow);
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
-    if (type == MenuType::SUB_MENU || type == MenuType::SELECT_OVERLAY_SUB_MENU || !withWrapper) {
-        wrapperNode->RemoveChild(menuNode);
-        wrapperNode.Reset();
-        return menuNode;
-    }
-    if (type == MenuType::CONTEXT_MENU) {
-        auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
-        ContextMenuChildMountProc(targetNode, wrapperNode, previewNode, menuNode, menuParam);
-        MountTextNode(wrapperNode, previewCustomNode);
-    }
-    return wrapperNode;
 }
 
 void MenuView::UpdateMenuPaintProperty(
@@ -1292,6 +1341,7 @@ void MenuView::UpdateMenuBorderEffect(const RefPtr<FrameNode>& menuNode)
         renderContext->SetBorderWidth(innerWidthProp);
     }
 }
+
 void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
 {
     auto menuNodeRenderContext = menuNode->GetRenderContext();
@@ -1338,9 +1388,26 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
             }
             menuNodeRenderContext->UpdateBackgroundEffect(menuParam.effectOption.value());
         }
-    } else if (menuParam.backgroundColor.has_value()) {
-        menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value());
+    } else {
+        UpdateMenuBackgroundStyleSub(menuNode, menuParam);
     }
+}
+
+void MenuView::UpdateMenuBackgroundStyleSub(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    auto menuNodeRenderContext = menuNode->GetRenderContext();
+    auto pipeLineContext = menuNode->GetContextWithCheck();
+    CHECK_NULL_VOID(pipeLineContext);
+    auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    menuNodeRenderContext->UpdateBackgroundColor(
+        menuParam.backgroundColor.value_or(selectTheme->GetBackgroundColor()));
+    BlurStyleOption blurStyleOption;
+    blurStyleOption.blurStyle = static_cast<BlurStyle>(selectTheme->GetMenuBackgroundBlurStyle());
+    if (menuParam.backgroundBlurStyle.has_value()) {
+        blurStyleOption.blurStyle = static_cast<BlurStyle>(menuParam.backgroundBlurStyle.value());
+    }
+    menuNodeRenderContext->UpdateBackBlurStyle(blurStyleOption);
 }
 
 void MenuView::NeedAgingUpdateNode(const RefPtr<FrameNode>& optionNode)

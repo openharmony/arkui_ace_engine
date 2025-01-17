@@ -360,12 +360,19 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
+    static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
+    static bool GetTargetNodeIsInSubwindow(const RefPtr<UINode>& targetNode);
     static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
     static int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
     static int32_t ClosePopup(const RefPtr<UINode>& customNode);
     static int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
     static void DismissDialog();
     static void DismissPopup();
+    static void ShowMenuPreview(
+        const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode, const NG::MenuParam& menuParam);
+    static int32_t OpenMenu(NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode, const int32_t& targetId);
+    static int32_t UpdateMenu(const NG::MenuParam& menuParam, const RefPtr<NG::UINode>& customNode);
+    static int32_t CloseMenu(const RefPtr<UINode>& customNode);
     static void BindMenuWithItems(std::vector<OptionParam> &&params, const RefPtr<FrameNode> &targetNode,
         const NG::OffsetF &offset, const MenuParam &menuParam);
     static void BindMenuWithCustomNode(std::function<void()>&& buildFunc, const RefPtr<FrameNode>& targetNode,
@@ -841,6 +848,9 @@ private:
     static PopupInfo GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode);
     static PopupInfo GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId);
     static RefPtr<OverlayManager> GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId);
+    static int32_t OpenMenuMode(const RefPtr<FrameNode>& targetNode, RefPtr<OverlayManager>& overlayManager,
+        std::function<int32_t()>&& openMenuFunc);
+    static void CheckMenuPreview(NG::MenuParam& menuParam);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;
