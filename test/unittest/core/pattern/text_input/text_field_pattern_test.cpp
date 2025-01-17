@@ -2562,6 +2562,42 @@ HWTEST_F(TextFieldPatternTest, OnDirtyLayoutWrapperSwap001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: IsShowTranslate001
+ * @tc.desc: test testInput text IsShowTranslate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, IsShowTranslate001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->IsShowTranslate();
+    EXPECT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: HandleOnTranslate001
+ * @tc.desc: test testInput text HandleOnTranslate
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, HandleOnTranslate001, TestSize.Level1)
+{
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto selectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    selectOverlay->HandleOnTranslate();
+    EXPECT_EQ(pattern->selectController_->GetFirstHandleInfo().index, 0);
+    EXPECT_EQ(pattern->selectController_->GetSecondHandleInfo().index, 0);
+}
+
+/**
  * @tc.name: OnDirectionConfigurationUpdate001
  * @tc.desc: test testInput text OnDirectionConfigurationUpdate
  * @tc.type: FUNC

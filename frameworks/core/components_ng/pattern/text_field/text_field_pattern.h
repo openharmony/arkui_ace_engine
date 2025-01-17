@@ -1019,6 +1019,7 @@ public:
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleOnPaste() override;
     void HandleOnCut() override;
+    bool IsShowTranslate();
     bool IsShowSearch();
     void HandleOnCameraInput();
     void HandleOnAIWrite();
