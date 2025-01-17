@@ -1145,6 +1145,14 @@ HWTEST_F(SwiperAttrTestNg, SwiperModelNg002, TestSize.Level1)
     auto onUnselected = [](const BaseEventInfo* info) {};
     model.SetOnUnselected(std::move(onUnselected));
     EXPECT_NE(pattern->unselectedEvent_, nullptr);
+
+    /**
+     * @tc.steps: step3.9 Test SetOnSelected function.
+     * @tc.expected:pattern->selectedEvent_ not null.
+     */
+    auto onSelected = [](const BaseEventInfo* info) {};
+    model.SetOnSelected(std::move(onSelected));
+    EXPECT_NE(pattern->selectedEvent_, nullptr);
 }
 
 /**
