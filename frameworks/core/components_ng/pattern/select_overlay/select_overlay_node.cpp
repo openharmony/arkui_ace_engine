@@ -2677,12 +2677,15 @@ void SelectOverlayNode::SetFrameNodeVisibility(FrameNodeType type, VisibleType v
 {
     switch (type) {
         case FrameNodeType::SELECTMENU:
+            CHECK_NULL_VOID(selectMenu_);
             selectMenu_->GetLayoutProperty()->UpdateVisibility(visibleType);
             break;
         case FrameNodeType::EXTENSIONMENU:
+            CHECK_NULL_VOID(extensionMenu_);
             extensionMenu_->GetLayoutProperty()->UpdateVisibility(visibleType);
             break;
         case FrameNodeType::BACKBUTTON:
+            CHECK_NULL_VOID(backButton_);
             backButton_->GetLayoutProperty()->UpdateVisibility(visibleType);
             break;
         case FrameNodeType::MENUONLY:
