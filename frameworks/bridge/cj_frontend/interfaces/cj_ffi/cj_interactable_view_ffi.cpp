@@ -15,6 +15,11 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_interactable_view_ffi.h"
 
+#include <cstddef>
+#include <cstdint>
+#include <vector>
+
+#include "cj_common_ffi.h"
 #include "cj_lambda.h"
 
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -29,6 +34,9 @@ using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace {
+const std::vector<NG::TouchTestStrategy> TOUCH_TEST_STRATEGY = { NG::TouchTestStrategy::DEFAULT,
+    NG::TouchTestStrategy::FORWARD_COMPETITION, NG::TouchTestStrategy::FORWARD };
+
 void FFiSetDragInfo(
     const RefPtr<DragEvent>& info, const std::string& extraParams, CJPosition& cjPosition, CJDragInfo& ffiDragInfo)
 {
@@ -179,6 +187,65 @@ void FfiOHOSAceFrameworkInteractableViewOnHover(void (*callback)(bool))
     ViewAbstractModel::GetInstance()->SetOnHover([onHover](bool param, HoverInfo& info) { onHover(param); });
 }
 
+VectorTouchTestInfoHandle FFICJCreateVectorTouchTestInfo(int64_t size)
+{
+    return new std::vector<CJTouchTestInfo>(size);
+}
+
+void FFICJVectorTouchTestInfoSetElement(VectorTouchTestInfoHandle vec, int64_t index, CJTouchTestInfo touchTestInfo)
+{
+    auto actualVec = reinterpret_cast<std::vector<CJTouchTestInfo>*>(vec);
+    (*actualVec)[index] = touchTestInfo;
+}
+
+CJTouchTestInfo FFICJVectorTouchTestInfoGetElement(VectorTouchTestInfoHandle vec, int64_t index)
+{
+    auto actualVec = reinterpret_cast<std::vector<CJTouchTestInfo>*>(vec);
+    return (*actualVec)[index];
+}
+
+void FFICJVectorTouchTestInfoDelete(VectorTouchTestInfoHandle vec)
+{
+    auto actualVec = reinterpret_cast<std::vector<CJTouchTestInfo>*>(vec);
+    delete actualVec;
+}
+
+int64_t FFICJVectorTouchTestInfoGetSize(VectorTouchTestInfoHandle vec)
+{
+    auto actualVec = reinterpret_cast<std::vector<CJTouchTestInfo>*>(vec);
+    return (*actualVec).size();
+}
+
+void FfiOHOSAceFrameworkInteractableOnChildTouchTest(CJTouchResult (*callback)(VectorTouchTestInfoHandle handle))
+{
+    auto onChildTouchTest = [ffiCallback = CJLambda::Create(callback)](
+                                const std::vector<NG::TouchTestInfo>& touchInfo) -> NG::TouchResult {
+        NG::TouchResult touchRes;
+        auto arr = new std::vector<CJTouchTestInfo>(touchInfo.size());
+        size_t size = touchInfo.size();
+        for (size_t i = 0; i < size; i++) {
+            CJTouchTestInfo tmp;
+            tmp.windowX = touchInfo[i].windowPoint.GetX();
+            tmp.windowY = touchInfo[i].windowPoint.GetY();
+            tmp.parentX = touchInfo[i].currentCmpPoint.GetX();
+            tmp.parentY = touchInfo[i].currentCmpPoint.GetY();
+            tmp.x = touchInfo[i].subCmpPoint.GetX();
+            tmp.y = touchInfo[i].subCmpPoint.GetY();
+            tmp.rect.x = static_cast<double>(touchInfo[i].subRect.GetX());
+            tmp.rect.y = static_cast<double>(touchInfo[i].subRect.GetY());
+            tmp.rect.width = static_cast<double>(touchInfo[i].subRect.Width());
+            tmp.rect.height = static_cast<double>(touchInfo[i].subRect.Height());
+            tmp.id = Utils::MallocCString(touchInfo[i].id);
+            (*arr)[i] = tmp;
+        }
+        auto ret = ffiCallback(arr);
+        touchRes.strategy = static_cast<NG::TouchTestStrategy>(ret.strategy);
+        touchRes.id = ret.id.value;
+        return touchRes;
+    };
+    ViewAbstractModel::GetInstance()->SetOnTouchTestFunc(std::move(onChildTouchTest));
+}
+
 void FfiOHOSAceFrameworkInteractableViewOnAreaChanged(void (*callback)(CJArea, CJArea))
 {
     auto onAreaChanged = CJLambda::Create(callback);
@@ -244,7 +311,7 @@ void FfiOHOSAceFrameworkInteractableViewOnMouse(void (*callback)(CJMouseEvent))
 // can not trigged this event on eTS app
 void FfiOHOSAceFrameworkInteractableViewOnKey(bool (*callback)(CJKeyEvent info))
 {
-    auto onKeyEvent = [ffiCallback = CJLambda::Create(callback)](KeyEventInfo& keyInfo) -> bool  {
+    auto onKeyEvent = [ffiCallback = CJLambda::Create(callback)](KeyEventInfo& keyInfo) -> bool {
         CJKeyEvent ffiKeyInfo {};
         ffiKeyInfo.keyText = keyInfo.GetKeyText();
         ffiKeyInfo.type = static_cast<int32_t>(keyInfo.GetKeyType());

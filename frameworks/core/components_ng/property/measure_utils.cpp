@@ -483,6 +483,30 @@ OptionalSizeF CreateIdealSizeByPercentRef(
     return idealSize;
 }
 
+OptionalSizeF ConstrainIdealSizeByLayoutPolicy(const LayoutConstraintF& layoutConstraint,
+    uint8_t widthLayoutPolicy, uint8_t heightLayoutPolicy, Axis axis)
+{
+    bool isHorizontal = axis == Axis::HORIZONTAL;
+    bool mainAxisMatchParent = (isHorizontal ? widthLayoutPolicy : heightLayoutPolicy) ==
+                               static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT);
+    bool crossAxisMatchParent = (isHorizontal ? heightLayoutPolicy : widthLayoutPolicy) ==
+                                static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT);
+    OptionalSizeF idealSize;
+    if (mainAxisMatchParent) {
+        auto parentMainSize = GetMainAxisSize(layoutConstraint.parentIdealSize, axis);
+        if (parentMainSize) {
+            SetMainAxisSize(parentMainSize.value(), axis, idealSize);
+        }
+    }
+    if (crossAxisMatchParent) {
+        auto parentCrossSize = GetCrossAxisSize(layoutConstraint.parentIdealSize, axis);
+        if (parentCrossSize) {
+            SetCrossAxisSize(parentCrossSize.value(), axis, idealSize);
+        }
+    }
+    return idealSize;
+}
+
 void CreateChildrenConstraint(SizeF& size, const PaddingPropertyF& padding)
 {
     float width = 0;

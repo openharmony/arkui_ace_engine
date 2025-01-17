@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -176,7 +176,12 @@ const std::string RESOURCE_AUDIO_CAPTURE = "TYPE_AUDIO_CAPTURE";
 
 std::map<std::string, std::string> WebResourceRequsetImpl::GetRequestHeader() const
 {
-    return std::map<std::string, std::string>();
+    auto obj = WebObjectEventManager::GetInstance().GetResourceRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceRequsetImpl GetRequestHeader failed");
+        return std::map<std::string, std::string>();
+    }
+    return obj->GetRequestHeader(object_);
 }
 
 std::string WebResourceRequsetImpl::GetRequestUrl() const
@@ -190,32 +195,62 @@ std::string WebResourceRequsetImpl::GetRequestUrl() const
 
 std::string WebResourceRequsetImpl::GetMethod() const
 {
-    return "GET";
+    auto obj = WebObjectEventManager::GetInstance().GetResourceRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceRequsetImpl GetMethod failed");
+        return std::string();
+    }
+    return obj->GetMethod(object_);
 }
 
 bool WebResourceRequsetImpl::IsRequestGesture() const
 {
-    return true;
+    auto obj = WebObjectEventManager::GetInstance().GetResourceRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceRequsetImpl IsRequestGesture failed");
+        return false;
+    }
+    return obj->IsRequestGesture(object_);
 }
 
 bool WebResourceRequsetImpl::IsMainFrame() const
 {
-    return true;
+    auto obj = WebObjectEventManager::GetInstance().GetResourceRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceRequsetImpl IsMainFrame failed");
+        return true;
+    }
+    return obj->IsMainFrame(object_);
 }
 
 bool WebResourceRequsetImpl::IsRedirect() const
 {
-    return false;
+    auto obj = WebObjectEventManager::GetInstance().GetResourceRequestObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceRequsetImpl IsRedirect failed");
+        return false;
+    }
+    return obj->IsRedirect(object_);
 }
 
 std::map<std::string, std::string> WebResourceResponseImpl::GetResponseHeader() const
 {
-    return std::map<std::string, std::string>();
+    auto obj = WebObjectEventManager::GetInstance().GetResourceResponseObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceResponseImpl ResponseHeader failed");
+        return std::map<std::string, std::string>();
+    }
+    return obj->GetResponseHeader(object_);
 }
 
 std::string WebResourceResponseImpl::GetResponseData() const
 {
-    return "ResponseData";
+    auto obj = WebObjectEventManager::GetInstance().GetResourceResponseObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceResponseImpl ResponseData failed");
+        return std::string();
+    }
+    return obj->GetResponseData(object_);
 }
 
 std::string WebResourceResponseImpl::GetEncoding() const
@@ -240,7 +275,12 @@ std::string WebResourceResponseImpl::GetMimeType() const
 
 std::string WebResourceResponseImpl::GetReason() const
 {
-    return "ResponseReason";
+    auto obj = WebObjectEventManager::GetInstance().GetResourceResponseObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebResourceResponseImpl Reason failed");
+        return std::string();
+    }
+    return obj->GetReason(object_);
 }
 
 int WebResourceResponseImpl::GetStatusCode() const
@@ -313,12 +353,22 @@ int WebConsoleMessage::GetMessageLevel() const
 
 std::string WebConsoleMessage::GetSourceId() const
 {
-    return "SourceId";
+    auto obj = WebObjectEventManager::GetInstance().GetConsoleMessageObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebConsoleMessage GetSourceId failed");
+        return std::string();
+    }
+    return obj->GetSourceId(object_);
 }
 
 int WebConsoleMessage::GetLineNumber() const
 {
-    return 0;
+    auto obj = WebObjectEventManager::GetInstance().GetConsoleMessageObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebConsoleMessage GetLineNumber failed");
+        return 0;
+    }
+    return obj->GetLineNumber(object_);
 }
 
 float WebScaleChangeImpl::GetNewScale() const
@@ -552,7 +602,12 @@ std::string WebDownloadResponseImpl::GetUserAgent() const
 
 std::string WebDownloadResponseImpl::GetContentDisposition() const
 {
-    return "ContentDisposition";
+    auto obj = WebObjectEventManager::GetInstance().GetDownloadResponseObject();
+    if (!obj) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebDownloadResponseImpl GetContentDisposition failed");
+        return std::string();
+    }
+    return obj->GetContentDisposition(object_);
 }
 
 void DialogResult::Confirm(const std::string& promptResult)
@@ -666,7 +721,8 @@ void WebFileSelectorResult::HandleFileList(std::vector<std::string>& fileList)
 {
     auto obj = WebObjectEventManager::GetInstance().GetFileChooserObject();
     if (!obj) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileChooserImpl FileSelectorResultCallback failed");
+        TAG_LOGE(
+            AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileSelectorResult FileSelectorResultCallback failed");
         return;
     }
     obj->HandleFileList(object_, fileList, index_);
@@ -676,7 +732,7 @@ std::string WebGeolocationImpl::GetOrigin() const
 {
     auto obj = WebObjectEventManager::GetInstance().GetGeolocationObject();
     if (!obj) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileChooserImpl FileSelectorResultCallback failed");
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebGeolocationImpl FileSelectorResultCallback failed");
         return nullptr;
     }
     return obj->GetOrigin(object_);
@@ -686,7 +742,7 @@ void Geolocation::Invoke(const std::string& origin, const bool& allow, const boo
 {
     auto obj = WebObjectEventManager::GetInstance().GetGeolocationObject();
     if (!obj) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get WebFileChooserImpl FileSelectorResultCallback failed");
+        TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get Geolocation FileSelectorResultCallback failed");
         return;
     }
     obj->Invoke(index_, origin, allow, retain);

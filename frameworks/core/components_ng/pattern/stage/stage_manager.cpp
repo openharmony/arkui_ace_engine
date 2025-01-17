@@ -709,4 +709,31 @@ void StageManager::StopPageTransition(bool needTransition)
         destPageNode_ = nullptr;
     }
 }
+
+std::vector<RefPtr<FrameNode>> StageManager::GetTopPagesWithTransition() const
+{
+    std::vector<RefPtr<FrameNode>> pages;
+    auto page = GetLastPageWithTransition();
+    if (page) {
+        pages.emplace_back(page);
+    }
+    return pages;
+}
+
+std::vector<std::string> StageManager::GetTopPagePaths() const
+{
+    std::vector<std::string> paths;
+    auto pages = GetTopPagesWithTransition();
+    for (auto& page : pages) {
+        paths.emplace_back("");
+        CHECK_NULL_CONTINUE(page);
+        auto pattern = page->GetPattern<PagePattern>();
+        CHECK_NULL_CONTINUE(pattern);
+        auto info = pattern->GetPageInfo();
+        CHECK_NULL_CONTINUE(info);
+        CHECK_NULL_CONTINUE(getPagePathCallback_);
+        paths.back() = getPagePathCallback_(info->GetPageUrl());
+    }
+    return paths;
+}
 } // namespace OHOS::Ace::NG

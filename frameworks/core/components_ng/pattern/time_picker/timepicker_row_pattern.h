@@ -670,21 +670,22 @@ private:
     void HandleMinColumnChange(const PickerTime& value);
     uint32_t ParseHourOf24(uint32_t hourOf24) const;
     PickerTime AdjustTime(const PickerTime& time);
-
     bool IsStartEndTimeDefined();
     void HourChangeBuildTimeRange();
-    void MinuteChangeBuildTimeRange(const std::string& hourStr);
+    void MinuteChangeBuildTimeRange(uint32_t hourOf24);
     void RecordHourAndMinuteOptions();
     void RecordHourMinuteValues();
     int32_t GetOptionsIndex(const RefPtr<FrameNode>& frameNode, const std::string& value);
     std::string GetOptionsCurrentValue(const RefPtr<FrameNode>& frameNode);
     std::string GetOptionsValueWithIndex(const RefPtr<FrameNode>& frameNode, uint32_t optionIndex);
     void HandleColumnsChangeTimeRange(const RefPtr<FrameNode>& tag);
-    void UpdateHourAndMinuteTimeRange(bool isAmPmColumnChange = false);
+    void UpdateHourAndMinuteTimeRange(const RefPtr<FrameNode>& tag);
     void Hour24ChangeBuildTimeRange();
     void Hour12ChangeBuildTimeRange();
     int32_t GetOldHourIndex(const std::vector<std::string>& hourVector);
     void RecordHourOptions();
+    void UpdateSecondTimeRange();
+    void HandleSecondsChangeTimeRange(const RefPtr<FrameNode>& secondColumn);
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;

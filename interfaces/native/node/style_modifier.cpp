@@ -6603,7 +6603,7 @@ int32_t SetButtonType(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (LessNotEqual(actualSize, 0) ||
-        !InRegion(ARKUI_BUTTON_TYPE_NORMAL, ARKUI_BUTTON_TYPE_CIRCLE, item->value[NUM_0].i32)) {
+        !InRegion(ARKUI_BUTTON_TYPE_NORMAL, ARKUI_BUTTON_ROUNDED_RECTANGLE, item->value[NUM_0].i32)) {
         return ERROR_CODE_PARAM_INVALID;
     }
 
@@ -6627,31 +6627,42 @@ void ResetButtonType(ArkUI_NodeHandle node)
 
 int32_t SetButtonMinFontScale(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getButtonModifier()) {
-        if (LessNotEqual(item->value[0].f32, 0.0f)) {
-            fullImpl->getNodeModifiers()->getButtonModifier()->setButtonMinFontScale(node->uiNodeHandle, 0.0f);
-        } else if (GreatNotEqual(item->value[0].f32, 1.0f)) {
-            fullImpl->getNodeModifiers()->getButtonModifier()->setButtonMinFontScale(node->uiNodeHandle, 1.0f);
-        } else {
-            fullImpl->getNodeModifiers()->getButtonModifier()->setButtonMinFontScale(
-                node->uiNodeHandle, item->value[NUM_0].f32);
-        }
+    CHECK_NULL_RETURN(fullImpl, ERROR_CODE_INTERNAL_ERROR);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, ERROR_CODE_INTERNAL_ERROR);
+    auto buttonModifier = nodeModifiers->getButtonModifier();
+    CHECK_NULL_RETURN(buttonModifier, ERROR_CODE_INTERNAL_ERROR);
+    auto scale = item->value[0].f32;
+
+    if (LessNotEqual(scale, 0.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    } else if (GreatNotEqual(scale, 1.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    } else {
+        buttonModifier->setButtonMinFontScale(node->uiNodeHandle, scale);
     }
+
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetButtonMinFontScale(ArkUI_NodeHandle node)
 {
+    CHECK_NULL_RETURN(node, &g_attributeItem);
     auto* fullImpl = GetFullImpl();
-    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getButtonModifier()) {
-        auto resultValue =
-            fullImpl->getNodeModifiers()->getButtonModifier()->getButtonMinFontScale(node->uiNodeHandle);
+    CHECK_NULL_RETURN(fullImpl, &g_attributeItem);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, &g_attributeItem);
+    auto buttonModifier = nodeModifiers->getButtonModifier();
+
+    if (buttonModifier) {
+        auto resultValue = buttonModifier->getButtonMinFontScale(node->uiNodeHandle);
         g_numberValues[0].f32 = resultValue;
         return &g_attributeItem;
     } else {
@@ -6661,37 +6672,53 @@ const ArkUI_AttributeItem* GetButtonMinFontScale(ArkUI_NodeHandle node)
 
 void ResetButtonMinFontScale(ArkUI_NodeHandle node)
 {
+    CHECK_NULL_VOID(node);
     auto* fullImpl = GetFullImpl();
-    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getButtonModifier()) {
-        fullImpl->getNodeModifiers()->getButtonModifier()->resetButtonMinFontScale(node->uiNodeHandle);
-    }
+    CHECK_NULL_VOID(fullImpl);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    auto buttonModifier = nodeModifiers->getButtonModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    
+    buttonModifier->resetButtonMinFontScale(node->uiNodeHandle);
+    
 }
 
 int32_t SetButtonMaxFontScale(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getButtonModifier()) {
-        if (LessNotEqual(item->value[0].f32, 1.0f)) {
-            fullImpl->getNodeModifiers()->getButtonModifier()->setButtonMaxFontScale(node->uiNodeHandle, 1.0f);
-        } else {
-            fullImpl->getNodeModifiers()->getButtonModifier()->setButtonMaxFontScale(
-                node->uiNodeHandle, item->value[NUM_0].f32);
-        }
+    CHECK_NULL_RETURN(fullImpl, ERROR_CODE_INTERNAL_ERROR);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, ERROR_CODE_INTERNAL_ERROR);
+    auto buttonModifier = nodeModifiers->getButtonModifier();
+    CHECK_NULL_RETURN(buttonModifier, ERROR_CODE_INTERNAL_ERROR);
+    auto scale = item->value[0].f32;
+
+    if (LessNotEqual(scale, 1.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    } else {
+        buttonModifier->setButtonMaxFontScale(node->uiNodeHandle, scale);
     }
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetButtonMaxFontScale(ArkUI_NodeHandle node)
 {
+    CHECK_NULL_RETURN(node, &g_attributeItem);
     auto* fullImpl = GetFullImpl();
-    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getButtonModifier()) {
-        auto resultValue =
-            fullImpl->getNodeModifiers()->getButtonModifier()->getButtonMaxFontScale(node->uiNodeHandle);
+    CHECK_NULL_RETURN(fullImpl, &g_attributeItem);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, &g_attributeItem);
+    auto buttonModifier = nodeModifiers->getButtonModifier();
+
+    if (buttonModifier) {
+        auto resultValue = buttonModifier->getButtonMaxFontScale(node->uiNodeHandle);
         g_numberValues[0].f32 = resultValue;
         return &g_attributeItem;
     } else {
@@ -6701,10 +6728,15 @@ const ArkUI_AttributeItem* GetButtonMaxFontScale(ArkUI_NodeHandle node)
 
 void ResetButtonMaxFontScale(ArkUI_NodeHandle node)
 {
+    CHECK_NULL_VOID(node);
     auto* fullImpl = GetFullImpl();
-    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getButtonModifier()) {
-        fullImpl->getNodeModifiers()->getButtonModifier()->resetButtonMaxFontScale(node->uiNodeHandle);
-    }
+    CHECK_NULL_VOID(fullImpl);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    auto buttonModifier = nodeModifiers->getButtonModifier();
+    CHECK_NULL_VOID(buttonModifier);
+
+    buttonModifier->resetButtonMaxFontScale(node->uiNodeHandle);
 }
 
 int32_t SetProgressValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -12938,36 +12970,6 @@ void ResetSliderTrackThickness(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getSliderModifier()->resetThickness(node->uiNodeHandle);
 }
 
-int32_t SetSliderValidSlideRange(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
-{
-    if (!item || std::isnan(item->value[NUM_0].f32) || std::isnan(item->value[NUM_1].f32)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getSliderModifier()->setSliderValidSlideRange(
-        node->uiNodeHandle, item->value[NUM_0].f32, item->value[NUM_1].f32);
-    return ERROR_CODE_NO_ERROR;
-}
-
-const ArkUI_AttributeItem* GetSliderValidSlideRange(ArkUI_NodeHandle node)
-{
-    auto modifier = GetFullImpl()->getNodeModifiers()->getSliderModifier();
-    ArkUISliderValidSlideRange validRange = modifier->getSliderValidSlideRange(node->uiNodeHandle);
-    if (std::isnan(validRange.from) || std::isnan(validRange.to)) {
-        return nullptr;
-    }
-    g_numberValues[NUM_0].f32 = validRange.from;
-    g_numberValues[NUM_1].f32 = validRange.to;
-    return &g_attributeItem;
-}
-
-void ResetSliderValidSlideRange(ArkUI_NodeHandle node)
-{
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getSliderModifier()->resetSliderValidSlideRange(node->uiNodeHandle);
-}
-
 const ArkUI_AttributeItem* GetSliderEnableHapticFeedback(ArkUI_NodeHandle node)
 {
     auto fullImpl = GetFullImpl();
@@ -14960,7 +14962,6 @@ int32_t SetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetSliderReverse,
         SetSliderStyle,
         SetSliderTrackThickness,
-        SetSliderValidSlideRange,
         SetSliderEnableHapticFeedback,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
@@ -14986,7 +14987,6 @@ const ArkUI_AttributeItem* GetSliderAttribute(ArkUI_NodeHandle node, int32_t sub
         GetSliderReverse,
         GetSliderStyle,
         GetSliderTrackThickness,
-        GetSliderValidSlideRange,
         GetSliderEnableHapticFeedback,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
@@ -15013,7 +15013,6 @@ void ResetSliderAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetSliderReverse,
         ResetSliderStyle,
         ResetSliderTrackThickness,
-        ResetSliderValidSlideRange,
         ResetSliderEnableHapticFeedback,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
@@ -15584,7 +15583,7 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
     int32_t nodeSubTypeClass =
         subTypeClass < MAX_NODE_SCOPE_NUM ? subTypeClass : (subTypeClass - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     if ((static_cast<uint32_t>(nodeSubTypeClass) >= sizeof(setterClasses) / sizeof(AttributeSetterClass*)) ||
-        !CheckIfAttributeLegal(node, type) || !CheckIsCNode(node)) {
+        !CheckIfAttributeLegal(node, type) || !CheckIsCNodeOrCrossLanguage(node)) {
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
     if (!setterClasses[nodeSubTypeClass]) {
@@ -15641,7 +15640,7 @@ int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
     int32_t nodeSubTypeClass =
         subTypeClass < MAX_NODE_SCOPE_NUM ? subTypeClass : (subTypeClass - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     if ((static_cast<uint32_t>(nodeSubTypeClass) >= sizeof(resetterClasses) / sizeof(AttributeResetterClass*)) ||
-        !CheckIfAttributeLegal(node, type) || !CheckIsCNode(node)) {
+        !CheckIfAttributeLegal(node, type) || !CheckIsCNodeOrCrossLanguage(node)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node attribute: %{public}d NOT IMPLEMENT", type);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }

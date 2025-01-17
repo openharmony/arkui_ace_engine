@@ -20,6 +20,7 @@
 #include "core/components_ng/pattern/app_bar/app_bar_theme.h"
 #include "core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/custom/custom_app_bar_node.h"
 
 namespace OHOS::Ace::NG {
 class AtomicServicePattern : public LinearLayoutPattern {
@@ -38,6 +39,9 @@ public:
     {
         return MakeRefPtr<AtomicServiceLayoutAlgorithm>();
     }
+    RefPtr<CustomAppBarNode> GetJSAppBarContainer();
+    RefPtr<FrameNode> GetStageNodeWrapper();
+    RefPtr<FrameNode> GetContent();
     RefPtr<FrameNode> GetMenuBarRow();
     RefPtr<FrameNode> GetMenuBar();
     RefPtr<FrameNode> GetMenuButton();
@@ -54,14 +58,16 @@ public:
     void UpdateMenuBarLayout(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& menuBar, bool isRtl);
     void UpdateButtonLayout(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& button, bool isLeft);
     void UpdateIconLayout(RefPtr<AppBarTheme>& theme, RefPtr<FrameNode>& icon, bool isLeft);
-
+    void ColorConfigurationCallBack();
+    void AppInfoCallBack();
+    void AppScreenCallBack();
     std::optional<bool> settedColorMode = std::nullopt;
 
 private:
     void UpdateLayoutMargin();
     void UpdateOverlayLayout();
-    double safeAreaLeft_ = 0;
-    double safeAreaRight_ = 0;
+    void MenuBarSafeAreaCallBack();
+    void ContentSafeAreaCallBack();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_ATOMIC_SERVICE_PATTERN_H

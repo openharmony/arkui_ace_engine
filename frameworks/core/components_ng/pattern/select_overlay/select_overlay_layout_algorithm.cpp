@@ -49,7 +49,7 @@ void SelectOverlayLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (pattern->GetMode() == SelectOverlayMode::HANDLE_ONLY) {
         auto geometryNode = layoutWrapper->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
-        auto parentNode = host->GetAncestorNodeOfFrame(false);
+        auto parentNode = host->GetAncestorNodeOfFrame(true);
         CHECK_NULL_VOID(parentNode);
         auto parentGeo = parentNode->GetGeometryNode();
         CHECK_NULL_VOID(parentGeo);
@@ -578,7 +578,7 @@ void SelectOverlayLayoutAlgorithm::AdjustMenuTooFarAway(OffsetF& menuOffset, con
     auto pipeline = hostFrameNode->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto hostFrameRect = hostFrameNode->GetGeometryNode()->GetFrameRect();
-    auto hostGlobalOffset = hostFrameNode->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset();
+    auto hostGlobalOffset = hostFrameNode->GetPaintRectOffset(false, true) - pipeline->GetRootRect().GetOffset();
     auto centerX = menuRect.Width() / 2.0f;
     if (info_->callerNodeInfo) {
         hostFrameRect = info_->callerNodeInfo->paintFrameRect;

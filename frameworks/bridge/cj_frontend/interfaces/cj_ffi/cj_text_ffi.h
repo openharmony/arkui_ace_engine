@@ -54,15 +54,6 @@ using VectorStringPtr = void*;
 using VectorNativeShadowOptionsHandle = void*;
 using VectorTextMenuItemHandle = void*;
 
-struct NativeShadowOptions {
-    double radius;
-    uint32_t shadowType;
-    uint32_t color;
-    double offsetX;
-    double offsetY;
-    bool fill;
-};
-
 CJ_EXPORT void FfiOHOSAceFrameworkTextCreate(const char* content);
 CJ_EXPORT void FfiOHOSAceFrameworkTextCreateWithController(const char* content, int64_t controllerId);
 CJ_EXPORT void FfiOHOSAceFrameworkTextSetWidth(double width, int32_t unit);

@@ -1496,6 +1496,34 @@
         "name": "OH_ArkUI_NodeUtils_GetWindowInfo"
     },
     {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NodeUtils_MoveTo"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NodeUtils_SetCrossLanguageOption"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NodeUtils_GetCrossLanguageOption"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_CrossLanguageOption_Create"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_CrossLanguageOption_Destroy"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_CrossLanguageOption_SetAttributeSettingStatus"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_CrossLanguageOption_GetAttributeSettingStatus"
+    },
+    {
         "first_introduced": "14",
         "name": "OH_ArkUI_ActiveChildrenInfo_Destroy"
     },

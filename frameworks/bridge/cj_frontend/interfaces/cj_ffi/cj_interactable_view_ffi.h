@@ -23,6 +23,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 
 using VectorFloat64Handle = void*;
+using VectorTouchTestInfoHandle = void*;
 
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnClick(void (*callback)(CJClickInfo clickInfo));
@@ -38,7 +39,14 @@ CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnDelete(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnFocus(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnBlur(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnMouse(void (*callback)(CJMouseEvent));
-
+CJ_EXPORT VectorTouchTestInfoHandle FFICJCreateVectorTouchTestInfo(int64_t size);
+CJ_EXPORT void FFICJVectorTouchTestInfoSetElement(
+    VectorTouchTestInfoHandle vec, int64_t index, CJTouchTestInfo touchTestInfo);
+CJ_EXPORT CJTouchTestInfo FFICJVectorTouchTestInfoGetElement(VectorTouchTestInfoHandle vec, int64_t index);
+CJ_EXPORT void FFICJVectorTouchTestInfoDelete(VectorTouchTestInfoHandle vec);
+CJ_EXPORT int64_t FFICJVectorTouchTestInfoGetSize(VectorTouchTestInfoHandle vec);
+CJ_EXPORT void FfiOHOSAceFrameworkInteractableOnChildTouchTest(
+    CJTouchResult (*callback)(VectorTouchTestInfoHandle handle));
 CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnDragStart(
     CJDragItemInfo (*callback)(CJDragInfo info), uint32_t componentName);
 CJ_EXPORT void FfiOHOSAceFrameworkInteractableViewOnDragEnter(

@@ -599,12 +599,14 @@ private:
 
 class WebAvoidAreaChangedListener : public OHOS::Rosen::IAvoidAreaChangedListener {
 public:
-    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
+    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate, WeakPtr<PipelineBase> context)
+        : webDelegate_(webDelegate), context_(context) {}
     ~WebAvoidAreaChangedListener() = default;
 
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
 private:
     WeakPtr<WebDelegate> webDelegate_;
+    WeakPtr<PipelineBase> context_;
 };
 
 enum class ScriptItemType {

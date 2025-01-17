@@ -534,6 +534,16 @@ public:
 
     bool IsMenuPreviewNode(const RefPtr<FrameNode>& frameNode) const;
 
+    void SetHoverMode(bool enableFold)
+    {
+        enableFold_ = enableFold;
+    }
+
+    bool GetHoverMode() const
+    {
+        return enableFold_.value_or(false);
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -602,6 +612,7 @@ private:
     MenuParam menuParam_;
     bool isShowFromUser_ = false;
     int32_t fingerId_ = -1;
+    std::optional<bool> enableFold_;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

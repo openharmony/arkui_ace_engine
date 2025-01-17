@@ -36,7 +36,7 @@ void SelectOverlayInfo::GetCallerNodeAncestorViewPort(RectF& viewPort)
     } else {
         auto frameNode = callerFrameNode.Upgrade();
         if (frameNode) {
-            auto viewPortOption = frameNode->GetViewPort();
+            auto viewPortOption = frameNode->GetViewPort(true);
             if (viewPortOption.has_value()) {
                 viewPort = viewPortOption.value();
             }

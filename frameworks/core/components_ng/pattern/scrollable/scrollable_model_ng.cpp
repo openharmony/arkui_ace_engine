@@ -34,6 +34,19 @@ void ScrollableModelNG::SetScrollBarMode(DisplayMode value)
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, value);
 }
 
+void ScrollableModelNG::SetScrollBarMode(FrameNode* frameNode, const std::optional<DisplayMode>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, value.value(), frameNode);
+    } else {
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<ScrollablePattern>();
+        CHECK_NULL_VOID(pattern);
+        auto defaultValue = pattern->GetDefaultScrollBarDisplayMode();
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, defaultValue, frameNode);
+    }
+}
+
 void ScrollableModelNG::SetScrollBarColor(const std::string& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, Color::FromString(value));
@@ -44,6 +57,15 @@ void ScrollableModelNG::ResetScrollBarColor(FrameNode* frameNode)
     ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
 }
 
+void ScrollableModelNG::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, frameNode);
+    }
+}
+
 void ScrollableModelNG::SetScrollBarWidth(const std::string& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, StringUtils::StringToDimensionWithUnit(value));
@@ -52,6 +74,15 @@ void ScrollableModelNG::SetScrollBarWidth(const std::string& value)
 void ScrollableModelNG::ResetScrollBarWidth(FrameNode* frameNode)
 {
     ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
+}
+
+void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::optional<Dimension>& value)
+{
+    if (value) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, value.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth, frameNode);
+    }
 }
 
 void ScrollableModelNG::SetOnScroll(OnScrollEvent&& onScroll)
@@ -327,4 +358,20 @@ void ScrollableModelNG::SetDigitalCrownSensitivity(CrownSensitivity sensitivity)
     pattern->SetDigitalCrownSensitivity(sensitivity);
 }
 #endif
+
+void ScrollableModelNG::SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNestedScroll(nestedOpt);
+}
+
+void ScrollableModelNG::SetFriction(FrameNode* frameNode, const std::optional<double>& value)
+{
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    const double invalidValue = -1.; // allow pattern to set proper default value
+    pattern->SetFriction(value.value_or(invalidValue));
+}
 } // namespace OHOS::Ace::NG
