@@ -2686,5 +2686,17 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_XComponent_StopImageAnalyzer"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_DragEvent_StartDataLoading"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_CancelDataLoading"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_DisableDropDataPrefetchOnNode"
     }
 ]

@@ -56,6 +56,7 @@ template("ace_capability_ohos_source_set") {
     sources += [ "xcollie/xcollieInterface_impl.cpp" ]
     if (defined(config.enable_drag_framework) && config.enable_drag_framework) {
       if (defined(global_parts_info.distributeddatamgr_udmf)) {
+        external_deps += [ "udmf:libudmf" ]
         external_deps += [ "udmf:udmf_client" ]
         external_deps += [ "udmf:udmf_data_napi" ]
         external_deps += [ "device_status:devicestatus_client" ]
