@@ -557,7 +557,7 @@ void WindowSceneLayoutManager::DumpNodeInfo(const RefPtr<FrameNode>& node,
 
 void WindowSceneLayoutManager::RegisterScreenNode(uint64_t screenId, const RefPtr<FrameNode>& node)
 {
-    screenNodeMap_[screenId] = node;
+    screenNodeMap_[screenId] = WeakPtr<FrameNode>(node);
     TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "screenNode:%{public}" PRIu64 " register, size:%{public}d",
         screenId, static_cast<uint32_t>(screenNodeMap_.size()));
 }
@@ -625,10 +625,11 @@ void WindowSceneLayoutManager::GetTotalUITreeInfo(std::string& info)
         for (auto it = screenNodeMap_.begin(); it != screenNodeMap_.end(); ++it) {
             TAG_LOGI(AceLogTag::ACE_WINDOW_PIPELINE, "begin task GetTotalUITreeInfo:%{public}" PRIu64, it->first);
             std::ostringstream oss;
-            GetUITreeInfo(it->second, 0, 0, oss);
+            auto screenNode = it->second.Upgrade();
+            GetUITreeInfo(screenNode, 0, 0, oss);
             oss << "--------------------------------PatternTree" << " screenId: " <<
                 it->first << "-----------------------------------" << std::endl;
-            GetRSNodeTreeInfo(GetRSNode(it->second), 0, oss);
+            GetRSNodeTreeInfo(GetRSNode(screenNode), 0, oss);
             info.append(oss.str());
         }
     };
