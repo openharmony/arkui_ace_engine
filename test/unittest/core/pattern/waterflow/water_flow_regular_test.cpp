@@ -728,7 +728,7 @@ HWTEST_F(WaterFlowTestNg, LazyForEachNotify001, TestSize.Level1)
     CreateWaterFlowItems(5);
     RefPtr<WaterFlowMockLazy> mockLazy = CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
     CreateDone();
-    frameNode_->AttachToMainTree(true, PipelineContext::GetCurrentContextPtrSafely());
+
     EXPECT_EQ(frameNode_->GetChildren().size(), 7);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 5);

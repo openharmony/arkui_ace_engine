@@ -21,6 +21,7 @@ ace_unittest("patternlock_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/patternlock/patternlock_pattern.cpp",
+    "patternlock_modifier_test_ng.cpp",
     "patternlock_test_ng.cpp",
   ]
 }

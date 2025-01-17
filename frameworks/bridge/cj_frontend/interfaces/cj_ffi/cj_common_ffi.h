@@ -88,6 +88,16 @@ struct NativeOptionCallBack {
     void (*value)();
 };
 
+struct NativeOptionCallback1Param {
+    bool hasValue;
+    void (*value)(int32_t reason);
+};
+
+struct NativeOptionCallback1FloatParam {
+    bool hasValue;
+    void (*value)(float reason);
+};
+
 struct NativeOptionBool {
     bool hasValue;
     bool value;
@@ -242,6 +252,10 @@ struct CJGestureEvent {
     double velocityY;
     double velocity;
     double pressure;
+    float axisHorizontal;
+    float axisVertical;
+    int64_t deviceId;
+    const OHOS::Ace::BaseEventInfo* baseEventInfoPtr;
 };
 
 struct CJDragInfo {
@@ -263,6 +277,9 @@ struct CJBaseEvent {
     int64_t tiltX;
     int64_t tiltY;
     int32_t sourceTool;
+    float* axisHorizontal;
+    float* axisVertical;
+    int64_t deviceId;
 };
 
 struct AtCPackage;

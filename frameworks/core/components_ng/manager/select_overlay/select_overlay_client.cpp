@@ -74,6 +74,11 @@ void SelectOverlayClient::InitMenuCallback()
         CHECK_NULL_VOID(client);
         client->OnSelectOverlayMenuClicked(SelectOverlayMenuId::SEARCH);
     };
+    selectOverlayInfo_.menuCallback.onShare = [weak = WeakClaim(this)]() {
+        auto client = weak.Upgrade();
+        CHECK_NULL_VOID(client);
+        client->OnSelectOverlayMenuClicked(SelectOverlayMenuId::SHARE);
+    };
     selectOverlayInfo_.menuCallback.onCameraInput = [weak = WeakClaim(this)]() {
         auto client = weak.Upgrade();
         CHECK_NULL_VOID(client);
@@ -318,7 +323,7 @@ RectF SelectOverlayClient::GetVisibleContentRect(WeakPtr<FrameNode> parent, Rect
             return RectF(0, 0, 0, 0);
         }
     }
-    parentNode = parentNode->GetAncestorNodeOfFrame();
+    parentNode = parentNode->GetAncestorNodeOfFrame(true);
     return GetVisibleContentRect(parentNode, intersectRect);
 }
 } // namespace OHOS::Ace::NG

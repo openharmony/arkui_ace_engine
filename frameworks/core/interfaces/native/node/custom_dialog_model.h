@@ -40,6 +40,9 @@ struct _ArkUIDialog {
     void* userData;
     std::optional<ArkUI_Float32> keyboardAvoidDistanceValue;
     OHOS::Ace::DimensionUnit keyboardAvoidDistanceUnit;
+    ArkUI_Int32 levelMode;
+    ArkUI_Int32 levelUniqueId;
+    ArkUI_Int32 immersiveMode;
 };
 
 namespace OHOS::Ace::NG::CustomDialog {
@@ -65,6 +68,9 @@ ArkUI_Int32 RegisterOnWillDialogDismiss(ArkUIDialogHandle handler, bool (*eventH
 ArkUI_Int32 RegisterOnWillDialogDismissWithUserData(
     ArkUIDialogHandle handler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
 ArkUI_Int32 SetKeyboardAvoidDistance(ArkUIDialogHandle handle, float distance, ArkUI_Int32 unit);
+ArkUI_Int32 SetLevelMode(ArkUIDialogHandle handle, ArkUI_Int32 mode);
+ArkUI_Int32 SetLevelUniqueId(ArkUIDialogHandle handle, ArkUI_Int32 uniqueId);
+ArkUI_Int32 SetImmersiveMode(ArkUIDialogHandle handle, ArkUI_Int32 mode);
 } // namespace OHOS::Ace::NG::CustomDialog
 
 #endif

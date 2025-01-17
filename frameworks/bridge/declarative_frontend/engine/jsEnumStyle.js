@@ -822,7 +822,16 @@ let AnimationMode;
   AnimationMode[AnimationMode.CONTENT_FIRST = 0] = 'CONTENT_FIRST';
   AnimationMode[AnimationMode.ACTION_FIRST = 1] = 'ACTION_FIRST';
   AnimationMode[AnimationMode.NO_ANIMATION = 2] = 'NO_ANIMATION';
+  AnimationMode[AnimationMode.CONTENT_FIRST_WITH_JUMP = 3] = 'CONTENT_FIRST_WITH_JUMP';
+  AnimationMode[AnimationMode.ACTION_FIRST_WITH_JUMP = 4] = 'ACTION_FIRST_WITH_JUMP';
 })(AnimationMode || (AnimationMode = {}));
+
+let SwiperAnimationMode;
+(function (SwiperAnimationMode) {
+  SwiperAnimationMode[SwiperAnimationMode.NO_ANIMATION = 0] = 'NO_ANIMATION';
+  SwiperAnimationMode[SwiperAnimationMode.DEFAULT_ANIMATION = 1] = 'DEFAULT_ANIMATION';
+  SwiperAnimationMode[SwiperAnimationMode.FAST_ANIMATION = 2] = 'FAST_ANIMATION';
+})(SwiperAnimationMode || (SwiperAnimationMode = {}));
 
 let SelectedMode;
 (function (SelectedMode) {
@@ -1104,6 +1113,7 @@ let RichEditorResponseType;
   RichEditorResponseType[RichEditorResponseType.RIGHT_CLICK = 0] = 'RIGHT_CLICK';
   RichEditorResponseType[RichEditorResponseType.LONG_PRESS = 1] = 'LONG_PRESS';
   RichEditorResponseType[RichEditorResponseType.SELECT = 2] = 'SELECT';
+  RichEditorResponseType[RichEditorResponseType.DEFAULT = 3] = 'DEFAULT';
 })(RichEditorResponseType || (RichEditorResponseType = {}));
 
 let MenuType;
@@ -1471,6 +1481,7 @@ let RichEditorSpanType;
   RichEditorSpanType[RichEditorSpanType.IMAGE = 1] = 'IMAGE';
   RichEditorSpanType[RichEditorSpanType.MIXED = 2] = 'MIXED';
   RichEditorSpanType[RichEditorSpanType.BUILDER = 3] = 'BUILDER';
+  RichEditorSpanType[RichEditorSpanType.DEFAULT = 4] = 'DEFAULT';
 })(RichEditorSpanType || (RichEditorSpanType = {}));
 
 let ListItemAlign;
@@ -1779,6 +1790,19 @@ let KeyboardAvoidMode;
     KeyboardAvoidMode[KeyboardAvoidMode.NONE = 1] = 'NONE';
 })(KeyboardAvoidMode || (KeyboardAvoidMode = {}));
 
+let LevelMode;
+(function (LevelMode) {
+    LevelMode[LevelMode.OVERLAY = 0] = 'OVERLAY';
+    LevelMode[LevelMode.EMBEDDED = 1] = 'EMBEDDED';
+})(LevelMode || (LevelMode = {}));
+
+let ImmersiveMode;
+(function (ImmersiveMode) {
+    ImmersiveMode[ImmersiveMode.DEFAULT = 0] = 'DEFAULT';
+    ImmersiveMode[ImmersiveMode.PAGE = 1] = 'PAGE';
+    ImmersiveMode[ImmersiveMode.FULL = 2] = 'FULL';
+})(ImmersiveMode || (ImmersiveMode = {}));
+
 class SubTabBarStyle {
   constructor(content) {
     this.type = 'SubTabBarStyle';
@@ -2054,6 +2078,18 @@ class TransitionEffect {
   }
 }
 
+class ColorContent {
+  colorContent_ = '';
+
+  constructor(colorContent) {
+    this.colorContent_ = colorContent;
+  }
+
+  static get ORIGIN() {
+    return new ColorContent('ORIGIN');
+  }
+}
+
 class TextMenuItemId {
   id_ = '';
 
@@ -2087,6 +2123,10 @@ class TextMenuItemId {
 
   static get SEARCH() {
     return new TextMenuItemId('OH_DEFAULT_SEARCH');
+  }
+
+  static get SHARE() {
+    return new TextMenuItemId('OH_DEFAULT_SHARE');
   }
 
   static get COLLABORATION_SERVICE() {
@@ -2331,7 +2371,7 @@ class NavPathStack {
         if (launchMode === LaunchMode.MOVE_TO_TOP_SINGLETON) {
           this.moveIndexToTop(index, animated);
         } else {
-          this.popToIndex(index, undefined, animated);
+          this.innerPopToIndex(index, undefined, animated, false);
         }
         let promise = null;
         if (createPromise) {
@@ -2498,15 +2538,12 @@ class NavPathStack {
     let pathInfo = this.pathArray.pop();
     this.popArray.push(pathInfo);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean') {
-      if (currentPathInfo.onPop !== undefined) {
-        let popInfo = {
-          info: currentPathInfo,
-          result: result,
-        };
-        currentPathInfo.onPop(popInfo);
-      }
-      this.nativeStack.onPopCallback(result);
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
+      let popInfo = {
+        info: currentPathInfo,
+        result: result,
+      };
+      currentPathInfo.onPop(popInfo);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
@@ -2515,6 +2552,7 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
+    this.nativeStack.onPopCallback(typeof result === 'boolean' ? undefined : result);
     this.nativeStack?.onStateChanged();
     return pathInfo;
   }
@@ -2529,15 +2567,12 @@ class NavPathStack {
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean') {
-      if (currentPathInfo.onPop !== undefined) {
-        let popInfo = {
-          info: currentPathInfo,
-          result: result,
-        };
-        currentPathInfo.onPop(popInfo);
-      }
-      this.nativeStack.onPopCallback(result);
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
+      let popInfo = {
+        info: currentPathInfo,
+        result: result,
+      };
+      currentPathInfo.onPop(popInfo);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
@@ -2546,25 +2581,23 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
+    this.nativeStack.onPopCallback(typeof result == 'boolean' ? undefined : result);
     this.nativeStack?.onStateChanged();
     return index;
   }
-  popToIndex(index, result, animated) {
+  innerPopToIndex(index, result, animated, needFireOnResult) {
     if (index >= this.pathArray.length) {
       return;
     }
     let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean') {
-      if (currentPathInfo.onPop !== undefined) {
-        let popInfo = {
-          info: currentPathInfo,
-          result: result,
-        };
-        currentPathInfo.onPop(popInfo);
-      }
-      this.nativeStack.onPopCallback(result);
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
+      let popInfo = {
+        info: currentPathInfo,
+        result: result,
+      };
+      currentPathInfo.onPop(popInfo);
     }
     if (typeof result === 'boolean') {
       this.animated = result;
@@ -2573,7 +2606,13 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
+    if (needFireOnResult) {
+      this.nativeStack.onPopCallback(typeof result == 'boolean' ? undefined : result);
+    }
     this.nativeStack?.onStateChanged();
+  }
+  popToIndex(index, result, animated) {
+    this.innerPopToIndex(index, result, animated, true);
   }
   moveToTop(name, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -3307,6 +3346,7 @@ let DragPreviewMode;
   DragPreviewMode.ENABLE_DEFAULT_SHADOW = 3;
   DragPreviewMode.ENABLE_DEFAULT_RADIUS = 4;
   DragPreviewMode.ENABLE_DRAG_ITEM_GRAY_EFFECT = 5;
+  DragPreviewMode.ENABLE_MULTI_TILE_EFFECT  = 6;
 })(DragPreviewMode || (DragPreviewMode = {}));
 
 let FoldStatus;
@@ -3370,6 +3410,7 @@ let TextSpanType;
   TextSpanType[TextSpanType.TEXT = 0] = 'TEXT';
   TextSpanType[TextSpanType.IMAGE = 1] = 'IMAGE';
   TextSpanType[TextSpanType.MIXED = 2] = 'MIXED';
+  TextSpanType[TextSpanType.DEFAULT = 3] = 'DEFAULT';
 })(TextSpanType || (TextSpanType = {}));
 
 let TextResponseType;
@@ -3377,6 +3418,7 @@ let TextResponseType;
   TextResponseType[TextResponseType.RIGHT_CLICK = 0] = 'RIGHT_CLICK';
   TextResponseType[TextResponseType.LONG_PRESS = 1] = 'LONG_PRESS';
   TextResponseType[TextResponseType.SELECT = 2] = 'SELECT';
+  TextResponseType[TextResponseType.DEFAULT = 3] = 'DEFAULT';
 })(TextResponseType || (TextResponseType = {}));
 
 let MarqueeState;
@@ -3431,7 +3473,14 @@ let PreDragStatus;
   PreDragStatus.PREVIEW_LANDING_STARTED = 4;
   PreDragStatus.PREVIEW_LANDING_FINISHED = 5;
   PreDragStatus.ACTION_CANCELED_BEFORE_DRAG = 6;
+  PreDragStatus.PREPARING_FOR_DRAG_DETECTION = 7;
 })(PreDragStatus || (PreDragStatus = {}));
+
+let DragStartRequestStatus;
+(function (DragStartRequestStatus) {
+  DragStartRequestStatus.WAITING = 0;
+  DragStartRequestStatus.READY = 1;
+})(DragStartRequestStatus || (DragStartRequestStatus = {}));
 
 let DataOperationType;
 (function (DataOperationType) {
@@ -3735,3 +3784,9 @@ let CrownAction;
   CrownAction[CrownAction.UPDATE = 1] = 'UPDATE';
   CrownAction[CrownAction.END = 2] = 'END';
 })(CrownAction || (CrownAction = {}));
+
+let AccessibilitySamePageMode;
+(function (AccessibilitySamePageMode) {
+  AccessibilitySamePageMode[AccessibilitySamePageMode.SEMI_SILENT = 0] = 'SEMI_SILENT';
+  AccessibilitySamePageMode[AccessibilitySamePageMode.FULL_SILENT = 1] = 'FULL_SILENT';
+})(AccessibilitySamePageMode || (AccessibilitySamePageMode = {}));

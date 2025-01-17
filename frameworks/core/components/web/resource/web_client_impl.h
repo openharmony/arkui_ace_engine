@@ -243,6 +243,9 @@ public:
                        std::shared_ptr<OHOS::NWeb::NWebAppLinkCallback> callback) override;
     void OnShowAutofillPopup(
         const float offsetX, const float offsetY, const std::vector<std::string>& menu_items) override;
+    void OnShowAutofillPopupV2(
+        const float offsetX, const float offsetY, const float height, const float width,
+        const std::vector<std::string>& menu_items) override;
     void OnHideAutofillPopup() override;
     void OnAdsBlocked(const std::string& url, const std::vector<std::string>& adsBlocked) override;
 
@@ -294,6 +297,8 @@ public:
     bool IsCurrentFocus() override;
 
     void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight) override;
+
+    void OnScrollStart(const float x, const float y) override;
 private:
     std::weak_ptr<OHOS::NWeb::NWeb> webviewWeak_;
     WeakPtr<WebDelegate> webDelegate_;

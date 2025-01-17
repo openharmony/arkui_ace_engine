@@ -134,29 +134,6 @@ TransformParam GetTransformParam(
     return param;
 }
 
-TransformParam ConvertToTransformParam(const TransformParams p)
-{
-    TransformParam param;
-    param.scaleX = p.scaleX;
-    param.scaleY = p.scaleY;
-    param.skewX = p.skewX;
-    param.skewY = p.skewY;
-    param.translateX = p.translateX;
-    param.translateY = p.translateY;
-    return param;
-}
-
-TransformParams ConvertToTransformParams(const TransformParam p)
-{
-    TransformParams param;
-    param.scaleX = p.scaleX;
-    param.scaleY = p.scaleY;
-    param.skewX = p.skewX;
-    param.skewY = p.skewY;
-    param.translateX = p.translateX;
-    param.translateY = p.translateY;
-    return param;
-}
 } // namespace
 
 extern "C" {
@@ -1141,7 +1118,7 @@ void FfiOHOSAceFrameworkRenderingContextSetPixelMap(int64_t contextId, int64_t p
         return;
     }
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
-    if (context != nullptr) {
+    if (context == nullptr) {
         LOGE("NativeCanvasRenderer SetPixelMap error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64,
             contextId);
         return;
@@ -1162,7 +1139,7 @@ int64_t FfiOHOSAceFrameworkRenderingContextGetImageData(
     return context->GetNativeImageData(left, top, width, height);
 }
 
-void FfiOHOSAceFrameworkRenderingContextPutImageData(int64_t contextId, int64_t dataId, double dx, double dy,
+void FfiOHOSAceFrameworkRenderingContextPutImageDataWithDirty(int64_t contextId, int64_t dataId, double dx, double dy,
     double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight)
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
@@ -1177,6 +1154,20 @@ void FfiOHOSAceFrameworkRenderingContextPutImageData(int64_t contextId, int64_t 
     context->PutImageData(nativeImagedata, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
 }
 
+void FfiOHOSAceFrameworkRenderingContextPutImageData(int64_t contextId, int64_t dataId, double dx, double dy)
+{
+    auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
+    if (context == nullptr) {
+        LOGE("NativeCanvasRenderer GetImageData error, Cannot get NativeCanvasRenderer by id: %{public}" PRId64,
+            contextId);
+    }
+    auto nativeImagedata = FFIData::GetData<NativeImageData>(dataId);
+    if (nativeImagedata == nullptr) {
+        LOGE("NativeCanvasRenderer PutImageData error, Cannot get NativeImageData by id: %{public}" PRId64, dataId);
+    }
+    context->PutImageData(nativeImagedata, dx, dy);
+}
+
 VectorFloat64Ptr FfiOHOSAceFrameworkRenderingContextGetLineDash(int64_t contextId)
 {
     auto context = FFIData::GetData<NativeCanvasRenderer>(contextId);
@@ -1185,9 +1176,7 @@ VectorFloat64Ptr FfiOHOSAceFrameworkRenderingContextGetLineDash(int64_t contextI
             contextId);
         return nullptr;
     }
-    auto lineDash = context->GetLineDash();
-    VectorFloat64Ptr ret = static_cast<VectorFloat64Ptr>(&lineDash);
-    return ret;
+    return new std::vector<double>(context->GetLineDash());
 }
 
 const char* FfiOHOSAceFrameworkRenderingContextToDataURL(int64_t contextId, const char* type, double quality)
@@ -1385,89 +1374,163 @@ int64_t FfiOHOSAceFrameworkCanvasMatrixCtor(int32_t unit)
     return matrix2d->GetID();
 }
 
-TransformParams FfiOHOSAceFrameworkCanvasMatrixIdentity(int64_t selfId, TransformParams transParams)
+double FfiOHOSAceFrameworkCanvasMatrixGetScaleX(int64_t selfId)
 {
-    TransformParam params = ConvertToTransformParam(transParams);
     auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
-    if (matrix2d != nullptr) {
-        matrix2d->SetTransform(params);
-        matrix2d->Identity();
-        params = matrix2d->GetTransform();
-    } else {
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+        return FFI_ERROR_CODE;
+    }
+    return matrix2d->GetScaleX();
+}
+
+double FfiOHOSAceFrameworkCanvasMatrixGetScaleY(int64_t selfId)
+{
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+        return FFI_ERROR_CODE;
+    }
+    return matrix2d->GetScaleY();
+}
+
+double FfiOHOSAceFrameworkCanvasMatrixGetRotateX(int64_t selfId)
+{
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+        return FFI_ERROR_CODE;
+    }
+    return matrix2d->GetRotateX();
+}
+
+double FfiOHOSAceFrameworkCanvasMatrixGetRotateY(int64_t selfId)
+{
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+        return FFI_ERROR_CODE;
+    }
+    return matrix2d->GetRotateY();
+}
+
+double FfiOHOSAceFrameworkCanvasMatrixGetTranslateX(int64_t selfId)
+{
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+        return FFI_ERROR_CODE;
+    }
+    return matrix2d->GetTranslateX();
+}
+
+double FfiOHOSAceFrameworkCanvasMatrixGetTranslateY(int64_t selfId)
+{
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+        return FFI_ERROR_CODE;
+    }
+    return matrix2d->GetTranslateY();
+}
+
+void FfiOHOSAceFrameworkCanvasMatrixSetScaleX(int64_t selfId, double value)
+{
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d == nullptr) {
         LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
     }
-    return ConvertToTransformParams(params);
+    matrix2d->SetScaleX(value);
 }
 
-TransformParams FfiOHOSAceFrameworkCanvasMatrixInvert(int64_t selfId, TransformParams transParams)
+void FfiOHOSAceFrameworkCanvasMatrixSetScaleY(int64_t selfId, double value)
 {
-    TransformParam params = ConvertToTransformParam(transParams);
     auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
-    if (matrix2d != nullptr) {
-        matrix2d->SetTransform(params);
-        matrix2d->Invert();
-        params = matrix2d->GetTransform();
-    } else {
-        LOGE("canvas matrix2d invert error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
     }
-    return ConvertToTransformParams(params);
+    matrix2d->SetScaleY(value);
 }
 
-TransformParams FfiOHOSAceFrameworkCanvasMatrixRotate(
-    int64_t selfId, TransformParams transParams, double degree, double rx, double ry)
+void FfiOHOSAceFrameworkCanvasMatrixSetRotateX(int64_t selfId, double value)
 {
-    TransformParam params = ConvertToTransformParam(transParams);
     auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
-    if (matrix2d != nullptr) {
-        matrix2d->SetTransform(params);
-        matrix2d->Rotate(degree, rx, ry);
-        params = matrix2d->GetTransform();
-    } else {
-        LOGE("canvas matrix2d invert error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
     }
-    return ConvertToTransformParams(params);
+    matrix2d->SetRotateX(value);
 }
 
-TransformParams FfiOHOSAceFrameworkCanvasMatrixTranslate(
-    int64_t selfId, TransformParams transParams, double tx, double ty)
+void FfiOHOSAceFrameworkCanvasMatrixSetRotateY(int64_t selfId, double value)
 {
-    TransformParam params = ConvertToTransformParam(transParams);
     auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
-    if (matrix2d != nullptr) {
-        matrix2d->SetTransform(params);
-        matrix2d->Translate(tx, ty);
-        params = matrix2d->GetTransform();
-    } else {
-        LOGE("canvas matrix2d invert error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
     }
-    return ConvertToTransformParams(params);
+    matrix2d->SetRotateY(value);
 }
 
-TransformParams FfiOHOSAceFrameworkCanvasMatrixScale(int64_t selfId, TransformParams transParams, double sx, double sy)
+void FfiOHOSAceFrameworkCanvasMatrixSetTranslateX(int64_t selfId, double value)
 {
-    TransformParam params = ConvertToTransformParam(transParams);
     auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
-    if (matrix2d != nullptr) {
-        matrix2d->SetTransform(params);
-        matrix2d->Scale(sx, sy);
-        params = matrix2d->GetTransform();
-    } else {
-        LOGE("canvas matrix2d invert error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
     }
-    return ConvertToTransformParams(params);
+    matrix2d->SetTranslateX(value);
 }
 
-void FfiOHOSAceFrameworkCanvasMatrixUpdate(int64_t selfId, TransformParams transParams)
+void FfiOHOSAceFrameworkCanvasMatrixSetTranslateY(int64_t selfId, double value)
 {
-    TransformParam params = ConvertToTransformParam(transParams);
     auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
-    if (matrix2d != nullptr) {
-        params.translateX *= matrix2d->GetDensity();
-        params.translateY *= matrix2d->GetDensity();
-        matrix2d->SetTransform(params);
-    } else {
-        LOGE("canvas matrix2d invert error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
     }
+    matrix2d->SetTranslateY(value);
+}
+
+void FfiOHOSAceFrameworkCanvasMatrixIdentity(int64_t selfId)
+{
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    }
+    matrix2d->Identity();
+}
+
+void FfiOHOSAceFrameworkCanvasMatrixInvert(int64_t selfId)
+{
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    }
+    matrix2d->Invert();
+}
+
+void FfiOHOSAceFrameworkCanvasMatrixRotate(int64_t selfId, double degree, double rx, double ry)
+{
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    }
+    matrix2d->Rotate(degree, rx, ry);
+}
+
+void FfiOHOSAceFrameworkCanvasMatrixTranslate(int64_t selfId, double tx, double ty)
+{
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    }
+    matrix2d->Translate(tx, ty);
+}
+
+void FfiOHOSAceFrameworkCanvasMatrixScale(int64_t selfId, double sx, double sy)
+{
+    auto matrix2d = FFIData::GetData<NativeMatrix2d>(selfId);
+    if (matrix2d == nullptr) {
+        LOGE("canvas matrix2d identity error, Cannot get NativeCanvasMatrix2d by id: %{public}" PRId64, selfId);
+    }
+    matrix2d->Scale(sx, sy);
 }
 
 // Canvas ImageData
@@ -1646,6 +1709,7 @@ double FfiOHOSAceFrameworkOffscreenCanvasGetHeight(int64_t selfId)
     auto offscreenCanvas = FFIData::GetData<NativeOffscreenCanvas>(selfId);
     if (offscreenCanvas == nullptr) {
         LOGE("offscreen canvas invert error, Cannot get NativeOffscreenCanvas by id: %{public}" PRId64, selfId);
+        return FFI_ERROR_CODE;
     }
     return offscreenCanvas->NativeGetHeihgt();
 }
@@ -1655,6 +1719,7 @@ double FfiOHOSAceFrameworkOffscreenCanvasGetWidth(int64_t selfId)
     auto offscreenCanvas = FFIData::GetData<NativeOffscreenCanvas>(selfId);
     if (offscreenCanvas == nullptr) {
         LOGE("offscreen canvas invert error, Cannot get NativeOffscreenCanvas by id: %{public}" PRId64, selfId);
+        return FFI_ERROR_CODE;
     }
     return offscreenCanvas->NativeGetWidth();
 }

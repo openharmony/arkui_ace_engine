@@ -33,6 +33,9 @@ void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     MouseEvent& events, bool isScenceBoardWindow)
 {}
 
+void ConvertCrownEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, CrownEvent& event)
+{}
+
 void ConvertAxisEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, AxisEvent& event) {}
 
 void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& event) {}

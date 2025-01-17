@@ -144,6 +144,7 @@ SelectOverlayInfo SelectContentOverlayManager::BuildSelectOverlayInfo(int32_t re
     overlayInfo.menuCallback.onCut = MakeMenuCallback(OptionMenuActionId::CUT, overlayInfo);
     overlayInfo.menuCallback.onSelectAll = MakeMenuCallback(OptionMenuActionId::SELECT_ALL, overlayInfo);
     overlayInfo.menuCallback.onSearch = MakeMenuCallback(OptionMenuActionId::SEARCH, overlayInfo);
+    overlayInfo.menuCallback.onShare = MakeMenuCallback(OptionMenuActionId::SHARE, overlayInfo);
     overlayInfo.menuCallback.onCameraInput = MakeMenuCallback(OptionMenuActionId::CAMERA_INPUT, overlayInfo);
     overlayInfo.menuCallback.onAIWrite = MakeMenuCallback(OptionMenuActionId::AI_WRITE, overlayInfo);
     overlayInfo.menuCallback.onAppear = MakeMenuCallback(OptionMenuActionId::APPEAR, overlayInfo);
@@ -942,7 +943,7 @@ bool SelectContentOverlayManager::IsTouchInHandleLevelOverlayArea(const PointF& 
     selectOverlayNode = DynamicCast<SelectOverlayNode>(handleNode_.Upgrade());
     CHECK_NULL_RETURN(selectOverlayNode, false);
     auto localPoint = point;
-    ConvertPointRelativeToNode(selectOverlayNode->GetAncestorNodeOfFrame(), localPoint);
+    ConvertPointRelativeToNode(selectOverlayNode->GetAncestorNodeOfFrame(true), localPoint);
     return selectOverlayNode->IsInSelectedOrSelectOverlayArea(localPoint);
 }
 
@@ -1031,7 +1032,7 @@ void SelectContentOverlayManager::ConvertPointRelativeToNode(const RefPtr<FrameN
     auto parent = node;
     while (parent && parent != rootNode) {
         nodeStack.push(parent);
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     CHECK_NULL_VOID(!nodeStack.empty());
     PointF temp(point.GetX(), point.GetY());

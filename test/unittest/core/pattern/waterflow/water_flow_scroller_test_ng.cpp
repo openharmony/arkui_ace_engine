@@ -20,12 +20,7 @@
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 
 namespace OHOS::Ace::NG {
-
-namespace {} // namespace
-
-class WaterFlowScrollerTestNg : public WaterFlowTestNg {
-public:
-};
+class WaterFlowScrollerTestNg : public WaterFlowTestNg {};
 
 /**
  * @tc.name: UpdateCurrentOffset001
@@ -841,11 +836,11 @@ HWTEST_F(WaterFlowScrollerTestNg, ReachStart001, TestSize.Level1)
 }
 
 /**
- * @tc.name: ScrollPage001
+ * @tc.name: ScrollPage002
  * @tc.desc: Test ScrollPage
  * @tc.type: FUNC
  */
-HWTEST_F(WaterFlowScrollerTestNg, ScrollPage001, TestSize.Level1)
+HWTEST_F(WaterFlowScrollerTestNg, ScrollPage002, TestSize.Level1)
 {
     WaterFlowModelNG model = CreateWaterFlow();
     model.SetColumnsTemplate("1fr");

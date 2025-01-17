@@ -866,7 +866,7 @@ void FfiOHOSAceFrameworkOffscreenCanvasRenderingContextDrawImageWithImageBitMap(
         LOGE("canvas DrawImage error, Cannot get CJRenderImage by id: %{public}" PRId64, bitMapID);
         return;
     }
-    if (imageBitmap->GetPixelMap() == nullptr) {
+    if (!imageBitmap->GetSrc().empty()) {
         FfiOHOSAceFrameworkOffscreenCanvasRenderingContextDrawImageWithSrc(
             contextId, imageBitmap->GetSrc().c_str(), imageInfo);
     } else {
@@ -999,7 +999,7 @@ void FfiOHOSAceFrameworkOffscreenCanvasRenderingContextSetPixelMap(int64_t conte
         return;
     }
     auto context = FFIData::GetData<CJOffscreenRenderingContext>(contextId);
-    if (context != nullptr) {
+    if (context == nullptr) {
         LOGE("NativeCanvasRenderer SetPixelMap error, Cannot get OffscreenRenderingContext by id: %{public}" PRId64,
             contextId);
         return;
@@ -1020,8 +1020,8 @@ int64_t FfiOHOSAceFrameworkOffscreenCanvasRenderingContextGetImageData(
     return context->GetNativeImageData(left, top, width, height);
 }
 
-void FfiOHOSAceFrameworkOffscreenCanvasRenderingContextPutImageData(int64_t contextId, int64_t dataId, double dx,
-    double dy, double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight)
+void FfiOHOSAceFrameworkOffscreenCanvasRenderingContextPutImageDataWithDirty(int64_t contextId, int64_t dataId,
+    double dx, double dy, double dirtyX, double dirtyY, double dirtyWidth, double dirtyHeight)
 {
     auto context = FFIData::GetData<CJOffscreenRenderingContext>(contextId);
     if (context == nullptr) {
@@ -1033,6 +1033,21 @@ void FfiOHOSAceFrameworkOffscreenCanvasRenderingContextPutImageData(int64_t cont
         LOGE("NativeCanvasRenderer PutImageData error, Cannot get NativeImageData by id: %{public}" PRId64, dataId);
     }
     context->PutImageData(nativeImagedata, dx, dy, dirtyX, dirtyY, dirtyWidth, dirtyHeight);
+}
+
+void FfiOHOSAceFrameworkOffscreenCanvasRenderingContextPutImageData(
+    int64_t contextId, int64_t dataId, double dx, double dy)
+{
+    auto context = FFIData::GetData<CJOffscreenRenderingContext>(contextId);
+    if (context == nullptr) {
+        LOGE("NativeCanvasRenderer GetImageData error, Cannot get OffscreenRenderingContext by id: %{public}" PRId64,
+            contextId);
+    }
+    auto nativeImagedata = FFIData::GetData<NativeImageData>(dataId);
+    if (nativeImagedata == nullptr) {
+        LOGE("NativeCanvasRenderer PutImageData error, Cannot get NativeImageData by id: %{public}" PRId64, dataId);
+    }
+    context->PutImageData(nativeImagedata, dx, dy);
 }
 
 void FfiOHOSAceFrameworkOffscreenCanvasRenderingContextSetLineDash(int64_t contextId, VectorDoublePtr lineDashArr)
@@ -1054,9 +1069,7 @@ VectorFloat64Ptr FfiOHOSAceFrameworkOffscreenCanvasRenderingContextGetLineDash(i
             contextId);
         return nullptr;
     }
-    auto lineDash = context->GetLineDash();
-    VectorFloat64Ptr ret = static_cast<VectorFloat64Ptr>(&lineDash);
-    return ret;
+    return new std::vector<double>(context->GetLineDash());
 }
 
 const char* FfiOHOSAceFrameworkOffscreenCanvasRenderingContextToDataURL(
@@ -1070,7 +1083,7 @@ const char* FfiOHOSAceFrameworkOffscreenCanvasRenderingContextToDataURL(
     } else {
         dataUrl = context->ToDataURL(type, quality);
     }
-    auto ret = dataUrl.c_str();
+    auto ret = strdup(dataUrl.c_str());
     return ret;
 }
 

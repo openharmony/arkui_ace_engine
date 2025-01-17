@@ -252,7 +252,7 @@ public:
 
    // Get main component include composed component created by js view.
     const RefPtr<UINode>& GetMainElementNode() const;
-    
+    void ApplyParentThemeScopeId(const RefPtr<UINode>& element);
     // create wrappingComponentsMap and the component to map and then Push
     // the map to the render component stack.
     ACE_FORCE_EXPORT void Push(const RefPtr<UINode>& element, bool isCustomView = false);
@@ -440,6 +440,16 @@ public:
         return customTitleNode_;
     }
 
+    void SetCustomWindowMaskNode(const RefPtr<UINode>& customWindowMaskNode)
+    {
+        customWindowMaskNode_ = customWindowMaskNode;
+    }
+
+    const RefPtr<UINode> GetCustomWindowMaskNode() const
+    {
+        return customWindowMaskNode_;
+    }
+
     void SetCustomButtonNode(const RefPtr<UINode>& customButtonNode)
     {
         customButtonNode_ = customButtonNode;
@@ -494,6 +504,7 @@ private:
 
     RefPtr<UINode> customTitleNode_;
     RefPtr<UINode> customButtonNode_;
+    RefPtr<UINode> customWindowMaskNode_;
 
     RefPtr<GestureProcessor> gestureStack_;
 

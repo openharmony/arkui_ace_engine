@@ -634,6 +634,8 @@ HWTEST_F(TextFieldUXTest, OnHandleMove004, TestSize.Level1)
     pattern_->SetIsSingleHandle(false);
     RectF handleRect;
     pattern_->selectOverlay_->OnHandleMove(handleRect, true);
+    EXPECT_EQ(pattern_->selectController_->GetStartIndex(), 0);
+    EXPECT_EQ(pattern_->selectController_->GetEndIndex(), 10);
 }
 
 /**

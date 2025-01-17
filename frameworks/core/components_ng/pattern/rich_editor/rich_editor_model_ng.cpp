@@ -219,7 +219,7 @@ void RichEditorModelNG::BindSelectionMenu(TextSpanType& editorType, TextResponse
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     if (pattern) {
-        pattern->BindSelectionMenu(type, editorType, buildFunc, menuParam.onAppear, menuParam.onDisappear);
+        pattern->BindSelectionMenu(type, editorType, buildFunc, menuParam);
     }
 }
 

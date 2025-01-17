@@ -288,6 +288,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick001, TestSize.Le
      * @tc.expected: Related function runs ok.
      */
     tabBarPattern_->HandleBottomTabBarClick(selectedIndex, unselectedIndex);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -312,6 +313,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick002, TestSize.Le
      * @tc.expected: Related function runs ok.
      */
     tabBarPattern_->HandleBottomTabBarClick(selectedIndex, unselectedIndex);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -335,6 +337,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick003, TestSize.Le
      * @tc.expected: Related function runs ok.
      */
     tabBarPattern_->HandleBottomTabBarClick(selectedIndex, unselectedIndex);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -358,6 +361,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick004, TestSize.Le
      * @tc.expected: Related function runs ok.
      */
     tabBarPattern_->HandleBottomTabBarClick(selectedIndex, unselectedIndex);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -380,6 +384,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick005, TestSize.Le
      * @tc.expected: Related function runs ok.
      */
     tabBarPattern_->HandleBottomTabBarClick(selectedIndex, unselectedIndex);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -425,6 +430,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleSubTabBarClick002, TestSize.Level
         tabBarPattern_->HandleSubTabBarClick(tabBarLayoutProperty_, index);
         tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -450,6 +456,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchDown001, TestSize.Level1)
         tabBarPattern_->HandleTouchDown(index);
         tabBarPattern_->swiperController_->SetRemoveSwiperEventCallback([]() {});
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -476,6 +483,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchUp001, TestSize.Level1)
         tabBarPattern_->HandleTouchUp(index);
         tabBarPattern_->swiperController_->SetAddSwiperEventCallback([]() {});
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**

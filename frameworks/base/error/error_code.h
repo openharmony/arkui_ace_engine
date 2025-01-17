@@ -23,6 +23,7 @@ namespace OHOS::Ace {
 constexpr int32_t ERROR_CODE_NO_ERROR = 0;
 constexpr int32_t ERROR_CODE_PERMISSION_DENIED = 201; // The application does not have permission to call the interface.
 constexpr int32_t ERROR_CODE_PARAM_INVALID = 401;     // Invalid input parameter.
+constexpr int32_t ERROR_CODE_CAPI_INIT_ERROR = 500;     // C-API impl not initialized yet.
 constexpr int32_t ERROR_CODE_SYSTEMCAP_ERROR = 801;   // The specified SystemCapability names was not found.
 
 // Notification error code
@@ -75,6 +76,7 @@ constexpr int32_t ERROR_CODE_NATIVE_IMPL_NODE_INDEX_INVALID  = 106200;
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_GET_INFO_FAILED  = 106201;
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_BUFFER_SIZE_ERROR  = 106202;
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_NOT_MAIN_THREAD  = 106301;
+constexpr int32_t ERROR_CODE_NATIVE_IMPL_NODE_NOT_ON_MAIN_TREE  = 106302;
 
 // AI error for Canvas,XComponent
 constexpr int32_t ERROR_CODE_AI_ANALYSIS_UNSUPPORTED = 110001;

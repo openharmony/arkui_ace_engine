@@ -23,7 +23,7 @@ export const navigatesRoute: RouteGroup = {
   label: '导航类',
   children: [
     { name: 'swiper', label: '轮播/Swiper' },
-    { name: 'tabContent', label: '页签内容/TabContent' }
+    { name: 'tabContent', label: '页签内容/TabContent' },
     { name: 'tabs', label: '页签容器/Tabs' }
   ]
 };

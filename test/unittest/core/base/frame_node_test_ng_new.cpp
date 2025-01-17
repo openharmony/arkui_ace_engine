@@ -835,7 +835,7 @@ HWTEST_F(FrameNodeTestNg, GetPixelMap001, TestSize.Level1)
      * @tc.steps: step2. Don't initialize pixelMap and rosenNode.
      * @tc.expected: expect GetPixelMap() == nullptr.
      */
-    EXPECT_EQ(FRAME_NODE->GetPixelMap(), nullptr);
+    EXPECT_EQ(FRAME_NODE->GetDragPixelMap(), nullptr);
 
     /**
      * @tc.steps: step3. set a pixelMap of gestureHub, and call GetPixelMap.
@@ -845,14 +845,14 @@ HWTEST_F(FrameNodeTestNg, GetPixelMap001, TestSize.Level1)
     RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
     ASSERT_NE(pixelMap, nullptr);
     gestureHub->SetPixelMap(pixelMap);
-    EXPECT_NE(FRAME_NODE->GetPixelMap(), nullptr);
+    EXPECT_NE(FRAME_NODE->GetDragPixelMap(), nullptr);
 
     /**
      * @tc.steps: step4. set a pixelMap of the renderContext, and call GetPixelMap.
      * @tc.expected: expect GetPixelMap() != nullptr.
      */
     gestureHub->SetPixelMap(nullptr);
-    EXPECT_EQ(FRAME_NODE->GetPixelMap(), nullptr);
+    EXPECT_EQ(FRAME_NODE->GetDragPixelMap(), nullptr);
 }
 
 /**

@@ -390,6 +390,7 @@ export class ToolBarV2 extends ViewV2 {
       });
       Column.opacity(this.toolBarList[e49]?.state !== ToolBarV2ItemState.DISABLE ? 1 : 0.4);
       Column.enabled(this.toolBarList[e49]?.state !== ToolBarV2ItemState.DISABLE);
+      Column.accessibilityGroup(true);
       Column.accessibilityText(this.toStringFormat(this.toolBarList[e49]?.accessibilityText) ??
       this.toStringFormat(this.toolBarList[e49]?.content?.text));
       Column.accessibilityDescription(this.toStringFormat(this.toolBarList[e49]?.accessibilityDescription) ?? '');

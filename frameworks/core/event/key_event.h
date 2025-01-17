@@ -649,6 +649,9 @@ public:
     {
         return unicode_;
     }
+
+    void ParseKeyEvent(KeyEvent& keyEvent);
+
 private:
     KeyCode keyCode_ = KeyCode::KEY_UNKNOWN;
     const char* keyText_ = "";
@@ -667,6 +670,14 @@ enum class BlurReason : int32_t {
     VIEW_SWITCH = 3,
     CLEAR_FOCUS = 4, // User api clearFocus triggered
     BACK_TO_TABSTOP = 5,
+};
+
+enum class FocusReason : int32_t {
+    DEFAULT = 0,
+    FOCUS_TRAVEL = 1,
+    FOCUS_TOUCH = 2,
+    WINDOW_FOCUS = 3,
+    VIEW_SWITCH = 4,
 };
 
 using OnKeyEventFunc = std::function<bool(const KeyEvent&)>;

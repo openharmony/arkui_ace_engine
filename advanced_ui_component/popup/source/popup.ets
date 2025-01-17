@@ -194,6 +194,8 @@ export interface PopupOptions {
 const noop = () => {
 };
 
+const POPUP_DEFAULT_MAXWIDTH = 400;
+
 @Builder
 export function Popup(options: PopupOptions) {
   PopupComponent({
@@ -373,8 +375,12 @@ export struct PopupComponent {
       return textMaxWeight = 400
     }
     if (this.showClose || this.showClose === void (0)) {
-      if (px2vp(defaultDisplaySync.width) > 400) {
-        textMaxWeight = 400
+      if (this.messageMaxWidth != undefined) {
+        if(this.maxWidth > px2vp(defaultDisplaySync.width)) {
+          textMaxWeight = px2vp(defaultDisplaySync.width)
+        } else {
+          textMaxWeight = this.messageMaxWidth
+        }
       } else {
         if (defaultDisplaySync.width != 0) {
           textMaxWeight = px2vp(defaultDisplaySync.width)
@@ -526,7 +532,7 @@ export struct PopupComponent {
           .getNumberByName(((value.params as string[])[0]).split('.')[2]))
       }
     } catch (error) {
-      return CounterResource.COUNTER_LIST_PADDING
+      return POPUP_DEFAULT_MAXWIDTH
     }
   }
 
@@ -597,6 +603,8 @@ export struct PopupComponent {
     if (this.maxWidth !== undefined) {
       if (typeof this.maxWidth === 'number' && this.maxWidth >= 0) {
           maxWidthSize = px2vp(this.maxWidth);
+      } else if (typeof this.maxWidth === 'number' && this.maxWidth < 0) {
+         maxWidthSize = POPUP_DEFAULT_MAXWIDTH
       } else {
           maxWidthSize = this.toVp(this.maxWidth);
       }
@@ -617,6 +625,7 @@ export struct PopupComponent {
       applyMaxHeight = px2vp(defaultDisplaySync.height) - 40 - 40
     }
     applyMaxSize = { maxWidth: applyMaxWidth, maxHeight: applyMaxHeight }
+    this.messageMaxWidth = applyMaxHeight;
     this.messageMaxWeight = this.getMessageMaxWeight()
     return applyMaxSize
   }
@@ -905,6 +914,7 @@ export struct PopupComponent {
     .direction(this.popupDirection)
     .alignItems(VerticalAlign.Top)
     .padding(this.getWindowsPadding())
+    .constraintSize(this.applySizeOptions)
     .constraintSize(this.getApplyMaxSize())
     .onAreaChange((_, rect) => {
       this.applyHeight = rect.height as number

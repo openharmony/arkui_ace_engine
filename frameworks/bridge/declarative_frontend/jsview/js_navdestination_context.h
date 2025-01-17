@@ -68,6 +68,8 @@ public:
         return navDestinationPopCallback_;
     }
 
+    void UpdateNavPathInfo(const RefPtr<NG::NavPathInfo>& info) override;
+
 private:
     JSRef<JSVal> param_;
     JSRef<JSVal> onPop_;

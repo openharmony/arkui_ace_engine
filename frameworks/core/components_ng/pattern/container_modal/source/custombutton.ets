@@ -551,7 +551,7 @@ struct custombutton {
 
   build() {
     Row() {
-      Row() {
+      Row({space: this.buttonSpacing}) {
         Button() {
           Image(this.maximizeResource)
             .width(IMAGE_SIZE)
@@ -569,8 +569,6 @@ struct custombutton {
         .type(ButtonType.Normal)
         .borderRadius('4vp')
         .hoverEffect(HoverEffect.None)
-        // 间距可修改
-        .margin({ right: this.buttonSpacing + 'vp' })
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,
           y: TITLE_BUTTON_RESPONSE_REGION_OFFSET_Y,
@@ -622,7 +620,6 @@ struct custombutton {
         .height(this.buttonSize + 'vp')
         .type(ButtonType.Normal)
         .borderRadius('4vp')
-        .margin({ right: this.buttonSpacing + 'vp' })
         .hoverEffect(HoverEffect.None)
         .responseRegion({
           x: TITLE_BUTTON_RESPONSE_REGION_OFFSET_X,

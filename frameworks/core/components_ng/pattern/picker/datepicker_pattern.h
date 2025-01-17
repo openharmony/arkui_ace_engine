@@ -715,6 +715,9 @@ public:
         return paintDividerSpacing_;
     }
 
+    static bool ReportDateChangeEvent(int32_t nodeId, const std::string& compName,
+        const std::string& eventName, const std::string& eventData);
+
     void SetUserDefinedOpacity(double opacity)
     {
         curOpacity_ = opacity;
@@ -771,7 +774,8 @@ private:
     void UpdateCancelButtonMargin(
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
     void ShowColumnByDatePickMode();
-    void UpdateStackPropVisibility(VisibleType yearType, VisibleType monthType, VisibleType dayType);
+    void UpdateStackPropVisibility(const RefPtr<FrameNode>& stackNode,
+        const VisibleType visibleType, const int32_t weight);
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
@@ -836,6 +840,8 @@ private:
     bool CheckFocusID(int32_t childSize);
     bool ParseDirectionKey(RefPtr<DatePickerColumnPattern>& pattern, KeyCode& code, uint32_t totalOptionCount,
                           int32_t childSize);
+    bool ReportDateChangeEvent(const std::string& compName,
+        const std::string& eventName, const std::string& eventData);
 
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;

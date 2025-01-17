@@ -18,6 +18,7 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "core/components_ng/pattern/ui_extension/security_ui_extension_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "frameworks/core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 UIExtensionIdUtility::UIExtensionIdUtility() {}
@@ -279,6 +280,14 @@ bool UIExtensionManager::IsShowPlaceholder(int32_t nodeId)
             return uiExtension->IsShowPlaceholder();
         }
     }
+
+    auto itSec = aliveSecurityUIExtensions_.find(nodeId);
+    if (itSec != aliveSecurityUIExtensions_.end()) {
+        auto secExtension = itSec->second.Upgrade();
+        if (secExtension) {
+            return secExtension->IsShowPlaceholder();
+        }
+    }
     return true;
 }
 
@@ -442,6 +451,41 @@ void UIExtensionManager::NotifyWindowMode(Rosen::WindowMode mode)
         auto uiExtension = it.second.Upgrade();
         if (uiExtension) {
             uiExtension->NotifyHostWindowMode(mode);
+        }
+    }
+}
+
+void UIExtensionManager::SendPageModeToUEA(const RefPtr<PipelineContext>& pipeline)
+{
+    AAFwk::Want data;
+    data.SetParam("requestPageMode", std::string("yes"));
+    AAFwk::Want reply;
+    SendBusinessToHostSyncReply(UIContentBusinessCode::SEND_PAGE_MODE, std::move(data), reply);
+    if (reply.HasParameter("pageMode")) {
+        auto pageMode = reply.GetStringParam("pageMode");
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "UEA received a reply, pageMode: %{public}s.", pageMode.c_str());
+        auto accessibilityManager = pipeline->GetAccessibilityManager();
+        CHECK_NULL_VOID(accessibilityManager);
+        accessibilityManager->UpdatePageMode(pageMode);
+    }
+}
+
+void UIExtensionManager::TransferAccessibilityRectInfo()
+{
+    {
+        std::lock_guard<std::mutex> aliveUIExtensionMutex(aliveUIExtensionMutex_);
+        for (const auto& it : aliveUIExtensions_) {
+            auto uiExtension = it.second.Upgrade();
+            if (uiExtension) {
+                uiExtension->TransferAccessibilityRectInfo();
+            }
+        }
+    }
+    for (const auto& it : aliveSecurityUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->TransferAccessibilityRectInfo();
         }
     }
 }

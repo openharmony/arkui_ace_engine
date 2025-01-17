@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (C) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,11 @@
  * limitations under the License.
  */
 
-#include "core/components/web/resource/web_area_changed.h"
+#include "core/common/share/text_share_adapter.h"
 
 namespace OHOS::Ace {
-void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
-    const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
-{
-    auto delegate = Referenced::WeakClaim(this).Upgrade();
-    if (delegate) {
-        delegate->OnAvoidAreaChanged(avoidArea, type);
-    }
-}
-}
+
+void TextShareAdapter::StartTextShareTask(
+    const int32_t containerId, const NG::RectF &contentRect, const std::string &shareText) {}
+
+} // namespace OHOS::Ace

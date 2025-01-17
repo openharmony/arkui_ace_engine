@@ -1952,10 +1952,10 @@ HWTEST_F(ParseTestNg, ParseNodeTest009, TestSize.Level1)
     EXPECT_NE(svgNode->GetBaseAttributes().clipState.GetHref(), "testClipPathFaild");
 
     svgNode->SetAttr("clip-rule", "evenodd");
-    EXPECT_EQ(svgNode->GetBaseAttributes().clipState.GetClipRule(), "evenodd");
+    EXPECT_EQ(svgNode->GetBaseAttributes().clipState.GetClipRule(), SvgRuleType::SVG_RULE_EVENODD);
 
     svgNode->SetAttr("clipRule", "evenodd1");
-    EXPECT_EQ(svgNode->GetBaseAttributes().clipState.GetClipRule(), "evenodd1");
+    EXPECT_EQ(svgNode->GetBaseAttributes().clipState.GetClipRule(), SvgRuleType::SVG_RULE_NONEZERO);
 
     svgNode->SetAttr("fill", "url(#testFill)");
     EXPECT_EQ(svgNode->GetBaseAttributes().fillState.GetHref(), "testFill");
