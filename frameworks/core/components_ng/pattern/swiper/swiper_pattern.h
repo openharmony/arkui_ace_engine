@@ -1148,7 +1148,7 @@ private:
 
     bool ComputeTargetIndex(int32_t index, int32_t& targetIndex) const;
     void FastAnimation(int32_t targetIndex);
-
+    void MarkDirtyBindIndicatorNode() const;
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;

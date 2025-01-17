@@ -245,7 +245,8 @@ public:
     virtual bool GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& frameSize) const;
     virtual int32_t RealTotalCount() const;
     virtual int32_t GetCurrentIndex() const;
-
+    void ResetDotModifier();
+    
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -293,7 +294,6 @@ private:
     void RegisterIndicatorChangeEvent();
     std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     std::pair<int32_t, int32_t> CalculateStepAndItemCountDefault() const;
-    void ResetDotModifier();
     void UpdateFocusable() const;
     void CheckDragAndUpdate(
         const RefPtr<SwiperPattern>& swiperPattern, int32_t animationStartIndex, int32_t animationEndIndex);

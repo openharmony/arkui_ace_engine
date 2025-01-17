@@ -354,6 +354,13 @@ bool SwiperPattern::NeedForceMeasure() const
            (isSwipeByGroup_.has_value() && isSwipeByGroup_.value() != IsSwipeByGroup());
 }
 
+void SwiperPattern::MarkDirtyBindIndicatorNode() const
+{
+    auto indicatorNode = GetIndicatorNode();
+    CHECK_NULL_VOID(indicatorNode);
+    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
 void SwiperPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -373,6 +380,8 @@ void SwiperPattern::OnModifyDone()
 
     if (!isBindIndicator_) {
         InitIndicator();
+    } else if (NeedForceMeasure()) {
+        MarkDirtyBindIndicatorNode();
     }
     InitArrow();
     InitCapture();
