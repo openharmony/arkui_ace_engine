@@ -156,7 +156,8 @@
                         "header_files": [
                             "ace_forward_compatibility.h",
                             "ai/data_detector_interface.h",
-                            "ai/data_url_analyzer.h"
+                            "ai/data_url_analyzer.h",
+                            "share/text_share_interface.h"
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ace:ace_forward_compatibility"

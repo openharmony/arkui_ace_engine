@@ -41,6 +41,7 @@ enum class DragPreviewMode : int32_t {
     ENABLE_DEFAULT_SHADOW = 3,
     ENABLE_DEFAULT_RADIUS = 4,
     ENABLE_DRAG_ITEM_GRAY_EFFECT = 5,
+    ENABLE_MULTI_TILE_EFFECT  = 6,
 };
 
 struct BlurBackGroundInfo {
@@ -68,6 +69,7 @@ struct OptionsAfterApplied {
     double opacity { 1.0f };
     std::optional<Shadow> shadow;
     std::string shadowPath;
+    bool isFilled = true;
     std::optional<BorderRadiusProperty> borderRadius;
     BlurBackGroundInfo blurbgEffect;
 };
@@ -81,6 +83,9 @@ struct DragPreviewOption {
     bool isDefaultRadiusEnabled = false;
     bool isDragPreviewEnabled = true;
     bool isDefaultDragItemGrayEffectEnabled = false;
+    bool enableEdgeAutoScroll = true;
+    bool enableHapticFeedback = false;
+    bool isMultiTiled = false;
     union {
         int32_t badgeNumber;
         bool isShowBadge;
@@ -102,6 +107,7 @@ struct DragPreviewOption {
         isDefaultShadowEnabled = false;
         isDefaultRadiusEnabled = false;
         isDefaultDragItemGrayEffectEnabled = false;
+        isMultiTiled = false;
     }
 };
 

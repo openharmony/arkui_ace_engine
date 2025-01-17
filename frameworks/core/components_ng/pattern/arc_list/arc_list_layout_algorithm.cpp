@@ -48,36 +48,21 @@ static constexpr Dimension ARC_LIST_ITEM_SNAP_SIZE = 145.0_vp;
 static constexpr float FLOAT_TWO = 2.0f;
 static constexpr float HEADER_DIST = 40.f;
 static constexpr float TRANSPARENCY_DIST = 40.f;
+static constexpr double SCALE_FACTOR_A = 108;
+static constexpr double SCALE_FACTOR_B = -0.012414818053443355;
+static constexpr double SCALE_FACTOR_C = -0.0015925017083441295;
+static constexpr double SCALE_FACTOR_D = 3.0809306290456454E-06;
+static constexpr double SCALE_FACTOR_E = 100.0;
 } // namespace
-
-// map data from UX, mark for scale ratio according to distance between item center and list center
-ArcListLayoutAlgorithm::CenterPos2ScaleMap ArcListLayoutAlgorithm::centerPos2ScaleMap_ = { { 224, 0.56 }, { 192, 0.7 },
-    { 141, 0.78 }, { 118, 0.88 }, { 94, 0.97 }, { 70.6, 1.03 }, { 47, 1.07 }, { 23.5, 1.075 }, { 0, 1.08 },
-    { -23, 1.075 }, { -45, 1.07 }, { -66, 1.03 }, { -89, 0.98 }, { -112, 0.9 }, { -132, 0.82 }, { -192, 0.7 },
-    { -224, 0.56 } };
 
 float ArcListLayoutAlgorithm::GetNearScale(float pos)
 {
-    if (centerPos2ScaleMap_.empty()) {
-        return 0.0;
-    }
-
-    if (LessOrEqual(pos, centerPos2ScaleMap_.begin()->first)) {
-        return centerPos2ScaleMap_.begin()->second;
-    }
-    if (GreatOrEqual(pos, centerPos2ScaleMap_.rbegin()->first)) {
-        return centerPos2ScaleMap_.rbegin()->second;
-    }
-
-    for (auto it = centerPos2ScaleMap_.begin(); it != centerPos2ScaleMap_.end(); ++it) {
-        if (GreatNotEqual(it->first, pos)) {
-            auto itPrev = std::prev(it, 1);
-            float t = std::abs(pos - itPrev->first) / std::abs(it->first - itPrev->first);
-            return GetLerpValue(itPrev->second, it->second, t);
-        }
-    }
-
-    return 0.0;
+    float offset = fabs(pos);
+    float ratio = static_cast<float>((SCALE_FACTOR_A +
+                                    SCALE_FACTOR_B * offset +
+                                    SCALE_FACTOR_C * pow(offset, 2) + // 2:平方
+                                    SCALE_FACTOR_D * pow(offset, 3)) / SCALE_FACTOR_E); // 3:3次方
+    return ratio;
 }
 
 void ArcListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)

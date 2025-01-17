@@ -273,11 +273,13 @@ public:
     virtual void SetType(TextInputType value) = 0;
     virtual void SetContentType(const NG::TextContentType& value) = 0;
     virtual void SetPlaceholderColor(const Color& value) = 0;
+    virtual void ResetPlaceholderColor() = 0;
     virtual void SetPlaceholderFont(const Font& value) = 0;
     virtual void SetEnterKeyType(TextInputAction value) = 0;
     virtual void SetTextAlign(TextAlign value) = 0;
     virtual void SetLineBreakStrategy(LineBreakStrategy lineBreakStrategy) = 0;
     virtual void SetCaretColor(const Color& value) = 0;
+    virtual void ResetCaretColor() = 0;
     virtual void SetCaretPosition(const int32_t& value) = 0;
     virtual void SetSelectedBackgroundColor(const Color& value) = 0;
     virtual void SetCaretStyle(const CaretStyle& value) = 0;
@@ -286,6 +288,7 @@ public:
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
     virtual void SetTextColor(const Color& value) = 0;
+    virtual void ResetTextColor() = 0;
     virtual void SetWordBreak(Ace::WordBreak value) {};
     virtual void SetFontStyle(FontStyle value) = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
@@ -311,6 +314,7 @@ public:
     virtual void ResetMaxLength() = 0;
     virtual void SetForegroundColor(const Color& value) = 0;
     virtual void SetBackgroundColor(const Color& color, bool tmp) = 0;
+    virtual void ResetBackgroundColor() = 0;
     virtual void SetHeight(const Dimension& value) = 0;
     virtual void SetPadding(const NG::PaddingProperty& newPadding, Edge oldPadding, bool tmp) = 0;
     virtual void SetMargin() {};

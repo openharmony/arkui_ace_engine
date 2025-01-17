@@ -163,6 +163,10 @@ struct ArkUI_CustomProperty {
     char* value;
 };
 
+struct ArkUI_HostWindowInfo {
+    char* name;
+};
+
 struct ArkUI_ActiveChildrenInfo {
     ArkUI_NodeHandle* nodeList;
     int32_t nodeCount;

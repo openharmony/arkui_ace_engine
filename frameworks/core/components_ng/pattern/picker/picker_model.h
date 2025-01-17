@@ -29,6 +29,8 @@ struct PickerDialogInfo {
     PickerDate parseStartDate;
     PickerDate parseEndDate;
     PickerDate parseSelectedDate;
+    PickerTime parseStartTime;
+    PickerTime parseEndTime;
     PickerTime pickerTime;
     bool isUseMilitaryTime;
     bool isSelectedTime;
@@ -76,6 +78,7 @@ public:
     virtual void SetBackgroundColor(const Color& color) = 0;
     virtual void SetChangeEvent(DateChangeEvent&& onChange) = 0;
     virtual void HasUserDefinedOpacity() = 0;
+    virtual void SetEnableHapticFeedback(bool isEnableHapticFeedback) {};
 
 private:
     static std::unique_ptr<DatePickerModel> datePickerInstance_;

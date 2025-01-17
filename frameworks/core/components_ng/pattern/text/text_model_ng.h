@@ -72,11 +72,6 @@ public:
     void SetRemoteMessage(std::function<void()>&& event) override;
     void SetCopyOption(CopyOptions copyOption) override;
     void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
-    void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
-    void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
-    void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
-    void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
-    void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType, std::function<void()>& buildFunc,
         SelectMenuParam& menuParam) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;

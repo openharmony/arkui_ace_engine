@@ -65,11 +65,11 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::u16s
     }
     if (isBackward) {
         if (startIndex == static_cast<int32_t>(u16.length())) {
-            u32ContentToDelete = StringUtils::ToU32string(StringUtils::Str16ToStr8(content));
+            u32ContentToDelete = UtfUtils::Str16ToStr32(content);
         } else {
             remainString = u16.substr(startIndex, substrLength);
             std::u16string temp = u16.substr(0, startIndex);
-            u32ContentToDelete = StringUtils::ToU32string(StringUtils::Str16ToStr8(temp));
+            u32ContentToDelete = UtfUtils::Str16ToStr32(temp);
         }
         if (u32ContentToDelete.length() == 0) {
             return 0;
@@ -79,14 +79,14 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::u16s
                 break;
             }
         }
-        content = StringUtils::Str8ToStr16(StringUtils::U32StringToString(u32ContentToDelete)) + remainString;
+        content = UtfUtils::Str32ToStr16(u32ContentToDelete) + remainString;
     } else {
         if (startIndex == 0) {
-            u32ContentToDelete = StringUtils::ToU32string(StringUtils::Str16ToStr8(content));
+            u32ContentToDelete = UtfUtils::Str16ToStr32(content);
         } else {
             remainString = u16.substr(0, startIndex);
             std::u16string temp = u16.substr(startIndex, substrLength);
-            u32ContentToDelete = StringUtils::ToU32string(StringUtils::Str16ToStr8(temp));
+            u32ContentToDelete = UtfUtils::Str16ToStr32(temp);
         }
         if (u32ContentToDelete.length() == 0) {
             return 0;
@@ -96,7 +96,7 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::u16s
                 break;
             }
         }
-        content = remainString + StringUtils::Str8ToStr16(StringUtils::U32StringToString(u32ContentToDelete));
+        content = remainString + UtfUtils::Str32ToStr16(u32ContentToDelete);
     }
     // we need length to update the cursor
     int32_t deletedLength = static_cast<int32_t>(u16.length() - content.length());
@@ -162,7 +162,7 @@ EmojiRelation TextEmojiProcessor::GetIndexRelationToEmoji(int32_t index,
     int32_t emojiBackwardLengthU16 = 0;
     if (backwardLen > 0) {
         int32_t u32Length = static_cast<int32_t>(u32Content.length());
-        std::u16string tempstr = U32ToU16string(u32Content.substr(u32Length - backwardLen));
+        std::u16string tempstr = UtfUtils::Str32ToStr16(u32Content.substr(u32Length - backwardLen));
         emojiBackwardLengthU16 = static_cast<int32_t>(tempstr.length());
         index -= emojiBackwardLengthU16;
         emojiBackwardLengthU16 = endIndex - index; // calculate length of the part of emoji
@@ -312,13 +312,6 @@ std::string TextEmojiProcessor::ConvertU8stringUnpairedSurrogates(const std::str
     return result;
 }
 
-std::u16string TextEmojiProcessor::U32ToU16string(const std::u32string& u32str)
-{
-    std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> u8ToU16converter;
-    std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> u32ToU8converter;
-    return u8ToU16converter.from_bytes(u32ToU8converter.to_bytes(u32str));
-}
-
 int32_t TextEmojiProcessor::GetEmojiLengthBackward(std::u32string& u32Content,
     int32_t& startIndex, const std::u16string& u16Content)
 {
@@ -326,18 +319,13 @@ int32_t TextEmojiProcessor::GetEmojiLengthBackward(std::u32string& u32Content,
         return 0;
     }
     do {
-        // U32 string may be failed to tranfer for spliting. Try to enlarge string scope to get transferred u32 string.
-        std::u16string temp = u16Content.substr(0, startIndex);
-        u32Content = StringUtils::ToU32string(StringUtils::Str16ToStr8(temp));
-        if (static_cast<int32_t>(u32Content.length()) == 0) {
-            ++startIndex;
+        if (!UtfUtils::IsIndexInPairedSurrogates(startIndex, u16Content)) {
+            break;
         }
-    } while (static_cast<int32_t>(u32Content.length()) == 0 &&
-            startIndex <= static_cast<int32_t>(u16Content.length()));
-    if (u32Content.length() == 0) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetEmojiLengthBackward u32Content is 0");
-        return 0;
-    }
+        ++startIndex;
+    } while (1);
+    std::u16string temp = u16Content.substr(0, startIndex);
+    u32Content = UtfUtils::Str16ToStr32(temp);
     return GetEmojiLengthAtEnd(u32Content, false);
 }
 
@@ -345,7 +333,10 @@ int32_t TextEmojiProcessor::GetEmojiLengthU16Forward(std::u32string& u32Content,
     int32_t& startIndex, const std::u16string& u16Content)
 {
     int32_t forwardLen = GetEmojiLengthForward(u32Content, startIndex, u16Content);
-    return U32ToU16string(u32Content.substr(0, forwardLen)).length();
+    if (u32Content.empty()) {
+        return 0;
+    }
+    return UtfUtils::Str32ToStr16(u32Content.substr(0, forwardLen)).length();
 }
 
 int32_t TextEmojiProcessor::GetEmojiLengthForward(std::u32string& u32Content,
@@ -355,17 +346,13 @@ int32_t TextEmojiProcessor::GetEmojiLengthForward(std::u32string& u32Content,
         return 0;
     }
     do {
-        // U32 string may be failed to tranfer for spliting. Try to enlarge string scope to get transferred u32 string.
-        std::u16string temp = u16Content.substr(startIndex, u16Content.length() - startIndex);
-        u32Content = StringUtils::ToU32string(StringUtils::Str16ToStr8(temp));
-        if (static_cast<int32_t>(u32Content.length()) == 0) {
-            --startIndex;
+        if (!UtfUtils::IsIndexInPairedSurrogates(startIndex, u16Content)) {
+            break;
         }
-    } while (static_cast<int32_t>(u32Content.length()) == 0 && startIndex >= 0);
-    if (static_cast<int32_t>(u32Content.length()) == 0) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "GetEmojiLengthForward u32Content is 0");
-        return 0;
-    }
+        --startIndex;
+    } while (1);
+    std::u16string temp = u16Content.substr(startIndex, u16Content.length() - startIndex);
+    u32Content = UtfUtils::Str16ToStr32(temp);
     return GetEmojiLengthAtFront(u32Content, false);
 }
 

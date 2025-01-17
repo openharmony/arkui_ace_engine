@@ -45,6 +45,7 @@ public:
     static void UseMilitaryTime(bool isUseMilitaryTime);
     static void IsUserDefinedFontFamily(const std::string& pos);
     static void JsOpacity(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
 
 private:
     static void CreateDatePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
@@ -116,10 +117,11 @@ public:
 private:
     static void CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static void SetDefaultAttributes();
-    static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
+    static PickerTime ParseTime(
+        const JSRef<JSVal>& timeVal, PickerTime defaultTime = PickerTime(), bool useDefaultTime = false);
 };
 
-class JSTimePickerDialog {
+class JSTimePickerDialog : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Show(const JSCallbackInfo& info);
@@ -129,7 +131,8 @@ public:
 
 private:
     static void CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj);
-    static PickerTime ParseTime(const JSRef<JSVal>& timeVal);
+    static PickerTime ParseTime(
+        const JSRef<JSVal>& timeVal, PickerTime defaultTime = PickerTime(), bool useDefaultTime = false);
     static PickerDate ParseDate(const JSRef<JSVal>& dateVal);
 };
 } // namespace OHOS::Ace::Framework

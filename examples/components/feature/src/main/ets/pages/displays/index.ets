@@ -29,8 +29,13 @@ import { CounterBootcamp } from './CounterBootcamp';
 import { AdvancedCounterBootcamp } from './AdvancedCounterBootcamp';
 import { DataPanelBootcamp } from './DataPanelBootcamp';
 import { GaugeBootcamp } from './GaugeBootcamp';
+import { TextClockBootcamp } from './TextClockBootcamp';
+import { PatternLockBootcamp } from './PatternLockBootcamp'
+import { QRCodeBootcamp } from './QRCodeBootcamp'
+
 import { TextTimerBootcamp } from './TextTimerBootcamp';
 import { ProgressLockBootcamp } from './ProgressBootcamp';
+import { PopupBootcamp } from './PopupBootcamp';
 
 export const displaysRoute: RouteGroup = {
   name: 'displays',
@@ -50,16 +55,21 @@ export const displaysRoute: RouteGroup = {
     { name: 'advancedCounter', label: '计数器/advanced.Counter' },
     { name: 'dataPanel', label: '数据面板/DataPanel' },
     { name: 'gauge', label: '数据量规图/gauge' },
-    { name: 'textTimer', label: '文本计时器/TextTimer' }
-    { name: 'alphabetIndexer', label: '索引条/AlphabetIndexer' }
-    { name: 'badge', label: '信息标记/Badge' }
-    { name: 'chipGroup', label: '操作块群组/ChipGroup' }
-    { name: 'chip', label: '操作块/Chip' }
+    { name: 'textClock', label: '文本时钟/TextClock' },
+    { name: 'textTimer', label: '文本计时器/TextTimer' },
+    { name: 'textTimer', label: '文本计时器/TextTimer' },
+    { name: 'alphabetIndexer', label: '索引条/AlphabetIndexer' },
+    { name: 'badge', label: '信息标记/Badge' },
+    { name: 'chipGroup', label: '操作块群组/ChipGroup' },
+    { name: 'chip', label: '操作块/Chip' },
     { name: 'counter', label: '计数器/Counter'},
     { name: 'advancedCounter', label: '计数器/advanced.Counter'},
     { name: 'dataPanel', label: '数据面板/DataPanel'},
     { name: 'gauge', label: '数据量规图/gauge' },
-    { name: 'Progress', label: '进度条/Progress' },
+    { name: 'PatternLock', label: '图案密码锁/PatternLock' },
+    { name: 'popup', label: '气泡/Popup' },
+    { name: 'QRCode', label: '二维码/QRCode' },
+    { name: 'Progress', label: '进度条/Progress' }
   ]
 };
 
@@ -96,6 +106,14 @@ export function DisplaysDestination(name: string, route: Route) {
     DataPanelBootcamp({ title: route.label })
   } else if (name === 'displays/gauge') {
     GaugeBootcamp({ title: route.label })
+  } else if (name === 'displays/textClock') {
+    TextClockBootcamp({ title: route.label })
+  } else if (name === 'displays/PatternLock') {
+    PatternLockBootcamp({ title: route.label })
+  } else if (name === 'displays/popup') {
+    PopupBootcamp({ title: route.label })
+  } else if (name === 'displays/QRCode') {
+    QRCodeBootcamp({ title: route.label })
   } else if (name === 'displays/textTimer') {
     TextTimerBootcamp({ title: route.label })
   } else if (name === 'displays/Progress') {

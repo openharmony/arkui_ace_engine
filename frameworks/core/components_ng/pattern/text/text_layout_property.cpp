@@ -107,7 +107,7 @@ void TextLayoutProperty::UpdateMarqueeOptionsFromJson(const std::unique_ptr<Json
 void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     LayoutProperty::ToJsonValue(json, filter);
-    json->PutFixedAttr("content", UtfUtils::Str16ToStr8(GetContent().value_or(u"")).c_str(), filter,
+    json->PutFixedAttr("content", UtfUtils::Str16DebugToStr8(GetContent().value_or(u"")).c_str(), filter,
         FIXED_ATTR_CONTENT);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
@@ -189,7 +189,7 @@ void TextLayoutProperty::ToTreeJson(std::unique_ptr<JsonValue>& json, const Insp
     if (json->Contains(TreeKey::CONTENT)) {
         return;
     }
-    auto content = UtfUtils::Str16ToStr8(GetContent().value_or(u""));
+    auto content = UtfUtils::Str16DebugToStr8(GetContent().value_or(u""));
     if (!content.empty()) {
         json->Put(TreeKey::CONTENT, content.c_str());
     }

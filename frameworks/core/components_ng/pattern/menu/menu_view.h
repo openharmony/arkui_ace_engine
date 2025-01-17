@@ -36,7 +36,7 @@ struct OptionValueInfo {
 public:
     static void BindImageNodeToMenu(const RefPtr<FrameNode>& targetNode, const RefPtr<FrameNode>& wrapperNode,
         const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam, const RefPtr<UINode>& previewCustomNode);
-   
+
     // create menu with menuItems
     static RefPtr<FrameNode> Create(std::vector<OptionParam>&& params, int32_t targetId,
         const std::string& targetTag = "", MenuType type = MenuType::MENU, const MenuParam& menuParam = MenuParam());
@@ -82,6 +82,8 @@ private:
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option, const std::function<void()>& onClickFunc);
     static void CreateOption(bool optionsHasIcon, std::vector<OptionParam>& params, int32_t index,
         const RefPtr<FrameNode>& row, const RefPtr<FrameNode>& option);
+    static void MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
+        const MenuParam& menuParam, RefPtr<FrameNode> column);
 };
 } // namespace OHOS::Ace::NG
 

@@ -191,6 +191,15 @@ void JSNavDestination::SetHideTitleBar(const JSCallbackInfo& info)
     NavDestinationModel::GetInstance()->SetHideTitleBar(isHide, isAnimated);
 }
 
+void JSNavDestination::SetHideBackButton(const JSCallbackInfo& info)
+{
+    bool isHide = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isHide = info[0]->ToBoolean();
+    }
+    NavDestinationModel::GetInstance()->SetHideBackButton(isHide);
+}
+
 void JSNavDestination::SetTitle(const JSCallbackInfo& info)
 {
     // Resource and string type.
@@ -585,6 +594,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("create", &JSNavDestination::Create);
     JSClass<JSNavDestination>::StaticMethod("title", &JSNavDestination::SetTitle);
     JSClass<JSNavDestination>::StaticMethod("hideTitleBar", &JSNavDestination::SetHideTitleBar);
+    JSClass<JSNavDestination>::StaticMethod("hideBackButton", &JSNavDestination::SetHideBackButton);
     JSClass<JSNavDestination>::StaticMethod("backButtonIcon", &JSNavDestination::SetBackButtonIcon);
     JSClass<JSNavDestination>::StaticMethod("backgroundColor", &JSNavDestination::SetBackgroundColor);
     JSClass<JSNavDestination>::StaticMethod("onShown", &JSNavDestination::SetOnShown);
@@ -603,6 +613,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onWillShow", &JSNavDestination::SetWillShow);
     JSClass<JSNavDestination>::StaticMethod("onWillHide", &JSNavDestination::SetWillHide);
     JSClass<JSNavDestination>::StaticMethod("onWillDisappear", &JSNavDestination::SetWillDisAppear);
+    JSClass<JSNavDestination>::StaticMethod("onResult", &JSNavDestination::SetResultCallback);
     JSClass<JSNavDestination>::StaticMethod("ignoreLayoutSafeArea", &JSNavDestination::SetIgnoreLayoutSafeArea);
     JSClass<JSNavDestination>::StaticMethod("systemBarStyle", &JSNavDestination::SetSystemBarStyle);
     JSClass<JSNavDestination>::StaticMethod("recoverable", &JSNavDestination::SetRecoverable);
@@ -636,5 +647,25 @@ void JSNavDestination::SetSystemTransition(const JSCallbackInfo& info)
     auto value = info[0]->ToNumber<int32_t>();
     NG::NavigationSystemTransitionType type = ParseTransitionType(value);
     NavDestinationModel::GetInstance()->SetSystemTransitionType(type);
+}
+
+void JSNavDestination::SetResultCallback(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto func = JSRef<JSFunc>::Cast(info[0]);
+    if (func->IsEmpty()) {
+        return;
+    }
+    auto setPopCallback = [func](const RefPtr<NG::NavPathInfo>& info) {
+        auto pathInfo = AceType::DynamicCast<JSNavPathInfo>(info);
+        CHECK_NULL_VOID(pathInfo);
+        pathInfo->SetNavDestinationPopCallback(func);
+    };
+    NavDestinationModel::GetInstance()->SetOnPop(setPopCallback);
 }
 } // namespace OHOS::Ace::Framework

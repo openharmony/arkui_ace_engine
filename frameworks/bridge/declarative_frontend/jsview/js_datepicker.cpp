@@ -305,6 +305,7 @@ void JSDatePicker::JSBind(BindingTarget globalObj)
     JSClass<JSDatePicker>::StaticMethod("disappearTextStyle", &JSDatePicker::SetDisappearTextStyle);
     JSClass<JSDatePicker>::StaticMethod("textStyle", &JSDatePicker::SetTextStyle);
     JSClass<JSDatePicker>::StaticMethod("selectedTextStyle", &JSDatePicker::SetSelectedTextStyle);
+    JSClass<JSDatePicker>::StaticMethod("enableHapticFeedback", &JSDatePicker::SetEnableHapticFeedback);
     JSClass<JSDatePicker>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -462,6 +463,15 @@ void JSDatePicker::SetTextStyle(const JSCallbackInfo& info)
         JSDatePicker::ParseTextStyle(info[0], textStyle, "textStyle");
     }
     DatePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
+}
+
+void JSDatePicker::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool isEnableHapticFeedback = true;
+    if (info[0]->IsBoolean()) {
+        isEnableHapticFeedback = info[0]->ToBoolean();
+    }
+    DatePickerModel::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);
 }
 
 void JSDatePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
@@ -1027,6 +1037,10 @@ void JSDatePickerDialog::UpdateDatePickerSettingData(
             UpdateLunarSwitchSettingData(style, settingData);
         }
     }
+    auto enableHapticFeedbackValue = paramObject->GetProperty("enableHapticFeedback");
+    if (enableHapticFeedbackValue->IsBoolean()) {
+        settingData.isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
+    }
     settingData.showTime = sTime->ToBoolean();
     settingData.useMilitary = useMilitary->ToBoolean();
 
@@ -1093,7 +1107,7 @@ void JSDatePickerDialog::UpdatePickerDialogPositionInfo(
     auto alignmentValue = paramObject->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
         auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
         }
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -1253,6 +1267,10 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
         settingData.datePickerProperty["selected"] = parseSelectedDate;
         settingData.timePickerProperty["selected"] = ParseTime(selectedDate);
     }
+    auto enableHapticFeedbackValue = paramObj->GetProperty("enableHapticFeedback");
+    if (enableHapticFeedbackValue->IsBoolean()) {
+        settingData.isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
+    }
 
     JSDatePicker::ParseTextProperties(paramObj, settingData.properties);
     auto context = AccessibilityManager::DynamicCast<NG::PipelineContext>(pipelineContext);
@@ -1263,7 +1281,8 @@ void JSDatePickerDialog::DatePickerDialogShow(const JSRef<JSObject>& paramObj,
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowDateDialog(properties, settingData, dialogEvent, dialogCancelEvent);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowDatePicker");
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowDatePicker",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void JSDatePickerDialog::CreateDatePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj)
@@ -1559,9 +1578,17 @@ void JSTimePicker::SetSelectedTextStyle(const JSCallbackInfo& info)
 
 void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj)
 {
+    auto startTime = paramObj->GetProperty("start");
+    auto endTime = paramObj->GetProperty("end");
     auto selectedTime = paramObj->GetProperty("selected");
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
+    auto parseStartTime = ParseTime(startTime, theme->GetDefaultStartTime(), true);
+    auto parseEndTime = ParseTime(endTime, theme->GetDefaultEndTime(), true);
+    if (parseStartTime.ToMinutes() > parseEndTime.ToMinutes()) {
+        parseStartTime = theme->GetDefaultStartTime();
+        parseEndTime = theme->GetDefaultEndTime();
+    }
     auto formatValue = paramObj->GetProperty("format");
     bool showSecond = false;
     if (formatValue->IsNumber()) {
@@ -1571,6 +1598,8 @@ void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSOb
         }
     }
     TimePickerModel::GetInstance()->CreateTimePicker(theme, showSecond);
+    TimePickerModel::GetInstance()->SetStartTime(parseStartTime);
+    TimePickerModel::GetInstance()->SetEndTime(parseEndTime);
     if (selectedTime->IsObject()) {
         JSRef<JSObject> selectedTimeObj = JSRef<JSObject>::Cast(selectedTime);
         JSRef<JSVal> changeEventVal = selectedTimeObj->GetProperty("changeEvent");
@@ -1611,9 +1640,9 @@ void JSTimePicker::SetDefaultAttributes()
     TimePickerModel::GetInstance()->SetNormalTextStyle(theme, textStyle);
 }
 
-PickerTime JSTimePicker::ParseTime(const JSRef<JSVal>& timeVal)
+PickerTime JSTimePicker::ParseTime(const JSRef<JSVal>& timeVal, PickerTime defaultTime, bool startEndCheckValue)
 {
-    auto pickerTime = PickerTime::Current();
+    auto pickerTime = startEndCheckValue ? defaultTime : PickerTime::Current();
     if (!timeVal->IsObject()) {
         return pickerTime;
     }
@@ -1785,6 +1814,8 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
             func->Execute();
         };
     }
+    auto startTime = paramObject->GetProperty("start");
+    auto endTime = paramObject->GetProperty("end");
     auto selectedTime = paramObject->GetProperty("selected");
     auto useMilitaryTime = paramObject->GetProperty("useMilitaryTime");
     auto enableCascade = paramObject->GetProperty("enableCascade");
@@ -1794,6 +1825,17 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     settingData.isEnableCascade = enableCascade->ToBoolean();
     pickerDialog.isUseMilitaryTime = useMilitaryTime->ToBoolean();
     pickerDialog.isEnableCascade = enableCascade->ToBoolean();
+    auto theme = GetTheme<PickerTheme>();
+    CHECK_NULL_VOID(theme);
+    auto parseStartTime = ParseTime(startTime, theme->GetDefaultStartTime(), true);
+    auto parseEndTime = ParseTime(endTime, theme->GetDefaultEndTime(), true);
+    if (parseStartTime.ToMinutes() > parseEndTime.ToMinutes()) {
+        parseStartTime = theme->GetDefaultStartTime();
+        parseEndTime = theme->GetDefaultEndTime();
+    }
+    pickerDialog.parseStartTime = parseStartTime;
+    pickerDialog.parseEndTime = parseEndTime;
+
     if (selectedTime->IsObject()) {
         PickerDate dialogTitleDate = ParseDate(selectedTime);
         if (dialogTitleDate.GetYear() != 0) {
@@ -1813,7 +1855,7 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     auto alignmentValue = paramObject->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
         auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
         }
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -1878,6 +1920,12 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
         }
     }
     settingData.showSecond = showSecond;
+    auto enableHapticFeedbackValue = paramObject->GetProperty("enableHapticFeedback");
+    bool isEnableHapticFeedback = true;
+    if (enableHapticFeedbackValue->IsBoolean()) {
+        isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
+    }
+    settingData.isEnableHapticFeedback = isEnableHapticFeedback;
     TimePickerDialogEvent timePickerDialogEvent { nullptr, nullptr, nullptr, nullptr };
     TimePickerDialogAppearEvent(info, timePickerDialogEvent);
     TimePickerDialogDisappearEvent(info, timePickerDialogEvent);
@@ -1915,6 +1963,13 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
     }
 
+    auto enableHapticFeedbackValue = paramObj->GetProperty("enableHapticFeedback");
+    bool isEnableHapticFeedback = true;
+    if (enableHapticFeedbackValue->IsBoolean()) {
+        isEnableHapticFeedback = enableHapticFeedbackValue->ToBoolean();
+    }
+    settingData.isEnableHapticFeedback = isEnableHapticFeedback;
+    
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
@@ -1936,7 +1991,8 @@ void JSTimePickerDialog::TimePickerDialogShow(const JSRef<JSObject>& paramObj,
             CHECK_NULL_VOID(overlayManager);
             overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowTimePicker");
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowTimePicker",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void JSTimePickerDialog::CreateTimePicker(RefPtr<Component>& component, const JSRef<JSObject>& paramObj)
@@ -1957,9 +2013,9 @@ void JSTimePickerDialog::CreateTimePicker(RefPtr<Component>& component, const JS
     component = timePicker;
 }
 
-PickerTime JSTimePickerDialog::ParseTime(const JSRef<JSVal>& timeVal)
+PickerTime JSTimePickerDialog::ParseTime(const JSRef<JSVal>& timeVal, PickerTime defaultTime, bool startEndCheckValue)
 {
-    auto pickerTime = PickerTime();
+    auto pickerTime = startEndCheckValue ? defaultTime : PickerTime();
     if (!timeVal->IsObject()) {
         return pickerTime;
     }

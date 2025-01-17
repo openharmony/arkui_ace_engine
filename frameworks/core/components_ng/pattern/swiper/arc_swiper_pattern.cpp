@@ -243,13 +243,13 @@ void ArcSwiperPattern::PlayVerticalAnimation(const OffsetF& offset, int32_t inde
 bool ArcSwiperPattern::IsPreItem(int32_t index, float translate, bool rollback)
 {
     if (translate < 0) {
-        if (index < itemPosition_.size() / HALF) {
+        if (index < static_cast<int32_t>(itemPosition_.size() / HALF)) {
             return !rollback;
         } else {
             return rollback;
         }
     } else {
-        if (index < itemPosition_.size() / HALF) {
+        if (index < static_cast<int32_t>(itemPosition_.size() / HALF)) {
             return rollback;
         } else {
             return !rollback;

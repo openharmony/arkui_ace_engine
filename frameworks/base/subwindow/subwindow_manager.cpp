@@ -1107,7 +1107,8 @@ bool SubwindowManager::GetShown()
 void SubwindowManager::ResizeWindowForFoldStatus(int32_t parentContainerId)
 {
     auto containerId = Container::CurrentId();
-    auto subwindow = parentContainerId < 0 ? GetDialogSubwindow(parentContainerId) : GetToastSubwindow(containerId);
+    auto subwindow = parentContainerId < 0 || parentContainerId >= MIN_PA_SERVICE_ID ?
+        GetDialogSubwindow(parentContainerId) : GetToastSubwindow(containerId);
     if (!subwindow) {
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
             "Get Subwindow error, containerId = %{public}d, parentContainerId = %{public}d", containerId,
@@ -1191,6 +1192,17 @@ void SubwindowManager::OnWindowSizeChanged(int32_t instanceId, Rect windowRect, 
     CHECK_NULL_VOID(overlayManager);
     overlayManager->OnUIExtensionWindowSizeChange();
     uiExtensionWindowRect_ = windowRect;
+}
+
+void SubwindowManager::FlushSubWindowUITasks(int32_t instanceId)
+{
+    auto subwindowContainerId = GetSubContainerId(instanceId);
+    if (subwindowContainerId >= MIN_SUBCONTAINER_ID) {
+        auto subPipline = NG::PipelineContext::GetContextByContainerId(subwindowContainerId);
+        CHECK_NULL_VOID(subPipline);
+        ContainerScope scope(subwindowContainerId);
+        subPipline->FlushUITasks();
+    }
 }
 
 RefPtr<NG::FrameNode> SubwindowManager::GetSubwindowDialogNodeWithExistContent(const RefPtr<NG::UINode>& node)

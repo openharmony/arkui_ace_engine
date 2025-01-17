@@ -15,6 +15,9 @@
 
 #include "core/common/resource/resource_manager.h"
 
+#include "base/log/dump_log.h"
+#include "base/utils/time_util.h"
+
 namespace OHOS::Ace {
 namespace {
 const std::string DEFAULT_BUNDLE_NAME = "";
@@ -49,5 +52,25 @@ void ResourceManager::RegisterMainResourceAdapter(
     std::unique_lock<std::shared_mutex> lock(mutex_);
     auto key = MakeCacheKey(bundleName, moduleName);
     resourceAdapters_.emplace(key, resAdapter);
+}
+
+void ResourceManager::DumpResLoadError()
+{
+    std::unique_lock<std::shared_mutex> lock(errorMutex_);
+    auto resLoadErrorSize = resourceErrorList_.size();
+    DumpLog::GetInstance().Print("----------ResourceLoadWrrorInfo----------");
+    if (resLoadErrorSize == 0) {
+        DumpLog::GetInstance().Print("No resource load error have occurred.");
+        return;
+    }
+
+    DumpLog::GetInstance().Print("ResourceLoadErrorTimes: " + std::to_string(resLoadErrorSize));
+    for (const auto& nodeError : resourceErrorList_) {
+        DumpLog::GetInstance().Print(1, "Node: " + std::to_string(nodeError.nodeId) +
+            ", nodeTag: " + nodeError.nodeTag + ", sourceKey: " + nodeError.sourceKey +
+            ", sourceTag: " + nodeError.sourceTag +
+            ", errorCode: " + std::to_string(nodeError.state) + ", errorTime: " +
+            ConvertTimestampToStr(nodeError.errorTime));
+    }
 }
 } // namespace OHOS::Ace

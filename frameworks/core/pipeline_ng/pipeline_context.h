@@ -112,6 +112,8 @@ public:
 
     static float GetCurrentRootHeight();
 
+    void MarkDirtyOverlay();
+
     void SetupRootElement() override;
 
     void SetupSubRootElement() override;
@@ -1166,6 +1168,7 @@ private:
 
     void RegisterFocusCallback();
     void DumpFocus(bool hasJson) const;
+    void DumpResLoadError() const;
     void DumpInspector(const std::vector<std::string>& params, bool hasJson) const;
     void DumpElement(const std::vector<std::string>& params, bool hasJson) const;
     void DumpData(const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const;
@@ -1194,6 +1197,8 @@ private:
 
     uint64_t AdjustVsyncTimeStamp(uint64_t nanoTimestamp);
     bool FlushModifierAnimation(uint64_t nanoTimestamp);
+    
+    void FlushAnimationDirtysWhenExist(const AnimationOption& option);
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 

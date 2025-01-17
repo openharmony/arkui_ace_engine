@@ -58,6 +58,7 @@ void ScrollTestNg::SetUp() {}
 
 void ScrollTestNg::TearDown()
 {
+    RemoveFromStageNode();
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -97,8 +98,8 @@ ScrollModelNG ScrollTestNg::CreateScroll()
     model.Create();
     auto proxy = model.CreateScrollBarProxy();
     model.SetScrollBarProxy(proxy);
-    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
     GetScroll();
     return model;
 }

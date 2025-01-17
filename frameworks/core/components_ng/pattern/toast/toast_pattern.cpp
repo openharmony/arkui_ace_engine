@@ -19,6 +19,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -52,16 +53,15 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
     auto pipelineContext =
         IsDefaultToast() ? PipelineContext::GetCurrentContextSafelyWithCheck() : GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-    CHECK_NULL_VOID(safeAreaManager);
-    float safeAreaTop = safeAreaManager->GetSystemSafeArea().top_.Length();
+    CHECK_NULL_VOID(layoutWrapper);
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(layoutWrapper->GetHostNode());
+    float safeAreaTop = safeAreaInsets.top_.Length();
     const auto& safeArea = toastProps->GetSafeAreaInsets();
     limitPos_ = Dimension(GreatNotEqual(safeAreaTop, 0) ? safeAreaTop : LIMIT_SPACING.ConvertToPx());
     // Default Toast need to avoid keyboard, but the Top mode doesn't need.
-    float safeAreaBottom = (safeArea && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN))
-                               ? safeArea->bottom_.Length()
-                               : safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
-    
+    auto useOldSafeArea = safeArea && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
+    float safeAreaBottom = useOldSafeArea ? safeArea->bottom_.Length() : safeAreaInsets.bottom_.Length();
+
     if (IsSystemTopMost()) {
         wrapperRect_ = pipelineContext->GetDisplayWindowRectInfo();
         auto windowSize = GetSystemTopMostSubwindowSize();
@@ -79,6 +79,8 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
     
     isHoverMode_ = pipelineContext->IsHalfFoldHoverStatus();
     if (isHoverMode_ && toastInfo_.enableHoverMode) {
+        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+        CHECK_NULL_VOID(safeAreaManager);
         UpdateHoverModeRect(toastProps, safeAreaManager, safeAreaTop, safeAreaBottom);
     }
 }
@@ -388,7 +390,7 @@ void ToastPattern::UpdateTextSizeConstraint(const RefPtr<FrameNode>& text)
         auto limitHeight = GetTextMaxHeight();
         textLayoutProperty->UpdateCalcMaxSize(
             CalcSize(NG::CalcLength(limitWidth), NG::CalcLength(Dimension(limitHeight))));
-
+        CHECK_NULL_VOID(textNode_);
         auto textProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textProperty);
         auto toastMaxFontSize = toastTheme->GetTextStyle().GetFontSize();
@@ -417,6 +419,7 @@ void ToastPattern::OnColorConfigurationUpdate()
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto textColor = toastTheme->GetTextStyle().GetTextColor();
+    CHECK_NULL_VOID(textNode_);
     auto textLayoutProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto toastInfo = GetToastInfo();
@@ -491,9 +494,9 @@ double ToastPattern::GetTextMaxHeight()
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "Device height is invalid when show toast.");
         deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
     }
-    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-    auto bottom = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
-    auto top = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().top_.Length() : 0;
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(host);
+    auto bottom = safeAreaInsets.bottom_.Length();
+    auto top = safeAreaInsets.top_.Length();
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_RETURN(toastTheme, 0.0);
     auto toastLimitHeightRatio = toastTheme->GetToastLimitHeightRatio();

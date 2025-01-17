@@ -64,6 +64,11 @@ public:
         return localOffset_;
     }
 
+    std::optional<OffsetF> GetLocalOffsetWithoutTrans() const
+    {
+        return localOffsetWithoutTrans_;
+    }
+
     RefPtr<FrameNode> GetMagnifierNode() const
     {
         return magnifierFrameNode_;

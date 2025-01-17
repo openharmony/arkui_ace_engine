@@ -134,7 +134,7 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
     } else if (std::holds_alternative<std::function<void(int32_t, std::string, std::string, int32_t, std::string)>>(
                    menuOption.second)) {
         std::get<std::function<void(int32_t, std::string, std::string, int32_t, std::string)>>(menuOption.second)(
-            mainContainerId_, UtfUtils::Str16ToStr8(textForAI_), bundleName, aiSpan.start, aiSpan.content);
+            mainContainerId_, UtfUtils::Str16DebugToStr8(textForAI_), bundleName, aiSpan.start, aiSpan.content);
         TAG_LOGI(AceLogTag::ACE_TEXT, "textForAI:%{public}d, start:%{public}d, aiSpan.length:%{public}d",
             static_cast<int32_t>(textForAI_.length()), aiSpan.start, static_cast<int32_t>(aiSpan.content.length()));
     } else {
@@ -316,7 +316,7 @@ void DataDetectorAdapter::HandleTextUrlDetect()
 
     auto backgroundExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     backgroundExecutor.PostTask(
-        [text = UtfUtils::Str16ToStr8(textForAI_), func = std::move(textFunc)] {
+        [text = UtfUtils::Str16DebugToStr8(textForAI_), func = std::move(textFunc)] {
             TAG_LOGI(AceLogTag::ACE_TEXT, "Start url entity detect using AI");
             func(DataUrlAnalyzerMgr::GetInstance().AnalyzeUrls(text));
         },
@@ -456,7 +456,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
         auto wTextForAILength = static_cast<int32_t>(wTextForAI.length());
         dataDetectorAdapter->PreprocessTextDetect();
         do {
-            std::string detectText = UtfUtils::Str16ToStr8(
+            std::string detectText = UtfUtils::Str16DebugToStr8(
                 wTextForAI.substr(startPos, std::min(AI_TEXT_MAX_LENGTH, wTextForAILength - startPos)));
             bool isSameDetectText = detectTextIdx < dataDetectorAdapter->detectTexts_.size() &&
                                     detectText == dataDetectorAdapter->detectTexts_[detectTextIdx];
@@ -464,7 +464,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
                    aiSpanMapIt->first < std::min(wTextForAILength, startPos + AI_TEXT_MAX_LENGTH - AI_TEXT_GAP)) {
                 auto aiContent = aiSpanMapIt->second.content;
                 auto wAIContent = StringUtils::ToWstring(aiContent);
-                if (isSameDetectText || aiContent == UtfUtils::Str16ToStr8(wTextForAI.substr(aiSpanMapIt->first,
+                if (isSameDetectText || aiContent == UtfUtils::Str16DebugToStr8(wTextForAI.substr(aiSpanMapIt->first,
                     std::min(static_cast<int32_t>(wAIContent.length()), wTextForAILength - aiSpanMapIt->first)))) {
                     dataDetectorAdapter->aiSpanMap_[aiSpanMapIt->first] = aiSpanMapIt->second;
                     hasSame = true;

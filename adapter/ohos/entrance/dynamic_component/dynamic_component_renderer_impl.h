@@ -90,9 +90,12 @@ private:
         const std::shared_ptr<Framework::JsValue>& jsContext);
 
     void AttachRenderContext();
+    void AttachRenderContextInIsolatedComponent();
+    void AttachRenderContextInDynamicComponent();
     void RegisterSizeChangedCallback();
     void RegisterConfigChangedCallback();
     void UnRegisterConfigChangedCallback();
+    void RegisterContainerHandler();
 
     SizeF ComputeAdaptiveSize(const SizeF& size) const;
     void HandleCardSizeChangeEvent(const SizeF& size);

@@ -81,6 +81,7 @@ public:
     std::optional<Color> GetHandleColor() override;
 
 protected:
+    OffsetF GetHandleReferenceOffset(const RectF& handleRect);
     virtual void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle);
     void UpdateTransformFlag() override
     {
@@ -92,6 +93,7 @@ protected:
     }
     void UpdateClipHandleViewPort(RectF& rect) override;
     bool AllowSearch() override;
+    bool AllowShare() override;
     bool selectTextUseTopHandle = false;
 
 private:

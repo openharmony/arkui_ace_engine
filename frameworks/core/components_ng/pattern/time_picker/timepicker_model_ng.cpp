@@ -207,6 +207,24 @@ RefPtr<FrameNode> TimePickerModelNG::CreateFrameNode(int32_t nodeId)
     return timePickerNode;
 }
 
+void TimePickerModelNG::SetStartTime(const PickerTime& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetStartTime(value);
+}
+
+void TimePickerModelNG::SetEndTime(const PickerTime& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetEndTime(value);
+}
+
 void TimePickerModelNG::SetSelectedTime(const PickerTime& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -474,6 +492,8 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
     }
 
     std::map<std::string, PickerTime> timePickerProperty;
+    timePickerProperty["start"] = pickerDialog.parseStartTime;
+    timePickerProperty["end"] = pickerDialog.parseEndTime;
     if (pickerDialog.isSelectedTime == true) {
         timePickerProperty["selected"] = pickerDialog.pickerTime;
     }
@@ -487,7 +507,24 @@ void TimePickerDialogModelNG::SetTimePickerDialogShow(PickerDialogInfo& pickerDi
             overlayManager->ShowTimeDialog(properties, settingData, timePickerProperty, dialogEvent, dialogCancelEvent,
                 dialogLifeCycleEvent, buttonInfos);
         },
-        TaskExecutor::TaskType::UI, "ArkUITimePickerShowTimeDialog");
+        TaskExecutor::TaskType::UI, "ArkUITimePickerShowTimeDialog",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+}
+
+void TimePickerModelNG::SetStartTime(FrameNode* frameNode, const PickerTime& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetStartTime(value);
+}
+
+void TimePickerModelNG::SetEndTime(FrameNode* frameNode, const PickerTime& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetEndTime(value);
 }
 
 void TimePickerModelNG::SetSelectedTime(FrameNode* frameNode, const PickerTime& value)
@@ -721,6 +758,24 @@ PickerTextStyle TimePickerModelNG::getSelectedTextStyle(FrameNode* frameNode)
     ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TimePickerLayoutProperty, SelectedFontStyle,
         pickerTextStyle.fontStyle, frameNode, style.GetFontStyle());
     return pickerTextStyle;
+}
+
+PickerTime TimePickerModelNG::getTimepickerStart(FrameNode* frameNode)
+{
+    PickerTime pickerTime;
+    CHECK_NULL_RETURN(frameNode, pickerTime);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, pickerTime);
+    return timePickerRowPattern->GetStartTime();
+}
+
+PickerTime TimePickerModelNG::getTimepickerEnd(FrameNode* frameNode)
+{
+    PickerTime pickerTime;
+    CHECK_NULL_RETURN(frameNode, pickerTime);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    CHECK_NULL_RETURN(timePickerRowPattern, pickerTime);
+    return timePickerRowPattern->GetEndTime();
 }
 
 PickerTime TimePickerModelNG::getTimepickerSelected(FrameNode* frameNode)

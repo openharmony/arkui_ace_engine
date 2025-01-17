@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 #endif
 
 #include "base/log/ace_scoring_log.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
@@ -88,13 +87,6 @@ bool ParseJsLengthMetrics(const JSRef<JSObject>& obj, CalcDimension& result)
     result = dimension;
     return true;
 }
-
-void HandleSearchInvalidUTF16(std::optional<std::u16string>& str)
-{
-    if (str.has_value()) {
-        UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(str.value().data()), str.value().length(), 0);
-    }
-}
 } // namespace
 
 void JSSearch::JSBind(BindingTarget globalObj)
@@ -107,6 +99,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("searchIcon", &JSSearch::SetSearchIcon, opt);
     JSClass<JSSearch>::StaticMethod("cancelButton", &JSSearch::SetCancelButton, opt);
     JSClass<JSSearch>::StaticMethod("fontColor", &JSSearch::SetTextColor, opt);
+    JSClass<JSSearch>::StaticMethod("backgroundColor", &JSSearch::SetBackgroundColor, opt);
     JSClass<JSSearch>::StaticMethod("caretStyle", &JSSearch::SetCaret, opt);
     JSClass<JSSearch>::StaticMethod("placeholderColor", &JSSearch::SetPlaceholderColor, opt);
     JSClass<JSSearch>::StaticMethod("placeholderFont", &JSSearch::SetPlaceholderFont, opt);
@@ -250,8 +243,6 @@ void JSSearch::Create(const JSCallbackInfo& info)
             jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextEditableController>();
         }
     }
-    HandleSearchInvalidUTF16(key);
-    HandleSearchInvalidUTF16(tip);
     auto controller = SearchModel::GetInstance()->Create(key, tip, src);
     if (jsController) {
         jsController->SetController(controller);
@@ -261,7 +252,6 @@ void JSSearch::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseSearchValueObject(info, changeEventVal);
     }
-    JSSeacrhTheme::ApplyTheme();
 }
 
 void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
@@ -271,11 +261,8 @@ void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     }
     Color selectedColor;
     if (!ParseJsColor(info[0], selectedColor)) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
-        selectedColor = theme->GetSelectedColor();
+        SearchModel::GetInstance()->ResetSelectedBackgroundColor();
+        return;
     }
     // Alpha = 255 means opaque
     if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
@@ -338,9 +325,7 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 
         auto fontColorProp = param->GetProperty("fontColor");
         if (fontColorProp->IsUndefined() || fontColorProp->IsNull() || !ParseJsColor(fontColorProp, fontColor)) {
-            if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
-                SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
-            }
+            SearchModel::GetInstance()->ResetSearchButtonFontColor();
         } else {
             SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
         }
@@ -353,9 +338,7 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         }
     } else {
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
-        if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
-            SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
-        }
+        SearchModel::GetInstance()->ResetSearchButtonFontColor();
     }
 }
 
@@ -425,15 +408,17 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
     }
 
     // set icon color
-    Color iconColor = theme->GetSearchIconColor();
+    Color iconColor;
+    NG::IconOptions cancelIconOptions;
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
-        NG::IconOptions cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, "", "");
-        SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
+        SearchModel::GetInstance()->SetCancelIconColor(iconColor);
+        cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, "", "");
     } else {
-        NG::IconOptions cancelIconOptions = NG::IconOptions(iconSize, iconSrc, "", "");
-        SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
+        SearchModel::GetInstance()->ResetCancelIconColor();
+        cancelIconOptions = NG::IconOptions(iconSize, iconSrc, "", "");
     }
+    SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
 }
 
 void JSSearch::SetSearchDefaultIcon()
@@ -478,17 +463,20 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     if (srcPathProp->IsUndefined() || srcPathProp->IsNull() || !ParseJsMedia(srcPathProp, src)) {
         src = "";
     }
-    // set icon color
-    Color colorVal = theme->GetSearchIconColor();
-    auto colorProp = param->GetProperty("color");
-    if (!colorProp->IsUndefined() && !colorProp->IsNull()) {
-        ParseJsColor(colorProp, colorVal);
-    }
-
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(srcPathProp, bundleName, moduleName);
-    NG::IconOptions searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
+    // set icon color
+    Color colorVal;
+    NG::IconOptions searchIconOptions;
+    auto colorProp = param->GetProperty("color");
+    if (!colorProp->IsUndefined() && !colorProp->IsNull() && ParseJsColor(colorProp, colorVal)) {
+        SearchModel::GetInstance()->SetSearchIconColor(colorVal);
+        searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
+    } else {
+        SearchModel::GetInstance()->ResetSearchIconColor();
+        searchIconOptions = NG::IconOptions(size, src, bundleName, moduleName);
+    }
     SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
 }
 
@@ -560,9 +548,23 @@ void JSSearch::SetTextColor(const JSCallbackInfo& info)
     auto value = JSRef<JSVal>::Cast(info[0]);
     Color colorVal;
     if (!ParseJsColor(value, colorVal)) {
-        colorVal = theme->GetTextColor();
+        SearchModel::GetInstance()->ResetTextColor();
+        return;
     }
     SearchModel::GetInstance()->SetTextColor(colorVal);
+}
+
+void JSSearch::SetBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color colorVal;
+    if (!ParseJsColor(info[0], colorVal)) {
+        SearchModel::GetInstance()->ResetBackgroundColor();
+        return;
+    }
+    SearchModel::GetInstance()->SetBackgroundColor(colorVal);
 }
 
 void JSSearch::SetCaret(const JSCallbackInfo& info)
@@ -584,7 +586,8 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
         Color caretColor;
         auto caretColorProp = param->GetProperty("color");
         if (caretColorProp->IsUndefined() || caretColorProp->IsNull() || !ParseJsColor(caretColorProp, caretColor)) {
-            caretColor = textFieldTheme->GetCursorColor();
+            SearchModel::GetInstance()->ResetCaretColor();
+            return;
         }
         SearchModel::GetInstance()->SetCaretColor(caretColor);
     }
@@ -645,9 +648,8 @@ void JSSearch::SetPlaceholderColor(const JSCallbackInfo& info)
     auto value = JSRef<JSVal>::Cast(info[0]);
     Color colorVal;
     if (!ParseJsColor(value, colorVal)) {
-        auto theme = GetTheme<SearchTheme>();
-        CHECK_NULL_VOID(theme);
-        colorVal = theme->GetPlaceholderColor();
+        SearchModel::GetInstance()->ResetPlaceholderColor();
+        return;
     }
     SearchModel::GetInstance()->SetPlaceholderColor(colorVal);
 }

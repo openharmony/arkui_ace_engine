@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 #include "base/log/ace_scoring_log.h"
@@ -362,7 +363,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     if (shadowVal->IsObject() || shadowVal->IsNumber()) {
         auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
         if (!ret) {
-            if (!popupParam->IsPartialUpdate()) {
+            if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
                 JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
                 popupParam->SetShadow(shadow);
             }
@@ -370,7 +371,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             popupParam->SetShadow(shadow);
         }
     } else {
-        if (!popupParam->IsPartialUpdate()) {
+        if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
             JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
             popupParam->SetShadow(shadow);
         }
@@ -383,12 +384,12 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
             blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             popupParam->SetBlurStyle(static_cast<BlurStyle>(blurStyle));
         } else {
-            if (!popupParam->IsPartialUpdate()) {
+            if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
                 GetBlurStyleFromTheme(popupParam);
             }
         }
     } else {
-        if (!popupParam->IsPartialUpdate()) {
+        if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
             GetBlurStyleFromTheme(popupParam);
         }
     }
@@ -743,6 +744,28 @@ void ParseMenuLayoutRegionMarginParam(const JSRef<JSObject>& menuOptions, NG::Me
     }
 }
 
+void ParseMenuBlurStyleOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto blurStyle = menuOptions->GetProperty("backgroundBlurStyleOptions");
+    if (blurStyle->IsObject()) {
+        if (!menuParam.blurStyleOption.has_value()) {
+            menuParam.blurStyleOption.emplace();
+        }
+        JSViewAbstract::ParseBlurStyleOption(blurStyle, menuParam.blurStyleOption.value());
+    }
+}
+
+void ParseMenuEffectOption(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
+{
+    auto effectOption = menuOptions->GetProperty("backgroundEffect");
+    if (effectOption->IsObject()) {
+        if (!menuParam.effectOption.has_value()) {
+            menuParam.effectOption.emplace();
+        }
+        JSViewAbstract::ParseEffectOption(effectOption, menuParam.effectOption.value());
+    }
+}
+
 void GetMenuShowInSubwindow(NG::MenuParam& menuParam)
 {
     menuParam.isShowInSubWindow = false;
@@ -870,6 +893,8 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     ParseMenuArrowParam(menuOptions, menuParam);
     ParseMenuBorderRadius(menuOptions, menuParam);
     ParseMenuLayoutRegionMarginParam(menuOptions, menuParam);
+    ParseMenuBlurStyleOption(menuOptions, menuParam);
+    ParseMenuEffectOption(menuOptions, menuParam);
 }
 
 void ParseBindOptionParam(const JSCallbackInfo& info, NG::MenuParam& menuParam, size_t optionIndex)
@@ -1299,7 +1324,7 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
     };
     // parse SheetStyle and callbacks
     NG::SheetStyle sheetStyle;
-    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
     sheetStyle.showCloseIcon = true;
     sheetStyle.showInPage = false;
@@ -1327,6 +1352,19 @@ void JSViewAbstract::JsBindSheet(const JSCallbackInfo& info)
         std::move(shouldDismissFunc), std::move(onWillDismissCallback),  std::move(onWillAppearCallback),
         std::move(onWillDisappearCallback), std::move(onHeightDidChangeCallback), std::move(onDetentsDidChangeCallback),
         std::move(onWidthDidChangeCallback), std::move(onTypeDidChangeCallback), std::move(sheetSpringBackFunc));
+}
+
+NG::SheetEffectEdge JSViewAbstract::ParseSheetEffectEdge(const JSRef<JSObject>& paramObj)
+{
+    auto sheetEffectEdge = static_cast<int32_t>(NG::SheetEffectEdge::ALL);
+    JSRef<JSVal> effectEdgedParam = paramObj->GetProperty("effectEdge");
+    if (effectEdgedParam->IsNull() || effectEdgedParam->IsUndefined() ||
+        !JSViewAbstract::ParseJsInt32(effectEdgedParam, sheetEffectEdge) ||
+        sheetEffectEdge < static_cast<int32_t>(NG::SheetEffectEdge::NONE) ||
+        sheetEffectEdge > static_cast<int32_t>(NG::SheetEffectEdge::END)) {
+        sheetEffectEdge = static_cast<int32_t>(NG::SheetEffectEdge::ALL);
+    }
+    return static_cast<NG::SheetEffectEdge>(sheetEffectEdge);
 }
 
 void JSViewAbstract::ParseSheetStyle(
@@ -1434,6 +1472,22 @@ void JSViewAbstract::ParseSheetStyle(
         }
     }
 
+    auto placement = paramObj->GetProperty("placement");
+    sheetStyle.placement.reset();
+    if (placement->IsNumber()) {
+        auto placementValue = placement->ToNumber<int32_t>();
+        if (placementValue >= static_cast<int>(Placement::LEFT) &&
+            placementValue <= static_cast<int>(Placement::RIGHT_BOTTOM)) {
+            sheetStyle.placement = static_cast<Placement>(placementValue);
+        }
+    }
+
+    auto placementOnTarget = paramObj->GetProperty("placementOnTarget");
+    sheetStyle.placementOnTarget.reset();
+    if (placementOnTarget->IsBoolean()) {
+        sheetStyle.placementOnTarget = placementOnTarget->ToBoolean();
+    }
+
     Color color;
     if (ParseJsColor(backgroundColor, color)) {
         sheetStyle.backgroundColor = color;
@@ -1492,6 +1546,9 @@ void JSViewAbstract::ParseSheetStyle(
         sheetStyle.shadow = shadow;
     }
 
+    //parse effectEdge
+    sheetStyle.sheetEffectEdge = ParseSheetEffectEdge(paramObj);
+
     // Parse hoverMode
     auto enableHoverModeValue = paramObj->GetProperty("enableHoverMode");
     if (enableHoverModeValue->IsBoolean()) {
@@ -1514,51 +1571,29 @@ void JSViewAbstract::ParseSheetStyle(
     auto radiusValue = paramObj->GetProperty("radius");
     JSViewAbstract::ParseBindSheetBorderRadius(radiusValue, sheetStyle);
 
-    CalcDimension sheetHeight;
-    if (height->IsString()) {
-        std::string heightStr = height->ToString();
-        // Remove all " ".
-        heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
-        std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
-        if (heightStr == SHEET_HEIGHT_MEDIUM) {
-            sheetStyle.sheetMode = NG::SheetMode::MEDIUM;
-            sheetStyle.height.reset();
-            return;
-        }
-        if (heightStr == SHEET_HEIGHT_LARGE) {
-            sheetStyle.sheetMode = NG::SheetMode::LARGE;
-            sheetStyle.height.reset();
-            return;
-        }
-        if (heightStr == SHEET_HEIGHT_FITCONTENT) {
-            sheetStyle.sheetMode = NG::SheetMode::AUTO;
-            sheetStyle.height.reset();
-            return;
-        }
-        if (heightStr.find("calc") != std::string::npos) {
-            sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
-        } else {
-            sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
-        }
-        if (sheetHeight.Value() < 0) {
-            sheetStyle.sheetMode = NG::SheetMode::LARGE;
-            sheetStyle.height.reset();
-            return;
-        }
+    ParseDetentSelection(paramObj, sheetStyle);
+
+    NG::SheetHeight sheetStruct;
+    bool parseResult = ParseSheetHeight(height, sheetStruct, isPartialUpdate);
+    if (!parseResult) {
+        TAG_LOGD(AceLogTag::ACE_SHEET, "parse sheet height in unnormal condition");
     }
-    if (!ParseJsDimensionVpNG(height, sheetHeight)) {
-        if (isPartialUpdate) {
-            sheetStyle.sheetMode.reset();
-        } else {
-            sheetStyle.sheetMode = NG::SheetMode::LARGE;
-        }
-        sheetStyle.height.reset();
-    } else {
-        sheetStyle.height = sheetHeight;
-        sheetStyle.sheetMode.reset();
-    }
+    sheetStyle.sheetHeight = sheetStruct;
 }
 
+void JSViewAbstract::ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle)
+{
+    auto detentSelection = paramObj->GetProperty("detentSelection");
+    NG::SheetHeight sheetStruct;
+    bool parseResult = ParseSheetHeight(detentSelection, sheetStruct, true);
+    if (!parseResult) {
+        sheetStruct.height.reset();
+        sheetStruct.sheetMode.reset();
+        TAG_LOGD(AceLogTag::ACE_SHEET, "parse sheet detent selection in unnormal condition");
+    }
+    sheetStyle.detentSelection = sheetStruct;
+}
+ 
 bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents)
 {
     if (!args->IsArray()) {
@@ -1567,7 +1602,10 @@ bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG:
     JSRef<JSArray> array = JSRef<JSArray>::Cast(args);
     NG::SheetHeight sheetDetent;
     for (size_t i = 0; i < array->Length(); i++) {
-        ParseSheetDetentHeight(array->GetValueAt(i), sheetDetent);
+        bool parseResult = ParseSheetHeight(array->GetValueAt(i), sheetDetent, false);
+        if (!parseResult) {
+            TAG_LOGD(AceLogTag::ACE_SHEET, "parse sheet detent in unnormal condition");
+        }
         if ((!sheetDetent.height.has_value()) && (!sheetDetent.sheetMode.has_value())) {
             continue;
         }
@@ -1576,49 +1614,6 @@ bool JSViewAbstract::ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG:
         sheetDetent.sheetMode.reset();
     }
     return true;
-}
-
-void JSViewAbstract::ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent)
-{
-    CalcDimension sheetHeight;
-    if (args->IsString()) {
-        std::string heightStr = args->ToString();
-        // Remove all " ".
-        heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
-        std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
-        if (heightStr == SHEET_HEIGHT_MEDIUM) {
-            detent.sheetMode = NG::SheetMode::MEDIUM;
-            detent.height.reset();
-            return;
-        }
-        if (heightStr == SHEET_HEIGHT_LARGE) {
-            detent.sheetMode = NG::SheetMode::LARGE;
-            detent.height.reset();
-            return;
-        }
-        if (heightStr == SHEET_HEIGHT_FITCONTENT) {
-            detent.sheetMode = NG::SheetMode::AUTO;
-            detent.height.reset();
-            return;
-        }
-        if (heightStr.find("calc") != std::string::npos) {
-            sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
-        } else {
-            sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
-        }
-        if (sheetHeight.Value() < 0) {
-            detent.sheetMode = NG::SheetMode::LARGE;
-            detent.height.reset();
-            return;
-        }
-    }
-    if (!ParseJsDimensionVpNG(args, sheetHeight)) {
-        detent.sheetMode = NG::SheetMode::LARGE;
-        detent.height.reset();
-    } else {
-        detent.height = sheetHeight;
-        detent.sheetMode.reset();
-    }
 }
 
 bool JSViewAbstract::ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions)
@@ -1787,6 +1782,59 @@ panda::Local<panda::JSValueRef> JSViewAbstract::JsSheetSpringBack(panda::JsiRunt
 {
     ViewAbstractModel::GetInstance()->SheetSpringBack();
     return JSValueRef::Undefined(runtimeCallInfo->GetVM());
+}
+
+bool JSViewAbstract::ParseSheetMode(const std::string heightStr, NG::SheetHeight& detent)
+{
+    if (heightStr == SHEET_HEIGHT_MEDIUM) {
+        detent.sheetMode = NG::SheetMode::MEDIUM;
+        return true;
+    }
+
+    if (heightStr == SHEET_HEIGHT_LARGE) {
+        detent.sheetMode = NG::SheetMode::LARGE;
+        return true;
+    }
+    if (heightStr == SHEET_HEIGHT_FITCONTENT) {
+        detent.sheetMode = NG::SheetMode::AUTO;
+        return true;
+    }
+    return false;
+}
+
+bool JSViewAbstract::ParseSheetHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent,
+    bool isReset)
+{
+    detent.height.reset();
+    detent.sheetMode.reset();
+    CalcDimension sheetHeight;
+    if (args->IsString()) {
+        std::string heightStr = args->ToString();
+
+        // Remove all " ".
+        heightStr.erase(std::remove(heightStr.begin(), heightStr.end(), ' '), heightStr.end());
+        std::transform(heightStr.begin(), heightStr.end(), heightStr.begin(), ::tolower);
+        if (ParseSheetMode(heightStr, detent)) {
+            return true;
+        }
+        if (heightStr.find("calc") != std::string::npos) {
+            sheetHeight = CalcDimension(heightStr, DimensionUnit::CALC);
+        } else {
+            sheetHeight = StringUtils::StringToDimensionWithUnit(heightStr, DimensionUnit::VP, -1.0);
+        }
+        if (sheetHeight.Value() < 0) {
+            detent.sheetMode = NG::SheetMode::LARGE;
+            return false;
+        }
+    }
+    if (!ParseJsDimensionVpNG(args, sheetHeight)) {
+        if (!isReset) {
+            detent.sheetMode = NG::SheetMode::LARGE;
+        }
+        return false;
+    }
+    detent.height = sheetHeight;
+    return true;
 }
 
 void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)

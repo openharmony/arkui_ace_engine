@@ -1542,6 +1542,8 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomTitleBar));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomTitleButton"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomButton));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomWindowMask"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomWindowMask));
 
     BindingTarget cursorControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
     cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCursor"),

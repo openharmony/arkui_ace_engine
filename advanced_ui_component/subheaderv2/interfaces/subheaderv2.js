@@ -42,10 +42,12 @@ const common = requireNapi('app.ability.common');
 const hilog = requireNapi('hilog');
 const HashMap = requireNapi('util.HashMap');
 const SymbolGlyphModifier = requireNapi('arkui.modifier').SymbolGlyphModifier;
+const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 
 const INDEX_ZERO = 0;
 const INDEX_ONE = 1;
 const INDEX_TWO = 2;
+const DEFAULT_FONT_SCALE = 1;
 const SINGLE_LINE_NUM = 1;
 const DOUBLE_LINE_NUM = 2;
 const RESOURCE_TYPE_SYMBOL = 40000;
@@ -96,6 +98,7 @@ let SubHeaderV2Select = class SubHeaderV2Select {
         this.selectedIndex = d16.selectedIndex;
         this.selectedContent = d16.selectedContent;
         this.onSelect = d16.onSelect;
+        this.defaultFocus = d16.defaultFocus;
     }
 };
 __decorate([
@@ -110,6 +113,9 @@ __decorate([
 __decorate([
     Trace
 ], SubHeaderV2Select.prototype, "onSelect", void 0);
+__decorate([
+    Trace
+], SubHeaderV2Select.prototype, "defaultFocus", void 0);
 SubHeaderV2Select = __decorate([
     ObservedV2
 ], SubHeaderV2Select);
@@ -128,6 +134,7 @@ let SubHeaderV2OperationItem = class SubHeaderV2OperationItem {
         this.accessibilityText = b16.accessibilityText;
         this.accessibilityDescription = b16.accessibilityDescription;
         this.accessibilityLevel = b16.accessibilityLevel;
+        this.defaultFocus = b16.defaultFocus;
     }
 };
 __decorate([
@@ -145,6 +152,9 @@ __decorate([
 __decorate([
     Trace
 ], SubHeaderV2OperationItem.prototype, "accessibilityLevel", void 0);
+__decorate([
+    Trace
+], SubHeaderV2OperationItem.prototype, "defaultFocus", void 0);
 SubHeaderV2OperationItem = __decorate([
     ObservedV2
 ], SubHeaderV2OperationItem);
@@ -364,6 +374,7 @@ export class SubHeaderV2 extends ViewV2 {
             Select.width('auto');
             Select.selected(this.selectedIndex);
             Select.value(this.selectedContent);
+            Select.defaultFocus(e14.defaultFocus);
             Select.onSelect((k14, l14) => {
                 this.selectedIndex = k14;
                 if (l14) {
@@ -545,6 +556,25 @@ export class SubHeaderV2 extends ViewV2 {
                 LEFT_TEXT_NUMBER) : LengthMetrics.vp(0);
         }
     }
+    onMeasureSize(f, g, h) {
+        let i = { width: f.width, height: f.height };
+        let j = this.getUIContext().getHostContext();
+        this.fontSize = this.updateFontScale();
+        if (this.isSuitableAging()) {
+            this.ageing = true;
+            this.subHeaderModifier.isAgeing = this.ageing;
+        }
+        else {
+            this.ageing = false;
+            this.subHeaderModifier.isAgeing = this.ageing;
+        }
+        g.forEach((k) => {
+            h.minHeight = Math.min(Number(this.getMinHeight()), Number(h.maxHeight));
+            i.height = k.measure(h).height;
+            i.width = Number(h.maxWidth);
+        });
+        return i;
+    }
     ButtonStyle(k12 = null) {
         this.observeComponentCreation2((m12, n12) => {
             If.create();
@@ -598,6 +628,7 @@ export class SubHeaderV2 extends ViewV2 {
                             maxLines: DOUBLE_LINE_NUM,
                             fontColor: this.subHeaderV2Theme.fontButtonColor,
                         });
+                        Text.defaultFocus(this.operationItems[0].defaultFocus);
                         Text.focusable(true);
                     }, Text);
                     Text.pop();
@@ -648,6 +679,8 @@ export class SubHeaderV2 extends ViewV2 {
                             alignment: Alignment.End,
                             fontColor: this.subHeaderV2Theme.fontSecondaryColor,
                         });
+                        Text.focusable(true);
+                        Text.defaultFocus(this.operationItems[0].defaultFocus);
                         Text.margin({
                             end: this.getTextArrowMarginRight(),
                         });
@@ -673,7 +706,6 @@ export class SubHeaderV2 extends ViewV2 {
             Image.fillColor(this.subHeaderV2Theme.iconArrowColor);
             Image.width(ARROW_ICON_WIDTH);
             Image.height(OPERATE_ITEM_LENGTH);
-            Image.focusable(true);
             Image.draggable(false);
             Image.matchTextDirection(true);
         }, Image);
@@ -831,14 +863,22 @@ export class SubHeaderV2 extends ViewV2 {
                         });
                     }, Button);
                     this.observeComponentCreation2((v9, w9) => {
-                        Image.create({ "id": -1, "type": 20000, params: ['sys.media.ohos_ic_public_arrow_right'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
-                        Image.fillColor(this.subHeaderV2Theme.iconArrowColor);
-                        Image.width(ARROW_ICON_WIDTH);
-                        Image.height(OPERATE_ITEM_LENGTH);
-                        Image.focusable(true);
-                        Image.draggable(false);
-                        Image.matchTextDirection(true);
-                    }, Image);
+                        SymbolGlyph.create({
+                            "id": -1,
+                            "type": 40000,
+                            params: ['sys.symbol.chevron_right'],
+                            "bundleName": "__harDefaultBundleName__",
+                            "moduleName": "__harDefaultModuleName__"
+                        });
+                        SymbolGlyph.fontSize(OPERATE_ITEM_LENGTH);
+                        SymbolGlyph.fontColor([this.subHeaderV2Theme.iconArrowColor]);
+                        SymbolGlyph.draggable(false);
+                        SymbolGlyph.focusable(true);
+                        SymbolGlyph.minFontScale(DEFAULT_FONT_SCALE);
+                        SymbolGlyph.maxFontScale(DEFAULT_FONT_SCALE);
+                        SymbolGlyph.width(ARROW_ICON_WIDTH);
+                        SymbolGlyph.height(OPERATE_ITEM_LENGTH);
+                    }, SymbolGlyph);
                     Button.pop();
                     Row.pop();
                 });
@@ -878,6 +918,7 @@ export class SubHeaderV2 extends ViewV2 {
                                                         item: {
                                                             iconOptions: this.operationItems?.[p8].content,
                                                             action: this.operationItems?.[p8].action,
+                                                            defaultFocus: q8.defaultFocus,
                                                             accessibilityLevel: q8.accessibilityLevel,
                                                             accessibilityText: q8.accessibilityText,
                                                             accessibilityDescription: q8.accessibilityDescription,
@@ -890,6 +931,7 @@ export class SubHeaderV2 extends ViewV2 {
                                                             item: {
                                                                 iconOptions: this.operationItems?.[p8].content,
                                                                 action: this.operationItems?.[p8].action,
+                                                                defaultFocus: q8.defaultFocus,
                                                                 accessibilityLevel: q8.accessibilityLevel,
                                                                 accessibilityText: q8.accessibilityText,
                                                                 accessibilityDescription: q8.accessibilityDescription,
@@ -904,6 +946,7 @@ export class SubHeaderV2 extends ViewV2 {
                                                         item: {
                                                             iconOptions: this.operationItems?.[p8].content,
                                                             action: this.operationItems?.[p8].action,
+                                                            defaultFocus: q8.defaultFocus,
                                                             accessibilityLevel: q8.accessibilityLevel,
                                                             accessibilityText: q8.accessibilityText,
                                                             accessibilityDescription: q8.accessibilityDescription,
@@ -1003,6 +1046,19 @@ export class SubHeaderV2 extends ViewV2 {
                         Button.margin(INDEX_ZERO);
                         Button.padding(INDEX_ZERO);
                         Button.align(Alignment.BottomEnd);
+                        Button.onKeyEvent((n) => {
+                            if (!n) {
+                                return;
+                            }
+                            if ((n.keyCode === KeyCode.KEYCODE_SPACE || n.keyCode === KeyCode.KEYCODE_ENTER) &&
+                                n.type === KeyType.Down) {
+                                if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW || this.operationType === SubHeaderV2OperationType.BUTTON) &&
+                                    this.operationItems && this.operationItems.length > 0 && this.operationItems[0].action) {
+                                    this.operationItems[0].action();
+                                }
+                                n.stopPropagation();
+                            }
+                        });
                         Button.onClick(() => {
                             if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW || this.operationType === SubHeaderV2OperationType.BUTTON) &&
                             this.operationItems && this.operationItems.length > 0 && this.operationItems[0].action) {
@@ -1037,6 +1093,7 @@ export class SubHeaderV2 extends ViewV2 {
                         this.getRightAreaAccessibilityLevel() : 'no');
                         Button.hoverEffect(HoverEffect.None);
                         Button.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                        Button.accessibilityGroup(true);
                         Button.accessibilityText(this.getRightAreaAccessibilityText());
                         Button.accessibilityDescription(this.getAccessibilityDescription());
                     }, Button);
@@ -1051,6 +1108,19 @@ export class SubHeaderV2 extends ViewV2 {
                         Row.focusable(this.operationItems && this.operationType !== SubHeaderV2OperationType.LOADING ? true : false);
                         Row.justifyContent(FlexAlign.End);
                         Row.alignItems(VerticalAlign.Bottom);
+                        Row.onKeyEvent((l) => {
+                            if (!l) {
+                                return;
+                            }
+                            if ((l.keyCode === KeyCode.KEYCODE_SPACE || l.keyCode === KeyCode.KEYCODE_ENTER) &&
+                                l.type === KeyType.Down) {
+                                if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW || this.operationType === SubHeaderV2OperationType.BUTTON) &&
+                                    this.operationItems && this.operationItems.length > 0 && this.operationItems[0].action) {
+                                    this.operationItems[0].action();
+                                }
+                                l.stopPropagation();
+                            }
+                        });
                         Row.onClick(() => {
                             if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW || this.operationType === SubHeaderV2OperationType.BUTTON) &&
                             this.operationItems && this.operationItems.length > 0 && this.operationItems[0].action) {
@@ -1100,6 +1170,19 @@ export class SubHeaderV2 extends ViewV2 {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
                         Button.focusable(this.operationItems ? true : false);
                         Button.align(Alignment.Start);
+                        Button.onKeyEvent((d) => {
+                            if (!d) {
+                                return;
+                            }
+                            if ((d.keyCode === KeyCode.KEYCODE_SPACE || d.keyCode === KeyCode.KEYCODE_ENTER) &&
+                                d.type === KeyType.Down) {
+                                if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW || this.operationType === SubHeaderV2OperationType.BUTTON) &&
+                                    this.operationItems && this.operationItems.length > 0 && this.operationItems[0].action) {
+                                    this.operationItems[0].action();
+                                }
+                                d.stopPropagation();
+                            }
+                        });
                         Button.onClick(() => {
                             if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW || this.operationType === SubHeaderV2OperationType.BUTTON) &&
                             this.operationItems && this.operationItems.length > 0 && this.operationItems[0].action) {
@@ -1135,7 +1218,9 @@ export class SubHeaderV2 extends ViewV2 {
                             this.operationType === SubHeaderV2OperationType.TEXT_ARROW ? this.getRightAreaAccessibilityLevel() : 'no');
                         Button.backgroundColor({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_sub_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                         Button.hoverEffect(HoverEffect.None);
+                        Button.accessibilityGroup(true);
                         Button.accessibilityText(this.getRightAreaAccessibilityText());
+                        Button.accessibilityDescription(this.getAccessibilityDescription());
                     }, Button);
                     this.rightArea.bind(this)(z5 ? z5 : this);
                     Button.pop();
@@ -1147,6 +1232,19 @@ export class SubHeaderV2 extends ViewV2 {
                         Row.create();
                         Row.focusable(this.operationItems && this.operationType !== SubHeaderV2OperationType.LOADING ? true : false);
                         Row.justifyContent(FlexAlign.Start);
+                        Row.onKeyEvent((b) => {
+                            if (!b) {
+                                return;
+                            }
+                            if ((b.keyCode === KeyCode.KEYCODE_SPACE || b.keyCode === KeyCode.KEYCODE_ENTER) &&
+                                b.type === KeyType.Down) {
+                                if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW || this.operationType === SubHeaderV2OperationType.BUTTON) &&
+                                    this.operationItems && this.operationItems.length > 0 && this.operationItems[0].action) {
+                                    this.operationItems[0].action();
+                                }
+                                b.stopPropagation();
+                            }
+                        });
                         Row.onClick(() => {
                             if ((this.operationType === SubHeaderV2OperationType.TEXT_ARROW || this.operationType === SubHeaderV2OperationType.BUTTON) &&
                             this.operationItems && this.operationItems.length > 0 && this.operationItems[0].action) {
@@ -1542,6 +1640,7 @@ class SingleIconStyle extends ViewV2 {
                     this.observeComponentCreation2((t2, u2) => {
                         Button.createWithChild({ type: ButtonType.Normal, stateEffect: false });
                         Button.focusable(true);
+                        Button.defaultFocus(this.item.defaultFocus);
                         Button.width(SINGLE_ICON_ZONE_SIZE);
                         Button.height(SINGLE_ICON_ZONE_SIZE);
                         Button.align(Alignment.Center);

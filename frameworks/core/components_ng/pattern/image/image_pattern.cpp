@@ -292,7 +292,7 @@ void ImagePattern::CheckHandles(SelectHandleInfo& handleInfo)
     const auto& geometryNode = host->GetGeometryNode();
     auto contentRect = geometryNode->GetContentRect();
     RectF visibleContentRect(contentRect.GetOffset() + parentGlobalOffset_, contentRect.GetSize());
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     visibleContentRect = GetVisibleContentRect(parent, visibleContentRect);
     auto paintRect = handleInfo.paintRect;
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
@@ -1597,6 +1597,8 @@ inline void ImagePattern::DumpFillColor(const RefPtr<OHOS::Ace::NG::ImageRenderP
     if (fillColor.has_value()) {
         auto color = fillColor.value();
         DumpLog::GetInstance().AddDesc(std::string("fillColor: ").append(color.ColorToString()));
+    } else {
+        DumpLog::GetInstance().AddDesc("fillColor: Null");
     }
 }
 

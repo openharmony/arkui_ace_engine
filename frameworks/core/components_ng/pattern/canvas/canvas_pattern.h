@@ -35,7 +35,7 @@ class CanvasPaintMethod;
 class OffscreenCanvasPattern;
 class CanvasModifier;
 // CanvasPattern is the base class for custom paint render node to perform paint canvas.
-class ACE_EXPORT CanvasPattern : public Pattern {
+class ACE_FORCE_EXPORT CanvasPattern : public Pattern {
     DECLARE_ACE_TYPE(CanvasPattern, Pattern);
 
 public:

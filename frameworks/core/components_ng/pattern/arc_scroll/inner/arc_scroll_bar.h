@@ -41,8 +41,6 @@ public:
         double mainScrollExtent) override;
     virtual float CalcPatternOffset(float scrollBarOffset) const override;
 
-    void ScheduleShrinkDelayTask();
-
 private:
     void SetRoundTrickRegion(double estimatedHeight, double barRegionSize, double activeSize,
         double activeMainOffset, double normalWidth, const Size& size);

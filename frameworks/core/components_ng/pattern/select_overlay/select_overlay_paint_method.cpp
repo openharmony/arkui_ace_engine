@@ -58,6 +58,9 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(pipeline);
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
+    if (!IsModeSwitchComplete()) {
+        return;
+    }
 
     auto offset = paintWrapper->GetGeometryNode()->GetFrameOffset();
     auto viewPort = paintWrapper->GetGeometryNode()->GetFrameRect() - offset;
@@ -180,4 +183,20 @@ void SelectOverlayPaintMethod::CheckHandleIsShown()
     }
 }
 
+bool SelectOverlayPaintMethod::IsModeSwitchComplete() const
+{
+    if (info_.enableHandleLevel && info_.handleLevelMode == HandleLevelMode::EMBED) {
+        CHECK_NULL_RETURN(selectOverlayContentModifier_, false);
+        auto pattern = selectOverlayContentModifier_->GetSelectOverlayPattern();
+        CHECK_NULL_RETURN(pattern, false);
+        auto host = pattern->GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto parentNode = host->GetAncestorNodeOfFrame(true);
+        CHECK_NULL_RETURN(parentNode, false);
+        auto callerNode = info_.callerFrameNode.Upgrade();
+        CHECK_NULL_RETURN(callerNode, false);
+        return parentNode == info_.callerFrameNode.Upgrade();
+    }
+    return true;
+}
 } // namespace OHOS::Ace::NG

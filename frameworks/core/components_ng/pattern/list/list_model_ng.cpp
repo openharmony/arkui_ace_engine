@@ -582,6 +582,15 @@ void ListModelNG::SetListMaintainVisibleContentPosition(FrameNode* frameNode, bo
     pattern->SetMaintainVisibleContentPosition(enabled);
 }
 
+bool ListModelNG::GetListMaintainVisibleContentPosition(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    std::optional<bool> maintainVisibleContentPosition = pattern->GetMaintainVisibleContentPosition();
+    return maintainVisibleContentPosition.value_or(false);
+}
+
 void ListModelNG::SetListNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt)
 {
     CHECK_NULL_VOID(frameNode);
@@ -652,6 +661,12 @@ void ListModelNG::SetLanes(FrameNode* frameNode, int32_t lanes)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Lanes, lanes, frameNode);
 }
 
+int32_t ListModelNG::GetLanes(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    return static_cast<int32_t>(frameNode->GetLayoutProperty<ListLayoutProperty>()->GetLanes().value_or(1));
+}
+
 void ListModelNG::SetLaneConstrain(FrameNode* frameNode, const Dimension& laneMinLength, const Dimension& laneMaxLength)
 {
     SetLaneMinLength(frameNode, laneMinLength);
@@ -667,6 +682,13 @@ void ListModelNG::SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMi
     }
 }
 
+float ListModelNG::GetLaneMinLength(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    Dimension laneMinLength = 0.0_vp;
+    return frameNode->GetLayoutProperty<ListLayoutProperty>()->GetLaneMinLength().value_or(laneMinLength).Value();
+}
+
 void ListModelNG::SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength)
 {
     if (laneMaxLength.IsValid()) {
@@ -676,9 +698,23 @@ void ListModelNG::SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMa
     }
 }
 
+float ListModelNG::GetLaneMaxLength(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    Dimension laneMaxLength = 0.0_vp;
+    return frameNode->GetLayoutProperty<ListLayoutProperty>()->GetLaneMaxLength().value_or(laneMaxLength).Value();
+}
+
 void ListModelNG::SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutter)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, LaneGutter, laneGutter, frameNode);
+}
+
+float ListModelNG::GetLaneGutter(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    Dimension laneLaneGutter = 0.0_vp;
+    return frameNode->GetLayoutProperty<ListLayoutProperty>()->GetLaneGutter().value_or(laneLaneGutter).Value();
 }
 
 int32_t ListModelNG::GetListItemAlign(FrameNode* frameNode)
@@ -722,14 +758,35 @@ void ListModelNG::SetScrollSnapAlign(FrameNode* frameNode, ScrollSnapAlign scrol
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, scrollSnapAlign, frameNode);
 }
 
+int32_t ListModelNG::GetScrollSnapAlign(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    return static_cast<int32_t>(layoutProperty->GetScrollSnapAlign().value_or(ScrollSnapAlign::NONE));
+}
+
 void ListModelNG::SetContentStartOffset(FrameNode* frameNode, float startOffset)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ContentStartOffset, startOffset, frameNode);
 }
 
+float ListModelNG::GetContentStartOffset(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    return static_cast<float>(layoutProperty->GetContentStartOffset().value_or(0.0f));
+}
+
 void ListModelNG::SetContentEndOffset(FrameNode* frameNode, float endOffset)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ContentEndOffset, endOffset, frameNode);
+}
+
+float ListModelNG::GetContentEndOffset(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0);
+    auto layoutProperty = frameNode->GetLayoutProperty<ListLayoutProperty>();
+    return static_cast<float>(layoutProperty->GetContentEndOffset().value_or(0.0f));
 }
 
 void ListModelNG::SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
@@ -793,12 +850,13 @@ void ListModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onSc
     eventHub->SetOnScrollStop(std::move(onScrollStop));
 }
 
-void ListModelNG::SetScrollToIndex(FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment)
+void ListModelNG::SetScrollToIndex(
+    FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment, std::optional<float> extraOffset)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment));
+    pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment), extraOffset);
 }
 
 void ListModelNG::SetScrollBy(FrameNode* frameNode, double x, double y)
@@ -991,5 +1049,17 @@ void ListModelNG::AddDragFrameNodeToManager(FrameNode* frameNode)
     CHECK_NULL_VOID(dragDropManager);
 
     dragDropManager->AddListDragFrameNode(frameNode->GetId(), AceType::WeakClaim(frameNode));
+}
+
+void ListModelNG::ScrollToItemInGroup(
+    FrameNode* frameNode, int32_t index, int32_t indexInGroup, bool smooth, ScrollAlign align)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto listPattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(listPattern);
+    if (align == ScrollAlign::NONE) {
+        align = ScrollAlign::START;
+    }
+    listPattern->ScrollToItemInGroup(index, indexInGroup, smooth, align);
 }
 } // namespace OHOS::Ace::NG

@@ -77,7 +77,8 @@ JsAcePage::~JsAcePage()
             component.Reset();
             radioGroups.reset();
         },
-        TaskExecutor::TaskType::UI, "ArkUIPageReleaseDomAndComponent");
+        TaskExecutor::TaskType::UI, "ArkUIPageReleaseDomAndComponent",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 #endif
 }
 

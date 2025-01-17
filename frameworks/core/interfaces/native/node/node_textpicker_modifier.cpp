@@ -29,6 +29,7 @@ const char DEFAULT_DELIMITER = '|';
 const int32_t ERROR_INT_CODE = -1;
 constexpr uint32_t MAX_SIZE = 12;
 constexpr float MAX_PERCENT = 100.0f;
+constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK = true;
 std::string g_strValue;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverflow::CLIP, TextOverflow::ELLIPSIS,
@@ -342,7 +343,7 @@ void SetTextPickerColumnWidths(ArkUINodeHandle node, ArkUI_Float32* values, ArkU
     std::vector<Dimension> widths;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    for (uint32_t i = 0; i < size; i++) {
+    for (ArkUI_Int32 i = 0; i < size; i++) {
         widths.emplace_back(Dimension(values[i] * MAX_PERCENT, DimensionUnit::PERCENT));
     }
     TextPickerModelNG::SetColumnWidths(frameNode, widths);
@@ -353,9 +354,9 @@ void ResetTextPickerColumnWidths(ArkUINodeHandle node)
     std::vector<Dimension> widths;
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto childCount = static_cast<float>(frameNode->GetChildren().size());
-    for (uint32_t i = 0; i < childCount; i++) {
-        widths.emplace_back(Dimension(MAX_PERCENT / childCount, DimensionUnit::PERCENT));
+    auto childCount =  frameNode->GetChildren().size();
+    for (size_t i = 0; i < childCount; i++) {
+        widths.emplace_back(Dimension(MAX_PERCENT / static_cast<float>(childCount), DimensionUnit::PERCENT));
     }
     TextPickerModelNG::SetColumnWidths(frameNode, widths);
 }
@@ -662,6 +663,9 @@ const ArkUITextPickerModifier* GetTextPickerModifier()
         .resetTextPickerDisableTextStyleAnimation = ResetTextPickerDisableTextStyleAnimation,
         .setTextPickerDefaultTextStyle = SetTextPickerDefaultTextStyle,
         .resetTextPickerDefaultTextStyle = ResetTextPickerDefaultTextStyle,
+        .getTextPickerEnableHapticFeedback = GetTextPickerEnableHapticFeedback,
+        .setTextPickerEnableHapticFeedback = SetTextPickerEnableHapticFeedback,
+        .resetTextPickerEnableHapticFeedback = ResetTextPickerEnableHapticFeedback,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -873,6 +877,27 @@ void SetTextPickerOnScrollStop(ArkUINodeHandle node, void* extraParam)
         SendArkUISyncEvent(&event);
     };
     TextPickerModelNG::SetOnScrollStop(frameNode, std::move(onScrollStopEvent));
+}
+
+void SetTextPickerEnableHapticFeedback(ArkUINodeHandle node, ArkUI_Bool isEnableHapticFeedback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetEnableHapticFeedback(frameNode, isEnableHapticFeedback);
+}
+
+void ResetTextPickerEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextPickerModelNG::SetEnableHapticFeedback(frameNode, DEFAULT_ENABLE_HAPTIC_FEEDBACK);
+}
+
+ArkUI_Bool GetTextPickerEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Bool>(TextPickerModelNG::GetEnableHapticFeedback(frameNode));
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

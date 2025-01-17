@@ -66,9 +66,9 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
 void VideoModelNG::SetSrc(const std::string& src, const std::string& bundleName, const std::string& moduleName)
 {
     VideoSourceInfo videoSrcInfo;
-    videoSrcInfo.src = src;
-    videoSrcInfo.bundleName = bundleName;
-    videoSrcInfo.moduleName = moduleName;
+    videoSrcInfo.src_ = src;
+    videoSrcInfo.bundleName_ = bundleName;
+    videoSrcInfo.moduleName_ = moduleName;
     ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, VideoSource, videoSrcInfo);
 }
 

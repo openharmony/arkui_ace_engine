@@ -39,6 +39,7 @@ void JSNavPathStack::JSBind(BindingTarget globalObj)
 {
     JSClass<JSNavPathStack>::Declare("NativeNavPathStack");
     JSClass<JSNavPathStack>::Method("onStateChanged", &JSNavPathStack::OnStateChanged);
+    JSClass<JSNavPathStack>::CustomMethod("onPopCallback", &JSNavPathStack::OnPopCallback);
     JSClass<JSNavPathStack>::Bind(globalObj, &JSNavPathStack::Constructor, &JSNavPathStack::Destructor);
 }
 
@@ -130,5 +131,15 @@ bool JSNavPathStack::CheckIsValid(JSValueWrapper object)
     napi_value stack = nativeEngine->ValueToNapiValue(object);
     napi_instanceof(env, stack, constructor, &isInstance);
     return isInstance;
+}
+
+void JSNavPathStack::OnPopCallback(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    if (onPopCallback_) {
+        onPopCallback_(info[0]);
+    }
 }
 } // namespace OHOS::Ace::Framework

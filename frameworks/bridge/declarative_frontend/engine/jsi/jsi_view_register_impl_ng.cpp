@@ -368,11 +368,12 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSParagraphStyleSpan::JSBind(globalObj);
     JSLineHeightSpan::JSBind(globalObj);
     JSUrlSpan::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
+#ifndef ARKUI_WEARABLE
     JSCalendarPicker::JSBind(globalObj);
+    JSCalendarPickerDialog::JSBind(globalObj);
 #endif
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
