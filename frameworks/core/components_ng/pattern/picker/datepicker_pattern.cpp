@@ -61,6 +61,7 @@ const int32_t RATE = 2;
 const int32_t MONTH_DECEMBER = 12;
 constexpr int32_t RATIO_ZERO = 0;
 constexpr int32_t RATIO_ONE = 1;
+constexpr int32_t SECOND_PAGE = 1;
 } // namespace
 bool DatePickerPattern::inited_ = false;
 const std::string DatePickerPattern::empty_;
@@ -707,9 +708,25 @@ bool DatePickerPattern::CheckFocusID(int32_t childSize)
     if (focusKeyID_ > childSize - 1) {
         focusKeyID_ = childSize - 1;
         return false;
-    } else if (focusKeyID_ < 0) {
-        focusKeyID_ = 0;
-        return false;
+    }
+
+    if (NeedAdaptForAging()) {
+        if (GetCurrentPage() == SECOND_PAGE) {
+            if (focusKeyID_ < INDEX_MONTH) {
+                focusKeyID_ = INDEX_MONTH;
+                return false;
+            }
+        } else {
+            if (focusKeyID_ != INDEX_YEAR) {
+                focusKeyID_ = INDEX_YEAR;
+                return false;
+            }
+        }
+    } else {
+        if (focusKeyID_ < INDEX_YEAR) {
+            focusKeyID_ = INDEX_YEAR;
+            return false;
+        }
     }
     return true;
 }
@@ -2684,5 +2701,21 @@ void DatePickerPattern::SetFocusEnable()
 
     isFocus_ = true;
     focusHub->SetFocusable(true);
+}
+
+bool DatePickerPattern::NeedAdaptForAging()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, false);
+
+    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
+        GreatOrEqual(Dimension(pipeline->GetRootHeight()).ConvertToVp(), pickerTheme->GetDeviceHeightLimit())) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

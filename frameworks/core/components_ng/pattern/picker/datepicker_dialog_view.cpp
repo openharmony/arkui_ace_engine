@@ -66,6 +66,10 @@ constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
 constexpr int32_t NODE_ZERO = 0;
 constexpr int32_t NODE_TWO = 2;
+constexpr int32_t FIRST_STACK  = 0;
+constexpr int32_t SECOND_STACK = 1;
+constexpr int32_t FIRST_PAGE  = 0;
+constexpr int32_t SECOND_PAGE = 1;
 } // namespace
 bool DatePickerDialogView::switchFlag_ = false;
 bool DatePickerDialogView::switchTimePickerFlag_ = false;
@@ -515,6 +519,12 @@ void DatePickerDialogView::SwitchDatePickerPage(const RefPtr<FrameNode>& dateNod
         auto result = UpdateVisibilityForNode(dateStackNode, isSwitchByTitle, index);
         CHECK_NULL_VOID(result);
     }
+
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetCurrentFocusKeyID(switchDatePickerFlag_ ? SECOND_STACK : FIRST_STACK);
+    datePickerPattern->SetCurrentPage(switchDatePickerFlag_ ? SECOND_PAGE : FIRST_PAGE);
+
     switchDatePickerFlag_ = !switchDatePickerFlag_;
     dateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
