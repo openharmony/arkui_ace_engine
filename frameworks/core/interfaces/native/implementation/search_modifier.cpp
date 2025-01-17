@@ -373,9 +373,18 @@ void OnPasteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    //auto convValue = Converter::OptConvert<type_name>(*value);
-    //SearchModelNG::SetOnPaste(frameNode, convValue);
-    LOGE("ARKOALA SearchAttributeModifier.OnPasteImpl -> Method is not implemented.");
+    auto onPaste = [arkCallback = CallbackHelper(*value)](const std::string& content,
+        NG::TextCommonEvent& event) -> void {
+        auto arkContent = Converter::ArkValue<Ark_String>(content);
+        auto keeper = CallbackKeeper::Claim([&event](){
+            event.SetPreventDefault(true);
+        });
+        Ark_PasteEvent arkEvent = {
+            .preventDefault = Converter::ArkValue<Opt_Callback_Void>(keeper.ArkValue())
+        };
+        arkCallback.Invoke(arkContent, arkEvent);
+    };
+    SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(onPaste));
 }
 void CopyOptionImpl(Ark_NativePointer node,
                     Ark_CopyOptions value)
