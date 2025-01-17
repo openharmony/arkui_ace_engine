@@ -243,7 +243,7 @@ HWTEST_F(CalendarModifierTest, showLunarTestDefaultValues, TestSize.Level1)
     ASSERT_FALSE(frameNode->GetChildren().empty());
     auto swiperNode = frameNode->GetChildren().front();
     ASSERT_NE(swiperNode, nullptr);
-    ASSERT_FALSE(swiperNode->GetChildren().empty());    
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
         ASSERT_NE(calendarFrameNode, nullptr);
