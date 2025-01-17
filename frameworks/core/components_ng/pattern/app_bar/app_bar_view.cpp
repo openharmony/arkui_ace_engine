@@ -417,7 +417,7 @@ std::optional<RectF> AppBarView::GetAppBarRect()
     if (LessOrEqual(offset.GetX(), 0.0) && atomRect.Width() > 0) {
         auto width = Dimension(ATOMIC_SERVICE_MENU_BAR_WIDTH, DimensionUnit::VP).ConvertToPx();
         offset.SetX(isRtl ? (right) : (atomRect.Width() - width - left));
-    }else {
+    } else {
         size.AddWidth((left + right));
         offset.AddX(isRtl ? 0 : -left);
     }
