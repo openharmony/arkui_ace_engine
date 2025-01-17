@@ -4813,12 +4813,26 @@ void TextFieldPattern::CalcCounterAfterFilterInsertValue(
     HandleCountStyle();
 }
 
+void TextFieldPattern::NotifyImfFinishTextPreview()
+{
+    if (!HasFocus()) {
+        return;
+    }
+#if defined(ENABLE_STANDARD_INPUT)
+    int32_t caretIndex = selectController_->GetCaretIndex();
+    MiscServices::InputMethodController::GetInstance()->OnSelectionChange(
+        u"", caretIndex, caretIndex);
+    TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "notify imf that textfield exit textPreview");
+#endif
+}
+
 int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertValue, int32_t offset)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, offset);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, offset);
+    NotifyImfFinishTextPreview();
     int32_t originLength =
         static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
     bool hasInsertValue =
