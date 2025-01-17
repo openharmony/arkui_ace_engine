@@ -699,10 +699,12 @@ void ContainerModalPattern::CallButtonsRectChange()
     GetContainerModalButtonsRect(containerModal, buttons);
     NotifyButtonsRectChange(containerModal, buttons);
     CHECK_NULL_VOID(controlButtonsRectChangeCallback_);
-    if (isInitButtonsRect_ && buttonsRect_ == buttons) {
-        return;
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        if (isInitButtonsRect_ && buttonsRect_ == buttons) {
+            return;
+        }
+        isInitButtonsRect_ = true;
     }
-    isInitButtonsRect_ = true;
     buttonsRect_ = buttons;
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);

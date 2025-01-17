@@ -93,10 +93,11 @@ public:
     virtual void SetColumnWidths(const std::vector<Dimension>& widths) = 0;
     virtual void SetDisableTextStyleAnimation(const bool value) = 0;
     virtual void SetDefaultTextStyle(const RefPtr<TextTheme>& textTheme, const NG::PickerTextStyle& value) = 0;
+    virtual void SetEnableHapticFeedback(bool isEnableHapticFeedback) = 0;
 
 private:
     static std::unique_ptr<TextPickerModel> textPickerInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 
 class TextPickerDialogModel {
@@ -113,7 +114,7 @@ public:
 
 private:
     static std::unique_ptr<TextPickerDialogModel> textPickerDialogInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_PICKER_TEXT_PICKER_MODEL_H

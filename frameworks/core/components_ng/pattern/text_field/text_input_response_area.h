@@ -99,6 +99,7 @@ public:
     const RefPtr<FrameNode> GetFrameNode() override;
 
     void OnPasswordIconClicked();
+    void UpdatePasswordIconColor(const Color& color);
 
 private:
     void LoadImageSourceInfo();

@@ -139,10 +139,9 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         ARKUI_TOGGLE, ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_TEXTAREA, ARKUI_BUTTON, ARKUI_PROGRESS,
         ARKUI_CHECKBOX, ARKUI_XCOMPONENT, ARKUI_DATE_PICKER, ARKUI_TIME_PICKER, ARKUI_TEXT_PICKER,
         ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_RADIO, ARKUI_IMAGE_ANIMATOR, ARKUI_XCOMPONENT_TEXTURE,
-        ARKUI_CHECK_BOX_GROUP, ARKUI_STACK, ARKUI_SWIPER,
-        ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM, ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX,
-        ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM, ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM,
-        ARKUI_CUSTOM_SPAN };
+        ARKUI_CHECK_BOX_GROUP, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM,
+        ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM,
+        ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM, ARKUI_CUSTOM_SPAN };
     // already check in entry point.
     uint32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     const auto* impl = GetFullImpl();
@@ -467,6 +466,18 @@ void HandleFocusAxisEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEven
     uiEvent.inputEvent = &(innerEvent->focusAxisEvent);
 }
 
+void HandleClickEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.eventTypeId = C_CLICK_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->clickEvent);
+}
+
+void HandleHoverEvent(ArkUI_UIInputEvent& uiEvent, ArkUINodeEvent* innerEvent)
+{
+    uiEvent.eventTypeId = C_HOVER_EVENT_ID;
+    uiEvent.inputEvent = &(innerEvent->hoverEvent);
+}
+
 void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
 {
     if (!innerEvent) {
@@ -505,7 +516,9 @@ void HandleInnerNodeEvent(ArkUINodeEvent* innerEvent)
             {NODE_ON_KEY_EVENT, HandleKeyEvent},
             {NODE_ON_KEY_PRE_IME, HandleKeyEvent},
             {NODE_ON_FOCUS_AXIS, HandleFocusAxisEvent},
-            {NODE_DISPATCH_KEY_EVENT, HandleKeyEvent}
+            {NODE_DISPATCH_KEY_EVENT, HandleKeyEvent},
+            {NODE_ON_CLICK, HandleClickEvent},
+            {NODE_ON_HOVER, HandleHoverEvent},
         };
 
         auto it = eventHandlers.find(eventType);

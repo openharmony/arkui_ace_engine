@@ -401,6 +401,13 @@ void SetFillColor(ArkUINodeHandle node, ArkUI_Uint32 value)
     ImageModelNG::SetImageFill(frameNode, Color(value));
 }
 
+void ResetImageFill(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::ResetImageFill(frameNode);
+}
+
 void ResetFillColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1002,6 +1009,7 @@ const ArkUIImageModifier* GetImageModifier()
         .setMatchTextDirection = SetMatchTextDirection,
         .resetMatchTextDirection = ResetMatchTextDirection,
         .setFillColor = SetFillColor,
+        .resetImageFill = ResetImageFill,
         .resetFillColor = ResetFillColor,
         .setAlt = SetAlt,
         .resetAlt = ResetAlt,

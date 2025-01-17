@@ -15,7 +15,7 @@
 
 import { Drawer } from 'common/src/main/ets/components/Drawer';
 import { ColorBlock, IconBlock, RadioBlock, SliderBlock, useEnabled } from 'common';
-import { LengthUnit } from '@kit.ArkUI';
+import { componentUtils, LengthUnit } from '@kit.ArkUI';
 import {
   matrix4,
   LengthMetrics,
@@ -948,9 +948,15 @@ export struct GaugeBootcamp {
   // Special Effect Drawing Combination
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
+  @State scrollShow: number = 0
   //compEvent
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
+
+  scroller: Scroller = new Scroller()
+  aboutToAppear(): void {
+    AppStorage.setOrCreate('scroller', this.scroller)
+  }
 
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
@@ -1845,7 +1851,7 @@ export struct GaugeBootcamp {
           this.compFocusBoxStrokeWidth)) : null,
       })
       .id(useEnabled(this.enableCompId, this.compId) ? useEnabled(this.enableCompId, this.compId) : null)
-      .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : null)
+      .key(useEnabled(this.enableCompKey, this.compKey) ? useEnabled(this.enableCompKey, this.compKey) : 'Gauge')
       .focusScopePriority(
         useEnabled(this.enableCompFocusScopePriorityScopeId, this.compFocusScopePriorityScopeId),
         useEnabled(this.enableCompFocusScopePriorityPriority, this.compFocusScopePriorityPriority)
@@ -2151,1023 +2157,1070 @@ export struct GaugeBootcamp {
 
   @Builder
   Parameters() {
-    Scroll() {
+    Scroll(this.scroller) {
+
       Column({ space: 8 }) {
+        if(this.scrollShow >= 0){
+          RadioBlock({
+            title: 'show.ChildComponents',
+            isEnabled: $enableGaugeChildComponent,
+            value: $gaugeChildComponent,
+            dataSource: [
+              { label: 'true', value: true },
+              { label: 'false', value: false }
+            ]
+          })
 
-        RadioBlock({
-          title: 'show.ChildComponents',
-          isEnabled: $enableGaugeChildComponent,
-          value: $gaugeChildComponent,
-          dataSource: [
-            { label: 'true', value: true },
-            { label: 'false', value: false }
-          ]
-        })
+          SliderBlock({
+            title: 'value',
+            isEnabled: $enableGaugeValue,
+            value: $gaugeValue,
+            min: 0,
+            max: 100
+          })
 
-        SliderBlock({
-          title: 'value',
-          isEnabled: $enableGaugeValue,
-          value: $gaugeValue,
-          min: 0,
-          max: 100
-        })
+          SliderBlock({
+            title: 'min',
+            isEnabled: $enableGaugeMin,
+            value: $gaugeMin,
+            min: 0,
+            max: 100
+          })
 
-        SliderBlock({
-          title: 'min',
-          isEnabled: $enableGaugeMin,
-          value: $gaugeMin,
-          min: 0,
-          max: 100
-        })
+          SliderBlock({
+            title: 'max',
+            isEnabled: $enableGaugeMax,
+            value: $gaugeMax,
+            min: 100,
+            max: 400
+          })
 
-        SliderBlock({
-          title: 'max',
-          isEnabled: $enableGaugeMax,
-          value: $gaugeMax,
-          min: 100,
-          max: 400
-        })
+          SliderBlock({
+            title: 'startAngle',
+            isEnabled: $enableStartAngle,
+            value: $startAngle,
+            min: 0,
+            max: 100
+          })
 
-        SliderBlock({
-          title: 'startAngle',
-          isEnabled: $enableStartAngle,
-          value: $startAngle,
-          min: 0,
-          max: 100
-        })
+          SliderBlock({
+            title: 'endAngle',
+            isEnabled: $enableEndAngle,
+            value: $endAngle,
+            min: 100,
+            max: 360
+          })
 
-        SliderBlock({
-          title: 'endAngle',
-          isEnabled: $enableEndAngle,
-          value: $endAngle,
-          min: 100,
-          max: 360
-        })
+          ColorBlock({
+            title: 'colors',
+            isEnabled: $enableColors,
+            color: $colors
+          })
 
-        ColorBlock({
-          title: 'colors',
-          isEnabled: $enableColors,
-          color: $colors
-        })
+          SliderBlock({
+            title: 'strokeWidth',
+            isEnabled: $enableStrokeWidth,
+            value: $strokeWidth,
+            min: 4,
+            max: 10
+          })
 
-        SliderBlock({
-          title: 'strokeWidth',
-          isEnabled: $enableStrokeWidth,
-          value: $strokeWidth,
-          min: 4,
-          max: 10
-        })
-
-        RadioBlock({
-          title: 'description',
-          isEnabled: $enableDescription,
-          value: $description,
-          dataSource: [
-            { label: 'true', value: true },
-            { label: 'false', value: false }
-          ]
-        })
-
-
-        SliderBlock({
-          title: 'trackShadow.radius',
-          isEnabled: $enableTrackShadowRadius,
-          value: $trackShadowRadius,
-          min: 20,
-          max: 50
-        })
-
-        SliderBlock({
-          title: 'trackShadow.OffsetX',
-          isEnabled: $enableTrackShadowOffsetX,
-          value: $trackShadowOffsetX,
-          min: 5,
-          max: 15
-        })
-
-        SliderBlock({
-          title: 'trackShadow.OffsetY',
-          isEnabled: $enableTrackShadowOffsetY,
-          value: $trackShadowOffsetY,
-          min: 5,
-          max: 15
-        })
-
-        IconBlock({
-          title: 'indicator.icon',
-          isEnabled: $enableIndicatorIcon,
-          icon: $indicatorIcon,
-        })
-
-        SliderBlock({
-          title: 'indicator.space',
-          isEnabled: $enableIndicatorSpace,
-          value: $indicatorSpace,
-          min: 8,
-          max: 20
-        })
-        CompSizeBlocks({
-          enableCompWidth: $enableCompWidth,
-          compWidth: $compWidth,
-          enableCompHeight: $enableCompHeight,
-          compHeight: $compHeight,
-          enableCompPadding: $enableCompPadding,
-          compPadding: $compPadding,
-          enableCompMargin: $enableCompMargin,
-          compMargin: $compMargin,
-          enableCompConstraintSize: $enableCompConstraintSize,
-          enableCompConstraintSizeMinWidth: $enableCompConstraintSizeMinWidth,
-          compConstraintSizeMinWidth: $compConstraintSizeMinWidth,
-          enableCompConstraintSizeMinHeight: $enableCompConstraintSizeMinHeight,
-          compConstraintSizeMinHeight: $compConstraintSizeMinHeight,
-          enableCompConstraintSizeMaxWidth: $enableCompConstraintSizeMaxWidth,
-          compConstraintSizeMaxWidth: $compConstraintSizeMaxWidth,
-          enableCompConstraintSizeMaxHeight: $enableCompConstraintSizeMaxHeight,
-          compConstraintSizeMaxHeight: $compConstraintSizeMaxHeight
-        })
-
-        CompLocationBlocks({
-          enableCompPosition: $enableCompPosition,
-          enableCompPositionTop: $enableCompPositionTop,
-          compPositionTop: $compPositionTop,
-          enableCompPositionBottom: $enableCompPositionBottom,
-          compPositionBottom: $compPositionBottom,
-          enableCompPositionLeft: $enableCompPositionLeft,
-          compPositionLeft: $compPositionLeft,
-          enableCompPositionRight: $enableCompPositionRight,
-          compPositionRight: $compPositionRight,
-          enableCompMarkAnchor: $enableCompMarkAnchor,
-          enableCompMarkAnchorX: $enableCompMarkAnchorX,
-          compMarkAnchorX: $compMarkAnchorX,
-          enableCompMarkAnchorY: $enableCompMarkAnchorY,
-          compMarkAnchorY: $compMarkAnchorY,
-          enableCompOffset: $enableCompOffset,
-          enableCompOffsetX: $enableCompOffsetX,
-          compOffsetX: $compOffsetX,
-          enableCompOffsetY: $enableCompOffsetY,
-          compOffsetY: $compOffsetY
-        })
-
-        CompLayoutConstraintsBlocks({
-          enableCompAspectRatio: $enableCompAspectRatio,
-          compAspectRatio: $compAspectRatio,
-          enableCompPixelRound: $enableCompPixelRound,
-          enableCompPixelRoundStart: $enableCompPixelRoundStart,
-          compPixelRoundStart: $compPixelRoundStart,
-          enableCompPixelRoundTop: $enableCompPixelRoundTop,
-          compPixelRoundTop: $compPixelRoundTop,
-          enableCompPixelRoundEnd: $enableCompPixelRoundEnd,
-          compPixelRoundEnd: $compPixelRoundEnd,
-          enableCompPixelRoundBottom: $enableCompPixelRoundBottom,
-          compPixelRoundBottom: $compPixelRoundBottom
-        })
-
-        CompBorderBlocks({
-          enableCompBorderWidth: $enableCompBorderWidth,
-          compBorderWidth: $compBorderWidth,
-          enableCompBorderColor: $enableCompBorderColor,
-          compBorderColor: $compBorderColor,
-          enableCompBorderRadius: $enableCompBorderRadius,
-          compBorderRadius: $compBorderRadius,
-          enableCompBorderStyle: $enableCompBorderStyle,
-          compBorderStyle: $compBorderStyle,
-          enableCompBorderDashGapLeft: $enableCompBorderDashGapLeft,
-          compBorderDashGapLeft: $compBorderDashGapLeft,
-          enableCompBorderDashGapRight: $enableCompBorderDashGapRight,
-          compBorderDashGapRight: $compBorderDashGapRight,
-          enableCompBorderDashGapTop: $enableCompBorderDashGapTop,
-          compBorderDashGapTop: $compBorderDashGapTop,
-          enableCompBorderDashGapBottom: $enableCompBorderDashGapBottom,
-          compBorderDashGapBottom: $compBorderDashGapBottom,
-          enableCompBorderDashWidthLeft: $enableCompBorderDashWidthLeft,
-          compBorderDashWidthLeft: $compBorderDashWidthLeft,
-          enableCompBorderDashWidthRight: $enableCompBorderDashWidthRight,
-          compBorderDashWidthRight: $compBorderDashWidthRight,
-          enableCompBorderDashWidthTop: $enableCompBorderDashWidthTop,
-          compBorderDashWidthTop: $compBorderDashWidthTop,
-          enableCompBorderDashWidthBottom: $enableCompBorderDashWidthBottom,
-          compBorderDashWidthBottom: $compBorderDashWidthBottom
-        })
-
-        CompBorderImageBlocks({
-          enableCompBorderImage: $enableCompBorderImage,
-          enableCompBorderImageSource: $enableCompBorderImageSource,
-          enableCompBorderImageSlice: $enableCompBorderImageSlice,
-          enableCompBorderImageSliceTop: $enableCompBorderImageSliceTop,
-          compBorderImageSliceTop: $compBorderImageSliceTop,
-          enableCompBorderImageSliceBottom: $enableCompBorderImageSliceBottom,
-          compBorderImageSliceBottom: $compBorderImageSliceBottom,
-          enableCompBorderImageSliceLeft: $enableCompBorderImageSliceLeft,
-          compBorderImageSliceLeft: $compBorderImageSliceLeft,
-          enableCompBorderImageSliceRight: $enableCompBorderImageSliceRight,
-          compBorderImageSliceRight: $compBorderImageSliceRight,
-          enableCompBorderImageWidth: $enableCompBorderImageWidth,
-          enableCompBorderImageWidthTop: $enableCompBorderImageWidthTop,
-          compBorderImageWidthTop: $compBorderImageWidthTop,
-          enableCompBorderImageWidthBottom: $enableCompBorderImageWidthBottom,
-          compBorderImageWidthBottom: $compBorderImageWidthBottom,
-          enableCompBorderImageWidthLeft: $enableCompBorderImageWidthLeft,
-          compBorderImageWidthLeft: $compBorderImageWidthLeft,
-          enableCompBorderImageWidthRight: $enableCompBorderImageWidthRight,
-          compBorderImageWidthRight: $compBorderImageWidthRight,
-          enableCompBorderImageOutset: $enableCompBorderImageOutset,
-          enableCompBorderImageOutsetTop: $enableCompBorderImageOutsetTop,
-          compBorderImageOutsetTop: $compBorderImageOutsetTop,
-          enableCompBorderImageOutsetBottom: $enableCompBorderImageOutsetBottom,
-          compBorderImageOutsetBottom: $compBorderImageOutsetBottom,
-          enableCompBorderImageOutsetLeft: $enableCompBorderImageOutsetLeft,
-          compBorderImageOutsetLeft: $compBorderImageOutsetLeft,
-          enableCompBorderImageOutsetRight: $enableCompBorderImageOutsetRight,
-          compBorderImageOutsetRight: $compBorderImageOutsetRight,
-          enableCompBorderImageRepeat: $enableCompBorderImageRepeat,
-          compBorderImageRepeat: $compBorderImageRepeat,
-          enableCompBorderImageFill: $enableCompBorderImageFill,
-          compBorderImageFill: $compBorderImageFill
-        })
-
-        CompBackgroundBlocks({
-          enableCompBackgroundAlign: $enableCompBackgroundAlign,
-          compBackgroundAlign: $compBackgroundAlign,
-          enableCompBackgroundColor: $enableCompBackgroundColor,
-          compBackgroundColor: $compBackgroundColor,
-          enableCompBackgroundImageSrc: $enableCompBackgroundImageSrc,
-          enableCompBackgroundImageRepeat: $enableCompBackgroundImageRepeat,
-          compBackgroundImageRepeat: $compBackgroundImageRepeat,
-          enableCompBackgroundImageSize: $enableCompBackgroundImageSize,
-          compBackgroundImageSize: $compBackgroundImageSize,
-          enableCompBackgroundImagePositionX: $enableCompBackgroundImagePositionX,
-          compBackgroundImagePositionX: $compBackgroundImagePositionX,
-          enableCompBackgroundImagePositionY: $enableCompBackgroundImagePositionY,
-          compBackgroundImagePositionY: $compBackgroundImagePositionY,
-          enableCompBackgroundBlurStyle: $enableCompBackgroundBlurStyle,
-          compBackgroundBlurStyle: $compBackgroundBlurStyle,
-          enableCompBackgroundBlurStyleParams: $enableCompBackgroundBlurStyleParams,
-          enableCompBackgroundBlurStyleParamsColorMode: $enableCompBackgroundBlurStyleParamsColorMode,
-          compBackgroundBlurStyleParamsColorMode: $compBackgroundBlurStyleParamsColorMode,
-          enableCompBackgroundBlurStyleParamsAdaptiveColor: $enableCompBackgroundBlurStyleParamsAdaptiveColor,
-          compBackgroundBlurStyleParamsAdaptiveColor: $compBackgroundBlurStyleParamsAdaptiveColor,
-          enableCompBackgroundBlurStyleParamsBlurOptionsLeft: $enableCompBackgroundBlurStyleParamsBlurOptionsLeft,
-          compBackgroundBlurStyleParamsBlurOptionsLeft: $compBackgroundBlurStyleParamsBlurOptionsLeft,
-          enableCompBackgroundBlurStyleParamsBlurOptionsRight: $enableCompBackgroundBlurStyleParamsBlurOptionsRight,
-          compBackgroundBlurStyleParamsBlurOptionsRight: $compBackgroundBlurStyleParamsBlurOptionsRight,
-          enableCompBackgroundBlurStyleParamsScale: $enableCompBackgroundBlurStyleParamsScale,
-          compBackgroundBlurStyleParamsScale: $compBackgroundBlurStyleParamsScale,
-          enableCompBackdropBlur: $enableCompBackdropBlur,
-          compBackdropBlur: $compBackdropBlur,
-          enableCompBackdropBlurGrayscale: $enableCompBackdropBlurGrayscale,
-          enableCompBackdropBlurGrayscaleLeft: $enableCompBackdropBlurGrayscaleLeft,
-          compBackdropBlurGrayscaleLeft: $compBackdropBlurGrayscaleLeft,
-          enableCompBackdropBlurGrayscaleRight: $enableCompBackdropBlurGrayscaleRight,
-          compBackdropBlurGrayscaleRight: $compBackdropBlurGrayscaleRight,
-          enableCompBackgroundEffect: $enableCompBackgroundEffect,
-          enableCompBackgroundEffectRadius: $enableCompBackgroundEffectRadius,
-          compBackgroundEffectRadius: $compBackgroundEffectRadius,
-          enableCompBackgroundEffectSaturation: $enableCompBackgroundEffectSaturation,
-          compBackgroundEffectSaturation: $compBackgroundEffectSaturation,
-          enableCompBackgroundEffectBrightness: $enableCompBackgroundEffectBrightness,
-          compBackgroundEffectBrightness: $compBackgroundEffectBrightness,
-          enableCompBackgroundEffectColor: $enableCompBackgroundEffectColor,
-          compBackgroundEffectColor: $compBackgroundEffectColor,
-          enableCompBackgroundEffectAdaptiveColor: $enableCompBackgroundEffectAdaptiveColor,
-          compBackgroundEffectAdaptiveColor: $compBackgroundEffectAdaptiveColor,
-          enableCompBackgroundEffectBlurOptionsGrayscaleLeft: $enableCompBackgroundEffectBlurOptionsGrayscaleLeft,
-          compBackgroundEffectBlurOptionsGrayscaleLeft: $compBackgroundEffectBlurOptionsGrayscaleLeft,
-          enableCompBackgroundEffectBlurOptionsGrayscaleRight: $enableCompBackgroundEffectBlurOptionsGrayscaleRight,
-          compBackgroundEffectBlurOptionsGrayscaleRight: $compBackgroundEffectBlurOptionsGrayscaleRight,
-          enableCompBackgroundImageResizable: $enableCompBackgroundImageResizable,
-          enableCompBackgroundImageResizableSliceTop: $enableCompBackgroundImageResizableSliceTop,
-          compBackgroundImageResizableSliceTop: $compBackgroundImageResizableSliceTop,
-          enableCompBackgroundImageResizableSliceBottom: $enableCompBackgroundImageResizableSliceBottom,
-          compBackgroundImageResizableSliceBottom: $compBackgroundImageResizableSliceBottom,
-          enableCompBackgroundImageResizableSliceLeft: $enableCompBackgroundImageResizableSliceLeft,
-          compBackgroundImageResizableSliceLeft: $compBackgroundImageResizableSliceLeft,
-          enableCompBackgroundImageResizableSliceRight: $enableCompBackgroundImageResizableSliceRight,
-          compBackgroundImageResizableSliceRight: $compBackgroundImageResizableSliceRight,
-          enableCompBackgroundImageResizableLattice: $enableCompBackgroundImageResizableLattice,
-          enableCompBackgroundImageResizableLatticeXDivs: $enableCompBackgroundImageResizableLatticeXDivs,
-          compBackgroundImageResizableLatticeXDivs: $compBackgroundImageResizableLatticeXDivs,
-          enableCompBackgroundImageResizableLatticeYDivs: $enableCompBackgroundImageResizableLatticeYDivs,
-          compBackgroundImageResizableLatticeYDivs: $compBackgroundImageResizableLatticeYDivs,
-          enableCompBackgroundImageResizableLatticeFXCount: $enableCompBackgroundImageResizableLatticeFXCount,
-          compBackgroundImageResizableLatticeFXCount: $compBackgroundImageResizableLatticeFXCount,
-          enableCompBackgroundImageResizableLatticeFYCount: $enableCompBackgroundImageResizableLatticeFYCount,
-          compBackgroundImageResizableLatticeFYCount: $compBackgroundImageResizableLatticeFYCount,
-          enableCompBackgroundImageResizableLatticeFBounds: $enableCompBackgroundImageResizableLatticeFBounds,
-          enableCompBackgroundImageResizableLatticeFBoundsLeft: $enableCompBackgroundImageResizableLatticeFBoundsLeft,
-          compBackgroundImageResizableLatticeFBoundsLeft: $compBackgroundImageResizableLatticeFBoundsLeft,
-          enableCompBackgroundImageResizableLatticeFBoundsTop: $enableCompBackgroundImageResizableLatticeFBoundsTop,
-          compBackgroundImageResizableLatticeFBoundsTop: $compBackgroundImageResizableLatticeFBoundsTop,
-          enableCompBackgroundImageResizableLatticeFBoundsRight:
-          $enableCompBackgroundImageResizableLatticeFBoundsRight,
-          compBackgroundImageResizableLatticeFBoundsRight: $compBackgroundImageResizableLatticeFBoundsRight,
-          enableCompBackgroundImageResizableLatticeFBoundsBottom:
-          $enableCompBackgroundImageResizableLatticeFBoundsBottom,
-          compBackgroundImageResizableLatticeFBoundsBottom: $compBackgroundImageResizableLatticeFBoundsBottom,
-          enableCompBackgroundImageResizableLatticeFColors: $enableCompBackgroundImageResizableLatticeFColors,
-          compBackgroundImageResizableLatticeFColors: $compBackgroundImageResizableLatticeFColors,
-          enableCompBackgroundBrightnessRate: $enableCompBackgroundBrightnessRate,
-          compBackgroundBrightnessRate: $compBackgroundBrightnessRate,
-          enableCompBackgroundBrightnessLightUpDegree: $enableCompBackgroundBrightnessLightUpDegree,
-          compBackgroundBrightnessLightUpDegree: $compBackgroundBrightnessLightUpDegree
-        })
-
-        CompOpacityBlocks({
-          enableCompOpacity: $enableCompOpacity,
-          compOpacity: $compOpacity
-        })
-
-        CompVisibilityBlocks({
-          enableCompVisibility: $enableCompVisibility,
-          compVisibility: $compVisibility
-        })
-
-        CompEnabledBlocks({
-          enableCompEnabled: $enableCompEnabled,
-          compEnabled: $compEnabled
-        })
-
-        CompOverlayBlocks({
-          enableCompOverlay: $enableCompOverlay,
-          compOverlay: $compOverlay,
-          enableCompOverlayOptions: $enableCompOverlayOptions,
-          enableCompOverlayOptionsAlign: $enableCompOverlayOptionsAlign,
-          compOverlayOptionsAlign: $compOverlayOptionsAlign,
-          enableCompOverlayOptionsOffsetX: $enableCompOverlayOptionsOffsetX,
-          compOverlayOptionsOffsetX: $compOverlayOptionsOffsetX,
-          enableCompOverlayOptionsOffsetY: $enableCompOverlayOptionsOffsetY,
-          compOverlayOptionsOffsetY: $compOverlayOptionsOffsetY
-        })
-
-        CompZOrderControlBlocks({
-          enableCompZIndex: $enableCompZIndex,
-          compZIndex: $compZIndex
-        })
-
-        CompTransformationBlocks({
-          enableCompRotate: $enableCompRotate,
-          enableCompRotateX: $enableCompRotateX,
-          compRotateX: $compRotateX,
-          enableCompRotateY: $enableCompRotateY,
-          compRotateY: $compRotateY,
-          enableCompRotateZ: $enableCompRotateZ,
-          compRotateZ: $compRotateZ,
-          enableCompRotateAngle: $enableCompRotateAngle,
-          compRotateAngle: $compRotateAngle,
-          enableCompRotateCenterX: $enableCompRotateCenterX,
-          compRotateCenterX: $compRotateCenterX,
-          enableCompRotateCenterY: $enableCompRotateCenterY,
-          compRotateCenterY: $compRotateCenterY,
-          enableCompRotateCenterZ: $enableCompRotateCenterZ,
-          compRotateCenterZ: $compRotateCenterZ,
-          enableCompRotatePerspective: $enableCompRotatePerspective,
-          compRotatePerspective: $compRotatePerspective,
-          enableCompTranslate: $enableCompTranslate,
-          enableCompTranslateX: $enableCompTranslateX,
-          compTranslateX: $compTranslateX,
-          enableCompTranslateY: $enableCompTranslateY,
-          compTranslateY: $compTranslateY,
-          enableCompTranslateZ: $enableCompTranslateZ,
-          compTranslateZ: $compTranslateZ,
-          enableCompScale: $enableCompScale,
-          enableCompScaleX: $enableCompScaleX,
-          compScaleX: $compScaleX,
-          enableCompScaleY: $enableCompScaleY,
-          compScaleY: $compScaleY,
-          enableCompScaleZ: $enableCompScaleZ,
-          compScaleZ: $compScaleZ,
-          enableCompScaleCenterX: $enableCompScaleCenterX,
-          compScaleCenterX: $compScaleCenterX,
-          enableCompScaleCenterY: $enableCompScaleCenterY,
-          compScaleCenterY: $compScaleCenterY,
-          enableCompTransform: $enableCompTransform
-        })
-
-        CompShapeClippingBlocks({
-          enableCompClip: $enableCompClip,
-          compClip: $compClip,
-          enableCompClipShape: $enableCompClipShape,
-          enableCompClipShapeWidth: $enableCompClipShapeWidth,
-          compClipShapeWidth: $compClipShapeWidth,
-          enableCompClipShapeHeight: $enableCompClipShapeHeight,
-          compClipShapeHeight: $compClipShapeHeight,
-          enableCompMask: $enableCompMask,
-          enableCompMaskValue: $enableCompMaskValue,
-          compMaskValue: $compMaskValue,
-          enableCompMaskColor: $enableCompMaskColor,
-          compMaskColor: $compMaskColor,
-          enableCompMaskShape: $enableCompMaskShape,
-          enableCompMaskShapeWidth: $enableCompMaskShapeWidth,
-          compMaskShapeWidth: $compMaskShapeWidth,
-          enableCompMaskShapeHeight: $enableCompMaskShapeHeight,
-          compMaskShapeHeight: $compMaskShapeHeight
-        })
-
-        CompImageEffectsBlocks({
-          enableCompBlurValue: $enableCompBlurValue,
-          compBlurValue: $compBlurValue,
-          enableCompBlurOptionsNumber1: $enableCompBlurOptionsNumber1,
-          compBlurOptionsNumber1: $compBlurOptionsNumber1,
-          enableCompBlurOptionsNumber2: $enableCompBlurOptionsNumber2,
-          compBlurOptionsNumber2: $compBlurOptionsNumber2,
-          enableCompShadowValueRadius: $enableCompShadowValueRadius,
-          compShadowValueRadius: $compShadowValueRadius,
-          enableCompShadowValueType: $enableCompShadowValueType,
-          compShadowValueType: $compShadowValueType,
-          enableCompShadowValueColor: $enableCompShadowValueColor,
-          compShadowValueColor: $compShadowValueColor,
-          enableCompShadowValueOffsetX: $enableCompShadowValueOffsetX,
-          compShadowValueOffsetX: $compShadowValueOffsetX,
-          enableCompShadowValueOffsetY: $enableCompShadowValueOffsetY,
-          compShadowValueOffsetY: $compShadowValueOffsetY,
-          enableCompShadowValueFill: $enableCompShadowValueFill,
-          compShadowValueFill: $compShadowValueFill,
-          enableCompGrayscale: $enableCompGrayscale,
-          compGrayscale: $compGrayscale,
-          enableCompBrightness: $enableCompBrightness,
-          compBrightness: $compBrightness,
-          enableCompSaturate: $enableCompSaturate,
-          compSaturate: $compSaturate,
-          enableCompContrast: $enableCompContrast,
-          compContrast: $compContrast,
-          enableCompInvert: $enableCompInvert,
-          compInvert: $compInvert,
-          enableCompSepia: $enableCompSepia,
-          compSepia: $compSepia,
-          enableCompHueRotate: $enableCompHueRotate,
-          compHueRotate: $compHueRotate,
-          enableCompColorBlend: $enableCompColorBlend,
-          compColorBlend: $compColorBlend,
-          enableCompLinearGradientBlurValue: $enableCompLinearGradientBlurValue,
-          compLinearGradientBlurValue: $compLinearGradientBlurValue,
-          enableCompLinearGradientBlurOptionsFractionStops: $enableCompLinearGradientBlurOptionsFractionStops,
-          compLinearGradientBlurOptionsFractionStops: $compLinearGradientBlurOptionsFractionStops,
-          enableCompLinearGradientBlurOptionsDirection: $enableCompLinearGradientBlurOptionsDirection,
-          compLinearGradientBlurOptionsDirection: $compLinearGradientBlurOptionsDirection,
-          enableCompRenderGroup: $enableCompRenderGroup,
-          compRenderGroup: $compRenderGroup,
-          enableCompBlendModeValue: $enableCompBlendModeValue,
-          compBlendModeValue: $compBlendModeValue,
-          enableCompBlendModeType: $enableCompBlendModeType,
-          compBlendModeType: $compBlendModeType,
-          enableCompUseShadowBatching: $enableCompUseShadowBatching,
-          compUseShadowBatching: $compUseShadowBatching,
-          enableCompSphericalEffect: $enableCompSphericalEffect,
-          compSphericalEffect: $compSphericalEffect,
-          enableCompLightUpEffect: $enableCompLightUpEffect,
-          compLightUpEffect: $compLightUpEffect,
-          enableCompPixelStretchEffectOptionsLeft: $enableCompPixelStretchEffectOptionsLeft,
-          compPixelStretchEffectOptionsLeft: $compPixelStretchEffectOptionsLeft,
-          enableCompPixelStretchEffectOptionsRight: $enableCompPixelStretchEffectOptionsRight,
-          compPixelStretchEffectOptionsRight: $compPixelStretchEffectOptionsRight,
-          enableCompPixelStretchEffectOptionsTop: $enableCompPixelStretchEffectOptionsTop,
-          compPixelStretchEffectOptionsTop: $compPixelStretchEffectOptionsTop,
-          enableCompPixelStretchEffectOptionsBottom: $enableCompPixelStretchEffectOptionsBottom,
-          compPixelStretchEffectOptionsBottom: $compPixelStretchEffectOptionsBottom,
-          enableCompFreeze: $enableCompFreeze,
-          compFreeze: $compFreeze
-        })
-
-        //linearGradient
-        CompGradientColorBlocks({
-          enableCompLinearGradientAngle: $enableCompLinearGradientAngle,
-          compLinearGradientAngle: $compLinearGradientAngle,
-          enableCompLinearGradientDirection: $enableCompLinearGradientDirection,
-          compLinearGradientDirection: $compLinearGradientDirection,
-          enableCompLinearGradientColors1: $enableCompLinearGradientColors1,
-          compLinearGradientColors1: $compLinearGradientColors1,
-          enableCompLinearGradientColorsNumber1: $enableCompLinearGradientColorsNumber1,
-          compLinearGradientColorsNumber1: $compLinearGradientColorsNumber1,
-          enableCompLinearGradientColors2: $enableCompLinearGradientColors2,
-          compLinearGradientColors2: $compLinearGradientColors2,
-          enableCompLinearGradientColorsNumber2: $enableCompLinearGradientColorsNumber2,
-          compLinearGradientColorsNumber2: $compLinearGradientColorsNumber2,
-          enableCompLinearGradientRepeating: $enableCompLinearGradientRepeating,
-          compLinearGradientRepeating: $compLinearGradientRepeating,
-        })
-
-        CompPopupControlBlocks({
-          enableCompBindPopupType: $enableCompBindPopupType,
-          compBindPopupType: $compBindPopupType,
-          handlePopup: $handlePopup,
-          enableCompPopupType: $enableCompPopupType,
-          compPopupType: $compPopupType,
-          enableCompBindPopupArrowOffset: $enableCompBindPopupArrowOffset,
-          compBindPopupArrowOffset: $compBindPopupArrowOffset,
-          enableCompBindPopupShowInSubWindow: $enableCompBindPopupShowInSubWindow,
-          compBindPopupShowInSubWindow: $compBindPopupShowInSubWindow,
-          enableCompBindPopupMaskType: $enableCompBindPopupMaskType,
-          compBindPopupMaskType: $compBindPopupMaskType,
-          enableCompBindPopupMaskBoolean: $enableCompBindPopupMaskBoolean,
-          compBindPopupMaskBoolean: $compBindPopupMaskBoolean,
-          enableCompBindPopupMaskColor: $enableCompBindPopupMaskColor,
-          compBindPopupMaskColor: $compBindPopupMaskColor,
-          enableCompBindPopupMessageOptionsTextColor: $enableCompBindPopupMessageOptionsTextColor,
-          compBindPopupMessageOptionsTextColor: $compBindPopupMessageOptionsTextColor,
-          enableCompBindPopupMessageOptionsFontSize: $enableCompBindPopupMessageOptionsFontSize,
-          compBindPopupMessageOptionsFontSize: $compBindPopupMessageOptionsFontSize,
-          enableCompBindPopupMessageOptionsFontWeight: $enableCompBindPopupMessageOptionsFontWeight,
-          compBindPopupMessageOptionsFontWeight: $compBindPopupMessageOptionsFontWeight,
-          enableCompBindPopupMessageOptionsFontStyle: $enableCompBindPopupMessageOptionsFontStyle,
-          compBindPopupMessageOptionsFontStyle: $compBindPopupMessageOptionsFontStyle,
-          enableCompBindPopupTargetSpace: $enableCompBindPopupTargetSpace,
-          compBindPopupTargetSpace: $compBindPopupTargetSpace,
-          enableCompBindPopupPlacement: $enableCompBindPopupPlacement,
-          compBindPopupPlacement: $compBindPopupPlacement,
-          enableCompBindPopupOffsetX: $enableCompBindPopupOffsetX,
-          compBindPopupOffsetX: $compBindPopupOffsetX,
-          enableCompBindPopupOffsetY: $enableCompBindPopupOffsetY,
-          compBindPopupOffsetY: $compBindPopupOffsetY,
-          enableCompBindPopupEnableArrow: $enableCompBindPopupEnableArrow,
-          compBindPopupEnableArrow: $compBindPopupEnableArrow,
-          enableCompBindPopupPopupColor: $enableCompBindPopupPopupColor,
-          compBindPopupPopupColor: $compBindPopupPopupColor,
-          enableCompBindPopupAutoCancel: $enableCompBindPopupAutoCancel,
-          compBindPopupAutoCancel: $compBindPopupAutoCancel,
-          enableCompBindPopupWidth: $enableCompBindPopupWidth,
-          compBindPopupWidth: $compBindPopupWidth,
-          enableCompBindPopupArrowPointPosition: $enableCompBindPopupArrowPointPosition,
-          compBindPopupArrowPointPosition: $compBindPopupArrowPointPosition,
-          enableCompBindPopupArrowWidth: $enableCompBindPopupArrowWidth,
-          compBindPopupArrowWidth: $compBindPopupArrowWidth,
-          enableCompBindPopupArrowHeight: $enableCompBindPopupArrowHeight,
-          compBindPopupArrowHeight: $compBindPopupArrowHeight,
-          enableCompBindPopupRadius: $enableCompBindPopupRadius,
-          compBindPopupRadius: $compBindPopupRadius,
-          enableCompBindPopupShadowType: $enableCompBindPopupShadowType,
-          compBindPopupShadowType: $compBindPopupShadowType,
-          enableCompBindPopupShadowStyle: $enableCompBindPopupShadowStyle,
-          compBindPopupShadowStyle: $compBindPopupShadowStyle,
-          enableCompBindPopupShadowOptionsRadius: $enableCompBindPopupShadowOptionsRadius,
-          compBindPopupShadowOptionsRadius: $compBindPopupShadowOptionsRadius,
-          enableCompBindPopupShadowOptionsType: $enableCompBindPopupShadowOptionsType,
-          compBindPopupShadowOptionsType: $compBindPopupShadowOptionsType,
-          enableCompBindPopupShadowOptionsColor: $enableCompBindPopupShadowOptionsColor,
-          compBindPopupShadowOptionsColor: $compBindPopupShadowOptionsColor,
-          enableCompBindPopupShadowOptionsOffsetX: $enableCompBindPopupShadowOptionsOffsetX,
-          compBindPopupShadowOptionsOffsetX: $compBindPopupShadowOptionsOffsetX,
-          enableCompBindPopupShadowOptionsOffsetY: $enableCompBindPopupShadowOptionsOffsetY,
-          compBindPopupShadowOptionsOffsetY: $compBindPopupShadowOptionsOffsetY,
-          enableCompBindPopupShadowOptionsFill: $enableCompBindPopupShadowOptionsFill,
-          compBindPopupShadowOptionsFill: $compBindPopupShadowOptionsFill,
-          enableCompBindPopupBackgroundBlurStyle: $enableCompBindPopupBackgroundBlurStyle,
-          compBindPopupBackgroundBlurStyle: $compBindPopupBackgroundBlurStyle,
-          enableTransitionTransitionEffect: $enableTransitionTransitionEffect,
-          transitionTransitionEffect: $transitionTransitionEffect,
-          enableCompBindPopupTransitionOpacity: $enableCompBindPopupTransitionOpacity,
-          compBindPopupTransitionOpacity: $compBindPopupTransitionOpacity,
-          enableCompBindPopupTransitionTranslateX: $enableCompBindPopupTransitionTranslateX,
-          compBindPopupTransitionTranslateX: $compBindPopupTransitionTranslateX,
-          enableCompBindPopupTransitionTranslateY: $enableCompBindPopupTransitionTranslateY,
-          compBindPopupTransitionTranslateY: $compBindPopupTransitionTranslateY,
-          enableCompBindPopupTransitionTranslateZ: $enableCompBindPopupTransitionTranslateZ,
-          compBindPopupTransitionTranslateZ: $compBindPopupTransitionTranslateZ,
-          enableCompBindPopupTransitionScaleX: $enableCompBindPopupTransitionScaleX,
-          compBindPopupTransitionScaleX: $compBindPopupTransitionScaleX,
-          enableCompBindPopupTransitionScaleY: $enableCompBindPopupTransitionScaleY,
-          compBindPopupTransitionScaleY: $compBindPopupTransitionScaleY,
-          enableCompBindPopupTransitionScaleZ: $enableCompBindPopupTransitionScaleZ,
-          compBindPopupTransitionScaleZ: $compBindPopupTransitionScaleZ,
-          enableCompBindPopupTransitionScaleCenterX: $enableCompBindPopupTransitionScaleCenterX,
-          compBindPopupTransitionScaleCenterX: $compBindPopupTransitionScaleCenterX,
-          enableCompBindPopupTransitionScaleCenterY: $enableCompBindPopupTransitionScaleCenterY,
-          compBindPopupTransitionScaleCenterY: $compBindPopupTransitionScaleCenterY,
-          enableCompBindPopupTransitionRotateX: $enableCompBindPopupTransitionRotateX,
-          compBindPopupTransitionRotateX: $compBindPopupTransitionRotateX,
-          enableCompBindPopupTransitionRotateY: $enableCompBindPopupTransitionRotateY,
-          compBindPopupTransitionRotateY: $compBindPopupTransitionRotateY,
-          enableCompBindPopupTransitionRotateZ: $enableCompBindPopupTransitionRotateZ,
-          compBindPopupTransitionRotateZ: $compBindPopupTransitionRotateZ,
-          enableCompBindPopupTransitionRotateAngle: $enableCompBindPopupTransitionRotateAngle,
-          compBindPopupTransitionRotateAngle: $compBindPopupTransitionRotateAngle,
-          enableCompBindPopupTransitionRotateCenterX: $enableCompBindPopupTransitionRotateCenterX,
-          compBindPopupTransitionRotateCenterX: $compBindPopupTransitionRotateCenterX,
-          enableCompBindPopupTransitionRotateCenterY: $enableCompBindPopupTransitionRotateCenterY,
-          compBindPopupTransitionRotateCenterY: $compBindPopupTransitionRotateCenterY,
-          enableCompBindPopupTransitionRotateCenterZ: $enableCompBindPopupTransitionRotateCenterZ,
-          compBindPopupTransitionRotateCenterZ: $compBindPopupTransitionRotateCenterZ,
-          enableCompBindPopupTransitionRotatePerspective: $enableCompBindPopupTransitionRotatePerspective,
-          compBindPopupTransitionRotatePerspective: $compBindPopupTransitionRotatePerspective,
-          enableCompBindPopupTransitionMove: $enableCompBindPopupTransitionMove,
-          compBindPopupTransitionMove: $compBindPopupTransitionMove,
-        })
-
-        //bindMenu
-        CompMenuControlBlocks({
-          enableCompBindMenuStartIcon: $enableCompBindMenuStartIcon,
-          compBindMenuStartIcon: $compBindMenuStartIcon,
-          compBindMenuStartIconStr: $compBindMenuStartIconStr,
-          enableCompBindMenuEndIcon: $enableCompBindMenuEndIcon,
-          compBindMenuEndIcon: $compBindMenuEndIcon,
-          compBindMenuEndIconStr: $compBindMenuEndIconStr,
-          enableCompBindMenuSelect: $enableCompBindMenuSelect,
-          compBindMenuSelect: $compBindMenuSelect,
-          enableCompBindMenuSelect2: $enableCompBindMenuSelect2,
-          compBindMenuSelect2: $compBindMenuSelect2,
-          enableCompBindMenuSelect3: $enableCompBindMenuSelect3,
-          compBindMenuSelect3: $compBindMenuSelect3,
-          enableCompBindMenuSelect4: $enableCompBindMenuSelect4,
-          compBindMenuSelect4: $compBindMenuSelect4,
-          enableCompBindMenuDirection: $enableCompBindMenuDirection,
-          compBindMenuComDirection: $compBindMenuComDirection,
-          enableCompBindMenuSelectIcon: $enableCompBindMenuSelectIcon,
-          compBindMenuSelectIcon: $compBindMenuSelectIcon,
-          enableCompBindMenuSelectIcon2: $enableCompBindMenuSelectIcon2,
-          compBindMenuSelectIcon2: $compBindMenuSelectIcon2,
-          enableCompBindMenuSelectIcon3: $enableCompBindMenuSelectIcon3,
-          compBindMenuSelectIcon3: $compBindMenuSelectIcon3,
-          enableCompBindMenuSelectIcon4: $enableCompBindMenuSelectIcon4,
-          compBindMenuSelectIcon4: $compBindMenuSelectIcon4,
-          enableCompBindMenuMenuFontSize: $enableCompBindMenuMenuFontSize,
-          compBindMenuMenuFontSize: $compBindMenuMenuFontSize,
-          enableCompBindMenuMenuFontWeight: $enableCompBindMenuMenuFontWeight,
-          compBindMenuMenuFontWeight: $compBindMenuMenuFontWeight,
-          enableCompBindMenuMenuFontStyle: $enableCompBindMenuMenuFontStyle,
-          compBindMenuMenuFontStyle: $compBindMenuMenuFontStyle,
-          enableCompBindMenuMenuFontColor: $enableCompBindMenuMenuFontColor,
-          compBindMenuMenuFontColor: $compBindMenuMenuFontColor,
-          enableCompBindMenuMenuRadius: $enableCompBindMenuMenuRadius,
-          compBindMenuMenuRadius: $compBindMenuMenuRadius,
-          enableCompBindMenuMenuWidth: $enableCompBindMenuMenuWidth,
-          compBindMenuMenuWidth: $compBindMenuMenuWidth,
-          enableCompBindMenuMenuHeight: $enableCompBindMenuMenuHeight,
-          compBindMenuMenuHeight: $compBindMenuMenuHeight,
-          enableCompBindMenuMenuItemDividerStrokeWidth: $enableCompBindMenuMenuItemDividerStrokeWidth,
-          compBindMenuMenuItemDividerStrokeWidth: $compBindMenuMenuItemDividerStrokeWidth,
-          enableCompBindMenuMenuItemDividerColor: $enableCompBindMenuMenuItemDividerColor,
-          compBindMenuMenuItemDividerColor: $compBindMenuMenuItemDividerColor,
-          enableCompBindMenuMenuItemDividerStartMargin: $enableCompBindMenuMenuItemDividerStartMargin,
-          compBindMenuMenuItemDividerStartMargin: $compBindMenuMenuItemDividerStartMargin,
-          enableCompBindMenuMenuItemDividerEndMargin: $enableCompBindMenuMenuItemDividerEndMargin,
-          compBindMenuMenuItemDividerEndMargin: $compBindMenuMenuItemDividerEndMargin,
-          enableCompBindMenuMenuItemGroupDividerStrokeWidth: $enableCompBindMenuMenuItemGroupDividerStrokeWidth,
-          compBindMenuMenuItemGroupDividerStrokeWidth: $compBindMenuMenuItemGroupDividerStrokeWidth,
-          enableCompBindMenuMenuItemGroupDividerColor: $enableCompBindMenuMenuItemGroupDividerColor,
-          compBindMenuMenuItemGroupDividerColor: $compBindMenuMenuItemGroupDividerColor,
-          enableCompBindMenuMenuItemGroupDividerStartMargin: $enableCompBindMenuMenuItemGroupDividerStartMargin,
-          compBindMenuMenuItemGroupDividerStartMargin: $compBindMenuMenuItemGroupDividerStartMargin,
-          enableCompBindMenuMenuItemGroupDividerEndMargin: $enableCompBindMenuMenuItemGroupDividerEndMargin,
-          compBindMenuMenuItemGroupDividerEndMargin: $compBindMenuMenuItemGroupDividerEndMargin,
-          enableCompBindMenuSubMenuExpandingMode: $enableCompBindMenuSubMenuExpandingMode,
-          compBindMenuSubMenuExpandingMode: $compBindMenuSubMenuExpandingMode,
-          enableCompBindMenuMenuBackgroundColor: $enableCompBindMenuMenuBackgroundColor,
-          compBindMenuMenuBackgroundColor: $compBindMenuMenuBackgroundColor,
-          enableCompBindMenuMenuOpacity: $enableCompBindMenuMenuOpacity,
-          compBindMenuMenuOpacity: $compBindMenuMenuOpacity,
-          enableCompBindMenuMenuVisibility: $enableCompBindMenuMenuVisibility,
-          compBindMenuMenuVisibility: $compBindMenuMenuVisibility,
-          enableCompBindMenuMenuPadding: $enableCompBindMenuMenuPadding,
-          compBindMenuMenuPadding: $compBindMenuMenuPadding,
-          enableCompBindMenuMenuMargin: $enableCompBindMenuMenuMargin,
-          compBindMenuMenuMargin: $compBindMenuMenuMargin,
-        })
-
-        //focusable
-        CompFocusControlBlocks({
-          enableCompFocusable: $enableCompFocusable,
-          compFocusable: $compFocusable,
-          enableCompDefaultFocus: $compDefaultFocus,
-          compDefaultFocus: $compDefaultFocus,
-          enableCompGroupDefaultFocus: $enableCompGroupDefaultFocus,
-          compGroupDefaultFocus: $compGroupDefaultFocus,
-          enableCompFocusOnTouch: $enableCompFocusOnTouch,
-          compFocusOnTouch: $compFocusOnTouch,
-          enableCompFocusBoxMargin: $enableCompFocusBoxMargin,
-          compFocusBoxMargin: $compFocusBoxMargin,
-          enableCompFocusBoxStrokeColor: $enableCompFocusBoxStrokeColor,
-          compFocusBoxStrokeColor: $compFocusBoxStrokeColor,
-          enableCompFocusBoxStrokeWidth: $enableCompFocusBoxStrokeWidth,
-          compFocusBoxStrokeWidth: $compFocusBoxStrokeWidth,
-          enableCompFocusScopePriorityScopeId: $enableCompFocusScopePriorityScopeId,
-          compFocusScopePriorityScopeId: $compFocusScopePriorityScopeId,
-          enableCompFocusScopePriorityPriority: $enableCompFocusScopePriorityPriority,
-          compFocusScopePriorityPriority: $compFocusScopePriorityPriority,
-          enableCompFocusScopeId: $enableCompFocusScopeId,
-          compFocusScopeId: $compFocusScopeId,
-          enableCompFocusScopeIdIsGroup: $enableCompFocusScopeIdIsGroup,
-          compFocusScopeIdIsGroup: $compFocusScopeIdIsGroup,
-        })
-
-        CompHoverEffectBlocks({
-          enableCompHoverEffect: $enableCompHoverEffect,
-          compHoverEffect: $compHoverEffect,
-        })
-
-        CompComponentIDBlocks({
-          enableCompId: $enableCompId,
-          compId: $compId,
-          enableCompKey: $enableCompKey,
-          compKey: $compKey,
-        })
-
-        CompReuseIDBlocks({
-          enableCompReuseId: $enableCompReuseId,
-          compReuseId: $compReuseId,
-        })
-
-        CompRestoreIdBlocks({
-          enableCompRestoreId: $enableCompRestoreId,
-          compRestoreId: $compRestoreId,
-        })
-
-        CompForegroundEffectBlocks({
-          enableCompForegroundEffectRadius: $enableCompForegroundEffectRadius,
-          compForegroundEffectRadius: $compForegroundEffectRadius
-        })
-
-        CompForegroundBlurBlocks({
-          enableCompForegroundBlurStyleValue: $enableCompForegroundBlurStyleValue,
-          compForegroundBlurStyleValue: $compForegroundBlurStyleValue,
-          enableCompForegroundBlurStyleOptionsColorMode: $enableCompForegroundBlurStyleOptionsColorMode,
-          compForegroundBlurStyleOptionsColorMode: $compForegroundBlurStyleOptionsColorMode,
-          enableCompForegroundBlurStyleOptionsAdaptiveColor: $enableCompForegroundBlurStyleOptionsAdaptiveColor,
-          compForegroundBlurStyleOptionsAdaptiveColor: $compForegroundBlurStyleOptionsAdaptiveColor,
-          enableCompForegroundBlurStyleOptionsBlurOptions: $enableCompForegroundBlurStyleOptionsBlurOptions,
-          compForegroundBlurStyleOptionsBlurOptions: $compForegroundBlurStyleOptionsBlurOptions,
-          enableCompForegroundBlurStyleOptionsScale: $enableCompForegroundBlurStyleOptionsScale,
-          compForegroundBlurStyleOptionsScale: $compForegroundBlurStyleOptionsScale,
-        })
-
-        CompMotionBlurBlocks({
-          enableCompMotionBlurRadius: $enableCompMotionBlurRadius,
-          compMotionBlurRadius: $compMotionBlurRadius,
-          enableCompMotionBlurAnchorX: $enableCompMotionBlurAnchorX,
-          compMotionBlurAnchorX: $compMotionBlurAnchorX,
-          enableCompMotionBlurAnchorY: $enableCompMotionBlurAnchorY,
-          compMotionBlurAnchorY: $compMotionBlurAnchorY,
-        })
-
-        CompClickEffectBlocks({
-          enableCompClickEffect: $enableCompClickEffect,
-          compClickEffect: $compClickEffect,
-          enableCompClickEffectLevel: $enableCompClickEffectLevel,
-          compClickEffectLevel: $compClickEffectLevel,
-          enableCompClickEffectScale: $enableCompClickEffectScale,
-          compClickEffectScale: $compClickEffectScale,
-        })
-
-        CompAccessibilityBlocks({
-          enableCompAccessibilityGroup: $enableCompAccessibilityGroup,
-          compAccessibilityGroup: $compAccessibilityGroup,
-          enableCompAccessibilityText: $enableCompAccessibilityText,
-          compAccessibilityText: $compAccessibilityText,
-          enableCompAccessibilityDescription: $enableCompAccessibilityDescription,
-          compAccessibilityDescription: $compAccessibilityDescription,
-          enableCompAccessibilityLevel: $enableCompAccessibilityLevel,
-          compAccessibilityLevel: $compAccessibilityLevel,
-        })
-
-        CompAttributeModifierBlocks({
-          enableCompAttributeModifier: $enableCompAttributeModifier,
-          compAttributeModifier: $compAttributeModifier,
-        })
-
-        CompForegroundEffectBlocks({
-          enableCompForegroundEffectRadius: $enableCompForegroundEffectRadius,
-          compForegroundEffectRadius: $compForegroundEffectRadius
-        })
+          RadioBlock({
+            title: 'description',
+            isEnabled: $enableDescription,
+            value: $description,
+            dataSource: [
+              { label: 'true', value: true },
+              { label: 'false', value: false }
+            ]
+          })
 
 
-        CompForegroundBlurBlocks({
-          enableCompForegroundBlurStyleValue: $enableCompForegroundBlurStyleValue,
-          compForegroundBlurStyleValue: $compForegroundBlurStyleValue,
-          enableCompForegroundBlurStyleOptionsColorMode: $enableCompForegroundBlurStyleOptionsColorMode,
-          compForegroundBlurStyleOptionsColorMode: $compForegroundBlurStyleOptionsColorMode,
-          enableCompForegroundBlurStyleOptionsAdaptiveColor: $enableCompForegroundBlurStyleOptionsAdaptiveColor,
-          compForegroundBlurStyleOptionsAdaptiveColor: $compForegroundBlurStyleOptionsAdaptiveColor,
-          enableCompForegroundBlurStyleOptionsBlurOptions: $enableCompForegroundBlurStyleOptionsBlurOptions,
-          compForegroundBlurStyleOptionsBlurOptions: $compForegroundBlurStyleOptionsBlurOptions,
-          enableCompForegroundBlurStyleOptionsScale: $enableCompForegroundBlurStyleOptionsScale,
-          compForegroundBlurStyleOptionsScale: $compForegroundBlurStyleOptionsScale,
-        })
+          SliderBlock({
+            title: 'trackShadow.radius',
+            isEnabled: $enableTrackShadowRadius,
+            value: $trackShadowRadius,
+            min: 20,
+            max: 50
+          })
 
-        CompMotionBlurBlocks({
-          enableCompMotionBlurRadius: $enableCompMotionBlurRadius,
-          compMotionBlurRadius: $compMotionBlurRadius,
-          enableCompMotionBlurAnchorX: $enableCompMotionBlurAnchorX,
-          compMotionBlurAnchorX: $compMotionBlurAnchorX,
-          enableCompMotionBlurAnchorY: $enableCompMotionBlurAnchorY,
-          compMotionBlurAnchorY: $compMotionBlurAnchorY,
-        })
+          SliderBlock({
+            title: 'trackShadow.OffsetX',
+            isEnabled: $enableTrackShadowOffsetX,
+            value: $trackShadowOffsetX,
+            min: 5,
+            max: 15
+          })
 
-        CompAccessibilityBlocks({
-          enableCompAccessibilityGroup: $enableCompAccessibilityGroup,
-          compAccessibilityGroup: $compAccessibilityGroup,
-          enableCompAccessibilityText: $enableCompAccessibilityText,
-          compAccessibilityText: $compAccessibilityText,
-          enableCompAccessibilityDescription: $enableCompAccessibilityDescription,
-          compAccessibilityDescription: $compAccessibilityDescription,
-          enableCompAccessibilityLevel: $enableCompAccessibilityLevel,
-          compAccessibilityLevel: $compAccessibilityLevel,
-        })
+          SliderBlock({
+            title: 'trackShadow.OffsetY',
+            isEnabled: $enableTrackShadowOffsetY,
+            value: $trackShadowOffsetY,
+            min: 5,
+            max: 15
+          })
 
-        CompAttributeModifierBlocks({
-          enableCompAttributeModifier: $enableCompAttributeModifier,
-          compAttributeModifier: $compAttributeModifier,
-        })
+          IconBlock({
+            title: 'indicator.icon',
+            isEnabled: $enableIndicatorIcon,
+            icon: $indicatorIcon,
+          })
 
-        CompGestureModifierBlocks({
-          enableCompGestureModifier: $enableCompGestureModifier,
-          compGestureModifier: $compGestureModifier
-        })
+          SliderBlock({
+            title: 'indicator.space',
+            isEnabled: $enableIndicatorSpace,
+            value: $indicatorSpace,
+            min: 8,
+            max: 20
+          })
+        }
 
-        CompOutlineBlocks({
-          enableCompOutlineValueWidth: $enableCompOutlineValueWidth,
-          compOutlineValueWidth: $compOutlineValueWidth,
-          enableCompOutlineValueColor: $enableCompOutlineValueColor,
-          compOutlineValueColor: $compOutlineValueColor,
-          enableCompOutlineValueRadius: $enableCompOutlineValueRadius,
-          compOutlineValueRadius: $compOutlineValueRadius,
-          enableCompOutlineValueStyle: $enableCompOutlineValueStyle,
-          compOutlineValueStyle: $compOutlineValueStyle
-        })
+        if (this.scrollShow >= 1) {
+          CompSizeBlocks({
+            enableCompWidth: $enableCompWidth,
+            compWidth: $compWidth,
+            enableCompHeight: $enableCompHeight,
+            compHeight: $compHeight,
+            enableCompPadding: $enableCompPadding,
+            compPadding: $compPadding,
+            enableCompMargin: $enableCompMargin,
+            compMargin: $compMargin,
+            enableCompConstraintSize: $enableCompConstraintSize,
+            enableCompConstraintSizeMinWidth: $enableCompConstraintSizeMinWidth,
+            compConstraintSizeMinWidth: $compConstraintSizeMinWidth,
+            enableCompConstraintSizeMinHeight: $enableCompConstraintSizeMinHeight,
+            compConstraintSizeMinHeight: $compConstraintSizeMinHeight,
+            enableCompConstraintSizeMaxWidth: $enableCompConstraintSizeMaxWidth,
+            compConstraintSizeMaxWidth: $compConstraintSizeMaxWidth,
+            enableCompConstraintSizeMaxHeight: $enableCompConstraintSizeMaxHeight,
+            compConstraintSizeMaxHeight: $compConstraintSizeMaxHeight
+          })
 
-        CompVisualEffectBlocks({
-          enableCompVisualEffect: $enableCompVisualEffect,
-          compVisualEffect: $compVisualEffect,
-          enableCompBackgroundFilter: $enableCompBackgroundFilter,
-          compBackgroundFilter: $compBackgroundFilter,
-          enableCompForegroundFilter: $enableCompForegroundFilter,
-          compForegroundFilter: $compForegroundFilter,
-          enableCompCompositingFilter: $enableCompCompositingFilter,
-          compCompositingFilter: $compCompositingFilter
-        })
+          CompLocationBlocks({
+            enableCompPosition: $enableCompPosition,
+            enableCompPositionTop: $enableCompPositionTop,
+            compPositionTop: $compPositionTop,
+            enableCompPositionBottom: $enableCompPositionBottom,
+            compPositionBottom: $compPositionBottom,
+            enableCompPositionLeft: $enableCompPositionLeft,
+            compPositionLeft: $compPositionLeft,
+            enableCompPositionRight: $enableCompPositionRight,
+            compPositionRight: $compPositionRight,
+            enableCompMarkAnchor: $enableCompMarkAnchor,
+            enableCompMarkAnchorX: $enableCompMarkAnchorX,
+            compMarkAnchorX: $compMarkAnchorX,
+            enableCompMarkAnchorY: $enableCompMarkAnchorY,
+            compMarkAnchorY: $compMarkAnchorY,
+            enableCompOffset: $enableCompOffset,
+            enableCompOffsetX: $enableCompOffsetX,
+            compOffsetX: $compOffsetX,
+            enableCompOffsetY: $enableCompOffsetY,
+            compOffsetY: $compOffsetY
+          })
 
-        CompTouchTargetBlocks({
-          enableCompResponseRegionValueX: $enableCompResponseRegionValueX,
-          compResponseRegionValueX: $compResponseRegionValueX,
-          enableCompResponseRegionValueY:
-          $enableCompResponseRegionValueY,
-          compResponseRegionValueY: $compResponseRegionValueY,
-          enableCompResponseRegionValueWidth: $enableCompResponseRegionValueWidth,
-          compResponseRegionValueWidth: $compResponseRegionValueWidth,
-          enableCompResponseRegionValueHeight: $enableCompResponseRegionValueHeight,
-          compResponseRegionValueHeight: $compResponseRegionValueHeight
-        })
+          CompLayoutConstraintsBlocks({
+            enableCompAspectRatio: $enableCompAspectRatio,
+            compAspectRatio: $compAspectRatio,
+            enableCompPixelRound: $enableCompPixelRound,
+            enableCompPixelRoundStart: $enableCompPixelRoundStart,
+            compPixelRoundStart: $compPixelRoundStart,
+            enableCompPixelRoundTop: $enableCompPixelRoundTop,
+            compPixelRoundTop: $compPixelRoundTop,
+            enableCompPixelRoundEnd: $enableCompPixelRoundEnd,
+            compPixelRoundEnd: $compPixelRoundEnd,
+            enableCompPixelRoundBottom: $enableCompPixelRoundBottom,
+            compPixelRoundBottom: $compPixelRoundBottom
+          })
+        }
 
-        CompHitTestControlBlocks({
-          enableCompHitTestBehavior: $enableCompHitTestBehavior,
-          compHitTestBehavior: $compHitTestBehavior
-        })
+        if (this.scrollShow >= 2){
+          CompBorderBlocks({
+            enableCompBorderWidth: $enableCompBorderWidth,
+            compBorderWidth: $compBorderWidth,
+            enableCompBorderColor: $enableCompBorderColor,
+            compBorderColor: $compBorderColor,
+            enableCompBorderRadius: $enableCompBorderRadius,
+            compBorderRadius: $compBorderRadius,
+            enableCompBorderStyle: $enableCompBorderStyle,
+            compBorderStyle: $compBorderStyle,
+            enableCompBorderDashGapLeft: $enableCompBorderDashGapLeft,
+            compBorderDashGapLeft: $compBorderDashGapLeft,
+            enableCompBorderDashGapRight: $enableCompBorderDashGapRight,
+            compBorderDashGapRight: $compBorderDashGapRight,
+            enableCompBorderDashGapTop: $enableCompBorderDashGapTop,
+            compBorderDashGapTop: $compBorderDashGapTop,
+            enableCompBorderDashGapBottom: $enableCompBorderDashGapBottom,
+            compBorderDashGapBottom: $compBorderDashGapBottom,
+            enableCompBorderDashWidthLeft: $enableCompBorderDashWidthLeft,
+            compBorderDashWidthLeft: $compBorderDashWidthLeft,
+            enableCompBorderDashWidthRight: $enableCompBorderDashWidthRight,
+            compBorderDashWidthRight: $compBorderDashWidthRight,
+            enableCompBorderDashWidthTop: $enableCompBorderDashWidthTop,
+            compBorderDashWidthTop: $compBorderDashWidthTop,
+            enableCompBorderDashWidthBottom: $enableCompBorderDashWidthBottom,
+            compBorderDashWidthBottom: $compBorderDashWidthBottom
+          })
 
-        CompModalTransitionBlocks({
-          enableCompBindContentCoverIsShow: $enableCompBindContentCoverIsShow,
-          compBindContentCoverIsShow: $compBindContentCoverIsShow,
-          enableCompBindContentCoverOptionsModalTransition: $enableCompBindContentCoverOptionsModalTransition,
-          compBindContentCoverOptionsModalTransition: $compBindContentCoverOptionsModalTransition,
-          enableCompBindContentCoverOptionsTransitionOpacity: $enableCompBindContentCoverOptionsTransitionOpacity,
-          compBindContentCoverOptionsTransitionOpacity: $compBindContentCoverOptionsTransitionOpacity,
-          enableCompBindContentCoverOptionsTransitionTranslateX:
-          $enableCompBindContentCoverOptionsTransitionTranslateX,
-          compBindContentCoverOptionsTransitionTranslateX: $compBindContentCoverOptionsTransitionTranslateX,
-          enableCompBindContentCoverOptionsTransitionTranslateY:
-          $enableCompBindContentCoverOptionsTransitionTranslateY,
-          compBindContentCoverOptionsTransitionTranslateY: $compBindContentCoverOptionsTransitionTranslateY,
-          enableCompBindContentCoverOptionsTransitionTranslateZ:
-          $enableCompBindContentCoverOptionsTransitionTranslateZ,
-          compBindContentCoverOptionsTransitionTranslateZ: $compBindContentCoverOptionsTransitionTranslateZ,
-          enableCompBindContentCoverOptionsTransitionScaleX: $enableCompBindContentCoverOptionsTransitionScaleX,
-          compBindContentCoverOptionsTransitionScaleX: $compBindContentCoverOptionsTransitionScaleX,
-          enableCompBindContentCoverOptionsTransitionScaleY: $enableCompBindContentCoverOptionsTransitionScaleY,
-          compBindContentCoverOptionsTransitionScaleY: $compBindContentCoverOptionsTransitionScaleY,
-          enableCompBindContentCoverOptionsTransitionScaleZ: $enableCompBindContentCoverOptionsTransitionScaleZ,
-          compBindContentCoverOptionsTransitionScaleZ: $compBindContentCoverOptionsTransitionScaleZ,
-          enableCompBindContentCoverOptionsTransitionScaleCenterX:
-          $enableCompBindContentCoverOptionsTransitionScaleCenterX,
-          compBindContentCoverOptionsTransitionScaleCenterX: $compBindContentCoverOptionsTransitionScaleCenterX,
-          enableCompBindContentCoverOptionsTransitionScaleCenterY:
-          $enableCompBindContentCoverOptionsTransitionScaleCenterY,
-          compBindContentCoverOptionsTransitionScaleCenterY: $compBindContentCoverOptionsTransitionScaleCenterY,
-          enableCompBindContentCoverOptionsTransitionRotateX: $enableCompBindContentCoverOptionsTransitionRotateX,
-          compBindContentCoverOptionsTransitionRotateX: $compBindContentCoverOptionsTransitionRotateX,
-          enableCompBindContentCoverOptionsTransitionRotateY: $enableCompBindContentCoverOptionsTransitionRotateY,
-          compBindContentCoverOptionsTransitionRotateY: $compBindContentCoverOptionsTransitionRotateY,
-          enableCompBindContentCoverOptionsTransitionRotateZ: $enableCompBindContentCoverOptionsTransitionRotateZ,
-          compBindContentCoverOptionsTransitionRotateZ: $compBindContentCoverOptionsTransitionRotateZ,
-          enableCompBindContentCoverOptionsTransitionRotateAngle:
-          $enableCompBindContentCoverOptionsTransitionRotateAngle,
-          compBindContentCoverOptionsTransitionRotateAngle: $compBindContentCoverOptionsTransitionRotateAngle,
-          enableCompBindContentCoverOptionsTransitionRotateCenterX:
-          $enableCompBindContentCoverOptionsTransitionRotateCenterX,
-          compBindContentCoverOptionsTransitionRotateCenterX: $compBindContentCoverOptionsTransitionRotateCenterX,
-          enableCompBindContentCoverOptionsTransitionRotateCenterY:
-          $enableCompBindContentCoverOptionsTransitionRotateCenterY,
-          compBindContentCoverOptionsTransitionRotateCenterY: $compBindContentCoverOptionsTransitionRotateCenterY,
-          enableCompBindContentCoverOptionsTransitionRotateCenterZ:
-          $enableCompBindContentCoverOptionsTransitionRotateCenterZ,
-          compBindContentCoverOptionsTransitionRotateCenterZ: $compBindContentCoverOptionsTransitionRotateCenterZ,
-          enableCompBindContentCoverOptionsTransitionRotatePerspective:
-          $enableCompBindContentCoverOptionsTransitionRotatePerspective,
-          compBindContentCoverOptionsTransitionRotatePerspective:
-          $compBindContentCoverOptionsTransitionRotatePerspective,
-          enableCompBindContentCoverOptionsTransitionMove: $enableCompBindContentCoverOptionsTransitionMove,
-          compBindContentCoverOptionsTransitionMove: $compBindContentCoverOptionsTransitionMove,
-          enableCompBindContentCoverOptionsTransitionAnimationDuration:
-          $enableCompBindContentCoverOptionsTransitionAnimationDuration,
-          compBindContentCoverOptionsTransitionAnimationDuration:
-          $compBindContentCoverOptionsTransitionAnimationDuration,
-          enableCompBindContentCoverOptionsTransitionAnimationTempo:
-          $enableCompBindContentCoverOptionsTransitionAnimationTempo,
-          compBindContentCoverOptionsTransitionAnimationTempo:
-          $compBindContentCoverOptionsTransitionAnimationTempo,
-          enableCompBindContentCoverOptionsTransitionAnimationCurve:
-          $enableCompBindContentCoverOptionsTransitionAnimationCurve,
-          compBindContentCoverOptionsTransitionAnimationCurve:
-          $compBindContentCoverOptionsTransitionAnimationCurve,
-          enableCompBindContentCoverOptionsTransitionAnimationDelay:
-          $enableCompBindContentCoverOptionsTransitionAnimationDelay,
-          compBindContentCoverOptionsTransitionAnimationDelay:
-          $compBindContentCoverOptionsTransitionAnimationDelay,
-          enableCompBindContentCoverOptionsTransitionAnimationIterations:
-          $enableCompBindContentCoverOptionsTransitionAnimationIterations,
-          compBindContentCoverOptionsTransitionAnimationIterations:
-          $compBindContentCoverOptionsTransitionAnimationIterations,
-          enableCompBindContentCoverOptionsTransitionAnimationPlayMode:
-          $enableCompBindContentCoverOptionsTransitionAnimationPlayMode,
-          compBindContentCoverOptionsTransitionAnimationPlayMode:
-          $compBindContentCoverOptionsTransitionAnimationPlayMode,
-          enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin:
-          $enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
-          compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin:
-          $compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
-          enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax:
-          $enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax,
-          compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax:
-          $compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax,
-          enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected:
-          $enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected,
-          compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected:
-          $compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected
-        })
+          CompBorderImageBlocks({
+            enableCompBorderImage: $enableCompBorderImage,
+            enableCompBorderImageSource: $enableCompBorderImageSource,
+            enableCompBorderImageSlice: $enableCompBorderImageSlice,
+            enableCompBorderImageSliceTop: $enableCompBorderImageSliceTop,
+            compBorderImageSliceTop: $compBorderImageSliceTop,
+            enableCompBorderImageSliceBottom: $enableCompBorderImageSliceBottom,
+            compBorderImageSliceBottom: $compBorderImageSliceBottom,
+            enableCompBorderImageSliceLeft: $enableCompBorderImageSliceLeft,
+            compBorderImageSliceLeft: $compBorderImageSliceLeft,
+            enableCompBorderImageSliceRight: $enableCompBorderImageSliceRight,
+            compBorderImageSliceRight: $compBorderImageSliceRight,
+            enableCompBorderImageWidth: $enableCompBorderImageWidth,
+            enableCompBorderImageWidthTop: $enableCompBorderImageWidthTop,
+            compBorderImageWidthTop: $compBorderImageWidthTop,
+            enableCompBorderImageWidthBottom: $enableCompBorderImageWidthBottom,
+            compBorderImageWidthBottom: $compBorderImageWidthBottom,
+            enableCompBorderImageWidthLeft: $enableCompBorderImageWidthLeft,
+            compBorderImageWidthLeft: $compBorderImageWidthLeft,
+            enableCompBorderImageWidthRight: $enableCompBorderImageWidthRight,
+            compBorderImageWidthRight: $compBorderImageWidthRight,
+            enableCompBorderImageOutset: $enableCompBorderImageOutset,
+            enableCompBorderImageOutsetTop: $enableCompBorderImageOutsetTop,
+            compBorderImageOutsetTop: $compBorderImageOutsetTop,
+            enableCompBorderImageOutsetBottom: $enableCompBorderImageOutsetBottom,
+            compBorderImageOutsetBottom: $compBorderImageOutsetBottom,
+            enableCompBorderImageOutsetLeft: $enableCompBorderImageOutsetLeft,
+            compBorderImageOutsetLeft: $compBorderImageOutsetLeft,
+            enableCompBorderImageOutsetRight: $enableCompBorderImageOutsetRight,
+            compBorderImageOutsetRight: $compBorderImageOutsetRight,
+            enableCompBorderImageRepeat: $enableCompBorderImageRepeat,
+            compBorderImageRepeat: $compBorderImageRepeat,
+            enableCompBorderImageFill: $enableCompBorderImageFill,
+            compBorderImageFill: $compBorderImageFill
+          })
+        }
 
-        CompSheetTransitionBlocks({
-          enableCompBindSheetIsShow: $enableCompBindSheetIsShow,
-          compBindSheetIsShow: $compBindSheetIsShow,
-          enableCompBindSheetOptionsHeight: $enableCompBindSheetOptionsHeight,
-          compBindSheetOptionsHeight: $compBindSheetOptionsHeight,
-          enableCompBindSheetOptionsDetents: $enableCompBindSheetOptionsDetents,
-          compBindSheetOptionsDetents: $compBindSheetOptionsDetents,
-          enableCompBindSheetOptionsPreferType: $enableCompBindSheetOptionsPreferType,
-          compBindSheetOptionsPreferType: $compBindSheetOptionsPreferType,
-          enableCompBindSheetOptionsShowClose: $enableCompBindSheetOptionsShowClose,
-          compBindSheetOptionsShowClose: $compBindSheetOptionsShowClose,
-          enableCompBindSheetOptionsDragBar: $enableCompBindSheetOptionsDragBar,
-          compBindSheetOptionsDragBar: $compBindSheetOptionsDragBar,
-          enableCompBindSheetOptionsBlurStyle: $enableCompBindSheetOptionsBlurStyle,
-          compBindSheetOptionsBlurStyle: $compBindSheetOptionsBlurStyle,
-          enableCompBindSheetOptionsMaskColor: $enableCompBindSheetOptionsMaskColor,
-          compBindSheetOptionsMaskColor: $compBindSheetOptionsMaskColor,
-          enableCompBindSheetOptionsTitleTitle: $enableCompBindSheetOptionsTitleTitle,
-          compBindSheetOptionsTitleTitle: $compBindSheetOptionsTitleTitle,
-          enableCompBindSheetOptionsTitleSubtitle: $enableCompBindSheetOptionsTitleSubtitle,
-          compBindSheetOptionsTitleSubtitle: $compBindSheetOptionsTitleSubtitle,
-          enableCompBindSheetOptionsEnableOutsideInteractive: $enableCompBindSheetOptionsEnableOutsideInteractive,
-          compBindSheetOptionsEnableOutsideInteractive: $compBindSheetOptionsEnableOutsideInteractive,
-          enableCompBindSheetOptionsBorderWidth: $enableCompBindSheetOptionsBorderWidth,
-          compBindSheetOptionsBorderWidth: $compBindSheetOptionsBorderWidth,
-          enableCompBindSheetOptionsBorderColor: $enableCompBindSheetOptionsBorderColor,
-          compBindSheetOptionsBorderColor: $compBindSheetOptionsBorderColor,
-          enableCompBindSheetOptionsBorderStyle: $enableCompBindSheetOptionsBorderStyle,
-          compBindSheetOptionsBorderStyle: $compBindSheetOptionsBorderStyle,
-          enableCompBindSheetOptionWidth: $enableCompBindSheetOptionWidth,
-          compBindSheetOptionsWidth: $compBindSheetOptionsWidth,
-          enableCompBindSheetOptionShadow: $enableCompBindSheetOptionShadow,
-          compBindSheetOptionShadow: $compBindSheetOptionShadow,
-          enableCompBindSheetOptionMode: $enableCompBindSheetOptionMode,
-          compBindSheetOptionMode: $compBindSheetOptionMode,
-          enableCompBindSheetOptionScrollSizeMode: $enableCompBindSheetOptionScrollSizeMode,
-          compBindSheetOptionScrollSizeMode: $compBindSheetOptionScrollSizeMode
-        })
+        if (this.scrollShow >= 3){
+          CompBackgroundBlocks({
+            enableCompBackgroundAlign: $enableCompBackgroundAlign,
+            compBackgroundAlign: $compBackgroundAlign,
+            enableCompBackgroundColor: $enableCompBackgroundColor,
+            compBackgroundColor: $compBackgroundColor,
+            enableCompBackgroundImageSrc: $enableCompBackgroundImageSrc,
+            enableCompBackgroundImageRepeat: $enableCompBackgroundImageRepeat,
+            compBackgroundImageRepeat: $compBackgroundImageRepeat,
+            enableCompBackgroundImageSize: $enableCompBackgroundImageSize,
+            compBackgroundImageSize: $compBackgroundImageSize,
+            enableCompBackgroundImagePositionX: $enableCompBackgroundImagePositionX,
+            compBackgroundImagePositionX: $compBackgroundImagePositionX,
+            enableCompBackgroundImagePositionY: $enableCompBackgroundImagePositionY,
+            compBackgroundImagePositionY: $compBackgroundImagePositionY,
+            enableCompBackgroundBlurStyle: $enableCompBackgroundBlurStyle,
+            compBackgroundBlurStyle: $compBackgroundBlurStyle,
+            enableCompBackgroundBlurStyleParams: $enableCompBackgroundBlurStyleParams,
+            enableCompBackgroundBlurStyleParamsColorMode: $enableCompBackgroundBlurStyleParamsColorMode,
+            compBackgroundBlurStyleParamsColorMode: $compBackgroundBlurStyleParamsColorMode,
+            enableCompBackgroundBlurStyleParamsAdaptiveColor: $enableCompBackgroundBlurStyleParamsAdaptiveColor,
+            compBackgroundBlurStyleParamsAdaptiveColor: $compBackgroundBlurStyleParamsAdaptiveColor,
+            enableCompBackgroundBlurStyleParamsBlurOptionsLeft: $enableCompBackgroundBlurStyleParamsBlurOptionsLeft,
+            compBackgroundBlurStyleParamsBlurOptionsLeft: $compBackgroundBlurStyleParamsBlurOptionsLeft,
+            enableCompBackgroundBlurStyleParamsBlurOptionsRight: $enableCompBackgroundBlurStyleParamsBlurOptionsRight,
+            compBackgroundBlurStyleParamsBlurOptionsRight: $compBackgroundBlurStyleParamsBlurOptionsRight,
+            enableCompBackgroundBlurStyleParamsScale: $enableCompBackgroundBlurStyleParamsScale,
+            compBackgroundBlurStyleParamsScale: $compBackgroundBlurStyleParamsScale,
+            enableCompBackdropBlur: $enableCompBackdropBlur,
+            compBackdropBlur: $compBackdropBlur,
+            enableCompBackdropBlurGrayscale: $enableCompBackdropBlurGrayscale,
+            enableCompBackdropBlurGrayscaleLeft: $enableCompBackdropBlurGrayscaleLeft,
+            compBackdropBlurGrayscaleLeft: $compBackdropBlurGrayscaleLeft,
+            enableCompBackdropBlurGrayscaleRight: $enableCompBackdropBlurGrayscaleRight,
+            compBackdropBlurGrayscaleRight: $compBackdropBlurGrayscaleRight,
+            enableCompBackgroundEffect: $enableCompBackgroundEffect,
+            enableCompBackgroundEffectRadius: $enableCompBackgroundEffectRadius,
+            compBackgroundEffectRadius: $compBackgroundEffectRadius,
+            enableCompBackgroundEffectSaturation: $enableCompBackgroundEffectSaturation,
+            compBackgroundEffectSaturation: $compBackgroundEffectSaturation,
+            enableCompBackgroundEffectBrightness: $enableCompBackgroundEffectBrightness,
+            compBackgroundEffectBrightness: $compBackgroundEffectBrightness,
+            enableCompBackgroundEffectColor: $enableCompBackgroundEffectColor,
+            compBackgroundEffectColor: $compBackgroundEffectColor,
+            enableCompBackgroundEffectAdaptiveColor: $enableCompBackgroundEffectAdaptiveColor,
+            compBackgroundEffectAdaptiveColor: $compBackgroundEffectAdaptiveColor,
+            enableCompBackgroundEffectBlurOptionsGrayscaleLeft: $enableCompBackgroundEffectBlurOptionsGrayscaleLeft,
+            compBackgroundEffectBlurOptionsGrayscaleLeft: $compBackgroundEffectBlurOptionsGrayscaleLeft,
+            enableCompBackgroundEffectBlurOptionsGrayscaleRight: $enableCompBackgroundEffectBlurOptionsGrayscaleRight,
+            compBackgroundEffectBlurOptionsGrayscaleRight: $compBackgroundEffectBlurOptionsGrayscaleRight,
+            enableCompBackgroundImageResizable: $enableCompBackgroundImageResizable,
+            enableCompBackgroundImageResizableSliceTop: $enableCompBackgroundImageResizableSliceTop,
+            compBackgroundImageResizableSliceTop: $compBackgroundImageResizableSliceTop,
+            enableCompBackgroundImageResizableSliceBottom: $enableCompBackgroundImageResizableSliceBottom,
+            compBackgroundImageResizableSliceBottom: $compBackgroundImageResizableSliceBottom,
+            enableCompBackgroundImageResizableSliceLeft: $enableCompBackgroundImageResizableSliceLeft,
+            compBackgroundImageResizableSliceLeft: $compBackgroundImageResizableSliceLeft,
+            enableCompBackgroundImageResizableSliceRight: $enableCompBackgroundImageResizableSliceRight,
+            compBackgroundImageResizableSliceRight: $compBackgroundImageResizableSliceRight,
+            enableCompBackgroundImageResizableLattice: $enableCompBackgroundImageResizableLattice,
+            enableCompBackgroundImageResizableLatticeXDivs: $enableCompBackgroundImageResizableLatticeXDivs,
+            compBackgroundImageResizableLatticeXDivs: $compBackgroundImageResizableLatticeXDivs,
+            enableCompBackgroundImageResizableLatticeYDivs: $enableCompBackgroundImageResizableLatticeYDivs,
+            compBackgroundImageResizableLatticeYDivs: $compBackgroundImageResizableLatticeYDivs,
+            enableCompBackgroundImageResizableLatticeFXCount: $enableCompBackgroundImageResizableLatticeFXCount,
+            compBackgroundImageResizableLatticeFXCount: $compBackgroundImageResizableLatticeFXCount,
+            enableCompBackgroundImageResizableLatticeFYCount: $enableCompBackgroundImageResizableLatticeFYCount,
+            compBackgroundImageResizableLatticeFYCount: $compBackgroundImageResizableLatticeFYCount,
+            enableCompBackgroundImageResizableLatticeFBounds: $enableCompBackgroundImageResizableLatticeFBounds,
+            enableCompBackgroundImageResizableLatticeFBoundsLeft: $enableCompBackgroundImageResizableLatticeFBoundsLeft,
+            compBackgroundImageResizableLatticeFBoundsLeft: $compBackgroundImageResizableLatticeFBoundsLeft,
+            enableCompBackgroundImageResizableLatticeFBoundsTop: $enableCompBackgroundImageResizableLatticeFBoundsTop,
+            compBackgroundImageResizableLatticeFBoundsTop: $compBackgroundImageResizableLatticeFBoundsTop,
+            enableCompBackgroundImageResizableLatticeFBoundsRight:
+            $enableCompBackgroundImageResizableLatticeFBoundsRight,
+            compBackgroundImageResizableLatticeFBoundsRight: $compBackgroundImageResizableLatticeFBoundsRight,
+            enableCompBackgroundImageResizableLatticeFBoundsBottom:
+            $enableCompBackgroundImageResizableLatticeFBoundsBottom,
+            compBackgroundImageResizableLatticeFBoundsBottom: $compBackgroundImageResizableLatticeFBoundsBottom,
+            enableCompBackgroundImageResizableLatticeFColors: $enableCompBackgroundImageResizableLatticeFColors,
+            compBackgroundImageResizableLatticeFColors: $compBackgroundImageResizableLatticeFColors,
+            enableCompBackgroundBrightnessRate: $enableCompBackgroundBrightnessRate,
+            compBackgroundBrightnessRate: $compBackgroundBrightnessRate,
+            enableCompBackgroundBrightnessLightUpDegree: $enableCompBackgroundBrightnessLightUpDegree,
+            compBackgroundBrightnessLightUpDegree: $compBackgroundBrightnessLightUpDegree
+          })
+        }
 
-        CompObscuringBlocks({
-          enableCompObscured: $enableCompObscured, compObscured: $compObscured
-        })
+        if (this.scrollShow >= 4){
+          CompOpacityBlocks({
+            enableCompOpacity: $enableCompOpacity,
+            compOpacity: $compOpacity
+          })
 
-        CompRenderFitBlocks({
-          enableCompRenderFit: $enableCompRenderFit, compRenderFit: $compRenderFit
-        })
+          CompVisibilityBlocks({
+            enableCompVisibility: $enableCompVisibility,
+            compVisibility: $compVisibility
+          })
 
-        CompEventMonopolizationBlocks({
-          enableCompMonopolizeEvents: $enableCompMonopolizeEvents,
-          compMonopolizeEvents: $enableCompMonopolizeEvents
-        })
+          CompEnabledBlocks({
+            enableCompEnabled: $enableCompEnabled,
+            compEnabled: $compEnabled
+          })
 
-        CompCursorControlBlocks({
-          enableCompCursorControl: $enableCompCursorControl,
-          compCursorControl: $compCursorControl
-        })
+          CompOverlayBlocks({
+            enableCompOverlay: $enableCompOverlay,
+            compOverlay: $compOverlay,
+            enableCompOverlayOptions: $enableCompOverlayOptions,
+            enableCompOverlayOptionsAlign: $enableCompOverlayOptionsAlign,
+            compOverlayOptionsAlign: $compOverlayOptionsAlign,
+            enableCompOverlayOptionsOffsetX: $enableCompOverlayOptionsOffsetX,
+            compOverlayOptionsOffsetX: $compOverlayOptionsOffsetX,
+            enableCompOverlayOptionsOffsetY: $enableCompOverlayOptionsOffsetY,
+            compOverlayOptionsOffsetY: $compOverlayOptionsOffsetY
+          })
 
-        RadioBlock({
-          title: 'useEffect',
-          isEnabled: $enableCompUseEffect,
-          value: $compUseEffect,
-          dataSource: [
-            { label: 'true', value: true },
-            { label: 'false', value: false },
-          ]
-        })
+          CompZOrderControlBlocks({
+            enableCompZIndex: $enableCompZIndex,
+            compZIndex: $compZIndex
+          })
+        }
+
+        if (this.scrollShow >= 5){
+          CompTransformationBlocks({
+            enableCompRotate: $enableCompRotate,
+            enableCompRotateX: $enableCompRotateX,
+            compRotateX: $compRotateX,
+            enableCompRotateY: $enableCompRotateY,
+            compRotateY: $compRotateY,
+            enableCompRotateZ: $enableCompRotateZ,
+            compRotateZ: $compRotateZ,
+            enableCompRotateAngle: $enableCompRotateAngle,
+            compRotateAngle: $compRotateAngle,
+            enableCompRotateCenterX: $enableCompRotateCenterX,
+            compRotateCenterX: $compRotateCenterX,
+            enableCompRotateCenterY: $enableCompRotateCenterY,
+            compRotateCenterY: $compRotateCenterY,
+            enableCompRotateCenterZ: $enableCompRotateCenterZ,
+            compRotateCenterZ: $compRotateCenterZ,
+            enableCompRotatePerspective: $enableCompRotatePerspective,
+            compRotatePerspective: $compRotatePerspective,
+            enableCompTranslate: $enableCompTranslate,
+            enableCompTranslateX: $enableCompTranslateX,
+            compTranslateX: $compTranslateX,
+            enableCompTranslateY: $enableCompTranslateY,
+            compTranslateY: $compTranslateY,
+            enableCompTranslateZ: $enableCompTranslateZ,
+            compTranslateZ: $compTranslateZ,
+            enableCompScale: $enableCompScale,
+            enableCompScaleX: $enableCompScaleX,
+            compScaleX: $compScaleX,
+            enableCompScaleY: $enableCompScaleY,
+            compScaleY: $compScaleY,
+            enableCompScaleZ: $enableCompScaleZ,
+            compScaleZ: $compScaleZ,
+            enableCompScaleCenterX: $enableCompScaleCenterX,
+            compScaleCenterX: $compScaleCenterX,
+            enableCompScaleCenterY: $enableCompScaleCenterY,
+            compScaleCenterY: $compScaleCenterY,
+            enableCompTransform: $enableCompTransform
+          })
+
+          CompShapeClippingBlocks({
+            enableCompClip: $enableCompClip,
+            compClip: $compClip,
+            enableCompClipShape: $enableCompClipShape,
+            enableCompClipShapeWidth: $enableCompClipShapeWidth,
+            compClipShapeWidth: $compClipShapeWidth,
+            enableCompClipShapeHeight: $enableCompClipShapeHeight,
+            compClipShapeHeight: $compClipShapeHeight,
+            enableCompMask: $enableCompMask,
+            enableCompMaskValue: $enableCompMaskValue,
+            compMaskValue: $compMaskValue,
+            enableCompMaskColor: $enableCompMaskColor,
+            compMaskColor: $compMaskColor,
+            enableCompMaskShape: $enableCompMaskShape,
+            enableCompMaskShapeWidth: $enableCompMaskShapeWidth,
+            compMaskShapeWidth: $compMaskShapeWidth,
+            enableCompMaskShapeHeight: $enableCompMaskShapeHeight,
+            compMaskShapeHeight: $compMaskShapeHeight
+          })
+
+        }
+
+        if (this.scrollShow >= 6){
+          CompImageEffectsBlocks({
+            enableCompBlurValue: $enableCompBlurValue,
+            compBlurValue: $compBlurValue,
+            enableCompBlurOptionsNumber1: $enableCompBlurOptionsNumber1,
+            compBlurOptionsNumber1: $compBlurOptionsNumber1,
+            enableCompBlurOptionsNumber2: $enableCompBlurOptionsNumber2,
+            compBlurOptionsNumber2: $compBlurOptionsNumber2,
+            enableCompShadowValueRadius: $enableCompShadowValueRadius,
+            compShadowValueRadius: $compShadowValueRadius,
+            enableCompShadowValueType: $enableCompShadowValueType,
+            compShadowValueType: $compShadowValueType,
+            enableCompShadowValueColor: $enableCompShadowValueColor,
+            compShadowValueColor: $compShadowValueColor,
+            enableCompShadowValueOffsetX: $enableCompShadowValueOffsetX,
+            compShadowValueOffsetX: $compShadowValueOffsetX,
+            enableCompShadowValueOffsetY: $enableCompShadowValueOffsetY,
+            compShadowValueOffsetY: $compShadowValueOffsetY,
+            enableCompShadowValueFill: $enableCompShadowValueFill,
+            compShadowValueFill: $compShadowValueFill,
+            enableCompGrayscale: $enableCompGrayscale,
+            compGrayscale: $compGrayscale,
+            enableCompBrightness: $enableCompBrightness,
+            compBrightness: $compBrightness,
+            enableCompSaturate: $enableCompSaturate,
+            compSaturate: $compSaturate,
+            enableCompContrast: $enableCompContrast,
+            compContrast: $compContrast,
+            enableCompInvert: $enableCompInvert,
+            compInvert: $compInvert,
+            enableCompSepia: $enableCompSepia,
+            compSepia: $compSepia,
+            enableCompHueRotate: $enableCompHueRotate,
+            compHueRotate: $compHueRotate,
+            enableCompColorBlend: $enableCompColorBlend,
+            compColorBlend: $compColorBlend,
+            enableCompLinearGradientBlurValue: $enableCompLinearGradientBlurValue,
+            compLinearGradientBlurValue: $compLinearGradientBlurValue,
+            enableCompLinearGradientBlurOptionsFractionStops: $enableCompLinearGradientBlurOptionsFractionStops,
+            compLinearGradientBlurOptionsFractionStops: $compLinearGradientBlurOptionsFractionStops,
+            enableCompLinearGradientBlurOptionsDirection: $enableCompLinearGradientBlurOptionsDirection,
+            compLinearGradientBlurOptionsDirection: $compLinearGradientBlurOptionsDirection,
+            enableCompRenderGroup: $enableCompRenderGroup,
+            compRenderGroup: $compRenderGroup,
+            enableCompBlendModeValue: $enableCompBlendModeValue,
+            compBlendModeValue: $compBlendModeValue,
+            enableCompBlendModeType: $enableCompBlendModeType,
+            compBlendModeType: $compBlendModeType,
+            enableCompUseShadowBatching: $enableCompUseShadowBatching,
+            compUseShadowBatching: $compUseShadowBatching,
+            enableCompSphericalEffect: $enableCompSphericalEffect,
+            compSphericalEffect: $compSphericalEffect,
+            enableCompLightUpEffect: $enableCompLightUpEffect,
+            compLightUpEffect: $compLightUpEffect,
+            enableCompPixelStretchEffectOptionsLeft: $enableCompPixelStretchEffectOptionsLeft,
+            compPixelStretchEffectOptionsLeft: $compPixelStretchEffectOptionsLeft,
+            enableCompPixelStretchEffectOptionsRight: $enableCompPixelStretchEffectOptionsRight,
+            compPixelStretchEffectOptionsRight: $compPixelStretchEffectOptionsRight,
+            enableCompPixelStretchEffectOptionsTop: $enableCompPixelStretchEffectOptionsTop,
+            compPixelStretchEffectOptionsTop: $compPixelStretchEffectOptionsTop,
+            enableCompPixelStretchEffectOptionsBottom: $enableCompPixelStretchEffectOptionsBottom,
+            compPixelStretchEffectOptionsBottom: $compPixelStretchEffectOptionsBottom,
+            enableCompFreeze: $enableCompFreeze,
+            compFreeze: $compFreeze
+          })
+        }
+
+        if (this.scrollShow >= 7){
+          //linearGradient
+          CompGradientColorBlocks({
+            enableCompLinearGradientAngle: $enableCompLinearGradientAngle,
+            compLinearGradientAngle: $compLinearGradientAngle,
+            enableCompLinearGradientDirection: $enableCompLinearGradientDirection,
+            compLinearGradientDirection: $compLinearGradientDirection,
+            enableCompLinearGradientColors1: $enableCompLinearGradientColors1,
+            compLinearGradientColors1: $compLinearGradientColors1,
+            enableCompLinearGradientColorsNumber1: $enableCompLinearGradientColorsNumber1,
+            compLinearGradientColorsNumber1: $compLinearGradientColorsNumber1,
+            enableCompLinearGradientColors2: $enableCompLinearGradientColors2,
+            compLinearGradientColors2: $compLinearGradientColors2,
+            enableCompLinearGradientColorsNumber2: $enableCompLinearGradientColorsNumber2,
+            compLinearGradientColorsNumber2: $compLinearGradientColorsNumber2,
+            enableCompLinearGradientRepeating: $enableCompLinearGradientRepeating,
+            compLinearGradientRepeating: $compLinearGradientRepeating,
+          })
+        }
+
+        if (this.scrollShow >= 8){
+          CompPopupControlBlocks({
+            enableCompBindPopupType: $enableCompBindPopupType,
+            compBindPopupType: $compBindPopupType,
+            handlePopup: $handlePopup,
+            enableCompPopupType: $enableCompPopupType,
+            compPopupType: $compPopupType,
+            enableCompBindPopupArrowOffset: $enableCompBindPopupArrowOffset,
+            compBindPopupArrowOffset: $compBindPopupArrowOffset,
+            enableCompBindPopupShowInSubWindow: $enableCompBindPopupShowInSubWindow,
+            compBindPopupShowInSubWindow: $compBindPopupShowInSubWindow,
+            enableCompBindPopupMaskType: $enableCompBindPopupMaskType,
+            compBindPopupMaskType: $compBindPopupMaskType,
+            enableCompBindPopupMaskBoolean: $enableCompBindPopupMaskBoolean,
+            compBindPopupMaskBoolean: $compBindPopupMaskBoolean,
+            enableCompBindPopupMaskColor: $enableCompBindPopupMaskColor,
+            compBindPopupMaskColor: $compBindPopupMaskColor,
+            enableCompBindPopupMessageOptionsTextColor: $enableCompBindPopupMessageOptionsTextColor,
+            compBindPopupMessageOptionsTextColor: $compBindPopupMessageOptionsTextColor,
+            enableCompBindPopupMessageOptionsFontSize: $enableCompBindPopupMessageOptionsFontSize,
+            compBindPopupMessageOptionsFontSize: $compBindPopupMessageOptionsFontSize,
+            enableCompBindPopupMessageOptionsFontWeight: $enableCompBindPopupMessageOptionsFontWeight,
+            compBindPopupMessageOptionsFontWeight: $compBindPopupMessageOptionsFontWeight,
+            enableCompBindPopupMessageOptionsFontStyle: $enableCompBindPopupMessageOptionsFontStyle,
+            compBindPopupMessageOptionsFontStyle: $compBindPopupMessageOptionsFontStyle,
+            enableCompBindPopupTargetSpace: $enableCompBindPopupTargetSpace,
+            compBindPopupTargetSpace: $compBindPopupTargetSpace,
+            enableCompBindPopupPlacement: $enableCompBindPopupPlacement,
+            compBindPopupPlacement: $compBindPopupPlacement,
+            enableCompBindPopupOffsetX: $enableCompBindPopupOffsetX,
+            compBindPopupOffsetX: $compBindPopupOffsetX,
+            enableCompBindPopupOffsetY: $enableCompBindPopupOffsetY,
+            compBindPopupOffsetY: $compBindPopupOffsetY,
+            enableCompBindPopupEnableArrow: $enableCompBindPopupEnableArrow,
+            compBindPopupEnableArrow: $compBindPopupEnableArrow,
+            enableCompBindPopupPopupColor: $enableCompBindPopupPopupColor,
+            compBindPopupPopupColor: $compBindPopupPopupColor,
+            enableCompBindPopupAutoCancel: $enableCompBindPopupAutoCancel,
+            compBindPopupAutoCancel: $compBindPopupAutoCancel,
+            enableCompBindPopupWidth: $enableCompBindPopupWidth,
+            compBindPopupWidth: $compBindPopupWidth,
+            enableCompBindPopupArrowPointPosition: $enableCompBindPopupArrowPointPosition,
+            compBindPopupArrowPointPosition: $compBindPopupArrowPointPosition,
+            enableCompBindPopupArrowWidth: $enableCompBindPopupArrowWidth,
+            compBindPopupArrowWidth: $compBindPopupArrowWidth,
+            enableCompBindPopupArrowHeight: $enableCompBindPopupArrowHeight,
+            compBindPopupArrowHeight: $compBindPopupArrowHeight,
+            enableCompBindPopupRadius: $enableCompBindPopupRadius,
+            compBindPopupRadius: $compBindPopupRadius,
+            enableCompBindPopupShadowType: $enableCompBindPopupShadowType,
+            compBindPopupShadowType: $compBindPopupShadowType,
+            enableCompBindPopupShadowStyle: $enableCompBindPopupShadowStyle,
+            compBindPopupShadowStyle: $compBindPopupShadowStyle,
+            enableCompBindPopupShadowOptionsRadius: $enableCompBindPopupShadowOptionsRadius,
+            compBindPopupShadowOptionsRadius: $compBindPopupShadowOptionsRadius,
+            enableCompBindPopupShadowOptionsType: $enableCompBindPopupShadowOptionsType,
+            compBindPopupShadowOptionsType: $compBindPopupShadowOptionsType,
+            enableCompBindPopupShadowOptionsColor: $enableCompBindPopupShadowOptionsColor,
+            compBindPopupShadowOptionsColor: $compBindPopupShadowOptionsColor,
+            enableCompBindPopupShadowOptionsOffsetX: $enableCompBindPopupShadowOptionsOffsetX,
+            compBindPopupShadowOptionsOffsetX: $compBindPopupShadowOptionsOffsetX,
+            enableCompBindPopupShadowOptionsOffsetY: $enableCompBindPopupShadowOptionsOffsetY,
+            compBindPopupShadowOptionsOffsetY: $compBindPopupShadowOptionsOffsetY,
+            enableCompBindPopupShadowOptionsFill: $enableCompBindPopupShadowOptionsFill,
+            compBindPopupShadowOptionsFill: $compBindPopupShadowOptionsFill,
+            enableCompBindPopupBackgroundBlurStyle: $enableCompBindPopupBackgroundBlurStyle,
+            compBindPopupBackgroundBlurStyle: $compBindPopupBackgroundBlurStyle,
+            enableTransitionTransitionEffect: $enableTransitionTransitionEffect,
+            transitionTransitionEffect: $transitionTransitionEffect,
+            enableCompBindPopupTransitionOpacity: $enableCompBindPopupTransitionOpacity,
+            compBindPopupTransitionOpacity: $compBindPopupTransitionOpacity,
+            enableCompBindPopupTransitionTranslateX: $enableCompBindPopupTransitionTranslateX,
+            compBindPopupTransitionTranslateX: $compBindPopupTransitionTranslateX,
+            enableCompBindPopupTransitionTranslateY: $enableCompBindPopupTransitionTranslateY,
+            compBindPopupTransitionTranslateY: $compBindPopupTransitionTranslateY,
+            enableCompBindPopupTransitionTranslateZ: $enableCompBindPopupTransitionTranslateZ,
+            compBindPopupTransitionTranslateZ: $compBindPopupTransitionTranslateZ,
+            enableCompBindPopupTransitionScaleX: $enableCompBindPopupTransitionScaleX,
+            compBindPopupTransitionScaleX: $compBindPopupTransitionScaleX,
+            enableCompBindPopupTransitionScaleY: $enableCompBindPopupTransitionScaleY,
+            compBindPopupTransitionScaleY: $compBindPopupTransitionScaleY,
+            enableCompBindPopupTransitionScaleZ: $enableCompBindPopupTransitionScaleZ,
+            compBindPopupTransitionScaleZ: $compBindPopupTransitionScaleZ,
+            enableCompBindPopupTransitionScaleCenterX: $enableCompBindPopupTransitionScaleCenterX,
+            compBindPopupTransitionScaleCenterX: $compBindPopupTransitionScaleCenterX,
+            enableCompBindPopupTransitionScaleCenterY: $enableCompBindPopupTransitionScaleCenterY,
+            compBindPopupTransitionScaleCenterY: $compBindPopupTransitionScaleCenterY,
+            enableCompBindPopupTransitionRotateX: $enableCompBindPopupTransitionRotateX,
+            compBindPopupTransitionRotateX: $compBindPopupTransitionRotateX,
+            enableCompBindPopupTransitionRotateY: $enableCompBindPopupTransitionRotateY,
+            compBindPopupTransitionRotateY: $compBindPopupTransitionRotateY,
+            enableCompBindPopupTransitionRotateZ: $enableCompBindPopupTransitionRotateZ,
+            compBindPopupTransitionRotateZ: $compBindPopupTransitionRotateZ,
+            enableCompBindPopupTransitionRotateAngle: $enableCompBindPopupTransitionRotateAngle,
+            compBindPopupTransitionRotateAngle: $compBindPopupTransitionRotateAngle,
+            enableCompBindPopupTransitionRotateCenterX: $enableCompBindPopupTransitionRotateCenterX,
+            compBindPopupTransitionRotateCenterX: $compBindPopupTransitionRotateCenterX,
+            enableCompBindPopupTransitionRotateCenterY: $enableCompBindPopupTransitionRotateCenterY,
+            compBindPopupTransitionRotateCenterY: $compBindPopupTransitionRotateCenterY,
+            enableCompBindPopupTransitionRotateCenterZ: $enableCompBindPopupTransitionRotateCenterZ,
+            compBindPopupTransitionRotateCenterZ: $compBindPopupTransitionRotateCenterZ,
+            enableCompBindPopupTransitionRotatePerspective: $enableCompBindPopupTransitionRotatePerspective,
+            compBindPopupTransitionRotatePerspective: $compBindPopupTransitionRotatePerspective,
+            enableCompBindPopupTransitionMove: $enableCompBindPopupTransitionMove,
+            compBindPopupTransitionMove: $compBindPopupTransitionMove,
+          })
+        }
+
+        if (this.scrollShow >= 9){
+          //bindMenu
+          CompMenuControlBlocks({
+            enableCompBindMenuStartIcon: $enableCompBindMenuStartIcon,
+            compBindMenuStartIcon: $compBindMenuStartIcon,
+            compBindMenuStartIconStr: $compBindMenuStartIconStr,
+            enableCompBindMenuEndIcon: $enableCompBindMenuEndIcon,
+            compBindMenuEndIcon: $compBindMenuEndIcon,
+            compBindMenuEndIconStr: $compBindMenuEndIconStr,
+            enableCompBindMenuSelect: $enableCompBindMenuSelect,
+            compBindMenuSelect: $compBindMenuSelect,
+            enableCompBindMenuSelect2: $enableCompBindMenuSelect2,
+            compBindMenuSelect2: $compBindMenuSelect2,
+            enableCompBindMenuSelect3: $enableCompBindMenuSelect3,
+            compBindMenuSelect3: $compBindMenuSelect3,
+            enableCompBindMenuSelect4: $enableCompBindMenuSelect4,
+            compBindMenuSelect4: $compBindMenuSelect4,
+            enableCompBindMenuDirection: $enableCompBindMenuDirection,
+            compBindMenuComDirection: $compBindMenuComDirection,
+            enableCompBindMenuSelectIcon: $enableCompBindMenuSelectIcon,
+            compBindMenuSelectIcon: $compBindMenuSelectIcon,
+            enableCompBindMenuSelectIcon2: $enableCompBindMenuSelectIcon2,
+            compBindMenuSelectIcon2: $compBindMenuSelectIcon2,
+            enableCompBindMenuSelectIcon3: $enableCompBindMenuSelectIcon3,
+            compBindMenuSelectIcon3: $compBindMenuSelectIcon3,
+            enableCompBindMenuSelectIcon4: $enableCompBindMenuSelectIcon4,
+            compBindMenuSelectIcon4: $compBindMenuSelectIcon4,
+            enableCompBindMenuMenuFontSize: $enableCompBindMenuMenuFontSize,
+            compBindMenuMenuFontSize: $compBindMenuMenuFontSize,
+            enableCompBindMenuMenuFontWeight: $enableCompBindMenuMenuFontWeight,
+            compBindMenuMenuFontWeight: $compBindMenuMenuFontWeight,
+            enableCompBindMenuMenuFontStyle: $enableCompBindMenuMenuFontStyle,
+            compBindMenuMenuFontStyle: $compBindMenuMenuFontStyle,
+            enableCompBindMenuMenuFontColor: $enableCompBindMenuMenuFontColor,
+            compBindMenuMenuFontColor: $compBindMenuMenuFontColor,
+            enableCompBindMenuMenuRadius: $enableCompBindMenuMenuRadius,
+            compBindMenuMenuRadius: $compBindMenuMenuRadius,
+            enableCompBindMenuMenuWidth: $enableCompBindMenuMenuWidth,
+            compBindMenuMenuWidth: $compBindMenuMenuWidth,
+            enableCompBindMenuMenuHeight: $enableCompBindMenuMenuHeight,
+            compBindMenuMenuHeight: $compBindMenuMenuHeight,
+            enableCompBindMenuMenuItemDividerStrokeWidth: $enableCompBindMenuMenuItemDividerStrokeWidth,
+            compBindMenuMenuItemDividerStrokeWidth: $compBindMenuMenuItemDividerStrokeWidth,
+            enableCompBindMenuMenuItemDividerColor: $enableCompBindMenuMenuItemDividerColor,
+            compBindMenuMenuItemDividerColor: $compBindMenuMenuItemDividerColor,
+            enableCompBindMenuMenuItemDividerStartMargin: $enableCompBindMenuMenuItemDividerStartMargin,
+            compBindMenuMenuItemDividerStartMargin: $compBindMenuMenuItemDividerStartMargin,
+            enableCompBindMenuMenuItemDividerEndMargin: $enableCompBindMenuMenuItemDividerEndMargin,
+            compBindMenuMenuItemDividerEndMargin: $compBindMenuMenuItemDividerEndMargin,
+            enableCompBindMenuMenuItemGroupDividerStrokeWidth: $enableCompBindMenuMenuItemGroupDividerStrokeWidth,
+            compBindMenuMenuItemGroupDividerStrokeWidth: $compBindMenuMenuItemGroupDividerStrokeWidth,
+            enableCompBindMenuMenuItemGroupDividerColor: $enableCompBindMenuMenuItemGroupDividerColor,
+            compBindMenuMenuItemGroupDividerColor: $compBindMenuMenuItemGroupDividerColor,
+            enableCompBindMenuMenuItemGroupDividerStartMargin: $enableCompBindMenuMenuItemGroupDividerStartMargin,
+            compBindMenuMenuItemGroupDividerStartMargin: $compBindMenuMenuItemGroupDividerStartMargin,
+            enableCompBindMenuMenuItemGroupDividerEndMargin: $enableCompBindMenuMenuItemGroupDividerEndMargin,
+            compBindMenuMenuItemGroupDividerEndMargin: $compBindMenuMenuItemGroupDividerEndMargin,
+            enableCompBindMenuSubMenuExpandingMode: $enableCompBindMenuSubMenuExpandingMode,
+            compBindMenuSubMenuExpandingMode: $compBindMenuSubMenuExpandingMode,
+            enableCompBindMenuMenuBackgroundColor: $enableCompBindMenuMenuBackgroundColor,
+            compBindMenuMenuBackgroundColor: $compBindMenuMenuBackgroundColor,
+            enableCompBindMenuMenuOpacity: $enableCompBindMenuMenuOpacity,
+            compBindMenuMenuOpacity: $compBindMenuMenuOpacity,
+            enableCompBindMenuMenuVisibility: $enableCompBindMenuMenuVisibility,
+            compBindMenuMenuVisibility: $compBindMenuMenuVisibility,
+            enableCompBindMenuMenuPadding: $enableCompBindMenuMenuPadding,
+            compBindMenuMenuPadding: $compBindMenuMenuPadding,
+            enableCompBindMenuMenuMargin: $enableCompBindMenuMenuMargin,
+            compBindMenuMenuMargin: $compBindMenuMenuMargin,
+          })
+        }
+
+        if (this.scrollShow >= 10){
+          //focusable
+          CompFocusControlBlocks({
+            enableCompFocusable: $enableCompFocusable,
+            compFocusable: $compFocusable,
+            enableCompDefaultFocus: $compDefaultFocus,
+            compDefaultFocus: $compDefaultFocus,
+            enableCompGroupDefaultFocus: $enableCompGroupDefaultFocus,
+            compGroupDefaultFocus: $compGroupDefaultFocus,
+            enableCompFocusOnTouch: $enableCompFocusOnTouch,
+            compFocusOnTouch: $compFocusOnTouch,
+            enableCompFocusBoxMargin: $enableCompFocusBoxMargin,
+            compFocusBoxMargin: $compFocusBoxMargin,
+            enableCompFocusBoxStrokeColor: $enableCompFocusBoxStrokeColor,
+            compFocusBoxStrokeColor: $compFocusBoxStrokeColor,
+            enableCompFocusBoxStrokeWidth: $enableCompFocusBoxStrokeWidth,
+            compFocusBoxStrokeWidth: $compFocusBoxStrokeWidth,
+            enableCompFocusScopePriorityScopeId: $enableCompFocusScopePriorityScopeId,
+            compFocusScopePriorityScopeId: $compFocusScopePriorityScopeId,
+            enableCompFocusScopePriorityPriority: $enableCompFocusScopePriorityPriority,
+            compFocusScopePriorityPriority: $compFocusScopePriorityPriority,
+            enableCompFocusScopeId: $enableCompFocusScopeId,
+            compFocusScopeId: $compFocusScopeId,
+            enableCompFocusScopeIdIsGroup: $enableCompFocusScopeIdIsGroup,
+            compFocusScopeIdIsGroup: $compFocusScopeIdIsGroup,
+          })
+
+          CompHoverEffectBlocks({
+            enableCompHoverEffect: $enableCompHoverEffect,
+            compHoverEffect: $compHoverEffect,
+          })
+
+          CompComponentIDBlocks({
+            enableCompId: $enableCompId,
+            compId: $compId,
+            enableCompKey: $enableCompKey,
+            compKey: $compKey,
+          })
+
+          CompReuseIDBlocks({
+            enableCompReuseId: $enableCompReuseId,
+            compReuseId: $compReuseId,
+          })
+
+          CompRestoreIdBlocks({
+            enableCompRestoreId: $enableCompRestoreId,
+            compRestoreId: $compRestoreId,
+          })
+        }
+
+        if (this.scrollShow >= 11){
+          CompForegroundEffectBlocks({
+            enableCompForegroundEffectRadius: $enableCompForegroundEffectRadius,
+            compForegroundEffectRadius: $compForegroundEffectRadius
+          })
+
+          CompForegroundBlurBlocks({
+            enableCompForegroundBlurStyleValue: $enableCompForegroundBlurStyleValue,
+            compForegroundBlurStyleValue: $compForegroundBlurStyleValue,
+            enableCompForegroundBlurStyleOptionsColorMode: $enableCompForegroundBlurStyleOptionsColorMode,
+            compForegroundBlurStyleOptionsColorMode: $compForegroundBlurStyleOptionsColorMode,
+            enableCompForegroundBlurStyleOptionsAdaptiveColor: $enableCompForegroundBlurStyleOptionsAdaptiveColor,
+            compForegroundBlurStyleOptionsAdaptiveColor: $compForegroundBlurStyleOptionsAdaptiveColor,
+            enableCompForegroundBlurStyleOptionsBlurOptions: $enableCompForegroundBlurStyleOptionsBlurOptions,
+            compForegroundBlurStyleOptionsBlurOptions: $compForegroundBlurStyleOptionsBlurOptions,
+            enableCompForegroundBlurStyleOptionsScale: $enableCompForegroundBlurStyleOptionsScale,
+            compForegroundBlurStyleOptionsScale: $compForegroundBlurStyleOptionsScale,
+          })
+
+          CompMotionBlurBlocks({
+            enableCompMotionBlurRadius: $enableCompMotionBlurRadius,
+            compMotionBlurRadius: $compMotionBlurRadius,
+            enableCompMotionBlurAnchorX: $enableCompMotionBlurAnchorX,
+            compMotionBlurAnchorX: $compMotionBlurAnchorX,
+            enableCompMotionBlurAnchorY: $enableCompMotionBlurAnchorY,
+            compMotionBlurAnchorY: $compMotionBlurAnchorY,
+          })
+
+          CompClickEffectBlocks({
+            enableCompClickEffect: $enableCompClickEffect,
+            compClickEffect: $compClickEffect,
+            enableCompClickEffectLevel: $enableCompClickEffectLevel,
+            compClickEffectLevel: $compClickEffectLevel,
+            enableCompClickEffectScale: $enableCompClickEffectScale,
+            compClickEffectScale: $compClickEffectScale,
+          })
+
+          CompAccessibilityBlocks({
+            enableCompAccessibilityGroup: $enableCompAccessibilityGroup,
+            compAccessibilityGroup: $compAccessibilityGroup,
+            enableCompAccessibilityText: $enableCompAccessibilityText,
+            compAccessibilityText: $compAccessibilityText,
+            enableCompAccessibilityDescription: $enableCompAccessibilityDescription,
+            compAccessibilityDescription: $compAccessibilityDescription,
+            enableCompAccessibilityLevel: $enableCompAccessibilityLevel,
+            compAccessibilityLevel: $compAccessibilityLevel,
+          })
+        }
+
+        if (this.scrollShow >= 12){
+          CompAttributeModifierBlocks({
+            enableCompAttributeModifier: $enableCompAttributeModifier,
+            compAttributeModifier: $compAttributeModifier,
+          })
+
+          CompForegroundEffectBlocks({
+            enableCompForegroundEffectRadius: $enableCompForegroundEffectRadius,
+            compForegroundEffectRadius: $compForegroundEffectRadius
+          })
+
+
+          CompForegroundBlurBlocks({
+            enableCompForegroundBlurStyleValue: $enableCompForegroundBlurStyleValue,
+            compForegroundBlurStyleValue: $compForegroundBlurStyleValue,
+            enableCompForegroundBlurStyleOptionsColorMode: $enableCompForegroundBlurStyleOptionsColorMode,
+            compForegroundBlurStyleOptionsColorMode: $compForegroundBlurStyleOptionsColorMode,
+            enableCompForegroundBlurStyleOptionsAdaptiveColor: $enableCompForegroundBlurStyleOptionsAdaptiveColor,
+            compForegroundBlurStyleOptionsAdaptiveColor: $compForegroundBlurStyleOptionsAdaptiveColor,
+            enableCompForegroundBlurStyleOptionsBlurOptions: $enableCompForegroundBlurStyleOptionsBlurOptions,
+            compForegroundBlurStyleOptionsBlurOptions: $compForegroundBlurStyleOptionsBlurOptions,
+            enableCompForegroundBlurStyleOptionsScale: $enableCompForegroundBlurStyleOptionsScale,
+            compForegroundBlurStyleOptionsScale: $compForegroundBlurStyleOptionsScale,
+          })
+
+          CompMotionBlurBlocks({
+            enableCompMotionBlurRadius: $enableCompMotionBlurRadius,
+            compMotionBlurRadius: $compMotionBlurRadius,
+            enableCompMotionBlurAnchorX: $enableCompMotionBlurAnchorX,
+            compMotionBlurAnchorX: $compMotionBlurAnchorX,
+            enableCompMotionBlurAnchorY: $enableCompMotionBlurAnchorY,
+            compMotionBlurAnchorY: $compMotionBlurAnchorY,
+          })
+
+          CompAccessibilityBlocks({
+            enableCompAccessibilityGroup: $enableCompAccessibilityGroup,
+            compAccessibilityGroup: $compAccessibilityGroup,
+            enableCompAccessibilityText: $enableCompAccessibilityText,
+            compAccessibilityText: $compAccessibilityText,
+            enableCompAccessibilityDescription: $enableCompAccessibilityDescription,
+            compAccessibilityDescription: $compAccessibilityDescription,
+            enableCompAccessibilityLevel: $enableCompAccessibilityLevel,
+            compAccessibilityLevel: $compAccessibilityLevel,
+          })
+
+          CompAttributeModifierBlocks({
+            enableCompAttributeModifier: $enableCompAttributeModifier,
+            compAttributeModifier: $compAttributeModifier,
+          })
+        }
+
+        if (this.scrollShow >= 13){
+          CompGestureModifierBlocks({
+            enableCompGestureModifier: $enableCompGestureModifier,
+            compGestureModifier: $compGestureModifier
+          })
+
+          CompOutlineBlocks({
+            enableCompOutlineValueWidth: $enableCompOutlineValueWidth,
+            compOutlineValueWidth: $compOutlineValueWidth,
+            enableCompOutlineValueColor: $enableCompOutlineValueColor,
+            compOutlineValueColor: $compOutlineValueColor,
+            enableCompOutlineValueRadius: $enableCompOutlineValueRadius,
+            compOutlineValueRadius: $compOutlineValueRadius,
+            enableCompOutlineValueStyle: $enableCompOutlineValueStyle,
+            compOutlineValueStyle: $compOutlineValueStyle
+          })
+
+          CompVisualEffectBlocks({
+            enableCompVisualEffect: $enableCompVisualEffect,
+            compVisualEffect: $compVisualEffect,
+            enableCompBackgroundFilter: $enableCompBackgroundFilter,
+            compBackgroundFilter: $compBackgroundFilter,
+            enableCompForegroundFilter: $enableCompForegroundFilter,
+            compForegroundFilter: $compForegroundFilter,
+            enableCompCompositingFilter: $enableCompCompositingFilter,
+            compCompositingFilter: $compCompositingFilter
+          })
+
+          CompTouchTargetBlocks({
+            enableCompResponseRegionValueX: $enableCompResponseRegionValueX,
+            compResponseRegionValueX: $compResponseRegionValueX,
+            enableCompResponseRegionValueY:
+            $enableCompResponseRegionValueY,
+            compResponseRegionValueY: $compResponseRegionValueY,
+            enableCompResponseRegionValueWidth: $enableCompResponseRegionValueWidth,
+            compResponseRegionValueWidth: $compResponseRegionValueWidth,
+            enableCompResponseRegionValueHeight: $enableCompResponseRegionValueHeight,
+            compResponseRegionValueHeight: $compResponseRegionValueHeight
+          })
+
+          CompHitTestControlBlocks({
+            enableCompHitTestBehavior: $enableCompHitTestBehavior,
+            compHitTestBehavior: $compHitTestBehavior
+          })
+        }
+
+        if (this.scrollShow >= 14){
+          CompModalTransitionBlocks({
+            enableCompBindContentCoverIsShow: $enableCompBindContentCoverIsShow,
+            compBindContentCoverIsShow: $compBindContentCoverIsShow,
+            enableCompBindContentCoverOptionsModalTransition: $enableCompBindContentCoverOptionsModalTransition,
+            compBindContentCoverOptionsModalTransition: $compBindContentCoverOptionsModalTransition,
+            enableCompBindContentCoverOptionsTransitionOpacity: $enableCompBindContentCoverOptionsTransitionOpacity,
+            compBindContentCoverOptionsTransitionOpacity: $compBindContentCoverOptionsTransitionOpacity,
+            enableCompBindContentCoverOptionsTransitionTranslateX:
+            $enableCompBindContentCoverOptionsTransitionTranslateX,
+            compBindContentCoverOptionsTransitionTranslateX: $compBindContentCoverOptionsTransitionTranslateX,
+            enableCompBindContentCoverOptionsTransitionTranslateY:
+            $enableCompBindContentCoverOptionsTransitionTranslateY,
+            compBindContentCoverOptionsTransitionTranslateY: $compBindContentCoverOptionsTransitionTranslateY,
+            enableCompBindContentCoverOptionsTransitionTranslateZ:
+            $enableCompBindContentCoverOptionsTransitionTranslateZ,
+            compBindContentCoverOptionsTransitionTranslateZ: $compBindContentCoverOptionsTransitionTranslateZ,
+            enableCompBindContentCoverOptionsTransitionScaleX: $enableCompBindContentCoverOptionsTransitionScaleX,
+            compBindContentCoverOptionsTransitionScaleX: $compBindContentCoverOptionsTransitionScaleX,
+            enableCompBindContentCoverOptionsTransitionScaleY: $enableCompBindContentCoverOptionsTransitionScaleY,
+            compBindContentCoverOptionsTransitionScaleY: $compBindContentCoverOptionsTransitionScaleY,
+            enableCompBindContentCoverOptionsTransitionScaleZ: $enableCompBindContentCoverOptionsTransitionScaleZ,
+            compBindContentCoverOptionsTransitionScaleZ: $compBindContentCoverOptionsTransitionScaleZ,
+            enableCompBindContentCoverOptionsTransitionScaleCenterX:
+            $enableCompBindContentCoverOptionsTransitionScaleCenterX,
+            compBindContentCoverOptionsTransitionScaleCenterX: $compBindContentCoverOptionsTransitionScaleCenterX,
+            enableCompBindContentCoverOptionsTransitionScaleCenterY:
+            $enableCompBindContentCoverOptionsTransitionScaleCenterY,
+            compBindContentCoverOptionsTransitionScaleCenterY: $compBindContentCoverOptionsTransitionScaleCenterY,
+            enableCompBindContentCoverOptionsTransitionRotateX: $enableCompBindContentCoverOptionsTransitionRotateX,
+            compBindContentCoverOptionsTransitionRotateX: $compBindContentCoverOptionsTransitionRotateX,
+            enableCompBindContentCoverOptionsTransitionRotateY: $enableCompBindContentCoverOptionsTransitionRotateY,
+            compBindContentCoverOptionsTransitionRotateY: $compBindContentCoverOptionsTransitionRotateY,
+            enableCompBindContentCoverOptionsTransitionRotateZ: $enableCompBindContentCoverOptionsTransitionRotateZ,
+            compBindContentCoverOptionsTransitionRotateZ: $compBindContentCoverOptionsTransitionRotateZ,
+            enableCompBindContentCoverOptionsTransitionRotateAngle:
+            $enableCompBindContentCoverOptionsTransitionRotateAngle,
+            compBindContentCoverOptionsTransitionRotateAngle: $compBindContentCoverOptionsTransitionRotateAngle,
+            enableCompBindContentCoverOptionsTransitionRotateCenterX:
+            $enableCompBindContentCoverOptionsTransitionRotateCenterX,
+            compBindContentCoverOptionsTransitionRotateCenterX: $compBindContentCoverOptionsTransitionRotateCenterX,
+            enableCompBindContentCoverOptionsTransitionRotateCenterY:
+            $enableCompBindContentCoverOptionsTransitionRotateCenterY,
+            compBindContentCoverOptionsTransitionRotateCenterY: $compBindContentCoverOptionsTransitionRotateCenterY,
+            enableCompBindContentCoverOptionsTransitionRotateCenterZ:
+            $enableCompBindContentCoverOptionsTransitionRotateCenterZ,
+            compBindContentCoverOptionsTransitionRotateCenterZ: $compBindContentCoverOptionsTransitionRotateCenterZ,
+            enableCompBindContentCoverOptionsTransitionRotatePerspective:
+            $enableCompBindContentCoverOptionsTransitionRotatePerspective,
+            compBindContentCoverOptionsTransitionRotatePerspective:
+            $compBindContentCoverOptionsTransitionRotatePerspective,
+            enableCompBindContentCoverOptionsTransitionMove: $enableCompBindContentCoverOptionsTransitionMove,
+            compBindContentCoverOptionsTransitionMove: $compBindContentCoverOptionsTransitionMove,
+            enableCompBindContentCoverOptionsTransitionAnimationDuration:
+            $enableCompBindContentCoverOptionsTransitionAnimationDuration,
+            compBindContentCoverOptionsTransitionAnimationDuration:
+            $compBindContentCoverOptionsTransitionAnimationDuration,
+            enableCompBindContentCoverOptionsTransitionAnimationTempo:
+            $enableCompBindContentCoverOptionsTransitionAnimationTempo,
+            compBindContentCoverOptionsTransitionAnimationTempo:
+            $compBindContentCoverOptionsTransitionAnimationTempo,
+            enableCompBindContentCoverOptionsTransitionAnimationCurve:
+            $enableCompBindContentCoverOptionsTransitionAnimationCurve,
+            compBindContentCoverOptionsTransitionAnimationCurve:
+            $compBindContentCoverOptionsTransitionAnimationCurve,
+            enableCompBindContentCoverOptionsTransitionAnimationDelay:
+            $enableCompBindContentCoverOptionsTransitionAnimationDelay,
+            compBindContentCoverOptionsTransitionAnimationDelay:
+            $compBindContentCoverOptionsTransitionAnimationDelay,
+            enableCompBindContentCoverOptionsTransitionAnimationIterations:
+            $enableCompBindContentCoverOptionsTransitionAnimationIterations,
+            compBindContentCoverOptionsTransitionAnimationIterations:
+            $compBindContentCoverOptionsTransitionAnimationIterations,
+            enableCompBindContentCoverOptionsTransitionAnimationPlayMode:
+            $enableCompBindContentCoverOptionsTransitionAnimationPlayMode,
+            compBindContentCoverOptionsTransitionAnimationPlayMode:
+            $compBindContentCoverOptionsTransitionAnimationPlayMode,
+            enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin:
+            $enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
+            compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin:
+            $compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMin,
+            enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax:
+            $enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax,
+            compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax:
+            $compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeMax,
+            enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected:
+            $enableCompBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected,
+            compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected:
+            $compBindContentCoverOptionsTransitionAnimationExpectedFrameRateRangeExpected
+          })
+        }
+
+        if (this.scrollShow >= 15){
+          CompSheetTransitionBlocks({
+            enableCompBindSheetIsShow: $enableCompBindSheetIsShow,
+            compBindSheetIsShow: $compBindSheetIsShow,
+            enableCompBindSheetOptionsHeight: $enableCompBindSheetOptionsHeight,
+            compBindSheetOptionsHeight: $compBindSheetOptionsHeight,
+            enableCompBindSheetOptionsDetents: $enableCompBindSheetOptionsDetents,
+            compBindSheetOptionsDetents: $compBindSheetOptionsDetents,
+            enableCompBindSheetOptionsPreferType: $enableCompBindSheetOptionsPreferType,
+            compBindSheetOptionsPreferType: $compBindSheetOptionsPreferType,
+            enableCompBindSheetOptionsShowClose: $enableCompBindSheetOptionsShowClose,
+            compBindSheetOptionsShowClose: $compBindSheetOptionsShowClose,
+            enableCompBindSheetOptionsDragBar: $enableCompBindSheetOptionsDragBar,
+            compBindSheetOptionsDragBar: $compBindSheetOptionsDragBar,
+            enableCompBindSheetOptionsBlurStyle: $enableCompBindSheetOptionsBlurStyle,
+            compBindSheetOptionsBlurStyle: $compBindSheetOptionsBlurStyle,
+            enableCompBindSheetOptionsMaskColor: $enableCompBindSheetOptionsMaskColor,
+            compBindSheetOptionsMaskColor: $compBindSheetOptionsMaskColor,
+            enableCompBindSheetOptionsTitleTitle: $enableCompBindSheetOptionsTitleTitle,
+            compBindSheetOptionsTitleTitle: $compBindSheetOptionsTitleTitle,
+            enableCompBindSheetOptionsTitleSubtitle: $enableCompBindSheetOptionsTitleSubtitle,
+            compBindSheetOptionsTitleSubtitle: $compBindSheetOptionsTitleSubtitle,
+            enableCompBindSheetOptionsEnableOutsideInteractive: $enableCompBindSheetOptionsEnableOutsideInteractive,
+            compBindSheetOptionsEnableOutsideInteractive: $compBindSheetOptionsEnableOutsideInteractive,
+            enableCompBindSheetOptionsBorderWidth: $enableCompBindSheetOptionsBorderWidth,
+            compBindSheetOptionsBorderWidth: $compBindSheetOptionsBorderWidth,
+            enableCompBindSheetOptionsBorderColor: $enableCompBindSheetOptionsBorderColor,
+            compBindSheetOptionsBorderColor: $compBindSheetOptionsBorderColor,
+            enableCompBindSheetOptionsBorderStyle: $enableCompBindSheetOptionsBorderStyle,
+            compBindSheetOptionsBorderStyle: $compBindSheetOptionsBorderStyle,
+            enableCompBindSheetOptionWidth: $enableCompBindSheetOptionWidth,
+            compBindSheetOptionsWidth: $compBindSheetOptionsWidth,
+            enableCompBindSheetOptionShadow: $enableCompBindSheetOptionShadow,
+            compBindSheetOptionShadow: $compBindSheetOptionShadow,
+            enableCompBindSheetOptionMode: $enableCompBindSheetOptionMode,
+            compBindSheetOptionMode: $compBindSheetOptionMode,
+            enableCompBindSheetOptionScrollSizeMode: $enableCompBindSheetOptionScrollSizeMode,
+            compBindSheetOptionScrollSizeMode: $compBindSheetOptionScrollSizeMode
+          })
+        }
+
+        if (this.scrollShow >= 16){
+          CompObscuringBlocks({
+            enableCompObscured: $enableCompObscured, compObscured: $compObscured
+          })
+
+          CompRenderFitBlocks({
+            enableCompRenderFit: $enableCompRenderFit, compRenderFit: $compRenderFit
+          })
+
+          CompEventMonopolizationBlocks({
+            enableCompMonopolizeEvents: $enableCompMonopolizeEvents,
+            compMonopolizeEvents: $enableCompMonopolizeEvents
+          })
+
+          CompCursorControlBlocks({
+            enableCompCursorControl: $enableCompCursorControl,
+            compCursorControl: $compCursorControl
+          })
+
+          RadioBlock({
+            title: 'useEffect',
+            isEnabled: $enableCompUseEffect,
+            value: $compUseEffect,
+            dataSource: [
+              { label: 'true', value: true },
+              { label: 'false', value: false },
+            ]
+          })
+        }
+
       }.width('100%')
+      .id('column')
     }
+    .id('scroll')
     .height('52%')
+    .onScrollStop(()=>{
+      let column:componentUtils.ComponentInfo = componentUtils.getRectangleById('column');
+      let scroll:componentUtils.ComponentInfo = componentUtils.getRectangleById('scroll');
+      if ((this.scroller.currentOffset().yOffset + px2vp(scroll.size.height))/px2vp(column.size.height) > 0.8) {
+        this.scrollShow++
+      }
+      console.info('scrollTest',this.scrollShow.toString())
+    })
   }
 }
 

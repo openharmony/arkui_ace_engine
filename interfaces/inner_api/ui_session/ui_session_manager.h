@@ -19,6 +19,7 @@
 #include <iremote_object.h>
 #include <map>
 #include <mutex>
+#include <shared_mutex>
 
 #include "ui_report_stub.h"
 #include "ui_session_json_util.h"

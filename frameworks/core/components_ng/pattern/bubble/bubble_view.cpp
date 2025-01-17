@@ -580,7 +580,7 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
     auto bubbleHub = popupNode->GetEventHub<BubbleEventHub>();
-    if (bubbleHub) {
+    if (bubbleHub && (!(param->GetIsPartialUpdate().has_value()))) {
         bubbleHub->SetOnStateChange(param->GetOnStateChange());
     }
     auto popupLayoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
@@ -666,10 +666,13 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
         }
     }
     RefPtr<BubblePattern> bubblePattern = popupNode->GetPattern<BubblePattern>();
-    bubblePattern->SetHasTransition(param->GetHasTransition());
     bubblePattern->SetAvoidKeyboard(param->GetKeyBoardAvoidMode() == PopupKeyboardAvoidMode::DEFAULT);
-    if (param->GetHasTransition()) {
-        popupNode->GetRenderContext()->UpdateChainedTransition(param->GetTransitionEffects());
+
+    if (!(param->GetIsPartialUpdate().has_value())) {
+        bubblePattern->SetHasTransition(param->GetHasTransition());
+        if (param->GetHasTransition()) {
+            popupNode->GetRenderContext()->UpdateChainedTransition(param->GetTransitionEffects());
+        }
     }
 }
 
@@ -679,10 +682,33 @@ void BubbleView::ResetBubbleProperty(int32_t popupId)
     CHECK_NULL_VOID(popupNode);
     auto popupLayoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
     CHECK_NULL_VOID(popupLayoutProp);
-    popupLayoutProp->Reset();
+    popupLayoutProp->ResetEnableArrow();
+    popupLayoutProp->ResetPlacement();
+    popupLayoutProp->ResetTargetSpace();
+    popupLayoutProp->ResetPositionOffset();
+    popupLayoutProp->ResetArrowHeight();
+    popupLayoutProp->ResetArrowWidth();
+    popupLayoutProp->ResetRadius();
+    popupLayoutProp->ResetFollowTransformOfTarget();
+
     auto popupPaintProp = popupNode->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(popupPaintProp);
-    popupPaintProp->Reset();
+    popupPaintProp->ResetAutoCancel();
+    popupPaintProp->ResetBackgroundColor();
+    popupPaintProp->ResetEnableArrow();
+    popupPaintProp->ResetMaskColor();
+    popupPaintProp->ResetPlacement();
+    popupPaintProp->ResetArrowOffset();
+
+    auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto renderContext = childNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->ResetBackShadow();
+    }
+    auto childLayoutProperty = childNode->GetLayoutProperty();
+    CHECK_NULL_VOID(childLayoutProperty);
+    childLayoutProperty->ClearUserDefinedIdealSize(true, false);
 }
 
 RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsUseCustom)

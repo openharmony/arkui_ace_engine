@@ -71,9 +71,7 @@ using CardViewPositionCallBack = std::function<void(int id, float offsetX, float
 using DragEventCallBack = std::function<void(const DragPointerEvent&, const DragEventAction&,
     const RefPtr<NG::FrameNode>&)>;
 using StopDragCallback = std::function<void()>;
-#ifdef SUPPORT_DIGITAL_CROWN
 using CrownEventCallback = std::function<bool(const CrownEvent&, const std::function<void()>&)>;
-#endif
 
 class ACE_FORCE_EXPORT Container : public virtual AceType {
     DECLARE_ACE_TYPE(Container, AceType);
@@ -327,6 +325,7 @@ public:
     static RefPtr<Container> GetActive();
     static RefPtr<Container> GetDefault();
     static RefPtr<Container> GetFoucsed();
+    static RefPtr<Container> GetByWindowId(uint32_t windowId);
     static RefPtr<TaskExecutor> CurrentTaskExecutor();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafely();
     static RefPtr<TaskExecutor> CurrentTaskExecutorSafelyWithCheck();
@@ -544,7 +543,7 @@ public:
      */
     static bool LessThanAPIVersion(PlatformVersion version)
     {
-        return static_cast<int32_t>(version) < 14
+        return static_cast<int32_t>(version) < 15
                    ? PipelineBase::GetCurrentContext() &&
                          PipelineBase::GetCurrentContext()->GetMinPlatformVersion() < static_cast<int32_t>(version)
                    : LessThanAPITargetVersion(version);
@@ -556,7 +555,7 @@ public:
      */
     static bool GreatOrEqualAPIVersion(PlatformVersion version)
     {
-        return static_cast<int32_t>(version) < 14
+        return static_cast<int32_t>(version) < 15
                    ? PipelineBase::GetCurrentContext() &&
                          PipelineBase::GetCurrentContext()->GetMinPlatformVersion() >= static_cast<int32_t>(version)
                    : GreatOrEqualAPITargetVersion(version);

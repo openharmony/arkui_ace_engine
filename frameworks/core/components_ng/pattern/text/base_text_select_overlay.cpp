@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/text/base_text_select_overlay.h"
 
+#include "base/utils/system_properties.h"
+#include "core/common/share/text_share_adapter.h"
 #include "core/components_ng/pattern/scrollable/nestable_scroll_container.h"
 #include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -23,6 +25,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t NO_NEED_RESTART_SINGLE_HANDLE = 100;
 constexpr FrameNodeChangeInfoFlag AVOID_KEYBOARD_END_FALG = 1 << 8;
+const char *SYSTEM_CAPABILITY_OF_SHARE = "SystemCapability.Collaboration.SystemShare";
 } // namespace
 void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
 {
@@ -1250,9 +1253,14 @@ void BaseTextSelectOverlay::OnHandleMarkInfoChange(
     }
     if ((flag & DIRTY_FIRST_HANDLE) == DIRTY_FIRST_HANDLE ||
         (flag & DIRTY_SECOND_HANDLE) == DIRTY_SECOND_HANDLE) {
-        if (isSupportMenuSearch_ && AllowSearch() &&
-            info->menuInfo.showSearch != IsNeedMenuSearch()) {
+        if (info->menuInfo.showSearch != (isSupportMenuSearch_ && AllowSearch() &&
+            IsNeedMenuSearch())) {
             info->menuInfo.showSearch = !info->menuInfo.showSearch;
+            manager->NotifyUpdateToolBar(true);
+        }
+        if (info->menuInfo.showShare != (IsSupportMenuShare() && AllowShare() &&
+            IsNeedMenuShare())) {
+            info->menuInfo.showShare = !info->menuInfo.showShare;
             manager->NotifyUpdateToolBar(true);
         }
     }
@@ -1273,12 +1281,42 @@ bool BaseTextSelectOverlay::IsNeedMenuSearch()
 
 void BaseTextSelectOverlay::HandleOnSearch()
 {
+    HideMenu(true);
     auto value = GetSelectedText();
     auto queryWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
     if (!queryWord.empty()) {
-        auto pipeline = PipelineBase::GetCurrentContext();
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(pipeline);
         pipeline->StartAbilityOnQuery(queryWord);
+    }
+}
+
+bool BaseTextSelectOverlay::IsSupportMenuShare()
+{
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        return false;
+    }
+    return SystemProperties::IsSyscapExist(SYSTEM_CAPABILITY_OF_SHARE);
+}
+
+bool BaseTextSelectOverlay::IsNeedMenuShare()
+{
+    auto shareContent = GetSelectedText();
+    return !std::regex_match(shareContent, std::regex("^\\s*$"));
+}
+
+void BaseTextSelectOverlay::HandleOnShare()
+{
+    HideMenu(true);
+    auto value = GetSelectedText();
+    auto shareWord = std::regex_replace(value, std::regex("^\\s+|\\s+$"), "");
+    if (!shareWord.empty()) {
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto containerId = pipeline->GetInstanceId();
+        auto contentRect = GetSelectArea();
+        TextShareAdapter::StartTextShareTask(containerId, contentRect, shareWord);
     }
 }
 
@@ -1380,7 +1418,7 @@ bool BaseTextSelectOverlay::IsHandleInParentSafeAreaPadding(const RectF& firstRe
         CHECK_NULL_RETURN(context, false);
         firstHandlePaint += context->GetPaintRectWithTransform().GetOffset();
         secondHandlePaint += context->GetPaintRectWithTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     return false;
 }

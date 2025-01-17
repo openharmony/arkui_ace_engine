@@ -63,6 +63,7 @@ void ScrollBarTestNg::SetUp() {}
 
 void ScrollBarTestNg::TearDown()
 {
+    RemoveFromStageNode();
     stackNode_ = nullptr;
     scrollNode_ = nullptr;
     scrollPattern_ = nullptr;

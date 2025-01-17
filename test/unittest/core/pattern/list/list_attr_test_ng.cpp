@@ -18,9 +18,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-class ListAttrTestNg : public ListTestNg {
-public:
-};
+class ListAttrTestNg : public ListTestNg {};
 
 /**
  * @tc.name: ListLayoutProperty001
@@ -364,11 +362,11 @@ HWTEST_F(ListAttrTestNg, AttrSpace002, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, AttrSpace003, TestSize.Level1)
 {
     /**
-     * @tc.cases: Set invalid space:LIST_HEIGHT
+     * @tc.cases: Set invalid space:HEIGHT
      * @tc.expected: Space was going to be zero
      */
     ListModelNG model = CreateList();
-    model.SetSpace(Dimension(LIST_HEIGHT));
+    model.SetSpace(Dimension(HEIGHT));
     CreateListItems(2);
     CreateDone();
     EXPECT_EQ(GetChildY(frameNode_, 1), GetChildHeight(frameNode_, 0));
@@ -430,11 +428,11 @@ HWTEST_F(ListAttrTestNg, AttrDivider002, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, AttrDivider003, TestSize.Level1)
 {
     /**
-     * @tc.cases: Set invalid strokeWidth:LIST_HEIGHT
+     * @tc.cases: Set invalid strokeWidth:HEIGHT
      * @tc.expected: strokeWidth was going to be zero
      */
     auto divider = ITEM_DIVIDER;
-    divider.strokeWidth = Dimension(LIST_HEIGHT);
+    divider.strokeWidth = Dimension(HEIGHT);
     ListModelNG model = CreateList();
     model.SetDivider(divider);
     CreateListItems(2);
@@ -638,12 +636,12 @@ HWTEST_F(ListAttrTestNg, AttrLanes001, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, AttrLanes002, TestSize.Level1)
 {
     /**
-     * @tc.cases: Set LaneMinLength half of LIST_WIDTH
+     * @tc.cases: Set LaneMinLength half of WIDTH
      * @tc.expected: Has two lanes
      */
     ListModelNG model = CreateList();
-    model.SetLaneMinLength(Dimension(LIST_WIDTH / 2 - 1));
-    model.SetLaneMaxLength(Dimension(LIST_WIDTH));
+    model.SetLaneMinLength(Dimension(WIDTH / 2 - 1));
+    model.SetLaneMaxLength(Dimension(WIDTH));
     CreateListItems(4);
     CreateDone();
     EXPECT_LT(GetChildX(frameNode_, 0), GetChildX(frameNode_, 1));
@@ -662,7 +660,7 @@ HWTEST_F(ListAttrTestNg, AttrLanes003, TestSize.Level1)
      * @tc.cases: Set LaneMinLength greater than LaneMaxLength
      * @tc.expected: Has two lanes, ignore LaneMaxLength
      */
-    const float minLaneLength = LIST_WIDTH / 2 - 1;
+    const float minLaneLength = WIDTH / 2 - 1;
     ListModelNG model = CreateList();
     model.SetLaneMinLength(Dimension(minLaneLength));
     model.SetLaneMaxLength(Dimension(minLaneLength - 1));
@@ -711,7 +709,7 @@ HWTEST_F(ListAttrTestNg, AttrLanes005, TestSize.Level1)
     model.SetLaneGutter(laneGutter);
     CreateListItems(2);
     CreateDone();
-    double gutter = laneGutter.ConvertToPxWithSize(LIST_WIDTH);
+    double gutter = laneGutter.ConvertToPxWithSize(WIDTH);
     EXPECT_EQ(GetChildX(frameNode_, 1), GetChildWidth(frameNode_, 0) + gutter);
 }
 
@@ -743,10 +741,10 @@ HWTEST_F(ListAttrTestNg, AttrLanes006, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, AttrAlignListItem001, TestSize.Level1)
 {
     /**
-     * @tc.cases: case1. Set item width smaller than LIST_WIDTH
+     * @tc.cases: case1. Set item width smaller than WIDTH
      * @tc.expected: the item default is align to start
      */
-    const float itemWidth = LIST_WIDTH / 2;
+    const float itemWidth = WIDTH / 2;
     ListModelNG model = CreateList();
     CreateListItem();
     ViewAbstract::SetWidth(CalcLength(itemWidth));
@@ -759,7 +757,7 @@ HWTEST_F(ListAttrTestNg, AttrAlignListItem001, TestSize.Level1)
      */
     layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
     FlushUITasks();
-    EXPECT_EQ(GetChildX(frameNode_, 0), (LIST_WIDTH - itemWidth) / 2);
+    EXPECT_EQ(GetChildX(frameNode_, 0), (WIDTH - itemWidth) / 2);
 
     /**
      * @tc.cases: case3. Set ListItemAlign::END
@@ -767,7 +765,7 @@ HWTEST_F(ListAttrTestNg, AttrAlignListItem001, TestSize.Level1)
      */
     layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::END);
     FlushUITasks();
-    EXPECT_EQ(GetChildX(frameNode_, 0), LIST_WIDTH - itemWidth);
+    EXPECT_EQ(GetChildX(frameNode_, 0), WIDTH - itemWidth);
 }
 
 /**
@@ -778,16 +776,16 @@ HWTEST_F(ListAttrTestNg, AttrAlignListItem001, TestSize.Level1)
 HWTEST_F(ListAttrTestNg, AttrAlignListItem002, TestSize.Level1)
 {
     /**
-     * @tc.cases: case1. Set item width smaller than LIST_WIDTH
+     * @tc.cases: case1. Set item width smaller than WIDTH
      * @tc.expected: the item default is align to start
      */
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    const float itemWidth = LIST_WIDTH / 2;
+    const float itemWidth = WIDTH / 2;
     CreateList();
     CreateListItem();
     ViewAbstract::SetWidth(CalcLength(itemWidth));
     CreateDone();
-    EXPECT_EQ(GetChildX(frameNode_, 0), LIST_WIDTH - itemWidth);
+    EXPECT_EQ(GetChildX(frameNode_, 0), WIDTH - itemWidth);
 
     /**
      * @tc.cases: case2. Set ListItemAlign::CENTER
@@ -795,7 +793,7 @@ HWTEST_F(ListAttrTestNg, AttrAlignListItem002, TestSize.Level1)
      */
     layoutProperty_->UpdateListItemAlign(V2::ListItemAlign::CENTER);
     FlushUITasks();
-    EXPECT_EQ(GetChildX(frameNode_, 0), (LIST_WIDTH - itemWidth) / 2);
+    EXPECT_EQ(GetChildX(frameNode_, 0), (WIDTH - itemWidth) / 2);
 
     /**
      * @tc.cases: case3. Set ListItemAlign::END

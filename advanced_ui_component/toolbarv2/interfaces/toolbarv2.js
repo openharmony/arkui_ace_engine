@@ -390,6 +390,7 @@ export class ToolBarV2 extends ViewV2 {
       });
       Column.opacity(this.toolBarList[e49]?.state !== ToolBarV2ItemState.DISABLE ? 1 : 0.4);
       Column.enabled(this.toolBarList[e49]?.state !== ToolBarV2ItemState.DISABLE);
+      Column.accessibilityGroup(true);
       Column.accessibilityText(this.toStringFormat(this.toolBarList[e49]?.accessibilityText) ??
       this.toStringFormat(this.toolBarList[e49]?.content?.text));
       Column.accessibilityDescription(this.toStringFormat(this.toolBarList[e49]?.accessibilityDescription) ?? '');
@@ -465,7 +466,7 @@ export class ToolBarV2 extends ViewV2 {
   itemCardDialogBuilder(h, i, j = null) {
     this.observeComponentCreation2((x, y) => {
       If.create();
-      if (h.content) {
+      if (h.content && h.content.text) {
         this.ifElseBranchUpdateFunction(0, () => {
           this.observeComponentCreation2((r1, s1) => {
             Column.create();

@@ -19,6 +19,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -55,6 +56,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(hostNode);
     auto dialogPattern = hostNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
+    auto parent = hostNode->GetParent();
     expandDisplay_ = dialogTheme->GetExpandDisplay() || dialogPattern->IsShowInFreeMultiWindow();
     keyboardAvoidMode_ = dialogPattern->GetDialogProperties().keyboardAvoidMode;
     keyboardAvoidDistance_ = dialogPattern->GetDialogProperties().keyboardAvoidDistance;
@@ -86,7 +88,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (isSuitableForElderly_ || GreatOrEqual(dialogContext->GetFontScale(), 1.75f)) {
         dialogPattern->UpdateDeviceOrientation(SystemProperties::GetDeviceOrientation());
     }
-    UpdateSafeArea();
+    UpdateSafeArea(hostNode);
     isShowInFloatingWindow_ = dialogPattern->IsShowInFloatingWindow();
     ResizeDialogSubwindow(expandDisplay_, isShowInSubWindow_, isShowInFloatingWindow_);
     const auto& layoutConstraint = dialogProp->GetLayoutConstraint();
@@ -94,6 +96,10 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     OptionalSizeF realSize;
     // dialog size fit screen.
     realSize.UpdateIllegalSizeWithCheck(parentIdealSize);
+    if (!realSize.IsValid() && parent &&
+        (parent->GetTag() == V2::PAGE_ETS_TAG || parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG)) {
+        realSize.UpdateIllegalSizeWithCheck(layoutConstraint->maxSize);
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(realSize.ConvertToSizeT());
     layoutWrapper->GetGeometryNode()->SetContentSize(realSize.ConvertToSizeT());
     // update child layout constraint
@@ -889,7 +895,6 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
         }
     }
     auto childOffset = topLeftPoint + dialogOffset;
-
     auto manager = pipelineContext->GetSafeAreaManager();
     auto keyboardInsert = manager->GetKeyboardInset();
     auto childBottom = childOffset.GetY() + childSize.Height();
@@ -913,7 +918,7 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     return childOffset;
 }
 
-void DialogLayoutAlgorithm::UpdateSafeArea()
+void DialogLayoutAlgorithm::UpdateSafeArea(const RefPtr<FrameNode>& frameNode)
 {
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
@@ -924,11 +929,7 @@ void DialogLayoutAlgorithm::UpdateSafeArea()
         CHECK_NULL_VOID(container);
         ContainerScope scope(currentId);
     }
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContext);
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    CHECK_NULL_VOID(context);
-    safeAreaInsets_ = context->GetSafeAreaWithoutProcess();
+    safeAreaInsets_ = OverlayManager::GetSafeAreaInsets(frameNode);
     if (isHoverMode_) {
         auto displayInfo = container->GetDisplayInfo();
         CHECK_NULL_VOID(displayInfo);

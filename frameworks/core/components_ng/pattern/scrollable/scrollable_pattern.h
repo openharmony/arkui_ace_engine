@@ -822,13 +822,13 @@ public:
         return crownSensitivity_;
     }
 #endif
-protected:
-    void SuggestOpIncGroup(bool flag);
-    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {
         return DisplayMode::AUTO;
     }
+protected:
+    void SuggestOpIncGroup(bool flag);
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     RefPtr<ScrollBar> GetScrollBar() const
     {
         return scrollBar_;

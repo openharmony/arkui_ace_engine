@@ -525,14 +525,14 @@ public:
         return followTransformOfTarget_;
     }
 
+    std::optional<bool> GetIsPartialUpdate() const
+    {
+        return isPartialUpdate_;
+    }
+
     void SetIsPartialUpdate(bool isPartialUpdate)
     {
         isPartialUpdate_ = isPartialUpdate;
-    }
-
-    bool IsPartialUpdate() const
-    {
-        return isPartialUpdate_;
     }
 
 private:
@@ -552,7 +552,7 @@ private:
     bool isCaretMode_ = true;
     bool enableHoverMode_ = false;
     bool followTransformOfTarget_ = false;
-    bool isPartialUpdate_ = false;
+    std::optional<bool> isPartialUpdate_;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;

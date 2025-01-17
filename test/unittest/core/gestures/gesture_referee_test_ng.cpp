@@ -1844,28 +1844,6 @@ HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest031, TestSize.Le
 }
 
 /**
- * @tc.name: GestureRefereeOnAcceptGestureTest032
- * @tc.desc: Test GestureReferee OnAcceptGesture function
- */
-HWTEST_F(GestureRefereeTestNg, GestureRefereeOnAcceptGestureTest032, TestSize.Level1)
-{
-    auto container = Container::Current();
-    auto pipelineContext = container->GetPipelineContext();
-    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
-    PanDirection panDirection;
-    panDirection.type = PanDirection::VERTICAL;
-    auto panRecognizer = AceType::MakeRefPtr<PanRecognizer>(1, panDirection, 0);
-    std::vector<RefPtr<NGGestureRecognizer>> recognizers { panRecognizer };
-    auto test = AceType::MakeRefPtr<SequencedRecognizer>(recognizers);
-    auto gesture = AceType::MakeRefPtr<NG::GestureReferee>();
-    auto Ngg = AceType::DynamicCast<NG::NGGestureRecognizer>(test);
-    RefPtr<GestureScope> gestureScope = AceType::MakeRefPtr<GestureScope>(0);
-    gestureScope->recognizers_.emplace_back(Ngg);
-    gestureScope->recognizers_.emplace_back(nullptr);
-    gestureScope->CheckRecognizerState();
-}
-
-/**
  * @tc.name: GestureRefereeOnAcceptGestureTest033
  * @tc.desc: Test GestureReferee OnAcceptGesture function
  */

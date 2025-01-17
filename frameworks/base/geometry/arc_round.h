@@ -46,6 +46,7 @@ public:
     Point GetEndPoint() const;
     void SetOuterRadius(float outerRadius);
     void SetWidth(float width);
+    double Get2PIRadians(double radian) const;
     bool IsInRegion(const Point& point) const;
 
     const Point& GetCenterPoint() const

@@ -520,7 +520,7 @@ void SpanString::SetSpanMap(std::unordered_map<SpanType, std::list<RefPtr<SpanBa
 
 const std::string SpanString::GetString() const
 {
-    return UtfUtils::Str16ToStr8(text_);
+    return UtfUtils::Str16DebugToStr8(text_);
 }
 
 const std::u16string& SpanString::GetU16string() const
@@ -538,13 +538,21 @@ bool SpanString::IsEqualToSpanString(const RefPtr<SpanString>& other) const
     return *this == *other;
 }
 
-RefPtr<SpanString> SpanString::GetSubSpanString(int32_t start, int32_t length) const
+RefPtr<SpanString> SpanString::GetSubSpanString(int32_t start, int32_t length, bool includeStartHalf,
+    bool includeEndHalf, bool rangeNeedNotChange) const
 {
     if (!CheckRange(start, length)) {
         RefPtr<SpanString> span = AceType::MakeRefPtr<SpanString>(u"");
         return span;
     }
     int32_t end = start + length;
+    if (!rangeNeedNotChange) {
+        TextEmojiSubStringRange range = TextEmojiProcessor::CalSubU16stringRange(
+            start, end - start, text_, includeStartHalf, includeEndHalf);
+        start = range.startIndex;
+        end = range.endIndex;
+        length = end - start;
+    }
     RefPtr<SpanString> span =
         AceType::MakeRefPtr<SpanString>(text_.substr(start, length));
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> subMap;
@@ -864,7 +872,7 @@ bool SpanString::EncodeTlv(std::vector<uint8_t>& buff)
         spanItem->EncodeTlv(buff);
     }
     TLVUtil::WriteUint8(buff, TLV_SPAN_STRING_CONTENT);
-    TLVUtil::WriteString(buff, UtfUtils::Str16ToStr8(text_));
+    TLVUtil::WriteString(buff, UtfUtils::Str16DebugToStr8(text_));
     TLVUtil::WriteUint8(buff, TLV_END);
     return true;
 }
@@ -885,7 +893,7 @@ void SpanString::DecodeTlvExt(std::vector<uint8_t>& buff, SpanString* spanString
     for (uint8_t tag = TLVUtil::ReadUint8(buff, cursor); tag != TLV_END; tag = TLVUtil::ReadUint8(buff, cursor)) {
         switch (tag) {
             case TLV_SPAN_STRING_CONTENT: {
-                auto str = UtfUtils::Str8ToStr16(TLVUtil::ReadString(buff, cursor));
+                auto str = UtfUtils::Str8DebugToStr16(TLVUtil::ReadString(buff, cursor));
                 spanString->SetString(str);
                 break;
             }
@@ -962,7 +970,7 @@ std::string SpanString::ToString()
     std::stringstream ss;
     for (auto span: spans_) {
         ss << "Get spanItem [" << span->interval.first << ":"
-            << span->interval.second << "] " << UtfUtils::Str16ToStr8(span->content) << std::endl;
+            << span->interval.second << "] " << UtfUtils::Str16DebugToStr8(span->content) << std::endl;
     }
     for (auto& iter : spansMap_) {
         auto spans = spansMap_[iter.first];

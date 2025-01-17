@@ -38,6 +38,8 @@ public:
     virtual ~TimePickerModel() = default;
 
     virtual void CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool hasSecond = false) = 0;
+    virtual void SetStartTime(const PickerTime& value) = 0;
+    virtual void SetEndTime(const PickerTime& value) = 0;
     virtual void SetSelectedTime(const PickerTime& value) = 0;
     virtual void SetOnChange(ChangeEvent&& onChange) = 0;
     virtual void SetOnEnterSelectedArea(ChangeEvent&& onEnterSelectedArea) = 0;
@@ -59,7 +61,7 @@ public:
 
 private:
     static std::unique_ptr<TimePickerModel> timePickerInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 
 class TimePickerDialogModel {
@@ -75,7 +77,7 @@ public:
 
 private:
     static std::unique_ptr<TimePickerDialogModel> timePickerDialogInstance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TIME_PICKER_TIME_PICKER_MODEL_H

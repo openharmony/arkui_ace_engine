@@ -505,7 +505,6 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern014, TestSize.Level1)
     indicatorPattern->isPressed_ = false;
     indicatorPattern->isClicked_ = true;
     indicatorPattern->isRepeatClicked_ = false;
-    indicatorPattern->swiperIndicatorType_ = SwiperIndicatorType::DOT;
     /**
      * @tc.steps: step2. call the function DumpAdvanceInfo.
      * @tc.expected: verify the size dumped correctly.
@@ -522,7 +521,6 @@ HWTEST_F(SwiperIndicatorCommon, SwiperIndicatorPattern014, TestSize.Level1)
     indicatorPattern->isPressed_ = true;
     indicatorPattern->isClicked_ = false;
     indicatorPattern->isRepeatClicked_ = true;
-    indicatorPattern->swiperIndicatorType_ = SwiperIndicatorType::DIGIT;
     indicatorPattern->DumpAdvanceInfo();
     EXPECT_EQ(DumpLog::GetInstance().description_.size(), 5);
 }

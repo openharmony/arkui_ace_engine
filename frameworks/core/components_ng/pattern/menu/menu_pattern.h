@@ -376,9 +376,9 @@ public:
         return hasAnimation_;
     }
 
-    void SetSubMenuShow()
+    void SetSubMenuShow(bool subMenuShowed)
     {
-        isSubMenuShow_ = true;
+        isSubMenuShow_ = subMenuShowed;
     }
 
     void SetMenuShow()
@@ -521,16 +521,6 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
-    void SetHoverMode(bool enableFold)
-    {
-        enableFold_ = enableFold;
-    }
-
-    bool GetHoverMode() const
-    {
-        return enableFold_.value_or(false);
-    }
-
     void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
 
     RefPtr<FrameNode> GetLastSelectedItem()
@@ -594,7 +584,6 @@ public:
         return pathParams_;
     }
     void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
-
 
     float GetSelectMenuWidthFromTheme() const;
 
@@ -731,7 +720,6 @@ private:
     RectF previewRect_;
     SizeF previewIdealSize_;
     OffsetF statusOriginOffset_;
-    std::optional<bool> enableFold_;
 
     WeakPtr<FrameNode> builderNode_;
     bool isWidthModifiedBySelect_ = false;

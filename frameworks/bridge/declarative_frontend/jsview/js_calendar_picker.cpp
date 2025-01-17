@@ -32,23 +32,22 @@
 
 namespace OHOS::Ace {
 std::unique_ptr<CalendarPickerModel> CalendarPickerModel::instance_ = nullptr;
-std::mutex CalendarPickerModel::mutex_;
+std::once_flag CalendarPickerModel::onceFlag_;
+
 CalendarPickerModel* CalendarPickerModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
+    std::call_once(onceFlag_, []() {
 #ifdef NG_BUILD
-            instance_.reset(new NG::CalendarPickerModelNG());
+        instance_.reset(new NG::CalendarPickerModelNG());
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::CalendarPickerModelNG());
-            } else {
-                instance_.reset(new Framework::CalendarPickerModelImpl());
-            }
-#endif
+        if (Container::IsCurrentUseNewPipeline()) {
+            instance_.reset(new NG::CalendarPickerModelNG());
+        } else {
+            instance_.reset(new Framework::CalendarPickerModelImpl());
         }
-    }
+#endif
+    });
+
     return instance_.get();
 }
 } // namespace OHOS::Ace
@@ -449,16 +448,18 @@ void JSCalendarPicker::Create(const JSCallbackInfo& info)
                 settingData.selectedDate = parseSelectedDate;
             }
         }
-        auto startDate = obj->GetProperty("start");
-        auto endDate = obj->GetProperty("end");
-        auto parseStartDate = ParseDate(startDate, false);
-        auto parseEndDate = ParseDate(endDate, false);
-        if (parseEndDate.GetYear() > 0 && parseStartDate.ToDays() > parseEndDate.ToDays()) {
-            parseStartDate = PickerDate();
-            parseEndDate = PickerDate();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            auto startDate = obj->GetProperty("start");
+            auto endDate = obj->GetProperty("end");
+            auto parseStartDate = ParseDate(startDate, false);
+            auto parseEndDate = ParseDate(endDate, false);
+            if (parseEndDate.GetYear() > 0 && parseStartDate.ToDays() > parseEndDate.ToDays()) {
+                parseStartDate = PickerDate();
+                parseEndDate = PickerDate();
+            }
+            settingData.startDate = parseStartDate;
+            settingData.endDate = parseEndDate;
         }
-        settingData.startDate = parseStartDate;
-        settingData.endDate = parseEndDate;
     } else {
         dayRadius = calendarTheme->GetCalendarDayRadius();
     }
@@ -739,19 +740,23 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     CHECK_NULL_VOID(theme);
     auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>();
     NG::CalendarSettingData settingData;
-    auto startDate = paramObj->GetProperty("start");
-    auto endDate = paramObj->GetProperty("end");
-    auto parseStartDate = ParseDate(startDate);
-    auto parseEndDate = ParseDate(endDate);
-    if (parseEndDate.GetYear() > 0 && parseStartDate.ToDays() > parseEndDate.ToDays()) {
-        parseStartDate = PickerDate();
-        parseEndDate = PickerDate();
-    }
-    settingData.startDate = parseStartDate;
-    settingData.endDate = parseEndDate;
     auto selectedDate = paramObj->GetProperty("selected");
     auto parseSelectedDate = ParseDate(selectedDate, true);
-    parseSelectedDate = PickerDate::AdjustDateToRange(parseSelectedDate, parseStartDate, parseEndDate);
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        auto startDate = paramObj->GetProperty("start");
+        auto endDate = paramObj->GetProperty("end");
+        auto parseStartDate = ParseDate(startDate);
+        auto parseEndDate = ParseDate(endDate);
+        if (parseEndDate.GetYear() > 0 && parseStartDate.ToDays() > parseEndDate.ToDays()) {
+            parseStartDate = PickerDate();
+            parseEndDate = PickerDate();
+        }
+        settingData.startDate = parseStartDate;
+        settingData.endDate = parseEndDate;
+        parseSelectedDate = PickerDate::AdjustDateToRange(parseSelectedDate, parseStartDate, parseEndDate);
+    }
+
     if (parseSelectedDate.GetYear() != 0) {
         settingData.selectedDate = parseSelectedDate;
     }
@@ -807,6 +812,7 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
             overlayManager->ShowCalendarDialog(
                 properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker");
+        TaskExecutor::TaskType::UI, "ArkUIDialogShowCalendarPicker",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 } // namespace OHOS::Ace::Framework

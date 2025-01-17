@@ -106,10 +106,10 @@ export function ContainersDestination(name: string, route: Route) {
     SwiperBootcamp({ title: route.label })
   } else if (name === 'containers/refresh') {
     RefreshBootcamp({ title: route.label })
-  }else if (name === 'containers/gridRow') {
+  } else if (name === 'containers/gridRow') {
     GridRowBootcamp({ title: route.label })
-  } else if (name === 'containers/gridItem'){
-    GridItemBootcamp({ title: route.label})
+  } else if (name === 'containers/gridItem') {
+    GridItemBootcamp({ title: route.label })
   } else if (name === 'containers/folder-stack') {
     FolderStackBootcamp({ title: route.label })
   } else if (name === 'containers/rowSplit') {

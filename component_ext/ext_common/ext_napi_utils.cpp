@@ -301,7 +301,7 @@ bool ExtNapiUtils::ParseColorFromResource(napi_env env, napi_value value, Color&
 
     napi_value jsColorId = ExtNapiUtils::GetNamedProperty(env, value, "id");
     napi_value jsParams = ExtNapiUtils::GetNamedProperty(env, value, "params");
-    uint32_t colorId = ExtNapiUtils::GetCInt32(env, jsColorId);
+    uint32_t colorId = static_cast<uint32_t>(ExtNapiUtils::GetCInt32(env, jsColorId));
     if (!ExtNapiUtils::IsArray(env, jsParams)) {
         return false;
     }
@@ -315,8 +315,8 @@ bool ExtNapiUtils::ParseColorFromResource(napi_env env, napi_value value, Color&
             std::string key = std::to_string(i);
             jsonArray->Put(key.c_str(), PutJsonValue(env, elementValue, key));
         }
-        const char* jsonKey = std::to_string(0).c_str();
-        std::string colorName = jsonArray->GetValue(jsonKey)->GetValue(jsonKey)->ToString();
+        std::string strKey = std::to_string(0);
+        std::string colorName = jsonArray->GetValue(strKey.c_str())->GetValue(strKey.c_str())->ToString();
         colorResult = themeConstants->GetColorByName(colorName);
         return true;
     }

@@ -54,6 +54,7 @@
 #include "core/interfaces/native/node/node_gesture_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_image_span_modifier.h"
+#include "core/interfaces/native/node/node_indicator_modifier.h"
 #include "core/interfaces/native/node/node_list_item_group_modifier.h"
 #include "core/interfaces/native/node/node_list_item_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
@@ -202,11 +203,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCalendarPickerModifier = nullptr,
     #endif
         .getTextInputModifier = NodeModifier::GetTextInputModifier,
-    #ifndef ARKUI_WEARABLE
         .getTabsModifier = NodeModifier::GetTabsModifier,
-    #else
-        .getTabsModifier = nullptr,
-    #endif
     #ifndef ARKUI_WEARABLE
         .getStepperItemModifier = NodeModifier::GetStepperItemModifier,
     #else
@@ -265,11 +262,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getFlexModifier = NodeModifier::GetFlexModifier, // FlexModifier
         .getScrollBarModifier = NodeModifier::GetScrollBarModifier, // ScrollBarModifier
         .getScrollerModifier = NodeModifier::GetScrollerModifier,
-    #ifndef ARKUI_WEARABLE
         .getTabContentModifier = NodeModifier::GetTabContentModifier,
-    #else
-        .getTabContentModifier = nullptr,
-    #endif
         .getTabsControllerModifier = nullptr, // TabsControllerModifier
         .getSwiperControllerModifier = NodeModifier::GetSwiperControllerModifier,
         .getGestureModifier = NodeModifier::GetGestureModifier, // GestureModifier
@@ -302,8 +295,9 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCustomNodeExtModifier = nullptr,
         .getThemeModifier = NodeModifier::GetThemeModifier,
         .getLinearIndicatorModifier = NodeModifier::GetLinearIndicatorModifier,
+        .getIndicatorComponentModifier = NodeModifier::GetIndicatorComponentModifier,
     };
-    CHECK_INITIALIZED_FIELDS_END(impl, 16, 0, 0); // don't move this line
+    CHECK_INITIALIZED_FIELDS_END(impl, 14, 0, 0); // don't move this line.  14: ifdef count.
     return &impl;
 }
 
@@ -383,11 +377,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getCalendarPickerModifier = nullptr,
     #endif
         .getTextInputModifier = NodeModifier::GetCJUITextInputModifier,
-    #ifndef ARKUI_WEARABLE
         .getTabsModifier = NodeModifier::GetCJUITabsModifier,
-    #else
-        .getTabsModifier = nullptr,
-    #endif
     #ifndef ARKUI_WEARABLE
         .getStepperItemModifier = NodeModifier::GetCJUIStepperItemModifier,
     #else
@@ -449,11 +439,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getFlexModifier = NodeModifier::GetCJUIFlexModifier, // FlexModifier
         .getScrollBarModifier = NodeModifier::GetCJUIScrollBarModifier, // ScrollBarModifier
         .getScrollerModifier = NodeModifier::GetCJUIScrollerModifier,
-    #ifndef ARKUI_WEARABLE
         .getTabContentModifier = NodeModifier::GetCJUITabContentModifier,
-    #else
-        .getTabContentModifier = nullptr,
-    #endif
         .getTabsControllerModifier = nullptr, // TabsControllerModifier
         .getSwiperControllerModifier = NodeModifier::GetCJUISwiperControllerModifier,
         .getGestureModifier = NodeModifier::GetCJUIGestureModifier, // GestureModifier
@@ -486,7 +472,7 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
 
         .getContainerSpanModifier = NodeModifier::GetCJUIContainerSpanModifier,
     };
-    CHECK_INITIALIZED_FIELDS_END(modifiers, 16, 6, 0); // don't move this line
+    CHECK_INITIALIZED_FIELDS_END(modifiers, 14, 6, 0); // don't move this line
     return &modifiers;
 }
 }

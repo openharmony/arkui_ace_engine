@@ -168,6 +168,10 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperPageFlipModeModifier.identity, SwiperPageFlipModeModifier, value);
     return this;
   }
+  onContentWillScroll(handler: ContentWillScrollCallback): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnContentWillScrollModifier.identity, SwiperOnContentWillScrollModifier, handler);
+    return this;
+  }
 }
 class SwiperInitializeModifier extends ModifierWithKey<SwiperController> {
   static identity: Symbol = Symbol('swiperInitialize');
@@ -345,7 +349,7 @@ class SwiperDisplayArrowModifier extends ModifierWithKey<ArkDisplayArrow> {
   }
 }
 
-class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | DigitIndicator> {
+class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | DigitIndicator | IndicatorComponentController> {
   static identity: Symbol = Symbol('swiperIndicator');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
@@ -435,7 +439,7 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
           bottom
         );
       } else {
-        getUINativeModule().swiper.setSwiperIndicator(node, 'boolean', true);
+        getUINativeModule().swiper.setSwiperIndicator(node, 'IndicatorComponentController', this.value );
       }
     }
   }
@@ -679,8 +683,8 @@ class SwiperAutoPlayModifier extends ModifierWithKey<ArkAutoPlay> {
     }
   }
   checkObjectDiff(): boolean {
-    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay)
-      || !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched);
+    return !isBaseOrResourceEqual(this.stageValue.autoPlay, this.value.autoPlay) ||
+      !isBaseOrResourceEqual(this.stageValue.needStopWhenTouched, this.value.needStopWhenTouched);
   }
 }
 class SwiperIndexModifier extends ModifierWithKey<number> {
@@ -837,6 +841,22 @@ class SwiperPageFlipModeModifier extends ModifierWithKey<PageFlipMode> {
       getUINativeModule().swiper.resetSwiperPageFlipMode(node);
     } else {
       getUINativeModule().swiper.setSwiperPageFlipMode(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class SwiperOnContentWillScrollModifier extends ModifierWithKey<(result: SwiperContentWillScrollResult) => boolean> {
+  constructor(value: (result: SwiperContentWillScrollResult) => boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnContentWillScroll');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnContentWillScroll(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnContentWillScroll(node, this.value);
     }
   }
   checkObjectDiff(): boolean {

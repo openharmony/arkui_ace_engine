@@ -26,13 +26,14 @@ class ACE_EXPORT SheetView {
 public:
     static RefPtr<FrameNode> CreateSheetPage(int32_t targetId, std::string targetTag, RefPtr<UINode> builder,
         RefPtr<FrameNode> titleBuilder, std::function<void(const std::string&)>&& callback, NG::SheetStyle& sheetStyle);
-    static RefPtr<FrameNode> CreateScrollNode();
+    static RefPtr<FrameNode> CreateScrollNode(NG::SheetStyle& sheetStyle);
 
 private:
     static RefPtr<FrameNode> CreateOperationColumnNode(
         RefPtr<FrameNode> titleBuilder, NG::SheetStyle& sheetStyle, RefPtr<FrameNode> sheetNode);
     static void CreateDragBarNode(const RefPtr<FrameNode>& titleBuilder, const RefPtr<FrameNode>& operationColumn,
-        NG::SheetStyle& sheetStyle, const RefPtr<FrameNode>& sheetNode);
+        NG::SheetStyle& sheetStyle, const RefPtr<FrameNode>& sheetNode,
+        Dimension sheetDragBarHeight = SHEET_DRAG_BAR_HEIGHT);
     static void CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle);
     static void CreateCloseIconNode(RefPtr<FrameNode> buttonNode);
     static void SetSheetOffset(RefPtr<FrameNode> sheetNode);

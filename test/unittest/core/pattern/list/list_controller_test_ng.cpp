@@ -288,7 +288,7 @@ HWTEST_P(ListControllerTestNg, ScrollToIndex_AddItem001, TestSize.Level1)
      */
     EXPECT_EQ(frameNode_->GetChildren().size(), TOTAL_ITEM_NUMBER);
     EXPECT_EQ(pattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
-    AddItems(1);
+    AddListItem();
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks();
     EXPECT_EQ(frameNode_->GetChildren().size(), TOTAL_ITEM_NUMBER + 1);
@@ -643,7 +643,7 @@ HWTEST_P(ListControllerTestNg, AnimateTo002, TestSize.Level1)
     EXPECT_EQ(pattern_->GetScrollableDistance(), HORIZONTAL_SCROLLABLE_DISTANCE);
 
     /**
-     * @tc.steps: step1. AnimateTo the position without animation
+     * @tc.steps: step1. AnimateTo the position in the scroll
      * @tc.expected: AnimateTo the position
      */
     bool smooth = GetParam();
@@ -651,8 +651,15 @@ HWTEST_P(ListControllerTestNg, AnimateTo002, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE));
 
     /**
-     * @tc.steps: step2. AnimateTo the position with animation
+     * @tc.steps: step2. AnimateTo the position over the scroll
      * @tc.expected: AnimateTo the bottom, can not over scroll
+     */
+    AnimateTo(Dimension(10000.0f), 0, nullptr, smooth);
+    EXPECT_TRUE(TickPosition(-HORIZONTAL_SCROLLABLE_DISTANCE));
+
+    /**
+     * @tc.steps: step3. AnimateTo the top
+     * @tc.expected: AnimateTo the top
      */
     AnimateTo(Dimension(0), 0, nullptr, smooth);
     EXPECT_TRUE(TickPosition(0));
@@ -671,10 +678,9 @@ HWTEST_P(ListControllerTestNg, AnimateTo003, TestSize.Level1)
     CreateListItems();
     CreateDone();
     EXPECT_EQ(pattern_->GetScrollableDistance(), HORIZONTAL_SCROLLABLE_DISTANCE);
-    EXPECT_TRUE(TickPosition(0));
 
     /**
-     * @tc.steps: step1. AnimateTo the position without animation
+     * @tc.steps: step1. AnimateTo the position in the scroll
      * @tc.expected: AnimateTo the position
      */
     bool smooth = GetParam();
@@ -682,8 +688,15 @@ HWTEST_P(ListControllerTestNg, AnimateTo003, TestSize.Level1)
     EXPECT_TRUE(TickPosition(-ITEM_MAIN_SIZE));
 
     /**
-     * @tc.steps: step2. AnimateTo the position with animation
+     * @tc.steps: step2. AnimateTo the position over the scroll
      * @tc.expected: AnimateTo the bottom, can not over scroll
+     */
+    AnimateTo(Dimension(10000.0f), 0, nullptr, smooth);
+    EXPECT_TRUE(TickPosition(-HORIZONTAL_SCROLLABLE_DISTANCE));
+
+    /**
+     * @tc.steps: step3. AnimateTo the top
+     * @tc.expected: AnimateTo the top
      */
     AnimateTo(Dimension(0), 0, nullptr, smooth);
     EXPECT_TRUE(TickPosition(0));
@@ -779,7 +792,7 @@ HWTEST_P(ListControllerTestNg, ScrollPage001, TestSize.Level1)
      */
     bool smooth = GetParam();
     ScrollPage(false, smooth);
-    EXPECT_TRUE(TickPosition(-LIST_HEIGHT));
+    EXPECT_TRUE(TickPosition(-HEIGHT));
 
     /**
      * @tc.steps: step2. ScrollPage up
@@ -948,7 +961,7 @@ HWTEST_F(ListControllerTestNg, GetInfo001, TestSize.Level1)
     EXPECT_EQ(GetScrollDirection(), Axis::VERTICAL);
     EXPECT_TRUE(IsEqual(GetCurrentOffset(), Offset()));
     EXPECT_FALSE(IsAtEnd());
-    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, 0, LIST_WIDTH, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(GetItemRect(0), Rect(0, 0, WIDTH, ITEM_MAIN_SIZE)));
     EXPECT_EQ(pattern_->GetItemIndex(100000, -100000), -1);
     EXPECT_TRUE(IsEqual(pattern_->GetItemIndex(1, 1), 0));
     EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(1, 0), Rect())); // no group
@@ -995,7 +1008,7 @@ HWTEST_F(ListControllerTestNg, GetInfo002, TestSize.Level1)
      * @tc.steps: step2. Get valid group item index.
      * @tc.expected: Return actual index when input valid group x and y.
      */
-    EXPECT_TRUE(IsEqual(pattern_->GetItemIndexInGroup(LIST_WIDTH * 0.9, ITEM_MAIN_SIZE * 0.9), { 0, 1, 2 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemIndexInGroup(WIDTH * 0.9, ITEM_MAIN_SIZE * 0.9), { 0, 1, 2 }));
 }
 
 /**
@@ -1025,12 +1038,12 @@ HWTEST_F(ListControllerTestNg, GetInfo003, TestSize.Level1)
      * @tc.steps: step2. Get valid group item Rect.
      * @tc.expected: Return actual Rect when input valid group index.
      */
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(0, 2), Rect(0, 0, LIST_WIDTH, ITEM_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRectInGroup(0, 2), Rect(0, 0, WIDTH, ITEM_MAIN_SIZE)));
 
     /**
      * @tc.steps: step3. Get valid ListItemGroup Rect.
      * @tc.expected: Return actual Rect when input valid index.
      */
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, -200.0f, LIST_WIDTH, 700.0f)));
+    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(0, -200.0f, WIDTH, 700.0f)));
 }
 } // namespace OHOS::Ace::NG

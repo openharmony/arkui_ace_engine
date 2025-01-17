@@ -65,6 +65,9 @@ void DynamicComponentManager::TriggerOnAreaChangeCallback(FrameNode* frameNode, 
         if (isCurrentNotSameRect || isHostNotSameOffset) {
             HandleDynamicRenderOnAreaChange(frameNode, currFrameRect, currParentOffset, currHostParentOffset);
         }
+
+        eventHub->FireUntriggeredInnerOnAreaChanged(frameNode->GetLastFrameRect(),
+            frameNode->GetLastParentOffsetToWindow(), currFrameRect, currParentOffset);
     }
     frameNode->GetPattern()->OnAreaChangedInner();
 }

@@ -331,7 +331,7 @@ int32_t OH_NativeXComponent_GetTouchEventSourceType(
 
 OH_NativeXComponent* OH_NativeXComponent_GetNativeXComponent(ArkUI_NodeHandle node)
 {
-    if (node == nullptr || node->type != ARKUI_NODE_XCOMPONENT) {
+    if (node == nullptr || (node->type != ARKUI_NODE_XCOMPONENT && node->type != ARKUI_NODE_XCOMPONENT_TEXTURE)) {
         return nullptr;
     }
     auto nodeModifiers = OHOS::Ace::NodeModel::GetFullImpl()->getNodeModifiers();

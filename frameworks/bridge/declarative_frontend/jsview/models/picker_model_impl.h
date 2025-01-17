@@ -44,6 +44,7 @@ public:
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(DateChangeEvent&& onChange) override {};
     void HasUserDefinedOpacity() override {};
+    void SetEnableHapticFeedback(bool isEnableHapticFeedback) override {};
 };
 
 class DatePickerDialogModelImpl : public DatePickerDialogModel {

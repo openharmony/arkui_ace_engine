@@ -190,6 +190,11 @@ enum class AccessibilityRoleType {
     ROLE_NONE = 124,
 };
 
+enum class AccessibilitySamePageMode {
+    SEMI_SILENT = 0,
+    FULL_SILENT = 1,
+};
+
 enum class ButtonStyleMode { NORMAL, EMPHASIZE, TEXT };
 
 enum class ControlSize { SMALL, NORMAL };
@@ -790,6 +795,8 @@ enum class TabAnimateMode {
     CONTENT_FIRST = 0,
     ACTION_FIRST,
     NO_ANIMATION,
+    CONTENT_FIRST_WITH_JUMP,
+    ACTION_FIRST_WITH_JUMP,
     MAX_VALUE,
 };
 
@@ -1096,6 +1103,13 @@ enum class SafeAreaSyncType : uint32_t {
     SYNC_TYPE_KEYBOARD,
     SYNC_TYPE_AVOID_AREA,
     SYNC_TYPE_WINDOW_IGNORE
+};
+
+enum class SwiperAnimationMode {
+    NO_ANIMATION = 0,
+    DEFAULT_ANIMATION,
+    FAST_ANIMATION,
+    MAX_VALUE,
 };
 } // namespace OHOS::Ace
 

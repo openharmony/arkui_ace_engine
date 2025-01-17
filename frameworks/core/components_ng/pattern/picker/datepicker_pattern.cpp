@@ -34,6 +34,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -56,6 +59,9 @@ constexpr float DISABLE_ALPHA = 0.6f;
 const Dimension FOCUS_OFFSET = 2.0_vp;
 const int32_t RATE = 2;
 const int32_t MONTH_DECEMBER = 12;
+constexpr int32_t RATIO_ZERO = 0;
+constexpr int32_t RATIO_ONE = 1;
+constexpr int32_t SECOND_PAGE = 1;
 } // namespace
 bool DatePickerPattern::inited_ = false;
 const std::string DatePickerPattern::empty_;
@@ -289,6 +295,38 @@ void DatePickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect, float
         static_cast<RSScalar>(selectorItemRadius_.ConvertToPx()));
 }
 
+void DatePickerPattern::ColumnPatternInitHapticController()
+{
+    if (!isHapticChanged_) {
+        return;
+    }
+    isHapticChanged_ = false;
+    auto frameNodes = GetAllChildNode();
+    for (auto iter : frameNodes) {
+        auto columnNode = iter.second;
+        if (!columnNode) {
+            continue;
+        }
+        auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+        if (!columnPattern) {
+            continue;
+        }
+        columnPattern->InitHapticController();
+    }
+}
+
+void DatePickerPattern::ColumnPatternInitHapticController(const RefPtr<FrameNode>& columnNode)
+{
+    CHECK_NULL_VOID(columnNode);
+    if (!isHapticChanged_) {
+        return;
+    }
+    isHapticChanged_ = false;
+    auto columnPattern = columnNode->GetPattern<DatePickerColumnPattern>();
+    CHECK_NULL_VOID(columnPattern);
+    columnPattern->InitHapticController();
+}
+
 void DatePickerPattern::OnModifyDone()
 {
     Pattern::CheckLocalized();
@@ -296,6 +334,10 @@ void DatePickerPattern::OnModifyDone()
     CHECK_NULL_VOID(host);
     auto datePickerRowLayoutProperty = host->GetLayoutProperty<DataPickerRowLayoutProperty>();
     CHECK_NULL_VOID(datePickerRowLayoutProperty);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        ColumnPatternInitHapticController();
+        isHapticChanged_ = false;
+    }
     if (isFiredDateChange_ && !isForceUpdate_ && (lunar_ == datePickerRowLayoutProperty->GetLunar().value_or(false))) {
         isFiredDateChange_ = false;
         return;
@@ -666,9 +708,25 @@ bool DatePickerPattern::CheckFocusID(int32_t childSize)
     if (focusKeyID_ > childSize - 1) {
         focusKeyID_ = childSize - 1;
         return false;
-    } else if (focusKeyID_ < 0) {
-        focusKeyID_ = 0;
-        return false;
+    }
+
+    if (NeedAdaptForAging()) {
+        if (GetCurrentPage() == SECOND_PAGE) {
+            if (focusKeyID_ < INDEX_MONTH) {
+                focusKeyID_ = INDEX_MONTH;
+                return false;
+            }
+        } else {
+            if (focusKeyID_ != INDEX_YEAR) {
+                focusKeyID_ = INDEX_YEAR;
+                return false;
+            }
+        }
+    } else {
+        if (focusKeyID_ < INDEX_YEAR) {
+            focusKeyID_ = INDEX_YEAR;
+            return false;
+        }
     }
     return true;
 }
@@ -840,17 +898,6 @@ void DatePickerPattern::FlushColumn()
 
 void DatePickerPattern::ShowColumnByDatePickMode()
 {
-    if (datePickerMode_ == DatePickerMode::DATE) {
-        UpdateStackPropVisibility(VisibleType::VISIBLE, VisibleType::VISIBLE, VisibleType::VISIBLE);
-    } else if (datePickerMode_ == DatePickerMode::YEAR_AND_MONTH) {
-        UpdateStackPropVisibility(VisibleType::VISIBLE, VisibleType::VISIBLE, VisibleType::GONE);
-    } else if (datePickerMode_ == DatePickerMode::MONTH_AND_DAY) {
-        UpdateStackPropVisibility(VisibleType::GONE, VisibleType::VISIBLE, VisibleType::VISIBLE);
-    }
-}
-
-void DatePickerPattern::UpdateStackPropVisibility(VisibleType yearType, VisibleType monthType, VisibleType dayType)
-{
     RefPtr<FrameNode> stackYear;
     RefPtr<FrameNode> stackMonth;
     RefPtr<FrameNode> stackDay;
@@ -859,15 +906,35 @@ void DatePickerPattern::UpdateStackPropVisibility(VisibleType yearType, VisibleT
     CHECK_NULL_VOID(stackMonth);
     CHECK_NULL_VOID(stackDay);
 
-    auto yearColumnNodeLayoutProperty = stackYear->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(yearColumnNodeLayoutProperty);
-    yearColumnNodeLayoutProperty->UpdateVisibility(yearType);
-    auto monthColumnNodeLayoutProperty = stackMonth->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(monthColumnNodeLayoutProperty);
-    monthColumnNodeLayoutProperty->UpdateVisibility(monthType);
-    auto dayColumnNodeLayoutProperty = stackDay->GetLayoutProperty<LayoutProperty>();
-    CHECK_NULL_VOID(dayColumnNodeLayoutProperty);
-    dayColumnNodeLayoutProperty->UpdateVisibility(dayType);
+    if (datePickerMode_ == DatePickerMode::DATE) {
+        UpdateStackPropVisibility(stackYear, VisibleType::VISIBLE, RATIO_ONE);
+        UpdateStackPropVisibility(stackMonth, VisibleType::VISIBLE, RATIO_ONE);
+        UpdateStackPropVisibility(stackDay, VisibleType::VISIBLE, RATIO_ONE);
+    } else if (datePickerMode_ == DatePickerMode::YEAR_AND_MONTH) {
+        UpdateStackPropVisibility(stackYear, VisibleType::VISIBLE, RATIO_ONE);
+        UpdateStackPropVisibility(stackMonth, VisibleType::VISIBLE, RATIO_ONE);
+        UpdateStackPropVisibility(stackDay, VisibleType::GONE, RATIO_ZERO);
+    } else if (datePickerMode_ == DatePickerMode::MONTH_AND_DAY) {
+        UpdateStackPropVisibility(stackYear, VisibleType::GONE, RATIO_ZERO);
+        UpdateStackPropVisibility(stackMonth, VisibleType::VISIBLE, RATIO_ONE);
+        UpdateStackPropVisibility(stackDay, VisibleType::VISIBLE, RATIO_ONE);
+    }
+}
+
+void DatePickerPattern::UpdateStackPropVisibility(const RefPtr<FrameNode>& stackNode,
+    const VisibleType visibleType, const int32_t weight)
+{
+    for (const auto& child : stackNode->GetChildren()) {
+        auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(child);
+        CHECK_NULL_VOID(frameNodeChild);
+        auto layoutProperty = frameNodeChild->GetLayoutProperty();
+        layoutProperty->UpdateVisibility(visibleType);
+    }
+    auto stackNodeLayoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
+    CHECK_NULL_VOID(stackNodeLayoutProperty);
+    if ((datePickerMode_ != DatePickerMode::DATE) || !GetIsShowInDialog()) {
+        stackNodeLayoutProperty->UpdateLayoutWeight(weight);
+    }
 }
 
 void DatePickerPattern::FlushMonthDaysColumn()
@@ -917,9 +984,41 @@ void DatePickerPattern::FlushMonthDaysColumn()
     yearColumnPattern->FlushCurrentOptions();
 }
 
+bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string& compName,
+    const std::string& eventName, const std::string& eventData)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto dataJson = JsonUtil::ParseJsonString(eventData);
+    CHECK_NULL_RETURN(dataJson, false);
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+    value->Put(compName.c_str(), eventName.c_str());
+    value->Put("year", dataJson->GetUInt("year"));
+    value->Put("month", dataJson->GetUInt("month") + 1); // month: 1-12
+    value->Put("day", dataJson->GetUInt("day"));
+    value->Put("hour", dataJson->GetUInt("hour"));
+    value->Put("minute", dataJson->GetUInt("minute"));
+    UiSessionManager::GetInstance().ReportComponentChangeEvent(nodeId, "event", value);
+#endif
+    return true;
+}
+
+bool DatePickerPattern::ReportDateChangeEvent(const std::string& compName,
+    const std::string& eventName, const std::string& eventData)
+{
+    auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
+    if ((datePickerEventHub != nullptr) && datePickerEventHub->HasSetDialogChange()) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return ReportDateChangeEvent(host->GetId(), compName, eventName, eventData);
+}
+
 void DatePickerPattern::FireChangeEvent(bool refresh)
 {
     if (refresh) {
+        ReportDateChangeEvent("DatePicker", "onDateChange", GetSelectedObject(true));
         auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
         CHECK_NULL_VOID(datePickerEventHub);
         auto str = GetSelectedObject(true);
@@ -2577,6 +2676,7 @@ void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         jsonConstructor->Put("selected", GetDateString(selectedDate_).c_str());
     }
     json->PutExtAttr("constructor", jsonConstructor, filter);
+    json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
 }
 
 void DatePickerPattern::SetFocusDisable()
@@ -2601,5 +2701,21 @@ void DatePickerPattern::SetFocusEnable()
 
     isFocus_ = true;
     focusHub->SetFocusable(true);
+}
+
+bool DatePickerPattern::NeedAdaptForAging()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, false);
+
+    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
+        GreatOrEqual(Dimension(pipeline->GetRootHeight()).ConvertToVp(), pickerTheme->GetDeviceHeightLimit())) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

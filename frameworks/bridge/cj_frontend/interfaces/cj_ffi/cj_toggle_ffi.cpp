@@ -16,6 +16,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_toggle_ffi.h"
 
 #include "cj_lambda.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_button_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
@@ -26,6 +27,7 @@ using namespace OHOS::Ace::Framework;
 
 namespace {
 const std::vector<ToggleType> TOGGOLE_TYPES = { ToggleType::CHECKBOX, ToggleType::SWITCH, ToggleType::BUTTON };
+int32_t toggleType_ = 1;
 } // namespace
 
 extern "C" {
@@ -35,6 +37,7 @@ void FfiOHOSAceFrameworkToggleCreate(int type, bool isOn)
         LOGE("invalid value for toggle type");
         return;
     }
+    toggleType_ = type;
     ToggleModel::GetInstance()->Create(NG::ToggleType(type), isOn);
 }
 
@@ -109,5 +112,40 @@ void FfiToggleSetResponseRegionArray(VectorStringPtr vecContent)
     std::vector<DimensionRect> result;
     ParseVectorStringPtr(vecContent, result);
     ToggleModel::GetInstance()->SetResponseRegion(result);
+}
+
+void FfiOHOSAceFrameworkToggleSwitchStyle(
+    double pointRadius,
+    uint32_t unselectedColor,
+    uint32_t pointColor,
+    double trackBorderRadius)
+{
+    Dimension pointRadiusValue = Dimension(pointRadius, DimensionUnit::VP);
+    ToggleModel::GetInstance()->SetPointRadius(pointRadiusValue);
+    ToggleModel::GetInstance()->SetUnselectedColor(Color(unselectedColor));
+    ToggleModel::GetInstance()->SetSwitchPointColor(Color(pointColor));
+    Dimension trackBorderRadiusValue = Dimension(trackBorderRadius, DimensionUnit::VP);
+    ToggleModel::GetInstance()->SetTrackBorderRadius(trackBorderRadiusValue);
+}
+
+void FfiOHOSAceFrameworkToggleBackgroundColor(uint32_t color)
+{
+    ToggleModel::GetInstance()->SetBackgroundColor(Color(color), true);
+}
+
+void FfiOHOSAceFrameworkToggleHoverEffect(int32_t value)
+{
+    ToggleModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(value));
+}
+
+void FfiOHOSAceFrameworkToggleRadius(double radius, int32_t unit)
+{
+    Dimension value(radius, static_cast<DimensionUnit>(unit));
+    // when toggle equels button should follow button model.
+    if (static_cast<NG::ToggleType>(toggleType_) == NG::ToggleType::BUTTON) {
+        FfiOHOSAceFrameworkButtonSetRadius(radius, unit);
+    } else {
+        ViewAbstractModel::GetInstance()->SetBorderRadius(value);
+    }
 }
 }

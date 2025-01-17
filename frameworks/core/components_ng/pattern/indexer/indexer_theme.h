@@ -101,7 +101,7 @@ inline constexpr uint32_t POPUP_TITLE_BG_COLOR_SINGLE = 0x00ffffff;
 inline constexpr float INDEXER_ZERO_WIDTH = 0.0f;
 inline constexpr int32_t INDEXER_COLLAPSE_WAIT_DURATION = 1;
 
-inline constexpr int32_t ARC_INDEXER_ITEM_MAX_COUNT = 30; // [indexer], default max count
+inline constexpr int32_t ARC_INDEXER_ITEM_MAX_COUNT = 29; // [indexer], default max count
 inline const std::u16string ARC_INDEXER_STR_SHARP = StringUtils::Str8ToStr16("#");
 inline const std::u16string ARC_INDEXER_STR_EXPANDED = StringUtils::Str8ToStr16(">");
 inline const std::u16string ARC_INDEXER_STR_COLLAPSED = StringUtils::Str8ToStr16("<");
@@ -132,7 +132,6 @@ inline constexpr uint32_t ARC_INDEXER_STR_DOT_COLOR = 0xA9FFFFFF;
 inline constexpr uint32_t ARC_INDEXER_SELECTED_BG_COLOR = 0xFF1F71FF;
 inline constexpr uint32_t ARC_POPUP_BG_COLOR = 0xD8404040;
 inline constexpr float ARC_INDEXER_PADDING_LEFT = 4.0f;
-inline constexpr double ARC_BUBBLE_RADIUS = 23.0;
 inline constexpr double ARC_INDEXER_DEFAULT_RADIUS = 12.0;
 inline constexpr int32_t ARC_INDEXER_COLLAPSE_WAIT_DURATION = 1;
 

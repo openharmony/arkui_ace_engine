@@ -90,6 +90,11 @@ public:
         canOverScroll_ = canOverScroll;
     }
 
+    float GetBarGridMargin()
+    {
+        return barGridMargin_;
+    }
+
 private:
     void MeasureFixedMode(LayoutWrapper* layoutWrapper, SizeF frameSize);
     void MeasureScrollableMode(LayoutWrapper* layoutWrapper, SizeF frameSize);
@@ -121,7 +126,6 @@ private:
     void CalculateItemWidthsForSymmetricExtensible(LayoutWrapper* layoutWrapper,
         const std::vector<float>& spaceRequests, const std::vector<float>& leftBuffer,
         const std::vector<float>& rightBuffer, float allocatedWidth);
-    void UpdateHorizontalPadding(LayoutWrapper* layoutWrapper, float horizontalPadding) const;
     void MeasureMask(LayoutWrapper* layoutWrapper) const;
     void UpdateChildMarginProperty(float rightMargin, float leftMargin, const RefPtr<LayoutWrapper>& childWrapper);
     bool GetBarAdaptiveHeight(LayoutWrapper* layoutWrapper);

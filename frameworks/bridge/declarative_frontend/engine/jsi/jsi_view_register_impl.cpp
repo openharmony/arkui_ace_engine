@@ -72,6 +72,7 @@
 #include "bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "bridge/declarative_frontend/jsview/js_image_span.h"
 #include "bridge/declarative_frontend/jsview/js_indexer.h"
+#include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #include "bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
@@ -485,6 +486,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Gauge", JSGauge::JSBind },
     { "Marquee", JSMarquee::JSBind },
     { "Swiper", JSSwiper::JSBind },
+    { "Indicator", JSIndicator::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
     { "CalendarController", JSCalendarController::JSBind },
     { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
@@ -558,6 +560,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
+    { "Indicator", JSIndicator::JSBind },
     { "Panel", JSSlidingPanel::JSBind },
     { "RepeatNative", JSRepeat::JSBind },
     { "RepeatVirtualScrollNative", JSRepeatVirtualScroll::JSBind },
@@ -590,10 +593,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polygon", JSPolygon::JSBind },
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
-#ifndef ARKUI_WEARABLE
     { "Tabs", JSTabs::JSBind },
     { "TabContent", JSTabContent::JSBind },
-#endif
     { "TextPicker", JSTextPicker::JSBind },
     { "TimePicker", JSTimePicker::JSBind },
 #ifndef ARKUI_WEARABLE
@@ -689,9 +690,8 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Scroller", JSScroller::JSBind },
     { "ListScroller", JSListScroller::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
-#ifndef ARKUI_WEARABLE
+    { "IndicatorController", JSIndicatorController::JSBind },
     { "TabsController", JSTabsController::JSBind },
-#endif
     { "CalendarController", JSCalendarController::JSBind },
 #ifdef ABILITY_COMPONENT_SUPPORTED
     { "AbilityController", JSAbilityComponentController::JSBind },
@@ -820,9 +820,8 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
+    JSIndicatorController::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
-#endif
     JSScroller::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
@@ -873,6 +872,7 @@ void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);
+    JSIndicatorController::JSBind(globalObj);
     JSScroller::JSBind(globalObj);
     JSListScroller::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
@@ -933,10 +933,8 @@ void RegisterModuleByName(BindingTarget globalObj, std::string moduleName)
     }
     if ((*func).first == "Swiper") {
         JSSwiperController::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     } else if ((*func).first == "Tabs") {
         JSTabsController::JSBind(globalObj);
-#endif
     } else if ((*func).first == "Calendar") {
         JSCalendarController::JSBind(globalObj);
     } else if ((*func).first == "AbilityComponent") {

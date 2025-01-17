@@ -87,10 +87,10 @@ public:
 
     static void UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
-        TextStyle& textStyle, bool isDisabled);
+        TextStyle& textStyle, bool isDisabled, bool isTextColorByUser = true);
     static void UpdatePlaceholderTextStyle(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
-        TextStyle& textStyle, bool isDisabled);
+        TextStyle& textStyle, bool isDisabled, bool isTextColorByUser = true);
     void CounterLayout(LayoutWrapper* layoutWrapper);
     void ErrorLayout(LayoutWrapper* layoutWrapper);
 
@@ -171,12 +171,18 @@ protected:
 private:
     void InlineFocusMeasure(const LayoutConstraintF& contentConstraint,
         LayoutWrapper* layoutWrapper, double& safeBoundary, float& contentWidth);
+    static void UpdateTextStyleSetTextColor(const RefPtr<FrameNode>& frameNode,
+        const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
+        TextStyle& textStyle, bool isDisabled, bool isTextColorByUser = true);
     static void UpdateTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, TextStyle& textStyle, bool isDisabled);
     static void UpdateTextStyleLineHeight(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutPropeerty, TextStyle& textStyle);
     static void UpdateTextStyleFontScale(const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty,
         TextStyle& textStyle, const RefPtr<TextFieldPattern>& pattern);
+    static void UpdatePlaceholderTextStyleSetTextColor(
+        const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
+        TextStyle& textStyle, bool isDisabled, bool isTextColorByUser);
     static void UpdatePlaceholderTextStyleMore(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
         TextStyle& placeholderTextStyle, bool isDisabled);

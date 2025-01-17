@@ -625,7 +625,7 @@ HWTEST_F(TextTestEightNg, SpanNodeDumpInfo001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SpanNodeDumpInfo003
+ * @tc.name: SpanNodeDumpInfo002
  * @tc.desc: test DumpInfo.
  * @tc.type: FUNC
  */

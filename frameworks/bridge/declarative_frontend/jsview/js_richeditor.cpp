@@ -1357,6 +1357,15 @@ void JSRichEditor::SetMaxLines(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetMaxLines(normalMaxLines);
 }
 
+void JSRichEditor::SetStopBackPress(const JSCallbackInfo& info)
+{
+    bool isStopBackPress = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isStopBackPress = info[0]->ToBoolean();
+    }
+    RichEditorModel::GetInstance()->SetStopBackPress(isStopBackPress);
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -1402,6 +1411,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("barState", &JSRichEditor::SetBarState);
     JSClass<JSRichEditor>::StaticMethod("maxLength", &JSRichEditor::SetMaxLength);
     JSClass<JSRichEditor>::StaticMethod("maxLines", &JSRichEditor::SetMaxLines);
+    JSClass<JSRichEditor>::StaticMethod("stopBackPress", &JSRichEditor::SetStopBackPress);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1993,6 +2003,15 @@ void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOption
         if (placeholderOffset >= 0) {
             placeholderSpan.offset = placeholderOffset;
         }
+    }
+    JSRef<JSVal> colorMetrics = placeholderOptionObject->GetProperty("dragBackgroundColor");
+    if (Color dragBackgroundColor; !colorMetrics->IsNull() &&
+        JSContainerBase::ParseColorMetricsToColor(colorMetrics, dragBackgroundColor)) {
+        placeholderSpan.dragBackgroundColor = dragBackgroundColor;
+    }
+    JSRef<JSVal> isDragShadowNeeded = placeholderOptionObject->GetProperty("isDragShadowNeeded");
+    if (!isDragShadowNeeded->IsNull() && isDragShadowNeeded->IsBoolean()) {
+        placeholderSpan.isDragShadowNeeded = isDragShadowNeeded->ToBoolean();
     }
 }
 

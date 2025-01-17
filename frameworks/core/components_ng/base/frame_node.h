@@ -433,7 +433,7 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
-    RefPtr<FrameNode> GetAncestorNodeOfFrame(bool checkBoundary = false) const;
+    RefPtr<FrameNode> GetAncestorNodeOfFrame(bool checkBoundary) const;
 
     std::string& GetNodeName()
     {
@@ -477,15 +477,24 @@ public:
 
     RectF GetTransformRectRelativeToWindow() const;
 
-    OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
+    // deprecated, please use GetPaintRectOffsetNG.
+    // this function only consider transform of itself when calculate transform,
+    // do not consider the transform of its ansestors
+    OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false) const;
 
-    OffsetF GetPaintRectOffsetNG(bool excludeSelf = false) const;
+    // returns a node's offset relative to root.
+    // and accumulate every ancestor node's graphic properties such as rotate and transform
+    // @param excludeSelf default false, set true can exclude self.
+    // @param checkBoundary default false. should be true if you want check boundary of window scene
+    // for getting the offset to window.
+    OffsetF GetPaintRectOffsetNG(bool excludeSelf = false, bool checkBoundary = false) const;
 
     bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
 
     RectF GetPaintRectToWindowWithTransform();
 
-    std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
+    std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(
+        bool excludeSelf = false, bool checkBoundary = false) const;
 
     OffsetF GetPaintRectOffsetToStage() const;
 
@@ -753,7 +762,7 @@ public:
         return viewPort_;
     }
 
-    std::optional<RectF> GetViewPort() const;
+    std::optional<RectF> GetViewPort(bool checkBoundary = false) const;
 
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     // speed is measured by millimeter/second
@@ -914,7 +923,7 @@ public:
     }
     OffsetF GetOffsetInScreen();
     OffsetF GetOffsetInSubwindow(const OffsetF& subwindowOffset);
-    RefPtr<PixelMap> GetPixelMap();
+    RefPtr<PixelMap> GetDragPixelMap();
     RefPtr<FrameNode> GetPageNode();
     RefPtr<FrameNode> GetFirstAutoFillContainerNode();
     RefPtr<FrameNode> GetNodeContainer();
@@ -1148,6 +1157,7 @@ public:
     void* GetExtraCustomProperty(const std::string& key) const;
     void RemoveExtraCustomProperty(const std::string& key);
     bool GetCustomPropertyByKey(const std::string& key, std::string& value);
+    void ExtraCustomPropertyToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     void AddNodeDestroyCallback(const std::string& callbackKey, std::function<void()>&& callback);
     void RemoveNodeDestroyCallback(const std::string& callbackKey);
     void FireOnExtraNodeDestroyCallback();
@@ -1214,6 +1224,9 @@ public:
         return lastHostParentOffsetToWindow_;
     }
 
+    void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
+    void FireFrameNodeDestructorCallback();
+
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1239,8 +1252,6 @@ private:
 
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
-
-    OffsetF GetParentGlobalOffset() const;
 
     RefPtr<PaintWrapper> CreatePaintWrapper();
     void LayoutOverlay();
@@ -1457,7 +1468,8 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, false, { .isShowBadge = true } };
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, true,
+        false, true, false, false, { .isShowBadge = true } };
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
 
@@ -1485,6 +1497,7 @@ private:
     int32_t childrenUpdatedFrom_ = -1;
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
     float preOpacity_ = 1.0f;
+    std::function<void(int32_t)> frameNodeDestructorCallback_;
 
     friend class RosenRenderContext;
     friend class RenderContext;

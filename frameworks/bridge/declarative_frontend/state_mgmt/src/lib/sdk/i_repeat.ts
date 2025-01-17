@@ -55,7 +55,7 @@ interface RepeatAPI<T> {
     // when call virtualScroll, framework will use virtual scroll
     // totalCount: number of logical items, can be larger than number of loaded
     // data items of lazy loading array source, can be larger than that array.length
-    virtualScroll: (options?: { totalCount?: number }) => RepeatAPI<T>;
+    virtualScroll: (options?: { totalCount?: number, reusable?: boolean }) => RepeatAPI<T>;
 
     // function to decide which template to use, each template has an id
     templateId: (typeFunc: RepeatTypeGenFunc<T>) => RepeatAPI<T>;

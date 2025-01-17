@@ -16,6 +16,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_scroll_ffi.h"
 
 #include "cj_lambda.h"
+
 #include "bridge/common/utils/utils.h"
 #include "core/components/scroll/scroll_component.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"

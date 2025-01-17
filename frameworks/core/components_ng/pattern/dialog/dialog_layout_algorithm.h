@@ -89,7 +89,7 @@ private:
         OffsetF& topLeftPoint, const OffsetF& dialogOffset, const SizeF& childSize, bool needAvoidKeyboard);
 
     SizeF UpdateHeightWithSafeArea(SizeF size);
-    void UpdateSafeArea();
+    void UpdateSafeArea(const RefPtr<FrameNode>& frameNode);
     void UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
         LayoutConstraintF& childLayoutConstraint, RefPtr<LayoutWrapper>& childLayoutWrapper);
     void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip);

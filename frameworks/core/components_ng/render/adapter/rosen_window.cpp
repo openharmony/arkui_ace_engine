@@ -71,7 +71,8 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             onVsync();
             return;
         }
-        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync");
+        uiTaskRunner.PostTask([callback = std::move(onVsync)]() { callback(); }, "ArkUIRosenWindowVsync",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     };
     rsUIDirector_ = OHOS::Rosen::RSUIDirector::Create();
     if (window->GetSurfaceNode()) {

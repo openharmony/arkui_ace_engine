@@ -44,8 +44,7 @@ const Dimension OFFSET_LENGTH = 5.5_vp;
 const Dimension DIALOG_OFFSET = 1.0_vp;
 const Dimension DIALOG_OFFSET_LENGTH = 1.0_vp;
 constexpr uint32_t HALF = 2;
-const Dimension FOUCS_WIDTH = 2.0_vp;
-const Dimension MARGIN_SIZE = 12.0_vp;
+const Dimension FOCUS_WIDTH = 2.0_vp;
 constexpr float DISABLE_ALPHA = 0.6f;
 constexpr float MAX_PERCENT = 100.0f;
 } // namespace
@@ -388,10 +387,6 @@ void TextPickerPattern::GetInnerFocusButtonPaintRect(RoundRect& paintRect, float
     CHECK_NULL_VOID(buttonNode);
     auto focusButtonRect = buttonNode->GetGeometryNode()->GetFrameRect();
     auto focusSpace = pickerTheme->GetFocusPadding().ConvertToPx();
-    if (isShowInDialog_) {
-        auto stackTopMargin = pickerTheme->GetContentMarginVertical().ConvertToPx();
-        focusButtonRect += OffsetF(0, stackTopMargin);
-    }
     auto stackRenderContext = stackNode->GetRenderContext();
     CHECK_NULL_VOID(stackRenderContext);
     auto leftPadding = 0.0f;
@@ -434,13 +429,39 @@ void TextPickerPattern::CalcLeftTotalColumnWidth(
     }
 }
 
+void TextPickerPattern::ColumnPatternInitHapticController()
+{
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+    if (!isHapticChanged_) {
+        return;
+    }
+
+    isHapticChanged_ = false;
+    auto frameNodes = GetColumnNodes();
+    for (auto iter : frameNodes) {
+        auto columnNode = iter.second;
+        if (!columnNode) {
+            continue;
+        }
+        auto columnPattern = columnNode->GetPattern<TextPickerColumnPattern>();
+        if (!columnPattern) {
+            continue;
+        }
+        columnPattern->InitHapticController(columnNode);
+    }
+}
+
 void TextPickerPattern::OnModifyDone()
 {
     Pattern::CheckLocalized();
     if (isFiredSelectsChange_) {
         isFiredSelectsChange_ = false;
+        ColumnPatternInitHapticController();
         return;
     }
+    isHapticChanged_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<LinearLayoutProperty>();
@@ -869,22 +890,13 @@ RectF TextPickerPattern::CalculatePaintRect(int32_t currentFocusIndex,
     if (!GetIsShowInDialog()) {
         paintRectHeight = paintRectHeight - OFFSET_LENGTH.ConvertToPx();
         centerY = centerY + OFFSET.ConvertToPx();
-        if (paintRectWidth > columnWidth) {
-            paintRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_INTERVAL.ConvertToPx();
-            centerX = currentFocusIndex * (paintRectWidth + FOUCS_WIDTH.ConvertToPx() + PRESS_INTERVAL.ConvertToPx()) +
-                      FOUCS_WIDTH.ConvertToPx();
-        } else {
-            centerX = centerX - MARGIN_SIZE.ConvertToPx() / HALF;
-        }
-        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
-            paintRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
-            centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
-        }
+        paintRectWidth = columnWidth - FOCUS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
+        centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
         AdjustFocusBoxOffset(centerX, centerY);
     } else {
         paintRectHeight = paintRectHeight - DIALOG_OFFSET.ConvertToPx();
         centerY = centerY + DIALOG_OFFSET_LENGTH.ConvertToPx();
-        paintRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
+        paintRectWidth = columnWidth - FOCUS_WIDTH.ConvertToPx() - PRESS_RADIUS.ConvertToPx();
         centerX = currentFocusIndex * columnWidth + (columnWidth - paintRectWidth) / HALF;
     }
     return RectF(centerX, centerY, paintRectWidth, paintRectHeight);
@@ -1309,6 +1321,7 @@ void TextPickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
             }
         }
     }
+    json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
 }
 
 std::string TextPickerPattern::GetRangeStr() const
@@ -1466,16 +1479,11 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size, RefPtr<FrameNode>&
         size.SetWidth(pickerContentSize.Width());
     } else {
         auto index = CalculateIndex(frameNode);
-        if (index == -1) {
+        if (index < 0 || index >= static_cast<int32_t>(childCount)) {
             return;
         }
-        float percent = CalculateColumnSize(index, childCount, pickerContentSize);
-        SetDividerLength(index, childCount, pickerContentSize);
-        if (columnWidths_.empty()) {
-            size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));
-        } else {
-            size.SetWidth(pickerContentSize.Width() * percent);
-        }
+        float width = CalculateColumnSize(index, childCount, pickerContentSize);
+        size.SetWidth(width);
     }
     size.SetHeight(std::min(pickerContentSize.Height(), size.Height()));
 }
@@ -1493,49 +1501,31 @@ int32_t TextPickerPattern::CalculateIndex(RefPtr<FrameNode>& frameNode)
     return index;
 }
 
-void TextPickerPattern::SetDividerLength(int32_t index, float childCount, const SizeF& pickerContentSize)
-{
-    if (index == childCount - 1) {
-        dividerLength_ = 0.0f;
-        for (int32_t i = 0; i < childCount; i++) {
-            dividerLength_ = dividerLength_.value()+ columnWidths_[i].Value() * pickerContentSize.Width() / 100.0f;
-        }
-    }
-}
-
 float TextPickerPattern::CalculateColumnSize(int32_t index, float childCount, const SizeF& pickerContentSize)
 {
-    for (auto& width : columnWidths_) {
-        if (width.Unit() != DimensionUnit::PERCENT) {
-            width = Dimension(width.ConvertToPx() / pickerContentSize.Width() * MAX_PERCENT, DimensionUnit::PERCENT);
-        }
-        if (width.Value() < 0.0f) {
-            width.SetValue(0.0f);
-        }
-    }
-
     float widthSum = 0.0f;
-    for (uint32_t i = 0; i < columnWidths_.size(); i++) {
-        if (i < childCount) {
-            widthSum += columnWidths_[i].Value();
-        } else {
-            columnWidths_[i].SetValue(0.0f);
+    for (size_t i = 0; i < std::min(columnWidths_.size(), static_cast<size_t>(childCount)); i++) {
+        columnWidths_[i] = columnWidths_[i].Unit() != DimensionUnit::PERCENT ?
+            Dimension(columnWidths_[i].ConvertToPx(), DimensionUnit::PX) :
+            Dimension(pickerContentSize.Width() * columnWidths_[i].Value() / MAX_PERCENT, DimensionUnit::PX);
+
+        if (LessNotEqual(columnWidths_[i].Value(), 0.0f) && !NearZero(childCount)) {
+            columnWidths_[i].SetValue(pickerContentSize.Width() / childCount);
         }
-    }
-    if (widthSum > MAX_PERCENT || widthSum < 0.0f) {
-        columnWidths_.clear();
+
+        widthSum += columnWidths_[i].Value();
     }
 
-    if (index >= columnWidths_.size()) {
-        float unAssignedColumnWidth = MAX_PERCENT;
-        for (const auto& width : columnWidths_) {
-            unAssignedColumnWidth -= width.Value();
-        }
-        columnWidths_.emplace_back(Dimension(unAssignedColumnWidth / (childCount - columnWidths_.size()),
-            DimensionUnit::PERCENT));
+    if (GreatNotEqual(widthSum, pickerContentSize.Width())) {
+        return pickerContentSize.Width() / std::max(childCount, 1.0f);
     }
 
-    return columnWidths_[index].Value() / MAX_PERCENT;
+    if (static_cast<size_t>(index) >= columnWidths_.size()) {
+        columnWidths_.emplace_back(Dimension((pickerContentSize.Width() - widthSum) /
+            (childCount - columnWidths_.size()), DimensionUnit::PX));
+    }
+    return columnWidths_.size() == 0 ?
+        pickerContentSize.Width() / std::max(childCount, 1.0f) : columnWidths_[index].Value();
 }
 
 void TextPickerPattern::SetCanLoop(bool isLoop)

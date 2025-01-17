@@ -31,10 +31,10 @@ RefPtr<TextFieldControllerBase> TextFieldModelImpl::CreateTextInput(
 {
     auto textInputComponent = AceType::MakeRefPtr<TextFieldComponent>();
     if (placeholder) {
-        textInputComponent->SetPlaceholder(UtfUtils::Str16ToStr8(placeholder.value()));
+        textInputComponent->SetPlaceholder(UtfUtils::Str16DebugToStr8(placeholder.value()));
     }
     if (value) {
-        textInputComponent->SetValue(UtfUtils::Str16ToStr8(value.value()));
+        textInputComponent->SetValue(UtfUtils::Str16DebugToStr8(value.value()));
     }
     ViewStackProcessor::GetInstance()->ClaimElementId(textInputComponent);
     textInputComponent->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
@@ -138,10 +138,10 @@ RefPtr<TextFieldControllerBase> TextFieldModelImpl::CreateTextArea(
         boxBorder = boxComponent->GetBackDecoration()->GetBorder();
     }
     if (value) {
-        textAreaComponent->SetValue(UtfUtils::Str16ToStr8(value.value()));
+        textAreaComponent->SetValue(UtfUtils::Str16DebugToStr8(value.value()));
     }
     if (placeholder) {
-        textAreaComponent->SetPlaceholder(UtfUtils::Str16ToStr8(placeholder.value()));
+        textAreaComponent->SetPlaceholder(UtfUtils::Str16DebugToStr8(placeholder.value()));
     }
     UpdateDecoration(boxComponent, textAreaComponent, boxBorder, theme);
 
@@ -369,7 +369,7 @@ void TextFieldModelImpl::SetInputFilter(
     component->SetInputFilter(value);
     if (func) {
         auto onError = [func] (const std::string& value) {
-            func(UtfUtils::Str8ToStr16(value));
+            func(UtfUtils::Str8DebugToStr16(value));
         };
         component->SetOnError(std::move(onError));
     }
@@ -407,7 +407,7 @@ void TextFieldModelImpl::SetOnChange(std::function<void(const std::u16string&, P
     auto onChange = [func] (const std::string& value) {
         if (!func) {
             PreviewText previewText {};
-            func(UtfUtils::Str8ToStr16(value), previewText);
+            func(UtfUtils::Str8DebugToStr16(value), previewText);
         }
     };
     component->SetOnChange(std::move(onChange));
@@ -420,7 +420,7 @@ void TextFieldModelImpl::SetOnCopy(std::function<void(const std::u16string&)>&& 
     CHECK_NULL_VOID(component);
     auto onCopy = [func] (const std::string& value) {
         if (func) {
-            func(UtfUtils::Str8ToStr16(value));
+            func(UtfUtils::Str8DebugToStr16(value));
         }
     };
     component->SetOnCopy(std::move(onCopy));
@@ -433,7 +433,7 @@ void TextFieldModelImpl::SetOnCut(std::function<void(const std::u16string&)>&& f
     CHECK_NULL_VOID(component);
     auto onCut = [func] (const std::string& value) {
         if (func) {
-            func(UtfUtils::Str8ToStr16(value));
+            func(UtfUtils::Str8DebugToStr16(value));
         }
     };
     component->SetOnCut(std::move(onCut));
@@ -446,7 +446,7 @@ void TextFieldModelImpl::SetOnPaste(std::function<void(const std::u16string&)>&&
     CHECK_NULL_VOID(component);
     auto onPaste = [func] (const std::string& value) {
         if (func) {
-            func(UtfUtils::Str8ToStr16(value));
+            func(UtfUtils::Str8DebugToStr16(value));
         }
     };
     component->SetOnPaste(std::move(onPaste));
