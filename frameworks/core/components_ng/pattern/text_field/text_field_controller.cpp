@@ -146,6 +146,7 @@ int32_t TextFieldController::AddText(std::u16string text, int32_t offset)
     if (textFieldPattern->IsDragging()) {
         return textFieldPattern->GetCaretIndex();
     }
+    textFieldPattern->FinishTextPreviewOperation();
     int32_t length = textFieldPattern->GetTextUtf16Value().length();
     if (offset == -1) {
         offset = length;
@@ -160,6 +161,7 @@ void TextFieldController::DeleteText(int32_t start, int32_t end)
     if (textFieldPattern->IsDragging()) {
         return;
     }
+    textFieldPattern->FinishTextPreviewOperation();
     int32_t length = textFieldPattern->GetTextUtf16Value().length();
     if (start == -1 && end == -1) {
         // delete all
