@@ -4887,6 +4887,19 @@ void PipelineContext::SetContainerModalTitleVisible(bool customTitleSettedShow, 
     customTitleSettedShow_ = customTitleSettedShow;
 }
 
+bool PipelineContext::GetContainerModalTitleVisible()
+{
+    if (windowModal_ != WindowModal::CONTAINER_MODAL) {
+        return false;
+    }
+    CHECK_NULL_RETURN(rootNode_, false);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode_->GetFirstChild());
+    CHECK_NULL_RETURN(containerNode, false);
+    auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerPattern, false);
+    return containerPattern->GetContainerModalTitleVisible();
+}
+
 void PipelineContext::SetContainerModalTitleHeight(int32_t height)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
