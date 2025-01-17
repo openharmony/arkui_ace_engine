@@ -41,6 +41,8 @@ constexpr int SHEET_HEIGHT_LARGE = 1;
 constexpr int SHEET_HEIGHT_FITCONTENT = 2;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
+constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -497,6 +499,7 @@ void FfiOHOSAceFrameworkViewAbstractSetForegroundBlurStyleOption(int32_t blurSty
         styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
     }
 
+    styleOption.scale = options.scale < 0.0 || options.scale > 1.0 ? 1.0 : options.scale;
     BlurOption blurOption;
     std::vector<float> greyVec(2); // 2 number
     greyVec[0] = options.blurOptions.grayscale[0];
@@ -913,6 +916,34 @@ void FfiOHOSAceFrameworkViewAbstractSetColorBlend(uint32_t color)
     ViewAbstractModel::GetInstance()->SetColorBlend(Color(color));
 }
 
+void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(double radius, int32_t direction,
+    VectorFloat64Ptr blurVec, VectorFloat64Ptr positionVec)
+{
+    double blurRadius = radius;
+    std::vector<std::pair<float, float>> fractionStops;
+    const auto& blurVector = *reinterpret_cast<std::vector<double>*>(blurVec);
+    const auto& positionVector = *reinterpret_cast<std::vector<double>*>(positionVec);
+    if (blurVector.size() <= 1) {
+        return;
+    }
+    float tmpPos = -1.0f;
+    for (size_t i = 0; i <blurVector.size(); i++) {
+        std::pair<float, float> fractionStop;
+        fractionStop.first = static_cast<float>(std::clamp(blurVector[i], 0.0, 1.0));
+        fractionStop.second = static_cast<float>(std::clamp(positionVector[i], 0.0, 1.0));
+        if (fractionStop.second <= tmpPos) {
+            fractionStops.clear();
+            return;
+        }
+        tmpPos = fractionStop.second;
+        fractionStops.push_back(fractionStop);
+    }
+    // Parse direction
+    CalcDimension dimensionRadius(static_cast<float>(blurRadius), DimensionUnit::PX);
+    NG::LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, static_cast<NG::GradientDirection>(direction));
+    ViewAbstractModel::GetInstance()->SetLinearGradientBlur(blurPara);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetBackdropBlur(double value)
 {
     Dimension radius(value, DimensionUnit::PX);
@@ -987,6 +1018,19 @@ void FfiOHOSAceFrameworkViewAbstractSetInvert(double value)
     if (LessNotEqual(value, 0.0)) {
         invert = static_cast<float>(0.0);
     }
+    ViewAbstractModel::GetInstance()->SetInvert(invert);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetInvertWithOptions(
+    double low, double high, double threshold, double thresholdRange)
+{
+    InvertVariant invert = 0.0f;
+    InvertOption option;
+    option.low_ = std::clamp(low, 0.0, 1.0);
+    option.high_ = std::clamp(high, 0.0, 1.0);
+    option.threshold_ = std::clamp(threshold, 0.0, 1.0);
+    option.thresholdRange_ = std::clamp(thresholdRange, 0.0, 1.0);
+    invert = option;
     ViewAbstractModel::GetInstance()->SetInvert(invert);
 }
 
@@ -1244,6 +1288,75 @@ void FfiOHOSAceFrameworkViewAbstractSetMaskByShape(int64_t shapeId)
     } else {
         LOGI("set mask error, Cannot get NativeShape by id: %{public}" PRId64, shapeId);
     }
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityDescription(const char* value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityDescription(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityText(const char* value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityText(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityGroup(bool value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityGroup(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityLevel(const char* value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityImportance(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityTextHint(const char* value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityTextHint(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityVirtualNode(void (*builder)())
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityVirtualNode(CJLambda::Create(builder));
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetClickEffect(int32_t level, float scale)
+{
+    if (level < static_cast<int32_t>(ClickEffectLevel::LIGHT) ||
+        level > static_cast<int32_t>(ClickEffectLevel::HEAVY)) {
+        level = 0;
+    }
+
+    if (scale < 0.0 || scale > 1.0) {
+        if (level == 0) {
+            scale = DEFAULT_SCALE_LIGHT;
+        } else {
+            scale = DEFAULT_SCALE_MIDDLE_OR_HEAVY;
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetClickEffectLevel(static_cast<ClickEffectLevel>(level), scale);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetMotionPath(CJMotionPathOptions options)
+{
+    MotionPathOption motionPathOption;
+    if (options.path != nullptr && strlen(options.path) > 0) {
+        motionPathOption.SetPath(std::string(options.path));
+        double from = options.from;
+        double to = options.to;
+        if (from > 1.0 || from < 0.0) {
+            from = 0.0;
+        }
+        if (to > 1.0 || to < 0.0) {
+            from = 1.0;
+        } else if (to < from) {
+            to = from;
+        }
+        motionPathOption.SetBegin(static_cast<float>(from));
+        motionPathOption.SetEnd(static_cast<float>(to));
+        motionPathOption.SetRotate(options.rotatable);
+    }
+    ViewAbstractModel::GetInstance()->SetMotionPath(motionPathOption);
 }
 
 void FfiOHOSAceFrameworkViewAbstractPop()
