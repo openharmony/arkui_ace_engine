@@ -35,6 +35,11 @@ const auto ATTRIBUTE_PLACEHOLDER_NAME = "placeholder";
 const auto ATTRIBUTE_TEXT_NAME = "text";
 const auto ATTRIBUTE_PLACEHOLDER_VALUE = "xxx";
 const auto ATTRIBUTE_TEXT_VALUE = "yyy";
+const auto ATTRIBUTE_INPUT_FILTER_NAME("inputFilter");
+const std::u16string ERROR_TEXT = u"error_text";
+const std::u16string ERROR_TEXT2 = u"error_text2";
+const std::string STR_TEST_TEXT("test_text");
+const std::string STR_TEST_TEXT2("test_text2");
 const std::string COLOR_RED = "#FFFF0000";
 const std::string COLOR_BLACK = "#FF000000";
 const std::string COLOR_TRANSPARENT = "#00000000";
@@ -264,7 +269,6 @@ std::vector<DecorationStyleTestStep> TEXT_DECORATION_STYLE_TEST_PLAN = {
 
 // events
 const auto CHECK_TEXT(u"test_text");
-const auto ERROR_TEXT(u"test_error_text");
 PreviewText PREVIEW_TEXT = { .offset = 1234, .value = u"test_offset" };
 const auto EMPTY_TEXT(u"");
 
@@ -339,14 +343,7 @@ GENERATED_ArkUITextAreaEventsReceiver recv {
             if (didDeleteDirection) {
                 g_deleteDirection = didDeleteDirection.value();
             }
-        },
-#ifdef WRONG_CALLBACK
-    .inputFilter =
-        [](Ark_Int32 nodeId, const Ark_String data) {
-            g_EventErrorTestString = Converter::Convert<std::u16string>(data);
-            g_EventTestString = g_EventErrorTestString;
         }
-#endif
 };
 
 const GENERATED_ArkUITextAreaEventsReceiver* getTextAreaEventsReceiverTest()
@@ -1260,7 +1257,7 @@ HWTEST_F(TextAreaModifierTest, setOnContentScrollTest, TestSize.Level1)
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setCopyOption
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setCopyOptionTest, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setCopyOptionTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("copyOption");
     ASSERT_NE(modifier_->setCopyOption, nullptr);
@@ -1275,7 +1272,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setCopyOptionTest, TestSize.Level1)
     };
 
     auto checkVal = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal, "CopyOptions.Local"); // Now default value is CopyOptions.Distributed. It is wrong.
+    EXPECT_EQ(checkVal, "CopyOptions.Local");
     for (const auto& [value, expectVal] : copyOptionTestPlan) {
         modifier_->setCopyOption(node_, value);
         checkVal = GetStringAttribute(node_, PROP_NAME);
@@ -1284,31 +1281,88 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setCopyOptionTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setInputFilterTest
+ * @tc.name: setInputFilterTestValidValues
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setInputFilter
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setInputFilterTest, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setInputFilterTestValidValues, TestSize.Level1)
 {
-    static const std::string PROP_NAME("inputFilter");
-    g_EventTestString = u"";
-    g_EventErrorTestString = u"";
     ASSERT_NE(modifier_->setInputFilter, nullptr);
+    struct CheckEvent {
+        int32_t nodeId;
+        std::u16string error;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto onErrorChange = [](Ark_Int32 nodeId, const Ark_String error) {
+        checkEvent = {
+            .nodeId = nodeId,
+            .error = Converter::Convert<std::u16string>(error)
+        };
+    };
 
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Opt_Callback_String_Void func{};
-    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
-    auto textFieldEventHub = frameNode->GetEventHub<TextFieldEventHub>();
-
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    Callback_String_Void callBackValue = {
+        .resource = Ark_CallbackResource {
+            .resourceId = frameNode->GetId(),
+            .hold = nullptr,
+            .release = nullptr,
+        },
+        .call = onErrorChange
+    };
+    auto optCallbackValue = Converter::ArkValue<Opt_Callback_String_Void>(callBackValue);
     Converter::ConvContext ctx;
-    auto sendString = Converter::ArkValue<Ark_String>(std::u16string(ERROR_TEXT), &ctx);
+    auto sendString = Converter::ArkValue<Ark_String>(STR_TEST_TEXT, &ctx);
     auto sendResource = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(sendString);
-    modifier_->setInputFilter(node_, &sendResource, &func);
-    textFieldEventHub->FireOnInputFilterError(ERROR_TEXT);
-    auto filterValue = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(StringUtils::Str8ToStr16(filterValue), ERROR_TEXT);
-    EXPECT_EQ(g_EventTestString, ERROR_TEXT);
-    EXPECT_EQ(g_EventErrorTestString, ERROR_TEXT);
+    sendString = Converter::ArkValue<Ark_String>(STR_TEST_TEXT2, &ctx);
+    auto sendResource2 = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(sendString);
+
+    modifier_->setInputFilter(node_, &sendResource, &optCallbackValue);
+    EXPECT_FALSE(checkEvent.has_value());
+    eventHub->FireOnInputFilterError(ERROR_TEXT);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->error, ERROR_TEXT);
+    auto attrValue = GetStringAttribute(node_, ATTRIBUTE_INPUT_FILTER_NAME);
+    EXPECT_EQ(attrValue, STR_TEST_TEXT);
+    
+    checkEvent.reset();
+    modifier_->setInputFilter(node_, &sendResource2, &optCallbackValue);
+    EXPECT_FALSE(checkEvent.has_value());
+    eventHub->FireOnInputFilterError(ERROR_TEXT2);
+    ASSERT_TRUE(checkEvent.has_value());
+    EXPECT_EQ(checkEvent->nodeId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->error, ERROR_TEXT2);
+    attrValue = GetStringAttribute(node_, ATTRIBUTE_INPUT_FILTER_NAME);
+    EXPECT_EQ(attrValue, STR_TEST_TEXT2);
+}
+
+/**
+ * @tc.name: setInputFilterTestInvalidValues
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setInputFilter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setInputFilterTestInvalidValues, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setInputFilter, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto optCallbackValue = Converter::ArkValue<Opt_Callback_String_Void>();
+    Converter::ConvContext ctx;
+    auto sendString = Converter::ArkValue<Ark_String>(STR_TEST_TEXT, &ctx);
+    auto sendResource = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(sendString);
+    sendString = Converter::ArkValue<Ark_String>(STR_TEST_TEXT2, &ctx);
+    auto sendResource2 = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(sendString);
+
+    modifier_->setInputFilter(node_, &sendResource, &optCallbackValue);
+    eventHub->FireOnInputFilterError(ERROR_TEXT);
+    auto attrValue = GetStringAttribute(node_, ATTRIBUTE_INPUT_FILTER_NAME);
+    EXPECT_EQ(attrValue, STR_TEST_TEXT);
+
+    modifier_->setInputFilter(node_, &sendResource2, nullptr);
+    eventHub->FireOnInputFilterError(ERROR_TEXT);
+    attrValue = GetStringAttribute(node_, ATTRIBUTE_INPUT_FILTER_NAME);
+    EXPECT_EQ(attrValue, STR_TEST_TEXT2);
 }
 
 /**
@@ -1652,5 +1706,82 @@ HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest2, TestSize.Level1)
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
         checkValue(input, expected, Converter::ArkUnion<Opt_ResourceStr, Ark_String>(value));
     }
+}
+
+/**
+ * @tc.name: setOnPasteTestCallEvent
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setOnPaste
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setOnPasteTestCallEvent, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnPaste, nullptr);
+    TextCommonEvent event;
+    const std::u16string testString = u"testText";
+    struct CheckEvent {
+        int32_t resourceId;
+        std::u16string content;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto testCallback = [](const Ark_Int32 resourceId, const Ark_String content, const Ark_PasteEvent event) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .content = Converter::Convert<std::u16string>(content)
+        };
+        auto arkCallback = Converter::OptConvert<Callback_Void>(event.preventDefault);
+        if (arkCallback) {
+            auto helper = CallbackHelper(*arkCallback);
+            helper.Invoke();
+        }
+    };
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto arkCallback = Converter::ArkValue<Callback_String_PasteEvent_Void>(testCallback, frameNode->GetId());
+    ASSERT_NE(eventHub, nullptr);
+    modifier_->setOnPaste(node_, &arkCallback);
+    EXPECT_FALSE(checkEvent);
+    EXPECT_FALSE(event.IsPreventDefault());
+    eventHub->FireOnPasteWithEvent(testString, event);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_TRUE(event.IsPreventDefault());
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->content, testString);
+}
+
+/**
+ * @tc.name: setOnPasteTest
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setOnPaste
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setOnPasteTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnPaste, nullptr);
+    TextCommonEvent event;
+    const std::u16string testString = u"testText";
+    struct CheckEvent {
+        int32_t resourceId;
+        std::u16string content;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto testCallback = [](const Ark_Int32 resourceId, const Ark_String content, const Ark_PasteEvent event) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .content = Converter::Convert<std::u16string>(content)
+        };
+    };
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    auto arkCallback = Converter::ArkValue<Callback_String_PasteEvent_Void>(testCallback, frameNode->GetId());
+    ASSERT_NE(eventHub, nullptr);
+    modifier_->setOnPaste(node_, &arkCallback);
+    EXPECT_FALSE(checkEvent);
+    EXPECT_FALSE(event.IsPreventDefault());
+    eventHub->FireOnPasteWithEvent(testString, event);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_FALSE(event.IsPreventDefault());
+    EXPECT_EQ(checkEvent->resourceId, frameNode->GetId());
+    EXPECT_EQ(checkEvent->content, testString);
 }
 } // namespace OHOS::Ace::NG
