@@ -70,8 +70,4 @@ const GENERATED_ArkUITextAreaControllerAccessor* GetTextAreaControllerAccessor()
     };
     return &TextAreaControllerAccessorImpl;
 }
-
-struct TextAreaControllerPeer {
-    virtual ~TextAreaControllerPeer() = default;
-};
 }

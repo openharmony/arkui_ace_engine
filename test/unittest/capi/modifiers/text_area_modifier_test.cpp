@@ -15,21 +15,26 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "generated/test_fixtures.h"
 
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 
+#include "core/interfaces/native/implementation/text_area_controller_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
-
 namespace OHOS::Ace::NG {
 
 using namespace testing;
 using namespace testing::ext;
 
 namespace {
+const auto ATTRIBUTE_PLACEHOLDER_NAME = "placeholder";
+const auto ATTRIBUTE_TEXT_NAME = "text";
+const auto ATTRIBUTE_PLACEHOLDER_VALUE = "xxx";
+const auto ATTRIBUTE_TEXT_VALUE = "yyy";
 const std::string COLOR_RED = "#FFFF0000";
 const std::string COLOR_BLACK = "#FF000000";
 const std::string COLOR_TRANSPARENT = "#00000000";
@@ -364,6 +369,10 @@ public:
         ModifierTestBase::SetUpTestCase();
 
         SetupTheme<TextFieldTheme>();
+        for (auto& [id, strid, res] : Fixtures::resourceInitTable) {
+            AddResource(id, res);
+            AddResource(strid, res);
+        }
 
         fullAPI_->setArkUIEventsAPI(GetArkUiEventsAPITest());
     }
@@ -383,26 +392,6 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderColorTest, TestSize.Level1)
     EXPECT_EQ(checkVal, COLOR_BLACK);
 
     for (const auto& [value, expectVal] : COLOR_TEST_PLAN) {
-        modifier_->setPlaceholderColor(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
-        EXPECT_EQ(checkVal, expectVal);
-    }
-}
-
-/**
- * @tc.name: setPlaceholderColorTestRes
- * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setPlaceholderColor
- * @tc.type: FUNC
- */
-HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderColorTestRes, TestSize.Level1)
-{
-    static const std::string PROP_NAME("placeholderColor");
-    ASSERT_NE(modifier_->setPlaceholderColor, nullptr);
-
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal, COLOR_BLACK);
-
-    for (const auto& [value, expectVal] : COLOR_TEST_PLAN_RES) {
         modifier_->setPlaceholderColor(node_, &value);
         checkVal = GetStringAttribute(node_, PROP_NAME);
         EXPECT_EQ(checkVal, expectVal);
@@ -800,26 +789,6 @@ HWTEST_F(TextAreaModifierTest, setLineHeightTest, TestSize.Level1)
     };
 
     for (const auto& [value, expectVal] : testPlan) {
-        modifier_->setLineHeight(node_, &value);
-        checkVal = GetStringAttribute(node_, PROP_NAME);
-        EXPECT_EQ(checkVal, expectVal);
-    }
-}
-
-/**
- * @tc.name: setLineHeightTestRes
- * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setLineHeight
- * @tc.type: FUNC
- */
-HWTEST_F(TextAreaModifierTest, DISABLED_setLineHeightTest, TestSize.Level1)
-{
-    static const std::string PROP_NAME("lineHeight");
-    ASSERT_NE(modifier_->setLineHeight, nullptr);
-
-    auto checkVal = GetStringAttribute(node_, PROP_NAME);
-    EXPECT_EQ(checkVal, "0.00vp");
-
-    for (const auto& [value, expectVal] : UNION_NUM_STR_RES_TEST_PLAN_RES) {
         modifier_->setLineHeight(node_, &value);
         checkVal = GetStringAttribute(node_, PROP_NAME);
         EXPECT_EQ(checkVal, expectVal);
@@ -1367,8 +1336,8 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest1, TestSize.Level1)
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
         auto checkSize = placeholderFont->GetString("size");
-        auto checkFamily = placeholderFont->GetString("fontFamily");
-        auto checkWeight = placeholderFont->GetString("fontWeight");
+        auto checkFamily = placeholderFont->GetString("family");
+        auto checkWeight = placeholderFont->GetString("weight");
         auto checkStyle = placeholderFont->GetString("style");
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1402,8 +1371,8 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest2, TestSize.Level1)
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
         auto checkSize = placeholderFont->GetString("size");
-        auto checkFamily = placeholderFont->GetString("fontFamily");
-        auto checkWeight = placeholderFont->GetString("fontWeight");
+        auto checkFamily = placeholderFont->GetString("family");
+        auto checkWeight = placeholderFont->GetString("weight");
         auto checkStyle = placeholderFont->GetString("style");
         EXPECT_EQ(checkSize, sizeStr);
         EXPECT_EQ(checkFamily, familyStr);
@@ -1437,7 +1406,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest3, TestSize.Level1)
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
         auto checkSize = placeholderFont->GetString("size");
-        auto checkFamily = placeholderFont->GetString("fontFamily");
+        auto checkFamily = placeholderFont->GetString("family");
         auto checkWeight = placeholderFont->GetString("weight");
         auto checkStyle = placeholderFont->GetString("style");
         EXPECT_EQ(checkSize, sizeStr);
@@ -1448,46 +1417,11 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest3, TestSize.Level1)
 }
 
 /**
- * @tc.name: setPlaceholderFontTestRes
+ * @tc.name: setPlaceholderFontTest4
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setPlaceholderFont.
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTestRes, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
-
-    Ark_Font font = {
-        .family = UNION_RESOURCE_STRING_PLAN[0].first,
-        .size = OPT_LENGTH_TEST_PLAN[0].first,
-        .style = FONT_STYLE_TEST_PLAN[0].first,
-        .weight = FONT_WEIGHT_TEST_PLAN[0].first
-    };
-    auto sizeStr = OPT_LENGTH_TEST_PLAN[0].second;
-    auto styleStr = FONT_STYLE_TEST_PLAN[0].second;
-    auto weightStr = FONT_WEIGHT_TEST_PLAN[0].second;
-
-    for (auto family : UNION_RESOURCE_STRING_PLAN) {
-        font.family = family.first;
-        modifier_->setPlaceholderFont(node_, &font);
-        auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
-        auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
-        auto checkSize = placeholderFont->GetString("size");
-        auto checkFamily = placeholderFont->GetString("fontFamily");
-        auto checkWeight = placeholderFont->GetString("fontWeight");
-        auto checkStyle = placeholderFont->GetString("style");
-        EXPECT_EQ(checkSize, sizeStr);
-        EXPECT_EQ(checkFamily,  family.second);
-        EXPECT_EQ(checkStyle, styleStr);
-        EXPECT_EQ(checkWeight, weightStr);
-    }
-}
-
-/**
- * @tc.name: setPlaceholderFontTest5
- * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setPlaceholderFont.
- * @tc.type: FUNC
- */
-HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest5, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest4, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setPlaceholderFont, nullptr);
 
@@ -1507,8 +1441,8 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTest5, TestSize.Level1)
         auto placeholderFontJSON = GetStringAttribute(node_, "placeholderFont");
         auto placeholderFont = JsonUtil::ParseJsonString(placeholderFontJSON);
         auto checkSize = placeholderFont->GetString("size");
-        auto checkFamily = placeholderFont->GetString("fontFamily");
-        auto checkWeight = placeholderFont->GetString("fontWeight");
+        auto checkFamily = placeholderFont->GetString("family");
+        auto checkWeight = placeholderFont->GetString("weight");
         auto checkStyle = placeholderFont->GetString("style");
         EXPECT_EQ(checkSize, size.second);
         EXPECT_EQ(checkFamily,  familyStr);
@@ -1579,26 +1513,6 @@ HWTEST_F(TextAreaModifierTest, setLetterSpacingTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setLetterSpacingTestRes
- * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setLetterSpacing
- * @tc.type: FUNC
- */
-HWTEST_F(TextAreaModifierTest, DISABLED_setLetterSpacingTestRes, TestSize.Level1)
-{
-    ASSERT_NE(modifier_->setLetterSpacing, nullptr);
-    const auto letterSpacingAttr("letterSpacing");
-
-    auto checkVal = GetStringAttribute(node_, letterSpacingAttr);
-    EXPECT_EQ(checkVal, "0.00px");
-
-    for (const auto &[value, expectVal]: UNION_NUM_STR_RES_TEST_PLAN_RES) {
-        modifier_->setLetterSpacing(node_, &value);
-        checkVal = GetStringAttribute(node_, letterSpacingAttr);
-        EXPECT_EQ(checkVal, expectVal);
-    }
-}
-
-/**
  * @tc.name: setContentTypeTest
  * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setContentType
  * @tc.type: FUNC
@@ -1637,6 +1551,106 @@ HWTEST_F(TextAreaModifierTest, setContentTypeTest, TestSize.Level1)
         modifier_->setContentType(node_, value);
         checkVal = GetStringAttribute(node_, PROP_NAME);
         EXPECT_EQ(checkVal, expectVal);
+    }
+}
+
+/**
+ * @tc.name: setTextAreaOptionsTest
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setTextAreaOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setTextAreaOptions, nullptr);
+
+    // assume nothing bad with invalid and empty options
+    modifier_->setTextAreaOptions(node_, nullptr);
+    auto optionsUndef = Converter::ArkValue<Opt_TextAreaOptions>();
+    modifier_->setTextAreaOptions(node_, &optionsUndef);
+
+    Ark_TextAreaOptions optionsInvalid;
+    optionsInvalid.text = Converter::ArkValue<Opt_ResourceStr>();
+    optionsInvalid.placeholder = Converter::ArkValue<Opt_ResourceStr>();
+    optionsInvalid.controller = Converter::ArkValue<Opt_TextAreaController>();
+    auto optionsInvalidDef = Converter::ArkValue<Opt_TextAreaOptions>();
+    modifier_->setTextAreaOptions(node_, &optionsInvalidDef);
+
+    // set the invoke checker to the internal controller
+    bool checkInvoke = false;
+    auto frameNode = reinterpret_cast<FrameNode *>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    std::optional<std::u16string> placeholder;
+    std::optional<std::u16string> text;
+    auto internalController = TextFieldModelNG::GetController(frameNode, placeholder, text);
+    ASSERT_NE(internalController, nullptr);
+    internalController->SetStopEditing([&checkInvoke]() {
+        checkInvoke = true;
+    });
+
+    // create the external TextAreaController peer and attach modifier to it
+    TextAreaControllerPeer peer;
+    Ark_TextAreaOptions options;
+    options.text = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(ATTRIBUTE_TEXT_VALUE);
+    options.placeholder = Converter::ArkUnion<Opt_ResourceStr, Ark_String>(ATTRIBUTE_PLACEHOLDER_VALUE);
+    options.controller = Converter::ArkValue<Opt_TextAreaController>(peer);
+    auto optionsDef = Converter::ArkValue<Opt_TextAreaOptions>(options);
+    modifier_->setTextAreaOptions(node_, &optionsDef);
+
+    // check initial state of invoke checker
+    EXPECT_FALSE(checkInvoke);
+
+    // simulate the action from the external peer
+    peer.GetController()->StopEditing();
+
+    // check the expected state of invoke checker
+    EXPECT_TRUE(checkInvoke);
+
+    // check the expected "placeholder" and "text" attribute values
+    auto checkVal = GetStringAttribute(node_, ATTRIBUTE_PLACEHOLDER_NAME);
+    EXPECT_EQ(checkVal, ATTRIBUTE_PLACEHOLDER_VALUE);
+    checkVal = GetStringAttribute(node_, ATTRIBUTE_TEXT_NAME);
+    EXPECT_EQ(checkVal, ATTRIBUTE_TEXT_VALUE);
+}
+
+/**
+ * @tc.name: setTextAreaOptionsTest2
+ * @tc.desc: Check the functionality of GENERATED_ArkUITextAreaModifier.setTextAreaOptions
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setTextAreaOptionsTest2, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setTextAreaOptions, nullptr);
+    Opt_ResourceStr initValue =
+        Converter::ArkUnion<Opt_ResourceStr, Ark_String>(std::get<1>(Fixtures::testFixtureStringValidValues[0]));
+    auto checkValue = [this, &initValue](const std::string& input,
+            const std::string& expectedStr, const Opt_ResourceStr& value) {
+        Ark_TextAreaOptions options;
+        TextAreaControllerPeer peer;
+        Opt_ResourceStr inputValue = initValue;
+        inputValue = value;
+        options.text = inputValue;
+        options.placeholder = inputValue;
+        options.controller = Converter::ArkValue<Opt_TextAreaController>(peer);
+        auto optionsDef = Converter::ArkValue<Opt_TextAreaOptions>(options);
+        modifier_->setTextAreaOptions(node_, &optionsDef);
+
+        auto jsonValue = GetJsonValue(node_);
+        ASSERT_NE(jsonValue, nullptr);
+        auto checkVal = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PLACEHOLDER_NAME);
+        EXPECT_EQ(checkVal, expectedStr)
+            << "Input value is: " << input << ", method: setTextAreaOptions, attribute: "
+            << ATTRIBUTE_PLACEHOLDER_NAME;
+        checkVal = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TEXT_NAME);
+        EXPECT_EQ(checkVal, expectedStr)
+            << "Input value is: " << input << ", method: setTextAreaOptions, attribute: "
+            << ATTRIBUTE_TEXT_NAME;
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringResValidValues) {
+        checkValue(input, expected, Converter::ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+        checkValue(input, expected, Converter::ArkUnion<Opt_ResourceStr, Ark_String>(value));
     }
 }
 } // namespace OHOS::Ace::NG

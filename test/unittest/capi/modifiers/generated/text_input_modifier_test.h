@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,9 +60,10 @@ const auto ATTRIBUTE_TEXT_INDENT_DEFAULT_VALUE = "0.00vp";
 const auto ATTRIBUTE_PLACEHOLDER_FONT_I_SIZE_NAME = "size";
 const auto ATTRIBUTE_PLACEHOLDER_FONT_I_SIZE_DEFAULT_VALUE = "0.00px";
 const auto ATTRIBUTE_PLACEHOLDER_FONT_I_WEIGHT_NAME = "weight";
-const auto ATTRIBUTE_PLACEHOLDER_FONT_I_WEIGHT_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_PLACEHOLDER_FONT_I_WEIGHT_DEFAULT_VALUE = "FontWeight.Normal";
 const auto ATTRIBUTE_PLACEHOLDER_FONT_I_FAMILY_NAME = "family";
-const auto ATTRIBUTE_PLACEHOLDER_FONT_I_FAMILY_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_PLACEHOLDER_FONT_I_FAMILY_DEFAULT_VALUE = "Harmony"
+                                                               "OS Sans";
 const auto ATTRIBUTE_PLACEHOLDER_FONT_I_STYLE_NAME = "style";
 const auto ATTRIBUTE_PLACEHOLDER_FONT_I_STYLE_DEFAULT_VALUE = "FontStyle.Normal";
 const auto ATTRIBUTE_ENTER_KEY_TYPE_NAME = "enterKeyType";
