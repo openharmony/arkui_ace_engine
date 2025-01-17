@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "foundation/arkui/ace_engine/interfaces/native/native_gesture.h"
 #include "core/interfaces/native/node/node_gesture_modifier.h"
 #include <securec.h>
 
@@ -21,6 +22,9 @@
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/gestures/recognizers/pan_recognizer.h"
+#include "core/components_ng/gestures/recognizers/pinch_recognizer.h"
+#include "core/components_ng/gestures/recognizers/rotation_recognizer.h"
+#include "core/components_ng/gestures/recognizers/swipe_recognizer.h"
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/pinch_gesture.h"
@@ -762,6 +766,116 @@ ArkUI_Int32 getPanGestureDirectionMask(ArkUIGestureRecognizer* recognizer, ArkUI
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 getSwipeGestureDirectionMask(ArkUIGestureRecognizer* recognizer, ArkUISwipeGestureDirection* direction)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(gestureRecognizer);
+    CHECK_NULL_RETURN(swipeRecognizer, ERROR_CODE_PARAM_INVALID);
+    *direction = static_cast<ArkUISwipeGestureDirection>(swipeRecognizer->GetDirection().type);
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 getGestureFingerCount(ArkUIGestureRecognizer* recognizer, int* finger)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto multiFingersRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(gestureRecognizer);
+    CHECK_NULL_RETURN(multiFingersRecognizer, ERROR_CODE_PARAM_INVALID);
+    *finger = static_cast<int32_t>(multiFingersRecognizer->GetFingers());
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 getGestureLimitFingerCount(ArkUIGestureRecognizer* recognizer, bool* isLimited)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto multiFingersRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(gestureRecognizer);
+    CHECK_NULL_RETURN(multiFingersRecognizer, ERROR_CODE_PARAM_INVALID);
+    *isLimited = static_cast<bool>(multiFingersRecognizer->GetLimitFingerCount());
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 getLongPressGestureRepeat(ArkUIGestureRecognizer* recognizer, bool* isRepeat)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(gestureRecognizer);
+    CHECK_NULL_RETURN(longPressRecognizer, ERROR_CODE_PARAM_INVALID);
+    *isRepeat = static_cast<bool>(longPressRecognizer->GetIsRepeat());
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 getPanGestureDistance(ArkUIGestureRecognizer* recognizer, double* distance)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto panRecognizer = AceType::DynamicCast<PanRecognizer>(gestureRecognizer);
+    CHECK_NULL_RETURN(panRecognizer, ERROR_CODE_PARAM_INVALID);
+    *distance = static_cast<bool>(panRecognizer->GetDistance());
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 getPinchGestureDistance(ArkUIGestureRecognizer* recognizer, double* distance)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto pinchRecognizer = AceType::DynamicCast<PinchRecognizer>(gestureRecognizer);
+    CHECK_NULL_RETURN(pinchRecognizer, ERROR_CODE_PARAM_INVALID);
+    *distance = static_cast<bool>(pinchRecognizer->GetDistance());
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 getSwipeGestureSpeed(ArkUIGestureRecognizer* recognizer, double* speed)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto swipeRecognizer = AceType::DynamicCast<SwipeRecognizer>(gestureRecognizer);
+    CHECK_NULL_RETURN(swipeRecognizer, ERROR_CODE_PARAM_INVALID);
+    *speed = static_cast<bool>(swipeRecognizer->GetSpeed());
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 getLongPressGestureDuration(ArkUIGestureRecognizer* recognizer, int* duration)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(gestureRecognizer);
+    CHECK_NULL_RETURN(longPressRecognizer, ERROR_CODE_PARAM_INVALID);
+    *duration = static_cast<bool>(longPressRecognizer->GetDuration());
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 getRotationGestureAngle(ArkUIGestureRecognizer* recognizer, double* angle)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto rotationRecognizer = AceType::DynamicCast<RotationRecognizer>(gestureRecognizer);
+    CHECK_NULL_RETURN(rotationRecognizer, ERROR_CODE_PARAM_INVALID);
+    *angle = static_cast<bool>(rotationRecognizer->GetAngle());
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 getTapGestureDistanceThreshold(ArkUIGestureRecognizer* recognizer, double* distanceThreshold)
+{
+    auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
+    CHECK_NULL_RETURN(rawRecognizer, ERROR_CODE_PARAM_INVALID);
+    auto gestureRecognizer = AceType::Claim(rawRecognizer);
+    auto tapRecognizer = AceType::DynamicCast<ClickRecognizer>(gestureRecognizer);
+    CHECK_NULL_RETURN(tapRecognizer, ERROR_CODE_PARAM_INVALID);
+    *distanceThreshold = static_cast<bool>(tapRecognizer->GetDistanceThreshold());
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
 ArkUI_Bool isBuiltInGesture(ArkUIGestureRecognizer* recognizer)
 {
     auto* rawRecognizer = reinterpret_cast<NG::NGGestureRecognizer*>(recognizer->recognizer);
@@ -866,6 +980,16 @@ const ArkUIGestureModifier* GetGestureModifier()
         .gestureEventTargetInfoIsScrollBegin = gestureEventTargetInfoIsScrollBegin,
         .gestureEventTargetInfoIsScrollEnd = gestureEventTargetInfoIsScrollEnd,
         .getPanGestureDirectionMask = getPanGestureDirectionMask,
+        .getSwipeGestureDirectionMask = getSwipeGestureDirectionMask,
+        .getGestureFingerCount = getGestureFingerCount,
+        .getGestureLimitFingerCount = getGestureLimitFingerCount,
+        .getLongPressGestureRepeat = getLongPressGestureRepeat,
+        .getPanGestureDistance = getPanGestureDistance,
+        .getPinchGestureDistance = getPinchGestureDistance,
+        .getSwipeGestureSpeed = getSwipeGestureSpeed,
+        .getLongPressGestureDuration = getLongPressGestureDuration,
+        .getRotationGestureAngle = getRotationGestureAngle,
+        .getTapGestureDistanceThreshold = getTapGestureDistanceThreshold,
         .isBuiltInGesture = isBuiltInGesture,
         .getGestureTag = getGestureTag,
         .getGestureBindNodeId = getGestureBindNodeId,
@@ -907,6 +1031,26 @@ const CJUIGestureModifier* GetCJUIGestureModifier()
     return &modifier;
 }
 
+ArkUI_Int32 ConvertGestureTypeNameToArkUIType(GestureTypeName gestureTypeName)
+{
+    switch (gestureTypeName) {
+        case GestureTypeName::TAP_GESTURE:
+            return static_cast<ArkUI_Int32>(ArkUI_GestureRecognizerType::TAP_GESTURE);
+        case GestureTypeName::LONG_PRESS_GESTURE:
+            return static_cast<ArkUI_Int32>(ArkUI_GestureRecognizerType::LONG_PRESS_GESTURE);
+        case GestureTypeName::PAN_GESTURE:
+            return static_cast<ArkUI_Int32>(ArkUI_GestureRecognizerType::PAN_GESTURE);
+        case GestureTypeName::PINCH_GESTURE:
+            return static_cast<ArkUI_Int32>(ArkUI_GestureRecognizerType::PINCH_GESTURE);
+        case GestureTypeName::SWIPE_GESTURE:
+            return static_cast<ArkUI_Int32>(ArkUI_GestureRecognizerType::SWIPE_GESTURE);
+        case GestureTypeName::ROTATION_GESTURE:
+            return static_cast<ArkUI_Int32>(ArkUI_GestureRecognizerType::ROTATION_GESTURE);
+        default:
+            return static_cast<ArkUI_Int32>(gestureTypeName);
+    }
+}
+
 ArkUIGestureRecognizer* CreateGestureRecognizer(const RefPtr<NG::NGGestureRecognizer>& recognizer)
 {
     CHECK_NULL_RETURN(recognizer, nullptr);
@@ -921,7 +1065,7 @@ ArkUIGestureRecognizer* CreateGestureRecognizer(const RefPtr<NG::NGGestureRecogn
         arkUIGestureRecognizer->capi = false;
         gestureInfo->SetUserData(arkUIGestureRecognizer);
     }
-    arkUIGestureRecognizer->type = static_cast<int32_t>(gestureInfo->GetRecognizerType());
+    arkUIGestureRecognizer->type = ConvertGestureTypeNameToArkUIType(gestureInfo->GetRecognizerType());
     arkUIGestureRecognizer->recognizer = reinterpret_cast<void*>(AceType::RawPtr(recognizer));
     auto attachNode = recognizer->GetAttachedNode().Upgrade();
     if (attachNode) {

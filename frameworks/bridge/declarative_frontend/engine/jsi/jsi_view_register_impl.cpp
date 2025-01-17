@@ -791,7 +791,12 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ScrollableTargetInfo", JSScrollableTargetInfo::JSBind },
     { "PanRecognizer", JSPanRecognizer::JSBind },
     { "LinearIndicator", JSLinearIndicator::JSBind },
-    { "LinearIndicatorController", JSLinearIndicatorController::JSBind }
+    { "LinearIndicatorController", JSLinearIndicatorController::JSBind },
+    { "TapRecognizer", JSTapRecognizer::JSBind },
+    { "LongPressRecognizer", JSLongPressRecognizer::JSBind },
+    { "SwipeRecognizer", JSSwipeRecognizer::JSBind },
+    { "PinchRecognizer", JSPinchRecognizer::JSBind },
+    { "RotationRecognizer", JSRotationRecognizer::JSBind }
 };
 
 void RegisterBindFuncs(BindingTarget globalObj)

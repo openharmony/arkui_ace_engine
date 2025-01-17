@@ -76,6 +76,11 @@ public:
         return count_;
     }
 
+    double GetDistanceThreshold() const
+    {
+        return distanceThreshold_;
+    }
+
     GestureEventFunc GetTapActionFunc()
     {
         auto callback = [weak = WeakClaim(this)](GestureEvent& info) {

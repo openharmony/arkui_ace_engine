@@ -3357,6 +3357,17 @@ struct ArkUIGestureModifier {
     ArkUI_Int32 (*gestureEventTargetInfoIsScrollBegin)(ArkUIGestureEventTargetInfo* info, bool* ret);
     ArkUI_Int32 (*gestureEventTargetInfoIsScrollEnd)(ArkUIGestureEventTargetInfo* info, bool* ret);
     ArkUI_Int32 (*getPanGestureDirectionMask)(ArkUIGestureRecognizer* recognizer, ArkUIGestureDirection* direction);
+    ArkUI_Int32 (*getSwipeGestureDirectionMask)(
+        ArkUIGestureRecognizer* recognizer, ArkUISwipeGestureDirection* direction);
+    ArkUI_Int32 (*getGestureFingerCount)(ArkUIGestureRecognizer* recognizer, int* finger);
+    ArkUI_Int32 (*getGestureLimitFingerCount)(ArkUIGestureRecognizer* recognizer, bool* isLimited);
+    ArkUI_Int32 (*getLongPressGestureRepeat)(ArkUIGestureRecognizer* recognizer, bool* isRepeat);
+    ArkUI_Int32 (*getPanGestureDistance)(ArkUIGestureRecognizer* recognizer, double* distance);
+    ArkUI_Int32 (*getPinchGestureDistance)(ArkUIGestureRecognizer* recognizer, double* distance);
+    ArkUI_Int32 (*getSwipeGestureSpeed)(ArkUIGestureRecognizer* recognizer, double* speed);
+    ArkUI_Int32 (*getLongPressGestureDuration)(ArkUIGestureRecognizer* recognizer, int* duration);
+    ArkUI_Int32 (*getRotationGestureAngle)(ArkUIGestureRecognizer* recognizer, double* angle);
+    ArkUI_Int32 (*getTapGestureDistanceThreshold)(ArkUIGestureRecognizer* recognizer, double* distanceThreshold);
     ArkUI_Bool (*isBuiltInGesture)(ArkUIGestureRecognizer* recognizer);
     ArkUI_Int32 (*getGestureTag)(
         ArkUIGestureRecognizer* recognizer, char* buffer, ArkUI_Int32 bufferSize, ArkUI_Int32* result);
