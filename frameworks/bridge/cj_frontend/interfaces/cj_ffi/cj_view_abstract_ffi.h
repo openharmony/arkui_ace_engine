@@ -281,6 +281,26 @@ struct CJAlignRuleOption {
     float* verticalBias;
 };
 
+struct CJCaretOffset {
+    double index;
+    double x;
+    double y;
+};
+
+struct CJVisibleAreaEventOptions {
+    VectorFloat64Ptr ratios;
+    double expectedUpdateInterval;
+};
+
+struct CJMutiShadowOptions {
+    double radiusValue;
+    double offsetXValue;
+    double offsetYValue;
+    int32_t radiusUnit;
+    int32_t offsetXUnit;
+    int32_t offsetYUnit;
+};
+
 struct CJChainInfo {
     int32_t direction;
     int32_t style;
