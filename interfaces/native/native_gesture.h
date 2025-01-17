@@ -483,6 +483,19 @@ int32_t OH_ArkUI_GetResponseRecognizersFromInterruptInfo(const ArkUI_GestureInte
 int32_t OH_ArkUI_SetGestureRecognizerEnabled(ArkUI_GestureRecognizer* recognizer, bool enabled);
 
 /**
+* @brief Sets whether to enable strict finger count checking. If this feature is enabled and the actual number of touch
+*        fingers does not match the set number, the gesture recognition fails.
+*
+* @param recognizer Indicates the pointer to a gesture recognizer.
+* @param limitFingerCount Indicates whether to enable strict finger count checking.
+* @return Returns <b>0</b> if the operation is successful.
+*         Returns <b>401</b> if a parameter error occurs.
+* @since 16
+*/
+int32_t OH_ArkUI_SetGestureRecognizerLimitFingerCount(ArkUI_GestureRecognizer* recognizer, bool limitFingerCount);
+
+
+/**
 * @brief Obtains the enabled state of a gesture recognizer.
 *
 * @param recognizer Indicates the pointer to a gesture recognizer.
