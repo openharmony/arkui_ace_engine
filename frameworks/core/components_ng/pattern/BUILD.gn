@@ -80,7 +80,6 @@ build_component_ng("pattern_ng") {
     "checkboxgroup/checkboxgroup_pattern.cpp",
     "common_view/common_view_model_ng.cpp",
     "container_modal/container_modal_accessibility_property.cpp",
-    "container_modal/container_modal_cj_utils.cpp",
     "container_modal/container_modal_pattern.cpp",
     "container_modal/container_modal_utils.cpp",
     "container_modal/container_modal_view.cpp",
@@ -550,6 +549,9 @@ build_component_ng("pattern_ng") {
     "video/video_pattern.cpp",
     "view_context/view_context_model_ng.cpp",
   ]
+
+  # Add Cangjie application window registration
+  sources += [ "$ace_root/frameworks/bridge/cj_frontend/frontend/container_modal_cj_utils.cpp" ]
 
   if (!ace_engine_feature_wearable) {
     sources += [

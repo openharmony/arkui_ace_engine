@@ -24,7 +24,6 @@
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
-#include "core/components_ng/pattern/container_modal/container_modal_cj_utils.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/container_modal/container_modal_utils.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -45,6 +44,11 @@ constexpr float CURRENT_RATIO = 0.86f;
 constexpr float CURRENT_DURATION = 0.25f;
 } // namespace
 float ContainerModalView::baseScale = 1.0f;
+std::function<RefPtr<NG::FrameNode>()> ContainerModalView::cjTitileBuilder_ = nullptr;
+std::function<RefPtr<NG::FrameNode>(
+    WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern, RefPtr<NG::FrameNode>& containerTitleRow)>
+    ContainerModalView::cjControlButtonBuilder_ = nullptr;
+
 /**
  * The structure of container_modal is designed as follows :
  * |--container_modal(stack)
@@ -100,11 +104,8 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleContainer(RefPtr<FrameNode>& con
     auto containerTitleRow = BuildTitleRow(isFloatingTitle);
     CHECK_NULL_RETURN(containerTitleRow, nullptr);
 
-    auto currentContaioner = Container::GetContainer(Container::CurrentId());
-    CHECK_NULL_RETURN(currentContaioner, nullptr);
-    auto isCjApp = currentContaioner->IsCJApp();
-    if (isCjApp) {
-        auto node = BuildTitleNodeForCj();
+    if (cjTitileBuilder_) {
+        auto node = cjTitileBuilder_();
         NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(node);
     } else {
         auto isSucc = ExecuteCustomTitleAbc();
@@ -118,6 +119,14 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleContainer(RefPtr<FrameNode>& con
     CHECK_NULL_RETURN(customTitleBarNode, nullptr);
     containerTitleRow->AddChild(customTitleBarNode);
     return containerTitleRow;
+}
+
+void ContainerModalView::RegistCJNodeBuilder(std::function<RefPtr<NG::FrameNode>()>& title,
+    std::function<RefPtr<NG::FrameNode>(
+        WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern, RefPtr<NG::FrameNode>& containerTitleRow)>& button)
+{
+    cjTitileBuilder_ = title;
+    cjControlButtonBuilder_ = button;
 }
 
 RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
@@ -252,7 +261,6 @@ RefPtr<FrameNode> ContainerModalView::BuildControlButton(
     buttonEventHub->AddGesture(clickGesture);
     buttonNode->SetDraggable(canDrag);
 
-    
     DimensionOffset offsetDimen(TITLE_BUTTON_RESPONSE_REGIOIN_OFFSET_X, TITLE_BUTTON_RESPONSE_REGIOIN_OFFSET_Y);
     DimensionRect dimenRect(TITLE_BUTTON_RESPONSE_REGIOIN_WIDTH, TITLE_BUTTON_RESPONSE_REGIOIN_HEIGHT, offsetDimen);
     std::vector<DimensionRect> result;

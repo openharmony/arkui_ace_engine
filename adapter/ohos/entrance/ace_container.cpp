@@ -2232,10 +2232,6 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     };
     pipelineContext_->RegisterWindowDensityCallback(std::move(windowDensityCallback));
 
-    if (type_ == FrontendType::DECLARATIVE_CJ) {
-        auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
-        container->SetCJApp();
-    }
     pipelineContext_->SetRootSize(density, width, height);
     if (isFormRender_) {
         pipelineContext_->OnSurfaceDensityChanged(density);

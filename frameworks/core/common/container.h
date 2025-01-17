@@ -250,16 +250,6 @@ public:
         return moduleName_;
     }
 
-    bool IsCJApp()
-    {
-        return IsCJApp_;
-    }
-
-    void SetCJApp()
-    {
-        IsCJApp_ = true;
-    }
-
     virtual bool IsMainWindow() const { return false; }
     virtual bool IsSubWindow() const { return false; }
     virtual bool IsDialogWindow() const { return false; }
@@ -722,7 +712,6 @@ private:
     std::string filesDataPath_;
     std::string tempDir_;
     bool usePartialUpdate_ = false;
-    bool IsCJApp_ = false;
     Settings settings_;
     RefPtr<PageUrlChecker> pageUrlChecker_;
     RefPtr<NG::NavigationRoute> navigationRoute_;

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/container_modal/container_modal_cj_utils.h"
+#include "bridge/cj_frontend/frontend/container_modal_cj_utils.h"
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/image/pixel_map.h"
@@ -21,6 +21,7 @@
 #include "base/subwindow/subwindow_manager.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/theme/advanced_pattern_theme.h"
 #include "core/components_ng/gestures/pan_gesture.h"
 #include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -33,7 +34,6 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components/theme/advanced_pattern_theme.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -164,8 +164,7 @@ void AddButtonHoverEvent(
     inputHub->AddOnHoverEvent(hoverCallBack);
 }
 
-void AddButtonStyleMouseEvent(
-    RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn)
+void AddButtonStyleMouseEvent(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn)
 {
     auto inputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
@@ -178,7 +177,7 @@ void AddButtonMouse(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode)
     auto inputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
     auto mouseTask = [buttonWk = AceType::WeakClaim(AceType::RawPtr(buttonNode)),
-                        imageWk = AceType::WeakClaim(AceType::RawPtr(imageNode))](MouseInfo& info) {
+                         imageWk = AceType::WeakClaim(AceType::RawPtr(imageNode))](MouseInfo& info) {
         auto buttonNode = buttonWk.Upgrade();
         auto imageNode = imageWk.Upgrade();
         CHECK_NULL_VOID(buttonNode && imageNode);
@@ -220,7 +219,7 @@ void AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode)
     auto inputHub = buttonNode->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
     auto hoverTask = [buttonWk = AceType::WeakClaim(AceType::RawPtr(buttonNode)),
-            imageWk = AceType::WeakClaim(AceType::RawPtr(imageNode))](bool isHover) {
+                         imageWk = AceType::WeakClaim(AceType::RawPtr(imageNode))](bool isHover) {
         auto buttonNode = buttonWk.Upgrade();
         auto imageNode = imageWk.Upgrade();
         CHECK_NULL_VOID(buttonNode && imageNode);
@@ -241,8 +240,8 @@ void AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode)
         float imageScale = isHover ? g_baseScale : 1.0f;
         float btnScale = 1.0f;
         AnimationOption option = AnimationOption();
-        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRINGMOTION_RESPONSE,
-            CURRENT_RATIO, CURRENT_DURATION);
+        auto motion =
+            AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRINGMOTION_RESPONSE, CURRENT_RATIO, CURRENT_DURATION);
         option.SetCurve(motion);
         if (isHover) {
             AnimationUtils::Animate(option, [buttonNodeRenderContext, imageIconRenderContext, imageScale, btnScale]() {
@@ -260,7 +259,7 @@ void AddButtonHover(RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode)
     auto hoverEvent = AceType::MakeRefPtr<InputEvent>(std::move(hoverTask));
     inputHub->AddOnHoverEvent(hoverEvent);
 }
-}
+} // namespace
 
 RefPtr<FrameNode> BuildControlButtonForCj(
     InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isCloseButton, bool canDrag)
@@ -329,7 +328,7 @@ RefPtr<FrameNode> BuildControlButtonForCj(
     clickGesture->SetOnActionId(clickCallback);
     buttonEventHub->AddGesture(clickGesture);
     buttonNode->SetDraggable(canDrag);
-    
+
     DimensionOffset offsetDimen(TITLE_BUTTON_RESPONSE_REGIOIN_OFFSET_X, TITLE_BUTTON_RESPONSE_REGIOIN_OFFSET_Y);
     DimensionRect dimenRect(TITLE_BUTTON_RESPONSE_REGIOIN_WIDTH, TITLE_BUTTON_RESPONSE_REGIOIN_HEIGHT, offsetDimen);
     std::vector<DimensionRect> result;
@@ -357,8 +356,7 @@ RefPtr<FrameNode> AddControlButtonsForCj(
     WeakPtr<ContainerModalPatternEnhance>& weakPattern, RefPtr<FrameNode>& containerTitleRow)
 {
     RefPtr<FrameNode> maximizeBtn = BuildControlButtonForCj(
-        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
-        [weakPattern](GestureEvent& info) {
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE, [weakPattern](GestureEvent& info) {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnMaxButtonClick(info);
@@ -396,9 +394,8 @@ RefPtr<FrameNode> AddControlButtonsForCj(
     eventHub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFuc)));
     containerTitleRow->AddChild(maximizeBtn);
 
-    RefPtr<FrameNode> minimizeBtn =BuildControlButtonForCj(
-        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
-        [weakPattern](GestureEvent& info) {
+    RefPtr<FrameNode> minimizeBtn = BuildControlButtonForCj(
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, [weakPattern](GestureEvent& info) {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnMinButtonClick(info);
@@ -424,15 +421,14 @@ RefPtr<FrameNode> AddControlButtonsForCj(
 
 RefPtr<FrameNode> BuildTitleNodeForCj()
 {
-    auto titleRow = FrameNode::CreateFrameNode(
-        V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto titleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_RETURN(titleRow, nullptr);
     auto rowLayoutProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(rowLayoutProperty, nullptr);
 
     // The magic number in the following style refer to the native arkts application titile_node style
-    PaddingProperty padding = {CalcLength(6), CalcLength(6), CalcLength(8), CalcLength(8)};
+    PaddingProperty padding = { CalcLength(6), CalcLength(6), CalcLength(8), CalcLength(8) };
     rowLayoutProperty->UpdatePadding(padding);
     // Set the width to 100%
     Dimension width(1.0, DimensionUnit::PERCENT);

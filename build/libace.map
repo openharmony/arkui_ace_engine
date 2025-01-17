@@ -103,6 +103,9 @@
       OHOS::Ace::Alignment::*;
       OHOS::Ace::LinearColor::*;
       OHOS::Ace::NG::Gradient::*;
+      OHOS::Ace::NG::ContainerModalView::*;
+      OHOS::Ace::NG::BuildTitleNodeForCj*;
+      OHOS::Ace::NG::AddControlButtonsForCj*;
       OHOS::Ace::PixelMap::*;
       OHOS::Ace::MeasureUtil::*;
       OHOS::Ace::ViewPartialUpdateModel::*;
@@ -365,6 +368,7 @@
       VTT?for?OHOS::Ace::NG::OffscreenCanvasPattern;
       VTT?for?OHOS::Ace::NG::ParallelPagePattern;
       VTT?for?OHOS::Ace::NG::ViewAdvancedRegister;
+      VTT?for?OHOS::Ace::NG::ContainerModalView;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -458,6 +462,7 @@
       vtable?for?OHOS::Ace::NG::IndexerModelNG;
       vtable?for?OHOS::Ace::NG::ParallelPagePattern;
       vtable?for?OHOS::Ace::NG::ViewAdvancedRegister;
+      vtable?for?OHOS::Ace::NG::ContainerModalView;      
       vtable?for?OHOS::Ace::NG::SwiperModelNG;
       vtable?for?OHOS::Ace::NG::ListModelNG;
       vtable?for?OHOS::Ace::NG::ListItemModelNG;

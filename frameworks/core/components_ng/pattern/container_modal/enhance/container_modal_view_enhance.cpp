@@ -17,13 +17,12 @@
 
 #include "core/components/theme/advanced_pattern_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/container_modal/container_modal_utils.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "core/components_ng/pattern/container_modal/container_modal_utils.h"
-#include "core/components_ng/pattern/container_modal/container_modal_cj_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -81,16 +80,13 @@ RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
 
     // Confirm that if it is a pure Cangjie application, the node construction is completed on the C side
-    auto currentContaioner = Container::GetContainer(Container::CurrentId());
-    CHECK_NULL_RETURN(currentContaioner, nullptr);
-    auto isCjApp = currentContaioner->IsCJApp();
-    if (isCjApp) {
-        WeakPtr<ContainerModalPatternEnhance> weakPattern = controlButtonsRow->GetPattern<ContainerModalPatternEnhance>();
-        containerModalNode->AddChild(AddControlButtonsForCj(weakPattern, controlButtonsRow));
+    if (cjControlButtonBuilder_) {
+        WeakPtr<ContainerModalPatternEnhance> weakPattern =
+            controlButtonsRow->GetPattern<ContainerModalPatternEnhance>();
+        containerModalNode->AddChild(cjControlButtonBuilder_(weakPattern, controlButtonsRow));
     } else {
         containerModalNode->AddChild(BuildCustomButtonRow(controlButtonsRow));
     }
-    
     containerPattern->Init();
     return containerModalNode;
 }
@@ -121,8 +117,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
 {
     WeakPtr<ContainerModalPatternEnhance> weakPattern = containerNode->GetPattern<ContainerModalPatternEnhance>();
     RefPtr<FrameNode> maximizeBtn = BuildControlButton(
-        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE,
-        [weakPattern](GestureEvent& info) {
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MAXIMIZE, [weakPattern](GestureEvent& info) {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnMaxButtonClick(info);
@@ -160,9 +155,8 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
     eventHub->AddOnHoverEvent(AceType::MakeRefPtr<InputEvent>(std::move(hoverEventFuc)));
     containerTitleRow->AddChild(maximizeBtn);
 
-    RefPtr<FrameNode> minimizeBtn =BuildControlButton(
-        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE,
-        [weakPattern](GestureEvent& info) {
+    RefPtr<FrameNode> minimizeBtn = BuildControlButton(
+        InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_MINIMIZE, [weakPattern](GestureEvent& info) {
             auto pattern = weakPattern.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->OnMinButtonClick(info);
@@ -220,8 +214,8 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildGestureRow(RefPtr<FrameNode>& 
     return gestureRow;
 }
 
-bool ContainerModalViewEnhance::GetContainerModalComponentRect(PipelineContext *pipelineContext,
-    RectF& floatContainerModal, RectF& floatButtons)
+bool ContainerModalViewEnhance::GetContainerModalComponentRect(
+    PipelineContext* pipelineContext, RectF& floatContainerModal, RectF& floatButtons)
 {
     CHECK_NULL_RETURN(pipelineContext, false);
     auto rootNode = pipelineContext->GetRootElement();
@@ -254,8 +248,8 @@ void ContainerModalViewEnhance::SetContainerButtonStyle(RefPtr<PipelineContext> 
     if (colorMode != static_cast<int32_t>(ColorMode::DARK) && colorMode != static_cast<int32_t>(ColorMode::LIGHT)) {
         containerPattern->OnColorConfigurationUpdate();
     }
-    controlButtonsNode->FireCustomCallback(EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE,
-        std::to_string(closeButtonRightMargin));
+    controlButtonsNode->FireCustomCallback(
+        EVENT_NAME_BUTTON_RIGHT_OFFSET_CHANGE, std::to_string(closeButtonRightMargin));
     containerPattern->CallButtonsRectChange();
 }
 

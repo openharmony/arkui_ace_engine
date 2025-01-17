@@ -12,21 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CONTAINER_MODAL_CJ_UTILS_H
+#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CONTAINER_MODAL_CJ_UTILS_H
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_CJ_UTILS_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_CJ_UTILS_H
-
-#include "base/utils/macros.h"
 #include "base/resource/internal_resource.h"
+#include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 
 namespace OHOS::Ace::NG {
-    RefPtr<FrameNode> BuildControlButtonForCj(InternalResource::ResourceId icon, GestureEventFunc&& clickCallback,
-        bool isCloseButton = false, bool canDrag = false);
-    RefPtr<FrameNode> AddControlButtonsForCj(
-        WeakPtr<ContainerModalPatternEnhance>& weakPattern, RefPtr<FrameNode>& containerTitleRow);  
-    RefPtr<FrameNode> BuildTitleNodeForCj();
+RefPtr<FrameNode> BuildControlButtonForCj(InternalResource::ResourceId icon, GestureEventFunc&& clickCallback,
+    bool isCloseButton = false, bool canDrag = false);
+ACE_FORCE_EXPORT RefPtr<FrameNode> AddControlButtonsForCj(
+    WeakPtr<ContainerModalPatternEnhance>& weakPattern, RefPtr<FrameNode>& containerTitleRow);
+ACE_FORCE_EXPORT RefPtr<FrameNode> BuildTitleNodeForCj();
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_CJ_UTILS_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_CONTAINER_MODAL_CJ_UTILS_H
