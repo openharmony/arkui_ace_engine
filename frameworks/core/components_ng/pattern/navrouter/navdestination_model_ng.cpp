@@ -1110,6 +1110,8 @@ void NavDestinationModelNG::SetCustomBackButtonNode(FrameNode* frameNode, FrameN
     CHECK_NULL_VOID(titleBarNode);
     auto backButton = AceType::DynamicCast<UINode>(Referenced::Claim<FrameNode>(backButtonNode));
     titleBarNode->SetCustomBackButton(backButton);
+}
+
 void NavDestinationModelNG::SetOnActive(std::function<void(int32_t)>&& onActive)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
