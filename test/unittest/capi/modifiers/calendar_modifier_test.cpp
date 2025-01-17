@@ -240,14 +240,16 @@ HWTEST_F(CalendarModifierTest, setNeedSlideTestNeedSlideValidValues, TestSize.Le
 HWTEST_F(CalendarModifierTest, showLunarTestDefaultValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    EXPECT_TRUE(frameNode->GetChildren().size() > 0);
     auto swiperNode = frameNode->GetChildren().front();
-    CHECK_NULL_VOID(swiperNode);
+    ASSERT_NE(swiperNode, nullptr);
+    EXPECT_TRUE(swiperNode->GetChildren().size() > 0);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
-        CHECK_NULL_VOID(calendarFrameNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
         auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
-        CHECK_NULL_VOID(calendarPaintProperty);
-        static const InspectorFilter inspector;
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
         auto jsonVal = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonVal, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_SHOW_LUNAR_NAME);
@@ -272,16 +274,17 @@ HWTEST_F(CalendarModifierTest, showLunarTestNeedSlideValidValues, TestSize.Level
         Ark_Boolean inputValueShowLunar = initValueShowLunar;
         inputValueShowLunar = value;
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        EXPECT_TRUE(frameNode->GetChildren().size() > 0);
         auto swiperNode = frameNode->GetChildren().front();
-        CHECK_NULL_VOID(swiperNode);
+        ASSERT_NE(swiperNode, nullptr);
         modifier_->setShowLunar(node_, inputValueShowLunar);
-
+        EXPECT_TRUE(swiperNode->GetChildren().size() > 0);
         for (const auto& calendarNode : swiperNode->GetChildren()) {
             auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
-            CHECK_NULL_VOID(calendarFrameNode);
+            ASSERT_NE(calendarFrameNode, nullptr);
             auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
-            CHECK_NULL_VOID(calendarPaintProperty);
-            static const InspectorFilter inspector;
+            ASSERT_NE(calendarPaintProperty, nullptr);
+            const InspectorFilter inspector;
             auto jsonVal = JsonUtil::Create(true);
             calendarPaintProperty->ToJsonValue(jsonVal, inspector);
             auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_SHOW_LUNAR_NAME);
@@ -302,14 +305,16 @@ HWTEST_F(CalendarModifierTest, showLunarTestNeedSlideValidValues, TestSize.Level
 HWTEST_F(CalendarModifierTest, showHolidayTestDefaultValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    EXPECT_TRUE(frameNode->GetChildren().size() > 0);
     auto swiperNode = frameNode->GetChildren().front();
-    CHECK_NULL_VOID(swiperNode);
+    ASSERT_NE(swiperNode, nullptr);
+    EXPECT_TRUE(swiperNode->GetChildren().size() > 0);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
-        CHECK_NULL_VOID(calendarFrameNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
         auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
-        CHECK_NULL_VOID(calendarPaintProperty);
-        static const InspectorFilter inspector;
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
         auto jsonVal = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonVal, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_SHOW_HOLIDAY_NAME);
@@ -332,16 +337,17 @@ HWTEST_F(CalendarModifierTest, showHolidayTestNeedSlideValidValues, TestSize.Lev
         Ark_Boolean inputValueShowHoliday = initValueShowHoliday;
         inputValueShowHoliday = value;
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        EXPECT_TRUE(frameNode->GetChildren().size() > 0);
         auto swiperNode = frameNode->GetChildren().front();
-        CHECK_NULL_VOID(swiperNode);
+        ASSERT_NE(swiperNode, nullptr);
         modifier_->setShowHoliday(node_, inputValueShowHoliday);
-
+        EXPECT_TRUE(swiperNode->GetChildren().size() > 0);
         for (const auto& calendarNode : swiperNode->GetChildren()) {
             auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
-            CHECK_NULL_VOID(calendarFrameNode);
+            ASSERT_NE(calendarFrameNode, nullptr);
             auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
-            CHECK_NULL_VOID(calendarPaintProperty);
-            static const InspectorFilter inspector;
+            ASSERT_NE(calendarPaintProperty, nullptr);
+            const InspectorFilter inspector;
             auto jsonVal = JsonUtil::Create(true);
             calendarPaintProperty->ToJsonValue(jsonVal, inspector);
             auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_SHOW_HOLIDAY_NAME);
@@ -362,14 +368,16 @@ HWTEST_F(CalendarModifierTest, showHolidayTestNeedSlideValidValues, TestSize.Lev
 HWTEST_F(CalendarModifierTest, startOfWeekTestDefaultValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    EXPECT_TRUE(frameNode->GetChildren().size() > 0);
     auto swiperNode = frameNode->GetChildren().front();
-    CHECK_NULL_VOID(swiperNode);
+    ASSERT_NE(swiperNode, nullptr);
+    EXPECT_TRUE(swiperNode->GetChildren().size() > 0);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
-        CHECK_NULL_VOID(calendarFrameNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
         auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
-        CHECK_NULL_VOID(calendarPaintProperty);
-        static const InspectorFilter inspector;
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
         auto jsonVal = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonVal, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_START_OF_WEEK_NAME);
@@ -392,15 +400,17 @@ HWTEST_F(CalendarModifierTest, startOfWeekTestValidValues, TestSize.Level1)
         Ark_Number inputValueStartOfWeek = initValuestartOfWeek;
         inputValueStartOfWeek = value;
         auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        EXPECT_TRUE(frameNode->GetChildren().size() > 0);
         auto swiperNode = frameNode->GetChildren().front();
-        CHECK_NULL_VOID(swiperNode);
+        ASSERT_NE(swiperNode, nullptr);
         modifier_->setStartOfWeek(node_, &inputValueStartOfWeek);
+        EXPECT_TRUE(swiperNode->GetChildren().size() > 0);
         for (const auto& calendarNode : swiperNode->GetChildren()) {
             auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
-            CHECK_NULL_VOID(calendarFrameNode);
+            ASSERT_NE(calendarFrameNode, nullptr);
             auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
-            CHECK_NULL_VOID(calendarPaintProperty);
-            static const InspectorFilter inspector;
+            ASSERT_NE(calendarPaintProperty, nullptr);
+            const InspectorFilter inspector;
             auto jsonVal = JsonUtil::Create(true);
             calendarPaintProperty->ToJsonValue(jsonVal, inspector);
             auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_START_OF_WEEK_NAME);
@@ -421,14 +431,16 @@ HWTEST_F(CalendarModifierTest, startOfWeekTestValidValues, TestSize.Level1)
 HWTEST_F(CalendarModifierTest, offDaysTestDefaultValues, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    EXPECT_TRUE(frameNode->GetChildren().size() > 0);
     auto swiperNode = frameNode->GetChildren().front();
-    CHECK_NULL_VOID(swiperNode);
+    ASSERT_NE(swiperNode, nullptr);
+    EXPECT_TRUE(swiperNode->GetChildren().size() > 0);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
-        CHECK_NULL_VOID(calendarFrameNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
         auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
-        CHECK_NULL_VOID(calendarPaintProperty);
-        static const InspectorFilter inspector;
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
         auto jsonVal = JsonUtil::Create(true);
         calendarPaintProperty->ToJsonValue(jsonVal, inspector);
         auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_OFF_DAYS_NAME);
@@ -522,9 +534,11 @@ HWTEST_F(CalendarModifierTest, setOnSelectChangeTest, TestSize.Level1)
     modifier_->setCalendarOptions(node_, &calendarOptions);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
+    EXPECT_TRUE(frameNode->GetChildren().size() > 0);
     auto swiperNode = frameNode->GetChildren().front();
     ASSERT_NE(swiperNode, nullptr);
     std::vector<RefPtr<CalendarEventHub>> eventHubList;
+    EXPECT_TRUE(swiperNode->GetChildren().size() > 0);
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
         CHECK_NULL_CONTINUE(calendarFrameNode);
