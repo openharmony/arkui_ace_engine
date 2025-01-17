@@ -39,7 +39,7 @@ public:
     ~JSView() override = default;
     virtual void Destroy(JSView* parentCustomView) = 0;
 
-    virtual RefPtr<AceType> CreateViewNode(bool isTitleNode = false)
+    virtual RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false)
     {
         LOGE("Internal error. Not implemented");
         return nullptr;
@@ -203,7 +203,7 @@ public:
     // TODO: delete this after the toolchain for partial update is ready.
     RefPtr<AceType> InternalRender();
 
-    RefPtr<AceType> CreateViewNode(bool isTitleNode = false) override;
+    RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false) override;
 
     void MarkNeedUpdate() override;
 
@@ -309,7 +309,7 @@ public:
 
     RefPtr<AceType> InitialRender();
 
-    RefPtr<AceType> CreateViewNode(bool isTitleNode = false) override;
+    RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false) override;
 
     static void Create(const JSCallbackInfo& info);
     static void CreateRecycle(const JSCallbackInfo& info);

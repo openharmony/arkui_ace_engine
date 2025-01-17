@@ -7171,6 +7171,22 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
     parent->RemoveChild(node);
 }
 
+RefPtr<UINode> OverlayManager::FindChildNodeByKey(const RefPtr<NG::UINode>& parentNode, const std::string& key)
+{
+    CHECK_NULL_RETURN(parentNode, nullptr);
+    const auto& children = parentNode->GetChildren();
+    for (const auto& childNode : children) {
+        if (childNode && childNode->GetInspectorId().value_or("") == key) {
+            return childNode;
+        }
+        auto childResult = FindChildNodeByKey(childNode, key);
+        if (childResult) {
+            return childResult;
+        }
+    }
+    return nullptr;
+}
+
 bool OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(rootNode, false);
@@ -7180,14 +7196,14 @@ bool OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, con
         if (child->GetTag() != V2::ATOMIC_SERVICE_ETS_TAG) {
             continue;
         }
-        for (auto childNode : child->GetChildren()) {
-            CHECK_NULL_RETURN(childNode, false);
-            if (childNode->GetTag() == V2::APP_BAR_ETS_TAG) {
-                TAG_LOGD(AceLogTag::ACE_OVERLAY, "setNodeBeforeAppbar AddChildBefore");
-                child->AddChildBefore(node, childNode);
-                return true;
-            }
-        }
+        auto serviceContainer = FindChildNodeByKey(child, "AtomicServiceContainerId");
+        CHECK_NULL_RETURN(serviceContainer, false);
+        auto childNode = FindChildNodeByKey(child, "AtomicServiceMenubarRowId");
+        CHECK_NULL_RETURN(childNode, false);
+        serviceContainer->AddChildBefore(node, childNode);
+        node->MarkModifyDone();
+        node->MarkDirtyNode();
+        return true;
     }
     return false;
 }
