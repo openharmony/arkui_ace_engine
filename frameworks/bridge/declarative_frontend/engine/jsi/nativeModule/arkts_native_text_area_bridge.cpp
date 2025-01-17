@@ -16,11 +16,13 @@
 
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 
@@ -2087,6 +2089,55 @@ ArkUINativeModuleValue TextAreaBridge::ResetEnableHapticFeedback(ArkUIRuntimeCal
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getTextAreaModifier()->resetTextAreaEnableHapticFeedback(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextAreaBridge::SetTextAreaInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeVal = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> placeholderVal = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> textVal = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> controllerVal = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto nativeNode = nodePtr(nodeVal->ToNativePointer(vm)->Value());
+    std::string placeholder;
+    if (ArkTSUtils::ParseJsString(vm, placeholderVal, placeholder)) {
+        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderString(nativeNode, placeholder.c_str());
+    } else {
+        GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderString(nativeNode, "");
+    }
+    std::string text, value;
+    auto changeEventVal = Framework::JSRef<Framework::JSVal>::Make();
+    if (textVal->IsString(vm) && ArkTSUtils::ParseJsString(vm, textVal, text)) {
+        value = text;
+    } else {
+        value = "";
+    }
+    GetArkUINodeModifiers()->getTextAreaModifier()->setTextAreaTextString(nativeNode, value.c_str());
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    if (!controllerVal->IsUndefined() && !controllerVal->IsNull()) {
+        auto* jsController = Framework::JSRef<Framework::JSObject>(Framework::JSObject(controllerVal->ToObject(vm)))
+                                 ->Unwrap<Framework::JSTextEditableController>();
+        if (jsController) {
+            auto pointer = TextFieldModelNG::GetJSTextEditableController(frameNode);
+            auto preController = reinterpret_cast<Framework::JSTextEditableController*>(Referenced::RawPtr(pointer));
+            if (preController) {
+                preController->SetController(nullptr);
+            }
+            TextFieldModelNG::SetJSTextEditableController(frameNode, Referenced::Claim((Referenced*)jsController));
+            auto controller = TextFieldModelNG::GetOrCreateController(frameNode);
+            jsController->SetController(controller);
+        }
+    } else {
+        auto pointer = TextFieldModelNG::GetJSTextEditableController(frameNode);
+        auto preController = reinterpret_cast<Framework::JSTextEditableController*>(Referenced::RawPtr(pointer));
+        if (preController) {
+            preController->SetController(nullptr);
+        }
+        TextFieldModelNG::SetJSTextEditableController(frameNode, nullptr);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

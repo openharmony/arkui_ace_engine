@@ -70,6 +70,29 @@ public:
                 };
     }
 
+    RefPtr<Modifier> GetOverlayModifier(PaintWrapper* paintWrapper) override
+    {
+        CHECK_NULL_RETURN(paintWrapper, nullptr);
+        CHECK_NULL_RETURN(shapeOverlayModifier_, nullptr);
+        auto paintProperty = paintWrapper->GetPaintProperty();
+        CHECK_NULL_RETURN(paintProperty, nullptr);
+        auto shapePaintProperty = DynamicCast<ShapePaintProperty>(paintProperty->Clone());
+        CHECK_NULL_RETURN(shapePaintProperty, nullptr);
+
+        if (propertiesFromAncestor_) {
+            shapePaintProperty->UpdateShapeProperty(propertiesFromAncestor_);
+        }
+        float height = paintWrapper->GetContentSize().Height();
+        float width = paintWrapper->GetContentSize().Width();
+        auto offset = paintWrapper->GetContentOffset();
+        float strokeWidth =
+            shapePaintProperty->GetStrokeWidthValue(ShapePaintProperty::STROKE_WIDTH_DEFAULT).ConvertToPx();
+        RectF boundsRect = { (offset.GetX() - strokeWidth), (offset.GetY() - strokeWidth), (width + strokeWidth * 2),
+            (height + strokeWidth * 2) };
+        shapeOverlayModifier_->SetBoundsRect(boundsRect);
+        return shapeOverlayModifier_;
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(CirclePaintMethod);
 };
 

@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_glyph_bridge.h"
+#include <cstdint>
+#include "arkts_native_symbol_glyph_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_symbol.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
@@ -33,19 +35,6 @@ constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
 } // namespace
-
-ArkUINativeModuleValue SymbolGlyphBridge::SetSymbolId(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
-    uint32_t content = 0;
-    ArkTSUtils::ParseJsSymbolId(vm, secondArg, content);
-    GetArkUINodeModifiers()->getSymbolGlyphModifier()->setSymbolId(nativeNode, content);
-    return panda::JSValueRef::Undefined(vm);
-}
 
 ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -71,11 +60,7 @@ ArkUINativeModuleValue SymbolGlyphBridge::SetFontColor(ArkUIRuntimeCallInfo* run
         }
         colorArray.emplace_back(color.GetValue());
     }
-    if (static_cast<uint32_t>(length) == colorArray.size() && (static_cast<uint32_t>(length) & 1)) {
-        for (uint32_t i = 0; i < length; i++) {
-            colorArray.emplace_back(colorArray[i]);
-        }
-    }
+
     GetArkUINodeModifiers()->getSymbolGlyphModifier()->setFontColor(nativeNode, colorArray.data(), colorArray.size());
     return panda::JSValueRef::Undefined(vm);
 }
@@ -228,4 +213,26 @@ ArkUINativeModuleValue SymbolGlyphBridge::ResetSymbolEffect(ArkUIRuntimeCallInfo
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue SymbolGlyphBridge::SetSymbolGlyphInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    uint32_t symbolId = 0;
+    ArkTSUtils::ParseJsSymbolId(vm, valueArg, symbolId);
+    GetArkUINodeModifiers()->getSymbolGlyphModifier()->setSymbolGlyphInitialize(nativeNode, symbolId);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SymbolGlyphBridge::ResetSymbolGlyphInitialize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSymbolGlyphModifier()->resetSymbolGlyphInitialize(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

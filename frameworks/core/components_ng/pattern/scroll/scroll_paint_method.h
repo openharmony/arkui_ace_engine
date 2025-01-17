@@ -17,16 +17,18 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLL_SCROLL_PAINT_METHOD_H
 
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
+#include "core/components_ng/pattern/scroll/scroll_content_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
-#include "core/components_ng/render/node_paint_method.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_method.h"
 
 namespace OHOS::Ace::NG {
 
-class ScrollPaintMethod : public NodePaintMethod {
-    DECLARE_ACE_TYPE(ScrollPaintMethod, NodePaintMethod)
+class ScrollPaintMethod : public ScrollablePaintMethod {
+    DECLARE_ACE_TYPE(ScrollPaintMethod, ScrollablePaintMethod)
 
 public:
     ScrollPaintMethod() = default;
+    ScrollPaintMethod(bool vertical, bool isReverse) : ScrollablePaintMethod(vertical, isReverse) {}
     ~ScrollPaintMethod() override = default;
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
@@ -53,7 +55,20 @@ public:
 
     void UpdateOverlayModifier(PaintWrapper* paintWrapper) override;
 
+    RefPtr<Modifier> GetContentModifier(PaintWrapper* paintWrapper) override
+    {
+        return scrollContentModifier_;
+    }
+
+    void UpdateContentModifier(PaintWrapper* paintWrapper) override;
+
+    void SetContentModifier(const RefPtr<ScrollContentModifier>& modify)
+    {
+        scrollContentModifier_ = modify;
+    }
+
 private:
+    RefPtr<ScrollContentModifier> scrollContentModifier_;
     void PaintScrollEffect(RSCanvas& canvas, PaintWrapper* paintWrapper) const;
 
     WeakPtr<ScrollBar> scrollBar_;

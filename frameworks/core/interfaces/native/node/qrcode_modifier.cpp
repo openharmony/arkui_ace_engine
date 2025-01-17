@@ -75,11 +75,19 @@ void ResetContentOpacity(ArkUINodeHandle node)
     QRCodeModelNG::SetContentOpacity(frameNode, DEFAULT_OPACITY);
 }
 
+void SetQRValue(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    QRCodeModelNG::SetQRCodeValue(frameNode, std::string(value));
+}
+
 namespace NodeModifier {
 const ArkUIQRCodeModifier* GetQRCodeModifier()
 {
     static const ArkUIQRCodeModifier modifier = { SetQRColor, ResetQRColor, SetQRBackgroundColor,
-        ResetQRBackgroundColor, SetContentOpacity, ResetContentOpacity };
+        ResetQRBackgroundColor, SetContentOpacity, ResetContentOpacity, SetQRValue };
 
     return &modifier;
 }

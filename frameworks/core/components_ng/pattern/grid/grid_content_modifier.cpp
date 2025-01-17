@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
-class Logger {
-  static log(message: string): void {}
-}
+#include "core/components_ng/pattern/grid/grid_content_modifier.h"
+
+namespace OHOS::Ace::NG {
+GridContentModifier::GridContentModifier() {}
+void GridContentModifier::onDraw(DrawingContext& context) {}
+} // namespace OHOS::Ace::NG

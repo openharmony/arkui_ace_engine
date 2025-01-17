@@ -28,26 +28,20 @@
 
 namespace OHOS::Ace {
 
-std::unique_ptr<ViewStackModel> ViewStackModel::instance_ = nullptr;
-std::mutex ViewStackModel::mutex_;
-
 ViewStackModel* ViewStackModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::ViewStackModelNG());
+    static NG::ViewStackModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::ViewStackModelNG());
-            } else {
-                instance_.reset(new Framework::ViewStackModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::ViewStackModelNG instance;
+        return &instance;
+    } else {
+        static Framework::ViewStackModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace

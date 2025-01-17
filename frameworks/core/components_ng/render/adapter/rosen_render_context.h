@@ -67,6 +67,7 @@ public:
     void MarkNewFrameAvailable(void* nativeWindow) override;
     void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) override;
     void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) override;
+    void AddInitTypeCallBack(const std::function<void(int32_t&)>& initTypeCallback) override;
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
@@ -140,6 +141,12 @@ public:
     const std::shared_ptr<Rosen::RSNode>& GetRSNode();
 
     void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
+
+    uint64_t GetNodeId() const override
+    {
+        CHECK_NULL_RETURN(rsNode_, 0);
+        return static_cast<uint64_t>(rsNode_->GetId());
+    }
 
     void StartRecording() override;
 
@@ -232,7 +239,9 @@ public:
     void ClipWithOval(const RectF& rectF) override;
     void ClipWithCircle(const Circle& circle) override;
     void RemoveClipWithRRect() override;
+    void UpdateWindowFocusState(bool isFocused) override;
 
+    void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) override;
     bool TriggerPageTransition(PageTransitionType type, const std::function<void()>& onFinish) override;
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
     float GetStatusBarHeight();
@@ -407,6 +416,7 @@ public:
     {
         return isDisappearing_;
     }
+    void UpdateWindowBlur() override;
 
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -483,6 +493,8 @@ protected:
     void OnBloomUpdate(const float bloomIntensity) override;
 
     void OnUseEffectUpdate(bool useEffect) override;
+    void OnUseEffectTypeUpdate(EffectType effectType) override;
+    bool GetStatusByEffectTypeAndWindow() override;
     void OnUseShadowBatchingUpdate(bool useShadowBatching) override;
     void OnFreezeUpdate(bool isFreezed) override;
     void OnRenderGroupUpdate(bool isRenderGroup) override;
@@ -554,6 +566,8 @@ protected:
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
     void SetBackBlurFilter();
     void SetFrontBlurFilter();
+    bool UpdateBlurBackgroundColor(const std::optional<BlurStyleOption>& bgBlurStyle);
+    bool UpdateBlurBackgroundColor(const std::optional<EffectOption>& efffectOption);
     void GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddingLeft, Dimension& parentPaddingTop);
     void CombineMarginAndPosition(Dimension& resultX, Dimension& resultY, const Dimension& parentPaddingLeft,
         const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
@@ -626,6 +640,7 @@ protected:
     RefPtr<ImageLoadingContext> bdImageLoadingCtx_;
     RefPtr<CanvasImage> bdImage_;
 
+    PatternType patternType_ = PatternType::DEFAULT;
     std::shared_ptr<Rosen::RSNode> rsNode_;
     bool isHdr_ = false;
     bool isHoveredScale_ = false;
@@ -669,6 +684,7 @@ protected:
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
     std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
+    std::optional<WindowBlurModifier> windowBlurModifier_;
     // translate and scale modifier for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXYUserModifier_;
     std::shared_ptr<Rosen::RSTranslateZModifier> translateZUserModifier_;

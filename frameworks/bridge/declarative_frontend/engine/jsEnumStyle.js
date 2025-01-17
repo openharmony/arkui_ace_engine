@@ -246,6 +246,15 @@ var ImageRenderMode;
   ImageRenderMode[ImageRenderMode["Template"] = 1] = "Template";
 })(ImageRenderMode || (ImageRenderMode = {}));
 
+var ImageRotateOrientation;
+(function (ImageRotateOrientation) {
+  ImageRotateOrientation[ImageRotateOrientation["AUTO"] = 0] = "AUTO";
+  ImageRotateOrientation[ImageRotateOrientation["UP"] = 1] = "UP";
+  ImageRotateOrientation[ImageRotateOrientation["RIGHT"] = 2] = "RIGHT";
+  ImageRotateOrientation[ImageRotateOrientation["DOWN"] = 3] = "DOWN";
+  ImageRotateOrientation[ImageRotateOrientation["LEFT"] = 4] = "LEFT";
+})(ImageRotateOrientation || (ImageRotateOrientation = {}));
+
 var ImageInterpolation;
 (function (ImageInterpolation) {
   ImageInterpolation[ImageInterpolation["None"] = 0] = "None";
@@ -1008,8 +1017,9 @@ var NavigationTitleMode;
 
 let BarStyle;
 (function (BarStyle) {
-  BarStyle[BarStyle.STANDARD = 0] = "STANDARD";
-  BarStyle[BarStyle.STACK = 1] = "STACK";
+  BarStyle[BarStyle.STANDARD = 0] = 'STANDARD';
+  BarStyle[BarStyle.STACK = 1] = 'STACK';
+  BarStyle[BarStyle.SAFE_AREA_PADDING = 2] = 'SAFE_AREA_PADDING';
 })(BarStyle || (BarStyle = {}));
 var NavigationMode;
 (function (NavigationMode) {
@@ -1042,6 +1052,14 @@ var NavDestinationMode;
   NavDestinationMode[NavDestinationMode["STANDARD"] = 0] = "STANDARD";
   NavDestinationMode[NavDestinationMode["DIALOG"] = 1] = "DIALOG";
 }(NavDestinationMode || (NavDestinationMode = {})));
+
+var NavigationSystemTransitionType;
+(function (NavigationSystemTransitionType) {
+  NavigationSystemTransitionType[NavigationSystemTransitionType["DEFAULT"] = 0] = "DEFAULT";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["NONE"] = 1] = "NONE";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["TITLE"] = 2] = "TITLE";
+  NavigationSystemTransitionType[NavigationSystemTransitionType["CONTENT"] = 3] = "CONTENT";
+}(NavigationSystemTransitionType || (NavigationSystemTransitionType = {})));
 
 let NavigationOperation;
 (function (NavigationOperation) {
@@ -1134,7 +1152,9 @@ var SourceTool;
 (function (SourceTool) {
   SourceTool[SourceTool["Unknown"] = 0] = "Unknown";
   SourceTool[SourceTool["FINGER"] = 1] = "FINGER";
+  SourceTool["Finger"] = 1;
   SourceTool[SourceTool["PEN"] = 2] = "PEN";
+  SourceTool["Pen"] = 2;
   SourceTool[SourceTool["MOUSE"] = 7] = "MOUSE";
   SourceTool[SourceTool["TOUCHPAD"] = 9] = "TOUCHPAD";
   SourceTool[SourceTool["JOYSTICK"] = 10] = "JOYSTICK";
@@ -1215,6 +1235,12 @@ var OverScrollMode;
   OverScrollMode[OverScrollMode["NEVER"] = 0] = "NEVER";
   OverScrollMode[OverScrollMode["ALWAYS"] = 1] = "ALWAYS";
 })(OverScrollMode || (OverScrollMode = {}));
+
+var BlurOnKeyboardHideMode;
+(function (BlurOnKeyboardHideMode) {
+  BlurOnKeyboardHideMode[BlurOnKeyboardHideMode["SILENT"] = 0] = "SILENT";
+  BlurOnKeyboardHideMode[BlurOnKeyboardHideMode["BLUR"] = 1] = "BLUR";
+})(BlurOnKeyboardHideMode || (BlurOnKeyboardHideMode = {}));
 
 var RenderExitReason;
 (function (RenderExitReason) {
@@ -1449,6 +1475,25 @@ var BlurStyle;
   BlurStyle[BlurStyle["COMPONENT_ULTRA_THICK"] = 12] = "COMPONENT_ULTRA_THICK";
   BlurStyle[BlurStyle["NONE"] = 0] = "NONE";
 })(BlurStyle || (BlurStyle = {}));
+
+var BlurStyleActivePolicy;
+(function (BlurStyleActivePolicy) {
+  BlurStyleActivePolicy[BlurStyleActivePolicy["FOLLOWS_WINDOW_ACTIVE_STATE"] = 0] = "FOLLOWS_WINDOW_ACTIVE_STATE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_ACTIVE"] = 1] = "ALWAYS_ACTIVE";
+  BlurStyleActivePolicy[BlurStyleActivePolicy["ALWAYS_INACTIVE"] = 2] = "ALWAYS_INACTIVE";
+})(BlurStyleActivePolicy || (BlurStyleActivePolicy = {}));
+
+var BlurType;
+(function (BlurType) {
+  BlurType[BlurType["WITHIN_WINDOW"] = 0] = "WITHIN_WINDOW";
+  BlurType[BlurType["BEHIND_WINDOW"] = 1] = "BEHIND_WINDOW";
+})(BlurType || (BlurType = {}));
+
+let EffectType;
+(function (EffectType) {
+  EffectType[EffectType.DEFAULT = 0] = 'DEFAULT';
+  EffectType[EffectType.WINDOW_EFFECT = 1] = 'WINDOW_EFFECT';
+})(EffectType || (EffectType = {}));
 
 var ThemeColorMode;
 (function (ThemeColorMode) {
@@ -2001,7 +2046,7 @@ class TextMenuItemId {
   static get CUT() {
     return new TextMenuItemId('OH_DEFAULT_CUT');
   }
-  
+
   static get COPY() {
     return new TextMenuItemId('OH_DEFAULT_COPY');
   }
@@ -2105,6 +2150,8 @@ class NavPathInfo {
     this.needBuildNewInstance = false;
     this.navDestinationId = undefined;
     this.isEntry = isEntry;
+    this.fromRecovery = false;
+    this.mode = undefined;
   }
 }
 
@@ -3256,6 +3303,7 @@ var StyledStringKey;
   StyledStringKey[StyledStringKey["LINE_HEIGHT"] = 5] = "LINE_HEIGHT";
   StyledStringKey[StyledStringKey["PARAGRAPH_STYLE"] = 200] = "PARAGRAPH_STYLE";
   StyledStringKey[StyledStringKey["BACKGROUND_COLOR"] = 6] = "BACKGROUND_COLOR";
+  StyledStringKey[StyledStringKey["URL"] = 7] = "URL";
   StyledStringKey[StyledStringKey["GESTURE"] = 100] = "GESTURE";
   StyledStringKey[StyledStringKey["IMAGE"] = 300] = "IMAGE";
   StyledStringKey[StyledStringKey["CUSTOM_SPAN"] = 400] = "CUSTOM_SPAN";
@@ -3339,6 +3387,13 @@ let GridItemAlignment;
   GridItemAlignment[GridItemAlignment['DEFAULT'] = 0] = 'DEFAULT';
   GridItemAlignment[GridItemAlignment['STRETCH'] = 1] = 'STRETCH';
 })(GridItemAlignment || (GridItemAlignment = {}));
+
+let ContentClipMode;
+(function (ContentClipMode) {
+  ContentClipMode[ContentClipMode['CONTENT_ONLY'] = 0] = 'CONTENT_ONLY';
+  ContentClipMode[ContentClipMode['BOUNDARY'] = 1] = 'BOUNDARY';
+  ContentClipMode[ContentClipMode['SAFE_AREA'] = 2] = 'SAFE_AREA';
+})(ContentClipMode || (ContentClipMode = {}));
 
 var AccessibilityHoverType;
 (function (AccessibilityHoverType) {

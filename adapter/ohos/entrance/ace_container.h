@@ -20,6 +20,7 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 #include "display_manager.h"
 #include "dm_common.h"
@@ -42,6 +43,7 @@
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
 #include "core/common/resource/resource_configuration.h"
+#include "core/common/router_recover_record.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_context.h"
 
@@ -71,12 +73,13 @@ struct ParsedConfig {
     std::string mcc;
     std::string mnc;
     std::string preferredLanguage;
+    std::string fontId;
     bool IsValid() const
     {
         return !(colorMode.empty() && deviceAccess.empty() && languageTag.empty() && direction.empty() &&
                  densitydpi.empty() && themeTag.empty() && fontScale.empty() && fontWeightScale.empty() &&
                  colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() && fontFamily.empty() &&
-                 preferredLanguage.empty());
+                 preferredLanguage.empty() && fontId.empty());
     }
 };
 
@@ -242,7 +245,7 @@ public:
         colorScheme_ = colorScheme;
     }
 
-    ResourceConfiguration GetResourceConfiguration() const
+    ResourceConfiguration GetResourceConfiguration() const override
     {
         return resourceInfo_.GetResourceConfiguration();
     }
@@ -455,9 +458,9 @@ public:
     static OHOS::AppExecFwk::Ability* GetAbility(int32_t instanceId);
     static OHOS::AbilityRuntime::Context* GetRuntimeContext(int32_t instanceId);
     static void SetWindowStyle(int32_t instanceId, WindowModal windowModal, ColorScheme colorScheme);
-    static std::pair<std::string, UIContentErrorCode> RestoreRouterStack(
-        int32_t instanceId, const std::string& contentInfo);
-    static std::string GetContentInfo(int32_t instanceId);
+    static std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
+        int32_t instanceId, const std::string& contentInfo, ContentInfoType type);
+    static std::string GetContentInfo(int32_t instanceId, ContentInfoType type);
 
     static RefPtr<AceContainer> GetContainer(int32_t instanceId);
     static bool UpdatePage(int32_t instanceId, int32_t pageId, const std::string& content);
@@ -511,8 +514,11 @@ public:
 
     std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(
         const std::string& bundle, const std::string& module);
-
+    void BuildResConfig(
+        ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration);
+    void UpdateConfigurationSyncForAll(
+        const ParsedConfig& parsedConfig, const std::string& configuration);
 
     void NotifyConfigurationChange(
         bool needReloadTransition, const ConfigurationChange& configurationChange = { false, false }) override;
@@ -681,6 +687,11 @@ public:
         return registerComponents_;
     }
 
+    const std::vector<std::string>& GetUieParams() const
+    {
+        return paramUie_;
+    }
+
     void UpdateResourceOrientation(int32_t orientation);
     void UpdateResourceDensity(double density);
 
@@ -689,8 +700,13 @@ public:
         CHECK_NULL_RETURN(uiWindow_, false);
         return uiWindow_->GetFreeMultiWindowModeEnabledState();
     }
-
+    void FireUIExtensionEventCallback(uint32_t eventId);
     void FireAccessibilityEventCallback(uint32_t eventId, int64_t parameter);
+
+    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
+    {
+        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
+    }
 
 private:
     virtual bool MaybeRelease() override;
@@ -762,7 +778,7 @@ private:
     std::vector<std::string> registerComponents_;
 
     std::unordered_set<std::string> resAdapterRecord_;
-
+    
     mutable std::mutex frontendMutex_;
     mutable std::mutex pipelineMutex_;
     mutable std::mutex destructMutex_;
@@ -785,6 +801,9 @@ private:
     std::unordered_map<int32_t, std::list<StopDragCallback>> stopDragCallbackMap_;
     std::map<int32_t, std::shared_ptr<MMI::PointerEvent>> currentEvents_;
     ACE_DISALLOW_COPY_AND_MOVE(AceContainer);
+    // for Ui Extension dump param get
+    std::vector<std::string> paramUie_;
+    std::optional<bool> isTouchEventsPassThrough_;
 };
 
 } // namespace OHOS::Ace::Platform

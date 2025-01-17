@@ -54,7 +54,7 @@ public:
     void SetOnScrollIndex(ScrollIndexFunc&& onScrollIndex) override;
 
     void SetFriction(double friction) override;
-    void SetCachedCount(int32_t value) override;
+    void SetCachedCount(int32_t value, bool show = false) override;
     void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled) override;
 
     void SetScrollBarMode(DisplayMode value) override;
@@ -85,6 +85,8 @@ public:
     static NestedScrollOptions GetNestedScroll(FrameNode* frameNode);
     static void SetCachedCount(FrameNode* frameNode, int32_t value);
     static int32_t GetCachedCount(FrameNode* frameNode);
+    static void SetShowCached(FrameNode* frameNode, bool show);
+    static int32_t GetShowCached(FrameNode* frameNode);
     static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
     static float GetFriction(FrameNode* frameNode);
     static void SetScrollBarMode(FrameNode* frameNode, DisplayMode value);

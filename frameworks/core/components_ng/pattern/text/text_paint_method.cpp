@@ -145,6 +145,8 @@ void TextPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
     CHECK_NULL_VOID(theme);
     auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
+    auto cursorColor = layoutProperty->GetCursorColorValue(theme->GetCaretColor());
+    textOverlayModifier_->SetCursorColor(cursorColor.GetValue());
     auto selectedColor = layoutProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
     textOverlayModifier_->SetSelectedColor(selectedColor.GetValue());
     if (context->GetClipEdge().has_value()) {

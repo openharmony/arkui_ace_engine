@@ -366,7 +366,7 @@ void UpdateHoverImageDisappearScaleAndPosition(const RefPtr<MenuWrapperPattern>&
     CHECK_NULL_VOID(flexNode);
     auto flexContext = flexNode->GetRenderContext();
     CHECK_NULL_VOID(flexContext);
-    
+
     auto menuChild = menuWrapperPattern->GetMenu();
     CHECK_NULL_VOID(menuChild);
     auto menuPattern = menuChild->GetPattern<MenuPattern>();
@@ -395,7 +395,7 @@ void ShowPreviewDisappearAnimation(const RefPtr<MenuWrapperPattern>& menuWrapper
     auto previewChild = menuWrapperPattern->GetPreview();
     CHECK_NULL_VOID(previewChild);
     ShowPreviewDisappearAnimationProc(menuWrapperPattern, previewChild);
-    
+
     CHECK_NULL_VOID(menuWrapperPattern->GetIsShowHoverImage());
     auto hoverImagePreview = menuWrapperPattern->GetHoverImagePreview();
     CHECK_NULL_VOID(hoverImagePreview);
@@ -459,7 +459,7 @@ void ContextMenuSwitchDragPreviewScaleAnimationProc(const RefPtr<RenderContext>&
     auto previewPattern = previewChild->GetPattern<MenuPreviewPattern>();
     CHECK_NULL_VOID(previewPattern);
     CHECK_NULL_VOID(previewPattern->GetIsShowHoverImage());
-    
+
     CHECK_NULL_VOID(dragPreviewContext);
     auto width = dragPreviewContext->GetPaintRectWithTransform().Width();
     auto height = dragPreviewContext->GetPaintRectWithTransform().Height();
@@ -467,7 +467,7 @@ void ContextMenuSwitchDragPreviewScaleAnimationProc(const RefPtr<RenderContext>&
     CHECK_NULL_VOID(previewRenderContext);
     auto previewWidth = previewPattern->GetCustomPreviewWidth();
     auto previewHeight = previewPattern->GetCustomPreviewHeight();
-    
+
     // reverse scale
     float scaleTo = 1.0f;
     if (previewWidth - width < previewHeight - height) {
@@ -777,9 +777,9 @@ void OverlayManager::PostDialogFinishEvent(const WeakPtr<FrameNode>& nodeWk)
         TaskExecutor::TaskType::UI, "ArkUIOverlayDialogCloseEvent");
 }
 
-void OverlayManager::FireDialogAutoSave(const RefPtr<FrameNode>& ContainerNode)
+void OverlayManager::FireAutoSave(const RefPtr<FrameNode>& ContainerNode)
 {
-    TAG_LOGD(AceLogTag::ACE_OVERLAY, "fire dialog auto save enter");
+    TAG_LOGD(AceLogTag::ACE_OVERLAY, "fire auto save enter");
     CHECK_NULL_VOID(ContainerNode);
     if (!ContainerNode->NeedRequestAutoSave()) {
         return;
@@ -787,7 +787,21 @@ void OverlayManager::FireDialogAutoSave(const RefPtr<FrameNode>& ContainerNode)
     auto container = Container::Current();
     auto currentId = Container::CurrentId();
     CHECK_NULL_VOID(container);
-    if (container->IsSubContainer()) {
+
+    const auto& nodeTag = ContainerNode->GetTag();
+    if (nodeTag == V2::SHEET_PAGE_TAG) {
+        // BindSheet does not use subwindowManage. If use subwindow for display, autosave is started in the main window.
+        auto layoutProperty = ContainerNode->GetLayoutProperty<SheetPresentationProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto currentStyle = layoutProperty->GetSheetStyleValue();
+        if (currentStyle.instanceId.has_value()) {
+            auto pattern = ContainerNode->GetPattern<SheetPresentationPattern>();
+            CHECK_NULL_VOID(pattern);
+            auto targetNode = FrameNode::GetFrameNode(pattern->GetTargetTag(), pattern->GetTargetId());
+            CHECK_NULL_VOID(targetNode);
+            currentId = targetNode->GetInstanceId();
+        }
+    } else if (container->IsSubContainer()) {
         currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
     }
     container->RequestAutoSave(ContainerNode, nullptr, nullptr, true, currentId);
@@ -799,7 +813,7 @@ void OverlayManager::OnDialogCloseEvent(const RefPtr<FrameNode>& node)
     TAG_LOGI(AceLogTag::ACE_DIALOG, "on dialog/%{public}d close event enter", node->GetId());
 
     BlurOverlayNode(node);
-    FireDialogAutoSave(node);
+    FireAutoSave(node);
 
     auto dialogPattern = node->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
@@ -1204,7 +1218,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
     auto wrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(wrapperPattern);
 
-    if (wrapperPattern->GetMenuStatus() == MenuStatus::ON_HIDE_ANIMATION) {
+    if (wrapperPattern->IsHide()) {
         return;
     }
 
@@ -3279,7 +3293,7 @@ bool OverlayManager::RemoveModalInOverlay()
     return true;
 }
 
-bool OverlayManager::RemoveAllModalInOverlay()
+bool OverlayManager::RemoveAllModalInOverlay(bool isRouterTransition)
 {
     if (modalStack_.empty()) {
         return true;
@@ -3287,9 +3301,20 @@ bool OverlayManager::RemoveAllModalInOverlay()
 
     auto topModalNode = modalStack_.top().Upgrade();
     bool isModalUiextensionNode = IsModalUiextensionNode(topModalNode);
+    if (!isRouterTransition) {
+        bool isProhibitedRemoveByNavigation = IsProhibitedRemoveByNavigation(topModalNode);
+        TAG_LOGI(AceLogTag::ACE_OVERLAY,
+            "isNavigation: isModalUiextensionNode: %{public}d, isProhibitedRemoveByNavigation: %{public}d",
+            isModalUiextensionNode, isProhibitedRemoveByNavigation);
+        if (isModalUiextensionNode && !isProhibitedRemoveByNavigation) {
+            return RemoveAllModalInOverlayByStack();
+        }
+        return true;
+    }
+
     bool isProhibitedRemoveByRouter = IsProhibitedRemoveByRouter(topModalNode);
     TAG_LOGI(AceLogTag::ACE_OVERLAY,
-        "isModalUiextensionNode: %{public}d, isProhibitedRemoveByRouter: %{public}d,",
+        "isRouter: isModalUiextensionNode: %{public}d, isProhibitedRemoveByRouter: %{public}d,",
         isModalUiextensionNode, isProhibitedRemoveByRouter);
     if (isModalUiextensionNode && isProhibitedRemoveByRouter) {
         return RemoveAllModalInOverlayByList();
@@ -3441,6 +3466,22 @@ bool OverlayManager::IsProhibitedRemoveByRouter(const RefPtr<FrameNode>& topModa
     return modalPattern->IsProhibitedRemoveByRouter();
 }
 
+bool OverlayManager::IsProhibitedRemoveByNavigation(const RefPtr<FrameNode>& topModalNode)
+{
+    if (topModalNode == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "topModalNode is null,");
+        return true;
+    }
+
+    if (topModalNode->GetTag() != V2::MODAL_PAGE_TAG) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "topModalNode is not modalPage");
+        return true;
+    }
+
+    auto modalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
+    CHECK_NULL_RETURN(modalPattern, true);
+    return modalPattern->IsProhibitedRemoveByNavigation();
+}
 
 bool OverlayManager::ModalExitProcess(const RefPtr<FrameNode>& topModalNode)
 {
@@ -3469,6 +3510,7 @@ void OverlayManager::PlayTransitionEffectOut(const RefPtr<FrameNode>& topModalNo
             FireNavigationStateChange(false, topModalNode);
         }
         auto rootNode = FindWindowScene(topModalNode);
+        FireAutoSave(topModalNode);
         RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         // Fire shown event of navdestination under the disappeared modal
@@ -3487,6 +3529,7 @@ void OverlayManager::PlayTransitionEffectOut(const RefPtr<FrameNode>& topModalNo
                     // Fire hidden event of navdestination on the disappeared modal
                     overlayManager->FireNavigationStateChange(false, modal);
                 }
+                overlayManager->FireAutoSave(modal);
                 overlayManager->RemoveChildWithService(root, modal);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 // Fire shown event of navdestination under the disappeared modal
@@ -3524,6 +3567,7 @@ bool OverlayManager::ModalPageExitProcess(const RefPtr<FrameNode>& topModalNode)
         topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
         // Fire hidden event of navdestination on the disappeared modal
         FireNavigationStateChange(false, topModalNode);
+        FireAutoSave(topModalNode);
         RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -3803,6 +3847,7 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalPagePattern->UpdateOnWillDismiss(std::move(contentCoverParam.onWillDismiss));
     modalPagePattern->UpdateUIExtensionMode(modalStyle.isUIExtension);
     modalPagePattern->SetProhibitedRemoveByRouter(modalStyle.prohibitedRemoveByRouter);
+    modalPagePattern->SetProhibitedRemoveByNavigation(modalStyle.prohibitedRemoveByNavigation);
     modalPagePattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
     modalNode->GetRenderContext()->UpdateChainedTransition(contentCoverParam.transitionEffect);
     modalStack_.push(WeakClaim(RawPtr(modalNode)));
@@ -3887,6 +3932,7 @@ void OverlayManager::HandleModalPop(
             // Fire hidden event of navdestination on the disappeared modal
             FireNavigationStateChange(false, topModalNode);
         }
+        FireAutoSave(topModalNode);
         RemoveChildWithService(rootNode, topModalNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -3981,6 +4027,7 @@ void OverlayManager::PlayDefaultModalOut(
                 // Fire hidden event of navdestination on the disappeared modal
                 overlayManager->FireNavigationStateChange(false, modal);
             }
+            overlayManager->FireAutoSave(modal);
             overlayManager->RemoveChildWithService(root, modal);
             root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             // Fire shown event of navdestination under the disappeared modal
@@ -4042,6 +4089,7 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
                     // Fire hidden event of navdestination on the disappeared modal
                     overlayManager->FireNavigationStateChange(false, modal);
                 }
+                overlayManager->FireAutoSave(modal);
                 overlayManager->RemoveChildWithService(root, modal);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                 // Fire shown event of navdestination under the disappeared modal
@@ -4380,7 +4428,8 @@ void OverlayManager::PlaySheetTransition(
     if (isTransitionIn) {
         sheetPattern->SetCurrentHeight(sheetHeight_);
         float offset = 0.0f;
-        if (sheetPattern->GetSheetType() == SheetType::SHEET_POPUP) {
+        auto sheetType = sheetPattern->GetSheetType();
+        if (sheetType == SheetType::SHEET_POPUP || sheetPattern->IsCurSheetNeedHalfFoldHover()) {
             offset = sheetPattern->GetSheetOffset();
         } else {
             offset = sheetMaxHeight - sheetHeight_;
@@ -4438,6 +4487,7 @@ void OverlayManager::PlaySheetTransition(
                 CHECK_NULL_VOID(root);
                 auto sheetParent = DynamicCast<FrameNode>(sheet->GetParent());
                 CHECK_NULL_VOID(sheetParent);
+                overlayManager->FireAutoSave(sheet);
                 overlayManager->RemoveChildWithService(root, sheetParent);
                 root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             });
@@ -4917,7 +4967,8 @@ void OverlayManager::PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode,
                         CHECK_NULL_VOID(root);
                         auto sheetParent = DynamicCast<FrameNode>(sheet->GetParent());
                         CHECK_NULL_VOID(sheetParent);
-                         overlayManager->RemoveChildWithService(root, sheetParent);
+                        overlayManager->FireAutoSave(sheet);
+                        overlayManager->RemoveChildWithService(root, sheetParent);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                     },
                     TaskExecutor::TaskType::UI, "ArkUIOverlaySheetExitingAnimation");
@@ -5899,10 +5950,8 @@ int32_t OverlayManager::CreateModalUIExtension(
     };
     auto sessionId = ModalUIExtension::GetSessionId(uiExtNode);
     if (!config.isAsyncModalBinding) {
-        ModalStyle modalStyle;
-        modalStyle.modalTransition = NG::ModalTransition::NONE;
-        modalStyle.isUIExtension = true;
-        modalStyle.prohibitedRemoveByRouter = config.prohibitedRemoveByRouter;
+        ModalStyle modalStyle = OverlayManager::SetUIExtensionModalStyleAndGet(config.prohibitedRemoveByRouter,
+            config.prohibitedRemoveByNavigation);
         SetIsAllowedBeCovered(config.isAllowedBeCovered);
         // Convert the sessionId into a negative number to distinguish it from the targetId of other modal pages
         BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, nullptr,
@@ -5912,15 +5961,14 @@ int32_t OverlayManager::CreateModalUIExtension(
         auto bindModalCallback = [weak = WeakClaim(this), buildNodeFunc, sessionId, id = Container::CurrentId(),
             isAllowedBeCovered = config.isAllowedBeCovered,
             prohibitedRemoveByRouter = config.prohibitedRemoveByRouter,
+            prohibitedRemoveByNavigation = config.prohibitedRemoveByNavigation,
             doAfterAsyncModalBinding = std::move(config.doAfterAsyncModalBinding)]() {
             ContainerScope scope(id);
             auto overlayManager = weak.Upgrade();
             CHECK_NULL_VOID(overlayManager);
             overlayManager->SetIsAllowedBeCovered(isAllowedBeCovered);
-            ModalStyle modalStyle;
-            modalStyle.modalTransition = NG::ModalTransition::NONE;
-            modalStyle.isUIExtension = true;
-            modalStyle.prohibitedRemoveByRouter = prohibitedRemoveByRouter;
+            ModalStyle modalStyle = OverlayManager::SetUIExtensionModalStyleAndGet(prohibitedRemoveByRouter,
+                prohibitedRemoveByNavigation);
             overlayManager->BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr,
                 nullptr, nullptr, ContentCoverParam(), nullptr, -(sessionId));
             overlayManager->SetIsAllowedBeCovered(true);
@@ -5932,6 +5980,18 @@ int32_t OverlayManager::CreateModalUIExtension(
         uiExtNodes_[sessionId] = WeakClaim(RawPtr(uiExtNode));
     }
     return sessionId;
+}
+
+ModalStyle OverlayManager::SetUIExtensionModalStyleAndGet(bool prohibitedRemoveByRouter,
+    bool prohibitedRemoveByNavigation)
+{
+    ModalStyle modalStyle;
+    modalStyle.modalTransition = NG::ModalTransition::NONE;
+    modalStyle.isUIExtension = true;
+    modalStyle.prohibitedRemoveByRouter = prohibitedRemoveByRouter;
+    modalStyle.prohibitedRemoveByNavigation = prohibitedRemoveByNavigation;
+
+    return modalStyle;
 }
 
 void OverlayManager::ClearUIExtensionNode()
@@ -5965,6 +6025,24 @@ void OverlayManager::CloseModalUIExtension(int32_t sessionId)
     BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, nullptr, nullptr, ContentCoverParam(),
         nullptr, -(sessionId));
     ResetRootNode(-(sessionId));
+}
+
+void OverlayManager::UpdateModalUIExtensionConfig(
+    int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config)
+{
+    auto targetModalNode = GetModal((-(sessionId)));
+    if (!targetModalNode) {
+        TAG_LOGE(AceLogTag::ACE_OVERLAY,
+            "not has sessionId(%{public}d) when UpdateModalUIExtensionConfig", sessionId);
+        return;
+    }
+
+    const auto& targetModalPattern = targetModalNode->GetPattern<ModalPresentationPattern>();
+    CHECK_NULL_VOID(targetModalPattern);
+    targetModalPattern->SetProhibitedRemoveByNavigation(config.prohibitedRemoveByNavigation);
+    targetModalPattern->SetProhibitedRemoveByRouter(config.prohibitedRemoveByRouter);
+    TAG_LOGE(AceLogTag::ACE_OVERLAY,
+        "UpdateModalUIExtensionConfig seccess with sessionId(%{public}d)", sessionId);
 }
 
 RefPtr<FrameNode> OverlayManager::BuildAIEntityMenu(
@@ -6802,7 +6880,7 @@ void OverlayManager::MountToParentWithService(const RefPtr<UINode>& rootNode, co
         node->MountToParent(rootNode);
     }
 }
- 
+
 void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(rootNode);
@@ -6811,7 +6889,7 @@ void OverlayManager::RemoveChildWithService(const RefPtr<UINode>& rootNode, cons
     CHECK_NULL_VOID(parent);
     parent->RemoveChild(node);
 }
- 
+
 void OverlayManager::SetNodeBeforeAppbar(const RefPtr<NG::UINode>& rootNode, const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_VOID(rootNode);

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
-  
+
 #include <numeric>
 
 #include "base/utils/utils.h"
@@ -330,11 +330,11 @@ void GridLayoutInfo::GetLineHeights(
         if (options.irregularIndexes.find(lineStart) != options.irregularIndexes.end()) {
             irregularHeight = item.second + mainGap;
         } else {
-            if (NearZero(regularHeight)) {
+            if (NonPositive(regularHeight)) {
                 regularHeight = item.second + mainGap;
             }
         }
-        if (!(NearZero(irregularHeight) || NearZero(regularHeight))) {
+        if (Positive(irregularHeight) && Positive(regularHeight)) {
             break;
         }
     }
@@ -349,20 +349,21 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t
         return GetContentHeight(mainGap);
     }
 
-    float irregularHeight = 0.0f;
-    float regularHeight = 0.0f;
+    float irregularHeight = -1.0f;
+    float regularHeight = -1.0f;
     GetLineHeights(options, mainGap, regularHeight, irregularHeight);
-    if (NearZero(irregularHeight)) {
+    if (Negative(irregularHeight) && Positive(lastIrregularMainSize_)) {
         irregularHeight = lastIrregularMainSize_;
     }
     if (NearZero(regularHeight)) {
         regularHeight = lastRegularMainSize_;
     }
-
+    if (Negative(irregularHeight)) {
+        irregularHeight = regularHeight;
+    }
     // get line count
-    auto firstIrregularIndex = *(options.irregularIndexes.begin());
-    float totalHeight = AddLinesInBetween(-1, firstIrregularIndex, crossCount_, regularHeight);
-    auto lastIndex = firstIrregularIndex;
+    float totalHeight = 0;
+    auto lastIndex = -1;
     for (int32_t idx : options.irregularIndexes) {
         if (idx >= endIdx) {
             break;
@@ -423,10 +424,10 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
         return;
     }
 
-    float irregularHeight = 0.0f;
-    float regularHeight = 0.0f;
+    float irregularHeight = -1.0f;
+    float regularHeight = -1.0f;
     GetLineHeights(options, mainGap, regularHeight, irregularHeight);
-    if (NearZero(irregularHeight)) {
+    if (Negative(irregularHeight) && Positive(lastIrregularMainSize_)) {
         irregularHeight = lastIrregularMainSize_;
     } else {
         lastIrregularMainSize_ = irregularHeight;
@@ -436,17 +437,17 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
     } else {
         lastRegularMainSize_ = regularHeight;
     }
+    if (Negative(irregularHeight)) {
+        irregularHeight = regularHeight;
+    }
 
-    int32_t firstIrregularIndex = *(options.irregularIndexes.begin());
-    float totalHeight = AddLinesInBetween(-1, firstIrregularIndex, crossCount_, regularHeight);
-    int32_t lastIndex = GreatNotEqual(totalHeight, targetContent) ? 0 : firstIrregularIndex;
-    float lastHeight = 0.0f;
+    float totalHeight = 0;
+    int32_t lastIndex = -1;
 
     for (int32_t idx : options.irregularIndexes) {
         if (GreatOrEqual(totalHeight, targetContent)) {
             break;
         }
-        lastHeight = totalHeight;
         float height = AddLinesInBetween(lastIndex, idx, crossCount_, regularHeight);
         if (GreatOrEqual(totalHeight + height, targetContent)) {
             break;
@@ -455,9 +456,9 @@ void GridLayoutInfo::SkipStartIndexByOffset(const GridLayoutOptions& options, fl
         totalHeight += irregularHeight;
         lastIndex = idx;
     }
-    int32_t lines = static_cast<int32_t>(std::floor((targetContent - lastHeight) / regularHeight));
-    currentOffset_ = lastHeight + lines * regularHeight - targetContent;
-    int32_t startIdx = lines * crossCount_ + lastIndex;
+    int32_t lines = static_cast<int32_t>(std::floor((targetContent - totalHeight) / regularHeight));
+    currentOffset_ = totalHeight + lines * regularHeight - targetContent;
+    int32_t startIdx = lines * crossCount_ + lastIndex + 1;
     startIndex_ = std::min(startIdx, childrenCount_ - 1);
 }
 
@@ -490,11 +491,11 @@ std::pair<int32_t, int32_t> GridLayoutInfo::FindItemInRange(int32_t target) cons
     if (gridMatrix_.empty()) {
         return { -1, -1 };
     }
-    for (int r = startMainLineIndex_; r <= endMainLineIndex_; ++r) {
-        const auto& row = gridMatrix_.at(r);
-        for (const auto& it : row) {
-            if (it.second == target) {
-                return { r, it.first };
+    auto end = gridMatrix_.upper_bound(endMainLineIndex_);
+    for (auto row = gridMatrix_.lower_bound(startMainLineIndex_); row != end; ++row) {
+        for (const auto& cell : row->second) {
+            if (cell.second == target) {
+                return { row->first, cell.first };
             }
         }
     }
@@ -740,14 +741,18 @@ std::pair<int32_t, int32_t> GridLayoutInfo::GetItemPos(int32_t itemIdx) const
 
 GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
 {
-    if (gridMatrix_.find(endLine) == gridMatrix_.end()) {
+    auto it = gridMatrix_.find(endLine);
+    if (it == gridMatrix_.end()) {
         return {};
     }
-    for (int32_t rowIdx = endLine; rowIdx >= 0; --rowIdx) {
-        const auto& row = gridMatrix_.at(rowIdx);
-        for (auto it = row.rbegin(); it != row.rend(); ++it) {
-            if (it->second > 0) {
-                return { .itemIdx = it->second, .y = rowIdx, .x = it->first };
+
+    // Create reverse iterator starting from endLine position
+    for (auto rIt = std::make_reverse_iterator(++it); rIt != gridMatrix_.rend(); ++rIt) {
+        const auto& row = rIt->second;
+        // Search backwards in the row for first positive index
+        for (auto cell = row.rbegin(); cell != row.rend(); ++cell) {
+            if (cell->second > 0) {
+                return { .itemIdx = cell->second, .y = rIt->first, .x = cell->first };
             }
         }
     }
@@ -756,78 +761,17 @@ GridLayoutInfo::EndIndexInfo GridLayoutInfo::FindEndIdx(int32_t endLine) const
 
 void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
 {
-    if (hasMultiLineItem_) {
-        ClearMapsToEndContainsMultiLineItem(idx - 1);
-        return;
-    }
     auto gridIt = gridMatrix_.lower_bound(idx);
     gridMatrix_.erase(gridIt, gridMatrix_.end());
     ClearHeightsToEnd(idx);
 }
 
-void GridLayoutInfo::ClearMapsToEndContainsMultiLineItem(int32_t idx)
-{
-    int32_t maxIndex = INT_MIN;
-    for (const auto& col : gridMatrix_[idx]) {
-        maxIndex = std::max(maxIndex, col.second);
-    }
-
-    int targetLine = idx;
-    while (targetLine < gridMatrix_.rbegin()->first) {
-        int32_t minIndex = INT_MAX;
-        for (const auto& col : gridMatrix_[targetLine + 1]) {
-            minIndex = std::min(minIndex, col.second);
-        }
-        if (maxIndex < minIndex) {
-            break;
-        }
-        targetLine++;
-    }
-    gridMatrix_.erase(gridMatrix_.find(targetLine + 1), gridMatrix_.end());
-
-    auto lineIt = lineHeightMap_.find(targetLine + 1);
-    if (lineIt != lineHeightMap_.end()) {
-        lineHeightMap_.erase(lineIt, lineHeightMap_.end());
-    }
-}
-
 void GridLayoutInfo::ClearMapsFromStart(int32_t idx)
 {
-    if (hasMultiLineItem_) {
-        ClearMapsFromStartContainsMultiLineItem(idx);
-        return;
-    }
     auto gridIt = gridMatrix_.lower_bound(idx);
     gridMatrix_.erase(gridMatrix_.begin(), gridIt);
     auto lineIt = lineHeightMap_.lower_bound(idx);
     lineHeightMap_.erase(lineHeightMap_.begin(), lineIt);
-}
-
-void GridLayoutInfo::ClearMapsFromStartContainsMultiLineItem(int32_t idx)
-{
-    int32_t minIndex = INT_MAX;
-    for (const auto& col : gridMatrix_[idx]) {
-        minIndex = std::min(minIndex, col.second);
-    }
-
-    auto iter = gridMatrix_.begin();
-    int targetLine = idx;
-    while (targetLine > iter->first) {
-        int32_t maxIndex = INT_MIN;
-        for (const auto& col : gridMatrix_[targetLine - 1]) {
-            maxIndex = std::max(maxIndex, col.second);
-        }
-        if (maxIndex < minIndex) {
-            break;
-        }
-        targetLine--;
-    }
-    gridMatrix_.erase(gridMatrix_.begin(), gridMatrix_.find(targetLine));
-
-    auto lineIt = lineHeightMap_.find(targetLine);
-    if (lineIt != lineHeightMap_.end()) {
-        lineHeightMap_.erase(lineHeightMap_.begin(), lineIt);
-    }
 }
 
 void GridLayoutInfo::ClearHeightsToEnd(int32_t idx)
@@ -989,13 +933,9 @@ float GridLayoutInfo::GetHeightInRange(int32_t startLine, int32_t endLine, float
     if (endLine <= startLine) {
         return 0.0f;
     }
-    auto endIt = lineHeightMap_.lower_bound(endLine);
-    auto it = lineHeightMap_.find(startLine);
-    if (it == lineHeightMap_.end()) {
-        return 0.0f;
-    }
     float totalHeight = 0.0f;
-    for (; it != lineHeightMap_.end() && it != endIt; ++it) {
+    auto endIt = lineHeightMap_.lower_bound(endLine);
+    for (auto it = lineHeightMap_.lower_bound(startLine); it != endIt; ++it) {
         totalHeight += it->second + mainGap;
     }
     return totalHeight;

@@ -465,16 +465,16 @@ napi_modules = [
         lib_names = [ "innerfullscreenlaunchcomponent" ]
       },
       {
-        label = "//foundation/arkui/ace_engine/advanced_ui_component/foldsplitcontainer/interfaces:foldsplitcontainer"
-        subsystem_name = "arkui"
-        part_name = "ace_engine"
-        lib_names = [ "foldsplitcontainer" ]
-      },
-      {
         label = "//foundation/arkui/ace_engine/advanced_ui_component/formmenu/interfaces:formmenu"
         subsystem_name = "arkui"
         part_name = "ace_engine"
         lib_names = [ "formmenu" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/foldsplitcontainer/interfaces:foldsplitcontainer"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "foldsplitcontainer" ]
       },
     ]
   },

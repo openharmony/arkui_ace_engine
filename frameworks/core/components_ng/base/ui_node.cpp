@@ -816,7 +816,8 @@ void UINode::UpdateGeometryTransition()
 
 bool UINode::IsAutoFillContainerNode()
 {
-    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG;
+    return tag_ == V2::PAGE_ETS_TAG || tag_ == V2::NAVDESTINATION_VIEW_ETS_TAG || tag_ == V2::DIALOG_ETS_TAG
+        || tag_ == V2::SHEET_PAGE_TAG || tag_ == V2::MODAL_PAGE_TAG;
 }
 
 void UINode::DumpViewDataPageNodes(
@@ -1091,13 +1092,14 @@ HitTestResult UINode::MouseTest(const PointF& globalPoint, const PointF& parentL
     return hitTestResult;
 }
 
-HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult)
+HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLocalPoint,
+    const PointF& parentRevertPoint, TouchRestrict& touchRestrict, AxisTestResult& onAxisResult)
 {
     auto children = GetChildren();
     HitTestResult hitTestResult = HitTestResult::OUT_OF_REGION;
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
-        auto hitResult = child->AxisTest(globalPoint, parentLocalPoint, onAxisResult);
+        auto hitResult = child->AxisTest(globalPoint, parentLocalPoint, parentRevertPoint, touchRestrict, onAxisResult);
         if (hitResult == HitTestResult::STOP_BUBBLING) {
             return HitTestResult::STOP_BUBBLING;
         }
@@ -1107,6 +1109,7 @@ HitTestResult UINode::AxisTest(const PointF& globalPoint, const PointF& parentLo
     }
     return hitTestResult;
 }
+
 
 int32_t UINode::FrameCount() const
 {
@@ -1486,11 +1489,11 @@ void UINode::DoRemoveChildInRenderTree(uint32_t index, bool isAll)
     }
 }
 
-void UINode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd)
+void UINode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache)
 {
     for (const auto& child : children_) {
         uint32_t count = static_cast<uint32_t>(child->FrameCount());
-        child->DoSetActiveChildRange(start, end, cacheStart, cacheEnd);
+        child->DoSetActiveChildRange(start, end, cacheStart, cacheEnd, showCache);
         start -= static_cast<int32_t>(count);
         end -= static_cast<int32_t>(count);
     }

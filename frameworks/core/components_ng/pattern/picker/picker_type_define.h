@@ -66,9 +66,16 @@ struct TextCascadePickerOptionsAttr {
     bool isHasSelectAttr = false;
 };
 
+struct CheckboxSettingData {
+    std::optional<Color> selectedColor;
+    std::optional<Color> unselectedColor;
+    std::optional<Color> strokeColor;
+};
+
 struct DatePickerSettingData {
     bool isLunar;
     bool lunarswitch;
+    CheckboxSettingData checkboxSettingData;
     bool showTime;
     bool useMilitary;
     std::map<std::string, PickerDate> datePickerProperty;

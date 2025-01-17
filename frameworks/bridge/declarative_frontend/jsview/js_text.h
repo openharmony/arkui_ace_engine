@@ -55,6 +55,8 @@ public:
     static void SetWordBreak(const JSCallbackInfo& info);
     static void SetLineBreakStrategy(const JSCallbackInfo& info);
     static void SetTextSelection(const JSCallbackInfo& info);
+    static void SetTextCaretColor(const JSCallbackInfo& info);
+    static void SetSelectedBackgroundColor(const JSCallbackInfo& info);
     static void SetEllipsisMode(const JSCallbackInfo& info);
     static void SetTextSelectableMode(const JSCallbackInfo& info);
     static void SetTextCase(int32_t value);

@@ -87,7 +87,7 @@ struct AccessibilityCallbackEvent {
     AccessibilityCallbackEvent(AccessibilityCallbackEventId id, int64_t para) : eventId(id), parameter(para) {}
     bool operator < (const AccessibilityCallbackEvent& other) const
     {
-        return eventId < other.eventId;
+        return std::tie(eventId, parameter) < std::tie(other.eventId, other.parameter);
     }
 };
 

@@ -926,6 +926,9 @@ static KeyEvent GetKeyEventFromJS(const JsiObject& value)
     auto timeStamp = jsTimestamp->ToNumber<int64_t>();
     keyEvent.SetTimeStamp(timeStamp);
 
+    auto jsUnicode = value->GetProperty("unicode");
+    keyEvent.unicode = jsUnicode->ToNumber<uint32_t>();
+
     return keyEvent;
 }
 

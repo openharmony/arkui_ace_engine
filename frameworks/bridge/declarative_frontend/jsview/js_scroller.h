@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/scroll_bar/scroll_proxy.h"
+#include "core/components_ng/pattern/scrollable/scroller_observer_manager.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -41,6 +42,7 @@ public:
     void ScrollBy(const JSCallbackInfo& args);
     void IsAtEnd(const JSCallbackInfo& args);
     void GetItemRect(const JSCallbackInfo& args);
+    void GetItemIndex(const JSCallbackInfo& args);
 
     const WeakPtr<ScrollControllerBase>& GetController() const
     {
@@ -53,9 +55,11 @@ public:
         if (oldController) {
             ScrollerObserver observer;
             oldController->SetObserver(observer);
+            oldController->SetObserverManager(nullptr);
         }
         if (controller) {
             controller->SetObserver(observer_);
+            controller->SetObserverManager(observerMgr_);
         }
         controllerWeak_ = controller;
     }
@@ -91,6 +95,16 @@ public:
         }
     }
 
+    void AddObserver(const ScrollerObserver& observer, int32_t id)
+    {
+        observerMgr_->AddObserver(observer, id);
+    }
+
+    void RemoveObserver(int32_t id)
+    {
+        observerMgr_->RemoveObserver(id);
+    }
+
 private:
     bool ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue);
 
@@ -102,6 +116,7 @@ private:
     int32_t instanceId_ = INSTANCE_ID_UNDEFINED;
 
     ScrollerObserver observer_;
+    RefPtr<ScrollerObserverManager> observerMgr_ = MakeRefPtr<ScrollerObserverManager>();
 };
 
 } // namespace OHOS::Ace::Framework

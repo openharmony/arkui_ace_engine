@@ -212,7 +212,7 @@ public:
     void RemoveScheduleTask(uint32_t id) override;
 
     // Called by view when touch event received.
-    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
+    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false, bool isEventsPassThrough = false) override;
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     // Used to determine whether the touched frameNode is the target
@@ -345,7 +345,7 @@ public:
 
     void ShowContainerTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
 
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
 
     RefPtr<StageElement> GetStageElement() const;
 
@@ -981,8 +981,6 @@ private:
     int32_t frameCount_ = 0;
 #endif
 
-    int32_t width_ = 0;
-    int32_t height_ = 0;
     bool isFirstPage_ = true;
     bool buildingFirstPage_ = false;
     bool forbidPlatformQuit_ = false;

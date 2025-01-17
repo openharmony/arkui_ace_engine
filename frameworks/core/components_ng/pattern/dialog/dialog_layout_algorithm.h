@@ -67,9 +67,10 @@ private:
     int32_t GetDeviceColumns(GridSizeType type, DeviceType deviceType);
     OffsetF ComputeChildPosition(
         const SizeF& childSize, const RefPtr<DialogLayoutProperty>& prop, const SizeF& slefSize);
-    bool SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint);
+    bool SetAlignmentSwitch(SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint);
     bool SetAlignmentSwitchLessThanAPITwelve(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint);
     bool IsAlignmentByWholeScreen();
+    void CaculateMaxSize(SizeF& maxSize);
     bool IsDialogTouchingBoundary(OffsetF topLeftPoint, SizeF childSize, SizeF selfSize);
     void MultipleDialog(const RefPtr<DialogLayoutProperty>& dialogProp, const SizeF& childSize, const SizeF& selfSize,
         const RefPtr<OverlayManager> subOverlayManager);
@@ -92,6 +93,7 @@ private:
     void ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip);
     void AdjustHeightForKeyboard(LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& child);
     void UpdateIsScrollHeightNegative(LayoutWrapper* layoutWrapper, float height);
+    void UpdateChildMaxSizeHeight(SizeT<float>& maxSize);
 
     RectF touchRegion_;
     OffsetF topLeftPoint_;
@@ -115,6 +117,11 @@ private:
 
     SizeF dialogChildSize_;
     bool resizeFlag_ = false;
+    bool isHoverMode_ = false;
+    bool isKeyBoardShow_ = false;
+    bool alignBottomScreen_ = false;
+    Rect foldCreaseRect = Rect(0.0, 0.0, 0.0, 0.0);
+    HoverModeAreaType hoverModeArea_ = HoverModeAreaType::BOTTOM_SCREEN;
 
     KeyboardAvoidMode keyboardAvoidMode_ = KeyboardAvoidMode::DEFAULT;
 

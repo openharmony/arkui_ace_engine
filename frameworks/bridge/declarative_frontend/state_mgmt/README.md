@@ -31,7 +31,7 @@ For profiler build. See StateMgmt Profiler.
 The output is one JS file:
 `./distProfile/stateMgmt.js`
 
-The difference between debug build and release build is the removal
+The difference between debug build and release/profiler build is the removal
 of all `stateMgmtConsole.log`/`.debug`/`.info` statements from the
 release version JS output code.
 

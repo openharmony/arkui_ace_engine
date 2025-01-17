@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_scrollable_base.h"
 
+#include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
@@ -75,6 +76,23 @@ void JSScrollableBase::JsOnDidScroll(const JSCallbackInfo& args)
     }
 }
 
+void JSScrollableBase::SetFadingEdge(const JSCallbackInfo& info)
+{
+    bool fadingEdge = false;
+    CalcDimension fadingEdgeLength = Dimension(32.0, DimensionUnit::VP); // 32.0: default fading edge length
+    if (info.Length() >= 1) {
+        ParseJsBool(info[0], fadingEdge);
+    }
+    if (info.Length() == 2 && info[1]->IsObject()) { /* 2: parameter count */
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[1]);
+        JSViewAbstract::ParseLengthMetricsToDimension(obj->GetProperty("fadingEdgeLength"), fadingEdgeLength);
+        if (fadingEdgeLength.Value() < 0) {
+            fadingEdgeLength = Dimension(32.0, DimensionUnit::VP); // 32.0: default fading edge length
+        }
+    }
+    NG::ScrollableModelNG::SetFadingEdge(fadingEdge, fadingEdgeLength);
+}
+
 void JSScrollableBase::JSBind(BindingTarget globalObj)
 {
     MethodOptions opt = MethodOptions::NONE;
@@ -82,6 +100,31 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("flingSpeedLimit", &JSScrollableBase::JSFlingSpeedLimit, opt);
     JSClass<JSScrollableBase>::StaticMethod("onWillScroll", &JSScrollableBase::JsOnWillScroll);
     JSClass<JSScrollableBase>::StaticMethod("onDidScroll", &JSScrollableBase::JsOnDidScroll);
+    JSClass<JSScrollableBase>::StaticMethod("fadingEdge", &JSScrollableBase::SetFadingEdge);
+    JSClass<JSScrollableBase>::StaticMethod("clipContent", &JSScrollableBase::JSClipContent);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
+}
+
+void JSScrollableBase::JSClipContent(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        return;
+    }
+    if (info[0]->IsNumber()) {
+        auto mode = static_cast<NG::ContentClipMode>(info[0]->ToNumber<int32_t>());
+        if (mode >= NG::ContentClipMode::CONTENT_ONLY && mode <= NG::ContentClipMode::SAFE_AREA) {
+            NG::ScrollableModelNG::SetContentClip(mode, nullptr);
+            return;
+        }
+    } else if (info[0]->IsObject()) {
+        auto* clipShape = JSRef<JSObject>::Cast(info[0])->Unwrap<JSShapeAbstract>();
+        if (clipShape) {
+            NG::ScrollableModelNG::SetContentClip(
+                NG::ContentClipMode::CUSTOM, AceType::DynamicCast<ShapeRect>(clipShape->GetBasicShape()));
+            return;
+        }
+    }
+    // default
+    NG::ScrollableModelNG::SetContentClip(NG::ContentClipMode::DEFAULT, nullptr);
 }
 } // namespace OHOS::Ace::Framework

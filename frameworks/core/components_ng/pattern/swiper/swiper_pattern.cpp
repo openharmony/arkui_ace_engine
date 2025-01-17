@@ -202,7 +202,6 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     algo->SetHasCachedCapture(hasCachedCapture_);
     algo->SetIsCaptureReverse(isCaptureReverse_);
     algo->SetCachedCount(GetCachedCount());
-    algo->SetNextMarginIgnoreBlank(nextMarginIgnoreBlank_);
     algo->SetIgnoreBlankOffset(ignoreBlankOffset_);
     return algo;
 }
@@ -331,7 +330,8 @@ void SwiperPattern::ResetOnForceMeasure()
     itemPosition_.clear();
     isVoluntarilyClear_ = true;
     jumpIndex_ = currentIndex_;
-
+    TAG_LOGI(
+        AceLogTag::ACE_SWIPER, "jump index has been changed to %{public}d by force measure", jumpIndex_.value_or(-1));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto targetNode = FindLazyForEachNode(host);
@@ -728,17 +728,20 @@ void SwiperPattern::FlushFocus(const RefPtr<FrameNode>& curShowFrame)
     if (HasRightButtonNode()) {
         ++skipCnt;
     }
-    swiperFocusHub->AllChildFocusHub<true>(
-        [&skipCnt, &showChildFocusHub, this](const RefPtr<FocusHub>& child) {
-            if (--skipCnt >= 0 || !child) {
-                return;
-            }
-            if (IsUseCustomAnimation() && hasTabsAncestor_) {
-                child->SetParentFocusable(child == showChildFocusHub);
-            } else {
-                child->SetParentFocusable(IsFocusNodeInItemPosition(child));
-            }
-        });
+    std::list<RefPtr<FocusHub>> focusNodes;
+    swiperFocusHub->FlushChildrenFocusHub(focusNodes);
+    for (auto iter = focusNodes.rbegin(); iter != focusNodes.rend(); ++iter) {
+        const auto& node = *iter;
+        if (skipCnt > 0 || !node) {
+            --skipCnt;
+            continue;
+        }
+        if (IsUseCustomAnimation() && hasTabsAncestor_) {
+            node->SetParentFocusable(node == showChildFocusHub);
+        } else {
+            node->SetParentFocusable(IsFocusNodeInItemPosition(node));
+        }
+    }
 
     RefPtr<FocusHub> needFocusNode = showChildFocusHub;
     if (IsShowIndicator() && isLastIndicatorFocused_) {
@@ -1116,6 +1119,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     contentMainSize_ = algo->GetContentMainSize();
     oldContentMainSize_ = contentMainSize_;
     crossMatchChild_ = algo->IsCrossMatchChild();
+    ignoreBlankOffset_ = algo->GetIgnoreBlankOffset();
     oldIndex_ = currentIndex_;
     oldChildrenSize_ = TotalCount();
     needFireCustomAnimationEvent_ = true;
@@ -1149,16 +1153,6 @@ void SwiperPattern::UpdateIgnoreBlankOffsetWithIndex()
         auto lastIgnoreBlankOffset = ignoreBlankOffset_;
         ignoreBlankOffset_ = 0.0f;
         UpdateIgnoreBlankOffsetInMap(lastIgnoreBlankOffset);
-        return;
-    }
-    if (jumpIndex_.has_value()) {
-        if (prevMarginIgnoreBlank_ && jumpIndex_.value() == 0) {
-            ignoreBlankOffset_ = -GetPrevMarginWithItemSpace();
-        } else if (nextMarginIgnoreBlank_ && jumpIndex_.value() >= (TotalCount() - GetDisplayCount())) {
-            ignoreBlankOffset_ = GetNextMarginWithItemSpace();
-        } else {
-            ignoreBlankOffset_ = 0.0f;
-        }
         return;
     }
     if (targetIndex_.has_value()) {
@@ -2412,7 +2406,7 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
             FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
         }
     }
-    HandleSwiperCustomAnimation(offset);
+    HandleSwiperCustomAnimation(-currentDelta_);
     MarkDirtyNodeSelf();
 }
 
@@ -3221,6 +3215,7 @@ void SwiperPattern::UpdateOffsetAfterPropertyAnimation(float offset)
     auto context = host->GetContext();
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(host);
+        context->FlushSyncGeometryNodeTasks();
     }
 }
 
@@ -3798,9 +3793,7 @@ float SwiperPattern::GetItemSpace() const
     if (props->IgnoreItemSpace()) {
         return 0.0f;
     }
-    auto itemSpace =
-        ConvertToPx(props->GetItemSpace().value_or(0.0_vp), props->GetLayoutConstraint()->scaleProperty, 0.0f)
-            .value_or(0.0f);
+    auto itemSpace = props->GetItemSpace().value_or(0.0_vp).ConvertToPx();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0f);
     auto geometryNode = host->GetGeometryNode();
@@ -4901,6 +4894,7 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
         if (pipeline) {
             if (pipeline->IsLayouting()) {
                 pipeline->FlushUITaskWithSingleDirtyNode(host);
+                pipeline->FlushSyncGeometryNodeTasks();
             } else {
                 pipeline->FlushUITasks();
                 pipeline->FlushMessages();

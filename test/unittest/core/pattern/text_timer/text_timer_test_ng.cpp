@@ -883,4 +883,38 @@ HWTEST_F(TextTimerTestNg, TextTimerTest014, TestSize.Level1)
     pattern->SetBuilderFunc(node);
     pattern->BuildContentModifierNode();
 }
+
+/**
+ * @tc.name: TextTimerTest015
+ * @tc.desc: Test TextTimer property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create framenode and Init.
+     */
+    auto frameNode = TextTimerModelNG::CreateFrameNode(-1);
+    ASSERT_NE(frameNode, nullptr);
+    auto node = AceType::RawPtr(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto controller = TextTimerModelNG::InitTextController(node);
+    ASSERT_NE(controller, nullptr);
+    /**
+     * @tc.steps: step2. SetIsCountDown.
+     */
+    TextTimerModelNG::SetIsCountDown(node, true);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetIsCountDownValue(), true);
+    TextTimerModelNG::SetInputCount(node, INPUT_COUNT);
+    EXPECT_EQ(layoutProperty->GetInputCountValue(), INPUT_COUNT);
+
+    /**
+     * @tc.steps: step3. SetJSTextTimerController.
+     */
+    TextTimerModelNG::SetJSTextTimerController(node, controller);
+    auto result = TextTimerModelNG::GetJSTextTimerController(node);
+    EXPECT_NE(result, nullptr);
+}
 } // namespace OHOS::Ace::NG

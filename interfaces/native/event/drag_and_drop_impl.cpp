@@ -123,7 +123,7 @@ int32_t OH_ArkUI_DragEvent_GetDataTypes(
 
 ArkUI_DragAction* OH_ArkUI_CreateDragActionWithNode(ArkUI_NodeHandle node)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !node) {
         return nullptr;
     }
@@ -133,7 +133,7 @@ ArkUI_DragAction* OH_ArkUI_CreateDragActionWithNode(ArkUI_NodeHandle node)
 
 ArkUI_DragAction* OH_ArkUI_CreateDragActionWithContext(ArkUI_ContextHandle uiContext)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !uiContext) {
         return nullptr;
     }
@@ -247,7 +247,7 @@ int32_t OH_ArkUI_DragAction_SetDragPreviewOption(ArkUI_DragAction* dragAction, A
 int32_t OH_ArkUI_DragAction_RegisterStatusListener(ArkUI_DragAction* dragAction, void* userData,
     void (*listener)(ArkUI_DragAndDropInfo* dragAndDropInfo, void* userData))
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !dragAction) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -258,7 +258,7 @@ int32_t OH_ArkUI_DragAction_RegisterStatusListener(ArkUI_DragAction* dragAction,
 
 void OH_ArkUI_DragAction_UnregisterStatusListener(ArkUI_DragAction* dragAction)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !dragAction) {
         return;
     }
@@ -292,7 +292,7 @@ int32_t OH_ArkUI_StartDrag(ArkUI_DragAction* dragAction)
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* dragActions = reinterpret_cast<ArkUIDragAction*>(dragAction);
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!dragActions || !impl) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -334,7 +334,7 @@ int32_t OH_ArkUI_DragEvent_DisableDefaultDropAnimation(ArkUI_DragEvent* event, b
 
 int32_t OH_ArkUI_SetNodeDraggable(ArkUI_NodeHandle node, bool enabled)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !node) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -425,7 +425,7 @@ int32_t OH_ArkUI_DragPreviewOption_SetDefaultAnimationBeforeLiftingEnabled(
 
 int32_t OH_ArkUI_SetNodeDragPreviewOption(ArkUI_NodeHandle node, ArkUI_DragPreviewOption* option)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !node) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
@@ -468,7 +468,7 @@ int32_t OH_ArkUI_SetNodeDragPreviewOption(ArkUI_NodeHandle node, ArkUI_DragPrevi
 
 int32_t OH_ArkUI_SetNodeDragPreview(ArkUI_NodeHandle node, OH_PixelmapNative* preview)
 {
-    auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
     if (!impl || !node) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }

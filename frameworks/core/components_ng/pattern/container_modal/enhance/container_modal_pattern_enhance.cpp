@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
 
 #include "base/memory/referenced.h"
+#include "base/log/event_report.h"
 #include "base/subwindow/subwindow.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/utils.h"
@@ -33,6 +34,19 @@ constexpr int32_t MAX_RECOVER_BUTTON_INDEX = 0;
 constexpr int32_t MINIMIZE_BUTTON_INDEX = 1;
 constexpr int32_t CLOSE_BUTTON_INDEX = 2;
 constexpr int32_t TITLE_POPUP_DURATION = 400;
+const int32_t DOUBLE_CLICK_TO_RECOVER = 2;
+const int32_t DOUBLE_CLICK_TO_MAXIMIZE = 1;
+
+RefPtr<WindowManager> GetNotMovingWindowManager(WeakPtr<FrameNode>& weak)
+{
+    auto node = weak.Upgrade();
+    CHECK_NULL_RETURN(node, nullptr);
+    auto pipeline = node->GetContextRefPtr();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    const auto& windowManager = pipeline->GetWindowManager();
+    CHECK_NULL_RETURN(windowManager, nullptr);
+    return windowManager;
+}
 } // namespace
 
 void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
@@ -111,8 +125,10 @@ void ContainerModalPatternEnhance::ShowTitle(bool isShow, bool hasDeco, bool nee
     SetControlButtonVisibleBeforeAnim(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
     auto gestureRow = GetGestureRow();
     CHECK_NULL_VOID(gestureRow);
-    AddOrRemovePanEvent(customTitleRow);
-    AddOrRemovePanEvent(gestureRow);
+    if (enableContainerModalGesture_) {
+        AddPanEvent(customTitleRow);
+        AddPanEvent(gestureRow);
+    }
     UpdateGestureRowVisible();
     InitColumnTouchTestFunc();
     controlButtonsNode->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
@@ -224,7 +240,8 @@ void ContainerModalPatternEnhance::ChangeTitleButtonIcon(
     ContainerModalPattern::ChangeTitleButtonIcon(buttonNode, icon, isFocus, isCloseBtn);
 }
 
-void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize,
+    bool hideClose)
 {
     auto controlButtonsNode = GetControlButtonRow();
     CHECK_NULL_VOID(controlButtonsNode);
@@ -243,6 +260,9 @@ void ContainerModalPatternEnhance::SetContainerButtonHide(bool hideSplit, bool h
     minimizeBtn->MarkDirtyNode();
 
     auto closeBtn = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
+        CHECK_NULL_VOID(closeBtn);
+        closeBtn->GetLayoutProperty()->UpdateVisibility(hideClose ? VisibleType::GONE : VisibleType::VISIBLE);
+        closeBtn->MarkDirtyNode();
     InitTitleRowLayoutProperty(GetCustomTitleRow());
 }
 
@@ -301,5 +321,116 @@ void ContainerModalPatternEnhance::UpdateTitleInTargetPos(bool isShow, int32_t h
                 controlButtonsLayoutProperty->UpdateVisibility(containerModal->GetControlButtonVisibleBeforeAnim());
             });
     }
+}
+
+void ContainerModalPatternEnhance::ClearTapGestureEvent(RefPtr<FrameNode>& containerTitleRow)
+{
+    auto eventHub = containerTitleRow->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->ClearGesture();
+    eventHub->OnModifyDone();
+}
+
+void ContainerModalPatternEnhance::SetTapGestureEvent(RefPtr<FrameNode>& containerTitleRow)
+{
+    auto eventHub = containerTitleRow->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(eventHub);
+    auto tapGesture = AceType::MakeRefPtr<NG::TapGesture>(2, 1);
+    CHECK_NULL_VOID(tapGesture);
+    WeakPtr<FrameNode> weakNode = frameNode_;
+    tapGesture->SetOnActionId([weakNode](GestureEvent& info) mutable {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "container window double click.");
+        auto containerNode = weakNode.Upgrade();
+        CHECK_NULL_VOID(containerNode);
+        auto windowManager = GetNotMovingWindowManager(weakNode);
+        CHECK_NULL_VOID(windowManager);
+        auto windowMode = windowManager->GetWindowMode();
+        auto maximizeMode = windowManager->GetCurrentWindowMaximizeMode();
+        if (maximizeMode == MaximizeMode::MODE_AVOID_SYSTEM_BAR || windowMode == WindowMode::WINDOW_MODE_FULLSCREEN ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+            windowMode == WindowMode::WINDOW_MODE_SPLIT_SECONDARY) {
+            EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_RECOVER);
+            windowManager->WindowRecover();
+        } else if (windowMode == WindowMode::WINDOW_MODE_FLOATING) {
+            EventReport::ReportDoubleClickTitle(DOUBLE_CLICK_TO_MAXIMIZE);
+            windowManager->WindowMaximize(true);
+        }
+        containerNode->OnWindowFocused();
+    });
+    eventHub->AddGesture(tapGesture);
+    eventHub->OnModifyDone();
+}
+
+void ContainerModalPatternEnhance::EnablePanEventOnNode(
+    RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName)
+{
+    if (!node) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "%{public}s is not exist when set pan event", rowName.c_str());
+        return;
+    }
+
+    if (isEnable) {
+        AddPanEvent(node);
+    } else {
+        RemovePanEvent(node);
+    }
+}
+
+void ContainerModalPatternEnhance::EnableTapGestureOnNode(
+    RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName)
+{
+    if (!node) {
+        TAG_LOGI(AceLogTag::ACE_APPBAR, "%{public}s is not exist when set tap gesture", rowName.c_str());
+        return;
+    }
+
+    if (isEnable) {
+        SetTapGestureEvent(node);
+    } else {
+        ClearTapGestureEvent(node);
+    }
+}
+
+void ContainerModalPatternEnhance::EnableContainerModalGesture(bool isEnable)
+{
+    TAG_LOGI(AceLogTag::ACE_APPBAR, "set event on container modal is %{public}d", isEnable);
+
+    enableContainerModalGesture_ = isEnable;
+
+    auto floatingTitleRow = GetFloatingTitleRow();
+    auto customTitleRow = GetCustomTitleRow();
+    auto gestureRow = GetGestureRow();
+    EnableTapGestureOnNode(floatingTitleRow, isEnable, "floating title row");
+    EnablePanEventOnNode(customTitleRow, isEnable, "custom title row");
+    EnableTapGestureOnNode(customTitleRow, isEnable, "custom title row");
+    EnablePanEventOnNode(gestureRow, isEnable, "gesture row");
+    EnableTapGestureOnNode(gestureRow, isEnable, "gesture row");
+}
+
+bool ContainerModalPatternEnhance::GetFloatingTitleVisible()
+{
+    auto floatingTitleRow = GetFloatingTitleRow();
+    CHECK_NULL_RETURN(floatingTitleRow, false);
+    auto floatingTitleRowProp = floatingTitleRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(floatingTitleRowProp, false);
+    return (floatingTitleRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
+}
+
+bool ContainerModalPatternEnhance::GetCustomTitleVisible()
+{
+    auto customTitleRow = GetCustomTitleRow();
+    CHECK_NULL_RETURN(customTitleRow, false);
+    auto customTitleRowProp = customTitleRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(customTitleRowProp, false);
+    return (customTitleRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
+}
+
+bool ContainerModalPatternEnhance::GetControlButtonVisible()
+{
+    auto controlButtonRow = GetControlButtonRow();
+    CHECK_NULL_RETURN(controlButtonRow, false);
+    auto controlButtonRowProp = controlButtonRow->GetLayoutProperty();
+    CHECK_NULL_RETURN(controlButtonRowProp, false);
+    return (controlButtonRowProp->GetVisibilityValue() == VisibleType::VISIBLE);
 }
 } // namespace OHOS::Ace::NG

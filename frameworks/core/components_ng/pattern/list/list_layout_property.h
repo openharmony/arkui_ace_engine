@@ -50,6 +50,7 @@ public:
         value->propLaneGutter_ = CloneLaneGutter();
         value->propListItemAlign_ = CloneListItemAlign();
         value->propCachedCount_ = CloneCachedCount();
+        value->propShowCachedItems_ = CloneShowCachedItems();
         value->propStickyStyle_ = CloneStickyStyle();
         value->propContentStartOffset_ = CloneContentStartOffset();
         value->propContentEndOffset_ = CloneContentEndOffset();
@@ -72,6 +73,7 @@ public:
         ResetLaneGutter();
         ResetListItemAlign();
         ResetCachedCount();
+        ResetShowCachedItems();
         ResetStickyStyle();
         ResetContentStartOffset();
         ResetContentEndOffset();
@@ -106,6 +108,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(LaneGutter, Dimension, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ListItemAlign, V2::ListItemAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CachedCount, int32_t, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowCachedItems, bool, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StickyStyle, V2::StickyStyle, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ScrollSnapAlign, V2::ScrollSnapAlign, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ChainAnimation, bool, PROPERTY_UPDATE_MEASURE);

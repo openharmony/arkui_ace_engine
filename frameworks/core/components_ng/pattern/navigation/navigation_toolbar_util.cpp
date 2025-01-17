@@ -610,6 +610,9 @@ void NavigationToolbarUtil::SetToolbarOptions(
     const RefPtr<NavDestinationNodeBase>& nodeBase, NavigationToolbarOptions&& opt)
 {
     CHECK_NULL_VOID(nodeBase);
+    auto navDestinationPatternBase = nodeBase->GetPattern<NavDestinationPatternBase>();
+    CHECK_NULL_VOID(navDestinationPatternBase);
+    navDestinationPatternBase->SetToolBarStyle(opt.brOptions.barStyle);
     auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(nodeBase->GetToolBarNode());
     CHECK_NULL_VOID(toolBarNode);
     auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
@@ -641,6 +644,13 @@ void NavigationToolbarUtil::MountToolBar(
 
     bool hideToolBar = propertyBase->GetHideToolBarValue(false);
     auto currhideToolBar = navDestinationPatternBase->GetCurrHideToolBar();
+    if (currhideToolBar.has_value() && currhideToolBar.value() != hideToolBar && hideToolBar) {
+        /**
+         * we need reset translate&opacity of toolBar when state change from show to hide.
+         * @sa NavDestinationPattern::EnableTitleBarSwipe
+         */
+        NavigationTitleUtil::UpdateTitleOrToolBarTranslateYAndOpacity(nodeBase, toolBarNode, 0.0f, false);
+    }
     /**
      * 1. At the initial state, animation is not required;
      * 2. When toolbar is displayed at Title's menu position, no animation is needed for the toolbar.

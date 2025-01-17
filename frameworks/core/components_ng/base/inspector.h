@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,13 +17,16 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_INSPECTOR_INSPECTOR_H
 
 #include <string>
+#include <unordered_map>
 
 #include "base/utils/macros.h"
 #include "bridge/common/utils/componentInfo.h"
 #include "core/components_ng/base/frame_node.h"
+#include "rec_node.h"
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
+using InspectorTreeMap = std::unordered_map<int32_t, RefPtr<RecNode>>;
 
 class ACE_FORCE_EXPORT Inspector {
 public:
@@ -40,6 +43,17 @@ public:
     static void HideAllMenus();
     static void AddOffscreenNode(RefPtr<FrameNode> node);
     static void RemoveOffscreenNode(RefPtr<FrameNode> node);
+    static void GetInspectorTree(InspectorTreeMap& treesInfo);
+    static void GetOffScreenTreeNodes(InspectorTreeMap& nodes);
+    static void GetRecordAllPagesNodes(InspectorTreeMap& treesInfo);
+
+private:
+    static RefPtr<RecNode> AddInspectorTreeNode(const RefPtr<NG::UINode>& uiNode, InspectorTreeMap& recNodes);
+    static void GetInspectorTreeInfo(
+        std::vector<RefPtr<NG::UINode>> children, int32_t pageId, InspectorTreeMap& recNodes);
+    static void GetInspectorChildrenInfo(
+        const RefPtr<NG::UINode>& parent, InspectorTreeMap& recNodes, int32_t pageId, uint32_t depth = UINT32_MAX);
+    static void RecordOnePageNodes(const RefPtr<NG::UINode>& pageNode, InspectorTreeMap& treesInfo);
 
 private:
     static std::set<RefPtr<FrameNode>> offscreenNodes;

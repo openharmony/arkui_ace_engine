@@ -47,6 +47,7 @@ public:
     UIContentErrorCode RunPage(const std::string& url, const std::string& params) override;
     UIContentErrorCode RunPage(
         const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params) override;
+    UIContentErrorCode RunPageByNamedRouter(const std::string& name, const std::string& params) override;
 
     void ReplacePage(const std::string& url, const std::string& params) override;
 
@@ -136,9 +137,10 @@ public:
     // navigator component call router
     void NavigatePage(uint8_t type, const PageTarget& target, const std::string& params) override;
 
-    // distribute
-    std::pair<std::string, UIContentErrorCode> RestoreRouterStack(const std::string& contentInfo) override;
-    std::string GetContentInfo() const override;
+    // restore
+    std::pair<RouterRecoverRecord, UIContentErrorCode> RestoreRouterStack(
+        const std::string& contentInfo, ContentInfoType type) override;
+    std::string GetContentInfo(ContentInfoType type) const override;
 
     int32_t GetRouterSize() const override;
 

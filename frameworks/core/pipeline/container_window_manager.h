@@ -32,6 +32,7 @@ using WindowGetMaximizeModeCallback = std::function<MaximizeMode(void)>;
 using GetSystemBarStyleCallback = std::function<RefPtr<SystemBarStyle>(void)>;
 using SetSystemBarStyleCallback = std::function<void(const RefPtr<SystemBarStyle>&)>;
 using GetFreeMultiWindowModeEnabledStateCallback = std::function<bool(void)>;
+using WindowIsStartMovingCallback = std::function<bool(void)>;
 
 class WindowManager : public virtual AceType {
     DECLARE_ACE_TYPE(WindowManager, AceType);
@@ -108,6 +109,11 @@ public:
     void SetWindowStartMoveCallBack(WindowCallback&& callback)
     {
         windowStartMoveCallback_ = std::move(callback);
+    }
+
+    void SetWindowIsStartMovingCallBack(WindowIsStartMovingCallback&& callback)
+    {
+        WindowIsStartMovingCallback_ = std::move(callback);
     }
 
     void SetWindowSetMaximizeModeCallBack(WindowSetMaximizeModeCallback&& callback)
@@ -190,9 +196,19 @@ public:
         }
     }
 
+    bool WindowIsStartMoving() const
+    {
+        if (WindowIsStartMovingCallback_) {
+            return WindowIsStartMovingCallback_();
+        }
+        return false;
+    }
+
     void WindowPerformBack()
     {
-        windowPerformBackCallback_();
+        if (windowPerformBackCallback_) {
+            windowPerformBackCallback_();
+        }
     }
 
     WindowMode GetWindowMode() const
@@ -269,6 +285,7 @@ private:
     WindowCallback windowSplitPrimaryCallback_;
     WindowCallback windowSplitSecondaryCallback_;
     WindowCallback windowStartMoveCallback_;
+    WindowIsStartMovingCallback WindowIsStartMovingCallback_;
     WindowCallback windowPerformBackCallback_;
     WindowCallback windowMaximizeCallback_;
     WindowCallback windowMaximizeFloatingCallback_;

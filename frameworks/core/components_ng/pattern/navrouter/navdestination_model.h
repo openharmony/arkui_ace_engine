@@ -22,6 +22,7 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navrouter/navdestination_context.h"
+#include "core/components_ng/pattern/navrouter/navdestination_scrollable_processor.h"
 
 namespace OHOS::Ace {
 class NavDestinationModel {
@@ -54,6 +55,7 @@ public:
     virtual void SetToolBarOptions(NG::NavigationToolbarOptions&& opt) {}
     virtual void SetCustomToolBar(const RefPtr<AceType>& customNode) = 0;
     virtual void SetNavDestinationMode(NG::NavDestinationMode mode);
+    virtual void SetRecoverable(bool recoverable) {}
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) {};
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
     virtual void SetBackgroundColor(const Color& color, bool isVaild = true) = 0;
@@ -70,6 +72,11 @@ public:
 
     virtual void SetIgnoreLayoutSafeArea(const NG::SafeAreaExpandOpts& opts) {};
     virtual void SetSystemBarStyle(const RefPtr<SystemBarStyle>& style) {};
+    virtual void SetSystemTransitionType(NG::NavigationSystemTransitionType type) {};
+    virtual void SetScrollableProcessor(
+        const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator) {}
+    virtual void UpdateBindingWithScrollable(
+        std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback) {}
 
 private:
     static std::unique_ptr<NavDestinationModel> instance_;

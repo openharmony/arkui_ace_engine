@@ -463,7 +463,9 @@ public:
         info.SetSourceTool(event.sourceTool);
         info.SetTarget(GetEventTarget().value_or(EventTarget()));
         info.SetPressedKeyCodes(event.pressedKeyCodes_);
-        onMouseCallback_(info);
+        // onMouseCallback_ may be overwritten in its invoke so we copy it first
+        auto onMouseCallback = onMouseCallback_;
+        onMouseCallback(info);
         return info.IsStopPropagation();
     }
 
@@ -512,6 +514,11 @@ public:
     void HandleAccessibilityHoverEvent(bool isHovered, const TouchEvent& event);
 
     bool HandlePenHoverEvent(bool isHovered, const TouchEvent& event);
+
+    bool IsHoverTarget() const
+    {
+        return onHoverCallback_ != nullptr || onHoverEventCallback_ != nullptr;
+    }
 
     bool IsAccessibilityHoverTarget()
     {

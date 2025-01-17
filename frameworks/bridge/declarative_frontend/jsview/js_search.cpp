@@ -45,21 +45,18 @@ std::mutex SearchModel::mutex_;
 
 SearchModel* SearchModel::GetInstance()
 {
-    if (!instance_) {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::SearchModelNG());
+    static NG::SearchModelNG instance;
+    return &instance;
 #else
-            if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::SearchModelNG());
-            } else {
-                instance_.reset(new Framework::SearchModelImpl());
-            }
-#endif
-        }
+    if (Container::IsCurrentUseNewPipeline()) {
+        static NG::SearchModelNG instance;
+        return &instance;
+    } else {
+        static Framework::SearchModelImpl instance;
+        return &instance;
     }
-    return instance_.get();
+#endif
 }
 
 } // namespace OHOS::Ace
@@ -758,11 +755,51 @@ void JSSearch::JsBorderRadius(const JSCallbackInfo& info)
     SearchModel::GetInstance()->SetBackBorder();
 }
 
+void JSSearch::CreateJsSearchCommonEvent(const JSCallbackInfo &info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        return;
+    }
+    auto jsTextFunc = AceType::MakeRefPtr<JsCommonEventFunction<NG::TextFieldCommonEvent, 2>>(
+        JSRef<JSFunc>::Cast(info[0]));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                        const std::string& value, NG::TextFieldCommonEvent& event) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onSubmit");
+        PipelineContext::SetCallBackNode(node);
+        JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+        objectTemplate->SetInternalFieldCount(2);
+        JSRef<JSObject> object = objectTemplate->NewInstance();
+        object->SetProperty<std::string>("text", event.GetText());
+        object->SetPropertyObject(
+            "keepEditableState", JSRef<JSFunc>::New<FunctionCallback>(JSTextField::JsKeepEditableState));
+        object->Wrap<NG::TextFieldCommonEvent>(&event);
+        JSRef<JSVal> stringValue = JSRef<JSVal>::Make(ToJSValue(value));
+        JSRef<JSVal> dataObject = JSRef<JSVal>::Cast(object);
+        JSRef<JSVal> param[2] = {stringValue, dataObject};
+        func->Execute(param);
+#if !defined(PREVIEW) && defined(OHOS_PLATFORM)
+        UiSessionManager::GetInstance().ReportComponentChangeEvent("event", "onSubmit");
+#endif
+    };
+    SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
+}
+
 void JSSearch::OnSubmit(const JSCallbackInfo& info)
 {
-    CHECK_NULL_VOID(info[0]->IsFunction());
-    JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
-    SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+#ifdef NG_BUILD
+    CreateJsSearchCommonEvent(info);
+#else
+    if (Container::IsCurrentUseNewPipeline()) {
+        CreateJsSearchCommonEvent(info);
+    } else {
+        JsEventCallback<void(const std::string&)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(jsValue));
+        SearchModel::GetInstance()->SetOnSubmit(std::move(callback));
+    }
+#endif
 }
 
 JSRef<JSVal> JSSearch::CreateJsOnChangeObj(const PreviewText& previewText)

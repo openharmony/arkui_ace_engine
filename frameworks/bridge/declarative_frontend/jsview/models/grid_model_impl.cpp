@@ -123,7 +123,7 @@ void GridModelImpl::SetScrollBarWidth(const std::string& value)
     grid->SetScrollBarWidth(value);
 }
 
-void GridModelImpl::SetCachedCount(int32_t value)
+void GridModelImpl::SetCachedCount(int32_t value, bool show)
 {
     auto component = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto grid = AceType::DynamicCast<GridLayoutComponent>(component);

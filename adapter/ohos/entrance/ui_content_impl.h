@@ -53,6 +53,8 @@ public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
     ~UIContentImpl()
     {
+        UnSubscribeEventsPassThroughMode();
+        ProcessDestructCallbacks();
         DestroyUIDirector();
         DestroyCallback();
     }
@@ -76,10 +78,10 @@ public:
     void Destroy() override;
     void OnNewWant(const OHOS::AAFwk::Want& want) override;
 
-    // distribute
-    UIContentErrorCode Restore(
-        OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage) override;
-    std::string GetContentInfo() const override;
+    // restore
+    UIContentErrorCode Restore(OHOS::Rosen::Window* window, const std::string& contentInfo,
+        napi_value storage, ContentInfoType type) override;
+    std::string GetContentInfo(ContentInfoType type) const override;
     void DestroyUIDirector() override;
     void SetUIContentType(UIContentType uIContentType) override;
     void UpdateFontScale(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
@@ -103,7 +105,8 @@ public:
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {});
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDeco = true) override;
     void UpdateDecorVisible(bool visible, bool hasDeco) override;
-    void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void UpdateWindowBlur();
+    void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) override;
     void UpdateMaximizeMode(OHOS::Rosen::MaximizeMode mode) override;
     void ProcessFormVisibleChange(bool isVisible) override;
@@ -133,9 +136,6 @@ public:
 
     // Set UIContent callback after layout finish
     void SetFrameLayoutFinishCallback(std::function<void()>&& callback) override;
-
-    // Set UIContent callback after latest layout finish
-    void SetLatestFrameLayoutFinishCallback(std::function<void()>&& callback) override;
 
     // Receive memory level notification
     void NotifyMemoryLevel(int32_t level) override;
@@ -172,7 +172,9 @@ public:
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) override;
 
-    void OnFormSurfaceChange(float width, float height) override;
+    void OnFormSurfaceChange(float width, float height,
+        OHOS::Rosen::WindowSizeChangeReason type = static_cast<OHOS::Rosen::WindowSizeChangeReason>(0),
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr) override;
 
     void SetFormBackgroundColor(const std::string& color) override;
 
@@ -229,6 +231,8 @@ public:
     int32_t CreateModalUIExtension(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const ModalUIExtensionConfig& config) override;
     void CloseModalUIExtension(int32_t sessionId) override;
+    void UpdateModalUIExtensionConfig(
+        int32_t sessionId, const ModalUIExtensionAllowedUpdateConfig& config) override;
 
     void SetParentToken(sptr<IRemoteObject> token) override;
     sptr<IRemoteObject> GetParentToken() override;
@@ -272,6 +276,8 @@ public:
 
     int32_t CreateCustomPopupUIExtension(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config) override;
+    bool GetTargetNode(
+        int32_t& nodeIdLabel, RefPtr<NG::FrameNode>& targetNode, const CustomPopupUIExtensionConfig& config);
     void DestroyCustomPopupUIExtension(int32_t nodeId) override;
     void UpdateCustomPopupUIExtension(const CustomPopupUIExtensionConfig& config) override;
 
@@ -339,6 +345,26 @@ public:
         return instance_;
     }
 
+    void AddDestructCallback(void* key, const std::function<void()>& callback)
+    {
+        destructCallbacks_.emplace(key, callback);
+    }
+
+    void RemoveDestructCallback(void* key)
+    {
+        destructCallbacks_.erase(key);
+    }
+
+    void EnableContainerModalGesture(bool isEnable) override;
+
+    bool GetContainerFloatingTitleVisible() override;
+
+    bool GetContainerCustomTitleVisible() override;
+
+    bool GetContainerControlButtonVisible() override;
+
+    void UpdateConfigurationSyncForAll(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config) override;
+
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -348,6 +374,7 @@ private:
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
     void InitializeSubWindow(OHOS::Rosen::Window* window, bool isDialog = false);
     void DestroyCallback() const;
+    void ProcessDestructCallbacks();
     void SetConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
 
     void InitializeSafeArea(const RefPtr<Platform::AceContainer>& container);
@@ -368,6 +395,8 @@ private:
     void AddWatchSystemParameter();
     void StoreConfiguration(const std::shared_ptr<OHOS::AppExecFwk::Configuration>& config);
     void UnregisterDisplayManagerCallback();
+    void SubscribeEventsPassThroughMode();
+    void UnSubscribeEventsPassThroughMode();
 
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
@@ -413,6 +442,7 @@ private:
     bool isUIExtensionAbilityHost_ = false;
     RefPtr<UpdateConfigManager<AceViewportConfig>> viewportConfigMgr_ =
         Referenced::MakeRefPtr<UpdateConfigManager<AceViewportConfig>>();
+    std::unordered_map<void*, std::function<void()>> destructCallbacks_;
 
     SingleTaskExecutor::CancelableTask updateDecorVisibleTask_;
     std::mutex updateDecorVisibleMutex_;

@@ -44,6 +44,8 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
+    HoverModeAreaType::BOTTOM_SCREEN };
 const std::regex DIMENSION_REGEX(R"(^[-+]?\d+(?:\.\d+)?(?:px|vp|fp|lpx)?$)", std::regex::icase);
 }
 
@@ -203,6 +205,7 @@ void JSTextPicker::JSBind(BindingTarget globalObj)
     JSClass<JSTextPicker>::StaticMethod("onAccept", &JSTextPicker::OnAccept);
     JSClass<JSTextPicker>::StaticMethod("onCancel", &JSTextPicker::OnCancel);
     JSClass<JSTextPicker>::StaticMethod("onChange", &JSTextPicker::OnChange);
+    JSClass<JSTextPicker>::StaticMethod("onScrollStop", &JSTextPicker::OnScrollStop);
     JSClass<JSTextPicker>::StaticMethod("backgroundColor", &JSTextPicker::PickerBackgroundColor);
     JSClass<JSTextPicker>::StaticMethod("gradientHeight", &JSTextPicker::SetGradientHeight);
     JSClass<JSTextPicker>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
@@ -1256,6 +1259,40 @@ void JSTextPicker::OnChange(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+void JSTextPicker::OnScrollStop(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = JSRef<JSFunc>::Cast(info[0]);
+    auto onScrollStop = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc)](
+                        const std::vector<std::string>& value, const std::vector<double>& index) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("TextPicker.onScrollStop");
+        if (value.size() == 1 && index.size() == 1) {
+            auto params = ConvertToJSValues(value[0], index[0]);
+            func->Call(JSRef<JSObject>(), static_cast<int>(params.size()), params.data());
+        } else {
+            std::vector<JSRef<JSVal>> result;
+            JSRef<JSArray> valueArray = JSRef<JSArray>::New();
+            for (uint32_t i = 0; i < value.size(); i++) {
+                valueArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(value[i])));
+            }
+            JSRef<JSVal> valueJs = JSRef<JSVal>::Cast(valueArray);
+            result.emplace_back(valueJs);
+            JSRef<JSArray> selectedArray = JSRef<JSArray>::New();
+            for (uint32_t i = 0; i < index.size(); i++) {
+                selectedArray->SetValueAt(i, JSRef<JSVal>::Make(ToJSValue(index[i])));
+            }
+            JSRef<JSVal> selectedJs = JSRef<JSVal>::Cast(selectedArray);
+            result.emplace_back(selectedJs);
+            func->Call(JSRef<JSObject>(), static_cast<int>(result.size()), result.data());
+        }
+    };
+    TextPickerModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
+    info.ReturnSelf();
+}
+
 void JSTextPickerDialog::JSBind(BindingTarget globalObj)
 {
     JSClass<JSTextPickerDialog>::Declare("TextPickerDialog");
@@ -1377,6 +1414,19 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
             func->Execute(keys, info);
         };
     }
+    std::function<void(const std::string&)> scrollStopEvent;
+    auto onScrollStop = paramObject->GetProperty("onScrollStop");
+    if (!onScrollStop->IsUndefined() && onScrollStop->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onScrollStop));
+        scrollStopEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                              const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            std::vector<std::string> keys = { "value", "index" };
+            ACE_SCORING_EVENT("TextPickerDialog.onScrollStop");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute(keys, info);
+        };
+    }
     NG::TextPickerSettingData settingData;
     TextPickerDialog textPickerDialog;
 
@@ -1465,7 +1515,6 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     }
 
     auto backgroundBlurStyle = paramObject->GetProperty("backgroundBlurStyle");
-    BlurStyleOption styleOption;
     if (backgroundBlurStyle->IsNumber()) {
         auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -1479,13 +1528,27 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
         textPickerDialog.shadow = shadow;
     }
 
+    auto enableHoverModeValue = paramObject->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        textPickerDialog.enableHoverMode = enableHoverModeValue->ToBoolean();
+    }
+
+    auto hoverModeAreaValue = paramObject->GetProperty("hoverModeArea");
+    if (hoverModeAreaValue->IsNumber()) {
+        auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
+        if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
+            textPickerDialog.hoverModeArea = HOVER_MODE_AREA_TYPE[hoverModeArea];
+        }
+    }
+
     auto buttonInfos = ParseButtonStyles(paramObject);
 
     TextPickerDialogEvent textPickerDialogEvent { nullptr, nullptr, nullptr, nullptr };
     TextPickerDialogAppearEvent(info, textPickerDialogEvent);
     TextPickerDialogDisappearEvent(info, textPickerDialogEvent);
     TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData, std::move(cancelEvent),
-        std::move(acceptEvent), std::move(changeEvent), textPickerDialog, textPickerDialogEvent, buttonInfos);
+        std::move(acceptEvent), std::move(changeEvent), std::move(scrollStopEvent), textPickerDialog,
+        textPickerDialogEvent, buttonInfos);
 }
 
 void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
@@ -1706,6 +1769,19 @@ std::map<std::string, NG::DialogTextEvent> JSTextPickerDialog::DialogEvent(const
             func->Execute(keys, info);
         };
         dialogEvent["changeId"] = changeId;
+    }
+    auto onScrollStop = paramObject->GetProperty("onScrollStop");
+    if (!onScrollStop->IsUndefined() && onScrollStop->IsFunction()) {
+        auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onScrollStop));
+        auto scrollStopId = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+                            const std::string& info) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            std::vector<std::string> keys = { "value", "index" };
+            ACE_SCORING_EVENT("TextPickerDialog.onScrollStop");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute(keys, info);
+        };
+        dialogEvent["scrollStopId"] = scrollStopId;
     }
     return dialogEvent;
 }

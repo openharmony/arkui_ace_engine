@@ -19,6 +19,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
+#include "core/components/dialog/dialog_theme.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/utils.h"

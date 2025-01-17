@@ -69,6 +69,7 @@ public:
     // The interface for responsing provider
     void OnConnect() override;
     void OnDisconnect(bool isAbnormal) override;
+    void OnReleaseDone() override;
     void OnExtensionTimeout(int32_t errorCode) override;
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) override;
 
@@ -94,6 +95,10 @@ public:
     void SendDataAsync(const AAFwk::WantParams& params) const override;
     int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const override;
 
+    // The interface for UEC dump
+    uint32_t GetReasonDump() const override;
+    void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+
 private:
     void InitAllCallback();
     void UpdateSessionConfig();
@@ -112,6 +117,7 @@ private:
     bool isNotifyOccupiedAreaChange_ = true;
     Rect displayAreaWindow_;
     RectF displayArea_;
+    uint32_t reason_ = (uint32_t)Rosen::SizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     std::function<void((OHOS::Rosen::WSError))> foregroundCallback_;
     std::function<void((OHOS::Rosen::WSError))> backgroundCallback_;

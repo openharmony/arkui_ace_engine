@@ -151,11 +151,18 @@ void ResetEffectStrategy(ArkUINodeHandle node)
     SymbolModelNG::SetSymbolEffect(frameNode, 0);
 }
 
-void SetSymbolId(ArkUINodeHandle node, ArkUI_Uint32 symbolId)
+void SetSymbolGlyphInitialize(ArkUINodeHandle node, ArkUI_Uint32 symbolId)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SymbolModelNG::InitialSymbol(frameNode, symbolId);
+    SymbolModelNG::SetSymbolGlyphInitialize(frameNode, symbolId);
+}
+
+void ResetSymbolGlyphInitialize(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SymbolModelNG::SetSymbolGlyphInitialize(frameNode, 0);
 }
 }
 
@@ -174,7 +181,8 @@ const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier()
         ResetRenderingStrategy,
         SetEffectStrategy,
         ResetEffectStrategy,
-        SetSymbolId,
+        SetSymbolGlyphInitialize,
+        ResetSymbolGlyphInitialize,
     };
 
     return &modifier;
@@ -194,7 +202,8 @@ const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier()
         ResetRenderingStrategy,
         SetEffectStrategy,
         ResetEffectStrategy,
-        SetSymbolId,
+        SetSymbolGlyphInitialize,
+        ResetSymbolGlyphInitialize,
     };
 
     return &modifier;

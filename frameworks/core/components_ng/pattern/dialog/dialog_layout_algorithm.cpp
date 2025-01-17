@@ -71,13 +71,13 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto dialogTheme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    expandDisplay_ = dialogTheme->GetExpandDisplay();
     auto dialogProp = AceType::DynamicCast<DialogLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(dialogProp);
     auto hostNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(hostNode);
     auto dialogPattern = hostNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
+    expandDisplay_ = dialogTheme->GetExpandDisplay() || dialogPattern->IsShowInFreeMultiWindow();
     keyboardAvoidMode_ = dialogPattern->GetDialogProperties().keyboardAvoidMode;
     isUIExtensionSubWindow_ = dialogPattern->IsUIExtensionSubWindow();
     hostWindowRect_ = dialogPattern->GetHostWindowRect();
@@ -85,6 +85,12 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     gridCount_ = dialogProp->GetGridCount().value_or(-1);
     isShowInSubWindow_ = dialogProp->GetShowInSubWindowValue(false);
     isModal_ = dialogProp->GetIsModal().value_or(true);
+    auto enableHoverMode = dialogProp->GetEnableHoverMode().value_or(false);
+    hoverModeArea_ = dialogProp->GetHoverModeArea().value_or(HoverModeAreaType::BOTTOM_SCREEN);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    auto keyboardInsert = safeAreaManager->GetKeyboardInset();
+    isKeyBoardShow_ = keyboardInsert.IsValid();
+    isHoverMode_ = enableHoverMode ? pipeline->IsHalfFoldHoverStatus() : false;
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);
     dialogPattern->UpdateFontScale();
@@ -123,10 +129,7 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             maxSize.SetWidth(pipeline->GetRootWidth());
             maxSize.SetHeight(pipeline->GetRootHeight());
         }
-        maxSize.MinusPadding(0, 0, safeAreaInsets_.top_.Length(), 0);
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && LessNotEqual(gridCount_, 0)) {
-            maxSize.MinusPadding(0, 0, 0, safeAreaInsets_.bottom_.Length());
-        }
+        UpdateChildMaxSizeHeight(maxSize);
         childLayoutConstraint.UpdateMaxSizeWithCheck(maxSize);
         ComputeInnerLayoutParam(childLayoutConstraint, dialogProp);
         UpdateChildLayoutConstraint(dialogProp, childLayoutConstraint, child);
@@ -143,6 +146,23 @@ void DialogLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         AnalysisHeightOfChild(layoutWrapper);
     }
+}
+
+void DialogLayoutAlgorithm::UpdateChildMaxSizeHeight(SizeT<float>& maxSize)
+{
+    if (!isHoverMode_) {
+        maxSize.MinusPadding(0, 0, safeAreaInsets_.top_.Length(), 0);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE) && LessNotEqual(gridCount_, 0)) {
+            maxSize.MinusPadding(0, 0, 0, safeAreaInsets_.bottom_.Length());
+        }
+        return;
+    }
+    alignBottomScreen_ = !isKeyBoardShow_ && hoverModeArea_ == HoverModeAreaType::BOTTOM_SCREEN;
+    if (alignBottomScreen_) {
+        maxSize.MinusPadding(0, 0, foldCreaseRect.Bottom(), safeAreaInsets_.bottom_.Length());
+        return;
+    }
+    maxSize.SetHeight(foldCreaseRect.Top() - safeAreaInsets_.top_.Length());
 }
 
 void DialogLayoutAlgorithm::UpdateChildLayoutConstraint(const RefPtr<DialogLayoutProperty>& dialogProp,
@@ -687,9 +707,6 @@ OffsetF DialogLayoutAlgorithm::ComputeChildPosition(
     OffsetF dialogOffset = OffsetF(dialogOffsetX.value_or(0.0), dialogOffsetY.value_or(0.0));
     auto isHostWindowAlign = isUIExtensionSubWindow_ && expandDisplay_ && hostWindowRect_.GetSize().IsPositive();
     auto maxSize = isHostWindowAlign ? hostWindowRect_.GetSize() : layoutConstraint->maxSize;
-    if (!customSize_ && !IsAlignmentByWholeScreen()) {
-        maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
-    }
     if (!SetAlignmentSwitch(maxSize, childSize, topLeftPoint)) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
     }
@@ -727,8 +744,25 @@ bool DialogLayoutAlgorithm::IsAlignmentByWholeScreen()
     }
 }
 
-bool DialogLayoutAlgorithm::SetAlignmentSwitch(const SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint)
+void DialogLayoutAlgorithm::CaculateMaxSize(SizeF& maxSize)
 {
+    auto halfScreenHeight = maxSize.Height() / HALF;
+    if (!customSize_ && isHoverMode_) {
+        maxSize.SetHeight(halfScreenHeight);
+    }
+    if (!customSize_ && !IsAlignmentByWholeScreen()) {
+        if (isHoverMode_ && hoverModeArea_ == HoverModeAreaType::TOP_SCREEN) {
+            maxSize.SetHeight(foldCreaseRect.Top());
+            return;
+        }
+        maxSize.MinusHeight(safeAreaInsets_.bottom_.Length());
+    }
+}
+
+bool DialogLayoutAlgorithm::SetAlignmentSwitch(SizeF& maxSize, const SizeF& childSize, OffsetF& topLeftPoint)
+{
+    auto halfScreenHeight = maxSize.Height() / HALF;
+    CaculateMaxSize(maxSize);
     if (alignment_ != DialogAlignment::DEFAULT || Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         switch (alignment_) {
             case DialogAlignment::TOP:
@@ -765,6 +799,9 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitch(const SizeF& maxSize, const SizeF
                 topLeftPoint =
                     OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / HALF;
                 break;
+        }
+        if (alignBottomScreen_) {
+            topLeftPoint.SetY(topLeftPoint.GetY() + halfScreenHeight);
         }
         return true;
     }
@@ -824,6 +861,13 @@ OffsetF DialogLayoutAlgorithm::AdjustChildPosition(
     if (!customSize_ && topLeftPoint.GetY() < safeAreaInsets_.top_.end) {
         topLeftPoint.SetY(safeAreaInsets_.top_.end);
     }
+    if (alignBottomScreen_) {
+        bool alignTop = alignment_ == DialogAlignment::TOP || alignment_ == DialogAlignment::TOP_START ||
+            alignment_ == DialogAlignment::TOP_END;
+        if (topLeftPoint.GetY() < foldCreaseRect.Bottom() || alignTop) {
+            topLeftPoint.SetY(foldCreaseRect.Bottom());
+        }
+    }
     auto childOffset = topLeftPoint + dialogOffset;
 
     auto manager = pipelineContext->GetSafeAreaManager();
@@ -861,6 +905,12 @@ void DialogLayoutAlgorithm::UpdateSafeArea()
     auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
     CHECK_NULL_VOID(context);
     safeAreaInsets_ = context->GetSafeAreaWithoutProcess();
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    auto foldCreaseRects = displayInfo->GetCurrentFoldCreaseRegion();
+    if (!foldCreaseRects.empty()) {
+        foldCreaseRect = foldCreaseRects.front();
+    }
 }
 
 void DialogLayoutAlgorithm::ClipUIExtensionSubWindowContent(const RefPtr<FrameNode>& dialog, bool isClip)

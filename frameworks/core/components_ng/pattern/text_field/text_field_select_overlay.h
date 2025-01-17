@@ -92,6 +92,7 @@ public:
     {
         return !HasRenderTransform();
     }
+    std::optional<Color> GetHandleColor() override;
 
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);

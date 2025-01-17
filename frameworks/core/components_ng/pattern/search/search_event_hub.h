@@ -21,6 +21,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/search/search_gesture_event_hub.h"
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/common/recorder/event_recorder.h"
 
 namespace OHOS::Ace::NG {
@@ -33,20 +34,16 @@ public:
 
     ~SearchEventHub() override = default;
 
-    void SetOnSubmit(ChangeAndSubmitEvent&& submitEvent)
+    void SetOnSubmit(std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& func)
     {
-        submitEvent_ = std::move(submitEvent);
+        onSubmit_ = std::move(func);
     }
 
-    void SetOnChange(ChangeAndSubmitEvent&& changeEvent)
+    void FireOnSubmit(const std::string& value, NG::TextFieldCommonEvent& event)
     {
-        changeEvent_ = std::move(changeEvent);
-    }
-
-    void UpdateSubmitEvent(const std::string& value) const
-    {
-        if (submitEvent_) {
-            submitEvent_(value);
+        if (onSubmit_) {
+            event.SetText(value);
+            onSubmit_(value, event);
         }
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             Recorder::EventParamsBuilder builder;
@@ -58,6 +55,11 @@ public:
             builder.SetEventType(Recorder::EventType::SEARCH_SUBMIT).SetText(value);
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
         }
+    }
+
+    void SetOnChange(ChangeAndSubmitEvent&& changeEvent)
+    {
+        changeEvent_ = std::move(changeEvent);
     }
 
     void UpdateChangeEvent(const std::string& value) const;
@@ -121,7 +123,6 @@ public:
     }
 
 private:
-    ChangeAndSubmitEvent submitEvent_;
     ChangeAndSubmitEvent changeEvent_;
     ChangeAndSubmitEvent onValueChangeEvent_;
 
@@ -129,6 +130,7 @@ private:
     std::function<void(const std::string&)> onCut_;
     std::function<void(const std::string&)> onPaste_;
     std::function<void(const std::string&, NG::TextCommonEvent&)> onPasteWithEvent_;
+    std::function<void(const std::string&, NG::TextFieldCommonEvent&)> onSubmit_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SearchEventHub);
 };

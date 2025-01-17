@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -65,12 +65,15 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
         CHECK_NULL_VOID(controllerRowNode);
         videoNode->AddChild(controllerRowNode);
     }
-    AddDragFrameNodeToManager();
 }
 
-void VideoModelNG::SetSrc(const std::string& src)
+void VideoModelNG::SetSrc(const std::string& src, const std::string& bundleName, const std::string& moduleName)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, VideoSource, src);
+    VideoSourceInfo videoSrcInfo;
+    videoSrcInfo.src = src;
+    videoSrcInfo.bundleName = bundleName;
+    videoSrcInfo.moduleName = moduleName;
+    ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, VideoSource, videoSrcInfo);
 }
 
 void VideoModelNG::SetProgressRate(double progressRate)
@@ -216,17 +219,6 @@ void VideoModelNG::SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange)
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFullScreenChange(std::move(onFullScreenChange));
-}
-
-void VideoModelNG::AddDragFrameNodeToManager() const
-{
-    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
 }
 
 void VideoModelNG::SetAutoPlay(FrameNode* frameNode, bool autoPlay)

@@ -133,14 +133,14 @@ void SwiperArrowPattern::InitEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_VOID(buttonNode);
     auto arrowGestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(arrowGestureHub);
     // Set hit test mode transparent to avoid blocking the touch event of child nodes and sibling nodes.
     arrowGestureHub->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
+    auto buttonNode = DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(buttonNode);
 
-    auto buttonGestureHub  = buttonNode->GetOrCreateGestureEventHub();
+    auto buttonGestureHub = buttonNode->GetOrCreateGestureEventHub();
 
     auto touchCallback = [weak = WeakClaim(this), buttonNode](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
@@ -155,7 +155,7 @@ void SwiperArrowPattern::InitEvent()
         CHECK_NULL_VOID(pattern);
         pattern->ButtonOnHover(buttonNode, isHovered);
     };
-    buttonOnHoverListener_  = MakeRefPtr<InputEvent>(std::move(hoverCallback));
+    buttonOnHoverListener_ = MakeRefPtr<InputEvent>(std::move(hoverCallback));
     auto buttonInputHub = buttonNode->GetOrCreateInputEventHub();
     buttonInputHub->AddOnHoverEvent(buttonOnHoverListener_);
 
@@ -165,9 +165,9 @@ void SwiperArrowPattern::InitEvent()
         pattern->ButtonClickEvent();
     };
     if (buttonClickListener_) {
-        arrowGestureHub->RemoveClickEvent(buttonClickListener_);
+        buttonGestureHub->RemoveClickEvent(buttonClickListener_);
     }
-    buttonClickListener_  = MakeRefPtr<ClickEvent>(std::move(clickCallback));
+    buttonClickListener_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));
     buttonGestureHub->AddClickEvent(buttonClickListener_);
 }
 

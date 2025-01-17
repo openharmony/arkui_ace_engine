@@ -21,22 +21,50 @@
 #include "napi/native_common.h"
 #include "native_engine/impl/ark/ark_native_engine.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 namespace OHOS::Ace {
+namespace {
+const char* NODEPTR_OF_UINODE = "nodePtr_";
+} // namespace
 std::shared_ptr<XComponentController> XComponentController::GetXComponentControllerFromNapiValue(
     napi_env env, napi_value napiValue)
 {
-    auto vm = reinterpret_cast<NativeEngine*>(env)->GetEcmaVm();
+    const auto* vm = reinterpret_cast<NativeEngine*>(env)->GetEcmaVm();
     auto localRef = NapiValueToLocalValue(napiValue);
     if (localRef->IsNull()) {
         return nullptr;
     }
-    auto* jsXComponentController =
-        static_cast<Framework::JSXComponentController*>(Local<panda::ObjectRef>(localRef)->GetNativePointerField(
-            vm, 0));
+    auto* jsXComponentController = static_cast<Framework::JSXComponentController*>(
+        Local<panda::ObjectRef>(localRef)->GetNativePointerField(vm, 0));
     if (!jsXComponentController) {
         return nullptr;
     }
     return jsXComponentController->GetController();
+}
+
+XComponentControllerErrorCode XComponentController::SetSurfaceCallbackMode(
+    napi_env env, napi_value node, SurfaceCallbackMode mode)
+{
+    const auto* vm = reinterpret_cast<NativeEngine*>(env)->GetEcmaVm();
+    auto nodeRef = NapiValueToLocalValue(node);
+    if (nodeRef.IsEmpty() || !nodeRef->IsObject(vm)) {
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    auto nodeObj = nodeRef->ToObject(vm);
+    panda::Local<panda::JSValueRef> nodePtr = nodeObj->Get(vm, panda::StringRef::NewFromUtf8(vm, NODEPTR_OF_UINODE));
+    if (nodePtr.IsEmpty() || nodePtr->IsNull() || nodePtr->IsUndefined()) {
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    auto* frameNode = reinterpret_cast<NG::FrameNode*>(nodePtr->ToNativePointer(vm)->Value());
+    if (!frameNode) {
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    auto* xcPattern = frameNode->GetPatternPtr<NG::XComponentPattern>();
+    if (!xcPattern) {
+        return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_BAD_PARAMETER;
+    }
+    xcPattern->ChangeSurfaceCallbackMode(mode);
+    return XComponentControllerErrorCode::XCOMPONENT_CONTROLLER_NO_ERROR;
 }
 } // namespace OHOS::Ace

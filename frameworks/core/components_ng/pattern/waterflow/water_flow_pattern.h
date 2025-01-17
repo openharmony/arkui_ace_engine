@@ -35,6 +35,7 @@ public:
     bool IsAtTop() const override;
     bool IsAtBottom() const override;
     bool IsReverse() const override;
+    bool IsVerticalReverse() const;
     bool hasFooter()
     {
         return footer_.Upgrade() != nullptr;
@@ -110,11 +111,11 @@ public:
     /**
      * @brief LayoutMode::SLIDING_WINDOW doesn't support animateTo
      */
-    void AnimateTo(
-        float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll,
+    void AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth, bool canOverScroll,
         bool useTotalOffset = true) override;
 
-    void ScrollPage(bool reverse, AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL);
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::START,
         std::optional<float> extraOffset = std::nullopt) override;
@@ -137,6 +138,7 @@ public:
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     Rect GetItemRect(int32_t index) const override;
+    int32_t GetItemIndex(double x, double y) const override;
 
     RefPtr<WaterFlowSections> GetSections() const;
     RefPtr<WaterFlowSections> GetOrCreateWaterFlowSections();
@@ -199,6 +201,8 @@ public:
     {
         return layoutInfo_->defCachedCount_;
     }
+
+    SizeF GetChildrenExpandedSize() override;
 
 private:
     DisplayMode GetDefaultScrollBarDisplayMode() const override

@@ -152,9 +152,11 @@ public:
     /**
      * @param cacheStart number of items to cache before @c start
      * @param cacheEnd number of items to cache after @c end
+     * @param showCached whether to set cached items as active
      * @note To deactivate all children, set @c start and @c end to -1
      */
-    virtual void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) = 0;
+    virtual void SetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0, bool showCached = false) = 0;
     virtual void SetActiveChildRange(const std::optional<ActiveChildSets>& activeChildSets,
         const std::optional<ActiveChildRange>& activeChildRange = std::nullopt)
     {}
@@ -234,7 +236,9 @@ public:
     void AdjustNotExpandNode();
     void AdjustFixedSizeNode(RectF& frame);
     void ExpandHelper(const std::unique_ptr<SafeAreaExpandOpts>& opts, RectF& frame);
-
+    ExpandEdges GetAccumulatedSafeAreaExpand(bool includingSelf = false);
+    void ResetSafeAreaPadding();
+    
     bool SkipSyncGeometryNode() const
     {
         return needSkipSyncGeometryNode_;
@@ -259,6 +263,10 @@ protected:
     OffsetF ExpandIntoKeyboard();
     bool CheckValidSafeArea();
     float GetPageCurrentOffset();
+    bool AccumulateExpandCacheHit(ExpandEdges& totalExpand, const PaddingPropertyF& innerSpace);
+    void GetAccumulatedSafeAreaExpandHelper(RectF& adjustingRect, ExpandEdges& totalExpand, bool fromSelf = false);
+    void ParseSafeAreaPaddingSides(const PaddingPropertyF& parentSafeAreaPadding,
+        const PaddingPropertyF& parentInnerSpace, const RectF& adjustingRect, ExpandEdges& rollingExpand);
 
     WeakPtr<FrameNode> hostNode_;
 

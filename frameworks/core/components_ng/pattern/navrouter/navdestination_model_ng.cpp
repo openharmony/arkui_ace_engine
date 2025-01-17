@@ -390,6 +390,9 @@ void NavDestinationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
     CHECK_NULL_VOID(frameNode);
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetTitleBarStyle(opt.brOptions.barStyle);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
@@ -561,6 +564,21 @@ void NavDestinationModelNG::SetNavDestinationMode(NavDestinationMode mode)
     auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestination);
     navDestination->SetNavDestinationMode(mode);
+}
+
+void NavDestinationModelNG::SetRecoverable(FrameNode* frameNode, bool recoverable)
+{
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    navDestination->SetRecoverable(recoverable);
+}
+
+void NavDestinationModelNG::SetRecoverable(bool recoverable)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    navDestination->SetRecoverable(recoverable);
 }
 
 void NavDestinationModelNG::SetMenuItems(std::vector<NG::BarItem>&& menuItems)
@@ -813,10 +831,112 @@ void NavDestinationModelNG::SetTitlebarOptions(FrameNode* frameNode, NavigationT
 {
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationNode);
+    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetTitleBarStyle(opt.brOptions.barStyle);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titleBarPattern);
     titleBarPattern->SetTitlebarOptions(std::move(opt));
+}
+
+void NavDestinationModelNG::SetMenuItems(FrameNode* frameNode, std::vector<NG::BarItem>&& menuItems)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    // if previous menu is custom, just remove it and create new menu, otherwise update old menu
+    if (navDestinationGroupNode->GetPrevMenuIsCustom().value_or(false)) {
+        navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+    } else {
+        if (navDestinationGroupNode->GetMenu()) {
+            navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::REPLACE);
+        } else {
+            navDestinationGroupNode->UpdateMenuNodeOperation(ChildNodeOperation::ADD);
+        }
+    }
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    navDestinationPattern->SetTitleBarMenuItems(menuItems);
+    navDestinationPattern->SetMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navDestinationPattern->SetLandscapeMenuNodeId(ElementRegister::GetInstance()->MakeUniqueId());
+    navDestinationGroupNode->UpdatePrevMenuIsCustom(false);
+}
+
+void NavDestinationModelNG::SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto menuItems = navDestinationPattern->GetTitleBarMenuItems();
+    if (menuItems.size() > index) {
+        menuItems.at(index).action = action;
+        navDestinationPattern->SetTitleBarMenuItems(menuItems);
+    }
+}
+
+void NavDestinationModelNG::SetMenuItemSymbol(FrameNode* frameNode,
+    std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index)
+{
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationGroupNode);
+    auto navDestinationPattern = navDestinationGroupNode->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(navDestinationPattern);
+    auto menuItems = navDestinationPattern->GetTitleBarMenuItems();
+    if (menuItems.size() > index) {
+        menuItems.at(index).iconSymbol = symbol;
+        navDestinationPattern->SetTitleBarMenuItems(menuItems);
+    }
+}
+
+void NavDestinationModelNG::SetSystemTransitionType(NG::NavigationSystemTransitionType type)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    navDestination->SetSystemTransitionType(type);
+}
+
+void NavDestinationModelNG::SetSystemTransitionType(FrameNode* frameNode, NG::NavigationSystemTransitionType type)
+{
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestination);
+    navDestination->SetSystemTransitionType(type);
+}
+
+void NavDestinationModelNG::SetScrollableProcessor(
+    const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator)
+{
+    CHECK_NULL_VOID(creator);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!pattern->GetScrollableProcessor()) {
+        auto processor = creator();
+        if (processor) {
+            processor->SetNodeId(node->GetId());
+            processor->SetNavDestinationPattern(WeakPtr(pattern));
+        }
+        pattern->SetScrollableProcessor(processor);
+    }
+}
+
+void NavDestinationModelNG::UpdateBindingWithScrollable(
+    std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto processor = pattern->GetScrollableProcessor();
+    callback(processor);
 }
 } // namespace OHOS::Ace::NG

@@ -579,6 +579,9 @@ public:
     static float GetDragStartPanDistanceThreshold();
 
     static bool IsSmallFoldProduct();
+
+    static bool IsNeedResampleTouchPoints();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;

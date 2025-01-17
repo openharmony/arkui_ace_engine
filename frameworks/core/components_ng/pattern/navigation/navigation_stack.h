@@ -187,6 +187,12 @@ public:
     virtual int32_t GetJsIndexFromNativeIndex(int32_t index) { return -1; }
     virtual void MoveIndexToTop(int32_t index) {}
 
+    virtual std::string GetStringifyParamByIndex(int32_t index) const { return ""; }
+    virtual void SetPathArray(const std::vector<NavdestinationRecoveryInfo>& navdestinationsInfo) {}
+    virtual void SetFromRecovery(int32_t index, bool fromRecovery) {}
+    virtual bool IsFromRecovery(int32_t index) { return false; }
+    virtual int32_t GetRecoveredDestinationMode(int32_t index) { return false; }
+
     const WeakPtr<UINode>& GetNavigationNode()
     {
         return navigationNode_;
@@ -196,6 +202,14 @@ public:
     {
         navigationNode_ = navigationNode;
     }
+
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    void SetLastNavPathList(const NavPathList& navPathList)
+    {
+        lastNavPathList_ = navPathList;
+    }
+    bool isLastListContains(const std::string& name, const RefPtr<UINode>& navDestinationNode);
+#endif
 
     virtual void UpdatePathInfoIfNeeded(RefPtr<UINode>& uiNode, int32_t index) {}
     virtual void RecoveryNavigationStack() {}
@@ -229,6 +243,10 @@ protected:
     NavPathList navPathList_;
     // prev backup NavPathList
     NavPathList preNavPathList_;
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    // backup NavPathList before push or pop
+    NavPathList lastNavPathList_;
+#endif
     // recovery NavPathList
     NavPathList recoveryList_;
     NavPathList cacheNodes_;

@@ -80,7 +80,7 @@ void WebPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetRenderContext()->SetClipToFrame(true);
+    host->GetRenderContext()->UpdateClipEdge(true);
     host->GetRenderContext()->UpdateBackgroundColor(Color::WHITE);
     host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -773,7 +773,7 @@ void WebPattern::OnModifyDone()
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
-#if !defined(IOS_PLATFORM) && defined(ANDROID_PLATFORM)
+#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
     RegistVirtualKeyBoardListener();
 #endif
     if (!delegate_) {
@@ -1191,6 +1191,11 @@ void WebPattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     // cross platform is not support now;
 }
 
+void WebPattern::SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::JavaScriptOnDocumentStart(const ScriptItems& scriptItems)
 {
     // cross platform is not support now;
@@ -1207,6 +1212,11 @@ void WebPattern::JavaScriptOnDocumentEnd(const ScriptItems& scriptItems)
 }
 
 void WebPattern::OnOverScrollModeUpdate(int mode)
+{
+   // cross platform is not support now;
+}
+
+void WebPattern::OnBlurOnKeyboardHideModeUpdate(int mode)
 {
    // cross platform is not support now;
 }

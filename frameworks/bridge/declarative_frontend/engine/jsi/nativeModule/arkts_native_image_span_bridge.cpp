@@ -17,6 +17,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 #include "base/image/pixel_map.h"
+#include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
@@ -33,6 +34,7 @@ const std::vector<float> DEFAULT_COLOR_FILTER_MATRIX = {
     1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
     0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f
 };
+
 void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<ArkUI_Float32>& values,
     std::vector<ArkUI_Int32>& units, int32_t argsIndex)
 {
@@ -286,6 +288,79 @@ ArkUINativeModuleValue ImageSpanBridge::ResetOnError(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanOnError(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+void SetSpanColorFilterObject(const EcmaVM* vm, const Local<JSValueRef>& jsObjArg, ArkUINodeHandle nativeNode)
+{
+    Framework::JSColorFilter* colorFilter;
+    if (!jsObjArg->IsUndefined() && !jsObjArg->IsNull()) {
+        colorFilter = static_cast<Framework::JSColorFilter*>(jsObjArg->ToObject(vm)->GetNativePointerField(vm, 0));
+    } else {
+        GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanColorFilter(
+            nativeNode, &(*DEFAULT_COLOR_FILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+        return;
+    }
+    if (colorFilter && colorFilter->GetColorFilterMatrix().size() == COLOR_FILTER_MATRIX_SIZE) {
+        GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanColorFilter(
+            nativeNode, &(*colorFilter->GetColorFilterMatrix().begin()), COLOR_FILTER_MATRIX_SIZE);
+        return;
+    }
+    GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanColorFilter(
+        nativeNode, &(*DEFAULT_COLOR_FILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+}
+
+ArkUINativeModuleValue ImageSpanBridge::SetColorFilter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> jsObjArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!jsObjArg->IsArray(vm) && !jsObjArg->IsObject(vm)) {
+        GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanColorFilter(
+            nativeNode, &(*DEFAULT_COLOR_FILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (jsObjArg->IsObject(vm) && !jsObjArg->IsArray(vm)) {
+        auto drawingColorFilter = Ace::Framework::CreateDrawingColorFilter(info[1]);
+        if (drawingColorFilter) {
+            ImageModelNG::SetDrawingColorFilter(reinterpret_cast<FrameNode*>(nativeNode), drawingColorFilter);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        SetSpanColorFilterObject(vm, jsObjArg, nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto array = panda::CopyableGlobal<panda::ArrayRef>(vm, jsObjArg);
+    if (array->Length(vm) != COLOR_FILTER_MATRIX_SIZE) {
+        GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanColorFilter(
+            nativeNode, &(*DEFAULT_COLOR_FILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::vector<float> colorFilter;
+    for (size_t i = 0; i < array->Length(vm); i++) {
+        auto value = array->GetValueAt(vm, jsObjArg, i);
+        if (value->IsNumber()) {
+            colorFilter.emplace_back(value->ToNumber(vm)->Value());
+        } else {
+            GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanColorFilter(
+                nativeNode, &(*DEFAULT_COLOR_FILTER_MATRIX.begin()), COLOR_FILTER_MATRIX_SIZE);
+            return panda::JSValueRef::Undefined(vm);
+        }
+    }
+    GetArkUINodeModifiers()->getImageSpanModifier()->setImageSpanColorFilter(
+        nativeNode, &(*colorFilter.begin()), COLOR_FILTER_MATRIX_SIZE);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageSpanBridge::ResetColorFilter(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getImageSpanModifier()->resetImageSpanColorFilter(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

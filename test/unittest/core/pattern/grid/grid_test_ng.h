@@ -20,7 +20,6 @@
 
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
-#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #define protected public
 #define private public
 #include "core/components_ng/pattern/grid/grid_pattern.h"

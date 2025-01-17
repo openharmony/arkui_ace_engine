@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,7 +41,6 @@
 #include "core/components/video/video_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -169,7 +168,7 @@ RefPtr<FrameNode> VideoTestExtraAddNg::CreateVideoNode(TestProperty& g_testPrope
         .WillRepeatedly(Return(true));
 
     if (g_testProperty.src.has_value()) {
-        VideoModelNG().SetSrc(g_testProperty.src.value());
+        VideoModelNG().SetSrc(g_testProperty.src.value(), "", "");
     }
     if (g_testProperty.progressRate.has_value()) {
         VideoModelNG().SetProgressRate(g_testProperty.progressRate.value());
@@ -652,5 +651,4 @@ HWTEST_F(VideoTestExtraAddNg, VideoPatternTest006, TestSize.Level1)
     pattern->OnPlayerStatus(PlaybackStatus::STOPPED);
     EXPECT_EQ(stopCheck, VIDEO_STOP_EVENT);
 }
-
 } // namespace OHOS::Ace::NG

@@ -582,6 +582,7 @@ public:
         : result_(result) {}
 
     void SetGestureEventResult(bool result) override;
+    void SetGestureEventResult(bool result, bool stopPropagation) override;
     bool HasSendTask() { return sendTask_; }
     void SetSendTask() { sendTask_ = true; }
     bool GetEventResult() { return eventResult_; }
@@ -729,6 +730,7 @@ public:
     void UpdateOverlayScrollbarEnabled(bool isEnabled);
     void UpdateScrollBarColor(const std::string& colorValue);
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
+    void UpdateBlurOnKeyboardHideMode(const int32_t isBlurOnKeyboardHideEnable);
     void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
     void UpdateNativeEmbedRuleTag(const std::string& tag);
     void UpdateNativeEmbedRuleType(const std::string& type);
@@ -780,6 +782,7 @@ public:
     bool GetPendingSizeStatus();
     void OnInactive();
     void OnActive();
+    void GestureBackBlur();
     void OnWebviewHide();
     void OnWebviewShow();
     bool OnCursorChange(const OHOS::NWeb::CursorType& type, std::shared_ptr<OHOS::NWeb::NWebCursorInfo> info);
@@ -915,6 +918,7 @@ public:
         TouchEventInfo& touchEventInfo);
     std::string SpanstringConvertHtml(const std::vector<uint8_t> &content);
     bool CloseImageOverlaySelection();
+    void GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;

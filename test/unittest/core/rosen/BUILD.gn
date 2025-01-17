@@ -159,6 +159,7 @@ ohos_unittest("arkui_rosen_render_context_test") {
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
     "skia:skia_canvaskit",
+    "window_manager:libwm",
   ]
   if (defined(use_rosen_drawing) && use_rosen_drawing) {
     defines = [ "USE_ROSEN_DRAWING" ]
@@ -261,6 +262,7 @@ ohos_unittest("gradient_style_modifier_test") {
     "graphic_2d:2d_graphics",
     "graphic_2d:librender_service_client",
     "skia:skia_canvaskit",
+    "window_manager:libwm",
   ]
   if (defined(use_rosen_drawing) && use_rosen_drawing) {
     defines = [ "USE_ROSEN_DRAWING" ]

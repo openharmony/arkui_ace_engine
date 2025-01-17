@@ -29,6 +29,7 @@
 
 namespace OHOS::Ace::NG {
 class DateTimeAnimationController;
+class CheckBoxPaintProperty;
 class ACE_EXPORT DatePickerDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
@@ -72,8 +73,10 @@ private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
+    static void UpdateCheckboxPaintProperty(const RefPtr<CheckBoxPaintProperty>& checkboxPaintProps,
+    bool isLunar, const CheckboxSettingData& checkboxSettingData);
     static void CreateLunarswitchNode(const RefPtr<FrameNode>& contentColumn, const RefPtr<FrameNode>& dateNode,
-        std::function<void(const bool)>&& changeEvent, bool isLunar);
+        std::function<void(const bool)>&& changeEvent, bool isLunar, const CheckboxSettingData& checkboxSettingData);
     static void SetTitleMouseHoverEvent(const RefPtr<FrameNode>& titleRow);
     static void HandleMouseEvent(const RefPtr<FrameNode>& titleButton, bool isHover);
     static void PlayHoverAnimation(const RefPtr<FrameNode>& titleButton, const Color& color);

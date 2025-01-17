@@ -97,6 +97,16 @@ public:
         currentDateModified_ = currentDateModified;
     }
 
+    void SetMovingPhotoFormat(MovingPhotoFormat format)
+    {
+        movingPhotoFormat_ = format;
+    }
+
+    void SetDynamicRangeMode(DynamicRangeMode rangeMode)
+    {
+        dynamicRangeMode_ = rangeMode;
+    }
+
     int64_t GetCurrentDateModified()
     {
         return currentDateModified_;
@@ -129,6 +139,8 @@ private:
     void UpdateImageNode();
     void UpdateVideoNode();
     void UpdatePlayMode();
+    void MovingPhotoFormatConvert(MovingPhotoFormat format);
+    void DynamicRangeModeConvert(DynamicRangeMode rangeMode);
     SizeF CalculateFitContain(const SizeF& rawSize, const SizeF& layoutSize);
     SizeF CalculateFitFill(const SizeF& layoutSize);
     SizeF CalculateFitCover(const SizeF& rawSize, const SizeF& layoutSize);
@@ -172,12 +184,9 @@ private:
     void SelectPlaybackMode(PlaybackMode mode);
     void StartPlayback();
     void StartAnimation();
-    void CommonStartAnimation(const RefPtr<RenderContext>& image, const RefPtr<RenderContext>& video);
-    void RepeatStartAnimation(const RefPtr<RenderContext>& videoRsContext);
     void StopPlayback();
     void PausePlayback();
     void StopAnimation();
-    void RepeatStopAnimation(const RefPtr<RenderContext>& videoRsContext);
     void StopAnimationCallback();
     void StartAutoPlay();
     void StartRepeatPlay();
@@ -211,6 +220,9 @@ private:
     PlaybackMode autoAndRepeatLevel_ = PlaybackMode::NONE;
     PlaybackMode historyAutoAndRepeatLevel_ = PlaybackMode::NONE;
     int64_t currentDateModified_ = -2;
+    MovingPhotoFormat movingPhotoFormat_ = MovingPhotoFormat::UNKNOWN;
+    PixelFormat imageFormat_ = PixelFormat::UNKNOWN;
+    DynamicRangeMode dynamicRangeMode_ = DynamicRangeMode::HIGH;
 
     Rect lastBoundsRect_;
 

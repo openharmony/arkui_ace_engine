@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,13 +79,16 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, b
     auto source = ImageSource::Create(static_cast<const uint8_t*>(data_->GetData()), data_->GetSize());
     CHECK_NULL_RETURN(source, nullptr);
 
-    auto width = std::lround(desiredSize_.Width());
-    auto height = std::lround(desiredSize_.Height());
+    auto width = static_cast<int32_t>(std::lround(desiredSize_.Width()));
+    auto height = static_cast<int32_t>(std::lround(desiredSize_.Height()));
     std::pair<int32_t, int32_t> sourceSize = source->GetImageSize();
     auto src = obj_->GetSourceInfo();
     auto srcStr = src.GetSrcType() == SrcType::BASE64 ? src.GetKey() : src.ToString();
+    // Determine whether to decode the width and height of each other based on the orientation
+    SwapDecodeSize(width, height);
     ACE_SCOPED_TRACE("CreateImagePixelMap %s, sourceSize: [ %d, %d ], targetSize: [ %d, %d ]", srcStr.c_str(),
         sourceSize.first, sourceSize.second, static_cast<int32_t>(width), static_cast<int32_t>(height));
+
     auto pixmap = source->CreatePixelMap({ width, height }, imageQuality, isHdrDecoderNeed);
 
     CHECK_NULL_RETURN(pixmap, nullptr);
@@ -104,6 +107,17 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage(AIImageQuality imageQuality, b
     }
 
     return image;
+}
+
+void ImageDecoder::SwapDecodeSize(int32_t& width, int32_t& height)
+{
+    if (width == 0 || height == 0 || obj_->GetUserOrientation() == ImageRotateOrientation::UP) {
+        return;
+    }
+    auto orientation = obj_->GetOrientation();
+    if (orientation == ImageRotateOrientation::LEFT || orientation == ImageRotateOrientation::RIGHT) {
+        std::swap(width, height);
+    }
 }
 
 std::shared_ptr<RSImage> ImageDecoder::ForceResizeImage(const std::shared_ptr<RSImage>& image, const RSImageInfo& info)

@@ -235,6 +235,7 @@ struct DialogProperties {
     DialogButtonDirection buttonDirection = DialogButtonDirection::AUTO;
     bool isMask = false;
     bool isModal = true;
+    bool enableHoverMode = false;
     bool isScenceBoardDialog = false;
     bool isSysBlurStyle = true;           // init use sysBlurStyle
     std::function<void()> customBuilder;
@@ -245,6 +246,7 @@ struct DialogProperties {
     std::optional<Shadow> shadow;
     std::optional<CalcDimension> width;
     std::optional<CalcDimension> height;
+    std::optional<HoverModeAreaType> hoverModeArea;
 
 #ifndef NG_BUILD
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>
@@ -282,6 +284,7 @@ struct PromptDialogAttr {
     bool autoCancel = true;
     bool showInSubWindow = false;
     bool isModal = false;
+    bool enableHoverMode = false;
     std::function<void()> customBuilder;
     std::function<void(const int32_t& info)> customOnWillDismiss;
 
@@ -297,6 +300,7 @@ struct PromptDialogAttr {
     std::optional<Shadow> shadow;
     std::optional<CalcDimension> width;
     std::optional<CalcDimension> height;
+    std::optional<HoverModeAreaType> hoverModeArea;
 
     WeakPtr<NG::UINode> contentNode;
     bool customStyle = false;

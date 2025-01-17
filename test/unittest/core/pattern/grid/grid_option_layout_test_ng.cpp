@@ -832,4 +832,36 @@ HWTEST_F(GridOptionLayoutTestNg, ScrollTo001, TestSize.Level1)
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().startIndex_, 20);
 }
+
+/**
+ * @tc.name: AdaptToChildMainSize001
+ * @tc.desc: Test Horizontal Grid with Infinity mainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, AdaptToChildMainSize001, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    ViewAbstract::SetWidth(CalcLength(Infinity<int32_t>()));
+    CreateFixedItems(8);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_HEIGHT * 2);
+}
+
+/**
+ * @tc.name: AdaptToChildMainSize002
+ * @tc.desc: Test Vertical Grid with Infinity mainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridOptionLayoutTestNg, AdaptToChildMainSize002, TestSize.Level1)
+{
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    model.SetLayoutOptions({});
+    ViewAbstract::SetHeight(CalcLength(Infinity<int32_t>()));
+    CreateFixedItems(8);
+    CreateDone();
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().lastMainSize_, ITEM_HEIGHT * 2);
+}
 } // namespace OHOS::Ace::NG

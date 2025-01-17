@@ -83,10 +83,10 @@ void NavBarNode::InitSystemTransitionPop()
         { curFrameSize.Width() * TITLE_OFFSET_PERCENT * isRTL, 0.0f });
 }
 
-void NavBarNode::SystemTransitionPushAction(bool isFinish)
+void NavBarNode::SystemTransitionPushAction(bool isStart)
 {
     // initialization or finish callBack
-    if (isFinish) {
+    if (isStart) {
         SetTransitionType(PageTransitionType::EXIT_PUSH);
     } else {
         GetRenderContext()->SetActualForegroundColor(Color::TRANSPARENT);

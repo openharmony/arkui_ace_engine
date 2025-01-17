@@ -127,6 +127,7 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_ALL_MENU_ITEM = 1 << 3;
 inline constexpr SelectOverlayDirtyFlag DIRTY_COPY_ALL_ITEM = 1 << 4;
 inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_TEXT = 1 << 5;
 inline constexpr SelectOverlayDirtyFlag DIRTY_VIEWPORT = 1 << 6;
+inline constexpr SelectOverlayDirtyFlag DIRTY_HANDLE_COLOR_FLAG = 1 << 7;
 inline constexpr SelectOverlayDirtyFlag DIRTY_DOUBLE_HANDLE = DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE;
 inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
     DIRTY_DOUBLE_HANDLE | DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT | DIRTY_VIEWPORT;

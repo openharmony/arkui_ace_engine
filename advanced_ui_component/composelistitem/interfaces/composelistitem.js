@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,29 +19,29 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 }
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 export var IconType;
-(function (a17) {
-    a17[a17["BADGE"] = 1] = "BADGE";
-    a17[a17["NORMAL_ICON"] = 2] = "NORMAL_ICON";
-    a17[a17["SYSTEM_ICON"] = 3] = "SYSTEM_ICON";
-    a17[a17["HEAD_SCULPTURE"] = 4] = "HEAD_SCULPTURE";
-    a17[a17["APP_ICON"] = 5] = "APP_ICON";
-    a17[a17["PREVIEW"] = 6] = "PREVIEW";
-    a17[a17["LONGITUDINAL"] = 7] = "LONGITUDINAL";
-    a17[a17["VERTICAL"] = 8] = "VERTICAL";
+(function (a65) {
+    a65[a65["BADGE"] = 1] = "BADGE";
+    a65[a65["NORMAL_ICON"] = 2] = "NORMAL_ICON";
+    a65[a65["SYSTEM_ICON"] = 3] = "SYSTEM_ICON";
+    a65[a65["HEAD_SCULPTURE"] = 4] = "HEAD_SCULPTURE";
+    a65[a65["APP_ICON"] = 5] = "APP_ICON";
+    a65[a65["PREVIEW"] = 6] = "PREVIEW";
+    a65[a65["LONGITUDINAL"] = 7] = "LONGITUDINAL";
+    a65[a65["VERTICAL"] = 8] = "VERTICAL";
 })(IconType || (IconType = {}));
 var FontSizeScaleLevel;
-(function (z16) {
-    z16[z16["LEVEL1"] = 1.75] = "LEVEL1";
-    z16[z16["LEVEL2"] = 2] = "LEVEL2";
-    z16[z16["LEVEL3"] = 3.2] = "LEVEL3";
+(function (z64) {
+    z64[z64["LEVEL1"] = 1.75] = "LEVEL1";
+    z64[z64["LEVEL2"] = 2] = "LEVEL2";
+    z64[z64["LEVEL3"] = 3.2] = "LEVEL3";
 })(FontSizeScaleLevel || (FontSizeScaleLevel = {}));
 var ItemHeight;
-(function (y16) {
-    y16[y16["FIRST_HEIGHT"] = 48] = "FIRST_HEIGHT";
-    y16[y16["SECOND_HEIGHT"] = 56] = "SECOND_HEIGHT";
-    y16[y16["THIRD_HEIGHT"] = 64] = "THIRD_HEIGHT";
-    y16[y16["FOURTH_HEIGHT"] = 72] = "FOURTH_HEIGHT";
-    y16[y16["FIFTH_HEIGHT"] = 96] = "FIFTH_HEIGHT";
+(function (y64) {
+    y64[y64["FIRST_HEIGHT"] = 48] = "FIRST_HEIGHT";
+    y64[y64["SECOND_HEIGHT"] = 56] = "SECOND_HEIGHT";
+    y64[y64["THIRD_HEIGHT"] = 64] = "THIRD_HEIGHT";
+    y64[y64["FOURTH_HEIGHT"] = 72] = "FOURTH_HEIGHT";
+    y64[y64["FIFTH_HEIGHT"] = 96] = "FIFTH_HEIGHT";
 })(ItemHeight || (ItemHeight = {}));
 const TEXT_MAX_LINE = 1;
 const ITEM_BORDER_SHOWN = 2;
@@ -70,7 +71,6 @@ const OPERATEITEM_SELECTIONBOX_PADDING_SIZE = 2;
 const OPERATEITEM_ARROW_WIDTH = 12;
 const OPERATEITEM_ICON_CLICKABLE_SIZE = 40;
 const OPERATEITEM_IMAGE_SIZE = 48;
-const RIGHT_CONTENT_NULL_LEFTWIDTH = '100%';
 const RIGHT_CONTENT_NULL_RIGHTWIDTH = '0vp';
 const LEFT_PART_WIDTH = 'calc(66% - 16vp)';
 const RIGHT_PART_WIDTH = '34%';
@@ -92,25 +92,25 @@ const ICON_SIZE_MAP = new Map([
     [IconType.VERTICAL, VERTICAL_SIZE]
 ]);
 class ContentItemStruct extends ViewPU {
-    constructor(s16, t16, u16, v16 = -1, w16 = undefined, x16) {
-        super(s16, u16, v16, x16);
-        if (typeof w16 === "function") {
-            this.paramsGenerator_ = w16;
+    constructor(s64, t64, u64, v64 = -1, w64 = undefined, x64) {
+        super(s64, u64, v64, x64);
+        if (typeof w64 === "function") {
+            this.paramsGenerator_ = w64;
         }
-        this.__iconStyle = new SynchedPropertySimpleOneWayPU(t16.iconStyle, this, "iconStyle");
-        this.__icon = new SynchedPropertyObjectOneWayPU(t16.icon, this, "icon");
-        this.__primaryText = new SynchedPropertyObjectOneWayPU(t16.primaryText, this, "primaryText");
-        this.__secondaryText = new SynchedPropertyObjectOneWayPU(t16.secondaryText, this, "secondaryText");
-        this.__description = new SynchedPropertyObjectOneWayPU(t16.description, this, "description");
+        this.__iconStyle = new SynchedPropertySimpleOneWayPU(t64.iconStyle, this, "iconStyle");
+        this.__icon = new SynchedPropertyObjectOneWayPU(t64.icon, this, "icon");
+        this.__primaryText = new SynchedPropertyObjectOneWayPU(t64.primaryText, this, "primaryText");
+        this.__secondaryText = new SynchedPropertyObjectOneWayPU(t64.secondaryText, this, "secondaryText");
+        this.__description = new SynchedPropertyObjectOneWayPU(t64.description, this, "description");
         this.__itemRowSpace = new ObservedPropertySimplePU(NORMAL_ITEM_ROW_SPACE, this, "itemRowSpace");
-        this.__leftWidth = new SynchedPropertySimpleOneWayPU(t16.leftWidth, this, "leftWidth");
+        this.__leftWidth = new SynchedPropertySimpleOneWayPU(t64.leftWidth, this, "leftWidth");
         this.__primaryTextColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_primary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "primaryTextColor");
         this.__secondaryTextColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColor");
         this.__descriptionColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "descriptionColor");
-        this.__fontSizeScale = new SynchedPropertySimpleOneWayPU(t16.fontSizeScale, this, "fontSizeScale");
-        this.__parentDirection = new SynchedPropertySimpleOneWayPU(t16.parentDirection, this, "parentDirection");
-        this.__itemDirection = new SynchedPropertySimpleOneWayPU(t16.itemDirection, this, "itemDirection");
-        this.setInitiallyProvidedValue(t16);
+        this.__fontSizeScale = new SynchedPropertySimpleOneWayPU(t64.fontSizeScale, this, "fontSizeScale");
+        this.__parentDirection = new SynchedPropertySimpleOneWayPU(t64.parentDirection, this, "parentDirection");
+        this.__itemDirection = new SynchedPropertySimpleOneWayPU(t64.itemDirection, this, "itemDirection");
+        this.setInitiallyProvidedValue(t64);
         this.declareWatch("iconStyle", this.onPropChange);
         this.declareWatch("icon", this.onPropChange);
         this.declareWatch("primaryText", this.onPropChange);
@@ -118,63 +118,63 @@ class ContentItemStruct extends ViewPU {
         this.declareWatch("description", this.onPropChange);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(r16) {
-        if (r16.iconStyle === undefined) {
+    setInitiallyProvidedValue(r64) {
+        if (r64.iconStyle === undefined) {
             this.__iconStyle.set(null);
         }
-        if (r16.icon === undefined) {
+        if (r64.icon === undefined) {
             this.__icon.set(null);
         }
-        if (r16.primaryText === undefined) {
+        if (r64.primaryText === undefined) {
             this.__primaryText.set(null);
         }
-        if (r16.secondaryText === undefined) {
+        if (r64.secondaryText === undefined) {
             this.__secondaryText.set(null);
         }
-        if (r16.description === undefined) {
+        if (r64.description === undefined) {
             this.__description.set(null);
         }
-        if (r16.itemRowSpace !== undefined) {
-            this.itemRowSpace = r16.itemRowSpace;
+        if (r64.itemRowSpace !== undefined) {
+            this.itemRowSpace = r64.itemRowSpace;
         }
-        if (r16.leftWidth === undefined) {
+        if (r64.leftWidth === undefined) {
             this.__leftWidth.set(LEFT_PART_WIDTH);
         }
-        if (r16.primaryTextColor !== undefined) {
-            this.primaryTextColor = r16.primaryTextColor;
+        if (r64.primaryTextColor !== undefined) {
+            this.primaryTextColor = r64.primaryTextColor;
         }
-        if (r16.secondaryTextColor !== undefined) {
-            this.secondaryTextColor = r16.secondaryTextColor;
+        if (r64.secondaryTextColor !== undefined) {
+            this.secondaryTextColor = r64.secondaryTextColor;
         }
-        if (r16.descriptionColor !== undefined) {
-            this.descriptionColor = r16.descriptionColor;
+        if (r64.descriptionColor !== undefined) {
+            this.descriptionColor = r64.descriptionColor;
         }
     }
-    updateStateVars(q16) {
-        this.__iconStyle.reset(q16.iconStyle);
-        this.__icon.reset(q16.icon);
-        this.__primaryText.reset(q16.primaryText);
-        this.__secondaryText.reset(q16.secondaryText);
-        this.__description.reset(q16.description);
-        this.__leftWidth.reset(q16.leftWidth);
-        this.__fontSizeScale.reset(q16.fontSizeScale);
-        this.__parentDirection.reset(q16.parentDirection);
-        this.__itemDirection.reset(q16.itemDirection);
+    updateStateVars(q64) {
+        this.__iconStyle.reset(q64.iconStyle);
+        this.__icon.reset(q64.icon);
+        this.__primaryText.reset(q64.primaryText);
+        this.__secondaryText.reset(q64.secondaryText);
+        this.__description.reset(q64.description);
+        this.__leftWidth.reset(q64.leftWidth);
+        this.__fontSizeScale.reset(q64.fontSizeScale);
+        this.__parentDirection.reset(q64.parentDirection);
+        this.__itemDirection.reset(q64.itemDirection);
     }
-    purgeVariableDependenciesOnElmtId(p16) {
-        this.__iconStyle.purgeDependencyOnElmtId(p16);
-        this.__icon.purgeDependencyOnElmtId(p16);
-        this.__primaryText.purgeDependencyOnElmtId(p16);
-        this.__secondaryText.purgeDependencyOnElmtId(p16);
-        this.__description.purgeDependencyOnElmtId(p16);
-        this.__itemRowSpace.purgeDependencyOnElmtId(p16);
-        this.__leftWidth.purgeDependencyOnElmtId(p16);
-        this.__primaryTextColor.purgeDependencyOnElmtId(p16);
-        this.__secondaryTextColor.purgeDependencyOnElmtId(p16);
-        this.__descriptionColor.purgeDependencyOnElmtId(p16);
-        this.__fontSizeScale.purgeDependencyOnElmtId(p16);
-        this.__parentDirection.purgeDependencyOnElmtId(p16);
-        this.__itemDirection.purgeDependencyOnElmtId(p16);
+    purgeVariableDependenciesOnElmtId(p64) {
+        this.__iconStyle.purgeDependencyOnElmtId(p64);
+        this.__icon.purgeDependencyOnElmtId(p64);
+        this.__primaryText.purgeDependencyOnElmtId(p64);
+        this.__secondaryText.purgeDependencyOnElmtId(p64);
+        this.__description.purgeDependencyOnElmtId(p64);
+        this.__itemRowSpace.purgeDependencyOnElmtId(p64);
+        this.__leftWidth.purgeDependencyOnElmtId(p64);
+        this.__primaryTextColor.purgeDependencyOnElmtId(p64);
+        this.__secondaryTextColor.purgeDependencyOnElmtId(p64);
+        this.__descriptionColor.purgeDependencyOnElmtId(p64);
+        this.__fontSizeScale.purgeDependencyOnElmtId(p64);
+        this.__parentDirection.purgeDependencyOnElmtId(p64);
+        this.__itemDirection.purgeDependencyOnElmtId(p64);
     }
     aboutToBeDeleted() {
         this.__iconStyle.aboutToBeDeleted();
@@ -196,85 +196,85 @@ class ContentItemStruct extends ViewPU {
     get iconStyle() {
         return this.__iconStyle.get();
     }
-    set iconStyle(o16) {
-        this.__iconStyle.set(o16);
+    set iconStyle(o64) {
+        this.__iconStyle.set(o64);
     }
     get icon() {
         return this.__icon.get();
     }
-    set icon(n16) {
-        this.__icon.set(n16);
+    set icon(n64) {
+        this.__icon.set(n64);
     }
     get primaryText() {
         return this.__primaryText.get();
     }
-    set primaryText(m16) {
-        this.__primaryText.set(m16);
+    set primaryText(m64) {
+        this.__primaryText.set(m64);
     }
     get secondaryText() {
         return this.__secondaryText.get();
     }
-    set secondaryText(l16) {
-        this.__secondaryText.set(l16);
+    set secondaryText(l64) {
+        this.__secondaryText.set(l64);
     }
     get description() {
         return this.__description.get();
     }
-    set description(k16) {
-        this.__description.set(k16);
+    set description(k64) {
+        this.__description.set(k64);
     }
     get itemRowSpace() {
         return this.__itemRowSpace.get();
     }
-    set itemRowSpace(j16) {
-        this.__itemRowSpace.set(j16);
+    set itemRowSpace(j64) {
+        this.__itemRowSpace.set(j64);
     }
     get leftWidth() {
         return this.__leftWidth.get();
     }
-    set leftWidth(i16) {
-        this.__leftWidth.set(i16);
+    set leftWidth(i64) {
+        this.__leftWidth.set(i64);
     }
     get primaryTextColor() {
         return this.__primaryTextColor.get();
     }
-    set primaryTextColor(h16) {
-        this.__primaryTextColor.set(h16);
+    set primaryTextColor(h64) {
+        this.__primaryTextColor.set(h64);
     }
     get secondaryTextColor() {
         return this.__secondaryTextColor.get();
     }
-    set secondaryTextColor(g16) {
-        this.__secondaryTextColor.set(g16);
+    set secondaryTextColor(g64) {
+        this.__secondaryTextColor.set(g64);
     }
     get descriptionColor() {
         return this.__descriptionColor.get();
     }
-    set descriptionColor(f16) {
-        this.__descriptionColor.set(f16);
+    set descriptionColor(f64) {
+        this.__descriptionColor.set(f64);
     }
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
-    set fontSizeScale(e16) {
-        this.__fontSizeScale.set(e16);
+    set fontSizeScale(e64) {
+        this.__fontSizeScale.set(e64);
     }
     get parentDirection() {
         return this.__parentDirection.get();
     }
-    set parentDirection(d16) {
-        this.__parentDirection.set(d16);
+    set parentDirection(d64) {
+        this.__parentDirection.set(d64);
     }
     get itemDirection() {
         return this.__itemDirection.get();
     }
-    set itemDirection(c16) {
-        this.__itemDirection.set(c16);
+    set itemDirection(c64) {
+        this.__itemDirection.set(c64);
     }
-    onWillApplyTheme(b16) {
-        this.primaryTextColor = b16.colors.fontPrimary;
-        this.secondaryTextColor = b16.colors.fontSecondary;
-        this.descriptionColor = b16.colors.fontTertiary;
+    onWillApplyTheme(b64) {
+        this.primaryTextColor = b64.colors.fontPrimary;
+        this.secondaryTextColor = b64.colors.fontSecondary;
+        this.descriptionColor = b64.colors.fontTertiary;
     }
     onPropChange() {
         if (this.icon == null && this.iconStyle == null) {
@@ -287,16 +287,16 @@ class ContentItemStruct extends ViewPU {
     aboutToAppear() {
         this.onPropChange();
     }
-    createIcon(s15 = null) {
-        this.observeComponentCreation2((t15, u15) => {
+    createIcon(s63 = null) {
+        this.observeComponentCreation2((t63, u63) => {
             If.create();
             if (this.icon != null && this.iconStyle != null && ICON_SIZE_MAP.has(this.iconStyle)) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((v15, w15) => {
+                    this.observeComponentCreation2((v63, w63) => {
                         If.create();
                         if (this.iconStyle <= IconType.PREVIEW) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((z15, a16) => {
+                                this.observeComponentCreation2((z63, a64) => {
                                     Image.create(this.icon);
                                     Image.objectFit(ImageFit.Contain);
                                     Image.width(ICON_SIZE_MAP.get(this.iconStyle));
@@ -311,7 +311,7 @@ class ContentItemStruct extends ViewPU {
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((x15, y15) => {
+                                this.observeComponentCreation2((x63, y63) => {
                                     Image.create(this.icon);
                                     Image.objectFit(ImageFit.Contain);
                                     Image.constraintSize({
@@ -339,8 +339,8 @@ class ContentItemStruct extends ViewPU {
         }, If);
         If.pop();
     }
-    createText(f15 = null) {
-        this.observeComponentCreation2((q15, r15) => {
+    createText(f63 = null) {
+        this.observeComponentCreation2((q63, r63) => {
             Column.create({ space: TEXT_COLUMN_SPACE });
             Column.flexShrink(1);
             Column.margin(this.fontSizeScale >= FontSizeScaleLevel.LEVEL1 ? undefined : {
@@ -349,7 +349,7 @@ class ContentItemStruct extends ViewPU {
             });
             Column.alignItems(HorizontalAlign.Start);
         }, Column);
-        this.observeComponentCreation2((o15, p15) => {
+        this.observeComponentCreation2((o63, p63) => {
             Text.create(this.primaryText);
             Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body1'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
             Text.fontColor(ObservedObject.GetRawObject(this.primaryTextColor));
@@ -359,11 +359,11 @@ class ContentItemStruct extends ViewPU {
             Text.draggable(false);
         }, Text);
         Text.pop();
-        this.observeComponentCreation2((k15, l15) => {
+        this.observeComponentCreation2((k63, l63) => {
             If.create();
             if (this.secondaryText != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((m15, n15) => {
+                    this.observeComponentCreation2((m63, n63) => {
                         Text.create(this.secondaryText);
                         Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
@@ -379,11 +379,11 @@ class ContentItemStruct extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((g15, h15) => {
+        this.observeComponentCreation2((g63, h63) => {
             If.create();
             if (this.description != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((i15, j15) => {
+                    this.observeComponentCreation2((i63, j63) => {
                         Text.create(this.description);
                         Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                         Text.fontColor(ObservedObject.GetRawObject(this.descriptionColor));
@@ -414,7 +414,7 @@ class ContentItemStruct extends ViewPU {
         return LengthMetrics.vp(this.itemRowSpace);
     }
     initialRender() {
-        this.observeComponentCreation2((d15, e15) => {
+        this.observeComponentCreation2((d63, e63) => {
             Flex.create({
                 space: { main: this.getItemSpace() },
                 direction: this.itemDirection,
@@ -440,36 +440,36 @@ class ContentItemStruct extends ViewPU {
 class CreateIconParam {
 }
 class OperateItemStruct extends ViewPU {
-    constructor(x14, y14, z14, a15 = -1, b15 = undefined, c15) {
-        super(x14, z14, a15, c15);
-        if (typeof b15 === "function") {
-            this.paramsGenerator_ = b15;
+    constructor(x62, y62, z62, a63 = -1, b63 = undefined, c63) {
+        super(x62, z62, a63, c63);
+        if (typeof b63 === "function") {
+            this.paramsGenerator_ = b63;
         }
-        this.__arrow = new SynchedPropertyObjectOneWayPU(y14.arrow, this, "arrow");
-        this.__icon = new SynchedPropertyObjectOneWayPU(y14.icon, this, "icon");
-        this.__subIcon = new SynchedPropertyObjectOneWayPU(y14.subIcon, this, "subIcon");
-        this.__button = new SynchedPropertyObjectOneWayPU(y14.button, this, "button");
-        this.__switch = new SynchedPropertyObjectOneWayPU(y14.switch, this, "switch");
-        this.__checkBox = new SynchedPropertyObjectOneWayPU(y14.checkBox, this, "checkBox");
-        this.__radio = new SynchedPropertyObjectOneWayPU(y14.radio, this, "radio");
-        this.__image = new SynchedPropertyObjectOneWayPU(y14.image, this, "image");
-        this.__text = new SynchedPropertyObjectOneWayPU(y14.text, this, "text");
+        this.__arrow = new SynchedPropertyObjectOneWayPU(y62.arrow, this, "arrow");
+        this.__icon = new SynchedPropertyObjectOneWayPU(y62.icon, this, "icon");
+        this.__subIcon = new SynchedPropertyObjectOneWayPU(y62.subIcon, this, "subIcon");
+        this.__button = new SynchedPropertyObjectOneWayPU(y62.button, this, "button");
+        this.__switch = new SynchedPropertyObjectOneWayPU(y62.switch, this, "switch");
+        this.__checkBox = new SynchedPropertyObjectOneWayPU(y62.checkBox, this, "checkBox");
+        this.__radio = new SynchedPropertyObjectOneWayPU(y62.radio, this, "radio");
+        this.__image = new SynchedPropertyObjectOneWayPU(y62.image, this, "image");
+        this.__text = new SynchedPropertyObjectOneWayPU(y62.text, this, "text");
         this.__switchState = new ObservedPropertySimplePU(false, this, "switchState");
         this.__radioState = new ObservedPropertySimplePU(false, this, "radioState");
         this.__checkBoxState = new ObservedPropertySimplePU(false, this, "checkBoxState");
-        this.__rightWidth = new SynchedPropertySimpleOneWayPU(y14.rightWidth, this, "rightWidth");
+        this.__rightWidth = new SynchedPropertySimpleOneWayPU(y62.rightWidth, this, "rightWidth");
         this.__secondaryTextColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_text_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondaryTextColor");
         this.__hoveringColor = new ObservedPropertyObjectPU('#0d000000', this, "hoveringColor");
         this.__activedColor = new ObservedPropertyObjectPU('#1a0a59f7', this, "activedColor");
-        this.__parentCanFocus = new SynchedPropertySimpleTwoWayPU(y14.parentCanFocus, this, "parentCanFocus");
-        this.__parentCanTouch = new SynchedPropertySimpleTwoWayPU(y14.parentCanTouch, this, "parentCanTouch");
-        this.__parentIsHover = new SynchedPropertySimpleTwoWayPU(y14.parentIsHover, this, "parentIsHover");
-        this.__parentCanHover = new SynchedPropertySimpleTwoWayPU(y14.parentCanHover, this, "parentCanHover");
-        this.__parentIsActive = new SynchedPropertySimpleTwoWayPU(y14.parentIsActive, this, "parentIsActive");
-        this.__parentFrontColor = new SynchedPropertyObjectTwoWayPU(y14.parentFrontColor, this, "parentFrontColor");
-        this.__parentDirection = new SynchedPropertySimpleTwoWayPU(y14.parentDirection, this, "parentDirection");
+        this.__parentCanFocus = new SynchedPropertySimpleTwoWayPU(y62.parentCanFocus, this, "parentCanFocus");
+        this.__parentCanTouch = new SynchedPropertySimpleTwoWayPU(y62.parentCanTouch, this, "parentCanTouch");
+        this.__parentIsHover = new SynchedPropertySimpleTwoWayPU(y62.parentIsHover, this, "parentIsHover");
+        this.__parentCanHover = new SynchedPropertySimpleTwoWayPU(y62.parentCanHover, this, "parentCanHover");
+        this.__parentIsActive = new SynchedPropertySimpleTwoWayPU(y62.parentIsActive, this, "parentIsActive");
+        this.__parentFrontColor = new SynchedPropertyObjectTwoWayPU(y62.parentFrontColor, this, "parentFrontColor");
+        this.__parentDirection = new SynchedPropertySimpleTwoWayPU(y62.parentDirection, this, "parentDirection");
         this.__rowSpace = new ObservedPropertySimplePU(DEFAULT_ROW_SPACE, this, "rowSpace");
-        this.setInitiallyProvidedValue(y14);
+        this.setInitiallyProvidedValue(y62);
         this.declareWatch("arrow", this.onPropChange);
         this.declareWatch("icon", this.onPropChange);
         this.declareWatch("subIcon", this.onPropChange);
@@ -481,96 +481,96 @@ class OperateItemStruct extends ViewPU {
         this.declareWatch("text", this.onPropChange);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(w14) {
-        if (w14.arrow === undefined) {
+    setInitiallyProvidedValue(w62) {
+        if (w62.arrow === undefined) {
             this.__arrow.set(null);
         }
-        if (w14.icon === undefined) {
+        if (w62.icon === undefined) {
             this.__icon.set(null);
         }
-        if (w14.subIcon === undefined) {
+        if (w62.subIcon === undefined) {
             this.__subIcon.set(null);
         }
-        if (w14.button === undefined) {
+        if (w62.button === undefined) {
             this.__button.set(null);
         }
-        if (w14.switch === undefined) {
+        if (w62.switch === undefined) {
             this.__switch.set(null);
         }
-        if (w14.checkBox === undefined) {
+        if (w62.checkBox === undefined) {
             this.__checkBox.set(null);
         }
-        if (w14.radio === undefined) {
+        if (w62.radio === undefined) {
             this.__radio.set(null);
         }
-        if (w14.image === undefined) {
+        if (w62.image === undefined) {
             this.__image.set(null);
         }
-        if (w14.text === undefined) {
+        if (w62.text === undefined) {
             this.__text.set(null);
         }
-        if (w14.switchState !== undefined) {
-            this.switchState = w14.switchState;
+        if (w62.switchState !== undefined) {
+            this.switchState = w62.switchState;
         }
-        if (w14.radioState !== undefined) {
-            this.radioState = w14.radioState;
+        if (w62.radioState !== undefined) {
+            this.radioState = w62.radioState;
         }
-        if (w14.checkBoxState !== undefined) {
-            this.checkBoxState = w14.checkBoxState;
+        if (w62.checkBoxState !== undefined) {
+            this.checkBoxState = w62.checkBoxState;
         }
-        if (w14.rightWidth === undefined) {
+        if (w62.rightWidth === undefined) {
             this.__rightWidth.set(RIGHT_PART_WIDTH);
         }
-        if (w14.secondaryTextColor !== undefined) {
-            this.secondaryTextColor = w14.secondaryTextColor;
+        if (w62.secondaryTextColor !== undefined) {
+            this.secondaryTextColor = w62.secondaryTextColor;
         }
-        if (w14.hoveringColor !== undefined) {
-            this.hoveringColor = w14.hoveringColor;
+        if (w62.hoveringColor !== undefined) {
+            this.hoveringColor = w62.hoveringColor;
         }
-        if (w14.activedColor !== undefined) {
-            this.activedColor = w14.activedColor;
+        if (w62.activedColor !== undefined) {
+            this.activedColor = w62.activedColor;
         }
-        if (w14.rowSpace !== undefined) {
-            this.rowSpace = w14.rowSpace;
+        if (w62.rowSpace !== undefined) {
+            this.rowSpace = w62.rowSpace;
         }
     }
-    updateStateVars(v14) {
-        this.__arrow.reset(v14.arrow);
-        this.__icon.reset(v14.icon);
-        this.__subIcon.reset(v14.subIcon);
-        this.__button.reset(v14.button);
-        this.__switch.reset(v14.switch);
-        this.__checkBox.reset(v14.checkBox);
-        this.__radio.reset(v14.radio);
-        this.__image.reset(v14.image);
-        this.__text.reset(v14.text);
-        this.__rightWidth.reset(v14.rightWidth);
+    updateStateVars(v62) {
+        this.__arrow.reset(v62.arrow);
+        this.__icon.reset(v62.icon);
+        this.__subIcon.reset(v62.subIcon);
+        this.__button.reset(v62.button);
+        this.__switch.reset(v62.switch);
+        this.__checkBox.reset(v62.checkBox);
+        this.__radio.reset(v62.radio);
+        this.__image.reset(v62.image);
+        this.__text.reset(v62.text);
+        this.__rightWidth.reset(v62.rightWidth);
     }
-    purgeVariableDependenciesOnElmtId(u14) {
-        this.__arrow.purgeDependencyOnElmtId(u14);
-        this.__icon.purgeDependencyOnElmtId(u14);
-        this.__subIcon.purgeDependencyOnElmtId(u14);
-        this.__button.purgeDependencyOnElmtId(u14);
-        this.__switch.purgeDependencyOnElmtId(u14);
-        this.__checkBox.purgeDependencyOnElmtId(u14);
-        this.__radio.purgeDependencyOnElmtId(u14);
-        this.__image.purgeDependencyOnElmtId(u14);
-        this.__text.purgeDependencyOnElmtId(u14);
-        this.__switchState.purgeDependencyOnElmtId(u14);
-        this.__radioState.purgeDependencyOnElmtId(u14);
-        this.__checkBoxState.purgeDependencyOnElmtId(u14);
-        this.__rightWidth.purgeDependencyOnElmtId(u14);
-        this.__secondaryTextColor.purgeDependencyOnElmtId(u14);
-        this.__hoveringColor.purgeDependencyOnElmtId(u14);
-        this.__activedColor.purgeDependencyOnElmtId(u14);
-        this.__parentCanFocus.purgeDependencyOnElmtId(u14);
-        this.__parentCanTouch.purgeDependencyOnElmtId(u14);
-        this.__parentIsHover.purgeDependencyOnElmtId(u14);
-        this.__parentCanHover.purgeDependencyOnElmtId(u14);
-        this.__parentIsActive.purgeDependencyOnElmtId(u14);
-        this.__parentFrontColor.purgeDependencyOnElmtId(u14);
-        this.__parentDirection.purgeDependencyOnElmtId(u14);
-        this.__rowSpace.purgeDependencyOnElmtId(u14);
+    purgeVariableDependenciesOnElmtId(u62) {
+        this.__arrow.purgeDependencyOnElmtId(u62);
+        this.__icon.purgeDependencyOnElmtId(u62);
+        this.__subIcon.purgeDependencyOnElmtId(u62);
+        this.__button.purgeDependencyOnElmtId(u62);
+        this.__switch.purgeDependencyOnElmtId(u62);
+        this.__checkBox.purgeDependencyOnElmtId(u62);
+        this.__radio.purgeDependencyOnElmtId(u62);
+        this.__image.purgeDependencyOnElmtId(u62);
+        this.__text.purgeDependencyOnElmtId(u62);
+        this.__switchState.purgeDependencyOnElmtId(u62);
+        this.__radioState.purgeDependencyOnElmtId(u62);
+        this.__checkBoxState.purgeDependencyOnElmtId(u62);
+        this.__rightWidth.purgeDependencyOnElmtId(u62);
+        this.__secondaryTextColor.purgeDependencyOnElmtId(u62);
+        this.__hoveringColor.purgeDependencyOnElmtId(u62);
+        this.__activedColor.purgeDependencyOnElmtId(u62);
+        this.__parentCanFocus.purgeDependencyOnElmtId(u62);
+        this.__parentCanTouch.purgeDependencyOnElmtId(u62);
+        this.__parentIsHover.purgeDependencyOnElmtId(u62);
+        this.__parentCanHover.purgeDependencyOnElmtId(u62);
+        this.__parentIsActive.purgeDependencyOnElmtId(u62);
+        this.__parentFrontColor.purgeDependencyOnElmtId(u62);
+        this.__parentDirection.purgeDependencyOnElmtId(u62);
+        this.__rowSpace.purgeDependencyOnElmtId(u62);
     }
     aboutToBeDeleted() {
         this.__arrow.aboutToBeDeleted();
@@ -603,151 +603,151 @@ class OperateItemStruct extends ViewPU {
     get arrow() {
         return this.__arrow.get();
     }
-    set arrow(t14) {
-        this.__arrow.set(t14);
+    set arrow(t62) {
+        this.__arrow.set(t62);
     }
     get icon() {
         return this.__icon.get();
     }
-    set icon(s14) {
-        this.__icon.set(s14);
+    set icon(s62) {
+        this.__icon.set(s62);
     }
     get subIcon() {
         return this.__subIcon.get();
     }
-    set subIcon(r14) {
-        this.__subIcon.set(r14);
+    set subIcon(r62) {
+        this.__subIcon.set(r62);
     }
     get button() {
         return this.__button.get();
     }
-    set button(q14) {
-        this.__button.set(q14);
+    set button(q62) {
+        this.__button.set(q62);
     }
     get switch() {
         return this.__switch.get();
     }
-    set switch(p14) {
-        this.__switch.set(p14);
+    set switch(p62) {
+        this.__switch.set(p62);
     }
     get checkBox() {
         return this.__checkBox.get();
     }
-    set checkBox(o14) {
-        this.__checkBox.set(o14);
+    set checkBox(o62) {
+        this.__checkBox.set(o62);
     }
     get radio() {
         return this.__radio.get();
     }
-    set radio(n14) {
-        this.__radio.set(n14);
+    set radio(n62) {
+        this.__radio.set(n62);
     }
     get image() {
         return this.__image.get();
     }
-    set image(m14) {
-        this.__image.set(m14);
+    set image(m62) {
+        this.__image.set(m62);
     }
     get text() {
         return this.__text.get();
     }
-    set text(l14) {
-        this.__text.set(l14);
+    set text(l62) {
+        this.__text.set(l62);
     }
     get switchState() {
         return this.__switchState.get();
     }
-    set switchState(k14) {
-        this.__switchState.set(k14);
+    set switchState(k62) {
+        this.__switchState.set(k62);
     }
     get radioState() {
         return this.__radioState.get();
     }
-    set radioState(j14) {
-        this.__radioState.set(j14);
+    set radioState(j62) {
+        this.__radioState.set(j62);
     }
     get checkBoxState() {
         return this.__checkBoxState.get();
     }
-    set checkBoxState(i14) {
-        this.__checkBoxState.set(i14);
+    set checkBoxState(i62) {
+        this.__checkBoxState.set(i62);
     }
     get rightWidth() {
         return this.__rightWidth.get();
     }
-    set rightWidth(h14) {
-        this.__rightWidth.set(h14);
+    set rightWidth(h62) {
+        this.__rightWidth.set(h62);
     }
     get secondaryTextColor() {
         return this.__secondaryTextColor.get();
     }
-    set secondaryTextColor(g14) {
-        this.__secondaryTextColor.set(g14);
+    set secondaryTextColor(g62) {
+        this.__secondaryTextColor.set(g62);
     }
     get hoveringColor() {
         return this.__hoveringColor.get();
     }
-    set hoveringColor(f14) {
-        this.__hoveringColor.set(f14);
+    set hoveringColor(f62) {
+        this.__hoveringColor.set(f62);
     }
     get activedColor() {
         return this.__activedColor.get();
     }
-    set activedColor(e14) {
-        this.__activedColor.set(e14);
+    set activedColor(e62) {
+        this.__activedColor.set(e62);
     }
     get parentCanFocus() {
         return this.__parentCanFocus.get();
     }
-    set parentCanFocus(d14) {
-        this.__parentCanFocus.set(d14);
+    set parentCanFocus(d62) {
+        this.__parentCanFocus.set(d62);
     }
     get parentCanTouch() {
         return this.__parentCanTouch.get();
     }
-    set parentCanTouch(c14) {
-        this.__parentCanTouch.set(c14);
+    set parentCanTouch(c62) {
+        this.__parentCanTouch.set(c62);
     }
     get parentIsHover() {
         return this.__parentIsHover.get();
     }
-    set parentIsHover(b14) {
-        this.__parentIsHover.set(b14);
+    set parentIsHover(b62) {
+        this.__parentIsHover.set(b62);
     }
     get parentCanHover() {
         return this.__parentCanHover.get();
     }
-    set parentCanHover(a14) {
-        this.__parentCanHover.set(a14);
+    set parentCanHover(a62) {
+        this.__parentCanHover.set(a62);
     }
     get parentIsActive() {
         return this.__parentIsActive.get();
     }
-    set parentIsActive(z13) {
-        this.__parentIsActive.set(z13);
+    set parentIsActive(z61) {
+        this.__parentIsActive.set(z61);
     }
     get parentFrontColor() {
         return this.__parentFrontColor.get();
     }
-    set parentFrontColor(y13) {
-        this.__parentFrontColor.set(y13);
+    set parentFrontColor(y61) {
+        this.__parentFrontColor.set(y61);
     }
     get parentDirection() {
         return this.__parentDirection.get();
     }
-    set parentDirection(x13) {
-        this.__parentDirection.set(x13);
+    set parentDirection(x61) {
+        this.__parentDirection.set(x61);
     }
     get rowSpace() {
         return this.__rowSpace.get();
     }
-    set rowSpace(w13) {
-        this.__rowSpace.set(w13);
+    set rowSpace(w61) {
+        this.__rowSpace.set(w61);
     }
-    onWillApplyTheme(v13) {
-        this.secondaryTextColor = v13.colors.fontSecondary;
-        this.hoveringColor = v13.colors.interactiveHover;
-        this.activedColor = v13.colors.interactiveActive;
+    onWillApplyTheme(v61) {
+        this.secondaryTextColor = v61.colors.fontSecondary;
+        this.hoveringColor = v61.colors.interactiveHover;
+        this.activedColor = v61.colors.interactiveActive;
     }
     onPropChange() {
         if (this.switch != null) {
@@ -770,8 +770,8 @@ class OperateItemStruct extends ViewPU {
     aboutToAppear() {
         this.onPropChange();
     }
-    createButton(n13 = null) {
-        this.observeComponentCreation2((s13, t13) => {
+    createButton(n61 = null) {
+        this.observeComponentCreation2((s61, t61) => {
             Button.createWithChild();
             Button.padding({ top: 0, bottom: 0 });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
@@ -788,12 +788,12 @@ class OperateItemStruct extends ViewPU {
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Button.onHover((u13) => {
+            Button.onHover((u61) => {
                 this.parentCanHover = false;
-                if (u13 && this.parentFrontColor === this.hoveringColor) {
+                if (u61 && this.parentFrontColor === this.hoveringColor) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!u13) {
+                if (!u61) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -802,14 +802,14 @@ class OperateItemStruct extends ViewPU {
                 }
             });
         }, Button);
-        this.observeComponentCreation2((q13, r13) => {
+        this.observeComponentCreation2((q61, r61) => {
             Row.create();
             Row.padding({
                 left: TEXT_SAFE_MARGIN,
                 right: TEXT_SAFE_MARGIN
             });
         }, Row);
-        this.observeComponentCreation2((o13, p13) => {
+        this.observeComponentCreation2((o61, p61) => {
             Text.create(this.button?.text);
             Text.focusable(true);
         }, Text);
@@ -817,8 +817,8 @@ class OperateItemStruct extends ViewPU {
         Row.pop();
         Button.pop();
     }
-    createIcon(g13, h13 = null) {
-        this.observeComponentCreation2((k13, l13) => {
+    createIcon(g61, h61 = null) {
+        this.observeComponentCreation2((k61, l61) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.hitTestBehavior(HitTestMode.Block);
             Button.backgroundColor(Color.Transparent);
@@ -828,12 +828,12 @@ class OperateItemStruct extends ViewPU {
             Button.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Button.onHover((m13) => {
+            Button.onHover((m61) => {
                 this.parentCanHover = false;
-                if (m13 && this.parentFrontColor === this.hoveringColor) {
+                if (m61 && this.parentFrontColor === this.hoveringColor) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!m13) {
+                if (!m61) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -841,11 +841,11 @@ class OperateItemStruct extends ViewPU {
                     }
                 }
             });
-            Button.onClick(g13.icon?.action);
+            Button.onClick(g61.icon?.action);
             Button.flexShrink(0);
         }, Button);
-        this.observeComponentCreation2((i13, j13) => {
-            Image.create(g13.icon?.value);
+        this.observeComponentCreation2((i61, j61) => {
+            Image.create(g61.icon?.value);
             Image.height(OPERATEITEM_ICONLIKE_SIZE);
             Image.width(OPERATEITEM_ICONLIKE_SIZE);
             Image.focusable(true);
@@ -854,8 +854,8 @@ class OperateItemStruct extends ViewPU {
         }, Image);
         Button.pop();
     }
-    createImage(d13 = null) {
-        this.observeComponentCreation2((e13, f13) => {
+    createImage(d61 = null) {
+        this.observeComponentCreation2((e61, f61) => {
             Image.create(this.image);
             Image.height(OPERATEITEM_IMAGE_SIZE);
             Image.width(OPERATEITEM_IMAGE_SIZE);
@@ -863,8 +863,8 @@ class OperateItemStruct extends ViewPU {
             Image.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
         }, Image);
     }
-    createText(a13 = null) {
-        this.observeComponentCreation2((b13, c13) => {
+    createText(a61 = null) {
+        this.observeComponentCreation2((b61, c61) => {
             Text.create(this.text);
             Text.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
@@ -874,8 +874,8 @@ class OperateItemStruct extends ViewPU {
         }, Text);
         Text.pop();
     }
-    createArrow(u12 = null) {
-        this.observeComponentCreation2((x12, y12) => {
+    createArrow(u60 = null) {
+        this.observeComponentCreation2((x60, y60) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Button.hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent);
@@ -887,15 +887,15 @@ class OperateItemStruct extends ViewPU {
             });
             Button.stateEffect(this.arrow?.action !== undefined);
             Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
-            Button.onHover((z12) => {
+            Button.onHover((z60) => {
                 if (this.arrow?.action === undefined) {
                     return;
                 }
                 this.parentCanHover = false;
-                if (z12) {
+                if (z60) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!z12) {
+                if (!z60) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -905,7 +905,7 @@ class OperateItemStruct extends ViewPU {
             });
             Button.onClick(this.arrow?.action);
         }, Button);
-        this.observeComponentCreation2((v12, w12) => {
+        this.observeComponentCreation2((v60, w60) => {
             Image.create(this.arrow?.value);
             Image.height(OPERATEITEM_ICONLIKE_SIZE);
             Image.width(OPERATEITEM_ARROW_WIDTH);
@@ -916,8 +916,8 @@ class OperateItemStruct extends ViewPU {
         }, Image);
         Button.pop();
     }
-    createRadio(q12 = null) {
-        this.observeComponentCreation2((r12, s12) => {
+    createRadio(q60 = null) {
+        this.observeComponentCreation2((r60, s60) => {
             Radio.create({ value: '', group: '' });
             Radio.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Radio.checked(this.radioState);
@@ -930,12 +930,12 @@ class OperateItemStruct extends ViewPU {
             });
             Radio.hitTestBehavior(HitTestMode.Block);
             Radio.flexShrink(0);
-            Radio.onHover((t12) => {
+            Radio.onHover((t60) => {
                 this.parentCanHover = false;
-                if (t12 && this.parentFrontColor === this.hoveringColor) {
+                if (t60 && this.parentFrontColor === this.hoveringColor) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!t12) {
+                if (!t60) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -945,8 +945,8 @@ class OperateItemStruct extends ViewPU {
             });
         }, Radio);
     }
-    createCheckBox(m12 = null) {
-        this.observeComponentCreation2((n12, o12) => {
+    createCheckBox(m60 = null) {
+        this.observeComponentCreation2((n60, o60) => {
             Checkbox.create();
             Checkbox.margin({ end: LengthMetrics.vp(LISTITEM_PADDING) });
             Checkbox.select(this.checkBoxState);
@@ -958,12 +958,12 @@ class OperateItemStruct extends ViewPU {
                 this.parentCanFocus = false;
             });
             Checkbox.hitTestBehavior(HitTestMode.Block);
-            Checkbox.onHover((p12) => {
+            Checkbox.onHover((p60) => {
                 this.parentCanHover = false;
-                if (p12 && this.parentFrontColor === this.hoveringColor) {
+                if (p60 && this.parentFrontColor === this.hoveringColor) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!p12) {
+                if (!p60) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -974,8 +974,8 @@ class OperateItemStruct extends ViewPU {
         }, Checkbox);
         Checkbox.pop();
     }
-    createSwitch(g12 = null) {
-        this.observeComponentCreation2((j12, k12) => {
+    createSwitch(g60 = null) {
+        this.observeComponentCreation2((j60, k60) => {
             Row.create();
             Row.margin({ end: LengthMetrics.vp(SWITCH_PADDING) });
             Row.height(OPERATEITEM_ICON_CLICKABLE_SIZE);
@@ -984,12 +984,12 @@ class OperateItemStruct extends ViewPU {
             Row.onFocus(() => {
                 this.parentCanFocus = false;
             });
-            Row.onHover((l12) => {
+            Row.onHover((l60) => {
                 this.parentCanHover = false;
-                if (l12 && this.parentFrontColor === this.hoveringColor) {
+                if (l60 && this.parentFrontColor === this.hoveringColor) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!l12) {
+                if (!l60) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -998,7 +998,7 @@ class OperateItemStruct extends ViewPU {
                 }
             });
         }, Row);
-        this.observeComponentCreation2((h12, i12) => {
+        this.observeComponentCreation2((h60, i60) => {
             Toggle.create({ type: ToggleType.Switch, isOn: this.switchState });
             Toggle.onChange(this.switch?.onChange);
             Toggle.onClick(() => {
@@ -1009,8 +1009,8 @@ class OperateItemStruct extends ViewPU {
         Toggle.pop();
         Row.pop();
     }
-    createTextArrow(o11 = null) {
-        this.observeComponentCreation2((d12, e12) => {
+    createTextArrow(o59 = null) {
+        this.observeComponentCreation2((d60, e60) => {
             Button.createWithChild({ type: ButtonType.Normal });
             Button.hitTestBehavior(this.arrow?.action !== undefined ? HitTestMode.Block : HitTestMode.Transparent);
             Button.labelStyle({
@@ -1030,15 +1030,15 @@ class OperateItemStruct extends ViewPU {
             });
             Button.stateEffect(this.arrow?.action !== undefined);
             Button.hoverEffect(this.arrow?.action !== undefined ? HoverEffect.Auto : HoverEffect.None);
-            Button.onHover((f12) => {
+            Button.onHover((f60) => {
                 if (this.arrow?.action === undefined) {
                     return;
                 }
                 this.parentCanHover = false;
-                if (f12) {
+                if (f60) {
                     this.parentFrontColor = this.parentIsActive ? this.activedColor : Color.Transparent.toString();
                 }
-                if (!f12) {
+                if (!f60) {
                     this.parentCanHover = true;
                     if (this.parentIsHover) {
                         this.parentFrontColor = this.parentIsHover ? this.hoveringColor :
@@ -1048,18 +1048,18 @@ class OperateItemStruct extends ViewPU {
             });
             Button.onClick(this.arrow?.action);
         }, Button);
-        this.observeComponentCreation2((p11, q11) => {
+        this.observeComponentCreation2((p59, q59) => {
             If.create();
             if (this.parentDirection === FlexDirection.Column) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((b12, c12) => {
+                    this.observeComponentCreation2((b60, c60) => {
                         Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
                         Flex.padding({
                             start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
                             end: LengthMetrics.vp(LISTITEM_PADDING)
                         });
                     }, Flex);
-                    this.observeComponentCreation2((z11, a12) => {
+                    this.observeComponentCreation2((z59, a60) => {
                         Text.create(this.text);
                         Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
@@ -1070,7 +1070,7 @@ class OperateItemStruct extends ViewPU {
                         });
                     }, Text);
                     Text.pop();
-                    this.observeComponentCreation2((x11, y11) => {
+                    this.observeComponentCreation2((x59, y59) => {
                         Image.create(this.arrow?.value);
                         Image.height(OPERATEITEM_ICONLIKE_SIZE);
                         Image.width(OPERATEITEM_ARROW_WIDTH);
@@ -1084,14 +1084,14 @@ class OperateItemStruct extends ViewPU {
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((v11, w11) => {
+                    this.observeComponentCreation2((v59, w59) => {
                         Row.create({ space: SPECICAL_ROW_SPACE });
                         Row.padding({
                             start: LengthMetrics.vp(TEXT_SAFE_MARGIN),
                             end: LengthMetrics.vp(LISTITEM_PADDING)
                         });
                     }, Row);
-                    this.observeComponentCreation2((t11, u11) => {
+                    this.observeComponentCreation2((t59, u59) => {
                         Text.create(this.text);
                         Text.fontSize({ "id": -1, "type": 10002, params: ['sys.float.ohos_id_text_size_body2'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                         Text.fontColor(ObservedObject.GetRawObject(this.secondaryTextColor));
@@ -1102,7 +1102,7 @@ class OperateItemStruct extends ViewPU {
                         });
                     }, Text);
                     Text.pop();
-                    this.observeComponentCreation2((r11, s11) => {
+                    this.observeComponentCreation2((r59, s59) => {
                         Image.create(this.arrow?.value);
                         Image.height(OPERATEITEM_ICONLIKE_SIZE);
                         Image.width(OPERATEITEM_ARROW_WIDTH);
@@ -1119,22 +1119,22 @@ class OperateItemStruct extends ViewPU {
         Button.pop();
     }
     getFlexOptions() {
-        let n11 = { alignItems: ItemAlign.Center };
+        let n59 = { alignItems: ItemAlign.Center };
         if (this.parentDirection === FlexDirection.Column) {
-            n11.justifyContent = FlexAlign.SpaceBetween;
+            n59.justifyContent = FlexAlign.SpaceBetween;
         }
         else {
-            n11.space = { main: LengthMetrics.vp(this.rowSpace) };
-            n11.justifyContent = FlexAlign.End;
+            n59.space = { main: LengthMetrics.vp(this.rowSpace) };
+            n59.justifyContent = FlexAlign.End;
         }
-        return n11;
+        return n59;
     }
     initialRender() {
-        this.observeComponentCreation2((l11, m11) => {
+        this.observeComponentCreation2((l59, m59) => {
             Flex.create(this.getFlexOptions());
             Flex.width(this.parentDirection === FlexDirection.Column ? undefined : this.rightWidth);
         }, Flex);
-        this.observeComponentCreation2((h11, i11) => {
+        this.observeComponentCreation2((h59, i59) => {
             If.create();
             if (this.button != null) {
                 this.ifElseBranchUpdateFunction(0, () => {
@@ -1185,7 +1185,7 @@ class OperateItemStruct extends ViewPU {
             else if (this.icon != null) {
                 this.ifElseBranchUpdateFunction(9, () => {
                     this.createIcon.bind(this)(makeBuilderParameterProxy("createIcon", { icon: () => (this["__icon"] ? this["__icon"] : this["icon"]) }));
-                    this.observeComponentCreation2((j11, k11) => {
+                    this.observeComponentCreation2((j59, k59) => {
                         If.create();
                         if (this.subIcon != null) {
                             this.ifElseBranchUpdateFunction(0, () => {
@@ -1213,13 +1213,13 @@ class OperateItemStruct extends ViewPU {
     }
 }
 export class ComposeListItem extends ViewPU {
-    constructor(b11, c11, d11, e11 = -1, f11 = undefined, g11) {
-        super(b11, d11, e11, g11);
-        if (typeof f11 === "function") {
-            this.paramsGenerator_ = f11;
+    constructor(b59, c59, d59, e59 = -1, f59 = undefined, g59) {
+        super(b59, d59, e59, g59);
+        if (typeof f59 === "function") {
+            this.paramsGenerator_ = f59;
         }
-        this.__contentItem = new SynchedPropertyObjectOneWayPU(c11.contentItem, this, "contentItem");
-        this.__operateItem = new SynchedPropertyObjectOneWayPU(c11.operateItem, this, "operateItem");
+        this.__contentItem = new SynchedPropertyObjectOneWayPU(c59.contentItem, this, "contentItem");
+        this.__operateItem = new SynchedPropertyObjectOneWayPU(c59.operateItem, this, "operateItem");
         this.__frontColor = new ObservedPropertyObjectPU(Color.Transparent.toString(), this, "frontColor");
         this.__borderSize = new ObservedPropertySimplePU(0, this, "borderSize");
         this.__canFocus = new ObservedPropertySimplePU(false, this, "canFocus");
@@ -1239,101 +1239,101 @@ export class ComposeListItem extends ViewPU {
         this.__textArrowLeftSafeOffset = new ObservedPropertySimplePU(0, this, "textArrowLeftSafeOffset");
         this.isFollowingSystemFontScale = this.getUIContext().isFollowingSystemFontScale();
         this.maxFontScale = this.getUIContext().getMaxFontScale();
-        this.setInitiallyProvidedValue(c11);
+        this.setInitiallyProvidedValue(c59);
         this.declareWatch("contentItem", this.onPropChange);
         this.declareWatch("operateItem", this.onPropChange);
         this.declareWatch("fontSizeScale", this.onFontSizeScaleChange);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(a11) {
-        if (a11.contentItem === undefined) {
+    setInitiallyProvidedValue(a59) {
+        if (a59.contentItem === undefined) {
             this.__contentItem.set(null);
         }
-        if (a11.operateItem === undefined) {
+        if (a59.operateItem === undefined) {
             this.__operateItem.set(null);
         }
-        if (a11.frontColor !== undefined) {
-            this.frontColor = a11.frontColor;
+        if (a59.frontColor !== undefined) {
+            this.frontColor = a59.frontColor;
         }
-        if (a11.borderSize !== undefined) {
-            this.borderSize = a11.borderSize;
+        if (a59.borderSize !== undefined) {
+            this.borderSize = a59.borderSize;
         }
-        if (a11.canFocus !== undefined) {
-            this.canFocus = a11.canFocus;
+        if (a59.canFocus !== undefined) {
+            this.canFocus = a59.canFocus;
         }
-        if (a11.canTouch !== undefined) {
-            this.canTouch = a11.canTouch;
+        if (a59.canTouch !== undefined) {
+            this.canTouch = a59.canTouch;
         }
-        if (a11.canHover !== undefined) {
-            this.canHover = a11.canHover;
+        if (a59.canHover !== undefined) {
+            this.canHover = a59.canHover;
         }
-        if (a11.isHover !== undefined) {
-            this.isHover = a11.isHover;
+        if (a59.isHover !== undefined) {
+            this.isHover = a59.isHover;
         }
-        if (a11.itemHeight !== undefined) {
-            this.itemHeight = a11.itemHeight;
+        if (a59.itemHeight !== undefined) {
+            this.itemHeight = a59.itemHeight;
         }
-        if (a11.isActive !== undefined) {
-            this.isActive = a11.isActive;
+        if (a59.isActive !== undefined) {
+            this.isActive = a59.isActive;
         }
-        if (a11.hoveringColor !== undefined) {
-            this.hoveringColor = a11.hoveringColor;
+        if (a59.hoveringColor !== undefined) {
+            this.hoveringColor = a59.hoveringColor;
         }
-        if (a11.touchDownColor !== undefined) {
-            this.touchDownColor = a11.touchDownColor;
+        if (a59.touchDownColor !== undefined) {
+            this.touchDownColor = a59.touchDownColor;
         }
-        if (a11.activedColor !== undefined) {
-            this.activedColor = a11.activedColor;
+        if (a59.activedColor !== undefined) {
+            this.activedColor = a59.activedColor;
         }
-        if (a11.focusOutlineColor !== undefined) {
-            this.focusOutlineColor = a11.focusOutlineColor;
+        if (a59.focusOutlineColor !== undefined) {
+            this.focusOutlineColor = a59.focusOutlineColor;
         }
-        if (a11.fontSizeScale !== undefined) {
-            this.fontSizeScale = a11.fontSizeScale;
+        if (a59.fontSizeScale !== undefined) {
+            this.fontSizeScale = a59.fontSizeScale;
         }
-        if (a11.containerDirection !== undefined) {
-            this.containerDirection = a11.containerDirection;
+        if (a59.containerDirection !== undefined) {
+            this.containerDirection = a59.containerDirection;
         }
-        if (a11.contentItemDirection !== undefined) {
-            this.contentItemDirection = a11.contentItemDirection;
+        if (a59.contentItemDirection !== undefined) {
+            this.contentItemDirection = a59.contentItemDirection;
         }
-        if (a11.containerPadding !== undefined) {
-            this.containerPadding = a11.containerPadding;
+        if (a59.containerPadding !== undefined) {
+            this.containerPadding = a59.containerPadding;
         }
-        if (a11.textArrowLeftSafeOffset !== undefined) {
-            this.textArrowLeftSafeOffset = a11.textArrowLeftSafeOffset;
+        if (a59.textArrowLeftSafeOffset !== undefined) {
+            this.textArrowLeftSafeOffset = a59.textArrowLeftSafeOffset;
         }
-        if (a11.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = a11.isFollowingSystemFontScale;
+        if (a59.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = a59.isFollowingSystemFontScale;
         }
-        if (a11.maxFontScale !== undefined) {
-            this.maxFontScale = a11.maxFontScale;
+        if (a59.maxFontScale !== undefined) {
+            this.maxFontScale = a59.maxFontScale;
         }
     }
-    updateStateVars(z10) {
-        this.__contentItem.reset(z10.contentItem);
-        this.__operateItem.reset(z10.operateItem);
+    updateStateVars(z58) {
+        this.__contentItem.reset(z58.contentItem);
+        this.__operateItem.reset(z58.operateItem);
     }
-    purgeVariableDependenciesOnElmtId(y10) {
-        this.__contentItem.purgeDependencyOnElmtId(y10);
-        this.__operateItem.purgeDependencyOnElmtId(y10);
-        this.__frontColor.purgeDependencyOnElmtId(y10);
-        this.__borderSize.purgeDependencyOnElmtId(y10);
-        this.__canFocus.purgeDependencyOnElmtId(y10);
-        this.__canTouch.purgeDependencyOnElmtId(y10);
-        this.__canHover.purgeDependencyOnElmtId(y10);
-        this.__isHover.purgeDependencyOnElmtId(y10);
-        this.__itemHeight.purgeDependencyOnElmtId(y10);
-        this.__isActive.purgeDependencyOnElmtId(y10);
-        this.__hoveringColor.purgeDependencyOnElmtId(y10);
-        this.__touchDownColor.purgeDependencyOnElmtId(y10);
-        this.__activedColor.purgeDependencyOnElmtId(y10);
-        this.__focusOutlineColor.purgeDependencyOnElmtId(y10);
-        this.__fontSizeScale.purgeDependencyOnElmtId(y10);
-        this.__containerDirection.purgeDependencyOnElmtId(y10);
-        this.__contentItemDirection.purgeDependencyOnElmtId(y10);
-        this.__containerPadding.purgeDependencyOnElmtId(y10);
-        this.__textArrowLeftSafeOffset.purgeDependencyOnElmtId(y10);
+    purgeVariableDependenciesOnElmtId(y58) {
+        this.__contentItem.purgeDependencyOnElmtId(y58);
+        this.__operateItem.purgeDependencyOnElmtId(y58);
+        this.__frontColor.purgeDependencyOnElmtId(y58);
+        this.__borderSize.purgeDependencyOnElmtId(y58);
+        this.__canFocus.purgeDependencyOnElmtId(y58);
+        this.__canTouch.purgeDependencyOnElmtId(y58);
+        this.__canHover.purgeDependencyOnElmtId(y58);
+        this.__isHover.purgeDependencyOnElmtId(y58);
+        this.__itemHeight.purgeDependencyOnElmtId(y58);
+        this.__isActive.purgeDependencyOnElmtId(y58);
+        this.__hoveringColor.purgeDependencyOnElmtId(y58);
+        this.__touchDownColor.purgeDependencyOnElmtId(y58);
+        this.__activedColor.purgeDependencyOnElmtId(y58);
+        this.__focusOutlineColor.purgeDependencyOnElmtId(y58);
+        this.__fontSizeScale.purgeDependencyOnElmtId(y58);
+        this.__containerDirection.purgeDependencyOnElmtId(y58);
+        this.__contentItemDirection.purgeDependencyOnElmtId(y58);
+        this.__containerPadding.purgeDependencyOnElmtId(y58);
+        this.__textArrowLeftSafeOffset.purgeDependencyOnElmtId(y58);
     }
     aboutToBeDeleted() {
         this.__contentItem.aboutToBeDeleted();
@@ -1361,122 +1361,122 @@ export class ComposeListItem extends ViewPU {
     get contentItem() {
         return this.__contentItem.get();
     }
-    set contentItem(x10) {
-        this.__contentItem.set(x10);
+    set contentItem(x58) {
+        this.__contentItem.set(x58);
     }
     get operateItem() {
         return this.__operateItem.get();
     }
-    set operateItem(w10) {
-        this.__operateItem.set(w10);
+    set operateItem(w58) {
+        this.__operateItem.set(w58);
     }
     get frontColor() {
         return this.__frontColor.get();
     }
-    set frontColor(v10) {
-        this.__frontColor.set(v10);
+    set frontColor(v58) {
+        this.__frontColor.set(v58);
     }
     get borderSize() {
         return this.__borderSize.get();
     }
-    set borderSize(u10) {
-        this.__borderSize.set(u10);
+    set borderSize(u58) {
+        this.__borderSize.set(u58);
     }
     get canFocus() {
         return this.__canFocus.get();
     }
-    set canFocus(t10) {
-        this.__canFocus.set(t10);
+    set canFocus(t58) {
+        this.__canFocus.set(t58);
     }
     get canTouch() {
         return this.__canTouch.get();
     }
-    set canTouch(s10) {
-        this.__canTouch.set(s10);
+    set canTouch(s58) {
+        this.__canTouch.set(s58);
     }
     get canHover() {
         return this.__canHover.get();
     }
-    set canHover(r10) {
-        this.__canHover.set(r10);
+    set canHover(r58) {
+        this.__canHover.set(r58);
     }
     get isHover() {
         return this.__isHover.get();
     }
-    set isHover(q10) {
-        this.__isHover.set(q10);
+    set isHover(q58) {
+        this.__isHover.set(q58);
     }
     get itemHeight() {
         return this.__itemHeight.get();
     }
-    set itemHeight(p10) {
-        this.__itemHeight.set(p10);
+    set itemHeight(p58) {
+        this.__itemHeight.set(p58);
     }
     get isActive() {
         return this.__isActive.get();
     }
-    set isActive(o10) {
-        this.__isActive.set(o10);
+    set isActive(o58) {
+        this.__isActive.set(o58);
     }
     get hoveringColor() {
         return this.__hoveringColor.get();
     }
-    set hoveringColor(n10) {
-        this.__hoveringColor.set(n10);
+    set hoveringColor(n58) {
+        this.__hoveringColor.set(n58);
     }
     get touchDownColor() {
         return this.__touchDownColor.get();
     }
-    set touchDownColor(m10) {
-        this.__touchDownColor.set(m10);
+    set touchDownColor(m58) {
+        this.__touchDownColor.set(m58);
     }
     get activedColor() {
         return this.__activedColor.get();
     }
-    set activedColor(l10) {
-        this.__activedColor.set(l10);
+    set activedColor(l58) {
+        this.__activedColor.set(l58);
     }
     get focusOutlineColor() {
         return this.__focusOutlineColor.get();
     }
-    set focusOutlineColor(k10) {
-        this.__focusOutlineColor.set(k10);
+    set focusOutlineColor(k58) {
+        this.__focusOutlineColor.set(k58);
     }
     get fontSizeScale() {
         return this.__fontSizeScale.get();
     }
-    set fontSizeScale(j10) {
-        this.__fontSizeScale.set(j10);
+    set fontSizeScale(j58) {
+        this.__fontSizeScale.set(j58);
     }
     get containerDirection() {
         return this.__containerDirection.get();
     }
-    set containerDirection(i10) {
-        this.__containerDirection.set(i10);
+    set containerDirection(i58) {
+        this.__containerDirection.set(i58);
     }
     get contentItemDirection() {
         return this.__contentItemDirection.get();
     }
-    set contentItemDirection(h10) {
-        this.__contentItemDirection.set(h10);
+    set contentItemDirection(h58) {
+        this.__contentItemDirection.set(h58);
     }
     get containerPadding() {
         return this.__containerPadding.get();
     }
-    set containerPadding(g10) {
-        this.__containerPadding.set(g10);
+    set containerPadding(g58) {
+        this.__containerPadding.set(g58);
     }
     get textArrowLeftSafeOffset() {
         return this.__textArrowLeftSafeOffset.get();
     }
-    set textArrowLeftSafeOffset(f10) {
-        this.__textArrowLeftSafeOffset.set(f10);
+    set textArrowLeftSafeOffset(f58) {
+        this.__textArrowLeftSafeOffset.set(f58);
     }
-    onWillApplyTheme(e10) {
-        this.hoveringColor = e10.colors.interactiveHover;
-        this.touchDownColor = e10.colors.interactivePressed;
-        this.activedColor = e10.colors.interactiveActive;
-        this.focusOutlineColor = e10.colors.interactiveFocus;
+    onWillApplyTheme(e58) {
+        this.hoveringColor = e58.colors.interactiveHover;
+        this.touchDownColor = e58.colors.interactivePressed;
+        this.activedColor = e58.colors.interactiveActive;
+        this.focusOutlineColor = e58.colors.interactiveFocus;
     }
     onPropChange() {
         if (this.contentItem === undefined) {
@@ -1610,9 +1610,9 @@ export class ComposeListItem extends ViewPU {
         if (this.containerDirection === FlexDirection.Row) {
             return LengthMetrics.vp(0);
         }
-        let d10 = ICON_SIZE_MAP.get(this.contentItem?.iconStyle);
-        if (this.contentItem?.icon && d10 && d10 <= HEADSCULPTURE_SIZE) {
-            return LengthMetrics.vp(d10 + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
+        let d58 = ICON_SIZE_MAP.get(this.contentItem?.iconStyle);
+        if (this.contentItem?.icon && d58 && d58 <= HEADSCULPTURE_SIZE) {
+            return LengthMetrics.vp(d58 + NORMAL_ITEM_ROW_SPACE + LISTITEM_PADDING - this.textArrowLeftSafeOffset);
         }
         return LengthMetrics.vp(LISTITEM_PADDING - this.textArrowLeftSafeOffset);
     }
@@ -1643,18 +1643,18 @@ export class ComposeListItem extends ViewPU {
         }
         return Math.min(this.maxFontScale, this.getUIContext().getHostContext()?.config.fontSizeScale ?? 1);
     }
-    onMeasureSize(x9, y9, z9) {
+    onMeasureSize(x57, y57, z57) {
         this.fontSizeScale = this.decideFontSizeScale();
-        let a10 = { height: 0, width: 0 };
-        y9.forEach((b10) => {
-            let c10 = b10.measure(z9);
-            a10.width = c10.width;
-            a10.height = c10.height;
+        let a58 = { height: 0, width: 0 };
+        y57.forEach((b58) => {
+            let c58 = b58.measure(z57);
+            a58.width = c58.width;
+            a58.height = c58.height;
         });
-        return a10;
+        return a58;
     }
     initialRender() {
-        this.observeComponentCreation2((v9, w9) => {
+        this.observeComponentCreation2((v57, w57) => {
             Stack.create();
             Stack.width('100%');
             Stack.padding({
@@ -1662,7 +1662,7 @@ export class ComposeListItem extends ViewPU {
                 right: STACK_PADDING
             });
         }, Stack);
-        this.observeComponentCreation2((s9, t9) => {
+        this.observeComponentCreation2((s57, t57) => {
             Flex.create(this.getFlexOptions());
             Flex.constraintSize({
                 minHeight: this.itemHeight
@@ -1676,10 +1676,10 @@ export class ComposeListItem extends ViewPU {
             Flex.onBlur(() => {
                 this.canFocus = false;
             });
-            Flex.onHover((u9) => {
-                this.isHover = u9;
+            Flex.onHover((u57) => {
+                this.isHover = u57;
                 if (this.canHover) {
-                    this.frontColor = u9 ? this.hoveringColor :
+                    this.frontColor = u57 ? this.hoveringColor :
                         (this.isActive ? this.activedColor : Color.Transparent.toString());
                 }
             });
@@ -1701,22 +1701,22 @@ export class ComposeListItem extends ViewPU {
             ViewStackProcessor.visualState();
             Flex.padding(ObservedObject.GetRawObject(this.containerPadding));
         }, Flex);
-        this.observeComponentCreation2((m9, n9) => {
+        this.observeComponentCreation2((m57, n57) => {
             If.create();
             if (this.contentItem === null) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((o9, p9) => {
-                            if (p9) {
-                                let q9 = new ContentItemStruct(this, {}, undefined, o9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 885, col: 11 });
-                                ViewPU.create(q9);
-                                let f8 = () => {
+                        this.observeComponentCreation2((o57, p57) => {
+                            if (p57) {
+                                let q57 = new ContentItemStruct(this, {}, undefined, o57, () => { }, { page: "libs/composelistitem1108/src/main/ets/components/composelistitem.ets", line: 885, col: 11 });
+                                ViewPU.create(q57);
+                                let c = () => {
                                     return {};
                                 };
-                                q9.paramsGenerator_ = f8;
+                                q57.paramsGenerator_ = c;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(o9, {});
+                                this.updateStateVarsOfChildByElmtId(o57, {});
                             }
                         }, { name: "ContentItemStruct" });
                     }
@@ -1728,14 +1728,14 @@ export class ComposeListItem extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((g9, h9) => {
+        this.observeComponentCreation2((g57, h57) => {
             If.create();
             if (this.contentItem !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((i9, j9) => {
-                            if (j9) {
-                                let k9 = new ContentItemStruct(this, {
+                        this.observeComponentCreation2((i57, j57) => {
+                            if (j57) {
+                                let k57 = new ContentItemStruct(this, {
                                     icon: this.contentItem?.icon,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
@@ -1744,9 +1744,9 @@ export class ComposeListItem extends ViewPU {
                                     fontSizeScale: this.fontSizeScale,
                                     parentDirection: this.containerDirection,
                                     itemDirection: this.contentItemDirection,
-                                }, undefined, i9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 888, col: 11 });
-                                ViewPU.create(k9);
-                                let e8 = () => {
+                                }, undefined, i57, () => { }, { page: "libs/composelistitem1108/src/main/ets/components/composelistitem.ets", line: 888, col: 11 });
+                                ViewPU.create(k57);
+                                let b = () => {
                                     return {
                                         icon: this.contentItem?.icon,
                                         iconStyle: this.contentItem?.iconStyle,
@@ -1758,10 +1758,10 @@ export class ComposeListItem extends ViewPU {
                                         itemDirection: this.contentItemDirection
                                     };
                                 };
-                                k9.paramsGenerator_ = e8;
+                                k57.paramsGenerator_ = b;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(i9, {
+                                this.updateStateVarsOfChildByElmtId(i57, {
                                     icon: this.contentItem?.icon,
                                     iconStyle: this.contentItem?.iconStyle,
                                     primaryText: this.contentItem?.primaryText,
@@ -1782,11 +1782,11 @@ export class ComposeListItem extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((y8, z8) => {
+        this.observeComponentCreation2((y56, z56) => {
             If.create();
             if (this.operateItem !== null) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((e9, f9) => {
+                    this.observeComponentCreation2((e57, f57) => {
                         __Common__.create();
                         __Common__.flexShrink(0);
                         __Common__.onFocus(() => {
@@ -1798,9 +1798,9 @@ export class ComposeListItem extends ViewPU {
                         __Common__.padding({ start: this.getOperateOffset() });
                     }, __Common__);
                     {
-                        this.observeComponentCreation2((a9, b9) => {
-                            if (b9) {
-                                let c9 = new OperateItemStruct(this, {
+                        this.observeComponentCreation2((a57, b57) => {
+                            if (b57) {
+                                let c57 = new OperateItemStruct(this, {
                                     icon: this.operateItem?.icon,
                                     subIcon: this.operateItem?.subIcon,
                                     button: this.operateItem?.button,
@@ -1818,9 +1818,9 @@ export class ComposeListItem extends ViewPU {
                                     parentCanHover: this.__canHover,
                                     rightWidth: this.calculatedRightWidth(),
                                     parentDirection: this.__containerDirection,
-                                }, undefined, a9, () => { }, { page: "librarys/composelistitem/src/main/ets/components/composelistitem.ets", line: 900, col: 11 });
-                                ViewPU.create(c9);
-                                let d8 = () => {
+                                }, undefined, a57, () => { }, { page: "libs/composelistitem1108/src/main/ets/components/composelistitem.ets", line: 900, col: 11 });
+                                ViewPU.create(c57);
+                                let a = () => {
                                     return {
                                         icon: this.operateItem?.icon,
                                         subIcon: this.operateItem?.subIcon,
@@ -1841,10 +1841,10 @@ export class ComposeListItem extends ViewPU {
                                         parentDirection: this.containerDirection
                                     };
                                 };
-                                c9.paramsGenerator_ = d8;
+                                c57.paramsGenerator_ = a;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(a9, {
+                                this.updateStateVarsOfChildByElmtId(a57, {
                                     icon: this.operateItem?.icon,
                                     subIcon: this.operateItem?.subIcon,
                                     button: this.operateItem?.button,

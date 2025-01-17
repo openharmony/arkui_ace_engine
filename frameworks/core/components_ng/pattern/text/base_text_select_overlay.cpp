@@ -1191,4 +1191,22 @@ void BaseTextSelectOverlay::ApplySelectAreaWithKeyboard(RectF& selectArea)
         selectArea.SetHeight(0.0f);
     }
 }
+
+void BaseTextSelectOverlay::OnHandleMarkInfoChange(
+    const std::shared_ptr<SelectOverlayInfo> info, SelectOverlayDirtyFlag flag)
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    if ((flag & DIRTY_HANDLE_COLOR_FLAG) == DIRTY_HANDLE_COLOR_FLAG) {
+        info->handlerColor = GetHandleColor();
+        manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
+void BaseTextSelectOverlay::UpdateHandleColor()
+{
+    auto manager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(manager);
+    manager->MarkInfoChange(DIRTY_HANDLE_COLOR_FLAG);
+}
 } // namespace OHOS::Ace::NG

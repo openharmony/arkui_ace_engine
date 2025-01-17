@@ -27,6 +27,7 @@
 #include "bridge/declarative_frontend/jsview/js_navdestination_context.h"
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_utils.h"
+#include "bridge/declarative_frontend/jsview/js_navdestination_scrollable_processor.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -60,31 +61,53 @@ constexpr int32_t PARAMATER_LENGTH_ONE = 1;
 constexpr int32_t PARAMATER_LENGTH_TWO = 2;
 constexpr uint32_t FIRST_INDEX = 0;
 constexpr uint32_t SECOND_INDEX = 1;
+constexpr int32_t JS_EMUN_TRANSITIONTYPE_NONE = 1;
+constexpr int32_t JS_EMUN_TRANSITIONTYPE_TITLE = 2;
+constexpr int32_t JS_EMUN_TRANSITIONTYPE_CONTENT = 3;
+
+NG::NavigationSystemTransitionType ParseTransitionType(int32_t value)
+{
+    switch (value) {
+        case JS_EMUN_TRANSITIONTYPE_NONE:
+            return NG::NavigationSystemTransitionType::NONE;
+        case JS_EMUN_TRANSITIONTYPE_TITLE:
+            return NG::NavigationSystemTransitionType::TITLE;
+        case JS_EMUN_TRANSITIONTYPE_CONTENT:
+            return NG::NavigationSystemTransitionType::CONTENT;
+        default:
+            return NG::NavigationSystemTransitionType::DEFAULT;
+    }
+}
 
 bool ParseCommonTitle(const JSRef<JSObject>& jsObj)
 {
     JSRef<JSVal> subtitle = jsObj->GetProperty("sub");
     JSRef<JSVal> title = jsObj->GetProperty("main");
-    bool hasSub = subtitle->IsString();
-    bool hasMain = title->IsString();
+    std::string mainTitle;
+    std::string subTitle;
+    bool hasSub = JSViewAbstract::ParseJsString(subtitle, subTitle);
+    bool hasMain = JSViewAbstract::ParseJsString(title, mainTitle);
     if (hasSub || hasMain) {
         return NG::NavDestinationModelNG::GetInstance()->ParseCommonTitle(
-            hasSub, hasMain, subtitle->ToString(), title->ToString());
+            hasSub, hasMain, subTitle, mainTitle);
     }
     return false;
 }
-
 } // namespace
 
 void JSNavDestination::Create()
 {
     NavDestinationModel::GetInstance()->Create();
+    NavDestinationModel::GetInstance()->SetScrollableProcessor(
+        []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
 }
 
 void JSNavDestination::Create(const JSCallbackInfo& info)
 {
     if (info.Length() <= 0) {
         NavDestinationModel::GetInstance()->Create();
+        NavDestinationModel::GetInstance()->SetScrollableProcessor(
+            []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
         return;
     }
 
@@ -103,6 +126,8 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
             auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfo>();
             ctx->SetNavPathInfo(navPathInfo);
             NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
+            NavDestinationModel::GetInstance()->SetScrollableProcessor(
+                []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
             return;
         } else if (info[0]->IsObject()) {
             // first parameter = pathInfo{'moduleName': stringA, 'pagePath': stringB}
@@ -115,6 +140,8 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
             moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
             pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
             NavDestinationModel::GetInstance()->Create();
+            NavDestinationModel::GetInstance()->SetScrollableProcessor(
+                []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
             NavDestinationModel::GetInstance()->SetNavDestinationPathInfo(moduleName, pagePath);
             return;
         }
@@ -145,6 +172,8 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
         moduleName = infoObj->GetProperty(NG::NAVIGATION_MODULE_NAME)->ToString();
         pagePath = infoObj->GetProperty(NG::NAVIGATION_PAGE_PATH)->ToString();
         NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
+        NavDestinationModel::GetInstance()->SetScrollableProcessor(
+            []() { return AceType::MakeRefPtr<JSNavDestinationScrollableProcessor>(); });
         NavDestinationModel::GetInstance()->SetNavDestinationPathInfo(moduleName, pagePath);
     }
 }
@@ -426,44 +455,6 @@ void JSNavDestination::SetWillShow(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
-void JSNavDestination::SetToolBarConfiguration(const JSCallbackInfo& info)
-{
-    if (info[0]->IsUndefined() || info[0]->IsArray()) {
-        std::vector<NG::BarItem> toolBarItems;
-        if (info[0]->IsArray()) {
-            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-            JSNavigationUtils::ParseToolbarItemsConfiguration(
-                targetNode, info, JSRef<JSArray>::Cast(info[0]), toolBarItems);
-        }
-        NavDestinationModel::GetInstance()->SetToolbarConfiguration(std::move(toolBarItems));
-    } else if (info[0]->IsObject()) {
-        auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
-        if (builderFuncParam->IsFunction()) {
-            ViewStackModel::GetInstance()->NewScope();
-            JsFunction jsBuilderFunc(builderFuncParam);
-            jsBuilderFunc.Execute();
-            auto customNode = ViewStackModel::GetInstance()->Finish();
-            NavDestinationModel::GetInstance()->SetCustomToolBar(customNode);
-        }
-    }
-    NG::NavigationToolbarOptions options;
-    JSNavigationUtils::ParseToolbarOptions(info, options);
-    NavDestinationModel::GetInstance()->SetToolBarOptions(std::move(options));
-}
-
-void JSNavDestination::SetHideToolBar(const JSCallbackInfo& info)
-{
-    bool isHide = false;
-    if (info.Length() > 0 && info[0]->IsBoolean()) {
-        isHide = info[0]->ToBoolean();
-    }
-    bool isAnimated = false;
-    if (info.Length() > 1 && info[1]->IsBoolean()) {
-        isAnimated = info[1]->ToBoolean();
-    }
-    NavDestinationModel::GetInstance()->SetHideToolBar(isHide, isAnimated);
-}
-
 void JSNavDestination::SetWillDisAppear(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -518,6 +509,75 @@ void JSNavDestination::SetIgnoreLayoutSafeArea(const JSCallbackInfo& info)
     NavDestinationModel::GetInstance()->SetIgnoreLayoutSafeArea(opts);
 }
 
+void JSNavDestination::SetRecoverable(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        // the default value of navDestination's recoverable is true
+        NavDestinationModel::GetInstance()->SetRecoverable(true);
+        return;
+    }
+    auto recoverable = info[0]->ToBoolean();
+    NavDestinationModel::GetInstance()->SetRecoverable(recoverable);
+}
+
+void JSNavDestination::SetToolBarConfiguration(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined() || info[0]->IsArray()) {
+        std::vector<NG::BarItem> toolBarItems;
+        if (info[0]->IsArray()) {
+            auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+            JSNavigationUtils::ParseToolbarItemsConfiguration(
+                targetNode, info, JSRef<JSArray>::Cast(info[0]), toolBarItems);
+        }
+        NavDestinationModel::GetInstance()->SetToolbarConfiguration(std::move(toolBarItems));
+    } else if (info[0]->IsObject()) {
+        auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
+        if (builderFuncParam->IsFunction()) {
+            ViewStackModel::GetInstance()->NewScope();
+            JsFunction jsBuilderFunc(builderFuncParam);
+            jsBuilderFunc.Execute();
+            auto customNode = ViewStackModel::GetInstance()->Finish();
+            NavDestinationModel::GetInstance()->SetCustomToolBar(customNode);
+        }
+    }
+    NG::NavigationToolbarOptions options;
+    JSNavigationUtils::ParseToolbarOptions(info, options);
+    NavDestinationModel::GetInstance()->SetToolBarOptions(std::move(options));
+}
+
+void JSNavDestination::SetHideToolBar(const JSCallbackInfo& info)
+{
+    bool isHide = false;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isHide = info[0]->ToBoolean();
+    }
+    bool isAnimated = false;
+    if (info.Length() > 1 && info[1]->IsBoolean()) {
+        isAnimated = info[1]->ToBoolean();
+    }
+    NavDestinationModel::GetInstance()->SetHideToolBar(isHide, isAnimated);
+}
+
+void JSNavDestination::BindToScrollable(const JSCallbackInfo& info)
+{
+    auto bindFunc = [&info](const RefPtr<NG::NavDestinationScrollableProcessor>& processor) {
+        auto jsProcessor = AceType::DynamicCast<JSNavDestinationScrollableProcessor>(processor);
+        CHECK_NULL_VOID(jsProcessor);
+        jsProcessor->BindToScrollable(info);
+    };
+    NavDestinationModel::GetInstance()->UpdateBindingWithScrollable(std::move(bindFunc));
+}
+
+void JSNavDestination::BindToNestedScrollable(const JSCallbackInfo& info)
+{
+    auto bindFunc = [&info](const RefPtr<NG::NavDestinationScrollableProcessor>& processor) {
+        auto jsProcessor = AceType::DynamicCast<JSNavDestinationScrollableProcessor>(processor);
+        CHECK_NULL_VOID(jsProcessor);
+        jsProcessor->BindToNestedScrollable(info);
+    };
+    NavDestinationModel::GetInstance()->UpdateBindingWithScrollable(std::move(bindFunc));
+}
+
 void JSNavDestination::JSBind(BindingTarget globalObj)
 {
     JSNavDestinationContext::JSBind(globalObj);
@@ -547,6 +607,10 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onWillDisappear", &JSNavDestination::SetWillDisAppear);
     JSClass<JSNavDestination>::StaticMethod("ignoreLayoutSafeArea", &JSNavDestination::SetIgnoreLayoutSafeArea);
     JSClass<JSNavDestination>::StaticMethod("systemBarStyle", &JSNavDestination::SetSystemBarStyle);
+    JSClass<JSNavDestination>::StaticMethod("systemTransition", &JSNavDestination::SetSystemTransition);
+    JSClass<JSNavDestination>::StaticMethod("recoverable", &JSNavDestination::SetRecoverable);
+    JSClass<JSNavDestination>::StaticMethod("bindToScrollable", &JSNavDestination::BindToScrollable);
+    JSClass<JSNavDestination>::StaticMethod("bindToNestedScrollable", &JSNavDestination::BindToNestedScrollable);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -561,5 +625,16 @@ void JSNavDestination::SetSystemBarStyle(const JSCallbackInfo& info)
         }
     }
     NavDestinationModel::GetInstance()->SetSystemBarStyle(style);
+}
+
+void JSNavDestination::SetSystemTransition(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsNumber()) {
+        NavDestinationModel::GetInstance()->SetSystemTransitionType(NG::NavigationSystemTransitionType::DEFAULT);
+        return;
+    }
+    auto value = info[0]->ToNumber<int32_t>();
+    NG::NavigationSystemTransitionType type = ParseTransitionType(value);
+    NavDestinationModel::GetInstance()->SetSystemTransitionType(type);
 }
 } // namespace OHOS::Ace::Framework

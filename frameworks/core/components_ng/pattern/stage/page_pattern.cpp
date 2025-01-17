@@ -16,8 +16,8 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 
 #include "base/log/jank_frame_report.h"
-#include "base/perfmonitor/perf_constants.h"
 #include "base/log/log_wrapper.h"
+#include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
@@ -199,7 +199,7 @@ void PagePattern::OnAttachToMainTree()
     int32_t index = INVALID_PAGE_INDEX;
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate) {
-        index = delegate->GetStackSize();
+        index = delegate->GetCurrentPageIndex();
         GetPageInfo()->SetPageIndex(index);
     }
     state_ = RouterPageState::ABOUT_TO_APPEAR;

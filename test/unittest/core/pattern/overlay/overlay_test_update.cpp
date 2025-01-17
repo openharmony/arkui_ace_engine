@@ -98,6 +98,7 @@ const Dimension ADAPT_TOAST_NEG_FONT_SIZE = -12.0_fp;
 const Dimension DISAPPEAR_FONT_SIZE = 0.0_fp;
 const Dimension NORMAL_FONT_SIZE = 10.0_fp;
 const Dimension SELECT_FONT_SIZE = 15.0_fp;
+constexpr float KEYBOARD_HEIGHT = 600.0f;
 } // namespace
 class OverlayTestUpdate : public testing::Test {
 public:
@@ -1663,5 +1664,269 @@ HWTEST_F(OverlayTestUpdate, ToastTest029, TestSize.Level1)
      */
     auto textMaxHeight = pattern->GetTextMaxHeight();
     EXPECT_EQ(textMaxHeight, 832);
+}
+
+/**
+ * @tc.name: ToastTest030
+ * @tc.desc: Test ToastPattern::InitWrapperRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestUpdate, ToastTest030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateToastNode.
+     */
+    ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0 };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto toastProps = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+    ASSERT_NE(toastProps, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(toastNode, toastNode->GetGeometryNode(), toastNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Init wrapper rect.
+     */
+    pattern->InitWrapperRect(layoutWrapper.rawPtr_, toastProps);
+
+    /**
+     * @tc.steps: step3. Test not in hover mode, toast's wrapper rect.
+     */
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    float safeAreaTop = safeAreaManager->GetSystemSafeArea().top_.Length();
+    const auto& safeArea = toastProps->GetSafeAreaInsets();
+    float safeAreaBottom =
+        safeArea ? safeArea->bottom_.Length() : safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
+    EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());
+    EXPECT_EQ(pattern->wrapperRect_.Height(), pipelineContext->GetRootHeight()- safeAreaTop - safeAreaBottom);
+    EXPECT_EQ(pattern->wrapperRect_.Top(), safeAreaTop);
+}
+
+/**
+ * @tc.name: ToastTest031
+ * @tc.desc: Test ToastPattern::InitWrapperRect ToastPattern::UpdateHoverModeRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestUpdate, ToastTest031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateToastNode, enable hover mode, hover mode area is default.
+     */
+    ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0 };
+    toastInfo.enableHoverMode = true;
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto toastProps = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+    ASSERT_NE(toastProps, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(toastNode, toastNode->GetGeometryNode(), toastNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Set in hover mode.
+     */
+    pipelineContext->isHalfFoldHoverStatus_ = true;
+
+    /**
+     * @tc.steps: step3. Set fold crease region.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto displayInfo = container->GetDisplayInfo();
+    std::vector<Rect> rects;
+    Rect rect;
+    rect.SetRect(0, 1064, 2294, 171);
+    rects.insert(rects.end(), rect);
+    displayInfo->SetCurrentFoldCreaseRegion(rects);
+    float foldCreaseBottom = 1235.0f;
+
+    /**
+     * @tc.steps: step4. Init wrapper rect.
+     */
+    pattern->InitWrapperRect(layoutWrapper.rawPtr_, toastProps);
+
+    /**
+     * @tc.steps: step3. Test in hover mode, hover mode area is default, toast's wrapper rect.
+     */
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    const auto& safeArea = toastProps->GetSafeAreaInsets();
+    float safeAreaBottom =
+        safeArea ? safeArea->bottom_.Length() : safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
+    EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());
+    EXPECT_EQ(pattern->wrapperRect_.Height(), pipelineContext->GetRootHeight()- foldCreaseBottom - safeAreaBottom);
+    EXPECT_EQ(pattern->wrapperRect_.Top(), foldCreaseBottom);
+}
+
+/**
+ * @tc.name: ToastTest032
+ * @tc.desc: Test ToastPattern::InitWrapperRect ToastPattern::UpdateHoverModeRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestUpdate, ToastTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateToastNode, enable hover mode, hover mode area is default.
+     */
+    ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0 };
+    toastInfo.enableHoverMode = true;
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto toastProps = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+    ASSERT_NE(toastProps, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(toastNode, toastNode->GetGeometryNode(), toastNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Set in hover mode.
+     */
+    pipelineContext->isHalfFoldHoverStatus_ = true;
+
+    /**
+     * @tc.steps: step3. Set fold crease region and keyboard safe area.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto displayInfo = container->GetDisplayInfo();
+    std::vector<Rect> rects;
+    Rect rect;
+    rect.SetRect(0, 1064, 2294, 171);
+    rects.insert(rects.end(), rect);
+    displayInfo->SetCurrentFoldCreaseRegion(rects);
+    float foldCreaseTop = 1064.0f;
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+    auto ret = safeAreaManager->UpdateKeyboardSafeArea(KEYBOARD_HEIGHT);
+    EXPECT_EQ(ret, true);
+
+    /**
+     * @tc.steps: step4. Init wrapper rect.
+     */
+    pattern->InitWrapperRect(layoutWrapper.rawPtr_, toastProps);
+
+    /**
+     * @tc.steps: step5. Test in hover mode, hover mode area is default, avoid keyboard toast's wrapper rect.
+     */
+    float safeAreaTop = safeAreaManager->GetSystemSafeArea().top_.Length();
+    EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());
+    EXPECT_EQ(pattern->wrapperRect_.Height(), foldCreaseTop - safeAreaTop);
+    EXPECT_EQ(pattern->wrapperRect_.Top(), safeAreaTop);
+    auto reset = safeAreaManager->UpdateKeyboardSafeArea(0.0f);
+    EXPECT_EQ(reset, true);
+}
+
+/**
+ * @tc.name: ToastTest033
+ * @tc.desc: Test ToastPattern::InitWrapperRect ToastPattern::UpdateHoverModeRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestUpdate, ToastTest033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateToastNode, enable hover mode, hover mode area is TOP_SCREEN.
+     */
+    ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0 };
+    toastInfo.enableHoverMode = true;
+    toastInfo.hoverModeArea = HoverModeAreaType::TOP_SCREEN;
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto toastProps = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+    ASSERT_NE(toastProps, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(toastNode, toastNode->GetGeometryNode(), toastNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Set in hover mode.
+     */
+    pipelineContext->isHalfFoldHoverStatus_ = true;
+
+    /**
+     * @tc.steps: step3. Set fold crease region.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto displayInfo = container->GetDisplayInfo();
+    std::vector<Rect> rects;
+    Rect rect;
+    rect.SetRect(0, 1064, 2294, 171);
+    rects.insert(rects.end(), rect);
+    displayInfo->SetCurrentFoldCreaseRegion(rects);
+    float foldCreaseTop = 1064.0f;
+    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+    ASSERT_NE(safeAreaManager, nullptr);
+
+    /**
+     * @tc.steps: step4. Init wrapper rect.
+     */
+    pattern->InitWrapperRect(layoutWrapper.rawPtr_, toastProps);
+
+    /**
+     * @tc.steps: step5. Test in hover mode, hover mode area is TOP_SCREEN.
+     */
+    float safeAreaTop = safeAreaManager->GetSystemSafeArea().top_.Length();
+    EXPECT_EQ(pattern->wrapperRect_.Width(), pipelineContext->GetRootWidth());
+    EXPECT_EQ(pattern->wrapperRect_.Height(), foldCreaseTop - safeAreaTop);
+    EXPECT_EQ(pattern->wrapperRect_.Top(), safeAreaTop);
+}
+
+/**
+ * @tc.name: ToastTest034
+ * @tc.desc: Test Toast offset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayTestUpdate, ToastTest034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateToastNode.
+     */
+    ToastInfo toastInfo = { MESSAGE, 0, BOTTOMSTRING, true, ToastShowMode::DEFAULT, 0 };
+    auto toastNode = ToastView::CreateToastNode(toastInfo);
+    ASSERT_NE(toastNode, nullptr);
+    auto pattern = toastNode->GetPattern<ToastPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto toastProps = toastNode->GetLayoutProperty<ToastLayoutProperty>();
+    ASSERT_NE(toastProps, nullptr);
+    auto layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(toastNode, toastNode->GetGeometryNode(), toastNode->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+
+    /**
+     * @tc.steps: step2. Init wrapper rect.
+     */
+    pattern->InitWrapperRect(layoutWrapper.rawPtr_, toastProps);
+
+    /**
+     * @tc.steps: step3. Toast showMode and offset.
+     */
+    auto toastContext = toastNode->GetRenderContext();
+    ASSERT_NE(toastContext, nullptr);
+    EXPECT_TRUE(pattern->IsDefaultToast());
+    EXPECT_TRUE(pattern->OnDirtyLayoutWrapperSwap(toastNode->CreateLayoutWrapper(), DirtySwapConfig()));
+    toastContext->UpdateOffset({pattern->GetOffsetX(toastNode->CreateLayoutWrapper()),
+        pattern->GetOffsetY(toastNode->CreateLayoutWrapper())});
+    EXPECT_EQ(toastContext->GetOffset()->GetX().ConvertToPx(), 360.0);
+    EXPECT_EQ(toastContext->GetOffset()->GetY().ConvertToPx(), 1280.0);
 }
 }

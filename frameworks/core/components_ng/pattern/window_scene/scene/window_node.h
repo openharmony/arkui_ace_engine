@@ -26,7 +26,9 @@ class ACE_EXPORT WindowNode : public FrameNode {
 
 public:
     WindowNode(const std::string& tag,
-        int32_t nodeId, int32_t sessionId, const RefPtr<Pattern>& pattern, bool isRoot = false);
+        int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot = false);
+    WindowNode(const std::string& tag,
+        int32_t nodeId, int32_t sessionId, const RefPtr<Pattern>& pattern, bool isRoot, int32_t screenId);
     ~WindowNode() override;
 
     static RefPtr<WindowNode> GetOrCreateWindowNode(const std::string& tag,
@@ -41,6 +43,7 @@ private:
     std::vector<RectF> ConvertHotRects(const std::vector<Rosen::Rect>& hotAreas);
 
     int32_t sessionId_ = 0;
+    int32_t screenId_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

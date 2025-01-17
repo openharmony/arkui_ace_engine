@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/stage/page_info.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/render/render_context.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -837,4 +838,137 @@ void Inspector::RemoveOffscreenNode(RefPtr<FrameNode> node)
     offscreenNodes.erase(node);
 }
 
+void Inspector::GetInspectorTree(InspectorTreeMap& treesInfo)
+{
+    treesInfo.clear();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    RefPtr<UINode> pageRootNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageRootNode);
+    auto rootNode = AddInspectorTreeNode(pageRootNode, treesInfo);
+    CHECK_NULL_VOID(rootNode);
+    auto pageId = pageRootNode->GetPageId();
+    std::vector<RefPtr<NG::UINode>> children;
+    for (const auto& item : pageRootNode->GetChildren()) {
+        GetFrameNodeChildren(item, children, pageId, false);
+    }
+    auto overlayNode = GetOverlayNode(pageRootNode);
+    if (overlayNode) {
+        GetFrameNodeChildren(overlayNode, children, pageId, false);
+    }
+    return GetInspectorTreeInfo(children, pageId, treesInfo);
+}
+
+void Inspector::RecordOnePageNodes(const RefPtr<NG::UINode>& pageNode, InspectorTreeMap& treesInfo)
+{
+    CHECK_NULL_VOID(pageNode);
+    std::vector<RefPtr<NG::UINode>> children;
+    auto pageId = pageNode->GetPageId();
+    auto rootNode = AddInspectorTreeNode(pageNode, treesInfo);
+    CHECK_NULL_VOID(rootNode);
+    for (const auto& item : pageNode->GetChildren()) {
+        GetFrameNodeChildren(item, children, pageId, false);
+    }
+    auto overlayNode = GetOverlayNode(pageNode);
+    if (overlayNode) {
+        GetFrameNodeChildren(overlayNode, children, pageId, false);
+    }
+    GetInspectorTreeInfo(children, pageId, treesInfo);
+}
+
+void Inspector::GetRecordAllPagesNodes(InspectorTreeMap& treesInfo)
+{
+    treesInfo.clear();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    auto stageNode = stageManager->GetStageNode();
+    CHECK_NULL_VOID(stageNode);
+    for (const auto& item : stageNode->GetChildren()) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(item);
+        if (frameNode == nullptr) {
+            continue;
+        }
+        auto pagePattern = frameNode->GetPattern<PagePattern>();
+        if (pagePattern == nullptr) {
+            continue;
+        }
+        RecordOnePageNodes(item, treesInfo);
+    }
+}
+
+RefPtr<RecNode> Inspector::AddInspectorTreeNode(const RefPtr<NG::UINode>& uiNode, InspectorTreeMap& recNodes)
+{
+    CHECK_NULL_RETURN(uiNode, nullptr);
+    RefPtr<RecNode> recNode = AceType::MakeRefPtr<RecNode>();
+    CHECK_NULL_RETURN(recNode, nullptr);
+    recNode->SetNodeId(uiNode->GetId());
+    std::string strTag = uiNode->GetTag();
+    ConvertIllegalStr(strTag);
+    recNode->SetName(strTag);
+    std::string strDebugLine = uiNode->GetDebugLine();
+    ConvertIllegalStr(strDebugLine);
+    recNode->SetDebugLine(strDebugLine);
+    auto frameNode = AceType::DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto renderContext = frameNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    recNode->SetSelfId(renderContext->GetNodeId());
+    recNodes.emplace(uiNode->GetId(), recNode);
+    return recNode;
+}
+
+void Inspector::GetInspectorTreeInfo(
+    std::vector<RefPtr<NG::UINode>> children, int32_t pageId, InspectorTreeMap& recNodes)
+{
+    for (auto& uiNode : children) {
+        auto addedItem = AddInspectorTreeNode(uiNode, recNodes);
+        if (addedItem == nullptr) {
+            continue;
+        }
+        GetInspectorChildrenInfo(uiNode, recNodes, pageId);
+    }
+}
+
+void Inspector::GetInspectorChildrenInfo(
+    const RefPtr<NG::UINode>& parent, InspectorTreeMap& recNodes, int32_t pageId, uint32_t depth)
+{
+    // Span is a special case in Inspector since span inherits from UINode
+    if (AceType::InstanceOf<SpanNode>(parent)) {
+        return;
+    }
+    if (AceType::InstanceOf<CustomNode>(parent)) {
+        return;
+    }
+    std::vector<RefPtr<NG::UINode>> children;
+    for (const auto& item : parent->GetChildren()) {
+        GetFrameNodeChildren(item, children, pageId, false);
+    }
+    auto node = AceType::DynamicCast<FrameNode>(parent);
+    if (node != nullptr) {
+        auto overlayNode = node->GetOverlayNode();
+        if (overlayNode != nullptr) {
+            GetFrameNodeChildren(overlayNode, children, pageId, false);
+        }
+    }
+    if (depth) {
+        for (auto uiNode : children) {
+            auto addedNode = AddInspectorTreeNode(uiNode, recNodes);
+            if (addedNode == nullptr) {
+                continue;
+            }
+            GetInspectorChildrenInfo(uiNode, recNodes, pageId, depth - 1);
+        }
+    }
+}
+
+void Inspector::GetOffScreenTreeNodes(InspectorTreeMap& nodes)
+{
+    for (const auto& item : offscreenNodes) {
+        AddInspectorTreeNode(item, nodes);
+    }
+}
 } // namespace OHOS::Ace::NG

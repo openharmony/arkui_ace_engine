@@ -21,6 +21,17 @@ class ArkTextTimerComponent extends ArkComponent implements TextTimerAttribute {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
   }
+  allowChildCount(): number {
+    return 0;
+  }
+  initialize(value: Object[]): this {
+    if (value.length === 1 && isObject(value[0])) {
+      modifierWithKey(this._modifiersWithKeys, TextTimerOptionsModifier.identity, TextTimerOptionsModifier, value[0]);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, TextTimerOptionsModifier.identity, TextTimerOptionsModifier, undefined);
+    }
+    return this;
+  }
   fontColor(value: any): this {
     modifierWithKey(this._modifiersWithKeys, TextTimerFontColorModifier.identity, TextTimerFontColorModifier, value);
     return this;
@@ -86,6 +97,25 @@ class ArkTextTimerComponent extends ArkComponent implements TextTimerAttribute {
 
   onTimer(event: (utc: number, elapsedTime: number) => void): this {
     throw new Error('Method not implemented.');
+  }
+}
+
+class TextTimerOptionsModifier extends ModifierWithKey<TextTimerOptions> {
+  constructor(value: TextTimerOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textTimerOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textTimer.setTextTimerOptions(node, undefined, undefined, undefined);
+    } else {
+      getUINativeModule().textTimer.setTextTimerOptions(node, this.value?.isCountDown, this.value?.count, this.value?.controller);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue?.isCountDown, this.value?.isCountDown) ||
+          !isBaseOrResourceEqual(this.stageValue?.count, this.value?.count) ||
+          !isBaseOrResourceEqual(this.stageValue?.controller, this.value?.controller);
   }
 }
 

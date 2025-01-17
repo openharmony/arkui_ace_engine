@@ -90,6 +90,8 @@ public:
         return false;
     }
 
+    virtual void ProcessSafeAreaPadding() {}
+
     virtual bool IsNeedPercent() const
     {
         return false;
@@ -139,6 +141,11 @@ public:
         }
         frameNode_ = frameNode;
         OnAttachToFrameNode();
+    }
+
+    virtual bool CustomizeExpandSafeArea()
+    {
+        return false;
     }
 
     virtual RefPtr<AccessibilityProperty> CreateAccessibilityProperty()
@@ -385,6 +392,7 @@ public:
 
     virtual void DumpInfo() {}
     virtual void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) {}
+    virtual void DumpInfo(std::unique_ptr<JsonValue>& json) {}
     virtual void DumpAdvanceInfo() {}
     virtual void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData = false) {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
@@ -609,6 +617,8 @@ public:
         layoutProperty->CheckLocalizedBorderImageSlice(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageWidth(layoutDirection);
         layoutProperty->CheckLocalizedBorderImageOutset(layoutDirection);
+        host->ResetSafeAreaPadding();
+        layoutProperty->CheckLocalizedSafeAreaPadding(layoutDirection);
     }
 
     virtual void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) {}

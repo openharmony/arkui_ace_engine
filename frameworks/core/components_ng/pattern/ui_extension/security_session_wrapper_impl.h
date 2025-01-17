@@ -97,6 +97,10 @@ public:
     void SendDataAsync(const AAFwk::WantParams& params) const override;
     int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const override;
 
+    // The interface for UEC dump
+    uint32_t GetReasonDump() const override;
+    void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) override;
+
 private:
     void InitAllCallback();
     AceLogTag tag_ = AceLogTag::ACE_SECURITYUIEXTENSION;
@@ -109,6 +113,7 @@ private:
     sptr<Rosen::ExtensionSession> session_;
     bool isNotifyOccupiedAreaChange_ = true;
     RectF displayArea_;
+    uint32_t reason_ = (uint32_t)Rosen::SizeChangeReason::UNDEFINED;
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
     std::function<void((OHOS::Rosen::WSError))> foregroundCallback_;
     std::function<void((OHOS::Rosen::WSError))> backgroundCallback_;

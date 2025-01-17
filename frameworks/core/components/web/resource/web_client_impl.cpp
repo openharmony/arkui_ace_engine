@@ -1073,6 +1073,14 @@ void WebClientImpl::OnTooltip(const std::string& tooltip)
     delegate->OnTooltip(tooltip);
 }
 
+void WebClientImpl::GetVisibleRectToWeb(int& visibleX, int& visibleY, int& visibleWidth, int& visibleHeight)
+{
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->GetVisibleRectToWeb(visibleX, visibleY, visibleWidth, visibleHeight);
+}
+
 bool WebClientImpl::OnHandleOverrideUrlLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
 {
     auto delegate = webDelegate_.Upgrade();

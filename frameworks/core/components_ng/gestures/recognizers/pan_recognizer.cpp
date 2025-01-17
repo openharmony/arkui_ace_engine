@@ -195,6 +195,7 @@ void PanRecognizer::UpdateAxisPointInVelocityTracker(const AxisEvent& event, boo
 
 void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
+    extraInfo_ = "";
     isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -212,11 +213,13 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             "node tag = %{public}s, id = " SEC_PLD(%{public}s) ".",
             node ? node->GetTag().c_str() : "null",
             SEC_PARAM(node ? std::to_string(node->GetId()).c_str() : "invalid"));
+        extraInfo_ += "direction is NONE.";
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
     if (event.sourceType == SourceType::MOUSE && !isAllowMouse_) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
+        extraInfo_ += "mouse event is not allowed.";
         return;
     }
     if (!IsInAttachedNode(event)) {
@@ -248,6 +251,7 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
 void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
 {
+    extraInfo_ = "";
     isTouchEventFinished_ = false;
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
@@ -262,11 +266,13 @@ void PanRecognizer::HandleTouchDownEvent(const AxisEvent& event)
     direction_ = newDirection_;
 
     if (fingers_ != AXIS_PAN_FINGERS) {
+        extraInfo_ += "fingers does not meet the requirements of the axis event.";
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
 
     if (direction_.type == PanDirection::NONE) {
+        extraInfo_ += "direction is NONE in axis case.";
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -291,6 +297,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pan %{public}d up, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
+    extraInfo_ = "currentFingers: " + std::to_string(currentFingers_) + " fingers: " + std::to_string(fingers_);
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
     }
@@ -298,12 +305,15 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         return;
     }
 
-    if (currentFingers_ == fingers_) {
+    // In CrossPlatform, MOVE point has sampled, but the UP point is original coordinate,
+    // and participating in the Velocity calculation may cause abnormal rates
+    if (currentFingers_ == fingers_ && SystemProperties::IsNeedResampleTouchPoints()) {
         UpdateTouchPointInVelocityTracker(event);
     } else if (currentFingers_ > fingers_) {
         panVelocity_.Reset(event.id);
         UpdateTouchPointInVelocityTracker(event);
     }
+
     UpdateTouchEventInfo(event);
 
     if ((currentFingers_ <= fingers_) &&
@@ -457,6 +467,7 @@ void PanRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
     mainDelta_ = GetMainAxisDelta();
     averageDistance_ += delta_;
 
+    UpdateTouchPointWithAxisEvent(event);
     UpdateAxisPointInVelocityTracker(event);
     time_ = event.time;
 
@@ -690,7 +701,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
 
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
-    if (callback && *callback && IsEnabled()) {
+    if (callback && *callback && IsEnabled() && (!gestureInfo_ || !gestureInfo_->GetDisposeTag())) {
         GestureEvent info = GetGestureEventInfo();
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
@@ -780,7 +791,7 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     onActionUpdate_ = std::move(curr->onActionUpdate_);
     onActionEnd_ = std::move(curr->onActionEnd_);
     onActionCancel_ = std::move(curr->onActionCancel_);
-
+    ReconcileGestureInfoFrom(recognizer);
     return true;
 }
 
@@ -854,7 +865,8 @@ RefPtr<GestureSnapshot> PanRecognizer::Dump() const
     oss << "direction: " << direction_.type << ", "
         << "isForDrag: " << isForDrag_ << ", "
         << "distance: " << distance_ << ", "
-        << "fingers: " << fingers_;
+        << "fingers: " << fingers_ << ", "
+        << DumpGestureInfo();
     info->customInfo = oss.str();
     return info;
 }

@@ -202,6 +202,10 @@ void PageUrlCheckerOhos::LoadPageUrl(const std::string& url, const std::function
     size_t moduleStartPos = bundleEndPos + 1;
     size_t moduleEndPos = url.find('/', moduleStartPos);
     std::string moduleName = url.substr(moduleStartPos, moduleEndPos - moduleStartPos);
+    size_t harStartPos = moduleName.find('@');
+    if (harStartPos != std::string::npos) {
+        moduleName = moduleName.substr(0, harStartPos);
+    }
 
     auto appInfo = context_->GetApplicationInfo();
     if (appInfo) {

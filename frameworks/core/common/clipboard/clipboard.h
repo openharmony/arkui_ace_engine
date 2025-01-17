@@ -43,6 +43,8 @@ public:
     virtual void AddImageRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& uri) = 0;
     virtual void AddTextRecord(const RefPtr<PasteDataMix>& pasteData, const std::string& selectedStr) = 0;
     virtual void AddSpanStringRecord(const RefPtr<PasteDataMix>& pasteData, std::vector<uint8_t>& data) = 0;
+    virtual void AddMultiTypeRecord(
+        const RefPtr<PasteDataMix>& pasteData, const RefPtr<MultiTypeRecordMix>& multiTypeRecord) = 0;
     virtual void SetData(const RefPtr<PasteDataMix>& pasteData, CopyOptions copyOption = CopyOptions::Distributed) = 0;
     virtual void GetData(const std::function<void(const std::string&, bool isLastRecord)>& textCallback,
         const std::function<void(const RefPtr<PixelMap>&, bool isLastRecord)>& pixelMapCallback,
@@ -50,7 +52,8 @@ public:
     virtual RefPtr<PasteDataMix> CreatePasteDataMix() = 0;
     virtual void Clear() = 0;
     virtual void GetSpanStringData(
-        const std::function<void(std::vector<uint8_t>&, const std::string&)>& callback, bool syncMode = false) = 0;
+        const std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&)>& callback,
+        bool syncMode = false) = 0;
 
 protected:
     explicit Clipboard(const RefPtr<TaskExecutor>& taskExecutor) : taskExecutor_(taskExecutor) {}

@@ -68,6 +68,8 @@ public:
 
     virtual std::string GetGroupText(bool forceGetChildren = false) const;
 
+    virtual std::string GetGroupPreferAccessibilityText(bool forceGetChildren = false) const;
+
     virtual void SetText(const std::string& text)
     {
         propText_ = text;
@@ -518,6 +520,8 @@ public:
         childTreeId_ = childTreeId;
     }
 
+    void SetAccessibilityTextPreferred(bool accessibilityTextPreferred);
+
     void SetChildWindowId(int32_t childWindowId)
     {
         childWindowId_ = childWindowId;
@@ -545,6 +549,8 @@ public:
     {
         return childTreeId_;
     }
+
+    bool IsAccessibilityTextPreferred() const;
 
     int32_t GetChildWindowId() const
     {
@@ -643,6 +649,8 @@ public:
 
     static bool IsTagInModalDialog(const RefPtr<FrameNode>& node);
 
+    static bool HitAccessibilityHoverPriority(const RefPtr<FrameNode>& node);
+
     virtual void GetExtraElementInfo(Accessibility::ExtraElementInfo& extraElementInfo) {}
 
     void SetRelatedElementInfoCallback(const GetRelatedElementInfoImpl& getRelatedElementInfoImpl)
@@ -706,6 +714,9 @@ public:
     bool IsUserCheckable();
     void ResetUserCheckable();
 
+    virtual bool IsAccessibilityHoverPriority() const;
+    void SetAccessibilityHoverPriority(bool hoverPriority);
+
 private:
     // node should be not-null
     static bool HoverTestRecursive(
@@ -736,7 +747,7 @@ private:
     */
     static std::tuple<bool, bool, bool> GetSearchStrategy(const RefPtr<FrameNode>& node, bool& ancestorGroupFlag);
 
-    void GetGroupTextRecursive(bool forceGetChildren, std::string& text) const;
+    void GetGroupTextRecursive(bool forceGetChildren, std::string& text, bool preferAccessibilityText) const;
 
     bool HasAccessibilityTextOrDescription() const;
 
@@ -769,6 +780,8 @@ protected:
     OnAccessibilityFocusCallbackImpl onAccessibilityFocusCallbackImpl_;
     bool isAccessibilityFocused_ = false;
     bool accessibilityGroup_ = false;
+    bool accessibilityHoverPriority_ = false;
+    bool accessibilityTextPreferred_ = false;
     int32_t childTreeId_ = -1;
     int32_t childWindowId_ = 0;
     RefPtr<UINode> accessibilityVirtualNode_;

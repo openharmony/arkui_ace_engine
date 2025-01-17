@@ -15,12 +15,12 @@
 */
 
 /**
- * 
- * This file includes only framework internal classes and functions 
+ *
+ * This file includes only framework internal classes and functions
  * non are part of SDK. Do not access from app.
- * 
+ *
  * PUV2ViewBase is the common base class of ViewPU and ViewV2
- * 
+ *
  */
 
 /// <reference path="../../../../ark_theme/export/ark_theme_scope_manager.d.ts" />
@@ -44,7 +44,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   // or UINodeRegisterProxy.notRecordingDependencies if none is currently rendering
   // isRenderInProgress == true always when currentlyRenderedElmtIdStack_ length >= 0
   protected currentlyRenderedElmtIdStack_: Array<number> = new Array<number>();
-  
+
   // Set of elmtIds that need re-render
   protected dirtDescendantElementIds_: Set<number> = new Set<number>();
 
@@ -105,7 +105,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
   }
 
-  
+
   // globally unique id, this is different from compilerAssignedUniqueChildId!
   id__(): number {
     return this.id_;
@@ -121,7 +121,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   public scheduleDelayedUpdate(elmtId: number) : void {
     this.elmtIdsDelayedUpdate.add(elmtId);
   }
-    
+
   public get elmtIdsDelayedUpdate(): Set<number> {
     return this.elmtIdsDelayedUpdate_;
   }
@@ -192,6 +192,7 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
   public isDeleting(): boolean {
     return this.isDeleting_;
   }
+
   public setDeleting(): void {
     stateMgmtConsole.debug(`${this.debugInfo__()}: set as deleting (self)`);
     this.isDeleting_ = true;
@@ -217,11 +218,12 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
 
   public getChildViewV2ForElmtId(elmtId: number): ViewV2 | undefined {
     const optComp = this.childrenWeakrefMap_.get(elmtId);
-    return optComp?.deref() && (optComp.deref() instanceof ViewV2) ? optComp?.deref() as ViewV2 : undefined;
+    return optComp?.deref() && (optComp.deref() instanceof ViewV2) ?
+      optComp?.deref() as ViewV2 : undefined;
   }
 
   protected purgeVariableDependenciesOnElmtIdOwnFunc(elmtId: number): void {
-    // ViewPU overrides to unregister ViewPU from variables, 
+    // ViewPU overrides to unregister ViewPU from variables,
     // not in use in ViewV2
   }
 
@@ -278,7 +280,6 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
     stateMgmtConsole.warn(`Printing profiler information`);
     stateMgmtProfiler.report();
   }
-
 
   public updateStateVarsOfChildByElmtId(elmtId, params: Object): void {
     stateMgmtProfiler.begin('ViewPU/V2.updateStateVarsOfChildByElmtId');
@@ -338,7 +339,6 @@ abstract class PUV2ViewBase extends NativeViewPartialUpdate {
       stateMgmtProfiler.end();
       return;
     }
-    
     for (const child of this.childrenWeakrefMap_.values()) {
       const childView: IView | undefined = child.deref();
 

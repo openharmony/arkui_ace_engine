@@ -499,7 +499,7 @@ void ContainerModalElement::SetAppBgColor(const Color& color)
     renderContentBox->SetBackDecoration(backDecoration);
 }
 
-void ContainerModalElement::SetTitleButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+void ContainerModalElement::SetTitleButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     if (!titleBox_ || !floatingTitleBox_ || !containerModalComponent_) {
         LOGE("titleBox_  floatingTitleBox_ or containerModalComponent_ is null.");
@@ -515,7 +515,7 @@ void ContainerModalElement::SetTitleButtonHide(bool hideSplit, bool hideMaximize
         LOGE("floating row element is null.");
         return;
     }
-    containerModalComponent_->SetTitleButtonHide(hideSplit, hideMaximize, hideMinimize);
+    containerModalComponent_->SetTitleButtonHide(hideSplit, hideMaximize, hideMinimize, hideClose);
 
     auto titleChildrenRow = AceType::MakeRefPtr<RowComponent>(
         FlexAlign::FLEX_START, FlexAlign::CENTER, containerModalComponent_->BuildTitleChildren(false, windowFocus_));

@@ -448,9 +448,11 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSLetterSpacingSpan::JSBind(globalObj);
     JSGestureSpan::JSBind(globalObj);
     JSTextShadowSpan::JSBind(globalObj);
+    JSBackgroundColorSpan::JSBind(globalObj);
     JSImageAttachment::JSBind(globalObj);
     JSParagraphStyleSpan::JSBind(globalObj);
     JSLineHeightSpan::JSBind(globalObj);
+    JSUrlSpan::JSBind(globalObj);
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
@@ -631,6 +633,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSPatternLockController::JSBind(globalObj);
 #endif
     // add missing binds to ng build
+#ifndef CROSS_PLATFORM
     JSCalendarPicker::JSBind(globalObj);
     JSContextMenu::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED
@@ -640,14 +643,15 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSLocationButton::JSBind(globalObj);
     JSPasteButton::JSBind(globalObj);
     JSProfiler::JSBind(globalObj);
-    JSNodeContainer::JSBind(globalObj);
-    JSBaseNode::JSBind(globalObj);
     JSSaveButton::JSBind(globalObj);
     JSShareData::JSBind(globalObj);
 #ifdef WEB_SUPPORTED
     JSWeb::JSBind(globalObj);
     JSWebController::JSBind(globalObj);
 #endif
+#endif
+    JSNodeContainer::JSBind(globalObj);
+    JSBaseNode::JSBind(globalObj);
     JSContentSlot::JSBind(globalObj);
     JSNodeContent::JSBind(globalObj);
     JSGestureRecognizer::JSBind(globalObj);

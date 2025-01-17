@@ -55,6 +55,8 @@ public:
         controller_.emplace_back(controller);
     }
 
+    void removeController(const RefPtr<TextClockController>& controller);
+
     void SetInstanceId(int32_t id)
     {
         instanceId_ = id;

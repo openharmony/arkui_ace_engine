@@ -447,6 +447,7 @@ public:
     }
 
     virtual void NotifyConfigurationChange(bool, const ConfigurationChange& configurationChange = { false, false }) {}
+
     virtual void HotReload() {}
 
     void SetIsModule(bool isModule)
@@ -597,6 +598,8 @@ public:
     {
         return false;
     }
+
+    virtual ResourceConfiguration GetResourceConfiguration() const = 0;
 
 private:
     static bool IsIdAvailable(int32_t id);

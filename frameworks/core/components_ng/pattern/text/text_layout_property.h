@@ -56,7 +56,9 @@ public:
         ResetForegroundColor();
         ResetSymbolSourceInfo();
         ResetAdaptFontSizeStep();
+        ResetCursorColor();
         ResetSelectedBackgroundColor();
+        ResetTextColorFlagByUser();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -101,6 +103,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ForegroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AdaptFontSizeStep, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CursorColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextSelectableMode, TextSelectableMode, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsAnimationNeeded, bool, PROPERTY_UPDATE_NORMAL);
@@ -160,6 +163,8 @@ public:
         UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
     }
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextColorFlagByUser, bool, PROPERTY_UPDATE_NORMAL);
+
 protected:
     void Clone(RefPtr<LayoutProperty> property) const override
     {
@@ -170,6 +175,7 @@ protected:
         value->propContent_ = CloneContent();
         value->propForegroundColor_ = CloneForegroundColor();
         value->propAdaptFontSizeStep_ = CloneAdaptFontSizeStep();
+        value->propCursorColor_ = CloneCursorColor();
         value->propSelectedBackgroundColor_ = CloneSelectedBackgroundColor();
     }
 

@@ -132,6 +132,33 @@ void DialogPattern::OnAttachToFrameNode()
     };
     auto callbackId = pipelineContext->RegisterFoldDisplayModeChangedCallback(std::move(foldModeChangeCallback));
     UpdateFoldDisplayModeChangedCallbackId(callbackId);
+    RegisterHoverModeChangeCallback();
+}
+
+void DialogPattern::RegisterHoverModeChangeCallback()
+{
+    auto hoverModeChangeCallback = [weak = WeakClaim(this)](bool isHalfFoldHover) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        auto context = host->GetContext();
+        CHECK_NULL_VOID(context);
+        AnimationOption optionPosition;
+        auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.35f, 1.0f, 0.0f);
+        optionPosition.SetCurve(motion);
+        context->FlushUITasks();
+        context->Animate(optionPosition, motion, [host, context]() {
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            context->FlushUITasks();
+        });
+    };
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto hoverModeCallId = context->RegisterHalfFoldHoverChangedCallback(std::move(hoverModeChangeCallback));
+    UpdateHoverModeChangedCallbackId(hoverModeCallId);
 }
 
 void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -141,6 +168,9 @@ void DialogPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
     if (HasFoldDisplayModeChangedCallbackId()) {
         pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+    }
+    if (HasHoverModeChangedCallbackId()) {
+        pipeline->UnRegisterHalfFoldHoverChangedCallback(hoverModeChangedCallbackId_.value_or(-1));
     }
 }
 
@@ -1640,6 +1670,25 @@ void DialogPattern::InitHostWindowRect()
         auto rect = subwindow->GetUIExtensionHostWindowRect();
         hostWindowRect_ = RectF(rect.Left(), rect.Top(), rect.Width(), rect.Height());
     }
+}
+
+bool DialogPattern::IsShowInFreeMultiWindow()
+{
+    auto currentId = Container::CurrentId();
+    auto container = Container::Current();
+    if (!container) {
+        TAG_LOGW(AceLogTag::ACE_DIALOG, "container is null");
+        return false;
+    }
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(currentId);
+        container = AceEngine::Get().GetContainer(currentId);
+        if (!container) {
+            TAG_LOGW(AceLogTag::ACE_DIALOG, "parent container is null");
+            return false;
+        }
+    }
+    return container->IsFreeMultiWindow();
 }
 
 void DialogPattern::DumpSimplifyInfo(std::unique_ptr<JsonValue>& json)

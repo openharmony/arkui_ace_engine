@@ -76,6 +76,7 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation %{public}d down, state: %{public}d",
         event.touchEventId, event.id, refereeState_);
+    extraInfo_ = "";
     if (!firstInputTime_.has_value()) {
         firstInputTime_ = event.time;
     }
@@ -134,11 +135,13 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         event.touchEventId, event.id, refereeState_);
     if (static_cast<int32_t>(activeFingers_.size()) < DEFAULT_ROTATION_FINGERS &&
         refereeState_ != RefereeState::SUCCEED) {
+        extraInfo_ += "activeFinger size not satisify.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         activeFingers_.remove(event.id);
         return;
     }
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+        extraInfo_ += "refereeState is not satisify.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         activeFingers_.remove(event.id);
         return;
@@ -169,6 +172,7 @@ void RotationRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     if (!event.isRotationEvent) {
         return;
     }
+    UpdateTouchPointWithAxisEvent(event);
     lastAxisEvent_ = event;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -272,6 +276,7 @@ void RotationRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
     }
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, rotation %{public}d cancel", event.touchEventId, event.id);
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+        extraInfo_ += "receive cancel event.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
@@ -363,6 +368,7 @@ void RotationRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>
             info.SetPressedKeyCodes(touchPoint.pressedKeyCodes_);
         }
         info.SetPointerEvent(lastPointEvent_);
+        info.SetInputEventType(inputEventType_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
@@ -428,8 +434,19 @@ bool RotationRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recogn
     onActionUpdate_ = std::move(curr->onActionUpdate_);
     onActionEnd_ = std::move(curr->onActionEnd_);
     onActionCancel_ = std::move(curr->onActionCancel_);
-
+    ReconcileGestureInfoFrom(recognizer);
     return true;
+}
+
+RefPtr<GestureSnapshot> RotationRecognizer::Dump() const
+{
+    RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
+    std::stringstream oss;
+    oss << "angle: " << angle_ << ", "
+        << "fingers: " << fingers_ << ", "
+        << DumpGestureInfo();
+    info->customInfo = oss.str();
+    return info;
 }
 
 } // namespace OHOS::Ace::NG

@@ -110,14 +110,25 @@ public:
 
     bool NeedSoftKeyboard() override;
 
-    void SetOnWindowFocused(const std::function<void()>& callback) override
-    {
-        focusOnNodeCallback_ = callback;
-    }
+    void SetOnWindowFocused(const std::function<void()>& callback) override;
 
     const std::function<void()>& GetWindowFocusCallback() const
     {
         return focusOnNodeCallback_;
+    }
+
+    void SetSizeChangeByRotateCallback(const std::function<void(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)>& callback)
+    {
+        sizeChangeByRotateCallback_ = callback;
+    }
+
+    void FireSizeChangeByRotateCallback(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    {
+        if (sizeChangeByRotateCallback_) {
+            sizeChangeByRotateCallback_(isRotate, rsTransaction);
+        }
     }
 
     const RefPtr<FrameNode>& GetRootElement() const
@@ -136,7 +147,8 @@ public:
     // remove schedule task by id.
     void RemoveScheduleTask(uint32_t id) override;
 
-    void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) override;
+    void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false,
+        bool isEventsPassThrough = false) override;
 
     void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) override;
 
@@ -149,7 +161,7 @@ public:
     void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;
 
     // Called by view when touch event received.
-    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
+    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false, bool isEventsPassThrough = false) override;
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     // Used to determine whether the touched frameNode is the target
@@ -282,9 +294,10 @@ public:
 
     void AddPersistAfterLayoutTask(std::function<void()>&& task);
 
-    void AddLatestFrameLayoutFinishTask(std::function<void()>&& task);
-
     void AddAfterRenderTask(std::function<void()>&& task);
+
+    void AddSafeAreaPaddingProcessTask(FrameNode* node);
+    void RemoveSafeAreaPaddingProcessTask(FrameNode* node);
 
     void AddDragWindowVisibleTask(std::function<void()>&& task)
     {
@@ -296,6 +309,7 @@ public:
     void FlushFreezeNode();
     void FlushDirtyPropertyNodes();
     void FlushDirtyNodeUpdate();
+    void FlushSafeAreaPaddingProcess();
 
     void SetRootRect(double width, double height, double offset) override;
 
@@ -325,7 +339,20 @@ public:
     {
         return displayAvailableRect_;
     }
-    void SetEnableKeyBoardAvoidMode(bool value) override;
+
+    void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) override;
+
+    KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() override;
+
+    bool UsingCaretAvoidMode();
+
+    void OnCaretPositionChangeOrKeyboardHeightChange(float keyboardHeight, double positionY, double height,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, bool forceChange = false);
+    float CalcNewKeyboardOffset(float keyboardHeight, float positionYWithOffset,
+        float height, SizeF& rootSize);
+    float CalcAvoidOffset(float keyboardHeight, float positionYWithOffset,
+        float height, SizeF rootSize);
+
     bool IsEnableKeyBoardAvoidMode() override;
 
     void RequireSummary() override;
@@ -422,7 +449,8 @@ public:
         return isFocusActive_;
     }
 
-    bool SetIsFocusActive(bool isFocusActive);
+    bool SetIsFocusActive(bool isFocusActive,
+        FocusActiveReason reason = FocusActiveReason::KEYBOARD_EVENT, bool autoFocusInactive = true);
 
     void AddIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node, const std::function<void(bool)>& eventCallback);
     void RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& node);
@@ -445,8 +473,9 @@ public:
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void SetContainerWindow(bool isShow) override;
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void SetCloseButtonStatus(bool isEnabled);
+    void EnableContainerModalGesture(bool isEnable) override;
 
     void AddNodesToNotifyMemoryLevel(int32_t nodeId);
     void RemoveNodesToNotifyMemoryLevel(int32_t nodeId);
@@ -615,6 +644,7 @@ public:
     void AddAnimationClosure(std::function<void()>&& animation);
     void FlushAnimationClosure();
     void DumpJsInfo(const std::vector<std::string>& params) const;
+    void DumpUIExt() const override;
 
     bool DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap,
         bool skipSubAutoFillContainer = false, bool needsRecordData = false);
@@ -722,10 +752,7 @@ public:
         isWindowAnimation_ = true;
     }
 
-    void StopWindowAnimation() override
-    {
-        isWindowAnimation_ = false;
-    }
+    void StopWindowAnimation() override;
 
     void AddSyncGeometryNodeTask(std::function<void()>&& task) override;
     void FlushSyncGeometryNodeTasks() override;
@@ -924,6 +951,15 @@ public:
 
     void PostKeyboardAvoidTask();
 
+    bool GetContainerFloatingTitleVisible() override;
+
+    bool GetContainerCustomTitleVisible() override;
+
+    bool GetContainerControlButtonVisible() override;
+
+    std::string GetBundleName();
+    std::string GetModuleName();
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -1052,7 +1088,7 @@ private:
     // window on show or on hide
     std::set<int32_t> onWindowStateChangedCallbacks_;
     // window on focused or on unfocused
-    std::list<int32_t> onWindowFocusChangedCallbacks_;
+    std::set<int32_t> onWindowFocusChangedCallbacks_;
     // window on drag
     std::list<int32_t> onWindowSizeChangeCallbacks_;
 
@@ -1124,11 +1160,13 @@ private:
     WeakPtr<FrameNode> activeNode_;
     std::unique_ptr<MouseEvent> lastMouseEvent_;
     bool isWindowAnimation_ = false;
-    bool prevKeyboardAvoidMode_ = false;
+    KeyBoardAvoidMode prevKeyboardAvoidMode_ = KeyBoardAvoidMode::OFFSET;
     bool isFreezeFlushMessage_ = false;
 
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
+    std::function<void(bool isRotate,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)> sizeChangeByRotateCallback_;
     std::function<void()> dragWindowVisibleCallback_;
 
     std::optional<bool> needSoftKeyboard_;
@@ -1183,6 +1221,7 @@ private:
     CancelableCallback<void()> foldStatusDelayTask_;
     bool isFirstRootLayout_ = true;
     bool isFirstFlushMessages_ = true;
+    bool autoFocusInactive_ = true;
     std::unordered_set<UINode*> attachedNodeSet_;
 
     friend class ScopedLayout;

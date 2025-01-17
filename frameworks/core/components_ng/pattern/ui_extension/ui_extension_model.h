@@ -23,6 +23,7 @@
 #include "base/utils/macros.h"
 #include "base/want/want_wrap.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 
 namespace OHOS::AAFwk {
@@ -56,7 +57,7 @@ public:
     virtual ~UIExtensionModel() = default;
 
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
-        const RefPtr<NG::FrameNode>& placeholderNode = nullptr,
+        const std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap,
         bool transferringCaller = false, bool densityDpi = false);
     // for Embedded Component
     virtual void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, NG::SessionType sessionType);

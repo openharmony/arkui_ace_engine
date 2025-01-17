@@ -166,7 +166,13 @@ public:
 #endif
     };
 
-    enum class PatternType : int8_t { DEFAULT, VIDEO };
+    enum class PatternType : int8_t {
+        DEFAULT,
+        VIDEO,
+#ifdef PLATFORM_VIEW_SUPPORTED
+        PLATFORM_VIEW,
+#endif
+    };
     struct ContextParam {
         ContextType type;
         std::optional<std::string> surfaceName;
@@ -184,6 +190,7 @@ public:
     virtual void MarkNewFrameAvailable(void* nativeWindow) {}
     virtual void AddAttachCallBack(const std::function<void(int64_t, bool)>& attachCallback) {}
     virtual void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) {}
+    virtual void AddInitTypeCallBack(const std::function<void(int32_t&)>& initTypeCallback) {}
 
     virtual void StartRecording() {}
     virtual void StopRecordingIfNeeded() {}
@@ -290,6 +297,12 @@ public:
     virtual void ClipWithCircle(const Circle& circle) {}
     virtual void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) {}
     virtual void RemoveClipWithRRect() {}
+    virtual void UpdateWindowFocusState(bool isFocused) {}
+    /**
+     * @brief Only clip the content & foreground layer by @c rect.
+     * @param rect - offset of @c rect is relative to FrameRect.
+     */
+    virtual void SetContentClip(const std::variant<RectF, RefPtr<ShapeRect>>& rect) {}
 
     // visual
     virtual void UpdateVisualEffect(const OHOS::Rosen::VisualEffect* visualEffect) {}
@@ -636,6 +649,7 @@ public:
 
     // useEffect
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffect, bool);
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseEffectType, EffectType);
 
     // useShadowBatching
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(UseShadowBatching, bool);
@@ -693,12 +707,19 @@ public:
         isNeedAnimate_ = isNeedAnimate;
     }
 
+    virtual uint64_t GetNodeId() const
+    {
+        return 0;
+    }
+
     virtual bool IsDisappearing() const
     {
         return false;
     }
 
     virtual void SetRenderFit(RenderFit renderFit) {}
+
+    virtual void UpdateWindowBlur() {}
 
 protected:
     RenderContext() = default;
@@ -789,6 +810,8 @@ protected:
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}
     virtual void OnUseEffectUpdate(bool useEffect) {}
+    virtual void OnUseEffectTypeUpdate(EffectType effectType) {}
+    virtual bool GetStatusByEffectTypeAndWindow() { return false; }
     virtual void OnUseShadowBatchingUpdate(bool useShadowBatching) {}
     virtual void OnFreezeUpdate(bool isFreezed) {}
     virtual void OnObscuredUpdate(const std::vector<ObscuredReasons>& reasons) {}

@@ -39,6 +39,7 @@ public:
         value->propRowsGap_ = CloneRowsGap();
         value->propColumnsGap_ = CloneColumnsGap();
         value->propCachedCount_ = CloneCachedCount();
+        value->propShowCachedItems_ = CloneShowCachedItems();
         value->propGridDirection_ = CloneGridDirection();
         value->propMaxCount_ = CloneMaxCount();
         value->propMinCount_ = CloneMinCount();
@@ -56,6 +57,7 @@ public:
         ResetColumnsGap();
         ResetRowsGap();
         ResetCachedCount();
+        ResetShowCachedItems();
         ResetGridDirection();
         ResetMaxCount();
         ResetMinCount();
@@ -110,6 +112,7 @@ public:
     void OnRowsGapUpdate(const Dimension& /* rowsGap */) const;
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(CachedCount, int32_t);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowCachedItems, bool, PROPERTY_UPDATE_NORMAL);
     void OnCachedCountUpdate(int32_t /* cachedCount */) const {}
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(GridDirection, FlexDirection);

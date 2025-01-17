@@ -112,7 +112,8 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild, bool isCache = false,
         bool addToRenderTree = false) override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
-    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
 
     const std::list<RefPtr<UINode>>& GetChildren(bool notDetach = false) const override;
     void LoadChildren(bool notDetach) const;

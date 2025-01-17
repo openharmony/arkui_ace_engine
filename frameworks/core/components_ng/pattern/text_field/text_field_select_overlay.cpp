@@ -588,4 +588,13 @@ void TextFieldSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool i
         }
     }
 }
+
+std::optional<Color> TextFieldSelectOverlay::GetHandleColor()
+{
+    auto textFieldPattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, std::nullopt);
+    auto paintProperty = textFieldPattern->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, std::nullopt);
+    return paintProperty->GetCursorColor();
+}
 } // namespace OHOS::Ace::NG

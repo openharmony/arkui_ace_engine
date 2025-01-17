@@ -152,6 +152,7 @@ adapter/ohos/osal/socperf_client_impl.h @arkuiframework
 adapter/ohos/osal/stylus_detector_default.cpp @arkuievent
 adapter/ohos/osal/stylus_detector_loader.cpp @arkuievent
 adapter/ohos/osal/stylus_detector_mgr.cpp @arkuievent
+adapter/ohos/osal/stylus_detector_callback.cpp @huawei_g_five
 adapter/ohos/osal/system_bar_style_ohos.cpp @arkuievent
 adapter/ohos/osal/system_bar_style_ohos.h @arkuievent
 adapter/ohos/osal/system_properties.cpp @arkuiframework
@@ -1125,6 +1126,8 @@ frameworks/bridge/declarative_frontend/jsview/js_menu_item_group.h @arkuipopupwi
 frameworks/bridge/declarative_frontend/jsview/js_menu_item.h @arkuipopupwindow
 frameworks/bridge/declarative_frontend/jsview/js_navdestination_context.cpp @arkui_superman
 frameworks/bridge/declarative_frontend/jsview/js_navdestination_context.h @arkui_superman
+frameworks/bridge/declarative_frontend/jsview/js_navdestination_scrollable_processor.cpp @arkui_superman
+frameworks/bridge/declarative_frontend/jsview/js_navdestination_scrollable_processor.h @arkui_superman
 frameworks/bridge/declarative_frontend/jsview/js_navdestination.cpp @arkui_superman
 frameworks/bridge/declarative_frontend/jsview/js_navdestination.h @arkui_superman
 frameworks/bridge/declarative_frontend/jsview/js_navigation.cpp @arkui_superman
@@ -1797,7 +1800,10 @@ frameworks/core/common/router_recover_record.h @arkui_superman
 frameworks/core/common/settings.h @arkuiframework
 frameworks/core/common/sharedata/ @arkuiframework
 frameworks/core/common/storage/ @arkuistatemgmt
-frameworks/core/common/stylus/ @arkuievent
+frameworks/core/common/stylus/stylus_detector_default.h @arkuievent
+frameworks/core/common/stylus/stylus_detector_loader.h @arkuievent
+frameworks/core/common/stylus/stylus_detector_mgr.h @arkuievent
+frameworks/core/common/stylus/stylus_detector_callback.h @huawei_g_five
 frameworks/core/common/task_executor_impl.cpp @arkuiframework
 frameworks/core/common/task_executor_impl.h @arkuiframework
 frameworks/core/common/task_runner_adapter_factory.cpp @arkuiframework
@@ -1984,7 +1990,7 @@ frameworks/core/components/panel/ @arkui_superman
 frameworks/core/components_part_upd/foreach/ @arkuistatemgmt
 frameworks/core/components/picker/ @arkuipopupwindow
 frameworks/core/components/piece/ @arkui_image
-frameworks/core/components/plugin/ @arkuilayout
+frameworks/core/components/plugin/ @arkuiabilitygroup
 frameworks/core/components/popup/ @arkuipopupwindow
 frameworks/core/components/positioned/ @arkuilayout
 frameworks/core/components/progress/ @arkui_image
@@ -2943,7 +2949,7 @@ interfaces/napi/kits/utils/ @arkuiframework
 
 
 [Test source]
-test/mock/  @chenjiafeng-openharmony
+test/mock/  @zhoulianhai5
 test/mock/core/event/ @arkuievent
 test/mock/core/accessibility/ @arkuiabilitygroup
 test/mock/core/animation/ @arkuiframework
@@ -2951,7 +2957,7 @@ test/mock/core/image_provider/ @arkui_image
 test/mock/core/svg/ @arkui_image
 test/mock/interfaces/ @arkui_architecture
 
-test/unittest/ @chenjiafeng-openharmony
+test/unittest/ @zhoulianhai5
 test/unittest/core/accessibility/ @arkuiabilitygroup
 test/unittest/core/animation/ @arkuiframework
 test/unittest/core/common/ace_engine/ @arkuiframework
@@ -3070,7 +3076,7 @@ test/unittest/core/pattern/waterflow/ @arkuiscroll
 test/unittest/core/pattern/web/ @arkwebinarkuireview
 test/unittest/core/pattern/xcomponent/ @arkuilayout
 test/unittest/core/pipeline/ @arkuiframework
-test/unittest/core/property/ @chenjiafeng-openharmony
+test/unittest/core/property/ @zhoulianhai5
 test/unittest/core/render/ @arkuiframework
 test/unittest/core/rosen/ @arkuiframework 
 test/unittest/core/svg/ @arkui_image

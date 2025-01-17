@@ -49,6 +49,8 @@ void StaticImageObject::MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, 
 
 RefPtr<ImageObject> StaticImageObject::Clone()
 {
-    return MakeRefPtr<StaticImageObject>(src_, imageSize_, data_);
+    auto object = MakeRefPtr<StaticImageObject>(src_, imageSize_, data_);
+    object->SetOrientation(orientation_);
+    return object;
 }
 } // namespace OHOS::Ace::NG

@@ -94,7 +94,7 @@ void ParseBarOptions(const JSRef<JSVal>& obj, NG::NavigationBarOptions& options)
     if (barStyleProperty->IsNumber()) {
         auto barStyle = barStyleProperty->ToNumber<int32_t>();
         if (barStyle >= static_cast<int32_t>(NG::BarStyle::STANDARD) &&
-            barStyle <= static_cast<int32_t>(NG::BarStyle::STACK)) {
+            barStyle <= static_cast<int32_t>(NG::BarStyle::SAFE_AREA_PADDING)) {
             options.barStyle = static_cast<NG::BarStyle>(barStyle);
         } else {
             options.barStyle = NG::BarStyle::STANDARD;
@@ -220,6 +220,7 @@ void JSNavigationUtils::ParseToolbarOptions(const JSCallbackInfo& info, NG::Navi
     }
     if (info.Length() > 1) {
         ParseBackgroundOptions(info[1], options.bgOptions);
+        ParseBarOptions(info[1], options.brOptions);
     }
 }
 

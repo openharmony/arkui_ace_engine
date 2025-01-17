@@ -20,6 +20,8 @@
 #include "core/components_ng/pattern/text/text_select_overlay.h"
 
 namespace OHOS::Ace::NG {
+
+enum class DragHandleIndex { NONE, FIRST, SECOND };
 class RichEditorSelectOverlay : public TextSelectOverlay {
     DECLARE_ACE_TYPE(RichEditorSelectOverlay, TextSelectOverlay);
 
@@ -82,11 +84,13 @@ private:
     void UpdateSelectorOnHandleMove(const OffsetF& handleOffset, bool isFirstHandle) override;
     void CheckMenuParamChange(SelectOverlayInfo& selectInfo, TextSpanType selectType, TextResponseType responseType);
     void SwitchCaretState();
+    void ResumeTwinkling();
     std::shared_ptr<SelectionMenuParams> lastMenuParams_ = nullptr;
     std::pair<TextSpanType, TextResponseType> lastSelectResponseComb_;
     bool needRefreshMenu_ = false;
     bool handleIsHidden_ = true;
     std::pair<int32_t, int32_t> initSelector_ = { 0, 0 };
+    DragHandleIndex dragHandleIndex_ = DragHandleIndex::NONE;
 
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorSelectOverlay);
 };

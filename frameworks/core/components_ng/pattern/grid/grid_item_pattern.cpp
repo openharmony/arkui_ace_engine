@@ -326,4 +326,22 @@ void GridItemPattern::DumpAdvanceInfo()
         }
     }
 }
+
+void GridItemPattern::UpdateGridItemStyle(GridItemStyle gridItemStyle)
+{
+    gridItemStyle_ = gridItemStyle;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<GridItemTheme>();
+    CHECK_NULL_VOID(theme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (gridItemStyle_ == GridItemStyle::PLAIN) {
+        renderContext->UpdateBorderRadius(theme->GetGridItemBorderRadius());
+    } else if (gridItemStyle_ == GridItemStyle::NONE) {
+        renderContext->UpdateBorderRadius(BorderRadiusProperty());
+    }
+}
 } // namespace OHOS::Ace::NG

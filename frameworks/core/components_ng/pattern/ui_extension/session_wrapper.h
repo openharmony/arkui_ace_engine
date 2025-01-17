@@ -114,6 +114,7 @@ public:
     // The interface for responsing provider
     virtual void OnConnect() = 0;
     virtual void OnDisconnect(bool isAbnormal) = 0;
+    virtual void OnReleaseDone() {}
     virtual void OnExtensionTimeout(int32_t errorCode) = 0;
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) = 0;
 
@@ -138,6 +139,9 @@ public:
     // The interface to send the data for ArkTS
     virtual void SendDataAsync(const AAFwk::WantParams& params) const = 0;
     virtual int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const = 0;
+    // The interface for UEC dump
+    virtual uint32_t GetReasonDump() const = 0;
+    virtual void NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info) = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_H

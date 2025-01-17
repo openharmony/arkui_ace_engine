@@ -453,7 +453,12 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg002, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -467,7 +472,8 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg002, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -716,7 +722,12 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg004, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -730,7 +741,8 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg004, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);
@@ -748,7 +760,12 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg005, TestSize.Level1)
     /**
      * @tc.steps: step1. prepare paintMethod, paintProp, canvas.
      */
-    RefPtr<OptionPaintProperty> paintProp = AceType::MakeRefPtr<OptionPaintProperty>();
+    auto optionNode = FrameNode::CreateFrameNode(V2::OPTION_ETS_TAG, 0, AceType::MakeRefPtr<OptionPattern>(0));
+    ASSERT_NE(optionNode, nullptr);
+    auto renderContext = optionNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto paintProp = optionNode->GetPaintProperty<OptionPaintProperty>();
+    ASSERT_NE(paintProp, nullptr);
     RefPtr<OptionPaintMethod> paintMethod = AceType::MakeRefPtr<OptionPaintMethod>();
     paintProp->UpdatePress(false);
     paintProp->UpdateHover(false);
@@ -769,7 +786,8 @@ HWTEST_F(OptionTestNg, OptionPaintMethodTestNg005, TestSize.Level1)
      * @tc.steps: step2. Execute GetOverlayDrawFunction.
      * @tc.expected:  return value are as expected.
      */
-    PaintWrapper* paintWrapper = GetPaintWrapper(paintProp);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    PaintWrapper* paintWrapper = new PaintWrapper(renderContext, geometryNode, paintProp);
     paintMethod->PaintDivider(canvas, paintWrapper);
     auto result = paintMethod->GetOverlayDrawFunction(paintWrapper);
     EXPECT_NE(result, nullptr);

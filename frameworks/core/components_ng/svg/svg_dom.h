@@ -28,6 +28,7 @@
 #include "core/components_ng/svg/parse/svg_node.h"
 #include "core/components_ng/svg/parse/svg_style.h"
 #include "core/components_ng/svg/svg_context.h"
+#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 class SvgDom : public SvgDomBase {

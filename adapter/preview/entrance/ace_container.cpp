@@ -1066,14 +1066,14 @@ RefPtr<AceContainer> AceContainer::GetContainerInstance(int32_t instanceId)
     return container;
 }
 
-std::string AceContainer::GetContentInfo(int32_t instanceId)
+std::string AceContainer::GetContentInfo(int32_t instanceId, ContentInfoType type)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, "");
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, "");
-    return front->GetContentInfo();
+    return front->GetContentInfo(type);
 }
 
 void AceContainer::LoadDocument(const std::string& url, const std::string& componentName)

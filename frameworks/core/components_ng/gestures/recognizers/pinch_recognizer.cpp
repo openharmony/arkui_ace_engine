@@ -88,6 +88,7 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch %{public}d down, begin to detect pinch,"
         "state: %{public}d", event.touchEventId, event.id, refereeState_);
+    extraInfo_ = "";
     if (touchPoints_.size() == 1 && refereeState_ == RefereeState::FAIL) {
         refereeState_ = RefereeState::READY;
     }
@@ -154,7 +155,9 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, pinch %{public}d up, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
+    extraInfo_ = "activeSize: " + std::to_string(static_cast<int32_t>(activeFingers_.size()));
     if (static_cast<int32_t>(activeFingers_.size()) < fingers_ && refereeState_ != RefereeState::SUCCEED) {
+        extraInfo_ += "activeFinger size not satisify.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         activeFingers_.remove(event.id);
         return;
@@ -162,6 +165,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 
     lastTouchEvent_ = event;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
+        extraInfo_ += "refereeState not satisfy.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         activeFingers_.remove(event.id);
         return;
@@ -191,6 +195,7 @@ void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)
     if (isPinchEnd_ || event.isRotationEvent) {
         return;
     }
+    UpdateTouchPointWithAxisEvent(event);
     lastAxisEvent_ = event;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -425,6 +430,7 @@ void PinchRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& c
             info.SetPressedKeyCodes(lastTouchEvent_.pressedKeyCodes_);
         }
         info.SetPointerEvent(lastPointEvent_);
+        info.SetInputEventType(inputEventType_);
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
         callbackFunction(info);
@@ -486,8 +492,19 @@ bool PinchRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognize
     onActionUpdate_ = std::move(curr->onActionUpdate_);
     onActionEnd_ = std::move(curr->onActionEnd_);
     onActionCancel_ = std::move(curr->onActionCancel_);
-
+    ReconcileGestureInfoFrom(recognizer);
     return true;
+}
+
+RefPtr<GestureSnapshot> PinchRecognizer::Dump() const
+{
+    RefPtr<GestureSnapshot> info = NGGestureRecognizer::Dump();
+    std::stringstream oss;
+    oss << "distance: " << distance_ << ", "
+        << "fingers: " << fingers_ << ", "
+        << DumpGestureInfo();
+    info->customInfo = oss.str();
+    return info;
 }
 
 } // namespace OHOS::Ace::NG

@@ -52,6 +52,7 @@ constexpr float TITLE_FRAME_WIDTH = 60.0f;
 constexpr float TITLE_FRAME_HEIGHT = 30.0f;
 constexpr float SUBTITLE_FRAME_WIDTH = 60.0f;
 constexpr float SUBTITLE_FRAME_HEIGHT = 20.0f;
+const CalcDimension DEFAULT_PADDING = 24.0_vp;
 
 struct UIComponents {
     RefPtr<LayoutWrapperNode> layoutWrapper = nullptr;
@@ -722,5 +723,309 @@ HWTEST_F(NavdestinationTestNg, TitleBarLayoutAlgorithmGetFullModeTitleOffsetYTes
     float offsetY = 0.0f;
     EXPECT_EQ(ui.titleBarLayoutAlgorithm->GetFullModeTitleOffsetY(
         titleHeight, subtitleHeight, titleBarGeometryNode), offsetY);
+}
+
+/**
+ * @tc.name: SetTitlebarOptions001
+ * @tc.desc: Test SetTitlebarOptions function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetTitlebarOptions001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    navDestinationModelNG.SetTitle("navDestinationModel", true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+
+    NavigationTitlebarOptions opt;
+    opt.bgOptions.color = std::make_optional(Color(0xff0000ff));
+    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::NO_MATERIAL);
+    opt.brOptions.barStyle = std::make_optional(BarStyle::STACK);
+    opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
+    opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
+
+    navDestinationModelNG.SetTitlebarOptions(std::move(opt));
+
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    auto options = titleBarPattern->GetTitleBarOptions();
+    EXPECT_TRUE(options.bgOptions.color.has_value());
+    EXPECT_EQ(options.bgOptions.color.value(), Color(0xff0000ff));
+
+    EXPECT_TRUE(options.bgOptions.blurStyle.has_value());
+    EXPECT_EQ(options.bgOptions.blurStyle.value(), BlurStyle::NO_MATERIAL);
+
+    EXPECT_TRUE(options.brOptions.barStyle.has_value());
+    EXPECT_EQ(options.brOptions.barStyle.value(), BarStyle::STACK);
+
+    EXPECT_TRUE(options.brOptions.paddingStart.has_value());
+    EXPECT_EQ(options.brOptions.paddingStart.value(), DEFAULT_PADDING);
+    
+    EXPECT_TRUE(options.brOptions.paddingEnd.has_value());
+    EXPECT_EQ(options.brOptions.paddingEnd.value(), DEFAULT_PADDING);
+}
+
+/**
+ * @tc.name: SetTitlebarOptions002
+ * @tc.desc: Test SetTitlebarOptions function with specific node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetTitlebarOptions002, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    navDestinationModelNG.SetTitle("navDestinationModel", true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationGroupNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+
+    NavigationTitlebarOptions opt;
+    opt.bgOptions.color = std::make_optional(Color(0xff00ff00));
+    opt.bgOptions.blurStyle = std::make_optional(BlurStyle::REGULAR);
+    opt.brOptions.barStyle = std::make_optional(BarStyle::STANDARD);
+    opt.brOptions.paddingStart = std::make_optional(DEFAULT_PADDING);
+    opt.brOptions.paddingEnd = std::make_optional(DEFAULT_PADDING);
+    
+    NavDestinationModelNG::SetTitlebarOptions(&(*frameNode), std::move(opt));
+
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    EXPECT_NE(titleBarPattern, nullptr);
+
+    auto options = titleBarPattern->GetTitleBarOptions();
+    EXPECT_TRUE(options.bgOptions.color.has_value());
+    EXPECT_EQ(options.bgOptions.color.value(), Color(0xff00ff00));
+
+    EXPECT_TRUE(options.bgOptions.blurStyle.has_value());
+    EXPECT_EQ(options.bgOptions.blurStyle.value(), BlurStyle::REGULAR);
+
+    EXPECT_TRUE(options.brOptions.barStyle.has_value());
+    EXPECT_EQ(options.brOptions.barStyle.value(), BarStyle::STANDARD);
+
+    EXPECT_TRUE(options.brOptions.paddingStart.has_value());
+    EXPECT_EQ(options.brOptions.paddingStart.value(), DEFAULT_PADDING);
+
+    EXPECT_TRUE(options.brOptions.paddingEnd.has_value());
+    EXPECT_EQ(options.brOptions.paddingEnd.value(), DEFAULT_PADDING);
+}
+
+/**
+ * @tc.name: SetSystemTransitionType001
+ * @tc.desc: Test SetTitlebarOptions function with specific node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, SetSystemTransitionType001, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationGroupNode, nullptr);
+    navDestinationModelNG.SetSystemTransitionType(NavigationSystemTransitionType::DEFAULT);
+    EXPECT_EQ(navDestinationGroupNode->GetSystemTransitionType(), NavigationSystemTransitionType::DEFAULT);
+
+    navDestinationModelNG.SetSystemTransitionType(NavigationSystemTransitionType::CONTENT);
+    EXPECT_EQ(navDestinationGroupNode->GetSystemTransitionType(), NavigationSystemTransitionType::CONTENT);
+}
+
+/**
+ * @tc.name: GetSwipeContext001
+ * @tc.desc: Test GetSwipeContext function of NavDestinationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, GetSwipeContext001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetSwipeContext with parameter true.
+     * @tc.expected: All fields of TitleContext has default value.
+     */
+    auto& titleContext = pattern->GetSwipeContext(true);
+    auto* titleContextPtr = &titleContext;
+    ASSERT_EQ(titleContextPtr, &pattern->titleBarSwipeContext_);
+    EXPECT_FALSE(titleContext.isBarShowing);
+    EXPECT_FALSE(titleContext.isBarHiding);
+    EXPECT_FALSE(titleContext.showBarTask);
+
+    /**
+     * @tc.steps: step3. call GetSwipeContext with parameter false.
+     * @tc.expected: All fields of ToolContext has default value.
+     */
+    auto& toolContext = pattern->GetSwipeContext(false);
+    auto* toolContextPtr = &toolContext;
+    ASSERT_EQ(toolContextPtr, &pattern->toolBarSwipeContext_);
+    EXPECT_FALSE(toolContext.isBarShowing);
+    EXPECT_FALSE(toolContext.isBarHiding);
+    EXPECT_FALSE(toolContext.showBarTask);
+}
+
+/**
+ * @tc.name: GetBarNode001
+ * @tc.desc: Test GetBarNode function of NavDestinationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, GetBarNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto nodeBase = AceType::WeakClaim(node).Upgrade();
+    ASSERT_NE(nodeBase, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Call GetBarNode with parameter nullptr.
+     * @tc.expected: failed to get BarNode.
+     */
+    auto barNode = pattern->GetBarNode(nullptr, true);
+    ASSERT_EQ(barNode, nullptr);
+    barNode = pattern->GetBarNode(nullptr, false);
+    ASSERT_EQ(barNode, nullptr);
+
+    /**
+     * @tc.steps: step3. Call GetBarNode with node.
+     * @tc.expected: success to get titleBarNode.
+     */
+    barNode = pattern->GetBarNode(nodeBase, true);
+    auto titleBarNode = AceType::DynamicCast<FrameNode>(node->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    ASSERT_EQ(barNode, titleBarNode);
+
+    /**
+     * @tc.steps: step4. Call GetBarNode with node.
+     * @tc.expected: success to get toolBarNode.
+     */
+    barNode = pattern->GetBarNode(nodeBase, false);
+    auto toolBarNode = AceType::DynamicCast<FrameNode>(node->GetToolBarNode());
+    ASSERT_NE(toolBarNode, nullptr);
+    ASSERT_EQ(barNode, toolBarNode);
+}
+
+/**
+ * @tc.name: EnableTitleBarSwipe001
+ * @tc.desc: Test EnableTitleBarSwipe function of NavDestinationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, EnableTitleBarSwipe001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto nodeBase = AceType::WeakClaim(node).Upgrade();
+    ASSERT_NE(nodeBase, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto property = node->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+
+    /**
+     * @tc.steps: step2. Call EnableTitleBarSwipe with parameter nullptr.
+     * @tc.expected: disable titleBarSwipe.
+     */
+    bool enable = pattern->EnableTitleBarSwipe(nullptr);
+    ASSERT_FALSE(enable);
+
+    /**
+     * @tc.steps: step3. Hide titlebar.
+     * @tc.expected: disable titleBarSwipe.
+     */
+    property->UpdateHideTitleBar(true);
+    enable = pattern->EnableTitleBarSwipe(nodeBase);
+    ASSERT_FALSE(enable);
+
+    /**
+     * @tc.steps: step4. Show titlebar.
+     * @tc.expected: enable titleBarSwipe.
+     */
+    property->UpdateHideTitleBar(false);
+    enable = pattern->EnableTitleBarSwipe(nodeBase);
+    ASSERT_TRUE(enable);
+}
+
+/**
+ * @tc.name: EnableToolBarSwipe001
+ * @tc.desc: Test EnableToolBarSwipe function of NavDestinationPattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, EnableToolBarSwipe001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create NavDestinationGroupNode & NavDestinationPattern.
+     * @tc.expected: Success to create node & pattern.
+     */
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    navDestinationModelNG.Create();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(node, nullptr);
+    auto nodeBase = AceType::WeakClaim(node).Upgrade();
+    ASSERT_NE(nodeBase, nullptr);
+    auto pattern = node->GetPattern<NavDestinationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto property = node->GetLayoutProperty<NavDestinationLayoutProperty>();
+    ASSERT_NE(property, nullptr);
+
+    /**
+     * @tc.steps: step2. Call EnableToolBarSwipe with parameter nullptr.
+     * @tc.expected: disable toolBarSwipe.
+     */
+    bool enable = pattern->EnableToolBarSwipe(nullptr);
+    ASSERT_FALSE(enable);
+
+    /**
+     * @tc.steps: step3. Hide toolbar.
+     * @tc.expected: disable toolBarSwipe.
+     */
+    property->UpdateHideToolBar(true);
+    enable = pattern->EnableToolBarSwipe(nodeBase);
+    ASSERT_FALSE(enable);
+
+    /**
+     * @tc.steps: step4. Show toolbar.
+     * @tc.expected: enable toolBarSwipe.
+     */
+    property->UpdateHideToolBar(false);
+    enable = pattern->EnableToolBarSwipe(nodeBase);
+    ASSERT_TRUE(enable);
 }
 } // namespace OHOS::Ace::NG

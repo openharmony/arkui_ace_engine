@@ -64,7 +64,12 @@ public:
         return OnGetTotalCount();
     }
 
-    int32_t GetTotalCountOfOriginalDataset(const std::list<V2::Operation>& DataOperations);
+    void UpdateHistoricalTotalCount(int32_t count)
+    {
+        historicalTotalCount_ = count;
+    }
+
+    int32_t GetTotalCountOfOriginalDataset();
 
     std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild, bool isCache = false);
 
@@ -91,7 +96,8 @@ public:
 
     bool OnDataMoved(size_t from, size_t to);
 
-    std::pair<int32_t, std::list<RefPtr<UINode>>> OnDatasetChange(std::list<V2::Operation> DataOperations);
+    std::pair<int32_t, std::list<std::pair<std::string, RefPtr<UINode>>>> OnDatasetChange(
+        std::list<V2::Operation> DataOperations);
 
     void RepairDatasetItems(std::map<int32_t, LazyForEachChild>& cachedTemp,
         std::map<int32_t, LazyForEachChild>& expiringTempItem_, std::map<int32_t, int32_t>& indexChangedMap);
@@ -213,9 +219,11 @@ public:
             if (frameNode) {
                 frameNode->SetActive(false);
             }
+            auto tempNode = node.second;
             auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
             if (!pair.second) {
                 TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+                ProcessOffscreenNode(tempNode, true);
             }
         }
     }
@@ -224,6 +232,7 @@ public:
     {
         ACE_SYNTAX_SCOPED_TRACE("LazyForEach active range start[%d], end[%d]", start, end);
         int32_t count = GetTotalCount();
+        UpdateHistoricalTotalCount(count);
         bool needBuild = false;
         for (auto& [index, node] : cachedItems_) {
             if ((index < count) && ((start <= end && start <= index && end >= index) ||
@@ -254,9 +263,11 @@ public:
             if (frameNode) {
                 frameNode->SetActive(false);
             }
+            auto tempNode = node.second;
             auto pair = expiringItem_.try_emplace(node.first, LazyForEachCacheChild(index, std::move(node.second)));
             if (!pair.second) {
                 TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+                ProcessOffscreenNode(tempNode, true);
             }
             needBuild = true;
         }
@@ -305,7 +316,7 @@ public:
         ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
         auto itemInfo = OnGetChildByIndex(ConvertFormToIndex(index), expiringItem_);
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
-        cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
+        auto pair = cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
         auto context = itemInfo.second->GetContext();
         CHECK_NULL_RETURN(context, itemInfo.second);
         auto frameNode = AceType::DynamicCast<FrameNode>(itemInfo.second->GetFrameChildByIndex(0, false, true));
@@ -315,7 +326,11 @@ public:
             context->ResetPredictNode();
             return itemInfo.second;
         }
-        ProcessOffscreenNode(itemInfo.second, false);
+        if (pair.second) {
+            ProcessOffscreenNode(itemInfo.second, false);
+        } else {
+            TAG_LOGW(AceLogTag::ACE_LAZY_FOREACH, "Use repeat key for index: %{public}d", index);
+        }
         itemInfo.second->Build(nullptr);
         context->ResetPredictNode();
         itemInfo.second->SetJSViewActive(false, true);
@@ -326,7 +341,7 @@ public:
 
     void CheckCacheIndex(std::set<int32_t>& idleIndexes, int32_t count)
     {
-        for (int32_t i = 1; i <= cacheCount_; i++) {
+        for (int32_t i = 1; i <= cacheCount_ - endShowCached_; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && endIndex_ + i < count) ||
                     startIndex_ > endIndex_ + i) {
@@ -340,7 +355,7 @@ public:
                 }
             }
         }
-        for (int32_t i = 1; i <= cacheCount_; i++) {
+        for (int32_t i = 1; i <= cacheCount_ - startShowCached_; i++) {
             if (isLoop_) {
                 if ((startIndex_ <= endIndex_ && startIndex_ >= i) ||
                     startIndex_ > endIndex_ + i) {
@@ -549,6 +564,9 @@ public:
             node.second.second->SetJSViewActive(active, true);
         }
         for (const auto& node : expiringItem_) {
+            if (node.second.second == nullptr) {
+                continue;
+            }
             node.second.second->SetJSViewActive(active, true);
         }
     }
@@ -575,6 +593,13 @@ public:
     }
 
     void GetAllItems(std::vector<UINode*>& items);
+
+    void SetShowCached(int32_t start, int32_t end)
+    {
+        startShowCached_ = start;
+        endShowCached_ = end;
+    }
+
 protected:
     virtual int32_t OnGetTotalCount() = 0;
 
@@ -624,8 +649,11 @@ private:
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
     int32_t cacheCount_ = 0;
+    int32_t startShowCached_ = 0;
+    int32_t endShowCached_ = 0;
     int32_t preBuildingIndex_ = -1;
     int32_t totalCountOfOriginalDataset_ = 0;
+    int32_t historicalTotalCount_ = 0;
     bool needTransition = false;
     bool isLoop_ = false;
     bool useNewInterface_ = false;

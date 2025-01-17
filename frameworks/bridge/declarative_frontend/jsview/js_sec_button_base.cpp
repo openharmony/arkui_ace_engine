@@ -238,7 +238,7 @@ void JSSecButtonBase::SetTextIconSpace(const JSCallbackInfo& info)
     CHECK_NULL_VOID(theme);
 
     CalcDimension length;
-    if (!ParseJsDimensionVp(info[0], length)) {
+    if (!ParseJsDimensionVp(info[0], length) || LessNotEqual(length.ConvertToPx(), 0.0)) {
         SecurityComponentModelNG::SetTextIconSpace(theme->GetTextIconSpace());
     } else {
         SecurityComponentModelNG::SetTextIconSpace(length);

@@ -39,6 +39,26 @@ enum class ButtonType {
     CUSTOM,
 };
 
+enum class RectWidthStyle {
+    TIGHT,
+    MAX,
+};
+
+enum class RectHeightStyle {
+    TIGHT,
+    MAX,
+    INCLUDE_LINE_SPACE_MIDDLE,
+    INCLUDE_LINE_SPACE_TOP,
+    INCLUDE_LINE_SPACE_BOTTOM,
+    STRUT,
+};
+
+// Type of hover mode area.
+enum class HoverModeAreaType {
+    TOP_SCREEN = 0,
+    BOTTOM_SCREEN = 1,
+};
+
 enum class ButtonStyleMode { NORMAL, EMPHASIZE, TEXT };
 
 enum class ControlSize { SMALL, NORMAL };
@@ -339,6 +359,14 @@ enum class AIImageQuality {
     HIGH,
 };
 
+enum class ImageRotateOrientation {
+    AUTO = 0,
+    UP = 1,
+    RIGHT = 2,
+    DOWN = 3,
+    LEFT = 4,
+};
+
 enum class ImageRenderMode {
     ORIGINAL = 0,
     TEMPLATE,
@@ -597,6 +625,10 @@ enum class SwiperDynamicSyncSceneType {
     ANIMATE,
 };
 
+enum class MarqueeDynamicSyncSceneType {
+    ANIMATE = 1,
+};
+
 namespace StringUtils {
 inline std::string ToString(const VerticalAlign& verticalAlign)
 {
@@ -814,7 +846,10 @@ enum class RenderFit : int32_t {
 
 enum class KeyBoardAvoidMode : int32_t {
     OFFSET = 0,
-    RESIZE,
+    RESIZE = 1,
+    OFFSET_WITH_CARET = 2,
+    RESIZE_WITH_CARET = 3,
+    NONE = 4,
 };
 
 enum class SwipeActionState : uint32_t {
@@ -850,6 +885,12 @@ enum class NodeRenderType : uint32_t {
 enum class MarqueeUpdateStrategy : uint32_t {
     DEFAULT = 0,
     PRESERVE_POSITION,
+};
+
+enum class EdgeType {
+    MARGIN,
+    PADDING,
+    SAFE_AREA_PADDING,
 };
 
 enum class SafeAreaSyncType : uint32_t {

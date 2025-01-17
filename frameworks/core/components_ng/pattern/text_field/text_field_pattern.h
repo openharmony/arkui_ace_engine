@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/pattern/text/multiple_click_recognizer.h"
 #include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_menu_extension.h"
@@ -198,7 +199,8 @@ class TextFieldPattern : public ScrollablePattern,
                          public TextInputClient,
                          public TextBase,
                          public Magnifier,
-                         public TextGestureSelector {
+                         public TextGestureSelector,
+                         public LayoutInfoInterface {
     DECLARE_ACE_TYPE(TextFieldPattern, ScrollablePattern, TextDragBase, ValueChangeObserver, TextInputClient, TextBase,
         Magnifier, TextGestureSelector);
 
@@ -335,6 +337,16 @@ public:
         return textFieldController_;
     }
 
+    void SetJSTextEditableController(const RefPtr<Referenced>& jsController)
+    {
+        jsTextEditableController_ = jsController;
+    }
+
+    RefPtr<Referenced> GetJSTextEditableController()
+    {
+        return jsTextEditableController_.Upgrade();
+    }
+
     void SetTextEditController(const RefPtr<TextEditController>& textEditController)
     {
         textEditingController_ = textEditController;
@@ -349,6 +361,9 @@ public:
     const TextEditingValue& GetInputEditingValue() const override
     {
         static TextEditingValue value;
+        value.text = contentController_->GetTextValue();
+        value.hint = GetPlaceHolder();
+        value.selection.Update(selectController_->GetStartIndex(), selectController_->GetEndIndex());
         return value;
     };
     Offset GetGlobalOffset() const;
@@ -386,6 +401,7 @@ public:
     }
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
+    void UpdateInputFilterErrorText(const std::string& errorText) override;
 
     void OnValueChanged(bool needFireChangeEvent = true, bool needFireSelectChangeEvent = true) override;
 
@@ -855,12 +871,15 @@ public:
     int32_t GetNakedCharPosition() const;
     void SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd,
         const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false);
+    void SetSelection(int32_t start, int32_t end,
+        const std::optional<SelectionOptions>& options = std::nullopt, bool isForward = false) override;
     void HandleBlurEvent();
     void HandleFocusEvent();
     void ProcessFocusStyle();
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
+    bool CheckMousePressedOverScrollBar(GestureEvent& info);
     int32_t CheckClickLocation(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleTripleClickEvent(GestureEvent& info);
@@ -907,7 +926,7 @@ public:
     std::string GetCancelImageText();
     std::string GetPasswordIconPromptInformation(bool show);
     bool OnKeyEvent(const KeyEvent& event);
-    int32_t GetLineCount() const;
+    size_t GetLineCount() const override;
     TextInputType GetKeyboard()
     {
         return keyboard_;
@@ -1362,6 +1381,10 @@ public:
 
     int32_t CheckPreviewTextValidate(const std::string& previewValue, const PreviewRange range) override;
 
+    void ScrollPage(bool reverse, bool smooth = false,
+        AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
+    void InitScrollBarClickEvent() override {}
+
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override
     {
         selectOverlay_->OnAncestorNodeChanged(flag);
@@ -1387,6 +1410,14 @@ public:
         parentGlobalOffset_ = GetPaintRectGlobalOffset();
     }
 
+    PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
+
+    bool InsertOrDeleteSpace(int32_t index) override;
+
+    void DeleteRange(int32_t start, int32_t end) override;
+
+    bool SetCaretOffset(int32_t caretPostion) override;
+
     const RefPtr<MultipleClickRecognizer>& GetMultipleClickRecognizer() const
     {
         return multipleClickRecognizer_;
@@ -1399,6 +1430,10 @@ public:
 
     void ShowCaretAndStopTwinkling();
 
+    void TriggerAvoidOnCaretChange();
+
+    void TriggerAvoidWhenCaretGoesDown();
+
     bool IsTextEditableForStylus() const override;
     bool IsHandleDragging();
     bool IsLTRLayout()
@@ -1406,6 +1441,16 @@ public:
         auto host = GetHost();
         CHECK_NULL_RETURN(host, true);
         return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
+    }
+
+    float GetLastCaretPos()
+    {
+        return lastCaretPos_;
+    }
+
+    void SetLastCaretPos(float lastCaretPos)
+    {
+        lastCaretPos_ = lastCaretPos;
     }
 
     void SetEnableHapticFeedback(bool isEnabled)
@@ -1465,6 +1510,7 @@ protected:
     bool isTextChangedAtCreation_ = false;
 
 private:
+    Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     void GetTextSelectRectsInRangeAndWillChange();
     bool BeforeIMEInsertValue(const std::string& insertValue, int32_t offset);
     void AfterIMEInsertValue(const std::string& insertValue);
@@ -1614,6 +1660,7 @@ private:
     void UnitResponseKeyEvent();
     void ProcBorderAndUnderlineInBlurEvent();
     void ProcNormalInlineStateInBlurEvent();
+    bool IsMouseOverScrollBar(const GestureEvent& info);
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
     void GetInlinePositionYAndHeight(double& positionY, double& height) const;
@@ -1760,6 +1807,7 @@ private:
     std::list<std::unique_ptr<TextInputFormatter>> textInputFormatters_;
 
     RefPtr<TextFieldController> textFieldController_;
+    WeakPtr<Referenced> jsTextEditableController_;
     RefPtr<TextEditController> textEditingController_;
     TextEditingValueNG textEditingValue_;
     // controls redraw of overlay modifier, update when need to redraw
@@ -1871,6 +1919,8 @@ private:
     uint32_t longPressFingerNum_ = 0;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     std::optional<float> maxFontSizeScale_;
+    float lastCaretPos_ = 0.0f;
+    bool hasMousePressed_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -386,6 +386,19 @@ class ArkListEdgeEffect {
   }
 }
 
+class ArkFadingEdge {
+  value: boolean;
+  options?: FadingEdgeOptions | undefined;
+  constructor() {
+    this.value = undefined;
+    this.options = undefined;
+  }
+  isEqual(another: ArkFadingEdge): boolean {
+    return (this.value === another.value) &&
+      (this.options === another.options);
+  }
+}
+
 class ArkScrollEdgeEffect {
   value: EdgeEffect;
   options?: EdgeEffectOptions | undefined;
@@ -479,6 +492,9 @@ class ArkBackgroundBlurStyle {
   adaptiveColor: number | undefined;
   scale: number | undefined;
   blurOptions: BlurOptions | undefined;
+  policy?: number;
+  inactiveColor?: ResourceColor;
+  type?: number;
 
   constructor() {
     this.blurStyle = undefined;
@@ -486,6 +502,9 @@ class ArkBackgroundBlurStyle {
     this.adaptiveColor = undefined;
     this.scale = undefined;
     this.blurOptions = undefined;
+    this.policy = undefined;
+    this.inactiveColor = undefined;
+    this.type = undefined;
   }
 
   isEqual(another: ArkBackgroundBlurStyle): boolean {
@@ -494,7 +513,10 @@ class ArkBackgroundBlurStyle {
       this.colorMode === another.colorMode &&
       this.adaptiveColor === another.adaptiveColor &&
       this.scale === another.scale &&
-      this.blurOptions === another.blurOptions
+      this.blurOptions === another.blurOptions &&
+      this.policy === another.policy &&
+      this.inactiveColor === another.inactiveColor &&
+      this.type === another.type
     );
   }
 }
@@ -959,6 +981,18 @@ class ArkCustomProperty {
   }
 }
 
+class ArkUseEffect {
+  useEffect: boolean;
+  effectType: EffectType;
+  constructor() {
+    this.useEffect = undefined;
+    this.effectType = undefined;
+  }
+  isEqual(another: ArkUseEffect): boolean {
+    return (this.useEffect === another.useEffect) && (this.effectType === another.effectType);
+  }
+}
+
 class ArkBlendMode {
   blendMode: number | Blender;
   blendApplyType: number;
@@ -1269,10 +1303,10 @@ class ArkScrollSnapOptions {
 class ArkGeometryTransition {
   id: string | undefined;
   options: GeometryTransitionOptions | undefined;
-  
+
   constructor() {
     this.id = undefined;
-    this.options = undefined;   
+    this.options = undefined;
   }
 
   isEqual(another: ArkGeometryTransition): boolean {
@@ -1360,6 +1394,19 @@ class ArkWaterFlowEdgeEffect {
   }
 }
 
+class ArkScrollableCacheOptions {
+  count: number;
+  show: boolean;
+  constructor(count: number, show: boolean) {
+    this.count = count;
+    this.show = show;
+  }
+  isEqual(other: ArkScrollableCacheOptions): boolean {
+    return (this.count === other.count) &&
+      (this.show === other.show);
+  }
+}
+
 class ArkSelection {
   selectionStart: number;
   selectionEnd: number;
@@ -1410,12 +1457,12 @@ class ArkDragPreviewOptions {
 }
 
 class ArkDragPreview {
-  inspetorId : string;
+  inspetorId: string;
   constructor() {
     this.inspetorId = undefined;
   }
 
-  isEqual(another: ArkDragPreview) : boolean {
+  isEqual(another: ArkDragPreview): boolean {
     return this.inspetorId === another.inspetorId;
   }
 }
@@ -1463,12 +1510,15 @@ class ArkRelativeContainerBarrier {
 class ArkFocusScopeId {
   id: string | undefined;
   isGroup: boolean | undefined;
+  arrowStepOut: boolean | undefined;
   constructor() {
     this.id = undefined;
     this.isGroup = undefined;
+    this.arrowStepOut = undefined;
   }
   isEqual(another: ArkFocusScopeId): boolean {
-    return (this.id === another.id) && (this.isGroup === another.isGroup);
+    return ((this.id === another.id) && (this.isGroup === another.isGroup) &&
+      (this.arrowStepOut === another.arrowStepOut));
   }
 }
 
@@ -1521,13 +1571,15 @@ class ArkFontWeight {
 }
 
 class ArkNavigationTitle {
+  value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined;
   navigationTitleOptions?: NavigationTitleOptions | undefined;
 
   constructor() {
+    this.value = undefined;
     this.navigationTitleOptions = undefined;
   }
   isEqual(another: ArkNavigationTitle): boolean {
-    return this.navigationTitleOptions === another.navigationTitleOptions;
+    return (this.value === another.value) && (this.navigationTitleOptions === another.navigationTitleOptions);
   }
 }
 

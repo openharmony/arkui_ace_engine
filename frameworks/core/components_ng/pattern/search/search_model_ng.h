@@ -54,7 +54,8 @@ public:
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
     void SetHeight(const Dimension& height) override;
-    void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
+    void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override {};
+    void SetOnSubmit(std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit) override;
     void SetOnChange(std::function<void(const std::string&, PreviewText&)>&& onChange) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnScroll(std::function<void(float, float)>&& func) override;
@@ -132,7 +133,8 @@ public:
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetLineHeight(FrameNode* frameNode, const Dimension& value);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& value);
-    static void SetOnSubmit(FrameNode* frameNode, std::function<void(const std::string&)>&& onSubmit);
+    static void SetOnSubmit(FrameNode* frameNode,
+        std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&, PreviewText&)>&& onChange);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(const std::string&)>&& func);

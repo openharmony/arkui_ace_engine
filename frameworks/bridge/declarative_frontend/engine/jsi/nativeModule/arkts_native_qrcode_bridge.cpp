@@ -97,4 +97,14 @@ ArkUINativeModuleValue QRCodeBridge::ResetContentOpacity(ArkUIRuntimeCallInfo *r
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue QRCodeBridge::SetQRValue(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> value = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getQRCodeModifier()->setQRValue(nativeNode, value->ToString(vm)->ToString(vm).c_str());
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

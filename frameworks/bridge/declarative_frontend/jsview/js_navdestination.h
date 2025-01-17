@@ -44,6 +44,10 @@ public:
     static void SetHideToolBar(const JSCallbackInfo& info);
     static void SetIgnoreLayoutSafeArea(const JSCallbackInfo& info);
     static void SetSystemBarStyle(const JSCallbackInfo& info);
+    static void SetSystemTransition(const JSCallbackInfo& info);
+    static void SetRecoverable(const JSCallbackInfo& info);
+    static void BindToScrollable(const JSCallbackInfo& info);
+    static void BindToNestedScrollable(const JSCallbackInfo& info);
 
 private:
     static void CreateForPartialUpdate(const JSCallbackInfo& info);

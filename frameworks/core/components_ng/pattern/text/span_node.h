@@ -205,6 +205,8 @@ public:
     std::optional<TextBackgroundStyle> backgroundStyle;
     GestureEventFunc onClick;
     GestureEventFunc onLongPress;
+    GestureEventFunc onDoubleClick;
+    OnHoverFunc onHover;
     [[deprecated]] std::list<RefPtr<SpanItem>> children;
     std::map<int32_t, AISpan> aiSpanMap;
     int32_t placeholderIndex = -1;
@@ -238,6 +240,11 @@ public:
     TextStyle InheritParentProperties(const RefPtr<FrameNode>& frameNode, bool isSpanStringMode = false);
     virtual RefPtr<SpanItem> GetSameStyleSpanItem() const;
     std::optional<std::pair<int32_t, int32_t>> GetIntersectionInterval(std::pair<int32_t, int32_t> interval) const;
+    std::function<void()> urlOnRelease;
+    void SetUrlOnReleaseEvent(std::function<void()>&& onRelease)
+    {
+        urlOnRelease = std::move(onRelease);
+    }
     bool Contains(int32_t index)
     {
         return rangeStart < index && index < position;
@@ -270,6 +277,17 @@ public:
     {
         onLongPress = std::move(onLongPress_);
     }
+
+    void SetDoubleClickEvent(GestureEventFunc&& onDoubleClick_)
+    {
+        onDoubleClick = std::move(onDoubleClick_);
+    }
+
+    void SetHoverEvent(OnHoverFunc&& onHover_)
+    {
+        onHover = std::move(onHover_);
+    }
+
     void SetIsParentText(bool isText)
     {
         isParentText = isText;
@@ -346,6 +364,7 @@ enum class PropertyInfo {
     HALFLEADING,
     VARIABLE_FONT_WEIGHT,
     ENABLE_VARIABLE_FONT_WEIGHT,
+    BACKGROUNDCOLOR,
 };
 
 class ACE_EXPORT BaseSpan : public virtual AceType {
@@ -681,6 +700,7 @@ public:
     ACE_DISALLOW_COPY_AND_MOVE(CustomSpanItem);
     std::optional<std::function<CustomSpanMetrics(CustomSpanMeasureInfo)>> onMeasure;
     std::optional<std::function<void(NG::DrawingContext&, CustomSpanOptions)>> onDraw;
+    bool isFrameNode = false;
 };
 
 class ACE_EXPORT CustomSpanNode : public FrameNode {
@@ -693,6 +713,7 @@ public:
             V2::CUSTOM_SPAN_NODE_ETS_TAG, nodeId);
         customSpanNode->InitializePatternAndContext();
         ElementRegister::GetInstance()->AddUINode(customSpanNode);
+        customSpanNode->customSpanItem_->isFrameNode = true;
         return customSpanNode;
     }
 
@@ -704,6 +725,7 @@ public:
         auto customSpanNode = AceType::MakeRefPtr<CustomSpanNode>(tag, nodeId);
         customSpanNode->InitializePatternAndContext();
         ElementRegister::GetInstance()->AddUINode(customSpanNode);
+        customSpanNode->customSpanItem_->isFrameNode = true;
         return customSpanNode;
     }
 

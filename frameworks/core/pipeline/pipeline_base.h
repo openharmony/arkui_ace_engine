@@ -46,6 +46,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/theme/theme_manager.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_config.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
@@ -181,10 +182,12 @@ public:
     virtual void RemoveScheduleTask(uint32_t id) = 0;
 
     // Called by view when touch event received.
-    virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) = 0;
+    virtual void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false, bool isEventsPassThrough = false) = 0;
 
     // Called by ohos AceContainer when touch event received.
-    virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) {}
+    virtual void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false,
+        bool isEventsPassThrough = false)
+    {}
 
     virtual void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
@@ -341,6 +344,8 @@ public:
     // Called by AceContainer.
     bool Dump(const std::vector<std::string>& params) const;
 
+    virtual void DumpUIExt() const {}
+
     virtual bool IsLastPage()
     {
         return false;
@@ -382,8 +387,25 @@ public:
 
     virtual void SetAppIcon(const RefPtr<PixelMap>& icon) = 0;
 
-    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
+    virtual void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
+    virtual void EnableContainerModalGesture(bool isEnable) {}
+
+    virtual bool GetContainerFloatingTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerCustomTitleVisible()
+    {
+        return false;
+    }
+
+    virtual bool GetContainerControlButtonVisible()
+    {
+        return false;
+    }
+    
     virtual void RefreshRootBgColor() const {}
 
     virtual void PostponePageTransition() {}
@@ -902,6 +924,7 @@ public:
         TaskExecutor::TaskType type = TaskExecutor::TaskType::UI);
 
     virtual void FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate = true) {}
+
     virtual void FlushBuild() {}
 
     virtual void FlushReloadTransition() {}
@@ -1010,7 +1033,11 @@ public:
 
     virtual void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
 
-    virtual void SetEnableKeyBoardAvoidMode(bool value) {}
+    virtual void SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {}
+
+    virtual KeyBoardAvoidMode GetEnableKeyBoardAvoidMode() {
+        return KeyBoardAvoidMode::OFFSET;
+    }
 
     virtual bool IsEnableKeyBoardAvoidMode() {
         return false;
@@ -1429,6 +1456,11 @@ public:
 
     void FireAccessibilityEvents();
 
+    void SetUIExtensionEventCallback(std::function<void(uint32_t)>&& callback);
+    void AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId);
+    void FireAllUIExtensionEvents();
+    void FireUIExtensionEventOnceImmediately(NG::UIExtCallbackEventId eventId);
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1462,6 +1494,7 @@ protected:
     {
         isReloading_ = isReloading;
     }
+    bool FireUIExtensionEventValid();
 
     std::function<void()> GetWrappedAnimationCallback(const std::function<void()>& finishCallback);
 
@@ -1500,6 +1533,8 @@ protected:
     double dipScale_ = 1.0;
     double rootHeight_ = 0.0;
     double rootWidth_ = 0.0;
+    int32_t width_ = 0;
+    int32_t height_ = 0;
     FrontendType frontendType_;
     WindowModal windowModal_ = WindowModal::NORMAL;
 
@@ -1574,6 +1609,7 @@ protected:
 private:
     void DumpFrontend() const;
     double ModifyKeyboardHeight(double keyboardHeight) const;
+    void FireUIExtensionEventInner(uint32_t eventId);
     StatusBarEventHandler statusBarBgColorEventHandler_;
     PopupEventHandler popupEventHandler_;
     MenuEventHandler menuEventHandler_;
@@ -1611,6 +1647,8 @@ private:
     int32_t densityChangeCallbackId_ = 0;
     std::unordered_map<int32_t, std::function<void(double)>> densityChangedCallbacks_;
     std::function<double()> windowDensityCallback_;
+    std::function<void(uint32_t)> uiExtensionEventCallback_;
+    std::set<NG::UIExtCallbackEvent> uiExtensionEvents_;
     std::function<void(uint32_t, int64_t)> accessibilityCallback_;
     std::set<AccessibilityCallbackEvent> accessibilityEvents_;
 

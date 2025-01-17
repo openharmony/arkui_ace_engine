@@ -193,6 +193,18 @@ void ReleaseStorageReference(void* sharedRuntime, NativeReference* storage)
         napi_delete_reference(env, reinterpret_cast<napi_ref>(storage));
     }
 }
+
+void ParseLanguage(ConfigurationChange& configurationChange, const std::string& languageTag)
+{
+    std::string language;
+    std::string script;
+    std::string region;
+    Localization::ParseLocaleTag(languageTag, language, script, region, false);
+    if (!language.empty() || !script.empty() || !region.empty()) {
+        configurationChange.languageUpdate = true;
+        AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
+    }
+}
 } // namespace
 
 AceContainer::AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
@@ -428,6 +440,16 @@ void AceContainer::InitializeFrontend()
                 jsEngine = loader.CreateJsEngine(instanceId_);
             }
             jsEngine->AddExtraNativeObject("ability", aceAbility.get());
+            auto pageUrlCheckFunc = [id = instanceId_](const std::string& url, const std::function<void()>& callback,
+                const std::function<void(int32_t, const std::string&)>& silentInstallErrorCallBack) {
+                ContainerScope scope(id);
+                auto container = Container::Current();
+                CHECK_NULL_VOID(container);
+                auto pageUrlChecker = container->GetPageUrlChecker();
+                CHECK_NULL_VOID(pageUrlChecker);
+                pageUrlChecker->LoadPageUrl(url, callback, silentInstallErrorCallBack);
+            };
+            jsEngine->SetPageUrlCheckFunc(std::move(pageUrlCheckFunc));
             EngineHelper::AddEngine(instanceId_, jsEngine);
             declarativeFrontend->SetJsEngine(jsEngine);
             declarativeFrontend->SetPageProfile(pageProfile_);
@@ -810,12 +832,23 @@ void AceContainer::InitializeCallback()
     ACE_FUNCTION_TRACE();
 
     ACE_DCHECK(aceView_ && taskExecutor_ && pipelineContext_);
-    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_](
-                                    const TouchEvent& event, const std::function<void()>& markProcess,
+    auto&& touchEventCallback = [context = pipelineContext_, id = instanceId_,
+                                    isTouchEventsPassThrough = isTouchEventsPassThrough_](const TouchEvent& event,
+                                    const std::function<void()>& markProcess,
                                     const RefPtr<OHOS::Ace::NG::FrameNode>& node) {
         ContainerScope scope(id);
+        bool passThroughMode = false;
+        if (isTouchEventsPassThrough.has_value()) {
+            passThroughMode = isTouchEventsPassThrough.value();
+        } else {
+            auto container = Platform::AceContainer::GetContainer(id);
+            if (container) {
+                passThroughMode = AceApplicationInfo::GetInstance().IsTouchEventsPassThrough();
+                container->SetTouchEventsPassThroughMode(passThroughMode);
+            }
+        }
         context->CheckAndLogLastReceivedTouchEventInfo(event.touchEventId, event.type);
-        auto touchTask = [context, event, markProcess, node]() {
+        auto touchTask = [context, event, markProcess, node, mode = passThroughMode]() {
             if (event.type == TouchType::HOVER_ENTER || event.type == TouchType::HOVER_MOVE ||
                 event.type == TouchType::HOVER_EXIT || event.type == TouchType::HOVER_CANCEL) {
                 context->OnAccessibilityHoverEvent(event, node);
@@ -823,9 +856,9 @@ void AceContainer::InitializeCallback()
                 context->OnPenHoverEvent(event, node);
             } else {
                 if (node) {
-                    context->OnTouchEvent(event, node);
+                    context->OnTouchEvent(event, node, false, mode);
                 } else {
-                    context->OnTouchEvent(event);
+                    context->OnTouchEvent(event, false, mode);
                 }
             }
             CHECK_NULL_VOID(markProcess);
@@ -1170,7 +1203,7 @@ UIContentErrorCode AceContainer::RunPage(
     }
 
     if (isNamedRouter) {
-        return front->RunPageByNamedRouter(content);
+        return front->RunPageByNamedRouter(content, params);
     }
 
     return front->RunPage(content, params);
@@ -1729,9 +1762,13 @@ bool AceContainer::Dump(const std::vector<std::string>& params, std::vector<std:
     }
     ContainerScope scope(instanceId_);
     auto result = false;
+    paramUie_.assign(params.begin(), params.end());
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     CHECK_NULL_RETURN(ostream, false);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    if (IsUIExtensionWindow()) {
+        DumpLog::GetInstance().SetSeparator(";");
+    }
     auto context = runtimeContext_.lock();
     DumpLog::GetInstance().Print("bundleName:" + GetBundleName());
     DumpLog::GetInstance().Print("moduleName:" + GetModuleName());
@@ -2082,6 +2119,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
     };
     pipelineContext_->SetStatusBarEventHandler(setStatusBarEventHandler);
 
+    auto uiExtensionEventCallback = [weak = WeakClaim(this)] (uint32_t eventId) {
+        auto container = weak.Upgrade();
+        CHECK_NULL_VOID(container);
+        container->FireUIExtensionEventCallback(eventId);
+    };
+    pipelineContext_->SetUIExtensionEventCallback(uiExtensionEventCallback);
+
     auto accessibilityEventCallback = [weak = WeakClaim(this)] (uint32_t eventId, int64_t parameter) {
         auto container = weak.Upgrade();
         CHECK_NULL_VOID(container);
@@ -2236,25 +2280,25 @@ void AceContainer::SetDialogCallback(int32_t instanceId, FrontendDialogCallback 
     }
 }
 
-std::pair<std::string, UIContentErrorCode> AceContainer::RestoreRouterStack(
-    int32_t instanceId, const std::string& contentInfo)
+std::pair<RouterRecoverRecord, UIContentErrorCode> AceContainer::RestoreRouterStack(
+    int32_t instanceId, const std::string& contentInfo, ContentInfoType type)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
-    CHECK_NULL_RETURN(container, std::make_pair("", UIContentErrorCode::NULL_POINTER));
+    CHECK_NULL_RETURN(container, std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NULL_POINTER));
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
-    CHECK_NULL_RETURN(front, std::make_pair("", UIContentErrorCode::NULL_POINTER));
-    return front->RestoreRouterStack(contentInfo);
+    CHECK_NULL_RETURN(front, std::make_pair(RouterRecoverRecord(), UIContentErrorCode::NULL_POINTER));
+    return front->RestoreRouterStack(contentInfo, type);
 }
 
-std::string AceContainer::GetContentInfo(int32_t instanceId)
+std::string AceContainer::GetContentInfo(int32_t instanceId, ContentInfoType type)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_RETURN(container, "");
     ContainerScope scope(instanceId);
     auto front = container->GetFrontend();
     CHECK_NULL_RETURN(front, "");
-    return front->GetContentInfo();
+    return front->GetContentInfo(type);
 }
 
 void AceContainer::SetWindowPos(int32_t left, int32_t top)
@@ -2294,6 +2338,8 @@ void AceContainer::InitWindowCallback()
     windowManager->SetWindowRecoverCallBack([window = uiWindow_]() { window->Recover(); });
     windowManager->SetWindowCloseCallBack([window = uiWindow_]() { window->Close(); });
     windowManager->SetWindowStartMoveCallBack([window = uiWindow_]() { window->StartMove(); });
+    windowManager->SetWindowIsStartMovingCallBack(
+        [window = uiWindow_]() -> bool { return static_cast<bool>(window->IsStartMoving()); });
     windowManager->SetPerformBackCallback([window = uiWindow_]() { window->PerformBack(); });
     windowManager->SetWindowSplitPrimaryCallBack(
         [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY); });
@@ -2393,6 +2439,7 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
 
 void AceContainer::CheckAndSetFontFamily()
 {
+    CHECK_NULL_VOID(pipelineContext_);
     auto fontManager = pipelineContext_->GetFontManager();
     CHECK_NULL_VOID(fontManager);
     if (fontManager->IsUseAppCustomFont()) {
@@ -2530,17 +2577,9 @@ void AceContainer::ReleaseResourceAdapter()
     }
 }
 
-void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration)
+void AceContainer::BuildResConfig(
+    ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig)
 {
-    if (!parsedConfig.IsValid()) {
-        LOGW("AceContainer::OnConfigurationUpdated param is empty");
-        return;
-    }
-    ConfigurationChange configurationChange;
-    CHECK_NULL_VOID(pipelineContext_);
-    auto themeManager = pipelineContext_->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto resConfig = GetResourceConfiguration();
     if (!parsedConfig.colorMode.empty()) {
         configurationChange.colorModeUpdate = true;
         if (parsedConfig.colorMode == "dark") {
@@ -2559,14 +2598,8 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         resConfig.SetDeviceAccess(parsedConfig.deviceAccess == "true");
     }
     if (!parsedConfig.languageTag.empty()) {
-        std::string language;
-        std::string script;
-        std::string region;
-        Localization::ParseLocaleTag(parsedConfig.languageTag, language, script, region, false);
-        if (!language.empty() || !script.empty() || !region.empty()) {
-            configurationChange.languageUpdate = true;
-            AceApplicationInfo::GetInstance().SetLocale(language, region, script, "");
-        }
+        ParseLanguage(configurationChange, parsedConfig.languageTag);
+        resConfig.SetLanguage(parsedConfig.languageTag);
     }
     if (!parsedConfig.fontFamily.empty()) {
         auto fontManager = pipelineContext_->GetFontManager();
@@ -2595,7 +2628,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         configurationChange.iconUpdate = iconUpdate;
         int skinUpdate = json->GetInt("skin");
         configurationChange.skinUpdate = skinUpdate;
-        if (fontUpdate) {
+        if ((isDynamicRender_ || isFormRender_) && fontUpdate) {
             CheckAndSetFontFamily();
         }
     }
@@ -2608,9 +2641,24 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     if (!parsedConfig.mnc.empty()) {
         resConfig.SetMnc(StringUtils::StringToUint(parsedConfig.mnc));
     }
+}
+
+void AceContainer::UpdateConfiguration(
+    const ParsedConfig& parsedConfig, const std::string& configuration)
+{
+    if (!parsedConfig.IsValid()) {
+        LOGW("AceContainer::OnConfigurationUpdated param is empty");
+        return;
+    }
+    ConfigurationChange configurationChange;
+    CHECK_NULL_VOID(pipelineContext_);
+    auto themeManager = pipelineContext_->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto resConfig = GetResourceConfiguration();
+    BuildResConfig(resConfig, configurationChange, parsedConfig);
     if (!parsedConfig.preferredLanguage.empty()) {
+        ParseLanguage(configurationChange, parsedConfig.preferredLanguage);
         resConfig.SetPreferredLanguage(parsedConfig.preferredLanguage);
-        configurationChange.languageUpdate = true;
     }
     SetFontScaleAndWeightScale(parsedConfig, configurationChange);
     SetResourceConfiguration(resConfig);
@@ -2631,6 +2679,19 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
     NotifyConfigToSubContainers(parsedConfig, configuration);
     // change color mode and theme to clear image cache
     pipelineContext_->ClearImageCache();
+}
+
+void AceContainer::UpdateConfigurationSyncForAll(
+    const ParsedConfig& parsedConfig, const std::string& configuration)
+{
+    if (!parsedConfig.IsValid()) {
+        LOGW("AceContainer::OnConfigurationUpdated param is empty");
+        return;
+    }
+
+    if (!parsedConfig.fontId.empty()) {
+        CheckAndSetFontFamily();
+    }
 }
 
 void AceContainer::NotifyConfigToSubContainers(const ParsedConfig& parsedConfig, const std::string& configuration)
@@ -2908,6 +2969,15 @@ bool AceContainer::IsUIExtensionWindow()
 {
     CHECK_NULL_RETURN(uiWindow_, false);
     return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_UI_EXTENSION;
+}
+
+void AceContainer::FireUIExtensionEventCallback(uint32_t eventId)
+{
+    if (!IsUIExtensionWindow()) {
+        return;
+    }
+    ACE_SCOPED_TRACE("FireUIExtensionEventCallback event[%u]", eventId);
+    uiWindow_->NotifyExtensionEventAsync(eventId);
 }
 
 bool AceContainer::IsSceneBoardEnabled()

@@ -28,7 +28,7 @@ public:
     void OnWindowUnfocused() override;
     void OnWindowForceUnfocused() override;
     void UpdateTitleInTargetPos(bool isShow, int32_t height);
-    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) override;
+    void SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
     void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false) override;
     VisibleType GetControlButtonVisibleBeforeAnim()
     {
@@ -40,6 +40,16 @@ public:
         controlButtonVisibleBeforeAnim_ = visibleType;
     }
 
+    void EnableContainerModalGesture(bool isEnable) override;
+    void ClearTapGestureEvent(RefPtr<FrameNode>& node);
+    void SetTapGestureEvent(RefPtr<FrameNode>& node);
+    void EnablePanEventOnNode(
+        RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName);
+    void EnableTapGestureOnNode(
+        RefPtr<FrameNode>& node, bool isEnable, const std::string& rowName);
+    bool GetFloatingTitleVisible() override;
+    bool GetCustomTitleVisible() override;
+    bool GetControlButtonVisible() override;
 protected:
     RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex) override;
     void ChangeFloatingTitle(bool isFocus) override;
@@ -53,6 +63,7 @@ protected:
 
 private:
     VisibleType controlButtonVisibleBeforeAnim_;
+    bool enableContainerModalGesture_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CONTAINER_MODAL_CONTAINER_MODAL_PATTERN_ENHANCE_H

@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/node_image_span_modifier.h"
 
 #include "core/components/common/layout/constants.h"
+#include "core/components/image/image_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/image/image_model_ng.h"
@@ -31,6 +32,10 @@ constexpr int DEFAULT_LENGTH = 4;
 constexpr VerticalAlign DEFAULT_VERTICAL_ALIGN = VerticalAlign::BOTTOM;
 constexpr ImageFit DEFAULT_OBJECT_FIT = ImageFit::COVER;
 constexpr Dimension DEFAULT_BASELINE_OFFSET { 0.0, DimensionUnit::FP };
+const std::vector<float> DEFAULT_COLOR_FILTER = {
+    1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+    0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f
+};
 
 void SetImageSpanVerticalAlign(ArkUINodeHandle node, int32_t value)
 {
@@ -205,6 +210,24 @@ void ResetImageSpanBorderRadius(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ImageSpanView::ResetBorderRadius(frameNode);
 }
+
+void SetImageSpanColorFilter(ArkUINodeHandle node, const ArkUI_Float32* array, int length)
+{
+    CHECK_NULL_VOID(array);
+    if (length != COLOR_FILTER_MATRIX_SIZE) {
+        return;
+    }
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetColorFilterMatrix(frameNode, std::vector<float>(array, array + length));
+}
+
+void ResetImageSpanColorFilter(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -215,7 +238,7 @@ const ArkUIImageSpanModifier* GetImageSpanModifier()
         SetImageSpanTextBackgroundStyle, ResetImageSpanTextBackgroundStyle, GetImageSpanTextBackgroundStyle,
         SetImageSpanBaselineOffset, ResetImageSpanBaselineOffset, SetImageSpanOnComplete, ResetImageSpanOnComplete,
         SetImageSpanOnError, ResetImageSpanOnError, SetImageSpanBorderRadius, ResetImageSpanBorderRadius,
-        GetImageSpanBaselineOffset };
+        GetImageSpanBaselineOffset, SetImageSpanColorFilter, ResetImageSpanColorFilter };
     return &modifier;
 }
 

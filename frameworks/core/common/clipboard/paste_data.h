@@ -26,5 +26,13 @@ public:
     PasteDataMix() = default;
     ~PasteDataMix() = default;
 };
+
+class MultiTypeRecordMix : public AceType {
+    DECLARE_ACE_TYPE(MultiTypeRecordMix, AceType);
+
+public:
+    MultiTypeRecordMix() = default;
+    ~MultiTypeRecordMix() = default;
+};
 } // namespace OHOS::Ace
 #endif

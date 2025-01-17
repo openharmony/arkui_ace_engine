@@ -187,12 +187,38 @@ declare class ArkWaterFlowComponent extends ArkComponent {}
 
 declare class ArkFlowItemComponent extends ArkComponent {}
 
+declare class ArkSymbolGlyphComponent extends ArkComponent {}
+
+declare class ArkMarqueeComponent extends ArkComponent {}
+
+declare class ArkTextAreaComponent extends ArkComponent {}
+
+declare class ArkQRCodeComponent extends ArkComponent {}
+
+declare class ArkBadgeComponent extends ArkComponent {}
+
+declare class ArkGridComponent extends ArkComponent {}
+
+declare class ArkGridItemComponent extends ArkComponent {}
+
+declare class ArkTextClockComponent extends ArkComponent {}
+
+declare class ArkTextTimerComponent extends ArkComponent {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;
   constructor(nodePtr: NodePtr);
   setInstanceId(instanceId: number): void;
   setNodePtr(nodePtr: NodePtr): void;
+}
+
+declare class UIGestureEvent {
+  private _nodePtr: NodePtr;
+  private _weakPtr: WeakRef<FrameNode>;
+  constructor();
+  setNodePtr(nodePtr: NodePtr): void;
+  setWeakNodePtr(weakPtr: WeakRef<FrameNode>): void;
 }
 
 declare class ModifierWithKey<T extends number | string | boolean | object> {

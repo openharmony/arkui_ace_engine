@@ -186,8 +186,8 @@ void TextPickerTossAnimationController::CreatePropertyCallback()
         if ((isTouchBreak) || (static_cast<int32_t>(position) == DISMIN)) {
             return;
         }
-        column->UpdateToss(position);
         column->SetTossStatus(true);
+        column->UpdateToss(position);
     };
     property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0f, std::move(propertyCallback));
 }

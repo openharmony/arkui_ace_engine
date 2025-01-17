@@ -36,6 +36,7 @@ class TapGestureHandler extends GestureHandler {
     fingers?: number;
     count?: number;
     gestureTag?: string;
+    allowedTypes?: Array<SourceTool>;
     onActionCallback?: Callback<GestureEvent>;
 
     constructor(options?: TapGestureHandlerOptions) {
@@ -53,6 +54,10 @@ class TapGestureHandler extends GestureHandler {
         this.gestureTag = tag;
         return this;
     }
+    allowedTypes(types: Array<SourceTool>) {
+        this.allowedTypes = types;
+        return this;
+    }
 }
 
 class LongPressGestureHandler extends GestureHandler {
@@ -60,6 +65,7 @@ class LongPressGestureHandler extends GestureHandler {
     repeat?: boolean;
     duration?: number;
     gestureTag?: string;
+    allowedTypes?: Array<SourceTool>;
     onActionCallback?: Callback<GestureEvent>;
     onActionEndCallback?: Callback<GestureEvent>;
     onActionCancelCallback?: Callback<void>;
@@ -91,6 +97,11 @@ class LongPressGestureHandler extends GestureHandler {
         this.gestureTag = tag;
         return this;
     }
+
+    allowedTypes(types: Array<SourceTool>) {
+        this.allowedTypes = types;
+        return this;
+    }
 }
 
 class PanGestureHandler extends GestureHandler {
@@ -98,6 +109,7 @@ class PanGestureHandler extends GestureHandler {
     direction?: PanDirection;
     distance?: number;
     gestureTag?: string;
+    allowedTypes?: Array<SourceTool>;
     onActionStartCallback?: Callback<GestureEvent>;
     onActionUpdateCallback?: Callback<GestureEvent>;
     onActionEndCallback?: Callback<GestureEvent>;
@@ -135,6 +147,11 @@ class PanGestureHandler extends GestureHandler {
         this.gestureTag = tag;
         return this;
     }
+
+    allowedTypes(types: Array<SourceTool>) {
+        this.allowedTypes = types;
+        return this;
+    }
 }
 
 class SwipeGestureHandler extends GestureHandler {
@@ -142,6 +159,7 @@ class SwipeGestureHandler extends GestureHandler {
     direction?: SwipeDirection;
     speed?: number;
     gestureTag?: string;
+    allowedTypes?: Array<SourceTool>;
     onActionCallback?: Callback<GestureEvent>;
     constructor(options?: SwipeGestureHandlerOptions) {
         super(CommonGestureType.PAN_GESTURE);
@@ -161,12 +179,18 @@ class SwipeGestureHandler extends GestureHandler {
         this.gestureTag = tag;
         return this;
     }
+
+    allowedTypes(types: Array<SourceTool>) {
+        this.allowedTypes = types;
+        return this;
+    }
 }
 
 class PinchGestureHandler extends GestureHandler {
     fingers?: number;
     distance?: number;
     gestureTag?: string;
+    allowedTypes?: Array<SourceTool>;
     onActionStartCallback?: Callback<GestureEvent>;
     onActionUpdateCallback?: Callback<GestureEvent>;
     onActionEndCallback?: Callback<GestureEvent>;
@@ -203,12 +227,18 @@ class PinchGestureHandler extends GestureHandler {
         this.gestureTag = tag;
         return this;
     }
+
+    allowedTypes(types: Array<SourceTool>) {
+        this.allowedTypes = types;
+        return this;
+    }
 }
 
 class RotationGestureHandler extends GestureHandler {
     fingers?: number;
     angle?: number;
     gestureTag?: string;
+    allowedTypes?: Array<SourceTool>;
     onActionStartCallback?: Callback<GestureEvent>;
     onActionUpdateCallback?: Callback<GestureEvent>;
     onActionEndCallback?: Callback<GestureEvent>;
@@ -243,6 +273,11 @@ class RotationGestureHandler extends GestureHandler {
 
     tag(tag: string) {
         this.gestureTag = tag;
+        return this;
+    }
+
+    allowedTypes(types: Array<SourceTool>) {
+        this.allowedTypes = types;
         return this;
     }
 }

@@ -62,6 +62,11 @@ class ComputedV2 {
         ObserveV2.getObserve().addRef(this, propertyKey);
         return ObserveV2.autoProxyObject(this, cachedProp);
       },
+      set(_) {
+        const error = `@Computed ${propertyKey} is readonly, cannot set value for it`;
+        stateMgmtConsole.applicationError(error);
+        throw new Error(error);
+      },
       enumerable: true
     });
 
@@ -102,6 +107,17 @@ class ComputedV2 {
     }
 
     return ret;
+  }
+
+  public static clearComputedFromTarget(target: Object): void {
+    let meta: Object;
+    if (!target || typeof target !== 'object' ||
+        !(meta = target[ObserveV2.COMPUTED_REFS]) || typeof meta !== 'object') {
+      return;
+    }
+
+    stateMgmtConsole.debug(`ComputedV2: clearComputedFromTarget: from target ${target.constructor?.name} computedIds to clear ${JSON.stringify(Array.from(Object.values(meta)))}`);
+    Array.from(Object.values(meta)).forEach((computed: ComputedV2) => ObserveV2.getObserve().clearWatch(computed.computedId_));
   }
 }
 

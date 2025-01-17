@@ -337,7 +337,7 @@ void PipelineContext::SetContainerWindow(bool isShow)
 #endif
 }
 
-void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
         LOGW("Window modal is not container.");
@@ -349,7 +349,7 @@ void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, 
     }
     auto containerModal = AceType::DynamicCast<ContainerModalElement>(rootElement_->GetFirstChild());
     if (containerModal) {
-        containerModal->SetTitleButtonHide(hideSplit, hideMaximize, hideMinimize);
+        containerModal->SetTitleButtonHide(hideSplit, hideMaximize, hideMinimize, hideClose);
     }
 }
 
@@ -1527,7 +1527,7 @@ RefPtr<RenderNode> PipelineContext::DragTest(
     return nullptr;
 }
 
-void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe)
+void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe, bool isEventsPassThrough)
 {
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
@@ -1949,6 +1949,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
         FlushAnimation(GetTimeFromExternalTimer());
         FlushPipelineWithoutAnimation();
         FlushAnimationTasks();
+        window_->FlushLayoutSize(width_, height_);
         hasIdleTasks_ = false;
     } else {
         LOGW("the surface is not ready, waiting");

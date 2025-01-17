@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
+#include "core/components_ng/pattern/grid/grid_item_theme.h"
 #include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
@@ -107,13 +108,20 @@ void ResetGridItemColumnEnd(ArkUINodeHandle node)
     GridItemModelNG::SetColumnEnd(frameNode, DEFAULT_GRID_ITEM_VALUE);
 }
 
+void SetGridItemOptions(ArkUINodeHandle node, ArkUI_Int32 style)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GridItemModelNG::SetGridItemStyle(frameNode, static_cast<GridItemStyle>(style));
+}
+
 namespace NodeModifier {
 const ArkUIGridItemModifier* GetGridItemModifier()
 {
     static const ArkUIGridItemModifier modifier = { SetGridItemSelectable, ResetGridItemSelectable,
         SetGridItemSelected, ResetGridItemSelected, SetGridItemRowStart, ResetGridItemRowStart,
         SetGridItemRowEnd, ResetGridItemRowEnd, SetGridItemColumnStart, ResetGridItemColumnStart,
-        SetGridItemColumnEnd, ResetGridItemColumnEnd };
+        SetGridItemColumnEnd, ResetGridItemColumnEnd, SetGridItemOptions };
     return &modifier;
 }
 

@@ -167,7 +167,7 @@ void FrontendDelegateDeclarativeNG::AttachSubPipelineContext(const RefPtr<Pipeli
 }
 
 void FrontendDelegateDeclarativeNG::RunPage(
-    const std::string& url, const std::string& params, const std::string& profile)
+    const std::string& url, const std::string& params, const std::string& profile, bool isNamedRouter)
 {
     ACE_SCOPED_TRACE("FrontendDelegateDeclarativeNG::RunPage");
 
@@ -189,11 +189,15 @@ void FrontendDelegateDeclarativeNG::RunPage(
     }
     taskExecutor_->PostTask(
         [manifestParser = manifestParser_, delegate = Claim(this),
-            weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params]() {
+            weakPtr = WeakPtr<NG::PageRouterManager>(pageRouterManager_), url, params, isNamedRouter]() {
             auto pageRouterManager = weakPtr.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
             pageRouterManager->SetManifestParser(manifestParser);
-            pageRouterManager->RunPage(url, params);
+            if (isNamedRouter) {
+                pageRouterManager->RunPageByNamedRouter(url, params);
+            } else {
+                pageRouterManager->RunPage(url, params);
+            }
             auto pipeline = delegate->GetPipelineContext();
             // TODO: get platform version from context, and should stored in AceApplicationInfo.
             if (manifestParser->GetMinPlatformVersion() > 0) {
@@ -383,64 +387,65 @@ void FrontendDelegateDeclarativeNG::ClearTimer(const std::string& callbackId)
 void FrontendDelegateDeclarativeNG::Push(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params }));
+    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, true }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::PushWithMode(const std::string& uri, const std::string& params, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
+    pageRouterManager_->Push(NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::PushWithCallback(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->Push(
-        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::PushNamedRoute(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->PushNamedRoute(
-        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::Replace(const std::string& uri, const std::string& params)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params }));
+    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, true }));
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceWithMode(
     const std::string& uri, const std::string& params, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
-    pageRouterManager_->Replace(NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode) }));
+    pageRouterManager_->Replace(
+        NG::RouterPageInfo({ uri, params, true, static_cast<NG::RouterMode>(routerMode) }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceWithCallback(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->Replace(
-        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
 void FrontendDelegateDeclarativeNG::ReplaceNamedRoute(const std::string& uri, const std::string& params,
-    const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
+    bool recoverable, const std::function<void(const std::string&, int32_t)>& errorCallback, uint32_t routerMode)
 {
     CHECK_NULL_VOID(pageRouterManager_);
     pageRouterManager_->ReplaceNamedRoute(
-        NG::RouterPageInfo({ uri, params, static_cast<NG::RouterMode>(routerMode), errorCallback }));
+        NG::RouterPageInfo({ uri, params, recoverable, static_cast<NG::RouterMode>(routerMode), errorCallback }));
     OnMediaQueryUpdate();
 }
 
@@ -683,6 +688,7 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .buttons = buttons,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
+        .enableHoverMode = dialogAttr.enableHoverMode,
         .maskRect = dialogAttr.maskRect,
     };
     if (dialogAttr.alignment.has_value()) {
@@ -699,6 +705,9 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
     }
     if (dialogAttr.backgroundBlurStyle.has_value()) {
         dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
+    }
+    if (dialogAttr.hoverModeArea.has_value()) {
+        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
     }
     ShowDialogInner(dialogProperties, std::move(callback), callbacks);
 }
@@ -738,6 +747,7 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .borderRadius = dialogAttr.borderRadius,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
+        .enableHoverMode = dialogAttr.enableHoverMode,
         .customBuilder = dialogAttr.customBuilder,
         .borderWidth = dialogAttr.borderWidth,
         .borderColor = dialogAttr.borderColor,
@@ -765,6 +775,9 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
     }
     if (dialogAttr.offset.has_value()) {
         dialogProperties.offset = dialogAttr.offset.value();
+    }
+    if (dialogAttr.hoverModeArea.has_value()) {
+        dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
     }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         dialogProperties.isSysBlurStyle = false;
@@ -1167,16 +1180,24 @@ std::pair<int32_t, std::shared_ptr<Media::PixelMap>> FrontendDelegateDeclarative
     return {ERROR_CODE_INTERNAL_ERROR, nullptr};
 }
 
-std::string FrontendDelegateDeclarativeNG::GetContentInfo()
+std::string FrontendDelegateDeclarativeNG::GetContentInfo(ContentInfoType type)
 {
     auto jsonContentInfo = JsonUtil::Create(true);
 
     CHECK_NULL_RETURN(pageRouterManager_, "");
-    jsonContentInfo->Put("stackInfo", pageRouterManager_->GetStackInfo());
+    jsonContentInfo->Put("stackInfo", pageRouterManager_->GetStackInfo(type));
+    if (type == ContentInfoType::RESOURCESCHEDULE_RECOVERY) {
+        auto namedRouterInfo = pageRouterManager_->GetNamedRouterInfo();
+        if (namedRouterInfo) {
+            jsonContentInfo->Put("namedRouterInfo", std::move(namedRouterInfo));
+        }
+    }
 
-    auto pipelineContext = pipelineContextHolder_.Get();
-    CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
-    jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
+    if (type == ContentInfoType::CONTINUATION || type == ContentInfoType::APP_RECOVERY) {
+        auto pipelineContext = pipelineContextHolder_.Get();
+        CHECK_NULL_RETURN(pipelineContext, jsonContentInfo->ToString());
+        jsonContentInfo->Put("nodeInfo", pipelineContext->GetStoredNodeInfo());
+    }
 
     return jsonContentInfo->ToString();
 }

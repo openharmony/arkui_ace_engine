@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,11 +64,6 @@ public:
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
         return MakeRefPtr<VideoAccessibilityProperty>();
-    }
-
-    bool DefaultSupportDrag() override
-    {
-        return true;
     }
 
     bool IsSupportDrawModifier() const override
@@ -160,7 +155,6 @@ public:
     void UpdateMediaPlayerOnBg();
     void ResetMediaPlayer();
 
-    void EnableDrag();
     void SetIsStop(bool isStop)
     {
         isStop_ = isStop;
@@ -171,24 +165,14 @@ public:
         return isStop_;
     }
 
-    void SetIsDrag(bool isDrag)
-    {
-        isDrag_ = isDrag;
-    }
-
     bool IsInitialState() const
     {
         return isInitialState_;
     }
 
-    void SetIsDragEndAutoPlay(bool isDragEndAutoPlay)
-    {
-        dragEndAutoPlay_ = isDragEndAutoPlay;
-    }
-
     const std::string& GetSrc() const
     {
-        return src_;
+        return videoSrcInfo_.src;
     }
 
     void UpdateMediaParam(const RefPtr<MediaPlayer>& mediaPlayer, const RefPtr<RenderSurface>& renderSurface,
@@ -355,6 +339,7 @@ private:
     void* GetNativeWindow(int32_t instanceId, int64_t textureId);
 #endif
 
+    void RegisterRenderContextCallBack();
     void ChangePlayerStatus(bool isPlaying, const PlaybackStatus& status);
 
     bool IsSupportImageAnalyzer();
@@ -375,12 +360,11 @@ private:
     HiddenChangeEvent hiddenChangeEvent_;
 
     // Video src.
-    std::string src_;
+    VideoSourceInfo videoSrcInfo_;
     bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
     bool isPlaying_ = false;
 
     bool isStop_ = false;
-    bool isDrag_ = false;
 
     bool muted_ = false;
     bool autoPlay_ = false;
@@ -388,7 +372,6 @@ private:
 
     bool pastPlayingStatus_ = false;
 
-    bool dragEndAutoPlay_ = false;
     bool isEnableAnalyzer_ = false;
     bool isAnalyzerCreated_ = false;
     bool isPaused_ = false;

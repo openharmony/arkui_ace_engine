@@ -379,6 +379,41 @@ ArkUINativeModuleValue WaterFlowBridge::ResetEdgeEffect(ArkUIRuntimeCallInfo* ru
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue WaterFlowBridge::SetFadingEdge(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> fadingEdgeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> fadingEdgeLengthArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+
+    auto nativeNode = nodePtr(frameNodeArg->ToNativePointer(vm)->Value());
+    CalcDimension fadingEdgeLength = Dimension(32.0f, DimensionUnit::VP); // default value
+
+    if (fadingEdgeArg->IsUndefined() || fadingEdgeArg->IsNull()) {
+        GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowFadingEdge(nativeNode);
+    } else {
+        bool fadingEdge = fadingEdgeArg->ToBoolean(vm)->Value();
+        if (!fadingEdgeLengthArg->IsUndefined() && !fadingEdgeLengthArg->IsNull() &&
+            fadingEdgeLengthArg->IsObject(vm)) {
+            ArkTSUtils::ParseJsLengthMetrics(vm, fadingEdgeLengthArg, fadingEdgeLength);
+        }
+        GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowFadingEdge(
+            nativeNode, fadingEdge, fadingEdgeLength.Value(), static_cast<int32_t>(fadingEdgeLength.Unit()));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue WaterFlowBridge::ResetFadingEdge(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowFadingEdge(nativeNode);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue WaterFlowBridge::SetScrollBar(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -467,13 +502,17 @@ ArkUINativeModuleValue WaterFlowBridge::SetCachedCount(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> argCachedCount = runtimeCallInfo->GetCallArgRef(NUM_1);
-    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
+    Local<JSValueRef> argShow = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto* nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
     int32_t cachedCount = 0;
     if (!ArkTSUtils::ParseJsInteger(vm, argCachedCount, cachedCount) || cachedCount < 0) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetCachedCount(nativeNode);
     } else {
         GetArkUINodeModifiers()->getWaterFlowModifier()->setCachedCount(nativeNode, cachedCount);
     }
+
+    bool show = !argShow.IsNull() && argShow->IsTrue();
+    GetArkUINodeModifiers()->getWaterFlowModifier()->setShowCached(nativeNode, show);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -484,6 +523,7 @@ ArkUINativeModuleValue WaterFlowBridge::ResetCachedCount(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getWaterFlowModifier()->resetCachedCount(nativeNode);
+    GetArkUINodeModifiers()->getWaterFlowModifier()->resetShowCached(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

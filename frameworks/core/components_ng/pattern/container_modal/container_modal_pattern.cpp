@@ -132,7 +132,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     CHECK_NULL_VOID(controlButtonsNode);
     auto controlButtonsLayoutProperty = controlButtonsNode->GetLayoutProperty();
     CHECK_NULL_VOID(controlButtonsLayoutProperty);
-    AddOrRemovePanEvent(controlButtonsNode);
+    AddPanEvent(controlButtonsNode);
     ChangeFloatingTitle(isFocus_);
     ChangeControlButtons(isFocus_);
 
@@ -280,7 +280,7 @@ void ContainerModalPattern::InitContainerEvent()
     });
 }
 
-void ContainerModalPattern::AddOrRemovePanEvent(const RefPtr<FrameNode>& controlButtonsNode)
+void ContainerModalPattern::AddPanEvent(const RefPtr<FrameNode>& controlButtonsNode)
 {
     auto eventHub = controlButtonsNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(eventHub);
@@ -305,6 +305,17 @@ void ContainerModalPattern::AddOrRemovePanEvent(const RefPtr<FrameNode>& control
         panEvent_ = MakeRefPtr<PanEvent>(std::move(panActionStart), nullptr, nullptr, nullptr);
     }
     eventHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+}
+
+void ContainerModalPattern::RemovePanEvent(const RefPtr<FrameNode>& controlButtonsNode)
+{
+    auto eventHub = controlButtonsNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(eventHub);
+
+    if (!panEvent_) {
+        return;
+    }
+    eventHub->RemovePanEvent(panEvent_);
 }
 
 void ContainerModalPattern::OnWindowFocused()
@@ -469,7 +480,7 @@ void ContainerModalPattern::SetAppIcon(const RefPtr<PixelMap>& icon)
 }
 
 void ContainerModalPattern::SetTitleButtonHide(
-    const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize)
+    const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     auto leftSplitButton =
         AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, LEFT_SPLIT_BUTTON_INDEX));
@@ -488,17 +499,24 @@ void ContainerModalPattern::SetTitleButtonHide(
     CHECK_NULL_VOID(minimizeButton);
     minimizeButton->GetLayoutProperty()->UpdateVisibility(hideMinimize ? VisibleType::GONE : VisibleType::VISIBLE);
     minimizeButton->MarkDirtyNode();
+
+    auto closeButton = AceType::DynamicCast<FrameNode>(GetTitleItemByIndex(controlButtonsNode, CLOSE_BUTTON_INDEX));
+    CHECK_NULL_VOID(closeButton);
+    closeButton->GetLayoutProperty()->UpdateVisibility(hideClose ? VisibleType::GONE : VisibleType::VISIBLE);
+    closeButton->MarkDirtyNode();
 }
 
-void ContainerModalPattern::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize)
+void ContainerModalPattern::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose)
 {
     auto controlButtonsRow = GetControlButtonRow();
     CHECK_NULL_VOID(controlButtonsRow);
-    SetTitleButtonHide(controlButtonsRow, hideSplit, hideMaximize, hideMinimize);
+    SetTitleButtonHide(controlButtonsRow, hideSplit, hideMaximize, hideMinimize, hideClose);
     hideSplitButton_ = hideSplit;
-    LOGI("Set containerModal button status successfully, hideSplit: %{public}d, hideMaximize: %{public}d, "
-         "hideMinimize: %{public}d",
-        hideSplit, hideMaximize, hideMinimize);
+    TAG_LOGI(AceLogTag::ACE_APPBAR,
+        "Set containerModal button status successfully, "
+        "hideSplit: %{public}d, hideMaximize: %{public}d, "
+        "hideMinimize: %{public}d, hideClose: %{public}d",
+        hideSplit, hideMaximize, hideMinimize, hideClose);
 }
 
 void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)

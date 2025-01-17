@@ -211,7 +211,7 @@ const Consumer = (aliasName?: string) => {
       get() {
         // this get function should never be called,
         // because transpiler will always assign it a value first.
-        stateMgmtConsole.warn('@Consumer outer "get" should never be called, internal error!')
+        stateMgmtConsole.warn('@Consumer outer "get" should never be called, internal error!');
         return undefined;
       },
       set(val) {

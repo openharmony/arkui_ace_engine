@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface IDataSourcePrefetching extends IDataSource {
   prefetch(index: number): Promise<void> | void;
   cancel?(index: number): Promise<void> | void;

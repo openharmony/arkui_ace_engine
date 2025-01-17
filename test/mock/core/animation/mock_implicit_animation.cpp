@@ -57,17 +57,6 @@ void MockImplicitAnimation::Next()
     }
 }
 
-void MockImplicitAnimation::ForceUpdate(float delta)
-{
-    auto prop = AceType::DynamicCast<NG::AnimatablePropertyFloat>(prop_.Upgrade());
-    CHECK_NULL_VOID(prop);
-    NG::MockAnimationProxy<float>::GetInstance().ForceUpdate(prop, delta);
-    auto cb = prop->GetUpdateCallback();
-    if (cb) {
-        cb(NG::MockAnimationProxy<float>::GetInstance().GetStagingValue(prop));
-    }
-}
-
 void MockImplicitAnimation::End()
 {
     remainingTicks_ = 0;
@@ -78,9 +67,11 @@ void MockImplicitAnimation::End()
 
 void MockImplicitAnimation::JumpToEnd()
 {
-    if (Finished()) {
-        return;
-    }
     remainingTicks_ = 1;
+    UpdateProp(prop_);
+    if (cbs_.repeatCb) {
+        cbs_.repeatCb();
+    }
+    End();
 }
 } // namespace OHOS::Ace

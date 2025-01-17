@@ -58,6 +58,8 @@ public:
         return AceType::MakeRefPtr<ToastLayoutAlgorithm>();
     }
 
+    void InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<ToastLayoutProperty>& toastProps);
+
     void OnAttachToFrameNode() override;
 
     void OnDetachFromFrameNode(FrameNode* node) override;
@@ -103,6 +105,16 @@ public:
     {
         return foldDisplayModeChangedCallbackId_.has_value();
     }
+
+    void UpdateHalfFoldHoverChangedCallbackId(std::optional<int32_t> id)
+    {
+        halfFoldHoverChangedCallbackId_ = id;
+    }
+
+    bool HasHalfFoldHoverChangedCallbackId()
+    {
+        return halfFoldHoverChangedCallbackId_.has_value();
+    }
     
     void SetToastInfo(const ToastInfo& toastInfo)
     {
@@ -122,6 +134,8 @@ private:
     void BeforeCreateLayoutWrapper() override;
     void UpdateToastSize(const RefPtr<FrameNode>& toast);
     void UpdateTextSizeConstraint(const RefPtr<FrameNode>& text);
+    void UpdateHoverModeRect(const RefPtr<ToastLayoutProperty>& toastProps,
+        const RefPtr<SafeAreaManager>& safeAreaManager, float safeAreaTop, float safeAreaBottom);
     Dimension GetOffsetX(const RefPtr<LayoutWrapper>& layoutWrapper);
     Dimension GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper);
 
@@ -133,11 +147,14 @@ private:
 
     RefPtr<FrameNode> textNode_;
     std::optional<int32_t> foldDisplayModeChangedCallbackId_;
+    std::optional<int32_t> halfFoldHoverChangedCallbackId_;
     ToastInfo toastInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(ToastPattern);
     double toastBottom_;
     Dimension defaultBottom_;
     bool expandDisplay_ = false;
+    Rect wrapperRect_;
+    bool isHoverMode_ = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_TOAST_TOAST_PATTERN_H

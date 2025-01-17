@@ -141,14 +141,14 @@ public:
         return changed;
     }
 
-    bool WidthFixed() const
+    bool WidthFixed(bool checkPercent = true) const
     {
-        return width_ && width_->GetDimension().Unit() != DimensionUnit::PERCENT;
+        return width_ && (!checkPercent || (checkPercent && width_->GetDimension().Unit() != DimensionUnit::PERCENT));
     }
 
-    bool HeightFixed() const
+    bool HeightFixed(bool checkPercent = true) const
     {
-        return height_ && height_->GetDimension().Unit() != DimensionUnit::PERCENT;
+        return height_ && (!checkPercent || (checkPercent && height_->GetDimension().Unit() != DimensionUnit::PERCENT));
     }
 
     bool PercentWidth() const
@@ -580,6 +580,79 @@ struct PaddingPropertyT<float> {
         right.reset();
         top.reset();
         bottom.reset();
+    }
+
+    bool Empty()
+    {
+        return !left.has_value() && !right.has_value() && !top.has_value() && !bottom.has_value();
+    }
+
+    PaddingPropertyT<float> Plus(const PaddingPropertyT<float>& another, bool skipNullOpt = true)
+    {
+        return Calculate(another, skipNullOpt, true);
+    }
+
+    PaddingPropertyT<float> Minus(const PaddingPropertyT<float>& another, bool skipNullOpt = true) const
+    {
+        return Calculate(another, skipNullOpt, false);
+    }
+
+    bool AllSidesFilled(bool checkZero = false)
+    {
+        // checking all sides has values and not zero
+        if (checkZero) {
+            return !NearZero(left.value_or(0.0f)) && !NearZero(right.value_or(0.0f)) && !NearZero(top.value_or(0.0f)) &&
+                   !NearZero(bottom.value_or(0.0f));
+        }
+        return left.has_value() && right.has_value() && top.has_value() && bottom.has_value();
+    }
+
+    bool OptionalValueCover(const PaddingPropertyT<float>& another)
+    {
+        if (another.left.has_value() && !left.has_value()) {
+            return false;
+        }
+        if (another.right.has_value() && !right.has_value()) {
+            return false;
+        }
+        if (another.top.has_value() && !top.has_value()) {
+            return false;
+        }
+        if (another.bottom.has_value() && !bottom.has_value()) {
+            return false;
+        }
+        return true;
+    }
+
+private:
+    PaddingPropertyT<float> Calculate(const PaddingPropertyT<float>& another, bool skipNullOpt, bool isAdd) const
+    {
+        PaddingPropertyT<float> result;
+        // skipNullOpt needs at least one padding has value to keep nullopt if two sides both null,
+        // !skipNullOpt needs both sides has value
+        int32_t factor = isAdd ? 1.0f : -1.0f;
+        // to resolve cyclomatic complexity
+        bool calculateCondition = (!skipNullOpt && left.has_value() && another.left.has_value()) ||
+                                  (skipNullOpt && (left.has_value() || another.left.has_value()));
+        if (calculateCondition) {
+            result.left = left.value_or(0.0f) + factor * another.left.value_or(0.0f);
+        }
+        calculateCondition = (!skipNullOpt && right.has_value() && another.right.has_value()) ||
+                             (skipNullOpt && (right.has_value() || another.right.has_value()));
+        if (calculateCondition) {
+            result.right = right.value_or(0.0f) + factor * another.right.value_or(0.0f);
+        }
+        calculateCondition = (!skipNullOpt && top.has_value() && another.top.has_value()) ||
+                             (skipNullOpt && (top.has_value() || another.top.has_value()));
+        if (calculateCondition) {
+            result.top = top.value_or(0.0f) + factor * another.top.value_or(0.0f);
+        }
+        calculateCondition = (!skipNullOpt && bottom.has_value() && another.bottom.has_value()) ||
+                             (skipNullOpt && (bottom.has_value() || another.bottom.has_value()));
+        if (calculateCondition) {
+            result.bottom = bottom.value_or(0.0f) + factor * another.bottom.value_or(0.0f);
+        }
+        return result;
     }
 };
 

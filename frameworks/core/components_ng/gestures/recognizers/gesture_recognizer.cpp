@@ -65,6 +65,17 @@ bool NGGestureRecognizer::ShouldResponse()
     return true;
 }
 
+bool NGGestureRecognizer::IsAllowedType(SourceTool type)
+{
+    // allow all types by default
+    if (!gestureInfo_) {
+        return true;
+    }
+
+    auto allowedTypes = gestureInfo_->GetAllowedTypes();
+    return allowedTypes.empty() || allowedTypes.find(type) != allowedTypes.end();
+}
+
 void NGGestureRecognizer::OnRejectBridgeObj()
 {
     if (bridgeObjList_.empty()) {
@@ -81,62 +92,86 @@ void NGGestureRecognizer::OnRejectBridgeObj()
 
 bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 {
-    if (!ShouldResponse()) {
+    if (!IsAllowedType(point.sourceTool) && point.type != TouchType::CANCEL) {
+        if (point.type == TouchType::DOWN) {
+            RemoveUnsupportEvent(point.id);
+        }
         return true;
     }
-    if (bridgeMode_) {
+    if (!ShouldResponse() || bridgeMode_) {
         return true;
     }
+    auto multiFingerRecognizer = AceType::DynamicCast<MultiFingersRecognizer>(Claim(this));
+    if (multiFingerRecognizer) {
+        multiFingerRecognizer->ResetTouchPointsForSucceedBlock();
+    }
+    return ProcessTouchEvent(point);
+}
+
+bool NGGestureRecognizer::ProcessTouchEvent(const TouchEvent& point)
+{
     switch (point.type) {
         case TouchType::MOVE:
             HandleTouchMoveEvent(point);
             HandleEventToBridgeObjList(point, bridgeObjList_);
             break;
-        case TouchType::DOWN: {
-            deviceId_ = point.deviceId;
-            deviceType_ = point.sourceType;
-            if (deviceType_ == SourceType::MOUSE) {
-                inputEventType_ = InputEventType::MOUSE_BUTTON;
-            } else {
-                inputEventType_ = InputEventType::TOUCH_SCREEN;
-            }
-            auto result = AboutToAddCurrentFingers(point);
-            if (result) {
-                HandleTouchDownEvent(point);
-                HandleEventToBridgeObjList(point, bridgeObjList_);
-            }
+        case TouchType::DOWN:
+            HandleTouchDown(point);
             break;
-        }
-        case TouchType::UP: {
-            auto result = AboutToMinusCurrentFingers(point.id);
-            if (result) {
-                HandleTouchUpEvent(point);
-                HandleEventToBridgeObjList(point, bridgeObjList_);
-                currentFingers_--;
-            }
+        case TouchType::UP:
+            HandleTouchUp(point);
             break;
-        }
-        case TouchType::CANCEL: {
-            auto result = AboutToMinusCurrentFingers(point.id);
-            if (result) {
-                HandleTouchCancelEvent(point);
-                HandleEventToBridgeObjList(point, bridgeObjList_);
-                currentFingers_--;
-            }
+        case TouchType::CANCEL:
+            HandleTouchCancel(point);
             break;
-        }
         default:
             break;
     }
     return true;
 }
 
+void NGGestureRecognizer::HandleTouchDown(const TouchEvent& point)
+{
+    deviceId_ = point.deviceId;
+    deviceType_ = point.sourceType;
+    inputEventType_ = (deviceType_ == SourceType::MOUSE) ? InputEventType::MOUSE_BUTTON : InputEventType::TOUCH_SCREEN;
+
+    auto result = AboutToAddCurrentFingers(point);
+    if (result) {
+        HandleTouchDownEvent(point);
+        HandleEventToBridgeObjList(point, bridgeObjList_);
+    }
+}
+
+void NGGestureRecognizer::HandleTouchUp(const TouchEvent& point)
+{
+    auto result = AboutToMinusCurrentFingers(point.id);
+    if (result) {
+        HandleTouchUpEvent(point);
+        HandleEventToBridgeObjList(point, bridgeObjList_);
+        currentFingers_--;
+    }
+}
+
+void NGGestureRecognizer::HandleTouchCancel(const TouchEvent& point)
+{
+    auto result = AboutToMinusCurrentFingers(point.id);
+    if (result) {
+        HandleTouchCancelEvent(point);
+        HandleEventToBridgeObjList(point, bridgeObjList_);
+        currentFingers_--;
+    }
+}
+
 bool NGGestureRecognizer::HandleEvent(const AxisEvent& event)
 {
-    if (!ShouldResponse()) {
+    if (!IsAllowedType(event.sourceTool) && event.action != AxisAction::CANCEL) {
+        if (event.action == AxisAction::BEGIN) {
+            RemoveUnsupportEvent(event.id);
+        }
         return true;
     }
-    if (bridgeMode_) {
+    if (!ShouldResponse() || bridgeMode_) {
         return true;
     }
     switch (event.action) {
@@ -374,6 +409,15 @@ void NGGestureRecognizer::HandleDidAccept()
     }
 }
 
+void NGGestureRecognizer::ReconcileGestureInfoFrom(const RefPtr<NGGestureRecognizer>& recognizer)
+{
+    CHECK_NULL_VOID(recognizer);
+    auto currGestureInfo = recognizer->GetGestureInfo();
+    if (gestureInfo_ && currGestureInfo) {
+        gestureInfo_->SetAllowedTypes(currGestureInfo->GetAllowedTypes());
+    }
+}
+
 RefPtr<GestureSnapshot> NGGestureRecognizer::Dump() const
 {
     RefPtr<GestureSnapshot> info = TouchEventTarget::Dump();
@@ -391,8 +435,9 @@ void NGGestureRecognizer::AddGestureProcedure(const std::string& procedure) cons
     auto eventMgr = context->GetEventManager();
     CHECK_NULL_VOID(eventMgr);
     eventMgr->GetEventTreeRecord(isPostEventResult_ ? EventTreeType::POST_EVENT : EventTreeType::TOUCH)
-        .AddGestureProcedure(reinterpret_cast<uintptr_t>(this), procedure, TransRefereeState(this->GetRefereeState()),
-            TransGestureDisposal(this->GetGestureDisposal()));
+        .AddGestureProcedure(reinterpret_cast<uintptr_t>(this), procedure,
+        extraInfo_, TransRefereeState(this->GetRefereeState()),
+        TransGestureDisposal(this->GetGestureDisposal()));
 }
 
 void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
@@ -406,8 +451,9 @@ void NGGestureRecognizer::AddGestureProcedure(const TouchEvent& point,
     auto eventMgr = context->GetEventManager();
     CHECK_NULL_VOID(eventMgr);
     eventMgr->GetEventTreeRecord(isPostEventResult_ ? EventTreeType::POST_EVENT : EventTreeType::TOUCH)
-        .AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)), point,
-            TransRefereeState(recognizer->GetRefereeState()), TransGestureDisposal(recognizer->GetGestureDisposal()));
+        .AddGestureProcedure(reinterpret_cast<uintptr_t>(AceType::RawPtr(recognizer)),
+        point, recognizer->GetExtraInfo(), TransRefereeState(recognizer->GetRefereeState()),
+        TransGestureDisposal(recognizer->GetGestureDisposal()));
 }
 
 bool NGGestureRecognizer::SetGestureGroup(const WeakPtr<NGGestureRecognizer>& gestureGroup)

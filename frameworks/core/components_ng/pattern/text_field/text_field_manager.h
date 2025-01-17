@@ -58,6 +58,10 @@ public:
         optionalPosition_ = std::nullopt;
     }
 
+    RectF GetFocusedNodeCaretRect();
+    
+    void TriggerAvoidOnCaretChange();
+
     void AvoidKeyboardInSheet(const RefPtr<FrameNode>& textField);
 
     void MovePage(int32_t pageId, const Offset& rootRect, double offsetHeight) override {}
@@ -76,8 +80,16 @@ public:
         }
         if (onFocusTextField_ != onFocusTextField) {
             SetImeAttached(false);
+            GetOnFocusTextFieldInfo(onFocusTextField);
         }
         onFocusTextField_ = onFocusTextField;
+    }
+
+    void GetOnFocusTextFieldInfo(const WeakPtr<Pattern>& onFocusTextField);
+
+    bool IsScrollableChild()
+    {
+        return isScrollableChild_;
     }
 
     bool ScrollTextFieldToSafeArea();
@@ -122,6 +134,8 @@ public:
     bool UsingCustomKeyboardAvoid() {
         return usingCustomKeyboardAvoid_;
     }
+
+    void TriggerCustomKeyboardAvoid();
 
     void SetUsingCustomKeyboardAvoid(bool usingCustomKeyboardAvoid) {
         usingCustomKeyboardAvoid_ = usingCustomKeyboardAvoid;
@@ -294,6 +308,8 @@ private:
     double laterAvoidHeight_ = 0.0;
     int32_t laterOrientation_ = -1;
     bool isImeAttached_ = false;
+    bool isScrollableChild_ = false;
+    float lastKeyboardOffset_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

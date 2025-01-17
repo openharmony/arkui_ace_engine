@@ -135,7 +135,8 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     pickerStack->MountToParent(contentColumn);
     // build lunarswitch Node
     if (settingData.lunarswitch) {
-        CreateLunarswitchNode(contentColumn, dateNode, std::move(lunarChangeEvent), settingData.isLunar);
+        CreateLunarswitchNode(contentColumn, dateNode, std::move(lunarChangeEvent), settingData.isLunar,
+            settingData.checkboxSettingData);
     }
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
@@ -1181,8 +1182,24 @@ RefPtr<FrameNode> DatePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     return buttonCancelNode;
 }
 
+void DatePickerDialogView::UpdateCheckboxPaintProperty(const RefPtr<CheckBoxPaintProperty>& checkboxPaintProps,
+    bool isLunar, const CheckboxSettingData& checkboxSettingData)
+{
+    checkboxPaintProps->UpdateCheckBoxSelect(isLunar);
+    if (checkboxSettingData.selectedColor.has_value()) {
+        checkboxPaintProps->UpdateCheckBoxSelectedColor(checkboxSettingData.selectedColor.value());
+    }
+    if (checkboxSettingData.unselectedColor.has_value()) {
+        checkboxPaintProps->UpdateCheckBoxUnSelectedColor(checkboxSettingData.unselectedColor.value());
+    }
+    if (checkboxSettingData.strokeColor.has_value()) {
+        checkboxPaintProps->UpdateCheckBoxCheckMarkColor(checkboxSettingData.strokeColor.value());
+    }
+}
+
 void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& contentColumn,
-    const RefPtr<FrameNode>& dateNode, std::function<void(const bool)>&& changeEvent, bool isLunar)
+    const RefPtr<FrameNode>& dateNode, std::function<void(const bool)>&& changeEvent, bool isLunar,
+    const CheckboxSettingData& checkboxSettingData)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1209,7 +1226,9 @@ void DatePickerDialogView::CreateLunarswitchNode(const RefPtr<FrameNode>& conten
     eventHub->SetOnChange(std::move(changeEvent));
     auto checkboxPaintProps = checkbox->GetPaintProperty<CheckBoxPaintProperty>();
     CHECK_NULL_VOID(checkboxPaintProps);
-    checkboxPaintProps->UpdateCheckBoxSelect(isLunar);
+    UpdateCheckboxPaintProperty(checkboxPaintProps, isLunar, checkboxSettingData);
+    auto checkboxPattern = checkbox->GetPattern<CheckBoxPattern>();
+    checkboxPattern->SaveCheckboxSettingData(checkboxSettingData);
     auto checkboxLayoutProps = checkbox->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(checkboxLayoutProps);
     MarginProperty marginCheckbox;

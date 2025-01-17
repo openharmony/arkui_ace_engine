@@ -1174,6 +1174,15 @@ class FrameNode {
         this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
         return this._commonEvent;
     }
+    get gestureEvent() {
+        if (this._gestureEvent === undefined) {
+            this._gestureEvent = new UIGestureEvent();
+            this._gestureEvent.setNodePtr(this.nodePtr_);
+            let weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nodePtr_);
+            this._gestureEvent.setWeakNodePtr(weakPtr);
+        }
+        return this._gestureEvent;
+    }
     updateInstance(uiContext) {
         this.uiContext_ = uiContext;
         this.instanceId_ = uiContext.instanceId_;
@@ -1428,9 +1437,54 @@ const __creatorMap__ = new Map([
                 return new ArkWaterFlowComponent(node, type);
             });
         }],
+    ['SymbolGlyph', (context)=> {
+            return new TypedFrameNode(context, 'SymbolGlyph', (node, type) => {
+                return new ArkSymbolGlyphComponent(node, type);
+            });
+        }],
     ['FlowItem', (context) => {
             return new TypedFrameNode(context, 'FlowItem', (node, type) => {
                 return new ArkFlowItemComponent(node, type);
+            });
+        }],
+    ['Marquee', (context) => {
+            return new TypedFrameNode(context, 'Marquee', (node, type) => {
+                return new ArkMarqueeComponent(node, type);
+            });
+        }],
+    ['TextArea', (context) => {
+            return new TypedFrameNode(context, 'TextArea', (node, type) => {
+                return new ArkTextAreaComponent(node, type);
+            });
+        }],
+    ['QRCode', (context) => {
+            return new TypedFrameNode(context, 'QRCode', (node, type) => {
+                return new ArkQRCodeComponent(node, type);
+            });
+        }],
+    ['Badge', (context) => {
+            return new TypedFrameNode(context, 'Badge', (node, type) => {
+                return new ArkBadgeComponent(node, type);
+            });
+        }],
+    ['Grid', (context) => {
+            return new TypedFrameNode(context, 'Grid', (node, type) => {
+                return new ArkGridComponent(node, type);
+            });
+        }],
+    ['GridItem', (context) => {
+            return new TypedFrameNode(context, 'GridItem', (node, type) => {
+                return new ArkGridItemComponent(node, type);
+            });
+        }],
+    ['TextClock', (context) => {
+            return new TypedFrameNode(context, 'TextClock', (node, type) => {
+                return new ArkTextClockComponent(node, type);
+            });
+        }],
+    ['TextTimer', (context) => {
+            return new TypedFrameNode(context, 'TextTimer', (node, type) => {
+                return new ArkTextTimerComponent(node, type);
             });
         }],
 ]);

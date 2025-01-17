@@ -82,6 +82,7 @@ public:
     static void SetOnDestroy(FrameNode* frameNode, DestroyEvent&& onDestroy);
     static void EnableAnalyzer(FrameNode* frameNode, bool enable);
     static void EnableSecure(FrameNode* frameNode, bool enable);
+    static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
 
 private:
     static XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);

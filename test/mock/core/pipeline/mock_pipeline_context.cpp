@@ -18,6 +18,8 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/accessibility/accessibility_manager.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
@@ -169,13 +171,15 @@ void PipelineContext::SendEventToAccessibilityWithNode(
     const AccessibilityEvent& accessibilityEvent, const RefPtr<FrameNode>& node)
 {}
 
-void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe) {}
+void PipelineContext::OnTouchEvent(
+    const TouchEvent& point, const RefPtr<FrameNode>& node, bool isSubPipe, bool isEventsPassThrough)
+{}
 
 void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode>& node) {}
 
-void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe) {}
+void PipelineContext::OnTouchEvent(const TouchEvent& point, bool isSubPipe, bool isEventsPassThrough) {}
 
 void PipelineContext::OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) {}
 
@@ -279,6 +283,8 @@ void PipelineContext::FlushFocus() {}
 
 void PipelineContext::FlushOnceVsyncTask() {}
 
+void PipelineContext::SetOnWindowFocused(const std::function<void()>& callback) {}
+
 void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp) {}
 
 void PipelineContext::FlushAnimation(uint64_t nanoTimestamp) {}
@@ -332,7 +338,7 @@ void PipelineContext::OnSurfacePositionChanged(int32_t posX, int32_t posY) {}
 
 void PipelineContext::FlushReload(const ConfigurationChange& configurationChange, bool fullUpdate) {}
 
-void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize) {}
+void PipelineContext::SetContainerButtonHide(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) {}
 
 void PipelineContext::AddAnimationClosure(std::function<void()>&& animation) {}
 
@@ -450,6 +456,8 @@ void PipelineContext::AddSyncGeometryNodeTask(std::function<void()>&& task)
     }
 }
 
+void PipelineContext::StopWindowAnimation() {}
+
 void PipelineContext::FlushSyncGeometryNodeTasks() {}
 
 void PipelineContext::AddAfterRenderTask(std::function<void()>&& task)
@@ -522,8 +530,16 @@ void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea)
     safeAreaManager_->UpdateCutoutSafeArea(cutoutSafeArea);
 }
 void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {};
-void PipelineContext::SetEnableKeyBoardAvoidMode(bool value) {};
+KeyBoardAvoidMode PipelineContext::GetEnableKeyBoardAvoidMode()
+{
+    return KeyBoardAvoidMode::OFFSET;
+}
+void PipelineContext::SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode value) {};
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
+{
+    return false;
+}
+bool PipelineContext::UsingCaretAvoidMode()
 {
     return false;
 }
@@ -584,7 +600,7 @@ RefPtr<FrameNode> PipelineContext::FindNavigationNodeToHandleBack(const RefPtr<U
     return nullptr;
 }
 
-bool PipelineContext::SetIsFocusActive(bool isFocusActive)
+bool PipelineContext::SetIsFocusActive(bool isFocusActive, FocusActiveReason reason, bool autoFocusInactive)
 {
     return false;
 }
@@ -857,6 +873,11 @@ bool PipelineBase::HasFloatTitle() const
     return true;
 }
 
+void PipelineBase::AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId eventId)
+{
+    uiExtensionEvents_.insert(NG::UIExtCallbackEvent(eventId));
+}
+
 Dimension NG::PipelineContext::GetCustomTitleHeight()
 {
     return Dimension();
@@ -884,6 +905,24 @@ bool NG::PipelineContext::CheckThreadSafe() const
 {
     return false;
 }
+
+void NG::PipelineContext::EnableContainerModalGesture(bool isEnable) {}
+
+bool NG::PipelineContext::GetContainerFloatingTitleVisible()
+{
+    return false;
+}
+
+bool NG::PipelineContext::GetContainerCustomTitleVisible()
+{
+    return false;
+}
+
+bool NG::PipelineContext::GetContainerControlButtonVisible() 
+{
+    return false;
+}
+
 void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameNode>& node)
 {
     CHECK_NULL_VOID(node);
@@ -906,5 +945,9 @@ void NG::PipelineContext::RegisterAttachedNode(UINode* uiNode) {}
 void NG::PipelineContext::RemoveAttachedNode(UINode* uiNode) {}
 NG::ScopedLayout::ScopedLayout(PipelineContext* pipeline) {}
 NG::ScopedLayout::~ScopedLayout() {}
+
+void NG::PipelineContext::DumpUIExt() const
+{
+}
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

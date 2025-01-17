@@ -1348,24 +1348,24 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg040, TestSize.Level1)
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     ASSERT_NE(containerPattern, nullptr);
     /**
-     * @tc.steps2: call SetContainerButtonHide with params true, true, false.
+     * @tc.steps2: call SetContainerButtonHide with params true, true, false, false.
      * @tc.expected: depends on first param, hideSplitButton value is true.
      */
-    context_->SetContainerButtonHide(true, true, false);
+    context_->SetContainerButtonHide(true, true, false, false);
     EXPECT_TRUE(containerPattern->hideSplitButton_ == true);
     /**
-     * @tc.steps3: call SetContainerButtonHide with params false, true, false.
+     * @tc.steps3: call SetContainerButtonHide with params false, true, false, false.
      * @tc.expected: depends on first param, hideSplitButton value is false.
      */
-    context_->SetContainerButtonHide(false, true, false);
+    context_->SetContainerButtonHide(false, true, false, false);
     EXPECT_TRUE(containerPattern->hideSplitButton_ == false);
 
     /**
-     * @tc.steps4: call SetContainerButtonHide with params false, true, false.
+     * @tc.steps4: call SetContainerButtonHide with params false, true, false, false.
      * @tc.expected: cover branch windowModal_ is not CONTAINER_MODAL
      */
     context_->SetWindowModal(WindowModal::DIALOG_MODAL);
-    context_->SetContainerButtonHide(false, true, false);
+    context_->SetContainerButtonHide(false, true, false, false);
     EXPECT_FALSE(containerPattern->hideSplitButton_);
 }
 
@@ -1429,7 +1429,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg060, TestSize.Level1)
      * @tc.steps2: Set EnableAvoidKeyboardMode is true.
      * @tc.expected: get KeyboardSafeAreaEnabled is true.
      */
-    context_->SetEnableKeyBoardAvoidMode(true);
+    context_->SetEnableKeyBoardAvoidMode(KeyBoardAvoidMode::RESIZE);
     EXPECT_TRUE(context_->GetSafeAreaManager()->KeyboardSafeAreaEnabled());
 
     /**

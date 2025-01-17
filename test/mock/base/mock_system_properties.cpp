@@ -196,4 +196,9 @@ bool SystemProperties::IsSmallFoldProduct()
 {
     return false;
 }
+
+bool SystemProperties::IsNeedResampleTouchPoints()
+{
+    return true;
+}
 } // namespace OHOS::Ace

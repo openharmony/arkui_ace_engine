@@ -222,6 +222,33 @@ public:
         ViewAbstract::SetPadding(paddings);
     }
 
+    void ResetSafeAreaPadding() override
+    {
+        ViewAbstract::ResetSafeAreaPadding();
+    }
+
+    void SetSafeAreaPadding(const CalcDimension& value) override
+    {
+        if (value.Unit() == DimensionUnit::CALC) {
+            ViewAbstract::SetSafeAreaPadding(NG::CalcLength(value.CalcValue()));
+        } else {
+            // padding must great or equal zero.
+            ViewAbstract::SetSafeAreaPadding(NG::CalcLength(value.IsNonNegative() ? value : CalcDimension()));
+        }
+    }
+
+    void SetSafeAreaPaddings(const NG::PaddingProperty& paddings) override
+    {
+        ViewAbstract::SetSafeAreaPadding(paddings);
+    }
+
+    void SetSafeAreaPaddings(const std::optional<CalcDimension>& top, const std::optional<CalcDimension>& bottom,
+        const std::optional<CalcDimension>& left, const std::optional<CalcDimension>& right) override
+    {
+        NG::PaddingProperty paddings = NG::ConvertToCalcPaddingProperty(top, bottom, left, right);
+        ViewAbstract::SetSafeAreaPadding(paddings);
+    }
+
     void SetMargin(const CalcDimension& value) override
     {
         if (value.Unit() == DimensionUnit::CALC) {
@@ -502,6 +529,11 @@ public:
     void SetLayoutPriority(int32_t priority) override {}
 
     void SetLayoutWeight(float value) override
+    {
+        ViewAbstract::SetLayoutWeight(value);
+    }
+
+    void SetLayoutWeight(const LayoutWeightPair& value) override
     {
         ViewAbstract::SetLayoutWeight(value);
     }
@@ -862,9 +894,9 @@ public:
         ViewAbstract::SetHueRotate(value);
     }
 
-    void SetUseEffect(bool useEffect) override
+    void SetUseEffect(bool useEffect, EffectType effectType) override
     {
-        ViewAbstract::SetUseEffect(useEffect);
+        ViewAbstract::SetUseEffect(useEffect, effectType);
     }
 
     void SetUseShadowBatching(bool useShadowBatching) override
@@ -914,19 +946,19 @@ public:
         ViewAbstract::SetOnTouch(std::move(touchEventFunc));
     }
 
-    void SetOnKeyEvent(OnKeyCallbackFunc&& onKeyCallback) override
+    void SetOnKeyEvent(OnKeyConsumeFunc&& onKeyCallback) override
     {
         ViewAbstract::SetOnKeyEvent(std::move(onKeyCallback));
     }
 
-    void SetOnKeyPreIme(OnKeyPreImeFunc&& onKeyCallback) override
+    void SetOnKeyPreIme(OnKeyConsumeFunc&& onKeyCallback) override
     {
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->SetOnKeyPreImeCallback(std::move(onKeyCallback));
     }
 
-    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyPreImeFunc&& onKeyCallback)
+    static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback)
     {
         auto focusHub = frameNode->GetOrCreateFocusHub();
         CHECK_NULL_VOID(focusHub);
@@ -1129,6 +1161,11 @@ public:
         ViewAbstract::SetFocusable(focusable);
     }
 
+    void SetTabStop(bool tabStop) override
+    {
+        ViewAbstract::SetTabStop(tabStop);
+    }
+
     void SetFocusNode(bool focus) override {}
 
     void SetTabIndex(int32_t index) override
@@ -1263,6 +1300,7 @@ public:
     void SetAccessibilityVirtualNode(std::function<void()>&& buildFunc) override;
     void SetAccessibilitySelected(bool selected, bool resetValue) override;
     void SetAccessibilityChecked(bool checked, bool resetValue) override;
+    void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1396,9 +1434,9 @@ public:
         ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
     }
 
-    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup) override
+    void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) override
     {
-        ViewAbstract::SetFocusScopeId(focusScopeId, isGroup);
+        ViewAbstract::SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
     }
 
     void SetFocusScopePriority(const std::string& focusScopeId, const uint32_t focusPriority) override
@@ -1432,6 +1470,7 @@ public:
     static void SetAccessibilityDescription(FrameNode* frameNode, const std::string& description);
     static void SetAccessibilitySelected(FrameNode* frameNode, bool selected, bool resetValue);
     static void SetAccessibilityChecked(FrameNode* frameNode, bool checked, bool resetValue);
+    static void SetAccessibilityTextPreferred(FrameNode* frameNode, bool accessibilityTextPreferred);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {

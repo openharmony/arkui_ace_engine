@@ -44,6 +44,7 @@ struct NamedRouterProperty {
     std::string bundleName;
     std::string moduleName;
     std::string pagePath;
+    std::string ohmUrl;
 };
 
 class JsiDeclarativeEngineInstance final : public AceType, public JsEngineInstance {
@@ -454,6 +455,12 @@ public:
     static void AddToNavigationBuilderMap(std::string name,
         panda::Global<panda::ObjectRef> builderFunc);
     bool LoadNamedRouterSource(const std::string& namedRoute, bool isTriggeredByJs) override;
+    std::unique_ptr<JsonValue> GetFullPathInfo() override;
+    void RestoreFullPathInfo(std::unique_ptr<JsonValue> namedRouterInfo) override;
+    std::unique_ptr<JsonValue> GetNamedRouterInfo() override;
+    void RestoreNamedRouterInfo(std::unique_ptr<JsonValue> namedRouterInfo) override;
+    bool IsNamedRouterNeedPreload(const std::string& name) override;
+    void PreloadNamedRouter(const std::string& name, std::function<void(bool)>&& loadFinishCallback) override;
     std::string SearchRouterRegisterMap(const std::string& pageName) override;
     bool UpdateRootComponent() override;
     bool LoadPluginComponent(const std::string& url, const RefPtr<JsAcePage>& page, bool isMainPage) override;

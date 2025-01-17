@@ -35,7 +35,8 @@ public:
     static RefPtr<FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
         const InnerModalUIExtensionConfig& config);
 
-    void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, const RefPtr<NG::FrameNode>& placeholderNode = nullptr,
+    void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
+        const std::map<NG::PlaceholderType, RefPtr<NG::FrameNode>>& placeholderMap,
         bool transferringCaller = false, bool densityDpi = true) override;
     // for Embedded Component
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, SessionType sessionType) override;

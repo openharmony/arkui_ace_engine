@@ -40,6 +40,20 @@ public:
     NavDestinationPatternBase() = default;
     ~NavDestinationPatternBase() override = default;
 
+    void SetTitleBarStyle(const std::optional<BarStyle>& barStyle);
+
+    std::optional<BarStyle> GetTitleBarStyle() const
+    {
+        return titleBarStyle_;
+    }
+
+    void SetToolBarStyle(const std::optional<BarStyle>& barStyle);
+
+    std::optional<BarStyle> GetToolBarStyle() const
+    {
+        return toolBarStyle_;
+    }
+
     bool IsAtomicNode() const override
     {
         return false;
@@ -220,8 +234,31 @@ public:
         needHideToolBarForNavWidth_ = hide;
     }
 
+    void UpdateSafeAreaPaddingChanged(bool changed)
+    {
+        safeAreaPaddingChanged_ = changed;
+    }
+
+    bool IsSafeAreaPaddingChanged() const
+    {
+        return safeAreaPaddingChanged_;
+    }
+
+    float GetTitleBarOffsetY() const
+    {
+        return titleBarOffsetY_;
+    }
+
+    void SetTitleBarOffsetY(float titleBarOffsetY)
+    {
+        titleBarOffsetY_ = titleBarOffsetY;
+    }
+
+    void MarkSafeAreaPaddingChangedWithCheckTitleBar(float titleBarHeight);
 protected:
     void AbortBarAnimation();
+    void UpdateHideBarProperty();
+    void ExpandContentSafeAreaIfNeeded();
     void RemoveAnimation(int32_t id);
     void BarAnimationPropertyCallback(
         bool needRunTitleBarAnimation, bool hideTitle, bool needRunToolBarAnimation, bool hideTool);
@@ -231,6 +268,9 @@ protected:
 
     bool isHideToolbar_ = false;
     bool isHideTitlebar_ = false;
+    std::optional<BarStyle> titleBarStyle_;
+    std::optional<BarStyle> toolBarStyle_;
+    bool safeAreaPaddingChanged_ = false;
     float avoidKeyboardOffset_ = 0.0f;
     std::vector<BarItem> titleBarMenuItems_;
     std::vector<BarItem> toolBarMenuItems_;
@@ -238,6 +278,7 @@ protected:
     std::optional<int32_t> landscapeMenuNodeId_;
     int32_t maxMenuNums_ = -1;
     float titleBarHeight_ = 0.0f;
+    float titleBarOffsetY_ = 0.0f;
     float toolBarHeight_ = 0.0f;
     float toolBarDividerHeight_ = 0.0f;
     int32_t titleBarAnimationCount_ = 0;

@@ -41,6 +41,7 @@ constexpr double FRICTION_DEFAULT = 0.6;
 constexpr double DEFAULT_DIMENSION_VALUE = 0.0;
 constexpr double DEFAULT_SCROLLBARWIDTH_VALUE = 4.0;
 constexpr int32_t PARAM_SIZE = 4;
+constexpr Dimension DEFAULT_FADING_EDGE_LENGTH = Dimension(32.0f, DimensionUnit::VP); // default value
 constexpr float DEFAULT_OFFSET_VALUE = 0.0;
 constexpr int32_t ERROR_INT_CODE = -1;
 constexpr int32_t SCROLL_TO_INDEX_0 = 0;
@@ -534,6 +535,42 @@ void SetScrollToIndex(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 smoot
     CHECK_NULL_VOID(scrollControllerBase);
     scrollControllerBase->ScrollToIndex(index, smooth, static_cast<ScrollAlign>(align));
 }
+
+void SetScrollFadingEdge(
+    ArkUINodeHandle node, ArkUI_Bool fadingEdge, ArkUI_Float32 fadingEdgeLengthValue, ArkUI_Int32 fadingEdgeLengthUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension fadingEdgeLengthDimension =
+        Dimension(fadingEdgeLengthValue, static_cast<OHOS::Ace::DimensionUnit>(fadingEdgeLengthUnit));
+    NG::ScrollableModelNG::SetFadingEdge(frameNode, fadingEdge, fadingEdgeLengthDimension);
+}
+
+void ResetScrollFadingEdge(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::ScrollableModelNG::SetFadingEdge(frameNode, false, DEFAULT_FADING_EDGE_LENGTH);
+}
+
+void GetScrollFadingEdge(ArkUINodeHandle node, ArkUIInt32orFloat32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    (*values)[0].i32 = static_cast<int32_t>(NG::ScrollableModelNG::GetFadingEdge(frameNode));
+    (*values)[1].f32 = NG::ScrollableModelNG::GetFadingEdgeLength(frameNode);
+}
+
+void GetScrollContentSize(ArkUINodeHandle node, ArkUI_Float32 (*values)[2])
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<OHOS::Ace::NG::ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    SizeF size = pattern->GetChildrenExpandedSize();
+    (*values)[0] = Dimension(size.Width(), DimensionUnit::PX).ConvertToVp();
+    (*values)[1] = Dimension(size.Height(), DimensionUnit::PX).ConvertToVp();
+}
 } // namespace
 
 namespace NodeModifier {
@@ -575,7 +612,9 @@ const ArkUIScrollModifier* GetScrollModifier()
         SetScrollOnDidScrollCallBack, ResetScrollOnDidScroll,
         SetScrollOnWillScrollCallBack, ResetScrollOnWillScrollCallBack,
         SetOnScrollFrameBeginCallBack, ResetOnScrollFrameBeginCallBack,
+        SetScrollFadingEdge, ResetScrollFadingEdge, GetScrollFadingEdge,
         SetScrollFling,
+        GetScrollContentSize,
     };
     /* clang-format on */
     return &modifier;

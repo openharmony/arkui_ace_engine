@@ -48,6 +48,8 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
     DialogAlignment::BOTTOM_END };
+const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
+    HoverModeAreaType::BOTTOM_SCREEN };
 const char TIMEPICKER_OPTIONS_HOUR[] = "hour";
 const char TIMEPICKER_OPTIONS_MINUTE[] = "minute";
 const char TIMEPICKER_OPTIONS_SECOND[] = "second";
@@ -263,6 +265,22 @@ std::vector<ButtonInfo> ParseButtonStyles(const JSRef<JSObject>& paramObject)
     }
 
     return buttonInfos;
+}
+
+void ParseDatePickerHoverMode(PickerDialogInfo& pickerDialog, const JSRef<JSObject>& paramObject)
+{
+    auto enableHoverModeValue = paramObject->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        pickerDialog.enableHoverMode = enableHoverModeValue->ToBoolean();
+    }
+
+    auto hoverModeAreaValue = paramObject->GetProperty("hoverModeArea");
+    if (hoverModeAreaValue->IsNumber()) {
+        auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
+        if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
+            pickerDialog.hoverModeArea = HOVER_MODE_AREA_TYPE[hoverModeArea];
+        }
+    }
 }
 } // namespace
 
@@ -934,6 +952,26 @@ std::function<void()> JSDatePickerDialog::GetCancelEvent(
     return cancelEvent;
 }
 
+void JSDatePickerDialog::UpdateLunarSwitchSettingData(
+    const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData)
+{
+    auto selectedColorValue = paramObject->GetProperty("selectedColor");
+    auto unselectedColorValue = paramObject->GetProperty("unselectedColor");
+    auto strokeColorValue = paramObject->GetProperty("strokeColor");
+    Color selectedColor;
+    if (JSViewAbstract::ParseJsColor(selectedColorValue, selectedColor)) {
+        settingData.checkboxSettingData.selectedColor = selectedColor;
+    }
+    Color unselectedColor;
+    if (JSViewAbstract::ParseJsColor(unselectedColorValue, unselectedColor)) {
+        settingData.checkboxSettingData.unselectedColor = unselectedColor;
+    }
+    Color strokeColor;
+    if (JSViewAbstract::ParseJsColor(strokeColorValue, strokeColor)) {
+        settingData.checkboxSettingData.strokeColor = strokeColor;
+    }
+}
+
 void JSDatePickerDialog::UpdateDatePickerSettingData(
     const JSRef<JSObject>& paramObject, NG::DatePickerSettingData& settingData)
 {
@@ -943,6 +981,13 @@ void JSDatePickerDialog::UpdateDatePickerSettingData(
     auto useMilitary = paramObject->GetProperty("useMilitaryTime");
     settingData.isLunar = lunar->ToBoolean();
     settingData.lunarswitch = lunarSwitch->ToBoolean();
+    if (settingData.lunarswitch) {
+        auto lunarSwitchStyle = paramObject->GetProperty("lunarSwitchStyle");
+        if ((!lunarSwitchStyle->IsUndefined()) && lunarSwitchStyle->IsObject()) {
+            auto style = JSRef<JSObject>::Cast(lunarSwitchStyle);
+            UpdateLunarSwitchSettingData(style, settingData);
+        }
+    }
     settingData.showTime = sTime->ToBoolean();
     settingData.useMilitary = useMilitary->ToBoolean();
     auto dateTimeOptionsValue = paramObject->GetProperty("dateTimeOptions");
@@ -1041,7 +1086,6 @@ void JSDatePickerDialog::UpdatePickerDialogInfo(const JSRef<JSObject>& paramObje
     }
 
     auto backgroundBlurStyle = paramObject->GetProperty("backgroundBlurStyle");
-    BlurStyleOption styleOption;
     if (backgroundBlurStyle->IsNumber()) {
         auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -1055,6 +1099,8 @@ void JSDatePickerDialog::UpdatePickerDialogInfo(const JSRef<JSObject>& paramObje
     if ((shadowValue->IsObject() || shadowValue->IsNumber()) && JSViewAbstract::ParseShadowProps(shadowValue, shadow)) {
         pickerDialog.shadow = shadow;
     }
+
+    ParseDatePickerHoverMode(pickerDialog, paramObject);
 }
 
 void JSDatePickerDialog::Show(const JSCallbackInfo& info)
@@ -1723,7 +1769,6 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     }
 
     auto backgroundBlurStyle = paramObject->GetProperty("backgroundBlurStyle");
-    BlurStyleOption styleOption;
     if (backgroundBlurStyle->IsNumber()) {
         auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -1731,6 +1776,8 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
             pickerDialog.backgroundBlurStyle = blurStyle;
         }
     }
+
+    ParseDatePickerHoverMode(pickerDialog, paramObject);
 
     auto buttonInfos = ParseButtonStyles(paramObject);
 

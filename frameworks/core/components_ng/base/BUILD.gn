@@ -51,4 +51,10 @@ build_component_ng("base_ng") {
   if (!use_mingw_win && !use_mac && !use_linux) {
     external_deps = [ "window_manager:scene_session" ]
   }
+  if (ace_engine_feature_enable_nav_split_mode &&
+      defined(vendor_configs.ace_engine_advanced_navigation_split_mode)) {
+    sources += vendor_configs.ace_engine_advanced_navigation_split_mode
+  } else {
+    sources += [ "navigation_register.cpp" ]
+  }
 }

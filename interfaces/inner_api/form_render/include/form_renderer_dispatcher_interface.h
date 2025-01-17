@@ -24,6 +24,9 @@
 #include "base/utils/macros.h"
 #include "interfaces/inner_api/ace/serialized_gesture.h"
 
+namespace OHOS::Rosen {
+class RSTransaction;
+}
 namespace OHOS {
 namespace Ace {
 /**
@@ -49,7 +52,8 @@ public:
      */
     virtual void SetAllowUpdate(bool allowUpdate) = 0;
 
-    virtual void DispatchSurfaceChangeEvent(float width, float height, float borderWidth = 0.0) = 0;
+    virtual void DispatchSurfaceChangeEvent(float width, float height, uint32_t reason = 0,
+        const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr, float borderWidth = 0.0) = 0;
     virtual void SetObscured(bool isObscured) = 0;
 
     virtual void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId) = 0;

@@ -28,6 +28,7 @@
 namespace OHOS::Ace::NG {
 using AlignRulesItem = std::map<AlignDirection, AlignRule>;
 using BiasPair = std::pair<float, float>;
+using LayoutWeightPair = std::pair<std::optional<float>, std::optional<float>>; // <horizontal,vertical>
 using GuidelineItem = std::vector<GuidelineInfo>;
 using BarrierItem = std::vector<BarrierInfo>;
 namespace {
@@ -116,6 +117,7 @@ struct FlexItemProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Bias, BiasPair);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Barrier, BarrierItem);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Guideline, GuidelineItem);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(ChainWeight, LayoutWeightPair); // <horizontal,vertical>
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
     {

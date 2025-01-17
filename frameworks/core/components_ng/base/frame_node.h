@@ -371,8 +371,12 @@ public:
     HitTestResult MouseTest(const PointF& globalPoint, const PointF& parentLocalPoint, MouseTestResult& onMouseResult,
         MouseTestResult& onHoverResult, RefPtr<FrameNode>& hoverNode) override;
 
-    HitTestResult AxisTest(
-        const PointF& globalPoint, const PointF& parentLocalPoint, AxisTestResult& onAxisResult) override;
+    HitTestResult AxisTest(const PointF &globalPoint, const PointF &parentLocalPoint, const PointF &parentRevertPoint,
+        TouchRestrict &touchRestrict, AxisTestResult &axisResult) override;
+
+    void CollectSelfAxisResult(const PointF& globalPoint, const PointF& localPoint, bool& consumed,
+        const PointF& parentRevertPoint, AxisTestResult& axisResult, bool& preventBubbling, HitTestResult& testResult,
+        TouchRestrict& touchRestrict);
 
     void AnimateHoverEffect(bool isHovered) const;
 
@@ -670,6 +674,9 @@ public:
     }
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
+    // some developer use translate to make Grid drag animation, using old function can't find accurate child. 
+    // new function will ignore child's position and translate properties.
+    RefPtr<FrameNode> FindChildByPositionWithoutChildTransform(float x, float y);
 
     RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
     static RefPtr<FrameNode> FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName);
@@ -770,10 +777,12 @@ public:
     void RemoveChildInRenderTree(uint32_t index) override;
     void RemoveAllChildInRenderTree() override;
     void DoRemoveChildInRenderTree(uint32_t index, bool isAll) override;
-    void SetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0) override;
+    void SetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart = 0, int32_t cacheEnd = 0, bool showCached = false) override;
     void SetActiveChildRange(const std::optional<ActiveChildSets>& activeChildSets,
         const std::optional<ActiveChildRange>& activeChildRange = std::nullopt) override;
-    void DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd) override;
+    void DoSetActiveChildRange(
+        int32_t start, int32_t end, int32_t cacheStart, int32_t cacheEnd, bool showCache = false) override;
     void RecycleItemsByIndex(int32_t start, int32_t end) override;
     const std::string& GetHostTag() const override
     {
@@ -807,6 +816,7 @@ public:
     {
         return renderContext_->HasPosition() || renderContext_->HasPositionEdges();
     }
+    void ProcessSafeAreaPadding();
 
     bool SkipMeasureContent() const override;
     float GetBaselineDistance() const override;
@@ -951,7 +961,8 @@ public:
     void SetExposureProcessor(const RefPtr<Recorder::ExposureProcessor>& processor);
 
     void GetVisibleRect(RectF& visibleRect, RectF& frameRect) const;
-    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect);
+    void GetVisibleRectWithClip(RectF& visibleRect, RectF& visibleInnerRect, RectF& frameRect,
+                                bool withClip = false) const;
 
     bool GetIsGeometryTransitionIn() const
     {
@@ -1094,8 +1105,8 @@ public:
     bool GetJSCustomProperty(const std::string& key, std::string& value);
     bool GetCapiCustomProperty(const std::string& key, std::string& value);
 
-    void AddCustomProperty(const std::string& key, const std::string& value);
-    void RemoveCustomProperty(const std::string& key);
+    void AddCustomProperty(const std::string& key, const std::string& value) override;
+    void RemoveCustomProperty(const std::string& key) override;
 
     LayoutConstraintF GetLayoutConstraint() const;
 
@@ -1112,6 +1123,17 @@ public:
     bool GetExposeInnerGestureFlag() const
     {
         return exposeInnerGestureFlag_;
+    }
+
+    RefPtr<UINode> GetCurrentPageRootNode() override;
+
+    std::list<RefPtr<FrameNode>> GetActiveChildren();
+
+    void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
+    {
+        if (visibleAreaChangeTriggerReason_ != triggerReason) {
+            visibleAreaChangeTriggerReason_ = triggerReason;
+        }
     }
 
 protected:
@@ -1191,7 +1213,7 @@ private:
         VisibleCallbackInfo& visibleAreaUserCallback, double currentVisibleRatio,
         double lastVisibleRatio, bool isThrottled = false, bool isInner = false);
     void ProcessThrottledVisibleCallback();
-    bool IsFrameDisappear();
+    bool IsFrameDisappear() const;
     bool IsFrameDisappear(uint64_t timestamp);
     bool IsFrameAncestorDisappear(uint64_t timestamp);
     void ThrottledVisibleTask();
@@ -1226,6 +1248,8 @@ private:
 
     void TriggerShouldParallelInnerWith(
         const ResponseLinkResult& currentRecognizers, const ResponseLinkResult& responseLinkRecognizers);
+
+    void TriggerRsProfilerNodeMountCallbackIfExist();
 
     void AddTouchEventAllFingersInfo(TouchEventInfo& event, const TouchEvent& touchEvent);
 
@@ -1367,6 +1391,7 @@ private:
     std::optional<RectF> syncedFramePaintRect_;
 
     int32_t childrenUpdatedFrom_ = -1;
+    VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
 
     friend class RosenRenderContext;
     friend class RenderContext;

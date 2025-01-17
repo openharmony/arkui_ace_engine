@@ -24,6 +24,7 @@
 #include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
+#include "core/components_ng/pattern/scrollable/scroller_observer_manager.h"
 #include "core/event/ace_events.h"
 
 namespace OHOS::Ace {
@@ -58,6 +59,12 @@ enum class ScrollAlign {
     END,
     AUTO,
     NONE,
+};
+
+struct ListItemGroupIndex {
+    int32_t index = -1;
+    int32_t area = -1;
+    int32_t indexInGroup = -1;
 };
 
 using OnFinishFunc = std::function<void()>;
@@ -102,13 +109,38 @@ public:
     {
         return Rect();
     }
+
+    virtual int32_t GetItemIndex(double x, double y) const
+    {
+        return -1;
+    }
+
     virtual Rect GetItemRectInGroup(int32_t index, int32_t indexInGroup) const
     {
         return Rect();
     }
+
+    virtual ListItemGroupIndex GetItemIndexInGroup(double x, double y) const
+    {
+        return ListItemGroupIndex();
+    }
+
     virtual void CloseAllSwipeActions(OnFinishFunc&& onFinishCallback) {}
 
     virtual void SetObserver(const ScrollerObserver& observer) {}
+
+    virtual void SetObserverManager(const RefPtr<ScrollerObserverManager>& mgr)
+    {
+        observerMgr_ = mgr;
+    }
+
+    virtual RefPtr<ScrollerObserverManager> GetObserverManager() const
+    {
+        return observerMgr_;
+    }
+
+protected:
+    RefPtr<ScrollerObserverManager> observerMgr_ = nullptr;
 };
 } // namespace OHOS::Ace
 

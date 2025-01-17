@@ -4127,10 +4127,11 @@ class PUV2ViewBase extends NativeViewPartialUpdate {
     }
     getChildViewV2ForElmtId(elmtId) {
         const optComp = this.childrenWeakrefMap_.get(elmtId);
-        return (optComp === null || optComp === void 0 ? void 0 : optComp.deref()) && (optComp.deref() instanceof ViewV2) ? optComp === null || optComp === void 0 ? void 0 : optComp.deref() : undefined;
+        return (optComp === null || optComp === void 0 ? void 0 : optComp.deref()) && (optComp.deref() instanceof ViewV2) ?
+            optComp === null || optComp === void 0 ? void 0 : optComp.deref() : undefined;
     }
     purgeVariableDependenciesOnElmtIdOwnFunc(elmtId) {
-        // ViewPU overrides to unregister ViewPU from variables, 
+        // ViewPU overrides to unregister ViewPU from variables,
         // not in use in ViewV2
     }
     // overwritten by sub classes
@@ -6216,6 +6217,7 @@ class ViewPU extends PUV2ViewBase {
         this.runReuse_ = false;
         this.watchedProps = new Map();
         this.recycleManager_ = undefined;
+        // Internal variable to keep track is component recycled or not.
         this.hasBeenRecycled_ = false;
         this.preventRecursiveRecycle_ = false;
         this.delayRecycleNodeRerender = false;
@@ -6373,14 +6375,11 @@ class ViewPU extends PUV2ViewBase {
         
         // it will unregister removed elmtIds from all ViewPu, equals purgeDeletedElmtIdsRecursively
         this.purgeDeletedElmtIds();
-        // un-registers its own id once its children are unregistered above
-        //FIXME: Uncomment once photos app avoids rerendering of removed elementIds
-        //UINodeRegisterProxy unregisterRemovedElmtsFromViewPUs([this id__()]);
+        // unregisters its own id once its children are unregistered above
+        UINodeRegisterProxy.unregisterRemovedElmtsFromViewPUs([this.id__()]);
         
         // in case this ViewPU is currently frozen
         PUV2ViewBase.inactiveComponents_.delete(`${this.constructor.name}[${this.id__()}]`);
-        // FIXME needed ?
-        MonitorV2.clearWatchesFromTarget(this);
         this.updateFuncByElmtId.clear();
         this.watchedProps.clear();
         this.providedVars_.clear();
@@ -7433,6 +7432,8 @@ class ObjectProxyHandler {
         const conditionalTarget = this.getTarget(target);
         // makeObserved logic adds wrapper proxy later
         let ret = this.isMakeObserved_ ? target[key] : ObserveV2.autoProxyObject(target, key);
+        // do not addref for function type, it will make such huge unnecessary dependency collection
+        // for some common function attributes, e.g. toString etc.
         if (typeof (ret) !== 'function') {
             ObserveV2.getObserve().addRef(conditionalTarget, key);
             return (typeof (ret) === 'object' && this.isMakeObserved_) ? RefInfo.get(ret).proxy : ret;
@@ -7546,7 +7547,7 @@ class ArrayProxyHandler {
                     // so we must call "target" here to deal with the collections situations.
                     // But we also need to addref for each index.
                     ObserveV2.getObserve().addRef(conditionalTarget, index.toString());
-                    callbackFn(typeof value == 'object' ? RefInfo.get(value).proxy : value, index, receiver);
+                    callbackFn(typeof value === 'object' ? RefInfo.get(value).proxy : value, index, receiver);
                 });
                 return result;
             };
@@ -8249,7 +8250,7 @@ class ObserveV2 {
                     // FIXME need to call syncInstanceId before update?
                     view.UpdateElement(elmtId);
                 }
-                else {
+                else if (view instanceof ViewV2) {
                     // schedule delayed update once the view gets active
                     view.scheduleDelayedUpdate(elmtId);
                 }
@@ -8273,7 +8274,7 @@ class ObserveV2 {
                 if (view.isViewActive()) {
                     view.uiNodeNeedUpdateV3(elmtId);
                 }
-                else if (view instanceof ViewV2) {
+                else {
                     // schedule delayed update once the view gets active
                     view.scheduleDelayedUpdate(elmtId);
                 }
@@ -8921,6 +8922,11 @@ class ComputedV2 {
                 ObserveV2.getObserve().addRef(this, propertyKey);
                 return ObserveV2.autoProxyObject(this, cachedProp);
             },
+            set(_) {
+                const error = `@Computed ${propertyKey} is readonly, cannot set value for it`;
+                stateMgmtConsole.applicationError(error);
+                throw new Error(error);
+            },
             enumerable: true
         });
         this.target_[cachedProp] = this.observeObjectAccess();
@@ -8956,6 +8962,16 @@ class ComputedV2 {
             ObserveV2.getObserve().stopRecordDependencies();
         }
         return ret;
+    }
+    static clearComputedFromTarget(target) {
+        var _a;
+        let meta;
+        if (!target || typeof target !== 'object' ||
+            !(meta = target[ObserveV2.COMPUTED_REFS]) || typeof meta !== 'object') {
+            return;
+        }
+        
+        Array.from(Object.values(meta)).forEach((computed) => ObserveV2.getObserve().clearWatch(computed.computedId_));
     }
 }
 // start with high number to avoid same id as elmtId for components.
@@ -9110,6 +9126,7 @@ class ViewV2 extends PUV2ViewBase {
            ViewPU inactiveComponents_ delete(`${this.constructor.name}[${this.id__()}]`);
         */
         MonitorV2.clearWatchesFromTarget(this);
+        ComputedV2.clearComputedFromTarget(this);
         this.updateFuncByElmtId.clear();
         if (this.parent_) {
             this.parent_.removeChild(this);

@@ -521,10 +521,7 @@ void ListTestNg::ScrollTo(float position)
 void ListTestNg::CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::function<void(uint32_t)>& createFunc)
 {
     RepeatVirtualScrollModelNG repeatModel;
-    std::function<void(const std::string&, uint32_t)> updateFunc =
-        [&createFunc](const std::string& value, uint32_t idx) {
-            createFunc(idx);
-        };
+    std::function<void(const std::string&, uint32_t)> updateFunc = [](const std::string& value, uint32_t idx) {};
     std::function<std::list<std::string>(uint32_t, uint32_t)> getKeys = [](uint32_t start, uint32_t end) {
         std::list<std::string> keys;
         for (uint32_t i = start; i <= end; ++i) {
@@ -539,8 +536,7 @@ void ListTestNg::CreateRepeatVirtualScrollNode(int32_t itemNumber, const std::fu
         }
         return keys;
     };
-    std::function<void(uint32_t, uint32_t)> setActiveRange = [](uint32_t start, uint32_t end) {
-    };
+    std::function<void(uint32_t, uint32_t)> setActiveRange = [](uint32_t start, uint32_t end) {};
     repeatModel.Create(itemNumber, {}, createFunc, updateFunc, getKeys, getTypes, setActiveRange);
 }
 

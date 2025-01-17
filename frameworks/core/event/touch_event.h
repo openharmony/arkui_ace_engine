@@ -102,6 +102,7 @@ struct TouchEvent final : public UIInputEvent {
     bool isInterpolated = false;
     bool isMouseTouchTest = false;
     bool isFalsified = false;
+    bool isPassThroughMode = false;
 
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
@@ -280,6 +281,12 @@ struct TouchEvent final : public UIInputEvent {
         return *this;
     }
 
+    TouchEvent& SetIsPassThroughMode(bool isPassThroughMode)
+    {
+        this->isPassThroughMode = isPassThroughMode;
+        return *this;
+    }
+
     TouchEvent CloneWith(float scale) const
     {
         return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
@@ -314,6 +321,7 @@ struct TouchEvent final : public UIInputEvent {
         event.isPrivacyMode = isPrivacyMode;
         event.inputXDeltaSlope = inputXDeltaSlope;
         event.inputYDeltaSlope = inputYDeltaSlope;
+        event.isPassThroughMode = isPassThroughMode;
         return event;
     }
 
@@ -450,7 +458,8 @@ struct TouchEvent final : public UIInputEvent {
             .SetSourceType(sourceType)
             .SetIsInterpolated(isInterpolated)
             .SetPointerEvent(pointerEvent)
-            .SetOriginalId(originalId);
+            .SetOriginalId(originalId)
+            .SetIsPassThroughMode(isPassThroughMode);
         event.pointers.emplace_back(std::move(point));
         return event;
     }
@@ -671,12 +680,14 @@ using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;
 
 struct StateRecord {
     std::string procedure;
+    std::string extraInfo;
     std::string state;
     std::string disposal;
     int64_t timestamp = 0;
 
-    StateRecord(const std::string& procedure, const std::string& state, const std::string& disposal,
-        int64_t timestamp):procedure(procedure), state(state), disposal(disposal), timestamp(timestamp)
+    StateRecord(const std::string& procedure, const std::string& extraInfo, const std::string& state,
+        const std::string& disposal, int64_t timestamp) : procedure(procedure), extraInfo(extraInfo),
+        state(state), disposal(disposal), timestamp(timestamp)
     {}
 
     void Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
@@ -696,13 +707,13 @@ struct GestureSnapshot : public virtual AceType {
     DECLARE_ACE_TYPE(GestureSnapshot, AceType);
 
 public:
-    void AddProcedure(const std::string& procedure, const std::string& state, const std::string& disposal,
-        int64_t timestamp)
+    void AddProcedure(const std::string& procedure, const std::string& extraInfo,
+        const std::string& state, const std::string& disposal, int64_t timestamp)
     {
         if (timestamp == 0) {
             timestamp = GetCurrentTimestamp();
         }
-        stateHistory.emplace_back(StateRecord(procedure, state, disposal, timestamp));
+        stateHistory.emplace_back(StateRecord(procedure, extraInfo, state, disposal, timestamp));
     }
 
     bool CheckNeedAddMove(const std::string& state, const std::string& disposal)
@@ -1015,6 +1026,7 @@ public:
     ~GestureEventResult() = default;
 
     virtual void SetGestureEventResult(bool result) = 0;
+    virtual void SetGestureEventResult(bool result, bool stopPropagation) = 0;
 };
 
 class NativeEmbeadTouchInfo : public BaseEventInfo {

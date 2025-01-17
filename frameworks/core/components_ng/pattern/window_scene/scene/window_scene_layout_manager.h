@@ -70,12 +70,13 @@ private:
     void DumpNodeInfo(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& parentNode, const std::string& reason);
     void GetUINodeInfo(const RefPtr<FrameNode>& node, int32_t parentId, std::ostringstream& oss);
     void GetUITreeInfo(const RefPtr<FrameNode>& node, int32_t depth, int32_t parentId, std::ostringstream& oss);
-    void GetTotalUITreeInfo(uint64_t screenId, std::string& info);
+    void GetTotalUITreeInfo(std::string& info);
     void DumpRSNodeType(Rosen::RSUINodeType rsNode, std::ostringstream& oss);
     void GetRSNodeTreeInfo(const std::shared_ptr<RSNode>& rsNode, int32_t depth,
         std::ostringstream& oss);
     void GetRSNodeInfo(const std::shared_ptr<RSNode>& rsNode,
         std::ostringstream& oss);
+    void IsFrameNodeAbnormal(const RefPtr<FrameNode>& node);
     std::unordered_map<uint64_t, RefPtr<FrameNode>> screenNodeMap_;
     std::shared_ptr<AppExecFwk::EventHandler> mainHandler_;
     bool isCoreDebugEnable_ = false;

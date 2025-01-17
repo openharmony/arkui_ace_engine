@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
+#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -40,14 +41,27 @@ constexpr int32_t OPACITY_ANIMATION_DURATION_APPEAR = 150;
 constexpr int32_t OPACITY_ANIMATION_DURATION_DISAPPEAR = 250;
 constexpr int32_t EMPTY_DESTINATION_CHILD_SIZE = 1;
 constexpr Dimension DEFAULT_DRAG_REGION = 12.0_vp;
+constexpr Dimension DEFAULT_DRAG_BAR_HOT_ZONE = 12.0_vp;
 constexpr float DEFAULT_HALF = 2.0f;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 constexpr int32_t PAGE_NODES = 1000;
 constexpr int32_t PAGE_DEPTH = 300;
+constexpr int32_t HALF_POSITION = 50;
+constexpr int32_t END_POSITION = 100;
+constexpr Dimension DRAG_BAR_RADIUS = 6.0_vp;
+constexpr Dimension DRAG_BAR_BLUR_RADIUS = 20.0_vp;
+constexpr Dimension DRAG_BAR_ITEM_RADIUS = 1.0_vp;
+constexpr int32_t SECOND_ZINDEX_VALUE = 2;
 namespace {
-constexpr static int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t MODE_SWITCH_ANIMATION_DURATION = 500; // ms
 const RefPtr<CubicCurve> MODE_SWITCH_CURVE = AceType::MakeRefPtr<CubicCurve>(0.2f, 0.2f, 0.1f, 1.0f);
+
+GradientColor CreatePercentGradientColor(int32_t percent, Color color)
+{
+    NG::GradientColor gredient = GradientColor(color);
+    gredient.SetDimension(CalcDimension(percent, DimensionUnit::PERCENT));
+    return gredient;
+}
 
 void BuildNavDestinationInfoFromContext(const std::string& navigationId, NavDestinationState state,
     const RefPtr<NavDestinationContext>& context, bool isFrom, std::optional<NavDestinationInfo>& info)
@@ -186,6 +200,86 @@ void NavigationPattern::DoNavbarHideAnimation(const RefPtr<NavigationGroupNode>&
     });
 }
 
+void NavigationPattern::InitDragBarEvent()
+{
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(GetDragBarNode());
+    CHECK_NULL_VOID(dragBarNode);
+    auto dragGestureHub = dragBarNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(dragGestureHub);
+    InitDragBarPanEvent(dragGestureHub);
+    InitTouchEvent(dragGestureHub);
+
+    // clear divider hover and pan event
+    auto dividerNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerGestureHub = dividerNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(dividerGestureHub);
+    auto dividerInputHub = dividerNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(dividerInputHub);
+    if (hoverEvent_) {
+        dividerInputHub->RemoveOnHoverEvent(hoverEvent_);
+        hoverEvent_.Reset();
+    }
+    if (panEvent_) {
+        dividerGestureHub->RemovePanEvent(panEvent_);
+        panEvent_.Reset();
+    }
+}
+
+void NavigationPattern::ClearDragBarEvent()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(GetDragBarNode());
+    CHECK_NULL_VOID(dragBarNode);
+    auto dragGestureHub = dragBarNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(dragGestureHub);
+
+    // clear drag bar touch and pan event
+    if (touchEvent_) {
+        dragGestureHub->RemoveTouchEvent(touchEvent_);
+        touchEvent_.Reset();
+    }
+    if (dragBarPanEvent_) {
+        dragGestureHub->RemovePanEvent(dragBarPanEvent_);
+        dragBarPanEvent_.Reset();
+    }
+
+    hostNode->RemoveChild(dragBarNode);
+    hostNode->SetDragBarNode(nullptr);
+}
+
+void NavigationPattern::BuildDragBar()
+{
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TEN)) {
+        return;
+    }
+    if (enableDragBar_) {
+        if (GetDragBarNode()) {
+            // if dragBar is already in navigation, do nothing
+            return;
+        }
+        // create drag bar and init drag bar gesture event
+        auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+        CHECK_NULL_VOID(hostNode);
+        CreateDragBarNode(hostNode);
+        InitDragBarEvent();
+        return;
+    }
+    auto dividerNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerGestureHub = dividerNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(dividerGestureHub);
+    auto dividerInputHub = dividerNode->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(dividerInputHub);
+    InitDividerPanEvent(dividerGestureHub);
+    InitDividerMouseEvent(dividerInputHub);
+    if (GetDragBarNode()) {
+        // clear drag bar gesture event and remove dragBar
+        ClearDragBarEvent();
+    }
+}
+
 void NavigationPattern::OnModifyDone()
 {
     // !!! Do not add operations about NavPathStack here, see @SyncWithJsStackIfNeeded
@@ -199,17 +293,7 @@ void NavigationPattern::OnModifyDone()
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
-    if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
-        auto dividerNode = GetDividerNode();
-        CHECK_NULL_VOID(dividerNode);
-        auto gestureHub = dividerNode->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        InitPanEvent(gestureHub);
-        auto inputHub = dividerNode->GetOrCreateInputEventHub();
-        CHECK_NULL_VOID(inputHub);
-        InitDividerMouseEvent(inputHub);
-    }
+    BuildDragBar();
 
     auto layoutProperty = hostNode->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
@@ -236,6 +320,10 @@ void NavigationPattern::OnModifyDone()
     if (GetNavigationMode() == NavigationMode::SPLIT && GetNavBarVisibilityChange()) {
         DoNavbarHideAnimation(hostNode);
     }
+
+    // AddRecoverableNavigation function will check inside whether current navigation can be recovered
+    pipeline->GetNavigationManager()->AddRecoverableNavigation(hostNode->GetCurId(), hostNode);
+    RestoreJsStackIfNeeded();
 }
 
 void NavigationPattern::SetSystemBarStyle(const RefPtr<SystemBarStyle>& style)
@@ -597,10 +685,24 @@ void NavigationPattern::UpdateNavPathList()
     NavPathList navPathList;
     int32_t pathListSize = static_cast<int32_t>(pathNames.size());
     isCurTopNewInstance_ = false;
+    // lastRecoveredStandardIndex will be only used in recovery case
+    int32_t lastRecoveredStandardIndex = 0;
     for (int32_t index = 0; index < pathListSize; ++index) {
         auto pathName = pathNames[index];
-        auto pathIndex = indexes[index];
         RefPtr<UINode> uiNode = nullptr;
+        if (navigationStack_->IsFromRecovery(index)) {
+            if (navigationStack_->GetRecoveredDestinationMode(index) ==
+                static_cast<int32_t>(NavDestinationMode::STANDARD)) {
+                lastRecoveredStandardIndex = index;
+            }
+            navPathList.emplace_back(std::make_pair(pathName, uiNode));
+            // only create recovery node when it is at top
+            if (index == pathListSize - 1) {
+                GenerateUINodeFromRecovery(lastRecoveredStandardIndex, navPathList);
+            }
+            continue;
+        }
+        auto pathIndex = indexes[index];
         if (navigationStack_->NeedBuildNewInstance(index)) {
             // if marked NEW_INSTANCE when push/replace in frontend, build a new instance anyway
             uiNode = GenerateUINodeByIndex(index);
@@ -666,6 +768,10 @@ void NavigationPattern::RefreshNavDestination()
     hostNode->UpdateNavDestinationNodeWithoutMarkDirty(
         preTopNavPath.has_value() ? preTopNavPath->second : nullptr, navigationModeChange_);
     auto newTopNavPath = navigationStack_->GetTopNavPath();
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    isBackPage_ = newTopNavPath.has_value() ?
+        navigationStack_->isLastListContains(newTopNavPath->first, newTopNavPath->second) : false;
+#endif
     std::string navDestinationName = "";
     CheckTopNavPathChange(preTopNavPath, newTopNavPath, preLastStandardIndex);
 
@@ -677,6 +783,10 @@ void NavigationPattern::RefreshNavDestination()
     if (isChanged_ && GetIsFocusable(targetNode)) {
         InputMethodManager::GetInstance()->CloseKeyboard();
     }
+#endif
+
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    navigationStack_->SetLastNavPathList(navPathList);
 #endif
 
     /* if first navDestination is removed, the new one will be refreshed */
@@ -1101,16 +1211,9 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
 
     // navDestination pop to navBar
     if (preTopNavDestination) {
+        preTopNavDestination->CleanContent();
         auto parent = preTopNavDestination->GetParent();
         CHECK_NULL_VOID(parent);
-        auto preTopNavDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
-        auto shallowBuilder = preTopNavDestinationPattern->GetShallowBuilder();
-        if (shallowBuilder) {
-            shallowBuilder->MarkIsExecuteDeepRenderDone(false);
-        }
-        if (preTopNavDestination->GetContentNode()) {
-            preTopNavDestination->GetContentNode()->Clean(false, true);
-        }
         parent->RemoveChild(preTopNavDestination, true);
         navigationNode->SetNeedSetInvisible(false);
         auto navBar = AceType::DynamicCast<NavBarNode>(navBarNode);
@@ -1380,6 +1483,7 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
     CHECK_NULL_RETURN(navigationLayoutProperty, false);
     UpdateTitleModeChangeEventHub(hostNode);
+    AddDragBarHotZoneRect();
     AddDividerHotZoneRect();
     ifNeedInit_ = false;
     return false;
@@ -1462,6 +1566,26 @@ bool NavigationPattern::UpdateTitleModeChangeEventHub(const RefPtr<NavigationGro
     return true;
 }
 
+void NavigationPattern::GenerateUINodeFromRecovery(int32_t lastStandardIndex, NavPathList& navPathList)
+{
+    /**
+     * In case several pages at the top of stack are dialog pages.
+     * We need to recovery node until a standard page created.
+     * And the creation process should be bottom-up to satisfy the order of life-cycle.
+     */
+    int32_t jsStackSize = static_cast<int32_t>(navPathList.size());
+    for (int32_t index = lastStandardIndex; index < jsStackSize; ++ index) {
+        if (navPathList[index].second || !navigationStack_->IsFromRecovery(index)) {
+            continue;
+        }
+        navPathList[index].second = GenerateUINodeByIndex(index);
+        navigationStack_->SetFromRecovery(index, false);
+        auto navdestination = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(navPathList[index].second));
+        navdestination->SetNeedAppearFromRecovery(true);
+    }
+}
+
 RefPtr<UINode> NavigationPattern::GenerateUINodeByIndex(int32_t index)
 {
     auto node = navigationStack_->CreateNodeByIndex(index, parentNode_);
@@ -1505,11 +1629,13 @@ void NavigationPattern::HandleDragStart()
         return;
     }
     isInDividerDrag_ = true;
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto windowId = pipeline->GetWindowId();
-    auto mouseStyle = MouseStyle::CreateMouseStyle();
-    mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::RESIZE_LEFT_RIGHT);
+    if (!enableDragBar_) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto windowId = pipeline->GetWindowId();
+        auto mouseStyle = MouseStyle::CreateMouseStyle();
+        mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::RESIZE_LEFT_RIGHT);
+    }
 }
 
 void NavigationPattern::HandleDragUpdate(float xOffset)
@@ -1583,7 +1709,7 @@ void NavigationPattern::HandleDragEnd()
     mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::DEFAULT);
 }
 
-void NavigationPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
+void NavigationPattern::InitDividerPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
     CHECK_NULL_VOID(!panEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
@@ -1610,6 +1736,35 @@ void NavigationPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
+}
+
+void NavigationPattern::InitDragBarPanEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    CHECK_NULL_VOID(!dragBarPanEvent_);
+    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragStart();
+    };
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragUpdate(static_cast<float>(info.GetOffsetX()));
+    };
+    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragEnd();
+    };
+    auto actionCancelTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleDragEnd();
+    };
+    dragBarPanEvent_ = MakeRefPtr<PanEvent>(
+        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+    PanDirection panDirection = { .type = PanDirection::HORIZONTAL };
+    gestureHub->AddPanEvent(dragBarPanEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
 
 void NavigationPattern::OnHover(bool isHover)
@@ -1650,6 +1805,17 @@ RefPtr<FrameNode> NavigationPattern::GetDividerNode() const
     return dividerFrameNode;
 }
 
+RefPtr<FrameNode> NavigationPattern::GetDragBarNode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(host);
+    CHECK_NULL_RETURN(navigationNode, nullptr);
+    auto dragBarNode = AceType::DynamicCast<FrameNode>(navigationNode->GetDragBarNode());
+    CHECK_NULL_RETURN(dragBarNode, nullptr);
+    return dragBarNode;
+}
+
 void NavigationPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& /* config */)
 {
     AddDividerHotZoneRect();
@@ -1657,7 +1823,7 @@ void NavigationPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& /* c
 
 void NavigationPattern::AddDividerHotZoneRect()
 {
-    if (realDividerWidth_ <= 0.0f) {
+    if (NearZero(realDividerWidth_)) {
         return;
     }
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
@@ -1676,7 +1842,7 @@ void NavigationPattern::AddDividerHotZoneRect()
     hotZoneSize.SetHeight(geometryNode->GetFrameSize().Height());
     DimensionRect hotZoneRegion;
     auto paintHeight = GetPaintRectHeight(navBarNode);
-    if (navigationMode_ == NavigationMode::STACK) {
+    if (navigationMode_ == NavigationMode::STACK || enableDragBar_) {
         hotZoneRegion.SetSize(DimensionSize(Dimension(0.0f), Dimension(0.0f)));
     } else {
         hotZoneRegion.SetSize(DimensionSize(
@@ -1696,7 +1862,7 @@ void NavigationPattern::AddDividerHotZoneRect()
     auto dragRectOffset = geometryNode->GetMarginFrameOffset();
     dragRectOffset.SetX(-DEFAULT_DRAG_REGION.ConvertToPx());
     dragRect_.SetOffset(dragRectOffset);
-    if (navigationMode_ == NavigationMode::STACK) {
+    if (navigationMode_ == NavigationMode::STACK || enableDragBar_) {
         dragRect_.SetSize(SizeF(0.0f, 0.0f));
     } else {
         dragRect_.SetSize(SizeF(DEFAULT_DRAG_REGION.ConvertToPx() * DEFAULT_HALF + realDividerWidth_,
@@ -1709,6 +1875,36 @@ void NavigationPattern::AddDividerHotZoneRect()
         Dimension(dragRect_.Height(), DimensionUnit::PX), responseOffset);
     responseRegion.emplace_back(responseRect);
     dividerGestureHub->SetResponseRegion(responseRegion);
+}
+
+void NavigationPattern::AddDragBarHotZoneRect()
+{
+    if (NearZero(realDividerWidth_)) {
+        return;
+    }
+    auto dargBarNode = GetDragBarNode();
+    CHECK_NULL_VOID(dargBarNode);
+    auto geometryNode = dargBarNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto dragBarGestureHub = dargBarNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(dragBarGestureHub);
+
+    auto dragRectOffset = geometryNode->GetMarginFrameOffset();
+    dragRectOffset.SetX(-DEFAULT_DRAG_BAR_HOT_ZONE.ConvertToPx());
+    dragRectOffset.SetY(0.0f);
+    dragBarRect_.SetOffset(dragRectOffset);
+    if (navigationMode_ == NavigationMode::STACK) {
+        dragBarRect_.SetSize(SizeF(0.0f, 0.0f));
+    } else {
+        dragBarRect_.SetSize(SizeF(DEFAULT_DRAG_BAR_HOT_ZONE.ConvertToPx() * DEFAULT_HALF +
+            geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height()));
+    }
+    std::vector<DimensionRect> responseRegion;
+    DimensionOffset responseOffset(dragRectOffset);
+    DimensionRect responseRect(Dimension(dragBarRect_.Width(), DimensionUnit::PX),
+        Dimension(dragBarRect_.Height(), DimensionUnit::PX), responseOffset);
+    responseRegion.emplace_back(responseRect);
+    dragBarGestureHub->SetResponseRegion(responseRegion);
 }
 
 void NavigationPattern::NotifyDialogChange(NavDestinationLifecycle lifecycle, bool isNavigationChanged,
@@ -1747,6 +1943,12 @@ void NavigationPattern::OnColorConfigurationUpdate()
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+
+    auto dragBarNode = GetDragBarNode();
+    CHECK_NULL_VOID(dragBarNode);
+    auto dragPattern = dragBarNode->GetPattern<NavigationDragBarPattern>();
+    CHECK_NULL_VOID(dragPattern);
+    dragPattern->UpdateDefaultColor();
 }
 
 bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
@@ -2271,6 +2473,14 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     std::string toPathInfo;
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
+    bool isNotNeedAnimation = !isAnimated;
+#if defined(ENABLE_NAV_SPLIT_MODE)
+    isNotNeedAnimation = !isAnimated ||
+        (navigationMode_ == NavigationMode::SPLIT && navigationStack_->Size() <= 1 &&
+            !isBackPage_ && !isCustomAnimation_);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "StartTransition navigationMode_:%{public}d isNotNeedAnimation:%{public}d",
+        navigationMode_, isNotNeedAnimation);
+#endif
 
     if (preDestination) {
         fromPathInfo = preDestination->GetNavDestinationPathInfo();
@@ -2278,7 +2488,7 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
         CHECK_NULL_VOID(preDestinationPattern);
         auto navDestinationName = preDestinationPattern->GetName();
         fromPathInfo += ", navDesitinationName: " + navDestinationName;
-        if ((isPopPage || preDestination->NeedRemoveInPush()) && !isAnimated) {
+        if ((isPopPage || preDestination->NeedRemoveInPush()) && isNotNeedAnimation) {
             /**
              * when transition without animation, 'pop' and 'push with remove' need to post
              * afterLayoutTask to delay old top's onDisappear. So set this flag to 'false'
@@ -2314,10 +2524,14 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
     CHECK_NULL_VOID(pipeline);
     auto navigationManager = pipeline->GetNavigationManager();
     navigationManager->FireNavigationUpdateCallback();
+    auto overlayManager = pipeline->GetOverlayManager();
+    if (overlayManager) {
+        overlayManager->RemoveAllModalInOverlay(false);
+    }
     if (topDestination) {
         NotifyDialogChange(NavDestinationLifecycle::ON_WILL_SHOW, false, true);
     }
-    if (!isAnimated) {
+    if (isNotNeedAnimation) {
         FireShowAndHideLifecycle(preDestination, topDestination, isPopPage, false);
         TransitionWithOutAnimation(preDestination, topDestination, isPopPage, isNeedVisible);
         return;
@@ -2398,6 +2612,60 @@ void NavigationPattern::NotifyDestinationLifecycle(const RefPtr<UINode>& uiNode,
     }
 }
 
+std::unique_ptr<JsonValue> NavigationPattern::GetNavdestinationJsonArray()
+{
+    auto allNavdestinationInfo = JsonUtil::CreateArray(true);
+    const auto& navdestinationNodes = GetAllNavDestinationNodes();
+    for (auto iter : navdestinationNodes) {
+        auto navdestinationInfo = JsonUtil::Create(true);
+        auto navdestinationNode =
+            AceType::DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(iter.second));
+        if (!navdestinationNode) {
+            continue;
+        }
+        if (!navdestinationNode->CanRecovery()) {
+            continue;
+        }
+        auto navdestinationPattern = navdestinationNode->GetPattern<NavDestinationPattern>();
+        if (!navdestinationPattern) {
+            continue;
+        }
+        auto name = navdestinationPattern->GetName();
+        auto param = navigationStack_->GetStringifyParamByIndex(navdestinationNode->GetIndex());
+        auto mode = static_cast<int32_t>(navdestinationNode->GetNavDestinationMode());
+        navdestinationInfo->Put("name", name.c_str());
+        navdestinationInfo->Put("param", param.c_str());
+        navdestinationInfo->Put("mode", mode);
+        allNavdestinationInfo->Put(navdestinationInfo);
+    }
+    return allNavdestinationInfo;
+}
+
+void NavigationPattern::RestoreJsStackIfNeeded()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto navigationManager = pipeline->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto navdestinationsInfo = navigationManager->GetNavigationRecoveryInfo(hostNode->GetCurId());
+    if (navdestinationsInfo.empty()) {
+        return;
+    }
+    navigationStack_->SetPathArray(navdestinationsInfo);
+}
+
+void NavigationPattern::PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName)
+{
+    if (nodeCount >= PAGE_NODES) {
+        EventReport::ReportPageNodeOverflow(navDestinationName, nodeCount, PAGE_NODES);
+    }
+    if (depth >= PAGE_DEPTH) {
+        EventReport::ReportPageDepthOverflow(navDestinationName, depth, PAGE_DEPTH);
+    }
+}
+
 void NavigationPattern::FireShowAndHideLifecycle(const RefPtr<NavDestinationGroupNode>& preDestination,
     const RefPtr<NavDestinationGroupNode>& topDestination, bool isPopPage, bool isAnimated)
 {
@@ -2438,16 +2706,6 @@ void NavigationPattern::OnWindowSizeChanged(int32_t  /*width*/, int32_t  /*heigh
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
         CHECK_NULL_VOID(hostNode);
         AbortAnimation(hostNode);
-    }
-}
-
-void NavigationPattern::PerformanceEventReport(int32_t nodeCount, int32_t depth, const std::string& navDestinationName)
-{
-    if (nodeCount >= PAGE_NODES) {
-        EventReport::ReportPageNodeOverflow(navDestinationName, nodeCount, PAGE_NODES);
-    }
-    if (depth >= PAGE_DEPTH) {
-        EventReport::ReportPageDepthOverflow(navDestinationName, depth, PAGE_DEPTH);
     }
 }
 
@@ -2724,6 +2982,45 @@ void NavigationPattern::TransitionWithDialogAnimation(const RefPtr<NavDestinatio
     FollowStdNavdestinationAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
 }
 
+void NavigationPattern::CreateDragBarNode(const RefPtr<NavigationGroupNode>& navigationGroupNode)
+{
+    auto dragBarNode = FrameNode::GetOrCreateFrameNode("DragBar", ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavigationDragBarPattern>(); });
+    auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(dragBarLayoutProperty);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto renderContext = dragBarNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateBackBlurRadius(DRAG_BAR_BLUR_RADIUS);
+    renderContext->UpdateBorderRadius(BorderRadiusProperty(DRAG_BAR_RADIUS));
+    renderContext->UpdateZIndex(1);
+    dragBarNode->MarkModifyDone();
+    auto dragBarItem = CreateDragBarItemNode();
+    dragBarItem->MountToParent(dragBarNode);
+    dragBarNode->MountToParent(navigationGroupNode);
+    navigationGroupNode->SetDragBarNode(dragBarNode);
+
+    auto dragBarPattern = dragBarNode->GetPattern<NavigationDragBarPattern>();
+    CHECK_NULL_VOID(dragBarPattern);
+    dragBarPattern->UpdateDefaultColor();
+}
+
+RefPtr<FrameNode> NavigationPattern::CreateDragBarItemNode()
+{
+    auto dragBarItemNode = FrameNode::GetOrCreateFrameNode("DragBarItem",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto dragBarItemLayoutProperty = dragBarItemNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(dragBarItemLayoutProperty, nullptr);
+    dragBarItemLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    auto renderContext = dragBarItemNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    renderContext->UpdateZIndex(SECOND_ZINDEX_VALUE);
+    renderContext->UpdateBorderRadius(BorderRadiusProperty(DRAG_BAR_ITEM_RADIUS));
+    dragBarItemNode->MarkModifyDone();
+    return dragBarItemNode;
+}
+
 RefPtr<NavigationTransitionProxy> NavigationPattern::GetProxyById(uint64_t id) const
 {
     for (auto proxy : proxyList_) {
@@ -2742,6 +3039,73 @@ void NavigationPattern::RemoveProxyById(uint64_t id)
             return;
         }
     }
+}
+
+void NavigationPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    if (touchEvent_) {
+        return;
+    }
+    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleTouchEvent(info);
+    };
+    touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gestureHub->AddTouchEvent(touchEvent_);
+}
+
+void NavigationPattern::HandleTouchEvent(const TouchEventInfo& info)
+{
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::DOWN) {
+        HandleTouchDown();
+    }
+    if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+        HandleTouchUp();
+    }
+}
+
+void NavigationPattern::HandleTouchDown()
+{
+    auto dragBarNode = GetDragBarNode();
+    CHECK_NULL_VOID(dragBarNode);
+    auto dragPattern = dragBarNode->GetPattern<NavigationDragBarPattern>();
+    CHECK_NULL_VOID(dragPattern);
+    dragPattern->UpdateActiveColor();
+
+    auto dividerNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerRenderContext = dividerNode->GetRenderContext();
+    CHECK_NULL_VOID(dividerRenderContext);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    gradient.AddColor(CreatePercentGradientColor(0, theme->GetDviderLightBlueColor()));
+    gradient.AddColor(CreatePercentGradientColor(HALF_POSITION, theme->GetDviderDarkBlueColor()));
+    gradient.AddColor(CreatePercentGradientColor(END_POSITION, theme->GetDviderLightBlueColor()));
+    dividerRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+    dividerRenderContext->UpdateLinearGradient(gradient);
+}
+
+void NavigationPattern::HandleTouchUp()
+{
+    auto dragBarNode = GetDragBarNode();
+    CHECK_NULL_VOID(dragBarNode);
+    auto dragPattern = dragBarNode->GetPattern<NavigationDragBarPattern>();
+    CHECK_NULL_VOID(dragPattern);
+    dragPattern->UpdateDefaultColor();
+
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto dividerNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerNode);
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
+    dividerNode->GetRenderContext()->UpdateLinearGradient(gradient);
+    dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
 }
 
 void NavigationPattern::CheckContentNeedMeasure(const RefPtr<FrameNode>& node)

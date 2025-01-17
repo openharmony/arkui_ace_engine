@@ -48,6 +48,7 @@ void EventHub::OnDetachContext(PipelineContext *context)
     }
 
     if (HasVisibleAreaCallback(true) || HasVisibleAreaCallback(false)) {
+        host->SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason::DETACH_FROM_MAINTREE);
         host->TriggerVisibleAreaChangeCallback(0, true);
         context->RemoveVisibleAreaChangeNode(host->GetId());
     }
@@ -300,6 +301,36 @@ void EventHub::RemoveInnerOnAreaChangedCallback(int32_t id)
     onAreaChangedInnerCallbacks_.erase(id);
 }
 
+void EventHub::ClearCustomerOnDragStart()
+{
+    onDragStart_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragEnter()
+{
+    customerOnDragEnter_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragMove()
+{
+    customerOnDragMove_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragLeave()
+{
+    customerOnDragLeave_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDrop()
+{
+    customerOnDrop_ = nullptr;
+}
+
+void EventHub::ClearCustomerOnDragEnd()
+{
+    customerOnDragEnd_ = nullptr;
+}
+
 void EventHub::SetOnSizeChanged(OnSizeChangedFunc&& onSizeChanged)
 {
     onSizeChanged_ = std::move(onSizeChanged);
@@ -503,7 +534,10 @@ void EventHub::SetEnabled(bool enabled)
 {
     auto host = GetFrameNode();
     if (enabled_ != enabled && host) {
-        host->OnAccessibilityEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+        auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        if (accessibilityProperty) {
+            accessibilityProperty->NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+        }
     }
     enabled_ = enabled;
     developerEnabled_ = enabled;

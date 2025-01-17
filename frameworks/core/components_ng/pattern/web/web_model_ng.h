@@ -84,6 +84,7 @@ public:
     void SetRefreshAccessedHistoryId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetCacheMode(WebCacheMode cacheMode) override;
     void SetOverScrollMode(OverScrollMode mode) override;
+    void SetBlurOnKeyboardHideMode(BlurOnKeyboardHideMode mode) override;
     void SetCopyOptionMode(CopyOptions mode) override;
     void SetOverviewModeAccessEnabled(bool isOverviewModeAccessEnabled) override;
     void SetFileFromUrlAccessEnabled(bool isFileFromUrlAccessEnabled) override;
@@ -170,6 +171,7 @@ public:
     void SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback) override;
     void SetLayoutMode(WebLayoutMode mode) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    void SetNestedScrollExt(const NestedScrollOptionsExt& nestedOpt) override;
     void SetMetaViewport(bool enabled) override;
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems) override;
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems) override;

@@ -665,7 +665,6 @@ HWTEST_F(TextPickerExTestNg, TextPickerPaintTest002, TestSize.Level1)
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawPath(_)).Times(AtLeast(1));
     canvasDrawFunction(rsCanvas);
 }
 
@@ -944,6 +943,7 @@ HWTEST_F(TextPickerExTestNg, TextPickerFireChangeEventTest001, TestSize.Level1)
     std::vector<std::string> values { "currentValue" };
     std::vector<double> indexs { 1.0 };
     textPickerEventHub->FireChangeEvent(values, indexs);
+    textPickerEventHub->FireScrollStopEvent(values, indexs);
 }
 
 /**

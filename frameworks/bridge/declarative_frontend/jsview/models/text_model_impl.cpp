@@ -69,6 +69,8 @@ void TextModelImpl::SetTextColor(const Color& value)
 }
 
 void TextModelImpl::SetTextShadow(const std::vector<Shadow>& value) {}
+void TextModelImpl::SetTextCaretColor(const Color& value) {}
+void TextModelImpl::SetSelectedBackgroundColor(const Color& value) {}
 
 void TextModelImpl::SetItalicFontStyle(Ace::FontStyle value)
 {

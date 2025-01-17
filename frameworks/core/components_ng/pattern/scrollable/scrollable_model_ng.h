@@ -17,11 +17,14 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_NG_H
 
 #include "base/utils/macros.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/scrollable/scrollable_paint_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 
 namespace OHOS::Ace::NG {
+
+constexpr Dimension DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE = Dimension(32.0f, DimensionUnit::VP); // default value
 class ACE_EXPORT ScrollableModelNG {
 public:
     static void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled);
@@ -38,6 +41,11 @@ public:
     static void SetOnReachStart(OnReachEvent&& onReachStart);
     static void SetOnReachEnd(OnReachEvent&& onReachEnd);
     static void SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& ScrollFrameBegin);
+    static void SetFadingEdge(
+        bool fadingEdge, const Dimension& fadingEdgeLength = DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE);
+    static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge,
+        const Dimension& fadingEdgeLength = DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE);
+    static void SetContentClip(ContentClipMode mode, const RefPtr<ShapeRect>& rect);
 
     static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
     static void SetScrollBarMode(FrameNode* frameNode, int32_t displayNumber);
@@ -56,6 +64,9 @@ public:
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& ScrollFrameBegin);
     static void SetMaxFlingSpeed(FrameNode* frameNode, double max);
+    static bool GetFadingEdge(FrameNode* frameNode);
+    static float GetFadingEdgeLength(FrameNode* frameNode);
+    static void SetContentClip(FrameNode* frameNode, ContentClipMode mode, const RefPtr<ShapeRect>& shape);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

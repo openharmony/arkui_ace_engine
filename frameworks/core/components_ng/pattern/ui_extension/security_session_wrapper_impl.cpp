@@ -295,7 +295,8 @@ void SecuritySessionWrapperImpl::InitAllCallback()
 /*********************** Begin: About session ************************************/
 void SecuritySessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionConfig& config)
 {
-    PLATFORM_LOGI("The session is created with want = %{private}s", want.ToString().c_str());
+    PLATFORM_LOGI("The session is created with bundle = %{public}s, ability = %{public}s",
+        want.GetElement().GetBundleName().c_str(), want.GetElement().GetAbilityName().c_str());
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     auto wantPtr = std::make_shared<Want>(want);
@@ -594,6 +595,7 @@ void SecuritySessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     std::shared_ptr<Rosen::RSTransaction> transaction;
     auto parentSession = session_->GetParentSession();
     auto reason = parentSession ? parentSession->GetSizeChangeReason() : session_->GetSizeChangeReason();
+    reason_ = (uint32_t)reason;
     auto persistentId = parentSession ? parentSession->GetPersistentId() : session_->GetPersistentId();
     ACE_SCOPED_TRACE("NotifyDisplayArea id: %d, reason [%d]", persistentId, reason);
     PLATFORM_LOGI("DisplayArea: %{public}s, persistentId: %{public}d, reason: %{public}d",
@@ -685,5 +687,16 @@ int32_t SecuritySessionWrapperImpl::SendDataSync(
         transferCode = session_->TransferComponentDataSync(wantParams, reWantParams);
     }
     return static_cast<int32_t>(transferCode);
+}
+
+uint32_t SecuritySessionWrapperImpl::GetReasonDump() const
+{
+    return reason_;
+}
+
+void SecuritySessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& params, std::vector<std::string>& info)
+{
+    CHECK_NULL_VOID(session_);
+    session_->NotifyDumpInfo(params, info);
 }
 } // namespace OHOS::Ace::NG

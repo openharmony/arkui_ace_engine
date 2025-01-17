@@ -508,7 +508,7 @@ void SearchModelNG::SetHeight(const Dimension& height)
     NG::ViewAbstract::SetHeight(NG::CalcLength(height));
 }
 
-void SearchModelNG::SetOnSubmit(std::function<void(const std::string&)>&& onSubmit)
+void SearchModelNG::SetOnSubmit(std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
@@ -1577,7 +1577,8 @@ void SearchModelNG::SetTextDecorationStyle(FrameNode* frameNode, Ace::TextDecora
     textFieldChild->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void SearchModelNG::SetOnSubmit(FrameNode* frameNode, std::function<void(const std::string&)>&& onSubmit)
+void SearchModelNG::SetOnSubmit(
+    FrameNode* frameNode, std::function<void(const std::string&, NG::TextFieldCommonEvent&)>&& onSubmit)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<SearchEventHub>();

@@ -117,6 +117,8 @@ const std::string RESOURCE_NAME_PATTERN = "\\[(.+?)\\]";
 constexpr int32_t DIRECTION_COUNT = 4;
 constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
 constexpr int NUM1 = 1;
+const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
+    HoverModeAreaType::BOTTOM_SCREEN };
 } // namespace
 
 std::unique_ptr<ViewAbstractModel> ViewAbstractModel::instance_ = nullptr;
@@ -172,6 +174,7 @@ constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
+constexpr float DEFAULT_LAYOUT_WEIGHT = 0.0f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
 const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location", "datetime" };
 const std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
@@ -1361,22 +1364,22 @@ bool ParseCommonEdgeColors(const JSRef<JSObject>& object, CommonColor& commonCol
 void ParseEdgeWidths(const JSRef<JSObject>& object, CommonCalcDimension& commonCalcDimension, bool notNegative)
 {
     CalcDimension left;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::LEFT)), left)) {
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(LEFT_PROPERTY), left)) {
         CheckDimensionUnit(left, true, notNegative);
         commonCalcDimension.left = left;
     }
     CalcDimension right;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::RIGHT)), right)) {
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(RIGHT_PROPERTY), right)) {
         CheckDimensionUnit(right, true, notNegative);
         commonCalcDimension.right = right;
     }
     CalcDimension top;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::TOP)), top)) {
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(TOP_PROPERTY), top)) {
         CheckDimensionUnit(top, true, notNegative);
         commonCalcDimension.top = top;
     }
     CalcDimension bottom;
-    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(static_cast<int32_t>(ArkUIIndex::BOTTOM)), bottom)) {
+    if (JSViewAbstract::ParseJsDimensionVp(object->GetProperty(BOTTOM_PROPERTY), bottom)) {
         CheckDimensionUnit(bottom, true, notNegative);
         commonCalcDimension.bottom = bottom;
     }
@@ -2304,6 +2307,24 @@ void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
 }
 
+void JSViewAbstract::JsChainWeight(const JSCallbackInfo& info)
+{
+    NG::LayoutWeightPair layoutWeightPair(DEFAULT_LAYOUT_WEIGHT, DEFAULT_LAYOUT_WEIGHT);
+    auto jsVal = info[0];
+    if (jsVal->IsObject()) {
+        JSRef<JSObject> val = JSRef<JSObject>::Cast(jsVal);
+        auto weightX = val->GetProperty("horizontal");
+        auto weightY = val->GetProperty("vertical");
+        if (weightX->IsNumber()) {
+            layoutWeightPair.first = weightX->ToNumber<float>();
+        }
+        if (weightY->IsNumber()) {
+            layoutWeightPair.second = weightY->ToNumber<float>();
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetLayoutWeight(layoutWeightPair);
+}
+
 void JSViewAbstract::JsAlign(const JSCallbackInfo& info)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
@@ -2726,7 +2747,7 @@ void JSViewAbstract::JsGeometryTransition(const JSCallbackInfo& info)
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
         ParseJsBool(jsOption->GetProperty("follow"), followWithOutTransition);
-        
+
         auto transitionHierarchyStrategy = static_cast<int32_t>(TransitionHierarchyStrategy::ADAPTIVE);
         ParseJsInt32(jsOption->GetProperty("hierarchyStrategy"), transitionHierarchyStrategy);
         switch (transitionHierarchyStrategy) {
@@ -2818,6 +2839,56 @@ void JSViewAbstract::ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOp
     }
 }
 
+void JSViewAbstract::ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurStyleOption& styleOption)
+{
+    auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
+    ParseJsInt32(jsOption->GetProperty("colorMode"), colorMode);
+    if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
+        colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
+        styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
+    }
+    auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColor);
+    if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+        adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+        styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+    }
+
+    // policy
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    ParseJsInt32(jsOption->GetProperty("policy"), policy);
+    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
+        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+        styleOption.policy = static_cast<BlurStyleActivePolicy>(policy);
+    }
+
+    // blurType
+    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    ParseJsInt32(jsOption->GetProperty("type"), blurType);
+    if (blurType >= static_cast<int32_t>(BlurType::WITHIN_WINDOW) &&
+        blurType <= static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
+        styleOption.blurType = static_cast<BlurType>(blurType);
+    }
+
+    // inactiveColor
+    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), styleOption.inactiveColor)) {
+        styleOption.isValidColor = true;
+    }
+
+    // scale
+    if (jsOption->GetProperty("scale")->IsNumber()) {
+        double scale = jsOption->GetProperty("scale")->ToNumber<double>();
+        styleOption.scale = std::clamp(scale, 0.0, 1.0);
+    }
+
+    if (jsOption->GetProperty("blurOptions")->IsObject()) {
+        JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
+        BlurOption blurOption;
+        ParseBlurOption(jsBlurOption, blurOption);
+        styleOption.blurOption = blurOption;
+    }
+}
+
 void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
 {
     if (info.Length() == 0) {
@@ -2833,29 +2904,7 @@ void JSViewAbstract::JsBackgroundBlurStyle(const JSCallbackInfo& info)
     }
     if (info.Length() > 1 && info[1]->IsObject()) {
         JSRef<JSObject> jsOption = JSRef<JSObject>::Cast(info[1]);
-        auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
-        ParseJsInt32(jsOption->GetProperty("colorMode"), colorMode);
-        if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
-            colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
-            styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
-        }
-        auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
-        ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColor);
-        if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
-            adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
-            styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
-        }
-        if (jsOption->GetProperty("scale")->IsNumber()) {
-            double scale = jsOption->GetProperty("scale")->ToNumber<double>();
-            styleOption.scale = std::clamp(scale, 0.0, 1.0);
-        }
-
-        if (jsOption->GetProperty("blurOptions")->IsObject()) {
-            JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
-            BlurOption blurOption;
-            ParseBlurOption(jsBlurOption, blurOption);
-            styleOption.blurOption = blurOption;
-        }
+        ParseBlurStyleOption(jsOption, styleOption);
     }
     ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
 }
@@ -2916,20 +2965,24 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
     if (!ParseJsDimensionVp(jsOption->GetProperty("radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
         radius.SetValue(0.0f);
     }
+    effectOption.radius = radius;
+
     double saturation = 1.0f;
     if (jsOption->GetProperty("saturation")->IsNumber()) {
         saturation = jsOption->GetProperty("saturation")->ToNumber<double>();
         saturation = (saturation > 0.0f || NearZero(saturation)) ? saturation : 1.0f;
     }
+    effectOption.saturation = saturation;
+
     double brightness = 1.0f;
     if (jsOption->GetProperty("brightness")->IsNumber()) {
         brightness = jsOption->GetProperty("brightness")->ToNumber<double>();
         brightness = (brightness > 0.0f || NearZero(brightness)) ? brightness : 1.0f;
     }
-    Color color = Color::TRANSPARENT;
-    if (!ParseJsColor(jsOption->GetProperty("color"), color)) {
-        color.SetValue(Color::TRANSPARENT.GetValue());
-    }
+    effectOption.brightness = brightness;
+
+    ParseJsColor(jsOption->GetProperty("color"), effectOption.color);
+
     auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
     auto adaptiveColor = AdaptiveColor::DEFAULT;
     ParseJsInt32(jsOption->GetProperty("adaptiveColor"), adaptiveColorValue);
@@ -2937,13 +2990,35 @@ void JSViewAbstract::ParseEffectOption(const JSRef<JSObject>& jsOption, EffectOp
         adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
         adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
     }
+    effectOption.adaptiveColor = adaptiveColor;
+
+    // policy
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    ParseJsInt32(jsOption->GetProperty("policy"), policy);
+    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
+        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+        effectOption.policy = static_cast<BlurStyleActivePolicy>(policy);
+    }
+
+    // blurType
+    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    ParseJsInt32(jsOption->GetProperty("type"), blurType);
+    if (blurType >= static_cast<int32_t>(BlurType::WITHIN_WINDOW) &&
+        blurType <= static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
+        effectOption.blurType = static_cast<BlurType>(blurType);
+    }
+
+    // inactiveColor
+    if (ParseJsColor(jsOption->GetProperty("inactiveColor"), effectOption.inactiveColor)) {
+        effectOption.isValidColor = true;
+    }
 
     BlurOption blurOption;
     if (jsOption->GetProperty("blurOptions")->IsObject()) {
         JSRef<JSObject> jsBlurOption = JSRef<JSObject>::Cast(jsOption->GetProperty("blurOptions"));
         ParseBlurOption(jsBlurOption, blurOption);
+        effectOption.blurOption = blurOption;
     }
-    effectOption = { radius, saturation, brightness, color, adaptiveColor, blurOption };
 }
 
 void JSViewAbstract::JsForegroundEffect(const JSCallbackInfo& info)
@@ -3369,7 +3444,6 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
     }
 
     auto backgroundBlurStyle = menuOptions->GetProperty(static_cast<int32_t>(ArkUIIndex::BACKGROUND_BLUR_STYLE));
-    BlurStyleOption styleOption;
     if (backgroundBlurStyle->IsNumber()) {
         auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
         if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
@@ -3641,35 +3715,45 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsPadding(const JSCallbackInfo& info)
 {
-    ParseMarginOrPadding(info, false);
+    ParseMarginOrPadding(info, EdgeType::PADDING);
 }
 
 void JSViewAbstract::JsMargin(const JSCallbackInfo& info)
 {
-    ParseMarginOrPadding(info, true);
+    ParseMarginOrPadding(info, EdgeType::MARGIN);
 }
 
-void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMargin)
+void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, EdgeType type)
 {
     static std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT, JSCallbackInfoType::STRING,
         JSCallbackInfoType::NUMBER };
     auto jsVal = info[0];
     if (!CheckJSCallbackInfo("MarginOrPadding", jsVal, checkList)) {
         auto resetDimension = CalcDimension(0.0);
-        if (isMargin) {
+        if (type == EdgeType::MARGIN) {
             ViewAbstractModel::GetInstance()->SetMargin(resetDimension);
-        } else {
+        } else if (type == EdgeType::PADDING) {
             ViewAbstractModel::GetInstance()->SetPadding(resetDimension);
+        } else if (type == EdgeType::SAFE_AREA_PADDING) {
+            ViewAbstractModel::GetInstance()->ResetSafeAreaPadding();
         }
         return;
     }
+
     if (jsVal->IsObject()) {
-        CommonCalcDimension commonCalcDimension;
         JSRef<JSObject> paddingObj = JSRef<JSObject>::Cast(jsVal);
+
+        CalcDimension length;
+        if (type == EdgeType::SAFE_AREA_PADDING && ParseJsLengthMetrics(paddingObj, length)) {
+            ViewAbstractModel::GetInstance()->SetSafeAreaPadding(length);
+            return;
+        }
+
+        CommonCalcDimension commonCalcDimension;
         auto useLengthMetrics = ParseCommonMarginOrPaddingCorner(paddingObj, commonCalcDimension);
         if (commonCalcDimension.left.has_value() || commonCalcDimension.right.has_value() ||
             commonCalcDimension.top.has_value() || commonCalcDimension.bottom.has_value()) {
-            if (isMargin) {
+            if (type == EdgeType::MARGIN)  {
                 if (useLengthMetrics) {
                     ViewAbstractModel::GetInstance()->SetMargins(GetLocalizedPadding(commonCalcDimension.top,
                         commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
@@ -3677,13 +3761,21 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
                     ViewAbstractModel::GetInstance()->SetMargins(commonCalcDimension.top, commonCalcDimension.bottom,
                         commonCalcDimension.left, commonCalcDimension.right);
                 }
-            } else {
+            } else if (type == EdgeType::PADDING) {
                 if (useLengthMetrics) {
                     ViewAbstractModel::GetInstance()->SetPaddings(GetLocalizedPadding(commonCalcDimension.top,
                         commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
                 } else {
                     ViewAbstractModel::GetInstance()->SetPaddings(commonCalcDimension.top, commonCalcDimension.bottom,
                         commonCalcDimension.left, commonCalcDimension.right);
+                }
+            } else if (type == EdgeType::SAFE_AREA_PADDING) {
+                if (useLengthMetrics) {
+                    ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(GetLocalizedPadding(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right));
+                } else {
+                    ViewAbstractModel::GetInstance()->SetSafeAreaPaddings(commonCalcDimension.top,
+                        commonCalcDimension.bottom, commonCalcDimension.left, commonCalcDimension.right);
                 }
             }
             return;
@@ -3695,9 +3787,9 @@ void JSViewAbstract::ParseMarginOrPadding(const JSCallbackInfo& info, bool isMar
         // use default value.
         length.Reset();
     }
-    if (isMargin) {
+    if (type == EdgeType::MARGIN) {
         ViewAbstractModel::GetInstance()->SetMargin(length);
-    } else {
+    } else if (type == EdgeType::PADDING) {
         ViewAbstractModel::GetInstance()->SetPadding(length);
     }
 }
@@ -4787,7 +4879,14 @@ void JSViewAbstract::JsColorBlend(const JSCallbackInfo& info)
 void JSViewAbstract::JsUseEffect(const JSCallbackInfo& info)
 {
     if (info[0]->IsBoolean()) {
-        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean());
+        auto effectType = EffectType::DEFAULT;
+        if (info.Length() == 2 && info[1]->IsNumber()) {
+            effectType = static_cast<EffectType>(info[1]->ToNumber<int32_t>());
+            if (effectType < EffectType::DEFAULT || effectType > EffectType::WINDOW_EFFECT) {
+                effectType = EffectType::DEFAULT;
+            }
+        }
+        ViewAbstractModel::GetInstance()->SetUseEffect(info[0]->ToBoolean(), effectType);
     }
 }
 
@@ -6628,8 +6727,8 @@ void JSViewAbstract::ParseDialogCallback(const JSRef<JSObject>& paramObj,
 {
     auto onWillDismissFunc = paramObj->GetProperty("onWillDismiss");
     if (onWillDismissFunc->IsFunction()) {
-        RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
+        auto jsFunc =
+            AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
         onWillDismiss = [func = std::move(jsFunc)](const int32_t& info) {
             JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
             objectTemplate->SetInternalFieldCount(ON_WILL_DISMISS_FIELD_COUNT);
@@ -7241,6 +7340,15 @@ void JSViewAbstract::JsFocusable(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetFocusable(info[0]->ToBoolean());
 }
 
+void JSViewAbstract::JsTabStop(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetTabStop(false);
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetTabStop(info[0]->ToBoolean());
+}
+
 void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject() || info.Length() != 1) {
@@ -7295,11 +7403,12 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
     RefPtr<JsKeyFunction> JsOnKeyEvent = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(arg));
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onKeyEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEvent), node = frameNode](
-                          KeyEventInfo& info) {
-        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                          KeyEventInfo& info) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
         ACE_SCORING_EVENT("onKey");
         PipelineContext::SetCallBackNode(node);
-        func->Execute(info);
+        auto ret = func->ExecuteWithValue(info);
+        return ret->IsBoolean() ? ret->ToBoolean() : false;
     };
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
@@ -7485,9 +7594,21 @@ void JSViewAbstract::JsTransitionPassThrough(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetTransition(options, true);
 }
 
-void JSViewAbstract::JsAccessibilityGroup(bool accessible)
+void JSViewAbstract::JsAccessibilityGroup(const JSCallbackInfo& info)
 {
-    ViewAbstractModel::GetInstance()->SetAccessibilityGroup(accessible);
+    bool isGroup = false;
+    if (info[0]->IsBoolean()) {
+        isGroup = info[0]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetAccessibilityGroup(isGroup);
+
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[1]);
+
+        auto preferAccessibilityTextObj = obj->GetProperty("accessibilityPreferred");
+        auto preferAccessibilityText = preferAccessibilityTextObj->IsBoolean() ? preferAccessibilityTextObj->ToBoolean() : false;
+        ViewAbstractModel::GetInstance()->SetAccessibilityTextPreferred(preferAccessibilityText);
+    }
 }
 
 void JSViewAbstract::JsAccessibilityText(const JSCallbackInfo& info)
@@ -8000,6 +8121,19 @@ void JSViewAbstract::ParseSheetStyle(
     auto shadowValue = paramObj->GetProperty("shadow");
     if ((shadowValue->IsObject() || shadowValue->IsNumber()) && ParseShadowProps(shadowValue, shadow)) {
         sheetStyle.shadow = shadow;
+    }
+
+    // Parse hoverMode
+    auto enableHoverModeValue = paramObj->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        sheetStyle.enableHoverMode = enableHoverModeValue->ToBoolean();
+    }
+    auto hoverModeAreaValue = paramObj->GetProperty("hoverModeArea");
+    if (hoverModeAreaValue->IsNumber()) {
+        auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
+        if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
+            sheetStyle.hoverModeArea = HOVER_MODE_AREA_TYPE[hoverModeArea];
+        }
     }
 
     auto widthValue = paramObj->GetProperty("width");
@@ -8536,6 +8670,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("layoutPriority", &JSViewAbstract::JsLayoutPriority);
     JSClass<JSViewAbstract>::StaticMethod("pixelRound", &JSViewAbstract::JsPixelRound);
     JSClass<JSViewAbstract>::StaticMethod("layoutWeight", &JSViewAbstract::JsLayoutWeight);
+    JSClass<JSViewAbstract>::StaticMethod("chainWeight", &JSViewAbstract::JsChainWeight);
 
     JSClass<JSViewAbstract>::StaticMethod("margin", &JSViewAbstract::JsMargin);
     JSClass<JSViewAbstract>::StaticMethod("marginTop", &JSViewAbstract::SetMarginTop, opt);
@@ -8548,6 +8683,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("paddingBottom", &JSViewAbstract::SetPaddingBottom, opt);
     JSClass<JSViewAbstract>::StaticMethod("paddingLeft", &JSViewAbstract::SetPaddingLeft, opt);
     JSClass<JSViewAbstract>::StaticMethod("paddingRight", &JSViewAbstract::SetPaddingRight, opt);
+    JSClass<JSViewAbstract>::StaticMethod("safeAreaPadding", &JSViewAbstract::SetSafeAreaPadding, opt);
 
     JSClass<JSViewAbstract>::StaticMethod("foregroundColor", &JSViewAbstract::JsForegroundColor);
     JSClass<JSViewAbstract>::StaticMethod("foregroundEffect", &JSViewAbstract::JsForegroundEffect);
@@ -8648,6 +8784,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("advancedBlendMode", &JSViewAbstract::JsAdvancedBlendMode);
     JSClass<JSViewAbstract>::StaticMethod("grayscale", &JSViewAbstract::JsGrayScale);
     JSClass<JSViewAbstract>::StaticMethod("focusable", &JSViewAbstract::JsFocusable);
+    JSClass<JSViewAbstract>::StaticMethod("tabStop", &JSViewAbstract::JsTabStop);
     JSClass<JSViewAbstract>::StaticMethod("focusBox", &JSViewAbstract::JsFocusBox);
     JSClass<JSViewAbstract>::StaticMethod("onKeyEvent", &JSViewAbstract::JsOnKeyEvent);
     JSClass<JSViewAbstract>::StaticMethod("onKeyPreIme", &JSInteractableView::JsOnKeyPreIme);
@@ -9042,6 +9179,11 @@ void JSViewAbstract::SetPaddingRight(const JSCallbackInfo& info)
         return;
     }
     ViewAbstractModel::GetInstance()->SetPaddings(std::nullopt, std::nullopt, std::nullopt, value);
+}
+
+void JSViewAbstract::SetSafeAreaPadding(const JSCallbackInfo& info)
+{
+    ParseMarginOrPadding(info, EdgeType::SAFE_AREA_PADDING);
 }
 
 void JSViewAbstract::SetColorBlend(Color color)
@@ -10512,6 +10654,23 @@ void JSViewAbstract::SetDialogProperties(const JSRef<JSObject>& obj, DialogPrope
     }
 }
 
+void JSViewAbstract::SetDialogHoverModeProperties(const JSRef<JSObject>& obj, DialogProperties& properties)
+{
+    auto enableHoverModeValue = obj->GetProperty("enableHoverMode");
+    if (enableHoverModeValue->IsBoolean()) {
+        properties.enableHoverMode = enableHoverModeValue->ToBoolean();
+    }
+
+    // Parse hoverModeArea
+    auto hoverModeAreaValue = obj->GetProperty("hoverModeArea");
+    if (hoverModeAreaValue->IsNumber()) {
+        auto hoverModeArea = hoverModeAreaValue->ToNumber<int32_t>();
+        if (hoverModeArea >= 0 && hoverModeArea < static_cast<int32_t>(HOVER_MODE_AREA_TYPE.size())) {
+            properties.hoverModeArea = HOVER_MODE_AREA_TYPE[hoverModeArea];
+        }
+    }
+}
+
 std::function<std::string(const std::string&)> ParseJsGetFunc(const JSCallbackInfo& info, int32_t nodeId)
 {
     auto* vm = info.GetVm();
@@ -10671,11 +10830,16 @@ void JSViewAbstract::JsFocusScopeId(const JSCallbackInfo& info)
     }
 
     bool isGroup = false;
-    if (info.Length() == PARAMETER_LENGTH_SECOND && !info[0]->IsNull() && !info[0]->IsUndefined() &&
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && !info[1]->IsNull() && !info[1]->IsUndefined() &&
         info[1]->IsBoolean()) {
         isGroup = info[1]->ToBoolean();
     }
-    ViewAbstractModel::GetInstance()->SetFocusScopeId(focusScopeId, isGroup);
+    bool arrowKeyStepOut = true;
+    if (info.Length() >= PARAMETER_LENGTH_THIRD && !info[2]->IsNull() && !info[2]->IsUndefined() &&
+        info[2]->IsBoolean()) {
+        arrowKeyStepOut = info[2]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
 }
 
 void JSViewAbstract::JsFocusScopePriority(const JSCallbackInfo& info)

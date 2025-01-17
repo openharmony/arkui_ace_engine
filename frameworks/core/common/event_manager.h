@@ -293,6 +293,13 @@ public:
 
     void ClearTouchTestTargetForPenStylus(TouchEvent& touchEvent);
 
+    inline const std::unordered_map<int32_t, int32_t>& GetDownFingerIds() const
+    {
+        return downFingerIds_;
+    }
+
+    TouchEvent ConvertAxisEventToTouchEvent(const AxisEvent& axisEvent);
+
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     bool TouchTargetHitTest(const TouchEvent& touchPoint, const RefPtr<NG::FrameNode>& frameNode,
         TouchRestrict& touchRestrict, const Offset& offset = Offset(), float viewScale = 1.0f,
@@ -305,6 +312,7 @@ private:
         bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
     void CheckMouseTestResults(bool& isMousePressAtSelectedNode, int32_t selectedNodeId);
     void LogTouchTestResultRecognizers(const TouchTestResult& result, int32_t touchEventId);
+    void LogTouchTestRecognizerStates(int32_t touchEventId);
     void DispatchTouchEventToTouchTestResult(TouchEvent touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
     void CleanRecognizersForDragBegin(TouchEvent& touchEvent);
@@ -318,6 +326,8 @@ private:
     void DispatchMouseEventToPressResults(const MouseEvent& event, const MouseTestResult& targetResults,
         MouseTestResult& handledResults, bool& isStopPropagation);
     bool DispatchMouseEventToCurResults(
+        const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
+    bool DispatchMouseEventToCurResultsInLessAPI13(
         const MouseEvent& event, const MouseTestResult& handledResults, bool isStopPropagation);
     bool innerEventWin_ = false;
     std::unordered_map<size_t, TouchTestResult> mouseTestResults_;

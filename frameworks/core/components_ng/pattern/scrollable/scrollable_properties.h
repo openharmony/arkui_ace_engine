@@ -156,6 +156,21 @@ struct NestedScrollOptions {
     }
 };
 
+struct NestedScrollOptionsExt {
+    NestedScrollMode scrollUp;
+    NestedScrollMode scrollDown;
+    NestedScrollMode scrollLeft;
+    NestedScrollMode scrollRight;
+
+    std::string ToString() const
+    {
+        return "NestedScrollOptionsExt scrollUp: " + std::to_string(static_cast<int32_t>(scrollUp)) +
+               ", scrollDown: " + std::to_string(static_cast<int32_t>(scrollDown)) +
+               ", scrollLeft: " + std::to_string(static_cast<int32_t>(scrollLeft)) +
+               ", scrollRight: " + std::to_string(static_cast<int32_t>(scrollRight));
+    }
+};
+
 struct ListItemIndex {
     int32_t index = -1;
     int32_t area = -1;
@@ -380,7 +395,7 @@ constexpr char SCROLLER_ANIMATION[] = "CUSTOM_ANIMATOR_SCROLLER_ANIMATION ";
 constexpr char SCROLLER_FIX_VELOCITY_ANIMATION[] = "SCROLLER_FIX_VELOCITY_ANIMATION ";
 
 using OnScrollEvent = std::function<void(Dimension, ScrollState)>;
-using OnDidScrollEvent = std::function<void(Dimension, ScrollState, bool, bool)>;
+using OnDidScrollEvent = std::function<void(Dimension, ScrollState, ScrollSource, bool, bool)>;
 using OnWillScrollEvent = std::function<ScrollFrameResult(Dimension, ScrollState, ScrollSource)>;
 using OnScrollBeginEvent = std::function<ScrollInfo(Dimension, Dimension)>;
 using OnScrollFrameBeginEvent = std::function<ScrollFrameResult(Dimension, ScrollState)>;
@@ -406,6 +421,7 @@ struct ScrollerObserver {
     OnScrollStopEvent onScrollStopEvent;
     OnDidScrollEvent onDidScrollEvent;
 };
+using ScrollPageCallback = std::function<void(bool, bool smooth)>;
 } // namespace OHOS::Ace
 
 #endif

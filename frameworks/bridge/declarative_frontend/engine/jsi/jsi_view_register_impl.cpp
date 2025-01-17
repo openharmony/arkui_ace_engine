@@ -520,8 +520,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "DecorationStyle", JSDecorationSpan::JSBind },
     { "BaselineOffsetStyle", JSBaselineOffsetSpan::JSBind },
     { "LetterSpacingStyle", JSLetterSpacingSpan::JSBind },
+    { "UrlStyle", JSUrlSpan::JSBind },
     { "NativeGestureStyle", JSGestureSpan::JSBind },
     { "TextShadowSpan", JSTextShadowSpan::JSBind },
+    { "BackgroundColorStyle", JSBackgroundColorSpan::JSBind },
     { "ImageAttachment", JSImageAttachment::JSBind },
     { "ParagraphStyleSpan", JSParagraphStyleSpan::JSBind},
     { "LineHeightSpan", JSLineHeightSpan::JSBind},
@@ -606,8 +608,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "DecorationStyle", JSDecorationSpan::JSBind },
     { "BaselineOffsetStyle", JSBaselineOffsetSpan::JSBind },
     { "LetterSpacingStyle", JSLetterSpacingSpan::JSBind },
+    { "UrlStyle", JSUrlSpan::JSBind },
     { "NativeGestureStyle", JSGestureSpan::JSBind },
     { "TextShadowSpan", JSTextShadowSpan::JSBind },
+    { "BackgroundColorStyle", JSBackgroundColorSpan::JSBind },
     { "ImageAttachment", JSImageAttachment::JSBind },
     { "ParagraphStyleSpan", JSParagraphStyleSpan::JSBind},
     { "LineHeightSpan", JSLineHeightSpan::JSBind},
@@ -1090,6 +1094,11 @@ void JsBindFormViews(
         JSOffscreenRenderingContext::JSBind(globalObj);
         JSRenderingContextSettings::JSBind(globalObj);
         JSRenderingContext::JSBind(globalObj);
+
+        JSRectShape::JSBind(globalObj);
+        JSCircleShape::JSBind(globalObj);
+        JSEllipseShape::JSBind(globalObj);
+        JSPathShape::JSBind(globalObj);
     }
 
     if (!formModuleList.empty()) {

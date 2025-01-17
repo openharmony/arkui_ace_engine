@@ -86,8 +86,11 @@ public:
         return true;
     }
 
-    bool IsHitTestBlock() const
+    bool IsHitTestBlock(const PointF& localPoint, SourceType source) const
     {
+        if (source == SourceType::MOUSE && InBarRectRegion(localPoint, source)) {
+            return false;
+        }
         if (scrollable_ && !scrollable_->Idle() &&
             std::abs(scrollable_->GetCurrentVelocity()) > PipelineBase::Vp2PxWithCurrentDensity(HTMBLOCK_VELOCITY)) {
             return true;
@@ -135,6 +138,32 @@ public:
         }
     }
 
+    void SetBarCollectClickAndLongPressTargetCallback(const BarCollectTouchTargetCallback&& barCollectLongPressTarget)
+    {
+        barCollectLongPressTarget_ = std::move(barCollectLongPressTarget);
+    }
+
+    void SetInBarRectRegionCallback(const InBarRegionCallback&& inBarRectRegionCallback)
+    {
+        inBarRectRegionCallback_ = std::move(inBarRectRegionCallback);
+    }
+
+    bool InBarRectRegion(const PointF& localPoint, SourceType source) const
+    {
+        CHECK_NULL_RETURN(inBarRectRegionCallback_, false);
+        return inBarRectRegionCallback_ && barCollectLongPressTarget_ && inBarRectRegionCallback_(localPoint, source);
+    }
+
+    void BarCollectLongPressTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        ResponseLinkResult& responseLinkResult)
+    {
+        if (barCollectLongPressTarget_) {
+            barCollectLongPressTarget_(
+                coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent, responseLinkResult);
+        }
+    }
+
     bool ClickJudge(const PointF& localPoint) const
     {
         return clickJudgeCallback_ && clickJudgeCallback_(localPoint);
@@ -145,12 +174,18 @@ public:
         clickJudgeCallback_ = std::move(clickJudgeCallback);
     }
 
+    void CollectScrollableTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
+        ResponseLinkResult& responseLinkResult);
+
 private:
     Axis axis_ = Axis::VERTICAL;
     bool enabled_ = true;
     RefPtr<Scrollable> scrollable_;
     BarCollectTouchTargetCallback barCollectTouchTarget_;
+    BarCollectTouchTargetCallback barCollectLongPressTarget_;
     InBarRegionCallback inBarRegionCallback_;
+    InBarRegionCallback inBarRectRegionCallback_;
     GetAnimateVelocityCallback getAnimateVelocityCallback_;
     ClickJudgeCallback clickJudgeCallback_;
 };
@@ -193,7 +228,8 @@ public:
 
     void InitClickRecognizer(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
-        const RefPtr<ScrollableEvent>& event, bool clickJudge);
+        const RefPtr<ScrollableEvent>& event, bool clickJudge,
+        const PointF& localPoint, SourceType source);
 
 private:
     void InitializeScrollable(RefPtr<ScrollableEvent> event);

@@ -614,7 +614,7 @@ void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent)
     UpdateDragListener(Point(-1, -1));
     if (preTargetFrameNode_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Leave the current window, windowId is %{public}d,"
-            "PreTargetFrameNode is %{public}s, depth is %{public}d",
+            "PreTargetFrameNode is %{public}s, depth is %{public}d.",
             container->GetWindowId(), preTargetFrameNode_->GetTag().c_str(), preTargetFrameNode_->GetDepth());
         FireOnDragEvent(preTargetFrameNode_, pointerEvent, DragEventType::LEAVE, extraInfo_);
         preTargetFrameNode_ = nullptr;
@@ -1361,7 +1361,7 @@ int32_t DragDropManager::GetItemIndex(
         if (frameNode != draggedGridFrameNode_) {
             return eventHub->GetInsertPosition(globalX, globalY);
         }
-        auto itemFrameNode = frameNode->FindChildByPosition(globalX, globalY);
+        auto itemFrameNode = frameNode->FindChildByPositionWithoutChildTransform(globalX, globalY);
         if (!itemFrameNode) {
             if (eventHub->CheckPostionInGrid(globalX, globalY)) {
                 return eventHub->GetFrameNodeChildSize();

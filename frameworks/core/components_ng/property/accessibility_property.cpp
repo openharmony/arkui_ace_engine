@@ -64,12 +64,14 @@ std::unordered_set<AceAction> AccessibilityProperty::GetSupportAction() const
 
 void AccessibilityProperty::NotifyComponentChangeEvent(AccessibilityEventType eventType)
 {
-    auto frameNode = host_.Upgrade();
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddAccessibilityCallbackEvent(AccessibilityCallbackEventId::ON_SEND_ELEMENT_INFO_CHANGE,
-        frameNode->GetAccessibilityId());
+    if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        auto frameNode = host_.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->AddAccessibilityCallbackEvent(AccessibilityCallbackEventId::ON_SEND_ELEMENT_INFO_CHANGE,
+                                                frameNode->GetAccessibilityId());
+    }
 }
 
 std::string AccessibilityProperty::GetText() const
@@ -80,11 +82,19 @@ std::string AccessibilityProperty::GetText() const
 std::string AccessibilityProperty::GetGroupText(bool forceGetChildren) const
 {
     std::string text;
-    GetGroupTextRecursive(forceGetChildren, text);
+    GetGroupTextRecursive(forceGetChildren, text, false);
     return text;
 }
 
-void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::string& text) const
+std::string AccessibilityProperty::GetGroupPreferAccessibilityText(bool forceGetChildren) const
+{
+    std::string text;
+    GetGroupTextRecursive(forceGetChildren, text, true);
+    return text;
+}
+
+void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::string& text,
+                                                  bool preferAccessibilityText) const
 {
     auto node = host_.Upgrade();
     CHECK_NULL_VOID(node);
@@ -93,7 +103,8 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
     }
     auto level = GetAccessibilityLevel();
     if (level == Level::AUTO || level == Level::YES_STR) {
-        auto nodeText = GetText();
+        std::string accessibilityText = GetAccessibilityText();
+        auto nodeText = preferAccessibilityText && !accessibilityText.empty() ? accessibilityText : GetText();
         if (!text.empty() && !nodeText.empty()) {
             text += ", ";
         }
@@ -112,7 +123,8 @@ void AccessibilityProperty::GetGroupTextRecursive(bool forceGetChildren, std::st
         if (child == nullptr) {
             continue;
         }
-        child->GetAccessibilityProperty<AccessibilityProperty>()->GetGroupTextRecursive(true, text);
+        child->GetAccessibilityProperty<AccessibilityProperty>()->GetGroupTextRecursive(true, text,
+                                                                                        preferAccessibilityText);
     }
 }
 
@@ -265,7 +277,8 @@ bool AccessibilityProperty::HoverTestRecursive(
     PointF selfPoint = parentPoint;
     renderContext->GetPointWithRevert(selfPoint);
     bool hitSelf = rect.IsInnerRegion(selfPoint);
-    if (hitSelf && shouldSearchSelf && (IsAccessibilityFocusable(node) || IsTagInModalDialog(node))) {
+    if (hitSelf && shouldSearchSelf
+        && (IsAccessibilityFocusable(node) || IsTagInModalDialog(node) || HitAccessibilityHoverPriority(node))) {
         hitTarget = true;
         path.push_back(node);
     }
@@ -305,12 +318,12 @@ static const std::set<std::string> TAGS_CROSS_PROCESS_COMPONENT = {
     V2::UI_EXTENSION_COMPONENT_ETS_TAG,
     V2::EMBEDDED_COMPONENT_ETS_TAG,
     V2::FORM_ETS_TAG,
-    V2::ISOLATED_COMPONENT_ETS_TAG
+    V2::ISOLATED_COMPONENT_ETS_TAG,
+    V2::WEB_ETS_TAG,
 };
 
 static const std::set<std::string> TAGS_MODAL_DIALOG_COMPONENT = {
     V2::MENU_WRAPPER_ETS_TAG,
-    V2::POPUP_ETS_TAG,
     V2::SELECT_ETS_TAG,
     V2::DIALOG_ETS_TAG,
     V2::SHEET_PAGE_TAG,
@@ -329,6 +342,14 @@ bool AccessibilityProperty::IsTagInModalDialog(const RefPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(node, false);
     return TAGS_MODAL_DIALOG_COMPONENT.find(node->GetTag()) != TAGS_MODAL_DIALOG_COMPONENT.end();
+}
+
+bool AccessibilityProperty::HitAccessibilityHoverPriority(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    return accessibilityProperty->IsAccessibilityHoverPriority();
 }
 
 std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
@@ -723,6 +744,11 @@ void AccessibilityProperty::SetAccessibilityGroup(bool accessibilityGroup)
     NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
 }
 
+void AccessibilityProperty::SetAccessibilityTextPreferred(bool accessibilityTextPreferred)
+{
+    accessibilityTextPreferred_ = accessibilityTextPreferred;
+}
+
 void AccessibilityProperty::SetAccessibilityText(const std::string& text)
 {
     if (text == accessibilityText_.value_or("")) {
@@ -759,11 +785,15 @@ void AccessibilityProperty::SetAccessibilityDescriptionWithEvent(const std::stri
     NotifyComponentChangeEvent(AccessibilityEventType::TEXT_CHANGE);
 }
 
+bool AccessibilityProperty::IsAccessibilityTextPreferred() const
+{
+    return accessibilityTextPreferred_;
+}
+
 void AccessibilityProperty::SetAccessibilityLevel(const std::string& accessibilityLevel)
 {
-    if (accessibilityLevel == accessibilityLevel_.value_or("")) {
-        return;
-    }
+    auto backupLevel = accessibilityLevel_.value_or("");
+
     if (accessibilityLevel == Level::YES_STR ||
         accessibilityLevel == Level::NO_STR ||
         accessibilityLevel == Level::NO_HIDE_DESCENDANTS) {
@@ -771,6 +801,21 @@ void AccessibilityProperty::SetAccessibilityLevel(const std::string& accessibili
     } else {
         accessibilityLevel_ = Level::AUTO;
     }
-    NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+
+    if (backupLevel != accessibilityLevel_.value_or("")) {
+        NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
+    }
 }
+
+bool AccessibilityProperty::IsAccessibilityHoverPriority() const
+{
+    return accessibilityHoverPriority_;
+}
+
+void AccessibilityProperty::SetAccessibilityHoverPriority(bool hoverPriority)
+{
+    // true means node consume barrierfree hover event prior to brothers
+    accessibilityHoverPriority_ = hoverPriority;
+}
+
 } // namespace OHOS::Ace::NG

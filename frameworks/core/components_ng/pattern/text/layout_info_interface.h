@@ -19,6 +19,7 @@
 #include "core/components/common/properties/text_layout_info.h"
 #include "core/components_ng/pattern/text/layout_info_interface.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
 namespace OHOS::Ace::NG  {
 class LayoutInfoInterface : public virtual AceType {
@@ -43,6 +44,12 @@ public:
     virtual TextLineMetrics GetLineMetrics(int32_t lineNumber)
     {
         return TextLineMetrics();
+    }
+
+    virtual std::vector<ParagraphManager::TextBox> GetRectsForRange(int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle)
+    {
+        return {};
     }
 
     virtual PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y)

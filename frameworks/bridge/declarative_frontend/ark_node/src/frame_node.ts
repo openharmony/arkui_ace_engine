@@ -23,6 +23,7 @@ class FrameNode {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
   protected _commonEvent: UICommonEvent;
+  protected _gestureEvent: UIGestureEvent;
   protected _childList: Map<number, FrameNode>;
   protected _nativeRef: NativeStrongRef | NativeWeakRef;
   protected renderNode_: RenderNode;
@@ -526,6 +527,16 @@ class FrameNode {
     this._commonEvent.setInstanceId((this.uiContext_ === undefined || this.uiContext_ === null) ? -1 : this.uiContext_.instanceId_);
     return this._commonEvent;
   }
+
+  get gestureEvent(): UIGestureEvent {
+    if (this._gestureEvent === undefined) {
+        this._gestureEvent = new UIGestureEvent();
+        this._gestureEvent.setNodePtr(this.nodePtr_);
+        let weakPtr = getUINativeModule().nativeUtils.createNativeWeakRef(this.nodePtr_);
+        this._gestureEvent.setWeakNodePtr(weakPtr);
+    }
+    return this._gestureEvent;
+  }
   updateInstance(uiContext: UIContext): void {
     this.uiContext_ = uiContext;
     this.instanceId_ = uiContext.instanceId_;
@@ -799,9 +810,54 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
         return new ArkWaterFlowComponent(node, type);
       })
     }],
+    ['SymbolGlyph', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'SymbolGlyph', (node: NodePtr, type: ModifierType): ArkSymbolGlyphComponent => {
+        return new ArkSymbolGlyphComponent(node, type);
+      })
+    }],
     ['FlowItem', (context: UIContext): FrameNode=> {
       return new TypedFrameNode(context, 'FlowItem', (node: NodePtr, type: ModifierType): ArkFlowItemComponent => {
         return new ArkFlowItemComponent(node, type);
+      })
+    }],
+    ['Marquee', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Marquee', (node: NodePtr, type: ModifierType): ArkMarqueeComponent => {
+        return new ArkMarqueeComponent(node, type);
+      })
+    }],
+    ['TextArea', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextArea', (node: NodePtr, type: ModifierType): ArkTextAreaComponent => {
+        return new ArkTextAreaComponent(node, type);
+      })
+    }],
+    ['QRCode', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'QRCode', (node: NodePtr, type: ModifierType): ArkQRCodeComponent => {
+        return new ArkQRCodeComponent(node, type);
+      })
+    }],
+    ['Badge', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Badge', (node: NodePtr, type: ModifierType): ArkBadgeComponent => {
+        return new ArkBadgeComponent(node, type);
+      })
+    }],
+    ['Grid', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'Grid', (node: NodePtr, type: ModifierType): ArkGridComponent => {
+        return new ArkGridComponent(node, type);
+      })
+    }],
+    ['GridItem', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'GridItem', (node: NodePtr, type: ModifierType): ArkGridItemComponent => {
+        return new ArkGridItemComponent(node, type);
+      })
+    }],
+    ['TextClock', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextClock', (node: NodePtr, type: ModifierType): ArkTextClockComponent => {
+        return new ArkTextClockComponent(node, type);
+      })
+    }],
+    ['TextTimer', (context: UIContext): FrameNode=> {
+      return new TypedFrameNode(context, 'TextTimer', (node: NodePtr, type: ModifierType): ArkTextTimerComponent => {
+        return new ArkTextTimerComponent(node, type);
       })
     }],
   ]

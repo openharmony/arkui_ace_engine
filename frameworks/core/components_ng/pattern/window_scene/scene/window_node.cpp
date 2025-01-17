@@ -16,26 +16,33 @@
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
+#include "core/components_ng/pattern/window_scene/screen/screen_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "session_manager/include/scene_session_manager.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr float MOUSE_RECT_HOT_VP = 4.0f;
 constexpr float TOUCH_RECT_HOT_VP = 20.0f;
 constexpr double DEFAULT_HOT_DENSITY = 1.5f;
-std::map<int32_t, WeakPtr<WindowNode>> g_windowNodeMap;
+std::map<int32_t, std::map<int32_t, WeakPtr<WindowNode>>> g_windowNodeMap;
 }
 
 WindowNode::WindowNode(const std::string& tag,
-    int32_t nodeId, int32_t sessionId, const RefPtr<Pattern>& pattern, bool isRoot)
+    int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
+    : FrameNode(tag, nodeId, pattern, isRoot) {}
+
+WindowNode::WindowNode(const std::string& tag,
+    int32_t nodeId, int32_t sessionId, const RefPtr<Pattern>& pattern, bool isRoot, int32_t screenId)
     : FrameNode(tag, nodeId, pattern, isRoot)
 {
+    screenId_ = screenId;
     sessionId_ = sessionId;
 }
 
 WindowNode::~WindowNode()
 {
-    g_windowNodeMap.erase(sessionId_);
+    g_windowNodeMap[screenId_].erase(sessionId_);
 }
 
 RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(const std::string& tag,
@@ -53,19 +60,32 @@ RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(const std::string& tag,
         }
     }
 
-    auto iter = g_windowNodeMap.find(sessionId);
-    if (iter != g_windowNodeMap.end()) {
-        auto node = iter->second.Upgrade();
-        if (node) {
-            return node;
+    auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(sessionId);
+    auto screenId = static_cast<int>(sceneSession->GetScreenId());
+    auto screenIter = g_windowNodeMap.find(screenId);
+    if (screenIter != g_windowNodeMap.end()) {
+        auto sessionMap = screenIter->second;
+        auto iter = sessionMap.find(sessionId);
+        if (iter != sessionMap.end()) {
+            auto node = iter->second.Upgrade();
+            if (node) {
+                TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE,
+                    "screenId: %{public}d, node id: %{public}d, sessionId: %{public}d",
+                    screenId, node->GetId(), sessionId);
+                return node;
+            }
         }
     }
 
     auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
-    windowNode = AceType::MakeRefPtr<WindowNode>(tag, nodeId, sessionId, pattern, false);
+    windowNode = AceType::MakeRefPtr<WindowNode>(tag, nodeId, sessionId, pattern, false, screenId);
     windowNode->InitializePatternAndContext();
-    ElementRegister::GetInstance()->AddUINode(windowNode);
-    g_windowNodeMap.emplace(sessionId, WeakPtr<WindowNode>(windowNode));
+    bool added = ElementRegister::GetInstance()->AddUINode(windowNode);
+    if (!added) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "Add UINode failed, node id: %{public}d",
+            nodeId);
+    }
+    g_windowNodeMap[screenId][sessionId] = WeakPtr<WindowNode>(windowNode);
     return windowNode;
 }
 
