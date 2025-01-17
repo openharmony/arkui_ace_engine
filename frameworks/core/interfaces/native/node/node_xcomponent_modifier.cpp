@@ -252,6 +252,80 @@ ArkUI_Int32 GetXComponentRenderFit(ArkUINodeHandle node)
     }
     return static_cast<ArkUI_Int32>(XComponentModelNG::GetSurfaceRenderFit(frameNode));
 }
+
+void SetXComponentSurfaceRect(ArkUINodeHandle node, ArkUI_Int32 offsetX,
+    ArkUI_Int32 offsetY, ArkUI_Int32 surfaceWidth, ArkUI_Int32 surfaceHeight)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (surfaceWidth <= 0 || surfaceHeight <= 0) {
+        return;
+    }
+    XComponentModelNG::SetXComponentSurfaceRect(frameNode, static_cast<float>(offsetX), static_cast<float>(offsetY),
+        static_cast<float>(surfaceWidth), static_cast<float>(surfaceHeight));
+}
+
+void GetXComponentSurfaceRect(ArkUINodeHandle node, ArkUI_Int32& offsetX, ArkUI_Int32& offsetY,
+    ArkUI_Int32& surfaceWidth, ArkUI_Int32& surfaceHeight)
+{
+    float surfaceRectOffsetX = 0.0f;
+    float surfaceRectOffsetY = 0.0f;
+    float surfaceRectWidth = 0.0f;
+    float surfaceRectHeight = 0.0f;
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    XComponentModelNG::GetXComponentSurfaceRect(frameNode, surfaceRectOffsetX, surfaceRectOffsetY,
+        surfaceRectWidth, surfaceRectHeight);
+    offsetX = static_cast<ArkUI_Uint32>(surfaceRectOffsetX);
+    offsetY = static_cast<ArkUI_Uint32>(surfaceRectOffsetY);
+    surfaceWidth = static_cast<ArkUI_Uint32>(surfaceRectWidth);
+    surfaceHeight = static_cast<ArkUI_Uint32>(surfaceRectHeight);
+}
+
+void ResetXComponentSurfaceRect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    float width  = ViewAbstract::GetWidth(frameNode).GetNativeValue(static_cast<DimensionUnit>(0));
+    float height = ViewAbstract::GetHeight(frameNode).GetNativeValue(static_cast<DimensionUnit>(0));
+    XComponentModelNG::SetXComponentSurfaceRect(frameNode, 0.0f, 0.0f, width, height);
+}
+
+ArkUI_Bool GetXComponentEnableAnalyzer(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    auto type = XComponentModelNG::GetXComponentType(frameNode);
+    if (type != XComponentType::SURFACE && type != XComponentType::TEXTURE) {
+        return false;
+    }
+    ArkUI_Bool isEnable = XComponentModelNG::GetXComponentEnableAnalyzer(frameNode);
+    return isEnable;
+}
+
+void StartImageAnalyzer(ArkUINodeHandle node, void* arkuiNode, void* userData,
+    XComponentAnalyzerCallback callback)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = frameNode->GetPattern<XComponentPattern>();
+    CHECK_NULL_VOID(xcPattern);
+    std::function<void(int32_t)> nativeAnalyzerCallback = [arkuiNode, userData, callback](int32_t statusCode) {
+        if (callback) {
+            callback(arkuiNode, statusCode, userData);
+        }
+    };
+    xcPattern->NativeStartImageAnalyzer(nativeAnalyzerCallback);
+}
+
+void StopImageAnalyzer(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto xcPattern = frameNode->GetPattern<XComponentPattern>();
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->StopImageAnalyzer();
+}
 } // namespace
 
 namespace NodeModifier {
@@ -285,6 +359,12 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         .setXComponentRenderFit = SetXComponentRenderFit,
         .resetXComponentRenderFit = ResetXComponentRenderFit,
         .getXComponentRenderFit = GetXComponentRenderFit,
+        .setXComponentSurfaceRect = SetXComponentSurfaceRect,
+        .getXComponentSurfaceRect = GetXComponentSurfaceRect,
+        .resetXComponentSurfaceRect = ResetXComponentSurfaceRect,
+        .getXComponentEnableAnalyzer = GetXComponentEnableAnalyzer,
+        .startImageAnalyzer = StartImageAnalyzer,
+        .stopImageAnalyzer = StopImageAnalyzer,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
