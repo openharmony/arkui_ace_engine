@@ -35,6 +35,11 @@ const auto SEGMENT_LIMIT_MIN = 0.0;
 const auto SCALE_LIMIT_MIN = 0.0;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
 const auto EMPTY_STRING = "";
+const auto FILL_RULE_EVEN_ODD = "evenodd";
+const auto DIR_AUTO = "auto";
+const auto DIR_INHERIT = "inherit";
+const auto DIR_LTR = "ltr";
+const auto DIR_RTL = "rtl";
 struct Ark_Custom_Rect {
     Ark_Number x;
     Ark_Number y;
@@ -77,6 +82,19 @@ std::optional<double> ConvertDimension(
 }
 } // namespace
 namespace Converter {
+template<>
+TextDirection Convert(const Ark_String& src)
+{
+    auto val = Converter::Convert<std::string>(src);
+    static const LinearMapNode<TextDirection> textDirectionTable[] = {
+        { DIR_AUTO, TextDirection::AUTO },
+        { DIR_INHERIT, TextDirection::INHERIT },
+        { DIR_LTR, TextDirection::LTR },
+        { DIR_RTL, TextDirection::RTL },
+    };
+    auto index = BinarySearchFindIndex(textDirectionTable, ArraySize(textDirectionTable), val.c_str());
+    return index < 0 ? TextDirection::LTR : textDirectionTable[index].value;
+}
 template<>
 std::vector<uint32_t> Convert(const Ark_Buffer& src)
 {
@@ -191,28 +209,56 @@ void BeginPathImpl(CanvasRendererPeer* peer)
 void Clip0Impl(CanvasRendererPeer* peer,
                const Opt_String* fillRule)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::Clip0Impl Opt_String parameter "
-        "should be replaced with a valid ark enum for CanvasFillRule type.");
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(fillRule);
+    auto opt = Converter::OptConvert<std::string>(*fillRule);
+    auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+    peerImpl->Clip(rule);
 }
 void Clip1Impl(CanvasRendererPeer* peer,
                const Ark_Path2D* path,
                const Opt_String* fillRule)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::Clip1Impl Opt_String parameter "
-        "should be replaced with a valid ark enum for CanvasFillRule type.");
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(path);
+    CHECK_NULL_VOID(fillRule);
+    auto opt = Converter::OptConvert<std::string>(*fillRule);
+    auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path->ptr);
+    CHECK_NULL_VOID(pathImpl);
+    CHECK_NULL_VOID(pathImpl->path);
+    peerImpl->Clip(rule, pathImpl->path);
 }
 void Fill0Impl(CanvasRendererPeer* peer,
                const Opt_String* fillRule)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::Fill0Impl Opt_String parameter "
-        "should be replaced with a valid ark enum for CanvasFillRule type.");
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(fillRule);
+    auto opt = Converter::OptConvert<std::string>(*fillRule);
+    auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+    peerImpl->Fill(rule);
 }
 void Fill1Impl(CanvasRendererPeer* peer,
                const Ark_Path2D* path,
                const Opt_String* fillRule)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::Fill1Impl Opt_String parameter "
-        "should be replaced with a valid ark enum for CanvasFillRule type.");
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(path);
+    CHECK_NULL_VOID(fillRule);
+    auto opt = Converter::OptConvert<std::string>(*fillRule);
+    auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path->ptr);
+    CHECK_NULL_VOID(pathImpl);
+    CHECK_NULL_VOID(pathImpl->path);
+    peerImpl->Fill(rule, pathImpl->path);
 }
 void Stroke0Impl(CanvasRendererPeer* peer)
 {
@@ -1148,8 +1194,12 @@ Ark_NativePointer GetDirectionImpl(CanvasRendererPeer* peer)
 void SetDirectionImpl(CanvasRendererPeer* peer,
                       const Ark_String* direction)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::SetDirectionImpl Ark_String type parameter "
-        "should be replaced with a valid ark enum for CanvasDirection type.");
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(direction);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto dir = Converter::Convert<TextDirection>(*direction);
+    peerImpl->SetTextDirection(dir);
 }
 void GetFontImpl(CanvasRendererPeer* peer)
 {
