@@ -33,7 +33,6 @@ const std::string EVENT_NAME_CUSTOM_APP_BAR_MENU_CLICK = "arkui_custom_app_bar_m
 const std::string EVENT_NAME_CUSTOM_APP_BAR_CLOSE_CLICK = "arkui_custom_app_bar_close_click";
 const std::string EVENT_NAME_CUSTOM_APP_BAR_DID_BUILD = "arkui_custom_app_bar_did_build";
 
-const int32_t EVENT_NAME_MENU_WIDTH_CHANGE_PARAM_COUNT = 2;
 static std::map<std::string, std::function<void(const JSCallbackInfo& info)>> nativeFucMap_;
 } // namespace
 
