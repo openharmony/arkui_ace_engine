@@ -646,8 +646,8 @@ class LayoutPolicyPolicy {
     this.id_ = id;
   }
 
-  static get MATCH_PARENT() {
-    return new LayoutPolicyPolicy('MATCH_PARENT');
+  static get matchParent() {
+    return new LayoutPolicyPolicy('matchParent');
   }
 }
 
