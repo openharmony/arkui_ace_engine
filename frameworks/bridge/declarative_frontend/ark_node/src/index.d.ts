@@ -220,6 +220,8 @@ declare class ArkSelectComponent extends ArkComponent {}
 
 declare class ArkToggleComponent extends ArkComponent {}
 
+declare class Scroller {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;
