@@ -295,7 +295,7 @@ void FfiOHOSAceFrameworkViewAbstractSetPixelRound(CJPixelRoundPolicy cjValue)
 {
     uint16_t value = 0;
     int32_t startValue = cjValue.start;
-    if (Utils::CheckParamsValid(startValue, PIXEL_ROUND_CALC_POLICIES.size()) {
+    if (Utils::CheckParamsValid(startValue, PIXEL_ROUND_CALC_POLICIES.size())) {
         if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(startValue)) {
             value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
         } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(startValue)) {
@@ -307,7 +307,7 @@ void FfiOHOSAceFrameworkViewAbstractSetPixelRound(CJPixelRoundPolicy cjValue)
     
 
     int32_t topValue = cjValue.top;
-    if (Utils::CheckParamsValid(topValue, PIXEL_ROUND_CALC_POLICIES.size()) {
+    if (Utils::CheckParamsValid(topValue, PIXEL_ROUND_CALC_POLICIES.size())) {
         if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(topValue)) {
             value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
         } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(topValue)) {
@@ -318,7 +318,7 @@ void FfiOHOSAceFrameworkViewAbstractSetPixelRound(CJPixelRoundPolicy cjValue)
     }
 
     int32_t endValue = cjValue.end;
-    if (Utils::CheckParamsValid(endValue, PIXEL_ROUND_CALC_POLICIES.size()) {
+    if (Utils::CheckParamsValid(endValue, PIXEL_ROUND_CALC_POLICIES.size())) {
         if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(endValue)) {
             value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
         } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(endValue)) {
@@ -329,7 +329,7 @@ void FfiOHOSAceFrameworkViewAbstractSetPixelRound(CJPixelRoundPolicy cjValue)
     }
 
     int32_t bottomValue = cjValue.bottom;
-    if (Utils::CheckParamsValid(bottomValue, PIXEL_ROUND_CALC_POLICIES.size()) {
+    if (Utils::CheckParamsValid(bottomValue, PIXEL_ROUND_CALC_POLICIES.size())) {
         if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
             value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
         } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
