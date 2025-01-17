@@ -1608,14 +1608,15 @@ ScopeFocusAlgorithm GridPattern::GetScopeFocusAlgorithm()
     }
     return ScopeFocusAlgorithm(property->IsVertical(), true, ScopeType::OTHERS,
         [wp = WeakClaim(this)](
-            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
             auto grid = wp.Upgrade();
-            CHECK_NULL_VOID(grid);
+            CHECK_NULL_RETURN(grid, false);
             if (grid->UseIrregularLayout() && (step == FocusStep::TAB || step == FocusStep::SHIFT_TAB)) {
                 nextFocusNode = grid->focusHandler_.GetNextFocusSimplified(step, currFocusNode.Upgrade());
             } else {
                 nextFocusNode = grid->focusHandler_.GetNextFocusNode(step, currFocusNode);
             }
+            return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
         });
 }
 

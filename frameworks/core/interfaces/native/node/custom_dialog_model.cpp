@@ -34,6 +34,9 @@ namespace {
     constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_INDEX = 7;
     constexpr int32_t ARKUI_ALIGNMENT_BOTTOM_END_INDEX = 8;
     constexpr float AVOID_DISTANCE = 16.0f;
+    constexpr int32_t ARKUI_LEVEL_MODE_DEFAULT_VALUE = 0;
+    constexpr int32_t ARKUI_DEFAULT_LEVEL_UNIQUEID = -1;
+    constexpr int32_t ARKUI_IMMERSIVE_MODE_DEFAULT_VALUE = 0;
 } // namespace
 
 ArkUIDialogHandle CreateDialog()
@@ -57,7 +60,11 @@ ArkUIDialogHandle CreateDialog()
         .onWillDismissCallByNDK  = nullptr,
         .userData = nullptr,
         .keyboardAvoidDistanceValue = std::optional<ArkUI_Float32>(),
-        .keyboardAvoidDistanceUnit = DimensionUnit::VP});
+        .keyboardAvoidDistanceUnit = DimensionUnit::VP,
+        .levelMode = ARKUI_LEVEL_MODE_DEFAULT_VALUE,
+        .levelUniqueId = ARKUI_DEFAULT_LEVEL_UNIQUEID,
+        .immersiveMode = ARKUI_IMMERSIVE_MODE_DEFAULT_VALUE,
+    });
 }
 
 void DisposeDialog(ArkUIDialogHandle controllerHandler)
@@ -156,6 +163,9 @@ void ParseDialogProperties(DialogProperties& dialogProperties, ArkUIDialogHandle
     dialogProperties.backgroundColor = Color(controllerHandler->backgroundColor);
     dialogProperties.customStyle = controllerHandler->enableCustomStyle;
     dialogProperties.gridCount = controllerHandler->gridCount;
+    dialogProperties.dialogLevelMode = static_cast<LevelMode>(controllerHandler->levelMode);
+    dialogProperties.dialogLevelUniqueId = controllerHandler->levelUniqueId;
+    dialogProperties.dialogImmersiveMode = static_cast<ImmersiveMode>(controllerHandler->immersiveMode);
     ParseDialogMask(dialogProperties, controllerHandler);
     ParseDialogCornerRadiusRect(dialogProperties, controllerHandler);
     if (controllerHandler->onWillDismissCall) {
@@ -358,4 +368,24 @@ ArkUI_Int32 SetKeyboardAvoidDistance(
     return ERROR_CODE_NO_ERROR;
 }
 
+ArkUI_Int32 SetLevelMode(ArkUIDialogHandle controllerHandler, ArkUI_Int32 mode)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->levelMode = mode;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetLevelUniqueId(ArkUIDialogHandle controllerHandler, ArkUI_Int32 uniqueId)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->levelUniqueId = uniqueId;
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Int32 SetImmersiveMode(ArkUIDialogHandle controllerHandler, ArkUI_Int32 mode)
+{
+    CHECK_NULL_RETURN(controllerHandler, ERROR_CODE_PARAM_INVALID);
+    controllerHandler->immersiveMode = mode;
+    return ERROR_CODE_NO_ERROR;
+}
 } // namespace OHOS::Ace::NG::ViewModel

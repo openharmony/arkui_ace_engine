@@ -1026,7 +1026,7 @@ void DragEventActuator::CreatePreviewNode(
     const RefPtr<FrameNode>& frameNode, RefPtr<FrameNode>& imageNode, float dragPreviewScale)
 {
     CHECK_NULL_VOID(frameNode);
-    auto pixelMap = frameNode->GetPixelMap();
+    auto pixelMap = frameNode->GetDragPixelMap();
     CHECK_NULL_VOID(pixelMap);
     auto center = DragDropFuncWrapper::GetPaintRectCenter(frameNode);
     auto frameOffset = OffsetF(center.GetX() - (pixelMap->GetWidth() / 2.0f),

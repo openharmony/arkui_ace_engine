@@ -5289,6 +5289,7 @@ struct ArkUIFrameNodeModifier {
     void (*focusActivate)(ArkUI_Int32 instanceId, bool isActive, bool isAutoInactive);
     void (*setAutoFocusTransfer)(ArkUI_Int32 instanceId, bool isAutoFocusTransfer);
     ArkUI_Int32 (*getWindowInfoByNode)(ArkUINodeHandle node, char** name);
+    ArkUI_Int32 (*moveNodeTo)(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkUI_Int32 index);
 };
 
 struct ArkUINodeContentEvent {
@@ -5664,6 +5665,9 @@ struct ArkUIDialogAPI {
     ArkUI_Int32 (*registerOnWillDismissWithUserData)(
         ArkUIDialogHandle handler, void* userData, void (*callback)(ArkUI_DialogDismissEvent* event));
     ArkUI_Int32 (*setKeyboardAvoidDistance)(ArkUIDialogHandle handle, float distance, ArkUI_Int32 unit);
+    ArkUI_Int32 (*setLevelMode)(ArkUIDialogHandle handle, ArkUI_Int32 mode);
+    ArkUI_Int32 (*setLevelUniqueId)(ArkUIDialogHandle handle, ArkUI_Int32 uniqueId);
+    ArkUI_Int32 (*setImmersiveMode)(ArkUIDialogHandle handle, ArkUI_Int32 mode);
 };
 
 struct ArkUIBasicNodeAPI {
@@ -5802,6 +5806,17 @@ typedef struct {
     void (*setDragEventStrictReportingEnabledWithContext)(ArkUI_Int32 instanceId, bool enabled);
 } ArkUIDragAdapterAPI;
 
+struct ArkUISnapshotOptions {
+    ArkUI_Float32 scale = 1.0f;
+};
+
+typedef struct {
+    ArkUISnapshotOptions* (*createSnapshotOptions)();
+    void (*destroySnapshotOptions)(ArkUISnapshotOptions* snapshotOptions);
+    ArkUI_Int32 (*snapshotOptionsSetScale)(ArkUISnapshotOptions* snapshotOptions, ArkUI_Float32 scale);
+    ArkUI_Int32 (*getSyncSnapshot)(ArkUINodeHandle node, ArkUISnapshotOptions* snapshotOptions, void* mediaPixel);
+} ArkUISnapshotAPI;
+
 /**
  * An API to control an implementation. When making changes modifying binary
  * layout, i.e. adding new events - increase ARKUI_NODE_API_VERSION above for binary
@@ -5820,6 +5835,7 @@ struct ArkUIFullNodeAPI {
     const ArkUINodeAdapterAPI* (*getNodeAdapterAPI)();
     const ArkUIDragAdapterAPI* (*getDragAdapterAPI)();
     const ArkUIStyledStringAPI* (*getStyledStringAPI)();
+    const ArkUISnapshotAPI* (*getSnapshotAPI)();
 };
 
 struct ArkUIAnyAPI {

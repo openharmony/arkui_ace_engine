@@ -2074,6 +2074,12 @@ typedef enum {
     ARKUI_ERROR_CODE_PARAM_INVALID = 401,
     /** CAPI init error. */
     ARKUI_ERROR_CODE_CAPI_INIT_ERROR = 500,
+    /**
+     * @error Internal error occurs, such as failure occurs because of the internal environment error,
+     * or operation failed because of the internal execution failed.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_INTERNAL_ERROR = 100001,
     /** The component does not support specific attributes or events. */
     ARKUI_ERROR_CODE_ATTRIBUTE_OR_EVENT_NOT_SUPPORTED = 106102,
     /** The specific operation is not allowed on the node created by ArkTS. */
@@ -2090,6 +2096,11 @@ typedef enum {
     ARKUI_ERROR_CODE_GET_INFO_FAILED = 106201,
     /** The buffer size is not large enough. */
     ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR = 106202,
+    /**
+     * @error The snapshot taking is timeout.
+     * @since 16
+     */
+    ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT = 160002,
     /** The node is not on main tree. */
     ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE = 106203,
     /**
@@ -2173,6 +2184,13 @@ typedef enum {
  * @since 12
  */
 typedef struct ArkUI_SystemFontStyleEvent ArkUI_SystemFontStyleEvent;
+
+/**
+ * @brief Defines the options for taking snapshot.
+ *
+ * @since 16
+ */
+typedef struct ArkUI_SnapshotOptions ArkUI_SnapshotOptions;
 
 typedef struct {
     float x;
@@ -4092,6 +4110,35 @@ float OH_ArkUI_ProgressLinearStyleOption_GetStrokeWidth(ArkUI_ProgressLinearStyl
  * @since 16
  */
 float OH_ArkUI_ProgressLinearStyleOption_GetStrokeRadius(ArkUI_ProgressLinearStyleOption* option);
+
+/**
+ * @brief Creates an option for taking snapshot, the returned value must be released through
+ *        {@link OH_ArkUI_DestroySnapshotOptions} when it's not used anymore.
+ *
+ * @return Returns the pointer to the created snapshot options object.If the object returns a null pointer,
+ *         it indicates a creation failure, and the reason for the failure may be that the address space is full.
+ * @since 16
+ */
+ArkUI_SnapshotOptions* OH_ArkUI_CreateSnapshotOptions();
+
+/**
+ * @brief Dispose a snapshot option object.
+ *
+ * @param snapshotOptions Indicates the pointer to the snapshot option.
+ * @since 16
+ */
+void OH_ArkUI_DestroySnapshotOptions(ArkUI_SnapshotOptions* snapshotOptions);
+
+/**
+ * @brief Config the snapshot option with scale.
+ *
+ * @param snapshotOptions Indicates the pointer to the snapshot option.
+ * @param scale Indicates the scale property to take the snapshot.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_SnapshotOptions_SetScale(ArkUI_SnapshotOptions* snapshotOptions, float scale);
 #ifdef __cplusplus
 };
 #endif

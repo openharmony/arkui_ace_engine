@@ -69,6 +69,7 @@
 #include "core/components_ng/pattern/menu/preview/menu_preview_pattern.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/overlay/keyboard_view.h"
 #include "core/components_ng/pattern/overlay/overlay_container_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_view.h"
@@ -3214,6 +3215,7 @@ int32_t OverlayManager::RemoveOverlayCommon(const RefPtr<NG::UINode>& rootNode, 
             return OVERLAY_REMOVE;
         } else if (dialogPattern->ShouldDismiss()) {
             SetDismissDialogId(overlay->GetId());
+            DialogManager::GetInstance().SetDismissDialogInfo(overlay->GetId(), overlay->GetTag());
             auto currentId = Container::CurrentId();
             dialogPattern->CallOnWillDismiss(static_cast<int32_t>(DialogDismissReason::DIALOG_PRESS_BACK), currentId);
             TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog Should Dismiss, currentId: %{public}d", currentId);
@@ -4781,6 +4783,9 @@ void OverlayManager::UpdateSheetProperty(const RefPtr<FrameNode>& sheetNode,
         UpdateSheetMask(maskNode, sheetNode, currentStyle, isPartialUpdate);
     }
     sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto sheetWrapper = sheetNode->GetParent();
+    CHECK_NULL_VOID(sheetWrapper);
+    sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     pipeline->FlushUITasks();
     ComputeSheetOffset(currentStyle, sheetNode);
 }
@@ -4972,7 +4977,7 @@ RefPtr<FrameNode> OverlayManager::CreateSheetMask(const RefPtr<FrameNode>& sheet
 {
     // create maskColor node(sheetWrapper)
     auto maskNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<SheetWrapperPattern>());
+        AceType::MakeRefPtr<SheetWrapperPattern>(targetNode->GetId(), targetNode->GetTag()));
     CHECK_NULL_RETURN(maskNode, nullptr);
     auto maskLayoutProps = maskNode->GetLayoutProperty();
     CHECK_NULL_RETURN(maskLayoutProps, nullptr);
@@ -5578,7 +5583,7 @@ CustomKeyboardOffsetInfo OverlayManager::CalcCustomKeyboardOffset(const RefPtr<F
         pageHeight = rootGeo->GetFrameSize().Height();
         finalOffset = (pageHeight - keyboardHeight) - (pageHeight - keyboardHeight) / NUM_FLOAT_2;
     } else if (!pageNode) {
-        auto fatherNode = customKeyboard->GetAncestorNodeOfFrame(false);
+        auto fatherNode = customKeyboard->GetAncestorNodeOfFrame(true);
         CHECK_NULL_RETURN(fatherNode, keyboardOffsetInfo);
         auto fatherGeoNode = fatherNode->GetGeometryNode();
         CHECK_NULL_RETURN(fatherGeoNode, keyboardOffsetInfo);
@@ -7242,6 +7247,7 @@ BorderRadiusProperty OverlayManager::GetPrepareDragFrameNodeBorderRadius() const
 
 RefPtr<FrameNode> OverlayManager::GetLastChildNotRemoving(const RefPtr<UINode>& rootNode)
 {
+    CHECK_NULL_RETURN(rootNode, nullptr);
     const auto& children = rootNode->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;

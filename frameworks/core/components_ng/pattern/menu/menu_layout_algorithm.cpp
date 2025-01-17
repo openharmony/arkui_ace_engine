@@ -502,7 +502,11 @@ void MenuLayoutAlgorithm::InitWrapperRect(
         }
     }
     isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
-    if (isHalfFoldHover_ && menuPattern->GetHoverMode()) {
+    auto menuWrapper = menuPattern->GetMenuWrapper();
+    CHECK_NULL_VOID(menuWrapper);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_VOID(menuWrapperPattern);
+    if (isHalfFoldHover_ && menuWrapperPattern->GetHoverMode()) {
         UpdateWrapperRectForHoverMode(props, menuPattern);
     } else {
         wrapperRect_.SetRect(left_, top_, width_ - left_ - right_, height_ - top_ - bottom_);
@@ -2301,7 +2305,7 @@ OffsetF MenuLayoutAlgorithm::GetMenuWrapperOffset(const LayoutWrapper* layoutWra
     CHECK_NULL_RETURN(menuNode, OffsetF());
     auto menuLayoutProperty = layoutWrapper->GetLayoutProperty();
     if (menuLayoutProperty && menuLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
-        return menuNode->GetPaintRectOffset(true);
+        return menuNode->GetPaintRectOffset(true, true);
     }
     return menuNode->GetParentGlobalOffsetDuringLayout();
 }
@@ -2343,7 +2347,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
             targetOffset_ = props->GetMenuOffsetValue(OffsetF());
         } else {
             targetSize_ = targetNode->GetPaintRectWithTransform().GetSize();
-            targetOffset_ = targetNode->GetPaintRectOffset();
+            targetOffset_ = targetNode->GetPaintRectOffset(false, true);
         }
     }
     dumpInfo_.targetSize = targetSize_;

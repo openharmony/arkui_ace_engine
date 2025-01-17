@@ -439,7 +439,7 @@ class SwiperIndicatorModifier extends ModifierWithKey<boolean | DotIndicator | D
           bottom
         );
       } else {
-        getUINativeModule().swiper.setSwiperIndicator(node, "IndicatorComponentController", this.value );
+        getUINativeModule().swiper.setSwiperIndicator(node, 'IndicatorComponentController', this.value );
       }
     }
   }

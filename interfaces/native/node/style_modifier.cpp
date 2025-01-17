@@ -6627,31 +6627,42 @@ void ResetButtonType(ArkUI_NodeHandle node)
 
 int32_t SetButtonMinFontScale(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getButtonModifier()) {
-        if (LessNotEqual(item->value[0].f32, 0.0f)) {
-            fullImpl->getNodeModifiers()->getButtonModifier()->setButtonMinFontScale(node->uiNodeHandle, 0.0f);
-        } else if (GreatNotEqual(item->value[0].f32, 1.0f)) {
-            fullImpl->getNodeModifiers()->getButtonModifier()->setButtonMinFontScale(node->uiNodeHandle, 1.0f);
-        } else {
-            fullImpl->getNodeModifiers()->getButtonModifier()->setButtonMinFontScale(
-                node->uiNodeHandle, item->value[NUM_0].f32);
-        }
+    CHECK_NULL_RETURN(fullImpl, ERROR_CODE_INTERNAL_ERROR);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, ERROR_CODE_INTERNAL_ERROR);
+    auto buttonModifier = nodeModifiers->getButtonModifier();
+    CHECK_NULL_RETURN(buttonModifier, ERROR_CODE_INTERNAL_ERROR);
+    auto scale = item->value[0].f32;
+
+    if (LessNotEqual(scale, 0.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    } else if (GreatNotEqual(scale, 1.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    } else {
+        buttonModifier->setButtonMinFontScale(node->uiNodeHandle, scale);
     }
+
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetButtonMinFontScale(ArkUI_NodeHandle node)
 {
+    CHECK_NULL_RETURN(node, &g_attributeItem);
     auto* fullImpl = GetFullImpl();
-    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getButtonModifier()) {
-        auto resultValue =
-            fullImpl->getNodeModifiers()->getButtonModifier()->getButtonMinFontScale(node->uiNodeHandle);
+    CHECK_NULL_RETURN(fullImpl, &g_attributeItem);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, &g_attributeItem);
+    auto buttonModifier = nodeModifiers->getButtonModifier();
+
+    if (buttonModifier) {
+        auto resultValue = buttonModifier->getButtonMinFontScale(node->uiNodeHandle);
         g_numberValues[0].f32 = resultValue;
         return &g_attributeItem;
     } else {
@@ -6661,37 +6672,53 @@ const ArkUI_AttributeItem* GetButtonMinFontScale(ArkUI_NodeHandle node)
 
 void ResetButtonMinFontScale(ArkUI_NodeHandle node)
 {
+    CHECK_NULL_VOID(node);
     auto* fullImpl = GetFullImpl();
-    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getButtonModifier()) {
-        fullImpl->getNodeModifiers()->getButtonModifier()->resetButtonMinFontScale(node->uiNodeHandle);
-    }
+    CHECK_NULL_VOID(fullImpl);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    auto buttonModifier = nodeModifiers->getButtonModifier();
+    CHECK_NULL_VOID(buttonModifier);
+    
+    buttonModifier->resetButtonMinFontScale(node->uiNodeHandle);
+    
 }
 
 int32_t SetButtonMaxFontScale(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
     CHECK_NULL_RETURN(item, ERROR_CODE_PARAM_INVALID);
     auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
     if (actualSize < 0) {
         return ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = GetFullImpl();
-    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getButtonModifier()) {
-        if (LessNotEqual(item->value[0].f32, 1.0f)) {
-            fullImpl->getNodeModifiers()->getButtonModifier()->setButtonMaxFontScale(node->uiNodeHandle, 1.0f);
-        } else {
-            fullImpl->getNodeModifiers()->getButtonModifier()->setButtonMaxFontScale(
-                node->uiNodeHandle, item->value[NUM_0].f32);
-        }
+    CHECK_NULL_RETURN(fullImpl, ERROR_CODE_INTERNAL_ERROR);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, ERROR_CODE_INTERNAL_ERROR);
+    auto buttonModifier = nodeModifiers->getButtonModifier();
+    CHECK_NULL_RETURN(buttonModifier, ERROR_CODE_INTERNAL_ERROR);
+    auto scale = item->value[0].f32;
+
+    if (LessNotEqual(scale, 1.0f)) {
+        return ERROR_CODE_PARAM_INVALID;
+    } else {
+        buttonModifier->setButtonMaxFontScale(node->uiNodeHandle, scale);
     }
     return ERROR_CODE_NO_ERROR;
 }
 
 const ArkUI_AttributeItem* GetButtonMaxFontScale(ArkUI_NodeHandle node)
 {
+    CHECK_NULL_RETURN(node, &g_attributeItem);
     auto* fullImpl = GetFullImpl();
-    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getButtonModifier()) {
-        auto resultValue =
-            fullImpl->getNodeModifiers()->getButtonModifier()->getButtonMaxFontScale(node->uiNodeHandle);
+    CHECK_NULL_RETURN(fullImpl, &g_attributeItem);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, &g_attributeItem);
+    auto buttonModifier = nodeModifiers->getButtonModifier();
+
+    if (buttonModifier) {
+        auto resultValue = buttonModifier->getButtonMaxFontScale(node->uiNodeHandle);
         g_numberValues[0].f32 = resultValue;
         return &g_attributeItem;
     } else {
@@ -6701,10 +6728,15 @@ const ArkUI_AttributeItem* GetButtonMaxFontScale(ArkUI_NodeHandle node)
 
 void ResetButtonMaxFontScale(ArkUI_NodeHandle node)
 {
+    CHECK_NULL_VOID(node);
     auto* fullImpl = GetFullImpl();
-    if (fullImpl && fullImpl->getNodeModifiers() && fullImpl->getNodeModifiers()->getButtonModifier()) {
-        fullImpl->getNodeModifiers()->getButtonModifier()->resetButtonMaxFontScale(node->uiNodeHandle);
-    }
+    CHECK_NULL_VOID(fullImpl);
+    auto nodeModifiers = fullImpl->getNodeModifiers();
+    CHECK_NULL_VOID(nodeModifiers);
+    auto buttonModifier = nodeModifiers->getButtonModifier();
+    CHECK_NULL_VOID(buttonModifier);
+
+    buttonModifier->resetButtonMaxFontScale(node->uiNodeHandle);
 }
 
 int32_t SetProgressValue(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)

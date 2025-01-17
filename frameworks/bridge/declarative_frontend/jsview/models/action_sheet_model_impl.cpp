@@ -21,7 +21,7 @@
 namespace OHOS::Ace::Framework {
 void ActionSheetModelImpl::ShowActionSheet(const DialogProperties& arg)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     LOGE("ActionSheetModelImpl::ShowActionSheet");
     auto container = Container::Current();
     if (container) {

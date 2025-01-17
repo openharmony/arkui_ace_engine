@@ -2004,7 +2004,7 @@ CachedIndexInfo ListLayoutAlgorithm::GetLayoutGroupCachedCount(LayoutWrapper* la
         backwardCache = backward ? backwardCache : -1;
     }
     res = group->UpdateCachedIndex(outOfView, reCache, forwardCache, backwardCache);
-    if (group->GetTotalItemCount() == 0 && outOfView) {
+    if ((group->GetTotalItemCount() == 0 && outOfView) || !group->IsVisible()) {
         if (groupNode->CheckNeedForceMeasureAndLayout()) {
             res = {0, 0, 1, 1};
         } else {
