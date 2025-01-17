@@ -227,11 +227,12 @@ public:
     {
         return ScopeFocusAlgorithm(direction_ != Axis::HORIZONTAL, true, ScopeType::OTHERS,
             [wp = WeakClaim(this)](
-                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
                 auto swiper = wp.Upgrade();
                 if (swiper) {
                     nextFocusNode = swiper->GetNextFocusNode(step, currFocusNode);
                 }
+                return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
             });
     }
 
@@ -715,19 +716,7 @@ public:
         isBindIndicator_ = bind;
     }
 
-    void SetIndicatorNode(const WeakPtr<NG::UINode>& indicatorNode)
-    {
-        if (isBindIndicator_) {
-            indicatorNode_ = indicatorNode;
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-
-            auto frameIndicatorNode = GetIndicatorNode();
-            CHECK_NULL_VOID(frameIndicatorNode);
-            frameIndicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        }
-    }
+    void SetIndicatorNode(const WeakPtr<NG::UINode>& indicatorNode);
 
     RefPtr<FrameNode> GetIndicatorNode() const
     {

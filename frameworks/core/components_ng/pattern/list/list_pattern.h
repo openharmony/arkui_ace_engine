@@ -153,11 +153,12 @@ public:
         return ScopeFocusAlgorithm(property->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL, true,
             ScopeType::OTHERS,
             [wp = WeakClaim(this)](
-                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
                 auto list = wp.Upgrade();
                 if (list) {
                     nextFocusNode = list->GetNextFocusNode(step, currFocusNode);
                 }
+                return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
             });
     }
 

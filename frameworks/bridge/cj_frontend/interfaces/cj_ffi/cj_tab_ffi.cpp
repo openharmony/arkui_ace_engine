@@ -16,8 +16,10 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_tab_ffi.h"
 
 #include "cj_lambda.h"
+#include "cj_view_abstract_ffi.h"
 
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 
 using namespace OHOS::Ace;
@@ -38,6 +40,8 @@ const std::vector<TabBarMode> TAB_BAR_MODES = {
 };
 const std::vector<TabAnimateMode> TAB_ANIMATE_MODES = { TabAnimateMode::CONTENT_FIRST, TabAnimateMode::ACTION_FIRST,
     TabAnimateMode::NO_ANIMATION };
+const std::vector<TextOverflow> TEXT_OVER_FLOWS = { TextOverflow::CLIP, TextOverflow::ELLIPSIS, TextOverflow::NONE,
+    TextOverflow::MARQUEE };
 } // namespace
 
 namespace OHOS::Ace::Framework {
@@ -152,7 +156,7 @@ void FfiOHOSAceFrameworkTabsSetBarModeWithOptions(int32_t barMode, CJTabsScrolla
     }
     TabBarMode barModeEnum = TabBarMode::FIXED;
     barModeEnum = TAB_BAR_MODES[barMode];
-    if (barMode == static_cast<int32_t>(TabBarMode::SCROLLABLE)) {
+    if (barModeEnum == TabBarMode::SCROLLABLE) {
         ScrollableBarModeOptions option;
         Dimension margin(options.margin, static_cast<DimensionUnit>(options.marginUnit));
         if (margin.IsNegative() || margin.Unit() == DimensionUnit::PERCENT) {
@@ -569,18 +573,330 @@ void FfiOHOSAceFrameworkTabContentPop()
 
 void FfiOHOSAceFrameworkTabContentSetTabBar(const char* content)
 {
+    TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
     TabContentModel::GetInstance()->SetTabBar(content, std::nullopt, std::nullopt, nullptr, true);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
 void FfiOHOSAceFrameworkTabContentSetTabBarWithIcon(const char* icon, const char* text)
 {
+    TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
     TabContentModel::GetInstance()->SetTabBar(text, icon, std::nullopt, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
 void FfiOHOSAceFrameworkTabContentSetTabBarWithComponent(void (*callback)())
 {
+    TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::NOSTYLE);
     TabContentModel::GetInstance()->SetTabBar(
         std::nullopt, std::nullopt, std::nullopt, CJLambda::Create(callback), false);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
+}
+
+void SetPadding(CJPadding cjPadding, bool isSubTabStyle)
+{
+    CalcDimension length;
+    NG::PaddingProperty padding;
+    bool useLocalizedPadding = false;
+
+    RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+    if (tabTheme) {
+        if (isSubTabStyle) {
+            padding.top = NG::CalcLength(tabTheme->GetSubTabTopPadding());
+            padding.bottom = NG::CalcLength(tabTheme->GetSubTabBottomPadding());
+            padding.left = NG::CalcLength(tabTheme->GetSubTabHorizontalPadding());
+            padding.right = NG::CalcLength(tabTheme->GetSubTabHorizontalPadding());
+        } else {
+            padding.top = NG::CalcLength(0.0_vp);
+            padding.bottom = NG::CalcLength(0.0_vp);
+            padding.left = NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
+            padding.right = NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
+        }
+    }
+
+    CalcDimension left(cjPadding.left, static_cast<DimensionUnit>(cjPadding.leftUnit));
+    if (left.Value() >= 0 && left.Unit() != DimensionUnit::PERCENT) {
+        padding.left = NG::CalcLength(left);
+    }
+    CalcDimension right(cjPadding.right, static_cast<DimensionUnit>(cjPadding.rightUnit));
+    if (right.Value() >= 0 && right.Unit() != DimensionUnit::PERCENT) {
+        padding.right = NG::CalcLength(right);
+    }
+    CalcDimension top(cjPadding.top, static_cast<DimensionUnit>(cjPadding.topUnit));
+    if (top.Value() >= 0 && top.Unit() != DimensionUnit::PERCENT) {
+        padding.top = NG::CalcLength(top);
+    }
+    CalcDimension bottom(cjPadding.bottom, static_cast<DimensionUnit>(cjPadding.bottomUnit));
+    if (bottom.Value() >= 0 && bottom.Unit() != DimensionUnit::PERCENT) {
+        padding.bottom = NG::CalcLength(bottom);
+    }
+
+    if (cjPadding.paddingType == static_cast<int32_t>(PaddingType::LENGTH)) {
+        TabContentModel::GetInstance()->SetPadding(padding);
+        return;
+    }
+
+    if (cjPadding.paddingType == static_cast<int32_t>(PaddingType::LOCALIZEDPADDING)) {
+        useLocalizedPadding = true;
+    }
+
+    TabContentModel::GetInstance()->SetPadding(padding);
+    TabContentModel::GetInstance()->SetUseLocalizedPadding(useLocalizedPadding);
+}
+
+void SetLayoutMode(int32_t layoutMode)
+{
+    auto mode = LayoutMode::VERTICAL;
+    if (layoutMode >= static_cast<int32_t>(LayoutMode::AUTO) &&
+        layoutMode <= static_cast<int32_t>(LayoutMode::HORIZONTAL)) {
+        mode = static_cast<LayoutMode>(layoutMode);
+    }
+    TabContentModel::GetInstance()->SetLayoutMode(mode);
+}
+
+void SetVerticalAlign(int32_t verticalAlign)
+{
+    auto align = FlexAlign::CENTER;
+    if (verticalAlign >= static_cast<int32_t>(FlexAlign::FLEX_START) &&
+        verticalAlign <= static_cast<int32_t>(FlexAlign::FLEX_END)) {
+        align = static_cast<FlexAlign>(verticalAlign);
+    }
+    TabContentModel::GetInstance()->SetVerticalAlign(align);
+}
+
+void SetSymmetricExtensible(bool isExtensible)
+{
+    TabContentModel::GetInstance()->SetSymmetricExtensible(isExtensible);
+}
+
+void GetFontContent(CJFont font, LabelStyle& labelStyle, bool isSubTabStyle)
+{
+    CalcDimension size(font.size, static_cast<DimensionUnit>(font.sizeUnit));
+    if (size.Value() >= 0 && size.Unit() != DimensionUnit::PERCENT) {
+        labelStyle.fontSize = size;
+    }
+
+    auto parseResult = StringUtils::ParseFontWeight(font.weight, FontWeight::NORMAL);
+    if (parseResult.first || isSubTabStyle) {
+        labelStyle.fontWeight = parseResult.second;
+    }
+
+    labelStyle.fontFamily = ConvertStrToFontFamilies(font.family);
+
+    labelStyle.fontStyle = FontStyle::NORMAL;
+    if (font.style >= static_cast<int32_t>(FontStyle::NORMAL) &&
+        font.style <= static_cast<int32_t>(FontStyle::ITALIC)) {
+        labelStyle.fontStyle = static_cast<FontStyle>(font.style);
+    }
+}
+
+void CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle)
+{
+    auto tabTheme = GetTheme<TabTheme>();
+    if (!tabTheme) {
+        return;
+    }
+    if (!labelStyle.maxLines.has_value()) {
+        labelStyle.maxLines = 1;
+    }
+    if (!labelStyle.minFontSize.has_value()) {
+        labelStyle.minFontSize = 0.0_vp;
+    }
+    if (!labelStyle.maxFontSize.has_value()) {
+        labelStyle.maxFontSize = 0.0_vp;
+    }
+    if (!labelStyle.fontSize.has_value()) {
+        if (isSubTabStyle) {
+            labelStyle.fontSize = tabTheme->GetSubTabTextDefaultFontSize();
+        }
+    }
+    if (!labelStyle.fontWeight.has_value() && !isSubTabStyle) {
+        labelStyle.fontWeight = FontWeight::MEDIUM;
+    }
+    if (!labelStyle.fontStyle.has_value()) {
+        labelStyle.fontStyle = FontStyle::NORMAL;
+    }
+    if (!labelStyle.heightAdaptivePolicy.has_value()) {
+        labelStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
+    }
+    if (!labelStyle.textOverflow.has_value()) {
+        labelStyle.textOverflow = TextOverflow::ELLIPSIS;
+    }
+}
+
+void SetLabelStyle(CJTabContentLabelStyle cjLabelStyle, bool isSubTabStyle)
+{
+    auto tabTheme = GetTheme<TabTheme>();
+
+    LabelStyle labelStyle;
+    if (Utils::CheckParamsValid(cjLabelStyle.overflow, TEXT_OVER_FLOWS.size())) {
+        labelStyle.textOverflow = TEXT_OVER_FLOWS[cjLabelStyle.overflow];
+    }
+
+    if (cjLabelStyle.maxLines > 0) {
+        labelStyle.maxLines = cjLabelStyle.maxLines;
+    }
+
+    CalcDimension minFontSize(cjLabelStyle.minFontSize, static_cast<DimensionUnit>(cjLabelStyle.minFontSizeUnit));
+    if (minFontSize.Value() >= 0 && minFontSize.Unit() != DimensionUnit::PERCENT) {
+        labelStyle.minFontSize = minFontSize;
+    }
+
+    CalcDimension maxFontSize(cjLabelStyle.maxFontSize, static_cast<DimensionUnit>(cjLabelStyle.maxFontSizeUnit));
+    if (maxFontSize.Value() >= 0 && maxFontSize.Unit() != DimensionUnit::PERCENT) {
+        labelStyle.maxFontSize = maxFontSize;
+    }
+
+    if (cjLabelStyle.heightAdaptivePolicy >= static_cast<int32_t>(TextHeightAdaptivePolicy::MAX_LINES_FIRST) &&
+        cjLabelStyle.heightAdaptivePolicy <= static_cast<int32_t>(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST)) {
+        labelStyle.heightAdaptivePolicy = static_cast<TextHeightAdaptivePolicy>(cjLabelStyle.heightAdaptivePolicy);
+    }
+
+    GetFontContent(cjLabelStyle.font, labelStyle, isSubTabStyle);
+
+    labelStyle.unselectedColor = Color(cjLabelStyle.unselectedColor);
+
+    labelStyle.selectedColor = Color(cjLabelStyle.selectedColor);
+
+    CompleteParameters(labelStyle, isSubTabStyle);
+
+    TabContentModel::GetInstance()->SetLabelStyle(labelStyle);
+}
+
+void SetIconStyle(CJTabBarIconStyle style)
+{
+    IconStyle iconStyle;
+    iconStyle.unselectedColor = Color(style.unselectedColor);
+    iconStyle.selectedColor = Color(style.selectedColor);
+    TabContentModel::GetInstance()->SetIconStyle(iconStyle);
+}
+
+void SetId(const char* id)
+{
+    TabContentModel::GetInstance()->SetId(id);
+}
+
+void SetIndicator(CJTabContentIndicatorStyle cjIndicator)
+{
+    IndicatorStyle indicator;
+
+    indicator.color = Color(cjIndicator.color);
+
+    CalcDimension indicatorHeight(cjIndicator.height, static_cast<DimensionUnit>(cjIndicator.heightUnit));
+    if (indicatorHeight.Value() < 0.0f || indicatorHeight.Unit() == DimensionUnit::PERCENT) {
+        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+        if (tabTheme) {
+            indicator.height = tabTheme->GetActiveIndicatorWidth();
+        }
+    } else {
+        indicator.height = indicatorHeight;
+    }
+
+    CalcDimension indicatorWidth(cjIndicator.width, static_cast<DimensionUnit>(cjIndicator.widthUnit));
+    if (indicatorWidth.Value() < 0.0f || indicatorWidth.Unit() == DimensionUnit::PERCENT) {
+        indicator.width = 0.0_vp;
+    } else {
+        indicator.width = indicatorWidth;
+    }
+
+    CalcDimension indicatorBorderRadius(
+        cjIndicator.borderRadius, static_cast<DimensionUnit>(cjIndicator.borderRadiusUnit));
+    if (indicatorBorderRadius.Value() < 0.0f || indicatorBorderRadius.Unit() == DimensionUnit::PERCENT) {
+        indicator.borderRadius = 0.0_vp;
+    } else {
+        indicator.borderRadius = indicatorBorderRadius;
+    }
+
+    CalcDimension indicatorMarginTop(cjIndicator.marginTop, static_cast<DimensionUnit>(cjIndicator.marginTopUnit));
+    if (indicatorMarginTop.Value() < 0.0f || indicatorMarginTop.Unit() == DimensionUnit::PERCENT) {
+        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+        if (tabTheme) {
+            indicator.marginTop = tabTheme->GetSubTabIndicatorGap();
+        }
+    } else {
+        indicator.marginTop = indicatorMarginTop;
+    }
+    TabContentModel::GetInstance()->SetIndicator(indicator);
+}
+
+void SetSelectedMode(int32_t selectedMode)
+{
+    if (selectedMode < static_cast<int32_t>(SelectedMode::INDICATOR) ||
+        selectedMode > static_cast<int32_t>(SelectedMode::BOARD)) {
+        TabContentModel::GetInstance()->SetSelectedMode(SelectedMode::INDICATOR);
+    } else {
+        TabContentModel::GetInstance()->SetSelectedMode(static_cast<SelectedMode>(selectedMode));
+    }
+}
+
+void SetBoard(CJBoardStyle cjBoardStyle)
+{
+    BoardStyle board;
+    CalcDimension borderRadius(cjBoardStyle.borderRadius, static_cast<DimensionUnit>(cjBoardStyle.borderRadiusUnit));
+    if (borderRadius.Value() < 0.0f || borderRadius.Unit() == DimensionUnit::PERCENT) {
+        RefPtr<TabTheme> tabTheme = GetTheme<TabTheme>();
+        if (tabTheme) {
+            board.borderRadius = tabTheme->GetFocusIndicatorRadius();
+        }
+    } else {
+        board.borderRadius = borderRadius;
+    }
+    TabContentModel::GetInstance()->SetBoard(board);
+}
+
+void FfiOHOSAceFrameworkTabContentSetTabBarWithSubTabBarStyle(CJSubTabBarStyle subTabBarStyle)
+{
+    std::optional<std::string> contentOpt = subTabBarStyle.content;
+
+    SetIndicator(subTabBarStyle.indicator);
+
+    SetSelectedMode(subTabBarStyle.selectedMode);
+
+    SetBoard(subTabBarStyle.board);
+
+    SetLabelStyle(subTabBarStyle.labelStyle, true);
+
+    SetPadding(subTabBarStyle.padding, true);
+
+    SetId(subTabBarStyle.id);
+
+    TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    TabContentModel::GetInstance()->SetTabBar(contentOpt, std::nullopt, std::nullopt, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
+}
+
+void FfiOHOSAceFrameworkTabContentSetTabBarWithBottomTabBarStyle(CJBottomTabBarStyle bottomTabBarStyle)
+{
+    std::optional<std::string> textOpt = std::nullopt;
+    if (bottomTabBarStyle.text != nullptr) {
+        textOpt = std::optional<std::string>(bottomTabBarStyle.text);
+    }
+
+    std::optional<std::string> iconOpt = std::nullopt;
+    std::optional<TabBarSymbol> tabBarSymbol = std::nullopt;
+    if (bottomTabBarStyle.isTabBarSymbol) {
+        LOGW("Not support tab bar symbol.");
+    } else {
+        iconOpt = std::optional<std::string>(bottomTabBarStyle.icon);
+    }
+
+    SetPadding(bottomTabBarStyle.padding, false);
+
+    SetLayoutMode(bottomTabBarStyle.layoutMode);
+
+    SetVerticalAlign(bottomTabBarStyle.verticalAlign);
+
+    SetSymmetricExtensible(bottomTabBarStyle.symmetricExtensible);
+
+    SetLabelStyle(bottomTabBarStyle.labelStyle, false);
+
+    SetIconStyle(bottomTabBarStyle.iconStyle);
+
+    SetId(bottomTabBarStyle.id);
+
+    TabContentModel::GetInstance()->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    TabContentModel::GetInstance()->SetTabBar(textOpt, iconOpt, tabBarSymbol, nullptr, false);
+    TabContentModel::GetInstance()->SetTabBarWithContent(nullptr);
 }
 
 void FfiOHOSAceFrameworkTabContentOnWillShow(void (*callback)())

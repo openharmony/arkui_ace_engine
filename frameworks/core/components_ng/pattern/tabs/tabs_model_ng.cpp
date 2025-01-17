@@ -530,18 +530,6 @@ void TabsModelNG::Pop()
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
 
-    auto tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
-    auto tabsFocusNode = tabsNode->GetFocusHub();
-    CHECK_NULL_VOID(tabsFocusNode);
-    auto tabBarFocusNode = tabBarNode->GetFocusHub();
-    CHECK_NULL_VOID(tabBarFocusNode);
-    if (tabBarPosition == BarPosition::START && !tabsFocusNode->IsCurrentFocus()) {
-        auto lastWeakFocusNode = tabsFocusNode->GetLastWeakFocusNode().Upgrade();
-        if (!lastWeakFocusNode) {
-            tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
-        }
-    }
-
     tabBarNode->MarkModifyDone();
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     auto dividerNode = AceType::DynamicCast<FrameNode>(tabsNode->GetDivider());

@@ -770,7 +770,7 @@ protected:
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
-    virtual void OnBackgroundImageSyncModeUpdate(bool imageRepeat) {}
+    virtual void OnBackgroundImageSyncModeUpdate(bool syncMode) {}
     virtual void OnBackgroundImageSizeUpdate(const BackgroundImageSize& bgImgSize) {}
     virtual void OnBackgroundImagePositionUpdate(const BackgroundImagePosition& bgImgPosition) {}
     virtual void OnBackgroundImageResizableSliceUpdate(const ImageResizableSlice& slice) {}

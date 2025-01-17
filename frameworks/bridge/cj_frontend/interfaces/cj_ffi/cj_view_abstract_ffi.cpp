@@ -44,6 +44,8 @@ constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
 constexpr Dimension ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
 constexpr Dimension ARROW_HALF_PERCENT_VALUE = 0.5_pct;
 constexpr Dimension ARROW_FULL_PERCENT_VALUE = 1.0_pct;
+constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
+constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -363,6 +365,69 @@ void FfiOHOSAceFrameworkViewAbstractSetLayoutPriority(int32_t value)
     ViewAbstractModel::GetInstance()->SetLayoutPriority(value);
 }
 
+void FfiOHOSAceFrameworkViewAbstractSetPixelRound(CJPixelRoundPolicy cjValue)
+{
+    uint16_t value = 0;
+    int32_t startValue = cjValue.start;
+    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(startValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
+    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(startValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(startValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START);
+    }
+
+    int32_t topValue = cjValue.top;
+    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(topValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(topValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(topValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP);
+    }
+
+    int32_t endValue = cjValue.end;
+    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(endValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
+    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(endValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(endValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END);
+    }
+
+    int32_t bottomValue = cjValue.bottom;
+    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
+    }
+
+    ViewAbstractModel::GetInstance()->SetPixelRound(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetMotionBlur(CJMotionBlurOptions value)
+{
+    MotionBlurOption option;
+    double radius = value.radius;
+    double x = value.anchor.x;
+    double y = value.anchor.y;
+    if (radius < 0.0) {
+        radius = 0.0;
+    }
+    if (x < 0.0) {
+        x = 0.0;
+    }
+    if (y < 0.0) {
+        y = 0.0;
+    }
+    option.radius = radius;
+    option.anchor.x = std::clamp(x, 0.0, 1.0);
+    option.anchor.y = std::clamp(y, 0.0, 1.0);
+    ViewAbstractModel::GetInstance()->SetMotionBlur(option);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetLayoutWeight(int32_t value)
 {
     ViewAbstractModel::GetInstance()->SetLayoutWeight(value);
@@ -509,6 +574,7 @@ void FfiOHOSAceFrameworkViewAbstractSetForegroundBlurStyleOption(int32_t blurSty
         styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
     }
 
+    styleOption.scale = options.scale < 0.0 || options.scale > 1.0 ? 1.0 : options.scale;
     BlurOption blurOption;
     std::vector<float> greyVec(2); // 2 number
     greyVec[0] = options.blurOptions.grayscale[0];
@@ -838,6 +904,14 @@ void FfiOHOSAceFrameworkViewAbstractSetAlignRules(CJAlignRuleOption option)
     ViewAbstractModel::GetInstance()->SetBias(biasPair);
 }
 
+void FfiOHOSAceFrameworkViewAbstractSetChainMode(CJChainInfo option)
+{
+    ChainInfo chainInfo;
+    chainInfo.direction = static_cast<LineDirection>(option.direction);
+    chainInfo.style = static_cast<ChainStyle>(option.style);
+    ViewAbstractModel::GetInstance()->SetChainStyle(chainInfo);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetEnabled(bool value)
 {
     ViewAbstractModel::GetInstance()->SetEnabled(value);
@@ -917,6 +991,34 @@ void FfiOHOSAceFrameworkViewAbstractSetColorBlend(uint32_t color)
     ViewAbstractModel::GetInstance()->SetColorBlend(Color(color));
 }
 
+void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(double radius, int32_t direction,
+    VectorFloat64Ptr blurVec, VectorFloat64Ptr positionVec)
+{
+    double blurRadius = radius;
+    std::vector<std::pair<float, float>> fractionStops;
+    const auto& blurVector = *reinterpret_cast<std::vector<double>*>(blurVec);
+    const auto& positionVector = *reinterpret_cast<std::vector<double>*>(positionVec);
+    if (blurVector.size() <= 1) {
+        return;
+    }
+    float tmpPos = -1.0f;
+    for (size_t i = 0; i <blurVector.size(); i++) {
+        std::pair<float, float> fractionStop;
+        fractionStop.first = static_cast<float>(std::clamp(blurVector[i], 0.0, 1.0));
+        fractionStop.second = static_cast<float>(std::clamp(positionVector[i], 0.0, 1.0));
+        if (fractionStop.second <= tmpPos) {
+            fractionStops.clear();
+            return;
+        }
+        tmpPos = fractionStop.second;
+        fractionStops.push_back(fractionStop);
+    }
+    // Parse direction
+    CalcDimension dimensionRadius(static_cast<float>(blurRadius), DimensionUnit::PX);
+    NG::LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, static_cast<NG::GradientDirection>(direction));
+    ViewAbstractModel::GetInstance()->SetLinearGradientBlur(blurPara);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetBackdropBlur(double value)
 {
     Dimension radius(value, DimensionUnit::PX);
@@ -994,6 +1096,19 @@ void FfiOHOSAceFrameworkViewAbstractSetInvert(double value)
     ViewAbstractModel::GetInstance()->SetInvert(invert);
 }
 
+void FfiOHOSAceFrameworkViewAbstractSetInvertWithOptions(
+    double low, double high, double threshold, double thresholdRange)
+{
+    InvertVariant invert = 0.0f;
+    InvertOption option;
+    option.low_ = std::clamp(low, 0.0, 1.0);
+    option.high_ = std::clamp(high, 0.0, 1.0);
+    option.threshold_ = std::clamp(threshold, 0.0, 1.0);
+    option.thresholdRange_ = std::clamp(thresholdRange, 0.0, 1.0);
+    invert = option;
+    ViewAbstractModel::GetInstance()->SetInvert(invert);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetSepia(double value)
 {
     Dimension dValue(value, DimensionUnit::VP);
@@ -1010,6 +1125,180 @@ void FfiOHOSAceFrameworkViewAbstractSetHueRotate(float deg)
         deg += ROUND_UNIT;
     }
     ViewAbstractModel::GetInstance()->SetHueRotate(deg);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetBlendMode(int32_t value, int32_t type)
+{
+    BlendMode blendMode = BlendMode::NONE;
+    BlendApplyType blendApplyType = BlendApplyType::FAST;
+    // for backward compatible, we temporary add a magic number to trigger offscreen, will remove soon
+    constexpr int backwardCompatMagicNumberOffscreen = 1000;
+    constexpr int backwardCompatSourceInNumberOffscreen = 2000;
+    constexpr int backwardCompatDestinationInNumberOffscreen = 3000;
+    constexpr int backwardCompatMagicNumberSrcIn = 5000;
+   
+    if (value >= 0 && value < static_cast<int>(BlendMode::MAX)) {
+        blendMode = static_cast<BlendMode>(value);
+    } else if (value == backwardCompatMagicNumberOffscreen) {
+        // backward compatibility code, will remove soon
+        blendMode = BlendMode::SRC_OVER;
+        blendApplyType = BlendApplyType::OFFSCREEN;
+    } else if (value == backwardCompatSourceInNumberOffscreen) {
+        // backward compatibility code, will remove soon
+        blendMode = BlendMode::SRC_IN;
+        blendApplyType = BlendApplyType::OFFSCREEN;
+    } else if (value == backwardCompatDestinationInNumberOffscreen) {
+        // backward compatibility code, will remove soon
+        blendMode = BlendMode::DST_IN;
+        blendApplyType = BlendApplyType::OFFSCREEN;
+    } else if (value == backwardCompatMagicNumberSrcIn) {
+        blendMode = BlendMode::BACK_COMPAT_SOURCE_IN;
+    }
+    blendApplyType = static_cast<BlendApplyType>(type);
+
+    ViewAbstractModel::GetInstance()->SetBlendMode(blendMode);
+    ViewAbstractModel::GetInstance()->SetBlendApplyType(blendApplyType);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetUseShadowBatching(bool value)
+{
+    ViewAbstractModel::GetInstance()->SetUseShadowBatching(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetSphericalEffect(double value)
+{
+    ViewAbstractModel::GetInstance()->SetSphericalEffect(std::clamp(value, 0.0, 1.0));
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetLightUpEffect(double value)
+{
+    ViewAbstractModel::GetInstance()->SetLightUpEffect(std::clamp(value, 0.0, 1.0));
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetPixelStretchEffect(CJEdge params)
+{
+    Dimension top(params.top, static_cast<DimensionUnit>(params.topUnit));
+    Dimension right(params.right, static_cast<DimensionUnit>(params.rightUnit));
+    Dimension bottom(params.bottom, static_cast<DimensionUnit>(params.bottomUnit));
+    Dimension left(params.left, static_cast<DimensionUnit>(params.leftUnit));
+
+    PixStretchEffectOption option;
+    if ((left.IsNonNegative() && top.IsNonNegative() && right.IsNonNegative() && bottom.IsNonNegative()) ||
+        (left.IsNonPositive() && top.IsNonPositive() && right.IsNonPositive() && bottom.IsNonPositive())) {
+        option.top = top;
+        option.right = right;
+        option.bottom = bottom;
+        option.left = left;
+    } else {
+        option.ResetValue();
+    }
+    ViewAbstractModel::GetInstance()->SetPixelStretchEffect(option);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetSystemBarEffect()
+{
+    ViewAbstractModel::GetInstance()->SetSystemBarEffect(true);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetFreeze(bool value)
+{
+    ViewAbstractModel::GetInstance()->SetFreeze(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetRenderGroup(bool value)
+{
+    ViewAbstractModel::GetInstance()->SetRenderGroup(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineStyle(int32_t style)
+{
+    ViewAbstractModel::GetInstance()->SetOuterBorderStyle(BORDER_STYLES[style]);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineStyles(int32_t styleTop, int32_t styleRight,
+    int32_t styleBottom, int32_t styleLeft)
+{
+    ViewAbstractModel::GetInstance()->SetOuterBorderStyle(BORDER_STYLES[styleLeft],
+        BORDER_STYLES[styleRight], BORDER_STYLES[styleTop], BORDER_STYLES[styleBottom]);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineWidth(double width, int32_t unit)
+{
+    Dimension value(width, static_cast<DimensionUnit>(unit));
+    CalcDimension outlineWidth = CalcDimension(value);
+    if (!outlineWidth.IsNegative() && outlineWidth.Unit() != DimensionUnit::PERCENT) {
+        ViewAbstractModel::GetInstance()->SetOuterBorderWidth(value);
+    }
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineWidths(CJEdge params)
+{
+    Dimension topDimen(params.top, static_cast<DimensionUnit>(params.topUnit));
+    CalcDimension top = CalcDimension(topDimen);
+    if (top.IsNegative() || top.Unit() == DimensionUnit::PERCENT) {
+        topDimen = Dimension(0);
+    }
+    Dimension rightDimen(params.right, static_cast<DimensionUnit>(params.rightUnit));
+    CalcDimension right = CalcDimension(rightDimen);
+    if (right.IsNegative() || right.Unit() == DimensionUnit::PERCENT) {
+        rightDimen = Dimension(0);
+    }
+    Dimension bottomDimen(params.bottom, static_cast<DimensionUnit>(params.bottomUnit));
+    CalcDimension bottom = CalcDimension(bottomDimen);
+    if (bottom.IsNegative() || bottom.Unit() == DimensionUnit::PERCENT) {
+        bottomDimen = Dimension(0);
+    }
+    Dimension leftDimen(params.left, static_cast<DimensionUnit>(params.leftUnit));
+    CalcDimension left = CalcDimension(leftDimen);
+    if (left.IsNegative() || left.Unit() == DimensionUnit::PERCENT) {
+        leftDimen = Dimension(0);
+    }
+    ViewAbstractModel::GetInstance()->SetOuterBorderWidth(leftDimen, rightDimen, topDimen, bottomDimen);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineColor(uint32_t value)
+{
+    ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color(value));
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineColors(uint32_t colorTop, uint32_t colorRight,
+    uint32_t colorBottom, uint32_t colorLeft)
+{
+    ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color(colorLeft), Color(colorRight),
+        Color(colorTop), Color(colorBottom));
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineRadius(double radius, int32_t unit)
+{
+    Dimension value(radius, static_cast<DimensionUnit>(unit));
+    CalcDimension outlineRadius = CalcDimension(value);
+    if (outlineRadius.Unit() != DimensionUnit::PERCENT) {
+        ViewAbstractModel::GetInstance()->SetOuterBorderRadius(value);
+    }
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutlineRadiuses(CJOutlineRadius params)
+{
+    CalcDimension topLeft(params.topLeft, static_cast<DimensionUnit>(params.topLeftUnit));
+    CalcDimension topRight(params.topRight, static_cast<DimensionUnit>(params.topRightUnit));
+    CalcDimension bottomLeft(params.bottomLeft, static_cast<DimensionUnit>(params.bottomLeftUnit));
+    CalcDimension bottomRight(params.bottomRight, static_cast<DimensionUnit>(params.bottomRightUnit));
+    ViewAbstractModel::GetInstance()->SetOuterBorderRadius(topLeft, topRight, bottomLeft, bottomRight);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetOutline(CJOutline params)
+{
+    Dimension widthDime(params.width, static_cast<DimensionUnit>(params.widthUnit));
+    Dimension radiusDime(params.radius, static_cast<DimensionUnit>(params.radiusUnit));
+    if (!Utils::CheckParamsValid(params.style, BORDER_STYLES.size())) {
+        LOGE("invalid value for outline style");
+        return;
+    }
+
+    ViewAbstractModel::GetInstance()->SetOuterBorderStyle(BORDER_STYLES[params.style]);
+    ViewAbstractModel::GetInstance()->SetOuterBorderWidth(widthDime);
+    ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color(params.color));
+    ViewAbstractModel::GetInstance()->SetOuterBorderRadius(radiusDime);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetFlexBasis(double value, int32_t unit)
@@ -1074,6 +1363,75 @@ void FfiOHOSAceFrameworkViewAbstractSetMaskByShape(int64_t shapeId)
     } else {
         LOGI("set mask error, Cannot get NativeShape by id: %{public}" PRId64, shapeId);
     }
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityDescription(const char* value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityDescription(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityText(const char* value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityText(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityGroup(bool value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityGroup(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityLevel(const char* value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityImportance(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityTextHint(const char* value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityTextHint(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityVirtualNode(void (*builder)())
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityVirtualNode(CJLambda::Create(builder));
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetClickEffect(int32_t level, float scale)
+{
+    if (level < static_cast<int32_t>(ClickEffectLevel::LIGHT) ||
+        level > static_cast<int32_t>(ClickEffectLevel::HEAVY)) {
+        level = 0;
+    }
+
+    if (scale < 0.0 || scale > 1.0) {
+        if (level == 0) {
+            scale = DEFAULT_SCALE_LIGHT;
+        } else {
+            scale = DEFAULT_SCALE_MIDDLE_OR_HEAVY;
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetClickEffectLevel(static_cast<ClickEffectLevel>(level), scale);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetMotionPath(CJMotionPathOptions options)
+{
+    MotionPathOption motionPathOption;
+    if (options.path != nullptr && strlen(options.path) > 0) {
+        motionPathOption.SetPath(std::string(options.path));
+        double from = options.from;
+        double to = options.to;
+        if (from > 1.0 || from < 0.0) {
+            from = 0.0;
+        }
+        if (to > 1.0 || to < 0.0) {
+            from = 1.0;
+        } else if (to < from) {
+            to = from;
+        }
+        motionPathOption.SetBegin(static_cast<float>(from));
+        motionPathOption.SetEnd(static_cast<float>(to));
+        motionPathOption.SetRotate(options.rotatable);
+    }
+    ViewAbstractModel::GetInstance()->SetMotionPath(motionPathOption);
 }
 
 void FfiOHOSAceFrameworkViewAbstractPop()
@@ -1531,8 +1889,21 @@ void FfiOHOSAceFrameworkViewAbstractExpandSafeArea(uint32_t types, uint32_t edge
     ViewAbstractModel::GetInstance()->UpdateSafeAreaExpandOpts(opts);
 }
 
+void FfiOHOSAceFrameworkViewAbstractDismiss()
+{
+    ViewAbstractModel::GetInstance()->DismissSheet();
+}
+
+void FfiOHOSAceFrameworkViewAbstractSpringBack()
+{
+    ViewAbstractModel::GetInstance()->SheetSpringBack();
+}
+
 void ParseSheetCallback(CJSheetOptions options, std::function<void()>& onAppear, std::function<void()>& onDisappear,
-    std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear)
+    std::function<void()>& shouldDismiss, std::function<void()>& onWillAppear, std::function<void()>& onWillDisappear,
+    std::function<void(const int32_t info)>& onWillDismiss, std::function<void()>& sheetSpringBack,
+    std::function<void(const float)>& onHeightDidChange, std::function<void(const float)>& onDetentsDidChange,
+    std::function<void(const float)>& onWidthDidChange, std::function<void(const float)>& onTypeDidChange)
 {
     if (options.onAppear.hasValue) {
         onAppear = CJLambda::Create(options.onAppear.value);
@@ -1548,6 +1919,28 @@ void ParseSheetCallback(CJSheetOptions options, std::function<void()>& onAppear,
     }
     if (options.onWillDisappear.hasValue) {
         onWillDisappear = CJLambda::Create(options.onWillDisappear.value);
+    }
+    if (options.onWillDismiss.hasValue) {
+        onWillDismiss = [lambda = CJLambda::Create(options.onWillDismiss.value)](const int32_t info) { lambda(info); };
+    }
+    if (options.onWillSpringBackWhenDismiss.hasValue) {
+        sheetSpringBack = CJLambda::Create(options.onWillSpringBackWhenDismiss.value);
+    }
+    if (options.onHeightDidChange.hasValue) {
+        onHeightDidChange =
+            [lambda = CJLambda::Create(options.onHeightDidChange.value)](const float value) { lambda(value); };
+    }
+    if (options.onDetentsDidChange.hasValue) {
+        onDetentsDidChange =
+            [lambda = CJLambda::Create(options.onDetentsDidChange.value)](const float value) { lambda(value); };
+    }
+    if (options.onWidthDidChange.hasValue) {
+        onWidthDidChange =
+            [lambda = CJLambda::Create(options.onWidthDidChange.value)](const float value) { lambda(value); };
+    }
+    if (options.onTypeDidChange.hasValue) {
+        onTypeDidChange =
+            [lambda = CJLambda::Create(options.onTypeDidChange.value)](const float value) { lambda(value); };
     }
 }
 
@@ -1587,6 +1980,91 @@ bool ParseSheetDetents(const CArrInt32 array, std::vector<NG::SheetHeight>& shee
     return true;
 }
 
+void ParseSheetBorderProps(CJSheetOptions option, NG::SheetStyle& sheetStyle)
+{
+    if (option.borderWidth.hasValue) {
+        auto nativeBorderWidth = option.borderWidth.value;
+        auto borderWidth = Dimension(nativeBorderWidth.value, static_cast<DimensionUnit>(nativeBorderWidth.unitType));
+        auto borderWidthProp = NG::BorderWidthProperty({ borderWidth, borderWidth, borderWidth, borderWidth });
+        sheetStyle.borderWidth = borderWidthProp;
+    }
+    if (option.borderColor.hasValue) {
+        NG::BorderColorProperty colorProperty;
+        Color borderColor = Color(ColorAlphaAdapt(option.borderColor.value));
+        colorProperty.SetColor(borderColor);
+        sheetStyle.borderColor = colorProperty;
+    }
+    if (option.borderStyle.hasValue) {
+        NG::BorderStyleProperty borderStyle;
+        auto nativeBorderSytle = option.borderStyle.value;
+        borderStyle.styleLeft = static_cast<BorderStyle>(nativeBorderSytle.left);
+        borderStyle.styleRight = static_cast<BorderStyle>(nativeBorderSytle.right);
+        borderStyle.styleTop = static_cast<BorderStyle>(nativeBorderSytle.top);
+        borderStyle.styleBottom = static_cast<BorderStyle>(nativeBorderSytle.bottom);
+        borderStyle.multiValued = true;
+        sheetStyle.borderStyle = borderStyle;
+    }
+}
+
+void ParseScrollSizeMode(const NativeOptionUInt32 scrollSizeMode, NG::SheetStyle& sheetStyle)
+{
+    if (!scrollSizeMode.hasValue) {
+        return;
+    }
+    sheetStyle.scrollSizeMode = NG::ScrollSizeMode::FOLLOW_DETENT;
+    if (scrollSizeMode.value >= static_cast<int>(NG::ScrollSizeMode::FOLLOW_DETENT) &&
+        scrollSizeMode.value <= static_cast<int>(NG::ScrollSizeMode::CONTINUOUS)) {
+        sheetStyle.scrollSizeMode = static_cast<NG::ScrollSizeMode>(scrollSizeMode.value);
+    }
+}
+
+void ParseShadow(NativeShadow nativeShadow, NG::SheetStyle& sheetStyle)
+{
+    if (!nativeShadow.hasValue) {
+        return;
+    }
+    Shadow shadow;
+    NativeShadowOptions shadowOptions = nativeShadow.value;
+    if (LessNotEqual(shadowOptions.radius, 0.0)) {
+        shadowOptions.radius = 0.0;
+    }
+    shadow.SetBlurRadius(shadowOptions.radius);
+    Color shadowColor = Color(ColorAlphaAdapt(shadowOptions.color));
+    shadow.SetColor(shadowColor);
+    shadow.SetShadowType(static_cast<ShadowType>(shadowOptions.shadowType));
+    shadow.SetIsFilled(shadowOptions.fill);
+    shadow.SetOffsetX(shadowOptions.offsetX);
+    shadow.SetOffsetY(shadowOptions.offsetY);
+    sheetStyle.shadow = shadow;
+}
+
+void ParseBlurStyle(const int32_t blurStyle, NG::SheetStyle& sheetStyle)
+{
+    BlurStyleOption styleOption;
+    styleOption.blurStyle = BlurStyle::NO_MATERIAL;
+    if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+        blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+        styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+    }
+    sheetStyle.backgroundBlurStyle = styleOption;
+}
+
+void ParsePreferType(const int32_t sheetType, NG::SheetStyle& sheetStyle)
+{
+    if (sheetType >= static_cast<int>(NG::SheetType::SHEET_BOTTOM) &&
+        sheetType <= static_cast<int>(NG::SheetType::SHEET_POPUP)) {
+        sheetStyle.sheetType = static_cast<NG::SheetType>(sheetType);
+    }
+}
+
+void ParseSheetHeight(const int height, NG::SheetStyle& sheetStyle)
+{
+    NG::SheetHeight sheetDetent;
+    ParseSheetDetentHeight(height, sheetDetent);
+    sheetStyle.sheetHeight.sheetMode = sheetDetent.sheetMode;
+    sheetStyle.sheetHeight.height = sheetDetent.height;
+}
+
 void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
 {
     std::vector<NG::SheetHeight> detents;
@@ -1594,13 +2072,7 @@ void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
         sheetStyle.detents = detents;
     }
     if (option.blurStyle.hasValue) {
-        BlurStyleOption styleOption;
-        int32_t blurStyle = option.blurStyle.value;
-        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
-            styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
-            sheetStyle.backgroundBlurStyle = styleOption;
-        }
+        ParseBlurStyle(option.blurStyle.value, sheetStyle);
     }
     if (option.showClose.hasValue) {
         sheetStyle.showCloseIcon = option.showClose.value;
@@ -1617,11 +2089,7 @@ void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
         sheetStyle.interactive = option.enableOutsideInteractive.value;
     }
     if (option.preferType.hasValue) {
-        auto sheetType = option.preferType.value;
-        if (sheetType >= static_cast<int>(NG::SheetType::SHEET_BOTTOM) &&
-            sheetType <= static_cast<int>(NG::SheetType::SHEET_POPUP)) {
-            sheetStyle.sheetType = static_cast<NG::SheetType>(sheetType);
-        }
+        ParsePreferType(option.preferType.value, sheetStyle);
     }
     if (option.backgroundColor.hasValue) {
         sheetStyle.backgroundColor = Color(ColorAlphaAdapt(option.backgroundColor.value));
@@ -1635,6 +2103,17 @@ void ParseSheetStyle(CJSheetOptions option, NG::SheetStyle& sheetStyle)
         sheetStyle.sheetHeight.sheetMode = sheetDetent.sheetMode;
         sheetStyle.sheetHeight.height = sheetDetent.height;
     }
+    if (option.mode.hasValue) {
+        auto sheetLevel = option.mode.value;
+        sheetStyle.showInPage = (sheetLevel == static_cast<int>(NG::SheetLevel::EMBEDDED));
+    }
+    if (option.width.hasValue) {
+        sheetStyle.width =
+            CalcDimension(option.width.value.value, static_cast<DimensionUnit>(option.width.value.unitType));
+    }
+    ParseScrollSizeMode(option.scrollSizeMode, sheetStyle);
+    ParseShadow(option.shadow, sheetStyle);
+    ParseSheetBorderProps(option, sheetStyle);
 }
 
 void ParseSheetTitle(CJSheetOptions option, NG::SheetStyle& sheetStyle, std::function<void()>& titleBuilderFunction)
@@ -1642,6 +2121,7 @@ void ParseSheetTitle(CJSheetOptions option, NG::SheetStyle& sheetStyle, std::fun
     sheetStyle.isTitleBuilder = true;
     titleBuilderFunction = option.title.hasValue ? CJLambda::Create(option.title.value) : ([]() -> void {});
 }
+
 void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(), CJSheetOptions option)
 {
     auto buildFunc = CJLambda::Create(builder);
@@ -1663,7 +2143,8 @@ void FfiOHOSAceFrameworkViewAbstractbindSheetParam(bool isShow, void (*builder)(
     std::function<void()> titleBuilderFunction;
     std::function<void()> sheetSpringBackFunc;
     ParseSheetCallback(option, onAppearCallback, onDisappearCallback, shouldDismissFunc, onWillAppearCallback,
-        onWillDisappearCallback);
+        onWillDisappearCallback, onWillDismissCallback, sheetSpringBackFunc, onHeightDidChangeCallback,
+        onDetentsDidChangeCallback, onWidthDidChangeCallback, onTypeDidChangeCallback);
     ParseSheetStyle(option, sheetStyle);
     ParseSheetTitle(option, sheetStyle, titleBuilderFunction);
     ViewAbstractModel::GetInstance()->BindSheet(isShow, std::move(callback), std::move(buildFunc),

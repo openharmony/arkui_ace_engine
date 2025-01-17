@@ -1324,7 +1324,15 @@ HWTEST_F(SelectOverlayManagerTestNg, InitSelectOverlay, TestSize.Level1)
     EXPECT_FALSE(client.SelectOverlayIsOn());
 
     client.InitSelectOverlay();
+    client.selectOverlayInfo_.menuCallback.onTranslate();
+    EXPECT_FALSE(client.SelectOverlayIsOn());
+
+    client.InitSelectOverlay();
     client.selectOverlayInfo_.menuCallback.onSearch();
+    EXPECT_FALSE(client.SelectOverlayIsOn());
+
+    client.InitSelectOverlay();
+    client.selectOverlayInfo_.menuCallback.onShare();
     EXPECT_FALSE(client.SelectOverlayIsOn());
 
     client.InitSelectOverlay();

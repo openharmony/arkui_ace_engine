@@ -627,7 +627,10 @@ public:
     }
 
     virtual void TerminateUIExtension() {}
-
+    virtual bool UIExtensionIsHalfScreen()
+    {
+        return false;
+    }
     template<ContainerType type>
     static int32_t GenerateId();
     static void SetFontScale(int32_t instanceId, float fontScale);

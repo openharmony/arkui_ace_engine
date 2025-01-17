@@ -288,7 +288,7 @@ void SecurityUIExtensionPattern::OnConnect()
     RegisterVisibleAreaChange();
     DispatchFocusState(isFocused);
     DispatchFollowHostDensity(GetDensityDpi());
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = host->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->AddAliveUIExtension(host->GetId(), WeakClaim(this));

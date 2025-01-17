@@ -266,6 +266,16 @@ public:
     // Restore the titleBar&toolBar to its original position (hide or show state).
     void ResetTitleAndToolBarState();
 
+    void SetIsActive(bool isActive)
+    {
+        isActive_ = isActive;
+    }
+
+    bool IsActive() const
+    {
+        return isActive_;
+    }
+
 private:
     struct HideBarOnSwipeContext {
         CancelableCallback<void()> showBarTask;
@@ -306,6 +316,7 @@ private:
     WeakPtr<UINode> navigationNode_;
     RefPtr<OverlayManager> overlayManager_;
     bool isOnShow_ = false;
+    bool isActive_ = false;
     bool isUserDefinedBgColor_ = false;
     bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;

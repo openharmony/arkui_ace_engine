@@ -54,6 +54,8 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
     "$ace_root/test/mock/core/common/mock_motion_path_evaluator.cpp",
     "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
+    "$ace_root/test/mock/core/common/mock_text_share_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_text_translation_adapter.cpp",
     "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
     "$ace_root/test/mock/core/event/mock_touch_event.cpp",
@@ -113,6 +115,7 @@ ohos_unittest("image_file_cache_test_ng") {
   module_out_path = image_test_output_path
 
   sources = [
+    "$ace_root/frameworks/core/components_ng/pattern/overlay/dialog_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/overlay/sheet_manager.cpp",
     "$ace_root/frameworks/core/image/image_file_cache.cpp",
     "$ace_root/test/mock/base/mock_frame_report.cpp",

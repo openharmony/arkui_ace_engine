@@ -409,6 +409,38 @@ HWTEST_F(TabsTestNg, TabsNodeToJsonValue002, TestSize.Level2)
 }
 
 /**
+ * @tc.name: TabsNodeToJsonValue003
+ * @tc.desc: Test the ToJsonValue function in the TabsNode class.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsNodeToJsonValue003, TestSize.Level2)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(1);
+    CreateTabsDone(model);
+    ASSERT_NE(frameNode_, nullptr);
+    ASSERT_NE(pattern_, nullptr);
+
+    InspectorFilter filter;
+    auto json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    frameNode_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("animationMode"), "AnimationMode.CONTENT_FIRST");
+
+    pattern_->SetAnimateMode(TabAnimateMode::CONTENT_FIRST_WITH_JUMP);
+    json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    frameNode_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("animationMode"), "AnimationMode.CONTENT_FIRST_WITH_JUMP");
+
+    pattern_->SetAnimateMode(TabAnimateMode::ACTION_FIRST_WITH_JUMP);
+    json = JsonUtil::Create(true);
+    ASSERT_NE(json, nullptr);
+    frameNode_->ToJsonValue(json, filter);
+    EXPECT_EQ(json->GetString("animationMode"), "AnimationMode.ACTION_FIRST_WITH_JUMP");
+}
+
+/**
  * @tc.name: TabsNodeGetScrollableBarModeOptions001
  * @tc.desc: Test the GetScrollableBarModeOptions function in the TabsNode class.
  * @tc.type: FUNC

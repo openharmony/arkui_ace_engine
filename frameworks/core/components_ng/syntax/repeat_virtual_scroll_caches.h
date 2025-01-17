@@ -33,21 +33,12 @@ namespace OHOS::Ace::NG {
 // custom sorting for std::set only works with struct
 // with operator() inside
 class RepeatVirtualScrollCaches;
-struct KeySorterClass {
-    const RepeatVirtualScrollCaches* virtualScroll_;
-
-    explicit KeySorterClass(const RepeatVirtualScrollCaches* virtualScroll) : virtualScroll_(virtualScroll) {}
-    bool operator()(const std::string& left, const std::string& right) const;
-};
-
 struct CacheItem {
     bool isValid = false;
     RefPtr<UINode> item;
 };
 
 class RepeatVirtualScrollCaches {
-    friend struct KeySorterClass;
-
 public:
     RepeatVirtualScrollCaches(const std::map<std::string, std::pair<bool, uint32_t>>& cacheCountL24ttype,
         const std::function<void(uint32_t)>& onCreateNode,
@@ -254,7 +245,7 @@ private:
      */
     bool CompareKeyByIndexDistance(const std::string& key1, const std::string& key2) const;
 
-    std::set<std::string, KeySorterClass> GetSortedL2KeysForTType(
+    std::set<std::string> GetL2KeysForTType(
         const std::unordered_map<std::string, RefPtr<UINode>>& uiNode4Key) const;
 
     /**

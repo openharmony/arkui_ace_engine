@@ -779,7 +779,7 @@ void DragAnimationHelper::UpdateBadgeTextNodePosition(const RefPtr<FrameNode>& f
     CHECK_NULL_VOID(textNode);
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
-    auto pixelMap = frameNode->GetPixelMap();
+    auto pixelMap = frameNode->GetDragPixelMap();
     CHECK_NULL_VOID(pixelMap);
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();

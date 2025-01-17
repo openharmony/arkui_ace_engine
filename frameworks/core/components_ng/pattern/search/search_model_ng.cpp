@@ -308,7 +308,8 @@ void SearchModelNG::SetSearchImageIcon(IconOptions &iconOptions)
     CHECK_NULL_VOID(pattern);
     pattern->SetSearchImageIcon(iconOptions);
     ACE_UPDATE_LAYOUT_PROPERTY(
-        SearchLayoutProperty, SearchIconUDSize, iconOptions.GetSize().value());
+        SearchLayoutProperty, SearchIconUDSize,
+        pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)));
 }
 
 void SearchModelNG::SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol)
@@ -381,7 +382,8 @@ void SearchModelNG::SetCancelImageIcon(IconOptions &iconOptions)
     CHECK_NULL_VOID(pattern);
     pattern->SetCancelImageIcon(iconOptions);
     ACE_UPDATE_LAYOUT_PROPERTY(
-        SearchLayoutProperty, CancelButtonUDSize, iconOptions.GetSize().value());
+        SearchLayoutProperty, CancelButtonUDSize,
+        pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)));
 }
 
 void SearchModelNG::SetCancelSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol)
@@ -1379,7 +1381,7 @@ void SearchModelNG::SetSearchImageIcon(FrameNode *frameNode, IconOptions &iconOp
     CHECK_NULL_VOID(pattern);
     pattern->SetSearchImageIcon(iconOptions);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, SearchIconUDSize,
-        iconOptions.GetSize().value_or(ICON_HEIGHT), frameNode);
+        pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)), frameNode);
 }
 
 void SearchModelNG::SetSearchButton(FrameNode* frameNode, const std::string& text)
@@ -1638,7 +1640,7 @@ void SearchModelNG::SetCancelImageIcon(FrameNode *frameNode, IconOptions &iconOp
     CHECK_NULL_VOID(pattern);
     pattern->SetCancelImageIcon(iconOptions);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SearchLayoutProperty, CancelButtonUDSize,
-        iconOptions.GetSize().value_or(ICON_HEIGHT), frameNode);
+        pattern->ConvertImageIconSizeValue(iconOptions.GetSize().value_or(ICON_HEIGHT)), frameNode);
 }
 
 void SearchModelNG::SetSearchEnterKeyType(FrameNode* frameNode, TextInputAction value)

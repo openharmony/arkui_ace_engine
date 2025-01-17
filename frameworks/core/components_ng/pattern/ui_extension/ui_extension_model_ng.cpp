@@ -29,10 +29,11 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId);
-    auto wantWrap = WantWrap::CreateWantWrap(bundleName, abilityName);
-    wantWrap->SetWantParam(params);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto wantWrap = WantWrap::CreateWantWrap(bundleName, abilityName);
+    CHECK_NULL_RETURN(wantWrap, frameNode);
+    wantWrap->SetWantParam(params);
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
     pattern->UpdateWant(wantWrap);

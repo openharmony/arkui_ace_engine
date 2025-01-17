@@ -156,14 +156,14 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg038, TestSize.Level1)
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
                 set onWindowSizeChangeCallbacks_.
-     * @tc.expect: the value 314 has been erased.
+     * @tc.expect: the value -1 has been erased.
      */
     ASSERT_NE(context_, nullptr);
-    context_->onWindowSizeChangeCallbacks_.emplace_back(314);
+    context_->onWindowSizeChangeCallbacks_.emplace_back(-1);
     ASSERT_NE(frameNode_, nullptr);
     context_->onWindowSizeChangeCallbacks_.emplace_back(frameNode_->GetId());
     context_->FlushWindowSizeChangeCallback(0, 0, WindowSizeChangeReason::UNDEFINED);
-    EXPECT_EQ(context_->onWindowSizeChangeCallbacks_.size(), 2);
+    EXPECT_EQ(context_->onWindowSizeChangeCallbacks_.size(), 1);
 }
 
 /**

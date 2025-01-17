@@ -408,7 +408,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     auto haveNewLineAtStart = FillBlankAtStart(mainSize, crossSize, layoutWrapper);
     if (info_.reachStart_) {
         auto offset = info_.currentOffset_;
-        if ((Positive(offset) && !canOverScrollStart_) || (Negative(offset) && !canOverScrollEnd_)) {
+        if ((NonNegative(offset) && !canOverScrollStart_) || (NonPositive(offset) && !canOverScrollEnd_)) {
             info_.currentOffset_ = 0.0;
             info_.prevOffset_ = 0.0;
         }
@@ -573,8 +573,8 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     float lengthOfItemsInViewport = info_.GetTotalHeightOfItemsInView(mainGap_);
     // scroll forward
     if (LessNotEqual(info_.prevOffset_, info_.currentOffset_)) {
-        if ((Positive(info_.currentOffset_) && !canOverScrollStart_) ||
-            (Negative(info_.currentOffset_) && !canOverScrollEnd_)) {
+        if ((NonNegative(info_.currentOffset_) && !canOverScrollStart_) ||
+            (NonPositive(info_.currentOffset_) && !canOverScrollEnd_)) {
             info_.reachEnd_ = false;
             return;
         } else if (!isChildrenUpdated_) {
@@ -586,8 +586,8 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     // Step2. Calculate real offset that items can only be moved up by.
     // Hint: [prevOffset_] is a non-positive value
     if (LessNotEqual(lengthOfItemsInViewport, mainSize) && info_.startIndex_ == 0) {
-        if (((Positive(info_.currentOffset_) && !canOverScrollStart_) ||
-                (Negative(info_.currentOffset_) && !canOverScrollEnd_)) ||
+        if (((NonNegative(info_.currentOffset_) && !canOverScrollStart_) ||
+                (NonPositive(info_.currentOffset_) && !canOverScrollEnd_)) ||
             isChildrenUpdated_) {
             info_.currentOffset_ = 0;
             info_.prevOffset_ = 0;
