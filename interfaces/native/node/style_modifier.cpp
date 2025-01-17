@@ -14255,7 +14255,7 @@ int32_t SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, co
     int32_t nodeSubTypeClass =
         subTypeClass < MAX_NODE_SCOPE_NUM ? subTypeClass : (subTypeClass - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     if ((static_cast<uint32_t>(nodeSubTypeClass) >= sizeof(setterClasses) / sizeof(AttributeSetterClass*)) ||
-        !CheckIfAttributeLegal(node, type) || !CheckIsCNode(node)) {
+        !CheckIfAttributeLegal(node, type) || !CheckIsCNodeOrCrossLanguage(node)) {
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }
     if (!setterClasses[nodeSubTypeClass]) {
@@ -14339,7 +14339,7 @@ int32_t ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
     int32_t nodeSubTypeClass =
         subTypeClass < MAX_NODE_SCOPE_NUM ? subTypeClass : (subTypeClass - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     if ((static_cast<uint32_t>(nodeSubTypeClass) >= sizeof(resetterClasses) / sizeof(AttributeResetterClass*)) ||
-        !CheckIfAttributeLegal(node, type) || !CheckIsCNode(node)) {
+        !CheckIfAttributeLegal(node, type) || !CheckIsCNodeOrCrossLanguage(node)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node attribute: %{public}d NOT IMPLEMENT", type);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
     }

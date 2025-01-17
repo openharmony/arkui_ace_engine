@@ -205,6 +205,8 @@ declare class ArkTextClockComponent extends ArkComponent {}
 
 declare class ArkTextTimerComponent extends ArkComponent {}
 
+declare class Scroller {}
+
 declare class UICommonEvent {
   private _nodePtr: NodePtr;
   private _instanceId: number;

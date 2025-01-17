@@ -165,6 +165,10 @@ struct ArkUI_ActiveChildrenInfo {
     int32_t nodeCount;
 };
 
+struct ArkUI_CrossLanguageOption {
+    bool attributeSetting;
+};
+
 #ifdef __cplusplus
 };
 #endif

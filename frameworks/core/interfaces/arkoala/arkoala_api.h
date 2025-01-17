@@ -4854,6 +4854,9 @@ struct ArkUIFrameNodeModifier {
     ArkUI_Int32 (*resetDrawCompleteEvent)(ArkUINodeHandle node);
     ArkUI_Int32 (*setLayoutEvent)(ArkUINodeHandle node, void* userData, void (*onLayout)(void*));
     ArkUI_Int32 (*resetLayoutEvent)(ArkUINodeHandle node);
+    ArkUI_Int32 (*setCrossLanguageOptions)(ArkUINodeHandle node, bool attributeSetting);
+    ArkUI_Bool (*getCrossLanguageOptions)(ArkUINodeHandle node);
+    ArkUI_Bool (*checkIfCanCrossLanguageAttributeSetting)(ArkUINodeHandle node);
 };
 
 struct ArkUINodeContentEvent {

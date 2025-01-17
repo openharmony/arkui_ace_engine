@@ -3797,6 +3797,13 @@ void ArkUINativeModule::RegisterFrameNodeAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::RegisterFrameCallback));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "markDirty"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::MarkDirty));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCrossLanguageOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::SetCrossLanguageOptions));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getCrossLanguageOptions"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::GetCrossLanguageOptions));
+    frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "checkIfCanCrossLanguageAttributeSetting"),
+        panda::FunctionRef::New(
+            const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CheckIfCanCrossLanguageAttributeSetting));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createNodeContent"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateNodeContent));
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "addFrameNodeToNodeContent"),
