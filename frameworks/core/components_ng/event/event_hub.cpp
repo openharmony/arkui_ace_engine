@@ -851,6 +851,16 @@ bool EventHub::HasCustomerOnDrop() const
     return customerOnDrop_ != nullptr;
 }
 
+void EventHub::SetDisableDataPrefetch(bool disableDataPrefetch)
+{
+    disableDataPrefetch_ = disableDataPrefetch;
+}
+
+bool EventHub::GetDisableDataPrefetch() const
+{
+    return disableDataPrefetch_;
+}
+
 bool EventHub::IsEnabled() const
 {
     return enabled_;

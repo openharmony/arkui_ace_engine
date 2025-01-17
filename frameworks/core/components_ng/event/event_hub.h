@@ -166,6 +166,8 @@ public:
     bool HasCustomerOnDragMove() const;
     bool HasCustomerOnDragEnd() const;
     bool HasCustomerOnDrop() const;
+    void SetDisableDataPrefetch(bool disableDataPrefetch);
+    bool GetDisableDataPrefetch() const;
 
     virtual std::string GetDragExtraParams(const std::string& extraInfo, const Point& point, DragEventType isStart)
     {
@@ -348,6 +350,7 @@ private:
 
     bool enabled_ { true };
     bool developerEnabled_ { true };
+    bool disableDataPrefetch_ { false };
     std::vector<KeyboardShortcut> keyboardShortcut_;
     std::vector<int32_t> hasInnerAreaChangeUntriggered_;
 
