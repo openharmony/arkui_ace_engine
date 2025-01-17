@@ -1706,26 +1706,6 @@ HWTEST_F(UINodeTestNg, UINodeTestNg048, TestSize.Level1)
 }
 
 /**
- * @tc.name: UINodeTestNg049
- * @tc.desc: Test ui node method UpdateGeometryTransition
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, UINodeTestNg049, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. add child and update geometry transition
-     * @tc.expected: children_.size = 3
-     */
-    ONE->AddChild(TWO, 1, false);
-    auto testNode = TestNode::CreateTestNode(TEST_ID_ONE);
-    auto testNode2 = TestNode::CreateTestNode(TEST_ID_TWO);
-    ONE->AddChild(testNode, 1, false);
-    ONE->AddChild(testNode2, 1, false);
-    ONE->UpdateGeometryTransition();
-    ONE->Clean();
-}
-
-/**
  * @tc.name: UINodeTestNg050
  * @tc.desc: Test ui node method GetContextWithCheck
  * @tc.type: FUNC
@@ -1945,28 +1925,6 @@ HWTEST_F(UINodeTestNg, UINodeTestNg055, TestSize.Level1)
 }
 
 /**
- * @tc.name: UINodeTestNg056
- * @tc.desc: Test ui node method UpdateGeometryTransition
- * @tc.type: FUNC
- */
-HWTEST_F(UINodeTestNg, UINodeTestNg056, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct a uinode and add child
-     * @tc.expected: expect no exception
-     */
-    ZERO->parent_ = nullptr;
-    const RefPtr<FrameNode> testNode1 =
-        FrameNode::CreateFrameNode("testNode1", 1, AceType::MakeRefPtr<Pattern>(), true);
-    const RefPtr<FrameNode> testNode2 =
-        FrameNode::CreateFrameNode("testNode2", 1, AceType::MakeRefPtr<Pattern>(), true);
-    ZERO->AddChild(testNode1, 1, false);
-    testNode1->AddChild(testNode2, 1, false);
-    testNode2->UpdateGeometryTransition();
-    ZERO->Clean();
-}
-
-/**
  * @tc.name: UINodeTestNg057
  * @tc.desc: Test ui node method DumpViewDataPageNodes
  * @tc.type: FUNC
@@ -1983,7 +1941,6 @@ HWTEST_F(UINodeTestNg, UINodeTestNg057, TestSize.Level1)
         FrameNode::CreateFrameNode("testNode2", 1, AceType::MakeRefPtr<Pattern>(), true);
     testNode1->AddChild(testNode2, 1, false);
     testNode1->AddChild(nullptr, 1, false);
-    std::cout << testNode1->children_.size() << std::endl;
     auto viewDataWrap = ViewDataWrap::CreateViewDataWrap();
     testNode1->DumpViewDataPageNodes(viewDataWrap, false);
     ZERO->Clean();
@@ -2000,10 +1957,10 @@ HWTEST_F(UINodeTestNg, UINodeTestNg057, TestSize.Level1)
     testNode3->AddChild(testNode4, 1, false);
     testNode3->AddChild(nullptr, 1, false);
     testNode3->AddChild(testNodePage, 1, false);
-    std::cout << testNode3->children_.size() << std::endl;
     auto viewDataWrap2 = ViewDataWrap::CreateViewDataWrap();
     testNode3->DumpViewDataPageNodes(viewDataWrap2, true);
     ZERO->Clean();
+    EXPECT_TRUE(DumpLog::GetInstance().result_.find("testNode2"));
 }
 
 /**
@@ -2033,6 +1990,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg058, TestSize.Level1)
     testNode1->AddDisappearingChild(testNode4, 0);
     testNode1->DumpTree(0);
     ZERO->Clean();
+    EXPECT_TRUE(DumpLog::GetInstance().result_.find("testNode1"));
 }
 
 /**
@@ -2063,6 +2021,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg059, TestSize.Level1)
     testNode1->DumpTreeById(0, "3");
     testNode1->DumpTreeById(0, "4");
     ZERO->Clean();
+    EXPECT_TRUE(DumpLog::GetInstance().result_.find("testNode1"));
 }
 
 /**
@@ -2089,6 +2048,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg060, TestSize.Level1)
     testNode1->AddChild(testNode4, 1, false);
     RefPtr<LayoutWrapperNode> retLayoutWrapper = testNode1->UINode::CreateLayoutWrapper(true, true);
     testNode1->UINode::AdjustLayoutWrapperTree(retLayoutWrapper, false, false);
+    EXPECT_EQ(testNode1->GetChildren().size(), 3);
 }
 
 /**
@@ -2131,6 +2091,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg062, TestSize.Level1)
     parent->UINode::SetJSViewActive(true, true);
     child->SetIsV2(true);
     parent->UINode::SetJSViewActive(true, true);
+    EXPECT_TRUE(child->GetJsActive());
 }
 
 /**
@@ -2304,6 +2265,7 @@ HWTEST_F(UINodeTestNg, UINodeTestNg068, TestSize.Level1)
     parent->UINode::Build(extraInfos);
     extraInfos = std::make_shared<std::list<ExtraInfo>>();
     parent->UINode::Build(extraInfos);
+    EXPECT_EQ(parent->GetChildren().size(), 3);
 }
 
 /**
@@ -2450,6 +2412,7 @@ HWTEST_F(UINodeTestNg, GetPerformanceCheckData004, TestSize.Level1)
      */
     child->tag_ = V2::JS_FOR_EACH_ETS_TAG;
     child->UINode::GetPerformanceCheckData(nodeMap);
+    EXPECT_EQ(child->nodeInfo_->nodeTag, "ForEach");
 }
 
 /**

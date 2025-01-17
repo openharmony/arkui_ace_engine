@@ -44,6 +44,11 @@ public:
         placeholderNode_ = placeholderNode;
     }
 
+    bool IsShowPlaceholder()
+    {
+        return isShowPlaceholder_;
+    }
+
     RefPtr<EventHub> CreateEventHub() override
     {
         return MakeRefPtr<UIExtensionHub>();
@@ -129,6 +134,8 @@ public:
     void RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode code, BusinessDataUECConsumeCallback callback);
     void RegisterUIExtBusinessConsumeReplyCallback(
         UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback);
+    void TransferAccessibilityRectInfo();
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
 
 private:
     void InitializeAccessibility();
@@ -141,7 +148,9 @@ private:
     void ResetAccessibilityChildTreeCallback();
     void InitBusinessDataHandleCallback();
     void RegisterEventProxyFlagCallback();
-    void RegisterTransformParamGetCallback();
+    bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);
+    bool IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag);
+    AccessibilityParentRectInfo GetAccessibilityRectInfo() const;
 
     enum class AbilityState {
         NONE = 0,
@@ -174,6 +183,7 @@ private:
     std::list<std::function<void(const RefPtr<NG::SecurityUIExtensionProxy>&)>> onAsyncOnCallbackList_;
     std::map<UIContentBusinessCode, BusinessDataUECConsumeCallback> businessDataUECConsumeCallbacks_;
     std::map<UIContentBusinessCode, BusinessDataUECConsumeReplyCallback> businessDataUECConsumeReplyCallbacks_;
+    std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SecurityUIExtensionPattern);
 };

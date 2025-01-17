@@ -26,6 +26,32 @@ public:
     static void ShowInEmbeddedOverlay(std::function<void(RefPtr<NG::OverlayManager>)>&& task,
         const std::string& name, int32_t uniqueId);
     static RefPtr<OverlayManager> GetEmbeddedOverlay(int32_t uniqueId, const RefPtr<PipelineContext>& context);
+
+    static RefPtr<OverlayManager> FindPageNodeOverlay(const RefPtr<FrameNode>& currentNode);
+    
+    RefPtr<OverlayManager> GetEmbeddedOverlayWithNode(const RefPtr<UINode>& dialogNode);
+
+    RefPtr<UINode> GetDialogNodeByContentNode(const RefPtr<UINode>& currentNode);
+
+    void SetDismissDialogInfo(int32_t id, const std::string& name)
+    {
+        dismissDialogId_ = id;
+        dialogTag_ = name;
+    }
+
+    int32_t GetDismissDialogId() const
+    {
+        return dismissDialogId_;
+    }
+
+    std::string& GetDialogTag()
+    {
+        return dialogTag_;
+    }
+
+private:
+    int32_t dismissDialogId_ = 0;
+    std::string dialogTag_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_DIALOG_MANAGER_H

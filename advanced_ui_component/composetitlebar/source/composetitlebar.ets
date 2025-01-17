@@ -387,6 +387,13 @@ struct CollapsibleMenuSection {
     .justifyContent(FlexAlign.Center)
   }
 
+  onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Layoutable[], constraint: ConstraintSizeOptions): void {
+    children.forEach((child) => {
+      child.layout({ x: 0, y: 0 });
+    })
+    this.fontSize = this.decideFontScale();
+  }
+
   @Builder
   popupBuilder() {
     Column() {
@@ -396,7 +403,7 @@ struct CollapsibleMenuSection {
           (item: ComposeTitleBarMenuItem, index: number) => {
             ImageMenuItem({
               item: item, index: this.index * 1000 +
-              CollapsibleMenuSection.maxCountOfVisibleItems + index, isPopup: true
+              CollapsibleMenuSection.maxCountOfVisibleItems + index, isPopup: false
             })
           })
       }
@@ -420,7 +427,7 @@ struct ImageMenuItem {
   isFollowingSystemFontScale: boolean = false;
   maxFontScale: number = 1;
   systemFontScale?: number = 1;
-  isPopup: boolean = false;
+  isPopup: boolean = true;
   static readonly imageSize = 24;
   static readonly imageHotZoneWidth = 48;
   static readonly buttonBorderRadius = 8;
@@ -548,111 +555,219 @@ struct ImageMenuItem {
   }
 
   build() {
-    Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
-      if (this.item?.symbolStyle) {
-        SymbolGlyph()
-          .fontColor([$r('sys.color.ohos_id_color_text_primary')])
-          .attributeModifier(this.item?.symbolStyle)
-          .fontSize(`${ImageMenuItem.imageSize}vp`)
-          .effectStrategy(SymbolEffectStrategy.NONE)
-          .symbolEffect(new SymbolEffect(), false)
-          .draggable(false)
-          .focusable(this.item?.isEnabled)
-          .key(ImageMenuItem.focusablePrefix + this.index)
-      } else {
-        if (Util.isSymbolResource(this.item.value)) {
-          SymbolGlyph(this.item.value as Resource)
-            .fontSize(`${ImageMenuItem.imageSize}vp`)
+    if (this.isPopup) {
+      Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
+        if (this.item?.symbolStyle) {
+          SymbolGlyph()
             .fontColor([$r('sys.color.ohos_id_color_text_primary')])
+            .attributeModifier(this.item?.symbolStyle)
+            .fontSize(`${ImageMenuItem.imageSize}vp`)
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(new SymbolEffect(), false)
             .draggable(false)
             .focusable(this.item?.isEnabled)
             .key(ImageMenuItem.focusablePrefix + this.index)
         } else {
-          Image(this.item?.value)
-            .matchTextDirection(this.item?.value === PUBLIC_BACK ? true : false)
-            .width(ImageMenuItem.imageSize)
+          if (Util.isSymbolResource(this.item.value)) {
+            SymbolGlyph(this.item.value as Resource)
+              .fontSize(`${ImageMenuItem.imageSize}vp`)
+              .fontColor([$r('sys.color.ohos_id_color_text_primary')])
+              .draggable(false)
+              .focusable(this.item?.isEnabled)
+              .key(ImageMenuItem.focusablePrefix + this.index)
+          } else {
+            Image(this.item?.value)
+              .matchTextDirection(this.item?.value === PUBLIC_BACK ? true : false)
+              .width(ImageMenuItem.imageSize)
+              .draggable(false)
+              .height(ImageMenuItem.imageSize)
+              .focusable(this.item?.isEnabled)
+              .key(ImageMenuItem.focusablePrefix + this.index)
+              .fillColor($r('sys.color.ohos_id_color_text_primary'))
+          }
+        }
+      }
+      .id(`ComposeTitleBar_ImageMenuItem_${this.parentParentUniqueId}_${this.itemIndex}`)
+      .accessibilityText(this.getAccessibilityReadText())
+      .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
+      .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
+      .enabled(this.item.isEnabled ? this.item.isEnabled : false)
+      .width(ImageMenuItem.imageHotZoneWidth)
+      .height(ImageMenuItem.imageHotZoneWidth)
+      .borderRadius(ImageMenuItem.buttonBorderRadius)
+      .foregroundColor(this.getFgColor())
+      .backgroundColor(this.getBgColor())
+      .stateStyles({
+        focused: {
+          .border({
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: ImageMenuItem.focusBorderWidth,
+            color: $r('sys.color.ohos_id_color_focused_outline'),
+            style: BorderStyle.Solid
+          })
+        },
+        normal: {
+          .border({
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: 0
+          })
+        }
+      })
+      .onFocus(() => {
+        if (!this.item?.isEnabled) {
+          return;
+        }
+        this.isOnFocus = true;
+      })
+      .onBlur(() => this.isOnFocus = false)
+      .onHover((isOn) => {
+        if (!this.item?.isEnabled) {
+          return;
+        }
+        this.isOnHover = isOn;
+      })
+      .onKeyEvent((event) => {
+        if (!this.item?.isEnabled) {
+          return;
+        }
+        if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
+          event.keyCode !== KeyCode.KEYCODE_SPACE) {
+          return;
+        }
+        if (event.type === KeyType.Down) {
+          this.isOnClick = true;
+        }
+        if (event.type === KeyType.Up) {
+          this.isOnClick = false;
+        }
+      })
+      .onTouch((event) => {
+        if (!this.item?.isEnabled) {
+          return;
+        }
+        if (event.type === TouchType.Down) {
+          this.isOnClick = true;
+        }
+        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+          this.isOnClick = false;
+          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+            this.dialogController?.close();
+          }
+        }
+      })
+      .onClick(() => {
+        if (this.item) {
+          return this.item.isEnabled && this.item.action?.();
+        }
+      })
+      .gestureModifier(this.buttonGestureModifier)
+    } else {
+      Button({ type: ButtonType.Normal, stateEffect: this.item.isEnabled }) {
+        if (this.item?.symbolStyle) {
+          SymbolGlyph()
+            .fontColor([$r('sys.color.ohos_id_color_text_primary')])
+            .attributeModifier(this.item?.symbolStyle)
+            .fontSize(`${ImageMenuItem.imageSize}vp`)
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(new SymbolEffect(), false)
             .draggable(false)
-            .height(ImageMenuItem.imageSize)
             .focusable(this.item?.isEnabled)
             .key(ImageMenuItem.focusablePrefix + this.index)
-            .fillColor($r('sys.color.ohos_id_color_text_primary'))
+        } else {
+          if (Util.isSymbolResource(this.item.value)) {
+            SymbolGlyph(this.item.value as Resource)
+              .fontSize(`${ImageMenuItem.imageSize}vp`)
+              .fontColor([$r('sys.color.ohos_id_color_text_primary')])
+              .draggable(false)
+              .focusable(this.item?.isEnabled)
+              .key(ImageMenuItem.focusablePrefix + this.index)
+          } else {
+            Image(this.item?.value)
+              .matchTextDirection(this.item?.value === PUBLIC_BACK ? true : false)
+              .width(ImageMenuItem.imageSize)
+              .draggable(false)
+              .height(ImageMenuItem.imageSize)
+              .focusable(this.item?.isEnabled)
+              .key(ImageMenuItem.focusablePrefix + this.index)
+              .fillColor($r('sys.color.ohos_id_color_text_primary'))
+          }
         }
       }
+      .id(`ComposeTitleBar_ImageMenuItem_${this.parentParentUniqueId}_${this.itemIndex}`)
+      .accessibilityText(this.getAccessibilityReadText())
+      .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
+      .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
+      .enabled(this.item.isEnabled ? this.item.isEnabled : false)
+      .width(ImageMenuItem.imageHotZoneWidth)
+      .height(ImageMenuItem.imageHotZoneWidth)
+      .borderRadius(ImageMenuItem.buttonBorderRadius)
+      .foregroundColor(this.getFgColor())
+      .backgroundColor(this.getBgColor())
+      .stateStyles({
+        focused: {
+          .border({
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: ImageMenuItem.focusBorderWidth,
+            color: $r('sys.color.ohos_id_color_focused_outline'),
+            style: BorderStyle.Solid
+          })
+        },
+        normal: {
+          .border({
+            radius: $r('sys.float.ohos_id_corner_radius_clicked'),
+            width: 0
+          })
+        }
+      })
+      .onFocus(() => {
+        if (!this.item?.isEnabled) {
+          return;
+        }
+        this.isOnFocus = true;
+      })
+      .onBlur(() => this.isOnFocus = false)
+      .onHover((isOn) => {
+        if (!this.item?.isEnabled) {
+          return;
+        }
+        this.isOnHover = isOn;
+      })
+      .onKeyEvent((event) => {
+        if (!this.item?.isEnabled) {
+          return;
+        }
+        if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
+          event.keyCode !== KeyCode.KEYCODE_SPACE) {
+          return;
+        }
+        if (event.type === KeyType.Down) {
+          this.isOnClick = true;
+        }
+        if (event.type === KeyType.Up) {
+          this.isOnClick = false;
+        }
+      })
+      .onTouch((event) => {
+        if (!this.item?.isEnabled) {
+          return;
+        }
+        if (event.type === TouchType.Down) {
+          this.isOnClick = true;
+        }
+        if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
+          this.isOnClick = false;
+          if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+            this.dialogController?.close();
+          }
+        }
+      })
+      .onClick(() => {
+        if (this.item) {
+          return this.item.isEnabled && this.item.action?.();
+        }
+      })
     }
-    .id(`ComposeTitleBar_ImageMenuItem_${this.parentParentUniqueId}_${this.itemIndex}`)
-    .accessibilityText(this.getAccessibilityReadText())
-    .accessibilityLevel(this.item?.accessibilityLevel ?? 'auto')
-    .accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription))
-    .enabled(this.item.isEnabled ? this.item.isEnabled : false)
-    .width(ImageMenuItem.imageHotZoneWidth)
-    .height(ImageMenuItem.imageHotZoneWidth)
-    .borderRadius(ImageMenuItem.buttonBorderRadius)
-    .foregroundColor(this.getFgColor())
-    .backgroundColor(this.getBgColor())
-    .stateStyles({
-      focused: {
-        .border({
-          radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-          width: ImageMenuItem.focusBorderWidth,
-          color: $r('sys.color.ohos_id_color_focused_outline'),
-          style: BorderStyle.Solid
-        })
-      },
-      normal: {
-        .border({
-          radius: $r('sys.float.ohos_id_corner_radius_clicked'),
-          width: 0
-        })
-      }
-    })
-    .onFocus(() => {
-      if (!this.item?.isEnabled) {
-        return;
-      }
-      this.isOnFocus = true;
-    })
-    .onBlur(() => this.isOnFocus = false)
-    .onHover((isOn) => {
-      if (!this.item?.isEnabled) {
-        return;
-      }
-      this.isOnHover = isOn;
-    })
-    .onKeyEvent((event) => {
-      if (!this.item?.isEnabled) {
-        return;
-      }
-      if (event.keyCode !== KeyCode.KEYCODE_ENTER &&
-        event.keyCode !== KeyCode.KEYCODE_SPACE) {
-        return;
-      }
-      if (event.type === KeyType.Down) {
-        this.isOnClick = true;
-      }
-      if (event.type === KeyType.Up) {
-        this.isOnClick = false;
-      }
-    })
-    .onTouch((event) => {
-      if (!this.item?.isEnabled) {
-        return;
-      }
-      if (event.type === TouchType.Down) {
-        this.isOnClick = true;
-      }
-      if (event.type === TouchType.Up || event.type === TouchType.Cancel) {
-        this.isOnClick = false;
-        if (this.fontSize >= this.minFontSize && this.isPopup === false) {
-          this.dialogController?.close();
-        }
-      }
-    })
-    .onClick(() => {
-      if (this.item) {
-        return this.item.isEnabled && this.item.action?.();
-      }
-    })
-    .gestureModifier(this.buttonGestureModifier)
+
   }
 }
 

@@ -217,6 +217,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("customContentTransition", &JSSwiper::SetCustomContentTransition);
     JSClass<JSSwiper>::StaticMethod("onContentDidScroll", &JSSwiper::SetOnContentDidScroll);
     JSClass<JSSwiper>::StaticMethod("pageFlipMode", &JSSwiper::SetPageFlipMode);
+    JSClass<JSSwiper>::StaticMethod("onContentWillScroll", &JSSwiper::SetOnContentWillScroll);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -779,9 +780,9 @@ void JSSwiper::SetIndicatorController(const JSCallbackInfo& info)
         return;
     }
 
+    SwiperModel::GetInstance()->SetBindIndicator(true);
     WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     jsIndicatorController->SetSwiperNode(targetNode);
-    SwiperModel::GetInstance()->SetBindIndicator(true);
 }
 
 void JSSwiper::SetIndicator(const JSCallbackInfo& info)
@@ -1433,6 +1434,35 @@ void JSSwiper::SetOnContentDidScroll(const JSCallbackInfo& info)
         func->Execute(selectedIndex, index, position, mainAxisLength);
     };
     SwiperModel::GetInstance()->SetOnContentDidScroll(std::move(onContentDidScroll));
+}
+
+void JSSwiper::SetOnContentWillScroll(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        SwiperModel::GetInstance()->SetOnContentWillScroll(nullptr);
+        return;
+    }
+
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto handler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(handler)](
+                        const SwiperContentWillScrollResult& result) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        ACE_SCORING_EVENT("Swiper.onContentWillScroll");
+        auto ret = func->Execute(result);
+        if (!ret->IsBoolean()) {
+            return true;
+        }
+        return ret->ToBoolean();
+    };
+    SwiperModel::GetInstance()->SetOnContentWillScroll(std::move(callback));
 }
 
 void JSSwiper::SetPageFlipMode(const JSCallbackInfo& info)

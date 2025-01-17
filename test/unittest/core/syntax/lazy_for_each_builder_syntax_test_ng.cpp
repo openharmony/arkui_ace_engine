@@ -178,7 +178,9 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDataBulkChangedTest001, TestSize.
         AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(lazyForEachNode, nullptr);
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    ASSERT_NE(lazyForEachBuilder, nullptr);
 
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
@@ -256,7 +258,9 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDatasetChangeTest001, TestSize.Le
         AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(lazyForEachNode, nullptr);
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    ASSERT_NE(lazyForEachBuilder, nullptr);
     
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
@@ -295,6 +299,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachGetFrameChildByIndexTest001, TestSi
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(ViewStackProcessor::GetInstance()->Finish());
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    ASSERT_NE(lazyForEachBuilder, nullptr);
     EXPECT_TRUE(lazyForEachNode != nullptr && lazyForEachNode->GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG);
 
     UpdateItems(lazyForEachNode, mockLazyForEachActuator);
@@ -328,10 +333,11 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOnDataBulkChangedTest002, TestSize.
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
-
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
     lazyForEachBuilder->OnDataBulkChanged(0, 5);
-
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 2);
     lazyForEachBuilder->OnDataBulkChanged(10, 20);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 2);
 }
 
 /**
@@ -362,8 +368,8 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachCollectIndexChangedCountTest001, Te
 
     std::map<int32_t, OperationInfo> operationList;
     OperationInfo itemInfo;
-    operationList[1] = itemInfo;
-    operationList[2] = itemInfo;
+    operationList[7] = itemInfo;
+    operationList[8] = itemInfo;
 
     std::map<int32_t, int32_t> indexChangedMap;
     indexChangedMap[1] = 1;
@@ -374,7 +380,9 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachCollectIndexChangedCountTest001, Te
     indexChangedMap[6] = 6;
 
     lazyForEachBuilder->operationList_ = operationList;
+    EXPECT_EQ(indexChangedMap.size(), 6);
     lazyForEachBuilder->CollectIndexChangedCount(indexChangedMap);
+    EXPECT_EQ(indexChangedMap.size(), 8);
 }
 
 /**
@@ -399,6 +407,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOperateDeleteTest001, TestSize.Leve
         AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    ASSERT_NE(lazyForEachBuilder, nullptr);
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
@@ -434,6 +443,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOperateChangeTest001, TestSize.Leve
         AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    ASSERT_NE(lazyForEachBuilder, nullptr);
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
@@ -466,6 +476,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOperateMoveTest001, TestSize.Level1
         AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    ASSERT_NE(lazyForEachBuilder, nullptr);
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
@@ -508,6 +519,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOperateExchangeTest001, TestSize.Le
         AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    ASSERT_NE(lazyForEachBuilder, nullptr);
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
@@ -559,14 +571,17 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachOperateReloadTest001, TestSize.Leve
         AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    ASSERT_NE(lazyForEachBuilder, nullptr);
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
 
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 7);
     std::list<V2::Operation> DataOperations;
     V2::Operation operation1 = {.type = "reload", .index = INDEX_0, .count = INDEX_8, .coupleIndex = std::pair(1, 3)};
     DataOperations.push_back(operation1);
     lazyForEachBuilder->OnDatasetChange(DataOperations);
+    EXPECT_EQ(lazyForEachBuilder->OnGetTotalCount(), 0);
 }
 
 /**
@@ -591,6 +606,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachThrowRepeatOperationErrorTest001, T
         AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    ASSERT_NE(lazyForEachBuilder, nullptr);
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
@@ -620,6 +636,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachRecycleChildByIndexTest001, TestSiz
         AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    ASSERT_NE(lazyForEachBuilder, nullptr);
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }
@@ -657,6 +674,7 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachRecordOutOfBoundaryNodesTest001, Te
         AceType::MakeRefPtr<OHOS::Ace::Framework::MockLazyForEachBuilder>();
     lazyForEach.Create(mockLazyForEachActuator);
     auto lazyForEachBuilder = AceType::DynamicCast<LazyForEachBuilder>(mockLazyForEachActuator);
+    ASSERT_NE(lazyForEachBuilder, nullptr);
     for (auto iter : LAZY_FOR_EACH_NODE_IDS_INT) {
         lazyForEachBuilder->GetChildByIndex(iter.value_or(0), true);
     }

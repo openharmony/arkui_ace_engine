@@ -144,15 +144,28 @@ int32_t SearchTextFieldPattern::GetRequestKeyboardId()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
-    auto searchHost = host->GetAncestorNodeOfFrame(false);
+    auto searchHost = host->GetAncestorNodeOfFrame(true);
     CHECK_NULL_RETURN(searchHost, -1);
     return searchHost->GetId();
 }
 
 float SearchTextFieldPattern::FontSizeConvertToPx(const Dimension& fontSize)
 {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, fontSize.ConvertToPx());
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, fontSize.ConvertToPx());
+    auto textFieldLayoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, fontSize.ConvertToPx());
+
     if (fontSize.Unit() == DimensionUnit::FP) {
-        return fontSize.ConvertToPxDistribute(0, MAX_FONT_SCALE);
+        auto maxFontScale = MAX_FONT_SCALE;
+        if (textFieldLayoutProperty->HasMaxFontScale()) {
+            maxFontScale = std::min(textFieldLayoutProperty->GetMaxFontScale().value(), maxFontScale);
+        } else {
+            maxFontScale = std::min(pipeline->GetMaxAppFontScale(), maxFontScale);
+        }
+        return fontSize.ConvertToPxDistribute(0, maxFontScale);
     } else {
         return fontSize.ConvertToPx();
     }

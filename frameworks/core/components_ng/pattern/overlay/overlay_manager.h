@@ -587,6 +587,14 @@ public:
     {
         return gatherNodeWeak_.Upgrade();
     }
+    void SetDragNodeCopy(const RefPtr<FrameNode>& dragNodeCopy)
+    {
+        dragNodeCopyWeak_ = dragNodeCopy;
+    }
+    RefPtr<FrameNode> GetDragNodeCopy()
+    {
+        return dragNodeCopyWeak_.Upgrade();
+    }
     const std::vector<GatherNodeChildInfo>& GetGatherNodeChildrenInfo()
     {
         return gatherNodeChildrenInfo_;
@@ -661,6 +669,7 @@ public:
     OffsetF CalculateMenuPosition(const RefPtr<FrameNode>& menuWrapperNode, const OffsetF& offset);
     BorderRadiusProperty GetPrepareDragFrameNodeBorderRadius() const;
     static SafeAreaInsets GetSafeAreaInsets(const RefPtr<FrameNode>& frameNode, bool useCurrentWindow = false);
+    RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
 
 private:
     void OnBindSheetInner(std::function<void(const std::string&)>&& callback,
@@ -841,7 +850,6 @@ private:
     void SendToAccessibility(const WeakPtr<FrameNode> node, bool isShow);
     void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode);
     void SetDragNodeNeedClean();
-    RefPtr<FrameNode> GetLastChildNotRemoving(const RefPtr<UINode>& rootNode);
     void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
 
     RefPtr<FrameNode> overlayNode_;
@@ -905,6 +913,7 @@ private:
     bool hasGatherNode_ { false };
     bool isGatherWithMenu_ { false };
     WeakPtr<FrameNode> gatherNodeWeak_;
+    WeakPtr<FrameNode> dragNodeCopyWeak_;
     std::vector<GatherNodeChildInfo> gatherNodeChildrenInfo_;
     bool isMenuShow_ = false;
     bool isAttachToCustomNode_ = false;
