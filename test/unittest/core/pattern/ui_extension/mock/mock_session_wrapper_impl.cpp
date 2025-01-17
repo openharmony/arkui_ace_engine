@@ -240,6 +240,9 @@ void SessionWrapperImpl::OnReleaseDone()
 {
 }
 
+void SessionWrapperImpl::OnExtensionDetachToDisplay()
+{}
+
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {
 }

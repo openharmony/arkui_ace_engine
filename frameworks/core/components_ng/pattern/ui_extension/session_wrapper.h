@@ -116,6 +116,7 @@ public:
     virtual void OnDisconnect(bool isAbnormal) = 0;
     virtual void OnReleaseDone() {}
     virtual void OnExtensionTimeout(int32_t errorCode) = 0;
+    virtual void OnExtensionDetachToDisplay() {};
     virtual void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) = 0;
 
     // The interface about the accessibility

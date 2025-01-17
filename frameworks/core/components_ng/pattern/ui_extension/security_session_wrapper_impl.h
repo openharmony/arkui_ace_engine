@@ -73,6 +73,7 @@ public:
     void OnConnect() override;
     void OnDisconnect(bool isAbnormal) override;
     void OnExtensionTimeout(int32_t errorCode) override;
+    void OnExtensionDetachToDisplay() override;
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t offset) override;
 
     // The interface about the accessibility
