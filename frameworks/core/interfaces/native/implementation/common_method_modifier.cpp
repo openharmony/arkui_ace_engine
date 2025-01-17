@@ -2047,6 +2047,7 @@ void SafeAreaPaddingImpl(Ark_NativePointer node,
             ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },
         [frameNode](const Ark_LocalizedPadding& value) {
+             LOGE("ARKOALA: CommonMethod::SafeAreaPaddingImpl: Ark_LocalizedPadding is not supported.\n");
             auto convValue = Converter::Convert<PaddingProperty>(value);
              ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },
@@ -4263,6 +4264,7 @@ void CustomPropertyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    LOGE("CommonMethodModifier::CustomPropertyImpl is not implemented");
     //auto convValue = Converter::Convert<type>(name);
     //auto convValue = Converter::OptConvert<type>(name); // for enums
     //CommonMethodModelNG::SetCustomProperty(frameNode, convValue);
@@ -4280,7 +4282,7 @@ void ExpandSafeAreaImpl(Ark_NativePointer node,
     if (convTypes.has_value()) {
         std::vector<std::optional<uint32_t>> vec = convTypes.value();
         for (size_t i = 0; i < vec.size(); ++i) {
-            safeAreaType |= (1 << (vec[i].has_value() ? vec[i].value() : 0));
+            safeAreaType |= vec[i].value_or(0);
         }
         opts.type = safeAreaType;
     }
@@ -4288,7 +4290,7 @@ void ExpandSafeAreaImpl(Ark_NativePointer node,
     if (convEdges.has_value()) {
         std::vector<std::optional<uint32_t>> vec = convEdges.value();
         for (size_t i = 0; i < vec.size(); ++i) {
-            safeAreaEdge |= (1 << (vec[i].has_value() ? vec[i].value() : 0));
+            safeAreaEdge |= vec[i].value_or(0);
         }
         opts.edges = safeAreaEdge;
     }
