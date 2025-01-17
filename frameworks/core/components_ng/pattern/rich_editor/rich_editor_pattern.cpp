@@ -10008,7 +10008,7 @@ void RichEditorPattern::GetReplacedSpanFission(RichEditorChangeValue& changeValu
     }
     CreateSpanResult(changeValue, innerPosition, spanIndex, offsetInSpan, content.length(),
         content, textStyle, paraStyle);
-    innerPosition += content.length();
+    innerPosition += static_cast<int32_t>(content.length());
 }
 
 void RichEditorPattern::CreateSpanResult(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t spanIndex,
@@ -10111,7 +10111,7 @@ void RichEditorPattern::CalcInsertValueObj(TextInsertValueInfo& info, int textIn
         info.SetOffsetInSpan(0);
     } else {
         info.SetSpanIndex(std::distance(spans_.begin(), it));
-        int32_t spanStart = (*it)->position - (*it)->content.length();
+        int32_t spanStart = (*it)->position - static_cast<int32_t>((*it)->content.length());
         info.SetOffsetInSpan(textIndex - spanStart);
     }
 }
@@ -10205,7 +10205,7 @@ RefPtr<SpanItem> RichEditorPattern::GetDelPartiallySpanItem(
             return retItem; // is not a textSpan(Image/Symbol/other)
         }
         retItem->content = (*nextIt)->content;
-        retItem->position = retItem->content.length();
+        retItem->position = static_cast<int32_t>(retItem->content.length());
     }
     return retItem;
 }
