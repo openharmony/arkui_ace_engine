@@ -2311,30 +2311,25 @@ HWTEST_F(CanvasRendererAccessorTest, setDirectionTest, TestSize.Level1)
     }
     holder->TearDown();
 }
+
 /**
  * @tc.name: setTextAlignTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CanvasRendererAccessorTest,   setTextAlignTest, TestSize.Level1)
+HWTEST_F(CanvasRendererAccessorTest, setTextAlignTest, TestSize.Level1)
 {
     auto holder = TestHolder::GetInstance();
     ASSERT_NE(accessor_->setTextAlign, nullptr);
     for (const auto& [actual, expected] : TEXT_ALIGN_TEST_PLAN) {
         holder->SetUp();
         accessor_->setTextAlign(peer_, &actual);
-
-        std::printf("textAlign: holder %d==%d isCalled: %d\n",
-            std::underlying_type_t<TextAlign>(*holder->textAlign),
-            std::underlying_type_t<TextAlign>(expected),
-            holder->isCalled
-        );
-        
         EXPECT_TRUE(holder->isCalled);
         EXPECT_EQ(*holder->textAlign, expected);
     }
     holder->TearDown();
 }
+
 /**
  * @tc.name: setTextBaselineTest
  * @tc.desc:
@@ -2347,24 +2342,9 @@ HWTEST_F(CanvasRendererAccessorTest, setTextBaselineTest, TestSize.Level1)
     for (const auto& [actual, expected] : TEXT_BASE_LINE_TEST_PLAN) {
         holder->SetUp();
         accessor_->setTextBaseline(peer_, &actual);
-
-        std::printf("baseLine: holder %d==%d isCalled: %d\n", 
-            std::underlying_type_t<TextBaseline>(*holder->baseline),
-            std::underlying_type_t<TextBaseline>(expected), 
-            holder->isCalled
-        );
-
         EXPECT_TRUE(holder->isCalled);
         EXPECT_EQ(*holder->baseline, expected);
     }
     holder->TearDown();
-}
-
-
-
-HWTEST_F(CanvasRendererAccessorTest, setDirectionTest2, TestSize.Level1)
-{
-    int *p=nullptr;
-    *p = 0;
 }
 } // namespace OHOS::Ace::NG
