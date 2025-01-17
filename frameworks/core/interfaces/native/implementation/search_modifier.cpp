@@ -373,9 +373,10 @@ void OnPasteImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
-    auto onPaste = [arkCallback = CallbackHelper(*value)](const std::string& content,
+    auto onPaste = [arkCallback = CallbackHelper(*value)](const std::u16string& content,
         NG::TextCommonEvent& event) -> void {
-        auto arkContent = Converter::ArkValue<Ark_String>(content);
+        Converter::ConvContext ctx;
+        auto arkContent = Converter::ArkValue<Ark_String>(content, &ctx);
         auto keeper = CallbackKeeper::Claim([&event](){
             event.SetPreventDefault(true);
         });
