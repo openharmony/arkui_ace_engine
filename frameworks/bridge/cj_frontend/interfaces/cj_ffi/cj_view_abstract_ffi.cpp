@@ -142,7 +142,7 @@ void UpdateBackgroundImagePosition(const Align& align, BackgroundImagePosition& 
     }
 }
 
-void SetPopupParams(CJBindPopupParams& bindPopupParams, RefPtr<OHOS::Ace::PopupParam>& popupParam)
+void SetPopupParams(CJBindPopupParams bindPopupParams, const RefPtr<PopupParam>& popupParam)
 {
     popupParam->SetMessage(bindPopupParams.message);
     popupParam->SetPlacement(static_cast<Placement>(bindPopupParams.placement));
@@ -1151,7 +1151,7 @@ void FfiOHOSAceFrameworkViewAbstractKeyShortcutByChar(
     FfiOHOSAceFrameworkViewAbstractKeyShortcut(keyValue, keysArray, size, callback);
 }
 
-void SetCustomPopupParams(CJBindCustomPopup& value, RefPtr<OHOS::Ace::PopupParam>& popupParam)
+void SetCustomPopupParams(CJBindCustomPopup& value, const RefPtr<PopupParam>& popupParam)
 {
     popupParam->SetPlacement(static_cast<Placement>(value.placement));
     popupParam->SetMaskColor(Color(value.maskColor));
@@ -1205,14 +1205,27 @@ void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
     std::function<void(bool)> onStateChangeFunc = (reinterpret_cast<int64_t>(value.onStateChange) == 0)
                                                       ? ([](bool) -> void {})
                                                       : CJLambda::Create(value.onStateChange);
-    auto popupParam = AceType::MakeRefPtr<PopupParam>();
-    popupParam->SetIsShow(value.isShow);
-    popupParam->SetUseCustomComponent(true);
-    SetCustomPopupParams(value, popupParam);
     auto onStateChangeCallback = [onStateChangeFunc](const std::string& param) {
         auto paramData = JsonUtil::ParseJsonString(param);
         onStateChangeFunc(paramData->GetBool("isVisible"));
     };
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(value.isShow);
+    popupParam->SetUseCustomComponent(true);
+    popupParam->SetOnStateChange(onStateChangeCallback);
+    if (popupParam->IsShow()) {
+        auto builderFunc = CJLambda::Create(value.builder);
+        RefPtr<AceType> customNode;
+        {
+            ViewStackModel::GetInstance()->NewScope();
+            builderFunc();
+            customNode = ViewStackModel::GetInstance()->Finish();
+        }
+        ViewAbstractModel::GetInstance()->BindPopup(popupParam, customNode);
+    } else {
+        ViewAbstractModel::GetInstance()->BindPopup(popupParam, nullptr);
+    }
+    SetCustomPopupParams(value, popupParam);
     if (value.onWillDismiss.hasValue) {
         std::function<void(const int32_t& info)> onWillDismissFunc =
             [nativeFunc = CJLambda::Create(value.onWillDismiss.value)]
@@ -1226,19 +1239,6 @@ void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
             popupParam->SetHasTransition(true);
             popupParam->SetTransitionEffects(nativeTransitionEffect->effect);
         }
-    }
-    popupParam->SetOnStateChange(onStateChangeCallback);
-    if (popupParam->IsShow()) {
-        auto builderFunc = CJLambda::Create(value.builder);
-        RefPtr<AceType> customNode;
-        {
-            ViewStackModel::GetInstance()->NewScope();
-            builderFunc();
-            customNode = ViewStackModel::GetInstance()->Finish();
-        }
-        ViewAbstractModel::GetInstance()->BindPopup(popupParam, customNode);
-    } else {
-        ViewAbstractModel::GetInstance()->BindPopup(popupParam, nullptr);
     }
 }
 
