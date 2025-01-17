@@ -122,6 +122,8 @@ public:
     void Fill(const Ace::CanvasFillRule& fillRule);
     void Fill(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path);
     void SetTextDirection(const Ace::TextDirection& direction);
+    void SetTextAlign(const TextAlign& align);
+    void SetTextBaseline(const TextBaseline& baseline);
     void SetUnit(CanvasUnit unit)
     {
         unit_ = unit;

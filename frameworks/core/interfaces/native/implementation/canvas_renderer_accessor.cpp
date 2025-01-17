@@ -40,6 +40,17 @@ const auto DIR_AUTO = "auto";
 const auto DIR_INHERIT = "inherit";
 const auto DIR_LTR = "ltr";
 const auto DIR_RTL = "rtl";
+const auto DOM_CLIP = "clip";
+const auto DOM_LEFT = "left";
+const auto DOM_RIGHT = "right";
+const auto DOM_CENTER = "center";
+const auto DOM_JUSTIFY = "justify";
+const auto DOM_ALPHABETIC = "alphabetic";
+const auto DOM_BOTTOM = "bottom";
+const auto DOM_HANGING = "hanging";
+const auto DOM_IDEOGRAPHIC = "ideographic";
+const auto DOM_MIDDLE = "middle";
+const auto DOM_TOP = "top";
 struct Ark_Custom_Rect {
     Ark_Number x;
     Ark_Number y;
@@ -82,6 +93,34 @@ std::optional<double> ConvertDimension(
 }
 } // namespace
 namespace Converter {
+template<>
+TextBaseline Convert(const Ark_String& src)
+{
+   static const LinearMapNode<TextAlign> textBaseAlignTable[] = {
+    { DOM_ALPHABETIC, TextBaseline::ALPHABETIC },
+    { DOM_BOTTOM, TextBaseline::BOTTOM },
+    { DOM_HANGING, TextBaseline::HANGING },
+    { DOM_IDEOGRAPHIC, TextBaseline::IDEOGRAPHIC },
+    { DOM_MIDDLE, TextBaseline::MIDDLE },
+    { DOM_TOP, TextBaseline::TOP },
+    };
+    auto index = BinarySearchFindIndex(textBaseAlignTable, ArraySize(textBaseAlignTable), align.c_str());
+    return index < 0 ? TextBaseline::ALPHABETIC : textBaseAlignTable[index].value;
+}
+template<>
+TextAlign Convert(const Ark_String& src)
+{
+   static const LinearMapNode<TextAlign> textAlignTable[] = {
+        { DOM_CENTER, TextAlign::CENTER },
+        { DOM_END, TextAlign::END },
+        { DOM_JUSTIFY, TextAlign::JUSTIFY },
+        { DOM_LEFT, TextAlign::LEFT },
+        { DOM_RIGHT, TextAlign::RIGHT },
+        { DOM_START, TextAlign::START },
+    };
+    auto index = BinarySearchFindIndex(textAlignTable, ArraySize(textAlignTable), align.c_str());
+    return index < 0 ? TextAlign::CENTER : textAlignTable[index].value;
+}
 template<>
 TextDirection Convert(const Ark_String& src)
 {
@@ -1227,8 +1266,12 @@ Ark_NativePointer GetTextAlignImpl(CanvasRendererPeer* peer)
 void SetTextAlignImpl(CanvasRendererPeer* peer,
                       const Ark_String* textAlign)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::SetTextAlignImpl Ark_String type parameter "
-        "should be replaced with a valid ark enum for CanvasTextAlign type.");
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(textAlign);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto align = Converter::Convert<TextAlign>(*textAlign);
+    peerImpl->SetTextAlign(align);
 }
 Ark_NativePointer GetTextBaselineImpl(CanvasRendererPeer* peer)
 {
@@ -1241,8 +1284,12 @@ Ark_NativePointer GetTextBaselineImpl(CanvasRendererPeer* peer)
 void SetTextBaselineImpl(CanvasRendererPeer* peer,
                          const Ark_String* textBaseline)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::SetTextBaselineImpl Ark_String type parameter "
-        "should be replaced with a valid ark enum for CanvasTextBaseline type.");
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(textAlign);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto baseLine = Converter::Convert<TextBaseLine>(*textBaseline);
+    peerImpl->SetTextBaseLine(baseLine);
 }
 } // CanvasRendererAccessor
 const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
