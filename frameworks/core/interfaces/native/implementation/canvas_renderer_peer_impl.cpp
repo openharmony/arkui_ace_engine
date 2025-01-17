@@ -712,7 +712,7 @@ void CanvasRendererPeerImpl::SetLineJoin(const std::string& joinStr)
 void CanvasRendererPeerImpl::Clip(const Ace::CanvasFillRule& fillRule)
 {
     if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::SetClip pattern not bound to component.");
+        LOGE("ARKOALA CanvasRendererPeerImpl::Clip pattern not bound to component.");
         return;
     }
     pattern_->UpdateFillRuleForPath(fillRule);
@@ -721,7 +721,7 @@ void CanvasRendererPeerImpl::Clip(const Ace::CanvasFillRule& fillRule)
 void CanvasRendererPeerImpl::Clip(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
 {
     if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::SetClip pattern not bound to component.");
+        LOGE("ARKOALA CanvasRendererPeerImpl::Clip pattern not bound to component.");
         return;
     }
     pattern_->UpdateFillRuleForPath(fillRule);
@@ -730,7 +730,7 @@ void CanvasRendererPeerImpl::Clip(const Ace::CanvasFillRule& fillRule, const Ref
 void CanvasRendererPeerImpl::Fill(const Ace::CanvasFillRule& fillRule)
 {
     if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::SetFill pattern not bound to component.");
+        LOGE("ARKOALA CanvasRendererPeerImpl::Fill pattern not bound to component.");
         return;
     }
     pattern_->UpdateFillRuleForPath(fillRule);
@@ -739,7 +739,7 @@ void CanvasRendererPeerImpl::Fill(const Ace::CanvasFillRule& fillRule)
 void CanvasRendererPeerImpl::Fill(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
 {
     if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::SetFill pattern not bound to component.");
+        LOGE("ARKOALA CanvasRendererPeerImpl::Fill pattern not bound to component.");
         return;
     }
     pattern_->UpdateFillRuleForPath(fillRule);
@@ -748,7 +748,7 @@ void CanvasRendererPeerImpl::Fill(const Ace::CanvasFillRule& fillRule, const Ref
 void CanvasRendererPeerImpl::SetTextDirection(const Ace::TextDirection& direction)
 {
     if (!pattern_) {
-        LOGE("ARKOALA CanvasRendererPeerImpl::SetFill pattern not bound to component.");
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetTextDirection pattern not bound to component.");
         return;
     }
     pattern_->SetTextDirection(direction);
