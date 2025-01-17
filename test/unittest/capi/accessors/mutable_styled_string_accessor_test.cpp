@@ -390,11 +390,10 @@ HWTEST_F(MutableStyledStringAccessorTest, removeInvalidStyleTest, TestSize.Level
     accessor_->removeStyle(peer_, &arkStart, nullptr, ARK_STYLED_STRING_KEY_DECORATION);
     accessor_->removeStyle(peer_, &arkStart, &arkLength, ARK_STYLED_STRING_KEY_DECORATION);
     ASSERT_NE(peer_->spanString, nullptr);
-    auto currentSpans = peer_->spanString->GetSpans(0, testString.length());
-    ASSERT_EQ(currentSpans.size(), 3);
-    EXPECT_NE(AceType::DynamicCast<FontSpan>(currentSpans[0]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<DecorationSpan>(currentSpans[1]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<BaselineOffsetSpan>(currentSpans[2]), nullptr);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length()).size(), 3);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length(), SpanType::Font).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length(), SpanType::Decoration).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length(), SpanType::BaselineOffset).size(), 1);
     EXPECT_EQ(peer_->spanString->GetU16string(), testString);
 }
 
@@ -412,14 +411,12 @@ HWTEST_F(MutableStyledStringAccessorTest, removeStylesTest, TestSize.Level1)
     const auto arkLength1 = Converter::ArkValue<Ark_Number>(1);
     accessor_->removeStyles(peer_, &arkStart, &arkLength1);
     ASSERT_NE(peer_->spanString, nullptr);
-    auto currentSpans = peer_->spanString->GetSpans(0, testString.length());
-    ASSERT_EQ(currentSpans.size(), 2);
-    EXPECT_NE(AceType::DynamicCast<DecorationSpan>(currentSpans[0]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<BaselineOffsetSpan>(currentSpans[1]), nullptr);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length()).size(), 2);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length(), SpanType::Decoration).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length(), SpanType::BaselineOffset).size(), 1);
     const auto arkLength = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(testString.length()));
     accessor_->removeStyles(peer_, &arkStart, &arkLength);
-    currentSpans = peer_->spanString->GetSpans(0, testString.length());
-    EXPECT_EQ(currentSpans.size(), 0);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length()).size(), 0);
     EXPECT_EQ(peer_->spanString->GetU16string(), testString);
 }
 
@@ -441,10 +438,10 @@ HWTEST_F(MutableStyledStringAccessorTest, removeInvalidStylesTest, TestSize.Leve
     accessor_->removeStyles(peer_, &arkStart, &arkLength);
     ASSERT_NE(peer_->spanString, nullptr);
     auto currentSpans = peer_->spanString->GetSpans(0, testString.length());
-    ASSERT_EQ(currentSpans.size(), 3);
-    EXPECT_NE(AceType::DynamicCast<FontSpan>(currentSpans[0]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<DecorationSpan>(currentSpans[1]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<BaselineOffsetSpan>(currentSpans[2]), nullptr);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length()).size(), 3);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length(), SpanType::Font).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length(), SpanType::Decoration).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length(), SpanType::BaselineOffset).size(), 1);
     EXPECT_EQ(peer_->spanString->GetU16string(), testString);
 }
 
@@ -460,8 +457,7 @@ HWTEST_F(MutableStyledStringAccessorTest, clearStylesTest, TestSize.Level1)
 
     accessor_->clearStyles(peer_);
     ASSERT_NE(peer_->spanString, nullptr);
-    const auto currentSpans = peer_->spanString->GetSpans(0, testString.length());
-    EXPECT_EQ(currentSpans.size(), 0);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length()).size(), 0);
     EXPECT_EQ(peer_->spanString->GetU16string(), testString);
 }
 
@@ -477,11 +473,10 @@ HWTEST_F(MutableStyledStringAccessorTest, clearInvalidStylesTest, TestSize.Level
 
     accessor_->clearStyles(nullptr);
     ASSERT_NE(peer_->spanString, nullptr);
-    const auto currentSpans = peer_->spanString->GetSpans(0, testString.length());
-    ASSERT_EQ(currentSpans.size(), 3);
-    EXPECT_NE(AceType::DynamicCast<FontSpan>(currentSpans[0]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<DecorationSpan>(currentSpans[1]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<BaselineOffsetSpan>(currentSpans[2]), nullptr);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length()).size(), 3);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length(), SpanType::Font).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length(), SpanType::Decoration).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, testString.length(), SpanType::BaselineOffset).size(), 1);
     EXPECT_EQ(peer_->spanString->GetU16string(), testString);
 }
 
@@ -518,19 +513,17 @@ HWTEST_F(MutableStyledStringAccessorTest, replaceStyledStringTest, TestSize.Leve
     ASSERT_NE(peer_->spanString, nullptr);
     const auto resultString = peer_->spanString->GetU16string();
     EXPECT_EQ(resultString, u"secondStringTest");
-    auto currentSpans = peer_->spanString->GetSpans(0, resultString.length());
-    ASSERT_EQ(currentSpans.size(), 4);
-    EXPECT_NE(AceType::DynamicCast<DecorationSpan>(currentSpans[0]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<BaselineOffsetSpan>(currentSpans[1]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<LetterSpacingSpan>(currentSpans[2]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<TextShadowSpan>(currentSpans[3]), nullptr);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length()).size(), 4);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::Decoration).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::BaselineOffset).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::TextShadow).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::LetterSpacing).size(), 1);
 
     ASSERT_NE(peer2.spanString, nullptr);
     EXPECT_EQ(peer2.spanString->GetU16string(), testString2);
-    currentSpans = peer2.spanString->GetSpans(0, testString2.length());
-    ASSERT_EQ(currentSpans.size(), 2);
-    EXPECT_NE(AceType::DynamicCast<TextShadowSpan>(currentSpans[0]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<LetterSpacingSpan>(currentSpans[1]), nullptr);
+    EXPECT_EQ(peer2.spanString->GetSpans(0, testString2.length()).size(), 2);
+    EXPECT_EQ(peer2.spanString->GetSpans(0, testString2.length(), SpanType::TextShadow).size(), 1);
+    EXPECT_EQ(peer2.spanString->GetSpans(0, testString2.length(), SpanType::LetterSpacing).size(), 1);
 }
 
 /**
@@ -554,11 +547,10 @@ HWTEST_F(MutableStyledStringAccessorTest, replaceStyledStringInvalidTest, TestSi
     ASSERT_NE(peer_->spanString, nullptr);
     const auto resultString = peer_->spanString->GetU16string();
     EXPECT_EQ(resultString, testString);
-    const auto currentSpans = peer_->spanString->GetSpans(0, resultString.length());
-    ASSERT_EQ(currentSpans.size(), 3);
-    EXPECT_NE(AceType::DynamicCast<FontSpan>(currentSpans[0]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<DecorationSpan>(currentSpans[1]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<BaselineOffsetSpan>(currentSpans[2]), nullptr);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length()).size(), 3);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::Font).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::Decoration).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::BaselineOffset).size(), 1);
 }
 
 /**
@@ -580,22 +572,18 @@ HWTEST_F(MutableStyledStringAccessorTest, insertStyledStringTest, TestSize.Level
     ASSERT_NE(peer_->spanString, nullptr);
     const auto resultString = peer_->spanString->GetU16string();
     EXPECT_EQ(resultString, u"insertStyledSecondStringTest");
-    auto currentSpans = peer_->spanString->GetSpans(0, resultString.length());
-    ASSERT_EQ(currentSpans.size(), 7);
-    EXPECT_NE(AceType::DynamicCast<FontSpan>(currentSpans[0]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<DecorationSpan>(currentSpans[1]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<DecorationSpan>(currentSpans[2]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<BaselineOffsetSpan>(currentSpans[3]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<BaselineOffsetSpan>(currentSpans[4]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<LetterSpacingSpan>(currentSpans[5]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<TextShadowSpan>(currentSpans[6]), nullptr);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length()).size(), 7);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::Font).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::Decoration).size(), 2);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::BaselineOffset).size(), 2);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::TextShadow).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::LetterSpacing).size(), 1);
 
     ASSERT_NE(peer2.spanString, nullptr);
     EXPECT_EQ(peer2.spanString->GetU16string(), testString2);
-    currentSpans = peer2.spanString->GetSpans(0, testString2.length());
-    ASSERT_EQ(currentSpans.size(), 2);
-    EXPECT_NE(AceType::DynamicCast<TextShadowSpan>(currentSpans[0]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<LetterSpacingSpan>(currentSpans[1]), nullptr);
+    EXPECT_EQ(peer2.spanString->GetSpans(0, testString2.length()).size(), 2);
+    EXPECT_EQ(peer2.spanString->GetSpans(0, testString2.length(), SpanType::TextShadow).size(), 1);
+    EXPECT_EQ(peer2.spanString->GetSpans(0, testString2.length(), SpanType::LetterSpacing).size(), 1);
 }
 
 /**
@@ -617,11 +605,10 @@ HWTEST_F(MutableStyledStringAccessorTest, insertStyledStringInvalidTest, TestSiz
     ASSERT_NE(peer_->spanString, nullptr);
     const auto resultString = peer_->spanString->GetU16string();
     EXPECT_EQ(resultString, testString);
-    const auto currentSpans = peer_->spanString->GetSpans(0, resultString.length());
-    ASSERT_EQ(currentSpans.size(), 3);
-    EXPECT_NE(AceType::DynamicCast<FontSpan>(currentSpans[0]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<DecorationSpan>(currentSpans[1]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<BaselineOffsetSpan>(currentSpans[2]), nullptr);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length()).size(), 3);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::Font).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::Decoration).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::BaselineOffset).size(), 1);
 }
 
 /**
@@ -643,19 +630,18 @@ HWTEST_F(MutableStyledStringAccessorTest, appendStyledStringTest, TestSize.Level
     const auto resultString = peer_->spanString->GetU16string();
     EXPECT_EQ(resultString, u"appendStyledStringTestEnd");
     auto currentSpans = peer_->spanString->GetSpans(0, resultString.length());
-    ASSERT_EQ(currentSpans.size(), 5);
-    EXPECT_NE(AceType::DynamicCast<FontSpan>(currentSpans[0]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<DecorationSpan>(currentSpans[1]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<BaselineOffsetSpan>(currentSpans[2]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<LetterSpacingSpan>(currentSpans[3]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<TextShadowSpan>(currentSpans[4]), nullptr);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length()).size(), 5);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::Font).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::Decoration).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::BaselineOffset).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::TextShadow).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::LetterSpacing).size(), 1);
 
     ASSERT_NE(peer2.spanString, nullptr);
     EXPECT_EQ(peer2.spanString->GetU16string(), testString2);
-    currentSpans = peer2.spanString->GetSpans(0, testString2.length());
-    ASSERT_EQ(currentSpans.size(), 2);
-    EXPECT_NE(AceType::DynamicCast<TextShadowSpan>(currentSpans[0]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<LetterSpacingSpan>(currentSpans[1]), nullptr);
+    EXPECT_EQ(peer2.spanString->GetSpans(0, testString2.length()).size(), 2);
+    EXPECT_EQ(peer2.spanString->GetSpans(0, testString2.length(), SpanType::TextShadow).size(), 1);
+    EXPECT_EQ(peer2.spanString->GetSpans(0, testString2.length(), SpanType::LetterSpacing).size(), 1);
 }
 
 /**
@@ -674,11 +660,10 @@ HWTEST_F(MutableStyledStringAccessorTest, appendStyledStringInvalidTest, TestSiz
     ASSERT_NE(peer_->spanString, nullptr);
     const auto resultString = peer_->spanString->GetU16string();
     EXPECT_EQ(resultString, testString);
-    const auto currentSpans = peer_->spanString->GetSpans(0, resultString.length());
-    ASSERT_EQ(currentSpans.size(), 3);
-    EXPECT_NE(AceType::DynamicCast<FontSpan>(currentSpans[0]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<DecorationSpan>(currentSpans[1]), nullptr);
-    EXPECT_NE(AceType::DynamicCast<BaselineOffsetSpan>(currentSpans[2]), nullptr);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length()).size(), 3);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::Font).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::Decoration).size(), 1);
+    EXPECT_EQ(peer_->spanString->GetSpans(0, resultString.length(), SpanType::BaselineOffset).size(), 1);
 }
 
 } // namespace OHOS::Ace::NG
