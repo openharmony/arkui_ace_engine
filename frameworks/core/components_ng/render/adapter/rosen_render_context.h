@@ -313,6 +313,8 @@ public:
 
     void GetPointTransformRotate(PointF& point) override;
 
+    Matrix4 GetMatrixWithTransformRotate() override;
+
     void GetPointWithTransform(PointF& point) override;
 
     void ClearDrawCommands() override;
@@ -632,7 +634,6 @@ protected:
     void OnePixelRounding();
     void OnePixelRounding(uint16_t flag = 0);
     Matrix4 GetMatrix();
-    Matrix4 GetMatrixWithTransformRotate();
     bool IsUniRenderEnabled() override;
     void AddFrameNodeInfoToRsNode();
     // Use rect to update the drawRegion rect at index.
