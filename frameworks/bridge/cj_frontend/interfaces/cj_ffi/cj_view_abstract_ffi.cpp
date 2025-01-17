@@ -89,6 +89,9 @@ const std::vector<RenderFit> RENDERFITS = { RenderFit::CENTER, RenderFit::TOP, R
     RenderFit::RESIZE_CONTAIN_BOTTOM_RIGHT, RenderFit::RESIZE_COVER, RenderFit::RESIZE_COVER_TOP_LEFT,
     RenderFit::RESIZE_COVER_BOTTOM_RIGHT };
 
+const std::vector<PixelRoundCalcPolicy> PIXEL_ROUND_CALC_POLICIES = { PixelRoundCalcPolicy::NO_FORCE_ROUND,
+    PixelRoundCalcPolicy::FORCE_CEIL, PixelRoundCalcPolicy::FORCE_FLOOR };
+
 // Regex for match the placeholder.
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
 
@@ -296,39 +299,48 @@ void FfiOHOSAceFrameworkViewAbstractSetPixelRound(CJPixelRoundPolicy cjValue)
 {
     uint16_t value = 0;
     int32_t startValue = cjValue.start;
-    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(startValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
-    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(startValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START);
-    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(startValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START);
+    if (Utils::CheckParamsValid(startValue, PIXEL_ROUND_CALC_POLICIES.size())) {
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(startValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(startValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(startValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START);
+        }
     }
+    
 
     int32_t topValue = cjValue.top;
-    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(topValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
-    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(topValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
-    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(topValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP);
+    if (Utils::CheckParamsValid(topValue, PIXEL_ROUND_CALC_POLICIES.size())) {
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(topValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(topValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(topValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP);
+        }
     }
 
     int32_t endValue = cjValue.end;
-    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(endValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
-    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(endValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
-    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(endValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END);
+    if (Utils::CheckParamsValid(endValue, PIXEL_ROUND_CALC_POLICIES.size())) {
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(endValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(endValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(endValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END);
+        }
     }
 
     int32_t bottomValue = cjValue.bottom;
-    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
-    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
-    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
+    if (Utils::CheckParamsValid(bottomValue, PIXEL_ROUND_CALC_POLICIES.size())) {
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
+        }
     }
 
     ViewAbstractModel::GetInstance()->SetPixelRound(value);
