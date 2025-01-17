@@ -753,4 +753,21 @@ void CanvasRendererPeerImpl::SetTextDirection(const Ace::TextDirection& directio
     }
     pattern_->SetTextDirection(direction);
 }
+
+void CanvasRendererPeerImpl::SetTextAlign(const TextAlign& align)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetTextAlign pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateTextAlign(align);
+}
+void CanvasRendererPeerImpl::SetTextBaseline(const TextBaseline& baseline)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetTextBaseline pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateTextBaseline(baseline);
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier

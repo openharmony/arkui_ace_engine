@@ -40,11 +40,12 @@ const auto DIR_AUTO = "auto";
 const auto DIR_INHERIT = "inherit";
 const auto DIR_LTR = "ltr";
 const auto DIR_RTL = "rtl";
-const auto DOM_CLIP = "clip";
+const auto DOM_CENTER = "center";
+const auto DOM_END = "end";
+const auto DOM_JUSTIFY = "justify";
 const auto DOM_LEFT = "left";
 const auto DOM_RIGHT = "right";
-const auto DOM_CENTER = "center";
-const auto DOM_JUSTIFY = "justify";
+const auto DOM_START = "start";
 const auto DOM_ALPHABETIC = "alphabetic";
 const auto DOM_BOTTOM = "bottom";
 const auto DOM_HANGING = "hanging";
@@ -96,21 +97,23 @@ namespace Converter {
 template<>
 TextBaseline Convert(const Ark_String& src)
 {
-   static const LinearMapNode<TextAlign> textBaseAlignTable[] = {
-    { DOM_ALPHABETIC, TextBaseline::ALPHABETIC },
-    { DOM_BOTTOM, TextBaseline::BOTTOM },
-    { DOM_HANGING, TextBaseline::HANGING },
-    { DOM_IDEOGRAPHIC, TextBaseline::IDEOGRAPHIC },
-    { DOM_MIDDLE, TextBaseline::MIDDLE },
-    { DOM_TOP, TextBaseline::TOP },
+    auto baseLine = Converter::Convert<std::string>(src);
+    static const LinearMapNode<TextBaseline> textBaseAlignTable[] = {
+        { DOM_ALPHABETIC, TextBaseline::ALPHABETIC },
+        { DOM_BOTTOM, TextBaseline::BOTTOM },
+        { DOM_HANGING, TextBaseline::HANGING },
+        { DOM_IDEOGRAPHIC, TextBaseline::IDEOGRAPHIC },
+        { DOM_MIDDLE, TextBaseline::MIDDLE },
+        { DOM_TOP, TextBaseline::TOP },
     };
-    auto index = BinarySearchFindIndex(textBaseAlignTable, ArraySize(textBaseAlignTable), align.c_str());
+    auto index = BinarySearchFindIndex(textBaseAlignTable, ArraySize(textBaseAlignTable), baseLine.c_str());
     return index < 0 ? TextBaseline::ALPHABETIC : textBaseAlignTable[index].value;
 }
 template<>
 TextAlign Convert(const Ark_String& src)
 {
-   static const LinearMapNode<TextAlign> textAlignTable[] = {
+    auto align = Converter::Convert<std::string>(src);
+    static const LinearMapNode<TextAlign> textAlignTable[] = {
         { DOM_CENTER, TextAlign::CENTER },
         { DOM_END, TextAlign::END },
         { DOM_JUSTIFY, TextAlign::JUSTIFY },
@@ -1285,11 +1288,11 @@ void SetTextBaselineImpl(CanvasRendererPeer* peer,
                          const Ark_String* textBaseline)
 {
     CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(textAlign);
+    CHECK_NULL_VOID(textBaseline);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto baseLine = Converter::Convert<TextBaseLine>(*textBaseline);
-    peerImpl->SetTextBaseLine(baseLine);
+    auto baseLine = Converter::Convert<TextBaseline>(*textBaseline);
+    peerImpl->SetTextBaseline(baseLine);
 }
 } // CanvasRendererAccessor
 const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()
