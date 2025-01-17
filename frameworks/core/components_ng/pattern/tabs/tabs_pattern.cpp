@@ -723,6 +723,7 @@ void TabsPattern::UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateIndicator(index);
     tabBarPattern->SetClickRepeat(false);
+    tabBarPattern->ResetIndicatorAnimationState();
     tabBarPattern->UpdateSubTabBoard(index);
     tabBarPattern->UpdateTextColorAndFontWeight(index);
     tabBarPattern->AdjustSymbolStats(index);
