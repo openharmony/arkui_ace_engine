@@ -89,5 +89,10 @@ void WindowSceneModel::Create(int32_t persistentId)
     if (windowNode->GetHitTestMode() == HitTestMode::HTMDEFAULT) {
         windowNode->SetHitTestMode(HitTestMode::HTMBLOCK);
     }
+    auto parent = windowNode->GetParentFrameNode();
+    if (parent) {
+        TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "parentId:%{public}d, nodeId:%{public}d, sessionId:%{public}d",
+            parent->GetId(), windowNode->GetId(), sceneSession->GetPersistentId());
+    }
 }
 } // namespace OHOS::Ace::NG
