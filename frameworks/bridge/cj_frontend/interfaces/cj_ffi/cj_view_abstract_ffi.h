@@ -29,6 +29,7 @@
 using VectorMenuValuePtr = void*;
 using VectorStringPtr = void*;
 using VectorNativeRectangleHandle = void*;
+using VectorFloat64Ptr = void*;
 
 namespace OHOS::Ace::Framework {
 
@@ -277,6 +278,26 @@ struct CJAlignRuleOption {
     int32_t centerVerticalAlign;
     float* horizontalBias;
     float* verticalBias;
+};
+
+struct CJCaretOffset {
+    double index;
+    double x;
+    double y;
+};
+
+struct CJVisibleAreaEventOptions {
+    VectorFloat64Ptr ratios;
+    double expectedUpdateInterval;
+};
+
+struct CJMutiShadowOptions {
+    double radiusValue;
+    double offsetXValue;
+    double offsetYValue;
+    int32_t radiusUnit;
+    int32_t offsetXUnit;
+    int32_t offsetYUnit;
 };
 
 struct CJChainInfo {
