@@ -20,11 +20,10 @@ import { CheckboxGroupBootcamp } from './CheckboxGroupBootcamp';
 import { RatingBootcamp } from './RatingBootcamp';
 import { ToggleBootcamp } from './ToggleBootcamp';
 import { SliderBootcamp } from '../pickers/SliderBootcamp';
-// import { TextPickerBootcamp } from './TextPickerBootcamp';
+import { TextPickerBootcamp } from './TextPickerBootcamp';
 import { RadioBootcamp } from './RadioBootcamp';
 import { CheckboxBootcamp } from './CheckboxBootcamp';
-
-// import { TimePickerBootcamp } from './TimePickerBootcamp';
+import { TimePickerBootcamp } from './TimePickerBootcamp';
 
 export const pickersRoute: RouteGroup = {
   name: 'pickers',
@@ -39,7 +38,6 @@ export const pickersRoute: RouteGroup = {
     { name:'text-picker',label:'文本选择器/TextPicker'},
     { name: 'Radio', label: '单选框/Radio' },
     { name: 'Timepicker', label: '时间选择器/Timepicker' },
-    { name: 'check-box', label: '多选框/check-box' },
   ]
 };
 
@@ -63,7 +61,5 @@ export function PickersDestination(name: string, route: Route) {
     TextPickerBootcamp({title: route.label})
   } else if (name === 'pickers/Timepicker') {
     TimePickerBootcamp({ title: route.label })
-  } else if (name === 'pickers/check-box'){
-    CheckboxBootcamp({ title: route.label })
   }
 }
