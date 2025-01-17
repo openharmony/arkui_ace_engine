@@ -277,6 +277,217 @@ HWTEST_F(TextPickerColumnExtendTestNg, PlayTossAnimation001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetColumnWidths001
+ * @tc.desc: Test SetColumnWidths when the unit is PERCENT, PX or VP.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths001, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto textPickerNode = GetOrCreateTextPickerFrameNodeTree();
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto pickerProperty = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto textPickerLayoutAlgorithm = textPickerColumnPattern->CreateLayoutAlgorithm();
+
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(50.0f, DimensionUnit::PERCENT));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), COMPONENT_WIDTH / 2.0f);
+
+    width.pop_back();
+    width.emplace_back(Dimension(10.0f, DimensionUnit::PX));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), 10.0f);
+
+    width.pop_back();
+    width.emplace_back(Dimension(10.0f, DimensionUnit::VP));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), Dimension(10.0f, DimensionUnit::VP).ConvertToPx());
+}
+
+/**
+ * @tc.name: SetColumnWidths002
+ * @tc.desc: Test SetColumnWidths when the unit is LPX, FP or the width is negative.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths002, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto textPickerNode = GetOrCreateTextPickerFrameNodeTree();
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto pickerProperty = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto textPickerLayoutAlgorithm = textPickerColumnPattern->CreateLayoutAlgorithm();
+
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(10.0f, DimensionUnit::LPX));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), Dimension(10.0f, DimensionUnit::LPX).ConvertToPx());
+
+    width.pop_back();
+    width.emplace_back(Dimension(10.0f, DimensionUnit::FP));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), Dimension(10.0f, DimensionUnit::FP).ConvertToPx());
+
+    width.pop_back();
+    width.emplace_back(Dimension(-10.0f, DimensionUnit::PX));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), COMPONENT_WIDTH);
+}
+
+/**
+ * @tc.name: SetColumnWidths003
+ * @tc.desc: Test SetColumnWidths when width.size() is less than the number of options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths003, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto textPickerNode = GetOrCreateTextPickerFrameNodeTree();
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto pickerProperty = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto textPickerLayoutAlgorithm = textPickerColumnPattern->CreateLayoutAlgorithm();
+
+    std::vector<Dimension> width;
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), COMPONENT_WIDTH);
+}
+
+/**
+ * @tc.name: SetColumnWidths004
+ * @tc.desc: Test SetColumnWidths when width.size() is greater than the number of options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths004, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    auto textPickerNode = GetOrCreateTextPickerFrameNodeTree();
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto pickerProperty = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto textPickerLayoutAlgorithm = textPickerColumnPattern->CreateLayoutAlgorithm();
+
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(COMPONENT_WIDTH, DimensionUnit::PX));
+    width.emplace_back(Dimension(30.0f, DimensionUnit::PX));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), COMPONENT_WIDTH);
+}
+
+/**
+ * @tc.name: SetColumnWidths005
+ * @tc.desc: Test SetColumnWidths when there are multiple options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnExtendTestNg, SetColumnWidths005, TestSize.Level1)
+{
+    auto theme = MockPipelineContext::GetCurrent()->GetTheme<PickerTheme>();
+    ASSERT_NE(theme, nullptr);
+    TextPickerModelNG::GetInstance()->MultiInit(theme);
+    TextPickerModelNG::GetInstance()->SetIsCascade(true);
+    std::vector<NG::TextCascadePickerOptions> options;
+    NG::TextCascadePickerOptions options1;
+    options1.rangeResult = { "11", "12", "13" };
+    options.emplace_back(options1);
+    NG::TextCascadePickerOptions options2;
+    options2.rangeResult = { "21", "22", "23" };
+    options.emplace_back(options2);
+    NG::TextCascadePickerOptions options3;
+    options3.rangeResult = { "31", "32", "33" };
+    options.emplace_back(options3);
+    TextPickerModelNG::GetInstance()->SetColumns(options);
+
+    auto textPickerNode = GetOrCreateTextPickerFrameNodeTree();
+    ASSERT_NE(textPickerNode, nullptr);
+    auto textPickerPattern = textPickerNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    auto pickerProperty = textPickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerProperty, nullptr);
+    auto textPickerColumnPattern = GetTextPickerColumnPatternFromNodeTree();
+    ASSERT_NE(textPickerColumnPattern, nullptr);
+    auto columnNode = textPickerColumnPattern->GetHost();
+    ASSERT_NE(columnNode, nullptr);
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(columnNode, columnNode->GetGeometryNode(), pickerProperty);
+    auto textPickerLayoutAlgorithm = textPickerColumnPattern->CreateLayoutAlgorithm();
+
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(15.0f, DimensionUnit::PX));
+    width.emplace_back(Dimension(15.0f, DimensionUnit::PX));
+    width.emplace_back(Dimension(15.0f, DimensionUnit::PX));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+    textPickerPattern->OnModifyDone();
+    SetColumnNodeIdealSize();
+    textPickerLayoutAlgorithm->Measure(&layoutWrapper);
+    auto widthSize = textPickerPattern->GetColumnWidths().size();
+    EXPECT_EQ(widthSize, 3);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(0).Value(), 15.0f);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(1).Value(), 15.0f);
+    EXPECT_EQ(textPickerPattern->GetColumnWidths().at(2).Value(), 15.0f);
+}
+
+/**
  * @tc.name: PerformLayout001
  * @tc.desc: Test performlayout when user set GradientFont.
  * @tc.type: FUNC
