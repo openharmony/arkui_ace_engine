@@ -29,6 +29,7 @@
 using VectorMenuValuePtr = void*;
 using VectorStringPtr = void*;
 using VectorNativeRectangleHandle = void*;
+using VectorFloat64Ptr = void*;
 
 namespace OHOS::Ace::Framework {
 
@@ -260,6 +261,7 @@ struct CJForegroundBlurStyle {
     int32_t colorMode;
     int32_t adaptiveColor;
     CJBlurOptions blurOptions;
+    float scale;
 };
 
 struct CJAlignRuleOption {
@@ -383,6 +385,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSharedTransition(char* shareId,
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, CJGeometryTransitionOptions option);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBlur(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetColorBlend(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(double radius, int32_t direction,
+    VectorFloat64Ptr blurVec, VectorFloat64Ptr positionVec);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackdropBlur(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetWindowBlur(float progress, int32_t styleValue);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetShadow(double radius, uint32_t color, double offsetX, double offsetY);
@@ -391,6 +395,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBrightness(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSaturate(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetContrast(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetInvert(double value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetInvertWithOptions(
+    double low, double high, double threshold, double thresholdRange);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSepia(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetHueRotate(float deg);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBlendMode(int32_t value, int32_t type);
@@ -507,6 +513,14 @@ CJ_EXPORT void FFIOHOSAceFrameworkTabIndex(int32_t index);
 CJ_EXPORT void FFIOHOSAceFrameworkDefaultFocus(bool isDefaultFocus);
 CJ_EXPORT void FFIOHOSAceFrameworkGroupDefaultFocus(bool isGroupDefaultFocus);
 CJ_EXPORT void FFIOHOSAceFrameworkFocusOnTouch(bool isFocusOnTouch);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityDescription(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityText(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityGroup(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityLevel(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityTextHint(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityVirtualNode(void (*builder)());
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetClickEffect(int32_t level, float scale);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetMotionPath(CJMotionPathOptions options);
 CJ_EXPORT bool FFIOHOSAceFrameworkRequestFocus(const char* inspectorKey);
 
 struct CJFocusBoxStyle {
