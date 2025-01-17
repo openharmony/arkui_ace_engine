@@ -91,7 +91,11 @@ PaintType SvgGraphic::GetFillType()
     if (!attributes_.fillState.GetHref().empty()) {
         return GetHrefType(attributes_.fillState.GetHref());
     }
-    // for gradient inherit from g
+    // If this shape has color, return Color type
+    if (attributes_.fillState.HasColor() && attributes_.fillState.GetColor() != Color::TRANSPARENT) {
+        return PaintType::COLOR;
+    }
+    // this shape has no color but gradient inherit from g, return gradient type
     auto& gradient = attributes_.fillState.GetGradient();
     if (gradient.has_value()) {
         auto href = gradient->GetHref();
@@ -100,8 +104,8 @@ PaintType SvgGraphic::GetFillType()
             return GetHrefType(attributes_.fillState.GetHref());
         }
     }
-    // Href is empty
-    if (attributes_.fillState.HasColor() || attributes_.fillState.GetColor() != Color::TRANSPARENT) {
+    // default Not fillNone case, use default color
+    if (!attributes_.fillState.IsFillNone()) {
         return PaintType::COLOR;
     }
     return PaintType::NONE;
@@ -238,7 +242,6 @@ void SvgGraphic::InitBrush(RSCanvas& canvas, RSBrush& brush,
             break;
         case PaintType::PATTERN:
             SetBrushPattern(canvas,  brush, svgCoordinateSystemContext);
-            brush.SetAlpha(GetAlpha());
             break;
         default:
             break;
@@ -260,7 +263,7 @@ void SvgGraphic::SetBrushColor(RSBrush& brush)
         brush.SetColor(attributes_.fillState.GetColor().BlendOpacity(curOpacity).GetValue());
         return;
     }
-    brush.SetColor(imageComponentColor.value().BlendOpacity(curOpacity).GetValue());
+    brush.SetColor(imageComponentColor->BlendOpacity(curOpacity).GetValue());
 }
 
 RsLinearGradient SvgGraphic::ConvertToRsLinearGradient(const SvgLinearGradientInfo& linearGradientInfo)

@@ -646,8 +646,8 @@ class LayoutPolicyPolicy {
     this.id_ = id;
   }
 
-  static get MATCH_PARENT() {
-    return new LayoutPolicyPolicy('MATCH_PARENT');
+  static get matchParent() {
+    return new LayoutPolicyPolicy('matchParent');
   }
 }
 
@@ -2131,6 +2131,10 @@ class TextMenuItemId {
 
   static get SELECT_ALL() {
     return new TextMenuItemId('OH_DEFAULT_SELECT_ALL');
+  }
+
+  static get TRANSLATE() {
+    return new TextMenuItemId('OH_DEFAULT_TRANSLATE');
   }
 
   static get SEARCH() {

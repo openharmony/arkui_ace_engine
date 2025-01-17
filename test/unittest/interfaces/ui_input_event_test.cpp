@@ -20,6 +20,7 @@
 #include "ui_input_event.h"
 
 #include "frameworks/core/event/ace_events.h"
+#include "frameworks/core/event/axis_event.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -27,6 +28,7 @@ namespace OHOS::Ace {
 namespace {
 constexpr int32_t ARKUI_DEVICE_ID = 1;
 constexpr uint64_t ARKUI_TIME = 20;
+constexpr ArkUI_Int32 AXIS_UPDATE = 2;
 } // namespace
 class UIInputEventTest : public testing::Test {
 public:
@@ -132,5 +134,88 @@ HWTEST_F(UIInputEventTest, NativeTouchEventTest001, TestSize.Level1)
      */
     EXPECT_EQ(changed_PointerId, ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(pointerIndex, 1);
+}
+
+/**
+ * @tc.name: AxisEventGetActionTest001
+ * @tc.desc: Test function OH_ArkUI_AxisEvent_GetAxisAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, AxisEventGetActionTest001, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+    auto event = std::make_unique<OHOS::Ace::AxisEvent>();
+    EXPECT_NE(event, nullptr);
+
+    event->action = AxisAction::BEGIN;
+    uiInputEvent->inputEvent = static_cast<void*>(event.get());
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+
+    auto action = OH_ArkUI_AxisEvent_GetAxisAction(uiInputEvent.get());
+    EXPECT_EQ(action, UI_AXIS_EVENT_ACTION_BEGIN);
+}
+
+/**
+ * @tc.name: AxisEventGetActionTest002
+ * @tc.desc: Test function OH_ArkUI_AxisEvent_GetAxisAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, AxisEventGetActionTest002, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+    auto event = std::make_unique<ArkUIAxisEvent>();
+    EXPECT_NE(event, nullptr);
+
+    event->action = AXIS_UPDATE;
+    uiInputEvent->inputEvent = static_cast<void*>(event.get());
+    uiInputEvent->eventTypeId = C_AXIS_EVENT_ID;
+
+    auto action = OH_ArkUI_AxisEvent_GetAxisAction(uiInputEvent.get());
+    EXPECT_EQ(action, UI_AXIS_EVENT_ACTION_UPDATE);
+}
+
+/**
+ * @tc.name: AxisEventGetActionTest003
+ * @tc.desc: Test function OH_ArkUI_AxisEvent_GetAxisActionfunction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, AxisEventGetActionTest003, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+    auto event = std::make_unique<ArkUIAxisEvent>();
+    EXPECT_NE(event, nullptr);
+
+    event->action = AXIS_UPDATE;
+    uiInputEvent->inputEvent = static_cast<void*>(event.get());
+    uiInputEvent->eventTypeId = C_MOUSE_EVENT_ID;
+
+    auto action = OH_ArkUI_AxisEvent_GetAxisAction(uiInputEvent.get());
+    EXPECT_EQ(action, UI_AXIS_EVENT_ACTION_NONE);
+
+    action = OH_ArkUI_AxisEvent_GetAxisAction(nullptr);
+    EXPECT_EQ(action, UI_AXIS_EVENT_ACTION_NONE);
+}
+
+/**
+ * @tc.name: AxisEventGetActionTest004
+ * @tc.desc: Test function OH_ArkUI_AxisEvent_GetAxisAction.
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIInputEventTest, AxisEventGetActionTest004, TestSize.Level1)
+{
+    auto uiInputEvent = std::make_unique<ArkUI_UIInputEvent>();
+    EXPECT_NE(uiInputEvent, nullptr);
+
+    uiInputEvent->inputEvent = nullptr;
+    uiInputEvent->eventTypeId = AXIS_EVENT_ID;
+    auto action = OH_ArkUI_AxisEvent_GetAxisAction(uiInputEvent.get());
+    EXPECT_EQ(action, UI_AXIS_EVENT_ACTION_NONE);
+
+    uiInputEvent->eventTypeId = C_AXIS_EVENT_ID;
+    action = OH_ArkUI_AxisEvent_GetAxisAction(uiInputEvent.get());
+    EXPECT_EQ(action, UI_AXIS_EVENT_ACTION_NONE);
 }
 } // namespace OHOS::Ace

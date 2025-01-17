@@ -66,8 +66,6 @@ public:
 
     void SetNavPathList(const NavPathList& navPathList)
     {
-        // save pre nav path list when poped
-        SavePreNavList();
         preNavPathList_ = navPathList;
         //copy nav path
         navPathList_ = navPathList;
