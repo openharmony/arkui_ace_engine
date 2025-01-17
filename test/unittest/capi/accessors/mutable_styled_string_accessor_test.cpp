@@ -216,12 +216,12 @@ HWTEST_F(MutableStyledStringAccessorTest, replaceStyleTest, TestSize.Level1)
  */
 HWTEST_F(MutableStyledStringAccessorTest, replaceStyleInvalidTest, TestSize.Level1)
 {
-    static constexpr auto START = 0;
-    static constexpr auto LENGTH = 7;
+    static constexpr auto start = 0;
+    static constexpr auto length = 7;
     static const auto COLOR = Color::RED;
     peer_->spanString = AceType::MakeRefPtr<MutableSpanString>(u"replaceStyleInvalidTest");
     const std::vector<RefPtr<SpanBase>> spans {
-        AceType::MakeRefPtr<FontSpan>(Font { .fontColor = COLOR }, START, LENGTH)
+        AceType::MakeRefPtr<FontSpan>(Font { .fontColor = COLOR }, start, length)
     };
     peer_->spanString->BindWithSpans(spans);
 
@@ -244,7 +244,7 @@ HWTEST_F(MutableStyledStringAccessorTest, replaceStyleInvalidTest, TestSize.Leve
     arkSpan.length = Converter::ArkValue<Ark_Number>(0);
     accessor_->replaceStyle(peer_, &arkSpan);
     ASSERT_NE(peer_->spanString, nullptr);
-    const auto currentSpans = peer_->spanString->GetSpans(START, LENGTH);
+    const auto currentSpans = peer_->spanString->GetSpans(start, length);
     ASSERT_EQ(currentSpans.size(), 1);
     const auto fontSpan = AceType::DynamicCast<FontSpan>(currentSpans.front());
     ASSERT_NE(fontSpan, nullptr);
@@ -299,11 +299,11 @@ HWTEST_F(MutableStyledStringAccessorTest, setStyleTest, TestSize.Level1)
  */
 HWTEST_F(MutableStyledStringAccessorTest, setStyleInvalidTest, TestSize.Level1)
 {
-    static constexpr auto START = 0;
-    static constexpr auto LENGTH = 5;
+    static constexpr auto start = 0;
+    static constexpr auto length = 5;
     peer_->spanString = AceType::MakeRefPtr<MutableSpanString>(u"setStyleInvalidTest");
     const std::vector<RefPtr<SpanBase>> spans {
-        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::UNDERLINE, std::nullopt, std::nullopt, START, LENGTH)
+        AceType::MakeRefPtr<DecorationSpan>(TextDecoration::UNDERLINE, std::nullopt, std::nullopt, start, length)
     };
     peer_->spanString->BindWithSpans(spans);
 
@@ -324,7 +324,7 @@ HWTEST_F(MutableStyledStringAccessorTest, setStyleInvalidTest, TestSize.Level1)
     arkSpan.length = Converter::ArkValue<Ark_Number>(0);
     accessor_->setStyle(peer_, &arkSpan);
     ASSERT_NE(peer_->spanString, nullptr);
-    auto currentSpans = peer_->spanString->GetSpans(START, LENGTH);
+    auto currentSpans = peer_->spanString->GetSpans(start, length);
     ASSERT_EQ(currentSpans.size(), 1);
     auto decorationSpan = AceType::DynamicCast<DecorationSpan>(currentSpans.front());
     ASSERT_NE(decorationSpan, nullptr);
@@ -491,8 +491,8 @@ static RefPtr<MutableSpanString> CreateTestSpans2(const std::u16string& str)
     std::vector<RefPtr<SpanBase>> spans {
         AceType::MakeRefPtr<TextShadowSpan>(std::vector<Shadow> {
             Shadow::CreateShadow(ShadowStyle::OuterDefaultLG)
-        }, 0 , str.length()),
-        AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(20), 0 , str.length())
+        }, 0, str.length()),
+        AceType::MakeRefPtr<LetterSpacingSpan>(Dimension(20), 0, str.length())
     };
     spanString->BindWithSpans(spans);
     return spanString;
