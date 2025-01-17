@@ -4754,7 +4754,7 @@ bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     textFieldTheme_ = textFieldTheme;
     CHECK_NULL_RETURN(textFieldTheme, result);
 
-    if (!paintProperty->HasBackgroundColor()) {
+    if (!paintProperty->HasBackgroundColor() && !IsUnderlineMode() && !IsInlineMode()) {
         Color bgColor = textFieldTheme->GetBgColor();
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, result);
