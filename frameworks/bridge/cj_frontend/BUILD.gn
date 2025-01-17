@@ -92,6 +92,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_badge_ffi.cpp",
       "interfaces/cj_ffi/cj_blank_ffi.cpp",
       "interfaces/cj_ffi/cj_button_ffi.cpp",
+      "interfaces/cj_ffi/cj_calendar_picker_ffi.cpp",
       "interfaces/cj_ffi/cj_canvas_ffi.cpp",
       "interfaces/cj_ffi/cj_checkbox_ffi.cpp",
       "interfaces/cj_ffi/cj_checkbox_group_ffi.cpp",
