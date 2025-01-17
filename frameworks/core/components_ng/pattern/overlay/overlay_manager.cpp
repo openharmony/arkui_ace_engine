@@ -2423,6 +2423,8 @@ void OverlayManager::BeforeShowDialog(const RefPtr<FrameNode>& node)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "before show dialog");
     CHECK_NULL_VOID(node);
+    FireNavigationLifecycle(node, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE),
+        true, static_cast<int32_t>(NavDestinationActiveReason::DIALOG));
     if (dialogMap_.find(node->GetId()) != dialogMap_.end()) {
         TAG_LOGW(AceLogTag::ACE_OVERLAY, "dialog %{public}d already in dialog map", node->GetId());
         return;
@@ -3061,6 +3063,8 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
     if (dialogCount_ == 0) {
         SetContainerButtonEnable(true);
     }
+    FireNavigationLifecycle(dialogNode, static_cast<int32_t>(NavDestinationLifecycle::ON_ACTIVE), true,
+        static_cast<int32_t>(NavDestinationActiveReason::DIALOG));
     CallOnHideDialogCallback();
 }
 
@@ -3958,6 +3962,8 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
         }
         HandleModalShow(std::move(callback), std::move(buildNodeFunc), modalStyle, std::move(onAppear),
             std::move(onDisappear), std::move(onWillDisappear), rootNode, contentCoverParam, targetId, modalTransition);
+        FireNavigationLifecycle(GetModal(targetId), static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE),
+            true, static_cast<int32_t>(NavDestinationActiveReason::CONTENT_COVER));
         return;
     }
 
@@ -4070,6 +4076,8 @@ void OverlayManager::HandleModalPop(
     if (onWillDisappear) {
         onWillDisappear();
     }
+    FireNavigationLifecycle(topModalNode, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE),
+        false, static_cast<int32_t>(NavDestinationActiveReason::CONTENT_COVER));
     topModalNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_CLOSE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
     if (modalPresentationPattern->HasTransitionEffect()) {
@@ -4898,6 +4906,9 @@ void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& 
         TAG_LOGI(AceLogTag::ACE_SHEET, "bindSheet lifecycle change to onWillAppear state.");
         onWillAppear();
     }
+    // fire navigation onActive
+    FireNavigationLifecycle(sheetNode, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE),
+        true, static_cast<int32_t>(NavDestinationActiveReason::SHEET));
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         sheetNodePattern->OnAppear();
     }
@@ -6463,6 +6474,8 @@ void OverlayManager::RemoveFrameNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
     overlayNode_->RemoveChild(node);
     frameNodeMapOnOverlay_.erase(node->GetId());
     if (overlayNode_->GetChildren().empty()) {
+        FireNavigationLifecycle(overlayNode_, static_cast<int32_t>(NavDestinationLifecycle::ON_ACTIVE), true,
+            static_cast<int32_t>(NavDestinationActiveReason::OVERLAY));
         auto rootNode = rootNodeWeak_.Upgrade();
         CHECK_NULL_VOID(rootNode);
         rootNode->RemoveChild(overlayNode_);
@@ -6484,11 +6497,27 @@ void OverlayManager::ShowNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
     if (layoutProperty->GetVisibility().has_value() && layoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
         return;
     }
+    bool hasVisibleNode = false;
+    for (auto& child : overlayNode_->GetChildren()) {
+        auto frameNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        if (layoutProperty->GetVisibility().has_value() &&
+            layoutProperty->GetVisibilityValue() == VisibleType::VISIBLE) {
+            hasVisibleNode = true;
+            break;
+        }
+    }
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
     auto focusHub = node->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocus();
+    if (!hasVisibleNode) {
+        FireNavigationLifecycle(overlayNode_, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE),
+            true, static_cast<int32_t>(NavDestinationActiveReason::OVERLAY));
+    }
 }
 
 void OverlayManager::HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
@@ -6523,6 +6552,9 @@ void OverlayManager::HideNodeOnOverlay(const RefPtr<NG::FrameNode>& node)
         auto focusView = overlayNode_->GetPattern<FocusView>();
         CHECK_NULL_VOID(focusView);
         focusView->FocusViewClose();
+        // overlay node has all hide
+        FireNavigationLifecycle(overlayNode_, static_cast<int32_t>(NavDestinationLifecycle::ON_ACTIVE),
+            true, static_cast<int32_t>(NavDestinationActiveReason::OVERLAY));
     }
 }
 
@@ -6541,6 +6573,8 @@ void OverlayManager::ShowAllNodesOnOverlay()
     auto focusView = overlayNode_->GetPattern<FocusView>();
     CHECK_NULL_VOID(focusView);
     focusView->FocusViewShow();
+    FireNavigationLifecycle(overlayNode_, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE),
+        true, static_cast<int32_t>(NavDestinationActiveReason::OVERLAY));
 }
 
 void OverlayManager::HideAllNodesOnOverlay()
@@ -6558,6 +6592,8 @@ void OverlayManager::HideAllNodesOnOverlay()
     auto focusView = overlayNode_->GetPattern<FocusView>();
     CHECK_NULL_VOID(focusView);
     focusView->FocusViewClose();
+    FireNavigationLifecycle(overlayNode_, static_cast<int32_t>(NavDestinationLifecycle::ON_ACTIVE), true,
+        static_cast<int32_t>(NavDestinationActiveReason::OVERLAY));
 }
 
 void OverlayManager::MarkDirty(PropertyChangeFlag flag)
@@ -7275,5 +7311,34 @@ SafeAreaInsets OverlayManager::GetSafeAreaInsets(const RefPtr<FrameNode>& frameN
     auto containerId = pipeline->GetInstanceId();
     ContainerScope scope(containerId);
     return pipeline->GetScbSafeArea();
+}
+
+void OverlayManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t lifecycle,
+    bool isLowerOnly, int32_t reason)
+{
+    auto pipelineContext = node->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    if (node->GetTag() == V2::DIALOG_ETS_TAG) {
+        auto frameNode = AceType::DynamicCast<FrameNode>(node);
+        CHECK_NULL_VOID(frameNode);
+        auto layoutProperty = frameNode->GetLayoutProperty<DialogLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        auto isShowInSubWindow = layoutProperty->GetShowInSubWindow().value_or(false);
+        if (isShowInSubWindow) {
+            return;
+        }
+        auto dialogPattern = frameNode->GetPattern<DialogPattern>();
+        CHECK_NULL_VOID(dialogPattern);
+        if (dialogPattern->GetIsPickerDialog()) {
+            return;
+        }
+    }
+    if (isLowerOnly) {
+        navigationManager->FireLowerLayerLifecycle(node, lifecycle, reason);
+        return;
+    }
+    navigationManager->FireOverlayLifecycle(node, lifecycle, reason);
 }
 } // namespace OHOS::Ace::NG

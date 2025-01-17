@@ -174,6 +174,20 @@ public:
         state_ = state;
     }
 
+    void SetOnActive(const std::function<void(int32_t)>& onActive)
+    {
+        onActive_ = onActive;
+    }
+
+    void FireOnActive(int32_t reason);
+
+    void SetOnInactive(const std::function<void(int32_t)>& onInactive)
+    {
+        onInactive_ = onInactive;
+    }
+
+    void FireOnInactive(int32_t reason);
+
 private:
     WeakPtr<AceType> GetNavDestinationPattern() const
     {
@@ -192,6 +206,8 @@ private:
     std::function<void()> onWillHide_;
     std::function<void()> onWillDisAppear_;
     std::function<bool()> onBackPressedEvent_;
+    std::function<void(int32_t)> onInactive_;
+    std::function<void(int32_t)> onActive_;
     std::function<void(RefPtr<NavDestinationContext>)> onReadyEvent_;
     std::unordered_map<int32_t, OnStateChangeEvent> onHiddenChange_;
     std::string name_;

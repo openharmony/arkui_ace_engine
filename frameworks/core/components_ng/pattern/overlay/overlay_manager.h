@@ -851,6 +851,7 @@ private:
     void RemoveMenuWrapperNode(const RefPtr<UINode>& rootNode);
     void SetDragNodeNeedClean();
     void MountCustomKeyboard(const RefPtr<FrameNode>& customKeyboard, int32_t targetId);
+    void FireNavigationLifecycle(const RefPtr<UINode>& uiNode, int32_t lifecycleId, bool isLowerOnly, int32_t reason);
 
     RefPtr<FrameNode> overlayNode_;
     // Key: frameNode Id, Value: index
