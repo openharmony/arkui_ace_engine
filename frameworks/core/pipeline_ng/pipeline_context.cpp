@@ -3662,7 +3662,7 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
     }
 
-    DispatchAxisEventToDragDropManager(event, node);
+    DispatchAxisEventToDragDropManager(event, node, etsSerializedGesture);
 
     if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
         eventManager_->AxisTest(scaleEvent, node);
@@ -3692,7 +3692,8 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     }
 }
 
-void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node)
+void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node,
+    SerializedGesture& etsSerializedGesture)
 {
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     auto dragManager = GetDragDropManager();
@@ -3706,6 +3707,16 @@ void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event,
             // If received rotate event, no need to touchtest.
             if (!event.isRotationEvent) {
                 eventManager_->TouchTest(scaleEvent, node, touchRestrict);
+                auto axisTouchTestResults_ = eventManager_->GetAxisTouchTestResults();
+                auto formEventMgr = this->GetFormEventManager();
+                if (formEventMgr) {
+                    formEventMgr->HandleEtsCardTouchEvent(touchRestrict.touchEvent, etsSerializedGesture);
+                }
+                auto formGestureMgr =  this->GetFormGestureManager();
+                if (formGestureMgr) {
+                    formGestureMgr->LinkGesture(event, this, node, axisTouchTestResults_,
+                        etsSerializedGesture, eventManager_);
+                }
             }
         }
         eventManager_->DispatchTouchEvent(scaleEvent);
