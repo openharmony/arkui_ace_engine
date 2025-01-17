@@ -185,7 +185,7 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress003
 HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress004, TestSize.Level1)
 {
     ASSERT_NE(richEditorNode_, nullptr);
-    richEditorNode_->eventHub_->GetOrCreateFocusHub();
+    richEditorNode_->GetOrCreateFocusHub();
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();

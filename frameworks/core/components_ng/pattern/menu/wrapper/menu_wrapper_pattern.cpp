@@ -576,7 +576,7 @@ void MenuWrapperPattern::MarkWholeSubTreeNoDraggable(const RefPtr<FrameNode>& fr
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto gestureEventHub = eventHub->GetGestureEventHub();
+    auto gestureEventHub = eventHub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
     gestureEventHub->SetDragForbiddenForcely(true);
 }

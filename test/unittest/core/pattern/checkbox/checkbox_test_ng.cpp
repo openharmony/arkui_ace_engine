@@ -735,7 +735,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest019, TestSize.Level1)
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     EXPECT_NE(pattern, nullptr);
     RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(
+        AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(eventHub)), FocusType::DISABLE, false);
     pattern->InitOnKeyEvent(focusHub);
     RoundRect paintRect;
     pattern->GetInnerFocusPaintRect(paintRect);
@@ -1195,7 +1196,8 @@ HWTEST_F(CheckBoxTestNG, CheckBoxLayoutTest033, TestSize.Level1)
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelectedStyleValue(), CheckBoxStyle::CIRCULAR_STYLE);
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(AccessibilityManager::WeakClaim(
+        AccessibilityManager::RawPtr(eventHub)), FocusType::DISABLE, false);
     pattern->InitOnKeyEvent(focusHub);
     RoundRect paintRect;
     /**
@@ -1839,7 +1841,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintMethodTest008, TestSize.Level1)
      */
     auto eventHub = frameNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    auto inputEventHub = eventHub->GetInputEventHub();
+    auto inputEventHub = eventHub->GetOrCreateInputEventHub();
     inputEventHub->SetHoverEffect(HoverEffectType::UNKNOWN);
     
     /**

@@ -315,7 +315,6 @@ private:
     WeakPtr<FrameNode> host_;
     RefPtr<GestureEventHub> gestureEventHub_;
     RefPtr<InputEventHub> inputEventHub_;
-    RefPtr<FocusHub> focusHub_;
     RefPtr<StateStyleManager> stateStyleMgr_;
 
     std::function<void()> onDisappear_;
