@@ -244,6 +244,20 @@ enum {
 };
 
 /**
+ * @brief Defines interaction hand for touch event.
+ *
+ * @since 16
+ */
+typedef enum {
+    /** None. */
+    HAND_NONE = 0,
+    /** Left hand. */
+    HAND_LEFT = 1,
+    /** Right hand. */
+    HAND_RIGHT = 2,
+} InteractionHand;
+
+/**
  * @brief Obtains the type of this UI input event.
  *
  * @param event Indicates the pointer to the current UI input event.
@@ -478,6 +492,32 @@ float OH_ArkUI_PointerEvent_GetTiltX(const ArkUI_UIInputEvent* event, uint32_t p
  * @since 12
  */
 float OH_ArkUI_PointerEvent_GetTiltY(const ArkUI_UIInputEvent* event, uint32_t pointerIndex);
+
+/**
+ * @brief Obtains the interaction hand of a touch point.
+ *
+ * @param event Indicates the pointer to the current UI input event.
+ * @param hand Indicates the interaction hand of a touch point.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_PointerEvent_GetInteractionHand(const ArkUI_UIInputEvent *event, InteractionHand *hand);
+
+/**
+ * @brief Obtains the interaction hand of a touch point.
+ *
+ * @param event Indicates the pointer to the current UI input event.
+ * @param pointerIndex Indicates the index of the target touch point in the multi-touch data list.
+ * @param hand Indicates the interaction hand of a touch point.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_PointerEvent_GetInteractionHandByIdx(
+    const ArkUI_UIInputEvent *event, int32_t pointerIndex, InteractionHand *hand);
 
 /**
  * @brief Obtains the width of the touch area from a directional input event (for example, a touch event).

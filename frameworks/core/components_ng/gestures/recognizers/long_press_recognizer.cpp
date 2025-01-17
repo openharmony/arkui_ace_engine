@@ -216,6 +216,7 @@ void LongPressRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
+    touchPoints_[event.id].operatingHand = event.operatingHand;
     lastTouchEvent_ = event;
     UpdateFingerListInfo();
     time_ = event.time;
