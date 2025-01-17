@@ -1412,7 +1412,7 @@ public:
         JSClass<JSFileSelectorParam>::CustomMethod("getMode", &JSFileSelectorParam::GetMode);
         JSClass<JSFileSelectorParam>::CustomMethod("getAcceptType", &JSFileSelectorParam::GetAcceptType);
         JSClass<JSFileSelectorParam>::CustomMethod("isCapture", &JSFileSelectorParam::IsCapture);
-        JSClass<JSFileSelectorParam>::CustomMethod("getMimeType", &JSFileSelectorParam::GetMimeType);
+        JSClass<JSFileSelectorParam>::CustomMethod("getMimeTypes", &JSFileSelectorParam::GetMimeType);
         JSClass<JSFileSelectorParam>::Bind(
             globalObj, &JSFileSelectorParam::Constructor, &JSFileSelectorParam::Destructor);
     }

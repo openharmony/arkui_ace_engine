@@ -526,8 +526,9 @@ public:
     bool CursorMoveRight();
     bool CursorMoveUp();
     bool CursorMoveDown();
-    bool CursorMoveLeftWord();
-    bool CursorMoveRightWord();
+    void CursorMoveToNextWord(CaretMoveIntent direction);
+    int32_t GetLeftWordIndex();
+    int32_t GetRightWordIndex();
     bool CursorMoveToParagraphBegin();
     bool CursorMoveToParagraphEnd();
     bool CursorMoveHome();
@@ -553,6 +554,8 @@ public:
     int32_t HandleSelectWrapper(CaretMoveIntent direction, int32_t fixedPos);
     void AIDeleteComb(int32_t start, int32_t end, int32_t& aiPosition, bool direction);
     bool HandleOnDeleteComb(bool backward) override;
+    void DeleteBackwardWord();
+    void DeleteForwardWord();
     int32_t GetLeftWordPosition(int32_t caretPosition);
     int32_t GetRightWordPosition(int32_t caretPosition);
     int32_t GetParagraphBeginPosition(int32_t caretPosition);
@@ -650,7 +653,6 @@ public:
     void RemoveEmptySpanNodes();
     void RemoveEmptySpans();
     RefPtr<GestureEventHub> GetGestureEventHub();
-    float GetSelectedMaxWidth();
     void OnWindowHide() override;
     bool BeforeAddImage(RichEditorChangeValue& changeValue, const ImageSpanOptions& options, int32_t insertIndex);
     RefPtr<SpanString> ToStyledString(int32_t start, int32_t end);
@@ -712,6 +714,9 @@ public:
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
     void CreateDragNode();
+    float GetMaxSelectedWidth();
+    void InitDragShadow(const RefPtr<FrameNode>& host, const RefPtr<FrameNode>& dragNode, bool isDragShadowNeeded,
+        bool hasDragBackgroundColor);
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
     void ResetSelection();
@@ -950,6 +955,7 @@ public:
     void UpdateSelector(int32_t start, int32_t end);
     void UpdateSelectionType(const SelectionInfo& textSelectInfo);
     std::list<RefPtr<SpanItem>>::iterator GetSpanIter(int32_t index);
+    SpanItemType GetSpanType(int32_t index);
 
     void DumpAdvanceInfo() override {}
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override  {}
@@ -1046,7 +1052,7 @@ public:
         isTriggerAvoidOnCaretAvoidMode_ = true;
     }
 
-    void TriggerAvoidOnCaretChangeImmediately()
+    void TriggerAvoidOnCaretChangeNextFrame()
     {
         ForceTriggerAvoidOnCaretChange(true);
         isTriggerAvoidOnCaretAvoidMode_ = false;
@@ -1097,6 +1103,14 @@ public:
     bool IsDragging() const override
     {
         return status_ == Status::DRAGGING || status_ == Status::FLOATING;
+    }
+
+    const RefPtr<SpanItem> GetSpanItemByPosition(int32_t position)
+    {
+        CHECK_NULL_RETURN(position >= 0, nullptr);
+        auto it = GetSpanIter(position);
+        CHECK_NULL_RETURN(it != spans_.end(), nullptr);
+        return *it;
     }
 
 protected:
@@ -1416,6 +1430,7 @@ private:
     std::pair<int32_t, SelectType> JudgeSelectType(const Offset& pos);
     bool IsSelectEmpty(int32_t start, int32_t end);
     bool AdjustIndexSkipLineSeparator(int32_t& currentPosition);
+    bool AdjustIndexSkipSpace(int32_t& currentPosition, const MoveDirection direction);
     void RequestKeyboardToEdit();
     void HandleTasksOnLayoutSwap()
     {

@@ -502,6 +502,7 @@ FrameNode::~FrameNode()
     }
     FireOnNodeDestroyCallback();
     FireOnExtraNodeDestroyCallback();
+    FireFrameNodeDestructorCallback();
     if (kitNode_) {
         kitNode_->Reset();
     }
@@ -1178,6 +1179,7 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
         GeometryNodeToJsonValue(json, filter);
     }
     json->PutFixedAttr("id", propInspectorId_.value_or("").c_str(), filter, FIXED_ATTR_ID);
+    ExtraCustomPropertyToJsonValue(json, filter);
 }
 
 void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
@@ -4706,7 +4708,7 @@ OffsetF FrameNode::GetOffsetInSubwindow(const OffsetF& subwindowOffset)
     return frameOffset;
 }
 
-RefPtr<PixelMap> FrameNode::GetPixelMap()
+RefPtr<PixelMap> FrameNode::GetDragPixelMap()
 {
     auto gestureHub = GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, nullptr);
@@ -6208,6 +6210,22 @@ void FrameNode::RemoveExtraCustomProperty(const std::string& key)
     }
 }
 
+void FrameNode::ExtraCustomPropertyToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto mapIter = extraCustomPropertyMap_.find("ToJsonValue");
+    if (mapIter == extraCustomPropertyMap_.end()) {
+        return;
+    }
+
+    auto callback = reinterpret_cast<std::map<std::string, std::string>(*)(std::unordered_map<std::string, void*>)>(
+        mapIter->second);
+    CHECK_NULL_VOID(callback);
+    auto jsonValue = callback(extraCustomPropertyMap_);
+    for (auto iter = jsonValue.begin(); iter != jsonValue.end(); iter++) {
+        json->PutExtAttr(iter->first.c_str(), iter->second.c_str(), filter);
+    }
+}
+
 bool FrameNode::IsDebugInspectorId()
 {
     if (!SystemProperties::GetDebugEnabled()) {
@@ -6299,6 +6317,18 @@ void FrameNode::FireOnExtraNodeDestroyCallback()
 {
     for (const auto& callback : destroyCallbacks_) {
         callback.second();
+    }
+}
+
+void FrameNode::SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback)
+{
+    frameNodeDestructorCallback_ = callback;
+}
+
+void FrameNode::FireFrameNodeDestructorCallback()
+{
+    if (frameNodeDestructorCallback_) {
+        frameNodeDestructorCallback_(GetId());
     }
 }
 } // namespace OHOS::Ace::NG

@@ -413,6 +413,7 @@ ScopeFocusAlgorithm TabsPattern::GetScopeFocusAlgorithm()
             if (tabs) {
                 nextFocusNode = tabs->GetNextFocusNode(step, currFocusNode);
             }
+            return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
         });
 }
 
@@ -545,6 +546,18 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
         tabBarPattern->SetMaskAnimationByCreate(true);
         UpdateSelectedState(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, indexSetByUser);
     }
+}
+
+void TabsPattern::SetAnimateMode(TabAnimateMode mode)
+{
+    animateMode_ = mode;
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetJumpAnimationMode(mode);
 }
 
 /**

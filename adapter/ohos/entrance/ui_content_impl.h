@@ -387,6 +387,9 @@ public:
         const std::function<void(bool)>& callback) override;
 
     bool ConfigCustomWindowMask(bool enable) override;
+    void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override;
+
+    std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -415,6 +418,8 @@ private:
     void ExecuteUITask(std::function<void()> task, const std::string& name);
     void SubscribeEventsPassThroughMode();
     void UnSubscribeEventsPassThroughMode();
+    bool GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason lastReason,
+        OHOS::Rosen::WindowSizeChangeReason reason);
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
@@ -466,6 +471,7 @@ private:
     SingleTaskExecutor::CancelableTask setAppWindowIconTask_;
     std::mutex setAppWindowIconMutex_;
     uint64_t listenedDisplayId_ = 0;
+    OHOS::Rosen::WindowSizeChangeReason lastReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
 };
 
 } // namespace OHOS::Ace

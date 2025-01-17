@@ -3315,6 +3315,7 @@ class ArkComponent {
       this._gestureEvent = new UIGestureEvent();
       this._gestureEvent.setNodePtr(this.nativePtr);
       this._gestureEvent.setWeakNodePtr(this._weakPtr);
+      this._gestureEvent.registerFrameNodeDeletedCallback(this.nativePtr);
     }
     return this._gestureEvent;
   }
@@ -4987,6 +4988,12 @@ class UIGestureEvent {
   setWeakNodePtr(weakNodePtr) {
     this._weakNodePtr = weakNodePtr;
   }
+  registerFrameNodeDeletedCallback(nodePtr) {
+    this._destructorCallback = (elementId) => {
+      globalThis.__mapOfModifier__.delete(elementId);
+    };
+    getUINativeModule().common.registerFrameNodeDestructorCallback(nodePtr, this._destructorCallback);
+  }
   addGesture(gesture, priority, mask) {
     if (this._weakNodePtr.invalid()) {
       return;
@@ -5159,9 +5166,6 @@ function applyGesture(modifier, component) {
 
 globalThis.__mapOfModifier__ = new Map();
 function __gestureModifier__(modifier) {
-  if (globalThis.__mapOfModifier__.size === 0) {
-    __modifierElmtDeleteCallback__();
-  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   if (globalThis.__mapOfModifier__.get(elmtId)) {
@@ -5172,12 +5176,6 @@ function __gestureModifier__(modifier) {
     globalThis.__mapOfModifier__.set(elmtId, component);
     applyGesture(modifier, component);
   }
-}
-
-function __modifierElmtDeleteCallback__() {
-  UINodeRegisterProxy.registerModifierElmtDeleteCallback((elmtId) => {
-    globalThis.__mapOfModifier__.delete(elmtId);
-  });
 }
 
 const __elementIdToCustomProperties__ = new Map();
@@ -22040,6 +22038,11 @@ class ArkNavDestinationComponent extends ArkComponent {
   toolbarConfiguration(value) {
     throw new Error('Method not implemented.');
   }
+  hideBackButton(value) {
+    modifierWithKey(this._modifiersWithKeys, NavDestinationHideBackButtonModifier.identity,
+      NavDestinationHideBackButtonModifier, value);
+    return this;
+  }
   backButtonIcon(value) {
     modifierWithKey(this._modifiersWithKeys, NavDestinationBackButtonIconModifier.identity,
       NavDestinationBackButtonIconModifier, value);
@@ -22143,6 +22146,21 @@ class NavDestinationHideToolBarModifier extends ModifierWithKey {
   }
 }
 NavDestinationHideToolBarModifier.identity = Symbol('hideToolBar');
+
+class NavDestinationHideBackButtonModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().navDestination.resetHideBackButton(node);
+    }
+    else {
+      getUINativeModule().navDestination.setHideBackButton(node, this.value);
+    }
+  }
+}
+NavDestinationHideBackButtonModifier.identity = Symbol('hideBackButton');
 
 class IgnoreLayoutSafeAreaModifier extends ModifierWithKey {
   constructor(value) {
@@ -29403,6 +29421,10 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperPageFlipModeModifier.identity, SwiperPageFlipModeModifier, value);
     return this;
   }
+  onContentWillScroll(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnContentWillScrollModifier.identity, SwiperOnContentWillScrollModifier, value);
+    return this;
+  }
 }
 class SwiperInitializeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -29615,7 +29637,7 @@ class SwiperIndicatorModifier extends ModifierWithKey {
           digitFontWeight, selectedDigitFontSize, selectedDigitFontWeight, left, top, right, bottom);
       }
       else {
-        getUINativeModule().swiper.setSwiperIndicator(node, "IndicatorComponentController", this.value );
+        getUINativeModule().swiper.setSwiperIndicator(node, 'IndicatorComponentController', this.value );
       }
     }
   }
@@ -29999,6 +30021,22 @@ class SwiperPageFlipModeModifier extends ModifierWithKey {
   }
 }
 SwiperPageFlipModeModifier.identity = Symbol('swiperPageFlipMode');
+class SwiperOnContentWillScrollModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnContentWillScroll(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnContentWillScroll(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperOnContentWillScrollModifier.identity = Symbol('swiperOnContentWillScroll');
 // @ts-ignore
 if (globalThis.Swiper !== undefined) {
   globalThis.Swiper.attributeModifier = function (modifier) {
@@ -32891,7 +32929,7 @@ class ArkContainerSpanComponent extends ArkComponent {
 // @ts-ignore
 if (globalThis.ContainerSpan !== undefined) {
   globalThis.ContainerSpan.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
+    attributeModifierFuncWithoutStateStyles.call(this, modifier, (nativePtr) => {
       return new ArkContainerSpanComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.ContainerSpanModifier(nativePtr, classType);

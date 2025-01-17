@@ -2267,4 +2267,29 @@ void VideoPattern::OnWindowHide()
 #endif
 }
 
+void VideoPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    if (filter.IsFastFilter()) {
+        return;
+    }
+
+    json->PutExtAttr("muted", muted_ ? "true" : "false", filter);
+    json->PutExtAttr("autoPlay", autoPlay_ ? "true" : "false", filter);
+    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
+    json->PutExtAttr(
+        "controls", layoutProperty ? (layoutProperty->GetControlsValue(true) ? "true" : "false") : "", filter);
+    json->PutExtAttr("objectFit",
+        layoutProperty ? StringUtils::ToString(layoutProperty->GetObjectFitValue(ImageFit::COVER)).c_str() : "",
+        filter);
+    json->PutExtAttr("loop", loop_ ? "true" : "false", filter);
+    json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
+    json->PutExtAttr("currentProgressRate", progressRate_, filter);
+    json->PutExtAttr("surfaceBackgroundColor",
+        renderContextForMediaPlayer_
+            ? renderContextForMediaPlayer_->GetBackgroundColorValue(Color::BLACK).ColorToString().c_str()
+            : "",
+        filter);
+    json->PutExtAttr("enableShortcutKey", isEnableShortcutKey_ ? "true" : "false", filter);
+}
 } // namespace OHOS::Ace::NG

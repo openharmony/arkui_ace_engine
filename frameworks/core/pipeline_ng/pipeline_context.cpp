@@ -2102,10 +2102,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 
 void PipelineContext::MarkDirtyOverlay()
 {
-    if (rootNode_) {
-        auto lastChild = rootNode_->GetLastChild();
-        if (lastChild && lastChild->GetTag() == V2::POPUP_ETS_TAG) {
-            lastChild->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    CHECK_NULL_VOID(rootNode_);
+    auto childNodes = rootNode_->GetChildren();
+    for (auto child: childNodes) {
+        if (child && child->GetTag() == V2::POPUP_ETS_TAG) {
+            child->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
     }
 }

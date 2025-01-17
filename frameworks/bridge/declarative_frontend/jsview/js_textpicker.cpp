@@ -606,12 +606,10 @@ bool JSTextPickerParser::ParseMultiTextArraySelect(const JsiRef<JsiValue>& jsSel
 bool JSTextPickerParser::ParseMultiColumnWidths(const JsiRef<JsiValue>& jsColumnWidthsValue,
     ParseTextArrayParam& param)
 {
-    if (jsColumnWidthsValue->IsArray()) {
-        ParseJsLengthMetricsArray(jsColumnWidthsValue, param.columnWidths);
+    if (jsColumnWidthsValue->IsArray() && ParseJsLengthMetricsArray(jsColumnWidthsValue, param.columnWidths)) {
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 
 void JSTextPickerParser::ParseMultiTextArrayValueInternal(
@@ -1633,7 +1631,7 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     auto alignmentValue = paramObject->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
         auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             textPickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
         }
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {

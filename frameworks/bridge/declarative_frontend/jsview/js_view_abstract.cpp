@@ -310,6 +310,9 @@ void ParseDragPreviewMode(NG::DragPreviewOption& previewOption, int32_t modeValu
         case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_DRAG_ITEM_GRAY_EFFECT):
             previewOption.isDefaultDragItemGrayEffectEnabled = true;
             break;
+        case static_cast<int32_t>(NG::DragPreviewMode::ENABLE_MULTI_TILE_EFFECT):
+            previewOption.isMultiTiled = true;
+            break;
         default:
             break;
     }

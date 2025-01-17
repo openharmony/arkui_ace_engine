@@ -728,7 +728,9 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     SetDragFRCSceneCallback(scrollable);
     SetOnContinuousSliding(scrollable);
     SetGetSnapTypeCallback(scrollable);
-    scrollable->SetUnstaticVelocityScale(velocityScale_);
+    if (!NearZero(velocityScale_)) {
+        scrollable->SetUnstaticVelocityScale(velocityScale_);
+    }
     scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
     if (friction_ != -1) {
         scrollable->SetUnstaticFriction(friction_);
@@ -2901,12 +2903,8 @@ void ScrollablePattern::Register2DragDropManager()
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     if (enableEdgeAutoScroll) {
-        TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
-            "Enable scrolling when the drag hovered on a scrollable controller's edge.");
         dragDropManager->RegisterDragStatusListener(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
     } else {
-        TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
-            "Disable scrolling when the drag hovered on a scrollable controller's edge.");
         StopHotzoneScroll();
         dragDropManager->UnRegisterDragStatusListener(host->GetId());
     }

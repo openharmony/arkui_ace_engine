@@ -331,6 +331,7 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
     menuInfo.showCopyAll = !textPattern->IsSelectAll();
     menuInfo.showCopy = !textPattern->GetTextSelector().SelectNothing();
     menuInfo.showSearch = menuInfo.showCopy && textPattern->IsShowSearch() && IsNeedMenuSearch();
+    menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
     if (dirtyFlag == DIRTY_COPY_ALL_ITEM) {
         return;
     }
@@ -394,6 +395,9 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
             break;
         case OptionMenuActionId::SEARCH:
             HandleOnSearch();
+            break;
+        case OptionMenuActionId::SHARE:
+            HandleOnShare();
             break;
         default:
             TAG_LOGI(AceLogTag::ACE_TEXT, "Unsupported menu option id %{public}d", id);
@@ -592,6 +596,13 @@ std::optional<Color> TextSelectOverlay::GetHandleColor()
 }
 
 bool TextSelectOverlay::AllowSearch()
+{
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    return !textPattern->GetTextSelector().SelectNothing();
+}
+
+bool TextSelectOverlay::AllowShare()
 {
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, false);

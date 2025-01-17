@@ -235,7 +235,7 @@ export struct GridObjectSortComponent {
       () => {
         this.goEdit();
       },
-      this.getStringByResource(ACCESSIBILITY_COMPLETE_BUTTON))
+      this.getStringByResource(ACCESSIBILITY_HEADER_EDIT_BUTTON))
   ];
   onSave?: (select: GridObjectSortComponentItem[], unselect: GridObjectSortComponentItem[]) => void;
   onCancel?: () => void;

@@ -77,7 +77,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<SheetPresentationLayoutAlgorithm>(targetId_, targetTag_, GetSheetType());
+        return MakeRefPtr<SheetPresentationLayoutAlgorithm>(GetSheetType(), sheetPopupInfo_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -696,6 +696,15 @@ public:
     void RecoverHalfFoldOrAvoidStatus();
     bool UpdateAccessibilityDetents(float height);
     void CalculateSheetRadius(BorderRadiusProperty& sheetRadius);
+    void UpdateSheetPopupInfo(const SheetPopupInfo& sheetPopupInfo)
+    {
+        sheetPopupInfo_ = sheetPopupInfo;
+    }
+
+    SheetPopupInfo GetSheetPopupInfo() const
+    {
+        return sheetPopupInfo_;
+    }
 
     bool UpdateIndexByDetentSelection(const SheetStyle& sheetStyle, bool isFirstTransition);
 
@@ -745,6 +754,7 @@ private:
     void CalculateAloneSheetRadius(
         std::optional<Dimension>& sheetRadius, const std::optional<Dimension>& sheetStyleRadius);
     std::string GetPopupStyleSheetClipPath(const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius);
+    std::string GetPopupStyleSheetClipPathNew(const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius);
     std::string GetCenterStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string GetBottomStyleSheetClipPath(SizeF sheetSize, Dimension sheetRadius);
     std::string MoveTo(double x, double y);
@@ -777,6 +787,13 @@ private:
     void HandleDragEndAccessibilityEvent();
     void RegisterElementInfoCallBack();
     uint32_t GetCurrentBroadcastDetentsIndex();
+
+    void GetArrowOffsetByPlacement(const RefPtr<SheetPresentationLayoutAlgorithm>& layoutAlgorithm);
+    std::string DrawClipPathBottom(const SizeF&, const BorderRadiusProperty&);
+    std::string DrawClipPathTop(const SizeF&, const BorderRadiusProperty&);
+    std::string DrawClipPathLeft(const SizeF&, const BorderRadiusProperty&);
+    std::string DrawClipPathRight(const SizeF&, const BorderRadiusProperty&);
+
     uint32_t broadcastPreDetentsIndex_ = 0;
     SheetAccessibilityDetents sheetDetents_ = SheetAccessibilityDetents::HIGH;
 
@@ -832,6 +849,7 @@ private:
     bool isDirectionUp_ = true;
     bool topSafeAreaChanged_ = false;
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
+    SheetEffectEdge sheetEffectEdge_ = SheetEffectEdge::ALL;
 
     //record sheet sored detent index
     uint32_t detentsIndex_ = 0;
@@ -872,6 +890,10 @@ private:
     SheetKeyboardAvoidMode keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
     float resizeDecreasedHeight_ = 0.f;
     bool isPlayTransition_ = false;
+    Placement finalPlacement_ = Placement::BOTTOM;
+    bool showArrow_ = true;
+    SheetArrowPosition arrowPosition_ = SheetArrowPosition::NONE;
+    SheetPopupInfo sheetPopupInfo_;
 };
 } // namespace OHOS::Ace::NG
 

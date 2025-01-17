@@ -736,7 +736,7 @@ void TextPattern::EncodeTlvSpanItems(const std::string& pasteData, std::vector<u
         }
         auto spanStart = oldStart <= start ? 0 : oldStart - start;
         auto spanEnd = oldEnd < end ? oldEnd - start : end - start;
-        auto newSpanItem = spanItem->GetSameStyleSpanItem();
+        auto newSpanItem = spanItem->GetSameStyleSpanItem(true);
         newSpanItem->interval = { spanStart - ignoreLength, spanEnd - ignoreLength };
         newSpanItem->content = spanItem->content
                 .substr(std::max(start - oldStart, 0), std::min(end, oldEnd) - std::max(start, oldStart));
@@ -852,6 +852,10 @@ void TextPattern::HandleOnSelectAll()
 
 bool TextPattern::IsShowSearch()
 {
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        return false;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto context = host->GetContext();
@@ -1031,7 +1035,7 @@ bool TextPattern::GlobalOffsetInSelectedArea(const Offset& globalOffset)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto offset = host->GetPaintRectOffset();
+    auto offset = host->GetPaintRectOffset(false, true);
     auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
     if (selectOverlay_->HasRenderTransform()) {
         localOffset = ConvertGlobalToLocalOffset(globalOffset);
@@ -1335,6 +1339,8 @@ RectF TextPattern::CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandl
     textSelector_.Update(baseOffset, destinationOffset);
     if (calculateHandleFunc == nullptr) {
         CalculateHandleOffsetAndShowOverlay();
+    } else {
+        calculateHandleFunc();
     }
     return aiRect;
 }
@@ -2257,7 +2263,7 @@ void TextPattern::ProcessNormalUdmfData(const RefPtr<UnifiedData>& unifiedData)
                 // builder span, fill pixelmap data
                 auto builderNode = DynamicCast<FrameNode>(pattern->GetChildByIndex(result.spanPosition.spanIndex));
                 CHECK_NULL_VOID(builderNode);
-                pattern->AddPixelMapToUdmfData(builderNode->GetPixelMap(), unifiedData);
+                pattern->AddPixelMapToUdmfData(builderNode->GetDragPixelMap(), unifiedData);
             }
         }
     };
@@ -2817,7 +2823,7 @@ OffsetF TextPattern::GetParentGlobalOffset() const
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    return host->GetPaintRectOffset() - rootOffset;
+    return host->GetPaintRectOffset(false, true) - rootOffset;
 }
 
 void TextPattern::CreateHandles()
@@ -2833,7 +2839,7 @@ bool TextPattern::BetweenSelectedPosition(const Offset& globalOffset)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto offset = host->GetPaintRectOffset();
+    auto offset = host->GetPaintRectOffset(false, true);
     auto localOffset = globalOffset - Offset(offset.GetX(), offset.GetY());
     if (selectOverlay_->HasRenderTransform()) {
         localOffset = ConvertGlobalToLocalOffset(globalOffset);
@@ -3515,7 +3521,7 @@ void TextPattern::GetGlobalOffset(Offset& offset)
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    auto globalOffset = host->GetPaintRectOffset() - rootOffset;
+    auto globalOffset = host->GetPaintRectOffset(false, true) - rootOffset;
     offset = Offset(globalOffset.GetX(), globalOffset.GetY());
 }
 

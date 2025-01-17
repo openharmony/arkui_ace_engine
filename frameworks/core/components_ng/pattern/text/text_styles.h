@@ -117,6 +117,8 @@ struct SpanOptionBase {
     std::optional<int32_t> offset;
     UserGestureOptions userGestureOption;
     UserMouseOptions userMouseOption;
+    std::optional<Color> dragBackgroundColor;
+    bool isDragShadowNeeded = true;
 
     std::string ToString() const
     {
