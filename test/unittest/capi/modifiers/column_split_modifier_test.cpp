@@ -33,15 +33,10 @@ namespace  {
     const auto ATTRIBUTE_DIVIDER_END_MARGIN = "endMargin";
     const auto ATTRIBUTE_DIVIDER_END_MARGIN_DEFAULT_VALUE = "";
 
-    static const Ark_Int32 AINT32_NEG(-1234);
-    static const Ark_Int32 AINT32_ZERO(0);
-    static const Ark_Int32 AINT32_POS(1234);
-    static const Ark_Int32 AINT32_INT_MAX(INT_MAX);
-
-    static const auto OPT_LEN_NUM_NEG = Converter::ArkValue<Opt_Length>(AINT32_NEG);
-    static const auto OPT_LEN_NUM_ZERO = Converter::ArkValue<Opt_Length>(AINT32_ZERO);
-    static const auto OPT_LEN_NUM_VALID = Converter::ArkValue<Opt_Length>(AINT32_POS);
-    static const auto OPT_LEN_NUM_MAX = Converter::ArkValue<Opt_Length>(AINT32_INT_MAX);
+    static const auto OPT_LEN_NUM_NEG = Converter::ArkValue<Opt_Length>("-1234.00px");
+    static const auto OPT_LEN_NUM_ZERO = Converter::ArkValue<Opt_Length>("0.00px");
+    static const auto OPT_LEN_NUM_VALID = Converter::ArkValue<Opt_Length>("1234.00px");
+    static const auto OPT_LEN_NUM_MAX = Converter::ArkValue<Opt_Length>("2147483648.00px");
 
     static const std::string EXPECTED_NUM_NEG_PX("-1234.00px");
     static const std::string EXPECTED_NUM_VILID_PX("1234.00px");

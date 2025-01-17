@@ -54,15 +54,11 @@ const auto ATTRIBUTE_ACTIVATE_CIRCLE_STYLE_OPTIONS_ENABLE_WAVE_EFFECT_DEFAULT_VA
 const int32_t INT_NEG = -1234;
 const int32_t INT_ZERO = 0;
 const int32_t INT_POS = 1234;
-const Ark_Int32 AINT32_NEG(-1234);
-const Ark_Int32 AINT32_ZERO(0);
-const Ark_Int32 AINT32_POS(1234);
-const Ark_Int32 AINT32_INT_MAX(INT_MAX);
 
-const auto LEN_NUM_NEG = Converter::ArkValue<Ark_Length>(AINT32_NEG);
-const auto LEN_NUM_ZERO = Converter::ArkValue<Ark_Length>(AINT32_ZERO);
-const auto LEN_NUM_VALID = Converter::ArkValue<Ark_Length>(AINT32_POS);
-const auto LEN_NUM_MAX = Converter::ArkValue<Ark_Length>(AINT32_INT_MAX);
+const auto LEN_NUM_NEG = Converter::ArkValue<Ark_Length>("-1234.00px");
+const auto LEN_NUM_ZERO = Converter::ArkValue<Ark_Length>("0.00px");
+const auto LEN_NUM_VALID = Converter::ArkValue<Ark_Length>("1234.00px");
+const auto LEN_NUM_MAX = Converter::ArkValue<Ark_Length>("2147483648.00px");
 
 const std::string EXPECTED_NUM_NEG_PX("-1234.00px");
 const std::string EXPECTED_NUM_VILID_PX("1234.00px");
@@ -570,7 +566,7 @@ HWTEST_F(PatternLockModifierTest, setActivateCircleStyleTestValidValues, TestSiz
     std::unique_ptr<JsonValue> jsonValue;
     std::unique_ptr<JsonValue> resultJsonOptions;
     std::string resultStr;
-    Opt_CircleStyleOptions realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Opt_CircleStyleOptions realInputValue = Converter::ArkValue<Opt_CircleStyleOptions>(Ark_CircleStyleOptions{});
 
     for (auto [passed, checkVal, expected]: styleColorValidValues) {
         realInputValue.value.color = checkVal;

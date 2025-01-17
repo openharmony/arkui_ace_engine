@@ -51,12 +51,12 @@ const auto FORM_ON_ERROR_MSG_KEY = "msg";
 const auto FORM_EMPTY_STRING = "";
 
 
-std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureFormSizeDimensionValidValues = {
-    { "100.00vp", Converter::ArkValue<Ark_Number>(100), "100.00vp" },
-    { "0.00vp", Converter::ArkValue<Ark_Number>(0), "0.00vp" },
-    { "-100.00vp", Converter::ArkValue<Ark_Number>(-100), "-100.00vp" },
-    { "12.34vp", Converter::ArkValue<Ark_Number>(12.34), "12.34vp" },
-    { "-56.78vp", Converter::ArkValue<Ark_Number>(-56.78), "-56.78vp" },
+std::vector<std::tuple<std::string, Opt_Length, std::string>> testFixtureFormSizeDimensionValidValues = {
+    { "100.00vp", Converter::ArkValue<Opt_Length>(100.), "100.00vp" },
+    { "0.00vp", Converter::ArkValue<Opt_Length>(0.), "0.00vp" },
+    { "-100.00vp", Converter::ArkValue<Opt_Length>(-100.), "-100.00vp" },
+    { "12.34vp", Converter::ArkValue<Opt_Length>(12.34), "12.34vp" },
+    { "-56.78vp", Converter::ArkValue<Opt_Length>(-56.78), "-56.78vp" },
 };
 
 std::vector<std::tuple<std::string, Ark_FormDimension, std::string>> testFixtureEnumFormDimensionValidValues = {
@@ -170,15 +170,15 @@ HWTEST_F(FormComponentModifierTest, setSizeTestDefaultValues, TestSize.Level1)
  */
 HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeWidthValidValues, TestSize.Level1)
 {
-    Ark_Literal_Number_height_width initValueSize;
+    Ark_SizeOptions initValueSize;
 
     // Initial setup
     initValueSize.width = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
     initValueSize.height = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
 
     auto checkValue = [this, &initValueSize](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
-        Ark_Literal_Number_height_width inputValueSize = initValueSize;
+                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+        Ark_SizeOptions inputValueSize = initValueSize;
         inputValueSize.width = value;
         modifier_->setSize(node_, &inputValueSize);
         auto jsonValue = GetJsonValue(node_);
@@ -200,13 +200,13 @@ HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeWidthValidValues, Te
  */
 HWTEST_F(FormComponentModifierTest, DISABLED_setSizeTestSizeHeightValidValues, TestSize.Level1)
 {
-    Ark_Literal_Number_height_width initValueSize;
+    Ark_SizeOptions initValueSize;
     // Initial setup
     initValueSize.width = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
     initValueSize.height = std::get<1>(testFixtureFormSizeDimensionValidValues[0]);
     auto checkValue = [this, &initValueSize](
-                          const std::string& input, const Ark_Number& value, const std::string& expectedStr) {
-        Ark_Literal_Number_height_width inputValueSize = initValueSize;
+                          const std::string& input, const Opt_Length& value, const std::string& expectedStr) {
+        Ark_SizeOptions inputValueSize = initValueSize;
         inputValueSize.height = value;
         modifier_->setSize(node_, &inputValueSize);
         auto jsonValue = GetJsonValue(node_);

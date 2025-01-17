@@ -74,7 +74,7 @@ static auto radioOnChange(Ark_Int32 nodeId, const Ark_Boolean isChecked)
     g_isCheckedTest = !g_isCheckedTest;
 };
 static GENERATED_ArkUIRadioEventsReceiver recv {
-    .onChange = radioOnChange
+    .onChange0 = radioOnChange
 };
 static const GENERATED_ArkUIRadioEventsReceiver* getRadioEventsReceiverTest()
 {
@@ -212,7 +212,7 @@ HWTEST_F(RadioModifierTest, RadioModifierTest001, TestSize.Level1)
 {
     auto checked = GetStringAttribute(node_, CHECKED_ATTR);
     EXPECT_EQ(checked, "false");
-    modifier_->setChecked(node_, true);
+    modifier_->setChecked0(node_, true);
     auto checkedChanged = GetStringAttribute(node_, CHECKED_ATTR);
     EXPECT_EQ(checkedChanged, "true");
 }
@@ -509,7 +509,7 @@ HWTEST_F(RadioModifierTest, RadioEventTest001, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     Callback_Boolean_Void func{};
-    modifier_->setOnChange(node_, &func);
+    modifier_->setOnChange0(node_, &func);
     auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
     eventHub->UpdateChangeEvent(true);
     EXPECT_EQ(g_isCheckedTest, false);

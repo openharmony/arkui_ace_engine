@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct EventEmulatorPeer {
-    virtual ~EventEmulatorPeer() = default;
-};
+struct EventEmulatorPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace EventEmulatorAccessor {

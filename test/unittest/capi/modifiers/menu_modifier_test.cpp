@@ -62,8 +62,6 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN_RES = {
     { Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(COLOR_STRING_RES), COLOR_RED }
 };
 
-const Ark_Int32 AINT32_POS(70);
-const Ark_Int32 AINT32_NEG(INT_MIN);
 const Ark_Float32 AFLT32_POS(1.234f);
 const Ark_Float32 AFLT32_NEG(-5.6789f);
 
@@ -83,16 +81,14 @@ const std::vector<UnionStringResourceTestStep> UNION_RESOURCE_STRING_PLAN = {
 
 typedef std::pair<Opt_Length, std::string> OptLengthTestStep;
 const std::vector<OptLengthTestStep> OPT_LENGTH_TEST_PLAN = {
-    { Converter::ArkValue<Opt_Length>(AINT32_POS), "70.00px" },
-    { Converter::ArkValue<Opt_Length>(AINT32_NEG), "0.00px" },
     { Converter::ArkValue<Opt_Length>(AFLT32_NEG), "0.00px" },
     { Converter::ArkValue<Opt_Length>(AFLT32_POS), "1.23vp" } };
 
 typedef std::pair<Opt_FontStyle, std::string> ArkFontStyleTestStep;
 const std::vector<ArkFontStyleTestStep> FONT_STYLE_TEST_PLAN = {
-    { { .tag = ARK_TAG_OBJECT, .value = ARK_FONT_STYLE_NORMAL }, "FontStyle.Normal" },
-    { { .tag = ARK_TAG_OBJECT, .value = ARK_FONT_STYLE_ITALIC }, "FontStyle.Italic" },
-    { { .tag = ARK_TAG_OBJECT, .value = static_cast<Ark_FontStyle>(2) }, "FontStyle.Normal" },
+    { Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_NORMAL), "FontStyle.Normal" },
+    { Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC), "FontStyle.Italic" },
+    { Converter::ArkValue<Opt_FontStyle>(static_cast<Ark_FontStyle>(-1)), "FontStyle.Normal" },
 };
 
 typedef std::pair<Opt_Union_FontWeight_Number_String, std::string> ArkFontWeightTest;
@@ -216,12 +212,12 @@ HWTEST_F(MenuModifierTest, setFontSizeTest, TestSize.Level1)
     auto checkVal = GetAttrValue<std::string>(node_, "fontSize");
     EXPECT_EQ(checkVal, "0.00px");
 
-    Ark_Length size = Converter::ArkValue<Ark_Length>(123);
+    Ark_Length size = Converter::ArkValue<Ark_Length>(123._px);
     modifier_->setFontSize(node_, &size);
     checkVal = GetStringAttribute(node_, "fontSize");
     EXPECT_EQ(checkVal, "123.00px");
 
-    size = Converter::ArkValue<Ark_Length>(-123);
+    size = Converter::ArkValue<Ark_Length>(-123._px);
     modifier_->setFontSize(node_, &size);
     checkVal = GetAttrValue<std::string>(node_, "fontSize");
     EXPECT_EQ(checkVal, "0.00px");
@@ -304,7 +300,7 @@ HWTEST_F(MenuModifierTest, setRadiusTest, TestSize.Level1)
     auto bottomRight = GetAttrValue<std::string>(radiusObject, "bottomRight");
     EXPECT_EQ(bottomRight, "0.00vp");
 
-    auto radius = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(5);
+    auto radius = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(5._px);
     modifier_->setRadius(node_, &radius);
     fullJson = GetJsonValue(node_);
     radiusObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "radius");
@@ -317,7 +313,7 @@ HWTEST_F(MenuModifierTest, setRadiusTest, TestSize.Level1)
     bottomRight = GetAttrValue<std::string>(radiusObject, "bottomRight");
     EXPECT_EQ(bottomRight, "5.00px");
 
-    radius = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(-5);
+    radius = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_Length>(-5._px);
     modifier_->setRadius(node_, &radius);
     fullJson = GetJsonValue(node_);
     radiusObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "radius");
@@ -350,8 +346,8 @@ HWTEST_F(MenuModifierTest, setRadiusRadiusesValidTest, TestSize.Level1)
     EXPECT_EQ(bottomRight, "0.00vp");
 
     Ark_BorderRadiuses radiuses = {
-        .topLeft = Converter::ArkValue<Opt_Length>(5), .topRight = Converter::ArkValue<Opt_Length>(7),
-        .bottomLeft = Converter::ArkValue<Opt_Length>(8), .bottomRight = Converter::ArkValue<Opt_Length>(0)
+        .topLeft = Converter::ArkValue<Opt_Length>(5._px), .topRight = Converter::ArkValue<Opt_Length>(7._px),
+        .bottomLeft = Converter::ArkValue<Opt_Length>(8._px), .bottomRight = Converter::ArkValue<Opt_Length>(0._px)
     };
     auto radius = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(radiuses);
     modifier_->setRadius(node_, &radius);
@@ -386,8 +382,8 @@ HWTEST_F(MenuModifierTest, setRadiusRadiusesNegativeOrEmptyTest, TestSize.Level1
     EXPECT_EQ(bottomRight, "0.00vp");
 
     Ark_BorderRadiuses radiuses = {
-        .topLeft = Converter::ArkValue<Opt_Length>(5), .topRight = Converter::ArkValue<Opt_Length>(7),
-        .bottomLeft = Converter::ArkValue<Opt_Length>(-8), .bottomRight = Converter::ArkValue<Opt_Length>(-9)
+        .topLeft = Converter::ArkValue<Opt_Length>(5._px), .topRight = Converter::ArkValue<Opt_Length>(7._px),
+        .bottomLeft = Converter::ArkValue<Opt_Length>(-8._px), .bottomRight = Converter::ArkValue<Opt_Length>(-9._px)
     };
     auto radius = Converter::ArkUnion<Ark_Union_Dimension_BorderRadiuses, Ark_BorderRadiuses>(radiuses);
     modifier_->setRadius(node_, &radius);
@@ -403,7 +399,7 @@ HWTEST_F(MenuModifierTest, setRadiusRadiusesNegativeOrEmptyTest, TestSize.Level1
     EXPECT_EQ(bottomRight, "0.00vp");
 
     radiuses = {
-        .topLeft = Converter::ArkValue<Opt_Length>(5), .topRight = Converter::ArkValue<Opt_Length>(7),
+        .topLeft = Converter::ArkValue<Opt_Length>(5._px), .topRight = Converter::ArkValue<Opt_Length>(7._px),
         .bottomLeft = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .bottomRight = Converter::ArkValue<Opt_Length>(Ark_Empty())
     };

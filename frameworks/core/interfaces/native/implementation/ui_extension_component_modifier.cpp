@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -252,6 +252,15 @@ void OnTerminatedImpl(Ark_NativePointer node,
     UIExtensionModelNG::SetOnTerminated(frameNode, std::move(onTerminated));
 #endif //WINDOW_SCENE_SUPPORTED
 }
+void OnDrawReadyImpl(Ark_NativePointer node,
+                     const Callback_Void* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //UIExtensionComponentModelNG::SetOnDrawReady(frameNode, convValue);
+}
 } // UIExtensionComponentAttributeModifier
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier()
 {
@@ -264,6 +273,7 @@ const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifi
         UIExtensionComponentAttributeModifier::OnReleaseImpl,
         UIExtensionComponentAttributeModifier::OnErrorImpl,
         UIExtensionComponentAttributeModifier::OnTerminatedImpl,
+        UIExtensionComponentAttributeModifier::OnDrawReadyImpl,
     };
     return &ArkUIUIExtensionComponentModifierImpl;
 }

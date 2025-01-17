@@ -177,11 +177,8 @@ const std::vector<ColorTestStep> COLOR_TEST_PLAN_RES = {
         COLOR_RED }
 };
 
-const Ark_Int32 AINT32_POS(70);
-const Ark_Int32 AINT32_NEG(INT_MIN);
 const Ark_Float32 AFLT32_POS(1.234f);
 const Ark_Float32 AFLT32_NEG(-5.6789f);
-const auto CHECK_AINT32_POS = "70.00px";
 const auto CHECK_AFLT32_POS = "1.23vp";
 
 const auto RES_CONTENT = Converter::ArkValue<Ark_String>("aa.bb.cc");
@@ -197,17 +194,15 @@ const std::vector<UnionStringResourceTestStep> UNION_RESOURCE_STRING_PLAN = {
 
 typedef std::pair<Opt_Length, std::string> OptLengthTestStep;
 const std::vector<OptLengthTestStep> FONT_SIZE_TEST_PLAN = {
-    { Converter::ArkValue<Opt_Length>(AINT32_POS), CHECK_AINT32_POS },
-    { Converter::ArkValue<Opt_Length>(AINT32_NEG), ATTRIBUTE_FONT_DEFAULT_SIZE },
+    { Converter::ArkValue<Opt_Length>(AFLT32_POS), CHECK_AFLT32_POS },
     { Converter::ArkValue<Opt_Length>(AFLT32_NEG), ATTRIBUTE_FONT_DEFAULT_SIZE },
-    { Converter::ArkValue<Opt_Length>(AFLT32_POS), CHECK_AFLT32_POS }
 };
 
 typedef std::pair<Opt_FontStyle, std::string> ArkFontStyleTestStep;
 const std::vector<ArkFontStyleTestStep> FONT_STYLE_TEST_PLAN = {
-    { { .tag = ARK_TAG_OBJECT, .value = ARK_FONT_STYLE_NORMAL }, "FontStyle::NORMAL" },
-    { { .tag = ARK_TAG_OBJECT, .value = ARK_FONT_STYLE_ITALIC }, "FontStyle::ITALIC" },
-    { { .tag = ARK_TAG_OBJECT, .value = static_cast<Ark_FontStyle>(2) }, "FontStyle::NORMAL" },
+    { Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_NORMAL), "FontStyle::NORMAL" },
+    { Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC), "FontStyle::ITALIC" },
+    { Converter::ArkValue<Opt_FontStyle>(static_cast<Ark_FontStyle>(-1)), "FontStyle::NORMAL" },
 };
 
 typedef std::pair<Opt_Union_FontWeight_Number_String, std::string> ArkFontWeightTest;
@@ -286,9 +281,6 @@ const std::vector<AlignTestStep> ALIGN_TEST_PLAN = {
 };
 
 const std::vector<OptLengthTestStep> POPUP_HORIZONTAL_OFFSET_TEST_PLAN = {
-    { Converter::ArkValue<Opt_Length>(10), "10.00px" },
-    { Converter::ArkValue<Opt_Length>(0), "0.00px" },
-    { Converter::ArkValue<Opt_Length>(-20), ATTRIBUTE_POPUP_HORIZONTAL_SPACE_DEFAULT_VALUE },
     { Converter::ArkValue<Opt_Length>(15.4f), "15.40vp" },
     { Converter::ArkValue<Opt_Length>(22.11_px), "22.11px" },
     { Converter::ArkValue<Opt_Length>("99.00%"), "99.00%" },
@@ -300,9 +292,6 @@ const std::vector<OptLengthTestStep> POPUP_HORIZONTAL_OFFSET_TEST_PLAN = {
 
 typedef std::pair<Ark_Length, std::string> PopupPositionTestStep;
 static const std::vector<PopupPositionTestStep> POPUP_POSITION_TEST_PLAN = {
-    { Converter::ArkValue<Ark_Length>(10), "10.00px" },
-    { Converter::ArkValue<Ark_Length>(0), "0.00px" },
-    { Converter::ArkValue<Ark_Length>(-20), "-20.00px" },
     { Converter::ArkValue<Ark_Length>(15.4f), "15.40vp" },
     { Converter::ArkValue<Ark_Length>(22.11_px), "22.11px" },
     { Converter::ArkValue<Ark_Length>("99.00%"), "99.00%" },

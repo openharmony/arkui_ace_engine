@@ -64,7 +64,7 @@ HWTEST_F(StepperModifierTest, setStepperOptionsTestIndexValidValues, TestSize.Le
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Opt_Literal_Number_index realInputValue = {.tag = ARK_TAG_OBJECT, .value = {.index = {}}};
+    auto realInputValue = Converter::ArkValue<Opt_Literal_Number_index>(Ark_Literal_Number_index{});
     Opt_Number& inputValueStatus = realInputValue.value.index;
     Opt_Number initValueStatus;
 
@@ -98,7 +98,7 @@ HWTEST_F(StepperModifierTest, setStepperOptionsTestIndexInvalidValues, TestSize.
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Opt_Literal_Number_index realInputValue = {.tag = ARK_TAG_OBJECT, .value = {.index = {}}};
+    auto realInputValue = Converter::ArkValue<Opt_Literal_Number_index>(Ark_Literal_Number_index{});
     Opt_Number& inputValueStatus = realInputValue.value.index;
     Opt_Number initValueStatus;
 

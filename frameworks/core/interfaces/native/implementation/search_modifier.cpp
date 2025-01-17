@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -441,6 +441,22 @@ void MaxFontSizeImpl(Ark_NativePointer node,
     resetPercent(optValue);
     SearchModelNG::SetAdaptMaxFontSize(frameNode, optValue);
 }
+void MinFontScaleImpl(Ark_NativePointer node,
+                      const Opt_Union_Number_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SearchModelNG::SetMinFontScale(frameNode, convValue);
+}
+void MaxFontScaleImpl(Ark_NativePointer node,
+                      const Opt_Union_Number_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SearchModelNG::SetMaxFontScale(frameNode, convValue);
+}
 void DecorationImpl(Ark_NativePointer node,
                     const Ark_TextDecorationOptions* value)
 {
@@ -581,6 +597,22 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetEnableHapticFeedback(frameNode, Converter::Convert<bool>(value));
 }
+void HalfLeadingImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SearchModelNG::SetHalfLeading(frameNode, convValue);
+}
+void StopBackPressImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //SearchModelNG::SetStopBackPress(frameNode, convValue);
+}
 void SearchButtonImpl(Ark_NativePointer node,
                       const Ark_String* value,
                       const Opt_SearchButtonOptions* option)
@@ -663,6 +695,8 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::SelectionMenuHiddenImpl,
         SearchAttributeModifier::MinFontSizeImpl,
         SearchAttributeModifier::MaxFontSizeImpl,
+        SearchAttributeModifier::MinFontScaleImpl,
+        SearchAttributeModifier::MaxFontScaleImpl,
         SearchAttributeModifier::DecorationImpl,
         SearchAttributeModifier::LetterSpacingImpl,
         SearchAttributeModifier::LineHeightImpl,
@@ -675,6 +709,8 @@ const GENERATED_ArkUISearchModifier* GetSearchModifier()
         SearchAttributeModifier::EditMenuOptionsImpl,
         SearchAttributeModifier::EnablePreviewTextImpl,
         SearchAttributeModifier::EnableHapticFeedbackImpl,
+        SearchAttributeModifier::HalfLeadingImpl,
+        SearchAttributeModifier::StopBackPressImpl,
         SearchAttributeModifier::SearchButtonImpl,
         SearchAttributeModifier::InputFilterImpl,
         SearchAttributeModifier::CustomKeyboardImpl,

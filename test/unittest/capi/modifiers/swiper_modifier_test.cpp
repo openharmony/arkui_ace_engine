@@ -54,19 +54,18 @@ static const auto ANUM_INT_POS = ArkValue<Ark_Number>(AINT32_POS);
 static const auto ANUM_INT_NEG = ArkValue<Ark_Number>(AINT32_NEG);
 static const auto ASTR_INVALID = ArkValue<Ark_String>("(*%^&#@");
 
-static const auto ALEN_PX_POS = ArkValue<Ark_Length>(AINT32_POS);
-static const auto ALEN_PX_NEG = ArkValue<Ark_Length>(AINT32_NEG);
 static const auto ALEN_VP_POS = ArkValue<Ark_Length>(AFLT32_POS);
 static const auto ALEN_VP_NEG = ArkValue<Ark_Length>(AFLT32_NEG);
 
-static const auto OPT_LEN_PX_POS = ArkValue<Opt_Length>(AINT32_POS);
-static const auto OPT_LEN_PX_NEG = ArkValue<Opt_Length>(AINT32_NEG);
 static const auto OPT_LEN_VP_POS = ArkValue<Opt_Length>(AFLT32_POS);
 static const auto OPT_LEN_VP_NEG = ArkValue<Opt_Length>(AFLT32_NEG);
+static const auto OPT_LEN_UNDEF = ArkValue<Opt_Length>();
 
 static const auto OPT_BOOL_UNDEF = ArkValue<Opt_Boolean>(Ark_Empty());
 static const auto OPT_BOOL_TRUE = ArkValue<Opt_Boolean>(true);
 static const auto OPT_BOOL_FALSE = ArkValue<Opt_Boolean>(false);
+
+static const auto OPT_COLOR_UNDEF = ArkValue<Opt_ResourceColor>();
 
 static const std::string EXPECTED_TRUE("true");
 static const std::string EXPECTED_FALSE("false");
@@ -146,16 +145,16 @@ HWTEST_F(SwiperModifierTest, setAutoPlayTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("autoPlay");
     static const std::string &DEFAULT_VALUE(EXPECTED_FALSE);
-    ASSERT_NE(modifier_->setAutoPlay, nullptr);
+    ASSERT_NE(modifier_->setAutoPlay0, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, DEFAULT_VALUE);
 
-    modifier_->setAutoPlay(node_, ABOOL_TRUE);
+    modifier_->setAutoPlay0(node_, ABOOL_TRUE);
     auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, EXPECTED_TRUE);
 
-    modifier_->setAutoPlay(node_, ABOOL_FALSE);
+    modifier_->setAutoPlay0(node_, ABOOL_FALSE);
     auto checkVal3 = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, EXPECTED_FALSE);
 }
@@ -195,11 +194,11 @@ HWTEST_F(SwiperModifierTest, setIntervalTest, TestSize.Level1)
 }
 
 /**
- * @tc.name: setIndicator0TestDotPadding
+ * @tc.name: setIndicatorTestDotPadding
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Dot type, the padding's subattr
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicator0TestDotPadding, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setIndicatorTestDotPadding, TestSize.Level1)
 {
     typedef std::tuple<Ark_DotIndicator, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
@@ -208,18 +207,12 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDotPadding, TestSize.Level1)
     { { ._left = OPT_LEN_VP_POS, ._top = OPT_LEN_VP_POS, ._right = OPT_LEN_VP_POS, ._bottom = OPT_LEN_VP_POS,
         ._start = ArkValue<Opt_LengthMetrics>(), ._end = ArkValue<Opt_LengthMetrics>(),
         }, EXPECTED_VP_POS },
-    { { ._left = OPT_LEN_PX_POS, ._top = OPT_LEN_PX_POS, ._right = OPT_LEN_PX_POS, ._bottom = OPT_LEN_PX_POS,
-        ._start = ArkValue<Opt_LengthMetrics>(), ._end = ArkValue<Opt_LengthMetrics>(),
-        }, EXPECTED_PX_POS },
     { { ._left = OPT_LEN_VP_NEG, ._top = OPT_LEN_VP_NEG, ._right = OPT_LEN_VP_NEG, ._bottom = OPT_LEN_VP_NEG,
-        ._start = ArkValue<Opt_LengthMetrics>(), ._end = ArkValue<Opt_LengthMetrics>(),
-        }, DEFAULT_VALUE },
-    { { ._left = OPT_LEN_PX_NEG, ._top = OPT_LEN_PX_NEG, ._right = OPT_LEN_PX_NEG, ._bottom = OPT_LEN_PX_NEG,
         ._start = ArkValue<Opt_LengthMetrics>(), ._end = ArkValue<Opt_LengthMetrics>(),
         }, DEFAULT_VALUE },
     };
 
-    ASSERT_NE(modifier_->setIndicator0, nullptr);
+    ASSERT_NE(modifier_->setIndicator, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, EXPECTED_TRUE);
@@ -229,7 +222,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDotPadding, TestSize.Level1)
     };
     for (const auto &[indicator, expect]: testPlan) {
         auto arkParam = ArkUnion<Ark_Union_DotIndicator_DigitIndicator_Boolean, Ark_DotIndicator>(indicator);
-        modifier_->setIndicator0(node_, &arkParam);
+        modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
         for (const auto &nameKey: keys) {
             auto checkPadding = GetAttrValue<std::string>(strWithObj, nameKey);
@@ -239,11 +232,11 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDotPadding, TestSize.Level1)
 }
 
 /**
- * @tc.name: setIndicator0TestDotSize
+ * @tc.name: setIndicatorTestDotSize
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Dot type, the size's subattr
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicator0TestDotSize, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setIndicatorTestDotSize, TestSize.Level1)
 {
     typedef std::tuple<Ark_DotIndicator, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
@@ -252,18 +245,12 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDotSize, TestSize.Level1)
     { { ._itemWidth = OPT_LEN_VP_POS, ._itemHeight = OPT_LEN_VP_POS,
         ._selectedItemWidth = OPT_LEN_VP_POS, ._selectedItemHeight = OPT_LEN_VP_POS,
         }, EXPECTED_VP_POS },
-    { { ._itemWidth = OPT_LEN_PX_POS, ._itemHeight = OPT_LEN_PX_POS,
-        ._selectedItemWidth = OPT_LEN_PX_POS, ._selectedItemHeight = OPT_LEN_PX_POS,
-        }, EXPECTED_PX_POS },
     { { ._itemWidth = OPT_LEN_VP_NEG, ._itemHeight = OPT_LEN_VP_NEG,
         ._selectedItemWidth = OPT_LEN_VP_NEG, ._selectedItemHeight = OPT_LEN_VP_NEG,
         }, DEFAULT_SIZE },
-    { { ._itemWidth = OPT_LEN_PX_NEG, ._itemHeight = OPT_LEN_PX_NEG,
-        ._selectedItemWidth = OPT_LEN_PX_NEG, ._selectedItemHeight = OPT_LEN_PX_NEG,
-        }, DEFAULT_SIZE },
     };
 
-    ASSERT_NE(modifier_->setIndicator0, nullptr);
+    ASSERT_NE(modifier_->setIndicator, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, EXPECTED_TRUE);
@@ -273,7 +260,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDotSize, TestSize.Level1)
     };
     for (const auto &[indicator, expect]: testPlan) {
         auto arkParam = ArkUnion<Ark_Union_DotIndicator_DigitIndicator_Boolean, Ark_DotIndicator>(indicator);
-        modifier_->setIndicator0(node_, &arkParam);
+        modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
         for (const auto &nameKey: keys) {
             auto checkVal = GetAttrValue<std::string>(strWithObj, nameKey);
@@ -283,11 +270,11 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDotSize, TestSize.Level1)
 }
 
 /**
- * @tc.name: setIndicator0TestDotColor
+ * @tc.name: setIndicatorTestDotColor
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Dot type, the Color type subattr
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicator0TestDotColor, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setIndicatorTestDotColor, TestSize.Level1)
 {
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
@@ -304,7 +291,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDotColor, TestSize.Level1)
         { CreateResourceUnion<Ark_ResourceColor>(RES_ID), EXPECTED_RESOURCE_COLOR },
     };
 
-    ASSERT_NE(modifier_->setIndicator0, nullptr);
+    ASSERT_NE(modifier_->setIndicator, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, EXPECTED_TRUE);
@@ -314,7 +301,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDotColor, TestSize.Level1)
         ._selectedColor = ArkValue<Opt_ResourceColor>(Ark_Empty())
     };
     auto arkParam = ArkUnion<Ark_Union_DotIndicator_DigitIndicator_Boolean, Ark_DotIndicator>(indicator);
-    modifier_->setIndicator0(node_, &arkParam);
+    modifier_->setIndicator(node_, &arkParam);
     auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
     auto checkColorDflt = GetAttrValue<std::string>(strWithObj, "color");
     EXPECT_EQ(checkColorDflt, DEFAULT_VALUE);
@@ -327,7 +314,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDotColor, TestSize.Level1)
             ._selectedColor = ArkValue<Opt_ResourceColor>(arkResColor)
         };
         auto arkParam = ArkUnion<Ark_Union_DotIndicator_DigitIndicator_Boolean, Ark_DotIndicator>(indicator);
-        modifier_->setIndicator0(node_, &arkParam);
+        modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
         auto checkColor = GetAttrValue<std::string>(strWithObj, "color");
         EXPECT_EQ(checkColor, expected);
@@ -337,11 +324,11 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDotColor, TestSize.Level1)
 }
 
 /**
- * @tc.name: setIndicator0TestDotOther
+ * @tc.name: setIndicatorTestDotOther
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Dot type, the other subattr
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicator0TestDotOther, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setIndicatorTestDotOther, TestSize.Level1)
 {
     typedef std::tuple<Ark_DotIndicator, std::string, int> OneTestStep;
     static const std::string PROP_NAME("indicator");
@@ -354,14 +341,14 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDotOther, TestSize.Level1)
             EXPECTED_FALSE, 0 },
     };
 
-    ASSERT_NE(modifier_->setIndicator0, nullptr);
+    ASSERT_NE(modifier_->setIndicator, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, EXPECTED_TRUE);
 
     for (const auto &[indicator, expectMask, expectCount]: testPlan) {
         Ark_Union_DotIndicator_DigitIndicator_Boolean arkParam = { .selector = 0, .value0 = indicator };
-        modifier_->setIndicator0(node_, &arkParam);
+        modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
         auto checkMask = GetAttrValue<std::string>(strWithObj, "mask");
         EXPECT_EQ(checkMask, expectMask);
@@ -370,11 +357,11 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDotOther, TestSize.Level1)
     }
 }
 /**
- * @tc.name: setIndicator0TestDigitPadding
+ * @tc.name: setIndicatorTestDigitPadding
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Digit indicator, padding's attributes
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicator0TestDigitPadding, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setIndicatorTestDigitPadding, TestSize.Level1)
 {
     typedef std::tuple<Ark_DigitIndicator, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
@@ -383,18 +370,12 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitPadding, TestSize.Level1)
     { { ._left = OPT_LEN_VP_POS, ._top = OPT_LEN_VP_POS, ._right = OPT_LEN_VP_POS, ._bottom = OPT_LEN_VP_POS,
         ._start = ArkValue<Opt_LengthMetrics>(), ._end = ArkValue<Opt_LengthMetrics>(),
         }, EXPECTED_VP_POS },
-    { { ._left = OPT_LEN_PX_POS, ._top = OPT_LEN_PX_POS, ._right = OPT_LEN_PX_POS, ._bottom = OPT_LEN_PX_POS,
-        ._start = ArkValue<Opt_LengthMetrics>(), ._end = ArkValue<Opt_LengthMetrics>(),
-        }, EXPECTED_PX_POS },
     { { ._left = OPT_LEN_VP_NEG, ._top = OPT_LEN_VP_NEG, ._right = OPT_LEN_VP_NEG, ._bottom = OPT_LEN_VP_NEG,
-        ._start = ArkValue<Opt_LengthMetrics>(), ._end = ArkValue<Opt_LengthMetrics>(),
-        }, DEFAULT_VALUE },
-    { { ._left = OPT_LEN_PX_NEG, ._top = OPT_LEN_PX_NEG, ._right = OPT_LEN_PX_NEG, ._bottom = OPT_LEN_PX_NEG,
         ._start = ArkValue<Opt_LengthMetrics>(), ._end = ArkValue<Opt_LengthMetrics>(),
         }, DEFAULT_VALUE },
     };
 
-    ASSERT_NE(modifier_->setIndicator0, nullptr);
+    ASSERT_NE(modifier_->setIndicator, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, EXPECTED_TRUE);
@@ -404,7 +385,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitPadding, TestSize.Level1)
     };
     for (const auto &[indicator, expect]: testPlan) {
         Ark_Union_DotIndicator_DigitIndicator_Boolean arkParam = { .selector = 1, .value1 = indicator };
-        modifier_->setIndicator0(node_, &arkParam);
+        modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
         for (const auto &nameKey: keys) {
             auto checkVal = GetAttrValue<std::string>(strWithObj, nameKey);
@@ -414,24 +395,22 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitPadding, TestSize.Level1)
 }
 
 /**
- * @tc.name: setIndicator0TestDigitFontSize
+ * @tc.name: setIndicatorTestDigitFontSize
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Digit indicator, font size attributes
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontSize, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setIndicatorTestDigitFontSize, TestSize.Level1)
 {
     typedef std::tuple<Ark_Font, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
     static const std::string DEFAULT_VALUE(THEME_SWIPER_FONT_SIZE.ToString());
     static const std::vector<OneTestStep> testPlan = {
         {{ .size = OPT_LEN_VP_POS }, EXPECTED_VP_POS},
-        {{ .size = OPT_LEN_PX_POS }, EXPECTED_PX_POS},
         {{ .size = OPT_LEN_VP_NEG }, DEFAULT_VALUE},
-        {{ .size = OPT_LEN_PX_NEG }, DEFAULT_VALUE},
         {{ .size = ArkValue<Opt_Dimension>(Ark_Empty()) }, DEFAULT_VALUE},
     };
 
-    ASSERT_NE(modifier_->setIndicator0, nullptr);
+    ASSERT_NE(modifier_->setIndicator, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, EXPECTED_TRUE);
@@ -442,7 +421,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontSize, TestSize.Level1)
             ._selectedDigitFont = ArkValue<Opt_Font>(font)
         };
         auto arkParam = ArkUnion<Ark_Union_DotIndicator_DigitIndicator_Boolean, Ark_DigitIndicator>(indicator);
-        modifier_->setIndicator0(node_, &arkParam);
+        modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
         auto checkFontSz = GetAttrValue<std::string>(strWithObj, "fontSize");
         EXPECT_EQ(checkFontSz, expect);
@@ -452,11 +431,11 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontSize, TestSize.Level1)
 }
 
 /**
- * @tc.name: setIndicator0TestDigitFontWeight
+ * @tc.name: setIndicatorTestDigitFontWeight
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Digit indicator, font weight attributes
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontWeight, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setIndicatorTestDigitFontWeight, TestSize.Level1)
 {
     typedef Opt_Union_FontWeight_Number_String FontWeightT;
     typedef std::tuple<Ark_Font, std::string> OneTestStep;
@@ -475,7 +454,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontWeight, TestSize.Level1)
         { {.weight = ArkValue<FontWeightT>(Ark_Empty())}, DEFAULT_VALUE },
     };
 
-    ASSERT_NE(modifier_->setIndicator0, nullptr);
+    ASSERT_NE(modifier_->setIndicator, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, EXPECTED_TRUE);
@@ -486,7 +465,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontWeight, TestSize.Level1)
             ._selectedDigitFont = ArkValue<Opt_Font>(Ark_Empty()),
         };
         auto arkParam = ArkUnion<Ark_Union_DotIndicator_DigitIndicator_Boolean, Ark_DigitIndicator>(indicator);
-        modifier_->setIndicator0(node_, &arkParam);
+        modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
         auto checkFontWeightDftl = GetAttrValue<std::string>(strWithObj, "fontWeight");
         EXPECT_EQ(checkFontWeightDftl, DEFAULT_VALUE);
@@ -499,7 +478,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontWeight, TestSize.Level1)
             ._selectedDigitFont = ArkValue<Opt_Font>(font)
         };
         auto arkParam = ArkUnion<Ark_Union_DotIndicator_DigitIndicator_Boolean, Ark_DigitIndicator>(indicator);
-        modifier_->setIndicator0(node_, &arkParam);
+        modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
         auto checkFontWeight = GetAttrValue<std::string>(strWithObj, "fontWeight");
         EXPECT_EQ(checkFontWeight, expect);
@@ -509,11 +488,11 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontWeight, TestSize.Level1)
 }
 
 /**
- * @tc.name: setIndicator0TestDigitFontColor
+ * @tc.name: setIndicatorTestDigitFontColor
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Digit Indicator, the Color type subattributes
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontColor, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setIndicatorTestDigitFontColor, TestSize.Level1)
 {
     typedef std::pair<Ark_ResourceColor, std::string> OneTestStep;
     static const std::string PROP_NAME("indicator");
@@ -530,7 +509,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontColor, TestSize.Level1)
         { CreateResourceUnion<Ark_ResourceColor>(RES_ID), EXPECTED_RESOURCE_COLOR },
     };
 
-    ASSERT_NE(modifier_->setIndicator0, nullptr);
+    ASSERT_NE(modifier_->setIndicator, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, EXPECTED_TRUE);
@@ -540,7 +519,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontColor, TestSize.Level1)
         ._selectedFontColor = ArkValue<Opt_ResourceColor>(Ark_Empty())
     };
     auto arkParam = ArkUnion<Ark_Union_DotIndicator_DigitIndicator_Boolean, Ark_DigitIndicator>(indicator);
-    modifier_->setIndicator0(node_, &arkParam);
+    modifier_->setIndicator(node_, &arkParam);
     auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
     auto checkColorDflt = GetAttrValue<std::string>(strWithObj, "fontColor");
     EXPECT_EQ(checkColorDflt, DEFAULT_VALUE);
@@ -553,7 +532,7 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontColor, TestSize.Level1)
             ._selectedFontColor = ArkValue<Opt_ResourceColor>(arkResColor)
         };
         auto arkParam = ArkUnion<Ark_Union_DotIndicator_DigitIndicator_Boolean, Ark_DigitIndicator>(indicator);
-        modifier_->setIndicator0(node_, &arkParam);
+        modifier_->setIndicator(node_, &arkParam);
         auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
         auto checkColor = GetAttrValue<std::string>(strWithObj, "fontColor");
         EXPECT_EQ(checkColor, expected);
@@ -563,25 +542,25 @@ HWTEST_F(SwiperModifierTest, setIndicator0TestDigitFontColor, TestSize.Level1)
 }
 
 /**
- * @tc.name: setIndicator0TestBoolean
+ * @tc.name: setIndicatorTestBoolean
  * @tc.desc: Check the functionality of SwiperModifier.IndicatorImpl with Boolean type
  * @tc.type: FUNC
  */
-HWTEST_F(SwiperModifierTest, setIndicator0TestBoolean, TestSize.Level1)
+HWTEST_F(SwiperModifierTest, setIndicatorTestBoolean, TestSize.Level1)
 {
     static const std::string PROP_NAME("indicator");
-    ASSERT_NE(modifier_->setIndicator0, nullptr);
+    ASSERT_NE(modifier_->setIndicator, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, EXPECTED_TRUE);
 
     auto boolIndFalse = ArkUnion<Ark_Union_DotIndicator_DigitIndicator_Boolean, Ark_Boolean>(ABOOL_FALSE);
-    modifier_->setIndicator0(node_, &boolIndFalse);
+    modifier_->setIndicator(node_, &boolIndFalse);
     auto checkFalse = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkFalse, EXPECTED_FALSE);
 
     auto boolIndTrue = ArkUnion<Ark_Union_DotIndicator_DigitIndicator_Boolean, Ark_Boolean>(ABOOL_TRUE);
-    modifier_->setIndicator0(node_, &boolIndTrue);
+    modifier_->setIndicator(node_, &boolIndTrue);
     auto checkTrue = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkTrue, EXPECTED_TRUE);
 }
@@ -630,20 +609,14 @@ HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleSize, TestSize.Level1)
     static const std::string &DEFAULT_VALUE_B(EXPECTED_VP_ZERO);
     static const std::vector<OneTestStep> testPlan = {
         { {.isSidebarMiddle = OPT_BOOL_FALSE, .arrowSize = OPT_LEN_VP_POS}, "1.23vp" },
-        { {.isSidebarMiddle = OPT_BOOL_FALSE, .arrowSize = OPT_LEN_PX_POS}, "1234.00px" },
         { {.isSidebarMiddle = OPT_BOOL_FALSE, .arrowSize = OPT_LEN_VP_NEG}, DEFAULT_VALUE_S },
-        { {.isSidebarMiddle = OPT_BOOL_FALSE, .arrowSize = OPT_LEN_PX_NEG}, DEFAULT_VALUE_S },
-        { {.isSidebarMiddle = OPT_BOOL_FALSE, .arrowSize = {.tag = ARK_TAG_UNDEFINED}}, DEFAULT_VALUE_S },
+        { {.isSidebarMiddle = OPT_BOOL_FALSE, .arrowSize = OPT_LEN_UNDEF}, DEFAULT_VALUE_S },
         { {.isSidebarMiddle = OPT_BOOL_TRUE, .arrowSize = OPT_LEN_VP_POS}, "1.23vp" },
-        { {.isSidebarMiddle = OPT_BOOL_TRUE, .arrowSize = OPT_LEN_PX_POS}, "1234.00px" },
         { {.isSidebarMiddle = OPT_BOOL_TRUE, .arrowSize = OPT_LEN_VP_NEG}, DEFAULT_VALUE_B },
-        { {.isSidebarMiddle = OPT_BOOL_TRUE, .arrowSize = OPT_LEN_PX_NEG}, DEFAULT_VALUE_B },
-        { {.isSidebarMiddle = OPT_BOOL_TRUE, .arrowSize = {.tag = ARK_TAG_UNDEFINED}}, DEFAULT_VALUE_B },
+        { {.isSidebarMiddle = OPT_BOOL_TRUE, .arrowSize = OPT_LEN_UNDEF}, DEFAULT_VALUE_B },
         { {.isSidebarMiddle = OPT_BOOL_UNDEF, .arrowSize = OPT_LEN_VP_POS}, "1.23vp" },
-        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .arrowSize = OPT_LEN_PX_POS}, "1234.00px" },
         { {.isSidebarMiddle = OPT_BOOL_UNDEF, .arrowSize = OPT_LEN_VP_NEG}, DEFAULT_VALUE_S },
-        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .arrowSize = OPT_LEN_PX_NEG}, DEFAULT_VALUE_S },
-        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .arrowSize = {.tag = ARK_TAG_UNDEFINED}}, DEFAULT_VALUE_S },
+        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .arrowSize = OPT_LEN_UNDEF}, DEFAULT_VALUE_S },
     };
 
     ASSERT_NE(modifier_->setDisplayArrow, nullptr);
@@ -659,7 +632,8 @@ HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleSize, TestSize.Level1)
         auto checkVal2 = GetAttrValue<std::string>(node_, PROP_NAME);
         EXPECT_EQ(checkVal2, expect);
         auto checkVal3 = GetAttrValue<std::string>(node_, "isSidebarMiddle");
-        bool expect3 = (style.isSidebarMiddle.tag != ARK_TAG_UNDEFINED && style.isSidebarMiddle.value != 0);
+        auto optExp3 = Converter::OptConvert<bool>(style.isSidebarMiddle);
+        bool expect3 = optExp3 && *optExp3;
         EXPECT_EQ(checkVal3, expect3 ? EXPECTED_TRUE : EXPECTED_FALSE);
     }
 }
@@ -677,20 +651,14 @@ HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleBgSize, TestSize.Level1)
     static const std::string &DEFAULT_VALUE_B(EXPECTED_VP_ZERO);
     static const std::vector<OneTestStep> testPlan = {
         { {.isSidebarMiddle = OPT_BOOL_FALSE, .backgroundSize = OPT_LEN_VP_POS}, "1.23vp" },
-        { {.isSidebarMiddle = OPT_BOOL_FALSE, .backgroundSize = OPT_LEN_PX_POS}, "1234.00px" },
         { {.isSidebarMiddle = OPT_BOOL_FALSE, .backgroundSize = OPT_LEN_VP_NEG}, DEFAULT_VALUE_S },
-        { {.isSidebarMiddle = OPT_BOOL_FALSE, .backgroundSize = OPT_LEN_PX_NEG}, DEFAULT_VALUE_S },
-        { {.isSidebarMiddle = OPT_BOOL_FALSE, .backgroundSize = {.tag = ARK_TAG_UNDEFINED}}, DEFAULT_VALUE_S },
+        { {.isSidebarMiddle = OPT_BOOL_FALSE, .backgroundSize = OPT_LEN_UNDEF}, DEFAULT_VALUE_S },
         { {.isSidebarMiddle = OPT_BOOL_TRUE, .backgroundSize = OPT_LEN_VP_POS}, "1.23vp" },
-        { {.isSidebarMiddle = OPT_BOOL_TRUE, .backgroundSize = OPT_LEN_PX_POS}, "1234.00px" },
         { {.isSidebarMiddle = OPT_BOOL_TRUE, .backgroundSize = OPT_LEN_VP_NEG}, DEFAULT_VALUE_B },
-        { {.isSidebarMiddle = OPT_BOOL_TRUE, .backgroundSize = OPT_LEN_PX_NEG}, DEFAULT_VALUE_B },
-        { {.isSidebarMiddle = OPT_BOOL_TRUE, .backgroundSize = {.tag = ARK_TAG_UNDEFINED}}, DEFAULT_VALUE_B },
+        { {.isSidebarMiddle = OPT_BOOL_TRUE, .backgroundSize = OPT_LEN_UNDEF}, DEFAULT_VALUE_B },
         { {.isSidebarMiddle = OPT_BOOL_UNDEF, .backgroundSize = OPT_LEN_VP_POS}, "1.23vp" },
-        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .backgroundSize = OPT_LEN_PX_POS}, "1234.00px" },
         { {.isSidebarMiddle = OPT_BOOL_UNDEF, .backgroundSize = OPT_LEN_VP_NEG}, DEFAULT_VALUE_S },
-        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .backgroundSize = OPT_LEN_PX_NEG}, DEFAULT_VALUE_S },
-        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .backgroundSize = {.tag = ARK_TAG_UNDEFINED}}, DEFAULT_VALUE_S },
+        { {.isSidebarMiddle = OPT_BOOL_UNDEF, .backgroundSize = OPT_LEN_UNDEF}, DEFAULT_VALUE_S },
     };
 
     ASSERT_NE(modifier_->setDisplayArrow, nullptr);
@@ -725,7 +693,8 @@ HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleColorDefault, TestSize.Leve
     {
         Ark_Union_ArrowStyle_Boolean arkParam = { .selector = 0, .value0 = {
             .isSidebarMiddle = OPT_BOOL_FALSE,
-            .arrowColor = {.tag = ARK_TAG_UNDEFINED}, .backgroundColor = {.tag = ARK_TAG_UNDEFINED}
+            .arrowColor = OPT_COLOR_UNDEF,
+            .backgroundColor = OPT_COLOR_UNDEF,
         } };
         modifier_->setDisplayArrow(node_, &arkParam, nullptr);
         auto defaultSmallArrowColor = GetAttrValue<std::string>(node_, "arrowColor");
@@ -736,7 +705,8 @@ HWTEST_F(SwiperModifierTest, setDisplayArrowTestStyleColorDefault, TestSize.Leve
     {
         Ark_Union_ArrowStyle_Boolean arkParam = { .selector = 0, .value0 = {
             .isSidebarMiddle = OPT_BOOL_TRUE,
-            .arrowColor = {.tag = ARK_TAG_UNDEFINED}, .backgroundColor = {.tag = ARK_TAG_UNDEFINED}
+            .arrowColor = OPT_COLOR_UNDEF,
+            .backgroundColor = OPT_COLOR_UNDEF,
         } };
         modifier_->setDisplayArrow(node_, &arkParam, nullptr);
         auto defaultBigArrowColor = GetAttrValue<std::string>(node_, "arrowColor");
@@ -984,28 +954,28 @@ HWTEST_F(SwiperModifierTest, setCachedCountTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("cachedCount");
     static const int DEFAULT_VALUE(DEFAULT_SWIPER_CACHED_SIZE);
-    ASSERT_NE(modifier_->setCachedCount, nullptr);
+    ASSERT_NE(modifier_->setCachedCount0, nullptr);
 
     auto checkInitial = GetAttrValue<int>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, DEFAULT_VALUE);
 
     Ark_Number numberInt = ArkValue<Ark_Number>(123456);
-    modifier_->setCachedCount(node_, &numberInt);
+    modifier_->setCachedCount0(node_, &numberInt);
     auto checkVal2 = GetAttrValue<int>(node_, PROP_NAME);
     EXPECT_EQ(checkVal2, 123456);
 
     Ark_Number numberFlt = ArkValue<Ark_Number>(1.23456f);
-    modifier_->setCachedCount(node_, &numberFlt);
+    modifier_->setCachedCount0(node_, &numberFlt);
     auto checkVal3 = GetAttrValue<int>(node_, PROP_NAME);
     EXPECT_EQ(checkVal3, 1);
 
     Ark_Number numberIntNeg = ArkValue<Ark_Number>(-111);
-    modifier_->setCachedCount(node_, &numberIntNeg);
+    modifier_->setCachedCount0(node_, &numberIntNeg);
     auto checkVal4 = GetAttrValue<int>(node_, PROP_NAME);
     EXPECT_EQ(checkVal4, DEFAULT_VALUE);
 
     Ark_Number numberFltNeg = ArkValue<Ark_Number>(-1.111f);
-    modifier_->setCachedCount(node_, &numberFltNeg);
+    modifier_->setCachedCount0(node_, &numberFltNeg);
     auto checkVal5 = GetAttrValue<int>(node_, PROP_NAME);
     EXPECT_EQ(checkVal5, DEFAULT_VALUE);
 }
@@ -1329,21 +1299,21 @@ HWTEST_F(SwiperModifierTest, setIndicatorStyleTest, TestSize.Level1)
 {
     static const std::string PROP_NAME("indicator");
     ASSERT_NE(modifier_->setIndicatorStyle, nullptr);
-    ASSERT_NE(modifier_->setIndicator0, nullptr);
+    ASSERT_NE(modifier_->setIndicator, nullptr);
 
     auto checkValInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkValInitial, EXPECTED_TRUE);
 
-    Opt_IndicatorStyle style = {.tag = ARK_TAG_OBJECT, .value = {
-        .left = OPT_LEN_PX_NEG,
+    Opt_IndicatorStyle style = Converter::ArkValue<Opt_IndicatorStyle>(Ark_IndicatorStyle{
+        .left = OPT_LEN_VP_NEG,
         .top = OPT_LEN_VP_NEG,
-        .right = OPT_LEN_PX_POS,
+        .right = OPT_LEN_VP_POS,
         .bottom = OPT_LEN_VP_POS,
-        .size = OPT_LEN_PX_POS,
+        .size = OPT_LEN_VP_POS,
         .mask = OPT_BOOL_TRUE,
         .color = ArkUnion<Opt_ResourceColor, Ark_Number>(0x12345678),
         .selectedColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
-    }};
+    });
     modifier_->setIndicatorStyle(node_, &style);
     auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
     ASSERT_NE(strWithObj, EXPECTED_TRUE);
@@ -1354,18 +1324,18 @@ HWTEST_F(SwiperModifierTest, setIndicatorStyleTest, TestSize.Level1)
     auto checkT = GetAttrValue<std::string>(strWithObj, "top");
     EXPECT_EQ(checkT, "0.00vp");
     auto checkR = GetAttrValue<std::string>(strWithObj, "right");
-    EXPECT_EQ(checkR, "1234.00px");
+    EXPECT_EQ(checkR, "1.23vp");
     auto checkB = GetAttrValue<std::string>(strWithObj, "bottom");
     EXPECT_EQ(checkB, "1.23vp");
 
     auto checkW = GetAttrValue<std::string>(strWithObj, "itemWidth");
-    EXPECT_EQ(checkW, "1234.00px");
+    EXPECT_EQ(checkW, "1.23vp");
     auto checkH = GetAttrValue<std::string>(strWithObj, "itemHeight");
-    EXPECT_EQ(checkH, "1234.00px");
+    EXPECT_EQ(checkH, "1.23vp");
     auto checkSelW = GetAttrValue<std::string>(strWithObj, "selectedItemWidth");
-    EXPECT_EQ(checkSelW, "1234.00px");
+    EXPECT_EQ(checkSelW, "1.23vp");
     auto checkSelH = GetAttrValue<std::string>(strWithObj, "selectedItemHeight");
-    EXPECT_EQ(checkSelH, "1234.00px");
+    EXPECT_EQ(checkSelH, "1.23vp");
 
     auto checkMask = GetAttrValue<std::string>(strWithObj, "mask");
     EXPECT_EQ(checkMask, EXPECTED_TRUE);
@@ -1387,12 +1357,12 @@ HWTEST_F(SwiperModifierTest, setIndicatorStyleTestInvalid, TestSize.Level1)
     static const std::string DEFAULT_PADDING("0.00vp");
     static const std::string DEFAULT_SIZE(THEME_SWIPER_INDICATOR_SIZE.ToString());
     ASSERT_NE(modifier_->setIndicatorStyle, nullptr);
-    ASSERT_NE(modifier_->setIndicator0, nullptr);
+    ASSERT_NE(modifier_->setIndicator, nullptr);
 
     auto checkInitial = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkInitial, EXPECTED_TRUE);
 
-    Opt_IndicatorStyle styleInvalid = {.tag = ARK_TAG_UNDEFINED };
+    Opt_IndicatorStyle styleInvalid = Converter::ArkValue<Opt_IndicatorStyle>();
     modifier_->setIndicatorStyle(node_, &styleInvalid);
     auto strWithObj = GetAttrValue<std::string>(node_, PROP_NAME);
     ASSERT_NE(strWithObj, EXPECTED_TRUE);
@@ -1444,24 +1414,24 @@ HWTEST_F(SwiperModifierTest, setPrevMarginTest, TestSize.Level1)
     EXPECT_EQ(checkInitOpt, EXPECTED_FALSE);
 
     // test the main arg
-    modifier_->setPrevMargin(node_, &ALEN_PX_POS, nullptr);
+    modifier_->setPrevMargin(node_, &ALEN_VP_POS, nullptr);
     auto checkPxPos = GetAttrValue<std::string>(node_, PROP_NAME);
-    EXPECT_EQ(checkPxPos, EXPECTED_PX_POS);
+    EXPECT_EQ(checkPxPos, EXPECTED_VP_POS);
     modifier_->setPrevMargin(node_, &ALEN_VP_NEG, nullptr);
     auto checkVpNeg = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVpNeg, DEFAULT_VALUE);
 
     // test the optional arg
-    modifier_->setPrevMargin(node_, &ALEN_PX_POS, &OPT_BOOL_TRUE);
+    modifier_->setPrevMargin(node_, &ALEN_VP_POS, &OPT_BOOL_TRUE);
     auto checkOptTrue = GetAttrValue<std::string>(node_, PROP_NAME_OPT);
     EXPECT_EQ(checkOptTrue, EXPECTED_TRUE);
-    modifier_->setPrevMargin(node_, &ALEN_PX_POS, &OPT_BOOL_UNDEF);
+    modifier_->setPrevMargin(node_, &ALEN_VP_POS, &OPT_BOOL_UNDEF);
     auto checkOptUndef = GetAttrValue<std::string>(node_, PROP_NAME_OPT);
     EXPECT_EQ(checkOptUndef, EXPECTED_TRUE); // nothing change with the undefined optional param
-    modifier_->setPrevMargin(node_, &ALEN_PX_POS, nullptr);
+    modifier_->setPrevMargin(node_, &ALEN_VP_POS, nullptr);
     auto checkOptNull = GetAttrValue<std::string>(node_, PROP_NAME_OPT);
     EXPECT_EQ(checkOptNull, EXPECTED_TRUE); // nothing change with no optional param
-    modifier_->setPrevMargin(node_, &ALEN_PX_POS, &OPT_BOOL_FALSE);
+    modifier_->setPrevMargin(node_, &ALEN_VP_POS, &OPT_BOOL_FALSE);
     auto checkOptFalse = GetAttrValue<std::string>(node_, PROP_NAME_OPT);
     EXPECT_EQ(checkOptFalse, EXPECTED_FALSE);
 }
@@ -1484,24 +1454,24 @@ HWTEST_F(SwiperModifierTest, setNextMarginTest, TestSize.Level1)
     EXPECT_EQ(checkInitOpt, EXPECTED_FALSE);
 
     // test the main arg
-    modifier_->setNextMargin(node_, &ALEN_PX_POS, nullptr);
+    modifier_->setNextMargin(node_, &ALEN_VP_POS, nullptr);
     auto checkPxPos = GetAttrValue<std::string>(node_, PROP_NAME);
-    EXPECT_EQ(checkPxPos, EXPECTED_PX_POS);
+    EXPECT_EQ(checkPxPos, EXPECTED_VP_POS);
     modifier_->setNextMargin(node_, &ALEN_VP_NEG, nullptr);
     auto checkVpNeg = GetAttrValue<std::string>(node_, PROP_NAME);
     EXPECT_EQ(checkVpNeg, DEFAULT_VALUE);
 
     // test the optional arg
-    modifier_->setNextMargin(node_, &ALEN_PX_POS, &OPT_BOOL_TRUE);
+    modifier_->setNextMargin(node_, &ALEN_VP_POS, &OPT_BOOL_TRUE);
     auto checkOptTrue = GetAttrValue<std::string>(node_, PROP_NAME_OPT);
     EXPECT_EQ(checkOptTrue, EXPECTED_TRUE);
-    modifier_->setNextMargin(node_, &ALEN_PX_POS, &OPT_BOOL_UNDEF);
+    modifier_->setNextMargin(node_, &ALEN_VP_POS, &OPT_BOOL_UNDEF);
     auto checkOptUndef = GetAttrValue<std::string>(node_, PROP_NAME_OPT);
     EXPECT_EQ(checkOptUndef, EXPECTED_TRUE); // nothing change with the undefined optional param
-    modifier_->setNextMargin(node_, &ALEN_PX_POS, nullptr);
+    modifier_->setNextMargin(node_, &ALEN_VP_POS, nullptr);
     auto checkOptNull = GetAttrValue<std::string>(node_, PROP_NAME_OPT);
     EXPECT_EQ(checkOptNull, EXPECTED_TRUE); // nothing change with no optional param
-    modifier_->setNextMargin(node_, &ALEN_PX_POS, &OPT_BOOL_FALSE);
+    modifier_->setNextMargin(node_, &ALEN_VP_POS, &OPT_BOOL_FALSE);
     auto checkOptFalse = GetAttrValue<std::string>(node_, PROP_NAME_OPT);
     EXPECT_EQ(checkOptFalse, EXPECTED_FALSE);
 }

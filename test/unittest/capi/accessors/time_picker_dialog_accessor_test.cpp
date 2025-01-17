@@ -57,12 +57,10 @@ HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorDialogPropertiesT
         Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>(TEST_COLOR));
     Ark_ShadowOptions shadow = {
         .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(TEST_COLOR),
-        .offsetX = { .tag = ARK_TAG_OBJECT,
-            .value = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(TEST_SIZE) },
-        .offsetY = { .tag = ARK_TAG_OBJECT,
-            .value = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(TEST_SIZE) },
+        .offsetX = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(TEST_SIZE),
+        .offsetY = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(TEST_SIZE),
         .radius = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(TEST_RADIUS_SIZE),
-        .type = { .tag = ARK_TAG_OBJECT, .value = ARK_SHADOW_TYPE_COLOR }
+        .type = Converter::ArkValue<Opt_ShadowType>(ARK_SHADOW_TYPE_COLOR),
     };
     arkOptions.shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(shadow);
     arkOptions.enableHoverMode = Converter::ArkValue<Opt_Boolean>(true);
@@ -154,7 +152,7 @@ HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorButtonInfosTest, 
     ASSERT_NE(accessor_->show, nullptr);
 
     Ark_TimePickerDialogOptions arkOptions;
-    
+
     Ark_PickerDialogButtonStyle buttonStyle = {
         .fontSize = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(TEST_SIZE)),
         .fontColor = Converter::ArkValue<Opt_ResourceColor>(
@@ -184,7 +182,7 @@ HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorButtonInfosTest, 
 HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorSettingDataTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->show, nullptr);
-    
+
     Ark_TimePickerDialogOptions arkOptions;
 
     arkOptions.useMilitaryTime = Converter::ArkValue<Opt_Boolean>(Converter::ArkValue<Ark_Boolean>(true));
@@ -223,7 +221,7 @@ HWTEST_F(TimePickerDialogAccessorTest, timePickerDialogAccessorPickerPropertyTes
 
     Ark_TimePickerDialogOptions arkOptions;
     arkOptions.selected = testDate;
-    
+
     Opt_TimePickerDialogOptions options = Converter::ArkValue<Opt_TimePickerDialogOptions>(arkOptions);
     accessor_->show(&options);
 

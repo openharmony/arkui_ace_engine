@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -52,10 +52,14 @@ const auto ATTRIBUTE_FLING_SPEED_LIMIT_NAME = "flingSpeedLimit";
 const auto ATTRIBUTE_FLING_SPEED_LIMIT_DEFAULT_VALUE = "9000.00vp";
 const auto ATTRIBUTE_CLIP_CONTENT_NAME = "clipContent";
 const auto ATTRIBUTE_CLIP_CONTENT_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME = "digitalCrownSensitivity";
+const auto ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_NAME = "edgeEffect";
 const auto ATTRIBUTE_EDGE_EFFECT_I_EDGE_EFFECT_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_ALWAYS_ENABLED_NAME = "alwaysEnabled";
 const auto ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_ALWAYS_ENABLED_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_NAME = "effectEdge";
+const auto ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_FADING_EDGE_NAME = "fadingEdge";
 const auto ATTRIBUTE_FADING_EDGE_DEFAULT_VALUE = "false";
 const auto ATTRIBUTE_FADING_EDGE_OPTION_I_FADING_EDGE_LENGTH_NAME = "fadingEdgeLength";
@@ -761,6 +765,85 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setClipContentTestClipCont
 }
 
 /*
+ * @tc.name: setDigitalCrownSensitivityTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setDigitalCrownSensitivityTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE) <<
+        "Default value for attribute 'digitalCrownSensitivity'";
+}
+
+/*
+ * @tc.name: setDigitalCrownSensitivityTestDigitalCrownSensitivityValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setDigitalCrownSensitivityTestDigitalCrownSensitivityValidValues,
+    TestSize.Level1)
+{
+    Opt_CrownSensitivity initValueDigitalCrownSensitivity;
+
+    // Initial setup
+    initValueDigitalCrownSensitivity =
+        ArkValue<Opt_CrownSensitivity>(std::get<1>(Fixtures::testFixtureEnumCrownSensitivityValidValues[0]));
+
+    auto checkValue = [this, &initValueDigitalCrownSensitivity](
+                          const std::string& input, const std::string& expectedStr, const Opt_CrownSensitivity& value) {
+        Opt_CrownSensitivity inputValueDigitalCrownSensitivity = initValueDigitalCrownSensitivity;
+
+        inputValueDigitalCrownSensitivity = value;
+        modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input <<
+                                          ", method: setDigitalCrownSensitivity, attribute: digitalCrownSensitivity";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumCrownSensitivityValidValues) {
+        checkValue(input, expected, ArkValue<Opt_CrownSensitivity>(value));
+    }
+}
+
+/*
+ * @tc.name: setDigitalCrownSensitivityTestDigitalCrownSensitivityInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollableCommonMethodModifierTest,
+    DISABLED_setDigitalCrownSensitivityTestDigitalCrownSensitivityInvalidValues, TestSize.Level1)
+{
+    Opt_CrownSensitivity initValueDigitalCrownSensitivity;
+
+    // Initial setup
+    initValueDigitalCrownSensitivity =
+        ArkValue<Opt_CrownSensitivity>(std::get<1>(Fixtures::testFixtureEnumCrownSensitivityValidValues[0]));
+
+    auto checkValue = [this, &initValueDigitalCrownSensitivity](
+                          const std::string& input, const Opt_CrownSensitivity& value) {
+        Opt_CrownSensitivity inputValueDigitalCrownSensitivity = initValueDigitalCrownSensitivity;
+
+        modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
+        inputValueDigitalCrownSensitivity = value;
+        modifier_->setDigitalCrownSensitivity(node_, &inputValueDigitalCrownSensitivity);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_DIGITAL_CROWN_SENSITIVITY_DEFAULT_VALUE) <<
+            "Input value is: " << input
+            << ", method: setDigitalCrownSensitivity, attribute: digitalCrownSensitivity";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumCrownSensitivityInvalidValues) {
+        checkValue(input, ArkValue<Opt_CrownSensitivity>(value));
+    }
+}
+
+/*
  * @tc.name: setEdgeEffectTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -781,6 +864,10 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestDefaultVa
     resultStr = GetAttrValue<std::string>(resultOptions, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_ALWAYS_ENABLED_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_ALWAYS_ENABLED_DEFAULT_VALUE) <<
         "Default value for attribute 'edgeEffect.options.alwaysEnabled'";
+
+    resultStr = GetAttrValue<std::string>(resultOptions, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_DEFAULT_VALUE) <<
+        "Default value for attribute 'edgeEffect.options.effectEdge'";
 }
 
 /*
@@ -796,6 +883,8 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffec
     // Initial setup
     initValueEdgeEffect = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
     WriteTo(initValueOptions).alwaysEnabled = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    WriteTo(initValueOptions).effectEdge =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
     auto checkValue = [this, &initValueEdgeEffect, &initValueOptions](
                           const std::string& input, const std::string& expectedStr, const Ark_EdgeEffect& value) {
@@ -830,6 +919,8 @@ HWTEST_P(
     // Initial setup
     initValueEdgeEffect = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
     WriteTo(initValueOptions).alwaysEnabled = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    WriteTo(initValueOptions).effectEdge =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
     auto checkValue = [this, &initValueEdgeEffect, &initValueOptions](
                           const std::string& input, const Ark_EdgeEffect& value) {
@@ -865,6 +956,8 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffec
     // Initial setup
     initValueEdgeEffect = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
     WriteTo(initValueOptions).alwaysEnabled = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    WriteTo(initValueOptions).effectEdge =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
 
     auto checkValue = [this, &initValueEdgeEffect, &initValueOptions](
                           const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
@@ -886,6 +979,82 @@ HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffec
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
         checkValue(input, expected, value);
     }
+}
+
+/*
+ * @tc.name: setEdgeEffectTestEdgeEffectOptionsEffectEdgeValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffectOptionsEffectEdgeValidValues,
+    TestSize.Level1)
+{
+    Ark_EdgeEffect initValueEdgeEffect;
+    Opt_EdgeEffectOptions initValueOptions;
+
+    // Initial setup
+    initValueEdgeEffect = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
+    WriteTo(initValueOptions).alwaysEnabled = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    WriteTo(initValueOptions).effectEdge =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueEdgeEffect, &initValueOptions](
+                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
+        Ark_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
+        Opt_EdgeEffectOptions inputValueOptions = initValueOptions;
+
+        WriteTo(inputValueOptions).effectEdge = value;
+        modifier_->setEdgeEffect(node_, inputValueEdgeEffect, &inputValueOptions);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultEdgeEffect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
+        auto resultOptions =
+            GetAttrValue<std::unique_ptr<JsonValue>>(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultOptions, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEdgeEffect, attribute: edgeEffect.options.effectEdge";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Number>(value));
+    }
+}
+
+/*
+ * @tc.name: setEdgeEffectTestEdgeEffectOptionsEffectEdgeInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_P(ScrollableCommonMethodModifierTest, DISABLED_setEdgeEffectTestEdgeEffectOptionsEffectEdgeInvalidValues,
+    TestSize.Level1)
+{
+    Ark_EdgeEffect initValueEdgeEffect;
+    Opt_EdgeEffectOptions initValueOptions;
+
+    // Initial setup
+    initValueEdgeEffect = std::get<1>(Fixtures::testFixtureEnumEdgeEffectValidValues[0]);
+    WriteTo(initValueOptions).alwaysEnabled = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+    WriteTo(initValueOptions).effectEdge =
+        ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueEdgeEffect, &initValueOptions](
+                          const std::string& input, const Opt_Number& value) {
+        Ark_EdgeEffect inputValueEdgeEffect = initValueEdgeEffect;
+        Opt_EdgeEffectOptions inputValueOptions = initValueOptions;
+
+        modifier_->setEdgeEffect(node_, inputValueEdgeEffect, &inputValueOptions);
+        WriteTo(inputValueOptions).effectEdge = value;
+        modifier_->setEdgeEffect(node_, inputValueEdgeEffect, &inputValueOptions);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultEdgeEffect = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_EDGE_EFFECT_NAME);
+        auto resultOptions =
+            GetAttrValue<std::unique_ptr<JsonValue>>(resultEdgeEffect, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_NAME);
+        auto resultStr = GetAttrValue<std::string>(resultOptions, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_EDGE_EFFECT_I_OPTIONS_I_EFFECT_EDGE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setEdgeEffect, attribute: edgeEffect.options.effectEdge";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Number>());
 }
 
 /*

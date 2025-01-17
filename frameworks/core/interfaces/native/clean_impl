@@ -1,0 +1,4 @@
+cd implementation
+#for f in ./*.cpp; do sed -i -E '/ DestroyPeerImpl/{n;n;N;N;N;d}' $f; done
+for f in ./*.cpp; do sed -i -E '/ DestroyPeerImpl/{n;N;/\{\n\}/{n;n;n;s/new [A-Za-z0-9]*\(\)/nullptr/;}}' $f; done
+cd ..

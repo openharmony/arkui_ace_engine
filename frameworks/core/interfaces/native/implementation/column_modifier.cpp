@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,8 +62,8 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
 }
 } // ColumnModifier
 namespace ColumnInterfaceModifier {
-void SetColumnOptionsImpl(Ark_NativePointer node,
-                          const Opt_ColumnOptions* options)
+void SetColumnOptions0Impl(Ark_NativePointer node,
+                           const Opt_ColumnOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -72,6 +72,14 @@ void SetColumnOptionsImpl(Ark_NativePointer node,
     if (opts) {
         ColumnModelNG::SetSpace(frameNode, opts->space);
     }
+}
+void SetColumnOptions1Impl(Ark_NativePointer node,
+                           const Opt_Union_ColumnOptions_ColumnOptionsV2* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = options ? Converter::OptConvert<type>(*options) : std::nullopt;
+    //ColumnModelNG::SetSetColumnOptions1(frameNode, convValue);
 }
 } // ColumnInterfaceModifier
 namespace ColumnAttributeModifier {
@@ -143,7 +151,8 @@ const GENERATED_ArkUIColumnModifier* GetColumnModifier()
 {
     static const GENERATED_ArkUIColumnModifier ArkUIColumnModifierImpl {
         ColumnModifier::ConstructImpl,
-        ColumnInterfaceModifier::SetColumnOptionsImpl,
+        ColumnInterfaceModifier::SetColumnOptions0Impl,
+        ColumnInterfaceModifier::SetColumnOptions1Impl,
         ColumnAttributeModifier::AlignItemsImpl,
         ColumnAttributeModifier::JustifyContentImpl,
         ColumnAttributeModifier::PointLightImpl,

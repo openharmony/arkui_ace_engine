@@ -126,7 +126,7 @@ HWTEST_F(CommonMethodModifierTest6, setTransformTestDefaultValues, TestSize.Leve
 HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestValidValues, TestSize.Level1)
 {
     LOGE("Custom objects are not supported.");
-    ASSERT_NE(modifier_->setTransform, nullptr);
+    ASSERT_NE(modifier_->setTransform0, nullptr);
     using OneTestStep = std::tuple<Ark_CustomObject, std::string>;
     double matrix1[4][4] = {{11, 12, 13, 14}, {21, 22, 23, 24}, {31, 32, 33, 34}, {41, 42, 43, 44}};
     double matrix2[4][4] = {{22, 24, 26, 28}, {42, 44, 46, 48}, {62, 64, 66, 68}, {82, 84, 86, 88}};
@@ -145,7 +145,7 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestValidValues, TestSi
             "28.000000,48.000000,68.000000,88.000000,\"}"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setTransform(node_, &inputValue);
+        modifier_->setTransform0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_TRANSFORM_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -159,7 +159,7 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestValidValues, TestSi
  */
 HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTransform, nullptr);
+    ASSERT_NE(modifier_->setTransform0, nullptr);
     using OneTestStep = std::tuple<Ark_CustomObject, std::string>;
     Ark_CustomObject invalidValue1 = {};
     Ark_CustomObject invalidValue2 = {};
@@ -179,7 +179,7 @@ HWTEST_F(CommonMethodModifierTest6, DISABLED_setTransformTestInvalidValues, Test
         {invalidValue3, ATTRIBUTE_TRANSFORM_DEFAULT_VALUE},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setTransform(node_, &inputValue);
+        modifier_->setTransform0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_TRANSFORM_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -204,7 +204,7 @@ HWTEST_F(CommonMethodModifierTest6, setClickEffectTestDefaultValues, TestSize.Le
  */
 HWTEST_F(CommonMethodModifierTest6, setClickEffectTestValidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setClickEffect, nullptr);
+    ASSERT_NE(modifier_->setClickEffect0, nullptr);
     using OneTestStep = std::tuple<Opt_ClickEffect, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_ClickEffect>(ClickEffect({.level = ARK_CLICK_EFFECT_LEVEL_LIGHT, .scale = 0.5f})),
@@ -215,7 +215,7 @@ HWTEST_F(CommonMethodModifierTest6, setClickEffectTestValidValues, TestSize.Leve
             "{\"level\":\"2\",\"scale\":\"2.500000\"}"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setClickEffect(node_, &inputValue);
+        modifier_->setClickEffect0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_CLICK_EFFECT_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
@@ -229,7 +229,7 @@ HWTEST_F(CommonMethodModifierTest6, setClickEffectTestValidValues, TestSize.Leve
  */
 HWTEST_F(CommonMethodModifierTest6, setClickEffectTestInvalidValues, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setClickEffect, nullptr);
+    ASSERT_NE(modifier_->setClickEffect0, nullptr);
     using OneTestStep = std::tuple<Opt_ClickEffect, std::string>;
     static const std::vector<OneTestStep> testPlan = {
         {Converter::ArkValue<Opt_ClickEffect>(), ""},
@@ -240,12 +240,12 @@ HWTEST_F(CommonMethodModifierTest6, setClickEffectTestInvalidValues, TestSize.Le
             "{\"level\":\"2\",\"scale\":\"-2.500000\"}"},
     };
     for (auto [inputValue, expectedValue]: testPlan) {
-        modifier_->setClickEffect(node_, &inputValue);
+        modifier_->setClickEffect0(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_CLICK_EFFECT_NAME);
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
-    modifier_->setClickEffect(node_, nullptr);
+    modifier_->setClickEffect0(node_, nullptr);
     auto fullJson = GetJsonValue(node_);
     auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_CLICK_EFFECT_NAME);
     auto expectedValue = "";

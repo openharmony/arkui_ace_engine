@@ -74,15 +74,11 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestDefaultValues, TestSize.L
         checkInvokeStop = true;
     });
 
-
     TextClockControllerPeer peer;
-    Opt_TextClockController controller = { .tag = ARK_TAG_OBJECT, .value.ptr = &peer };
-    ASSERT_NE(controller.value.ptr, nullptr);
-    auto timeZoneOffset = Converter::ArkValue<Opt_Number>(0);
-    Opt_TextClockOptions realInputValue = {.tag = ARK_TAG_OBJECT,
-        .value = {
-            .timeZoneOffset = timeZoneOffset,
-            .controller = controller}};
+    Opt_TextClockOptions realInputValue = Converter::ArkValue<Opt_TextClockOptions>(Ark_TextClockOptions{
+        .timeZoneOffset = Converter::ArkValue<Opt_Number>(0),
+        .controller = Converter::ArkValue<Opt_TextClockController>(Ark_TextClockController{&peer}),
+    });
     modifier_->setTextClockOptions(node_, &realInputValue);
 
     ASSERT_NE(peer.controller, nullptr);
@@ -135,7 +131,7 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestValidValues, TestSize.Lev
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    Opt_TextClockOptions inputValueOptions = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Opt_TextClockOptions inputValueOptions = Converter::ArkValue<Opt_TextClockOptions>();
 
     // Verifying attribute's  values
     for (auto& [print, input, expectedStr]: setTextClockOptionsOptionsValidValues) {
@@ -166,7 +162,7 @@ HWTEST_F(TextClockModifierTest, setTextClockOptionsTestInvalidValues, TestSize.L
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Opt_TextClockOptions realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Opt_TextClockOptions realInputValue = Converter::ArkValue<Opt_TextClockOptions>();
     Ark_TextClockOptions& inputValueOptions = realInputValue.value;
     Ark_TextClockOptions initValueOptions;
 

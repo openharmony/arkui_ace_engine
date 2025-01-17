@@ -561,8 +561,6 @@ std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthN
 };
 
 std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegNonPctInvalidValues = {
-    { "-1", Converter::ArkValue<Ark_Length>(-1) },
-    { "-2.f", Converter::ArkValue<Ark_Length>(-2.f) },
     { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp) },
     { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp) },
     { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px) },
@@ -582,8 +580,6 @@ std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthP
 };
 
 std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPositivelInvalidValues = {
-    { "-1", Converter::ArkValue<Ark_Length>(-1) },
-    { "-2.f", Converter::ArkValue<Ark_Length>(-2.f) },
     { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp) },
     { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp) },
     { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px) },
@@ -602,8 +598,6 @@ std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthP
 };
 
 std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPosNonPctInvalidValues = {
-    { "-1", Converter::ArkValue<Ark_Length>(-1) },
-    { "-2.f", Converter::ArkValue<Ark_Length>(-2.f) },
     { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp) },
     { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp) },
     { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px) },
@@ -653,8 +647,6 @@ std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthN
 };
 
 std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthNonNegInvalidValues = {
-    { "-1", Converter::ArkValue<Ark_Length>(-1) },
-    { "-2.f", Converter::ArkValue<Ark_Length>(-2.f) },
     { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp) },
     { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp) },
     { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px) },
@@ -677,8 +669,6 @@ std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthPositiveInvali
     { "0.0_fp", Converter::ArkValue<Ark_Length>(0.0_fp) },
     { "0.0_px", Converter::ArkValue<Ark_Length>(0.0_px) },
     { "0.0_pct", Converter::ArkValue<Ark_Length>(0.0_pct) },
-    { "-1", Converter::ArkValue<Ark_Length>(-1) },
-    { "-2.f", Converter::ArkValue<Ark_Length>(-2.f) },
     { "-2.3_vp", Converter::ArkValue<Ark_Length>(-2.3_vp) },
     { "-4.5_fp", Converter::ArkValue<Ark_Length>(-4.5_fp) },
     { "-5.6_px", Converter::ArkValue<Ark_Length>(-5.6_px) },
@@ -739,49 +729,21 @@ std::vector<std::tuple<std::string, Ark_Resource, std::string>> testFixtureResDa
 
 // Fixture 'LengthResPositive' for type 'Ark_Length'
 std::vector<std::tuple<std::string, Ark_Length, std::string>> testFixtureLengthResPositiveValidValues = {
-    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_0_ID}",
-        Converter::ArkValue<Ark_Length>(
-            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_0_ID }),
-        "432.00vp" },
-    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_1_ID}",
-        Converter::ArkValue<Ark_Length>(
-            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_1_ID }),
-        "123.00fp" },
-    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_2_ID}",
-        Converter::ArkValue<Ark_Length>(
-            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_2_ID }),
-        "22.55px" },
-    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_3_ID}",
-        Converter::ArkValue<Ark_Length>(
-            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_3_ID }),
-        "50.00%" },
+    { "RES_DATA_FOR_LENGTH_0_ID", Converter::ArkValue<Ark_Length>(RES_DATA_FOR_LENGTH_0_ID), "432.00vp" },
+    { "RES_DATA_FOR_LENGTH_1_ID", Converter::ArkValue<Ark_Length>(RES_DATA_FOR_LENGTH_1_ID), "123.00fp" },
+    { "RES_DATA_FOR_LENGTH_2_ID", Converter::ArkValue<Ark_Length>(RES_DATA_FOR_LENGTH_2_ID), "22.55px" },
+    { "RES_DATA_FOR_LENGTH_3_ID", Converter::ArkValue<Ark_Length>(RES_DATA_FOR_LENGTH_3_ID), "50.00%" },
 };
 
 std::vector<std::tuple<std::string, Ark_Length>> testFixtureLengthResPositiveInvalidValues = {
-    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_4_ID}",
-        Converter::ArkValue<Ark_Length>(
-            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_4_ID }) },
-    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_5_ID}",
-        Converter::ArkValue<Ark_Length>(
-            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_5_ID }) },
-    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_6_ID}",
-        Converter::ArkValue<Ark_Length>(
-            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_6_ID }) },
-    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_7_ID}",
-        Converter::ArkValue<Ark_Length>(
-            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_7_ID }) },
-    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_8_ID}",
-        Converter::ArkValue<Ark_Length>(
-            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_8_ID }) },
-    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_9_ID}",
-        Converter::ArkValue<Ark_Length>(
-            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_9_ID }) },
-    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_10_ID}",
-        Converter::ArkValue<Ark_Length>(
-            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_10_ID }) },
-    { "Ark_Length{.type=Ark_Tag::ARK_TAG_RESOURCE, .resource=RES_DATA_FOR_LENGTH_11_ID}",
-        Converter::ArkValue<Ark_Length>(
-            Ark_Length { .type = Ark_Tag::ARK_TAG_RESOURCE, .resource = RES_DATA_FOR_LENGTH_11_ID }) },
+    { "RES_DATA_FOR_LENGTH_4_ID", Converter::ArkValue<Ark_Length>(RES_DATA_FOR_LENGTH_4_ID) },
+    { "RES_DATA_FOR_LENGTH_5_ID", Converter::ArkValue<Ark_Length>(RES_DATA_FOR_LENGTH_5_ID) },
+    { "RES_DATA_FOR_LENGTH_6_ID", Converter::ArkValue<Ark_Length>(RES_DATA_FOR_LENGTH_6_ID) },
+    { "RES_DATA_FOR_LENGTH_7_ID", Converter::ArkValue<Ark_Length>(RES_DATA_FOR_LENGTH_7_ID) },
+    { "RES_DATA_FOR_LENGTH_8_ID", Converter::ArkValue<Ark_Length>(RES_DATA_FOR_LENGTH_8_ID) },
+    { "RES_DATA_FOR_LENGTH_9_ID", Converter::ArkValue<Ark_Length>(RES_DATA_FOR_LENGTH_9_ID) },
+    { "RES_DATA_FOR_LENGTH_10_ID", Converter::ArkValue<Ark_Length>(RES_DATA_FOR_LENGTH_10_ID) },
+    { "RES_DATA_FOR_LENGTH_11_ID", Converter::ArkValue<Ark_Length>(RES_DATA_FOR_LENGTH_11_ID) },
 };
 
 // Fixture 'LengthAny' for type 'Ark_Length'

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -344,11 +344,11 @@ HWTEST_P(CommonMethodModifierTest, setFocusOnTouchTestFocusOnTouchValidValues, T
 }
 
 /*
- * @tc.name: setMotionBlurTestDefaultValues
+ * @tc.name: setMotionBlur0TestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setMotionBlurTestDefaultValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setMotionBlur0TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultMotionBlur =
@@ -371,11 +371,11 @@ HWTEST_P(CommonMethodModifierTest, setMotionBlurTestDefaultValues, TestSize.Leve
 }
 
 /*
- * @tc.name: setMotionBlurTestMotionBlurRadiusValidValues
+ * @tc.name: setMotionBlur0TestMotionBlurRadiusValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setMotionBlurTestMotionBlurRadiusValidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setMotionBlur0TestMotionBlurRadiusValidValues, TestSize.Level1)
 {
     Ark_MotionBlurOptions initValueMotionBlur;
 
@@ -389,12 +389,12 @@ HWTEST_P(CommonMethodModifierTest, setMotionBlurTestMotionBlurRadiusValidValues,
         Ark_MotionBlurOptions inputValueMotionBlur = initValueMotionBlur;
 
         inputValueMotionBlur.radius = value;
-        modifier_->setMotionBlur(node_, &inputValueMotionBlur);
+        modifier_->setMotionBlur0(node_, &inputValueMotionBlur);
         auto jsonValue = GetJsonValue(node_);
         auto resultMotionBlur = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MOTION_BLUR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultMotionBlur, ATTRIBUTE_MOTION_BLUR_I_RADIUS_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setMotionBlur, attribute: motionBlur.radius";
+            "Input value is: " << input << ", method: setMotionBlur0, attribute: motionBlur.radius";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureMotionBlurRadiusNumberValidValues) {
@@ -403,11 +403,11 @@ HWTEST_P(CommonMethodModifierTest, setMotionBlurTestMotionBlurRadiusValidValues,
 }
 
 /*
- * @tc.name: setMotionBlurTestMotionBlurAnchorXValidValues
+ * @tc.name: setMotionBlur0TestMotionBlurAnchorXValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setMotionBlurTestMotionBlurAnchorXValidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setMotionBlur0TestMotionBlurAnchorXValidValues, TestSize.Level1)
 {
     Ark_MotionBlurOptions initValueMotionBlur;
 
@@ -421,14 +421,14 @@ HWTEST_P(CommonMethodModifierTest, setMotionBlurTestMotionBlurAnchorXValidValues
         Ark_MotionBlurOptions inputValueMotionBlur = initValueMotionBlur;
 
         inputValueMotionBlur.anchor.x = value;
-        modifier_->setMotionBlur(node_, &inputValueMotionBlur);
+        modifier_->setMotionBlur0(node_, &inputValueMotionBlur);
         auto jsonValue = GetJsonValue(node_);
         auto resultMotionBlur = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MOTION_BLUR_NAME);
         auto resultAnchor =
             GetAttrValue<std::unique_ptr<JsonValue>>(resultMotionBlur, ATTRIBUTE_MOTION_BLUR_I_ANCHOR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultAnchor, ATTRIBUTE_MOTION_BLUR_I_ANCHOR_I_X_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setMotionBlur, attribute: motionBlur.anchor.x";
+            "Input value is: " << input << ", method: setMotionBlur0, attribute: motionBlur.anchor.x";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureMotionBlurAnchorNumberValidValues) {
@@ -437,11 +437,11 @@ HWTEST_P(CommonMethodModifierTest, setMotionBlurTestMotionBlurAnchorXValidValues
 }
 
 /*
- * @tc.name: setMotionBlurTestMotionBlurAnchorYValidValues
+ * @tc.name: setMotionBlur0TestMotionBlurAnchorYValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setMotionBlurTestMotionBlurAnchorYValidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setMotionBlur0TestMotionBlurAnchorYValidValues, TestSize.Level1)
 {
     Ark_MotionBlurOptions initValueMotionBlur;
 
@@ -455,14 +455,14 @@ HWTEST_P(CommonMethodModifierTest, setMotionBlurTestMotionBlurAnchorYValidValues
         Ark_MotionBlurOptions inputValueMotionBlur = initValueMotionBlur;
 
         inputValueMotionBlur.anchor.y = value;
-        modifier_->setMotionBlur(node_, &inputValueMotionBlur);
+        modifier_->setMotionBlur0(node_, &inputValueMotionBlur);
         auto jsonValue = GetJsonValue(node_);
         auto resultMotionBlur = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_MOTION_BLUR_NAME);
         auto resultAnchor =
             GetAttrValue<std::unique_ptr<JsonValue>>(resultMotionBlur, ATTRIBUTE_MOTION_BLUR_I_ANCHOR_NAME);
         auto resultStr = GetAttrValue<std::string>(resultAnchor, ATTRIBUTE_MOTION_BLUR_I_ANCHOR_I_Y_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setMotionBlur, attribute: motionBlur.anchor.y";
+            "Input value is: " << input << ", method: setMotionBlur0, attribute: motionBlur.anchor.y";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureMotionBlurAnchorNumberValidValues) {
@@ -471,11 +471,11 @@ HWTEST_P(CommonMethodModifierTest, setMotionBlurTestMotionBlurAnchorYValidValues
 }
 
 /*
- * @tc.name: setRotateTestRotateXValidValues
+ * @tc.name: setRotate0TestRotateXValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setRotateTestRotateXValidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setRotate0TestRotateXValidValues, TestSize.Level1)
 {
     Ark_RotateOptions initValueRotate;
 
@@ -498,11 +498,11 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateXValidValues, TestSize.Lev
         Ark_RotateOptions inputValueRotate = initValueRotate;
 
         inputValueRotate.x = value;
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_X_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setRotate, attribute: rotate.x";
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setRotate0, attribute: rotate.x";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberFloatAnythingValidValues) {
@@ -511,11 +511,11 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateXValidValues, TestSize.Lev
 }
 
 /*
- * @tc.name: setRotateTestRotateXInvalidValues
+ * @tc.name: setRotate0TestRotateXInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setRotateTestRotateXInvalidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setRotate0TestRotateXInvalidValues, TestSize.Level1)
 {
     Ark_RotateOptions initValueRotate;
 
@@ -536,14 +536,14 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateXInvalidValues, TestSize.L
     auto checkValue = [this, &initValueRotate](const std::string& input, const Opt_Number& value) {
         Ark_RotateOptions inputValueRotate = initValueRotate;
 
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         inputValueRotate.x = value;
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_X_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_X_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setRotate, attribute: rotate.x";
+            "Input value is: " << input << ", method: setRotate0, attribute: rotate.x";
     };
 
     // Check empty optional
@@ -551,11 +551,11 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateXInvalidValues, TestSize.L
 }
 
 /*
- * @tc.name: setRotateTestRotateYValidValues
+ * @tc.name: setRotate0TestRotateYValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setRotateTestRotateYValidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setRotate0TestRotateYValidValues, TestSize.Level1)
 {
     Ark_RotateOptions initValueRotate;
 
@@ -578,11 +578,11 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateYValidValues, TestSize.Lev
         Ark_RotateOptions inputValueRotate = initValueRotate;
 
         inputValueRotate.y = value;
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_Y_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setRotate, attribute: rotate.y";
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setRotate0, attribute: rotate.y";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberFloatAnythingValidValues) {
@@ -591,11 +591,11 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateYValidValues, TestSize.Lev
 }
 
 /*
- * @tc.name: setRotateTestRotateYInvalidValues
+ * @tc.name: setRotate0TestRotateYInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setRotateTestRotateYInvalidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setRotate0TestRotateYInvalidValues, TestSize.Level1)
 {
     Ark_RotateOptions initValueRotate;
 
@@ -616,14 +616,14 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateYInvalidValues, TestSize.L
     auto checkValue = [this, &initValueRotate](const std::string& input, const Opt_Number& value) {
         Ark_RotateOptions inputValueRotate = initValueRotate;
 
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         inputValueRotate.y = value;
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_Y_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_Y_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setRotate, attribute: rotate.y";
+            "Input value is: " << input << ", method: setRotate0, attribute: rotate.y";
     };
 
     // Check empty optional
@@ -631,11 +631,11 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateYInvalidValues, TestSize.L
 }
 
 /*
- * @tc.name: setRotateTestRotateZValidValues
+ * @tc.name: setRotate0TestRotateZValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setRotateTestRotateZValidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setRotate0TestRotateZValidValues, TestSize.Level1)
 {
     Ark_RotateOptions initValueRotate;
 
@@ -658,11 +658,11 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateZValidValues, TestSize.Lev
         Ark_RotateOptions inputValueRotate = initValueRotate;
 
         inputValueRotate.z = value;
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_Z_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setRotate, attribute: rotate.z";
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setRotate0, attribute: rotate.z";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberFloatAnythingValidValues) {
@@ -671,11 +671,11 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateZValidValues, TestSize.Lev
 }
 
 /*
- * @tc.name: setRotateTestRotateZInvalidValues
+ * @tc.name: setRotate0TestRotateZInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setRotateTestRotateZInvalidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setRotate0TestRotateZInvalidValues, TestSize.Level1)
 {
     Ark_RotateOptions initValueRotate;
 
@@ -696,14 +696,14 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateZInvalidValues, TestSize.L
     auto checkValue = [this, &initValueRotate](const std::string& input, const Opt_Number& value) {
         Ark_RotateOptions inputValueRotate = initValueRotate;
 
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         inputValueRotate.z = value;
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_Z_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_Z_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setRotate, attribute: rotate.z";
+            "Input value is: " << input << ", method: setRotate0, attribute: rotate.z";
     };
 
     // Check empty optional
@@ -711,11 +711,11 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateZInvalidValues, TestSize.L
 }
 
 /*
- * @tc.name: setRotateTestRotateCenterXValidValues
+ * @tc.name: setRotate0TestRotateCenterXValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setRotateTestRotateCenterXValidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setRotate0TestRotateCenterXValidValues, TestSize.Level1)
 {
     Ark_RotateOptions initValueRotate;
 
@@ -738,12 +738,12 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateCenterXValidValues, TestSi
         Ark_RotateOptions inputValueRotate = initValueRotate;
 
         inputValueRotate.centerX = value;
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_X_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setRotate, attribute: rotate.centerX";
+            "Input value is: " << input << ", method: setRotate0, attribute: rotate.centerX";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumAnyValidValues) {
@@ -755,11 +755,11 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateCenterXValidValues, TestSi
 }
 
 /*
- * @tc.name: setRotateTestRotateCenterYValidValues
+ * @tc.name: setRotate0TestRotateCenterYValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setRotateTestRotateCenterYValidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setRotate0TestRotateCenterYValidValues, TestSize.Level1)
 {
     Ark_RotateOptions initValueRotate;
 
@@ -782,12 +782,12 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateCenterYValidValues, TestSi
         Ark_RotateOptions inputValueRotate = initValueRotate;
 
         inputValueRotate.centerY = value;
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_CENTER_Y_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setRotate, attribute: rotate.centerY";
+            "Input value is: " << input << ", method: setRotate0, attribute: rotate.centerY";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumAnyValidValues) {
@@ -799,11 +799,11 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateCenterYValidValues, TestSi
 }
 
 /*
- * @tc.name: setRotateTestRotatePerspectiveValidValues
+ * @tc.name: setRotate0TestRotatePerspectiveValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setRotateTestRotatePerspectiveValidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setRotate0TestRotatePerspectiveValidValues, TestSize.Level1)
 {
     Ark_RotateOptions initValueRotate;
 
@@ -826,12 +826,12 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotatePerspectiveValidValues, Te
         Ark_RotateOptions inputValueRotate = initValueRotate;
 
         inputValueRotate.perspective = value;
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_PERSPECTIVE_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setRotate, attribute: rotate.perspective";
+            "Input value is: " << input << ", method: setRotate0, attribute: rotate.perspective";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureNumberFloatAnythingValidValues) {
@@ -840,11 +840,11 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotatePerspectiveValidValues, Te
 }
 
 /*
- * @tc.name: setRotateTestRotatePerspectiveInvalidValues
+ * @tc.name: setRotate0TestRotatePerspectiveInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setRotateTestRotatePerspectiveInvalidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setRotate0TestRotatePerspectiveInvalidValues, TestSize.Level1)
 {
     Ark_RotateOptions initValueRotate;
 
@@ -865,14 +865,14 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotatePerspectiveInvalidValues, 
     auto checkValue = [this, &initValueRotate](const std::string& input, const Opt_Number& value) {
         Ark_RotateOptions inputValueRotate = initValueRotate;
 
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         inputValueRotate.perspective = value;
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_PERSPECTIVE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_PERSPECTIVE_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setRotate, attribute: rotate.perspective";
+            "Input value is: " << input << ", method: setRotate0, attribute: rotate.perspective";
     };
 
     // Check empty optional
@@ -880,11 +880,11 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotatePerspectiveInvalidValues, 
 }
 
 /*
- * @tc.name: setRotateTestRotateAngleInvalidValues
+ * @tc.name: setRotate0TestRotateAngleInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(CommonMethodModifierTest, setRotateTestRotateAngleInvalidValues, TestSize.Level1)
+HWTEST_P(CommonMethodModifierTest, setRotate0TestRotateAngleInvalidValues, TestSize.Level1)
 {
     Ark_RotateOptions initValueRotate;
 
@@ -905,14 +905,14 @@ HWTEST_P(CommonMethodModifierTest, setRotateTestRotateAngleInvalidValues, TestSi
     auto checkValue = [this, &initValueRotate](const std::string& input, const Ark_Union_Number_String& value) {
         Ark_RotateOptions inputValueRotate = initValueRotate;
 
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         inputValueRotate.angle = value;
-        modifier_->setRotate(node_, &inputValueRotate);
+        modifier_->setRotate0(node_, &inputValueRotate);
         auto jsonValue = GetJsonValue(node_);
         auto resultRotate = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_ROTATE_NAME);
         auto resultStr = GetAttrValue<std::string>(resultRotate, ATTRIBUTE_ROTATE_I_ANGLE_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_ROTATE_I_ANGLE_DEFAULT_VALUE) <<
-            "Input value is: " << input << ", method: setRotate, attribute: rotate.angle";
+            "Input value is: " << input << ", method: setRotate0, attribute: rotate.angle";
     };
 
     // Check invalid union

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,152 @@
 
 namespace OHOS::Ace::NG {
 using namespace TestConst::TextArea;
+/*
+ * @tc.name: setHeightAdaptivePolicyTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setHeightAdaptivePolicyTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE) <<
+        "Default value for attribute 'heightAdaptivePolicy'";
+}
+
+/*
+ * @tc.name: setHeightAdaptivePolicyTestHeightAdaptivePolicyValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyValidValues, TestSize.Level1)
+{
+    Ark_TextHeightAdaptivePolicy initValueHeightAdaptivePolicy;
+
+    // Initial setup
+    initValueHeightAdaptivePolicy = std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]);
+
+    auto checkValue = [this, &initValueHeightAdaptivePolicy](const std::string& input, const std::string& expectedStr,
+                          const Ark_TextHeightAdaptivePolicy& value) {
+        Ark_TextHeightAdaptivePolicy inputValueHeightAdaptivePolicy = initValueHeightAdaptivePolicy;
+
+        inputValueHeightAdaptivePolicy = value;
+        modifier_->setHeightAdaptivePolicy(node_, inputValueHeightAdaptivePolicy);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setHeightAdaptivePolicy, attribute: heightAdaptivePolicy";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setHeightAdaptivePolicyTestHeightAdaptivePolicyInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, setHeightAdaptivePolicyTestHeightAdaptivePolicyInvalidValues, TestSize.Level1)
+{
+    Ark_TextHeightAdaptivePolicy initValueHeightAdaptivePolicy;
+
+    // Initial setup
+    initValueHeightAdaptivePolicy = std::get<1>(Fixtures::testFixtureEnumTextHeightAdaptivePolicyValidValues[0]);
+
+    auto checkValue = [this, &initValueHeightAdaptivePolicy](
+                          const std::string& input, const Ark_TextHeightAdaptivePolicy& value) {
+        Ark_TextHeightAdaptivePolicy inputValueHeightAdaptivePolicy = initValueHeightAdaptivePolicy;
+
+        modifier_->setHeightAdaptivePolicy(node_, inputValueHeightAdaptivePolicy);
+        inputValueHeightAdaptivePolicy = value;
+        modifier_->setHeightAdaptivePolicy(node_, inputValueHeightAdaptivePolicy);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_HEIGHT_ADAPTIVE_POLICY_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setHeightAdaptivePolicy, attribute: heightAdaptivePolicy";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumTextHeightAdaptivePolicyInvalidValues) {
+        checkValue(input, value);
+    }
+}
+
+/*
+ * @tc.name: setMaxLinesTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setMaxLinesTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LINES_DEFAULT_VALUE) << "Default value for attribute 'maxLines'";
+}
+
+/*
+ * @tc.name: setMaxLinesTestMaxLinesValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setMaxLinesTestMaxLinesValidValues, TestSize.Level1)
+{
+    Ark_Number initValueMaxLines;
+
+    // Initial setup
+    initValueMaxLines = std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]);
+
+    auto checkValue = [this, &initValueMaxLines](
+                          const std::string& input, const std::string& expectedStr, const Ark_Number& value) {
+        Ark_Number inputValueMaxLines = initValueMaxLines;
+
+        inputValueMaxLines = value;
+        modifier_->setMaxLines(node_, &inputValueMaxLines);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMaxLines, attribute: maxLines";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberPosIntFloorValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setMaxLinesTestMaxLinesInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setMaxLinesTestMaxLinesInvalidValues, TestSize.Level1)
+{
+    Ark_Number initValueMaxLines;
+
+    // Initial setup
+    initValueMaxLines = std::get<1>(Fixtures::testFixtureNumberPosIntFloorValidValues[0]);
+
+    auto checkValue = [this, &initValueMaxLines](const std::string& input, const Ark_Number& value) {
+        Ark_Number inputValueMaxLines = initValueMaxLines;
+
+        modifier_->setMaxLines(node_, &inputValueMaxLines);
+        inputValueMaxLines = value;
+        modifier_->setMaxLines(node_, &inputValueMaxLines);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LINES_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMaxLines, attribute: maxLines";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureNumberPosIntFloorInvalidValues) {
+        checkValue(input, value);
+    }
+}
+
 /*
  * @tc.name: setWordBreakTestDefaultValues
  * @tc.desc:
@@ -962,6 +1108,222 @@ HWTEST_F(TextAreaModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackVa
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
         checkValue(input, expected, value);
     }
+}
+
+/*
+ * @tc.name: setHalfLeadingTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setHalfLeadingTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HALF_LEADING_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_HALF_LEADING_DEFAULT_VALUE) << "Default value for attribute 'halfLeading'";
+}
+
+/*
+ * @tc.name: setHalfLeadingTestHalfLeadingValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setHalfLeadingTestHalfLeadingValidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueHalfLeading;
+
+    // Initial setup
+    initValueHalfLeading = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueHalfLeading](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueHalfLeading = initValueHalfLeading;
+
+        inputValueHalfLeading = value;
+        modifier_->setHalfLeading(node_, &inputValueHalfLeading);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HALF_LEADING_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setHalfLeading, attribute: halfLeading";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setHalfLeadingTestHalfLeadingInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setHalfLeadingTestHalfLeadingInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueHalfLeading;
+
+    // Initial setup
+    initValueHalfLeading = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueHalfLeading](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueHalfLeading = initValueHalfLeading;
+
+        modifier_->setHalfLeading(node_, &inputValueHalfLeading);
+        inputValueHalfLeading = value;
+        modifier_->setHalfLeading(node_, &inputValueHalfLeading);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_HALF_LEADING_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_HALF_LEADING_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setHalfLeading, attribute: halfLeading";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
+}
+
+/*
+ * @tc.name: setEllipsisModeTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setEllipsisModeTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ELLIPSIS_MODE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ELLIPSIS_MODE_DEFAULT_VALUE) << "Default value for attribute 'ellipsisMode'";
+}
+
+/*
+ * @tc.name: setEllipsisModeTestEllipsisModeValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setEllipsisModeTestEllipsisModeValidValues, TestSize.Level1)
+{
+    Opt_EllipsisMode initValueEllipsisMode;
+
+    // Initial setup
+    initValueEllipsisMode =
+        ArkValue<Opt_EllipsisMode>(std::get<1>(Fixtures::testFixtureEnumEllipsisModeValidValues[0]));
+
+    auto checkValue = [this, &initValueEllipsisMode](
+                          const std::string& input, const std::string& expectedStr, const Opt_EllipsisMode& value) {
+        Opt_EllipsisMode inputValueEllipsisMode = initValueEllipsisMode;
+
+        inputValueEllipsisMode = value;
+        modifier_->setEllipsisMode(node_, &inputValueEllipsisMode);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ELLIPSIS_MODE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEllipsisMode, attribute: ellipsisMode";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumEllipsisModeValidValues) {
+        checkValue(input, expected, ArkValue<Opt_EllipsisMode>(value));
+    }
+}
+
+/*
+ * @tc.name: setEllipsisModeTestEllipsisModeInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setEllipsisModeTestEllipsisModeInvalidValues, TestSize.Level1)
+{
+    Opt_EllipsisMode initValueEllipsisMode;
+
+    // Initial setup
+    initValueEllipsisMode =
+        ArkValue<Opt_EllipsisMode>(std::get<1>(Fixtures::testFixtureEnumEllipsisModeValidValues[0]));
+
+    auto checkValue = [this, &initValueEllipsisMode](const std::string& input, const Opt_EllipsisMode& value) {
+        Opt_EllipsisMode inputValueEllipsisMode = initValueEllipsisMode;
+
+        modifier_->setEllipsisMode(node_, &inputValueEllipsisMode);
+        inputValueEllipsisMode = value;
+        modifier_->setEllipsisMode(node_, &inputValueEllipsisMode);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ELLIPSIS_MODE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_ELLIPSIS_MODE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setEllipsisMode, attribute: ellipsisMode";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumEllipsisModeInvalidValues) {
+        checkValue(input, ArkValue<Opt_EllipsisMode>(value));
+    }
+}
+
+/*
+ * @tc.name: setStopBackPressTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setStopBackPressTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STOP_BACK_PRESS_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_STOP_BACK_PRESS_DEFAULT_VALUE) << "Default value for attribute 'stopBackPress'";
+}
+
+/*
+ * @tc.name: setStopBackPressTestStopBackPressValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setStopBackPressTestStopBackPressValidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueStopBackPress;
+
+    // Initial setup
+    initValueStopBackPress = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueStopBackPress](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueStopBackPress = initValueStopBackPress;
+
+        inputValueStopBackPress = value;
+        modifier_->setStopBackPress(node_, &inputValueStopBackPress);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STOP_BACK_PRESS_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setStopBackPress, attribute: stopBackPress";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setStopBackPressTestStopBackPressInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextAreaModifierTest, DISABLED_setStopBackPressTestStopBackPressInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueStopBackPress;
+
+    // Initial setup
+    initValueStopBackPress = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueStopBackPress](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueStopBackPress = initValueStopBackPress;
+
+        modifier_->setStopBackPress(node_, &inputValueStopBackPress);
+        inputValueStopBackPress = value;
+        modifier_->setStopBackPress(node_, &inputValueStopBackPress);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_STOP_BACK_PRESS_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_STOP_BACK_PRESS_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setStopBackPress, attribute: stopBackPress";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*

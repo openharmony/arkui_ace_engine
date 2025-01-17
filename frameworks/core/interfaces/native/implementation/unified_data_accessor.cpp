@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,9 +17,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct UnifiedDataPeer {
-    virtual ~UnifiedDataPeer() = default;
-};
+struct UnifiedDataPeer {};
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace UnifiedDataAccessor {
@@ -36,7 +34,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Ark_Boolean HasTypeImpl(UnifiedDataPeer* peer,
-                        const Ark_String* type)
+                        const Ark_String* UnifiedData_type)
 {
     return 0;
 }

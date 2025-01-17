@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -380,5 +380,155 @@ HWTEST_F(ButtonModifierTest, setLabelStyleTestLabelStyleFontStyleInvalidValues, 
     for (auto& [input, value] : Fixtures::testFixtureEnumFontStyleInvalidValues) {
         checkValue(input, ArkValue<Opt_FontStyle>(value));
     }
+}
+
+/*
+ * @tc.name: setMinFontScaleTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierTest, DISABLED_setMinFontScaleTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'minFontScale'";
+}
+
+/*
+ * @tc.name: setMinFontScaleTestMinFontScaleValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierTest, DISABLED_setMinFontScaleTestMinFontScaleValidValues, TestSize.Level1)
+{
+    Ark_Union_Number_Resource initValueMinFontScale;
+
+    // Initial setup
+    initValueMinFontScale =
+        ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueMinFontScale](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_Number_Resource& value) {
+        Ark_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
+
+        inputValueMinFontScale = value;
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value));
+    }
+    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+}
+
+/*
+ * @tc.name: setMinFontScaleTestMinFontScaleInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierTest, DISABLED_setMinFontScaleTestMinFontScaleInvalidValues, TestSize.Level1)
+{
+    Ark_Union_Number_Resource initValueMinFontScale;
+
+    // Initial setup
+    initValueMinFontScale =
+        ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueMinFontScale](const std::string& input, const Ark_Union_Number_Resource& value) {
+        Ark_Union_Number_Resource inputValueMinFontScale = initValueMinFontScale;
+
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        inputValueMinFontScale = value;
+        modifier_->setMinFontScale(node_, &inputValueMinFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MIN_FONT_SCALE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MIN_FONT_SCALE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMinFontScale, attribute: minFontScale";
+    };
+
+    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_Union_Number_Resource, Ark_Empty>(nullptr));
+}
+
+/*
+ * @tc.name: setMaxFontScaleTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierTest, DISABLED_setMaxFontScaleTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE) << "Default value for attribute 'maxFontScale'";
+}
+
+/*
+ * @tc.name: setMaxFontScaleTestMaxFontScaleValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierTest, DISABLED_setMaxFontScaleTestMaxFontScaleValidValues, TestSize.Level1)
+{
+    Ark_Union_Number_Resource initValueMaxFontScale;
+
+    // Initial setup
+    initValueMaxFontScale =
+        ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const std::string& expectedStr,
+                          const Ark_Union_Number_Resource& value) {
+        Ark_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
+
+        inputValueMaxFontScale = value;
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_Resource, Ark_Number>(value));
+    }
+    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+}
+
+/*
+ * @tc.name: setMaxFontScaleTestMaxFontScaleInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonModifierTest, DISABLED_setMaxFontScaleTestMaxFontScaleInvalidValues, TestSize.Level1)
+{
+    Ark_Union_Number_Resource initValueMaxFontScale;
+
+    // Initial setup
+    initValueMaxFontScale =
+        ArkUnion<Ark_Union_Number_Resource, Ark_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueMaxFontScale](const std::string& input, const Ark_Union_Number_Resource& value) {
+        Ark_Union_Number_Resource inputValueMaxFontScale = initValueMaxFontScale;
+
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        inputValueMaxFontScale = value;
+        modifier_->setMaxFontScale(node_, &inputValueMaxFontScale);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_FONT_SCALE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_FONT_SCALE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMaxFontScale, attribute: maxFontScale";
+    };
+
+    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    // Check invalid union
+    checkValue("invalid union", ArkUnion<Ark_Union_Number_Resource, Ark_Empty>(nullptr));
 }
 } // namespace OHOS::Ace::NG

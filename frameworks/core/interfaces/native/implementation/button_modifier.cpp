@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -234,6 +234,24 @@ void LabelStyleImpl(Ark_NativePointer node,
     auto parameters = Converter::OptConvert<ButtonParameters>(*value);
     ButtonModelNG::SetLabelStyle(frameNode, parameters);
 }
+void MinFontScaleImpl(Ark_NativePointer node,
+                      const Ark_Union_Number_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ButtonModelNG::SetMinFontScale(frameNode, convValue);
+}
+void MaxFontScaleImpl(Ark_NativePointer node,
+                      const Ark_Union_Number_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    //auto convValue = Converter::OptConvert<type_name>(*value);
+    //ButtonModelNG::SetMaxFontScale(frameNode, convValue);
+}
 } // ButtonAttributeModifier
 const GENERATED_ArkUIButtonModifier* GetButtonModifier()
 {
@@ -254,6 +272,8 @@ const GENERATED_ArkUIButtonModifier* GetButtonModifier()
         ButtonAttributeModifier::FontFamilyImpl,
         ButtonAttributeModifier::ContentModifierImpl,
         ButtonAttributeModifier::LabelStyleImpl,
+        ButtonAttributeModifier::MinFontScaleImpl,
+        ButtonAttributeModifier::MaxFontScaleImpl,
     };
     return &ArkUIButtonModifierImpl;
 }

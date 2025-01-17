@@ -52,15 +52,15 @@ const auto NUM_ZERO = Converter::ArkValue<Ark_Number>(AINT32_ZERO);
 const auto NUM_VALID = Converter::ArkValue<Ark_Number>(AINT32_POS);
 const auto NUM_MAX = Converter::ArkValue<Ark_Number>(AINT32_INT_MAX);
 
-const auto LEN_NUM_NEG = Converter::ArkValue<Ark_Length>(AINT32_NEG);
-const auto LEN_NUM_ZERO = Converter::ArkValue<Ark_Length>(AINT32_ZERO);
-const auto LEN_NUM_VALID = Converter::ArkValue<Ark_Length>(AINT32_POS);
-const auto LEN_NUM_MAX = Converter::ArkValue<Ark_Length>(AINT32_INT_MAX);
+const auto LEN_NUM_NEG = Converter::ArkValue<Ark_Length>("-1234.00px");
+const auto LEN_NUM_ZERO = Converter::ArkValue<Ark_Length>("0.00px");
+const auto LEN_NUM_VALID = Converter::ArkValue<Ark_Length>("1234.00px");
+const auto LEN_NUM_MAX = Converter::ArkValue<Ark_Length>("2147483648.00px");
 
-const auto OPT_LEN_NUM_NEG = Converter::ArkValue<Opt_Length>(AINT32_NEG);
-const auto OPT_LEN_NUM_ZERO = Converter::ArkValue<Opt_Length>(AINT32_ZERO);
-const auto OPT_LEN_NUM_VALID = Converter::ArkValue<Opt_Length>(AINT32_POS);
-const auto OPT_LEN_NUM_MAX = Converter::ArkValue<Opt_Length>(AINT32_INT_MAX);
+const auto OPT_LEN_NUM_NEG = Converter::ArkValue<Opt_Length>("-1234.00px");
+const auto OPT_LEN_NUM_ZERO = Converter::ArkValue<Opt_Length>("0.00px");
+const auto OPT_LEN_NUM_VALID = Converter::ArkValue<Opt_Length>("1234.00px");
+const auto OPT_LEN_NUM_MAX = Converter::ArkValue<Opt_Length>("2147483648.00px");
 
 const std::string EXPECTED_NUM_NEG("-1234.000000");
 const std::string EXPECTED_NUM_VILID("1234.000000");
@@ -77,18 +77,15 @@ const auto CUSTOM_COLOR_STRING("#FF123456");
 const int CUSTOM_COLOR_INT(0xFF123456);
 const float CUSTOM_COLOR_FLOAT(0.1f);
 
-const Ark_ResourceColor COLOR_COLOR = { .selector = 0, .value0 = Ark_Color::ARK_COLOR_GREEN };
-const Ark_ResourceColor COLOR_INT = { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(CUSTOM_COLOR_INT) };
-const Ark_ResourceColor COLOR_FLOAT = { .selector = 1, .value1 = Converter::ArkValue<Ark_Number>(CUSTOM_COLOR_FLOAT) };
-const Ark_ResourceColor COLOR_STRING = {
-    .selector = 2,
-    .value2 = Converter::ArkValue<Ark_String>(CUSTOM_COLOR_STRING)
-};
+const Ark_ResourceColor COLOR_COLOR = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
+const Ark_ResourceColor COLOR_INT = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(CUSTOM_COLOR_INT);
+const Ark_ResourceColor COLOR_FLOAT = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(CUSTOM_COLOR_FLOAT);
+const Ark_ResourceColor COLOR_STRING = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(CUSTOM_COLOR_STRING);
 
-const Opt_ResourceColor OPT_COLOR_COLOR = { .tag = ARK_TAG_OBJECT, .value = COLOR_COLOR };
-const Opt_ResourceColor OPT_COLOR_INT = { .tag = ARK_TAG_OBJECT, .value = COLOR_INT };
-const Opt_ResourceColor OPT_COLOR_FLOAT = { .tag = ARK_TAG_OBJECT, .value = COLOR_FLOAT };
-const Opt_ResourceColor OPT_COLOR_STRING = { .tag = ARK_TAG_OBJECT, .value = COLOR_STRING };
+const Opt_ResourceColor OPT_COLOR_COLOR = Converter::ArkValue<Opt_ResourceColor>(COLOR_COLOR);
+const Opt_ResourceColor OPT_COLOR_INT = Converter::ArkValue<Opt_ResourceColor>(COLOR_INT);
+const Opt_ResourceColor OPT_COLOR_FLOAT = Converter::ArkValue<Opt_ResourceColor>(COLOR_FLOAT);
+const Opt_ResourceColor OPT_COLOR_STRING = Converter::ArkValue<Opt_ResourceColor>(COLOR_STRING);
 
 static bool g_isCheckedTest = true;
 static auto sideBarOnChange(Ark_Int32 nodeId, const Ark_Boolean isChecked)

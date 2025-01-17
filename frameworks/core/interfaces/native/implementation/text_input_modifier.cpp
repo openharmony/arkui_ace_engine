@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -209,7 +209,10 @@ void OnSubmitImpl(Ark_NativePointer node,
                         const int32_t& value, const NG::TextFieldCommonEvent& event) {
         auto enterKeyType = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(value));
         Converter::ConvContext ctx;
-        auto submitEvent = Ark_SubmitEvent { .text = Converter::ArkValue<Ark_String>(event.GetText(), &ctx) };
+        auto submitEvent = Ark_SubmitEvent{};
+#ifdef WRONG_TYPE
+        submitEvent.text = Converter::ArkValue<Ark_String>(event.GetText(), &ctx);
+#endif
         arkCallback.Invoke(enterKeyType, submitEvent);
     };
     TextFieldModelNG::SetOnSubmit(frameNode, onSubmit);
@@ -584,6 +587,22 @@ void MaxFontSizeImpl(Ark_NativePointer node,
     Validator::ValidateNonPercent(convValue);
     TextFieldModelNG::SetAdaptMaxFontSize(frameNode, convValue);
 }
+void MinFontScaleImpl(Ark_NativePointer node,
+                      const Opt_Union_Number_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextInputModelNG::SetMinFontScale(frameNode, convValue);
+}
+void MaxFontScaleImpl(Ark_NativePointer node,
+                      const Opt_Union_Number_Resource* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextInputModelNG::SetMaxFontScale(frameNode, convValue);
+}
 void HeightAdaptivePolicyImpl(Ark_NativePointer node,
                               Ark_TextHeightAdaptivePolicy value)
 {
@@ -761,6 +780,30 @@ void EnableHapticFeedbackImpl(Ark_NativePointer node,
     auto convValue = Converter::Convert<bool>(value);
     TextFieldModelNG::SetEnableHapticFeedback(frameNode, convValue);
 }
+void HalfLeadingImpl(Ark_NativePointer node,
+                     const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextInputModelNG::SetHalfLeading(frameNode, convValue);
+}
+void EllipsisModeImpl(Ark_NativePointer node,
+                      const Opt_EllipsisMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextInputModelNG::SetEllipsisMode(frameNode, convValue);
+}
+void StopBackPressImpl(Ark_NativePointer node,
+                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextInputModelNG::SetStopBackPress(frameNode, convValue);
+}
 void InputFilterImpl(Ark_NativePointer node,
                      const Ark_ResourceStr* value,
                      const Opt_Callback_String_Void* error)
@@ -860,6 +903,8 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::SelectAllImpl,
         TextInputAttributeModifier::MinFontSizeImpl,
         TextInputAttributeModifier::MaxFontSizeImpl,
+        TextInputAttributeModifier::MinFontScaleImpl,
+        TextInputAttributeModifier::MaxFontScaleImpl,
         TextInputAttributeModifier::HeightAdaptivePolicyImpl,
         TextInputAttributeModifier::EnableAutoFillImpl,
         TextInputAttributeModifier::DecorationImpl,
@@ -876,6 +921,9 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::EditMenuOptionsImpl,
         TextInputAttributeModifier::EnablePreviewTextImpl,
         TextInputAttributeModifier::EnableHapticFeedbackImpl,
+        TextInputAttributeModifier::HalfLeadingImpl,
+        TextInputAttributeModifier::EllipsisModeImpl,
+        TextInputAttributeModifier::StopBackPressImpl,
         TextInputAttributeModifier::InputFilterImpl,
         TextInputAttributeModifier::CustomKeyboardImpl,
         TextInputAttributeModifier::ShowCounterImpl,

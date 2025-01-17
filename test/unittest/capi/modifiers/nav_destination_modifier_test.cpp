@@ -432,7 +432,7 @@ HWTEST_F(NavDestinationModifierTest, setRecoverableTestValidValues, TestSize.Lev
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Opt_Boolean realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Opt_Boolean realInputValue = Converter::ArkValue<Opt_Boolean>(false);
     Opt_Boolean initValueRecoverableRecoverable;
     Opt_Boolean& inputValueRecoverableRecoverable = realInputValue;
     // Initial setup
@@ -465,7 +465,7 @@ HWTEST_F(NavDestinationModifierTest, setRecoverableTestInvalidValues, TestSize.L
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Opt_Boolean realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Opt_Boolean realInputValue = Converter::ArkValue<Opt_Boolean>(false);
     Opt_Boolean initValueRecoverableRecoverable;
     Opt_Boolean& inputValueRecoverableRecoverable = realInputValue;
     // Initial setup
@@ -511,8 +511,8 @@ HWTEST_F(NavDestinationModifierTest, setIgnoreLayoutSafeAreaTestValidValues, Tes
     std::string resultStr;
     std::string expectedStr;
     std::unique_ptr<JsonValue> jsonValue;
-    Opt_Array_LayoutSafeAreaType realInputValue0 = {.tag = ARK_TAG_OBJECT, .value = {}};
-    Opt_Array_LayoutSafeAreaEdge realInputValue1 = {.tag = ARK_TAG_OBJECT, .value = {}};
+    auto realInputValue0 = Converter::ArkValue<Opt_Array_LayoutSafeAreaType>(Array_LayoutSafeAreaType{});
+    auto realInputValue1 = Converter::ArkValue<Opt_Array_LayoutSafeAreaEdge>(Array_LayoutSafeAreaEdge{});
 
     Ark_LayoutSafeAreaType typeVal = ARK_LAYOUT_SAFE_AREA_TYPE_SYSTEM;
     Ark_LayoutSafeAreaEdge edgeVal = ARK_LAYOUT_SAFE_AREA_EDGE_TOP;

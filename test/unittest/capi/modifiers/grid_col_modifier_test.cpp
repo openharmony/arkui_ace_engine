@@ -96,7 +96,7 @@ class GridColModifierTest : public ModifierTestBase<GENERATED_ArkUIGridColModifi
 HWTEST_F(GridColModifierTest, setGridColOptionsTestDefaultValues, TestSize.Level1)
 {
     CHECK_NULL_VOID(node_);
-    Opt_GridColOptions initValue = {.tag = ARK_TAG_UNDEFINED, .value = {}};
+    Opt_GridColOptions initValue = Converter::ArkValue<Opt_GridColOptions>();
     modifier_->setGridColOptions(node_, &initValue);
     std::unique_ptr<JsonValue> jsonLayout = GetLayoutJsonValue(node_);
     CHECK_NULL_VOID(jsonLayout);

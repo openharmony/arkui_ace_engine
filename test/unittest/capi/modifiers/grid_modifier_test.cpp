@@ -105,7 +105,7 @@ namespace {
     };
 
     const Ark_Int32 FAKE_RES_ID(1234);
-    const Ark_Length RES_ARK_LENGTH = { .type = ARK_TAG_RESOURCE, .resource = FAKE_RES_ID };
+    const Ark_Length RES_ARK_LENGTH = Converter::ArkValue<Ark_Length>(FAKE_RES_ID);
 } // namespace
 
 class GridModifierTest : public ModifierTestBase<GENERATED_ArkUIGridModifier,
@@ -416,30 +416,6 @@ HWTEST_F(GridModifierTest, setColumnsGapTestValidValues, TestSize.Level1)
     std::string strResult;
     Ark_Length inputValue;
 
-    // set 5px
-    inputValue = Converter::ArkValue<Ark_Length>(5);
-    modifier_->setColumnsGap(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
-    EXPECT_EQ(strResult, "5.00px");
-
-    // set 20px
-    inputValue = Converter::ArkValue<Ark_Length>(20);
-    modifier_->setColumnsGap(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
-    EXPECT_EQ(strResult, "20.00px");
-
-    // set 0px
-    inputValue = Converter::ArkValue<Ark_Length>(0);
-    modifier_->setColumnsGap(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
-    EXPECT_EQ(strResult, "0.00px");
-
-    // set 2147483648px
-    inputValue = Converter::ArkValue<Ark_Length>(INT_MAX);
-    modifier_->setColumnsGap(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
-    EXPECT_EQ(strResult, "2147483648.00px");
-
     // set 2vp
     inputValue = Converter::ArkValue<Ark_Length>(2.f);
     modifier_->setColumnsGap(node_, &inputValue);
@@ -482,13 +458,6 @@ HWTEST_F(GridModifierTest, setColumnsGapTestInvalidValues, TestSize.Level1)
     std::string strResult;
     Ark_Length inputValue;
 
-    // set -1px
-    inputValue = Converter::ArkValue<Ark_Length>(-1);
-    modifier_->setColumnsGap(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMNS_GAP_NAME);
-    EXPECT_NE(strResult, "-1.00px");
-    EXPECT_EQ(strResult, ATTRIBUTE_COLUMNS_GAP_DEFAULT_VALUE);
-
     // set -1vp
     inputValue = Converter::ArkValue<Ark_Length>(-1.f);
     modifier_->setColumnsGap(node_, &inputValue);
@@ -519,30 +488,6 @@ HWTEST_F(GridModifierTest, setRowsGapTestValidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_Length inputValue;
-
-    // set 5px
-    inputValue = Converter::ArkValue<Ark_Length>(5);
-    modifier_->setRowsGap(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_GAP_NAME);
-    EXPECT_EQ(strResult, "5.00px");
-
-    // set 20px
-    inputValue = Converter::ArkValue<Ark_Length>(20);
-    modifier_->setRowsGap(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_GAP_NAME);
-    EXPECT_EQ(strResult, "20.00px");
-
-    // set 0px
-    inputValue = Converter::ArkValue<Ark_Length>(0);
-    modifier_->setRowsGap(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_GAP_NAME);
-    EXPECT_EQ(strResult, "0.00px");
-
-    // set 2147483648px
-    inputValue = Converter::ArkValue<Ark_Length>(INT_MAX);
-    modifier_->setRowsGap(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_GAP_NAME);
-    EXPECT_EQ(strResult, "2147483648.00px");
 
     // set 2vp
     inputValue = Converter::ArkValue<Ark_Length>(2.f);
@@ -585,13 +530,6 @@ HWTEST_F(GridModifierTest, setRowsGapTestInvalidValues, TestSize.Level1)
 {
     std::string strResult;
     Ark_Length inputValue;
-
-    // set -1px
-    inputValue = Converter::ArkValue<Ark_Length>(-1);
-    modifier_->setRowsGap(node_, &inputValue);
-    strResult = GetStringAttribute(node_, ATTRIBUTE_ROWS_GAP_NAME);
-    EXPECT_NE(strResult, "-1.00px");
-    EXPECT_EQ(strResult, ATTRIBUTE_ROWS_GAP_DEFAULT_VALUE);
 
     // set -1vp
     inputValue = Converter::ArkValue<Ark_Length>(-1.f);

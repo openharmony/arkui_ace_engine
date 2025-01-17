@@ -110,12 +110,10 @@ HWTEST_F(TextPickerDialogAccessorTest, textPickerDialogAccessorDialogPropertiesT
         Converter::ArkValue<Opt_ResourceColor>(Converter::ArkUnion<Ark_ResourceColor, Ark_String>(TEST_COLOR));
     Ark_ShadowOptions shadow = {
         .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(TEST_COLOR),
-        .offsetX = { .tag = ARK_TAG_OBJECT,
-            .value = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(TEST_SIZE) },
-        .offsetY = { .tag = ARK_TAG_OBJECT,
-            .value = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(TEST_SIZE) },
+        .offsetX = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(TEST_SIZE),
+        .offsetY = Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(TEST_SIZE),
         .radius = Converter::ArkUnion<Ark_Union_Number_Resource, Ark_Number>(TEST_RADIUS_SIZE),
-        .type = { .tag = ARK_TAG_OBJECT, .value = ARK_SHADOW_TYPE_COLOR }
+        .type = Converter::ArkValue<Opt_ShadowType>(ARK_SHADOW_TYPE_COLOR),
     };
     arkOptions.shadow = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(shadow);
     arkOptions.enableHoverMode = Converter::ArkValue<Opt_Boolean>(true);

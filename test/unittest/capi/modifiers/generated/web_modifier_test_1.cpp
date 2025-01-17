@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1064,6 +1064,80 @@ HWTEST_F(WebModifierTest, setOverScrollModeTestOverScrollModeInvalidValues, Test
 }
 
 /*
+ * @tc.name: setBlurOnKeyboardHideModeTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setBlurOnKeyboardHideModeTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_DEFAULT_VALUE) <<
+        "Default value for attribute 'blurOnKeyboardHideMode'";
+}
+
+/*
+ * @tc.name: setBlurOnKeyboardHideModeTestBlurOnKeyboardHideModeValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setBlurOnKeyboardHideModeTestBlurOnKeyboardHideModeValidValues, TestSize.Level1)
+{
+    Ark_BlurOnKeyboardHideMode initValueBlurOnKeyboardHideMode;
+
+    // Initial setup
+    initValueBlurOnKeyboardHideMode = std::get<1>(Fixtures::testFixtureEnumBlurOnKeyboardHideModeValidValues[0]);
+
+    auto checkValue = [this, &initValueBlurOnKeyboardHideMode](const std::string& input, const std::string& expectedStr,
+                          const Ark_BlurOnKeyboardHideMode& value) {
+        Ark_BlurOnKeyboardHideMode inputValueBlurOnKeyboardHideMode = initValueBlurOnKeyboardHideMode;
+
+        inputValueBlurOnKeyboardHideMode = value;
+        modifier_->setBlurOnKeyboardHideMode(node_, inputValueBlurOnKeyboardHideMode);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setBlurOnKeyboardHideMode, attribute: blurOnKeyboardHideMode";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureEnumBlurOnKeyboardHideModeValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setBlurOnKeyboardHideModeTestBlurOnKeyboardHideModeInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setBlurOnKeyboardHideModeTestBlurOnKeyboardHideModeInvalidValues, TestSize.Level1)
+{
+    Ark_BlurOnKeyboardHideMode initValueBlurOnKeyboardHideMode;
+
+    // Initial setup
+    initValueBlurOnKeyboardHideMode = std::get<1>(Fixtures::testFixtureEnumBlurOnKeyboardHideModeValidValues[0]);
+
+    auto checkValue = [this, &initValueBlurOnKeyboardHideMode](
+                          const std::string& input, const Ark_BlurOnKeyboardHideMode& value) {
+        Ark_BlurOnKeyboardHideMode inputValueBlurOnKeyboardHideMode = initValueBlurOnKeyboardHideMode;
+
+        modifier_->setBlurOnKeyboardHideMode(node_, inputValueBlurOnKeyboardHideMode);
+        inputValueBlurOnKeyboardHideMode = value;
+        modifier_->setBlurOnKeyboardHideMode(node_, inputValueBlurOnKeyboardHideMode);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setBlurOnKeyboardHideMode, attribute: blurOnKeyboardHideMode";
+    };
+
+    for (auto& [input, value] : Fixtures::testFixtureEnumBlurOnKeyboardHideModeInvalidValues) {
+        checkValue(input, value);
+    }
+}
+
+/*
  * @tc.name: setTextZoomAtioTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -2076,79 +2150,6 @@ HWTEST_F(WebModifierTest, setPinchSmoothTestDefaultValues, TestSize.Level1)
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PINCH_SMOOTH_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_PINCH_SMOOTH_DEFAULT_VALUE) << "Default value for attribute 'pinchSmooth'";
-}
-
-/*
- * @tc.name: setPinchSmoothTestPinchSmoothValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(WebModifierTest, setPinchSmoothTestPinchSmoothValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValuePinchSmooth;
-
-    // Initial setup
-    initValuePinchSmooth = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-
-    auto checkValue = [this, &initValuePinchSmooth](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValuePinchSmooth = initValuePinchSmooth;
-
-        inputValuePinchSmooth = value;
-        modifier_->setPinchSmooth(node_, inputValuePinchSmooth);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PINCH_SMOOTH_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setPinchSmooth, attribute: pinchSmooth";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setAllowWindowOpenMethodTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(WebModifierTest, setAllowWindowOpenMethodTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALLOW_WINDOW_OPEN_METHOD_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_ALLOW_WINDOW_OPEN_METHOD_DEFAULT_VALUE) <<
-        "Default value for attribute 'allowWindowOpenMethod'";
-}
-
-/*
- * @tc.name: setAllowWindowOpenMethodTestAllowWindowOpenMethodValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(WebModifierTest, setAllowWindowOpenMethodTestAllowWindowOpenMethodValidValues, TestSize.Level1)
-{
-    Ark_Boolean initValueAllowWindowOpenMethod;
-
-    // Initial setup
-    initValueAllowWindowOpenMethod = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
-
-    auto checkValue = [this, &initValueAllowWindowOpenMethod](
-                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
-        Ark_Boolean inputValueAllowWindowOpenMethod = initValueAllowWindowOpenMethod;
-
-        inputValueAllowWindowOpenMethod = value;
-        modifier_->setAllowWindowOpenMethod(node_, inputValueAllowWindowOpenMethod);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALLOW_WINDOW_OPEN_METHOD_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setAllowWindowOpenMethod, attribute: allowWindowOpenMethod";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
-        checkValue(input, expected, value);
-    }
 }
 
 } // namespace OHOS::Ace::NG

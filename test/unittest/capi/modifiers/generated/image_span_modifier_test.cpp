@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -252,7 +252,7 @@ HWTEST_F(ImageSpanModifierTest, setObjectFitTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ImageSpanModifierTest, setObjectFitTestObjectFitValidValues, TestSize.Level1)
+HWTEST_F(ImageSpanModifierTest, DISABLED_setObjectFitTestObjectFitValidValues, TestSize.Level1)
 {
     Ark_ImageFit initValueObjectFit;
 

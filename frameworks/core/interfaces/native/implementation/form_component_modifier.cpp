@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,11 +50,11 @@ const int32_t MAX_SIGNED_NUMBER_OF_ARK = INT_MAX;
 } // namespace
 namespace Converter {
 template<>
-LiteralDimension Convert(const Ark_Literal_Number_height_width& src)
+LiteralDimension Convert(const Ark_SizeOptions& src)
 {
     return LiteralDimension {
-        .width = Converter::Convert<Dimension>(src.width),
-        .height = Converter::Convert<Dimension>(src.height)
+        .width = Converter::OptConvert<Dimension>(src.width).value_or(Dimension()),
+        .height = Converter::OptConvert<Dimension>(src.height).value_or(Dimension()),
     };
 }
 template<>
@@ -111,7 +111,7 @@ void SetFormComponentOptionsImpl(Ark_NativePointer node,
 } // FormComponentInterfaceModifier
 namespace FormComponentAttributeModifier {
 void SizeImpl(Ark_NativePointer node,
-              const Ark_Literal_Number_height_width* value)
+              const Ark_SizeOptions* value)
 {
 #ifdef FORM_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode*>(node);

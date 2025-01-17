@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -150,7 +150,9 @@ void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue&
 
 void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src, ConvContext *ctx)
 {
+#ifdef WRONG_TYPE
     dst.text = Converter::ArkValue<Ark_String>(src.GetText(), ctx);
+#endif
 }
 
 template<>
@@ -515,6 +517,22 @@ void BarStateImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvert<DisplayMode>(value);
     RichEditorModelNG::SetBarState(frameNode, convValue);
 }
+void MaxLengthImpl(Ark_NativePointer node,
+                   const Opt_Number* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RichEditorModelNG::SetMaxLength(frameNode, convValue);
+}
+void MaxLinesImpl(Ark_NativePointer node,
+                  const Opt_Number* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //RichEditorModelNG::SetMaxLines(frameNode, convValue);
+}
 void BindSelectionMenuImpl(Ark_NativePointer node,
                            Ark_RichEditorSpanType spanType,
                            const CustomNodeBuilder* content,
@@ -608,6 +626,8 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
         RichEditorAttributeModifier::EnableKeyboardOnFocusImpl,
         RichEditorAttributeModifier::EnableHapticFeedbackImpl,
         RichEditorAttributeModifier::BarStateImpl,
+        RichEditorAttributeModifier::MaxLengthImpl,
+        RichEditorAttributeModifier::MaxLinesImpl,
         RichEditorAttributeModifier::BindSelectionMenuImpl,
         RichEditorAttributeModifier::CustomKeyboardImpl,
         RichEditorAttributeModifier::PlaceholderImpl,

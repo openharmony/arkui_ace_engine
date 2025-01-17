@@ -128,10 +128,10 @@ const std::vector<BoolStrTestStep> BOOL_STR_TEST_PLAN = {
     { false, "false" }
 };
 const Ark_Int32 FAKE_RES_ID(1234);
-const Ark_Length RES_ARK_LENGTH = { .type = ARK_TAG_RESOURCE, .resource = FAKE_RES_ID };
+const Ark_Length RES_ARK_LENGTH = Converter::ArkValue<Ark_Length>(FAKE_RES_ID);
 typedef std::pair<Ark_ScrollableBarModeOptions, std::string> ScrollableBarModeTestStep;
 const std::vector<ScrollableBarModeTestStep> SCROLLABLE_BAR_MODE_TEST_PLAN = {
-    { CreateScrollableMode(Converter::ArkValue<Opt_Length>(70), ARK_LAYOUT_STYLE_ALWAYS_AVERAGE_SPLIT),
+    { CreateScrollableMode(Converter::ArkValue<Opt_Length>(70._px), ARK_LAYOUT_STYLE_ALWAYS_AVERAGE_SPLIT),
         "BarMode.Scrollable,"
         "{\"margin\":\"70.00px\","
         "\"nonScrollableLayoutStyle\":\"LayoutStyle.ALWAYS_AVERAGE_SPLIT\"}" },
@@ -525,7 +525,7 @@ HWTEST_F(TabsModifierTest, setBarMode1Test, TestSize.Level1)
         EXPECT_EQ(checkVal, "BarMode.Fixed");
     }
 
-    Opt_Length margin = Converter::ArkValue<Opt_Length>(70);
+    Opt_Length margin = Converter::ArkValue<Opt_Length>(70._px);
     Opt_LayoutStyle nonScrollableLayoutStyle =
     Converter::ArkValue<Opt_LayoutStyle>(ARK_LAYOUT_STYLE_ALWAYS_AVERAGE_SPLIT);
     Ark_ScrollableBarModeOptions options = {.margin = margin, .nonScrollableLayoutStyle = nonScrollableLayoutStyle};
@@ -838,8 +838,6 @@ HWTEST_F(TabsModifierTest, setBarWidthTestDefaultValues, TestSize.Level1)
 
 // Valid values for attribute 'barWidth' of method 'barWidth'
 static std::vector<std::tuple<std::string, Ark_Length, std::string>> barSizeValidValues = {
-    {"1", Converter::ArkValue<Ark_Length>(1), "1.00px"},
-    {"0", Converter::ArkValue<Ark_Length>(0), "0.00px"},
     {"2.45f", Converter::ArkValue<Ark_Length>(2.45f), "2.45vp"},
     {"5.0_px", Converter::ArkValue<Ark_Length>(5.0_px), "5.00px"},
     {"22.35_px", Converter::ArkValue<Ark_Length>(22.35_px), "22.35px"},
@@ -876,7 +874,6 @@ HWTEST_F(TabsModifierTest, setBarWidthTestValidValues, TestSize.Level1)
 
 // Invalid values for attribute 'barWidth' of method 'barWidth'
 static std::vector<std::tuple<std::string, Ark_Length>> barSizeInvalidValues = {
-    {"-1", Converter::ArkValue<Ark_Length>(-1)},
     {"-2.45f", Converter::ArkValue<Ark_Length>(-2.45f)},
     {"-5.0_px", Converter::ArkValue<Ark_Length>(-5.0_px)},
     {"-22.35_px", Converter::ArkValue<Ark_Length>(-22.35_px)},
@@ -1001,10 +998,10 @@ HWTEST_F(TabsModifierTest, setDividerTest, TestSize.Level1)
 
     // set valid values, color as Ark_Color aka int
     Ark_DividerStyle dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11),
+        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
-        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)}
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77._px)),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE),
     };
     auto divider = Converter::ArkValue<Opt_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
@@ -1021,10 +1018,10 @@ HWTEST_F(TabsModifierTest, setDividerTest, TestSize.Level1)
 
     // set color as Ark_Number
     dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11),
+        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
-        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)}
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77._px)),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456),
     };
     divider = Converter::ArkValue<Opt_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
@@ -1043,10 +1040,10 @@ HWTEST_F(TabsModifierTest, setDividerUndefinedTest, TestSize.Level1)
 {
     // set undefined values
     Ark_DividerStyle dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11),
+        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
         .startMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .endMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
-        .color = {.tag = ARK_TAG_UNDEFINED}
+        .color = Converter::ArkValue<Opt_ResourceColor>(),
     };
     auto divider = Converter::ArkValue<Opt_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
@@ -1071,10 +1068,10 @@ HWTEST_F(TabsModifierTest, setDividerColorStringTest, TestSize.Level1)
 {
     // set color as Ark_String
     Ark_DividerStyle dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11),
+        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
-        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")}
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77._px)),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"),
     };
     auto divider = Converter::ArkValue<Opt_DividerStyle>(dividerOptions);
     modifier_->setDivider(node_, &divider);
@@ -1434,8 +1431,6 @@ static std::vector<std::tuple<std::string, Opt_Number, std::string>> barGridAlig
 
 // Valid values for attribute 'margin' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> barGridAlignMarginValidValues = {
-    {"margin_1", Converter::ArkValue<Opt_Length>(1), "1.00px"},
-    {"margin_0", Converter::ArkValue<Opt_Length>(0), "0.00px"},
     {"margin_2.45f", Converter::ArkValue<Opt_Length>(2.45f), "2.45vp"},
     {"margin_5.0_px", Converter::ArkValue<Opt_Length>(5.0_px), "5.00px"},
     {"margin_22.35_px", Converter::ArkValue<Opt_Length>(22.35_px), "22.35px"},
@@ -1448,8 +1443,6 @@ static std::vector<std::tuple<std::string, Opt_Length, std::string>> barGridAlig
 
 // Valid values for attribute 'gutter' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> barGridAlignGutterValidValues = {
-    {"gutter_1", Converter::ArkValue<Opt_Length>(1), "1.00px"},
-    {"gutter_0", Converter::ArkValue<Opt_Length>(0), "0.00px"},
     {"gutter_2.45f", Converter::ArkValue<Opt_Length>(2.45f), "2.45vp"},
     {"gutter_5.0_px", Converter::ArkValue<Opt_Length>(5.0_px), "5.00px"},
     {"gutter_22.35_px", Converter::ArkValue<Opt_Length>(22.35_px), "22.35px"},
@@ -1592,14 +1585,14 @@ static std::vector<std::tuple<std::string, Opt_Number>> barGridAlignLgInvalidVal
 static std::vector<std::tuple<std::string, Opt_Length>> barGridAlignMarginInvalidValues = {
     {"margin_Ark_Empty", Converter::ArkValue<Opt_Length>(Ark_Empty())},
     {"margin_percent", Converter::ArkValue<Opt_Length>("12.00%")},
-    {"margin_negative", Converter::ArkValue<Opt_Length>(-10)}
+    {"margin_negative", Converter::ArkValue<Opt_Length>(-10._px)}
 };
 
 // Invalid values for attribute 'gutter' of method 'barGridAlign'
 static std::vector<std::tuple<std::string, Opt_Length>> barGridAlignGutterInvalidValues = {
     {"gutter_Ark_Empty", Converter::ArkValue<Opt_Length>(Ark_Empty())},
     {"gutter_percent", Converter::ArkValue<Opt_Length>("12.00%")},
-    {"gutter_negative", Converter::ArkValue<Opt_Length>(-10)}
+    {"gutter_negative", Converter::ArkValue<Opt_Length>(-10._px)}
 };
 
 /*

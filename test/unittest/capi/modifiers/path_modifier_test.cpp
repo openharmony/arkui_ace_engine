@@ -85,7 +85,7 @@ HWTEST_F(PathModifierTest, setPathOptionsTestSizeValidValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    Opt_PathOptions realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Opt_PathOptions realInputValue = Converter::ArkValue<Opt_PathOptions>(Ark_PathOptions{});
     Ark_PathOptions& inputValueOptions = realInputValue.value;
 
     for (const auto &[arkValue, expected]: testPlan) {
@@ -129,7 +129,7 @@ HWTEST_F(PathModifierTest, setPathOptionsTestSizeInvalidValues, TestSize.Level1)
 
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
-    Opt_PathOptions realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Opt_PathOptions realInputValue = Converter::ArkValue<Opt_PathOptions>(Ark_PathOptions{});
     Ark_PathOptions& inputValueOptions = realInputValue.value;
 
     for (auto &[arkValue, expected]: testPlan) {
@@ -154,7 +154,7 @@ HWTEST_F(PathModifierTest, setPathOptionsTestSizeInvalidValues, TestSize.Level1)
 HWTEST_F(PathModifierTest, setPathOptionsTestCmdValid, TestSize.Level1)
 {
     std::string resultStr;
-    Opt_PathOptions realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Opt_PathOptions realInputValue = Converter::ArkValue<Opt_PathOptions>(Ark_PathOptions{});
     Ark_PathOptions& inputValueOptions = realInputValue.value;
 
     // Initial setup/verification
@@ -178,7 +178,7 @@ HWTEST_F(PathModifierTest, setPathOptionsTestCmdValid, TestSize.Level1)
 HWTEST_F(PathModifierTest, setPathOptionsTestCmdInvalid, TestSize.Level1)
 {
     std::string resultStr;
-    Opt_PathOptions realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Opt_PathOptions realInputValue = Converter::ArkValue<Opt_PathOptions>(Ark_PathOptions{});
     Ark_PathOptions& inputValueOptions = realInputValue.value;
 
     // Verifying attribute's valid values

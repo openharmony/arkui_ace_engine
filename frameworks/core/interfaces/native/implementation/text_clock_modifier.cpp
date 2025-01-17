@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,14 +36,13 @@ namespace OHOS::Ace::NG::Converter {
     TextClockOptions Convert(const Ark_TextClockOptions& src)
     {
         TextClockOptions dst;
-        if (src.timeZoneOffset.tag != ARK_TAG_UNDEFINED) {
-            auto value = OptConvert<float>(src.timeZoneOffset.value);
-            // valid hoursWest is within [-14, 12]
-            Validator::ValidateByRange(value, -14.0f, 12.0f);
-            dst.timeZoneOffset = value;
-        }
-        if (src.controller.tag != ARK_TAG_UNDEFINED) {
-            dst.peerController = reinterpret_cast<TextClockControllerPeer*>(src.controller.value.ptr);
+        auto value = OptConvert<float>(src.timeZoneOffset);
+        // valid hoursWest is within [-14, 12]
+        Validator::ValidateByRange(value, -14.0f, 12.0f);
+        dst.timeZoneOffset = value;
+        auto controller = OptConvert<Ark_NativePointer>(src.controller);
+        if (controller) {
+            dst.peerController = reinterpret_cast<TextClockControllerPeer*>(*controller);
         }
         return dst;
     }
@@ -68,17 +67,15 @@ void SetTextClockOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
-    if (options->tag != ARK_TAG_UNDEFINED) {
-        auto textClockOptionsOpt = Converter::OptConvert<TextClockOptions>(options->value);
-        if (textClockOptionsOpt.has_value()) {
-            TextClockModelNG::SetHoursWest(frameNode, textClockOptionsOpt.value().timeZoneOffset);
+    auto textClockOptionsOpt = Converter::OptConvert<TextClockOptions>(*options);
+    if (textClockOptionsOpt.has_value()) {
+        TextClockModelNG::SetHoursWest(frameNode, textClockOptionsOpt.value().timeZoneOffset);
 
-            auto controller = TextClockModelNG::InitTextController(frameNode);
-            CHECK_NULL_VOID(controller);
-            auto peerImplPtr = textClockOptionsOpt.value().peerController;
-            CHECK_NULL_VOID(peerImplPtr);
-            peerImplPtr->controller = std::move(controller);
-        }
+        auto controller = TextClockModelNG::InitTextController(frameNode);
+        CHECK_NULL_VOID(controller);
+        auto peerImplPtr = textClockOptionsOpt.value().peerController;
+        CHECK_NULL_VOID(peerImplPtr);
+        peerImplPtr->controller = std::move(controller);
     }
 }
 } // TextClockInterfaceModifier

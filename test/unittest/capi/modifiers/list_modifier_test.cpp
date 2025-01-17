@@ -352,10 +352,10 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
     auto spaceCheckValue = GetAttrValue<std::string>(node_, "space");
     EXPECT_EQ(spaceCheckValue, "0.00vp");
 
-    Ark_ListOptions listOptions = {.initialIndex = Converter::ArkValue<Opt_Number>(1),
-        .space = Converter::ArkValue<Opt_Union_Number_String>
-            (Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(55.7f)),
-        .scroller = {.tag = ARK_TAG_OBJECT, .value = {.ptr = Converter::ArkValue<Ark_NativePointer>(nullptr)}}
+    Ark_ListOptions listOptions = {
+        .initialIndex = Converter::ArkValue<Opt_Number>(1),
+        .space = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(55.7f),
+        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{.ptr = nullptr}),
     };
 
     Opt_ListOptions options = Converter::ArkValue<Opt_ListOptions>(listOptions);
@@ -374,9 +374,10 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
     EXPECT_EQ(spaceCheckValue, "55.70vp");
 
     // index, space are undefined
-    listOptions = {.initialIndex = Converter::ArkValue<Opt_Number>(Ark_Empty()),
+    listOptions = {
+        .initialIndex = Converter::ArkValue<Opt_Number>(Ark_Empty()),
         .space = Converter::ArkValue<Opt_Union_Number_String>(Ark_Empty()),
-        .scroller = {.tag = ARK_TAG_OBJECT, .value = {.ptr = Converter::ArkValue<Ark_NativePointer>(nullptr)}}
+        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{.ptr = nullptr}),
     };
     options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);
@@ -386,9 +387,10 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
     EXPECT_EQ(spaceCheckValue, "0.00vp");
 
     // space as string
-    listOptions = {.initialIndex = Converter::ArkValue<Opt_Number>(3), .space =
-        Converter::ArkValue<Opt_Union_Number_String>(Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("88.9px")),
-        .scroller = {.tag = ARK_TAG_OBJECT, .value = {.ptr = Converter::ArkValue<Ark_NativePointer>(nullptr)}}
+    listOptions = {
+        .initialIndex = Converter::ArkValue<Opt_Number>(3),
+        .space = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>("88.9px"),
+        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{.ptr = nullptr}),
     };
     options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);
@@ -406,9 +408,10 @@ HWTEST_F(ListModifierTest, setListOptionsTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setListOptionsNegativeTest, TestSize.Level1)
 {
 // space and index are negative
-    Ark_ListOptions listOptions = {.initialIndex = Converter::ArkValue<Opt_Number>(-7), .space =
-        Converter::ArkValue<Opt_Union_Number_String>(Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(-9)),
-        .scroller = {.tag = ARK_TAG_OBJECT, .value = {.ptr = Converter::ArkValue<Ark_NativePointer>(nullptr)}}
+    Ark_ListOptions listOptions = {
+        .initialIndex = Converter::ArkValue<Opt_Number>(-7),
+        .space = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(-9),
+        .scroller = Converter::ArkValue<Opt_Scroller>(Ark_Scroller{.ptr = nullptr}),
     };
     Opt_ListOptions options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);
@@ -477,7 +480,7 @@ HWTEST_F(ListModifierTest, setLanesNegativeTest, TestSize.Level1)
 {
     // lanes, gutter are negative
     Ark_Union_Number_LengthConstrain value = Converter::ArkUnion<Ark_Union_Number_LengthConstrain, Ark_Number>(-2);
-    Opt_Dimension gutterOpt = Converter::ArkValue<Opt_Dimension>(Converter::ArkValue<Ark_Length>(-88));
+    Opt_Dimension gutterOpt = Converter::ArkValue<Opt_Dimension>(Converter::ArkValue<Ark_Length>(-88._px));
     modifier_->setLanes(node_, &value, &gutterOpt);
     auto lanesCheckValue = GetAttrValue<std::string>(node_, "lanes");
     EXPECT_EQ(lanesCheckValue, "-2");
@@ -601,10 +604,10 @@ HWTEST_F(ListModifierTest, setDividerTest, TestSize.Level1)
 
     // set valid values, color as Ark_Color aka int
     Ark_ListDividerOptions dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11),
+        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
-        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_WHITE)}
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77._px)),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE),
     };
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
@@ -621,10 +624,10 @@ HWTEST_F(ListModifierTest, setDividerTest, TestSize.Level1)
 
     // set color as Ark_Number
     dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11),
+        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
-        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(0x123456)}
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77._px)),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Number>(0x123456),
     };
     divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
@@ -648,9 +651,9 @@ HWTEST_F(ListModifierTest, setDividerColorResourceTest, TestSize.Level1)
     EXPECT_EQ(dividerCheckValue, "{}");
 
     Ark_ListDividerOptions dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11),
+        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
-        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
+        .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77._px)),
         .color = Converter::ArkValue<Opt_ResourceColor>(
             Converter::ArkUnion<Ark_ResourceColor, Ark_Resource>(DIVIDER_COLOR_RESOURCE))
     };
@@ -671,10 +674,10 @@ HWTEST_F(ListModifierTest, setDividerUndefinedTest, TestSize.Level1)
 {
     // set undefined values
     Ark_ListDividerOptions dividerOptions = {
-        .strokeWidth = Converter::ArkValue<Ark_Length>(11),
+        .strokeWidth = Converter::ArkValue<Ark_Length>(11._px),
         .startMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
         .endMargin = Converter::ArkValue<Opt_Length>(Ark_Empty()),
-        .color = {.tag = ARK_TAG_UNDEFINED}
+        .color = Converter::ArkValue<Opt_ResourceColor>(),
     };
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);
@@ -702,7 +705,7 @@ HWTEST_F(ListModifierTest, setDividerColorStringTest, TestSize.Level1)
         .strokeWidth = Converter::ArkValue<Ark_Length>(11),
         .startMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(55.5f)),
         .endMargin = Converter::ArkValue<Opt_Length>(Converter::ArkValue<Ark_Length>(77)),
-        .color = {.tag = ARK_TAG_OBJECT, .value = Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#11223344")}
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>("#11223344"),
     };
     auto divider = Converter::ArkValue<Opt_ListDividerOptions>(dividerOptions);
     modifier_->setDivider(node_, &divider);

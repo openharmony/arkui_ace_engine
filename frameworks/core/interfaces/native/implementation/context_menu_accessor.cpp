@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,8 +17,6 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "arkoala_api_generated.h"
 
-struct ContextMenuPeer {};
-
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ContextMenuAccessor {
 void DestroyPeerImpl(ContextMenuPeer* peer)
@@ -26,7 +24,7 @@ void DestroyPeerImpl(ContextMenuPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new ContextMenuPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -47,7 +45,4 @@ const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor()
     return &ContextMenuAccessorImpl;
 }
 
-struct ContextMenuPeer {
-    virtual ~ContextMenuPeer() = default;
-};
 }

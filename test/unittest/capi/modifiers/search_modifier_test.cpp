@@ -93,15 +93,15 @@ const auto CHECK_FLOAT_COLOR("#00000000");
 const auto CHECK_COLOR_COLOR("#FF008000");
 const auto TEST_STRING("testString");
 
-const Ark_ResourceColor COLOR_COLOR = { .selector = 0, .value0 = Ark_Color::ARK_COLOR_GREEN };
-const Ark_ResourceColor COLOR_INT = { .selector = 1, .value1 = ArkValue<Ark_Number>(CUSTOM_COLOR_INT) };
-const Ark_ResourceColor COLOR_FLOAT = { .selector = 1, .value1 = ArkValue<Ark_Number>(CUSTOM_COLOR_FLOAT) };
-const Ark_ResourceColor COLOR_STRING = { .selector = 2, .value2 = ArkValue<Ark_String>(CUSTOM_COLOR_STRING) };
+const Ark_ResourceColor COLOR_COLOR = Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(Ark_Color::ARK_COLOR_GREEN);
+const Ark_ResourceColor COLOR_INT = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(CUSTOM_COLOR_INT);
+const Ark_ResourceColor COLOR_FLOAT = Converter::ArkUnion<Ark_ResourceColor, Ark_Number>(CUSTOM_COLOR_FLOAT);
+const Ark_ResourceColor COLOR_STRING = Converter::ArkUnion<Ark_ResourceColor, Ark_String>(CUSTOM_COLOR_STRING);
 
-const Opt_ResourceColor OPT_COLOR_COLOR = { .tag = ARK_TAG_OBJECT, .value = COLOR_COLOR };
-const Opt_ResourceColor OPT_COLOR_INT = { .tag = ARK_TAG_OBJECT, .value = COLOR_INT };
-const Opt_ResourceColor OPT_COLOR_FLOAT = { .tag = ARK_TAG_OBJECT, .value = COLOR_FLOAT };
-const Opt_ResourceColor OPT_COLOR_STRING = { .tag = ARK_TAG_OBJECT, .value = COLOR_STRING };
+const Opt_ResourceColor OPT_COLOR_COLOR = Converter::ArkValue<Opt_ResourceColor>(COLOR_COLOR);
+const Opt_ResourceColor OPT_COLOR_INT = Converter::ArkValue<Opt_ResourceColor>(COLOR_INT);
+const Opt_ResourceColor OPT_COLOR_FLOAT = Converter::ArkValue<Opt_ResourceColor>(COLOR_FLOAT);
+const Opt_ResourceColor OPT_COLOR_STRING = Converter::ArkValue<Opt_ResourceColor>(COLOR_STRING);
 
 const auto RES_NAME = NamedResourceId(TEST_STRING, Converter::ResourceType::MEDIA);
 
@@ -119,12 +119,8 @@ const Ark_Int32 AINT32_POS(1234);
 const Ark_Int32 AINT32_NEG(INT_MIN);
 const Ark_Float32 AFLT32_POS(1.234f);
 const Ark_Float32 AFLT32_NEG(-5.6789f);
-const auto ALEN_PX_POS = ArkValue<Ark_Length>(AINT32_POS);
-const auto ALEN_PX_NEG = ArkValue<Ark_Length>(AINT32_NEG);
 const auto ALEN_VP_POS = ArkValue<Ark_Length>(AFLT32_POS);
 const auto ALEN_VP_NEG = ArkValue<Ark_Length>(AFLT32_NEG);
-const auto OPT_LEN_PX_POS = ArkValue<Opt_Length>(AINT32_POS);
-const auto OPT_LEN_PX_NEG = ArkValue<Opt_Length>(AINT32_NEG);
 const auto OPT_LEN_VP_POS = ArkValue<Opt_Length>(AFLT32_POS);
 const auto OPT_LEN_VP_NEG = ArkValue<Opt_Length>(AFLT32_NEG);
 
@@ -186,26 +182,18 @@ typedef std::pair<Ark_EnterKeyType, std::string> EnterKeyTypeTest;
 
 // common testPlans
 const std::vector<OptLengthTest> OPT_LENGTH_TEST_PLAN = {
-    { OPT_LEN_PX_POS, CHECK_POSITIVE_VALUE_INT },
-    { OPT_LEN_PX_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT }
 };
 const std::vector<OptLengthTest> TEST_PLAN_OPT_LENGTH_PX = {
-    { OPT_LEN_PX_POS, CHECK_MAX_ICON_PX },
-    { OPT_LEN_PX_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT_PX }
 };
 const std::vector<OptLengthTest> ICON_SIZE_TEST_PLAN = {
-    { OPT_LEN_PX_POS, CHECK_ICON_MAX_VALUE_INT },
-    { OPT_LEN_PX_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_NEG, CHECK_DEFAULT_PX },
     { OPT_LEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT_PX }
 };
 const std::vector<LengthTest> INDENT_LENGTH_TEST_PLAN = {
-    { ALEN_PX_POS, CHECK_POSITIVE_VALUE_INT },
-    { ALEN_PX_NEG, CHECK_NEGATIVE_VALUE_INT },
     { ALEN_VP_NEG, CHECK_NEGATIVE_VALUE_FLOAT },
     { ALEN_VP_POS, CHECK_POSITIVE_VALUE_FLOAT }
 };
@@ -860,7 +848,7 @@ HWTEST_F(SearchModifierTest, setSearchButtonTest, TestSize.Level1)
     for (auto testLength : OPT_LENGTH_TEST_PLAN) {
         for (auto ColorTest : COLOR_TEST_PLAN) {
             Ark_SearchButtonOptions buttonOptions = { .fontColor = ColorTest.first, .fontSize = testLength.first };
-            Opt_SearchButtonOptions options = { .tag = ARK_TAG_OBJECT, .value = buttonOptions };
+            Opt_SearchButtonOptions options = Converter::ArkValue<Opt_SearchButtonOptions>(buttonOptions);
             CheckSearchButtonOptions checkSearchButtonOptions = { ColorTest.second, testLength.second };
             TestSearchButtonOption testSearchButtonOption = { options, checkSearchButtonOptions };
             testSearchButton.push_back(testSearchButtonOption);

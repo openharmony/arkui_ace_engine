@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -89,8 +89,8 @@ void onRequestDataImpl(Ark_Int32 nodeId,
 }
 }
 namespace CalendarPicker {
-void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Date parameter)
+void onChange0Impl(Ark_Int32 nodeId,
+                   const Ark_Date parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -102,15 +102,15 @@ void onReadyImpl(Ark_Int32 nodeId)
 }
 }
 namespace Checkbox {
-void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean value)
+void onChange0Impl(Ark_Int32 nodeId,
+                   const Ark_Boolean value)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
 namespace CheckboxGroup {
-void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_CheckboxGroupResult value)
+void onChange0Impl(Ark_Int32 nodeId,
+                   const Ark_CheckboxGroupResult value)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -153,13 +153,28 @@ void onTouchImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void onKeyEventImpl(Ark_Int32 nodeId,
-                    const Ark_KeyEvent event)
+void onKeyEvent0Impl(Ark_Int32 nodeId,
+                     const Ark_KeyEvent event)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void onKeyEvent1Impl(Ark_Int32 nodeId,
+                     const Ark_KeyEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onKeyPreImeImpl(Ark_Int32 nodeId,
                      const Ark_KeyEvent parameter)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void onKeyEventDispatchImpl(Ark_Int32 nodeId,
+                            const Ark_KeyEvent parameter)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void onFocusAxisEventImpl(Ark_Int32 nodeId,
+                          const Ark_FocusAxisEvent parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -231,6 +246,11 @@ void onDragEndImpl(Ark_Int32 nodeId,
 }
 void onPreDragImpl(Ark_Int32 nodeId,
                    const Ark_PreDragStatus parameter)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void onAccessibilityFocusImpl(Ark_Int32 nodeId,
+                              const Ark_Boolean isFocus)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -346,8 +366,8 @@ void onChangeImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void onDateChangeImpl(Ark_Int32 nodeId,
-                      const Ark_Date parameter)
+void onDateChange0Impl(Ark_Int32 nodeId,
+                       const Ark_Date parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -751,15 +771,15 @@ void onErrorImpl(Ark_Int32 nodeId,
 }
 }
 namespace Radio {
-void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Boolean parameter)
+void onChange0Impl(Ark_Int32 nodeId,
+                   const Ark_Boolean parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
 namespace Rating {
-void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Number index)
+void onChange0Impl(Ark_Int32 nodeId,
+                   const Ark_Number index)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -885,8 +905,8 @@ void onClickImpl(Ark_Int32 nodeId,
 }
 namespace Scroll {
 void onScrollImpl(Ark_Int32 nodeId,
-                  const Ark_Number first,
-                  const Ark_Number last)
+                  const Ark_Number scrollOffset,
+                  const Ark_ScrollState scrollState)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -991,9 +1011,9 @@ void customKeyboardImpl(Ark_Int32 nodeId)
 }
 }
 namespace Select {
-void onSelectImpl(Ark_Int32 nodeId,
-                  const Ark_Number index,
-                  const Ark_String value)
+void onSelect0Impl(Ark_Int32 nodeId,
+                   const Ark_Number index,
+                   const Ark_String value)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1068,13 +1088,6 @@ void onContentDidScrollImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 }
-namespace IndicatorComponent {
-void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Number index)
-{
-    // GENERATED EMPTY IMPLEMENTATION
-}
-}
 namespace Tabs {
 void onChangeImpl(Ark_Int32 nodeId,
                   const Ark_Number index)
@@ -1137,6 +1150,11 @@ void onCopyImpl(Ark_Int32 nodeId,
 void onTextSelectionChangeImpl(Ark_Int32 nodeId,
                                const Ark_Number first,
                                const Ark_Number last)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
+void onMarqueeStateChangeImpl(Ark_Int32 nodeId,
+                              const Ark_MarqueeState parameter)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1324,15 +1342,15 @@ void onCancelImpl(Ark_Int32 nodeId)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_Union_String_Array_String value,
-                  const Ark_Union_Number_Array_Number index)
+void onChange0Impl(Ark_Int32 nodeId,
+                   const Ark_Union_String_Array_String value,
+                   const Ark_Union_Number_Array_Number index)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
-void onScrollStopImpl(Ark_Int32 nodeId,
-                      const Ark_Union_String_Array_String value,
-                      const Ark_Union_Number_Array_Number index)
+void onScrollStop0Impl(Ark_Int32 nodeId,
+                       const Ark_Union_String_Array_String value,
+                       const Ark_Union_Number_Array_Number index)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1346,8 +1364,8 @@ void onTimerImpl(Ark_Int32 nodeId,
 }
 }
 namespace TimePicker {
-void onChangeImpl(Ark_Int32 nodeId,
-                  const Ark_TimePickerResult value)
+void onChange0Impl(Ark_Int32 nodeId,
+                   const Ark_TimePickerResult value)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1781,6 +1799,10 @@ void onTerminatedImpl(Ark_Int32 nodeId,
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
+void onDrawReadyImpl(Ark_Int32 nodeId)
+{
+    // GENERATED EMPTY IMPLEMENTATION
+}
 }
 const GENERATED_ArkUIAbilityComponentEventsReceiver* GetAbilityComponentEventsReceiver()
 {
@@ -1827,7 +1849,7 @@ const GENERATED_ArkUICalendarEventsReceiver* GetCalendarEventsReceiver()
 const GENERATED_ArkUICalendarPickerEventsReceiver* GetCalendarPickerEventsReceiver()
 {
     static const GENERATED_ArkUICalendarPickerEventsReceiver GENERATED_ArkUICalendarPickerEventsReceiverImpl {
-        CalendarPicker::onChangeImpl,
+        CalendarPicker::onChange0Impl,
     };
 
     return &GENERATED_ArkUICalendarPickerEventsReceiverImpl;
@@ -1843,7 +1865,7 @@ const GENERATED_ArkUICanvasEventsReceiver* GetCanvasEventsReceiver()
 const GENERATED_ArkUICheckboxEventsReceiver* GetCheckboxEventsReceiver()
 {
     static const GENERATED_ArkUICheckboxEventsReceiver GENERATED_ArkUICheckboxEventsReceiverImpl {
-        Checkbox::onChangeImpl,
+        Checkbox::onChange0Impl,
     };
 
     return &GENERATED_ArkUICheckboxEventsReceiverImpl;
@@ -1851,7 +1873,7 @@ const GENERATED_ArkUICheckboxEventsReceiver* GetCheckboxEventsReceiver()
 const GENERATED_ArkUICheckboxGroupEventsReceiver* GetCheckboxGroupEventsReceiver()
 {
     static const GENERATED_ArkUICheckboxGroupEventsReceiver GENERATED_ArkUICheckboxGroupEventsReceiverImpl {
-        CheckboxGroup::onChangeImpl,
+        CheckboxGroup::onChange0Impl,
     };
 
     return &GENERATED_ArkUICheckboxGroupEventsReceiverImpl;
@@ -1866,8 +1888,11 @@ const GENERATED_ArkUICommonMethodEventsReceiver* GetCommonMethodEventsReceiver()
         CommonMethod::onAccessibilityHoverImpl,
         CommonMethod::onMouseImpl,
         CommonMethod::onTouchImpl,
-        CommonMethod::onKeyEventImpl,
+        CommonMethod::onKeyEvent0Impl,
+        CommonMethod::onKeyEvent1Impl,
         CommonMethod::onKeyPreImeImpl,
+        CommonMethod::onKeyEventDispatchImpl,
+        CommonMethod::onFocusAxisEventImpl,
         CommonMethod::onFocusImpl,
         CommonMethod::onBlurImpl,
         CommonMethod::onAppearImpl,
@@ -1882,6 +1907,7 @@ const GENERATED_ArkUICommonMethodEventsReceiver* GetCommonMethodEventsReceiver()
         CommonMethod::onDropImpl,
         CommonMethod::onDragEndImpl,
         CommonMethod::onPreDragImpl,
+        CommonMethod::onAccessibilityFocusImpl,
         CommonMethod::accessibilityVirtualNodeImpl,
         CommonMethod::onGestureJudgeBeginImpl,
         CommonMethod::onGestureRecognizerJudgeBegin0Impl,
@@ -1925,7 +1951,7 @@ const GENERATED_ArkUIDatePickerEventsReceiver* GetDatePickerEventsReceiver()
 {
     static const GENERATED_ArkUIDatePickerEventsReceiver GENERATED_ArkUIDatePickerEventsReceiverImpl {
         DatePicker::onChangeImpl,
-        DatePicker::onDateChangeImpl,
+        DatePicker::onDateChange0Impl,
     };
 
     return &GENERATED_ArkUIDatePickerEventsReceiverImpl;
@@ -2151,7 +2177,7 @@ const GENERATED_ArkUIPluginComponentEventsReceiver* GetPluginComponentEventsRece
 const GENERATED_ArkUIRadioEventsReceiver* GetRadioEventsReceiver()
 {
     static const GENERATED_ArkUIRadioEventsReceiver GENERATED_ArkUIRadioEventsReceiverImpl {
-        Radio::onChangeImpl,
+        Radio::onChange0Impl,
     };
 
     return &GENERATED_ArkUIRadioEventsReceiverImpl;
@@ -2159,7 +2185,7 @@ const GENERATED_ArkUIRadioEventsReceiver* GetRadioEventsReceiver()
 const GENERATED_ArkUIRatingEventsReceiver* GetRatingEventsReceiver()
 {
     static const GENERATED_ArkUIRatingEventsReceiver GENERATED_ArkUIRatingEventsReceiverImpl {
-        Rating::onChangeImpl,
+        Rating::onChange0Impl,
     };
 
     return &GENERATED_ArkUIRatingEventsReceiverImpl;
@@ -2252,7 +2278,7 @@ const GENERATED_ArkUISearchEventsReceiver* GetSearchEventsReceiver()
 const GENERATED_ArkUISelectEventsReceiver* GetSelectEventsReceiver()
 {
     static const GENERATED_ArkUISelectEventsReceiver GENERATED_ArkUISelectEventsReceiverImpl {
-        Select::onSelectImpl,
+        Select::onSelect0Impl,
     };
 
     return &GENERATED_ArkUISelectEventsReceiverImpl;
@@ -2289,14 +2315,6 @@ const GENERATED_ArkUISwiperEventsReceiver* GetSwiperEventsReceiver()
 
     return &GENERATED_ArkUISwiperEventsReceiverImpl;
 }
-const GENERATED_ArkUIIndicatorComponentEventsReceiver* GetIndicatorComponentEventsReceiver()
-{
-    static const GENERATED_ArkUIIndicatorComponentEventsReceiver GENERATED_ArkUIIndicatorComponentEventsReceiverImpl {
-        IndicatorComponent::onChangeImpl,
-    };
-
-    return &GENERATED_ArkUIIndicatorComponentEventsReceiverImpl;
-}
 const GENERATED_ArkUITabsEventsReceiver* GetTabsEventsReceiver()
 {
     static const GENERATED_ArkUITabsEventsReceiver GENERATED_ArkUITabsEventsReceiverImpl {
@@ -2325,6 +2343,7 @@ const GENERATED_ArkUITextEventsReceiver* GetTextEventsReceiver()
     static const GENERATED_ArkUITextEventsReceiver GENERATED_ArkUITextEventsReceiverImpl {
         Text::onCopyImpl,
         Text::onTextSelectionChangeImpl,
+        Text::onMarqueeStateChangeImpl,
         Text::bindSelectionMenuImpl,
     };
 
@@ -2387,8 +2406,8 @@ const GENERATED_ArkUITextPickerEventsReceiver* GetTextPickerEventsReceiver()
     static const GENERATED_ArkUITextPickerEventsReceiver GENERATED_ArkUITextPickerEventsReceiverImpl {
         TextPicker::onAcceptImpl,
         TextPicker::onCancelImpl,
-        TextPicker::onChangeImpl,
-        TextPicker::onScrollStopImpl,
+        TextPicker::onChange0Impl,
+        TextPicker::onScrollStop0Impl,
     };
 
     return &GENERATED_ArkUITextPickerEventsReceiverImpl;
@@ -2404,7 +2423,7 @@ const GENERATED_ArkUITextTimerEventsReceiver* GetTextTimerEventsReceiver()
 const GENERATED_ArkUITimePickerEventsReceiver* GetTimePickerEventsReceiver()
 {
     static const GENERATED_ArkUITimePickerEventsReceiver GENERATED_ArkUITimePickerEventsReceiverImpl {
-        TimePicker::onChangeImpl,
+        TimePicker::onChange0Impl,
     };
 
     return &GENERATED_ArkUITimePickerEventsReceiverImpl;
@@ -2540,6 +2559,7 @@ const GENERATED_ArkUIUIExtensionComponentEventsReceiver* GetUIExtensionComponent
         UIExtensionComponent::onResultImpl,
         UIExtensionComponent::onReleaseImpl,
         UIExtensionComponent::onTerminatedImpl,
+        UIExtensionComponent::onDrawReadyImpl,
     };
 
     return &GENERATED_ArkUIUIExtensionComponentEventsReceiverImpl;
@@ -2597,7 +2617,6 @@ const GENERATED_ArkUIEventsAPI* GENERATED_GetArkUiEventsAPI()
         GetSliderEventsReceiver,
         GetStepperEventsReceiver,
         GetSwiperEventsReceiver,
-        GetIndicatorComponentEventsReceiver,
         GetTabsEventsReceiver,
         GetTabContentEventsReceiver,
         GetTextEventsReceiver,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -92,6 +92,8 @@ const auto ATTRIBUTE_OVERVIEW_MODE_ACCESS_NAME = "overviewModeAccess";
 const auto ATTRIBUTE_OVERVIEW_MODE_ACCESS_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_OVER_SCROLL_MODE_NAME = "overScrollMode";
 const auto ATTRIBUTE_OVER_SCROLL_MODE_DEFAULT_VALUE = "OverScrollMode.NEVER";
+const auto ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_NAME = "blurOnKeyboardHideMode";
+const auto ATTRIBUTE_BLUR_ON_KEYBOARD_HIDE_MODE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_TEXT_ZOOM_ATIO_NAME = "textZoomAtio";
 const auto ATTRIBUTE_TEXT_ZOOM_ATIO_DEFAULT_VALUE = "100";
 const auto ATTRIBUTE_TEXT_ZOOM_RATIO_NAME = "textZoomRatio";
@@ -178,6 +180,10 @@ const auto ATTRIBUTE_KEYBOARD_AVOID_MODE_NAME = "keyboardAvoidMode";
 const auto ATTRIBUTE_KEYBOARD_AVOID_MODE_DEFAULT_VALUE = "empty";
 const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME = "enableHapticFeedback";
 const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE = "empty";
+const auto ATTRIBUTE_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT_NAME = "enableFollowSystemFontWeight";
+const auto ATTRIBUTE_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_ENABLE_WEB_AVSESSION_NAME = "enableWebAVSession";
+const auto ATTRIBUTE_ENABLE_WEB_AVSESSION_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TAG_NAME = "tag";
 const auto ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TAG_DEFAULT_VALUE = "";
 const auto ATTRIBUTE_REGISTER_NATIVE_EMBED_RULE_I_TYPE_NAME = "type";

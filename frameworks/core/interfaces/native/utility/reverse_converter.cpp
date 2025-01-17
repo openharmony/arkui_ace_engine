@@ -126,60 +126,60 @@ void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src)
 
 void AssignArkValue(Ark_Length& dst, const double& src)
 {
-    dst.type = ARK_RUNTIME_NUMBER;
+    dst.type = INTEROP_RUNTIME_NUMBER;
     dst.value = src;
     dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
 }
 
 void AssignArkValue(Ark_Length& dst, const Dimension& src)
 {
-    dst.type = ARK_RUNTIME_NUMBER;
+    dst.type = INTEROP_RUNTIME_NUMBER;
     dst.value = src.Unit() == DimensionUnit::PERCENT ? src.Value() * 100.f : src.Value();
     dst.unit = static_cast<int32_t>(src.Unit());
 }
 
 void AssignArkValue(Ark_Length& dst, const float& src)
 {
-    dst.type = ARK_RUNTIME_NUMBER;
+    dst.type = INTEROP_RUNTIME_NUMBER;
     dst.value = src;
     dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
 }
 
 void AssignArkValue(Ark_Number& dst, const int32_t& src)
 {
-    dst.tag = ARK_TAG_INT32;
+    dst.tag = INTEROP_TAG_INT32;
     dst.i32 = src;
 }
 
 void AssignArkValue(Ark_Number& dst, const long& src)
 {
     LOGE("Ark_Number doesn`t support long");
-    dst.tag = ARK_TAG_INT32;
+    dst.tag = INTEROP_TAG_INT32;
     dst.i32 = static_cast<int32_t>(src);
 }
 
 void AssignArkValue(Ark_Number& dst, const long long& src)
 {
     LOGE("Ark_Number doesn`t support long long");
-    dst.tag = ARK_TAG_INT32;
+    dst.tag = INTEROP_TAG_INT32;
     dst.i32 = static_cast<int32_t>(src);
 }
 
 void AssignArkValue(Ark_Number& dst, const uint32_t& src)
 {
-    dst.tag = ARK_TAG_INT32;
+    dst.tag = INTEROP_TAG_INT32;
     dst.i32 = src;
 }
 
 void AssignArkValue(Ark_Number& dst, const float& src)
 {
-    dst.tag = ARK_TAG_FLOAT32;
+    dst.tag = INTEROP_TAG_FLOAT32;
     dst.f32 = src;
 }
 
 void AssignArkValue(Ark_Number& dst, const double& src)
 {
-    dst.tag = ARK_TAG_FLOAT32;
+    dst.tag = INTEROP_TAG_FLOAT32;
     dst.f32 = static_cast<float>(src);
 }
 
@@ -189,11 +189,10 @@ void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *c
     dst.value = ArkValue<Ark_String>(src.value, ctx);
 }
 
-void AssignArkValue(Ark_Length& dst, const int& src)
+void AssignArkValue(Ark_Length& dst, const int& id)
 {
-    dst.type = ARK_RUNTIME_NUMBER;
-    dst.value = src;
-    dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::PX);
+    dst.type = INTEROP_TAG_RESOURCE;
+    dst.resource = id;
 }
 
 void AssignArkValue(Ark_Number& dst, const Dimension& src)
@@ -222,7 +221,7 @@ void AssignArkValue(Ark_Date& dst, const std::string& src)
         json->GetValue(MONTH)->GetInt(),
         json->GetValue(DAY)->GetInt());
     Validator::ValidatePickerDate(date);
-    
+
     std::tm tm {};
     tm.tm_year = date.GetYear() - STD_TM_START_YEAR; // tm_year is years since 1900
     tm.tm_mon = date.GetMonth() - 1; // tm_mon from 0 to 11

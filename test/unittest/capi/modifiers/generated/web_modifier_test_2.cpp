@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,79 @@
 
 namespace OHOS::Ace::NG {
 using namespace TestConst::Web;
+/*
+ * @tc.name: setPinchSmoothTestPinchSmoothValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, setPinchSmoothTestPinchSmoothValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValuePinchSmooth;
+
+    // Initial setup
+    initValuePinchSmooth = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValuePinchSmooth](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValuePinchSmooth = initValuePinchSmooth;
+
+        inputValuePinchSmooth = value;
+        modifier_->setPinchSmooth(node_, inputValuePinchSmooth);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PINCH_SMOOTH_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setPinchSmooth, attribute: pinchSmooth";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setAllowWindowOpenMethodTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, setAllowWindowOpenMethodTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALLOW_WINDOW_OPEN_METHOD_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ALLOW_WINDOW_OPEN_METHOD_DEFAULT_VALUE) <<
+        "Default value for attribute 'allowWindowOpenMethod'";
+}
+
+/*
+ * @tc.name: setAllowWindowOpenMethodTestAllowWindowOpenMethodValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, setAllowWindowOpenMethodTestAllowWindowOpenMethodValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueAllowWindowOpenMethod;
+
+    // Initial setup
+    initValueAllowWindowOpenMethod = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueAllowWindowOpenMethod](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueAllowWindowOpenMethod = initValueAllowWindowOpenMethod;
+
+        inputValueAllowWindowOpenMethod = value;
+        modifier_->setAllowWindowOpenMethod(node_, inputValueAllowWindowOpenMethod);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ALLOW_WINDOW_OPEN_METHOD_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setAllowWindowOpenMethod, attribute: allowWindowOpenMethod";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
 /*
  * @tc.name: setJavaScriptOnDocumentStartTestDefaultValues
  * @tc.desc:
@@ -1052,6 +1125,96 @@ HWTEST_F(WebModifierTest, setEnableHapticFeedbackTestEnableHapticFeedbackValidVa
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
             "Input value is: " << input << ", method: setEnableHapticFeedback, attribute: enableHapticFeedback";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setEnableFollowSystemFontWeightTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setEnableFollowSystemFontWeightTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableFollowSystemFontWeight'";
+}
+
+/*
+ * @tc.name: setEnableFollowSystemFontWeightTestEnableFollowSystemFontWeightValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setEnableFollowSystemFontWeightTestEnableFollowSystemFontWeightValidValues,
+    TestSize.Level1)
+{
+    Ark_Boolean initValueEnableFollowSystemFontWeight;
+
+    // Initial setup
+    initValueEnableFollowSystemFontWeight = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueEnableFollowSystemFontWeight](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueEnableFollowSystemFontWeight = initValueEnableFollowSystemFontWeight;
+
+        inputValueEnableFollowSystemFontWeight = value;
+        modifier_->setEnableFollowSystemFontWeight(node_, inputValueEnableFollowSystemFontWeight);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_FOLLOW_SYSTEM_FONT_WEIGHT_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input
+            << ", method: setEnableFollowSystemFontWeight, attribute: enableFollowSystemFontWeight";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
+ * @tc.name: setEnableWebAVSessionTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setEnableWebAVSessionTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_WEB_AVSESSION_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_ENABLE_WEB_AVSESSION_DEFAULT_VALUE) <<
+        "Default value for attribute 'enableWebAVSession'";
+}
+
+/*
+ * @tc.name: setEnableWebAVSessionTestEnableWebAVSessionValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebModifierTest, DISABLED_setEnableWebAVSessionTestEnableWebAVSessionValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueEnableWebAVSession;
+
+    // Initial setup
+    initValueEnableWebAVSession = std::get<1>(Fixtures::testFixtureBooleanValidValues[0]);
+
+    auto checkValue = [this, &initValueEnableWebAVSession](
+                          const std::string& input, const std::string& expectedStr, const Ark_Boolean& value) {
+        Ark_Boolean inputValueEnableWebAVSession = initValueEnableWebAVSession;
+
+        inputValueEnableWebAVSession = value;
+        modifier_->setEnableWebAVSession(node_, inputValueEnableWebAVSession);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_ENABLE_WEB_AVSESSION_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setEnableWebAVSession, attribute: enableWebAVSession";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {

@@ -52,6 +52,8 @@
 #include "generated/converter_generated.h"
 #include "ace_engine_types.h"
 
+using Ark_Empty = InteropVoid;
+
 namespace OHOS::Ace::NG::Converter {
     // Optional trait
     template<typename T, typename = void>
@@ -266,9 +268,9 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(To& dst, const From& src, ConvContext *ctx = nullptr)
     {
         if constexpr (std::is_same_v<From, Ark_Empty> || std::is_same_v<From, std::nullopt_t>) {
-            dst.tag = ARK_TAG_UNDEFINED;
+            dst.tag = INTEROP_TAG_UNDEFINED;
         } else {
-            dst.tag = ARK_TAG_OBJECT;
+            dst.tag = INTEROP_TAG_OBJECT;
             AssignArkValue(dst.value, src, ctx);
         }
     }
@@ -277,10 +279,10 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(To& dst, const std::optional<From>& src, ConvContext *ctx = nullptr)
     {
         if (src.has_value()) {
-            dst.tag = ARK_TAG_OBJECT;
+            dst.tag = INTEROP_TAG_OBJECT;
             AssignArkValue(dst.value, src.value(), ctx);
         } else {
-            dst.tag = ARK_TAG_UNDEFINED;
+            dst.tag = INTEROP_TAG_UNDEFINED;
         }
     }
 
@@ -456,7 +458,7 @@ namespace OHOS::Ace::NG::Converter {
     To ArkUnion(const From& src, ConvContext *ctx = nullptr)
     {
         return {
-            .tag = ARK_TAG_OBJECT,
+            .tag = INTEROP_TAG_OBJECT,
             .value = ArkUnion<decltype(To().value), Which>(src, ctx),
         };
     }
@@ -465,7 +467,7 @@ namespace OHOS::Ace::NG::Converter {
     To ArkUnion(const Ark_Empty& src, ConvContext *ctx = nullptr)
     {
         return {
-            .tag = ARK_TAG_UNDEFINED,
+            .tag = INTEROP_TAG_UNDEFINED,
         };
     }
 
@@ -569,7 +571,7 @@ namespace OHOS::Ace::NG::Converter {
                 .length = data_.size(),
             };
             return {
-                .tag = ARK_TAG_OBJECT,
+                .tag = INTEROP_TAG_OBJECT,
                 .value = value,
             };
         }

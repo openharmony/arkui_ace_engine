@@ -165,7 +165,7 @@ HWTEST_F(StepperItemModifierTest, setStatusTestValidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Opt_ItemState realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Opt_ItemState realInputValue = Converter::ArkValue<Opt_ItemState>(Ark_ItemState{});
     Ark_ItemState& inputValueStatus = realInputValue.value;
     Ark_ItemState initValueStatus;
 
@@ -199,7 +199,7 @@ HWTEST_F(StepperItemModifierTest, setStatusTestInvalidValues, TestSize.Level1)
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
     std::string expectedStr;
-    Opt_ItemState realInputValue = {.tag = ARK_TAG_OBJECT, .value = {}};
+    Opt_ItemState realInputValue = Converter::ArkValue<Opt_ItemState>(Ark_ItemState{});
     Ark_ItemState& inputValueStatus = realInputValue.value;
     Ark_ItemState initValueStatus;
 

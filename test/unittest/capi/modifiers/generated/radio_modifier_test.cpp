@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -223,11 +223,11 @@ HWTEST_F(RadioModifierTest, setRadioOptionsTestOptionsIndicatorTypeInvalidValues
 }
 
 /*
- * @tc.name: setCheckedTestDefaultValues
+ * @tc.name: setChecked0TestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, setCheckedTestDefaultValues, TestSize.Level1)
+HWTEST_F(RadioModifierTest, setChecked0TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -237,11 +237,11 @@ HWTEST_F(RadioModifierTest, setCheckedTestDefaultValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setCheckedTestCheckedValidValues
+ * @tc.name: setChecked0TestCheckedValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(RadioModifierTest, setCheckedTestCheckedValidValues, TestSize.Level1)
+HWTEST_F(RadioModifierTest, setChecked0TestCheckedValidValues, TestSize.Level1)
 {
     Ark_Boolean initValueChecked;
 
@@ -253,15 +253,85 @@ HWTEST_F(RadioModifierTest, setCheckedTestCheckedValidValues, TestSize.Level1)
         Ark_Boolean inputValueChecked = initValueChecked;
 
         inputValueChecked = value;
-        modifier_->setChecked(node_, inputValueChecked);
+        modifier_->setChecked0(node_, inputValueChecked);
         auto jsonValue = GetJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CHECKED_NAME);
-        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setChecked, attribute: checked";
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setChecked0, attribute: checked";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
         checkValue(input, expected, value);
     }
+}
+
+/*
+ * @tc.name: setChecked1TestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioModifierTest, setChecked1TestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CHECKED_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_CHECKED_DEFAULT_VALUE) << "Default value for attribute 'checked'";
+}
+
+/*
+ * @tc.name: setChecked1TestCheckedValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioModifierTest, DISABLED_setChecked1TestCheckedValidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueChecked;
+
+    // Initial setup
+    initValueChecked = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueChecked](
+                          const std::string& input, const std::string& expectedStr, const Opt_Boolean& value) {
+        Opt_Boolean inputValueChecked = initValueChecked;
+
+        inputValueChecked = value;
+        modifier_->setChecked1(node_, &inputValueChecked);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CHECKED_NAME);
+        EXPECT_EQ(resultStr, expectedStr) << "Input value is: " << input << ", method: setChecked1, attribute: checked";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureBooleanValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Boolean>(value));
+    }
+}
+
+/*
+ * @tc.name: setChecked1TestCheckedInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioModifierTest, setChecked1TestCheckedInvalidValues, TestSize.Level1)
+{
+    Opt_Boolean initValueChecked;
+
+    // Initial setup
+    initValueChecked = ArkValue<Opt_Boolean>(std::get<1>(Fixtures::testFixtureBooleanValidValues[0]));
+
+    auto checkValue = [this, &initValueChecked](const std::string& input, const Opt_Boolean& value) {
+        Opt_Boolean inputValueChecked = initValueChecked;
+
+        modifier_->setChecked1(node_, &inputValueChecked);
+        inputValueChecked = value;
+        modifier_->setChecked1(node_, &inputValueChecked);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_CHECKED_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_CHECKED_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setChecked1, attribute: checked";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Boolean>());
 }
 
 /*

@@ -191,7 +191,7 @@ HWTEST_F(ButtonModifierResourcesTest, setFontSizeTestResourcesValidResources, Te
 
     using OneTestStep = std::pair<Ark_Length, std::string>;
     const std::vector<OneTestStep> testPlan = {
-        { { .type = ARK_TAG_RESOURCE, .resource = RES_DIMENSION_ID }, "5.00vp" },
+        { Converter::ArkValue<Ark_Length>(RES_DIMENSION_ID), "5.00vp" },
     };
 
     for (const auto &[arkLength, expected]: testPlan) {
@@ -215,7 +215,7 @@ HWTEST_F(ButtonModifierResourcesTest, DISABLED_setFontSizeTestResourcesInvalidRe
 
     using OneTestStep = std::pair<Ark_Length, std::string>;
     const std::vector<OneTestStep> testPlan = {
-        { { .type = ARK_TAG_RESOURCE, .resource = -1 }, ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE }
+        { Converter::ArkValue<Ark_Length>(-1), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE }
     };
 
     for (const auto &[arkLength, expected]: testPlan) {

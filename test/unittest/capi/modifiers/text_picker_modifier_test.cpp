@@ -135,11 +135,8 @@ const std::vector<PickerItemHeightTestStep> PICKER_ITEM_HEIGHT_TEST_PLAN = {
     { Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("-10px"), "-10.00px" }
 };
 
-const Ark_Int32 AINT32_POS(70);
-const Ark_Int32 AINT32_NEG(INT_MIN);
 const Ark_Float32 AFLT32_POS(1.234f);
 const Ark_Float32 AFLT32_NEG(-5.6789f);
-const auto CHECK_AINT32_POS = "70.00px";
 const auto CHECK_AFLT32_POS = "1.23vp";
 
 const auto RES_CONTENT_STR = "aa.bb.cc";
@@ -156,17 +153,15 @@ const std::vector<UnionStringResourceTestStep> UNION_RESOURCE_STRING_PLAN = {
 
 typedef std::pair<Opt_Length, std::string> OptLengthTestStep;
 const std::vector<OptLengthTestStep> FONT_SIZE_TEST_PLAN = {
-    { Converter::ArkValue<Opt_Length>(AINT32_POS), CHECK_AINT32_POS },
-    { Converter::ArkValue<Opt_Length>(AINT32_NEG), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
+    { Converter::ArkValue<Opt_Length>(AFLT32_POS), CHECK_AFLT32_POS },
     { Converter::ArkValue<Opt_Length>(AFLT32_NEG), ATTRIBUTE_FONT_SIZE_DEFAULT_VALUE },
-    { Converter::ArkValue<Opt_Length>(AFLT32_POS), CHECK_AFLT32_POS }
 };
 
 typedef std::pair<Opt_FontStyle, std::string> ArkFontStyleTestStep;
 const std::vector<ArkFontStyleTestStep> FONT_STYLE_TEST_PLAN = {
-    { { .tag = ARK_TAG_OBJECT, .value = ARK_FONT_STYLE_NORMAL }, "FontStyle.Normal" },
-    { { .tag = ARK_TAG_OBJECT, .value = ARK_FONT_STYLE_ITALIC }, "FontStyle.Italic" },
-    { { .tag = ARK_TAG_OBJECT, .value = static_cast<Ark_FontStyle>(2) }, "FontStyle.Normal" },
+    { Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_NORMAL), "FontStyle.Normal" },
+    { Converter::ArkValue<Opt_FontStyle>(ARK_FONT_STYLE_ITALIC), "FontStyle.Italic" },
+    { Converter::ArkValue<Opt_FontStyle>(static_cast<Ark_FontStyle>(-1)), "FontStyle.Normal" },
 };
 
 typedef std::pair<Opt_Union_FontWeight_Number_String, std::string> ArkFontWeightTest;
@@ -341,10 +336,10 @@ const std::vector<SelectedIndexTestStep> SELECTEDS_INDEX_CASCADE_TEST_PLAN = {
 
 typedef std::pair<Opt_Length, std::string> OptLengthTestStep;
 const std::vector<OptLengthTestStep> DIVIDER_STROKE_WIDTH_TEST_PLAN = {
-    { Converter::ArkValue<Opt_Length>(10), "10.00px" },
+    { Converter::ArkValue<Opt_Length>(10._px), "10.00px" },
     { Converter::ArkValue<Opt_Length>("-55.00%"), ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE },
-    { Converter::ArkValue<Opt_Length>(0), "0.00px" },
-    { Converter::ArkValue<Opt_Length>(-20), ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE },
+    { Converter::ArkValue<Opt_Length>(0._px), "0.00px" },
+    { Converter::ArkValue<Opt_Length>(-20._px), ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE },
     { Converter::ArkValue<Opt_Length>(15.4f), "15.40vp" },
     { Converter::ArkValue<Opt_Length>("55.00%"), ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE },
     { Converter::ArkValue<Opt_Length>(22.11_px), "22.11px" },
@@ -353,10 +348,10 @@ const std::vector<OptLengthTestStep> DIVIDER_STROKE_WIDTH_TEST_PLAN = {
     { Converter::ArkValue<Opt_Length>(-3.12_px), ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE }
 };
 const std::vector<OptLengthTestStep> DIVIDER_MARGIN_TEST_PLAN = {
-    { Converter::ArkValue<Opt_Length>(10), "10.00px" },
+    { Converter::ArkValue<Opt_Length>(10._px), "10.00px" },
     { Converter::ArkValue<Opt_Length>("-55.00%"), "0.00vp" },
-    { Converter::ArkValue<Opt_Length>(0), "0.00px" },
-    { Converter::ArkValue<Opt_Length>(-20), "0.00vp" },
+    { Converter::ArkValue<Opt_Length>(0._px), "0.00px" },
+    { Converter::ArkValue<Opt_Length>(-20._px), "0.00vp" },
     { Converter::ArkValue<Opt_Length>(15.4f), "15.40vp" },
     { Converter::ArkValue<Opt_Length>("55.00%"), "0.00vp" },
     { Converter::ArkValue<Opt_Length>(22.11_px), "22.11px" },
@@ -998,7 +993,7 @@ HWTEST_F(TextPickerModifierTest, setOnChangeTest, TestSize.Level1)
     auto func = ArkValue<Type_TextPickerAttribute_onChange_callback>(developerCallback, CONTEXT_ID);
     textPickerEventHub->FireChangeEvent(values, indexes);
     ASSERT_FALSE(checkInvoke.has_value());
-    modifier_->setOnChange(node_, &func);
+    modifier_->setOnChange0(node_, &func);
     textPickerEventHub->FireChangeEvent(values, indexes);
     ASSERT_TRUE(checkInvoke.has_value());
     EXPECT_EQ(std::get<INVOKE_POS_0>(checkInvoke.value()), CONTEXT_ID);
@@ -1013,12 +1008,12 @@ HWTEST_F(TextPickerModifierTest, setOnChangeTest, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setDefaultItemHeight, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDefaultPickerItemHeight, nullptr);
+    ASSERT_NE(modifier_->setDefaultPickerItemHeight0, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_DEFAULT_PICKER_ITEM_HEIGHT_NAME);
     EXPECT_EQ(checkVal, ATTRIBUTE_DEFAULT_PICKER_ITEM_HEIGHT_DEFAULT_VALUE);
 
     for (const auto &[height, expected] : PICKER_ITEM_HEIGHT_TEST_PLAN) {
-        modifier_->setDefaultPickerItemHeight(node_, &height);
+        modifier_->setDefaultPickerItemHeight0(node_, &height);
         checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_DEFAULT_PICKER_ITEM_HEIGHT_NAME);
         EXPECT_EQ(checkVal, expected);
     }
@@ -1031,16 +1026,16 @@ HWTEST_F(TextPickerModifierTest, setDefaultItemHeight, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setCanLoop, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setCanLoop, nullptr);
+    ASSERT_NE(modifier_->setCanLoop0, nullptr);
 
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_CAN_LOOP_NAME);
     EXPECT_EQ(checkVal, ATTRIBUTE_CAN_LOOP_DEFAULT_VALUE);
 
-    modifier_->setCanLoop(node_, true);
+    modifier_->setCanLoop0(node_, true);
     checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_CAN_LOOP_NAME);
     EXPECT_EQ(checkVal, EXPECTED_TRUE);
 
-    modifier_->setCanLoop(node_, false);
+    modifier_->setCanLoop0(node_, false);
     checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_CAN_LOOP_NAME);
     EXPECT_EQ(checkVal, EXPECTED_FALSE);
 }
@@ -1052,7 +1047,7 @@ HWTEST_F(TextPickerModifierTest, setCanLoop, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setDisappearTextStyle, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
+    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -1070,7 +1065,7 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextStyle, TestSize.Level1)
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
         pickerStyle.font.value = font;
-        modifier_->setDisappearTextStyle(node_, &pickerStyle);
+        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1092,7 +1087,7 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextStyle, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setDisappearTextWeight, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
+    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -1110,7 +1105,7 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextWeight, TestSize.Level1)
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
         pickerStyle.font.value = font;
-        modifier_->setDisappearTextStyle(node_, &pickerStyle);
+        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1127,7 +1122,7 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextWeight, TestSize.Level1)
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
         pickerStyle.font.value = font;
-        modifier_->setDisappearTextStyle(node_, &pickerStyle);
+        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1149,7 +1144,7 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextWeight, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextFamily, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
+    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -1167,7 +1162,7 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextFamily, TestSize.Level
     for (auto family : UNION_RESOURCE_STRING_PLAN) {
         font.family = family.first;
         pickerStyle.font.value = font;
-        modifier_->setDisappearTextStyle(node_, &pickerStyle);
+        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1189,7 +1184,7 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setDisappearTextFamily, TestSize.Level
  */
 HWTEST_F(TextPickerModifierTest, setDisappearTextSize, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
+    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -1207,7 +1202,7 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextSize, TestSize.Level1)
     for (auto size : FONT_SIZE_TEST_PLAN) {
         font.size = size.first;
         pickerStyle.font.value = font;
-        modifier_->setDisappearTextStyle(node_, &pickerStyle);
+        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1229,7 +1224,7 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextSize, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setDisappearTextColor, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDisappearTextStyle, nullptr);
+    ASSERT_NE(modifier_->setDisappearTextStyle0, nullptr);
     auto fullJson = GetJsonValue(node_);
     auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
     auto checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
@@ -1238,7 +1233,7 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextColor, TestSize.Level1)
 
     for (const auto& [value, expectVal] : COLOR_BLACK_TEST_PLAN) {
         pickerStyle.color = { .value = value };
-        modifier_->setDisappearTextStyle(node_, &pickerStyle);
+        modifier_->setDisappearTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DISAPPEAR_TEXT_STYLE_NAME);
         checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
@@ -1253,7 +1248,7 @@ HWTEST_F(TextPickerModifierTest, setDisappearTextColor, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setTextStyle, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle, nullptr);
+    ASSERT_NE(modifier_->setTextStyle0, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -1271,7 +1266,7 @@ HWTEST_F(TextPickerModifierTest, setTextStyle, TestSize.Level1)
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
         pickerStyle.font.value = font;
-        modifier_->setTextStyle(node_, &pickerStyle);
+        modifier_->setTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1293,7 +1288,7 @@ HWTEST_F(TextPickerModifierTest, setTextStyle, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setTextWeight, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle, nullptr);
+    ASSERT_NE(modifier_->setTextStyle0, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -1311,7 +1306,7 @@ HWTEST_F(TextPickerModifierTest, setTextWeight, TestSize.Level1)
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
         pickerStyle.font.value = font;
-        modifier_->setTextStyle(node_, &pickerStyle);
+        modifier_->setTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1328,7 +1323,7 @@ HWTEST_F(TextPickerModifierTest, setTextWeight, TestSize.Level1)
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
         pickerStyle.font.value = font;
-        modifier_->setTextStyle(node_, &pickerStyle);
+        modifier_->setTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1350,7 +1345,7 @@ HWTEST_F(TextPickerModifierTest, setTextWeight, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, DISABLED_setTextFamily, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle, nullptr);
+    ASSERT_NE(modifier_->setTextStyle0, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -1368,7 +1363,7 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setTextFamily, TestSize.Level1)
     for (auto family : UNION_RESOURCE_STRING_PLAN) {
         font.family = family.first;
         pickerStyle.font.value = font;
-        modifier_->setTextStyle(node_, &pickerStyle);
+        modifier_->setTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1390,7 +1385,7 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setTextFamily, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setTextSize, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle, nullptr);
+    ASSERT_NE(modifier_->setTextStyle0, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -1408,7 +1403,7 @@ HWTEST_F(TextPickerModifierTest, setTextSize, TestSize.Level1)
     for (auto size : FONT_SIZE_TEST_PLAN) {
         font.size = size.first;
         pickerStyle.font.value = font;
-        modifier_->setTextStyle(node_, &pickerStyle);
+        modifier_->setTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1430,7 +1425,7 @@ HWTEST_F(TextPickerModifierTest, setTextSize, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setTextColor, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setTextStyle, nullptr);
+    ASSERT_NE(modifier_->setTextStyle0, nullptr);
     auto fullJson = GetJsonValue(node_);
     auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
     auto checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
@@ -1439,7 +1434,7 @@ HWTEST_F(TextPickerModifierTest, setTextColor, TestSize.Level1)
 
     for (const auto& [value, expectVal] : COLOR_BLACK_TEST_PLAN) {
         pickerStyle.color = { .value = value };
-        modifier_->setTextStyle(node_, &pickerStyle);
+        modifier_->setTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_TEXT_STYLE_NAME);
         checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
@@ -1454,7 +1449,7 @@ HWTEST_F(TextPickerModifierTest, setTextColor, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setSelectedTextStyle, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
+    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -1472,7 +1467,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextStyle, TestSize.Level1)
     for (auto style : FONT_STYLE_TEST_PLAN) {
         font.style = style.first;
         pickerStyle.font.value = font;
-        modifier_->setSelectedTextStyle(node_, &pickerStyle);
+        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1494,7 +1489,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextStyle, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setSelectedTextWeight, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
+    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -1512,7 +1507,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextWeight, TestSize.Level1)
     for (auto weight : FONT_WEIGHT_TEST_PLAN) {
         font.weight = weight.first;
         pickerStyle.font.value = font;
-        modifier_->setSelectedTextStyle(node_, &pickerStyle);
+        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1529,7 +1524,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextWeight, TestSize.Level1)
     for (auto weight : FONT_WEIGHT_TEST_PLAN2) {
         font.weight = weight.first;
         pickerStyle.font.value = font;
-        modifier_->setSelectedTextStyle(node_, &pickerStyle);
+        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1551,7 +1546,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextWeight, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextFamily, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
+    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -1569,7 +1564,7 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextFamily, TestSize.Level1
     for (auto family : UNION_RESOURCE_STRING_PLAN) {
         font.family = family.first;
         pickerStyle.font.value = font;
-        modifier_->setSelectedTextStyle(node_, &pickerStyle);
+        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1591,7 +1586,7 @@ HWTEST_F(TextPickerModifierTest, DISABLED_setSelectedTextFamily, TestSize.Level1
  */
 HWTEST_F(TextPickerModifierTest, setSelectedTextSize, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
+    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
     Ark_Font font = {
         .family = UNION_RESOURCE_STRING_PLAN[0].first,
         .size = FONT_SIZE_TEST_PLAN[0].first,
@@ -1609,7 +1604,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextSize, TestSize.Level1)
     for (auto size : FONT_SIZE_TEST_PLAN) {
         font.size = size.first;
         pickerStyle.font.value = font;
-        modifier_->setSelectedTextStyle(node_, &pickerStyle);
+        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         auto fontObject = GetAttrValue<std::string>(styleObject, ATTRIBUTE_FONT_NAME);
@@ -1631,7 +1626,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextSize, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setSelectedTextColor, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSelectedTextStyle, nullptr);
+    ASSERT_NE(modifier_->setSelectedTextStyle0, nullptr);
     auto fullJson = GetJsonValue(node_);
     auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
     auto checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
@@ -1640,7 +1635,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextColor, TestSize.Level1)
 
     for (const auto& [value, expectVal] : COLOR_BLACK_TEST_PLAN) {
         pickerStyle.color = { .value = value };
-        modifier_->setSelectedTextStyle(node_, &pickerStyle);
+        modifier_->setSelectedTextStyle0(node_, &pickerStyle);
         auto fullJson = GetJsonValue(node_);
         auto styleObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_SELECTED_TEXT_STYLE_NAME);
         checkVal = GetAttrValue<std::string>(styleObject, ATTRIBUTE_COLOR_NAME);
@@ -1655,7 +1650,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedTextColor, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setSelectedIndex, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSelectedIndex, nullptr);
+    ASSERT_NE(modifier_->setSelectedIndex0, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME);
     EXPECT_EQ(checkVal, ATTRIBUTE_SELECTED_DEFAULT_VALUE);
 
@@ -1671,7 +1666,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndex, TestSize.Level1)
     TextPickerModelNG::SetRange(frameNode, range);
 
     for (const auto &[index, expected] : SELECTED_INDEX_TEST_PLAN) {
-        modifier_->setSelectedIndex(node_, &index);
+        modifier_->setSelectedIndex0(node_, &index);
         checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME);
         EXPECT_EQ(checkVal, expected);
     }
@@ -1684,7 +1679,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndex, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setSelectedIndexMulti, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSelectedIndex, nullptr);
+    ASSERT_NE(modifier_->setSelectedIndex0, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTEDS_NAME);
     EXPECT_EQ(checkVal, ATTRIBUTE_SELECTEDS_DEFAULT_VALUE);
     checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME_INDEX);
@@ -1702,7 +1697,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexMulti, TestSize.Level1)
     TextPickerModelNG::SetColumns(frameNode, options);
 
     for (const auto &[indexes, expected] : SELECTEDS_INDEX_TEST_PLAN) {
-        modifier_->setSelectedIndex(node_, &indexes);
+        modifier_->setSelectedIndex0(node_, &indexes);
         checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTEDS_NAME);
         EXPECT_EQ(checkVal, expected);
         checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME_INDEX);
@@ -1717,7 +1712,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexMulti, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setSelectedIndexMultiCascade, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setSelectedIndex, nullptr);
+    ASSERT_NE(modifier_->setSelectedIndex0, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTEDS_NAME);
     EXPECT_EQ(checkVal, ATTRIBUTE_SELECTEDS_DEFAULT_VALUE);
     checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME_INDEX);
@@ -1743,7 +1738,7 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexMultiCascade, TestSize.Level1)
     TextPickerModelNG::SetColumns(frameNode, options);
 
     for (const auto &[indexes, expected] : SELECTEDS_INDEX_CASCADE_TEST_PLAN) {
-        modifier_->setSelectedIndex(node_, &indexes);
+        modifier_->setSelectedIndex0(node_, &indexes);
         checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTEDS_NAME);
         EXPECT_EQ(checkVal, expected);
         checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_SELECTED_NAME_INDEX);
@@ -1758,13 +1753,13 @@ HWTEST_F(TextPickerModifierTest, setSelectedIndexMultiCascade, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setDividerStrokeWidth, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDivider, nullptr);
+    ASSERT_NE(modifier_->setDivider0, nullptr);
     Ark_DividerOptions options;
 
     for (const auto &[length, expected] : DIVIDER_STROKE_WIDTH_TEST_PLAN) {
         options.strokeWidth = length;
         auto unionOptions = Converter::ArkValue<Opt_DividerOptions>(options);
-        modifier_->setDivider(node_, &unionOptions);
+        modifier_->setDivider0(node_, &unionOptions);
         auto fullJson = GetJsonValue(node_);
         auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);
         auto checkStrokeWidth = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_STROKE_WIDTH_NAME);
@@ -1785,7 +1780,7 @@ HWTEST_F(TextPickerModifierTest, setDividerStrokeWidth, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setDividerColor, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDivider, nullptr);
+    ASSERT_NE(modifier_->setDivider0, nullptr);
     Ark_DividerOptions options;
     Opt_ResourceColor resColor;
 
@@ -1793,7 +1788,7 @@ HWTEST_F(TextPickerModifierTest, setDividerColor, TestSize.Level1)
         resColor.value = color;
         options.color = resColor;
         auto unionOptions = Converter::ArkValue<Opt_DividerOptions>(options);
-        modifier_->setDivider(node_, &unionOptions);
+        modifier_->setDivider0(node_, &unionOptions);
         auto fullJson = GetJsonValue(node_);
         auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);
         auto checkStrokeWidth = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_STROKE_WIDTH_NAME);
@@ -1814,13 +1809,13 @@ HWTEST_F(TextPickerModifierTest, setDividerColor, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setDividerStartMargin, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDivider, nullptr);
+    ASSERT_NE(modifier_->setDivider0, nullptr);
     Ark_DividerOptions options;
 
     for (const auto &[length, expected] : DIVIDER_MARGIN_TEST_PLAN) {
         options.startMargin = length;
         auto unionOptions = Converter::ArkValue<Opt_DividerOptions>(options);
-        modifier_->setDivider(node_, &unionOptions);
+        modifier_->setDivider0(node_, &unionOptions);
         auto fullJson = GetJsonValue(node_);
         auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);
         auto checkStrokeWidth = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_STROKE_WIDTH_NAME);
@@ -1841,13 +1836,13 @@ HWTEST_F(TextPickerModifierTest, setDividerStartMargin, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setDividerEndMargin, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDivider, nullptr);
+    ASSERT_NE(modifier_->setDivider0, nullptr);
     Ark_DividerOptions options;
 
     for (const auto &[length, expected] : DIVIDER_MARGIN_TEST_PLAN) {
         options.endMargin = length;
         auto unionOptions = Converter::ArkValue<Opt_DividerOptions>(options);
-        modifier_->setDivider(node_, &unionOptions);
+        modifier_->setDivider0(node_, &unionOptions);
         auto fullJson = GetJsonValue(node_);
         auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);
         auto checkStrokeWidth = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_STROKE_WIDTH_NAME);
@@ -1868,9 +1863,9 @@ HWTEST_F(TextPickerModifierTest, setDividerEndMargin, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setDividerUndefined, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setDivider, nullptr);
+    ASSERT_NE(modifier_->setDivider0, nullptr);
     auto unionOptions = Converter::ArkValue<Opt_DividerOptions>();
-    modifier_->setDivider(node_, &unionOptions);
+    modifier_->setDivider0(node_, &unionOptions);
     auto fullJson = GetJsonValue(node_);
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, ATTRIBUTE_DIVIDER_NAME);
     auto checkStrokeWidth = GetAttrValue<std::string>(dividerObject, ATTRIBUTE_STROKE_WIDTH_NAME);
@@ -1890,12 +1885,12 @@ HWTEST_F(TextPickerModifierTest, setDividerUndefined, TestSize.Level1)
  */
 HWTEST_F(TextPickerModifierTest, setGradientHeight, TestSize.Level1)
 {
-    ASSERT_NE(modifier_->setGradientHeight, nullptr);
+    ASSERT_NE(modifier_->setGradientHeight0, nullptr);
     auto checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_GRADIENT_HEIGHT_NAME);
     EXPECT_EQ(checkVal, ATTRIBUTE_GRADIENT_HEIGHT_DEFAULT_VALUE);
 
     for (const auto &[height, expected] : GRADIENT_HEIGHT_TEST_PLAN) {
-        modifier_->setGradientHeight(node_, &height);
+        modifier_->setGradientHeight0(node_, &height);
         checkVal = GetAttrValue<std::string>(node_, ATTRIBUTE_GRADIENT_HEIGHT_NAME);
         EXPECT_EQ(checkVal, expected);
     }

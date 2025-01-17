@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,6 +67,10 @@ const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_NAME = "enableHapticFeedback";
 const auto ATTRIBUTE_ENABLE_HAPTIC_FEEDBACK_DEFAULT_VALUE = "true";
 const auto ATTRIBUTE_BAR_STATE_NAME = "barState";
 const auto ATTRIBUTE_BAR_STATE_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_MAX_LENGTH_NAME = "maxLength";
+const auto ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE = "!NOT-DEFINED!";
+const auto ATTRIBUTE_MAX_LINES_NAME = "maxLines";
+const auto ATTRIBUTE_MAX_LINES_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_PLACEHOLDER_I_VALUE_NAME = "value";
 const auto ATTRIBUTE_PLACEHOLDER_I_VALUE_DEFAULT_VALUE = "!NOT-DEFINED!";
 const auto ATTRIBUTE_PLACEHOLDER_I_STYLE_I_FONT_I_SIZE_NAME = "size";
@@ -762,6 +766,148 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setBarStateTestBarStateInvalidValues, 
     for (auto& [input, value] : Fixtures::testFixtureEnumBarStateInvalidValues) {
         checkValue(input, value);
     }
+}
+
+/*
+ * @tc.name: setMaxLengthTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLengthTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LENGTH_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE) << "Default value for attribute 'maxLength'";
+}
+
+/*
+ * @tc.name: setMaxLengthTestMaxLengthValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLengthTestMaxLengthValidValues, TestSize.Level1)
+{
+    Opt_Number initValueMaxLength;
+
+    // Initial setup
+    initValueMaxLength = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueMaxLength](
+                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
+        Opt_Number inputValueMaxLength = initValueMaxLength;
+
+        inputValueMaxLength = value;
+        modifier_->setMaxLength(node_, &inputValueMaxLength);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LENGTH_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMaxLength, attribute: maxLength";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Number>(value));
+    }
+}
+
+/*
+ * @tc.name: setMaxLengthTestMaxLengthInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLengthTestMaxLengthInvalidValues, TestSize.Level1)
+{
+    Opt_Number initValueMaxLength;
+
+    // Initial setup
+    initValueMaxLength = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueMaxLength](const std::string& input, const Opt_Number& value) {
+        Opt_Number inputValueMaxLength = initValueMaxLength;
+
+        modifier_->setMaxLength(node_, &inputValueMaxLength);
+        inputValueMaxLength = value;
+        modifier_->setMaxLength(node_, &inputValueMaxLength);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LENGTH_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LENGTH_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMaxLength, attribute: maxLength";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Number>());
+}
+
+/*
+ * @tc.name: setMaxLinesTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLinesTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LINES_DEFAULT_VALUE) << "Default value for attribute 'maxLines'";
+}
+
+/*
+ * @tc.name: setMaxLinesTestMaxLinesValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLinesTestMaxLinesValidValues, TestSize.Level1)
+{
+    Opt_Number initValueMaxLines;
+
+    // Initial setup
+    initValueMaxLines = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueMaxLines](
+                          const std::string& input, const std::string& expectedStr, const Opt_Number& value) {
+        Opt_Number inputValueMaxLines = initValueMaxLines;
+
+        inputValueMaxLines = value;
+        modifier_->setMaxLines(node_, &inputValueMaxLines);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setMaxLines, attribute: maxLines";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+        checkValue(input, expected, ArkValue<Opt_Number>(value));
+    }
+}
+
+/*
+ * @tc.name: setMaxLinesTestMaxLinesInvalidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorModifierTest, DISABLED_setMaxLinesTestMaxLinesInvalidValues, TestSize.Level1)
+{
+    Opt_Number initValueMaxLines;
+
+    // Initial setup
+    initValueMaxLines = ArkValue<Opt_Number>(std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+
+    auto checkValue = [this, &initValueMaxLines](const std::string& input, const Opt_Number& value) {
+        Opt_Number inputValueMaxLines = initValueMaxLines;
+
+        modifier_->setMaxLines(node_, &inputValueMaxLines);
+        inputValueMaxLines = value;
+        modifier_->setMaxLines(node_, &inputValueMaxLines);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_LINES_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_LINES_DEFAULT_VALUE) <<
+            "Input value is: " << input << ", method: setMaxLines, attribute: maxLines";
+    };
+
+    // Check empty optional
+    checkValue("undefined", ArkValue<Opt_Number>());
 }
 
 /*
