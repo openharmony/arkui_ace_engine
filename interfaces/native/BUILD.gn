@@ -110,6 +110,7 @@ ohos_shared_library("ace_ndk") {
       "image_framework:pixelmap",
       "napi:ace_napi",
       "resource_management:global_resmgr",
+      "udmf:libudmf",
       "udmf:udmf_client",
     ]
     version_script =

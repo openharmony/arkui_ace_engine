@@ -5795,6 +5795,16 @@ void JSViewAbstract::JsOnDrop(const JSCallbackInfo& info)
     };
 
     ViewAbstractModel::GetInstance()->SetOnDrop(std::move(onDrop));
+
+    bool disableDataPrefetch = false;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        JSRef<JSObject> interObj = JSRef<JSObject>::Cast(info[1]);
+        auto jsDisableDataPrefetch = interObj->GetProperty("disableDataPrefetch");
+        if (jsDisableDataPrefetch->IsBoolean()) {
+            disableDataPrefetch = jsDisableDataPrefetch->ToBoolean();
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetDisableDataPrefetch(disableDataPrefetch);
 }
 
 void JSViewAbstract::JsOnAreaChange(const JSCallbackInfo& info)
@@ -6802,6 +6812,14 @@ void JSViewAbstract::JsNotifyDragStartRequest(const JSCallbackInfo& info)
     }
 }
 
+void JSViewAbstract::JsCancelDataLoading(const std::string& key)
+{
+    auto ret = ViewAbstractModel::GetInstance()->CancelDataLoading(key);
+    if (ret != 0) {
+        JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Invalid input parameter.");
+    }
+}
+
 void JSViewAbstract::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewAbstract>::Declare("JSViewAbstract");
@@ -7027,6 +7045,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("notifyDragStartRequest", &JSViewAbstract::JsNotifyDragStartRequest);
     JSClass<JSViewAbstract>::StaticMethod(
         "setDragEventStrictReportingEnabled", &JSViewAbstract::JsSetDragEventStrictReportingEnabled);
+    JSClass<JSViewAbstract>::StaticMethod("cancelDataLoading", &JSViewAbstract::JsCancelDataLoading);
 
     JSClass<JSViewAbstract>::StaticMethod("focusScopeId", &JSViewAbstract::JsFocusScopeId);
     JSClass<JSViewAbstract>::StaticMethod("focusScopePriority", &JSViewAbstract::JsFocusScopePriority);

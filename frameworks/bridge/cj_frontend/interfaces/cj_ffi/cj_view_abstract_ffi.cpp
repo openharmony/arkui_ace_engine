@@ -23,6 +23,8 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "pixel_map_impl.h"
+#include "core/components/common/properties/border_image.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -2369,6 +2371,87 @@ VectorStringHandle FFIGetResourceVectorString(NativeResourceObject obj)
     }
     return result;
 }
+
+void FfiOHOSAceFrameworkViewAbstractSetDraggable(bool value)
+{
+    ViewAbstractModel::GetInstance()->SetDraggable(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithBuilder(void (*builder)())
+{
+    NG::DragDropInfo dragPreviewInfo;
+    auto buildFunc = CJLambda::Create(builder);
+    RefPtr<AceType> customNode;
+    {
+        ViewStackModel::GetInstance()->NewScope();
+        buildFunc();
+        customNode = ViewStackModel::GetInstance()->Finish();
+    }
+    dragPreviewInfo.customNode = AceType::DynamicCast<NG::UINode>(customNode);
+    ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithDragItemInfo(CJDragItemInfo value)
+{
+    NG::DragDropInfo dragPreviewInfo;
+
+    if (value.builder == nullptr) {
+        dragPreviewInfo.customNode = nullptr;
+    } else {
+        auto buildFunc = CJLambda::Create(value.builder);
+        RefPtr<AceType> customNode;
+        {
+            ViewStackModel::GetInstance()->NewScope();
+            buildFunc();
+            customNode = ViewStackModel::GetInstance()->Finish();
+        }
+        dragPreviewInfo.customNode = AceType::DynamicCast<NG::UINode>(customNode);
+    }
+
+#if defined(PIXEL_MAP_SUPPORTED)
+    dragPreviewInfo.pixelMap = ParseDragPreviewPixelMap(value.pixelMapId);
+#else
+    dragPreviewInfo.pixelMap = nullptr;
+#endif
+
+    dragPreviewInfo.extraInfo = std::string(value.extraInfo);
+    ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithString(const char* value)
+{
+    NG::DragDropInfo dragPreviewInfo;
+    dragPreviewInfo.inspectorId = std::string(value);
+    ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithString(
+    const char* source, CBorderImageOption option)
+{
+    RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
+    uint8_t imageBorderBitsets = 0;
+
+    borderImage->SetSrc(std::string(source));
+    imageBorderBitsets |= BorderImage::SOURCE_BIT;
+
+    ParceBorderImageParam(borderImage, imageBorderBitsets, option);
+    ViewAbstractModel::GetInstance()->SetBorderImage(borderImage, imageBorderBitsets);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithLinearGradient(
+    LinearGradientParam source, CBorderImageOption option)
+{
+    RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
+    uint8_t imageBorderBitsets = 0;
+
+    NG::Gradient lineGradient;
+    NewCjLinearGradient(source, lineGradient);
+    ViewAbstractModel::GetInstance()->SetBorderImageGradient(lineGradient);
+    imageBorderBitsets |= BorderImage::GRADIENT_BIT;
+    
+    ParceBorderImageParam(borderImage, imageBorderBitsets, option);
+    ViewAbstractModel::GetInstance()->SetBorderImage(borderImage, imageBorderBitsets);
+}
 }
 
 namespace OHOS::Ace {
@@ -2482,4 +2565,77 @@ void ParseVectorStringPtr(VectorStringPtr vecContent, std::vector<DimensionRect>
     }
 }
 
+void ParceBorderImageParam(RefPtr<BorderImage>& borderImage, uint8_t& bitset, CBorderImageOption& option)
+{
+    borderImage->SetEdgeOutset(
+        BorderImageDirection::LEFT,
+        Dimension(option.outset.top, static_cast<DimensionUnit>(option.outset.topUnit)));
+    borderImage->SetEdgeOutset(
+        BorderImageDirection::RIGHT,
+        Dimension(option.outset.right, static_cast<DimensionUnit>(option.outset.rightUnit)));
+    borderImage->SetEdgeOutset(
+        BorderImageDirection::TOP,
+        Dimension(option.outset.bottom, static_cast<DimensionUnit>(option.outset.bottomUnit)));
+    borderImage->SetEdgeOutset(
+        BorderImageDirection::BOTTOM,
+        Dimension(option.outset.left, static_cast<DimensionUnit>(option.outset.leftUnit)));
+    bitset |= BorderImage::OUTSET_BIT;
+
+    borderImage->SetEdgeWidth(
+        BorderImageDirection::LEFT,
+        Dimension(option.width.top, static_cast<DimensionUnit>(option.width.topUnit)));
+    borderImage->SetEdgeWidth(
+        BorderImageDirection::RIGHT,
+        Dimension(option.width.right, static_cast<DimensionUnit>(option.width.rightUnit)));
+    borderImage->SetEdgeWidth(
+        BorderImageDirection::TOP,
+        Dimension(option.width.bottom, static_cast<DimensionUnit>(option.width.bottomUnit)));
+    borderImage->SetEdgeWidth(
+        BorderImageDirection::BOTTOM,
+        Dimension(option.width.left, static_cast<DimensionUnit>(option.width.leftUnit)));
+    bitset |= BorderImage::WIDTH_BIT;
+
+    borderImage->SetEdgeSlice(
+        BorderImageDirection::LEFT,
+        Dimension(option.slice.top, static_cast<DimensionUnit>(option.slice.topUnit)));
+    borderImage->SetEdgeSlice(
+        BorderImageDirection::RIGHT,
+        Dimension(option.slice.right, static_cast<DimensionUnit>(option.slice.rightUnit)));
+    borderImage->SetEdgeSlice(
+        BorderImageDirection::TOP,
+        Dimension(option.slice.bottom, static_cast<DimensionUnit>(option.slice.bottomUnit)));
+    borderImage->SetEdgeSlice(
+        BorderImageDirection::BOTTOM,
+        Dimension(option.slice.left, static_cast<DimensionUnit>(option.slice.leftUnit)));
+    bitset |= BorderImage::SLICE_BIT;
+
+    borderImage->SetRepeatMode(static_cast<BorderImageRepeat>(option.repeat));
+    bitset |= BorderImage::REPEAT_BIT;
+
+    borderImage->SetNeedFillCenter(option.fill);
+}
+
+RefPtr<PixelMap> ParseDragPreviewPixelMap(int64_t pixelMapId)
+{
+    if (pixelMapId == 0) {
+        return nullptr;
+    }
+    auto pixelMapImpl = FFIData::GetData<OHOS::Media::PixelMapImpl>(pixelMapId);
+    if (pixelMapImpl == nullptr) {
+        LOGE("DragPreview error, Cannot get PixelMapProxy by id: %{public}" PRId64, pixelMapId);
+        return nullptr;
+    }
+    auto pixMap = pixelMapImpl->GetRealPixelMap();
+    if (pixMap == nullptr) {
+        LOGE("DragPreview error, Cannot get pixMap in PixelMapProxy");
+        return nullptr;
+    }
+    auto pixMapOhos = PixelMap::CreatePixelMap(&pixMap);
+    if (pixMapOhos == nullptr) {
+        LOGE("DragPreview error, Cannot create PixelMapOhos by pixMap");
+        return nullptr;
+    }
+
+    return pixMapOhos;
+}
 } // namespace OHOS::Ace

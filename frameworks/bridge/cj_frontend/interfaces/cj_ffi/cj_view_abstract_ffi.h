@@ -347,6 +347,26 @@ struct CJAlignRuleOption {
     float* verticalBias;
 };
 
+struct CJCaretOffset {
+    double index;
+    double x;
+    double y;
+};
+
+struct CJVisibleAreaEventOptions {
+    VectorFloat64Ptr ratios;
+    double expectedUpdateInterval;
+};
+
+struct CJMutiShadowOptions {
+    double radiusValue;
+    double offsetXValue;
+    double offsetYValue;
+    int32_t radiusUnit;
+    int32_t offsetXUnit;
+    int32_t offsetYUnit;
+};
+
 struct CJChainInfo {
     int32_t direction;
     int32_t style;
@@ -618,6 +638,22 @@ CJ_EXPORT bool FFIGetResourceBool(NativeResourceObject obj);
 CJ_EXPORT VectorUInt32Handle FFIGetResourceVectorUInt32(NativeResourceObject obj);
 CJ_EXPORT VectorStringHandle FFIGetResourceVectorString(NativeResourceObject obj);
 CJ_EXPORT void FfiOHOSAceFrameworkPopupDismiss();
+
+struct CBorderImageOption {
+    CJEdge slice;
+    CJEdge width;
+    CJEdge outset;
+    int32_t repeat;
+    bool fill;
+};
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDraggable(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithBuilder(void (*builder)());
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithDragItemInfo(CJDragItemInfo value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithString(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithString(
+    const char* source, CBorderImageOption option);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithLinearGradient(
+    LinearGradientParam source, CBorderImageOption option);
 }
 
 namespace OHOS::Ace {
@@ -628,6 +664,8 @@ bool ParseCjDimension(int64_t id, Dimension& result);
 bool ParseColorById(int64_t id, Color& color);
 void ParseCJResponseRegion(CJResponseRegion value, std::vector<DimensionRect>& result);
 void ParseVectorStringPtr(VectorStringPtr value, std::vector<DimensionRect>& result);
+void ParceBorderImageParam(RefPtr<BorderImage>& borderImage, uint8_t& bitset, CBorderImageOption& option);
+RefPtr<PixelMap> ParseDragPreviewPixelMap(int64_t pixelMapId);
 } // namespace OHOS::Ace
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_VIEW_ABSTRACT_FFI_H
