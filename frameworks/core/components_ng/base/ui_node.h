@@ -826,6 +826,16 @@ public:
         isMoving_ = isMoving;
     }
 
+    bool isCrossLanguageAttributeSetting() const
+    {
+        return isCrossLanguageAttributeSetting_;
+    }
+
+    void SetIsCrossLanguageAttributeSetting(bool isCrossLanguageAttributeSetting)
+    {
+        isCrossLanguageAttributeSetting_ = isCrossLanguageAttributeSetting;
+    }
+
     /**
      * flag used by Repeat virtual scroll
      * to mark a child UINode of RepeatVirtualScroll as either allowing or not allowing
@@ -978,6 +988,7 @@ private:
     friend class RosenRenderContext;
     ACE_DISALLOW_COPY_AND_MOVE(UINode);
     bool isMoving_ = false;
+    bool isCrossLanguageAttributeSetting_ = false;
 };
 
 } // namespace OHOS::Ace::NG

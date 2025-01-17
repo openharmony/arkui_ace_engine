@@ -1235,6 +1235,26 @@ class FrameNode {
     setNeedsLayout() {
         getUINativeModule().frameNode.setNeedsLayout(this.getNodePtr());
     }
+    setCrossLanguageOptions(options) {
+        if (!this.isModifiable()) {
+            throw { message: 'The FrameNode cannot be set whether to support cross-language common attribute setting.', code: 100022 };
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const result = getUINativeModule().frameNode.setCrossLanguageOptions(this.getNodePtr(), options.attributeSetting ?? false);
+        __JSScopeUtil__.restoreInstanceId();
+        if (result !== 0) {
+            throw { message: 'The FrameNode cannot be set whether to support cross-language common attribute setting.', code: 100022 };
+        }
+    }
+    getCrossLanguageOptions() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        const attributeSetting = getUINativeModule().frameNode.getCrossLanguageOptions(this.getNodePtr());
+        __JSScopeUtil__.restoreInstanceId();
+        return { attributeSetting: attributeSetting ?? false };
+    }
+    checkIfCanCrossLanguageAttributeSetting() {
+        return this.isModifiable() || getUINativeModule().frameNode.checkIfCanCrossLanguageAttributeSetting(this.getNodePtr());
+    }
     get commonAttribute() {
         if (this._commonAttribute === undefined) {
             this._commonAttribute = new ArkComponent(this.nodePtr_, ModifierType.FRAME_NODE);
@@ -1613,6 +1633,18 @@ const __creatorMap__ = new Map([
             }, options);
         }],
 ]);
+const __attributeMap__ = new Map([
+    ['Scroll', (node) => {
+            if (node._componentAttribute) {
+                return node._componentAttribute;
+            }
+            if (!node.getNodePtr()) {
+                return undefined;
+            }
+            node._componentAttribute = new ArkScrollComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+            return node._componentAttribute;
+        }],
+]);
 class typeNode {
     static createNode(context, type, options) {
         let creator = __creatorMap__.get(type);
@@ -1620,6 +1652,29 @@ class typeNode {
             return undefined;
         }
         return creator(context, options);
+    }
+    static getAttribute(node, nodeType) {
+        if (node === undefined || node === null || node.getNodeType() != nodeType) {
+            return undefined;
+        }
+        if (!node.checkIfCanCrossLanguageAttributeSetting()) {
+            return undefined;
+        }
+        let attribute = __attributeMap__.get(nodeType);
+        if (attribute === undefined || attribute == null) {
+            return undefined;
+        }
+        return attribute(node);
+    }
+    static bindController(node, controller, nodeType) {
+        if (node === undefined || node === null || controller === undefined || controller === null ||
+            node.getNodeType() != nodeType || node.getNodePtr() === null || node.getNodePtr() === undefined) {
+            throw { message: 'Parameter error. Possible causes: 1. The type of the node is error; 2. The node is null or undefined.', code: 401 };
+        }
+        if (!node.checkIfCanCrossLanguageAttributeSetting()) {
+            throw { message: 'The FrameNode is not modifiable.', code: 100021 };
+        }
+        getUINativeModule().scroll.setScrollInitialize(node.getNodePtr(), controller);
     }
 }
 /*

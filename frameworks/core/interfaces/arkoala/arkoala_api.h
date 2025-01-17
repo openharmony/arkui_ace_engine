@@ -5290,6 +5290,9 @@ struct ArkUIFrameNodeModifier {
     void (*setAutoFocusTransfer)(ArkUI_Int32 instanceId, bool isAutoFocusTransfer);
     ArkUI_Int32 (*getWindowInfoByNode)(ArkUINodeHandle node, char** name);
     ArkUI_Int32 (*moveNodeTo)(ArkUINodeHandle node, ArkUINodeHandle target_parent, ArkUI_Int32 index);
+    ArkUI_Int32 (*setCrossLanguageOptions)(ArkUINodeHandle node, bool attributeSetting);
+    ArkUI_Bool (*getCrossLanguageOptions)(ArkUINodeHandle node);
+    ArkUI_Bool (*checkIfCanCrossLanguageAttributeSetting)(ArkUINodeHandle node);
 };
 
 struct ArkUINodeContentEvent {
