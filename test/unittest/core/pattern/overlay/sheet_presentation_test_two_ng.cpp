@@ -33,6 +33,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -58,6 +59,7 @@ private:
 void SheetPresentationTestTwoNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
@@ -150,6 +152,7 @@ void SheetPresentationTestTwoNg::SetSheetType(RefPtr<SheetPresentationPattern> s
 void SheetPresentationTestTwoNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 /**
@@ -1737,9 +1740,13 @@ HWTEST_F(SheetPresentationTestTwoNg, SheetHoverStatus003, TestSize.Level1)
 HWTEST_F(SheetPresentationTestTwoNg, UpdateBackBlurStyle001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. create target node.
+     * @tc.steps: step1. create target node and set API12.
      */
     SheetPresentationTestTwoNg::SetUpTestCase();
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+
     auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<Pattern>(); });
     auto stageNode = FrameNode::CreateFrameNode(
