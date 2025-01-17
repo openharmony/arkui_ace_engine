@@ -69,6 +69,8 @@ import { CompAccessibilityBlocks } from '../../components/CompAccessibilityBlock
 import { CompAttributeModifierBlocks } from '../../components/CompAttributeModifierBlocks';
 
 
+
+
 //part2
 class MyModifier implements AttributeModifier<FlowItemAttribute> {
   applyNormalAttribute(instance: FlowItemAttribute) {
@@ -887,6 +889,30 @@ export struct FlowItemBootcamp {
   @State compDirection: Direction = Direction.Auto;
   @State totalCount: number = 16;
   scroller: Scroller = new Scroller();
+  @State minSize: number = 80
+  @State maxSize: number = 180
+  @State fontSize: number = 24
+  @State colors: number[] = [0xFFC0CB, 0xDA70D6, 0x6B8E23, 0x6A5ACD, 0x00FFFF, 0x00FF7F]
+  private itemWidthArray: number[] = []
+  private itemHeightArray: number[] = []
+
+  // 计算FlowItem宽/高
+  getSize() {
+    let ret = Math.floor(Math.random() * this.maxSize)
+    return (ret > this.minSize ? ret : this.minSize)
+  }
+
+  // 设置FlowItem的宽/高数组
+  setItemSizeArray() {
+    for (let i = 0; i < 100; i++) {
+      this.itemWidthArray.push(this.getSize())
+      this.itemHeightArray.push(this.getSize())
+    }
+  }
+
+  aboutToAppear() {
+    this.setItemSizeArray()
+  }
 
   compMaskColorChange() {
     this.progress.updateColor(this.compMaskColor);
@@ -944,17 +970,20 @@ export struct FlowItemBootcamp {
 
   @Builder
   Content() {
-    Column() {
+    Column({space: 10}) {
       WaterFlow({ scroller: this.scroller }) {
         ForEach(this.getElements(), (item: number) => {
           FlowItem() {
             Column(){
-              Text('item').width('30%').height('30%').backgroundColor(0xF5DEB3)
+              Text('item').width('100%').height('100%').backgroundColor(0xF5DEB3)
             }
           }
+          .width('100%')
+          .height(this.itemHeightArray[item % 100])
+          .backgroundColor(this.colors[item % 5])
+
           //part1
           .width(useEnabled(this.enableCompWidth, this.compWidth))
-          .height(useEnabled(this.enableCompHeight, this.compHeight))
           .padding(useEnabled(this.enableCompPadding, this.compPadding))
           .margin(useEnabled(this.enableCompMargin, this.compMargin))
           .constraintSize({
@@ -1831,7 +1860,12 @@ export struct FlowItemBootcamp {
           })
         }, (item: string) => item)
       }
-      .columnsTemplate('1fr 1fr 2fr')
+      .columnsTemplate('1fr 1fr')
+      .columnsGap(10)
+      .rowsGap(5)
+      .onScrollFrameBegin((offset: number, state: ScrollState) => {
+        return { offsetRemain: offset }
+      })
     }
     .height('80%')
   }
@@ -1965,27 +1999,62 @@ export struct FlowItemBootcamp {
   Parameters() {
     Scroll() {
       Column({ space: 8 }) {
-        //part1
-        CompSizeBlocks({
-          enableCompWidth: $enableCompWidth,
-          compWidth: $compWidth,
-          enableCompHeight: $enableCompHeight,
-          compHeight: $compHeight,
-          enableCompPadding: $enableCompPadding,
-          compPadding: $compPadding,
-          enableCompMargin: $enableCompMargin,
-          compMargin: $compMargin,
-          enableCompConstraintSize: $enableCompConstraintSize,
-          enableCompConstraintSizeMinWidth: $enableCompConstraintSizeMinWidth,
-          compConstraintSizeMinWidth: $compConstraintSizeMinWidth,
-          enableCompConstraintSizeMinHeight: $enableCompConstraintSizeMinHeight,
-          compConstraintSizeMinHeight: $compConstraintSizeMinHeight,
-          enableCompConstraintSizeMaxWidth: $enableCompConstraintSizeMaxWidth,
-          compConstraintSizeMaxWidth: $compConstraintSizeMaxWidth,
-          enableCompConstraintSizeMaxHeight: $enableCompConstraintSizeMaxHeight,
-          compConstraintSizeMaxHeight: $compConstraintSizeMaxHeight
+
+        SliderBlock({
+          title: 'width',
+          isEnabled: $enableCompWidth,
+          value: $compWidth,
+          min: 100,
+          max: 500
         })
 
+        SliderBlock({
+          title: 'padding',
+          isEnabled: $enableCompPadding,
+          value: $compPadding,
+          min: 0,
+          max: 100
+        })
+
+        SliderBlock({
+          title: 'margin',
+          isEnabled: $enableCompMargin,
+          value: $compMargin,
+          min: 0,
+          max: 100
+        })
+
+        RadioBlock({
+          title: 'constraintSize',
+          isEnabled: $enableCompConstraintSize,
+          value: $enableCompConstraintSize,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
+          ]
+        })
+
+        if (this.enableCompConstraintSize) {
+
+          SliderBlock({
+            title: 'constraintSize.minWidth',
+            isEnabled: $enableCompConstraintSizeMinWidth,
+            value: $compConstraintSizeMinWidth,
+            min: 100,
+            max: 500
+          })
+
+
+          SliderBlock({
+            title: 'constraintSize.maxWidth',
+            isEnabled: $enableCompConstraintSizeMaxWidth,
+            value: $compConstraintSizeMaxWidth,
+            min: 100,
+            max: 500
+          })
+        }
+
+        //part1
         CompLocationBlocks({
           enableCompPosition: $enableCompPosition,
           enableCompPositionTop: $enableCompPositionTop,
