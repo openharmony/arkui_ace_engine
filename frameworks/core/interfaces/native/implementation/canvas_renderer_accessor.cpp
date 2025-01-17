@@ -91,7 +91,6 @@ TextDirection Convert(const Ark_String& src)
     auto index = BinarySearchFindIndex(textDirectionTable, ArraySize(textDirectionTable), val.c_str());
     return index < 0 ? TextDirection::LTR : textDirectionTable[index].value;
 }
-
 template<>
 std::vector<uint32_t> Convert(const Ark_Buffer& src)
 {
