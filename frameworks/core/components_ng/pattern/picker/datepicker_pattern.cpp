@@ -2675,6 +2675,7 @@ void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         jsonConstructor->Put("end", GetDateString(endDateSolar_).c_str());
         jsonConstructor->Put("selected", GetDateString(selectedDate_).c_str());
     }
+    jsonConstructor->Put("mode", rowLayoutProperty->GetDatePickerMode().c_str());
     json->PutExtAttr("constructor", jsonConstructor, filter);
     json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
 }
