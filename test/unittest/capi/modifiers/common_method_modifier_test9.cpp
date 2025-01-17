@@ -545,7 +545,7 @@ HWTEST_F(CommonMethodModifierTest9, SetOnTouchInterceptTest, TestSize.Level1)
         TouchEventInfo* info = new TouchEventInfo("");
         func(*info);
         EXPECT_TRUE(checkEvent.has_value());
-        delete info;        
+        delete info;
     };
     test();
 }
