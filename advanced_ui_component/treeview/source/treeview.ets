@@ -463,6 +463,20 @@ export class NodeInfo {
     }
   }
 
+  /**
+   * NodeInfo add expand image
+   *
+   * @param isHasChildNode whether node has child node
+   */
+  addImageExpand(isHasChildNode: boolean): void {
+    if (isHasChildNode) {
+      this.nodeItemView.imageCollapse =
+        CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_DOWN);
+    } else {
+      this.nodeItemView.imageCollapse = undefined;
+    }
+  }
+
   setFontColor(color: ResourceColor): void {
     this.fontColor = color
   }
@@ -2014,8 +2028,8 @@ export class TreeController {
       this.add(this.initBuild);
       return this;
     } else {
-      for (let i = 0; i < this.listNodeDataSource.listNode.length; i++) {
-        if (nodeParam.currentNodeId === this.listNodeDataSource.listNode[i].getNodeCurrentNodeId()) {
+      for (let i: number = 0; i < this.nodeIdList.length; i++) {
+        if (nodeParam.currentNodeId === this.nodeIdList[i].valueOf()) {
           throw new Error('ListTreeNode[addNode]: ' +
             'The parameters of the new node cannot contain the same currentNodeId.');
           return this;
@@ -3935,10 +3949,10 @@ class ListNodeDataSource extends BasicDataSource {
     let parentIndex: number = this.nodeIdAndNodeIndexMap.get(parentNodeId) as number;
     if (parent.children.length > 0) {
       if (this.nodeIdAndNodeIndexMap.has(parentNodeId)) {
-        this.listNode[parentIndex]?.addImageCollapse(true);
+        this.listNode[parentIndex]?.addImageExpand(true);
       }
     } else {
-      this.listNode[parentIndex]?.addImageCollapse(false);
+      this.listNode[parentIndex]?.addImageExpand(false);
     }
   }
 
@@ -4304,14 +4318,22 @@ export struct TreeViewInner {
   }
 
   getLeftIconColor(): ResourceColor {
-    if (this.item.getIsModify()
-      || this.item.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT_WITHE
-      || this.item.getNodeItem().imageCollapse?.collapseSource === ARROW_DOWN_WITHE) {
+    if (this.item.getIsModify() || this.item.getIsHighLight()) {
       return $r('sys.color.icon_on_primary');
     } else if (this.item.getIsSelected()) {
       return this.treeViewTheme.leftIconActiveColor;
     } else {
       return this.treeViewTheme.leftIconColor;
+    }
+  }
+
+  getPrimaryTextColor(): ResourceColor {
+    if (this.item.getIsModify() || this.item.getIsHighLight()) {
+      return $r('sys.color.ohos_id_color_primary_contrary');
+    } else if (this.item.getIsSelected()) {
+      return this.treeViewTheme.primaryTitleActiveFontColor;
+    } else {
+      return this.treeViewTheme.primaryTitleFontColor;
     }
   }
 
@@ -4605,8 +4627,7 @@ export struct TreeViewInner {
                       .maxFontScale(this.decideFontScale())
                       .maxLines(1)// max line
                       .fontSize(this.item.getNodeItem().mainTitleNode?.size)
-                      .fontColor(this.item.getIsSelected() ?
-                      this.treeViewTheme.primaryTitleActiveFontColor : this.treeViewTheme.primaryTitleFontColor)
+                      .fontColor(this.getPrimaryTextColor())
                       .margin({
                         end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem()
                           .mainTitleNode?.itemRightMargin)
