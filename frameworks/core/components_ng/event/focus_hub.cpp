@@ -19,6 +19,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_utils.h"
+#include "core/components_ng/base/inspector.h"
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -810,8 +811,33 @@ bool FocusHub::GetNextFocusByStep(const KeyEvent& keyEvent)
     return RequestNextFocusByKey(event);
 }
 
+bool FocusHub::RequestUserNextFocus(const FocusEvent& event)
+{
+    CHECK_EQUAL_RETURN(nextStep_.empty(), true, false);
+    int32_t key = static_cast<int32_t>(event.intension);
+    auto item = nextStep_.find(key);
+    if (item  == nextStep_.end()) {
+        return false;
+    }
+    const auto& input = item->second;
+    RefPtr<FrameNode> frameNode = nullptr;
+    if (std::holds_alternative<std::string>(input)) {
+        frameNode = Inspector::GetFrameNodeByKey(std::get<std::string>(input));
+    } else if (std::holds_alternative<WeakPtr<AceType>>(input)) {
+        frameNode = AceType::DynamicCast<FrameNode>(std::get<WeakPtr<AceType>>(input).Upgrade());
+    }
+    if (frameNode == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Cannot find user specified nextFocus.");
+        return false;
+    }
+    auto focusHub = frameNode->GetFocusHub();
+    return focusHub->RequestFocusImmediately();
+}
+
 bool FocusHub::RequestNextFocusByKey(const FocusEvent& event)
 {
+    CHECK_EQUAL_RETURN(RequestUserNextFocus(event), true, true);
+
     switch (event.intension) {
         case FocusIntension::TAB:
         case FocusIntension::SHIFT_TAB:

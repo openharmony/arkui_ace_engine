@@ -15,6 +15,7 @@
 #include "style_modifier.h"
 
 #include <cstdlib>
+#include <utility>
 
 #include "frame_information.h"
 #include "native_type.h"
@@ -3832,6 +3833,27 @@ int32_t SetTransition(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
     auto toEffectOption = OHOS::Ace::TransitionModel::ConvertToEffectOption(effectOption);
     fullImpl->getNodeModifiers()->getCommonModifier()->setTransition(node->uiNodeHandle, toEffectOption);
     return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetNextFocus(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    if (item->size == 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    CHECK_NULL_RETURN(node, ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(item->object, ERROR_CODE_PARAM_INVALID);
+    auto* fullImpl = GetFullImpl();
+    ArkUI_NodeHandle focusFrameNode = reinterpret_cast<ArkUI_NodeHandle>(item->object);
+    auto idx = static_cast<FocusMove>(item->value[0].i32);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setNextFocusOneByOne(
+        node->uiNodeHandle, idx, focusFrameNode->uiNodeHandle);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetNextFocus(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetNextFocus(node->uiNodeHandle);
 }
 
 int32_t SetFocusBox(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -14359,6 +14381,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetTabStop,
         SetBackdropBlur,
         SetBackgroundImageResizableWithSlice,
+        SetNextFocus,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14587,6 +14610,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTabStop,
         ResetBackdropBlur,
         ResetBackgroundImageResizableWithSlice,
+        ResetNextFocus,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(resetters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);

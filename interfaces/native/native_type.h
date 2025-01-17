@@ -2299,6 +2299,26 @@ typedef enum {
 } ArkUI_ExpandMode;
 
 /**
+ * @brief Define an enum for the focus movement directions.
+ *
+ * @since 16
+*/
+typedef enum {
+    /** Move focus forward. */
+    ARKUI_FOCUS_MOVE_FORWARD = 0,
+    /** Move focus backward. */
+    ARKUI_FOCUS_MOVE_BACKWARD,
+    /** Move focus up. */
+    ARKUI_FOCUS_MOVE_UP,
+    /** Move focus down. */
+    ARKUI_FOCUS_MOVE_DOWN,
+    /** Move focus left. */
+    ARKUI_FOCUS_MOVE_LEFT,
+    /** Move focus right. */
+    ARKUI_FOCUS_MOVE_RIGHT,
+} ArkUI_FocusMove;
+
+/**
  * @brief Defines parameter used by the system font style callback event.
  *
  * @since 12

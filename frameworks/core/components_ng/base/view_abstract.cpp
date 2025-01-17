@@ -1290,6 +1290,20 @@ void ViewAbstract::SetFocusOnTouch(bool isSet)
     focusHub->SetIsFocusOnTouch(isSet);
 }
 
+void ViewAbstract::SetNextFocus(FocusIntension key, const std::string& nextFocus)
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetNextFocus(key, nextFocus);
+}
+
+void ViewAbstract::ResetNextFocus()
+{
+    auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ResetNextFocus();
+}
+
 void ViewAbstract::SetFocusBoxStyle(const NG::FocusBoxStyle& style)
 {
     auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
@@ -5242,6 +5256,23 @@ void ViewAbstract::SetShouldBuiltInRecognizerParallelWith(
     auto gestureHub = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetShouldBuildinRecognizerParallelWithFunc(std::move(shouldBuiltInRecognizerParallelWithFunc));
+}
+
+void ViewAbstract::SetNextFocus(FrameNode* frameNode, FocusIntension key,
+    std::variant<WeakPtr<AceType>, std::string> nextFocus)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetNextFocus(key, nextFocus);
+}
+
+void ViewAbstract::ResetNextFocus(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->ResetNextFocus();
 }
 
 void ViewAbstract::SetFocusBoxStyle(FrameNode* frameNode, const NG::FocusBoxStyle& style)

@@ -6436,6 +6436,38 @@ void JSViewAbstract::JsTabStop(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetTabStop(info[0]->ToBoolean());
 }
 
+void JSViewAbstract::JsNextFocus(const JSCallbackInfo& info)
+{
+    ViewAbstractModel::GetInstance()->ResetNextFocus();
+    if (info.Length() == 1 && info[0]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[0]);
+        auto forward = obj->GetPropertyValue<std::string>("forward", "");
+        if (!forward.empty()) {
+            ViewAbstractModel::GetInstance()->SetNextFocus(NG::FocusIntension::TAB, forward);
+        }
+        auto backward = obj->GetPropertyValue<std::string>("backward", "");
+        if (!backward.empty()) {
+            ViewAbstractModel::GetInstance()->SetNextFocus(NG::FocusIntension::SHIFT_TAB, backward);
+        }
+        auto up = obj->GetPropertyValue<std::string>("up", "");
+        if (!up.empty()) {
+            ViewAbstractModel::GetInstance()->SetNextFocus(NG::FocusIntension::UP, up);
+        }
+        auto down = obj->GetPropertyValue<std::string>("down", "");
+        if (!down.empty()) {
+            ViewAbstractModel::GetInstance()->SetNextFocus(NG::FocusIntension::DOWN, down);
+        }
+        auto left = obj->GetPropertyValue<std::string>("left", "");
+        if (!left.empty()) {
+            ViewAbstractModel::GetInstance()->SetNextFocus(NG::FocusIntension::LEFT, left);
+        }
+        auto right = obj->GetPropertyValue<std::string>("right", "");
+        if (!right.empty()) {
+            ViewAbstractModel::GetInstance()->SetNextFocus(NG::FocusIntension::RIGHT, right);
+        }
+    }
+}
+
 void JSViewAbstract::JsFocusBox(const JSCallbackInfo& info)
 {
     if (!info[0]->IsObject() || info.Length() != 1) {
@@ -6947,6 +6979,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("grayscale", &JSViewAbstract::JsGrayScale);
     JSClass<JSViewAbstract>::StaticMethod("focusable", &JSViewAbstract::JsFocusable);
     JSClass<JSViewAbstract>::StaticMethod("tabStop", &JSViewAbstract::JsTabStop);
+    JSClass<JSViewAbstract>::StaticMethod("nextFocus", &JSViewAbstract::JsNextFocus);
     JSClass<JSViewAbstract>::StaticMethod("focusBox", &JSViewAbstract::JsFocusBox);
     JSClass<JSViewAbstract>::StaticMethod("onKeyEvent", &JSViewAbstract::JsOnKeyEvent);
     JSClass<JSViewAbstract>::StaticMethod("onKeyPreIme", &JSInteractableView::JsOnKeyPreIme);

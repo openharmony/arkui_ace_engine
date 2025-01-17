@@ -53,6 +53,15 @@ typedef enum {
     ARKUI_NODE_FLAG_C = 1,
 } ArkUINodeFlag;
 
+typedef enum {
+    FOCUS_MOVE_FORWARD = 0,
+    FOCUS_MOVE_BACKWARD,
+    FOCUS_MOVE_UP,
+    FOCUS_MOVE_DOWN,
+    FOCUS_MOVE_LEFT,
+    FOCUS_MOVE_RIGHT,
+} FocusMove;
+
 typedef int ArkUI_Bool;
 typedef int ArkUI_Int32;
 typedef unsigned int ArkUI_Uint32;
@@ -2158,6 +2167,10 @@ struct ArkUICommonModifier {
     void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragPreview dragPreview);
     void (*resetDragPreview)(ArkUINodeHandle node);
     ArkUI_Int32 (*getNodeUniqueId)(ArkUINodeHandle node);
+    void (*setNextFocus)(ArkUINodeHandle node, ArkUI_CharPtr forward, ArkUI_CharPtr backward, ArkUI_CharPtr up,
+        ArkUI_CharPtr down, ArkUI_CharPtr left, ArkUI_CharPtr right, ArkUI_Uint32 hasValue);
+    void (*setNextFocusOneByOne)(ArkUINodeHandle node, FocusMove idx, ArkUINodeHandle focusNode);
+    void (*resetNextFocus)(ArkUINodeHandle node);
     void (*setFocusBoxStyle)(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
         ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue);
     void (*resetFocusBoxStyle)(ArkUINodeHandle node);

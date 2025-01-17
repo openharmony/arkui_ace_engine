@@ -6352,6 +6352,70 @@ ArkUI_Int32 GetNodeUniqueId(ArkUINodeHandle node)
     return frameNode->GetId();
 }
 
+void SetNextFocus(ArkUINodeHandle node, ArkUI_CharPtr forward, ArkUI_CharPtr backward,
+    ArkUI_CharPtr up, ArkUI_CharPtr down, ArkUI_CharPtr left, ArkUI_CharPtr right, ArkUI_Uint32 hasValue)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    if ((hasValue >> 5) & 1) { // 5: forward
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::TAB, forward);
+    }
+    if ((hasValue >> 4) & 1) { // 4: backward
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::SHIFT_TAB, backward);
+    }
+    if ((hasValue >> 3) & 1) { // 3: up
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::UP, up);
+    }
+    if ((hasValue >> 2) & 1) { // 2: down
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::DOWN, down);
+    }
+    if ((hasValue >> 1) & 1) { // 1: left
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::LEFT, std::string(left));
+    }
+    if ((hasValue >> 0) & 1) { // 0: right
+        ViewAbstract::SetNextFocus(frameNode, FocusIntension::RIGHT, std::string(right));
+    }
+}
+
+void SetNextFocusOneByOne(ArkUINodeHandle node, ::FocusMove idx, ArkUINodeHandle focusNode)
+{
+    CHECK_NULL_VOID(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* focusFrameNode = reinterpret_cast<FrameNode*>(focusNode);
+    auto nodePtr = AceType::WeakClaim<AceType>(focusFrameNode);
+    FocusIntension key;
+    switch (idx) {
+        case ::FocusMove::FOCUS_MOVE_FORWARD:
+            key = FocusIntension::TAB;
+            break;
+        case ::FocusMove::FOCUS_MOVE_BACKWARD:
+            key = FocusIntension::SHIFT_TAB;
+            break;
+        case ::FocusMove::FOCUS_MOVE_UP:
+            key = FocusIntension::UP;
+            break;
+        case ::FocusMove::FOCUS_MOVE_DOWN:
+            key = FocusIntension::DOWN;
+            break;
+        case ::FocusMove::FOCUS_MOVE_LEFT:
+            key = FocusIntension::LEFT;
+            break;
+        case ::FocusMove::FOCUS_MOVE_RIGHT:
+            key = FocusIntension::RIGHT;
+            break;
+        default:
+            return;
+    }
+    ViewAbstract::SetNextFocus(frameNode, key, nodePtr);
+}
+
+void ResetNextFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ResetNextFocus(frameNode);
+}
+
 void SetFocusBoxStyle(ArkUINodeHandle node, ArkUI_Float32 valueMargin, ArkUI_Int32 marginUnit,
     ArkUI_Float32 valueStrokeWidth, ArkUI_Int32 widthUnit, ArkUI_Uint32 valueColor, ArkUI_Uint32 hasValue)
 {
@@ -7009,6 +7073,9 @@ const ArkUICommonModifier* GetCommonModifier()
         .setDragPreview = SetDragPreview,
         .resetDragPreview = ResetDragPreview,
         .getNodeUniqueId = GetNodeUniqueId,
+        .setNextFocus = SetNextFocus,
+        .setNextFocusOneByOne = SetNextFocusOneByOne,
+        .resetNextFocus = ResetNextFocus,
         .setFocusBoxStyle = SetFocusBoxStyle,
         .resetFocusBoxStyle = ResetFocusBoxStyle,
         .setClickDistance = SetClickDistance,

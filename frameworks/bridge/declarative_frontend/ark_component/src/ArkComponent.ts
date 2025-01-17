@@ -3336,6 +3336,21 @@ class FocusBoxModifier extends ModifierWithKey<FocusBoxStyle> {
   }
 }
 
+class NextFocusModifier extends ModifierWithKey<FocusMovement> {
+  constructor(value: FocusMovement) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('nextFocus');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetNextFocus(node);
+    } else {
+      getUINativeModule().common.setNextFocus(node, this.value.forward, this.value.backward,
+        this.value.up, this.value.down, this.value.left, this.value.right);
+    }
+  }
+}
+
 const JSCallbackInfoType = { STRING: 0, NUMBER: 1, OBJECT: 2, BOOLEAN: 3, FUNCTION: 4 };
 type basicType = string | number | bigint | boolean | symbol | undefined | object | null;
 const isString = (val: basicType): boolean => typeof val === 'string';
@@ -4859,6 +4874,9 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
   focusBox(value:FocusBoxStyle):this {
     modifierWithKey(this._modifiersWithKeys, FocusBoxModifier.identity, FocusBoxModifier, value);
+  }
+  nextFocus(value:FocusMovement):this {
+    modifierWithKey(this._modifiersWithKeys, NextFocusModifier.identity, NextFocusModifier, value);
   }
 }
 
