@@ -155,6 +155,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_richeditor_ffi.cpp",
       "interfaces/cj_ffi/cj_row_ffi.cpp",
       "interfaces/cj_ffi/cj_scroll_ffi.cpp",
+      "interfaces/cj_ffi/cj_scrollable_ffi.cpp",
       "interfaces/cj_ffi/cj_scrollbar_ffi.cpp",
       "interfaces/cj_ffi/cj_search_ffi.cpp",
       "interfaces/cj_ffi/cj_shape_ffi.cpp",

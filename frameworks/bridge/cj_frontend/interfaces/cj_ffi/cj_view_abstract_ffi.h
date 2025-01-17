@@ -370,6 +370,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTranslateX(double translateValu
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTranslateY(double translateValue, int32_t translateUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTransition();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractTransition(int64_t id);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractTransitionWithBack(int64_t id, void (*onFinish)(bool transitionIn));
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTransform(int64_t id);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAlign(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDirection(int32_t dirValue);
@@ -562,8 +563,19 @@ CJ_EXPORT uint32_t FFIOHOSAceFrameworkBlendColor(uint32_t color, uint32_t overla
 CJ_EXPORT void FFISetWidthWithEmpty();
 CJ_EXPORT void FFISetHeightWithEmpty();
 
+struct CJDismissContentCoverAction {
+    int32_t reason;
+    void (*dismissContentCover)();
+};
+
+struct NativeOptionOnWillDismiss {
+    bool hasValue;
+    void (*value)(CJDismissContentCoverAction action);
+};
 struct CJContentCoverOptions {
     uint32_t modalTransition;
+    NativeOptionOnWillDismiss onWillDismiss;
+    NativeOptionInt64 transition;
     NativeOptionUInt32 backgroundColor;
     NativeOptionCallBack onAppear;
     NativeOptionCallBack onDisappear;

@@ -14,10 +14,11 @@
  */
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_scroll_ffi.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_shape_ffi.h"
 
 #include "cj_lambda.h"
-
 #include "bridge/common/utils/utils.h"
+#include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "core/components/scroll/scroll_component.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
@@ -388,6 +389,16 @@ void FfiOHOSAceFrameworkScrollOnScrollEdge(void (*callback)(int32_t edge))
 void FfiOHOSAceFrameworkScrollOnScrollEnd(void (*callback)())
 {
     ScrollModel::GetInstance()->SetOnScrollEnd(CJLambda::Create(callback));
+}
+
+void FfiOHOSAceFrameworkScrollOnReachStart(void (*callback)())
+{
+    ScrollModel::GetInstance()->SetOnReachStart(CJLambda::Create(callback));
+}
+
+void FfiOHOSAceFrameworkScrollOnReachEnd(void (*callback)())
+{
+    ScrollModel::GetInstance()->SetOnReachEnd(CJLambda::Create(callback));
 }
 
 void FfiOHOSAceFrameworkScrollOnScrollStart(void (*callback)())
