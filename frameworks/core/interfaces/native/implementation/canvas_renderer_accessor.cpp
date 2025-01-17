@@ -36,6 +36,10 @@ const auto SCALE_LIMIT_MIN = 0.0;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
 const auto EMPTY_STRING = "";
 const auto FILL_RULE_EVEN_ODD = "evenodd";
+const auto DIR_AUTO = "auto";
+const auto DIR_INHERIT = "inherit";
+const auto DIR_LTR = "ltr";
+const auto DIR_RTL = "rtl";
 struct Ark_Custom_Rect {
     Ark_Number x;
     Ark_Number y;
@@ -83,10 +87,10 @@ TextDirection Convert(const Ark_String& src)
 {
     auto val = Converter::Convert<std::string>(src);
     static const LinearMapNode<TextDirection> textDirectionTable[] = {
-        { "auto", TextDirection::AUTO },
-        { "inherit", TextDirection::INHERIT },
-        { "ltr", TextDirection::LTR },
-        { "rtl", TextDirection::RTL },
+        { DIR_AUTO, TextDirection::AUTO },
+        { DIR_INHERIT, TextDirection::INHERIT },
+        { DIR_LTR, TextDirection::LTR },
+        { DIR_RTL, TextDirection::RTL },
     };
     auto index = BinarySearchFindIndex(textDirectionTable, ArraySize(textDirectionTable), val.c_str());
     return index < 0 ? TextDirection::LTR : textDirectionTable[index].value;
