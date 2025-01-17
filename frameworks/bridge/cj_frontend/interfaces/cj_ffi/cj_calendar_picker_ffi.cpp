@@ -28,18 +28,6 @@ using namespace OHOS::Ace::Framework;
 
 namespace {
 
-constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
-constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
-
-uint32_t ColorAlphaAdapt(uint32_t origin)
-{
-    uint32_t result = origin;
-    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
-        result = origin | COLOR_ALPHA_VALUE;
-    }
-    return result;
-}
-
 void SetRadius(NG::BorderRadiusProperty& dialogRadius, const Dimension& borderRadius)
 {
     dialogRadius.radiusTopLeft = borderRadius;
@@ -83,7 +71,7 @@ Shadow ParseNativeShadowOptions(NativeShadowOptions shadowOptions)
         shadowOptions.radius = 0.0;
     }
     shadow.SetBlurRadius(shadowOptions.radius);
-    Color shadowColor = Color(ColorAlphaAdapt(shadowOptions.color));
+    Color shadowColor = Color(shadowOptions.color);
     shadow.SetColor(shadowColor);
     shadow.SetShadowType(static_cast<ShadowType>(shadowOptions.shadowType));
     shadow.SetIsFilled(shadowOptions.fill);
