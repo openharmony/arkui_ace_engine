@@ -16,6 +16,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_constants.h"
+#include "core/components/theme/app_theme.h"
 #include "core/event/focus_axis_event.h"
 #include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -178,8 +179,10 @@ bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension int
         return true;
     }
     // Handle on click
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
-        !pipeline->GetIsFocusActive()) {
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    CHECK_NULL_RETURN(appTheme, false);
+    if (!pipeline->GetIsFocusActive() && (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ||
+                                             !appTheme->NeedFocusHandleClick())) {
         return false;
     }
     if (intension == FocusIntension::SELECT && !IsTabStop()) {
