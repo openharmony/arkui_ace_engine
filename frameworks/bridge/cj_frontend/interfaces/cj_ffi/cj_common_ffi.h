@@ -279,6 +279,12 @@ struct CJDragInfo {
     CJPosition* position;
 };
 
+struct CJDragEvent {
+    void* evtPtr;
+    bool useCustomDropAnimation;
+    int32_t dragBehavior;
+};
+
 struct CJDragItemInfo {
     int64_t pixelMapId;
     void (*builder)();
