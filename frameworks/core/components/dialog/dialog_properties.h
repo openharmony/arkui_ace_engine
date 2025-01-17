@@ -105,6 +105,17 @@ enum class KeyboardAvoidMode {
     NONE,
 };
 
+enum class LevelMode {
+    OVERLAY = 0,
+    EMBEDDED,
+};
+
+enum class ImmersiveMode {
+    DEFAULT = 0,
+    PAGE,
+    FULL,
+};
+
 class DialogAlignmentUtils {
 public:
     static std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment)
@@ -281,6 +292,9 @@ struct DialogProperties {
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
     std::optional<Dimension> keyboardAvoidDistance;
+    LevelMode dialogLevelMode = LevelMode::OVERLAY;
+    int32_t dialogLevelUniqueId = -1;
+    ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
 };
 
 struct PromptDialogAttr {
@@ -320,6 +334,9 @@ struct PromptDialogAttr {
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
     std::optional<Dimension> keyboardAvoidDistance;
+    LevelMode dialogLevelMode = LevelMode::OVERLAY;
+    int32_t dialogLevelUniqueId = -1;
+    ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
 };
 
 } // namespace OHOS::Ace

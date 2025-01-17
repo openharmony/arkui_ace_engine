@@ -19,12 +19,14 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT ContainerModalView : public AceType {
 public:
     static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
+    static bool ConfigCustomWindowMask(RefPtr<PipelineContext>& pipeline, bool enable);
 
 protected:
     static RefPtr<FrameNode> AddControlButtons(RefPtr<FrameNode>& controlButtonsRow);

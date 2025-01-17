@@ -23,6 +23,9 @@ namespace OHOS::Ace::NG {
 namespace {
 const char DOM_SVG_SRC_GRADIENT_TRANSFORM[] = "gradientTransform";
 const char DOM_SVG_SRC_SPREAD_METHOD[] = "spreadMethod"; 
+const std::string SPREAD_METHOD_PAD = "pad";
+const std::string SPREAD_METHOD_REPEAT = "repeat";
+const std::string SPREAD_METHOD_REFLECT = "reflect";
 }
 
 SvgGradient::SvgGradient(OHOS::Ace::GradientType gradientType)
@@ -130,4 +133,26 @@ const OHOS::Ace::Gradient& SvgGradient::GetGradient() const
     return gradientAttr_.gradient;
 }
 
+std::vector<Ace::GradientColor> SvgGradient::GetStopColors()
+{
+    std::vector<Ace::GradientColor> colors;
+    for (auto& node : children_) {
+        auto stopNode = DynamicCast<SvgStop>(node);
+        if (stopNode) {
+            colors.push_back(stopNode->GetGradientColor());
+        }
+    }
+    return colors;
+}
+
+SvgSpreadMethod SvgGradient::ParseSpreadMethod(const std::string& spreadStr)
+{
+    if (spreadStr == SPREAD_METHOD_REPEAT) {
+        return SvgSpreadMethod::REPEAT;
+    }
+    if (spreadStr == SPREAD_METHOD_REFLECT) {
+        return SvgSpreadMethod::REFLECT;
+    }
+    return SvgSpreadMethod::PAD;
+}
 } // namespace OHOS::Ace::NG

@@ -1771,7 +1771,7 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest008, TestSize.Level1
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
     textPickerColumnPattern->optionProperties_.emplace_back(prop);
-    textPickerColumnPattern->CalcAlgorithmOffset(DISTANCE);
+    textPickerColumnPattern->CalcAlgorithmOffset(ScrollDirection::UP, DISTANCE);
     EXPECT_EQ(textPickerColumnPattern->algorithmOffset_.size() - BUFFER_NODE_NUMBER, 5);
 }
 
@@ -1889,7 +1889,6 @@ HWTEST_F(TextPickerColumnTestNg, TextPickerColumnPatternTest013, TestSize.Level1
     std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" }, { "", "4" }, { "", "5" } };
     textPickerColumnPattern->SetOptions(range);
     textPickerColumnPattern->SetCurrentIndex(SELECTED_INDEX_2);
-    textPickerColumnPattern->SetScrollDirection(true);
     TextPickerOptionProperty prop;
     prop.height = 4.0f;
     prop.fontheight = 3.0f;

@@ -586,7 +586,7 @@ bool JSImage::ParseColorContent(const JSRef<JSVal>& jsValue)
     }
     auto paramObject = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> typeVal = paramObject->GetProperty("colorContent_");
-    return !typeVal.IsEmpty() && typeVal->IsString() && typeVal->ToString() == "RESET";
+    return !typeVal.IsEmpty() && typeVal->IsString() && typeVal->ToString() == "ORIGIN";
 }
 
 void JSImage::SetImageFill(const JSCallbackInfo& info)

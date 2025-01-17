@@ -325,4 +325,20 @@ ArkUINativeModuleValue ImageAnimatorBridge::ResetIteration(ArkUIRuntimeCallInfo*
     nodeModifiers->getImageAnimatorModifier()->resetImageAnimatorIteration(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue ImageAnimatorBridge::SetAutoMonitorInvisibleArea(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    bool value = false;
+    if (secondArg->IsBoolean()) {
+        value = secondArg->ToBoolean(vm)->BooleaValue(vm);
+    }
+
+    GetArkUINodeModifiers()->getImageAnimatorModifier()->setAutoMonitorInvisibleArea(nativeNode, value);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

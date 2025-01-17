@@ -28,9 +28,9 @@ public:
     void SetOffset(const V2::GridContainerSize& offset) override;
     void SetOrder(const V2::GridContainerSize& order) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetSpan(FrameNode* frameNode, const V2::GridContainerSize& span);
-    static void SetOffset(FrameNode* frameNode, const V2::GridContainerSize& offset);
-    static void SetOrder(FrameNode* frameNode, const V2::GridContainerSize& order);
+    static void SetSpan(FrameNode* frameNode, const std::optional<V2::GridContainerSize>& span);
+    static void SetOffset(FrameNode* frameNode, const std::optional<V2::GridContainerSize>& offset);
+    static void SetOrder(FrameNode* frameNode, const std::optional<V2::GridContainerSize>& order);
 };
 } // namespace OHOS::Ace::NG
 

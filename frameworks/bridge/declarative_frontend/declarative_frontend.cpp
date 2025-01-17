@@ -1185,6 +1185,14 @@ void DeclarativeFrontend::NotifyAppStorage(const std::string& key, const std::st
     delegate_->NotifyAppStorage(jsEngine_, key, value);
 }
 
+std::string DeclarativeFrontend::GetPagePathByUrl(const std::string& url) const
+{
+    if (!delegate_) {
+        return "";
+    }
+    return delegate_->GetPagePathByUrl(url);
+}
+
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)
 {
     LOGI("HandleAsyncEvent pageId: %{private}d, eventId: %{private}s, eventType: %{private}s",

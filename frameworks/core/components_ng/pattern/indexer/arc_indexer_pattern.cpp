@@ -34,6 +34,23 @@ void ArcIndexerPattern::OnModifyDone()
     auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     bool autoCollapseModeChanged = true;
+    InitArrayValue(autoCollapseModeChanged);
+    auto itemSize =
+        layoutProperty->GetItemSize().value_or(Dimension(ARC_INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToPx();
+    lastItemSize_ = itemSize;
+    auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
+    ApplyIndexChanged(needMarkDirty, initialized_ && selectChanged_, false);
+    InitTouchEvent ();
+    SetAccessibilityAction();
+    InitializeAccessibility();
+}
+
+void ArcIndexerPattern::InitArrayValue(bool& autoCollapseModeChanged)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     if (!isNewHeightCalculated_) {
         auto autoCollapse = layoutProperty->GetAutoCollapse().value_or(false);
         autoCollapseModeChanged = autoCollapse != autoCollapse_;
@@ -49,8 +66,8 @@ void ArcIndexerPattern::OnModifyDone()
             }
         }
         fullArrayValue_ = newArray;
+        fullCount_ = fullArrayValue_.size();
     }
-    ResetArrayValue(autoCollapseModeChanged);
     auto propSelect = layoutProperty->GetSelected().value();
     if (propSelect < 0) {
         propSelect = 0;
@@ -61,21 +78,20 @@ void ArcIndexerPattern::OnModifyDone()
         layoutProperty->UpdateSelected(propSelect);
     }
     if (propSelect != selected_) {
-        selected_ = propSelect;
         selectChanged_ = true;
+        if (selected_ + startIndex_ == propSelect) {
+            selectChanged_ = false;
+        }
+        selected_ = propSelect;
         ResetStatus();
-    } else if (!isNewHeightCalculated_) {
+    } else if (propSelect == selected_ && propSelect == 0) {
+        selectChanged_ = true;
+    }
+    if (isNewHeightCalculated_) {
         selectChanged_ = false;
     }
     isNewHeightCalculated_ = false;
-    auto itemSize =
-        layoutProperty->GetItemSize().value_or(Dimension(ARC_INDEXER_ITEM_SIZE, DimensionUnit::VP)).ConvertToPx();
-    lastItemSize_ = itemSize;
-    auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
-    ApplyIndexChanged(needMarkDirty, initialized_ && selectChanged_, false);
-    InitTouchEvent ();
-    SetAccessibilityAction();
-    InitializeAccessibility();
+    ResetArrayValue(autoCollapseModeChanged);
 }
 
 void ArcIndexerPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -350,6 +366,8 @@ bool ArcIndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
         isNewHeightCalculated_ = true;
         auto hostNode = dirty->GetHostNode();
         StartCollapseDelayTask(hostNode, ARC_INDEXER_COLLAPSE_WAIT_DURATION);
+    } else {
+        initialized_ = true;
     }
 
     return true;
@@ -381,7 +399,7 @@ void ArcIndexerPattern::BuildArrayValueItems()
     for (auto indexerItem : arcArrayValue_) {
         arrayValueStrs.push_back(indexerItem.first);
     }
-    layoutProperty->UpdateArrayValue(arrayValueStrs);
+    layoutProperty->UpdateActualArrayValue(arrayValueStrs);
 }
 
 void ArcIndexerPattern::BuildFullArrayValue()
@@ -393,7 +411,9 @@ void ArcIndexerPattern::BuildFullArrayValue()
         arraySize = arraySize + 1;
     }
     for (int32_t i = startIndex; i < startIndex + arraySize; ++i) {
-        arcArrayValue_.push_back(std::pair(fullArrayValue_.at(i), ArcIndexerBarState::INVALID));
+        if (i >= 0 && i < static_cast<int32_t>(fullArrayValue_.size())) {
+            arcArrayValue_.push_back(std::pair(fullArrayValue_.at(i), ArcIndexerBarState::INVALID));
+        }
     }
     if (autoCollapse_ && arraySize > ARC_INDEXER_COLLAPSE_ITEM_COUNT) {
         arcArrayValue_.push_back(
@@ -445,6 +465,9 @@ void ArcIndexerPattern::UpdateStartAndEndIndexbySelected()
     auto arraySize = (fullCount_ > ARC_INDEXER_ITEM_MAX_COUNT) ? ARC_INDEXER_ITEM_MAX_COUNT : fullCount_;
     if (currectCollapsingMode_ == ArcIndexerCollapsingMode::FOUR) {
         focusIndex_ = selected_ - startIndex_;
+        if (endIndex_ > arraySize) {
+            endIndex_ = arraySize;
+        }
         if (selected_ >= endIndex_ - 1) {
             endIndex_ = selected_ + 1;
             if (endIndex_ > arraySize) {
@@ -472,7 +495,9 @@ void ArcIndexerPattern::ApplyFourPlusOneMode()
     UpdateStartAndEndIndexbySelected();
     arcArrayValue_.clear();
     for (int32_t index = startIndex_; index < endIndex_; index++) {
-        arcArrayValue_.push_back(std::pair(fullArrayValue_.at(index), ArcIndexerBarState::INVALID));
+        if (index >= 0 && index < static_cast<int32_t>(fullArrayValue_.size())) {
+            arcArrayValue_.push_back(std::pair(fullArrayValue_.at(index), ArcIndexerBarState::INVALID));
+        }
     }
     arcArrayValue_.push_back(
         std::pair(StringUtils::Str16ToStr8(ARC_INDEXER_STR_EXPANDED), ArcIndexerBarState::EXPANDED));
@@ -499,14 +524,9 @@ void ArcIndexerPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             return;
         }
         if (info.GetInputEventType() == InputEventType::AXIS) {
-            if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
-                pattern->MoveIndexByStep(-1);
-            } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
-                pattern->MoveIndexByStep(1);
-            }
-        } else {
-            pattern->MoveIndexByOffset(info.GetLocalLocation());
+            return;
         }
+        pattern->MoveIndexByOffset(info.GetLocalLocation());
     };
 
     auto onActionEnd = [weak = WeakClaim(this)](const GestureEvent& info) {
@@ -565,6 +585,7 @@ void ArcIndexerPattern::MoveIndexByOffset(const Offset& offset)
         return;
     }
     if (arcArrayValue_[nextSelectIndex].second != ArcIndexerBarState::INVALID) {
+        selectChanged_ = false;
         isNewHeightCalculated_ = true;
         lastCollapsingMode_ = currectCollapsingMode_;
         if (arcArrayValue_[nextSelectIndex].second == ArcIndexerBarState::COLLAPSED && autoCollapse_) {
@@ -660,7 +681,6 @@ void ArcIndexerPattern::IndexNodeExpandedAnimation()
         },
         [weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
-            pattern->atomicAnimateOp_ = true;
             pattern->atomicAnimateOp_ = true;
             auto collapsedNode = pattern->collapsedNode_.Upgrade();
             CHECK_NULL_VOID(collapsedNode);
@@ -1074,9 +1094,6 @@ RefPtr<FrameNode> ArcIndexerPattern::CreatePopupNode()
 void ArcIndexerPattern::UpdateBubbleView()
 {
     CHECK_NULL_VOID(popupNode_);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-
     auto currentListData = std::vector<std::string>();
     UpdateBubbleLetterView(false, currentListData);
     auto columnRenderContext = popupNode_->GetRenderContext();

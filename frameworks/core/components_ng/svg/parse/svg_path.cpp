@@ -36,6 +36,44 @@ bool SvgPath::ParseAndSetSpecializedAttr(const std::string& name, const std::str
     return false;
 }
 
+Rect SvgPath::GetobjectBoundingBox(const SvgLengthScaleRule& lengthRule)
+{
+    if (lengthRule.GetLengthScaleUnit() == SvgLengthScaleUnit::OBJECT_BOUNDING_BOX) {
+        LOGD("SvgPath::GetobjectBoundingBox : objectBoundingBox");
+        return lengthRule.GetBaseRect();
+    }
+    LOGD("SvgPath::GetobjectBoundingBox : userSpaceOnUse");
+    Rect objectBoundingBox(0, 0, 1, 1);
+    return objectBoundingBox;
+}
+
+RSRecordingPath SvgPath::AsPath(const SvgLengthScaleRule& lengthRule)
+{
+    if (path_.has_value()) {
+        return path_.value();
+    }
+    RSRecordingPath tmp;
+    RSRecordingPath out;
+    Rect objectBoundingBox = GetobjectBoundingBox(lengthRule);
+    RSMatrix matrix;
+    /* Setup matrix  for converting the points in path */
+    matrix.SetScaleTranslate(objectBoundingBox.Width(), objectBoundingBox.Height(), objectBoundingBox.Left(),
+        objectBoundingBox.Top());
+
+    if (!d_.empty()) {
+        tmp.BuildFromSVGString(d_);
+        /* convert the points in Path with the matrixs */
+        tmp.TransformWithPerspectiveClip(matrix, &out, false);
+        if (attributes_.fillState.IsEvenodd()) {
+            out.SetFillStyle(RSPathFillType::EVENTODD);
+        }
+        if (attributes_.clipState.IsEvenodd()) {
+            out.SetFillStyle(RSPathFillType::EVENTODD);
+        }
+    }
+    return out;
+}
+
 RSRecordingPath SvgPath::AsPath(const Size& /* viewPort */) const
 {
     RSRecordingPath out;

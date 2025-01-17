@@ -254,11 +254,13 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg006, TestSize.Level1)
      */
     props.isShowInSubWindow = true;
     alertDialogModelNg.SetShowDialog(props);
+    EXPECT_EQ(props.isModal, true);
     /**
      * @tc.steps: step2. Call SetShowDialog when isShowInSubWindow is false.
      */
     props.isShowInSubWindow = false;
     alertDialogModelNg.SetShowDialog(props);
+    EXPECT_EQ(props.isModal, true);
 }
 
 /**
@@ -314,12 +316,14 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg008, TestSize.Level1)
      * @tc.steps: step3. Call ShowActionSheet when isShowInSubWindow is true.
      */
     actionSheetModelNg.ShowActionSheet(props);
+    EXPECT_EQ(props.title, TITLE);
 
     /**
      * @tc.steps: step3. Call ShowActionSheet when isShowInSubWindow is false.
      */
     props.isShowInSubWindow = false;
     actionSheetModelNg.ShowActionSheet(props);
+    EXPECT_EQ(props.title, TITLE);
 }
 
 /**

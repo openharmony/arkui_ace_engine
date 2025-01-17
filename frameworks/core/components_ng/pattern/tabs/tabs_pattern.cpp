@@ -277,6 +277,7 @@ void TabsPattern::OnModifyDone()
     Pattern::OnModifyDone();
     UpdateSwiperDisableSwipe(isCustomAnimation_ ? true : isDisableSwipe_);
     SetSwiperPaddingAndBorder();
+    InitFocusEvent();
 
     if (onChangeEvent_) {
         return;
@@ -408,11 +409,12 @@ ScopeFocusAlgorithm TabsPattern::GetScopeFocusAlgorithm()
     }
     return ScopeFocusAlgorithm(isVertical, true, ScopeType::OTHERS,
         [wp = WeakClaim(this)](
-            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
             auto tabs = wp.Upgrade();
             if (tabs) {
                 nextFocusNode = tabs->GetNextFocusNode(step, currFocusNode);
             }
+            return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
         });
 }
 
@@ -425,6 +427,7 @@ WeakPtr<FocusHub> TabsPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     CHECK_NULL_RETURN(property, nullptr);
     auto axis = property->GetAxis().value_or(Axis::HORIZONTAL);
     auto tabBarPosition = property->GetTabBarPosition().value_or(BarPosition::START);
+    auto isRTL = property->GetNonAutoLayoutDirection() == TextDirection::RTL;
 
     auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
     CHECK_NULL_RETURN(tabsNode, nullptr);
@@ -437,33 +440,104 @@ WeakPtr<FocusHub> TabsPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto swiperFocusNode = swiperNode->GetFocusHub();
     CHECK_NULL_RETURN(swiperFocusNode, nullptr);
 
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_RETURN(tabBarPattern, nullptr);
-    tabBarPattern->SetFirstFocus(true);
-    auto tabsLayoutProperty = AceType::DynamicCast<TabsLayoutProperty>(tabsNode->GetLayoutProperty());
-    CHECK_NULL_RETURN(tabsLayoutProperty, nullptr);
-    auto isRTL_ = tabsLayoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (curFocusNode->GetFrameName() == V2::TAB_BAR_ETS_TAG &&
-        ((tabBarPosition == BarPosition::START && axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
-        (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL &&
-        (isRTL_ ? step == FocusStep::LEFT : step == FocusStep::RIGHT)) ||
-        (tabBarPosition == BarPosition::END && axis == Axis::HORIZONTAL && step == FocusStep::UP) ||
-        (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL &&
-        (isRTL_ ? step == FocusStep::RIGHT : step == FocusStep::LEFT)))) {
-        return AceType::WeakClaim(AceType::RawPtr(swiperFocusNode));
-    }
-    if (curFocusNode->GetFrameName() == V2::SWIPER_ETS_TAG) {
-        if ((tabBarPosition == BarPosition::START && axis == Axis::HORIZONTAL && step == FocusStep::UP) ||
-            (tabBarPosition == BarPosition::START && axis == Axis::VERTICAL &&
-            (isRTL_ ? step == FocusStep::RIGHT : step == FocusStep::LEFT)) ||
-            (tabBarPosition == BarPosition::END && axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
-            (tabBarPosition == BarPosition::END && axis == Axis::VERTICAL &&
-            (isRTL_ ? step == FocusStep::LEFT : step == FocusStep::RIGHT))) {
-            return AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode));
+    if (curFocusNode->GetFrameName() == V2::TAB_BAR_ETS_TAG) {
+        if (tabBarPosition == BarPosition::START) {
+            if (step == FocusStep::TAB || (axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
+                (axis == Axis::VERTICAL && (isRTL ? step == FocusStep::LEFT : step == FocusStep::RIGHT))) {
+                return AceType::WeakClaim(AceType::RawPtr(swiperFocusNode));
+            }
+        } else {
+            if (step == FocusStep::SHIFT_TAB || (axis == Axis::HORIZONTAL && step == FocusStep::UP) ||
+                (axis == Axis::VERTICAL && (isRTL ? step == FocusStep::RIGHT : step == FocusStep::LEFT))) {
+                return AceType::WeakClaim(AceType::RawPtr(swiperFocusNode));
+            }
+        }
+    } else if (curFocusNode->GetFrameName() == V2::SWIPER_ETS_TAG) {
+        if (tabBarPosition == BarPosition::START) {
+            if (step == FocusStep::SHIFT_TAB || (axis == Axis::HORIZONTAL && step == FocusStep::UP) ||
+                (axis == Axis::VERTICAL && (isRTL ? step == FocusStep::RIGHT : step == FocusStep::LEFT))) {
+                return AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode));
+            }
+        } else {
+            if (step == FocusStep::TAB || (axis == Axis::HORIZONTAL && step == FocusStep::DOWN) ||
+                (axis == Axis::VERTICAL && (isRTL ? step == FocusStep::LEFT : step == FocusStep::RIGHT))) {
+                return AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode));
+            }
         }
         if (step == FocusStep::LEFT_END || step == FocusStep::RIGHT_END || step == FocusStep::UP_END ||
             step == FocusStep::DOWN_END) {
             return AceType::WeakClaim(AceType::RawPtr(swiperFocusNode));
+        }
+    }
+    return nullptr;
+}
+
+void TabsPattern::InitFocusEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto focusHub = host->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+
+    auto getNextFocusNodeFunc = [weak = WeakClaim(this)](
+                                    FocusReason reason, FocusIntension intension) -> RefPtr<FocusHub> {
+        if (reason != FocusReason::FOCUS_TRAVEL) {
+            return nullptr;
+        }
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, nullptr);
+        return pattern->GetCurrentFocusNode(intension);
+    };
+    focusHub->SetOnGetNextFocusNodeFunc(getNextFocusNodeFunc);
+}
+
+RefPtr<FocusHub> TabsPattern::GetCurrentFocusNode(FocusIntension intension)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_RETURN(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_RETURN(tabBarNode, nullptr);
+    auto tabBarFocusHub = tabBarNode->GetFocusHub();
+    CHECK_NULL_RETURN(tabBarFocusHub, nullptr);
+    if (!tabBarFocusHub->GetFocusable()) {
+        return nullptr;
+    }
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_RETURN(swiperNode, nullptr);
+    auto swiperFocusHub = swiperNode->GetFocusHub();
+    CHECK_NULL_RETURN(swiperFocusHub, nullptr);
+
+    auto property = GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_RETURN(property, nullptr);
+    auto axis = property->GetAxis().value_or(Axis::HORIZONTAL);
+    auto barPosition = property->GetTabBarPosition().value_or(BarPosition::START);
+    auto isRTL = property->GetNonAutoLayoutDirection() == TextDirection::RTL;
+
+    auto focusFirstNodeIntension = intension == FocusIntension::TAB || intension == FocusIntension::SELECT ||
+                                   intension == FocusIntension::HOME;
+    auto focusLastNodeIntension = intension == FocusIntension::SHIFT_TAB || intension == FocusIntension::END;
+    auto firstFocusHub = barPosition == BarPosition::START ? tabBarFocusHub : swiperFocusHub;
+    auto lastFocusHub = barPosition == BarPosition::START ? swiperFocusHub : tabBarFocusHub;
+    if (focusFirstNodeIntension) {
+        return firstFocusHub;
+    } else if (focusLastNodeIntension) {
+        return lastFocusHub;
+    } else if (axis == Axis::HORIZONTAL) {
+        if (intension == FocusIntension::DOWN || intension == FocusIntension::LEFT ||
+            intension == FocusIntension::RIGHT) {
+            return firstFocusHub;
+        } else if (intension == FocusIntension::UP) {
+            return lastFocusHub;
+        }
+    } else {
+        if (intension == FocusIntension::DOWN || intension == FocusIntension::UP) {
+            return firstFocusHub;
+        } else if (intension == FocusIntension::LEFT) {
+            return (isRTL ? barPosition == BarPosition::END : barPosition == BarPosition::START) ? swiperFocusHub
+                                                                                                 : tabBarFocusHub;
+        } else if (intension == FocusIntension::RIGHT) {
+            return (isRTL ? barPosition == BarPosition::END : barPosition == BarPosition::START) ? tabBarFocusHub
+                                                                                                 : swiperFocusHub;
         }
     }
     return nullptr;
@@ -528,6 +602,7 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
     if (indexSetByUser >= tabContentNum) {
         indexSetByUser = 0;
     }
+    SetLastWeakFocusNode(tabsNode, tabBarNode, tabsLayoutProperty, indexSetByUser);
     if (!tabsLayoutProperty->GetIndex().has_value()) {
         UpdateSelectedState(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, indexSetByUser);
     } else {
@@ -545,6 +620,41 @@ void TabsPattern::UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<Fr
         tabBarPattern->SetMaskAnimationByCreate(true);
         UpdateSelectedState(tabBarNode, swiperNode, tabBarPattern, tabsLayoutProperty, indexSetByUser);
     }
+}
+
+void TabsPattern::SetLastWeakFocusNode(const RefPtr<FrameNode>& tabsNode, const RefPtr<FrameNode>& tabBarNode,
+    const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int32_t index)
+{
+    auto tabsFocusNode = tabsNode->GetFocusHub();
+    CHECK_NULL_VOID(tabsFocusNode);
+    auto tabBarFocusNode = tabBarNode->GetFocusHub();
+    CHECK_NULL_VOID(tabBarFocusNode);
+    if (!tabsFocusNode->IsCurrentFocus() && !tabsFocusNode->GetLastWeakFocusNode().Upgrade()) {
+        auto tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
+        if (tabBarPosition == BarPosition::START) {
+            tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
+        }
+        if (!tabBarFocusNode->IsCurrentFocus() && !tabBarFocusNode->GetLastWeakFocusNode().Upgrade()) {
+            auto childNode = AceType::DynamicCast<FrameNode>(tabBarNode->GetChildAtIndex(index));
+            CHECK_NULL_VOID(childNode);
+            auto childFocusNode = childNode->GetFocusHub();
+            CHECK_NULL_VOID(childFocusNode);
+            childFocusNode->SetFocusDependence(FocusDependence::SELF);
+            tabBarFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(childFocusNode)));
+        }
+    }
+}
+
+void TabsPattern::SetAnimateMode(TabAnimateMode mode)
+{
+    animateMode_ = mode;
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperPattern->SetJumpAnimationMode(mode);
 }
 
 /**

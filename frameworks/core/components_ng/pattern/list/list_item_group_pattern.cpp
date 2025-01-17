@@ -206,6 +206,17 @@ float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<floa
     return height - targetPos.first;
 }
 
+bool ListItemGroupPattern::IsVisible() const
+{
+    auto layoutProperty = GetLayoutProperty<ListItemGroupLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto visible = layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
+    if (visible == VisibleType::GONE) {
+        return false;
+    }
+    return true;
+}
+
 float ListItemGroupPattern::GetEstimateHeight(float& averageHeight,
     float headerMainSize, float footerMainSize, float spaceWidth) const
 {

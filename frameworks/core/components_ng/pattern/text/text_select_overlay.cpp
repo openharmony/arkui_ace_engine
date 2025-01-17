@@ -244,7 +244,9 @@ void TextSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     textPattern->CalculateHandleOffsetAndShowOverlay();
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
-    overlayManager->ShowOptionMenu();
+    if (!textPattern->IsSelectedTypeChange()) {
+        overlayManager->ShowOptionMenu();
+    }
     overlayManager->MarkInfoChange((isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE) | DIRTY_SELECT_AREA |
                                    DIRTY_SELECT_TEXT | DIRTY_COPY_ALL_ITEM);
     if (textPattern->CheckSelectedTypeChange()) {
@@ -329,6 +331,7 @@ void TextSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOverlay
     menuInfo.showCopyAll = !textPattern->IsSelectAll();
     menuInfo.showCopy = !textPattern->GetTextSelector().SelectNothing();
     menuInfo.showSearch = menuInfo.showCopy && textPattern->IsShowSearch() && IsNeedMenuSearch();
+    menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
     if (dirtyFlag == DIRTY_COPY_ALL_ITEM) {
         return;
     }
@@ -370,6 +373,13 @@ void TextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlayInfo
             return deltaOffset;
         };
     }
+    overlayInfo.menuCallback.showMenuOnMoveDone = [weak = WeakClaim(this)]() {
+        auto overlay = weak.Upgrade();
+        CHECK_NULL_RETURN(overlay, true);
+        auto textPattern = overlay->GetPattern<TextPattern>();
+        CHECK_NULL_RETURN(textPattern, true);
+        return !textPattern->IsSelectedTypeChange();
+    };
 }
 
 void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType type)
@@ -385,6 +395,9 @@ void TextSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuType t
             break;
         case OptionMenuActionId::SEARCH:
             HandleOnSearch();
+            break;
+        case OptionMenuActionId::SHARE:
+            HandleOnShare();
             break;
         default:
             TAG_LOGI(AceLogTag::ACE_TEXT, "Unsupported menu option id %{public}d", id);
@@ -583,6 +596,13 @@ std::optional<Color> TextSelectOverlay::GetHandleColor()
 }
 
 bool TextSelectOverlay::AllowSearch()
+{
+    auto textPattern = GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, false);
+    return !textPattern->GetTextSelector().SelectNothing();
+}
+
+bool TextSelectOverlay::AllowShare()
 {
     auto textPattern = GetPattern<TextPattern>();
     CHECK_NULL_RETURN(textPattern, false);

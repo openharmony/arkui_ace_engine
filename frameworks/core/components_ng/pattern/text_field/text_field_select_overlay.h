@@ -99,6 +99,7 @@ public:
 
 protected:
     bool AllowSearch() override;
+    bool AllowShare() override;
 
 private:
     std::optional<SelectHandleInfo> GetHandleInfo(const RectF& handlePaintRect);

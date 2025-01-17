@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -182,6 +182,11 @@ public:
 
     void ResetDragOption() override;
     void OnColorConfigurationUpdate() override;
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    bool ButtonNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme);
+    bool IconNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme);
+    bool TextNodeOnThemeScopeUpdate(const RefPtr<SearchTheme>& searchTheme,
+        const RefPtr<TextFieldTheme>& textFieldTheme);
 
     void SetSearchIconSize(const Dimension& value);
     void SetSearchIconColor(const Color& color);
@@ -203,6 +208,8 @@ public:
     const Dimension ConvertImageIconSizeValue(const Dimension& fontSizeValue);
     void UpdateDisable(const std::u16string& textValue);
     void UpdateEnable(bool needToenable);
+    float GetMaxFontScale();
+    float GetMinFontScale();
 
 private:
     void OnModifyDone() override;

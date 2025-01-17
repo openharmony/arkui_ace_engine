@@ -66,6 +66,7 @@ struct SpanNodeInfo {
     RefPtr<UINode> node;
     RefPtr<UINode> containerSpanNode;
 };
+enum class SelectionMenuCalblackId { MENU_APPEAR, MENU_SHOW, MENU_HIDE };
 
 // TextPattern is the base class for text render node to perform paint text.
 class TextPattern : public virtual Pattern,
@@ -518,7 +519,7 @@ public:
     }
 
     void BindSelectionMenu(TextSpanType spanType, TextResponseType responseType, std::function<void()>& menuBuilder,
-        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear);
+        const SelectMenuParam& menuParam);
 
     void SetTextController(const RefPtr<TextController>& controller)
     {
@@ -593,9 +594,14 @@ public:
         textResponseType_ = type;
     }
 
+    bool IsSelectedTypeChange()
+    {
+        return selectedType_.has_value() && oldSelectedType_ != selectedType_.value();
+    }
+
     bool CheckSelectedTypeChange()
     {
-        auto changed = selectedType_.has_value() && oldSelectedType_ != selectedType_.value();
+        auto changed = IsSelectedTypeChange();
         if (changed) {
             oldSelectedType_ = selectedType_.value();
         }
@@ -818,6 +824,8 @@ protected:
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
     void UpdateSelectionType(const SelectionInfo& selection);
     void CopyBindSelectionMenuParams(SelectOverlayInfo& selectInfo, std::shared_ptr<SelectionMenuParams> menuParams);
+    virtual void OnHandleSelectionMenuCallback(
+        SelectionMenuCalblackId callbackId, std::shared_ptr<SelectionMenuParams> menuParams);
     bool IsSelectedBindSelectionMenu();
     bool CheckAndClick(const RefPtr<SpanItem>& item);
     bool CalculateClickedSpanPosition(const PointF& textOffset);

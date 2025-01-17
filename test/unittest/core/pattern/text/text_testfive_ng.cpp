@@ -521,6 +521,24 @@ HWTEST_F(TextTestFiveNg, IsShowSearch001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsSupportMenuShare001
+ * @tc.desc: test base_text_select_overlay.cpp IsSupportMenuShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsSupportMenuShare001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    EXPECT_EQ(textSelectOverlay->IsSupportMenuShare(), false);
+}
+
+/**
  * @tc.name: CheckHandleIsVisibleWithTransform001
  * @tc.desc: test base_text_select_overlay.cpp CheckHandleIsVisibleWithTransform function
  * @tc.type: FUNC
@@ -1487,11 +1505,19 @@ HWTEST_F(TextTestFiveNg, OnHandleMarkInfoChange001, TestSize.Level1)
     textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
     EXPECT_EQ(shareOverlayInfo->menuInfo.showSearch, false);
 
+    shareOverlayInfo->menuInfo.showShare = false;
+    textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->menuInfo.showShare, false);
+
     flag = DIRTY_SECOND_HANDLE;
     shareOverlayInfo->menuInfo.showSearch = true;
     textSelectOverlay->SetIsSupportMenuSearch(true);
     textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
     EXPECT_EQ(shareOverlayInfo->menuInfo.showSearch, false);
+
+    shareOverlayInfo->menuInfo.showShare = true;
+    textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->menuInfo.showShare, false);
 }
 
 /**
@@ -1528,6 +1554,44 @@ HWTEST_F(TextTestFiveNg, HandleOnSearch001, TestSize.Level1)
     ASSERT_NE(textSelectOverlay, nullptr);
 
     textSelectOverlay->HandleOnSearch();
+    EXPECT_EQ(pattern->GetTextSelector().GetTextStart(), -1);
+    EXPECT_EQ(pattern->GetTextSelector().GetTextEnd(), -1);
+}
+
+/**
+ * @tc.name: IsNeedMenuShare001
+ * @tc.desc: test base_text_select_overlay.cpp IsNeedMenuShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsNeedMenuShare001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    EXPECT_EQ(textSelectOverlay->IsNeedMenuShare(), false);
+}
+
+/**
+ * @tc.name: HandleOnShare001
+ * @tc.desc: test base_text_select_overlay.cpp HandleOnShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, HandleOnShare001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    textSelectOverlay->HandleOnShare();
     EXPECT_EQ(pattern->GetTextSelector().GetTextStart(), -1);
     EXPECT_EQ(pattern->GetTextSelector().GetTextEnd(), -1);
 }

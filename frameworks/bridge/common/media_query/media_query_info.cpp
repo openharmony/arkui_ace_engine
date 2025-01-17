@@ -39,6 +39,8 @@ std::string MediaQueryInfo::GetDeviceType()
             return "tablet";
         case DeviceType::TWO_IN_ONE:
             return "2in1";
+        case DeviceType::WEARABLE:
+            return "wearable";
         default:
             return "phone";
     }

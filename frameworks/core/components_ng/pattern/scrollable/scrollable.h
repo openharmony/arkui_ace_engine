@@ -185,7 +185,8 @@ public:
 
     void SetUnstaticVelocityScale(double scale)
     {
-        sVelocityScale_ = scale;
+        flingVelocityScale_ = scale;
+        springVelocityScale_ = scale;
     }
 
     void HandleTouchDown();

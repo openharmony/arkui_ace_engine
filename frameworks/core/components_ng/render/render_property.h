@@ -41,6 +41,7 @@ namespace OHOS::Ace::NG {
 struct BackgroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImage, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageRepeat, ImageRepeat);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageSyncMode, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImagePosition, BackgroundImagePosition);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageResizableSlice, ImageResizableSlice);

@@ -214,10 +214,6 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         extraInfo_ += "mouse event is not allowed.";
         return;
     }
-    if (!IsInAttachedNode(event)) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
 
     if (fingersId_.find(event.id) == fingersId_.end()) {
         fingersId_.insert(event.id);

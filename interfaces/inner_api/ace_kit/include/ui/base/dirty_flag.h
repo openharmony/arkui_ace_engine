@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef WEB_AREA_CHANGED_H
-#define WEB_AREA_CHANGED_H
-#include "core/components/web/resource/web_delegate.h"
+#ifndef FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_DIRTY_FLAG_H
+#define FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_DIRTY_FLAG_H
 
-namespace OHOS::Ace {
-class WebAvoidAreaChangedListener : public Referenced, public OHOS::Rosen::IAvoidAreaChangedListener {
-public:
-    explicit WebAvoidAreaChangedListener(WeakPtr<WebDelegate> webDelegate) : webDelegate_(webDelegate) {}
-    ~WebAvoidAreaChangedListener() = default;
-    void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override;
+namespace OHOS::Ace::NG {
 
-private:
-    WeakPtr<WebDelegate> webDelegate_;
+struct DirtySwapConfig {
+    bool frameSizeChange = false;
+    bool frameOffsetChange = false;
+    bool contentSizeChange = false;
+    bool contentOffsetChange = false;
+    bool skipMeasure = false;
+    bool skipLayout = false;
 };
-}
 
-#endif
+} // namespace OHOS::Ace::NG
+
+#endif // FOUNDATION_ACE_INTERFACES_INNER_API_ACE_KIT_INCLUDE_BASE_DIRTY_FLAG_H
