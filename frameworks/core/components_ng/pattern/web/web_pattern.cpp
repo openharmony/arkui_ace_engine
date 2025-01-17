@@ -7131,6 +7131,7 @@ void WebPattern::OnShowAutofillPopupV2(
     menuParam.isShow = true;
     menuParam.setShow = true;
     menuParam.placement = Placement::BOTTOM_LEFT;
+    menuParam.isShowInSubWindow = false;
     auto dataListNode = CreateDataListFrameNode(OffsetF(offsetX, offsetY), height, width);
     CHECK_NULL_VOID(dataListNode);
     auto menu = MenuView::Create(std::move(optionParam), dataListNode->GetId(), dataListNode->GetTag(),
@@ -7161,11 +7162,8 @@ void WebPattern::OnShowAutofillPopupV2(
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    auto offset = GetCoordinatePoint().value_or(OffsetF());
-    offset.AddX(offsetX);
-    offset.AddY(offsetY);
     menu->GetOrCreateFocusHub()->SetFocusable(false);
-    overlayManager->ShowMenu(dataListNode->GetId(), offset, menu);
+    overlayManager->ShowMenu(dataListNode->GetId(), OffsetF(), menu);
 }
 
 void WebPattern::OnHideAutofillPopup()
