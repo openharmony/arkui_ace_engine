@@ -1659,6 +1659,16 @@ void MenuItemPattern::AddClickableArea()
         accessibilityProperty->SetAccessibilityText(content + "," + label);
         clickableArea_ = clickableArea;
         clickableArea_->MountToParent(host, CLICKABLE_AREA_VIEW_INDEX);
+        if (content_) {
+            auto nodeAccessibilityProps = content_->GetAccessibilityProperty<AccessibilityProperty>();
+            CHECK_NULL_VOID(nodeAccessibilityProps);
+            nodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        }
+        if (label_) {
+            auto nodeAccessibilityProps = label_->GetAccessibilityProperty<AccessibilityProperty>();
+            CHECK_NULL_VOID(nodeAccessibilityProps);
+            nodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        }
     }
 }
 
@@ -1879,6 +1889,11 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
     node->MarkModifyDone();
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (isLabel) {
+        label_ = node;
+    } else {
+        content_ = node;
+    }
 }
 
 void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty,
