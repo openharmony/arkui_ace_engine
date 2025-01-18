@@ -404,7 +404,7 @@ export struct SubHeaderV2 {
       .width('auto')
       .selected(this.selectedIndex)
       .value(this.selectedContent)
-      .defaultFocus(selectParam.defaultFocus)
+      .defaultFocus(this.select?.defaultFocus)
       .onSelect((index: number, value?: string) => {
         this.selectedIndex = index;
         if (value) {
@@ -831,10 +831,10 @@ export struct SubHeaderV2 {
               item: {
                 iconOptions: this.operationItems?.[index].content,
                 action: this.operationItems?.[index].action,
-                defaultFocus: item.defaultFocus,
-                accessibilityLevel: item.accessibilityLevel,
-                accessibilityText: item.accessibilityText,
-                accessibilityDescription: item.accessibilityDescription,
+                defaultFocus: this.operationItems?.[index].defaultFocus,
+                accessibilityLevel: this.operationItems?.[index].accessibilityLevel,
+                accessibilityText: this.operationItems?.[index].accessibilityText,
+                accessibilityDescription: this.operationItems?.[index].accessibilityDescription,
               },
               isSingleIcon: this.operationItems?.length === SINGLE_ICON_NUMBER,
             })

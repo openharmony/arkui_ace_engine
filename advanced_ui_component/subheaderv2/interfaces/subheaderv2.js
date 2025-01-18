@@ -443,7 +443,7 @@ export class SubHeaderV2 extends ViewV2 {
             Select.width('auto');
             Select.selected(this.selectedIndex);
             Select.value(this.selectedContent);
-            Select.defaultFocus(e14.defaultFocus);
+            Select.defaultFocus(this.select?.defaultFocus);
             Select.onSelect((k14, l14) => {
                 this.selectedIndex = k14;
                 if (l14) {
@@ -987,10 +987,10 @@ export class SubHeaderV2 extends ViewV2 {
                                                         item: {
                                                             iconOptions: this.operationItems?.[p8].content,
                                                             action: this.operationItems?.[p8].action,
-                                                            defaultFocus: q8.defaultFocus,
-                                                            accessibilityLevel: q8.accessibilityLevel,
-                                                            accessibilityText: q8.accessibilityText,
-                                                            accessibilityDescription: q8.accessibilityDescription,
+                                                            defaultFocus: this.operationItems?.[p8].defaultFocus,
+                                                            accessibilityLevel: this.operationItems?.[p8].accessibilityLevel,
+                                                            accessibilityText: this.operationItems?.[p8].accessibilityText,
+                                                            accessibilityDescription: this.operationItems?.[p8].accessibilityDescription,
                                                         },
                                                         isSingleIcon: this.operationItems?.length === SINGLE_ICON_NUMBER,
                                                     }, undefined, d9, () => { }, { page: "library/src/main/ets/components/subheaderv2.ets", line: 758 });
@@ -1000,10 +1000,10 @@ export class SubHeaderV2 extends ViewV2 {
                                                             item: {
                                                                 iconOptions: this.operationItems?.[p8].content,
                                                                 action: this.operationItems?.[p8].action,
-                                                                defaultFocus: q8.defaultFocus,
-                                                                accessibilityLevel: q8.accessibilityLevel,
-                                                                accessibilityText: q8.accessibilityText,
-                                                                accessibilityDescription: q8.accessibilityDescription,
+                                                                defaultFocus: this.operationItems?.[p8].defaultFocus,
+                                                                accessibilityLevel: this.operationItems?.[p8].accessibilityLevel,
+                                                                accessibilityText: this.operationItems?.[p8].accessibilityText,
+                                                                accessibilityDescription: this.operationItems?.[p8].accessibilityDescription,
                                                             },
                                                             isSingleIcon: this.operationItems?.length === SINGLE_ICON_NUMBER
                                                         };
@@ -1015,10 +1015,10 @@ export class SubHeaderV2 extends ViewV2 {
                                                         item: {
                                                             iconOptions: this.operationItems?.[p8].content,
                                                             action: this.operationItems?.[p8].action,
-                                                            defaultFocus: q8.defaultFocus,
-                                                            accessibilityLevel: q8.accessibilityLevel,
-                                                            accessibilityText: q8.accessibilityText,
-                                                            accessibilityDescription: q8.accessibilityDescription,
+                                                            defaultFocus: this.operationItems?.[p8].defaultFocus,
+                                                            accessibilityLevel: this.operationItems?.[p8].accessibilityLevel,
+                                                            accessibilityText: this.operationItems?.[p8].accessibilityText,
+                                                            accessibilityDescription: this.operationItems?.[p8].accessibilityDescription,
                                                         },
                                                         isSingleIcon: this.operationItems?.length === SINGLE_ICON_NUMBER
                                                     });
