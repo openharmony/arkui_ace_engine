@@ -1482,4 +1482,27 @@ HWTEST_F(RichEditorPatternTestOneNg, HandleOnDeleteComb001, TestSize.Level1)
     auto ret = richEditorPattern->HandleOnDeleteComb(true);
     EXPECT_TRUE(ret);
 }
+
+/**
+ * @tc.name: HandleOnShare001
+ * @tc.desc: test rich_editor_select_overlay.cpp HandleOnShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestOneNg, HandleOnShare001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+
+    richEditorPattern->HandleOnShare();
+    auto value = richEditorPattern->selectOverlay_->GetSelectedText();
+    int32_t ret = value.length();
+    EXPECT_EQ(ret, 0);
+}
 } // namespace OHOS::Ace::NG
