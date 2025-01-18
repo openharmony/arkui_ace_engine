@@ -90,6 +90,21 @@ void DotIndicatorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         indicatorHeight_ = indicatorWidth;
     }
 
+    const auto& calcLayoutConstraint = layoutProperty->GetCalcLayoutConstraint();
+    if (isSingle_ && calcLayoutConstraint && calcLayoutConstraint->selfIdealSize) {
+        auto idealSize =
+            CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, layoutProperty->GetMeasureType(), true);
+        auto width = calcLayoutConstraint->selfIdealSize->Width();
+        auto height = calcLayoutConstraint->selfIdealSize->Height();
+        if (width) {
+            indicatorWidth_ = std::max(indicatorWidth_, idealSize.Width());
+        }
+
+        if (height) {
+            indicatorHeight_ = std::max(indicatorHeight_, idealSize.Height());
+        }
+    }
+
     SizeF frameSize = { -1.0f, -1.0f };
     do {
         frameSize.SetSizeT(SizeF { indicatorWidth_, indicatorHeight_ });
