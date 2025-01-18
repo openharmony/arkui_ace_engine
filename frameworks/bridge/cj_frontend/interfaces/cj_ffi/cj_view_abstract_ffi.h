@@ -71,6 +71,72 @@ struct CJBindPopupParams {
     char* secondaryValue;
     void (*secondaryAction)();
     void (*onStateChange)(bool);
+    uint32_t textColor;
+    char* fontWeight;
+    double fontSize;
+    int32_t fontSizeUnit;
+    int32_t fontStyle;
+    double arrowOffset;
+    int32_t arrowOffsetUnit;
+    bool showInSubWindow;
+    uint32_t mask;
+    double targetSpace;
+    int32_t targetSpaceUnit;
+    int32_t placement;
+    double offsetX;
+    double offsetY;
+    bool enableArrow;
+    uint32_t popupColor;
+    bool autoCancel;
+    double width;
+    int32_t widthUnit;
+    char* arrowPointPosition;
+    double arrowWidth;
+    int32_t arrowWidthUnit;
+    double arrowHeight;
+    int32_t arrowHeightUnit;
+    double radius;
+    int32_t radiusUnit;
+    int32_t shadow;
+    int32_t backgroundBlurStyle;
+    NativeOptionInt64 transition;
+    NativeOptionCallback1Param onWillDismiss;
+    bool followTransformOfTarget;
+};
+
+struct CJBindCustomPopup {
+    bool isShow;
+    void (*builder)();
+    int32_t placement;
+    uint32_t maskColor;
+    uint32_t backgroundColor;
+    bool enableArrow;
+    bool autoCancel;
+    void (*onStateChange)(bool);
+    uint32_t popupColor;
+    double arrowOffset;
+    int32_t arrowOffsetUnit;
+    bool showInSubWindow;
+    uint32_t mask;
+    double targetSpace;
+    int32_t targetSpaceUnit;
+    double offsetX;
+    double offsetY;
+    double width;
+    int32_t widthUnit;
+    char* arrowPointPosition;
+    double arrowWidth;
+    int32_t arrowWidthUnit;
+    double arrowHeight;
+    int32_t arrowHeightUnit;
+    double radius;
+    int32_t radiusUnit;
+    int32_t shadow;
+    int32_t backgroundBlurStyle;
+    bool focusable;
+    NativeOptionInt64 transition;
+    NativeOptionCallback1Param onWillDismiss;
+    bool followTransformOfTarget;
 };
 
 struct NativeShadowOptions {
@@ -455,17 +521,6 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractKeyShortcutByFuncKey(
     int32_t value, int32_t* keysArray, int64_t size, void (*callback)(void));
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractKeyShortcutByChar(
     const char* value, int32_t* keysArray, int64_t size, void (*callback)(void));
-
-struct CJBindCustomPopup {
-    bool isShow;
-    void (*builder)();
-    int32_t placement;
-    uint32_t maskColor;
-    uint32_t backgroundColor;
-    bool enableArrow;
-    bool autoCancel;
-    void (*onStateChange)(bool);
-};
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractBindMenu(
     VectorMenuValuePtr vectorMenuValue, void (*menuActionCallback)(const char*));
@@ -594,6 +649,7 @@ CJ_EXPORT uint32_t FFIGetResourceUInt32(NativeResourceObject obj);
 CJ_EXPORT bool FFIGetResourceBool(NativeResourceObject obj);
 CJ_EXPORT VectorUInt32Handle FFIGetResourceVectorUInt32(NativeResourceObject obj);
 CJ_EXPORT VectorStringHandle FFIGetResourceVectorString(NativeResourceObject obj);
+CJ_EXPORT void FfiOHOSAceFrameworkPopupDismiss();
 
 struct CBorderImageOption {
     CJEdge slice;
