@@ -1517,6 +1517,7 @@ void SetCustomPopupParams(CJBindCustomPopup& value, const RefPtr<PopupParam>& po
 {
     popupParam->SetPlacement(static_cast<Placement>(value.placement));
     popupParam->SetMaskColor(Color(value.maskColor));
+    popupParam->SetBackgroundColor(Color(value.backgroundColor));
     popupParam->SetEnableArrow(value.enableArrow);
     popupParam->SetHasAction(!value.autoCancel);
     popupParam->SetShowInSubWindow(value.showInSubWindow);

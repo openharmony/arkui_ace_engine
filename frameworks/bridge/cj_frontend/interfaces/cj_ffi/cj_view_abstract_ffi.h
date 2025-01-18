@@ -109,10 +109,11 @@ struct CJBindCustomPopup {
     void (*builder)();
     int32_t placement;
     uint32_t maskColor;
-    uint32_t popupColor;
+    uint32_t backgroundColor;
     bool enableArrow;
     bool autoCancel;
     void (*onStateChange)(bool);
+    uint32_t popupColor;
     double arrowOffset;
     int32_t arrowOffsetUnit;
     bool showInSubWindow;
