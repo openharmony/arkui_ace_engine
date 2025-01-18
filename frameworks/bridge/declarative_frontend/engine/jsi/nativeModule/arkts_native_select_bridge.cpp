@@ -21,6 +21,9 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int NUM_0 = 0;
+constexpr int NUM_1 = 1;
+constexpr int NUM_3 = 3;
 const int32_t SIZE_OF_TWO = 2;
 const std::string FORMAT_FONT = "%s|%s|%s";
 const std::string DEFAULT_STR = "-1";
@@ -977,6 +980,39 @@ ArkUINativeModuleValue SelectBridge::SetOptions(ArkUIRuntimeCallInfo* runtimeCal
         }
     }
     SelectModelNG::InitSelect(reinterpret_cast<FrameNode*>(nativeNode), params);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::SetSelectDirection(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    std::string dir;
+    int32_t direction = NUM_3;
+    if (secondArg->IsString(vm)) {
+        dir = secondArg->ToString(vm)->ToString(vm);
+        if (dir == "Ltr") {
+            direction = NUM_0;
+        } else if (dir == "Rtl") {
+            direction = NUM_1;
+        } else if (dir == "Auto") {
+            direction = NUM_3;
+        }
+    }
+    GetArkUINodeModifiers()->getSelectModifier()->setSelectDirection(nativeNode, direction);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::ResetSelectDirection(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetSelectDirection(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
