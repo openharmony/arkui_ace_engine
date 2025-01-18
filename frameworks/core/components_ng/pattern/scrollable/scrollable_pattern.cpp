@@ -36,6 +36,11 @@
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+#ifdef ARKUI_CIRCLE_FEATURE
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar.h"
+#include "core/components_ng/pattern/arc_scroll/inner/arc_scroll_bar_overlay_modifier.h"
+#endif // ARKUI_CIRCLE_FEATURE
+
 namespace OHOS::Ace::NG {
 namespace {
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
@@ -48,6 +53,8 @@ constexpr uint32_t DEFAULT_VSYNC_DIFF_TIME = 16 * 1000 * 1000; // default is 16 
 constexpr uint32_t EVENTS_FIRED_INFO_COUNT = 50;
 constexpr uint32_t SCROLLABLE_FRAME_INFO_COUNT = 50;
 constexpr Dimension LIST_FADINGEDGE = 32.0_vp;
+constexpr double ARC_INITWIDTH_VAL = 4.0;
+constexpr double ARC_INITWIDTH_HALF_VAL = 2.0;
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -721,10 +728,16 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     SetDragFRCSceneCallback(scrollable);
     SetOnContinuousSliding(scrollable);
     SetGetSnapTypeCallback(scrollable);
+    if (!NearZero(velocityScale_)) {
+        scrollable->SetUnstaticVelocityScale(velocityScale_);
+    }
     scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
     if (friction_ != -1) {
         scrollable->SetUnstaticFriction(friction_);
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    scrollable->ListenDigitalCrownEvent(host);
+#endif
     return scrollable;
 }
 
@@ -999,6 +1012,16 @@ void ScrollablePattern::InitScrollBarGestureEvent()
         });
 }
 
+RefPtr<ScrollBar> ScrollablePattern::CreateScrollBar()
+{
+#ifdef ARKUI_CIRCLE_FEATURE
+    if (isRoundScroll_) {
+        return AceType::MakeRefPtr<ArcScrollBar>();
+    }
+#endif
+    return AceType::MakeRefPtr<ScrollBar>();
+}
+
 void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
 {
     auto host = GetHost();
@@ -1018,7 +1041,8 @@ void ScrollablePattern::SetScrollBar(DisplayMode displayMode)
     }
     DisplayMode oldDisplayMode = DisplayMode::OFF;
     if (!scrollBar_) {
-        scrollBar_ = AceType::MakeRefPtr<ScrollBar>();
+        scrollBar_ = CreateScrollBar();
+        CHECK_NULL_VOID(scrollBar_);
         RegisterScrollBarEventTask();
     } else {
         oldDisplayMode = scrollBar_->GetDisplayMode();
@@ -1069,10 +1093,19 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
     if (scrollBar_) {
         auto barWidth = property->GetScrollBarWidth();
         if (barWidth) {
-            scrollBar_->SetInactiveWidth(barWidth.value());
-            scrollBar_->SetNormalWidth(barWidth.value());
             scrollBar_->SetActiveWidth(barWidth.value());
             scrollBar_->SetTouchWidth(barWidth.value());
+            if (isRoundScroll_) {
+                scrollBar_->SetNormalWidth(Dimension(ARC_INITWIDTH_VAL));
+                scrollBar_->SetInactiveWidth(Dimension(ARC_INITWIDTH_VAL));
+#ifdef ARKUI_CIRCLE_FEATURE
+                scrollBar_->SetActiveBackgroundWidth(barWidth.value());
+                scrollBar_->SetActiveScrollBarWidth(barWidth.value() - Dimension(ARC_INITWIDTH_HALF_VAL));
+#endif
+            } else {
+                scrollBar_->SetInactiveWidth(barWidth.value());
+                scrollBar_->SetNormalWidth(barWidth.value());
+            }
             scrollBar_->SetIsUserNormalWidth(true);
         } else {
             scrollBar_->SetIsUserNormalWidth(false);
@@ -1189,11 +1222,22 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
     scrollBarProxy_ = scrollBarProxy;
 }
 
+RefPtr<ScrollBarOverlayModifier> ScrollablePattern::CreateOverlayModifier()
+{
+#ifdef ARKUI_CIRCLE_FEATURE
+    if (isRoundScroll_) {
+        return AceType::MakeRefPtr<ArcScrollBarOverlayModifier>();
+    }
+#endif
+    return AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+}
+
 void ScrollablePattern::CreateScrollBarOverlayModifier()
 {
     CHECK_NULL_VOID(scrollBar_ && scrollBar_->NeedPaint());
     CHECK_NULL_VOID(!scrollBarOverlayModifier_);
-    scrollBarOverlayModifier_ = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
+    scrollBarOverlayModifier_ = CreateOverlayModifier();
+    CHECK_NULL_VOID(scrollBarOverlayModifier_);
     scrollBarOverlayModifier_->SetRect(scrollBar_->GetActiveRect());
     scrollBarOverlayModifier_->SetPositionMode(scrollBar_->GetPositionMode());
     SetOnHiddenChangeForParent();
@@ -1226,6 +1270,18 @@ void ScrollablePattern::SetFriction(double friction)
     scrollable->SetUnstaticFriction(friction_);
 }
 
+void ScrollablePattern::SetVelocityScale(double scale)
+{
+    if (LessOrEqual(scale, 0.0)) {
+        scale = Container::GreatOrEqualAPITargetVersion(
+            PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
+    }
+    velocityScale_ = scale;
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    scrollable->SetUnstaticVelocityScale(velocityScale_);
+}
+
 void ScrollablePattern::SetMaxFlingVelocity(double max)
 {
     if (LessOrEqual(max, 0.0f)) {
@@ -1245,7 +1301,7 @@ void ScrollablePattern::GetParentNavigation()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if ((host->GetTag() != V2::LIST_ETS_TAG) && (host->GetTag() != V2::GRID_ETS_TAG) &&
-        (host->GetTag() != V2::SCROLL_ETS_TAG)) {
+        (host->GetTag() != V2::SCROLL_ETS_TAG) && (host->GetTag() != V2::ARC_LIST_ETS_TAG)) {
         return;
     }
     for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
@@ -1254,7 +1310,7 @@ void ScrollablePattern::GetParentNavigation()
             continue;
         }
         if ((frameNode->GetTag() == V2::LIST_ETS_TAG) || (frameNode->GetTag() == V2::GRID_ETS_TAG) ||
-            (frameNode->GetTag() == V2::SCROLL_ETS_TAG)) {
+            (frameNode->GetTag() == V2::SCROLL_ETS_TAG) || (frameNode->GetTag() == V2::ARC_LIST_ETS_TAG)) {
             break;
         }
         navBarPattern_ = frameNode->GetPattern<NavBarPattern>();
@@ -1613,6 +1669,7 @@ void ScrollablePattern::InitMouseEvent()
     PanDirection panDirection = { .type = PanDirection::ALL };
     gestureHub->AddPanEvent(boxSelectPanEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
     gestureHub->SetPanEventType(GestureTypeName::BOXSELECT);
+    gestureHub->SetExcludedAxisForPanEvent(true);
     gestureHub->SetOnGestureJudgeNativeBegin([](const RefPtr<NG::GestureInfo>& gestureInfo,
                                                  const std::shared_ptr<BaseGestureEvent>& info) -> GestureJudgeResult {
         if (gestureInfo->GetType() == GestureTypeName::BOXSELECT &&
@@ -2727,7 +2784,7 @@ void ScrollablePattern::SuggestOpIncGroup(bool flag)
     flag = flag && isVertical();
     if (flag) {
         ACE_SCOPED_TRACE("SuggestOpIncGroup %s", host->GetHostTag().c_str());
-        auto parent = host->GetAncestorNodeOfFrame();
+        auto parent = host->GetAncestorNodeOfFrame(false);
         CHECK_NULL_VOID(parent);
         parent->SetSuggestOpIncActivatedOnce();
         // get 1st layer
@@ -2841,9 +2898,16 @@ void ScrollablePattern::Register2DragDropManager()
     CHECK_NULL_VOID(host);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
+    DragPreviewOption dragPreviewOption = host->GetDragPreviewOption();
+    bool enableEdgeAutoScroll = dragPreviewOption.enableEdgeAutoScroll;
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->RegisterDragStatusListener(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
+    if (enableEdgeAutoScroll) {
+        dragDropManager->RegisterDragStatusListener(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
+    } else {
+        StopHotzoneScroll();
+        dragDropManager->UnRegisterDragStatusListener(host->GetId());
+    }
 }
 
 /**
@@ -3972,13 +4036,13 @@ void ScrollablePattern::SetOnHiddenChangeForParent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     while (parent) {
         if (parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
             break;
         }
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(false);
     }
     if (parent && parent->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
         auto navDestinationPattern = parent->GetPattern<NavDestinationPattern>();

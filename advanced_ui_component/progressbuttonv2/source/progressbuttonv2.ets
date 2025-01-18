@@ -40,8 +40,9 @@ export struct ProgressButtonV2 {
   @Param @Once progressButtonWidth?: LengthMetrics = LengthMetrics.vp(BUTTON_NORMARL_WIDTH);
   @Param onClicked: ClickCallback = () => {
   };
-  @Param enable: boolean = true;
+  @Param isEnabled: boolean = true;
   @Param colorOptions?: ProgressButtonV2Color | undefined = undefined;
+  @Param progressButtonRadius?: LengthMetrics | undefined = undefined;
   @Local textProgress: string = EMPTY_STRING;
   @Local isLoading: boolean = false;
   @Local progressColor: ResourceColor = '#330A59F7'
@@ -104,8 +105,16 @@ export struct ProgressButtonV2 {
           .borderRadius(this.buttonBorderRadius)
           .width('100%')
           .hoverEffect(HoverEffect.None)
+          .style(this.progressButtonRadius ?
+            { borderRadius: new LengthMetrics(Math.max(this.progressButtonRadius.value, 0)) } : {})
+          .padding({
+            top: 0.6,
+            left: 0.6,
+            right: 0.6,
+            bottom: 0.6
+          })
           .clip(false)
-          .enabled(this.enable)
+          .enabled(this.isEnabled)
           .key(PROGRESS_BUTTON_PROGRESS_KEY)
           .color(this.colorOptions?.progressColor?.color ? this.colorOptions?.progressColor?.color : this.progressColor)
         Row() {
@@ -122,7 +131,7 @@ export struct ProgressButtonV2 {
               right: 8,
               bottom: 4
             })
-            .opacity(this.enable ? TEXT_ENABLE : TEXT_OPACITY)
+            .opacity(this.isEnabled ? TEXT_ENABLE : TEXT_OPACITY)
             .onSizeChange((_, newValue) => {
               if (!newValue.height || newValue.height === this.textHeight) {
                 return;
@@ -143,11 +152,13 @@ export struct ProgressButtonV2 {
           })
           .height(this.textHeight)
           .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
-          .borderRadius(this.buttonBorderRadius)
+          .borderRadius(this.progressButtonRadius ? this.toLengthString(this.progressButtonRadius) :
+          this.buttonBorderRadius)
           .width('100%')
       }
     }
-    .borderRadius(this.buttonBorderRadius)
+    .borderRadius(this.progressButtonRadius ? this.toLengthString(this.progressButtonRadius) :
+    this.buttonBorderRadius)
     .clip(false)
     .hoverEffect(HoverEffect.None)
     .key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY)
@@ -156,11 +167,12 @@ export struct ProgressButtonV2 {
         ? this.colorOptions?.backgroundColor?.color
         : this.containerBackgroundColor)
     .padding({ top: 0, bottom: 0 })
-    .width(this.toLengthString(this.progressButtonWidth))
+    .width((!this.progressButtonWidth || this.progressButtonWidth.value < 0) ?
+      BUTTON_NORMARL_WIDTH : this.toLengthString(this.progressButtonWidth))
     .constraintSize({ minWidth: BUTTON_NORMARL_WIDTH })
-    .stateEffect(this.enable)
+    .stateEffect(this.isEnabled)
     .onClick(() => {
-      if (!this.enable) {
+      if (!this.isEnabled) {
         return;
       }
       if (this.progress < MAX_PROGRESS) {

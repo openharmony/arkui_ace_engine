@@ -41,6 +41,7 @@ namespace OHOS::Ace::NG {
 struct BackgroundProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImage, ImageSourceInfo);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageRepeat, ImageRepeat);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageSyncMode, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageSize, BackgroundImageSize);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImagePosition, BackgroundImagePosition);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackgroundImageResizableSlice, ImageResizableSlice);
@@ -54,12 +55,20 @@ struct BackgroundProperty {
         }
         return NearEqual(propBlurStyleOption.value(), option.value());
     }
-    bool CheckBlurRadius(const Dimension& radius) const
+    bool CheckBlurRadiusChanged(const Dimension& radius) const
     {
         if (!propBlurRadius.has_value()) {
             return false;
         }
         return NearEqual(propBlurRadius.value(), radius);
+    }
+    bool CheckBlurOptionChanged(const BlurOption& blurOption) const
+    {
+        if (!propBackdropBlurOption.has_value()) {
+            return false;
+        }
+        return NearEqual(propBackdropBlurOption->grayscale[0], blurOption.grayscale[0])
+            && NearEqual(propBackdropBlurOption->grayscale[1], blurOption.grayscale[1]);
     }
     bool CheckEffectOption(const std::optional<EffectOption>& effectOption) const
     {
@@ -74,6 +83,7 @@ struct BackgroundProperty {
     std::optional<BlurStyleOption> propBlurStyleOption;
     std::optional<Dimension> propBlurRadius;
     std::optional<EffectOption> propEffectOption;
+    std::optional<BlurOption> propBackdropBlurOption;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
 };
@@ -97,7 +107,7 @@ struct ForegroundProperty {
         }
         return NearEqual(propBlurStyleOption.value(), option.value());
     }
-    bool CheckBlurRadius(const Dimension& radius) const
+    bool CheckBlurRadiusChanged(const Dimension& radius) const
     {
         if (!propBlurRadius.has_value()) {
             return false;

@@ -42,7 +42,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     itemStart_ = OverScrollTop();
     itemEnd_ = endIndex_ == itemCnt - 1;
     if (footerIndex_ == 0) {
-        itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize, 0.1f);
+        itemEnd_ &= LessOrEqualCustomPrecision(endPos_, mainSize + expandHeight_, 0.1f);
     }
 
     if (itemEnd_) {
@@ -760,6 +760,17 @@ void WaterFlowLayoutInfoSW::NotifyDataChange(int32_t index, int32_t count)
         return;
     }
     newStartIndex_ += count;
+}
+
+void WaterFlowLayoutInfoSW::NotifySectionChange(int32_t index)
+{
+    if (startIndex_ == Infinity<int32_t>()) {
+        newStartIndex_ = INVALID_NEW_START_INDEX;
+        return;
+    }
+    if (index >= startIndex_) {
+        newStartIndex_ = INVALID_NEW_START_INDEX;
+    }
 }
 
 void WaterFlowLayoutInfoSW::UpdateLanesIndex(int32_t updateIdx)

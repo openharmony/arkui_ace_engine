@@ -25,6 +25,7 @@
 #include "transaction/rs_transaction.h"
 #include "want_params.h"
 #include "wm/wm_common.h"
+#include "wm/data_handler_interface.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
@@ -364,12 +365,17 @@ void SecuritySessionWrapperImpl::CreateSession(const AAFwk::Want& want, const Se
         AceType::WeakClaim(this));
     session_->RegisterLifecycleListener(lifecycleListener_);
     InitAllCallback();
+    RegisterDataConsumer();
 }
 
 void SecuritySessionWrapperImpl::DestroySession()
 {
     CHECK_NULL_VOID(session_);
     session_->UnregisterLifecycleListener(lifecycleListener_);
+    auto dataHandler = session_->GetExtensionDataHandler();
+    if (dataHandler) {
+        dataHandler->UnregisterDataConsumer(subSystemId_);
+    }
     session_ = nullptr;
 }
 
@@ -756,5 +762,138 @@ void SecuritySessionWrapperImpl::NotifyUieDump(const std::vector<std::string>& p
 {
     CHECK_NULL_VOID(session_);
     session_->NotifyDumpInfo(params, info);
+}
+
+bool SecuritySessionWrapperImpl::SendBusinessDataSyncReply(
+    UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+{
+    if (code == UIContentBusinessCode::UNDEFINED) {
+        return false;
+    }
+    CHECK_NULL_RETURN(session_, false);
+    auto dataHandler = session_->GetExtensionDataHandler();
+    CHECK_NULL_RETURN(dataHandler, false);
+    auto result = dataHandler->SendDataSync(subSystemId_, static_cast<uint32_t>(code), data, reply);
+    if (result != Rosen::DataHandlerErr::OK) {
+        PLATFORM_LOGW("SendBusinessDataSyncReply Fail, businessCode=%{public}u, result=%{public}u.", code, result);
+        return false;
+    }
+    PLATFORM_LOGI("SendBusinessDataSyncReply Success, businessCode=%{public}u.", code);
+    return true;
+}
+
+int32_t SecuritySessionWrapperImpl::GetInstanceIdFromHost() const
+{
+    auto pattern = hostPattern_.Upgrade();
+    if (pattern == nullptr) {
+        PLATFORM_LOGW("UIExtension pattern is null, session wrapper get instanceId from host return fail.");
+        return INSTANCE_ID_UNDEFINED;
+    }
+    auto instanceId = pattern->GetInstanceIdFromHost();
+    if (instanceId != instanceId_) {
+        PLATFORM_LOGW("SessionWrapper instanceId %{public}d not equal frame node instanceId %{public}d",
+            instanceId_, instanceId);
+    }
+    return instanceId;
+}
+
+bool SecuritySessionWrapperImpl::SendBusinessData(
+    UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+{
+    if (code == UIContentBusinessCode::UNDEFINED) {
+        return false;
+    }
+    CHECK_NULL_RETURN(session_, false);
+    auto dataHandler = session_->GetExtensionDataHandler();
+    CHECK_NULL_RETURN(dataHandler, false);
+    if (type == BusinessDataSendType::ASYNC) {
+        dataHandler->SendDataAsync(subSystemId_, static_cast<uint32_t>(code), data);
+        PLATFORM_LOGW("SendBusinessData ASYNC Success, businessCode=%{public}u.", code);
+        return true;
+    }
+    auto result = dataHandler->SendDataSync(subSystemId_, static_cast<uint32_t>(code), data);
+    if (result != Rosen::DataHandlerErr::OK) {
+        PLATFORM_LOGW("SendBusinessData SYNC Fail, businessCode=%{public}u, result=%{public}u.", code, result);
+        return false;
+    }
+    PLATFORM_LOGI("SendBusinessData SYNC Success, businessCode=%{public}u.", code);
+    return true;
+}
+
+void SecuritySessionWrapperImpl::PostBusinessDataConsumeAsync(uint32_t customId, AAFwk::Want&& data)
+{
+    PLATFORM_LOGI("PostBusinessDataConsumeAsync, businessCode=%{public}u.", customId);
+    int32_t callSessionId = GetSessionId();
+    CHECK_NULL_VOID(taskExecutor_);
+    auto instanceId = GetInstanceIdFromHost();
+    AAFwk::Want businessData = data;
+    taskExecutor_->PostTask(
+        [instanceId, weak = hostPattern_, customId, businessData, callSessionId]() {
+            ContainerScope scope(instanceId);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                LOGW("BusinessDataConsumeAsync: The callSessionId(%{public}d)"
+                    " is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+                return;
+            }
+            pattern->OnUIExtBusinessReceive(static_cast<UIContentBusinessCode>(customId), businessData);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUIExtensionBusinessDataConsumeAsync");
+}
+void SecuritySessionWrapperImpl::PostBusinessDataConsumeSyncReply(
+    uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply)
+{
+    PLATFORM_LOGI("PostBusinessDataConsumeSyncReply, businessCode=%{public}u.", customId);
+    int32_t callSessionId = GetSessionId();
+    CHECK_NULL_VOID(taskExecutor_);
+    auto instanceId = GetInstanceIdFromHost();
+    AAFwk::Want businessData = data;
+    taskExecutor_->PostSyncTask(
+        [instanceId, weak = hostPattern_, customId, businessData, &reply, callSessionId]() {
+            ContainerScope scope(instanceId);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (callSessionId != pattern->GetSessionId()) {
+                LOGW("BusinessDataConsumeSyncReply: The callSessionId(%{public}d)"
+                    " is inconsistent with the curSession(%{public}d)",
+                    callSessionId, pattern->GetSessionId());
+                return;
+            }
+            pattern->OnUIExtBusinessReceiveReply(
+                static_cast<UIContentBusinessCode>(customId), businessData, reply);
+        },
+        TaskExecutor::TaskType::UI, "ArkUIUIExtensionBusinessDataConsumeSyncReply");
+}
+
+bool SecuritySessionWrapperImpl::RegisterDataConsumer()
+{
+    CHECK_NULL_RETURN(session_, false);
+    auto dataHandler = session_->GetExtensionDataHandler();
+    CHECK_NULL_RETURN(dataHandler, false);
+    auto subSystemId = subSystemId_;
+    auto callback = [wrapperWeak = WeakClaim(this), subSystemId]
+        (Rosen::SubSystemId id, uint32_t customId, AAFwk::Want&& data, std::optional<AAFwk::Want>& reply) ->int32_t {
+        auto sessionWrapper = wrapperWeak.Upgrade();
+        CHECK_NULL_RETURN(sessionWrapper, false);
+        auto instanceId = sessionWrapper->GetInstanceIdFromHost();
+        ContainerScope scope(instanceId);
+        if (id != subSystemId) {
+            return 0;
+        }
+        if (reply.has_value()) {
+            sessionWrapper->PostBusinessDataConsumeSyncReply(customId, std::move(data), reply);
+        } else {
+            sessionWrapper->PostBusinessDataConsumeAsync(customId, std::move(data));
+        }
+        return 0;
+    };
+    auto result = dataHandler->RegisterDataConsumer(subSystemId, std::move(callback));
+    if (result != Rosen::DataHandlerErr::OK) {
+        PLATFORM_LOGW("RegisterDataConsumer Fail, result=%{public}u", result);
+        return false;
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

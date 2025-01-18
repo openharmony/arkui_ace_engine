@@ -91,7 +91,11 @@ const std::string TEST_INPUT_U8_STRING_NULL = "";
 const std::string TEST_INPUT_U8_STRING_NUMBER = "123456";
 const std::string STRING_TO_CALC_DIMENSION_RESULT = "100.0calc";
 const std::u16string TEST_INPUT_U16_STRING = u"THIS IS A STRING";
+const std::u16string TEST_INPUT_U16_EMOJI = u"😁👻🔕🈯👩‍👩‍👧‍👦👨‍👩‍👧‍👧🙄😬🤥😌😔👩‍👦👨‍👩‍👦";
 const std::u16string DEFAULT_USTRING = u"error";
+const std::u32string TEST_INPUT_U32_STRING = U"THIS IS A STRING";
+const std::u32string TEST_INPUT_U32_EMOJI = U"😁👻🔕🈯👩‍👩‍👧‍👦👨‍👩‍👧‍👧🙄😬🤥😌😔👩‍👦👨‍👩‍👦";
+const std::u32string DEFAULT_U32STRING = U"error";
 const std::wstring TEST_INPUT_W_STRING = L"THIS IS A STRING";
 const std::wstring DEFAULT_WSTRING = L"error";
 const char TEST_INPUT_ARGS_ONE[MAX_STRING_SIZE] = "TODAY";
@@ -1178,6 +1182,104 @@ HWTEST_F(BaseUtilsTest, BaseUtilsTest070, TestSize.Level1)
     std::u16string excpectEmojiStr = emojiStr;
     UtfUtils::HandleInvalidUTF16(reinterpret_cast<uint16_t*>(emojiStr.data()), emojiStr.length(), 0);
     ASSERT_EQ(emojiStr, excpectEmojiStr);
+}
+
+/**
+ * @tc.name: BaseUtilsTest071
+ * @tc.desc: test utf_helper.cpp: Convert u16string and u32string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest071, TestSize.Level1)
+{
+    ASSERT_EQ(UtfUtils::Str16ToStr32(TEST_INPUT_U16_STRING), TEST_INPUT_U32_STRING);
+    ASSERT_EQ(UtfUtils::Str32ToStr16(TEST_INPUT_U32_STRING), TEST_INPUT_U16_STRING);
+    ASSERT_EQ(UtfUtils::Str16ToStr32(TEST_INPUT_U16_EMOJI), TEST_INPUT_U32_EMOJI);
+    ASSERT_EQ(UtfUtils::Str32ToStr16(TEST_INPUT_U32_EMOJI), TEST_INPUT_U16_EMOJI);
+    ASSERT_EQ(UtfUtils::Str16ToStr32(u""), U"");
+    ASSERT_EQ(UtfUtils::Str32ToStr16(U""), u"");
+    ASSERT_EQ(UtfUtils::Str16ToStr32(UtfUtils::DEFAULT_U16STR), UtfUtils::DEFAULT_U32STR);
+    ASSERT_EQ(UtfUtils::Str32ToStr16(UtfUtils::DEFAULT_U32STR), UtfUtils::DEFAULT_U16STR);
+}
+
+/**
+ * @tc.name: BaseUtilsTest072
+ * @tc.desc: test utf_helper.cpp: Convert u16string to u32string reserving truncated emoji string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest072, TestSize.Level1)
+{
+    std::u16string emojiStr = u"😁";
+    std::u16string subEmojiStr = emojiStr.substr(0, 1);
+    std::u32string excpectSubEmojiStr = U"哈";
+    excpectSubEmojiStr[0] = 0xD83D; /* D83D DC01 is utf-16 encoding for emoji 😁 */
+    ASSERT_EQ(UtfUtils::Str16ToStr32(subEmojiStr), excpectSubEmojiStr);
+    ASSERT_EQ(UtfUtils::Str32ToStr16(UtfUtils::Str16ToStr32(subEmojiStr)), subEmojiStr);
+}
+
+/**
+ * @tc.name: BaseUtilsTest073
+ * @tc.desc: test utf_helper.cpp: Convert u16string to u32string reserving truncated emoji string
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest073, TestSize.Level1)
+{
+    std::u16string emojiStr = u"哈哈😁";
+    std::u16string subEmojiStr = emojiStr.substr(0, 3);
+    std::u32string excpectSubEmojiStr = U"哈哈哈";
+    excpectSubEmojiStr[2] = 0xD83D; /* D83D DC01 is utf-16 encoding for emoji 😁 */
+    ASSERT_EQ(UtfUtils::Str16ToStr32(subEmojiStr), excpectSubEmojiStr);
+    ASSERT_EQ(UtfUtils::Str32ToStr16(UtfUtils::Str16ToStr32(subEmojiStr)), subEmojiStr);
+}
+
+/**
+ * @tc.name: BaseUtilsTest074
+ * @tc.desc: test utf_helper.cpp: justify that index is in paired surrogates
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest074, TestSize.Level1)
+{
+    std::u16string emojiStr = u"";
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(-1, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(0, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(1, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(2, emojiStr), false);
+}
+
+/**
+ * @tc.name: BaseUtilsTest075
+ * @tc.desc: test utf_helper.cpp: justify that index is in paired surrogates
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest075, TestSize.Level1)
+{
+    std::u16string emojiStr = u"哈哈😁";
+    int32_t len = static_cast<int32_t>(emojiStr.length());
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(-1, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(0, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(1, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(2, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len - 1, emojiStr), true);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len, emojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len + 1, emojiStr), false);
+}
+
+/**
+ * @tc.name: BaseUtilsTest076
+ * @tc.desc: test utf_helper.cpp: justify that index is in paired surrogates when a emoji is truncated
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseUtilsTest, BaseUtilsTest076, TestSize.Level1)
+{
+    std::u16string emojiStr = u"哈哈😁😁";
+    int32_t len = static_cast<int32_t>(emojiStr.length());
+    std::u16string subEmojiStr = emojiStr.substr(0, len - 1);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(0, subEmojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(1, subEmojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(2, subEmojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(3, subEmojiStr), true);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len - 1, subEmojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len, subEmojiStr), false);
+    ASSERT_EQ(UtfUtils::IsIndexInPairedSurrogates(len + 1, subEmojiStr), false);
 }
 
 /**

@@ -730,7 +730,7 @@ void CustomPaintPaintMethod::Fill(const RefPtr<CanvasPath2D>& path)
     ParsePath2D(path);
     Path2DFill();
     rsPath2d_.Reset();
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
         isPath2dChanged_ = false;
     }
 }
@@ -797,7 +797,7 @@ void CustomPaintPaintMethod::Stroke(const RefPtr<CanvasPath2D>& path)
     ParsePath2D(path);
     Path2DStroke();
     rsPath2d_.Reset();
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
         isPath2dChanged_ = false;
     }
 }
@@ -842,7 +842,7 @@ void CustomPaintPaintMethod::Clip(const RefPtr<CanvasPath2D>& path)
     ParsePath2D(path);
     Path2DClip();
     rsPath2d_.Reset();
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
         isPath2dChanged_ = false;
     }
 }
@@ -856,7 +856,7 @@ void CustomPaintPaintMethod::Path2DClip()
 void CustomPaintPaintMethod::BeginPath()
 {
     rsPath_.Reset();
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
         isPathChanged_ = false;
     }
 }
@@ -2076,7 +2076,7 @@ void CustomPaintPaintMethod::ResetStates()
     colorMatrix_ = RSColorMatrix();
     colorFilter_ = RSColorFilter::CreateMatrixColorFilter(colorMatrix_);
     blurFilter_ = RSImageFilter::CreateBlurImageFilter(0, 0, RSTileMode::DECAL, nullptr);
-    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN)) {
+    if (apiVersion_ >= static_cast<int32_t>(PlatformVersion::VERSION_SIXTEEN)) {
         isPathChanged_ = false;
         isPath2dChanged_ = false;
     }

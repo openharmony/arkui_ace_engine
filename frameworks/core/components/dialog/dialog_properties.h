@@ -19,6 +19,7 @@
 #include <cstdint>
 
 #include "base/geometry/dimension_offset.h"
+#include "base/geometry/dimension.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
 #include "core/components_ng/event/click_event.h"
@@ -102,6 +103,17 @@ enum class DialogButtonDirection {
 enum class KeyboardAvoidMode {
     DEFAULT = 0,
     NONE,
+};
+
+enum class LevelMode {
+    OVERLAY = 0,
+    EMBEDDED,
+};
+
+enum class ImmersiveMode {
+    DEFAULT = 0,
+    PAGE,
+    FULL,
 };
 
 class DialogAlignmentUtils {
@@ -279,6 +291,10 @@ struct DialogProperties {
 
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
+    std::optional<Dimension> keyboardAvoidDistance;
+    LevelMode dialogLevelMode = LevelMode::OVERLAY;
+    int32_t dialogLevelUniqueId = -1;
+    ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
 };
 
 struct PromptDialogAttr {
@@ -317,6 +333,10 @@ struct PromptDialogAttr {
     std::function<void(DialogProperties&)> onLanguageChange;
     KeyboardAvoidMode keyboardAvoidMode = KeyboardAvoidMode::DEFAULT;
     std::function<void(RefPtr<NG::FrameNode> dialogNode)> dialogCallback;
+    std::optional<Dimension> keyboardAvoidDistance;
+    LevelMode dialogLevelMode = LevelMode::OVERLAY;
+    int32_t dialogLevelUniqueId = -1;
+    ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
 };
 
 } // namespace OHOS::Ace

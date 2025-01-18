@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT BorderImage final : public AceType {
+class ACE_FORCE_EXPORT BorderImage final : public AceType {
     DECLARE_ACE_TYPE(BorderImage, AceType);
 
 public:

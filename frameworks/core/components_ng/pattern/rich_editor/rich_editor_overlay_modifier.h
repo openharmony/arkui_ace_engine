@@ -52,7 +52,7 @@ public:
     bool GetFloatCaretLanding() const;
     void onDraw(DrawingContext& drawingContext) override;
     void UpdateScrollBar(PaintWrapper* paintWrapper);
-    void StartFloatingCaretLand();
+    void StartFloatingCaretLand(const OffsetF& originCaretOffset);
 private:
     void PaintPreviewTextDecoration(DrawingContext& drawingContext) const;
     void PaintCaret(DrawingContext& drawingContext) const;

@@ -32,6 +32,7 @@ public:
     void SetFont(const Font& value) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
+    void ResetTextColor() override {};
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetTextSelection(int32_t startIndex, int32_t endIndex) override {};
     void SetTextSelectableMode(TextSelectableMode value) override {};
@@ -76,11 +77,6 @@ public:
     void SetFontFeature(const std::list<std::pair<std::string, int32_t>>& value) override {};
     void SetMarqueeOptions(const NG::TextMarqueeOptions& options) override {};
     void SetOnMarqueeStateChange(std::function<void(int32_t)>&& func) override {};
-    void SetOnDragStart(NG::OnDragStartFunc&& onDragStart) override;
-    void SetOnDragEnter(NG::OnDragDropFunc&& onDragEnter) override;
-    void SetOnDragMove(NG::OnDragDropFunc&& onDragMove) override;
-    void SetOnDragLeave(NG::OnDragDropFunc&& onDragLeave) override;
-    void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetHalfLeading(bool halfLeading) override;
     void SetEnableHapticFeedback(bool state) override {};
 

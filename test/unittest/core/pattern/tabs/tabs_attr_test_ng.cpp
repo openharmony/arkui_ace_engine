@@ -16,8 +16,8 @@
 #include "tabs_test_ng.h"
 
 #include "core/components/tab_bar/tab_theme.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
+#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 
@@ -163,7 +163,8 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     EXPECT_EQ(swiperLayoutProperty_->GetDirectionValue(), Axis::HORIZONTAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarWidthValue(Dimension(56.f)), Dimension(-1.f));
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarHeightValue(Dimension(56.f)), Dimension(-1.f));
-    EXPECT_EQ(tabBarPaintProperty_->GetTabBarBlurStyleOption().value_or(option).blurStyle, BlurStyle::NO_MATERIAL);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackBlurStyle().value_or(option).blurStyle, BlurStyle::NO_MATERIAL);
 
     /**
      * @tc.steps3: set valid properties
@@ -186,7 +187,7 @@ HWTEST_F(TabsAttrTestNg, Interface005, TestSize.Level1)
     EXPECT_EQ(swiperLayoutProperty_->GetDirectionValue(), Axis::VERTICAL);
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarWidthValue(Dimension(56.f)), Dimension(60.f));
     EXPECT_EQ(tabBarLayoutProperty_->GetTabBarHeightValue(Dimension(56.f)), Dimension(60.f));
-    EXPECT_EQ(tabBarPaintProperty_->GetTabBarBlurStyleOption().value_or(option).blurStyle, BlurStyle::COMPONENT_THICK);
+    EXPECT_EQ(renderContext->GetBackBlurStyle().value_or(option).blurStyle, BlurStyle::COMPONENT_THICK);
 }
 
 /**
@@ -782,14 +783,15 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarOverlap001, TestSize.Level1)
     model.SetBarOverlap(true);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    tabBarPaintProperty_->UpdateBarBackgroundColor(Color::RED);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    renderContext->UpdateBackgroundColor(Color::RED);
     EXPECT_TRUE(layoutProperty_->GetBarOverlap().value());
 
     model = CreateTabs();
     model.SetBarOverlap(false);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    tabBarPaintProperty_->UpdateBarBackgroundColor(Color::RED);
+    renderContext->UpdateBackgroundColor(Color::RED);
     EXPECT_FALSE(layoutProperty_->GetBarOverlap().value());
 }
 
@@ -808,7 +810,8 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetBarBackgroundColor001, TestSize.Level1)
     model.SetBarBackgroundColor(Color::RED);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
-    EXPECT_EQ(tabBarPaintProperty_->GetBarBackgroundColor().value_or(Color::BLACK), Color::RED);
+    auto renderContext = tabBarNode_->GetRenderContext();
+    EXPECT_EQ(renderContext->GetBackgroundColor().value_or(Color::BLACK), Color::RED);
 }
 
 /**
@@ -850,6 +853,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetAnimationDuration001, TestSize.Level1)
     }
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    EXPECT_TRUE(frameNode_);
 }
 
 /**
@@ -900,6 +904,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetScrollable001, TestSize.Level1)
     model.SetScrollable(false);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    ASSERT_NE(frameNode_, nullptr);
 }
 
 /**
@@ -914,6 +919,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetClipEdge001, TestSize.Level1)
     model.SetClipEdge(false);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    ASSERT_NE(frameNode_, nullptr);
 }
 
 /**
@@ -1259,8 +1265,8 @@ HWTEST_F(TabsAttrTestNg, TabsModelPop001, TestSize.Level1)
     CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     CreateTabsDone(model);
     tabBarNode_->eventHub_ = AceType::MakeRefPtr<EventHub>();
-    tabBarNode_->eventHub_->focusHub_ = AceType::MakeRefPtr<FocusHub>(tabBarNode_->eventHub_);
-    ASSERT_NE(tabBarNode_->eventHub_->focusHub_, nullptr);
+    tabBarNode_->focusHub_ = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(tabBarNode_)));
+    ASSERT_NE(tabBarNode_->focusHub_, nullptr);
     tabBarPattern_->OnModifyDone();
     tabBarPattern_->swiperController_->removeTabBarEventCallback_();
     tabBarPattern_->swiperController_->addTabBarEventCallback_();
@@ -1283,6 +1289,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModelCreate002, TestSize.Level1)
     TabsModelNG Mode1NG;
     Mode1NG.Create(BarPosition::END, 0, nullptr, nullptr);
     tabContentPattern->shallowBuilder_->deepRenderFunc_();
+    EXPECT_FALSE(frameNode_);
 }
 
 /**
@@ -1585,6 +1592,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModelAddTabBarItem005, TestSize.Level1)
     ViewStackProcessor::GetInstance()->Pop();
     ViewStackProcessor::GetInstance()->StopGetAccessRecording();
     CreateTabsDone(model);
+
     /**
      * @tc.steps: step1. check if SvgFillColor is called and value is set correctly.
      */

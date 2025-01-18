@@ -50,6 +50,7 @@ constexpr float CHILD_SIZE = 300.0f;
 constexpr float CHILD_SIZE_2 = 600.0f;
 constexpr float OFFSET = 200.0f;
 constexpr float OFFSET_2 = -100.0f;
+constexpr float AVOID_DISTANCE = 100000.0f;
 const SizeF CONTAINER_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
 const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
 const std::string TITLE = "title";
@@ -253,11 +254,13 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg006, TestSize.Level1)
      */
     props.isShowInSubWindow = true;
     alertDialogModelNg.SetShowDialog(props);
+    EXPECT_EQ(props.isModal, true);
     /**
      * @tc.steps: step2. Call SetShowDialog when isShowInSubWindow is false.
      */
     props.isShowInSubWindow = false;
     alertDialogModelNg.SetShowDialog(props);
+    EXPECT_EQ(props.isModal, true);
 }
 
 /**
@@ -313,12 +316,14 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg008, TestSize.Level1)
      * @tc.steps: step3. Call ShowActionSheet when isShowInSubWindow is true.
      */
     actionSheetModelNg.ShowActionSheet(props);
+    EXPECT_EQ(props.title, TITLE);
 
     /**
      * @tc.steps: step3. Call ShowActionSheet when isShowInSubWindow is false.
      */
     props.isShowInSubWindow = false;
     actionSheetModelNg.ShowActionSheet(props);
+    EXPECT_EQ(props.title, TITLE);
 }
 
 /**
@@ -1269,6 +1274,12 @@ HWTEST_F(DialogModelTestNg, DialogModelTestNg031, TestSize.Level1)
     MockContainer::Current()->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
     offset = layoutAlgorithm->AdjustChildPosition(topLeftOffset, dialogOffset, childSize, true);
     EXPECT_EQ(offset.GetY(), 0.f);
+
+    topLeftOffset.SetY(0.f);
+    childSize.SetHeight(CHILD_SIZE_2);
+    layoutAlgorithm->keyboardAvoidDistance_ = Dimension(AVOID_DISTANCE, OHOS::Ace::DimensionUnit::VP);
+    layoutAlgorithm->AdjustChildPosition(topLeftOffset, dialogOffset, childSize, true);
+    EXPECT_EQ(layoutAlgorithm->dialogChildSize_.Height(), 0.f);
     MockContainer::Current()->SetApiTargetVersion(backupApiVersion);
 }
 

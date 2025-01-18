@@ -378,6 +378,120 @@ size_t ConvertRegionUtf8ToUtf16(const uint8_t *utf8In, uint16_t *utf16Out, size_
     return out_pos;
 }
 
+bool IsIndexInPairedSurrogates(int32_t index, const std::u16string& utf16)
+{
+    uint16_t len = utf16.length();
+    if (len == 0 || index <= 0 || index >= static_cast<int32_t>(len)) {
+        return false;
+    }
+    // A valid surrogate pair should always start with a High Surrogate
+    if (IsUTF16HighSurrogate(utf16[index - 1]) && IsUTF16LowSurrogate(utf16[index])) {
+        return true;
+    }
+
+    return false;
+}
+
+size_t Utf16ToUtf32Size(const uint16_t *utf16, uint32_t length)
+{
+    size_t res = 1;  // zero byte
+    // when utf16 data length is only 1 and code in 0xd800-0xdfff,
+    // means that is a single code point, it needs to be represented by 1 UTF32 code.
+    if (length == 1 && utf16[0] >= HI_SURROGATE_MIN &&
+        utf16[0] <= LO_SURROGATE_MAX) {
+        res += UtfLength::ONE;
+        return res;
+    }
+
+    for (uint32_t i = 0; i < length; ++i) {
+        if (utf16[i] == 0) {
+            // do nothing
+            continue;
+        }
+        if (utf16[i] >= HI_SURROGATE_MIN && utf16[i] <= HI_SURROGATE_MAX) {
+            if (i < length - 1 &&
+                utf16[i + 1] >= LO_SURROGATE_MIN &&
+                utf16[i + 1] <= LO_SURROGATE_MAX) {
+                ++i;
+            }
+        }
+        res += UtfLength::ONE;
+    }
+    return res;
+}
+
+inline size_t UTF32Length(uint32_t codepoint)
+{
+    return UtfLength::ONE;
+}
+
+size_t EncodeUTF32(uint32_t codepoint, uint32_t *utf32, size_t len, size_t index)
+{
+    size_t size = UTF32Length(codepoint);
+    if (index + size > len) {
+        return 0;
+    }
+    utf32[index] = codepoint;
+    return size;
+}
+
+size_t ConvertRegionUtf16ToUtf32(const uint16_t *utf16In, uint32_t *utf32Out, size_t utf16Len, size_t utf32Len,
+    size_t start)
+{
+    if (utf16In == nullptr || utf32Out == nullptr || utf32Len == 0) {
+        return 0;
+    }
+    size_t utf32Pos = 0;
+    size_t end = start + utf16Len;
+    for (size_t i = start; i < end; ++i) {
+        uint32_t codepoint = DecodeUTF16(utf16In, end, &i);
+        if (codepoint == 0) {
+            continue;
+        }
+        utf32Pos += EncodeUTF32(codepoint, utf32Out, utf32Len, utf32Pos);
+    }
+    return utf32Pos;
+}
+
+size_t Utf32ToUtf16Size(const uint32_t *utf32, uint32_t length)
+{
+    size_t res = 1;  // zero byte
+
+    for (uint32_t i = 0; i < length; ++i) {
+        if (utf32[i] == 0) {
+            // do nothing
+        } else if (utf32[i] < SURROGATE_RAIR_START) {
+            res += UtfLength::ONE;
+        } else {
+            res += UtfLength::TWO;
+        }
+    }
+    return res;
+}
+
+size_t ConvertRegionUtf32ToUtf16(const uint32_t *utf32In, uint16_t *utf16Out, size_t utf32Len, size_t utf16Len)
+{
+    size_t in_pos = 0;
+    size_t out_pos = 0;
+    while (in_pos < utf32Len && out_pos < utf16Len) {
+        uint32_t codePoint = utf32In[in_pos];
+        if (codePoint >= SURROGATE_RAIR_START) {
+            CHECK_OUT_POS_RETURN(out_pos, utf16Len);
+            codePoint -= SURROGATE_RAIR_START;
+            utf16Out[out_pos++] = static_cast<uint16_t>((codePoint >> OFFSET_10POS) | H_SURROGATE_START);
+            utf16Out[out_pos++] = static_cast<uint16_t>((codePoint & 0x3FF) | L_SURROGATE_START);
+        } else {
+            utf16Out[out_pos++] = static_cast<uint16_t>(codePoint);
+        }
+        in_pos++;
+    }
+    // The remain chars should be treated as single byte char.
+    while (in_pos < utf32Len && out_pos < utf16Len) {
+        utf16Out[out_pos++] = static_cast<uint16_t>(utf32In[in_pos++]);
+    }
+    return out_pos;
+}
+
 std::u16string Str8ToStr16(const std::string& str)
 {
     if (str.empty()) {
@@ -451,4 +565,45 @@ std::string Str16DebugToStr8(const std::u16string& str)
     }
     return "";
 }
+
+std::u32string Str16ToStr32(const std::u16string& str)
+{
+    if (str.empty()) {
+        return U"";
+    }
+    if (str == DEFAULT_U16STR) {
+        return DEFAULT_U32STR;
+    }
+    const uint16_t* buf16 = reinterpret_cast<const uint16_t*>(str.c_str());
+    size_t utf16Len = str.size();
+    auto utf32Len = Utf16ToUtf32Size(buf16, utf16Len) - 1;
+    std::unique_ptr<uint32_t[]> pBuf32 = std::make_unique<uint32_t[]>(utf32Len);
+    uint32_t *buf32 = pBuf32.get();
+    auto resultLen = ConvertRegionUtf16ToUtf32(buf16, buf32, utf16Len, utf32Len, 0);
+    if (resultLen == utf32Len) {
+        return std::u32string(reinterpret_cast<const char32_t*>(buf32), utf32Len);
+    }
+    return U"";
+}
+
+std::u16string Str32ToStr16(const std::u32string& str)
+{
+    if (str.empty()) {
+        return u"";
+    }
+    if (str == DEFAULT_U32STR) {
+        return DEFAULT_U16STR;
+    }
+    const uint32_t* buf32 = reinterpret_cast<const uint32_t*>(str.c_str());
+    size_t utf32Len = str.size();
+    auto utf16Len = Utf32ToUtf16Size(buf32, utf32Len) - 1;
+    std::unique_ptr<uint16_t[]> pBuf16 = std::make_unique<uint16_t[]>(utf16Len);
+    uint16_t *buf16 = pBuf16.get();
+    auto resultLen = ConvertRegionUtf32ToUtf16(buf32, buf16, utf32Len, utf16Len);
+    if (resultLen == utf16Len) {
+        return std::u16string(reinterpret_cast<const char16_t*>(buf16), utf16Len);
+    }
+    return u"";
+}
+
 }  // namespace OHOS::Ace::UtfUtils

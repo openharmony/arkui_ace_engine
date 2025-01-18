@@ -65,45 +65,42 @@ export struct ExceptionPrompt {
     Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign
       .Center }) {
       Row() {
-        Flex({ justifyContent: FlexAlign.Start, alignItems: ItemAlign.Center }) {
-          if (this.options?.symbolStyle !== undefined) {
-            SymbolGlyph()
+        if (this.options?.symbolStyle !== undefined) {
+          SymbolGlyph()
+            .fontColor([$r('sys.color.ohos_id_color_warning')])
+            .attributeModifier(this.options?.symbolStyle)
+            .effectStrategy(SymbolEffectStrategy.NONE)
+            .symbolEffect(new SymbolEffect(), false)
+            .fontSize(`${(this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE) * SYMBOL_SIZE}vp`)
+        } else {
+          if (Util.isSymbolResource(this.options?.icon)) {
+            SymbolGlyph((this.options?.icon as Resource | undefined) ?? $r('sys.symbol.exclamationmark_circle'))
               .fontColor([$r('sys.color.ohos_id_color_warning')])
-              .attributeModifier(this.options?.symbolStyle)
-              .effectStrategy(SymbolEffectStrategy.NONE)
-              .symbolEffect(new SymbolEffect(), false)
               .fontSize(`${(this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE) * SYMBOL_SIZE}vp`)
           } else {
-            if (Util.isSymbolResource(this.options?.icon)) {
-              SymbolGlyph((this.options?.icon as Resource | undefined) ?? $r('sys.symbol.exclamationmark_circle'))
-                .fontColor([$r('sys.color.ohos_id_color_warning')])
-                .fontSize(`${(this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE) * SYMBOL_SIZE}vp`)
-            } else {
-              Image(this.options?.icon)
-                .width('24vp')
-                .height('24vp')
-                .fillColor($r('sys.color.ohos_id_color_warning'))
-            }
+            Image(this.options?.icon)
+              .width('24vp')
+              .height('24vp')
+              .fillColor($r('sys.color.ohos_id_color_warning'))
           }
-          Text(this.options.tip)
-            .fontSize($r('sys.float.ohos_id_text_size_body1'))
-            .minFontScale(1)
-            .maxFontScale(Math.min(this.updateFontScale(), 2))
-            .fontColor($r('sys.color.ohos_id_color_warning'))
-            .textOverflow({ overflow: TextOverflow.Ellipsis })
-            .maxLines(2)
-            .margin({
-              left: $r('sys.float.ohos_id_dialog_margin_end'),
-              right: $r('sys.float.ohos_id_dialog_margin_end')
-            })
         }
+        Text(this.options.tip)
+          .fontSize($r('sys.float.ohos_id_text_size_body1'))
+          .minFontScale(1)
+          .maxFontScale(Math.min(this.updateFontScale(), 2))
+          .fontColor($r('sys.color.ohos_id_color_warning'))
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .maxLines(2)
+          .margin({
+            left: $r('sys.float.ohos_id_dialog_margin_end'),
+          })
+          .flexShrink(1)
       }
       .padding({ right: $r('sys.float.ohos_id_default_padding_end') })
       .width('100%')
       .accessibilityDescription(this.onTipClick ? '' : ' ')
       .onClick(() => {
         this.onTipClick && this.onTipClick();
-
       })
 
       if (this.options.actionText) {
@@ -118,23 +115,25 @@ export struct ExceptionPrompt {
               .padding(0)
               .margin({ right: $r('sys.float.ohos_id_text_paragraph_margin_s') })
               .textOverflow({ overflow: TextOverflow.Ellipsis })
+              .flexShrink(1)
+              .textAlign(TextAlign.End)
             SymbolGlyph($r('sys.symbol.chevron_right'))
               .fontSize(`${(this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE) * SYMBOL_SIZE}vp`)
               .fontColor([$r('sys.color.ohos_id_color_tertiary')])
           }
+          .width('100%')
+          .justifyContent(FlexAlign.End)
         }
         .backgroundColor(this.touchBackgroundColor)
-        .width(this.options.actionText ? 168 : 0)
+        .width(this.options.actionText ? 144 : 0)
         .borderRadius($r('sys.float.ohos_id_corner_radius_subtab'))
         .padding({
-          right: $r('sys.float.ohos_id_elements_margin_vertical_l'),
-          left: $r('sys.float.ohos_id_elements_margin_vertical_l')
+          right: $r('sys.float.padding_level2'),
         })
         .accessibilityDescription(this.onActionTextClick ? '' : ' ')
         .onClick(() => {
           this.onActionTextClick && this.onActionTextClick();
         })
-
       }
     }
     .padding({

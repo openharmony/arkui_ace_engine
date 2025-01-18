@@ -44,6 +44,10 @@ public:
         controllerWeak_ = controller;
     }
 
+    void AddText(const JSCallbackInfo& info);
+    void DeleteText(const JSCallbackInfo& info);
+    void GetSelection(const JSCallbackInfo& info);
+
 private:
     WeakPtr<TextFieldControllerBase> controllerWeak_;
     JSRef<JSObject> CreateRectangle(const Rect& info);

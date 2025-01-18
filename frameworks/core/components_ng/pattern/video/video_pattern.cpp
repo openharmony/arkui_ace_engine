@@ -319,20 +319,20 @@ void VideoPattern::ResetMediaPlayerOnBg()
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    VideoSourceInfo videoSrc = {videoSrcInfo_.GetSrc(), videoSrcInfo_.GetBundleName(), videoSrcInfo_.GetModuleName()};
+    VideoSourceInfo videoSrc = {videoSrcInfo_.src_, videoSrcInfo_.bundleName_, videoSrcInfo_.moduleName_};
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask(
         [weak = WeakClaim(this), mediaPlayerWeak = WeakClaim(AceType::RawPtr(mediaPlayer_)),
-        videoSrc, id = instanceId_, uiTaskExecutor] {
+        videoSrc, id = instanceId_, showFirstFrame = showFirstFrame_, uiTaskExecutor] {
         auto mediaPlayer = mediaPlayerWeak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
         mediaPlayer->ResetMediaPlayer();
 
-        RegisterMediaPlayerEvent(weak, mediaPlayer, videoSrc.src, id);
+        RegisterMediaPlayerEvent(weak, mediaPlayer, videoSrc.src_, id);
 
-        if (!mediaPlayer->SetSource(videoSrc.src, videoSrc.bundleName, videoSrc.moduleName)) {
+        if (!mediaPlayer->SetSource(videoSrc.src_, videoSrc.bundleName_, videoSrc.moduleName_)) {
             uiTaskExecutor.PostTask([weak]() {
                 auto videoPattern = weak.Upgrade();
                 CHECK_NULL_VOID(videoPattern);
@@ -346,7 +346,7 @@ void VideoPattern::ResetMediaPlayerOnBg()
             CHECK_NULL_VOID(videoPattern);
             videoPattern->PrepareSurface();
             }, "ArkUIVideoPrepareSurface");
-
+        mediaPlayer->SetRenderFirstFrame(showFirstFrame);
         if (mediaPlayer->PrepareAsync() != 0) {
             TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
         }
@@ -376,7 +376,7 @@ void VideoPattern::ResetMediaPlayer()
     }
 
     mediaPlayer_->SetRenderFirstFrame(showFirstFrame_);
-    RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.GetSrc(), instanceId_);
+    RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src_, instanceId_);
     PrepareSurface();
     if (mediaPlayer_ && mediaPlayer_->PrepareAsync() != 0) {
         TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
@@ -404,10 +404,10 @@ void VideoPattern::PrepareMediaPlayer()
         TAG_LOGI(AceLogTag::ACE_VIDEO, "Video source is null or the source has not changed.");
         return;
     }
-    auto videoSrcInfo = videoLayoutProperty->GetVideoSource();
-    videoSrcInfo_.src = videoSrcInfo->GetSrc();
-    videoSrcInfo_.bundleName = videoSrcInfo->GetBundleName();
-    videoSrcInfo_.moduleName = videoSrcInfo->GetModuleName();
+    auto videoSrcInfo = videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo());
+    videoSrcInfo_.src_ = videoSrcInfo.src_;
+    videoSrcInfo_.bundleName_ = videoSrcInfo.bundleName_;
+    videoSrcInfo_.moduleName_ = videoSrcInfo.moduleName_;
     if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
         mediaPlayer_->CreateMediaPlayer();
     }
@@ -425,8 +425,7 @@ void VideoPattern::PrepareMediaPlayer()
 bool VideoPattern::SetSourceForMediaPlayer()
 {
     CHECK_NULL_RETURN(mediaPlayer_, false);
-    return mediaPlayer_->SetSource(videoSrcInfo_.GetSrc(), videoSrcInfo_.GetBundleName(),
-        videoSrcInfo_.GetModuleName());
+    return mediaPlayer_->SetSource(videoSrcInfo_.src_, videoSrcInfo_.bundleName_, videoSrcInfo_.moduleName_);
 }
 
 void VideoPattern::RegisterMediaPlayerEvent(const WeakPtr<VideoPattern>& weak, const RefPtr<MediaPlayer>& mediaPlayer,
@@ -724,10 +723,6 @@ void VideoPattern::checkNeedAutoPlay()
     if (isStop_) {
         isStop_ = false;
     }
-    if (dragEndAutoPlay_) {
-        dragEndAutoPlay_ = false;
-        Start();
-    }
     if (autoPlay_) {
         Start();
     }
@@ -825,7 +820,7 @@ void VideoPattern::UpdateMuted()
             [weak = WeakClaim(RawPtr(mediaPlayer_)), isMuted = muted_, currentVolume = currentVolume_] {
                 auto mediaPlayer = weak.Upgrade();
                 CHECK_NULL_VOID(mediaPlayer);
-                if (isMuted) {
+                if (isMuted || NearZero(currentVolume)) {
                     mediaPlayer->SetMediaMuted(MEDIA_TYPE_AUD, true);
                     mediaPlayer->SetVolume(0.0f, 0.0f);
                 } else {
@@ -925,7 +920,6 @@ void VideoPattern::OnAttachToFrameNode()
     renderContext->UpdateBackgroundColor(Color::BLACK);
     renderContextForMediaPlayer_->UpdateBackgroundColor(Color::BLACK);
     renderContext->SetClipToBounds(true);
-    InitKeyEvent();
 }
 
 void VideoPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -1017,7 +1011,6 @@ void VideoPattern::OnModifyDone()
         CHECK_NULL_VOID(pipelineContext);
         pipelineContext->AddOnAreaChangeNode(host->GetId());
     }
-    EnableDrag();
     auto eventHub = GetEventHub<VideoEventHub>();
     if (!AceType::InstanceOf<VideoFullScreenPattern>(this)) {
         auto host = GetHost();
@@ -1029,6 +1022,7 @@ void VideoPattern::OnModifyDone()
     } else if (isPaused_ && !isPlaying_ && !GetAnalyzerState()) {
         StartImageAnalyzer();
     }
+    InitKeyEvent();
 }
 
 void VideoPattern::InitKeyEvent()
@@ -1477,7 +1471,8 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderPaintProperty, nullptr);
     sliderPaintProperty->UpdateMax(static_cast<float>(duration_));
-    sliderPaintProperty->UpdateSelectColor(videoTheme->GetSelectColor());
+    sliderPaintProperty->UpdateSelectGradientColor(ConvertToGradient(videoTheme->GetSelectColor()));
+    sliderPaintProperty->UpdateSelectIsResourceColor(true);
     sliderPaintProperty->UpdateTrackBackgroundColor(ConvertToGradient(videoTheme->GetTrackBgColor()));
     sliderPaintProperty->UpdateTrackBackgroundIsResourceColor(true);
     sliderPaintProperty->UpdateValue(static_cast<float>(currentPos_));
@@ -1958,55 +1953,6 @@ void VideoPattern::FullScreen()
     fullScreenPattern->RequestFullScreen(videoNode);
 }
 
-void VideoPattern::EnableDrag()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-    auto dragEnd = [wp = WeakClaim(this)](
-                       const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
-        auto videoPattern = wp.Upgrade();
-        CHECK_NULL_VOID(videoPattern);
-        auto videoLayoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
-        CHECK_NULL_VOID(videoLayoutProperty);
-        CHECK_NULL_VOID(event);
-        auto unifiedData = event->GetData();
-        std::string videoSrc;
-        if (unifiedData != nullptr) {
-            int ret = UdmfClient::GetInstance()->GetVideoRecordUri(unifiedData, videoSrc);
-            if (ret != 0) {
-                TAG_LOGW(AceLogTag::ACE_VIDEO, "unifiedRecords is empty");
-                return;
-            }
-        } else {
-            auto json = JsonUtil::ParseJsonString(extraParams);
-            std::string key = "extraInfo";
-            videoSrc = json->GetString(key);
-        }
-
-        if (videoSrc == videoPattern->GetSrc()) {
-            return;
-        }
-
-        std::regex extensionRegex("\\.(" + PNG_FILE_EXTENSION + ")$");
-        bool isPng = std::regex_search(videoSrc, extensionRegex);
-        if (isPng) {
-            event->SetResult(DragRet::DRAG_FAIL);
-            return;
-        }
-
-        videoPattern->SetIsDragEndAutoPlay(true);
-        VideoSourceInfo videoSrcInfo = {videoSrc, "", ""};
-        videoLayoutProperty->UpdateVideoSource(videoSrcInfo);
-        auto frameNode = videoPattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->MarkModifyDone();
-    };
-    auto eventHub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnDrop(std::move(dragEnd));
-}
-
 VideoPattern::~VideoPattern()
 {
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -2038,10 +1984,11 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     }
     isInitialState_ = videoPattern->GetInitialState();
     auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
-    auto videoSrcInfo = layoutProperty->GetVideoSource();
-    videoSrcInfo_.src = videoSrcInfo->GetSrc();
-    videoSrcInfo_.bundleName = videoSrcInfo->GetBundleName();
-    videoSrcInfo_.moduleName = videoSrcInfo->GetModuleName();
+    CHECK_NULL_VOID(layoutProperty);
+    auto videoSrcInfo = layoutProperty->GetVideoSourceValue(VideoSourceInfo());
+    videoSrcInfo_.src_ = videoSrcInfo.src_;
+    videoSrcInfo_.bundleName_ = videoSrcInfo.bundleName_;
+    videoSrcInfo_.moduleName_ = videoSrcInfo.moduleName_;
     isPrepared_ = videoPattern->GetIsPrepared();
     isSeeking_ = videoPattern->GetIsSeeking();
     isStop_ = videoPattern->GetIsStop();
@@ -2053,8 +2000,11 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     progressRate_ = videoPattern->GetProgressRate();
     isAnalyzerCreated_ = videoPattern->GetAnalyzerState();
     isEnableAnalyzer_ = videoPattern->isEnableAnalyzer_;
+    SetShortcutKeyEnabled(videoPattern->GetShortcutKeyEnabled());
+    SetCurrentVolume(videoPattern->GetCurrentVolume());
+
     fullScreenNodeId_.reset();
-    RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src, instanceId_);
+    RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src_, instanceId_);
     auto videoNode = GetHost();
     CHECK_NULL_VOID(videoNode);
     // change event hub to the origin video node
@@ -2116,6 +2066,21 @@ void VideoPattern::EnableAnalyzer(bool enable)
 void VideoPattern::SetShortcutKeyEnabled(bool isEnableShortcutKey)
 {
     isEnableShortcutKey_ = isEnableShortcutKey;
+}
+
+bool VideoPattern::GetShortcutKeyEnabled() const
+{
+    return isEnableShortcutKey_;
+}
+
+void VideoPattern::SetCurrentVolume(float currentVolume)
+{
+    currentVolume_ = currentVolume;
+}
+
+float VideoPattern::GetCurrentVolume() const
+{
+    return currentVolume_;
 }
 
 void VideoPattern::SetImageAnalyzerConfig(void* config)

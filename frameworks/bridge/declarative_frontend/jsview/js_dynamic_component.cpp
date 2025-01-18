@@ -74,21 +74,6 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
         TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent argument type is invalid");
         return;
     }
-    auto hostEngine = EngineHelper::GetCurrentEngine();
-    CHECK_NULL_VOID(hostEngine);
-    NativeEngine* hostNativeEngine = hostEngine->GetNativeEngine();
-    auto jsWorker = dynamicComponentArg->GetProperty("worker");
-    panda::Local<JsiValue> value = jsWorker.Get().GetLocalHandle();
-    JSValueWrapper valueWrapper = value;
-    napi_value nativeValue = hostNativeEngine->ValueToNapiValue(valueWrapper);
-    Worker* worker = nullptr;
-    napi_unwrap(reinterpret_cast<napi_env>(hostNativeEngine), nativeValue, reinterpret_cast<void**>(&worker));
-    if (worker == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker is nullptr");
-        return;
-    }
-    TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker running=%{public}d, worker name=%{public}s",
-        worker->IsRunning(), worker->GetName().c_str());
     auto entryPoint = entryPointValue->ToString();
     bool backgroundTransparent = true;
     if (backgroundTransparentValue->IsBoolean()) {
@@ -100,6 +85,23 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     UIExtensionModel::GetInstance()->Create(config);
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto hostEngine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_VOID(hostEngine);
+    NativeEngine* hostNativeEngine = hostEngine->GetNativeEngine();
+    auto jsWorker = dynamicComponentArg->GetProperty("worker");
+    panda::Local<JsiValue> value = jsWorker.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_value nativeValue = hostNativeEngine->ValueToNapiValue(valueWrapper);
+    Worker* worker = nullptr;
+    napi_unwrap(reinterpret_cast<napi_env>(hostNativeEngine), nativeValue, reinterpret_cast<void**>(&worker));
+    if (worker == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker is nullptr");
+        UIExtensionModel::GetInstance()->InitializeDynamicComponent(
+            AceType::Claim(frameNode), "", "", entryPoint, nullptr);
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker running=%{public}d, worker name=%{public}s",
+        worker->IsRunning(), worker->GetName().c_str());
     auto instanceId = Container::CurrentId();
     worker->RegisterCallbackForWorkerEnv([instanceId,
         weak = AceType::WeakClaim(frameNode), entryPoint](napi_env env) {

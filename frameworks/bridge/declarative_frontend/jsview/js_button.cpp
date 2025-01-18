@@ -231,6 +231,36 @@ void JSButton::SetRole(const JSCallbackInfo& info)
     }
 }
 
+void JSButton::SetMinFontScale(const JSCallbackInfo& info)
+{
+    double minFontScale;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], minFontScale)) {
+        return;
+    }
+    if (LessOrEqual(minFontScale, 0.0f)) {
+        ButtonModel::GetInstance()->SetMinFontScale(0.0f);
+        return;
+    }
+    if (GreatOrEqual(minFontScale, 1.0f)) {
+        ButtonModel::GetInstance()->SetMinFontScale(1.0f);
+        return;
+    }
+    ButtonModel::GetInstance()->SetMinFontScale(static_cast<float>(minFontScale));
+}
+
+void JSButton::SetMaxFontScale(const JSCallbackInfo& info)
+{
+    double maxFontScale;
+    if (info.Length() < 1 || !ParseJsDouble(info[0], maxFontScale)) {
+        return;
+    }
+    if (LessOrEqual(maxFontScale, 1.0f)) {
+        ButtonModel::GetInstance()->SetMaxFontScale(1.0f);
+        return;
+    }
+    ButtonModel::GetInstance()->SetMaxFontScale(static_cast<float>(maxFontScale));
+}
+
 void JSButton::SetStateEffect(const JSCallbackInfo& info)
 {
     bool value = info[0]->IsBoolean() ? info[0]->ToBoolean() : true;
@@ -386,6 +416,8 @@ void JSButton::JSBind(BindingTarget globalObj)
     JSClass<JSButton>::StaticMethod("role", &JSButton::SetRole);
     JSClass<JSButton>::StaticMethod("createWithLabel", &JSButton::CreateWithLabel, MethodOptions::NONE);
     JSClass<JSButton>::StaticMethod("createWithChild", &JSButton::CreateWithChild, MethodOptions::NONE);
+    JSClass<JSButton>::StaticMethod("minFontScale", &JSButton::SetMinFontScale);
+    JSClass<JSButton>::StaticMethod("maxFontScale", &JSButton::SetMaxFontScale);
     JSClass<JSButton>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

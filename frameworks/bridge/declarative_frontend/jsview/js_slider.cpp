@@ -88,6 +88,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSlider>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSlider>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSSlider>::StaticMethod("enableHapticFeedback", &JSSlider::SetEnableHapticFeedback);
     JSClass<JSSlider>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -145,15 +146,15 @@ void JSSlider::Create(const JSCallbackInfo& info)
     auto isReverse = paramObject->GetProperty("reverse");
     JSRef<JSVal> changeEventVal;
 
-    if (!getValue->IsNull() && getValue->IsNumber()) {
-        value = getValue->ToNumber<double>();
-    } else if (!getValue->IsNull() && getValue->IsObject()) {
+    if (!getValue->IsNull() && getValue->IsObject()) {
         JSRef<JSObject> valueObj = JSRef<JSObject>::Cast(getValue);
         changeEventVal = valueObj->GetProperty("changeEvent");
         auto valueProperty = valueObj->GetProperty("value");
         value = valueProperty->ToNumber<double>();
     } else if (paramObject->HasProperty("$value")) {
         changeEventVal = paramObject->GetProperty("$value");
+        value = getValue->ToNumber<double>();
+    } else if (!getValue->IsNull() && getValue->IsNumber()) {
         value = getValue->ToNumber<double>();
     }
 
@@ -303,13 +304,20 @@ void JSSlider::SetSelectedColor(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    Color colorVal;
-    if (!ParseJsColor(info[0], colorVal)) {
-        auto theme = GetTheme<SliderTheme>();
-        CHECK_NULL_VOID(theme);
-        colorVal = theme->GetTrackSelectedColor();
+    NG::Gradient gradient;
+    bool isResourceColor = false;
+    if (!ConvertGradientColor(info[0], gradient)) {
+        Color colorVal;
+        if (!ParseJsColor(info[0], colorVal)) {
+            auto theme = GetTheme<SliderTheme>();
+            CHECK_NULL_VOID(theme);
+            colorVal = theme->GetTrackSelectedColor();
+        }
+        isResourceColor = true;
+        gradient = NG::SliderModelNG::CreateSolidGradient(colorVal);
+        SliderModel::GetInstance()->SetSelectColor(colorVal);
     }
-    SliderModel::GetInstance()->SetSelectColor(colorVal);
+    SliderModel::GetInstance()->SetSelectColor(gradient, isResourceColor);
 }
 
 void JSSlider::SetMinLabel(const JSCallbackInfo& info)
@@ -628,6 +636,15 @@ void JSSlider::OnChange(const JSCallbackInfo& info)
     SliderModel::GetInstance()->SetOnChange(
         JsEventCallback<void(float, int32_t)>(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0])));
     info.ReturnSelf();
+}
+
+void JSSlider::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool isEnableHapticFeedback = true;
+    if (info[0]->IsBoolean()) {
+        isEnableHapticFeedback = info[0]->ToBoolean();
+    }
+    SliderModel::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);
 }
 
 void JSSlider::ResetBlockStyle()

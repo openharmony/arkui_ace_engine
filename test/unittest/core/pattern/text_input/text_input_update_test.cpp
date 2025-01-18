@@ -953,10 +953,10 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest001, TestSize.Level1)
      * @tc.steps: step2. change text with HandleOnUndoAction
      * @tc.expected: return value is valid
      */
-    SourceAndValueInfo info;
+    InsertCommandInfo info;
     info.insertValue = u"2";
-    info.isIME = true;
-    pattern_->InsertValueOperation(info);
+    info.reason = InputReason::IME;
+    pattern_->ExecuteInsertValueCommand(info);
     EXPECT_EQ(offset, 0);
     EXPECT_EQ(value, "2");
     EXPECT_EQ(didOffset, 1);
@@ -1045,10 +1045,10 @@ HWTEST_F(TextInputUpdateTestNg, ChangeTextCallbackTest003, TestSize.Level1)
      * @tc.steps: step2. change text with HandleOnUndoAction
      * @tc.expected: return value is valid
      */
-    SourceAndValueInfo info;
+    InsertCommandInfo info;
     info.insertValue = u"2";
-    info.isIME = true;
-    pattern_->InsertValueOperation(info);
+    info.reason = InputReason::IME;
+    pattern_->ExecuteInsertValueCommand(info);
     EXPECT_EQ(offset, 0);
     EXPECT_EQ(value, "2");
     EXPECT_EQ(didOffset, -1);

@@ -60,6 +60,14 @@ public:
         return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
     }
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
+    void DumpInfo() override;
+
+    void DumpInfo(std::unique_ptr<JsonValue>& json) override;
+
+    std::string DumpDividerColor();
+
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     float constrainStrokeWidth_ = 0;

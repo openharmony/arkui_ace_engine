@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SIDE_BAR_CONTAINER_MODEL_NG_H
 
 #include "core/components_ng/pattern/side_bar/side_bar_container_model.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SideBarContainerModelNG : public SideBarContainerModel {
@@ -25,8 +26,8 @@ public:
     void SetSideBarContainerType(SideBarContainerType type) override;
     void SetShowSideBar(bool isShow) override;
     void SetShowControlButton(bool showControlButton) override;
-    void ParseAndSetWidth(WidthType widthType, Dimension& width) override;
-    void SetSideBarWidth(const Dimension& sideBarWidth) override;
+    void ParseAndSetWidth(WidthType widthType, Dimension& width, bool isDoubleBind = false) override;
+    void SetSideBarWidth(const Dimension& sideBarWidth, bool isDoubleBind = false) override;
     void SetMinSideBarWidth(const Dimension& minSideBarWidth) override;
     void SetMaxSideBarWidth(const Dimension& maxSideBarWidth) override;
     void SetAutoHide(bool autoHide) override;
@@ -49,6 +50,7 @@ public:
     void SetDividerStartMargin(const Dimension& startMargin) override;
     void SetDividerEndMargin(const Dimension& endMargin) override;
     void SetOnChangeEvent(std::function<void(const bool)>&& onChangeEvent) override;
+    void SetOnSideBarWidthChangeEvent(OnSideBarWidthChangeEvent&& event) override;
     void SetMinContentWidth(const Dimension& minContentWidth) override;
     void ResetControlButton() override;
     static void SetSideBarWidth(FrameNode* frameNode, const Dimension& sideBarWidth);
@@ -76,9 +78,11 @@ public:
     static void SetDividerEndMargin(FrameNode* frameNode, const Dimension& endMargin);
     static void ResetControlButtonLeft(FrameNode* frameNode);
     static void ResetControlButtonIconInfo(FrameNode* frameNode);
+    static bool IsDoubleBindBlock(const RefPtr<SideBarContainerPattern>& sideBarContainerPattern);
 private:
     void MarkNeedInitRealSideBarWidth() override;
     static void MarkNeedInitRealSideBarWidth(FrameNode* frameNode);
+    static bool sideBarWidthDoubleBind_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SIDE_BAR_CONTAINER_MODEL_H

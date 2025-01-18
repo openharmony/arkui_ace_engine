@@ -60,6 +60,13 @@ RefPtr<FrameNode> GridItemModelNG::CreateFrameNode(int32_t nodeId)
     return frameNode;
 }
 
+RefPtr<FrameNode> GridItemModelNG::CreateGridItem(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::GRID_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<GridItemPattern>(nullptr); });
+    return frameNode;
+}
+
 void GridItemModelNG::SetRowStart(int32_t value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(GridItemLayoutProperty, RowStart, value);
@@ -128,6 +135,14 @@ void GridItemModelNG::SetOnSelect(SelectFunc&& onSelect)
     eventHub->SetOnSelect(std::move(onSelect));
 }
 
+void GridItemModelNG::SetForceRebuild(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridItemPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetForceRebuild(value);
+}
+
 void GridItemModelNG::SetSelectable(FrameNode* frameNode, bool selectable)
 {
     CHECK_NULL_VOID(frameNode);
@@ -173,5 +188,13 @@ void GridItemModelNG::SetGridItemStyle(FrameNode* frameNode, GridItemStyle gridI
     auto pattern = frameNode->GetPatternPtr<GridItemPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateGridItemStyle(gridItemStyle);
+}
+
+void GridItemModelNG::SetOnSelect(FrameNode* frameNode, SelectFunc&& onSelect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<GridItemEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelect(std::move(onSelect));
 }
 } // namespace OHOS::Ace::NG

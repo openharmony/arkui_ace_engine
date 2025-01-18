@@ -100,7 +100,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText001, TestSize.Level1)
     auto previewContent = previewTextRecord.previewContent;
     EXPECT_EQ(previewContent, PREVIEW_TEXT_VALUE1);
     EXPECT_EQ(previewTextRecord.startOffset, 0);
-    auto length = static_cast<int32_t>(StringUtils::ToWstring(PREVIEW_TEXT_VALUE1).length());
+    auto length = static_cast<int32_t>(PREVIEW_TEXT_VALUE1.length());
     EXPECT_EQ(previewTextRecord.endOffset, previewTextRecord.startOffset + length);
     /**
      * @tc.steps: step3. set previewTextDecoration
@@ -156,7 +156,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText002, TestSize.Level1)
     auto previewContent = previewTextRecord.previewContent;
     EXPECT_EQ(previewContent, PREVIEW_TEXT_VALUE2);
     EXPECT_EQ(previewTextRecord.startOffset, 0);
-    auto length = static_cast<int32_t>(StringUtils::ToWstring(PREVIEW_TEXT_VALUE2).length());
+    auto length = static_cast<int32_t>(PREVIEW_TEXT_VALUE2.length());
     EXPECT_EQ(previewTextRecord.endOffset, previewTextRecord.startOffset + length);
     /**
      * @tc.steps: step4. delete content  previewText
@@ -165,7 +165,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText002, TestSize.Level1)
     auto previewContent2 = previewTextRecord.previewContent;
     EXPECT_EQ(previewContent2, PREVIEW_TEXT_VALUE3);
     EXPECT_EQ(previewTextRecord.startOffset, 0);
-    length = static_cast<int32_t>(StringUtils::ToWstring(PREVIEW_TEXT_VALUE3).length());
+    length = static_cast<int32_t>(PREVIEW_TEXT_VALUE3.length());
     EXPECT_EQ(richEditorPattern->previewTextRecord_.endOffset, previewTextRecord.startOffset + length);
 }
 
@@ -182,7 +182,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText003, TestSize.Level1)
     auto property = richEditorPattern->GetLayoutProperty<RichEditorLayoutProperty>();
     ASSERT_NE(property, nullptr);
     property->UpdatePreviewTextStyle("underline");
-    std::vector<std::tuple<int, int, std::string, int>> testPreviewList;
+    std::vector<std::tuple<int, int, std::u16string, int>> testPreviewList;
     testPreviewList.emplace_back(-1, -1, PREVIEW_TEXT_VALUE1, 0);
     testPreviewList.emplace_back(0, -1, PREVIEW_TEXT_VALUE1, -1);
     testPreviewList.emplace_back(-1, 0, PREVIEW_TEXT_VALUE1, -1);
@@ -207,13 +207,13 @@ HWTEST_F(RichEditorPreviewTextTestNg, SetPreviewText004, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    std::string previewTextValue;
+    std::u16string previewTextValue;
     PreviewRange range;
 
     range.start = -1;
     range.end = 0;
 
-    richEditorPattern->previewTextRecord_.previewContent = "";
+    richEditorPattern->previewTextRecord_.previewContent = u"";
     richEditorPattern->previewTextRecord_.previewTextHasStarted = true;
     richEditorPattern->previewTextRecord_.startOffset = 0;
     richEditorPattern->previewTextRecord_.endOffset = 0;
@@ -249,7 +249,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview001, TestSize.Level1)
      */
     auto previewTextRecord = richEditorPattern->previewTextRecord_;
     auto previewContent = previewTextRecord.previewContent;
-    EXPECT_EQ(previewContent, "");
+    EXPECT_EQ(previewContent, u"");
     EXPECT_EQ(previewTextRecord.startOffset, -1);
     EXPECT_EQ(previewTextRecord.endOffset, -1);
 }
@@ -281,7 +281,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, FinishTextPreview002, TestSize.Level1)
     richEditorPattern->InsertValue(PREVIEW_TEXT_VALUE1);
     EXPECT_EQ(richEditorPattern->spans_.size(), 1);
     auto it = richEditorPattern->spans_.begin();
-    EXPECT_EQ(StringUtils::Str16ToStr8((*it)->content), PREVIEW_TEXT_VALUE1);
+    EXPECT_EQ((*it)->content, PREVIEW_TEXT_VALUE1);
 }
 
 /**
@@ -297,7 +297,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, GetPreviewTextInfo001, TestSize.Level1)
     PreviewTextInfo info = richEditorPattern->GetPreviewTextInfo();
     ASSERT_EQ(richEditorPattern->previewTextRecord_.previewContent.empty(), true);
 
-    richEditorPattern->previewTextRecord_.previewContent = "abc";
+    richEditorPattern->previewTextRecord_.previewContent = u"abc";
     info = richEditorPattern->GetPreviewTextInfo();
     ASSERT_EQ(richEditorPattern->previewTextRecord_.previewContent.empty(), false);
 }
@@ -316,7 +316,7 @@ HWTEST_F(RichEditorPreviewTextTestNg, UpdatePreviewText001, TestSize.Level1)
     ASSERT_NE(property, nullptr);
     property->UpdatePreviewTextStyle("underline");
 
-    std::string previewTextValue = INIT_VALUE_1;
+    std::u16string previewTextValue = INIT_VALUE_1;
     PreviewRange previewRange;
     previewRange.start = -1;
     previewRange.end = -1;

@@ -693,20 +693,20 @@ HWTEST_F(FormPatternTest, FormPatternTest_002, TestSize.Level1)
     auto host = pattern->GetHost();
 
     auto gestureEventHub = formNode->GetOrCreateGestureEventHub();
-    formNode->eventHub_->gestureEventHub_ = nullptr;
+    formNode->GetEventHub<EventHub>()->gestureEventHub_ = nullptr;
     pattern->OnModifyDone();
     EXPECT_FALSE(pattern->isSnapshot_);
-    formNode->eventHub_->gestureEventHub_ = gestureEventHub;
+    formNode->GetEventHub<EventHub>()->gestureEventHub_ = gestureEventHub;
 
     pattern->OnModifyDone();
-    EXPECT_EQ(formNode->eventHub_->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+    EXPECT_EQ(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
 
     host = pattern->GetHost();
     auto layoutProperty = host->layoutProperty_;
     EXPECT_NE(layoutProperty, nullptr);
     host->layoutProperty_ = nullptr;
     pattern->OnModifyDone();
-    EXPECT_EQ(formNode->eventHub_->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+    EXPECT_EQ(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
     host->layoutProperty_ = layoutProperty;
 
     auto &&layoutConstraint = layoutProperty->calcLayoutConstraint_;
@@ -716,20 +716,20 @@ HWTEST_F(FormPatternTest, FormPatternTest_002, TestSize.Level1)
     calcLayoutConstraint->maxSize = idealSize;
 
     pattern->OnModifyDone();
-    EXPECT_EQ(formNode->eventHub_->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+    EXPECT_EQ(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
     layoutConstraint = std::move(calcLayoutConstraint);
     EXPECT_NE(layoutProperty->calcLayoutConstraint_, nullptr);
 
     auto size = layoutConstraint->selfIdealSize;
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize = CalcSize();
     pattern->OnModifyDone();
-    EXPECT_EQ(formNode->eventHub_->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+    EXPECT_EQ(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize = size;
 
     auto sizeWidth = size->Width();
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->width_.reset();
     pattern->OnModifyDone();
-    EXPECT_EQ(formNode->eventHub_->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+    EXPECT_EQ(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->width_ = sizeWidth;
 }
 
@@ -752,12 +752,12 @@ HWTEST_F(FormPatternTest, FormPatternTest_006, TestSize.Level1)
     auto sizeHeight = size->Height();
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->height_.reset();
     pattern->OnModifyDone();
-    EXPECT_NE(formNode->eventHub_->gestureEventHub_->clickEventActuator_, nullptr);
+    EXPECT_NE(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_, nullptr);
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->height_ = sizeHeight;
 
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->width_->dimension_.unit_ = DimensionUnit::PERCENT;
     pattern->OnModifyDone();
-    EXPECT_NE(formNode->eventHub_->gestureEventHub_->clickEventActuator_, nullptr);
+    EXPECT_NE(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_, nullptr);
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->width_->dimension_.unit_ = DimensionUnit::PX;
 
     host->layoutProperty_->borderWidth_ = std::make_unique<BorderWidthProperty>();
@@ -766,7 +766,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_006, TestSize.Level1)
     std::optional<Dimension> topDimen = borderWidthProperty->topDimen;
     borderWidthProperty->topDimen->Reset();
     pattern->OnModifyDone();
-    EXPECT_NE(formNode->eventHub_->gestureEventHub_->clickEventActuator_, nullptr);
+    EXPECT_NE(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_, nullptr);
     borderWidthProperty->topDimen = topDimen;
 
     float borderWidth = 0.0f;

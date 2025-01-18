@@ -65,7 +65,10 @@ void JSScrollableBase::JsOnWillScroll(const JSCallbackInfo& args)
 
 void JSScrollableBase::JsOnDidScroll(const JSCallbackInfo& args)
 {
-    if (args.Length() > 0 && args[0]->IsFunction()) {
+    if (args.Length() <= 0) {
+        return;
+    }
+    if (args[0]->IsFunction()) {
         auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                             const CalcDimension& scrollOffset, const ScrollState& scrollState) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -73,6 +76,8 @@ void JSScrollableBase::JsOnDidScroll(const JSCallbackInfo& args)
             func->Call(JSRef<JSObject>(), params.size(), params.data());
         };
         NG::ScrollableModelNG::SetOnDidScroll(std::move(onScroll));
+    } else {
+        NG::ScrollableModelNG::SetOnDidScroll(nullptr);
     }
 }
 

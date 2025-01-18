@@ -84,6 +84,11 @@ void SliderModelNG::SetSelectColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectColor, value);
 }
+void SliderModelNG::SetSelectColor(const Gradient& value, bool isResourceColor)
+{
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectGradientColor, value);
+    ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, SelectIsResourceColor, isResourceColor);
+}
 void SliderModelNG::SetMinLabel(float value)
 {
     ACE_UPDATE_PAINT_PROPERTY(SliderPaintProperty, Min, value);
@@ -417,9 +422,10 @@ void SliderModelNG::SetTrackBackgroundColor(FrameNode* frameNode, const Gradient
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundColor, value, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, TrackBackgroundIsResourceColor, isResourceColor, frameNode);
 }
-void SliderModelNG::SetSelectColor(FrameNode* frameNode, const Color& value)
+void SliderModelNG::SetSelectColor(FrameNode* frameNode, const Gradient& value, bool isResourceColor)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectColor, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectGradientColor, value, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SliderPaintProperty, SelectIsResourceColor, isResourceColor, frameNode);
 }
 void SliderModelNG::SetShowSteps(FrameNode* frameNode, bool value)
 {
@@ -629,11 +635,12 @@ Gradient SliderModelNG::GetTrackBackgroundColor(FrameNode* frameNode)
     return value;
 }
 
-Color SliderModelNG::GetSelectColor(FrameNode* frameNode)
+Gradient SliderModelNG::GetSelectColor(FrameNode* frameNode)
 {
-    Color value;
+    Gradient value;
     ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(
-        SliderPaintProperty, SelectColor, value, frameNode, Color(SELECTED_COLOR));
+        SliderPaintProperty, SelectGradientColor, value, frameNode,
+        SliderModelNG::CreateSolidGradient(Color(SELECTED_COLOR)));
     return value;
 }
 
@@ -764,6 +771,29 @@ void SliderModelNG::SetChangeValue(FrameNode* frameNode, double value, int32_t m
     auto pattern = frameNode->GetPattern<SliderPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSliderValue(value, mode);
+}
+
+bool SliderModelNG::GetEnableHapticFeedback(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_RETURN(sliderPattern, true);
+    return sliderPattern->GetEnableHapticFeedback();
+}
+
+void SliderModelNG::SetEnableHapticFeedback(bool isEnableHapticFeedback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetEnableHapticFeedback(frameNode, isEnableHapticFeedback);
+}
+
+void SliderModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(sliderPattern);
+    sliderPattern->SetEnableHapticFeedback(isEnableHapticFeedback);
 }
 
 Dimension SliderModelNG::GetThickness(FrameNode* frameNode)

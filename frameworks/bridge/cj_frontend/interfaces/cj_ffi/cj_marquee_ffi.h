@@ -29,6 +29,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkMarqueeSetFontColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkMarqueeSetFontSize(double value, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkMarqueeSetFontWeight(const char* fontWeight);
 CJ_EXPORT void FfiOHOSAceFrameworkMarqueeSetFontFamily(const char* fontFamily);
+CJ_EXPORT void FfiOHOSAceFrameworkMarqueeSetMarqueeUpdateStrategy(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkMarqueeOnStart(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkMarqueeOnBounce(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkMarqueeOnFinish(void (*callback)());

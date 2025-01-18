@@ -28,6 +28,7 @@ public:
     void DividerColor(const Color& value) override;
     void StrokeWidth(const Dimension& value) override;
     void LineCap(const enum LineCap& value) override;
+    void ResetDividerColor() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void StrokeWidth(FrameNode* frameNode, const Dimension& value);
     static void LineCap(FrameNode* frameNode, const enum LineCap& value);

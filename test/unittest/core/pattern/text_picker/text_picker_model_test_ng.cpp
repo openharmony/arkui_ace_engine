@@ -265,6 +265,58 @@ HWTEST_F(TextPickerModelTestNg, SetValue001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SetColumnWidths001
+ * @tc.desc: Test SetColumnWidths
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetColumnWidths001, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(50.0f, DimensionUnit::PERCENT));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto widthSize = pattern->GetColumnWidths().size();
+    EXPECT_EQ(widthSize, 1);
+    EXPECT_EQ(pattern->GetColumnWidths().at(0).Value(), 50.0f);
+}
+
+/**
+ * @tc.name: SetColumnWidths002
+ * @tc.desc: Test SetColumnWidths
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, SetColumnWidths002, TestSize.Level1)
+{
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    TextPickerModelNG::GetInstance()->Create(theme, TEXT);
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(50.0f, DimensionUnit::PERCENT));
+    width.emplace_back(Dimension(20.0f, DimensionUnit::PERCENT));
+    width.emplace_back(Dimension(30.0f, DimensionUnit::PERCENT));
+    TextPickerModelNG::GetInstance()->SetColumnWidths(width);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto widthSize = pattern->GetColumnWidths().size();
+    EXPECT_EQ(widthSize, 3);
+    EXPECT_EQ(pattern->GetColumnWidths().at(0).Value(), 50.0f);
+    EXPECT_EQ(pattern->GetColumnWidths().at(1).Value(), 20.0f);
+    EXPECT_EQ(pattern->GetColumnWidths().at(2).Value(), 30.0f);
+}
+
+/**
  * @tc.name: IsSingle001
  * @tc.desc: Test IsSingle
  * @tc.type: FUNC
@@ -347,6 +399,7 @@ HWTEST_F(TextPickerModelTestNg, SetTextPickerDialogShow001, TestSize.Level1)
     auto onAcceptFunc = [](const std::string&) {};
     auto onChangeFunc = [](const std::string&) {};
     auto onScrollStopFunc = [](const std::string&) {};
+    auto onEnterSelectedAreaFunc = [](const std::string&) {};
 
     TextPickerDialog textPickerDialog = {
         .height = 16.0_vp,
@@ -367,8 +420,8 @@ HWTEST_F(TextPickerModelTestNg, SetTextPickerDialogShow001, TestSize.Level1)
     };
     std::vector<ButtonInfo> buttonInfos;
     TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData,
-        onCancelFunc, onAcceptFunc, onChangeFunc, onScrollStopFunc, textPickerDialog, textPickerDialogEvent,
-        buttonInfos);
+        onCancelFunc, onAcceptFunc, onChangeFunc, onScrollStopFunc, onEnterSelectedAreaFunc, textPickerDialog,
+        textPickerDialogEvent, buttonInfos);
     EXPECT_EQ(textPickerDialog.alignment, DialogAlignment::CENTER);
 }
 
@@ -594,6 +647,48 @@ HWTEST_F(TextPickerModelTestNg, StaticSetValues001, TestSize.Level1)
     EXPECT_FALSE(TextPickerModelNG::getTextPickerValues(AceType::RawPtr(frameNode)).empty());
 }
 
+/**
+ * @tc.name: StaticSetColumnWidths001
+ * @tc.desc: Test static SetColumnWidths GetColumnWidths
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, StaticSetColumnWidths001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(50.0f, DimensionUnit::PERCENT));
+    width.emplace_back(Dimension(20.0f, DimensionUnit::PERCENT));
+    width.emplace_back(Dimension(30.0f, DimensionUnit::PERCENT));
+    TextPickerModelNG::SetColumnWidths(AceType::RawPtr(frameNode), width);
+    auto columnWidths = TextPickerModelNG::GetColumnWidths(AceType::RawPtr(frameNode));
+    EXPECT_EQ(columnWidths.size(), width.size());
+    EXPECT_EQ(columnWidths.at(0).Value(), 50.0f);
+    EXPECT_EQ(columnWidths.at(1).Value(), 20.0f);
+    EXPECT_EQ(columnWidths.at(2).Value(), 30.0f);
+}
+
+/**
+ * @tc.name: StaticGetColumnWidthsSize001
+ * @tc.desc: Test static GetColumnWidthsSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerModelTestNg, StaticGetColumnWidthsSize001, TestSize.Level1)
+{
+    auto frameNode = TextPickerModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(frameNode, nullptr);
+    auto textPickerPattern = frameNode->GetPattern<TextPickerPattern>();
+    ASSERT_NE(textPickerPattern, nullptr);
+    std::vector<Dimension> width;
+    width.emplace_back(Dimension(50.0f, DimensionUnit::PERCENT));
+    width.emplace_back(Dimension(20.0f, DimensionUnit::PERCENT));
+    width.emplace_back(Dimension(30.0f, DimensionUnit::PERCENT));
+    TextPickerModelNG::SetColumnWidths(AceType::RawPtr(frameNode), width);
+    auto columnWidthsSize = TextPickerModelNG::GetColumnWidthsSize(AceType::RawPtr(frameNode));
+    EXPECT_EQ(columnWidthsSize, width.size());
+}
 /**
  * @tc.name: StaticSetDivider001
  * @tc.desc: Test static SetDivider

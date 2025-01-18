@@ -119,6 +119,35 @@ static napi_value JSSetIconColor(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
+static void SetFrameProperty(napi_env env, napi_value jsFrame, const char* propertyName, float value)
+{
+    napi_value napiValue = nullptr;
+    napi_create_double(env, value, &napiValue);
+    napi_set_named_property(env, jsFrame, propertyName, napiValue);
+}
+
+static napi_value JSGetBarRect(napi_env env, napi_callback_info info)
+{
+    auto appBar = ObtainAppBar();
+    CHECK_NULL_RETURN(appBar, nullptr);
+    NG::RectF barRect(0, 0, 0, 0);
+    std::optional<NG::RectF> rectOpt = appBar->GetAppBarRect();
+    if (rectOpt) {
+        const NG::RectF& rect = rectOpt.value();
+        barRect.SetLeft(Dimension(rect.Left(), DimensionUnit::PX).ConvertToVp());
+        barRect.SetTop(Dimension(rect.Top(), DimensionUnit::PX).ConvertToVp());
+        barRect.SetWidth(Dimension(rect.Width(), DimensionUnit::PX).ConvertToVp());
+        barRect.SetHeight(Dimension(rect.Height(), DimensionUnit::PX).ConvertToVp());
+    }
+    napi_value jsFrame = nullptr;
+    napi_create_object(env, &jsFrame);
+    SetFrameProperty(env, jsFrame, "x", barRect.Left());
+    SetFrameProperty(env, jsFrame, "y", barRect.Top());
+    SetFrameProperty(env, jsFrame, "width", barRect.Width());
+    SetFrameProperty(env, jsFrame, "height", barRect.Height());
+    return jsFrame;
+}
+
 static napi_value Export(napi_env env, napi_value exports)
 {
     napi_property_descriptor properties[] = {
@@ -127,6 +156,7 @@ static napi_value Export(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("setTitleContent", JSSetTitleContent),
         DECLARE_NAPI_FUNCTION("setTitleFontStyle", JSSetTitleFontStyle),
         DECLARE_NAPI_FUNCTION("setIconColor", JSSetIconColor),
+        DECLARE_NAPI_FUNCTION("getBarRect", JSGetBarRect),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(properties) / sizeof(properties[0]), properties));
     return exports;

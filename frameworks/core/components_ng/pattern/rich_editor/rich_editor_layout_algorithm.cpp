@@ -135,6 +135,32 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContentSize(
     return SizeF(pManager_->GetMaxWidth(), pManager_->GetHeight());
 }
 
+LayoutConstraintF RichEditorLayoutAlgorithm::ReMeasureContent(
+    SizeF& textSize, const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto newContentConstraint = contentConstraint;
+    auto pattern = GetRichEditorPattern(layoutWrapper);
+    CHECK_NULL_RETURN(pattern, newContentConstraint);
+    auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, newContentConstraint);
+    if (pattern->GetMaxLinesHeight() != FLT_MAX && layoutProperty->GetMaxLinesValue(INT32_MAX) == INT32_MAX) {
+        newContentConstraint.maxSize.SetHeight(pattern->GetMaxLinesHeight());
+        return newContentConstraint;
+    }
+    if (pattern->GetMaxLines() == INT32_MAX || pManager_->GetHeight() <= 0.0f) {
+        return newContentConstraint;
+    }
+    pattern->SetMaxLinesHeight(pManager_->GetHeight());
+    newContentConstraint.maxSize.SetHeight(pattern->GetMaxLinesHeight());
+    layoutProperty->UpdateMaxLines(INT32_MAX);
+    TextStyle textStyle;
+    ConstructTextStyles(newContentConstraint, layoutWrapper, textStyle);
+    CHECK_NULL_RETURN(BuildParagraph(textStyle, layoutProperty, newContentConstraint, layoutWrapper), {});
+    pManager_->SetParagraphs(GetParagraphs());
+    textSize = SizeF(pManager_->GetMaxWidth(), pManager_->GetHeight());
+    return newContentConstraint;
+}
+
 std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
@@ -145,11 +171,12 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         ? MeasureEmptyContentSize(contentConstraint, layoutWrapper)
         : MeasureContentSize(contentConstraint, layoutWrapper);
     CHECK_NULL_RETURN(optionalTextSize, {});
+    auto newContentConstraint = ReMeasureContent(optionalTextSize.value(), contentConstraint, layoutWrapper);
     SizeF res = optionalTextSize.value();
     res.AddHeight(spans_.empty() ? 0 : shadowOffset_);
     CHECK_NULL_RETURN(res.IsNonNegative(), {});
     UpdateRichTextRect(optionalTextSize.value(), layoutWrapper);
-    auto maxHeight = contentConstraint.selfIdealSize.Height().value_or(contentConstraint.maxSize.Height());
+    auto maxHeight = newContentConstraint.selfIdealSize.Height().value_or(newContentConstraint.maxSize.Height());
     auto contentHeight = std::min(res.Height(), maxHeight);
     return SizeF(res.Width(), contentHeight);
 }
@@ -157,6 +184,9 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
 bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
+    auto pattern = GetRichEditorPattern(layoutWrapper);
+    CHECK_NULL_RETURN(pattern, {});
+    layoutProperty->UpdateMaxLines(pattern->GetMaxLines());
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
     if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(u""), layoutWrapper, maxSize.Width())) {
         return false;
@@ -314,7 +344,7 @@ std::string RichEditorLayoutAlgorithm::SpansToString()
         ss << "[";
         for_each(list.begin(), list.end(), [&ss](const RefPtr<SpanItem>& item) {
 #ifndef IS_RELEASE_VERSION
-            ss << "(" << StringUtils::RestoreEscape(UtfUtils::Str16ToStr8(item->content)) << ")";
+            ss << "(" << StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(item->content)) << ")";
 #endif
             ss << "[" << item->rangeStart << ":" << item->position << "],";
         });

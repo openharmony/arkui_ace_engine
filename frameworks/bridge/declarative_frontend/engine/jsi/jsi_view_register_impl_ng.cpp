@@ -136,6 +136,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
 
@@ -143,7 +144,9 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #else
 #include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
+#ifdef QRCODEGEN_SUPPORT
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
+#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #endif
 
@@ -366,11 +369,12 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSParagraphStyleSpan::JSBind(globalObj);
     JSLineHeightSpan::JSBind(globalObj);
     JSUrlSpan::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
+#ifndef ARKUI_WEARABLE
     JSCalendarPicker::JSBind(globalObj);
+    JSCalendarPickerDialog::JSBind(globalObj);
 #endif
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
@@ -388,6 +392,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRichEditorStyledStringController::JSBind(globalObj);
     JSLayoutManager::JSBind(globalObj);
     JSContainerModal::JSBind(globalObj);
+    JSAppBar::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);
@@ -546,12 +551,16 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSContainerSpan::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
+#ifdef QRCODEGEN_SUPPORT
     JSBindLibs("arkui.qrcode", "QRCode");
+#endif
     JSBindLibs("arkui.relativeContainer", "RelativeContainer");
     JSBindLibs("arkui.patternlock", "PatternLock");
     JSBindLibs("arkui.patternlockcontroller", "PatternLockController", true);
 #else
+#ifdef QRCODEGEN_SUPPORT
     JSQRCode::JSBind(globalObj);
+#endif
     JSRelativeContainer::JSBind(globalObj);
     JSPatternLock::JSBind(globalObj);
     JSPatternLockController::JSBind(globalObj);

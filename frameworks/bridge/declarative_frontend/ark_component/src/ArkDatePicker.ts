@@ -47,6 +47,10 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
     modifierWithKey(this._modifiersWithKeys, DatePickerBackgroundColorModifier.identity, DatePickerBackgroundColorModifier, value);
     return this;
   }
+  enableHapticFeedback(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, DatePickerEnableHapticFeedbackModifier.identity, DatePickerEnableHapticFeedbackModifier, value);
+    return this;
+  }
 }
 
 class DatePickerLunarModifier extends ModifierWithKey<boolean> {
@@ -165,6 +169,19 @@ class DatePickerBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class DatePickerEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('datePickerEnableHapticFeedback');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().datePicker.resetEnableHapticFeedback(node);
+    } else {
+      getUINativeModule().datePicker.setEnableHapticFeedback(node, this.value);
+    }
   }
 }
 

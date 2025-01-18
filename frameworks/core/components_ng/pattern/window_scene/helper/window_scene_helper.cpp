@@ -314,6 +314,11 @@ bool WindowSceneHelper::IsTransformScene(uint32_t type)
     return type == static_cast<uint32_t>(WindowPatternType::TRANSFORM_SCENE);
 }
 
+bool WindowSceneHelper::IsAppOrSubScene(uint32_t type)
+{
+    return type == static_cast<uint32_t>(WindowPatternType::WINDOW_SCENE);
+}
+
 bool WindowSceneHelper::IsSystemWindowScene(uint32_t type)
 {
     return type == static_cast<uint32_t>(WindowPatternType::SYSTEM_WINDOW_SCENE);

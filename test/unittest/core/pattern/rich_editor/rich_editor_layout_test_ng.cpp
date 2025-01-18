@@ -250,7 +250,7 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm001, TestSize.Level1)
     auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
     layoutAlgorithm->paragraphManager_ = paragraphManager;
 
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     layoutAlgorithm->spans_.emplace_back(richEditorPattern->spans_);
     layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
 

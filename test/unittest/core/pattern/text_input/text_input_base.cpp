@@ -41,6 +41,13 @@ void TextInputBases::SetUpTestSuite()
             }
             return textFieldTheme;
         });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([textFieldTheme = textFieldTheme](ThemeType type, int themeScopeId) -> RefPtr<Theme> {
+            if (type == ScrollBarTheme::TypeId()) {
+                return AceType::MakeRefPtr<ScrollBarTheme>();
+            }
+            return textFieldTheme;
+        });
     MockPipelineContext::GetCurrent()->SetMinPlatformVersion(MIN_PLATFORM_VERSION);
     MockPipelineContext::GetCurrent()->SetTextFieldManager(AceType::MakeRefPtr<TextFieldManagerNG>());
     MockContainer::Current()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
@@ -75,6 +82,8 @@ void TextInputBases::ExpectCallParagraphMethods(ExpectParagraphParams params)
     EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(params.longestLine));
     EXPECT_CALL(*paragraph, GetMaxWidth()).WillRepeatedly(Return(params.maxWidth));
     EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(params.lineCount));
+    ParagraphStyle paragraphStyle;
+    EXPECT_CALL(*paragraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(paragraphStyle));
 }
 
 void TextInputBases::CreateTextField(

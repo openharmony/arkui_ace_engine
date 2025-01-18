@@ -85,8 +85,12 @@ RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(symbol);
-    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextAlign(TextAlign::CENTER);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty) {
+        textLayoutProperty->UpdateContent(symbol);
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+        textLayoutProperty->UpdateTextColorFlagByUser(false);
+    }
     textNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetControlWidth()), CalcLength(counterTheme->GetHeight())));
     textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);

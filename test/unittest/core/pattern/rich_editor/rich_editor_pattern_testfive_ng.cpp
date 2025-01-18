@@ -718,7 +718,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleOnDragInsertStyledString001, TestSiz
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_U16VALUE2);
+    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_VALUE2);
     richEditorPattern->HandleOnDragInsertStyledString(spanStringRef);
     EXPECT_FALSE(richEditorPattern->isDragSponsor_);
 }
@@ -733,7 +733,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleOnDragInsertStyledString002, TestSiz
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_U16VALUE2);
+    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_VALUE2);
     richEditorPattern->isDragSponsor_ = true;
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->HandleOnDragInsertStyledString(spanStringRef);
@@ -750,7 +750,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleOnDragInsertStyledString003, TestSiz
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_U16VALUE2);
+    RefPtr<SpanString> spanStringRef = AceType::MakeRefPtr<SpanString>(PREVIEW_TEXT_VALUE2);
     richEditorPattern->isDragSponsor_ = true;
     richEditorPattern->caretPosition_ = 1;
     richEditorPattern->dragRange_ = { 2, 8 };
@@ -771,8 +771,8 @@ HWTEST_F(RichEditorPatternTestFiveNg, InsertValueToBeforeSpan001, TestSize.Level
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto spanNodeBefore = SpanNode::GetOrCreateSpanNode(V2::RICH_EDITOR_ETS_TAG, nodeId);
-    string insertValue = PREVIEW_TEXT_VALUE3;
-    spanNodeBefore->GetSpanItem()->content = PREVIEW_TEXT_U16VALUE2;
+    std::u16string insertValue = PREVIEW_TEXT_VALUE3;
+    spanNodeBefore->GetSpanItem()->content = PREVIEW_TEXT_VALUE2;
     richEditorPattern->InsertValueToBeforeSpan(spanNodeBefore, insertValue);
     EXPECT_EQ(spanNodeBefore->GetSpanItem()->position, 4);
 }
@@ -790,7 +790,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, InsertValueToBeforeSpan002, TestSize.Level
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto spanNodeBefore = SpanNode::GetOrCreateSpanNode(V2::RICH_EDITOR_ETS_TAG, nodeId);
-    spanNodeBefore->GetSpanItem()->content = EXCEPT_U16VALUE;
+    spanNodeBefore->GetSpanItem()->content = EXCEPT_VALUE;
     richEditorPattern->InsertValueToBeforeSpan(spanNodeBefore, EXCEPT_VALUE);
     EXPECT_EQ(spanNodeBefore->GetSpanItem()->position, -1);
 }
@@ -1230,7 +1230,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleOnDragInsertValue001, TestSize.Level
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    std::string insertValue;
+    std::u16string insertValue;
     richEditorPattern->textSelector_.baseOffset = -2;
     richEditorPattern->textSelector_.destinationOffset = -2;
     richEditorPattern->HandleOnDragInsertValue(insertValue);
@@ -1247,7 +1247,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, HandleOnDragInsertValue002, TestSize.Level
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
-    std::string insertValue;
+    std::u16string insertValue;
     richEditorPattern->textSelector_.baseOffset = 1;
     richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->HandleOnDragInsertValue(insertValue);
@@ -1353,7 +1353,7 @@ HWTEST_F(RichEditorPatternTestFiveNg, SetSubSpans001, TestSize.Level1)
     spanItem1->position = 0;
     richEditorPattern->spans_.push_back(spanItem);
     richEditorPattern->spans_.push_back(spanItem1);
-    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(INIT_U16VALUE_1);
+    RefPtr<SpanString> spanString = AceType::MakeRefPtr<SpanString>(INIT_VALUE_1);
     richEditorPattern->SetSubSpans(spanString, 1, 1);
     EXPECT_EQ(spanString->spans_.size(), 0);
 }

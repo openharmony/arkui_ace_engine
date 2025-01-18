@@ -201,6 +201,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_001, TestSize.Level1)
     webpattern.OnVerticalScrollBarAccessEnabledUpdate(true);
     webpattern.OnAudioResumeIntervalUpdate(0);
     webpattern.OnAudioExclusiveUpdate(true);
+    webpattern.OnOptimizeParserBudgetEnabledUpdate(true);
 #endif
 }
 
@@ -252,6 +253,7 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_002, TestSize.Level1)
     webPattern->OnAllowWindowOpenMethodUpdate(true);
     webPattern->OnHorizontalScrollBarAccessEnabledUpdate(true);
     webPattern->OnVerticalScrollBarAccessEnabledUpdate(true);
+    webPattern->OnOptimizeParserBudgetEnabledUpdate(true);
 #endif
 }
 
@@ -668,6 +670,76 @@ HWTEST_F(WebPatternTestNg, UpdateJavaScriptOnDocumentEndByOrder005, TestSize.Lev
     webPattern->onDocumentEndScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
     webPattern->UpdateJavaScriptOnDocumentEndByOrder();
     EXPECT_TRUE(webPattern->onDocumentEndScriptItems_.has_value());
+#endif
+}
+
+/**
+ * @tc.name: JavaScriptOnHeadReadyByOrder001
+ * @tc.desc: JavaScriptOnHeadReadyByOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, JavaScriptOnHeadReadyByOrder001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    webPattern->delegate_ = nullptr;
+    std::map<std::string, std::vector<std::string>> scriptItems;
+    std::vector<std::string> scriptItemsByOrder;
+    std::string group = "group";
+    std::vector<std::string> vec;
+    vec.push_back("main");
+    scriptItems.insert(std::make_pair(group, vec));
+    webPattern->JavaScriptOnHeadReadyByOrder(scriptItems, scriptItemsByOrder);
+    EXPECT_EQ(webPattern->delegate_, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: UpdateJavaScriptOnHeadReadyByOrder001
+ * @tc.desc: UpdateJavaScriptOnHeadReadyByOrder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternTestNg, UpdateJavaScriptOnHeadReadyByOrder001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    std::map<std::string, std::vector<std::string>> scriptItems;
+    std::vector<std::string> scriptItemsByOrder;
+    std::string group = "group";
+    std::vector<std::string> vec;
+    vec.push_back("main");
+    scriptItems.insert(std::make_pair(group, vec));
+    webPattern->onHeadReadyScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->onHeadReadyScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    webPattern->UpdateJavaScriptOnHeadReadyByOrder();
+    EXPECT_FALSE(webPattern->onHeadReadyScriptItems_.has_value());
+    webPattern->UpdateJavaScriptOnHeadReadyByOrder();
+    webPattern->delegate_ = nullptr;
+    webPattern->UpdateJavaScriptOnHeadReadyByOrder();
+    webPattern->onHeadReadyScriptItems_ = std::make_optional<ScriptItems>(scriptItems);
+    webPattern->onHeadReadyScriptItemsByOrder_ = std::make_optional<ScriptItemsByOrder>(scriptItemsByOrder);
+    webPattern->UpdateJavaScriptOnHeadReadyByOrder();
+    EXPECT_TRUE(webPattern->onHeadReadyScriptItems_.has_value());
 #endif
 }
 

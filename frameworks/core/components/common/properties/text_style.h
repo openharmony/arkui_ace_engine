@@ -142,7 +142,7 @@ inline std::string ToString(const EllipsisMode& ellipsisMode)
 }
 } // namespace StringUtils
 
-enum class WordBreak { NORMAL = 0, BREAK_ALL, BREAK_WORD };
+enum class WordBreak { NORMAL = 0, BREAK_ALL, BREAK_WORD, HYPHENATION };
 extern const std::vector<WordBreak> WORD_BREAK_TYPES;
 extern const std::vector<LineBreakStrategy> LINE_BREAK_STRATEGY_TYPES;
 namespace StringUtils {
@@ -152,6 +152,7 @@ inline std::string ToString(const WordBreak& wordBreak)
         { WordBreak::NORMAL, "NORMAL" },
         { WordBreak::BREAK_ALL, "BREAK_ALL" },
         { WordBreak::BREAK_WORD, "BREAK_WORD" },
+        { WordBreak::HYPHENATION, "HYPHENATION" },
     };
     auto iter = BinarySearchFindIndex(table, ArraySize(table), wordBreak);
     return iter != -1 ? table[iter].value : "";
@@ -865,6 +866,7 @@ inline FontWeight StringToFontWeight(const std::string& weight, FontWeight defau
 inline WordBreak StringToWordBreak(const std::string& wordBreak)
 {
     static const LinearMapNode<WordBreak> wordBreakTable[] = {
+        { "hyphenation", WordBreak::HYPHENATION },
         { "break-all", WordBreak::BREAK_ALL },
         { "break-word", WordBreak::BREAK_WORD },
         { "normal", WordBreak::NORMAL },

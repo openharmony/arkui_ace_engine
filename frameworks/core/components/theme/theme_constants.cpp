@@ -66,17 +66,14 @@ void ThemeConstants::InitDeviceType()
 
 const ResValueWrapper* ThemeConstants::GetPlatformConstants(uint32_t key)
 {
-#ifdef WEARABLE_PRODUCT
     if (g_deviceType == DeviceType::WATCH && key < ThemeConstants::WatchMapCount &&
         ThemeConstants::styleMapWatch[key] != nullptr) {
         return ThemeConstants::styleMapWatch[key];
     }
-#else
     if (g_deviceType == DeviceType::TV && key < ThemeConstants::TvMapCount &&
         ThemeConstants::styleMapTv[key] != nullptr) {
         return ThemeConstants::styleMapTv[key];
     }
-#endif
     if (key < ThemeConstants::DefaultMapCount) {
         return ThemeConstants::styleMapDefault[key];
     }

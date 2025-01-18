@@ -44,12 +44,13 @@ void PasteButtonModelNG::Create(int32_t text, int32_t icon,
 }
 
 RefPtr<FrameNode> PasteButtonModelNG::CreateNode(int32_t text, int32_t icon,
-    int32_t backgroundType, bool isArkuiComponent)
+    int32_t backgroundType, bool isArkuiComponent, uint32_t symbolIcon)
 {
     SecurityComponentElementStyle style = {
         .text = text,
         .icon = icon,
-        .backgroundType = backgroundType
+        .backgroundType = backgroundType,
+        .symbolIcon = symbolIcon
     };
     return SecurityComponentModelNG::CreateNode(V2::PASTE_BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(),

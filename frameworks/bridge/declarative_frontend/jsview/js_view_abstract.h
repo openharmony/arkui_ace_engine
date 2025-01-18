@@ -145,6 +145,7 @@ public:
     static void JsBackgroundImageSize(const JSCallbackInfo& info);
     static void JsBackgroundImagePosition(const JSCallbackInfo& info);
     static void ParseBlurOption(const JSRef<JSObject>& jsBlurOption, BlurOption& blurOption);
+    static void ParseBackgroundImageOption(const JSCallbackInfo& jsOption, int32_t& repeatIndex, bool& syncMode);
     static void ParseBlurStyleOption(const JSRef<JSObject>& jsOption, BlurStyleOption& styleOption);
     static void JsBackgroundBlurStyle(const JSCallbackInfo& info);
     static void JsBackgroundEffect(const JSCallbackInfo& info);
@@ -165,15 +166,19 @@ public:
     static void JsBindSheet(const JSCallbackInfo& info);
     static bool CheckJSCallbackInfo(
         const std::string& callerName, const JSRef<JSVal>& tmpInfo, std::vector<JSCallbackInfoType>& infoTypes);
-    static void ParseSheetIsShow(
-        const JSCallbackInfo& info, bool& isShow, std::function<void(const std::string&)>& callback);
+    static RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
+        const JSRef<JSObject>& object, const JSExecutionContext& context, const RefPtr<NG::FrameNode> node = nullptr);
+    static bool ParseSheetIsShow(
+        const JSCallbackInfo& info, const std::string& name, std::function<void(const std::string&)>& callback);
     static void ParseSheetStyle(
         const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle, bool isPartialUpdate = false);
+    static NG::SheetEffectEdge ParseSheetEffectEdge(const JSRef<JSObject>& paramObj);
     static void ParseBindSheetBorderRadius(const JSRef<JSVal>& args, NG::SheetStyle& sheetStyle);
     static bool ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, NG::BorderRadiusProperty& radius);
     static std::optional<CalcDimension> ParseBindSheetBorderRadiusProp(const JSRef<JSObject>& object, const char* prop);
+    static bool ParseSheetMode(const std::string heightStr, NG::SheetHeight& detent);
     static bool ParseSheetDetents(const JSRef<JSVal>& args, std::vector<NG::SheetHeight>& sheetDetents);
-    static void ParseSheetDetentHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent);
+    static bool ParseSheetHeight(const JSRef<JSVal>& args, NG::SheetHeight& detent, bool isReset);
     static bool ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, BlurStyleOption& blurStyleOptions);
     static bool ParseSheetLevel(const JSRef<JSVal>& args, NG::SheetLevel& sheetLevel);
     static void ParseCallback(const JSRef<JSObject>& paramObj,
@@ -300,7 +305,6 @@ public:
     static bool ParseJsLengthVpNG(const JSRef<JSVal>& jsValue, NG::CalcLength& result, bool isSupportPercent = true);
 
     // for number and string with no unit, use default dimension unit.
-    static bool ParseFlexSpaceToPositiveDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension& result, DimensionUnit defaultUnit);
     static bool ParseJsDimensionVp(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static bool ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimension& result);
@@ -340,6 +344,7 @@ public:
     static bool ParseJsInteger(const JSRef<JSVal>& jsValue, int32_t& result);
     static bool ParseJsIntegerArray(const JSRef<JSVal>& jsValue, std::vector<uint32_t>& result);
     static bool ParseJsStrArray(const JSRef<JSVal>& jsValue, std::vector<std::string>& result);
+    static bool ParseJsLengthMetricsArray(const JSRef<JSVal>& jsValue, std::vector<Dimension>& result);
     static bool IsGetResourceByName(const JSRef<JSObject>& jsObj);
     static bool GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static bool ParseShadowProps(const JSRef<JSVal>& jsValue, Shadow& shadow);
@@ -424,6 +429,7 @@ public:
     static void JsFocusBox(const JSCallbackInfo& info);
     static void JsOnFocusMove(const JSCallbackInfo& args);
     static void JsOnKeyEvent(const JSCallbackInfo& args);
+    static void JsDispatchKeyEvent(const JSCallbackInfo& args);
     static void JsOnFocus(const JSCallbackInfo& args);
     static void JsOnBlur(const JSCallbackInfo& args);
     static void JsTabIndex(const JSCallbackInfo& info);
@@ -451,6 +457,8 @@ public:
     static void JsAccessibilityChecked(const JSCallbackInfo& info);
     static void JsAccessibilityRole(const JSCallbackInfo& info);
     static void JsOnAccessibilityFocus(const JSCallbackInfo& info);
+    static void JsAccessibilityDefaultFocus(const JSCallbackInfo& info);
+    static void JsAccessibilityUseSamePage(const JSCallbackInfo& info);
     static void JsAllowDrop(const JSCallbackInfo& info);
     static void JsDrawModifier(const JSCallbackInfo& info);
     static void JsDragPreview(const JSCallbackInfo& info);
@@ -469,6 +477,7 @@ public:
 
     static void JsBackgroundImageResizable(const JSCallbackInfo& info);
     static void JsSetDragEventStrictReportingEnabled(const JSCallbackInfo& info);
+    static void JsCancelDataLoading(const std::string& key);
     static void SetSymbolOptionApply(const JSCallbackInfo& info,
         std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const JSRef<JSVal> modifierObj);
     static void SetTextStyleApply(const JSCallbackInfo& info,
@@ -480,12 +489,19 @@ public:
         const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam);
     static PopupOnWillDismiss ParsePopupCallback(const JSCallbackInfo& info, const JSRef<JSObject>& paramObj);
     static panda::Local<panda::JSValueRef> JsDismissPopup(panda::JsiRuntimeCallInfo* runtimeCallInfo);
+    static void ParseContentPopupCommonParam(
+        const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam);
+    static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode);
+    static int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode);
+    static int32_t ClosePopup(const RefPtr<NG::UINode>& customNode);
+    static int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode);
 #endif
 
     /**
      * Binds the native methods to the the js object
      */
     static void JSBind(BindingTarget globalObj);
+    static void JsNotifyDragStartRequest(const JSCallbackInfo& info);
     static void ParseDialogCallback(const JSRef<JSObject>& paramObj,
         std::function<void(const int32_t& info, const int32_t& instanceId)>& onWillDismiss);
     static panda::Local<panda::JSValueRef> JsDismissDialog(panda::JsiRuntimeCallInfo* runtimeCallInfo);
@@ -660,6 +676,7 @@ public:
     static NG::BorderRadiusProperty GetLocalizedBorderRadius(const std::optional<Dimension>& radiusTopStart,
         const std::optional<Dimension>& radiusTopEnd, const std::optional<Dimension>& radiusBottomStart,
         const std::optional<Dimension>& radiusBottomEnd);
+    static void ParseDetentSelection(const JSRef<JSObject>& paramObj, NG::SheetStyle& sheetStyle);
 
 private:
     static bool ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& result);

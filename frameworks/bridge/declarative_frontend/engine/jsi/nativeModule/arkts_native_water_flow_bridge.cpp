@@ -480,35 +480,6 @@ ArkUINativeModuleValue WaterFlowBridge::ResetCachedCount(ArkUIRuntimeCallInfo* r
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue WaterFlowBridge::SetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> argSpeed = runtimeCallInfo->GetCallArgRef(NUM_1);
-    CHECK_NULL_RETURN(argNode->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
-    double limitSpeed = -1.0;
-    if (!ArkTSUtils::ParseJsDouble(vm, argSpeed, limitSpeed)) {
-        GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowFlingSpeedLimit(nativeNode);
-    } else {
-        GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowFlingSpeedLimit(
-            nativeNode, static_cast<ArkUI_Float32>(limitSpeed));
-    }
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue WaterFlowBridge::ResetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(NUM_0);
-    CHECK_NULL_RETURN(argNode->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowFlingSpeedLimit(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
 void SetWaterFlowScroller(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

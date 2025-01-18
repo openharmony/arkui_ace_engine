@@ -118,6 +118,25 @@ void JSInteractableView::JsOnKeyPreIme(const JSCallbackInfo& args)
     ViewAbstractModel::GetInstance()->SetOnKeyPreIme(std::move(onPreImeEvent));
 }
 
+void JSInteractableView::JsOnKeyEventDispatch(const JSCallbackInfo& args)
+{
+    if (args[0]->IsUndefined() || !args[0]->IsFunction()) {
+        ViewAbstractModel::GetInstance()->DisableOnKeyEventDispatch();
+        return;
+    }
+    RefPtr<JsKeyFunction> JsOnKeyEventDispatch = AceType::MakeRefPtr<JsKeyFunction>(JSRef<JSFunc>::Cast(args[0]));
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onKeyEventDispatch = [execCtx = args.GetExecutionContext(), func = std::move(JsOnKeyEventDispatch),
+                             node = frameNode](KeyEventInfo& keyEvent) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, false);
+        ACE_SCORING_EVENT("onKeyEventDispatch");
+        PipelineContext::SetCallBackNode(node);
+        auto ret = func->ExecuteWithValue(keyEvent);
+        return ret->IsBoolean() ? ret->ToBoolean() : false;
+    };
+    ViewAbstractModel::GetInstance()->SetOnKeyEventDispatch(std::move(onKeyEventDispatch));
+}
+
 void JSInteractableView::JsOnHover(const JSCallbackInfo& info)
 {
     if (info[0]->IsUndefined() && IsDisableEventVersion()) {
@@ -410,20 +429,21 @@ std::function<void()> JSInteractableView::GetRemoteMessageEventCallback(const JS
 }
 
 #if !defined(PREVIEW) && defined(OHOS_PLATFORM)
-void JSInteractableView::ReportClickEvent(const WeakPtr<NG::FrameNode>& node, const std::u16string text)
+void JSInteractableView::ReportClickEvent(const WeakPtr<NG::FrameNode>& weakNode, const std::u16string text)
 {
     if (UiSessionManager::GetInstance().GetClickEventRegistered()) {
         auto data = JsonUtil::Create();
         data->Put("event", "onClick");
         std::u16string content = text;
-        if (!node.Invalid()) {
-            data->Put("id", node.GetRawPtr()->GetId());
-            auto children = node.GetRawPtr()->GetChildren();
+        auto node = weakNode.Upgrade();
+        if (node) {
+            data->Put("id", node->GetId());
+            auto children = node->GetChildren();
             if (!children.empty()) {
-                node.GetRawPtr()->GetContainerComponentText(content);
+                node->GetContainerComponentText(content);
             }
-            data->Put("text", UtfUtils::Str16ToStr8(content).data());
-            data->Put("position", node.GetRawPtr()->GetGeometryNode()->GetFrameRect().ToString().data());
+            data->Put("text", UtfUtils::Str16DebugToStr8(content).data());
+            data->Put("position", node->GetGeometryNode()->GetFrameRect().ToString().data());
         }
         UiSessionManager::GetInstance().ReportClickEvent(data->ToString());
     }

@@ -73,6 +73,7 @@ public:
     float GetBoundHeight() const override;
 private:
     void BeforeLayout();
+    void UpdateLayoutProperty();
     void UpdateErrorStyle();
 
 };

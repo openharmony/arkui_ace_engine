@@ -320,6 +320,15 @@ void SwiperModelNG::SetArcDotIndicatorStyle(FrameNode* frameNode, const SwiperAr
     pattern->SetSwiperArcDotParameters(swiperArcDotParameters);
 }
 
+void SwiperModelNG::SetBindIndicator(bool bind)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBindIndicator(bind);
+}
+
 void SwiperModelNG::SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -388,6 +397,25 @@ void SwiperModelNG::SetIndicatorIsBoolean(bool isBoolean)
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetIndicatorIsBoolean(isBoolean);
+}
+
+void SwiperModelNG::SetAutoPlayOptions(const SwiperAutoPlayOptions& swiperAutoPlayOptions)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetStopWhenTouched(swiperAutoPlayOptions.stopWhenTouched);
+}
+
+SwiperAutoPlayOptions SwiperModelNG::GetAutoPlayOptions(FrameNode* frameNode)
+{
+    SwiperAutoPlayOptions swiperAutoPlayOptions;
+    CHECK_NULL_RETURN(frameNode, swiperAutoPlayOptions);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_RETURN(pattern, swiperAutoPlayOptions);
+    swiperAutoPlayOptions.stopWhenTouched = pattern->IsStopWhenTouched();
+    return swiperAutoPlayOptions;
 }
 
 void SwiperModelNG::SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters)
@@ -470,6 +498,23 @@ void SwiperModelNG::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScroll
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
+}
+
+void SwiperModelNG::SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnContentWillScroll(std::move(onContentWillScroll));
+}
+
+void SwiperModelNG::SetOnContentWillScroll(FrameNode* frameNode, ContentWillScrollEvent&& onContentWillScroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnContentWillScroll(std::move(onContentWillScroll));
 }
 
 void SwiperModelNG::SetPageFlipMode(int32_t pageFlipMode)
@@ -635,6 +680,14 @@ void SwiperModelNG::SetCurve(FrameNode* frameNode, const RefPtr<Curve>& curve)
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwiperPaintProperty, Curve, curve, frameNode);
 }
 
+void SwiperModelNG::SetAutoPlayOptions(FrameNode* frameNode, const SwiperAutoPlayOptions& swiperAutoPlayOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetStopWhenTouched(swiperAutoPlayOptions.stopWhenTouched);
+}
+
 void SwiperModelNG::SetArrowStyle(FrameNode* frameNode, const SwiperArrowParameters& swiperArrowParameters)
 {
     if (swiperArrowParameters.isShowBackground.has_value()) {
@@ -714,6 +767,14 @@ void SwiperModelNG::SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParam
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperParameters(swiperParameters);
+}
+
+void SwiperModelNG::SetBindIndicator(FrameNode* frameNode, bool bind)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBindIndicator(bind);
 }
 
 void SwiperModelNG::SetEnabled(FrameNode* frameNode, bool enabled)
@@ -896,6 +957,14 @@ void SwiperModelNG::SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool u
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ChangeIndex(index, useAnimation);
+}
+
+void SwiperModelNG::SetSwiperToIndex(FrameNode* frameNode, int32_t index, SwiperAnimationMode animationMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ChangeIndex(index, animationMode);
 }
 
 void SwiperModelNG::GetPreviousMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options)

@@ -246,8 +246,8 @@ bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
     if (isSvg_ && fillColor_ != info.fillColor_) {
         return false;
     }
-    return ((!pixmap_ && !info.pixmap_) ||
-               (pixmap_ && info.pixmap_ && pixmapBuffer_ == info.pixmap_->GetPixels())) &&
+    return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmapBuffer_ == info.pixmap_->GetPixels() &&
+                                               pixmap_->GetRawPixelMapPtr() == info.pixmap_->GetRawPixelMapPtr())) &&
            GetSrc() == info.GetSrc() && resourceId_ == info.resourceId_;
 }
 

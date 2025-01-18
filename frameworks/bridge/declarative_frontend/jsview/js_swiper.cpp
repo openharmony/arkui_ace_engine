@@ -30,6 +30,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
+#include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
@@ -81,6 +82,8 @@ namespace {
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
 const std::vector<SwiperDisplayMode> DISPLAY_MODE = { SwiperDisplayMode::STRETCH, SwiperDisplayMode::AUTO_LINEAR };
 const std::vector<SwiperIndicatorType> INDICATOR_TYPE = { SwiperIndicatorType::DOT, SwiperIndicatorType::DIGIT };
+const std::vector<SwiperAnimationMode> SWIPER_ANIMATION_MODE = { SwiperAnimationMode::NO_ANIMATION,
+    SwiperAnimationMode::DEFAULT_ANIMATION, SwiperAnimationMode::FAST_ANIMATION };
 const static int32_t DEFAULT_INTERVAL = 3000;
 const static int32_t DEFAULT_DURATION = 400;
 const static int32_t DEFAULT_DISPLAY_COUNT = 1;
@@ -214,6 +217,7 @@ void JSSwiper::JSBind(BindingTarget globalObj)
     JSClass<JSSwiper>::StaticMethod("customContentTransition", &JSSwiper::SetCustomContentTransition);
     JSClass<JSSwiper>::StaticMethod("onContentDidScroll", &JSSwiper::SetOnContentDidScroll);
     JSClass<JSSwiper>::StaticMethod("pageFlipMode", &JSSwiper::SetPageFlipMode);
+    JSClass<JSSwiper>::StaticMethod("onContentWillScroll", &JSSwiper::SetOnContentWillScroll);
     JSClass<JSSwiper>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -230,9 +234,23 @@ void JSSwiper::SetIndicatorInteractive(const JSCallbackInfo& info)
     }
 }
 
-void JSSwiper::SetAutoPlay(bool autoPlay)
+void JSSwiper::SetAutoPlay(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    bool autoPlay = false;
+    if (info[0]->IsBoolean()) {
+        autoPlay = info[0]->ToBoolean();
+    }
     SwiperModel::GetInstance()->SetAutoPlay(autoPlay);
+    SwiperAutoPlayOptions swiperAutoPlayOptions;
+    if (info.Length() > 1 && info[1]->IsObject()) {
+        auto obj = JSRef<JSObject>::Cast(info[1]);
+        GetAutoPlayOptionsInfo(obj, swiperAutoPlayOptions);
+    }
+
+    SwiperModel::GetInstance()->SetAutoPlayOptions(swiperAutoPlayOptions);
 }
 
 void JSSwiper::SetEnabled(const JSCallbackInfo& info)
@@ -751,6 +769,22 @@ void JSSwiper::SetDisplayArrow(const JSCallbackInfo& info)
     }
 }
 
+void JSSwiper::SetIndicatorController(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        return;
+    }
+
+    auto* jsIndicatorController = JSRef<JSObject>::Cast(info[0])->Unwrap<JSIndicatorController>();
+    if (!jsIndicatorController) {
+        return;
+    }
+
+    SwiperModel::GetInstance()->SetBindIndicator(true);
+    WeakPtr<NG::UINode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    jsIndicatorController->SetSwiperNode(targetNode);
+}
+
 void JSSwiper::SetIndicator(const JSCallbackInfo& info)
 {
     if (info.Length() < 1) {
@@ -761,6 +795,7 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
         SwiperModel::GetInstance()->SetShowIndicator(true);
         return;
     }
+    SwiperModel::GetInstance()->SetBindIndicator(false);
     if (info[0]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[0]);
         SwiperModel::GetInstance()->SetIndicatorIsBoolean(false);
@@ -779,6 +814,8 @@ void JSSwiper::SetIndicator(const JSCallbackInfo& info)
                 SwiperModel::GetInstance()->SetDotIndicatorStyle(swiperParameters);
                 SwiperModel::GetInstance()->SetIndicatorType(SwiperIndicatorType::DOT);
             }
+        } else if (typeParam->IsUndefined()) {
+            SetIndicatorController(info);
         } else {
             SwiperParameters swiperParameters = GetDotIndicatorInfo(obj);
             JSSwiperTheme::ApplyThemeToDotIndicatorForce(swiperParameters);
@@ -1206,12 +1243,19 @@ void JSSwiperController::ChangeIndex(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsNumber()) {
         return;
     }
-    int32_t index = -1;
+    int32_t index = args[0]->ToNumber<int32_t>();
+    if (args.Length() > 1 && args[1]->IsNumber()) {
+        int32_t animationMode = args[1]->ToNumber<int32_t>();
+        if (animationMode < 0 || animationMode >= static_cast<int32_t>(SWIPER_ANIMATION_MODE.size())) {
+            animationMode = 0;
+        }
+        controller_->ChangeIndex(index, SWIPER_ANIMATION_MODE[animationMode]);
+        return;
+    }
     bool useAnimation = false;
     if (args.Length() > 1 && args[1]->IsBoolean()) {
         useAnimation = args[1]->ToBoolean();
     }
-    index = args[0]->ToNumber<int32_t>();
     controller_->ChangeIndex(index, useAnimation);
 }
 
@@ -1392,6 +1436,35 @@ void JSSwiper::SetOnContentDidScroll(const JSCallbackInfo& info)
     SwiperModel::GetInstance()->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
 
+void JSSwiper::SetOnContentWillScroll(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+
+    if (info[0]->IsUndefined() || info[0]->IsNull()) {
+        SwiperModel::GetInstance()->SetOnContentWillScroll(nullptr);
+        return;
+    }
+
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto handler = AceType::MakeRefPtr<JsSwiperFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(handler)](
+                        const SwiperContentWillScrollResult& result) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        ACE_SCORING_EVENT("Swiper.onContentWillScroll");
+        auto ret = func->Execute(result);
+        if (!ret->IsBoolean()) {
+            return true;
+        }
+        return ret->ToBoolean();
+    };
+    SwiperModel::GetInstance()->SetOnContentWillScroll(std::move(callback));
+}
+
 void JSSwiper::SetPageFlipMode(const JSCallbackInfo& info)
 {
     // default value
@@ -1402,5 +1475,13 @@ void JSSwiper::SetPageFlipMode(const JSCallbackInfo& info)
     }
     JSViewAbstract::ParseJsInt32(info[0], value);
     SwiperModel::GetInstance()->SetPageFlipMode(value);
+}
+
+void JSSwiper::GetAutoPlayOptionsInfo(const JSRef<JSObject>& obj, SwiperAutoPlayOptions& swiperAutoPlayOptions)
+{
+    auto stopWhenTouched = obj->GetProperty("stopWhenTouched");
+    if (stopWhenTouched->IsBoolean()) {
+        swiperAutoPlayOptions.stopWhenTouched = stopWhenTouched->ToBoolean();
+    }
 }
 } // namespace OHOS::Ace::Framework

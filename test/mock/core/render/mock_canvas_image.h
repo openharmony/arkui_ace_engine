@@ -41,8 +41,20 @@ public:
         onFinishCallback_ = callback;
     }
 
+    RefPtr<PixelMap> GetPixelMap() const override
+    {
+        void* voidPtr = static_cast<void*>(new char[0]);
+        RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+        if (!needPixelMap) {
+            return nullptr;
+        }
+        return pixelMap;
+    }
+
     std::function<void()> redrawCallback_ = nullptr;
     std::function<void()> onFinishCallback_ = nullptr;
+
+    bool needPixelMap = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_RENDER_MOCK_CANVAS_IMAGE__H

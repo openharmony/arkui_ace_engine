@@ -20,6 +20,23 @@
 type DFXCommand = { what: string, viewId: number, isRecursive: boolean };
 type RecycleUpdateFunc = (elmtId: number, isFirstRender: boolean, recycleNode: ViewPU) => void;
 
+/**
+ * A decorator function that sets the static `isReusable_` property to `true`
+ * on the provided class. This decorator is automatically invoked when the generated component
+ * class in the transpiler has the `@Reusable` decorator prefix, as below:
+ * @Reusable
+ * class MyComponent { }
+ */
+function Reusable<T extends Constructor>(BaseClass: T): T {
+  stateMgmtConsole.debug(`@Reusable ${BaseClass.name}: Redefining isReusable_ as true.`);
+  Reflect.defineProperty(BaseClass.prototype, 'isReusable_', {
+    get: () => {
+      return true;
+    }
+  });
+  return BaseClass;
+}
+
 abstract class ViewPU extends PUV2ViewBase
   implements IViewPropertiesChangeSubscriber, IView {
 
@@ -31,13 +48,13 @@ abstract class ViewPU extends PUV2ViewBase
 
   private runReuse_: boolean = false;
 
-  private paramsGenerator_: () => Object;
+  public paramsGenerator_: () => Object;
 
   private watchedProps: Map<string, (propName: string) => void> = new Map<string, (propName: string) => void>();
 
   private recycleManager_: RecycleManager = undefined;
 
-  private hasBeenRecycled_: boolean = false;
+  public hasBeenRecycled_: boolean = false;
 
   private preventRecursiveRecycle_: boolean = false;
 
@@ -153,6 +170,7 @@ abstract class ViewPU extends PUV2ViewBase
     //this.id_ = elmtId == UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
 
     this.localStoragebackStore_ = undefined;
+
     stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
     PUV2ViewBase.arkThemeScopeManager?.onViewPUCreate(this)
@@ -300,7 +318,7 @@ abstract class ViewPU extends PUV2ViewBase
  * may enable the freezeWhenInActive.
  * @param active true for active, false for inactive
  */
-  public setActiveInternal(active: boolean): void {
+  public setActiveInternal(active: boolean, isReuse = false): void {
     stateMgmtProfiler.begin('ViewPU.setActive');
     if (this.isCompFreezeAllowed()) {
       this.setActiveCount(active);
@@ -313,7 +331,7 @@ abstract class ViewPU extends PUV2ViewBase
     for (const child of this.childrenWeakrefMap_.values()) {
       const childView: IView | undefined = child.deref();
       if (childView) {
-        childView.setActiveInternal(active);
+        childView.setActiveInternal(active, isReuse);
       }
     }
     stateMgmtProfiler.end();
@@ -825,6 +843,7 @@ abstract class ViewPU extends PUV2ViewBase
   // param is used by BuilderNode
   aboutToReuseInternal(param?: Object) {
     this.runReuse_ = true;
+    stateMgmtConsole.debug(`ViewPU ${this.debugInfo__()} aboutToReuseInternal`);
     stateMgmtTrace.scopedTrace(() => {
       if (this.paramsGenerator_ && typeof this.paramsGenerator_ === 'function') {
         const params = param ? param : this.paramsGenerator_();
@@ -848,19 +867,7 @@ abstract class ViewPU extends PUV2ViewBase
     } else {
       this.flushDelayCompleteRerender();
     }
-    this.childrenWeakrefMap_.forEach((weakRefChild) => {
-      const child = weakRefChild.deref();
-      if (child) {
-        if (child instanceof ViewPU) {
-          if (!child.hasBeenRecycled_ && !child.__isBlockRecycleOrReuse__) {
-            child.aboutToReuseInternal();
-          }
-        } else {
-          // FIXME fix for mixed V1 - V2 Hierarchies
-          throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
-        }
-      } // if child
-    });
+    this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doReuse);
     this.runReuse_ = false;
   }
 
@@ -870,6 +877,7 @@ abstract class ViewPU extends PUV2ViewBase
 
   aboutToRecycleInternal() {
     this.runReuse_ = true;
+    stateMgmtConsole.debug(`ViewPU ${this.debugInfo__()} aboutToRecycleInternal`);
     stateMgmtTrace.scopedTrace(() => {
       this.aboutToRecycle();
     }, 'aboutToRecycle', this.constructor.name);
@@ -877,19 +885,7 @@ abstract class ViewPU extends PUV2ViewBase
       this.preventRecursiveRecycle_ = false;
       return;
     }
-    this.childrenWeakrefMap_.forEach((weakRefChild) => {
-      const child = weakRefChild.deref();
-      if (child) {
-        if (child instanceof ViewPU) {
-          if (!child.hasBeenRecycled_ && !child.__isBlockRecycleOrReuse__) {
-            child.aboutToRecycleInternal();
-          }
-        } else {
-          // FIXME fix for mixed V1 - V2 Hierarchies
-          throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
-        }
-      } // if child
-    });
+    this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doRecycle);
     this.runReuse_ = false;
   }
 
@@ -1033,6 +1029,14 @@ abstract class ViewPU extends PUV2ViewBase
     }
 
     return repeat;
+  }
+
+  public reuseOrCreateNewComponent(params: { componentClass: any, getParams: () => Object,
+    getReuseId?: () => string, extraInfo?: ExtraInfo }): void {
+      // ViewPU should not have a ReusableV2 Component, throw error!
+      const error = `@Component cannot have a child @ReusableV2 component !`;
+      stateMgmtConsole.applicationError(error);
+      throw new Error(error);
   }
 } // class ViewPU
 

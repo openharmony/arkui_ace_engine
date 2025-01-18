@@ -563,7 +563,7 @@ struct KeyEvent final : public NonPointerEvent {
     std::string ConvertCodeToString() const;
 
     KeyCode code { KeyCode::KEY_UNKNOWN };
-    const char* key = "";
+    std::string key;
     KeyAction action { KeyAction::UNKNOWN };
     std::vector<KeyCode> pressedCodes;
     // When the key is held down for a long period of time, it will be accumulated once in a while.
@@ -602,7 +602,7 @@ public:
     explicit KeyEventInfo(const KeyEvent& event) : BaseEventInfo("keyEvent")
     {
         keyCode_ = event.code;
-        keyText_ = event.key;
+        keyText_ = event.key.c_str();
         keyType_ = event.action;
         keySource_ = event.sourceType;
         keyIntention_ = event.keyIntention;
@@ -649,6 +649,9 @@ public:
     {
         return unicode_;
     }
+
+    void ParseKeyEvent(KeyEvent& keyEvent);
+
 private:
     KeyCode keyCode_ = KeyCode::KEY_UNKNOWN;
     const char* keyText_ = "";
@@ -669,6 +672,14 @@ enum class BlurReason : int32_t {
     BACK_TO_TABSTOP = 5,
 };
 
+enum class FocusReason : int32_t {
+    DEFAULT = 0,
+    FOCUS_TRAVEL = 1,
+    FOCUS_TOUCH = 2,
+    WINDOW_FOCUS = 3,
+    VIEW_SWITCH = 4,
+};
+
 using OnKeyEventFunc = std::function<bool(const KeyEvent&)>;
 using OnKeyCallbackFunc = std::function<void(KeyEventInfo&)>;
 using OnKeyConsumeFunc = std::function<bool(KeyEventInfo&)>;
@@ -678,6 +689,7 @@ using OnPaintFocusStateFunc = std::function<bool()>;
 using OnBlurFunc = std::function<void()>;
 using OnBlurReasonFunc = std::function<void(BlurReason reason)>;
 using OnPreFocusFunc = std::function<void()>;
+using OnKeyEventDispatchFunc = std::function<bool(KeyEventInfo&)>;
 using OnFocusAxisEventFunc = std::function<void(NG::FocusAxisEventInfo&)>;
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_KEY_EVENT_H

@@ -275,6 +275,7 @@ private:
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool IsSquareStyleBox();
+    bool OnKeyEvent(const KeyEvent& event);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void AddHotZoneRect();
     void RemoveLastHotZoneRect() const;

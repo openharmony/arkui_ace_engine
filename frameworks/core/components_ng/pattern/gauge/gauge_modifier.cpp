@@ -737,7 +737,7 @@ void GaugeModifier::DrawSingleSegmentGradientExtend(RSCanvas& canvas, RenderRing
     if (index == 0) {
         brush.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
             ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colorValues, pos, RSTileMode::CLAMP,
-            drawStartDegree - offsetDegree, drawStartDegree + drawSweepDegree - offsetDegree, nullptr));
+            drawStartDegree + offsetDegree, drawStartDegree + drawSweepDegree + offsetDegree, nullptr));
         float startDegree = drawStartDegree + offsetDegree;
         float sweepDegree = drawSweepDegree - offsetDegree * MIN_CIRCLE;
         if (info.isDrawShadow) {
@@ -747,7 +747,7 @@ void GaugeModifier::DrawSingleSegmentGradientExtend(RSCanvas& canvas, RenderRing
     } else {
         brush.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
             ToRSPoint(PointF(data.center.GetX(), data.center.GetY())), colorValues, pos, RSTileMode::CLAMP,
-            drawStartDegree + offsetDegree, drawStartDegree + drawSweepDegree + offsetDegree, nullptr));
+            drawStartDegree - offsetDegree, drawStartDegree + drawSweepDegree - offsetDegree, nullptr));
         float startDegree = drawStartDegree - offsetDegree;
         float sweepDegree = 0.0f;
         if (Positive(startDegree - offsetDegree)) {

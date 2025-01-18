@@ -16,7 +16,9 @@
 #include "core/components_ng/svg/parse/svg_graphic.h"
 
 #include "core/common/container.h"
+#include "core/components_ng/svg/parse/svg_linear_gradient.h"
 #include "core/components_ng/svg/parse/svg_pattern.h"
+#include "core/components_ng/svg/parse/svg_radial_gradient.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -64,6 +66,51 @@ void SvgGraphic::OnDraw(RSCanvas& canvas, const Size& layout, const std::optiona
     }
 }
 
+void SvgGraphic::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
+{
+    RSRecordingPath path = AsPath(lengthRule); // asPath override by graphic tag
+    if (!path.IsValid()) {
+        return;
+    }
+    auto bounds = path.GetBounds();
+    Rect boundingRect(bounds.GetLeft(), bounds.GetTop(), bounds.GetWidth(), bounds.GetHeight());
+    SvgCoordinateSystemContext svgCoordinateSystemContext(boundingRect, GetSvgContainerRect());
+    auto fillType = GetFillType();
+    if (fillType != PaintType::NONE) {
+        OnGraphicFill(canvas, svgCoordinateSystemContext, path, fillType);
+    }
+    auto strokeType = GetStrokeType();
+    if (GreatNotEqual(attributes_.strokeState.GetLineWidth().Value(), 0.0) &&
+        strokeType != PaintType::NONE) {
+        OnGraphicStroke(canvas, svgCoordinateSystemContext, path, strokeType);
+    }
+}
+
+PaintType SvgGraphic::GetFillType()
+{
+    if (!attributes_.fillState.GetHref().empty()) {
+        return GetHrefType(attributes_.fillState.GetHref());
+    }
+    // If this shape has color, return Color type
+    if (attributes_.fillState.HasColor() && attributes_.fillState.GetColor() != Color::TRANSPARENT) {
+        return PaintType::COLOR;
+    }
+    // this shape has no color but gradient inherit from g, return gradient type
+    auto& gradient = attributes_.fillState.GetGradient();
+    if (gradient.has_value()) {
+        auto href = gradient->GetHref();
+        if (!href.empty()) {
+            attributes_.fillState.SetHref(href);
+            return GetHrefType(attributes_.fillState.GetHref());
+        }
+    }
+    // default Not fillNone case, use default color
+    if (!attributes_.fillState.IsFillNone()) {
+        return PaintType::COLOR;
+    }
+    return PaintType::NONE;
+}
+
 bool SvgGraphic::CheckHrefPattern()
 {
     auto svgContext = svgContext_.Upgrade();
@@ -71,6 +118,24 @@ bool SvgGraphic::CheckHrefPattern()
     auto refSvgNode = svgContext->GetSvgNodeById(fillState_.GetHref());
     CHECK_NULL_RETURN(refSvgNode, false);
     return AceType::InstanceOf<SvgPattern>(refSvgNode);
+}
+
+PaintType SvgGraphic::GetHrefType(const std::string& href)
+{
+    auto svgContext = svgContext_.Upgrade();
+    CHECK_NULL_RETURN(svgContext, PaintType::NONE);
+    auto refSvgNode = svgContext->GetSvgNodeById(href);
+    CHECK_NULL_RETURN(refSvgNode, PaintType::NONE);
+    if (AceType::InstanceOf<SvgPattern>(refSvgNode)) {
+        return PaintType::PATTERN;
+    }
+    if (AceType::InstanceOf<SvgLinearGradient>(refSvgNode)) {
+        return PaintType::LINEAR_GRADIENT;
+    }
+    if (AceType::InstanceOf<SvgRadialGradient>(refSvgNode)) {
+        return PaintType::RADIAL_GRADIENT;
+    }
+    return PaintType::NONE;
 }
 
 void SvgGraphic::SetLinearGradient(const Size& viewPort, OHOS::Ace::Gradient& gradient)
@@ -160,6 +225,63 @@ void SvgGraphic::UpdateFillGradient(const Size& viewPort)
     }
 }
 
+void SvgGraphic::InitBrush(RSCanvas& canvas, RSBrush& brush,
+    const SvgCoordinateSystemContext& svgCoordinateSystemContext, PaintType type)
+{
+    switch (type) {
+        case PaintType::COLOR:
+            SetBrushColor(brush);
+            break;
+        case PaintType::LINEAR_GRADIENT:
+            SetBrushLinearGradient(brush, svgCoordinateSystemContext);
+            brush.SetAlpha(GetAlpha());
+            break;
+        case PaintType::RADIAL_GRADIENT:
+            SetBrushRadialGradient(brush, svgCoordinateSystemContext);
+            brush.SetAlpha(GetAlpha());
+            break;
+        case PaintType::PATTERN:
+            SetBrushPattern(canvas,  brush, svgCoordinateSystemContext);
+            break;
+        default:
+            break;
+    }
+}
+
+uint32_t SvgGraphic::GetAlpha()
+{
+    auto curOpacity = attributes_.fillState.GetOpacity().GetValue() * opacity_ * (1.0f / UINT8_MAX);
+    uint32_t alpha = curOpacity * 255;
+    return alpha;
+}
+
+void SvgGraphic::SetBrushColor(RSBrush& brush)
+{
+    auto curOpacity = attributes_.fillState.GetOpacity().GetValue() * opacity_ * (1.0f / UINT8_MAX);
+    auto imageComponentColor = GetFillColor();
+    if (!imageComponentColor.has_value() || attributes_.fillState.IsFillNone()) {
+        brush.SetColor(attributes_.fillState.GetColor().BlendOpacity(curOpacity).GetValue());
+        return;
+    }
+    brush.SetColor(imageComponentColor->BlendOpacity(curOpacity).GetValue());
+}
+
+RsLinearGradient SvgGraphic::ConvertToRsLinearGradient(const SvgLinearGradientInfo& linearGradientInfo)
+{
+    std::vector<RSScalar> pos;
+    std::vector<RSColorQuad> colors;
+    for (const auto& gradientColor : linearGradientInfo.colors) {
+        pos.push_back(static_cast<RSScalar>(gradientColor.GetDimension().Value()));
+        colors.push_back(
+            gradientColor.GetColor().BlendOpacity(gradientColor.GetOpacity()).GetValue());
+    }
+    RSPoint startPoint(static_cast<RSScalar>(linearGradientInfo.x1), static_cast<RSScalar>(linearGradientInfo.y1));
+    RSPoint endPoint(static_cast<RSScalar>(linearGradientInfo.x2), static_cast<RSScalar>(linearGradientInfo.y2));
+    return RsLinearGradient({ .startPoint_ = startPoint, .endPoint_ = endPoint,
+        .spreadMethod_ = static_cast<RSTileMode>(linearGradientInfo.spreadMethod),
+        .pos_ = pos, .colors_ = colors });
+}
+
 void SvgGraphic::UpdateStrokeGradient(const Size& viewPort)
 {
     auto& gradient = attributes_.strokeState.GetGradient();
@@ -209,7 +331,7 @@ void SvgGraphic::SetGradientFillStyle(const std::optional<OHOS::Ace::Gradient>& 
     auto center = RSPoint(static_cast<RSScalar>(info.cx), static_cast<RSScalar>(info.cy));
     auto focal = RSPoint(static_cast<RSScalar>(info.fx), static_cast<RSScalar>(info.fy));
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
-        auto bounds = path_.GetBounds();
+        auto bounds = path_->GetBounds();
         auto maxBounds = std::max(bounds.GetWidth(), bounds.GetHeight());
         if (maxBounds != 0) {
             RSMatrix m, t;
@@ -241,6 +363,67 @@ void SvgGraphic::SetGradientFillStyle(const std::optional<OHOS::Ace::Gradient>& 
                 &matrix));
         }
     }
+}
+
+void SvgGraphic::SetBrushLinearGradient(RSBrush& brush, const SvgCoordinateSystemContext& svgCoordinateSystemContext)
+{
+    auto svgContext = svgContext_.Upgrade();
+    CHECK_NULL_VOID(svgContext);
+    auto linearGradientNode =
+        DynamicCast<SvgLinearGradient>(svgContext->GetSvgNodeById(attributes_.fillState.GetHref()));
+    CHECK_NULL_VOID(linearGradientNode);
+    RsLinearGradient rsLinearGradient =
+        ConvertToRsLinearGradient(linearGradientNode->GetLinearGradientInfo(svgCoordinateSystemContext));
+    brush.SetShaderEffect(RSRecordingShaderEffect::CreateLinearGradient(rsLinearGradient.startPoint_,
+        rsLinearGradient.endPoint_, rsLinearGradient.colors_, rsLinearGradient.pos_,
+        rsLinearGradient.spreadMethod_));
+}
+
+RsRadialGradient SvgGraphic::ConvertToRsRadialGradient(const SvgRadialGradientInfo& radialGradientInfo)
+{
+    std::vector<RSScalar> pos;
+    std::vector<RSColorQuad> colors;
+    for (const auto& gradientColor : radialGradientInfo.colors) {
+        pos.push_back(static_cast<RSScalar>(gradientColor.GetDimension().Value()));
+        colors.push_back(
+            gradientColor.GetColor().BlendOpacity(gradientColor.GetOpacity()).GetValue());
+    }
+    RSPoint center(static_cast<RSScalar>(radialGradientInfo.cx), static_cast<RSScalar>(radialGradientInfo.cy));
+    RSPoint focal(static_cast<RSScalar>(radialGradientInfo.fx), static_cast<RSScalar>(radialGradientInfo.fy));
+
+    return RsRadialGradient({ .center_ = center, .focal_ = focal,
+        .spreadMethod_ = static_cast<RSTileMode>(radialGradientInfo.spreadMethod),
+        .r_ = static_cast<RSScalar>(radialGradientInfo.r), .pos_ = pos, .colors_ = colors});
+}
+
+void SvgGraphic::SetBrushRadialGradient(RSBrush& brush, const SvgCoordinateSystemContext& svgCoordinateSystemContext)
+{
+    auto svgContext = svgContext_.Upgrade();
+    CHECK_NULL_VOID(svgContext);
+    auto radialGradientNode =
+        DynamicCast<SvgRadialGradient>(svgContext->GetSvgNodeById(attributes_.fillState.GetHref()));
+    CHECK_NULL_VOID(radialGradientNode);
+    auto rsRadialGradient =
+        ConvertToRsRadialGradient(radialGradientNode->GetRadialGradientInfo(svgCoordinateSystemContext));
+    auto rsMatrix = rsRadialGradient.matrix_.value_or(RSMatrix());
+    if (rsRadialGradient.center_ == rsRadialGradient.focal_) {
+        brush.SetShaderEffect(RSRecordingShaderEffect::CreateRadialGradient(rsRadialGradient.center_,
+            rsRadialGradient.r_, rsRadialGradient.colors_, rsRadialGradient.pos_, rsRadialGradient.spreadMethod_));
+    } else {
+        brush.SetShaderEffect(RSRecordingShaderEffect::CreateTwoPointConical(rsRadialGradient.focal_, 0,
+            rsRadialGradient.center_, rsRadialGradient.r_, rsRadialGradient.colors_,
+            rsRadialGradient.pos_, rsRadialGradient.spreadMethod_, &rsMatrix));
+    }
+}
+
+void SvgGraphic::SetBrushPattern(RSCanvas& canvas, RSBrush& brush,
+    const SvgCoordinateSystemContext& svgCoordinateSystemContext)
+{
+    auto svgContext = svgContext_.Upgrade();
+    CHECK_NULL_VOID(svgContext);
+    auto refPatternNode = DynamicCast<SvgPattern>(svgContext->GetSvgNodeById(attributes_.fillState.GetHref()));
+    CHECK_NULL_VOID(refPatternNode);
+    refPatternNode->OnPatternEffect(canvas, brush, svgCoordinateSystemContext);
 }
 
 bool SvgGraphic::SetGradientStyle(double opacity)
@@ -308,6 +491,74 @@ void SvgGraphic::SetStrokeGradientStyle(double opacity)
                 &matrix));
         }
     }
+}
+
+PaintType SvgGraphic::GetStrokeType()
+{
+    if (!attributes_.strokeState.GetHref().empty()) {
+        return GetHrefType(attributes_.strokeState.GetHref());
+    }
+    if (attributes_.strokeState.HasColor()) {
+        return PaintType::COLOR;
+    }
+    return PaintType::NONE;
+}
+
+void SvgGraphic::InitPenFill(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext, PaintType type)
+{
+    switch (type) {
+        case PaintType::COLOR:
+            SetPenColor(rsPen);
+            break;
+        case PaintType::LINEAR_GRADIENT:
+            SetPenLinearGradient(rsPen, svgCoordinateSystemContext);
+            rsPen.SetAlpha(GetAlpha());
+            break;
+        case PaintType::RADIAL_GRADIENT:
+            SetPenRadialGradient(rsPen, svgCoordinateSystemContext);
+            rsPen.SetAlpha(GetAlpha());
+            break;
+        case PaintType::PATTERN:
+            break;
+        default:
+            break;
+    }
+}
+
+void SvgGraphic::SetPenStyle(RSPen& rsPen)
+{
+    if (attributes_.strokeState.GetLineCap() == LineCapStyle::ROUND) {
+        rsPen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
+    } else if (attributes_.strokeState.GetLineCap() == LineCapStyle::SQUARE) {
+        rsPen.SetCapStyle(RSPen::CapStyle::SQUARE_CAP);
+    } else {
+        rsPen.SetCapStyle(RSPen::CapStyle::FLAT_CAP);
+    }
+    if (attributes_.strokeState.GetLineJoin() == LineJoinStyle::ROUND) {
+        rsPen.SetJoinStyle(RSPen::JoinStyle::ROUND_JOIN);
+    } else if (attributes_.strokeState.GetLineJoin() == LineJoinStyle::BEVEL) {
+        rsPen.SetJoinStyle(RSPen::JoinStyle::BEVEL_JOIN);
+    } else {
+        rsPen.SetJoinStyle(RSPen::JoinStyle::MITER_JOIN);
+    }
+    rsPen.SetWidth(static_cast<RSScalar>(attributes_.strokeState.GetLineWidth().Value()));
+    rsPen.SetMiterLimit(static_cast<RSScalar>(attributes_.strokeState.GetMiterLimit()));
+    rsPen.SetAntiAlias(true);
+    auto lineDashState = attributes_.strokeState.GetLineDash().lineDash;
+    if (lineDashState.empty()) {
+        return;
+    }
+
+    auto intervalsLen = lineDashState.size();
+    if (lineDashState.size() % 2 != 0) { // 2:judging odd
+        intervalsLen = lineDashState.size() * 2; // 2:double size
+    }
+    RSScalar intervals[intervalsLen];
+    for (size_t i = 0; i < intervalsLen; ++i) {
+        intervals[i] = static_cast<RSScalar>(lineDashState[i % lineDashState.size()]);
+    }
+    RSScalar phase = static_cast<RSScalar>(attributes_.strokeState.GetLineDash().dashOffset);
+    rsPen.SetPathEffect(RSRecordingPathEffect::CreateDashPathEffect(intervals, intervalsLen, phase));
 }
 
 bool SvgGraphic::UpdateStrokeStyle(bool antiAlias)
@@ -380,6 +631,40 @@ void SvgGraphic::UpdateLineDash()
     }
 }
 
+void SvgGraphic::SetPenColor(RSPen& rsPen)
+{
+    double curOpacity = attributes_.strokeState.GetOpacity().GetValue() * opacity_ * (1.0f / UINT8_MAX);
+    rsPen.SetColor(attributes_.strokeState.GetColor().BlendOpacity(curOpacity).GetValue());
+    AddColorFilterEffect(rsPen);
+}
+
+void SvgGraphic::AddColorFilterEffect(RSPen& rsPen)
+{
+    auto colorFilter = GetColorFilter();
+    if (!colorFilter.has_value()) {
+        return;
+    }
+    if (colorFilter.value().colorFilterMatrix_) {
+        RSColorMatrix colorMatrix;
+        colorMatrix.SetArray(colorFilter.value().colorFilterMatrix_->data());
+        auto filter = rsPen.GetFilter();
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
+        rsPen.SetFilter(filter);
+        return;
+    }
+    if (!colorFilter.value().colorFilterDrawing_) {
+        return;
+    }
+    auto colorFilterSptrAddr = static_cast<std::shared_ptr<RSColorFilter>*>(
+        colorFilter.value().colorFilterDrawing_->GetDrawingColorFilterSptrAddr());
+    if (!colorFilterSptrAddr || !(*colorFilterSptrAddr)) {
+        return;
+    }
+    auto filter = rsPen.GetFilter();
+    filter.SetColorFilter(*colorFilterSptrAddr);
+    rsPen.SetFilter(filter);
+}
+
 void SvgGraphic::UpdateColorFilter(RSFilter& filter)
 {
     auto colorFilter = GetColorFilter();
@@ -411,5 +696,46 @@ void SvgGraphic::RectifyTargetSize(const Rect& bounds, double& width, double& he
     auto scalar = bounds.Width() / bounds.Height();
     width = 2 * bounds.Height() * sin(std::atan(scalar)) * cos(atan(scalar));  // 2: algorithm parameters
     height = 2 * bounds.Height() * sin(std::atan(scalar)) * sin(atan(scalar)); // 2: algorithm parameters
+}
+
+void SvgGraphic::SetPenLinearGradient(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext)
+{
+    auto svgContext = svgContext_.Upgrade();
+    CHECK_NULL_VOID(svgContext);
+    auto linearGradientNode =
+        DynamicCast<SvgLinearGradient>(svgContext->GetSvgNodeById(attributes_.strokeState.GetHref()));
+    CHECK_NULL_VOID(linearGradientNode);
+    RsLinearGradient rsLinearGradient =
+        ConvertToRsLinearGradient(linearGradientNode->GetLinearGradientInfo(svgCoordinateSystemContext));
+    rsPen.SetShaderEffect(RSRecordingShaderEffect::CreateLinearGradient(
+        rsLinearGradient.startPoint_, rsLinearGradient.endPoint_, rsLinearGradient.colors_,
+        rsLinearGradient.pos_, rsLinearGradient.spreadMethod_));
+}
+
+void SvgGraphic::SetPenRadialGradient(RSPen& rsPen, const SvgCoordinateSystemContext& svgCoordinateSystemContext)
+{
+    auto svgContext = svgContext_.Upgrade();
+    CHECK_NULL_VOID(svgContext);
+    auto radialGradientNode =
+        DynamicCast<SvgRadialGradient>(svgContext->GetSvgNodeById(attributes_.strokeState.GetHref()));
+    CHECK_NULL_VOID(radialGradientNode);
+    auto rsRadialGradient =
+        ConvertToRsRadialGradient(radialGradientNode->GetRadialGradientInfo(svgCoordinateSystemContext));
+    auto rsMatrix = rsRadialGradient.matrix_.value_or(RSMatrix());
+    if (rsRadialGradient.center_ == rsRadialGradient.focal_) {
+        rsPen.SetShaderEffect(RSRecordingShaderEffect::CreateRadialGradient(rsRadialGradient.center_,
+            rsRadialGradient.r_, rsRadialGradient.colors_, rsRadialGradient.pos_, rsRadialGradient.spreadMethod_));
+    } else {
+        rsPen.SetShaderEffect(RSRecordingShaderEffect::CreateTwoPointConical(rsRadialGradient.focal_, 0,
+            rsRadialGradient.center_, rsRadialGradient.r_, rsRadialGradient.colors_, rsRadialGradient.pos_,
+            rsRadialGradient.spreadMethod_, &rsMatrix));
+    }
+}
+
+std::optional<Color> SvgGraphic::GetFillColor()
+{
+    auto svgContext = svgContext_.Upgrade();
+    CHECK_NULL_RETURN(svgContext, std::nullopt);
+    return svgContext->GetFillColor();
 }
 } // namespace OHOS::Ace::NG

@@ -17,6 +17,8 @@
 
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/pattern/custom/custom_app_bar_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -33,6 +35,8 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     RefPtr<NG::CustomNodeBase> customNode;
     if (info.isCustomTitle) {
         customNode = NG::CustomTitleNode::CreateCustomTitleNode(viewId, key);
+    } else if (info.isCustomAppBar) {
+        customNode = NG::CustomAppBarNode::CreateCustomAppBarNode(viewId, key);
     } else if (info.hasMeasureOrLayout) {
         customNode = NG::CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(viewId, key);
         auto customMeasureLayoutNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(customNode);
@@ -98,4 +102,20 @@ void ViewPartialUpdateModelNG::FinishUpdate(
     NG::ViewStackProcessor::GetInstance()->FlushRerenderTask();
 }
 
+bool ViewPartialUpdateModelNG::AllowReusableV2Descendant(const WeakPtr<AceType>& viewNode)
+{
+    // check if this @ReusbaleV2 @ComponentV2 instance is inside RepeatVirtualScroll
+    // and created within a .template builder function
+    auto weak = AceType::DynamicCast<NG::CustomNode>(viewNode);
+    RefPtr<UINode> node = weak.Upgrade();
+    CHECK_NULL_RETURN(node, false);
+
+    while ((node->GetParent()) && (node->GetParent()->GetTag() != V2::JS_VIEW_ETS_TAG) &&
+           (AceType::DynamicCast<RepeatVirtualScrollNode>(node->GetParent()) == nullptr)) {
+            node = node->GetParent();
+    }
+    bool result = ((node->GetParent() == nullptr) || (node->GetParent()->GetTag() == V2::JS_VIEW_ETS_TAG) ||
+                   (node->IsAllowReusableV2Descendant()));
+    return result;
+}
 } // namespace OHOS::Ace::NG

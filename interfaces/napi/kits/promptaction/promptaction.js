@@ -13,63 +13,63 @@
  * limitations under the License.
  */
 
-const __prompt__ = requireInternal("promptAction");
+const __prompt__ = requireInternal('promptAction');
 
 const CommonController = class CommonController {
-    constructor() {}
-    close() {}
-}
+    constructor() {};
+    close() {};
+};
 
 const DialogController = class DialogController extends CommonController {
     constructor() {
-        super()
-        __prompt__.PromptController.bindDialog(this)
+        super();
+        __prompt__.PromptController.bindDialog(this);
     }
 
     close() {
-        __prompt__.PromptController.closeDialog(this)
+        __prompt__.PromptController.closeDialog(this);
     }
-}
+};
 
 const showToast = function showToast(options) {
     return __prompt__.showToast(options);
-}
+};
 
 const openToast = function openToast(options) {
     return __prompt__.openToast(options);
-}
+};
 
 const closeToast = function closeToast(toastId) {
     return __prompt__.closeToast(toastId);
-}
+};
 
 const showDialog = function showDialog(options, callback) {
     if (callback === undefined) {
         return __prompt__.showDialog(options);
     }
     return __prompt__.showDialog(options, callback);
-}
+};
 
 const showActionMenu = function showActionMenu(options, callback) {
     if (callback === undefined) {
         return __prompt__.showActionMenu(options);
     }
     return __prompt__.showActionMenu(options, callback);
-}
+};
 
 const openCustomDialog = function openCustomDialog(content, options) {
     if (options === undefined) {
         return __prompt__.openCustomDialog(content);
     }
     return __prompt__.openCustomDialog(content, options);
-}
+};
 
 const openCustomDialogWithController = function openCustomDialogWithController(content, controller, options) {
     if (options === undefined) {
         return __prompt__.openCustomDialogWithController(content, controller);
     }
     return __prompt__.openCustomDialogWithController(content, controller, options);
-}
+};
 
 const presentCustomDialog = function presentCustomDialog(builder, controller, options) {
     if (controller === undefined && options === undefined) {
@@ -79,15 +79,15 @@ const presentCustomDialog = function presentCustomDialog(builder, controller, op
         return __prompt__.presentCustomDialog(builder, controller);
     }
     return __prompt__.presentCustomDialog(builder, controller, options);
-}
+};
 
 const updateCustomDialog = function updateCustomDialog(content, options) {
     return __prompt__.updateCustomDialog(content, options);
-}
+};
 
 const closeCustomDialog = function closeCustomDialog(content) {
     return __prompt__.closeCustomDialog(content);
-}
+};
 
 export default {
     CommonController,
@@ -103,4 +103,4 @@ export default {
     closeCustomDialog,
     showActionMenu,
     ToastShowMode: __prompt__.ToastShowMode
-}
+};

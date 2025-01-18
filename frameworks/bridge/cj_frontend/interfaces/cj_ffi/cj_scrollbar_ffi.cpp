@@ -15,7 +15,6 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_scrollbar_ffi.h"
 
-
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_scroll_ffi.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model.h"
 
@@ -51,5 +50,10 @@ void FfiOHOSAceFrameworkScrollBarCreate(int64_t scrollerID, int32_t direction, i
     auto proxy = ScrollBarModel::GetInstance()->GetScrollBarProxy(scrollBarProxy);
 
     ScrollBarModel::GetInstance()->Create(proxy, infoflag, proxyFlag, direction, state);
+}
+
+void FfiOHOSAceFrameworkSetEnableNestedScroll(bool value)
+{
+    ScrollBarModel::GetInstance()->SetEnableNestedScroll(value);
 }
 }

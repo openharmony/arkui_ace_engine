@@ -538,8 +538,10 @@ void JSTabs::SetScrollableBarModeOptions(const JSRef<JSVal>& info)
 
     auto nonScrollableLayoutStyle = optionParam->GetProperty("nonScrollableLayoutStyle");
     int32_t layoutStyle;
-    if (!ConvertFromJSValue(nonScrollableLayoutStyle, layoutStyle)) {
-        option.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
+    if (!ConvertFromJSValue(nonScrollableLayoutStyle, layoutStyle) ||
+        layoutStyle < static_cast<int32_t>(LayoutStyle::ALWAYS_CENTER) ||
+        layoutStyle > static_cast<int32_t>(LayoutStyle::SPACE_BETWEEN_OR_CENTER)) {
+        option.nonScrollableLayoutStyle = std::nullopt;
     } else {
         option.nonScrollableLayoutStyle = (static_cast<LayoutStyle>(layoutStyle));
     }
@@ -738,6 +740,30 @@ void JSTabs::SetBarModifier(const JSCallbackInfo& info, const JsiRef<JsiValue>& 
     TabsModel::GetInstance()->SetBarModifier(std::move(onApply));
 }
 
+void JSTabs::SetCachedMaxCount(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 1) {
+        return;
+    }
+
+    std::optional<int32_t> cachedMaxCount;
+    if (info[0]->IsNumber()) {
+        auto count = info[0]->ToNumber<int32_t>();
+        if (count >= 0) {
+            cachedMaxCount = count;
+        }
+    }
+    auto cacheMode = TabsCacheMode::CACHE_BOTH_SIDE;
+    if (info[1]->IsNumber()) {
+        auto mode = info[1]->ToNumber<int32_t>();
+        if (mode >= static_cast<int32_t>(TabsCacheMode::CACHE_BOTH_SIDE) &&
+            mode <= static_cast<int32_t>(TabsCacheMode::CACHE_LATEST_SWITCHED)) {
+            cacheMode = static_cast<TabsCacheMode>(mode);
+        }
+    }
+    TabsModel::GetInstance()->SetCachedMaxCount(cachedMaxCount, cacheMode);
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JsTabContentTransitionProxy::JSBind(globalObj);
@@ -782,6 +808,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("edgeEffect", &JSTabs::SetEdgeEffect);
     JSClass<JSTabs>::StaticMethod("barBackgroundEffect", &JSTabs::SetBarBackgroundEffect);
     JSClass<JSTabs>::StaticMethod("pageFlipMode", &JSTabs::SetPageFlipMode);
+    JSClass<JSTabs>::StaticMethod("cachedMaxCount", &JSTabs::SetCachedMaxCount);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

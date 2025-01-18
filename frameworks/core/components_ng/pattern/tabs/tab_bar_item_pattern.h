@@ -20,6 +20,8 @@
 #include "core/components_ng/pattern/tabs/tab_bar_item_accessibility_property.h"
 
 namespace OHOS::Ace::NG {
+const auto TWO = 2;
+
 class TabBarItemPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(TabBarItemPattern, LinearLayoutPattern);
 
@@ -31,6 +33,91 @@ public:
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
         return MakeRefPtr<TabBarItemAccessibilityProperty>();
+    }
+
+    FocusPattern GetFocusPattern() const override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, FocusPattern());
+        auto pipeline = host->GetContext();
+        CHECK_NULL_RETURN(pipeline, FocusPattern());
+        auto focusTheme = pipeline->GetTheme<FocusAnimationTheme>();
+        CHECK_NULL_RETURN(focusTheme, FocusPattern());
+        auto tabTheme = pipeline->GetTheme<TabTheme>();
+        CHECK_NULL_RETURN(tabTheme, FocusPattern());
+        FocusPaintParam focusPaintParam;
+        focusPaintParam.SetPaintWidth(tabTheme->GetActiveIndicatorWidth());
+        focusPaintParam.SetPaintColor(focusTheme->GetColor());
+        return { FocusType::SCOPE, true, FocusStyleType::CUSTOM_REGION, focusPaintParam };
+    }
+
+    void OnAttachToMainTree() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetFocusable(true, false);
+        focusHub->SetInnerFocusPaintRectCallback([weak = WeakClaim(this)](RoundRect& paintRect) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->GetInnerFocusPaintRect(paintRect);
+
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto tabBar = host->GetAncestorNodeOfFrame(false);
+            CHECK_NULL_VOID(tabBar);
+            auto tabBarPattern = tabBar->GetPattern<TabBarPattern>();
+            CHECK_NULL_VOID(tabBarPattern);
+            auto index = tabBar->GetChildFlatIndex(host->GetId()).second;
+            tabBarPattern->SetFocusIndicator(index);
+        });
+    }
+
+    void GetInnerFocusPaintRect(RoundRect& paintRect)
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        auto tabBar = host->GetAncestorNodeOfFrame(false);
+        CHECK_NULL_VOID(tabBar);
+        auto tabBarFocusHub = tabBar->GetFocusHub();
+        CHECK_NULL_VOID(tabBarFocusHub);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        auto columnPaintRect = renderContext->GetPaintRectWithTransform();
+        auto pipeline = GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto tabTheme = pipeline->GetTheme<TabTheme>();
+        CHECK_NULL_VOID(tabTheme);
+        auto padding = tabTheme->GetFocusPadding();
+        auto radius = tabTheme->GetFocusIndicatorRadius() + padding;
+        if (tabBarFocusHub->GetFocusBox().HasCustomStyle()) {
+            auto tabBarFocusBoxStyle = tabBarFocusHub->GetFocusBox().GetStyle().value();
+            focusHub->GetFocusBox().SetStyle(tabBarFocusBoxStyle);
+            auto margin = tabBarFocusBoxStyle.margin.value_or(CalcDimension(0.0));
+            columnPaintRect.SetOffset(OffsetF(-margin.ConvertToPx(), -margin.ConvertToPx()));
+            columnPaintRect.SetSize(SizeF((columnPaintRect.GetSize().Width() + margin.ConvertToPx() * TWO),
+                (columnPaintRect.GetSize().Height() + margin.ConvertToPx() * TWO)));
+        } else {
+            FocusBoxStyle tabBarFocusBoxStyle;
+            focusHub->GetFocusBox().SetStyle(tabBarFocusBoxStyle);
+            auto outLineWidth = tabTheme->GetActiveIndicatorWidth().ConvertToPx() - padding.ConvertToPx() * TWO;
+            columnPaintRect.SetOffset(OffsetF(outLineWidth / TWO, outLineWidth / TWO));
+            columnPaintRect.SetSize(SizeF((columnPaintRect.GetSize().Width() - outLineWidth),
+                (columnPaintRect.GetSize().Height() - outLineWidth)));
+        }
+
+        paintRect.SetRect(columnPaintRect);
+        paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+            static_cast<RSScalar>(radius.ConvertToPx()));
+        paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+            static_cast<RSScalar>(radius.ConvertToPx()));
+        paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+            static_cast<RSScalar>(radius.ConvertToPx()));
+        paintRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
+            static_cast<RSScalar>(radius.ConvertToPx()));
     }
 
 private:

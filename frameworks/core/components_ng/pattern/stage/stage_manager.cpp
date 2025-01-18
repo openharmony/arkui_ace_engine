@@ -211,7 +211,6 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     PageChangeCloseKeyboard();
     AddPageTransitionTrace(outPageNode, node);
     if (needTransition) {
-        ExpandSafeArea(node);
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
                                          weakOut = WeakPtr<FrameNode>(outPageNode)]() {
             auto stage = weakStage.Upgrade();
@@ -287,7 +286,6 @@ bool StageManager::PopPage(const RefPtr<FrameNode>& inPage, bool needShowNext, b
     const size_t transitionPageSize = 2;
     needTransition &= (children.size() >= transitionPageSize);
     if (needTransition) {
-        ExpandSafeArea(pageNode);
         pipeline->FlushPipelineImmediately();
     }
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
@@ -336,7 +334,6 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
     }
     auto outPageNode = AceType::DynamicCast<FrameNode>(srcPageNode_.Upgrade());
     if (needTransition) {
-        ExpandSafeArea(outPageNode);
         pipeline->FlushPipelineImmediately();
     }
     bool firstPageTransition = true;
@@ -427,7 +424,6 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
         return true;
     }
     if (needTransition) {
-        ExpandSafeArea(node);
         pipeline->FlushPipelineImmediately();
     }
     if (needHideLast) {
@@ -680,7 +676,7 @@ std::string StageManager::GetSrcPageInfo(const RefPtr<FrameNode>& srcPage)
 bool StageManager::CheckPageInTransition(const RefPtr<UINode>& pageNode)
 {
     auto frameNode = AceType::DynamicCast<FrameNode>(pageNode);
-    CHECK_NULL_RETURN(pageNode, false);
+    CHECK_NULL_RETURN(frameNode, false);
     auto pagePattern = frameNode->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     return pagePattern->GetPageInTransition();
@@ -693,17 +689,6 @@ void StageManager::UpdatePageNeedRemove(const RefPtr<UINode>& pageNode)
     auto pagePattern = frameNode->GetPattern<PagePattern>();
     CHECK_NULL_VOID(pagePattern);
     pagePattern->SetIsNeedRemove(true);
-}
-
-void StageManager::ExpandSafeArea(const RefPtr<UINode>& pageNode)
-{
-    auto node = AceType::DynamicCast<FrameNode>(pageNode);
-    CHECK_NULL_VOID(node);
-    auto layoutProperty = node->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProperty);
-    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM | SAFE_AREA_TYPE_CUTOUT,
-        .edges = SAFE_AREA_EDGE_ALL };
-    layoutProperty->UpdateSafeAreaExpandOpts(opts);
 }
 
 void StageManager::StopPageTransition(bool needTransition)
@@ -723,5 +708,32 @@ void StageManager::StopPageTransition(bool needTransition)
         pattern->StopPageTransition();
         destPageNode_ = nullptr;
     }
+}
+
+std::vector<RefPtr<FrameNode>> StageManager::GetTopPagesWithTransition() const
+{
+    std::vector<RefPtr<FrameNode>> pages;
+    auto page = GetLastPageWithTransition();
+    if (page) {
+        pages.emplace_back(page);
+    }
+    return pages;
+}
+
+std::vector<std::string> StageManager::GetTopPagePaths() const
+{
+    std::vector<std::string> paths;
+    auto pages = GetTopPagesWithTransition();
+    for (auto& page : pages) {
+        paths.emplace_back("");
+        CHECK_NULL_CONTINUE(page);
+        auto pattern = page->GetPattern<PagePattern>();
+        CHECK_NULL_CONTINUE(pattern);
+        auto info = pattern->GetPageInfo();
+        CHECK_NULL_CONTINUE(info);
+        CHECK_NULL_CONTINUE(getPagePathCallback_);
+        paths.back() = getPagePathCallback_(info->GetPageUrl());
+    }
+    return paths;
 }
 } // namespace OHOS::Ace::NG

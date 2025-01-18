@@ -36,7 +36,7 @@ public:
     void TearDown() override;
     static void TearDownTestSuite();
     void GetFocus(const RefPtr<RichEditorPattern>& pattern);
-    void OnDrawVerify(const SelectSpanType& type, const std::string& text, SymbolSpanOptions options, Offset offset,
+    void OnDrawVerify(const SelectSpanType& type, const std::u16string& text, SymbolSpanOptions options, Offset offset,
         bool selected = false);
 };
 
@@ -51,7 +51,7 @@ void RichEditorBaseTestOneNg::GetFocus(const RefPtr<RichEditorPattern>& pattern)
 
 
 void RichEditorBaseTestOneNg::OnDrawVerify(
-    const SelectSpanType& type, const std::string& text, SymbolSpanOptions options, Offset offset, bool selected)
+    const SelectSpanType& type, const std::u16string& text, SymbolSpanOptions options, Offset offset, bool selected)
 {
     /**
      * @tc.steps: step1. Initialize text input and get focus
@@ -313,7 +313,7 @@ HWTEST_F(RichEditorBaseTestOneNg, RichEditorEventHub002, TestSize.Level1)
     result.SetLineHeight(20.0);
     result.SetLetterspacing(20.0);
     result.SetValueResource(valueResource);
-    result.SetValueString(INIT_VALUE_1);
+    result.SetValueString(TEST_STR);
     result.SetSymbolSpanStyle(symbolSpanStyle);
     result.SetTextDecoration(TextDecoration::UNDERLINE);
     result.SetColor("");
@@ -328,7 +328,7 @@ HWTEST_F(RichEditorBaseTestOneNg, RichEditorEventHub002, TestSize.Level1)
     EXPECT_EQ(result.GetFontColor(), "");
     EXPECT_EQ(result.GetFontSize(), 0);
     EXPECT_EQ(result.GetValueResource(), valueResource);
-    EXPECT_EQ(result.GetValueString(), INIT_VALUE_1);
+    EXPECT_EQ(result.GetValueString(), TEST_STR);
     EXPECT_EQ(result.GetSymbolSpanStyle().lineHeight, 0.0);
     EXPECT_EQ(result.GetFontWeight(), 0);
     EXPECT_EQ(result.GetFontFamily(), "");
@@ -480,14 +480,14 @@ HWTEST_F(RichEditorBaseTestOneNg, Controller001, TestSize.Level1)
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
     richEditorController->AddTextSpan(options);
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     auto info = richEditorController->GetSpansInfo(1, 5);
     TextStyleResult textStyle1 = info.selection_.resultObjects.front().textStyle;
     UpdateSpanStyle typingStyle;
     richEditorController->SetTypingStyle(typingStyle, style);
     TextSpanOptions options1;
     options1.style = richEditorPattern->typingTextStyle_;
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     auto info1 = richEditorController->GetSpansInfo(1, 5);
     TextStyleResult textStyle2 = info1.selection_.resultObjects.front().textStyle;
     EXPECT_EQ(textStyle2.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());
@@ -527,7 +527,7 @@ HWTEST_F(RichEditorBaseTestOneNg, Controller002, TestSize.Level1)
     options.value = INIT_VALUE_1;
     options.style = style;
     richEditorController->AddTextSpan(options);
-    AddSpan(INIT_U16VALUE_1);
+    AddSpan(INIT_VALUE_1);
     richEditorController->SetSelection(1, 3);
     auto info1 = richEditorController->GetSpansInfo(1, 2);
     EXPECT_EQ(info1.selection_.resultObjects.front().textStyle.lineHeight, LINE_HEIGHT_VALUE.ConvertToVp());

@@ -1209,4 +1209,44 @@ HWTEST_F(WaterFlowSegmentCommonTest, ShowCachedItems001, TestSize.Level1)
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 13)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 14)->IsActive());
 }
+
+/**
+ * @tc.name: SafeAreaExpand001
+ * @tc.desc: Test onReachStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentCommonTest, SafeAreaExpand001, TestSize.Level1)
+{
+    auto model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
+    model.SetCachedCount(0);
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    secObj->ChangeData(0, 0, SECTION_7);
+    CreateDone();
+
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 6);
+    EXPECT_EQ(GetChildHeight(frameNode_, 7), 0.0f);
+
+    EXPECT_CALL(*MockPipelineContext::pipeline_, GetSafeArea)
+        .Times(2)
+        .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
+    layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
+
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
+    // When set SAFE_AREA_EDGE_BOTTOM, endIndex should become bigger.
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 7);
+    EXPECT_EQ(pattern_->layoutInfo_->expandHeight_, 100.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 7), 100.0f);
+    EXPECT_TRUE(IsEqual(frameNode_->GetGeometryNode()->GetFrameRect(), RectF(0, 0, 400, 600)));
+
+    ScrollToIndex(10, false, ScrollAlign::END);
+    // scrollTo the last index with ScrollAlign::END, footer should be measured if set SAFE_AREA_EDGE_BOTTOM.
+    EXPECT_EQ(pattern_->layoutInfo_->expandHeight_, 100.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 4);
+    EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 11);
+}
 } // namespace OHOS::Ace::NG

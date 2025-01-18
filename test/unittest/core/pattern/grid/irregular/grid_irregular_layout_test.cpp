@@ -1480,7 +1480,7 @@ HWTEST_F(GridIrregularLayoutTest, TemplateChange002, TestSize.Level1)
     EXPECT_TRUE(info.offsetEnd_);
     EXPECT_EQ(info.startIndex_, 3);
     EXPECT_EQ(info.endIndex_, 8);
-    EXPECT_EQ(info.GetIrregularOffset(5.0f), 11 * 300.0f + 10 * 5.0f - GRID_HEIGHT);
+    EXPECT_EQ(info.GetIrregularOffset(5.0f), 11 * 300.0f + 10 * 5.0f - HEIGHT);
     EXPECT_EQ(info.GetIrregularHeight(5.0f), 11 * 300.0f + 10 * 5.0f);
 
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr 1fr 1fr");
@@ -1824,7 +1824,7 @@ HWTEST_F(GridIrregularLayoutTest, GetEndOffset001, TestSize.Level1)
     EXPECT_EQ(info.startMainLineIndex_, 9);
     EXPECT_EQ(info.endMainLineIndex_, 9);
     // last item should match up with the bottom again
-    EXPECT_EQ(pattern_->GetEndOffset(), GRID_HEIGHT - ITEM_MAIN_SIZE);
+    EXPECT_EQ(pattern_->GetEndOffset(), HEIGHT - ITEM_MAIN_SIZE);
 }
 
 /**

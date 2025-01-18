@@ -39,6 +39,8 @@ enum class NavDestinationState {
     ON_WILL_HIDE = 5,
     ON_WILL_APPEAR = 6,
     ON_WILL_DISAPPEAR = 7,
+    ON_ACTIVE = 8,
+    ON_INACTIVE = 9,
     ON_BACKPRESS = 100,
 };
 
@@ -49,6 +51,8 @@ struct NavDestinationInfo {
     int32_t index;
     napi_value param;
     std::string navDestinationId;
+    NavDestinationMode mode;
+    std::string uniqueId;
 
     NavDestinationInfo() = default;
 
@@ -60,6 +64,12 @@ struct NavDestinationInfo {
         int32_t index, napi_value param, std::string navDesId)
         : navigationId(std::move(id)), name(std::move(name)), state(state),
           index(index), param(param), navDestinationId(std::move(navDesId))
+    {}
+
+    NavDestinationInfo(std::string id, std::string name, NavDestinationState state,
+        int32_t index, napi_value param, std::string navDesId, NavDestinationMode mode, std::string uniqueId)
+        : navigationId(std::move(id)), name(std::move(name)), state(state),
+        index(index), param(param), navDestinationId(std::move(navDesId)), mode(mode), uniqueId(std::move(uniqueId))
     {}
 };
 

@@ -105,7 +105,7 @@ struct ArkUI_AlignmentRuleOption {
     float biasVertical;
 };
 
-constexpr int BASIC_COMPONENT_NUM = 21;
+constexpr int BASIC_COMPONENT_NUM = 22;
 
 #ifdef __cplusplus
 };
@@ -164,5 +164,8 @@ int32_t AddNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_
 int32_t RemoveNodeEventReceiver(ArkUI_NodeHandle node, void (*eventReceiver)(ArkUI_NodeEvent* event));
 void* GetParseJsMedia();
 bool CheckIsCNode(ArkUI_NodeHandle node);
+bool CheckIsCNodeOrCrossLanguage(ArkUI_NodeHandle node);
+ArkUI_NodeHandle GetArkUINode(ArkUINodeHandle node);
+int32_t GetNodeTypeByTag(ArkUI_NodeHandle node);
 }; // namespace OHOS::Ace::NodeModel
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_MODEL_H

@@ -112,6 +112,8 @@ public:
 
     static float GetCurrentRootHeight();
 
+    void MarkDirtyOverlay();
+
     void SetupRootElement() override;
 
     void SetupSubRootElement() override;
@@ -170,7 +172,8 @@ public:
     // remove schedule task by id.
     void RemoveScheduleTask(uint32_t id) override;
 
-    void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false) override;
+    void OnTouchEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node, bool isSubPipe = false,
+        bool isEventsPassThrough = false) override;
 
     void OnAccessibilityHoverEvent(const TouchEvent& point, const RefPtr<NG::FrameNode>& node) override;
 
@@ -186,7 +189,7 @@ public:
     void OnAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node) override;
 
     // Called by view when touch event received.
-    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false) override;
+    void OnTouchEvent(const TouchEvent& point, bool isSubPipe = false, bool isEventsPassThrough = false) override;
 
 #if defined(SUPPORT_TOUCH_TARGET_TEST)
     // Used to determine whether the touched frameNode is the target
@@ -366,9 +369,10 @@ public:
 
     bool IsWindowSceneConsumed();
 
-    void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
-    void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
-    void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
+    void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea, bool checkSystemWindow = false) override;
+    void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea, bool checkSystemWindow = false) override;
+    void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea, bool checkSystemWindow = false) override;
+
     void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 
     float GetPageAvoidOffset() override;
@@ -415,6 +419,8 @@ public:
     virtual SafeAreaInsets GetSafeArea() const;
 
     virtual SafeAreaInsets GetSafeAreaWithoutProcess() const;
+
+    virtual SafeAreaInsets GetScbSafeArea() const;
 
     const RefPtr<FullScreenManager>& GetFullScreenManager();
 
@@ -668,31 +674,34 @@ public:
         transformHintChangedCallbackMap_.erase(callbackId);
     }
 
-    void SetMouseStyleHoldNode(int32_t id)
+    bool SetMouseStyleHoldNode(int32_t id)
     {
-        CHECK_NULL_VOID(eventManager_);
+        CHECK_NULL_RETURN(eventManager_, false);
         auto mouseStyleManager = eventManager_->GetMouseStyleManager();
         if (mouseStyleManager) {
-            mouseStyleManager->SetMouseStyleHoldNode(id);
+            return mouseStyleManager->SetMouseStyleHoldNode(id);
         }
+        return false;
     }
 
-    void FreeMouseStyleHoldNode(int32_t id)
+    bool FreeMouseStyleHoldNode(int32_t id)
     {
-        CHECK_NULL_VOID(eventManager_);
+        CHECK_NULL_RETURN(eventManager_, false);
         auto mouseStyleManager = eventManager_->GetMouseStyleManager();
         if (mouseStyleManager) {
-            mouseStyleManager->FreeMouseStyleHoldNode(id);
+            return mouseStyleManager->FreeMouseStyleHoldNode(id);
         }
+        return false;
     }
 
-    void FreeMouseStyleHoldNode()
+    bool FreeMouseStyleHoldNode()
     {
-        CHECK_NULL_VOID(eventManager_);
+        CHECK_NULL_RETURN(eventManager_, false);
         auto mouseStyleManager = eventManager_->GetMouseStyleManager();
         if (mouseStyleManager) {
-            mouseStyleManager->FreeMouseStyleHoldNode();
+            return mouseStyleManager->FreeMouseStyleHoldNode();
         }
+        return false;
     }
 
     void MarkNeedFlushMouseEvent(MockFlushEventType type = MockFlushEventType::EXECUTE)
@@ -1150,7 +1159,8 @@ private:
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
-    void DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node);
+    void DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node,
+        SerializedGesture& etsSerializedGesture);
 
     // only used for static form.
     void UpdateFormLinkInfos();
@@ -1159,6 +1169,7 @@ private:
 
     void RegisterFocusCallback();
     void DumpFocus(bool hasJson) const;
+    void DumpResLoadError() const;
     void DumpInspector(const std::vector<std::string>& params, bool hasJson) const;
     void DumpElement(const std::vector<std::string>& params, bool hasJson) const;
     void DumpData(const RefPtr<FrameNode>& node, const std::vector<std::string>& params, bool hasJson) const;
@@ -1187,6 +1198,8 @@ private:
 
     uint64_t AdjustVsyncTimeStamp(uint64_t nanoTimestamp);
     bool FlushModifierAnimation(uint64_t nanoTimestamp);
+    
+    void FlushAnimationDirtysWhenExist(const AnimationOption& option);
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
@@ -1244,13 +1257,12 @@ private:
     RefPtr<FocusManager> focusManager_;
     RefPtr<SharedOverlayManager> sharedTransitionManager_;
 #ifdef WINDOW_SCENE_SUPPORTED
-    RefPtr<UIExtensionManager> uiExtensionManager_;
+    RefPtr<UIExtensionManager> uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
     RefPtr<PrivacySensitiveManager> privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     Rect displayAvailableRect_;
-    std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     WeakPtr<FrameNode> dirtyRequestFocusNode_;

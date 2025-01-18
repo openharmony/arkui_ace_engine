@@ -297,12 +297,13 @@ HWTEST_F(TextPickerColumnTestOneNg, CreateItemTouchEventListener003, TestSize.Le
     auto testImpl = columnPattern->CreateItemTouchEventListener();
     ASSERT_NE(testImpl, nullptr);
     TouchEventInfo info("touch");
+    info.touches_.front().SetTouchType(TouchType::DOWN);
+    testImpl->GetTouchEventCallback()(info);
+    EXPECT_TRUE(columnPattern->animationBreak_ == false);
+    EXPECT_TRUE(columnPattern->clickBreak_ == false);
     info.touches_.front().SetTouchType(TouchType::UP);
     testImpl->GetTouchEventCallback()(info);
     EXPECT_TRUE(columnPattern->touchBreak_ == false);
-    columnPattern->animationBreak_ = true;
-    testImpl->GetTouchEventCallback()(info);
-    EXPECT_TRUE(columnPattern->isDownScroll_ == false);
 }
 
 /**
@@ -367,7 +368,7 @@ HWTEST_F(TextPickerColumnTestOneNg, ParseTouchListener001, TestSize.Level1)
     TouchEventInfo info("touch");
     info.touches_.front().SetTouchType(TouchType::DOWN);
     testImpl->GetTouchEventCallback()(info);
-    EXPECT_TRUE(columnPattern->localDownDistance_ != 0.0f);
+    EXPECT_TRUE(columnPattern->localDownDistance_ == 0.0f);
     info.touches_.front().SetTouchType(TouchType::UP);
     testImpl->GetTouchEventCallback()(info);
     EXPECT_TRUE(columnPattern->localDownDistance_ == 0.0f);

@@ -31,22 +31,22 @@ int32_t RichEditorInsertValue::GetInsertOffset() const
     return insertOffset_;
 }
 
-void RichEditorInsertValue::SetInsertValue(const std::string& insertValue)
+void RichEditorInsertValue::SetInsertValue(const std::u16string& insertValue)
 {
     insertValue_ = insertValue;
 }
 
-void RichEditorInsertValue::SetPreviewText(const std::string& previewText)
+void RichEditorInsertValue::SetPreviewText(const std::u16string& previewText)
 {
     previewText_ = previewText;
 }
 
-const std::string& RichEditorInsertValue::GetInsertValue() const
+const std::u16string& RichEditorInsertValue::GetInsertValue() const
 {
     return insertValue_;
 }
 
-const std::string& RichEditorInsertValue::GetPreviewText() const
+const std::u16string& RichEditorInsertValue::GetPreviewText() const
 {
     return previewText_;
 }
@@ -111,27 +111,22 @@ int32_t RichEditorAbstractSpanResult::GetEraseLength() const
     return eraseLength_;
 }
 
-void RichEditorAbstractSpanResult::SetValue(const std::string& value)
+void RichEditorAbstractSpanResult::SetValue(const std::u16string& value)
 {
     value_ = value;
 }
 
-void RichEditorAbstractSpanResult::SetValue(const std::u16string& value)
-{
-    value_ = UtfUtils::Str16ToStr8(value);
-}
-
-const std::string& RichEditorAbstractSpanResult::GetValue() const
+const std::u16string& RichEditorAbstractSpanResult::GetValue() const
 {
     return value_;
 }
 
-void RichEditorAbstractSpanResult::SetPreviewText(const std::string& previewText)
+void RichEditorAbstractSpanResult::SetPreviewText(const std::u16string& previewText)
 {
     previewText_ = previewText;
 }
 
-const std::string& RichEditorAbstractSpanResult::GetPreviewText() const
+const std::u16string& RichEditorAbstractSpanResult::GetPreviewText() const
 {
     return previewText_;
 }
@@ -481,12 +476,12 @@ const RefPtr<SpanStringBase> StyledStringChangeValue::GetReplacementString() con
     return replacementString_;
 }
 
-void StyledStringChangeValue::SetPreviewText(const std::string& previewText)
+void StyledStringChangeValue::SetPreviewText(const std::u16string& previewText)
 {
     previewText_ = previewText;
 }
 
-const std::string& StyledStringChangeValue::GetPreviewText() const
+const std::u16string& StyledStringChangeValue::GetPreviewText() const
 {
     return previewText_;
 }

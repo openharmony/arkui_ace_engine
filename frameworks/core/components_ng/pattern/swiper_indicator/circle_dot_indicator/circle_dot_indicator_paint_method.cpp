@@ -33,9 +33,9 @@ constexpr uint32_t ACTIVE_ITEM_ANGLE = 5;
 constexpr uint32_t ITEM_MINOR_PADDING = 6;
 constexpr uint32_t ITEM_MINI_PADDING = 7;
 
-constexpr Dimension ITEM_SHRINK_DIAMETER = 5.0_vp;
-constexpr Dimension SLECTED_ITEM_SHRINK_DIAMETER = 5.0_vp;
-constexpr Dimension CONTAINER_SHRINK_DIAMETER = 16.0_vp;
+constexpr Dimension ITEM_SHRINK_RADIUS = 2.5_vp;
+constexpr Dimension SLECTED_ITEM_SHRINK_RADIUS = 2.5_vp;
+constexpr Dimension CONTAINER_SHRINK_RADIUS = 8.0_vp;
 constexpr float ITEM_SHRINK_PADDING = 5.0;
 constexpr float ITEM_SHRINK_MINOR_PADDING = 4.5;
 constexpr float ITEM_SHRINK_MINI_PADDING = 4.0;
@@ -43,9 +43,9 @@ constexpr float ITEM_SHRINK_FADE_PADDING = 3.5;
 constexpr float SELECTED_ITEM_SHRINK_PADDING = 7.0;
 constexpr float ACTIVE_ITEM_SHRINK_ANGLE = 4.0;
 
-constexpr Dimension ITEM_DILATE_DIAMETER = 8.0_vp;
-constexpr Dimension SLECTED_ITEM_DILATE_DIAMETER = 8.0_vp;
-constexpr Dimension CONTAINER_DILATE_DIAMETER = 24.0_vp;
+constexpr Dimension ITEM_DILATE_RADIUS = 4.0_vp;
+constexpr Dimension SLECTED_ITEM_DILATE_RADIUS = 4.0_vp;
+constexpr Dimension CONTAINER_DILATE_RADIUS = 12.0_vp;
 constexpr float ITEM_DILATE_PADDING = 10.0;
 constexpr float ITEM_DILATE_MINOR_PADDING = 9.0;
 constexpr float ITEM_DILATE_MINI_PADDING = 8.0;
@@ -152,9 +152,9 @@ void CircleDotIndicatorPaintMethod::PaintPressIndicator(const PaintWrapper* pain
     CHECK_NULL_VOID(paintWrapper);
     LinearVector<float> itemSizes;
     // The number 0.5 represents equal division
-    itemSizes.emplace_back(static_cast<float>(ITEM_DILATE_DIAMETER.ConvertToPx()) * 0.5);
-    itemSizes.emplace_back(static_cast<float>(SLECTED_ITEM_DILATE_DIAMETER.ConvertToPx()) * 0.5);
-    itemSizes.emplace_back(static_cast<float>(CONTAINER_DILATE_DIAMETER.ConvertToPx()) * 0.5);
+    itemSizes.emplace_back(static_cast<float>(ITEM_DILATE_RADIUS.ConvertToPx()));
+    itemSizes.emplace_back(static_cast<float>(SLECTED_ITEM_DILATE_RADIUS.ConvertToPx()));
+    itemSizes.emplace_back(static_cast<float>(CONTAINER_DILATE_RADIUS.ConvertToPx()));
     itemSizes.emplace_back(ITEM_DILATE_PADDING);
     itemSizes.emplace_back(SELECTED_ITEM_DILATE_PADDING);
     itemSizes.emplace_back(ACTIVE_ITEM_DILATE_ANGLE);
@@ -183,11 +183,11 @@ void CircleDotIndicatorPaintMethod::CalculatePointRadius(int32_t index, int32_t 
     if (isLongPressed_) {
         itemMiniRadius = ITEM_DILATE_MINI_DIAMETER.ConvertToPx() / HALF_DIVISOR;
         itemMinorRadius = ITEM_DILATE_MINOR_DIAMETER.ConvertToPx() / HALF_DIVISOR;
-        itemNormalRadius = ITEM_DILATE_DIAMETER.ConvertToPx() / HALF_DIVISOR;
+        itemNormalRadius = ITEM_DILATE_RADIUS.ConvertToPx();
     } else {
         itemMiniRadius = ITEM_SHRINK_MINI_DIAMETER.ConvertToPx() / HALF_DIVISOR;
         itemMinorRadius = ITEM_SHRINK_MINOR_DIAMETER.ConvertToPx() / HALF_DIVISOR;
-        itemNormalRadius = ITEM_SHRINK_DIAMETER.ConvertToPx() / HALF_DIVISOR;
+        itemNormalRadius = ITEM_SHRINK_RADIUS.ConvertToPx();
     }
     if (itemCount_ > MAX_INDICATOR_DOT_COUNT) {
         bool unsetFlag =
@@ -488,18 +488,18 @@ std::tuple<std::pair<float, float>, LinearVector<float>> CircleDotIndicatorPaint
     LinearVector<float> itemSizes;
     // The number 0.5 represents equal division
     if (isNormal) {
-        itemSizes.emplace_back(static_cast<float>(ITEM_SHRINK_DIAMETER.ConvertToPx()) * 0.5);
-        itemSizes.emplace_back(static_cast<float>(SLECTED_ITEM_SHRINK_DIAMETER.ConvertToPx()) * 0.5);
-        itemSizes.emplace_back(static_cast<float>(CONTAINER_SHRINK_DIAMETER.ConvertToPx()) * 0.5);
+        itemSizes.emplace_back(static_cast<float>(ITEM_SHRINK_RADIUS.ConvertToPx()));
+        itemSizes.emplace_back(static_cast<float>(SLECTED_ITEM_SHRINK_RADIUS.ConvertToPx()));
+        itemSizes.emplace_back(static_cast<float>(CONTAINER_SHRINK_RADIUS.ConvertToPx()));
         itemSizes.emplace_back(ITEM_SHRINK_PADDING);
         itemSizes.emplace_back(SELECTED_ITEM_SHRINK_PADDING);
         itemSizes.emplace_back(ACTIVE_ITEM_SHRINK_ANGLE);
         itemSizes.emplace_back(ITEM_SHRINK_MINOR_PADDING);
         itemSizes.emplace_back(ITEM_SHRINK_MINI_PADDING);
     } else {
-        itemSizes.emplace_back(static_cast<float>(ITEM_DILATE_DIAMETER.ConvertToPx()) * 0.5);
-        itemSizes.emplace_back(static_cast<float>(SLECTED_ITEM_DILATE_DIAMETER.ConvertToPx()) * 0.5);
-        itemSizes.emplace_back(static_cast<float>(CONTAINER_DILATE_DIAMETER.ConvertToPx()) * 0.5);
+        itemSizes.emplace_back(static_cast<float>(ITEM_DILATE_RADIUS.ConvertToPx()));
+        itemSizes.emplace_back(static_cast<float>(SLECTED_ITEM_DILATE_RADIUS.ConvertToPx()));
+        itemSizes.emplace_back(static_cast<float>(CONTAINER_DILATE_RADIUS.ConvertToPx()));
         itemSizes.emplace_back(ITEM_DILATE_PADDING);
         itemSizes.emplace_back(SELECTED_ITEM_DILATE_PADDING);
         itemSizes.emplace_back(ACTIVE_ITEM_DILATE_ANGLE);
@@ -691,7 +691,7 @@ void CircleDotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWr
     float longAngleChangeValue = (displayAreaCount - 1) * itemChangeValue;
 
     if (touchBottomType_ == TouchBottomType::END) {
-        for (int32_t indexLeft = tempvector.size() - displayAreaCount; indexLeft < tempvector.size(); indexLeft++) {
+        for (auto indexLeft = tempvector.size() - displayAreaCount; indexLeft < tempvector.size(); indexLeft++) {
             tempvector[indexLeft] -= (indexLeft - (tempvector.size() - displayAreaCount)) * itemChangeValue;
         }
         longAngleChangeValue *= -1;

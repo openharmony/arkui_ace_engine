@@ -58,7 +58,7 @@ public:
         std::function<void(const BaseEventInfo* baseInfo)>&& eventInfo) override;
     void SetUsrNavigationMode(NG::NavigationMode mode) override;
     void SetNavBarPosition(NG::NavBarPosition mode) override;
-    void SetNavBarWidth(const Dimension& value) override;
+    void SetNavBarWidth(const Dimension& value, bool isDoubleBind = false) override;
     void SetMinNavBarWidth(const Dimension& value) override;
     void SetMaxNavBarWidth(const Dimension& value) override;
     void SetMinContentWidth(const Dimension& value) override;
@@ -68,6 +68,7 @@ public:
     RefPtr<NG::NavigationStack> GetNavigationStack() override;
     void SetMenuCount(int32_t menuCount) override;
     void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onModeChange) override;
+    void SetOnNavBarWidthChangeEvent(OnNavBarWidthChangeEvent event) override;
     void SetCustomTransition(NavigationTransitionEvent&& animationTransition) override;
     void SetIsCustomAnimation(bool isCustom) override;
     void SetRecoverable(bool recoverable) override;
@@ -103,6 +104,7 @@ public:
     static void SetMenuItemAction(FrameNode* frameNode, std::function<void()>&& action, uint32_t index);
     static void SetMenuItemSymbol(FrameNode* frameNode,
         std::function<void(WeakPtr<NG::FrameNode>)>&& symbol, uint32_t index);
+    static bool IsDoubleBindBlock(const RefPtr<NavigationPattern>& navigationPattern);
 
 private:
     bool CreateNavBarNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode);
@@ -112,6 +114,7 @@ private:
     static void SetHideNavBarInner(const RefPtr<NavigationGroupNode>& navigationGroupNode, bool hideNavBar);
     static bool CreateBackButtonNode(RefPtr<FrameNode>& backButtonNode);
     static bool UpdateBackButtonProperty(const RefPtr<FrameNode>& backButtonNode);
+    static bool navBarWidthDoubleBind_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_NG_H

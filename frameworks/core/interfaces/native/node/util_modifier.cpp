@@ -48,21 +48,25 @@ ArkUI_Float32 GetDesignWidthScale(int deviceId)
 namespace NodeModifier {
 const ArkUIUtilsModifier* GetUtilsModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIUtilsModifier modifier = {
-        GetDensity,
-        GetFontScale,
-        GetDesignWidthScale,
+        .getDensity = GetDensity,
+        .getFontScale = GetFontScale,
+        .getDesignWidthScale = GetDesignWidthScale,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIUtilsModifier* GetCJUIUtilsModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIUtilsModifier modifier = {
-        GetDensity,
-        GetFontScale,
-        GetDesignWidthScale,
+        .getDensity = GetDensity,
+        .getFontScale = GetFontScale,
+        .getDesignWidthScale = GetDesignWidthScale,
     };
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

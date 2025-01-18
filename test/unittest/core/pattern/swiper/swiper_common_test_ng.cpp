@@ -1732,4 +1732,85 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems024, TestSize.Level1)
     EXPECT_EQ(thirdChildSize.Width(), 100.0f);
     EXPECT_EQ(thirdChildSize.Height(), 200.0f);
 }
+
+/**
+ * @tc.name: SetAutoPlayOptions001
+ * @tc.desc: Test HandleTouchDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, SetAutoPlayOptions001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Swiper Model.
+     */
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    indicatorNode_->tag_ = V2::SWIPER_ETS_TAG;
+    pattern_->isIndicatorLongPress_ = false;
+    pattern_->isInAutoPlay_ = true;
+    auto swiperPaintProperty = frameNode_->GetPaintProperty<SwiperPaintProperty>();
+    swiperPaintProperty->UpdateAutoPlay(true);
+    /**
+     * @tc.steps: step1. Call IsStopWhenTouched Get stopWhenTouched default values.
+     * @tc.expected: stopWhenTouched is true.
+     */
+    EXPECT_TRUE(pattern_->IsStopWhenTouched());
+    /**
+     * @tc.steps: step2. Call HandleTouchDown when stopWhenTouched is true
+     * @tc.expected: The autoplay status pattern_->isInAutoPlay_ has changed.
+     */
+    TouchLocationInfo touch(0);
+    touch.SetLocalLocation(Offset(100.f, 100.f));
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_FALSE(pattern_->isInAutoPlay_);
+    /**
+     * @tc.steps: step3. Reset isInAutoPlay_ state and set stopWhenTouched.
+     * @tc.expected: pattern_->isInAutoPlay_ is true.
+     * @tc.expected: stopWhenTouched is false.
+     */
+    pattern_->isInAutoPlay_ = true;
+    swiperPaintProperty->UpdateAutoPlay(true);
+    SwiperAutoPlayOptions parameters;
+    parameters.stopWhenTouched = false;
+    model.SetAutoPlayOptions(frameNode_.GetRawPtr(), parameters);
+    EXPECT_FALSE(pattern_->IsStopWhenTouched());
+    /**
+     * @tc.steps: step4. Call HandleTouchDown when stopWhenTouched is false
+     * @tc.expected: The autoplay status pattern_ ->isInAutoPlay_ will not change.
+     */
+    pattern_->HandleTouchDown({ touch });
+    EXPECT_TRUE(pattern_->isInAutoPlay_);
+}
+
+/**
+ * @tc.name: SwiperIndicatorAccessibilityProperty001
+ * @tc.desc: check function about SwiperIndicatorAccessibilityProperty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, SwiperIndicatorAccessibilityProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. indicator type is DOT, indicator use mode is INNER
+     * @tc.expected: check function.
+     */
+    CreateDefaultSwiper();
+    ASSERT_NE(accessibilityProperty_, nullptr);
+    auto accessibilityProperty = indicatorNode_->GetAccessibilityProperty<SwiperIndicatorAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto frameNode = accessibilityProperty->GetSwiperNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto currentIndex = accessibilityProperty->GetCurrentIndex();
+    EXPECT_EQ(currentIndex, 0);
+    auto beginIndex = accessibilityProperty->GetBeginIndex();
+    EXPECT_EQ(beginIndex, 0);
+    auto endIndex = accessibilityProperty->GetEndIndex();
+    EXPECT_EQ(endIndex, 0);
+    auto collectionItemCounts = accessibilityProperty->GetCollectionItemCounts();
+    EXPECT_EQ(collectionItemCounts, 4);
+    auto GetAccessibilityText = accessibilityProperty->GetAccessibilityText();
+    EXPECT_EQ(GetAccessibilityText, "");
+    auto accessibilityAction = accessibilityProperty->GetAccessibilityValue();
+    EXPECT_EQ(accessibilityAction.current, 0);
+}
 } // namespace OHOS::Ace::NG

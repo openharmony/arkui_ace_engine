@@ -34,6 +34,19 @@
 namespace OHOS::Ace {
 constexpr char DEFAULT_RESOURCE_KEY[] = "";
 
+struct ResourceErrorInfo {
+    ResourceErrorInfo(int32_t nodeId, std::string sourceKey, std::string sourceTag, std::string nodeTag,
+        int64_t errorTime, int32_t state)
+        : nodeId(nodeId), sourceKey(std::move(sourceKey)), sourceTag(std::move(sourceTag)),
+          nodeTag(std::move(nodeTag)), errorTime(errorTime), state(state) {}
+    int32_t nodeId;
+    std::string sourceKey;
+    std::string sourceTag;
+    std::string nodeTag;
+    int64_t errorTime;
+    int32_t state;
+};
+
 class ACE_FORCE_EXPORT ResourceManager final : public AceType {
     DECLARE_ACE_TYPE(ResourceManager, AceType);
 
@@ -103,7 +116,10 @@ public:
     {
         std::shared_lock<std::shared_mutex> lock(mutex_);
         auto key = MakeCacheKey("", "");
-        return resourceAdapters_.at(key);
+        if (resourceAdapters_.find(key) != resourceAdapters_.end()) {
+            return resourceAdapters_.at(key);
+        }
+        return nullptr;
     }
 
     void UpdateResourceConfig(const ResourceConfiguration& config, bool themeFlag = false)
@@ -151,15 +167,29 @@ public:
     void RegisterMainResourceAdapter(
         const std::string& bundleName, const std::string& moduleName, const RefPtr<ResourceAdapter>& resAdapter);
 
+    void DumpResLoadError();
+
+    void AddResourceLoadError(ResourceErrorInfo errorInfo)
+    {
+        std::unique_lock<std::shared_mutex> lock(errorMutex_);
+        resourceErrorList_.emplace_front(errorInfo);
+        if (resourceErrorList_.size() > MAX_DUMP_LIST_SIZE) {
+            resourceErrorList_.pop_back();
+        }
+    }
+
 private:
     ResourceManager() = default;
 
+    static const size_t MAX_DUMP_LIST_SIZE = 100;
     std::unordered_map<std::string, RefPtr<ResourceAdapter>> resourceAdapters_;
     std::shared_mutex mutex_;
 
     std::atomic<size_t> capacity_ = 3;
     std::list<CacheNode<RefPtr<ResourceAdapter>>> cacheList_;
     std::unordered_map<std::string, std::list<CacheNode<RefPtr<ResourceAdapter>>>::iterator> cache_;
+    std::shared_mutex errorMutex_;
+    std::list<ResourceErrorInfo> resourceErrorList_;
 };
 } // namespace OHOS::Ace
 

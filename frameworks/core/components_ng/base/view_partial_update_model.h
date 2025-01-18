@@ -47,7 +47,7 @@ struct NodeInfoPU {
     std::function<void(int32_t)> nodeUpdateFunc;
     std::function<bool(int32_t)> hasNodeUpdateFunc;
     std::function<void(RefPtr<NG::CustomNodeBase>)> recycleCustomNodeFunc;
-    std::function<void(bool)> setActiveFunc;
+    std::function<void(bool, bool)> setActiveFunc;
     std::function<void(const std::vector<std::string>&)> onDumpInfoFunc;
     std::function<std::string()> onDumpInspectorFunc;
     std::function<void*()> getThisFunc;
@@ -57,6 +57,7 @@ struct NodeInfoPU {
     bool hasMeasureOrLayout = false;
     bool isStatic = false;
     bool isCustomTitle = false;
+    bool isCustomAppBar = false;
     int32_t codeRow = -1;
     int32_t codeCol = -1;
 
@@ -77,6 +78,7 @@ public:
     virtual void FlushUpdateTask(const UpdateTask& task) = 0;
     virtual void FinishUpdate(
         const WeakPtr<AceType>& viewNode, int32_t id, std::function<void(const UpdateTask&)>&& emplaceTaskFunc) = 0;
+    virtual bool AllowReusableV2Descendant(const WeakPtr<AceType>& viewNode) = 0;
 };
 
 } // namespace OHOS::Ace

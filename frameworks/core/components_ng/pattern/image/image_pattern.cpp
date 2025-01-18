@@ -292,7 +292,7 @@ void ImagePattern::CheckHandles(SelectHandleInfo& handleInfo)
     const auto& geometryNode = host->GetGeometryNode();
     auto contentRect = geometryNode->GetContentRect();
     RectF visibleContentRect(contentRect.GetOffset() + parentGlobalOffset_, contentRect.GetSize());
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     visibleContentRect = GetVisibleContentRect(parent, visibleContentRect);
     auto paintRect = handleInfo.paintRect;
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
@@ -557,6 +557,8 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     if (!host->GetGeometryNode()->GetContent()) {
         return;
     }
+
+    ACE_SCOPED_TRACE("StartDecoding imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
 
     const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(props);
@@ -1597,6 +1599,8 @@ inline void ImagePattern::DumpFillColor(const RefPtr<OHOS::Ace::NG::ImageRenderP
     if (fillColor.has_value()) {
         auto color = fillColor.value();
         DumpLog::GetInstance().AddDesc(std::string("fillColor: ").append(color.ColorToString()));
+    } else {
+        DumpLog::GetInstance().AddDesc("fillColor: Null");
     }
 }
 

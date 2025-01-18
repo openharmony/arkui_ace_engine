@@ -762,7 +762,7 @@ void JSSpanString::FromHtml(const JSCallbackInfo& info)
                     jsSpanString->SetController(styledString);
                     auto spanStrNapi = JsConverter::ConvertJsValToNapiValue(obj);
                     ProcessPromiseCallback(asyncContext, ERROR_CODE_NO_ERROR, spanStrNapi);
-                }, TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::IMMEDIATE);
+                }, TaskExecutor::TaskType::UI, "FromHtmlReturnPromise", PriorityType::VIP);
         }, TaskExecutor::TaskType::BACKGROUND, "FromHtml", PriorityType::IMMEDIATE);
     auto jsPromise = JsConverter::ConvertNapiValueToJsVal(result);
     CHECK_NULL_VOID(jsPromise->IsObject());

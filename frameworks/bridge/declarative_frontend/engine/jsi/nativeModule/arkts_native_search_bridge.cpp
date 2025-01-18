@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,6 @@
 #include "base/utils/utils.h"
 #include "base/memory/ace_type.h"
 #include "frameworks/core/components_ng/pattern/search/search_model_ng.h"
-#include "frameworks/bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_text_editable_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_textfield.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
@@ -80,7 +79,6 @@ ArkUINativeModuleValue SearchBridge::SetSearchInitialize(ArkUIRuntimeCallInfo* r
     }
     SearchModel::GetInstance()->SetFocusable(true);
     SearchModel::GetInstance()->SetFocusNode(true);
-    Framework::JSSeacrhTheme::ApplyTheme();
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -90,7 +88,6 @@ ArkUINativeModuleValue SearchBridge::ResetSearchInitialize(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     SearchModel::GetInstance()->SetFocusable(true);
     SearchModel::GetInstance()->SetFocusNode(true);
-    Framework::JSSeacrhTheme::ApplyTheme();
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -1820,6 +1817,31 @@ ArkUINativeModuleValue SearchBridge::ResetStopBackPress(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSearchModifier()->resetStopBackPress(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::SetKeyboardAppearance(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    if (secondArg->IsNumber()) {
+        uint32_t keyboardAppearance = secondArg->Uint32Value(vm);
+        GetArkUINodeModifiers()->getSearchModifier()->
+            setSearchKeyboardAppearance(nativeNode, keyboardAppearance);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetKeyboardAppearance(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSearchModifier()->resetSearchKeyboardAppearance(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

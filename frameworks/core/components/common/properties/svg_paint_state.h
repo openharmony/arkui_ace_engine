@@ -118,6 +118,9 @@ public:
         }
         if (!hasGradient_) {
             gradient_ = parent.GetGradient();
+            if (gradient_.has_value() && !parent.GetHref().empty()) {
+                gradient_->SetHref(parent.GetHref());
+            }
         }
     }
 

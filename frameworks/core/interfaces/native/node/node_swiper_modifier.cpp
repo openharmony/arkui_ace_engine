@@ -79,10 +79,13 @@ constexpr float ANIMATION_INFO_DEFAULT = 0.0f;
 constexpr float ARROW_SIZE_COEFFICIENT = 0.75f;
 const int32_t ERROR_INT_CODE = -1;
 constexpr float ZERO_F = 0.0f;
+constexpr bool DEFAULT_STOP_WHEN_TOUCHED = true;
 
 const std::vector<SwiperDisplayMode> DISPLAY_MODE = { SwiperDisplayMode::STRETCH, SwiperDisplayMode::AUTO_LINEAR };
 const std::vector<EdgeEffect> EDGE_EFFECT = { EdgeEffect::SPRING, EdgeEffect::FADE, EdgeEffect::NONE };
 const std::vector<SwiperIndicatorType> INDICATOR_TYPE = { SwiperIndicatorType::DOT, SwiperIndicatorType::DIGIT };
+const std::vector<SwiperAnimationMode> ANIMATION_MODE = { SwiperAnimationMode::NO_ANIMATION,
+    SwiperAnimationMode::DEFAULT_ANIMATION, SwiperAnimationMode::FAST_ANIMATION };
 const std::vector<OHOS::Ace::RefPtr<OHOS::Ace::Curve>> CURVES = {
     OHOS::Ace::Curves::LINEAR,
     OHOS::Ace::Curves::EASE,
@@ -735,12 +738,36 @@ void ResetSwiperAutoPlay(ArkUINodeHandle node)
     SwiperModelNG::SetAutoPlay(frameNode, DEFAULT_AUTO_PLAY);
 }
 
-void SetSwiperIndex(ArkUINodeHandle node, ArkUI_Int32 index)
+void SetSwiperStopWhenTouched(ArkUINodeHandle node, ArkUI_Bool stopWhenTouched)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    SwiperAutoPlayOptions swiperAutoPlayOptions;
+    swiperAutoPlayOptions.stopWhenTouched = stopWhenTouched;
+    SwiperModelNG::SetAutoPlayOptions(frameNode, swiperAutoPlayOptions);
+}
+
+void ResetSwiperStopWhenTouched(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperAutoPlayOptions swiperAutoPlayOptions;
+    swiperAutoPlayOptions.stopWhenTouched = DEFAULT_STOP_WHEN_TOUCHED;
+    SwiperModelNG::SetAutoPlayOptions(frameNode, swiperAutoPlayOptions);
+}
+
+void SetSwiperIndex(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animationMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     index = index < 0 ? 0 : index;
-    SwiperModelNG::SetIndex(frameNode, index);
+    if (animationMode <= static_cast<int32_t>(SwiperAnimationMode::NO_ANIMATION) ||
+        animationMode >= static_cast<int32_t>(ANIMATION_MODE.size())) {
+        SwiperModelNG::SetIndex(frameNode, index);
+        return;
+    }
+    SwiperModelNG::SetSwiperToIndex(frameNode, index, static_cast<SwiperAnimationMode>(animationMode));
 }
 
 void ResetSwiperIndex(ArkUINodeHandle node)
@@ -759,6 +786,10 @@ void SetSwiperIndicator(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr)
     std::string indicatorValues = std::string(indicatorStr);
     StringUtils::StringSplitter(indicatorValues, '|', res);
     std::string type = res[INDICATOR_TYPE_INDEX];
+    if (type == "IndicatorComponentController") {
+        SwiperModelNG::SetBindIndicator(frameNode, true);
+        return;
+    }
     if (type == "ArkDigitIndicator") {
         SwiperModelNG::SetIndicatorIsBoolean(frameNode, false);
         SwiperDigitalParameters digitalParameters = GetDigitIndicatorInfo(res);
@@ -834,6 +865,13 @@ ArkUI_Int32 GetSwiperAutoPlay(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<ArkUI_Int32>(SwiperModelNG::GetAutoPlay(frameNode));
+}
+
+ArkUI_Int32 GetSwiperStopWhenTouched(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(SwiperModelNG::GetAutoPlayOptions(frameNode).stopWhenTouched);
 }
 
 ArkUI_Int32 GetSwiperIndex(ArkUINodeHandle node)
@@ -979,6 +1017,7 @@ void SetSwiperToIndex(ArkUINodeHandle node, ArkUI_Int32 (*values)[2])
     CHECK_NULL_VOID(frameNode);
     SwiperModelNG::SetSwiperToIndex(frameNode, (*values)[0], (*values)[1]);
 }
+
 void GetSwiperPrevMargin(ArkUINodeHandle node, ArkUI_Int32 unit, ArkUISwiperMarginOptions* options)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1176,12 +1215,31 @@ ArkUI_Int32 GetSwiperSwiperPageFlipMode(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     return SwiperModelNG::GetPageFlipMode(frameNode);
 }
+
+void SetSwiperOnContentWillScroll(ArkUINodeHandle node, bool* callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onEvent = reinterpret_cast<std::function<bool(const SwiperContentWillScrollResult&)>*>(callback);
+        SwiperModelNG::SetOnContentWillScroll(frameNode, std::move(*onEvent));
+    } else {
+        SwiperModelNG::SetOnContentWillScroll(frameNode, nullptr);
+    }
+}
+
+void ResetSwiperOnContentWillScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetOnContentWillScroll(frameNode, nullptr);
+}
 } // namespace
 
 namespace NodeModifier {
 const ArkUISwiperModifier* GetSwiperModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISwiperModifier modifier = {
         .setSwiperNextMargin = SetSwiperNextMargin,
         .resetSwiperNextMargin = ResetSwiperNextMargin,
@@ -1215,6 +1273,8 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .resetSwiperInterval = ResetSwiperInterval,
         .setSwiperAutoPlay = SetSwiperAutoPlay,
         .resetSwiperAutoPlay = ResetSwiperAutoPlay,
+        .setSwiperStopWhenTouched = SetSwiperStopWhenTouched,
+        .resetSwiperStopWhenTouched = ResetSwiperStopWhenTouched,
         .setSwiperIndex = SetSwiperIndex,
         .resetSwiperIndex = ResetSwiperIndex,
         .setSwiperIndicator = SetSwiperIndicator,
@@ -1225,6 +1285,7 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .resetSwiperEnabled = ResetSwiperEnabled,
         .getSwiperLoop = GetSwiperLoop,
         .getSwiperAutoPlay = GetSwiperAutoPlay,
+        .getSwiperStopWhenTouched = GetSwiperStopWhenTouched,
         .getSwiperIndex = GetSwiperIndex,
         .getSwiperVertical = GetSwiperVertical,
         .getSwiperDuration = GetSwiperDuration,
@@ -1266,21 +1327,16 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setSwiperPageFlipMode = SetSwiperPageFlipMode,
         .resetSwiperPageFlipMode = ResetSwiperPageFlipMode,
         .getSwiperPageFlipMode = GetSwiperSwiperPageFlipMode,
+        .setSwiperOnContentWillScroll = SetSwiperOnContentWillScroll,
+        .resetSwiperOnContentWillScroll = ResetSwiperOnContentWillScroll,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUISwiperModifier* GetCJUISwiperModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUISwiperModifier modifier = {
         .setSwiperNextMargin = SetSwiperNextMargin,
         .resetSwiperNextMargin = ResetSwiperNextMargin,
@@ -1312,6 +1368,8 @@ const CJUISwiperModifier* GetCJUISwiperModifier()
         .resetSwiperInterval = ResetSwiperInterval,
         .setSwiperAutoPlay = SetSwiperAutoPlay,
         .resetSwiperAutoPlay = ResetSwiperAutoPlay,
+        .setSwiperStopWhenTouched = SetSwiperStopWhenTouched,
+        .resetSwiperStopWhenTouched = ResetSwiperStopWhenTouched,
         .setSwiperIndex = SetSwiperIndex,
         .resetSwiperIndex = ResetSwiperIndex,
         .setSwiperIndicator = SetSwiperIndicator,
@@ -1322,6 +1380,7 @@ const CJUISwiperModifier* GetCJUISwiperModifier()
         .resetSwiperEnabled = ResetSwiperEnabled,
         .getSwiperLoop = GetSwiperLoop,
         .getSwiperAutoPlay = GetSwiperAutoPlay,
+        .getSwiperStopWhenTouched = GetSwiperStopWhenTouched,
         .getSwiperIndex = GetSwiperIndex,
         .getSwiperVertical = GetSwiperVertical,
         .getSwiperDuration = GetSwiperDuration,
@@ -1357,14 +1416,7 @@ const CJUISwiperModifier* GetCJUISwiperModifier()
         .setSwiperOnGestureSwipe = SetSwiperOnGestureSwipe,
         .resetSwiperOnGestureSwipe = ResetSwiperOnGestureSwipe,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 

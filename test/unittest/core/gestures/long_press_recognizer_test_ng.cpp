@@ -18,6 +18,8 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+constexpr float GESTURE_EVENT_PROPERTY_DEFAULT_VALUE = 0.0;
+constexpr float GESTURE_EVENT_PROPERTY_VALUE = 10.0;
 class LongPressRecognizerTestNg : public GesturesCommonTestNg {
 public:
     static void SetUpTestSuite();
@@ -1261,5 +1263,83 @@ HWTEST_F(LongPressRecognizerTestNg, DeadlineTimerTest, TestSize.Level1)
         FINGER_NUMBER, false);
     longPressRecognizerPtr->DeadlineTimer(1, true);
     EXPECT_NE(longPressRecognizerPtr, nullptr);
+}
+
+/**
+ * @tc.name: SetOnActionCancelTest001
+ * @tc.desc: Test SendCallbackMsg function in the HandleTouchCancelEvent with touch event input. The onActionCancel
+ * function will return GestureEvent info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, SetOnActionCancelTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LongPressRecognizer.
+     */
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+
+    /**
+     * @tc.steps: step2. Call SetOnActionCancel.
+     * @tc.expected: LongPressRecognizer's callback onActionCancel is not nullptr.
+     */
+    longPressRecognizer.deviceId_ = GESTURE_EVENT_PROPERTY_VALUE;
+    float unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    auto onActionCancel = [&unknownPropertyValue](
+                                GestureEvent& info) { unknownPropertyValue = info.GetDeviceId(); };
+    longPressRecognizer.SetOnActionCancel(onActionCancel);
+    
+    EXPECT_NE(longPressRecognizer.onActionCancel_, nullptr);
+
+    /**
+     * @tc.steps: step3. Invoke HandleTouchCancelEvent when onActionCancel_ is not null.
+     * @tc.expected: The functions have been executed and the unknownPropertyValue has been assigned the correct
+     * value. LongPressRecognizer.refereeState_ = RefereeState::READY
+     */
+    TouchEvent touchEvent;
+    longPressRecognizer.touchPoints_[touchEvent.id] = touchEvent;
+    longPressRecognizer.refereeState_ = RefereeState::SUCCEED;
+    longPressRecognizer.HandleTouchCancelEvent(touchEvent);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(longPressRecognizer.refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: SetOnActionCancelTest002
+ * @tc.desc: Test SendCallbackMsg function in the ReconcileFrom. The onActionCancel function will return
+ * GestureEvent info.
+ * @tc.type: FUNC
+ */
+HWTEST_F(LongPressRecognizerTestNg, SetOnActionCancelTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create LongPressRecognizer.
+     */
+    LongPressRecognizer longPressRecognizer = LongPressRecognizer(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+    RefPtr<LongPressRecognizer> longPressRecognizerPtr =
+        AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, FINGER_NUMBER, false);
+
+    /**
+     * @tc.steps: step2. Call SetOnActionCancel.
+     * @tc.expected: LongPressRecognizer's callback onActionCancel is not nullptr.
+     */
+    longPressRecognizer.deviceId_ = GESTURE_EVENT_PROPERTY_VALUE;
+    float unknownPropertyValue = GESTURE_EVENT_PROPERTY_DEFAULT_VALUE;
+    auto onActionCancel = [&unknownPropertyValue](
+                                GestureEvent& info) { unknownPropertyValue = info.GetDeviceId(); };
+    longPressRecognizer.SetOnActionCancel(onActionCancel);
+    EXPECT_NE(longPressRecognizer.onActionCancel_, nullptr);
+
+    /**
+     * @tc.steps: step3. Invoke ReconcileFrom when onActionCancel_ is not null.
+     * @tc.expected: The functions have been executed and the unknownPropertyValue has been assigned the correct
+     * value.
+     */
+    TouchEvent touchEvent;
+    longPressRecognizer.touchPoints_[touchEvent.id] = touchEvent;
+    longPressRecognizer.duration_ = 0;
+    longPressRecognizer.refereeState_ = RefereeState::SUCCEED;
+    auto result = longPressRecognizer.ReconcileFrom(longPressRecognizerPtr);
+    EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
+    EXPECT_EQ(result, false);
 }
 } // namespace OHOS::Ace::NG

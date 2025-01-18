@@ -193,7 +193,7 @@ class ArkThemeScopeManager {
             // retrieve existing theme scope by WithTheme elmtId
             const scope = this.themeScopes.find(item => item.getWithThemeId() === withThemeId);
             // update WithTheme options
-            scope.updateWithThemeOptions(withThemeOptions, theme);
+            scope?.updateWithThemeOptions(withThemeOptions, theme);
             // re-render all components from the scope
             this.forceRerenderScope(scope);
         }

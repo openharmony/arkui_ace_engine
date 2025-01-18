@@ -51,6 +51,7 @@ public:
     UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard);
     ~UIContentImpl()
     {
+        UnSubscribeEventsPassThroughMode();
         ProcessDestructCallbacks();
         DestroyUIDirector();
         DestroyCallback();
@@ -104,6 +105,7 @@ public:
         const std::map<OHOS::Rosen::AvoidAreaType, OHOS::Rosen::AvoidArea>& avoidAreas = {});
     void UIExtensionUpdateViewportConfig(const ViewportConfig& config);
     void UpdateWindowMode(OHOS::Rosen::WindowMode mode, bool hasDecor = true) override;
+    void NotifyWindowMode(OHOS::Rosen::WindowMode mode) override;
     void UpdateDecorVisible(bool visible, bool hasDecor) override;
     void UpdateWindowBlur();
     void HideWindowTitleButton(bool hideSplit, bool hideMaximize, bool hideMinimize, bool hideClose) override;
@@ -381,6 +383,13 @@ public:
     int32_t AddFocusActiveChangeCallback(const std::function<void(bool isFocusAvtive)>& callback) override;
     void RemoveFocusActiveChangeCallback(int32_t handler) override;
 
+    bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent,
+        const std::function<void(bool)>& callback) override;
+
+    bool ConfigCustomWindowMask(bool enable) override;
+    void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override;
+
+    std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId) override;
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);
@@ -407,6 +416,10 @@ private:
     void UnregisterDisplayManagerCallback();
     void RegisterLinkJumpCallback();
     void ExecuteUITask(std::function<void()> task, const std::string& name);
+    void SubscribeEventsPassThroughMode();
+    void UnSubscribeEventsPassThroughMode();
+    bool GetWindowSizeChangeReason(OHOS::Rosen::WindowSizeChangeReason lastReason,
+        OHOS::Rosen::WindowSizeChangeReason reason);
     std::weak_ptr<OHOS::AbilityRuntime::Context> context_;
     void* runtime_ = nullptr;
     OHOS::Rosen::Window* window_ = nullptr;
@@ -458,6 +471,7 @@ private:
     SingleTaskExecutor::CancelableTask setAppWindowIconTask_;
     std::mutex setAppWindowIconMutex_;
     uint64_t listenedDisplayId_ = 0;
+    OHOS::Rosen::WindowSizeChangeReason lastReason_ = OHOS::Rosen::WindowSizeChangeReason::UNDEFINED;
 };
 
 } // namespace OHOS::Ace

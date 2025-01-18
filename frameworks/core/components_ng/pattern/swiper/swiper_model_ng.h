@@ -71,6 +71,7 @@ public:
     void SetNextMargin(const Dimension& nextMargi, bool ignoreBlankn) override;
     void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent) override;
     void SetIndicatorIsBoolean(bool isBoolean) override;
+    void SetAutoPlayOptions(const SwiperAutoPlayOptions& swiperAutoPlayOptions) override;
     void SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) override;
     void SetDisplayArrow(bool displayArrow) override;
     void SetHoverShow(bool hoverShow) override;
@@ -79,6 +80,8 @@ public:
     void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) override;
     void SetDisableTransitionAnimation(bool isDisable) override;
     void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) override;
+    void SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll) override;
+    void SetBindIndicator(bool bind) override;
     void SetPageFlipMode(int32_t pageFlipMode) override;
     void SetDigitalCrownSensitivity(int32_t sensitivity) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
@@ -103,6 +106,7 @@ public:
     static void SetDisplayCount(FrameNode* frameNode, int32_t displayCount);
     static void ResetDisplayCount(FrameNode* frameNode);
     static void SetCurve(FrameNode* frameNode, const RefPtr<Curve>& curve);
+    static void SetAutoPlayOptions(FrameNode* frameNode, const SwiperAutoPlayOptions& swiperAutoPlayOptions);
     static void SetArrowStyle(FrameNode* frameNode, const SwiperArrowParameters& swiperArrowParameters);
     static void SetDisplayArrow(FrameNode* frameNode, bool displayArrow);
     static void SetHoverShow(FrameNode* frameNode, bool hoverShow);
@@ -120,12 +124,14 @@ public:
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe);
     static void SetNestedScroll(FrameNode* frameNode, const int32_t nestedOpt);
     static void SetSwipeByGroup(FrameNode* frameNode, bool swipeByGroup);
+    static void SetBindIndicator(FrameNode* frameNode, bool bind);
     static bool GetLoop(FrameNode* frameNode);
     static bool GetAutoPlay(FrameNode* frameNode);
     static int GetIndex(FrameNode* frameNode);
     static Axis GetDirection(FrameNode* frameNode);
     static uint32_t GetDuration(FrameNode* frameNode);
     static int GetDisplayCount(FrameNode* frameNode);
+    static SwiperAutoPlayOptions GetAutoPlayOptions(FrameNode* frameNode);
     static int GetAutoPlayInterval(FrameNode* frameNode);
     static RefPtr<Curve> GetCurve(FrameNode* frameNode);
     static bool GetDisableSwipe(FrameNode* frameNode);
@@ -137,12 +143,14 @@ public:
 
     static int32_t RealTotalCount(FrameNode* frameNode);
     static void SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool useAnimation);
+    static void SetSwiperToIndex(FrameNode* frameNode, int32_t index, SwiperAnimationMode animationMode);
     static void GetPreviousMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options);
     static void GetNextMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options);
     static std::shared_ptr<SwiperParameters> GetDotIndicator(FrameNode* frameNode);
     static int32_t GetIndicatorType(FrameNode* frameNode);
     static RefPtr<SwiperController> GetSwiperController(FrameNode* frameNode);
     static void SetOnContentDidScroll(FrameNode* frameNode, ContentDidScrollEvent&& onContentDidScroll);
+    static void SetOnContentWillScroll(FrameNode* frameNode, ContentWillScrollEvent&& onContentWillScroll);
     static void SetCustomContentTransition(FrameNode* frameNode, SwiperContentAnimatedTransition& transition);
     static RefPtr<SwiperController> GetOrCreateSwiperController(FrameNode* frameNode);
     static bool GetIndicatorInteractive(FrameNode* frameNode);
