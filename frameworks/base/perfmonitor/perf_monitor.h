@@ -185,6 +185,7 @@ private:
     bool IsSceneIdInSceneWhiteList(const std::string& sceneId);
     void CheckTimeOutOfExceptAnimatorStatus(const std::string& sceneId);
     bool IsExclusionFrame();
+    void SetVsyncLazyMode();
     void CheckInStartAppStatus();
     void CheckExclusionWindow(const std::string& windowName);
     void CheckResponseStatus();
