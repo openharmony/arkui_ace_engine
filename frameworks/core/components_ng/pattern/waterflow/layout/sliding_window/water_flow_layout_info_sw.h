@@ -308,7 +308,7 @@ private:
     /**
      * @brief Sync state when there has no items in lanes.
      */
-    void SyncOnEmptyLanes();
+    void SyncOnEmptyLanes(float mainSize);
 
     /**
      * @brief cache main-axis length of measured FlowItems.
