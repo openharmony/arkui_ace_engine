@@ -683,6 +683,22 @@ void ResetTextAreaHalfLeading(ArkUINodeHandle node)
     TextFieldModelNG::SetHalfLeading(frameNode, value);
 }
 
+void SetTextAreaKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = static_cast<KeyboardAppearance>(keyboardAppearance);
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
+void ResetTextAreaKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = KeyboardAppearance::NONE_IMMERSIVE;
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
 void SetTextAreaFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1945,6 +1961,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .resetTextAreaMaxFontScale = ResetTextAreaMaxFontScale,
         .setStopBackPress = SetStopBackPress,
         .resetStopBackPress = ResetStopBackPress,
+        .setTextAreaKeyboardAppearance = SetTextAreaKeyboardAppearance,
+        .resetTextAreaKeyboardAppearance = ResetTextAreaKeyboardAppearance,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

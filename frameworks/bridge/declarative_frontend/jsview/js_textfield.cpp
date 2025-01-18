@@ -1700,6 +1700,24 @@ void JSTextField::SetSelectAllValue(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetSelectAllValue(isSetSelectAllValue);
 }
 
+void JSTextField::SetKeyboardAppearance(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    if (!jsValue->IsNumber()) {
+        return;
+    }
+    auto keyboardAppearance = jsValue->ToNumber<uint32_t>();
+    if (keyboardAppearance < static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
+        keyboardAppearance > static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        return;
+    }
+    TextFieldModel::GetInstance()->
+        SetKeyboardAppearance(static_cast<KeyboardAppearance>(keyboardAppearance));
+}
+
 void JSTextField::SetDecoration(const JSCallbackInfo& info)
 {
     do {

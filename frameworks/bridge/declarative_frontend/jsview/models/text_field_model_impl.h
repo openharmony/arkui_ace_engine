@@ -107,6 +107,7 @@ public:
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override {};
     void SetEnablePreviewText(bool enablePreviewText) override {};
     void SetEnableHapticFeedback(bool state) override {};
+    void SetKeyboardAppearance(KeyboardAppearance value) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

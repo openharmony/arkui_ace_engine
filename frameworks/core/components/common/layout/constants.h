@@ -521,6 +521,13 @@ enum class ImageFit {
     MATRIX,
 };
 
+enum class KeyboardAppearance {
+    NONE_IMMERSIVE = 0,
+    IMMERSIVE = 1,
+    LIGHT_IMMERSIVE = 2,
+    DARK_IMMERSIVE = 3
+};
+
 namespace StringUtils {
 inline std::string ToString(const ImageFit& imageFit)
 {
