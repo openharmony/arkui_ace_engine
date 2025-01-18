@@ -113,6 +113,7 @@ enum class InputOperation {
     CURSOR_RIGHT,
     SET_PREVIEW_TEXT,
     SET_PREVIEW_FINISH,
+    INPUT,
 };
 
 struct PasswordModeStyle {
@@ -180,14 +181,32 @@ enum class RequestKeyboardInnerChangeReason {
     SEARCH_FOCUS
 };
 
+enum class InputReason {
+    NONE = 0,
+    IME,
+    PASTE,
+    CUT,
+    DRAG,
+    AUTO_FILL,
+    AI_WRITE,
+    CANCEL_BUTTON
+};
+
 struct PreviewTextInfo {
     std::u16string text;
     PreviewRange range;
 };
 
-struct SourceAndValueInfo {
+struct InsertCommandInfo {
     std::u16string insertValue;
-    bool isIME = false;
+    InputReason reason;
+};
+
+struct InputCommandInfo {
+    PreviewRange deleteRange;
+    int32_t insertOffset;
+    std::u16string insertValue;
+    InputReason reason;
 };
 
 struct TouchAndMoveCaretState {
@@ -330,7 +349,7 @@ public:
     void InsertValue(const std::string& insertValue, bool isIME = false) override;
     void NotifyImfFinishTextPreview();
     int32_t InsertValueByController(const std::u16string& insertValue, int32_t offset);
-    void InsertValueOperation(const SourceAndValueInfo& info);
+    void ExecuteInsertValueCommand(const InsertCommandInfo& info);
     void CalcCounterAfterFilterInsertValue(int32_t curLength, const std::u16string insertValue, int32_t maxLength);
     void UpdateObscure(const std::u16string& insertValue, bool hasInsertValue);
     void CleanCounterNode();
@@ -1371,6 +1390,7 @@ public:
     void ScrollPage(bool reverse, bool smooth = false,
         AccessibilityScrollType scrollType = AccessibilityScrollType::SCROLL_FULL) override;
     void InitScrollBarClickEvent() override {}
+    void ClearTextContent();
     bool IsUnderlineMode() const;
     bool IsInlineMode() const;
     bool IsShowError();
@@ -1643,6 +1663,9 @@ public:
     bool GetOriginCaretPosition(OffsetF& offset) const;
     void ResetOriginCaretPosition() override;
     bool RecordOriginCaretPosition() override;
+    void AddInsertCommand(const std::u16string& insertValue, InputReason reason);
+    void AddInputCommand(const InputCommandInfo& inputCommandInfo);
+    void ExecuteInputCommand(const InputCommandInfo& inputCommandInfo);
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -1692,6 +1715,12 @@ private:
     void AfterIMEInsertValue(const std::u16string& insertValue);
     bool BeforeIMEDeleteValue(const std::u16string& deleteValue, TextDeleteDirection direction, int32_t offset);
     void AfterIMEDeleteValue(const std::u16string& deleteValue, TextDeleteDirection direction);
+
+    bool FireOnWillChange(const ChangeValueInfo& changeValueInfo);
+    bool OnWillChangePreSetValue(const std::u16string& newValue);
+    bool OnWillChangePreDelete(const std::u16string& oldContent, uint32_t start, uint32_t end);
+    bool OnWillChangePreInsert(const std::u16string& insertValue, const std::u16string& oldContent,
+        uint32_t start, uint32_t end);
     void OnAfterModifyDone() override;
     void HandleTouchEvent(const TouchEventInfo& info);
     void HandleTouchDown(const Offset& offset);
@@ -2075,7 +2104,8 @@ private:
 
     std::queue<int32_t> deleteBackwardOperations_;
     std::queue<int32_t> deleteForwardOperations_;
-    std::queue<SourceAndValueInfo> insertValueOperations_;
+    std::queue<InsertCommandInfo> insertCommands_;
+    std::queue<InputCommandInfo> inputCommands_;
     std::queue<InputOperation> inputOperations_;
     bool leftMouseCanMove_ = false;
     bool isLongPress_ = false;
@@ -2146,6 +2176,10 @@ private:
     RequestFocusReason requestFocusReason_ = RequestFocusReason::UNKNOWN;
     bool directionKeysMoveFocusOut_ = false;
     KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
+    TextRange callbackRangeBefore_;
+    TextRange callbackRangeAfter_;
+    std::u16string callbackOldContent_;
+    PreviewText callbackOldPreviewText_;
 };
 } // namespace OHOS::Ace::NG
 

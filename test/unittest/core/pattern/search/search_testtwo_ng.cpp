@@ -987,7 +987,7 @@ HWTEST_F(SearchTestTwoNg, SetProperty001, TestSize.Level1)
     searchModelInstance.SetHeight(Dimension(2.5, DimensionUnit::VP));
 
     //test SetOnChange
-    searchModelInstance.SetOnChange([](const std::u16string str, PreviewText previewText) {});
+    searchModelInstance.SetOnChange([](const ChangeValueInfo& changeValueInfo) {});
     EXPECT_NE(eventHub->GetOnChange(), nullptr);
 
     //test SetOnTextSelectionChange
@@ -1661,7 +1661,7 @@ HWTEST_F(SearchTestTwoNg, SetTextFont, TestSize.Level1)
     searchModelInstance.SetIcon(frameNode, "");
     searchModelInstance.SetMaxLength(frameNode, 19);
     searchModelInstance.SetOnSubmit(frameNode, [](const std::u16string& title, NG::TextFieldCommonEvent& event) {});
-    searchModelInstance.SetOnChange(frameNode, [](const std::u16string str, PreviewText previewText) {});
+    searchModelInstance.SetOnChange(frameNode, [](const ChangeValueInfo& changeValueInfo) {});
     searchModelInstance.SetType(frameNode, TextInputType::BEGIN);
     EXPECT_EQ(textFieldLayoutProperty->GetTextInputType().value(), TextInputType::BEGIN);
     searchModelInstance.SetType(frameNode, TextInputType::TEXT);

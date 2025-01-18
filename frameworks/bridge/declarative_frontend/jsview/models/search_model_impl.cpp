@@ -234,20 +234,6 @@ void SearchModelImpl::SetOnSubmit(std::function<void(const std::string&)>&& onSu
     component->SetOnSubmit(std::move(onSubmit));
 }
 
-void SearchModelImpl::SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& onChange)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
-    CHECK_NULL_VOID(component);
-    auto onChangeImpl = [onChange] (const std::string& value) {
-        if (!onChange) {
-            PreviewText previewText {};
-            onChange(UtfUtils::Str8DebugToStr16(value), previewText);
-        }
-    };
-    component->SetOnChange(std::move(onChangeImpl));
-}
-
 void SearchModelImpl::SetOnCopy(std::function<void(const std::u16string&)>&& func)
 {
     auto* stack = ViewStackProcessor::GetInstance();
