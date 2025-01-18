@@ -293,6 +293,9 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.UpdateMaxSizeWithCheck(size);
     }
     // childSize_ and childOffset_ is used in Layout.
+    auto childProp = child->GetLayoutProperty();
+    CHECK_NULL_VOID(childProp);
+    childProp->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     child->Measure(childLayoutConstraint);
     measureChildSizeAfter_ = child->GetGeometryNode()->GetFrameSize();
     if (!NearEqual(measureChildSizeBefore_, measureChildSizeAfter_)) {
