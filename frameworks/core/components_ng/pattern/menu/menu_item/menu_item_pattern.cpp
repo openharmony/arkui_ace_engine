@@ -1659,15 +1659,22 @@ void MenuItemPattern::AddClickableArea()
         accessibilityProperty->SetAccessibilityText(content + "," + label);
         clickableArea_ = clickableArea;
         clickableArea_->MountToParent(host, CLICKABLE_AREA_VIEW_INDEX);
-        if (content_) {
-            auto nodeAccessibilityProps = content_->GetAccessibilityProperty<AccessibilityProperty>();
+
+        RefPtr<FrameNode> leftRow =
+            host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
+        if (leftRow) {
+            auto nodeAccessibilityProps = leftRow->GetAccessibilityProperty<AccessibilityProperty>();
             CHECK_NULL_VOID(nodeAccessibilityProps);
             nodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+            nodeAccessibilityProps->SetAccessibilityGroup(true);
         }
-        if (label_) {
-            auto nodeAccessibilityProps = label_->GetAccessibilityProperty<AccessibilityProperty>();
+        RefPtr<FrameNode> rightRow =
+            host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
+        if (rightRow) {
+            auto nodeAccessibilityProps = rightRow->GetAccessibilityProperty<AccessibilityProperty>();
             CHECK_NULL_VOID(nodeAccessibilityProps);
             nodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+            nodeAccessibilityProps->SetAccessibilityGroup(true);
         }
     }
 }
