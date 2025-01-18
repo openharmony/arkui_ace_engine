@@ -165,6 +165,7 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("enablePreviewText", &JSSearch::SetEnablePreviewText);
     JSClass<JSSearch>::StaticMethod("enableHapticFeedback", &JSSearch::SetEnableHapticFeedback);
     JSClass<JSSearch>::StaticMethod("stopBackPress", &JSSearch::SetStopBackPress);
+    JSClass<JSSearch>::StaticMethod("keyboardAppearance", &JSSearch::SetKeyboardAppearance);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -1419,5 +1420,23 @@ void JSSearch::SetStopBackPress(const JSCallbackInfo& info)
         isStopBackPress = info[0]->ToBoolean();
     }
     SearchModel::GetInstance()->SetStopBackPress(isStopBackPress);
+}
+
+void JSSearch::SetKeyboardAppearance(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    if (!jsValue->IsNumber()) {
+        return;
+    }
+    auto keyboardAppearance = jsValue->ToNumber<uint32_t>();
+    if (keyboardAppearance < static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
+        keyboardAppearance > static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        return;
+    }
+    SearchModel::GetInstance()->
+        SetKeyboardAppearance(static_cast<KeyboardAppearance>(keyboardAppearance));
 }
 } // namespace OHOS::Ace::Framework

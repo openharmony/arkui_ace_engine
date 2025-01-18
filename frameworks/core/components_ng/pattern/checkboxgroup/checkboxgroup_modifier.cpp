@@ -58,6 +58,7 @@ CheckBoxGroupModifier::CheckBoxGroupModifier(const Parameters& parameters)
     hotZoneHorizontalPadding_ = parameters.hotZoneHorizontalPadding;
     defaultPaddingSize_ = parameters.defaultPaddingSize;
     hoverPaddingSize_ = parameters.hoverPaddingSize;
+    showCircleDial_ = parameters.showCircleDial;
     hotZoneVerticalPadding_ = parameters.hotZoneVerticalPadding;
     shadowWidth_ = parameters.shadowWidth;
     hoverDuration_ = parameters.hoverDuration;
@@ -269,7 +270,7 @@ void CheckBoxGroupModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF
     float originY;
     float endX;
     float endY;
-    auto paddingPx = hoverPaddingSize_.ConvertToPx();
+    auto paddingPx = (showCircleDial_ ? hoverPaddingSize_.ConvertToPx() : defaultPaddingSize_.ConvertToPx());
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         originX = offset.GetX() - paddingPx;
         originY = offset.GetY() - paddingPx;

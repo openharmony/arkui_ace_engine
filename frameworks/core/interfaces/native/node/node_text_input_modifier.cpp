@@ -1130,6 +1130,29 @@ void ResetTextInputHalfLeading(ArkUINodeHandle node)
     TextFieldModelNG::SetHalfLeading(frameNode, value);
 }
 
+void SetTextInputKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = static_cast<KeyboardAppearance>(keyboardAppearance);
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
+ArkUI_Int32 GetTextInputKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetKeyboardAppearance(frameNode));
+}
+
+void ResetTextInputKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = KeyboardAppearance::NONE_IMMERSIVE;
+    TextFieldModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
 void SetTextInputFontFeature(ArkUINodeHandle node, ArkUI_CharPtr value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -2108,6 +2131,9 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .resetTextInputMaxFontScale = ResetTextInputMaxFontScale,
         .setStopBackPress = SetStopBackPress,
         .resetStopBackPress = ResetStopBackPress,
+        .setTextInputKeyboardAppearance = SetTextInputKeyboardAppearance,
+        .getTextInputKeyboardAppearance = GetTextInputKeyboardAppearance,
+        .resetTextInputKeyboardAppearance = ResetTextInputKeyboardAppearance,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

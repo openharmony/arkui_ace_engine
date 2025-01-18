@@ -481,7 +481,7 @@ void SearchPattern::HandleTouchableAndHitTestMode()
         auto childFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childIndex));
         CHECK_NULL_VOID(childFrameNode);
         auto childEventHub = childFrameNode->GetEventHub<EventHub>();
-        auto childGestureHub = childEventHub->GetGestureEventHub();
+        auto childGestureHub = childEventHub->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(childGestureHub);
         childGestureHub->SetTouchable(searchTouchable);
         childGestureHub->SetHitTestMode(searchHitTestMode);

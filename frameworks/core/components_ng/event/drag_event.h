@@ -253,6 +253,11 @@ public:
         return isRestartDrag_;
     }
 
+    void SetIsForDragDrop(bool isForDragDrop)
+    {
+        isForDragDrop_ = isForDragDrop;
+    }
+
     void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
 
     void SetGatherNodeAboveFilter(const RefPtr<DragEventActuator>& actuator);
@@ -364,6 +369,7 @@ private:
     int32_t lastTouchFingerId_ = 0;
     bool isNewFwk_ = false;
     bool isRestartDrag_ = false;
+    bool isForDragDrop_ = false;
 };
 
 } // namespace OHOS::Ace::NG

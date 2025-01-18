@@ -47,4 +47,41 @@ void SearchController::SetTextSelection(
     }
 }
 
+int32_t SearchController::GetTextContentLinesNum()
+{
+    int32_t linesNum = -1;
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        linesNum = controller->GetTextContentLinesNum();
+    }
+    return linesNum;
+}
+
+CJRectResult SearchController::GetTextContentRect()
+{
+    CJRectResult result;
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        Rect rect = controller->GetTextContentRect();
+        result.x = rect.Left();
+        result.y = rect.Top();
+        result.width = rect.Width();
+        result.height = rect.Height();
+    }
+    return result;
+}
+
+CJCaretOffset SearchController::GetCaretOffset()
+{
+    CJCaretOffset result;
+    auto controller = controller_.Upgrade();
+    if (controller) {
+        NG::OffsetF caretOffset = controller->GetCaretPosition();
+        result.index = controller->GetCaretIndex();
+        result.x = caretOffset.GetX();
+        result.y = caretOffset.GetY();
+    }
+    return result;
+}
+
 } // namespace OHOS::Ace::Framework

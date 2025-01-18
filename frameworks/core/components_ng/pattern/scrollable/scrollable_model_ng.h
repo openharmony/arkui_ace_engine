@@ -28,7 +28,7 @@
 namespace OHOS::Ace::NG {
 
 constexpr Dimension DEFAULT_FADING_EDGE_LENGTH_SCROLLABLE = Dimension(32.0f, DimensionUnit::VP); // default value
-class ACE_EXPORT ScrollableModelNG {
+class ACE_FORCE_EXPORT ScrollableModelNG {
 public:
     static void SetEdgeEffect(EdgeEffect edgeEffect, bool alwaysEnabled, EffectEdge effectEdge = EffectEdge::ALL);
 

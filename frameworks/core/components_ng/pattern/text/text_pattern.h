@@ -581,6 +581,7 @@ public:
     void HandleOnCopy();
     void HandleOnCopySpanString();
     virtual void HandleOnSelectAll();
+    bool IsShowTranslate();
     bool IsShowSearch();
     void SetTextSelectableMode(TextSelectableMode value);
 

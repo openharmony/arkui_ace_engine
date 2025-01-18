@@ -275,6 +275,7 @@ struct ArkUIDragEvent {
     ArkUI_Int32 dataTypesCount;
     ArkUI_CharPtr* dataTypes;
     ArkUI_Int32 dataTypesMaxStrLength;
+    ArkUI_CharPtr key;
 };
 
 struct ArkUIFocusAxisEvent {
@@ -1462,6 +1463,8 @@ typedef ArkUIAnimator* ArkUIAnimatorHandle;
 
 typedef void (*DragStatusCallback)(ArkUIDragAndDropInfo* dragAndDropInfo, void* userData);
 
+typedef void (*XComponentAnalyzerCallback)(void* node, int32_t statusCode, void* userData);
+
 struct ArkUIImageFrameInfo {
     ArkUI_CharPtr src;
     ArkUI_Int32 width;
@@ -1921,6 +1924,7 @@ struct ArkUICommonModifier {
     void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUIDragPreViewOptions dragPreviewOptions,
         ArkUIDragInteractionOptions dragInteractionOptions);
     void (*resetDragPreviewOptions)(ArkUINodeHandle node);
+    void (*setDisableDataPrefetch)(ArkUINodeHandle node, ArkUI_Bool disable);
     void (*setMouseResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetMouseResponseRegion)(ArkUINodeHandle node);
@@ -3277,17 +3281,22 @@ struct ArkUIParallelInnerGestureEvent {
 };
 
 struct ArkUIGestureModifier {
-    ArkUIGesture* (*createTapGesture)(ArkUI_Int32 count, ArkUI_Int32 fingers, void* userData);
+    ArkUIGesture* (*createTapGesture)(ArkUI_Int32 count, ArkUI_Int32 fingers, bool limitFingerCount, void* userData);
     ArkUIGesture* (*createTapGestureWithDistanceThreshold)(
-        ArkUI_Int32 count, ArkUI_Int32 fingers, ArkUI_Float64 distanceThreshold, void* userData);
-    ArkUIGesture* (*createLongPressGesture)(ArkUI_Int32 fingers, bool repeat, ArkUI_Int32 duration, void* userData);
+        ArkUI_Int32 count, ArkUI_Int32 fingers, ArkUI_Float64 distanceThreshold, bool limitFingerCount,
+        void* userData);
+    ArkUIGesture* (*createLongPressGesture)(ArkUI_Int32 fingers, bool repeat, ArkUI_Int32 duration,
+        bool limitFingerCount, void* userData);
     ArkUIGesture* (*createPanGesture)(
-        ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance, void* userData);
-    ArkUIGesture* (*createPinchGesture)(ArkUI_Int32 fingers, ArkUI_Float64 distance, void* userData);
-    ArkUIGesture* (*createRotationGesture)(ArkUI_Int32 fingers, ArkUI_Float64 angle, void* userData);
+        ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance, bool limitFingerCount, void* userData);
+    ArkUIGesture* (*createPinchGesture)(ArkUI_Int32 fingers, ArkUI_Float64 distance, bool limitFingerCount,
+        void* userData);
+    ArkUIGesture* (*createRotationGesture)(ArkUI_Int32 fingers, ArkUI_Float64 angle, bool limitFingerCount,
+        void* userData);
     ArkUIGesture* (*createSwipeGesture)(
-        ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed, void* userData);
-    ArkUIGesture* (*createSwipeGestureByModifier)(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 speed);
+        ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed, bool limitFingerCount, void* userData);
+    ArkUIGesture* (*createSwipeGestureByModifier)(
+        ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 speed, bool limitFingerCount);
     ArkUIGesture* (*createGestureGroup)(ArkUI_Int32 mode);
     void (*addGestureToGestureGroup)(ArkUIGesture* group, ArkUIGesture* child);
     void (*removeGestureFromGestureGroup)(ArkUIGesture* group, ArkUIGesture* child);
@@ -3303,6 +3312,7 @@ struct ArkUIGestureModifier {
     ArkUI_Int32 (*setInnerGestureParallelTo)(ArkUINodeHandle node, void* userData,
         ArkUIGestureRecognizer* (*parallelInnerGesture)(ArkUIParallelInnerGestureEvent* event));
     ArkUI_Int32 (*setGestureRecognizerEnabled)(ArkUIGestureRecognizer* recognizer, bool enabled);
+    ArkUI_Int32 (*setGestureRecognizerLimitFingerCount)(ArkUIGesture* gesture, bool limitFingerCount);
     ArkUI_Bool (*getGestureRecognizerEnabled)(ArkUIGestureRecognizer* recognizer);
     ArkUI_Int32 (*getGestureRecognizerState)(ArkUIGestureRecognizer* recognizer, ArkUIGestureRecognizerState* state);
     ArkUI_Int32 (*gestureEventTargetInfoIsScrollBegin)(ArkUIGestureEventTargetInfo* info, bool* ret);
@@ -3642,6 +3652,8 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaMaxFontScale)(ArkUINodeHandle node);
     void (*setStopBackPress)(ArkUINodeHandle node, ArkUI_Uint32 isStopBackPress);
     void (*resetStopBackPress)(ArkUINodeHandle node);
+    void (*setTextAreaKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyBoardAppearance);
+    void (*resetTextAreaKeyboardAppearance)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
@@ -3856,6 +3868,9 @@ struct ArkUITextInputModifier {
     void (*resetTextInputMaxFontScale)(ArkUINodeHandle node);
     void (*setStopBackPress)(ArkUINodeHandle node, ArkUI_Uint32 sStopBackPress);
     void (*resetStopBackPress)(ArkUINodeHandle node);
+    void (*setTextInputKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyBoardAppearance);
+    ArkUI_Int32 (*getTextInputKeyboardAppearance)(ArkUINodeHandle node);
+    void (*resetTextInputKeyboardAppearance)(ArkUINodeHandle node);
 };
 
 struct ArkUIWebModifier {
@@ -4525,6 +4540,8 @@ struct ArkUISearchModifier {
     void (*resetSearchMaxFontScale)(ArkUINodeHandle node);
     void (*setStopBackPress)(ArkUINodeHandle node, ArkUI_Uint32 isStopBackPress);
     void (*resetStopBackPress)(ArkUINodeHandle node);
+    void (*setSearchKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyBoardAppearance);
+    void (*resetSearchKeyboardAppearance)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {
@@ -4843,6 +4860,8 @@ struct ArkUISelectModifier {
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetSelectDivider)(ArkUINodeHandle node);
     void (*resetSelectDividerNull)(ArkUINodeHandle node);
+    void (*setSelectDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
+    void (*resetSelectDirection)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/
@@ -5180,6 +5199,15 @@ struct ArkUIXComponentModifier {
     void (*setXComponentRenderFit)(ArkUINodeHandle node, ArkUI_Int32 renderFit);
     void (*resetXComponentRenderFit)(ArkUINodeHandle node);
     ArkUI_Int32 (*getXComponentRenderFit)(ArkUINodeHandle node);
+    void (*setXComponentSurfaceRect)(ArkUINodeHandle node, ArkUI_Int32 offsetX, ArkUI_Int32 offsetY,
+        ArkUI_Int32 surfaceWidth, ArkUI_Int32 surfaceHeight);
+    void (*getXComponentSurfaceRect)(ArkUINodeHandle node, ArkUI_Int32& offsetX, ArkUI_Int32& offsetY,
+        ArkUI_Int32& surfaceWidth, ArkUI_Int32& surfaceHeight);
+    void (*resetXComponentSurfaceRect)(ArkUINodeHandle node);
+    ArkUI_Bool (*getXComponentEnableAnalyzer)(ArkUINodeHandle node);
+    void (*startImageAnalyzer)(ArkUINodeHandle node, void* arkuiNode, void* userData,
+        XComponentAnalyzerCallback callback);
+    void (*stopImageAnalyzer)(ArkUINodeHandle node);
 };
 
 struct ArkUIStateModifier {

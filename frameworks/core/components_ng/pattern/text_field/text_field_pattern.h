@@ -43,6 +43,7 @@
 #include "core/common/ime/text_input_proxy.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/ime/text_selection.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
@@ -265,6 +266,16 @@ public:
     bool GetBlurOnSubmit()
     {
         return IsTextArea() ? textAreaBlurOnSubmit_ : textInputBlurOnSubmit_;
+    }
+
+    void SetKeyboardAppearance(KeyboardAppearance value)
+    {
+        keyboardAppearance_ = value;
+    }
+
+    KeyboardAppearance GetKeyboardAppearance() const
+    {
+        return keyboardAppearance_;
     }
 
     bool NeedToRequestKeyboardOnFocus() const override
@@ -1019,6 +1030,7 @@ public:
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleOnPaste() override;
     void HandleOnCut() override;
+    bool IsShowTranslate();
     bool IsShowSearch();
     void HandleOnCameraInput();
     void HandleOnAIWrite();
@@ -1574,7 +1586,7 @@ public:
         return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
     }
 
-    float GetLastCaretPos()
+    std::optional<float> GetLastCaretPos() const
     {
         return lastCaretPos_;
     }
@@ -2128,11 +2140,12 @@ private:
     uint32_t longPressFingerNum_ = 0;
     ContentScroller contentScroller_;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
-    float lastCaretPos_ = 0.0f;
+    std::optional<float> lastCaretPos_ = std::nullopt;
     bool firstClickAfterLosingFocus_ = true;
     CancelableCallback<void()> firstClickResetTask_;
     RequestFocusReason requestFocusReason_ = RequestFocusReason::UNKNOWN;
     bool directionKeysMoveFocusOut_ = false;
+    KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
 };
 } // namespace OHOS::Ace::NG
 

@@ -646,8 +646,8 @@ class LayoutPolicyPolicy {
     this.id_ = id;
   }
 
-  static get MATCH_PARENT() {
-    return new LayoutPolicyPolicy('MATCH_PARENT');
+  static get matchParent() {
+    return new LayoutPolicyPolicy('matchParent');
   }
 }
 
@@ -1400,6 +1400,14 @@ let WebKeyboardAvoidMode;
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.OVERLAYS_CONTENT = 2] = 'OVERLAYS_CONTENT';
 })(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
 
+let KeyboardAppearance;
+(function (KeyboardAppearance) {
+  KeyboardAppearance[KeyboardAppearance.NONE_IMMERSIVE = 0] = 'NONE_IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.IMMERSIVE = 1] = 'IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.LIGHT_IMMERSIVE = 2] = 'LIGHT_IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.DARK_IMMERSIVE = 3] = 'DARK_IMMERSIVE';
+})(KeyboardAppearance || (KeyboardAppearance = {}));
+
 class SymbolEffect {
 }
 
@@ -2131,6 +2139,10 @@ class TextMenuItemId {
 
   static get SELECT_ALL() {
     return new TextMenuItemId('OH_DEFAULT_SELECT_ALL');
+  }
+
+  static get TRANSLATE() {
+    return new TextMenuItemId('OH_DEFAULT_TRANSLATE');
   }
 
   static get SEARCH() {

@@ -892,6 +892,17 @@ void SearchModelNG::SetEnableHapticFeedback(bool state)
     pattern->SetEnableHapticFeedback(state);
 }
 
+void SearchModelNG::SetKeyboardAppearance(KeyboardAppearance value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetKeyboardAppearance(value);
+}
+
 void SearchModelNG::SetOnPaste(std::function<void(const std::u16string&)>&& func)
 {
     auto searchTextField = GetSearchTextFieldFrameNode();
@@ -2249,5 +2260,15 @@ void SearchModelNG::SetStopBackPress(FrameNode* frameNode, bool isStopBackPress)
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
     CHECK_NULL_VOID(textFieldChild);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StopBackPress, isStopBackPress, textFieldChild);
+}
+
+void SearchModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    CHECK_NULL_VOID(textFieldChild);
+    auto pattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetKeyboardAppearance(value);
 }
 } // namespace OHOS::Ace::NG

@@ -132,6 +132,7 @@ public:
     void SetEnablePreviewText(bool enablePreviewText) override;
     void SetEnableHapticFeedback(bool state) override;
     void SetStopBackPress(bool isStopBackPress) override;
+    void SetKeyboardAppearance(KeyboardAppearance value) override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -305,6 +306,8 @@ public:
     static bool GetEnablePreviewText(FrameNode* frameNode);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode modal);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
+    static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
+    static int32_t GetKeyboardAppearance(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

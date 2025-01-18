@@ -35,7 +35,8 @@ class ClickRecognizer : public MultiFingersRecognizer {
 
 public:
     ClickRecognizer() = default;
-    ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold = std::numeric_limits<double>::infinity());
+    ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold = std::numeric_limits<double>::infinity(),
+    bool isLimitFingerCount_ = false);
 
     ~ClickRecognizer() override = default;
 

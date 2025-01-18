@@ -29,6 +29,7 @@
 using VectorMenuValuePtr = void*;
 using VectorStringPtr = void*;
 using VectorNativeRectangleHandle = void*;
+using VectorFloat64Ptr = void*;
 
 namespace OHOS::Ace::Framework {
 
@@ -260,6 +261,7 @@ struct CJForegroundBlurStyle {
     int32_t colorMode;
     int32_t adaptiveColor;
     CJBlurOptions blurOptions;
+    float scale;
 };
 
 struct CJAlignRuleOption {
@@ -277,6 +279,26 @@ struct CJAlignRuleOption {
     int32_t centerVerticalAlign;
     float* horizontalBias;
     float* verticalBias;
+};
+
+struct CJCaretOffset {
+    double index;
+    double x;
+    double y;
+};
+
+struct CJVisibleAreaEventOptions {
+    VectorFloat64Ptr ratios;
+    double expectedUpdateInterval;
+};
+
+struct CJMutiShadowOptions {
+    double radiusValue;
+    double offsetXValue;
+    double offsetYValue;
+    int32_t radiusUnit;
+    int32_t offsetXUnit;
+    int32_t offsetYUnit;
 };
 
 struct CJChainInfo {
@@ -348,6 +370,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTranslateX(double translateValu
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTranslateY(double translateValue, int32_t translateUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTransition();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractTransition(int64_t id);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractTransitionWithBack(int64_t id, void (*onFinish)(bool transitionIn));
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetTransform(int64_t id);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAlign(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDirection(int32_t dirValue);
@@ -383,6 +406,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSharedTransition(char* shareId,
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, CJGeometryTransitionOptions option);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBlur(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetColorBlend(uint32_t color);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(double radius, int32_t direction,
+    VectorFloat64Ptr blurVec, VectorFloat64Ptr positionVec);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackdropBlur(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetWindowBlur(float progress, int32_t styleValue);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetShadow(double radius, uint32_t color, double offsetX, double offsetY);
@@ -391,6 +416,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBrightness(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSaturate(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetContrast(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetInvert(double value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetInvertWithOptions(
+    double low, double high, double threshold, double thresholdRange);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSepia(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetHueRotate(float deg);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBlendMode(int32_t value, int32_t type);
@@ -507,6 +534,14 @@ CJ_EXPORT void FFIOHOSAceFrameworkTabIndex(int32_t index);
 CJ_EXPORT void FFIOHOSAceFrameworkDefaultFocus(bool isDefaultFocus);
 CJ_EXPORT void FFIOHOSAceFrameworkGroupDefaultFocus(bool isGroupDefaultFocus);
 CJ_EXPORT void FFIOHOSAceFrameworkFocusOnTouch(bool isFocusOnTouch);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityDescription(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityText(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityGroup(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityLevel(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityTextHint(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetAccessibilityVirtualNode(void (*builder)());
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetClickEffect(int32_t level, float scale);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetMotionPath(CJMotionPathOptions options);
 CJ_EXPORT bool FFIOHOSAceFrameworkRequestFocus(const char* inspectorKey);
 
 struct CJFocusBoxStyle {
@@ -528,8 +563,19 @@ CJ_EXPORT uint32_t FFIOHOSAceFrameworkBlendColor(uint32_t color, uint32_t overla
 CJ_EXPORT void FFISetWidthWithEmpty();
 CJ_EXPORT void FFISetHeightWithEmpty();
 
+struct CJDismissContentCoverAction {
+    int32_t reason;
+    void (*dismissContentCover)();
+};
+
+struct NativeOptionOnWillDismiss {
+    bool hasValue;
+    void (*value)(CJDismissContentCoverAction action);
+};
 struct CJContentCoverOptions {
     uint32_t modalTransition;
+    NativeOptionOnWillDismiss onWillDismiss;
+    NativeOptionInt64 transition;
     NativeOptionUInt32 backgroundColor;
     NativeOptionCallBack onAppear;
     NativeOptionCallBack onDisappear;
@@ -548,6 +594,22 @@ CJ_EXPORT uint32_t FFIGetResourceUInt32(NativeResourceObject obj);
 CJ_EXPORT bool FFIGetResourceBool(NativeResourceObject obj);
 CJ_EXPORT VectorUInt32Handle FFIGetResourceVectorUInt32(NativeResourceObject obj);
 CJ_EXPORT VectorStringHandle FFIGetResourceVectorString(NativeResourceObject obj);
+
+struct CBorderImageOption {
+    CJEdge slice;
+    CJEdge width;
+    CJEdge outset;
+    int32_t repeat;
+    bool fill;
+};
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDraggable(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithBuilder(void (*builder)());
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithDragItemInfo(CJDragItemInfo value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithString(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithString(
+    const char* source, CBorderImageOption option);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithLinearGradient(
+    LinearGradientParam source, CBorderImageOption option);
 }
 
 namespace OHOS::Ace {
@@ -558,6 +620,8 @@ bool ParseCjDimension(int64_t id, Dimension& result);
 bool ParseColorById(int64_t id, Color& color);
 void ParseCJResponseRegion(CJResponseRegion value, std::vector<DimensionRect>& result);
 void ParseVectorStringPtr(VectorStringPtr value, std::vector<DimensionRect>& result);
+void ParceBorderImageParam(RefPtr<BorderImage>& borderImage, uint8_t& bitset, CBorderImageOption& option);
+RefPtr<PixelMap> ParseDragPreviewPixelMap(int64_t pixelMapId);
 } // namespace OHOS::Ace
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_VIEW_ABSTRACT_FFI_H

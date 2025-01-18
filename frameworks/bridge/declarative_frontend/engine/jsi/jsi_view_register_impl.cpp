@@ -158,6 +158,7 @@
 #include "bridge/declarative_frontend/sharedata/js_share_data.h"
 #include "bridge/declarative_frontend/style_string/js_span_string.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
 
@@ -1085,6 +1086,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSProfiler::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
     JSContainerModal::JSBind(globalObj);
+    JSAppBar::JSBind(globalObj);
     auto delegate = JsGetFrontendDelegate();
     std::string jsModules;
     if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {

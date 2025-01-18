@@ -1109,7 +1109,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest034, TestSize.Lev
     DimensionRect responseRect(Dimension(-1), Dimension(-1), DimensionOffset(OFFSETF));
     std::vector<DimensionRect> responseRegion;
     responseRegion.push_back(responseRect);
-    auto gestureEventHub = host->eventHub_->GetOrCreateGestureEventHub();
+    auto gestureEventHub = host->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureEventHub->SetResponseRegion(responseRegion);
     auto paintRect = host->renderContext_->GetPaintRectWithoutTransform();
     auto responseRegionList = host->GetResponseRegionList(paintRect, 2);
@@ -1141,7 +1141,7 @@ HWTEST_F(AccessibilityPropertyTestNg, AccessibilityPropertyTest035, TestSize.Lev
     DimensionRect responseRect(Dimension(-1), Dimension(-1), DimensionOffset(OFFSETF));
     std::vector<DimensionRect> responseRegion;
     responseRegion.push_back(responseRect);
-    auto gestureEventHub = host->eventHub_->GetOrCreateGestureEventHub();
+    auto gestureEventHub = host->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureEventHub->SetResponseRegion(responseRegion);
 
     auto responseRegionList = host->GetResponseRegionList(paintRect, 2);

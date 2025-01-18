@@ -1265,8 +1265,8 @@ HWTEST_F(TabsAttrTestNg, TabsModelPop001, TestSize.Level1)
     CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     CreateTabsDone(model);
     tabBarNode_->eventHub_ = AceType::MakeRefPtr<EventHub>();
-    tabBarNode_->eventHub_->focusHub_ = AceType::MakeRefPtr<FocusHub>(tabBarNode_->eventHub_);
-    ASSERT_NE(tabBarNode_->eventHub_->focusHub_, nullptr);
+    tabBarNode_->focusHub_ = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(tabBarNode_)));
+    ASSERT_NE(tabBarNode_->focusHub_, nullptr);
     tabBarPattern_->OnModifyDone();
     tabBarPattern_->swiperController_->removeTabBarEventCallback_();
     tabBarPattern_->swiperController_->addTabBarEventCallback_();

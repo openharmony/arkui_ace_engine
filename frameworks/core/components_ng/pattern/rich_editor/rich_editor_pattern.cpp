@@ -6831,6 +6831,7 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
         HandleTouchMove(touchInfo);
     } else if (touchType == TouchType::CANCEL) {
         IF_PRESENT(magnifierController_, RemoveMagnifierFrameNode());
+        HandleTouchCancelAfterLongPress();
         ResetTouchAndMoveCaretState();
     }
 }
@@ -6926,6 +6927,20 @@ void RichEditorPattern::HandleTouchUpAfterLongPress()
     selectOverlay_->ProcessOverlay({ .animation = true });
     FireOnSelectionChange(selectStart, selectEnd);
     IF_TRUE(IsSingleHandle(), ForceTriggerAvoidOnCaretChange());
+}
+
+void RichEditorPattern::HandleTouchCancelAfterLongPress()
+{
+    CHECK_NULL_VOID(editingLongPress_ || previewLongPress_);
+    auto selectStart = std::min(textSelector_.GetTextStart(), GetTextContentLength());
+    auto selectEnd = std::min(textSelector_.GetTextEnd(), GetTextContentLength());
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "touch canceled, textSelector=[%{public}d, %{public}d] isEditing=%{public}d",
+        selectStart, selectEnd, isEditing_);
+    textSelector_.Update(selectStart, selectEnd);
+    SetCaretPositionWithAffinity({ selectEnd, TextAffinity::UPSTREAM });
+    CalculateHandleOffsetAndShowOverlay();
+    selectOverlay_->ProcessOverlay({ .menuIsShow = selectOverlay_->IsCurrentMenuVisibile(), .animation = true });
+    FireOnSelectionChange(selectStart, selectEnd);
 }
 
 void RichEditorPattern::HandleTouchMove(const TouchLocationInfo& info)
@@ -10008,7 +10023,7 @@ void RichEditorPattern::GetReplacedSpanFission(RichEditorChangeValue& changeValu
     }
     CreateSpanResult(changeValue, innerPosition, spanIndex, offsetInSpan, content.length(),
         content, textStyle, paraStyle);
-    innerPosition += content.length();
+    innerPosition += static_cast<int32_t>(content.length());
 }
 
 void RichEditorPattern::CreateSpanResult(RichEditorChangeValue& changeValue, int32_t& innerPosition, int32_t spanIndex,
@@ -10111,7 +10126,7 @@ void RichEditorPattern::CalcInsertValueObj(TextInsertValueInfo& info, int textIn
         info.SetOffsetInSpan(0);
     } else {
         info.SetSpanIndex(std::distance(spans_.begin(), it));
-        int32_t spanStart = (*it)->position - (*it)->content.length();
+        int32_t spanStart = (*it)->position - static_cast<int32_t>((*it)->content.length());
         info.SetOffsetInSpan(textIndex - spanStart);
     }
 }
@@ -10205,7 +10220,7 @@ RefPtr<SpanItem> RichEditorPattern::GetDelPartiallySpanItem(
             return retItem; // is not a textSpan(Image/Symbol/other)
         }
         retItem->content = (*nextIt)->content;
-        retItem->position = retItem->content.length();
+        retItem->position = static_cast<int32_t>(retItem->content.length());
     }
     return retItem;
 }

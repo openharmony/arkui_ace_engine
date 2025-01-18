@@ -23,6 +23,8 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "pixel_map_impl.h"
+#include "core/components/common/properties/border_image.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
@@ -41,6 +43,8 @@ constexpr int SHEET_HEIGHT_LARGE = 1;
 constexpr int SHEET_HEIGHT_FITCONTENT = 2;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
+constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
@@ -84,6 +88,9 @@ const std::vector<RenderFit> RENDERFITS = { RenderFit::CENTER, RenderFit::TOP, R
     RenderFit::RESIZE_FILL, RenderFit::RESIZE_CONTAIN, RenderFit::RESIZE_CONTAIN_TOP_LEFT,
     RenderFit::RESIZE_CONTAIN_BOTTOM_RIGHT, RenderFit::RESIZE_COVER, RenderFit::RESIZE_COVER_TOP_LEFT,
     RenderFit::RESIZE_COVER_BOTTOM_RIGHT };
+
+const std::vector<PixelRoundCalcPolicy> PIXEL_ROUND_CALC_POLICIES = { PixelRoundCalcPolicy::NO_FORCE_ROUND,
+    PixelRoundCalcPolicy::FORCE_CEIL, PixelRoundCalcPolicy::FORCE_FLOOR };
 
 // Regex for match the placeholder.
 const std::regex RESOURCE_APP_STRING_PLACEHOLDER(R"(\%((\d+)(\$)){0,1}([dsf]))", std::regex::icase);
@@ -292,39 +299,48 @@ void FfiOHOSAceFrameworkViewAbstractSetPixelRound(CJPixelRoundPolicy cjValue)
 {
     uint16_t value = 0;
     int32_t startValue = cjValue.start;
-    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(startValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
-    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(startValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START);
-    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(startValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START);
+    if (Utils::CheckParamsValid(startValue, PIXEL_ROUND_CALC_POLICIES.size())) {
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(startValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_START);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(startValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(startValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_START);
+        }
     }
+    
 
     int32_t topValue = cjValue.top;
-    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(topValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
-    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(topValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
-    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(topValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP);
+    if (Utils::CheckParamsValid(topValue, PIXEL_ROUND_CALC_POLICIES.size())) {
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(topValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(topValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(topValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_TOP);
+        }
     }
 
     int32_t endValue = cjValue.end;
-    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(endValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
-    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(endValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
-    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(endValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END);
+    if (Utils::CheckParamsValid(endValue, PIXEL_ROUND_CALC_POLICIES.size())) {
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(endValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_END);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(endValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(endValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_END);
+        }
     }
 
     int32_t bottomValue = cjValue.bottom;
-    if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
-    } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
-    } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
-        value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
+    if (Utils::CheckParamsValid(bottomValue, PIXEL_ROUND_CALC_POLICIES.size())) {
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+        } else if (PixelRoundCalcPolicy::NO_FORCE_ROUND == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+            value |= static_cast<uint16_t>(PixelRoundPolicy::NO_FORCE_ROUND_BOTTOM);
+        }
     }
 
     ViewAbstractModel::GetInstance()->SetPixelRound(value);
@@ -497,6 +513,7 @@ void FfiOHOSAceFrameworkViewAbstractSetForegroundBlurStyleOption(int32_t blurSty
         styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
     }
 
+    styleOption.scale = options.scale < 0.0 || options.scale > 1.0 ? 1.0 : options.scale;
     BlurOption blurOption;
     std::vector<float> greyVec(2); // 2 number
     greyVec[0] = options.blurOptions.grayscale[0];
@@ -720,6 +737,20 @@ void FfiOHOSAceFrameworkViewAbstractTransition(int64_t id)
     ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect);
 }
 
+void FfiOHOSAceFrameworkViewAbstractTransitionWithBack(int64_t id, void (*onFinish)(bool transitionIn))
+{
+    auto nativeTransitionEffect = FFIData::GetData<NativeTransitionEffect>(id);
+    if (nativeTransitionEffect == nullptr) {
+        return;
+    }
+    auto chainedEffect = nativeTransitionEffect->effect;
+    auto lambda = CJLambda::Create(onFinish);
+    auto finishCallback = [lambda](bool isTransitionIn) {
+        lambda(isTransitionIn);
+    };
+    ViewAbstractModel::GetInstance()->SetChainedTransition(chainedEffect, std::move(finishCallback));
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetTransform(int64_t id)
 {
     auto nativeMatrix = FFIData::GetData<NativeMatrix>(id);
@@ -913,6 +944,34 @@ void FfiOHOSAceFrameworkViewAbstractSetColorBlend(uint32_t color)
     ViewAbstractModel::GetInstance()->SetColorBlend(Color(color));
 }
 
+void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(double radius, int32_t direction,
+    VectorFloat64Ptr blurVec, VectorFloat64Ptr positionVec)
+{
+    double blurRadius = radius;
+    std::vector<std::pair<float, float>> fractionStops;
+    const auto& blurVector = *reinterpret_cast<std::vector<double>*>(blurVec);
+    const auto& positionVector = *reinterpret_cast<std::vector<double>*>(positionVec);
+    if (blurVector.size() <= 1) {
+        return;
+    }
+    float tmpPos = -1.0f;
+    for (size_t i = 0; i <blurVector.size(); i++) {
+        std::pair<float, float> fractionStop;
+        fractionStop.first = static_cast<float>(std::clamp(blurVector[i], 0.0, 1.0));
+        fractionStop.second = static_cast<float>(std::clamp(positionVector[i], 0.0, 1.0));
+        if (fractionStop.second <= tmpPos) {
+            fractionStops.clear();
+            return;
+        }
+        tmpPos = fractionStop.second;
+        fractionStops.push_back(fractionStop);
+    }
+    // Parse direction
+    CalcDimension dimensionRadius(static_cast<float>(blurRadius), DimensionUnit::PX);
+    NG::LinearGradientBlurPara blurPara(dimensionRadius, fractionStops, static_cast<NG::GradientDirection>(direction));
+    ViewAbstractModel::GetInstance()->SetLinearGradientBlur(blurPara);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetBackdropBlur(double value)
 {
     Dimension radius(value, DimensionUnit::PX);
@@ -987,6 +1046,19 @@ void FfiOHOSAceFrameworkViewAbstractSetInvert(double value)
     if (LessNotEqual(value, 0.0)) {
         invert = static_cast<float>(0.0);
     }
+    ViewAbstractModel::GetInstance()->SetInvert(invert);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetInvertWithOptions(
+    double low, double high, double threshold, double thresholdRange)
+{
+    InvertVariant invert = 0.0f;
+    InvertOption option;
+    option.low_ = std::clamp(low, 0.0, 1.0);
+    option.high_ = std::clamp(high, 0.0, 1.0);
+    option.threshold_ = std::clamp(threshold, 0.0, 1.0);
+    option.thresholdRange_ = std::clamp(thresholdRange, 0.0, 1.0);
+    invert = option;
     ViewAbstractModel::GetInstance()->SetInvert(invert);
 }
 
@@ -1244,6 +1316,75 @@ void FfiOHOSAceFrameworkViewAbstractSetMaskByShape(int64_t shapeId)
     } else {
         LOGI("set mask error, Cannot get NativeShape by id: %{public}" PRId64, shapeId);
     }
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityDescription(const char* value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityDescription(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityText(const char* value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityText(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityGroup(bool value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityGroup(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityLevel(const char* value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityImportance(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityTextHint(const char* value)
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityTextHint(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetAccessibilityVirtualNode(void (*builder)())
+{
+    ViewAbstractModel::GetInstance()->SetAccessibilityVirtualNode(CJLambda::Create(builder));
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetClickEffect(int32_t level, float scale)
+{
+    if (level < static_cast<int32_t>(ClickEffectLevel::LIGHT) ||
+        level > static_cast<int32_t>(ClickEffectLevel::HEAVY)) {
+        level = 0;
+    }
+
+    if (scale < 0.0 || scale > 1.0) {
+        if (level == 0) {
+            scale = DEFAULT_SCALE_LIGHT;
+        } else {
+            scale = DEFAULT_SCALE_MIDDLE_OR_HEAVY;
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetClickEffectLevel(static_cast<ClickEffectLevel>(level), scale);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetMotionPath(CJMotionPathOptions options)
+{
+    MotionPathOption motionPathOption;
+    if (options.path != nullptr && strlen(options.path) > 0) {
+        motionPathOption.SetPath(std::string(options.path));
+        double from = options.from;
+        double to = options.to;
+        if (from > 1.0 || from < 0.0) {
+            from = 0.0;
+        }
+        if (to > 1.0 || to < 0.0) {
+            from = 1.0;
+        } else if (to < from) {
+            to = from;
+        }
+        motionPathOption.SetBegin(static_cast<float>(from));
+        motionPathOption.SetEnd(static_cast<float>(to));
+        motionPathOption.SetRotate(options.rotatable);
+    }
+    ViewAbstractModel::GetInstance()->SetMotionPath(motionPathOption);
 }
 
 void FfiOHOSAceFrameworkViewAbstractPop()
@@ -2016,6 +2157,30 @@ void FFIOHOSAceFrameworkBindContentCover(bool isShow, void (*builder)(), CJConte
     std::function<void()> onDismissCallback =
         options.onDisappear.hasValue ? CJLambda::Create(options.onDisappear.value) : ([]() -> void {});
 
+    auto transitionEffectValue = options.transition;
+    if (transitionEffectValue.hasValue) {
+        auto nativeTransitionEffect = FFIData::GetData<NativeTransitionEffect>(transitionEffectValue.value);
+        if (nativeTransitionEffect != nullptr) {
+            auto chainedEffect = nativeTransitionEffect->effect;
+            contentCoverParam.transitionEffect = chainedEffect;
+        }
+    }
+    auto onWillDismiss = options.onWillDismiss;
+    if (onWillDismiss.hasValue) {
+        auto callback = onWillDismiss.value;
+        auto lambda = CJLambda::Create(callback);
+        auto onWillDismissFunc = [lambda](const int32_t& info) {
+            auto dismissContentCoverLambda = []() {
+                ViewAbstractModel::GetInstance()->DismissContentCover();
+            };
+            CJDismissContentCoverAction dismissAction = {
+                .reason = info,
+                .dismissContentCover = dismissContentCoverLambda };
+            lambda(dismissAction);
+        };
+        contentCoverParam.onWillDismiss = std::move(onWillDismissFunc);
+    }
+
     ViewAbstractModel::GetInstance()->BindContentCover(isShow, nullptr, std::move(buildFunc), modalStyle,
         std::move(onShowCallback), std::move(onDismissCallback), std::move(onWillShowCallback),
         std::move(onWillDismissCallback), contentCoverParam);
@@ -2121,6 +2286,87 @@ VectorStringHandle FFIGetResourceVectorString(NativeResourceObject obj)
         LOGE("Parse string array failed.");
     }
     return result;
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetDraggable(bool value)
+{
+    ViewAbstractModel::GetInstance()->SetDraggable(value);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithBuilder(void (*builder)())
+{
+    NG::DragDropInfo dragPreviewInfo;
+    auto buildFunc = CJLambda::Create(builder);
+    RefPtr<AceType> customNode;
+    {
+        ViewStackModel::GetInstance()->NewScope();
+        buildFunc();
+        customNode = ViewStackModel::GetInstance()->Finish();
+    }
+    dragPreviewInfo.customNode = AceType::DynamicCast<NG::UINode>(customNode);
+    ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithDragItemInfo(CJDragItemInfo value)
+{
+    NG::DragDropInfo dragPreviewInfo;
+
+    if (value.builder == nullptr) {
+        dragPreviewInfo.customNode = nullptr;
+    } else {
+        auto buildFunc = CJLambda::Create(value.builder);
+        RefPtr<AceType> customNode;
+        {
+            ViewStackModel::GetInstance()->NewScope();
+            buildFunc();
+            customNode = ViewStackModel::GetInstance()->Finish();
+        }
+        dragPreviewInfo.customNode = AceType::DynamicCast<NG::UINode>(customNode);
+    }
+
+#if defined(PIXEL_MAP_SUPPORTED)
+    dragPreviewInfo.pixelMap = ParseDragPreviewPixelMap(value.pixelMapId);
+#else
+    dragPreviewInfo.pixelMap = nullptr;
+#endif
+
+    dragPreviewInfo.extraInfo = std::string(value.extraInfo);
+    ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetDragPreviewWithString(const char* value)
+{
+    NG::DragDropInfo dragPreviewInfo;
+    dragPreviewInfo.inspectorId = std::string(value);
+    ViewAbstractModel::GetInstance()->SetDragPreview(dragPreviewInfo);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithString(
+    const char* source, CBorderImageOption option)
+{
+    RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
+    uint8_t imageBorderBitsets = 0;
+
+    borderImage->SetSrc(std::string(source));
+    imageBorderBitsets |= BorderImage::SOURCE_BIT;
+
+    ParceBorderImageParam(borderImage, imageBorderBitsets, option);
+    ViewAbstractModel::GetInstance()->SetBorderImage(borderImage, imageBorderBitsets);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetBorderImageWithLinearGradient(
+    LinearGradientParam source, CBorderImageOption option)
+{
+    RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
+    uint8_t imageBorderBitsets = 0;
+
+    NG::Gradient lineGradient;
+    NewCjLinearGradient(source, lineGradient);
+    ViewAbstractModel::GetInstance()->SetBorderImageGradient(lineGradient);
+    imageBorderBitsets |= BorderImage::GRADIENT_BIT;
+    
+    ParceBorderImageParam(borderImage, imageBorderBitsets, option);
+    ViewAbstractModel::GetInstance()->SetBorderImage(borderImage, imageBorderBitsets);
 }
 }
 
@@ -2235,4 +2481,77 @@ void ParseVectorStringPtr(VectorStringPtr vecContent, std::vector<DimensionRect>
     }
 }
 
+void ParceBorderImageParam(RefPtr<BorderImage>& borderImage, uint8_t& bitset, CBorderImageOption& option)
+{
+    borderImage->SetEdgeOutset(
+        BorderImageDirection::LEFT,
+        Dimension(option.outset.top, static_cast<DimensionUnit>(option.outset.topUnit)));
+    borderImage->SetEdgeOutset(
+        BorderImageDirection::RIGHT,
+        Dimension(option.outset.right, static_cast<DimensionUnit>(option.outset.rightUnit)));
+    borderImage->SetEdgeOutset(
+        BorderImageDirection::TOP,
+        Dimension(option.outset.bottom, static_cast<DimensionUnit>(option.outset.bottomUnit)));
+    borderImage->SetEdgeOutset(
+        BorderImageDirection::BOTTOM,
+        Dimension(option.outset.left, static_cast<DimensionUnit>(option.outset.leftUnit)));
+    bitset |= BorderImage::OUTSET_BIT;
+
+    borderImage->SetEdgeWidth(
+        BorderImageDirection::LEFT,
+        Dimension(option.width.top, static_cast<DimensionUnit>(option.width.topUnit)));
+    borderImage->SetEdgeWidth(
+        BorderImageDirection::RIGHT,
+        Dimension(option.width.right, static_cast<DimensionUnit>(option.width.rightUnit)));
+    borderImage->SetEdgeWidth(
+        BorderImageDirection::TOP,
+        Dimension(option.width.bottom, static_cast<DimensionUnit>(option.width.bottomUnit)));
+    borderImage->SetEdgeWidth(
+        BorderImageDirection::BOTTOM,
+        Dimension(option.width.left, static_cast<DimensionUnit>(option.width.leftUnit)));
+    bitset |= BorderImage::WIDTH_BIT;
+
+    borderImage->SetEdgeSlice(
+        BorderImageDirection::LEFT,
+        Dimension(option.slice.top, static_cast<DimensionUnit>(option.slice.topUnit)));
+    borderImage->SetEdgeSlice(
+        BorderImageDirection::RIGHT,
+        Dimension(option.slice.right, static_cast<DimensionUnit>(option.slice.rightUnit)));
+    borderImage->SetEdgeSlice(
+        BorderImageDirection::TOP,
+        Dimension(option.slice.bottom, static_cast<DimensionUnit>(option.slice.bottomUnit)));
+    borderImage->SetEdgeSlice(
+        BorderImageDirection::BOTTOM,
+        Dimension(option.slice.left, static_cast<DimensionUnit>(option.slice.leftUnit)));
+    bitset |= BorderImage::SLICE_BIT;
+
+    borderImage->SetRepeatMode(static_cast<BorderImageRepeat>(option.repeat));
+    bitset |= BorderImage::REPEAT_BIT;
+
+    borderImage->SetNeedFillCenter(option.fill);
+}
+
+RefPtr<PixelMap> ParseDragPreviewPixelMap(int64_t pixelMapId)
+{
+    if (pixelMapId == 0) {
+        return nullptr;
+    }
+    auto pixelMapImpl = FFIData::GetData<OHOS::Media::PixelMapImpl>(pixelMapId);
+    if (pixelMapImpl == nullptr) {
+        LOGE("DragPreview error, Cannot get PixelMapProxy by id: %{public}" PRId64, pixelMapId);
+        return nullptr;
+    }
+    auto pixMap = pixelMapImpl->GetRealPixelMap();
+    if (pixMap == nullptr) {
+        LOGE("DragPreview error, Cannot get pixMap in PixelMapProxy");
+        return nullptr;
+    }
+    auto pixMapOhos = PixelMap::CreatePixelMap(&pixMap);
+    if (pixMapOhos == nullptr) {
+        LOGE("DragPreview error, Cannot create PixelMapOhos by pixMap");
+        return nullptr;
+    }
+
+    return pixMapOhos;
+}
 } // namespace OHOS::Ace

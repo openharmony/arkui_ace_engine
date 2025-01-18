@@ -685,6 +685,7 @@ void NavigationPattern::SyncWithJsStackIfNeeded()
     if (isCustomAnimation_) {
         navigationStack_->UpdateRecoveryList();
     }
+    navigationStack_->SavePreNavList();
     UpdateNavPathList();
     auto newTopNavPath = navigationStack_->GetTopNavPath();
     auto replaceValue = navigationStack_->GetReplaceValue();

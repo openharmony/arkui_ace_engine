@@ -137,6 +137,7 @@ public:
     static void SetEnablePreviewText(const JSCallbackInfo& info);
     static void SetEnableHapticFeedback(const JSCallbackInfo& info);
     static void SetStopBackPress(const JSCallbackInfo& info);
+    static void SetKeyboardAppearance(const JSCallbackInfo& info);
 
 private:
     static void SetCancelIconColorAndIconSrc(const JSRef<JSObject>& iconParam);

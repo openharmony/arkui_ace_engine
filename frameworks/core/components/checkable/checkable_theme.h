@@ -326,12 +326,18 @@ public:
         return colorAnimationDuration_;
     }
 
+    bool IsCircleDial() const
+    {
+        return showCircleDial_;
+    }
+
 private:
     Dimension borderRadius_;
     Dimension whiteBorderRadius_;
     Dimension checkStroke_;
     Dimension hoverPaddingSize_;
     double colorAnimationDuration_ = 0.0;
+    bool showCircleDial_ = false;
 };
 
 class SwitchTheme : public CheckableTheme {

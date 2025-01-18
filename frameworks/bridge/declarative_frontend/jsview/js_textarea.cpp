@@ -116,6 +116,7 @@ void JSTextArea::JSBind(BindingTarget globalObj)
     JSClass<JSTextArea>::StaticMethod("enableHapticFeedback", &JSTextField::SetEnableHapticFeedback);
     JSClass<JSTextArea>::StaticMethod("ellipsisMode", &JSTextField::SetEllipsisMode);
     JSClass<JSTextArea>::StaticMethod("stopBackPress", &JSTextField::SetStopBackPress);
+    JSClass<JSTextArea>::StaticMethod("keyboardAppearance", &JSTextField::SetKeyboardAppearance);
     JSClass<JSTextArea>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 

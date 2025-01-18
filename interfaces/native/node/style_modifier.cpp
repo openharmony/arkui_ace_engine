@@ -17,6 +17,7 @@
 #include <cstdlib>
 
 #include "frame_information.h"
+#include "native_type.h"
 #include "node_model.h"
 #include "node_transition.h"
 #include "waterflow_section_option.h"
@@ -656,6 +657,13 @@ bool CheckAttributeIsAxis(int32_t value)
     int32_t minEnumValue = static_cast<int32_t>(ArkUI_Axis::ARKUI_AXIS_VERTICAL);
     int32_t maxEnumValue =
         static_cast<int32_t>(ArkUI_Axis::ARKUI_AXIS_HORIZONTAL);
+    return value >= minEnumValue && value <= maxEnumValue;
+}
+
+bool CheckAttributeIsKeyboardAppearance(int32_t value)
+{
+    int32_t minEnumValue = static_cast<int32_t>(ArkUI_KeyboardAppearance::ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE);
+    int32_t maxEnumValue = static_cast<int32_t>(ArkUI_KeyboardAppearance::ARKUI_KEYBOARD_APPEARANCE_DARK_IMMERSIVE);
     return value >= minEnumValue && value <= maxEnumValue;
 }
 
@@ -3582,7 +3590,7 @@ int32_t SetRenderFit(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 void ResetRenderFit(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    if (node->type == ARKUI_NODE_XCOMPONENT) {
+    if (node->type == ARKUI_NODE_XCOMPONENT || node->type == ARKUI_NODE_XCOMPONENT_TEXTURE) {
         fullImpl->getNodeModifiers()->getXComponentModifier()->resetXComponentRenderFit(node->uiNodeHandle);
     } else {
         fullImpl->getNodeModifiers()->getCommonModifier()->resetRenderFit(node->uiNodeHandle);
@@ -5067,6 +5075,33 @@ int32_t SetTextInputHalfLeading(ArkUI_NodeHandle node, const ArkUI_AttributeItem
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputHalfLeading(
         node->uiNodeHandle, item->value[0].i32);
     return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetTextInputKeyboardAppearance(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    if (item->size != 1 || !CheckAttributeIsKeyboardAppearance(item->value[0].i32)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputKeyboardAppearance(
+        node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetTextInputKeyboardAppearance(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextInputModifier()->
+        getTextInputKeyboardAppearance(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetTextInputKeyboardAppearance(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputKeyboardAppearance(
+        node->uiNodeHandle, ArkUI_KeyboardAppearance::ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE);
 }
 
 const ArkUI_AttributeItem* GetTextInputNumberOfLines(ArkUI_NodeHandle node)
@@ -6985,6 +7020,69 @@ void ResetXComponentSurfaceSize(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getXComponentModifier()->setXComponentSurfaceSize(node->uiNodeHandle, 0, 0);
+}
+
+int32_t SetXComponentSurfaceRect(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_FOUR_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getXComponentModifier()->setXComponentSurfaceRect(
+        node->uiNodeHandle, item->value[0].i32, item->value[1].i32, item->value[2].i32, item->value[3].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetXComponentSurfaceRect(ArkUI_NodeHandle node)
+{
+    int index = NUM_0;
+    ArkUI_Int32 offsetX = NUM_0;
+    ArkUI_Int32 offsetY = NUM_0;
+    ArkUI_Int32 surfaceWidth = NUM_0;
+    ArkUI_Int32 surfaceHeight = NUM_0;
+    GetFullImpl()->getNodeModifiers()->getXComponentModifier()->getXComponentSurfaceRect(
+        node->uiNodeHandle, offsetX, offsetY, surfaceWidth, surfaceHeight);
+    g_numberValues[index++].i32 = offsetX;
+    g_numberValues[index++].i32 = offsetY;
+    g_numberValues[index++].i32 = surfaceWidth;
+    g_numberValues[index++].i32 = surfaceHeight;
+    g_attributeItem.size = index;
+    return &g_attributeItem;
+}
+        
+void ResetXComponentSurfaceRect(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getXComponentModifier()->resetXComponentSurfaceRect(node->uiNodeHandle);
+}
+
+int32_t SetXComponentEnableAnalyzer(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    // already check in entry point.
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getXComponentModifier()->setXComponentEnableAnalyzer(
+        node->uiNodeHandle, item->value[0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetXComponentEnableAnalyzer(ArkUI_NodeHandle node)
+{
+    auto resultValue = GetFullImpl()->getNodeModifiers()->getXComponentModifier()->getXComponentEnableAnalyzer(node->uiNodeHandle);
+    g_numberValues[0].i32 = resultValue;
+    g_attributeItem.size = 1;
+    return &g_attributeItem;
+}
+
+void ResetXComponentEnableAnalyzer(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getXComponentModifier()->resetXComponentEnableAnalyzer(node->uiNodeHandle);
 }
 
 int32_t SetBaseLineOffset(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -14568,7 +14666,7 @@ int32_t SetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
         SetInputFilter, SetTextInputStyle, SetTextInputCaretOffset, nullptr, nullptr,
         SetTextInputSelectionMenuHidden, SetBlurOnSubmit, SetInputCustomKeyboard, SetTextInputWordBreak,
         SetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines, SetLetterSpacing, SetEnablePreviewText,
-        SetTextInputHalfLeading };
+        SetTextInputHalfLeading, SetTextInputKeyboardAppearance };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -14585,7 +14683,8 @@ const ArkUI_AttributeItem* GetTextInputAttribute(ArkUI_NodeHandle node, int32_t 
         GetTextInputContentType, GetTextInputPasswordRules, GetTextInputSelectAll, GetInputFilter,
         GetTextInputStyle, GetTextInputCaretOffset, GetTextInputContentRect, GetTextInputContentLineCount,
         GetTextInputSelectionMenuHidden, GetBlurOnSubmit, GetInputCustomKeyboard, GetTextInputWordBreak,
-        GetTextInputShowKeyBoardOnFocus, GetTextInputNumberOfLines, GetLetterSpacing, GetEnablePreviewText };
+        GetTextInputShowKeyBoardOnFocus, GetTextInputNumberOfLines, GetLetterSpacing, GetEnablePreviewText,
+        nullptr, GetTextInputKeyboardAppearance };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -14603,7 +14702,7 @@ void ResetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetInputFilter, ResetTextInputStyle, ResetTextInputCaretOffset, nullptr, nullptr,
         ResetTextInputSelectionMenuHidden, ResetBlurOnSubmit, ResetInputCustomKeyboard, ResetTextInputWordBreak,
         ResetTextInputShowKeyBoardOnFocus, ResetTextInputNumberOfLines, ResetLetterSpacing, ResetEnablePreviewText,
-        ResetTextInputHalfLeading };
+        ResetTextInputHalfLeading, ResetTextInputKeyboardAppearance };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -14621,7 +14720,7 @@ int32_t SetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ark
         SetEnterKeyType, SetEnableKeyboardOnFocus, SetTextInputCaretOffset, nullptr, nullptr,
         SetTextInputTextSelection, SetTextInputEnableAutoFill, SetTextInputContentType,
         SetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines, SetLetterSpacing, SetEnablePreviewText,
-        SetTextInputHalfLeading };
+        SetTextInputHalfLeading, SetTextInputKeyboardAppearance };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -14636,7 +14735,8 @@ const ArkUI_AttributeItem* GetTextAreaAttribute(ArkUI_NodeHandle node, int32_t s
         GetTextAreaSelectionMenuHidden, GetBlurOnSubmit, GetInputFilter, GetSelectedBackgroundColor,
         GetEnterKeyType, GetEnableKeyboardOnFocus, GetTextInputCaretOffset, GetTextInputContentRect,
         GetTextInputContentLineCount, GetTextInputTextSelection, GetTextInputEnableAutoFill, GetTextInputContentType,
-        GetTextInputShowKeyBoardOnFocus, GetTextInputNumberOfLines, GetLetterSpacing, GetEnablePreviewText };
+        GetTextInputShowKeyBoardOnFocus, GetTextInputNumberOfLines, GetLetterSpacing, GetEnablePreviewText,
+        nullptr, GetTextInputKeyboardAppearance };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -14655,7 +14755,7 @@ void ResetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetEnterKeyType, ResetEnableKeyboardOnFocus, ResetTextInputCaretOffset, nullptr, nullptr,
         ResetTextInputTextSelection, ResetTextInputEnableAutoFill, ResetTextInputContentType,
         ResetTextInputShowKeyBoardOnFocus, ResetTextInputNumberOfLines, ResetLetterSpacing, ResetEnablePreviewText,
-        ResetTextInputHalfLeading };
+        ResetTextInputHalfLeading, ResetTextInputKeyboardAppearance };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -14771,6 +14871,8 @@ int32_t SetXComponentAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const A
         SetXComponentId,
         SetXComponentType,
         SetXComponentSurfaceSize,
+        SetXComponentSurfaceRect,
+        SetXComponentEnableAnalyzer,
     };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "xcomponent node attribute: %{public}d NOT IMPLEMENT", subTypeId);
@@ -14781,7 +14883,8 @@ int32_t SetXComponentAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const A
 
 const ArkUI_AttributeItem* GetXComponentAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Getter* getters[] = { GetXComponentId, GetXComponentType, GetXComponentSurfaceSize, };
+    static Getter* getters[] = { GetXComponentId, GetXComponentType, GetXComponentSurfaceSize,
+        GetXComponentSurfaceRect, GetXComponentEnableAnalyzer };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "xcomponent node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -14792,7 +14895,8 @@ const ArkUI_AttributeItem* GetXComponentAttribute(ArkUI_NodeHandle node, int32_t
 
 void ResetXComponentAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
 {
-    static Resetter* setters[] = { nullptr, ResetXComponentType, ResetXComponentSurfaceSize };
+    static Resetter* setters[] = { nullptr, ResetXComponentType, ResetXComponentSurfaceSize,
+        ResetXComponentSurfaceRect, ResetXComponentEnableAnalyzer };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "xcomponent node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

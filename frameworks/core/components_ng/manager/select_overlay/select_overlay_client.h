@@ -69,6 +69,7 @@ enum class SelectOverlayMenuId {
     CUT,
     PASTE,
     SELECT_ALL,
+    TRANSLATE,
     SEARCH,
     SHARE,
     CAMERA_INPUT,

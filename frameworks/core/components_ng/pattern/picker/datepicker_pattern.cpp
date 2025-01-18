@@ -383,7 +383,7 @@ void DatePickerPattern::InitDisabled()
     CHECK_NULL_VOID(renderContext);
     if (!enabled_) {
         renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
-    } else {
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         renderContext->UpdateOpacity(curOpacity_);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -2675,6 +2675,7 @@ void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         jsonConstructor->Put("end", GetDateString(endDateSolar_).c_str());
         jsonConstructor->Put("selected", GetDateString(selectedDate_).c_str());
     }
+    jsonConstructor->Put("mode", rowLayoutProperty->GetDatePickerMode().c_str());
     json->PutExtAttr("constructor", jsonConstructor, filter);
     json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
 }

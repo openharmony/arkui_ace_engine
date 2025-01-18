@@ -542,8 +542,8 @@ int64_t FfiOHOSAceFrameworkTapGestureHandlerCtor(int32_t count, int32_t fingers)
         LOGE("FfiOHOSAceFrameworkTapGestureHandlerCtor: nativeGesture create failed");
         return FFI_ERROR_CODE;
     }
-    auto tapGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->createTapGestureWithDistanceThreshold(
-        count, fingers, DEFAULT_TAP_DISTANCE, nullptr);
+    auto tapGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
+        createTapGestureWithDistanceThreshold(count, fingers, DEFAULT_TAP_DISTANCE, false, nullptr);
     nativeGesture->setArkUIGesture(tapGesture);
     return nativeGesture->GetID();
 }
@@ -555,8 +555,8 @@ int64_t FfiOHOSAceFrameworkLongPressGestureHandlerCtor(int32_t fingers, bool rep
         LOGE("FfiOHOSAceFrameworkLongPressGestureHandlerCtor: nativeGesture create failed");
         return FFI_ERROR_CODE;
     }
-    auto longPressGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->createLongPressGesture(
-        fingers, repeat, duration, nullptr);
+    auto longPressGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
+        createLongPressGesture(fingers, repeat, duration, false, nullptr);
     nativeGesture->setArkUIGesture(longPressGesture);
     return nativeGesture->GetID();
 }
@@ -568,8 +568,8 @@ int64_t FfiOHOSAceFrameworkPinchGestureHandlerCtor(int32_t fingers, double dista
         LOGE("FfiOHOSAceFrameworkPinchGestureHandlerCtor: nativeGesture create failed");
         return FFI_ERROR_CODE;
     }
-    auto pinchGesture =
-        GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->createPinchGesture(fingers, distance, nullptr);
+    auto pinchGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
+        createPinchGesture(fingers, distance, false, nullptr);
     nativeGesture->setArkUIGesture(pinchGesture);
     return nativeGesture->GetID();
 }
@@ -581,8 +581,8 @@ int64_t FfiOHOSAceFrameworkSwipeGestureHandlerCtor(int32_t fingers, uint32_t dir
         LOGE("FfiOHOSAceFrameworkSwipeGestureHandlerCtor: nativeGesture create failed");
         return FFI_ERROR_CODE;
     }
-    auto swipeGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->createSwipeGestureByModifier(
-        fingers, direction, speed);
+    auto swipeGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
+        createSwipeGestureByModifier(fingers, direction, speed, false);
     nativeGesture->setArkUIGesture(swipeGesture);
     return nativeGesture->GetID();
 }
@@ -594,8 +594,8 @@ int64_t FfiOHOSAceFrameworkRotationGestureHandlerCtor(int32_t fingers, double an
         LOGE("FfiOHOSAceFrameworkRotationGestureHandlerCtor: nativeGesture create failed");
         return FFI_ERROR_CODE;
     }
-    auto rotationGesture =
-        GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->createRotationGesture(fingers, angle, nullptr);
+    auto rotationGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
+        createRotationGesture(fingers, angle, false, nullptr);
     nativeGesture->setArkUIGesture(rotationGesture);
     return nativeGesture->GetID();
 }
@@ -607,8 +607,8 @@ int64_t FfiOHOSAceFrameworkPanGestureHandlerCtor(int32_t fingers, uint32_t direc
         LOGE("FfiOHOSAceFrameworkPanGestureHandlerCtor: nativeGesture create failed");
         return FFI_ERROR_CODE;
     }
-    auto panGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->createPanGesture(
-        fingers, direction, distance, nullptr);
+    auto panGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
+        createPanGesture(fingers, direction, distance, false, nullptr);
     nativeGesture->setArkUIGesture(panGesture);
     return nativeGesture->GetID();
 }

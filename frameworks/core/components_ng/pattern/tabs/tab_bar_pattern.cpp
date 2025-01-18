@@ -2543,19 +2543,15 @@ void TabBarPattern::StopTranslateAnimation(bool isImmediately)
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
             host->UpdateAnimatablePropertyFloat(TAB_BAR_PROPERTY_NAME, pattern->currentOffset_);
-
-            auto indicatorCurrentValue =
-                pattern->turnPageRate_ * (pattern->indicatorEndPos_ - pattern->indicatorStartPos_) +
-                pattern->indicatorStartPos_;
-            host->UpdateAnimatablePropertyFloat(INDICATOR_WIDTH_PROPERTY_NAME, indicatorCurrentValue);
-            host->UpdateAnimatablePropertyFloat(INDICATOR_OFFSET_PROPERTY_NAME, indicatorCurrentValue);
         });
     } else {
-        if (translateAnimation_)
+        if (translateAnimation_) {
             AnimationUtils::StopAnimation(translateAnimation_);
+        }
+    }
 
-        if (tabbarIndicatorAnimation_)
-            AnimationUtils::StopAnimation(tabbarIndicatorAnimation_);
+    if (tabbarIndicatorAnimation_) {
+        AnimationUtils::StopAnimation(tabbarIndicatorAnimation_);
     }
 
     indicatorAnimationIsRunning_ = false;

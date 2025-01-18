@@ -1800,6 +1800,20 @@ void TextFieldPattern::HandleOnPaste()
     clipboard_->GetData(pasteCallback);
 }
 
+bool TextFieldPattern::IsShowTranslate()
+{
+    auto container = Container::Current();
+    if (container && container->IsScenceBoardWindow()) {
+        return false;
+    }
+
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, false);
+    return textFieldTheme->GetTranslateIsSupport();
+}
+
 bool TextFieldPattern::IsShowSearch()
 {
     auto container = Container::Current();
@@ -3373,6 +3387,7 @@ void TextFieldPattern::OnModifyDone()
         UpdateTextFieldInfo();
     }
     TriggerAvoidWhenCaretGoesDown();
+    selectOverlay_->SetMenuTranslateIsSupport(IsShowTranslate());
     selectOverlay_->SetIsSupportMenuSearch(IsShowSearch());
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     isModifyDone_ = true;
@@ -3392,7 +3407,8 @@ void TextFieldPattern::TriggerAvoidWhenCaretGoesDown()
             auto textFieldManager = manager.Upgrade();
             CHECK_NULL_VOID(textFieldManager);
             auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
-            if (caretPos > textField->GetLastCaretPos()) {
+            auto lastCaretPos = textField->GetLastCaretPos();
+            if (!lastCaretPos.has_value() || caretPos > lastCaretPos.value()) {
                 TAG_LOGI(ACE_KEYBOARD, "Caret Position Goes Down, Retrigger Avoid");
                 textField->TriggerAvoidOnCaretChange();
             }
@@ -4561,7 +4577,9 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .height = selectController_->GetCaretRect().Height() };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
-        .isTextPreviewSupported = hasSupportedPreviewText_ };
+        .isTextPreviewSupported = hasSupportedPreviewText_,
+        .immersiveMode = static_cast<int32_t>(keyboardAppearance_)};
+    TAG_LOGI(ACE_TEXT_FIELD, "GetMiscTextConfig, immersiveMode:%{public}i", keyboardAppearance_);
     MiscServices::TextConfig textConfig = { .inputAttribute = inputAttribute,
         .cursorInfo = cursorInfo,
         .range = { .start = selectController_->GetStartIndex(), .end = selectController_->GetEndIndex() },
@@ -8680,6 +8698,7 @@ void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, Window
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->ResetOptionalClickPosition();
+    lastCaretPos_ = std::nullopt;
     taskExecutor->PostTask(
         [weak = WeakClaim(this), manager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
             auto textField = weak.Upgrade();

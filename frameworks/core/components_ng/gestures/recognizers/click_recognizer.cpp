@@ -82,8 +82,8 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     return true;
 }
 
-ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold)
-    : MultiFingersRecognizer(fingers), count_(count), distanceThreshold_(distanceThreshold)
+ClickRecognizer::ClickRecognizer(int32_t fingers, int32_t count, double distanceThreshold, bool isLimitFingerCount)
+    : MultiFingersRecognizer(fingers, isLimitFingerCount), count_(count), distanceThreshold_(distanceThreshold)
 {
     if (fingers_ > MAX_TAP_FINGERS || fingers_ < DEFAULT_TAP_FINGERS) {
         fingers_ = DEFAULT_TAP_FINGERS;
@@ -308,6 +308,10 @@ void ClickRecognizer::TriggerClickAccepted(const TouchEvent& event)
     if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         TAG_LOGI(AceLogTag::ACE_GESTURE, "Click gesture judge reject");
+        return;
+    }
+    if (CheckLimitFinger()) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
     }
     Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
@@ -606,7 +610,7 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
 
 RefPtr<Gesture> ClickRecognizer::CreateGestureFromRecognizer() const
 {
-    return AceType::MakeRefPtr<TapGesture>(count_, fingers_, distanceThreshold_);
+    return AceType::MakeRefPtr<TapGesture>(count_, fingers_, distanceThreshold_, isLimitFingerCount_);
 }
 
 void ClickRecognizer::CleanRecognizerState()
