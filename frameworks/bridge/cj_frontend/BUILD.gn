@@ -146,6 +146,7 @@ template("cj_frontend") {
       "interfaces/cj_ffi/cj_polygon_ffi.cpp",
       "interfaces/cj_ffi/cj_polyline_ffi.cpp",
       "interfaces/cj_ffi/cj_progress_ffi.cpp",
+      "interfaces/cj_ffi/cj_progressmask_ffi.cpp",
       "interfaces/cj_ffi/cj_radio_ffi.cpp",
       "interfaces/cj_ffi/cj_rating_ffi.cpp",
       "interfaces/cj_ffi/cj_rect_ffi.cpp",
