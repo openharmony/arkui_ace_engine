@@ -9458,7 +9458,9 @@ void TextFieldPattern::OnTextGenstureSelectionEnd(const TouchLocationInfo& locat
             selectController_->MoveSecondHandleToContentRect(selectController_->GetSecondHandleIndex(), false);
         }
     }
-    ProcessOverlay({ .animation = true });
+    if (HasFocus()) {
+        ProcessOverlay({ .animation = true });
+    }
 }
 
 PositionWithAffinity TextFieldPattern::GetGlyphPositionAtCoordinate(int32_t x, int32_t y)
