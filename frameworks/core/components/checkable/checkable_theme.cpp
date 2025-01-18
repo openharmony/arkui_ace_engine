@@ -101,6 +101,10 @@ void SwitchTheme::Builder::ParsePattern(const RefPtr<ThemeConstants>& themeConst
         switchPattern->GetAttr<Dimension>("switch_hotzone_horizontal_padding", 0.0_vp);
     theme->hotZoneVerticalPadding_ =
         switchPattern->GetAttr<Dimension>("switch_hotzone_vertical_padding", 0.0_vp);
+    theme->hotZoneHorizontalSize_ =
+        switchPattern->GetAttr<Dimension>("switch_hotzone_horizontal_size", 6.0_vp);
+    theme->hotZoneVerticalSize_ =
+        switchPattern->GetAttr<Dimension>("switch_hotzone_vertical_size", 14.0_vp);
     theme->aspectRatio_ = switchPattern->GetAttr<double>("switch_aspect_ratio", 0.0);
     theme->backgroundSolid_ =
         static_cast<bool>(switchPattern->GetAttr<double>("switch_inactive_background_solid", 0.0));
