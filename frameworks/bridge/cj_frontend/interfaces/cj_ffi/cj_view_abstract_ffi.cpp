@@ -145,6 +145,7 @@ void UpdateBackgroundImagePosition(const Align& align, BackgroundImagePosition& 
 void SetPopupParams(CJBindPopupParams bindPopupParams, const RefPtr<PopupParam>& popupParam)
 {
     popupParam->SetMessage(bindPopupParams.message);
+    popupParam->SetPlacement(bindPopupParams.placementOnTop ? Placement::TOP : Placement::BOTTOM);
     popupParam->SetPlacement(static_cast<Placement>(bindPopupParams.placement));
     popupParam->SetShowInSubWindow(bindPopupParams.showInSubWindow);
     popupParam->SetTextColor(Color(bindPopupParams.textColor));
@@ -1213,18 +1214,6 @@ void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
     popupParam->SetIsShow(value.isShow);
     popupParam->SetUseCustomComponent(true);
     popupParam->SetOnStateChange(onStateChangeCallback);
-    if (popupParam->IsShow()) {
-        auto builderFunc = CJLambda::Create(value.builder);
-        RefPtr<AceType> customNode;
-        {
-            ViewStackModel::GetInstance()->NewScope();
-            builderFunc();
-            customNode = ViewStackModel::GetInstance()->Finish();
-        }
-        ViewAbstractModel::GetInstance()->BindPopup(popupParam, customNode);
-    } else {
-        ViewAbstractModel::GetInstance()->BindPopup(popupParam, nullptr);
-    }
     SetCustomPopupParams(value, popupParam);
     if (value.onWillDismiss.hasValue) {
         std::function<void(const int32_t& info)> onWillDismissFunc =
@@ -1239,6 +1228,18 @@ void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
             popupParam->SetHasTransition(true);
             popupParam->SetTransitionEffects(nativeTransitionEffect->effect);
         }
+    }
+    if (popupParam->IsShow()) {
+        auto builderFunc = CJLambda::Create(value.builder);
+        RefPtr<AceType> customNode;
+        {
+            ViewStackModel::GetInstance()->NewScope();
+            builderFunc();
+            customNode = ViewStackModel::GetInstance()->Finish();
+        }
+        ViewAbstractModel::GetInstance()->BindPopup(popupParam, customNode);
+    } else {
+        ViewAbstractModel::GetInstance()->BindPopup(popupParam, nullptr);
     }
 }
 
