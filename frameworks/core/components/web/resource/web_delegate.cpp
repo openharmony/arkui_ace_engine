@@ -7319,4 +7319,14 @@ bool WebDelegate::GetAccessibilityVisible(int64_t accessibilityId)
     CHECK_NULL_RETURN(nweb_, true);
     return nweb_->GetAccessibilityVisible(accessibilityId);
 }
+
+void WebDelegate::ScaleGestureChangeV2(int type, double scale, double originScale, double centerX, double centerY)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->ScaleGestureChangeV2(type, scale, originScale, centerX, centerY);
+    }
+#endif
+}
 } // namespace OHOS::Ace
