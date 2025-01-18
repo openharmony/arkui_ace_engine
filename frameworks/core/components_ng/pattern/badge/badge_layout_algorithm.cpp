@@ -94,6 +94,7 @@ void BadgeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
     
     textLayoutProperty->UpdateFontSize(Dimension(fontSizeInit, DimensionUnit::VP));
+    textLayoutProperty->UpdateTextColorFlagByUser(true);
     auto circleSize = std::make_optional(Dimension(badgeSizeInit, DimensionUnit::VP));
     auto badgeCircleDiameter = Dimension(badgeSizeInit, DimensionUnit::VP).ConvertToPx();
 
