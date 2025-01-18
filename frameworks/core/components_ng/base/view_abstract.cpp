@@ -5496,6 +5496,20 @@ void ViewAbstract::SetFocusScopePriority(FrameNode* frameNode, const std::string
     focusHub->SetFocusScopePriority(focusScopeId, focusPriority);
 }
 
+void ViewAbstract::FreezeUINodeById(const std::string& id, bool isFreeze)
+{
+    auto targetNode = ElementRegister::GetInstance()->GetFrameNodeById(id);
+    targetNode->SetFreeze(isFreeze, true);
+}
+
+void ViewAbstract::FreezeUINodeByUniqueId(const int32_t& uniqueId, bool isFreeze)
+{
+    auto targetNodeElement = ElementRegister::GetInstance()->GetNodeById(uniqueId);
+    auto targetNode = AceType::DynamicCast<NG::FrameNode>(targetNodeElement);
+    CHECK_NULL_VOID(targetNode);
+    targetNode->SetFreeze(isFreeze, true);
+}
+
 uint32_t ViewAbstract::GetSafeAreaExpandType(FrameNode* frameNode)
 {
     uint32_t value = SAFE_AREA_TYPE_ALL;

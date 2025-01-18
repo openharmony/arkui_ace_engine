@@ -795,6 +795,16 @@ class UIContext {
         }
         return this.textMenuController_;
     }
+
+    freezeUINode(idOrUniqueId, isFreeze) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        if (typeof idOrUniqueId === "string") {
+            getUINativeModule().common.freezeUINodeById(idOrUniqueId, isFreeze);
+        } else if (typeof idOrUniqueId === "number") {
+            getUINativeModule().common.freezeUINodeByUniqueId(idOrUniqueId, isFreeze);
+        }
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class DynamicSyncScene {

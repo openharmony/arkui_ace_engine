@@ -376,6 +376,8 @@ public:
     static ArkUINativeModuleValue GetWindowName(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetWindowWidthBreakpoint(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetWindowHeightBreakpoint(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue FreezeUINodeById(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue FreezeUINodeByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetSystemBarEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue PostFrameCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetFocusScopeId(ArkUIRuntimeCallInfo* runtimeCallInfo);

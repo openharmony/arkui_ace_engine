@@ -8342,6 +8342,42 @@ ArkUINativeModuleValue CommonBridge::GetWindowHeightBreakpoint(ArkUIRuntimeCallI
     return panda::IntegerRef::NewFromUnsigned(vm, static_cast<uint32_t>(breakpoint));
 }
 
+ArkUINativeModuleValue CommonBridge::FreezeUINodeById(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> idArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> isFreezeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (!idArg->IsString(vm)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    std::string id = idArg->ToString(vm)->ToString(vm);
+    bool isFreeze = false;
+    if (isFreezeArg->IsBoolean()) {
+        isFreeze = isFreezeArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getCommonModifier()->freezeUINodeById(id.c_str(), isFreeze);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::FreezeUINodeByUniqueId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> uniqueIdArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> isFreezeArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    if (!uniqueIdArg->IsNumber()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    int32_t uniqueId = uniqueIdArg->IntegerValue(vm);
+    bool isFreeze = false;
+    if (isFreezeArg->IsBoolean()) {
+        isFreeze = isFreezeArg->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getCommonModifier()->freezeUINodeByUniqueId(uniqueId, isFreeze);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CommonBridge::SetSystemBarEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

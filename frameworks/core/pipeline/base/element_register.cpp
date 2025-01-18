@@ -245,6 +245,27 @@ RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(const std::strin
     return frameNode;
 }
 
+RefPtr<NG::FrameNode> ElementRegister::GetFrameNodeById(const std::string& key)
+{
+    auto it = inspectorIdMap_.find(key);
+    CHECK_NULL_RETURN(it != inspectorIdMap_.end(), nullptr);
+    CHECK_NULL_RETURN(!it->second.empty(), nullptr);
+    int32_t depth = INT32_MAX;
+    RefPtr<NG::FrameNode> frameNode;
+    for (const auto& node : it->second) {
+        auto uiNode = node.Upgrade();
+        if (!uiNode) {
+            continue;
+        }
+        auto depOfNode = uiNode->GetDepth();
+        if (uiNode->GetInspectorId().value_or("") == key && depth > depOfNode) {
+            depth = depOfNode;
+            frameNode = uiNode;
+        }
+    }
+    return frameNode;
+}
+
 void ElementRegister::AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node)
 {
     auto it = inspectorIdMap_.find(key);

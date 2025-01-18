@@ -825,6 +825,8 @@ public:
     static uint32_t GetSafeAreaExpandType(FrameNode* frameNode);
     static uint32_t GetSafeAreaExpandEdges(FrameNode* frameNode);
     static void SetPositionLocalizedEdges(bool needLocalized);
+    static void FreezeUINodeById(const std::string& id, bool isFreeze);
+    static void FreezeUINodeByUniqueId(const int32_t& uniqueId, bool isFreeze);
     static void SetMarkAnchorStart(Dimension& markAnchorStart);
     static void ResetMarkAnchorStart();
     static void SetOffsetLocalizedEdges(bool needLocalized);
