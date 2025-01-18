@@ -723,7 +723,7 @@ void RichEditorPattern::HandleSelectOverlayOnLayoutSwap()
         IF_PRESENT(selectOverlay, UpdateSelectOverlayOnAreaChanged());
     };
     if (AnimationUtils::IsImplicitAnimationOpen()) {
-        auto pipeline = PipelineContext::GetCurrentContextSafely();
+        auto pipeline = GetContext();
         CHECK_NULL_VOID(pipeline);
         pipeline->AddAfterRenderTask(overlayTask);
     } else {
@@ -3187,7 +3187,7 @@ void RichEditorPattern::OnFocusNodeChange(FocusReason focusReason)
 
 WindowMode RichEditorPattern::GetWindowMode()
 {
-    auto pipelineContext = PipelineBase::GetCurrentContextSafely();
+    auto pipelineContext = GetContext();
     CHECK_NULL_RETURN(pipelineContext, WindowMode::WINDOW_MODE_UNDEFINED);
     auto windowManager = pipelineContext->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, WindowMode::WINDOW_MODE_UNDEFINED);
@@ -5091,7 +5091,7 @@ PreviewTextStyle RichEditorPattern::GetPreviewTextStyle() const
 
 const Color& RichEditorPattern::GetPreviewTextDecorationColor() const
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, Color::TRANSPARENT);
     auto theme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(theme, Color::TRANSPARENT);
@@ -5103,7 +5103,7 @@ const Color& RichEditorPattern::GetPreviewTextDecorationColor() const
 
 float RichEditorPattern::GetPreviewTextUnderlineWidth() const
 {
-    auto pipeline = PipelineBase::GetCurrentContextSafely();
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipeline, 0.0f);
     auto theme = pipeline->GetTheme<RichEditorTheme>();
     CHECK_NULL_RETURN(theme, 0.0f);
