@@ -687,7 +687,7 @@ template("declarative_js_engine") {
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",
-        "graphic_2d:librender_service_base",
+        "graphic_2d:librender_service_client",
         "napi:ace_napi",
       ]
     }
@@ -1135,7 +1135,7 @@ template("declarative_js_engine_ng") {
     } else {
       external_deps += [
         "ets_runtime:libark_jsruntime",
-        "graphic_2d:librender_service_base",
+        "graphic_2d:librender_service_client",
         "napi:ace_napi",
       ]
     }
