@@ -272,6 +272,10 @@ public:
     bool IsHiddenHandle();
 
     bool IsHandleVisible(bool isFirst);
+    void SetMenuTranslateIsSupport(bool menuTranslateIsSupport)
+    {
+        menuTranslateIsSupport_ = menuTranslateIsSupport;
+    }
     void SetIsSupportMenuSearch(bool isSupportMenuSearch)
     {
         isSupportMenuSearch_ = isSupportMenuSearch;
@@ -331,9 +335,22 @@ protected:
     {
         enableContainerModal_ = true;
     }
+    bool IsNeedMenuTranslate();
+    void HandleOnTranslate();
     bool IsNeedMenuSearch();
     void HandleOnSearch();
+    virtual bool AllowTranslate()
+    {
+        return false;
+    }
     virtual bool AllowSearch()
+    {
+        return false;
+    }
+    bool IsSupportMenuShare();
+    bool IsNeedMenuShare();
+    void HandleOnShare();
+    virtual bool AllowShare()
     {
         return false;
     }
@@ -344,6 +361,9 @@ protected:
     OnMenuItemClickCallback onMenuItemClick_;
     bool isHandleMoving_ = false;
     DragHandleIndex dragHandleIndex_ = DragHandleIndex::NONE;
+    RectF ConvertWindowToScreenDomain(RectF rect);
+    EdgeF ConvertWindowToScreenDomain(EdgeF edge);
+    std::string GetTranslateParamRectStr(RectF rect, EdgeF rectLeftTop, EdgeF rectRightBottom);
 
 private:
     void FindScrollableParentAndSetCallback(const RefPtr<FrameNode>& host);
@@ -368,6 +388,7 @@ private:
     RectF globalPaintRect_;
     bool originalMenuIsShow_ = true;
     bool enableContainerModal_ = false;
+    bool menuTranslateIsSupport_ = false;
     bool isSupportMenuSearch_ = false;
 };
 

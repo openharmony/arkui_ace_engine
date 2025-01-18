@@ -317,6 +317,7 @@ public:
 
     void InsertValue(const std::u16string& insertValue, bool isIME = false) override;
     void InsertValue(const std::string& insertValue, bool isIME = false) override;
+    void NotifyImfFinishTextPreview();
     int32_t InsertValueByController(const std::u16string& insertValue, int32_t offset);
     void InsertValueOperation(const SourceAndValueInfo& info);
     void CalcCounterAfterFilterInsertValue(int32_t curLength, const std::u16string insertValue, int32_t maxLength);
@@ -950,6 +951,9 @@ public:
     std::string GetFontSize() const;
     std::string GetMinFontSize() const;
     std::string GetMaxFontSize() const;
+    std::string GetMinFontScale() const;
+    std::string GetMaxFontScale() const;
+    std::string GetEllipsisMode() const;
     std::string GetTextIndent() const;
     Ace::FontStyle GetItalicFontStyle() const;
     FontWeight GetFontWeight() const;
@@ -1015,6 +1019,7 @@ public:
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleOnPaste() override;
     void HandleOnCut() override;
+    bool IsShowTranslate();
     bool IsShowSearch();
     void HandleOnCameraInput();
     void HandleOnAIWrite();
@@ -1603,16 +1608,6 @@ public:
 
     virtual float FontSizeConvertToPx(const Dimension& fontSize);
 
-    void SetMaxFontSizeScale(float scale)
-    {
-        maxFontSizeScale_ = scale;
-    }
-
-    std::optional<float> GetMaxFontSizeScale()
-    {
-        return maxFontSizeScale_;
-    }
-
     SelectionInfo GetSelection();
 
     bool GetContentScrollerIsScrolling() const
@@ -2135,7 +2130,6 @@ private:
     ContentScroller contentScroller_;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
     float lastCaretPos_ = 0.0f;
-    std::optional<float> maxFontSizeScale_;
     bool firstClickAfterLosingFocus_ = true;
     CancelableCallback<void()> firstClickResetTask_;
     RequestFocusReason requestFocusReason_ = RequestFocusReason::UNKNOWN;

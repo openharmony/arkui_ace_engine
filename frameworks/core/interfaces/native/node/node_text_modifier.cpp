@@ -601,6 +601,7 @@ void SetTextHeightAdaptivePolicy(ArkUINodeHandle node, ArkUI_Int32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    value = std::clamp(value, 0, static_cast<int32_t>(HEIGHT_ADAPTIVE_POLICY.size()));
     TextModelNG::SetHeightAdaptivePolicy(frameNode, HEIGHT_ADAPTIVE_POLICY[value]);
 }
 

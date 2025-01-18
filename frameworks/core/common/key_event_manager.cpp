@@ -475,8 +475,9 @@ bool KeyEventManager::DispatchTabIndexEventNG(const KeyEvent& event, const RefPt
     auto mainViewFocusHub = mainView->GetFocusHub();
     CHECK_NULL_RETURN(mainViewFocusHub, false);
     if (mainViewFocusHub->HandleFocusByTabIndex(event)) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Tab index handled the key event: code:%{private}d/action:%{public}d",
-            event.code, event.action);
+        TAG_LOGD(AceLogTag::ACE_FOCUS,
+            "Tab index handled the key event: code:" SEC_PLD(%{private}d) "/action:%{public}d",
+            SEC_PARAM(event.code), event.action);
         return true;
     }
     return false;
@@ -486,24 +487,26 @@ bool KeyEventManager::DispatchKeyEventNG(const KeyEvent& event, const RefPtr<Fra
 {
     if (!focusNode) {
         TAG_LOGD(AceLogTag::ACE_FOCUS,
-            "Cannot dispatch key event: code:%{private}d/action:%{public}d/isPreIme:%{public}d on node: nullptr",
-            event.code, event.action, event.isPreIme);
+            "Cannot dispatch key event: code:" SEC_PLD(%{private}d)
+            "/action:%{public}d/isPreIme:%{public}d on node: nullptr",
+            SEC_PARAM(event.code), event.action, event.isPreIme);
         return false;
     }
     TAG_LOGD(AceLogTag::ACE_FOCUS,
-        "Dispatch key event: code:%{private}d/action:%{public}d/isPreIme:%{public}d on node: %{public}s/%{public}d.",
-        event.code, event.action, event.isPreIme, focusNode->GetTag().c_str(), focusNode->GetId());
+        "Dispatch key event: code:" SEC_PLD(%{private}d)
+        "/action:%{public}d/isPreIme:%{public}d on node: %{public}s/%{public}d.",
+        SEC_PARAM(event.code), event.action, event.isPreIme, focusNode->GetTag().c_str(), focusNode->GetId());
     isKeyConsumed_ = false;
     auto focusNodeHub = focusNode->GetFocusHub();
     CHECK_NULL_RETURN(focusNodeHub, false);
     if (focusNodeHub->HandleEvent(event)) {
-        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus system handled the key event: code:%{private}d/action:%{public}d",
-            event.code, event.action);
+        TAG_LOGI(AceLogTag::ACE_FOCUS, "Focus system handled the key event: code:" SEC_PLD(%{private}d)
+            "/action:%{public}d", SEC_PARAM(event.code), event.action);
         return true;
     }
     if (!isKeyConsumed_) {
-        TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:%{private}d/action:%{public}d",
-            event.code, event.action);
+        TAG_LOGD(AceLogTag::ACE_FOCUS, "Focus system do not handled the key event: code:"
+            SEC_PLD(%{private}d) "/action:%{public}d", SEC_PARAM(event.code), event.action);
     }
     return isKeyConsumed_;
 }
@@ -579,7 +582,6 @@ bool KeyEventManager::OnFocusAxisEvent(const FocusAxisEvent& event)
     return true;
 }
 
-#ifdef SUPPORT_DIGITAL_CROWN
 bool KeyEventManager::OnCrownEvent(const CrownEvent& event)
 {
     auto container = Container::GetContainer(GetInstanceId());
@@ -593,7 +595,6 @@ bool KeyEventManager::OnCrownEvent(const CrownEvent& event)
     focusNodeHub->HandleEvent(event);
     return true;
 }
-#endif
 
 bool KeyEventManager::TriggerKeyEventDispatch(const KeyEvent& event)
 {

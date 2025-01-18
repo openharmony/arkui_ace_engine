@@ -34,12 +34,13 @@
             "https://gitee.com/lightningHo"
         ],
         "https://gitee.com/arkui_image": [
-            "https://gitee.com/ileft2019",
             "https://gitee.com/jinweiliu",
             "https://gitee.com/lexiaoyao2",
             "https://gitee.com/liyujie43",
             "https://gitee.com/luoying_ace_admin",
-            "https://gitee.com/xiaoxiaohuang9"
+            "https://gitee.com/xiaoxiaohuang9",
+            "https://gitee.com/crazyracing0726",
+            "https://gitee.com/xuqinfeng1996"
         ],
         "https://gitee.com/arkuistatemgmt": [
             "https://gitee.com/seaside_wu",
@@ -197,16 +198,20 @@
             "info": "[渲染核心数据结构 hesu]",
             "group": "https://gitee.com/arkui_architecture"
         },
-        "https://gitee.com/ileft2019": {
-            "info": "[图片能力公共 zuopengpeng]",
-            "group": "https://gitee.com/arkui_image"
-        },
         "https://gitee.com/jinweiliu": {
             "info": "[Image组件 liujinwei]",
             "group": "https://gitee.com/arkui_image"
         },
+        "https://gitee.com/crazyracing0726": {
+            "info": "[Image组件 wangjiongfeng]",
+            "group": "https://gitee.com/arkui_image"
+        },
         "https://gitee.com/lexiaoyao2": {
             "info": "[Image/信息展示类组件 chennaifeng]",
+            "group": "https://gitee.com/arkui_image"
+        },
+        "https://gitee.com/xuqinfeng1996": {
+            "info": "[信息展示类组件 xuqingfeng]",
             "group": "https://gitee.com/arkui_image"
         },
         "https://gitee.com/liyujie43": {

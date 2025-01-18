@@ -37,9 +37,9 @@ void PanRecognizer::ForceCleanRecognizer()
     isStartTriggered_ = false;
 }
 
-PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, double distance)
-    : MultiFingersRecognizer(fingers), direction_(direction), distance_(distance), mouseDistance_(distance),
-      newFingers_(fingers_), newDistance_(distance_), newDirection_(direction_)
+PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, double distance, bool isLimitFingerCount)
+    : MultiFingersRecognizer(fingers, isLimitFingerCount), direction_(direction), distance_(distance),
+    mouseDistance_(distance), newFingers_(fingers_), newDistance_(distance_), newDirection_(direction_)
 {
     panVelocity_.SetDirection(direction_.type);
     if (fingers_ > MAX_PAN_FINGERS || fingers_ < DEFAULT_PAN_FINGERS) {
@@ -49,7 +49,7 @@ PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, dou
 
 RefPtr<Gesture> PanRecognizer::CreateGestureFromRecognizer() const
 {
-    return AceType::MakeRefPtr<PanGesture>(fingers_, direction_, distance_);
+    return AceType::MakeRefPtr<PanGesture>(fingers_, direction_, distance_, isLimitFingerCount_);
 }
 
 PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) : panGestureOption_(panGestureOption)
@@ -57,9 +57,11 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
     uint32_t directNum = panGestureOption->GetDirection().type;
     double distanceNumber = panGestureOption->GetDistance();
     int32_t fingersNumber = panGestureOption->GetFingers();
+    bool isLimitFingerCount = panGestureOption->GetIsLimitFingerCount();
 
     distance_ = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE.ConvertToPx() : distanceNumber;
     fingers_ = fingersNumber;
+    isLimitFingerCount_ = isLimitFingerCount;
     if (fingers_ > MAX_PAN_FINGERS || fingers_ < DEFAULT_PAN_FINGERS) {
         fingers_ = DEFAULT_PAN_FINGERS;
     }
@@ -212,10 +214,6 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     if (event.sourceType == SourceType::MOUSE && !isAllowMouse_) {
         Adjudicate(Claim(this), GestureDisposal::REJECT);
         extraInfo_ += "mouse event is not allowed.";
-        return;
-    }
-    if (!IsInAttachedNode(event)) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
 
@@ -424,6 +422,9 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
                 SendCallbackMsg(onActionStart_);
                 isStartTriggered_ = true;
             }
+            if (static_cast<int32_t>(touchPoints_.size()) > fingers_ && isLimitFingerCount_) {
+                return;
+            }
             SendCallbackMsg(onActionUpdate_);
         }
     }
@@ -512,6 +513,10 @@ bool PanRecognizer::HandlePanAccept()
             dragEventActuator->SetIsDragUserReject(true);
         }
         return true;
+    }
+    if (CheckLimitFinger()) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return false;
     }
     if (IsBridgeMode()) {
         OnAccepted();

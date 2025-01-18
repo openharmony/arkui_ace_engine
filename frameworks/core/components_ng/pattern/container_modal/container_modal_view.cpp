@@ -430,4 +430,26 @@ void ContainerModalView::AddButtonOnEvent(
     inputHub->AddOnMouseEvent(onclickCallback);
 }
 
+bool ContainerModalView::ConfigCustomWindowMask(RefPtr<PipelineContext>& pipeline, bool enable)
+{
+    CHECK_NULL_RETURN(pipeline, false);
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    if (!enable) {
+        auto customWindowMaskNode = NG::ViewStackProcessor::GetInstance()->GetCustomWindowMaskNode();
+        CHECK_NULL_RETURN(customWindowMaskNode, false);
+        rootNode->RemoveChild(customWindowMaskNode);
+        rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
+        return true;
+    }
+    auto isSucc = ExecuteCustomWindowMaskAbc();
+    if (!isSucc) {
+        return false;
+    }
+    auto customWindowMaskNode = NG::ViewStackProcessor::GetInstance()->GetCustomWindowMaskNode();
+    CHECK_NULL_RETURN(customWindowMaskNode, false);
+    customWindowMaskNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF);
+    return true;
+}
 } // namespace OHOS::Ace::NG

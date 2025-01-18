@@ -26,13 +26,13 @@ namespace OHOS::Ace::NG {
 /**
  * The structure of Atomic Service (install free):
  * |--AtomicService(Column)
- *   |--Stage
- *   |--ModalPage(normal)
- *   |--MenuBarRow
- *     |--MenuBar
- *       |--menuButton
- *       |--divider
- *       |--closeButton
+ *   |--JsView
+ *     |--Stage
+ *     |--MenuBarRow
+ *       |--MenuBar
+ *          |--menuButton
+ *          |--divider
+ *          |--closeButton
  * |--ModalPage(UEC)
  */
 
@@ -47,13 +47,16 @@ public:
     void SetIconColor(const std::optional<Color>& color) {}
     void SetStatusBarItemColor(bool isLight);
     std::optional<RectF> GetAppBarRect();
-
+    void AddContentToJSContainer();
+    void OnMenuClick();
+    void OnCloseClick();
 private:
     RefPtr<FrameNode> BuildMenuBarRow();
     RefPtr<FrameNode> BuildMenuBar();
     RefPtr<FrameNode> BuildButton(bool isMenuButton);
     RefPtr<FrameNode> BuildIcon(bool isMenuIcon);
     RefPtr<FrameNode> BuildDivider();
+    void BindJSContainer();
     void BindMenuCallback(const RefPtr<FrameNode>& menuButton);
     void BindCloseCallback(const RefPtr<FrameNode>& closeButton);
     void CreateServicePanel(bool firstTry);
@@ -62,6 +65,7 @@ private:
     int32_t sessionId_ = 0;
 
     WeakPtr<FrameNode> atomicService_;
+    RefPtr<FrameNode> contentStage_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_APP_BAR_VIEW_H

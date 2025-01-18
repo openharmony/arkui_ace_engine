@@ -41,7 +41,7 @@ public:
                 MakeRefPtr<GestureInfo>(GestureTypeName::ROTATION_GESTURE, GestureTypeName::ROTATION_GESTURE, false);
         }
     }
-    RotationGesture(int32_t fingers, double angle);
+    RotationGesture(int32_t fingers, double angle, bool isLimitFingerCount = false);
     ~RotationGesture() override = default;
 
 protected:

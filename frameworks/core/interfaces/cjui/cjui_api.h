@@ -188,6 +188,8 @@ struct CJUICommonModifier {
     void (*resetAllowDrop)(ArkUINodeHandle node);
     void (*setAccessibilityLevel)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*resetAccessibilityLevel)(ArkUINodeHandle node);
+    void (*setAccessibilityCustomRole)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*resetAccessibilityCustomRole)(ArkUINodeHandle node);
     void (*setDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
     void (*resetDirection)(ArkUINodeHandle node);
     void (*setLayoutWeight)(ArkUINodeHandle node, ArkUI_Int32 layoutWeight);
@@ -976,7 +978,7 @@ struct CJUISwiperModifier {
     void (*resetSwiperAutoPlay)(ArkUINodeHandle node);
     void (*setSwiperStopWhenTouched)(ArkUINodeHandle node, ArkUI_Bool stopWhenTouched);
     void (*resetSwiperStopWhenTouched)(ArkUINodeHandle node);
-    void (*setSwiperIndex)(ArkUINodeHandle node, ArkUI_Int32 index);
+    void (*setSwiperIndex)(ArkUINodeHandle node, ArkUI_Int32 index, ArkUI_Int32 animationMode);
     void (*resetSwiperIndex)(ArkUINodeHandle node);
     void (*setSwiperIndicator)(ArkUINodeHandle node, ArkUI_CharPtr indicatorStr);
     void (*resetSwiperIndicator)(ArkUINodeHandle node);
@@ -1062,6 +1064,12 @@ struct CJUITimepickerModifier {
     ArkUI_CharPtr (*getTimepickerSelected)(ArkUINodeHandle node);
     void (*setTimepickerSelected)(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute);
     void (*resetTimepickerSelected)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getTimepickerStart)(ArkUINodeHandle node);
+    void (*setTimepickerStart)(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute);
+    void (*resetTimepickerStart)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getTimepickerEnd)(ArkUINodeHandle node);
+    void (*setTimepickerEnd)(ArkUINodeHandle node, ArkUI_Uint32 hour, ArkUI_Uint32 minute);
+    void (*resetTimepickerEnd)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTimepickerBackgroundColor)(ArkUINodeHandle node);
     void (*setTimepickerBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     ArkUI_CharPtr (*getTimepickerDisappearTextStyle)(ArkUINodeHandle node);
@@ -1342,15 +1350,19 @@ struct CJUIGestureInterruptInfo {
 };
 
 struct CJUIGestureModifier {
-    ArkUIGesture* (*createTapGesture)(ArkUI_Int32 count, ArkUI_Int32 fingers, void* userData);
-    ArkUIGesture* (*createLongPressGesture)(ArkUI_Int32 fingers, bool repeat, ArkUI_Int32 duration, void* userData);
+    ArkUIGesture* (*createTapGesture)(ArkUI_Int32 count, ArkUI_Int32 fingers, bool limitFingerCount, void* userData);
+    ArkUIGesture* (*createLongPressGesture)(ArkUI_Int32 fingers, bool repeat, ArkUI_Int32 duration,
+    bool limitFingerCount, void* userData);
     ArkUIGesture* (*createPanGesture)(
-        ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance, void* userData);
-    ArkUIGesture* (*createPinchGesture)(ArkUI_Int32 fingers, ArkUI_Float64 distance, void* userData);
-    ArkUIGesture* (*createRotationGesture)(ArkUI_Int32 fingers, ArkUI_Float64 angle, void* userData);
+        ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 distance, bool limitFingerCount, void* userData);
+    ArkUIGesture* (*createPinchGesture)(ArkUI_Int32 fingers, ArkUI_Float64 distance, bool limitFingerCount,
+    void* userData);
+    ArkUIGesture* (*createRotationGesture)(ArkUI_Int32 fingers, ArkUI_Float64 angle, bool limitFingerCount,
+    void* userData);
     ArkUIGesture* (*createSwipeGesture)(
-        ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed, void* userData);
-    ArkUIGesture* (*createSwipeGestureByModifier)(ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 speed);
+        ArkUI_Int32 fingers, ArkUI_Int32 directions, ArkUI_Float64 speed, bool limitFingerCount, void* userData);
+    ArkUIGesture* (*createSwipeGestureByModifier)(
+        ArkUI_Int32 fingers, ArkUI_Int32 direction, ArkUI_Float64 speed, bool limitFingerCount);
     ArkUIGesture* (*createGestureGroup)(ArkUI_Int32 mode);
     void (*addGestureToGestureGroup)(ArkUIGesture* group, ArkUIGesture* child);
     void (*removeGestureFromGestureGroup)(ArkUIGesture* group, ArkUIGesture* child);
@@ -1439,6 +1451,9 @@ struct CJUISliderModifier {
     ArkUI_CharPtr (*getSliderBlockShape)(ArkUINodeHandle node, ArkUI_Float32 (*value)[5]);
     ArkUI_Float32 (*getThickness)(ArkUINodeHandle node, ArkUI_Int32 unit);
     ArkUISliderValidSlideRange (*getSliderValidSlideRange)(ArkUINodeHandle node);
+    ArkUI_Bool (*getEnableHapticFeedback)(ArkUINodeHandle node);
+    void (*setEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Bool enableHapticFeedback);
+    void (*resetEnableHapticFeedback)(ArkUINodeHandle node);
 };
 
 struct CJUIProgressModifier {
@@ -1480,6 +1495,8 @@ struct CJUINavDestinationModifier {
     void (*resetHideTitleBar)(ArkUINodeHandle node);
     void (*setNavDestinationHideToolBar)(ArkUINodeHandle node, ArkUI_Bool hide, ArkUI_Bool animated);
     void (*resetNavDestinationHideToolBar)(ArkUINodeHandle node);
+    void (*setNavDestinationHideBackButton)(ArkUINodeHandle node, ArkUI_Bool hideBackButton);
+    void (*resetNavDestinationHideBackButton)(ArkUINodeHandle node);
     void (*setNavDestinationMode)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetNavDestinationMode)(ArkUINodeHandle node);
     void (*setIgnoreLayoutSafeArea)(ArkUINodeHandle node, ArkUI_CharPtr typeStr, ArkUI_CharPtr edgesStr);

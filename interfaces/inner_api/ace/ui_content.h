@@ -53,12 +53,14 @@ struct Rect;
 enum class WindowSizeChangeReason : uint32_t;
 enum class WindowMode : uint32_t;
 enum class MaximizeMode : uint32_t;
+class RSNode;
 class RSSurfaceNode;
 class RSTransaction;
 class Transform;
 enum class AvoidAreaType : uint32_t;
 class AvoidArea;
 struct DecorButtonStyle;
+struct SingleHandTransform;
 } // namespace Rosen
 
 namespace AAFwk {
@@ -481,6 +483,18 @@ public:
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void(bool)>& callback)
     {
         return false;
+    }
+
+    virtual bool ConfigCustomWindowMask(bool enable)
+    {
+        return false;
+    }
+
+    virtual void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) {};
+
+    virtual std::shared_ptr<Rosen::RSNode> GetRSNodeByStringID(const std::string& stringId)
+    {
+        return nullptr;
     }
 };
 

@@ -19,8 +19,11 @@
 #include "bridge/common/utils/utils.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_scroll_ffi.h"
 #include "cj_lambda.h"
+#include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "base/utils/utils.h"
 
@@ -262,6 +265,32 @@ void FfiOHOSAceFrameworkGridOnItemDragStart(void (*callback)(CJItemDragInfo drag
             .x = x, .y = y
         };
         lambda(itemDragInfo, itemIndex);
+    };
+    GridModel::GetInstance()->SetOnItemDragStart(std::move(onItemDragStart));
+}
+
+void FfiOHOSAceFrameworkGridOnItemDragStartWithBack(
+    CJDragItemInfo (*callback)(CJItemDragInfo dragInfo, int32_t itemIndex))
+{
+    auto lambda = CJLambda::Create(callback);
+    auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onItemDragStart = [node = targetNode, lambda](const ItemDragInfo& dragInfo, int32_t itemIndex) {
+        PipelineContext::SetCallBackNode(node);
+        auto x = dragInfo.GetX();
+        auto y = dragInfo.GetY();
+        CJItemDragInfo itemDragInfo = {
+            .x = x, .y = y
+        };
+        auto ret = lambda(itemDragInfo, itemIndex);
+        if (ret.builder == nullptr) {
+            return;
+        }
+        std::function<void(void)> builderFunc = CJLambda::Create(ret.builder);
+        ViewStackModel::GetInstance()->NewScope();
+        {
+            builderFunc();
+        }
+        ViewStackModel::GetInstance()->Finish();
     };
     GridModel::GetInstance()->SetOnItemDragStart(std::move(onItemDragStart));
 }

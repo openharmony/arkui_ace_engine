@@ -350,37 +350,6 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager007, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsAccessibilityManager008
- * @tc.desc: SendAccessibilitySyncEvent, TransferAccessibilityAsyncEvent
- * @tc.type: FUNC
- */
-HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager008, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct JsAccessibilityManager
-     */
-    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
-    auto context = NG::PipelineContext::GetCurrentContext();
-    jsAccessibilityManager->SetPipelineContext(context);
-    jsAccessibilityManager->Register(true);
-
-    /**
-     * @tc.steps: step2. test SendAccessibilitySyncEvent
-     */
-    AccessibilityEvent accessibilityEvent;
-    Accessibility::AccessibilityEventInfo eventInfo;
-    auto ret = jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
-    EXPECT_EQ(ret, false);
-
-    /**
-     * @tc.steps: step2. test TransferAccessibilityAsyncEvent
-     */
-    int64_t uiExtensionOffset = 1000;
-    ret = jsAccessibilityManager->TransferAccessibilityAsyncEvent(eventInfo, uiExtensionOffset);
-    EXPECT_EQ(ret, false);
-}
-
-/**
  * @tc.name: JsAccessibilityManager009
  * @tc.desc: GetDelayTimeBeforeSendEvent
  * @tc.type: FUNC

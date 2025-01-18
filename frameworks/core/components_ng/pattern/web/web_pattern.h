@@ -429,7 +429,7 @@ public:
     bool HandleScrollVelocity(float velocity, const RefPtr<NestableScrollContainer>& child = nullptr) override;
     bool HandleScrollVelocity(RefPtr<NestableScrollContainer> parent, float velocity);
     void OnScrollStartRecursive(WeakPtr<NestableScrollContainer> child, float position, float velocity = 0.f) override;
-    void OnScrollStartRecursive(std::vector<float> positions);
+    void OnScrollStartRecursive(float position);
     void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
     void GetParentAxis();
@@ -502,6 +502,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, KeyboardAvoidMode, WebKeyboardAvoidMode);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, EnabledHapticFeedback, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OptimizeParserBudgetEnabled, bool);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, WebMediaAVSessionEnabled, bool);
 
     bool IsFocus() const
     {
@@ -548,7 +549,11 @@ public:
         std::shared_ptr<NWeb::NWebDateTimeChooserCallback> callback);
     void OnDateTimeChooserClose();
     void OnShowAutofillPopup(const float offsetX, const float offsetY, const std::vector<std::string>& menu_items);
+    void OnShowAutofillPopupV2(const float offsetX, const float offsetY, const float height, const float width,
+        const std::vector<std::string>& menu_items);
     void OnHideAutofillPopup();
+    RefPtr<FrameNode> CreateDataListFrameNode(const OffsetF& offfset, const float height, const float width);
+    void RemoveDataListNode();
     void UpdateTouchHandleForOverlay(bool fromOverlay = false);
     bool IsSelectOverlayDragging()
     {
@@ -603,6 +608,9 @@ public:
     void UpdateJavaScriptOnDocumentEndByOrder();
     void JavaScriptOnDocumentEndByOrder(const ScriptItems& scriptItems,
         const ScriptItemsByOrder& scriptItemsByOrder);
+    void UpdateJavaScriptOnHeadReadyByOrder();
+    void JavaScriptOnHeadReadyByOrder(const ScriptItems& scriptItems,
+        const ScriptItemsByOrder& scriptItemsByOrder);
     void SetTouchEventInfo(const TouchEvent& touchEvent,
         TouchEventInfo& touchEventInfo, const std::string& embdedId);
     DragRet GetDragAcceptableStatus();
@@ -611,6 +619,7 @@ public:
     void UpdateImagePreviewParam();
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
+    void OnScrollStart(const float x, const float y);
     void SetLayoutMode(WebLayoutMode mode);
     WebLayoutMode GetLayoutMode() const
     {
@@ -761,6 +770,8 @@ public:
     bool IsPreviewMenuNotNeedShowPreview();
 
     bool GetAccessibilityVisible(int64_t accessibilityId);
+
+    void OnWebMediaAVSessionEnabledUpdate(bool enable);
 
 private:
     friend class WebContextSelectOverlay;
@@ -1022,6 +1033,7 @@ private:
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> beginTouchHandle,
         std::shared_ptr<OHOS::NWeb::NWebTouchHandleState> endTouchHandle);
     double GetNewScale(double& scale) const;
+    double GetNewOriginScale(double originScale) const;
     void UpdateSlideOffset();
     void ClearKeyEventByKeyCode(int32_t keyCode);
     void SetRotation(uint32_t rotation);
@@ -1155,7 +1167,6 @@ private:
     bool isMemoryLevelEnable_ = true;
     OffsetF fitContentOffset_;
     bool isFirstFlingScrollVelocity_ = true;
-    bool isNeedUpdateScrollAxis_ = true;
     bool isScrollStarted_ = false;
     WebLayoutMode layoutMode_ = WebLayoutMode::NONE;
     bool isEmbedModeEnabled_ = false;
@@ -1172,8 +1183,10 @@ private:
     RefPtr<WebDelegateObserver> observer_;
     std::optional<ScriptItems> onDocumentStartScriptItems_;
     std::optional<ScriptItems> onDocumentEndScriptItems_;
+    std::optional<ScriptItems> onHeadReadyScriptItems_;
     std::optional<ScriptItemsByOrder> onDocumentStartScriptItemsByOrder_;
     std::optional<ScriptItemsByOrder> onDocumentEndScriptItemsByOrder_;
+    std::optional<ScriptItemsByOrder> onHeadReadyScriptItemsByOrder_;
     bool offlineWebInited_ = false;
     bool offlineWebRendered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
@@ -1238,6 +1251,8 @@ private:
     int64_t lastHeight_ = 0L;
     int64_t lastWidth_ = 0L;
     bool dragWindowFlag_ = false;
+
+    std::optional<int32_t> dataListNodeId_ = std::nullopt;
 
 protected:
     OnCreateMenuCallback onCreateMenuCallback_;

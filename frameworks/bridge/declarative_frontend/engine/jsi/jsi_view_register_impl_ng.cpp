@@ -136,6 +136,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_water_flow_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/scroll_bar/js_scroll_bar.h"
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_app_bar_view.h"
 #include "frameworks/bridge/declarative_frontend/style_string/js_span_string.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_modal_view.h"
 
@@ -391,6 +392,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSRichEditorStyledStringController::JSBind(globalObj);
     JSLayoutManager::JSBind(globalObj);
     JSContainerModal::JSBind(globalObj);
+    JSAppBar::JSBind(globalObj);
 #ifdef VIDEO_SUPPORTED
     JSVideo::JSBind(globalObj);
     JSVideoController::JSBind(globalObj);

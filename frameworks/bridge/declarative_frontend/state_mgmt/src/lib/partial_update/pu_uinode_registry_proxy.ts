@@ -79,13 +79,6 @@ class UINodeRegisterProxy {
         UINodeRegisterProxy.instance_.unregisterElmtIdsFromIViews();
     }
 
-    public static registerModifierElmtDeleteCallback(callback): void {
-        if (UINodeRegisterProxy.modifierElmtDeleteCallback_) {
-            return;
-        }
-        UINodeRegisterProxy.modifierElmtDeleteCallback_ = callback;
-    }
-
     private populateRemoveElementInfo(removedElements: Array<number>) {
         for (const elmtId of removedElements) {
             this.removeElementsInfo_.push(elmtId);
@@ -119,9 +112,6 @@ class UINodeRegisterProxy {
                 } else {
                     stateMgmtConsole.debug(`elmtIds ${elmtId} has not been removed because of failure of updating the weakptr of viewpu. Internal error!.`);
                 }
-                if (UINodeRegisterProxy.modifierElmtDeleteCallback_) {
-                    UINodeRegisterProxy.modifierElmtDeleteCallback_(elmtId);
-                }
             } else {
                 stateMgmtConsole.debug(`elmtIds ${elmtId} cannot find its owning ViewPU, maybe this ViewPu has already been aboutToBeDeleted. Internal error!`);
             }
@@ -140,5 +130,4 @@ class UINodeRegisterProxy {
     public static instance_: UINodeRegisterProxy = new UINodeRegisterProxy();
     public removeElementsInfo_: Array<number> = new Array<number>();
     public static ElementIdToOwningViewPU_: Map<number, WeakRef<IView>> = new Map<number, WeakRef<IView>>();
-    public static modifierElmtDeleteCallback_;
 }

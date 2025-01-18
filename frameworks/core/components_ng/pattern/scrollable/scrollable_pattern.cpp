@@ -728,11 +728,16 @@ RefPtr<Scrollable> ScrollablePattern::CreateScrollable()
     SetDragFRCSceneCallback(scrollable);
     SetOnContinuousSliding(scrollable);
     SetGetSnapTypeCallback(scrollable);
-    scrollable->SetUnstaticVelocityScale(velocityScale_);
+    if (!NearZero(velocityScale_)) {
+        scrollable->SetUnstaticVelocityScale(velocityScale_);
+    }
     scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
     if (friction_ != -1) {
         scrollable->SetUnstaticFriction(friction_);
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    scrollable->ListenDigitalCrownEvent(host);
+#endif
     return scrollable;
 }
 
@@ -758,9 +763,6 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
         CHECK_NULL_VOID(child);
         child->StopScrollAnimation();
     }
-#ifdef SUPPORT_DIGITAL_CROWN
-    scrollable->ListenDigitalCrownEvent(host);
-#endif
 }
 
 void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -2901,12 +2903,8 @@ void ScrollablePattern::Register2DragDropManager()
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     if (enableEdgeAutoScroll) {
-        TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
-            "Enable scrolling when the drag hovered on a scrollable controller's edge.");
         dragDropManager->RegisterDragStatusListener(host->GetId(), AceType::WeakClaim(AceType::RawPtr(host)));
     } else {
-        TAG_LOGI(AceLogTag::ACE_SCROLLABLE,
-            "Disable scrolling when the drag hovered on a scrollable controller's edge.");
         StopHotzoneScroll();
         dragDropManager->UnRegisterDragStatusListener(host->GetId());
     }

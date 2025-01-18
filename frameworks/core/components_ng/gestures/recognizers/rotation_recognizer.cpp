@@ -30,7 +30,9 @@ constexpr double RANGE_MAX = 180.0;
 
 } // namespace
 
-RotationRecognizer::RotationRecognizer(int32_t fingers, double angle) : MultiFingersRecognizer(fingers), angle_(angle)
+RotationRecognizer::RotationRecognizer(
+    int32_t fingers, double angle, bool isLimitFingerCount)
+    : MultiFingersRecognizer(fingers, isLimitFingerCount), angle_(angle)
 {
     if (fingers_ > MAX_ROTATION_FINGERS || fingers_ < DEFAULT_ROTATION_FINGERS) {
         fingers_ = DEFAULT_ROTATION_FINGERS;
@@ -76,10 +78,6 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     }
 
     if (static_cast<int32_t>(activeFingers_.size()) >= DEFAULT_ROTATION_FINGERS) {
-        return;
-    }
-    if (!IsInAttachedNode(event)) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
         return;
     }
     if (fingers_ > MAX_ROTATION_FINGERS) {
@@ -234,12 +232,18 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
                 return;
             }
+            if (CheckLimitFinger()) {
+                return;
+            }
             Adjudicate(AceType::Claim(this), GestureDisposal::ACCEPT);
         }
     } else if (refereeState_ == RefereeState::SUCCEED) {
         lastAngle_ = 0.0;
         angleSignChanged_ = false;
         resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
+        if (static_cast<int32_t>(touchPoints_.size()) > fingers_ && isLimitFingerCount_) {
+            return;
+        }
         SendCallbackMsg(onActionUpdate_);
     }
 }

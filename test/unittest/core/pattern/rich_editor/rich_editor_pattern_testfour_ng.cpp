@@ -24,6 +24,10 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+namespace {
+const auto BUILDER_NODE_1 = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG,
+    ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+} // namespace
 
 class RichEditorPatternTestFourNg : public RichEditorCommonTestNg {
 public:
@@ -1349,5 +1353,202 @@ HWTEST_F(RichEditorPatternTestFourNg, InitSelection_ABOVE_LINE, TestSize.Level1)
 
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
     EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+}
+
+/**
+ * @tc.name: DeleteContentRichEditor001
+ * @tc.desc: test DeleteContentRichEditor
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, DeleteContentRichEditor001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    struct UpdateSpanStyle typingStyle;
+    TextStyle textStyle(5);
+    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
+    std::string insertValue = "hello";
+    RichEditorPattern::OperationRecord record;
+    richEditorPattern->InsertValueOperation(StringUtils::Str8ToStr16(insertValue), &record, OperationType::DEFAULT);
+    richEditorPattern->DeleteContent(3);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 2);
+}
+
+/**
+ * @tc.name: SetMaxLength001
+ * @tc.desc: test SetMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetMaxLength001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    int32_t maxLength = 1;
+    richEditorPattern->SetMaxLength(maxLength);
+    EXPECT_EQ(richEditorPattern->GetMaxLength(), 1);
+}
+
+/**
+ * @tc.name: SetMaxLength002
+ * @tc.desc: test SetMaxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetMaxLength002, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    EXPECT_EQ(richEditorPattern->GetMaxLength(), INT_MAX);
+}
+
+/**
+ * @tc.name: SetMaxLines001
+ * @tc.desc: test SetMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetMaxLines001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    int32_t maxLines = 1;
+    richEditorPattern->SetMaxLines(maxLines);
+    EXPECT_EQ(richEditorPattern->GetMaxLines(), 1);
+}
+
+/**
+ * @tc.name: SetMaxLines002
+ * @tc.desc: test SetMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetMaxLines002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    int32_t maxLines = 0;
+    richEditorPattern->SetMaxLines(maxLines);
+    EXPECT_EQ(richEditorPattern->GetMaxLines(), 0);
+}
+
+/**
+ * @tc.name: SetMaxLines003
+ * @tc.desc: test SetMaxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetMaxLines003, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    EXPECT_EQ(richEditorPattern->GetMaxLines(), INT_MAX);
+}
+
+/**
+ * @tc.name: SetMaxLinesHeight001
+ * @tc.desc: test SetMaxLinesHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetMaxLinesHeight001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    float height = 0.0f;
+    richEditorPattern->SetMaxLinesHeight(height);
+    EXPECT_EQ(richEditorPattern->GetMaxLinesHeight(), 0.0f);
+}
+
+/**
+ * @tc.name: SetMaxLinesHeight002
+ * @tc.desc: test SetMaxLinesHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetMaxLinesHeight002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    float height = 10.0f;
+    richEditorPattern->SetMaxLinesHeight(height);
+    EXPECT_EQ(richEditorPattern->GetMaxLinesHeight(), 10.0f);
+}
+
+/**
+ * @tc.name: SetMaxLinesHeight003
+ * @tc.desc: test SetMaxLinesHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, SetMaxLinesHeight003, TestSize.Level1)
+{
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    EXPECT_EQ(richEditorPattern->GetMaxLinesHeight(), FLT_MAX);
+}
+
+/**
+ * @tc.name: CalculateTruncationLength001
+ * @tc.desc: test CalculateTruncationLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, CalculateTruncationLength001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    std::string insertValue = "hello";
+    int32_t index = 2;
+    int32_t allowInsertLength = 3;
+    richEditorPattern->textSelector_.baseOffset = 2;
+    richEditorPattern->textSelector_.destinationOffset = 4;
+    int32_t length =
+        richEditorPattern->CalculateTruncationLength(StringUtils::Str8ToStr16(insertValue), index, allowInsertLength);
+    EXPECT_EQ(length, 5);
+}
+
+/**
+ * @tc.name: CalculateTruncationLength002
+ * @tc.desc: test CalculateTruncationLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, CalculateTruncationLength002, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    std::string insertValue = "hello";
+    int32_t index = 2;
+    int32_t allowInsertLength = 3;
+    richEditorPattern->textSelector_.baseOffset = 1;
+    richEditorPattern->textSelector_.destinationOffset = 1;
+    int32_t length =
+        richEditorPattern->CalculateTruncationLength(StringUtils::Str8ToStr16(insertValue), index, allowInsertLength);
+    EXPECT_EQ(length, 3);
+}
+
+/**
+ * @tc.name: AddSpan001
+ * @tc.desc: Test the function AddTextSpan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestFourNg, AddSpan001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->CreateNodePaintMethod();
+    struct UpdateSpanStyle typingStyle;
+    TextStyle textStyle(5);
+    richEditorPattern->SetTypingStyle(typingStyle, textStyle);
+    std::string insertValue = "hello";
+    RichEditorPattern::OperationRecord record;
+    richEditorPattern->InsertValueOperation(StringUtils::Str8ToStr16(insertValue), &record, OperationType::DEFAULT);
+    int32_t maxLength = 5;
+    richEditorPattern->SetMaxLength(maxLength);
+    richEditorPattern->AddImageSpan(IMAGE_SPAN_OPTIONS_1);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 5);
+
+    // 0: AddTextSpan
+    richEditorPattern->AddTextSpan(TEXT_SPAN_OPTIONS_1);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 5);
+
+    // 1: AddSymbolSpan
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 5);
+
+    // 2: AddPlaceholderSpan
+    richEditorPattern->AddPlaceholderSpan(BUILDER_NODE_1, {});
+    EXPECT_EQ(richEditorPattern->GetTextContentLength(), 5);
 }
 } // namespace OHOS::Ace::NG

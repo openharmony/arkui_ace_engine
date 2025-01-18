@@ -130,6 +130,11 @@ public:
         ViewAbstract::SetBackgroundImageRepeat(imageRepeat);
     }
 
+    void SetBackgroundImageSyncMode(bool syncMode) override
+    {
+        ViewAbstract::SetBackgroundImageSyncMode(syncMode);
+    }
+
     void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override
     {
         ViewAbstract::SetBackgroundImageSize(bgImgSize);
@@ -1348,6 +1353,8 @@ public:
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
     void ResetOnAccessibilityFocus() override;
+    void SetAccessibilityDefaultFocus() override;
+    void SetAccessibilityUseSamePage(bool isFullSilent) override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1505,6 +1512,16 @@ public:
         ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
     }
 
+    int32_t CancelDataLoading(const std::string& key) override
+    {
+        return ViewAbstract::CancelDataLoading(key);
+    }
+
+    void SetDisableDataPrefetch(bool disableDataPrefetch) override
+    {
+        return ViewAbstract::SetDisableDataPrefetch(disableDataPrefetch);
+    }
+
     void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) override
     {
         ViewAbstract::SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
@@ -1547,6 +1564,8 @@ public:
         FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);
     static void ResetOnAccessibilityFocus(FrameNode* frameNode);
     static void SetAccessibilityNextFocusId(FrameNode* frameNode, const std::string& nextFocusId);
+    static void SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus);
+    static void SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {

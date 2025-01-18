@@ -698,6 +698,13 @@ void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
     }
     TAG_LOGI(AceLogTag::ACE_DRAG, "TransDragWindowToDragFwk is %{public}d", isDragFwkShow_);
     ACE_SCOPED_TRACE("drag: set drag window visible by transfer");
+    if (draggedFrameNode_) {
+        auto gestureHub = draggedFrameNode_->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        auto dragEventActuator = gestureHub->GetDragEventActuator();
+        CHECK_NULL_VOID(dragEventActuator);
+        dragEventActuator->NotifyTransDragWindowToFwk();
+    }
     InteractionInterface::GetInstance()->SetDragWindowVisible(true);
     DragDropGlobalController::GetInstance().ResetDragDropInitiatingStatus();
     isDragFwkShow_ = true;
@@ -723,6 +730,7 @@ void DragDropManager::OnDragMoveOut(const DragPointerEvent& pointerEvent)
     SetIsWindowConsumed(false);
     UpdateVelocityTrackerPoint(point, false);
     UpdateDragListener(Point(-1, -1));
+    NotifyPullEventListener(pointerEvent);
     if (preTargetFrameNode_) {
         TAG_LOGI(AceLogTag::ACE_DRAG, "Leave the current window, windowId is %{public}d,"
             " pointerEventId is %{public}d. PreTargetFrameNode is %{public}s, depth is %{public}d.",
@@ -800,6 +808,7 @@ void DragDropManager::OnDragMove(const DragPointerEvent& pointerEvent, const std
     if (ReachMoveLimit(pointerEvent, point)) {
         return;
     }
+    NotifyPullEventListener(pointerEvent);
     preMovePoint_ = point;
     preTimeStamp_ = static_cast<uint64_t>(
         std::chrono::duration_cast<std::chrono::milliseconds>(pointerEvent.time.time_since_epoch()).count());
@@ -933,9 +942,15 @@ void DragDropManager::HandleOnDragEnd(const DragPointerEvent& pointerEvent, cons
     RequestDragSummaryInfoAndPrivilege();
     std::string udKey;
     InteractionInterface::GetInstance()->GetUdKey(udKey);
-    if (!CheckRemoteData(dragFrameNode, pointerEvent, udKey)) {
-        auto unifiedData = RequestUDMFDataWithUDKey(udKey);
-        DoDropAction(dragFrameNode, pointerEvent, unifiedData, udKey);
+    auto eventHub = dragFrameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    if (!eventHub->GetDisableDataPrefetch()) {
+        if (!CheckRemoteData(dragFrameNode, pointerEvent, udKey)) {
+            auto unifiedData = RequestUDMFDataWithUDKey(udKey);
+            DoDropAction(dragFrameNode, pointerEvent, unifiedData, udKey);
+        }
+    } else {
+        DoDropAction(dragFrameNode, pointerEvent, nullptr, udKey);
     }
 }
 
@@ -2412,6 +2427,32 @@ void DragDropManager::RegisterDragStatusListener(int32_t nodeId, const WeakPtr<F
     }
 }
 
+void DragDropManager::RegisterPullEventListener(
+    int32_t uniqueIdentify, std::function<void(const DragPointerEvent&)> callback)
+{
+    pullEventListener_[uniqueIdentify] = callback;
+}
+
+void DragDropManager::UnRegisterPullEventListener(int32_t uniqueIdentify)
+{
+    auto it = pullEventListener_.find(uniqueIdentify);
+    if (it != pullEventListener_.end()) {
+        pullEventListener_.erase(it);
+    }
+}
+
+void DragDropManager::NotifyPullEventListener(const DragPointerEvent& pointerEvent)
+{
+    if (pullEventListener_.empty()) {
+        return;
+    }
+    for (const auto& pair : pullEventListener_) {
+        if (pair.second) {
+            pair.second(pointerEvent);
+        }
+    }
+}
+
 bool DragDropManager::IsDraggingPressed(int32_t currentPointerId) const
 {
     if (currentPointerId_ == currentPointerId) {
@@ -2486,5 +2527,10 @@ bool DragDropManager::IsAnyDraggableHit(const RefPtr<PipelineBase>& pipeline, in
         }
     }
     return false;
+}
+
+int32_t DragDropManager::CancelUDMFDataLoading(const std::string& key)
+{
+    return UdmfClient::GetInstance()->Cancel(key);
 }
 } // namespace OHOS::Ace::NG

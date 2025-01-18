@@ -207,6 +207,7 @@ template("declarative_js_engine_ark") {
 
     sources = [
       "js_converter.cpp",
+      "jsi_container_app_bar_register.cpp",
       "jsi_container_modal_view_register.cpp",
       "jsi_declarative_engine.cpp",
       "jsi_declarative_group_js_bridge.cpp",
@@ -285,7 +286,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_scrollable_bridge.cpp",
       "nativeModule/arkts_native_scrollbar_bridge.cpp",
       "nativeModule/arkts_native_search_bridge.cpp",
-      "nativeModule/arkts_native_select_bridge.cpp",
       "nativeModule/arkts_native_shape_bridge.cpp",
       "nativeModule/arkts_native_slider_bridge.cpp",
       "nativeModule/arkts_native_span_bridge.cpp",
@@ -315,6 +315,7 @@ template("declarative_js_engine_ark") {
         "nativeModule/arkts_native_column_split_bridge.cpp",
         "nativeModule/arkts_native_folder_stack_bridge.cpp",
         "nativeModule/arkts_native_row_split_bridge.cpp",
+        "nativeModule/arkts_native_select_bridge.cpp",
         "nativeModule/arkts_native_side_bar_container_bridge.cpp",
         "nativeModule/arkts_native_stepper_item_bridge.cpp",
         "nativeModule/arkts_native_water_flow_bridge.cpp",

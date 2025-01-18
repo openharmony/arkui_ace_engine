@@ -1883,7 +1883,7 @@ void SubwindowOhos::ResizeWindowForFoldStatus(int32_t parentContainerId)
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SurfaceChanged(aceView, defaultDisplay->GetWidth(), defaultDisplay->GetHeight(), 0);
     };
-    if (parentContainerId > 0) {
+    if (parentContainerId > 0 && parentContainerId < MIN_PA_SERVICE_ID) {
         ResizeWindowForFoldStatus();
         return;
     }

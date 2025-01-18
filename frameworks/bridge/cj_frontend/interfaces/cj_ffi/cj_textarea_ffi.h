@@ -36,6 +36,9 @@ public:
     }
     void StopEditing();
     void SetTextSelection(int32_t selectionStart, int32_t selectionEnd, const std::optional<SelectionOptions>& options);
+    CJRectResult GetTextContentRect();
+    int32_t GetTextContentLinesNum();
+    CJCaretOffset GetCaretOffset();
 
 private:
     RefPtr<TextFieldControllerBase> controller_;
@@ -49,6 +52,9 @@ CJ_EXPORT void FfiOHOSAceFrameworkTextAreaControllerCaretPosition(int64_t selfID
 CJ_EXPORT void FfiOHOSAceFrameworkTextAreaControllerStopEditing(int64_t selfID);
 CJ_EXPORT void FfiOHOSAceFrameworkTextAreaControllerSetTextSelection(
     int64_t selfID, int32_t selectionStart, int32_t selectionEnd, int32_t option);
+CJ_EXPORT CJRectResult FfiOHOSAceFrameworkTextAreaControllerGetTextContentRect(int64_t id);
+CJ_EXPORT int32_t FfiOHOSAceFrameworkTextAreaControllerGetTextContentLineCount(int64_t id);
+CJ_EXPORT CJCaretOffset FfiOHOSAceFrameworkTextAreaControllerGetCaretOffset(int64_t id);
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_TEXTAREA_FFI_H

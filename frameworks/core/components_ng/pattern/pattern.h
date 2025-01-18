@@ -661,6 +661,8 @@ public:
         return host->GetThemeScopeId();
     }
 
+    virtual void OnFocusNodeChange(FocusReason focusReason) {}
+
 protected:
     virtual void OnAttachToFrameNode() {}
     virtual void OnDetachFromFrameNode(FrameNode* frameNode) {}

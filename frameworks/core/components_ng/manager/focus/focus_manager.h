@@ -19,6 +19,7 @@
 #include <list>
 #include <optional>
 
+#include "base/error/error_code.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/manager/focus/focus_view.h"
@@ -30,7 +31,8 @@ class PipelineContext;
 using FocusViewMap = std::unordered_map<int32_t, std::pair<WeakPtr<FocusView>, std::list<WeakPtr<FocusView>>>>;
 using RequestFocusCallback = std::function<void(NG::RequestFocusResult result)>;
 using FocusHubScopeMap = std::unordered_map<std::string, std::pair<WeakPtr<FocusHub>, std::list<WeakPtr<FocusHub>>>>;
-using FocusChangeCallback = std::function<void(const WeakPtr<FocusHub>& last, const RefPtr<FocusHub>& current)>;
+using FocusChangeCallback = std::function<void(const WeakPtr<FocusHub>& last,
+    const RefPtr<FocusHub>& current, FocusReason focusReason)>;
 using FocusActiveChangeCallback = std::function<void(bool isFocusActive)>;
 
 enum class FocusActiveReason : int32_t {
@@ -100,6 +102,21 @@ public:
         }
     }
 
+    void SetRequestFocusResult(const int32_t requestFocusResult)
+    {
+        requestFocusResult_ = requestFocusResult;
+    }
+
+    int32_t GetRequestFocusResult()
+    {
+        return requestFocusResult_;
+    }
+
+    void ResetRequestFocusResult()
+    {
+        requestFocusResult_ = ERROR_CODE_NO_ERROR;
+    }
+
     void SetLastFocusStateNode(const RefPtr<FocusHub>& node)
     {
         lastFocusStateNode_ = AceType::WeakClaim(AceType::RawPtr(node));
@@ -167,12 +184,27 @@ public:
     void WindowFocusMoveStart();
     void WindowFocusMoveEnd();
     void WindowFocus(bool isFocus);
+    std::optional<FocusEvent> GetCurrentFocusEvent()
+    {
+        return currentFocusEvent_;
+    }
+
+    void SetCurrentFocusEvent(const FocusEvent& event)
+    {
+        currentFocusEvent_.reset();
+        currentFocusEvent_.emplace(event);
+    }
+
+    void ResetCurrentFocusEvent()
+    {
+        currentFocusEvent_.reset();
+    }
 
     static RefPtr<FocusManager> GetFocusManager(RefPtr<FrameNode>& node);
 
 private:
     void GetFocusViewMap(FocusViewMap& focusViewMap);
-    void ReportFocusSwitching();
+    void ReportFocusSwitching(FocusReason focusReason);
 
     std::list<WeakPtr<FocusView>> focusViewStack_;
     WeakPtr<FocusView> lastFocusView_;
@@ -204,6 +236,8 @@ private:
     bool isAutoFocusTransfer_ = true;
     FocusViewStackState focusViewStackState_ = FocusViewStackState::IDLE;
 
+    int32_t requestFocusResult_ = ERROR_CODE_NO_ERROR;
+    std::optional<FocusEvent> currentFocusEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(FocusManager);
 };
 } // namespace OHOS::Ace::NG

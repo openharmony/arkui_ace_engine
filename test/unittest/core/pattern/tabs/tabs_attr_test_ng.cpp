@@ -853,6 +853,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetAnimationDuration001, TestSize.Level1)
     }
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    EXPECT_TRUE(frameNode_);
 }
 
 /**
@@ -903,6 +904,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetScrollable001, TestSize.Level1)
     model.SetScrollable(false);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    ASSERT_NE(frameNode_, nullptr);
 }
 
 /**
@@ -917,6 +919,7 @@ HWTEST_F(TabsAttrTestNg, TabsModelSetClipEdge001, TestSize.Level1)
     model.SetClipEdge(false);
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
+    ASSERT_NE(frameNode_, nullptr);
 }
 
 /**
@@ -1262,8 +1265,8 @@ HWTEST_F(TabsAttrTestNg, TabsModelPop001, TestSize.Level1)
     CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
     CreateTabsDone(model);
     tabBarNode_->eventHub_ = AceType::MakeRefPtr<EventHub>();
-    tabBarNode_->eventHub_->focusHub_ = AceType::MakeRefPtr<FocusHub>(tabBarNode_->eventHub_);
-    ASSERT_NE(tabBarNode_->eventHub_->focusHub_, nullptr);
+    tabBarNode_->focusHub_ = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(tabBarNode_)));
+    ASSERT_NE(tabBarNode_->focusHub_, nullptr);
     tabBarPattern_->OnModifyDone();
     tabBarPattern_->swiperController_->removeTabBarEventCallback_();
     tabBarPattern_->swiperController_->addTabBarEventCallback_();
@@ -1286,6 +1289,7 @@ HWTEST_F(TabsAttrTestNg, TabContentModelCreate002, TestSize.Level1)
     TabsModelNG Mode1NG;
     Mode1NG.Create(BarPosition::END, 0, nullptr, nullptr);
     tabContentPattern->shallowBuilder_->deepRenderFunc_();
+    EXPECT_FALSE(frameNode_);
 }
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -51,7 +51,7 @@ public:
             return theme;
         }
 
-    private:
+    protected:
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<SearchTheme>& theme) const
         {
             if (!theme) {
@@ -315,11 +315,16 @@ public:
 
 protected:
     SearchTheme() = default;
+    TextStyle textStyle_;
+    Color textColor_;
+    Color placeholderColor_;
+    Color searchIconColor_;
+    Color searchButtonTextColor_;
+    Color symbolIconColor_;
+    Color focusIconColor_;
 
 private:
-    Color placeholderColor_;
     Color focusPlaceholderColor_;
-    Color textColor_;
     Color focusTextColor_;
     Color touchColor_;
     Color hoverColor_;
@@ -342,19 +347,14 @@ private:
     Dimension searchIconLeftSpace_;
     Dimension searchIconRightSpace_;
     Color searchDividerColor_;
-    Color searchButtonTextColor_;
-    Color searchIconColor_;
     CancelButtonStyle cancelButtonStyle_ = CancelButtonStyle::INPUT;
-    TextStyle textStyle_;
     uint32_t searchSymbolId_ = 0;
     uint32_t cancelSymbolId_ = 0;
-    Color symbolIconColor_;
     Dimension symbolIconHeight_;
     Dimension rightPaddingWithoutButton_;
     Color borderColor_;
     Dimension borderWidth_;
     Color focusBgColor_;
-    Color focusIconColor_;
     bool needFocusBox_ = false;
     Dimension searchFocusPadding_;
 };

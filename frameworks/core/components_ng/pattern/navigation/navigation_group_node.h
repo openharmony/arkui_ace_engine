@@ -159,9 +159,9 @@ public:
     void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     virtual void CreateAnimationWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
-        const AnimationFinishCallback finishCallback);
+        const AnimationFinishCallback finishCallback, bool isNavBar = false);
     virtual void CreateAnimationWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode,
-        const AnimationFinishCallback finishCallback);
+        const AnimationFinishCallback finishCallback, bool isNavBar = false);
 
     std::shared_ptr<AnimationUtils::Animation> BackButtonAnimation(
         const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
@@ -320,6 +320,7 @@ private:
     bool FindNavigationParent(const std::string& parentName);
     void DealRemoveDestination(const RefPtr<NavDestinationGroupNode>& destination);
     RefPtr<FrameNode> TransitionAnimationIsValid(const RefPtr<FrameNode>& node, bool isNavBar);
+    bool CheckNeedUpdateParentNode(const RefPtr<UINode>& node);
 
     RefPtr<UINode> navBarNode_;
     RefPtr<UINode> contentNode_;

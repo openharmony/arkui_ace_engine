@@ -1048,6 +1048,7 @@ void WebDelegate::SetPopupSurface(const RefPtr<NG::RenderSurface>& popupSurface)
 #endif
 void WebDelegate::OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling) {}
 void WebDelegate::OnScrollState(bool scrollState) {}
+void WebDelegate::OnScrollStart(const float x, const float y) {}
 void WebDelegate::OnRootLayerChanged(int width, int height) {}
 bool WebDelegate::FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity)
 {
@@ -1071,8 +1072,14 @@ void WebDelegate::SetJavaScriptItemsByOrder(
     const ScriptItemsByOrder& scriptItemsByOrder) {}
 void WebDelegate::JavaScriptOnDocumentStartByOrder() {}
 void WebDelegate::JavaScriptOnDocumentEndByOrder() {}
+void WebDelegate::JavaScriptOnHeadReadyByOrder() {}
 bool WebDelegate::ExecuteAction(
     int64_t accessibilityId, AceAction action, const std::map<std::string, std::string>& actionArguments)
+{
+    return false;
+}
+bool WebDelegate::GetAccessibilityNodeRectById(
+    int64_t accessibilityId, int32_t* width, int32_t* height, int32_t* offsetX, int32_t* offsetY)
 {
     return false;
 }
@@ -1147,6 +1154,10 @@ Offset WebDelegate::GetPosition(const std::string& embedId)
 void WebDelegate::OnShowAutofillPopup(
     const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
 {}
+void WebDelegate::OnShowAutofillPopupV2(
+    const float offsetX, const float offsetY, const float height, const float width,
+    const std::vector<std::string>& menu_items)
+{}
 void WebDelegate::SuggestionSelected(int32_t index) {}
 void WebDelegate::OnHideAutofillPopup() {}
 void WebDelegate::OnAreaChange(const OHOS::Ace::Rect& area) {}
@@ -1201,4 +1212,5 @@ bool WebDelegate::IsActivePolicyDisable()
 }
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
 void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}
+void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled) {}
 } // namespace OHOS::Ace

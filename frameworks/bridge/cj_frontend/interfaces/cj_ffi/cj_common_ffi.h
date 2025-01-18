@@ -88,6 +88,16 @@ struct NativeOptionCallBack {
     void (*value)();
 };
 
+struct NativeOptionCallback1Param {
+    bool hasValue;
+    void (*value)(int32_t reason);
+};
+
+struct NativeOptionCallback1FloatParam {
+    bool hasValue;
+    void (*value)(float reason);
+};
+
 struct NativeOptionBool {
     bool hasValue;
     bool value;
@@ -118,6 +128,22 @@ struct CJRectResult {
     double y;
     double width;
     double height;
+};
+
+struct CJTouchTestInfo {
+    float windowX;
+    float windowY;
+    float parentX;
+    float parentY;
+    float x;
+    float y;
+    CJRectResult rect;
+    ExternalString id;
+};
+
+struct CJTouchResult {
+    int32_t strategy;
+    ExternalString id;
 };
 
 struct CJTouchInfo {
@@ -242,11 +268,21 @@ struct CJGestureEvent {
     double velocityY;
     double velocity;
     double pressure;
+    float axisHorizontal;
+    float axisVertical;
+    int64_t deviceId;
+    const OHOS::Ace::BaseEventInfo* baseEventInfoPtr;
 };
 
 struct CJDragInfo {
     const char* extraParams;
     CJPosition* position;
+};
+
+struct CJDragEvent {
+    void* evtPtr;
+    bool useCustomDropAnimation;
+    int32_t dragBehavior;
 };
 
 struct CJDragItemInfo {
@@ -263,6 +299,9 @@ struct CJBaseEvent {
     int64_t tiltX;
     int64_t tiltY;
     int32_t sourceTool;
+    float* axisHorizontal;
+    float* axisVertical;
+    int64_t deviceId;
 };
 
 struct AtCPackage;

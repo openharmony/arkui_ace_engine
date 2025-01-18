@@ -213,6 +213,7 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest003, TestSize.Level1)
     ViewAbstract::SetLayoutDirection(direction);
     ViewAbstract::SetLayoutDirection(AceType::RawPtr(FRAME_NODE_REGISTER), direction);
     ViewAbstract::GetAlignRules(AceType::RawPtr(FRAME_NODE_REGISTER));
+    ViewAbstract::SetBackgroundImageSyncMode(true);
 
     /**
      * @tc.expected: Return expected results..
@@ -561,8 +562,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest010, TestSize.Level1)
     ViewAbstract::SetOnBlur(callback);
     ViewAbstract::SetFlexBasis(VALUE);
 
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
     ViewAbstract::SetVisibility(VisibleType::VISIBLE);

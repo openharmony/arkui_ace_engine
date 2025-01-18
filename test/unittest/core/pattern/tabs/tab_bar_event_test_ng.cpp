@@ -26,6 +26,8 @@ class TabBarEventTestNg : public TabsTestNg {
 public:
     void LongPress(Offset location);
     void DragTo(Offset location);
+    AssertionResult IsEqualNextFocusNode(
+        FocusStep step, const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode);
 };
 
 void TabBarEventTestNg::LongPress(Offset location)
@@ -42,6 +44,31 @@ void TabBarEventTestNg::DragTo(Offset location)
     GestureEvent info;
     info.SetLocalLocation(location);
     dragUpdate(info);
+}
+
+AssertionResult TabBarEventTestNg::IsEqualNextFocusNode(
+    FocusStep step, const RefPtr<FrameNode>& currentNode, const RefPtr<FrameNode>& expectNextNode)
+{
+    RefPtr<FocusHub> currentFocusHub;
+    if (currentNode) {
+        currentFocusHub = currentNode->GetOrCreateFocusHub();
+    }
+    RefPtr<FocusHub> expectNextFocusHub;
+    if (expectNextNode) {
+        expectNextFocusHub = expectNextNode->GetOrCreateFocusHub();
+    }
+    auto scopeFocusAlgorithm = tabBarPattern_->GetScopeFocusAlgorithm();
+    auto getNextFocusNode = scopeFocusAlgorithm.getNextFocusNode;
+    WeakPtr<FocusHub> weakNextFocusHub;
+    getNextFocusNode(step, currentFocusHub, weakNextFocusHub);
+    RefPtr<FocusHub> nextFocusHub = weakNextFocusHub.Upgrade();
+    if (expectNextFocusHub == nullptr && nextFocusHub != nullptr) {
+        return AssertionFailure() << "Next focusNode is not null";
+    }
+    if (expectNextFocusHub != nullptr && nextFocusHub != expectNextFocusHub) {
+        return AssertionFailure() << "Next focusNode is not as expected";
+    }
+    return AssertionSuccess();
 }
 
 /**
@@ -288,6 +315,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick001, TestSize.Le
      * @tc.expected: Related function runs ok.
      */
     tabBarPattern_->HandleBottomTabBarClick(selectedIndex, unselectedIndex);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -312,6 +340,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick002, TestSize.Le
      * @tc.expected: Related function runs ok.
      */
     tabBarPattern_->HandleBottomTabBarClick(selectedIndex, unselectedIndex);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -335,6 +364,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick003, TestSize.Le
      * @tc.expected: Related function runs ok.
      */
     tabBarPattern_->HandleBottomTabBarClick(selectedIndex, unselectedIndex);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -358,6 +388,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick004, TestSize.Le
      * @tc.expected: Related function runs ok.
      */
     tabBarPattern_->HandleBottomTabBarClick(selectedIndex, unselectedIndex);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -380,6 +411,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleBottomTabBarClick005, TestSize.Le
      * @tc.expected: Related function runs ok.
      */
     tabBarPattern_->HandleBottomTabBarClick(selectedIndex, unselectedIndex);
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -425,6 +457,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleSubTabBarClick002, TestSize.Level
         tabBarPattern_->HandleSubTabBarClick(tabBarLayoutProperty_, index);
         tabBarLayoutProperty_->UpdateTabBarMode(TabBarMode::FIXED);
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -450,6 +483,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchDown001, TestSize.Level1)
         tabBarPattern_->HandleTouchDown(index);
         tabBarPattern_->swiperController_->SetRemoveSwiperEventCallback([]() {});
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -476,6 +510,7 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternHandleTouchUp001, TestSize.Level1)
         tabBarPattern_->HandleTouchUp(index);
         tabBarPattern_->swiperController_->SetAddSwiperEventCallback([]() {});
     }
+    EXPECT_TRUE(tabBarPattern_);
 }
 
 /**
@@ -1035,32 +1070,314 @@ HWTEST_F(TabBarEventTestNg, TabBarPatternCanScroll001, TestSize.Level1)
 }
 
 /**
- * @tc.name: TabBarPatternOnKeyEvent001
- * @tc.desc: test OnKeyEvent
+ * @tc.name: TabBarFocusTest001
+ * @tc.desc: test onGetNextFocusNodeFunc_
  * @tc.type: FUNC
  */
-HWTEST_F(TabBarEventTestNg, TabBarPatternOnKeyEvent001, TestSize.Level1)
+HWTEST_F(TabBarEventTestNg, TabBarFocusTest001, TestSize.Level1)
 {
-    TabsModelNG model = CreateTabs(BarPosition::END);
+    TabsModelNG model = CreateTabs();
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step2. Call onGetNextFocusNodeFunc_ use FocusReason::DEFAULT
+     * @tc.expected: expect The function is run ok.
+     */
+    EXPECT_EQ(tabBarPattern_->tabBarStyle_, TabBarStyle::SUBTABBATSTYLE);
+    auto tabBarFocusHub = tabBarNode_->GetFocusHub();
+    auto nextFocusHub = tabBarFocusHub->onGetNextFocusNodeFunc_(FocusReason::DEFAULT, FocusIntension::TAB);
+    EXPECT_EQ(nextFocusHub, nullptr);
+
+    /**
+     * @tc.steps: step3. Call onGetNextFocusNodeFunc_ use FocusReason::FOCUS_TRAVEL
+     * @tc.expected: expect The function is run ok.
+     */
+    auto childNode0 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    auto childFocusHub0 = childNode0->GetOrCreateFocusHub();
+    nextFocusHub = tabBarFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::TAB);
+    EXPECT_EQ(nextFocusHub, childFocusHub0);
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 0);
+
+    /**
+     * @tc.steps: step3. Swipe to page 1, then call onGetNextFocusNodeFunc_ use FocusReason::FOCUS_TRAVEL
+     * @tc.expected: expect The function is run ok.
+     */
+    SwipeToWithoutAnimation(1);
+    auto childNode1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+    auto childFocusHub1 = childNode1->GetOrCreateFocusHub();
+    nextFocusHub = tabBarFocusHub->onGetNextFocusNodeFunc_(FocusReason::FOCUS_TRAVEL, FocusIntension::TAB);
+    EXPECT_EQ(nextFocusHub, childFocusHub1);
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 1);
+}
+
+/**
+ * @tc.name: TabBarFocusTest002
+ * @tc.desc: test scopeFocusAlgorithm.getNextFocusNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarFocusTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. vertical is false, tabBarStyle is BOTTOMTABBATSTYLE
+     */
+    TabsModelNG model = CreateTabs();
+    model.SetIsVertical(false);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
+    auto childNode0 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    auto childNode1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+
+    /**
+     * @tc.steps: step2. Set isFocusActive_ to false, call scopeFocusAlgorithm.getNextFocusNode
+     * @tc.expected: expect The function is run ok.
+     */
+    auto pipeline = frameNode_->GetContext();
+    pipeline->isFocusActive_ = false;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode0, nullptr));
+
+    /**
+     * @tc.steps: step3. Set isFocusActive_ to true, call scopeFocusAlgorithm.getNextFocusNode use different FocusStep
+     * @tc.expected: expect The function is run ok.
+     */
+    pipeline->isFocusActive_ = true;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode0, childNode1));
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 1);
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode1, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, childNode1, childNode0));
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 0);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, childNode0, nullptr));
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, childNode0, childNode1));
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 1);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, childNode1, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, childNode1, childNode0));
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 0);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, childNode0, childNode1));
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 1);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, childNode1, childNode0));
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 0);
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, childNode0, nullptr));
+
+    /**
+     * @tc.steps: step3. Set isRTL_ to true, call scopeFocusAlgorithm.getNextFocusNode use different FocusStep
+     * @tc.expected: expect The function is run ok.
+     */
+    tabBarPattern_->isRTL_ = true;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, childNode0, childNode1));
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 1);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, childNode1, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, childNode1, childNode0));
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 0);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, childNode0, nullptr));
+}
+
+/**
+ * @tc.name: TabBarFocusTest003
+ * @tc.desc: test scopeFocusAlgorithm.getNextFocusNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarFocusTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. vertical is true, tabBarStyle is BOTTOMTABBATSTYLE
+     */
+    TabsModelNG model = CreateTabs();
+    model.SetIsVertical(true);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    CreateTabsDone(model);
+    auto childNode0 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    auto childNode1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+
+    /**
+     * @tc.steps: step2. Call scopeFocusAlgorithm.getNextFocusNode use different FocusStep
+     * @tc.expected: expect The function is run ok.
+     */
+    auto pipeline = frameNode_->GetContext();
+    pipeline->isFocusActive_ = true;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode0, childNode1));
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 1);
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode1, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, childNode1, childNode0));
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 0);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, childNode0, nullptr));
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, childNode0, childNode1));
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 1);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, childNode1, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, childNode1, childNode0));
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 0);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, childNode0, childNode1));
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 1);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, childNode1, childNode0));
+    EXPECT_EQ(tabBarPattern_->focusIndicator_, 0);
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, childNode0, nullptr));
+}
+
+/**
+ * @tc.name: TabBarFocusTest004
+ * @tc.desc: test scopeFocusAlgorithm.getNextFocusNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarFocusTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. vertical is false, tabBarStyle is NOSTYLE
+     */
+    TabsModelNG model = CreateTabs();
+    model.SetIsVertical(false);
     CreateTabContentTabBarStyle(TabBarStyle::NOSTYLE);
     CreateTabContentTabBarStyle(TabBarStyle::NOSTYLE);
     CreateTabsDone(model);
+    auto childNode0 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    auto childNode1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+
+    /**
+     * @tc.steps: step2. Call scopeFocusAlgorithm.getNextFocusNode use different FocusStep
+     * @tc.expected: expect The function is run ok.
+     */
     auto pipeline = frameNode_->GetContext();
     pipeline->isFocusActive_ = true;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode0, childNode1));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 1);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode1, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, childNode1, childNode0));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, childNode0, nullptr));
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, childNode0, childNode1));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 1);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, childNode1, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, childNode1, childNode0));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, childNode0, childNode1));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 1);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, childNode1, childNode0));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, childNode0, nullptr));
+
     /**
-     * @tc.steps: step1. call OnKeyEvent use Axis::HORIZONTAL and KeyCode::KEY_TAB and isCustomAnimation_ is true
+     * @tc.steps: step3. Set isRTL_ to true, call scopeFocusAlgorithm.getNextFocusNode use different FocusStep
+     * @tc.expected: expect The function is run ok.
      */
-    tabBarLayoutProperty_->UpdateAxis(Axis::HORIZONTAL);
-    KeyEvent event;
-    event.action = KeyAction::DOWN;
-    event.code = KeyCode::KEY_TAB;
+    tabBarPattern_->isRTL_ = true;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, childNode0, childNode1));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 1);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, childNode1, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, childNode1, childNode0));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, childNode0, nullptr));
+
+    /**
+     * @tc.steps: step4. Set isCustomAnimation_ to true, call scopeFocusAlgorithm.getNextFocusNode
+     * @tc.expected: expect The function is run ok.
+     */
     pattern_->isCustomAnimation_ = true;
-    EXPECT_TRUE(tabBarPattern_->OnKeyEvent(event));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode0, childNode1));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 1);
     EXPECT_EQ(swiperPattern_->customAnimationToIndex_, 1);
+}
+
+/**
+ * @tc.name: TabBarFocusTest005
+ * @tc.desc: test scopeFocusAlgorithm.getNextFocusNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarFocusTest005, TestSize.Level1)
+{
     /**
-     * @tc.steps: step2. call OnKeyEvent use other code
+     * @tc.steps: step1. vertical is true, tabBarStyle is NOSTYLE
      */
-    event.code = KeyCode::KEY_9;
-    EXPECT_FALSE(tabBarPattern_->OnKeyEvent(event));
+    TabsModelNG model = CreateTabs();
+    model.SetIsVertical(true);
+    CreateTabContentTabBarStyle(TabBarStyle::NOSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::NOSTYLE);
+    CreateTabsDone(model);
+    auto childNode0 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    auto childNode1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+
+    /**
+     * @tc.steps: step2. Call scopeFocusAlgorithm.getNextFocusNode use different FocusStep
+     * @tc.expected: expect The function is run ok.
+     */
+    auto pipeline = frameNode_->GetContext();
+    pipeline->isFocusActive_ = true;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode0, childNode1));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 1);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode1, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, childNode1, childNode0));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::SHIFT_TAB, childNode0, nullptr));
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, childNode0, childNode1));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 1);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN, childNode1, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, childNode1, childNode0));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::DOWN_END, childNode0, childNode1));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 1);
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::UP_END, childNode1, childNode0));
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
+
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::LEFT_END, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::RIGHT_END, childNode0, nullptr));
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::NONE, childNode0, nullptr));
+}
+
+/**
+ * @tc.name: TabBarFocusTest006
+ * @tc.desc: test scopeFocusAlgorithm.getNextFocusNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabBarEventTestNg, TabBarFocusTest006, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    bool isTrigger = false;
+    auto event = [&isTrigger](int32_t, int32_t) {
+        isTrigger = true;
+        return false;
+    };
+    model.SetOnContentWillChange(event);
+    CreateTabContentTabBarStyle(TabBarStyle::NOSTYLE);
+    CreateTabContentTabBarStyle(TabBarStyle::NOSTYLE);
+    CreateTabsDone(model);
+    auto childNode0 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
+    auto childNode1 = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(1));
+
+    /**
+     * @tc.steps: step2. Call scopeFocusAlgorithm.getNextFocusNode use FocusStep::TAB and isCustomAnimation_ is true
+     * @tc.expected: expect The function is run ok.
+     */
+    auto pipeline = frameNode_->GetContext();
+    pipeline->isFocusActive_ = true;
+    EXPECT_TRUE(IsEqualNextFocusNode(FocusStep::TAB, childNode0, childNode0));
+    EXPECT_TRUE(isTrigger);
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(0), 0);
 }
 } // namespace OHOS::Ace::NG

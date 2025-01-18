@@ -219,14 +219,25 @@ enum class NavigationOperation {
 };
 
 enum NavDestinationLifecycle {
-    ON_WILL_APPEAR,
+    ON_WILL_APPEAR = 0,
     ON_APPEAR,
     ON_WILL_SHOW,
     ON_SHOW,
+    ON_ACTIVE,
     ON_WILL_HIDE,
+    ON_INACTIVE,
     ON_HIDE,
     ON_WILL_DISAPPEAR,
     ON_DISAPPEAR
+};
+
+enum class NavDestinationActiveReason {
+    TRANSITION = 0,
+    CONTENT_COVER,
+    SHEET,
+    DIALOG,
+    OVERLAY,
+    APP_STATE_CHANGE
 };
 
 enum class NavigationSystemTransitionType {

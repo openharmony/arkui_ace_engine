@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -246,6 +247,16 @@ void ViewAbstract::SetBackgroundImageRepeat(const ImageRepeat& imageRepeat)
 void ViewAbstract::SetBackgroundImageRepeat(FrameNode* frameNode, const ImageRepeat& imageRepeat)
 {
     ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageRepeat, imageRepeat, frameNode);
+}
+
+void ViewAbstract::SetBackgroundImageSyncMode(bool syncMode)
+{
+    ACE_UPDATE_RENDER_CONTEXT(BackgroundImageSyncMode, syncMode);
+}
+
+void ViewAbstract::SetBackgroundImageSyncMode(FrameNode* frameNode, bool syncMode)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundImageSyncMode, syncMode, frameNode);
 }
 
 void ViewAbstract::SetBackgroundImageSize(const BackgroundImageSize& bgImgSize)
@@ -2210,21 +2221,25 @@ void ViewAbstract::DismissDialog()
     CHECK_NULL_VOID(overlayManager);
     auto rootNode = overlayManager->GetRootNode().Upgrade();
     CHECK_NULL_VOID(rootNode);
-    RefPtr<FrameNode> overlay;
-    if (overlayManager->GetDismissDialogId()) {
-        overlay = overlayManager->GetDialog(overlayManager->GetDismissDialogId());
-    } else {
-        overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
+    RefPtr<FrameNode> dialogNode;
+    auto dialogId = DialogManager::GetInstance().GetDismissDialogId();
+    auto dialogTag = DialogManager::GetInstance().GetDialogTag();
+    if (dialogId && !dialogTag.empty()) {
+        dialogNode = FrameNode::GetFrameNode(dialogTag, dialogId);
     }
-    CHECK_NULL_VOID(overlay);
-    auto pattern = overlay->GetPattern();
+    if (!dialogNode) {
+        if (overlayManager->GetDismissDialogId()) {
+            dialogNode = overlayManager->GetDialog(overlayManager->GetDismissDialogId());
+        } else {
+            dialogNode = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
+        }
+    }
+    CHECK_NULL_VOID(dialogNode);
+    auto pattern = dialogNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
     if (dialogPattern) {
-        overlayManager->RemoveDialog(overlay, false);
-        if (overlayManager->isMaskNode(dialogPattern->GetHost()->GetId())) {
-            overlayManager->PopModalDialog(dialogPattern->GetHost()->GetId());
-        }
+        dialogPattern->OverlayDismissDialog(dialogNode);
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "destroy");
 #endif
@@ -4338,6 +4353,57 @@ bool ViewAbstract::GetNeedFocus(FrameNode* frameNode)
     return focusHub->IsCurrentFocus();
 }
 
+int ViewAbstract::RequestFocus(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, ERROR_CODE_NON_EXIST);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_RETURN(context, ERROR_CODE_NON_EXIST);
+    auto instanceId = context->GetInstanceId();
+    ContainerScope scope(instanceId);
+    auto focusManager = context->GetOrCreateFocusManager();
+    focusManager->ResetRequestFocusResult();
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    // check node focusable
+    if (focusHub->IsSyncRequestFocusable()) {
+        focusHub->RequestFocusImmediately();
+    }
+    auto retCode = focusManager->GetRequestFocusResult();
+    focusManager->ResetRequestFocusResult();
+    return retCode;
+}
+
+void ViewAbstract::ClearFocus(int32_t instanceId)
+{
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "Can't find attachedContext, please check the timing of the function call.");
+        return;
+    }
+    FocusHub::LostFocusToViewRoot();
+}
+
+void ViewAbstract::FocusActivate(int32_t instanceId, bool isActive, bool isAutoInactive)
+{
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "Can't find attachedContext, please check the timing of the function call.");
+        return;
+    }
+    context->SetIsFocusActive(isActive, NG::FocusActiveReason::USE_API, isAutoInactive);
+}
+
+void ViewAbstract::SetAutoFocusTransfer(int32_t instanceId, bool isAutoFocusTransfer)
+{
+    auto context = PipelineContext::GetContextByContainerId(instanceId);
+    if (!context) {
+        TAG_LOGW(AceLogTag::ACE_FOCUS, "Can't find attachedContext, please check the timing of the function call.");
+        return;
+    }
+    auto focusManager = context->GetOrCreateFocusManager();
+    CHECK_NULL_VOID(focusManager);
+    focusManager->SetIsAutoFocusTransfer(isAutoFocusTransfer);
+}
+
 double ViewAbstract::GetOpacity(FrameNode* frameNode)
 {
     double opacity = 1.0f;
@@ -5489,4 +5555,28 @@ void ViewAbstract::RemoveCustomProperty(UINode* frameNode, const std::string& ke
     frameNode->RemoveCustomProperty(key);
 }
 
+int32_t ViewAbstract::CancelDataLoading(const std::string& key)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, -1);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, -1);
+    return dragDropManager->CancelUDMFDataLoading(key);
+}
+
+void ViewAbstract::SetDisableDataPrefetch(bool disableDataPrefetch)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDisableDataPrefetch(disableDataPrefetch);
+}
+
+void ViewAbstract::SetDisableDataPrefetch(FrameNode* frameNode, bool disableDataPrefetch)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetDisableDataPrefetch(disableDataPrefetch);
+}
 } // namespace OHOS::Ace::NG

@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 
 namespace OHOS::Ace::NG {
@@ -181,8 +182,7 @@ void CreateTitleNode(const std::string& title, RefPtr<FrameNode>& column)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    auto padding = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
-                   static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    auto padding = static_cast<float>(theme->GetMenuItemHorIntervalPadding().ConvertToPx());
     PaddingProperty textPadding;
     textPadding.left = CalcLength(padding);
     textPadding.right = CalcLength(padding);
@@ -218,7 +218,7 @@ RefPtr<FrameNode> CreateMenuScroll(const RefPtr<UINode>& node)
     auto theme = pipeline->GetTheme<SelectTheme>();
     float contentPadding = 0.0f;
     if (theme) {
-        contentPadding = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+        contentPadding = static_cast<float>(theme->GetMenuPadding().ConvertToPx());
     }
     PaddingProperty padding;
     padding.left = padding.right = padding.top = padding.bottom = CalcLength(contentPadding);
@@ -278,7 +278,7 @@ bool GetHasSymbol(const std::vector<OptionParam>& params)
 
 OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
 {
-    auto offsetToWindow = frameNode->GetPaintRectOffset();
+    auto offsetToWindow = frameNode->GetPaintRectOffset(false, true);
     auto offsetX = offsetToWindow.GetX();
     auto offsetY = offsetToWindow.GetY();
     return OffsetF(offsetX, offsetY);
@@ -609,16 +609,7 @@ void InitPanEvent(const RefPtr<GestureEventHub>& targetGestureHub, const RefPtr<
     auto touchTask = [actuator = AceType::WeakClaim(AceType::RawPtr(dragEventActuator))](const TouchEventInfo& info) {
         auto dragEventActuator = actuator.Upgrade();
         CHECK_NULL_VOID(dragEventActuator);
-        if (info.GetTouches().empty()) {
-            return;
-        }
-        auto touchPoint = Point(
-            info.GetTouches().front().GetGlobalLocation().GetX(), info.GetTouches().front().GetGlobalLocation().GetY());
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
-            dragEventActuator->SetDragDampStartPointInfo(touchPoint, info.GetTouches().front().GetFingerId());
-        } else if (info.GetTouches().front().GetTouchType() == TouchType::MOVE) {
-            dragEventActuator->HandleDragDampingMove(touchPoint, info.GetTouches().front().GetFingerId(), true);
-        }
+        dragEventActuator->HandleTouchEvent(info, true);
     };
     auto touchListener = AceType::MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddTouchEvent(touchListener);
@@ -1006,48 +997,10 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     }
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
     SetMenuFocusRule(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(menuPattern, nullptr);
-    bool optionsHasIcon = GetHasIcon(params);
-    bool optionsHasSymbol = GetHasSymbol(params);
-    RefPtr<FrameNode> optionNode = nullptr;
-    // append options to menu
-    for (size_t i = 0; i < params.size(); ++i) {
-        if (params[i].symbol != nullptr) {
-            optionNode = CreateMenuOption(optionsHasSymbol, params, i);
-        } else {
-            optionNode = CreateMenuOption(
-                optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
-            if (optionNode) {
-                auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
-                optionPattern->SetBlockClick(params[i].disableSystemClick);
-            }
-        }
-        if (!optionNode) {
-            continue;
-        }
-        NeedAgingUpdateNode(optionNode);
-        menuPattern->AddOptionNode(optionNode);
-        auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
-        auto eventHub = optionNode->GetEventHub<EventHub>();
-        CHECK_NULL_RETURN(eventHub, nullptr);
-        eventHub->SetEnabled(params[i].enabled);
-        auto focusHub = optionNode->GetFocusHub();
-        CHECK_NULL_RETURN(focusHub, nullptr);
-        focusHub->SetEnabled(params[i].enabled);
-
-        OptionKeepMenu(optionNode, menuWeak);
-        // first node never paints divider
-        auto props = optionNode->GetPaintProperty<MenuItemPaintProperty>();
-        if (i == 0 && menuParam.title.empty()) {
-            props->UpdateNeedDivider(false);
-        }
-        if (optionsHasIcon) {
-            props->UpdateHasIcon(true);
-        }
-        optionNode->MountToParent(column);
-        optionNode->MarkModifyDone();
-    }
+    MountOptionToColumn(params, menuNode, menuParam, column);
+    auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
+    menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && !menuParam.enableArrow.value_or(false)) {
         UpdateMenuBorderEffect(menuNode);
     }
@@ -1162,11 +1115,9 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
     auto menuWrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_RETURN(menuWrapperPattern, nullptr);
     menuWrapperPattern->SetMenuParam(menuParam);
+    menuWrapperPattern->SetHoverMode(menuParam.enableHoverMode);
 
     CustomPreviewNodeProc(previewNode, menuParam, previewCustomNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_RETURN(menuPattern, nullptr);
-    menuPattern->SetHoverMode(menuParam.enableHoverMode);
     UpdateMenuBackgroundStyle(menuNode, menuParam);
     SetPreviewTransitionEffect(wrapperNode, menuParam);
     SetHasCustomRadius(wrapperNode, menuNode, menuParam);
@@ -1351,6 +1302,14 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
         auto selectTheme = pipeLineContext->GetTheme<SelectTheme>();
         CHECK_NULL_VOID(selectTheme);
         BlurStyleOption styleOption;
+        if (menuParam.blurStyleOption.has_value()) {
+            styleOption = menuParam.blurStyleOption.value();
+            if (styleOption.policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeLineContext->AddWindowFocusChangedCallback(menuNode->GetId());
+            } else {
+                pipeLineContext->RemoveWindowFocusChangedCallback(menuNode->GetId());
+            }
+        }
         Color color;
         if (selectTheme->GetMenuBlendBgColor()) {
             styleOption.blurStyle = static_cast<BlurStyle>(
@@ -1363,8 +1322,22 @@ void MenuView::UpdateMenuBackgroundStyle(const RefPtr<FrameNode>& menuNode, cons
                 menuParam.backgroundBlurStyle.value_or(menuTheme->GetMenuBackgroundBlurStyle()));
             color = menuParam.backgroundColor.value_or(Color::TRANSPARENT);
         }
+        if (menuParam.blurStyleOption.has_value() && menuNodeRenderContext->GetBackgroundEffect().has_value()) {
+            menuNodeRenderContext->UpdateBackgroundEffect(std::nullopt);
+        }
         menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
         menuNodeRenderContext->UpdateBackgroundColor(color);
+        if (menuParam.effectOption.has_value()) {
+            if (menuParam.effectOption->policy == BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) {
+                pipeLineContext->AddWindowFocusChangedCallback(menuNode->GetId());
+            } else {
+                pipeLineContext->RemoveWindowFocusChangedCallback(menuNode->GetId());
+            }
+            if (menuNodeRenderContext->GetBackBlurStyle().has_value()) {
+                menuNodeRenderContext->UpdateBackBlurStyle(std::nullopt);
+            }
+            menuNodeRenderContext->UpdateBackgroundEffect(menuParam.effectOption.value());
+        }
     } else if (menuParam.backgroundColor.has_value()) {
         menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value());
     }
@@ -1472,19 +1445,69 @@ RefPtr<FrameNode> MenuView::CreateMenuOption(bool optionsHasIcon, const OptionVa
     return option;
 }
 
+void MenuView::MountOptionToColumn(std::vector<OptionParam>& params, const RefPtr<FrameNode>& menuNode,
+    const MenuParam& menuParam, RefPtr<FrameNode> column)
+{
+    bool optionsHasIcon = GetHasIcon(params);
+    bool optionsHasSymbol = GetHasSymbol(params);
+    RefPtr<FrameNode> optionNode = nullptr;
+    // append options to menu
+    for (size_t i = 0; i < params.size(); ++i) {
+        if (params[i].symbol != nullptr) {
+            optionNode = CreateMenuOption(optionsHasSymbol, params, i);
+        } else {
+            optionNode = CreateMenuOption(
+                optionsHasIcon, { params[i].value, params[i].isPasteOption }, params[i].action, i, params[i].icon);
+            if (optionNode) {
+                auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
+                optionPattern->SetBlockClick(params[i].disableSystemClick);
+            }
+        }
+        if (!optionNode) {
+            continue;
+        }
+        NeedAgingUpdateNode(optionNode);
+        auto menuPattern = menuNode->GetPattern<MenuPattern>();
+        CHECK_NULL_VOID(menuPattern);
+        menuPattern->AddOptionNode(optionNode);
+        auto menuWeak = AceType::WeakClaim(AceType::RawPtr(menuNode));
+        auto eventHub = optionNode->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetEnabled(params[i].enabled);
+        auto focusHub = optionNode->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        focusHub->SetEnabled(params[i].enabled);
+
+        OptionKeepMenu(optionNode, menuWeak);
+        // first node never paints divider
+        auto props = optionNode->GetPaintProperty<MenuItemPaintProperty>();
+        if (i == 0 && menuParam.title.empty()) {
+            props->UpdateNeedDivider(false);
+        }
+        if (optionsHasIcon) {
+            props->UpdateHasIcon(true);
+        }
+        optionNode->MountToParent(column);
+        optionNode->MarkModifyDone();
+    }
+}
+
 void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& option, const RefPtr<FrameNode>& row,
     const std::function<void()>& onClickFunc, const std::string& icon)
 {
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    auto overlayTheme = pipeline->GetTheme<TextOverlayTheme>();
+    CHECK_NULL_VOID(overlayTheme);
     RefPtr<FrameNode> pasteNode;
-    if (optionsHasIcon) {
-        pasteNode =
-            PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-                static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE), static_cast<int32_t>(ButtonType::NORMAL), true);
-    } else {
-        pasteNode =
-            PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
-                static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL), static_cast<int32_t>(ButtonType::NORMAL), true);
-    }
+    pasteNode = PasteButtonModelNG::GetInstance()->CreateNode(static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
+        optionsHasIcon ? static_cast<int32_t>(PasteButtonIconStyle::ICON_LINE) :
+        static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
+        static_cast<int32_t>(ButtonType::NORMAL),
+        true,
+        optionsHasIcon ? overlayTheme->GetPasteSymbolId() : static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL));
     CHECK_NULL_VOID(pasteNode);
     auto pattern = option->GetPattern<MenuItemPattern>();
     CHECK_NULL_VOID(pattern);
@@ -1492,10 +1515,6 @@ void MenuView::CreatePasteButton(bool optionsHasIcon, const RefPtr<FrameNode>& o
     CHECK_NULL_VOID(pasteLayoutProperty);
     auto pastePaintProperty = pasteNode->GetPaintProperty<SecurityComponentPaintProperty>();
     CHECK_NULL_VOID(pastePaintProperty);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
 
     pasteLayoutProperty->UpdateFontSize(theme->GetMenuFontSize());
     pasteLayoutProperty->UpdateFontWeight(FontWeight::REGULAR);

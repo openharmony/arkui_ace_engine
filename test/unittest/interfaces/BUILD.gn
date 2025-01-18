@@ -766,6 +766,7 @@ ohos_unittest("node_transition_test") {
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
     "$ace_root/interfaces/native/node/dialog_model.cpp",
     "$ace_root/interfaces/native/node/event_converter.cpp",
@@ -933,6 +934,7 @@ ohos_unittest("node_extened_test") {
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
     "$ace_root/interfaces/native/node/dialog_model.cpp",
     "$ace_root/interfaces/native/node/event_converter.cpp",
@@ -989,6 +991,7 @@ ohos_unittest("node_animate_test") {
   sources = [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
     "$ace_root/frameworks/core/components/common/properties/color.cpp",
+    "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/interfaces/native/node/animate_impl.cpp",
     "$ace_root/interfaces/native/node/dialog_model.cpp",
     "$ace_root/interfaces/native/node/event_converter.cpp",

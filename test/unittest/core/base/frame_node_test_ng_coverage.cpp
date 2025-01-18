@@ -502,7 +502,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchToJsonValue02, TestSize.Level1)
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
     EXPECT_NE(frameNode->pattern_, nullptr);
     frameNode->isActive_ = true;
-    frameNode->eventHub_->SetEnabled(true);
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
 
     /**
      * @tc.steps: step2. update the mouseResponseRegion.
@@ -510,7 +510,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchToJsonValue02, TestSize.Level1)
     DimensionRect responseRect(Dimension(0), Dimension(0), DimensionOffset(OFFSETF));
     std::vector<DimensionRect> mouseResponseRegion;
     mouseResponseRegion.emplace_back(responseRect);
-    auto gestureEventHub = frameNode->eventHub_->GetOrCreateGestureEventHub();
+    auto gestureEventHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
     gestureEventHub->SetMouseResponseRegion(mouseResponseRegion);
 
     /**
@@ -895,8 +895,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback01, TestSize.Level
     bool flag = false;
     OnAreaChangedFunc onAreaChanged = [&flag](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
                                           const OffsetF& origin) { flag = !flag; };
-    frameNode->eventHub_->SetOnAreaChanged(std::move(onAreaChanged));
-    frameNode->eventHub_->AddInnerOnAreaChangedCallback(1, std::move(onAreaChanged));
+    frameNode->GetEventHub<EventHub>()->SetOnAreaChanged(std::move(onAreaChanged));
+    frameNode->GetEventHub<EventHub>()->AddInnerOnAreaChangedCallback(1, std::move(onAreaChanged));
     frameNode->lastParentOffsetToWindow_ = std::make_unique<OffsetF>(OffsetF(50.0f, 50.0f)); // 50.0f is the offset
     frameNode->lastFrameRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
@@ -925,7 +925,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback02, TestSize.Level
     bool flag = false;
     OnAreaChangedFunc onAreaChanged = [&flag](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
                                           const OffsetF& origin) { flag = !flag; };
-    frameNode->eventHub_->SetOnAreaChanged(std::move(onAreaChanged));
+    frameNode->GetEventHub<EventHub>()->SetOnAreaChanged(std::move(onAreaChanged));
     frameNode->lastParentOffsetToWindow_ = std::make_unique<OffsetF>(OffsetF(50.0f, 50.0f)); // 50.0f is the offset
     frameNode->lastFrameRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
@@ -954,7 +954,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnAreaChangeCallback03, TestSize.Level
     bool flag = false;
     OnAreaChangedFunc onAreaChanged = [&flag](const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect,
                                           const OffsetF& origin) { flag = !flag; };
-    frameNode->eventHub_->AddInnerOnAreaChangedCallback(1, std::move(onAreaChanged));
+    frameNode->GetEventHub<EventHub>()->AddInnerOnAreaChangedCallback(1, std::move(onAreaChanged));
     frameNode->lastParentOffsetToWindow_ = std::make_unique<OffsetF>(OffsetF(50.0f, 50.0f)); // 50.0f is the offset
     frameNode->lastFrameRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
@@ -1118,8 +1118,8 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback01, TestSize.Level
     pattern->isOnShow_ = true;
     bool flag = false;
     OnSizeChangedFunc onSizeChanged = [&flag](const RectF& oldRect, const RectF& rect) { flag = !flag; };
-    frameNode->eventHub_->SetOnSizeChanged(std::move(onSizeChanged));
-    frameNode->eventHub_->AddInnerOnSizeChanged(1, std::move(onSizeChanged));
+    frameNode->GetEventHub<EventHub>()->SetOnSizeChanged(std::move(onSizeChanged));
+    frameNode->GetEventHub<EventHub>()->AddInnerOnSizeChanged(1, std::move(onSizeChanged));
     frameNode->lastFrameNodeRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
     frameNode->onSizeChangeDumpInfos.push_back(dumpInfoOne);
@@ -1153,7 +1153,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback02, TestSize.Level
     pattern->isOnShow_ = true;
     bool flag = false;
     OnSizeChangedFunc onSizeChanged = [&flag](const RectF& oldRect, const RectF& rect) { flag = !flag; };
-    frameNode->eventHub_->SetOnSizeChanged(std::move(onSizeChanged));
+    frameNode->GetEventHub<EventHub>()->SetOnSizeChanged(std::move(onSizeChanged));
     frameNode->lastFrameNodeRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
     frameNode->onSizeChangeDumpInfos.push_back(dumpInfoOne);
@@ -1183,7 +1183,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerOnSizeChangeCallback03, TestSize.Level
     pattern->isOnShow_ = true;
     bool flag = false;
     OnSizeChangedFunc onSizeChanged = [&flag](const RectF& oldRect, const RectF& rect) { flag = !flag; };
-    frameNode->eventHub_->AddInnerOnSizeChanged(1, std::move(onSizeChanged));
+    frameNode->GetEventHub<EventHub>()->AddInnerOnSizeChanged(1, std::move(onSizeChanged));
     frameNode->lastFrameNodeRect_ =
         std::make_unique<RectF>(RectF(OffsetF(50.0f, 50.0f), SizeF(50.0f, 50.0f))); // 50.0f is ths offset and size
     frameNode->onSizeChangeDumpInfos.push_back(dumpInfoOne);
@@ -1290,17 +1290,17 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback01, TestSize.
     const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
     callbackInfo.callback = jsCallback;
     callbackInfo.period = 1;
-    frameNode->eventHub_->visibleAreaUserCallback_ = callbackInfo;
+    frameNode->GetEventHub<EventHub>()->visibleAreaUserCallback_ = callbackInfo;
     frameNode->TriggerVisibleAreaChangeCallback(0, false);
-    frameNode->eventHub_->visibleAreaUserCallback_.callback = nullptr;
-    frameNode->eventHub_->visibleAreaInnerCallback_ = callbackInfo;
+    frameNode->GetEventHub<EventHub>()->visibleAreaUserCallback_.callback = nullptr;
+    frameNode->GetEventHub<EventHub>()->visibleAreaInnerCallback_ = callbackInfo;
     frameNode->TriggerVisibleAreaChangeCallback(0, false);
-    EXPECT_NE(frameNode->eventHub_, nullptr);
+    EXPECT_NE(frameNode->GetEventHub<EventHub>(), nullptr);
     frameNode->isCalculateInnerVisibleRectClip_ = true;
     frameNode->lastInnerVisibleRatio_ = 10.0;
     frameNode->lastVisibleRatio_ = 10.0;
     frameNode->TriggerVisibleAreaChangeCallback(0, true);
-    frameNode->eventHub_->visibleAreaUserCallback_ = callbackInfo;
+    frameNode->GetEventHub<EventHub>()->visibleAreaUserCallback_ = callbackInfo;
     /**
      * @tc.steps: step2. create layoutProperty.
      */
@@ -1314,7 +1314,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTriggerVisibleAreaChangeCallback01, TestSize.
     frameNode->SetLayoutProperty(layoutProperty);
     frameNode->TriggerVisibleAreaChangeCallback(false);
     frameNode->ProcessAllVisibleCallback(ratios, callbackInfo, 1.0, 0.0, true);
-    EXPECT_NE(frameNode->eventHub_, nullptr);
+    EXPECT_NE(frameNode->GetEventHub<EventHub>(), nullptr);
 }
 
 /**
@@ -1338,7 +1338,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask01, TestSize.Level1)
     const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
     callbackInfo.callback = jsCallback;
     callbackInfo.period = 1;
-    frameNode->eventHub_->throttledVisibleAreaCallback_ = callbackInfo;
+    frameNode->GetEventHub<EventHub>()->throttledVisibleAreaCallback_ = callbackInfo;
 
     /**
      * @tc.steps: step2. create layoutProperty.
@@ -1376,7 +1376,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask02, TestSize.Level1)
     const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
     callbackInfo.callback = jsCallback;
     callbackInfo.period = 1;
-    frameNode->eventHub_->throttledVisibleAreaCallback_ = callbackInfo;
+    frameNode->GetEventHub<EventHub>()->throttledVisibleAreaCallback_ = callbackInfo;
 
     /**
      * @tc.steps: step2. create layoutProperty.
@@ -1392,7 +1392,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask02, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     EXPECT_FALSE(frameNode->throttledCallbackOnTheWay_);
     EXPECT_TRUE(frameNode->isActive_);
-    EXPECT_EQ(frameNode->eventHub_->throttledVisibleAreaCallback_.period, 1);
+    EXPECT_EQ(frameNode->GetEventHub<EventHub>()->throttledVisibleAreaCallback_.period, 1);
 }
 
 /**
@@ -1412,14 +1412,14 @@ HWTEST_F(FrameNodeTestNg, FrameNodeThrottledVisibleTask03, TestSize.Level1)
     const std::function<void(bool, double)>&& jsCallback = [&flag](bool isVisible, double radio) { flag++; };
     callbackInfo.callback = jsCallback;
     callbackInfo.period = 1;
-    frameNode->eventHub_->throttledVisibleAreaCallback_ = callbackInfo;
+    frameNode->GetEventHub<EventHub>()->throttledVisibleAreaCallback_ = callbackInfo;
 
     /**
      * @tc.steps: step2. call the function ThrottledVisibleTask.
      */
     frameNode->ThrottledVisibleTask();
     EXPECT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->eventHub_->throttledVisibleAreaCallback_.period, 1);
+    EXPECT_EQ(frameNode->GetEventHub<EventHub>()->throttledVisibleAreaCallback_.period, 1);
 }
 
 /**

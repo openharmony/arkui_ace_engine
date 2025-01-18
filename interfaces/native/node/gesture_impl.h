@@ -36,7 +36,8 @@ ArkUI_GestureRecognizer* CreatePinchGesture(int32_t fingersNum, double distanceN
 
 ArkUI_GestureRecognizer* CreateRotationGesture(int32_t fingersNum, double angleNum);
 
-ArkUI_GestureRecognizer* CreateSwipeGesture(int32_t fingersNum, ArkUI_GestureDirectionMask directions, double speedNum);
+ArkUI_GestureRecognizer* CreateSwipeGesture(
+    int32_t fingersNum, ArkUI_GestureDirectionMask directions, double speedNum);
 
 void DisposeGesture(ArkUI_GestureRecognizer* recognizer);
 

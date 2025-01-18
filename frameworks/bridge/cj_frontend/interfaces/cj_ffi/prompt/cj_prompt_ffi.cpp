@@ -414,6 +414,9 @@ void FfiPromptOpenCustomDialog(void (*builder)(), NativeBaseOption options, void
 
     std::function<void(const int32_t& info, const int32_t& instanceId)> onWillDismiss = nullptr;
 
+    if (options.alignment < 0 || options.alignment >= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        return;
+    }
     auto alignment = DIALOG_ALIGNMENT[options.alignment];
 
     // parse maskRect

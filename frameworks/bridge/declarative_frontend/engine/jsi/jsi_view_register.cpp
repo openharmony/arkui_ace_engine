@@ -39,6 +39,7 @@
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_v2/inspector/inspector.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.h"
 
 namespace OHOS::Ace::Framework {
@@ -1542,6 +1543,10 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomTitleBar));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomTitleButton"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomButton));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomAppbar"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomAppBar));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadCustomWindowMask"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadCustomWindowMask));
 
     BindingTarget cursorControlObj = panda::ObjectRef::New(const_cast<panda::EcmaVM*>(vm));
     cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCursor"),
