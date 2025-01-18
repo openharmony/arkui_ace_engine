@@ -98,11 +98,13 @@ public:
             indicatorLayoutAlgorithm->SetIsHoverOrPress(IsHover() || IsPressed());
             indicatorLayoutAlgorithm->SetHoverPoint(GetHoverPoint());
             indicatorLayoutAlgorithm->SetIndicatorDisplayCount(GetCountFromProperty());
+            indicatorLayoutAlgorithm->SetIsSingle(true);
             return indicatorLayoutAlgorithm;
         } else {
             auto indicatorLayoutAlgorithm = MakeRefPtr<DigitIndicatorLayoutAlgorithm>();
             indicatorLayoutAlgorithm->SetIsHoverOrPress(IsHover() || IsPressed());
             indicatorLayoutAlgorithm->SetHoverPoint(GetHoverPoint());
+            indicatorLayoutAlgorithm->SetIsSingle(true);
             return indicatorLayoutAlgorithm;
         }
     }
