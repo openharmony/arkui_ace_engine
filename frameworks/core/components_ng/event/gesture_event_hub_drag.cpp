@@ -1128,6 +1128,9 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }
                 gestureEventHubPtr->HandleDragEndAction(dragframeNodeInfo);
+                auto dragEventActuator = gestureEventHubPtr->GetDragEventActuator();
+                CHECK_NULL_VOID(dragEventActuator);
+                dragEventActuator->NotifyDragEnd();
             },
             TaskExecutor::TaskType::UI, "ArkUIGestureDragEnd");
     };

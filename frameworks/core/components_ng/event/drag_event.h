@@ -305,6 +305,7 @@ public:
     virtual RefPtr<PixelMap> GetPreScaledPixelMapForDragThroughTouch(float& preScale);
     virtual void ResetPreScaledPixelMapForDragThroughTouch();
     virtual void NotifyDragStart() {};
+    virtual void NotifyDragEnd() {};
 
     void SetIsThumbnailCallbackTriggered(bool isThumbnailCallbackTriggered)
     {
