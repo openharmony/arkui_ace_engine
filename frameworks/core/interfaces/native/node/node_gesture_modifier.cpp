@@ -36,6 +36,7 @@
 #include "core/interfaces/native/node/touch_event_convertor.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
+#include "node_drag_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -248,6 +249,19 @@ void ConvertIMMEventToTouchEvent(GestureEvent& info, ArkUITouchEvent& touchEvent
 {
     CHECK_NULL_VOID(info.GetPointerEvent());
     auto tempTouchEvent = NG::ConvertToTouchEvent(info.GetPointerEvent());
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    // width height x y globalx globaly
+    touchEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+    touchEvent.targetGlobalPositionY = targetLocalOffset.GetY().ConvertToPx();
+    touchEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+    touchEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+    touchEvent.width = info.GetTarget().area.GetWidth().ConvertToPx();
+    touchEvent.height = info.GetTarget().area.GetHeight().ConvertToPx();
+    // deviceid
+    touchEvent.deviceId = info.GetDeviceId();
+    // modifierkeystates
+    touchEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
     touchEvent.action = static_cast<int32_t>(tempTouchEvent.type);
     touchEvent.sourceType = static_cast<int32_t>(tempTouchEvent.sourceType);
     touchEvent.timeStamp = tempTouchEvent.time.time_since_epoch().count();
@@ -386,6 +400,19 @@ void ConvertIMMEventToMouseEvent(GestureEvent& info, ArkUIMouseEvent& mouseEvent
     NG::ConvertToMouseEvent(tempMouseEvent, info.GetPointerEvent());
     auto fingureBegin = std::begin(info.GetFingerList());
     auto fingureEnd = std::end(info.GetFingerList());
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    // width height x y globalx globaly
+    mouseEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+    mouseEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+    mouseEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+    mouseEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+    mouseEvent.width = info.GetTarget().area.GetWidth().ConvertToPx();
+    mouseEvent.height = info.GetTarget().area.GetHeight().ConvertToPx();
+    // deviceid
+    mouseEvent.deviceId = info.GetDeviceId();
+    // modifierkeystates
+    mouseEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
     mouseEvent.action = static_cast<int32_t>(tempMouseEvent.action);
     mouseEvent.sourceType = static_cast<int32_t>(tempMouseEvent.sourceType);
     mouseEvent.timeStamp = tempMouseEvent.time.time_since_epoch().count();
@@ -407,6 +434,19 @@ void ConvertIMMEventToAxisEvent(GestureEvent& info, ArkUIAxisEvent& axisEvent)
     NG::ConvertToAxisEvent(tempAxisEvent, info.GetPointerEvent());
     auto fingureBegin = std::begin(info.GetFingerList());
     auto fingureEnd = std::end(info.GetFingerList());
+    const auto& targetLocalOffset = info.GetTarget().area.GetOffset();
+    const auto& targetOrigin = info.GetTarget().origin;
+    // width height x y globalx globaly
+    axisEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+    axisEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+    axisEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+    axisEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+    axisEvent.width = info.GetTarget().area.GetWidth().ConvertToPx();
+    axisEvent.height = info.GetTarget().area.GetHeight().ConvertToPx();
+    // deviceid
+    axisEvent.deviceId = info.GetDeviceId();
+    // modifierkeystates
+    axisEvent.modifierKeyState = NodeModifier::CalculateModifierKeyState(info.GetPressedKeyCodes());
     axisEvent.action = static_cast<int32_t>(tempAxisEvent.action);
     axisEvent.sourceType = static_cast<int32_t>(tempAxisEvent.sourceType);
     axisEvent.timeStamp = tempAxisEvent.time.time_since_epoch().count();

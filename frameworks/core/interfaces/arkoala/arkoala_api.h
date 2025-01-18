@@ -214,6 +214,14 @@ struct ArkUITouchEvent {
     ArkUI_Uint32 historySize;
     ArkUI_Int32 sourceType;
     ArkUIEventTarget target;
+    ArkUI_Float32 targetPositionX;
+    ArkUI_Float32 targetPositionY;
+    ArkUI_Float32 targetGlobalPositionX;
+    ArkUI_Float32 targetGlobalPositionY;
+    ArkUI_Float32 width;
+    ArkUI_Float32 height;
+    ArkUI_Int64 deviceId;
+    ArkUI_Uint64 modifierKeyState;
 
     /**
      * @brief Prevents events from bubbling further to the parent node for processing.
@@ -247,6 +255,19 @@ struct ArkUIMouseEvent {
     ArkUI_Int32* pressedButtons;
     ArkUI_Int32 pressedButtonsLength;
     ArkUI_Int32 targetDisplayId;
+    ArkUI_Float32 targetPositionX;
+    ArkUI_Float32 targetPositionY;
+    ArkUI_Float32 targetGlobalPositionX;
+    ArkUI_Float32 targetGlobalPositionY;
+    ArkUI_Float32 width;
+    ArkUI_Float32 height;
+    ArkUI_Int64 deviceId;
+    ArkUI_Uint64 modifierKeyState;
+    /**
+     * @brief Prevents events from bubbling further to the parent node for processing.
+     *
+     */
+    bool stopPropagation;
 };
 
 struct ArkUIAxisEvent {
@@ -261,6 +282,14 @@ struct ArkUIAxisEvent {
     ArkUI_Int32 subKind;
     bool propagation;
     ArkUI_Int32 scrollStep;
+    ArkUI_Float32 targetPositionX;
+    ArkUI_Float32 targetPositionY;
+    ArkUI_Float32 targetGlobalPositionX;
+    ArkUI_Float32 targetGlobalPositionY;
+    ArkUI_Float32 width;
+    ArkUI_Float32 height;
+    ArkUI_Uint64 modifierKeyState;
+    ArkUI_Int64 deviceId;
 };
 
 struct ArkUIDragEvent {
@@ -313,6 +342,13 @@ struct ArkUIFocusAxisEvent {
     ArkUI_Int32 keyCodesLength;
     ArkUI_Int32 targetDisplayId;
     bool stopPropagation;
+    ArkUI_Float32 targetPositionX;
+    ArkUI_Float32 targetPositionY;
+    ArkUI_Float32 targetGlobalPositionX;
+    ArkUI_Float32 targetGlobalPositionY;
+    ArkUI_Float32 width;
+    ArkUI_Float32 height;
+    ArkUI_Uint64 modifierKeyState;
 };
 
 struct ArkUIStringAndFloat {
@@ -865,6 +901,8 @@ enum ArkUIEventCategory {
     KEY_INPUT_EVENT = 13, // KEY_EVENT is already defined as a macro in wincon.h
     FOCUS_AXIS_EVENT = 14,
     TEXT_INPUT_CHANGE = 15,
+    HOVER_EVENT = 16,
+    CLICK_EVENT = 17,
     AXIS_EVENT = 18,
 };
 
@@ -899,6 +937,8 @@ enum ArkUIEventSubKind {
     ON_FOCUS_AXIS,
     ON_KEY_DISPATCH,
     ON_AXIS,
+    ON_CLICK_EVENT,
+    ON_HOVER_EVENT,
     ON_DETECT_RESULT_UPDATE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT,
     ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
     ON_IMAGE_ERROR,
@@ -1217,6 +1257,7 @@ struct ArkUIKeyEvent {
     ArkUI_Int32* pressedKeyCodes;
     ArkUI_Int32 keyCodesLength;
     ArkUI_Int32 intentionCode;
+    ArkUI_Uint64 modifierKeyState;
 
     // user input.
     bool isConsumed;
@@ -1225,10 +1266,52 @@ struct ArkUIKeyEvent {
 
 struct ArkUIClickEvent {
     ArkUI_Int32 targetDisplayId;
+    ArkUI_Int32 subKind;
+    ArkUI_Float32 localX;
+    ArkUI_Float32 localY;
+    ArkUI_Float32 timestamp;
+    ArkUI_Float32 sourceType;
+    ArkUI_Float32 windowX;
+    ArkUI_Float32 windowY;
+    ArkUI_Float32 displayX;
+    ArkUI_Float32 displayY;
+    ArkUI_Float32 targetPositionX;
+    ArkUI_Float32 targetPositionY;
+    ArkUI_Float32 targetGlobalPositionX;
+    ArkUI_Float32 targetGlobalPositionY;
+    ArkUI_Float64 tiltX;
+    ArkUI_Float64 tiltY;
+    ArkUI_Uint32 clickPointSize;
+    ArkUI_Int32 toolType;
+    ArkUI_Float64 pressure;
+    ArkUI_Float32 width;
+    ArkUI_Float32 height;
+    ArkUI_Int64 deviceId;
+    ArkUI_Uint64 modifierKeyState;
 };
 
 struct ArkUIHoverEvent {
     ArkUI_Int32 targetDisplayId;
+    ArkUI_Int32 subKind;
+    ArkUI_Int32 isHover;
+    ArkUI_Float32 targetPositionX;
+    ArkUI_Float32 targetPositionY;
+    ArkUI_Float32 targetGlobalPositionX;
+    ArkUI_Float32 targetGlobalPositionY;
+    ArkUI_Float64 tiltX;
+    ArkUI_Float64 tiltY;
+    ArkUI_Float32 width;
+    ArkUI_Float32 height;
+    ArkUI_Int64 timeStamp;
+    ArkUI_Int32 sourceType;
+    ArkUI_Int64 deviceId;
+    ArkUI_Int32 toolType;
+    ArkUI_Uint64 modifierKeyState;
+    /**
+     * @brief Prevents events from bubbling further to the parent node for processing.
+     *
+     */
+    bool stopPropagation;
 };
 
 struct ArkUINodeEvent {

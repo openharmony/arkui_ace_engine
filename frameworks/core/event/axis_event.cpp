@@ -16,6 +16,7 @@
 #include "core/event/axis_event.h"
 
 #include "base/input_manager/input_manager.h"
+#include "core/event/key_event.h"
 
 namespace OHOS::Ace {
 AxisEvent AxisEvent::CreateScaleEvent(float scale) const
@@ -244,6 +245,19 @@ AxisEvent AxisInfo::ConvertToAxisEvent() const
     axisEvent.time = timeStamp_;
     axisEvent.localX = static_cast<float>(localLocation_.GetX());
     axisEvent.localY = static_cast<float>(localLocation_.GetY());
+    const auto& targetLocalOffset = GetTarget().area.GetOffset();
+    const auto& targetOrigin = GetTarget().origin;
+    // width height x y globalx globaly
+    axisEvent.targetPositionX = targetLocalOffset.GetX().ConvertToPx();
+    axisEvent.targetPositionY = targetLocalOffset.GetY().ConvertToPx();
+    axisEvent.targetGlobalPositionX = targetOrigin.GetX().ConvertToPx() + targetLocalOffset.GetX().ConvertToPx();
+    axisEvent.targetGlobalPositionY = targetOrigin.GetY().ConvertToPx() + targetLocalOffset.GetY().ConvertToPx();
+    axisEvent.width = GetTarget().area.GetWidth().ConvertToPx();
+    axisEvent.height = GetTarget().area.GetHeight().ConvertToPx();
+    // deviceid
+    axisEvent.deviceId = GetDeviceId();
+    // modifierkeystates
+    axisEvent.modifierKeyState = CalculateModifierKeyState(GetPressedKeyCodes());
     return axisEvent;
 }
 

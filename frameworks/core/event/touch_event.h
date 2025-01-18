@@ -100,6 +100,13 @@ struct TouchEvent final : public PointerEvent {
     TimeStamp pressedTime;
     int32_t width;
     int32_t height;
+    float targetPositionX;
+    float targetPositionY;
+    float targetGlobalPositionX;
+    float targetGlobalPositionY;
+    float widthArea;
+    float heightArea;
+    uint64_t modifierKeyState;
 
     TouchEvent()
     {
