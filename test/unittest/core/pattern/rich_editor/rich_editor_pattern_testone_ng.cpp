@@ -1332,4 +1332,6 @@ HWTEST_F(RichEditorPatternTestOneNg, AdjustPlaceholderSelection001, TestSize.Lev
     richEditorPattern->AdjustPlaceholderSelection(start, end, touchPos);
     EXPECT_NE(start, end);
 }
+
+
 } // namespace OHOS::Ace::NG

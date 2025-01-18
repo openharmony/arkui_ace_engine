@@ -93,6 +93,8 @@ public:
             theme->aiWriteBundleName_ = pattern->GetAttr<std::string>("rich_editor_writting_bundle_name", "");
             theme->aiWriteAbilityName_ = pattern->GetAttr<std::string>("rich_editor_writting_ability_name", "");
             theme->aiWriteIsSupport_ = pattern->GetAttr<std::string>("rich_editor_writting_is_support", "");
+            auto translateIsSupport = pattern->GetAttr<std::string>("menu_translate_is_support", "0");
+            theme->translateIsSupport_ = StringUtils::StringToInt(translateIsSupport);
             auto disabledOpacity = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
             theme->urlDefaultColor_ = pattern->GetAttr<Color>("font_emphasize", Color(0xff007dff));
             theme->urlDisabledColor_ = theme->urlDefaultColor_.BlendOpacity(disabledOpacity);
@@ -211,6 +213,11 @@ public:
         return aiWriteIsSupport_;
     }
 
+    bool GetTranslateIsSupport() const
+    {
+        return translateIsSupport_;
+    }
+
     const Color& GetUrlDisabledColor() const
     {
         return urlDisabledColor_;
@@ -258,6 +265,7 @@ private:
     std::string aiWriteBundleName_;
     std::string aiWriteAbilityName_;
     std::string aiWriteIsSupport_;
+    bool translateIsSupport_ = false;
     Color urlDisabledColor_ = Color(0x99000000);
     Color urlDefaultColor_ = Color(0x99000000);
     Color urlHoverColor_ = Color(0x99000000);
