@@ -494,6 +494,68 @@ ohos_unittest("navigation_controller_test") {
   ]
 }
 
+ohos_unittest("node_component_snapshot_test") {
+  module_out_path = interface_test_output_path
+
+  sources = [
+    "$ace_root/interfaces/native/node/animate_impl.cpp",
+    "$ace_root/interfaces/native/node/dialog_model.cpp",
+    "$ace_root/interfaces/native/node/event_converter.cpp",
+    "$ace_root/interfaces/native/node/gesture_impl.cpp",
+    "$ace_root/interfaces/native/node/native_impl.cpp",
+    "$ace_root/interfaces/native/node/node_component_snapshot.cpp",
+    "$ace_root/interfaces/native/node/node_extened.cpp",
+    "$ace_root/interfaces/native/node/node_model.cpp",
+    "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
+    "$ace_root/interfaces/native/node/node_transition.cpp",
+    "$ace_root/interfaces/native/node/style_modifier.cpp",
+    "node_component_snapshot_test.cpp",
+  ]
+
+  configs = [
+    "$ace_root/test/unittest:ace_unittest_config",
+    ":c_api_configs",
+  ]
+
+  include_dirs = [
+    "$ace_root/frameworks/core/interfaces/arkoala",
+    "$ace_root/frameworks/",
+    "$ace_root/interfaces/native/",
+    "$ace_root/interfaces/native/node",
+    "$ace_root",
+  ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+  ]
+
+  external_deps = [
+    "cJSON:cjson",
+    "c_utils:utils",
+    "googletest:gmock_main",
+    "graphic_2d:2d_graphics",
+    "graphic_2d:librender_service_client",
+    "hilog:libhilog",
+    "image_framework:image",
+    "image_framework:image_native",
+    "image_framework:pixelmap",
+    "napi:ace_napi",
+    "resource_management:global_resmgr",
+  ]
+}
+
 config("c_api_configs") {
   cflags = [ "-Wno-missing-braces" ]
 }
@@ -1139,6 +1201,7 @@ group("interfaces_unittest") {
     ":native_node_napi_test",
     ":navigation_controller_test",
     ":node_animate_test",
+    ":node_component_snapshot_test",
     ":node_extened_test",
     ":node_transition_test",
     ":ui_content_test",
