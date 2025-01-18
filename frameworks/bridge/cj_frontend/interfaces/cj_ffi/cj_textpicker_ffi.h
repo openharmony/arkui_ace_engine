@@ -22,6 +22,7 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
 
 using VectorStringPtr = void*;
+using VectorUInt32Handle = void*;
 
 extern "C" {
 struct CJDialogShow {
@@ -32,9 +33,30 @@ struct CJDialogShow {
     void (*cancel)();
     void (*change)(CJTextPickerResult pickerResult);
 };
+
+struct DividerParams {
+    double width;
+    int32_t widthUnit;
+    uint32_t color;
+    double startMargin;
+    int32_t startMarginUnit;
+    double endMargin;
+    int32_t endMarginUnit;
+};
+
 CJ_EXPORT void FfiOHOSAceFrameworkTextPickerDialogShow(VectorStringPtr vecContent, CJDialogShow value);
 CJ_EXPORT void FfiOHOSAceFrameworkTextPickerSetDefaultPickerItemHeight(double height, int32_t unit);
 CJ_EXPORT void FfiOHOSAceFrameworkTextPickerSetCanLoop(bool value);
+CJ_EXPORT void FfiOHOSAceFrameworkTextPickerSetTextStyle(uint32_t color, double size, int32_t unit,
+    const char* weight, const char* family, uint32_t style);
+CJ_EXPORT void FfiOHOSAceFrameworkTextPickerSetSelectedTextStyle(uint32_t color, double size, int32_t unit,
+    const char* weight, const char* family, uint32_t style);
+CJ_EXPORT void FfiOHOSAceFrameworkTextPikerSetDisappearTextStyle(uint32_t color, double size,
+    int32_t unit, const char* weight, const char* family, uint32_t style);
+CJ_EXPORT void FfiOHOSAceFrameworkTextPickerSetGradientHeight(double length, int32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkTextPickerSetDivider(DividerParams params);
+CJ_EXPORT void FfiOHOSAceFrameworkTextPickerSetSelectedIndexSingle(uint32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkTextPickerSetSelectedIndexMulti(VectorUInt32Handle values);
 CJ_EXPORT void FfiOHOSAceFrameworkTextPickerOnChange(void (*callback)(CJTextPickerResult pickerResult));
 CJ_EXPORT void FfiOHOSAceFrameworkTextPickerCreate(VectorStringPtr vecContent, uint32_t selected, const char* value);
 }
