@@ -405,7 +405,7 @@ private:
     std::map<UIContentBusinessCode, BusinessDataUECConsumeCallback> businessDataUECConsumeCallbacks_;
     std::map<UIContentBusinessCode, BusinessDataUECConsumeReplyCallback> businessDataUECConsumeReplyCallbacks_;
 
-    bool isWindowModeFollowHost_;
+    bool isWindowModeFollowHost_ = false;
     std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
