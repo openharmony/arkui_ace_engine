@@ -48,6 +48,7 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetFirstHandleInfo()
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
     SetTransformPaintInfo(handleInfo, localPaintRect);
+    handleInfo.forceDraw = !CheckSwitchToMode(HandleLevelMode::OVERLAY);
     return handleInfo;
 }
 
@@ -63,6 +64,7 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetSecondHandleInfo()
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
     SetTransformPaintInfo(handleInfo, localPaintRect);
+    handleInfo.forceDraw = !CheckSwitchToMode(HandleLevelMode::OVERLAY);
     return handleInfo;
 }
 
