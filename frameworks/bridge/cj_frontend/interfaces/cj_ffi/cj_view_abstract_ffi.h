@@ -264,6 +264,26 @@ struct CJForegroundBlurStyle {
     float scale;
 };
 
+struct CJBackgroundBlurStyleOptions {
+    int32_t colorMode;
+    int32_t adaptiveColor;
+    CJBlurOptions blurOptions;
+    float scale;
+    int32_t policy;
+    uint32_t inactiveColor;
+};
+
+struct CJBackgroundEffectOptions {
+    double radius;
+    double saturation;
+    double brightness;
+    uint32_t color;
+    int32_t adaptiveColor;
+    CJBlurOptions blurOptions;
+    int32_t policy;
+    uint32_t inactiveColor;
+};
+
 struct CJAlignRuleOption {
     char* leftAnchor;
     int32_t leftHorizontalAlign;
@@ -385,8 +405,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetSharedTransition(char* shareId,
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetGeometryTransition(char* id, CJGeometryTransitionOptions option);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBlur(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetColorBlend(uint32_t color);
-CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(double radius, int32_t direction,
-    VectorFloat64Ptr blurVec, VectorFloat64Ptr positionVec);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(
+    double radius, int32_t direction, VectorFloat64Ptr blurVec, VectorFloat64Ptr positionVec);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackdropBlur(double value);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetWindowBlur(float progress, int32_t styleValue);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetShadow(double radius, uint32_t color, double offsetX, double offsetY);
@@ -426,6 +446,14 @@ CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetZIndex(int32_t zIndex);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetVisibility(int32_t visibility);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetClip(bool isClip);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetClipByShape(int64_t shapeId);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackground(void (*builder)(), int32_t align);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackgroundBlurStyleOption(
+    int32_t blurStyle, CJBackgroundBlurStyleOptions options);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackgroundBlurStyle(int32_t blurStyle);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackgroundImageResizable(CJEdge slice);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackgroundBrightness(double rate, double lightUpDegree);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetBackgroundEffect(CJBackgroundEffectOptions value);
+CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetMaskByProgressMask(int64_t progressId);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetMaskByShape(int64_t shapeId);
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractPop();
 CJ_EXPORT void FfiOHOSAceFrameworkViewAbstractSetOverlay(const char* title, int32_t align, double x, double y);
