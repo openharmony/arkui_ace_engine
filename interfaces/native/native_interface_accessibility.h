@@ -393,6 +393,92 @@ typedef struct ArkUI_AccessibilityProviderCallbacks {
 } ArkUI_AccessibilityProviderCallbacks;
 
 /**
+ * @brief Registers callbacks with instance for the accessibility provider.
+ * @since 15
+ */
+typedef struct ArkUI_AccessibilityProviderCallbacksWithInstance {
+    /**
+    * @brief Called to obtain element information based on a specified node.
+    * @param instanceId Indicates ID of third-party framework instance.
+    * @param elementId The unique id of the component ID.
+    * @param mode Indicates accessibility search mode.
+    * @param requestId Matched the request and response. transfer it by callback only.
+    * @param elementList The all obtained accessibility elements list information.
+    * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
+    *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+    */
+    int32_t (*findAccessibilityNodeInfosById)(const char* instanceId, int64_t elementId,
+        ArkUI_AccessibilitySearchMode mode, int32_t requestId, ArkUI_AccessibilityElementInfoList* elementList);
+    /**
+    * @brief Called to obtain element information based on a specified node and text content.
+    * @param instanceId Indicates ID of third-party framework instance.
+    * @param elementId The unique id of the component ID.
+    * @param text Filter for the child components to matched with the text.
+    * @param requestId Matched the request and response. transfer it by callback only.
+    * @param elementList The all obtained accessibility elements list information.
+    * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
+    *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+    */
+    int32_t (*findAccessibilityNodeInfosByText)(const char* instanceId, int64_t elementId, const char* text,
+        int32_t requestId, ArkUI_AccessibilityElementInfoList* elementList);
+    /**
+    * @brief Called to obtain focused element information based on a specified node.
+    * @param instanceId Indicates ID of third-party framework instance.
+    * @param elementId The unique id of the component ID.
+    * @param focusType Indicates focus type.
+    * @param requestId Matched the request and response. transfer it by callback only.
+    * @param elementInfo The all obtained accessibility elements list information.
+    * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
+    *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+    */
+    int32_t (*findFocusedAccessibilityNode)(const char* instanceId, int64_t elementId,
+        ArkUI_AccessibilityFocusType focusType, int32_t requestId, ArkUI_AccessibilityElementInfo* elementInfo);
+    /**
+    * @brief Called to find the next focusable node based on the reference node.
+    * @param instanceId Indicates ID of third-party framework instance.
+    * @param elementId The unique id of the component ID.
+    * @param direction Indicates direction.
+    * @param requestId Matched the request and response. transfer it by callback only.
+    * @param elementInfo The all obtained accessibility elements list information.
+    * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
+    *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+    */
+    int32_t (*findNextFocusAccessibilityNode)(
+        const char* instanceId, int64_t elementId, ArkUI_AccessibilityFocusMoveDirection direction,
+        int32_t requestId, ArkUI_AccessibilityElementInfo* elementInfo);
+    /**
+    * @brief Called to execute a specified action on a specified node.
+    * @param instanceId Indicates ID of third-party framework instance.
+    * @param elementId The unique id of the component ID.
+    * @param action Indicates action.
+    * @param actionArguments Indicates action arguments.
+    * @param requestId Matched the request and response. transfer it by callback only.
+    * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
+    *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+    */
+    int32_t (*executeAccessibilityAction)(const char* instanceId, int64_t elementId,
+        ArkUI_Accessibility_ActionType action, ArkUI_AccessibilityActionArguments *actionArguments, int32_t requestId);
+    /**
+    * @brief Called to clear the focus state of the current focused node.
+    * @param instanceId Indicates ID of third-party framework instance.
+    * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
+    *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_FAILED} if the operation is failed.
+    */
+    int32_t (*clearFocusedFocusAccessibilityNode)(const char* instanceId);
+    /**
+    * @brief Called to query the current cursor position of the specified node.
+    * @param instanceId Indicates ID of third-party framework instance.
+    * @param elementId The unique id of the component ID.
+    * @param requestId Matched the request and response. transfer it by callback only.
+    * @param index Indicates index.
+    * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
+    *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+    */
+    int32_t (*getAccessibilityNodeCursorPosition)(const char* instanceId, int64_t elementId,
+        int32_t requestId, int32_t* index);
+} ArkUI_AccessibilityProviderCallbacksWithInstance;
+
+/**
  * @brief Registers a callback for this <b>ArkUI_AccessibilityProvider</b> instance.
  *
  * @param provider Indicates the pointer to the <b>ArkUI_AccessibilityProvider</b> instance.
@@ -403,6 +489,18 @@ typedef struct ArkUI_AccessibilityProviderCallbacks {
  */
 int32_t OH_ArkUI_AccessibilityProviderRegisterCallback(
     ArkUI_AccessibilityProvider* provider, ArkUI_AccessibilityProviderCallbacks* callbacks);
+
+/**
+ * @brief Registers a callback with instance for this <b>ArkUI_AccessibilityProvider</b> instance.
+ * @param instanceId Indicates ID of third-party framework instance.
+ * @param provider Indicates the pointer to the <b>ArkUI_AccessibilityProvider</b> instance.
+ * @param callbacks Indicates the pointer to the <b>ArkUI_AccessibilityProviderCallbacksWithInstance</b> callback.
+ * @return Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_SUCCESSFUL} if the operation is successful.
+ *         Returns {@link ARKUI_ACCESSIBILITY_NATIVE_RESULT_BAD_PARAMETER} if a parameter is incorrect.
+ * @since 15
+ */
+int32_t OH_ArkUI_AccessibilityProviderRegisterCallbackWithInstance(const char* instanceId,
+    ArkUI_AccessibilityProvider* provider, ArkUI_AccessibilityProviderCallbacksWithInstance* callbacks);
 
 /**
  * @brief Sends accessibility event information.
