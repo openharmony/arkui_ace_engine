@@ -43,13 +43,6 @@ struct NativeSheetInfoArray {
     NativeSheetInfo* sheetInfo;
 };
 
-struct NativeEdgeStyle {
-    int32_t top;
-    int32_t right;
-    int32_t bottom;
-    int32_t left;
-};
-
 struct NativeOptionConfirm {
     bool hasValue;
     NativeConfirm value;
@@ -74,11 +67,6 @@ struct NativeBorderRadiuses {
     int32_t bottomLeftUnit;
     double bottomRightRadiuses;
     int32_t bottomRightUnit;
-};
-
-struct NativeOptionEdgeStyle {
-    bool hasValue;
-    NativeEdgeStyle value;
 };
 
 struct NativeOptionRadius {
@@ -109,15 +97,6 @@ struct NativeActionSheetOptions {
     NativeOptionLength width;
     NativeOptionLength height;
     NativeOptionInt64 transition;
-};
-
-struct NativeShadowOptions {
-    double radius;
-    int32_t shadowType;
-    uint32_t color;
-    double offsetX;
-    double offsetY;
-    bool fill;
 };
 
 CJ_EXPORT void FfiOHOSAceFrameworkActionSheetShowWithShadowOptions(

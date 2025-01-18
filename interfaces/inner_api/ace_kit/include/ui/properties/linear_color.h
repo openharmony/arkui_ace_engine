@@ -93,10 +93,10 @@ public:
 
     uint32_t GetValue() const
     {
-        return (static_cast<uint32_t>(std::clamp<int16_t>(blue_, 0, UINT8_MAX))) |
-               (static_cast<uint32_t>((std::clamp<int16_t>(green_, 0, UINT8_MAX)) << 8)) |
-               (static_cast<uint32_t>((std::clamp<int16_t>(red_, 0, UINT8_MAX)) << 16)) |
-               (static_cast<uint32_t>((std::clamp<int16_t>(alpha_, 0, UINT8_MAX)) << 24));
+        return (static_cast<uint32_t>(std::clamp<uint16_t>(blue_, 0, UINT8_MAX))) |
+               (static_cast<uint32_t>((std::clamp<uint16_t>(green_, 0, UINT8_MAX)) << 8)) |
+               (static_cast<uint32_t>((std::clamp<uint16_t>(red_, 0, UINT8_MAX)) << 16)) |
+               (static_cast<uint32_t>((std::clamp<uint16_t>(alpha_, 0, UINT8_MAX)) << 24));
     }
 
     Color BlendOpacity(double opacityRatio) const

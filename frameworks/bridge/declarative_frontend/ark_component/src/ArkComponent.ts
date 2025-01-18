@@ -5039,7 +5039,7 @@ class UIGestureEvent {
     this._weakNodePtr = weakNodePtr;
   }
   registerFrameNodeDeletedCallback(nodePtr): void {
-    this._destructorCallback = (elementId: number) => {
+    this._destructorCallback = (elementId: number): void => {
       globalThis.__mapOfModifier__.delete(elementId);
     };
     getUINativeModule().common.registerFrameNodeDestructorCallback(nodePtr, this._destructorCallback);

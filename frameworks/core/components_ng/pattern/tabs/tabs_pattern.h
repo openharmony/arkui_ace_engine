@@ -164,6 +164,10 @@ private:
     void FireTabContentStateCallback(int32_t oldIndex, int32_t nextIndex) const;
     void UpdateIndex(const RefPtr<FrameNode>& tabsNode, const RefPtr<FrameNode>& tabBarNode,
         const RefPtr<FrameNode>& swiperNode, const RefPtr<TabsLayoutProperty>& tabsLayoutProperty);
+    void InitFocusEvent();
+    RefPtr<FocusHub> GetCurrentFocusNode(FocusIntension intension);
+    void SetLastWeakFocusNode(const RefPtr<FrameNode>& tabsNode, const RefPtr<FrameNode>& tabBarNode,
+        const RefPtr<TabsLayoutProperty>& tabsLayoutProperty, int32_t index);
 
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;

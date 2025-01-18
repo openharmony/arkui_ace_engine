@@ -1154,7 +1154,13 @@ void PipelineContext::SetupRootElement()
     if (!stageManager_) {
         stageManager_ = MakeRefPtr<StageManager>(stageNode);
     }
-    auto frameNode = DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() :
+    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
+        auto frontend = weakFrontend.Upgrade();
+        CHECK_NULL_RETURN(frontend, "");
+        return frontend->GetPagePathByUrl(url);
+    };
+    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
+    auto frameNode = DynamicCast<FrameNode>(installationFree_ ? atomicService->GetParent() :
         stageNode->GetParent());
     overlayManager_ = MakeRefPtr<OverlayManager>(frameNode);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
@@ -1167,7 +1173,7 @@ void PipelineContext::SetupRootElement()
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     focusManager_ = GetOrCreateFocusManager();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
-        DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
+        DynamicCast<FrameNode>(installationFree_ ? atomicService->GetParent() : stageNode->GetParent()));
 
     OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_))](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
@@ -1240,6 +1246,12 @@ void PipelineContext::SetupSubRootElement()
     if (!stageManager_) {
         stageManager_ = MakeRefPtr<StageManager>(nullptr);
     }
+    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
+        auto frontend = weakFrontend.Upgrade();
+        CHECK_NULL_RETURN(frontend, "");
+        return frontend->GetPagePathByUrl(url);
+    };
+    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
@@ -2102,10 +2114,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 
 void PipelineContext::MarkDirtyOverlay()
 {
-    if (rootNode_) {
-        auto lastChild = rootNode_->GetLastChild();
-        if (lastChild && lastChild->GetTag() == V2::POPUP_ETS_TAG) {
-            lastChild->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
+    CHECK_NULL_VOID(rootNode_);
+    auto childNodes = rootNode_->GetChildren();
+    for (auto child: childNodes) {
+        if (child && child->GetTag() == V2::POPUP_ETS_TAG) {
+            child->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
         }
     }
 }
@@ -2232,7 +2245,7 @@ float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positi
     CHECK_NULL_RETURN(host, newKeyboardOffset);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, newKeyboardOffset);
-    auto paintOffset = host->GetPaintRectOffset();
+    auto paintOffset = host->GetPaintRectOffset(false, true);
     auto frameSize = geometryNode->GetFrameSize();
     auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffsetDirectly(),
         frameSize.Height() + CARET_AVOID_OFFSET.ConvertToPx(), rootSize);
@@ -3557,8 +3570,8 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32
 void PipelineContext::ReDispatch(KeyEvent& keyEvent)
 {
     CHECK_NULL_VOID(eventManager_);
-    TAG_LOGD(AceLogTag::ACE_WEB, "Web ReDispach key event: code:%{public}d/action:%{public}d.", keyEvent.code,
-        keyEvent.action);
+    TAG_LOGD(AceLogTag::ACE_WEB, "Web ReDispach key event: code:" SEC_PLD(%{public}d) "/action:%{public}d.",
+        SEC_PARAM(keyEvent.code), keyEvent.action);
     eventManager_->ReDispatch(keyEvent);
 }
 
@@ -3649,7 +3662,7 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
     }
 
-    DispatchAxisEventToDragDropManager(event, node);
+    DispatchAxisEventToDragDropManager(event, node, etsSerializedGesture);
 
     if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
         eventManager_->AxisTest(scaleEvent, node);
@@ -3679,7 +3692,8 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     }
 }
 
-void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node)
+void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node,
+    SerializedGesture& etsSerializedGesture)
 {
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     auto dragManager = GetDragDropManager();
@@ -3693,6 +3707,16 @@ void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event,
             // If received rotate event, no need to touchtest.
             if (!event.isRotationEvent) {
                 eventManager_->TouchTest(scaleEvent, node, touchRestrict);
+                auto axisTouchTestResults_ = eventManager_->GetAxisTouchTestResults();
+                auto formEventMgr = this->GetFormEventManager();
+                if (formEventMgr) {
+                    formEventMgr->HandleEtsCardTouchEvent(touchRestrict.touchEvent, etsSerializedGesture);
+                }
+                auto formGestureMgr =  this->GetFormGestureManager();
+                if (formGestureMgr) {
+                    formGestureMgr->LinkGesture(event, this, node, axisTouchTestResults_,
+                        etsSerializedGesture, eventManager_);
+                }
             }
         }
         eventManager_->DispatchTouchEvent(scaleEvent);

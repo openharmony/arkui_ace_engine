@@ -27,6 +27,7 @@
 #include "js_native_api.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
+#include "ui/base/utils/utils.h"
 #include "ui_extension_context.h"
 #include "ui/rs_surface_node.h"
 #include "window_manager.h"
@@ -117,7 +118,7 @@ const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.e
 const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
 std::mutex g_mutexFormRenderFontFamily;
 constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
-
+constexpr int32_t EXTENSION_HALF_SCREEN_MODE = 2;
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 #else
@@ -1956,7 +1957,7 @@ bool AceContainer::DumpInfo(const std::vector<std::string>& params)
 
 bool AceContainer::DumpRSNodeByStringID(const std::vector<std::string>& params)
 {
-    if (!params.empty() && params[0] == "-resnodebyid" && (params.size() > 1)) {
+    if (!params.empty() && params[0] == "-rsnodebyid" && (params.size() > 1)) {
         DumpLog::GetInstance().Print("------------DumpRSNodeByStringID------------");
         DumpLog::GetInstance().Print(1, "Query by stringid: " + params[1]);
         auto frameNode = NG::Inspector::GetFrameNodeByKey(params[1], true, true);
@@ -3542,6 +3543,17 @@ void AceContainer::TerminateUIExtension()
     auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
     CHECK_NULL_VOID(uiExtensionContext);
     uiExtensionContext->TerminateSelf();
+}
+
+bool AceContainer::UIExtensionIsHalfScreen()
+{
+    if (!IsUIExtensionWindow()) {
+        return false;
+    }
+    auto sharedContext = runtimeContext_.lock();
+    auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
+    CHECK_NULL_RETURN(uiExtensionContext, false);
+    return uiExtensionContext->GetScreenMode() == EXTENSION_HALF_SCREEN_MODE;
 }
 
 Rosen::WMError AceContainer::RegisterAvoidAreaChangeListener(sptr<Rosen::IAvoidAreaChangedListener>& listener)

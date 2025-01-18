@@ -241,7 +241,7 @@ void SheetView::CreateCloseIconNode(RefPtr<FrameNode> buttonNode)
     buttonNode->AddChild(iconNode);
 }
 
-RefPtr<FrameNode> SheetView::CreateScrollNode(NG::SheetStyle& sheetStyle)
+RefPtr<FrameNode> SheetView::CreateScrollNode(const NG::SheetStyle& sheetStyle)
 {
     auto scroll = FrameNode::CreateFrameNode(
         V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());

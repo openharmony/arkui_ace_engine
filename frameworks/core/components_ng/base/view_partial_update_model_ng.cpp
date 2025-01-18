@@ -18,6 +18,7 @@
 #include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
+#include "core/components_ng/pattern/custom/custom_app_bar_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,6 +35,8 @@ RefPtr<AceType> ViewPartialUpdateModelNG::CreateNode(NodeInfoPU&& info)
     RefPtr<NG::CustomNodeBase> customNode;
     if (info.isCustomTitle) {
         customNode = NG::CustomTitleNode::CreateCustomTitleNode(viewId, key);
+    } else if (info.isCustomAppBar) {
+        customNode = NG::CustomAppBarNode::CreateCustomAppBarNode(viewId, key);
     } else if (info.hasMeasureOrLayout) {
         customNode = NG::CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(viewId, key);
         auto customMeasureLayoutNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(customNode);

@@ -80,6 +80,7 @@ void SetDragEventProperty(const RefPtr<OHOS::Ace::DragEvent>& info, ArkUINodeEve
     }
     event.dragEvent.dataTypes = strList.data();
     event.dragEvent.dataTypesMaxStrLength = maxLength + 1;
+    event.dragEvent.key = info->GetUdKey().c_str();
 }
 
 void SetOnDragDrop(ArkUINodeHandle node, void* extraParam)

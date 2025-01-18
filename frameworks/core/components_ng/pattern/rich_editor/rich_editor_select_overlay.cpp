@@ -289,6 +289,7 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
     menuInfo.showCut = isShowItem && hasValue && !pattern->textSelector_.SelectNothing();
     menuInfo.showPaste = IsShowPaste();
     menuInfo.menuIsShow = IsShowMenu();
+    menuInfo.showTranslate = false;
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showAIWrite = pattern->IsShowAIWrite() && hasValue;
     pattern->UpdateSelectMenuInfo(menuInfo);

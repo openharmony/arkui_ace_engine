@@ -1186,7 +1186,19 @@ export struct ComposeListItem {
 
   private envCallback: EnvironmentCallback = {
     onConfigurationUpdated: (config) => {
-      this.fontSizeScale = this.decideFontSizeScale();
+      if (config === undefined || !this.isFollowingSystemFontScale) {
+        this.fontSizeScale = 1;
+        return;
+      }
+      try {
+        this.fontSizeScale = Math.min(
+          this.maxFontScale, config.fontSizeScale ?? 1);
+      } catch (paramError) {
+        let code = (paramError as BusinessError).code;
+        let message = (paramError as BusinessError).message;
+        hilog.error(0x3900, 'Ace',
+          `ComposeListItem environmentCallback error: ${code}, ${message}`);
+      }
     },
     onMemoryLevel: (level) => {
     }

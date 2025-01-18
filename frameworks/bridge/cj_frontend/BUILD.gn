@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -189,6 +189,10 @@ template("cj_frontend") {
       "interfaces/cj_ffi/font/cj_font_ffi.cpp",
       "interfaces/cj_ffi/matrix4/cj_matrix4_ffi.cpp",
       "interfaces/cj_ffi/measure/cj_measure_ffi.cpp",
+      "interfaces/cj_ffi/observer/cj_observer.cpp",
+      "interfaces/cj_ffi/observer/observer.cpp",
+      "interfaces/cj_ffi/observer/observer_ffi.cpp",
+      "interfaces/cj_ffi/observer/observer_listener.cpp",
       "interfaces/cj_ffi/prompt/cj_prompt_ffi.cpp",
       "interfaces/cj_ffi/router/cj_router_ffi.cpp",
       "interfaces/cj_ffi/state_manage/cj_environment.cpp",

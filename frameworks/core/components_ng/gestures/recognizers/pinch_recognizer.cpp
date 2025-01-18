@@ -93,10 +93,6 @@ void PinchRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     if (static_cast<int32_t>(activeFingers_.size()) >= fingers_) {
         return;
     }
-    if (!IsInAttachedNode(event)) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
 
     if (fingersId_.find(event.id) == fingersId_.end()) {
         fingersId_.insert(event.id);

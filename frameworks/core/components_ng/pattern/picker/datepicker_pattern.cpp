@@ -34,6 +34,9 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -58,6 +61,7 @@ const int32_t RATE = 2;
 const int32_t MONTH_DECEMBER = 12;
 constexpr int32_t RATIO_ZERO = 0;
 constexpr int32_t RATIO_ONE = 1;
+constexpr int32_t SECOND_PAGE = 1;
 } // namespace
 bool DatePickerPattern::inited_ = false;
 const std::string DatePickerPattern::empty_;
@@ -379,7 +383,7 @@ void DatePickerPattern::InitDisabled()
     CHECK_NULL_VOID(renderContext);
     if (!enabled_) {
         renderContext->UpdateOpacity(curOpacity_ * DISABLE_ALPHA);
-    } else {
+    } else if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         renderContext->UpdateOpacity(curOpacity_);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -704,9 +708,25 @@ bool DatePickerPattern::CheckFocusID(int32_t childSize)
     if (focusKeyID_ > childSize - 1) {
         focusKeyID_ = childSize - 1;
         return false;
-    } else if (focusKeyID_ < 0) {
-        focusKeyID_ = 0;
-        return false;
+    }
+
+    if (NeedAdaptForAging()) {
+        if (GetCurrentPage() == SECOND_PAGE) {
+            if (focusKeyID_ < INDEX_MONTH) {
+                focusKeyID_ = INDEX_MONTH;
+                return false;
+            }
+        } else {
+            if (focusKeyID_ != INDEX_YEAR) {
+                focusKeyID_ = INDEX_YEAR;
+                return false;
+            }
+        }
+    } else {
+        if (focusKeyID_ < INDEX_YEAR) {
+            focusKeyID_ = INDEX_YEAR;
+            return false;
+        }
     }
     return true;
 }
@@ -964,9 +984,41 @@ void DatePickerPattern::FlushMonthDaysColumn()
     yearColumnPattern->FlushCurrentOptions();
 }
 
+bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string& compName,
+    const std::string& eventName, const std::string& eventData)
+{
+#if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
+    auto dataJson = JsonUtil::ParseJsonString(eventData);
+    CHECK_NULL_RETURN(dataJson, false);
+    auto value = InspectorJsonUtil::Create();
+    CHECK_NULL_RETURN(value, false);
+    value->Put(compName.c_str(), eventName.c_str());
+    value->Put("year", dataJson->GetUInt("year"));
+    value->Put("month", dataJson->GetUInt("month") + 1); // month: 1-12
+    value->Put("day", dataJson->GetUInt("day"));
+    value->Put("hour", dataJson->GetUInt("hour"));
+    value->Put("minute", dataJson->GetUInt("minute"));
+    UiSessionManager::GetInstance().ReportComponentChangeEvent(nodeId, "event", value);
+#endif
+    return true;
+}
+
+bool DatePickerPattern::ReportDateChangeEvent(const std::string& compName,
+    const std::string& eventName, const std::string& eventData)
+{
+    auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
+    if ((datePickerEventHub != nullptr) && datePickerEventHub->HasSetDialogChange()) {
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    return ReportDateChangeEvent(host->GetId(), compName, eventName, eventData);
+}
+
 void DatePickerPattern::FireChangeEvent(bool refresh)
 {
     if (refresh) {
+        ReportDateChangeEvent("DatePicker", "onDateChange", GetSelectedObject(true));
         auto datePickerEventHub = GetEventHub<DatePickerEventHub>();
         CHECK_NULL_VOID(datePickerEventHub);
         auto str = GetSelectedObject(true);
@@ -2623,6 +2675,7 @@ void DatePickerPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Insp
         jsonConstructor->Put("end", GetDateString(endDateSolar_).c_str());
         jsonConstructor->Put("selected", GetDateString(selectedDate_).c_str());
     }
+    jsonConstructor->Put("mode", rowLayoutProperty->GetDatePickerMode().c_str());
     json->PutExtAttr("constructor", jsonConstructor, filter);
     json->PutExtAttr("enableHapticFeedback", isEnableHaptic_, filter);
 }
@@ -2649,5 +2702,21 @@ void DatePickerPattern::SetFocusEnable()
 
     isFocus_ = true;
     focusHub->SetFocusable(true);
+}
+
+bool DatePickerPattern::NeedAdaptForAging()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    CHECK_NULL_RETURN(pickerTheme, false);
+
+    if (GreatOrEqual(pipeline->GetFontScale(), pickerTheme->GetMaxOneFontScale()) &&
+        GreatOrEqual(Dimension(pipeline->GetRootHeight()).ConvertToVp(), pickerTheme->GetDeviceHeightLimit())) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

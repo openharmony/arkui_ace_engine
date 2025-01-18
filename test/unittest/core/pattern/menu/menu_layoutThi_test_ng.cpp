@@ -568,7 +568,9 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg049, TestSize.Level1)
     // get menuPattern and property
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    menuPattern->enableFold_ = true;
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->enableFold_ = true;
     auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     ASSERT_NE(property, nullptr);
     ASSERT_TRUE(property->GetPositionOffset().has_value());
@@ -626,7 +628,9 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg050, TestSize.Level1)
 
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    menuPattern->enableFold_ = true;
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->enableFold_ = true;
 
     auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     ASSERT_NE(property, nullptr);
@@ -689,7 +693,9 @@ HWTEST_F(MenuLayout3TestNg, MenuLayoutAlgorithmTestNg051, TestSize.Level1)
     // get menuPattern and property
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    menuPattern->enableFold_ = true;
+    auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
+    ASSERT_NE(menuWrapperPattern, nullptr);
+    menuWrapperPattern->enableFold_ = true;
 
     auto property = menuNode->GetLayoutProperty<MenuLayoutProperty>();
     ASSERT_NE(property, nullptr);

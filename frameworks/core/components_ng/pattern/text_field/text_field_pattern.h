@@ -317,6 +317,7 @@ public:
 
     void InsertValue(const std::u16string& insertValue, bool isIME = false) override;
     void InsertValue(const std::string& insertValue, bool isIME = false) override;
+    void NotifyImfFinishTextPreview();
     int32_t InsertValueByController(const std::u16string& insertValue, int32_t offset);
     void InsertValueOperation(const SourceAndValueInfo& info);
     void CalcCounterAfterFilterInsertValue(int32_t curLength, const std::u16string insertValue, int32_t maxLength);
@@ -1018,6 +1019,7 @@ public:
     void HandleOnCopy(bool isUsingExternalKeyboard = false) override;
     void HandleOnPaste() override;
     void HandleOnCut() override;
+    bool IsShowTranslate();
     bool IsShowSearch();
     void HandleOnCameraInput();
     void HandleOnAIWrite();

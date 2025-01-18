@@ -78,10 +78,6 @@ void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
     if (static_cast<int32_t>(activeFingers_.size()) >= DEFAULT_ROTATION_FINGERS) {
         return;
     }
-    if (!IsInAttachedNode(event)) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
     if (fingers_ > MAX_ROTATION_FINGERS) {
         fingers_ = DEFAULT_ROTATION_FINGERS;
     }

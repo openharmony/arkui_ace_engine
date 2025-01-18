@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
@@ -507,6 +508,19 @@ ArkUINativeModuleValue FrameNodeBridge::GetParent(ArkUIRuntimeCallInfo* runtimeC
     auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getParent(nativeNode);
     CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
     return FrameNodeBridge::MakeFrameNodeInfo(vm, nodePtr);
+}
+ArkUINativeModuleValue FrameNodeBridge::MoveTo(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, true));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    auto targetNativeNode = nodePtr(secondArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(2); // 2 : index of child node position
+    int index = thirdArg->ToNumber(vm)->Value();
+    GetArkUINodeModifiers()->getFrameNodeModifier()->moveNodeTo(nativeNode, targetNativeNode, index);
+    return panda::JSValueRef::Undefined(vm);
 }
 ArkUINativeModuleValue FrameNodeBridge::GetIdByNodePtr(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -1770,5 +1784,37 @@ ArkUINativeModuleValue FrameNodeBridge::TriggerOnRecycle(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     frameNode->OnRecycle();
     return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetCrossLanguageOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, ERROR_CODE_PARAM_INVALID));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    bool attributeSetting = secondArg->ToBoolean(vm)->Value();
+    int result = GetArkUINodeModifiers()->getFrameNodeModifier()->setCrossLanguageOptions(nativeNode, attributeSetting);
+    return panda::NumberRef::New(vm, result);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetCrossLanguageOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    bool result = GetArkUINodeModifiers()->getFrameNodeModifier()->getCrossLanguageOptions(nativeNode);
+    return panda::BooleanRef::New(vm, result);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CheckIfCanCrossLanguageAttributeSetting(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    bool result = GetArkUINodeModifiers()->getFrameNodeModifier()->checkIfCanCrossLanguageAttributeSetting(nativeNode);
+    return panda::BooleanRef::New(vm, result);
 }
 } // namespace OHOS::Ace::NG

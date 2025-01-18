@@ -28,6 +28,11 @@ void FocusBox::SetStyle(const FocusBoxStyle& style)
     }
 }
 
+std::optional<FocusBoxStyle> FocusBox::GetStyle() const
+{
+    return paintStyle_;
+}
+
 bool FocusBox::HasCustomStyle() const
 {
     return paintStyle_.has_value();

@@ -3418,10 +3418,12 @@ typedef enum {
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
      * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
      * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
+     * After api 16 the default value change to  <b>ARKUI_BUTTON_ROUNDED_RECTANGLE</b>.
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
      * .value[0].i32: button type. The parameter type is {@link ArkUI_ButtonType}.
      * The default value is <b>ARKUI_BUTTON_TYPE_CAPSULE</b>. \n
+     * After api 16 the default value change to  <b>ARKUI_BUTTON_ROUNDED_RECTANGLE</b>.
      *
      */
     NODE_BUTTON_TYPE,
@@ -3652,6 +3654,37 @@ typedef enum {
      *
      */
     NODE_XCOMPONENT_SURFACE_SIZE,
+    /**
+     * @brief Defines the rectangle information of surface created by the <b><XComponent></b> component.
+     * This attribute can be set and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The horizontal offset of the surface relative to XComponent, in pixels. \n
+     * .value[1].i32: The vertical offset of the surface relative to XComponent, in pixels. \n
+     * .value[2].i32: The width of the surface created by XComponent, in pixels. \n
+     * .value[3].i32: The height of the surface created by XComponent, in pixels. \n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: The horizontal offset of the surface relative to XComponent, in pixels. \n
+     * .value[1].i32: The vertical offset of the surface relative to XComponent, in pixels. \n
+     * .value[2].i32: The width of the surface created by XComponent, in pixels. \n
+     * .value[3].i32: The height of the surface created by XComponent, in pixels. \n
+     * @since 16
+     */
+    NODE_XCOMPONENT_SURFACE_RECT,
+    /**
+     * @brief Defines whether to enable the AI analyzer for the <b><XComponent></b> component.
+     * This attribute can be set and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * value[0].i32: The parameter type is 1 or 0.
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: The parameter type is 1 or 0.
+     * @since 16
+     */
+    NODE_XCOMPONENT_ENABLE_ANALYZER,
 
     /**
      * @brief Defines whether to display the lunar calendar in the date picker.
@@ -8592,6 +8625,21 @@ int32_t OH_ArkUI_NodeUtils_GetAttachedNodeHandleById(const char* id, ArkUI_NodeH
 int32_t OH_ArkUI_NodeUtils_GetWindowInfo(ArkUI_NodeHandle node, ArkUI_HostWindowInfo** info);
 
 /**
+ * @brief Move the node handle to target parent node as child.
+ *
+ * @param node The node handle of the node to move.
+ * @param target_parent The node handle of target parent.
+ * @param index Indicates the index which the node is moved to. If the value is a nagative number of invalid, the
+ *              node is moved to the end of the target parent node.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 16
+ */
+int32_t OH_ArkUI_NodeUtils_MoveTo(ArkUI_NodeHandle node, ArkUI_NodeHandle target_parent, int32_t index);
+
+/**
  * @brief The event called when the sliding operation offset changes.
  *
  * @param node Indicates the target node.
@@ -8735,7 +8783,49 @@ int32_t OH_ArkUI_UnregisterLayoutCallbackOnNodeHandle(ArkUI_NodeHandle node);
  */
 int32_t OH_ArkUI_UnregisterDrawCallbackOnNodeHandle(ArkUI_NodeHandle node);
 
+/**
+ * @brief Get the snapshot pixelmap for the given node synchronously, will get error if the node is not on the
+ * tree or is not rendered yet.
+ * Note: the pixelmap should be released through OH_PixelmapNative_Release when it's not used any more.
+ *
+ * @param node Indicates the target node.
+ * @param snapshotOptions the given configuration for taking snapshot, can be null for using default.
+ * @param pixelmap Pixelmap pointer created by system, it's the out result.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ *         Returns {@link ARKUI_ERROR_CODE_INTERNAL_ERROR} if the snapshot taking failed will null pixelmap returned.
+ *         Returns {@link ARKUI_ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT} if the snapshot taking is timeout.
+ * @since 16
+ */
+int32_t OH_ArkUI_GetNodeSnapshot(ArkUI_NodeHandle node, ArkUI_SnapshotOptions* snapshotOptions,
+    OH_PixelmapNative** pixelmap);
 
+/**
+ * @brief Set the cross-language option of the target node handle.
+ *
+ * @param node The target node handle.
+ * @param option The cross-language option {@link ArkUI_CrossLanguageOption}.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 16
+ */
+int32_t OH_ArkUI_NodeUtils_SetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
+
+/**
+ * @brief Get the cross-language option of the target node handle.
+ *
+ * @param node The target node handle.
+ * @param option The cross-language option {@link ArkUI_CrossLanguageOption}.
+ * @return Error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} success.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} Function parameter exception.
+ *         {@link ARKUI_ERROR_CODE_CAPI_INIT_ERROR} if the CAPI init error.
+ * @since 16
+ */
+int32_t OH_ArkUI_NodeUtils_GetCrossLanguageOption(ArkUI_NodeHandle node, ArkUI_CrossLanguageOption* option);
 #ifdef __cplusplus
 };
 #endif

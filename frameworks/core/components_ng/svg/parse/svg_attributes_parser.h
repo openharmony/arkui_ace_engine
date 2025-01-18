@@ -315,8 +315,6 @@ struct SvgFeCommonAttribute {
     std::string result;
     SvgFeIn in;
     SvgColorInterpolationType colorInterpolationType = SvgColorInterpolationType::SRGB;
-    std::optional<bool> isXValid;
-    std::optional<bool> isYValid;
     std::optional<bool> isWidthValid;
     std::optional<bool> isHeightValid;
 };

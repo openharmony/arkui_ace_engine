@@ -181,6 +181,13 @@ typedef struct ArkUI_DragAndDropInfo ArkUI_DragAndDropInfo;
 typedef struct OH_UdmfData OH_UdmfData;
 
 /**
+ * @brief Defines a struct for UDMF to get data with progress info.
+ *
+ * @since 16
+ */
+typedef struct OH_UdmfGetDataParams OH_UdmfGetDataParams;
+
+/**
  * @brief Defines the <b>Pixelmap</b> struct, which is used to perform operations related to a pixel map.
  *
  * @since 12
@@ -445,6 +452,56 @@ float OH_ArkUI_DragEvent_GetVelocity(ArkUI_DragEvent* event);
  * @since 12
  */
 int32_t OH_ArkUI_DragEvent_GetModifierKeyStates(ArkUI_DragEvent* event, uint64_t* keys);
+
+/**
+*
+* @brief Request to start the data sync process with the sync option.
+*
+* @param event Indicates the pointer to an ArkUI_DragEvent object.
+* @param options Indicates the pointer to an OH_UdmfGetDataParams object.
+* @param key Represents return value after set data to database successfully, it should be not
+*            less than {@link UDMF_KEY_BUFFER_LEN}.
+* @param keyLen Represents the length of key string.
+* @return Returns the result code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+*         Returns {@link ARKUI_ERROR_CODE_DRAG_DATA_SYNC_FAILED } if the data sync is not allowed or failed.
+* @since 16
+*/
+int32_t OH_ArkUI_DragEvent_StartDataLoading(
+    ArkUI_DragEvent* event, OH_UdmfGetDataParams* options, char* key, unsigned int keyLen);
+
+/**
+*
+* @brief Cancel the data sync process.
+*
+* @param uiContext Indicates the pointer to a UI instance.
+* @param key Represents the data key returned by {@link OH_ArkUI_DragEvent_StartDataLoading}.
+* @return Returns the result code.
+*         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+*         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+*         Returns {@link ARKUI_ERROR_CODE_OPERATION_FAILED} if no any data sync is in progress.
+* @since 16
+*/
+int32_t OH_ArkUI_CancelDataLoading(ArkUI_ContextHandle uiContext, const char* key);
+
+/**
+ * @brief Sets whether to disable data prefetch process before the onDrop callback executing.
+ *        The system will retry to getting data until the max time limit (2.4s for now) reaches,
+ *        this's useful for the cross device draging operation, as the system helps to eliminate
+ *        the communication instability, but it's redundant for {@link OH_ArkUI_DragEvent_StartDataLoading}
+ *        method, as it will take care the data fetching with asynchronous mechanism, so must set this
+ *        field to true if using {@link OH_ArkUI_DragEvent_StartDataLoading} in onDrop to avoid the data is
+ *        fetched before onDrop executing unexpectedly.
+ *
+ * @param node Indicates the pointer to a component node.
+ * @param disabled Indicates whether to disable the data pre-fetch process, true for disable, false for not.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 16
+ */
+int32_t OH_ArkUI_DisableDropDataPrefetchOnNode(ArkUI_NodeHandle node, bool disabled);
 
 /**
  * @brief Sets whether to enable strict reporting on drag events.

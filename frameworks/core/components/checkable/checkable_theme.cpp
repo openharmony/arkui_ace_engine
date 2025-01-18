@@ -53,6 +53,7 @@ void CheckboxTheme::Builder::ParsePattern(const RefPtr<ThemeConstants>& themeCon
             checkboxPattern->GetAttr<Dimension>("checkbox_default_padding_size", 2.0_vp);
         theme->defaultWidth_ = checkboxPattern->GetAttr<Dimension>("checkbox_default_size_twelve", 24.0_vp);
         theme->hoverPaddingSize_ = checkboxPattern->GetAttr<Dimension>("checkbox_hover_padding_size", 2.0_vp);
+        theme->showCircleDial_ = static_cast<bool>(checkboxPattern->GetAttr<double>("radio_circle_dial", 0.0));
     }
     theme->hotZoneVerticalPadding_ = theme->hotZoneHorizontalPadding_;
     theme->defaultHeight_ = theme->defaultWidth_;

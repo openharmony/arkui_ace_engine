@@ -14,7 +14,7 @@
  */
 
 import { Theme } from '@ohos.arkui.theme';
-import { LengthMetrics } from '@kit.ArkUI';
+import { LengthMetrics, LengthUnit } from '@kit.ArkUI';
 
 export interface ProgressButtonColorOptions {
   progressColor?: ResourceColor;
@@ -48,7 +48,8 @@ export struct ProgressButton {
   progressButtonWidth?: Length = BUTTON_NORMARL_WIDTH;
   clickCallback: () => void = () => {};
   @Prop enable: boolean = true;
-  colorOptions: ProgressButtonColorOptions | undefined = undefined;
+  @Prop colorOptions: ProgressButtonColorOptions | undefined = undefined;
+  @Prop progressButtonRadius?: LengthMetrics | undefined = undefined;
 
   @State progressColor: ResourceColor = '#330A59F7'
   @State containerBorderColor: ResourceColor = '#330A59F7'
@@ -84,6 +85,16 @@ export struct ProgressButton {
     }
   }
 
+  private getProgressButtonRadius(): LengthMetrics {
+    if (!this.progressButtonRadius || this.progressButtonRadius.unit === LengthUnit.PERCENT) {
+      return LengthMetrics.vp(this.buttonBorderRadius);
+    } else if (this.progressButtonRadius.value < 0) {
+      return LengthMetrics.vp(0);
+    } else {
+      return this.progressButtonRadius;
+    }
+  }
+
   private getLoadingProgress() {
     if (this.isLoading) {
       if(this.progress < 0) {
@@ -96,6 +107,35 @@ export struct ProgressButton {
     }
   }
 
+  private toLengthString(value: LengthMetrics | undefined): string {
+    if (value === void (0)) {
+      return '';
+    }
+    const length: number = value.value;
+    let lengthString: string = '';
+    switch (value.unit) {
+      case LengthUnit.PX:
+        lengthString = `${length}px`;
+        break;
+      case LengthUnit.FP:
+        lengthString = `${length}fp`;
+        break;
+      case LengthUnit.LPX:
+        lengthString = `${length}lpx`;
+        break;
+      case LengthUnit.PERCENT:
+        lengthString = `${length * 100}%`;
+        break;
+      case LengthUnit.VP:
+        lengthString = `${length}vp`;
+        break;
+      default:
+        lengthString = `${length}vp`;
+        break;
+    }
+    return lengthString;
+  }
+
   build() {
     Button() {
       Stack(){
@@ -106,7 +146,8 @@ export struct ProgressButton {
           .borderRadius(this.buttonBorderRadius)
           .width('100%')
           .hoverEffect(HoverEffect.None)
-          .padding({ top: 0.6, left: 0.6, right: 0.6, bottom: 0.6})
+          .style(this.progressButtonRadius ?
+            { borderRadius: this.getProgressButtonRadius() } : {})
           .clip(false)
           .key(PROGRESS_BUTTON_PROGRESS_KEY)
           .color(this.colorOptions?.progressColor ? this.colorOptions?.progressColor : this.progressColor)
@@ -138,11 +179,13 @@ export struct ProgressButton {
           })
           .height(this.textHeight)
           .constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT })
-          .borderRadius(this.buttonBorderRadius)
+          .borderRadius(this.progressButtonRadius ? this.toLengthString(this.getProgressButtonRadius()) :
+          this.buttonBorderRadius)
           .width('100%')
       }
     }
-    .borderRadius(this.buttonBorderRadius)
+    .borderRadius(this.progressButtonRadius ? this.toLengthString(this.getProgressButtonRadius()) :
+    this.buttonBorderRadius)
     .clip(false)
     .hoverEffect(HoverEffect.None)
     .key(PROGRESS_BUTTON_EMPHASIZE_SECONDARY_BUTTON_KEY)

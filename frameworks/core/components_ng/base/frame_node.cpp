@@ -745,6 +745,24 @@ void FrameNode::DumpCommonInfo()
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
     DumpLog::GetInstance().AddDesc(
         std::string("PaintRect without transform: ").append(renderContext_->GetPaintRectWithoutTransform().ToString()));
+    if (GetHostTag() == V2::COLUMN_ETS_TAG || GetHostTag() == V2::ROW_ETS_TAG) {
+        auto widthLayoutPolicy = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty_)
+                                     ->GetWidthLayoutPolicy()
+                                     .value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH));
+        auto heightLayoutPolicy = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty_)
+                                      ->GetHeightLayoutPolicy()
+                                      .value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH));
+        std::string layoutPolicy = "";
+        if (widthLayoutPolicy != static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) {
+            layoutPolicy.append("WidthLayoutPolicy: ").append(std::to_string(widthLayoutPolicy));
+        }
+        if (heightLayoutPolicy != static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) {
+            layoutPolicy.append("HeightLayoutPolicy: ").append(std::to_string(heightLayoutPolicy));
+        }
+        if (layoutPolicy.length() > 0) {
+            DumpLog::GetInstance().AddDesc(layoutPolicy);
+        }
+    }
     if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
         DumpLog::GetInstance().AddDesc(
             std::string("BackgroundColor: ").append(renderContext_->GetBackgroundColor()->ColorToString()));
@@ -1179,6 +1197,7 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
         GeometryNodeToJsonValue(json, filter);
     }
     json->PutFixedAttr("id", propInspectorId_.value_or("").c_str(), filter, FIXED_ATTR_ID);
+    ExtraCustomPropertyToJsonValue(json, filter);
 }
 
 void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
@@ -2732,7 +2751,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     }
 
     int32_t parentId = -1;
-    auto parent = GetAncestorNodeOfFrame(false);
+    auto parent = GetAncestorNodeOfFrame(true);
     if (parent) {
         parentId = parent->GetId();
     }
@@ -3560,10 +3579,10 @@ RectF FrameNode::GetPaintRectToWindowWithTransform()
     auto frameSize = geometryNode->GetFrameSize();
     auto pointList = GetRectPoints(frameSize);
     GetRectPointToParentWithTransform(pointList, Claim(this));
-    auto parent = GetAncestorNodeOfFrame(false);
+    auto parent = GetAncestorNodeOfFrame(true);
     while (parent) {
         if (GetRectPointToParentWithTransform(pointList, parent)) {
-            parent = parent->GetAncestorNodeOfFrame(false);
+            parent = parent->GetAncestorNodeOfFrame(true);
         } else {
             return RectF();
         }
@@ -3577,10 +3596,10 @@ RectF FrameNode::GetPaintRectToWindowWithTransform()
 OffsetF FrameNode::GetParentGlobalOffsetDuringLayout() const
 {
     OffsetF offset {};
-    auto parent = GetAncestorNodeOfFrame(false);
+    auto parent = GetAncestorNodeOfFrame(true);
     while (parent) {
         offset += parent->geometryNode_->GetFrameOffset();
-        parent = parent->GetAncestorNodeOfFrame(false);
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     return offset;
 }
@@ -4112,13 +4131,13 @@ void FrameNode::UpdatePercentSensitive()
     bool percentWidth = layoutAlgorithm_ ? layoutAlgorithm_->GetPercentWidth() : true;
     auto res = layoutProperty_->UpdatePercentSensitive(percentHeight, percentWidth);
     if (res.first) {
-        auto parent = GetAncestorNodeOfFrame(false);
+        auto parent = GetAncestorNodeOfFrame(true);
         if (parent && parent->layoutAlgorithm_) {
             parent->layoutAlgorithm_->SetPercentWidth(true);
         }
     }
     if (res.second) {
-        auto parent = GetAncestorNodeOfFrame(false);
+        auto parent = GetAncestorNodeOfFrame(true);
         if (parent && parent->layoutAlgorithm_) {
             parent->layoutAlgorithm_->SetPercentHeight(true);
         }
@@ -4690,7 +4709,7 @@ bool FrameNode::CheckNeedForceMeasureAndLayout()
 
 OffsetF FrameNode::GetOffsetInScreen()
 {
-    auto frameOffset = GetPaintRectOffset();
+    auto frameOffset = GetPaintRectOffset(false, true);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF(0.0f, 0.0f));
     auto window = pipelineContext->GetWindow();
@@ -4707,7 +4726,7 @@ OffsetF FrameNode::GetOffsetInSubwindow(const OffsetF& subwindowOffset)
     return frameOffset;
 }
 
-RefPtr<PixelMap> FrameNode::GetPixelMap()
+RefPtr<PixelMap> FrameNode::GetDragPixelMap()
 {
     auto gestureHub = GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(gestureHub, nullptr);
@@ -5695,7 +5714,7 @@ OPINC_TYPE_E FrameNode::FindSuggestOpIncNode(std::string& path, const SizeF& bou
 
 void FrameNode::MarkAndCheckNewOpIncNode()
 {
-    auto parent = GetAncestorNodeOfFrame(false);
+    auto parent = GetAncestorNodeOfFrame(true);
     CHECK_NULL_VOID(parent);
     if (parent->GetSuggestOpIncActivatedOnce() && !GetSuggestOpIncActivatedOnce()) {
         SetSuggestOpIncActivatedOnce();
@@ -6206,6 +6225,22 @@ void FrameNode::RemoveExtraCustomProperty(const std::string& key)
     auto iter = extraCustomPropertyMap_.find(key);
     if (iter != extraCustomPropertyMap_.end()) {
         extraCustomPropertyMap_.erase(iter);
+    }
+}
+
+void FrameNode::ExtraCustomPropertyToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    auto mapIter = extraCustomPropertyMap_.find("ToJsonValue");
+    if (mapIter == extraCustomPropertyMap_.end()) {
+        return;
+    }
+
+    auto callback = reinterpret_cast<std::map<std::string, std::string>(*)(std::unordered_map<std::string, void*>)>(
+        mapIter->second);
+    CHECK_NULL_VOID(callback);
+    auto jsonValue = callback(extraCustomPropertyMap_);
+    for (auto iter = jsonValue.begin(); iter != jsonValue.end(); iter++) {
+        json->PutExtAttr(iter->first.c_str(), iter->second.c_str(), filter);
     }
 }
 

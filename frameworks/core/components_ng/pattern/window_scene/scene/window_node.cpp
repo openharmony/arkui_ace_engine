@@ -65,6 +65,10 @@ RefPtr<WindowNode> WindowNode::GetOrCreateWindowNode(const std::string& tag,
     }
 
     auto sceneSession = Rosen::SceneSessionManager::GetInstance().GetSceneSession(sessionId);
+    if (sceneSession == nullptr) {
+        TAG_LOGE(AceLogTag::ACE_WINDOW_SCENE, "sessionId: %{public}d", sessionId);
+        return nullptr;
+    }
     auto screenId = static_cast<int>(sceneSession->GetScreenId());
     auto screenIter = g_windowNodeMap.find(screenId);
     if (screenIter != g_windowNodeMap.end()) {

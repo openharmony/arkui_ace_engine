@@ -29,6 +29,7 @@ class FocusView;
 class FocusManager;
 
 using TabIndexNodeList = std::list<std::pair<int32_t, WeakPtr<FocusHub>>>;
+using OnGetNextFocusNodeFunc = std::function<RefPtr<FocusHub>(FocusReason, FocusIntension)>;
 constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
 constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
 constexpr int32_t MASK_FOCUS_STEP_VERTICAL = 0x01;
@@ -87,7 +88,7 @@ enum class SwitchingUpdateReason : int32_t {
     ON_FOCUS_NODE = 2,
 };
 
-using GetNextFocusNodeFunc = std::function<void(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
+using GetNextFocusNodeFunc = std::function<bool(FocusStep, const WeakPtr<FocusHub>&, WeakPtr<FocusHub>&)>;
 
 enum class FocusStyleType : int32_t {
     NONE = -1,
@@ -474,9 +475,9 @@ public:
 
     bool HandleEvent(const NonPointerEvent& event);
     bool HandleFocusTravel(const FocusEvent& event) override;
-    bool RequestFocusImmediately();
+    bool RequestFocusImmediately(FocusReason reason = FocusReason::DEFAULT);
     void RequestFocus() const;
-    void SwitchFocus(const RefPtr<FocusHub>& focusNode);
+    void SwitchFocus(const RefPtr<FocusHub>& focusNode, FocusReason focusReason = FocusReason::DEFAULT);
     void HandleLastFocusNodeInFocusWindow();
 
     static void LostFocusToViewRoot();
@@ -558,6 +559,20 @@ public:
     void SetOnPreFocusCallback(OnPreFocusFunc&& onPreFocusCallback)
     {
         onPreFocusCallback_ = std::move(onPreFocusCallback);
+    }
+
+    void SetOnGetNextFocusNodeFunc(OnGetNextFocusNodeFunc&& onGetNextFocusNodeFunc)
+    {
+        onGetNextFocusNodeFunc_ = std::move(onGetNextFocusNodeFunc);
+    }
+
+    bool IsAllowedLoop()
+    {
+        return allowedLoop_;
+    }
+    void SetAllowedLoop(bool allowedLoop)
+    {
+        allowedLoop_ = allowedLoop;
     }
 
     void SetOnClearFocusStateInternal(OnClearFocusStateFunc&& onClearFocusCallback)
@@ -841,6 +856,11 @@ public:
     {
         isNodeNeedKey_ = isNodeNeedKey;
     }
+
+    OnGetNextFocusNodeFunc GetOnGetNextFocusNodeFunc()
+    {
+        return onGetNextFocusNodeFunc_;
+    }
 protected:
     bool RequestNextFocusOfKeyTab(const FocusEvent& event);
     bool RequestNextFocusOfKeyEnter();
@@ -910,7 +930,7 @@ private:
 
     void RaiseZIndex(); // Recover z-index in ClearFocusState
 
-    bool RequestFocusImmediatelyInner();
+    bool RequestFocusImmediatelyInner(FocusReason reason = FocusReason::DEFAULT);
     bool RequestNextFocusByKey(const FocusEvent& event);
 
     bool IsComponentDirectionRtl();
@@ -930,6 +950,7 @@ private:
     OnPreFocusFunc onPreFocusCallback_;
     OnClearFocusStateFunc onClearFocusStateCallback_;
     OnPaintFocusStateFunc onPaintFocusStateCallback_;
+    OnGetNextFocusNodeFunc onGetNextFocusNodeFunc_;
 
     RefPtr<TouchEventImpl> focusOnTouchListener_;
 
@@ -945,6 +966,7 @@ private:
     bool hasBackwardMovement_ { false };
     bool isFocusActiveWhenFocused_ { false };
     bool isRaisedZIndex_ { false };
+    bool allowedLoop_ { true };
 
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;
     std::unique_ptr<FocusPaintParam> focusPaintParamsPtr_;
@@ -954,6 +976,7 @@ private:
     RectF rectFromOrigin_;
     ScopeFocusAlgorithm focusAlgorithm_;
     BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
+    FocusReason focusReason_ = FocusReason::DEFAULT;
     FocusDependence focusDepend_ = FocusDependence::CHILD;
 
     std::string focusScopeId_;
@@ -963,6 +986,8 @@ private:
     bool arrowKeyStepOut_ { true };
     bool isSwitchByEnter_ { false };
     bool enableDirectionalKeyFocus_ { false };
+    bool isCustomFocusTravel_ = false;
+    WeakPtr<FocusHub> nextFocusTravelNode_;
 };
 } // namespace OHOS::Ace::NG
 

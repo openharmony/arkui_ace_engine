@@ -136,7 +136,19 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
 inline constexpr int32_t REQUEST_RECREATE = 1;
 
 enum class OptionMenuType { NO_MENU, MOUSE_MENU, TOUCH_MENU };
-enum class OptionMenuActionId { COPY, CUT, PASTE, SELECT_ALL, SEARCH, CAMERA_INPUT, AI_WRITE, APPEAR, DISAPPEAR };
+enum class OptionMenuActionId {
+    COPY,
+    CUT,
+    PASTE,
+    SELECT_ALL,
+    TRANSLATE,
+    SEARCH,
+    SHARE,
+    CAMERA_INPUT,
+    AI_WRITE,
+    APPEAR,
+    DISAPPEAR
+};
 enum class CloseReason {
     CLOSE_REASON_NORMAL = 1,
     CLOSE_REASON_HOLD_BY_OTHER,
@@ -171,7 +183,9 @@ struct SelectMenuInfo {
     bool showPaste = true;
     bool showCopyAll = true;
     bool showCut = true;
-    bool showSearch = true;
+    bool showTranslate = true;
+    bool showSearch = false;
+    bool showShare = false;
     bool showCameraInput = false;
     bool showAIWrite = false;
     std::optional<OffsetF> menuOffset;
@@ -188,7 +202,8 @@ struct SelectMenuInfo {
             return true;
         }
         return !((showCopy == info.showCopy) && (showPaste == info.showPaste) && (showCopyAll == info.showCopyAll) &&
-                 (showCut == info.showCut) && (showSearch == info.showSearch) &&
+                 (showTranslate == info.showTranslate) &&
+                 (showCut == info.showCut) && (showSearch == info.showSearch) && (showShare == info.showShare) &&
                  (showCameraInput == info.showCameraInput) &&
                  (showAIWrite == info.showAIWrite));
     }
@@ -203,7 +218,9 @@ struct SelectMenuInfo {
         JSON_STRING_PUT_BOOL(jsonValue, showPaste);
         JSON_STRING_PUT_BOOL(jsonValue, showCopyAll);
         JSON_STRING_PUT_BOOL(jsonValue, showCut);
+        JSON_STRING_PUT_BOOL(jsonValue, showTranslate);
         JSON_STRING_PUT_BOOL(jsonValue, showSearch);
+        JSON_STRING_PUT_BOOL(jsonValue, showShare);
         JSON_STRING_PUT_BOOL(jsonValue, showCameraInput);
         return jsonValue->ToString();
     }
@@ -214,7 +231,9 @@ struct SelectMenuCallback {
     std::function<void()> onPaste;
     std::function<void()> onSelectAll;
     std::function<void()> onCut;
+    std::function<void()> onTranslate;
     std::function<void()> onSearch;
+    std::function<void()> onShare;
     std::function<void()> onCameraInput;
     std::function<void()> onAIWrite;
 

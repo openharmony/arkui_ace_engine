@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -2220,21 +2221,25 @@ void ViewAbstract::DismissDialog()
     CHECK_NULL_VOID(overlayManager);
     auto rootNode = overlayManager->GetRootNode().Upgrade();
     CHECK_NULL_VOID(rootNode);
-    RefPtr<FrameNode> overlay;
-    if (overlayManager->GetDismissDialogId()) {
-        overlay = overlayManager->GetDialog(overlayManager->GetDismissDialogId());
-    } else {
-        overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
+    RefPtr<FrameNode> dialogNode;
+    auto dialogId = DialogManager::GetInstance().GetDismissDialogId();
+    auto dialogTag = DialogManager::GetInstance().GetDialogTag();
+    if (dialogId && !dialogTag.empty()) {
+        dialogNode = FrameNode::GetFrameNode(dialogTag, dialogId);
     }
-    CHECK_NULL_VOID(overlay);
-    auto pattern = overlay->GetPattern();
+    if (!dialogNode) {
+        if (overlayManager->GetDismissDialogId()) {
+            dialogNode = overlayManager->GetDialog(overlayManager->GetDismissDialogId());
+        } else {
+            dialogNode = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
+        }
+    }
+    CHECK_NULL_VOID(dialogNode);
+    auto pattern = dialogNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
     if (dialogPattern) {
-        overlayManager->RemoveDialog(overlay, false);
-        if (overlayManager->isMaskNode(dialogPattern->GetHost()->GetId())) {
-            overlayManager->PopModalDialog(dialogPattern->GetHost()->GetId());
-        }
+        dialogPattern->OverlayDismissDialog(dialogNode);
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "destroy");
 #endif
@@ -5550,4 +5555,28 @@ void ViewAbstract::RemoveCustomProperty(UINode* frameNode, const std::string& ke
     frameNode->RemoveCustomProperty(key);
 }
 
+int32_t ViewAbstract::CancelDataLoading(const std::string& key)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, -1);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, -1);
+    return dragDropManager->CancelUDMFDataLoading(key);
+}
+
+void ViewAbstract::SetDisableDataPrefetch(bool disableDataPrefetch)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDisableDataPrefetch(disableDataPrefetch);
+}
+
+void ViewAbstract::SetDisableDataPrefetch(FrameNode* frameNode, bool disableDataPrefetch)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetDisableDataPrefetch(disableDataPrefetch);
+}
 } // namespace OHOS::Ace::NG

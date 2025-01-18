@@ -1822,4 +1822,52 @@ HWTEST_F(WaterFlowSegmentTest, Illegal005, TestSize.Level1)
     EXPECT_EQ(secObj->GetSectionInfo()[1].itemsCount, 19);
     EXPECT_EQ(info->itemInfos_.size(), 27);
 }
+
+/**
+ * @tc.name: ChangeHeight004
+ * @tc.desc: test changing height of items which preloaded in section and lazyforeach with scrolling
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, ChangeHeight004, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    model.SetCachedCount(30);
+    CreateItemsInLazyForEach(37, [](uint32_t idx) { return 50.0f; });
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    auto sections = SECTION_7;
+    sections[3].onGetItemMainSizeByIndex = nullptr;
+    secObj->ChangeData(0, 0, sections);
+    CreateDone();
+
+    auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
+    EXPECT_EQ(info->startIndex_, 0);
+    EXPECT_EQ(info->endIndex_, 10);
+    EXPECT_FALSE(GetItem(32, true));
+    PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
+    auto item = GetItem(32, true);
+    ASSERT_TRUE(item);
+
+    EXPECT_EQ(item->GetGeometryNode()->GetFrameRect().ToString(), "RectT (0.00, 0.00) - [400.00 x 50.00]");
+    item->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(300.0f), CalcLength(Dimension(100.0f))));
+    FlushUITasks();
+    EXPECT_EQ(item->GetGeometryNode()->GetFrameRect().ToString(), "RectT (0.00, 1921.00) - [400.00 x 50.00]");
+    EXPECT_EQ(GetChildFrameNode(frameNode_, 32), item);
+    EXPECT_EQ(info->itemInfos_[32].mainOffset, 1921.0f);
+    EXPECT_EQ(info->itemInfos_[32].mainSize, 50.0f);
+    EXPECT_EQ(info->itemInfos_[33].mainOffset, 1973.0f);
+
+    pattern_->isAnimationStop_ = false; // manually set to prevent jumping
+    UpdateCurrentOffset(-1900.0f);
+    EXPECT_EQ(info->startIndex_, 22);
+    EXPECT_EQ(info->endIndex_, 36);
+    EXPECT_EQ(info->itemInfos_.size(), 37);
+    EXPECT_EQ(item->GetGeometryNode()->GetFrameRect().ToString(), "RectT (0.00, 489.00) - [300.00 x 100.00]");
+    EXPECT_EQ(info->itemInfos_[31].mainOffset, 1869.0f);
+    EXPECT_EQ(info->itemInfos_[31].mainSize, 50.0f);
+    EXPECT_EQ(info->itemInfos_[32].mainOffset, 1921.0f);
+    EXPECT_EQ(info->itemInfos_[32].mainSize, 100.0f);
+    EXPECT_EQ(info->itemInfos_[33].mainOffset, 2023.0f);
+}
 } // namespace OHOS::Ace::NG
