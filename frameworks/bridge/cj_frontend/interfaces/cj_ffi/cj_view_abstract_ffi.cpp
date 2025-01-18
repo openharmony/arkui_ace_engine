@@ -159,6 +159,7 @@ void SetPopupParams(CJBindPopupParams bindPopupParams, const RefPtr<PopupParam>&
     if (bindPopupParams.fontStyle < 0 ||  bindPopupParams.fontStyle > static_cast<int32_t>(FONT_STYLES.size())) {
         return;
     }
+    popupParam->SetFontStyle(FONT_STYLES[bindPopupParams.fontStyle]);
     CalcDimension targetSpaceDim(bindPopupParams.targetSpace,
         static_cast<DimensionUnit>(bindPopupParams.targetSpaceUnit));
     CalcDimension arrowOffsetDim(bindPopupParams.arrowOffset,
