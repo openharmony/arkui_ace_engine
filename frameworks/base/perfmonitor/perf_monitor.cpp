@@ -17,6 +17,7 @@
 
 #include "base/log/ace_trace.h"
 #include "base/log/event_report.h"
+#include "base/notification/eventhandler/interfaces/inner_api/event_handler.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "core/common/ace_application_info.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
@@ -292,6 +293,7 @@ void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const s
     SceneRecord* record = GetRecord(sceneId);
     if (IsSceneIdInSceneWhiteList(sceneId)) {
         isExceptAnimator = true;
+        SetVsyncLazyMode();
     }
     ACE_SCOPED_TRACE("Animation start and current sceneId=%s", sceneId.c_str());
     if (record == nullptr) {
@@ -316,6 +318,7 @@ void PerfMonitor::End(const std::string& sceneId, bool isRsRender)
     if (record != nullptr) {
         if (IsSceneIdInSceneWhiteList(sceneId)) {
             isExceptAnimator = false;
+            SetVsyncLazyMode();
         }
         RecordBaseInfo(record);
         record->Report(sceneId, mVsyncTime, isRsRender);
@@ -343,6 +346,7 @@ void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceTyp
                 ACE_SCOPED_TRACE("RecordInputEvent: last_up=%lld(ns)", static_cast<long long>(time));
                 mInputTime[LAST_UP] = time;
                 isResponseExclusion = true;
+                SetVsyncLazyMode();
                 break;
             }
         case FIRST_MOVE:
@@ -578,10 +582,30 @@ bool PerfMonitor::IsExclusionFrame()
     return isResponseExclusion || isStartAppFrame || isBackgroundApp || isExclusionWindow || isExceptAnimator;
 }
 
+void PerfMonitor::SetVsyncLazyMode()
+{
+    static bool lastExcusion = false;
+    bool needExcusion = isResponseExclusion || isStartAppFrame || isBackgroundApp ||
+                        isExclusionWindow || isExceptAnimator;
+    if (lastExcusion == needExcusion) {
+        return;
+    }
+
+    lastExcusion = needExcusion;
+    auto eventhandler = OHOS::AppExecFwk::EventHandler::Current();
+    if (eventhandler == nullptr) {
+        return;
+    }
+    ACE_SCOPED_TRACE("SetVsyncLazyMode: isResponse(%d) isStartApp(%d) isBg(%d) isExcluWindow(%d) isExcAni(%d)",
+        isResponseExclusion, isStartAppFrame, isBackgroundApp, isExclusionWindow, isExceptAnimator);
+    eventhandler->SetVsyncLazyMode(needExcusion);
+}
+
 void PerfMonitor::SetAppStartStatus()
 {
     ACE_FUNCTION_TRACE();
     isStartAppFrame = true;
+    SetVsyncLazyMode();
     startAppTime = GetCurrentRealTimeNs();
 }
 
@@ -592,6 +616,7 @@ void PerfMonitor::CheckInStartAppStatus()
         if (curTime - startAppTime >= STARTAPP_FRAME_TIMEOUT) {
             isStartAppFrame = false;
             startAppTime = curTime;
+            SetVsyncLazyMode();
         }
     }
 }
@@ -599,6 +624,7 @@ void PerfMonitor::CheckInStartAppStatus()
 void PerfMonitor::SetAppForeground(bool isShow)
 {
     isBackgroundApp = !isShow;
+    SetVsyncLazyMode();
 }
 
 void PerfMonitor::CheckExclusionWindow(const std::string& windowName)
@@ -609,12 +635,14 @@ void PerfMonitor::CheckExclusionWindow(const std::string& windowName)
         windowName == "SCBStatusBar15") {
         isExclusionWindow = true;
     }
+    SetVsyncLazyMode();
 }
 
 void PerfMonitor::CheckResponseStatus()
 {
     if (isResponseExclusion) {
         isResponseExclusion = false;
+        SetVsyncLazyMode();
     }
 }
 
@@ -667,6 +695,7 @@ void PerfMonitor::CheckTimeOutOfExceptAnimatorStatus(const std::string& sceneId)
 {
     if (IsSceneIdInSceneWhiteList(sceneId)) {
         isExceptAnimator = false;
+        SetVsyncLazyMode();
     }
 }
 
