@@ -1923,6 +1923,26 @@ void ResetStopBackPress(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetStopBackPress(frameNode, true);
 }
+
+void SetTextInputOnWillChange(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillChange = reinterpret_cast<std::function<bool(const ChangeValueInfo&)>*>(callback);
+        TextFieldModelNG::SetOnWillChangeEvent(frameNode, std::move(*onWillChange));
+    } else {
+        TextFieldModelNG::SetOnWillChangeEvent(frameNode, nullptr);
+    }
+}
+
+void ResetTextInputOnWillChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnWillChangeEvent(frameNode, nullptr);
+}
+
 } // namespace
 namespace NodeModifier {
 const ArkUITextInputModifier* GetTextInputModifier()
@@ -2055,6 +2075,8 @@ const ArkUITextInputModifier* GetTextInputModifier()
         .resetTextInputFilter = ResetTextInputFilter,
         .setTextInputOnSubmitWithEvent = SetTextInputOnSubmitWithEvent,
         .resetTextInputOnSubmitWithEvent = ResetTextInputOnSubmitWithEvent,
+        .setTextInputOnWillChange = SetTextInputOnWillChange,
+        .resetTextInputOnWillChange = ResetTextInputOnWillChange,
         .setTextInputOnChange = SetTextInputOnChange,
         .resetTextInputOnChange = ResetTextInputOnChange,
         .setTextInputOnTextSelectionChange = SetTextInputOnTextSelectionChange,

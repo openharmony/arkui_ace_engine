@@ -1109,6 +1109,20 @@ class TextAreaMarginModifier extends ModifierWithKey<ArkPadding> {
   }
 }
 
+class TextAreaOnWillChangeModifier extends ModifierWithKey<Callback<ChangeValueInfo, boolean>> {
+  constructor(value: Callback<ChangeValueInfo, boolean>) {
+    super(value);
+  }
+  static identity = Symbol('textAreaOnWillChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textArea.resetOnWillChange(node);
+    } else {
+      getUINativeModule().textArea.setOnWillChange(node, this.value);
+    }
+  }
+}
+
 class TextAreaOnWillInsertModifier extends ModifierWithKey<Callback<InsertValue, boolean>> {
   constructor(value: Callback<InsertValue, boolean>) {
     super(value);
@@ -1655,6 +1669,10 @@ class ArkTextAreaComponent extends ArkComponent implements CommonMethod<TextArea
     } else {
       modifierWithKey(this._modifiersWithKeys, TextAreaMarginModifier.identity, TextAreaMarginModifier, undefined);
     }
+    return this;
+  }
+  onWillChange(callback: Callback<ChangeValueInfo, boolean>): this {
+    modifierWithKey(this._modifiersWithKeys, TextAreaOnWillChangeModifier.identity, TextAreaOnWillChangeModifier, callback);
     return this;
   }
   onWillInsert(callback: Callback<InsertValue, boolean>): this {
