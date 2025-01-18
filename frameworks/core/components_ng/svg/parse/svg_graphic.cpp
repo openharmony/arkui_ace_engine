@@ -88,14 +88,19 @@ void SvgGraphic::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
 
 PaintType SvgGraphic::GetFillType()
 {
+    // fill="none" in this shape, return PaintType::None
+    if (attributes_.fillState.IsFillNone()) {
+        return PaintType::NONE;
+    }
+    // fill=pattern, gradient in this shape
     if (!attributes_.fillState.GetHref().empty()) {
         return GetHrefType(attributes_.fillState.GetHref());
     }
-    // If this shape has color, return Color type
-    if (attributes_.fillState.HasColor() && attributes_.fillState.GetColor() != Color::TRANSPARENT) {
+    // fill="color" case
+    if (attributes_.fillState.HasColor()) {
         return PaintType::COLOR;
     }
-    // this shape has no color but gradient inherit from g, return gradient type
+    // this shape fill has no color, Href, gradient, but gradient inherit from parent
     auto& gradient = attributes_.fillState.GetGradient();
     if (gradient.has_value()) {
         auto href = gradient->GetHref();
@@ -104,11 +109,8 @@ PaintType SvgGraphic::GetFillType()
             return GetHrefType(attributes_.fillState.GetHref());
         }
     }
-    // default Not fillNone case, use default color
-    if (!attributes_.fillState.IsFillNone()) {
-        return PaintType::COLOR;
-    }
-    return PaintType::NONE;
+    //By default No Fill in this shape and inherited from parent, apply the default color
+    return PaintType::COLOR;
 }
 
 bool SvgGraphic::CheckHrefPattern()
@@ -234,11 +236,11 @@ void SvgGraphic::InitBrush(RSCanvas& canvas, RSBrush& brush,
             break;
         case PaintType::LINEAR_GRADIENT:
             SetBrushLinearGradient(brush, svgCoordinateSystemContext);
-            brush.SetAlpha(GetAlpha());
+            SetBrushOpacity(brush);
             break;
         case PaintType::RADIAL_GRADIENT:
             SetBrushRadialGradient(brush, svgCoordinateSystemContext);
-            brush.SetAlpha(GetAlpha());
+            SetBrushOpacity(brush);
             break;
         case PaintType::PATTERN:
             SetBrushPattern(canvas,  brush, svgCoordinateSystemContext);
@@ -248,16 +250,9 @@ void SvgGraphic::InitBrush(RSCanvas& canvas, RSBrush& brush,
     }
 }
 
-uint32_t SvgGraphic::GetAlpha()
-{
-    auto curOpacity = attributes_.fillState.GetOpacity().GetValue() * opacity_ * (1.0f / UINT8_MAX);
-    uint32_t alpha = curOpacity * 255;
-    return alpha;
-}
-
 void SvgGraphic::SetBrushColor(RSBrush& brush)
 {
-    auto curOpacity = attributes_.fillState.GetOpacity().GetValue() * opacity_ * (1.0f / UINT8_MAX);
+    auto curOpacity = GetFillOpacity();
     auto imageComponentColor = GetFillColor();
     if (!imageComponentColor.has_value() || attributes_.fillState.IsFillNone()) {
         brush.SetColor(attributes_.fillState.GetColor().BlendOpacity(curOpacity).GetValue());
@@ -426,6 +421,40 @@ void SvgGraphic::SetBrushPattern(RSCanvas& canvas, RSBrush& brush,
     refPatternNode->OnPatternEffect(canvas, brush, svgCoordinateSystemContext);
 }
 
+double SvgGraphic::GetFillOpacity()
+{
+    auto curOpacity = 1.0;
+    if (attributes_.hasOpacity) {
+        curOpacity = opacity_ * (1.0f / UINT8_MAX);
+    }
+    curOpacity *= attributes_.fillState.GetOpacity().GetValue();
+    return curOpacity;
+}
+
+double SvgGraphic::GetStrokeOpacity()
+{
+    auto curOpacity = 1.0;
+    if (attributes_.hasOpacity) {
+        curOpacity = opacity_ * (1.0f / UINT8_MAX);
+    }
+    curOpacity *= attributes_.strokeState.GetOpacity().GetValue();
+    return curOpacity;
+}
+
+void SvgGraphic::SetBrushOpacity(RSBrush& brush)
+{
+    uint32_t alpha = GetFillOpacity() * UINT8_MAX;
+    brush.SetAlpha(alpha);
+    return;
+}
+
+void SvgGraphic::SetPenOpacity(RSPen& pen)
+{
+    uint32_t alpha = GetStrokeOpacity() * UINT8_MAX;
+    pen.SetAlpha(alpha);
+    return;
+}
+
 bool SvgGraphic::SetGradientStyle(double opacity)
 {
     auto gradient = fillState_.GetGradient();
@@ -512,11 +541,11 @@ void SvgGraphic::InitPenFill(RSPen& rsPen, const SvgCoordinateSystemContext& svg
             break;
         case PaintType::LINEAR_GRADIENT:
             SetPenLinearGradient(rsPen, svgCoordinateSystemContext);
-            rsPen.SetAlpha(GetAlpha());
+            SetPenOpacity(rsPen);
             break;
         case PaintType::RADIAL_GRADIENT:
             SetPenRadialGradient(rsPen, svgCoordinateSystemContext);
-            rsPen.SetAlpha(GetAlpha());
+            SetPenOpacity(rsPen);
             break;
         case PaintType::PATTERN:
             break;
@@ -633,7 +662,7 @@ void SvgGraphic::UpdateLineDash()
 
 void SvgGraphic::SetPenColor(RSPen& rsPen)
 {
-    double curOpacity = attributes_.strokeState.GetOpacity().GetValue() * opacity_ * (1.0f / UINT8_MAX);
+    auto curOpacity = GetStrokeOpacity();
     rsPen.SetColor(attributes_.strokeState.GetColor().BlendOpacity(curOpacity).GetValue());
     AddColorFilterEffect(rsPen);
 }
