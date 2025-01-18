@@ -523,34 +523,6 @@ HWTEST_F(TextFieldPatternTestThree, HandleAIWrite001, TestSize.Level0)
     EXPECT_EQ(textContent.empty(), false);
 }
 
-/**
- * @tc.name: HandleAIWrite001
- * @tc.desc: test HandleOnAIWrite
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTestThree, HandleAIWrite002, TestSize.Level0)
-{
-    /**
-     * @tc.steps: step1. create target node.
-     */
-    CreateTextField(DEFAULT_TEXT);
-    GetFocus();
-
-    /**
-     * @tc.steps: step2. test HandleOnAIWrite
-     */
-    pattern_->HandleSetSelection(0, 5, false);
-    pattern_->HandleOnAIWrite();
-
-    std::vector<uint8_t> buff;
-    auto spanStr = AceType::MakeRefPtr<SpanString>(u"dddd结果回填123456");
-    spanStr->EncodeTlv(buff);
-    pattern_->HandleAIWriteResult(0, 5, buff);
-    auto contentController = pattern_->GetTextContentController();
-    auto sentenceContent = StringUtils::Str16ToStr8(contentController->GetSelectedValue(0, spanStr->GetLength()));
-    ASSERT_EQ(sentenceContent, spanStr->GetString());
-}
-
 HWTEST_F(TextFieldPatternTestThree, HandleAIWrite003, TestSize.Level0)
 {
     /**

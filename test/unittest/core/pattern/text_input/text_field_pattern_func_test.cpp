@@ -874,7 +874,10 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc051, TestSize.Level1)
     ASSERT_NE(eventHub, nullptr);
     auto callback = [&state](const InsertValueInfo& info){ return (state = true); };
     eventHub->SetOnWillInsertValueEvent(callback);
-    pattern->AddInsertCommand(u"", InputReason::IME);
+    InsertCommandInfo info;
+    info.insertValue = u"";
+    info.reason = InputReason::IME;
+    pattern->ExecuteInsertValueCommand(info);
     EXPECT_TRUE(state);
 }
 
@@ -897,7 +900,10 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc052, TestSize.Level1)
     pattern->selectController_->firstHandleInfo_.index = 0;
     pattern->selectController_->secondHandleInfo_.index = 0;
 
-    pattern->AddInsertCommand(u"", InputReason::IME);
+    InsertCommandInfo info;
+    info.insertValue = u"";
+    info.reason = InputReason::IME;
+    pattern->ExecuteInsertValueCommand(info);
     EXPECT_TRUE(state);
 }
 
