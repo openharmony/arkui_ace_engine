@@ -3407,7 +3407,8 @@ void TextFieldPattern::TriggerAvoidWhenCaretGoesDown()
             auto textFieldManager = manager.Upgrade();
             CHECK_NULL_VOID(textFieldManager);
             auto caretPos = textFieldManager->GetFocusedNodeCaretRect().Top() + textFieldManager->GetHeight();
-            if (caretPos > textField->GetLastCaretPos()) {
+            auto lastCaretPos = textField->GetLastCaretPos();
+            if (!lastCaretPos.has_value() || caretPos > lastCaretPos.value()) {
                 TAG_LOGI(ACE_KEYBOARD, "Caret Position Goes Down, Retrigger Avoid");
                 textField->TriggerAvoidOnCaretChange();
             }
@@ -8697,6 +8698,7 @@ void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, Window
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     textFieldManager->ResetOptionalClickPosition();
+    lastCaretPos_ = std::nullopt;
     taskExecutor->PostTask(
         [weak = WeakClaim(this), manager = WeakPtr<TextFieldManagerNG>(textFieldManager)] {
             auto textField = weak.Upgrade();

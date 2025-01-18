@@ -1586,7 +1586,7 @@ public:
         return host->GetLayoutProperty()->GetNonAutoLayoutDirection() == TextDirection::LTR;
     }
 
-    float GetLastCaretPos()
+    std::optional<float> GetLastCaretPos() const
     {
         return lastCaretPos_;
     }
@@ -2140,7 +2140,7 @@ private:
     uint32_t longPressFingerNum_ = 0;
     ContentScroller contentScroller_;
     WeakPtr<FrameNode> firstAutoFillContainerNode_;
-    float lastCaretPos_ = 0.0f;
+    std::optional<float> lastCaretPos_ = std::nullopt;
     bool firstClickAfterLosingFocus_ = true;
     CancelableCallback<void()> firstClickResetTask_;
     RequestFocusReason requestFocusReason_ = RequestFocusReason::UNKNOWN;
