@@ -90,11 +90,11 @@ bool IndicatorPattern::IsLoopFromProperty() const
     return swiperIndicatorLayoutProperty->GetLoop().value_or(true);
 }
 
-void IndicatorPattern::FireChangeEvent() const
+void IndicatorPattern::FireChangeEvent(int32_t index) const
 {
     auto indicatorEventHub = GetEventHub<IndicatorEventHub>();
     CHECK_NULL_VOID(indicatorEventHub);
-    indicatorEventHub->FireChangeEvent(GetLoopIndex(GetCurrentIndex()));
+    indicatorEventHub->FireChangeEvent(index);
 }
 
 std::shared_ptr<SwiperParameters> IndicatorPattern::GetSwiperParameters()
@@ -321,7 +321,7 @@ void IndicatorPattern::OnIndexChangeInSingleMode(int32_t index)
         }
     }
     SetCurrentIndexInSingleMode(GetLoopIndex(index));
-    FireChangeEvent();
+    FireChangeEvent(GetLoopIndex(index));
     SwiperIndicatorPattern::IndicatorOnChange();
 }
 

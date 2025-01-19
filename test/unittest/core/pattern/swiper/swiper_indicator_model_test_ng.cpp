@@ -635,7 +635,7 @@ HWTEST_F(IndicatorModelTestNg, IndicatorModelTestNg012, TestSize.Level1)
     ChangeIndex(3, true);
     EXPECT_EQ(indicatorPattern_->GetCurrentIndex(), 3);
     ChangeIndex(4, true);
-    EXPECT_EQ(indicatorPattern_->GetCurrentIndex(), 3);
+    EXPECT_EQ(indicatorPattern_->GetCurrentIndex(), 0);
 }
 
 /**

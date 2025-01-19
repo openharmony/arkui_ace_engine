@@ -32,7 +32,7 @@ enum class Direction {
     PRE = 0,
     NEXT,
 };
-using ChangeIndicatorEvent = std::function<void()>;
+using ChangeIndicatorEvent = std::function<void(int32_t index)>;
 using ChangeEvent = std::function<void(int32_t index)>;
 using ChangeEventPtr = std::shared_ptr<ChangeEvent>;
 using ChangeEventWithPreIndex = std::function<void(int32_t preIndex, int32_t currentIndex)>;
@@ -142,7 +142,7 @@ public:
     void FireIndicatorChangeEvent(int32_t index) const
     {
         if (changeIndicatorEvent_) {
-            changeIndicatorEvent_();
+            changeIndicatorEvent_(index);
         }
     }
 
