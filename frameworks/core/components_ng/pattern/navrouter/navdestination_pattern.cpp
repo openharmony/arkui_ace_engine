@@ -165,6 +165,9 @@ void NavDestinationPattern::OnModifyDone()
     if (scrollableProcessor_) {
         scrollableProcessor_->UpdateBindingRelation();
     }
+    auto renderContext = hostNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    hostNode->UpdateUserSetOpacity(renderContext->GetOpacity().value_or(1.0f));
 }
 
 void NavDestinationPattern::OnLanguageConfigurationUpdate()
