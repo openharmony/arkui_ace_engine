@@ -11,10 +11,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
- #ifndef CUSTOM_NODE_BUILDER_TEST_HELPER_H
- #define CUSTOM_NODE_BUILDER_TEST_HELPER_H
+#ifndef CUSTOM_NODE_BUILDER_TEST_HELPER_H
+#define CUSTOM_NODE_BUILDER_TEST_HELPER_H
+
 
 #include <utility>
 #include "gtest/gtest.h"
@@ -83,3 +84,4 @@ private:
     int callbackCounter_ = 0;
 };
 }
+#endif // CUSTOM_NODE_BUILDER_TEST_HELPER_H
