@@ -611,7 +611,7 @@ void TextModelNG::BindSelectionMenu(TextSpanType& spanType, TextResponseType& re
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextPattern>();
     if (pattern) {
-        pattern->BindSelectionMenu(spanType, responseType, buildFunc, menuParam.onAppear, menuParam.onDisappear);
+        pattern->BindSelectionMenu(spanType, responseType, buildFunc, menuParam);
     }
 }
 

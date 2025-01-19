@@ -112,6 +112,17 @@ public:
         return animationId_;
     }
 
+    void SetGetPagePathCallback(std::function<std::string(const std::string& url)>&& callback)
+    {
+        getPagePathCallback_ = std::move(callback);
+    }
+    std::vector<std::string> GetTopPagePaths() const;
+    virtual std::vector<RefPtr<FrameNode>> GetTopPagesWithTransition() const;
+    virtual bool IsSplitMode() const
+    {
+        return false;
+    }
+
 protected:
     // ace performance check
     void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout, std::string path);
@@ -120,7 +131,6 @@ protected:
     std::string GetSrcPageInfo(const RefPtr<FrameNode>& srcPage);
     void UpdatePageNeedRemove(const RefPtr<UINode>& pageNode);
     bool CheckPageInTransition(const RefPtr<UINode>& pageNode);
-    void ExpandSafeArea(const RefPtr<UINode>& frameNode);
     void StopPageTransition(bool needTransition);
 
     std::list<std::shared_ptr<AnimationUtils::Animation>> pushAnimations_;
@@ -137,6 +147,7 @@ protected:
     bool isNewPageReplacing_ = false;
 #endif
     std::string replaceSrcPageInfo_;
+    std::function<std::string(const std::string& url)> getPagePathCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(StageManager);
 };

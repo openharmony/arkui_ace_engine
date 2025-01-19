@@ -1407,12 +1407,15 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
                                            childFlexItemProperty->GetAlignValue(AlignDirection::LEFT),
                 0.0f);
         }
-        if (LessNotEqual(childIdealWidth, 0.0f) && !IsNodeInHorizontalChain(nodeName, chainName)) {
+        if (LessOrEqual(childIdealWidth, 0.0f) && !IsNodeInHorizontalChain(nodeName, chainName)) {
             childConstraint.selfIdealSize.SetWidth(0.0f);
             childConstraint.selfIdealSize.SetHeight(0.0f);
             childWrapper->Measure(childConstraint);
             RecordSizeInChain(nodeName);
             return;
+        }
+        if (!horizontalHasIdealSize && !IsNodeInHorizontalChain(nodeName, chainName)) {
+            childConstraint.selfIdealSize.SetWidth(childIdealWidth);
         }
     }
     if (childFlexItemProperty->GetTwoVerticalDirectionAligned()) {
@@ -1433,12 +1436,15 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
                                             childFlexItemProperty->GetAlignValue(AlignDirection::TOP),
                 0.0f);
         }
-        if (LessNotEqual(childIdealHeight, 0.0f) && !IsNodeInVerticalChain(nodeName, chainName)) {
+        if (LessOrEqual(childIdealHeight, 0.0f) && !IsNodeInVerticalChain(nodeName, chainName)) {
             childConstraint.selfIdealSize.SetWidth(0.0f);
             childConstraint.selfIdealSize.SetHeight(0.0f);
             childWrapper->Measure(childConstraint);
             RecordSizeInChain(nodeName);
             return;
+        }
+        if (!verticalHasIdealSize && !IsNodeInVerticalChain(nodeName, chainName)) {
+            childConstraint.selfIdealSize.SetHeight(childIdealHeight);
         }
     }
 
@@ -1447,13 +1453,6 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
         childWrapper->Measure(childConstraint);
         RecordSizeInChain(nodeName);
         return;
-    }
-
-    if (!NearZero(childIdealWidth) && !horizontalHasIdealSize && !IsNodeInHorizontalChain(nodeName, chainName)) {
-        childConstraint.selfIdealSize.SetWidth(childIdealWidth);
-    }
-    if (!NearZero(childIdealHeight) && !verticalHasIdealSize && !IsNodeInVerticalChain(nodeName, chainName)) {
-        childConstraint.selfIdealSize.SetHeight(childIdealHeight);
     }
     childWrapper->Measure(childConstraint);
     RecordSizeInChain(nodeName);

@@ -181,6 +181,18 @@ void SwiperTestNg::ChangeIndex(int32_t index)
     FlushUITasks();
 }
 
+void SwiperTestNg::SwipeTo(int32_t index)
+{
+    controller_->SwipeTo(index);
+    FlushUITasks();
+}
+
+void SwiperTestNg::SwipeToWithoutAnimation(int32_t index)
+{
+    controller_->SwipeToWithoutAnimation(index);
+    FlushUITasks();
+}
+
 void SwiperTestNg::RemoveSwiperItem(int32_t index)
 {
     frameNode_->RemoveChildAtIndex(index);

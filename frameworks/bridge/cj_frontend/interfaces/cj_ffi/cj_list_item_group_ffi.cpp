@@ -34,6 +34,18 @@ void FfiOHOSAceFrameworkListItemGroupCreate(
     ListItemGroupModel::GetInstance()->SetFooter(CJLambda::Create(footerBuilder));
 }
 
+void FfiOHOSAceFrameworkListItemGroupCreate2(
+    void (*headerBuilder)(), void (*footerBuilder)(), double space, int32_t spaceUnit, int32_t style)
+{
+    Dimension spaceDime(space, static_cast<DimensionUnit>(spaceUnit));
+
+    V2::ListItemGroupStyle itemStyle = static_cast<V2::ListItemGroupStyle>(style);
+    ListItemGroupModel::GetInstance()->Create(itemStyle);
+    ListItemGroupModel::GetInstance()->SetSpace(spaceDime);
+    ListItemGroupModel::GetInstance()->SetHeader(CJLambda::Create(headerBuilder));
+    ListItemGroupModel::GetInstance()->SetFooter(CJLambda::Create(footerBuilder));
+}
+
 void FfiOHOSAceFrameworkListItemGroupSetDivider(DividerParams& params)
 {
     Dimension widthDime(params.width, static_cast<DimensionUnit>(params.widthUnit));

@@ -52,18 +52,18 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     sheetNode->SetDragHitTestBlock(true);
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(sheetLayoutProperty, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetPattern, nullptr);
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
     auto eventConfirmHub = sheetNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(
         [](const GestureEvent& /* info */) { TAG_LOGD(AceLogTag::ACE_SHEET, "The sheet hits the click event."); }));
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_RETURN(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
     auto operationColumn = CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
     CHECK_NULL_RETURN(operationColumn, nullptr);
     operationColumn->MountToParent(sheetNode);
-    auto scrollNode = CreateScrollNode();
+    auto scrollNode = CreateScrollNode(sheetStyle);
     CHECK_NULL_RETURN(scrollNode, nullptr);
     builder->MountToParent(scrollNode);
 
@@ -241,7 +241,7 @@ void SheetView::CreateCloseIconNode(RefPtr<FrameNode> buttonNode)
     buttonNode->AddChild(iconNode);
 }
 
-RefPtr<FrameNode> SheetView::CreateScrollNode()
+RefPtr<FrameNode> SheetView::CreateScrollNode(const NG::SheetStyle& sheetStyle)
 {
     auto scroll = FrameNode::CreateFrameNode(
         V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
@@ -255,7 +255,12 @@ RefPtr<FrameNode> SheetView::CreateScrollNode()
     paintProps->UpdateScrollBarMode(DisplayMode::OFF);
     auto pattern = scroll->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->SetEdgeEffect(EdgeEffect::SPRING, false);
+    if (sheetStyle.sheetEffectEdge.has_value() && sheetStyle.sheetEffectEdge.value() == NG::SheetEffectEdge::NONE) {
+        pattern->SetEdgeEffect(EdgeEffect::NONE, false);
+    } else {
+        pattern->SetEdgeEffect(EdgeEffect::SPRING,
+            false, static_cast<EffectEdge>(sheetStyle.sheetEffectEdge.value_or(NG::SheetEffectEdge::ALL)));
+    }
     pattern->SetScrollToSafeAreaHelper(false);
     props->UpdateAlignment(Alignment::TOP_CENTER);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {

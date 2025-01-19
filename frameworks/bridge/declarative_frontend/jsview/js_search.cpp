@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,7 +22,6 @@
 #endif
 
 #include "base/log/ace_scoring_log.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_search_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
@@ -100,6 +99,7 @@ void JSSearch::JSBind(BindingTarget globalObj)
     JSClass<JSSearch>::StaticMethod("searchIcon", &JSSearch::SetSearchIcon, opt);
     JSClass<JSSearch>::StaticMethod("cancelButton", &JSSearch::SetCancelButton, opt);
     JSClass<JSSearch>::StaticMethod("fontColor", &JSSearch::SetTextColor, opt);
+    JSClass<JSSearch>::StaticMethod("backgroundColor", &JSSearch::SetBackgroundColor, opt);
     JSClass<JSSearch>::StaticMethod("caretStyle", &JSSearch::SetCaret, opt);
     JSClass<JSSearch>::StaticMethod("placeholderColor", &JSSearch::SetPlaceholderColor, opt);
     JSClass<JSSearch>::StaticMethod("placeholderFont", &JSSearch::SetPlaceholderFont, opt);
@@ -165,6 +165,8 @@ void JSSearch::JSBindMore()
     JSClass<JSSearch>::StaticMethod("enablePreviewText", &JSSearch::SetEnablePreviewText);
     JSClass<JSSearch>::StaticMethod("enableHapticFeedback", &JSSearch::SetEnableHapticFeedback);
     JSClass<JSSearch>::StaticMethod("stopBackPress", &JSSearch::SetStopBackPress);
+    JSClass<JSSearch>::StaticMethod("keyboardAppearance", &JSSearch::SetKeyboardAppearance);
+    JSClass<JSSearch>::StaticMethod("onWillChange", &JSSearch::SetOnWillChange);
 }
 
 void ParseSearchValueObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -252,7 +254,6 @@ void JSSearch::Create(const JSCallbackInfo& info)
     if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
         ParseSearchValueObject(info, changeEventVal);
     }
-    JSSeacrhTheme::ApplyTheme();
 }
 
 void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
@@ -262,11 +263,8 @@ void JSSearch::SetSelectedBackgroundColor(const JSCallbackInfo& info)
     }
     Color selectedColor;
     if (!ParseJsColor(info[0], selectedColor)) {
-        auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-        CHECK_NULL_VOID(pipeline);
-        auto theme = pipeline->GetThemeManager()->GetTheme<TextFieldTheme>();
-        CHECK_NULL_VOID(theme);
-        selectedColor = theme->GetSelectedColor();
+        SearchModel::GetInstance()->ResetSelectedBackgroundColor();
+        return;
     }
     // Alpha = 255 means opaque
     if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
@@ -329,9 +327,7 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
 
         auto fontColorProp = param->GetProperty("fontColor");
         if (fontColorProp->IsUndefined() || fontColorProp->IsNull() || !ParseJsColor(fontColorProp, fontColor)) {
-            if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
-                SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
-            }
+            SearchModel::GetInstance()->ResetSearchButtonFontColor();
         } else {
             SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
         }
@@ -344,9 +340,7 @@ void JSSearch::SetSearchButton(const JSCallbackInfo& info)
         }
     } else {
         SearchModel::GetInstance()->SetSearchButtonFontSize(theme->GetFontSize());
-        if (!JSSeacrhTheme::ObtainSearchButtonFontColor(fontColor)) {
-            SearchModel::GetInstance()->SetSearchButtonFontColor(fontColor);
-        }
+        SearchModel::GetInstance()->ResetSearchButtonFontColor();
     }
 }
 
@@ -416,15 +410,17 @@ void JSSearch::SetCancelImageIcon(const JSCallbackInfo& info)
     }
 
     // set icon color
-    Color iconColor = theme->GetSearchIconColor();
+    Color iconColor;
+    NG::IconOptions cancelIconOptions;
     auto iconColorProp = iconParam->GetProperty("color");
     if (!iconColorProp->IsUndefined() && !iconColorProp->IsNull() && ParseJsColor(iconColorProp, iconColor)) {
-        NG::IconOptions cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, "", "");
-        SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
+        SearchModel::GetInstance()->SetCancelIconColor(iconColor);
+        cancelIconOptions = NG::IconOptions(iconColor, iconSize, iconSrc, "", "");
     } else {
-        NG::IconOptions cancelIconOptions = NG::IconOptions(iconSize, iconSrc, "", "");
-        SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
+        SearchModel::GetInstance()->ResetCancelIconColor();
+        cancelIconOptions = NG::IconOptions(iconSize, iconSrc, "", "");
     }
+    SearchModel::GetInstance()->SetCancelImageIcon(cancelIconOptions);
 }
 
 void JSSearch::SetSearchDefaultIcon()
@@ -469,17 +465,20 @@ void JSSearch::SetSearchImageIcon(const JSCallbackInfo& info)
     if (srcPathProp->IsUndefined() || srcPathProp->IsNull() || !ParseJsMedia(srcPathProp, src)) {
         src = "";
     }
-    // set icon color
-    Color colorVal = theme->GetSearchIconColor();
-    auto colorProp = param->GetProperty("color");
-    if (!colorProp->IsUndefined() && !colorProp->IsNull()) {
-        ParseJsColor(colorProp, colorVal);
-    }
-
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(srcPathProp, bundleName, moduleName);
-    NG::IconOptions searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
+    // set icon color
+    Color colorVal;
+    NG::IconOptions searchIconOptions;
+    auto colorProp = param->GetProperty("color");
+    if (!colorProp->IsUndefined() && !colorProp->IsNull() && ParseJsColor(colorProp, colorVal)) {
+        SearchModel::GetInstance()->SetSearchIconColor(colorVal);
+        searchIconOptions = NG::IconOptions(colorVal, size, src, bundleName, moduleName);
+    } else {
+        SearchModel::GetInstance()->ResetSearchIconColor();
+        searchIconOptions = NG::IconOptions(size, src, bundleName, moduleName);
+    }
     SearchModel::GetInstance()->SetSearchImageIcon(searchIconOptions);
 }
 
@@ -551,9 +550,23 @@ void JSSearch::SetTextColor(const JSCallbackInfo& info)
     auto value = JSRef<JSVal>::Cast(info[0]);
     Color colorVal;
     if (!ParseJsColor(value, colorVal)) {
-        colorVal = theme->GetTextColor();
+        SearchModel::GetInstance()->ResetTextColor();
+        return;
     }
     SearchModel::GetInstance()->SetTextColor(colorVal);
+}
+
+void JSSearch::SetBackgroundColor(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    Color colorVal;
+    if (!ParseJsColor(info[0], colorVal)) {
+        SearchModel::GetInstance()->ResetBackgroundColor();
+        return;
+    }
+    SearchModel::GetInstance()->SetBackgroundColor(colorVal);
 }
 
 void JSSearch::SetCaret(const JSCallbackInfo& info)
@@ -575,7 +588,8 @@ void JSSearch::SetCaret(const JSCallbackInfo& info)
         Color caretColor;
         auto caretColorProp = param->GetProperty("color");
         if (caretColorProp->IsUndefined() || caretColorProp->IsNull() || !ParseJsColor(caretColorProp, caretColor)) {
-            caretColor = textFieldTheme->GetCursorColor();
+            SearchModel::GetInstance()->ResetCaretColor();
+            return;
         }
         SearchModel::GetInstance()->SetCaretColor(caretColor);
     }
@@ -636,9 +650,8 @@ void JSSearch::SetPlaceholderColor(const JSCallbackInfo& info)
     auto value = JSRef<JSVal>::Cast(info[0]);
     Color colorVal;
     if (!ParseJsColor(value, colorVal)) {
-        auto theme = GetTheme<SearchTheme>();
-        CHECK_NULL_VOID(theme);
-        colorVal = theme->GetPlaceholderColor();
+        SearchModel::GetInstance()->ResetPlaceholderColor();
+        return;
     }
     SearchModel::GetInstance()->SetPlaceholderColor(colorVal);
 }
@@ -963,13 +976,27 @@ void JSSearch::OnChange(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     CHECK_NULL_VOID(jsValue->IsFunction());
-    auto jsChangeFunc =
-        AceType::MakeRefPtr<JsCitedEventFunction<PreviewText, 2>>(JSRef<JSFunc>::Cast(jsValue), CreateJsOnChangeObj);
+    auto jsChangeFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsValue));
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
-                        const std::u16string& val, PreviewText& previewText) {
+        const ChangeValueInfo& changeValueInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onChange");
-        func->Execute(val, previewText);
+        JSRef<JSVal> valueObj = JSRef<JSVal>::Make(ToJSValue(changeValueInfo.value));
+        auto previewTextObj = CreateJsOnChangeObj(changeValueInfo.previewText);
+        auto optionsObj = JSRef<JSObject>::New();
+        auto rangeBeforeObj = JSRef<JSObject>::New();
+        rangeBeforeObj->SetProperty<int32_t>("start", changeValueInfo.rangeBefore.start);
+        rangeBeforeObj->SetProperty<int32_t>("end", changeValueInfo.rangeBefore.end);
+        optionsObj->SetPropertyObject("rangeBefore", rangeBeforeObj);
+        auto rangeAfterObj = JSRef<JSObject>::New();
+        rangeAfterObj->SetProperty<int32_t>("start", changeValueInfo.rangeAfter.start);
+        rangeAfterObj->SetProperty<int32_t>("end", changeValueInfo.rangeAfter.end);
+        optionsObj->SetPropertyObject("rangeAfter", rangeAfterObj);
+        optionsObj->SetProperty<std::u16string>("oldContent", changeValueInfo.oldContent);
+        auto oldPreviewTextObj = CreateJsOnChangeObj(changeValueInfo.oldPreviewText);
+        optionsObj->SetPropertyObject("oldPreviewText", oldPreviewTextObj);
+        JSRef<JSVal> argv[] = { valueObj, previewTextObj, optionsObj };
+        func->ExecuteJS(3, argv);
     };
     SearchModel::GetInstance()->SetOnChange(std::move(onChange));
 }
@@ -1408,5 +1435,67 @@ void JSSearch::SetStopBackPress(const JSCallbackInfo& info)
         isStopBackPress = info[0]->ToBoolean();
     }
     SearchModel::GetInstance()->SetStopBackPress(isStopBackPress);
+}
+
+void JSSearch::SetKeyboardAppearance(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    if (!jsValue->IsNumber()) {
+        return;
+    }
+    auto keyboardAppearance = jsValue->ToNumber<uint32_t>();
+    if (keyboardAppearance < static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
+        keyboardAppearance > static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        return;
+    }
+    SearchModel::GetInstance()->
+        SetKeyboardAppearance(static_cast<KeyboardAppearance>(keyboardAppearance));
+}
+
+JSRef<JSVal> JSSearch::CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo)
+{
+    JSRef<JSObject> ChangeValueInfo = JSRef<JSObject>::New();
+    ChangeValueInfo->SetProperty<std::u16string>("content", changeValueInfo.value);
+
+    auto previewTextObj = CreateJsOnChangeObj(changeValueInfo.previewText);
+    ChangeValueInfo->SetPropertyObject("previewText", previewTextObj);
+
+    auto optionsObj = JSRef<JSObject>::New();
+    auto rangeBeforeObj = JSRef<JSObject>::New();
+    rangeBeforeObj->SetProperty<int32_t>("start", changeValueInfo.rangeBefore.start);
+    rangeBeforeObj->SetProperty<int32_t>("end", changeValueInfo.rangeBefore.end);
+    optionsObj->SetPropertyObject("rangeBefore", rangeBeforeObj);
+    auto rangeAfterObj = JSRef<JSObject>::New();
+    rangeAfterObj->SetProperty<int32_t>("start", changeValueInfo.rangeAfter.start);
+    rangeAfterObj->SetProperty<int32_t>("end", changeValueInfo.rangeAfter.end);
+    optionsObj->SetPropertyObject("rangeAfter", rangeAfterObj);
+    optionsObj->SetProperty<std::u16string>("oldContent", changeValueInfo.oldContent);
+    auto oldPreviewTextObj = CreateJsOnChangeObj(changeValueInfo.oldPreviewText);
+    optionsObj->SetPropertyObject("oldPreviewText", oldPreviewTextObj);
+
+    ChangeValueInfo->SetPropertyObject("options", optionsObj);
+    return JSRef<JSVal>::Cast(ChangeValueInfo);
+}
+
+void JSSearch::SetOnWillChange(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsChangeFunc = AceType::MakeRefPtr<JsEventFunction<ChangeValueInfo, 1>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsOnWillChangeObj);
+    auto onWillChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
+        const ChangeValueInfo& changeValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        ACE_SCORING_EVENT("onWillChange");
+        auto ret = func->ExecuteWithValue(changeValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    SearchModel::GetInstance()->SetOnWillChangeEvent(std::move(onWillChange));
 }
 } // namespace OHOS::Ace::Framework

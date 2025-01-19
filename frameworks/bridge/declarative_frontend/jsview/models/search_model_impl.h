@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,8 +32,10 @@ public:
     void SetSearchButton(const std::string& text) override;
     void SetCaretWidth(const Dimension& value) override {}
     void SetCaretColor(const Color& color) override {}
+    void ResetCaretColor() override {}
     void SetSearchIconSize(const Dimension& value) override {}
     void SetSearchIconColor(const Color& color) override {}
+    void ResetSearchIconColor() override {}
     void SetSearchSrcPath(
         const std::string& src, const std::string& bundleName, const std::string& moduleName) override {}
     void SetRightIconSrcPath(const std::string& src) override {}
@@ -46,15 +48,21 @@ public:
     void SetCancelButtonStyle(OHOS::Ace::CancelButtonStyle cancelButtonStyle) override {}
     void SetCancelIconSize(const Dimension& value) override {}
     void SetCancelIconColor(const Color& color) override {}
+    void ResetCancelIconColor() override {}
     void SetSearchButtonFontSize(const Dimension& value) override {}
     void SetSearchButtonFontColor(const Color& color) override {}
+    void ResetSearchButtonFontColor() override {}
     void SetSearchButtonAutoDisable(bool needToDisable) override {};
     void SetPlaceholderColor(const Color& color) override;
+    void ResetPlaceholderColor() override {};
     void SetPlaceholderFont(const Font& font) override;
     void SetTextFont(const Font& font) override;
     void SetMinFontScale(const float value) override;
     void SetMaxFontScale(const float value) override;
     void SetTextColor(const Color& color) override {}
+    void ResetTextColor() override {}
+    void SetBackgroundColor(const Color& color) override {}
+    void ResetBackgroundColor() override {}
     void SetTextAlign(const TextAlign& textAlign) override;
     void SetCopyOption(const CopyOptions& copyOptions) override;
     void SetFocusable(bool focusable) override;
@@ -63,7 +71,8 @@ public:
     void SetBackBorder() override;
     void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit) override;
     void SetOnSubmit(std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit) override {};
-    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& onChange) override;
+    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& onChange) override {};
+    void SetOnChange(std::function<void(const ChangeValueInfo&)>&& onChange) override {};
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
     void SetOnScroll(std::function<void(float, float)>&& func) override {};
     void SetOnCopy(std::function<void(const std::u16string&)>&& func) override;
@@ -74,6 +83,7 @@ public:
     void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func) override {};
     void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func) override {};
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override {};
+    void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func) override {};
     void SetOnChangeEvent(std::function<void(const std::u16string&)>&& onChangeEvent) override {};
     void SetSelectionMenuHidden(bool selectionMenuHidden) override {};
 
@@ -85,6 +95,7 @@ public:
     void SetType(TextInputType type) override {};
     void SetEnablePreviewText(bool enablePreviewText) override {};
     void SetEnableHapticFeedback(bool state) override {};
+    void SetKeyboardAppearance(KeyboardAppearance value) override {};
 
 private:
     void InitializeDefaultValue(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

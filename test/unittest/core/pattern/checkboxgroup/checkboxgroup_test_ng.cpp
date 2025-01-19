@@ -125,7 +125,7 @@ CheckBoxGroupModifier::Parameters CheckBoxGroupCreateDefModifierParam()
     CheckBoxGroupModifier::Parameters parameters = { BORDER_WIDTH, BORDER_RADIUS, CHECK_STROKE, CHECKMARK_PAINTSIZE,
         HOVER_DURATION, HOVER_TO_TOUCH_DURATION, POINT_COLOR, ACTIVE_COLOR, INACTIVE_COLOR, SHADOW_COLOR,
         CLICK_EFFECT_COLOR, HOVER_COLOR, INACTIVE_POINT_COLOR, HOVER_RADIUS, HORIZONTAL_PADDING, VERTICAL_PADDING,
-        SHADOW_WIDTH_FORUPDATE, UIStatus::UNSELECTED, PADDING_SIZE, PADDING_SIZE,
+        SHADOW_WIDTH_FORUPDATE, UIStatus::UNSELECTED, PADDING_SIZE, PADDING_SIZE, false,
         CheckBoxGroupPaintProperty::SelectStatus::NONE };
 
     return parameters;
@@ -847,7 +847,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxPatternTest014, TestSize.Level1)
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     EXPECT_NE(pattern, nullptr);
     RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(
+        AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(eventHub)), FocusType::DISABLE, false);
     pattern->InitOnKeyEvent(focusHub);
     RoundRect paintRect;
     pattern->GetInnerFocusPaintRect(paintRect);
@@ -1781,7 +1782,8 @@ HWTEST_F(CheckBoxGroupTestNG, CheckBoxGroupPatternTest025, TestSize.Level1)
      * @tc.expected: Get successfully.
      */
     RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(
+        AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(eventHub)), FocusType::DISABLE, false);
     checkBoxGroupPattern->InitOnKeyEvent(focusHub);
     auto getInnerPaintRectCallback = focusHub->getInnerFocusRectFunc_;
 

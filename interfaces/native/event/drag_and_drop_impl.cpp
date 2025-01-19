@@ -16,9 +16,13 @@
 #include "interfaces/native/drag_and_drop.h"
 #include "interfaces/native/node/event_converter.h"
 #include "interfaces/native/node/node_model.h"
+#include "async_task_params.h"
+#include "data_params_conversion.h"
 #include "ndk_data_conversion.h"
 #include "pixelmap_native_impl.h"
 #include "securec.h"
+#include "udmf_async_client.h"
+#include "unified_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -677,6 +681,53 @@ float OH_ArkUI_DragEvent_GetVelocity(ArkUI_DragEvent* event)
     auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
     auto result = static_cast<float>(dragEvent->velocity);
     return result;
+}
+
+int32_t OH_ArkUI_DragEvent_StartDataLoading(
+    ArkUI_DragEvent* event, OH_UdmfGetDataParams *options, char* key, unsigned int keyLen)
+{
+    if (!event || !options || !key || !keyLen || keyLen < UDMF_KEY_BUFFER_LEN) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto* dragEvent = reinterpret_cast<ArkUIDragEvent*>(event);
+    int32_t length = strlen(dragEvent->key);
+    for (int32_t i = 0; i < length; i++) {
+        key[i] = dragEvent->key[i];
+    }
+    OHOS::UDMF::QueryOption query;
+    query.key = key;
+    query.intention = OHOS::UDMF::Intention::UD_INTENTION_DRAG;
+    OHOS::UDMF::GetDataParams getDataParams;
+    OH_UdmfGetDataParams &optionsRef = *options;
+    OHOS::UDMF::DataParamsConversion::GetInnerDataParams(optionsRef, query, getDataParams);
+    auto status = static_cast<int32_t>(
+        OHOS::UDMF::UdmfAsyncClient::GetInstance().StartAsyncDataRetrieval(getDataParams));
+    if (status != 0) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_CancelDataLoading(ArkUI_ContextHandle uiContent, const char* key)
+{
+    if (!uiContent || !key) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    auto status = static_cast<int32_t>(OHOS::UDMF::UdmfAsyncClient::GetInstance().Cancel(key));
+    if (status != 0) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return ARKUI_ERROR_CODE_NO_ERROR;
+}
+
+int32_t OH_ArkUI_DisableDropDataPrefetchOnNode(ArkUI_NodeHandle node, bool disable)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl || !node) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    impl->getNodeModifiers()->getCommonModifier()->setDisableDataPrefetch(node->uiNodeHandle, disable);
+    return ARKUI_ERROR_CODE_NO_ERROR;
 }
 #ifdef __cplusplus
 };

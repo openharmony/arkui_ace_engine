@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,14 +21,12 @@
 #include "core/components/common/properties/text_style_parser.h"
 
 namespace OHOS::Ace::NG {
-constexpr uint32_t DEFAULT_SEARCH_COLOR = 0x99182431;
 constexpr Dimension DEFAULT_FONT_SIZE = 16.0_fp;
 constexpr FontWeight DEFAULT_FONT_WEIGHT = FontWeight::NORMAL;
 constexpr Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const bool DEFAULT_SELECTION_MENU_HIDDEN = false;
 constexpr CancelButtonStyle DEFAULT_CANCEL_BUTTON_STYLE = CancelButtonStyle::INPUT;
 constexpr Dimension THEME_SEARCH_FONT_SIZE = Dimension(16.0, DimensionUnit::FP);
-constexpr Color THEME_SEARCH_TEXT_COLOR = Color(0xe5000000);
 constexpr TextDecoration DEFAULT_TEXT_DECORATION = TextDecoration::NONE;
 constexpr Color DEFAULT_DECORATION_COLOR = Color(0xff000000);
 constexpr TextDecorationStyle DEFAULT_DECORATION_STYLE = TextDecorationStyle::SOLID;
@@ -75,7 +73,7 @@ void ResetSearchPlaceholderColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetPlaceholderColor(frameNode, Color(DEFAULT_SEARCH_COLOR));
+    SearchModelNG::ResetPlaceholderColor(frameNode);
 }
 
 void SetSearchSelectionMenuHidden(ArkUINodeHandle node, ArkUI_Uint32 selectionMenuHidden)
@@ -107,9 +105,8 @@ void ResetSearchCaretStyle(ArkUINodeHandle node)
     auto textFieldTheme = GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     CalcDimension caretWidth = textFieldTheme->GetCursorWidth();
-    uint32_t caretColor = textFieldTheme->GetCursorColor().GetValue();
     SearchModelNG::SetCaretWidth(frameNode, Dimension(caretWidth.Value(), caretWidth.Unit()));
-    SearchModelNG::SetCaretColor(frameNode, Color(caretColor));
+    SearchModelNG::ResetCaretColor(frameNode);
 }
 
 void SetSearchTextAlign(ArkUINodeHandle node, ArkUI_Int32 value)
@@ -233,7 +230,7 @@ void ResetSearchFontColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::SetTextColor(frameNode, THEME_SEARCH_TEXT_COLOR);
+    SearchModelNG::ResetTextColor(frameNode);
 }
 
 void SetSearchCopyOption(ArkUINodeHandle node, ArkUI_Uint32 value)
@@ -428,17 +425,7 @@ void ResetSearchSelectedBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Color selectedColor;
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_VOID(theme);
-    selectedColor = theme->GetSelectedColor();
-    if (selectedColor.GetAlpha() == DEFAULT_ALPHA) {
-        // Default setting of 20% opacity
-        selectedColor = selectedColor.ChangeOpacity(DEFAULT_OPACITY);
-    }
-    SearchModelNG::SetSelectedBackgroundColor(frameNode, selectedColor);
+    SearchModelNG::ResetSelectedBackgroundColor(frameNode);
 }
 
 void SetSearchTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit)
@@ -585,7 +572,7 @@ void SetSearchOnChange(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onSubmit = reinterpret_cast<std::function<void(const std::u16string&, PreviewText&)>*>(callback);
+        auto onSubmit = reinterpret_cast<std::function<void(const ChangeValueInfo&)>*>(callback);
         SearchModelNG::SetOnChange(frameNode, std::move(*onSubmit));
     } else {
         SearchModelNG::SetOnChange(frameNode, nullptr);
@@ -1008,6 +995,8 @@ const ArkUISearchModifier* GetSearchModifier()
         .resetSearchMaxFontScale = ResetSearchMaxFontScale,
         .setStopBackPress = SetStopBackPress,
         .resetStopBackPress = ResetStopBackPress,
+        .setSearchKeyboardAppearance = SetSearchKeyboardAppearance,
+        .resetSearchKeyboardAppearance = ResetSearchKeyboardAppearance,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1127,9 +1116,9 @@ void SetOnSearchChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [extraParam](const std::u16string& text, PreviewText&) {
+    auto onEvent = [extraParam](const ChangeValueInfo& info) {
         ArkUINodeEvent event;
-        std::string utf8Text = UtfUtils::Str16DebugToStr8(text);
+        std::string utf8Text = UtfUtils::Str16DebugToStr8(info.value);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_SEARCH_CHANGE;
@@ -1185,6 +1174,22 @@ void SetOnSearchPaste(ArkUINodeHandle node, void* extraParam)
         SendArkUISyncEvent(&event);
     };
     SearchModelNG::SetOnPasteWithEvent(frameNode, std::move(onEvent));
+}
+
+void SetSearchKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = static_cast<KeyboardAppearance>(keyboardAppearance);
+    SearchModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
+void ResetSearchKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = KeyboardAppearance::NONE_IMMERSIVE;
+    SearchModelNG::SetKeyboardAppearance(frameNode, value);
 }
 }
 } // namespace OHOS::Ace::NG

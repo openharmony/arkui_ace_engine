@@ -128,11 +128,11 @@ RefPtr<FrameNode> XComponentTestTwoNg::CreateXComponentNode(TestProperty& testPr
 }
 
 /**
- * @tc.name: XComponentTestTwoNg001
+ * @tc.name: DumpInfoTest
  * @tc.desc: Test DumpInfo Func.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg001, TestSize.Level1)
+HWTEST_F(XComponentTestTwoNg, DumpInfoTest, TestSize.Level1)
 {
     g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto frameNode = CreateXComponentNode(g_testProperty);
@@ -167,11 +167,11 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg001, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentTestTwoNg002
+ * @tc.name: RoundValueToPixelGridTest
  * @tc.desc: Test RoundValueToPixelGrid Func.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg002, TestSize.Level1)
+HWTEST_F(XComponentTestTwoNg, RoundValueToPixelGridTest, TestSize.Level1)
 {
     g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto frameNode = CreateXComponentNode(g_testProperty);
@@ -198,11 +198,11 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg002, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentTestTwoNg004
+ * @tc.name: OnModifyDoneTest
  * @tc.desc: Test OnModifyDone Func.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg004, TestSize.Level1)
+HWTEST_F(XComponentTestTwoNg, OnModifyDoneTest, TestSize.Level1)
 {
     g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto frameNode = CreateXComponentNode(g_testProperty);
@@ -230,11 +230,11 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg004, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentTestTwoNg006
+ * @tc.name: BeforeSyncGeometryPropertiesTest
  * @tc.desc: Test BeforeSyncGeometryProperties Func.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg006, TestSize.Level1)
+HWTEST_F(XComponentTestTwoNg, BeforeSyncGeometryPropertiesTest, TestSize.Level1)
 {
     g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
     auto frameNode = CreateXComponentNode(g_testProperty);
@@ -262,11 +262,11 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg006, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentTestTwoNg008
+ * @tc.name: SetHandlingRenderContextForSurfaceTest
  * @tc.desc: Test SetHandlingRenderContextForSurface Func.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg008, TestSize.Level1)
+HWTEST_F(XComponentTestTwoNg, SetHandlingRenderContextForSurfaceTest, TestSize.Level1)
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
@@ -290,11 +290,11 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg008, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentTestTwoNg009
+ * @tc.name: SetExtControllerTest
  * @tc.desc: Test SetExtController Func.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg009, TestSize.Level1)
+HWTEST_F(XComponentTestTwoNg, SetExtControllerTest, TestSize.Level1)
 {
     g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto frameNode = CreateXComponentNode(g_testProperty);
@@ -317,11 +317,11 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg009, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentTestTwoNg010
+ * @tc.name: ResetExtControllerTest
  * @tc.desc: Test ResetExtController Func.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg010, TestSize.Level1)
+HWTEST_F(XComponentTestTwoNg, ResetExtControllerTest, TestSize.Level1)
 {
     g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto frameNode = CreateXComponentNode(g_testProperty);
@@ -353,11 +353,11 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg010, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentTestTwoNg012
+ * @tc.name: HandleSurfaceChangeEventTest
  * @tc.desc: Test HandleSurfaceChangeEvent Func.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg012, TestSize.Level1)
+HWTEST_F(XComponentTestTwoNg, HandleSurfaceChangeEventTest, TestSize.Level1)
 {
     int32_t backupApiVersion = AceApplicationInfo::GetInstance().GetApiTargetVersion();
     AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
@@ -393,11 +393,11 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg012, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentTestTwoNg013
+ * @tc.name: UpdateSurfaceRectTest
  * @tc.desc: Test UpdateSurfaceRect Func.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg013, TestSize.Level1)
+HWTEST_F(XComponentTestTwoNg, UpdateSurfaceRectTest, TestSize.Level1)
 {
     g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
     auto frameNode = CreateXComponentNode(g_testProperty);
@@ -413,11 +413,11 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg013, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentTestTwoNg015
+ * @tc.name: StartImageAnalyzerTest
  * @tc.desc: Test StartImageAnalyzer Func.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg015, TestSize.Level1)
+HWTEST_F(XComponentTestTwoNg, StartImageAnalyzerTest, TestSize.Level1)
 {
     g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
     auto frameNode = CreateXComponentNode(g_testProperty);
@@ -446,11 +446,11 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg015, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentTestTwoNg016
+ * @tc.name: ChangeSurfaceCallbackModeTest
  * @tc.desc: Test ChangeSurfaceCallbackMode.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg016, TestSize.Level1)
+HWTEST_F(XComponentTestTwoNg, ChangeSurfaceCallbackModeTest, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. set surface life cycle callback, set id&libraryname to null and create XComponent
@@ -528,11 +528,11 @@ HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg016, TestSize.Level1)
 }
 
 /**
- * @tc.name: XComponentTestTwoNg017
+ * @tc.name: EnableSecureTest
  * @tc.desc: Test EnableSecure Func.
  * @tc.type: FUNC
  */
-HWTEST_F(XComponentTestTwoNg, XComponentTestTwoNg017, TestSize.Level1)
+HWTEST_F(XComponentTestTwoNg, EnableSecureTest, TestSize.Level1)
 {
     g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
     auto frameNode = CreateXComponentNode(g_testProperty);
@@ -587,5 +587,75 @@ HWTEST_F(XComponentTestTwoNg, EnableLayerTransparentTest, TestSize.Level1)
     EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
                 SetTransparentLayer(false)).Times(0);
     pattern->EnableTransparentLayer(false);
+}
+
+/**
+ * @tc.name: ConfigSurfaceTest
+ * @tc.desc: Test ConfigSurface Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, ConfigSurfaceTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
+                ConfigSurface(MAX_WIDTH, MAX_HEIGHT)).WillOnce(Return());
+    pattern->ConfigSurface(MAX_WIDTH, MAX_HEIGHT);
+}
+
+/**
+ * @tc.name: OnAttachContextTest
+ * @tc.desc: Test OnAttachContext Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, OnAttachContextTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    PipelineContext* context = frameNode->GetContextRefPtr().GetRawPtr();
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
+                SetInstanceId(context->GetInstanceId())).WillOnce(Return());
+    pattern->OnAttachContext(context);
+}
+
+/**
+ * @tc.name: HdrBrightnessTest
+ * @tc.desc: Test HdrBrightness Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, HdrBrightnessTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_SURFACE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
+                SetHDRBrightness(0.0f)).WillOnce(Return());
+    pattern->HdrBrightness(-0.5f);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
+                SetHDRBrightness(1.0f)).WillOnce(Return());
+    pattern->HdrBrightness(1.5f);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
+                SetHDRBrightness(0.5f)).WillOnce(Return());
+    pattern->HdrBrightness(0.5f);
+
+    pattern->type_ = XCOMPONENT_TEXTURE_TYPE_VALUE;
+
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
+                SetHDRBrightness(0.5f)).Times(0);
+    pattern->HdrBrightness(0.5f);
 }
 } // namespace OHOS::Ace::NG

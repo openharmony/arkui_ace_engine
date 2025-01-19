@@ -17,6 +17,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr Dimension INDICATOR_DRAG_MIN_DISTANCE = 4.0_vp;
+constexpr Dimension INDICATOR_DRAG_MAX_DISTANCE = 18.0_vp;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 constexpr float DEFAULT_COUNT = 2.0f;
 } // namespace
@@ -229,13 +231,19 @@ void IndicatorPattern::UpdatePaintProperty()
     paintProperty->UpdateSelectedColor(
         swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
     paintProperty->UpdateIsCustomSize(isCustomSize_);
+    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void IndicatorPattern::OnModifyDone()
 {
     if (!hasSetInitialIndex_) {
         hasSetInitialIndex_ = true;
-        currentIndexInSingleMode_ = GetInitialIndexFromProperty();
+        auto initialIndex = GetInitialIndexFromProperty();
+        if ((initialIndex < 0) || (initialIndex >= RealTotalCount())) {
+            initialIndex = 0;
+        }
+        currentIndexInSingleMode_ = initialIndex;
     }
 
     auto indicatorNode = GetHost();
@@ -256,7 +264,43 @@ void IndicatorPattern::OnModifyDone()
         radius.SetRadius(INDICATOR_BORDER_RADIUS);
     }
     renderContext->UpdateBorderRadius(radius);
+    auto focusHub = indicatorNode->GetFocusHub();
+    if (focusHub) {
+        InitOnKeyEvent(focusHub);
+    }
     SwiperIndicatorPattern::OnModifyDone();
+}
+
+void IndicatorPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
+{
+    auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            return pattern->OnKeyEvent(event);
+        }
+        return false;
+    };
+    focusHub->SetOnKeyEventInternal(std::move(onKeyEvent));
+}
+
+bool IndicatorPattern::OnKeyEvent(const KeyEvent& event)
+{
+    if (event.action != KeyAction::DOWN) {
+        return false;
+    }
+    if ((GetDirection() == Axis::HORIZONTAL &&
+            event.code == (IsHorizontalAndRightToLeft() ? KeyCode::KEY_DPAD_RIGHT : KeyCode::KEY_DPAD_LEFT)) ||
+        (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
+        ShowPrevious();
+        return true;
+    }
+    if ((GetDirection() == Axis::HORIZONTAL &&
+            event.code == (IsHorizontalAndRightToLeft() ? KeyCode::KEY_DPAD_LEFT : KeyCode::KEY_DPAD_RIGHT)) ||
+        (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
+        ShowNext();
+        return true;
+    }
+    return false;
 }
 
 bool IndicatorPattern::GetDotCurrentOffset(OffsetF& offset, float indicatorWidth, float indicatorHeight)
@@ -292,13 +336,7 @@ void IndicatorPattern::ShowPrevious()
     if (GetBindSwiperNode()) {
         return SwiperIndicatorPattern::ShowPrevious();
     }
-    auto isRtl = GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (isRtl) {
-        singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
-    } else {
-        singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
-    }
-
+    singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
     OnIndexChangeInSingleMode(GetCurrentIndex() - 1);
 }
 
@@ -316,12 +354,18 @@ void IndicatorPattern::ChangeIndex(int32_t index, bool useAnimation)
     if (GetBindSwiperNode()) {
         return SwiperIndicatorPattern::ChangeIndex(index, useAnimation);
     }
+    if ((index < 0) || (index >= RealTotalCount())) {
+        index = 0;
+    }
+
     if (useAnimation) {
         if (GetLoopIndex(GetCurrentIndex()) > GetLoopIndex(index)) {
             singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
         } else if (GetLoopIndex(GetCurrentIndex()) < GetLoopIndex(index)) {
             singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
         }
+    } else {
+        singleGestureState_ = GestureState::GESTURE_STATE_INIT;
     }
     OnIndexChangeInSingleMode(index);
 }
@@ -413,6 +457,36 @@ void IndicatorPattern::SwipeTo(std::optional<int32_t> mouseClickIndex)
     }
     if (mouseClickIndex) {
         OnIndexChangeInSingleMode(mouseClickIndex.value());
+    }
+}
+
+void IndicatorPattern::HandleLongDragUpdate(const TouchLocationInfo& info)
+{
+    if (GetBindSwiperNode()) {
+        return SwiperIndicatorPattern::HandleLongDragUpdate(info);
+    }
+    float turnPageRate = 0.0;
+    float turnPageRateOffset = 0.0;
+    auto dragPoint =
+        PointF(static_cast<float>(info.GetLocalLocation().GetX()), static_cast<float>(info.GetLocalLocation().GetY()));
+
+    auto offset = dragPoint - GetDragStartPoint();
+    turnPageRateOffset = GetDirection() == Axis::HORIZONTAL ? offset.GetX() : offset.GetY();
+    if (LessNotEqual(std::abs(turnPageRateOffset), INDICATOR_DRAG_MIN_DISTANCE.ConvertToPx())) {
+        return;
+    }
+    turnPageRate = -(turnPageRateOffset / INDICATOR_DRAG_MAX_DISTANCE.ConvertToPx());
+    if (IsHorizontalAndRightToLeft()) {
+        turnPageRateOffset = -turnPageRateOffset;
+    }
+    if (std::abs(turnPageRate) >= 1) {
+        if (Positive(turnPageRateOffset)) {
+            ShowNext();
+        }
+        if (NonPositive(turnPageRateOffset)) {
+            ShowPrevious();
+        }
+        SetDragStartPoint(dragPoint);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -399,15 +399,15 @@ void TextFieldModelImpl::SetOnSubmit(std::function<void(int32_t)>&& func)
     component->SetOnSubmit(std::move(func));
 }
 
-void TextFieldModelImpl::SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func)
+void TextFieldModelImpl::SetOnChange(std::function<void(const ChangeValueInfo&)>&& func)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto component = AceType::DynamicCast<OHOS::Ace::TextFieldComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
-    auto onChange = [func] (const std::string& value) {
+    auto onChange = [func] (const std::string& info) {
         if (!func) {
-            PreviewText previewText {};
-            func(UtfUtils::Str8DebugToStr16(value), previewText);
+            ChangeValueInfo info;
+            func(info);
         }
     };
     component->SetOnChange(std::move(onChange));

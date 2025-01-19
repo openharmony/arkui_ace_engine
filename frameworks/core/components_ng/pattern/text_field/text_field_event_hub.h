@@ -54,6 +54,15 @@ struct PreviewText {
         return this->offset != other.offset || this->value != other.value;
     }
 };
+
+struct ChangeValueInfo {
+    std::u16string value;
+    PreviewText previewText;
+    TextRange rangeBefore;
+    TextRange rangeAfter;
+    std::u16string oldContent;
+    PreviewText oldPreviewText;
+};
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::NG {
@@ -144,35 +153,36 @@ public:
         }
     }
 
-    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func)
+    void SetOnChange(std::function<void(const ChangeValueInfo&)>&& func)
     {
         onChange_ = std::move(func);
     }
 
-    const std::function<void(const std::u16string&, PreviewText&)>& GetOnChange() const
+    const std::function<void(const ChangeValueInfo&)>& GetOnChange() const
     {
         return onChange_;
     }
 
-    void FireOnChange(const std::u16string& value, PreviewText& previewText)
+    void FireOnChange(const ChangeValueInfo& info)
     {
-        if (lastValue_.has_value() && lastValue_.value() == value && lastPreviewText_ == previewText) {
+        if (lastValue_.has_value() && lastValue_.value() == info.value && lastPreviewText_ == info.previewText) {
             return;
         }
         if (onValueChangeEvent_) {
             TAG_LOGI(
-                AceLogTag::ACE_TEXT_FIELD, "On change event, len:%{public}d", static_cast<int32_t>(value.length()));
-            onValueChangeEvent_(value);
+                AceLogTag::ACE_TEXT_FIELD, "On change event, len:%{public}d",
+                static_cast<int32_t>(info.value.length()));
+            onValueChangeEvent_(info.value);
         }
         if (onChange_) {
             TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "On change previewText, len:%{public}d, index:%{private}d",
-                static_cast<int32_t>(previewText.value.length()), previewText.offset);
+                static_cast<int32_t>(info.previewText.value.length()), info.previewText.offset);
             // Not all in one, in order to fix the cppcrash bug
             auto onChange = onChange_;
-            onChange(value, previewText);
+            onChange(info);
         }
-        lastValue_ = value;
-        lastPreviewText_ = previewText;
+        lastValue_ = info.value;
+        lastPreviewText_ = info.previewText;
     }
 
     void SetOnContentSizeChange(std::function<void(float, float)>&& func)
@@ -317,6 +327,24 @@ public:
         return onScrollIndexEvent_;
     }
 
+    void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func)
+    {
+        onWillChangeEvent_ = std::move(func);
+    }
+
+    bool HaveOnWillChangeEvent()
+    {
+        return onWillChangeEvent_ != nullptr;
+    }
+
+    bool FireOnWillChangeEvent(const ChangeValueInfo& info)
+    {
+        if (onWillChangeEvent_) {
+            return onWillChangeEvent_(info);
+        }
+        return true;
+    }
+
     void SetOnChangeEvent(std::function<void(const std::u16string&)>&& func)
     {
         onValueChangeEvent_ = std::move(func);
@@ -408,7 +436,7 @@ private:
     std::function<void(bool)> onEditChanged_;
     std::function<void(bool)> onSecurityStateChanged_;
     std::function<void(int32_t, NG::TextFieldCommonEvent&)> onSubmit_;
-    std::function<void(const std::u16string&, PreviewText&)> onChange_;
+    std::function<void(const ChangeValueInfo&)> onChange_;
     std::function<void(float, float)> onContentSizeChange_;
     std::function<void(int32_t, int32_t)> onSelectionChange_;
 
@@ -416,6 +444,7 @@ private:
     std::function<void(const std::u16string&)> onCut_;
     std::function<void(const std::u16string&)> onPaste_;
     std::function<void(const std::u16string&, NG::TextCommonEvent&)> onPasteWithEvent_;
+    std::function<bool(const ChangeValueInfo&)> onWillChangeEvent_;
     std::function<void(const std::u16string&)> onValueChangeEvent_;
 
     std::function<bool(const InsertValueInfo&)> onWillInsertValueEvent_;

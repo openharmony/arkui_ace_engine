@@ -26,6 +26,7 @@ public:
     static void Create();
     static void Create(const JSCallbackInfo& info);
     static void SetHideTitleBar(const JSCallbackInfo& info);
+    static void SetHideBackButton(const JSCallbackInfo& info);
     static void SetTitle(const JSCallbackInfo& info);
     static void SetBackButtonIcon(const JSCallbackInfo& info);
     static void SetOnShown(const JSCallbackInfo& info);
@@ -40,6 +41,8 @@ public:
     static void SetWillShow(const JSCallbackInfo& info);
     static void SetWillHide(const JSCallbackInfo& info);
     static void SetWillDisAppear(const JSCallbackInfo& info);
+    static void SetOnActive(const JSCallbackInfo& info);
+    static void SetOnInactive(const JSCallbackInfo& info);
     static void SetResultCallback(const JSCallbackInfo& info);
     static void SetToolBarConfiguration(const JSCallbackInfo& info);
     static void SetHideToolBar(const JSCallbackInfo& info);

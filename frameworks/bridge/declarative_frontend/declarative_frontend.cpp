@@ -673,7 +673,8 @@ UIContentErrorCode DeclarativeFrontend::RunPage(const std::string& url, const st
                 CHECK_NULL_VOID(frontend->jsEngine_);
                 frontend->jsEngine_->LoadFaAppSource();
             },
-            TaskExecutor::TaskType::JS, "ArkUILoadFaAppSource", PriorityType::VIP);
+            TaskExecutor::TaskType::JS, "ArkUILoadFaAppSource",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     }
 
     if (delegate_) {
@@ -1182,6 +1183,14 @@ void DeclarativeFrontend::NotifyAppStorage(const std::string& key, const std::st
         return;
     }
     delegate_->NotifyAppStorage(jsEngine_, key, value);
+}
+
+std::string DeclarativeFrontend::GetPagePathByUrl(const std::string& url) const
+{
+    if (!delegate_) {
+        return "";
+    }
+    return delegate_->GetPagePathByUrl(url);
 }
 
 void DeclarativeEventHandler::HandleAsyncEvent(const EventMarker& eventMarker)

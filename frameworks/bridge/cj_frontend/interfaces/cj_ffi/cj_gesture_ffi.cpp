@@ -15,8 +15,10 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_gesture_ffi.h"
 
-#include "bridge/cj_frontend/cppview/gesture.h"
+#include "cj_gesture_native.h"
 #include "cj_lambda.h"
+
+#include "bridge/cj_frontend/cppview/gesture.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -27,7 +29,6 @@
 #include "frameworks/core/components_ng/gestures/pinch_gesture.h"
 #include "frameworks/core/components_ng/gestures/rotation_gesture.h"
 #include "frameworks/core/components_ng/gestures/swipe_gesture.h"
-#include "cj_gesture_native.h"
 #if defined(WINDOWS_PLATFORM)
 #include <windows.h>
 #else
@@ -75,10 +76,10 @@ void* FindFunction(void* library, const char* name)
 
 ArkUIFullNodeAPI* impl = nullptr;
 
-ArkUIFullNodeAPI *GetNodeAPIImpl()
+ArkUIFullNodeAPI* GetNodeAPIImpl()
 {
     if (!impl) {
-        typedef ArkUIAnyAPI *(*GetAPI_t)(int);
+        typedef ArkUIAnyAPI* (*GetAPI_t)(int);
         GetAPI_t getAPI = nullptr;
         void* module = FindModule();
         if (module == nullptr) {
@@ -125,9 +126,38 @@ const std::vector<GestureMode> GROUP_GESTURE_MODE = { GestureMode::Sequence, Ges
 
 enum class GestureEventType { ACTION, START, UPDATE, END, CANCEL };
 
+bool CheckKeysPressed(const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes)
+{
+    auto hasKeyCode = [pressedKeyCodes](const KeyCode& keyCode) -> bool {
+        auto it = std::find(pressedKeyCodes.begin(), pressedKeyCodes.end(), keyCode);
+        return it != pressedKeyCodes.end();
+    };
+    for (auto& checkKeyCode : checkKeyCodes) {
+        if (checkKeyCode == "ctrl") {
+            if (!hasKeyCode(KeyCode::KEY_CTRL_LEFT) && !hasKeyCode(KeyCode::KEY_CTRL_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "shift") {
+            if (!hasKeyCode(KeyCode::KEY_SHIFT_LEFT) && !hasKeyCode(KeyCode::KEY_SHIFT_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "alt") {
+            if (!hasKeyCode(KeyCode::KEY_ALT_LEFT) && !hasKeyCode(KeyCode::KEY_ALT_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "fn") {
+            if (!hasKeyCode(KeyCode::KEY_FN)) {
+                return false;
+            }
+        } else {
+            LOGE("CheckKeysPressed: indicate the keys are illegal");
+            return false;
+        }
+    }
+    return true;
+}
 
-void FormatGestureType(CJBaseGestureEvent& cjEvent,
-    const std::shared_ptr<BaseGestureEvent>& info, GestureTypeName type)
+void FormatGestureType(CJBaseGestureEvent& cjEvent, const std::shared_ptr<BaseGestureEvent>& info, GestureTypeName type)
 {
     double density = PipelineBase::GetCurrentDensity();
     if (density != 0.0) {
@@ -218,7 +248,10 @@ std::function<void(const GestureEvent& event)> FormatGestureEvenFunction(void (*
         ffiGestureEvent.velocityY = PipelineBase::Px2VpWithCurrentDensity(event.GetVelocity().GetVelocityY());
         ffiGestureEvent.velocity = PipelineBase::Px2VpWithCurrentDensity(event.GetVelocity().GetVelocityValue());
         ffiGestureEvent.pressure = event.GetForce();
-
+        ffiGestureEvent.axisHorizontal = event.GetHorizontalAxis();
+        ffiGestureEvent.axisVertical = event.GetVerticalAxis();
+        ffiGestureEvent.deviceId = event.GetDeviceId();
+        ffiGestureEvent.baseEventInfoPtr = dynamic_cast<const BaseEventInfo*>(&event);
         ffiOnAction(ffiGestureEvent);
     };
     return result;
@@ -242,16 +275,12 @@ void HandlerOnGestureEvent(
     }
 
     if (action == GestureEventType::CANCEL) {
-        auto onActionCancelFunc = [callback = std::move(callback)](GestureEvent& info) {
-            callback(info);
-        };
+        auto onActionCancelFunc = [callback = std::move(callback)](GestureEvent& info) { callback(info); };
         gesture->SetOnActionCancelId(onActionCancelFunc);
         return;
     }
 
-    auto onActionFunc = [callback = std::move(callback)](GestureEvent& info) {
-        callback(info);
-    };
+    auto onActionFunc = [callback = std::move(callback)](GestureEvent& info) { callback(info); };
 
     switch (action) {
         case GestureEventType::ACTION:
@@ -286,8 +315,7 @@ void FfiOHOSAceFrameworkGestureCreate(int32_t priority, int32_t mask)
         return;
     }
 
-    RefPtr<GestureProcessor> gestureProcessor =
-            NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    RefPtr<GestureProcessor> gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
     gestureProcessor->SetPriority(GESTURE_PRIORITY[priority]);
     gestureProcessor->SetGestureMask(GESTURE_MASK[mask]);
 }
@@ -299,8 +327,7 @@ void FfiOHOSAceFrameworkGestureOnAction(void (*callback)(CJGestureEvent info))
 
 void FfiOHOSAceFrameworkGestureSetTag(const char* tag)
 {
-    RefPtr<GestureProcessor> gestureProcessor =
-            NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    RefPtr<GestureProcessor> gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
     auto gesture = gestureProcessor->TopGestureNG();
     if (!gesture) {
         LOGE("FfiOHOSAceFrameworkGestureSetTag: get gesture failed");
@@ -331,8 +358,7 @@ void FfiOHOSAceFrameworkGestureOnActionCancel(void (*callback)())
 
 void FfiOHOSAceFrameworkGestureFinish()
 {
-    RefPtr<GestureProcessor> gestureProcessor =
-        NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    RefPtr<GestureProcessor> gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
     NG::ViewStackProcessor::GetInstance()->ResetGestureProcessor();
 
     auto gesture = gestureProcessor->FinishGestureNG();
@@ -350,16 +376,14 @@ void FfiOHOSAceFrameworkGestureFinish()
 
 void FfiOHOSAceFrameworkGesturePop()
 {
-    RefPtr<GestureProcessor> gestureProcessor =
-        NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    RefPtr<GestureProcessor> gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
     gestureProcessor->PopGestureNG();
 }
 
 // tapGesture
 void FfiOHOSAceFrameworkTapGestureCreate(int32_t count, int32_t fingers)
 {
-    RefPtr<GestureProcessor> gestureProcessor =
-        NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    RefPtr<GestureProcessor> gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
 
     int32_t countNum = Utils::CheckMin(DEFAULT_TAP_COUNT, DEFAULT_TAP_COUNT, count);
     int32_t fingersNum = Utils::CheckRange(DEFAULT_TAP_FINGER, MAX_TAP_FINGER, DEFAULT_TAP_FINGER, fingers);
@@ -371,8 +395,7 @@ void FfiOHOSAceFrameworkTapGestureCreate(int32_t count, int32_t fingers)
 // LongPressGesture
 void FfiOHOSAceFrameworkLongPressGestureCreate(int32_t fingers, bool repeat, int32_t duration)
 {
-    RefPtr<GestureProcessor> gestureProcessor =
-        NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    RefPtr<GestureProcessor> gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
 
     int32_t fingersNum =
         Utils::CheckRange(DEFAULT_LONG_PRESS_FINGER, MAX_LONG_PRESS_FINGER, DEFAULT_LONG_PRESS_FINGER, fingers);
@@ -385,11 +408,9 @@ void FfiOHOSAceFrameworkLongPressGestureCreate(int32_t fingers, bool repeat, int
 // PinchPressGesture
 void FfiOHOSAceFrameworkPinchGestureCreate(int32_t fingers, double distance)
 {
-    RefPtr<GestureProcessor> gestureProcessor =
-        NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    RefPtr<GestureProcessor> gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
 
-    int32_t fingersNum =
-        Utils::CheckRange(DEFAULT_PINCH_FINGER, MAX_PINCH_FINGER, DEFAULT_PINCH_FINGER, fingers);
+    int32_t fingersNum = Utils::CheckRange(DEFAULT_PINCH_FINGER, MAX_PINCH_FINGER, DEFAULT_PINCH_FINGER, fingers);
     double distanceNum = Utils::CheckMin(0.0, DEFAULT_PINCH_DISTANCE, distance);
 
     auto gesture = AceType::MakeRefPtr<NG::PinchGesture>(fingersNum, distanceNum);
@@ -402,11 +423,9 @@ void FfiOHOSAceFrameworkSwipeGestureCreate(int32_t fingers, uint32_t direction, 
     OHOS::Ace::SwipeDirection swipeDirection;
     swipeDirection.type = direction;
 
-    RefPtr<GestureProcessor> gestureProcessor =
-        NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    RefPtr<GestureProcessor> gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
 
-    int32_t fingersNum =
-        Utils::CheckRange(DEFAULT_SLIDE_FINGER, MAX_SLIDE_FINGER, DEFAULT_SLIDE_FINGER, fingers);
+    int32_t fingersNum = Utils::CheckRange(DEFAULT_SLIDE_FINGER, MAX_SLIDE_FINGER, DEFAULT_SLIDE_FINGER, fingers);
     double speedNum = Utils::CheckMin(0.0, DEFAULT_SLIDE_SPEED, speed);
 
     auto gesture = AceType::MakeRefPtr<NG::SwipeGesture>(fingersNum, swipeDirection, speedNum);
@@ -416,8 +435,7 @@ void FfiOHOSAceFrameworkSwipeGestureCreate(int32_t fingers, uint32_t direction, 
 // RotationGesture
 void FfiOHOSAceFrameworkRotationGestureCreate(int32_t fingers, double angle)
 {
-    RefPtr<GestureProcessor> gestureProcessor =
-        NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    RefPtr<GestureProcessor> gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
 
     int32_t fingersNum =
         Utils::CheckRange(DEFAULT_ROTATION_FINGER, MAX_ROTATION_FINGER, DEFAULT_ROTATION_FINGER, fingers);
@@ -433,11 +451,9 @@ void FfiOHOSAceFrameworkPanGestureCreate(int32_t fingers, uint32_t direction, do
     OHOS::Ace::PanDirection panDirection;
     panDirection.type = direction;
 
-    RefPtr<GestureProcessor> gestureProcessor =
-        NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    RefPtr<GestureProcessor> gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
 
-    int32_t fingersNum =
-        Utils::CheckRange(DEFAULT_PAN_FINGER, MAX_PAN_FINGER, DEFAULT_PAN_FINGER, fingers);
+    int32_t fingersNum = Utils::CheckRange(DEFAULT_PAN_FINGER, MAX_PAN_FINGER, DEFAULT_PAN_FINGER, fingers);
     double distanceNum = Utils::CheckMin(0.0, DEFAULT_PAN_DISTANCE.Value(), distance);
 
     auto gesture = AceType::MakeRefPtr<NG::PanGesture>(fingersNum, panDirection, distanceNum);
@@ -466,8 +482,7 @@ void FfiOHOSAceFrameworkGestureGroupCreate(int32_t mode)
         return;
     }
 
-    RefPtr<GestureProcessor> gestureProcessor =
-        NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    RefPtr<GestureProcessor> gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
     auto gesture = AceType::MakeRefPtr<NG::GestureGroup>(GROUP_GESTURE_MODE[mode]);
     gestureProcessor->PushGestureNG(gesture);
 }
@@ -528,7 +543,7 @@ int64_t FfiOHOSAceFrameworkTapGestureHandlerCtor(int32_t count, int32_t fingers)
         return FFI_ERROR_CODE;
     }
     auto tapGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
-        createTapGestureWithDistanceThreshold(count, fingers, DEFAULT_TAP_DISTANCE, nullptr);
+        createTapGestureWithDistanceThreshold(count, fingers, DEFAULT_TAP_DISTANCE, false, nullptr);
     nativeGesture->setArkUIGesture(tapGesture);
     return nativeGesture->GetID();
 }
@@ -541,7 +556,7 @@ int64_t FfiOHOSAceFrameworkLongPressGestureHandlerCtor(int32_t fingers, bool rep
         return FFI_ERROR_CODE;
     }
     auto longPressGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
-        createLongPressGesture(fingers, repeat, duration, nullptr);
+        createLongPressGesture(fingers, repeat, duration, false, nullptr);
     nativeGesture->setArkUIGesture(longPressGesture);
     return nativeGesture->GetID();
 }
@@ -554,7 +569,7 @@ int64_t FfiOHOSAceFrameworkPinchGestureHandlerCtor(int32_t fingers, double dista
         return FFI_ERROR_CODE;
     }
     auto pinchGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
-        createPinchGesture(fingers, distance, nullptr);
+        createPinchGesture(fingers, distance, false, nullptr);
     nativeGesture->setArkUIGesture(pinchGesture);
     return nativeGesture->GetID();
 }
@@ -567,7 +582,7 @@ int64_t FfiOHOSAceFrameworkSwipeGestureHandlerCtor(int32_t fingers, uint32_t dir
         return FFI_ERROR_CODE;
     }
     auto swipeGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
-        createSwipeGestureByModifier(fingers, direction, speed);
+        createSwipeGestureByModifier(fingers, direction, speed, false);
     nativeGesture->setArkUIGesture(swipeGesture);
     return nativeGesture->GetID();
 }
@@ -580,7 +595,7 @@ int64_t FfiOHOSAceFrameworkRotationGestureHandlerCtor(int32_t fingers, double an
         return FFI_ERROR_CODE;
     }
     auto rotationGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
-        createRotationGesture(fingers, angle, nullptr);
+        createRotationGesture(fingers, angle, false, nullptr);
     nativeGesture->setArkUIGesture(rotationGesture);
     return nativeGesture->GetID();
 }
@@ -593,7 +608,7 @@ int64_t FfiOHOSAceFrameworkPanGestureHandlerCtor(int32_t fingers, uint32_t direc
         return FFI_ERROR_CODE;
     }
     auto panGesture = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
-        createPanGesture(fingers, direction, distance, nullptr);
+        createPanGesture(fingers, direction, distance, false, nullptr);
     nativeGesture->setArkUIGesture(panGesture);
     return nativeGesture->GetID();
 }
@@ -605,8 +620,7 @@ int64_t FfiOHOSAceFrameworkGestureGroupHandlerCtor(int32_t mode, VectorInt64Hand
         LOGE("FfiOHOSAceFrameworkGestureGroupHandlerCtor: nativeGestureGroup create failed");
         return FFI_ERROR_CODE;
     }
-    auto gestureGroup = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
-        createGestureGroup(mode);
+    auto gestureGroup = GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->createGestureGroup(mode);
     nativeGestureGroup->setArkUIGesture(gestureGroup);
     const auto& gestureList = *reinterpret_cast<std::vector<int64_t>*>(vectorHandle);
     for (auto id : gestureList) {
@@ -615,8 +629,7 @@ int64_t FfiOHOSAceFrameworkGestureGroupHandlerCtor(int32_t mode, VectorInt64Hand
             LOGE("FfiOHOSAceFrameworkGestureGroupHandlerCtor: invalid id");
             return FFI_ERROR_CODE;
         }
-        GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
-        addGestureToGestureGroupWithRefCountDecrease(
+        GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->addGestureToGestureGroupWithRefCountDecrease(
             nativeGestureGroup->getArkUIGesture(), nativeGesture->getArkUIGesture());
     }
     return nativeGestureGroup->GetID();
@@ -711,6 +724,34 @@ void FfiOHOSAceFrameworkGestureHandlerSetOnActionCancel(int64_t id, void (*onCan
     gesturePtr->SetOnActionCancelId(event);
 }
 
+bool FfiOHOSAceFrameworkGestureGetModifierKeyState(void* baseEventInfoPtr, VectorStringHandle vectorHanle)
+{
+    if (!baseEventInfoPtr) {
+        return false;
+    }
+    const auto& paramArray = *reinterpret_cast<std::vector<std::string>*>(vectorHanle);
+    auto pBaseEventInfo = static_cast<BaseEventInfo*>(baseEventInfoPtr);
+    auto pressedKeyCodes = pBaseEventInfo->GetPressedKeyCodes();
+    std::vector<std::string> checkKeyCodes;
+    std::vector<std::string> validKeyCodes = { "ctrl", "shift", "alt", "fn" };
+    for (size_t i = 0; i < paramArray.size(); i++) {
+        auto code = paramArray[i];
+        std::transform(code.begin(), code.end(), code.begin(), [](char& c) { return std::tolower(c); });
+        auto it = std::find(validKeyCodes.begin(), validKeyCodes.end(), code.c_str());
+        if (it == validKeyCodes.end()) {
+            LOGE("FfiOHOSAceFrameworkGestureGetModifierKeyState: indicate the keys are illegal");
+            return false;
+        } else {
+            checkKeyCodes.emplace_back(code);
+        }
+    }
+    if (checkKeyCodes.empty()) {
+        LOGE("FfiOHOSAceFrameworkGestureGetModifierKeyState: indicate the keys are illegal");
+        return false;
+    }
+    return CheckKeysPressed(pressedKeyCodes, checkKeyCodes);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetGestureHandler(int64_t elemId, int64_t gestureId, int32_t priority, int32_t mask)
 {
     auto nativeGesture = FFIData::GetData<NativeGesture>(gestureId);
@@ -719,8 +760,8 @@ void FfiOHOSAceFrameworkViewAbstractSetGestureHandler(int64_t elemId, int64_t ge
         return;
     }
     auto nativeNode = GetNodeAPIImpl()->getNodeModifiers()->getFrameNodeModifier()->getFrameNodeById(elemId);
-    GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
-        addGestureToNodeWithRefCountDecrease(nativeNode, nativeGesture->getArkUIGesture(), priority, mask);
+    GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->addGestureToNodeWithRefCountDecrease(
+        nativeNode, nativeGesture->getArkUIGesture(), priority, mask);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetGestureGroupHandler(
@@ -732,8 +773,8 @@ void FfiOHOSAceFrameworkViewAbstractSetGestureGroupHandler(
         return;
     }
     auto nativeNode = GetNodeAPIImpl()->getNodeModifiers()->getFrameNodeModifier()->getFrameNodeById(elemId);
-    GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
-        addGestureToNodeWithRefCountDecrease(nativeNode, nativeGesture->getArkUIGesture(), priority, mask);
+    GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->addGestureToNodeWithRefCountDecrease(
+        nativeNode, nativeGesture->getArkUIGesture(), priority, mask);
 }
 
 void FfiOHOSAceFrameworkViewAbstractClearGestureHandlers(int64_t elemId)
@@ -743,8 +784,7 @@ void FfiOHOSAceFrameworkViewAbstractClearGestureHandlers(int64_t elemId)
         LOGE("FfiOHOSAceFrameworkViewAbstractClearGestureHandlers: invalid id");
         return;
     }
-    GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->
-        clearGestures(nativeNode);
+    GetNodeAPIImpl()->getNodeModifiers()->getGestureModifier()->clearGestures(nativeNode);
 }
 
 void FfiOHOSAceFrameworkViewAbstractRemoveGestureHandlerByTag(int64_t elemId, const char* tag)
@@ -797,6 +837,9 @@ void FfiOHOSAceFrameworkViewAbstractSetOnGestureJudgeBegin(int32_t (*callback)(C
         ffiBaseEvent.tiltY = info->GetTiltY().value();
         ffiBaseEvent.sourceTool = static_cast<int32_t>(info->GetSourceTool());
         ffiBaseEvent.target = &ffiEventTarget;
+        ffiBaseEvent.deviceId = info->GetDeviceId();
+        ffiBaseEvent.axisHorizontal = nullptr;
+        ffiBaseEvent.axisVertical = nullptr;
         baseGestureEvent.baseEvent = &ffiBaseEvent;
 
         auto& fingerList = info->GetFingerList();

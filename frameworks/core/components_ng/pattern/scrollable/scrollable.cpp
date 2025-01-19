@@ -30,7 +30,8 @@ constexpr double CAP_COEFFICIENT = 0.45;
 constexpr int32_t FIRST_THRESHOLD = 4;
 constexpr int32_t SECOND_THRESHOLD = 10;
 constexpr double CAP_FIXED_VALUE = 16.0;
-constexpr uint32_t DRAG_INTERVAL_TIME = 900;
+constexpr uint32_t DRAG_INTERVAL_TIME = 400;
+constexpr uint32_t MULTI_FLING_DISTANCE = 125;
 
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
@@ -61,14 +62,14 @@ constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 #endif
 
 #ifdef SUPPORT_DIGITAL_CROWN
-constexpr double ANGULAR_VELOCITY_FACTOR  = 532 / 360.0 * 0.013;
-constexpr float ANGULAR_VELOCITY_SLOW = 0.1f;
-constexpr float ANGULAR_VELOCITY_MEDIUM = 0.3f;
-constexpr float ANGULAR_VELOCITY_FAST = 0.8f;
-constexpr float DISPLAY_CONTROL_RATIO_VERY_SLOW = 3.24f;
-constexpr float DISPLAY_CONTROL_RATIO_SLOW = 3.39f;
-constexpr float DISPLAY_CONTROL_RATIO_MEDIUM = 3.08f;
-constexpr float DISPLAY_CONTROL_RATIO_FAST = 2.90f;
+constexpr double ANGULAR_VELOCITY_FACTOR  = 0.001f;
+constexpr float ANGULAR_VELOCITY_SLOW = 0.07f;
+constexpr float ANGULAR_VELOCITY_MEDIUM = 0.2f;
+constexpr float ANGULAR_VELOCITY_FAST = 0.54f;
+constexpr float DISPLAY_CONTROL_RATIO_VERY_SLOW = 2.97f;
+constexpr float DISPLAY_CONTROL_RATIO_SLOW = 3.11f;
+constexpr float DISPLAY_CONTROL_RATIO_MEDIUM = 2.82f;
+constexpr float DISPLAY_CONTROL_RATIO_FAST = 2.65f;
 constexpr float CROWN_SENSITIVITY_LOW = 0.8f;
 constexpr float CROWN_SENSITIVITY_MEDIUM = 1.0f;
 constexpr float CROWN_SENSITIVITY_HIGH = 1.2f;
@@ -352,6 +353,7 @@ void Scrollable::HandleCrownActionBegin(const TimeStamp& timeStamp, double mainD
     info.SetMainVelocity(crownVelocityTracker_.GetMainAxisVelocity());
     isDragging_ = true;
     isCrownEventDragging_ = true;
+    crownTask_.Cancel();
     HandleDragStart(info);
 }
 
@@ -380,7 +382,16 @@ void Scrollable::HandleCrownActionEnd(const TimeStamp& timeStamp, double mainDel
             event(gestureInfo);
         });
     isDragging_ = false;
-    isCrownEventDragging_ = false;
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    crownTask_.Reset([weak = WeakClaim(this)] {
+        auto scrollable = weak.Upgrade();
+        if (scrollable) {
+            scrollable->SetCrownEventDragging(false);
+        }
+    });
+    taskExecutor.PostDelayedTask(crownTask_, CUSTOM_SPRING_ANIMATION_DURATION, "ArkUIUpdateCrownEventDrag");
 }
 
 void Scrollable::HandleCrownActionCancel(GestureEvent& info)
@@ -920,6 +931,11 @@ double Scrollable::GetGain(double delta)
 {
     auto cap = 1.0;
     auto gain = 1.0;
+    if (std::abs(delta) < MULTI_FLING_DISTANCE) {
+        ResetContinueDragCount();
+        preGain_ = gain;
+        return gain;
+    }
     if (!continuousSlidingCallback_) {
         preGain_ = gain;
         return gain;

@@ -1126,13 +1126,27 @@ void JSTextField::SetOnChange(const JSCallbackInfo& info)
 {
     auto jsValue = info[0];
     CHECK_NULL_VOID(jsValue->IsFunction());
-    auto jsChangeFunc = AceType::MakeRefPtr<JsCitedEventFunction<PreviewText, 2>>(
-        JSRef<JSFunc>::Cast(jsValue), CreateJsOnChangeObj);
+    auto jsChangeFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(jsValue));
     auto onChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
-        const std::u16string& val, PreviewText& previewText) {
+        const ChangeValueInfo& changeValueInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onChange");
-        func->Execute(val, previewText);
+        JSRef<JSVal> valueObj = JSRef<JSVal>::Make(ToJSValue(changeValueInfo.value));
+        auto previewTextObj = CreateJsOnChangeObj(changeValueInfo.previewText);
+        auto optionsObj = JSRef<JSObject>::New();
+        auto rangeBeforeObj = JSRef<JSObject>::New();
+        rangeBeforeObj->SetProperty<int32_t>("start", changeValueInfo.rangeBefore.start);
+        rangeBeforeObj->SetProperty<int32_t>("end", changeValueInfo.rangeBefore.end);
+        optionsObj->SetPropertyObject("rangeBefore", rangeBeforeObj);
+        auto rangeAfterObj = JSRef<JSObject>::New();
+        rangeAfterObj->SetProperty<int32_t>("start", changeValueInfo.rangeAfter.start);
+        rangeAfterObj->SetProperty<int32_t>("end", changeValueInfo.rangeAfter.end);
+        optionsObj->SetPropertyObject("rangeAfter", rangeAfterObj);
+        optionsObj->SetProperty<std::u16string>("oldContent", changeValueInfo.oldContent);
+        auto oldPreviewTextObj = CreateJsOnChangeObj(changeValueInfo.oldPreviewText);
+        optionsObj->SetPropertyObject("oldPreviewText", oldPreviewTextObj);
+        JSRef<JSVal> argv[] = { valueObj, previewTextObj, optionsObj };
+        func->ExecuteJS(3, argv);
     };
     TextFieldModel::GetInstance()->SetOnChange(std::move(onChange));
 }
@@ -1700,6 +1714,24 @@ void JSTextField::SetSelectAllValue(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetSelectAllValue(isSetSelectAllValue);
 }
 
+void JSTextField::SetKeyboardAppearance(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1) {
+        return;
+    }
+    auto jsValue = info[0];
+    if (!jsValue->IsNumber()) {
+        return;
+    }
+    auto keyboardAppearance = jsValue->ToNumber<uint32_t>();
+    if (keyboardAppearance < static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
+        keyboardAppearance > static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        return;
+    }
+    TextFieldModel::GetInstance()->
+        SetKeyboardAppearance(static_cast<KeyboardAppearance>(keyboardAppearance));
+}
+
 void JSTextField::SetDecoration(const JSCallbackInfo& info)
 {
     do {
@@ -2004,4 +2036,49 @@ void JSTextField::SetStopBackPress(const JSCallbackInfo& info)
     }
     TextFieldModel::GetInstance()->SetStopBackPress(isStopBackPress);
 }
+
+JSRef<JSVal> JSTextField::CreateJsOnWillChangeObj(const ChangeValueInfo& changeValueInfo)
+{
+    JSRef<JSObject> ChangeValueInfo = JSRef<JSObject>::New();
+    ChangeValueInfo->SetProperty<std::u16string>("content", changeValueInfo.value);
+
+    auto previewTextObj = CreateJsOnChangeObj(changeValueInfo.previewText);
+    ChangeValueInfo->SetPropertyObject("previewText", previewTextObj);
+
+    auto optionsObj = JSRef<JSObject>::New();
+    auto rangeBeforeObj = JSRef<JSObject>::New();
+    rangeBeforeObj->SetProperty<int32_t>("start", changeValueInfo.rangeBefore.start);
+    rangeBeforeObj->SetProperty<int32_t>("end", changeValueInfo.rangeBefore.end);
+    optionsObj->SetPropertyObject("rangeBefore", rangeBeforeObj);
+    auto rangeAfterObj = JSRef<JSObject>::New();
+    rangeAfterObj->SetProperty<int32_t>("start", changeValueInfo.rangeAfter.start);
+    rangeAfterObj->SetProperty<int32_t>("end", changeValueInfo.rangeAfter.end);
+    optionsObj->SetPropertyObject("rangeAfter", rangeAfterObj);
+    optionsObj->SetProperty<std::u16string>("oldContent", changeValueInfo.oldContent);
+    auto oldPreviewTextObj = CreateJsOnChangeObj(changeValueInfo.oldPreviewText);
+    optionsObj->SetPropertyObject("oldPreviewText", oldPreviewTextObj);
+
+    ChangeValueInfo->SetPropertyObject("options", optionsObj);
+    return JSRef<JSVal>::Cast(ChangeValueInfo);
+}
+
+void JSTextField::SetOnWillChange(const JSCallbackInfo& info)
+{
+    auto jsValue = info[0];
+    CHECK_NULL_VOID(jsValue->IsFunction());
+    auto jsChangeFunc = AceType::MakeRefPtr<JsEventFunction<ChangeValueInfo, 1>>(
+        JSRef<JSFunc>::Cast(jsValue), CreateJsOnWillChangeObj);
+    auto onWillChange = [execCtx = info.GetExecutionContext(), func = std::move(jsChangeFunc)](
+        const ChangeValueInfo& changeValue) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        ACE_SCORING_EVENT("onWillChange");
+        auto ret = func->ExecuteWithValue(changeValue);
+        if (ret->IsBoolean()) {
+            return ret->ToBoolean();
+        }
+        return true;
+    };
+    TextFieldModel::GetInstance()->SetOnWillChangeEvent(std::move(onWillChange));
+}
+
 } // namespace OHOS::Ace::Framework

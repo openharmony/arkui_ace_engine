@@ -50,6 +50,15 @@ public:
             }
             theme->backResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_BACK);
             theme->moreResourceId_ = themeConstants->GetResourceId(THEME_NAVIGATION_BAR_RESOURCE_ID_MORE);
+            theme->moreSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_down");
+            theme->backSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.chevron_up");
+            theme->cutSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.cut");
+            theme->copySymbolId_ = themeConstants->GetSymbolByName("sys.symbol.plus_square_on_square");
+            theme->copyAllSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.checkmark_square_on_square");
+            theme->pasteSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.plus_square_dashed_on_square");
+            theme->cameraInputSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.auto_camera");
+            theme->aiWriteSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.edit_badge_star");
+            theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             ParseMenuPattern(themeConstants->GetThemeStyle(), theme);
             return theme;
@@ -103,6 +112,8 @@ public:
                     pattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, defaultTertiaryColorAlpha);
                 theme->cameraInput_ = pattern->GetAttr<std::string>("camera_input", "Camera input");
                 theme->aiWrite_ = pattern->GetAttr<std::string>("ai_write_menu_name", "Celia writer");
+                theme->symbolSize_ = pattern->GetAttr<Dimension>("more_or_back_symbol_size", 24.0_vp);
+                theme->symbolColor_ = pattern->GetAttr<Color>("more_or_back_symbol_color", Color());
             } else {
                 LOGW("find pattern of textoverlay fail");
             }
@@ -286,6 +297,62 @@ public:
     {
         return showShortcut_;
     }
+
+    const uint32_t& GetMoreSymbolId() const
+    {
+        return moreSymbolId_;
+    }
+
+    const uint32_t& GetBackSymbolId() const
+    {
+        return backSymbolId_;
+    }
+
+    const uint32_t& GetCutSymbolId() const
+    {
+        return cutSymbolId_;
+    }
+
+    const uint32_t& GetCopySymbolId() const
+    {
+        return copySymbolId_;
+    }
+
+    const uint32_t& GetCopyAllSymbolId() const
+    {
+        return copyAllSymbolId_;
+    }
+
+    const uint32_t& GetPasteSymbolId() const
+    {
+        return pasteSymbolId_;
+    }
+
+    const uint32_t& GetCameraInputSymbolId() const
+    {
+        return cameraInputSymbolId_;
+    }
+
+    const uint32_t& GetAIWriteSymbolId() const
+    {
+        return aiWriteSymbolId_;
+    }
+
+    const uint32_t& GetSearchSymbolId() const
+    {
+        return searchSymbolId_;
+    }
+
+    const Dimension& GetSymbolSize() const
+    {
+        return symbolSize_;
+    }
+
+    const Color& GetSymbolColor() const
+    {
+        return symbolColor_;
+    }
+    
 protected:
     TextOverlayTheme() = default;
 
@@ -319,6 +386,18 @@ private:
 
     InternalResource::ResourceId backResourceId_ = InternalResource::ResourceId::NO_ID;
     InternalResource::ResourceId moreResourceId_ = InternalResource::ResourceId::NO_ID;
+
+    Dimension symbolSize_;
+    Color symbolColor_;
+    uint32_t moreSymbolId_ = 0;
+    uint32_t backSymbolId_ = 0;
+    uint32_t cutSymbolId_ = 0;
+    uint32_t copySymbolId_ = 0;
+    uint32_t copyAllSymbolId_ = 0;
+    uint32_t pasteSymbolId_ = 0;
+    uint32_t cameraInputSymbolId_ = 0;
+    uint32_t aiWriteSymbolId_ = 0;
+    uint32_t searchSymbolId_ = 0;
 };
 
 } // namespace OHOS::Ace

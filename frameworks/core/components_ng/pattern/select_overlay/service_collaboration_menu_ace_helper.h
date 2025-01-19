@@ -37,7 +37,7 @@ class ACE_FORCE_EXPORT ServiceCollaborationMenuAceHelper : public virtual AceTyp
     DECLARE_ACE_TYPE(ServiceCollaborationMenuAceHelper, AceType);
 public:
     void CreateText(const std::string& value, const RefPtr<FrameNode>& parent, const Color& color,
-        bool needMargin, bool hasEndIncon);
+        bool needMargin, bool hasEndIcon);
     void CreateHeaderText(const std::string& value, const RefPtr<FrameNode>& row,
         const RefPtr<FrameNode>& menuItemGroupNode);
     void CreateEndIcon(uint32_t iconId, const RefPtr<FrameNode>& parent);

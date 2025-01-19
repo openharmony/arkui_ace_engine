@@ -180,6 +180,7 @@ HWTEST_F(TextFieldUXTest, CleanNode002, TestSize.Level1)
      * @tc.steps: step3. test clean node clicked
      */
     cleanNodeResponseArea->OnCleanNodeClicked();
+    pattern_->BeforeCreateLayoutWrapper();
     EXPECT_EQ(pattern_->GetTextValue(), "");
 }
 

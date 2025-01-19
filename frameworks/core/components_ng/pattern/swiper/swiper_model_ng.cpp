@@ -500,6 +500,23 @@ void SwiperModelNG::SetOnContentDidScroll(FrameNode* frameNode, ContentDidScroll
     pattern->SetOnContentDidScroll(std::move(onContentDidScroll));
 }
 
+void SwiperModelNG::SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnContentWillScroll(std::move(onContentWillScroll));
+}
+
+void SwiperModelNG::SetOnContentWillScroll(FrameNode* frameNode, ContentWillScrollEvent&& onContentWillScroll)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnContentWillScroll(std::move(onContentWillScroll));
+}
+
 void SwiperModelNG::SetPageFlipMode(int32_t pageFlipMode)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -940,6 +957,14 @@ void SwiperModelNG::SetSwiperToIndex(FrameNode* frameNode, int32_t index, bool u
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->ChangeIndex(index, useAnimation);
+}
+
+void SwiperModelNG::SetSwiperToIndex(FrameNode* frameNode, int32_t index, SwiperAnimationMode animationMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ChangeIndex(index, animationMode);
 }
 
 void SwiperModelNG::GetPreviousMargin(FrameNode* frameNode, int32_t unit, SwiperMarginOptions* options)

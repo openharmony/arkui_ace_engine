@@ -63,9 +63,6 @@ void SwiperIndicatorPattern::OnModifyDone()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
 
-    auto swiperPattern = GetSwiperPattern();
-    CHECK_NULL_VOID(swiperPattern);
-    swiperIndicatorType_ = swiperPattern->GetIndicatorType();
     if (GetIndicatorType() == SwiperIndicatorType::DIGIT) {
         UpdateDigitalIndicator();
     } else {
@@ -76,9 +73,15 @@ void SwiperIndicatorPattern::OnModifyDone()
         dotIndicatorModifier_->StopAnimation();
     }
 
+    InitIndicatorEvent();
+}
+
+void SwiperIndicatorPattern::InitIndicatorEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     RegisterIndicatorChangeEvent();
-    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
+
     if (GetIndicatorType() == SwiperIndicatorType::DOT) {
         auto gestureHub = host->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -88,6 +91,12 @@ void SwiperIndicatorPattern::OnModifyDone()
         InitLongPressEvent(gestureHub);
         InitFocusEvent();
     }
+
+    auto swiperPattern = GetSwiperPattern();
+    CHECK_NULL_VOID(swiperPattern);
+    swiperIndicatorType_ = swiperPattern->GetIndicatorType();
+    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
     if (swiperLayoutProperty->GetIndicatorTypeValue(SwiperIndicatorType::ARC_DOT) == SwiperIndicatorType::ARC_DOT) {
         auto gestureHub = host->GetOrCreateGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
@@ -452,13 +461,14 @@ void SwiperIndicatorPattern::HandleHoverEvent(bool isHover)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    if (swiperLayoutProperty->GetHoverShowValue(false) && !swiperPattern->GetIsAtHotRegion()) {
-        swiperPattern->ArrowHover(isHover_);
+    if (swiperNode) {
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_VOID(swiperPattern);
+        auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_VOID(swiperLayoutProperty);
+        if (swiperLayoutProperty->GetHoverShowValue(false) && !swiperPattern->GetIsAtHotRegion()) {
+            swiperPattern->ArrowHover(isHover_);
+        }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }

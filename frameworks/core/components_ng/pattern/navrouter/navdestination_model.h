@@ -34,6 +34,7 @@ public:
     virtual void Create(
         std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context = nullptr) = 0;
     virtual void SetHideTitleBar(bool hideTitleBar, bool animated = false) = 0;
+    virtual void SetHideBackButton(bool hideBackButton) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle) = 0;
     virtual void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) {};
     virtual void SetBackButtonIcon(const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol,
@@ -48,6 +49,8 @@ public:
     virtual void SetOnWillShow(std::function<void()>&& willShow) = 0;
     virtual void SetOnWillHide(std::function<void()>&& willHide) = 0;
     virtual void SetOnWillDisAppear(std::function<void()>&& willDisAppear) = 0;
+    virtual void SetOnActive(std::function<void(int32_t)>&& onActive) = 0;
+    virtual void SetOnInactive(std::function<void(int32_t)>&& onInactive) = 0;
     virtual void SetOnBackPressed(std::function<bool()>&& onBackPressed) = 0;
     virtual void SetOnReady(std::function<void(RefPtr<NG::NavDestinationContext>)>&& onReady) = 0;
     virtual void SetOnPop(std::function<void(const RefPtr<NG::NavPathInfo>&)>&& onPop) = 0;

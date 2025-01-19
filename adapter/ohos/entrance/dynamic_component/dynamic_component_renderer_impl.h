@@ -95,6 +95,7 @@ private:
     void RegisterSizeChangedCallback();
     void RegisterConfigChangedCallback();
     void UnRegisterConfigChangedCallback();
+    void RegisterContainerHandler();
 
     SizeF ComputeAdaptiveSize(const SizeF& size) const;
     void HandleCardSizeChangeEvent(const SizeF& size);

@@ -582,4 +582,83 @@ HWTEST_F(RichEditorPatternTestSevenNg, IsStopBackPress001, TestSize.Level1)
     auto result = richEditorPattern->OnBackPressed();
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: ShiftMultipleSelection001
+ * @tc.desc: test richEditor shift multiple selection function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, ShiftMultipleSelection001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+    TextSpanOptions textOptions;
+    textOptions.value = INIT_VALUE_3;
+    richEditorController->AddTextSpan(textOptions);
+
+    KeyEvent keyEvent;
+    keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.pressedCodes.push_back(KeyCode::KEY_SHIFT_LEFT);
+    richEditorPattern->UpdateShiftFlag(keyEvent);
+    EXPECT_TRUE(richEditorPattern->shiftFlag_);
+
+    MouseInfo mouseInfo;
+    mouseInfo.button_ = MouseButton::LEFT_BUTTON;
+    mouseInfo.action_ = MouseAction::PRESS;
+    richEditorPattern->mouseStatus_ = MouseStatus::NONE;
+    mouseInfo.SetGlobalLocation(Offset(0, 0));
+    richEditorPattern->SetCaretPosition(10);
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 10);
+    richEditorPattern->textSelector_.Update(10, 20);
+    richEditorPattern->HandleMouseLeftButton(mouseInfo);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 10);
+
+    GestureEvent info;
+    info.localLocation_ = Offset(0, 0);
+    info.deviceType_ = SourceType::MOUSE;
+    richEditorPattern->SetCaretPosition(10);
+    richEditorPattern->HandleSingleClickEvent(info);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 10);
+    richEditorPattern->textSelector_.Update(10, 20);
+    richEditorPattern->HandleSingleClickEvent(info);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.GetTextEnd(), 10);
+
+    keyEvent.action = KeyAction::UP;
+    richEditorPattern->UpdateShiftFlag(keyEvent);
+    EXPECT_FALSE(richEditorPattern->shiftFlag_);
+}
+
+/**
+ * @tc.name: PageScrollTest001
+ * @tc.desc: test richEditor pageup and pagedown function
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPatternTestSevenNg, PageScrollTest001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto geometryNode = richEditorNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(150.0f, 150.0f));
+    richEditorPattern->richTextRect_ = RectF(0, 0, 150.0f, 400.0f);
+    richEditorPattern->contentRect_ = RectF(0, 0, 150.0f, 150.0f);
+
+    richEditorPattern->HandleOnPageDown();
+    EXPECT_EQ(richEditorPattern->scrollOffset_, -150.0f);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), -150.0f);
+    richEditorPattern->HandleOnPageUp();
+    EXPECT_EQ(richEditorPattern->scrollOffset_, 0);
+    EXPECT_EQ(richEditorPattern->richTextRect_.GetY(), 0);
+}
 } // namespace OHOS::Ace::NG

@@ -29,7 +29,7 @@ class MultiFingersRecognizer : public NGGestureRecognizer {
 
 public:
     MultiFingersRecognizer() = default;
-    explicit MultiFingersRecognizer(int32_t fingers);
+    explicit MultiFingersRecognizer(int32_t fingers, bool isLimitFingerCount = false);
 
     ~MultiFingersRecognizer() override = default;
 
@@ -43,6 +43,21 @@ public:
     int GetFingers()
     {
         return fingers_;
+    }
+
+    void SetLimitFingerCount(bool limitFingerCount)
+    {
+        isLimitFingerCount_ = limitFingerCount;
+    }
+
+    bool CheckLimitFinger()
+    {
+        if (isLimitFingerCount_) {
+            if (static_cast<int32_t>(touchPoints_.size()) != fingers_) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void ForceCleanRecognizer() override
@@ -128,6 +143,7 @@ protected:
     std::list<int32_t> activeFingers_;
     std::shared_ptr<MMI::PointerEvent> lastPointEvent_;
     int32_t fingers_ = 1;
+    bool isLimitFingerCount_ = false;
     std::optional<std::map<int32_t, TouchEvent>> backupTouchPointsForSucceedBlock_;
 };
 

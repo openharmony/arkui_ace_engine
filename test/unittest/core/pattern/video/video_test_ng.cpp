@@ -327,7 +327,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      */
     auto videoLayoutProperty = pattern->GetLayoutProperty<VideoLayoutProperty>();
     auto videoSrcInfo = videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo());
-    videoSrcInfo.src = VIDEO_SRC;
+    videoSrcInfo.src_ = VIDEO_SRC;
     videoLayoutProperty->UpdateVideoSource(videoSrcInfo);
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(5)
@@ -337,7 +337,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
 
     /**
      * @tc.steps: step5. Call UpdateMediaPlayerOnBg
-     *            case: IsMediaPlayerValid is always true & has set VideoSource & has set videoSrcInfo_.src
+     *            case: IsMediaPlayerValid is always true & has set VideoSource & has set videoSrcInfo_.src_
      * @tc.expected: step5. IsMediaPlayerValid will be called 3 times.
      */
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
@@ -352,7 +352,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
      *                      other function will be called once and return right value when preparing MediaPlayer
      *                      firstly
      */
-    pattern->videoSrcInfo_.src.clear();
+    pattern->videoSrcInfo_.src_.clear();
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), IsMediaPlayerValid())
         .Times(5)
         .WillOnce(Return(false))
@@ -390,11 +390,11 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(true))
         .WillOnce(Return(true))
         .WillOnce(Return(true));
-    pattern->videoSrcInfo_.src.clear();
+    pattern->videoSrcInfo_.src_.clear();
     pattern->UpdateMediaPlayerOnBg();
-    pattern->videoSrcInfo_.src.clear();
+    pattern->videoSrcInfo_.src_.clear();
     pattern->UpdateMediaPlayerOnBg();
-    pattern->videoSrcInfo_.src.clear();
+    pattern->videoSrcInfo_.src_.clear();
     pattern->UpdateMediaPlayerOnBg();
 
     // CreateMediaPlayer success but PrepareMediaPlayer fail for mediaPlayer is invalid
@@ -405,7 +405,7 @@ HWTEST_F(VideoTestNg, VideoPatternTest008, TestSize.Level1)
         .WillOnce(Return(false))
         .WillOnce(Return(false))
         .WillOnce(Return(false));
-    pattern->videoSrcInfo_.src.clear();
+    pattern->videoSrcInfo_.src_.clear();
     pattern->UpdateMediaPlayerOnBg();
 }
 
@@ -699,12 +699,12 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop()).WillOnce(Return(0));
     pattern->Stop();
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
-    EXPECT_EQ(pattern->isStop_, true);
+    EXPECT_TRUE(pattern->isStop_);
 
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop()).WillOnce(Return(0));
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 0);
     pattern->Stop(); // case2: media player is valid & currentPos = currentPos_ = 0
-    EXPECT_EQ(pattern->isStop_, true);
+    EXPECT_TRUE(pattern->isStop_);
 
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(pattern->mediaPlayer_)), Stop())
         .Times(2)
@@ -717,14 +717,14 @@ HWTEST_F(VideoTestNg, VideoPatternTest012, TestSize.Level1)
                      // this will call OnUpdateTime(pos=DURATION_POS)
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 1);
     EXPECT_EQ(updateCheck, "");
-    EXPECT_EQ(pattern->isStop_, true);
+    EXPECT_TRUE(pattern->isStop_);
     updateCheck.clear();
     pattern->currentPos_ = 1;
     pattern->Stop(); // case4: media player is valid & currentPos != currentPos_ & duration_ = 0 &
                      // mediaPlayer_->GetDuration return err
     EXPECT_EQ(static_cast<int32_t>(pattern->currentPos_), 1);
     EXPECT_EQ(updateCheck, "");
-    EXPECT_EQ(pattern->isStop_, true);
+    EXPECT_TRUE(pattern->isStop_);
 }
 
 /**

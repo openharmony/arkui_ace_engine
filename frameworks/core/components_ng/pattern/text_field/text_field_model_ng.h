@@ -66,7 +66,9 @@ public:
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t)>&& func) override {};
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
-    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func) override;
+    void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func) override;
+    void SetOnChange(std::function<void(const ChangeValueInfo&)>&& func) override;
+    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& onChange) override {};
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     void SetOnSecurityStateChange(std::function<void(bool)>&& func) override;
     void SetOnContentScroll(std::function<void(float, float)>&& func) override;
@@ -132,6 +134,7 @@ public:
     void SetEnablePreviewText(bool enablePreviewText) override;
     void SetEnableHapticFeedback(bool state) override;
     void SetStopBackPress(bool isStopBackPress) override;
+    void SetKeyboardAppearance(KeyboardAppearance value) override;
 
     static void SetTextDecoration(FrameNode* frameNode, TextDecoration value);
     static void SetTextDecorationColor(FrameNode* frameNode, const Color& value);
@@ -191,7 +194,8 @@ public:
     static void SetShowCounter(FrameNode* frameNode, bool value);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
     static void SetShowError(FrameNode* frameNode, const std::u16string& errorText, bool visible);
-    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::u16string&, PreviewText&)>&& func);
+    static void SetOnWillChangeEvent(FrameNode* frameNode, std::function<bool(const ChangeValueInfo&)>&& func);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const ChangeValueInfo&)>&& func);
     static void SetOnContentSizeChange(FrameNode* frameNode, std::function<void(float, float)>&& func);
     static void SetOnTextSelectionChange(FrameNode* frameNode, std::function<void(int32_t, int32_t)>&& func);
     static void SetTextFieldText(FrameNode* frameNode, const std::u16string& value);
@@ -305,6 +309,8 @@ public:
     static bool GetEnablePreviewText(FrameNode* frameNode);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode modal);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
+    static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
+    static int32_t GetKeyboardAppearance(FrameNode* frameNode);
 
 private:
     void AddDragFrameNodeToManager() const;

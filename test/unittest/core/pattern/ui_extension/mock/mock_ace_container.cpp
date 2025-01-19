@@ -234,6 +234,10 @@ HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder
     return hintToTypeWrap;
 }
 void AceContainer::TerminateUIExtension() {}
+bool AceContainer::UIExtensionIsHalfScreen()
+{
+    return false;
+}
 bool AceContainer::MaybeRelease()
 {
     return true;

@@ -211,6 +211,49 @@ int32_t SetKeyboardAvoidDistance(
     return result;
 }
 
+int32_t SetLevelMode(ArkUI_NativeDialogHandle handle, ArkUI_LevelMode levelMode)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl) {
+        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+    }
+    if (!handle) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (static_cast<int32_t>(levelMode) < static_cast<int32_t>(ARKUI_LEVEL_MODE_OVERLAY) ||
+        static_cast<int32_t>(levelMode) > static_cast<int32_t>(ARKUI_LEVEL_MODE_EMBEDDED)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return impl->getDialogAPI()->setLevelMode(handle->controller, static_cast<int32_t>(levelMode));
+}
+
+int32_t SetLevelUniqueId(ArkUI_NativeDialogHandle handle, int32_t uniqueId)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl) {
+        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+    }
+    if (!handle || uniqueId < 0) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return impl->getDialogAPI()->setLevelUniqueId(handle->controller, uniqueId);
+}
+
+int32_t SetImmersiveMode(ArkUI_NativeDialogHandle handle, ArkUI_ImmersiveMode immersiveMode)
+{
+    const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
+    if (!impl) {
+        return ARKUI_ERROR_CODE_CAPI_INIT_ERROR;
+    }
+    if (!handle) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    if (static_cast<int32_t>(immersiveMode) < static_cast<int32_t>(ARKUI_IMMERSIVE_MODE_DEFAULT) ||
+        static_cast<int32_t>(immersiveMode) > static_cast<int32_t>(ARKUI_IMMERSIVE_MODE_FULL)) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    return impl->getDialogAPI()->setImmersiveMode(handle->controller, static_cast<int32_t>(immersiveMode));
+}
 } // namespace OHOS::Ace::NG::DialogModel
 
 #ifdef __cplusplus

@@ -82,7 +82,6 @@ bool RichEditorSelectOverlay::CheckHandleVisible(const RectF& paintRect)
     }
 
     auto visibleRect = GetVisibleRect();
-    CalculateClippedRect(visibleRect);
     if (visibleRect.IsEmpty()) {
         return false;
     }
@@ -107,7 +106,9 @@ RectF RichEditorSelectOverlay::GetVisibleRect()
     CHECK_NULL_RETURN(geometryNode, visibleRect);
     OffsetF paddingOffset = geometryNode->GetPaddingOffset() - geometryNode->GetFrameOffset();
     auto paintOffset = host->GetPaintRectWithTransform().GetOffset();
-    return RectF(paddingOffset + paintOffset, geometryNode->GetPaddingSize());
+    visibleRect = RectF(paddingOffset + paintOffset, geometryNode->GetPaddingSize());
+    CalculateClippedRect(visibleRect);
+    return visibleRect;
 }
 
 void RichEditorSelectOverlay::OnResetTextSelection()
@@ -253,11 +254,11 @@ std::string RichEditorSelectOverlay::GetSelectedText()
     return TextSelectOverlay::GetSelectedText();
 }
 
-RectF RichEditorSelectOverlay::GetSelectArea()
+RectF RichEditorSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
 {
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, {});
-    auto intersectRect = pattern->GetSelectArea();
+    auto intersectRect = pattern->GetSelectArea(pos);
 
     if (hasTransform_) {
         auto textPaintOffset = GetPaintOffsetWithoutTransform();
@@ -288,6 +289,7 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
     menuInfo.showCut = isShowItem && hasValue && !pattern->textSelector_.SelectNothing();
     menuInfo.showPaste = IsShowPaste();
     menuInfo.menuIsShow = IsShowMenu();
+    menuInfo.showTranslate = menuInfo.showCopy && pattern->IsShowTranslate() && IsNeedMenuTranslate();
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showAIWrite = pattern->IsShowAIWrite() && hasValue;
     pattern->UpdateSelectMenuInfo(menuInfo);
@@ -373,6 +375,9 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
         case OptionMenuActionId::SELECT_ALL:
             pattern->HandleMenuCallbackOnSelectAll();
             break;
+        case OptionMenuActionId::TRANSLATE:
+            HandleOnTranslate();
+            return;
         case OptionMenuActionId::SEARCH:
             HandleOnSearch();
             break;
@@ -425,9 +430,8 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
     isHandleMoving_ = false;
     if (isSingleHandle) {
         pattern->floatingCaretState_.Reset();
-        ResumeTwinkling();
+        pattern->isCursorAlwaysDisplayed_ = false;
     }
-    IF_TRUE(isSingleHandle, pattern->floatingCaretState_.Reset());
     auto needResetSelection = pattern->GetTextDetectEnable() && !pattern->HasFocus() &&
         reason != CloseReason::CLOSE_REASON_DRAG_FLOATING;
     auto isBackPressed = reason == CloseReason::CLOSE_REASON_BACK_PRESSED;

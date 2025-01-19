@@ -664,19 +664,6 @@ HWTEST_F(ImageProviderTestNg, PrepareImageData, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateImageObjHelper001
- * @tc.desc: Test CreateImageObjHelper
- * @tc.type: FUNC
- */
-HWTEST_F(ImageProviderTestNg, CreateImageObjHelper001, TestSize.Level1)
-{
-    g_loader = nullptr;
-    auto src = ImageSourceInfo(SRC_JPG);
-    ImageProvider::CreateImageObjHelper(src, true);
-    EXPECT_EQ(g_loader, nullptr);
-}
-
-/**
  * @tc.name: MakeCanvasImage
  * @tc.desc: Test MakeCanvasImage
  * @tc.type: FUNC

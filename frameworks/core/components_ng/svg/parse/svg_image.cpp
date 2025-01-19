@@ -63,6 +63,40 @@ void SvgImage::OnDraw(RSCanvas& canvas, const Size& viewPort, const std::optiona
     canvas.DrawImageRect(image, dstRect, RSSamplingOptions());
 }
 
+void SvgImage::OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule)
+{
+    if (imageAttr_.href.empty()) {
+        LOGW("Svg image href is empty");
+        return;
+    }
+    auto x = GetMeasuredPosition(imageAttr_.x, lengthRule, SvgLengthType::HORIZONTAL);
+    auto y = GetMeasuredPosition(imageAttr_.y, lengthRule, SvgLengthType::VERTICAL);
+    auto width = GetMeasuredLength(imageAttr_.width, lengthRule, SvgLengthType::HORIZONTAL);
+    auto height = GetMeasuredLength(imageAttr_.height, lengthRule, SvgLengthType::VERTICAL);
+    if (LessOrEqual(width, 0.0f) || LessOrEqual(height, 0.0f)) {
+        LOGW("Svg image size is illegal");
+        return;
+    }
+
+    auto srcType = ParseHrefAttr(imageAttr_.href);
+    auto data = std::make_shared<RSData>();
+    switch (srcType) {
+        case SrcType::BASE64:
+            data = LoadBase64Image(imageAttr_.href);
+            break;
+        case SrcType::ASSET:
+            data = LoadLocalImage(imageAttr_.href);
+            break;
+        default:
+            LOGW("Unknown svg href src type");
+    }
+    CHECK_NULL_VOID(data);
+    RSImage image;
+    image.MakeFromEncoded(data);
+    auto dstRect = CalcDstRect(Size(image.GetWidth(), image.GetHeight()), Rect(x, y, width, height));
+    canvas.DrawImageRect(image, dstRect, RSSamplingOptions());
+}
+
 std::shared_ptr<RSData> SvgImage::LoadLocalImage(const std::string& uri)
 {
     std::string svgPath = GetImagePath();

@@ -185,7 +185,8 @@ public:
 
     void SetUnstaticVelocityScale(double scale)
     {
-        sVelocityScale_ = scale;
+        flingVelocityScale_ = scale;
+        springVelocityScale_ = scale;
     }
 
     void HandleTouchDown();
@@ -539,6 +540,11 @@ public:
         return isCrownEventDragging_;
     }
 
+    void SetCrownEventDragging(bool draging)
+    {
+        isCrownEventDragging_ = draging;
+    }
+
     void SetReachBoundary(bool flag)
     {
         reachBoundary_ = flag;
@@ -718,6 +724,7 @@ private:
 
     int crownEventNum_ = 0;
     bool reachBoundary_ = false;
+    CancelableCallback<void()> crownTask_;
 #endif
 };
 

@@ -1425,4 +1425,38 @@ HWTEST_F(SwiperEventTestNg, MarginIgnoreBlankDragTest002, TestSize.Level1)
     HandleDrag(info);
     EXPECT_EQ(pattern_->ignoreBlankOffset_, 0.f);
 }
+
+/**
+ * @tc.name: OnContentWillScroll001
+ * @tc.desc: Test Swiper onContentWillScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnContentWillScroll001, TestSize.Level1)
+{
+    auto onContentWillScroll = [](const SwiperContentWillScrollResult& result) {
+        if (result.currentIndex == 0 && result.comingIndex == 1) {
+            return false;
+        }
+        return true;
+    };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnContentWillScroll(std::move(onContentWillScroll));
+    model.SetIndex(0);
+    CreateSwiperItems();
+    CreateSwiperDone();
+
+    GestureEvent info = CreateDragInfo(true);
+    info.SetMainVelocity(0);
+    info.SetGlobalLocation(Offset(0.f, 0.f));
+    info.SetMainDelta(-20.0f);
+    HandleDragStart(info);
+    HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, 0.0f);
+
+    info.SetMainDelta(20.0f);
+    HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->itemPosition_[0].startPos, 20.0f);
+}
 } // namespace OHOS::Ace::NG

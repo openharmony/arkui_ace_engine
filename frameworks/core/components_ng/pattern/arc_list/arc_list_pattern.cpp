@@ -43,7 +43,6 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float ARC_LIST_VELOCITY_SCALE = 0.6f;
 constexpr float ARC_LIST_FRICTION = 0.8f;
 constexpr float FRICTION_SCALE = -4.2f;
 constexpr float DRAG_FIX_OFFSET_RATIO = 0.85f;
@@ -52,7 +51,7 @@ constexpr float ARC_LIST_ITEM_MOVE_THRESHOLD_RATIO = 0.4f;
 constexpr float FLOAT_TWO = 2.0f;
 #ifdef SUPPORT_DIGITAL_CROWN
 constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
-constexpr const char* HAPTIC_STRENGTH5 = "watchhaptic.feedback.crown.impact";
+constexpr const char* HAPTIC_STRENGTH5 = "watchhaptic.base.short.6";
 #endif
 } // namespace
 
@@ -62,8 +61,12 @@ ArcListPattern::ArcListPattern()
     SetScrollBarShape(ScrollBarShape::ARC);
 #endif
     SetFriction(ARC_LIST_FRICTION);
-    SetVelocityScale(ARC_LIST_VELOCITY_SCALE);
     scrollAlign_ = ScrollAlign::CENTER;
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto arcListTheme = pipelineContext->GetTheme<ArcListTheme>();
+    CHECK_NULL_VOID(arcListTheme);
+    SetVelocityScale(arcListTheme->GetVelocityScale());
 }
 
 void ArcListPattern::OnModifyDone()

@@ -27,6 +27,7 @@
 #include "js_native_api.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
+#include "ui/base/utils/utils.h"
 #include "ui_extension_context.h"
 #include "ui/rs_surface_node.h"
 #include "window_manager.h"
@@ -82,10 +83,12 @@
 #include "core/common/window.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components/theme/theme_manager_impl.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 
@@ -93,9 +96,7 @@
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
 #endif
 
-#ifdef SUPPORT_DIGITAL_CROWN
 #include "base/ressched/ressched_report.h"
-#endif
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -116,10 +117,8 @@ const char ENABLE_DEBUG_STATEMGR_KEY[] = "persist.ace.debug.statemgr.enabled";
 const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.enabled";
 const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
 std::mutex g_mutexFormRenderFontFamily;
-#ifdef SUPPORT_DIGITAL_CROWN
 constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
-#endif
-
+constexpr int32_t EXTENSION_HALF_SCREEN_MODE = 2;
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 #else
@@ -1005,7 +1004,6 @@ void AceContainer::InitializeCallback()
     };
     aceView_->RegisterNonPointerEventCallback(nonPointerEventCallback);
 
-#ifdef SUPPORT_DIGITAL_CROWN
     auto&& crownEventCallback = [context = pipelineContext_, id = instanceId_](
                                    const CrownEvent& event, const std::function<void()>& markProcess) {
         if (event.action == CrownAction::BEGIN || event.action == CrownAction::END) {
@@ -1031,7 +1029,6 @@ void AceContainer::InitializeCallback()
         return result;
     };
     aceView_->RegisterCrownEventCallback(crownEventCallback);
-#endif
 
     auto&& rotationEventCallback = [context = pipelineContext_, id = instanceId_](const RotationEvent& event) {
         ContainerScope scope(id);
@@ -1950,8 +1947,34 @@ bool AceContainer::DumpInfo(const std::vector<std::string>& params)
     if (OnDumpInfo(params)) {
         return true;
     }
+
+    if (DumpRSNodeByStringID(params)) {
+        return true;
+    }
     CHECK_NULL_RETURN(pipelineContext_, false);
     return pipelineContext_->Dump(params);
+}
+
+bool AceContainer::DumpRSNodeByStringID(const std::vector<std::string>& params)
+{
+    if (!params.empty() && params[0] == "-rsnodebyid" && (params.size() > 1)) {
+        DumpLog::GetInstance().Print("------------DumpRSNodeByStringID------------");
+        DumpLog::GetInstance().Print(1, "Query by stringid: " + params[1]);
+        auto frameNode = NG::Inspector::GetFrameNodeByKey(params[1], true, true);
+        if (!frameNode) {
+            DumpLog::GetInstance().Print(1, "RSNode Not Found.");
+            return true;
+        }
+        auto renderContext =
+            AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+        CHECK_NULL_RETURN(renderContext, true);
+        auto rsNode = renderContext->GetRSNode();
+        DumpLog::GetInstance().Print(1, "RSNode " + (rsNode ?
+            ("name: " + rsNode->GetNodeName() + ", nodeId: " + std::to_string(rsNode->GetId())) :
+            "Not Found."));
+        return true;
+    }
+    return false;
 }
 
 bool AceContainer::OnDumpInfo(const std::vector<std::string>& params)
@@ -2419,6 +2442,13 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         Rosen::RSTransactionProxy::GetInstance()->ExecuteSynchronousTask(syncTask);
     });
 #endif
+    if (IsUIExtensionWindow()) {
+        auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipelineContext_);
+        CHECK_NULL_VOID(ngPipeline);
+        auto uiExtManager = ngPipeline->GetUIExtensionManager();
+        CHECK_NULL_VOID(uiExtManager);
+        uiExtManager->SendPageModeToUEA(ngPipeline);
+    }
 }
 
 void AceContainer::SetUIWindowInner(sptr<OHOS::Rosen::Window> uiWindow)
@@ -2545,7 +2575,7 @@ void AceContainer::InitWindowCallback()
     windowManager->SetWindowSplitSecondaryCallBack(
         [window = uiWindow_]() { window->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY); });
     windowManager->SetWindowGetModeCallBack(
-        [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetMode()); });
+        [window = uiWindow_]() -> WindowMode { return static_cast<WindowMode>(window->GetWindowMode()); });
     windowManager->SetWindowGetIsMidSceneCallBack(
         [window = uiWindow_](bool& isMidScene) -> int32_t {
             return static_cast<int32_t>(window->GetIsMidScene(isMidScene));
@@ -3513,6 +3543,17 @@ void AceContainer::TerminateUIExtension()
     auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
     CHECK_NULL_VOID(uiExtensionContext);
     uiExtensionContext->TerminateSelf();
+}
+
+bool AceContainer::UIExtensionIsHalfScreen()
+{
+    if (!IsUIExtensionWindow()) {
+        return false;
+    }
+    auto sharedContext = runtimeContext_.lock();
+    auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
+    CHECK_NULL_RETURN(uiExtensionContext, false);
+    return uiExtensionContext->GetScreenMode() == EXTENSION_HALF_SCREEN_MODE;
 }
 
 Rosen::WMError AceContainer::RegisterAvoidAreaChangeListener(sptr<Rosen::IAvoidAreaChangedListener>& listener)

@@ -143,13 +143,7 @@ public:
         onWillDisappear_ = std::move(onWillDisappear);
     }
 
-    void OnWillDisappear()
-    {
-        if (onWillDisappear_) {
-            TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillDisappear state.");
-            onWillDisappear_();
-        }
-    }
+    void OnWillDisappear();
 
     void UpdateOnAppear(std::function<void()>&& onAppear)
     {
@@ -463,7 +457,7 @@ public:
 
     void ResetToInvisible();
 
-    bool IsFold();
+    bool IsFoldExpand();
 
     void SetSheetKey(const SheetKey& sheetKey)
     {
@@ -633,7 +627,7 @@ public:
     }
 
     bool IsTypeNeedAvoidAiBar();
-    bool IsCustomHeightOrDetentsChanged(const SheetStyle& sheetStyle);
+    void IsNeedPlayTransition(const SheetStyle& sheetStyle);
 
     RefPtr<FrameNode> GetFirstFrameNodeOfBuilder() const;
     void GetBuilderInitHeight();
@@ -696,6 +690,13 @@ public:
     void RecoverHalfFoldOrAvoidStatus();
     bool UpdateAccessibilityDetents(float height);
     void CalculateSheetRadius(BorderRadiusProperty& sheetRadius);
+
+    bool UpdateIndexByDetentSelection(const SheetStyle& sheetStyle, bool isFirstTransition);
+
+    bool GetIsPlayTransition() const
+    {
+        return isPlayTransition_;
+    }
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
@@ -825,6 +826,7 @@ private:
     bool isDirectionUp_ = true;
     bool topSafeAreaChanged_ = false;
     ScrollSizeMode scrollSizeMode_ = ScrollSizeMode::FOLLOW_DETENT;
+    SheetEffectEdge sheetEffectEdge_ = SheetEffectEdge::ALL;
 
     //record sheet sored detent index
     uint32_t detentsIndex_ = 0;
@@ -864,6 +866,7 @@ private:
     Color sheetMaskColor_ = Color::TRANSPARENT;
     SheetKeyboardAvoidMode keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
     float resizeDecreasedHeight_ = 0.f;
+    bool isPlayTransition_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -85,7 +85,13 @@ public:
 
     void SetNavPathInfo(const RefPtr<NavPathInfo>& pathInfo)
     {
-        if (navDestinationContext_) {
+        if (!navDestinationContext_) {
+            return;
+        }
+        auto oldInfo = navDestinationContext_->GetNavPathInfo();
+        if (oldInfo) {
+            oldInfo->UpdateNavPathInfo(pathInfo);
+        } else {
             navDestinationContext_->SetNavPathInfo(pathInfo);
         }
     }
@@ -260,6 +266,16 @@ public:
     // Restore the titleBar&toolBar to its original position (hide or show state).
     void ResetTitleAndToolBarState();
 
+    void SetIsActive(bool isActive)
+    {
+        isActive_ = isActive;
+    }
+
+    bool IsActive() const
+    {
+        return isActive_;
+    }
+
 private:
     struct HideBarOnSwipeContext {
         CancelableCallback<void()> showBarTask;
@@ -300,6 +316,7 @@ private:
     WeakPtr<UINode> navigationNode_;
     RefPtr<OverlayManager> overlayManager_;
     bool isOnShow_ = false;
+    bool isActive_ = false;
     bool isUserDefinedBgColor_ = false;
     bool isRightToLeft_ = false;
     uint64_t navDestinationId_ = 0;

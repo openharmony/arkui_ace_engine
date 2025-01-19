@@ -179,7 +179,7 @@ JSViewFullUpdate::~JSViewFullUpdate()
     jsViewFunction_.Reset();
 };
 
-RefPtr<AceType> JSViewFullUpdate::CreateViewNode(bool isTitleNode)
+RefPtr<AceType> JSViewFullUpdate::CreateViewNode(bool isTitleNode, bool isCustomAppBar)
 {
     auto appearFunc = [weak = AceType::WeakClaim(this)] {
         auto jsView = weak.Upgrade();
@@ -528,7 +528,7 @@ JSViewPartialUpdate::~JSViewPartialUpdate()
     jsViewFunction_.Reset();
 };
 
-RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
+RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode, bool isCustomAppBar)
 {
     auto updateViewIdFunc = [weak = AceType::WeakClaim(this)](const std::string& viewId) {
         auto jsView = weak.Upgrade();
@@ -782,6 +782,9 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         info.isCustomTitle = true;
     }
 
+    if (isCustomAppBar) {
+        info.isCustomAppBar = true;
+    }
     auto node = ViewPartialUpdateModel::GetInstance()->CreateNode(std::move(info));
     auto customMeasureLayoutNode = DynamicCast<NG::CustomMeasureLayoutNode>(node);
     if (customMeasureLayoutNode) {

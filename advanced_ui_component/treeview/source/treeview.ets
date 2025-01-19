@@ -463,6 +463,20 @@ export class NodeInfo {
     }
   }
 
+  /**
+   * NodeInfo add expand image
+   *
+   * @param isHasChildNode whether node has child node
+   */
+  addImageExpand(isHasChildNode: boolean): void {
+    if (isHasChildNode) {
+      this.nodeItemView.imageCollapse =
+        CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_DOWN);
+    } else {
+      this.nodeItemView.imageCollapse = undefined;
+    }
+  }
+
   setFontColor(color: ResourceColor): void {
     this.fontColor = color
   }
@@ -989,7 +1003,7 @@ export struct TreeView {
   @Provide treeViewTheme: TreeViewTheme = TreeViewTheme.getInstance();
   @Provide clickButtonFlag: boolean = true;
   @Provide accessibilityNodeType: AccessibilityNodeType = AccessibilityNodeType.TEXT;
-  @Provide isAccessibilityEnabled: boolean = false;
+  @Provide isAccessibilityEnabled: boolean = accessibility.isScreenReaderOpenSync();
 
   @Builder
   NullBuilder() {
@@ -1041,7 +1055,7 @@ export struct TreeView {
     this.followingSystemFontScale = uiContent.isFollowingSystemFontScale();
     this.maxAppFontScale = uiContent.getMaxFontScale();
 
-    accessibility.on('accessibilityStateChange', (state: boolean) => {
+    accessibility.on('screenReaderStateChange', (state: boolean) => {
       this.isAccessibilityEnabled = state;
     })
   }
@@ -1160,11 +1174,7 @@ export struct TreeView {
       start: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.left),
       end: LengthMetrics.resource(this.listNodeDataSource.getDragPopupPara().padding.right),
     })
-    .shadow({
-      radius: $r('sys.float.ohos_id_corner_radius_default_m'),
-      color: SHADOW_COLOR,
-      offsetY: 0,
-    })
+    .shadow(this.listNodeDataSource.getDragPopupPara().shadow)
     .borderRadius(this.listNodeDataSource.getDragPopupPara().borderRadius) // need to doubleCheck.
   }
 
@@ -1599,6 +1609,9 @@ export struct TreeView {
 
       this.listNodeDataSource.lastIndex = currentFocusIndex;
 
+      let parentNodeId: number | undefined = currentNodeInfo?.getNodeParentNodeId();
+      this.listNodeDataSource.judgeImageCollapse(parentNodeId);
+
       /*accessibilityRead regain focus. */
       let eventInfo: accessibility.EventInfo = ({
         type: 'requestFocusForAccessibility',
@@ -2015,6 +2028,13 @@ export class TreeController {
       this.add(this.initBuild);
       return this;
     } else {
+      for (let i: number = 0; i < this.nodeIdList.length; i++) {
+        if (nodeParam.currentNodeId === this.nodeIdList[i].valueOf()) {
+          throw new Error('ListTreeNode[addNode]: ' +
+            'The parameters of the new node cannot contain the same currentNodeId.');
+          return this;
+        }
+      }
       let addNodeResult: boolean = false;
       if (nodeParam.primaryTitle !== undefined &&
         !this.listNodeDataSource.checkMainTitleIsValid(nodeParam.primaryTitle.toString())) {
@@ -2292,12 +2312,12 @@ class ListNodeDataSource extends BasicDataSource {
     backgroundColor: COLOR_IMAGE_EDIT,
     height: GRAG_POP_UP_HEIGHT,
     shadow: {
-      radius: $r('sys.float.ohos_id_corner_radius_default_m'),
+      radius: $r('sys.float.ohos_id_default_shadow_m'),
       color: SHADOW_COLOR,
       offsetX: 0,
       offsetY: SHADOW_OFFSETY,
     },
-    borderRadius: $r('sys.float.ohos_id_corner_radius_clicked'),
+    borderRadius: $r('sys.float.ohos_id_corner_radius_default_s'),
     fontColor: this.treeViewTheme.primaryTitleFontColor,
     fontSize: $r('sys.float.ohos_id_text_size_body1'),
     fontWeight: FontWeight.Regular,
@@ -3921,15 +3941,18 @@ class ListNodeDataSource extends BasicDataSource {
     }
   }
 
-  private judgeImageCollapse(parentNodeId: number): void {
+  public judgeImageCollapse(parentNodeId: number | undefined): void {
+    if (parentNodeId === undefined) {
+      return;
+    }
     let parent: NodeItem = this.nodeIdNodeItemMap.get(parentNodeId) as NodeItem;
     let parentIndex: number = this.nodeIdAndNodeIndexMap.get(parentNodeId) as number;
     if (parent.children.length > 0) {
       if (this.nodeIdAndNodeIndexMap.has(parentNodeId)) {
-        this.listNode[parentIndex]?.addImageCollapse(true);
+        this.listNode[parentIndex]?.addImageExpand(true);
       }
     } else {
-      this.listNode[parentIndex]?.addImageCollapse(false);
+      this.listNode[parentIndex]?.addImageExpand(false);
     }
   }
 
@@ -4295,12 +4318,22 @@ export struct TreeViewInner {
   }
 
   getLeftIconColor(): ResourceColor {
-    if (this.item.getIsModify()) {
+    if (this.item.getIsModify() || this.item.getIsHighLight()) {
       return $r('sys.color.icon_on_primary');
     } else if (this.item.getIsSelected()) {
       return this.treeViewTheme.leftIconActiveColor;
     } else {
       return this.treeViewTheme.leftIconColor;
+    }
+  }
+
+  getPrimaryTextColor(): ResourceColor {
+    if (this.item.getIsModify() || this.item.getIsHighLight()) {
+      return $r('sys.color.ohos_id_color_primary_contrary');
+    } else if (this.item.getIsSelected()) {
+      return this.treeViewTheme.primaryTitleActiveFontColor;
+    } else {
+      return this.treeViewTheme.primaryTitleFontColor;
     }
   }
 
@@ -4594,8 +4627,7 @@ export struct TreeViewInner {
                       .maxFontScale(this.decideFontScale())
                       .maxLines(1)// max line
                       .fontSize(this.item.getNodeItem().mainTitleNode?.size)
-                      .fontColor(this.item.getIsSelected() ?
-                      this.treeViewTheme.primaryTitleActiveFontColor : this.treeViewTheme.primaryTitleFontColor)
+                      .fontColor(this.getPrimaryTextColor())
                       .margin({
                         end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem()
                           .mainTitleNode?.itemRightMargin)

@@ -14,6 +14,7 @@
  */
 
 #include "bridge/cj_frontend/cppview/offscreen_canvas.h"
+
 #include "bridge/cj_frontend/cppview/offscreen_rendering_context.h"
 #include "core/components/common/properties/paint_state.h"
 
@@ -77,21 +78,22 @@ double NativeOffscreenCanvas::NativeGetWidth()
 
 int64_t NativeOffscreenCanvas::GetContext(int32_t contextType, bool option, double width, double height)
 {
+    double density = GetDensity();
     isGetContext_ = true;
-    width_ = width;
-    height_ = height;
+    width_ = width * density;
+    height_ = height * density;
     if (!Container::IsCurrentUseNewPipeline()) {
         return 0;
     }
     contextType_ = static_cast<ContextType>(contextType);
     if (contextType_ == ContextType::CONTEXT_2D) {
-        offscreenCanvasContext_ =
-            FFIData::Create<CJOffscreenRenderingContext>(height, width, option, static_cast<int32_t>(GetUnit()));
+        offscreenCanvasContext_ = FFIData::Create<CJOffscreenRenderingContext>();
         offscreenCanvasContext_->SetInstanceId(Container::CurrentId());
         offscreenCanvasContext_->SetOffscreenPattern(offscreenCanvasPattern_);
         offscreenCanvasContext_->AddOffscreenCanvasPattern(offscreenCanvasPattern_);
         offscreenCanvasContext_->SetWidth(width_);
         offscreenCanvasContext_->SetHeight(height_);
+        offscreenCanvasContext_->SetUnit(GetUnit());
     }
     offscreenCanvasContext_->SetDensity();
     return offscreenCanvasContext_->GetID();
