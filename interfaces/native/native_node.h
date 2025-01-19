@@ -7017,6 +7017,17 @@ typedef enum {
     NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL,
 
     /**
+     * @brief Defines the event triggered when a new <b>ARKUI_NODE_SWIPER</b> instance becomes selected.
+     * Animation is not necessarily complete.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: the index of the element becomes selected. \n
+     */
+    NODE_SWIPER_EVENT_ON_SELECTED,
+
+    /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component scrolls.
      *
      * Notes for triggering the event:\n

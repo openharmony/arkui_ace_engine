@@ -26,5 +26,6 @@ void SetSwiperAnimationStart(ArkUINodeHandle node, void* extraParam);
 void SetSwiperAnimationEnd(ArkUINodeHandle node, void* extraParam);
 void SetSwiperGestureSwipe(ArkUINodeHandle node, void* extraParam);
 void SetSwiperOnContentDidScroll(ArkUINodeHandle node, void* extraParam);
+void SetSwiperSelected(ArkUINodeHandle node, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_SWIPER_MODIFIER_H

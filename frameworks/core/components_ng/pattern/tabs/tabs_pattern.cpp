@@ -220,6 +220,31 @@ void TabsPattern::SetAnimationEndEvent(AnimationEndEvent&& event)
     }
 }
 
+void TabsPattern::SetOnSelectedEvent(std::function<void(const BaseEventInfo*)>&& event)
+{
+    ChangeEvent selectedEvent([jsEvent = std::move(event)](int32_t index) {
+        /* js callback */
+        if (jsEvent) {
+            TabContentChangeEvent eventInfo(index);
+            jsEvent(&eventInfo);
+        }
+    });
+    if (selectedEvent_) {
+        (*selectedEvent_).swap(selectedEvent);
+    } else {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+        CHECK_NULL_VOID(tabsNode);
+        auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+        CHECK_NULL_VOID(swiperNode);
+        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        selectedEvent_ = std::make_shared<ChangeEvent>(std::move(selectedEvent));
+        eventHub->AddOnSlectedEvent(selectedEvent_);
+    }
+}
+
 void TabsPattern::OnUpdateShowDivider()
 {
     auto host = AceType::DynamicCast<TabsNode>(GetHost());

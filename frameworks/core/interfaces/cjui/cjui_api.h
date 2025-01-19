@@ -1023,6 +1023,8 @@ struct CJUISwiperModifier {
     void (*resetSwiperOnAnimationEnd)(ArkUINodeHandle node);
     void (*setSwiperOnGestureSwipe)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnGestureSwipe)(ArkUINodeHandle node);
+    void (*setSwiperOnSelected)(ArkUINodeHandle node, void* callback);
+    void (*resetSwiperOnSelected)(ArkUINodeHandle node);
 };
 
 struct CJUISwiperControllerModifier {

@@ -493,6 +493,7 @@ const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSwiperAnimationEnd,
     NodeModifier::SetSwiperGestureSwipe,
     NodeModifier::SetSwiperOnContentDidScroll,
+    NodeModifier::SetSwiperSelected,
 };
 
 const ComponentAsyncEventHandler CANVAS_NODE_ASYNC_EVENT_HANDLERS[] = {
@@ -695,6 +696,7 @@ const ResetComponentAsyncEventHandler SLIDER_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
 };
 
 const ResetComponentAsyncEventHandler SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
