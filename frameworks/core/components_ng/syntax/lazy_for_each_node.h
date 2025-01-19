@@ -229,7 +229,7 @@ private:
     std::list<std::optional<std::string>> ids_;
     std::list<int32_t> predictItems_;
     std::optional<LayoutConstraintF> itemConstraint_;
-    bool requestLongPredict_ = false;
+    bool requestLongPredict_ = true;
     bool isRegisterListener_ = false;
     bool isLoop_ = false;
 
