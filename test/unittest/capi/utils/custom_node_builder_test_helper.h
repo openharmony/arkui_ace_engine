@@ -1,3 +1,21 @@
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ #ifndef CUSTOM_NODE_BUILDER_TEST_HELPER_H
+ #define CUSTOM_NODE_BUILDER_TEST_HELPER_H
+
 #include <utility>
 #include "gtest/gtest.h"
 #include "arkoala_api_generated.h"
@@ -16,14 +34,16 @@ public:
         expectedCustomNode_(testClassObject->CreateNode())
         {}
 
-    ~CustomNodeBuilderTestHelper() {
+    ~CustomNodeBuilderTestHelper()
+    {
         testClassObject_->DisposeNode(expectedCustomNode_);
         expectedParentNode_ = nullptr;
         testClassObject_ = nullptr;
     }
 
     void operator()(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
-                    const Callback_Pointer_Void continuation) {
+                    const Callback_Pointer_Void continuation)
+    {
         callbackCounter_++;
         EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode_);
         CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode_));
