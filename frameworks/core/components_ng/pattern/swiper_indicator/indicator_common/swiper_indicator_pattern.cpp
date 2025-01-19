@@ -461,13 +461,14 @@ void SwiperIndicatorPattern::HandleHoverEvent(bool isHover)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto swiperNode = GetSwiperNode();
-    CHECK_NULL_VOID(swiperNode);
-    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
-    CHECK_NULL_VOID(swiperPattern);
-    auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_VOID(swiperLayoutProperty);
-    if (swiperLayoutProperty->GetHoverShowValue(false) && !swiperPattern->GetIsAtHotRegion()) {
-        swiperPattern->ArrowHover(isHover_);
+    if (swiperNode) {
+        auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+        CHECK_NULL_VOID(swiperPattern);
+        auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_VOID(swiperLayoutProperty);
+        if (swiperLayoutProperty->GetHoverShowValue(false) && !swiperPattern->GetIsAtHotRegion()) {
+            swiperPattern->ArrowHover(isHover_);
+        }
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
