@@ -1,25 +1,12 @@
-// #ifndef FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_UTILS_CUSTOM_NODE_BUILDER_TEST_HELPER_CPP
-// #define FOUNDATION_ARKUI_ACE_ENGINE_TEST_UNITTEST_CAPI_UTILS_CUSTOM_NODE_BUILDER_TEST_HELPER_CPP
-
-
 #include <utility>
 #include "gtest/gtest.h"
 #include "arkoala_api_generated.h"
 
 #include "test/unittest/capi/modifiers/modifier_test_base.h"
-// #include "interfaces/inner_api/ace_kit/include/ui/view/frame_node.h"
 #include "core/interfaces/native/common/extension_companion_node.h"
-// #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
-// #include "core/interfaces/native/utility/callback_keeper.h"
-// #include "core/interfaces/native/utility/converter.h"
-// #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 
-// using namespace testing;
-// using namespace testing::ext;
-
 namespace OHOS::Ace::NG {
-
 template<typename T>
 class CustomNodeBuilderTestHelper {
 public:
@@ -59,11 +46,20 @@ public:
         return builder;
     }
 
+    Ark_NodeHandle GetCustomNodeHandle() const
+    {
+        return expectedCustomNode_;
+    }
+
+    FrameNode* GetCustomNode() const
+    {
+        return reinterpret_cast<FrameNode*>(expectedCustomNode_);
+    }
+
 private:
     T* testClassObject_;
     FrameNode* expectedParentNode_;
     Ark_NodeHandle expectedCustomNode_;
     int callbackCounter_ = 0;
-    // std::function<void(Ark_NodeHandle&)> destroyNodeFunction_;
 };
 }
