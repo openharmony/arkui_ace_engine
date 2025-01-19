@@ -18,7 +18,6 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/popup_base_pattern.h"
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_layout_algorithm.h"
 #include "core/components_ng/pattern/overlay/sheet_wrapper_paint_method.h"
 
@@ -28,9 +27,6 @@ class SheetWrapperPattern : virtual public PopupBasePattern {
 
 public:
     SheetWrapperPattern() = default;
-
-    SheetWrapperPattern(int32_t targetId, const std::string& targetTag) : targetId_(targetId), targetTag_(targetTag) {}
-
     ~SheetWrapperPattern() override = default;
 
     FocusPattern GetFocusPattern() const override
@@ -67,11 +63,6 @@ public:
         return MakeRefPtr<SheetWrapperPaintMethod>();
     }
 
-    RefPtr<FrameNode> GetTargetNode() const
-    {
-        return FrameNode::GetFrameNode(targetTag_, targetId_);
-    }
-
 protected:
     bool AvoidKeyboard() const override
     {
@@ -84,8 +75,6 @@ protected:
     }
 
 private:
-    int32_t targetId_ = -1;
-    std::string targetTag_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetWrapperPattern);
 };
