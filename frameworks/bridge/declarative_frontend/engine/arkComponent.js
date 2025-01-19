@@ -4628,7 +4628,7 @@ class TapGestureHandler extends GestureHandler {
     if (options !== undefined) {
       this.fingers = options.fingers;
       this.count = options.count;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
   onAction(event) {
@@ -4652,7 +4652,7 @@ class LongPressGestureHandler extends GestureHandler {
       this.fingers = options.fingers;
       this.repeat = options.repeat;
       this.duration = options.duration;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4689,7 +4689,7 @@ class PanGestureHandler extends GestureHandler {
       this.fingers = options.fingers;
       this.direction = options.direction;
       this.distance = options.distance;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4731,7 +4731,7 @@ class SwipeGestureHandler extends GestureHandler {
       this.fingers = options.fingers;
       this.direction = options.direction;
       this.speed = options.speed;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4757,7 +4757,7 @@ class PinchGestureHandler extends GestureHandler {
     if (options !== undefined) {
       this.fingers = options.fingers;
       this.distance = options.distance;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4798,7 +4798,7 @@ class RotationGestureHandler extends GestureHandler {
     if (options !== undefined) {
       this.fingers = options.fingers;
       this.angle = options.angle;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4839,7 +4839,6 @@ class GestureGroupHandler extends GestureHandler {
     if (options !== undefined) {
       this.mode = options.mode;
       this.gestures = options.gestures;
-      this.limitFingerCount = options.limitFingerCount;
     }
   }
 
