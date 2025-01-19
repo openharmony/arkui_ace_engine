@@ -1684,6 +1684,13 @@ enum ArkUIConfigType {
     ARKUI_FONT_SCALE_UPDATE = 7,
 };
 
+struct ArkUIImageResizableSlice {
+    ArkUI_Float32 left;
+    ArkUI_Float32 top;
+    ArkUI_Float32 right;
+    ArkUI_Float32 bottom;
+};
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -2087,6 +2094,7 @@ struct ArkUICommonModifier {
     void (*resetMask)(ArkUINodeHandle node);
     ArkUI_Float32 (*getAspectRatio)(ArkUINodeHandle node);
     void (*setBackgroundImageResizable)(ArkUINodeHandle node, ArkUIStringAndFloat* options);
+    ArkUIImageResizableSlice (*getBackgroundImageResizable)(ArkUINodeHandle node);
     void (*resetBackgroundImageResizable)(ArkUINodeHandle node);
     void (*setBackgroundImageSizeWithUnit)(ArkUINodeHandle node, ArkUI_Float32 valueWidth, ArkUI_Float32 valueHeight,
         ArkUI_Int32 unit);
