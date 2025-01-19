@@ -59,6 +59,7 @@ struct CommonProperty {
     int32_t windowTop = 0;
     int32_t pageId = 0;
     std::string pagePath;
+    bool isReduceMode = false;
 };
 
 struct ActionTable {
@@ -567,7 +568,7 @@ private:
         Accessibility::AccessibilityElementInfo& nodeInfo, const RefPtr<NG::PipelineContext>& ngPipeline);
 
     void UpdateCacheInfoNG(std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<NG::FrameNode>& node,
-        const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
+        CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
         const SearchParameter& searchParam);
 #ifdef WEB_SUPPORTED
 
