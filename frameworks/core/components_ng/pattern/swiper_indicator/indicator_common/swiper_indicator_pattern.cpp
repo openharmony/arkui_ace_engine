@@ -141,13 +141,16 @@ void SwiperIndicatorPattern::RegisterIndicatorChangeEvent()
     CHECK_NULL_VOID(swiperEventHub);
 
     swiperEventHub->SetIndicatorOnChange(
-        [weak = AceType::WeakClaim(RawPtr(host)), context = AceType::WeakClaim(this)]() {
+        [weak = AceType::WeakClaim(RawPtr(host)), context = AceType::WeakClaim(this)](int32_t index) {
             auto indicator = weak.Upgrade();
             CHECK_NULL_VOID(indicator);
             auto pipeline = indicator->GetContext();
             CHECK_NULL_VOID(pipeline);
             auto pattern = context.Upgrade();
-            pattern->FireChangeEvent();
+            if (pattern->lastNotifyIndex_ != index && index != pattern->GetCurrentIndex()) {
+                pattern->FireChangeEvent(index);
+                pattern->lastNotifyIndex_ = index;
+            }
             pipeline->AddAfterLayoutTask([weak, context]() {
                 auto indicator = weak.Upgrade();
                 CHECK_NULL_VOID(indicator);

@@ -203,7 +203,7 @@ public:
     int32_t hasSetInitialIndex_ = false;
 
 protected:
-    void FireChangeEvent() const override;
+    void FireChangeEvent(int32_t index) const override;
     SwiperIndicatorType GetIndicatorTypeFromProperty() const;
     Axis GetDirectionFromProperty() const;
     int32_t GetInitialIndexFromProperty() const;

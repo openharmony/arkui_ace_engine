@@ -330,7 +330,7 @@ private:
 protected:
     OffsetF CalculateAngleOffset(float centerX, float centerY, float radius, double angle);
     OffsetF CalculateRectLayout(double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height);
-    virtual void FireChangeEvent() const {}
+    virtual void FireChangeEvent(int32_t index) const {}
     virtual void SwipeTo(std::optional<int32_t> mouseClickIndex);
     virtual void ShowPrevious();
     virtual void ShowNext();
@@ -420,6 +420,7 @@ protected:
     RectF CalcBoundsRect() const;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     void ResetOverlongModifier();
+    int32_t lastNotifyIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 
