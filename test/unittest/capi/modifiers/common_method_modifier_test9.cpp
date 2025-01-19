@@ -23,10 +23,6 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 #include "generated/type_helpers.h"
-// #include "core/components_ng/event/input_event_hub.h"
-// #include "core/components_ng/event/input_event.h"
-// #include "core/components_ng/gestures/recognizers/click_recognizer.h"
-
 
 using namespace testing;
 using namespace testing::ext;
@@ -50,8 +46,33 @@ namespace {
     const auto ATTRIBUTE_BACKGROUND_NAME = "background";
     const auto ATTRIBUTE_BACKGROUND_DEFAULT_VALUE = "";
 }
-
+struct DoublePair {
+    double first;
+    double second;
+};
 namespace Converter {
+    template<>
+    std::string Convert(const Alignment& value)
+    {
+        double horizontal = value.GetHorizontal();
+        double vertical = value.GetVertical();
+        std::map<DoublePair, std::string> alignmentMap = {
+            {{-1.0, -1.0}, "TOP_LEFT"},
+            {{0.0, -1.0}, "TOP_CENTER"},
+            {{1.0, -1.0}, "TOP_RIGHT"},
+            {{-1.0, 0.0}, "CENTER_LEFT"},
+            {{0.0, 0.0}, "CENTER"},
+            {{1.0, 0.0}, "CENTER_RIGHT"},
+            {{-1.0, 1.0}, "BOTTOM_LEFT"},
+            {{0.0, 1.0}, "BOTTOM_CENTER"},
+            {{1.0, 1.0}, "BOTTOM_RIGHT"}
+        };
+        auto it = alignmentMap.find({horizontal, vertical});
+        if (it != alignmentMap.end()) {
+            return it->second;
+        }
+        return "";
+    }
     template<>
     void AssignArkValue(Ark_Resource& dst, const std::string& src, ConvContext *ctx)
     {
@@ -697,23 +718,27 @@ HWTEST_F(CommonMethodModifierTest9, setBackgroundTestValidValues, TestSize.Level
 
     using OneTestStep = std::tuple<Ark_Alignment, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        {Ark_Alignment::ARK_ALIGNMENT_TOP_START, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_TOP, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_TOP_END, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_START, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_CENTER, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_END, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_START, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_END, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_TOP_START, "TOP_LEFT"},
+        {Ark_Alignment::ARK_ALIGNMENT_TOP, "TOP_CENTER"},
+        {Ark_Alignment::ARK_ALIGNMENT_TOP_END, "TOP_RIGHT"},
+        {Ark_Alignment::ARK_ALIGNMENT_START, "CENTER_LEFT"},
+        {Ark_Alignment::ARK_ALIGNMENT_CENTER, "CENTER"},
+        {Ark_Alignment::ARK_ALIGNMENT_END, "CENTER_RIGHT"},
+        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_START, "BOTTOM_LEFT"},
+        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM, "BOTTOM_CENTER"},
+        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_END, "BOTTOM_RIGHT"},
     };
+    std::string resultValue = "";
+    const auto& renderContext = builderHelper.GetCustomNode()->GetRenderContext();
 
     for (auto [inputValue, expectedValue]: testPlan) {
         auto optInputValue = Converter::ArkValue<Opt_Literal_Alignment_align>(inputValue);
         modifier_->setBackground(node_, &builder, &optInputValue);
-        auto fullJson = GetJsonValue(node_);
         EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
-        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BACKGROUND_NAME);
+        if (renderContext) {
+            auto background = renderContext->GetBackgroundAlign();
+            resultValue = background.has_value() ? Converter::Convert(background.value()) : "";
+        }
         EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
     }
 }
