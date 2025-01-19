@@ -313,6 +313,8 @@ public:
         const RefPtr<PipelineBase>& context) override;
     void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo) override;
 
+    AccessibilityWorkMode GetAccessibilityWorkMode() override;
+
     AccessibilityParentRectInfo GetUECAccessibilityParentRectInfo() const;
     void UpdateUECAccessibilityParentRectInfo(const AccessibilityParentRectInfo& info);
     void RegisterUIExtBusinessConsumeCallback();

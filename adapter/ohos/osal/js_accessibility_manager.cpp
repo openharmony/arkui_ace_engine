@@ -2651,6 +2651,18 @@ bool JsAccessibilityManager::UnsubscribeStateObserver(int eventType)
     return ret == RET_OK;
 }
 
+AccessibilityWorkMode JsAccessibilityManager::GetAccessibilityWorkMode()
+{
+    AccessibilityWorkMode accessibilityWorkMode;
+    auto client = AccessibilitySystemAbilityClient::GetInstance();
+    CHECK_NULL_RETURN(client, accessibilityWorkMode);
+    auto ret = client->IsTouchExplorationEnabled(accessibilityWorkMode.isTouchExplorationEnabled);
+    if (ret != RET_OK) {
+        accessibilityWorkMode.isTouchExplorationEnabled = true;
+    }
+    return accessibilityWorkMode;
+}
+
 void JsAccessibilityManager::InitializeCallback()
 {
     if (IsRegister()) {
