@@ -77,7 +77,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<SheetPresentationLayoutAlgorithm>(targetId_, targetTag_, GetSheetType());
+        return MakeRefPtr<SheetPresentationLayoutAlgorithm>(GetSheetType(), sheetPopupInfo_);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -691,6 +691,16 @@ public:
     bool UpdateAccessibilityDetents(float height);
     void CalculateSheetRadius(BorderRadiusProperty& sheetRadius);
 
+    void UpdateSheetPopupInfo(const SheetPopupInfo& sheetPopupInfo)
+    {
+        sheetPopupInfo_ = sheetPopupInfo;
+    }
+
+    SheetPopupInfo GetSheetPopupInfo() const
+    {
+        return sheetPopupInfo_;
+    }
+
     bool UpdateIndexByDetentSelection(const SheetStyle& sheetStyle, bool isFirstTransition);
 
     bool GetIsPlayTransition() const
@@ -867,6 +877,10 @@ private:
     SheetKeyboardAvoidMode keyboardAvoidMode_ = SheetKeyboardAvoidMode::TRANSLATE_AND_SCROLL;
     float resizeDecreasedHeight_ = 0.f;
     bool isPlayTransition_ = false;
+    Placement finalPlacement_ = Placement::BOTTOM;
+    bool showArrow_ = true;
+    SheetArrowPosition arrowPosition_ = SheetArrowPosition::NONE;
+    SheetPopupInfo sheetPopupInfo_;
 };
 } // namespace OHOS::Ace::NG
 
