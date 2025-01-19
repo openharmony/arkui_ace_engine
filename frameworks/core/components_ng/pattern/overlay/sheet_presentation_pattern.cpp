@@ -68,6 +68,9 @@ constexpr Dimension ARROW_VERTICAL_P2_OFFSET_Y = 7.32_vp;
 constexpr Dimension ARROW_VERTICAL_P4_OFFSET_X = 1.5_vp;
 constexpr Dimension ARROW_VERTICAL_P4_OFFSET_Y = 7.32_vp;
 constexpr Dimension ARROW_VERTICAL_P5_OFFSET_X = 8.0_vp;
+constexpr Dimension ARROW_CORNER_P2_OFFSET_X = 12.8_vp;
+constexpr Dimension ARROW_CORNER_P2_OFFSET_Y = 7.6_vp;
+constexpr Dimension ARROW_CORNER_P4_OFFSET_Y = 6.0_vp;
 constexpr Dimension ARROW_RADIUS = 2.0_vp;
 } // namespace
 void SheetPresentationPattern::OnModifyDone()
@@ -244,6 +247,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
             windowChanged_ = true;
         }
     }
+    GetArrowOffsetByPlacement(sheetLayoutAlgorithm);
     InitialLayoutProps();
     UpdateFontScaleStatus();
     UpdateDragBarStatus();
@@ -288,7 +292,9 @@ void SheetPresentationPattern::CheckBuilderChange()
         CHECK_NULL_VOID(layoutProperty);
         auto sheetStyle = layoutProperty->GetSheetStyleValue();
         if (sheetStyle.sheetHeight.sheetMode == SheetMode::AUTO) {
-            sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            auto sheetWrapper = sheetNode->GetParent();
+            CHECK_NULL_VOID(sheetWrapper);
+            sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
     eventHub->AddInnerOnAreaChangedCallback(builderNode->GetId(), std::move(onBuilderAreaChangedFunc));
@@ -352,7 +358,9 @@ void SheetPresentationPattern::OnAttachToFrameNode()
         auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_VOID(sheetPattern);
         if (sheetPattern->GetSheetType() == SheetType::SHEET_POPUP) {
-            sheetNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            auto sheetWrapper = sheetNode->GetParent();
+            CHECK_NULL_VOID(sheetWrapper);
+            sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
     auto eventHub = targetNode->GetEventHub<EventHub>();
@@ -1537,7 +1545,9 @@ void SheetPresentationPattern::UpdateFontScaleStatus()
         }
         UpdateSheetTitle();
         scale_ = pipeline->GetFontScale();
-        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto sheetWrapper = host->GetParent();
+        CHECK_NULL_VOID(sheetWrapper);
+        sheetWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -2164,7 +2174,7 @@ void SheetPresentationPattern::ClipSheetNode()
     if (sheetTheme->IsOuterBorderEnable() && !sheetStyle.borderWidth.has_value()) {
         renderContext->UpdateOuterBorderRadius(borderRadius);
     }
-    if (sheetType == SheetType::SHEET_POPUP) {
+    if (sheetType == SheetType::SHEET_POPUP && sheetPopupInfo_.showArrow) {
         std::string clipPath;
         clipPath = GetPopupStyleSheetClipPath(sheetSize, borderRadius);
         auto path = AceType::MakeRefPtr<Path>();
@@ -2390,6 +2400,9 @@ void SheetPresentationPattern::CalculateAloneSheetRadius(
 std::string SheetPresentationPattern::GetPopupStyleSheetClipPath(
     const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius)
 {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return GetPopupStyleSheetClipPathNew(sheetSize, sheetRadius);
+    }
     auto radiusTopLeft = sheetRadius.radiusTopLeft->ConvertToPx();
     auto radiusTopRight = sheetRadius.radiusTopRight->ConvertToPx();
     auto radiusBottomRight = sheetRadius.radiusBottomRight->ConvertToPx();
@@ -3250,6 +3263,314 @@ void SheetPresentationPattern::FireHoverModeChangeCallback()
         return;
     }
     OnHeightDidChange(centerHeight_);
+}
+
+void SheetPresentationPattern::GetArrowOffsetByPlacement(
+    const RefPtr<SheetPresentationLayoutAlgorithm>& layoutAlgorithm)
+{
+    CHECK_NULL_VOID(layoutAlgorithm);
+    if (!Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        return;
+    }
+    finalPlacement_ = sheetPopupInfo_.finalPlacement;
+    showArrow_ = sheetPopupInfo_.showArrow;
+    arrowPosition_ = sheetPopupInfo_.arrowPosition;
+    if (!showArrow_ || finalPlacement_ == Placement::NONE) {
+        arrowOffset_ = OffsetF(0.f, 0.f);
+        return;
+    }
+
+    switch (finalPlacement_) {
+        case Placement::BOTTOM_LEFT:
+            [[fallthrough]];
+        case Placement::BOTTOM_RIGHT:
+            [[fallthrough]];
+        case Placement::BOTTOM:
+            [[fallthrough]];
+        case Placement::TOP_LEFT:
+            [[fallthrough]];
+        case Placement::TOP_RIGHT:
+            [[fallthrough]];
+        case Placement::TOP: {
+            arrowOffset_ = OffsetF(sheetPopupInfo_.arrowOffsetX, 0.f);
+            break;
+        }
+        case Placement::RIGHT_TOP:
+            [[fallthrough]];
+        case Placement::RIGHT_BOTTOM:
+            [[fallthrough]];
+        case Placement::RIGHT:
+            [[fallthrough]];
+        case Placement::LEFT_TOP:
+            [[fallthrough]];
+        case Placement::LEFT_BOTTOM:
+            [[fallthrough]];
+        case Placement::LEFT: {
+            arrowOffset_ = OffsetF(0.f, sheetPopupInfo_.arrowOffsetY);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+std::string SheetPresentationPattern::GetPopupStyleSheetClipPathNew(
+    const SizeF& sheetSize, const BorderRadiusProperty& sheetRadius)
+{
+    std::string drawPath;
+    switch (finalPlacement_) {
+        case Placement::BOTTOM_LEFT:
+            [[fallthrough]];
+        case Placement::BOTTOM_RIGHT:
+            [[fallthrough]];
+        case Placement::BOTTOM: {
+            drawPath = DrawClipPathBottom(sheetSize, sheetRadius);
+            break;
+        }
+        case Placement::TOP_LEFT:
+            [[fallthrough]];
+        case Placement::TOP_RIGHT:
+            [[fallthrough]];
+        case Placement::TOP: {
+            drawPath = DrawClipPathTop(sheetSize, sheetRadius);
+            break;
+        }
+        case Placement::RIGHT_TOP:
+            [[fallthrough]];
+        case Placement::RIGHT_BOTTOM:
+            [[fallthrough]];
+        case Placement::RIGHT: {
+            drawPath = DrawClipPathRight(sheetSize, sheetRadius);
+            break;
+        }
+        case Placement::LEFT_TOP:
+            [[fallthrough]];
+        case Placement::LEFT_BOTTOM:
+            [[fallthrough]];
+        case Placement::LEFT: {
+            drawPath = DrawClipPathLeft(sheetSize, sheetRadius);
+            break;
+        }
+        default:
+            break;
+    }
+    return drawPath;
+}
+
+std::string SheetPresentationPattern::DrawClipPathBottom(const SizeF& sheetSize,
+    const BorderRadiusProperty& sheetRadius)
+{
+    auto radiusTopLeft = sheetRadius.radiusTopLeft->ConvertToPx();
+    auto radiusTopRight = sheetRadius.radiusTopRight->ConvertToPx();
+    auto radiusBottomRight = sheetRadius.radiusBottomRight->ConvertToPx();
+    auto radiusBottomLeft = sheetRadius.radiusBottomLeft->ConvertToPx();
+    // clip path start from TopLeft, and draw Right-angled arrow first if needed
+    std::string path;
+    if (arrowPosition_ == SheetArrowPosition::BOTTOM_LEFT) {
+        path += MoveTo(0.f, SHEET_ARROW_HEIGHT.ConvertToPx());  // P5
+        path += LineTo(0.f, (SHEET_ARROW_HEIGHT - ARROW_CORNER_P4_OFFSET_Y).ConvertToPx()); // P4
+        path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
+            (SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx(),
+            (SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx()); // P2
+        path += LineTo(SHEET_ARROW_WIDTH.ConvertToPx(), SHEET_ARROW_HEIGHT.ConvertToPx());  // P1
+    } else {
+        path += MoveTo(0.0f, SHEET_ARROW_HEIGHT.ConvertToPx() + radiusTopLeft);
+        path += ArcTo(radiusTopLeft, radiusTopLeft, 0.0f, 0, radiusTopLeft,
+            SHEET_ARROW_HEIGHT.ConvertToPx());
+    }
+    if (arrowPosition_ == SheetArrowPosition::NONE) {
+        path += LineTo(arrowOffset_.GetX() - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx(),
+            SHEET_ARROW_HEIGHT.ConvertToPx());  // P1
+        path += LineTo(arrowOffset_.GetX() - ARROW_VERTICAL_P2_OFFSET_X.ConvertToPx(),
+            (SHEET_ARROW_HEIGHT - ARROW_VERTICAL_P2_OFFSET_Y).ConvertToPx());   // P2
+        path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
+            arrowOffset_.GetX() + ARROW_VERTICAL_P4_OFFSET_X.ConvertToPx(),
+            (SHEET_ARROW_HEIGHT - ARROW_VERTICAL_P4_OFFSET_Y).ConvertToPx());   // P4
+        path += LineTo(arrowOffset_.GetX() + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx(),
+            SHEET_ARROW_HEIGHT.ConvertToPx());  // P5
+    }
+    if (arrowPosition_ == SheetArrowPosition::BOTTOM_RIGHT) {
+        path += LineTo(sheetSize.Width() -
+            SHEET_ARROW_WIDTH.ConvertToPx(), SHEET_ARROW_HEIGHT.ConvertToPx());  // P1
+        path += LineTo(sheetSize.Width() - (SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx(),
+            (SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx()); // P2
+        path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
+            sheetSize.Width(), (SHEET_ARROW_HEIGHT - ARROW_CORNER_P4_OFFSET_Y).ConvertToPx());  // P4
+        path += LineTo(sheetSize.Width(), SHEET_ARROW_HEIGHT.ConvertToPx());    // P5
+    } else {
+        path += LineTo(sheetSize.Width() - radiusTopRight, SHEET_ARROW_HEIGHT.ConvertToPx());
+        path += ArcTo(radiusTopRight, radiusTopRight, 0.0f, 0, sheetSize.Width(),
+            SHEET_ARROW_HEIGHT.ConvertToPx() + radiusTopRight);
+    }
+    path += LineTo(sheetSize.Width(), sheetSize.Height() - radiusBottomRight);
+    path += ArcTo(radiusBottomRight, radiusBottomRight, 0.0f, 0,
+        sheetSize.Width() - radiusBottomRight, sheetSize.Height());
+    path += LineTo(radiusBottomLeft, sheetSize.Height());
+    path += ArcTo(radiusBottomLeft, radiusBottomLeft, 0.0f, 0, 0.0f,
+        sheetSize.Height() - radiusBottomLeft);
+    return path + "Z";
+}
+
+std::string SheetPresentationPattern::DrawClipPathTop(const SizeF& sheetSize,
+    const BorderRadiusProperty& sheetRadius)
+{
+    auto radiusTopLeft = sheetRadius.radiusTopLeft->ConvertToPx();
+    auto radiusTopRight = sheetRadius.radiusTopRight->ConvertToPx();
+    auto radiusBottomRight = sheetRadius.radiusBottomRight->ConvertToPx();
+    auto radiusBottomLeft = sheetRadius.radiusBottomLeft->ConvertToPx();
+    // clip path start from TopLeft, and draw sheet radius first
+    std::string path;
+    path += MoveTo(0.f, radiusTopLeft);
+    path += ArcTo(radiusTopLeft, radiusTopLeft, 0.0f, 0, radiusTopLeft, 0.f);
+    path += LineTo(sheetSize.Width() - radiusTopRight, 0.f);
+    path += ArcTo(radiusTopRight, radiusTopRight, 0.0f, 0,
+        sheetSize.Width(), radiusTopRight);
+    if (arrowPosition_ == SheetArrowPosition::TOP_RIGHT) {
+        path += LineTo(sheetSize.Width(),
+            sheetSize.Height() - (SHEET_ARROW_HEIGHT - ARROW_CORNER_P4_OFFSET_Y).ConvertToPx());    // P4
+        path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
+            sheetSize.Width() - (SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx(),
+            sheetSize.Height() - (SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx());    // P2
+        path += LineTo(sheetSize.Width() - SHEET_ARROW_WIDTH.ConvertToPx(),
+            sheetSize.Height() - SHEET_ARROW_HEIGHT.ConvertToPx()); // P1
+    } else {
+        path += LineTo(sheetSize.Width(), sheetSize.Height() - radiusBottomRight - SHEET_ARROW_HEIGHT.ConvertToPx());
+        path += ArcTo(radiusBottomRight, radiusBottomRight, 0.0f, 0,
+            sheetSize.Width() - radiusBottomRight, sheetSize.Height() - SHEET_ARROW_HEIGHT.ConvertToPx());
+    }
+    if (arrowPosition_ == SheetArrowPosition::NONE) {
+        path += LineTo(arrowOffset_.GetX() + ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx(),
+            sheetSize.Height() - SHEET_ARROW_HEIGHT.ConvertToPx()); // P1
+        path += LineTo(arrowOffset_.GetX() + ARROW_VERTICAL_P2_OFFSET_X.ConvertToPx(),
+            sheetSize.Height() - (SHEET_ARROW_HEIGHT - ARROW_VERTICAL_P2_OFFSET_Y).ConvertToPx());  // P2
+        path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
+            arrowOffset_.GetX() - ARROW_VERTICAL_P4_OFFSET_X.ConvertToPx(),
+            sheetSize.Height() - (SHEET_ARROW_HEIGHT - ARROW_VERTICAL_P4_OFFSET_Y).ConvertToPx());  // P4
+        path += LineTo(arrowOffset_.GetX() - ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx(),
+            sheetSize.Height() - SHEET_ARROW_HEIGHT.ConvertToPx()); // P5
+    }
+    if (arrowPosition_ == SheetArrowPosition::TOP_LEFT) {
+        path += LineTo(SHEET_ARROW_WIDTH.ConvertToPx(),
+            sheetSize.Height() - SHEET_ARROW_HEIGHT.ConvertToPx()); // P1
+        path += LineTo((SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx(),
+            sheetSize.Height() - (SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx());    // P2
+        path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0, 0.f,
+            sheetSize.Height() - (SHEET_ARROW_HEIGHT - ARROW_CORNER_P4_OFFSET_Y).ConvertToPx());    // P4
+        path += LineTo(0.f, sheetSize.Height() - SHEET_ARROW_HEIGHT.ConvertToPx()); // P5
+    } else {
+        path += LineTo(radiusBottomLeft, sheetSize.Height() - SHEET_ARROW_HEIGHT.ConvertToPx());
+        path += ArcTo(radiusBottomLeft, radiusBottomLeft, 0.0f, 0,
+            0.f, sheetSize.Height() - radiusBottomLeft - SHEET_ARROW_HEIGHT.ConvertToPx());
+    }
+    return path + "Z";
+}
+
+std::string SheetPresentationPattern::DrawClipPathLeft(const SizeF& sheetSize,
+    const BorderRadiusProperty& sheetRadius)
+{
+    auto radiusTopLeft = sheetRadius.radiusTopLeft->ConvertToPx();
+    auto radiusTopRight = sheetRadius.radiusTopRight->ConvertToPx();
+    auto radiusBottomRight = sheetRadius.radiusBottomRight->ConvertToPx();
+    auto radiusBottomLeft = sheetRadius.radiusBottomLeft->ConvertToPx();
+    // clip path start from TopLeft, and draw sheet radius first
+    std::string path;
+    path += MoveTo(0.f, radiusTopLeft);
+    path += ArcTo(radiusTopLeft, radiusTopLeft, 0.0f, 0, radiusTopLeft, 0.f);
+    if (arrowPosition_ == SheetArrowPosition::LEFT_TOP) {
+        path += LineTo(sheetSize.Width() - (SHEET_ARROW_HEIGHT - ARROW_CORNER_P4_OFFSET_Y).ConvertToPx(), 0.f); // P4
+        path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
+            sheetSize.Width() - (SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx(),
+            (SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx());  // P2
+        path += LineTo(sheetSize.Width() - SHEET_ARROW_HEIGHT.ConvertToPx(),
+            SHEET_ARROW_WIDTH.ConvertToPx());  // P1
+    } else {
+        path += LineTo(sheetSize.Width() - radiusTopRight - SHEET_ARROW_HEIGHT.ConvertToPx(), 0.f);
+        path += ArcTo(radiusTopRight, radiusTopRight, 0.0f, 0,
+            sheetSize.Width() - SHEET_ARROW_HEIGHT.ConvertToPx(), radiusTopRight);
+    }
+    if (arrowPosition_ == SheetArrowPosition::NONE) {
+        path += LineTo(sheetSize.Width() - SHEET_ARROW_HEIGHT.ConvertToPx(),
+            arrowOffset_.GetY() - ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx());    // P1
+        path += LineTo(sheetSize.Width() - (SHEET_ARROW_HEIGHT - ARROW_VERTICAL_P2_OFFSET_Y).ConvertToPx(),
+            arrowOffset_.GetY() - ARROW_VERTICAL_P2_OFFSET_X.ConvertToPx());    // P2
+        path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
+            sheetSize.Width() - (SHEET_ARROW_HEIGHT - ARROW_VERTICAL_P4_OFFSET_Y).ConvertToPx(),
+            arrowOffset_.GetY() + ARROW_VERTICAL_P4_OFFSET_X.ConvertToPx());    // P4
+        path += LineTo(sheetSize.Width() - SHEET_ARROW_HEIGHT.ConvertToPx(),
+            arrowOffset_.GetY() + ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx());    // P5
+    }
+    if (arrowPosition_ == SheetArrowPosition::LEFT_BOTTOM) {
+        path += LineTo(sheetSize.Width() - SHEET_ARROW_HEIGHT.ConvertToPx(),
+            sheetSize.Height() - SHEET_ARROW_WIDTH.ConvertToPx());  // P1
+        path += LineTo(sheetSize.Width() - (SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx(),
+            sheetSize.Height() - (SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx()); // P2
+        path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0, sheetSize.Width() -
+            (SHEET_ARROW_HEIGHT - ARROW_CORNER_P4_OFFSET_Y).ConvertToPx(), sheetSize.Height()); // P4
+        path += LineTo(sheetSize.Width() - SHEET_ARROW_HEIGHT.ConvertToPx(), sheetSize.Height());   // P5
+    } else {
+        path += LineTo(sheetSize.Width() - SHEET_ARROW_HEIGHT.ConvertToPx(),
+            sheetSize.Height() - radiusBottomRight);
+        path += ArcTo(radiusBottomRight, radiusBottomRight, 0.0f, 0,
+            sheetSize.Width() - radiusBottomRight - SHEET_ARROW_HEIGHT.ConvertToPx(), sheetSize.Height());
+    }
+    path += LineTo(radiusBottomLeft, sheetSize.Height());
+    path += ArcTo(radiusBottomLeft, radiusBottomLeft, 0.0f, 0,
+        0.f, sheetSize.Height() - radiusBottomLeft);
+    return path + "Z";
+}
+
+std::string SheetPresentationPattern::DrawClipPathRight(const SizeF& sheetSize,
+    const BorderRadiusProperty& sheetRadius)
+{
+    auto radiusTopLeft = sheetRadius.radiusTopLeft->ConvertToPx();
+    auto radiusTopRight = sheetRadius.radiusTopRight->ConvertToPx();
+    auto radiusBottomRight = sheetRadius.radiusBottomRight->ConvertToPx();
+    auto radiusBottomLeft = sheetRadius.radiusBottomLeft->ConvertToPx();
+    // clip path start from TopLeft, and if left side need draw left top Right-angled arrow, draw it first
+    std::string path;
+    if (arrowPosition_ == SheetArrowPosition::RIGHT_TOP) {
+        path += MoveTo(SHEET_ARROW_HEIGHT.ConvertToPx(), SHEET_ARROW_WIDTH.ConvertToPx());  // P1
+        path += LineTo((SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx(),
+            (SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx());  // P2
+        path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
+            (SHEET_ARROW_HEIGHT - ARROW_CORNER_P4_OFFSET_Y).ConvertToPx(), 0.f);    // P4
+        path += LineTo(SHEET_ARROW_HEIGHT.ConvertToPx(), 0.f);  // P5
+    } else {
+        path += MoveTo(SHEET_ARROW_HEIGHT.ConvertToPx(), radiusTopLeft);
+        path += ArcTo(radiusTopLeft, radiusTopLeft, 0.0f, 0,
+            radiusTopLeft + SHEET_ARROW_HEIGHT.ConvertToPx(), 0.f);
+    }
+    path += LineTo(sheetSize.Width() - radiusTopRight, 0.f);
+    path += ArcTo(radiusTopRight, radiusTopRight, 0.0f, 0,
+        sheetSize.Width(), radiusTopRight);
+    path += LineTo(sheetSize.Width(), sheetSize.Height() - radiusBottomRight);
+    path += ArcTo(radiusBottomRight, radiusBottomRight, 0.0f, 0,
+        sheetSize.Width() - radiusBottomRight, sheetSize.Height());
+    if (arrowPosition_ == SheetArrowPosition::RIGHT_BOTTOM) {
+        path += LineTo(SHEET_ARROW_HEIGHT.ConvertToPx(), sheetSize.Height());   // P5
+        path += LineTo((SHEET_ARROW_HEIGHT - ARROW_CORNER_P4_OFFSET_Y).ConvertToPx(), sheetSize.Height());  // P4
+        path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
+            (SHEET_ARROW_HEIGHT - ARROW_CORNER_P2_OFFSET_Y).ConvertToPx(),
+            sheetSize.Height() - (SHEET_ARROW_WIDTH - ARROW_CORNER_P2_OFFSET_X).ConvertToPx()); // P2
+        path += LineTo(SHEET_ARROW_HEIGHT.ConvertToPx(),
+            sheetSize.Height() - SHEET_ARROW_WIDTH.ConvertToPx()); // P1
+    } else {
+        path += LineTo(radiusBottomLeft + SHEET_ARROW_HEIGHT.ConvertToPx(), sheetSize.Height());
+        path += ArcTo(radiusBottomLeft, radiusBottomLeft, 0.0f, 0,
+            SHEET_ARROW_HEIGHT.ConvertToPx(), sheetSize.Height() - radiusBottomLeft);
+    }
+    if (arrowPosition_ == SheetArrowPosition::NONE) {
+        path += LineTo(SHEET_ARROW_HEIGHT.ConvertToPx(),
+            arrowOffset_.GetY() + ARROW_VERTICAL_P1_OFFSET_X.ConvertToPx());    // P1
+        path += LineTo((SHEET_ARROW_HEIGHT - ARROW_VERTICAL_P2_OFFSET_Y).ConvertToPx(),
+            arrowOffset_.GetY() + ARROW_VERTICAL_P2_OFFSET_X.ConvertToPx());    // P2
+        path += ArcTo(ARROW_RADIUS.ConvertToPx(), ARROW_RADIUS.ConvertToPx(), 0.0f, 0,
+            (SHEET_ARROW_HEIGHT - ARROW_VERTICAL_P4_OFFSET_Y).ConvertToPx(),
+            arrowOffset_.GetY() - ARROW_VERTICAL_P4_OFFSET_X.ConvertToPx());    // P4
+        path += LineTo(SHEET_ARROW_HEIGHT.ConvertToPx(),
+            arrowOffset_.GetY() - ARROW_VERTICAL_P5_OFFSET_X.ConvertToPx());    // P5
+    }
+    return path + "Z";
 }
 
 void SheetPresentationPattern::RecoverHalfFoldOrAvoidStatus()
