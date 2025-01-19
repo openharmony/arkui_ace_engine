@@ -23,9 +23,9 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 #include "generated/type_helpers.h"
-#include "core/components_ng/event/input_event_hub.h"
-#include "core/components_ng/event/input_event.h"
-#include "core/components_ng/gestures/recognizers/click_recognizer.h"
+// #include "core/components_ng/event/input_event_hub.h"
+// #include "core/components_ng/event/input_event.h"
+// #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 
 
 using namespace testing;
@@ -72,12 +72,6 @@ class CommonMethodModifierTest9 : public ModifierTestBase<GENERATED_ArkUICommonM
     > {
 public:
     RefPtr<RenderContext> render_;
-
-    CustomNodeBuilderTestHelper<CommonMethodModifierTest9>* GetCustomNodeBuilderHelper(FrameNode* frameNode)
-    {
-        static CustomNodeBuilderTestHelper<CommonMethodModifierTest9> builderHelper(this, frameNode);
-        return &builderHelper;
-    }
 
     void *CreateNodeImpl() override
     {
@@ -695,34 +689,32 @@ HWTEST_F(CommonMethodModifierTest9, setBackgroundTestValidValues, TestSize.Level
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    // static CustomNodeBuilderTestHelper builderHelper(frameNode,
-    //     &CommonMethodModifierTest9::CreateNode, &CommonMethodModifierTest9::DisposeNode);
-
-    auto builderHelper = GetCustomNodeBuilderHelper(frameNode);
-    const CustomNodeBuilder builder = builderHelper->GetBuilder();
+    int callsCount(0);
+    CustomNodeBuilderTestHelper<CommonMethodModifierTest9> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
     modifier_->setBackground(node_, &builder, nullptr);
-    EXPECT_EQ(builderHelper->GetCallsCount(), 1);
+    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
 
-    // using OneTestStep = std::tuple<Ark_Alignment, std::string>;
-    // static const std::vector<OneTestStep> testPlan = {
-    //     {Ark_Alignment::ARK_ALIGNMENT_TOP_START, ""},
-    //     {Ark_Alignment::ARK_ALIGNMENT_TOP, ""},
-    //     {Ark_Alignment::ARK_ALIGNMENT_TOP_END, ""},
-    //     {Ark_Alignment::ARK_ALIGNMENT_START, ""},
-    //     {Ark_Alignment::ARK_ALIGNMENT_CENTER, ""},
-    //     {Ark_Alignment::ARK_ALIGNMENT_END, ""},
-    //     {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_START, ""},
-    //     {Ark_Alignment::ARK_ALIGNMENT_BOTTOM, ""},
-    //     {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_END, ""},
-    // };
+    using OneTestStep = std::tuple<Ark_Alignment, std::string>;
+    static const std::vector<OneTestStep> testPlan = {
+        {Ark_Alignment::ARK_ALIGNMENT_TOP_START, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_TOP, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_TOP_END, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_START, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_CENTER, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_END, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_START, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM, ""},
+        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_END, ""},
+    };
 
-    // for (auto [inputValue, expectedValue]: testPlan) {
-    //     auto optInputValue = Converter::ArkValue<Opt_Literal_Alignment_align>(inputValue);
-    //     modifier_->setBackground(node_, &builder, &optInputValue);
-    //     auto fullJson = GetJsonValue(node_);
-    //     std::cout << std::endl << fullJson->ToString() << std::endl;
-    //     auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BACKGROUND_NAME);
-    //     EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
-    // }
+    for (auto [inputValue, expectedValue]: testPlan) {
+        auto optInputValue = Converter::ArkValue<Opt_Literal_Alignment_align>(inputValue);
+        modifier_->setBackground(node_, &builder, &optInputValue);
+        auto fullJson = GetJsonValue(node_);
+        EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BACKGROUND_NAME);
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    }
 }
 }
