@@ -381,7 +381,6 @@ void SwiperPattern::OnModifyDone()
     RegisterVisibleAreaChange();
     InitTouchEvent(gestureHub);
     InitHoverMouseEvent();
-    StopAndResetSpringAnimation();
 
     if (NeedForceMeasure()) {
         ResetOnForceMeasure();
