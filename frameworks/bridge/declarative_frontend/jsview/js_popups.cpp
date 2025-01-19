@@ -1479,6 +1479,22 @@ void JSViewAbstract::ParseSheetStyle(
         }
     }
 
+    auto placement = paramObj->GetProperty("placement");
+    sheetStyle.placement.reset();
+    if (placement->IsNumber()) {
+        auto placementValue = placement->ToNumber<int32_t>();
+        if (placementValue >= static_cast<int>(Placement::LEFT) &&
+            placementValue <= static_cast<int>(Placement::RIGHT_BOTTOM)) {
+            sheetStyle.placement = static_cast<Placement>(placementValue);
+        }
+    }
+
+    auto placementOnTarget = paramObj->GetProperty("placementOnTarget");
+    sheetStyle.placementOnTarget.reset();
+    if (placementOnTarget->IsBoolean()) {
+        sheetStyle.placementOnTarget = placementOnTarget->ToBoolean();
+    }
+
     Color color;
     if (ParseJsColor(backgroundColor, color)) {
         sheetStyle.backgroundColor = color;
