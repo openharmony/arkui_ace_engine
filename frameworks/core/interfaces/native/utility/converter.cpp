@@ -1922,7 +1922,21 @@ KeyboardOptions Convert(const Ark_KeyboardOptions& src)
 template<>
 SelectMenuParam Convert(const Ark_SelectionMenuOptions& src)
 {
-    SelectMenuParam selectMenuParam = {.onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {}};
+    SelectMenuParam selectMenuParam = {.onAppear = [](int32_t start, int32_t end) {}, .onDisappear = []() {},
+        .menuType = std::nullopt};
+    auto menuType = Converter::OptConvert<Ark_MenuType>(src.menuType);
+    if (menuType.has_value()) {
+        switch (menuType.value()) {
+            case Ark_MenuType::ARK_MENU_TYPE_SELECTION_MENU:
+                selectMenuParam.menuType = SelectionMenuType::SELECTION_MENU;
+                break;
+            case Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU:
+                selectMenuParam.menuType = SelectionMenuType::PREVIEW_MENU;
+                break;
+            default:
+                break;
+        }
+    }
     auto optOnAppear = Converter::OptConvert<MenuOnAppearCallback>(src.onAppear);
     if (optOnAppear.has_value()) {
         selectMenuParam.onAppear =

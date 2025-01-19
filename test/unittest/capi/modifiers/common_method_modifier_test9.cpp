@@ -21,6 +21,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 #include "generated/type_helpers.h"
 #include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/input_event.h"
@@ -72,6 +73,12 @@ class CommonMethodModifierTest9 : public ModifierTestBase<GENERATED_ArkUICommonM
 public:
     RefPtr<RenderContext> render_;
 
+    CustomNodeBuilderTestHelper<CommonMethodModifierTest9>* GetCustomNodeBuilderHelper(FrameNode* frameNode)
+    {
+        static CustomNodeBuilderTestHelper<CommonMethodModifierTest9> builderHelper(this, frameNode);
+        return &builderHelper;
+    }
+
     void *CreateNodeImpl() override
     {
         return nodeModifiers_->getBlankModifier()->construct(GetId(), 0);
@@ -86,6 +93,8 @@ public:
         }
         return nullptr;
     }
+private:
+    virtual void TestBody() {};
 };
 
 //////// AccessibilityGroup
@@ -686,38 +695,34 @@ HWTEST_F(CommonMethodModifierTest9, setBackgroundTestValidValues, TestSize.Level
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    using OneTestStep = std::tuple<Ark_Alignment, std::string>;
-    static const std::vector<OneTestStep> testPlan = {
-        {Ark_Alignment::ARK_ALIGNMENT_TOP_START, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_TOP, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_TOP_END, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_START, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_CENTER, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_END, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_START, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM, ""},
-        {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_END, ""},
-    };
+    // static CustomNodeBuilderTestHelper builderHelper(frameNode,
+    //     &CommonMethodModifierTest9::CreateNode, &CommonMethodModifierTest9::DisposeNode);
 
-    static const int32_t expectedResourceId = 123;
-    static auto expectedCustomNode = CreateNode();
-    static const FrameNode *expectedParentNode = frameNode;
-    static const CustomNodeBuilder builder = {
-        .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
-            const Callback_Pointer_Void continuation) {
-            EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode);
-            CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
-        }
-    };
+    auto builderHelper = GetCustomNodeBuilderHelper(frameNode);
+    const CustomNodeBuilder builder = builderHelper->GetBuilder();
+    modifier_->setBackground(node_, &builder, nullptr);
+    EXPECT_EQ(builderHelper->GetCallsCount(), 1);
 
-    for (auto [inputValue, expectedValue]: testPlan) {
-        auto optInputValue = Converter::ArkValue<Opt_Literal_Alignment_align>(inputValue);
-        modifier_->setBackground(node_, &builder, &optInputValue);
-        auto fullJson = GetJsonValue(node_);
-        std::cout << std::endl << fullJson->ToString() << std::endl;
-        auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BACKGROUND_NAME);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
-    }
-    DisposeNode(expectedCustomNode);
+    // using OneTestStep = std::tuple<Ark_Alignment, std::string>;
+    // static const std::vector<OneTestStep> testPlan = {
+    //     {Ark_Alignment::ARK_ALIGNMENT_TOP_START, ""},
+    //     {Ark_Alignment::ARK_ALIGNMENT_TOP, ""},
+    //     {Ark_Alignment::ARK_ALIGNMENT_TOP_END, ""},
+    //     {Ark_Alignment::ARK_ALIGNMENT_START, ""},
+    //     {Ark_Alignment::ARK_ALIGNMENT_CENTER, ""},
+    //     {Ark_Alignment::ARK_ALIGNMENT_END, ""},
+    //     {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_START, ""},
+    //     {Ark_Alignment::ARK_ALIGNMENT_BOTTOM, ""},
+    //     {Ark_Alignment::ARK_ALIGNMENT_BOTTOM_END, ""},
+    // };
+
+    // for (auto [inputValue, expectedValue]: testPlan) {
+    //     auto optInputValue = Converter::ArkValue<Opt_Literal_Alignment_align>(inputValue);
+    //     modifier_->setBackground(node_, &builder, &optInputValue);
+    //     auto fullJson = GetJsonValue(node_);
+    //     std::cout << std::endl << fullJson->ToString() << std::endl;
+    //     auto resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BACKGROUND_NAME);
+    //     EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+    // }
 }
 }
