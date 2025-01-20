@@ -6169,6 +6169,21 @@ class FlingSpeedLimitModifier extends ModifierWithKey {
 }
 FlingSpeedLimitModifier.identity = Symbol('flingSpeedLimit');
 
+class BackToTopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetBackToTop(node);
+    }
+    else {
+      getUINativeModule().scrollable.setBackToTop(node, this.value);
+    }
+  }
+}
+BackToTopModifier.identity = Symbol('backToTop');
+
 class ArkScrollable extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6203,6 +6218,10 @@ class ArkScrollable extends ArkComponent {
 
   flingSpeedLimit(value) {
     modifierWithKey(this._modifiersWithKeys, FlingSpeedLimitModifier.identity, FlingSpeedLimitModifier, value);
+    return this;
+  }
+  backToTop(value) {
+    modifierWithKey(this._modifiersWithKeys, BackToTopModifier.identity, BackToTopModifier, value);
     return this;
   }
 }
