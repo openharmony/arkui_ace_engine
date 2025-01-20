@@ -54,6 +54,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_group_js_bridge.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/modules/jsi_context_module.h"
@@ -846,7 +847,7 @@ void JsiDeclarativeEngineInstance::DestroyRootViewHandle(int32_t pageId)
             return;
         }
         panda::Local<panda::ObjectRef> rootView = iter->second.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(arkRuntime->GetEcmaVm(), 0));
+        auto* jsView = JsiObjectTemplate::GetNativeViewPartialUpdate(rootView);
         if (jsView != nullptr) {
             jsView->Destroy(nullptr);
         }
@@ -866,7 +867,7 @@ void JsiDeclarativeEngineInstance::DestroyAllRootViewHandle()
     for (const auto& pair : rootViewMap_) {
         auto globalRootView = pair.second;
         panda::Local<panda::ObjectRef> rootView = globalRootView.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(arkRuntime->GetEcmaVm(), 0));
+        auto* jsView = JsiObjectTemplate::GetNativeViewPartialUpdate(rootView);
         if (jsView != nullptr) {
             jsView->Destroy(nullptr);
         }
@@ -889,7 +890,7 @@ void JsiDeclarativeEngineInstance::FlushReload()
     for (const auto& pair : rootViewMap_) {
         auto globalRootView = pair.second;
         panda::Local<panda::ObjectRef> rootView = globalRootView.ToLocal(arkRuntime->GetEcmaVm());
-        auto* jsView = static_cast<JSView*>(rootView->GetNativePointerField(arkRuntime->GetEcmaVm(), 0));
+        auto* jsView = JsiObjectTemplate::GetNativeViewPartialUpdate(rootView);
         if (jsView != nullptr) {
             jsView->MarkNeedUpdate();
         }
