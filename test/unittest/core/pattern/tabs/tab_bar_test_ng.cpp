@@ -735,7 +735,7 @@ HWTEST_F(TabBarTestNg, TabBarPatternFocusIndexChange003, TestSize.Level1)
         ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
     }
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_TRUE(tabBarPattern_->CanScroll());
 
     /**

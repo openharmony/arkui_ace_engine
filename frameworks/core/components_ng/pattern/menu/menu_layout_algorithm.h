@@ -263,6 +263,8 @@ private:
     void NormalizeBorderRadius(float& radiusTopLeftPx, float& radiusTopRightPx,
         float& radiusBottomLeftPx, float& radiusBottomRightPx);
     std::string CalculateMenuPath(LayoutWrapper* layoutWrapper, bool didNeedArrow);
+    bool UpdateSelectOverlayMenuColumnInfo(
+        const RefPtr<MenuPattern>& menuPattern, const RefPtr<GridColumnInfo>& columnInfo);
 
     std::optional<OffsetF> lastPosition_;
     OffsetF targetOffset_;

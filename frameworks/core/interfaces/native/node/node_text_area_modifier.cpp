@@ -991,7 +991,7 @@ void SetTextAreaOnChange(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onChange = reinterpret_cast<std::function<void(const std::u16string&, PreviewText&)>*>(callback);
+        auto onChange = reinterpret_cast<std::function<void(const ChangeValueInfo&)>*>(callback);
         TextFieldModelNG::SetOnChange(frameNode, std::move(*onChange));
     } else {
         TextFieldModelNG::SetOnChange(frameNode, nullptr);
@@ -2122,9 +2122,9 @@ void SetOnTextAreaChange(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node, extraParam](const std::u16string& str, PreviewText&) {
+    auto onChange = [node, extraParam](const ChangeValueInfo& info) {
         ArkUINodeEvent event;
-        std::string utf8Str = UtfUtils::Str16DebugToStr8(str);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(info.value);
         event.kind = TEXT_INPUT;
         event.extraParam = reinterpret_cast<intptr_t>(extraParam);
         event.textInputEvent.subKind = ON_TEXTAREA_CHANGE;
@@ -2138,16 +2138,16 @@ void SetOnTextAreaChangeWithPreviewText(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node, extraParam](const std::u16string& value, PreviewText& previewText) {
+    auto onChange = [node, extraParam](const ChangeValueInfo& info) {
         ArkUINodeEvent eventWithPreview;
         eventWithPreview.kind = TEXT_INPUT_CHANGE;
-        std::string utf8StrValue = UtfUtils::Str16DebugToStr8(value);
-        std::string utf8Str = UtfUtils::Str16DebugToStr8(previewText.value);
+        std::string utf8StrValue = UtfUtils::Str16DebugToStr8(info.value);
+        std::string utf8Str = UtfUtils::Str16DebugToStr8(info.previewText.value);
         eventWithPreview.extraParam = reinterpret_cast<intptr_t>(extraParam);
         eventWithPreview.textChangeEvent.subKind = ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT;
         eventWithPreview.textChangeEvent.nativeStringPtr = const_cast<char*>(utf8StrValue.c_str());
         eventWithPreview.textChangeEvent.extendStringPtr = const_cast<char*>(utf8Str.c_str());
-        eventWithPreview.textChangeEvent.numArgs = previewText.offset;
+        eventWithPreview.textChangeEvent.numArgs = info.previewText.offset;
         SendArkUISyncEvent(&eventWithPreview);
     };
     TextFieldModelNG::SetOnChange(frameNode, std::move(onChange));

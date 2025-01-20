@@ -85,6 +85,10 @@ struct AccessibilityParentRectInfo {
     bool isChanged = false;    // only for uiextension, true means uec transfered translate params to uiextension
 };
 
+struct AccessibilityWorkMode {
+    bool isTouchExplorationEnabled = true;
+};
+
 struct AccessibilityWindowInfo {
     int32_t left = 0;
     int32_t top = 0;
@@ -314,6 +318,12 @@ public:
     }
 
     virtual void UpdateWindowInfo(AccessibilityWindowInfo& windowInfo) {}
+
+    virtual AccessibilityWorkMode GetAccessibilityWorkMode()
+    {
+        return AccessibilityWorkMode();
+    }
+
 protected:
     int32_t treeId_ = 0;
 

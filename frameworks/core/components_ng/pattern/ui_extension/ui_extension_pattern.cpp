@@ -746,8 +746,10 @@ void UIExtensionPattern::OnAttachToFrameNode()
     host->RegisterNodeChangeListener();
     accessibilitySAObserverCallback_ = std::make_shared<UECAccessibilitySAObserverCallback>(
         WeakClaim(this), host->GetAccessibilityId());
+#ifndef ACE_UNITTEST
     accessibilityManager->RegisterAccessibilitySAObserverCallback(host->GetAccessibilityId(),
         accessibilitySAObserverCallback_);
+#endif
     UIEXT_LOGI("OnAttachToFrameNode");
 }
 
@@ -764,9 +766,11 @@ void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->UnregisterSurfacePositionChangedCallback(surfacePositionCallBackId_);
     pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayCallBackId_);
     frameNode->UnregisterNodeChangeListener();
+#ifndef ACE_UNITTEST
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
+#endif
 }
 
 void UIExtensionPattern::OnModifyDone()

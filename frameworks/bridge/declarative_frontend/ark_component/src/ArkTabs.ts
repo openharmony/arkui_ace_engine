@@ -72,6 +72,9 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
   onChange(event: (index: number) => void): TabsAttribute {
     throw new Error('Method not implemented.');
   }
+  onSelected(event: (index: number) => void): TabsAttribute {
+    throw new Error('Method not implemented.');
+  }
   onTabBarClick(event: (index: number) => void): TabsAttribute {
     throw new Error('Method not implemented.');
   }

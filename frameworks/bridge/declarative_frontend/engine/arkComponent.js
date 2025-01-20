@@ -4628,7 +4628,7 @@ class TapGestureHandler extends GestureHandler {
     if (options !== undefined) {
       this.fingers = options.fingers;
       this.count = options.count;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
   onAction(event) {
@@ -4652,7 +4652,7 @@ class LongPressGestureHandler extends GestureHandler {
       this.fingers = options.fingers;
       this.repeat = options.repeat;
       this.duration = options.duration;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4689,7 +4689,7 @@ class PanGestureHandler extends GestureHandler {
       this.fingers = options.fingers;
       this.direction = options.direction;
       this.distance = options.distance;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4731,7 +4731,7 @@ class SwipeGestureHandler extends GestureHandler {
       this.fingers = options.fingers;
       this.direction = options.direction;
       this.speed = options.speed;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4757,7 +4757,7 @@ class PinchGestureHandler extends GestureHandler {
     if (options !== undefined) {
       this.fingers = options.fingers;
       this.distance = options.distance;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4798,7 +4798,7 @@ class RotationGestureHandler extends GestureHandler {
     if (options !== undefined) {
       this.fingers = options.fingers;
       this.angle = options.angle;
-      this.limitFingerCount = options.limitFingerCount;
+      this.limitFingerCount = options.isFingerCountLimited;
     }
   }
 
@@ -4839,7 +4839,6 @@ class GestureGroupHandler extends GestureHandler {
     if (options !== undefined) {
       this.mode = options.mode;
       this.gestures = options.gestures;
-      this.limitFingerCount = options.limitFingerCount;
     }
   }
 
@@ -6170,6 +6169,21 @@ class FlingSpeedLimitModifier extends ModifierWithKey {
 }
 FlingSpeedLimitModifier.identity = Symbol('flingSpeedLimit');
 
+class BackToTopModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().scrollable.resetBackToTop(node);
+    }
+    else {
+      getUINativeModule().scrollable.setBackToTop(node, this.value);
+    }
+  }
+}
+BackToTopModifier.identity = Symbol('backToTop');
+
 class ArkScrollable extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -6204,6 +6218,10 @@ class ArkScrollable extends ArkComponent {
 
   flingSpeedLimit(value) {
     modifierWithKey(this._modifiersWithKeys, FlingSpeedLimitModifier.identity, FlingSpeedLimitModifier, value);
+    return this;
+  }
+  backToTop(value) {
+    modifierWithKey(this._modifiersWithKeys, BackToTopModifier.identity, BackToTopModifier, value);
     return this;
   }
 }
@@ -9052,6 +9070,24 @@ class RichEditorStopBackPressModifier extends ModifierWithKey {
 }
 RichEditorStopBackPressModifier.identity = Symbol('richEditorStopBackPress');
 
+class RichEditorKeyboardAppearanceModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().richEditor.resetKeyboardAppearance(node);
+    }
+    else {
+      getUINativeModule().richEditor.setKeyboardAppearance(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RichEditorKeyboardAppearanceModifier.identity = Symbol('richEditorKeyboardAppearance');
+
 class ArkRichEditorComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -9192,6 +9228,10 @@ class ArkRichEditorComponent extends ArkComponent {
   }
   stopBackPress(value) {
     modifierWithKey(this._modifiersWithKeys, RichEditorStopBackPressModifier.identity, RichEditorStopBackPressModifier, value);
+    return this;
+  }
+  keyboardAppearance(value) {
+    modifierWithKey(this._modifiersWithKeys, RichEditorKeyboardAppearanceModifier.identity, RichEditorKeyboardAppearanceModifier, value);
     return this;
   }
 }
@@ -29477,6 +29517,10 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperOnChangeModifier.identity, SwiperOnChangeModifier, value);
     return this;
   }
+  onSelected(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnSelectedModifier.identity, SwiperOnSelectedModifier, value);
+    return this;
+  }
   indicatorStyle(value) {
     throw new Error('Method not implemented.');
   }
@@ -29842,6 +29886,22 @@ class SwiperOnChangeModifier extends ModifierWithKey {
   }
 }
 SwiperOnChangeModifier.identity = Symbol('swiperOnChange');
+class SwiperOnSelectedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnSelected(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnSelected(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperOnSelectedModifier.identity = Symbol('swiperOnSelected');
 class SwiperEffectModeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
@@ -30448,6 +30508,9 @@ class ArkTabsComponent extends ArkComponent {
     return this;
   }
   onChange(event) {
+    throw new Error('Method not implemented.');
+  }
+  onSelected(event) {
     throw new Error('Method not implemented.');
   }
   onTabBarClick(event) {

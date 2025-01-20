@@ -30,6 +30,7 @@ bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(textPattern, false);
     SetUsingMouse(textPattern->IsUsingMouse());
     SetEnableHandleLevel(true);
+    SetEnableSubWindowMenu(true);
     textPattern->CalculateHandleOffsetAndShowOverlay();
     selectTextUseTopHandle = true;
     CheckEnableContainerModal();
@@ -48,6 +49,7 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetFirstHandleInfo()
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
     SetTransformPaintInfo(handleInfo, localPaintRect);
+    handleInfo.forceDraw = !CheckSwitchToMode(HandleLevelMode::OVERLAY);
     return handleInfo;
 }
 
@@ -63,6 +65,7 @@ std::optional<SelectHandleInfo> TextSelectOverlay::GetSecondHandleInfo()
     localPaintRect.SetOffset(localPaintRect.GetOffset() - GetPaintOffsetWithoutTransform());
     handleInfo.localPaintRect = localPaintRect;
     SetTransformPaintInfo(handleInfo, localPaintRect);
+    handleInfo.forceDraw = !CheckSwitchToMode(HandleLevelMode::OVERLAY);
     return handleInfo;
 }
 

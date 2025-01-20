@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scrollable/scrollable_model_ng.h"
 
+#include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 
@@ -373,5 +374,28 @@ void ScrollableModelNG::SetFriction(FrameNode* frameNode, const std::optional<do
     CHECK_NULL_VOID(pattern);
     const double invalidValue = -1.; // allow pattern to set proper default value
     pattern->SetFriction(value.value_or(invalidValue));
+}
+
+void ScrollableModelNG::SetBackToTop(bool backToTop)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetBackToTop(frameNode, backToTop);
+}
+
+void ScrollableModelNG::SetBackToTop(FrameNode* frameNode, bool backToTop)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBackToTop(backToTop);
+}
+
+bool ScrollableModelNG::GetBackToTop(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->GetBackToTop();
 }
 } // namespace OHOS::Ace::NG

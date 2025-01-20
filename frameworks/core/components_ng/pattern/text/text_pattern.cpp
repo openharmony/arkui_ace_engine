@@ -115,6 +115,7 @@ void TextPattern::OnAttachToFrameNode()
     InitSurfaceChangedCallback();
     InitSurfacePositionChangedCallback();
     pipeline->AddWindowStateChangedCallback(host->GetId());
+    pipeline->AddWindowSizeChangeCallback(host->GetId());
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto theme = pipeline->GetTheme<TextTheme>();
@@ -145,6 +146,7 @@ void TextPattern::OnDetachFromFrameNode(FrameNode* node)
     pipeline->RemoveOnAreaChangeNode(node->GetId());
     pipeline->RemoveWindowStateChangedCallback(node->GetId());
     pipeline->RemoveVisibleAreaChangeNode(node->GetId());
+    pipeline->RemoveWindowSizeChangeCallback(node->GetId());
 }
 
 void TextPattern::CloseSelectOverlay()
@@ -5189,5 +5191,11 @@ std::string TextPattern::GetSelectedBackgroundColor() const
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, "");
     return textLayoutProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor()).ColorToString();
+}
+
+void TextPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
+{
+    CHECK_NULL_VOID(selectOverlay_);
+    selectOverlay_->UpdateMenuOnWindowSizeChanged(type);
 }
 } // namespace OHOS::Ace::NG

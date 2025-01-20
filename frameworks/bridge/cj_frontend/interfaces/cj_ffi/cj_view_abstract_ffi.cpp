@@ -19,6 +19,7 @@
 
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_pixel_unit_convert_ffi.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_progressmask_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/matrix4/cj_matrix4_ffi.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -43,6 +44,9 @@ constexpr int SHEET_HEIGHT_LARGE = 1;
 constexpr int SHEET_HEIGHT_FITCONTENT = 2;
 constexpr uint32_t COLOR_ALPHA_OFFSET = 24;
 constexpr uint32_t COLOR_ALPHA_VALUE = 0xFF000000;
+constexpr Dimension ARROW_ZERO_PERCENT_VALUE = 0.0_pct;
+constexpr Dimension ARROW_HALF_PERCENT_VALUE = 0.5_pct;
+constexpr Dimension ARROW_FULL_PERCENT_VALUE = 1.0_pct;
 constexpr float DEFAULT_SCALE_LIGHT = 0.9f;
 constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 
@@ -57,6 +61,7 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 const std::vector<BorderStyle> BORDER_STYLES = { BorderStyle::SOLID, BorderStyle::DASHED, BorderStyle::DOTTED };
 const std::vector<ImageRepeat> IMAGES_REPEATS = { ImageRepeat::NO_REPEAT, ImageRepeat::REPEAT_X, ImageRepeat::REPEAT_Y,
     ImageRepeat::REPEAT };
+const std::vector<FontStyle> FONT_STYLES = {FontStyle::NORMAL, FontStyle::ITALIC};
 const std::vector<BackgroundImageSizeType> IMAGE_SIZES = { BackgroundImageSizeType::CONTAIN,
     BackgroundImageSizeType::COVER, BackgroundImageSizeType::AUTO, BackgroundImageSizeType::FILL };
 const std::vector<TextDirection> TEXT_DIRECTIONS = { TextDirection::LTR, TextDirection::RTL, TextDirection::AUTO };
@@ -145,19 +150,86 @@ void UpdateBackgroundImagePosition(const Align& align, BackgroundImagePosition& 
     }
 }
 
+void SetPopupParams(CJBindPopupParams bindPopupParams, const RefPtr<PopupParam>& popupParam)
+{
+    popupParam->SetMessage(bindPopupParams.message);
+    popupParam->SetPlacement(bindPopupParams.placementOnTop ? Placement::TOP : Placement::BOTTOM);
+    popupParam->SetPlacement(static_cast<Placement>(bindPopupParams.placement));
+    popupParam->SetShowInSubWindow(bindPopupParams.showInSubWindow);
+    popupParam->SetTextColor(Color(bindPopupParams.textColor));
+    popupParam->SetFontWeight(ConvertStrToFontWeight(bindPopupParams.fontWeight));
+    CalcDimension fontSizeDim(bindPopupParams.fontSize, static_cast<DimensionUnit>(bindPopupParams.fontSizeUnit));
+    popupParam->SetFontSize(fontSizeDim);
+    if (bindPopupParams.fontStyle < 0 ||  bindPopupParams.fontStyle > static_cast<int32_t>(FONT_STYLES.size())) {
+        return;
+    }
+    popupParam->SetFontStyle(FONT_STYLES[bindPopupParams.fontStyle]);
+    CalcDimension targetSpaceDim(bindPopupParams.targetSpace,
+        static_cast<DimensionUnit>(bindPopupParams.targetSpaceUnit));
+    CalcDimension arrowOffsetDim(bindPopupParams.arrowOffset,
+        static_cast<DimensionUnit>(bindPopupParams.arrowOffsetUnit));
+    CalcDimension widthDim(bindPopupParams.width, static_cast<DimensionUnit>(bindPopupParams.widthUnit));
+    CalcDimension arrowWidthDim(bindPopupParams.arrowWidth, static_cast<DimensionUnit>(bindPopupParams.arrowWidthUnit));
+    CalcDimension arrowHeightDim(bindPopupParams.arrowHeight,
+        static_cast<DimensionUnit>(bindPopupParams.arrowHeightUnit));
+    CalcDimension radiusDim(bindPopupParams.radius, static_cast<DimensionUnit>(bindPopupParams.radiusUnit));
+    Offset offset(bindPopupParams.offsetX, bindPopupParams.offsetY);
+    popupParam->SetArrowOffset(arrowOffsetDim);
+    popupParam->SetTargetSpace(targetSpaceDim);
+    popupParam->SetBackgroundColor(Color(bindPopupParams.popupColor));
+    popupParam->SetMaskColor(Color(bindPopupParams.mask));
+    popupParam->SetHasAction(!bindPopupParams.autoCancel);
+    if (bindPopupParams.width > 0) {
+        popupParam->SetChildWidth(widthDim);
+    }
+    if (bindPopupParams.radius > 0) {
+        popupParam->SetRadius(radiusDim);
+    }
+    popupParam->SetArrowWidth(arrowWidthDim);
+    popupParam->SetArrowHeight(arrowHeightDim);
+    popupParam->SetShadow(Shadow::CreateShadow(static_cast<ShadowStyle>(bindPopupParams.shadow)));
+    popupParam->SetTargetOffset(offset);
+    popupParam->SetFollowTransformOfTarget(bindPopupParams.followTransformOfTarget);
+    if (std::strcmp(bindPopupParams.arrowPointPosition, "Start") == 0) {
+        popupParam->SetArrowOffset(ARROW_ZERO_PERCENT_VALUE);
+    }
+    if (std::strcmp(bindPopupParams.arrowPointPosition, "Center") == 0) {
+        popupParam->SetArrowOffset(ARROW_HALF_PERCENT_VALUE);
+    }
+    if (std::strcmp(bindPopupParams.arrowPointPosition, "End") == 0) {
+        popupParam->SetArrowOffset(ARROW_FULL_PERCENT_VALUE);
+    }
+}
+
 void DealBindPopupParams(bool isShow, const CJBindPopupParams& bindPopupParams,
     const std::function<void(bool)>& onStateChangeFunc, const std::function<void()>& primaryActionFunc,
     const std::function<void()>& secondaryActionFunc)
 {
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetIsShow(isShow);
-    popupParam->SetMessage(bindPopupParams.message);
-    popupParam->SetPlacement(bindPopupParams.placementOnTop ? Placement::TOP : Placement::BOTTOM);
+    SetPopupParams(bindPopupParams, popupParam);
     auto onStateChangeCallback = [onStateChangeFunc](const std::string& param) {
         auto paramData = JsonUtil::ParseJsonString(param);
         onStateChangeFunc(paramData->GetBool("isVisible"));
     };
     popupParam->SetOnStateChange(onStateChangeCallback);
+    if (bindPopupParams.onWillDismiss.hasValue) {
+        std::function<void(const int32_t& info)> onWillDismissFunc =
+            [nativeFunc = CJLambda::Create(bindPopupParams.onWillDismiss.value)]
+            (const int32_t& info) {nativeFunc(info);};
+        popupParam->SetOnWillDismiss(onWillDismissFunc);
+    }
+    if (bindPopupParams.transition.hasValue) {
+        auto nativeTransitionEffect = FFIData::GetData<NativeTransitionEffect>(bindPopupParams.transition.value);
+        if (nativeTransitionEffect) {
+            popupParam->SetHasTransition(true);
+            popupParam->SetTransitionEffects(nativeTransitionEffect->effect);
+        }
+    }
+    if (bindPopupParams.backgroundBlurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
+        bindPopupParams.backgroundBlurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+        popupParam->SetBlurStyle(static_cast<BlurStyle>(bindPopupParams.backgroundBlurStyle));
+    }
     std::string primaryString = bindPopupParams.primaryValue;
     if (!primaryString.empty()) {
         ButtonProperties propertiesPrimary;
@@ -169,7 +241,6 @@ void DealBindPopupParams(bool isShow, const CJBindPopupParams& bindPopupParams,
         propertiesPrimary.showButton = true;
         popupParam->SetPrimaryButtonProperties(propertiesPrimary);
     }
-
     std::string secondaryString = bindPopupParams.secondaryValue;
     if (!secondaryString.empty()) {
         ButtonProperties propertiesSecondary;
@@ -218,6 +289,13 @@ void ReplaceHolder(std::string& originStr, const std::string& param)
 } // namespace
 
 extern "C" {
+void FfiOHOSAceFrameworkPopupDismiss()
+{
+#ifndef ARKUI_WEARABLE
+    ViewAbstractModel::GetInstance()->DismissDialog();
+#endif
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetWidth(double width, int32_t unit)
 {
     Dimension value(width, static_cast<DimensionUnit>(unit));
@@ -944,8 +1022,8 @@ void FfiOHOSAceFrameworkViewAbstractSetColorBlend(uint32_t color)
     ViewAbstractModel::GetInstance()->SetColorBlend(Color(color));
 }
 
-void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(double radius, int32_t direction,
-    VectorFloat64Ptr blurVec, VectorFloat64Ptr positionVec)
+void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(
+    double radius, int32_t direction, VectorFloat64Ptr blurVec, VectorFloat64Ptr positionVec)
 {
     double blurRadius = radius;
     std::vector<std::pair<float, float>> fractionStops;
@@ -955,7 +1033,7 @@ void FfiOHOSAceFrameworkViewAbstractSetLinearGradientBlur(double radius, int32_t
         return;
     }
     float tmpPos = -1.0f;
-    for (size_t i = 0; i <blurVector.size(); i++) {
+    for (size_t i = 0; i < blurVector.size(); i++) {
         std::pair<float, float> fractionStop;
         fractionStop.first = static_cast<float>(std::clamp(blurVector[i], 0.0, 1.0));
         fractionStop.second = static_cast<float>(std::clamp(positionVector[i], 0.0, 1.0));
@@ -1089,7 +1167,7 @@ void FfiOHOSAceFrameworkViewAbstractSetBlendMode(int32_t value, int32_t type)
     constexpr int backwardCompatSourceInNumberOffscreen = 2000;
     constexpr int backwardCompatDestinationInNumberOffscreen = 3000;
     constexpr int backwardCompatMagicNumberSrcIn = 5000;
-   
+
     if (value >= 0 && value < static_cast<int>(BlendMode::MAX)) {
         blendMode = static_cast<BlendMode>(value);
     } else if (value == backwardCompatMagicNumberOffscreen) {
@@ -1168,11 +1246,11 @@ void FfiOHOSAceFrameworkViewAbstractSetOutlineStyle(int32_t style)
     ViewAbstractModel::GetInstance()->SetOuterBorderStyle(BORDER_STYLES[style]);
 }
 
-void FfiOHOSAceFrameworkViewAbstractSetOutlineStyles(int32_t styleTop, int32_t styleRight,
-    int32_t styleBottom, int32_t styleLeft)
+void FfiOHOSAceFrameworkViewAbstractSetOutlineStyles(
+    int32_t styleTop, int32_t styleRight, int32_t styleBottom, int32_t styleLeft)
 {
-    ViewAbstractModel::GetInstance()->SetOuterBorderStyle(BORDER_STYLES[styleLeft],
-        BORDER_STYLES[styleRight], BORDER_STYLES[styleTop], BORDER_STYLES[styleBottom]);
+    ViewAbstractModel::GetInstance()->SetOuterBorderStyle(
+        BORDER_STYLES[styleLeft], BORDER_STYLES[styleRight], BORDER_STYLES[styleTop], BORDER_STYLES[styleBottom]);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetOutlineWidth(double width, int32_t unit)
@@ -1214,11 +1292,11 @@ void FfiOHOSAceFrameworkViewAbstractSetOutlineColor(uint32_t value)
     ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color(value));
 }
 
-void FfiOHOSAceFrameworkViewAbstractSetOutlineColors(uint32_t colorTop, uint32_t colorRight,
-    uint32_t colorBottom, uint32_t colorLeft)
+void FfiOHOSAceFrameworkViewAbstractSetOutlineColors(
+    uint32_t colorTop, uint32_t colorRight, uint32_t colorBottom, uint32_t colorLeft)
 {
-    ViewAbstractModel::GetInstance()->SetOuterBorderColor(Color(colorLeft), Color(colorRight),
-        Color(colorTop), Color(colorBottom));
+    ViewAbstractModel::GetInstance()->SetOuterBorderColor(
+        Color(colorLeft), Color(colorRight), Color(colorTop), Color(colorBottom));
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetOutlineRadius(double radius, int32_t unit)
@@ -1306,6 +1384,180 @@ void FfiOHOSAceFrameworkViewAbstractSetClipByShape(int64_t shapeId)
     } else {
         LOGI("set clip error, Cannot get NativeShape by id: %{public}" PRId64, shapeId);
     }
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetBackground(void (*builder)(), int32_t align)
+{
+    auto buildFunc = CJLambda::Create(builder);
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto buildCallback = [func = std::move(buildFunc), node = frameNode]() {
+        ACE_SCORING_EVENT("BindBackground");
+        PipelineContext::SetCallBackNode(node);
+        func();
+    };
+
+    if (!Utils::CheckParamsValid(align, ALIGNMENT_LIST.size())) {
+        LOGE("set align error, invalid value for alignment");
+        return;
+    }
+
+    Alignment alignmentValue = ALIGNMENT_LIST[align];
+    ViewAbstractModel::GetInstance()->BindBackground(std::move(buildCallback), alignmentValue);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetBackgroundBlurStyleOption(
+    int32_t blurStyle, CJBackgroundBlurStyleOptions options)
+{
+    BlurStyleOption styleOption;
+
+    // Set blur style
+    if (blurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
+        blurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+        styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+    }
+
+    // Set color mode
+    auto colorMode = options.colorMode;
+    if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
+        colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
+        styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
+    }
+
+    // Set adaptive color
+    auto adaptiveColor = options.adaptiveColor;
+    if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+        adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+        styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+    }
+
+    // Set policy
+    auto policy = options.policy;
+    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
+        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+        styleOption.policy = static_cast<BlurStyleActivePolicy>(policy);
+    }
+
+    // Set inactive color
+    styleOption.inactiveColor = Color(options.inactiveColor);
+    styleOption.isValidColor = true;
+
+    // Set scale
+    styleOption.scale = std::clamp(styleOption.scale, 0.0, 1.0);
+
+    BlurOption blurOption;
+    int vectorSize = 2;
+    std::vector<float> greyVec(vectorSize);
+    greyVec[0] = options.blurOptions.grayscale[0];
+    greyVec[1] = options.blurOptions.grayscale[1];
+    blurOption.grayscale = greyVec;
+    styleOption.blurOption = blurOption;
+    ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetBackgroundBlurStyle(int32_t blurStyle)
+{
+    BlurStyleOption styleOption;
+
+    // Set blur style
+    if (blurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
+        blurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+        styleOption.blurStyle = static_cast<BlurStyle>(blurStyle);
+    }
+    ViewAbstractModel::GetInstance()->SetBackgroundBlurStyle(styleOption);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetBackgroundImageResizable(CJEdge slice)
+{
+    ImageResizableSlice sliceResult;
+
+    Dimension leftDim(slice.left, static_cast<DimensionUnit>(slice.leftUnit));
+    Dimension rightDim(slice.right, static_cast<DimensionUnit>(slice.rightUnit));
+    Dimension topDim(slice.top, static_cast<DimensionUnit>(slice.topUnit));
+    Dimension bottomDim(slice.bottom, static_cast<DimensionUnit>(slice.bottomUnit));
+
+    if (LessNotEqual(leftDim.Value(), 0.0)) {
+        leftDim.SetValue(0.0);
+    }
+    if (LessNotEqual(rightDim.Value(), 0.0)) {
+        rightDim.SetValue(0.0);
+    }
+    if (LessNotEqual(topDim.Value(), 0.0)) {
+        topDim.SetValue(0.0);
+    }
+    if (LessNotEqual(bottomDim.Value(), 0.0)) {
+        bottomDim.SetValue(0.0);
+    }
+
+    sliceResult.left = leftDim;
+    sliceResult.right = rightDim;
+    sliceResult.top = topDim;
+    sliceResult.bottom = bottomDim;
+    ViewAbstractModel::GetInstance()->SetBackgroundImageResizableSlice(sliceResult);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetBackgroundBrightness(double rate, double lightUpDegree)
+{
+    if (rate < 0.0) {
+        rate = 0.0;
+    }
+    lightUpDegree = std::clamp(lightUpDegree, -1.0, 1.0);
+    ViewAbstractModel::GetInstance()->SetDynamicLightUp(rate, lightUpDegree);
+}
+void FfiOHOSAceFrameworkViewAbstractSetBackgroundEffect(CJBackgroundEffectOptions value)
+{
+    EffectOption option;
+
+    // Set radius
+    CalcDimension radiusDimension(value.radius, DimensionUnit::VP);
+    option.radius = radiusDimension;
+
+    // Set saturation and brightness
+    auto saturation = value.saturation;
+    auto brightness = value.brightness;
+    option.saturation = (saturation > 0.0f || NearZero(saturation)) ? saturation : 1.0f;
+    option.brightness = (brightness > 0.0f || NearZero(brightness)) ? brightness : 1.0f;
+
+    // Set color
+    option.color = Color(value.color);
+
+    // Set adaptive color
+    auto adaptiveColor = value.adaptiveColor;
+    if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+        adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+        option.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+    }
+
+    // Set policy
+    auto policy = value.policy;
+    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
+        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+        option.policy = static_cast<BlurStyleActivePolicy>(policy);
+    }
+
+    // Set inactive color
+    option.inactiveColor = Color(value.inactiveColor);
+    option.isValidColor = true;
+
+    // Set blur options
+    BlurOption blurOption;
+    int vectorSize = 2;
+    std::vector<float> greyVec(vectorSize);
+    greyVec[0] = value.blurOptions.grayscale[0];
+    greyVec[1] = value.blurOptions.grayscale[1];
+    blurOption.grayscale = greyVec;
+    option.blurOption = blurOption;
+
+    ViewAbstractModel::GetInstance()->SetBackgroundEffect(option);
+}
+
+void FfiOHOSAceFrameworkViewAbstractSetMaskByProgressMask(int64_t progressId)
+{
+    auto nativeMask = FFIData::GetData<NativeProgressMask>(progressId);
+    if (nativeMask == nullptr) {
+        LOGI("set mask error, Cannot get NativeProgressMask by id: %{public}" PRId64, progressId);
+        return;
+    }
+    ViewAbstractModel::GetInstance()->SetProgressMask(nativeMask->GetProgressMask());
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetMaskByShape(int64_t shapeId)
@@ -1462,24 +1714,83 @@ void FfiOHOSAceFrameworkViewAbstractKeyShortcutByChar(
     FfiOHOSAceFrameworkViewAbstractKeyShortcut(keyValue, keysArray, size, callback);
 }
 
-void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
+void SetCustomPopupParams(CJBindCustomPopup& value, const RefPtr<PopupParam>& popupParam)
 {
-    std::function<void(bool)> onStateChangeFunc = (reinterpret_cast<int64_t>(value.onStateChange) == 0)
-                                                      ? ([](bool) -> void {})
-                                                      : CJLambda::Create(value.onStateChange);
-    auto popupParam = AceType::MakeRefPtr<PopupParam>();
-    popupParam->SetIsShow(value.isShow);
-    popupParam->SetUseCustomComponent(true);
     popupParam->SetPlacement(static_cast<Placement>(value.placement));
     popupParam->SetMaskColor(Color(value.maskColor));
     popupParam->SetBackgroundColor(Color(value.backgroundColor));
     popupParam->SetEnableArrow(value.enableArrow);
     popupParam->SetHasAction(!value.autoCancel);
+    popupParam->SetShowInSubWindow(value.showInSubWindow);
+    CalcDimension targetSpaceDim(value.targetSpace,
+        static_cast<DimensionUnit>(value.targetSpaceUnit));
+    CalcDimension arrowOffsetDim(value.arrowOffset,
+        static_cast<DimensionUnit>(value.arrowOffsetUnit));
+    CalcDimension widthDim(value.width, static_cast<DimensionUnit>(value.widthUnit));
+    CalcDimension arrowWidthDim(value.arrowWidth, static_cast<DimensionUnit>(value.arrowWidthUnit));
+    CalcDimension arrowHeightDim(value.arrowHeight, static_cast<DimensionUnit>(value.arrowHeightUnit));
+    CalcDimension radiusDim(value.radius, static_cast<DimensionUnit>(value.radiusUnit));
+    Offset offset(value.offsetX, value.offsetY);
+    popupParam->SetArrowOffset(arrowOffsetDim);
+    popupParam->SetTargetSpace(targetSpaceDim);
+    popupParam->SetBackgroundColor(Color(value.popupColor));
+    popupParam->SetMaskColor(Color(value.maskColor));
+    popupParam->SetMaskColor(Color(value.mask));
+    popupParam->SetArrowWidth(arrowWidthDim);
+    popupParam->SetArrowHeight(arrowHeightDim);
+    if (value.width > 0) {
+        popupParam->SetChildWidth(widthDim);
+    }
+    if (value.radius > 0) {
+        popupParam->SetRadius(radiusDim);
+    }
+    popupParam->SetShadow(Shadow::CreateShadow(static_cast<ShadowStyle>(value.shadow)));
+    popupParam->SetTargetOffset(offset);
+    popupParam->SetFocusable(value.focusable);
+    popupParam->SetFollowTransformOfTarget(value.followTransformOfTarget);
+    if (std::strcmp(value.arrowPointPosition, "Start") == 0) {
+        popupParam->SetArrowOffset(ARROW_ZERO_PERCENT_VALUE);
+    }
+    if (std::strcmp(value.arrowPointPosition, "Center") == 0) {
+        popupParam->SetArrowOffset(ARROW_HALF_PERCENT_VALUE);
+    }
+    if (std::strcmp(value.arrowPointPosition, "End") == 0) {
+        popupParam->SetArrowOffset(ARROW_FULL_PERCENT_VALUE);
+    }
+    if (value.backgroundBlurStyle >= static_cast<int32_t>(BlurStyle::NO_MATERIAL) &&
+        value.backgroundBlurStyle <= static_cast<int32_t>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+        popupParam->SetBlurStyle(static_cast<BlurStyle>(value.backgroundBlurStyle));
+    }
+}
+
+void FfiOHOSAceFrameworkViewAbstractBindCustomPopup(CJBindCustomPopup value)
+{
+    std::function<void(bool)> onStateChangeFunc = (reinterpret_cast<int64_t>(value.onStateChange) == 0)
+                                                      ? ([](bool) -> void {})
+                                                      : CJLambda::Create(value.onStateChange);
     auto onStateChangeCallback = [onStateChangeFunc](const std::string& param) {
         auto paramData = JsonUtil::ParseJsonString(param);
         onStateChangeFunc(paramData->GetBool("isVisible"));
     };
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetIsShow(value.isShow);
+    popupParam->SetUseCustomComponent(true);
     popupParam->SetOnStateChange(onStateChangeCallback);
+    SetCustomPopupParams(value, popupParam);
+    if (value.onWillDismiss.hasValue) {
+        std::function<void(const int32_t& info)> onWillDismissFunc =
+            [nativeFunc = CJLambda::Create(value.onWillDismiss.value)]
+            (const int32_t& info) {nativeFunc(info);};
+        
+        popupParam->SetOnWillDismiss(onWillDismissFunc);
+    }
+    if (value.transition.hasValue) {
+        auto nativeTransitionEffect = FFIData::GetData<NativeTransitionEffect>(value.transition.value);
+        if (nativeTransitionEffect) {
+            popupParam->SetHasTransition(true);
+            popupParam->SetTransitionEffects(nativeTransitionEffect->effect);
+        }
+    }
     if (popupParam->IsShow()) {
         auto builderFunc = CJLambda::Create(value.builder);
         RefPtr<AceType> customNode;
@@ -1821,20 +2132,20 @@ void ParseSheetCallback(CJSheetOptions options, std::function<void()>& onAppear,
         sheetSpringBack = CJLambda::Create(options.onWillSpringBackWhenDismiss.value);
     }
     if (options.onHeightDidChange.hasValue) {
-        onHeightDidChange =
-            [lambda = CJLambda::Create(options.onHeightDidChange.value)](const float value) { lambda(value); };
+        onHeightDidChange = [lambda = CJLambda::Create(options.onHeightDidChange.value)](
+                                const float value) { lambda(value); };
     }
     if (options.onDetentsDidChange.hasValue) {
-        onDetentsDidChange =
-            [lambda = CJLambda::Create(options.onDetentsDidChange.value)](const float value) { lambda(value); };
+        onDetentsDidChange = [lambda = CJLambda::Create(options.onDetentsDidChange.value)](
+                                 const float value) { lambda(value); };
     }
     if (options.onWidthDidChange.hasValue) {
-        onWidthDidChange =
-            [lambda = CJLambda::Create(options.onWidthDidChange.value)](const float value) { lambda(value); };
+        onWidthDidChange = [lambda = CJLambda::Create(options.onWidthDidChange.value)](
+                               const float value) { lambda(value); };
     }
     if (options.onTypeDidChange.hasValue) {
-        onTypeDidChange =
-            [lambda = CJLambda::Create(options.onTypeDidChange.value)](const float value) { lambda(value); };
+        onTypeDidChange = [lambda = CJLambda::Create(options.onTypeDidChange.value)](
+                              const float value) { lambda(value); };
     }
 }
 
@@ -2286,6 +2597,42 @@ VectorStringHandle FFIGetResourceVectorString(NativeResourceObject obj)
         LOGE("Parse string array failed.");
     }
     return result;
+}
+
+void FFIOHOSAceFrameworkSetCursor(int32_t pointerStyle)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (!pipelineContext) {
+        LOGE("pipeline context is non-valid");
+        return;
+    }
+    if (!pipelineContext->GetTaskExecutor()) {
+        LOGE("TaskExecutor is non-valid");
+        return;
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext, pointerStyle]() { pipelineContext->SetCursor(pointerStyle); }, TaskExecutor::TaskType::UI,
+        "ArkUICjSetCursor");
+}
+
+void FFIOHOSAceFrameworkRestoreDefault()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (!pipelineContext) {
+        LOGE("pipeline context is non-valid");
+        return;
+    }
+    if (!pipelineContext->GetTaskExecutor()) {
+        LOGE("TaskExecutor is non-valid");
+        return;
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask([pipelineContext]() { pipelineContext->RestoreDefault(); },
+        TaskExecutor::TaskType::UI, "ArkUICjRestoreDefault");
+}
+
+void FFIOHOSAceFrameworkMonopolizeEvents(bool monopolize)
+{
+    ViewAbstractModel::GetInstance()->SetMonopolizeEvents(monopolize);
 }
 
 void FfiOHOSAceFrameworkViewAbstractSetDraggable(bool value)

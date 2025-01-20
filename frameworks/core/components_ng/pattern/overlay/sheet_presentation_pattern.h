@@ -690,6 +690,7 @@ public:
     void RecoverHalfFoldOrAvoidStatus();
     bool UpdateAccessibilityDetents(float height);
     void CalculateSheetRadius(BorderRadiusProperty& sheetRadius);
+
     void UpdateSheetPopupInfo(const SheetPopupInfo& sheetPopupInfo)
     {
         sheetPopupInfo_ = sheetPopupInfo;
@@ -787,7 +788,7 @@ private:
     std::string DrawClipPathTop(const SizeF&, const BorderRadiusProperty&);
     std::string DrawClipPathLeft(const SizeF&, const BorderRadiusProperty&);
     std::string DrawClipPathRight(const SizeF&, const BorderRadiusProperty&);
-
+    
     uint32_t broadcastPreDetentsIndex_ = 0;
     SheetAccessibilityDetents sheetDetents_ = SheetAccessibilityDetents::HIGH;
 

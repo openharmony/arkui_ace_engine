@@ -252,6 +252,7 @@ void DragDropInitiatingStateLifting::SetPixelMap()
     // create imageNode
     auto imageNode = DragAnimationHelper::CreateImageNode(pixelMap);
     CHECK_NULL_VOID(imageNode);
+    imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
     // create columnNode
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));

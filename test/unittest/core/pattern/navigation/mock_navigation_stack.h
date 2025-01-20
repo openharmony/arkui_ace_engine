@@ -187,6 +187,8 @@ public:
 
     std::vector<int32_t> GetAllPathIndex() override;
 
+    void SetIsEntryByIndex(int32_t index, bool isEntry) override;
+
     // ============================ operation above is for mock NavPathStack in arkTS ============================
 private:
     int8_t lifecycleIndex_ = 0;
@@ -197,6 +199,7 @@ private:
     MockReplace *mockReplace_ = new MockReplace();
     std::vector<MockNavPathInfo> mockPathArray_;
     std::vector<MockNavPathInfo> mockPopArray_;
+    std::map<int32_t, bool> mockIsEntryMap_;
 };
 } // namespace NG
 #endif

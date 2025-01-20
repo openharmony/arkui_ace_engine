@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,6 +29,7 @@ ace_unittest("navigation_test_ng") {
     "navigation_focus_test.cpp",
     "navigation_layout_test_ng.cpp",
     "navigation_lifecycle_test_ng.cpp",
+    "navigation_manager_test_ng.cpp",
     "navigation_model_test_ng.cpp",
     "navigation_pattern_test_ng.cpp",
     "navigation_pattern_test_three_ng.cpp",

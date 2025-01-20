@@ -152,7 +152,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest007, TestSize.Level1)
     CreateWaterFlowItems();
     CreateDone();
     pattern_->UpdateStartIndex(8);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 3)->IsActive());
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 4)->IsActive());
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 5)->IsActive());
@@ -178,7 +178,7 @@ HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset003, TestSize.Level1)
     CreateDone();
     pattern_->SetAnimateCanOverScroll(true);
     pattern_->UpdateCurrentOffset(10000, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->FirstIdx(), 0);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 0);
 
@@ -189,7 +189,7 @@ HWTEST_F(WaterFlowTestNg, UpdateCurrentOffset003, TestSize.Level1)
      */
     pattern_->SetAnimateCanOverScroll(true);
     pattern_->UpdateCurrentOffset(-99999, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->FirstIdx(), 19);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 19);
 }
@@ -244,7 +244,7 @@ HWTEST_F(WaterFlowTestNg, OnWillScrollAndOnDidScroll001, TestSize.Level1)
      * @tc.expected: Trigger onWillScroll and onDidScroll with SCROLL state
      */
     pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnWillScrollCallBack);
     EXPECT_TRUE(isOnDidScrollCallBack);
@@ -306,7 +306,7 @@ HWTEST_F(WaterFlowTestNg, OnWillScrollAndOnDidScroll002, TestSize.Level1)
      * @tc.expected: Trigger onScroll with SCROLL state
      */
     pattern_->ScrollTo(ITEM_MAIN_SIZE * 5);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(isOnScrollCallBack);
     EXPECT_TRUE(isOnWillScrollCallBack);
     EXPECT_TRUE(isOnDidScrollCallBack);
@@ -340,7 +340,7 @@ HWTEST_F(WaterFlowTestNg, ModifyItem002, TestSize.Level1)
     auto child = GetChildFrameNode(frameNode_, 49);
     child->layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(300.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info->startIndex_, 43);
     EXPECT_EQ(GetChildY(frameNode_, 45), -50.0f);
     EXPECT_EQ(GetChildHeight(frameNode_, 49), 300.0f);
@@ -505,7 +505,7 @@ HWTEST_F(WaterFlowTestNg, EstimateTotalHeight001, TestSize.Level1)
     model.SetColumnsTemplate("1fr 1fr");
     CreateWaterFlowItems(TOTAL_LINE_NUMBER * 4);
     CreateDone();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto info = AceType::DynamicCast<WaterFlowLayoutInfo>(pattern_->layoutInfo_);
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 10);
@@ -517,7 +517,7 @@ HWTEST_F(WaterFlowTestNg, EstimateTotalHeight001, TestSize.Level1)
     EXPECT_EQ(info->EstimateTotalHeight(), info->GetMaxMainHeight() / childCount * info->childrenCount_);
 
     pattern_->UpdateCurrentOffset(-5000.f, SCROLL_FROM_UPDATE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info->startIndex_, 31);
     EXPECT_EQ(info->endIndex_, TOTAL_LINE_NUMBER * 4 - 1);
     EXPECT_EQ(info->EstimateTotalHeight(), info->maxHeight_);
@@ -623,7 +623,7 @@ HWTEST_F(WaterFlowTestNg, Cache002, TestSize.Level1)
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     EXPECT_TRUE(GetChildFrameNode(frameNode_, 40));
     EXPECT_EQ(GetChildWidth(frameNode_, 40), (WATER_FLOW_WIDTH - 10.0f) / 2.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 40), 850.0f);
     EXPECT_EQ(GetChildY(frameNode_, 26), -320.0f);
 
@@ -635,7 +635,7 @@ HWTEST_F(WaterFlowTestNg, Cache002, TestSize.Level1)
     PipelineContext::GetCurrentContext()->OnIdle(INT64_MAX);
     ASSERT_TRUE(GetChildFrameNode(frameNode_, 22));
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildY(frameNode_, 22), -340.0f);
     EXPECT_FALSE(GetChildFrameNode(frameNode_, 22)->IsActive());
 }
@@ -665,17 +665,17 @@ HWTEST_F(WaterFlowTestNg, Refresh002, TestSize.Level1)
     scrollable->HandleTouchDown();
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -31.505754);
 
     EXPECT_TRUE(pattern_->OutBoundaryCallback());
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -60.800022);
 
     MockAnimationManager::GetInstance().TickByVelocity(-100.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -160.80002);
     // swipe in the opposite direction
     info.SetMainVelocity(1200.f);
@@ -683,19 +683,19 @@ HWTEST_F(WaterFlowTestNg, Refresh002, TestSize.Level1)
     scrollable->HandleTouchDown();
     scrollable->HandleDragStart(info);
     scrollable->HandleDragUpdate(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -128.9174);
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0.0f);
     scrollable->HandleTouchUp();
     scrollable->HandleDragEnd(info);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FLOAT_EQ(GetChildY(frameNode_, 0), -96.869041);
     MockAnimationManager::GetInstance().TickByVelocity(1000.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(NearZero(GetChildY(frameNode_, 0)));
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 800);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(NearZero(GetChildY(frameNode_, 0)));
     // can't enter the refreshing status when refresh updates scroll offset by animation source
     EXPECT_EQ(frameNode_->GetRenderContext()->GetTransformTranslate()->y.Value(), 0);
@@ -722,7 +722,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest016, TestSize.Level1)
     pattern_->UpdateCurrentOffset(-10.0f, SCROLL_FROM_UPDATE);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), -510.0f);
     EXPECT_EQ(pattern_->GetPrevOffset(), -500.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), -510.0f);
     EXPECT_EQ(pattern_->GetPrevOffset(), -510.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 7);
@@ -733,7 +733,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest016, TestSize.Level1)
     pattern_->UpdateCurrentOffset(20.0f, SCROLL_FROM_UPDATE);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), -505.0f);
     EXPECT_EQ(pattern_->GetPrevOffset(), -510.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), -505.0f);
     EXPECT_EQ(pattern_->GetPrevOffset(), -505.0f);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 7);
@@ -790,7 +790,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowTest018, TestSize.Level1)
     frameNode_->RemoveChildAtIndex(20);
     frameNode_->ChildrenUpdatedFrom(20);
     pattern_->MarkDirtyNodeSelf();
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info->startIndex_, 7);
     EXPECT_EQ(info->endIndex_, 17);
     EXPECT_EQ(info->items_[0][0].size() + info->items_[0][1].size(), 20);
@@ -827,7 +827,7 @@ HWTEST_F(WaterFlowTestNg, ShowCache003, TestSize.Level1)
     EXPECT_EQ(GetChildY(frameNode_, 0), -300.0f);
 
     layoutProperty_->UpdateColumnsTemplate("1fr");
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     const auto info = pattern_->layoutInfo_;
     EXPECT_EQ(info->startIndex_, 1);
     EXPECT_EQ(info->endIndex_, 6);

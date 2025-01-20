@@ -104,6 +104,12 @@ bool MagnifierController::UpdateMagnifierOffset()
     CHECK_NULL_RETURN(UpdateMagnifierOffsetX(magnifierPaintOffset, magnifierOffset, paintOffset), false);
     CHECK_NULL_RETURN(UpdateMagnifierOffsetY(magnifierPaintOffset, magnifierOffset, paintOffset), false);
     auto geometryNode = magnifierFrameNode_->GetGeometryNode();
+    if (localOffsetChanged_ && NearEqual(params_.offsetX_, magnifierOffset.x) &&
+        NearEqual(params_.offsetY_, magnifierOffset.y)) {
+        // change x one pixel so magnifier can refresh
+        magnifierPaintOffset.SetX(magnifierPaintOffset.GetX() - 1.0f);
+        magnifierOffset.x += 1.0f;
+    }
     geometryNode->SetFrameOffset(magnifierPaintOffset);
     childContext->UpdatePosition(
         OffsetT<Dimension>(Dimension(magnifierPaintOffset.GetX()), Dimension(magnifierPaintOffset.GetY())));

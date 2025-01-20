@@ -856,6 +856,7 @@ public:
     void ReplacePlaceholderWithRawSpans(const RefPtr<SpanItem>& spanItem, size_t& index, size_t& textIndex);
     void SetSubSpansWithAIWrite(RefPtr<SpanString>& spanString, int32_t start, int32_t end);
     SymbolSpanOptions GetSymbolSpanOptions(const RefPtr<SpanItem>& spanItem);
+    bool IsShowTranslate();
     bool IsShowSearch();
     bool IsShowAIWrite();
     RefPtr<FocusHub> GetFocusHub() const;
@@ -1098,6 +1099,16 @@ public:
     bool IsStopBackPress() const
     {
         return isStopBackPress_;
+    }
+
+    void SetKeyboardAppearance(KeyboardAppearance value)
+    {
+        keyboardAppearance_ = value;
+    }
+
+    KeyboardAppearance GetKeyboardAppearance() const
+    {
+        return keyboardAppearance_;
     }
 
     bool IsDragging() const override
@@ -1382,7 +1393,8 @@ private:
     RefPtr<SpanItem> GetSameSpanItem(const RefPtr<SpanItem>& spanItem);
     RefPtr<ImageSpanNode> GetImageSpanNodeBySpanItem(const RefPtr<ImageSpanItem>& spanItem);
 
-    RectF GetSelectArea();
+    void AdjustSelectRects(SelectRectsType pos, std::vector<RectF>& selectRects);
+    RectF GetSelectArea(SelectRectsType pos);
     void AppendSelectRect(std::vector<RectF>& selectRects);
     bool IsTouchInFrameArea(const PointF& touchPoint);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& event, bool isCopy = false);
@@ -1598,6 +1610,7 @@ private:
     std::list<WeakPtr<PlaceholderSpanNode>> builderNodes;
     bool isStopBackPress_ = true;
     bool blockKbInFloatingWindow_ = false;
+    KeyboardAppearance keyboardAppearance_ = KeyboardAppearance::NONE_IMMERSIVE;
 };
 } // namespace OHOS::Ace::NG
 

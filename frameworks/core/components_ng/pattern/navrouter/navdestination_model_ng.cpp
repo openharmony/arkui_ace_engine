@@ -1129,4 +1129,14 @@ void NavDestinationModelNG::SetOnInactive(std::function<void(int32_t)>&& onInact
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnInactive(onInactive);
 }
+
+void NavDestinationModelNG::SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate)
+{
+    CHECK_NULL_VOID(transitionDelegate);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto node = AceType::DynamicCast<NavDestinationGroupNode>(Referenced::Claim<FrameNode>(frameNode));
+    CHECK_NULL_VOID(node);
+    node->SetNavDestinationTransitionDelegate(std::move(transitionDelegate));
+}
 } // namespace OHOS::Ace::NG

@@ -241,7 +241,7 @@ constexpr char LONG_PRESS_DURATION[] = "duration";
 constexpr char PAN_DIRECTION[] = "direction";
 constexpr char SWIPE_DIRECTION[] = "direction";
 constexpr char ROTATION_ANGLE[] = "angle";
-constexpr char LIMIT_FINGER_COUNT[] = "limitFingerCount";
+constexpr char LIMIT_FINGER_COUNT[] = "isFingerCountLimited";
 } // namespace
 
 void JSGesture::Create(const JSCallbackInfo& info)

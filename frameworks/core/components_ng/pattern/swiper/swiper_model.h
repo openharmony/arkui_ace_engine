@@ -174,6 +174,7 @@ public:
     virtual void SetDigitalCrownSensitivity(int32_t sensitivity) {}
     virtual void SetDisableTransitionAnimation(bool isDisable) {}
     virtual void SetBindIndicator(bool bind) {}
+    virtual void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) {}
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

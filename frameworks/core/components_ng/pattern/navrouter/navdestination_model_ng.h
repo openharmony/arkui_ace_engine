@@ -91,6 +91,7 @@ public:
     static void SetOnShown(FrameNode* frameNode, std::function<void()>&& onShow);
     static void SetOnHidden(FrameNode* frameNode, std::function<void()>&& onHidden);
     static void SetCustomBackButtonNode(FrameNode* frameNode, FrameNode* backButtonNode);
+    void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

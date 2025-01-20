@@ -387,6 +387,11 @@ public:
 
     virtual void GetPointTransformRotate(PointF& point) {}
 
+    virtual Matrix4 GetMatrixWithTransformRotate()
+    {
+        return {};
+    }
+
     virtual RectF GetPaintRectWithoutTransform()
     {
         return {};

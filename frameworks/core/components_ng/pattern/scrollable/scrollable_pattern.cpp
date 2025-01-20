@@ -764,6 +764,10 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
         CHECK_NULL_VOID(child);
         child->StopScrollAnimation();
     }
+    if (isClickAnimationStop_) {
+        StopAnimate();
+        isClickAnimationStop_ = false;
+    }
 }
 
 void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1418,6 +1422,7 @@ void ScrollablePattern::OnAnimateFinish()
                 .c_str());
     }
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::END);
+    isClickAnimationStop_ = false;
 }
 
 void ScrollablePattern::PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping,
@@ -2589,6 +2594,55 @@ float ScrollablePattern::GetMainContentSize() const
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0);
     return geometryNode->GetPaddingSize().MainSize(axis_);
+}
+
+void ScrollablePattern::SetBackToTop(bool backToTop)
+{
+    backToTop_ = backToTop;
+    auto* eventProxy = StatusBarEventProxy::GetInstance();
+    if (!eventProxy) {
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StatusBarEventProxy is null");
+        return;
+    }
+    if (backToTop_) {
+        eventProxy->Register(WeakClaim(this));
+    } else {
+        eventProxy->UnRegister(WeakClaim(this));
+    }
+}
+
+void ScrollablePattern::OnStatusBarClick()
+{
+    if (!backToTop_) {
+        return;
+    }
+
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!pipeline->GetOnShow() || !host->IsActive()) {
+        return;
+    }
+
+    bool isActive = true;
+    // If any of the parent components is not active while traversing the parent components, do not scroll to the top.
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        if (!frameNode->IsActive() || !frameNode->IsVisible()) {
+            isActive = false;
+            break;
+        }
+    }
+    if (!isActive) {
+        return;
+    }
+
+    isClickAnimationStop_ = true; // set stop animation flag when click status bar.
+    AnimateTo(0 - GetContentStartOffset(), -1, nullptr, true);
 }
 
 void ScrollablePattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)
