@@ -104,9 +104,7 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
-    if (!frameSize.IsPositive()) {
-        return;
-    }
+
     auto layoutProperty = AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
@@ -117,7 +115,12 @@ void TabsLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         return;
     }
 
-    auto offsetList = LayoutOffsetList(layoutWrapper, tabBarWrapper, frameSize);
+    std::vector<OffsetF> offsetList;
+    if (frameSize.IsPositive()) {
+        offsetList = LayoutOffsetList(layoutWrapper, tabBarWrapper, frameSize);
+    } else {
+        offsetList = { OffsetF(), OffsetF(), OffsetF() };
+    }
     auto tabsWidth = geometryNode->GetFrameSize().Width();
     if (isRTL) {
         auto swiperWidth = swiperWrapper->GetGeometryNode()->GetFrameSize().Width();
