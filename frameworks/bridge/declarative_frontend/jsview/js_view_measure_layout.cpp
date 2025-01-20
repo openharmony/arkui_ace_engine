@@ -365,6 +365,11 @@ void JSMeasureLayoutParamNG::GenChildArray(int32_t start, int32_t end)
     for (int32_t index = start; index < end; index++) {
         JSRef<JSObjTemplate> info = JSRef<JSObjTemplate>::New();
         info->SetInternalFieldCount(1);
+        auto child = GetChildByIndex(index);
+        if (child && child->GetHostNode()) {
+            auto uniqueId = child->GetHostNode()->GetId();
+            info->SetProperty("uniqueId", uniqueId);
+        }
         info->SetPropertyObject("measureResult", size);
         info->Wrap<NG::MeasureLayoutChild>(&Get(index));
         info->SetPropertyObject("measure", measureFunc);
