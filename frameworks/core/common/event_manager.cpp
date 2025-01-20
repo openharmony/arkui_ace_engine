@@ -2255,6 +2255,7 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint)
         if (touchPoint.id != iter.first) {
             falsifyEvent.history.clear();
         }
+        falsifyEvent.originalId = iter.second;
         DispatchTouchEvent(falsifyEvent);
     }
 }
