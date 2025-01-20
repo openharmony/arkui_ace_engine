@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 import { LengthMetrics } from '@ohos.arkui.node';
+import { BusinessError, Callback } from '@ohos.base';
 import common from '@ohos.app.ability.common';
+import { accessibility } from '@kit.AccessibilityKit';
 
 export enum CounterType {
   LIST = 0,
@@ -254,6 +256,11 @@ export struct CounterComponent {
   private controller2: TextInputController = new TextInputController();
   private controller3: TextInputController = new TextInputController();
   private initFlag = true;
+  private yearStr: string = getContext().resourceManager.getStringSync(125834849);
+  private monthStr: string = getContext().resourceManager.getStringSync(125834850);
+  private dayStr: string = getContext().resourceManager.getStringSync(125834851);
+  private increaseStr: string = getContext().resourceManager.getStringSync(125834852);
+  private reduceStr: string = getContext().resourceManager.getStringSync(125834853);
 
   getTextInputFontSize() {
     let fontSize = this.resourceToVp(CounterResource.COUNTER_NUMBER_SIZE);
@@ -599,6 +606,107 @@ export struct CounterComponent {
     }
   }
 
+  private accessibilityBroadcastSubDate(): void {
+    if (this.focusText === FocusText.TEXT1) {
+      if (this.subBtnStateEffect) {
+        this.inputYear = this.year;
+        this.year -= this.step;
+        if (!this.hasFocusText1) {
+          this.hasFocusText1 = true;
+        }
+      }
+      if (!this.addBtnStateEffect) {
+        this.addBtnStateEffect = true;
+        this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        this.addBtnEnabled = true;
+      }
+      if (this.year <= this.minYear) {
+        this.subOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+        this.subBtnStateEffect = false;
+        this.subBtnEnabled = false;
+      } else {
+        if (this.subOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+          this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        }
+        if (!this.subBtnStateEffect) {
+          this.subBtnStateEffect = true;
+        }
+        if (!this.subBtnEnabled) {
+          this.subBtnEnabled = true;
+        }
+      }
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'click',
+          textAnnouncedForAccessibility: (this.year.toString() + this.yearStr + ' ' + this.year.toString() +
+          this.yearStr +
+          this.month.toString() + this.monthStr + this.day.toString() + this.dayStr)
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.log('Accessility subYear click send event');
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        console.log(`Accessility subYear faild error code:${code} message:${message}`);
+      }
+    } else if (this.focusText === FocusText.TEXT2) {
+      this.month -= this.step % CounterConstant.COUNTER_MAX_MONTH;
+      if (this.month < CounterConstant.COUNTER_MIN_MONTH) {
+        this.month += CounterConstant.COUNTER_MAX_MONTH;
+      }
+      if (!this.hasFocusText2) {
+        this.hasFocusText2 = true;
+      }
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'click',
+          textAnnouncedForAccessibility: (this.month.toString() + this.monthStr + ' ' + this.year.toString() +
+          this.yearStr +
+          this.month.toString() + this.monthStr + this.day.toString() + this.dayStr)
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.log('Accessility subMonth click send event');
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        console.log(`Accessility subMonth faild error code:${code} message:${message}`);
+      }
+    } else if (this.focusText === FocusText.TEXT3) {
+      this.day -= this.step % this.getDayNumber();
+      if (this.day < CounterConstant.COUNTER_MIN_DAY) {
+        this.day += this.getDayNumber();
+      }
+      if (!this.hasFocusText3) {
+        this.hasFocusText3 = true;
+      }
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'click',
+          textAnnouncedForAccessibility: (this.day.toString() + this.dayStr + ' ' + this.year.toString() +
+          this.yearStr +
+          this.month.toString() + this.monthStr + this.day.toString() + this.dayStr)
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.log('Accessility subDay click send event');
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        console.log(`Accessility subDay faild error code:${code} message:${message}`);
+      }
+    } else {
+      this.focusDayWitdhSub();
+    }
+  }
+
   private subDate(): void {
     if (this.focusText === FocusText.TEXT1) {
       if (this.subBtnStateEffect) {
@@ -657,6 +765,107 @@ export struct CounterComponent {
       this.day += this.getDayNumber();
     }
     this.focusWithTarget('DateTextInput3' + this.timeStamp.toString());
+  }
+
+  private accessibilityBroadcastAddDate(): void {
+    if (this.focusText === FocusText.TEXT1) {
+      if (this.addBtnStateEffect) {
+        this.inputYear = this.year;
+        this.year += this.step;
+        if (!this.hasFocusText1) {
+          this.hasFocusText1 = true;
+        }
+      }
+      if (!this.subBtnStateEffect) {
+        this.subBtnStateEffect = true;
+        this.subOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        this.subBtnEnabled = true;
+      }
+      if (this.year >= this.maxYear) {
+        this.addOpacity = CounterResource.COUNTER_BUTTON_DISABLE_OPACITY;
+        this.addBtnStateEffect = false;
+        this.addBtnEnabled = false;
+      } else {
+        if (this.addOpacity === CounterResource.COUNTER_BUTTON_DISABLE_OPACITY) {
+          this.addOpacity = CounterResource.COUNTER_BUTTON_INITIAL_OPACITY;
+        }
+        if (!this.addBtnStateEffect) {
+          this.addBtnStateEffect = true;
+        }
+        if (!this.addBtnEnabled) {
+          this.addBtnEnabled = true;
+        }
+      }
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'click',
+          textAnnouncedForAccessibility: (this.year.toString() + this.yearStr + ' ' + this.year.toString() +
+          this.yearStr +
+          this.month.toString() + this.monthStr + this.day.toString() + this.dayStr)
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.log('Accessility addYear click send event');
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        console.log(`Accessility addYear click faild error code:${code} message:${message}`);
+      }
+    } else if (this.focusText === FocusText.TEXT2) {
+      this.month += this.step % CounterConstant.COUNTER_MAX_MONTH;
+      if (this.month > CounterConstant.COUNTER_MAX_MONTH) {
+        this.month -= CounterConstant.COUNTER_MAX_MONTH;
+      }
+      if (!this.hasFocusText2) {
+        this.hasFocusText2 = true;
+      }
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'click',
+          textAnnouncedForAccessibility: (this.month.toString() + this.monthStr + ' ' + this.year.toString() +
+          this.yearStr +
+          this.month.toString() + this.monthStr + this.day.toString() + this.dayStr)
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.log('Accessility addMonth click send event');
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        console.log(`Accessility addMonth faild error code:${code} message:${message}`);
+      }
+    } else if (this.focusText === FocusText.TEXT3) {
+      this.day += this.step % this.getDayNumber();
+      if (this.day > this.getDayNumber()) {
+        this.day -= this.getDayNumber();
+      }
+      if (!this.hasFocusText3) {
+        this.hasFocusText3 = true;
+      }
+      try {
+        let eventInfo: accessibility.EventInfo = ({
+          type: 'announceForAccessibility',
+          bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+          triggerAction: 'click',
+          textAnnouncedForAccessibility: (this.day.toString() + this.dayStr + ' ' + this.year.toString() +
+          this.yearStr +
+          this.month.toString() + this.monthStr + this.day.toString() + this.dayStr)
+        });
+        accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+          console.log('Accessility addDay click send event');
+        });
+      } catch (exception) {
+        let code: number = (exception as BusinessError).code;
+        let message: string = (exception as BusinessError).message;
+        console.log(`Accessility addDay faild error code:${code} message:${message}`);
+      }
+    } else {
+      this.focusDayWithAdd();
+    }
   }
 
   private addDate(): void {
@@ -931,6 +1140,22 @@ export struct CounterComponent {
     }
   }
 
+  public getAccessibilityResource(resource: ResourceStr | string | undefined): string {
+    let accessibilityResource: string = '';
+    try {
+      if (typeof resource === 'string') {
+        accessibilityResource = resource;
+      } else {
+        accessibilityResource = getContext()?.resourceManager?.getStringSync(resource?.id);
+      }
+    } catch (error) {
+      let code: number = (error as BusinessError).code;
+      let message: string = (error as BusinessError).message;
+      console.log(`Get accessility resource error code:${code} message:${message}`);
+    }
+    return accessibilityResource;
+  }
+
   build() {
     if (this.type === CounterType.LIST) {
       RelativeContainer() {
@@ -957,6 +1182,8 @@ export struct CounterComponent {
               .fillColor(CounterResource.BUTTON_ICON_COLOR)
               .opacity(this.subOpacity)
             Button({ type: ButtonType.Circle, stateEffect: this.subBtnStateEffect })
+              .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
+              .accessibilityDescription(this.value === this.min ? '' : this.reduceStr)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
               .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
@@ -1002,6 +1229,21 @@ export struct CounterComponent {
                   event.source === SourceType.TouchScreen) {
                   this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
+                try {
+                  let eventInfo: accessibility.EventInfo = ({
+                    type: 'announceForAccessibility',
+                    bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                    triggerAction: 'click',
+                    textAnnouncedForAccessibility: this.value?.toString()
+                  });
+                  accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                    console.log('Accessility subValue click send event');
+                  })
+                } catch (exception) {
+                  let code: number = (exception as BusinessError).code;
+                  let message: string = (exception as BusinessError).message;
+                  console.log(`Accessility subValue faild error code:${code} message:${message}`);
+                }
               })
               .gesture(
                 LongPressGesture({ repeat: true })
@@ -1011,6 +1253,23 @@ export struct CounterComponent {
                       this.onChange?.(this.value);
                     }
                     this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  })
+                  .onActionEnd(() => {
+                    try {
+                      let eventInfo: accessibility.EventInfo = ({
+                        type: 'announceForAccessibility',
+                        bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                        triggerAction: 'common',
+                        textAnnouncedForAccessibility: this.value?.toString()
+                      });
+                      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                        console.log('Accessility subValue longPress send event');
+                      })
+                    } catch (exception) {
+                      let code: number = (exception as BusinessError).code;
+                      let message: string = (exception as BusinessError).message;
+                      console.log(`Accessility subValue longPress faild error code:${code} message:${message}`);
+                    }
                   })
               )
               .hoverEffect(this.choverEffect)
@@ -1038,6 +1297,7 @@ export struct CounterComponent {
 
           if (this.hasTextWidth) {
             Text(this.value.toString())
+              .accessibilityText(this.getAccessibilityResource(this.numberStyleOptions.label) + this.value.toString())
               .direction(this.counterDirection)
               .width(this.textWidth.toString())
               .textAlign(TextAlign.Center)
@@ -1050,6 +1310,7 @@ export struct CounterComponent {
               })
           } else {
             Text(this.value.toString())
+              .accessibilityText(this.getAccessibilityResource(this.numberStyleOptions.label) + this.value.toString())
               .direction(this.counterDirection)
               .textAlign(TextAlign.Center)
               .fontSize(CounterResource.COUNTER_LIST_NUMBER_SIZE)
@@ -1069,6 +1330,8 @@ export struct CounterComponent {
               .fillColor(CounterResource.BUTTON_ICON_COLOR)
               .opacity(this.addOpacity)
             Button({ type: ButtonType.Circle, stateEffect: this.addBtnStateEffect })
+              .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
+              .accessibilityDescription(this.value === this.max ? '' : this.increaseStr)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_LIST_BUTTON_SIZE)
               .height(CounterResource.COUNTER_LIST_BUTTON_SIZE)
@@ -1113,6 +1376,21 @@ export struct CounterComponent {
                   event.source === SourceType.TouchScreen) {
                   this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
+                try {
+                  let eventInfo: accessibility.EventInfo = ({
+                    type: 'announceForAccessibility',
+                    bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                    triggerAction: 'click',
+                    textAnnouncedForAccessibility: this.value?.toString()
+                  });
+                  accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                    console.log('Accessility addValue click send event');
+                  })
+                } catch (exception) {
+                  let code: number = (exception as BusinessError).code;
+                  let message: string = (exception as BusinessError).message;
+                  console.log(`Accessility addValue click longPress faild error code:${code} message:${message}`);
+                }
               })
               .gesture(
                 LongPressGesture({ repeat: true })
@@ -1122,6 +1400,23 @@ export struct CounterComponent {
                       this.onChange?.(this.value);
                     }
                     this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  })
+                  .onActionEnd(() => {
+                    try {
+                      let eventInfo: accessibility.EventInfo = ({
+                        type: 'announceForAccessibility',
+                        bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                        triggerAction: 'common',
+                        textAnnouncedForAccessibility: this.value?.toString()
+                      });
+                      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                        console.log('Accessility addValue longPress send event');
+                      })
+                    } catch (exception) {
+                      let code: number = (exception as BusinessError).code;
+                      let message: string = (exception as BusinessError).message;
+                      console.log(`Accessility addValue longPress longPress faild error code:${code} message:${message}`);
+                    }
                   })
               )
               .hoverEffect(this.choverEffect)
@@ -1173,6 +1468,8 @@ export struct CounterComponent {
               .fillColor(CounterResource.BUTTON_ICON_COLOR)
               .opacity(this.subOpacity)
             Button({ type: ButtonType.Circle, stateEffect: this.subBtnStateEffect })
+              .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
+              .accessibilityDescription(this.value === this.min ? '' : this.reduceStr)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
               .height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
@@ -1211,6 +1508,21 @@ export struct CounterComponent {
                   event.source === SourceType.TouchScreen) {
                   this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
+                try {
+                  let eventInfo: accessibility.EventInfo = ({
+                    type: 'announceForAccessibility',
+                    bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                    triggerAction: 'click',
+                    textAnnouncedForAccessibility: this.value?.toString()
+                  });
+                  accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                    console.log('Accessility subValue click send event');
+                  })
+                } catch (exception) {
+                  let code: number = (exception as BusinessError).code;
+                  let message: string = (exception as BusinessError).message;
+                  console.log(`Accessility subValue click longPress faild error code:${code} message:${message}`);
+                }
               })
               .gesture(
                 LongPressGesture({ repeat: true })
@@ -1222,6 +1534,23 @@ export struct CounterComponent {
                     if (event.source === SourceType.Mouse ||
                       event.source === SourceType.TouchScreen) {
                       this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                    }
+                  })
+                  .onActionEnd(() => {
+                    try {
+                      let eventInfo: accessibility.EventInfo = ({
+                        type: 'announceForAccessibility',
+                        bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                        triggerAction: 'common',
+                        textAnnouncedForAccessibility: this.value?.toString()
+                      });
+                      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                        console.log('Accessility subValue longPress send event');
+                      })
+                    } catch (exception) {
+                      let code: number = (exception as BusinessError).code;
+                      let message: string = (exception as BusinessError).message;
+                      console.log(`Accessility subValue longPress longPress faild error code:${code} message:${message}`);
                     }
                   })
               )
@@ -1253,6 +1582,7 @@ export struct CounterComponent {
 
           if (this.hasTextWidth) {
             Text(this.value.toString())
+              .accessibilityText(this.getAccessibilityResource(this.numberStyleOptions.label) + this.value.toString())
               .textAlign(TextAlign.Center)
               .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
               .maxFontScale(CounterResource.COUNTER_NUMBER_MAX_FONT_SIZE_SCALE)
@@ -1264,6 +1594,7 @@ export struct CounterComponent {
               })
           } else {
             Text(this.value.toString())
+              .accessibilityText(this.getAccessibilityResource(this.numberStyleOptions.label) + this.value.toString())
               .direction(this.counterDirection)
               .textAlign(TextAlign.Center)
               .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
@@ -1283,6 +1614,8 @@ export struct CounterComponent {
               .fillColor(CounterResource.BUTTON_ICON_COLOR)
               .opacity(this.addOpacity)
             Button({ type: ButtonType.Circle, stateEffect: this.addBtnStateEffect })
+              .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
+              .accessibilityDescription(this.value === this.max ? '' : this.increaseStr)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
               .height(CounterResource.COUNTER_COMPACT_BUTTON_SIZE)
@@ -1321,6 +1654,21 @@ export struct CounterComponent {
                   event.source === SourceType.TouchScreen) {
                   this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
+                try {
+                  let eventInfo: accessibility.EventInfo = ({
+                    type: 'announceForAccessibility',
+                    bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                    triggerAction: 'click',
+                    textAnnouncedForAccessibility: this.value?.toString()
+                  });
+                  accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                    console.log('Accessility addValue click send event');
+                  })
+                } catch (exception) {
+                  let code: number = (exception as BusinessError).code;
+                  let message: string = (exception as BusinessError).message;
+                  console.log(`Accessility addValue click longPress faild error code:${code} message:${message}`);
+                }
               })
               .gesture(
                 LongPressGesture({ repeat: true })
@@ -1332,6 +1680,23 @@ export struct CounterComponent {
                     if (event.source === SourceType.Mouse ||
                       event.source === SourceType.TouchScreen) {
                       this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                    }
+                  })
+                  .onActionEnd(() => {
+                    try {
+                      let eventInfo: accessibility.EventInfo = ({
+                        type: 'announceForAccessibility',
+                        bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                        triggerAction: 'common',
+                        textAnnouncedForAccessibility: this.value?.toString()
+                      });
+                      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                        console.log('Accessility addValue longPress send event');
+                      })
+                    } catch (exception) {
+                      let code: number = (exception as BusinessError).code;
+                      let message: string = (exception as BusinessError).message;
+                      console.log(`Accessility addValue longPress longPress faild error code:${code} message:${message}`);
                     }
                   })
               )
@@ -1385,6 +1750,7 @@ export struct CounterComponent {
               text: this.hasInputText1 ? this.inputValue : this.value.toString(),
               controller: this.controller1
             })
+              .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
               .alignRules({
                 center: { anchor: '__container__', align: VerticalAlign.Center },
                 middle: { anchor: '__container__', align: HorizontalAlign.Center }
@@ -1537,6 +1903,7 @@ export struct CounterComponent {
               text: this.hasInputText1 ? this.inputValue : this.value.toString(),
               controller: this.controller1
             })
+              .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
               .direction(this.counterDirection)
               .width(this.getValueLength() * 9.6)
               .height('20vp')
@@ -1693,6 +2060,8 @@ export struct CounterComponent {
               .opacity(this.addOpacity)
 
             Button({ type: ButtonType.Normal, stateEffect: this.addBtnStateEffect })
+              .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
+              .accessibilityDescription(this.value === this.max ? '' : this.increaseStr)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
               .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
@@ -1705,6 +2074,21 @@ export struct CounterComponent {
                   event.source === SourceType.TouchScreen) {
                   this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
+                try {
+                  let eventInfo: accessibility.EventInfo = ({
+                    type: 'announceForAccessibility',
+                    bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                    triggerAction: 'click',
+                    textAnnouncedForAccessibility: this.value?.toString()
+                  });
+                  accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                    console.log('Accessility addValue click send event');
+                  })
+                } catch (exception) {
+                  let code: number = (exception as BusinessError).code;
+                  let message: string = (exception as BusinessError).message;
+                  console.log(`Accessility addValue click longPress faild error code:${code} message:${message}`);
+                }
               })
               .gesture(
                 LongPressGesture({ repeat: true })
@@ -1713,6 +2097,23 @@ export struct CounterComponent {
                       this.addValue();
                     }
                     this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  })
+                  .onActionEnd(() => {
+                    try {
+                      let eventInfo: accessibility.EventInfo = ({
+                        type: 'announceForAccessibility',
+                        bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                        triggerAction: 'common',
+                        textAnnouncedForAccessibility: this.value?.toString()
+                      });
+                      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                        console.log('Accessility addValue longPress send event');
+                      })
+                    } catch (exception) {
+                      let code: number = (exception as BusinessError).code;
+                      let message: string = (exception as BusinessError).message;
+                      console.log(`Accessility addValue longPress faild error code:${code} message:${message}`);
+                    }
                   })
               )
               .hoverEffect(this.choverEffect)
@@ -1759,6 +2160,8 @@ export struct CounterComponent {
               .fillColor(CounterResource.BUTTON_ICON_COLOR)
               .opacity(this.subOpacity)
             Button({ type: ButtonType.Normal, stateEffect: this.subBtnStateEffect })
+              .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
+              .accessibilityDescription(this.value === this.min ? '' : this.reduceStr)
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
               .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
@@ -1771,6 +2174,21 @@ export struct CounterComponent {
                   event.source === SourceType.TouchScreen) {
                   this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
                 }
+                try {
+                  let eventInfo: accessibility.EventInfo = ({
+                    type: 'announceForAccessibility',
+                    bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                    triggerAction: 'click',
+                    textAnnouncedForAccessibility: this.value?.toString()
+                  });
+                  accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                    console.log('Accessility subValue click send event');
+                  })
+                } catch (exception) {
+                  let code: number = (exception as BusinessError).code;
+                  let message: string = (exception as BusinessError).message;
+                  console.log(`Accessility subValue click faild error code:${code} message:${message}`);
+                }
               })
               .gesture(
                 LongPressGesture({ repeat: true })
@@ -1779,6 +2197,23 @@ export struct CounterComponent {
                       this.subValue();
                     }
                     this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  })
+                  .onActionEnd(() => {
+                    try {
+                      let eventInfo: accessibility.EventInfo = ({
+                        type: 'announceForAccessibility',
+                        bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
+                        triggerAction: 'common',
+                        textAnnouncedForAccessibility: this.value?.toString()
+                      });
+                      accessibility.sendAccessibilityEvent(eventInfo).then(() => {
+                        console.log('Accessility subValue longPress send event');
+                      })
+                    } catch (exception) {
+                      let code: number = (exception as BusinessError).code;
+                      let message: string = (exception as BusinessError).message;
+                      console.log(`Accessility subValue longPress faild error code:${code} message:${message}`);
+                    }
                   })
               )
               .hoverEffect(this.choverEffect)
@@ -1819,6 +2254,8 @@ export struct CounterComponent {
             text: this.hasInputText1 ? this.inputYear.toString() : this.getYear(),
             controller: this.controller1
           })
+            .accessibilityText(this.year.toString() + this.yearStr)
+            .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
             .direction(this.counterDirection)
             .type(InputType.Number)
             .copyOption(CopyOptions.None)
@@ -1938,6 +2375,7 @@ export struct CounterComponent {
               this.controller1.caretPosition(this.getYear().length);
             })
           Text('/')
+            .accessibilityLevel('no')
             .direction(this.counterDirection)
             .textAlign(TextAlign.Center)
             .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
@@ -1948,6 +2386,8 @@ export struct CounterComponent {
             text: this.hasInputText2 ? this.inputMoon.toString() : this.convertNumberToString(this.month),
             controller: this.controller2
           })
+            .accessibilityText(this.month.toString() + this.monthStr)
+            .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
             .direction(this.counterDirection)
             .type(InputType.Number)
             .copyOption(CopyOptions.None)
@@ -2075,6 +2515,7 @@ export struct CounterComponent {
               this.controller2.caretPosition(this.convertNumberToString(this.month).length);
             })
           Text('/')
+            .accessibilityLevel('no')
             .direction(this.counterDirection)
             .textAlign(TextAlign.Center)
             .fontSize(CounterResource.COUNTER_NUMBER_SIZE)
@@ -2085,6 +2526,8 @@ export struct CounterComponent {
             text: this.hasInputText3 ? this.inputDay.toString() : this.convertNumberToString(this.day),
             controller: this.controller3
           })
+            .accessibilityText(this.day.toString() + this.dayStr)
+            .accessibilityDescription($r('sys.string.input_counter_double_click_description'))
             .direction(this.counterDirection)
             .type(InputType.Number)
             .copyOption(CopyOptions.None)
@@ -2239,6 +2682,8 @@ export struct CounterComponent {
               .fillColor(CounterResource.BUTTON_ICON_COLOR)
               .opacity(this.addOpacity)
             Button({ type: ButtonType.Normal, stateEffect: this.addBtnStateEffect })
+              .accessibilityText($r('sys.string.increase_used_for_accessibility_text'))
+              .accessibilityDescription($r('sys.string.increase_counter_double_click_description'))
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
               .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
@@ -2246,7 +2691,7 @@ export struct CounterComponent {
               .opacity(this.addOpacity)
               .enabled(this.addBtnEnabled)
               .onClick((event: ClickEvent) => {
-                this.addDate();
+                this.accessibilityBroadcastAddDate();
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
                   this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -2259,6 +2704,9 @@ export struct CounterComponent {
                       this.addDate();
                     }
                     this.addBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  })
+                  .onActionEnd(() => {
+                    this.accessibilityBroadcastAddDate();
                   })
               )
               .hoverEffect(this.choverEffect)
@@ -2304,6 +2752,8 @@ export struct CounterComponent {
               .fillColor(CounterResource.BUTTON_ICON_COLOR)
               .opacity(this.subOpacity)
             Button({ type: ButtonType.Normal, stateEffect: this.subBtnStateEffect })
+              .accessibilityText($r('sys.string.reduce_used_for_accessibility_text'))
+              .accessibilityDescription($r('sys.string.reduce_counter_double_click_description'))
               .direction(this.counterDirection)
               .width(CounterResource.COUNTER_INLINE_BUTTON_WIDTH)
               .height(CounterResource.COUNTER_INLINE_BUTTON_HEIGHT)
@@ -2311,7 +2761,7 @@ export struct CounterComponent {
               .opacity(this.subOpacity)
               .enabled(this.subBtnEnabled)
               .onClick((event: ClickEvent) => {
-                this.subDate();
+                this.accessibilityBroadcastSubDate();
                 if (event.source === SourceType.Mouse ||
                   event.source === SourceType.TouchScreen) {
                   this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
@@ -2324,6 +2774,9 @@ export struct CounterComponent {
                       this.subDate();
                     }
                     this.subBtnFocusWidh = CounterResource.BUTTON_BORDER_BLUR_WIDTH;
+                  })
+                  .onActionEnd(() => {
+                    this.accessibilityBroadcastSubDate();
                   })
               )
               .hoverEffect(this.choverEffect)
