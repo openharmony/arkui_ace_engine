@@ -1842,6 +1842,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     };
     HidePopupAnimation(popupNode, onFinish);
     RemoveEventColumn();
+    FireAutoSave(popupNode);
     RemovePixelMapAnimation(false, 0, 0);
     RemoveGatherNodeWithAnimation();
     RemoveFilter();
