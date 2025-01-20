@@ -212,7 +212,8 @@ HWTEST_F(RichEditorBaseControllerAccessorTest, setTypingStyleTest, TestSize.Leve
     spanStyle->updateFontWeight = FONT_WEIGHT;
     std::optional<TextStyle> textStyle = TextStyle(FONT_FAMILIES, FONT_SIZE, FONT_WEIGHT, FONT_STYLE, FONT_COLOUR);
     EXPECT_CALL(*mockRichEditorController_, SetTypingStyle(spanStyle, textStyle)).Times(1);
-    auto value = Converter::ArkValue<Ark_RichEditorTextStyle>(*textStyle);
+    Converter::ConvContext ctx;
+    auto value = Converter::ArkValue<Ark_RichEditorTextStyle>(*textStyle, &ctx);
     accessor_->setTypingStyle(peer_, &value);
 }
 

@@ -15,6 +15,7 @@
 #include "richeditor_accessor_test.h"
 #include "core/interfaces/native/implementation/rich_editor_controller_peer_impl.h"
 #include "accessor_test_base.h"
+#include "accessor_test_utils.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -60,8 +61,7 @@ static constexpr double FONT_SIZE = 12.0;
 static constexpr OHOS::Ace::FontWeight FONT_WEIGHT = OHOS::Ace::FontWeight::BOLD;
 static constexpr OHOS::Ace::FontStyle FONT_STYLE = OHOS::Ace::FontStyle::ITALIC;
 static const OHOS::Ace::Color FONT_COLOUR = OHOS::Ace::Color::RED;
-static std::string tmp1;
-static std::string tmp2;
+
 namespace OHOS::Ace::NG {
 
 using namespace testing;
@@ -85,19 +85,20 @@ void AssignArkValue(Ark_RichEditorBuilderSpanOptions& dst, const OHOS::Ace::Span
     dst.offset = Converter::ArkValue<Opt_Number>(src.offset);
 }
 
-void AssignArkValue(Ark_RichEditorUpdateTextSpanStyleOptions& dst, const TextSpanOptionsForUpdate& src)
+void AssignArkValue(Ark_RichEditorUpdateTextSpanStyleOptions& dst, const TextSpanOptionsForUpdate& src,
+    Converter::ConvContext *ctx)
 {
     dst.start = Converter::ArkValue<Opt_Number>(src.start);
     dst.end = Converter::ArkValue<Opt_Number>(src.end);
     if (src.textStyle) {
-        dst.textStyle = Converter::ArkValue<Ark_RichEditorTextStyle>(src.textStyle.value());
+        dst.textStyle = Converter::ArkValue<Ark_RichEditorTextStyle>(src.textStyle.value(), ctx);
     }
 }
 void AssignArkValue(Ark_Type_RichEditorController_updateSpanStyle_value& dst,
-                    const TextSpanOptionsForUpdate& src)
+                    const TextSpanOptionsForUpdate& src, Converter::ConvContext *ctx)
 {
     dst = Converter::ArkUnion<Ark_Type_RichEditorController_updateSpanStyle_value,
-        Ark_RichEditorUpdateTextSpanStyleOptions>(src);
+        Ark_RichEditorUpdateTextSpanStyleOptions>(src, ctx);
 }
 
 void AssignArkValue(Ark_FontWeight& dst, OHOS::Ace::FontWeight src)
@@ -113,11 +114,12 @@ void AssignArkValue(Ark_FontWeight& dst, OHOS::Ace::FontWeight src)
     }
 }
 
-void AssignArkValue(Ark_DecorationStyleInterface& dst, const Converter::TextDecorationStruct& src)
+void AssignArkValue(Ark_DecorationStyleInterface& dst, const Converter::TextDecorationStruct& src,
+                    Converter::ConvContext *ctx)
 {
     if (src.color) {
-        tmp1 = src.color->ToString();
-        dst.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(tmp1);
+        auto str = Converter::ArkValue<Ark_String>(src.color->ToString(), ctx);
+        dst.color = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(str);
     }
     if (src.style) {
         dst.style = Converter::ArkValue<Opt_TextDecorationStyle>(src.style);
@@ -125,10 +127,11 @@ void AssignArkValue(Ark_DecorationStyleInterface& dst, const Converter::TextDeco
     dst.type = Converter::ArkValue<Ark_TextDecorationType>(src.textDecoration);
 }
 
-void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& style)
+void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& style,
+    Converter::ConvContext *ctx)
 {
-    tmp2 = style.GetTextColor().ToString();
-    dst.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(tmp2);
+    auto str = Converter::ArkValue<Ark_String>(style.GetTextColor().ToString(), ctx);
+    dst.fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(str);
     dst.fontSize = Converter::ArkUnion<Opt_Union_Length_Number, Ark_Length>(style.GetFontSize());
     dst.fontStyle = Converter::ArkValue<Opt_FontStyle>(style.GetFontStyle());
     dst.fontWeight = Converter::ArkUnion<
@@ -143,7 +146,7 @@ void AssignArkValue(Ark_RichEditorTextStyle& dst, const OHOS::Ace::TextStyle& st
     decoration.color = style.GetTextDecorationColor();
     decoration.style = style.GetTextDecorationStyle();
     decoration.textDecoration = style.GetTextDecoration();
-    dst.decoration = Converter::ArkValue<Opt_DecorationStyleInterface>(decoration);
+    dst.decoration = Converter::ArkValue<Opt_DecorationStyleInterface>(decoration, ctx);
 }
 
 void AssignArkValue(Ark_TextAlign& dst, const OHOS::Ace::TextAlign& src)
@@ -250,13 +253,20 @@ public:
  * @tc.desc: Check the functionality of addImageSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorControllerAccessorTest, DISABLED_addImageSpanTest, TestSize.Level1)
+HWTEST_F(RichEditorControllerAccessorTest, addImageSpanTest, TestSize.Level1)
 {
-    ASSERT_NE(accessor_->addTextSpan, nullptr);
+    ASSERT_NE(accessor_->addImageSpan, nullptr);
+
+    std::string urlString = "https://www.example.com/xxx.png";
+    std::string resName = "app.string.image_url";
+    AddResource(resName, urlString);
+    int resID = 2345;
+    const auto RES_ID = IntResourceId{resID, Converter::ResourceType::STRING};
+    Ark_ResourceStr arkResourceStr = CreateResourceUnion<Ark_ResourceStr>(RES_ID);
 
     ImageSpanOptions imageSpanOptions;
     imageSpanOptions.offset = TEST_OFFSET;
-    Ark_Union_PixelMap_ResourceStr value; // pixel map is not supported
+    auto value = Converter::ArkUnion<Ark_Union_PixelMap_ResourceStr, Ark_ResourceStr>(arkResourceStr);
     auto options = Converter::ArkValue<Opt_RichEditorImageSpanOptions>(imageSpanOptions);
 
     EXPECT_CALL(*mockRichEditorController_, AddImageSpan(imageSpanOptions)).Times(1);
@@ -334,7 +344,8 @@ HWTEST_F(RichEditorControllerAccessorTest, updateSpanStyleTest, TestSize.Level1)
     updateOptions.start = TEST_START;
     updateOptions.end = TEST_END;
     updateOptions.textStyle = TextStyle(FONT_FAMILIES, FONT_SIZE, FONT_WEIGHT, FONT_STYLE, FONT_COLOUR);
-    auto value = Converter::ArkValue<Ark_Type_RichEditorController_updateSpanStyle_value>(updateOptions);
+    Converter::ConvContext ctx;
+    auto value = Converter::ArkValue<Ark_Type_RichEditorController_updateSpanStyle_value>(updateOptions, &ctx);
 
     EXPECT_CALL(*mockRichEditorController_, UpdateSpanStyle(
         updateOptions.start, updateOptions.end, updateOptions.textStyle.value(), updateOptions.imageSpanAttribute

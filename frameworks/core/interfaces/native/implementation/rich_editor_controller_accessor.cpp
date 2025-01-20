@@ -303,7 +303,16 @@ Ark_Int32 AddImageSpanImpl(RichEditorControllerPeer* peer,
     std::optional<ImageSpanOptions> locOptions;
     if (options) {
         locOptions = Converter::OptConvert<ImageSpanOptions>(*options);
-        LOGW("RichEditorControllerAccessor::AddImageSpanImpl,Ark_CustomObject::need setting pixel map to options");
+    }
+
+    if (value && locOptions) {
+        auto info = Converter::OptConvert<ImageSourceInfo>(*value);
+        if (info) {
+            locOptions->image = info->GetSrc();
+            locOptions->bundleName = info->GetBundleName();
+            locOptions->moduleName = info->GetModuleName();
+            locOptions->imagePixelMap = info->GetPixmap();
+        }
     }
     if (locOptions) {
         result = peerImpl->AddImageSpanImpl(locOptions.value());

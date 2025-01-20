@@ -20,6 +20,7 @@
 #include "arkoala_api_generated.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/common/mock_theme_style.h"
 
 namespace OHOS::Ace::NG {
 
@@ -53,6 +54,37 @@ public:
         MockPipelineContext::TearDown();
         MockContainer::TearDown();
         finalyzer_ = nullptr;
+    }
+
+    static void AddResource(std::string key, const ResRawValue& value)
+    {
+        ThemeConstantsType type = ThemeConstantsType::ERROR;
+        if (std::holds_alternative<Color>(value)) {
+            type = ThemeConstantsType::COLOR;
+        } else if (std::holds_alternative<Dimension>(value)) {
+            type = ThemeConstantsType::DIMENSION;
+        } else if (std::holds_alternative<int32_t>(value)) {
+            type = ThemeConstantsType::INT;
+        } else if (std::holds_alternative<uint32_t>(value)) {
+            type = ThemeConstantsType::INT;
+        } else if (std::holds_alternative<double>(value)) {
+            type = ThemeConstantsType::DOUBLE;
+        } else if (std::holds_alternative<std::string>(value)) {
+            type = ThemeConstantsType::STRING;
+        }
+        ASSERT_NE(type, ThemeConstantsType::ERROR);
+        MockThemeStyle::GetInstance()->SetAttr(key, { .type = type, .value = value });
+    }
+
+    static void AddResource(uint32_t key, const ResRawValue& value)
+    {
+        AddResource(std::to_string(key), value);
+    }
+
+    template<typename T, typename U>
+    static void AddResource(const std::tuple<T, U>& resId, const ResRawValue& value)
+    {
+        AddResource(std::get<0>(resId), value);
     }
 
     virtual void TearDown(void)
