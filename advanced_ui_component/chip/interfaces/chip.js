@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 2024 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
+ * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
+ * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
@@ -26,11 +26,9 @@ const hilog = requireNapi('hilog');
 const ColorMetrics = requireNapi('arkui.node').ColorMetrics;
 const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
 const LengthUnit = requireNapi('arkui.node').LengthUnit;
-
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
-
 export var ChipSize;
 (function (k11) {
     k11['NORMAL'] = 'NORMAL';
@@ -539,7 +537,7 @@ export function Chip(w10, x10 = null) {
                 }, undefined, a11, () => {
                 }, { page: 'library/src/main/ets/components/chip.ets', line: 352, col: 3 });
                 ViewPU.create(d11);
-                let e11 = () => {
+                let a = () => {
                     return {
                         chipSize: c11.size,
                         prefixIcon: c11.prefixIcon,
@@ -563,7 +561,7 @@ export function Chip(w10, x10 = null) {
                         onClicked: c11.onClicked
                     };
                 };
-                d11.paramsGenerator_ = e11;
+                d11.paramsGenerator_ = a;
             } else {
                 (x10 ? x10 : this).updateStateVarsOfChildByElmtId(a11, {
                     chipSize: c11.size,
@@ -1259,7 +1257,7 @@ export class ChipComponent extends ViewPU {
         if (this.getChipActive()) {
             return FontWeight.Medium;
         }
-        return this.resourceToNumber(this.theme.label.fontWeight, FontWeight.Medium) ?? FontWeight.Regular;
+        return this.resourceToNumber(this.theme.label.fontWeight, FontWeight.Regular);
     }
 
     lengthMetricsToVp(p8) {
@@ -1526,7 +1524,7 @@ export class ChipComponent extends ViewPU {
 
     getSuffixIconFilledColor() {
         if (this.getChipActive()) {
-            return this.suffixIcon?.activatedFillColor ?? this.getDefaultActiveIconColor(IconType.PREFIX_ICON);
+            return this.suffixIcon?.activatedFillColor ?? this.getDefaultActiveIconColor(IconType.SUFFIX_ICON);
         }
         return this.suffixIcon?.fillColor ?? this.getDefaultFillIconColor(IconType.SUFFIX_ICON);
     }
@@ -1553,7 +1551,8 @@ export class ChipComponent extends ViewPU {
     }
 
     getSuffixIconFocusable() {
-        return (this.useDefaultSuffixIcon && (this.allowClose ?? true)) || this.suffixIcon?.action !== void (0);
+        return !this.isSuffixIconFocusStyleCustomized && ((this.useDefaultSuffixIcon && (this.allowClose ?? true)) ||
+            this.suffixIcon?.action !== void (0));
     }
 
     getChipNodePadding() {
@@ -1587,16 +1586,11 @@ export class ChipComponent extends ViewPU {
             hilog.error(0x3900, 'Ace', `Chip resourceColor, error: ${r7.toString()}`);
             q7 = ColorMetrics.resourceColor(Color.Transparent);
         }
-        if (this.isShowPressedBackGroundColor) {
-            this.isHovering = false;
-            return q7.blendColor(ColorMetrics.resourceColor(p7.pressedBlendColor))
-                .color;
+        if (!this.isShowPressedBackGroundColor) {
+            return q7.color;
         }
-        if (this.isHovering) {
-            return q7.blendColor(ColorMetrics.resourceColor(p7.hoverBlendColor))
-                .color;
-        }
-        return q7.color;
+        return q7.blendColor(ColorMetrics.resourceColor('#19000000'))
+            .color;
     }
 
     getChipNodeHeight() {
@@ -1923,8 +1917,8 @@ export class ChipComponent extends ViewPU {
             Button.padding(0);
             Button.accessibilityGroup(true);
             Button.accessibilityDescription(this.getAccessibilityDescription());
-            Button.accessibilityLevel(this.getAccessibilityLevel());
-            Button.accessibilityChecked(this.getAccessibilityChecked());
+			Button.accessibilityLevel(this.getAccessibilityLevel());
+			Button.accessibilityChecked(this.getAccessibilityChecked());
             Button.accessibilitySelected(this.getAccessibilitySelected());
             Button.onFocus(() => {
                 this.chipNodeOnFocus = true;
@@ -2053,7 +2047,7 @@ export class ChipComponent extends ViewPU {
                         Button.borderRadius(0);
                         Button.padding(0);
                         Button.stateEffect(false);
-                        Button.focusable(this.getSuffixIconFocusable());
+                        Button.focusable(!this.isSuffixIconFocusStyleCustomized);
                     }, Button);
                     this.observeComponentCreation2((y4, z4) => {
                         SymbolGlyph.create();
@@ -2136,7 +2130,7 @@ export class ChipComponent extends ViewPU {
                             this.onClose();
                             this.deleteChipNodeAnimate();
                         });
-                        Button.focusable(this.getSuffixIconFocusable());
+                        Button.focusable(!this.isSuffixIconFocusStyleCustomized);
                     }, Button);
                     this.observeComponentCreation2((d4, e4) => {
                         SymbolGlyph.create({

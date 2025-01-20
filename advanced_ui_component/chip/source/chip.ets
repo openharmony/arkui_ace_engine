@@ -172,7 +172,7 @@ interface ChipNodeTheme {
   activatedBackgroundColor: ResourceColor;
   focusOutlineColor: ResourceColor;
   borderColor: ResourceColor,
-  defaultBorderWidth: Dimension;
+  defaultBorderWidth: Resource;
   activatedBorderColor: ResourceColor;
   focusBtnScaleX: Resource;
   focusBtnScaleY: Resource;
@@ -508,7 +508,7 @@ export struct ChipComponent {
 
   private resourceToVp(resource: Resource): number {
     let metrics = LengthMetrics.resource(resource);
-    return this.lengthMetricsToVp(metrics)
+    return this.lengthMetricsToVp(metrics);
   }
 
   private getActiveFontColor(): ResourceColor {
@@ -534,7 +534,7 @@ export struct ChipComponent {
     if (this.getChipActive()) {
       return FontWeight.Medium;
     }
-    return this.resourceToNumber(this.theme.label.fontWeight, FontWeight.Medium) ?? FontWeight.Regular;
+    return this.resourceToNumber(this.theme.label.fontWeight, FontWeight.Regular) as FontWeight;
   }
 
   private lengthMetricsToVp(lengthMetrics?: LengthMetrics): number {
@@ -606,8 +606,8 @@ export struct ChipComponent {
     }
   }
 
-  private getChipNodeBorderWidth(): Dimension {
-    return this.resourceToVp(this.theme.chipNode.defaultBorderWidth as Resource);
+  private getChipNodeBorderWidth(): number {
+    return this.resourceToVp(this.theme.chipNode.defaultBorderWidth);
   }
 
   private getChipNodeBorderColor(): ResourceColor {
@@ -802,7 +802,7 @@ export struct ChipComponent {
 
   private getSuffixIconFilledColor(): ResourceColor {
     if (this.getChipActive()) {
-      return this.suffixIcon?.activatedFillColor ?? this.getDefaultActiveIconColor(IconType.PREFIX_ICON);
+      return this.suffixIcon?.activatedFillColor ?? this.getDefaultActiveIconColor(IconType.SUFFIX_ICON);
     }
     return this.suffixIcon?.fillColor ?? this.getDefaultFillIconColor(IconType.SUFFIX_ICON);
   }
@@ -829,7 +829,8 @@ export struct ChipComponent {
   }
 
   private getSuffixIconFocusable(): boolean {
-    return (this.useDefaultSuffixIcon && (this.allowClose ?? true)) || this.suffixIcon?.action !== void (0)
+    return !this.isSuffixIconFocusStyleCustomized && ((this.useDefaultSuffixIcon && (this.allowClose ?? true)) ||
+      this.suffixIcon?.action !== void (0));
   }
 
   private getChipNodePadding(): LocalizedPadding {
@@ -863,18 +864,12 @@ export struct ChipComponent {
       hilog.error(0x3900, 'Ace', `Chip resourceColor, error: ${err.toString()}`);
       sourceColor = ColorMetrics.resourceColor(Color.Transparent);
     }
-    if (this.isShowPressedBackGroundColor) {
-      this.isHovering = false;
-      return sourceColor
-        .blendColor(ColorMetrics.resourceColor(themeChipNode.pressedBlendColor))
-        .color;
+    if (!this.isShowPressedBackGroundColor) {
+      return sourceColor.color
     }
-    if (this.isHovering) {
-      return sourceColor
-        .blendColor(ColorMetrics.resourceColor(themeChipNode.hoverBlendColor))
-        .color;
-    }
-    return sourceColor.color;
+    return sourceColor
+      .blendColor(ColorMetrics.resourceColor("#19000000"))
+      .color
   }
 
   private getChipNodeHeight(): Length {
@@ -902,7 +897,7 @@ export struct ChipComponent {
   private getCalculateChipNodeWidth(): number {
     let calWidth: number = 0
     let startEndVp: LocalizedMargin = this.getLabelStartEndVp()
-    calWidth += (this.getChipNodeBorderWidth() as number) * 2;
+    calWidth += this.getChipNodeBorderWidth() * 2;
     calWidth += this.getChipNodePadding().start?.value ?? 0;
     calWidth += this.toVp(this.getPrefixChipWidth())
     calWidth += this.toVp(startEndVp.start?.value ?? 0)
@@ -1252,7 +1247,7 @@ export struct ChipComponent {
           .borderRadius(0)
           .padding(0)
           .stateEffect(false)
-          .focusable(this.getSuffixIconFocusable())
+          .focusable(!this.isSuffixIconFocusStyleCustomized)
         } else if (this.suffixIcon?.src !== "") {
           Button({ type: ButtonType.Normal }) {
             Image(this.getSuffixIconSrc())
@@ -1318,7 +1313,7 @@ export struct ChipComponent {
             this.onClose()
             this.deleteChipNodeAnimate()
           })
-          .focusable(this.getSuffixIconFocusable())
+          .focusable(!this.isSuffixIconFocusStyleCustomized)
         }
       }
       .direction(this.chipDirection)
@@ -1467,8 +1462,7 @@ export struct ChipComponent {
   }
 
   private getCloseIconAccessibilityLevel(): string {
-    if (this.closeOptions?.accessibilityLevel === 'no' ||
-      this.closeOptions?.accessibilityLevel === 'no-hide-descendants') {
+    if (this.closeOptions?.accessibilityLevel === 'no' || this.closeOptions?.accessibilityLevel === 'no-hide-descendants') {
       return this.closeOptions.accessibilityLevel;
     }
     return 'yes';
