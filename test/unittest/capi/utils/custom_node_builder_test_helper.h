@@ -35,6 +35,7 @@ public:
 
 class TestHelperManager {
 public:
+
     static TestHelperManager& GetInstance()
     {
         static TestHelperManager instance;

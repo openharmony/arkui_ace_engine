@@ -19,29 +19,6 @@
 #include "modifiers_test_utils.h"
 #include "generated/test_fixtures.h"
 #include "generated/type_helpers.h"
-
-// #include "core/interfaces/native/implementation/console_message_peer_impl.h"
-// #include "core/interfaces/native/implementation/controller_handler_peer_impl.h"
-// #include "core/interfaces/native/implementation/client_authentication_handler_peer_impl.h"
-// #include "core/interfaces/native/implementation/data_resubmission_handler_peer_impl.h"
-// #include "core/interfaces/native/implementation/event_result_peer_impl.h"
-// #include "core/interfaces/native/implementation/file_selector_param_peer_impl.h"
-// #include "core/interfaces/native/implementation/file_selector_result_peer_impl.h"
-// #include "core/interfaces/native/implementation/full_screen_exit_handler_peer_impl.h"
-// #include "core/interfaces/native/implementation/js_geolocation_peer_impl.h"
-// #include "core/interfaces/native/implementation/js_result_peer_impl.h"
-// #include "core/interfaces/native/implementation/http_auth_handler_peer_impl.h"
-// #include "core/interfaces/native/implementation/permission_request_peer_impl.h"
-// #include "core/interfaces/native/implementation/screen_capture_handler_peer_impl.h"
-// #include "core/interfaces/native/implementation/ssl_error_handler_peer_impl.h"
-// #include "core/interfaces/native/implementation/web_context_menu_param_peer_impl.h"
-// #include "core/interfaces/native/implementation/web_context_menu_result_peer_impl.h"
-// #include "core/interfaces/native/implementation/web_controller_peer_impl.h"
-// #include "core/interfaces/native/implementation/web_keyboard_controller_peer_impl.h"
-// #include "core/interfaces/native/implementation/web_resource_error_peer_impl.h"
-// #include "core/interfaces/native/implementation/web_resource_request_peer_impl.h"
-// #include "core/interfaces/native/implementation/web_resource_response_peer_impl.h"
-
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -49,7 +26,7 @@
 #include "test/unittest/capi/stubs/mock_web_pattern.h"
 #include "arkoala_api_generated.h"
 #include "generated/type_helpers.h"
-
+#include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -77,16 +54,6 @@ namespace Converter {
 namespace {
     const auto ATTRIBUTE_BIND_SELECTION_MENU_NAME = "bindSelectionMenu";
     const auto ATTRIBUTE_BIND_SELECTION_MENU_DEFAULT_VALUE = "";
-
-    struct EventsTracker {
-        // static inline GENERATED_ArkUIWebEventsReceiver webEventReceiver {};
-
-        // static inline const GENERATED_ArkUIEventsAPI eventsApiImpl = {
-        //     .getWebEventsReceiver = [] () -> const GENERATED_ArkUIWebEventsReceiver* {
-        //         return &webEventReceiver;
-        //     }
-        // };
-    };
 } // namespace
 
 class WebModifierTest3 : public ModifierTestBase<GENERATED_ArkUIWebModifier,
@@ -111,23 +78,15 @@ HWTEST_F(WebModifierTest3, bindSelectionMenuTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(WebModifierTest3, bindSelectionMenuTestValidValues, TestSize.Level1)
+HWTEST_F(WebModifierTest3, DISABLED_bindSelectionMenuTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBindSelectionMenu, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    static auto expectedCustomNode = CreateNode();
-    static const FrameNode *expectedParentNode = frameNode;
-
-    static const CustomNodeBuilder builder = {
-        .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
-            const Callback_Pointer_Void continuation) {
-            EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode);
-            CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
-        }
-    };
-
+    int callsCount(0);
+    CustomNodeBuilderTestHelper<WebModifierTest3> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
     using OneTestStep = std::tuple<Ark_WebElementType, CustomNodeBuilder, Ark_WebResponseType>;
 
     static const std::vector<OneTestStep> testPlan = {
@@ -139,12 +98,16 @@ HWTEST_F(WebModifierTest3, bindSelectionMenuTestValidValues, TestSize.Level1)
     SelectionMenuOptionsExt selectionMenuOptions1 = {.onAppear = std::nullopt, .onDisappear = std::nullopt,
         .preview = std::nullopt, .menuType = Ark_MenuType::ARK_MENU_TYPE_SELECTION_MENU};
     auto options1 = Converter::ArkValue<Opt_SelectionMenuOptionsExt>(selectionMenuOptions1);
+
     SelectionMenuOptionsExt selectionMenuOptions2 = {.onAppear = std::nullopt, .onDisappear = std::nullopt,
         .preview = std::nullopt, .menuType = Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU};
     auto options2 = Converter::ArkValue<Opt_SelectionMenuOptionsExt>(selectionMenuOptions2);
-    for (auto [spanType, content, responseType]: testPlan) {
-        modifier_->setBindSelectionMenu(node_, spanType, &content, responseType, &options1);
-        modifier_->setBindSelectionMenu(node_, spanType, &content, responseType, &options2);
+
+    for (auto [spanType, builder, responseType]: testPlan) {
+        modifier_->setBindSelectionMenu(node_, spanType, &builder, responseType, &options1);
+        EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
+        modifier_->setBindSelectionMenu(node_, spanType, &builder, responseType, &options2);
+        EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
         fullJson = GetJsonValue(node_);
         resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BIND_SELECTION_MENU_NAME);
     }

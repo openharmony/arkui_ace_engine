@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "test/unittest/capi/utils/custom_node_builder_test_helper.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -107,16 +108,9 @@ HWTEST_F(TextModifierTest2, bindSelectionMenuTestValidValues, TestSize.Level1)
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    static auto expectedCustomNode = CreateNode();
-    static const FrameNode *expectedParentNode = frameNode;
-
-    static const CustomNodeBuilder builder = {
-        .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
-            const Callback_Pointer_Void continuation) {
-            EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode);
-            CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
-        }
-    };
+    int callsCount(0);
+    CustomNodeBuilderTestHelper<TextModifierTest2> builderHelper(this, frameNode);
+    const CustomNodeBuilder builder = builderHelper.GetBuilder();
 
     using OneTestStep = std::tuple<Ark_TextSpanType, CustomNodeBuilder, Ark_TextResponseType>;
 
@@ -137,15 +131,20 @@ HWTEST_F(TextModifierTest2, bindSelectionMenuTestValidValues, TestSize.Level1)
     SelectionMenuOptions selectionMenuOptions1 = {.onAppear = std::nullopt, .onDisappear = std::nullopt,
         .menuType = Ark_MenuType::ARK_MENU_TYPE_SELECTION_MENU};
     auto options1 = Converter::ArkValue<Opt_SelectionMenuOptions>(selectionMenuOptions1);
+
     SelectionMenuOptions selectionMenuOptions2 = {.onAppear = std::nullopt, .onDisappear = std::nullopt,
         .menuType = Ark_MenuType::ARK_MENU_TYPE_PREVIEW_MENU};
     auto options2 = Converter::ArkValue<Opt_SelectionMenuOptions>(selectionMenuOptions2);
+
     for (auto [spanType, content, responseType]: testPlan) {
         modifier_->setBindSelectionMenu(node_, spanType, &content, responseType, &options1);
+        EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
         modifier_->setBindSelectionMenu(node_, spanType, &content, responseType, &options2);
+        EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
         fullJson = GetJsonValue(node_);
         resultValue = GetAttrValue<std::string>(fullJson, ATTRIBUTE_BIND_SELECTION_MENU_NAME);
     }
+
     std::string expectedValue =
         "[{\"spanType\":0,\"responseType\":0,\"menuType\":0},"
         "{\"spanType\":0,\"responseType\":1,\"menuType\":0},"

@@ -385,6 +385,16 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestInvalidVa
 }
 
 /*
+ * @tc.name: DISABLED_setBackgroundTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundTest, TestSize.Level1)
+{
+    EXPECT_TRUE(true); // not implemented
+}
+
+/*
  * @tc.name: DISABLED_setBackgroundImageResizableTest
  * @tc.desc:
  * @tc.type: FUNC
