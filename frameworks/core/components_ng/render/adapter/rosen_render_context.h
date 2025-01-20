@@ -434,6 +434,9 @@ public:
     void UpdateWindowBlur() override;
     void MarkUiFirstNode(bool isUiFirstNode) override;
 
+    OffsetF GetRectOffsetWithPositionEdges(
+        const EdgesParam& positionEdges, float widthPercentReference, float heightPercentReference) override;
+
 protected:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;
@@ -585,8 +588,6 @@ protected:
         const Dimension& parentPaddingTop, float widthPercentReference, float heightPercentReference);
     OffsetF GetRectOffsetWithOffsetEdges(
         const EdgesParam& offsetEdges, float widthPercentReference, float heightPercentReference);
-    OffsetF GetRectOffsetWithPositionEdges(
-        const EdgesParam& positionEdges, float widthPercentReference, float heightPercentReference);
 
     void InitEventClickEffect();
     RefPtr<Curve> UpdatePlayAnimationValue(const ClickEffectLevel& level, float& scaleValue);
