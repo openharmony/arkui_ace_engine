@@ -639,7 +639,7 @@ let FlexWrap;
   FlexWrap[FlexWrap.WrapReverse = 2] = 'WrapReverse';
 })(FlexWrap || (FlexWrap = {}));
 
-class LayoutPolicyPolicy {
+class LayoutPolicy {
   id_ = '';
 
   constructor(id) {
@@ -647,7 +647,7 @@ class LayoutPolicyPolicy {
   }
 
   static get matchParent() {
-    return new LayoutPolicyPolicy('matchParent');
+    return new LayoutPolicy('matchParent');
   }
 }
 

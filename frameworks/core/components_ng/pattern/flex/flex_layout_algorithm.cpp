@@ -310,9 +310,9 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
 bool FlexLayoutAlgorithm::AddElementIntoLayoutPolicyChildren(LayoutWrapper* layoutWrapper, RefPtr<LayoutWrapper> child)
 {
     auto widthLayoutPolicy =
-        AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty())->GetWidthLayoutPolicy();
+        AceType::DynamicCast<FlexLayoutProperty>(child->GetLayoutProperty())->GetWidthLayoutPolicy();
     auto heightLayoutPolicy =
-        AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty())->GetHeightLayoutPolicy();
+        AceType::DynamicCast<FlexLayoutProperty>(child->GetLayoutProperty())->GetHeightLayoutPolicy();
     if (widthLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
         static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH) &&
         heightLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
@@ -999,10 +999,6 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto realSize =
         CreateIdealSizeByPercentRef(layoutConstraint.value(), axis, measureType, needToConstraint, calcConstraint)
             .ConvertToSizeT();
-    if (children.empty()) {
-        layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
-        return;
-    }
     if (layoutWrapper->GetHostTag() == V2::COLUMN_ETS_TAG || layoutWrapper->GetHostTag() == V2::ROW_ETS_TAG) {
         auto widthLayoutPolicy =
             AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty())->GetWidthLayoutPolicy();
@@ -1013,6 +1009,10 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             heightLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)), axis)
                                     .ConvertToSizeT();
         realSize.UpdateIllegalSizeWithCheck(layoutPolicySize);
+    }
+    if (children.empty()) {
+        layoutWrapper->GetGeometryNode()->SetFrameSize(realSize);
+        return;
     }
     mainAxisSize_ = GetMainAxisSizeHelper(realSize, direction_);
     SetInitMainAxisSize(layoutWrapper);
