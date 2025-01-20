@@ -1703,7 +1703,10 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
     if (NEAR_ZERO(paintWidth.Value())) {
         return true;
     }
-    renderContext->PaintFocusState(paintRect, paintColor, paintWidth, false, appTheme->IsFocusBoxGlow());
+    Dimension focusPaddingVp;
+    GetPaintPaddingVp(focusPaddingVp);
+    renderContext->PaintFocusState(
+        paintRect, focusPaddingVp, paintColor, paintWidth, {false, appTheme->IsFocusBoxGlow()});
     return true;
 }
 
