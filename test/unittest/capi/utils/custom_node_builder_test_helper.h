@@ -11,16 +11,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 #ifndef CUSTOM_NODE_BUILDER_TEST_HELPER_H
 #define CUSTOM_NODE_BUILDER_TEST_HELPER_H
 
-
 #include <utility>
 #include "gtest/gtest.h"
 #include "arkoala_api_generated.h"
-
 #include "test/unittest/capi/modifiers/modifier_test_base.h"
 #include "core/interfaces/native/common/extension_companion_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
