@@ -19,6 +19,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
+#include "core/components/theme/app_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -651,7 +652,10 @@ bool KeyEventManager::DispatchTabKey(const KeyEvent& event, const RefPtr<FocusVi
     CHECK_NULL_RETURN(pipeline, false);
     // Tab key set focus state from inactive to active.
     // If return true. This tab key will just trigger onKeyEvent process.
-    bool isHandleFocusActive = (isKeyTabDown || isDPADDown) && pipeline->SetIsFocusActive(true);
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    CHECK_NULL_RETURN(appTheme, false);
+    bool isHandleFocusActive =
+        (isKeyTabDown || isDPADDown) && appTheme->NeedFocusActiveByTab() && pipeline->SetIsFocusActive(true);
     isTabJustTriggerOnKeyEvent_ = isTabJustTriggerOnKeyEvent || isHandleFocusActive;
     if (DispatchTabIndexEventNG(event, curEntryFocusViewFrame)) {
         return true;
