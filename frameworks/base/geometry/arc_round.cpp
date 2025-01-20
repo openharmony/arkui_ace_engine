@@ -19,7 +19,7 @@
 #endif
 
 namespace OHOS::Ace {
-#define HOT_ZONE_WIDTH_AMPLIFICATION_FACTOR 1.5f
+constexpr float HZEXPARAMETER = 1.5f;      // hot zone adjustment parameters
 
 ArcRound::ArcRound(const ArcRound& other)
 {
@@ -118,7 +118,7 @@ bool ArcRound::IsInRegion(const Point& point) const
     float distance = pow(pow(point.GetX() - centerPoint_.GetX(), SQUARE) +
         pow(point.GetY() - centerPoint_.GetY(), SQUARE), HALF);
     float angle = GetPositionAngle(Offset(point.GetX(), point.GetY()));
-    float width = width_ * HOT_ZONE_WIDTH_AMPLIFICATION_FACTOR;
+    float width = width_ * HZEXPARAMETER;
     if (distance > outerRadius_ || distance < outerRadius_ - width) {
         return false;
     }
