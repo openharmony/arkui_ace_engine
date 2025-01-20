@@ -830,6 +830,12 @@ void MenuWrapperPattern::ClearAllSubMenu()
     }
 }
 
+bool PreviewBorderRadiusHasPositive(const BorderRadiusProperty& borderRadius)
+{
+    return borderRadius.radiusTopLeft->IsValid() || borderRadius.radiusTopRight->IsValid() ||
+           borderRadius.radiusBottomLeft->IsValid() || borderRadius.radiusBottomRight->IsValid();
+}
+
 void MenuWrapperPattern::StopPreviewMenuAnimation()
 {
     if (HasTransitionEffect() || HasPreviewTransitionEffect()) {
@@ -883,8 +889,8 @@ void MenuWrapperPattern::StopPreviewMenuAnimation()
         if (previewScaleContext && Positive(animationInfo.previewScale)) {
             previewScaleContext->UpdateTransformScale(VectorF(animationInfo.previewScale, animationInfo.previewScale));
 
-            if (Positive(animationInfo.borderRadius)) {
-                previewScaleContext->UpdateBorderRadius(BorderRadiusProperty(Dimension(animationInfo.borderRadius)));
+            if (PreviewBorderRadiusHasPositive(animationInfo.borderRadius)) {
+                previewScaleContext->UpdateBorderRadius(animationInfo.borderRadius);
             }
         }
     });
