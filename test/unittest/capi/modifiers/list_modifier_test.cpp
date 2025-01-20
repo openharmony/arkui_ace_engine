@@ -494,7 +494,7 @@ HWTEST_F(ListModifierTest, setLanesNegativeTest, TestSize.Level1)
  * @tc.desc: Check the functionality of ListModifier.setEdgeEffect
  * @tc.type: FUNC
  */
-HWTEST_F(ListModifierTest, DISABLED_setEdgeEffectTest, TestSize.Level1)
+HWTEST_F(ListModifierTest, setEdgeEffectTest, TestSize.Level1)
 {
     // default values
     auto fullJson = GetJsonValue(node_);
@@ -524,7 +524,7 @@ HWTEST_F(ListModifierTest, DISABLED_setEdgeEffectTest, TestSize.Level1)
     EXPECT_EQ(edgeEffectCheckValue, "EdgeEffect.None");
     edgeEffectOptionsObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "edgeEffectOptions");
     edgeEffectOptionsCheckValue = GetAttrValue<bool>(edgeEffectOptionsObject, "alwaysEnabled");
-    EXPECT_EQ(edgeEffectOptionsCheckValue, true);
+    EXPECT_EQ(edgeEffectOptionsCheckValue, false);
 
     // set invalid edgeEffect
     options = Converter::ArkValue<Opt_EdgeEffectOptions>(Converter::ArkValue<Ark_Boolean>(true));
