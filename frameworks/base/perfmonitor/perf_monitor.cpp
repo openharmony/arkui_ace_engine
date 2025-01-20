@@ -24,6 +24,7 @@
 namespace OHOS::Ace {
 using namespace std;
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
+std::once_flag PerfMonitor::initFlag;
 constexpr int64_t SCENE_TIMEOUT = 10000000000;
 constexpr int64_t RESPONSE_TIMEOUT = 600000000;
 constexpr int64_t STARTAPP_FRAME_TIMEOUT = 1000000000;
@@ -275,10 +276,13 @@ void SceneRecord::Reset()
 
 PerfMonitor* PerfMonitor::GetPerfMonitor()
 {
-    if (pMonitor == nullptr) {
-        pMonitor = new PerfMonitor();
-    }
+    std::call_once(initFlag, &PerfMonitor::InitInstance);
     return pMonitor;
+}
+
+void PerfMonitor::InitInstance()
+{
+    pMonitor = new PerfMonitor();
 }
 
 void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note)
