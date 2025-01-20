@@ -507,10 +507,6 @@ HWTEST_F(CommonMethodModifierTest9, SetOnMouseTest, TestSize.Level1)
         auto inputEventHub = eventHub->GetInputEventHub();
         ASSERT_NE(inputEventHub, nullptr);
 
-        auto mouseTask = [weak = nullptr](MouseInfo& info) {};
-        auto inputEvent_ = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
-        inputEventHub->AddOnMouseEvent(inputEvent_);
-
         OffsetF offset;
         TouchTestResult result;
         inputEventHub->ProcessMouseTestHit(offset, result);
