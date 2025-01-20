@@ -67,7 +67,7 @@ class Util {
       return false;
     }
     let resource = s1;
-    return resource.type === g1;
+    return resource.type === RESOURCE_TYPE_SYMBOL;
   }
 
   static a2(resource) {
