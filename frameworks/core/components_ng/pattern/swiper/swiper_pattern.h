@@ -945,6 +945,7 @@ private:
     void UpdateIndicatorOnChildChange();
 
     void CheckSpecialItemCount() const;
+    bool IsCachedShow() const;
 
     friend class SwiperHelper;
 
