@@ -3496,10 +3496,11 @@ void TabBarPattern::InitFocusEvent()
 void TabBarPattern::AddIsFocusActiveUpdateEvent()
 {
     if (!isFocusActiveUpdateEvent_) {
-        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusAcitve) {
+        isFocusActiveUpdateEvent_ = [weak = WeakClaim(this)](bool isFocusActive) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->SetTabBarFocusActive(isFocusAcitve);
+            pattern->UpdateFocusToSelectedNode(isFocusActive);
+            pattern->SetTabBarFocusActive(isFocusActive);
             pattern->UpdateFocusTabBarPageState();
         };
     }
@@ -3517,6 +3518,26 @@ void TabBarPattern::RemoveIsFocusActiveUpdateEvent()
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveIsFocusActiveUpdateEvent(GetHost());
+}
+
+void TabBarPattern::UpdateFocusToSelectedNode(bool isFocusActive)
+{
+    if (!isFocusActive) {
+        return;
+    }
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    CHECK_NULL_VOID(tabTheme);
+    if (tabBarStyle_ == TabBarStyle::BOTTOMTABBATSTYLE ||
+        (tabBarStyle_ == TabBarStyle::SUBTABBATSTYLE && !tabTheme->GetIsChangeFocusTextStyle())) {
+        return;
+    }
+    auto childFocusNode = GetCurrentFocusNode();
+    CHECK_NULL_VOID(childFocusNode);
+    if (!childFocusNode->IsCurrentFocus()) {
+        childFocusNode->RequestFocusImmediately();
+    }
 }
 
 void TabBarPattern::UpdateFocusTabBarPageState()
