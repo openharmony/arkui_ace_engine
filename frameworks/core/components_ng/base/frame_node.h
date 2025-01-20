@@ -1136,6 +1136,9 @@ public:
         }
     }
 
+    void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
+    void FireFrameNodeDestructorCallback();
+
 protected:
     void DumpInfo() override;
     void DumpSimplifyInfo(std::unique_ptr<JsonValue>& json) override;
@@ -1392,6 +1395,7 @@ private:
 
     int32_t childrenUpdatedFrom_ = -1;
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
+    std::function<void(int32_t)> frameNodeDestructorCallback_;
 
     friend class RosenRenderContext;
     friend class RenderContext;
