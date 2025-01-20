@@ -46,12 +46,16 @@ namespace {
     const auto ATTRIBUTE_BACKGROUND_NAME = "background";
     const auto ATTRIBUTE_BACKGROUND_DEFAULT_VALUE = "";
 }
+
 struct DoublePair {
     double first;
     double second;
+    bool operator<(const DoublePair& other) const {
+        if (first != other.first) return first < other.first;
+        return second < other.second;
+    }
 };
 namespace Converter {
-    template<>
     std::string Convert(const Alignment& value)
     {
         double horizontal = value.GetHorizontal();
