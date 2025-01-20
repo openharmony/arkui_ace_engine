@@ -122,8 +122,6 @@ public:
 
         if (GetIndicatorType() == SwiperIndicatorType::DOT) {
             return CreateDotIndicatorPaintMethodInSingleMode();
-        } else {
-            ResetDotModifier();
         }
         return nullptr;
     }
