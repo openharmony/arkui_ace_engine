@@ -530,11 +530,9 @@ HWTEST_F(CalendarModifierTest, offDaysTestValidValues, TestSize.Level1)
             const InspectorFilter inspector;
             auto jsonVal = JsonUtil::Create(true);
             calendarPaintProperty->ToJsonValue(jsonVal, inspector);
-            std::cout<<"JSON :" << jsonVal->ToString() <<std::endl;
-
             auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_OFF_DAYS_NAME);
             EXPECT_EQ(resultStr, expectedStr)
-                 << "Input value is: " << input << ", method: setStartOfWeek, attribute: startOfWeek";
+                 << "Input value is: " << input << ", method: setOffDays, attribute: offDays";
         }
     };
     for (auto& [input, value, expected] : testFixtureOffDaysValidValues) {
@@ -632,20 +630,6 @@ HWTEST_F(CalendarModifierTest, currentDayStyleTest, TestSize.Level1)
     initValue.gregorianCalendarHeight = Converter::ArkValue<Opt_Number>(4);
     initValue.dayYAxisOffset = Converter::ArkValue<Opt_Number>(5);
     initValue.lunarDayYAxisOffset = Converter::ArkValue<Opt_Number>(6);
-    initValue.underscoreXAxisOffset = Converter::ArkValue<Opt_Number>(7);
-    initValue.underscoreYAxisOffset = Converter::ArkValue<Opt_Number>(8);
-    initValue.scheduleMarkerXAxisOffset = Converter::ArkValue<Opt_Number>(9);
-    initValue.scheduleMarkerYAxisOffset = Converter::ArkValue<Opt_Number>(10);
-    initValue.colSpace = Converter::ArkValue<Opt_Number>(11);
-    initValue.dailyFiveRowSpace = Converter::ArkValue<Opt_Number>(12);
-    initValue.dailySixRowSpace = Converter::ArkValue<Opt_Number>(13);
-    initValue.lunarHeight = Converter::ArkValue<Opt_Number>(14);
-    initValue.underscoreWidth = Converter::ArkValue<Opt_Number>(15);
-    initValue.underscoreLength = Converter::ArkValue<Opt_Number>(16);
-    initValue.scheduleMarkerRadius = Converter::ArkValue<Opt_Number>(17);
-    initValue.boundaryRowOffset = Converter::ArkValue<Opt_Number>(18);
-    initValue.boundaryColOffset = Converter::ArkValue<Opt_Number>(19);
-
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_FALSE(frameNode->GetChildren().empty());
     auto swiperNode = frameNode->GetChildren().front();
@@ -680,7 +664,38 @@ HWTEST_F(CalendarModifierTest, currentDayStyleTest, TestSize.Level1)
         EXPECT_EQ(resultStr, "5.00vp");
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LUNAR_DAY_Y_AXIS_OFFSET_NAME);
         EXPECT_EQ(resultStr, "6.00vp");
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNDERSCORE_X_AXIS_OFFSET_NAME);
+    }
+}
+
+/*
+ * @tc.name: currentDayStyleTest2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, currentDayStyleTest2, TestSize.Level1)
+{
+    Ark_CurrentDayStyle initValue;
+    initValue.underscoreXAxisOffset = Converter::ArkValue<Opt_Number>(7);
+    initValue.underscoreYAxisOffset = Converter::ArkValue<Opt_Number>(8);
+    initValue.scheduleMarkerXAxisOffset = Converter::ArkValue<Opt_Number>(9);
+    initValue.scheduleMarkerYAxisOffset = Converter::ArkValue<Opt_Number>(10);
+    initValue.colSpace = Converter::ArkValue<Opt_Number>(11);
+    initValue.dailyFiveRowSpace = Converter::ArkValue<Opt_Number>(12);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
+    auto swiperNode = frameNode->GetChildren().front();
+    ASSERT_NE(swiperNode, nullptr);
+    modifier_->setCurrentDayStyle(node_, &initValue);
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
+        auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
+        auto jsonValue = JsonUtil::Create(true);
+        calendarPaintProperty->ToJsonValue(jsonValue, inspector);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNDERSCORE_X_AXIS_OFFSET_NAME);
         EXPECT_EQ(resultStr, "7.00vp");
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNDERSCORE_Y_AXIS_OFFSET_NAME);
         EXPECT_EQ(resultStr, "8.00vp");
@@ -692,7 +707,39 @@ HWTEST_F(CalendarModifierTest, currentDayStyleTest, TestSize.Level1)
         EXPECT_EQ(resultStr, "11.00vp");
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAILY_FIVE_ROW_SPACE_NAME);
         EXPECT_EQ(resultStr, "12.00vp");
-        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAILY_SIX_ROW_SPACE_NAME);
+    }
+}
+
+/*
+ * @tc.name: currentDayStyleTest3
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, currentDayStyleTest3, TestSize.Level1)
+{
+    Ark_CurrentDayStyle initValue;
+    initValue.dailySixRowSpace = Converter::ArkValue<Opt_Number>(13);
+    initValue.lunarHeight = Converter::ArkValue<Opt_Number>(14);
+    initValue.underscoreWidth = Converter::ArkValue<Opt_Number>(15);
+    initValue.underscoreLength = Converter::ArkValue<Opt_Number>(16);
+    initValue.scheduleMarkerRadius = Converter::ArkValue<Opt_Number>(17);
+    initValue.boundaryRowOffset = Converter::ArkValue<Opt_Number>(18);
+    initValue.boundaryColOffset = Converter::ArkValue<Opt_Number>(19);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
+    auto swiperNode = frameNode->GetChildren().front();
+    ASSERT_NE(swiperNode, nullptr);
+    modifier_->setCurrentDayStyle(node_, &initValue);
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
+        auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
+        auto jsonValue = JsonUtil::Create(true);
+        calendarPaintProperty->ToJsonValue(jsonValue, inspector);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAILY_SIX_ROW_SPACE_NAME);
         EXPECT_EQ(resultStr, "13.00vp");
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LUNAR_HEIGHT_NAME);
         EXPECT_EQ(resultStr, "14.00vp");
