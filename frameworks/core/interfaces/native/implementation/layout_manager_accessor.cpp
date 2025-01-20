@@ -102,8 +102,4 @@ const GENERATED_ArkUILayoutManagerAccessor* GetLayoutManagerAccessor()
     };
     return &LayoutManagerAccessorImpl;
 }
-
-struct LayoutManagerPeer {
-    virtual ~LayoutManagerPeer() = default;
-};
 }
