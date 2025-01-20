@@ -2402,13 +2402,7 @@ bool ScrollablePattern::HandleScrollableOverScroll(float velocity)
         OnScrollEndRecursiveInner(velocity);
         return true;
     }
-    OnScrollEnd();
-    auto parent = GetNestedScrollParent();
-    auto nestedScroll = GetNestedScroll();
-    if (!result && parent && nestedScroll.NeedParent()) {
-        result = parent->HandleScrollVelocity(velocity, Claim(this));
-    }
-    return result;
+    return false;
 }
 
 bool ScrollablePattern::CanSpringOverScroll() const
@@ -2433,8 +2427,9 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
     auto isOutOfBoundary = IsOutOfBoundary();
     ACE_SCOPED_TRACE("HandleOverScroll, IsOutOfBoundary:%u, id:%d, tag:%s", isOutOfBoundary,
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    auto needSpringEffect = GetEdgeEffect() == EdgeEffect::SPRING && CanSpringOverScroll();
     if (!parent || !nestedScroll.NeedParent(velocity < 0) || isOutOfBoundary) {
-        if (GetEdgeEffect() == EdgeEffect::SPRING && AnimateStoped() && CanSpringOverScroll()) {
+        if (needSpringEffect && AnimateStoped()) {
             // trigger onScrollEnd later, when spring animation finishes
             ProcessSpringEffect(velocity, true);
             return true;
@@ -2442,10 +2437,10 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
         OnScrollEndRecursiveInner(velocity);
         return false;
     }
-    if (parent && InstanceOf<ScrollablePattern>(parent)) {
-        // Components that are not ScrollablePattern do not implement NestedScrollOutOfBoundary and
-        // handleScroll is handled differently, so isolate the implementation of handleOverScroll
-        return HandleScrollableOverScroll(velocity);
+    if (InstanceOf<ScrollablePattern>(parent) && HandleScrollableOverScroll(velocity)) {
+        // Triggers ancestor spring animation that out of boundary, and after ancestor returns to the boundary,
+        // triggers child RemainVelocityToChild
+        return true;
     }
     // parent handle over scroll first
     if ((velocity < 0 && (nestedScroll.forward == NestedScrollMode::SELF_FIRST)) ||
@@ -2455,16 +2450,20 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
             OnScrollEnd();
             return true;
         }
-        if (GetEdgeEffect() == EdgeEffect::SPRING && CanSpringOverScroll()) {
+        if (needSpringEffect) {
             ProcessSpringEffect(velocity);
             return true;
         }
     }
 
     // self handle over scroll first
-    if (GetEdgeEffect() == EdgeEffect::SPRING && CanSpringOverScroll()) {
+    if (needSpringEffect) {
         ProcessSpringEffect(velocity);
         return true;
+    }
+    if (GetEdgeEffect() == EdgeEffect::FADE) {
+        OnScrollEndRecursiveInner(velocity);
+        return false;
     }
     OnScrollEnd();
     return parent->HandleScrollVelocity(velocity);
