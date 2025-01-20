@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 template<typename T>
 class CustomNodeBuilderTestHelper {
 public:
-    explicit CustomNodeBuilderTestHelper(T* testClassObject, FrameNode* parentNode)
+    CustomNodeBuilderTestHelper(T* testClassObject, FrameNode* parentNode)
         : testClassObject_(testClassObject),
         expectedParentNode_(parentNode),
         expectedCustomNode_(testClassObject->CreateNode())
