@@ -26,6 +26,10 @@
 
 namespace OHOS::Ace::NG {
 
+namespace {
+    constexpr uint64_t MAX_WAITING_TIME = 1000; // 1000ms
+}
+
 class ImageObject : public virtual AceType {
     DECLARE_ACE_TYPE(ImageObject, AceType);
 
@@ -65,6 +69,12 @@ public:
     virtual void MakeCanvasImage(const RefPtr<ImageLoadingContext>& ctx, const SizeF& resizeTarget, bool forceResize,
         bool syncLoad, bool loadInVipChannel = false) = 0;
 
+    std::unique_lock<std::timed_mutex> GetPrepareImageDataLock(
+        const std::chrono::milliseconds& timeoutMs = std::chrono::milliseconds(MAX_WAITING_TIME))
+    {
+        return std::unique_lock<std::timed_mutex>(prepareImageDataMutex_, timeoutMs);
+    }
+
 protected:
     const ImageSourceInfo src_;
     ImageRotateOrientation orientation_ = ImageRotateOrientation::UP;
@@ -73,6 +83,9 @@ protected:
     // no longer needed after making canvas image
     RefPtr<ImageData> data_;
     int32_t frameCount_ = 1;
+    // Mutex for controlling access to prepareImageData operations.
+    // This is a timed mutex to prevent long blocking, allowing a maximum wait time of 1000ms for acquiring the lock.
+    std::timed_mutex prepareImageDataMutex_;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImageObject);
 };
