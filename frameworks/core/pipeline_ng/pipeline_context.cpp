@@ -3665,10 +3665,17 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     }
 
     DispatchAxisEventToDragDropManager(event, node, etsSerializedGesture);
-
-    if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
-        eventManager_->AxisTest(scaleEvent, node);
-        eventManager_->DispatchAxisEventNG(scaleEvent);
+    // when api >= 15, do not block end and cancel action.
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        if (event.action != AxisAction::NONE) {
+            eventManager_->AxisTest(scaleEvent, node);
+            eventManager_->DispatchAxisEventNG(scaleEvent);
+        }
+    } else {
+        if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
+            eventManager_->AxisTest(scaleEvent, node);
+            eventManager_->DispatchAxisEventNG(scaleEvent);
+        }
     }
     if (event.action == AxisAction::BEGIN && formEventMgr) {
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
