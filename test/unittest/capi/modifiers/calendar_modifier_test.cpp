@@ -23,6 +23,7 @@
 #include "core/interfaces/native/implementation/calendar_controller_peer.h"
 #include "core/components_ng/pattern/calendar/calendar_event_hub.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
+#include "core/components_ng/pattern/calendar/calendar_paint_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -40,6 +41,16 @@ constexpr auto ATTRIBUTE_NEED_SLIDE_NAME = "needSlide";
 constexpr auto ATTRIBUTE_NEED_SLIDE_DEFAULT_VALUE = "false";
 constexpr auto ATTRIBUTE_DIRECTION_NAME = "direction";
 constexpr auto ATTRIBUTE_DIRECTION_DEFAULT_VALUE = "1";
+
+constexpr auto ATTRIBUTE_SHOW_LUNAR_NAME = "showLunar";
+constexpr auto ATTRIBUTE_SHOW_HOLIDAY_NAME = "showHoliday";
+constexpr auto ATTRIBUTE_START_OF_WEEK_NAME = "startOfWeek";
+constexpr auto ATTRIBUTE_OFF_DAYS_NAME = "offDays";
+
+constexpr auto ATTRIBUTE_SHOW_LUNAR_DEFAULT_VALUE = "false";
+constexpr auto ATTRIBUTE_SHOW_HOLIDAY_DEFAULT_VALUE = "false";
+constexpr auto ATTRIBUTE_START_OF_WEEK_DEFAULT_VALUE = "Week.Mon";
+constexpr auto ATTRIBUTE_OF_DAYS_DEFAULT_VALUE = "5,6";
 
 class MockCalendarController : public OHOS::Ace::NG::CalendarControllerNg {
 public:
@@ -135,6 +146,16 @@ const std::vector<std::tuple<std::string, Ark_Axis>> testFixtureIntAxisInvalidVa
     { "static_cast<Ark_Axis>(-1)", Converter::ArkValue<Ark_Axis>(static_cast<Ark_Axis>(-1)) },
     { "static_cast<Ark_Axis>(INT_MAX)", Converter::ArkValue<Ark_Axis>(static_cast<Ark_Axis>(INT_MAX)) },
 };
+
+const std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberValidValues = {
+    { "1", Converter::ArkValue<Ark_Number>(0), "0"},
+    { "0", Converter::ArkValue<Ark_Number>(1), "1" },
+};
+
+const std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureStartOfWeekValidValues = {
+    { "1", Converter::ArkValue<Ark_Number>(0), "Week.Mon"},
+    { "0", Converter::ArkValue<Ark_Number>(1), "Week.Tue" },
+};
 } // namespace
 
 /*
@@ -142,7 +163,7 @@ const std::vector<std::tuple<std::string, Ark_Axis>> testFixtureIntAxisInvalidVa
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, DISABLED_setCalendarOptionsTestValidValues1, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setCalendarOptionsTestValidValues1, TestSize.Level1)
 {
     modifier_->setCalendarOptions(node_, &calendarOptions);
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
@@ -212,13 +233,230 @@ HWTEST_F(CalendarModifierTest, setNeedSlideTestNeedSlideValidValues, TestSize.Le
 }
 
 /*
+ * @tc.name: showLunarTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, showLunarTestDefaultValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
+    auto swiperNode = frameNode->GetChildren().front();
+    ASSERT_NE(swiperNode, nullptr);
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
+        auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
+        auto jsonVal = JsonUtil::Create(true);
+        calendarPaintProperty->ToJsonValue(jsonVal, inspector);
+        auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_SHOW_LUNAR_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_LUNAR_DEFAULT_VALUE)
+            << "Default value for attribute 'showLunar'";
+    }
+}
+
+/*
+ * @tc.name: showLunarTestNeedSlideValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, showLunarTestNeedSlideValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueShowLunar;
+
+    // Initial setup
+    initValueShowLunar = std::get<1>(testFixtureBooleanValidValues[0]);
+    auto checkValue = [this, &initValueShowLunar](
+                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+        Ark_Boolean inputValueShowLunar = initValueShowLunar;
+        inputValueShowLunar = value;
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        ASSERT_FALSE(frameNode->GetChildren().empty());
+        auto swiperNode = frameNode->GetChildren().front();
+        ASSERT_NE(swiperNode, nullptr);
+        modifier_->setShowLunar(node_, inputValueShowLunar);
+        ASSERT_FALSE(swiperNode->GetChildren().empty());
+        for (const auto& calendarNode : swiperNode->GetChildren()) {
+            auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+            ASSERT_NE(calendarFrameNode, nullptr);
+            auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+            ASSERT_NE(calendarPaintProperty, nullptr);
+            const InspectorFilter inspector;
+            auto jsonVal = JsonUtil::Create(true);
+            calendarPaintProperty->ToJsonValue(jsonVal, inspector);
+            auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_SHOW_LUNAR_NAME);
+            EXPECT_EQ(resultStr, expectedStr)
+                 << "Input value is: " << input << ", method: setShowLunar, attribute: showLunar";
+        }
+    };
+    for (auto& [input, value, expected] : testFixtureBooleanValidValues) {
+        checkValue(input, value, expected);
+    }
+}
+
+/*
+ * @tc.name: showHolidayTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, showHolidayTestDefaultValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
+    auto swiperNode = frameNode->GetChildren().front();
+    ASSERT_NE(swiperNode, nullptr);
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
+        auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
+        auto jsonVal = JsonUtil::Create(true);
+        calendarPaintProperty->ToJsonValue(jsonVal, inspector);
+        auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_SHOW_HOLIDAY_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_SHOW_HOLIDAY_DEFAULT_VALUE)
+            << "Default value for attribute 'showHoliday'";
+    }
+}
+
+/*
+ * @tc.name: showHolidayTestNeedSlideValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, showHolidayTestNeedSlideValidValues, TestSize.Level1)
+{
+    Ark_Boolean initValueShowHoliday;
+    initValueShowHoliday = std::get<1>(testFixtureBooleanValidValues[0]);
+    auto checkValue = [this, &initValueShowHoliday](
+                          const std::string& input, const Ark_Boolean& value, const std::string& expectedStr) {
+        Ark_Boolean inputValueShowHoliday = initValueShowHoliday;
+        inputValueShowHoliday = value;
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        ASSERT_FALSE(frameNode->GetChildren().empty());
+        auto swiperNode = frameNode->GetChildren().front();
+        ASSERT_NE(swiperNode, nullptr);
+        modifier_->setShowHoliday(node_, inputValueShowHoliday);
+        ASSERT_FALSE(swiperNode->GetChildren().empty());
+        for (const auto& calendarNode : swiperNode->GetChildren()) {
+            auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+            ASSERT_NE(calendarFrameNode, nullptr);
+            auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+            ASSERT_NE(calendarPaintProperty, nullptr);
+            const InspectorFilter inspector;
+            auto jsonVal = JsonUtil::Create(true);
+            calendarPaintProperty->ToJsonValue(jsonVal, inspector);
+            auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_SHOW_HOLIDAY_NAME);
+            EXPECT_EQ(resultStr, expectedStr)
+                 << "Input value is: " << input << ", method: setShowHoliday, attribute: showHoliday";
+        }
+    };
+    for (auto& [input, value, expected] : testFixtureBooleanValidValues) {
+        checkValue(input, value, expected);
+    }
+}
+
+/*
+ * @tc.name: startOfWeekTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, startOfWeekTestDefaultValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
+    auto swiperNode = frameNode->GetChildren().front();
+    ASSERT_NE(swiperNode, nullptr);
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
+        auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
+        auto jsonVal = JsonUtil::Create(true);
+        calendarPaintProperty->ToJsonValue(jsonVal, inspector);
+        auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_START_OF_WEEK_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_START_OF_WEEK_DEFAULT_VALUE)
+            << "Default value for attribute 'startOfWeek'";
+    }
+}
+
+/*
+ * @tc.name: startOfWeekTestNeedSlideValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, startOfWeekTestValidValues, TestSize.Level1)
+{
+    Ark_Number initValuestartOfWeek;
+    initValuestartOfWeek = std::get<1>(testFixtureStartOfWeekValidValues[0]);
+    auto checkValue = [this, &initValuestartOfWeek](
+                          const std::string& input, const  Ark_Number& value, const std::string& expectedStr) {
+        Ark_Number inputValueStartOfWeek = initValuestartOfWeek;
+        inputValueStartOfWeek = value;
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        ASSERT_FALSE(frameNode->GetChildren().empty());
+        auto swiperNode = frameNode->GetChildren().front();
+        ASSERT_NE(swiperNode, nullptr);
+        modifier_->setStartOfWeek(node_, &inputValueStartOfWeek);
+        ASSERT_FALSE(swiperNode->GetChildren().empty());
+        for (const auto& calendarNode : swiperNode->GetChildren()) {
+            auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+            ASSERT_NE(calendarFrameNode, nullptr);
+            auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+            ASSERT_NE(calendarPaintProperty, nullptr);
+            const InspectorFilter inspector;
+            auto jsonVal = JsonUtil::Create(true);
+            calendarPaintProperty->ToJsonValue(jsonVal, inspector);
+            auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_START_OF_WEEK_NAME);
+            EXPECT_EQ(resultStr, expectedStr)
+                 << "Input value is: " << input << ", method: setStartOfWeek, attribute: startOfWeek";
+        }
+    };
+    for (auto& [input, value, expected] : testFixtureStartOfWeekValidValues) {
+        checkValue(input, value, expected);
+    }
+}
+
+/*
+ * @tc.name: offDaysTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, offDaysTestDefaultValues, TestSize.Level1)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
+    auto swiperNode = frameNode->GetChildren().front();
+    ASSERT_NE(swiperNode, nullptr);
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
+        auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
+        auto jsonVal = JsonUtil::Create(true);
+        calendarPaintProperty->ToJsonValue(jsonVal, inspector);
+        auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_OFF_DAYS_NAME);
+        EXPECT_EQ(resultStr, ATTRIBUTE_OF_DAYS_DEFAULT_VALUE)
+            << "Default value for attribute 'offDays'";
+    }
+}
+
+/*
  * @tc.name: setDirectionTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, DISABLED_setDirectionTestDefaultValues, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setDirectionTestDefaultValues, TestSize.Level1)
 {
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    auto jsonValue = GetPatternJsonValue(node_);
     std::string resultStr;
 
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
@@ -230,7 +468,7 @@ HWTEST_F(CalendarModifierTest, DISABLED_setDirectionTestDefaultValues, TestSize.
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, DISABLED_setDirectionTestDirectionValidValues, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setDirectionTestDirectionValidValues, TestSize.Level1)
 {
     Ark_Axis initValueDirection;
 
@@ -243,7 +481,7 @@ HWTEST_F(CalendarModifierTest, DISABLED_setDirectionTestDirectionValidValues, Te
 
         inputValueDirection = value;
         modifier_->setDirection(node_, inputValueDirection);
-        auto jsonValue = GetJsonValue(node_);
+        auto jsonValue = GetPatternJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
         EXPECT_EQ(resultStr, expectedStr)
             << "Input value is: " << input << ", method: setDirection, attribute: direction";
@@ -259,7 +497,7 @@ HWTEST_F(CalendarModifierTest, DISABLED_setDirectionTestDirectionValidValues, Te
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CalendarModifierTest, DISABLED_setDirectionTestDirectionInvalidValues, TestSize.Level1)
+HWTEST_F(CalendarModifierTest, setDirectionTestDirectionInvalidValues, TestSize.Level1)
 {
     Ark_Axis initValueDirection;
 
@@ -272,7 +510,7 @@ HWTEST_F(CalendarModifierTest, DISABLED_setDirectionTestDirectionInvalidValues, 
         modifier_->setDirection(node_, inputValueDirection);
         inputValueDirection = value;
         modifier_->setDirection(node_, inputValueDirection);
-        auto jsonValue = GetJsonValue(node_);
+        auto jsonValue = GetPatternJsonValue(node_);
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DIRECTION_NAME);
         EXPECT_EQ(resultStr, ATTRIBUTE_DIRECTION_DEFAULT_VALUE)
             << "Input value is: " << input << ", method: setDirection, attribute: direction";
@@ -296,9 +534,11 @@ HWTEST_F(CalendarModifierTest, setOnSelectChangeTest, TestSize.Level1)
     modifier_->setCalendarOptions(node_, &calendarOptions);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
     auto swiperNode = frameNode->GetChildren().front();
     ASSERT_NE(swiperNode, nullptr);
     std::vector<RefPtr<CalendarEventHub>> eventHubList;
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
     for (const auto& calendarNode : swiperNode->GetChildren()) {
         auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
         CHECK_NULL_CONTINUE(calendarFrameNode);
