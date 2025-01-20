@@ -1536,7 +1536,7 @@ void TextFieldPattern::HandleCrossPlatformInBlurEvent()
 bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.code == KeyCode::KEY_TAB && !contentController_->IsEmpty()) {
-        if (isFocusedBeforeClick_ || !independentControlKeyboard_) {
+        if (isFocusedBeforeClick_) {
             isFocusedBeforeClick_ = false;
             HandleOnSelectAll(true);
         } else {
