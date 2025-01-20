@@ -19,6 +19,8 @@
 #endif
 
 namespace OHOS::Ace {
+#define HOT_ZONE_WIDTH_AMPLIFICATION_FACTOR 1.5f
+
 ArcRound::ArcRound(const ArcRound& other)
 {
     *this = other;
@@ -116,7 +118,8 @@ bool ArcRound::IsInRegion(const Point& point) const
     float distance = pow(pow(point.GetX() - centerPoint_.GetX(), SQUARE) +
         pow(point.GetY() - centerPoint_.GetY(), SQUARE), HALF);
     float angle = GetPositionAngle(Offset(point.GetX(), point.GetY()));
-    if (distance > outerRadius_ || distance < outerRadius_ - width_) {
+    float width = width_ * HOT_ZONE_WIDTH_AMPLIFICATION_FACTOR;
+    if (distance > outerRadius_ || distance < outerRadius_ - width) {
         return false;
     }
     auto startAngle = startAngle_;
