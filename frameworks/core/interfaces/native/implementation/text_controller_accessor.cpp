@@ -55,7 +55,7 @@ Ark_NativePointer GetLayoutManagerImpl(TextControllerPeer* peer)
     CHECK_NULL_RETURN(peer && peer->controller, nullptr);
     auto layoutManagerAccessor = GetLayoutManagerAccessor();
     CHECK_NULL_RETURN(layoutManagerAccessor, nullptr);
-    auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(GetLayoutManagerAccessor()->ctor());
+    auto layoutManagerPeer = reinterpret_cast<LayoutManagerPeer*>(layoutManagerAccessor->ctor());
     CHECK_NULL_RETURN(layoutManagerPeer, nullptr);
     layoutManagerPeer->handler = peer->controller->GetLayoutInfoInterface();
     return layoutManagerPeer;
