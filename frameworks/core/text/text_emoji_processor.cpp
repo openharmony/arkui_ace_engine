@@ -59,10 +59,10 @@ int32_t TextEmojiProcessor::Delete(int32_t startIndex, int32_t length, std::u16s
     if (startIndex < 0 || length < 0) {
         return 0;
     }
-    int32_t substrLength = u16.length() - unsigned(startIndex);
-    if (substrLength < 0) {
+    if (u16.length() < unsigned(startIndex)) {
         return 0;
     }
+    uint32_t substrLength = u16.length() - unsigned(startIndex);
     if (isBackward) {
         if (startIndex == static_cast<int32_t>(u16.length())) {
             u32ContentToDelete = UtfUtils::Str16ToStr32(content);
