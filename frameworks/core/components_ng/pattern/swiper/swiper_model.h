@@ -140,6 +140,7 @@ public:
     virtual void SetCachedCount(int32_t cachedCount);
     virtual void SetCachedIsShown(bool isShown) {}
     virtual void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange);
+    virtual void SetOnUnselected(std::function<void(const BaseEventInfo* info)>&& onUnselected) {}
     virtual void SetOnAnimationStart(std::function<void(const BaseEventInfo* info)>&& onAnimationStart) {}
     virtual void SetOnAnimationEnd(std::function<void(const BaseEventInfo* info)>&& onAnimationEnd) {}
     virtual void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) {}

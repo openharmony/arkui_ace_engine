@@ -1137,6 +1137,14 @@ HWTEST_F(SwiperAttrTestNg, SwiperModelNg002, TestSize.Level1)
     auto onAnimationEnd = [](int32_t index, const AnimationCallbackInfo& info) {};
     model.SetOnAnimationEnd(std::move(onAnimationEnd));
     EXPECT_NE(pattern->animationEndEvent_, nullptr);
+
+    /**
+     * @tc.steps: step3.8 Test SetOnUnselected function.
+     * @tc.expected:pattern->unselectedEvent_ not null.
+     */
+    auto onUnselected = [](const BaseEventInfo* info) {};
+    model.SetOnUnselected(std::move(onUnselected));
+    EXPECT_NE(pattern->unselectedEvent_, nullptr);
 }
 
 /**
