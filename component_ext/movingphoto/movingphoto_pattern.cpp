@@ -479,7 +479,7 @@ void MovingPhotoPattern::ResetMediaPlayer()
     ContainerScope scope(instanceId_);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (isRefreshMovingPhoto_) {
+    if (isRefreshMovingPhoto_ && isUsedMediaPlayerStatusChanged_) {
         TAG_LOGW(AceLogTag::ACE_MOVING_PHOTO, "ArkUIMovingPhotoResetMediaPlayerAsync.");
         auto bgTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
         bgTaskExecutor.PostTask(
@@ -879,6 +879,7 @@ SizeF MovingPhotoPattern::MeasureContentLayout(const SizeF& layoutSize,
 
 void MovingPhotoPattern::OnMediaPlayerStatusChanged(PlaybackStatus status)
 {
+    isUsedMediaPlayerStatusChanged_ = true;
     currentPlayStatus_ = status;
     TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "Player current status is %{public}d.", status);
     switch (status) {
@@ -1185,6 +1186,9 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     src.SetSrc(imageSrc);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src, host);
     UpdateImageNode();
+    if (fd_ > 0) {
+        close(fd_);
+    }
     fd_ = dataProvider->ReadMovingPhotoVideo(uri_);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, VideoSource, fd_, host);
     isRefreshMovingPhoto_ = true;
