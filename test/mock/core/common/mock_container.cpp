@@ -165,4 +165,9 @@ RefPtr<Container> Container::GetFoucsed()
     });
     return foucsContainer;
 }
+
+bool Container::IsNodeInKeyGuardWindow(const RefPtr<NG::FrameNode>& node)
+{
+    return false;
+}
 } // namespace OHOS::Ace

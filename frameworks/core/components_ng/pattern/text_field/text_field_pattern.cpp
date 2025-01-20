@@ -1072,6 +1072,7 @@ void TextFieldPattern::HandleFocusEvent()
     if (isSelectAll && !contentController_->IsEmpty()) {
         needSelectAll_ = !independentControlKeyboard_;
     }
+    SetIsEnableSubWindowMenu();
     ProcessFocusStyle();
     ProcessAutoFillOnFocus();
     RequestKeyboardByFocusSwitch();
@@ -3402,6 +3403,7 @@ void TextFieldPattern::OnModifyDone()
     selectOverlay_->SetMenuTranslateIsSupport(IsShowTranslate());
     selectOverlay_->SetIsSupportMenuSearch(IsShowSearch());
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    SetIsEnableSubWindowMenu();
     isModifyDone_ = true;
 }
 
@@ -8674,6 +8676,9 @@ void TextFieldPattern::RegisterWindowSizeCallback()
 
 void TextFieldPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
+    if (selectOverlay_) {
+        selectOverlay_->UpdateMenuOnWindowSizeChanged(type);
+    }
     if (type != WindowSizeChangeReason::ROTATION) {
         return;
     }
@@ -10454,5 +10459,14 @@ bool TextFieldPattern::RecordOriginCaretPosition()
     }
     originCaretPosition_ = selectController_->GetCaretRect().GetOffset();
     return originCaretPosition_.NonNegative();
+}
+
+void TextFieldPattern::SetIsEnableSubWindowMenu()
+{
+    if (selectOverlay_) {
+        auto enable = !IsNeedProcessAutoFill() || !CheckAutoFill();
+        selectOverlay_->SetIsHostNodeEnableSubWindowMenu(enable);
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "SetIsEnableSubWindowMenu enable=%{public}d", enable);
+    }
 }
 } // namespace OHOS::Ace::NG

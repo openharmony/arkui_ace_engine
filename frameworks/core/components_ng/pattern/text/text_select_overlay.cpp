@@ -30,6 +30,7 @@ bool TextSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(textPattern, false);
     SetUsingMouse(textPattern->IsUsingMouse());
     SetEnableHandleLevel(true);
+    SetEnableSubWindowMenu(true);
     textPattern->CalculateHandleOffsetAndShowOverlay();
     selectTextUseTopHandle = true;
     CheckEnableContainerModal();

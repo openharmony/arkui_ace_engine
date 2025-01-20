@@ -21,6 +21,7 @@
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
 namespace OHOS::Ace::NG {
 
 namespace {
@@ -2157,7 +2158,9 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
     auto optionConstraint = constraint;
     RefPtr<GridColumnInfo> columnInfo;
     columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-    columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
+    if (!UpdateSelectOverlayMenuColumnInfo(menuPattern, columnInfo)) {
+        columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
+    }
     auto minWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
     optionConstraint.maxSize.MinusWidth(optionPadding_ * 2.0f);
     optionConstraint.minSize.SetWidth(minWidth - optionPadding_ * 2.0f);
@@ -3175,5 +3178,36 @@ void MenuLayoutAlgorithm::ClipMenuPath(LayoutWrapper* layoutWrapper)
 {
     bool didNeedArrow = GetIfNeedArrow(layoutWrapper, childMarginFrameSize_);
     clipPath_ = CalculateMenuPath(layoutWrapper, didNeedArrow);
+}
+
+bool MenuLayoutAlgorithm::UpdateSelectOverlayMenuColumnInfo(
+    const RefPtr<MenuPattern>& pattern, const RefPtr<GridColumnInfo>& columnInfo)
+{
+    CHECK_NULL_RETURN(pattern, false);
+    CHECK_NULL_RETURN(pattern->IsSelectOverlayExtensionMenu(), false);
+    auto menuWrapper = pattern->GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, false);
+    if (menuWrapper->GetTag() != V2::SELECT_OVERLAY_ETS_TAG) {
+        return false;
+    }
+    auto selectOverlayPattern = menuWrapper->GetPattern<SelectOverlayPattern>();
+    CHECK_NULL_RETURN(selectOverlayPattern, false);
+    CHECK_NULL_RETURN(selectOverlayPattern->GetIsMenuShowInSubWindow(), false);
+    auto mainWindowContainerId = selectOverlayPattern->GetContainerId();
+    auto container = Container::GetContainer(mainWindowContainerId);
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto displayWindowRect = pipelineContext->GetDisplayWindowRectInfo();
+    auto mainWindowWidth = displayWindowRect.Width();
+    if (Positive(mainWindowWidth)) {
+        auto parent = columnInfo->GetParent();
+        CHECK_NULL_RETURN(parent, false);
+        parent->BuildColumnWidth(mainWindowWidth);
+        TAG_LOGD(
+            AceLogTag::ACE_MENU, "Update select overlay extension menu min width with main window width constraint.");
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

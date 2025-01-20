@@ -3826,3 +3826,9 @@ let AccessibilitySamePageMode;
   AccessibilitySamePageMode[AccessibilitySamePageMode.SEMI_SILENT = 0] = 'SEMI_SILENT';
   AccessibilitySamePageMode[AccessibilitySamePageMode.FULL_SILENT = 1] = 'FULL_SILENT';
 })(AccessibilitySamePageMode || (AccessibilitySamePageMode = {}));
+
+let TextMenuShowMode;
+(function (TextMenuShowMode) {
+  TextMenuShowMode[TextMenuShowMode.DEFAULT = 0] = 'DEFAULT';
+  TextMenuShowMode[TextMenuShowMode.PREFER_WINDOW = 1] = 'PREFER_WINDOW';
+})(TextMenuShowMode || (TextMenuShowMode = {}));

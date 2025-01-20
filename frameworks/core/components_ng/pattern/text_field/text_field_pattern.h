@@ -1969,6 +1969,7 @@ private:
         CHECK_NULL_RETURN(context, true);
         return !(context->GetIsFocusActive() && independentControlKeyboard_);
     }
+    void SetIsEnableSubWindowMenu();
 
     RectF frameRect_;
     RectF textRect_;
