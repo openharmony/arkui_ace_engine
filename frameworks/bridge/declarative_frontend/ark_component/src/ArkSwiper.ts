@@ -152,6 +152,10 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperOnGestureSwipeModifier.identity, SwiperOnGestureSwipeModifier, event);
     return this;
   }
+  onUnselected(event: (index: number) => void): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnUnselectedModifier.identity, SwiperOnUnselectedModifier, event);
+    return this;
+  }
   nestedScroll(value: SwiperNestedScrollMode): this {
     modifierWithKey(this._modifiersWithKeys, SwiperNestedScrollModifier.identity, SwiperNestedScrollModifier, value);
     return this;
@@ -801,6 +805,19 @@ class SwiperOnGestureSwipeModifier extends ModifierWithKey<Callback<number, Swip
       getUINativeModule().swiper.resetSwiperOnGestureSwipe(node);
     } else {
       getUINativeModule().swiper.setSwiperOnGestureSwipe(node, this.value);
+    }
+  }
+}
+class SwiperOnUnselectedModifier extends ModifierWithKey<Callback<number>> {
+  constructor(value: Callback<number>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperOnUnselected');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnUnselected(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnUnselected(node, this.value);
     }
   }
 }

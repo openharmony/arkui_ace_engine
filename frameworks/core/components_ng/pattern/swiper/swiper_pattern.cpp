@@ -210,6 +210,7 @@ void SwiperPattern::OnIndexChange(bool isInLayout)
     if (oldIndex != targetIndex) {
         FireChangeEvent(oldIndex, targetIndex, isInLayout);
         FireSelectedEvent(oldIndex, targetIndex);
+        FireUnselectedEvent(oldIndex, targetIndex);
         // lazyBuild feature.
         SetLazyLoadFeature(true);
     }
@@ -1419,6 +1420,19 @@ void SwiperPattern::FireSelectedEvent(int32_t currentIndex, int32_t targetIndex)
     if (selectedIndex_ != GetLoopIndex(targetIndex)) {
         selectedIndex_ = GetLoopIndex(targetIndex);
         swiperEventHub->FireSelectedEvent(GetLoopIndex(targetIndex));
+    }
+}
+
+void SwiperPattern::FireUnselectedEvent(int32_t currentIndex, int32_t targetIndex)
+{
+    if (currentIndex == targetIndex) {
+        return;
+    }
+    auto swiperEventHub = GetEventHub<SwiperEventHub>();
+    CHECK_NULL_VOID(swiperEventHub);
+    if (unselectedIndex_ != GetLoopIndex(currentIndex)) {
+        unselectedIndex_ = GetLoopIndex(currentIndex);
+        swiperEventHub->FireUnselectedEvent(GetLoopIndex(currentIndex));
     }
 }
 
@@ -3603,6 +3617,7 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
     propertyAnimationIsRunning_ = true;
     propertyAnimationIndex_ = nextIndex;
     FireSelectedEvent(currentIndex_, nextIndex);
+    FireUnselectedEvent(currentIndex_, nextIndex);
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost(), option);
     AnimationUtils::Animate(option, propertyUpdateCallback, finishCallback);
     AnimationCallbackInfo info;
@@ -3903,6 +3918,8 @@ void SwiperPattern::PlayTranslateAnimation(
                                      Dimension(-swiper->currentIndexOffset_, DimensionUnit::PX).ConvertToVp();
             }
             swiper->FireSelectedEvent(
+                swiper->GetLoopIndex(swiper->currentIndex_), swiper->GetLoopIndex(nextIndex));
+            swiper->FireUnselectedEvent(
                 swiper->GetLoopIndex(swiper->currentIndex_), swiper->GetLoopIndex(nextIndex));
             swiper->FireAnimationStartEvent(
                 swiper->GetLoopIndex(swiper->currentIndex_), swiper->GetLoopIndex(nextIndex), info);
@@ -5846,6 +5863,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
     info.currentOffset = GetCustomPropertyOffset();
     info.targetOffset = GetCustomPropertyTargetOffset();
     FireSelectedEvent(fromIndex, toIndex);
+    FireUnselectedEvent(fromIndex, toIndex);
     FireAnimationStartEvent(fromIndex, toIndex, info);
 
     auto pipeline = GetContext();

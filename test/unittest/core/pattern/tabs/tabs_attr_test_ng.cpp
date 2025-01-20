@@ -893,6 +893,24 @@ HWTEST_F(TabsAttrTestNg, TabsModelNg001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TabsModelNg002
+ * @tc.desc: Tabs Model NG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsAttrTestNg, TabsModelNg002, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+
+    /**
+     * @tc.steps: step3.1 Test SetOnUnselected function.
+     * @tc.expected:pattern->unselectedEvent_ not null.
+     */
+    auto onUnselected = [](const BaseEventInfo* info) {};
+    model.SetOnUnselected(std::move(onUnselected));
+    EXPECT_NE(pattern_->unselectedEvent_, nullptr);
+}
+
+/**
  * @tc.name: TabsModelSetScrollable001
  * @tc.desc: test SetScrollable
  * @tc.type: FUNC

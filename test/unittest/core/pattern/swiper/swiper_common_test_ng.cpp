@@ -1734,6 +1734,35 @@ HWTEST_F(SwiperCommonTestNg, ShowCachedItems024, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateOnUnselectedEvent
+ * @tc.desc: Test UpdateOnUnselectedEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperCommonTestNg, UpdateOnUnselectedEvent, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto eventHub = frameNode->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+
+    eventHub->unselectedEvents_.clear();
+
+    auto onUnselected = [](const BaseEventInfo* info) {};
+    pattern->UpdateOnUnselectedEvent([event = std::move(onUnselected)](int32_t index) {});
+    EXPECT_EQ(eventHub->unselectedEvents_.size(), 1);
+
+    pattern->UpdateOnUnselectedEvent([event = std::move(onUnselected)](int32_t index) {});
+    EXPECT_EQ(eventHub->unselectedEvents_.size(), 1);
+
+    auto onUnselected2 = [](const BaseEventInfo* info) {};
+    pattern->UpdateOnUnselectedEvent([event = std::move(onUnselected2)](int32_t index) {});
+    EXPECT_EQ(eventHub->unselectedEvents_.size(), 1);
+}
+
+/**
  * @tc.name: SetAutoPlayOptions001
  * @tc.desc: Test HandleTouchDown
  * @tc.type: FUNC

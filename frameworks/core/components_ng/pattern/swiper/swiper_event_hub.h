@@ -99,6 +99,29 @@ public:
         }
     }
 
+    void AddOnUnselectedEvent(const ChangeEventPtr& changeEvent)
+    {
+        unselectedEvents_.emplace_back(changeEvent);
+    }
+
+    void FireUnselectedEvent(int32_t index)
+    {
+        auto frameNode = GetFrameNode();
+        TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper FireUnselectedEvent id:%{public}d, index:%{public}d",
+            frameNode ? frameNode->GetId() : -1, index);
+        ACE_SCOPED_TRACE("Swiper FireUnselectedEvent, id: %d, index: %d", frameNode ? frameNode->GetId() : -1, index);
+        if (!unselectedEvents_.empty()) {
+            std::for_each(unselectedEvents_.begin(), unselectedEvents_.end(),
+                [index](const ChangeEventPtr& changeEvent) {
+                if (!changeEvent || !(*changeEvent)) {
+                    return;
+                }
+                auto event = *changeEvent;
+                event(index);
+            });
+        }
+    }
+
     void FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool isInLayout)
     {
         if (isInLayout) {
@@ -274,6 +297,7 @@ private:
     }
 
     Direction direction_;
+    std::list<ChangeEventPtr> unselectedEvents_;
     std::list<ChangeEventPtr> changeEvents_;
     std::list<ChangeEventPtr> selectedEvents_;
     std::list<ChangeEventWithPreIndexPtr> changeEventsWithPreIndex_;

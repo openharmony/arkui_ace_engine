@@ -222,6 +222,19 @@ void SwiperModelNG::SetOnChange(std::function<void(const BaseEventInfo* info)>&&
     });
 }
 
+void SwiperModelNG::SetOnUnselected(std::function<void(const BaseEventInfo* info)>&& onUnselected)
+{
+    auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(swiperNode);
+    auto pattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnUnselectedEvent([event = std::move(onUnselected)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
 void SwiperModelNG::SetOnAnimationStart(AnimationStartEvent&& onAnimationStart)
 {
     auto swiperNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -788,6 +801,18 @@ void SwiperModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const B
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->UpdateChangeEvent([event = std::move(onChange)](int32_t index) {
+        CHECK_NULL_VOID(event);
+        SwiperChangeEvent eventInfo(index);
+        event(&eventInfo);
+    });
+}
+
+void SwiperModelNG::SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateOnUnselectedEvent([event = std::move(onUnselected)](int32_t index) {
         CHECK_NULL_VOID(event);
         SwiperChangeEvent eventInfo(index);
         event(&eventInfo);
