@@ -6543,9 +6543,8 @@ void JSViewAbstract::JsOnCrownEvent(const JSCallbackInfo& args)
     if (args.Length() <= 0) {
         return;
     }
-    JSRef<JSVal> arg = args[0];
     if (args[0]->IsFunction()) {
-        RefPtr<JsCrownFunction> JsOnCrownEventfunc = AceType::MakeRefPtr<JsCrownFunction>(JSRef<JSFunc>::Cast(arg));
+        RefPtr<JsCrownFunction> JsOnCrownEventfunc = AceType::MakeRefPtr<JsCrownFunction>(JSRef<JSFunc>::Cast(args[0]));
         WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->
             GetMainFrameNode());
         auto onCrownEvent = [execCtx = args.GetExecutionContext(), func = std::move(JsOnCrownEventfunc),
