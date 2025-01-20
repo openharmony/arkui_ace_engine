@@ -1374,6 +1374,7 @@ void JSRichEditor::SetKeyboardAppearance(const JSCallbackInfo& info)
     auto keyboardAppearance = info[0]->ToNumber<int32_t>();
     if (keyboardAppearance < static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
         keyboardAppearance > static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        RichEditorModel::GetInstance()->SetKeyboardAppearance(KeyboardAppearance::NONE_IMMERSIVE);
         return;
     }
     RichEditorModel::GetInstance()->

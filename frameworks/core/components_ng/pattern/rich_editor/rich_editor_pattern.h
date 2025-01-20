@@ -1103,6 +1103,7 @@ public:
 
     void SetKeyboardAppearance(KeyboardAppearance value)
     {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetKeyboardAppearance=%{public}d", value);
         keyboardAppearance_ = value;
     }
 
