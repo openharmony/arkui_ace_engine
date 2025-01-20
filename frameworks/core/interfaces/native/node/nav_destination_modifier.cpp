@@ -16,11 +16,6 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
-#include "core/components_ng/base/view_abstract.h"
-#include "core/gestures/gesture_event.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#include "core/components_ng/event/click_event.h"
-
 namespace OHOS::Ace::NG {
 constexpr int32_t DEFAULT_SAFE_AREA_TYPE = 0b1;
 constexpr int32_t DEFAULT_SAFE_AREA_EDGE = 0b1111;

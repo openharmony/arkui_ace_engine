@@ -43,6 +43,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
@@ -59,9 +60,8 @@
 #include "core/components_ng/pattern/navrouter/navrouter_group_node.h"
 #include "core/components_ng/pattern/select/select_model.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "frameworks/bridge/common/utils/engine_helper.h"
-#include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "frameworks/base/system_bar/system_bar_style.h"
+#include "frameworks/bridge/common/utils/engine_helper.h"
 
 namespace OHOS::Ace::NG {
 namespace {
