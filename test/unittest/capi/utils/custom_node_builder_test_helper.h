@@ -27,6 +27,7 @@ namespace OHOS::Ace::NG {
 template<typename T>
 class CustomNodeBuilderTestHelper {
 public:
+
     CustomNodeBuilderTestHelper(T* testClassObject, FrameNode* parentNode)
         : testClassObject_(testClassObject),
         expectedParentNode_(parentNode),
@@ -55,11 +56,10 @@ public:
 
     CustomNodeBuilder GetBuilder() const
     {
-        const CustomNodeBuilderTestHelper* builderFunctor = this;
         const CustomNodeBuilder builder = {
             .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                 const Callback_Pointer_Void continuation) {
-                (*builderFunctor)(context, resourceId, parentNode, continuation);
+                (*builderFunctor_)(context, resourceId, parentNode, continuation);
             }
         };
         return builder;
@@ -80,6 +80,7 @@ private:
     FrameNode* expectedParentNode_;
     Ark_NodeHandle expectedCustomNode_;
     int callbackCounter_ = 0;
+    const CustomNodeBuilderTestHelper* builderFunctor_ = this;
 };
 }
 #endif // CUSTOM_NODE_BUILDER_TEST_HELPER_H
