@@ -222,7 +222,7 @@ bool DrawableDescriptor::GetPixelMapFromBuffer()
 
 std::shared_ptr<Media::PixelMap> DrawableDescriptor::GetPixelMap()
 {
-    if (pixelMap_.has_value()) {
+    if (pixelMap_.value_or(nullptr)) {
         return pixelMap_.value();
     }
     if (GetPixelMapFromBuffer()) {
@@ -252,7 +252,7 @@ std::unique_ptr<Media::ImageSource> LayeredDrawableDescriptor::CreateImageSource
 bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
 {
 #ifndef PREVIEW
-    if ((isBackground && background_.has_value()) || (!isBackground && foreground_.has_value())) {
+    if ((isBackground && background_.value_or(nullptr)) || (!isBackground && foreground_.value_or(nullptr))) {
         return true;
     }
     if ((isBackground && backgroundItem_.state_ == Global::Resource::SUCCESS) ||
@@ -385,7 +385,7 @@ bool LayeredDrawableDescriptor::GetMaskByName(
 
 std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetForeground()
 {
-    if (foreground_.has_value()) {
+    if (foreground_.value_or(nullptr)) {
         return std::make_unique<DrawableDescriptor>(foreground_.value());
     }
 
@@ -399,7 +399,7 @@ std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetForeground()
 
 std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetBackground()
 {
-    if (background_.has_value()) {
+    if (background_.value_or(nullptr)) {
         return std::make_unique<DrawableDescriptor>(background_.value());
     }
 
@@ -412,7 +412,7 @@ std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetBackground()
 
 std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetMask()
 {
-    if (mask_.has_value()) {
+    if (mask_.value_or(nullptr)) {
         return std::make_unique<DrawableDescriptor>(mask_.value());
     }
 
@@ -456,19 +456,19 @@ void LayeredDrawableDescriptor::DrawOntoCanvas(
 bool LayeredDrawableDescriptor::GetLayeredIconParm(std::shared_ptr<Rosen::Drawing::Bitmap>& foreground,
     std::shared_ptr<Rosen::Drawing::Bitmap>& background, std::shared_ptr<Rosen::Drawing::Bitmap>& mask)
 {
-    if (foreground_.has_value() || GetPixelMapFromJsonBuf(false)) {
+    if (foreground_.value_or(nullptr) || GetPixelMapFromJsonBuf(false)) {
         foreground = ImageConverter::PixelMapToBitmap(foreground_.value());
     } else if (!customized_) {
         HILOGI("Get pixelMap of foreground failed.");
         return false;
     }
-    if (background_.has_value() || GetPixelMapFromJsonBuf(true)) {
+    if (background_.value_or(nullptr) || GetPixelMapFromJsonBuf(true)) {
         background = ImageConverter::PixelMapToBitmap(background_.value());
     } else if (!customized_) {
         HILOGE("Get pixelMap of background failed.");
         return false;
     }
-    if (mask_.has_value() || GetMaskByPath() || GetDefaultMask()) {
+    if (mask_.value_or(nullptr) || GetMaskByPath() || GetDefaultMask()) {
         mask = ImageConverter::PixelMapToBitmap(mask_.value());
     } else if (!customized_) {
         HILOGE("Get pixelMap of mask failed.");
@@ -481,7 +481,7 @@ void LayeredDrawableDescriptor::TransformToPixelMap(
     const Rosen::Drawing::Bitmap& bitmap, const Rosen::Drawing::ImageInfo& imageInfo)
 {
     Media::InitializationOptions opts;
-    if (background_.has_value()) {
+    if (background_.value_or(nullptr)) {
         opts.alphaType = background_.value()->GetAlphaType();
     } else {
         opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
@@ -494,11 +494,11 @@ Rosen::Drawing::ImageInfo LayeredDrawableDescriptor::CreateRSImageInfo(
     OptionalPixelMap pixelmap, int32_t width, int32_t height)
 {
     Rosen::Drawing::ColorType colorType =
-        pixelmap.has_value() && pixelmap.value()
+        pixelmap.value_or(nullptr)
             ? colorType = ImageConverter::PixelFormatToColorType(pixelmap.value()->GetPixelFormat())
             : colorType = ImageConverter::PixelFormatToColorType(Media::PixelFormat::RGBA_8888);
     Rosen::Drawing::AlphaType alphaType =
-        pixelmap.has_value() && pixelmap.value()
+        pixelmap.value_or(nullptr)
             ? alphaType = ImageConverter::AlphaTypeToAlphaType(pixelmap.value()->GetAlphaType())
             : alphaType = ImageConverter::AlphaTypeToAlphaType(Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL);
     return Rosen::Drawing::ImageInfo(width, height, colorType, alphaType);
@@ -609,7 +609,7 @@ void LayeredDrawableDescriptor::CompositeIconNotAdaptive(std::shared_ptr<Rosen::
     bitmapCanvas.ReadPixels(imageInfo, tempCache.GetPixels(), tempCache.GetRowBytes(), 0, 0);
     // convert bitmap back to pixelMap
     Media::InitializationOptions opts;
-    if (background_.has_value()) {
+    if (background_.value_or(nullptr)) {
         opts.alphaType = background_.value()->GetAlphaType();
     } else {
         opts.alphaType = Media::AlphaType::IMAGE_ALPHA_TYPE_PREMUL;
@@ -717,7 +717,7 @@ bool LayeredDrawableDescriptor::GetCompositePixelMapWithBadge(
 
 std::shared_ptr<Media::PixelMap> LayeredDrawableDescriptor::GetPixelMap()
 {
-    if (layeredPixelMap_.has_value()) {
+    if (layeredPixelMap_.value_or(nullptr)) {
         return layeredPixelMap_.value();
     }
 
