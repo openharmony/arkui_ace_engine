@@ -169,7 +169,7 @@ public:
         }
         paintMethod->SetMouseClickIndex(GetOptinalMouseClickIndex());
         paintMethod->SetIsTouchBottom(GetTouchBottomType());
-        GetOptinalMouseClickIndex() = std::nullopt;
+        ResetOptinalMouseClickIndex();
     }
 
     const bool& IsIndicatorCustomSize() const

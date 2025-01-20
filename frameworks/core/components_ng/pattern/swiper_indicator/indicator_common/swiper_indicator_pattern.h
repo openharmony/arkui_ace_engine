@@ -383,6 +383,11 @@ protected:
         }
     }
 
+    void ResetOptinalMouseClickIndex()
+    {
+        mouseClickIndex_ = std::nullopt;
+    }
+
     const TouchBottomType& GetTouchBottomType() const
     {
         return touchBottomType_;

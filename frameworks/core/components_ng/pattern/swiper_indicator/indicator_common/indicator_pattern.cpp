@@ -231,7 +231,7 @@ void IndicatorPattern::UpdatePaintProperty()
     paintProperty->UpdateSelectedColor(
         swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
     paintProperty->UpdateIsCustomSize(isCustomSize_);
-    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
