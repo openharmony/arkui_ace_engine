@@ -1966,6 +1966,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
     CHECK_RUN_ON(UI);
     // prevent repeated trigger with same keyboardHeight
     CHECK_NULL_VOID(safeAreaManager_);
+    if (keyboardHeight >= rootHeight_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Keyboard higher than whole rootrect, no need to avoid");
+        return;
+    }
+
     if (UsingCaretAvoidMode()) {
         OnCaretPositionChangeOrKeyboardHeightChange(keyboardHeight,
             positionY, height, rsTransaction, forceChange);
@@ -1987,11 +1992,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
         TAG_LOGI(
             AceLogTag::ACE_KEYBOARD, "Ignore ileagal keyboard height change");
-        return;
-    }
-
-    if (keyboardHeight > rootHeight_) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Keyboard higher than whole rootrect, no need to avoid");
         return;
     }
 
