@@ -81,6 +81,7 @@ public:
         const std::function<RefPtr<NG::NavDestinationScrollableProcessor>()>& creator) override;
     void UpdateBindingWithScrollable(
         std::function<void(const RefPtr<NG::NavDestinationScrollableProcessor>& processor)>&& callback) override;
+    void SetCustomTransition(NG::NavDestinationTransitionDelegate&& transitionDelegate) override;
 
 private:
     void CreateBackButton(const RefPtr<NavDestinationGroupNode>& navDestinationNode);

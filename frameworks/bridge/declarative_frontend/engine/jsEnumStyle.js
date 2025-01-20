@@ -1105,6 +1105,10 @@ let NavigationSystemTransitionType;
   NavigationSystemTransitionType[NavigationSystemTransitionType.NONE = 1] = 'NONE';
   NavigationSystemTransitionType[NavigationSystemTransitionType.TITLE = 2] = 'TITLE';
   NavigationSystemTransitionType[NavigationSystemTransitionType.CONTENT = 3] = 'CONTENT';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.FADE = 4] = 'FADE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.EXPLODE = 5] = 'EXPLODE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.SLIDE_RIGHT = 6] = 'SLIDE_RIGHT';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.SLIDE_BOTTOM = 7] = 'SLIDE_BOTTOM';
 }(NavigationSystemTransitionType || (NavigationSystemTransitionType = {})));
 
 let NavigationOperation;
