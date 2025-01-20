@@ -36,9 +36,12 @@ public:
 
     ~CustomNodeBuilderTestHelper()
     {
-        testClassObject_->DisposeNode(expectedCustomNode_);
+        if (testClassObject_ && expectedCustomNode_) {
+            testClassObject_->DisposeNode(expectedCustomNode_);
+        }
         expectedParentNode_ = nullptr;
         testClassObject_ = nullptr;
+        builderFunctor_ = nullptr;
     }
 
     void operator()(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
@@ -54,12 +57,13 @@ public:
         return callbackCounter_;
     }
 
-    CustomNodeBuilder GetBuilder() const
+    CustomNodeBuilder GetBuilder()
     {
-        const CustomNodeBuilder builder = {
+        SetCurrentBuilderFunctor_(this);
+        CustomNodeBuilder builder = {
             .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                 const Callback_Pointer_Void continuation) {
-                (*builderFunctor_)(context, resourceId, parentNode, continuation);
+                (*(CustomNodeBuilderTestHelper::GetCurrentBuilderFunctor()))(context, resourceId, parentNode, continuation);
             }
         };
         return builder;
@@ -75,12 +79,31 @@ public:
         return reinterpret_cast<FrameNode*>(expectedCustomNode_);
     }
 
+    static CustomNodeBuilderTestHelper* GetCurrentBuilderFunctor()
+    {
+        return builderFunctor_;
+    }
+
+
 private:
     T* testClassObject_;
     FrameNode* expectedParentNode_;
     Ark_NodeHandle expectedCustomNode_;
     int callbackCounter_ = 0;
-    const CustomNodeBuilderTestHelper* builderFunctor_ = this;
+    static CustomNodeBuilderTestHelper* builderFunctor_;
+    void SetCurrentBuilderFunctor_(CustomNodeBuilderTestHelper* helperObject)
+    {
+        if (builderFunctor_) {
+            LOGE("You cannot use more than one instance of the helper at a time!");
+            ASSERT_EQ(builderFunctor_, nullptr);
+        }
+        builderFunctor_ = this;
+    }
 };
+
+template<typename T>
+CustomNodeBuilderTestHelper<T>* CustomNodeBuilderTestHelper<T>::builderFunctor_ = nullptr;
+
 }
+
 #endif // CUSTOM_NODE_BUILDER_TEST_HELPER_H

@@ -19,7 +19,6 @@ ace_unittest("capi_all_utils_test") {
   sources = [
     # place here your UT source code
     "converter_test.cpp",
-    "custom_node_builder_test_helper.h",
     "reverse_converter_test.cpp",
     "union_visitor.cpp",
   ]
