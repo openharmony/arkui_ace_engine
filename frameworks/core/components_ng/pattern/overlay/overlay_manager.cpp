@@ -150,6 +150,9 @@ constexpr int32_t UIEXTNODE_ANGLE_270 = 270;
 
 constexpr double DISTANCE_THRESHOLD = 20.0;
 
+const std::unordered_set<std::string> EMBEDDED_DIALOG_NODE_TAG = { V2::ALERT_DIALOG_ETS_TAG,
+    V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
+
 RefPtr<FrameNode> GetLastPage()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -6645,12 +6648,16 @@ void OverlayManager::MarkDirtyOverlay()
     auto child = root->GetLastChild();
     CHECK_NULL_VOID(child);
     // sheetPage Node will MarkDirty when VirtualKeyboard Height Changes
-    auto sheetParent = DynamicCast<FrameNode>(child);
-    if (sheetParent && sheetParent->GetTag() == V2::SHEET_WRAPPER_TAG) {
-        auto sheet = sheetParent->GetChildAtIndex(0);
+    auto overlayNode = DynamicCast<FrameNode>(child);
+    CHECK_NULL_VOID(overlayNode);
+    if (overlayNode->GetTag() == V2::SHEET_WRAPPER_TAG) {
+        auto sheet = overlayNode->GetChildAtIndex(0);
         if (sheet) {
             sheet->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
+    }
+    if (overlayNode->GetTag() == V2::DIALOG_ETS_TAG) {
+        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 
@@ -7362,5 +7369,18 @@ void OverlayManager::FireNavigationLifecycle(const RefPtr<UINode>& node, int32_t
         return;
     }
     navigationManager->FireOverlayLifecycle(node, lifecycle, reason);
+}
+
+bool OverlayManager::isCurrentNodeProcessRemoveOverlay(const RefPtr<FrameNode>& currentNode, bool skipModal)
+{
+    auto lastNode = GetLastChildNotRemoving(currentNode);
+    if (lastNode && EMBEDDED_DIALOG_NODE_TAG.find(lastNode->GetTag()) != EMBEDDED_DIALOG_NODE_TAG.end()) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Dialog/%{public}d begin consumed backpressed event", lastNode->GetId());
+        return true;
+    }
+    if (!skipModal && !IsModalEmpty()) {
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

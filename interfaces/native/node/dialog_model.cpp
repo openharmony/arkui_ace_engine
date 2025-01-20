@@ -249,7 +249,7 @@ int32_t SetImmersiveMode(ArkUI_NativeDialogHandle handle, ArkUI_ImmersiveMode im
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     if (static_cast<int32_t>(immersiveMode) < static_cast<int32_t>(ARKUI_IMMERSIVE_MODE_DEFAULT) ||
-        static_cast<int32_t>(immersiveMode) > static_cast<int32_t>(ARKUI_IMMERSIVE_MODE_FULL)) {
+        static_cast<int32_t>(immersiveMode) > static_cast<int32_t>(ARKUI_IMMERSIVE_MODE_EXTEND)) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     return impl->getDialogAPI()->setImmersiveMode(handle->controller, static_cast<int32_t>(immersiveMode));
