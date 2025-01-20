@@ -348,11 +348,6 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
             backButtonNode->GetTag(), "Back", parentId);
         backButtonNode->MarkModifyDone();
         return;
-    } else {
-        auto backButtonLayoutProperty = AceType::DynamicCast<FrameNode>(backButtonNode)->GetLayoutProperty();
-        CHECK_NULL_VOID(backButtonLayoutProperty);
-        auto hideBackButton = titleBarLayoutProperty->GetHideBackButtonValue(false);
-        backButtonLayoutProperty->UpdateVisibility(hideBackButton ? VisibleType::GONE : VisibleType::VISIBLE);
     }
 
     // set navdestination titleBar backButton inspectorId
