@@ -59,6 +59,7 @@ public:
     void ResetMaxLength() override;
     void SetMaxLines(uint32_t value) override;
     void SetStopBackPress(bool isStopBackPress) override;
+    void SetKeyboardAppearance(KeyboardAppearance value) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
@@ -95,6 +96,7 @@ public:
     static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
+    static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
 
 private:
     void SetDraggable(bool draggable);

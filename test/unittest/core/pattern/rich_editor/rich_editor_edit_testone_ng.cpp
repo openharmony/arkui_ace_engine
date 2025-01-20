@@ -1303,4 +1303,22 @@ HWTEST_F(RichEditorEditTestOneNg, HandleOnDelete001, TestSize.Level1)
     richEditorPattern->HandleOnDelete(true);
     richEditorPattern->HandleOnDelete(false);
 }
+
+/**
+ * @tc.name: KeyboardAppearance001
+ * @tc.desc: test KeyboardAppearance
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, KeyboardAppearance001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetKeyboardAppearance(KeyboardAppearance::IMMERSIVE);
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ASSERT_EQ(richEditorPattern->GetKeyboardAppearance(), KeyboardAppearance::IMMERSIVE);
+}
 } // namespace OHOS::Ace::NG

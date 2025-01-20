@@ -601,6 +601,22 @@ void ResetRichEditorStopBackPress(ArkUINodeHandle node)
     RichEditorModelNG::SetStopBackPress(frameNode, true);
 }
 
+void SetRichEditorKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = static_cast<KeyboardAppearance>(keyboardAppearance);
+    RichEditorModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
+void ResetRichEditorKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto value = KeyboardAppearance::NONE_IMMERSIVE;
+    RichEditorModelNG::SetKeyboardAppearance(frameNode, value);
+}
+
 namespace NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier()
 {
@@ -662,6 +678,8 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorMaxLines = ResetRichEditorMaxLines,
         .setRichEditorStopBackPress = SetRichEditorStopBackPress,
         .resetRichEditorStopBackPress = ResetRichEditorStopBackPress,
+        .setRichEditorKeyboardAppearance = SetRichEditorKeyboardAppearance,
+        .resetRichEditorKeyboardAppearance = ResetRichEditorKeyboardAppearance,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
