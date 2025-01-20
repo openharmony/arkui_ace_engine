@@ -958,4 +958,46 @@ HWTEST_F(WaterFlowTestNg, scrollPage001, TestSize.Level1)
     // sw need estimate currentOffset.
     EXPECT_TRUE(NearEqual(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT - WATER_FLOW_HEIGHT, 100));
 }
+
+/**
+ * @tc.name: OverScroll002
+ * @tc.desc: only have footer, test GetOverScrollOffset.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowTestNg, OverScroll002, TestSize.Level1)
+{
+    WaterFlowModelNG model = CreateWaterFlow();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    model.SetFooter(GetDefaultHeaderBuilder());
+    CreateDone();
+    EXPECT_TRUE(IsEqual(pattern_->layoutInfo_->GetContentHeight(), 50.0f));
+    EXPECT_LT(pattern_->layoutInfo_->GetContentHeight(), pattern_->layoutInfo_->lastMainSize_);
+
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(100.0f), { 100.0f, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-100.f), { 0, -100.f }));
+
+    // enable overScroll, layout in overScroll status at top.
+    pattern_->SetAnimateCanOverScroll(true);
+    pattern_->layoutInfo_->UpdateOffset(100.0f);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), 100.0f);
+
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(100.0f), { 100.0f, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-100.0f), { -100.0f, 0 }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-400.0f), { -100.0f, -300.0f }));
+
+    // layout in overScroll status at bottom.
+    pattern_->layoutInfo_->UpdateOffset(-150.0f);
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(GetChildY(frameNode_, 0), -50.0f);
+    EXPECT_EQ(pattern_->layoutInfo_->startIndex_,
+        pattern_->layoutInfo_->Mode() == WaterFlowLayoutMode::TOP_DOWN ? 0 : Infinity<int32_t>());
+
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(20.0f), { 0, 20.0f }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(-100.0f), { 0, -100.0f }));
+    EXPECT_TRUE(IsEqual(pattern_->GetOverScrollOffset(400.0f), { 350.0f, 50.0f }));
+}
 } // namespace OHOS::Ace::NG
