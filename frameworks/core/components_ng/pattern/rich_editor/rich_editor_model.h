@@ -379,6 +379,7 @@ public:
     virtual void ResetMaxLength() {}
     virtual void SetMaxLines(uint32_t value) {};
     virtual void SetStopBackPress(bool isStopBackPress) {};
+    virtual void SetKeyboardAppearance(KeyboardAppearance value) {};
 
 private:
     static std::unique_ptr<RichEditorModel> instance_;

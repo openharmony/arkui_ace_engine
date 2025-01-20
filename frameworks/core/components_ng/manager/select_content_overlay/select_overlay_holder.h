@@ -130,6 +130,12 @@ public:
     {
         return true;
     }
+
+    virtual bool GetIsHostNodeEnableSubWindowMenu() const
+    {
+        return true;
+    }
+
 protected:
     virtual RectF GetSelectAreaFromRects(SelectRectsType pos)
     {

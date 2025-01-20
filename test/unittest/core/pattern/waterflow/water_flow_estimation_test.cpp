@@ -46,7 +46,7 @@ HWTEST_F(WaterFlowTestNg, Offset001, TestSize.Level1)
     ScrollToIndex(0, false, ScrollAlign::START);
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
     EXPECT_EQ(info->startIndex_, 0);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info->Offset(), 0.0f);
     EXPECT_NEAR(info->EstimateTotalHeight(), 5200.0f, 100.0f);
 
@@ -156,7 +156,7 @@ HWTEST_F(WaterFlowTestNg, LargeOffset002, TestSize.Level1)
     EXPECT_EQ(info->endIndex_, 61);
 
     layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr");
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info->startIndex_, 57);
     EXPECT_EQ(info->endIndex_, 72);
 

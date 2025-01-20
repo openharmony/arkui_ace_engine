@@ -86,6 +86,7 @@ public:
     virtual int32_t GetChildContainerId() const = 0;
     virtual bool GetShown() = 0;
     virtual void MarkDirtyDialogSafeArea() = 0;
+    virtual bool ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode) = 0;
 
     // Add interface for hot regions
     virtual void SetHotAreas(const std::vector<Rect>& rects, int32_t nodeId) {};

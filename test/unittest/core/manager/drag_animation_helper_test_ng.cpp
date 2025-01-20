@@ -14,6 +14,7 @@
  */
 
 #include "test/unittest/core/manager/drag_animation_helper_test_ng.h"
+#include "test/mock/base/mock_pixel_map.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 
 using namespace testing;
@@ -43,6 +44,9 @@ void DragAnimationHelperTestNg::SetUp()
     ResetElmtId();
     auto [gridNode, gridItemNodes] = CreateGridNodeWithChild(DEFAULT_CHILD_COUNT);
     parentNode_ = gridNode;
+    auto pattern = gridNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->info_.endIndex_ = DEFAULT_CHILD_COUNT;
     CHECK_NULL_VOID(parentNode_);
     childNodes_ = gridItemNodes;
 }
@@ -69,8 +73,35 @@ std::pair<RefPtr<FrameNode>, std::list<RefPtr<FrameNode>>> DragAnimationHelperTe
         auto itemNodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
         auto childNode = FrameNode::GetOrCreateFrameNode(V2::GRID_ITEM_ETS_TAG, itemNodeId,
             [itemStyle = gridItemStyle]() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, itemStyle); });
+        if (!childNode) {
+            continue;
+        }
         ViewAbstract::SetWidth(childNode.GetRawPtr(), CalcLength(ITEM_WIDTH));
         ViewAbstract::SetHeight(childNode.GetRawPtr(), CalcLength(ITEM_HEIGHT));
+
+        auto gridItemPattern = childNode->GetPattern<GridItemPattern>();
+        if (gridItemPattern) {
+            gridItemPattern->SetSelected(true);
+        }
+
+        auto dragPreviewOption = childNode->GetDragPreviewOption();
+        dragPreviewOption.isMultiSelectionEnabled = true;
+        childNode->SetDragPreviewOptions(dragPreviewOption);
+
+        auto dragPreviewInfo = childNode->GetDragPreview();
+        dragPreviewInfo.pixelMap = AceType::MakeRefPtr<MockPixelMap>();
+        childNode->SetDragPreview(dragPreviewInfo);
+
+        auto gestureHub = childNode->GetOrCreateGestureEventHub();
+        if (!gestureHub) {
+            continue;
+        }
+        auto eventHub = gestureHub->eventHub_.Upgrade();
+        if (!eventHub) {
+            continue;
+        }
+        auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
+        eventHub->onDragStart_ = func;
         childNode->MountToParent(frameNode);
         childNodes.emplace_back(childNode);
     }
@@ -300,5 +331,284 @@ HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition002, TestSize.Level1)
 
     EXPECT_STREQ(StringUtils::Str16ToStr8(content).c_str(),
         std::to_string(3).c_str());
+}
+
+/**
+ * @tc.name: CreateImageNode
+ * @tc.desc: test CreateImageNode func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CreateImageNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pixelMap.
+     * @tc.expected: pixelMap is not null.
+     */
+    RefPtr<MockPixelMap> mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
+    ASSERT_NE(mockPixelMap, nullptr);
+
+    /**
+     * @tc.steps: step2. create imageNode.
+     * @tc.expected: imageNode is not null.
+     */
+    auto imageNode = DragAnimationHelper::CreateImageNode(mockPixelMap);
+    ASSERT_NE(imageNode, nullptr);
+
+    /**
+     * @tc.steps: step3. check imageNode attr
+     */
+    auto imageContext = imageNode->GetRenderContext();
+    ASSERT_NE(imageContext, nullptr);
+    auto opacity = imageContext->GetOpacity().value_or(0);
+    EXPECT_EQ(opacity, 1.0f);
+}
+
+/**
+ * @tc.name: CreateGatherImageNode
+ * @tc.desc: test CreateGatherImageNode func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CreateGatherImageNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gatherNode.
+     * @tc.expected: gatherChildNode is not null.
+     */
+    int32_t size = childNodes_.size();
+    ASSERT_EQ(DEFAULT_CHILD_COUNT, size);
+    auto iter = childNodes_.begin();
+    ASSERT_TRUE(iter != childNodes_.end());
+    auto itemNode = *(iter);
+    ASSERT_NE(itemNode, nullptr);
+    GatherNodeChildInfo gatherNodeChildInfo;
+    auto gatherChildNode = DragAnimationHelper::CreateGatherImageNode(itemNode, gatherNodeChildInfo);
+    ASSERT_NE(gatherChildNode, nullptr);
+}
+
+/**
+ * @tc.name: CreateGatherNode
+ * @tc.desc: test CreateGatherNode func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, CreateGatherNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gatherNode.
+     * @tc.expected: gatherNode is not null.
+     */
+    int32_t size = childNodes_.size();
+    ASSERT_EQ(DEFAULT_CHILD_COUNT, size);
+    auto iter = childNodes_.begin();
+    ASSERT_TRUE(iter != childNodes_.end());
+    auto itemNode = *(iter);
+    ASSERT_NE(itemNode, nullptr);
+    std::vector<GatherNodeChildInfo> gatherNodeInfo;
+    auto gatherNode = DragAnimationHelper::CreateGatherNode(itemNode, gatherNodeInfo);
+    ASSERT_NE(gatherNode, nullptr);
+
+    /**
+     * @tc.steps: step2. check gatherNodeInfo size
+     */
+    auto gatherChildSize = gatherNodeInfo.size();
+    EXPECT_EQ(gatherChildSize + 1, size);
+}
+
+/**
+ * @tc.name: GetOrCreateGatherNode
+ * @tc.desc: test GetOrCreateGatherNode func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, GetOrCreateGatherNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gatherNode.
+     * @tc.expected: gatherNode is not null.
+     */
+    int32_t size = childNodes_.size();
+    ASSERT_EQ(DEFAULT_CHILD_COUNT, size);
+    auto iter = childNodes_.begin();
+    ASSERT_TRUE(iter != childNodes_.end());
+    auto itemNode = *(iter);
+    ASSERT_NE(itemNode, nullptr);
+    std::vector<GatherNodeChildInfo> gatherNodeInfo;
+    auto gestureHub = itemNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Get overlayManager
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->RemoveGatherNode();
+
+    /**
+     * @tc.steps: step2. check gatherNodeInfo size
+     */
+    auto actuator = AceType::MakeRefPtr<DragEventActuator>(
+    AceType::WeakClaim(AceType::RawPtr(gestureHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(actuator, nullptr);
+    actuator->itemParentNode_ = parentNode_;
+    actuator->isSelectedItemNode_ = true;
+    auto gatherNode = DragAnimationHelper::GetOrCreateGatherNode(overlayManager, actuator, gatherNodeInfo);
+    ASSERT_NE(gatherNode, nullptr);
+
+    auto gatherChildSize = gatherNodeInfo.size();
+    EXPECT_EQ(gatherChildSize + 1, size);
+}
+
+/**
+ * @tc.name: GetOrCreateGatherNode
+ * @tc.desc: test GetOrCreateGatherNode func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, GetOrCreateGatherNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gatherNode.
+     * @tc.expected: gatherNode is not null.
+     */
+    int32_t size = childNodes_.size();
+    ASSERT_EQ(DEFAULT_CHILD_COUNT, size);
+    auto iter = childNodes_.begin();
+    ASSERT_TRUE(iter != childNodes_.end());
+    auto itemNode = *(iter);
+    ASSERT_NE(itemNode, nullptr);
+    std::vector<GatherNodeChildInfo> gatherNodeInfo;
+    auto gatherNode = DragAnimationHelper::CreateGatherNode(itemNode, gatherNodeInfo);
+    ASSERT_NE(gatherNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get overlayManager
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->RemoveGatherNode();
+
+    /**
+     * @tc.steps: step3. Call MountGatherNode
+     */
+    DragAnimationHelper::MountGatherNode(overlayManager, itemNode, gatherNode, gatherNodeInfo);
+    EXPECT_NE(overlayManager->GetGatherNode(), nullptr);
+    auto gatherChildSize = overlayManager->GetGatherNodeChildrenInfo().size();
+    EXPECT_EQ(gatherChildSize + 1, size);
+
+    /**
+     * @tc.steps: step4. call GetOrCreateGatherNode
+     */
+    auto gestureHub = itemNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureHub, nullptr);
+    auto actuator = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
+    ASSERT_NE(actuator, nullptr);
+    actuator->itemParentNode_ = parentNode_;
+    actuator->isSelectedItemNode_ = true;
+    auto newGatherNode = DragAnimationHelper::GetOrCreateGatherNode(overlayManager, actuator, gatherNodeInfo);
+    ASSERT_EQ(gatherNode, newGatherNode);
+}
+
+
+/**
+ * @tc.name: MountGatherNode
+ * @tc.desc: test MountGatherNode func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, MountGatherNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gatherNode.
+     * @tc.expected: gatherNode is not null.
+     */
+    int32_t size = childNodes_.size();
+    ASSERT_EQ(DEFAULT_CHILD_COUNT, size);
+    auto iter = childNodes_.begin();
+    ASSERT_TRUE(iter != childNodes_.end());
+    auto itemNode = *(iter);
+    ASSERT_NE(itemNode, nullptr);
+    std::vector<GatherNodeChildInfo> gatherNodeInfo;
+    auto gatherNode = DragAnimationHelper::CreateGatherNode(itemNode, gatherNodeInfo);
+    ASSERT_NE(gatherNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Get overlayManager
+     */
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+
+    /**
+     * @tc.steps: step3. Call MountGatherNode
+     */
+    DragAnimationHelper::MountGatherNode(overlayManager, itemNode, gatherNode, gatherNodeInfo);
+    EXPECT_NE(overlayManager->GetGatherNode(), nullptr);
+    auto gatherChildSize = overlayManager->GetGatherNodeChildrenInfo().size();
+    EXPECT_EQ(gatherChildSize + 1, size);
+}
+
+/**
+ * @tc.name: InitGatherNodeAttr
+ * @tc.desc: test InitGatherNodeAttr func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, InitGatherNodeAttr, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create gatherNode.
+     * @tc.expected: gatherNode is not null.
+     */
+    int32_t size = childNodes_.size();
+    ASSERT_EQ(DEFAULT_CHILD_COUNT, size);
+    auto iter = childNodes_.begin();
+    ASSERT_TRUE(iter != childNodes_.end());
+    auto itemNode = *(iter);
+    ASSERT_NE(itemNode, nullptr);
+    std::vector<GatherNodeChildInfo> gatherNodeInfo;
+    auto gatherNode = DragAnimationHelper::CreateGatherNode(itemNode, gatherNodeInfo);
+    ASSERT_NE(gatherNode, nullptr);
+
+    /**
+     * @tc.steps: step2. InitGatherNodeAttr
+     */
+    DragAnimationHelper::InitGatherNodeAttr(gatherNode, gatherNodeInfo);
+    auto renderContext = gatherNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_NE(renderContext->GetPosition(), std::nullopt);
+    EXPECT_EQ(renderContext->GetPosition()->GetX().Value(), 0);
+    EXPECT_EQ(renderContext->GetPosition()->GetY().Value(), 0);
+}
+
+/**
+ * @tc.name: HideDragNodeCopy
+ * @tc.desc: test HideDragNodeCopy func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragAnimationHelperTestNg, HideDragNodeCopy, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create DragNodeCopy
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    auto pipelineContext = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->dragNodeCopyWeak_ = frameNode;
+    auto renderContext = frameNode->GetRenderContext();
+    renderContext->UpdateOpacity(1.0f);
+    ASSERT_NE(renderContext, nullptr);
+    auto opacity = renderContext->GetOpacity().value_or(0);
+    EXPECT_EQ(opacity, 1.0f);
+
+    /**
+     * @tc.steps: step2. Call HideDragNodeCopy
+     */
+    DragAnimationHelper::HideDragNodeCopy(overlayManager);
+    opacity = renderContext->GetOpacity().value_or(0);
+    EXPECT_EQ(opacity, 0.0f);
 }
 } // namespace OHOS::Ace::NG

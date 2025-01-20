@@ -38,17 +38,20 @@ HWTEST_F(TabBarUniversalAttributeTestNg, TabBarAlignTest001, TestSize.Level1)
         auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
         ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
     }
-    FlushLayoutTask(tabBarNode_);
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 320.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 340.0f);
 
     ViewAbstract::SetAlign(AceType::RawPtr(tabBarNode_), Alignment::CENTER_LEFT);
-    FlushLayoutTask(tabBarNode_);
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 20.0f);
 
     ViewAbstract::SetAlign(AceType::RawPtr(tabBarNode_), Alignment::CENTER_RIGHT);
-    FlushLayoutTask(tabBarNode_);
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 640.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 660.0f);
 }
@@ -72,17 +75,20 @@ HWTEST_F(TabBarUniversalAttributeTestNg, TabBarAlignTest002, TestSize.Level1)
         auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
         ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
     }
-    FlushLayoutTask(tabBarNode_);
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 320.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 340.0f);
 
     ViewAbstract::SetAlign(AceType::RawPtr(tabBarNode_), Alignment::CENTER_LEFT);
-    FlushLayoutTask(tabBarNode_);
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 10.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 30.0f);
 
     ViewAbstract::SetAlign(AceType::RawPtr(tabBarNode_), Alignment::CENTER_RIGHT);
-    FlushLayoutTask(tabBarNode_);
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 630.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 650.0f);
 }
@@ -108,17 +114,20 @@ HWTEST_F(TabBarUniversalAttributeTestNg, TabBarAlignTest003, TestSize.Level1)
         auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
         ViewAbstract::SetHeight(AceType::RawPtr(child), CalcLength(itemHeight));
     }
-    FlushLayoutTask(tabBarNode_);
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 160.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 180.0f);
 
     ViewAbstract::SetAlign(AceType::RawPtr(tabBarNode_), Alignment::TOP_CENTER);
-    FlushLayoutTask(tabBarNode_);
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 20.0f);
 
     ViewAbstract::SetAlign(AceType::RawPtr(tabBarNode_), Alignment::BOTTOM_CENTER);
-    FlushLayoutTask(tabBarNode_);
+    tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 320.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 340.0f);
 }
@@ -139,17 +148,17 @@ HWTEST_F(TabBarUniversalAttributeTestNg, TabBarAlignTest004, TestSize.Level1)
         auto child = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(index));
         ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
     }
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 180.0f);
 
     ViewAbstract::SetAlign(AceType::RawPtr(tabBarNode_), Alignment::CENTER_LEFT);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 180.0f);
 
     ViewAbstract::SetAlign(AceType::RawPtr(tabBarNode_), Alignment::CENTER_RIGHT);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.startPos, 0.0f);
     EXPECT_EQ(tabBarPattern_->visibleItemPosition_.begin()->second.endPos, 180.0f);
 }
@@ -187,7 +196,7 @@ HWTEST_F(TabBarUniversalAttributeTestNg, TabBarPaddingAndBorderTest, TestSize.Le
     CreateTabsDone(model);
 
     ViewAbstract::SetPadding(AceType::RawPtr(tabBarNode_), CalcLength(5));
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->GetContentSize().Width(), 710.0f);
     EXPECT_EQ(tabBarPattern_->GetContentSize().Height(), 40.0f);
     auto childNode = AceType::DynamicCast<FrameNode>(tabBarNode_->GetChildAtIndex(0));
@@ -199,7 +208,7 @@ HWTEST_F(TabBarUniversalAttributeTestNg, TabBarPaddingAndBorderTest, TestSize.Le
     EXPECT_EQ(childOffset.GetY(), 5.0f);
 
     ViewAbstract::SetSafeAreaPadding(AceType::RawPtr(tabBarNode_), CalcLength(5));
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->GetContentSize().Width(), 700.0f);
     EXPECT_EQ(tabBarPattern_->GetContentSize().Height(), 30.0f);
     childOffset = childGeometryNode->GetMarginFrameOffset();
@@ -207,7 +216,7 @@ HWTEST_F(TabBarUniversalAttributeTestNg, TabBarPaddingAndBorderTest, TestSize.Le
     EXPECT_EQ(childOffset.GetY(), 10.0f);
 
     ViewAbstract::SetBorderWidth(AceType::RawPtr(tabBarNode_), 5.0_px);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_EQ(tabBarPattern_->GetContentSize().Width(), 690.0f);
     EXPECT_EQ(tabBarPattern_->GetContentSize().Height(), 20.0f);
     childOffset = childGeometryNode->GetMarginFrameOffset();

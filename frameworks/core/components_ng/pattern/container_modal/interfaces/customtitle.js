@@ -150,7 +150,6 @@ export class Index extends ViewPU {
       Text.fontWeight(TITLE_TEXT_FONT_WEIGHT);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.textAlign(TextAlign.Start);
-      Text.layoutWeight(1.0);
       Text.opacity(this.iconOpacity);
       Text.minFontScale(0.85);
       Text.maxFontScale(1.45);

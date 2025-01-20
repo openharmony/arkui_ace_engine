@@ -206,11 +206,12 @@ void JSTextEditableController::DeleteText(const JSCallbackInfo& info)
         if (start->IsNumber()) {
             startIndex = start->ToNumber<int32_t>();
             startIndex = std::max(0, startIndex);
+            startIndex = startIndex < 0 ? 0 : startIndex;
         }
         JSRef<JSVal> end = rangeObj->GetProperty("end");
         if (end->IsNumber()) {
             endIndex = end->ToNumber<int32_t>();
-            endIndex = std::max(0, endIndex);
+            endIndex = endIndex < 0 ? -1 : endIndex;
         }
         controller->DeleteText(startIndex, endIndex);
     } else {

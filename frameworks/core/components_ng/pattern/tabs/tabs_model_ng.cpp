@@ -442,6 +442,15 @@ void TabsModelNG::SetOnGestureSwipe(GestureSwipeEvent&& onGestureSwipe)
     eventHub->SetGestureSwipeEvent(std::move(onGestureSwipe));
 }
 
+void TabsModelNG::SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnSelectedEvent(std::move(onSelected));
+}
+
 void TabsModelNG::SetDivider(const TabsItemDivider& divider)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

@@ -1096,7 +1096,7 @@ HWTEST_F(SwiperArrowTestNg, Arrow005, TestSize.Level1)
     controller->SetSwiperNode(targetNode, indicatorNode);
     EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameRect(), RectF(0.f, 0.f, 0.f, 0.f)));
     indicatorPattern->SaveDotIndicatorProperty();
-    FlushLayoutTask(indicatorNode_);
+    FlushUITasks();
     EXPECT_TRUE(IsEqual(indicatorNode_->GetGeometryNode()->GetFrameRect(), RectF(0.0f, 0.f, 31.98f, 87.9f)));
 }
 } // namespace OHOS::Ace::NG

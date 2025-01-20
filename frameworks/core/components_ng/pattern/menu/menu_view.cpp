@@ -38,6 +38,7 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/property/menu_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
@@ -362,7 +363,7 @@ void UpdateOpacityInFinishEvent(const RefPtr<FrameNode>& previewNode, const RefP
 }
 
 void UpdatePreviewVisibleAreaByFrame(const RefPtr<RenderContext>& clipContext,
-    const RefPtr<MenuPreviewPattern>& previewPattern, float radius, float rate)
+    const RefPtr<MenuPreviewPattern>& previewPattern, const BorderRadiusProperty& radius, float rate)
 {
     CHECK_NULL_VOID(previewPattern && clipContext);
     // clip area start by actual image size after contain stack container and squeezed by parent proc
@@ -379,8 +380,47 @@ void UpdatePreviewVisibleAreaByFrame(const RefPtr<RenderContext>& clipContext,
     RoundRect roundRectInstance;
     roundRectInstance.SetRect(RectF(OffsetF((1 - rate) * clipOffset.GetX(), (1 - rate) * clipOffset.GetY()),
         SizeF(curentClipAreaWidth, curentClipAreaHeight)));
-    roundRectInstance.SetCornerRadius(rate * radius);
+    CHECK_NULL_VOID(radius.radiusTopLeft);
+    roundRectInstance.SetCornerRadius(
+        RoundRect::TOP_LEFT_POS, rate * radius.radiusTopLeft->Value(), rate * radius.radiusTopLeft->Value());
+    CHECK_NULL_VOID(radius.radiusTopRight);
+    roundRectInstance.SetCornerRadius(
+        RoundRect::TOP_RIGHT_POS, rate * radius.radiusTopRight->Value(), rate * radius.radiusTopRight->Value());
+    CHECK_NULL_VOID(radius.radiusBottomLeft);
+    roundRectInstance.SetCornerRadius(
+        RoundRect::BOTTOM_LEFT_POS, rate * radius.radiusBottomLeft->Value(), rate * radius.radiusBottomLeft->Value());
+    CHECK_NULL_VOID(radius.radiusBottomRight);
+    roundRectInstance.SetCornerRadius(RoundRect::BOTTOM_RIGHT_POS, rate * radius.radiusBottomRight->Value(),
+        rate * radius.radiusBottomRight->Value());
     clipContext->ClipWithRoundRect(roundRectInstance);
+}
+
+BorderRadiusProperty GetHoverPreviewBorderRadius(
+    const RefPtr<MenuPreviewPattern>& previewPattern, const RefPtr<MenuTheme>& menuTheme)
+{
+    CHECK_NULL_RETURN(previewPattern, {});
+    auto menuWrapper = previewPattern->GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, {});
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, {});
+    CHECK_NULL_RETURN(menuTheme, {});
+    auto radius = menuTheme->GetPreviewBorderRadius().ConvertToPx();
+    auto menuParam = menuWrapperPattern->GetMenuParam();
+    CHECK_NULL_RETURN(menuParam.previewBorderRadius, {});
+    if (menuParam.previewBorderRadius.has_value() && !menuParam.previewBorderRadius->multiValued) {
+        auto paramRadius = menuParam.previewBorderRadius->radiusTopLeft;
+        radius = (paramRadius->Unit() == DimensionUnit::PERCENT)
+                     ? paramRadius->Value() * previewPattern->GetCustomPreviewWidth()
+                     : paramRadius->ConvertToPx();
+    }
+
+    if (menuParam.previewBorderRadius.has_value() && menuParam.previewBorderRadius->multiValued) {
+        BorderRadiusProperty previewBorderRadius;
+        previewBorderRadius.SetRadius(Dimension(radius));
+        previewBorderRadius.UpdateWithCheck(menuParam.previewBorderRadius.value());
+        return previewBorderRadius;
+    }
+    return BorderRadiusProperty(Dimension(radius));
 }
 
 void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
@@ -415,13 +455,14 @@ void UpdateHoverImagePreviewScale(const RefPtr<FrameNode>& hoverImageStackNode,
     CHECK_NULL_VOID(menuWrapper);
     auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
-    auto radius = menuTheme->GetPreviewBorderRadius().ConvertToPx();
-    auto callback = [menuWrapperPattern, previewPattern, stackContext, scaleFrom, scaleTo, radius](float rate) {
+    BorderRadiusProperty previewRadius = GetHoverPreviewBorderRadius(previewPattern, menuTheme);
+
+    auto callback = [menuWrapperPattern, previewPattern, stackContext, scaleFrom, scaleTo, previewRadius](float rate) {
         CHECK_NULL_VOID(menuWrapperPattern && !menuWrapperPattern->IsHide());
         menuWrapperPattern->SetAnimationPreviewScale(rate * (scaleTo - scaleFrom) + scaleFrom);
         menuWrapperPattern->SetAnimationClipRate(rate);
-        menuWrapperPattern->SetAnimationBorderRadius(rate * radius);
-        UpdatePreviewVisibleAreaByFrame(stackContext, previewPattern, radius, rate);
+        menuWrapperPattern->SetAnimationBorderRadius(rate, previewRadius);
+        UpdatePreviewVisibleAreaByFrame(stackContext, previewPattern, previewRadius, rate);
     };
 
     auto animateProperty = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(-1.0, std::move(callback));
@@ -698,6 +739,25 @@ void SetAccessibilityPixelMap(const RefPtr<FrameNode>& targetNode, RefPtr<FrameN
     });
 }
 
+BorderRadiusProperty GetPixelMapPreviewBorderRadius(const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_RETURN(previewNode, {});
+    auto pipelineContext = previewNode->GetContextWithCheck();
+    CHECK_NULL_RETURN(pipelineContext, {});
+    auto menuTheme = pipelineContext->GetTheme<NG::MenuTheme>();
+    CHECK_NULL_RETURN(menuTheme, {});
+    auto previewBorderRadiusValue = menuTheme->GetPreviewBorderRadius();
+
+    CHECK_NULL_RETURN(menuParam.previewBorderRadius, {});
+    if (menuParam.previewBorderRadius.has_value()) {
+        BorderRadiusProperty previewBorderRadius;
+        previewBorderRadius.SetRadius(Dimension(previewBorderRadiusValue));
+        previewBorderRadius.UpdateWithCheck(menuParam.previewBorderRadius.value());
+        return previewBorderRadius;
+    }
+    return BorderRadiusProperty((Dimension(previewBorderRadiusValue)));
+}
+
 void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapperNode,
     const RefPtr<FrameNode>& hoverImageStackNode, const RefPtr<FrameNode>& previewNode, const MenuParam& menuParam)
 {
@@ -738,8 +798,9 @@ void SetPixelMap(const RefPtr<FrameNode>& target, const RefPtr<FrameNode>& wrapp
 
         auto imageContext = imageNode->GetRenderContext();
         CHECK_NULL_VOID(imageContext);
+        BorderRadiusProperty borderRadius = GetPixelMapPreviewBorderRadius(previewNode, menuParam);
         if (menuParam.previewBorderRadius) {
-            imageContext->UpdateBorderRadius(menuParam.previewBorderRadius.value());
+            imageContext->UpdateBorderRadius(borderRadius);
         }
         imageNode->MarkModifyDone();
         imageNode->MountToParent(wrapperNode);

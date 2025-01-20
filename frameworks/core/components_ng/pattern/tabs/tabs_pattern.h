@@ -78,6 +78,7 @@ public:
 
     void SetAnimationEndEvent(AnimationEndEvent&& event);
 
+    void SetOnSelectedEvent(std::function<void(const BaseEventInfo*)>&& event);
     ChangeEventPtr GetTabBarClickEvent()
     {
         return onTabBarClickEvent_;
@@ -175,6 +176,7 @@ private:
 
     TabAnimateMode animateMode_ = TabAnimateMode::CONTENT_FIRST;
     ChangeEventWithPreIndexPtr onChangeEvent_;
+    ChangeEventPtr selectedEvent_;
     ChangeEventPtr onTabBarClickEvent_;
     ChangeEventPtr onIndexChangeEvent_;
     AnimationStartEventPtr animationStartEvent_;

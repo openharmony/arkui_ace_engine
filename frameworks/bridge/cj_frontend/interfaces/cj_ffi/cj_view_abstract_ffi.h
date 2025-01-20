@@ -677,6 +677,9 @@ CJ_EXPORT uint32_t FFIGetResourceUInt32(NativeResourceObject obj);
 CJ_EXPORT bool FFIGetResourceBool(NativeResourceObject obj);
 CJ_EXPORT VectorUInt32Handle FFIGetResourceVectorUInt32(NativeResourceObject obj);
 CJ_EXPORT VectorStringHandle FFIGetResourceVectorString(NativeResourceObject obj);
+CJ_EXPORT void FFIOHOSAceFrameworkSetCursor(int32_t pointerStyle);
+CJ_EXPORT void FFIOHOSAceFrameworkRestoreDefault();
+CJ_EXPORT void FFIOHOSAceFrameworkMonopolizeEvents(bool monopolize);
 CJ_EXPORT void FfiOHOSAceFrameworkPopupDismiss();
 
 struct CBorderImageOption {

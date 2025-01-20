@@ -42,7 +42,13 @@ export let ItemState;
   j3[j3['ACTIVATE'] = 3] = 'ACTIVATE';
 })(ItemState || (ItemState = {}));
 
-const PUBLIC_MORE = { id: -1, type: 20000, params: ['sys.media.ohos_ic_public_more'], bundleName: '', moduleName: '' };
+const PUBLIC_MORE = {
+  id: -1,
+  type: 40000,
+  params: ['sys.symbol.dot_grid_2x2'],
+  bundleName: '',
+  moduleName: ''
+};
 const IMAGE_SIZE = '24vp';
 const DEFAULT_TOOLBAR_HEIGHT = 56;
 const TOOLBAR_MAX_LENGTH = 5;
@@ -53,6 +59,27 @@ const MIN_DIALOG = '216vp';
 const TEXT_TOOLBAR_DIALOG = '18.3fp';
 const FOCUS_BOX_MARGIN = -2;
 const FOCUS_BOX_BORDER_WIDTH = 2;
+const RESOURCE_TYPE_SYMBOL = 40000;
+
+class Util {
+  static z1(s1) {
+    if (!Util.a2(s1)) {
+      return false;
+    }
+    let resource = s1;
+    return resource.type === RESOURCE_TYPE_SYMBOL;
+  }
+
+  static a2(resource) {
+    if (!resource) {
+      return false;
+    }
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
+  }
+}
 
 class ButtonGestureModifier {
   constructor(o7) {
@@ -460,8 +487,8 @@ export class ToolBar extends ViewPU {
     this.fontActivatedPrimaryColor = k6.colors.fontEmphasize;
   }
 
-  MoreTabBuilder(x5, y5 = null) {
-    this.observeComponentCreation2((g6, h6) => {
+  MoreTabBuilder(index, parent = null) {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create();
       Column.width('100%');
       Column.height('100%');
@@ -508,10 +535,10 @@ export class ToolBar extends ViewPU {
         placement: Placement.TopRight,
         offset: { x: -12, y: -10 }
       });
-      Column.backgroundColor(this.toolBarItemBackground[x5]);
-      Column.onHover((j6) => {
-        if (j6) {
-          this.toolBarItemBackground[x5] = {
+      Column.backgroundColor(this.toolBarItemBackground[index]);
+      Column.onHover((isHover) => {
+        if (isHover) {
+          this.toolBarItemBackground[index] = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_hover'],
@@ -520,12 +547,12 @@ export class ToolBar extends ViewPU {
           };
         }
         else {
-          this.toolBarItemBackground[x5] = Color.Transparent;
+          this.toolBarItemBackground[index] = Color.Transparent;
         }
       });
       ViewStackProcessor.visualState('pressed');
       Column.backgroundColor((!this.toolBarModifier.stateEffectValue) ?
-      this.toolBarItemBackground[x5] : {
+      this.toolBarItemBackground[index] : {
           'id': -1,
           'type': 10001,
           params: ['sys.color.ohos_id_color_click_effect'],
@@ -533,14 +560,14 @@ export class ToolBar extends ViewPU {
           'moduleName': '',
         });
       ViewStackProcessor.visualState();
-      Column.gestureModifier(this.getItemGestureModifier(this.moreItem, x5));
+      Column.gestureModifier(this.getItemGestureModifier(this.moreItem, index));
     }, Column);
-    this.observeComponentCreation2((e6, f6) => {
-      Image.create(PUBLIC_MORE);
-      Image.width(IMAGE_SIZE);
-      Image.height(IMAGE_SIZE);
-      Image.fillColor(ObservedObject.GetRawObject(this.iconPrimaryColor));
-      Image.margin({
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
+      SymbolGlyph.create(PUBLIC_MORE);
+      SymbolGlyph.fontSize(IMAGE_SIZE);
+      SymbolGlyph.fontColor([this.iconPrimaryColor]);
+      SymbolGlyph.draggable(false);
+      SymbolGlyph.margin({
         bottom: {
           'id': -1,
           'type': 10002,
@@ -549,10 +576,8 @@ export class ToolBar extends ViewPU {
           'moduleName': '',
         }
       });
-      Image.objectFit(ImageFit.Contain);
-      Image.draggable(false);
-    }, Image);
-    this.observeComponentCreation2((c6, d6) => {
+    }, SymbolGlyph);
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Text.create(this.moreText);
       Text.fontColor(ObservedObject.GetRawObject(this.fontPrimaryColor));
       Text.fontSize({
@@ -571,8 +596,8 @@ export class ToolBar extends ViewPU {
     Column.pop();
   }
 
-  TabBuilder(b5, c5 = null) {
-    this.observeComponentCreation2((s5, t5) => {
+  TabBuilder(index, parent = null) {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       Column.create();
       Column.justifyContent(FlexAlign.Center);
       Column.width('100%');
@@ -600,15 +625,15 @@ export class ToolBar extends ViewPU {
           'moduleName': '',
         }),
       });
-      Column.opacity(this.toolBarList[b5]?.state !== ItemState.DISABLE ? 1 : 0.4);
-      Column.enabled(this.toolBarList[b5]?.state !== ItemState.DISABLE);
+      Column.opacity(this.toolBarList[index]?.state !== ItemState.DISABLE ? 1 : 0.4);
+      Column.enabled(this.toolBarList[index]?.state !== ItemState.DISABLE);
       Column.accessibilityGroup(true);
-      Column.accessibilityText(this.toStringFormat(this.toolBarList[b5]?.accessibilityText) ??
-      this.toStringFormat(this.toolBarList[b5]?.content));
-      Column.accessibilityDescription(this.toStringFormat(this.toolBarList[b5]?.accessibilityDescription) ?? '');
-      Column.accessibilityLevel(this.toStringFormat(this.toolBarList[b5]?.accessibilityLevel) ?? 'auto');
-      Column.focusable(!(this.toolBarList[b5]?.state === ItemState.DISABLE));
-      Column.focusOnTouch(!(this.toolBarList[b5]?.state === ItemState.DISABLE));
+      Column.accessibilityText(this.toStringFormat(this.toolBarList[index]?.accessibilityText) ??
+      this.toStringFormat(this.toolBarList[index]?.content));
+      Column.accessibilityDescription(this.toStringFormat(this.toolBarList[index]?.accessibilityDescription) ?? '');
+      Column.accessibilityLevel(this.toStringFormat(this.toolBarList[index]?.accessibilityLevel) ?? 'auto');
+      Column.focusable(!(this.toolBarList[index]?.state === ItemState.DISABLE));
+      Column.focusOnTouch(!(this.toolBarList[index]?.state === ItemState.DISABLE));
       Column.focusBox({
         margin: LengthMetrics.vp(FOCUS_BOX_MARGIN),
         strokeWidth: LengthMetrics.vp(FOCUS_BOX_BORDER_WIDTH),
@@ -620,10 +645,10 @@ export class ToolBar extends ViewPU {
           'moduleName': '',
         })
       });
-      Column.backgroundColor(this.toolBarItemBackground[b5]);
-      Column.onHover((w5) => {
-        if (w5 && this.toolBarList[b5]?.state !== ItemState.DISABLE) {
-          this.toolBarItemBackground[b5] = {
+      Column.backgroundColor(this.toolBarItemBackground[index]);
+      Column.onHover((isHover) => {
+        if (isHover && this.toolBarList[index]?.state !== ItemState.DISABLE) {
+          this.toolBarItemBackground[index] = {
             'id': -1,
             'type': 10001,
             params: ['sys.color.ohos_id_color_hover'],
@@ -632,13 +657,13 @@ export class ToolBar extends ViewPU {
           };
         }
         else {
-          this.toolBarItemBackground[b5] = Color.Transparent;
+          this.toolBarItemBackground[index] = Color.Transparent;
         }
       });
       ViewStackProcessor.visualState('pressed');
-      Column.backgroundColor((this.toolBarList[b5]?.state === ItemState.DISABLE) ||
+      Column.backgroundColor((this.toolBarList[index]?.state === ItemState.DISABLE) ||
         (!this.toolBarModifier.stateEffectValue) ?
-      this.toolBarItemBackground[b5] : {
+      this.toolBarItemBackground[index] : {
           'id': -1,
           'type': 10001,
           params: ['sys.color.ohos_id_color_click_effect'],
@@ -647,20 +672,37 @@ export class ToolBar extends ViewPU {
         });
       ViewStackProcessor.visualState();
       Column.onClick(() => {
-        this.clickEventAction(b5);
+        this.clickEventAction(index);
       });
-      Column.gestureModifier(this.getItemGestureModifier(this.toolBarList[b5], b5));
+      Column.gestureModifier(this.getItemGestureModifier(this.toolBarList[index], index));
     }, Column);
-    this.observeComponentCreation2((i5, j5) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
-      if (this.toolBarList[b5]?.toolBarSymbolOptions?.normal ||
-        this.toolBarList[b5]?.toolBarSymbolOptions?.activated) {
+      if (this.toolBarList[index]?.toolBarSymbolOptions?.normal ||
+        this.toolBarList[index]?.toolBarSymbolOptions?.activated) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((q5, r5) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             SymbolGlyph.create();
             SymbolGlyph.fontSize(IMAGE_SIZE);
             SymbolGlyph.symbolEffect(ObservedObject.GetRawObject(this.symbolEffect), false);
-            SymbolGlyph.attributeModifier.bind(this)(this.getToolBarSymbolModifier(b5));
+            SymbolGlyph.attributeModifier.bind(this)(this.getToolBarSymbolModifier(index));
+            SymbolGlyph.margin({
+              bottom: {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.padding_level1'],
+                'bundleName': '',
+                'moduleName': '',
+              }
+            });
+          }, SymbolGlyph);
+        });
+      } else if (Util.z1(this.toolBarList[index]?.icon)) {
+        this.ifElseBranchUpdateFunction(1, () => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
+            SymbolGlyph.create(this.toolBarList[index]?.icon);
+            SymbolGlyph.fontSize(IMAGE_SIZE);
+            SymbolGlyph.fontColor([this.getIconColor(index)]);
             SymbolGlyph.margin({
               bottom: {
                 'id': -1,
@@ -674,12 +716,12 @@ export class ToolBar extends ViewPU {
         });
       }
       else {
-        this.ifElseBranchUpdateFunction(1, () => {
-          this.observeComponentCreation2((m5, n5) => {
-            Image.create(this.toolBarList[b5]?.icon);
+        this.ifElseBranchUpdateFunction(2, () => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Image.create(this.toolBarList[index]?.icon);
             Image.width(IMAGE_SIZE);
             Image.height(IMAGE_SIZE);
-            Image.fillColor(this.getIconColor(b5));
+            Image.fillColor(this.getIconColor(index));
             Image.margin({
               bottom: {
                 'id': -1,
@@ -696,9 +738,9 @@ export class ToolBar extends ViewPU {
       }
     }, If);
     If.pop();
-    this.observeComponentCreation2((g5, h5) => {
-      Text.create(this.toolBarList[b5]?.content);
-      Text.fontColor(this.getTextColor(b5));
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
+      Text.create(this.toolBarList[index]?.content);
+      Text.fontColor(this.getTextColor(index));
       Text.fontSize({
         'id': -1,
         'type': 10002,
@@ -1129,11 +1171,11 @@ class ToolBarDialog extends ViewPU {
   }
 
   initialRender() {
-    this.observeComponentCreation2((e, f) => {
+    this.observeComponentCreation2((elmtId, isInitialRender) => {
       If.create();
       if (this.itemDialog.content) {
         this.ifElseBranchUpdateFunction(0, () => {
-          this.observeComponentCreation2((o1, p1) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width(this.fontSize === MAX_FONT_SIZE ? MAX_DIALOG : MIN_DIALOG);
             Column.constraintSize({ minHeight: this.fontSize === MAX_FONT_SIZE ? MAX_DIALOG : MIN_DIALOG });
@@ -1147,12 +1189,12 @@ class ToolBarDialog extends ViewPU {
               'moduleName': '',
             }));
           }, Column);
-          this.observeComponentCreation2((e1, f1) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.itemDialog.toolBarSymbolOptions?.normal ||
               this.itemDialog.toolBarSymbolOptions?.activated) {
               this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation2((m1, n1) => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                   SymbolGlyph.create();
                   SymbolGlyph.attributeModifier.bind(this)(this.itemSymbolModifier);
                   SymbolGlyph.symbolEffect(ObservedObject.GetRawObject(this.symbolEffect), false);
@@ -1182,10 +1224,39 @@ class ToolBarDialog extends ViewPU {
                   });
                 }, SymbolGlyph);
               });
-            }
-            else {
+            } else if (Util.z1(this.itemDialog.icon)) {
               this.ifElseBranchUpdateFunction(1, () => {
-                this.observeComponentCreation2((i1, j1) => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                  SymbolGlyph.create(this.itemDialog?.icon);
+                  SymbolGlyph.fontColor([{
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.icon_primary'],
+                    'bundleName': '',
+                    'moduleName': '',
+                  }]);
+                  SymbolGlyph.fontSize(DIALOG_IMAGE_SIZE);
+                  SymbolGlyph.margin({
+                    top: {
+                      'id': -1,
+                      'type': 10002,
+                      params: ['sys.float.padding_level24'],
+                      'bundleName': '',
+                      'moduleName': '',
+                    },
+                    bottom: {
+                      'id': -1,
+                      'type': 10002,
+                      params: ['sys.float.padding_level8'],
+                      'bundleName': '',
+                      'moduleName': '',
+                    },
+                  });
+                }, SymbolGlyph);
+              });
+            } else {
+              this.ifElseBranchUpdateFunction(2, () => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                   Image.create(this.itemDialog.icon);
                   Image.width(DIALOG_IMAGE_SIZE);
                   Image.height(DIALOG_IMAGE_SIZE);
@@ -1217,7 +1288,7 @@ class ToolBarDialog extends ViewPU {
             }
           }, If);
           If.pop();
-          this.observeComponentCreation2((c1, d1) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width('100%');
             Column.padding({
@@ -1244,7 +1315,7 @@ class ToolBarDialog extends ViewPU {
               },
             });
           }, Column);
-          this.observeComponentCreation2((a1, b1) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Text.create(this.itemDialog.content);
             Text.fontSize(TEXT_TOOLBAR_DIALOG);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
@@ -1266,7 +1337,7 @@ class ToolBarDialog extends ViewPU {
       }
       else {
         this.ifElseBranchUpdateFunction(1, () => {
-          this.observeComponentCreation2((t, u) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             Column.create();
             Column.width(this.fontSize === MAX_FONT_SIZE ? MAX_DIALOG : MIN_DIALOG);
             Column.constraintSize({ minHeight: this.fontSize === MAX_FONT_SIZE ? MAX_DIALOG : MIN_DIALOG });
@@ -1281,12 +1352,12 @@ class ToolBarDialog extends ViewPU {
             }));
             Column.justifyContent(FlexAlign.Center);
           }, Column);
-          this.observeComponentCreation2((j, k) => {
+          this.observeComponentCreation2((elmtId, isInitialRender) => {
             If.create();
             if (this.itemDialog.toolBarSymbolOptions?.normal ||
               this.itemDialog.toolBarSymbolOptions?.activated) {
               this.ifElseBranchUpdateFunction(0, () => {
-                this.observeComponentCreation2((r, s) => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                   SymbolGlyph.create();
                   SymbolGlyph.attributeModifier.bind(this)(this.itemSymbolModifier);
                   SymbolGlyph.symbolEffect(ObservedObject.GetRawObject(this.symbolEffect), false);
@@ -1300,10 +1371,24 @@ class ToolBarDialog extends ViewPU {
                   SymbolGlyph.fontSize(DIALOG_IMAGE_SIZE);
                 }, SymbolGlyph);
               });
+            } else if (Util.z1(this.itemDialog.icon)) {
+              this.ifElseBranchUpdateFunction(1, () => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
+                  SymbolGlyph.create(this.itemDialog?.icon);
+                  SymbolGlyph.fontColor([{
+                    'id': -1,
+                    'type': 10001,
+                    params: ['sys.color.icon_primary'],
+                    'bundleName': '__harDefaultBundleName__',
+                    'moduleName': '__harDefaultModuleName__',
+                  }]);
+                  SymbolGlyph.fontSize(DIALOG_IMAGE_SIZE);
+                }, SymbolGlyph);
+              });
             }
             else {
-              this.ifElseBranchUpdateFunction(1, () => {
-                this.observeComponentCreation2((n, o) => {
+              this.ifElseBranchUpdateFunction(2, () => {
+                this.observeComponentCreation2((elmtId, isInitialRender) => {
                   Image.create(this.itemDialog.icon);
                   Image.width(DIALOG_IMAGE_SIZE);
                   Image.height(DIALOG_IMAGE_SIZE);

@@ -103,10 +103,21 @@ export class ProgressButtonV2 extends ViewV2 {
       }
     }
   }
+  getProgressButtonRadius() {
+    if (!this.progressButtonRadius || this.progressButtonRadius.unit === LengthUnit.PERCENT) {
+      return LengthMetrics.vp(this.buttonBorderRadius);
+    }
+    else if (this.progressButtonRadius.value < 0) {
+      return LengthMetrics.vp(0);
+    }
+    else {
+      return this.progressButtonRadius;
+    }
+  }
   initialRender() {
     this.observeComponentCreation2((y, z) => {
       Button.createWithChild();
-      Button.borderRadius(this.progressButtonRadius ? this.toLengthString(this.progressButtonRadius) :
+      Button.borderRadius(this.progressButtonRadius ? this.toLengthString(this.getProgressButtonRadius()) :
         this.buttonBorderRadius);
       Button.clip(false);
       Button.hoverEffect(HoverEffect.None);
@@ -143,13 +154,7 @@ export class ProgressButtonV2 extends ViewV2 {
       Progress.width('100%');
       Progress.hoverEffect(HoverEffect.None);
       Progress.style(this.progressButtonRadius ?
-        { borderRadius: new LengthMetrics(Math.max(this.progressButtonRadius.value, 0)) } : {});
-      Progress.padding({
-        top: 0.6,
-        left: 0.6,
-        right: 0.6,
-        bottom: 0.6
-      });
+        { borderRadius: this.getProgressButtonRadius() } : {});
       Progress.clip(false);
       Progress.enabled(this.isEnabled);
       Progress.key(PROGRESS_BUTTON_PROGRESS_KEY);
@@ -195,7 +200,7 @@ export class ProgressButtonV2 extends ViewV2 {
       });
       Row.height(this.textHeight);
       Row.constraintSize({ minHeight: BUTTON_NORMARL_HEIGHT });
-      Row.borderRadius(this.progressButtonRadius ? this.toLengthString(this.progressButtonRadius) :
+      Row.borderRadius(this.progressButtonRadius ? this.toLengthString(this.getProgressButtonRadius()) :
         this.buttonBorderRadius);
       Row.width('100%');
     }, Row);

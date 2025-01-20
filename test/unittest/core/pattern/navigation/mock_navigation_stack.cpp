@@ -302,4 +302,9 @@ int32_t MockNavigationStack::MockMoveToTop(const std::string& name)
     }
     return candidateIndex;
 }
+
+void MockNavigationStack::SetIsEntryByIndex(int32_t index, bool isEntry)
+{
+    mockIsEntryMap_[index] = isEntry;
+}
 } // namespace OHOS::Ace::NG

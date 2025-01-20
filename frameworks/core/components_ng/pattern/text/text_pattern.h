@@ -777,6 +777,7 @@ public:
     void ResetCustomFontColor();
     void OnColorConfigurationUpdate() override;
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+    void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
 
 protected:
     int32_t GetClickedSpanPosition()

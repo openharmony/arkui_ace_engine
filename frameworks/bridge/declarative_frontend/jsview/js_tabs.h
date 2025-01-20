@@ -59,6 +59,7 @@ protected:
     static void SetPageFlipMode(const JSCallbackInfo& info);
     static void SetBarModifier(const JSCallbackInfo& info, const JsiRef<JsiValue>& jsValue);
     static void SetCachedMaxCount(const JSCallbackInfo& info);
+    static void SetOnSelected(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

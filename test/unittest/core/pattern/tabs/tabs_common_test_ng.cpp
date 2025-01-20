@@ -386,7 +386,7 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty002, TestSize.Level1)
         ViewAbstract::SetWidth(AceType::RawPtr(child), CalcLength(itemWidth));
     }
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_TRUE(tabBarAccessibilityProperty_->IsScrollable());
 }
 
@@ -482,7 +482,7 @@ HWTEST_F(TabsCommonTestNg, TabBarAccessibilityProperty006, TestSize.Level1)
      * @tc.expected: Check actions value
      */
     tabBarNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(tabBarNode_);
+    FlushUITasks();
     EXPECT_TRUE(tabBarPattern_->CanScroll());
     tabBarAccessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions = 0;

@@ -98,6 +98,13 @@ void LogCustomAnimationStart(const RefPtr<NavDestinationGroupNode>& preTopDestin
         newPattern ? newPattern->GetName().c_str() : "null",
         newPattern ? std::to_string(newPattern->GetNavDestinationId()).c_str() : "null");
 }
+
+void TriggerNavDestinationTransition(const RefPtr<NavDestinationGroupNode>& navDestination,
+    NavigationOperation operation, bool isEnter)
+{
+    CHECK_NULL_VOID(navDestination);
+    navDestination->DoTransition(operation, isEnter);
+}
 } // namespace
 
 NavigationPattern::NavigationPattern()
@@ -775,10 +782,17 @@ void NavigationPattern::UpdateNavPathList()
         }
         uiNode = navigationStack_->GetFromCacheNode(cacheNodes, pathName);
         if (uiNode) {
-            TAG_LOGD(AceLogTag::ACE_NAVIGATION, "find in cached node, navigation stack reserve node, "
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find in cached node, navigation stack reserve node, "
                 "index: %{public}d, removeSize: %{public}d, name: %{public}s.", index, removeSize, pathName.c_str());
             navPathList.emplace_back(std::make_pair(pathName, uiNode));
             navigationStack_->RemoveCacheNode(cacheNodes, pathName, uiNode);
+            auto navDestination =
+                DynamicCast<NavDestinationGroupNode>(NavigationGroupNode::GetNavDestinationNode(uiNode));
+            if (navDestination) {
+                auto eventHub = navDestination->GetEventHub<EventHub>();
+                CHECK_NULL_VOID(eventHub);
+                eventHub->SetEnabledInternal(true);
+            }
             continue;
         }
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "find in nowhere, navigation stack create new node, "
@@ -1315,6 +1329,12 @@ void NavigationPattern::TransitionWithAnimation(const RefPtr<NavDestinationGroup
         return;
     }
     if (isCustomAnimation_ && TriggerCustomAnimation(preTopNavDestination, newTopNavDestination, isPopPage)) {
+        auto operation = NavigationOperation::REPLACE;
+        if (navigationStack_->GetReplaceValue() == 0) {
+            operation = isPopPage ? NavigationOperation::POP : NavigationOperation::PUSH;
+        }
+        TriggerNavDestinationTransition(preTopNavDestination, operation, false);
+        TriggerNavDestinationTransition(newTopNavDestination, operation, true);
         return;
     }
     StartDefaultAnimation(preTopNavDestination, newTopNavDestination, isPopPage, isNeedVisible);

@@ -251,6 +251,7 @@ void BaseTextSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overlay
         CHECK_NULL_VOID(overlay);
         overlay->UpdateOriginalMenuIsShow();
     };
+    overlayInfo.enableSubWindowMenu = enableSubWindowMenu_;
 }
 
 RectF BaseTextSelectOverlay::GetVisibleRect(const RefPtr<FrameNode>& node, const RectF& visibleRect)
@@ -1552,5 +1553,21 @@ bool BaseTextSelectOverlay::IsHandleVisible(bool isFirst)
     auto overlayInfo = overlayManager->GetSelectOverlayInfo();
     CHECK_NULL_RETURN(overlayInfo, false);
     return isFirst ? overlayInfo->firstHandle.isShow : overlayInfo->secondHandle.isShow;
+}
+
+void BaseTextSelectOverlay::UpdateMenuOnWindowSizeChanged(WindowSizeChangeReason type)
+{
+    auto host = GetOwner();
+    CHECK_NULL_VOID(host);
+    auto overlayManager = GetManager<SelectContentOverlayManager>();
+    CHECK_NULL_VOID(overlayManager);
+    if (overlayManager->IsRightClickSubWindowMenu()) {
+        CloseOverlay(false, CloseReason::CLOSE_REASON_WINDOW_SIZE_CHANGE);
+    } else if (overlayManager->IsSeletctOverlaySubWindowMenu()) {
+        if (overlayManager->IsMenuShow()) {
+            HideMenu(true);
+            TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "Hide selectoverlay subwindow menu on window size change.");
+        }
+    }
 }
 } // namespace OHOS::Ace::NG

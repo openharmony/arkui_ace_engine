@@ -90,11 +90,11 @@ bool IndicatorPattern::IsLoopFromProperty() const
     return swiperIndicatorLayoutProperty->GetLoop().value_or(true);
 }
 
-void IndicatorPattern::FireChangeEvent() const
+void IndicatorPattern::FireChangeEvent(int32_t index) const
 {
     auto indicatorEventHub = GetEventHub<IndicatorEventHub>();
     CHECK_NULL_VOID(indicatorEventHub);
-    indicatorEventHub->FireChangeEvent(GetLoopIndex(GetCurrentIndex()));
+    indicatorEventHub->FireChangeEvent(index);
 }
 
 std::shared_ptr<SwiperParameters> IndicatorPattern::GetSwiperParameters()
@@ -231,13 +231,19 @@ void IndicatorPattern::UpdatePaintProperty()
     paintProperty->UpdateSelectedColor(
         swiperParameters->selectedColorVal.value_or(swiperIndicatorTheme->GetSelectedColor()));
     paintProperty->UpdateIsCustomSize(isCustomSize_);
+    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    indicatorNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void IndicatorPattern::OnModifyDone()
 {
     if (!hasSetInitialIndex_) {
         hasSetInitialIndex_ = true;
-        currentIndexInSingleMode_ = GetInitialIndexFromProperty();
+        auto initialIndex = GetInitialIndexFromProperty();
+        if ((initialIndex < 0) || (initialIndex >= RealTotalCount())) {
+            initialIndex = 0;
+        }
+        currentIndexInSingleMode_ = initialIndex;
     }
 
     auto indicatorNode = GetHost();
@@ -321,7 +327,7 @@ void IndicatorPattern::OnIndexChangeInSingleMode(int32_t index)
         }
     }
     SetCurrentIndexInSingleMode(GetLoopIndex(index));
-    FireChangeEvent();
+    FireChangeEvent(GetLoopIndex(index));
     SwiperIndicatorPattern::IndicatorOnChange();
 }
 
@@ -330,13 +336,7 @@ void IndicatorPattern::ShowPrevious()
     if (GetBindSwiperNode()) {
         return SwiperIndicatorPattern::ShowPrevious();
     }
-    auto isRtl = GetNonAutoLayoutDirection() == TextDirection::RTL;
-    if (isRtl) {
-        singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
-    } else {
-        singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
-    }
-
+    singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
     OnIndexChangeInSingleMode(GetCurrentIndex() - 1);
 }
 
@@ -354,6 +354,10 @@ void IndicatorPattern::ChangeIndex(int32_t index, bool useAnimation)
     if (GetBindSwiperNode()) {
         return SwiperIndicatorPattern::ChangeIndex(index, useAnimation);
     }
+    if ((index < 0) || (index >= RealTotalCount())) {
+        index = 0;
+    }
+
     if (useAnimation) {
         if (GetLoopIndex(GetCurrentIndex()) > GetLoopIndex(index)) {
             singleGestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;

@@ -80,7 +80,7 @@ private:
 
     float CalculatePredictSnapEndPositionByIndex(uint32_t index, float prevPredictEndPos);
 
-    float GetNearScale(float pos);
+    static float GetNearScale(float pos);
     float InitItemOffset(LayoutWrapper* layoutWrapper);
     void GenerateItemOffset(LayoutWrapper* layoutWrapper);
 

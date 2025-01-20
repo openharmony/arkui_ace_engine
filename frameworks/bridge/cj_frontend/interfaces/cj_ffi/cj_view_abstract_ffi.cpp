@@ -2599,6 +2599,42 @@ VectorStringHandle FFIGetResourceVectorString(NativeResourceObject obj)
     return result;
 }
 
+void FFIOHOSAceFrameworkSetCursor(int32_t pointerStyle)
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (!pipelineContext) {
+        LOGE("pipeline context is non-valid");
+        return;
+    }
+    if (!pipelineContext->GetTaskExecutor()) {
+        LOGE("TaskExecutor is non-valid");
+        return;
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask(
+        [pipelineContext, pointerStyle]() { pipelineContext->SetCursor(pointerStyle); }, TaskExecutor::TaskType::UI,
+        "ArkUICjSetCursor");
+}
+
+void FFIOHOSAceFrameworkRestoreDefault()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (!pipelineContext) {
+        LOGE("pipeline context is non-valid");
+        return;
+    }
+    if (!pipelineContext->GetTaskExecutor()) {
+        LOGE("TaskExecutor is non-valid");
+        return;
+    }
+    pipelineContext->GetTaskExecutor()->PostSyncTask([pipelineContext]() { pipelineContext->RestoreDefault(); },
+        TaskExecutor::TaskType::UI, "ArkUICjRestoreDefault");
+}
+
+void FFIOHOSAceFrameworkMonopolizeEvents(bool monopolize)
+{
+    ViewAbstractModel::GetInstance()->SetMonopolizeEvents(monopolize);
+}
+
 void FfiOHOSAceFrameworkViewAbstractSetDraggable(bool value)
 {
     ViewAbstractModel::GetInstance()->SetDraggable(value);

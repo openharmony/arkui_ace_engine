@@ -61,6 +61,7 @@ bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(!pattern->IsTransparent(), false);
     pattern->ShowSelect();
     SetEnableHandleLevel(true);
+    SetEnableSubWindowMenu(true);
     CheckEnableContainerModal();
     return true;
 }
@@ -357,6 +358,9 @@ RectF TextFieldSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
             selectRects.front().SetRect({selectRects.front().Right(), selectRects.front().Bottom()}, {0, 0});
         }
         res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
+        if (NearZero(res.Width())) {
+            res.SetWidth(TextBase::GetSelectedBlankLineWidth());
+        }
     }
     auto globalContentRect = GetVisibleContentRect(true);
     auto intersectRect = res.IntersectRectT(globalContentRect);
