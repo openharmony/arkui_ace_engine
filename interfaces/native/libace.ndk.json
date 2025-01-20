@@ -2702,5 +2702,9 @@
     {
         "first_introduced": "16",
         "name": "OH_ArkUI_DisableDropDataPrefetchOnNode"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_GestureInterrupter_GetUserData"
     }
 ]

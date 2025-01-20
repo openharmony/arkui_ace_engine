@@ -546,13 +546,14 @@ void clearGestures(ArkUINodeHandle node)
     gestureHub->ClearModifierGesture();
 }
 
-void setGestureInterrupterToNode(
-    ArkUINodeHandle node, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo))
+void setGestureInterrupterToNodeWithUserData(
+    ArkUINodeHandle node, void* userData, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo))
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    auto onGestureRecognizerJudgeBegin = [frameNode, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
-                                   const RefPtr<NG::NGGestureRecognizer>& current,
-                                   const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
+    auto onGestureRecognizerJudgeBegin =
+        [frameNode, userData, interrupter](const std::shared_ptr<BaseGestureEvent>& info,
+            const RefPtr<NG::NGGestureRecognizer>& current,
+            const std::list<RefPtr<NG::NGGestureRecognizer>>& others) -> GestureJudgeResult {
         ArkUIAPIEventGestureAsyncEvent gestureEvent;
         ArkUITouchEvent rawInputEvent;
         GetBaseGestureEvent(&gestureEvent, rawInputEvent, info);
@@ -563,7 +564,11 @@ void setGestureInterrupterToNode(
         interruptInfo.isSystemGesture = gestureInfo->IsSystemGesture();
         interruptInfo.systemRecognizerType = static_cast<ArkUI_Int32>(gestureInfo->GetType());
         interruptInfo.event = &gestureEvent;
-        interruptInfo.userData = gestureInfo->GetUserData();
+        if (userData) {
+            interruptInfo.userData = userData;
+        } else {
+            interruptInfo.userData = gestureInfo->GetUserData();
+        }
         ArkUIGestureRecognizer* currentArkUIGestureRecognizer = NodeModifier::CreateGestureRecognizer(current);
         interruptInfo.userData = reinterpret_cast<void*>(currentArkUIGestureRecognizer);
         auto count = static_cast<int32_t>(others.size());
@@ -588,6 +593,12 @@ void setGestureInterrupterToNode(
         return static_cast<GestureJudgeResult>(result);
     };
     ViewAbstract::SetOnGestureRecognizerJudgeBegin(frameNode, std::move(onGestureRecognizerJudgeBegin));
+}
+
+void setGestureInterrupterToNode(
+    ArkUINodeHandle node, ArkUI_Int32 (*interrupter)(ArkUIGestureInterruptInfo* interrupterInfo))
+{
+    setGestureInterrupterToNodeWithUserData(node, nullptr, interrupter);
 }
 
 ArkUI_Int32 setInnerGestureParallelTo(ArkUINodeHandle node, void* userData,
@@ -817,6 +828,7 @@ const ArkUIGestureModifier* GetGestureModifier()
         .removeGestureFromNodeByTag = removeGestureFromNodeByTag,
         .clearGestures = clearGestures,
         .setGestureInterrupterToNode = setGestureInterrupterToNode,
+        .setGestureInterrupterToNodeWithUserData = setGestureInterrupterToNodeWithUserData,
         .setInnerGestureParallelTo = setInnerGestureParallelTo,
         .setGestureRecognizerEnabled = setGestureRecognizerEnabled,
         .setGestureRecognizerLimitFingerCount = setGestureRecognizerLimitFingerCount,

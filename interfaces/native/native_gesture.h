@@ -916,6 +916,41 @@ typedef struct {
         int32_t countNum, int32_t fingersNum, double distanceThreshold);
 } ArkUI_NativeGestureAPI_1;
 
+/**
+ * @brief Defines the gesture APIs.
+ *
+ * @since 16
+ */
+typedef struct {
+    /**
+     * @brief Pointer to the <b>ArkUI_NativeGestureAPI_1</b> struct.
+     */
+    ArkUI_NativeGestureAPI_1* gestureApi1;
+    
+    /**
+    * @brief Sets the callback for gesture interruption events.
+    *
+    * @param node Node for which you want to set a gesture interruption callback.
+    * @param userData Custom data.
+    * @param interrupter Gesture interruption callback to set. <b>info</b> indicates the gesture interruption data.
+    * If <b>interrupter</b> returns <b>GESTURE_INTERRUPT_RESULT_CONTINUE</b>, the gesture recognition process proceeds
+    * properly. If it returns <b>GESTURE_INTERRUPT_RESULT_REJECT</b>, the gesture recognition process is paused.
+    * @return Returns <b>0</b> if success.
+    *         Returns <b>401</b> if a parameter error occurs.
+    */
+    int32_t (*setGestureInterrupterToNode)(ArkUI_NodeHandle node, void* userData,
+        ArkUI_GestureInterruptResult (*interrupter)(ArkUI_GestureInterruptInfo* info));
+} ArkUI_NativeGestureAPI_2;
+
+/**
+* @brief Obtains the custom data from a gesture interruption event.
+*
+* @param event Pointer to the gesture interruption information.
+* @return Returns the pointer to the custom data.
+* @since 16
+*/
+void* OH_ArkUI_GestureInterrupter_GetUserData(ArkUI_GestureInterruptInfo* event);
+
 #ifdef __cplusplus
 };
 #endif
