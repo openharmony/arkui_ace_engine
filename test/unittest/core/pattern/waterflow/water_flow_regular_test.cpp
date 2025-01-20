@@ -51,18 +51,18 @@ HWTEST_F(WaterFlowTestNg, OffsetEnd001, TestSize.Level1)
     EXPECT_FALSE(info->offsetEnd_);
 
     UpdateCurrentOffset(-45.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info->endIndex_, 29);
     EXPECT_FALSE(info->offsetEnd_);
 
     UpdateCurrentOffset(-5.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info->endIndex_, 29);
     EXPECT_TRUE(info->offsetEnd_);
     EXPECT_TRUE(info->ReachEnd(50.0f, false));
 
     UpdateCurrentOffset(1.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_FALSE(info->offsetEnd_);
 }
 
@@ -156,11 +156,11 @@ HWTEST_F(WaterFlowTestNg, Constraint001, TestSize.Level1)
     EXPECT_EQ(GetChildWidth(frameNode_, 0), 200.0f);
 
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(500.0f), CalcLength(Dimension(600.0f))));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildWidth(frameNode_, 4), 250.0f);
 
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(200.0f), CalcLength(Dimension(700.0f))));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildWidth(frameNode_, 4), 100.0f);
     EXPECT_EQ(info->endIndex_, 9);
 
@@ -168,7 +168,7 @@ HWTEST_F(WaterFlowTestNg, Constraint001, TestSize.Level1)
     EXPECT_EQ(info->storedOffset_, -20.0f);
     EXPECT_EQ(info->startIndex_, 3);
     layoutProperty_->UpdateUserDefinedIdealSize(CalcSize(CalcLength(600.0f), CalcLength(Dimension(700.0f))));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(GetChildWidth(frameNode_, 4), 300.0f);
     EXPECT_EQ(info->storedOffset_, -20.0f);
     EXPECT_EQ(info->startIndex_, 3);
@@ -297,7 +297,7 @@ HWTEST_F(WaterFlowTestNg, ChangeFooter001, TestSize.Level1)
 
     pattern_->AddFooter(ifNode);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(info->footerIndex_, -1);
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 60);
     EXPECT_EQ(GetChildY(frameNode_, 59), 600.0f);
@@ -327,11 +327,11 @@ HWTEST_F(WaterFlowTestNg, IllegalItemCnt, TestSize.Level1)
     }
     frameNode_->childrenUpdatedFrom_ = 0;
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     pattern_->ScrollToIndex(LAST_ITEM, false, ScrollAlign::START);
     EXPECT_EQ(info->jumpIndex_, LAST_ITEM);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(info->startIndex_ >= info->endIndex_);
 }
 
@@ -437,7 +437,7 @@ HWTEST_F(WaterFlowTestNg, Property014, TestSize.Level1)
      */
     model.SetItemMinWidth(AceType::RawPtr(frameNode_), Dimension(300.f));
     model.SetItemMaxWidth(AceType::RawPtr(frameNode_), Dimension(400.f));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(layoutProperty_->HasItemLayoutConstraint());
     EXPECT_EQ(model.GetItemMinWidth(AceType::RawPtr(frameNode_)), Dimension(300.f));
     EXPECT_EQ(model.GetItemMaxWidth(AceType::RawPtr(frameNode_)), Dimension(400.f));
@@ -454,7 +454,7 @@ HWTEST_F(WaterFlowTestNg, Property014, TestSize.Level1)
     layoutProperty_->Reset();
     model.SetItemMinHeight(AceType::RawPtr(frameNode_), Dimension(150.f));
     model.SetItemMaxHeight(AceType::RawPtr(frameNode_), Dimension(250.f));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(layoutProperty_->HasItemLayoutConstraint());
     EXPECT_EQ(model.GetItemMinWidth(AceType::RawPtr(frameNode_)), Dimension(0.f));
     EXPECT_EQ(model.GetItemMaxWidth(AceType::RawPtr(frameNode_)), Dimension(0.f));
@@ -486,7 +486,7 @@ HWTEST_F(WaterFlowTestNg, Cache003, TestSize.Level1)
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 51);
     ASSERT_TRUE(GetChildFrameNode(frameNode_, 0));
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     auto info = pattern_->layoutInfo_;
     EXPECT_EQ(info->startIndex_, 0);
     EXPECT_EQ(info->endIndex_, 15);
@@ -621,7 +621,7 @@ HWTEST_F(WaterFlowTestNg, Delete003, TestSize.Level1)
         frameNode_->ChildrenUpdatedFrom(1);
     }
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_EQ(frameNode_->GetTotalChildCount(), 1);
     // layout footer.
@@ -695,7 +695,7 @@ HWTEST_F(WaterFlowTestNg, Jump003, TestSize.Level1)
     frameNode_->RemoveChildAtIndex(12);
     frameNode_->ChildrenUpdatedFrom(12);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ScrollToIndex(12, false, ScrollAlign::START);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 12);
@@ -708,7 +708,7 @@ HWTEST_F(WaterFlowTestNg, Jump003, TestSize.Level1)
         frameNode_->ChildrenUpdatedFrom(i);
     }
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     ScrollToIndex(15, false, ScrollAlign::START);
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 15);
@@ -825,7 +825,7 @@ HWTEST_F(WaterFlowTestNg, Delete002, TestSize.Level1)
     child->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(300.0)));
     child->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     // both operations can take effect.
     EXPECT_EQ(GetChildHeight(frameNode_, 35), 300.0f);
@@ -857,7 +857,7 @@ HWTEST_F(WaterFlowTestNg, Delete004, TestSize.Level1)
     frameNode_->RemoveChildAtIndex(2);
     frameNode_->ChildrenUpdatedFrom(2);
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 2);
@@ -915,7 +915,7 @@ HWTEST_F(WaterFlowTestNg, SafeAreaExpand001, TestSize.Level1)
         .WillRepeatedly(Return(SafeAreaInsets { {}, {}, {}, { .start = 0, .end = 100 } }));
     layoutProperty_->UpdateSafeAreaExpandOpts({ .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL });
 
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->startIndex_, 0);
     // When set SAFE_AREA_EDGE_BOTTOM, endIndex should become bigger.
     EXPECT_EQ(pattern_->layoutInfo_->endIndex_, 17);
@@ -930,7 +930,7 @@ HWTEST_F(WaterFlowTestNg, SafeAreaExpand001, TestSize.Level1)
     EXPECT_EQ(reachEnd, false);
 
     UpdateCurrentOffset(-50.0f);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(reachEnd, true);
 }
 
@@ -948,13 +948,13 @@ HWTEST_F(WaterFlowTestNg, scrollPage001, TestSize.Level1)
 
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0);
     pattern_->ScrollPage(false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), 0 - WATER_FLOW_HEIGHT);
 
     layoutProperty_->UpdateWaterflowDirection(FlexDirection::COLUMN_REVERSE);
     EXPECT_EQ(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT);
     pattern_->ScrollPage(false);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     // sw need estimate currentOffset.
     EXPECT_TRUE(NearEqual(pattern_->layoutInfo_->Offset(), -WATER_FLOW_HEIGHT - WATER_FLOW_HEIGHT, 100));
 }
