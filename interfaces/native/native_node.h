@@ -6382,7 +6382,7 @@ typedef enum {
      * device. \n
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
-     * 
+     *
      * @since 14
      */
     NODE_ON_KEY_EVENT = 21,
@@ -6396,7 +6396,7 @@ typedef enum {
      * device. \n
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
-     * 
+     *
      * @since 14
      */
     NODE_ON_KEY_PRE_IME = 22,
@@ -6407,19 +6407,19 @@ typedef enum {
      * The event callback is triggered by interactions with a joystick and a focused component. \n
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_UIInputEvent}. \n
-     * 
+     *
      * @since 15
      */
     NODE_ON_FOCUS_AXIS = 23,
 
-     /**
+    /**
      * @brief Dispatch key event on the component node.
      *
      * When the component node receives a key event, this callback will be triggered instead of dispatching event to its
      * children. \n
      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
-     * 
+     *
      * @since 16
      */
     NODE_DISPATCH_KEY_EVENT = 24,
@@ -6758,16 +6758,16 @@ typedef enum {
     NODE_TEXT_AREA_ON_SUBMIT,
 
     /**
-      * @brief  This event is triggered when the input content of TextArea changes.
-      *
-      * Conditions for triggering this event: When the input content changes. \n
-      * When the event callback occurs, the union type in the event parameter {@link ArkUI_NodeEvent} object is \n
-      * {@link ArkUI_NodeComponentEvent}.\n
-      * {@link ArkUI_NodeComponentEvent} contains 2 parameters:\n
-      * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: Indicates the width of the text. \n
-      * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: Indicates the height of the text. \n
-      *
-      */
+     * @brief  This event is triggered when the input content of TextArea changes.
+     *
+     * Conditions for triggering this event: When the input content changes. \n
+     * When the event callback occurs, the union type in the event parameter {@link ArkUI_NodeEvent} object is \n
+     * {@link ArkUI_NodeComponentEvent}.\n
+     * {@link ArkUI_NodeComponentEvent} contains 2 parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].f32</b>: Indicates the width of the text. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].f32</b>: Indicates the height of the text. \n
+     *
+     */
     NODE_TEXT_AREA_ON_CONTENT_SIZE_CHANGE,
     /**
      * @brief Defines the event triggered when text is about to be entered.
@@ -7028,6 +7028,20 @@ typedef enum {
     NODE_SWIPER_EVENT_ON_SELECTED,
 
     /**
+     * @brief Defines the event triggered when content in the swiper component will scroll.
+     * Instructions: Before page scrolling, the </b>ContentWillScrollCallback</b> callback is invoked. \n \n
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains three parameters:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: the index value of the current child page. \n
+     * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: the index value of the child page that will display. \n
+     * <b>ArkUI_NodeComponentEvent.data[2].f32</b>: the sliding offset of each frame.
+     * Positive numbers indicating slide backward(e.g. from index=1 to index=0), negative numbers indicating
+     * slide forward(e.g. from index=0 to index=1). \n
+     */
+    NODE_SWIPER_EVENT_ON_CONTENT_WILL_SCROLL = 1001007,
+
+    /**
      * @brief Defines the event triggered when the <b>ARKUI_NODE_SCROLL</b> component scrolls.
      *
      * Notes for triggering the event:\n
@@ -7142,7 +7156,7 @@ typedef enum {
      * when the scrolling container component reaches the start position.
      * Condition for triggering the event:\n
      * Triggered when the component reaches the start position. \n
-     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is 
+     * When the event callback occurs, the union type in the {@Link ArkUI_NodeEvent} object is
      * {@Link ArkUI_NodeComponentEvent}. \n
      * {@Link ArkUI_NodeComponentEvent} contains no parameters. \n
      */
@@ -7204,7 +7218,7 @@ typedef enum {
      */
     NODE_LIST_ON_DID_SCROLL,
 
-     /**
+    /**
      * @brief Defines the event triggered when the currently displayed content of the <b>ARKUI_NODE_LIST</b> changes.
      *
      * Notes for triggering the event:\n
@@ -7231,7 +7245,7 @@ typedef enum {
      * @since 16
      */
     NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE,
-    
+
     /**
      * @brief Defines the event triggered when the refresh state of the <b>ARKUI_NODE_REFRESH</b> object changes.
      *
@@ -7315,7 +7329,7 @@ typedef enum {
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
      * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
      *
-    */
+     */
     NODE_IMAGE_ANIMATOR_EVENT_ON_START = MAX_NODE_SCOPE_NUM * ARKUI_NODE_IMAGE_ANIMATOR,
     /**
      * @brief 定义帧动画播放暂停时的状态回调。
@@ -7325,7 +7339,7 @@ typedef enum {
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
      * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
      *
-    */
+     */
     NODE_IMAGE_ANIMATOR_EVENT_ON_PAUSE = 19001,
     /**
      * @brief 定义帧动画c重复播放时的状态回调。
@@ -7335,7 +7349,7 @@ typedef enum {
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
      * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
      *
-    */
+     */
     NODE_IMAGE_ANIMATOR_EVENT_ON_REPEAT = 19002,
     /**
      * @brief 定义帧动画返回最初状态时的状态回调。
@@ -7345,7 +7359,7 @@ typedef enum {
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
      * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
      *
-    */
+     */
     NODE_IMAGE_ANIMATOR_EVENT_ON_CANCEL = 19003,
     /**
      * @brief 定义帧动画播放完成时或者停止播放时的状态回调。
@@ -7355,7 +7369,7 @@ typedef enum {
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
      * {@link ArkUI_NodeComponentEvent}中不包含参数。\n
      *
-    */
+     */
     NODE_IMAGE_ANIMATOR_EVENT_ON_FINISH = 19004,
 } ArkUI_NodeEventType;
 
