@@ -53,10 +53,10 @@ public:
         return callbackCounter_;
     }
 
-    CustomNodeBuilder GetBuilder()
+    CustomNodeBuilder GetBuilder() const
     {
-        static CustomNodeBuilderTestHelper* builderFunctor = this;
-        CustomNodeBuilder builder = {
+        const CustomNodeBuilderTestHelper* builderFunctor = this;
+        const CustomNodeBuilder builder = {
             .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                 const Callback_Pointer_Void continuation) {
                 (*builderFunctor)(context, resourceId, parentNode, continuation);
