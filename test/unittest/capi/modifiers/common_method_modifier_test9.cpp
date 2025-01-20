@@ -407,11 +407,13 @@ HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
         for (const auto& resultData : result) {
           auto hoverResult = AceType::DynamicCast<HoverEventTarget>(resultData);
           MouseEvent me;
-          hoverResult->HandleHoverEvent(true, me);
+          hoverResult->HandleHoverEvent(isHover, me);
         }
         ASSERT_TRUE(checkEvent.has_value());
+        EXPECT_EQ(checkEvent->isHover, isHover);
     };
     test(true);
+    test(false);
 }
 
 /*
@@ -464,11 +466,13 @@ HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1
         for (const auto& resultData : result) {
           auto hoverResult = AceType::DynamicCast<HoverEventTarget>(resultData);
           TouchEvent me;
-          hoverResult->HandleAccessibilityHoverEvent(true, me);
+          hoverResult->HandleAccessibilityHoverEvent(isHover, me);
         }
         ASSERT_TRUE(checkEvent.has_value());
+        EXPECT_EQ(checkEvent->isHover, isHover);
     };
     test(true);
+    test(false);
 }
 
 /*
