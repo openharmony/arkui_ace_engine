@@ -306,6 +306,10 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW, "Id:%{public}d, click %{public}d up, state: %{public}d", event.touchEventId,
         event.id, refereeState_);
+    if (fingersId_.find(event.id) != fingersId_.end()) {
+        fingersId_.erase(event.id);
+        --currentTouchPointsNum_;
+    }
     auto pipeline = PipelineBase::GetCurrentContext();
     // In a card scenario, determine the interval between finger pressing and finger lifting. Delete this section of
     // logic when the formal scenario is complete.
@@ -319,10 +323,6 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     touchPoints_[event.id] = event;
     UpdateFingerListInfo();
     auto isUpInRegion = IsPointInRegion(event);
-    if (fingersId_.find(event.id) != fingersId_.end()) {
-        fingersId_.erase(event.id);
-        --currentTouchPointsNum_;
-    }
     if (currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();
     }
