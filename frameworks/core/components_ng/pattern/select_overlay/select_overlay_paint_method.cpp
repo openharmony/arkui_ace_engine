@@ -84,8 +84,8 @@ void SelectOverlayPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     selectOverlayContentModifier_->SetInShowArea(SelectOverlayLayoutAlgorithm::CheckInShowArea(info_));
     selectOverlayContentModifier_->SetHandleReverse(info_.handleReverse);
     selectOverlayContentModifier_->SetIsSingleHandle(info_.isSingleHandle);
-    selectOverlayContentModifier_->SetFirstHandleIsShow(info_.firstHandle.isShow);
-    selectOverlayContentModifier_->SetSecondHandleIsShow(info_.secondHandle.isShow);
+    selectOverlayContentModifier_->SetFirstHandleIsShow(info_.firstHandle.isShow || info_.firstHandle.forceDraw);
+    selectOverlayContentModifier_->SetSecondHandleIsShow(info_.secondHandle.isShow || info_.firstHandle.forceDraw);
     selectOverlayContentModifier_->SetIsHandleLineShow(info_.isHandleLineShow);
     selectOverlayContentModifier_->SetIsHiddenHandle(isHiddenHandle_);
 
