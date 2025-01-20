@@ -362,7 +362,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_setAccessibilitySelectedTestValidVa
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnHoverTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, SetOnHoverTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -397,11 +397,19 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnHoverTest, TestSize.Level1)
     auto test = [this, &callBackValue, eventHub, frameNode](bool isHover) {
         checkEvent = std::nullopt;
         modifier_->setOnHover(node_, &callBackValue);
-        ASSERT_TRUE(checkEvent.has_value());
+        ASSERT_FALSE(checkEvent.has_value());
         auto inputEventHub = eventHub->GetInputEventHub();
         ASSERT_NE(inputEventHub, nullptr);
 
-        EXPECT_EQ(checkEvent->isHover, isHover);
+        OffsetF offset;
+        TouchTestResult result;
+        inputEventHub->ProcessMouseTestHit(offset, result);
+        for (const auto& resultData : result) {
+          auto hoverResult = AceType::DynamicCast<HoverEventTarget>(resultData);
+          MouseEvent me;
+          hoverResult->HandleHoverEvent(true, me);
+        }
+        ASSERT_TRUE(checkEvent.has_value());
     };
     test(true);
 }
@@ -411,7 +419,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnHoverTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnAccessibilityHoverTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, SetOnAccessibilityHoverTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -446,11 +454,19 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnAccessibilityHoverTest, TestSi
     auto test = [this, &callBackValue, eventHub, frameNode](bool isHover) {
         checkEvent = std::nullopt;
         modifier_->setOnAccessibilityHover(node_, &callBackValue);
-        ASSERT_TRUE(checkEvent.has_value());
+        ASSERT_FALSE(checkEvent.has_value());
         auto inputEventHub = eventHub->GetInputEventHub();
         ASSERT_NE(inputEventHub, nullptr);
 
-        EXPECT_EQ(checkEvent->isHover, isHover);
+        OffsetF offset;
+        TouchTestResult result;
+        inputEventHub->ProcessMouseTestHit(offset, result);
+        for (const auto& resultData : result) {
+          auto hoverResult = AceType::DynamicCast<HoverEventTarget>(resultData);
+          TouchEvent me;
+          hoverResult->HandleAccessibilityHoverEvent(true, me);
+        }
+        ASSERT_TRUE(checkEvent.has_value());
     };
     test(true);
 }
@@ -460,7 +476,7 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnAccessibilityHoverTest, TestSi
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnMouseTest, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest9, SetOnMouseTest, TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<EventHub>();
@@ -492,13 +508,17 @@ HWTEST_F(CommonMethodModifierTest9, DISABLED_SetOnMouseTest, TestSize.Level1)
         ASSERT_NE(inputEventHub, nullptr);
 
         auto mouseTask = [weak = nullptr](MouseInfo& info) {};
-        auto mouseEvent_ = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
-        inputEventHub->AddOnMouseEvent(mouseEvent_);
+        auto inputEvent_ = AceType::MakeRefPtr<InputEvent>(std::move(mouseTask));
+        inputEventHub->AddOnMouseEvent(inputEvent_);
 
         OffsetF offset;
         TouchTestResult result;
         inputEventHub->ProcessMouseTestHit(offset, result);
-
+        for (const auto& resultData : result) {
+          auto mouseResult = AceType::DynamicCast<MouseEventTarget>(resultData);
+          MouseEvent me;
+          mouseResult->HandleMouseEvent(me);
+        }
         ASSERT_TRUE(checkEvent.has_value());
     };
     test();
