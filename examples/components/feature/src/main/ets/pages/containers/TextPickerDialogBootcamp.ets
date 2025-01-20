@@ -105,6 +105,8 @@ export struct TextPickerDialogBootcamp {
   @State dialogBackgroundBlurStyle: BlurStyle = BlurStyle.COMPONENT_ULTRA_THICK;
   @State enableDialogShadow: boolean = false;
   @State dialogShadow: ShadowStyle = ShadowStyle.OUTER_FLOATING_SM;
+  @State enableHapticFeedback: boolean = false;
+  @State hapticFeedback: boolean = true;
 
   build() {
     NavDestination() {
@@ -195,6 +197,7 @@ export struct TextPickerDialogBootcamp {
             backgroundColor: useEnabled(this.enableDialogBackgroundColor, this.dialogBackgroundColor),
             backgroundBlurStyle: useEnabled(this.enableDialogBackgroundBlurStyle, this.dialogBackgroundBlurStyle),
             shadow: useEnabled(this.enableDialogShadow, this.dialogShadow),
+            enableHapticFeedback: useEnabled(this.enableHapticFeedback, this.hapticFeedback),
             onAccept: (value: TextPickerResult) => {
               this.select = value.index
             },
@@ -560,6 +563,16 @@ export struct TextPickerDialogBootcamp {
           dataSource: [
             { label: 'OUTER_FLOATING_MD', value: ShadowStyle.OUTER_FLOATING_MD },
             { label: 'OUTER_FLOATING_SM', value: ShadowStyle.OUTER_FLOATING_SM }
+          ]
+        })
+
+        RadioBlock({
+          title: 'hapticFeedback',
+          isEnabled: this.enableHapticFeedback,
+          value: this.hapticFeedback,
+          dataSource: [
+            { label: 'true', value: true },
+            { label: 'false', value: false }
           ]
         })
       }.width('100%')
