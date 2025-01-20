@@ -518,9 +518,9 @@ void UIExtensionPattern::UpdateFrameNodeState()
 {
     auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
-    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(ngPipeline);
-    auto frontend = ngPipeline->GetFrontend();
+    auto pipeline = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto frontend = pipeline->GetFrontend();
     CHECK_NULL_VOID(frontend);
     auto accessibilityManager = frontend->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
