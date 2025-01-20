@@ -811,6 +811,13 @@ class UIContext {
         Context.enableSwipeBack(enabled);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    getTextMenuController() {
+        if (this.textMenuController_ == null) {
+            this.textMenuController_ = new TextMenuController(this.instanceId_);
+        }
+        return this.textMenuController_;
+    }
 }
 
 class DynamicSyncScene {
@@ -1518,6 +1525,25 @@ class OverlayManager {
         __JSScopeUtil__.restoreInstanceId();
     }
 }
+
+class TextMenuController {
+    /**
+     * Construct new instance of TextMenuController.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 16
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+    }
+
+    setMenuOptions(textMenuOptions) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        TextMenu.setMenuOptions(textMenuOptions);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+}
+
 /**
  * Get UIContext instance.
  * @param instanceId obtained on the c++ side.
