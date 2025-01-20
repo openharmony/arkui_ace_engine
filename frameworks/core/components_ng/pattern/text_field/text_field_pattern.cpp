@@ -5055,7 +5055,7 @@ void TextFieldPattern::AdjustFloatingCaretInfo(const Offset& localOffset,
     bool FloatCursorOnOriginLeft = floatingCaretInfo.rect.GetX() < caretInfo.rect.GetX();
     bool FloatCursorNotInText = ((pos == TouchPosition::LEFT && FloatCursorOnOriginLeft) ||
         (pos == TouchPosition::RIGHT && !FloatCursorOnOriginLeft));
-    SetShowOriginCursor(reachBoundary || (distanceMoreThenTenVp && FloatCursorNotInText));
+    SetShowOriginCursor((reachBoundary || distanceMoreThenTenVp) && FloatCursorNotInText);
     SetFloatingCursorVisible(true);
 }
 
