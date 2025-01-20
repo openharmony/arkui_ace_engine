@@ -41,15 +41,7 @@ public:
         }
         expectedParentNode_ = nullptr;
         testClassObject_ = nullptr;
-        builderFunctor_ = nullptr;
-    }
-
-    void operator()(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
-                    const Callback_Pointer_Void continuation)
-    {
-        callbackCounter_++;
-        EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode_);
-        CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode_));
+        thisObject_ = nullptr;
     }
 
     int GetCallsCount() const
@@ -59,11 +51,11 @@ public:
 
     CustomNodeBuilder GetBuilder()
     {
-        SetCurrentBuilderFunctor_(this);
+        thisObject_ = this;
         CustomNodeBuilder builder = {
             .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                 const Callback_Pointer_Void continuation) {
-                (*(CustomNodeBuilderTestHelper::GetCurrentBuilderFunctor()))(context, resourceId, parentNode, continuation);
+                thisObject_->TestFunction_(context, resourceId, parentNode, continuation);
             }
         };
         return builder;
@@ -79,31 +71,21 @@ public:
         return reinterpret_cast<FrameNode*>(expectedCustomNode_);
     }
 
-    static CustomNodeBuilderTestHelper* GetCurrentBuilderFunctor()
-    {
-        return builderFunctor_;
-    }
-
-
 private:
     T* testClassObject_;
     FrameNode* expectedParentNode_;
     Ark_NodeHandle expectedCustomNode_;
     int callbackCounter_ = 0;
-    static CustomNodeBuilderTestHelper* builderFunctor_;
-    void SetCurrentBuilderFunctor_(CustomNodeBuilderTestHelper* helperObject)
+    static inline CustomNodeBuilderTestHelper* thisObject_;
+    void TestFunction_(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+                    const Callback_Pointer_Void continuation)
     {
-        if (builderFunctor_) {
-            LOGE("You cannot use more than one instance of the helper at a time!");
-            ASSERT_EQ(builderFunctor_, nullptr);
-        }
-        builderFunctor_ = this;
+        callbackCounter_++;
+        EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode_);
+        CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode_));
     }
 };
 
-template<typename T>
-CustomNodeBuilderTestHelper<T>* CustomNodeBuilderTestHelper<T>::builderFunctor_ = nullptr;
-
-}
+} // OHOS::Ace::NG
 
 #endif // CUSTOM_NODE_BUILDER_TEST_HELPER_H
