@@ -327,6 +327,7 @@ void RichEditorLayoutAlgorithm::HandleEmptyParagraph(RefPtr<Paragraph> paragraph
 
 RefPtr<SpanItem> RichEditorLayoutAlgorithm::GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup)
 {
+    CHECK_NULL_RETURN(!spanGroup.empty(), nullptr);
     auto it = spanGroup.begin();
     while (it != spanGroup.end()) {
         if (!AceType::DynamicCast<PlaceholderSpanItem>(*it)) {
