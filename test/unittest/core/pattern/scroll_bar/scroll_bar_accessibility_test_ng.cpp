@@ -117,7 +117,7 @@ HWTEST_F(ScrollBarAccessibilityTestNg, SetSpecificSupportAction001, TestSize.Lev
      * @tc.steps: step2. Scroll to middle.
      */
     pattern_->UpdateCurrentOffset(1.f, SCROLL_FROM_BAR);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 1.f);
     accessibilityProperty_->ResetSupportAction();
     expectActions = 0;
@@ -129,7 +129,7 @@ HWTEST_F(ScrollBarAccessibilityTestNg, SetSpecificSupportAction001, TestSize.Lev
      * @tc.steps: step3. Scroll to bottom.
      */
     pattern_->UpdateCurrentOffset(SCROLL_HEIGHT - SCROLL_BAR_CHILD_HEIGHT, SCROLL_FROM_BAR);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 640.f);
     accessibilityProperty_->ResetSupportAction();
     expectActions = 0;
@@ -174,11 +174,11 @@ HWTEST_F(ScrollBarAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
      * @tc.expected: Can scroll
      */
     accessibilityProperty_->ActActionScrollForward();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 50.f);
 
     accessibilityProperty_->ActActionScrollBackward();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
     /**
@@ -187,13 +187,13 @@ HWTEST_F(ScrollBarAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
      */
     layoutProperty_->UpdateAxis(Axis::NONE);
     frameNode_->MarkModifyDone();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     accessibilityProperty_->ActActionScrollForward();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
     accessibilityProperty_->ActActionScrollBackward();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
     /**
@@ -203,11 +203,11 @@ HWTEST_F(ScrollBarAccessibilityTestNg, PerformActionTest001, TestSize.Level1)
     layoutProperty_->UpdateAxis(Axis::VERTICAL);
     SetScrollContentMainSize(SCROLL_HEIGHT);
     accessibilityProperty_->ActActionScrollForward();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
     accessibilityProperty_->ActActionScrollBackward();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 }
 
@@ -226,11 +226,11 @@ HWTEST_F(ScrollBarAccessibilityTestNg, PerformActionTest002, TestSize.Level1)
     EXPECT_EQ(scrollPattern_->GetScrollableDistance(), 0.f);
 
     accessibilityProperty_->ActActionScrollForward();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
     accessibilityProperty_->ActActionScrollBackward();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 }
 } // namespace OHOS::Ace::NG
