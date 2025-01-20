@@ -39,6 +39,9 @@ class ACE_FORCE_EXPORT DragDropFuncWrapper {
 public:
     static int32_t StartDragAction(std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction);
     static void SetDraggingPointerAndPressedState(int32_t currentPointerId, int32_t containerId);
+    static int32_t RequestDragEndPending();
+    static int32_t NotifyDragResult(int32_t requestId, int32_t result);
+    static int32_t NotifyDragEndPendingDone(int32_t requestId);
     static void DecideWhetherToStopDragging(const DragPointerEvent& pointerEvent,
         const std::string& extraParams, int32_t currentPointerId, int32_t containerId);
     static void UpdateDragPreviewOptionsFromModifier(

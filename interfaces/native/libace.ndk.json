@@ -2801,6 +2801,18 @@
     },
     {
         "first_introduced": "16",
+        "name": "OH_ArkUI_DragEvent_RequestDragEndPending"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NotifyDragResult"
+    },
+    {
+        "first_introduced": "16",
+        "name": "OH_ArkUI_NotifyDragEndPendingDone"
+    },
+    {
+        "first_introduced": "16",
         "name": "OH_ArkUI_UIInputEvent_GetEventTargetWidth"
     },
     {
