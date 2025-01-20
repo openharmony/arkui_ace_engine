@@ -460,6 +460,14 @@ void TabsModelNG::SetOnSelected(std::function<void(const BaseEventInfo* info)>&&
     tabPattern->SetOnSelectedEvent(std::move(onSelected));
 }
 
+void TabsModelNG::SetOnSelected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onSelected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnSelectedEvent(std::move(onSelected));
+}
+
 void TabsModelNG::SetDivider(const TabsItemDivider& divider)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

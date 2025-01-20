@@ -73,7 +73,8 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     throw new Error('Method not implemented.');
   }
   onSelected(event: (index: number) => void): TabsAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TabsOnSelectedModifier.identity, TabsOnSelectedModifier, event);
+    return this;
   }
   onTabBarClick(event: (index: number) => void): TabsAttribute {
     throw new Error('Method not implemented.');
@@ -568,6 +569,20 @@ class TabHeightModifier extends ModifierWithKey<Length> {
       getUINativeModule().tabs.resetTabHeight(node);
     } else {
       getUINativeModule().tabs.setTabHeight(node, this.value);
+    }
+  }
+}
+
+class TabsOnSelectedModifier extends ModifierWithKey<Callback<number>> {
+  constructor(value: Callback<number>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabsOnSelected');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabsOnSelected(node);
+    } else {
+      getUINativeModule().tabs.setTabsOnSelected(node, this.value);
     }
   }
 }
