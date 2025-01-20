@@ -6813,8 +6813,8 @@ void JsAccessibilityManager::UpdateWindowInfo(AccessibilityWindowInfo& windowInf
     auto container = Platform::AceContainer::GetContainer(pipelineContext->GetInstanceId());
     CHECK_NULL_VOID(container);
     auto singleHandTransform = container->GetSingleHandTransform();
-    windowInfo.top = windowInfo.top * singleHandTransform.y_ + singleHandTransform.y_;
-    windowInfo.left = windowInfo.left * singleHandTransform.x_ +  singleHandTransform.x_;
+    windowInfo.top = windowInfo.top * singleHandTransform.scaleY_ + singleHandTransform.y_;
+    windowInfo.left = windowInfo.left * singleHandTransform.scaleX_ + singleHandTransform.x_;
     windowInfo.scaleX *= singleHandTransform.scaleX_;
     windowInfo.scaleY *= singleHandTransform.scaleY_;
 }
