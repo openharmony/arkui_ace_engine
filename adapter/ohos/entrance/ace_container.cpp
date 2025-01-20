@@ -1564,6 +1564,7 @@ private:
 bool AceContainer::UpdatePopupUIExtension(const RefPtr<NG::FrameNode>& node,
     uint32_t autoFillSessionId, bool isNative)
 {
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "UpdatePopupUIExtension");
     CHECK_NULL_RETURN(node, false);
     CHECK_NULL_RETURN(uiWindow_, false);
     auto uiContent = uiWindow_->GetUIContent();
@@ -1836,6 +1837,7 @@ bool AceContainer::RequestAutoSave(const RefPtr<NG::FrameNode>& node, const std:
     autoFillRequest.autoFillCommand = AbilityRuntime::AutoFill::AutoFillCommand::SAVE;
     autoFillRequest.autoFillType = ViewDataWrap::ViewDataToType(viewData);
     autoFillRequest.doAfterAsyncModalBinding = std::move(onUIExtNodeBindingCompleted);
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "RequestAutoSave viewData:%{public}s", viewData.ToJsonString().c_str());
     if (instanceId != -1) {
         auto uiWindow = GetUIWindow(instanceId);
         CHECK_NULL_RETURN(uiWindow, false);
