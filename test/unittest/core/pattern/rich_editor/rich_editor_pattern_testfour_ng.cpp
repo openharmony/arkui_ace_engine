@@ -1489,12 +1489,10 @@ HWTEST_F(RichEditorPatternTestFourNg, CalculateTruncationLength001, TestSize.Lev
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     std::string insertValue = "hello";
-    int32_t index = 2;
-    int32_t allowInsertLength = 3;
+    int32_t start = 2;
     richEditorPattern->textSelector_.baseOffset = 2;
     richEditorPattern->textSelector_.destinationOffset = 4;
-    int32_t length =
-        richEditorPattern->CalculateTruncationLength(StringUtils::Str8ToStr16(insertValue), index, allowInsertLength);
+    int32_t length = richEditorPattern->CalculateTruncationLength(StringUtils::Str8ToStr16(insertValue), start);
     EXPECT_EQ(length, 5);
 }
 
@@ -1508,12 +1506,10 @@ HWTEST_F(RichEditorPatternTestFourNg, CalculateTruncationLength002, TestSize.Lev
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     std::string insertValue = "hello";
-    int32_t index = 2;
-    int32_t allowInsertLength = 3;
+    int32_t start = 2;
     richEditorPattern->textSelector_.baseOffset = 1;
     richEditorPattern->textSelector_.destinationOffset = 1;
-    int32_t length =
-        richEditorPattern->CalculateTruncationLength(StringUtils::Str8ToStr16(insertValue), index, allowInsertLength);
+    int32_t length = richEditorPattern->CalculateTruncationLength(StringUtils::Str8ToStr16(insertValue), start);
     EXPECT_EQ(length, 3);
 }
 
