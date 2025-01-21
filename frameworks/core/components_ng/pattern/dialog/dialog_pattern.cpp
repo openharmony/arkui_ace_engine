@@ -716,15 +716,16 @@ void DialogPattern::ParseButtonFontColorAndBgColor(
     }
 
     // Parse default focus
+    bool isNormalButton = dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL;
     if (textColor.empty()) {
-        if (params.defaultFocus && isFirstDefaultFocus_) {
+        if (params.defaultFocus && isFirstDefaultFocus_ && !isNormalButton) {
             textColor = dialogTheme_->GetButtonHighlightFontColor().ColorToString();
         } else {
             textColor = dialogTheme_->GetButtonDefaultFontColor().ColorToString();
         }
     }
     if (!bgColor.has_value()) {
-        if (params.defaultFocus && isFirstDefaultFocus_) {
+        if (params.defaultFocus && isFirstDefaultFocus_ && !isNormalButton) {
             bgColor = dialogTheme_->GetButtonHighlightBgColor();
             isFirstDefaultFocus_ = false;
         } else {
@@ -745,6 +746,13 @@ RefPtr<FrameNode> DialogPattern::CreateButton(
     std::optional<Color> bgColor;
     isFirstDefaultFocus_ = true;
     ParseButtonFontColorAndBgColor(params, textColor, bgColor);
+    if ((dialogTheme_->GetButtonType() == BUTTON_TYPE_NORMAL) && params.dlgButtonStyle.has_value()) {
+        auto buttonStyle = params.dlgButtonStyle.value() == DialogButtonStyle::HIGHTLIGHT ? ButtonStyleMode::EMPHASIZE
+                                                                                          : ButtonStyleMode::NORMAL;
+        auto buttonProp = AceType::DynamicCast<ButtonLayoutProperty>(buttonNode->GetLayoutProperty());
+        CHECK_NULL_RETURN(buttonProp, nullptr);
+        buttonProp->UpdateButtonStyle(buttonStyle);
+    }
 
     // append text inside button
     auto textNode = CreateButtonText(params.text, textColor);
