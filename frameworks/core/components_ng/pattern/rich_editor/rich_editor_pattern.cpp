@@ -8118,6 +8118,8 @@ void RichEditorPattern::DumpInfo()
     CHECK_NULL_VOID(selectOverlayInfo);
     dumpLog.AddDesc(std::string("selectOverlay info: ").append(selectOverlayInfo->ToString()));
     dumpLog.AddDesc(std::string("IsAIWrite: ").append(std::to_string(IsShowAIWrite())));
+    dumpLog.AddDesc(std::string("keyboardAppearance: ")
+            .append(std::to_string(static_cast<int32_t>(keyboardAppearance_))));
 }
 
 bool RichEditorPattern::HasFocus() const
