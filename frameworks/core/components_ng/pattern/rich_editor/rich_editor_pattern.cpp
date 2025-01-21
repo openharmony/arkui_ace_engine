@@ -281,6 +281,14 @@ void RichEditorPattern::SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, 
             imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
             imageRenderCtx->SetClipToBounds(true);
         }
+        auto paintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+        if (imgAttr.colorFilterMatrix.has_value() && paintProperty) {
+            paintProperty->UpdateColorFilter(imgAttr.colorFilterMatrix.value());
+            paintProperty->ResetDrawingColorFilter();
+        } else if (imgAttr.drawingColorFilter.has_value() && paintProperty) {
+            paintProperty->UpdateDrawingColorFilter(imgAttr.drawingColorFilter.value());
+            paintProperty->ResetColorFilter();
+        }
     }
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     imageNode->MarkModifyDone();
