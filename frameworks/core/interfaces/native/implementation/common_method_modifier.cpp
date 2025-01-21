@@ -41,6 +41,7 @@
 using namespace OHOS::Ace::NG::Converter;
 
 namespace {
+constexpr double PERCENT_100 = 100.0;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -323,8 +324,17 @@ Gradient Convert(const Ark_Type_CommonMethod_radialGradient_value& src)
     gradient.CreateGradientWithType(NG::GradientType::RADIAL);
 
     // center
-    gradient.GetRadialGradient()->radialCenterX = Converter::Convert<Dimension>(src.center.value0);
-    gradient.GetRadialGradient()->radialCenterY = Converter::Convert<Dimension>(src.center.value1);
+    auto centerX = Converter::Convert<Dimension>(src.center.value0);
+    if (centerX.Unit() == DimensionUnit::PERCENT) {
+        centerX = centerX * PERCENT_100;
+    }
+    gradient.GetRadialGradient()->radialCenterX = centerX;
+
+    auto centerY = Converter::Convert<Dimension>(src.center.value1);
+    if (centerY.Unit() == DimensionUnit::PERCENT) {
+        centerY = centerY * PERCENT_100;
+    }
+    gradient.GetRadialGradient()->radialCenterY = centerY;
 
     // radius
     std::optional<Dimension> radiusOpt = Converter::OptConvert<Dimension>(src.radius);
