@@ -957,6 +957,7 @@ void TextFieldModelNG::SetKeyboardAppearance(KeyboardAppearance value)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
     pattern->SetKeyboardAppearance(value);
 }
 
