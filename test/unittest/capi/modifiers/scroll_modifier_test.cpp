@@ -1368,6 +1368,7 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetNullptrCallback, testing::ext::Test
     modifier_->setOnWillScroll(node_, nullptr);
     ASSERT_FALSE(eventHub->GetOnWillScrollEvent());
 }
+
 /*
  * @tc.name: OnDidScroll_SetCallback
  * @tc.desc: Test OnDidScrollImpl
@@ -1397,7 +1398,7 @@ HWTEST_F(ScrollModifierTest, OnDidScroll_SetCallback, testing::ext::TestSize.Lev
     auto id = Converter::ArkValue<Ark_Int32>(123);
 
     auto apiCall = Converter::ArkValue<Opt_ScrollOnWillScrollCallback>(
-        Converter::ArkValue<ScrollOnWillScrollCallback>(nullptr, callback, id));
+        Converter::ArkValue<ScrollOnWillScrollCallback>(callback, id));
     ASSERT_FALSE(eventHub->GetOnDidScrollEvent());
 
     ASSERT_NE(modifier_->setOnScrollEdge, nullptr);
