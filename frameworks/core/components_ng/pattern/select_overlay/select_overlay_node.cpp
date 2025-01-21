@@ -645,10 +645,10 @@ std::vector<OptionParam> GetOptionsParams(const std::shared_ptr<SelectOverlayInf
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE),
             GetMenuCallbackWithContainerId(info->menuCallback.onTranslate), "", info->menuInfo.showTranslate);
-        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH),
-            GetMenuCallbackWithContainerId(info->menuCallback.onSearch), "", info->menuInfo.showSearch);
         params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE),
             GetMenuCallbackWithContainerId(info->menuCallback.onShare), "", info->menuInfo.showShare);
+        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH),
+            GetMenuCallbackWithContainerId(info->menuCallback.onSearch), "", info->menuInfo.showSearch);
     }
     return params;
 }
@@ -1594,15 +1594,15 @@ std::vector<OptionParam> SelectOverlayNode::GetDefaultOptionsParams(const std::s
         params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_TRANSLATE), iconPath,
             GetMenuCallbackWithContainerId(info->menuCallback.onTranslate));
     }
-    if (!isShowInDefaultMenu_[OPTION_INDEX_SEARCH]) {
-        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_SEARCH_SVG) : "";
-        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH), iconPath,
-            GetMenuCallbackWithContainerId(info->menuCallback.onSearch));
-    }
     if (!isShowInDefaultMenu_[OPTION_INDEX_SHARE]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_SHARE_SVG) : "";
         params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_SHARE), iconPath,
             GetMenuCallbackWithContainerId(info->menuCallback.onShare));
+    }
+    if (!isShowInDefaultMenu_[OPTION_INDEX_SEARCH]) {
+        auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_SEARCH_SVG) : "";
+        params.emplace_back(Localization::GetInstance()->GetEntryLetters(BUTTON_SEARCH), iconPath,
+            GetMenuCallbackWithContainerId(info->menuCallback.onSearch));
     }
     GetFlexibleOptionsParams(info, params);
     return params;
@@ -1931,8 +1931,8 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
     ShowPaste(maxWidth, allocatedSize, info);
     ShowCopyAll(maxWidth, allocatedSize, info);
     ShowTranslate(maxWidth, allocatedSize, info);
-    ShowSearch(maxWidth, allocatedSize, info);
     ShowShare(maxWidth, allocatedSize, info);
+    ShowSearch(maxWidth, allocatedSize, info);
     ShowCamera(maxWidth, allocatedSize, info);
     ShowAIWrite(maxWidth, allocatedSize, info);
     if (isDefaultBtnOverMaxWidth_) {
@@ -2279,12 +2279,12 @@ const std::vector<MenuItemParam> SelectOverlayNode::GetSystemMenuItemParams(
             MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_TRANSLATE, BUTTON_TRANSLATE);
             systemItemParams.emplace_back(param);
         }
-        if (info->menuInfo.showSearch || info->isUsingMouse) {
-            MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SEARCH, BUTTON_SEARCH);
-            systemItemParams.emplace_back(param);
-        }
         if (info->menuInfo.showShare || info->isUsingMouse) {
             MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SHARE, BUTTON_SHARE);
+            systemItemParams.emplace_back(param);
+        }
+        if (info->menuInfo.showSearch || info->isUsingMouse) {
+            MenuItemParam param = GetSystemMenuItemParam(OH_DEFAULT_SEARCH, BUTTON_SEARCH);
             systemItemParams.emplace_back(param);
         }
     }

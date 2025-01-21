@@ -42,6 +42,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/ime/text_input_client.h"
+#include "core/common/share/text_share_adapter.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
@@ -128,6 +129,8 @@ constexpr int32_t CUSTOM_CONTENT_LENGTH = 1;
 constexpr int32_t SYMBOL_CONTENT_LENGTH = 2;
 constexpr int32_t PLACEHOLDER_LENGTH = 6;
 const std::u16string PLACEHOLDER_MARK = u"![id";
+const std::string SPACE_CHARS = "^\\s+|\\s+$";
+const static std::regex REMOVE_SPACE_CHARS{SPACE_CHARS};
 } // namespace
 
 RichEditorPattern::RichEditorPattern() :
@@ -7732,6 +7735,23 @@ void RichEditorPattern::HandleOnCut()
     caretUpdateType_ = CaretUpdateType::NONE;
     OnCopyOperation();
     DeleteBackward(1);
+}
+
+void RichEditorPattern::HandleOnShare()
+{
+    auto eventHub = GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    TextCommonEvent event;
+    eventHub->FireOnShare(event);
+    selectOverlay_->HideMenu(true);
+    auto value = selectOverlay_->GetSelectedText();
+    auto shareWord = std::regex_replace(value, REMOVE_SPACE_CHARS, "");
+    CHECK_NULL_VOID(!shareWord.empty());
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto containerId = pipeline->GetInstanceId();
+    auto contentRect = selectOverlay_->GetSelectArea();
+    TextShareAdapter::StartTextShareTask(containerId, contentRect, shareWord);
 }
 
 std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()

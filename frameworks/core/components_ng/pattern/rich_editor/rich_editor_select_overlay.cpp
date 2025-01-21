@@ -290,6 +290,7 @@ void RichEditorSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectO
     menuInfo.showPaste = IsShowPaste();
     menuInfo.menuIsShow = IsShowMenu();
     menuInfo.showTranslate = menuInfo.showCopy && pattern->IsShowTranslate() && IsNeedMenuTranslate();
+    menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
     menuInfo.showAIWrite = pattern->IsShowAIWrite() && hasValue;
     pattern->UpdateSelectMenuInfo(menuInfo);
@@ -378,6 +379,9 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
         case OptionMenuActionId::TRANSLATE:
             HandleOnTranslate();
             return;
+        case OptionMenuActionId::SHARE:
+            HandleOnShare();
+            break;
         case OptionMenuActionId::SEARCH:
             HandleOnSearch();
             break;
@@ -688,6 +692,13 @@ void RichEditorSelectOverlay::OnHandleMarkInfoChange(
     CHECK_NULL_VOID(pattern);
     info->handlerColor = pattern->caretColor_;
     manager->MarkHandleDirtyNode(PROPERTY_UPDATE_RENDER);
+    auto DIRTY_DOUBLE_HANDLE = DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE;
+    if ((flag & DIRTY_DOUBLE_HANDLE) != 0) {
+        if (info->menuInfo.showShare != (IsSupportMenuShare() && AllowShare() && IsNeedMenuShare())) {
+            info->menuInfo.showShare = !info->menuInfo.showShare;
+            manager->NotifyUpdateToolBar(true);
+        }
+    }
 }
 
 void RichEditorSelectOverlay::UpdateHandleColor()
