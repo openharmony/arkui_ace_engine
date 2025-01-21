@@ -557,6 +557,11 @@ void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
     if (info.GetSourceTool() == SourceTool::TOUCHPAD) {
         HandleTouchDown();
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (isCrownEventDragging_) {
+        HandleTouchDown();
+    }
+#endif
     currentVelocity_ = info.GetMainVelocity();
     ReportToDragFRCScene(currentVelocity_, NG::SceneStatus::START);
     if (continuousDragStatus_) {
@@ -651,6 +656,11 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
     if (isAxisEvent) {
         source = SCROLL_FROM_AXIS;
     }
+#ifdef SUPPORT_DIGITAL_CROWN
+    if (isCrownEventDragging_) {
+        source = SCROLL_FROM_CROWN;
+    }
+#endif
     ACE_SCOPED_TRACE(
         "HandleDragUpdate, mainDelta:%f, source:%d, id:%d, tag:%s", mainDelta, source, nodeId_, nodeTag_.c_str());
     if (isAxisEvent) {
