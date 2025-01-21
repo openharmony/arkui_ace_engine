@@ -54,6 +54,7 @@ public:
     void SetCachedCount(int32_t cachedCount) override;
     void SetCachedIsShown(bool isShown) override;
     void SetOnChange(std::function<void(const BaseEventInfo* info)>&& onChange) override;
+    void SetOnUnselected(std::function<void(const BaseEventInfo* info)>&& onUnselected) override;
     void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) override;
     void SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd) override;
     void SetOnGestureSwipe(GestureSwipeEvent&& gestureSwipe) override;
@@ -120,6 +121,7 @@ public:
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onChange);
+    static void SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected);
     static void SetOnAnimationStart(FrameNode* frameNode, AnimationStartEvent&& onAnimationStart);
     static void SetOnAnimationEnd(FrameNode* frameNode, AnimationEndEvent&& onAnimationEnd);
     static void SetOnGestureSwipe(FrameNode* frameNode, GestureSwipeEvent&& onGestureSwipe);

@@ -296,6 +296,18 @@ public:
         }
     }
 
+    void UpdateOnUnselectedEvent(ChangeEvent&& event)
+    {
+        if (!unselectedEvent_) {
+            unselectedEvent_ = std::make_shared<ChangeEvent>(event);
+            auto eventHub = GetEventHub<SwiperEventHub>();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->AddOnUnselectedEvent(unselectedEvent_);
+        } else {
+            (*unselectedEvent_).swap(event);
+        }
+    }
+
     void SetSwiperParameters(const SwiperParameters& swiperParameters)
     {
         swiperParameters_ = std::make_shared<SwiperParameters>(swiperParameters);
@@ -885,6 +897,7 @@ private:
     void FireChangeEvent(int32_t preIndex, int32_t currentIndex, bool isInLayout = false) const;
     void FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info, bool isInterrupt = false) const;
     void FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const;
+    void FireUnselectedEvent(int32_t currentIndex, int32_t targetIndex);
     void FireSwiperCustomAnimationEvent();
     void FireContentDidScrollEvent();
     void FireSelectedEvent(int32_t currentIndex, int32_t targetIndex);
@@ -1213,6 +1226,7 @@ private:
     int32_t nextValidIndex_ = 0;
     int32_t currentFocusIndex_ = 0;
     int32_t selectedIndex_ = -1;
+    int32_t unselectedIndex_ = -1;
 
     bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;
@@ -1237,6 +1251,7 @@ private:
     ChangeEventPtr changeEvent_;
     ChangeEventPtr onIndexChangeEvent_;
     ChangeEventPtr selectedEvent_;
+    ChangeEventPtr unselectedEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
 

@@ -1355,6 +1355,47 @@ HWTEST_F(SwiperEventTestNg, AttrPageFlipModeTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnUnselected001
+ * @tc.desc: Test OnUnselected event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperEventTestNg, OnUnselected001, TestSize.Level1)
+{
+    int32_t currentIndex = 0;
+    auto onUnselected = [&currentIndex](const BaseEventInfo* info) {
+        const auto* swiperInfo = TypeInfoHelper::DynamicCast<SwiperChangeEvent>(info);
+        currentIndex = swiperInfo->GetIndex();
+    };
+    SwiperModelNG model = CreateSwiper();
+    model.SetOnUnselected(std::move(onUnselected));
+    CreateSwiperItems(6);
+    CreateSwiperDone();
+
+    /**
+     * @tc.steps: step1. Show next page
+     * @tc.expected: currentIndex change to 1
+     */
+    ShowNext();
+    EXPECT_EQ(currentIndex, 0);
+    ShowNext();
+    EXPECT_EQ(currentIndex, 1);
+    /**
+     * @tc.steps: step2. Set the two parameter values of the FireSelecteEvent method to be the same
+     * @tc.expected: The value of unselectedIndex_ is 2
+     */
+    pattern_->unselectedIndex_ = 2;
+    pattern_->FireUnselectedEvent(3, 3);
+    EXPECT_EQ(pattern_->unselectedIndex_, 2);
+
+    /**
+     * @tc.steps: step3. Set the two parameter values of the FireSelecteEvent method to be different
+     * @tc.expected: The value of selectedIndex_ is 3
+     */
+    pattern_->FireUnselectedEvent(3, 4);
+    EXPECT_EQ(pattern_->unselectedIndex_, 3);
+}
+
+/**
  * @tc.name: MarginIgnoreBlankDragTest001
  * @tc.desc: Test Swiper IgnoreBlank with drag. When totalcount equal to displaycount, ignoreBlankOffset_ will be 0.f.
  * @tc.type: FUNC
