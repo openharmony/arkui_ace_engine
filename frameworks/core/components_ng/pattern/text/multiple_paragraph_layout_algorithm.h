@@ -66,6 +66,8 @@ protected:
 
     void ApplyIndent(ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width,
         const TextStyle& textStyle);
+    void ConstructTextStyles(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
+        TextStyle& textStyle, bool& needRemain);
     void ConstructTextStyles(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle);
     bool ParagraphReLayout(const LayoutConstraintF& contentConstraint);
