@@ -3215,6 +3215,7 @@ class ArkComponent {
       this._gestureEvent = new UIGestureEvent();
       this._gestureEvent.setNodePtr(this.nativePtr);
       this._gestureEvent.setWeakNodePtr(this._weakPtr);
+      this._gestureEvent.registerFrameNodeDeletedCallback(this.nativePtr);
     }
     return this._gestureEvent;
   }
@@ -4821,6 +4822,12 @@ class UIGestureEvent {
   setWeakNodePtr(weakNodePtr) {
     this._weakNodePtr = weakNodePtr;
   }
+  registerFrameNodeDeletedCallback(nodePtr) {
+    this._destructorCallback = (elementId) => {
+      globalThis.__mapOfModifier__.delete(elementId);
+    };
+    getUINativeModule().common.registerFrameNodeDestructorCallback(nodePtr, this._destructorCallback);
+  }
   addGesture(gesture, priority, mask) {
     if (this._weakNodePtr.invalid()) {
       return;
@@ -4993,9 +5000,6 @@ function applyGesture(modifier, component) {
 
 globalThis.__mapOfModifier__ = new Map();
 function __gestureModifier__(modifier) {
-  if (globalThis.__mapOfModifier__.size === 0) {
-    __modifierElmtDeleteCallback__();
-  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   if (globalThis.__mapOfModifier__.get(elmtId)) {
@@ -5006,12 +5010,6 @@ function __gestureModifier__(modifier) {
     globalThis.__mapOfModifier__.set(elmtId, component);
     applyGesture(modifier, component);
   }
-}
-
-function __modifierElmtDeleteCallback__() {
-  UINodeRegisterProxy.registerModifierElmtDeleteCallback((elmtId) => {
-    globalThis.__mapOfModifier__.delete(elmtId);
-  });
 }
 
 const __elementIdToCustomProperties__ = new Map();

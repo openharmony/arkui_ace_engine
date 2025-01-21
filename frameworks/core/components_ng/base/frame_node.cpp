@@ -528,6 +528,7 @@ FrameNode::~FrameNode()
         pipeline->RemoveFrameNodeChangeListener(GetId());
     }
     FireOnNodeDestroyCallback();
+    FireFrameNodeDestructorCallback();
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -5772,5 +5773,17 @@ std::list<RefPtr<FrameNode>> FrameNode::GetActiveChildren()
         }
     }
     return list;
+}
+
+void FrameNode::SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback)
+{
+    frameNodeDestructorCallback_ = callback;
+}
+
+void FrameNode::FireFrameNodeDestructorCallback()
+{
+    if (frameNodeDestructorCallback_) {
+        frameNodeDestructorCallback_(GetId());
+    }
 }
 } // namespace OHOS::Ace::NG
