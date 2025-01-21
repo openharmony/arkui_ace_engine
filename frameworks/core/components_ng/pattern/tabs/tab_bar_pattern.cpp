@@ -3238,13 +3238,10 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
     swiperStartIndex_ = std::clamp(swiperStartIndex_, 0, totalCount - 1);
     CHECK_NULL_VOID(IsValidIndex(swiperStartIndex_));
     auto index = swiperStartIndex_ + 1;
-    if ((index >= totalCount || index >= static_cast<int32_t>(tabBarStyles_.size())) && !isRTL_) {
+    if (index >= totalCount || index >= static_cast<int32_t>(tabBarStyles_.size())) {
         swiperStartIndex_--;
         index--;
         turnPageRate = 1.0f;
-    }
-    if (isRTL_ && index == static_cast<int32_t>(tabBarStyles_.size())) {
-        return;
     }
     if (Negative(turnPageRate)) {
         turnPageRate = 0.0f;
@@ -3319,8 +3316,11 @@ void TabBarPattern::InitTurnPageRateEvent()
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
+                auto host = pattern->GetHost();
+                CHECK_NULL_VOID(host);
                 if (NearZero(pattern->turnPageRate_) || NearEqual(pattern->turnPageRate_, 1.0f)) {
                     pattern->isTouchingSwiper_ = false;
+                    host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
                 }
                 pattern->SetMaskAnimationExecuted(false);
             };
