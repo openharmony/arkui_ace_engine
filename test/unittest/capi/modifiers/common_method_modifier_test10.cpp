@@ -99,6 +99,38 @@ HWTEST_F(CommonMethodModifierTest10, setBackgroundTestDefaultValues, TestSize.Le
  * @tc.desc:
  * @tc.type: FUNC
  */
+HWTEST_F(CommonMethodModifierTest10, setBackgroundCustomNodeBuilderTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setBackground, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+
+    // Test of using two helpers
+    int callsCount(0);
+    CustomNodeBuilderTestHelper<CommonMethodModifierTest10> builderHelper1(this, frameNode);
+    CustomNodeBuilderTestHelper<CommonMethodModifierTest10> builderHelper2(this, frameNode);
+
+    const CustomNodeBuilder builder = builderHelper2.GetBuilder();
+
+    // Testing builderHelper2
+    modifier_->setBackground(node_, &builder, nullptr);
+    EXPECT_EQ(builderHelper2.GetCallsCount(), ++callsCount);
+
+    // Selecting builderHelper1
+    builderHelper1.SetSelector(); // Selecting builderHelper1
+
+    // Testing builderHelper1
+    modifier_->setBackground(node_, &builder, nullptr);
+    EXPECT_EQ(builderHelper1.GetCallsCount(), callsCount);
+    modifier_->setBackground(node_, &builder, nullptr);
+    EXPECT_EQ(builderHelper1.GetCallsCount(), ++callsCount);
+}
+
+/*
+ * @tc.name: setBackgroundTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
 HWTEST_F(CommonMethodModifierTest10, setBackgroundTestValidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setBackground, nullptr);
@@ -108,8 +140,6 @@ HWTEST_F(CommonMethodModifierTest10, setBackgroundTestValidValues, TestSize.Leve
     int callsCount(0);
     CustomNodeBuilderTestHelper<CommonMethodModifierTest10> builderHelper(this, frameNode);
     const CustomNodeBuilder builder = builderHelper.GetBuilder();
-    modifier_->setBackground(node_, &builder, nullptr);
-    EXPECT_EQ(builderHelper.GetCallsCount(), ++callsCount);
 
     using OneTestStep = std::tuple<Ark_Alignment, std::string>;
     static const std::vector<OneTestStep> testPlan = {

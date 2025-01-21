@@ -24,24 +24,79 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 
 namespace OHOS::Ace::NG {
-template<typename T>
-class CustomNodeBuilderTestHelper {
+class ICustomNodeBuilderTestHelper {
 public:
+    virtual ~ICustomNodeBuilderTestHelper() = default;
+    virtual void TestFunction(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+                              const Callback_Pointer_Void continuation) = 0;
+};
 
+class TestHelperManager {
+public:
+    
+    static TestHelperManager& GetInstance() {
+        static TestHelperManager instance;
+        return instance;
+    }
+
+    static int64_t Register(ICustomNodeBuilderTestHelper* helper) {
+        if (helper != nullptr) {
+            auto uniqueId = reinterpret_cast<int64_t>(helper);
+            GetInstance().instances_[uniqueId] = helper;
+            return uniqueId;
+        }
+        return 0;
+    }
+
+    static void Unregister(int64_t uniqueId) {
+        auto instances = GetInstance().instances_;
+        auto it = instances.find(uniqueId);
+        if (it != instances.end()) {
+            instances.erase(it);
+        }
+    }
+
+    // static void Unregister(ICustomNodeBuilderTestHelper* helper) {
+    //     Unregister(reinterpret_cast<int64_t>(helper));
+    // }
+
+    ICustomNodeBuilderTestHelper* GetInstanceById(int64_t uniqueId) {
+        auto it = instances_.find(uniqueId);
+        if (it != instances_.end()) {
+            return it->second;
+        }
+        return nullptr;
+    }
+
+private:
+    TestHelperManager() {}
+    ~TestHelperManager() {}
+    std::unordered_map<int64_t, ICustomNodeBuilderTestHelper*> instances_;
+    TestHelperManager(const TestHelperManager&) = delete;
+    TestHelperManager& operator=(const TestHelperManager&) = delete;
+};
+
+template<typename T>
+class CustomNodeBuilderTestHelper : public ICustomNodeBuilderTestHelper {
+public:
     CustomNodeBuilderTestHelper(T* testClassObject, FrameNode* parentNode)
         : testClassObject_(testClassObject),
         expectedParentNode_(parentNode),
-        expectedCustomNode_(testClassObject->CreateNode())
+        expectedCustomNode_(testClassObject->CreateNode()),
+        uniqueId_(TestHelperManager::Register(this))
         {}
 
     ~CustomNodeBuilderTestHelper()
     {
+        if (helperSwitcher_ == uniqueId_) {
+            helperSwitcher_ = 0;
+        }
+        TestHelperManager::Unregister(uniqueId_);
         if (testClassObject_ && expectedCustomNode_) {
             testClassObject_->DisposeNode(expectedCustomNode_);
         }
         expectedParentNode_ = nullptr;
         testClassObject_ = nullptr;
-        thisObject_ = nullptr;
     }
 
     int GetCallsCount() const
@@ -51,14 +106,24 @@ public:
 
     CustomNodeBuilder GetBuilder()
     {
-        thisObject_ = this;
+        SetSelector();
         CustomNodeBuilder builder = {
             .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                 const Callback_Pointer_Void continuation) {
-                thisObject_->TestFunction_(context, resourceId, parentNode, continuation);
+                auto testHelper = TestHelperManager::GetInstance().GetInstanceById(helperSwitcher_);
+                if (testHelper) {
+                    testHelper->TestFunction(context, resourceId, parentNode, continuation);
+                } else {
+                    ASSERT_EQ(testHelper, nullptr);
+                }
             }
         };
         return builder;
+    }
+
+    void SetSelector()
+    {
+        helperSwitcher_ = uniqueId_;
     }
 
     Ark_NodeHandle GetCustomNodeHandle() const
@@ -71,19 +136,21 @@ public:
         return reinterpret_cast<FrameNode*>(expectedCustomNode_);
     }
 
-private:
-    T* testClassObject_;
-    FrameNode* expectedParentNode_;
-    Ark_NodeHandle expectedCustomNode_;
-    int callbackCounter_ = 0;
-    static inline CustomNodeBuilderTestHelper* thisObject_;
-    void TestFunction_(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
+    void TestFunction(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                     const Callback_Pointer_Void continuation)
     {
         callbackCounter_++;
         EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode_);
         CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode_));
     }
+
+private:
+    T* testClassObject_;
+    FrameNode* expectedParentNode_;
+    Ark_NodeHandle expectedCustomNode_;
+    int callbackCounter_ = 0;
+    const int64_t uniqueId_;
+    static inline int64_t helperSwitcher_;
 };
 
 } // OHOS::Ace::NG
