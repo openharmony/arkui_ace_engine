@@ -57,6 +57,11 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
         }
         return;
     }
+    // api 16 trigger onActive and onInactive observer
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && (
+        state == NavDestinationState::ON_ACTIVE || state == NavDestinationState::ON_INACTIVE)) {
+        return;
+    }
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
         pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, std::to_string(uniqueId));
     navigationHandleFunc_(info);
