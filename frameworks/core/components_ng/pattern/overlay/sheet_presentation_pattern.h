@@ -707,6 +707,7 @@ public:
     {
         return isPlayTransition_;
     }
+    void OnFontScaleConfigurationUpdate() override;
 
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;

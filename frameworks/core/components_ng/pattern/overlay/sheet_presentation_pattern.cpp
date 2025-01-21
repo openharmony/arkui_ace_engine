@@ -3624,4 +3624,17 @@ void SheetPresentationPattern::OnWillDisappear()
     navigationManager->FireOverlayLifecycle(hostNode, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE),
         static_cast<int32_t>(NavDestinationActiveReason::SHEET));
 }
+
+void SheetPresentationPattern::OnFontScaleConfigurationUpdate()
+{
+    auto hostNode = GetHost();
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = hostNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddAfterReloadAnimationTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->AvoidSafeArea(true);
+    });
+}
 } // namespace OHOS::Ace::NG
