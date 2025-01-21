@@ -588,6 +588,8 @@ public:
 
     float GetSelectMenuWidthFromTheme() const;
 
+    bool IsSelectOverlayDefaultModeRightClickMenu();
+
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);
     void SetMenuAttribute(RefPtr<FrameNode>& host);
