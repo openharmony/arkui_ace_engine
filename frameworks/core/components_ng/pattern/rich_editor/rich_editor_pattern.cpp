@@ -8619,11 +8619,9 @@ void RichEditorPattern::UpdateScrollStateAfterLayout(bool shouldDisappear)
 
 bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
 {
+    auto scrollBar = GetScrollBar();
     if (source == SCROLL_FROM_START) {
-        auto scrollBar = GetScrollBar();
-        if (scrollBar) {
-            scrollBar->PlayScrollBarAppearAnimation();
-        }
+        IF_PRESENT(scrollBar, PlayScrollBarAppearAnimation());
         if (SelectOverlayIsOn()) {
             selectOverlay_->HideMenu(true);
         }
@@ -8634,6 +8632,10 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
     }
     if (IsReachedBoundary(offset)) {
         return false;
+    }
+    if (scrollBar && source == SCROLL_FROM_JUMP) {
+        scrollBar->PlayScrollBarAppearAnimation();
+        scrollBar->ScheduleDisappearDelayTask();
     }
     auto newOffset = MoveTextRect(offset);
     MoveFirstHandle(newOffset);
