@@ -449,7 +449,7 @@ void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
         idToPoints[iter->pointerId].history.insert(idToPoints[iter->pointerId].history.begin(), *iter);
         needInterpolation = iter->action != PointerAction::PULL_MOVE ? false : true;
     }
-    if (focusWindowId_.has_value()) {
+    if (!NeedTouchInterpolation()) {
         needInterpolation = false;
     }
     if (needInterpolation) {
@@ -3145,7 +3145,7 @@ void PipelineContext::FlushTouchEvents()
             idToTouchPoints[scalePoint.id].history.insert(idToTouchPoints[scalePoint.id].history.begin(), scalePoint);
             needInterpolation = iter->type != TouchType::MOVE ? false : true;
         }
-        if (focusWindowId_.has_value()) {
+        if (!NeedTouchInterpolation()) {
             needInterpolation = false;
         }
         if (needInterpolation && SystemProperties::IsNeedResampleTouchPoints()) {
@@ -3502,7 +3502,7 @@ void PipelineContext::OnFlushMouseEvent(
         nodeToMousePoints[node].emplace_back(idToMousePoints[scaleEvent.id]);
         needInterpolation = iter->action != MouseAction::MOVE ? false : true;
     }
-    if (focusWindowId_.has_value()) {
+    if (!NeedTouchInterpolation()) {
         needInterpolation = false;
     }
     if (needInterpolation) {
