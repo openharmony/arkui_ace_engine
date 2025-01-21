@@ -4404,6 +4404,10 @@ struct ArkUICalendarPickerModifier {
     void (*resetStartDate)(ArkUINodeHandle node);
     void (*setEndDate)(ArkUINodeHandle node, ArkUI_Uint32 year, ArkUI_Uint32 month, ArkUI_Uint32 day);
     void (*resetEndDate)(ArkUINodeHandle node);
+    void (*setCalendarPickerMarkToday)(ArkUINodeHandle node, ArkUI_Bool isMarkToday);
+    void (*resetCalendarPickerMarkToday)(ArkUINodeHandle node);
+    void (*setCalendarPickerDisabledDateRange)(ArkUINodeHandle node, ArkUI_CharPtr disabledDateRangeStr);
+    void (*resetCalendarPickerDisabledDateRange)(ArkUINodeHandle node);
     void (*setEdgeAlign)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 size,
         ArkUI_Int32 alignType);
     void (*resetEdgeAlign)(ArkUINodeHandle node);
@@ -4417,6 +4421,8 @@ struct ArkUICalendarPickerModifier {
     ArkUICalendarTextStyleType (*getCalendarPickerTextStyle)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getStartDate)(ArkUINodeHandle node);
     ArkUI_CharPtr (*getEndDate)(ArkUINodeHandle node);
+    ArkUI_Bool (*getCalendarPickerMarkToday)(ArkUINodeHandle node);
+    ArkUI_CharPtr (*getCalendarPickerDisabledDateRange)(ArkUINodeHandle node);
     ArkUIEdgeAlignType (*getEdgeAlign)(ArkUINodeHandle node);
     void (*setCalendarPickerHeight)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetCalendarPickerHeight)(ArkUINodeHandle node);

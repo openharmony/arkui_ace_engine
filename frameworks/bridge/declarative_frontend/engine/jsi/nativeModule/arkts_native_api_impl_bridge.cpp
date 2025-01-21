@@ -4257,6 +4257,10 @@ void ArkUINativeModule::RegisterCalendarPickerAttributes(Local<panda::ObjectRef>
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetCalendarPickerBorderRadius));
     calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCalendarPickerBorderRadius"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetCalendarPickerBorderRadius));
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCalendarPickerMarkToday"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetCalendarPickerMarkToday));
+    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCalendarPickerMarkToday"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetCalendarPickerMarkToday));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "calendarPicker"), calendarPicker);
 #endif
 }

@@ -49,6 +49,15 @@ public:
 
     static bool IsDateInRange(const PickerDate& date, const PickerDate& start, const PickerDate& end);
 
+    static void SortAndMergeDisabledDateRange(std::vector<std::pair<PickerDate, PickerDate>>& disableDateRange);
+
+    static PickerDate GetAvailableNextDay(const PickerDate& date, const PickerDate& start, const PickerDate& end,
+        std::vector<std::pair<PickerDate, PickerDate>>& disableDateRange, bool isAdd);
+
+    static PickerDate PrevDay(const PickerDate& dateObj);
+
+    static PickerDate NextDay(const PickerDate& dateObj);
+
     uint32_t GetYear() const
     {
         return year_;
@@ -89,6 +98,33 @@ public:
 
     uint32_t ToDays() const;
     void FromDays(uint32_t days);
+
+    bool operator<(const PickerDate& other) const
+    {
+        if (year_ != other.year_) {
+            return year_ < other.year_;
+        }
+        if (month_ != other.month_) {
+            return month_ < other.month_;
+        }
+        return day_ < other.day_;
+    }
+
+    bool operator<=(const PickerDate& other) const
+    {
+        if (year_ != other.year_) {
+            return year_ < other.year_;
+        }
+        if (month_ != other.month_) {
+            return month_ < other.month_;
+        }
+        return day_ <= other.day_;
+    }
+
+    bool operator==(const PickerDate& other) const
+    {
+        return year_ < other.year_ && month_ < other.month_ && day_ == other.day_;
+    }
 
 private:
     uint32_t year_ = 0;

@@ -37,6 +37,7 @@ constexpr uint32_t YEAR_LENGTH = 4;
 static int32_t yearNodeIndex_ = 0;
 static int32_t monthNodeIndex_ = 2;
 static int32_t dayNodeIndex_ = 4;
+const bool DEFAULT_MARK_TODAY = false;
 void CalendarPickerModelNG::Create(const CalendarSettingData& settingData)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -816,5 +817,47 @@ std::string CalendarPickerModelNG::AddLeadingZeroToYear(uint32_t year)
     std::string yearStr = std::string(YEAR_LENGTH - std::to_string(year).length(), '0');
     yearStr += std::to_string(year);
     return yearStr;
+}
+
+void CalendarPickerModelNG::SetMarkToday(bool isMarkToday)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetMarkToday(isMarkToday);
+}
+
+void CalendarPickerModelNG::SetMarkToday(FrameNode* frameNode, bool isMarkToday)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetMarkToday(isMarkToday);
+}
+
+bool CalendarPickerModelNG::GetMarkToday(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, DEFAULT_MARK_TODAY);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, DEFAULT_MARK_TODAY);
+    return pickerPattern->GetMarkToday();
+}
+
+void CalendarPickerModelNG::SetDisabledDateRange(
+    FrameNode* frameNode, const std::vector<std::pair<PickerDate, PickerDate>>& disabledDateRange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    pickerPattern->SetDisabledDateRange(disabledDateRange);
+}
+
+std::string CalendarPickerModelNG::GetDisabledDateRange(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, "");
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_RETURN(pickerPattern, "");
+    return pickerPattern->GetDisabledDateRange();
 }
 } // namespace OHOS::Ace::NG
