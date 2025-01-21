@@ -95,7 +95,8 @@ void TimePickerColumnPattern::OnModifyDone()
     CHECK_NULL_VOID(focusHub);
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
+    auto theme = pipeline->GetTheme<PickerTheme>(GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
     auto showCount = GetShowCount();
@@ -590,7 +591,7 @@ void TimePickerColumnPattern::ChangeAmPmTextStyle(uint32_t index, uint32_t showO
     }
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(pickerTheme);
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     if (index == selectedIndex) {
@@ -617,7 +618,7 @@ void TimePickerColumnPattern::ChangeTextStyle(uint32_t index, uint32_t showOptio
     }
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
-    auto pickerTheme = pipeline->GetTheme<PickerTheme>();
+    auto pickerTheme = pipeline->GetTheme<PickerTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(pickerTheme);
     uint32_t selectedIndex = showOptionCount / 2; // the center option is selected.
     uint32_t val = selectedIndex > 0 ? selectedIndex - 1 : 0;

@@ -1081,7 +1081,6 @@ ArkThemeWhiteList.whiteList = [
     'CheckboxGroup',
     'Counter',
     'DataPanel',
-    'DatePicker',
     'LoadingProgress',
     'Menu',
     'MenuItem',
@@ -1095,7 +1094,5 @@ ArkThemeWhiteList.whiteList = [
     'Swiper',
     'Text',
     'TextClock',
-    'TextPicker',
-    'TimePicker',
     'Toggle',
 ];

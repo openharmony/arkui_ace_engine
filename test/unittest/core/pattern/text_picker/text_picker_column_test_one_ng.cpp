@@ -58,6 +58,23 @@ using namespace testing;
 using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
+
+namespace {
+RefPtr<Theme> GetTheme(ThemeType type)
+{
+    if (type == IconTheme::TypeId()) {
+        return AceType::MakeRefPtr<IconTheme>();
+    } else if (type == DialogTheme::TypeId()) {
+        return AceType::MakeRefPtr<DialogTheme>();
+    } else if (type == PickerTheme::TypeId()) {
+        return MockThemeDefault::GetPickerTheme();
+    } else if (type == ButtonTheme::TypeId()) {
+        return AceType::MakeRefPtr<ButtonTheme>();
+    } else {
+        return nullptr;
+    }
+}
+} // namespace
 class TextPickerColumnTestOneNg : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -163,16 +180,10 @@ void TextPickerColumnTestOneNg::SetUp()
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     auto fontManager = AceType::MakeRefPtr<MockFontManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
-        if (type == IconTheme::TypeId()) {
-            return AceType::MakeRefPtr<IconTheme>();
-        } else if (type == DialogTheme::TypeId()) {
-            return AceType::MakeRefPtr<DialogTheme>();
-        } else if (type == PickerTheme::TypeId()) {
-            return MockThemeDefault::GetPickerTheme();
-        } else {
-            return nullptr;
-        }
+        return GetTheme(type);
     });
+    EXPECT_CALL(*themeManager, GetTheme(_, _))
+        .WillRepeatedly([](ThemeType type, int32_t themeScopeId) -> RefPtr<Theme> { return GetTheme(type); });
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 

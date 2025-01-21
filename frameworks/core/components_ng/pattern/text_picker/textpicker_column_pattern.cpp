@@ -108,7 +108,8 @@ void TextPickerColumnPattern::OnModifyDone()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
+    auto theme = pipeline->GetTheme<PickerTheme>(GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
     pressColor_ = theme->GetPressColor();
     hoverColor_ = theme->GetHoverColor();
     useButtonFocusArea_ = theme->NeedButtonFocusAreaType();
@@ -1113,7 +1114,7 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    auto pickerTheme = context->GetTheme<PickerTheme>();
+    auto pickerTheme = context->GetTheme<PickerTheme>(GetThemeScopeId());
     CHECK_NULL_VOID(pickerTheme);
     if (currentIndex == middleIndex) {
         UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);

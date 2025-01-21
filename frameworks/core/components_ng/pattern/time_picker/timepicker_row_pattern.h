@@ -485,6 +485,8 @@ public:
     void CreateAmPmNode();
     void OnColorConfigurationUpdate() override;
 
+    bool OnThemeScopeUpdate(int32_t themeScopeId) override;
+
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
     {
         contentRowNode_ = contentRowNode;
