@@ -50,9 +50,11 @@ public:
     void SetAnimationDuration(float duration) override;
     void SetOnChange(std::function<void(const BaseEventInfo*)>&& onChange) override;
     void SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& onTabBarClick) override;
+    void SetOnUnselected(std::function<void(const BaseEventInfo*)>&& onUnselected) override;
     void SetOnAnimationStart(AnimationStartEvent&& onAnimationStart) override;
     void SetOnAnimationEnd(AnimationEndEvent&& onAnimationEnd) override;
     void SetOnGestureSwipe(GestureSwipeEvent&& gestureSwipe) override;
+    void SetOnSelected(std::function<void(const BaseEventInfo*)>&& onSelected) override;
     void SetDivider(const TabsItemDivider& divider) override;
     void SetFadingEdge(bool fadingEdge) override;
     void SetBarOverlap(bool barOverlap) override;
@@ -78,6 +80,7 @@ public:
     static void SetHeightAuto(FrameNode* frameNode, bool isAuto);
     static void SetTabBarMode(FrameNode* frameNode, TabBarMode tabBarMode);
     static void SetBarGridAlign(FrameNode* frameNode, const BarGridColumnOptions& BarGridColumnOptions);
+    static void SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected);
     static void SetDivider(FrameNode* frameNode, const TabsItemDivider& divider);
     static void SetFadingEdge(FrameNode* frameNode, bool fadingEdge);
     static void SetBarBackgroundColor(FrameNode* frameNode, const Color& backgroundColor);

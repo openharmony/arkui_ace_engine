@@ -278,11 +278,10 @@ CheckBoxStyle CheckBoxGroupModelNG::GetCheckboxGroupStyle(FrameNode* frameNode)
     return value;
 }
 
-void CheckBoxGroupModelNG::SetOnChange(FrameNode* frameNode, ChangeEvent&& onChange)
+void CheckBoxGroupModelNG::SetOnChange(FrameNode* frameNode, GroupChangeEvent&& onChange)
 {
     auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnChange(std::move(onChange));
 }
-
 } // namespace OHOS::Ace::NG

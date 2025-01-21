@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,7 +87,6 @@ void SearchModelImpl::SetPlaceholderColor(const Color& color)
         LOGE("text component error");
         return;
     }
-    textFieldComponent->SetPlaceholderColor(color);
     textFieldComponent->SetFocusPlaceholderColor(color);
 }
 
@@ -233,20 +232,6 @@ void SearchModelImpl::SetOnSubmit(std::function<void(const std::string&)>&& onSu
     auto component = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
     CHECK_NULL_VOID(component);
     component->SetOnSubmit(std::move(onSubmit));
-}
-
-void SearchModelImpl::SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& onChange)
-{
-    auto* stack = ViewStackProcessor::GetInstance();
-    auto component = AceType::DynamicCast<SearchComponent>(stack->GetMainComponent());
-    CHECK_NULL_VOID(component);
-    auto onChangeImpl = [onChange] (const std::string& value) {
-        if (!onChange) {
-            PreviewText previewText {};
-            onChange(UtfUtils::Str8DebugToStr16(value), previewText);
-        }
-    };
-    component->SetOnChange(std::move(onChangeImpl));
 }
 
 void SearchModelImpl::SetOnCopy(std::function<void(const std::u16string&)>&& func)

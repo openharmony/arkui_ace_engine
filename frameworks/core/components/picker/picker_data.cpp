@@ -189,6 +189,12 @@ std::string PickerTime::ToString(bool jsonFormat, bool hasSecond, int32_t status
             ",\"second\":" + std::to_string(second_) + ",\"status\":" + std::to_string(status) + "}";
 }
 
+uint32_t PickerTime::ToMinutes() const
+{
+    constexpr static uint32_t minInHour = 60;
+    return minute_ + hour_ * minInHour;
+}
+
 PickerDateTime PickerDateTime::Current()
 {
     PickerDateTime dateTime;

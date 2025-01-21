@@ -113,20 +113,28 @@ void JsSaveButtonClickFunction::Execute(GestureEvent& info)
     clickEventParam->SetProperty<double>("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     auto target = CreateEventTargetObject(info);
     clickEventParam->SetPropertyObject("target", target);
+    clickEventParam->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
 
     int32_t res = static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED);
+    JSRef<JSObject> errorMessage = JSRef<JSObject>::New();
 #ifdef SECURITY_COMPONENT_ENABLE
     auto secEventValue = info.GetSecCompHandleEvent();
     if (secEventValue != nullptr) {
         res = secEventValue->GetInt("handleRes", res);
+        int32_t code = static_cast<int32_t>(SecurityComponentErrorCode::SUCCESS);
+        std::string message;
         if (res == static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK)) {
             return;
         }
+        code = secEventValue->GetInt("code", code);
+        errorMessage->SetProperty<int32_t>("code", code);
+        message = secEventValue->GetString("message", message);
+        errorMessage->SetProperty<std::string>("message", message);
     }
 #endif
     JSRef<JSVal> errorParam = JSRef<JSVal>::Make(ToJSValue(res));
-    JSRef<JSVal> params[] = { clickEventParam, errorParam };
-    JsFunction::ExecuteJS(2, params);
+    JSRef<JSVal> params[] = { clickEventParam, errorParam, errorMessage };
+    JsFunction::ExecuteJS(3, params); // 3 means three params.
 }
 
 void JSSaveButton::JsOnClick(const JSCallbackInfo& info)

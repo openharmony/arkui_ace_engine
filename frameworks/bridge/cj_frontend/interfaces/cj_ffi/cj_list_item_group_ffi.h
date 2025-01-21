@@ -24,6 +24,8 @@
 extern "C" {
 CJ_EXPORT void FfiOHOSAceFrameworkListItemGroupCreate(
     void (*headerBuilder)(), void (*footerBuilder)(), double space, int32_t spaceUnit);
+CJ_EXPORT void FfiOHOSAceFrameworkListItemGroupCreate2(
+    void (*headerBuilder)(), void (*footerBuilder)(), double space, int32_t spaceUnit, int32_t style);
 CJ_EXPORT void FfiOHOSAceFrameworkListItemGroupSetDivider(DividerParams& params);
 }
 

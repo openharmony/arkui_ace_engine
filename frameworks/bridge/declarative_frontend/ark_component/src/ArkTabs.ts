@@ -72,8 +72,15 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
   onChange(event: (index: number) => void): TabsAttribute {
     throw new Error('Method not implemented.');
   }
+  onSelected(event: (index: number) => void): TabsAttribute {
+    throw new Error('Method not implemented.');
+  }
   onTabBarClick(event: (index: number) => void): TabsAttribute {
     throw new Error('Method not implemented.');
+  }
+  onUnselected(event: (index: number) => void): TabsAttribute {
+    modifierWithKey(this._modifiersWithKeys, TabsOnUnselectedModifier.identity, TabsOnUnselectedModifier, event);
+    return this;
   }
   fadingEdge(value: boolean): TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, FadingEdgeModifier.identity, FadingEdgeModifier, value);
@@ -454,6 +461,20 @@ class BarBackgroundEffectModifier extends ModifierWithKey<BackgroundEffectOption
       this.value.type === this.stageValue.type &&
       ((_a = this.value.blurOptions) === null || _a === void 0 ? void 0 : _a.grayscale) === ((_b = this.stageValue.blurOptions) === null ||
       _b === void 0 ? void 0 : _b.grayscale));
+  }
+}
+
+class TabsOnUnselectedModifier extends ModifierWithKey<Callback<number>> {
+  constructor(value: Callback<number>) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabOnUnselected');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetTabOnUnselected(node);
+    } else {
+      getUINativeModule().swiper.setTabOnUnselected(node, this.value);
+    }
   }
 }
 

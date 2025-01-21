@@ -30,6 +30,17 @@ RefPtr<SvgNode> SvgSvg::Create()
     return AceType::MakeRefPtr<SvgSvg>();
 }
 
+RSRecordingPath SvgSvg::AsPath(const SvgLengthScaleRule& lengthRule)
+{
+    RSRecordingPath path;
+    for (const auto& child : children_) {
+        CHECK_NULL_RETURN(child, path);
+        RSRecordingPath childPath = child->AsPath(lengthRule);
+        path.Op(path, childPath, RSPathOp::UNION);
+    }
+    return path;
+}
+
 RSRecordingPath SvgSvg::AsPath(const Size& viewPort) const
 {
     RSRecordingPath path;

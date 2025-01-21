@@ -19,6 +19,7 @@
 #include <optional>
 #include <vector>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -59,7 +60,7 @@ struct MenuItemInfo {
 struct PreviewMenuAnimationInfo {
     float previewScale = -1.0f;
     float menuScale = -1.0f;
-    float borderRadius = -1.0f;
+    BorderRadiusProperty borderRadius = BorderRadiusProperty(Dimension(-1.0f));
 
     // for hoverScale animation
     float clipRate = -1.0f;
@@ -376,9 +377,9 @@ public:
         return hasAnimation_;
     }
 
-    void SetSubMenuShow()
+    void SetSubMenuShow(bool subMenuShowed)
     {
-        isSubMenuShow_ = true;
+        isSubMenuShow_ = subMenuShowed;
     }
 
     void SetMenuShow()
@@ -521,16 +522,6 @@ public:
 
     BorderRadiusProperty CalcIdealBorderRadius(const BorderRadiusProperty& borderRadius, const SizeF& menuSize);
 
-    void SetHoverMode(bool enableFold)
-    {
-        enableFold_ = enableFold;
-    }
-
-    bool GetHoverMode() const
-    {
-        return enableFold_.value_or(false);
-    }
-
     void OnItemPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover = false);
 
     RefPtr<FrameNode> GetLastSelectedItem()
@@ -595,8 +586,9 @@ public:
     }
     void InitPreviewMenuAnimationInfo(const RefPtr<MenuTheme>& menuTheme);
 
-
     float GetSelectMenuWidthFromTheme() const;
+
+    bool IsSelectOverlayDefaultModeRightClickMenu();
 
 protected:
     void UpdateMenuItemChildren(RefPtr<UINode>& host);
@@ -731,7 +723,6 @@ private:
     RectF previewRect_;
     SizeF previewIdealSize_;
     OffsetF statusOriginOffset_;
-    std::optional<bool> enableFold_;
 
     WeakPtr<FrameNode> builderNode_;
     bool isWidthModifiedBySelect_ = false;

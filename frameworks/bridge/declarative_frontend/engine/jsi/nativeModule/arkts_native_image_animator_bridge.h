@@ -37,6 +37,7 @@ public:
     static ArkUINativeModuleValue ResetImages(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetIteration(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetIteration(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetAutoMonitorInvisibleArea(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

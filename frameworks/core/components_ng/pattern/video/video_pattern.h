@@ -181,7 +181,7 @@ public:
 
     const std::string& GetSrc() const
     {
-        return videoSrcInfo_.src;
+        return videoSrcInfo_.src_;
     }
 
     void UpdateMediaParam(const RefPtr<MediaPlayer>& mediaPlayer, const RefPtr<RenderSurface>& renderSurface,
@@ -424,6 +424,7 @@ private:
 
     // full screen node id
     std::optional<int32_t> fullScreenNodeId_;
+    int32_t hostId_ = 0;
 
     // Video playback speed.
     double progressRate_ = 1.0;

@@ -312,7 +312,7 @@ void SetSliderStyle(ArkUINodeHandle node, int value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    if (value >= static_cast<int32_t>(SLIDER_MODE.size())) {
+    if (value < 0 || value >= static_cast<int32_t>(SLIDER_MODE.size())) {
         return;
     }
     SliderModelNG::SetSliderMode(frameNode, SLIDER_MODE[value]);
@@ -448,6 +448,9 @@ void SetSliderBlockType(ArkUINodeHandle node, int value)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    if (value < 0 || value >= static_cast<int32_t>(SLIDER_STYLE_TYPE.size())) {
+        return;
+    }
     SliderModelNG::SetBlockType(frameNode, SLIDER_STYLE_TYPE[value]);
 }
 
@@ -659,6 +662,27 @@ ArkUISliderValidSlideRange GetSliderValidSlideRange(ArkUINodeHandle node)
     CHECK_NULL_RETURN(rangeValue && rangeValue->HasValidValues(), errorReturn);
     return { rangeValue->GetFromValue(), rangeValue->GetToValue() };
 }
+
+ArkUI_Bool GetEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return SliderModelNG::GetEnableHapticFeedback(frameNode);
+}
+
+void SetEnableHapticFeedback(ArkUINodeHandle node, int enableHapticFeedback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::SetEnableHapticFeedback(frameNode, enableHapticFeedback);
+}
+
+void ResetEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SliderModelNG::SetEnableHapticFeedback(frameNode, true);
+}
 } // namespace SliderModifier
 
 namespace NodeModifier {
@@ -735,6 +759,9 @@ const ArkUISliderModifier* GetSliderModifier()
         .getSliderBlockShape = SliderModifier::GetSliderBlockShape,
         .getThickness = SliderModifier::GetThickness,
         .getSliderValidSlideRange = SliderModifier::GetSliderValidSlideRange,
+        .getEnableHapticFeedback = SliderModifier::GetEnableHapticFeedback,
+        .setEnableHapticFeedback = SliderModifier::SetEnableHapticFeedback,
+        .resetEnableHapticFeedback = SliderModifier::ResetEnableHapticFeedback,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -814,6 +841,9 @@ const CJUISliderModifier* GetCJUISliderModifier()
         .getSliderBlockShape = SliderModifier::GetSliderBlockShape,
         .getThickness = SliderModifier::GetThickness,
         .getSliderValidSlideRange = SliderModifier::GetSliderValidSlideRange,
+        .getEnableHapticFeedback = SliderModifier::GetEnableHapticFeedback,
+        .setEnableHapticFeedback = SliderModifier::SetEnableHapticFeedback,
+        .resetEnableHapticFeedback = SliderModifier::ResetEnableHapticFeedback,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

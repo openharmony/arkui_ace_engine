@@ -31,6 +31,8 @@ struct TextDragInfo {
     float maxSelectedWidth = 0.0f;
     bool isFirstHandleAnimation = true;
     bool isSecondHandleAnimation = true;
+    std::optional<Color> dragBackgroundColor;
+    bool isDragShadowNeeded = true;
 };
 } // namespace OHOS::Ace::NG
 

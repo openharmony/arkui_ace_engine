@@ -307,12 +307,23 @@ public:
     void UpdateActiveChildRange(bool forward, int32_t cacheCount, bool show);
     void UpdateActiveChildRange(bool show);
     void SyncItemsToCachedItemPosition();
+    bool IsVisible() const;
     void SetRecache(bool value)
     {
         reCache_ = value;
     }
     void LayoutCache(const LayoutConstraintF& constraint, int64_t deadline, int32_t forwardCached,
         int32_t backwardCached, ListMainSizeValues listSizeValues);
+
+    RefPtr<UINode> GetHeader() const
+    {
+        return header_.Upgrade();
+    }
+
+    RefPtr<UINode> GetFooter() const
+    {
+        return footer_.Upgrade();
+    }
 
 private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

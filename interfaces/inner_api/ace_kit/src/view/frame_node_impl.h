@@ -32,6 +32,7 @@ public:
     ~FrameNodeImpl();
 
     void Reset() override;
+
     void Measure(const std::optional<NG::LayoutConstraintT<float>>& parentContraint) override;
 
     void Layout() override;
@@ -42,6 +43,9 @@ public:
     RefPtr<Pattern> GetPattern() override;
     RefPtr<AceNode> PopAceNode();
     NG::LayoutWrapper* GetLayoutWrapper();
+
+    void MeasureChildren() override;
+    void LayoutChildren() override;
 
 private:
     AceNode* frameNode_;

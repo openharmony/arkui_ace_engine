@@ -101,6 +101,8 @@ CJ_EXPORT void FfiOHOSAceFrameworkScrollOnScrollEnd(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkScrollOnWillScroll(
     CJOffset (*callback)(double xOffset, double yOffset, int32_t state, int32_t source));
 CJ_EXPORT void FfiOHOSAceFrameworkScrollOnDidScroll(void (*callback)(double xOffset, double yOffset, int32_t state));
+CJ_EXPORT void FfiOHOSAceFrameworkScrollOnReachStart(void (*callback)());
+CJ_EXPORT void FfiOHOSAceFrameworkScrollOnReachEnd(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkScrollOnScrollStart(void (*callback)());
 CJ_EXPORT void FfiOHOSAceFrameworkScrollOnScrollStop(void (*callback)());
 CJ_EXPORT int64_t FfiOHOSAceFrameworkScrollerCtor();

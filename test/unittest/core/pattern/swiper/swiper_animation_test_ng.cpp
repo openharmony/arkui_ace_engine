@@ -19,6 +19,12 @@
 #include "core/animation/spring_curve.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t SWIPE_ONE = 1;
+constexpr int32_t SWIPE_THREE = 3;
+constexpr int32_t SWIPE_FOUR = 4;
+} // namespace
+
 class SwiperAnimationTestNg : public SwiperTestNg {
 public:
     static void SetUpTestSuite()
@@ -619,6 +625,7 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSwipeTo001, TestSize.Level1)
     pattern_->SwipeTo(1);
     pattern_->TriggerCustomContentTransitionEvent(0, 1);
     pattern_->OnCustomAnimationFinish(0, 1, false);
+    EXPECT_TRUE(frameNode_);
 }
 
 /**
@@ -1210,5 +1217,75 @@ HWTEST_F(SwiperAnimationTestNg, StopAnimate002, TestSize.Level1)
     FlushUITasks();
     pattern_->HandleTouchDown({ touch });
     EXPECT_EQ(pattern_->GetCurrentShownIndex(), 0);
+}
+
+/**
+ * @tc.name: NeedFastAnimation001
+ * @tc.desc: Test NeedFastAnimation
+ * @tc.desc: Test NeedFastAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, NeedFastAnimation001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(pattern_, nullptr);
+
+    EXPECT_FALSE(pattern_->NeedFastAnimation());
+
+    pattern_->SetJumpAnimationMode(TabAnimateMode::CONTENT_FIRST);
+    EXPECT_FALSE(pattern_->NeedFastAnimation());
+
+    pattern_->SetJumpAnimationMode(TabAnimateMode::ACTION_FIRST);
+    EXPECT_FALSE(pattern_->NeedFastAnimation());
+
+    pattern_->SetJumpAnimationMode(TabAnimateMode::NO_ANIMATION);
+    EXPECT_FALSE(pattern_->NeedFastAnimation());
+
+    pattern_->SetJumpAnimationMode(TabAnimateMode::CONTENT_FIRST_WITH_JUMP);
+    EXPECT_TRUE(pattern_->NeedFastAnimation());
+
+    pattern_->SetJumpAnimationMode(TabAnimateMode::ACTION_FIRST_WITH_JUMP);
+    EXPECT_TRUE(pattern_->NeedFastAnimation());
+}
+
+/**
+ * @tc.name: FastAnimation001
+ * @tc.desc: Test FastAnimation
+ * @tc.desc: Test FastAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperAnimationTestNg, FastAnimation001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
+    ASSERT_NE(pattern_, nullptr);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    pattern_->currentIndex_ = 0;
+    pattern_->FastAnimation(pattern_->currentIndex_);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    pattern_->currentIndex_ = 0;
+    pattern_->FastAnimation(SWIPE_ONE);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    pattern_->currentIndex_ = 0;
+    pattern_->FastAnimation(SWIPE_THREE);
+    EXPECT_EQ(pattern_->currentIndex_, 0);
+
+    pattern_->currentIndex_ = 0;
+    pattern_->FastAnimation(SWIPE_FOUR);
+    EXPECT_EQ(pattern_->currentIndex_, SWIPE_ONE);
+
+    pattern_->currentIndex_ = SWIPE_FOUR;
+    pattern_->FastAnimation(-SWIPE_THREE);
+    EXPECT_EQ(pattern_->currentIndex_, SWIPE_ONE);
+
+    pattern_->currentIndex_ = SWIPE_FOUR;
+    pattern_->FastAnimation(-SWIPE_FOUR);
+    EXPECT_EQ(pattern_->currentIndex_, SWIPE_ONE);
 }
 } // namespace OHOS::Ace::NG

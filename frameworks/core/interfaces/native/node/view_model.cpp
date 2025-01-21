@@ -628,11 +628,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createRowNode,
     createFlexNode,
     createListItemNode,
-#ifndef ARKUI_WEARABLE
     createTabsNode,
-#else
-    nullptr, // createTabsNode
-#endif
     nullptr, // Navigator
     nullptr, // Web
     createSliderNode,
@@ -670,7 +666,6 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createBlankNode,
     createDividerNode,
     createAlphabetIndexerNode,
-    createArcAlphabetIndexerNode,
     createSearchNode,
     createGridRowNode,
     createGridColNode,
@@ -681,11 +676,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
 #endif
     createImageAnimatorNode,
     createCircleNode,
-#ifndef ARKUI_WEARABLE
     createTabContentNode,
-#else
-    nullptr, // createTabContentNode
-#endif
     createNavigationNode,
     createCustomSpanNode,
     createSymbolNode,
@@ -705,6 +696,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
 #else
     nullptr,
 #endif
+    createArcAlphabetIndexerNode,
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)

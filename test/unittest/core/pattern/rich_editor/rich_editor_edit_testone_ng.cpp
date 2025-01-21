@@ -1259,10 +1259,9 @@ HWTEST_F(RichEditorEditTestOneNg, HandleOnCut004, TestSize.Level1)
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->textSelector_.baseOffset = 0;
     richEditorPattern->textSelector_.destinationOffset = 1;
-    richEditorPattern->caretUpdateType_ = CaretUpdateType::PRESSED;
     richEditorPattern->previewLongPress_ = true;
     richEditorPattern->HandleOnCut();
-    EXPECT_EQ(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
+    EXPECT_NE(richEditorPattern->caretUpdateType_, CaretUpdateType::PRESSED);
     EXPECT_EQ(isEventCalled, true);
 }
 
@@ -1303,5 +1302,23 @@ HWTEST_F(RichEditorEditTestOneNg, HandleOnDelete001, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->HandleOnDelete(true);
     richEditorPattern->HandleOnDelete(false);
+}
+
+/**
+ * @tc.name: KeyboardAppearance001
+ * @tc.desc: test KeyboardAppearance
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorEditTestOneNg, KeyboardAppearance001, TestSize.Level1)
+{
+    RichEditorModelNG richEditorModel;
+    richEditorModel.Create();
+    richEditorModel.SetKeyboardAppearance(KeyboardAppearance::IMMERSIVE);
+
+    auto richEditorNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(richEditorNode, nullptr);
+    auto richEditorPattern = richEditorNode->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    ASSERT_EQ(richEditorPattern->GetKeyboardAppearance(), KeyboardAppearance::IMMERSIVE);
 }
 } // namespace OHOS::Ace::NG

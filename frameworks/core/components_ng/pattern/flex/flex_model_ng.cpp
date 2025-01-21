@@ -217,6 +217,26 @@ void FlexModelNG::SetFlexAlignContent(FrameNode* frameNode, int32_t value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, Alignment, static_cast<WrapAlignment>(value), frameNode);
 }
 
+void FlexModelNG::SetWidthLayoutPolicy(uint8_t widthLayoutPolicy)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, WidthLayoutPolicy, widthLayoutPolicy);
+}
+
+void FlexModelNG::SetWidthLayoutPolicy(FrameNode* frameNode, uint8_t widthLayoutPolicy)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, WidthLayoutPolicy, widthLayoutPolicy, frameNode);
+}
+
+void FlexModelNG::SetHeightLayoutPolicy(uint8_t heightLayoutPolicy)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, HeightLayoutPolicy, heightLayoutPolicy);
+}
+
+void FlexModelNG::SetHeightLayoutPolicy(FrameNode* frameNode, uint8_t heightLayoutPolicy)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(FlexLayoutProperty, HeightLayoutPolicy, heightLayoutPolicy, frameNode);
+}
+
 int FlexModelNG::GetFlexWrap(FrameNode* frameNode)
 {
     int value = 0;

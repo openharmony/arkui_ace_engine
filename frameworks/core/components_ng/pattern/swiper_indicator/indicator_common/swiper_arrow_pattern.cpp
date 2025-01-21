@@ -363,10 +363,16 @@ void SwiperArrowPattern::SetButtonVisible(bool visible)
     renderContext->SetVisible(visible);
     // Set hit test mode BLOCK to make sure button respond to the touch events when visible.
     buttonNodeGestureHub->SetHitTestMode(visible ? HitTestMode::HTMBLOCK : HitTestMode::HTMTRANSPARENT);
-    if (visible) {
-        buttonNodeGestureHub->AddClickEvent(buttonClickListener_);
-    } else {
+    if (buttonClickListener_) {
         buttonNodeGestureHub->RemoveClickEvent(buttonClickListener_);
+        if (visible) {
+            buttonNodeGestureHub->AddClickEvent(buttonClickListener_);
+        }
+    }
+    auto accessibilityProperty = buttonNode->GetAccessibilityProperty<AccessibilityProperty>();
+    if (accessibilityProperty) {
+        accessibilityProperty->SetAccessibilityLevel(
+            visible ? AccessibilityProperty::Level::AUTO : AccessibilityProperty::Level::NO_STR);
     }
 }
 

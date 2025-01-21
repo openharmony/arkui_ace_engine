@@ -48,6 +48,14 @@ private:
     std::string plainText_;
 };
 
+enum class DragDropInitiatingStatus : int32_t {
+    IDLE = 0,
+    READY,
+    PRESS,
+    LIFTING,
+    MOVING,
+};
+
 enum class DragRet {
     DRAG_DEFAULT = -1,
     DRAG_SUCCESS = 0,
@@ -65,6 +73,12 @@ enum class PreDragStatus {
     PREVIEW_LANDING_STARTED,
     PREVIEW_LANDING_FINISHED,
     ACTION_CANCELED_BEFORE_DRAG,
+    PREPARING_FOR_DRAG_DETECTION,
+};
+
+enum class DragStartRequestStatus : int32_t {
+    WAITING = 0,
+    READY
 };
 
 enum class DragBehavior {
@@ -235,7 +249,7 @@ public:
         udKey_ = udKey;
     }
 
-    std::string GetUdKey()
+    const std::string& GetUdKey()
     {
         return udKey_;
     }

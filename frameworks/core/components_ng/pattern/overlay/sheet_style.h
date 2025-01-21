@@ -22,6 +22,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/properties/placement.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
 
 namespace OHOS::Ace::NG {
@@ -55,6 +56,25 @@ enum class SheetAccessibilityDetents {
     LOW,
 };
 
+enum class SheetArrowPosition {
+    TOP_LEFT,
+    TOP_RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM_RIGHT,
+    LEFT_TOP,
+    LEFT_BOTTOM,
+    RIGHT_TOP,
+    RIGHT_BOTTOM,
+    NONE
+};
+
+enum class SheetEffectEdge {
+    NONE = 0,
+    START = 1,
+    END = 2,
+    ALL = 3,
+};
+
 struct SheetKey {
     SheetKey() {}
     explicit SheetKey(int32_t inputTargetId) : targetId(inputTargetId) {}
@@ -75,6 +95,18 @@ struct SheetKey {
     bool hasValidTargetNode = true;     // If sheet was start-up by UIContext and without targetId, this flag is FALSE
     int32_t contentId = -1;             // Indicates the uniqueID of componentContent when isStartUpByUIContext is TRUE
     int32_t targetId = -1;
+};
+
+struct SheetPopupInfo {
+    Placement finalPlacement = Placement::NONE;
+    bool placementOnTarget = true;
+    bool placementRechecked = false;
+    bool showArrow = true;
+    float arrowOffsetX = 0.f;
+    float arrowOffsetY = 0.f;
+    SheetArrowPosition arrowPosition = SheetArrowPosition::NONE;
+    float sheetOffsetX = 0.f;
+    float sheetOffsetY = 0.f;
 };
 
 struct SheetKeyHash {
@@ -117,8 +149,7 @@ enum class SheetKeyboardAvoidMode {
 };
 
 struct SheetStyle {
-    std::optional<Dimension> height;
-    std::optional<SheetMode> sheetMode;
+    SheetHeight sheetHeight;
     std::optional<bool> showDragBar;
     std::optional<bool> showCloseIcon;
     std::optional<bool> isTitleBuilder;
@@ -142,11 +173,15 @@ struct SheetStyle {
     std::optional<int32_t> instanceId; // uiContext instanceId
     std::optional<bool> enableHoverMode;
     std::optional<HoverModeAreaType> hoverModeArea;
+    std::optional<SheetEffectEdge> sheetEffectEdge;
     std::optional<NG::BorderRadiusProperty> radius;
+    std::optional<SheetHeight> detentSelection;
+    std::optional<Placement> placement;
+    std::optional<bool> placementOnTarget;
 
     bool operator==(const SheetStyle& sheetStyle) const
     {
-        return (height == sheetStyle.height && sheetMode == sheetStyle.sheetMode &&
+        return (sheetHeight == sheetStyle.sheetHeight &&
                 showDragBar == sheetStyle.showDragBar && showCloseIcon == sheetStyle.showCloseIcon &&
                 isTitleBuilder == sheetStyle.isTitleBuilder && sheetType == sheetStyle.sheetType &&
                 backgroundColor == sheetStyle.backgroundColor && maskColor == sheetStyle.maskColor &&
@@ -158,19 +193,22 @@ struct SheetStyle {
                 instanceId == sheetStyle.instanceId && scrollSizeMode == sheetStyle.scrollSizeMode &&
                 sheetKeyboardAvoidMode == sheetStyle.sheetKeyboardAvoidMode &&
                 bottomOffset == sheetStyle.bottomOffset && enableHoverMode == sheetStyle.enableHoverMode &&
-                hoverModeArea == sheetStyle.hoverModeArea && radius == sheetStyle.radius);
+                hoverModeArea == sheetStyle.hoverModeArea && radius == sheetStyle.radius &&
+                detentSelection == sheetStyle.detentSelection && sheetEffectEdge == sheetStyle.sheetEffectEdge &&
+                placement == sheetStyle.placement && placementOnTarget == sheetStyle.placementOnTarget);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
     {
-        if (sheetStyle.height.has_value() && !sheetStyle.sheetMode.has_value()) {
-            height = sheetStyle.height;
-            sheetMode.reset();
-        } else if (!sheetStyle.height.has_value() && sheetStyle.sheetMode.has_value()) {
-            sheetMode = sheetStyle.sheetMode;
-            height.reset();
+        if (sheetStyle.sheetHeight.height.has_value() && !sheetStyle.sheetHeight.sheetMode.has_value()) {
+            sheetHeight.height = sheetStyle.sheetHeight.height;
+            sheetHeight.sheetMode.reset();
+        } else if (!sheetStyle.sheetHeight.height.has_value() && sheetStyle.sheetHeight.sheetMode.has_value()) {
+            sheetHeight.sheetMode = sheetStyle.sheetHeight.sheetMode;
+            sheetHeight.height.reset();
         } else {
-            sheetMode = sheetStyle.sheetMode.has_value() ? sheetStyle.sheetMode : sheetMode;
+            sheetHeight.sheetMode = sheetStyle.sheetHeight.sheetMode.has_value() ?
+                sheetStyle.sheetHeight.sheetMode : sheetHeight.sheetMode;
         }
         showDragBar = sheetStyle.showDragBar.has_value() ? sheetStyle.showDragBar : showDragBar;
         showCloseIcon = sheetStyle.showCloseIcon.has_value() ? sheetStyle.showCloseIcon : showCloseIcon;
@@ -196,6 +234,11 @@ struct SheetStyle {
         enableHoverMode = sheetStyle.enableHoverMode.has_value() ? sheetStyle.enableHoverMode : enableHoverMode;
         hoverModeArea = sheetStyle.hoverModeArea.has_value() ? sheetStyle.hoverModeArea : hoverModeArea;
         radius = sheetStyle.radius.has_value() ? sheetStyle.radius : radius;
+        detentSelection = sheetStyle.detentSelection.has_value() ? sheetStyle.detentSelection : detentSelection;
+        sheetEffectEdge = sheetStyle.sheetEffectEdge.has_value() ? sheetStyle.sheetEffectEdge : sheetEffectEdge;
+        placement = sheetStyle.placement.has_value() ? sheetStyle.placement : placement;
+        placementOnTarget = sheetStyle.placementOnTarget.has_value() ?
+            sheetStyle.placementOnTarget : placementOnTarget;
     }
 };
 } // namespace OHOS::Ace::NG

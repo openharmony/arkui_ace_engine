@@ -875,7 +875,7 @@ void JSViewContext::JSOpenBindSheet(const JSCallbackInfo& info)
 
     // parse SheetStyle and callbacks
     NG::SheetStyle sheetStyle;
-    sheetStyle.sheetMode = NG::SheetMode::LARGE;
+    sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
     sheetStyle.showDragBar = true;
     sheetStyle.showInPage = false;
     std::function<void()> onAppearCallback;
@@ -952,7 +952,7 @@ void JSViewContext::JSUpdateBindSheet(const JSCallbackInfo& info)
         JSViewAbstract::ParseSheetStyle(info[INDEX_ONE], sheetStyle, isPartialUpdate);
         JSViewAbstract::ParseSheetTitle(info[INDEX_ONE], sheetStyle, titleBuilderFunction);
     } else {
-        sheetStyle.sheetMode = NG::SheetMode::LARGE;
+        sheetStyle.sheetHeight.sheetMode = NG::SheetMode::LARGE;
         sheetStyle.showDragBar = true;
         sheetStyle.showInPage = false;
         isPartialUpdate = false;
@@ -1201,13 +1201,11 @@ void JSViewContext::JSBind(BindingTarget globalObj)
     JSClass<JSViewContext>::StaticMethod("closePopup", JSClosePopup);
     JSClass<JSViewContext>::StaticMethod("isFollowingSystemFontScale", IsFollowingSystemFontScale);
     JSClass<JSViewContext>::StaticMethod("getMaxFontScale", GetMaxFontScale);
-#ifndef ARKUI_WEARABLE
     JSClass<JSViewContext>::StaticMethod("bindTabsToScrollable", JSTabsFeature::BindTabsToScrollable);
     JSClass<JSViewContext>::StaticMethod("unbindTabsFromScrollable", JSTabsFeature::UnbindTabsFromScrollable);
     JSClass<JSViewContext>::StaticMethod("bindTabsToNestedScrollable", JSTabsFeature::BindTabsToNestedScrollable);
     JSClass<JSViewContext>::StaticMethod(
         "unbindTabsFromNestedScrollable", JSTabsFeature::UnbindTabsFromNestedScrollable);
-#endif
     JSClass<JSViewContext>::StaticMethod("enableSwipeBack", JSViewContext::SetEnableSwipeBack);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }

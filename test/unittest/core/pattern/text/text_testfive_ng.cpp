@@ -505,6 +505,22 @@ HWTEST_F(TextTestFiveNg, GetTextHeight001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: IsShowTranslate001
+ * @tc.desc: test text_pattern.cpp IsShowTranslate function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsShowTranslate001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    bool showTranslate = textPattern->IsShowTranslate();
+    EXPECT_EQ(showTranslate, false);
+}
+
+/**
  * @tc.name: IsShowSearch001
  * @tc.desc: test text_pattern.cpp IsShowSearch function
  * @tc.type: FUNC
@@ -518,6 +534,24 @@ HWTEST_F(TextTestFiveNg, IsShowSearch001, TestSize.Level1)
 
     textPattern->IsShowSearch();
     EXPECT_NE(textPattern, nullptr);
+}
+
+/**
+ * @tc.name: IsSupportMenuShare001
+ * @tc.desc: test base_text_select_overlay.cpp IsSupportMenuShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsSupportMenuShare001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    EXPECT_EQ(textSelectOverlay->IsSupportMenuShare(), false);
 }
 
 /**
@@ -1482,16 +1516,74 @@ HWTEST_F(TextTestFiveNg, OnHandleMarkInfoChange001, TestSize.Level1)
     EXPECT_EQ(shareOverlayInfo->handlerColor, std::nullopt);
 
     flag = DIRTY_FIRST_HANDLE;
+    shareOverlayInfo->menuInfo.showTranslate = false;
+    textSelectOverlay->SetMenuTranslateIsSupport(false);
+    textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->menuInfo.showTranslate, false);
+
+    flag = DIRTY_SECOND_HANDLE;
+    shareOverlayInfo->menuInfo.showTranslate = true;
+    textSelectOverlay->SetMenuTranslateIsSupport(true);
+    textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->menuInfo.showTranslate, false);
+
+    flag = DIRTY_FIRST_HANDLE;
     shareOverlayInfo->menuInfo.showSearch = false;
     textSelectOverlay->SetIsSupportMenuSearch(false);
     textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
     EXPECT_EQ(shareOverlayInfo->menuInfo.showSearch, false);
+
+    shareOverlayInfo->menuInfo.showShare = false;
+    textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->menuInfo.showShare, false);
 
     flag = DIRTY_SECOND_HANDLE;
     shareOverlayInfo->menuInfo.showSearch = true;
     textSelectOverlay->SetIsSupportMenuSearch(true);
     textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
     EXPECT_EQ(shareOverlayInfo->menuInfo.showSearch, false);
+
+    shareOverlayInfo->menuInfo.showShare = true;
+    textSelectOverlay->OnHandleMarkInfoChange(shareOverlayInfo, flag);
+    EXPECT_EQ(shareOverlayInfo->menuInfo.showShare, false);
+}
+
+/**
+ * @tc.name: IsNeedMenuTranslate001
+ * @tc.desc: test base_text_select_overlay.cpp IsNeedMenuTranslate function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsNeedMenuTranslate001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    EXPECT_EQ(textSelectOverlay->IsNeedMenuTranslate(), false);
+}
+
+/**
+ * @tc.name: HandleOnTranslate001
+ * @tc.desc: test base_text_select_overlay.cpp HandleOnTranslate function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, HandleOnTranslate001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    textSelectOverlay->HandleOnTranslate();
+    EXPECT_EQ(pattern->GetTextSelector().GetTextStart(), -1);
+    EXPECT_EQ(pattern->GetTextSelector().GetTextEnd(), -1);
 }
 
 /**
@@ -1528,6 +1620,44 @@ HWTEST_F(TextTestFiveNg, HandleOnSearch001, TestSize.Level1)
     ASSERT_NE(textSelectOverlay, nullptr);
 
     textSelectOverlay->HandleOnSearch();
+    EXPECT_EQ(pattern->GetTextSelector().GetTextStart(), -1);
+    EXPECT_EQ(pattern->GetTextSelector().GetTextEnd(), -1);
+}
+
+/**
+ * @tc.name: IsNeedMenuShare001
+ * @tc.desc: test base_text_select_overlay.cpp IsNeedMenuShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, IsNeedMenuShare001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    EXPECT_EQ(textSelectOverlay->IsNeedMenuShare(), false);
+}
+
+/**
+ * @tc.name: HandleOnShare001
+ * @tc.desc: test base_text_select_overlay.cpp HandleOnShare function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestFiveNg, HandleOnShare001, TestSize.Level1)
+{
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("Test", 1, pattern);
+    ASSERT_NE(frameNode, nullptr);
+    pattern->AttachToFrameNode(frameNode);
+    auto textSelectOverlay = pattern->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    textSelectOverlay->HandleOnShare();
     EXPECT_EQ(pattern->GetTextSelector().GetTextStart(), -1);
     EXPECT_EQ(pattern->GetTextSelector().GetTextEnd(), -1);
 }
@@ -2302,7 +2432,7 @@ HWTEST_F(TextTestFiveNg, GetThumbnailCallback001, TestSize.Level1)
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
 
     textFrameNode->draggable_ = true;
-    textFrameNode->eventHub_->SetOnDragStart(
+    textFrameNode->GetEventHub<EventHub>()->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
     textPattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     textPattern->copyOption_ = CopyOptions::InApp;

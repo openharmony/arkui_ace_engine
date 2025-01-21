@@ -130,16 +130,17 @@ void SetOnThemeScopeDestroy(ArkUINodeHandle node, void* callback)
 namespace NodeModifier {
 const ArkUIThemeModifier* GetThemeModifier()
 {
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIThemeModifier modifier = {
-        ThemeModifier::CreateWithThemeNode,
-        ThemeModifier::GetWithThemeNode,
-        ThemeModifier::CreateTheme,
-        ThemeModifier::CreateThemeScope,
-        ThemeModifier::SetDefaultTheme,
-        ThemeModifier::RemoveFromCache,
-        ThemeModifier::SetOnThemeScopeDestroy,
+        .createWithThemeNode = ThemeModifier::CreateWithThemeNode,
+        .getWithThemeNode = ThemeModifier::GetWithThemeNode,
+        .createTheme = ThemeModifier::CreateTheme,
+        .createThemeScope = ThemeModifier::CreateThemeScope,
+        .setDefaultTheme = ThemeModifier::SetDefaultTheme,
+        .removeFromCache = ThemeModifier::RemoveFromCache,
+        .setOnThemeScopeDestroy = ThemeModifier::SetOnThemeScopeDestroy,
     };
-
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 } // namespace NodeModifier

@@ -413,6 +413,15 @@ void TabsModelNG::SetOnTabBarClick(std::function<void(const BaseEventInfo*)>&& o
     tabPattern->SetOnTabBarClickEvent(std::move(onTabBarClick));
 }
 
+void TabsModelNG::SetOnUnselected(std::function<void(const BaseEventInfo* info)>&& onUnselected)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnUnselectedEvent(std::move(onUnselected));
+}
+
 void TabsModelNG::SetOnAnimationStart(AnimationStartEvent&& onAnimationStart)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -440,6 +449,15 @@ void TabsModelNG::SetOnGestureSwipe(GestureSwipeEvent&& onGestureSwipe)
     auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetGestureSwipeEvent(std::move(onGestureSwipe));
+}
+
+void TabsModelNG::SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnSelectedEvent(std::move(onSelected));
 }
 
 void TabsModelNG::SetDivider(const TabsItemDivider& divider)
@@ -529,18 +547,6 @@ void TabsModelNG::Pop()
     CHECK_NULL_VOID(tabBarNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_VOID(swiperNode);
-
-    auto tabBarPosition = tabsLayoutProperty->GetTabBarPosition().value_or(BarPosition::START);
-    auto tabsFocusNode = tabsNode->GetFocusHub();
-    CHECK_NULL_VOID(tabsFocusNode);
-    auto tabBarFocusNode = tabBarNode->GetFocusHub();
-    CHECK_NULL_VOID(tabBarFocusNode);
-    if (tabBarPosition == BarPosition::START && !tabsFocusNode->IsCurrentFocus()) {
-        auto lastWeakFocusNode = tabsFocusNode->GetLastWeakFocusNode().Upgrade();
-        if (!lastWeakFocusNode) {
-            tabsFocusNode->SetLastWeakFocusNode(AceType::WeakClaim(AceType::RawPtr(tabBarFocusNode)));
-        }
-    }
 
     tabBarNode->MarkModifyDone();
     tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -704,6 +710,14 @@ void TabsModelNG::SetBarGridAlign(FrameNode* frameNode, const BarGridColumnOptio
     auto tabBarLayoutProperty = GetTabBarLayoutProperty(frameNode);
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateBarGridAlign(BarGridColumnOptions);
+}
+
+void TabsModelNG::SetOnUnselected(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& onUnselected)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnUnselectedEvent(std::move(onUnselected));
 }
 
 void TabsModelNG::SetDivider(FrameNode* frameNode, const TabsItemDivider& divider)

@@ -50,6 +50,7 @@ public:
     void SetSvgAnimatorFinishEvent(std::function<void()> &&callback) override;
     void SetImageSourceSize(const std::pair<Dimension, Dimension> &size) override;
     void SetImageFill(const Color &color) override;
+    void ResetImageFill() override;
     void SetImageInterpolation(ImageInterpolation interpolation) override;
     void SetImageRepeat(ImageRepeat imageRepeat) override;
     void SetImageRenderMode(ImageRenderMode imageRenderMode) override;
@@ -99,6 +100,7 @@ public:
     static void SetImageSourceSize(FrameNode *frameNode, const std::pair<Dimension, Dimension> &size);
     static void SetMatchTextDirection(FrameNode *frameNode, bool value);
     static void SetImageFill(FrameNode *frameNode, const Color &color);
+    static void ResetImageFill(FrameNode *frameNode);
     static void SetAlt(FrameNode *frameNode, const ImageSourceInfo &src);
     static void SetImageInterpolation(FrameNode *frameNode, ImageInterpolation interpolation);
     static void ResetImageInterpolation(FrameNode *frameNode);

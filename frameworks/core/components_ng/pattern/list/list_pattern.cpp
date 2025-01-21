@@ -1120,13 +1120,29 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
     auto curPattern = curFrame->GetPattern();
     CHECK_NULL_RETURN(curPattern, nullptr);
     auto curItemPattern = AceType::DynamicCast<ListItemPattern>(curPattern);
-    CHECK_NULL_RETURN(curItemPattern, nullptr);
+    auto curIndex = -1;
+    auto curIndexInGroup = -1;
+    if (!curItemPattern) {
+        auto parentNode = curFrame->GetParentFrameNode();
+        CHECK_NULL_RETURN(parentNode, nullptr);
+        auto parentPattern = AceType::DynamicCast<ListItemGroupPattern>(parentNode->GetPattern());
+        CHECK_NULL_RETURN(parentPattern, nullptr);
+        if (parentPattern->GetHeader() == curFrame) {
+            curIndex = parentPattern->GetIndexInList();
+            curIndexInGroup = -1;
+        } else if (parentPattern->GetFooter() == curFrame) {
+            curIndex = parentPattern->GetIndexInList();
+            curIndexInGroup = parentPattern->GetTotalItemCount();
+        } else {
+            return nullptr;
+        }
+    } else {
+        curIndex = curItemPattern->GetIndexInList();
+        curIndexInGroup = curItemPattern->GetIndexInListItemGroup();
+    }
     auto listProperty = GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_RETURN(listProperty, nullptr);
-
     auto isVertical = listProperty->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL;
-    auto curIndex = curItemPattern->GetIndexInList();
-    auto curIndexInGroup = curItemPattern->GetIndexInListItemGroup();
     auto curListItemGroupPara = GetListItemGroupParameter(curFrame);
     if (curIndex < 0 || curIndex > maxListItemIndex_) {
         return nullptr;
@@ -1147,7 +1163,9 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         } else if ((isVertical && (step == FocusStep::DOWN)) || (!isVertical && step == FocusStep::RIGHT) ||
                    (step == FocusStep::TAB)) {
             moveStep = 1;
-            if ((curIndexInGroup == -1) || (curIndexInGroup >= curListItemGroupPara.itemEndIndex)) {
+            if ((curIndexInGroup == -1 && !curListItemGroupPara.hasHeader) ||
+                (curIndexInGroup == curListItemGroupPara.itemEndIndex && !curListItemGroupPara.hasFooter) ||
+                (curIndexInGroup > curListItemGroupPara.itemEndIndex)) {
                 nextIndex = curIndex + moveStep;
                 nextIndexInGroup = -1;
             } else {
@@ -1156,7 +1174,9 @@ WeakPtr<FocusHub> ListPattern::GetNextFocusNode(FocusStep step, const WeakPtr<Fo
         } else if ((isVertical && step == FocusStep::UP) || (!isVertical && step == FocusStep::LEFT) ||
                    (step == FocusStep::SHIFT_TAB)) {
             moveStep = -1;
-            if ((curIndexInGroup == -1) || (curIndexInGroup <= 0)) {
+            if (curIndexInGroup == 0 && curListItemGroupPara.hasHeader) {
+                nextIndexInGroup = -1;
+            } else if ((curIndexInGroup == -1) || (curIndexInGroup <= 0)) {
                 nextIndex = curIndex + moveStep;
                 nextIndexInGroup = -1;
             } else {
@@ -1280,6 +1300,17 @@ WeakPtr<FocusHub> ListPattern::GetChildFocusNodeByIndex(int32_t tarMainIndex, in
         }
         auto childItemPattern = AceType::DynamicCast<ListItemPattern>(childPattern);
         if (!childItemPattern) {
+            auto parentNode = childFrame->GetParentFrameNode();
+            CHECK_NULL_RETURN(parentNode, false);
+            auto parentPattern = AceType::DynamicCast<ListItemGroupPattern>(parentNode->GetPattern());
+            CHECK_NULL_RETURN(parentPattern, false);
+            if (parentPattern->GetIndexInList() == tarMainIndex) {
+                if ((parentPattern->GetHeader() == childFrame && tarGroupIndex == -1) ||
+                    (parentPattern->GetFooter() == childFrame && tarGroupIndex == parentPattern->GetTotalItemCount())) {
+                    target = childFocus;
+                    return true;
+                }
+            }
             return false;
         }
         auto curIndex = childItemPattern->GetIndexInList();
@@ -1342,8 +1373,8 @@ WeakPtr<FocusHub> ListPattern::ScrollAndFindFocusNode(int32_t nextIndex, int32_t
     int32_t curIndexInGroup, int32_t moveStep, FocusStep step)
 {
     auto isScrollIndex = ScrollListForFocus(nextIndex, curIndex, nextIndexInGroup);
-    auto groupIndexInGroup =
-        ScrollListItemGroupForFocus(nextIndex, nextIndexInGroup, curIndexInGroup, moveStep, step, isScrollIndex);
+    auto groupIndexInGroup = ScrollListItemGroupForFocus(
+        nextIndex, curIndex, nextIndexInGroup, curIndexInGroup, moveStep, step, isScrollIndex);
 
     return groupIndexInGroup ? GetChildFocusNodeByIndex(nextIndex, nextIndexInGroup) : nullptr;
 }
@@ -1404,8 +1435,8 @@ bool ListPattern::HandleDisplayedChildFocus(int32_t nextIndex, int32_t curIndex)
     return false;
 }
 
-bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIndexInGroup, int32_t curIndexInGroup,
-    int32_t moveStep, FocusStep step, bool isScrollIndex)
+bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t curIndex, int32_t& nextIndexInGroup,
+    int32_t curIndexInGroup, int32_t moveStep, FocusStep step, bool isScrollIndex)
 {
     auto groupIndexInGroup = true;
     auto pipeline = GetContext();
@@ -1419,7 +1450,20 @@ bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIn
     auto nextListItemGroupPara = GetListItemGroupParameter(nextIndexNode);
     if (nextIndexInGroup == -1) {
         auto scrollAlign = ScrollAlign::END;
-        nextIndexInGroup = moveStep < 0 ? nextListItemGroupPara.itemEndIndex : 0;
+        if (nextIndex != curIndex) {
+            nextIndexInGroup = moveStep < 0 ? nextListItemGroupPara.itemEndIndex : 0;
+        }
+        if (moveStep == -1) {
+            if (curIndexInGroup == -1 && nextListItemGroupPara.hasFooter) {
+                nextIndexInGroup = nextListItemGroupPara.itemEndIndex + 1;
+            }
+        } else if (moveStep == 1) {
+            if (!nextListItemGroupPara.hasHeader) {
+                nextIndexInGroup = 0;
+            } else {
+                nextIndexInGroup = -1;
+            }
+        }
         if ((step == FocusStep::UP_END) || (step == FocusStep::LEFT_END) || (step == FocusStep::DOWN_END) ||
             (step == FocusStep::RIGHT_END)) {
             scrollAlign = moveStep < 0 ? ScrollAlign::END : ScrollAlign::START;
@@ -1432,8 +1476,13 @@ bool ListPattern::ScrollListItemGroupForFocus(int32_t nextIndex, int32_t& nextIn
             pipeline->FlushUITasks();
         }
     } else if (nextIndexInGroup > nextListItemGroupPara.itemEndIndex) {
-        nextIndexInGroup = -1;
-        groupIndexInGroup = false;
+        if (nextListItemGroupPara.hasFooter) {
+            ScrollToIndex(nextIndex, false, ScrollAlign::END);
+            pipeline->FlushUITasks();
+        } else {
+            nextIndexInGroup = -1;
+            groupIndexInGroup = false;
+        }
     } else {
         if ((nextIndexInGroup < curIndexInGroup) && (nextIndexInGroup < nextListItemGroupPara.displayStartIndex)) {
             ScrollToItemInGroup(nextIndex, nextIndexInGroup, false, ScrollAlign::START);
@@ -2572,6 +2621,8 @@ ListItemGroupPara ListPattern::GetListItemGroupParameter(const RefPtr<FrameNode>
         listItemGroupPara.displayStartIndex = itemGroupPattern->GetDisplayStartIndexInGroup();
         listItemGroupPara.lanes = itemGroupPattern->GetLanesInGroup();
         listItemGroupPara.itemEndIndex = itemGroupPattern->GetEndIndexInGroup();
+        listItemGroupPara.hasHeader = itemGroupPattern->IsHasHeader();
+        listItemGroupPara.hasFooter = itemGroupPattern->IsHasFooter();
     }
     return listItemGroupPara;
 }

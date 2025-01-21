@@ -1789,9 +1789,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest045, TestSize.Level1)
         AceType::MakeRefPtr<Pattern>());
     frameNode->GetOrCreateFocusHub();
 
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
     eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     focusHub->currentFocus_ = true;
 
     /**

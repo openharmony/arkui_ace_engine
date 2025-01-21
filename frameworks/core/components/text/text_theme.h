@@ -84,6 +84,8 @@ public:
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
             auto textShowHandle = pattern->GetAttr<std::string>("text_show_handle", "0");
             theme->isShowHandle_ = StringUtils::StringToInt(textShowHandle);
+            auto textShowTranslate = pattern->GetAttr<std::string>("menu_translate_is_support", "0");
+            theme->isShowTranslate_ = StringUtils::StringToInt(textShowTranslate);
             auto textShowSearch = pattern->GetAttr<std::string>("text_menu_search_is_support", "0");
             theme->isShowSearch_ = StringUtils::StringToInt(textShowSearch);
             auto disabledOpacity = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
@@ -140,6 +142,11 @@ public:
         return isShowHandle_;
     }
 
+    bool IsShowTranslate() const
+    {
+        return isShowTranslate_;
+    }
+
     bool IsShowSearch() const
     {
         return isShowSearch_;
@@ -185,6 +192,7 @@ private:
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
     bool isShowHandle_ = false;
+    bool isShowTranslate_ = false;
     bool isShowSearch_ = false;
     bool isTextFadeout_ = false;
     Dimension fadeoutWidth_;

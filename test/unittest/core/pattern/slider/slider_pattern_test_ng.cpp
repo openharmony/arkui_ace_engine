@@ -1218,9 +1218,10 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest021, TestSize.Level1)
     sliderPattern->InitTouchEvent(gestureHub);
     sliderPattern->InitPanEvent(gestureHub);
     RefPtr<EventHub> eventHub = AccessibilityManager::MakeRefPtr<EventHub>();
-    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(eventHub, FocusType::DISABLE, false);
+    RefPtr<FocusHub> focusHub = AccessibilityManager::MakeRefPtr<FocusHub>(
+        AccessibilityManager::WeakClaim(AccessibilityManager::RawPtr(eventHub)), FocusType::DISABLE, false);
     sliderPattern->InitOnKeyEvent(focusHub);
-    auto inputEventHub = eventHub->GetInputEventHub();
+    auto inputEventHub = eventHub->GetOrCreateInputEventHub();
     sliderPattern->InitMouseEvent(inputEventHub);
     EXPECT_EQ(sliderPattern->hoverEvent_, nullptr);
     EXPECT_EQ(sliderPattern->mouseEvent_, nullptr);
@@ -1735,5 +1736,120 @@ HWTEST_F(SliderPatternTestNg, SliderPatternTest023, TestSize.Level1)
     sliderPattern->isFocusActive_ = false;
     sliderPattern->HandleHoverEvent(true);
     ASSERT_TRUE(sliderPattern->sliderContentModifier_->isHovered_);
+}
+
+/**
+ * @tc.name: SliderPatternTest024
+ * @tc.desc: SliderPattern::HandleMouseEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SliderContentModifier::Parameters parameters;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+ 
+    /**
+     * @tc.steps: step2. call focusHub onBlurInternal callback.
+     * @tc.expected: step2. sliderPattern->bubbleFlag_ is false.
+     */
+    sliderPattern->bubbleFlag_ = true;
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    sliderPattern->OnModifyDone();
+    focusHub->onBlurInternal_();
+    ASSERT_FALSE(sliderPattern->bubbleFlag_);
+ 
+    /**
+     * @tc.steps: step3. Mouse on slider block.
+     * @tc.expected: step3. sliderPattern->bubbleFlag_ is true.
+     */
+    MouseInfo mouseInfo;
+    sliderPattern->blockSize_ = SizeF(MAX_WIDTH, MAX_HEIGHT);
+    sliderPattern->showTips_ = true;
+    sliderPattern->HandleMouseEvent(mouseInfo);
+    ASSERT_TRUE(sliderPattern->bubbleFlag_);
+    EXPECT_EQ(sliderPattern->sliderContentModifier_->isHovered_->Get(), true);
+ 
+    /**
+     * @tc.steps: step4. Mouse not on slider block.
+     * @tc.expected: step4. sliderPattern->bubbleFlag_ is false.
+     */
+    sliderPattern->blockSize_ = SizeF(0, 0);
+    sliderPattern->HandleMouseEvent(mouseInfo);
+    ASSERT_FALSE(sliderPattern->bubbleFlag_);
+    EXPECT_EQ(sliderPattern->sliderContentModifier_->isHovered_->Get(), false);
+}
+
+/**
+ * @tc.name: SliderPatternTest025
+ * @tc.desc: SliderPattern::HandleTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderPatternTestNg, SliderPatternTest025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    SliderContentModifier::Parameters parameters;
+    sliderPattern->sliderContentModifier_ = AceType::MakeRefPtr<SliderContentModifier>(parameters, nullptr, nullptr);
+    sliderPattern->AttachToFrameNode(frameNode);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    auto geometryNode = frameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetContentSize(SizeF(MAX_WIDTH, MAX_HEIGHT));
+ 
+    /**
+     * @tc.steps: step2. call focusHub onBlurInternal callback.
+     * @tc.expected: step2. sliderPattern->bubbleFlag_ is false.
+     */
+    sliderPattern->bubbleFlag_ = true;
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    sliderPattern->OnModifyDone();
+    focusHub->onBlurInternal_();
+    ASSERT_FALSE(sliderPattern->bubbleFlag_);
+
+    /**
+     * @tc.steps: step4. Test HandleTouchDown.
+     */
+    auto localLocation = Offset(MIN, MIN_LABEL);
+    TouchEventInfo infoDown("onTouchDown");
+    TouchLocationInfo touchDownInfo(0);
+    touchDownInfo.SetTouchType(TouchType::DOWN);
+    infoDown.AddTouchLocationInfo(std::move(touchDownInfo));
+    sliderPattern->fingerId_ = -1;
+    sliderPattern->HandleTouchEvent(infoDown);
+    sliderPattern->HandleTouchDown(localLocation, SourceType::TOUCH);
+    EXPECT_EQ(sliderPattern->axisFlag_, false);
+    EXPECT_EQ(sliderPattern->mousePressedFlag_, true);
+    EXPECT_EQ(sliderPattern->sliderContentModifier_->isPressed_->Get(), true);
+ 
+    /**
+     * @tc.steps: step4. Test HandleTouchUp.
+     */
+    TouchEventInfo infoUp("onTouchUp");
+    TouchLocationInfo touchUpInfo(1);
+    touchUpInfo.SetTouchType(TouchType::UP);
+    infoUp.AddTouchLocationInfo(std::move(touchUpInfo));
+    sliderPattern->HandleTouchEvent(infoUp);
+    sliderPattern->HandleTouchUp(localLocation, SourceType::TOUCH);
+    EXPECT_EQ(sliderPattern->mousePressedFlag_, false);
+    EXPECT_EQ(sliderPattern->sliderContentModifier_->isPressed_->Get(), false);
 }
 } // namespace OHOS::Ace::NG

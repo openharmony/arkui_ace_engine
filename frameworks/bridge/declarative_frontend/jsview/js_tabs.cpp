@@ -140,6 +140,30 @@ void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetOnTabBarClick(std::move(onTabBarClick));
 }
 
+void JSTabs::SetOnUnselected(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto unselectedHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onUnselected = [executionContext = info.GetExecutionContext(), func = std::move(unselectedHandler),
+                          node = targetNode](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onUnselected callback execute failed.");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onUnselected");
+        ACE_SCOPED_TRACE("Tabs.onUnselected index %d", tabsInfo->GetIndex());
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(*tabsInfo);
+    };
+    TabsModel::GetInstance()->SetOnUnselected(std::move(onUnselected));
+}
+
 void JSTabs::SetOnAnimationStart(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -190,6 +214,30 @@ void JSTabs::SetOnGestureSwipe(const JSCallbackInfo& info)
         func->Execute(index, info);
     };
     TabsModel::GetInstance()->SetOnGestureSwipe(std::move(onGestureSwipe));
+}
+
+void JSTabs::SetOnSelected(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto selectedHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onSelected = [executionContext = info.GetExecutionContext(), func = std::move(selectedHandler),
+                          node = targetNode](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onSelected callback execute failed.");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onSelected");
+        ACE_SCOPED_TRACE("Tabs.onSelected index %d", tabsInfo->GetIndex());
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(*tabsInfo);
+    };
+    TabsModel::GetInstance()->SetOnSelected(std::move(onSelected));
 }
 
 void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -784,6 +832,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("divider", &JSTabs::SetDivider);
     JSClass<JSTabs>::StaticMethod("onChange", &JSTabs::SetOnChange);
     JSClass<JSTabs>::StaticMethod("onTabBarClick", &JSTabs::SetOnTabBarClick);
+    JSClass<JSTabs>::StaticMethod("onUnselected", &JSTabs::SetOnUnselected);
     JSClass<JSTabs>::StaticMethod("onAnimationStart", &JSTabs::SetOnAnimationStart);
     JSClass<JSTabs>::StaticMethod("onAnimationEnd", &JSTabs::SetOnAnimationEnd);
     JSClass<JSTabs>::StaticMethod("onGestureSwipe", &JSTabs::SetOnGestureSwipe);
@@ -809,6 +858,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("barBackgroundEffect", &JSTabs::SetBarBackgroundEffect);
     JSClass<JSTabs>::StaticMethod("pageFlipMode", &JSTabs::SetPageFlipMode);
     JSClass<JSTabs>::StaticMethod("cachedMaxCount", &JSTabs::SetCachedMaxCount);
+    JSClass<JSTabs>::StaticMethod("onSelected", &JSTabs::SetOnSelected);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

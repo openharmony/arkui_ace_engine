@@ -27,11 +27,20 @@
 #include "core/components_ng/syntax/syntax_item.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t DEFAULT_ITEMS = 8;
+constexpr int32_t SWIPER_TO_ONE = 1;
+constexpr int32_t SWIPER_TO_TWO = 2;
+constexpr int32_t SWIPER_TO_THREE = 3;
+constexpr int32_t SWIPER_TO_SEVEN = 7;
+} // namespace
+
 class SwiperControllerTestNg : public SwiperTestNg {
 public:
     AssertionResult VerifyShowNext(int32_t expectIndex);
     AssertionResult VerifyShowPrevious(int32_t expectIndex);
     AssertionResult VerifyChangeIndex(int32_t targetIndex, bool useAnimation, int32_t expectIndex);
+    AssertionResult VerifyChangeIndex(int32_t targetIndex, SwiperAnimationMode mode, int32_t expectIndex);
     void CreateForEachSwiper(int32_t itemNumber = ITEM_NUMBER);
     void CreateItemsInLazyForEach(int32_t itemNumber = ITEM_NUMBER);
 };
@@ -53,6 +62,14 @@ AssertionResult SwiperControllerTestNg::VerifyShowPrevious(int32_t expectIndex)
 AssertionResult SwiperControllerTestNg::VerifyChangeIndex(int32_t targetIndex, bool useAnimation, int32_t expectIndex)
 {
     controller_->ChangeIndex(targetIndex, useAnimation);
+    FlushUITasks();
+    return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
+}
+
+AssertionResult SwiperControllerTestNg::VerifyChangeIndex(int32_t targetIndex, SwiperAnimationMode mode,
+    int32_t expectIndex)
+{
+    controller_->ChangeIndex(targetIndex, mode);
     FlushUITasks();
     return IsEqual(pattern_->GetCurrentShownIndex(), expectIndex);
 }
@@ -844,9 +861,9 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex001, TestSize.Level1)
     GetChildLayoutProperty<ButtonLayoutProperty>(frameNode_, 2)->UpdateVisibility(VisibleType::GONE);
     FlushUITasks();
 
-    VerifyChangeIndex(2, false, 3);
-    VerifyChangeIndex(5, false, 5);
-    VerifyChangeIndex(2, false, 1);
+    EXPECT_TRUE(VerifyChangeIndex(2, false, 3));
+    EXPECT_TRUE(VerifyChangeIndex(5, false, 5));
+    EXPECT_TRUE(VerifyChangeIndex(2, false, 1));
 }
 
 /**
@@ -864,7 +881,7 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex002, TestSize.Level1)
     CreateSwiperItems(10);
     CreateSwiperDone();
 
-    VerifyChangeIndex(9, false, 9);
+    EXPECT_TRUE(VerifyChangeIndex(9, false, 9));
 }
 
 /**
@@ -879,8 +896,30 @@ HWTEST_F(SwiperControllerTestNg, ChangeIndex003, TestSize.Level1)
     CreateSwiperItems(8);
     CreateSwiperDone();
 
-    VerifyChangeIndex(3, true, 3);
-    VerifyChangeIndex(1, false, 1);
+    EXPECT_TRUE(VerifyChangeIndex(3, true, 3));
+    EXPECT_TRUE(VerifyChangeIndex(1, false, 1));
+}
+
+/**
+ * @tc.name: ChangeIndex004
+ * @tc.desc: Test ChangeIndex with SwiperAnimationMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, ChangeIndex004, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    model.SetLoop(false);
+    CreateSwiperItems(DEFAULT_ITEMS);
+    CreateSwiperDone();
+
+    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_THREE, SwiperAnimationMode::NO_ANIMATION, SWIPER_TO_THREE));
+    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_ONE, SwiperAnimationMode::NO_ANIMATION, SWIPER_TO_ONE));
+    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_THREE, SwiperAnimationMode::DEFAULT_ANIMATION, SWIPER_TO_THREE));
+    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_ONE, SwiperAnimationMode::DEFAULT_ANIMATION, SWIPER_TO_ONE));
+    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_SEVEN, SwiperAnimationMode::FAST_ANIMATION, SWIPER_TO_SEVEN));
+    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_ONE, SwiperAnimationMode::FAST_ANIMATION, SWIPER_TO_ONE));
+    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_TWO, SwiperAnimationMode::FAST_ANIMATION, SWIPER_TO_TWO));
+    EXPECT_TRUE(VerifyChangeIndex(SWIPER_TO_ONE, SwiperAnimationMode::FAST_ANIMATION, SWIPER_TO_ONE));
 }
 
 /**

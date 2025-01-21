@@ -136,6 +136,18 @@ OptionalSizeF CreateIdealSizeByPercentRef(const LayoutConstraintF& layoutConstra
     bool needToConstrain = false, const std::unique_ptr<MeasureProperty>& rawConstraint = nullptr);
 
 /**
+ * @brief Constrain node IdealSize by LayoutPolicy.
+ *
+ * @param layoutConstraint the constraint of current node.
+ * @param widthLayoutPolicy the LayoutPolicy of width.
+ * @param heightLayoutPolicy the LayoutPolicy of height.
+ * @param axis the axis of this node.
+ * @return SizeF the node size info.
+ */
+OptionalSizeF ConstrainIdealSizeByLayoutPolicy(const LayoutConstraintF& layoutConstraint,
+    uint8_t widthLayoutPolicy, uint8_t heightLayoutPolicy, Axis axis);
+
+/**
  * @brief Create max size for children which is parent's max size minus margin and padding.
  *
  * @param size the max size of parent node.

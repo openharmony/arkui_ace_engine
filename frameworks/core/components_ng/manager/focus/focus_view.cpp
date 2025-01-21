@@ -332,7 +332,7 @@ bool FocusView::RequestDefaultFocus()
     }
     if (isViewRootScopeFocused_ && IsViewRootScopeHasLastFocus()) {
         SetIsViewRootScopeFocused(true);
-        auto ret = viewRootScope->RequestFocusImmediatelyInner();
+        auto ret = viewRootScope->RequestFocusImmediatelyInner(FocusReason::VIEW_SWITCH);
         // set neverShown_ false when request focus on focus view success
         neverShown_ &= !ret;
         TAG_LOGI(AceLogTag::ACE_FOCUS, "Request rootScope: %{public}s/%{public}d ret: %{public}d.",
@@ -347,7 +347,7 @@ bool FocusView::RequestDefaultFocus()
         focusViewHub->InheritFocus();
         ret = true;
     } else {
-        ret = lastViewFocusNode->RequestFocusImmediatelyInner();
+        ret = lastViewFocusNode->RequestFocusImmediatelyInner(FocusReason::VIEW_SWITCH);
     }
     // set neverShown_ false when request focus on focus view success
     neverShown_ &= !ret;

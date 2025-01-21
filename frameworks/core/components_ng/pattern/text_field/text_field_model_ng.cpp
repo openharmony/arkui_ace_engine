@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -209,7 +209,7 @@ void TextFieldModelNG::ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& 
     CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
-    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
     CHECK_NULL_VOID(textFieldTheme);
     auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(textfieldPaintProperty);
@@ -546,7 +546,7 @@ void TextFieldModelNG::SetOnSubmit(std::function<void(int32_t, NG::TextFieldComm
     eventHub->SetOnSubmit(std::move(func));
 }
 
-void TextFieldModelNG::SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func)
+void TextFieldModelNG::SetOnChange(std::function<void(const ChangeValueInfo&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -749,7 +749,7 @@ void TextFieldModelNG::SetBackgroundColor(const Color& color, bool tmp)
         CHECK_NULL_VOID(pipeline);
         auto themeManager = pipeline->GetThemeManager();
         CHECK_NULL_VOID(themeManager);
-        auto theme = themeManager->GetTheme<TextFieldTheme>();
+        auto theme = themeManager->GetTheme<TextFieldTheme>(frameNode->GetThemeScopeId());
         CHECK_NULL_VOID(theme);
         backgroundColor = theme->GetBgColor();
     }
@@ -833,6 +833,13 @@ void TextFieldModelNG::SetDefaultPadding()
 void TextFieldModelNG::SetHoverEffect(HoverEffectType hoverEffect)
 {
     NG::ViewAbstract::SetHoverEffect(hoverEffect);
+}
+
+void TextFieldModelNG::SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillChangeEvent(std::move(func));
 }
 
 void TextFieldModelNG::SetOnChangeEvent(std::function<void(const std::u16string&)>&& func)
@@ -943,6 +950,14 @@ void TextFieldModelNG::SetIsShowCancelButton(bool isShowCancelButton)
 void TextFieldModelNG::SetSelectAllValue(bool isSelectAllValue)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectAllValue, isSelectAllValue);
+}
+
+void TextFieldModelNG::SetKeyboardAppearance(KeyboardAppearance value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->SetKeyboardAppearance(value);
 }
 
 void TextFieldModelNG::SetLetterSpacing(const Dimension& value)
@@ -1400,8 +1415,15 @@ void TextFieldModelNG::SetCounterType(FrameNode* frameNode, int32_t value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, value, frameNode);
 }
 
-void TextFieldModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::u16string&,
-    PreviewText&)>&& func)
+void TextFieldModelNG::SetOnWillChangeEvent(FrameNode* frameNode, std::function<bool(const ChangeValueInfo&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnWillChangeEvent(std::move(func));
+}
+
+void TextFieldModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const ChangeValueInfo&)>&& func)
 {
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
@@ -1821,6 +1843,22 @@ bool TextFieldModelNG::GetBlurOnSubmit(FrameNode* frameNode)
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, true);
     return pattern->GetBlurOnSubmit();
+}
+
+void TextFieldModelNG::SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetKeyboardAppearance(value);
+}
+
+int32_t TextFieldModelNG::GetKeyboardAppearance(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, false);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return static_cast<int32_t>(pattern->GetKeyboardAppearance());
 }
 
 void TextFieldModelNG::SetOnEditChange(FrameNode* frameNode, std::function<void(bool)>&& func)

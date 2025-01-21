@@ -195,6 +195,23 @@ class ImageAnimatorIterationsModeModifier extends ModifierWithKey<number> {
   }
 }
 
+class ImageAnimatorAutoMonitorInvisibleAreaModeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('autoMonitorInvisibleAreaMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().imageAnimator.setAutoMonitorInvisibleAreaMode(node, false);
+    } else {
+      getUINativeModule().imageAnimator.setAutoMonitorInvisibleAreaMode(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return this.stageValue !== this.value;
+  }
+}
+
 class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<ImageAnimatorAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
     super(nativePtr, classType);
@@ -235,6 +252,11 @@ class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<Ima
   iterations(value: number): ImageAnimatorAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorIterationsModeModifier.identity,
       ImageAnimatorIterationsModeModifier, value);
+    return this;
+  }
+  autoMonitorInvisibleAreaMode(value: boolean): ImageAnimatorAttribute {
+    modifierWithKey(this._modifiersWithKeys, ImageAnimatorAutoMonitorInvisibleAreaModeModifier.identity,
+      ImageAnimatorAutoMonitorInvisibleAreaModeModifier, value);
     return this;
   }
   onStart(event: () => void): ImageAnimatorAttribute {

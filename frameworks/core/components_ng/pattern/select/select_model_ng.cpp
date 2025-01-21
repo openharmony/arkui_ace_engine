@@ -777,4 +777,12 @@ void SelectModelNG::SetLayoutDirection(TextDirection value)
     CHECK_NULL_VOID(pattern);
     pattern->SetLayoutDirection(value);
 }
+
+void SelectModelNG::SetLayoutDirection(FrameNode* frameNode, TextDirection value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetLayoutDirection(value);
+}
 } // namespace OHOS::Ace::NG

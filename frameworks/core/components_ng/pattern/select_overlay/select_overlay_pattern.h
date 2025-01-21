@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_content_modifier.h"
+#include "core/components_ng/pattern/select_overlay/select_overlay_event_hub.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_layout_algorithm.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_modifier.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_paint_method.h"
@@ -207,6 +208,22 @@ public:
     }
     void OnColorConfigurationUpdate() override;
 
+    RefPtr<EventHub> CreateEventHub() override
+    {
+        return MakeRefPtr<SelectOverlayEventHub>();
+    }
+    bool GetIsMenuShowInSubWindow() const
+    {
+        return isMenuShowInSubWindow_;
+    }
+
+    void SetIsMenuShowInSubWindow(bool isMenuShowInSubWindow)
+    {
+        isMenuShowInSubWindow_ = isMenuShowInSubWindow;
+    }
+
+    void DeleteHotAreas();
+
 protected:
     virtual void CheckHandleReverse();
     virtual void UpdateHandleHotZone();
@@ -243,6 +260,7 @@ private:
     void SetSelectMenuHeight();
     void SetContentModifierBounds(const RefPtr<SelectOverlayContentModifier>& modifier);
     void SwitchHandleToOverlayMode(bool afterRender);
+    void SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
 
     RefPtr<TouchEventImpl> touchEvent_;
 
@@ -272,6 +290,8 @@ private:
 
     bool closedByGlobalTouchEvent_ = false;
     SelectOverlayMode overlayMode_ = SelectOverlayMode::ALL;
+    // Used to identify whether the menu is actually displayed in the subwindow.
+    bool isMenuShowInSubWindow_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SelectOverlayPattern);
 };

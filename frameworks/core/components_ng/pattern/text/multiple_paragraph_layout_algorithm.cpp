@@ -57,6 +57,17 @@ float GetContentOffsetY(LayoutWrapper* layoutWrapper)
 void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle)
 {
+    bool needRemain = false;
+    ConstructTextStyles(contentConstraint, layoutWrapper, textStyle, needRemain);
+}
+
+void MultipleParagraphLayoutAlgorithm::ConstructTextStyles(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle, bool& needRemain)
+{
+    if (Negative(contentConstraint.maxSize.Width()) || Negative(contentConstraint.maxSize.Height())) {
+        needRemain = true;
+        return;
+    }
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto pipeline = frameNode->GetContext();
@@ -227,6 +238,7 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
         auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
         CHECK_NULL_VOID(modifier);
         modifier->SetFontReady(true);
+        TAG_LOGI(AceLogTag::ACE_TEXT, "FontRegisterCallback callback id:%{public}d", frameNode->GetId());
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->OnPropertyChangeMeasure();

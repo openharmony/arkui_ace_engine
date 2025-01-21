@@ -30,6 +30,7 @@ public:
     static RefPtr<SvgNode> Create();
 
     RSRecordingPath AsPath(const Size& viewPort) const override;
+    RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule) override;
 
     Size GetSize() const;
 

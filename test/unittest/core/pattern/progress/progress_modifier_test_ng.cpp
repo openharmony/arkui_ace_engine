@@ -390,10 +390,12 @@ HWTEST_F(ProgressModifierTestNg, ProgressPaintMethod002, TestSize.Level1)
     paintProperty_->UpdateBorderWidth(2.0_vp);
     SizeF progressContentSize(300.0f, 50.0f);
     progressModifier->SetContentSize(progressContentSize);
+    EXPECT_EQ(progressModifier->contentSize_->Get(), progressContentSize);
     progressPaintMethod.UpdateContentModifier(paintWrapper);
 
     SizeF progressContentSize1(50.0f, 300.0f);
     progressModifier->SetContentSize(progressContentSize1);
+    EXPECT_EQ(progressModifier->contentSize_->Get(), progressContentSize1);
     progressPaintMethod.UpdateContentModifier(paintWrapper);
 
     auto getModifier = progressPaintMethod.GetContentModifier(paintWrapper);
