@@ -57,6 +57,7 @@
 #include "core/image/image_source_info.h"
 
 #include "ace_engine_types.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/generated/converter_generated.h"
 #include "converter_union.h"
 
@@ -310,10 +311,14 @@ namespace Converter {
     }
 
     template<>
-    inline ImageSourceInfo Convert(const Ark_PixelMap& value)
+    inline void AssignCast(std::optional<ImageSourceInfo>& dst, const Ark_PixelMap& value)
     {
-        LOGE("Convert [Ark_PixelMap] to [ImageSourceInfo] is not supported");
-        return ImageSourceInfo();
+        auto pixelMapPeer = reinterpret_cast<PixelMapPeer*>(value.ptr);
+        if (pixelMapPeer) {
+            dst = ImageSourceInfo(pixelMapPeer->pixelMap);
+        } else {
+            LOGE("Invalid peer value at Ark_PixelMap");
+        }
     }
 
     template<>

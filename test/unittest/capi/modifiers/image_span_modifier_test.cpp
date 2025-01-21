@@ -20,6 +20,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/components_ng/pattern/image/image_event_hub.h"
+#include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "arkoala_api_generated.h"
 
 using namespace testing;
@@ -27,12 +28,141 @@ using namespace testing::ext;
 
 namespace OHOS::Ace::NG {
 
+namespace  {
+    constexpr auto ATTRIBUTE_SRC_NAME = "src";
+    constexpr auto ATTRIBUTE_SRC_DEFAULT_VALUE = "";
+    constexpr auto ATTRIBUTE_RAWSRC_NAME = "rawSrc";
+    constexpr auto ATTRIBUTE_RAWSRC_DEFAULT_VALUE = "";
+    const auto TEST_VALUE = "test";
+    const std::string IMAGES_OK_STR = "img_public_ok";
+} // namespace
+
 class ImageSpanModifierTest : public ModifierTestBase<
     GENERATED_ArkUIImageSpanModifier,
     &GENERATED_ArkUINodeModifiers::getImageSpanModifier,
     GENERATED_ARKUI_IMAGE_SPAN
 > {
+public:
+    static void SetUpTestCase()
+    {
+        ModifierTestBase::SetUpTestCase();
+        AddResource(IMAGES_OK_STR, TEST_VALUE);
+    }
+    RefPtr<PixelMap> CreatePixelMap(std::string& src);
 };
+
+RefPtr<PixelMap> ImageSpanModifierTest::CreatePixelMap(std::string& src)
+{
+    void* ptr = reinterpret_cast<void*>(src.data());
+    return PixelMap::CreatePixelMap(ptr);
+}
+
+/*
+ * @tc.name: setImageSpanOptionsTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_SRC_DEFAULT_VALUE) << "Default value for attribute 'src'";
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RAWSRC_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_RAWSRC_DEFAULT_VALUE) << "Default value for attribute 'rawSrc'";
+}
+
+/*
+ * @tc.name: setImageSpanOptionsTestValidStrValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidStrValues, TestSize.Level1)
+{
+    std::string strResult;
+    std::string resultStr;
+    std::string expectedStr = TEST_VALUE;
+    auto subvalue = Converter::ArkUnion<Ark_ResourceStr, Ark_String>(Converter::ArkValue<Ark_String>(TEST_VALUE));
+    auto options = Converter::ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(subvalue);
+    modifier_->setImageSpanOptions(node_, &options);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
+    EXPECT_EQ(resultStr, expectedStr);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RAWSRC_NAME);
+    EXPECT_EQ(resultStr, expectedStr);
+}
+
+/*
+ * @tc.name: setImageSpanOptionsTestValidResValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidResValues, TestSize.Level1)
+{
+    std::string resultStr;
+    std::string expectedStr = TEST_VALUE;
+    auto subvalue = Converter::ArkUnion<Ark_ResourceStr, Ark_Resource>(
+        CreateResource(IMAGES_OK_STR.c_str(), Converter::ResourceType::STRING));
+    auto options = Converter::ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_ResourceStr>(subvalue);
+    modifier_->setImageSpanOptions(node_, &options);
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SRC_NAME);
+    EXPECT_EQ(resultStr, expectedStr);
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_RAWSRC_NAME);
+    EXPECT_EQ(resultStr, expectedStr);
+}
+
+/*
+ * @tc.name: setImageSpanOptionsTestValidPixMapValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageSpanModifierTest, setImageSpanOptionsTestValidPixMapValues, TestSize.Level1)
+{
+    std::string resultStr;
+    std::string imagesSrc = TEST_VALUE;
+    RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
+    PixelMapPeer pixelMapPeer;
+    pixelMapPeer.pixelMap = pixelMap;
+    Ark_Materialized subvalue { .ptr = &pixelMapPeer };
+    auto options = Converter::ArkUnion<Ark_Union_ResourceStr_PixelMap, Ark_PixelMap>(subvalue);
+    modifier_->setImageSpanOptions(node_, &options);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto imageProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageProperty, nullptr);
+    auto imgInfo = imageProperty->GetImageSourceInfo();
+    ASSERT_TRUE(imgInfo.has_value());
+    EXPECT_EQ(imgInfo.value().GetPixmap(), pixelMap);
+}
+
+/*
+ * @tc.name: setAltTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageSpanModifierTest, setAltTestValidValues, TestSize.Level1)
+{
+    std::string resultStr;
+    std::string imagesSrc = TEST_VALUE;
+    RefPtr<PixelMap> pixelMap = CreatePixelMap(imagesSrc);
+    PixelMapPeer pixelMapPeer;
+    pixelMapPeer.pixelMap = pixelMap;
+    Ark_Materialized subvalue { .ptr = &pixelMapPeer };
+    auto value = Converter::ArkValue<Ark_PixelMap>(subvalue);
+    modifier_->setAlt(node_, &value);
+
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_NE(frameNode, nullptr);
+    auto imageProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageProperty, nullptr);
+    auto imgInfo = imageProperty->GetAlt();
+    ASSERT_TRUE(imgInfo.has_value());
+    EXPECT_EQ(imgInfo.value().GetPixmap(), pixelMap);
+}
 
 const std::vector<LoadImageSuccessEvent> COMPLETE_EVENT_TEST_PLAN = {
     { LoadImageSuccessEvent(100, 100, 100, 100, 1, 100, 100, 100, 100) },
