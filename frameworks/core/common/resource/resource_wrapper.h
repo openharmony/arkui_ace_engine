@@ -287,6 +287,16 @@ public:
         return themeConstants_->CloseRawFileDescription(rawfileName);
     }
 
+    bool GetRawFD(const std::string& rawfileName, RawfileDescription& rawfileDescription) const
+    {
+        if (SystemProperties::GetResourceDecoupling()) {
+            CHECK_NULL_RETURN(resourceAdapter_, false);
+            return resourceAdapter_->GetRawFD(rawfileName, rawfileDescription);
+        }
+        CHECK_NULL_RETURN(themeConstants_, false);
+        return themeConstants_->GetRawFD(rawfileName, rawfileDescription);
+    }
+
     bool GetMediaById(const int32_t& resId, std::string& mediaPath) const
     {
         if (SystemProperties::GetResourceDecoupling()) {
