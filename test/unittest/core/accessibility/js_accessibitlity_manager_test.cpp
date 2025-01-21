@@ -380,7 +380,7 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager008, TestSize.Level1)
     }
     
     /**
-     * @tc.steps: step2. test TransferAccessibilityAsyncEvent with register true
+     * @tc.steps: step3. test TransferAccessibilityAsyncEvent with register true
      */
     int64_t uiExtensionOffset = 1000;
     ret = jsAccessibilityManager->TransferAccessibilityAsyncEvent(eventInfo, uiExtensionOffset);
@@ -393,13 +393,13 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager008, TestSize.Level1)
     }
 
     /**
-     * @tc.steps: step3. test SendAccessibilitySyncEvent with register false
+     * @tc.steps: step4. test SendAccessibilitySyncEvent with register false
      */
     jsAccessibilityManager->Register(false);
     ret = jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
     EXPECT_EQ(ret, false);
     /**
-     * @tc.steps: step4. test TransferAccessibilityAsyncEvent with register false
+     * @tc.steps: step5. test TransferAccessibilityAsyncEvent with register false
      */
     ret = jsAccessibilityManager->TransferAccessibilityAsyncEvent(eventInfo, uiExtensionOffset);
     EXPECT_EQ(ret, false);
