@@ -551,6 +551,7 @@ private:
     std::string GetRangeStr() const;
     std::string GetOptionsMultiStr() const;
     std::string GetOptionsMultiStrInternal() const;
+    std::string GetColumnWidthsStr() const;
     std::string GetOptionsCascadeStr(
         const std::vector<NG::TextCascadePickerOptions>& options) const;
     bool ChangeCurrentOptionValue(NG::TextCascadePickerOptions& option,
