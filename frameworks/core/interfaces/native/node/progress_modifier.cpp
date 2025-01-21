@@ -424,8 +424,11 @@ void GetProgressLinearStyle(ArkUINodeHandle node, ArkUIProgressLinearStyleOption
 
     option.scanEffectEnable = paintProperty->GetEnableLinearScanEffect().value_or(false);
     option.smoothEffectEnable = paintProperty->GetEnableSmoothEffect().value_or(true);
-    option.strokeWidth = layoutProperty->GetStrokeWidth().value_or(Dimension(4.0_vp)).Value();
-    option.strokeRadius = paintProperty->GetStrokeRadiusValue(Dimension(2.0_vp)).Value();
+    auto strokeWidth = layoutProperty->GetStrokeWidth().value_or(Dimension(4.0_vp)).Value();
+    option.strokeWidth = strokeWidth;
+    auto strokeRadius = paintProperty->GetStrokeRadiusValue(Dimension(strokeWidth / 2.0f, DimensionUnit::VP)).Value();
+    strokeRadius = std::min(strokeWidth / 2.0f, strokeRadius);
+    option.strokeRadius = strokeRadius;
 }
 
 void SetProgressInitialize(
