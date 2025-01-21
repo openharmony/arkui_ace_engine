@@ -426,8 +426,8 @@ private:
     uint64_t GetSystemRealTime();
 
     // Page lifecycle
-    void OnPageShow();
-    void OnPageHide();
+    void OnPageShow(bool isFromWindow = false);
+    void OnPageHide(bool isFromWindow = false);
     void OnPageDestroy(int32_t pageId);
 
     int32_t GetRunningPageId() const;
