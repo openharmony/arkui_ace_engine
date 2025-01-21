@@ -2448,7 +2448,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         CHECK_NULL_VOID(ngPipeline);
         auto uiExtManager = ngPipeline->GetUIExtensionManager();
         CHECK_NULL_VOID(uiExtManager);
-        uiExtManager->SendPageModeToUEA(ngPipeline);
+        uiExtManager->SendPageModeRequestToHost(ngPipeline);
     }
 }
 
