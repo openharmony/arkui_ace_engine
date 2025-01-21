@@ -238,6 +238,7 @@ void MultipleParagraphLayoutAlgorithm::FontRegisterCallback(
         auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
         CHECK_NULL_VOID(modifier);
         modifier->SetFontReady(true);
+        TAG_LOGI(AceLogTag::ACE_TEXT, "FontRegisterCallback callback id:%{public}d", frameNode->GetId());
         auto layoutProperty = frameNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->OnPropertyChangeMeasure();

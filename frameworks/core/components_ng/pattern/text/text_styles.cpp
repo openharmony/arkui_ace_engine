@@ -115,6 +115,18 @@ std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& v
     }
     return fontFamily;
 }
+std::string GetFontFamilyInJson(const std::vector<std::string>& fontFamilyVector)
+{
+    std::string fontFamily;
+    if (fontFamilyVector.empty()) {
+        return fontFamily;
+    }
+    fontFamily = fontFamilyVector.at(0);
+    for (uint32_t i = 1; i < fontFamilyVector.size(); ++i) {
+        fontFamily += ',' + fontFamilyVector.at(i);
+    }
+    return fontFamily;
+}
 std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& value)
 {
     std::string text;

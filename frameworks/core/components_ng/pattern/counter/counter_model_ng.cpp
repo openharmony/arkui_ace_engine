@@ -89,7 +89,6 @@ RefPtr<FrameNode> CounterModelNG::CreateButtonChild(
     if (textLayoutProperty) {
         textLayoutProperty->UpdateContent(symbol);
         textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
-        textLayoutProperty->UpdateTextColorFlagByUser(false);
     }
     textNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(counterTheme->GetControlWidth()), CalcLength(counterTheme->GetHeight())));
