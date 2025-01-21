@@ -150,6 +150,7 @@ struct ArkUITouchPoint {
     ArkUI_Float32 rawX;
     ArkUI_Float32 rawY;
     ArkUI_Int32 toolType;
+    ArkUI_Int32 operatingHand;
 };
 
 struct ArkUIOffsetType {
