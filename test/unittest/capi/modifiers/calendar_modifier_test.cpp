@@ -47,10 +47,64 @@ constexpr auto ATTRIBUTE_SHOW_HOLIDAY_NAME = "showHoliday";
 constexpr auto ATTRIBUTE_START_OF_WEEK_NAME = "startOfWeek";
 constexpr auto ATTRIBUTE_OFF_DAYS_NAME = "offDays";
 
+constexpr auto ATTRIBUTE_DAY_COLOR_NAME = "dayColor";
+constexpr auto ATTRIBUTE_LUNAR_COLOR_NAME = "lunarColor";
+constexpr auto ATTRIBUTE_OFF_MARK_LUNAR_COLOR_NAME = "markLunarColor";
+constexpr auto ATTRIBUTE_DAY_FONT_SIZE_NAME = "dayFontSize";
+constexpr auto ATTRIBUTE_LUNAR_DAY_FONT_SIZE_NAME = "lunarDayFontSize";
+constexpr auto ATTRIBUTE_DAY_HEIGHT_NAME = "dayHeight";
+constexpr auto ATTRIBUTE_DAY_WIDTH_NAME = "dayWidth";
+constexpr auto ATTRIBUTE_GREGORIAN_CALENDAR_HEIGHT_NAME = "gregorianCalendarHeight";
+constexpr auto ATTRIBUTE_DAY_Y_AXIS_OFFSET_NAME = "dayYAxisOffset";
+constexpr auto ATTRIBUTE_LUNAR_DAY_Y_AXIS_OFFSET_NAME = "lunarDayYAxisOffset";
+constexpr auto ATTRIBUTE_UNDERSCORE_X_AXIS_OFFSET_NAME = "underscoreXAxisOffset";
+constexpr auto ATTRIBUTE_UNDERSCORE_Y_AXIS_OFFSET_NAME = "underscoreYAxisOffset";
+constexpr auto ATTRIBUTE_SCHEDULE_MARKER_X_AXIS_OFFSET_NAME = "scheduleMarkerXAxisOffset";
+constexpr auto ATTRIBUTE_SCHEDULE_MARKER_Y_AXIS_OFFSET_NAME = "scheduleMarkerYAxisOffset";
+constexpr auto ATTRIBUTE_COL_SPACE_NAME = "colSpace";
+constexpr auto ATTRIBUTE_DAILY_FIVE_ROW_SPACE_NAME = "dailyFiveRowSpace";
+constexpr auto ATTRIBUTE_DAILY_SIX_ROW_SPACE_NAME = "dailySixRowSpace";
+constexpr auto ATTRIBUTE_LUNAR_HEIGHT_NAME = "lunarHeight";
+constexpr auto ATTRIBUTE_UNDERSCORE_WIDTH_NAME = "underscoreWidth";
+constexpr auto ATTRIBUTE_UNDERSCORE_LENGTH_NAME = "underscoreLength";
+constexpr auto ATTRIBUTE_SCEDULE_MARKER_RADIUS_NAME = "scheduleMarkerRadius";
+constexpr auto ATTRIBUTE_BOUNDARY_ROW_OFFSET_NAME = "boundaryRowOffset";
+constexpr auto ATTRIBUTE_BOUNDARY_COL_OFFSET_NAME = "boundaryColOffset";
+
+constexpr auto ATTRIBUTE_NON_CURRENT_MONTH_DAY_COLOR_NAME = "nonCurrentMonthDayColor";
+constexpr auto ATTRIBUTE_NON_CURRENT_MONTH_LUNAR_COLOR_NAME = "nonCurrentMonthLunarColor";
+constexpr auto ATTRIBUTE_NON_CURRENT_MONTH_WORK_DAY_MARK_COLOR_NAME = "nonCurrentMonthWorkDayMarkColor";
+constexpr auto ATTRIBUTE_NON_CURRENT_MONTH_OFF_DAY_MARK_COLOR_NAME = "nonCurrentMonthOffDayMarkColor";
+
+constexpr auto ATTRIBUTE_FOCUSED_DAY_COLOR_NAME = "focusedDayColor";
+constexpr auto ATTRIBUTE_FOCUSED_LUNAR_COLOR_NAME = "focusedLunarColor";
+constexpr auto ATTRIBUTE_FOCUSED_AREA_BACKGROUND_COLOR_NAME = "focusedAreaBackgroundColor";
+constexpr auto ATTRIBUTE_FOCUSED_AREA_RADIUS_COLOR_NAME = "focusedAreaRadius";
+
+constexpr auto ATTRIBUTE_WEEK_COLOR_NAME = "weekColor";
+constexpr auto ATTRIBUTE_WEEKEND_DAY_COLOR_NAME = "weekendDayColor";
+constexpr auto ATTRIBUTE_WEEKEND_LUNAR_COLOR_NAME = "weekendLunarColor";
+constexpr auto ATTRIBUTE_WEEK_FONT_SIZE_NAME = "weekFontSize";
+constexpr auto ATTRIBUTE_WEEK_HEIGHT_NAME = "weekHeight";
+constexpr auto ATTRIBUTE_WEEK_WIDTH_NAME = "weekWidth";
+constexpr auto ATTRIBUTE_WEEK_AND_DAY_ROW_SPACE_NAME = "weekAndDayRowSpace";
+
+constexpr auto ATTRIBUTE_WORK_DAY_MARK_COLOR_NAME = "workDayMarkColor";
+constexpr auto ATTRIBUTE_OFF_DAY_MARK_COLOR_NAME = "offDayMarkColor";
+constexpr auto ATTRIBUTE_WORK_DAY_MARK_SIZE_NAME = "workDayMarkSize";
+constexpr auto ATTRIBUTE_OFF_DAY_MARK_SIZE_NAME = "offDayMarkSize";
+constexpr auto ATTRIBUTE_WORK_STATE_WIDTH_NAME = "workStateWidth";
+constexpr auto ATTRIBUTE_WORK_STATE_HORIZONTAL_MOVING_DISTANCE_NAME = "workStateHorizontalMovingDistance";
+constexpr auto ATTRIBUTE_WORK_STATE_VERTICAL_MOVING_DISTANCE_NAME = "workStateVerticalMovingDistance";
+
 constexpr auto ATTRIBUTE_SHOW_LUNAR_DEFAULT_VALUE = "false";
 constexpr auto ATTRIBUTE_SHOW_HOLIDAY_DEFAULT_VALUE = "false";
 constexpr auto ATTRIBUTE_START_OF_WEEK_DEFAULT_VALUE = "Week.Mon";
 constexpr auto ATTRIBUTE_OF_DAYS_DEFAULT_VALUE = "5,6";
+constexpr auto RESULT_COLOR_WHITE = "#FFFFFFFF";
+constexpr auto RESULT_COLOR_BLACK = "#FF000000";
+constexpr auto RESULT_COLOR_BLUE = "#FF0000FF";
+constexpr auto RESULT_COLOR_BROWN = "#FFA52A2A";
 
 class MockCalendarController : public OHOS::Ace::NG::CalendarControllerNg {
 public:
@@ -147,9 +201,9 @@ const std::vector<std::tuple<std::string, Ark_Axis>> testFixtureIntAxisInvalidVa
     { "static_cast<Ark_Axis>(INT_MAX)", Converter::ArkValue<Ark_Axis>(static_cast<Ark_Axis>(INT_MAX)) },
 };
 
-const std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureNumberValidValues = {
-    { "1", Converter::ArkValue<Ark_Number>(0), "0"},
-    { "0", Converter::ArkValue<Ark_Number>(1), "1" },
+const std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureOffDaysValidValues = {
+    { "1", Converter::ArkValue<Ark_Number>(1), "0"},
+    { "2", Converter::ArkValue<Ark_Number>(2), "1" },
 };
 
 const std::vector<std::tuple<std::string, Ark_Number, std::string>> testFixtureStartOfWeekValidValues = {
@@ -450,6 +504,43 @@ HWTEST_F(CalendarModifierTest, offDaysTestDefaultValues, TestSize.Level1)
 }
 
 /*
+ * @tc.name: offDaysTestNeedSlideValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, offDaysTestValidValues, TestSize.Level1)
+{
+    Ark_Number initValueOffDays;
+    initValueOffDays = std::get<1>(testFixtureOffDaysValidValues[0]);
+    auto checkValue = [this, &initValueOffDays](
+                          const std::string& input, const  Ark_Number& value, const std::string& expectedStr) {
+        Ark_Number inputValueOffDays = initValueOffDays;
+        inputValueOffDays = value;
+        auto frameNode = reinterpret_cast<FrameNode*>(node_);
+        ASSERT_FALSE(frameNode->GetChildren().empty());
+        auto swiperNode = frameNode->GetChildren().front();
+        ASSERT_NE(swiperNode, nullptr);
+        modifier_->setOffDays(node_, &inputValueOffDays);
+        ASSERT_FALSE(swiperNode->GetChildren().empty());
+        for (const auto& calendarNode : swiperNode->GetChildren()) {
+            auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+            ASSERT_NE(calendarFrameNode, nullptr);
+            auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+            ASSERT_NE(calendarPaintProperty, nullptr);
+            const InspectorFilter inspector;
+            auto jsonVal = JsonUtil::Create(true);
+            calendarPaintProperty->ToJsonValue(jsonVal, inspector);
+            auto resultStr = GetAttrValue<std::string>(jsonVal, ATTRIBUTE_OFF_DAYS_NAME);
+            EXPECT_EQ(resultStr, expectedStr)
+                 << "Input value is: " << input << ", method: setOffDays, attribute: offDays";
+        }
+    };
+    for (auto& [input, value, expected] : testFixtureOffDaysValidValues) {
+        checkValue(input, value, expected);
+    }
+}
+
+/*
  * @tc.name: setDirectionTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -518,6 +609,319 @@ HWTEST_F(CalendarModifierTest, setDirectionTestDirectionInvalidValues, TestSize.
 
     for (auto& [input, value] : testFixtureIntAxisInvalidValues) {
         checkValue(input, value);
+    }
+}
+
+/*
+ * @tc.name: currentDayStyleTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, currentDayStyleTest, TestSize.Level1)
+{
+    Ark_CurrentDayStyle initValue;
+    initValue.dayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
+    initValue.lunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK);
+    initValue.markLunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE);
+    initValue.dayFontSize = Converter::ArkValue<Opt_Number>(0);
+    initValue.lunarDayFontSize = Converter::ArkValue<Opt_Number>(1);
+    initValue.dayHeight = Converter::ArkValue<Opt_Number>(2);
+    initValue.dayWidth = Converter::ArkValue<Opt_Number>(3);
+    initValue.gregorianCalendarHeight = Converter::ArkValue<Opt_Number>(4);
+    initValue.dayYAxisOffset = Converter::ArkValue<Opt_Number>(5);
+    initValue.lunarDayYAxisOffset = Converter::ArkValue<Opt_Number>(6);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
+    auto swiperNode = frameNode->GetChildren().front();
+    ASSERT_NE(swiperNode, nullptr);
+    modifier_->setCurrentDayStyle(node_, &initValue);
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
+        auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
+        auto jsonValue = JsonUtil::Create(true);
+        calendarPaintProperty->ToJsonValue(jsonValue, inspector);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAY_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_WHITE);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LUNAR_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_BLACK);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OFF_MARK_LUNAR_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_BLUE);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAY_FONT_SIZE_NAME);
+        EXPECT_EQ(resultStr, "0.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LUNAR_DAY_FONT_SIZE_NAME);
+        EXPECT_EQ(resultStr, "1.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAY_HEIGHT_NAME);
+        EXPECT_EQ(resultStr, "2.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAY_WIDTH_NAME);
+        EXPECT_EQ(resultStr, "3.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_GREGORIAN_CALENDAR_HEIGHT_NAME);
+        EXPECT_EQ(resultStr, "4.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAY_Y_AXIS_OFFSET_NAME);
+        EXPECT_EQ(resultStr, "5.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LUNAR_DAY_Y_AXIS_OFFSET_NAME);
+        EXPECT_EQ(resultStr, "6.00vp");
+    }
+}
+
+/*
+ * @tc.name: currentDayStyleTest2
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, currentDayStyleTest2, TestSize.Level1)
+{
+    Ark_CurrentDayStyle initValue;
+    initValue.underscoreXAxisOffset = Converter::ArkValue<Opt_Number>(7);
+    initValue.underscoreYAxisOffset = Converter::ArkValue<Opt_Number>(8);
+    initValue.scheduleMarkerXAxisOffset = Converter::ArkValue<Opt_Number>(9);
+    initValue.scheduleMarkerYAxisOffset = Converter::ArkValue<Opt_Number>(10);
+    initValue.colSpace = Converter::ArkValue<Opt_Number>(11);
+    initValue.dailyFiveRowSpace = Converter::ArkValue<Opt_Number>(12);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
+    auto swiperNode = frameNode->GetChildren().front();
+    ASSERT_NE(swiperNode, nullptr);
+    modifier_->setCurrentDayStyle(node_, &initValue);
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
+        auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
+        auto jsonValue = JsonUtil::Create(true);
+        calendarPaintProperty->ToJsonValue(jsonValue, inspector);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNDERSCORE_X_AXIS_OFFSET_NAME);
+        EXPECT_EQ(resultStr, "7.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNDERSCORE_Y_AXIS_OFFSET_NAME);
+        EXPECT_EQ(resultStr, "8.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCHEDULE_MARKER_X_AXIS_OFFSET_NAME);
+        EXPECT_EQ(resultStr, "9.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCHEDULE_MARKER_Y_AXIS_OFFSET_NAME);
+        EXPECT_EQ(resultStr, "10.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_COL_SPACE_NAME);
+        EXPECT_EQ(resultStr, "11.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAILY_FIVE_ROW_SPACE_NAME);
+        EXPECT_EQ(resultStr, "12.00vp");
+    }
+}
+
+/*
+ * @tc.name: currentDayStyleTest3
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, currentDayStyleTest3, TestSize.Level1)
+{
+    Ark_CurrentDayStyle initValue;
+    initValue.dailySixRowSpace = Converter::ArkValue<Opt_Number>(13);
+    initValue.lunarHeight = Converter::ArkValue<Opt_Number>(14);
+    initValue.underscoreWidth = Converter::ArkValue<Opt_Number>(15);
+    initValue.underscoreLength = Converter::ArkValue<Opt_Number>(16);
+    initValue.scheduleMarkerRadius = Converter::ArkValue<Opt_Number>(17);
+    initValue.boundaryRowOffset = Converter::ArkValue<Opt_Number>(18);
+    initValue.boundaryColOffset = Converter::ArkValue<Opt_Number>(19);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
+    auto swiperNode = frameNode->GetChildren().front();
+    ASSERT_NE(swiperNode, nullptr);
+    modifier_->setCurrentDayStyle(node_, &initValue);
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
+        auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
+        auto jsonValue = JsonUtil::Create(true);
+        calendarPaintProperty->ToJsonValue(jsonValue, inspector);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_DAILY_SIX_ROW_SPACE_NAME);
+        EXPECT_EQ(resultStr, "13.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_LUNAR_HEIGHT_NAME);
+        EXPECT_EQ(resultStr, "14.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNDERSCORE_WIDTH_NAME);
+        EXPECT_EQ(resultStr, "15.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_UNDERSCORE_LENGTH_NAME);
+        EXPECT_EQ(resultStr, "16.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SCEDULE_MARKER_RADIUS_NAME);
+        EXPECT_EQ(resultStr, "17.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BOUNDARY_ROW_OFFSET_NAME);
+        EXPECT_EQ(resultStr, "18.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_BOUNDARY_COL_OFFSET_NAME);
+        EXPECT_EQ(resultStr, "19.00vp");
+    }
+}
+
+/*
+ * @tc.name: nonCurrentDayStyleTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, nonCurrentDayStyleTest, TestSize.Level1)
+{
+    Ark_NonCurrentDayStyle initValue;
+    initValue.nonCurrentMonthDayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
+    initValue.nonCurrentMonthLunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK);
+    initValue.nonCurrentMonthWorkDayMarkColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE);
+    initValue.nonCurrentMonthOffDayMarkColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BROWN);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
+    auto swiperNode = frameNode->GetChildren().front();
+    ASSERT_NE(swiperNode, nullptr);
+    modifier_->setNonCurrentDayStyle(node_, &initValue);
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
+        auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
+        auto jsonValue = JsonUtil::Create(true);
+        calendarPaintProperty->ToJsonValue(jsonValue, inspector);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NON_CURRENT_MONTH_DAY_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_WHITE);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NON_CURRENT_MONTH_LUNAR_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_BLACK);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NON_CURRENT_MONTH_WORK_DAY_MARK_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_BLUE);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_NON_CURRENT_MONTH_OFF_DAY_MARK_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_BROWN);
+    }
+}
+
+/*
+ * @tc.name: todayStyleTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, todayStyleTest, TestSize.Level1)
+{
+    Ark_TodayStyle initValue;
+    initValue.focusedDayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
+    initValue.focusedLunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK);
+    initValue.focusedAreaBackgroundColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE);
+    initValue.focusedAreaRadius = Converter::ArkValue<Opt_Number>(0);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
+    auto swiperNode = frameNode->GetChildren().front();
+    ASSERT_NE(swiperNode, nullptr);
+
+    modifier_->setTodayStyle(node_, &initValue);
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
+        auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
+        auto jsonValue = JsonUtil::Create(true);
+        calendarPaintProperty->ToJsonValue(jsonValue, inspector);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUSED_DAY_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_WHITE);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUSED_LUNAR_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_BLACK);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUSED_AREA_BACKGROUND_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_BLUE);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FOCUSED_AREA_RADIUS_COLOR_NAME);
+        EXPECT_EQ(resultStr, "0.00vp");
+    }
+}
+
+/*
+ * @tc.name: weekStyleTestValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, weekStyleTest, TestSize.Level1)
+{
+    Ark_WeekStyle initValue;
+    initValue.weekColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
+    initValue.weekendDayColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK);
+    initValue.weekendLunarColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLUE);
+    initValue.weekFontSize = Converter::ArkValue<Opt_Number>(0);
+    initValue.weekHeight = Converter::ArkValue<Opt_Number>(1);
+    initValue.weekWidth = Converter::ArkValue<Opt_Number>(2);
+    initValue.weekAndDayRowSpace = Converter::ArkValue<Opt_Number>(3);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
+    auto swiperNode = frameNode->GetChildren().front();
+    ASSERT_NE(swiperNode, nullptr);
+
+    modifier_->setWeekStyle(node_, &initValue);
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
+        auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
+        auto jsonValue = JsonUtil::Create(true);
+        calendarPaintProperty->ToJsonValue(jsonValue, inspector);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEEK_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_WHITE);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEEKEND_DAY_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_BLACK);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEEKEND_LUNAR_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_BLUE);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEEK_FONT_SIZE_NAME);
+        EXPECT_EQ(resultStr, "0.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEEK_HEIGHT_NAME);
+        EXPECT_EQ(resultStr, "1.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEEK_WIDTH_NAME);
+        EXPECT_EQ(resultStr, "2.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WEEK_AND_DAY_ROW_SPACE_NAME);
+        EXPECT_EQ(resultStr, "3.00vp");
+    }
+}
+
+/*
+ * @tc.name: workStateStyleTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarModifierTest, workStateStyleTest, TestSize.Level1)
+{
+    Ark_WorkStateStyle initValue;
+    initValue.workDayMarkColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_WHITE);
+    initValue.offDayMarkColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(ARK_COLOR_BLACK);
+    initValue.workDayMarkSize = Converter::ArkValue<Opt_Number>(0);
+    initValue.offDayMarkSize = Converter::ArkValue<Opt_Number>(1);
+    initValue.workStateWidth = Converter::ArkValue<Opt_Number>(2);
+    initValue.workStateHorizontalMovingDistance = Converter::ArkValue<Opt_Number>(3);
+    initValue.workStateVerticalMovingDistance = Converter::ArkValue<Opt_Number>(4);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    ASSERT_FALSE(frameNode->GetChildren().empty());
+    auto swiperNode = frameNode->GetChildren().front();
+    ASSERT_NE(swiperNode, nullptr);
+
+    modifier_->setWorkStateStyle(node_, &initValue);
+    ASSERT_FALSE(swiperNode->GetChildren().empty());
+    for (const auto& calendarNode : swiperNode->GetChildren()) {
+        auto calendarFrameNode = AceType::DynamicCast<FrameNode>(calendarNode);
+        ASSERT_NE(calendarFrameNode, nullptr);
+        auto calendarPaintProperty = calendarFrameNode->GetPaintProperty<CalendarPaintProperty>();
+        ASSERT_NE(calendarPaintProperty, nullptr);
+        const InspectorFilter inspector;
+        auto jsonValue = JsonUtil::Create(true);
+        calendarPaintProperty->ToJsonValue(jsonValue, inspector);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORK_DAY_MARK_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_WHITE);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OFF_DAY_MARK_COLOR_NAME);
+        EXPECT_EQ(resultStr, RESULT_COLOR_BLACK);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORK_DAY_MARK_SIZE_NAME);
+        EXPECT_EQ(resultStr, "0.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_OFF_DAY_MARK_SIZE_NAME);
+        EXPECT_EQ(resultStr, "1.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORK_STATE_WIDTH_NAME);
+        EXPECT_EQ(resultStr, "2.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORK_STATE_HORIZONTAL_MOVING_DISTANCE_NAME);
+        EXPECT_EQ(resultStr, "3.00vp");
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_WORK_STATE_VERTICAL_MOVING_DISTANCE_NAME);
+        EXPECT_EQ(resultStr, "4.00vp");
     }
 }
 
