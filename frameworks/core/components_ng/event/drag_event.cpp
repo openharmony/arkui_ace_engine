@@ -2003,6 +2003,10 @@ void DragEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool isRest
     if (info.GetTouches().empty()) {
         return;
     }
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_VOID(gestureHub);
+    auto frameNode = gestureHub->GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
     auto touchPoint = Point(
         info.GetTouches().front().GetGlobalLocation().GetX(), info.GetTouches().front().GetGlobalLocation().GetY());
     if (isRestartDrag) {
@@ -2012,12 +2016,13 @@ void DragEventActuator::HandleTouchEvent(const TouchEventInfo& info, bool isRest
             HandleDragDampingMove(
                 touchPoint, info.GetTouches().front().GetFingerId(), isRestartDrag);
         }
+        auto pipeline = frameNode->GetContextRefPtr();
+        CHECK_NULL_VOID(pipeline);
+        auto dragDropManager = pipeline->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        dragDropManager->SetDragMoveLastPoint(touchPoint);
         return;
     }
-    auto gestureHub = gestureEventHub_.Upgrade();
-    CHECK_NULL_VOID(gestureHub);
-    auto frameNode = gestureHub->GetFrameNode();
-    CHECK_NULL_VOID(frameNode);
     auto focusHub = frameNode->GetFocusHub();
     bool hasContextMenuUsingGesture =
         focusHub ? focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU) : false;
