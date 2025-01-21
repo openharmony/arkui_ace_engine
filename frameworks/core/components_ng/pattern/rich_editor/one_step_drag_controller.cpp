@@ -23,6 +23,7 @@ OneStepDragParam::OneStepDragParam(const Builder& builder, const SelectMenuParam
 {
     menuBuilder = builder;
     onAppear = selectMenuParam.onAppear;
+    onAppear = selectMenuParam.onDisappear;
     menuParam.previewMode = MenuPreviewMode::IMAGE;
     menuParam.type = MenuType::CONTEXT_MENU;
     menuParam.onDisappear = selectMenuParam.onDisappear;
