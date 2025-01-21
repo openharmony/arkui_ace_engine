@@ -300,6 +300,7 @@ void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdSt
 void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
 {
     if (formLinkInfos_.empty() || isDynamic_ || !shouldResponseClick_) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "StaticFrom click.");
         return;
     }
     TAG_LOGI(AceLogTag::ACE_FORM, "StaticFrom click.");
