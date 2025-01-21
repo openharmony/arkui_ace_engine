@@ -28,9 +28,9 @@ class ACE_FORCE_EXPORT ContainerModalView : public AceType {
 public:
     static RefPtr<FrameNode> Create(RefPtr<FrameNode>& content);
     static bool ConfigCustomWindowMask(RefPtr<PipelineContext>& pipeline, bool enable);
-    static void RegistCJNodeBuilder(std::function<RefPtr<NG::FrameNode>()>& title,
-        std::function<RefPtr<NG::FrameNode>(
-            WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern, RefPtr<NG::FrameNode>& containerTitleRow)>& button);
+    static void RegistCustomBuilder(std::function<RefPtr<NG::FrameNode>()>& title,
+        std::function<RefPtr<NG::FrameNode>(const WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern,
+            const RefPtr<NG::FrameNode>& containerTitleRow)>& button);
 
 protected:
     static RefPtr<FrameNode> AddControlButtons(RefPtr<FrameNode>& controlButtonsRow);
@@ -46,10 +46,10 @@ protected:
         RefPtr<InputEventHub>& inputHub, RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn);
     static void AddButtonOnEvent(
         RefPtr<InputEventHub>& inputHub, RefPtr<FrameNode>& buttonNode, RefPtr<FrameNode>& imageNode, bool isCloseBtn);
-    static std::function<RefPtr<NG::FrameNode>()> cjTitileBuilder_;
+    static std::function<RefPtr<NG::FrameNode>()> customTitileBuilder_;
     static std::function<RefPtr<NG::FrameNode>(
-        WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern, RefPtr<NG::FrameNode>& containerTitleRow)>
-        cjControlButtonBuilder_;
+        const WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern, const RefPtr<NG::FrameNode>& containerTitleRow)>
+        customControlButtonBuilder_;
 
 private:
     static float baseScale;

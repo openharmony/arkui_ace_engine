@@ -44,10 +44,10 @@ constexpr float CURRENT_RATIO = 0.86f;
 constexpr float CURRENT_DURATION = 0.25f;
 } // namespace
 float ContainerModalView::baseScale = 1.0f;
-std::function<RefPtr<NG::FrameNode>()> ContainerModalView::cjTitileBuilder_ = nullptr;
+std::function<RefPtr<NG::FrameNode>()> ContainerModalView::customTitileBuilder_ = nullptr;
 std::function<RefPtr<NG::FrameNode>(
-    WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern, RefPtr<NG::FrameNode>& containerTitleRow)>
-    ContainerModalView::cjControlButtonBuilder_ = nullptr;
+    const WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern, const RefPtr<NG::FrameNode>& containerTitleRow)>
+    ContainerModalView::customControlButtonBuilder_ = nullptr;
 
 /**
  * The structure of container_modal is designed as follows :
@@ -104,29 +104,28 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleContainer(RefPtr<FrameNode>& con
     auto containerTitleRow = BuildTitleRow(isFloatingTitle);
     CHECK_NULL_RETURN(containerTitleRow, nullptr);
 
-    if (cjTitileBuilder_) {
-        auto node = cjTitileBuilder_();
-        NG::ViewStackProcessor::GetInstance()->SetCustomTitleNode(node);
+    RefPtr<UINode> customTitleBarNode;
+    if (customTitileBuilder_) {
+        customTitleBarNode = customTitileBuilder_();
     } else {
         auto isSucc = ExecuteCustomTitleAbc();
         if (!isSucc) {
             return nullptr;
         }
+        customTitleBarNode = NG::ViewStackProcessor::GetInstance()->GetCustomTitleNode();
     }
 
-    // get custom node
-    auto customTitleBarNode = NG::ViewStackProcessor::GetInstance()->GetCustomTitleNode();
     CHECK_NULL_RETURN(customTitleBarNode, nullptr);
     containerTitleRow->AddChild(customTitleBarNode);
     return containerTitleRow;
 }
 
-void ContainerModalView::RegistCJNodeBuilder(std::function<RefPtr<NG::FrameNode>()>& title,
-    std::function<RefPtr<NG::FrameNode>(
-        WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern, RefPtr<NG::FrameNode>& containerTitleRow)>& button)
+void ContainerModalView::RegistCustomBuilder(std::function<RefPtr<NG::FrameNode>()>& title,
+    std::function<RefPtr<NG::FrameNode>(const WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern,
+        const RefPtr<NG::FrameNode>& containerTitleRow)>& button)
 {
-    cjTitileBuilder_ = title;
-    cjControlButtonBuilder_ = button;
+    customTitileBuilder_ = title;
+    customControlButtonBuilder_ = button;
 }
 
 RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)

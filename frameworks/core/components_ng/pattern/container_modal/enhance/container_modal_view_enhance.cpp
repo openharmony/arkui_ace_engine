@@ -80,10 +80,10 @@ RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
 
     // Confirm that if it is a pure Cangjie application, the node construction is completed on the C side
-    if (cjControlButtonBuilder_) {
+    if (customControlButtonBuilder_) {
         WeakPtr<ContainerModalPatternEnhance> weakPattern =
             controlButtonsRow->GetPattern<ContainerModalPatternEnhance>();
-        containerModalNode->AddChild(cjControlButtonBuilder_(weakPattern, controlButtonsRow));
+        containerModalNode->AddChild(customControlButtonBuilder_(weakPattern, controlButtonsRow));
     } else {
         containerModalNode->AddChild(BuildCustomButtonRow(controlButtonsRow));
     }

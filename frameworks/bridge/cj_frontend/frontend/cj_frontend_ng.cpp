@@ -29,12 +29,12 @@ void CJFrontendNG::InternalInitialize()
         return OHOS::Ace::NG::BuildTitleNodeForCj();
     };
     std::function<RefPtr<NG::FrameNode>(
-        WeakPtr<NG::ContainerModalPatternEnhance> & weakPattern, RefPtr<NG::FrameNode> & containerTitleRow)>
-        controlButton = [](WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern,
-                            RefPtr<NG::FrameNode>& containerTitleRow) -> RefPtr<NG::FrameNode> {
+        const WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern, const RefPtr<NG::FrameNode>& containerTitleRow)>
+        controlButton = [](const WeakPtr<NG::ContainerModalPatternEnhance>& weakPattern,
+                            const RefPtr<NG::FrameNode>& containerTitleRow) -> RefPtr<NG::FrameNode> {
         return OHOS::Ace::NG::AddControlButtonsForCj(weakPattern, containerTitleRow);
     };
-    NG::ContainerModalView::RegistCJNodeBuilder(title, controlButton);
+    NG::ContainerModalView::RegistCustomBuilder(title, controlButton);
 }
 
 } // namespace OHOS::Ace::Framework
