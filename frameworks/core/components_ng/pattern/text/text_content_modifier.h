@@ -90,6 +90,7 @@ public:
     {
         imageNodeList_ = imageNodeList;
     }
+    void ContentModifierDump();
 protected:
     OffsetF GetPaintOffset() const
     {

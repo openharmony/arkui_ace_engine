@@ -946,6 +946,7 @@ void LayoutProperty::UpdateLayoutDirection(TextDirection value)
     }
     layoutDirection_ = value;
     propertyChangeFlag_ = propertyChangeFlag_ | PROPERTY_UPDATE_MEASURE;
+    OnPropertyChangeMeasure();
 }
 
 TextDirection LayoutProperty::GetNonAutoLayoutDirection() const

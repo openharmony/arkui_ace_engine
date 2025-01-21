@@ -1331,6 +1331,22 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     NotifyConfigurationChangeNdk(configurationChange);
+    OnPropertyChangeMeasure();
+}
+
+void FrameNode::OnPropertyChangeMeasure() const
+{
+    auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
+}
+
+void FrameNode::MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag)
+{
+    MarkDirtyNode(extraFlag);
+    auto layoutProperty = GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
 }
 
 void FrameNode::NotifyConfigurationChangeNdk(const ConfigurationChange& configurationChange)

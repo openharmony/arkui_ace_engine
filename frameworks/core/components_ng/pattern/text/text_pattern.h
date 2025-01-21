@@ -161,10 +161,15 @@ public:
     }
 
     void DumpAdvanceInfo() override;
+    void DumpTextStyleInfo();
+    void DumpTextStyleInfo2();
+    void DumpTextStyleInfo3();
+    void DumpSpanItem();
 
     void DumpInfo() override;
     void DumpScaleInfo();
     void DumpTextEngineInfo();
+    void DumpParagraphsInfo();
 
     TextSelector GetTextSelector() const
     {
@@ -251,7 +256,7 @@ public:
         if (textDetectConfigCache != dataDetectorAdapter_->textDetectConfigStr_) {
             auto host = GetHost();
             CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE);
         }
     }
     void ModifyAISpanStyle(TextStyle& aiSpanStyle)

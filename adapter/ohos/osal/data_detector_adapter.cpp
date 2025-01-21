@@ -163,9 +163,7 @@ void DataDetectorAdapter::SetTextDetectTypes(const std::string& types)
         textDetectTypesSet_ = newTypesSet;
         typeChanged_ = true;
         aiDetectInitialized_ = false;
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+        MarkDirtyNode();
     }
 }
 
@@ -232,9 +230,7 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
                     return;
                 }
                 dataDetectorAdapter->ParseAIResult(result, startPos);
-                auto host = dataDetectorAdapter->GetHost();
-                CHECK_NULL_VOID(host);
-                host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+                dataDetectorAdapter->MarkDirtyNode();
             },
             "ArkUITextParseAIResult");
     };
@@ -378,9 +374,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
             startPos += AI_TEXT_MAX_LENGTH - AI_TEXT_GAP;
         } while (startPos + AI_TEXT_GAP < wTextForAILength);
         if (hasSame) {
-            auto host = dataDetectorAdapter->GetHost();
-            CHECK_NULL_VOID(host);
-            host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+            dataDetectorAdapter->MarkDirtyNode();
         }
     };
 }
@@ -388,9 +382,7 @@ std::function<void()> DataDetectorAdapter::GetDetectDelayTask(const std::map<int
 void DataDetectorAdapter::StartAITask()
 {
     if (textForAI_.empty() || (!typeChanged_ && lastTextForAI_ == textForAI_)) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+        MarkDirtyNode();
         return;
     }
     std::map<int32_t, AISpan> aiSpanMapCopy;
@@ -410,5 +402,15 @@ void DataDetectorAdapter::StartAITask()
     aiDetectDelayTask_.Reset(GetDetectDelayTask(aiSpanMapCopy));
     taskExecutor->PostDelayedTask(
         aiDetectDelayTask_, TaskExecutor::TaskType::UI, AI_DELAY_TIME, "ArkUITextStartAIDetect");
+}
+
+void DataDetectorAdapter::MarkDirtyNode() const
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->OnPropertyChangeMeasure();
 }
 } // namespace OHOS::Ace

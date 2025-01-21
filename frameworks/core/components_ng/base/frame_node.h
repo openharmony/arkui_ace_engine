@@ -1135,6 +1135,8 @@ public:
             visibleAreaChangeTriggerReason_ = triggerReason;
         }
     }
+    void MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag);
+    void OnPropertyChangeMeasure() const;
 
 protected:
     void DumpInfo() override;

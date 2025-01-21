@@ -117,13 +117,20 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, std::nullopt);
     ACE_SCOPED_TRACE("TextLayoutAlgorithm::MeasureContent[id:%d]", host->GetId());
-    TextStyle textStyle;
-    ConstructTextStyles(contentConstraint, layoutWrapper, textStyle);
+    auto pattern = host->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, std::nullopt);
     auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textLayoutProperty, std::nullopt);
+    CheckNeedReCreateParagraph(textLayoutProperty, pattern);
+    TextStyle textStyle;
+    bool needRemain = false;
+    auto styleChanged = ConstructTextStyles(contentConstraint, layoutWrapper, textStyle, needRemain);
+    needReCreateParagraph_ |= styleChanged;
     if (textStyle.GetTextOverflow() == TextOverflow::MARQUEE) { // create a paragraph with all text in 1 line
         isMarquee_ = true;
-        return BuildTextRaceParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
+        auto result = BuildTextRaceParagraph(textStyle, textLayoutProperty, contentConstraint, layoutWrapper);
+        ResetNeedReCreateParagraph(textLayoutProperty, needRemain);
+        return result;
     }
     if (isSpanStringMode_) {
         if (spanStringHasMaxLines_) {
@@ -137,6 +144,7 @@ std::optional<SizeF> TextLayoutAlgorithm::MeasureContent(
             return std::nullopt;
         }
     }
+    ResetNeedReCreateParagraph(textLayoutProperty, needRemain);
     textStyle_ = textStyle;
     baselineOffset_ = textStyle.GetBaselineOffset().ConvertToPxDistribute(
         textStyle.GetMinFontScale(), textStyle.GetMaxFontScale(), textStyle.IsAllowScale());
@@ -187,6 +195,29 @@ bool TextLayoutAlgorithm::AddPropertiesAndAnimations(TextStyle& textStyle,
             break;
     }
     return result;
+}
+
+void TextLayoutAlgorithm::CheckNeedReCreateParagraph(
+    const RefPtr<TextLayoutProperty>& textLayoutProperty, const RefPtr<TextPattern>& textPattern)
+{
+    CHECK_NULL_VOID(textLayoutProperty);
+    CHECK_NULL_VOID(textPattern);
+    auto useExternalParagraph = textPattern->GetExternalParagraph() && !textPattern->NeedShowAIDetect();
+    needReCreateParagraph_ =
+        textLayoutProperty->GetNeedReCreateParagraphValue(false) || !spans_.empty() || useExternalParagraph ||
+        textPattern->IsDragging() || textLayoutProperty->GetAdaptMaxFontSize().has_value() ||
+        textLayoutProperty->GetAdaptMinFontSize().has_value() ||
+        textLayoutProperty->GetHeightAdaptivePolicyValue(TextHeightAdaptivePolicy::MAX_LINES_FIRST) !=
+            TextHeightAdaptivePolicy::MAX_LINES_FIRST ||
+        textLayoutProperty->GetEllipsisModeValue(EllipsisMode::TAIL) == EllipsisMode::MIDDLE;
+}
+
+void TextLayoutAlgorithm::ResetNeedReCreateParagraph(
+    const RefPtr<TextLayoutProperty>& textLayoutProperty, bool needRemain)
+{
+    CHECK_NULL_VOID(!needRemain);
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->ResetNeedReCreateParagraph();
 }
 
 void TextLayoutAlgorithm::UpdateParagraphForAISpan(
@@ -377,9 +408,9 @@ bool TextLayoutAlgorithm::CreateParagraphAndLayout(const TextStyle& textStyle, c
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, bool needLayout)
 {
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
-    ACE_TEXT_SCOPED_TRACE("CreateParagraphAndLayout[maxSize:%s][Len:%d]", maxSize.ToString().c_str(),
-        static_cast<int32_t>(content.length()));
-    if (!CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width())) {
+    ACE_TEXT_SCOPED_TRACE("CreateParagraphAndLayout[maxSize:%s][Len:%d][needReCreateParagraph:%d]",
+        maxSize.ToString().c_str(), static_cast<int32_t>(content.length()), needReCreateParagraph_);
+    if (needReCreateParagraph_ && !CreateParagraph(textStyle, content, layoutWrapper, maxSize.Width())) {
         return false;
     }
     CHECK_NULL_RETURN(paragraphManager_, false);
@@ -548,7 +579,7 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseLayoutConstraint(TextStyle& text
     if (!BuildParagraph(textStyle, layoutProperty, contentConstraint, layoutWrapper)) {
         return false;
     }
-    
+
     auto paragraph = GetSingleParagraph();
     CHECK_NULL_RETURN(paragraph, false);
     auto lineCount = static_cast<uint32_t>(paragraph->GetLineCount());

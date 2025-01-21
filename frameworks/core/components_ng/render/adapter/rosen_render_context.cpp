@@ -719,6 +719,9 @@ void RosenRenderContext::OnForegroundColorUpdate(const Color& value)
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetEnvForegroundColor(value.GetValue());
     RequestNextFrame();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->OnPropertyChangeMeasure();
 }
 
 void RosenRenderContext::OnForegroundEffectUpdate(float radius)

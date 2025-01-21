@@ -66,6 +66,8 @@ protected:
 
     void ApplyIndent(ParagraphStyle& paragraphStyle, const RefPtr<Paragraph>& paragraph, double width,
         const TextStyle& textStyle);
+    bool ConstructTextStyles(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
+        TextStyle& textStyle, bool& needRemain);
     void ConstructTextStyles(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, TextStyle& textStyle);
     bool ParagraphReLayout(const LayoutConstraintF& contentConstraint);
@@ -103,6 +105,7 @@ protected:
     bool spanStringHasMaxLines_ = false;
     bool isSpanStringMode_ = false;
     bool isMarquee_ = false;
+    bool needReCreateParagraph_ = true;
 
 private:
     virtual OffsetF GetContentOffset(LayoutWrapper* layoutWrapper) = 0;
