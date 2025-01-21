@@ -1266,6 +1266,7 @@ HWTEST_F(ScrollModifierTest, OnScrollEdge_SetNullCallback, testing::ext::TestSiz
  * @tc.type: FUNC
  */
 HWTEST_F(ScrollModifierTest, setOnScrollFrameBeginTest, testing::ext::TestSize.Level1)
+{
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
@@ -1327,11 +1328,6 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetCallback, testing::ext::TestSize.Le
         retVal.xOffset = xOffset;
         retVal.yOffset = yOffset;
         CallbackHelper(continuation).Invoke(retVal);
-
-    auto callback = [](
-        const Ark_Int32 resourceId, const Ark_Number xOffset, const Ark_Number yOffset, Ark_ScrollState scrollState, 
-        Ark_ScrollSource scrollSource, const Callback_OffsetResult_Void continuation) {
-            result = {resourceId, xOffset, yOffset, scrollState};
     };
 
     auto id = Converter::ArkValue<Ark_Int32>(123);
@@ -1379,7 +1375,6 @@ HWTEST_F(ScrollModifierTest, OnWillScroll_SetNullptrCallback, testing::ext::Test
  */
 HWTEST_F(ScrollModifierTest, OnDidScroll_SetCallback, testing::ext::TestSize.Level1)
 {
-    Converter::ArkValue<ScrollOnWillScrollCallback>(callback, id));
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
