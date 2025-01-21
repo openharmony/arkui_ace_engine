@@ -2038,8 +2038,10 @@ void TabBarPattern::HandleTouchEvent(const TouchLocationInfo& info)
     CHECK_NULL_VOID(host);
     auto touchType = info.GetTouchType();
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
-    if ((touchType == TouchType::UP || touchType == TouchType::CANCEL) && dialogNode_) {
+    if (touchType == TouchType::UP && dialogNode_) {
         HandleClick(info.GetSourceDevice(), index);
+        CloseDialog();
+    } else if (touchType == TouchType::CANCEL && dialogNode_) {
         CloseDialog();
     }
 
