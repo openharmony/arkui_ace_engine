@@ -1559,8 +1559,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSpringProperty()
                 scroll->currentPos_ = currPos;
             }
         }
-        scroll->ProcessSpringMotion(scroll->finalPosition_);
-        scroll->StopSpringAnimation();
+        scroll->StopSpringAnimation(true);
     };
     springOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     AttachAnimatableProperty(springOffsetProperty_);
