@@ -108,9 +108,11 @@ const std::tuple<Ace::TextOverflow, Ark_TextOverflow> TEST_PSST_OVERFLOW = {
 const std::tuple<Ace::WordBreak, Ark_WordBreak> TEST_PSST_WORD_BREAK = {
     Ace::WordBreak::BREAK_ALL, ARK_WORD_BREAK_BREAK_ALL };
 const std::tuple<std::string, int> TEST_PSST_LEADING_MARGIN = { "width: 2.00vp height: 2.00vp", 2 };
-const std::tuple<std::string, Ark_Tuple_Dimension_Dimension> TEST_TUPLE_DIMENSION_DIMENSION =
-    {"width: 0.10fp height: 10.00vp",
-    Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> { 0.1_fp, 10.0_vp })};
+const std::tuple<std::string, Ark_Tuple_Dimension_Dimension> TEST_TUPLE_DIMENSION_DIMENSION = {
+    "width: 0.10fp height: 10.00vp",
+    Converter::ArkValue<Ark_Tuple_Dimension_Dimension>(std::pair<const Dimension, Dimension> {
+        0.1_fp, 10.0_vp
+    })};
 const Ark_LeadingMarginPlaceholder TEST_PSPM_LEADING_MARGIN {
     .pixelMap = TEST_PIXELMAP,
     .size = std::get<1>(TEST_TUPLE_DIMENSION_DIMENSION)
