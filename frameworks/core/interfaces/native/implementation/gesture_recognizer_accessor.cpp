@@ -127,8 +127,4 @@ const GENERATED_ArkUIGestureRecognizerAccessor* GetGestureRecognizerAccessor()
     };
     return &GestureRecognizerAccessorImpl;
 }
-
-struct GestureRecognizerPeer {
-    virtual ~GestureRecognizerPeer() = default;
-};
 }
