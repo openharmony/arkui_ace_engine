@@ -1064,7 +1064,7 @@ bool WebPattern::ZoomOutAndIn(const double& curScale, double& scale)
                 TAG_LOGD(AceLogTag::ACE_WEB, "ZoomOutAndIn curScale * pageScale_= %{public}f", scale);
             } else {
                 TAG_LOGD(AceLogTag::ACE_WEB, "ZoomOutAndIn curScale < DEFAULT_PINCH_SCALE");
-                scale = pageScale_ + (curScale - startPinchScale_);
+                scale = DEFAULT_PINCH_SCALE + (curScale - startPinchScale_);
             }
         } else {
             // The scale is from 0.4 to 0.5, the scale conversion should be from 1.0 to 1.1
@@ -1078,7 +1078,7 @@ bool WebPattern::ZoomOutAndIn(const double& curScale, double& scale)
                 zoomOutSwitch_ = true;
             } else {
                 TAG_LOGD(AceLogTag::ACE_WEB, "ZoomOutAndIn zoomStatus_ = STATUS_ZOOMOUT curScale < 1.0");
-                scale = pageScale_ + (curScale - startPinchScale_);
+                scale = DEFAULT_PINCH_SCALE + (curScale - startPinchScale_);
             }
         }
         zoomStatus_ = STATUS_ZOOMOUT;
@@ -1141,10 +1141,9 @@ void WebPattern::HandleScaleGestureChange(const GestureEvent& event)
     CHECK_NULL_VOID(frameNode);
     auto offset = frameNode->GetOffsetRelativeToWindow();
     TAG_LOGD(AceLogTag::ACE_WEB,
-        "HandleScaleGestureChange curScale:%{public}f pageScale: %{public}f newScale: %{public}f"
-        " newOriginScale: %{public}f centerX: %{public}f centerY: %{public}f offset X: %{public}f"
-        " offset Y: %{public}f",
-        curScale, scale, newScale, newOriginScale, centerX, centerY, offset.GetX(), offset.GetY());
+        "HandleScaleGestureChangeV2 curScale:%{public}f pageScale: %{public}f newScale: %{public}f"
+        " centerX: %{public}f centerY: %{public}f",
+        curScale, scale, newScale, centerX, centerY);
 
     // Plan two
     delegate_->ScaleGestureChangeV2(
