@@ -59,6 +59,7 @@ public:
     static void SetDigitalCrownSensitivity(const JSCallbackInfo& info);
     static void OnChange(const JSCallbackInfo& info);
     static void SetValidSlideRange(const JSCallbackInfo& info);
+    static void SetEnableHapticFeedback(const JSCallbackInfo& info);
 
 private:
     static void ResetBlockStyle();

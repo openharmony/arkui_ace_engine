@@ -61,19 +61,19 @@ void ScrollBarPattern::OnModifyDone()
             StartDisappearAnimator();
         }
     }
-    auto axis = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
+    auto axis = axis_;
+    axis_ = layoutProperty->GetAxis().value_or(Axis::VERTICAL);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        SetScrollBar(DisplayMode::ON);
+    }
     if (axis_ == axis && scrollableEvent_) {
         return;
     }
-    axis_ = axis;
     InitScrollPositionCallback();
     InitScrollEndCallback();
     AddScrollableEvent();
     SetAccessibilityAction();
     InitMouseEvent();
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        SetScrollBar(DisplayMode::ON);
-    }
     // After changing the axis direction, modify the direction of the pan gesture.
     InitPanRecognizer();
     if (!clickRecognizer_) {
@@ -222,17 +222,17 @@ void ScrollBarPattern::SetScrollBar(DisplayMode displayMode)
     DisplayMode oldDisplayMode = DisplayMode::OFF;
     if (!scrollBar_) {
         scrollBar_ = CreateScrollBar();
-        // set the scroll bar style
-        if (GetAxis() == Axis::HORIZONTAL) {
-            scrollBar_->SetPositionMode(PositionMode::BOTTOM);
-            if (scrollBarOverlayModifier_) {
-                scrollBarOverlayModifier_->SetPositionMode(PositionMode::BOTTOM);
-            }
-        }
         RegisterScrollBarEventTask();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     } else {
         oldDisplayMode = scrollBar_->GetDisplayMode();
+    }
+
+    // set the scroll bar style
+    auto positionMode = GetPositionMode();
+    scrollBar_->SetPositionMode(positionMode);
+    if (scrollBarOverlayModifier_) {
+        scrollBarOverlayModifier_->SetPositionMode(positionMode);
     }
 
     if (oldDisplayMode != displayMode) {
@@ -242,6 +242,20 @@ void ScrollBarPattern::SetScrollBar(DisplayMode displayMode)
         }
         scrollBar_->ScheduleDisappearDelayTask();
     }
+}
+
+PositionMode ScrollBarPattern::GetPositionMode()
+{
+    if (axis_ == Axis::HORIZONTAL) {
+        return PositionMode::BOTTOM;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, PositionMode::RIGHT);
+    auto layoutProperty = host->GetLayoutProperty();
+    if (layoutProperty && layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL) {
+        return PositionMode::LEFT;
+    }
+    return PositionMode::RIGHT;
 }
 
 void ScrollBarPattern::HandleScrollBarOutBoundary(float scrollBarOutBoundaryExtent)

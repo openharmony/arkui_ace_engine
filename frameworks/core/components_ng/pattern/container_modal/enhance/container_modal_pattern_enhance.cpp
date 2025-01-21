@@ -812,7 +812,7 @@ void ContainerModalPatternEnhance::SetMaximizeIconIsRecover()
     auto customNode = GetCustomButtonNode();
     CHECK_NULL_VOID(customNode);
 
-    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    auto pipeline = customNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_VOID(windowManager);

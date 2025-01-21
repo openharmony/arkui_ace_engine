@@ -45,14 +45,19 @@ public:
             if (!themeConstants) {
                 return theme;
             }
+            InitThemeDefaults(theme);
+            ParsePattern(themeConstants, theme);
+            return theme;
+        }
+    protected:
+        void InitThemeDefaults(const RefPtr<TextTheme>& theme) const
+        {
             // Styles below do not need to get from ThemeConstants, directly set at here.
             theme->textStyle_.SetFontStyle(FontStyle::NORMAL);
             theme->textStyle_.SetFontWeight(FontWeight::NORMAL);
             theme->textStyle_.SetTextDecoration(TextDecoration::NONE);
-            ParsePattern(themeConstants, theme);
-            return theme;
         }
-    private:
+
         void ParsePattern(const RefPtr<ThemeConstants>& themeConstants, const RefPtr<TextTheme>& theme) const
         {
             RefPtr<ThemeStyle> pattern = themeConstants->GetPatternByName(THEME_PATTERN_TEXT);
@@ -79,6 +84,8 @@ public:
             theme->linearSplitChildMinSize_ = pattern->GetAttr<double>(LINEAR_SPLIT_CHILD_MIN_SIZE, childMinSize);
             auto textShowHandle = pattern->GetAttr<std::string>("text_show_handle", "0");
             theme->isShowHandle_ = StringUtils::StringToInt(textShowHandle);
+            auto textShowTranslate = pattern->GetAttr<std::string>("menu_translate_is_support", "0");
+            theme->isShowTranslate_ = StringUtils::StringToInt(textShowTranslate);
             auto textShowSearch = pattern->GetAttr<std::string>("text_menu_search_is_support", "0");
             theme->isShowSearch_ = StringUtils::StringToInt(textShowSearch);
             auto disabledOpacity = pattern->GetAttr<double>("interactive_disable", URL_DISA_OPACITY);
@@ -135,6 +142,11 @@ public:
         return isShowHandle_;
     }
 
+    bool IsShowTranslate() const
+    {
+        return isShowTranslate_;
+    }
+
     bool IsShowSearch() const
     {
         return isShowSearch_;
@@ -171,15 +183,16 @@ public:
 
 protected:
     TextTheme() = default;
+    TextStyle textStyle_;
 
 private:
-    TextStyle textStyle_;
     Color caretColor_;
     Color selectedColor_;
     Color dragBackgroundColor_ = Color::WHITE;
     bool draggable_ = false;
     double linearSplitChildMinSize_ = 20.0;
     bool isShowHandle_ = false;
+    bool isShowTranslate_ = false;
     bool isShowSearch_ = false;
     bool isTextFadeout_ = false;
     Dimension fadeoutWidth_;

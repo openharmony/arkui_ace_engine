@@ -29,7 +29,6 @@ FrameNodeImpl::FrameNodeImpl(const RefPtr<AceNode>& node, const RefPtr<Pattern>&
     : nodeRef_(node), pattern_(pattern)
 {
     frameNode_ = AceType::RawPtr(node);
-    node->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE | NG::PROPERTY_UPDATE_RENDER);
 }
 
 FrameNodeImpl::~FrameNodeImpl()
@@ -84,5 +83,22 @@ NG::LayoutWrapper* FrameNodeImpl::GetLayoutWrapper()
 {
     CHECK_NULL_RETURN(frameNode_, nullptr);
     return frameNode_;
+}
+
+void FrameNodeImpl::MeasureChildren()
+{
+    CHECK_NULL_VOID(frameNode_);
+    auto layoutConstraint = frameNode_->GetLayoutProperty()->CreateChildConstraint();
+    for (auto& child : frameNode_->GetAllChildrenWithBuild()) {
+        child->Measure(layoutConstraint);
+    }
+}
+
+void FrameNodeImpl::LayoutChildren()
+{
+    CHECK_NULL_VOID(frameNode_);
+    for (auto& child : frameNode_->GetAllChildrenWithBuild()) {
+        child->Layout();
+    }
 }
 } // namespace OHOS::Ace::Kit

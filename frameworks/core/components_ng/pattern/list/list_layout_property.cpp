@@ -113,6 +113,7 @@ void ListLayoutProperty::FromJson(const std::unique_ptr<JsonValue>& json)
 
 void ListLayoutProperty::UpdateLayoutProperty(const ListLayoutProperty* layoutProperty)
 {
+    CHECK_NULL_VOID(layoutProperty);
     propSpace_ = layoutProperty->CloneSpace();
     propInitialIndex_ = layoutProperty->CloneInitialIndex();
     propListDirection_ = layoutProperty->CloneListDirection();

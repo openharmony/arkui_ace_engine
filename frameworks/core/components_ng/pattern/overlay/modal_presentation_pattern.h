@@ -121,12 +121,7 @@ public:
         onWillDisappear_ = std::move(onWillDisappear);
     }
 
-    void OnWillDisappear()
-    {
-        if (onWillDisappear_) {
-            onWillDisappear_();
-        }
-    }
+    void OnWillDisappear();
 
     void UpdateOnAppear(std::function<void()>&& onAppear)
     {

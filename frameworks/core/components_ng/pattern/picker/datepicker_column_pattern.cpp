@@ -21,6 +21,7 @@
 #include <list>
 #include <stdint.h>
 
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/log/log.h"
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
@@ -84,6 +85,16 @@ void DatePickerColumnPattern::OnAttachToFrameNode()
     CreateAnimation();
     InitPanEvent(gestureHub);
     host->GetRenderContext()->SetClipToFrame(true);
+    InitHapticController();
+    RegisterWindowStateChangedCallback();
+}
+
+void DatePickerColumnPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+    UnregisterWindowStateChangedCallback();
 }
 
 void DatePickerColumnPattern::OnModifyDone()
@@ -132,6 +143,68 @@ void DatePickerColumnPattern::OnModifyDone()
         }
         SetOptionShiftDistance();
     }
+}
+
+void DatePickerColumnPattern::InitHapticController()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto blendNode = DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(blendNode);
+    auto stackNode = DynamicCast<FrameNode>(blendNode->GetParent());
+    CHECK_NULL_VOID(stackNode);
+    auto parentNode = DynamicCast<FrameNode>(stackNode->GetParent());
+    CHECK_NULL_VOID(parentNode);
+    auto datePickerPattern = parentNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    if (datePickerPattern->GetEnableHapticFeedback()) {
+        isEnableHaptic_ = true;
+        if (!hapticController_) {
+            auto context = parentNode->GetContext();
+            CHECK_NULL_VOID(context);
+            context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->hapticController_ = PickerAudioHapticFactory::GetInstance();
+            });
+        }
+    } else {
+        isEnableHaptic_ = false;
+        if (hapticController_) {
+            hapticController_->Stop();
+        }
+    }
+}
+
+void DatePickerColumnPattern::RegisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
+}
+
+void DatePickerColumnPattern::UnregisterWindowStateChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveWindowStateChangedCallback(host->GetId());
+}
+
+void DatePickerColumnPattern::OnWindowHide()
+{
+    isShow_ = false;
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+}
+
+void DatePickerColumnPattern::OnWindowShow()
+{
+    isShow_ = true;
 }
 
 void DatePickerColumnPattern::ParseTouchListener()
@@ -403,7 +476,7 @@ void DatePickerColumnPattern::UpdateTextAreaPadding(const RefPtr<PickerTheme>& p
     if (useButtonFocusArea_) {
         auto padding = pickerTheme->GetSelectorItemSpace();
         PaddingProperty defaultPadding = { CalcLength(padding), CalcLength(padding),
-            CalcLength(0.0_vp), CalcLength(0.0_vp) };
+            CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp), CalcLength(0.0_vp) };
         textLayoutProperty->UpdatePadding(defaultPadding);
     }
 }
@@ -843,6 +916,9 @@ bool DatePickerColumnPattern::InnerHandleScroll(
         currentIndex = (totalCountAndIndex ? totalCountAndIndex - 1 : 0) % totalOptionCount; // index reduce one
     }
     SetCurrentIndex(currentIndex);
+    if (hapticController_ && isEnableHaptic_) {
+        hapticController_->PlayOnce();
+    }
     FlushCurrentOptions(isDown, isUpatePropertiesOnly, isUpdateAnimationProperties);
     HandleChangeCallback(isDown, true);
     HandleEventCallback(true);
@@ -930,6 +1006,9 @@ void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
 
 void DatePickerColumnPattern::HandleDragEnd()
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     pressed_ = false;
     CHECK_NULL_VOID(GetToss());
     auto toss = GetToss();
@@ -1068,6 +1147,9 @@ void DatePickerColumnPattern::TossStoped()
 
 void DatePickerColumnPattern::TossAnimationStoped()
 {
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
     yLast_ = 0.0;
 }
 
@@ -1235,6 +1317,11 @@ void DatePickerColumnPattern::SetOptionShiftDistance()
 void DatePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
 {
     int32_t dragDelta = offsetY - yLast_;
+    if (hapticController_ && isShow_) {
+        if (isEnableHaptic_) {
+            hapticController_->HandleDelta(dragDelta);
+        }
+    }
     yLast_ = offsetY;
     if (!CanMove(LessNotEqual(dragDelta, 0))) {
         return;

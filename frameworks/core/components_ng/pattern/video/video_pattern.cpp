@@ -319,20 +319,20 @@ void VideoPattern::ResetMediaPlayerOnBg()
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
-    VideoSourceInfo videoSrc = {videoSrcInfo_.GetSrc(), videoSrcInfo_.GetBundleName(), videoSrcInfo_.GetModuleName()};
+    VideoSourceInfo videoSrc = {videoSrcInfo_.src_, videoSrcInfo_.bundleName_, videoSrcInfo_.moduleName_};
 
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask(
         [weak = WeakClaim(this), mediaPlayerWeak = WeakClaim(AceType::RawPtr(mediaPlayer_)),
-        videoSrc, id = instanceId_, uiTaskExecutor] {
+        videoSrc, id = instanceId_, showFirstFrame = showFirstFrame_, uiTaskExecutor] {
         auto mediaPlayer = mediaPlayerWeak.Upgrade();
         CHECK_NULL_VOID(mediaPlayer);
         mediaPlayer->ResetMediaPlayer();
 
-        RegisterMediaPlayerEvent(weak, mediaPlayer, videoSrc.src, id);
+        RegisterMediaPlayerEvent(weak, mediaPlayer, videoSrc.src_, id);
 
-        if (!mediaPlayer->SetSource(videoSrc.src, videoSrc.bundleName, videoSrc.moduleName)) {
+        if (!mediaPlayer->SetSource(videoSrc.src_, videoSrc.bundleName_, videoSrc.moduleName_)) {
             uiTaskExecutor.PostTask([weak]() {
                 auto videoPattern = weak.Upgrade();
                 CHECK_NULL_VOID(videoPattern);
@@ -346,7 +346,7 @@ void VideoPattern::ResetMediaPlayerOnBg()
             CHECK_NULL_VOID(videoPattern);
             videoPattern->PrepareSurface();
             }, "ArkUIVideoPrepareSurface");
-
+        mediaPlayer->SetRenderFirstFrame(showFirstFrame);
         if (mediaPlayer->PrepareAsync() != 0) {
             TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
         }
@@ -376,7 +376,7 @@ void VideoPattern::ResetMediaPlayer()
     }
 
     mediaPlayer_->SetRenderFirstFrame(showFirstFrame_);
-    RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.GetSrc(), instanceId_);
+    RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src_, instanceId_);
     PrepareSurface();
     if (mediaPlayer_ && mediaPlayer_->PrepareAsync() != 0) {
         TAG_LOGE(AceLogTag::ACE_VIDEO, "Player prepare failed");
@@ -401,14 +401,15 @@ void VideoPattern::PrepareMediaPlayer()
     CHECK_NULL_VOID(videoLayoutProperty);
     // src has not set/changed
     if (!videoLayoutProperty->HasVideoSource() || videoLayoutProperty->GetVideoSource() == videoSrcInfo_) {
-        TAG_LOGI(AceLogTag::ACE_VIDEO, "Video source is null or the source has not changed.");
+        TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] source is null or the source has not changed.", hostId_);
         return;
     }
-    auto videoSrcInfo = videoLayoutProperty->GetVideoSource();
-    videoSrcInfo_.src = videoSrcInfo->GetSrc();
-    videoSrcInfo_.bundleName = videoSrcInfo->GetBundleName();
-    videoSrcInfo_.moduleName = videoSrcInfo->GetModuleName();
+    auto videoSrcInfo = videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo());
+    videoSrcInfo_.src_ = videoSrcInfo.src_;
+    videoSrcInfo_.bundleName_ = videoSrcInfo.bundleName_;
+    videoSrcInfo_.moduleName_ = videoSrcInfo.moduleName_;
     if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
+        TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] create MediaPlayer.", hostId_);
         mediaPlayer_->CreateMediaPlayer();
     }
 
@@ -425,8 +426,7 @@ void VideoPattern::PrepareMediaPlayer()
 bool VideoPattern::SetSourceForMediaPlayer()
 {
     CHECK_NULL_RETURN(mediaPlayer_, false);
-    return mediaPlayer_->SetSource(videoSrcInfo_.GetSrc(), videoSrcInfo_.GetBundleName(),
-        videoSrcInfo_.GetModuleName());
+    return mediaPlayer_->SetSource(videoSrcInfo_.src_, videoSrcInfo_.bundleName_, videoSrcInfo_.moduleName_);
 }
 
 void VideoPattern::RegisterMediaPlayerEvent(const WeakPtr<VideoPattern>& weak, const RefPtr<MediaPlayer>& mediaPlayer,
@@ -496,31 +496,31 @@ void VideoPattern::PrintPlayerStatus(PlaybackStatus status)
 {
     switch (status) {
         case PlaybackStatus::ERROR:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Player current status is ERROR.");
+            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is ERROR.", hostId_);
             break;
         case PlaybackStatus::IDLE:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Player current status is IDLE.");
+            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is IDLE.", hostId_);
             break;
         case PlaybackStatus::PREPARED:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Player current status is PREPARED.");
+            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is PREPARED.", hostId_);
             break;
         case PlaybackStatus::STARTED:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Player current status is STARTED.");
+            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is STARTED.", hostId_);
             break;
         case PlaybackStatus::PAUSED:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Player current status is PAUSED.");
+            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is PAUSED.", hostId_);
             break;
         case PlaybackStatus::STOPPED:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Player current status is STOPPED.");
+            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is STOPPED.", hostId_);
             break;
         case PlaybackStatus::PLAYBACK_COMPLETE:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Player current status is PLAYBACK_COMPLETE.");
+            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is PLAYBACK_COMPLETE.", hostId_);
             break;
         case PlaybackStatus::NONE:
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "Player current status is NONE.");
+            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Player current status is NONE.", hostId_);
             break;
         default:
-            TAG_LOGW(AceLogTag::ACE_VIDEO, "Invalid player status.");
+            TAG_LOGW(AceLogTag::ACE_VIDEO, "Video[%{public}d] Invalid player status.", hostId_);
             break;
     }
 }
@@ -666,7 +666,8 @@ void VideoPattern::OnStartRenderFrameCb()
     CHECK_NULL_VOID(videoLayoutProperty);
     SizeF videoSize =
         SizeF(static_cast<float>(mediaPlayer_->GetVideoWidth()), static_cast<float>(mediaPlayer_->GetVideoHeight()));
-    TAG_LOGI(AceLogTag::ACE_VIDEO, "start render frame size:%{public}s", videoSize.ToString().c_str());
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] start render frame size:%{public}s", hostId_,
+        videoSize.ToString().c_str());
     videoLayoutProperty->UpdateVideoSize(videoSize);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -712,6 +713,9 @@ void VideoPattern::OnPrepared(uint32_t duration, uint32_t currentPos, bool needF
         CHECK_NULL_VOID(eventHub);
         eventHub->FirePreparedEvent(param);
     }
+    TAG_LOGI(AceLogTag::ACE_VIDEO,
+        "Video[%{public}d] duration: %{public}u, loop: %{public}d, muted: %{public}d, Speed: %{public}f", hostId_,
+        duration_, loop_, muted_, progressRate_);
     UpdateLooping();
     UpdateSpeed();
     UpdateMuted();
@@ -896,6 +900,7 @@ void VideoPattern::OnAttachToFrameNode()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    hostId_ = host->GetId();
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->AddWindowStateChangedCallback(host->GetId());
@@ -1472,7 +1477,8 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     auto sliderPaintProperty = sliderNode->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_RETURN(sliderPaintProperty, nullptr);
     sliderPaintProperty->UpdateMax(static_cast<float>(duration_));
-    sliderPaintProperty->UpdateSelectColor(videoTheme->GetSelectColor());
+    sliderPaintProperty->UpdateSelectGradientColor(ConvertToGradient(videoTheme->GetSelectColor()));
+    sliderPaintProperty->UpdateSelectIsResourceColor(true);
     sliderPaintProperty->UpdateTrackBackgroundColor(ConvertToGradient(videoTheme->GetTrackBgColor()));
     sliderPaintProperty->UpdateTrackBackgroundIsResourceColor(true);
     sliderPaintProperty->UpdateValue(static_cast<float>(currentPos_));
@@ -1726,10 +1732,10 @@ void VideoPattern::Start()
 
     auto platformTask = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::BACKGROUND);
     platformTask.PostTask(
-        [weak = WeakClaim(RawPtr(mediaPlayer_))] {
+        [weak = WeakClaim(RawPtr(mediaPlayer_)), hostId = hostId_] {
             auto mediaPlayer = weak.Upgrade();
             CHECK_NULL_VOID(mediaPlayer);
-            TAG_LOGI(AceLogTag::ACE_VIDEO, "trigger mediaPlayer play");
+            TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] trigger mediaPlayer play", hostId);
             mediaPlayer->Play();
         },
         "ArkUIVideoPlay", PriorityType::VIP);
@@ -1740,6 +1746,7 @@ void VideoPattern::Pause()
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] trigger mediaPlayer pause", hostId_);
     auto ret = mediaPlayer_->Pause();
     if (ret != -1 && !isPaused_) {
         isPaused_ = true;
@@ -1752,7 +1759,7 @@ void VideoPattern::Stop()
     if (!mediaPlayer_ || !mediaPlayer_->IsMediaPlayerValid()) {
         return;
     }
-
+    TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] trigger mediaPlayer stop", hostId_);
     OnCurrentTimeChange(0);
     mediaPlayer_->Stop();
     isStop_ = true;
@@ -1984,10 +1991,11 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     }
     isInitialState_ = videoPattern->GetInitialState();
     auto layoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
-    auto videoSrcInfo = layoutProperty->GetVideoSource();
-    videoSrcInfo_.src = videoSrcInfo->GetSrc();
-    videoSrcInfo_.bundleName = videoSrcInfo->GetBundleName();
-    videoSrcInfo_.moduleName = videoSrcInfo->GetModuleName();
+    CHECK_NULL_VOID(layoutProperty);
+    auto videoSrcInfo = layoutProperty->GetVideoSourceValue(VideoSourceInfo());
+    videoSrcInfo_.src_ = videoSrcInfo.src_;
+    videoSrcInfo_.bundleName_ = videoSrcInfo.bundleName_;
+    videoSrcInfo_.moduleName_ = videoSrcInfo.moduleName_;
     isPrepared_ = videoPattern->GetIsPrepared();
     isSeeking_ = videoPattern->GetIsSeeking();
     isStop_ = videoPattern->GetIsStop();
@@ -2003,7 +2011,7 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
     SetCurrentVolume(videoPattern->GetCurrentVolume());
 
     fullScreenNodeId_.reset();
-    RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src, instanceId_);
+    RegisterMediaPlayerEvent(WeakClaim(this), mediaPlayer_, videoSrcInfo_.src_, instanceId_);
     auto videoNode = GetHost();
     CHECK_NULL_VOID(videoNode);
     // change event hub to the origin video node

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,6 +79,9 @@
 #include "core/components_ng/pattern/swiper/swiper_theme.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "core/components_ng/pattern/divider/divider_theme_wrapper.h"
+#include "core/components_ng/pattern/search/search_theme_wrapper.h"
+#include "core/components_ng/pattern/text/text_theme_wrapper.h"
+#include "core/components_ng/pattern/text_field/text_field_theme_wrapper.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -166,7 +169,10 @@ RefPtr<NG::TokenThemeWrapper> ThemeWrapperBuildFunc(const RefPtr<ThemeConstants>
 
 const std::unordered_map<ThemeType, RefPtr<NG::TokenThemeWrapper>(*)(const RefPtr<ThemeConstants>&)>
     TOKEN_THEME_WRAPPER_BUILDERS = {
-        { DividerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DividerThemeWrapper::WrapperBuilder> }
+        { DividerTheme::TypeId(), &ThemeWrapperBuildFunc<NG::DividerThemeWrapper::WrapperBuilder> },
+        { SearchTheme::TypeId(), &ThemeWrapperBuildFunc<NG::SearchThemeWrapper::WrapperBuilder> },
+        { TextTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextThemeWrapper::WrapperBuilder> },
+        { TextFieldTheme::TypeId(), &ThemeWrapperBuildFunc<NG::TextFieldThemeWrapper::WrapperBuilder> }
     };
 
 std::unordered_map<ThemeType, Ace::Kit::BuildFunc> THEME_BUILDERS_KIT;

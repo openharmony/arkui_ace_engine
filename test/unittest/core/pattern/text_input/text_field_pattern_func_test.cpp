@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#include "test/mock/core/common/mock_container.h"
 #include "text_input_base.h"
+#include "test/mock/core/common/mock_container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -717,7 +717,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc041, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    TextContentType type = TextContentType(30);
+    TextContentType type = TextContentType(38);
     auto state = pattern->TextContentTypeToAceAutoFillType(type);
     EXPECT_TRUE(state == AceAutoFillType::ACE_UNSPECIFIED);
 }
@@ -869,14 +869,15 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc051, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    SourceAndValueInfo info;
-    info.isIME = true;
     auto state = false;
     auto eventHub = pattern->GetHost()->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto callback = [&state](const InsertValueInfo& info){ return (state = true); };
     eventHub->SetOnWillInsertValueEvent(callback);
-    pattern->InsertValueOperation(info);
+    InsertCommandInfo info;
+    info.insertValue = u"";
+    info.reason = InputReason::IME;
+    pattern->ExecuteInsertValueCommand(info);
     EXPECT_TRUE(state);
 }
 
@@ -896,12 +897,13 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc052, TestSize.Level1)
     auto state = false;
     auto callback = [&state](const InsertValueInfo&){ return (state = true); };
     eventHub->SetOnWillInsertValueEvent(callback);
-    SourceAndValueInfo info;
-    info.isIME = true;
     pattern->selectController_->firstHandleInfo_.index = 0;
     pattern->selectController_->secondHandleInfo_.index = 0;
-    
-    pattern->InsertValueOperation(info);
+
+    InsertCommandInfo info;
+    info.insertValue = u"";
+    info.reason = InputReason::IME;
+    pattern->ExecuteInsertValueCommand(info);
     EXPECT_TRUE(state);
 }
 
@@ -920,12 +922,10 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc053, TestSize.Level1)
     auto state = false;
     auto callback = [&state](const DeleteValueInfo&){ state = true; };
     eventHub->SetOnDidDeleteEvent(callback);
-    SourceAndValueInfo info;
-    info.isIME = true;
     pattern->selectController_->firstHandleInfo_.index = 0;
     pattern->selectController_->secondHandleInfo_.index = 0;
-    
-    pattern->InsertValueOperation(info);
+
+    pattern->AddInsertCommand(u"", InputReason::IME);
     EXPECT_FALSE(pattern->cursorVisible_);
 }
 
@@ -986,7 +986,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc057, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     std::u16string insertValue = u"1";
     pattern->obscureTickCountDown_ = 10;
     pattern->UpdateObscure(insertValue, false);
@@ -1001,7 +1001,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc058, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     auto eventHub = pattern->GetFocusHub();
     eventHub->currentFocus_ = false;
     pattern->InsertValue(u"", true);
@@ -1016,7 +1016,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc059, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     auto eventHub = pattern->GetFocusHub();
     eventHub->currentFocus_ = true;
     pattern->isEdit_ = false;
@@ -1032,7 +1032,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc060, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     auto eventHub = pattern->GetFocusHub();
     eventHub->currentFocus_ = true;
     pattern->isEdit_ = true;
@@ -1050,7 +1050,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc061, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     auto eventHub = pattern->GetFocusHub();
     eventHub->currentFocus_ = true;
     pattern->isEdit_ = true;
@@ -1077,14 +1077,14 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc062, TestSize.Level1)
     auto eventHub = pattern->GetFocusHub();
     eventHub->currentFocus_ = true;
     pattern->isEdit_ = true;
-    while (!pattern->insertValueOperations_.empty()) {
-        pattern->insertValueOperations_.pop();
+    while (!pattern->insertCommands_.empty()) {
+        pattern->insertCommands_.pop();
     }
 
     pattern->focusIndex_ = FocuseIndex::TEXT;
     pattern->hasPreviewText_ = false;
     pattern->InsertValue(u"", true);
-    EXPECT_FALSE(pattern->insertValueOperations_.empty());
+    EXPECT_FALSE(pattern->insertCommands_.empty());
 }
 
 HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc063, TestSize.Level1)
@@ -1319,7 +1319,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc072, TestSize.Level1)
     element->tag_ = V2::SHEET_WRAPPER_TAG;
     textFieldNode->SetParent(element);
     auto result = textFieldManager->FindNavNode(textFieldNode);
-    auto parent = textFieldNode->GetAncestorNodeOfFrame();
+    auto parent = textFieldNode->GetAncestorNodeOfFrame(false);
     auto sheetNode = parent->GetChildAtIndex(0);
     EXPECT_EQ(result, sheetNode);
 }
@@ -1376,9 +1376,9 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc074, TestSize.Level1)
     ASSERT_NE(navigationNode, nullptr);
     navigationNode->tag_ = V2::NAVIGATION_VIEW_ETS_TAG;
     element1->SetParent(navigationNode);
-    auto oldParent = textFieldNode1->GetAncestorNodeOfFrame();
+    auto oldParent = textFieldNode1->GetAncestorNodeOfFrame(false);
     auto result = textFieldManager->FindNavNode(textFieldNode1);
-    auto newParent = textFieldNode1->GetAncestorNodeOfFrame();
+    auto newParent = textFieldNode1->GetAncestorNodeOfFrame(false);
     EXPECT_EQ(oldParent, newParent);
     EXPECT_EQ(result, nullptr);
 }
@@ -1414,11 +1414,11 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc075, TestSize.Level1)
     ASSERT_NE(navigationNode, nullptr);
     navigationNode->tag_ = V2::NAVDESTINATION_VIEW_ETS_TAG;
     element1->SetParent(navigationNode);
-    auto oldParent = textFieldNode1->GetAncestorNodeOfFrame();
-    auto oldNavigationNode = oldParent->GetAncestorNodeOfFrame();
+    auto oldParent = textFieldNode1->GetAncestorNodeOfFrame(false);
+    auto oldNavigationNode = oldParent->GetAncestorNodeOfFrame(false);
     auto result = textFieldManager->FindNavNode(textFieldNode1);
-    auto newParent = textFieldNode1->GetAncestorNodeOfFrame();
-    auto newNavigationNode = oldParent->GetAncestorNodeOfFrame();
+    auto newParent = textFieldNode1->GetAncestorNodeOfFrame(false);
+    auto newNavigationNode = oldParent->GetAncestorNodeOfFrame(false);
     EXPECT_EQ(oldNavigationNode, newNavigationNode);
     EXPECT_EQ(result, nullptr);
 }
@@ -1454,11 +1454,11 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc076, TestSize.Level1)
     ASSERT_NE(navigationNode, nullptr);
     navigationNode->tag_ = V2::NAVBAR_ETS_TAG;
     element1->SetParent(navigationNode);
-    auto oldParent = textFieldNode1->GetAncestorNodeOfFrame();
-    auto oldNavigationNode = oldParent->GetAncestorNodeOfFrame();
+    auto oldParent = textFieldNode1->GetAncestorNodeOfFrame(false);
+    auto oldNavigationNode = oldParent->GetAncestorNodeOfFrame(false);
     auto result = textFieldManager->FindNavNode(textFieldNode1);
-    auto newParent = textFieldNode1->GetAncestorNodeOfFrame();
-    auto newNavigationNode = oldParent->GetAncestorNodeOfFrame();
+    auto newParent = textFieldNode1->GetAncestorNodeOfFrame(false);
+    auto newNavigationNode = oldParent->GetAncestorNodeOfFrame(false);
     EXPECT_EQ(oldNavigationNode, newNavigationNode);
     EXPECT_EQ(result, nullptr);
 }
@@ -1689,5 +1689,131 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc084, TestSize.Level1)
     textFieldManager->onFocusTextField_ = AceType::DynamicCast<Pattern>(pattern);
     textFieldManager->SetClickPosition(menuOffset);
     EXPECT_NE(textFieldManager->optionalPosition_, menuOffset);
+}
+
+/**
+ * @tc.name: TextPatternFunc085
+ * @tc.desc: test GetKeyboardHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc085, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    auto result = pattern->GetKeyboardHeight();
+    EXPECT_EQ(result, 0.0f);
+}
+
+/**
+ * @tc.name: TextPatternFunc086
+ * @tc.desc: test SetKeyboardAreaChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc086, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<UINode> element = AceType::Claim<UINode>(textFieldNode.GetRawPtr());
+    keyboard->children_.emplace_back(element);
+    RefPtr<SafeAreaManager> safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    ASSERT_NE(safeAreaManager, nullptr);
+    safeAreaManager->SetRawKeyboardHeight(5.0f);
+    auto pipeline = pattern->GetHost()->GetContext();
+    pipeline->safeAreaManager_ = safeAreaManager;
+    pattern->SetKeyboardAreaChange(true);
+    EXPECT_EQ(pipeline->safeAreaManager_->GetRawKeyboardHeight(), 0.0f);
+}
+
+/**
+ * @tc.name: TextPatternFunc087
+ * @tc.desc: test SetKeyboardAreaChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc087, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto pipeline = pattern->GetHost()->GetContext();
+    pipeline->safeAreaManager_ = nullptr;
+    pattern->SetKeyboardAreaChange(true);
+    EXPECT_EQ(pipeline->safeAreaManager_, nullptr);
+}
+
+/**
+ * @tc.name: TextPatternFunc088
+ * @tc.desc: test SetKeyboardAreaChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc088, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<SafeAreaManager> safeAreaManager = AceType::MakeRefPtr<SafeAreaManager>();
+    ASSERT_NE(safeAreaManager, nullptr);
+    safeAreaManager->SetRawKeyboardHeight(5.0f);
+    auto pipeline = pattern->GetHost()->GetContext();
+    pipeline->safeAreaManager_ = safeAreaManager;
+    pattern->SetKeyboardAreaChange(false);
+    EXPECT_EQ(pipeline->safeAreaManager_->GetRawKeyboardHeight(), 5.0f);
+}
+
+/**
+ * @tc.name: TextPatternFunc089
+ * @tc.desc: test OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc089, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetKeyboardOption(true);
+    pattern->OnAreaChangedInner();
+    EXPECT_EQ(pattern->keyboardHeight_, 0.0f);
+}
+
+/**
+ * @tc.name: TextPatternFunc090
+ * @tc.desc: test OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc090, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetKeyboardOption(false);
+    pattern->keyboardHeight_ = 5.0f;
+    pattern->OnAreaChangedInner();
+    EXPECT_EQ(pattern->keyboardHeight_, 5.0f);
+}
+
+/**
+ * @tc.name: TextPatternFunc091
+ * @tc.desc: test OnAreaChangedInner.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc091, TestSize.Level1)
+{
+    auto keyboard = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<KeyboardPattern>(2));
+    ASSERT_NE(keyboard, nullptr);
+    auto pattern = keyboard->GetPattern<KeyboardPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->SetKeyboardOption(true);
+    pattern->keyboardHeight_ = 5.0f;
+    pattern->OnAreaChangedInner();
+    EXPECT_EQ(pattern->keyboardHeight_, 0.0f);
 }
 } // namespace OHOS::Ace

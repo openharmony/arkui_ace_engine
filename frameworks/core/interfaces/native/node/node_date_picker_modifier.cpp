@@ -406,6 +406,27 @@ ArkUI_Int32 GetDatePickerMode(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return static_cast<int>(DatePickerModelNG::getMode(frameNode));
 }
+
+ArkUI_Bool GetEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, true);
+    return DatePickerModelNG::GetEnableHapticFeedback(frameNode);
+}
+
+void SetEnableHapticFeedback(ArkUINodeHandle node, int enableHapticFeedback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetEnableHapticFeedback(frameNode, enableHapticFeedback);
+}
+
+void ResetEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetEnableHapticFeedback(frameNode, true);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -440,6 +461,9 @@ const ArkUIDatePickerModifier* GetDatePickerModifier()
         .getDatePickerMode = GetDatePickerMode,
         .setDatePickerMode = SetDatePickerMode,
         .resetDatePickerMode = ResetDatePickerMode,
+        .getEnableHapticFeedback = GetEnableHapticFeedback,
+        .setEnableHapticFeedback = SetEnableHapticFeedback,
+        .resetEnableHapticFeedback = ResetEnableHapticFeedback,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -477,6 +501,9 @@ const CJUIDatePickerModifier* GetCJUIDatePickerModifier()
         .getDatePickerMode = GetDatePickerMode,
         .setDatePickerMode = SetDatePickerMode,
         .resetDatePickerMode = ResetDatePickerMode,
+        .getEnableHapticFeedback = GetEnableHapticFeedback,
+        .setEnableHapticFeedback = SetEnableHapticFeedback,
+        .resetEnableHapticFeedback = ResetEnableHapticFeedback,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

@@ -46,7 +46,7 @@ class ACE_FORCE_EXPORT LongPressRecognizer : public MultiFingersRecognizer {
 public:
     explicit LongPressRecognizer() = default;
     LongPressRecognizer(int32_t duration, int32_t fingers, bool repeat,
-        bool isForDrag = false, bool isDisableMouseLeft = false);
+        bool isForDrag = false, bool isDisableMouseLeft = false, bool isLimitFingerCount = false);
 
     LongPressRecognizer(bool isForDrag = false, bool isDisableMouseLeft = false)
         : isForDrag_(isForDrag), isDisableMouseLeft_(isDisableMouseLeft)

@@ -178,6 +178,12 @@ TouchEvent& TouchEvent::SetPressedKeyCodes(const std::vector<KeyCode>& pressedKe
     return *this;
 }
 
+TouchEvent& TouchEvent::SetIsPassThroughMode(bool isPassThroughMode)
+{
+    this->isPassThroughMode = isPassThroughMode;
+    return *this;
+}
+
 TouchEvent TouchEvent::CloneWith(float scale) const
 {
     return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
@@ -213,6 +219,7 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.inputXDeltaSlope = inputXDeltaSlope;
     event.inputYDeltaSlope = inputYDeltaSlope;
     event.eventType = UIInputEventType::TOUCH;
+    event.isPassThroughMode = isPassThroughMode;
     return event;
 }
 
@@ -349,7 +356,8 @@ TouchEvent TouchEvent::UpdatePointers() const
         .SetSourceType(sourceType)
         .SetIsInterpolated(isInterpolated)
         .SetPointerEvent(pointerEvent)
-        .SetOriginalId(originalId);
+        .SetOriginalId(originalId)
+        .SetIsPassThroughMode(isPassThroughMode);
     event.pointers.emplace_back(std::move(point));
     return event;
 }
@@ -461,6 +469,36 @@ int64_t TouchLocationInfo::GetTouchDeviceId() const
 void TouchLocationInfo::SetTouchType(TouchType type)
 {
     touchType_ = type;
+}
+
+void TouchLocationInfo::SetPressedTime(TimeStamp pressedTime)
+{
+    pressedTime_ = pressedTime;
+}
+
+TimeStamp TouchLocationInfo::GetPressedTime() const
+{
+    return pressedTime_;
+}
+
+void TouchLocationInfo::SetWidth(int32_t width)
+{
+    width_ = width;
+}
+
+int32_t TouchLocationInfo::GetWidth() const
+{
+    return width_;
+}
+
+void TouchLocationInfo::SetHeight(int32_t height)
+{
+    height_ = height;
+}
+
+int32_t TouchLocationInfo::GetHeight() const
+{
+    return height_;
 }
 
 void StateRecord::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const

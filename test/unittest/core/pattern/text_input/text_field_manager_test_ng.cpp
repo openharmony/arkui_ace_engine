@@ -13,14 +13,18 @@
  * limitations under the License.
  */
 
+#include <memory>
 #include <utility>
 
 #include "foundation/graphic/graphic_utils_lite/interfaces/kits/gfx_utils/graphic_types.h"
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "text_input_base.h"
 
+#include "base/memory/ace_type.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/components_ng/pattern/text_field/text_content_type.h"
+#include "core/components_ng/pattern/text_field/text_field_select_overlay.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -28,6 +32,36 @@ using namespace testing::ext;
 namespace OHOS::Ace::NG {
 class TextFieldManagerTestNG : public TextInputBases {
 public:
+};
+
+class MockTextBase : public TextFieldPattern {
+public:
+    MockTextBase() = default;
+    ~MockTextBase() override = default;
+
+    MOCK_METHOD1(BetweenSelectedPosition, bool(const Offset& globalOffset));
+};
+
+class MockBaseTextSelectOverlay : public BaseTextSelectOverlay {
+public:
+    explicit MockBaseTextSelectOverlay(const WeakPtr<TextBase>& textBase) : BaseTextSelectOverlay(textBase) {}
+    ~MockBaseTextSelectOverlay() = default;
+
+    MOCK_METHOD1(CheckHandleVisible, bool(const RectF& paintRect));
+};
+
+class MockUINode : public UINode {
+public:
+    MockUINode(const std::string& tag, int32_t nodeId, bool isRoot = false) : UINode(tag, nodeId) {}
+    ~MockUINode() {};
+
+    MOCK_CONST_METHOD0(IsAtomicNode, bool());
+};
+
+class MySelectContentOverlayManager : public SelectContentOverlayManager {
+public:
+    explicit MySelectContentOverlayManager(const RefPtr<FrameNode>& rootNode) : SelectContentOverlayManager(rootNode) {}
+    ~MySelectContentOverlayManager() override = default;
 };
 
 /**
@@ -241,5 +275,381 @@ HWTEST_F(TextFieldManagerTestNG, TextFieldManagerNG_UpdateTextFieldInfo005, Test
     auto inputType = afterInnerMap.find(info_insert.nodeId)->second.inputType;
     EXPECT_NE(afterInnerMap.find(info.nodeId), afterInnerMap.end());
     EXPECT_EQ(inputType, TextInputType::DATETIME);
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlay_GetTextInputCaretPosition001
+ * @tc.desc: test GetTextInputCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldSelectOverlay_GetTextInputCaretPosition001, TestSize.Level1)
+{
+    auto refTextBase = AceType::MakeRefPtr<MockTextBase>();
+    WeakPtr<TextBase> textBase = refTextBase;
+    TextFieldSelectOverlay textFieldSelectOverlay = TextFieldSelectOverlay(textBase);
+    OffsetF localOffset(10.0f, 10.0f);
+    WeakPtr<TextBase> hostTextBase = refTextBase;
+    MockBaseTextSelectOverlay mockbBaseTextSelectOverlay = MockBaseTextSelectOverlay(hostTextBase);
+    refTextBase->contentRect_ = RectF(20.0f, 30.0f, 60.0f, 80.0f);
+    auto refPattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> pattern = refPattern;
+    auto contentController = AceType::MakeRefPtr<ContentController>(pattern);
+    auto selectController = AceType::MakeRefPtr<TextSelectController>(pattern);
+    refTextBase->contentController_ = contentController;
+    refTextBase->selectController_ = selectController;
+    refTextBase->contentController_->content_ = u"2";
+    HandleInfoNG firstHandleInfo;
+    firstHandleInfo.index = 4;
+    HandleInfoNG secondHandleInfo;
+    secondHandleInfo.index = 5;
+    refTextBase->selectController_->firstHandleInfo_ = firstHandleInfo;
+    refTextBase->selectController_->secondHandleInfo_ = secondHandleInfo;
+    SelectOverlayHolder selectOverlayHolder;
+    auto frameNode = FrameNode::CreateFrameNode("tag", 2, refPattern, false);
+    auto mockUINode = AceType::MakeRefPtr<MockUINode>("tag", 2, false);
+    WeakPtr<UINode> parent = mockUINode;
+    frameNode->parent_ = parent;
+    WeakPtr<FrameNode> node(frameNode);
+    auto manager = AceType::MakeRefPtr<MySelectContentOverlayManager>(frameNode);
+    std::shared_ptr<SelectOverlayInfo> shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
+    shareOverlayInfo->handleReverse = false;
+    shareOverlayInfo->enableHandleLevel = true;
+    manager->shareOverlayInfo_ = shareOverlayInfo;
+    manager->handleNode_ = node;
+    WeakPtr<AceType> bindManager = manager;
+    textFieldSelectOverlay.bindManager_ = bindManager;
+    SelectContentOverlayManager selectContentOverlayManager(frameNode);
+    selectContentOverlayManager.selectOverlayNode_ = frameNode;
+    auto index = textFieldSelectOverlay.GetTextInputCaretPosition(localOffset, false);
+    EXPECT_EQ(index, 5);
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlay_GetTextInputCaretPosition002
+ * @tc.desc: test GetTextInputCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldSelectOverlay_GetTextInputCaretPosition002, TestSize.Level1)
+{
+    auto refTextBase = AceType::MakeRefPtr<MockTextBase>();
+    WeakPtr<TextBase> textBase = refTextBase;
+    TextFieldSelectOverlay textFieldSelectOverlay = TextFieldSelectOverlay(textBase);
+    OffsetF localOffset(10.0f, 10.0f);
+    WeakPtr<TextBase> hostTextBase = refTextBase;
+    MockBaseTextSelectOverlay mockbBaseTextSelectOverlay = MockBaseTextSelectOverlay(hostTextBase);
+    refTextBase->contentRect_ = RectF(20.0f, 30.0f, 60.0f, 80.0f);
+    auto refPattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> pattern = refPattern;
+    auto contentController = AceType::MakeRefPtr<ContentController>(pattern);
+    auto selectController = AceType::MakeRefPtr<TextSelectController>(pattern);
+    refTextBase->contentController_ = contentController;
+    refTextBase->selectController_ = selectController;
+    refTextBase->contentController_->content_ = u"2";
+    HandleInfoNG firstHandleInfo;
+    firstHandleInfo.index = 4;
+    HandleInfoNG secondHandleInfo;
+    secondHandleInfo.index = 5;
+    refTextBase->selectController_->firstHandleInfo_ = firstHandleInfo;
+    refTextBase->selectController_->secondHandleInfo_ = secondHandleInfo;
+    SelectOverlayHolder selectOverlayHolder;
+    auto frameNode = FrameNode::CreateFrameNode("tag", 2, refPattern, false);
+    auto mockUINode = AceType::MakeRefPtr<MockUINode>("tag", 2, false);
+    WeakPtr<UINode> parent = mockUINode;
+    frameNode->parent_ = parent;
+    WeakPtr<FrameNode> node(frameNode);
+    auto manager = AceType::MakeRefPtr<MySelectContentOverlayManager>(frameNode);
+    std::shared_ptr<SelectOverlayInfo> shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
+    shareOverlayInfo->handleReverse = true;
+    shareOverlayInfo->enableHandleLevel = true;
+    manager->shareOverlayInfo_ = shareOverlayInfo;
+    manager->handleNode_ = node;
+    WeakPtr<AceType> bindManager = manager;
+    textFieldSelectOverlay.bindManager_ = bindManager;
+    SelectContentOverlayManager selectContentOverlayManager(frameNode);
+    selectContentOverlayManager.selectOverlayNode_ = frameNode;
+    auto index = textFieldSelectOverlay.GetTextInputCaretPosition(localOffset, true);
+    EXPECT_EQ(index, 5);
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlay_GetTextInputCaretPosition003
+ * @tc.desc: test GetTextInputCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldSelectOverlay_GetTextInputCaretPosition003, TestSize.Level1)
+{
+    auto refTextBase = AceType::MakeRefPtr<MockTextBase>();
+    WeakPtr<TextBase> textBase = refTextBase;
+    TextFieldSelectOverlay textFieldSelectOverlay = TextFieldSelectOverlay(textBase);
+    OffsetF localOffset(10.0f, 10.0f);
+    WeakPtr<TextBase> hostTextBase = refTextBase;
+    MockBaseTextSelectOverlay mockbBaseTextSelectOverlay = MockBaseTextSelectOverlay(hostTextBase);
+    refTextBase->contentRect_ = RectF(20.0f, 30.0f, 60.0f, 80.0f);
+    auto refPattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> pattern = refPattern;
+    auto contentController = AceType::MakeRefPtr<ContentController>(pattern);
+    auto selectController = AceType::MakeRefPtr<TextSelectController>(pattern);
+    refTextBase->contentController_ = contentController;
+    refTextBase->selectController_ = selectController;
+    refTextBase->contentController_->content_ = u"2";
+    HandleInfoNG firstHandleInfo;
+    firstHandleInfo.index = 4;
+    HandleInfoNG secondHandleInfo;
+    secondHandleInfo.index = 5;
+    refTextBase->selectController_->firstHandleInfo_ = firstHandleInfo;
+    refTextBase->selectController_->secondHandleInfo_ = secondHandleInfo;
+    SelectOverlayHolder selectOverlayHolder;
+    auto frameNode = FrameNode::CreateFrameNode("tag", 2, refPattern, false);
+    auto mockUINode = AceType::MakeRefPtr<MockUINode>("tag", 2, false);
+    WeakPtr<UINode> parent = mockUINode;
+    frameNode->parent_ = parent;
+    WeakPtr<FrameNode> node(frameNode);
+    auto manager = AceType::MakeRefPtr<MySelectContentOverlayManager>(frameNode);
+    std::shared_ptr<SelectOverlayInfo> shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
+    shareOverlayInfo->handleReverse = false;
+    shareOverlayInfo->enableHandleLevel = true;
+    manager->shareOverlayInfo_ = shareOverlayInfo;
+    manager->handleNode_ = node;
+    WeakPtr<AceType> bindManager = manager;
+    textFieldSelectOverlay.bindManager_ = bindManager;
+    SelectContentOverlayManager selectContentOverlayManager(frameNode);
+    selectContentOverlayManager.selectOverlayNode_ = frameNode;
+    auto index = textFieldSelectOverlay.GetTextInputCaretPosition(localOffset, true);
+    EXPECT_EQ(index, 4);
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlay_GetTextInputCaretPosition004
+ * @tc.desc: test GetTextInputCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldSelectOverlay_GetTextInputCaretPosition004, TestSize.Level1)
+{
+    auto refTextBase = AceType::MakeRefPtr<MockTextBase>();
+    WeakPtr<TextBase> textBase = refTextBase;
+    TextFieldSelectOverlay textFieldSelectOverlay = TextFieldSelectOverlay(textBase);
+    OffsetF localOffset(10.0f, 10.0f);
+    WeakPtr<TextBase> hostTextBase = refTextBase;
+    MockBaseTextSelectOverlay mockbBaseTextSelectOverlay = MockBaseTextSelectOverlay(hostTextBase);
+    refTextBase->contentRect_ = RectF(20.0f, 30.0f, 60.0f, 80.0f);
+    auto refPattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> pattern = refPattern;
+    auto contentController = AceType::MakeRefPtr<ContentController>(pattern);
+    auto selectController = AceType::MakeRefPtr<TextSelectController>(pattern);
+    refTextBase->contentController_ = contentController;
+    refTextBase->selectController_ = selectController;
+    refTextBase->contentController_->content_ = u"2";
+    HandleInfoNG firstHandleInfo;
+    firstHandleInfo.index = 4;
+    HandleInfoNG secondHandleInfo;
+    secondHandleInfo.index = 5;
+    refTextBase->selectController_->firstHandleInfo_ = firstHandleInfo;
+    refTextBase->selectController_->secondHandleInfo_ = secondHandleInfo;
+    SelectOverlayHolder selectOverlayHolder;
+    auto frameNode = FrameNode::CreateFrameNode("tag", 2, refPattern, false);
+    auto mockUINode = AceType::MakeRefPtr<MockUINode>("tag", 2, false);
+    WeakPtr<UINode> parent = mockUINode;
+    frameNode->parent_ = parent;
+    WeakPtr<FrameNode> node(frameNode);
+    auto manager = AceType::MakeRefPtr<MySelectContentOverlayManager>(frameNode);
+    std::shared_ptr<SelectOverlayInfo> shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
+    shareOverlayInfo->handleReverse = true;
+    shareOverlayInfo->enableHandleLevel = true;
+    manager->shareOverlayInfo_ = shareOverlayInfo;
+    manager->handleNode_ = node;
+    WeakPtr<AceType> bindManager = manager;
+    textFieldSelectOverlay.bindManager_ = bindManager;
+    SelectContentOverlayManager selectContentOverlayManager(frameNode);
+    selectContentOverlayManager.selectOverlayNode_ = frameNode;
+    auto index = textFieldSelectOverlay.GetTextInputCaretPosition(localOffset, false);
+    EXPECT_EQ(index, 4);
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlay_GetTextInputCaretPosition005
+ * @tc.desc: test GetTextInputCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldSelectOverlay_GetTextInputCaretPosition005, TestSize.Level1)
+{
+    auto refTextBase = AceType::MakeRefPtr<MockTextBase>();
+    WeakPtr<TextBase> textBase = refTextBase;
+    TextFieldSelectOverlay textFieldSelectOverlay = TextFieldSelectOverlay(textBase);
+    OffsetF localOffset(100.0f, 100.0f);
+    WeakPtr<TextBase> hostTextBase = refTextBase;
+    MockBaseTextSelectOverlay mockbBaseTextSelectOverlay = MockBaseTextSelectOverlay(hostTextBase);
+    refTextBase->contentRect_ = RectF(20.0f, 30.0f, 60.0f, 80.0f);
+    auto refPattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> pattern = refPattern;
+    auto contentController = AceType::MakeRefPtr<ContentController>(pattern);
+    auto selectController = AceType::MakeRefPtr<TextSelectController>(pattern);
+    refTextBase->contentController_ = contentController;
+    refTextBase->selectController_ = selectController;
+    refTextBase->contentController_->content_ = u"2";
+    HandleInfoNG firstHandleInfo;
+    firstHandleInfo.index = 4;
+    HandleInfoNG secondHandleInfo;
+    secondHandleInfo.index = 5;
+    refTextBase->selectController_->firstHandleInfo_ = firstHandleInfo;
+    refTextBase->selectController_->secondHandleInfo_ = secondHandleInfo;
+    SelectOverlayHolder selectOverlayHolder;
+    auto frameNode = FrameNode::CreateFrameNode("tag", 2, refPattern, false);
+    auto mockUINode = AceType::MakeRefPtr<MockUINode>("tag", 2, false);
+    WeakPtr<UINode> parent = mockUINode;
+    frameNode->parent_ = parent;
+    WeakPtr<FrameNode> node(frameNode);
+    auto manager = AceType::MakeRefPtr<MySelectContentOverlayManager>(frameNode);
+    std::shared_ptr<SelectOverlayInfo> shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
+    shareOverlayInfo->handleReverse = false;
+    shareOverlayInfo->enableHandleLevel = true;
+    manager->shareOverlayInfo_ = shareOverlayInfo;
+    manager->handleNode_ = node;
+    WeakPtr<AceType> bindManager = manager;
+    textFieldSelectOverlay.bindManager_ = bindManager;
+    SelectContentOverlayManager selectContentOverlayManager(frameNode);
+    selectContentOverlayManager.selectOverlayNode_ = frameNode;
+    auto index = textFieldSelectOverlay.GetTextInputCaretPosition(localOffset, false);
+    EXPECT_EQ(index, 5);
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlay_GetTextInputCaretPosition006
+ * @tc.desc: test GetTextInputCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldSelectOverlay_GetTextInputCaretPosition006, TestSize.Level1)
+{
+    auto refTextBase = AceType::MakeRefPtr<MockTextBase>();
+    WeakPtr<TextBase> textBase = refTextBase;
+    TextFieldSelectOverlay textFieldSelectOverlay = TextFieldSelectOverlay(textBase);
+    OffsetF localOffset(100.0f, 100.0f);
+    WeakPtr<TextBase> hostTextBase = refTextBase;
+    MockBaseTextSelectOverlay mockbBaseTextSelectOverlay = MockBaseTextSelectOverlay(hostTextBase);
+    refTextBase->contentRect_ = RectF(20.0f, 30.0f, 60.0f, 80.0f);
+    auto refPattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> pattern = refPattern;
+    auto contentController = AceType::MakeRefPtr<ContentController>(pattern);
+    auto selectController = AceType::MakeRefPtr<TextSelectController>(pattern);
+    refTextBase->contentController_ = contentController;
+    refTextBase->selectController_ = selectController;
+    refTextBase->contentController_->content_ = u"2";
+    HandleInfoNG firstHandleInfo;
+    firstHandleInfo.index = 4;
+    HandleInfoNG secondHandleInfo;
+    secondHandleInfo.index = 5;
+    refTextBase->selectController_->firstHandleInfo_ = firstHandleInfo;
+    refTextBase->selectController_->secondHandleInfo_ = secondHandleInfo;
+    SelectOverlayHolder selectOverlayHolder;
+    auto frameNode = FrameNode::CreateFrameNode("tag", 2, refPattern, false);
+    auto mockUINode = AceType::MakeRefPtr<MockUINode>("tag", 2, false);
+    WeakPtr<UINode> parent = mockUINode;
+    frameNode->parent_ = parent;
+    WeakPtr<FrameNode> node(frameNode);
+    auto manager = AceType::MakeRefPtr<MySelectContentOverlayManager>(frameNode);
+    std::shared_ptr<SelectOverlayInfo> shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
+    shareOverlayInfo->handleReverse = true;
+    shareOverlayInfo->enableHandleLevel = true;
+    manager->shareOverlayInfo_ = shareOverlayInfo;
+    manager->handleNode_ = node;
+    WeakPtr<AceType> bindManager = manager;
+    textFieldSelectOverlay.bindManager_ = bindManager;
+    SelectContentOverlayManager selectContentOverlayManager(frameNode);
+    selectContentOverlayManager.selectOverlayNode_ = frameNode;
+    auto index = textFieldSelectOverlay.GetTextInputCaretPosition(localOffset, true);
+    EXPECT_EQ(index, 5);
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlay_GetTextInputCaretPosition007
+ * @tc.desc: test GetTextInputCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldSelectOverlay_GetTextInputCaretPosition007, TestSize.Level1)
+{
+    auto refTextBase = AceType::MakeRefPtr<MockTextBase>();
+    WeakPtr<TextBase> textBase = refTextBase;
+    TextFieldSelectOverlay textFieldSelectOverlay = TextFieldSelectOverlay(textBase);
+    OffsetF localOffset(100.0f, 100.0f);
+    WeakPtr<TextBase> hostTextBase = refTextBase;
+    MockBaseTextSelectOverlay mockbBaseTextSelectOverlay = MockBaseTextSelectOverlay(hostTextBase);
+    refTextBase->contentRect_ = RectF(20.0f, 30.0f, 60.0f, 80.0f);
+    auto refPattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> pattern = refPattern;
+    auto contentController = AceType::MakeRefPtr<ContentController>(pattern);
+    auto selectController = AceType::MakeRefPtr<TextSelectController>(pattern);
+    refTextBase->contentController_ = contentController;
+    refTextBase->selectController_ = selectController;
+    refTextBase->contentController_->content_ = u"2";
+    HandleInfoNG firstHandleInfo;
+    firstHandleInfo.index = 4;
+    HandleInfoNG secondHandleInfo;
+    secondHandleInfo.index = 5;
+    refTextBase->selectController_->firstHandleInfo_ = firstHandleInfo;
+    refTextBase->selectController_->secondHandleInfo_ = secondHandleInfo;
+    SelectOverlayHolder selectOverlayHolder;
+    auto frameNode = FrameNode::CreateFrameNode("tag", 2, refPattern, false);
+    auto mockUINode = AceType::MakeRefPtr<MockUINode>("tag", 2, false);
+    WeakPtr<UINode> parent = mockUINode;
+    frameNode->parent_ = parent;
+    WeakPtr<FrameNode> node(frameNode);
+    auto manager = AceType::MakeRefPtr<MySelectContentOverlayManager>(frameNode);
+    std::shared_ptr<SelectOverlayInfo> shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
+    shareOverlayInfo->handleReverse = false;
+    shareOverlayInfo->enableHandleLevel = true;
+    manager->shareOverlayInfo_ = shareOverlayInfo;
+    manager->handleNode_ = node;
+    WeakPtr<AceType> bindManager = manager;
+    textFieldSelectOverlay.bindManager_ = bindManager;
+    SelectContentOverlayManager selectContentOverlayManager(frameNode);
+    selectContentOverlayManager.selectOverlayNode_ = frameNode;
+    auto index = textFieldSelectOverlay.GetTextInputCaretPosition(localOffset, true);
+    EXPECT_EQ(index, 4);
+}
+
+/**
+ * @tc.name: TextFieldSelectOverlay_GetTextInputCaretPosition008
+ * @tc.desc: test GetTextInputCaretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldManagerTestNG, TextFieldSelectOverlay_GetTextInputCaretPosition008, TestSize.Level1)
+{
+    auto refTextBase = AceType::MakeRefPtr<MockTextBase>();
+    WeakPtr<TextBase> textBase = refTextBase;
+    TextFieldSelectOverlay textFieldSelectOverlay = TextFieldSelectOverlay(textBase);
+    OffsetF localOffset(100.0f, 100.0f);
+    WeakPtr<TextBase> hostTextBase = refTextBase;
+    MockBaseTextSelectOverlay mockbBaseTextSelectOverlay = MockBaseTextSelectOverlay(hostTextBase);
+    refTextBase->contentRect_ = RectF(20.0f, 30.0f, 60.0f, 80.0f);
+    auto refPattern = AceType::MakeRefPtr<Pattern>();
+    WeakPtr<Pattern> pattern = refPattern;
+    auto contentController = AceType::MakeRefPtr<ContentController>(pattern);
+    auto selectController = AceType::MakeRefPtr<TextSelectController>(pattern);
+    refTextBase->contentController_ = contentController;
+    refTextBase->selectController_ = selectController;
+    refTextBase->contentController_->content_ = u"2";
+    HandleInfoNG firstHandleInfo;
+    firstHandleInfo.index = 4;
+    HandleInfoNG secondHandleInfo;
+    secondHandleInfo.index = 5;
+    refTextBase->selectController_->firstHandleInfo_ = firstHandleInfo;
+    refTextBase->selectController_->secondHandleInfo_ = secondHandleInfo;
+    SelectOverlayHolder selectOverlayHolder;
+    auto frameNode = FrameNode::CreateFrameNode("tag", 2, refPattern, false);
+    auto mockUINode = AceType::MakeRefPtr<MockUINode>("tag", 2, false);
+    WeakPtr<UINode> parent = mockUINode;
+    frameNode->parent_ = parent;
+    WeakPtr<FrameNode> node(frameNode);
+    auto manager = AceType::MakeRefPtr<MySelectContentOverlayManager>(frameNode);
+    std::shared_ptr<SelectOverlayInfo> shareOverlayInfo = std::make_shared<SelectOverlayInfo>();
+    shareOverlayInfo->handleReverse = true;
+    shareOverlayInfo->enableHandleLevel = true;
+    manager->shareOverlayInfo_ = shareOverlayInfo;
+    manager->handleNode_ = node;
+    WeakPtr<AceType> bindManager = manager;
+    textFieldSelectOverlay.bindManager_ = bindManager;
+    SelectContentOverlayManager selectContentOverlayManager(frameNode);
+    selectContentOverlayManager.selectOverlayNode_ = frameNode;
+    auto index = textFieldSelectOverlay.GetTextInputCaretPosition(localOffset, false);
+    EXPECT_EQ(index, 4);
 }
 } // namespace OHOS::Ace::NG

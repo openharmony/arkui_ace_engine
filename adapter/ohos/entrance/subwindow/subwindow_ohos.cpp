@@ -64,6 +64,8 @@
 namespace OHOS::Ace {
 namespace {
 const Rect MIN_WINDOW_HOT_AREA = Rect(0.0f, 0.0f, 1.0f, 1.0f);
+constexpr uint32_t ENABLE_SYSTEM_WINDOW_AVOID_AREA = 1;
+constexpr uint32_t ENABLE_APP_SUB_WINDOW_AVOID_AREA = 1 << 1;
 #ifndef NG_BUILD
 constexpr int32_t PLATFORM_VERSION_TEN = 10;
 #endif
@@ -231,10 +233,11 @@ bool SubwindowOhos::InitContainer()
         windowOption->SetWindowMode(Rosen::WindowMode::WINDOW_MODE_FLOATING);
         SetUIExtensionSubwindowFlag(windowOption, isAppSubwindow, parentWindow);
         windowOption->SetDisplayId(displayId);
+        OHOS::Rosen::WMError ret;
         window_ = OHOS::Rosen::Window::Create("ARK_APP_SUBWINDOW_" + windowTag + parentWindowName +
-            std::to_string(windowId_), windowOption, parentWindow->GetContext());
-        if (!window_) {
-            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed");
+            std::to_string(windowId_), windowOption, parentWindow->GetContext(), ret);
+        if (!window_ || ret != OHOS::Rosen::WMError::WM_OK) {
+            TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Window create failed, errCode is %{public}d", ret);
             return false;
         }
     }
@@ -298,6 +301,7 @@ bool SubwindowOhos::InitContainer()
     uiContentImpl->SetFontScaleAndWeightScale(container, childContainerId_);
     freeMultiWindowListener_ = new SwitchFreeMultiWindowListener(childContainerId_);
     window_->RegisterSwitchFreeMultiWindowListener(freeMultiWindowListener_);
+    window_->SetAvoidAreaOption(ENABLE_SYSTEM_WINDOW_AVOID_AREA | ENABLE_APP_SUB_WINDOW_AVOID_AREA);
 
 #ifndef NG_BUILD
 #ifdef ENABLE_ROSEN_BACKEND
@@ -564,6 +568,7 @@ void SubwindowOhos::ShowWindow(bool needFocus)
         RequestFocus();
     }
 
+    InitializeSafeArea();
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto context = aceContainer->GetPipelineContext();
@@ -950,6 +955,7 @@ RefPtr<StackElement> SubwindowOhos::GetStack()
 void SubwindowOhos::DeleteHotAreas(int32_t nodeId)
 {
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "delete hot area %{public}d", nodeId);
+    CHECK_NULL_VOID(window_);
     hotAreasMap_.erase(nodeId);
     if (hotAreasMap_.size() == 0) {
         // Set min window hot area so that sub window can transparent event.
@@ -1879,7 +1885,7 @@ void SubwindowOhos::ResizeWindowForFoldStatus(int32_t parentContainerId)
         CHECK_NULL_VOID(aceView);
         Platform::AceViewOhos::SurfaceChanged(aceView, defaultDisplay->GetWidth(), defaultDisplay->GetHeight(), 0);
     };
-    if (parentContainerId > 0) {
+    if (parentContainerId > 0 && parentContainerId < MIN_PA_SERVICE_ID) {
         ResizeWindowForFoldStatus();
         return;
     }
@@ -1988,5 +1994,65 @@ uint64_t SubwindowOhos::GetDisplayId()
         return window_->GetDisplayId();
     }
     return 0;
+}
+
+void SubwindowOhos::InitializeSafeArea()
+{
+    CHECK_NULL_VOID(window_);
+
+    auto container = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(container);
+    auto pipeline = DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+
+    auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
+    CHECK_NULL_VOID(parentContainer);
+
+    std::optional<NG::RectF> windowRect;
+    if (theme->GetExpandDisplay() || parentContainer->IsFreeMultiWindow()) {
+        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(window_->GetDisplayId());
+        CHECK_NULL_VOID(defaultDisplay);
+        windowRect = { 0.0, 0.0, defaultDisplay->GetWidth(), defaultDisplay->GetHeight() };
+    }
+
+    auto systemSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM, windowRect);
+    auto navSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR, windowRect);
+    pipeline->UpdateSystemSafeArea(systemSafeArea);
+    pipeline->UpdateNavSafeArea(navSafeArea);
+    if (pipeline->GetUseCutout()) {
+        auto cutoutSafeArea = container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT, windowRect);
+        pipeline->UpdateCutoutSafeArea(cutoutSafeArea);
+    }
+
+    auto safeAreaInsets = pipeline->GetScbSafeArea();
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "initializeSafeArea by windowRect: %{public}s, safeAreaInsets: %{public}s",
+        windowRect.value_or(NG::RectF()).ToString().c_str(), safeAreaInsets.ToString().c_str());
+}
+
+bool SubwindowOhos::ShowSelectOverlay(const RefPtr<NG::FrameNode>& overlayNode)
+{
+    TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "Show selectOverlay enter");
+    ContainerScope scope(childContainerId_);
+    CHECK_NULL_RETURN(window_, false);
+    ResizeWindow();
+    ShowWindow(false);
+    if (!isShowed_) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW,
+            "Show selectOverlay subwindow failed, subwindow not show after showWindow called.");
+        return false;
+    }
+    auto context = NG::PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(context, false);
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, false);
+    CHECK_NULL_RETURN(overlayNode, false);
+    overlayNode->MountToParent(rootNode);
+    rootNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
+    window_->SetTouchable(true);
+    window_->KeepKeyboardOnFocus(true);
+    window_->SetFocusable(false);
+    return true;
 }
 } // namespace OHOS::Ace

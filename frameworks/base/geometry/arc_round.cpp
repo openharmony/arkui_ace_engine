@@ -103,6 +103,14 @@ void ArcRound::SetWidth(float width)
     width_ = width;
 }
 
+double ArcRound::Get2PIRadians(double radian) const
+{
+    if (radian < 0) {
+        return 2 * PI_NUM + radian; // 2 * PI: 360度
+    }
+    return radian;
+}
+
 bool ArcRound::IsInRegion(const Point& point) const
 {
     float distance = pow(pow(point.GetX() - centerPoint_.GetX(), SQUARE) +
@@ -113,14 +121,19 @@ bool ArcRound::IsInRegion(const Point& point) const
     }
     auto startAngle = startAngle_;
     auto endAngle = startAngle_ + sweepAngle_;
+    auto startRadian = startAngle * PI_NUM / HALF_CIRCULARITY;
+    auto endRadian = endAngle * PI_NUM / HALF_CIRCULARITY;
     if (positionMode_ == PositionMode::LEFT) {
         endAngle = startAngle_ + sweepAngle_ <= -HALF_CIRCULARITY ? startAngle_ + sweepAngle_ + WHOLE_CIRCULARITY :
                                                                     startAngle_ + sweepAngle_;
-        if (angle > (startAngle * PI_NUM / HALF_CIRCULARITY) && angle < (endAngle * PI_NUM / HALF_CIRCULARITY)) {
+        startRadian = Get2PIRadians(startRadian);
+        endRadian = Get2PIRadians(endAngle * PI_NUM / HALF_CIRCULARITY);
+        angle = Get2PIRadians(angle);
+        if (angle < endRadian || angle > startRadian) {
             return false;
         }
     } else {
-        if (angle < (startAngle * PI_NUM / HALF_CIRCULARITY) || angle > (endAngle * PI_NUM / HALF_CIRCULARITY)) {
+        if (angle < startRadian || angle > endRadian) {
             return false;
         }
     }

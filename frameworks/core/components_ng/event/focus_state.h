@@ -37,6 +37,7 @@ class FocusState : public virtual AceType {
 public:
     FocusState() = default;
     explicit FocusState(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE);
+    explicit FocusState(const WeakPtr<FrameNode>& frameNode, FocusType type = FocusType::DISABLE);
     virtual ~FocusState() = default;
 
     void SetLastWeakFocusNode(const WeakPtr<FocusHub>& focusHub)
@@ -50,6 +51,10 @@ public:
     bool IsCurrentFocus() const
     {
         return currentFocus_;
+    }
+    void SetCurrentFocus(bool currentFocus)
+    {
+        currentFocus_ = currentFocus;
     }
     void SetTabStop(bool tabStop)
     {
@@ -66,6 +71,7 @@ public:
 
     bool currentFocus_ { false };
     WeakPtr<EventHub> eventHub_;
+    WeakPtr<FrameNode> frameNode_;
     FocusType focusType_ = FocusType::DISABLE;
     WeakPtr<FocusHub> lastWeakFocusNode_ { nullptr };
     bool tabStop_ { false };

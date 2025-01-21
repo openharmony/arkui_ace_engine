@@ -862,6 +862,7 @@ template("ace_core_ng_source_set") {
       # v1 deps
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
+      "$root_out_dir/arkui/framework/core/components/theme/theme_constants_watch.cpp",
       "components/checkable/checkable_theme.cpp",
       "components/common/painter/rosen_svg_painter.cpp",
       "components/custom_paint/render_custom_paint_creator.cpp",
@@ -910,6 +911,15 @@ template("ace_core_ng_source_set") {
       # text
       "text/text_emoji_processor.cpp",
     ]
+
+    if (ace_engine_feature_enable_event_extra_handling &&
+        defined(
+            vendor_configs.ace_engine_advanced_enable_event_extra_handling)) {
+      sources += vendor_configs.ace_engine_advanced_enable_event_extra_handling
+    } else {
+      sources += [ "event/event_info_convertor.cpp" ]
+    }
+
     include_dirs = [ "$ace_root" ]
     if (is_arkui_x) {
       include_dirs += [
@@ -1008,7 +1018,6 @@ template("ace_core_ng_source_set") {
       if (!is_arkui_x) {
         deps += [ "$ace_root/frameworks/core/components_ng/pattern/web:ace_core_components_web_pattern_ng_$platform" ]
         sources += [
-          "components/web/resource/web_area_changed.cpp",
           "components/web/resource/web_client_impl.cpp",
           "components/web/resource/web_configuration_observer.cpp",
           "components/web/resource/web_delegate.cpp",

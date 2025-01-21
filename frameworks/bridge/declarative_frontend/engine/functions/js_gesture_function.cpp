@@ -70,6 +70,7 @@ JSRef<JSObject> JsGestureFunction::CreateGestureEvent(const GestureEvent& info)
     gestureInfoObj->SetPropertyObject("target", target);
     gestureInfoObj->SetProperty<float>("axisVertical", info.GetVerticalAxis());
     gestureInfoObj->SetProperty<float>("axisHorizontal", info.GetHorizontalAxis());
+    gestureInfoObj->SetProperty<int32_t>("targetDisplayId", info.GetTargetDisplayId());
     gestureInfoObj->Wrap<GestureEvent>(const_cast<GestureEvent*> (&info));
     return gestureInfoObj;
 }

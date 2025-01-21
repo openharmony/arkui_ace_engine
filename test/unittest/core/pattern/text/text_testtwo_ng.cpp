@@ -779,7 +779,7 @@ HWTEST_F(TextTestTwoNg, IsDraggable001, TestSize.Level1)
     pattern->copyOption_ = CopyOptions::Distributed;
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     host->draggable_ = true;
-    host->eventHub_->SetOnDragStart(
+    host->GetEventHub<EventHub>()->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
 
     /**
@@ -1742,7 +1742,7 @@ HWTEST_F(TextTestTwoNg, HandleLongPress002, TestSize.Level1)
     auto [frameNode, pattern] = Init();
 
     frameNode->draggable_ = true;
-    frameNode->eventHub_->SetOnDragStart(
+    frameNode->GetEventHub<EventHub>()->SetOnDragStart(
         [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
     pattern->pManager_->AddParagraph({ .paragraph = paragraph, .start = 0, .end = 100 });
     pattern->copyOption_ = CopyOptions::InApp;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -22,13 +22,21 @@
 #define protected public
 #define private public
 #include "base/mousestyle/mouse_style.h"
+#include "core/common/agingadapation/aging_adapation_dialog_util.h"
+#include "core/components/dialog/dialog_properties.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_pattern.h"
+#include "core/components_ng/pattern/dialog/dialog_view.h"
 #include "core/components_ng/pattern/divider/divider_pattern.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_drag_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
+#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
@@ -43,18 +51,41 @@ class NavigationPatternTestThreeNg : public testing::Test {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
+    static RefPtr<FrameNode> CreateDialogNode();
 };
 
 void NavigationPatternTestThreeNg::SetUpTestSuite()
 {
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == DialogTheme::TypeId()) {
+            return AceType::MakeRefPtr<DialogTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
 }
 
 void NavigationPatternTestThreeNg::TearDownTestSuite()
 {
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
+}
+
+RefPtr<FrameNode> NavigationPatternTestThreeNg::CreateDialogNode()
+{
+    auto contentNode = FrameNode::CreateFrameNode(V2::BLANK_ETS_TAG, 100, AceType::MakeRefPtr<Pattern>());
+    DialogProperties dialogProperties {
+        .title = "Title",
+        .content = "Content",
+        .width = 300,
+        .height = 200,
+    };
+    return DialogView::CreateDialogNode(dialogProperties, contentNode);
 }
 
 /**
@@ -216,90 +247,6 @@ HWTEST_F(NavigationPatternTestThreeNg, JudgeFoldStateChangeAndUpdateState002, Te
     ASSERT_NE(container, nullptr);
     EXPECT_NE(container->GetCurrentFoldStatus(), navigationPattern->currentFoldStatus_);
     navigationPattern->JudgeFoldStateChangeAndUpdateState();
-    NavigationPatternTestThreeNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: ReplaceAnimation001
- * @tc.desc: Increase the coverage of NavigationPattern::ReplaceAnimation function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestThreeNg, ReplaceAnimation001, TestSize.Level1)
-{
-    NavigationPatternTestThreeNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto navBarNode = NavBarNode::GetOrCreateNavBarNode("NavBar", 201,
-        []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    navigationNode->navBarNode_ = navBarNode;
-    auto preTopNavDestinationNode = nullptr;
-    auto newTopNavDestinationNode = nullptr;
-
-    EXPECT_EQ(preTopNavDestinationNode, nullptr);
-    EXPECT_EQ(newTopNavDestinationNode, nullptr);
-    navigationPattern->ReplaceAnimation(preTopNavDestinationNode, newTopNavDestinationNode);
-    NavigationPatternTestThreeNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: ReplaceAnimation002
- * @tc.desc: Increase the coverage of NavigationPattern::ReplaceAnimation function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestThreeNg, ReplaceAnimation002, TestSize.Level1)
-{
-    NavigationPatternTestThreeNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto navBarNode = NavBarNode::GetOrCreateNavBarNode("NavBar", 201,
-        []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    navigationNode->navBarNode_ = navBarNode;
-    auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 301, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto newTopNavDestinationNode = nullptr;
-    navigationPattern->navigationMode_ = NavigationMode::SPLIT;
-
-    EXPECT_NE(preTopNavDestinationNode, nullptr);
-    EXPECT_EQ(newTopNavDestinationNode, nullptr);
-    EXPECT_NE(navigationPattern->navigationMode_, NavigationMode::STACK);
-    navigationPattern->ReplaceAnimation(preTopNavDestinationNode, newTopNavDestinationNode);
-    NavigationPatternTestThreeNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: ReplaceAnimation003
- * @tc.desc: Increase the coverage of NavigationPattern::ReplaceAnimation function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestThreeNg, ReplaceAnimation003, TestSize.Level1)
-{
-    NavigationPatternTestThreeNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(std::move(navigationStack));
-    auto navBarNode = NavBarNode::GetOrCreateNavBarNode("NavBar", 201,
-        []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    navigationNode->navBarNode_ = navBarNode;
-    auto preTopNavDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 301, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto newTopNavDestinationNode = nullptr;
-    navigationPattern->navigationMode_ = NavigationMode::STACK;
-
-    EXPECT_NE(preTopNavDestinationNode, nullptr);
-    EXPECT_EQ(newTopNavDestinationNode, nullptr);
-    EXPECT_EQ(navigationPattern->navigationMode_, NavigationMode::STACK);
-    navigationPattern->ReplaceAnimation(preTopNavDestinationNode, newTopNavDestinationNode);
     NavigationPatternTestThreeNg::TearDownTestSuite();
 }
 
@@ -608,152 +555,6 @@ HWTEST_F(NavigationPatternTestThreeNg, HandleTouchEvent004, TestSize.Level1)
 }
 
 /**
- * @tc.name: FireNavigationLifecycleChange001
- * @tc.desc: Increase the coverage of NavigationPattern::FireNavigationLifecycleChange function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestThreeNg, FireNavigationLifecycleChange001, TestSize.Level1)
-{
-    NavigationPatternTestThreeNg::SetUpTestSuite();
-    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 201,
-            []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-    navDestinationNode->children_.emplace_back(contentNode);
-
-    EXPECT_TRUE(navDestinationNode->GetChildren().size() > 0);
-    EXPECT_EQ(AceType::DynamicCast<NavigationGroupNode>(contentNode), nullptr);
-    NavigationPattern::FireNavigationLifecycleChange(navDestinationNode, NavDestinationLifecycle::ON_SHOW);
-    NavigationPatternTestThreeNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: FireNavigationLifecycleChange002
- * @tc.desc: Increase the coverage of NavigationPattern::FireNavigationLifecycleChange function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestThreeNg, FireNavigationLifecycleChange002, TestSize.Level1)
-{
-    NavigationPatternTestThreeNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(navigationStack);
-    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->children_.emplace_back(navigationNode);
-    navigationNode->parentDestinationNode_ = navDestinationNode;
-    auto lifecycle = NavDestinationLifecycle::ON_WILL_SHOW;
-
-    EXPECT_TRUE(navDestinationNode->GetChildren().size() > 0);
-    EXPECT_NE(AceType::DynamicCast<NavigationGroupNode>(navigationNode), nullptr);
-    EXPECT_NE(lifecycle, NavDestinationLifecycle::ON_SHOW);
-    NavigationPattern::FireNavigationLifecycleChange(navDestinationNode, lifecycle);
-    NavigationPatternTestThreeNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: FireNavigationLifecycleChange003
- * @tc.desc: Increase the coverage of NavigationPattern::FireNavigationLifecycleChange function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestThreeNg, FireNavigationLifecycleChange003, TestSize.Level1)
-{
-    NavigationPatternTestThreeNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(navigationStack);
-    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->children_.emplace_back(navigationNode);
-    navigationNode->parentDestinationNode_ = navDestinationNode;
-    auto lifecycle = NavDestinationLifecycle::ON_SHOW;
-    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
-    ASSERT_NE(navDestinationPattern, nullptr);
-    navDestinationPattern->isOnShow_ = true;
-
-    EXPECT_TRUE(navDestinationNode->GetChildren().size() > 0);
-    EXPECT_NE(AceType::DynamicCast<NavigationGroupNode>(navigationNode), nullptr);
-    EXPECT_EQ(lifecycle, NavDestinationLifecycle::ON_SHOW);
-    EXPECT_FALSE(NavigationPattern::CheckParentDestinationIsOnhide(navDestinationNode));
-    NavigationPattern::FireNavigationLifecycleChange(navDestinationNode, lifecycle);
-    NavigationPatternTestThreeNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: FireNavigationLifecycleChange004
- * @tc.desc: Increase the coverage of NavigationPattern::FireNavigationLifecycleChange function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestThreeNg, FireNavigationLifecycleChange004, TestSize.Level1)
-{
-    NavigationPatternTestThreeNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(navigationStack);
-    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->children_.emplace_back(navigationNode);
-    navigationNode->parentDestinationNode_ = navDestinationNode;
-    auto lifecycle = NavDestinationLifecycle::ON_SHOW;
-    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
-    ASSERT_NE(navDestinationPattern, nullptr);
-    navDestinationPattern->isOnShow_ = false;
-    navDestinationNode->index_ = -1;
-
-    EXPECT_TRUE(navDestinationNode->GetChildren().size() > 0);
-    EXPECT_NE(AceType::DynamicCast<NavigationGroupNode>(navigationNode), nullptr);
-    EXPECT_EQ(lifecycle, NavDestinationLifecycle::ON_SHOW);
-    EXPECT_TRUE(NavigationPattern::CheckParentDestinationIsOnhide(navDestinationNode));
-    EXPECT_FALSE(NavigationPattern::CheckDestinationIsPush(navDestinationNode));
-    NavigationPattern::FireNavigationLifecycleChange(navDestinationNode, lifecycle);
-    NavigationPatternTestThreeNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: FireNavigationLifecycleChange005
- * @tc.desc: Increase the coverage of NavigationPattern::FireNavigationLifecycleChange function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestThreeNg, FireNavigationLifecycleChange005, TestSize.Level1)
-{
-    NavigationPatternTestThreeNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(navigationStack);
-    auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 201, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestinationNode->children_.emplace_back(navigationNode);
-    navigationNode->parentDestinationNode_ = navDestinationNode;
-    auto lifecycle = NavDestinationLifecycle::ON_SHOW;
-    auto navDestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
-    ASSERT_NE(navDestinationPattern, nullptr);
-    navDestinationPattern->isOnShow_ = false;
-    navDestinationNode->index_ = 0;
-    auto customNode = CustomNode::CreateCustomNode(301, "Custom");
-    navDestinationNode->SetNavDestinationCustomNode(AceType::WeakClaim(AceType::RawPtr(customNode)));
-
-    EXPECT_TRUE(navDestinationNode->GetChildren().size() > 0);
-    EXPECT_NE(AceType::DynamicCast<NavigationGroupNode>(navigationNode), nullptr);
-    EXPECT_EQ(lifecycle, NavDestinationLifecycle::ON_SHOW);
-    EXPECT_TRUE(NavigationPattern::CheckParentDestinationIsOnhide(navDestinationNode));
-    EXPECT_TRUE(NavigationPattern::CheckDestinationIsPush(navDestinationNode));
-    NavigationPattern::FireNavigationLifecycleChange(navDestinationNode, lifecycle);
-    NavigationPatternTestThreeNg::TearDownTestSuite();
-}
-
-/**
  * @tc.name: DialogAnimation001
  * @tc.desc: Increase the coverage of NavigationPattern::DialogAnimation function.
  * @tc.type: FUNC
@@ -911,27 +712,6 @@ HWTEST_F(NavigationPatternTestThreeNg, GenerateUINodeFromRecovery004, TestSize.L
     EXPECT_TRUE(navigationStack->IsFromRecovery(lastStandardIndex));
     int32_t ret = navigationPattern->GenerateUINodeFromRecovery(lastStandardIndex, navPathList);
     EXPECT_EQ(ret, RET_ZERO);
-    NavigationPatternTestThreeNg::TearDownTestSuite();
-}
-
-/**
- * @tc.name: GenerateUINodeByIndex001
- * @tc.desc: Increase the coverage of NavigationPattern::GenerateUINodeByIndex function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationPatternTestThreeNg, GenerateUINodeByIndex001, TestSize.Level1)
-{
-    NavigationPatternTestThreeNg::SetUpTestSuite();
-    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
-        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
-    ASSERT_NE(navigationPattern, nullptr);
-    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-    navigationPattern->SetNavigationStack(navigationStack);
-    RefPtr<UINode> node = nullptr;
-
-    EXPECT_EQ(node, nullptr);
-    navigationPattern->GenerateUINodeByIndex(0, node);
     NavigationPatternTestThreeNg::TearDownTestSuite();
 }
 
@@ -1110,6 +890,344 @@ HWTEST_F(NavigationPatternTestThreeNg, GetNavdestinationJsonArray004, TestSize.L
     EXPECT_TRUE(navDestinationNode->CanRecovery());
     EXPECT_NE(navDestinationNode->GetPattern<NavDestinationPattern>(), nullptr);
     navigationPattern->GetNavdestinationJsonArray();
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: GetProxyById001
+ * @tc.desc: Branch: if (proxy && proxy->GetProxyId() == id) = false
+ *           Condition: proxy = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, GetProxyById001, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    navigationPattern->proxyList_.emplace_back(nullptr);
+
+    auto ret = navigationPattern->GetProxyById(100);
+    EXPECT_EQ(ret, nullptr);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: GetProxyById002
+ * @tc.desc: Branch: if (proxy && proxy->GetProxyId() == id) = false
+ *           Condition: proxy = true, proxy->GetProxyId() == id = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, GetProxyById002, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
+    auto proxyId = proxy->GetProxyId();
+    navigationPattern->proxyList_.emplace_back(proxy);
+
+    auto ret = navigationPattern->GetProxyById(proxyId + 100);
+    EXPECT_EQ(ret, nullptr);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: GetProxyById003
+ * @tc.desc: Branch: if (proxy && proxy->GetProxyId() == id) = true
+ *           Condition: proxy = true, proxy->GetProxyId() == id = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, GetProxyById003, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto proxy = AceType::MakeRefPtr<NavigationTransitionProxy>();
+    auto proxyId = proxy->GetProxyId();
+    navigationPattern->proxyList_.emplace_back(proxy);
+
+    auto ret = navigationPattern->GetProxyById(proxyId);
+    ASSERT_NE(ret, nullptr);
+    EXPECT_EQ(ret->GetProxyId(), proxyId);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: CheckContentNeedMeasure001
+ * @tc.desc: Branch: if (!IsAutoHeight) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, CheckContentNeedMeasure001, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    navigationLayoutProperty->calcLayoutConstraint_ = nullptr;
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 201,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    navigationNode->SetContentNode(contentNode);
+    contentNode->isFreeze_ = true;
+    contentNode->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+
+    navigationPattern->CheckContentNeedMeasure(navigationNode);
+    EXPECT_EQ(contentNode->layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_NORMAL);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: CheckContentNeedMeasure002
+ * @tc.desc: Branch: if (!IsAutoHeight) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, CheckContentNeedMeasure002, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(
+        V2::NAVIGATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navigationLayoutProperty = navigationNode->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(navigationLayoutProperty, nullptr);
+    navigationLayoutProperty->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    ASSERT_NE(navigationLayoutProperty->calcLayoutConstraint_, nullptr);
+    navigationLayoutProperty->calcLayoutConstraint_->selfIdealSize =
+        CalcSize(NG::CalcLength(100.0f), NG::CalcLength("auto"));
+    auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, 201,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    navigationNode->SetContentNode(contentNode);
+    contentNode->isFreeze_ = true;
+    contentNode->layoutProperty_->propertyChangeFlag_ = PROPERTY_UPDATE_NORMAL;
+
+    navigationPattern->CheckContentNeedMeasure(navigationNode);
+    EXPECT_EQ(contentNode->layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_MEASURE);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: CloseLongPressDialog001
+ * @tc.desc: Branch: if (backButtonDialogNode) = true
+ *           Branch: if (menuItemDialogNode) = true
+ *           Branch: if (toolBarItemDialogNode) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, CloseLongPressDialog001, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode("NavBar",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    navigationNode->navBarNode_ = navBarNode;
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navBarNode->titleBarNode_ = titleBarNode;
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    titleBarPattern->dialogNode_ = NavigationPatternTestThreeNg::CreateDialogNode();
+    int32_t backButtonDialogNodeId = titleBarPattern->dialogNode_->GetId();
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    overlayManager->dialogMap_.emplace(backButtonDialogNodeId, titleBarPattern->dialogNode_);
+    auto menuItemDialogNode = NavigationPatternTestThreeNg::CreateDialogNode();
+    int32_t menuItemDialogNodeId = menuItemDialogNode->GetId();
+    titleBarPattern->largeFontPopUpDialogNode_ = AceType::WeakClaim(AceType::RawPtr(menuItemDialogNode));
+    overlayManager->dialogMap_.emplace(menuItemDialogNodeId, menuItemDialogNode);
+    auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    navBarNode->toolBarNode_ = toolBarNode;
+    auto toolBarPattern = AceType::DynamicCast<NavToolbarPattern>(toolBarNode->GetPattern());
+    ASSERT_NE(toolBarPattern, nullptr);
+    toolBarPattern->dialogNode_ = NavigationPatternTestThreeNg::CreateDialogNode();
+    int32_t toolBarItemDialogNodeId = toolBarPattern->dialogNode_->GetId();
+    overlayManager->dialogMap_.emplace(toolBarItemDialogNodeId, toolBarPattern->dialogNode_);
+
+    navigationPattern->CloseLongPressDialog();
+    EXPECT_EQ(overlayManager->dialogMap_.find(backButtonDialogNodeId), overlayManager->dialogMap_.end());
+    EXPECT_EQ(overlayManager->dialogMap_.find(menuItemDialogNodeId), overlayManager->dialogMap_.end());
+    EXPECT_EQ(overlayManager->dialogMap_.find(toolBarItemDialogNodeId), overlayManager->dialogMap_.end());
+    EXPECT_EQ(titleBarPattern->GetBackButtonDialogNode(), nullptr);
+    EXPECT_EQ(titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+    EXPECT_EQ(toolBarPattern->GetDialogNode(), nullptr);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: CloseLongPressDialog002
+ * @tc.desc: Branch: if (backButtonDialogNode) = false
+ *           Branch: if (menuItemDialogNode) = false
+ *           Branch: if (toolBarItemDialogNode) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, CloseLongPressDialog002, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto navBarNode = NavBarNode::GetOrCreateNavBarNode("NavBar",
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavBarPattern>(); });
+    navigationNode->navBarNode_ = navBarNode;
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    navBarNode->titleBarNode_ = titleBarNode;
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    ASSERT_NE(titleBarPattern, nullptr);
+    titleBarPattern->dialogNode_ = nullptr;
+    titleBarPattern->largeFontPopUpDialogNode_ = nullptr;
+    auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+    navBarNode->toolBarNode_ = toolBarNode;
+    auto toolBarPattern = AceType::DynamicCast<NavToolbarPattern>(toolBarNode->GetPattern());
+    ASSERT_NE(toolBarPattern, nullptr);
+    toolBarPattern->dialogNode_ = nullptr;
+
+    navigationPattern->CloseLongPressDialog();
+    auto pipelineContext = navigationNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto overlayManager = pipelineContext->GetOverlayManager();
+    ASSERT_NE(overlayManager, nullptr);
+    EXPECT_EQ(overlayManager->dialogMap_.size(), 0);
+    EXPECT_EQ(titleBarPattern->GetBackButtonDialogNode(), nullptr);
+    EXPECT_EQ(titleBarPattern->GetLargeFontPopUpDialogNode(), nullptr);
+    EXPECT_EQ(toolBarPattern->GetDialogNode(), nullptr);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: RemoveFromDumpManager001
+ * @tc.desc: Branch: if (!node || !context) = false
+ *           Condition: !node = false, !context = false
+ *           Branch: if (mgr) = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager001, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto mgr = context->GetNavigationManager();
+    auto callback = [](int depth) {};
+    mgr->AddNavigationDumpCallback(navigationNode->GetId(), navigationNode->GetDepth(), callback);
+
+    navigationPattern->RemoveFromDumpManager();
+    EXPECT_EQ(mgr->dumpMap_.size(), 0);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: RemoveFromDumpManager002
+ * @tc.desc: Branch: if (!node || !context) = true
+ *           Condition: !node = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager002, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto mgr = context->GetNavigationManager();
+    auto callback = [](int depth) {};
+    mgr->AddNavigationDumpCallback(navigationNode->GetId(), navigationNode->GetDepth(), callback);
+    navigationPattern->frameNode_ = nullptr;
+
+    navigationPattern->RemoveFromDumpManager();
+    EXPECT_EQ(mgr->dumpMap_.size(), 1);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: RemoveFromDumpManager003
+ * @tc.desc: Branch: if (!node || !context) = true
+ *           Condition: !node = false, !context = true
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager003, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto mgr = context->GetNavigationManager();
+    auto callback = [](int depth) {};
+    mgr->AddNavigationDumpCallback(navigationNode->GetId(), navigationNode->GetDepth(), callback);
+    MockPipelineContext::pipeline_ = nullptr;
+
+    navigationPattern->RemoveFromDumpManager();
+    EXPECT_EQ(mgr->dumpMap_.size(), 1);
+    NavigationPatternTestThreeNg::TearDownTestSuite();
+}
+
+/**
+ * @tc.name: RemoveFromDumpManager004
+ * @tc.desc: Branch: if (!node || !context) = false
+ *           Condition: !node = false, !context = false
+ *           Branch: if (mgr) = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestThreeNg, RemoveFromDumpManager004, TestSize.Level1)
+{
+    NavigationPatternTestThreeNg::SetUpTestSuite();
+    auto navigationNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationPattern = navigationNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    navigationPattern->SetNavigationStack(navigationStack);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto mgr = context->GetNavigationManager();
+    auto callback = [](int depth) {};
+    mgr->AddNavigationDumpCallback(navigationNode->GetId(), navigationNode->GetDepth(), callback);
+    context->navigationMgr_ = nullptr;
+
+    navigationPattern->RemoveFromDumpManager();
+    EXPECT_EQ(mgr->dumpMap_.size(), 1);
     NavigationPatternTestThreeNg::TearDownTestSuite();
 }
 } // namespace OHOS::Ace::NG

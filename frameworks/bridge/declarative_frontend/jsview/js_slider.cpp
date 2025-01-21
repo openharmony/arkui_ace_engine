@@ -88,6 +88,7 @@ void JSSlider::JSBind(BindingTarget globalObj)
     JSClass<JSSlider>::StaticMethod("onDetach", &JSInteractableView::JsOnDetach);
     JSClass<JSSlider>::StaticMethod("onKeyEvent", &JSInteractableView::JsOnKey);
     JSClass<JSSlider>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSSlider>::StaticMethod("enableHapticFeedback", &JSSlider::SetEnableHapticFeedback);
     JSClass<JSSlider>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -635,6 +636,15 @@ void JSSlider::OnChange(const JSCallbackInfo& info)
     SliderModel::GetInstance()->SetOnChange(
         JsEventCallback<void(float, int32_t)>(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0])));
     info.ReturnSelf();
+}
+
+void JSSlider::SetEnableHapticFeedback(const JSCallbackInfo& info)
+{
+    bool isEnableHapticFeedback = true;
+    if (info[0]->IsBoolean()) {
+        isEnableHapticFeedback = info[0]->ToBoolean();
+    }
+    SliderModel::GetInstance()->SetEnableHapticFeedback(isEnableHapticFeedback);
 }
 
 void JSSlider::ResetBlockStyle()

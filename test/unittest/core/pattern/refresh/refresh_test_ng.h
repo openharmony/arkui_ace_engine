@@ -26,9 +26,6 @@
 namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
-constexpr float REFRESH_WIDTH = 240.f;
-constexpr float SCROLL_WIDTH = REFRESH_WIDTH;
-constexpr float SCROLL_HEIGHT = 400.f;
 constexpr float TRIGGER_LOADING_DISTANCE = 16.0;
 constexpr float TRIGGER_REFRESH_DISTANCE = 64.0;
 constexpr float TRIGGER_REFRESH_WITH_TEXT_DISTANCE = 96.0;

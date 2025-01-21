@@ -206,6 +206,17 @@ float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<floa
     return height - targetPos.first;
 }
 
+bool ListItemGroupPattern::IsVisible() const
+{
+    auto layoutProperty = GetLayoutProperty<ListItemGroupLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto visible = layoutProperty->GetVisibility().value_or(VisibleType::VISIBLE);
+    if (visible == VisibleType::GONE) {
+        return false;
+    }
+    return true;
+}
+
 float ListItemGroupPattern::GetEstimateHeight(float& averageHeight,
     float headerMainSize, float footerMainSize, float spaceWidth) const
 {
@@ -448,7 +459,7 @@ void ListItemGroupPattern::UpdateActiveChildRange(bool show)
     } else if (headerIndex_ >= 0 || footerIndex_ >= 0) {
         host->SetActiveChildRange(-1, itemStartIndex_ - 1);
     } else {
-        host->RemoveAllChildInRenderTree();
+        host->SetActiveChildRange(-1, -1);
     }
     if (headerIndex_ >= 0) {
         host->GetOrCreateChildByIndex(headerIndex_);

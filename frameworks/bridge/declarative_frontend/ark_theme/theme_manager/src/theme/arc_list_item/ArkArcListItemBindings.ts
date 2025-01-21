@@ -14,37 +14,25 @@
  */
 
 // @ts-ignore
-if (globalThis.ArcListItem !== undefined) {
-    // @ts-ignore
-    globalThis.ArcListItem.create = function (deepRenderFunction: (elmtId, isInitialRender) => {}, isLazy: boolean, options: any) {
-        // no need to add deep render theme scope when ArcListItem doesn`t use lazy mode
-        if (isLazy === false) {
-            // @ts-ignore
-            ArcListItem.createInternal(deepRenderFunction, isLazy, options)
-            return
-        }
-
-        const listItemElmtId = ViewStackProcessor.GetElmtIdToAccountFor()
-        const themeScope = ArkThemeScopeManager.getInstance().scopeForElmtId(listItemElmtId)
-
+if (globalThis.WithTheme !== undefined) {
+    globalThis.ArcListItem.getDeepRenderFuncForThemeSupport = function (
+        deepRenderFunction: (elmtId: number, isInitialRender: boolean) => void
+    ): (elmtId: number, isInitialRender: boolean) => void {
+        // get actual theme scope
+        const themeScope = ArkThemeScopeManager.getInstance().lastLocalThemeScope();
         // if ArcListItem isn`t in theme scope we shouldn`t use any theme scope for deep render
         if (themeScope === undefined) {
-            // @ts-ignore
-            ArcListItem.createInternal(deepRenderFunction, isLazy, options)
-            return
+            return deepRenderFunction;
         }
 
-        // create wrapper under original deepRenderFunction to add enter/exit callbacks for ThemeScopeManager
-        const deepRenderFunctionWrapper = (elmtId, isInitialRender) => {
-            const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope)
-            deepRenderFunction(elmtId, isInitialRender)
+        // create wrapper over original deepRenderFunction to add enter/exit callbacks for ThemeScopeManager
+        const deepRenderFunctionWrapper = (elmtId: number, isInitialRender: boolean) => {
+            const result = ArkThemeScopeManager.getInstance().onDeepRenderScopeEnter(themeScope);
+            deepRenderFunction(elmtId, isInitialRender);
             if (result === true) {
-                ArkThemeScopeManager.getInstance().onDeepRenderScopeExit()
+                ArkThemeScopeManager.getInstance().onDeepRenderScopeExit();
             }
-        }
-
-        // pass deepRenderFunctionWrapper instead of original deepRenderFunction to ArcListItem
-        // @ts-ignore
-        ArcListItem.createInternal(deepRenderFunctionWrapper, isLazy, options)
-    }
+        };
+        return deepRenderFunctionWrapper;
+    };
 }

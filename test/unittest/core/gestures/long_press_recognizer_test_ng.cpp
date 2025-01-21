@@ -1342,4 +1342,108 @@ HWTEST_F(LongPressRecognizerTestNg, SetOnActionCancelTest002, TestSize.Level1)
     EXPECT_EQ(unknownPropertyValue, GESTURE_EVENT_PROPERTY_VALUE);
     EXPECT_EQ(result, false);
 }
+
+/**
+ * @tc.name: LongPressGestureLimitFingerTest001
+ * @tc.desc: Test LongPressGesture CreateRecognizer function
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressGestureLimitFingerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressGesture.
+     */
+    LongPressGestureModelNG longPressGestureModelNG;
+    longPressGestureModelNG.Create(FINGER_NUMBER, false, 0, IS_LIMIT_FINGER_COUNT);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto longPressGestureNG = AceType::DynamicCast<NG::LongPressGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(longPressGestureNG->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    LongPressGesture longPressGesture = LongPressGesture(
+        FINGER_NUMBER, false, LONG_PRESS_DURATION, false, false, IS_LIMIT_FINGER_COUNT);
+    EXPECT_EQ(longPressGesture.repeat_, false);
+    EXPECT_EQ(longPressGesture.duration_, LONG_PRESS_DURATION);
+    EXPECT_EQ(longPressGesture.isForDrag_, false);
+    EXPECT_EQ(longPressGesture.isDisableMouseLeft_, false);
+    EXPECT_EQ(longPressGesture.isLimitFingerCount_, true);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: onActionId, onActionEndId, onActionCancelId not existed
+     */
+    auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
+    EXPECT_NE(longPressRecognizer, nullptr);
+    EXPECT_EQ(longPressRecognizer->repeat_, false);
+    EXPECT_EQ(longPressRecognizer->duration_, LONG_PRESS_DURATION);
+    EXPECT_EQ(longPressRecognizer->isForDrag_, false);
+    EXPECT_EQ(longPressRecognizer->isDisableMouseLeft_, false);
+    EXPECT_EQ(longPressRecognizer->isLimitFingerCount_, true);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case2: onActionId, onActionEndId, onActionCancelId existed
+     */
+    std::unique_ptr<GestureEventFunc> onActionId;
+    std::unique_ptr<GestureEventFunc> onActionEndId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
+    longPressGesture.onActionId_ = std::move(onActionId);
+    longPressGesture.onActionEndId_ = std::move(onActionEndId);
+    longPressGesture.onActionCancelId_ = std::move(onActionCancelId);
+    longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
+    EXPECT_NE(longPressRecognizer, nullptr);
+    EXPECT_EQ(longPressRecognizer->isLimitFingerCount_, true);
+}
+
+/**
+ * @tc.name: LongPressGestureLimitFingerTest002
+ * @tc.desc: Test LongPressGesture CreateRecognizer function
+ */
+HWTEST_F(LongPressRecognizerTestNg, LongPressGestureLimitFingerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create LongPressGesture.
+     */
+    LongPressGestureModelNG longPressGestureModelNG;
+    longPressGestureModelNG.Create(FINGER_NUMBER, false, 0, IS_NOT_LIMIT_FINGER_COUNT);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto longPressGestureNG = AceType::DynamicCast<NG::LongPressGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(longPressGestureNG->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    LongPressGesture longPressGesture = LongPressGesture(
+        FINGER_NUMBER, false, LONG_PRESS_DURATION, false, false, IS_NOT_LIMIT_FINGER_COUNT);
+    EXPECT_EQ(longPressGesture.repeat_, false);
+    EXPECT_EQ(longPressGesture.duration_, LONG_PRESS_DURATION);
+    EXPECT_EQ(longPressGesture.isForDrag_, false);
+    EXPECT_EQ(longPressGesture.isDisableMouseLeft_, false);
+    EXPECT_EQ(longPressGesture.isLimitFingerCount_, false);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: onActionId, onActionEndId, onActionCancelId not existed
+     */
+    auto longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
+    EXPECT_NE(longPressRecognizer, nullptr);
+    EXPECT_EQ(longPressRecognizer->repeat_, false);
+    EXPECT_EQ(longPressRecognizer->duration_, LONG_PRESS_DURATION);
+    EXPECT_EQ(longPressRecognizer->isForDrag_, false);
+    EXPECT_EQ(longPressRecognizer->isDisableMouseLeft_, false);
+    EXPECT_EQ(longPressRecognizer->isLimitFingerCount_, false);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case2: onActionId, onActionEndId, onActionCancelId existed
+     */
+    std::unique_ptr<GestureEventFunc> onActionId;
+    std::unique_ptr<GestureEventFunc> onActionEndId;
+    std::unique_ptr<GestureEventFunc> onActionCancelId;
+    longPressGesture.onActionId_ = std::move(onActionId);
+    longPressGesture.onActionEndId_ = std::move(onActionEndId);
+    longPressGesture.onActionCancelId_ = std::move(onActionCancelId);
+    longPressRecognizer = AceType::DynamicCast<LongPressRecognizer>(longPressGesture.CreateRecognizer());
+    EXPECT_NE(longPressRecognizer, nullptr);
+    EXPECT_EQ(longPressRecognizer->isLimitFingerCount_, false);
+}
 } // namespace OHOS::Ace::NG

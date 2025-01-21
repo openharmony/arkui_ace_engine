@@ -172,6 +172,7 @@ private:
 
     void FireMediaPlayerImageComplete();
     void OnMediaPlayerStatusChanged(PlaybackStatus status);
+    void OnMediaPlayerIdle();
     void OnMediaPlayerInitialized();
     void OnMediaPlayerPrepared();
     void OnMediaPlayerStoped();
@@ -261,6 +262,7 @@ private:
     bool isAnalyzerPlaying_ = false;
     bool isRefreshMovingPhoto_ = false;
     bool isRefreshMovingPhotoPlaying_ = false;
+    bool isUsedMediaPlayerStatusChanged_ = false;
     
     Rect lastBoundsRect_;
     Rect contentRect_;

@@ -293,19 +293,17 @@ void TextDragOverlayModifier::onDraw(DrawingContext& context)
     canvas.ClipPath(*path, RSClipOp::INTERSECT, true);
     PaintSelBackground(canvas, pattern);
     canvas.Restore();
-    if (isHandleAnimation_) {
-        if (firstHandle_) {
-            auto selectPosition = pattern->GetSelectPosition();
-            auto rect = firstHandle_->Get();
-            auto startY = rect.Top() - selectPosition.globalY_;
-            PaintHandle(canvas, firstHandle_->Get(), true, rect.Left() - selectPosition.globalX_, startY);
-        }
-        if (secondHandle_) {
-            auto selectPosition = pattern->GetSelectPosition();
-            auto rect = secondHandle_->Get();
-            auto startY = rect.Bottom() - selectPosition.globalY_;
-            PaintHandle(canvas, secondHandle_->Get(), false, rect.Left() - selectPosition.globalX_, startY);
-        }
+    if (firstHandle_ && isFirstHandleAnimated_) {
+        auto selectPosition = pattern->GetSelectPosition();
+        auto rect = firstHandle_->Get();
+        auto startY = rect.Top() - selectPosition.globalY_;
+        PaintHandle(canvas, firstHandle_->Get(), true, rect.Left() - selectPosition.globalX_, startY);
+    }
+    if (secondHandle_ && isSecondHandleAnimated_) {
+        auto selectPosition = pattern->GetSelectPosition();
+        auto rect = secondHandle_->Get();
+        auto startY = rect.Bottom() - selectPosition.globalY_;
+        PaintHandle(canvas, secondHandle_->Get(), false, rect.Left() - selectPosition.globalX_, startY);
     }
 }
 

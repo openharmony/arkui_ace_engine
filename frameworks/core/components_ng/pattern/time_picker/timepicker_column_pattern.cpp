@@ -1272,6 +1272,7 @@ void TimePickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     // the abs of drag delta is less than jump interval.
     dragDelta = dragDelta + yOffset_;
     if (GreatOrEqual(std::abs(dragDelta), std::abs(shiftDistance))) {
+        HandleEnterSelectedArea(dragDelta, shiftDistance, dir);
         InnerHandleScroll(LessNotEqual(dragDelta, 0.0), true);
         dragDelta = dragDelta % static_cast<int>(std::abs(shiftDistance));
         if (!NearZero(dragDelta) && !CanMove(LessNotEqual(dragDelta, 0))) {

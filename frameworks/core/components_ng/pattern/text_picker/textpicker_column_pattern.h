@@ -18,6 +18,7 @@
 
 #include <optional>
 
+#include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -394,27 +395,21 @@ public:
     int32_t GetOverScrollDeltaIndex() const;
     void SetCanLoop(bool isLoop);
 
-    void SetScrollDirection(bool isDown)
-    {
-        isDownScroll_ = isDown;
-    }
-
-    bool IsDownScroll()
-    {
-        return isDownScroll_;
-    }
     void ResetOptionPropertyHeight();
     void ResetTotalDelta();
+    void InitHapticController(const RefPtr<FrameNode>& host);
 
     void SetDisableTextStyleAnimation(bool value)
     {
         isDisableTextStyleAnimation_ = value;
     }
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
+    void StopHapticController();
 
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void InitSelectorButtonProperties(const RefPtr<PickerTheme>& pickerTheme);
     void UpdateSelectorButtonProps(bool haveFocus, bool needMarkDirty);
@@ -436,7 +431,7 @@ private:
     std::vector<TextPickerOptionProperty> optionProperties_;
     std::vector<int32_t> algorithmOffset_;
     void ResetAlgorithmOffset();
-    void CalcAlgorithmOffset(double distancePercent);
+    void CalcAlgorithmOffset(ScrollDirection dir, double distancePercent);
     void SetOptionShiftDistance();
     double GetShiftDistanceForLandscape(int32_t index, ScrollDirection dir);
     double GetShiftDistance(int32_t index, ScrollDirection dir);
@@ -497,11 +492,17 @@ private:
     void SpringCurveTailEndProcess(bool useRebound, bool stopMove);
     void UpdateTextAccessibilityProperty(
         int32_t virtualIndex, std::list<RefPtr<UINode>>::iterator& iter, bool virtualIndexValidate);
+    void OnWindowHide() override;
+    void OnWindowShow() override;
 
     void InitTextFadeOut();
     void UpdateTextOverflow(bool isSel, const RefPtr<TextLayoutProperty>& textLayoutProperty);
+    double GetDragDeltaLessThanJumpInterval(
+        double offsetY, float originalDragDelta, bool useRebound, float shiftDistance);
+    void RegisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback();
 
-    void HandleEnterSelectedArea(double scrollDelta, float shiftDistance);
+    void HandleEnterSelectedArea(double scrollDelta, float shiftDistance, ScrollDirection dir);
 
     bool isFocusColumn_ = false;
     bool isTextFadeOut_ = false;
@@ -573,7 +574,6 @@ private:
     bool animationBreak_ = false;
     bool needOptionPropertyHeightReset_ = false;
     bool isLoop_ = true;
-    bool isDownScroll_ = false;
 
     bool hasAppCustomFont_ = false;
     bool hasUserDefinedDisappearFontFamily_ = false;
@@ -581,6 +581,9 @@ private:
     bool hasUserDefinedSelectedFontFamily_ = false;
 
     bool isDisableTextStyleAnimation_ = false;
+    bool isShow_ = true;
+    bool isEnableHaptic_ = true;
+    std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 
     uint32_t currentEnterIndex_ = 0;
 

@@ -327,6 +327,7 @@ void RichEditorLayoutAlgorithm::HandleEmptyParagraph(RefPtr<Paragraph> paragraph
 
 RefPtr<SpanItem> RichEditorLayoutAlgorithm::GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup)
 {
+    CHECK_NULL_RETURN(!spanGroup.empty(), nullptr);
     auto it = spanGroup.begin();
     while (it != spanGroup.end()) {
         if (!AceType::DynamicCast<PlaceholderSpanItem>(*it)) {
@@ -344,7 +345,7 @@ std::string RichEditorLayoutAlgorithm::SpansToString()
         ss << "[";
         for_each(list.begin(), list.end(), [&ss](const RefPtr<SpanItem>& item) {
 #ifndef IS_RELEASE_VERSION
-            ss << "(" << StringUtils::RestoreEscape(UtfUtils::Str16ToStr8(item->content)) << ")";
+            ss << "(" << StringUtils::RestoreEscape(UtfUtils::Str16DebugToStr8(item->content)) << ")";
 #endif
             ss << "[" << item->rangeStart << ":" << item->position << "],";
         });

@@ -19,6 +19,7 @@
 #include <iremote_object.h>
 #include <map>
 #include <mutex>
+#include <shared_mutex>
 
 #include "ui_report_stub.h"
 #include "ui_session_json_util.h"
@@ -93,6 +94,7 @@ public:
 
 private:
     static std::mutex mutex_;
+    static std::shared_mutex reportObjectMutex_;
     std::map<int32_t, sptr<IRemoteObject>> reportObjectMap_;
     int32_t clickEventRegisterProcesses_ = 0;
     int32_t searchEventRegisterProcesses_ = 0;

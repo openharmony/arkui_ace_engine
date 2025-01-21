@@ -63,6 +63,7 @@ void ScrollBarTestNg::SetUp() {}
 
 void ScrollBarTestNg::TearDown()
 {
+    RemoveFromStageNode();
     stackNode_ = nullptr;
     scrollNode_ = nullptr;
     scrollPattern_ = nullptr;
@@ -150,7 +151,8 @@ void ScrollBarTestNg::SetScrollContentMainSize(float mainSize)
 {
     auto scrollContent = GetChildFrameNode(scrollNode_, 0);
     ViewAbstract::SetHeight(AceType::RawPtr(scrollContent), CalcLength(mainSize));
-    FlushLayoutTask(scrollNode_, true);
+    scrollNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    FlushUITasks();
 }
 
 /**
@@ -345,7 +347,7 @@ HWTEST_F(ScrollBarTestNg, HandleDragUpdate001, TestSize.Level1)
     GestureEvent info;
     info.SetMainDelta(10.f);
     pattern_->HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 10.f);
     auto scrollDelta = pattern_->scrollBarProxy_->CalcPatternOffset(scrollPattern_->scrollableDistance_,
         pattern_->scrollableDistance_, -pattern_->currentOffset_);
@@ -354,7 +356,7 @@ HWTEST_F(ScrollBarTestNg, HandleDragUpdate001, TestSize.Level1)
     info.SetMainDelta(10.f);
     auto scrollable = scrollPattern_->GetScrollableEvent()->GetScrollable();
     scrollable->HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 0.f);
     EXPECT_EQ(scrollPattern_->currentOffset_, 0.f);
 }
@@ -375,14 +377,14 @@ HWTEST_F(ScrollBarTestNg, HandleDragUpdate002, TestSize.Level1)
     GestureEvent info;
     info.SetMainDelta(10.f);
     pattern_->HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 0.f);
     EXPECT_EQ(scrollPattern_->currentOffset_, 0.f);
 
     info.SetMainDelta(-10.f);
     auto scrollable = scrollPattern_->GetScrollableEvent()->GetScrollable();
     scrollable->HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->currentOffset_, 0.f);
     EXPECT_EQ(scrollPattern_->currentOffset_, -10.f);
 }

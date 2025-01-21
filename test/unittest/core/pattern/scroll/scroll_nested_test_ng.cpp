@@ -36,8 +36,8 @@ ScrollModelNG ScrollNestedTestNg::CreateNestScroll()
     model.Create();
     auto proxy = model.CreateScrollBarProxy();
     model.SetScrollBarProxy(proxy);
-    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
-    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
     nestNode_ = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     nestPattern_ = nestNode_->GetPattern<ScrollPattern>();
     return model;
@@ -57,7 +57,7 @@ void ScrollNestedTestNg::ScrollAllToBottom()
 HWTEST_F(ScrollNestedTestNg, Layout001, TestSize.Level1)
 {
     CreateScroll();
-    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
     CreateContent(TOP_CONTENT_MAIN_SIZE);
     ViewStackProcessor::GetInstance()->Pop();
     CreateNestScroll();
@@ -66,10 +66,9 @@ HWTEST_F(ScrollNestedTestNg, Layout001, TestSize.Level1)
     EXPECT_EQ(pattern_->GetScrollableDistance(), TOP_CONTENT_MAIN_SIZE);
     EXPECT_EQ(nestPattern_->GetScrollableDistance(), VERTICAL_SCROLLABLE_DISTANCE);
     auto contentNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_TRUE(IsEqual(contentNode->GetGeometryNode()->GetFrameRect(),
-        RectF(0, 0, SCROLL_WIDTH, SCROLL_HEIGHT + TOP_CONTENT_MAIN_SIZE)));
-    EXPECT_TRUE(IsEqual(
-        nestNode_->GetGeometryNode()->GetFrameRect(), RectF(0, TOP_CONTENT_MAIN_SIZE, SCROLL_WIDTH, SCROLL_HEIGHT)));
+    EXPECT_TRUE(
+        IsEqual(contentNode->GetGeometryNode()->GetFrameRect(), RectF(0, 0, WIDTH, HEIGHT + TOP_CONTENT_MAIN_SIZE)));
+    EXPECT_TRUE(IsEqual(nestNode_->GetGeometryNode()->GetFrameRect(), RectF(0, TOP_CONTENT_MAIN_SIZE, WIDTH, HEIGHT)));
 }
 
 /**
@@ -85,7 +84,7 @@ HWTEST_F(ScrollNestedTestNg, NestTest001, TestSize.Level1)
     };
     CreateScroll();
     {
-        CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+        CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
         {
             CreateContent(TOP_CONTENT_MAIN_SIZE);
             ViewStackProcessor::GetInstance()->Pop();
@@ -166,7 +165,7 @@ HWTEST_F(ScrollNestedTestNg, NestTest002, TestSize.Level1)
     };
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::HORIZONTAL);
-    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_WIDTH);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + WIDTH);
     CreateContent(TOP_CONTENT_MAIN_SIZE);
     ViewStackProcessor::GetInstance()->Pop();
     ScrollModelNG nestModel = CreateNestScroll();
@@ -244,7 +243,7 @@ HWTEST_F(ScrollNestedTestNg, DISABLED_NestTest003, TestSize.Level1)
     };
     ScrollModelNG model = CreateScroll();
     model.SetAxis(Axis::HORIZONTAL);
-    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_WIDTH);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + WIDTH);
     CreateContent(TOP_CONTENT_MAIN_SIZE);
     ViewStackProcessor::GetInstance()->Pop();
     ScrollModelNG nestModel = CreateNestScroll();
@@ -320,7 +319,7 @@ HWTEST_F(ScrollNestedTestNg, NestTest004, TestSize.Level1)
         .backward = NestedScrollMode::SELF_FIRST,
     };
     CreateScroll();
-    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
     CreateContent(TOP_CONTENT_MAIN_SIZE);
     ViewStackProcessor::GetInstance()->Pop();
     ScrollModelNG nestModel = CreateNestScroll();
@@ -376,7 +375,7 @@ HWTEST_F(ScrollNestedTestNg, NestTest005, TestSize.Level1)
     ScrollModelNG model = CreateScroll();
     // set parent spring
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
-    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
     CreateContent(TOP_CONTENT_MAIN_SIZE);
     ViewStackProcessor::GetInstance()->Pop();
     ScrollModelNG nestModel = CreateNestScroll();
@@ -439,7 +438,7 @@ HWTEST_F(ScrollNestedTestNg, NestTest006, TestSize.Level1)
         .backward = NestedScrollMode::SELF_FIRST,
     };
     CreateScroll();
-    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
     CreateContent(TOP_CONTENT_MAIN_SIZE);
     ViewStackProcessor::GetInstance()->Pop();
     ScrollModelNG nestModel = CreateNestScroll();
@@ -506,7 +505,7 @@ HWTEST_F(ScrollNestedTestNg, NestTest007, TestSize.Level1)
         .backward = NestedScrollMode::PARENT_FIRST,
     };
     CreateScroll();
-    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
     CreateContent(TOP_CONTENT_MAIN_SIZE);
     ViewStackProcessor::GetInstance()->Pop();
     ScrollModelNG nestModel = CreateNestScroll();
@@ -580,7 +579,7 @@ HWTEST_F(ScrollNestedTestNg, NestTest008, TestSize.Level1)
         .backward = NestedScrollMode::SELF_FIRST,
     };
     CreateScroll();
-    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
     CreateContent(TOP_CONTENT_MAIN_SIZE);
     ViewStackProcessor::GetInstance()->Pop();
     ScrollModelNG nestModel = CreateNestScroll();
@@ -654,7 +653,7 @@ HWTEST_F(ScrollNestedTestNg, NestTest009, TestSize.Level1)
         .backward = NestedScrollMode::PARALLEL,
     };
     CreateScroll();
-    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
     CreateContent(TOP_CONTENT_MAIN_SIZE);
     ViewStackProcessor::GetInstance()->Pop();
     ScrollModelNG nestModel = CreateNestScroll();
@@ -673,10 +672,10 @@ HWTEST_F(ScrollNestedTestNg, NestTest009, TestSize.Level1)
     EXPECT_TRUE(Position(dragDelta));
     EXPECT_TRUE(Position(nestNode_, dragDelta));
     EXPECT_TRUE(TickPosition(dragDelta + velocityDelta / TICK));
-    FlushLayoutTask(nestNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(nestNode_, dragDelta + velocityDelta / TICK));
     EXPECT_TRUE(TickPosition(dragDelta + velocityDelta));
-    FlushLayoutTask(nestNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(nestNode_, dragDelta + velocityDelta));
     EXPECT_TRUE(pattern_->IsAtBottom());
     EXPECT_FALSE(nestPattern_->IsAtTop());
@@ -705,10 +704,10 @@ HWTEST_F(ScrollNestedTestNg, NestTest009, TestSize.Level1)
     EXPECT_TRUE(Position(nestNode_, dragDelta - VERTICAL_SCROLLABLE_DISTANCE));
     EXPECT_TRUE(Position(dragDelta - TOP_CONTENT_MAIN_SIZE));
     EXPECT_TRUE(TickPosition(nestNode_, dragDelta + velocityDelta / TICK - VERTICAL_SCROLLABLE_DISTANCE));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(dragDelta + velocityDelta / TICK - TOP_CONTENT_MAIN_SIZE));
     EXPECT_TRUE(TickPosition(nestNode_, dragDelta + velocityDelta - VERTICAL_SCROLLABLE_DISTANCE));
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(dragDelta + velocityDelta - TOP_CONTENT_MAIN_SIZE));
     EXPECT_TRUE(pattern_->IsAtTop());
     EXPECT_FALSE(nestPattern_->IsAtTop());
@@ -736,7 +735,7 @@ HWTEST_F(ScrollNestedTestNg, NestTest009, TestSize.Level1)
 HWTEST_F(ScrollNestedTestNg, NestTest010, TestSize.Level1)
 {
     CreateScroll();
-    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
     CreateContent(TOP_CONTENT_MAIN_SIZE);
     ViewStackProcessor::GetInstance()->Pop();
     CreateNestScroll();
@@ -784,7 +783,7 @@ HWTEST_F(ScrollNestedTestNg, NestTest011, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     int32_t stopCount = 0;
     model.SetOnScrollStop([&stopCount]() { ++stopCount; });
-    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
     CreateContent(TOP_CONTENT_MAIN_SIZE);
     ViewStackProcessor::GetInstance()->Pop();
     ScrollModelNG nestModel = CreateNestScroll();
@@ -827,7 +826,7 @@ HWTEST_F(ScrollNestedTestNg, NestTest012, TestSize.Level1)
     model.SetEdgeEffect(EdgeEffect::SPRING, true);
     int32_t stopCount = 0;
     model.SetOnScrollStop([&stopCount]() { ++stopCount; });
-    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
     CreateContent(TOP_CONTENT_MAIN_SIZE);
     ViewStackProcessor::GetInstance()->Pop();
     ScrollModelNG nestModel = CreateNestScroll();
@@ -850,21 +849,21 @@ HWTEST_F(ScrollNestedTestNg, NestTest012, TestSize.Level1)
     auto nestScrollable = nestPattern_->GetScrollableEvent()->GetScrollable();
     nestScrollable->HandleDragStart(info);
     nestScrollable->HandleDragEnd(info);
-    FlushLayoutTask(nestNode_);
+    FlushUITasks();
     EXPECT_TRUE(Position(-TOP_CONTENT_MAIN_SIZE));
     EXPECT_TRUE(Position(nestNode_, dragDelta));
     nestScrollable->scrollPause_ = true;
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(nestNode_);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
+    FlushUITasks();
     EXPECT_EQ(nestStopCount, 1);
     EXPECT_EQ(stopCount, 0);
     EXPECT_TRUE(Position(-TOP_CONTENT_MAIN_SIZE + dragDelta));
     EXPECT_TRUE(Position(nestNode_, -VERTICAL_SCROLLABLE_DISTANCE));
     EXPECT_TRUE(pattern_->IsScrollableSpringMotionRunning());
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(nestNode_);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
+    FlushUITasks();
     EXPECT_EQ(nestStopCount, 1);
     EXPECT_EQ(stopCount, 1);
 }
@@ -886,7 +885,7 @@ HWTEST_F(ScrollNestedTestNg, NestTest013, TestSize.Level1)
     model.SetOnScrollStop([&startCount]() { ++startCount; });
     int32_t stopCount = 0;
     model.SetOnScrollStart([&stopCount]() { ++stopCount; });
-    CreateContent(TOP_CONTENT_MAIN_SIZE + SCROLL_HEIGHT);
+    CreateContent(TOP_CONTENT_MAIN_SIZE + HEIGHT);
     CreateContent(TOP_CONTENT_MAIN_SIZE);
     ViewStackProcessor::GetInstance()->Pop();
     ScrollModelNG nestModel = CreateNestScroll();
@@ -904,8 +903,8 @@ HWTEST_F(ScrollNestedTestNg, NestTest013, TestSize.Level1)
      */
     nestPattern_->Fling(-300.f);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(nestNode_);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
+    FlushUITasks();
     EXPECT_LT(GetChildY(frameNode_, 0), -110.f);
     EXPECT_TRUE(Position(nestNode_, 0.f));
     EXPECT_EQ(startCount, 1);

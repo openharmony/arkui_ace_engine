@@ -43,6 +43,11 @@ constexpr int32_t ORIGIN_MOUSE_BUTTON_RIGHT = 2;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_MIDDLE = 4;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_BACK = 8;
 constexpr int32_t ORIGIN_MOUSE_BUTTON_FORWARD = 16;
+constexpr int32_t ORIGIN_AXIS_ACTION_NONE = 0;
+constexpr int32_t ORIGIN_AXIS_ACTION_BEGIN = 1;
+constexpr int32_t ORIGIN_AXIS_ACTION_UPDATE = 2;
+constexpr int32_t ORIGIN_AXIS_ACTION_END = 3;
+constexpr int32_t ORIGIN_AXIS_ACTION_CANCEL = 4;
 
 void ConvertToOriginEvent(const ArkUITouchEvent& origin, ArkUI_NodeTouchEvent& event)
 {
@@ -273,6 +278,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_TEXT_AREA_DID_DELETE;
         case NODE_SWIPER_EVENT_ON_CHANGE:
             return ON_SWIPER_CHANGE;
+        case NODE_SWIPER_EVENT_ON_SELECTED:
+            return ON_SWIPER_SELECTED;
         case NODE_SWIPER_EVENT_ON_ANIMATION_START:
             return ON_SWIPER_ANIMATION_START;
         case NODE_SWIPER_EVENT_ON_ANIMATION_END:
@@ -307,6 +314,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_WATER_FLOW_DID_SCROLL;
         case NODE_LIST_ON_SCROLL_INDEX:
             return ON_LIST_SCROLL_INDEX;
+        case NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE:
+            return ON_LIST_SCROLL_VISIBLE_CONTENT_CHANGE;
         case NODE_WATER_FLOW_ON_SCROLL_INDEX:
             return ON_WATER_FLOW_SCROLL_INDEX;
         case NODE_TEXT_ON_DETECT_RESULT_UPDATE:
@@ -323,6 +332,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_LIST_WILL_SCROLL;
         case NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL:
             return ON_SWIPER_DID_CONTENT_SCROLL;
+        case NODE_SWIPER_EVENT_ON_CONTENT_WILL_SCROLL:
+            return ON_SWIPER_CONTENT_WILL_SCROLL;
         case NODE_ON_ACCESSIBILITY_ACTIONS:
             return ON_ACCESSIBILITY_ACTIONS;
         case NODE_REFRESH_ON_OFFSET_CHANGE:
@@ -481,6 +492,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_TEXT_AREA_ON_DID_DELETE;
         case ON_SWIPER_CHANGE:
             return NODE_SWIPER_EVENT_ON_CHANGE;
+        case ON_SWIPER_SELECTED:
+            return NODE_SWIPER_EVENT_ON_SELECTED;
         case ON_SWIPER_ANIMATION_START:
             return NODE_SWIPER_EVENT_ON_ANIMATION_START;
         case ON_SWIPER_ANIMATION_END:
@@ -509,6 +522,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_MOUSE;
         case ON_LIST_REACH_END:
             return NODE_SCROLL_EVENT_ON_REACH_END;
+        case ON_LIST_SCROLL_VISIBLE_CONTENT_CHANGE:
+            return NODE_LIST_ON_SCROLL_VISIBLE_CONTENT_CHANGE;
         case ON_WATER_FLOW_REACH_END:
             return NODE_SCROLL_EVENT_ON_REACH_END;
         case ON_SCROLL_REACH_END:
@@ -543,6 +558,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_RADIO_EVENT_ON_CHANGE;
         case ON_SWIPER_DID_CONTENT_SCROLL:
             return NODE_SWIPER_EVENT_ON_CONTENT_DID_SCROLL;
+        case ON_SWIPER_CONTENT_WILL_SCROLL:
+            return NODE_SWIPER_EVENT_ON_CONTENT_WILL_SCROLL;
         case ON_ACCESSIBILITY_ACTIONS:
             return NODE_ON_ACCESSIBILITY_ACTIONS;
         case ON_REFRESH_ON_OFFSET_CHANGE:
@@ -747,6 +764,25 @@ int32_t ConvertToCMouseEventButtonType(int32_t originButtonType)
     return static_cast<int32_t>(UI_MOUSE_EVENT_BUTTON_NONE);
 }
 
+int32_t ConvertToCAxisActionType(int32_t originActionType)
+{
+    switch (originActionType) {
+        case ORIGIN_AXIS_ACTION_NONE:
+            return static_cast<int32_t>(UI_AXIS_EVENT_ACTION_NONE);
+        case ORIGIN_AXIS_ACTION_BEGIN:
+            return static_cast<int32_t>(UI_AXIS_EVENT_ACTION_BEGIN);
+        case ORIGIN_AXIS_ACTION_UPDATE:
+            return static_cast<int32_t>(UI_AXIS_EVENT_ACTION_UPDATE);
+        case ORIGIN_AXIS_ACTION_END:
+            return static_cast<int32_t>(UI_AXIS_EVENT_ACTION_END);
+        case ORIGIN_AXIS_ACTION_CANCEL:
+            return static_cast<int32_t>(UI_AXIS_EVENT_ACTION_CANCEL);
+        default:
+            break;
+    }
+    return static_cast<int32_t>(UI_AXIS_EVENT_ACTION_NONE);
+}
+
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_CompatibleNodeEvent* event)
 {
     ArkUIEventCategory eventCategory = static_cast<ArkUIEventCategory>(origin->kind);
@@ -828,7 +864,10 @@ ArkUI_NodeHandle OH_ArkUI_NodeEvent_GetNodeHandle(ArkUI_NodeEvent* event)
 
 ArkUI_UIInputEvent* OH_ArkUI_NodeEvent_GetInputEvent(ArkUI_NodeEvent* event)
 {
-    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT)) {
+    if (!event ||
+        (event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT) &&
+            (event->kind != ArkUI_NodeEventType::NODE_ON_CLICK && event->kind != ArkUI_NodeEventType::NODE_ON_HOVER &&
+                event->kind != ArkUI_NodeEventType::NODE_ON_MOUSE))) {
         return nullptr;
     }
     return reinterpret_cast<ArkUI_UIInputEvent*>(event->origin);

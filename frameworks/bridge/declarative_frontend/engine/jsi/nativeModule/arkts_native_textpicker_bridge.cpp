@@ -571,4 +571,40 @@ ArkUINativeModuleValue TextPickerBridge::ResetDefaultTextStyle(ArkUIRuntimeCallI
     GetArkUINodeModifiers()->getTextPickerModifier()->resetTextPickerDefaultTextStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue TextPickerBridge::SetTextPickerEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);   // framenode
+    Local<JSValueRef> enableHapticFeedbackArg = runtimeCallInfo->GetCallArgRef(1); // isEnableHapticFeedback
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    auto modifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(modifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto textPickerModifier = modifiers->getTextPickerModifier();
+    CHECK_NULL_RETURN(textPickerModifier, panda::NativePointerRef::New(vm, nullptr));
+    if (enableHapticFeedbackArg->IsBoolean()) {
+        bool value = enableHapticFeedbackArg->ToBoolean(vm)->Value();
+        textPickerModifier->setTextPickerEnableHapticFeedback(nativeNode, value);
+    } else {
+        textPickerModifier->resetTextPickerEnableHapticFeedback(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TextPickerBridge::ResetTextPickerEnableHapticFeedback(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // framenode
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    auto modifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(modifiers, panda::NativePointerRef::New(vm, nullptr));
+    auto textPickerModifier = modifiers->getTextPickerModifier();
+    CHECK_NULL_RETURN(textPickerModifier, panda::NativePointerRef::New(vm, nullptr));
+    textPickerModifier->resetTextPickerEnableHapticFeedback(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

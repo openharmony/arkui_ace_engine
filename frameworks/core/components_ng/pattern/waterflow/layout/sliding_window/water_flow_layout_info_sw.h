@@ -232,6 +232,7 @@ public:
     bool OverScrollBottom() override;
 
     void NotifyDataChange(int32_t index, int32_t count) override;
+    void NotifySectionChange(int32_t index) override;
     void UpdateLanesIndex(int32_t updateIdx);
     void InitSegmentsForKeepPositionMode(const std::vector<WaterFlowSections::Section>& sections,
         const std::vector<WaterFlowSections::Section>& prevSections, int32_t start) override;
@@ -308,7 +309,7 @@ private:
     /**
      * @brief Sync state when there has no items in lanes.
      */
-    void SyncOnEmptyLanes();
+    void SyncOnEmptyLanes(float mainSize);
 
     /**
      * @brief cache main-axis length of measured FlowItems.

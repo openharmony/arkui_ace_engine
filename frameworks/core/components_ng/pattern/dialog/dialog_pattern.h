@@ -313,6 +313,9 @@ public:
     bool IsShowInFreeMultiWindow();
     bool IsShowInFloatingWindow();
 
+    void OverlayDismissDialog(const RefPtr<FrameNode>& dialogNode);
+    RefPtr<OverlayManager> GetEmbeddedOverlay(const RefPtr<OverlayManager>& context);
+
 private:
     bool AvoidKeyboard() const override
     {
@@ -387,6 +390,8 @@ private:
     void UpdateTextFontScale();
     void UpdateTitleTextFontScale();
     void CheckScrollHeightIsNegative(const RefPtr<UINode>& contentColumn, const DialogProperties& props);
+    RefPtr<OverlayManager> GetOverlayManager(const RefPtr<FrameNode>& host);
+    void OnAttachToMainTree() override;
     RefPtr<DialogTheme> dialogTheme_;
     WeakPtr<UINode> customNode_;
     RefPtr<ClickEvent> onClick_;

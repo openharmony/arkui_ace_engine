@@ -31,11 +31,12 @@ class ACE_FORCE_EXPORT PanGesture : public Gesture {
     DECLARE_ACE_TYPE(PanGesture, Gesture);
 
 public:
-    PanGesture(int32_t fingers, const PanDirection& direction, double distance)
+    PanGesture(int32_t fingers, const PanDirection& direction, double distance, bool isLimitFingerCount = false)
     {
         fingers_ = fingers;
         direction_ = direction;
         distance_ = distance;
+        isLimitFingerCount_ = isLimitFingerCount;
         if (gestureInfo_) {
             gestureInfo_->SetType(GestureTypeName::PAN_GESTURE);
             gestureInfo_->SetRecognizerType(GestureTypeName::PAN_GESTURE);

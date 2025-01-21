@@ -27,6 +27,7 @@ class __RepeatVirtualScrollImpl<T> {
     private totalCount_: number;
     private totalCountSpecified : boolean = false;
     private templateOptions_: { [type: string]: RepeatTemplateImplOptions };
+    private reusable_: boolean = true;
 
     private mkRepeatItem_: (item: T, index?: number) => __RepeatItemFactoryReturn<T>;
     private onMoveHandler_?: OnMoveHandler;
@@ -64,6 +65,12 @@ class __RepeatVirtualScrollImpl<T> {
         this.onMoveHandler_ = config.onMoveHandler;
 
         if (isInitialRender) {
+            this.reusable_ = config.reusable;
+            if (!this.reusable_) {
+                for (let templateType in this.templateOptions_) {
+                    this.templateOptions_[templateType] = { cachedCountSpecified: true, cachedCount: 0 };
+                }
+            }
             this.initialRender(config.owningView_, ObserveV2.getCurrentRecordedId());
         } else {
             this.reRender();
@@ -238,6 +245,33 @@ class __RepeatVirtualScrollImpl<T> {
                     this.lastActiveRangeData_[i] = { item, ttype };
                 }
             }
+
+            if (this.reusable_) {
+                return;
+            }
+            let newRepeatItem4Key = new Map<string, __RepeatItemFactoryReturn<T>>();
+            if (from <= to) {
+                for (let i = Math.max(0, from); i <= to && i < this.arr_.length; i++) {
+                    let key = this.key4Index_.get(i);
+                    if (key && this.repeatItem4Key_.has(key)) {
+                        newRepeatItem4Key.set(key, this.repeatItem4Key_.get(key)!);
+                    }
+                }
+            } else {
+                for (let i = 0; i <= to && i < this.arr_.length; i++) {
+                    let key = this.key4Index_.get(i);
+                    if (key && this.repeatItem4Key_.has(key)) {
+                        newRepeatItem4Key.set(key, this.repeatItem4Key_.get(key)!);
+                    }
+                }
+                for (let i = Math.max(0, from); i < this.arr_.length; i++) {
+                    let key = this.key4Index_.get(i);
+                    if (key && this.repeatItem4Key_.has(key)) {
+                        newRepeatItem4Key.set(key, this.repeatItem4Key_.get(key)!);
+                    }
+                }
+            }
+            this.repeatItem4Key_ = newRepeatItem4Key;
         };
 
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): initialRenderVirtualScroll ...`);
@@ -248,7 +282,7 @@ class __RepeatVirtualScrollImpl<T> {
             onGetKeys4Range,
             onGetTypes4Range,
             onSetActiveRange
-        });
+        }, this.reusable_);
         RepeatVirtualScrollNative.onMove(this.onMoveHandler_);
         stateMgmtConsole.debug(`__RepeatVirtualScrollImpl(${this.repeatElmtId_}): initialRenderVirtualScroll`);
     }

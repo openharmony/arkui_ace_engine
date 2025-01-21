@@ -14,9 +14,11 @@
  */
 import { Drawer, RadioBlock, SliderBlock, useEnabled, useEnabledNumber } from 'common';
 import { CounterComponent, CounterType, DateData } from '@ohos.arkui.advanced.Counter';
+import { BlockTag } from 'common/src/main/ets/model/BlockTag';
+import { formatDate } from 'common/src/main/ets/utils/timeUtil';
 
 @Component
-export struct AdvancedCounterBootcamp{
+export struct AdvancedCounterBootcamp {
   @Require @Prop title: ResourceStr;
   @State showParameters: boolean = false;
   @State enableType: boolean = false;
@@ -41,6 +43,34 @@ export struct AdvancedCounterBootcamp{
   @State counterYear: number = 1;
   @State counterMonth: number = 1;
   @State counterDay: number = 1;
+  //compEvent
+  @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
+  @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
+
+  //compEvent
+  compEventTriggeredLog(value: string) {
+    let time = formatDate(new Date(Date.now()))
+    this.listEventTriggeredTagsTemp.push(
+      new BlockTag(time, value)
+    )
+    setTimeout(() => {
+      if (AppStorage.get('Block')) {
+        this.listEventTriggeredTags = this.listEventTriggeredTags.concat(
+          this.listEventTriggeredTagsTemp
+        );
+        this.listEventTriggeredTagsTemp = [];
+      } else {
+        if (this.listEventTriggeredTagsTemp) {
+          this.listEventTriggeredTags = this.listEventTriggeredTags.concat(
+            this.listEventTriggeredTagsTemp
+          );
+        }
+        if (this.listEventTriggeredTags) {
+          this.listEventTriggeredTagsTemp = [];
+        }
+      }
+    }, 200);
+  }
 
   build() {
     NavDestination() {
@@ -61,90 +91,115 @@ export struct AdvancedCounterBootcamp{
 
   @Builder
   Content() {
-    Column(){
-      if (this.counterType == 0){
+    Column() {
+      if (this.counterType == 0) {
         CounterComponent({
           options: {
-            type: useEnabledNumber(this.enableType,this.counterType,0),
-            direction: useEnabled(this.enabledDirection,this.counterDirection),
+            type: useEnabledNumber(this.enableType, this.counterType, 0),
+            direction: useEnabled(this.enabledDirection, this.counterDirection),
             numberOptions: {
               label: 'Counter',
-              value: useEnabled(this.enabledValue,this.counterValue),
-              min: useEnabled(this.enabledMin,this.counterMin),
-              max: useEnabled(this.enabledMax,this.counterMax),
-              focusable:useEnabled(this.enabledFocusable,this.counterFocusable),
+              value: useEnabled(this.enabledValue, this.counterValue),
+              min: useEnabled(this.enabledMin, this.counterMin),
+              max: useEnabled(this.enabledMax, this.counterMax),
+              focusable: useEnabled(this.enabledFocusable, this.counterFocusable),
               onFocusIncrease: () => {
-                console.log('onFocusIncrease,当前Counter组件增加按钮获取焦点时触发的回调');
+                this.compEventTriggeredLog('onFocusIncrease,当前Counter组件增加按钮获取焦点时触发的回调');
+                console.log('11111','asd');
               },
               onFocusDecrease: () => {
-                console.log('onFocusIncrease,当前Counter组件减小按钮获取焦点时触发的回调');
+                this.compEventTriggeredLog('onFocusDecrease,当前Counter组件减小按钮获取焦点时触发的回调');
               },
               onBlurIncrease: () => {
-                console.log('onFocusIncrease,当前Counter组件增加按钮失去焦点时触发的回调');
+                this.compEventTriggeredLog('onBlurIncrease,当前Counter组件增加按钮失去焦点时触发的回调');
               },
               onBlurDecrease: () => {
-                console.log('onFocusIncrease,当前Counter组件减小按钮失去焦点时触发的回调');
-              }
+                this.compEventTriggeredLog('onBlurDecrease,当前Counter组件减小按钮失去焦点时触发的回调');
+              },
+              onHoverIncrease: (isHover: boolean) => {
+                this.compEventTriggeredLog('onHoverIncrease,鼠标进入或退出Counter组件的增加按钮触发该回调');
+              },
+              onHoverDecrease: (isHover: boolean) => {
+                this.compEventTriggeredLog('onHoverDecrease,鼠标进入或退出Counter组件的减小按钮触发该回调');
+              },
             }
           }
         })
-      }else if (this.counterType == 1){
+      } else if (this.counterType == 1) {
         CounterComponent({
           options: {
-            type: useEnabledNumber(this.enableType,this.counterType,0),
-            direction: useEnabled(this.enabledDirection,this.counterDirection),
+            type: useEnabledNumber(this.enableType, this.counterType, 0),
+            direction: useEnabled(this.enabledDirection, this.counterDirection),
             numberOptions: {
               label: 'Counter',
-              value: useEnabled(this.enabledValue,this.counterValue),
-              min: useEnabled(this.enabledMin,this.counterMin),
-              max: useEnabled(this.enabledMax,this.counterMax),
-              focusable:useEnabled(this.enabledFocusable,this.counterFocusable),
+              value: useEnabled(this.enabledValue, this.counterValue),
+              min: useEnabled(this.enabledMin, this.counterMin),
+              max: useEnabled(this.enabledMax, this.counterMax),
+              focusable: useEnabled(this.enabledFocusable, this.counterFocusable),
               onFocusIncrease: () => {
-                console.log('onFocusIncrease,当前Counter组件增加按钮获取焦点时触发的回调');
+                this.compEventTriggeredLog('onFocusIncrease,当前Counter组件增加按钮获取焦点时触发的回调');
               },
               onFocusDecrease: () => {
-                console.log('onFocusIncrease,当前Counter组件减小按钮获取焦点时触发的回调');
+                this.compEventTriggeredLog('onFocusDecrease,当前Counter组件减小按钮获取焦点时触发的回调');
               },
               onBlurIncrease: () => {
-                console.log('onFocusIncrease,当前Counter组件增加按钮失去焦点时触发的回调');
+                this.compEventTriggeredLog('onBlurIncrease,当前Counter组件增加按钮失去焦点时触发的回调');
               },
               onBlurDecrease: () => {
-                console.log('onFocusIncrease,当前Counter组件减小按钮失去焦点时触发的回调');
-              }
+                this.compEventTriggeredLog('onBlurDecrease,当前Counter组件减小按钮失去焦点时触发的回调');
+              },
+              onHoverIncrease: (isHover: boolean) => {
+                this.compEventTriggeredLog('onHoverIncrease,鼠标进入或退出Counter组件的增加按钮触发该回调');
+              },
+              onHoverDecrease: (isHover: boolean) => {
+                this.compEventTriggeredLog('onHoverDecrease,鼠标进入或退出Counter组件的减小按钮触发该回调');
+              },
             }
           }
         })
-      }else if (this.counterType == 2){
+      } else if (this.counterType == 2) {
         CounterComponent({
           options: {
-            type: useEnabledNumber(this.enableType,this.counterType,0),
-            direction: useEnabled(this.enabledDirection,this.counterDirection),
+            type: useEnabledNumber(this.enableType, this.counterType, 0),
+            direction: useEnabled(this.enabledDirection, this.counterDirection),
             inlineOptions: {
-              value: useEnabled(this.enabledValue,this.counterValue),
-              min: useEnabled(this.enabledMin,this.counterMin),
-              max: useEnabled(this.enabledMax,this.counterMax),
-              step: useEnabled(this.enabledStep,this.counterStep),
-              textWidth: useEnabled(this.enabledTextWidth,this.counterTextWidth),
-              focusable:useEnabled(this.enabledFocusable,this.counterFocusable),
+              value: useEnabled(this.enabledValue, this.counterValue),
+              min: useEnabled(this.enabledMin, this.counterMin),
+              max: useEnabled(this.enabledMax, this.counterMax),
+              step: useEnabled(this.enabledStep, this.counterStep),
+              textWidth: useEnabled(this.enabledTextWidth, this.counterTextWidth),
+              focusable: useEnabled(this.enabledFocusable, this.counterFocusable),
               onChange: (value: number) => {
                 console.log('onDateChange Date: ' + value.toString());
-              }
+              },
+              onHoverIncrease: (isHover: boolean) => {
+                this.compEventTriggeredLog('onHoverIncrease,鼠标进入或退出Counter组件的增加按钮触发该回调');
+              },
+              onHoverDecrease: (isHover: boolean) => {
+                this.compEventTriggeredLog('onHoverDecrease,鼠标进入或退出Counter组件的减小按钮触发该回调');
+              },
             }
           }
         })
-      }else {
+      } else {
         CounterComponent({
           options: {
-            type: useEnabledNumber(this.enableType,this.counterType,0),
-            direction: useEnabled(this.enabledDirection,this.counterDirection),
+            type: useEnabledNumber(this.enableType, this.counterType, 0),
+            direction: useEnabled(this.enabledDirection, this.counterDirection),
             dateOptions: {
-              year: useEnabled(this.enabledYear,this.counterYear),
-              month: useEnabled(this.enabledMonth,this.counterMonth),
-              day: useEnabled(this.enabledDay,this.counterDay),
-              focusable:this.counterFocusable,
+              year: useEnabled(this.enabledYear, this.counterYear),
+              month: useEnabled(this.enabledMonth, this.counterMonth),
+              day: useEnabled(this.enabledDay, this.counterDay),
+              focusable: this.counterFocusable,
               onDateChange: (date: DateData) => {
                 console.log('onDateChange Date: ' + date.toString());
-              }
+              },
+              onHoverIncrease: (isHover: boolean) => {
+                this.compEventTriggeredLog('onHoverIncrease,鼠标进入或退出Counter组件的增加按钮触发该回调');
+              },
+              onHoverDecrease: (isHover: boolean) => {
+                this.compEventTriggeredLog('onHoverDecrease,鼠标进入或退出Counter组件的减小按钮触发该回调');
+              },
             }
           }
         })
@@ -154,14 +209,14 @@ export struct AdvancedCounterBootcamp{
 
   @Builder
   Parameters() {
-    Scroll(){
+    Scroll() {
       Column({ space: 8 }) {
         RadioBlock({
           title: 'type',
           isEnabled: $enableType,
           value: $counterType,
           dataSource: [
-            { label: 'LIST', value: 0},
+            { label: 'LIST', value: 0 },
             { label: 'COMPACT', value: 1 },
             { label: 'INLINE', value: 2 },
             { label: 'INLINE_DATE', value: 3 },
@@ -172,7 +227,7 @@ export struct AdvancedCounterBootcamp{
           isEnabled: $enabledDirection,
           value: $counterDirection,
           dataSource: [
-            { label: 'Ltr', value: Direction.Ltr},
+            { label: 'Ltr', value: Direction.Ltr },
             { label: 'Rtl', value: Direction.Rtl },
             { label: 'Auto', value: Direction.Auto },
           ]
@@ -182,8 +237,8 @@ export struct AdvancedCounterBootcamp{
           isEnabled: $enabledFocusable,
           value: $counterFocusable,
           dataSource: [
-            { label: 'true', value: true},
-            { label: 'false', value: false},
+            { label: 'true', value: true },
+            { label: 'false', value: false },
           ]
         })
         SliderBlock({
@@ -246,11 +301,11 @@ export struct AdvancedCounterBootcamp{
     }
     .height('52%')
   }
-
 }
+
 @Preview
 @Component
-struct AdvancedCounterBootcampPreviewer{
+struct AdvancedCounterBootcampPreviewer {
   build() {
     AdvancedCounterBootcamp({
       title: '计数器/AdvancedCounter'

@@ -441,4 +441,126 @@ HWTEST_F(TextDragTestNg, TextDragOverlayModifierPaintBackground003, TestSize.Lev
     EXPECT_CALL(mockCanvas, Save()).Times(1);
     modifier.PaintBackground(path, mockCanvas, textDragPattern);
 }
+
+/**
+ * @tc.name: TextDragPatternGenerateBackgroundPoints001
+ * @tc.desc: test GenerateBackgroundPoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragPatternGenerateBackgroundPoints001, TestSize.Level1)
+{
+    TextDragPattern textDragPattern;
+    RectF textRect = RectF(0.0f, 0.0f, 300.0f, 200.0f);
+    TextDragData textDragData = TextDragData(textRect, 300.0f, 200.0f, 20.0f, 20.0f);
+    textDragPattern.textDragData_ = textDragData;
+    std::vector<TextPoint> points;
+    TextPoint textPoint = TextPoint(5.0f, 10.0f);
+    textDragPattern.textDragData_.textRect_ = textRect;
+    SelectPositionInfo selectPositionInfo = SelectPositionInfo(60.0f, 10.0f, 295.0f, 150.0f);
+    textDragPattern.textDragData_.selectPosition_ = selectPositionInfo;
+    points.emplace_back(textPoint);
+    textDragPattern.textDragData_.oneLineSelected_ = true;
+    textDragPattern.GenerateBackgroundPoints(points, 5.0f, true);
+    EXPECT_EQ(points[3].x, 300);
+    EXPECT_EQ(points[3].y, 175);
+    EXPECT_EQ(points[4].x, 55);
+    EXPECT_EQ(points[4].y, 175);
+}
+
+/**
+ * @tc.name: TextDragPatternGenerateBackgroundPoints002
+ * @tc.desc: test GenerateBackgroundPoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragPatternGenerateBackgroundPoints002, TestSize.Level1)
+{
+    TextDragPattern textDragPattern;
+    RectF textRect = RectF(0.0f, 0.0f, 300.0f, 200.0f);
+    TextDragData textDragData = TextDragData(textRect, 300.0f, 200.0f, 20.0f, 20.0f);
+    textDragPattern.textDragData_ = textDragData;
+    std::vector<TextPoint> points;
+    TextPoint textPoint = TextPoint(5.0f, 10.0f);
+    textDragPattern.textDragData_.textRect_ = textRect;
+    SelectPositionInfo selectPositionInfo = SelectPositionInfo(60.0f, 10.0f, 105.0f, 50.0f);
+    textDragPattern.textDragData_.selectPosition_ = selectPositionInfo;
+    points.emplace_back(textPoint);
+    textDragPattern.textDragData_.oneLineSelected_ = true;
+    textDragPattern.GenerateBackgroundPoints(points, 5.0f, false);
+    EXPECT_EQ(points[3].x, 110);
+    EXPECT_EQ(points[3].y, 75);
+    EXPECT_EQ(points[4].x, 55);
+    EXPECT_EQ(points[4].y, 75);
+}
+
+/**
+ * @tc.name: TextDragPatternGenerateBackgroundPoints003
+ * @tc.desc: test GenerateBackgroundPoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragPatternGenerateBackgroundPoints003, TestSize.Level1)
+{
+    TextDragPattern textDragPattern;
+    RectF textRect = RectF(0.0f, 0.0f, 300.0f, 200.0f);
+    TextDragData textDragData = TextDragData(textRect, 300.0f, 200.0f, 20.0f, 20.0f);
+    textDragPattern.textDragData_ = textDragData;
+    std::vector<TextPoint> points;
+    TextPoint textPoint = TextPoint(5.0f, 10.0f);
+    textDragPattern.textDragData_.textRect_ = textRect;
+    SelectPositionInfo selectPositionInfo = SelectPositionInfo(60.0f, 10.0f, 295.0f, 150.0f);
+    textDragPattern.textDragData_.selectPosition_ = selectPositionInfo;
+    points.emplace_back(textPoint);
+    textDragPattern.GenerateBackgroundPoints(points, 5.0f, true);
+    EXPECT_EQ(points[1].x, 55);
+    EXPECT_EQ(points[1].y, 5);
+    EXPECT_EQ(points[2].x, 305);
+    EXPECT_EQ(points[2].y, 5);
+}
+
+/**
+ * @tc.name: TextDragPatternGenerateBackgroundPoints004
+ * @tc.desc: test GenerateBackgroundPoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragPatternGenerateBackgroundPoints004, TestSize.Level1)
+{
+    TextDragPattern textDragPattern;
+    RectF textRect = RectF(0.0f, 0.0f, 300.0f, 200.0f);
+    TextDragData textDragData = TextDragData(textRect, 400.0f, 600.0f, 30.0f, 30.0f);
+    textDragPattern.textDragData_ = textDragData;
+    std::vector<TextPoint> points;
+    TextPoint textPoint = TextPoint(5.0f, 10.0f);
+    textDragPattern.textDragData_.textRect_ = textRect;
+    SelectPositionInfo selectPositionInfo = SelectPositionInfo(50.0f, 50.0f, 150.0f, 110.0f);
+    textDragPattern.textDragData_.selectPosition_ = selectPositionInfo;
+    points.emplace_back(textPoint);
+    textDragPattern.GenerateBackgroundPoints(points, 5.0f, true);
+    EXPECT_EQ(points[1].x, 45);
+    EXPECT_EQ(points[1].y, 45);
+    EXPECT_EQ(points[4].x, 155);
+    EXPECT_EQ(points[4].y, 115);
+}
+
+/**
+ * @tc.name: TextDragPatternGenerateBackgroundPoints005
+ * @tc.desc: test GenerateBackgroundPoints
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextDragTestNg, TextDragPatternGenerateBackgroundPoints005, TestSize.Level1)
+{
+    TextDragPattern textDragPattern;
+    RectF textRect = RectF(0.0f, 0.0f, 300.0f, 200.0f);
+    TextDragData textDragData = TextDragData(textRect, 300.0f, 200.0f, 20.0f, 20.0f);
+    textDragPattern.textDragData_ = textDragData;
+    std::vector<TextPoint> points;
+    TextPoint textPoint = TextPoint(5.0f, 10.0f);
+    textDragPattern.textDragData_.textRect_ = textRect;
+    SelectPositionInfo selectPositionInfo = SelectPositionInfo(10.0f, 10.0f, 295.0f, 150.0f);
+    textDragPattern.textDragData_.selectPosition_ = selectPositionInfo;
+    points.emplace_back(textPoint);
+    textDragPattern.GenerateBackgroundPoints(points, 5.0f, true);
+    EXPECT_EQ(points[0].x, -5);
+    EXPECT_EQ(points[0].y, 5);
+    EXPECT_EQ(points[2].x, 305);
+    EXPECT_EQ(points[2].y, 5);
+}
 } // namespace OHOS::Ace::NG

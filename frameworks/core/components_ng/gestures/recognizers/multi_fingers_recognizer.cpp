@@ -22,13 +22,14 @@ namespace {
 constexpr int32_t DEFAULT_MAX_FINGERS = 10;
 } // namespace
 
-MultiFingersRecognizer::MultiFingersRecognizer(int32_t fingers)
+MultiFingersRecognizer::MultiFingersRecognizer(int32_t fingers, bool isLimitFingerCount)
 {
     if (fingers > DEFAULT_MAX_FINGERS || fingers <= 0) {
         fingers_ = 1;
     } else {
         fingers_ = fingers;
     }
+    isLimitFingerCount_ = isLimitFingerCount;
 }
 
 void MultiFingersRecognizer::UpdateFingerListInfo()

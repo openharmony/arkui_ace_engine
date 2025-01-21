@@ -237,7 +237,7 @@ public:
     {
         CHECK_NULL_VOID(scrollBar_ && scrollBar_->NeedPaint());
         CHECK_NULL_VOID(!scrollBarOverlayModifier_);
-        scrollBarOverlayModifier_ = CreateOverlayModifier();
+        scrollBarOverlayModifier_ = AceType::MakeRefPtr<ScrollBarOverlayModifier>();
         scrollBarOverlayModifier_->SetRect(scrollBar_->GetActiveRect());
         scrollBarOverlayModifier_->SetPositionMode(scrollBar_->GetPositionMode());
     }
@@ -347,11 +347,6 @@ public:
         return scrollBarOverlayModifier_;
     }
 
-    virtual RefPtr<ScrollBarOverlayModifier> CreateOverlayModifier() const
-    {
-        return AceType::MakeRefPtr<ScrollBarOverlayModifier>();
-    }
-
     virtual RefPtr<ScrollBar> CreateScrollBar() const
     {
         return AceType::MakeRefPtr<ScrollBar>();
@@ -363,6 +358,13 @@ public:
     }
 
     void OnModifyDone() override;
+
+    PositionMode GetPositionMode();
+
+    void SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModifier>& scrollBarOverlayModifier)
+    {
+        scrollBarOverlayModifier_ = scrollBarOverlayModifier;
+    }
 
 private:
     void InitScrollPositionCallback();

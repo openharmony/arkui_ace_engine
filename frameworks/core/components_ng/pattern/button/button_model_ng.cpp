@@ -667,6 +667,16 @@ void ButtonModelNG::SetCreateWithLabel(bool createWithLabel)
     ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, CreateWithLabel, createWithLabel);
 }
 
+void ButtonModelNG::SetMinFontScale(float minFontScale)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontScale, minFontScale);
+}
+
+void ButtonModelNG::SetMaxFontScale(float maxFontScale)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontScale, maxFontScale);
+}
+
 void ButtonModelNG::SetCreateWithLabel(FrameNode* frameNode, bool createWithLabel)
 {
     auto property = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
@@ -675,5 +685,32 @@ void ButtonModelNG::SetCreateWithLabel(FrameNode* frameNode, bool createWithLabe
         return;
     }
     property->UpdateCreateWithLabel(createWithLabel);
+}
+
+void ButtonModelNG::SetMinFontScale(FrameNode* frameNode, float minFontScale)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MinFontScale, minFontScale, frameNode);
+}
+
+void ButtonModelNG::SetMaxFontScale(FrameNode* frameNode, float maxFontScale)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, MaxFontScale, maxFontScale, frameNode);
+}
+
+float ButtonModelNG::GetMinFontScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    float minFontScale = 0.0f;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, MinFontScale, minFontScale, frameNode, 0.0f);
+    return minFontScale;
+}
+
+float ButtonModelNG::GetMaxFontScale(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, 0.0f);
+    float maxFontScale = 0.0f;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(ButtonLayoutProperty, MaxFontScale, maxFontScale, frameNode,
+        static_cast<float>(INT32_MAX));
+    return maxFontScale;
 }
 } // namespace OHOS::Ace::NG

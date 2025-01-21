@@ -153,11 +153,12 @@ public:
         return ScopeFocusAlgorithm(property->GetListDirection().value_or(Axis::VERTICAL) == Axis::VERTICAL, true,
             ScopeType::OTHERS,
             [wp = WeakClaim(this)](
-                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+                FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
                 auto list = wp.Upgrade();
                 if (list) {
                     nextFocusNode = list->GetNextFocusNode(step, currFocusNode);
                 }
+                return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
             });
     }
 
@@ -175,6 +176,11 @@ public:
     float GetTotalOffset() const override
     {
         return currentOffset_;
+    }
+
+    float GetContentStartOffset() const override
+    {
+        return contentStartOffset_;
     }
 
     RefPtr<ScrollControllerBase> GetPositionController() const

@@ -18,6 +18,7 @@
 
 #include <utility>
 
+#include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
 #include "base/i18n/localization.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -273,6 +274,7 @@ public:
     }
 
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
+    void InitHapticController();
 
 private:
     void OnModifyDone() override;
@@ -336,6 +338,11 @@ private:
     DimensionRect CalculateHotZone(int32_t index, int32_t midSize, float middleChildHeight, float otherChildHeight);
     void AddHotZoneRectToText();
     void InitTextFontFamily();
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
+    void RegisterWindowStateChangedCallback();
+    void UnregisterWindowStateChangedCallback();
+    void OnWindowHide() override;
+    void OnWindowShow() override;
 
     float localDownDistance_ = 0.0f;
     RefPtr<TouchEventImpl> touchListener_;
@@ -394,6 +401,9 @@ private:
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
     bool hasUserDefinedSelectedFontFamily_ = false;
+    bool isShow_ = true;
+    bool isEnableHaptic_ = true;
+    std::shared_ptr<IPickerAudioHaptic> hapticController_ = nullptr;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnPattern);
 };

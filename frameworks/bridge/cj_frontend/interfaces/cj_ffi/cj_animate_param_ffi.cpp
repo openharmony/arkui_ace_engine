@@ -14,23 +14,22 @@
  */
 
 #include "cj_animate_param_ffi.h"
+
+#include "cj_lambda.h"
+
 #include "bridge/common/utils/utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "cj_lambda.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
 
 namespace {
-const std::vector<AnimationDirection> ANIMATION_DIRECTION = {
-    AnimationDirection::NORMAL, AnimationDirection::REVERSE,
-    AnimationDirection::ALTERNATE, AnimationDirection::ALTERNATE_REVERSE
-};
-const std::vector<FinishCallbackType> FINISH_CALLBACK_TYPE = {
-    FinishCallbackType::REMOVED, FinishCallbackType::LOGICALLY
-};
-}
+const std::vector<AnimationDirection> ANIMATION_DIRECTION = { AnimationDirection::NORMAL, AnimationDirection::REVERSE,
+    AnimationDirection::ALTERNATE, AnimationDirection::ALTERNATE_REVERSE };
+const std::vector<FinishCallbackType> FINISH_CALLBACK_TYPE = { FinishCallbackType::REMOVED,
+    FinishCallbackType::LOGICALLY };
+} // namespace
 
 namespace OHOS::Ace::Framework {
 void ParseCjAnimation(NativeAnimateParam animationValue, AnimationOption& result)
@@ -55,7 +54,8 @@ void ParseCjAnimation(NativeAnimateParam animationValue, AnimationOption& result
         result.SetTempo(tempo);
     }
 
-    if (animationValue.playMode.hasValue) {
+    if (animationValue.playMode.hasValue && animationValue.playMode.value >= 0 &&
+        animationValue.playMode.value < static_cast<int32_t>(ANIMATION_DIRECTION.size())) {
         result.SetAnimationDirection(ANIMATION_DIRECTION[animationValue.playMode.value]);
     }
 
@@ -64,16 +64,14 @@ void ParseCjAnimation(NativeAnimateParam animationValue, AnimationOption& result
         result.SetCurve(curve);
     }
 
-    if (animationValue.finishCallbackType.hasValue) {
+    if (animationValue.finishCallbackType.hasValue && animationValue.finishCallbackType.value >= 0 &&
+        animationValue.finishCallbackType.value < static_cast<int32_t>(FINISH_CALLBACK_TYPE.size())) {
         result.SetFinishCallbackType(FINISH_CALLBACK_TYPE[animationValue.finishCallbackType.value]);
     }
 
     if (animationValue.min.hasValue && animationValue.max.hasValue && animationValue.expected.hasValue) {
         RefPtr<FrameRateRange> range = AceType::MakeRefPtr<FrameRateRange>(
-            animationValue.min.hasValue,
-            animationValue.max.hasValue,
-            animationValue.expected.hasValue
-        );
+            animationValue.min.hasValue, animationValue.max.hasValue, animationValue.expected.hasValue);
         result.SetFrameRateRange(range);
     }
 
@@ -91,4 +89,4 @@ void ParseCjAnimation(NativeAnimateParam animationValue, AnimationOption& result
         result.SetOnFinishEvent(onFinishEvent);
     }
 }
-}
+} // namespace OHOS::Ace::Framework

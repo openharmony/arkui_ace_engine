@@ -18,7 +18,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 inline constexpr double HALF = 0.5;
-constexpr int32_t BAR_SHRINK_DELAY_DURATION = 2000; // 2000ms
 } // namespace
 
 bool ArcScrollBar::InBarTouchRegion(const Point& point) const
@@ -53,7 +52,7 @@ void ArcScrollBar::SetBarRegion(const Offset& offset, const Size& size)
     double sweepAngle = GetPositionMode() == PositionMode::LEFT ? -GetNormaMaxOffsetAngle() : GetNormaMaxOffsetAngle();
     double width = NormalizeToPx(GetNormalBackgroundWidth());
     centerDeviation_ = width * FACTOR_HALF;
-    if (GetDisplayMode() == DisplayMode::AUTO || normalWidth == NormalizeToPx(GetActiveWidth())) {
+    if (normalWidth == NormalizeToPx(GetActiveWidth())) {
         startAngle = GetActiveStartAngle();
         sweepAngle = GetPositionMode() == PositionMode::LEFT ? -GetActiveMaxOffsetAngle() : GetActiveMaxOffsetAngle();
         width = NormalizeToPx(GetActiveBackgroundWidth());
@@ -70,7 +69,7 @@ void ArcScrollBar::SetRoundTrickRegion(double estimatedHeight, double barRegionS
         width_ = NormalizeToPx(GetNormalScrollBarWidth());
         centerDeviation_ = NormalizeToPx(GetNormalBackgroundWidth()) * FACTOR_HALF;
         double maxAngle = GetNormaMaxOffsetAngle();
-        if (GetDisplayMode() == DisplayMode::AUTO || normalWidth == NormalizeToPx(GetActiveWidth())) {
+        if (normalWidth == NormalizeToPx(GetActiveWidth())) {
             width_ = NormalizeToPx(GetActiveScrollBarWidth());
             centerDeviation_ = NormalizeToPx(GetActiveBackgroundWidth()) * FACTOR_HALF;
             maxAngle = GetActiveMaxOffsetAngle();
@@ -98,10 +97,8 @@ void ArcScrollBar::SetRoundTrickRegion(double estimatedHeight, double barRegionS
         double radius = size.Width() * FACTOR_HALF - centerDeviation_;
 
         Point centerPoint(size.Width() * HALF, size.Height() * HALF);
-        auto activeMaxOffsetAngle = GetPositionMode() == PositionMode::LEFT ? -GetActiveMaxOffsetAngle() :
-                                                                              GetActiveMaxOffsetAngle();
-        arcHotZoneRect_ = ArcRound(centerPoint, radius, GetActiveStartAngle(),
-            activeMaxOffsetAngle, NormalizeToPx(GetActiveBackgroundWidth()));
+        arcHotZoneRect_ = ArcRound(centerPoint, radius, trickStartAngle_, trickSweepAngle_,
+            NormalizeToPx(GetActiveBackgroundWidth()));
         arcHotZoneRect_.SetPositionMode(GetPositionMode());
         arcActiveRect_ = ArcRound(centerPoint, radius, trickStartAngle_, trickSweepAngle_, width_);
         arcHoverRegion_ = arcActiveRect_;
@@ -125,11 +122,11 @@ void ArcScrollBar::SetRoundTrickRegion(
         TAG_LOGE(AceLogTag::ACE_SCROLL_BAR, "estimatedHeight:%{public}1f", estimatedHeight);
         return;
     } else {
-        activeSize = barRegionSize * (mainSize / estimatedHeight) - GetOutBoundary();
+        activeSize = barRegionSize * (mainSize / estimatedHeight) - GetOutBoundary() * HALF;
     }
     auto minHeight = GetMinAngle() * barRegionSize / GetNormaMaxOffsetAngle();
     if (!NearZero(GetOutBoundary())) {
-        activeSize = std::max(std::max(activeSize, minHeight - GetOutBoundary()),
+        activeSize = std::max(std::max(activeSize, minHeight - GetOutBoundary() * HALF),
             NormalizeToPx(GetMinDynamicHeight()));
     } else {
         activeSize = std::max(activeSize, minHeight);
@@ -163,24 +160,6 @@ float ArcScrollBar::CalcPatternOffset(float scrollBarOffset) const
     auto mainSize = GetViewPortSize().Height();
     auto offset = -scrollBarOffset * (GetEstimatedHeigh() - mainSize) / (GetBarRegionSize() - activeRectLength);
     return offset;
-}
-
-void ArcScrollBar::ScheduleShrinkDelayTask()
-{
-    if (GetDisplayMode() != DisplayMode::AUTO) {
-        shrinkDelayTask_.Cancel();
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        shrinkDelayTask_.Reset([weak = WeakClaim(this)] {
-            auto scrollBar = weak.Upgrade();
-            CHECK_NULL_VOID(scrollBar);
-            scrollBar->PlayScrollBarShrinkAnimation();
-        });
-        taskExecutor->PostDelayedTask(shrinkDelayTask_, TaskExecutor::TaskType::UI, BAR_SHRINK_DELAY_DURATION,
-            "ArkUIScrollBarInnerShrinkAnimation");
-    }
 }
 
 void ArcScrollBar::CalcReservedHeight()

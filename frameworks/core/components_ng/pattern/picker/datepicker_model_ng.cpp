@@ -339,6 +339,29 @@ void DatePickerModelNG::SetMode(const DatePickerMode& value)
     ACE_UPDATE_LAYOUT_PROPERTY(DataPickerRowLayoutProperty, Mode, value);
 }
 
+bool DatePickerModelNG::GetEnableHapticFeedback(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_RETURN(datePickerPattern, true);
+    return datePickerPattern->GetEnableHapticFeedback();
+}
+
+void DatePickerModelNG::SetEnableHapticFeedback(bool isEnableHapticFeedback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetEnableHapticFeedback(frameNode, isEnableHapticFeedback);
+}
+
+void DatePickerModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetEnableHapticFeedback(isEnableHapticFeedback);
+}
+
 void DatePickerModelNG::SetOnChange(DateChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -712,7 +735,8 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
             overlayManager->ShowDateDialog(
                 properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
         },
-        TaskExecutor::TaskType::UI, "ArkUIDatePickerShowDateDialog");
+        TaskExecutor::TaskType::UI, "ArkUIDatePickerShowDateDialog",
+        TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
 }
 
 void DatePickerModelNG::SetSelectedTextStyle(

@@ -90,6 +90,8 @@ public:
         selectedTextStyle->Put("color", GetSelectedColor().value_or(Color::BLACK).ColorToString().c_str());
         selectedTextStyle->Put("font", selectedFont);
         json->PutExtAttr("selectedTextStyle", selectedTextStyle, filter);
+        json->PutExtAttr("enableCascade",
+            V2::ConvertBoolToString(GetIsEnableCascade().value_or(false)).c_str(), filter);
 
         auto options = JsonUtil::Create(true);
         options->Put("hour", TimeFormat::GetHourFormat(

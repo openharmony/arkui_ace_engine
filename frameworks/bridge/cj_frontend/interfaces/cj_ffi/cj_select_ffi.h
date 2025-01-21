@@ -25,6 +25,15 @@ using VectorStringPtr = void*;
 using VectorNativeSelectOptionHandle = void*;
 
 extern "C" {
+struct DividerParams {
+    double width;
+    int32_t widthUnit;
+    uint32_t color;
+    double startMargin;
+    int32_t startMarginUnit;
+    double endMargin;
+    int32_t endMarginUnit;
+};
 struct NativeSelectOption {
     char* value;
     char* icon;
@@ -37,6 +46,8 @@ CJ_EXPORT void FFICJVectorNativeSelectOptionDelete(VectorNativeSelectOptionHandl
 CJ_EXPORT void FfiOHOSAceFrameworkSelectCreate(VectorNativeSelectOptionHandle values);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetSelected(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetValue(const char* value);
+CJ_EXPORT void FfiOHOSAceFrameworkSelectSetControlSize(int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkSelectSetDivider(DividerParams params);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetFont(
     int32_t style, const char* weight, double size, int32_t sizeUnit, const char* family);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetFontColor(uint32_t color);
@@ -57,6 +68,9 @@ CJ_EXPORT void FfiOHOSAceFrameworkSelectSetOptionWidthWithMode(const char* value
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetOptionHeight(double height, int32_t heightUnit);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetMenuBackgroundColor(uint32_t color);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectSetMenuBackgroundBlurStyle(int32_t value);
+CJ_EXPORT void FfiOHOSAceFrameworkSelectSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit);
+CJ_EXPORT void FfiOHOSAceFrameworkSelectSetPadding(double padding, uint32_t unit);
+CJ_EXPORT void FfiOHOSAceFrameworkSelectSetDirection(int32_t value);
 CJ_EXPORT void FfiOHOSAceFrameworkSelectOnSelect(void (*callback)(int32_t index, const char* value));
 };
 #endif

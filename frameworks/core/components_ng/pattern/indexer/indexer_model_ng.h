@@ -62,7 +62,7 @@ public:
     void SetAdaptiveWidth(bool state) override;
     void SetEnableHapticFeedback(bool state) override;
 
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, bool isArc = false);
     static void SetArrayValue(FrameNode* frameNode, const std::vector<std::string>& arrayValue);
     static void SetAdaptiveWidth(FrameNode* frameNode, bool state);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);

@@ -183,6 +183,8 @@ private:
     OffsetF AdjustPositionNew(const OffsetF& position, float width, float height);
     OffsetF GetBubblePosition(const OffsetF& position, float xMin, float xMax, float yMin, float yMax);
     void CheckArrowPosition(OffsetF& position, float width, float height);
+    bool IsUIExtensionWindow();
+    void HandleUIExtensionKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow);
     OffsetF GetAdjustPosition(std::vector<Placement>& currentPlacementStates, size_t step, const SizeF& childSize,
         const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
     void InitTargetSizeAndPosition(bool showInSubWindow, LayoutWrapper* layoutWrapper);
@@ -239,7 +241,7 @@ private:
         OffsetF& childPosition, OffsetF& arrowPosition, const SizeF& childSize, Placement placement);
     ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
     OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
-    SizeF GetPopupMaxWidthAndHeight(bool showInSubWindow, const float& width);
+    SizeF GetPopupMaxWidthAndHeight(bool showInSubWindow, const RefPtr<FrameNode>& frameNode);
     void UpdateDumpInfo();
     ArrowOfTargetOffset arrowOfTargetOffset_ = ArrowOfTargetOffset::NONE;
     Dimension arrowOffset_;

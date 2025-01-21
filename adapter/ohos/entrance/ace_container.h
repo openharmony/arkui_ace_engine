@@ -20,6 +20,7 @@
 #include <list>
 #include <memory>
 #include <mutex>
+#include <optional>
 
 #include "display_manager.h"
 #include "dm_common.h"
@@ -40,6 +41,7 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
+#include "core/common/container_handler.h"
 #include "core/common/display_info.h"
 #include "core/common/font_manager.h"
 #include "core/common/js_message_dispatcher.h"
@@ -87,6 +89,17 @@ struct ParsedConfig {
                  colorModeIsSetByApp.empty() && mcc.empty() && mnc.empty() && fontFamily.empty() &&
                  preferredLanguage.empty() && fontId.empty());
     }
+};
+
+struct SingleHandTransform {
+    SingleHandTransform() = default;
+    SingleHandTransform(float x, float y, float scaleX, float scaleY)
+        : x_(x), y_(y), scaleX_(scaleX), scaleY_(scaleY) {}
+ 
+    float x_ = 0.0f;
+    float y_ = 0.0f;
+    float scaleX_ = 1.0f;
+    float scaleY_ = 1.0f;
 };
 
 using ConfigurationChangedCallback = std::function<void(const ParsedConfig& config, const std::string& configuration)>;
@@ -323,6 +336,8 @@ public:
         const std::vector<std::string>& params, std::vector<std::string>& info);
 
     bool DumpInfo(const std::vector<std::string>& params);
+
+    bool DumpRSNodeByStringID(const std::vector<std::string>& params);
 
     bool OnDumpInfo(const std::vector<std::string>& params);
 
@@ -605,7 +620,7 @@ public:
     Rosen::WindowMode GetWindowMode() const
     {
         CHECK_NULL_RETURN(uiWindow_, Rosen::WindowMode::WINDOW_MODE_UNDEFINED);
-        return uiWindow_->GetMode();
+        return uiWindow_->GetWindowMode();
     }
 
     // ArkTSCard
@@ -675,7 +690,7 @@ public:
         int32_t eventType, int64_t timeMs);
 
     void TerminateUIExtension() override;
-
+    bool UIExtensionIsHalfScreen() override;
     void SetUIExtensionSubWindow(bool isUIExtensionSubWindow)
     {
         isUIExtensionSubWindow_ = isUIExtensionSubWindow;
@@ -762,8 +777,35 @@ public:
     bool IsFloatingWindow() const override
     {
         CHECK_NULL_RETURN(uiWindow_, false);
-        return uiWindow_->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
+        return uiWindow_->GetWindowMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING;
     }
+
+    void SetTouchEventsPassThroughMode(bool isTouchEventsPassThrough)
+    {
+        isTouchEventsPassThrough_ = isTouchEventsPassThrough;
+    }
+
+    void RegisterContainerHandler(const WeakPtr<ContainerHandler>& containerHandler)
+    {
+        containerHandler_ = containerHandler;
+    }
+
+    WeakPtr<ContainerHandler> GetContainerHandler()
+    {
+        return containerHandler_;
+    }
+
+    void SetSingleHandTransform(const SingleHandTransform& singleHandTransform)
+    {
+        singleHandTransform_ = singleHandTransform;
+    }
+
+    const SingleHandTransform& GetSingleHandTransform() const
+    {
+        return singleHandTransform_;
+    }
+
+    bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
 
 private:
     virtual bool MaybeRelease() override;
@@ -872,6 +914,11 @@ private:
 
     // for Ui Extension dump param get
     std::vector<std::string> paramUie_;
+    std::optional<bool> isTouchEventsPassThrough_;
+
+    // for common handler
+    WeakPtr<ContainerHandler> containerHandler_;
+    SingleHandTransform singleHandTransform_;
 };
 
 } // namespace OHOS::Ace::Platform

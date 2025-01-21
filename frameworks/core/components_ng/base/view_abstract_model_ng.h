@@ -44,7 +44,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
+class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
 
@@ -128,6 +128,11 @@ public:
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override
     {
         ViewAbstract::SetBackgroundImageRepeat(imageRepeat);
+    }
+
+    void SetBackgroundImageSyncMode(bool syncMode) override
+    {
+        ViewAbstract::SetBackgroundImageSyncMode(syncMode);
     }
 
     void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override
@@ -1330,6 +1335,11 @@ public:
     void DismissContentCover() override;
     void SheetSpringBack() override;
 
+    void NotifyDragStartRequest(DragStartRequestStatus dragStatus) override
+    {
+        ViewAbstract::NotifyDragStartRequest(dragStatus);
+    }
+
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
     void SetAccessibilityTextHint(const std::string& text) override;
@@ -1343,6 +1353,8 @@ public:
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
     void ResetOnAccessibilityFocus() override;
+    void SetAccessibilityDefaultFocus() override;
+    void SetAccessibilityUseSamePage(bool isFullSilent) override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1500,6 +1512,16 @@ public:
         ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
     }
 
+    int32_t CancelDataLoading(const std::string& key) override
+    {
+        return ViewAbstract::CancelDataLoading(key);
+    }
+
+    void SetDisableDataPrefetch(bool disableDataPrefetch) override
+    {
+        return ViewAbstract::SetDisableDataPrefetch(disableDataPrefetch);
+    }
+
     void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) override
     {
         ViewAbstract::SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
@@ -1542,6 +1564,8 @@ public:
         FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);
     static void ResetOnAccessibilityFocus(FrameNode* frameNode);
     static void SetAccessibilityNextFocusId(FrameNode* frameNode, const std::string& nextFocusId);
+    static void SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus);
+    static void SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {

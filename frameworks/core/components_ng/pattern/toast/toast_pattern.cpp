@@ -19,12 +19,14 @@
 #include "core/common/ace_engine.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/dialog/dialog_theme.h"
+#include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/text/text_layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t API_VERSION_9 = 9;
 constexpr Dimension ADAPT_TOAST_MIN_FONT_SIZE = 12.0_fp;
+constexpr Dimension LIMIT_SPACING = 8.0_vp;
 
 // get main window's pipeline
 RefPtr<PipelineContext> GetMainPipelineContext()
@@ -51,14 +53,15 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
     auto pipelineContext =
         IsDefaultToast() ? PipelineContext::GetCurrentContextSafelyWithCheck() : GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-    CHECK_NULL_VOID(safeAreaManager);
-    float safeAreaTop = safeAreaManager->GetSystemSafeArea().top_.Length();
+    CHECK_NULL_VOID(layoutWrapper);
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(layoutWrapper->GetHostNode());
+    float safeAreaTop = safeAreaInsets.top_.Length();
     const auto& safeArea = toastProps->GetSafeAreaInsets();
+    limitPos_ = Dimension(GreatNotEqual(safeAreaTop, 0) ? safeAreaTop : LIMIT_SPACING.ConvertToPx());
     // Default Toast need to avoid keyboard, but the Top mode doesn't need.
-    float safeAreaBottom =
-        safeArea ? safeArea->bottom_.Length() : safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length();
-    
+    auto useOldSafeArea = safeArea && Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN);
+    float safeAreaBottom = useOldSafeArea ? safeArea->bottom_.Length() : safeAreaInsets.bottom_.Length();
+
     if (IsSystemTopMost()) {
         wrapperRect_ = pipelineContext->GetDisplayWindowRectInfo();
         auto windowSize = GetSystemTopMostSubwindowSize();
@@ -76,6 +79,8 @@ void ToastPattern::InitWrapperRect(LayoutWrapper* layoutWrapper, const RefPtr<To
     
     isHoverMode_ = pipelineContext->IsHalfFoldHoverStatus();
     if (isHoverMode_ && toastInfo_.enableHoverMode) {
+        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
+        CHECK_NULL_VOID(safeAreaManager);
         UpdateHoverModeRect(toastProps, safeAreaManager, safeAreaTop, safeAreaBottom);
     }
 }
@@ -181,7 +186,9 @@ bool ToastPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
             keyboardHeight = safeAreaManager->GetRawKeyboardHeight();
         }
         AnimationOption option = AnimationUtil::CreateKeyboardAnimationOption(keyboardAnimationConfig, keyboardHeight);
-        context->Animate(option, option.GetCurve(), func);
+        auto subContext = host->GetContextRefPtr();
+        CHECK_NULL_RETURN(subContext, false);
+        subContext->Animate(option, option.GetCurve(), func);
     } else {
         // animation effect of the toast position change
         AnimationOption option;
@@ -231,7 +238,6 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     // Get toastBottom and update defaultBottom_
     auto toastBottom = GetBottomValue(layoutWrapper);
     if (!toastProp->HasToastAlignment()) {
-        toastBottom_ = toastBottom;
         if (context->GetMinPlatformVersion() > API_VERSION_9) {
             offsetY = Dimension(rootHeight - toastBottom - textHeight);
         } else {
@@ -251,11 +257,17 @@ Dimension ToastPattern::GetOffsetY(const RefPtr<LayoutWrapper>& layoutWrapper)
     }
     // add toast wrapper rect's offsetY.
     offsetY += Dimension(wrapperRect_.Top());
-    AdjustOffsetForKeyboard(offsetY, toastBottom, textHeight);
+    bool needResizeBottom = false;
+    AdjustOffsetForKeyboard(offsetY, defaultBottom_.ConvertToPx(), textHeight, needResizeBottom);
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && needResizeBottom &&
+        !GreatNotEqual(offsetY.Value(), 0)) {
+        return limitPos_ + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
+    }
     return offsetY + toastProp->GetToastOffsetValue(DimensionOffset()).GetY();
 }
 
-void ToastPattern::AdjustOffsetForKeyboard(Dimension& offsetY, double toastBottom, float textHeight)
+void ToastPattern::AdjustOffsetForKeyboard(
+    Dimension& offsetY, double toastBottom, float textHeight, bool& needResizeBottom)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -288,8 +300,10 @@ void ToastPattern::AdjustOffsetForKeyboard(Dimension& offsetY, double toastBotto
             }
         }
     }
-    if (IsTopMostToast() && GreatNotEqual(keyboardInset, 0) &&
-        (offsetY.Value() + textHeight > keyboardOffset - toastBottom)) {
+    if (((IsDefaultToast() && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) ||
+            IsTopMostToast()) &&
+        GreatNotEqual(keyboardInset, 0) && (offsetY.Value() + textHeight > keyboardOffset)) {
+        needResizeBottom = true;
         offsetY = Dimension(keyboardOffset - toastBottom - textHeight);
     }
     TAG_LOGD(AceLogTag::ACE_OVERLAY,
@@ -376,7 +390,7 @@ void ToastPattern::UpdateTextSizeConstraint(const RefPtr<FrameNode>& text)
         auto limitHeight = GetTextMaxHeight();
         textLayoutProperty->UpdateCalcMaxSize(
             CalcSize(NG::CalcLength(limitWidth), NG::CalcLength(Dimension(limitHeight))));
-
+        CHECK_NULL_VOID(textNode_);
         auto textProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textProperty);
         auto toastMaxFontSize = toastTheme->GetTextStyle().GetFontSize();
@@ -405,6 +419,7 @@ void ToastPattern::OnColorConfigurationUpdate()
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_VOID(toastTheme);
     auto textColor = toastTheme->GetTextStyle().GetTextColor();
+    CHECK_NULL_VOID(textNode_);
     auto textLayoutProperty = textNode_->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     auto toastInfo = GetToastInfo();
@@ -479,17 +494,13 @@ double ToastPattern::GetTextMaxHeight()
         TAG_LOGE(AceLogTag::ACE_OVERLAY, "Device height is invalid when show toast.");
         deviceHeight = static_cast<double>(SystemProperties::GetDeviceHeight());
     }
-    auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-    auto bottom = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().bottom_.Length() : 0;
-    auto top = safeAreaManager ? safeAreaManager->GetSafeAreaWithoutProcess().top_.Length() : 0;
-    auto maxHeight = deviceHeight - bottom - top - toastBottom_;
+    auto safeAreaInsets = OverlayManager::GetSafeAreaInsets(host);
+    auto bottom = safeAreaInsets.bottom_.Length();
+    auto top = safeAreaInsets.top_.Length();
     auto toastTheme = pipelineContext->GetTheme<ToastTheme>();
     CHECK_NULL_RETURN(toastTheme, 0.0);
     auto toastLimitHeightRatio = toastTheme->GetToastLimitHeightRatio();
-    auto limitHeight = (deviceHeight - bottom - top) * toastLimitHeightRatio;
-    if (GreatNotEqual(maxHeight, limitHeight)) {
-        maxHeight = limitHeight;
-    }
+    auto maxHeight = (deviceHeight - bottom - top) * toastLimitHeightRatio;
 
     maxHeight = GreatOrEqual(maxHeight, 0.0) ? maxHeight : 0.0;
     return maxHeight;

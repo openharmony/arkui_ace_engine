@@ -640,6 +640,22 @@ void JSRichEditor::EditMenuOptions(const JSCallbackInfo& info)
         std::move(onCreateMenuCallback), std::move(onMenuItemClick));
 }
 
+void JSRichEditor::SetOnShare(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    auto jsTextFunc = AceType::MakeRefPtr<JsCitedEventFunction<NG::TextCommonEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), CreateJSTextCommonEvent);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onShare = [execCtx = info.GetExecutionContext(), func = std::move(jsTextFunc), node = targetNode](
+                        NG::TextCommonEvent& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("onShare");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(info);
+    };
+    RichEditorModel::GetInstance()->SetOnShare(std::move(onShare));
+}
+
 void JSRichEditor::SetCustomKeyboard(const JSCallbackInfo& args)
 {
     if (args.Length() > 0 && (args[0]->IsUndefined() || args[0]->IsNull())) {
@@ -1357,6 +1373,29 @@ void JSRichEditor::SetMaxLines(const JSCallbackInfo& info)
     RichEditorModel::GetInstance()->SetMaxLines(normalMaxLines);
 }
 
+void JSRichEditor::SetStopBackPress(const JSCallbackInfo& info)
+{
+    bool isStopBackPress = true;
+    if (info.Length() > 0 && info[0]->IsBoolean()) {
+        isStopBackPress = info[0]->ToBoolean();
+    }
+    RichEditorModel::GetInstance()->SetStopBackPress(isStopBackPress);
+}
+
+void JSRichEditor::SetKeyboardAppearance(const JSCallbackInfo& info)
+{
+    if (info.Length() != 1 || !info[0]->IsNumber()) {
+        return;
+    }
+    auto keyboardAppearance = info[0]->ToNumber<int32_t>();
+    if (keyboardAppearance < static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) ||
+        keyboardAppearance > static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+        return;
+    }
+    RichEditorModel::GetInstance()->
+        SetKeyboardAppearance(static_cast<KeyboardAppearance>(keyboardAppearance));
+}
+
 void JSRichEditor::JSBind(BindingTarget globalObj)
 {
     JSClass<JSRichEditor>::Declare("RichEditor");
@@ -1396,12 +1435,15 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("onDidChange", &JSRichEditor::SetOnDidChange);
     JSClass<JSRichEditor>::StaticMethod("onCut", &JSRichEditor::SetOnCut);
     JSClass<JSRichEditor>::StaticMethod("onCopy", &JSRichEditor::SetOnCopy);
+    JSClass<JSRichEditor>::StaticMethod("onShare", &JSRichEditor::SetOnShare);
     JSClass<JSRichEditor>::StaticMethod("editMenuOptions", &JSRichEditor::EditMenuOptions);
     JSClass<JSRichEditor>::StaticMethod("enableKeyboardOnFocus", &JSRichEditor::SetEnableKeyboardOnFocus);
     JSClass<JSRichEditor>::StaticMethod("enableHapticFeedback", &JSRichEditor::SetEnableHapticFeedback);
     JSClass<JSRichEditor>::StaticMethod("barState", &JSRichEditor::SetBarState);
     JSClass<JSRichEditor>::StaticMethod("maxLength", &JSRichEditor::SetMaxLength);
     JSClass<JSRichEditor>::StaticMethod("maxLines", &JSRichEditor::SetMaxLines);
+    JSClass<JSRichEditor>::StaticMethod("stopBackPress", &JSRichEditor::SetStopBackPress);
+    JSClass<JSRichEditor>::StaticMethod("keyboardAppearance", &JSRichEditor::SetKeyboardAppearance);
     JSClass<JSRichEditor>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
@@ -1993,6 +2035,15 @@ void JSRichEditorController::ParseOptions(const JSCallbackInfo& args, SpanOption
         if (placeholderOffset >= 0) {
             placeholderSpan.offset = placeholderOffset;
         }
+    }
+    JSRef<JSVal> colorMetrics = placeholderOptionObject->GetProperty("dragBackgroundColor");
+    if (Color dragBackgroundColor; !colorMetrics->IsNull() &&
+        JSContainerBase::ParseColorMetricsToColor(colorMetrics, dragBackgroundColor)) {
+        placeholderSpan.dragBackgroundColor = dragBackgroundColor;
+    }
+    JSRef<JSVal> isDragShadowNeeded = placeholderOptionObject->GetProperty("isDragShadowNeeded");
+    if (!isDragShadowNeeded->IsNull() && isDragShadowNeeded->IsBoolean()) {
+        placeholderSpan.isDragShadowNeeded = isDragShadowNeeded->ToBoolean();
     }
 }
 
