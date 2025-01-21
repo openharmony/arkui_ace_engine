@@ -815,7 +815,7 @@ void JSDatePickerDialog::Show(const JSCallbackInfo& info)
     auto alignmentValue = paramObject->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
         auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
         }
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
@@ -1286,7 +1286,7 @@ void JSTimePickerDialog::Show(const JSCallbackInfo& info)
     auto alignmentValue = paramObject->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
         auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             pickerDialog.alignment = DIALOG_ALIGNMENT[alignment];
         }
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
