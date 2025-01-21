@@ -935,6 +935,12 @@ void CanvasPattern::UpdateShadowOffsetY(double offsetY)
 
 void CanvasPattern::UpdateTextAlign(TextAlign align)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->textAlign = align;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [align](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextAlign(align);
@@ -947,6 +953,12 @@ void CanvasPattern::UpdateTextAlign(TextAlign align)
 
 void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->baseline = baseline;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [baseline](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextBaseline(baseline);

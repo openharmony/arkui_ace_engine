@@ -244,6 +244,26 @@ std::vector<std::tuple<Ark_String, Ace::TextDirection>> DIRECTION_TEST_PLAN = {
     { Converter::ArkValue<Ark_String>("invalid"), Ace::TextDirection::LTR },
     { Converter::ArkValue<Ark_String>(""), Ace::TextDirection::LTR },
 };
+std::vector<std::tuple<Ark_String, Ace::TextAlign>> TEXT_ALIGN_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("center"), Ace::TextAlign::CENTER },
+    { Converter::ArkValue<Ark_String>("end"), Ace::TextAlign::END },
+    { Converter::ArkValue<Ark_String>("justify"), Ace::TextAlign::JUSTIFY },
+    { Converter::ArkValue<Ark_String>("left"), Ace::TextAlign::LEFT },
+    { Converter::ArkValue<Ark_String>("right"), Ace::TextAlign::RIGHT },
+    { Converter::ArkValue<Ark_String>("start"), Ace::TextAlign::START },
+    { Converter::ArkValue<Ark_String>("invalid"), Ace::TextAlign::CENTER },
+    { Converter::ArkValue<Ark_String>(""), Ace::TextAlign::CENTER },
+};
+std::vector<std::tuple<Ark_String, TextBaseline>> TEXT_BASE_LINE_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("alphabetic"), Ace::TextBaseline::ALPHABETIC },
+    { Converter::ArkValue<Ark_String>("bottom"), Ace::TextBaseline::BOTTOM },
+    { Converter::ArkValue<Ark_String>("hanging"), Ace::TextBaseline::HANGING },
+    { Converter::ArkValue<Ark_String>("ideographic"), Ace::TextBaseline::IDEOGRAPHIC },
+    { Converter::ArkValue<Ark_String>("middle"), Ace::TextBaseline::MIDDLE },
+    { Converter::ArkValue<Ark_String>("top"), Ace::TextBaseline::TOP },
+    { Converter::ArkValue<Ark_String>("invalid"), Ace::TextBaseline::ALPHABETIC },
+    { Converter::ArkValue<Ark_String>(""), Ace::TextBaseline::ALPHABETIC },
+};
 class MockPixelMap : public PixelMap {
 public:
     MOCK_METHOD(bool, GetPixelsVec, (std::vector<uint8_t> & data), (const override));
@@ -2288,6 +2308,42 @@ HWTEST_F(CanvasRendererAccessorTest, setDirectionTest, TestSize.Level1)
         accessor_->setDirection(peer_, &actual);
         EXPECT_TRUE(holder->isCalled);
         EXPECT_EQ(*holder->direction, expected);
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setTextAlignTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setTextAlignTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->setTextAlign, nullptr);
+    for (const auto& [actual, expected] : TEXT_ALIGN_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->setTextAlign(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(*holder->textAlign, expected);
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setTextBaselineTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setTextBaselineTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->setTextBaseline, nullptr);
+    for (const auto& [actual, expected] : TEXT_BASE_LINE_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->setTextBaseline(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(*holder->baseline, expected);
     }
     holder->TearDown();
 }
