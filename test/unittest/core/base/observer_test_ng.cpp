@@ -24,6 +24,7 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
@@ -229,5 +230,113 @@ HWTEST_F(ObserverTestNg, ObserverTestNg009, TestSize.Level1)
         UIObserverHandler::GetInstance().GetHandleNavDestinationSwitchFunc();
     ASSERT_NE(handleFunc, nullptr);
     ASSERT_NE(func, nullptr);
+}
+
+/**
+ * @tc.name: ObserverTestNg010
+ * @tc.desc: Test the operation of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg010, TestSize.Level1)
+{
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigation", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navigation->GetPattern<NavigationPattern>()->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto pathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    ASSERT_NE(pathInfo, nullptr);
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    ASSERT_NE(context, nullptr);
+    context->SetNavPathInfo(pathInfo);
+
+    auto pattern = contentNode->GetPattern<NavDestinationPattern>();
+    pattern->SetNavDestinationContext(context);
+    pattern->name_ = "test_name";
+    pattern->isOnShow_ = true;
+    pattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigation));
+
+    auto info = UIObserverHandler::GetInstance().GetNavigationOuterState(nullptr);
+    ASSERT_EQ(info, nullptr);
+
+    info = UIObserverHandler::GetInstance().GetNavigationOuterState(navigation);
+    ASSERT_EQ(info, nullptr);
+
+    ASSERT_EQ(pattern->GetNavigationNode(), navigation);
+
+    info = UIObserverHandler::GetInstance().GetNavigationOuterState(contentNode);
+    ASSERT_EQ(info, nullptr);
+}
+
+/**
+ * @tc.name: ObserverTestNg011
+ * @tc.desc: Test the operation of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg011, TestSize.Level1)
+{
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigation", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navigation->GetPattern<NavigationPattern>()->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto pathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    ASSERT_NE(pathInfo, nullptr);
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    ASSERT_NE(context, nullptr);
+    context->SetNavPathInfo(pathInfo);
+
+    auto pattern = contentNode->GetPattern<NavDestinationPattern>();
+    pattern->SetNavDestinationContext(context);
+    pattern->name_ = "test_name";
+    pattern->isOnShow_ = true;
+    pattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigation));
+
+    auto info = UIObserverHandler::GetInstance().GetNavigationInnerState(nullptr);
+    ASSERT_EQ(info, nullptr);
+
+    info = UIObserverHandler::GetInstance().GetNavigationInnerState(navigation);
+    ASSERT_EQ(info, nullptr);
+}
+
+/**
+ * @tc.name: ObserverTestNg012
+ * @tc.desc: Test the operation of Observer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ObserverTestNg, ObserverTestNg012, TestSize.Level1)
+{
+    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
+        "navigation", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    navigation->GetPattern<NavigationPattern>()->navigationStack_ = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, 12,
+        []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto pathInfo = AceType::MakeRefPtr<NavPathInfo>();
+    ASSERT_NE(pathInfo, nullptr);
+    auto context = AceType::MakeRefPtr<NavDestinationContext>();
+    ASSERT_NE(context, nullptr);
+    context->SetNavPathInfo(pathInfo);
+    navDestination->SetParent(navigationContentNode);
+    auto pattern = navDestination->GetPattern<NavDestinationPattern>();
+    pattern->SetNavDestinationContext(context);
+    pattern->name_ = "test_name";
+    pattern->isOnShow_ = true;
+    pattern->navigationNode_ = AceType::WeakClaim(Referenced::RawPtr(navigation));
+
+    auto info = UIObserverHandler::GetInstance().GetNavigationOuterState(nullptr);
+    ASSERT_EQ(info, nullptr);
+
+    info = UIObserverHandler::GetInstance().GetNavigationOuterState(navigation);
+    ASSERT_EQ(info, nullptr);
+
+    ASSERT_EQ(pattern->GetNavigationNode(), navigation);
+
+    info = UIObserverHandler::GetInstance().GetNavigationOuterState(navDestination);
+    ASSERT_NE(info, nullptr);
+    ASSERT_EQ(info->name, "test_name");
+    ASSERT_EQ(info->navigationId, "");
+    ASSERT_EQ(info->state, NavDestinationState::ON_SHOWN);
 }
 }
