@@ -433,7 +433,7 @@ std::u16string TextFieldPattern::CreateDisplayText(
         auto text =
             TextFieldPattern::CreateObscuredText(static_cast<int32_t>(content.length()));
         if (nakedCharPosition >= 0 && nakedCharPosition < static_cast<int32_t>(content.length())) {
-            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE) || !showPasswordDirectly) {
+            if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE) || !showPasswordDirectly) {
                 text[nakedCharPosition] = content[nakedCharPosition];
             }
         }
