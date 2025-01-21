@@ -124,14 +124,17 @@ bool StylusDetectorMgr::IsNeedInterceptedTouchEvent(
 
     auto frameNode = FindHitFrameNode(touchEvent, iter->second);
     if (!frameNode) {
-        TAG_LOGI(AceLogTag::ACE_STYLUS, "Stylus hit position is (%{public}f, %{public}f). TargetNode is None",
-            touchEvent.x, touchEvent.y);
+        TAG_LOGI(AceLogTag::ACE_STYLUS,
+            "Stylus hit position is (" SEC_PLD(%{public}f) "," SEC_PLD(%{public}f) "). TargetNode is None",
+            SEC_PARAM(touchEvent.x), SEC_PARAM(touchEvent.y));
         return false;
     }
 
     TAG_LOGI(AceLogTag::ACE_STYLUS,
-        "Stylus hit position is (%{public}f, %{public}f). TargetNode is %{public}s, id is %{public}s", touchEvent.x,
-        touchEvent.y, frameNode->GetTag().c_str(), frameNode->GetInspectorId()->c_str());
+        "Stylus hit position is (" SEC_PLD(%{public}f) "," SEC_PLD(%{public}f) ")."
+        "TargetNode is %{public}s, id is " SEC_PLD(%{public}s) ".",
+        SEC_PARAM(touchEvent.x), SEC_PARAM(touchEvent.y), frameNode->GetTag().c_str(),
+        SEC_PARAM(frameNode->GetInspectorId()->c_str()));
 
     if (!IsEnable()) {
         TAG_LOGI(AceLogTag::ACE_STYLUS, "Stylus service is not enable");
