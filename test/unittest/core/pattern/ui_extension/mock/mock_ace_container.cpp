@@ -268,4 +268,9 @@ uint32_t AceContainer::GetStatusBarHeight()
 }
 void AceContainer::NotifyConfigurationChange(
     bool needReloadTransition, const ConfigurationChange& configurationChange) {}
+
+bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent)
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG
