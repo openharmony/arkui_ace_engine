@@ -35,8 +35,11 @@ namespace {
 struct DoublePair {
     double first;
     double second;
-    bool operator<(const DoublePair& other) const {
-        if (first != other.first) return first < other.first;
+    bool operator<(const DoublePair& other) const
+    {
+        if (first != other.first) {
+            return first < other.first;
+        }
         return second < other.second;
     }
 };

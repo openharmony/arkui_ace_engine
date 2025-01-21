@@ -33,13 +33,15 @@ public:
 
 class TestHelperManager {
 public:
-    
-    static TestHelperManager& GetInstance() {
+
+    static TestHelperManager& GetInstance()
+    {
         static TestHelperManager instance;
         return instance;
     }
 
-    static int64_t Register(ICustomNodeBuilderTestHelper* helper) {
+    static int64_t Register(ICustomNodeBuilderTestHelper* helper)
+    {
         if (helper != nullptr) {
             auto uniqueId = reinterpret_cast<int64_t>(helper);
             GetInstance().instances_[uniqueId] = helper;
@@ -48,7 +50,8 @@ public:
         return 0;
     }
 
-    static void Unregister(int64_t uniqueId) {
+    static void Unregister(int64_t uniqueId)
+    {
         auto instances = GetInstance().instances_;
         auto it = instances.find(uniqueId);
         if (it != instances.end()) {
@@ -56,11 +59,8 @@ public:
         }
     }
 
-    // static void Unregister(ICustomNodeBuilderTestHelper* helper) {
-    //     Unregister(reinterpret_cast<int64_t>(helper));
-    // }
-
-    ICustomNodeBuilderTestHelper* GetInstanceById(int64_t uniqueId) {
+    ICustomNodeBuilderTestHelper* GetHelperById(int64_t uniqueId)
+    {
         auto it = instances_.find(uniqueId);
         if (it != instances_.end()) {
             return it->second;
@@ -110,7 +110,7 @@ public:
         CustomNodeBuilder builder = {
             .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                 const Callback_Pointer_Void continuation) {
-                auto testHelper = TestHelperManager::GetInstance().GetInstanceById(helperSwitcher_);
+                auto testHelper = TestHelperManager::GetInstance().GetHelperById(helperSwitcher_);
                 if (testHelper) {
                     testHelper->TestFunction(context, resourceId, parentNode, continuation);
                 } else {
