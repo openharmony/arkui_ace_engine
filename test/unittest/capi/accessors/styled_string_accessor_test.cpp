@@ -39,11 +39,14 @@ constexpr auto STRING_TEST_VALUE = "This is a test string for styled text, and m
 PixelMapPeer* CreatePixelMap()
 {
     static PixelMapPeer pixelMapPeer;
-    std::string src = "test";
+    if (pixelMapPeer.pixelMap && pixelMapPeer.pixelMap->RefCount() > 0 ) {
+        pixelMapPeer.pixelMap->DecRefCount();
+    }
+    static std::string src = "test";
     auto voidChar = src.data();
     void* voidPtr = static_cast<void*>(voidChar);
-    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
-    pixelMapPeer.pixelMap = pixelMap.GetRawPtr();
+    pixelMapPeer.pixelMap = PixelMap::CreatePixelMap(voidPtr);
+    pixelMapPeer.pixelMap->IncRefCount();
     return &pixelMapPeer;
 }
 const Ark_PixelMap TEST_PIXELMAP {
@@ -603,7 +606,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorParagraphStyle, Te
 
 /**
  * @tc.name: styledStringCtorParagraphStylePixelMap
- * @tc.desc:
+ * @tc.desc: PixelMap check in the ParagraphStyle
  * @tc.type: FUNC
  */
 HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorParagraphStylePixelMap, TestSize.Level1)
@@ -614,14 +617,13 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorParagraphStylePixe
     auto paragraphSpan = AceType::DynamicCast<ParagraphStyleSpan>(spans[0]);
     EXPECT_NE(paragraphSpan, nullptr);
     SpanParagraphStyle style = paragraphSpan->GetParagraphStyle();
-    EXPECT_TRUE(style.leadingMargin.has_value());
-    if (style.leadingMargin.has_value()) {
-        auto size = style.leadingMargin.value().size;
-        EXPECT_EQ(size.ToString(), std::get<0>(TEST_TUPLE_DIMENSION_DIMENSION));
-        auto pixMap = style.leadingMargin.value().pixmap;
-        PixelMapPeer* pixMapPeer = reinterpret_cast<PixelMapPeer*>(TEST_PIXELMAP.ptr);
-        EXPECT_EQ(pixMap.GetRawPtr(), pixMapPeer->pixelMap.GetRawPtr());
-    }
+    ASSERT_TRUE(style.leadingMargin.has_value());
+    auto size = style.leadingMargin.value().size;
+    EXPECT_EQ(size.ToString(), std::get<0>(TEST_TUPLE_DIMENSION_DIMENSION));
+    auto pixMap = style.leadingMargin.value().pixmap;
+    auto pixMapPeer = reinterpret_cast<PixelMapPeer*>(TEST_PIXELMAP.ptr);
+    EXPECT_EQ(pixMap, pixMapPeer->pixelMap);
+    
 }
 
 /**
@@ -731,7 +733,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, DISABLED_styledStringUnmarshalling
 
 /**
  * @tc.name:styledStringCtorImageAttachment
- * @tc.desc:
+ * @tc.desc: ImageAttachment check
  * @tc.type: FUNC
  */
 HWTEST_F(StyledStringAccessorUnionImageAttachmentTest, styledStringCtorImageAttachment, TestSize.Level1)
@@ -742,21 +744,25 @@ HWTEST_F(StyledStringAccessorUnionImageAttachmentTest, styledStringCtorImageAtta
     auto imageSpan = AceType::DynamicCast<ImageSpan>(spans[0]);
     EXPECT_NE(imageSpan, nullptr);
     const ImageSpanOptions& options = imageSpan->GetImageSpanOptions();
-    PixelMapPeer* pixMapPeer = reinterpret_cast<PixelMapPeer*>(TEST_PIXELMAP.ptr);
-    EXPECT_EQ(options.imagePixelMap.value().GetRawPtr(), pixMapPeer->pixelMap.GetRawPtr());
+    auto pixMapPeer = reinterpret_cast<PixelMapPeer*>(TEST_PIXELMAP.ptr);
+    ASSERT_TRUE(options.imagePixelMap.has_value());
+    EXPECT_EQ(options.imagePixelMap.value(), pixMapPeer->pixelMap);
     const std::optional<ImageSpanAttribute>& imageAttribute = imageSpan->GetImageAttribute();
-    EXPECT_EQ(imageAttribute.has_value(), true);
-    if (imageAttribute.has_value()) {
-        EXPECT_EQ(imageAttribute.value().size.value().width, CalcDimension(TEST_SIZEOPTIONS));
-        EXPECT_EQ(imageAttribute.value().size.value().height, CalcDimension(TEST_SIZEOPTIONS));
-        EXPECT_EQ(imageAttribute.value().verticalAlign.value(), std::get<0>(TEST_VERTICALALIGN));
-        EXPECT_EQ(imageAttribute.value().objectFit.value(), std::get<0>(TEST_IMAGEFIT));
-        auto marginStr = imageAttribute.value().marginProp.value().ToString();
-        EXPECT_EQ(marginStr, TEST_LENGTHMETRICS_STR);
-        auto borderRadiusStr = imageAttribute.value().borderRadius.value().ToString();
-        EXPECT_EQ(borderRadiusStr, TEST_LENGTHMETRICS_BR_STR);
-        auto paddingStr = imageAttribute.value().paddingProp.value().ToString();
-        EXPECT_EQ(paddingStr, TEST_LENGTHMETRICS_STR);
-    }
+    ASSERT_TRUE(imageAttribute.has_value());
+    ASSERT_TRUE(imageAttribute.value().size.has_value());
+    EXPECT_EQ(imageAttribute.value().size.value().width, CalcDimension(TEST_SIZEOPTIONS));
+    EXPECT_EQ(imageAttribute.value().size.value().height, CalcDimension(TEST_SIZEOPTIONS));
+    ASSERT_TRUE(imageAttribute.value().verticalAlign.has_value());
+    EXPECT_EQ(imageAttribute.value().verticalAlign.value(), std::get<0>(TEST_VERTICALALIGN));
+    ASSERT_TRUE(imageAttribute.value().objectFit.has_value());
+    EXPECT_EQ(imageAttribute.value().objectFit.value(), std::get<0>(TEST_IMAGEFIT));
+    ASSERT_TRUE(imageAttribute.value().marginProp.has_value());
+    auto marginStr = imageAttribute.value().marginProp.value().ToString();
+    EXPECT_EQ(marginStr, TEST_LENGTHMETRICS_STR);
+    auto borderRadiusStr = imageAttribute.value().borderRadius.value().ToString();
+    EXPECT_EQ(borderRadiusStr, TEST_LENGTHMETRICS_BR_STR);
+    ASSERT_TRUE(imageAttribute.value().paddingProp.has_value());
+    auto paddingStr = imageAttribute.value().paddingProp.value().ToString();
+    EXPECT_EQ(paddingStr, TEST_LENGTHMETRICS_STR);
 }
 } // namespace OHOS::Ace::NG
