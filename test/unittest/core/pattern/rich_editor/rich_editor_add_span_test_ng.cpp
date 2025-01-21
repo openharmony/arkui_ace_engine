@@ -191,7 +191,7 @@ HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan001, TestSize.Level1)
     EXPECT_EQ(index1, 0);
     auto index2 = richEditorController->AddTextSpan(options);
     EXPECT_EQ(index2, 1);
-    options.value = "hello\n";
+    options.value = u"hello\n";
     auto index3 = richEditorController->AddTextSpan(options);
     EXPECT_EQ(index3, 1);
 }

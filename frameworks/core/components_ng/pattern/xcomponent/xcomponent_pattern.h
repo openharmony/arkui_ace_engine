@@ -325,6 +325,10 @@ public:
     void OnSurfaceCallbackModeChange(SurfaceCallbackMode mode);
     void EnableSecure(bool isSecure);
     void HdrBrightness(float hdrBrightness);
+    void EnableTransparentLayer(bool isTransparentLayer);
+    RenderFit GetSurfaceRenderFit() const;
+    bool GetEnableAnalyzer();
+    void NativeStartImageAnalyzer(std::function<void(int32_t)>& callback);
 
 private:
     void OnAttachToFrameNode() override;
@@ -463,8 +467,13 @@ private:
     bool hasLoadNativeDone_ = false;
     bool isEnableSecure_ = false;
     float hdrBrightness_ = 1.0f;
+    bool isTransparentLayer_ = false;
     SurfaceCallbackMode surfaceCallbackMode_ = SurfaceCallbackMode::DEFAULT;
     std::function<void(SurfaceCallbackMode)> surfaceCallbackModeChangeEvent_;
+    // record displaySync_->DelFromPipelineOnContainer() from OnDetachFromMainTree
+    bool needRecoverDisplaySync_ = false;
+    bool isNativeImageAnalyzing_ = false;
+    bool isOnTree_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -59,6 +59,8 @@ public:
     virtual void SetControlSize(const std::optional<ControlSize>& controlSize) {}
     virtual void SetRole(const std::optional<ButtonRole>& buttonRole) {}
     virtual void SetCreateWithLabel(bool isLabelButton) {}
+    virtual void SetMinFontScale(float minFontScale) {}
+    virtual void SetMaxFontScale(float maxFontScale) {}
 
 private:
     static std::unique_ptr<ButtonModel> instance_;

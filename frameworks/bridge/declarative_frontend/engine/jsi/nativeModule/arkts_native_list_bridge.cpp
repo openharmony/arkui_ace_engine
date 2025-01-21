@@ -474,33 +474,6 @@ ArkUINativeModuleValue ListBridge::ResetListScrollBarColor(ArkUIRuntimeCallInfo*
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue ListBridge::SetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
-    Local<JSValueRef> argSpeed = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_1);
-    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
-    double limitSpeed = -1.0;
-    if (!ArkTSUtils::ParseJsDouble(vm, argSpeed, limitSpeed)) {
-        GetArkUINodeModifiers()->getListModifier()->resetListFlingSpeedLimit(nativeNode);
-    } else {
-        GetArkUINodeModifiers()->getListModifier()->setListFlingSpeedLimit(
-            nativeNode, static_cast<ArkUI_Float32>(limitSpeed));
-    }
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue ListBridge::ResetFlingSpeedLimit(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> argNode = runtimeCallInfo->GetCallArgRef(LIST_ARG_INDEX_0);
-    auto nativeNode = nodePtr(argNode->ToNativePointer(vm)->Value());
-    GetArkUINodeModifiers()->getListModifier()->resetListFlingSpeedLimit(nativeNode);
-    return panda::JSValueRef::Undefined(vm);
-}
-
 ArkUINativeModuleValue ListBridge::SetAlignListItem(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

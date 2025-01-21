@@ -86,12 +86,38 @@ public:
         selectedTimeChangeEvent_ = std::move(changeEvent);
     }
 
+    void SetOnEnterSelectedArea(TimeChangeEvent&& onEnterSelectedArea)
+    {
+        onEnterSelectedAreaEvent_ = std::move(onEnterSelectedArea);
+    }
+
+    void FireEnterSelectedAreaEvent(const BaseEventInfo* info) const
+    {
+        if (onEnterSelectedAreaEvent_) {
+            onEnterSelectedAreaEvent_(info);
+        }
+    }
+
+    void SetDialogEnterSelectedArea(DialogEvent&& onEnterSelectedAreaEvent)
+    {
+        dialogEnterSelectedAreaEvent_ = std::move(onEnterSelectedAreaEvent);
+    }
+
+    void FireDialogEnterSelectedAreaEvent(const std::string& info) const
+    {
+        if (dialogEnterSelectedAreaEvent_) {
+            dialogEnterSelectedAreaEvent_(info);
+        }
+    }
+
 private:
     TimeChangeEvent changeEvent_;
     DialogEvent DialogChangeEvent_;
     DialogEvent DialogAcceptEvent_;
     TimeChangeEvent selectedTimeChangeEvent_;
     TimeChangeEventForDatePicker changeEventForDatePicker_;
+    TimeChangeEvent onEnterSelectedAreaEvent_;
+    DialogEvent dialogEnterSelectedAreaEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TimePickerEventHub);
 };

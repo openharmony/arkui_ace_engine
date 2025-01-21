@@ -86,10 +86,22 @@ void CheckAndSendHoverEnterByAncestor(const RefPtr<NG::FrameNode>& ancestor)
 }
 }
 
+bool IsTouchExplorationEnabled(const RefPtr<FrameNode>& root)
+{
+    CHECK_NULL_RETURN(root, true);
+    auto pipeline = root->GetContext();
+    CHECK_NULL_RETURN(pipeline, true);
+    auto jsAccessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_RETURN(jsAccessibilityManager, true);
+    auto accessibilityWorkMode = jsAccessibilityManager->GetAccessibilityWorkMode();
+    return accessibilityWorkMode.isTouchExplorationEnabled;
+}
+
 void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNode>& root, const MouseEvent& event)
 {
     if (root == nullptr ||
         !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
+        !IsTouchExplorationEnabled(root) ||
         event.sourceType != SourceType::MOUSE) {
         return;
     }
@@ -115,6 +127,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
 {
     if (root == nullptr ||
         !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
+        !IsTouchExplorationEnabled(root) ||
         event.sourceType == SourceType::MOUSE) {
         return;
     }
@@ -147,6 +160,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEvent(const RefPtr<FrameNod
 {
     if (root == nullptr ||
         !AceApplicationInfo::GetInstance().IsAccessibilityEnabled() ||
+        !IsTouchExplorationEnabled(root) ||
         eventType < 0 || eventType >= static_cast<int32_t>(AccessibilityHoverEventType::Count)) {
         return;
     }
@@ -173,7 +187,7 @@ void AccessibilityManagerNG::HandleAccessibilityHoverEventInner(
     AccessibilityHoverEventType eventType,
     TimeStamp time)
 {
-    static constexpr size_t THROTTLE_INTERVAL_HOVER_EVENT = 50;
+    static constexpr size_t THROTTLE_INTERVAL_HOVER_EVENT = 10;
     uint64_t duration =
         static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(time - hoverState_.time).count());
     if (!hoverState_.idle) {

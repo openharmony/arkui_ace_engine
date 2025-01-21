@@ -175,16 +175,15 @@ void JSSelect::Selected(const JSCallbackInfo& info)
     }
 
     int32_t value = 0;
-    if (info.Length() > 0 && !info[0]->IsObject()) {
-        ParseJsInteger<int32_t>(info[0], value);
-    }
+
+    bool result = ParseJsInteger<int32_t>(info[0], value);
 
     if (value < -1) {
         value = -1;
     }
     JSRef<JSVal> changeEventVal;
     auto selectedVal = info[0];
-    if (selectedVal->IsObject()) {
+    if (!result && selectedVal->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(selectedVal);
         selectedVal = obj->GetProperty("value");
         changeEventVal = obj->GetProperty("$value");
@@ -224,12 +223,12 @@ void JSSelect::Value(const JSCallbackInfo& info)
     }
 
     std::string value;
-    if (info.Length() > 0 && !info[0]->IsObject()) {
-        ParseJsString(info[0], value);
-    }
+    
+    bool result = ParseJsString(info[0], value);
+
     JSRef<JSVal> changeEventVal;
     auto selectedVal = info[0];
-    if (selectedVal->IsObject()) {
+    if (!result && selectedVal->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(selectedVal);
         selectedVal = obj->GetProperty("value");
         changeEventVal = obj->GetProperty("$value");

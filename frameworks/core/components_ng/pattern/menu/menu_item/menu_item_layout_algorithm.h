@@ -41,7 +41,7 @@ private:
     void CheckUserHeight(LayoutWrapper* layoutWrapper);
     void MeasureItemViews(LayoutConstraintF& childConstraint,
         std::optional<LayoutConstraintF>& layoutConstraint,
-        PaddingPropertyF padding, LayoutWrapper* layoutWrapper);
+        LayoutWrapper* layoutWrapper);
     void MeasureRow(const RefPtr<LayoutWrapper>& row, const LayoutConstraintF& constraint);
     void CheckNeedExpandContent(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
     void UpdateSelfSize(LayoutWrapper* layoutWrapper, float width, float itemHeight, float expandableHeight);
@@ -60,6 +60,10 @@ private:
     float MeasureExpandableHeight(LayoutConstraintF& childConstraint, LayoutWrapper* layoutWrapper);
     void InitPadding(const RefPtr<LayoutProperty>& props, std::optional<LayoutConstraintF>& layoutConstraint);
     float CalcItemHeight(float leftRowHeight, float rightRowHeight);
+    void MeasureClickableArea(LayoutWrapper* layoutWrapper);
+    std::pair<float, float> MeasureRightRow(LayoutWrapper* layoutWrapper, LayoutConstraintF& childConstraint);
+    void CalcContentExpandWidth(std::optional<LayoutConstraintF>& layoutConstraint,
+        float contentWidth, float leftRowWidth, float rightRowWidth);
 
     float horInterval_ = 0.0f;
     float verInterval_ = 0.0f;
@@ -74,6 +78,7 @@ private:
     bool needExpandContent_ = false;
     bool isOption_ = false;
     PaddingPropertyF padding_;
+    bool userSetPadding_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuItemLayoutAlgorithm);
 };

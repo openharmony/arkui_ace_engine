@@ -128,7 +128,7 @@ std::string TextFieldAccessibilityProperty::GetText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, "");
-    std::string text = UtfUtils::Str16ToStr8(textFieldLayoutProperty->GetValueValue(u""));
+    std::string text = UtfUtils::Str16DebugToStr8(textFieldLayoutProperty->GetValueValue(u""));
     if (IsPassword() && !text.empty()) {
         return std::string(text.size(), '*');
     }
@@ -151,7 +151,7 @@ std::string TextFieldAccessibilityProperty::GetHintText() const
     CHECK_NULL_RETURN(frameNode, "");
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(textFieldPattern, "");
-    return UtfUtils::Str16ToStr8(textFieldPattern->GetPlaceHolder());
+    return UtfUtils::Str16DebugToStr8(textFieldPattern->GetPlaceHolder());
 }
 
 bool TextFieldAccessibilityProperty::GetContentInvalid() const

@@ -61,15 +61,14 @@ void VideoModelNG::Create(const RefPtr<VideoControllerV2>& videoController)
         CHECK_NULL_VOID(controllerRowNode);
         videoNode->AddChild(controllerRowNode);
     }
-    AddDragFrameNodeToManager();
 }
 
 void VideoModelNG::SetSrc(const std::string& src, const std::string& bundleName, const std::string& moduleName)
 {
     VideoSourceInfo videoSrcInfo;
-    videoSrcInfo.src = src;
-    videoSrcInfo.bundleName = bundleName;
-    videoSrcInfo.moduleName = moduleName;
+    videoSrcInfo.src_ = src;
+    videoSrcInfo.bundleName_ = bundleName;
+    videoSrcInfo.moduleName_ = moduleName;
     ACE_UPDATE_LAYOUT_PROPERTY(VideoLayoutProperty, VideoSource, videoSrcInfo);
 }
 
@@ -247,17 +246,6 @@ void VideoModelNG::SetOnFullScreenChange(VideoEventFunc&& onFullScreenChange)
     auto eventHub = frameNode->GetEventHub<VideoEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnFullScreenChange(std::move(onFullScreenChange));
-}
-
-void VideoModelNG::AddDragFrameNodeToManager() const
-{
-    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    CHECK_NULL_VOID(frameNode);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_VOID(dragDropManager);
-    dragDropManager->AddDragFrameNode(frameNode->GetId(), frameNode);
 }
 
 void VideoModelNG::SetAutoPlay(FrameNode* frameNode, bool autoPlay)

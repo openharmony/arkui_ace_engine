@@ -30,6 +30,7 @@ void SetOnWaterFlowScrollStop(ArkUINodeHandle node, void* extraParam);
 void SetOnWaterFlowScrollFrameBegin(ArkUINodeHandle node, void* extraParam);
 void SetOnWaterFlowScrollIndex(ArkUINodeHandle node, void* extraParam);
 void SetOnWaterFlowReachStart(ArkUINodeHandle node, void* extraParam);
+void SetOnWaterFlowScrollIndexCallBack(ArkUINodeHandle node, void* extraParam);
 
 void ResetOnWillScroll(ArkUINodeHandle node);
 void ResetOnWaterFlowReachEnd(ArkUINodeHandle node);

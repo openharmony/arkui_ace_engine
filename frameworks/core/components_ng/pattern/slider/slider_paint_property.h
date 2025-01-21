@@ -104,6 +104,23 @@ public:
         return "";
     }
 
+    std::string ToJsonSelectColor() const
+    {
+        if (HasSelectGradientColor()) {
+            Gradient colors = GetSelectGradientColor().value();
+            if (GetSelectIsResourceColorValue(false)) {
+                return colors.GetColors()[0].GetLinearColor().ToColor().ColorToString();
+            } else {
+                return GradientToJson(colors);
+            }
+        }
+        auto pipeline = PipelineBase::GetCurrentContextSafely();
+        CHECK_NULL_RETURN(pipeline, "");
+        auto theme = pipeline->GetTheme<SliderTheme>();
+        CHECK_NULL_RETURN(theme, "");
+        return GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString();
+    }
+
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override
     {
         PaintProperty::ToJsonValue(json, filter);
@@ -130,8 +147,7 @@ public:
         json->PutExtAttr("blockColor",
             GetBlockColor().value_or(theme->GetBlockColor()).ColorToString().c_str(), filter);
         json->PutExtAttr("trackColor", ToJsonTrackBackgroundColor().c_str(), filter);
-        json->PutExtAttr("selectedColor",
-            GetSelectColor().value_or(theme->GetTrackSelectedColor()).ColorToString().c_str(), filter);
+        json->PutExtAttr("selectedColor", ToJsonSelectColor().c_str(), filter);
         json->PutExtAttr("showSteps", GetShowSteps().value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("showTips", GetShowTips().value_or(false) ? "true" : "false", filter);
         json->PutExtAttr("blockBorderColor",
@@ -214,6 +230,8 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundColor, Gradient, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, TrackBackgroundIsResourceColor, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectColor, Color, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectGradientColor, Gradient, PROPERTY_UPDATE_RENDER)
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, SelectIsResourceColor, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SliderPaintStyle, ShowSteps, bool, PROPERTY_UPDATE_RENDER)
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(
         SliderPaintStyle, SliderInteractionMode, SliderModel::SliderInteraction, PROPERTY_UPDATE_RENDER)

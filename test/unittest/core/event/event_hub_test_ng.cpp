@@ -1262,4 +1262,72 @@ HWTEST_F(EventHubTestNg, EventHubTest020, TestSize.Level1)
     eventHub->FireOnDrop(dragEvent, DRAG_ENTER_EVENT_TYPE);
     EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
 }
+
+/**
+ * @tc.name: EventHubTest021
+ * @tc.desc: FireOnWillBind
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest021, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto nodeContainerId = frameNode->GetId();
+    std::function<void(int32_t)> onWillBindCallback = [](int32_t) {};
+    eventHub->SetOnWillBind(std::move(onWillBindCallback));
+    eventHub->FireOnWillBind(nodeContainerId);
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest022
+ * @tc.desc: FireOnWillUnbind
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest022, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto nodeContainerId = frameNode->GetId();
+    std::function<void(int32_t)> onWillUnbindCallback = [](int32_t) {};
+    eventHub->SetOnWillUnbind(std::move(onWillUnbindCallback));
+    eventHub->FireOnWillUnbind(nodeContainerId);
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest023
+ * @tc.desc: FireOnBind
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest023, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto nodeContainerId = frameNode->GetId();
+    std::function<void(int32_t)> onBindCallback = [](int32_t) {};
+    eventHub->SetOnBind(std::move(onBindCallback));
+    eventHub->FireOnBind(nodeContainerId);
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
+
+/**
+ * @tc.name: EventHubTest024
+ * @tc.desc: FireOnUnbind
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest024, TestSize.Level1)
+{
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto nodeContainerId = frameNode->GetId();
+    std::function<void(int32_t)> onUnbindCallback = [](int32_t) {};
+    eventHub->SetOnUnbind(std::move(onUnbindCallback));
+    eventHub->FireOnUnbind(nodeContainerId);
+    EXPECT_NE(eventHub->GetOrCreateGestureEventHub(), nullptr);
+}
 } // namespace OHOS::Ace::NG

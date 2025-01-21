@@ -485,9 +485,12 @@ public:
         animationInfo_.clipRate = rate;
     }
 
-    void SetAnimationBorderRadius(float radius)
+    void SetAnimationBorderRadius(double rate, const BorderRadiusProperty& radius)
     {
-        animationInfo_.borderRadius = radius;
+        animationInfo_.borderRadius.radiusTopLeft = Dimension(radius.radiusTopLeft->Value() * rate);
+        animationInfo_.borderRadius.radiusTopRight = Dimension(radius.radiusTopRight->Value() * rate);
+        animationInfo_.borderRadius.radiusBottomLeft = Dimension(radius.radiusBottomLeft->Value() * rate);
+        animationInfo_.borderRadius.radiusBottomRight = Dimension(radius.radiusBottomRight->Value() * rate);
     }
 
     PreviewMenuAnimationInfo GetPreviewMenuAnimationInfo()
@@ -532,6 +535,28 @@ public:
         previewDisappearStartOffset_ = offset;
     }
 
+    bool IsMenuPreviewNode(const RefPtr<FrameNode>& frameNode) const;
+
+    void SetHoverMode(bool enableFold)
+    {
+        enableFold_ = enableFold;
+    }
+
+    bool GetHoverMode() const
+    {
+        return enableFold_.value_or(false);
+    }
+
+    bool GetIsSelectOverlaySubWindowWrapper() const
+    {
+        return isSelectOverlaySubWindowWrapper_;
+    }
+
+    void SetIsSelectOverlaySubWindowWrapper(bool isSelectOverlaySubWindowWrapper)
+    {
+        isSelectOverlaySubWindowWrapper_ = isSelectOverlaySubWindowWrapper;
+    }
+
 protected:
     void OnTouchEvent(const TouchEventInfo& info);
     void CheckAndShowAnimation();
@@ -561,6 +586,7 @@ private:
     void ClearLastMenuItem();
     RectF GetMenuZone(RefPtr<UINode>& innerMenuNode);
     RefPtr<FrameNode> FindTouchedMenuItem(const RefPtr<UINode>& menuNode, const OffsetF& position);
+    bool IsNeedSetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper);
 
     void HideMenu(const RefPtr<FrameNode>& menu);
     void HideMenu(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& menu, const OffsetF& position);
@@ -600,6 +626,9 @@ private:
     MenuParam menuParam_;
     bool isShowFromUser_ = false;
     int32_t fingerId_ = -1;
+    std::optional<bool> enableFold_;
+    // Identify whether the menuWrapper is used by selectOverlay in the subwindow.
+    bool isSelectOverlaySubWindowWrapper_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

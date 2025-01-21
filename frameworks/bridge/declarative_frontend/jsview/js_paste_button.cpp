@@ -114,18 +114,25 @@ void JsPasteButtonClickFunction::Execute(GestureEvent& info)
     clickEventParam->SetPropertyObject("target", target);
 
     int32_t res = static_cast<int32_t>(SecurityComponentHandleResult::CLICK_GRANT_FAILED);
+    JSRef<JSObject> errorMessage = JSRef<JSObject>::New();
 #ifdef SECURITY_COMPONENT_ENABLE
     auto secEventValue = info.GetSecCompHandleEvent();
     if (secEventValue != nullptr) {
         res = secEventValue->GetInt("handleRes", res);
+        int32_t code = static_cast<int32_t>(SecurityComponentErrorCode::SUCCESS);
+        std::string message;
         if (res == static_cast<int32_t>(SecurityComponentHandleResult::DROP_CLICK)) {
             return;
         }
+        code = secEventValue->GetInt("code", code);
+        errorMessage->SetProperty<int32_t>("code", code);
+        message = secEventValue->GetString("message", message);
+        errorMessage->SetProperty<std::string>("message", message);
     }
 #endif
     JSRef<JSVal> errorParam = JSRef<JSVal>::Make(ToJSValue(res));
-    JSRef<JSVal> params[] = { clickEventParam, errorParam };
-    JsFunction::ExecuteJS(2, params);
+    JSRef<JSVal> params[] = { clickEventParam, errorParam, errorMessage };
+    JsFunction::ExecuteJS(3, params); // 3 means three params.
 }
 
 void JSPasteButton::JsOnClick(const JSCallbackInfo& info)
@@ -187,6 +194,13 @@ void JSPasteButton::JSBind(BindingTarget globalObj)
     JSClass<JSPasteButton>::StaticMethod("alignRules", &JSViewAbstract::JsAlignRules);
     JSClass<JSPasteButton>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSPasteButton>::StaticMethod("chainMode", &JSViewAbstract::JsChainMode);
+    JSClass<JSPasteButton>::StaticMethod("maxFontScale", &JSSecButtonBase::SetMaxFontScale);
+    JSClass<JSPasteButton>::StaticMethod("minFontScale", &JSSecButtonBase::SetMinFontScale);
+    JSClass<JSPasteButton>::StaticMethod("maxLines", &JSSecButtonBase::SetMaxLines);
+    JSClass<JSPasteButton>::StaticMethod("maxFontSize", &JSSecButtonBase::SetMaxFontSize);
+    JSClass<JSPasteButton>::StaticMethod("minFontSize", &JSSecButtonBase::SetMinFontSize);
+    JSClass<JSPasteButton>::StaticMethod("heightAdaptivePolicy", &JSSecButtonBase::SetHeightAdaptivePolicy);
+    JSClass<JSPasteButton>::StaticMethod("enabled", &JSViewAbstract::JsEnabled);
     JSClass<JSPasteButton>::Bind<>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

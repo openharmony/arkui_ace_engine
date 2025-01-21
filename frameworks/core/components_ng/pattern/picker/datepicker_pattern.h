@@ -144,6 +144,10 @@ public:
 
     void HandleSolarDayChange(bool isAdd, uint32_t index);
 
+    void IncreaseLinkageYearMonth(PickerDate& date);
+
+    void ReduceLinkageYearMonth(PickerDate& date);
+
     void HandleSolarMonthDaysChange(bool isAdd, uint32_t index);
 
     void HandleLunarMonthDaysChange(bool isAdd, uint32_t index);
@@ -419,6 +423,16 @@ public:
         return endDateSolar_;
     }
 
+    void SetMode(const DatePickerMode& value)
+    {
+        datePickerMode_ = value;
+    }
+
+    const DatePickerMode& GetMode()
+    {
+        return datePickerMode_;
+    }
+
     void AdjustSolarDate(PickerDate& date, const PickerDate& start, const PickerDate& end) const
     {
         if (SolarDateCompare(date, start) < 0) {
@@ -576,6 +590,8 @@ public:
 
     static const std::string& GetLunarDay(uint32_t day);
 
+    const std::string GetText();
+
     FocusPattern GetFocusPattern() const override
     {
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -588,7 +604,31 @@ public:
         return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION, focusPaintParams };
     }
 
+    void SetCurrentFocusKeyID(int32_t value)
+    {
+        focusKeyID_ = value;
+    }
+
+    int32_t GetCurrentFocusKeyID()
+    {
+        return focusKeyID_;
+    }
+
+    void SetCurrentPage(uint32_t value)
+    {
+        currentPage_ = value;
+    }
+
+    uint32_t GetCurrentPage()
+    {
+        return currentPage_;
+    }
+
+    bool NeedAdaptForAging();
+
     void ShowTitle(int32_t titleId);
+    std::string GetVisibleColumnsText();
+    void GetColumnText(const RefPtr<FrameNode>& columnNode, std::string& result);
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void SetContentRowNode(RefPtr<FrameNode>& contentRowNode)
     {
@@ -697,10 +737,29 @@ public:
         return paintDividerSpacing_;
     }
 
+    static bool ReportDateChangeEvent(int32_t nodeId, const std::string& compName,
+        const std::string& eventName, const std::string& eventData);
+
     void SetUserDefinedOpacity(double opacity)
     {
         curOpacity_ = opacity;
     }
+
+    void SetEnableHapticFeedback(bool value)
+    {
+        if (isEnableHaptic_ != value) {
+            isHapticChanged_ = true;
+        }
+        isEnableHaptic_ = value;
+    }
+
+    bool GetEnableHapticFeedback() const
+    {
+        return isEnableHaptic_;
+    }
+
+    void ColumnPatternInitHapticController();
+    void ColumnPatternInitHapticController(const RefPtr<FrameNode>& columnNode);
 
 private:
     void OnModifyDone() override;
@@ -736,9 +795,13 @@ private:
         const RefPtr<FrameNode>& buttonConfirmNode, const RefPtr<DialogTheme>& dialogTheme);
     void UpdateCancelButtonMargin(
         const RefPtr<FrameNode>& buttonCancelNode, const RefPtr<DialogTheme>& dialogTheme);
+    void ShowColumnByDatePickMode();
+    void UpdateStackPropVisibility(const RefPtr<FrameNode>& stackNode,
+        const VisibleType visibleType, const int32_t weight);
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;
     int32_t focusKeyID_ = 0;
+    uint32_t currentPage_ = 0;
     std::map<WeakPtr<FrameNode>, std::vector<PickerDateF>> options_;
     uint32_t showCount_ = 0;
     std::string dateOrder_ = "";
@@ -800,6 +863,8 @@ private:
     bool CheckFocusID(int32_t childSize);
     bool ParseDirectionKey(RefPtr<DatePickerColumnPattern>& pattern, KeyCode& code, uint32_t totalOptionCount,
                           int32_t childSize);
+    bool ReportDateChangeEvent(const std::string& compName,
+        const std::string& eventName, const std::string& eventData);
 
     bool hasUserDefinedDisappearFontFamily_ = false;
     bool hasUserDefinedNormalFontFamily_ = false;
@@ -812,6 +877,10 @@ private:
     float paintDividerSpacing_ = 1.0f;
     PickerTextProperties textProperties_;
     double curOpacity_ = 1.0;
+    DatePickerMode datePickerMode_ = DatePickerMode::DATE;
+    bool isFocus_ = true;
+    bool isEnableHaptic_ = true;
+    bool isHapticChanged_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerPattern);
 };

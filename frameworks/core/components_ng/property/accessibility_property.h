@@ -449,6 +449,14 @@ public:
 
     void SetAccessibilityDescriptionWithEvent(const std::string& accessibilityDescription);
 
+    bool IsMatchAccessibilityResponseRegion(bool isAccessibilityVirtualNode);
+
+    bool IsAccessibilityCompInResponseRegion(const RectF& rect, const RectF& origRect);
+
+    static NG::RectF UpdateHoverTestRect(const RefPtr<FrameNode>& node);
+
+    NG::RectT<int32_t> GetAccessibilityResponseRegionRect(bool isAccessibilityVirtualNode);
+
     bool IsAccessibilityGroup() const;
 
     bool IsAccessibilityTextPreferred() const;
@@ -559,6 +567,10 @@ public:
     void ResetAccessibilityCustomRole();
     bool HasAccessibilityCustomRole();
     std::string GetAccessibilityCustomRole() const;
+
+    void SetAccessibilitySamePage(const std::string& pageMode);
+    bool HasAccessibilitySamePage();
+    std::string GetAccessibilitySamePage();
 
     void SetActions(const ActionsImpl& actionsImpl);
     bool ActionsDefined(uint32_t action);
@@ -692,6 +704,7 @@ protected:
     std::optional<uint32_t> accessibilityActions_;
     std::optional<std::string> accessibilityRole_;
     std::optional<std::string> accessibilityCustomRole_;
+    std::optional<std::string> accessibilityUseSamePage_;
     ACE_DISALLOW_COPY_AND_MOVE(AccessibilityProperty);
 
     std::optional<bool> isDisabled_;

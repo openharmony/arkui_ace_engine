@@ -21,6 +21,7 @@
 namespace OHOS::Ace::NG {
 
 using ChangeEvent = std::function<void(const bool)>;
+using OnSideBarWidthChangeEvent = std::function<void(const Dimension&)>;
 
 class SideBarContainerEventHub : public EventHub {
     DECLARE_ACE_TYPE(SideBarContainerEventHub, EventHub)
@@ -49,9 +50,22 @@ public:
         isShowChangeEvent_ = std::move(changeEventEvent);
     }
 
+    void SetOnSideBarWidthChangeEvent(OnSideBarWidthChangeEvent&& event)
+    {
+        onSideBarWidthChangeEvent_ = std::move(event);
+    }
+
+    void FireSideBarWidthChangeEvent(Dimension& sideBarWidth)
+    {
+        if (onSideBarWidthChangeEvent_) {
+            onSideBarWidthChangeEvent_(sideBarWidth);
+        }
+    }
+
 private:
     ChangeEvent changeEvent_;
     ChangeEvent isShowChangeEvent_;
+    OnSideBarWidthChangeEvent onSideBarWidthChangeEvent_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SideBarContainerEventHub);
 };

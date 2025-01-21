@@ -144,6 +144,16 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         stackMinuteNode->MountToParent(timePickerNode);
     }
     timePickerRowPattern->SetHasSecond(settingData.showSecond);
+    auto itStart = timePickerProperty.find("start");
+    if (itStart != timePickerProperty.end()) {
+        auto startTime = itStart->second;
+        SetStartTime(timePickerRowPattern, startTime);
+    }
+    auto itEnd = timePickerProperty.find("end");
+    if (itEnd != timePickerProperty.end()) {
+        auto endTime = itEnd->second;
+        SetEndTime(timePickerRowPattern, endTime);
+    }
     auto it = timePickerProperty.find("selected");
     if (it != timePickerProperty.end()) {
         auto selectedTime = it->second;
@@ -151,9 +161,12 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
         SetDialogTitleDate(timePickerRowPattern, settingData.dialogTitleDate);
     }
     SetHour24(timePickerRowPattern, settingData.isUseMilitaryTime);
+    SetEnableCascade(timePickerRowPattern, settingData.isEnableCascade);
     SetTextProperties(pickerTheme, settingData.properties);
     auto changeEvent = dialogEvent["changeId"];
     SetDialogChange(timePickerNode, std::move(changeEvent));
+    auto enterSelectedAreaEvent = dialogEvent["enterSelectedAreaId"];
+    SetDialogEnterSelectedArea(timePickerNode, std::move(enterSelectedAreaEvent));
     RefPtr<FrameNode> contentRow = nullptr;
     auto buttonTitleNode = CreateTitleButtonNode(timePickerNode);
     CHECK_NULL_RETURN(buttonTitleNode, nullptr);
@@ -179,6 +192,12 @@ RefPtr<FrameNode> TimePickerDialogView::Show(const DialogProperties& dialogPrope
 
     buttonTitleNode->MountToParent(contentColumn);
     timePickerNode->MountToParent(contentColumn);
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        bool enableHaptic = settingData.isEnableHapticFeedback;
+        timePickerRowPattern->SetIsEnableHaptic(enableHaptic);
+        timePickerRowPattern->ColumnPatternInitHapticController();
+    }
 
     contentRow->SetNeedCallChildrenUpdate(false);
     auto timePickerPattern = timePickerNode->GetPattern<TimePickerRowPattern>();
@@ -288,7 +307,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateNextPrevButtonNode(std::function<v
     auto buttonNextPrevLayoutProperty = nextPrevButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonNextPrevLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.next"));
     buttonNextPrevLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonNextPrevLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -678,7 +697,7 @@ void TimePickerDialogView::UpdateButtonLayoutProperty(
     CHECK_NULL_VOID(buttonConfirmLayoutProperty);
     buttonConfirmLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.ok"));
     buttonConfirmLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         buttonConfirmLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonConfirmLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -772,7 +791,7 @@ RefPtr<FrameNode> TimePickerDialogView::CreateCancelNode(NG::DialogGestureEvent&
     auto buttonCancelLayoutProperty = buttonCancelNode->GetLayoutProperty<ButtonLayoutProperty>();
     buttonCancelLayoutProperty->UpdateLabel(Localization::GetInstance()->GetEntryLetters("common.cancel"));
     buttonCancelLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_MAIN_AXIS);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN)) {
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         buttonCancelLayoutProperty->UpdateType(ButtonType::ROUNDED_RECTANGLE);
     } else {
         buttonCancelLayoutProperty->UpdateType(ButtonType::CAPSULE);
@@ -880,6 +899,19 @@ void TimePickerDialogView::UpdateButtonStyleAndRole(const std::vector<ButtonInfo
     }
 }
 
+void TimePickerDialogView::SetStartTime(
+    const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value)
+{
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetStartTime(value);
+}
+
+void TimePickerDialogView::SetEndTime(const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value)
+{
+    CHECK_NULL_VOID(timePickerRowPattern);
+    timePickerRowPattern->SetEndTime(value);
+}
+
 void TimePickerDialogView::SetSelectedTime(
     const RefPtr<TimePickerRowPattern>& timePickerRowPattern, const PickerTime& value)
 {
@@ -905,6 +937,15 @@ void TimePickerDialogView::SetDialogChange(const RefPtr<FrameNode>& frameNode, D
     auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDialogChange(std::move(onChange));
+}
+
+void TimePickerDialogView::SetDialogEnterSelectedArea(
+    const RefPtr<FrameNode>& frameNode, DialogEvent&& onEnterSelectedArea)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TimePickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDialogEnterSelectedArea(std::move(onEnterSelectedArea));
 }
 
 void TimePickerDialogView::SetDialogAcceptEvent(const RefPtr<FrameNode>& frameNode, DialogEvent&& onChange)
@@ -1161,6 +1202,12 @@ void TimePickerDialogView::GetUserSettingLimit()
     selectedTextStyleFont_ = pickerTheme->GetUseSetSelectedTextStyle();
     normalTextStyleFont_ = pickerTheme->GetUserSetNormalTextStyle();
     disappearTextStyleFont_ = pickerTheme->GetUserSetDisappearTextStyle();
+}
+
+void TimePickerDialogView::SetEnableCascade(
+    const RefPtr<TimePickerRowPattern>& timePickerRowPattern, bool isEnableCascade)
+{
+    timePickerRowPattern->SetEnableCascade(isEnableCascade);
 }
 
 } // namespace OHOS::Ace::NG

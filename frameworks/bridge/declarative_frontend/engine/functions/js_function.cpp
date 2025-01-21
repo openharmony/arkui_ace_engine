@@ -158,6 +158,11 @@ JSRef<JSObject> CreateEventTargetObject(const BaseEventInfo& info)
     area->SetProperty<double>("width", info.GetTarget().area.GetWidth().ConvertToVp());
     area->SetProperty<double>("height", info.GetTarget().area.GetHeight().ConvertToVp());
     target->SetPropertyObject("area", area);
+    if (info.GetTarget().id.empty()) {
+        target->SetPropertyObject("id", JsiValue::Undefined());
+    } else {
+        target->SetProperty<const char*>("id", info.GetTarget().id.c_str());
+    }
     return target;
 }
 

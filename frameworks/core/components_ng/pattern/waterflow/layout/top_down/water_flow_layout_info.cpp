@@ -429,7 +429,7 @@ void WaterFlowLayoutInfo::Sync(float mainSize, bool canOverScrollStart, bool can
     if (!canOverScrollStart) {
         currentOffset_ = std::min(currentOffset_, 0.0f);
     }
-    endIndex_ = FastSolveEndIndex(mainSize);
+    endIndex_ = FastSolveEndIndex(mainSize + expandHeight_);
 
     maxHeight_ = GetMaxMainHeight();
 

@@ -47,6 +47,7 @@
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif
+#include "core/event/statusbar/statusbar_event_proxy.h"
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 #ifndef WEARABLE_PRODUCT
@@ -54,8 +55,11 @@ constexpr double FRICTION = 0.6;
 constexpr double API11_FRICTION = 0.7;
 constexpr double API12_FRICTION = 0.75;
 constexpr double MAX_VELOCITY = 9000.0;
+constexpr double VELOCITY_SCALE = 1.0;
+constexpr double NEW_VELOCITY_SCALE = 1.5;
 #else
 constexpr double FRICTION = 0.9;
+constexpr double VELOCITY_SCALE = 0.8;
 constexpr double MAX_VELOCITY = 5000.0;
 #endif
 constexpr float SPRING_ACCURACY = 0.1f;
@@ -70,7 +74,7 @@ struct ScrollOffsetAbility {
     float contentStartOffset = 0.0f;
     float contentEndOffset = 0.0f;
 };
-class ScrollablePattern : public NestableScrollContainer {
+class ScrollablePattern : public NestableScrollContainer, public virtual StatusBarClickListener {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
@@ -224,8 +228,10 @@ public:
     // scrollBar
     virtual void UpdateScrollBarOffset() = 0;
     void SetScrollBar(const std::unique_ptr<ScrollBarProperty>& property);
+    virtual RefPtr<ScrollBar> CreateScrollBar();
     void SetScrollBar(DisplayMode displayMode);
     void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
+    virtual RefPtr<ScrollBarOverlayModifier> CreateOverlayModifier();
     void CreateScrollBarOverlayModifier();
 
     float GetScrollableDistance() const
@@ -335,12 +341,14 @@ public:
         }
     }
 
-    void SetFriction(double friction);
+    virtual void SetFriction(double friction);
 
     double GetFriction() const
     {
         return friction_;
     }
+
+    void SetVelocityScale(double scale);
 
     void SetMaxFlingVelocity(double max);
 
@@ -386,6 +394,10 @@ public:
         float position, float velocity, float mass, float stiffness, float damping, bool useTotalOffset = true);
     void PlayCurveAnimation(float position, float duration, const RefPtr<Curve>& curve, bool canOverScroll);
     virtual float GetTotalOffset() const
+    {
+        return 0.0f;
+    }
+    virtual float GetContentStartOffset() const
     {
         return 0.0f;
     }
@@ -729,6 +741,35 @@ public:
         hotZoneScrollCallback_ = func;
     }
 
+#ifdef ARKUI_CIRCLE_FEATURE
+    void SetScrollBarShape(const ScrollBarShape &shape)
+    {
+        if (shape == ScrollBarShape::ARC) {
+            isRoundScroll_ = true;
+        } else {
+            isRoundScroll_ = false;
+        }
+    }
+#endif
+
+#ifdef SUPPORT_DIGITAL_CROWN
+    bool GetCrownEventDragging() const
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, false);
+        return scrollable->GetCrownEventDragging();
+    }
+
+    void SetReachBoundary(bool flag)
+    {
+        CHECK_NULL_VOID(scrollableEvent_);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_VOID(scrollable);
+        scrollable->SetReachBoundary(flag);
+    }
+#endif
+
     void OnCollectClickTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
         TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent,
         ResponseLinkResult& responseLinkResult);
@@ -779,6 +820,15 @@ public:
 
     void StopScrollableAndAnimate();
 
+    void SetBackToTop(bool backToTop);
+
+    bool GetBackToTop() const
+    {
+        return backToTop_;
+    }
+
+    void OnStatusBarClick() override;
+
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownSensitivity(CrownSensitivity sensitivity);
     CrownSensitivity GetDigitalCrownSensitivity() const
@@ -786,13 +836,13 @@ public:
         return crownSensitivity_;
     }
 #endif
-protected:
-    void SuggestOpIncGroup(bool flag);
-    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {
         return DisplayMode::AUTO;
     }
+protected:
+    void SuggestOpIncGroup(bool flag);
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     RefPtr<ScrollBar> GetScrollBar() const
     {
         return scrollBar_;
@@ -1034,6 +1084,7 @@ private:
     float scrollBarOutBoundaryExtent_ = 0.f;
     std::optional<float> ratio_;
     double friction_ = -1.0;
+    double velocityScale_ = 0.0;
     double maxFlingVelocity_ = MAX_VELOCITY;
     // scroller
     RefPtr<Animator> animator_;
@@ -1076,6 +1127,7 @@ private:
     std::shared_ptr<AnimationUtils::Animation> curveAnimation_;
     uint64_t lastVsyncTime_ = 0;
     bool isAnimationStop_ = true; // graphic animation flag
+    bool isClickAnimationStop_ = false; // interrupt scrolling after click statubar.
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;
@@ -1105,9 +1157,13 @@ private:
     bool prevHasFadingEdge_ = false;
     float scrollStartOffset_ = 0.0f;
 
+    bool isRoundScroll_ = false;
+
     // dump info
     std::list<ScrollableEventsFiredInfo> eventsFiredInfos_;
     std::list<ScrollableFrameInfo> scrollableFrameInfos_;
+
+    bool backToTop_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -63,7 +63,8 @@ void GestureModelImpl::Pop()
     gestureProcessor->PopGesture();
 }
 
-void TapGestureModelImpl::Create(int32_t countNum, int32_t fingersNum, double distanceThreshold)
+void TapGestureModelImpl::Create(
+    int32_t countNum, int32_t fingersNum, double distanceThreshold, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
@@ -71,7 +72,8 @@ void TapGestureModelImpl::Create(int32_t countNum, int32_t fingersNum, double di
     gestureProcessor->PushGesture(gesture);
 }
 
-void LongPressGestureModelImpl::Create(int32_t fingersNum, bool repeatResult, int32_t durationNum)
+void LongPressGestureModelImpl::Create(
+    int32_t fingersNum, bool repeatResult, int32_t durationNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
@@ -79,7 +81,8 @@ void LongPressGestureModelImpl::Create(int32_t fingersNum, bool repeatResult, in
     gestureProcessor->PushGesture(gesture);
 }
 
-void PanGestureModelImpl::Create(int32_t fingersNum, const PanDirection& panDirection, double distanceNum)
+void PanGestureModelImpl::Create(
+    int32_t fingersNum, const PanDirection& panDirection, double distanceNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
@@ -95,7 +98,8 @@ void PanGestureModelImpl::SetPanGestureOption(const RefPtr<PanGestureOption>& pa
     gestureProcessor->PushGesture(gesture);
 }
 
-void SwipeGestureModelImpl::Create(int32_t fingersNum, const SwipeDirection& slideDirection, double speedNum)
+void SwipeGestureModelImpl::Create(
+    int32_t fingersNum, const SwipeDirection& slideDirection, double speedNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
@@ -103,7 +107,7 @@ void SwipeGestureModelImpl::Create(int32_t fingersNum, const SwipeDirection& sli
     gestureProcessor->PushGesture(gesture);
 }
 
-void PinchGestureModelImpl::Create(int32_t fingersNum, double distanceNum)
+void PinchGestureModelImpl::Create(int32_t fingersNum, double distanceNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
@@ -111,7 +115,7 @@ void PinchGestureModelImpl::Create(int32_t fingersNum, double distanceNum)
     gestureProcessor->PushGesture(gesture);
 }
 
-void RotationGestureModelImpl::Create(int32_t fingersNum, double angleNum)
+void RotationGestureModelImpl::Create(int32_t fingersNum, double angleNum, bool isLimitFingerCount)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
@@ -134,7 +138,7 @@ RefPtr<GestureProcessor> TimeoutGestureModelImpl::GetGestureProcessor()
     return gestureProcessor;
 }
 
-void GestureModelImpl::SetOnGestureEvent(const GestureEventNoParameter& gestureEventNoParameter)
+void GestureModelImpl::SetOnGestureEvent(const GestureEventFunc& gestureEventFunc)
 {
     RefPtr<GestureProcessor> gestureProcessor;
     gestureProcessor = ViewStackProcessor::GetInstance()->GetGestureComponent();
@@ -146,12 +150,11 @@ void GestureModelImpl::SetOnGestureEvent(const GestureEventNoParameter& gestureE
     CHECK_NULL_VOID(inspector);
     impl = inspector->GetInspectorFunctionImpl();
 
-    gesture->SetOnActionCancelId([func = std::move(gestureEventNoParameter), impl]() {
-        auto info = GestureEvent();
+    gesture->SetOnActionCancelId([func = std::move(gestureEventFunc), impl](GestureEvent& info) {
         if (impl) {
             impl->UpdateEventInfo(info);
         }
-        func();
+        func(info);
     });
 }
 

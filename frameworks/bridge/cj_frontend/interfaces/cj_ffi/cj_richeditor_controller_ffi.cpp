@@ -142,7 +142,7 @@ void NativeRichEditorController::ParseRichEditorAbstractTextSpanResult(
     nativeTextResult.offsetInSpanStart = spanObject.OffsetInSpan();
     nativeTextResult.offsetInSpanEnd = spanObject.OffsetInSpan() + spanObject.GetEraseLength();
     nativeTextResult.spanPosition = spanPosition;
-    nativeTextResult.value = spanObject.GetValue().c_str();
+    nativeTextResult.value = UtfUtils::Str16ToStr8(spanObject.GetValue()).c_str();
 }
 
 void NativeRichEditorController::ParseRichEditorAbstractImageSpanResult(
@@ -184,7 +184,7 @@ bool NativeRichEditorController::SetCaretOffset(int32_t value)
 int32_t NativeRichEditorController::AddTextSpan(std::string value, NativeRichEditorTextSpanOptions params)
 {
     TextSpanOptions options;
-    options.value = value;
+    options.value = UtfUtils::Str8ToStr16(value);
     options.offset = params.offset;
 
     auto pipelineContext = PipelineBase::GetCurrentContext();

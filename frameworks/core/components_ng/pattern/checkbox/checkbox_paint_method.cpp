@@ -88,6 +88,7 @@ void CheckBoxModifier::InitializeParam()
     hotZoneVerticalPadding_ = checkBoxTheme->GetHotZoneVerticalPadding();
     defaultPaddingSize_ = checkBoxTheme->GetDefaultPaddingSize();
     defaultRoundPaddingSize_ = checkBoxTheme->GetDefaultRoundPaddingSize();
+    hoverPaddingSize_ = checkBoxTheme->GetHoverPaddingSize();
     shadowWidth_ = checkBoxTheme->GetShadowWidth();
     userActiveColor_ = activeColor_;
     hoverDuration_ = checkBoxTheme->GetHoverDuration();
@@ -99,6 +100,7 @@ void CheckBoxModifier::InitializeParam()
     roundFocusBoardSize_ = checkBoxTheme->GetRoundFocusBoardSize();
     borderFocusedColor_ = checkBoxTheme->GetBorderFocusedColor();
     focusedBGColorUnselected_ = checkBoxTheme->GetFocusedBGColorUnselected();
+    showCircleDial_ = checkBoxTheme->IsCircleDial();
 }
 
 void CheckBoxModifier::PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffset, const SizeF& contentSize) const
@@ -176,6 +178,9 @@ void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& siz
     auto defaultPadding = (checkBoxShape_->Get() == static_cast<int32_t>(CheckBoxStyle::SQUARE_STYLE)) ?
         defaultPaddingSize_.ConvertToPx() : defaultRoundPaddingSize_.ConvertToPx();
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+        if (showCircleDial_) {
+            defaultPadding = hoverPaddingSize_.ConvertToPx();
+        }
         originX = offset.GetX() - defaultPadding;
         originY = offset.GetY() - defaultPadding;
         endX = size.Width() + originX + CHECKBOX_DOUBLE_RATIO * defaultPadding;

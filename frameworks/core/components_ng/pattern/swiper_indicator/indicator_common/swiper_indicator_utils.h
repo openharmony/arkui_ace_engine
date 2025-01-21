@@ -23,7 +23,6 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
 
 namespace OHOS::Ace::NG {
-static SwiperIndicatorType swiperIndicatorType = SwiperIndicatorType::DOT;
 
 inline float GET_PADDING_PROPERTY_VALUE_PX(const std::optional<CalcLength>& value)
 {
@@ -187,6 +186,8 @@ private:
         }
         return offsetY;
     }
+
+    static SwiperIndicatorType swiperIndicatorType;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_INDICATOR_SWIPER_INDICATOR_UTILS_H

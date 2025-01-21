@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/overlay/modal_presentation_pattern.h"
 
+#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -35,5 +36,20 @@ void ModalPresentationPattern::ModalInteractiveDismiss()
     CHECK_NULL_VOID(overlayManager);
     overlayManager->SetDismissTarget(DismissTarget(targetId_));
     CallOnWillDismiss(static_cast<int32_t>(ContentCoverDismissReason::BACK_PRESSED));
+}
+
+void ModalPresentationPattern::OnWillDisappear()
+{
+    if (onWillDisappear_) {
+        onWillDisappear_();
+    }
+    auto hostNode = GetHost();
+    CHECK_NULL_VOID(hostNode);
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto navigationManager = context->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    navigationManager->FireOverlayLifecycle(hostNode, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE),
+        static_cast<int32_t>(NavDestinationActiveReason::CONTENT_COVER));
 }
 } // namespace OHOS::Ace::NG

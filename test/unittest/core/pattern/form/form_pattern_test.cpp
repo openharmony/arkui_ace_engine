@@ -353,10 +353,10 @@ HWTEST_F(FormPatternTest, FormPatternTest_009, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<OHOS::Ace::NG::LinearLayoutPattern>(true));
     EXPECT_NE(columnNode, nullptr);
     pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
-    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE, textNode);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode);
     EXPECT_EQ(pattern->formChildrenNodeMap_.size(), 2);
     pattern->HandleEnableForm(true);
-    EXPECT_EQ(pattern->formChildrenNodeMap_.size(), 0);
+    EXPECT_EQ(pattern->formChildrenNodeMap_.size(), 2);
 
     RefPtr<FrameNode> textNode2 = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
@@ -365,7 +365,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_009, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<OHOS::Ace::NG::LinearLayoutPattern>(true));
     EXPECT_NE(columnNode2, nullptr);
     pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode2);
-    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE, textNode2);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode2);
     pattern->HandleEnableForm(false);
     EXPECT_EQ(pattern->formChildrenNodeMap_.size(), 2);
 }
@@ -693,20 +693,20 @@ HWTEST_F(FormPatternTest, FormPatternTest_002, TestSize.Level1)
     auto host = pattern->GetHost();
 
     auto gestureEventHub = formNode->GetOrCreateGestureEventHub();
-    formNode->eventHub_->gestureEventHub_ = nullptr;
+    formNode->GetEventHub<EventHub>()->gestureEventHub_ = nullptr;
     pattern->OnModifyDone();
     EXPECT_FALSE(pattern->isSnapshot_);
-    formNode->eventHub_->gestureEventHub_ = gestureEventHub;
+    formNode->GetEventHub<EventHub>()->gestureEventHub_ = gestureEventHub;
 
     pattern->OnModifyDone();
-    EXPECT_EQ(formNode->eventHub_->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+    EXPECT_EQ(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
 
     host = pattern->GetHost();
     auto layoutProperty = host->layoutProperty_;
     EXPECT_NE(layoutProperty, nullptr);
     host->layoutProperty_ = nullptr;
     pattern->OnModifyDone();
-    EXPECT_EQ(formNode->eventHub_->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+    EXPECT_EQ(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
     host->layoutProperty_ = layoutProperty;
 
     auto &&layoutConstraint = layoutProperty->calcLayoutConstraint_;
@@ -716,20 +716,20 @@ HWTEST_F(FormPatternTest, FormPatternTest_002, TestSize.Level1)
     calcLayoutConstraint->maxSize = idealSize;
 
     pattern->OnModifyDone();
-    EXPECT_EQ(formNode->eventHub_->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+    EXPECT_EQ(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
     layoutConstraint = std::move(calcLayoutConstraint);
     EXPECT_NE(layoutProperty->calcLayoutConstraint_, nullptr);
 
     auto size = layoutConstraint->selfIdealSize;
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize = CalcSize();
     pattern->OnModifyDone();
-    EXPECT_EQ(formNode->eventHub_->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+    EXPECT_EQ(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize = size;
 
     auto sizeWidth = size->Width();
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->width_.reset();
     pattern->OnModifyDone();
-    EXPECT_EQ(formNode->eventHub_->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
+    EXPECT_EQ(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_->userCallback_, nullptr);
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->width_ = sizeWidth;
 }
 
@@ -752,12 +752,12 @@ HWTEST_F(FormPatternTest, FormPatternTest_006, TestSize.Level1)
     auto sizeHeight = size->Height();
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->height_.reset();
     pattern->OnModifyDone();
-    EXPECT_NE(formNode->eventHub_->gestureEventHub_->clickEventActuator_, nullptr);
+    EXPECT_NE(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_, nullptr);
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->height_ = sizeHeight;
 
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->width_->dimension_.unit_ = DimensionUnit::PERCENT;
     pattern->OnModifyDone();
-    EXPECT_NE(formNode->eventHub_->gestureEventHub_->clickEventActuator_, nullptr);
+    EXPECT_NE(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_, nullptr);
     host->layoutProperty_->calcLayoutConstraint_->selfIdealSize->width_->dimension_.unit_ = DimensionUnit::PX;
 
     host->layoutProperty_->borderWidth_ = std::make_unique<BorderWidthProperty>();
@@ -766,7 +766,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_006, TestSize.Level1)
     std::optional<Dimension> topDimen = borderWidthProperty->topDimen;
     borderWidthProperty->topDimen->Reset();
     pattern->OnModifyDone();
-    EXPECT_NE(formNode->eventHub_->gestureEventHub_->clickEventActuator_, nullptr);
+    EXPECT_NE(formNode->GetEventHub<EventHub>()->gestureEventHub_->clickEventActuator_, nullptr);
     borderWidthProperty->topDimen = topDimen;
 
     float borderWidth = 0.0f;
@@ -1080,7 +1080,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_026, TestSize.Level1)
 
     RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE, textNode);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     textNode->layoutProperty_ = nullptr;
     pattern->UpdateTimeLimitFontCfg();
@@ -1131,7 +1131,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_027, TestSize.Level1)
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
     EXPECT_NE(columnNode, nullptr);
     pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_ROOT_NODE, columnNode);
-    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE, textNode);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode);
     pattern->LoadDisableFormStyle(info, false);
     num = host->GetTotalChildCount();
     EXPECT_EQ(num, 0);
@@ -1173,7 +1173,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_028, TestSize.Level1)
 
     RefPtr<FrameNode> textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    pattern->AddFormChildNode(FormChildNodeType::FORM_FORBIDDEN_TEXT_NODE, textNode);
+    pattern->AddFormChildNode(FormChildNodeType::FORM_SPECIAL_STYLE_NODE, textNode);
     RequestFormInfo info;
     auto host = pattern->GetHost();
     pattern->RemoveDisableFormStyle(info);

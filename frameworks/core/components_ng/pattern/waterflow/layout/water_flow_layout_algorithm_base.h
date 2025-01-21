@@ -18,6 +18,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_info_base.h"
+#include "core/components_ng/pattern/waterflow/water_flow_layout_property.h"
 
 namespace OHOS::Ace::NG {
 class WaterFlowLayoutBase : public LayoutAlgorithm {
@@ -70,6 +71,14 @@ protected:
 
     void UpdateOverlay(LayoutWrapper* layoutWrapper);
 
+    void GetExpandArea(
+        const RefPtr<WaterFlowLayoutProperty>& layoutProperty, const RefPtr<WaterFlowLayoutInfoBase>& info);
+
+    bool CheckNeedLayout(const RefPtr<LayoutWrapper>& layoutWrapper, bool isCache) const
+    {
+        return (!isCache && layoutWrapper->CheckNeedForceMeasureAndLayout()) || expandSafeArea_;
+    }
+
 private:
     /**
      * @brief immediately create / measure a cache item during LayoutTask
@@ -83,6 +92,7 @@ private:
         const RefPtr<WaterFlowLayoutInfoBase>& info, LayoutWrapper* host, int32_t cacheCount, bool force);
     static void PostIdleTask(const RefPtr<FrameNode>& frameNode);
 
+    bool expandSafeArea_ = false;
 };
 
 enum class WaterFlowLayoutMode { TOP_DOWN = 0, SLIDING_WINDOW = 1 };

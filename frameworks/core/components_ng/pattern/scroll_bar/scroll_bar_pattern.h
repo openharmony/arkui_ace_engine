@@ -341,8 +341,32 @@ public:
     {
         return scrollBar_;
     }
-private:
+
+    RefPtr<ScrollBarOverlayModifier> GetScrollBarOverlayModifier() const
+    {
+        return scrollBarOverlayModifier_;
+    }
+
+    virtual RefPtr<ScrollBar> CreateScrollBar() const
+    {
+        return AceType::MakeRefPtr<ScrollBar>();
+    }
+
+    virtual bool UseInnerScrollBar() const
+    {
+        return !hasChild_ && Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+    }
+
     void OnModifyDone() override;
+
+    PositionMode GetPositionMode();
+
+    void SetScrollBarOverlayModifier(RefPtr<ScrollBarOverlayModifier>& scrollBarOverlayModifier)
+    {
+        scrollBarOverlayModifier_ = scrollBarOverlayModifier;
+    }
+
+private:
     void InitScrollPositionCallback();
     void InitScrollEndCallback();
     void AddScrollableEvent();

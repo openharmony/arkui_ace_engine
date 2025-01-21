@@ -1424,4 +1424,85 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchUpEvent002, TestSize.L
     clickRecognizer.CleanRecognizerState();
     EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED_BLOCKED);
 }
+
+/**
+ * @tc.name: ClickEventRecordTest001
+ * @tc.desc: test RecordClickEventIfNeed.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickEventRecordTest001, TestSize.Level1)
+{
+    int32_t componentIndex = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_COMPONENT);
+    int32_t rectIndex = static_cast<int32_t>(Recorder::EventCategory::CATEGORY_RECT);
+    Recorder::EventRecorder::Get().eventSwitch_[componentIndex] = true;
+    Recorder::EventRecorder::Get().eventSwitch_[rectIndex] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[componentIndex] = true;
+    Recorder::EventRecorder::Get().globalSwitch_[rectIndex] = true;
+    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
+    GestureEvent info = GestureEvent();
+    clickRecognizer.RecordClickEventIfNeed(info);
+    EXPECT_TRUE(clickRecognizer.GetAttachedNode().Upgrade() == nullptr);
+}
+
+/**
+ * @tc.name: TapGestureLimit001
+ * @tc.desc: Test TapGesture with isFingerCountLimited
+ */
+
+HWTEST_F(ClickRecognizerTestNg, TapGestureLimit001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TapGestureGesture.
+     */
+    TapGestureModelNG tapGestureModelNG;
+    tapGestureModelNG.Create(COUNT, FINGER_NUMBER, 10, IS_LIMIT_FINGER_COUNT);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto tapGestureNG = AceType::DynamicCast<NG::TapGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(tapGestureNG->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    TapGesture tapGesture = TapGesture(COUNT, FINGER_NUMBER, 10, IS_LIMIT_FINGER_COUNT);
+    EXPECT_EQ(tapGesture.isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: compare isLimitFingerCount_
+     */
+    tapGesture.priority_ = GesturePriority::Low;
+    tapGesture.gestureMask_ = GestureMask::Normal;
+    auto tapRecognizer = AceType::DynamicCast<ClickRecognizer>(tapGesture.CreateRecognizer());
+    EXPECT_EQ(tapRecognizer->isLimitFingerCount_, IS_LIMIT_FINGER_COUNT);
+}
+
+/**
+ * @tc.name: TapGestureLimit002
+ * @tc.desc: Test TapGesture with isFingerCountLimited
+ */
+
+HWTEST_F(ClickRecognizerTestNg, TapGestureLimit002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create TapGestureGesture.
+     */
+    TapGestureModelNG tapGestureModelNG;
+    tapGestureModelNG.Create(COUNT, FINGER_NUMBER, 10, IS_NOT_LIMIT_FINGER_COUNT);
+
+    RefPtr<GestureProcessor> gestureProcessor;
+    gestureProcessor = NG::ViewStackProcessor::GetInstance()->GetOrCreateGestureProcessor();
+    auto tapGestureNG = AceType::DynamicCast<NG::TapGesture>(gestureProcessor->TopGestureNG());
+    EXPECT_EQ(tapGestureNG->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    TapGesture tapGesture = TapGesture(COUNT, FINGER_NUMBER, 10, IS_NOT_LIMIT_FINGER_COUNT);
+    EXPECT_EQ(tapGesture.isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+
+    /**
+     * @tc.steps: step2. call CreateRecognizer function and compare result
+     * @tc.steps: case1: compare isLimitFingerCount_
+     */
+    tapGesture.priority_ = GesturePriority::Low;
+    tapGesture.gestureMask_ = GestureMask::Normal;
+    auto tapRecognizer = AceType::DynamicCast<ClickRecognizer>(tapGesture.CreateRecognizer());
+    EXPECT_EQ(tapRecognizer->isLimitFingerCount_, IS_NOT_LIMIT_FINGER_COUNT);
+}
 } // namespace OHOS::Ace::NG

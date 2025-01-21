@@ -35,6 +35,11 @@ void TimePickerModelImpl::SetHour24(bool isUseMilitaryTime)
     JSViewSetProperty(&PickerTimeComponent::SetHour24, isUseMilitaryTime);
 }
 
+void TimePickerModelImpl::SetEnableCascade(bool isEnableCascade)
+{
+    JSViewSetProperty(&PickerTimeComponent::SetEnableCascade, isEnableCascade);
+}
+
 void TimePickerModelImpl::SetSelectedTime(const PickerTime& value)
 {
     JSViewSetProperty(&PickerTimeComponent::SetSelectedTime, value);
@@ -45,6 +50,8 @@ void TimePickerModelImpl::SetOnChange(ChangeEvent&& onChange)
     auto datePicker = EventMarker([func = std::move(onChange)](const BaseEventInfo* info) { func(info); });
     JSViewSetProperty(&PickerBaseComponent::SetOnChange, std::move(datePicker));
 }
+
+void TimePickerModelImpl::SetOnEnterSelectedArea(ChangeEvent&& onEnterSelectedArea) {}
 
 void TimePickerModelImpl::SetBackgroundColor(const Color& color)
 {
@@ -60,17 +67,20 @@ void TimePickerModelImpl::SetBackgroundColor(const Color& color)
 void TimePickerDialogModelImpl::SetTimePickerDialogShow(PickerDialogInfo& pickerDialog,
     NG::TimePickerSettingData& settingData, std::function<void()>&& onCancel,
     std::function<void(const std::string&)>&& onAccept, std::function<void(const std::string&)>&& onChange,
-    TimePickerDialogEvent& timePickerDialogEvent, const std::vector<ButtonInfo>& buttonInfos)
+    std::function<void(const std::string&)>&& onEnterSelectedArea, TimePickerDialogEvent& timePickerDialogEvent,
+    const std::vector<ButtonInfo>& buttonInfos)
 {
     RefPtr<Component> component;
     auto timePicker = AceType::MakeRefPtr<PickerTimeComponent>();
     bool isUseMilitaryTime = pickerDialog.isUseMilitaryTime;
+    bool isEnableCascade = pickerDialog.isEnableCascade;
     if (pickerDialog.isSelectedTime == true) {
         timePicker->SetSelectedTime(pickerDialog.pickerTime);
     }
     timePicker->SetIsDialog(true);
     timePicker->SetIsCreateDialogComponent(true);
     timePicker->SetHour24(isUseMilitaryTime);
+    timePicker->SetEnableCascade(isEnableCascade);
     component = timePicker;
 
     auto datePicker = AceType::DynamicCast<PickerBaseComponent>(component);
@@ -85,6 +95,8 @@ void TimePickerDialogModelImpl::SetTimePickerDialogShow(PickerDialogInfo& picker
     datePicker->SetDialogCancelEvent(cancelId);
     auto changeId = EventMarker(std::move(onChange));
     datePicker->SetDialogChangeEvent(changeId);
+    auto enterSelectedAreaId = EventMarker(std::move(onEnterSelectedArea));
+    datePicker->SetDialogEnterSelectedAreaEvent(enterSelectedAreaId);
     datePicker->SetDialogName("TimePickerDialog");
     datePicker->OpenDialog(properties);
 }

@@ -1846,7 +1846,7 @@ HWTEST_F(EventManagerTestNg, CleanRecognizersForDragBeginTest001, TestSize.Level
     panRecognizer->fingersId_.insert(event.id);
     panRecognizer->currentFingers_ = 1;
     bool unknownPropertyValue = false;
-    GestureEventNoParameter actionCancel = [&unknownPropertyValue]() { unknownPropertyValue = true; };
+    GestureEventFunc actionCancel = [&unknownPropertyValue](GestureEvent& info) { unknownPropertyValue = true; };
     panRecognizer->SetOnActionCancel(actionCancel);
     resultList.emplace_back(panRecognizer);
     eventManager->touchTestResults_.emplace(event.id, resultList);

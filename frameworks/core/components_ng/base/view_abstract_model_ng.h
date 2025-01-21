@@ -44,7 +44,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
+class ACE_FORCE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
 
@@ -128,6 +128,11 @@ public:
     void SetBackgroundImageRepeat(const ImageRepeat& imageRepeat) override
     {
         ViewAbstract::SetBackgroundImageRepeat(imageRepeat);
+    }
+
+    void SetBackgroundImageSyncMode(bool syncMode) override
+    {
+        ViewAbstract::SetBackgroundImageSyncMode(syncMode);
     }
 
     void SetBackgroundImageSize(const BackgroundImageSize& bgImgSize) override
@@ -964,6 +969,11 @@ public:
         focusHub->SetOnKeyPreIme(std::move(onKeyCallback));
     }
 
+    void SetOnKeyEventDispatch(OnKeyEventDispatchFunc&& onKeyCallback) override
+    {
+        ViewAbstract::SetOnKeyEventDispatch(std::move(onKeyCallback));
+    }
+
     static void SetOnKeyPreIme(FrameNode* frameNode, OnKeyConsumeFunc&& onKeyCallback)
     {
         auto focusHub = frameNode->GetOrCreateFocusHub();
@@ -1260,6 +1270,24 @@ public:
         ViewAbstract::BindPopup(param, AceType::Claim(targetNode), AceType::DynamicCast<UINode>(customNode));
     }
 
+    int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
+    {
+        return ViewAbstract::OpenPopup(param, customNode);
+    }
+    int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode) override
+    {
+        return ViewAbstract::UpdatePopup(param, customNode);
+    }
+    int32_t ClosePopup(const RefPtr<UINode>& customNode) override
+    {
+        return ViewAbstract::ClosePopup(customNode);
+    }
+
+    int32_t GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<NG::UINode>& customNode) override
+    {
+        return ViewAbstract::GetPopupParam(param, customNode);
+    }
+
     void DismissDialog() override
     {
         ViewAbstract::DismissDialog();
@@ -1307,6 +1335,11 @@ public:
     void DismissContentCover() override;
     void SheetSpringBack() override;
 
+    void NotifyDragStartRequest(DragStartRequestStatus dragStatus) override
+    {
+        ViewAbstract::NotifyDragStartRequest(dragStatus);
+    }
+
     void SetAccessibilityGroup(bool accessible) override;
     void SetAccessibilityText(const std::string& text) override;
     void SetAccessibilityTextHint(const std::string& text) override;
@@ -1320,6 +1353,8 @@ public:
     void SetAccessibilityTextPreferred(bool accessibilityTextPreferred) override;
     void SetAccessibilityNextFocusId(const std::string& nextFocusId) override;
     void ResetOnAccessibilityFocus() override;
+    void SetAccessibilityDefaultFocus() override;
+    void SetAccessibilityUseSamePage(bool isFullSilent) override;
 
     void SetForegroundColor(const Color& color) override
     {
@@ -1363,6 +1398,11 @@ public:
         auto focusHub = ViewStackProcessor::GetInstance()->GetOrCreateMainFrameNodeFocusHub();
         CHECK_NULL_VOID(focusHub);
         focusHub->ClearOnKeyPreIme();
+    }
+
+    void DisableOnKeyEventDispatch() override
+    {
+        ViewAbstract::DisableOnKeyEventDispatch();
     }
 
     static void DisableOnKeyPreIme(FrameNode* frameNode)
@@ -1472,6 +1512,16 @@ public:
         ViewAbstract::SetDragEventStrictReportingEnabled(dragEventStrictReportingEnabled);
     }
 
+    int32_t CancelDataLoading(const std::string& key) override
+    {
+        return ViewAbstract::CancelDataLoading(key);
+    }
+
+    void SetDisableDataPrefetch(bool disableDataPrefetch) override
+    {
+        return ViewAbstract::SetDisableDataPrefetch(disableDataPrefetch);
+    }
+
     void SetFocusScopeId(const std::string& focusScopeId, bool isGroup, bool arrowKeyStepOut) override
     {
         ViewAbstract::SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
@@ -1514,6 +1564,8 @@ public:
         FrameNode* frameNode, NG::OnAccessibilityFocusCallbackImpl&& onAccessibilityFocusCallbackImpl);
     static void ResetOnAccessibilityFocus(FrameNode* frameNode);
     static void SetAccessibilityNextFocusId(FrameNode* frameNode, const std::string& nextFocusId);
+    static void SetAccessibilityDefaultFocus(FrameNode* frameNode, bool isFocus);
+    static void SetAccessibilityUseSamePage(FrameNode* frameNode, const std::string& pageMode);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction)
     {

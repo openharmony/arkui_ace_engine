@@ -236,6 +236,10 @@ public:
     {
         return isCapture_;
     }
+    std::vector<std::string> GetMimeType() override
+    {
+        return mimeType_;
+    }
 
 private:
     std::string title_;
@@ -243,6 +247,7 @@ private:
     std::string defaultFileName_;
     std::vector<std::string> acceptType_;
     bool isCapture_;
+    std::vector<std::string> mimeType_;
 };
 
 class Geolocation : public WebGeolocation {
@@ -300,6 +305,64 @@ private:
     void* object_ = nullptr;
 };
 
+class WebRefreshAccessedHistoryImpl : public AceType {
+    DECLARE_ACE_TYPE(WebRefreshAccessedHistoryImpl, AceType);
+public:
+    explicit WebRefreshAccessedHistoryImpl(void* object) : object_(object) {}
+    std::string GetUrl() const;
+    bool GetIsRefreshed() const;
+
+private:
+    void* object_ = nullptr;
+};
+
+class WebFullScreenEnterImpl : public AceType {
+    DECLARE_ACE_TYPE(WebFullScreenEnterImpl, AceType);
+public:
+    explicit WebFullScreenEnterImpl(void* object) : object_(object) {}
+    int GetWidths() const;
+    int GetHeights() const;
+private:
+    void* object_ = nullptr;
+};
+
+class WebFullScreenExitImpl : public AceType {
+    DECLARE_ACE_TYPE(WebFullScreenExitImpl, AceType);
+public:
+    explicit WebFullScreenExitImpl(void* object) : object_(object) {}
+
+private:
+    void* object_ = nullptr;
+};
+
+class FullScreenExitHandlerImpl : public FullScreenExitHandler {
+    DECLARE_ACE_TYPE(FullScreenExitHandlerImpl, FullScreenExitHandler);
+public:
+    explicit FullScreenExitHandlerImpl(void* object) : object_(object)
+    {
+        auto obj = WebObjectEventManager::GetInstance().GetFullScreenEnterObject();
+        if (!obj) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get GetFullScreenEnterObject failed");
+            return;
+        }
+        index_ = obj->AddObject(object);
+    }
+    ~FullScreenExitHandlerImpl()
+    {
+        auto obj = WebObjectEventManager::GetInstance().GetFullScreenEnterObject();
+        if (!obj) {
+            TAG_LOGE(AceLogTag::ACE_WEB, "WebObjectEventManager get GetFullScreenEnterObject failed");
+            return;
+        }
+        obj->DelObject(index_);
+    }
+    void ExitFullScreen() override;
+
+private:
+    void* object_ = nullptr;
+    int index_;
+};
+
 class WebResourceErrorImpl : public AceType {
     DECLARE_ACE_TYPE(WebResourceErrorImpl, AceType);
 public:
@@ -353,6 +416,9 @@ public:
     void OnActive() override;
     void ShowWebView() override;
     void HideWebView() override;
+    void OnFullScreenEnter(void* object) ;
+    void OnFullScreenExit(void* object);
+    void OnRefreshAccessedHistory(void* object) ;
     void OnPageStarted(const std::string& param) override;
     void OnPageFinished(const std::string& param) override;
     void OnPageError(const std::string& param) override;
@@ -408,6 +474,7 @@ public:
     void SetBoundsOrResize(const Size& drawSize, const Offset& offset) override;
     void DragResize(
         const double& width, const double& height, const double& preHeight, const double& preWidth) override;
+    void UpdateOptimizeParserBudgetEnabled(const bool enable);
 private:
     void ReleasePlatformResource();
     void CreatePluginResource(const Size& size, const Offset& position, const WeakPtr<NG::PipelineContext>& context);
@@ -484,6 +551,9 @@ private:
     EventCallbackV2 onPageFinishedV2_;
     EventCallbackV2 onPageStartedV2_;
     EventCallbackV2 onProgressChangeV2_;
+    EventCallbackV2 onRefreshAccessedHistoryV2_;
+    EventCallbackV2 onFullScreenEnterV2_;
+    EventCallbackV2 onFullScreenExitV2_;
 
     int instanceId_ = -1;
 };

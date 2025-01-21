@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/waterflow/layout/water_flow_layout_algorithm_base.h"
 
+#include "core/components_ng/pattern/scrollable/scrollable_utils.h"
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -137,5 +138,13 @@ void WaterFlowLayoutBase::UpdateOverlay(LayoutWrapper* layoutWrapper)
     auto overlayGeometryNode = overlayNode->GetGeometryNode();
     CHECK_NULL_VOID(overlayGeometryNode);
     overlayGeometryNode->SetFrameSize(geometryNode->GetFrameSize());
+}
+
+void WaterFlowLayoutBase::GetExpandArea(
+    const RefPtr<WaterFlowLayoutProperty>& layoutProperty, const RefPtr<WaterFlowLayoutInfoBase>& info)
+{
+    auto&& safeAreaOpts = layoutProperty->GetSafeAreaExpandOpts();
+    expandSafeArea_ = safeAreaOpts && safeAreaOpts->Expansive();
+    info->expandHeight_ = ScrollableUtils::CheckHeightExpansion(layoutProperty, layoutProperty->GetAxis());
 }
 } // namespace OHOS::Ace::NG

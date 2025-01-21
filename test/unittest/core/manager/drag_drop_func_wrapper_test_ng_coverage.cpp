@@ -16,11 +16,13 @@
 #include <optional>
 
 #include "gtest/gtest.h"
+#define private public
 
 #include "test/mock/base/mock_drag_window.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_interaction_interface.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/event/drag_event/drag_event_test_ng_issue_utils.h"
 
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
@@ -32,17 +34,44 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
+#include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
 RefPtr<DragWindow> MOCK_DRAG_WINDOW;
+constexpr size_t DEFAULT_CHILD_COUNT = 4;
+constexpr float GRID_WIDTH = 480.0f;
+constexpr float GRID_HEIGHT = 800.0f;
+constexpr float ITEM_WIDTH = 120.0f;
+constexpr float ITEM_HEIGHT = 200.0f;
 } // namespace
+
+// test case
+struct DragMultiCase {
+    bool isAllowDrag = false;
+    bool isSelected = false;
+    bool isMultiSelectionEnabled = false;
+    bool expectResult = false;
+};
+
+const std::vector<DragMultiCase> DRAG_MULTI_CASES = {
+    { false, false, false, false},
+    { false, false, true, false},
+    { false, true, false, false},
+    { false, true, true, false},
+    { true, false, false, false},
+    { true, false, true, false},
+    { true, true, false, false},
+    { true, true, true, true},
+};
 
 class DragDropFuncWrapperTestNgCoverage : public testing::Test {
 public:
@@ -64,6 +93,49 @@ void DragDropFuncWrapperTestNgCoverage::TearDownTestCase()
     MOCK_DRAG_WINDOW = nullptr;
 }
 
+RefPtr<FrameNode> CreateGridNodeWithChild(size_t childCount)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::GRID_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() {return AceType::MakeRefPtr<GridPattern>(); });
+    ViewAbstract::SetWidth(frameNode.GetRawPtr(), CalcLength(GRID_WIDTH));
+    ViewAbstract::SetHeight(frameNode.GetRawPtr(), CalcLength(GRID_HEIGHT));
+
+    for (size_t i = 0; i < childCount; ++i) {
+        auto chidNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        auto childNode = FrameNode::GetOrCreateFrameNode(V2::GRID_ITEM_ETS_TAG, chidNodeId,
+            []() { return AceType::MakeRefPtr<GridItemPattern>(nullptr, GridItemStyle::NONE); });
+        ViewAbstract::SetWidth(childNode.GetRawPtr(), CalcLength(ITEM_WIDTH));
+        ViewAbstract::SetHeight(childNode.GetRawPtr(), CalcLength(ITEM_HEIGHT));
+        childNode->MountToParent(frameNode);
+    }
+    return frameNode;
+}
+
+
+RefPtr<FrameNode> ProcessDragItemGroupScene()
+{
+    auto gridNode = CreateGridNodeWithChild(DEFAULT_CHILD_COUNT);
+    CHECK_NULL_RETURN(gridNode, nullptr);
+    auto pattern = gridNode->GetPattern<GridPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->info_.endIndex_ = DEFAULT_CHILD_COUNT;
+    auto gestureEventHub = gridNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(gestureEventHub, nullptr);
+    gestureEventHub->InitDragDropEvent();
+    return gridNode;
+}
+
+void SetFrameNodeAllowDrag(RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->draggable_ = true;
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    auto eventHub = gestureHub->eventHub_.Upgrade();
+    CHECK_NULL_VOID(eventHub);
+    auto func = [](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) { return DragDropInfo(); };
+    eventHub->onDragStart_ = func;
+}
 /**
  * @tc.name: DragDropFuncWrapperTestNgCoverage001
  * @tc.desc: Test DecideWhetherToStopDragging with valid parameters
@@ -239,7 +311,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage010
 
 /**
  * @tc.name: DragDropFuncWrapperTestNgCoverage011
- * @tc.desc: Test BrulStyleToEffection with invalid pipeline context
+ * @tc.desc: Test BlurStyleToEffection with invalid pipeline context
  * @tc.type: FUNC
  * @tc.author:
  */
@@ -250,13 +322,13 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage011
     blurStyleOp.scale = 0.5;
     blurStyleOp.colorMode = ThemeColorMode::LIGHT;
 
-    auto effection = DragDropFuncWrapper::BrulStyleToEffection(blurStyleOp);
+    auto effection = DragDropFuncWrapper::BlurStyleToEffection(blurStyleOp);
     EXPECT_FALSE(effection.has_value());
 }
 
 /**
  * @tc.name: DragDropFuncWrapperTestNgCoverage012
- * @tc.desc: Test BrulStyleToEffection with invalid blurStyleOp
+ * @tc.desc: Test BlurStyleToEffection with invalid blurStyleOp
  * @tc.type: FUNC
  * @tc.author:
  */
@@ -264,7 +336,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage012
 {
     std::optional<BlurStyleOption> blurStyleOp = std::nullopt;
 
-    auto effection = DragDropFuncWrapper::BrulStyleToEffection(blurStyleOp);
+    auto effection = DragDropFuncWrapper::BlurStyleToEffection(blurStyleOp);
     EXPECT_FALSE(effection.has_value());
 }
 
@@ -383,7 +455,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage018
 
 /**
  * @tc.name: DragDropFuncWrapperTestNgCoverage019
- * @tc.desc: Test BrulStyleToEffection with valid BlurStyleOption
+ * @tc.desc: Test BlurStyleToEffection with valid BlurStyleOption
  * @tc.type: FUNC
  * @tc.author:
  */
@@ -394,7 +466,7 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage019
     blurStyleOp.scale = 0.5;
     blurStyleOp.colorMode = ThemeColorMode::LIGHT;
 
-    auto effection = DragDropFuncWrapper::BrulStyleToEffection(blurStyleOp);
+    auto effection = DragDropFuncWrapper::BlurStyleToEffection(blurStyleOp);
     EXPECT_FALSE(effection.has_value());
 }
 
@@ -429,44 +501,6 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage020
     TaskExecutor::TaskType::UI, "ArkUIDragHandleDragEventStart");
     EXPECT_EQ(instanceId, -1);
 }
-
-/**
- * @tc.name: DragDropFuncWrapperTestNgCoverage021
- * @tc.desc: Test UpdateDragPreviewOptionsFromModifier with shadow has value
- * @tc.type: FUNC
- * @tc.author:
- */
-HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage021, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. construct a lambda function, set drag preview opacity is 0.3f
-     */
-    std::optional<Shadow> shadowVal;
-    auto applyOnNodeSync = [shadowVal](WeakPtr<NG::FrameNode> node) {
-    auto frameNode = node.Upgrade();
-    Dimension dimen(2.0);
-    BlurBackGroundInfo bgBackEffect = {{dimen, 1.0f, 1.0f, Color::TRANSPARENT,
-        AdaptiveColor::DEFAULT, {{2.0f, 2.0f}}}};
-    std::optional<BorderRadiusProperty> borderRadiusVal;
-    OptionsAfterApplied optionTmp = {0, shadowVal, "test", borderRadiusVal, {bgBackEffect}};
-    DragPreviewOption dragPreviewInfos;
-    dragPreviewInfos.options = optionTmp;
-    frameNode->SetDragPreviewOptions(dragPreviewInfos);
-    };
-
-    /**
-     * @tc.steps: step2. construct a DragPreviewOption object
-     */
-    NG::DragPreviewOption option;
-
-    /**
-     * @tc.steps: step3. call UpdateDragPreviewOptionsFromModifier
-     * @tc.expected: step3. option.options.shadow is equal to shadowVal.
-     */
-    NG::DragDropFuncWrapper::UpdateDragPreviewOptionsFromModifier(applyOnNodeSync, option);
-    EXPECT_EQ(1, 1);
-}
-
 
 /**
  * @tc.name: DragDropFuncWrapperTestNgCoverage022
@@ -649,5 +683,173 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, DragDropFuncWrapperTestNgCoverage028
     EXPECT_TRUE(option.options.shadow.has_value());
     EXPECT_TRUE(option.options.borderRadius.has_value());
     EXPECT_FALSE(option.options.blurbgEffect.backGroundEffect.radius.IsValid());
+}
+
+/**
+ * @tc.name: TestIsSelectedItemNode
+ * @tc.desc: Test IsSelectedItemNode func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, TestIsSelectedItemNode, TestSize.Level1)
+{
+    int32_t caseNum = 0;
+    for (const auto& testCase : DRAG_MULTI_CASES) {
+        /**
+         * @tc.steps: step1. Create grid with gridItem frame node tree.
+         * @tc.expected: instance is not null.
+         */
+        auto gridNode = ProcessDragItemGroupScene();
+        ASSERT_NE(gridNode, nullptr);
+        auto gridItem = AceType::DynamicCast<FrameNode>(gridNode->GetChildByIndex(0));
+        ASSERT_NE(gridItem, nullptr);
+        auto gridItemPattern = gridItem->GetPattern<GridItemPattern>();
+        ASSERT_NE(gridItemPattern, nullptr);
+
+        /**
+         * @tc.steps: step2. Set GridItemNode selected
+         */
+        gridItemPattern->SetSelected(testCase.isSelected);
+
+        /**
+         * @tc.steps: step3. Set GridItemNode isMultiSelectionEnabled
+         */
+        auto dragPreviewOption = gridItem->GetDragPreviewOption();
+        dragPreviewOption.isMultiSelectionEnabled = testCase.isMultiSelectionEnabled;
+        gridItem->SetDragPreviewOptions(dragPreviewOption);
+
+        /**
+         * @tc.steps: step4. Set GridItemNode isAllowDrag
+         */
+        if (testCase.isAllowDrag) {
+            SetFrameNodeAllowDrag(gridItem);
+        }
+        EXPECT_TRUE(IsDragEventStateEqual(caseNum, DragDropFuncWrapper::IsSelectedItemNode(gridItem),
+            testCase.expectResult));
+        caseNum++;
+    }
+}
+
+/**
+ * @tc.name: Test IsBelongToMultiItemNode
+ * @tc.desc: Test IsBelongToMultiItemNode func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, TestIsBelongToMultiItemNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create grid with gridItem frame node tree.
+     * @tc.expected: instance is not null.
+     */
+    auto gridNode = ProcessDragItemGroupScene();
+    ASSERT_NE(gridNode, nullptr);
+    auto gridItem = AceType::DynamicCast<FrameNode>(gridNode->GetChildByIndex(0));
+    ASSERT_NE(gridItem, nullptr);
+
+    /**
+     * @tc.steps: step2. Create frameNode.
+     * @tc.expected: IsBelongToMultiItemNode return false.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MountToParent(gridItem);
+    EXPECT_FALSE(DragDropFuncWrapper::IsBelongToMultiItemNode(frameNode));
+
+    /**
+     * @tc.steps: step3. Set frameNode is selected and allowDrag.
+     * @tc.expected: IsBelongToMultiItemNode return true.
+     */
+    auto gridItemPattern = gridItem->GetPattern<GridItemPattern>();
+    ASSERT_NE(gridItemPattern, nullptr);
+    gridItemPattern->SetSelected(true);
+    auto dragPreviewOption = gridItem->GetDragPreviewOption();
+    dragPreviewOption.isMultiSelectionEnabled = true;
+    gridItem->SetDragPreviewOptions(dragPreviewOption);
+    SetFrameNodeAllowDrag(gridItem);
+
+    EXPECT_TRUE(DragDropFuncWrapper::IsBelongToMultiItemNode(frameNode));
+}
+
+/**
+ * @tc.name: Test CheckIsNeedGather
+ * @tc.desc: Test CheckIsNeedGather func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, CheckIsNeedGather, TestSize.Level1)
+{
+    int32_t caseNum = 0;
+    for (const auto& testCase : DRAG_MULTI_CASES) {
+        /**
+         * @tc.steps: step1. Create grid with gridItem frame node tree.
+         * @tc.expected: instance is not null.
+         */
+        auto gridNode = ProcessDragItemGroupScene();
+        ASSERT_NE(gridNode, nullptr);
+        auto gridItem = AceType::DynamicCast<FrameNode>(gridNode->GetChildByIndex(0));
+        ASSERT_NE(gridItem, nullptr);
+        auto gridItemPattern = gridItem->GetPattern<GridItemPattern>();
+        ASSERT_NE(gridItemPattern, nullptr);
+
+        /**
+         * @tc.steps: step2. Set GridItemNode selected
+         */
+        gridItemPattern->SetSelected(testCase.isSelected);
+
+        /**
+         * @tc.steps: step3. Set GridItemNode isMultiSelectionEnabled
+         */
+        auto dragPreviewOption = gridItem->GetDragPreviewOption();
+        dragPreviewOption.isMultiSelectionEnabled = testCase.isMultiSelectionEnabled;
+        gridItem->SetDragPreviewOptions(dragPreviewOption);
+
+        /**
+         * @tc.steps: step4. Set GridItemNode isAllowDrag
+         */
+        if (testCase.isAllowDrag) {
+            SetFrameNodeAllowDrag(gridItem);
+        }
+        EXPECT_TRUE(IsDragEventStateEqual(caseNum, DragDropFuncWrapper::CheckIsNeedGather(gridItem),
+            testCase.expectResult));
+        caseNum++;
+    }
+}
+
+/**
+ * @tc.name: Test FindItemParentNode
+ * @tc.desc: Test FindItemParentNode func
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, FindItemParentNode, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create grid with gridItem frame node tree.
+     * @tc.expected: instance is not null.
+     * @tc.expected: FindItemParentNode return false.
+     */
+    auto gridNode = ProcessDragItemGroupScene();
+    ASSERT_NE(gridNode, nullptr);
+    auto gridItem = AceType::DynamicCast<FrameNode>(gridNode->GetChildByIndex(0));
+    ASSERT_NE(gridItem, nullptr);
+
+    /**
+     * @tc.steps: step2.run FindItemParentNode func
+     * @tc.expected: FindItemParentNode return gridNode.
+     */
+    SetFrameNodeAllowDrag(gridItem);
+    EXPECT_EQ(DragDropFuncWrapper::FindItemParentNode(gridItem), gridNode);
+    
+    /**
+     * @tc.steps: step3.test other class frameNode
+     * @tc.expected: FindItemParentNode return nullptr.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() {return AceType::MakeRefPtr<Pattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    frameNode->MountToParent(gridNode);
+    EXPECT_EQ(DragDropFuncWrapper::FindItemParentNode(frameNode), nullptr);
 }
 } // namespace OHOS::Ace::NG

@@ -47,6 +47,8 @@ static constexpr uint32_t ON_WILL_SHOW = 4;
 static constexpr uint32_t ON_WILL_HIDE = 5;
 static constexpr uint32_t ON_WILL_APPEAR = 6;
 static constexpr uint32_t ON_WILL_DISAPPEAR = 7;
+static constexpr uint32_t ON_ACTIVE = 8;
+static constexpr uint32_t ON_INACTIVE = 9;
 static constexpr uint32_t ON_BACKPRESS = 100;
 
 static constexpr uint32_t SCROLL_START = 0;
@@ -1049,6 +1051,10 @@ napi_value CreateNavDestinationState(napi_env env)
     napi_set_named_property(env, navDestinationState, "ON_WILL_DISAPPEAR", prop);
     napi_create_uint32(env, ON_BACKPRESS, &prop);
     napi_set_named_property(env, navDestinationState, "ON_BACKPRESS", prop);
+    napi_create_uint32(env, ON_ACTIVE, &prop);
+    napi_set_named_property(env, navDestinationState, "ON_ACTIVE", prop);
+    napi_create_uint32(env, ON_INACTIVE, &prop);
+    napi_set_named_property(env, navDestinationState, "ON_INACTIVE", prop);
     return navDestinationState;
 }
 

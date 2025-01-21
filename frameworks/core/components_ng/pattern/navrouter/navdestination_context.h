@@ -56,6 +56,15 @@ public:
         isEntry_ = isEntry;
     }
 
+    virtual void UpdateNavPathInfo(const RefPtr<NG::NavPathInfo>& info)
+    {
+        if (!info) {
+            return;
+        }
+        name_ = info->GetName();
+        isEntry_ = info->GetIsEntry();
+    }
+
 protected:
     std::string name_;
     bool isEntry_ = false;
@@ -137,6 +146,16 @@ public:
         return mode_;
     }
 
+    void SetUniqueId(int32_t uniqueId)
+    {
+        uniqueId_ = uniqueId;
+    }
+
+    int32_t GetUniqueId() const
+    {
+        return uniqueId_;
+    }
+
 protected:
     int32_t index_ = -1;
     int32_t preIndex_ = -1;
@@ -145,6 +164,7 @@ protected:
     RefPtr<NavPathInfo> pathInfo_;
     bool isEmpty_ = false;
     WeakPtr<NavigationStack> navigationStack_;
+    int32_t uniqueId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

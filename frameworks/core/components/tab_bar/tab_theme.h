@@ -134,7 +134,14 @@ public:
             theme->tabBarColumnMargin_ = pattern->GetAttr<Dimension>("tab_bar_column_margin", 0.0_vp);
             theme->horizontalBottomTabMinWidth_ =
                 pattern->GetAttr<Dimension>("horizontal_bottom_tab_min_width", 0.0_vp);
-
+            theme->tabBarDefaultMargin_ = pattern->GetAttr<Dimension>("tab_bar_margin_width", 0.0_vp);
+            theme->tabBarFocusedColor_ = pattern->GetAttr<Color>("tab_bar_focused_color", Color::TRANSPARENT);
+            theme->subTabTextFocusedColor_ =
+                pattern->GetAttr<Color>("subtab_text_focused_color", theme->subTabTextOffColor_);
+            theme->focusBoardPadding_ = pattern->GetAttr<Dimension>("tab_bar_board_focus_padding", 0.0_vp);
+            theme->subTabItemHorizontalPadding_ = pattern->GetAttr<Dimension>("subtab_item_Horizontal_padding", 0.0_vp);
+            theme->focusPadding_ = pattern->GetAttr<Dimension>("tab_bar_focus_padding", 0.0_vp);
+            theme->isChangeFocusTextStyle_ = static_cast<bool>(pattern->GetAttr<int>("subtab_focused_style", 0));
             theme->labelPadding_ = pattern->GetAttr<Dimension>("label_padding", 8.0_vp);
             theme->padding_ = pattern->GetAttr<Dimension>("tab_padding", 16.0_vp);
             theme->gradientWidth_ = pattern->GetAttr<Dimension>("tab_gradient_width", 24.0_vp);
@@ -479,6 +486,41 @@ public:
     {
         return subTabBarIndicatorstyleMarginTop_;
     }
+
+    const Dimension& GetSubTabItemHorizontalPadding() const
+    {
+        return subTabItemHorizontalPadding_;
+    }
+
+    const Dimension& GetBoardFocusPadding() const
+    {
+        return focusBoardPadding_;
+    }
+
+    const Dimension& GetFocusPadding() const
+    {
+        return focusPadding_;
+    }
+
+    const Dimension& GetTabBarDefaultMargin() const
+    {
+        return tabBarDefaultMargin_;
+    }
+
+    const Color& GetTabBarFocusedColor() const
+    {
+        return tabBarFocusedColor_;
+    }
+
+    const Color& GetSubTabTextFocusedColor() const
+    {
+        return subTabTextFocusedColor_;
+    }
+
+    bool GetIsChangeFocusTextStyle() const
+    {
+        return isChangeFocusTextStyle_;
+    }
     
 protected:
     TabTheme() = default;
@@ -551,6 +593,13 @@ private:
     Dimension subTabBarLeftRightMargin_;
     Dimension subTabBarIndicatorstyleMarginTop_;
     float subTabBarThirdLargeFontSizeScale_ = 1.45f;
+    Dimension tabBarDefaultMargin_;
+    Dimension focusPadding_;
+    Dimension subTabItemHorizontalPadding_;
+    Dimension focusBoardPadding_;
+    Color tabBarFocusedColor_;
+    Color subTabTextFocusedColor_;
+    bool isChangeFocusTextStyle_;
 };
 
 } // namespace OHOS::Ace

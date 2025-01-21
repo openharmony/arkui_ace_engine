@@ -45,6 +45,7 @@ public:
         value->propLunar_ = CloneLunar();
         value->propStartDate_ = CloneStartDate();
         value->propEndDate_ = CloneEndDate();
+        value->propMode_ = CloneMode();
         value->propDisappearTextStyle_ = CloneDisappearTextStyle();
         value->propTextStyle_ = CloneTextStyle();
         value->propSelectedTextStyle_ = CloneSelectedTextStyle();
@@ -57,6 +58,7 @@ public:
         ResetSelectedDate();
         ResetStartDate();
         ResetEndDate();
+        ResetMode();
         ResetLunar();
         ResetDisappearTextStyle();
         ResetTextStyle();
@@ -141,10 +143,26 @@ public:
         return "";
     }
 
+    std::string GetDatePickerMode() const
+    {
+        std::string mode = "";
+        if (HasMode()) {
+            if (GetMode() == DatePickerMode::DATE) {
+                mode = "DatePickerMode.DATE";
+            } else if (GetMode() == DatePickerMode::YEAR_AND_MONTH) {
+                mode = "DatePickerMode.YEAR_AND_MONTH";
+            } else if (GetMode() == DatePickerMode::MONTH_AND_DAY) {
+                mode = "DatePickerMode.MONTH_AND_DAY";
+            }
+        }
+        return mode;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedDate, LunarDate, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Lunar, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(StartDate, LunarDate, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EndDate, LunarDate, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Mode, DatePickerMode, PROPERTY_UPDATE_RENDER);
 
     ACE_DEFINE_PROPERTY_GROUP(DisappearTextStyle, FontStyle);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP_ITEM(

@@ -219,9 +219,9 @@ bool SvgAttributesParser::ParseRGBAMagicColor(const std::string& value, Color& c
     if (!std::regex_match(value, matches, COLOR_WITH_RGBA_MAGIC)) {
         return false;
     }
-    std::string baseColorStr = value.substr(0, BASIC_COLOR_SPAN);
+    std::string baseColorStr = value.substr(1, BASIC_COLOR_SPAN);
     auto baseColorValue = std::strtoul(baseColorStr.c_str(), nullptr, RADIX_HEX);
-    std::string baseAlphaStr = value.substr(BASIC_COLOR_SPAN);
+    std::string baseAlphaStr = value.substr(BASIC_COLOR_SPAN + 1);
     auto alpha = std::strtoul(baseAlphaStr.c_str(), nullptr, RADIX_HEX);
     auto red = (baseColorValue >> TWO_BYTE_BITS) & 0xff;
     auto green = (baseColorValue >> ONE_BYTE_BITS) & 0xff;

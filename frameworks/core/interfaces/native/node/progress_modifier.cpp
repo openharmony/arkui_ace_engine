@@ -16,6 +16,7 @@
 
 #include "core/interfaces/native/node/progress_modifier.h"
 
+#include "core/components_ng/pattern/progress/progress_paint_property.h"
 #include "core/components_ng/pattern/progress/progress_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
 #include "core/components/select/select_theme.h"
@@ -412,6 +413,21 @@ ArkUI_Uint32 GetProgressColor(ArkUINodeHandle node)
     return ProgressModelNG::GetColor(frameNode).GetValue();
 }
 
+void GetProgressLinearStyle(ArkUINodeHandle node, ArkUIProgressLinearStyleOption& option)
+{
+    auto* frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto layoutProperty = frameNode->GetLayoutProperty<ProgressLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    option.scanEffectEnable = paintProperty->GetEnableLinearScanEffect().value_or(false);
+    option.smoothEffectEnable = paintProperty->GetEnableSmoothEffect().value_or(true);
+    option.strokeWidth = layoutProperty->GetStrokeWidth().value_or(Dimension(4.0_vp)).Value();
+    option.strokeRadius = paintProperty->GetStrokeRadiusValue(Dimension(2.0_vp)).Value();
+}
+
 void SetProgressInitialize(
     ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Float32 total, ArkUI_Int32 progressStyle)
 {
@@ -434,7 +450,7 @@ void ResetProgressInitialize(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUIProgressModifier* GetProgressModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIProgressModifier modifier = {
         .setProgressValue = SetProgressValue,
         .resetProgressValue = ResetProgressValue,
@@ -454,21 +470,15 @@ const ArkUIProgressModifier* GetProgressModifier()
         .getProgressColor = GetProgressColor,
         .setProgressInitialize = SetProgressInitialize,
         .resetProgressInitialize = ResetProgressInitialize,
+        .getProgressLinearStyle = GetProgressLinearStyle,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 
 const CJUIProgressModifier* GetCJUIProgressModifier()
 {
-    constexpr auto lineBegin = __LINE__; // don't move this line
+    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const CJUIProgressModifier modifier = {
         .setProgressValue = SetProgressValue,
         .resetProgressValue = ResetProgressValue,
@@ -489,14 +499,7 @@ const CJUIProgressModifier* GetCJUIProgressModifier()
         .setProgressInitialize = SetProgressInitialize,
         .resetProgressInitialize = ResetProgressInitialize,
     };
-    constexpr auto lineEnd = __LINE__; // don't move this line
-    constexpr auto ifdefOverhead = 4; // don't modify this line
-    constexpr auto overHeadLines = 3; // don't modify this line
-    constexpr auto blankLines = 0; // modify this line accordingly
-    constexpr auto ifdefs = 0; // modify this line accordingly
-    constexpr auto initializedFieldLines = lineEnd - lineBegin - ifdefs * ifdefOverhead - overHeadLines - blankLines;
-    static_assert(initializedFieldLines == sizeof(modifier) / sizeof(void*),
-        "ensure all fields are explicitly initialized");
+    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
 }
 }

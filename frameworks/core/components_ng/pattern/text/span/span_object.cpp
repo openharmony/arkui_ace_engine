@@ -879,6 +879,67 @@ bool LineHeightSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
     return lineHeight_ == lineHeight;
 }
 
+// HalfLeadingSpan
+HalfLeadingSpan::HalfLeadingSpan(bool halfLeading) : SpanBase(0, 0), halfLeading_(halfLeading) {}
+
+HalfLeadingSpan::HalfLeadingSpan(bool halfLeading, int32_t start, int32_t end)
+    : SpanBase(start, end), halfLeading_(halfLeading)
+{}
+
+void HalfLeadingSpan::ApplyToSpanItem(const RefPtr<NG::SpanItem>& spanItem, SpanOperation operation) const
+{
+    switch (operation) {
+        case SpanOperation::ADD:
+            AddHalfLeadingStyle(spanItem);
+            break;
+        case SpanOperation::REMOVE:
+            RemoveHalfLeadingStyle(spanItem);
+    }
+}
+
+RefPtr<SpanBase> HalfLeadingSpan::GetSubSpan(int32_t start, int32_t end)
+{
+    return MakeRefPtr<HalfLeadingSpan>(halfLeading_, start, end);
+}
+
+void HalfLeadingSpan::AddHalfLeadingStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    spanItem->textLineStyle->UpdateHalfLeading(halfLeading_);
+}
+
+void HalfLeadingSpan::RemoveHalfLeadingStyle(const RefPtr<NG::SpanItem>& spanItem) const
+{
+    spanItem->textLineStyle->ResetHalfLeading();
+}
+
+bool HalfLeadingSpan::GetHalfLeading() const
+{
+    return halfLeading_;
+}
+
+SpanType HalfLeadingSpan::GetSpanType() const
+{
+    return SpanType::HalfLeading;
+}
+
+std::string HalfLeadingSpan::ToString() const
+{
+    std::stringstream str;
+    str << "HalfLeadingSpan ( start:";
+    str << GetStartIndex();
+    str << " end:";
+    str << GetEndIndex();
+    str << "]";
+    return str.str();
+}
+
+bool HalfLeadingSpan::IsAttributesEqual(const RefPtr<SpanBase>& other) const
+{
+    auto halfLeadingSpan = DynamicCast<HalfLeadingSpan>(other);
+    CHECK_NULL_RETURN(halfLeadingSpan, false);
+    return halfLeading_ == halfLeadingSpan->GetHalfLeading();
+}
+
 // ExtSpan
 ExtSpan::ExtSpan(int32_t start, int32_t end) : SpanBase(start, end) {}
 

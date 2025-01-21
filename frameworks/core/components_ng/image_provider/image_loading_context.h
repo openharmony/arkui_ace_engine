@@ -42,6 +42,7 @@ public:
         const ImageDfxConfig& imageDfxConfig = {});
     ~ImageLoadingContext() override;
 
+    static RefPtr<ImageData> QueryDataFromCache(const ImageSourceInfo& src, bool& dataHit);
     // return true if calling MakeCanvasImage is necessary
     bool MakeCanvasImageIfNeed(const SizeF& dstSize, bool autoResize, ImageFit imageFit,
         const std::optional<SizeF>& sourceSize = std::nullopt, bool hasValidSlice = false);

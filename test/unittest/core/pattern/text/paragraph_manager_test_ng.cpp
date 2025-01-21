@@ -118,7 +118,7 @@ HWTEST_F(ParagraphManagerTestNg, GetGlyphIndexByCoordinate001, TestSize.Level1)
      */
     offset = Offset(50.0, 310.0);
     result = pManager->GetGlyphIndexByCoordinate(offset);
-    EXPECT_EQ(result, 40);
+    EXPECT_EQ(result, 39);
 }
 
 /**

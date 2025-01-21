@@ -1271,4 +1271,86 @@ HWTEST_F(CalendarMonthTestNg, OnColorConfigurationUpdate001, TestSize.Level1)
     calendarMonthPattern->OnColorConfigurationUpdate();
     EXPECT_NE(pipelineContext->GetTheme<CalendarTheme>(), nullptr);
 }
+
+/**
+ * @tc.name: CalendarDialogLayoutAlgorithmTest001
+ * @tc.desc: CalendarDialog LayoutAlgorithm Measure Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarMonthTestNg, CalendarDialogLayoutAlgorithmTest001, TestSize.Level1)
+{
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { 1, 1 },
+        .maxSize = { 10, 10 },        // 10 is the maxSize of width and height
+        .percentReference = { 5, 5 }, // 5 is the percentReference of width and height
+        .parentIdealSize = { 2, 2 },  // 2 is the parentIdealSize of width and height
+    };
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, geometryNode, AceType::MakeRefPtr<LayoutProperty>());
+    calendarMonthPattern->GetHost()->GetLayoutProperty()->layoutConstraint_ = layoutConstraintF;
+    CalendarDay calendarDay1;
+    calendarMonthPattern->obtainedMonth_.days.push_back(calendarDay1);
+    calendarMonthPattern->OnColorConfigurationUpdate();
+    EXPECT_NE(pipelineContext->GetTheme<CalendarTheme>(), nullptr);
+
+    auto layoutAlgorithmPattern = AceType::DynamicCast<CalendarMonthPattern>(frameNode->GetPattern());
+    ASSERT_NE(layoutAlgorithmPattern, nullptr);
+
+    auto calendarPickerLayoutAlgorithm = layoutAlgorithmPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(calendarPickerLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(calendarPickerLayoutAlgorithm));
+
+    calendarPickerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_NE(calendarPickerLayoutAlgorithm, nullptr);
+}
+
+/**
+ * @tc.name: CalendarDialogLayoutAlgorithmTest002
+ * @tc.desc: CalendarDialog LayoutAlgorithm Measure Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarMonthTestNg, CalendarDialogLayoutAlgorithmTest002, TestSize.Level1)
+{
+    LayoutConstraintF layoutConstraintF = {
+        .minSize = { 1, 1 },
+        .maxSize = { 10, 10 },        // 10 is the maxSize of width and height
+        .percentReference = { 5, 5 }, // 5 is the percentReference of width and height
+        .parentIdealSize = { 2, 2 },  // 2 is the parentIdealSize of width and height
+    };
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::CALENDAR_ETS_TAG, stack->ClaimNodeId(), []() { return AceType::MakeRefPtr<CalendarMonthPattern>(); });
+    auto calendarMonthPattern = frameNode->GetPattern<CalendarMonthPattern>();
+    ASSERT_NE(calendarMonthPattern, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        frameNode, geometryNode, AceType::MakeRefPtr<LayoutProperty>());
+    calendarMonthPattern->GetHost()->GetLayoutProperty()->layoutConstraint_ = layoutConstraintF;
+    CalendarDay calendarDay1;
+    calendarMonthPattern->obtainedMonth_.days.push_back(calendarDay1);
+    calendarMonthPattern->OnColorConfigurationUpdate();
+    EXPECT_NE(pipelineContext->GetTheme<CalendarTheme>(), nullptr);
+
+    auto layoutAlgorithmPattern = AceType::DynamicCast<CalendarMonthPattern>(frameNode->GetPattern());
+    ASSERT_NE(layoutAlgorithmPattern, nullptr);
+
+    auto calendarPickerLayoutAlgorithm = layoutAlgorithmPattern->CreateLayoutAlgorithm();
+    ASSERT_NE(calendarPickerLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(calendarPickerLayoutAlgorithm));
+
+    calendarPickerLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_NE(calendarPickerLayoutAlgorithm, nullptr);
+}
 } // namespace OHOS::Ace::NG

@@ -45,6 +45,22 @@ struct MenuStatusTestCase {
     bool expectResult = false;
 };
 
+struct UpdateDragCursorStyleTestCase {
+    DragRet dragResult = DragRet::DRAG_DEFAULT;
+    DragBehavior dragBehavior = DragBehavior::UNKNOWN;
+    DragCursorStyleCore expectResult;
+};
+
+struct UpdateDragAllowDropTestCase {
+    bool isCapi = false;
+    std::set<std::string> allowDropSet;
+    std::map<std::string, int64_t> summaryMap;
+    DragBehavior dragBehavior = DragBehavior::UNKNOWN;
+    bool isEnabled = true;
+    bool isInDraggedFrameNode = false;
+    DragCursorStyleCore expectResult = DragCursorStyleCore::MOVE;
+};
+
 const std::vector<DragStatusTestCase> DRAG_STATUS_IMAGE_TEST_CASES = {
     DragStatusTestCase(DragInfo(true, true, true, false), InputEventType::TOUCH_SCREEN, false),   // case 0
     DragStatusTestCase(DragInfo(true, true, true, false), InputEventType::TOUCH_PAD, false),      // case 1
@@ -194,6 +210,29 @@ const std::vector<MenuStatusTestCase> MENU_STATUS_TEST_CASES = {
     { true, true, MenuPreviewMode::NONE, true},
     { true, true, MenuPreviewMode::IMAGE, true},
     { true, true, MenuPreviewMode::CUSTOM, true}
+};
+
+const std::vector<UpdateDragCursorStyleTestCase> UPDATE_DRAG_CURSOR_TEST_CASES = {
+    { DragRet::ENABLE_DROP, DragBehavior::UNKNOWN, DragCursorStyleCore::COPY },
+    { DragRet::ENABLE_DROP, DragBehavior::COPY, DragCursorStyleCore::COPY },
+    { DragRet::ENABLE_DROP, DragBehavior::MOVE, DragCursorStyleCore::MOVE },
+    { DragRet::DISABLE_DROP, DragBehavior::UNKNOWN, DragCursorStyleCore::MOVE },
+    { DragRet::DISABLE_DROP, DragBehavior::COPY, DragCursorStyleCore::MOVE },
+    { DragRet::DISABLE_DROP, DragBehavior::MOVE, DragCursorStyleCore::MOVE }
+};
+
+const std::vector<UpdateDragAllowDropTestCase> UPDATE_DRAG_ALLOW_DROP_TEST_CASES = {
+    { false, {}, {}, DragBehavior::UNKNOWN, true, true, DragCursorStyleCore::MOVE },
+    { false, {}, {{"A", 1}}, DragBehavior::UNKNOWN, true, true, DragCursorStyleCore::MOVE },
+    { false, {"A"}, {}, DragBehavior::UNKNOWN, true, true, DragCursorStyleCore::MOVE },
+
+    { true, {}, {}, DragBehavior::UNKNOWN, true, true, DragCursorStyleCore::MOVE },
+    { true, {}, {}, DragBehavior::UNKNOWN, true, false, DragCursorStyleCore::COPY },
+    { true, {}, {}, DragBehavior::UNKNOWN, false, true, DragCursorStyleCore::MOVE },
+    { true, {}, {}, DragBehavior::UNKNOWN, false, false, DragCursorStyleCore::MOVE },
+
+    { true, {}, {}, DragBehavior::MOVE, false, false, DragCursorStyleCore::MOVE },
+    { true, {}, {}, DragBehavior::COPY, false, false, DragCursorStyleCore::COPY }
 };
 
 class DragEventTestNgIssue : public DragEventCommonTestNg {
@@ -349,6 +388,97 @@ HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue004, TestSize.Level1)
         gestureEventHub->SetBindMenuStatus(testCase.isBindCustomMenu, testCase.isShow, testCase.previewMode);
         EXPECT_TRUE(IsDragEventStateEqual(caseNum, gestureEventHub->bindMenuStatus_.IsNotNeedShowPreview(),
             testCase.expectResult));
+        caseNum++;
+    }
+};
+
+/**
+ * @tc.name: DragEventTestNGIssue005
+ * @tc.desc: Test UpdateDragCursorStyle function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue005, TestSize.Level1)
+{
+    int32_t caseNum = 0;
+    for (const auto& testCase : UPDATE_DRAG_CURSOR_TEST_CASES) {
+        /**
+         * @tc.steps: step1. create frameNode.
+         */
+        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        ASSERT_NE(frameNode, nullptr);
+
+        /**
+         * @tc.steps: step2. create dragEvent.
+         */
+        RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+        ASSERT_NE(event, nullptr);
+        event->dragBehavior_ = testCase.dragBehavior;
+        event->dragRet_ = testCase.dragResult;
+
+        
+        /**
+         * @tc.steps: step3. call UpdateDragCursorStyle function.
+         * @tc.expected: step4. drag status equals.
+         */
+        auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+        ASSERT_NE(dragDropManager, nullptr);
+        dragDropManager->UpdateDragCursorStyle(frameNode, event, -1);
+        EXPECT_TRUE(IsDragEventStateEqual(caseNum, dragDropManager->dragCursorStyleCore_ ==
+            testCase.expectResult, true));
+        caseNum++;
+    }
+};
+
+/**
+ * @tc.name: DragEventTestNGIssue006
+ * @tc.desc: Test UpdateDragAllowDrop function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragEventTestNgIssue, DragEventTestNGIssue006, TestSize.Level1)
+{
+    int32_t caseNum = 0;
+    for (const auto& testCase : UPDATE_DRAG_ALLOW_DROP_TEST_CASES) {
+
+        /**
+         * @tc.steps: step1. create eventhub.
+        */
+        auto eventHub = AceType::MakeRefPtr<EventHub>();
+        ASSERT_NE(eventHub, nullptr);
+        auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+        ASSERT_NE(gestureEventHub, nullptr);
+        eventHub->enabled_ = testCase.isEnabled;
+        /**
+         * @tc.steps: step2. create frameNode.
+         */
+        auto frameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        ASSERT_NE(frameNode, nullptr);
+        frameNode->eventHub_ = eventHub;
+        frameNode->allowDrop_ = testCase.allowDropSet;
+
+        /**
+         * @tc.steps: step3. create dragEvent.
+         */
+        RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+        ASSERT_NE(event, nullptr);
+        event->isCapi_ = testCase.isCapi;
+        event->dragBehavior_ = testCase.dragBehavior;
+
+        
+        /**
+         * @tc.steps: step4. call UpdateDragCursorStyle function.
+         * @tc.expected: step4. drag status equals.
+         */
+        auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+        ASSERT_NE(dragDropManager, nullptr);
+        dragDropManager->summaryMap_ = testCase.summaryMap;
+        if (testCase.isInDraggedFrameNode) {
+            dragDropManager->draggedFrameNode_ = frameNode;
+        }
+        dragDropManager->UpdateDragCursorStyle(frameNode, event, -1);
+        EXPECT_TRUE(IsDragEventStateEqual(caseNum, dragDropManager->dragCursorStyleCore_ ==
+            testCase.expectResult, true));
         caseNum++;
     }
 };

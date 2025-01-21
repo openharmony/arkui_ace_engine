@@ -52,18 +52,18 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     sheetNode->SetDragHitTestBlock(true);
     auto sheetLayoutProperty = sheetNode->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(sheetLayoutProperty, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    CHECK_NULL_RETURN(sheetPattern, nullptr);
     sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
     auto eventConfirmHub = sheetNode->GetOrCreateGestureEventHub();
     CHECK_NULL_RETURN(eventConfirmHub, nullptr);
     eventConfirmHub->AddClickEvent(AceType::MakeRefPtr<NG::ClickEvent>(
         [](const GestureEvent& /* info */) { TAG_LOGD(AceLogTag::ACE_SHEET, "The sheet hits the click event."); }));
-    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
-    CHECK_NULL_RETURN(sheetPattern, nullptr);
     sheetPattern->UpdateSheetType();
     auto operationColumn = CreateOperationColumnNode(titleBuilder, sheetStyle, sheetNode);
     CHECK_NULL_RETURN(operationColumn, nullptr);
     operationColumn->MountToParent(sheetNode);
-    auto scrollNode = CreateScrollNode();
+    auto scrollNode = CreateScrollNode(sheetStyle);
     CHECK_NULL_RETURN(scrollNode, nullptr);
     builder->MountToParent(scrollNode);
 
@@ -87,6 +87,7 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_RETURN(sheetTheme, nullptr);
+    auto sheetDragBarHeight = sheetTheme->GetSheetDragBarHeight();
     MarginProperty margin;
     margin.right = CalcLength(sheetTheme->GetTitleTextHorizMargin());
     margin.left = CalcLength(sheetTheme->GetTitleTextHorizMargin());
@@ -94,26 +95,26 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
 
     layoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     if (sheetStyle.isTitleBuilder.has_value() && pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
-        layoutProps->UpdateUserDefinedIdealSize(
-            CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT - SHEET_TITLE_AERA_MARGIN)));
+        layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(
+            sheetTheme->GetOperationAreaHeight() - sheetTheme->GetSheetTitleAreaMargin())));
         if (sheetStyle.sheetTitle.has_value() && sheetStyle.sheetSubtitle.has_value()) {
-            layoutProps->UpdateUserDefinedIdealSize(
-                CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_TITLE_AERA_MARGIN)));
+            layoutProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(
+                SHEET_OPERATION_AREA_HEIGHT_DOUBLE - sheetTheme->GetSheetTitleAreaMargin())));
         }
     }
-    CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode);
+    CreateDragBarNode(titleBuilder, operationColumn, sheetStyle, sheetNode, sheetDragBarHeight);
     return operationColumn;
 }
 
 void SheetView::CreateDragBarNode(const RefPtr<FrameNode>& titleBuilder, const RefPtr<FrameNode>& operationColumn,
-    NG::SheetStyle& sheetStyle, const RefPtr<FrameNode>& sheetNode)
+    NG::SheetStyle& sheetStyle, const RefPtr<FrameNode>& sheetNode, Dimension sheetDragBarHeight)
 {
     auto dragBarNode = FrameNode::GetOrCreateFrameNode("SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<SheetDragBarPattern>(); });
     auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
     CHECK_NULL_VOID(dragBarLayoutProperty);
     dragBarLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(SHEET_DRAG_BAR_WIDTH), CalcLength(SHEET_DRAG_BAR_HEIGHT)));
+        CalcSize(CalcLength(SHEET_DRAG_BAR_WIDTH), CalcLength(sheetDragBarHeight)));
     dragBarLayoutProperty->UpdateAlignment(Alignment::CENTER);
     auto showDragIndicator = sheetStyle.showDragBar.value_or(true);
     auto isSingleDetents = true;
@@ -240,7 +241,7 @@ void SheetView::CreateCloseIconNode(RefPtr<FrameNode> buttonNode)
     buttonNode->AddChild(iconNode);
 }
 
-RefPtr<FrameNode> SheetView::CreateScrollNode()
+RefPtr<FrameNode> SheetView::CreateScrollNode(const NG::SheetStyle& sheetStyle)
 {
     auto scroll = FrameNode::CreateFrameNode(
         V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
@@ -254,7 +255,12 @@ RefPtr<FrameNode> SheetView::CreateScrollNode()
     paintProps->UpdateScrollBarMode(DisplayMode::OFF);
     auto pattern = scroll->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->SetEdgeEffect(EdgeEffect::SPRING, false);
+    if (sheetStyle.sheetEffectEdge.has_value() && sheetStyle.sheetEffectEdge.value() == NG::SheetEffectEdge::NONE) {
+        pattern->SetEdgeEffect(EdgeEffect::NONE, false);
+    } else {
+        pattern->SetEdgeEffect(EdgeEffect::SPRING,
+            false, static_cast<EffectEdge>(sheetStyle.sheetEffectEdge.value_or(NG::SheetEffectEdge::ALL)));
+    }
     pattern->SetScrollToSafeAreaHelper(false);
     props->UpdateAlignment(Alignment::TOP_CENTER);
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
@@ -283,6 +289,7 @@ RefPtr<FrameNode> SheetView::BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::She
     auto titleProp = sheetTitle->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(titleProp, nullptr);
     auto titleTextFontSize = sheetTheme->GetTitleTextFontSize();
+    auto sheetTitleFontWeight = sheetTheme->GetSheetTitleFontWeight();
     titleTextFontSize.SetUnit(DimensionUnit::FP);
     titleProp->UpdateMaxLines(SHEET_TITLE_MAX_LINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
@@ -293,7 +300,7 @@ RefPtr<FrameNode> SheetView::BuildMainTitle(RefPtr<FrameNode> sheetNode, NG::She
     }
     titleProp->UpdateMaxFontScale(sheetTheme->GetSheetMaxAgingScale());
     titleProp->UpdateFontSize(titleTextFontSize);
-    titleProp->UpdateFontWeight(FontWeight::BOLD);
+    titleProp->UpdateFontWeight(sheetTitleFontWeight);
     titleProp->UpdateTextColor(sheetTheme->GetTitleTextFontColor());
 
     auto titleRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -376,10 +383,11 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT_CROSS_AXIS);
     bool isTitleCustombuilder = sheetStyle.isTitleBuilder.has_value() && sheetStyle.isTitleBuilder.value();
     if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale() || isTitleCustombuilder) {
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(SHEET_OPERATION_AREA_HEIGHT)));
+        layoutProperty->UpdateUserDefinedIdealSize(
+            CalcSize(std::nullopt, CalcLength(sheetTheme->GetOperationAreaHeight())));
     }
     MarginProperty margin;
-    margin.top = CalcLength(SHEET_TITLE_AERA_MARGIN);
+    margin.top = CalcLength(sheetTheme->GetSheetTitleAreaMargin());
     margin.bottom = CalcLength(SHEET_DOUBLE_TITLE_BOTTON_MARGIN);
     layoutProperty->UpdateMargin(margin);
     auto columnProps = titleColumn->GetLayoutProperty<LinearLayoutProperty>();
@@ -390,7 +398,7 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
         CHECK_NULL_RETURN(titleRow, nullptr);
         titleRow->MountToParent(titleColumn);
         MarginProperty titleMargin;
-        titleMargin.top = CalcLength(SHEET_DOUBLE_TITLE_TOP_PADDING);
+        titleMargin.top = CalcLength(sheetTheme->GetTitleTopPadding());
         auto titleProp = titleRow->GetLayoutProperty();
         CHECK_NULL_RETURN(titleProp, nullptr);
         titleProp->UpdateMargin(titleMargin);
@@ -399,9 +407,8 @@ RefPtr<FrameNode> SheetView::BuildTitleColumn(RefPtr<FrameNode> sheetNode, NG::S
             CHECK_NULL_RETURN(subtitleRow, nullptr);
             subtitleRow->MountToParent(titleColumn);
             if (pipeline->GetFontScale() == sheetTheme->GetSheetNormalScale()) {
-                layoutProperty->UpdateUserDefinedIdealSize(
-                    CalcSize(std::nullopt,
-                        CalcLength(SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
+                layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(
+                    SHEET_OPERATION_AREA_HEIGHT_DOUBLE - SHEET_DOUBLE_TITLE_BOTTON_MARGIN)));
             }
         }
     } else if (sheetStyle.isTitleBuilder.has_value()) {

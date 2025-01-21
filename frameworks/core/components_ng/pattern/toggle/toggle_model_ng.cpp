@@ -62,7 +62,7 @@ void ToggleModelNG::ReCreateFrameNode(
     auto frameNode = CreateFrameNode(nodeId, toggleType, isOn);
     stack->Push(frameNode);
     ReplaceAllChild(childFrameNode);
-    AddNewChild(parentFrame, nodeId, index);
+    AddNewChild(parentFrame, nodeId, index, toggleType);
 }
 
 RefPtr<FrameNode> ToggleModelNG::CreateFrameNode(int32_t nodeId, ToggleType toggleType, bool isOn)
@@ -294,10 +294,26 @@ void ToggleModelNG::ReplaceAllChild(const RefPtr<FrameNode>& oldFrameNode)
     oldFrameNode->RemoveAllChildInRenderTree();
 }
 
-void ToggleModelNG::AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index)
+void ToggleModelNG::AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index, ToggleType toggleType)
 {
     auto newFrameNode = FrameNode::GetFrameNode(V2::TOGGLE_ETS_TAG, nodeId);
     parentFrame->AddChild(newFrameNode, index);
+    CHECK_NULL_VOID(newFrameNode);
+    const auto& children = newFrameNode->GetChildren();
+    for (const auto& child : children) {
+        if (!child) {
+            continue;
+        }
+        auto childNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(childNode);
+        auto accessibilityProperty = childNode->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(accessibilityProperty);
+        if (toggleType == ToggleType::CHECKBOX || toggleType == ToggleType::SWITCH) {
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        } else {
+            accessibilityProperty->SetAccessibilityLevel(AccessibilityProperty::Level::YES_STR);
+        }
+    }
     newFrameNode->MarkModifyDone();
 }
 

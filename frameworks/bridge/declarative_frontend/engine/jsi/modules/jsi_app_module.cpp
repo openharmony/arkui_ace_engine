@@ -70,7 +70,7 @@ shared_ptr<JsValue> AppTerminate(const shared_ptr<JsRuntime>& runtime, const sha
                 pipelineContext->Finish();
             }
         },
-        "ArkUIAppTerminate");
+        "ArkUIAppTerminate", TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
     return runtime->NewNull();
 }
 

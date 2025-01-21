@@ -103,6 +103,7 @@ export const e1 = {
 };
 const f1 = () => {
 };
+const POPUP_DEFAULT_MAXWIDTH = 400;
 export function Popup(options, parent = null) {
     const w1 = options;
     {
@@ -115,7 +116,8 @@ export function Popup(options, parent = null) {
                     popupDirection: options.direction,
                     showClose: options.showClose,
                     onClose: options.onClose,
-                    buttons: options.buttons
+                    buttons: options.buttons,
+                    maxWidth: options.maxWidth
                 }, undefined, elmtId, () => { }, { page: "library/src/main/ets/components/MainPage.ets", line: 198, n1: 3 });
                 ViewPU.create(componentCall);
                 let paramsLambda = () => {
@@ -126,7 +128,8 @@ export function Popup(options, parent = null) {
                         popupDirection: options.direction,
                         showClose: options.showClose,
                         onClose: options.onClose,
-                        buttons: options.buttons
+                        buttons: options.buttons,
+                        maxWidth: options.maxWidth
                     };
                 };
                 componentCall.paramsGenerator_ = paramsLambda;
@@ -138,7 +141,8 @@ export function Popup(options, parent = null) {
                     message: options.message,
                     popupDirection: options.direction,
                     showClose: options.showClose,
-                    buttons: options.buttons
+                    buttons: options.buttons,
+                    maxWidth: options.maxWidth
                 });
             }
         }, { name: "PopupComponent" });
@@ -158,6 +162,7 @@ export class g1 extends ViewPU {
         this.__popupDirection = new SynchedPropertySimpleOneWayPU(params.popupDirection, this, "popupDirection");
         this.__showClose = new SynchedPropertyObjectOneWayPU(params.showClose, this, "showClose");
         this.__buttons = new SynchedPropertyObjectOneWayPU(params.buttons, this, "buttons");
+        this.__maxWidth = new SynchedPropertyObjectOneWayPU(params.maxWidth, this, 'maxWidth');
         this.textHeight = 0;
         this.__titleHeight = new ObservedPropertySimplePU(0, this, "titleHeight");
         this.__applyHeight = new ObservedPropertySimplePU(0, this, "applyHeight");
@@ -238,6 +243,9 @@ export class g1 extends ViewPU {
         if (params.listener !== undefined) {
             this.listener = params.listener;
         }
+        if (params.maxWidth !== undefined) {
+            this.maxWidth = params.maxWidth;
+        }
     }
     updateStateVars(params) {
         this.__icon.reset(params.icon);
@@ -246,9 +254,11 @@ export class g1 extends ViewPU {
         this.__popupDirection.reset(params.popupDirection);
         this.__showClose.reset(params.showClose);
         this.__buttons.reset(params.buttons);
+        this.__maxWidth.reset(params.maxWidth);
     }
     purgeVariableDependenciesOnElmtId(rmElmtId) {
         this.__icon.purgeDependencyOnElmtId(rmElmtId);
+        this.__maxWidth.purgeDependencyOnElmtId(rmElmtId);
         this.__title.purgeDependencyOnElmtId(rmElmtId);
         this.__message.purgeDependencyOnElmtId(rmElmtId);
         this.__popupDirection.purgeDependencyOnElmtId(rmElmtId);
@@ -268,6 +278,7 @@ export class g1 extends ViewPU {
     }
     aboutToBeDeleted() {
         this.__icon.aboutToBeDeleted();
+        this.__maxWidth.aboutToBeDeleted();
         this.__title.aboutToBeDeleted();
         this.__message.aboutToBeDeleted();
         this.__popupDirection.aboutToBeDeleted();
@@ -292,6 +303,12 @@ export class g1 extends ViewPU {
     }
     set icon(newValue) {
         this.__icon.set(newValue);
+    }
+    get maxWidth() {
+        return this.__maxWidth.get();
+    }
+    set maxWidth(newValue) {
+        this.__maxWidth.set(newValue);
     }
     get title() {
         return this.__title.get();
@@ -506,14 +523,16 @@ export class g1 extends ViewPU {
             return u1 = 400;
         }
         if (this.showClose || this.showClose === void (0)) {
-            if (px2vp(v1.width) > 400) {
-                u1 = 400;
-            }
-            else {
+            if (this.messageMaxWidth !== undefined) {
+                if (this.maxWidth > px2vp(v1.width)) {
+                    u1 = px2vp(v1.width);
+                } else {
+                    u1 = this.maxWidth;
+                }
+            } else {
                 if (v1.width != 0) {
                     u1 = px2vp(v1.width);
-                }
-                else {
+                } else {
                     u1 = -1;
                 }
             }
@@ -632,11 +651,76 @@ export class g1 extends ViewPU {
         }
         return layoutWeight;
     }
+    resourceToVp(r18) {
+        try {
+            if (r18.id !== -1) {
+                return px2vp(getContext(this).resourceManager.getNumber(r18.id));
+            }
+            else {
+                return px2vp(getContext(this)
+                    .resourceManager
+                    .getNumberByName((r18.params[0]).split('.')[2]));
+            }
+        }
+        catch (s18) {
+            return POPUP_DEFAULT_MAXWIDTH;
+        }
+    }
+    toVp(value) {
+        let q1 = display.getDefaultDisplaySync();
+        if (value === void 0) {
+            return Number.NEGATIVE_INFINITY;
+        }
+        switch (typeof value) {
+            case 'number':
+                return value;
+            case 'object':
+                try {
+                    let q1 = this.resourceToVp(value);
+                    if (q1 === 0 && !m(getContext(this), value)) {
+                        return Number.NEGATIVE_INFINITY;
+                    }
+                    return q1;
+                } catch (error) {
+                    return Number.NEGATIVE_INFINITY;
+                }
+            case 'string':
+                let p1 = new RegExp('(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$', 'i');
+                let matches = value.match(p1);
+                if (!matches) {
+                    return Number.NEGATIVE_INFINITY;
+                }
+                let length = Number(matches?.[1] ?? 0);
+                let unit = matches?.[2] ?? 'vp';
+                switch (unit.toLowerCase()) {
+                    case 'px':
+                        length = px2vp(length);
+                        break;
+                    case 'fp':
+                        length = px2vp(fp2px(length));
+                        break;
+                    case 'lpx':
+                        length = px2vp(lpx2px(length));
+                        break;
+                    case '%':
+                        length = length / 100 * px2vp(q1.width);
+                        break;
+                    case 'vp':
+                        break;
+                    default:
+                        break;
+                }
+                return length;
+            default:
+                return Number.NEGATIVE_INFINITY;
+        }
+    }
     getApplyMaxSize() {
         let n1 = undefined;
         let o1 = undefined;
         let p1 = undefined;
         let q1 = undefined;
+        let f1 = 400;
         try {
             q1 = display.getDefaultDisplaySync();
         }
@@ -645,8 +729,17 @@ export class g1 extends ViewPU {
             this.messageMaxWeight = 400;
             return p1 = { maxWidth: 400, maxHeight: 480 };
         }
-        if (px2vp(q1.width) > 400) {
-            n1 = 400;
+        if (this.maxWidth !== undefined) {
+            if (typeof this.maxWidth === 'number' && this.maxWidth >= 0) {
+                f1 = px2vp(this.maxWidth);
+            } else if (typeof this.maxWidth === 'number' && this.maxWidth < 0) {
+                f1 = POPUP_DEFAULT_MAXWIDTH;
+            } else {
+                f1 = this.toVp(this.maxWidth);
+            }
+        }
+        if (px2vp(q1.width) > f1) {
+            n1 = f1;
         }
         else {
             if (q1.width != 0) {
@@ -656,6 +749,7 @@ export class g1 extends ViewPU {
                 n1 = -1;
             }
         }
+
         if (px2vp(q1.height) > 480) {
             o1 = 480;
         }
@@ -663,6 +757,7 @@ export class g1 extends ViewPU {
             o1 = px2vp(q1.height) - 40 - 40;
         }
         p1 = { maxWidth: n1, maxHeight: o1 };
+        this.messageMaxWidth = n1;
         this.messageMaxWeight = this.getMessageMaxWeight();
         return p1;
     }
@@ -673,6 +768,7 @@ export class g1 extends ViewPU {
             Row.alignItems(VerticalAlign.Top);
             Row.padding(this.getWindowsPadding());
             Row.constraintSize(ObservedObject.GetRawObject(this.applySizeOptions));
+            Row.constraintSize(ObservedObject.GetRawObject(this.getApplyMaxSize()));
             Row.onAreaChange((m1, rect) => {
                 this.applyHeight = rect.height;
             });

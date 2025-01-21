@@ -195,7 +195,7 @@ void CheckBoxModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
 
 void CheckBoxModelNG::SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding)
 {
-    NG::ViewAbstract::SetPadding(padding);
+    NG::ViewAbstract::SetPadding(frameNode, padding);
 }
 
 void CheckBoxModelNG::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)

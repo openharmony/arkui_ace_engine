@@ -251,7 +251,7 @@ HWTEST_F(RichEditorSelectionTestNg, SetSelection003, TestSize.Level1)
     EXPECT_EQ(richEditorSelection2.selection[0], 15);
     EXPECT_EQ(richEditorSelection2.selection[1], 30);
     auto resultObject = richEditorSelection2.resultObjects.front();
-    EXPECT_EQ(StringUtils::Str16ToStr8(resultObject.valueString), INIT_VALUE_3);
+    EXPECT_EQ(resultObject.valueString, INIT_VALUE_3);
     EXPECT_EQ(resultObject.offsetInSpan[0], 15);
     EXPECT_EQ(resultObject.offsetInSpan[1], 30);
 }

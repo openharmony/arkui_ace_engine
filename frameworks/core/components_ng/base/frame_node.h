@@ -61,6 +61,10 @@ class AccessibilityElementInfo;
 class AccessibilityEventInfo;
 } // namespace OHOS::Accessibility
 
+namespace OHOS::Ace::Kit {
+class FrameNode;
+}
+
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 class PipelineContext;
@@ -238,6 +242,7 @@ public:
 
     void SetVisibleAreaUserCallback(const std::vector<double>& ratios, const VisibleCallbackInfo& callback)
     {
+        CreateEventHubInner();
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, true);
     }
 
@@ -247,6 +252,7 @@ public:
         bool isCalculateInnerClip = false)
     {
         isCalculateInnerVisibleRectClip_ = isCalculateInnerClip;
+        CreateEventHubInner();
         eventHub_->SetVisibleAreaRatiosAndCallback(callback, ratios, false);
     }
 
@@ -262,6 +268,7 @@ public:
 
     void CleanVisibleAreaInnerCallback()
     {
+        CHECK_NULL_VOID(eventHub_);
         eventHub_->CleanVisibleAreaCallback(false);
     }
 
@@ -327,26 +334,40 @@ public:
     }
 
     template<typename T>
-    RefPtr<T> GetEventHub() const
+    RefPtr<T> GetEventHub()
+    {
+        CreateEventHubInner();
+        return DynamicCast<T>(eventHub_);
+    }
+
+    template<typename T>
+    RefPtr<T> GetEventHubOnly()
     {
         return DynamicCast<T>(eventHub_);
     }
 
-    RefPtr<GestureEventHub> GetOrCreateGestureEventHub() const
+    RefPtr<GestureEventHub> GetOrCreateGestureEventHub()
     {
+        CreateEventHubInner();
         return eventHub_->GetOrCreateGestureEventHub();
     }
 
-    RefPtr<InputEventHub> GetOrCreateInputEventHub() const
+    RefPtr<InputEventHub> GetOrCreateInputEventHub()
     {
+        CreateEventHubInner();
         return eventHub_->GetOrCreateInputEventHub();
     }
 
-    RefPtr<FocusHub> GetOrCreateFocusHub() const;
+    RefPtr<FocusHub> GetOrCreateFocusHub();
+    const RefPtr<FocusHub>& GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
+        const std::unique_ptr<FocusPaintParam>& paintParamsPtr);
+    const RefPtr<FocusHub>& GetOrCreateFocusHub(const FocusPattern& focusPattern);
+
+    void CreateEventHubInner();
 
     const RefPtr<FocusHub>& GetFocusHub() const
     {
-        return eventHub_->GetFocusHub();
+        return focusHub_;
     }
 
     bool HasVirtualNodeAccessibilityProperty() override
@@ -396,6 +417,16 @@ public:
 
     bool IsContextTransparent() override;
 
+    bool IsTrimMemRecycle() const
+    {
+        return isTrimMemRecycle_;
+    }
+
+    void SetTrimMemRecycle(bool isTrimMemRecycle)
+    {
+        isTrimMemRecycle_ = isTrimMemRecycle;
+    }
+
     bool IsVisible() const
     {
         return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE;
@@ -419,7 +450,7 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
-    RefPtr<FrameNode> GetAncestorNodeOfFrame(bool checkBoundary = false) const;
+    RefPtr<FrameNode> GetAncestorNodeOfFrame(bool checkBoundary) const;
 
     std::string& GetNodeName()
     {
@@ -463,17 +494,26 @@ public:
 
     RectF GetTransformRectRelativeToWindow() const;
 
-    OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
+    // deprecated, please use GetPaintRectOffsetNG.
+    // this function only consider transform of itself when calculate transform,
+    // do not consider the transform of its ansestors
+    OffsetF GetPaintRectOffset(bool excludeSelf = false, bool checkBoundary = false) const;
 
-    OffsetF GetPaintRectOffsetNG(bool excludeSelf = false) const;
+    // returns a node's offset relative to root.
+    // and accumulate every ancestor node's graphic properties such as rotate and transform
+    // @param excludeSelf default false, set true can exclude self.
+    // @param checkBoundary default false. should be true if you want check boundary of window scene
+    // for getting the offset to window.
+    OffsetF GetPaintRectOffsetNG(bool excludeSelf = false, bool checkBoundary = false) const;
 
     bool GetRectPointToParentWithTransform(std::vector<Point>& pointList, const RefPtr<FrameNode>& parent) const;
 
     RectF GetPaintRectToWindowWithTransform();
 
-    std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
+    std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(
+        bool excludeSelf = false, bool checkBoundary = false) const;
 
-    OffsetF GetPaintRectOffsetToPage() const;
+    OffsetF GetPaintRectOffsetToStage() const;
 
     RectF GetPaintRectWithTransform() const;
 
@@ -544,7 +584,7 @@ public:
 
     bool MarkRemoving() override;
 
-    void AddHotZoneRect(const DimensionRect& hotZoneRect) const;
+    void AddHotZoneRect(const DimensionRect& hotZoneRect);
     void RemoveLastHotZoneRect() const;
 
     virtual bool IsOutOfTouchTestRegion(const PointF& parentLocalPoint, const TouchEvent& touchEvent,
@@ -697,7 +737,7 @@ public:
     }
 
     RefPtr<FrameNode> FindChildByPosition(float x, float y);
-    // some developer use translate to make Grid drag animation, using old function can't find accurate child. 
+    // some developer use translate to make Grid drag animation, using old function can't find accurate child.
     // new function will ignore child's position and translate properties.
     RefPtr<FrameNode> FindChildByPositionWithoutChildTransform(float x, float y);
 
@@ -739,7 +779,7 @@ public:
         return viewPort_;
     }
 
-    std::optional<RectF> GetViewPort() const;
+    std::optional<RectF> GetViewPort(bool checkBoundary = false) const;
 
     // Frame Rate Controller(FRC) decides FrameRateRange by scene, speed and scene status
     // speed is measured by millimeter/second
@@ -862,7 +902,7 @@ public:
         for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
             auto& child = *iter;
             auto target = DynamicCast<FrameNode>(child->FindChildNodeOfClass<T>());
-            if (target) {
+            if (target && target->eventHub_) {
                 auto focusEvent = target->eventHub_->GetFocusHub();
                 if (focusEvent && focusEvent->IsCurrentFocus()) {
                     return AceType::DynamicCast<T>(target);
@@ -872,7 +912,7 @@ public:
 
         if (AceType::InstanceOf<T>(this)) {
             auto target = DynamicCast<FrameNode>(this);
-            if (target) {
+            if (target && target->eventHub_) {
                 auto focusEvent = target->eventHub_->GetFocusHub();
                 if (focusEvent && focusEvent->IsCurrentFocus()) {
                     return Claim(AceType::DynamicCast<T>(this));
@@ -900,7 +940,7 @@ public:
     }
     OffsetF GetOffsetInScreen();
     OffsetF GetOffsetInSubwindow(const OffsetF& subwindowOffset);
-    RefPtr<PixelMap> GetPixelMap();
+    RefPtr<PixelMap> GetDragPixelMap();
     RefPtr<FrameNode> GetPageNode();
     RefPtr<FrameNode> GetFirstAutoFillContainerNode();
     RefPtr<FrameNode> GetNodeContainer();
@@ -1133,6 +1173,11 @@ public:
     void AddExtraCustomProperty(const std::string& key, void* extraData);
     void* GetExtraCustomProperty(const std::string& key) const;
     void RemoveExtraCustomProperty(const std::string& key);
+    bool GetCustomPropertyByKey(const std::string& key, std::string& value);
+    void ExtraCustomPropertyToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
+    void AddNodeDestroyCallback(const std::string& callbackKey, std::function<void()>&& callback);
+    void RemoveNodeDestroyCallback(const std::string& callbackKey);
+    void FireOnExtraNodeDestroyCallback();
 
     LayoutConstraintF GetLayoutConstraint() const;
 
@@ -1158,6 +1203,8 @@ public:
     void MarkDirtyWithOnProChange(PropertyChangeFlag extraFlag);
     void OnPropertyChangeMeasure() const;
 
+    void SetKitNode(const RefPtr<Kit::FrameNode>& node);
+
     void SetVisibleAreaChangeTriggerReason(VisibleAreaChangeTriggerReason triggerReason)
     {
         if (visibleAreaChangeTriggerReason_ != triggerReason) {
@@ -1166,6 +1213,36 @@ public:
     }
 
     void OnThemeScopeUpdate(int32_t themeScopeId) override;
+
+    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag = false);
+
+    bool IsDebugInspectorId();
+
+    RectF GetLastFrameRect() const
+    {
+        RectF rect;
+        return lastFrameRect_ ? *lastFrameRect_ : rect;
+    }
+    void SetLastFrameRect(const RectF& lastFrameRect)
+    {
+        *lastFrameRect_ = lastFrameRect;
+    }
+    OffsetF GetLastParentOffsetToWindow() const
+    {
+        OffsetF offset;
+        return lastParentOffsetToWindow_ ? *lastParentOffsetToWindow_ : offset;
+    }
+    void SetLastParentOffsetToWindow(const OffsetF& lastParentOffsetToWindow)
+    {
+        *lastParentOffsetToWindow_ = lastParentOffsetToWindow;
+    }
+    std::shared_ptr<OffsetF>& GetLastHostParentOffsetToWindow()
+    {
+        return lastHostParentOffsetToWindow_;
+    }
+
+    void SetFrameNodeDestructorCallback(const std::function<void(int32_t)>&& callback);
+    void FireFrameNodeDestructorCallback();
 
 protected:
     void DumpInfo() override;
@@ -1192,8 +1269,6 @@ private:
 
     void UpdateChildrenLayoutWrapper(const RefPtr<LayoutWrapperNode>& self, bool forceMeasure, bool forceLayout);
     void AdjustLayoutWrapperTree(const RefPtr<LayoutWrapperNode>& parent, bool forceMeasure, bool forceLayout) override;
-
-    OffsetF GetParentGlobalOffset() const;
 
     RefPtr<PaintWrapper> CreatePaintWrapper();
     void LayoutOverlay();
@@ -1274,8 +1349,6 @@ private:
 
     void RecordExposureInner();
 
-    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp, bool logFlag = false);
-
     const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const;
 
     void SetCachedGlobalOffset(const std::pair<uint64_t, OffsetF>& timestampOffset);
@@ -1309,8 +1382,7 @@ private:
 
     void ResetPredictNodes();
 
-    bool IsDebugInspectorId();
-
+    bool isTrimMemRecycle_ = false;
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
@@ -1325,6 +1397,7 @@ private:
     RefPtr<RenderContext> renderContext_ = RenderContext::Create();
     RefPtr<EventHub> eventHub_;
     RefPtr<Pattern> pattern_;
+    RefPtr<FocusHub> focusHub_;
 
     RefPtr<ExtensionHandler> extensionHandler_;
 
@@ -1332,6 +1405,7 @@ private:
     std::function<RefPtr<UINode>()> builderFunc_;
     std::unique_ptr<RectF> lastFrameRect_;
     std::unique_ptr<OffsetF> lastParentOffsetToWindow_;
+    std::shared_ptr<OffsetF> lastHostParentOffsetToWindow_;
     std::unique_ptr<RectF> lastFrameNodeRect_;
     std::set<std::string> allowDrop_;
     const static std::set<std::string> layoutTags_;
@@ -1412,11 +1486,14 @@ private:
 
     std::unordered_map<std::string, int32_t> sceneRateMap_;
 
-    DragPreviewOption previewOption_ { true, false, false, false, false, false, true, false, { .isShowBadge = true } };
+    DragPreviewOption previewOption_ { true, false, false, false, false, false, true,
+        false, true, false, false, { .isShowBadge = true } };
 
     std::unordered_map<std::string, std::string> customPropertyMap_;
 
     std::unordered_map<std::string, void*> extraCustomPropertyMap_;
+
+    std::map<std::string, std::function<void()>> destroyCallbacks_;
 
     RefPtr<Recorder::ExposureProcessor> exposureProcessor_;
 
@@ -1438,12 +1515,15 @@ private:
     int32_t childrenUpdatedFrom_ = -1;
     VisibleAreaChangeTriggerReason visibleAreaChangeTriggerReason_ = VisibleAreaChangeTriggerReason::IDLE;
     float preOpacity_ = 1.0f;
+    std::function<void(int32_t)> frameNodeDestructorCallback_;
 
     friend class RosenRenderContext;
     friend class RenderContext;
     friend class Pattern;
     mutable std::shared_mutex fontSizeCallbackMutex_;
     mutable std::shared_mutex colorModeCallbackMutex_;
+
+    RefPtr<Kit::FrameNode> kitNode_;
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 };
 } // namespace OHOS::Ace::NG

@@ -304,7 +304,7 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task, 
     CHECK_NULL_VOID(context);
     auto taskExecutor = context->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name);
+    taskExecutor->PostTask(task, TaskExecutor::TaskType::UI, name, PriorityType::VIP);
 }
 
 void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info)

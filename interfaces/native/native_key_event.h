@@ -317,6 +317,71 @@ typedef enum {
     ARKUI_KEYCODE_NUMPAD_LEFT_PAREN = 2121,
     /** Key ) on numeric keypad **/
     ARKUI_KEYCODE_NUMPAD_RIGHT_PAREN = 2122,
+    /**
+     * Joystick key A
+     * @since 15
+    */
+    ARKUI_KEYCODE_BUTTON_A = 2301,
+    /**
+     * Joystick key B
+     * @since 15
+    */
+    ARKUI_KEYCODE_BUTTON_B = 2302,
+    /**
+     * Joystick key X
+     * @since 15
+    */
+    ARKUI_KEYCODE_BUTTON_X = 2304,
+    /**
+     * Joystick key Y
+     * @since 15
+    */
+    ARKUI_KEYCODE_BUTTON_Y = 2305,
+    /**
+     * Joystick key L1
+     * @since 15
+    */
+    ARKUI_KEYCODE_BUTTON_L1 = 2307,
+    /**
+     * Joystick key R1
+     * @since 15
+    */
+    ARKUI_KEYCODE_BUTTON_R1 = 2308,
+    /**
+     * Joystick key L2
+     * @since 15
+    */
+    ARKUI_KEYCODE_BUTTON_L2 = 2309,
+    /**
+     * Joystick key R2
+     * @since 15
+    */
+    ARKUI_KEYCODE_BUTTON_R2 = 2310,
+    /**
+     * Joystick key Select
+     * @since 15
+    */
+    ARKUI_KEYCODE_BUTTON_SELECT = 2311,
+    /**
+     * Joystick key Start
+     * @since 15
+    */
+    ARKUI_KEYCODE_BUTTON_START = 2312,
+    /**
+     * Joystick key Mode
+     * @since 15
+    */
+    ARKUI_KEYCODE_BUTTON_MODE = 2313,
+    /**
+     * Joystick key THUMBL
+     * @since 15
+    */
+    ARKUI_KEYCODE_BUTTON_THUMBL = 2314,
+    /**
+     * Joystick key THUMBR
+     * @since 15
+    */
+    ARKUI_KEYCODE_BUTTON_THUMBR = 2315,
 } ArkUI_KeyCode;
 
 /**
@@ -491,6 +556,15 @@ uint32_t OH_ArkUI_KeyEvent_GetUnicode(const ArkUI_UIInputEvent* event);
  * @since 14
  */
 void OH_ArkUI_KeyEvent_SetConsumed(const ArkUI_UIInputEvent* event, bool isConsumed);
+
+/**
+ * @brief Dispatch key event to a specific component node.
+ *
+ * @param node Indicates the pointer to a component node.
+ * @param event Pointer to an <b>ArkUI_UIInputEvent</b> object.
+ * @since 16
+ */
+void OH_ArkUI_KeyEvent_Dispatch(ArkUI_NodeHandle node, const ArkUI_UIInputEvent* event);
 #ifdef __cplusplus
 };
 #endif

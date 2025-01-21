@@ -65,7 +65,10 @@ void JSScrollableBase::JsOnWillScroll(const JSCallbackInfo& args)
 
 void JSScrollableBase::JsOnDidScroll(const JSCallbackInfo& args)
 {
-    if (args.Length() > 0 && args[0]->IsFunction()) {
+    if (args.Length() <= 0) {
+        return;
+    }
+    if (args[0]->IsFunction()) {
         auto onScroll = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])](
                             const CalcDimension& scrollOffset, const ScrollState& scrollState) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
@@ -73,6 +76,8 @@ void JSScrollableBase::JsOnDidScroll(const JSCallbackInfo& args)
             func->Call(JSRef<JSObject>(), params.size(), params.data());
         };
         NG::ScrollableModelNG::SetOnDidScroll(std::move(onScroll));
+    } else {
+        NG::ScrollableModelNG::SetOnDidScroll(nullptr);
     }
 }
 
@@ -106,9 +111,8 @@ void JSScrollableBase::SetDigitalCrownSensitivity(const JSCallbackInfo& info)
         NG::ScrollableModelNG::SetDigitalCrownSensitivity(
             static_cast<CrownSensitivity>(static_cast<int32_t>(CrownSensitivity::MEDIUM)));
         return;
-    } else {
-        NG::ScrollableModelNG::SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
     }
+    NG::ScrollableModelNG::SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
 #endif
 }
 
@@ -122,6 +126,7 @@ void JSScrollableBase::JSBind(BindingTarget globalObj)
     JSClass<JSScrollableBase>::StaticMethod("fadingEdge", &JSScrollableBase::SetFadingEdge);
     JSClass<JSScrollableBase>::StaticMethod("clipContent", &JSScrollableBase::JSClipContent);
     JSClass<JSScrollableBase>::StaticMethod("digitalCrownSensitivity", &JSScrollableBase::SetDigitalCrownSensitivity);
+    JSClass<JSScrollableBase>::StaticMethod("backToTop", &JSScrollableBase::JSBackToTop);
     JSClass<JSScrollableBase>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -146,5 +151,10 @@ void JSScrollableBase::JSClipContent(const JSCallbackInfo& info)
     }
     // default
     NG::ScrollableModelNG::SetContentClip(NG::ContentClipMode::DEFAULT, nullptr);
+}
+
+void JSScrollableBase::JSBackToTop(bool backToTop)
+{
+    NG::ScrollableModelNG::SetBackToTop(backToTop);
 }
 } // namespace OHOS::Ace::Framework

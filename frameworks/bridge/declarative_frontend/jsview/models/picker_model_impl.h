@@ -29,6 +29,7 @@ public:
     void SetStartDate(const PickerDate& value) override;
     void SetEndDate(const PickerDate& value) override;
     void SetSelectedDate(const PickerDate& value) override;
+    void SetMode(const DatePickerMode& value) override;
     void SetShowLunar(bool lunar) override;
     void SetSelectedTime(const PickerTime& selectedTime) override;
     void SetHour24(bool value) override;
@@ -43,6 +44,7 @@ public:
     void SetBackgroundColor(const Color& color) override;
     void SetChangeEvent(DateChangeEvent&& onChange) override {};
     void HasUserDefinedOpacity() override {};
+    void SetEnableHapticFeedback(bool isEnableHapticFeedback) override {};
 };
 
 class DatePickerDialogModelImpl : public DatePickerDialogModel {

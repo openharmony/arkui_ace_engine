@@ -98,6 +98,23 @@ static napi_value JsSetAutoFocusTransfer(napi_env env, napi_callback_info info)
     return nullptr;
 }
 
+static napi_value JsConfigWindowMask(napi_env env, napi_callback_info info)
+{
+    auto delegate = EngineHelper::GetCurrentDelegateSafely();
+    if (!delegate) {
+        return nullptr;
+    }
+    napi_value argv[1] = { 0 };
+    napi_valuetype valueType = napi_undefined;
+    if (!GetSingleParam(env, info, argv, valueType) || (valueType != napi_boolean)) {
+        return nullptr;
+    }
+    bool enable = true;
+    napi_get_value_bool(env, argv[0], &enable);
+    delegate->ConfigWindowMask(enable);
+    return nullptr;
+}
+
 static napi_value JSActivate(napi_env env, napi_callback_info info)
 {
     size_t argc = ARGC_ACTIVATE_PARAMTER;
@@ -137,6 +154,7 @@ static napi_value registerFunc(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("requestFocus", JSRequestFocus),
         DECLARE_NAPI_FUNCTION("activate", JSActivate),
         DECLARE_NAPI_FUNCTION("setAutoFocusTransfer", JsSetAutoFocusTransfer),
+        DECLARE_NAPI_FUNCTION("configWindowMask", JsConfigWindowMask),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(animatorDesc) / sizeof(animatorDesc[0]), animatorDesc));
     return exports;

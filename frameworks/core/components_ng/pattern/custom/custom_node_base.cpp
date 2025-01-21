@@ -153,15 +153,15 @@ void CustomNodeBase::ResetRecycle()
     recycleRenderFunc_ = nullptr;
 }
 
-void CustomNodeBase::SetSetActiveFunc(std::function<void(bool)>&& func)
+void CustomNodeBase::SetSetActiveFunc(std::function<void(bool, bool)>&& func)
 {
     setActiveFunc_ = std::move(func);
 }
 
-void CustomNodeBase::FireSetActiveFunc(bool active)
+void CustomNodeBase::FireSetActiveFunc(bool active, bool isReuse)
 {
     if (setActiveFunc_) {
-        setActiveFunc_(active);
+        setActiveFunc_(active, isReuse);
     }
 }
 
@@ -283,7 +283,7 @@ void CustomNodeBase::FireRecycleRenderFunc()
             recycleRenderFunc_();
         }
         node->OnReuse();
-        node->SetJSViewActive(true);
+        node->SetJSViewActive(true, false, true);
         recycleRenderFunc_ = nullptr;
     }
 }

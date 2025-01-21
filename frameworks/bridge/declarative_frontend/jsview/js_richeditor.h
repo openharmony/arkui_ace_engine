@@ -56,6 +56,7 @@ public:
     static void SetOnDidChange(const JSCallbackInfo& info);
     static void SetOnCut(const JSCallbackInfo& info);
     static void SetOnCopy(const JSCallbackInfo& info);
+    static void SetOnShare(const JSCallbackInfo& info);
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
     static JSRef<JSVal> CreateJSSelection(const SelectionInfo& selectInfo);
@@ -85,6 +86,11 @@ public:
     static void SetJsTextBackgroundStyle(JSRef<JSObject>& textStyleObj, const TextStyleResult& textSpanResult);
     static JSRef<JSObject> CreateJsTextBackgroundStyle(const TextBackgroundStyle& style);
     static void SetBarState(const JSCallbackInfo& info);
+    static void SetMaxLength(const JSCallbackInfo& info);
+    static void SetMaxLines(const JSCallbackInfo& info);
+    static void SetStopBackPress(const JSCallbackInfo& info);
+    static void SetKeyboardAppearance(const JSCallbackInfo& info);
+
 private:
     static void CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult);
     static void CreateImageStyleObj(JSRef<JSObject>& imageStyleObj, JSRef<JSObject>& spanResultObj,
@@ -119,6 +125,8 @@ public:
     void ParseJsLineHeightLetterSpacingTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
         struct UpdateSpanStyle& updateSpanStyle, bool isSupportPercent = true);
     void ParseJsFontFeatureTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
+        struct UpdateSpanStyle& updateSpanStyle);
+    void ParseJsHalfLeadingTextStyle(const JSRef<JSObject>& styleObject, TextStyle& style,
         struct UpdateSpanStyle& updateSpanStyle);
     void GetTypingStyle(const JSCallbackInfo& info);
     void CloseSelectionMenu();

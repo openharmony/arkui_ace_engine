@@ -90,10 +90,10 @@ public:
     }
 
     void SetItemsPosition(const PositionMap& positionMap, const PositionMap& cachedPositionMap,
-        const std::set<int32_t>& pressedItem, bool showCached)
+        const std::set<int32_t>& pressedItem, bool showCached, bool clip)
     {
         itemPosition_ = positionMap;
-        if (showCached) {
+        if (showCached || clip) {
             for (auto& [index, pos] : cachedPositionMap) {
                 itemPosition_[index] = pos;
             }

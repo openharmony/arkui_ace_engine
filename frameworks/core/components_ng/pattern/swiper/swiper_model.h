@@ -28,6 +28,9 @@
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 
 namespace OHOS::Ace {
 
@@ -63,6 +66,14 @@ struct SwiperDigitalParameters {
     std::optional<FontWeight> selectedFontWeight;
 };
 
+struct SwiperArcDotParameters {
+    std::optional<SwiperArcDirection> arcDirection;
+    std::optional<Color> itemColor;
+    std::optional<Color> selectedItemColor;
+    std::optional<Color> containerColor;
+    std::optional<NG::Gradient> maskColor;
+};
+
 struct SwiperArrowParameters {
     std::optional<bool> isShowBackground;
     std::optional<bool> isSidebarMiddle;
@@ -84,6 +95,16 @@ struct SwiperMarginOptions {
     bool ignoreBlank;
 };
 
+struct SwiperAutoPlayOptions {
+    bool stopWhenTouched = true;
+};
+
+struct SwiperContentWillScrollResult {
+    int32_t currentIndex;
+    int32_t comingIndex;
+    float offset;
+};
+
 using AnimationStartEvent = std::function<void(int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info)>;
 using AnimationStartEventPtr = std::shared_ptr<AnimationStartEvent>;
 using AnimationEndEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
@@ -91,13 +112,14 @@ using AnimationEndEventPtr = std::shared_ptr<AnimationEndEvent>;
 using GestureSwipeEvent = std::function<void(int32_t index, const AnimationCallbackInfo& info)>;
 using ContentDidScrollEvent =
     std::function<void(int32_t selectedIndex, int32_t index, float position, float mainAxisLength)>;
+using ContentWillScrollEvent = std::function<bool(const SwiperContentWillScrollResult& result)>;
 
 class ACE_FORCE_EXPORT SwiperModel {
 public:
     static SwiperModel* GetInstance();
     virtual ~SwiperModel() = default;
 
-    virtual RefPtr<SwiperController> Create();
+    virtual RefPtr<SwiperController> Create(bool isCreateArc = false);
     virtual void SetDirection(Axis axis);
     virtual void SetIndex(uint32_t index);
     virtual void SetIndicatorInteractive(bool interactive) {}
@@ -133,11 +155,13 @@ public:
     virtual void SetIndicatorType(SwiperIndicatorType indicatorType) {}
     virtual void SetIsIndicatorCustomSize(bool isCustomSize) {}
     virtual void SetDotIndicatorStyle(const SwiperParameters& swiperParameters) {}
+    virtual void SetArcDotIndicatorStyle(const SwiperArcDotParameters& swiperArcDotParameters) {}
     virtual void SetDigitIndicatorStyle(const SwiperDigitalParameters& swiperDigitalParameters) {}
     virtual void SetPreviousMargin(const Dimension& prevMargin, bool ignoreBlank) {}
     virtual void SetNextMargin(const Dimension& nextMargin, bool ignoreBlank) {}
     virtual void SetOnChangeEvent(std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
     virtual void SetIndicatorIsBoolean(bool isBoolean) {}
+    virtual void SetAutoPlayOptions(const SwiperAutoPlayOptions& swiperAutoPlayOptions) {}
     virtual void SetArrowStyle(const SwiperArrowParameters& swiperArrowParameters) {}
     virtual void SetDisplayArrow(bool displayArrow) {}
     virtual void SetHoverShow(bool hoverShow) {}
@@ -145,7 +169,12 @@ public:
     virtual void SetSwipeByGroup(bool swipeByGroup) {}
     virtual void SetCustomContentTransition(SwiperContentAnimatedTransition& transition) {}
     virtual void SetOnContentDidScroll(ContentDidScrollEvent&& onContentDidScroll) {}
+    virtual void SetOnContentWillScroll(ContentWillScrollEvent&& onContentWillScroll) {}
     virtual void SetPageFlipMode(int32_t pageFlipMode) {}
+    virtual void SetDigitalCrownSensitivity(int32_t sensitivity) {}
+    virtual void SetDisableTransitionAnimation(bool isDisable) {}
+    virtual void SetBindIndicator(bool bind) {}
+    virtual void SetOnSelected(std::function<void(const BaseEventInfo* info)>&& onSelected) {}
 
 private:
     static std::unique_ptr<SwiperModel> instance_;

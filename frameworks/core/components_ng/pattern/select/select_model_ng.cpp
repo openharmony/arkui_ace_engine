@@ -31,7 +31,7 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
     if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
         layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth()), std::nullopt));
     } else {
-        auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+        auto pattern = select->GetPattern<SelectPattern>();
         CHECK_NULL_VOID(pattern);
         layoutProperty->UpdateCalcMinSize(CalcSize(CalcLength(theme->GetSelectMinWidth(pattern->GetControlSize())),
             CalcLength(theme->GetSelectDefaultHeight(pattern->GetControlSize()))));
@@ -468,6 +468,7 @@ RefPtr<FrameNode> SelectModelNG::CreateFrameNode(int32_t nodeId)
 
 void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectParam>& params)
 {
+    CHECK_NULL_VOID(frameNode);
     auto select = AceType::Claim(frameNode);
     SetSelectDefaultSize(select);
     auto pattern = select->GetPattern<SelectPattern>();
@@ -481,7 +482,7 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
         paddings.bottom = std::nullopt;
         paddings.left = NG::CalcLength(pattern->GetSelectLeftRightMargin());
         paddings.right = NG::CalcLength(pattern->GetSelectLeftRightMargin());
-        ViewAbstract::SetPadding(paddings);
+        ViewAbstract::SetPadding(frameNode, paddings);
     }
     
     pattern->BuildChild();
@@ -773,6 +774,14 @@ void SelectModelNG::SetMenuBackgroundBlurStyle(FrameNode* frameNode, const BlurS
 void SelectModelNG::SetLayoutDirection(TextDirection value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetLayoutDirection(value);
+}
+
+void SelectModelNG::SetLayoutDirection(FrameNode* frameNode, TextDirection value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetLayoutDirection(value);
 }

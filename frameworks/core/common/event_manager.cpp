@@ -23,9 +23,7 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/event/focus_axis_event.h"
-#ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
-#endif
 
 namespace OHOS::Ace {
 constexpr int32_t DUMP_START_NUMBER = 4;
@@ -363,7 +361,7 @@ void EventManager::TouchTest(
     ContainerScope scope(instanceId_);
 
     if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
-        TouchEvent touchEvent;
+        TouchEvent touchEvent = ConvertAxisEventToTouchEvent(event);
         FalsifyCancelEventAndDispatch(touchEvent, event.sourceTool != lastSourceTool_);
         responseCtrl_->Reset();
         refereeNG_->CleanAll(true);
@@ -763,6 +761,7 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event, bool sendOnTouch)
         DispatchTouchEventAndCheck(point, sendOnTouch);
     }
     DispatchTouchEventInOldPipeline(point, dispatchSuccess);
+    NotifyDragTouchEventListener(point);
 
     CheckUpEvent(event);
     UpdateInfoWhenFinishDispatch(point, sendOnTouch);
@@ -777,6 +776,7 @@ void EventManager::UpdateInfoWhenFinishDispatch(const TouchEvent& point, bool se
         if (ft != nullptr) {
             ft->SetFrameTraceLimit();
         }
+        refereeNG_->CleanGestureStateVoluntarily(point.id);
         refereeNG_->CleanGestureScope(point.id);
         referee_->CleanGestureScope(point.id);
         if (sendOnTouch) {
@@ -906,12 +906,43 @@ void EventManager::CleanHoverStatusForDragBegin()
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_DRAG, "Clean hover status for drag begin.");
-    lastHoverTestResults_ = std::move(currHoverTestResults_);
-    currHoverTestResults_.clear();
-    lastHoverNode_ = currHoverNode_;
-    currHoverNode_ = nullptr;
-    DispatchMouseHoverEventNG(lastMouseEvent_);
+    TAG_LOGD(AceLogTag::ACE_DRAG, "Clean mouse status for drag begin.");
+    MouseEvent falsifyEvent = lastMouseEvent_;
+    TouchTestResult testResult;
+    for (const auto& iter : mouseTestResults_) {
+        falsifyEvent.id = iter.first;
+        falsifyEvent.action = MouseAction::CANCEL;
+        UpdateHoverNode(falsifyEvent, testResult);
+        DispatchMouseEventNG(falsifyEvent);
+        DispatchMouseHoverEventNG(falsifyEvent);
+    }
+    mouseTestResults_.clear();
+}
+
+void EventManager::RegisterDragTouchEventListener(
+    int32_t uniqueIdentify, std::function<void(const TouchEvent&)> callback)
+{
+    dragTouchEventListener_[uniqueIdentify] = callback;
+}
+
+void EventManager::UnRegisterDragTouchEventListener(int32_t uniqueIdentify)
+{
+    auto it = dragTouchEventListener_.find(uniqueIdentify);
+    if (it != dragTouchEventListener_.end()) {
+        dragTouchEventListener_.erase(it);
+    }
+}
+
+void EventManager::NotifyDragTouchEventListener(const TouchEvent& touchEvent)
+{
+    if (dragTouchEventListener_.empty()) {
+        return;
+    }
+    for (const auto& pair : dragTouchEventListener_) {
+        if (pair.second) {
+            pair.second(touchEvent);
+        }
+    }
 }
 
 void EventManager::DispatchTouchEventToTouchTestResult(TouchEvent touchEvent,
@@ -1308,7 +1339,8 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         MouseAction::RELEASE,
         MouseAction::MOVE,
         MouseAction::WINDOW_ENTER,
-        MouseAction::WINDOW_LEAVE
+        MouseAction::WINDOW_LEAVE,
+        MouseAction::CANCEL
     };
     if (validAction.find(event.action) == validAction.end()) {
         return false;
@@ -1879,6 +1911,7 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
         if (touchPoint.id != iter.first) {
             falsifyEvent.history.clear();
         }
+        falsifyEvent.originalId = iter.second;
         DispatchTouchEvent(falsifyEvent, sendOnTouch);
     }
 }
@@ -2080,10 +2113,8 @@ bool EventManager::OnNonPointerEvent(const NonPointerEvent& event)
         return OnKeyEvent(static_cast<const KeyEvent&>(event));
     } else if (event.eventType == UIInputEventType::FOCUS_AXIS) {
         return OnFocusAxisEvent(static_cast<const NG::FocusAxisEvent&>(event));
-#ifdef SUPPORT_DIGITAL_CROWN
     } else if (event.eventType == UIInputEventType::CROWN) {
         return OnCrownEvent(static_cast<const CrownEvent&>(event));
-#endif
     } else {
         return false;
     }

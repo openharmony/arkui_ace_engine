@@ -26,6 +26,8 @@ public:
         const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal, bool isMethodProp);
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& args);
+    static void CreateArc(const JSCallbackInfo& args);
+    static void Create(const JSCallbackInfo& args, bool isArc);
     static void JsOnSelected(const JSCallbackInfo& args);
     static void SetColor(const JSCallbackInfo& args);
     static void SetSelectedColor(const JSCallbackInfo& args);

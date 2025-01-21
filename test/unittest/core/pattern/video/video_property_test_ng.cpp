@@ -42,7 +42,6 @@
 #include "core/components/video/video_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
@@ -68,6 +67,7 @@ struct TestProperty {
     std::optional<std::string> src;
     std::optional<double> progressRate;
     std::optional<std::string> posterUrl;
+    std::optional<bool> showFirstFrame;
     std::optional<bool> muted;
     std::optional<bool> autoPlay;
     std::optional<bool> controls;
@@ -81,6 +81,7 @@ constexpr bool MUTED_VALUE = false;
 constexpr bool AUTO_PLAY = false;
 constexpr bool CONTROL_VALUE = true;
 constexpr bool LOOP_VALUE = false;
+constexpr bool SHOW_FIRST_FRAME = false;
 const ImageFit VIDEO_IMAGE_FIT = ImageFit::COVER;
 const std::string VIDEO_SRC = "common/video.mp4";
 const std::string VIDEO_POSTER_URL = "common/img2.png";
@@ -137,6 +138,7 @@ protected:
 void VideoPropertyTestNg::SetUpTestSuite()
 {
     testProperty.progressRate = VIDEO_PROGRESS_RATE;
+    testProperty.showFirstFrame = SHOW_FIRST_FRAME;
     testProperty.muted = MUTED_VALUE;
     testProperty.autoPlay = AUTO_PLAY;
     testProperty.controls = CONTROL_VALUE;
@@ -198,6 +200,9 @@ RefPtr<FrameNode> VideoPropertyTestNg::CreateVideoNode(TestProperty& testPropert
     if (testProperty.objectFit.has_value()) {
         VideoModelNG().SetObjectFit(testProperty.objectFit.value());
     }
+    if (testProperty.showFirstFrame.has_value()) {
+        VideoModelNG().SetShowFirstFrame(testProperty.showFirstFrame.value());
+    }
 
     auto element = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     return AceType::Claim(element);
@@ -237,7 +242,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPropertyTest002, TestSize.Level1)
     auto videoPattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_NE(videoPattern, nullptr);
 
-    EXPECT_EQ(videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo()).GetSrc(), VIDEO_SRC);
+    EXPECT_EQ(videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo()).src_, VIDEO_SRC);
     EXPECT_EQ(videoPattern->GetProgressRate(), VIDEO_PROGRESS_RATE);
     EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(ImageSourceInfo("")), ImageSourceInfo(VIDEO_POSTER_URL));
     EXPECT_EQ(videoPattern->GetMuted(), MUTED_VALUE);
@@ -577,7 +582,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPropertyTest016, TestSize.Level1)
     auto videoLayoutProperty = frameNode->GetLayoutProperty<VideoLayoutProperty>();
     EXPECT_FALSE(videoLayoutProperty == nullptr);
 
-    EXPECT_EQ(videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo()).GetSrc(), VIDEO_SRC);
+    EXPECT_EQ(videoLayoutProperty->GetVideoSourceValue(VideoSourceInfo()).src_, VIDEO_SRC);
     EXPECT_EQ(videoLayoutProperty->GetPosterImageInfoValue(defaultImage), pixelMapImage);
 
     /**
@@ -814,72 +819,6 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest019, TestSize.Level1)
 }
 
 /**
- * @tc.name: VideoPatternTest020
- * @tc.desc: Test VideoPattern dragEnd
- * @tc.type: FUNC
- */
-HWTEST_F(VideoPropertyTestNg, VideoPatternTest020, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create a video and get the videoPattern.
-     * @tc.expected: step1. Create and get successfully.
-     */
-    VideoModelNG videoModelNG;
-    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
-    videoModelNG.Create(videoController);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
-    ASSERT_NE(videoPattern, nullptr);
-
-    videoPattern->videoSrcInfo_.src = "test";
-    videoPattern->EnableDrag();
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-    RefPtr<OHOS::Ace::UnifiedData> unifiedData;
-    auto dragEnd = eventHub->onDrop_;
-    std::string extraParams;
-    dragEnd(dragEvent, extraParams);
-
-    /**
-     * @tc.steps: step2. Call dragEnd in different wrong situation.
-     * @tc.expected: step2. Log error message.
-     */
-    auto json = JsonUtil::Create(true);
-    json->Put(EXTRA_INFO_KEY.c_str(), "");
-    dragEnd(dragEvent, json->ToString());
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "test");
-    dragEnd(dragEvent, json->ToString());
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "test::");
-    dragEnd(dragEvent, json->ToString());
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "::test");
-    dragEnd(dragEvent, json->ToString());
-
-    dragEvent->SetData(unifiedData);
-    videoPattern->isInitialState_ = false;
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "test::test");
-    dragEnd(dragEvent, json->ToString());
-    videoPattern->isInitialState_ = true;
-    dragEnd(dragEvent, json->ToString());
-
-    /**
-     * @tc.steps: step3. Call dragEnd while use new video src.
-     * @tc.expected: step3. VideoPattern property set correctly.
-     */
-    json->Delete(EXTRA_INFO_KEY.c_str());
-    json->Put(EXTRA_INFO_KEY.c_str(), "test::newTest");
-    videoPattern->SetIsStop(false);
-    videoPattern->isInitialState_ = false;
-    dragEnd(dragEvent, json->ToString());
-    EXPECT_FALSE(videoPattern->isStop_);
-}
-
-/**
  * @tc.name: VideoFullScreenTest001
  * @tc.desc: Test VideoFullScreenPattern UpdateState.
  * @tc.type: FUNC
@@ -919,9 +858,9 @@ HWTEST_F(VideoPropertyTestNg, VideoFullScreenTest001, TestSize.Level1)
     videoLayout->UpdateObjectFit(ImageFit::COVER);
     fullScreenLayout->UpdateObjectFit(ImageFit::CONTAIN);
     auto videoSrcInfo = videoLayout->GetVideoSourceValue(VideoSourceInfo());
-    videoSrcInfo.src = VIDEO_SRC;
+    videoSrcInfo.src_ = VIDEO_SRC;
     videoLayout->UpdateVideoSource(videoSrcInfo);
-    videoSrcInfo.src = "";
+    videoSrcInfo.src_ = "";
     fullScreenLayout->UpdateVideoSource(videoSrcInfo);
     videoLayout->UpdatePosterImageInfo(ImageSourceInfo(VIDEO_POSTER_URL));
     fullScreenLayout->UpdatePosterImageInfo(ImageSourceInfo(""));
@@ -929,7 +868,7 @@ HWTEST_F(VideoPropertyTestNg, VideoFullScreenTest001, TestSize.Level1)
     fullScreenLayout->UpdateControls(false);
     fullScreenPattern->UpdateState();
     EXPECT_EQ(fullScreenLayout->GetObjectFit().value(), ImageFit::COVER);
-    EXPECT_EQ(fullScreenLayout->GetVideoSource().value().GetSrc(), VIDEO_SRC);
+    EXPECT_EQ(fullScreenLayout->GetVideoSource().value().src_, VIDEO_SRC);
     EXPECT_EQ(fullScreenLayout->GetPosterImageInfo().value(), ImageSourceInfo(VIDEO_POSTER_URL));
     EXPECT_TRUE(fullScreenLayout->GetControls().value());
     fullScreenPattern->UpdateState();
@@ -956,7 +895,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest021, TestSize.Level1)
      * @tc.steps: step2. Call ResetMediaPlayer when mediaPlayer_ in different status.
      * @tc.expected: mediaPlayer_'s functions is called.
      */
-    videoPattern->videoSrcInfo_.src = VIDEO_SRC;
+    videoPattern->videoSrcInfo_.src_ = VIDEO_SRC;
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetSource(_, _, _))
         .WillOnce(Return(true))
         .WillOnce(Return(false))
@@ -964,8 +903,14 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest021, TestSize.Level1)
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), PrepareAsync())
         .WillOnce(Return(0))
         .WillOnce(Return(-1));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetRenderFirstFrame(false))
+        .WillOnce(Return(0));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetRenderFirstFrame(true))
+        .WillOnce(Return(0));
+    videoPattern->showFirstFrame_ = false;
     videoPattern->ResetMediaPlayer();
     videoPattern->ResetMediaPlayer();
+    videoPattern->showFirstFrame_ = true;
     videoPattern->ResetMediaPlayer();
     videoPattern->mediaPlayer_ = nullptr;
     videoPattern->SetSourceForMediaPlayer();

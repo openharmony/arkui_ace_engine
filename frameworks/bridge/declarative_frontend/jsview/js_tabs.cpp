@@ -192,6 +192,30 @@ void JSTabs::SetOnGestureSwipe(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetOnGestureSwipe(std::move(onGestureSwipe));
 }
 
+void JSTabs::SetOnSelected(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto selectedHandler = AceType::MakeRefPtr<JsEventFunction<TabContentChangeEvent, 1>>(
+        JSRef<JSFunc>::Cast(info[0]), TabContentChangeEventToJSValue);
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onSelected = [executionContext = info.GetExecutionContext(), func = std::move(selectedHandler),
+                          node = targetNode](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
+        const auto* tabsInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        if (!tabsInfo) {
+            TAG_LOGW(AceLogTag::ACE_TABS, "Tabs onSelected callback execute failed.");
+            return;
+        }
+        ACE_SCORING_EVENT("Tabs.onSelected");
+        ACE_SCOPED_TRACE("Tabs.onSelected index %d", tabsInfo->GetIndex());
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(*tabsInfo);
+    };
+    TabsModel::GetInstance()->SetOnSelected(std::move(onSelected));
+}
+
 void ParseTabsIndexObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
 {
     CHECK_NULL_VOID(!changeEventVal->IsUndefined() && changeEventVal->IsFunction());
@@ -264,6 +288,7 @@ void JSTabs::Create(const JSCallbackInfo& info)
 
     TabsModel::GetInstance()->Create(barPosition, index, tabController, tabsController);
     ParseTabsIndexObject(info, changeEventVal);
+    SetBarModifier(info, jsValue);
 }
 
 void JSTabs::Pop()
@@ -313,8 +338,7 @@ void JSTabs::SetBarMode(const JSCallbackInfo& info)
         if (info.Length() > 1 && info[1]->IsObject()) {
             SetScrollableBarModeOptions(info[1]);
         } else {
-            ScrollableBarModeOptions option;
-            TabsModel::GetInstance()->SetScrollableBarModeOptions(option);
+            TabsModel::GetInstance()->ResetScrollableBarModeOptions();
         }
     }
     TabsModel::GetInstance()->SetTabBarMode(barMode);
@@ -538,8 +562,10 @@ void JSTabs::SetScrollableBarModeOptions(const JSRef<JSVal>& info)
 
     auto nonScrollableLayoutStyle = optionParam->GetProperty("nonScrollableLayoutStyle");
     int32_t layoutStyle;
-    if (!ConvertFromJSValue(nonScrollableLayoutStyle, layoutStyle)) {
-        option.nonScrollableLayoutStyle = LayoutStyle::ALWAYS_CENTER;
+    if (!ConvertFromJSValue(nonScrollableLayoutStyle, layoutStyle) ||
+        layoutStyle < static_cast<int32_t>(LayoutStyle::ALWAYS_CENTER) ||
+        layoutStyle > static_cast<int32_t>(LayoutStyle::SPACE_BETWEEN_OR_CENTER)) {
+        option.nonScrollableLayoutStyle = std::nullopt;
     } else {
         option.nonScrollableLayoutStyle = (static_cast<LayoutStyle>(layoutStyle));
     }
@@ -702,6 +728,66 @@ void JSTabs::SetPageFlipMode(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetPageFlipMode(value);
 }
 
+void JSTabs::SetBarModifier(const JSCallbackInfo& info, const JsiRef<JsiValue>& jsValue)
+{
+    if (!jsValue->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> val = obj->GetProperty("barModifier");
+    if (!val->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> modifierObj = JSRef<JSObject>::Cast(val);
+    auto vm = info.GetVm();
+    auto globalObj = JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applyCommonModifierToNode"));
+    JsiValue jsiValue(globalFunc);
+    JsiRef<JsiValue> globalFuncRef = JsiRef<JsiValue>::Make(jsiValue);
+    std::function<void(WeakPtr<NG::FrameNode>)> onApply = nullptr;
+    if (globalFuncRef->IsFunction()) {
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(globalFuncRef));
+        onApply = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                      modifierParam = std::move(modifierObj)](WeakPtr<NG::FrameNode> frameNode) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            CHECK_NULL_VOID(func);
+            auto node = frameNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            JSRef<JSVal> params[2];
+            params[0] = modifierParam;
+            params[1] = JSRef<JSVal>::Make(panda::NativePointerRef::New(execCtx.vm_, AceType::RawPtr(node)));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(2, params);
+        };
+    }
+    TabsModel::GetInstance()->SetBarModifier(std::move(onApply));
+}
+
+void JSTabs::SetCachedMaxCount(const JSCallbackInfo& info)
+{
+    if (info.Length() <= 1) {
+        return;
+    }
+
+    std::optional<int32_t> cachedMaxCount;
+    if (info[0]->IsNumber()) {
+        auto count = info[0]->ToNumber<int32_t>();
+        if (count >= 0) {
+            cachedMaxCount = count;
+        }
+    }
+    auto cacheMode = TabsCacheMode::CACHE_BOTH_SIDE;
+    if (info[1]->IsNumber()) {
+        auto mode = info[1]->ToNumber<int32_t>();
+        if (mode >= static_cast<int32_t>(TabsCacheMode::CACHE_BOTH_SIDE) &&
+            mode <= static_cast<int32_t>(TabsCacheMode::CACHE_LATEST_SWITCHED)) {
+            cacheMode = static_cast<TabsCacheMode>(mode);
+        }
+    }
+    TabsModel::GetInstance()->SetCachedMaxCount(cachedMaxCount, cacheMode);
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JsTabContentTransitionProxy::JSBind(globalObj);
@@ -746,6 +832,8 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("edgeEffect", &JSTabs::SetEdgeEffect);
     JSClass<JSTabs>::StaticMethod("barBackgroundEffect", &JSTabs::SetBarBackgroundEffect);
     JSClass<JSTabs>::StaticMethod("pageFlipMode", &JSTabs::SetPageFlipMode);
+    JSClass<JSTabs>::StaticMethod("cachedMaxCount", &JSTabs::SetCachedMaxCount);
+    JSClass<JSTabs>::StaticMethod("onSelected", &JSTabs::SetOnSelected);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

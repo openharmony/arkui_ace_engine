@@ -94,7 +94,6 @@ void TextBase::CalculateSelectedRectEx(std::vector<RectF>& selectedRects, float 
     if (selectedRects.empty()) {
         return;
     }
-    const bool isRtl = direction.has_value() && (direction.value() == TextDirection::RTL);
     std::map<float, std::pair<RectF, std::vector<RectF>>> lineGroup;
     SelectedRectsToLineGroup(selectedRects, lineGroup);
     selectedRects.clear();
@@ -104,12 +103,6 @@ void TextBase::CalculateSelectedRectEx(std::vector<RectF>& selectedRects, float 
     lastLineBottom = LessNotEqual(lastLineBottom, 0.0f) ? lineGroup.begin()->second.first.Top() : lastLineBottom;
     for (const auto& line : lineGroup) {
         const auto& lineRect = line.second.first;
-        if (!isRtl) {
-            RectF rect = RectF(lineRect.Left(), lastLineBottom, lineRect.Width(), lineRect.Bottom() - lastLineBottom);
-            selectedRects.emplace_back(rect);
-            lastLineBottom = line.second.first.Bottom();
-            continue;
-        }
         const auto& lineRects = line.second.second;
         for (const auto& lineItem : lineRects) {
             RectF rect = RectF(lineItem.Left(), lastLineBottom, lineItem.Width(), lineRect.Bottom() - lastLineBottom);
@@ -255,10 +248,11 @@ void TextGestureSelector::DoGestureSelection(const TouchEventInfo& info)
     if (!isStarted_ || info.GetChangedTouches().empty()) {
         return;
     }
-    auto touchType = info.GetChangedTouches().front().GetTouchType();
+    auto locationInfo = info.GetChangedTouches().front();
+    auto touchType = locationInfo.GetTouchType();
     switch (touchType) {
         case TouchType::UP:
-            EndGestureSelection();
+            EndGestureSelection(locationInfo);
             break;
         case TouchType::MOVE:
             DoTextSelectionTouchMove(info);

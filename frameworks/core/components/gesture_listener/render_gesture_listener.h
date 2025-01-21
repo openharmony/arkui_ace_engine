@@ -44,7 +44,7 @@ public:
     void SetOnPinchStartCallback(const GestureEventFunc& callback);
     void SetOnPinchUpdateCallback(const GestureEventFunc& callback);
     void SetOnPinchEndCallback(const GestureEventFunc& callback);
-    void SetOnPinchCancelCallback(const GestureEventNoParameter& callback);
+    void SetOnPinchCancelCallback(const GestureEventFunc& callback);
     RefPtr<DragWindow> dragWindow_;
 protected:
     void OnTouchTestHit(

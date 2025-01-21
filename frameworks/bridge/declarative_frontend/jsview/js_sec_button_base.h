@@ -43,6 +43,12 @@ public:
     static void SetBackgroundBorderColor(const JSCallbackInfo& info);
     static void SetBackgroundBorderRadius(const JSCallbackInfo& info);
     static void SetAlign(const JSCallbackInfo& info);
+    static void SetMaxFontScale(const JSCallbackInfo& info);
+    static void SetMinFontScale(const JSCallbackInfo& info);
+    static void SetMaxLines(const JSCallbackInfo& info);
+    static void SetMaxFontSize(const JSCallbackInfo& info);
+    static void SetMinFontSize(const JSCallbackInfo& info);
+    static void SetHeightAdaptivePolicy(int32_t value);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SEC_BUTTON_BASE_H

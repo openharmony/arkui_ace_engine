@@ -27,6 +27,7 @@ public:
     static void StartVibraFeedback();
     static void StartVibraFeedback(const std::string& vibratorType);
     bool StartExclusiveVibraFeedback(const char* effectId);
+    static void StartViratorDirectly(const std::string& vibratorType);
 private:
     static const char* GetFirstSupportedId();
     static const char* supportedEffectId;

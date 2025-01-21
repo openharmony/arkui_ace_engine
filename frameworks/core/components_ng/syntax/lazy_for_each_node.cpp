@@ -96,7 +96,7 @@ void LazyForEachNode::PostIdleTask()
             if (!preBuildResult) {
                 node->PostIdleTask();
             } else {
-                node->requestLongPredict_ = false;
+                node->requestLongPredict_ = true;
                 node->itemConstraint_.reset();
             }
         }

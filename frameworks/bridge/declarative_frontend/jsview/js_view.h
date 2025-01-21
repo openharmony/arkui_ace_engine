@@ -24,6 +24,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_partial_update_model.h"
+#include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_functions.h"
@@ -38,7 +39,7 @@ public:
     ~JSView() override = default;
     virtual void Destroy(JSView* parentCustomView) = 0;
 
-    virtual RefPtr<AceType> CreateViewNode(bool isTitleNode = false)
+    virtual RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false)
     {
         LOGE("Internal error. Not implemented");
         return nullptr;
@@ -202,7 +203,7 @@ public:
     // TODO: delete this after the toolchain for partial update is ready.
     RefPtr<AceType> InternalRender();
 
-    RefPtr<AceType> CreateViewNode(bool isTitleNode = false) override;
+    RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false) override;
 
     void MarkNeedUpdate() override;
 
@@ -308,7 +309,7 @@ public:
 
     RefPtr<AceType> InitialRender();
 
-    RefPtr<AceType> CreateViewNode(bool isTitleNode = false) override;
+    RefPtr<AceType> CreateViewNode(bool isTitleNode = false, bool isCustomAppBar = false) override;
 
     static void Create(const JSCallbackInfo& info);
     static void CreateRecycle(const JSCallbackInfo& info);
@@ -419,6 +420,11 @@ public:
 
     void OnDumpInfo(const std::vector<std::string>& params) override;
 
+    void JSGetDialogController(const JSCallbackInfo& info);
+
+    bool JSAllowReusableV2Descendant();
+
+    static JSView* GetNativeViewPartialUpdate(JSRef<JSObject> obj);
 private:
     void MarkNeedUpdate() override;
 

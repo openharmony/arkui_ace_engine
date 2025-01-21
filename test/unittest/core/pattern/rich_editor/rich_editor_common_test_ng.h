@@ -26,17 +26,13 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-const std::string INIT_VALUE_1 = "hello1";
-const std::u16string INIT_U16VALUE_1 = u"hello1";
-const std::string INIT_VALUE_2 = "hello2";
-const std::u16string INIT_U16VALUE_2 = u"hello2";
-const std::string INIT_VALUE_3 = "hello world! hello world! hello world!";
-const std::u16string INIT_U16VALUE_3 = u"hello world! hello world! hello world!";
-const std::string TEST_INSERT_VALUE = "s";
-const std::u16string TEST_INSERT_U16VALUE = u"s";
-const std::string TEST_INSERT_LINE_SEP = "\n";
-const std::string EXCEPT_VALUE = "h\n";
-const std::u16string EXCEPT_U16VALUE = u"h\n";
+const std::string TEST_STR = "test";
+const std::u16string INIT_VALUE_1 = u"hello1";
+const std::u16string INIT_VALUE_2 = u"hello2";
+const std::u16string INIT_VALUE_3 = u"hello world! hello world! hello world!";
+const std::u16string TEST_INSERT_VALUE = u"s";
+const std::u16string TEST_INSERT_LINE_SEP = u"\n";
+const std::u16string EXCEPT_VALUE = u"h\n";
 const Dimension FONT_SIZE_VALUE = Dimension(20.1, DimensionUnit::PX);
 const Dimension FONT_SIZE_VALUE_2 = Dimension(40, DimensionUnit::PX);
 const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
@@ -55,12 +51,9 @@ const std::vector<Shadow> SHADOWS { TEXT_SHADOW1, TEXT_SHADOW2 };
 const std::string IMAGE_VALUE = "image1";
 const std::string BUNDLE_NAME = "bundleName";
 const std::string MODULE_NAME = "moduleName";
-const std::string PREVIEW_TEXT_VALUE1 = "nihao";
-const std::string PREVIEW_TEXT_VALUE2 = "nihaodajia";
-const std::string PREVIEW_TEXT_VALUE3 = "dajia";
-const std::u16string PREVIEW_TEXT_U16VALUE1 = u"nihao";
-const std::u16string PREVIEW_TEXT_U16VALUE2 = u"nihaodajia";
-const std::u16string PREVIEW_TEXT_U16VALUE3 = u"dajia";
+const std::u16string PREVIEW_TEXT_VALUE1 = u"nihao";
+const std::u16string PREVIEW_TEXT_VALUE2 = u"nihaodajia";
+const std::u16string PREVIEW_TEXT_VALUE3 = u"dajia";
 const std::string ROOT_TAG = "root";
 const CalcLength CALC_LENGTH_CALC { 10.0, DimensionUnit::CALC };
 const CalcLength ERROR_CALC_LENGTH_CALC { -10.0, DimensionUnit::CALC };

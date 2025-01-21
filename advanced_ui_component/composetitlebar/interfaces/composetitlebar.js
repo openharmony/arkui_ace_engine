@@ -14,7 +14,7 @@
  */
 
 if (!('finalizeConstruction' in ViewPU.prototype)) {
-  Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
+    Reflect.set(ViewPU.prototype, 'finalizeConstruction', () => { });
 }
 const KeyCode = requireNapi('multimodalInput.keyCode').KeyCode;
 const hilog = requireNapi('ohos.hilog');
@@ -26,53 +26,53 @@ const MAX_DIALOG = '256vp';
 const MIN_DIALOG = '216vp';
 const RESOURCE_TYPE_SYMBOL = 40000;
 class Util {
-    static isSymbolResource(t8) {
-        if (!Util.isResourceType(t8)) {
+    static isSymbolResource(o9) {
+        if (!Util.isResourceType(o9)) {
             return false;
         }
-        let u8 = t8;
-        return u8.type === RESOURCE_TYPE_SYMBOL;
+        let p9 = o9;
+        return p9.type === RESOURCE_TYPE_SYMBOL;
     }
-    static isResourceType(s8) {
-        if (!s8) {
+    static isResourceType(n9) {
+        if (!n9) {
             return false;
         }
-        if (typeof s8 === 'string' || typeof s8 === 'undefined') {
+        if (typeof n9 === 'string' || typeof n9 === 'undefined') {
             return false;
         }
         return true;
     }
 }
 class ButtonGestureModifier {
-    constructor(r8) {
+    constructor(m9) {
         this.fontSize = 1;
         this.controller = null;
-        this.controller = r8;
+        this.controller = m9;
     }
-    applyGesture(q8) {
+    applyGesture(l9) {
         if (this.fontSize >= ButtonGestureModifier.minFontSize) {
-            q8.addGesture(new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
+            l9.addGesture(new LongPressGestureHandler({ repeat: false, duration: ButtonGestureModifier.longPressTime })
                 .onAction(() => {
-                if (q8) {
-                    this.controller?.open();
-                }
-            })
+                    if (l9) {
+                        this.controller?.open();
+                    }
+                })
                 .onActionEnd(() => {
-                this.controller?.close();
-            }));
+                    this.controller?.close();
+                }));
         }
         else {
-            q8.clearGestures();
+            l9.clearGestures();
         }
     }
 }
 ButtonGestureModifier.longPressTime = 500;
 ButtonGestureModifier.minFontSize = 1.75;
 class ComposeTitleBar extends ViewPU {
-    constructor(k8, l8, m8, n8 = -1, o8 = undefined, p8) {
-        super(k8, m8, n8, p8);
-        if (typeof o8 === 'function') {
-            this.paramsGenerator_ = o8;
+    constructor(f9, g9, h9, i9 = -1, j9 = undefined, k9) {
+        super(f9, h9, i9, k9);
+        if (typeof j9 === 'function') {
+            this.paramsGenerator_ = j9;
         }
         this.item = undefined;
         this.title = '';
@@ -82,38 +82,38 @@ class ComposeTitleBar extends ViewPU {
         this.__fontSize = new ObservedPropertySimplePU(1, this, 'fontSize');
         this.__uniqueId = new ObservedPropertySimplePU(-1, this, 'uniqueId');
         this.addProvidedVar('uniqueId', this.__uniqueId, false);
-        this.setInitiallyProvidedValue(l8);
+        this.setInitiallyProvidedValue(g9);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(j8) {
-        if (j8.item !== undefined) {
-            this.item = j8.item;
+    setInitiallyProvidedValue(e9) {
+        if (e9.item !== undefined) {
+            this.item = e9.item;
         }
-        if (j8.title !== undefined) {
-            this.title = j8.title;
+        if (e9.title !== undefined) {
+            this.title = e9.title;
         }
-        if (j8.subtitle !== undefined) {
-            this.subtitle = j8.subtitle;
+        if (e9.subtitle !== undefined) {
+            this.subtitle = e9.subtitle;
         }
-        if (j8.menuItems !== undefined) {
-            this.menuItems = j8.menuItems;
+        if (e9.menuItems !== undefined) {
+            this.menuItems = e9.menuItems;
         }
-        if (j8.titleMaxWidth !== undefined) {
-            this.titleMaxWidth = j8.titleMaxWidth;
+        if (e9.titleMaxWidth !== undefined) {
+            this.titleMaxWidth = e9.titleMaxWidth;
         }
-        if (j8.fontSize !== undefined) {
-            this.fontSize = j8.fontSize;
+        if (e9.fontSize !== undefined) {
+            this.fontSize = e9.fontSize;
         }
-        if (j8.uniqueId !== undefined) {
-            this.uniqueId = j8.uniqueId;
+        if (e9.uniqueId !== undefined) {
+            this.uniqueId = e9.uniqueId;
         }
     }
-    updateStateVars(i8) {
+    updateStateVars(d9) {
     }
-    purgeVariableDependenciesOnElmtId(h8) {
-        this.__titleMaxWidth.purgeDependencyOnElmtId(h8);
-        this.__fontSize.purgeDependencyOnElmtId(h8);
-        this.__uniqueId.purgeDependencyOnElmtId(h8);
+    purgeVariableDependenciesOnElmtId(c9) {
+        this.__titleMaxWidth.purgeDependencyOnElmtId(c9);
+        this.__fontSize.purgeDependencyOnElmtId(c9);
+        this.__uniqueId.purgeDependencyOnElmtId(c9);
     }
     aboutToBeDeleted() {
         this.__titleMaxWidth.aboutToBeDeleted();
@@ -125,23 +125,23 @@ class ComposeTitleBar extends ViewPU {
     get titleMaxWidth() {
         return this.__titleMaxWidth.get();
     }
-    set titleMaxWidth(g8) {
-        this.__titleMaxWidth.set(g8);
+    set titleMaxWidth(b9) {
+        this.__titleMaxWidth.set(b9);
     }
     get fontSize() {
         return this.__fontSize.get();
     }
-    set fontSize(f8) {
-        this.__fontSize.set(f8);
+    set fontSize(a9) {
+        this.__fontSize.set(a9);
     }
     get uniqueId() {
         return this.__uniqueId.get();
     }
-    set uniqueId(e8) {
-        this.__uniqueId.set(e8);
+    set uniqueId(z8) {
+        this.__uniqueId.set(z8);
     }
     initialRender() {
-        this.observeComponentCreation2((y7, z7) => {
+        this.observeComponentCreation2((t8, u8) => {
             Flex.create({
                 justifyContent: FlexAlign.SpaceBetween,
                 alignItems: ItemAlign.Stretch
@@ -152,36 +152,36 @@ class ComposeTitleBar extends ViewPU {
             Flex.width('100%');
             Flex.height(ComposeTitleBar.totalHeight);
             Flex.backgroundColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_background'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-            Flex.onAreaChange((a8, b8) => {
-                let c8 = Number(b8.width);
+            Flex.onAreaChange((v8, w8) => {
+                let x8 = Number(w8.width);
                 if (this.menuItems !== undefined) {
-                    let d8 = this.menuItems.length;
-                    if (d8 >= CollapsibleMenuSection.maxCountOfVisibleItems) {
-                        c8 = c8 - ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
+                    let y8 = this.menuItems.length;
+                    if (y8 >= CollapsibleMenuSection.maxCountOfVisibleItems) {
+                        x8 = x8 - ImageMenuItem.imageHotZoneWidth * CollapsibleMenuSection.maxCountOfVisibleItems;
                     }
-                    else if (d8 > 0) {
-                        c8 = c8 - ImageMenuItem.imageHotZoneWidth * d8;
+                    else if (y8 > 0) {
+                        x8 = x8 - ImageMenuItem.imageHotZoneWidth * y8;
                     }
                 }
-                this.titleMaxWidth = c8;
+                this.titleMaxWidth = x8;
                 this.titleMaxWidth -= ComposeTitleBar.leftPadding;
                 this.titleMaxWidth -= ImageMenuItem.imageHotZoneWidth;
                 if (this.item !== undefined) {
                     this.titleMaxWidth -= ComposeTitleBar.portraitImageLeftPadding +
-                        ComposeTitleBar.portraitImageSize +
-                        ComposeTitleBar.portraitImageRightPadding;
+                    ComposeTitleBar.portraitImageSize +
+                    ComposeTitleBar.portraitImageRightPadding;
                 }
                 this.titleMaxWidth -= ComposeTitleBar.rightPadding;
             });
         }, Flex);
-        this.observeComponentCreation2((w7, x7) => {
+        this.observeComponentCreation2((r8, s8) => {
             Row.create();
             Row.margin({ left: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_start'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
         }, Row);
         {
-            this.observeComponentCreation2((s7, t7) => {
-                if (t7) {
-                    let u7 = new ImageMenuItem(this, {
+            this.observeComponentCreation2((n8, o8) => {
+                if (o8) {
+                    let p8 = new ImageMenuItem(this, {
                         item: {
                             value: PUBLIC_BACK,
                             isEnabled: true,
@@ -189,9 +189,9 @@ class ComposeTitleBar extends ViewPU {
                         },
                         index: -1,
                         itemIndex: -1
-                    }, undefined, s7, () => { }, { page: 'library/src/main/ets/components/ComposeTitleBar.ets', line: 113, col: 9 });
-                    ViewPU.create(u7);
-                    let v7 = () => {
+                    }, undefined, n8, () => { }, { page: 'library/src/main/ets/components/composetitlebar.ets', line: 113, col: 9 });
+                    ViewPU.create(p8);
+                    let q8 = () => {
                         return {
                             item: {
                                 value: PUBLIC_BACK,
@@ -202,22 +202,22 @@ class ComposeTitleBar extends ViewPU {
                             itemIndex: -1
                         };
                     };
-                    u7.paramsGenerator_ = v7;
+                    p8.paramsGenerator_ = q8;
                 }
                 else {
-                    this.updateStateVarsOfChildByElmtId(s7, {});
+                    this.updateStateVarsOfChildByElmtId(n8, {});
                 }
             }, { name: 'ImageMenuItem' });
         }
-        this.observeComponentCreation2((q7, r7) => {
+        this.observeComponentCreation2((l8, m8) => {
             Row.create();
             Row.accessibilityGroup(true);
         }, Row);
-        this.observeComponentCreation2((m7, n7) => {
+        this.observeComponentCreation2((h8, i8) => {
             If.create();
             if (this.item !== undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((o7, p7) => {
+                    this.observeComponentCreation2((j8, k8) => {
                         Image.create(this.item.value);
                         Image.width(ComposeTitleBar.portraitImageSize);
                         Image.height(ComposeTitleBar.portraitImageSize);
@@ -236,21 +236,21 @@ class ComposeTitleBar extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((k7, l7) => {
+        this.observeComponentCreation2((f8, g8) => {
             Column.create();
             Column.justifyContent(FlexAlign.Start);
             Column.alignItems(HorizontalAlign.Start);
             Column.constraintSize({ maxWidth: this.titleMaxWidth });
         }, Column);
-        this.observeComponentCreation2((e7, f7) => {
+        this.observeComponentCreation2((z7, a8) => {
             If.create();
             if (this.title !== undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((i7, j7) => {
+                    this.observeComponentCreation2((d8, e8) => {
                         Row.create();
                         Row.justifyContent(FlexAlign.Start);
                     }, Row);
-                    this.observeComponentCreation2((g7, h7) => {
+                    this.observeComponentCreation2((b8, c8) => {
                         Text.create(this.title);
                         Text.fontWeight(FontWeight.Medium);
                         Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_headline8'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
@@ -269,15 +269,15 @@ class ComposeTitleBar extends ViewPU {
             }
         }, If);
         If.pop();
-        this.observeComponentCreation2((y6, z6) => {
+        this.observeComponentCreation2((t7, u7) => {
             If.create();
             if (this.subtitle !== undefined) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((c7, d7) => {
+                    this.observeComponentCreation2((x7, y7) => {
                         Row.create();
                         Row.justifyContent(FlexAlign.Start);
                     }, Row);
-                    this.observeComponentCreation2((a7, b7) => {
+                    this.observeComponentCreation2((v7, w7) => {
                         Text.create(this.subtitle);
                         Text.fontSize({ 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_text_size_over_line'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                         Text.fontColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_subtitle_text'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
@@ -298,25 +298,25 @@ class ComposeTitleBar extends ViewPU {
         Column.pop();
         Row.pop();
         Row.pop();
-        this.observeComponentCreation2((s6, t6) => {
+        this.observeComponentCreation2((n7, o7) => {
             If.create();
             if (this.menuItems !== undefined && this.menuItems.length > 0) {
                 this.ifElseBranchUpdateFunction(0, () => {
                     {
-                        this.observeComponentCreation2((u6, v6) => {
-                            if (v6) {
-                                let w6 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ }, undefined, u6, () => { }, { page: 'library/src/main/ets/components/ComposeTitleBar.ets', line: 170, col: 9 });
-                                ViewPU.create(w6);
-                                let x6 = () => {
+                        this.observeComponentCreation2((p7, q7) => {
+                            if (q7) {
+                                let r7 = new CollapsibleMenuSection(this, { menuItems: this.menuItems, index: 1 + ComposeTitleBar.instanceCount++ }, undefined, p7, () => { }, { page: 'library/src/main/ets/components/composetitlebar.ets', line: 170, col: 9 });
+                                ViewPU.create(r7);
+                                let s7 = () => {
                                     return {
                                         menuItems: this.menuItems,
                                         index: 1 + ComposeTitleBar.instanceCount++
                                     };
                                 };
-                                w6.paramsGenerator_ = x6;
+                                r7.paramsGenerator_ = s7;
                             }
                             else {
-                                this.updateStateVarsOfChildByElmtId(u6, {});
+                                this.updateStateVarsOfChildByElmtId(p7, {});
                             }
                         }, { name: 'CollapsibleMenuSection' });
                     }
@@ -342,10 +342,10 @@ ComposeTitleBar.portraitImageLeftPadding = 4;
 ComposeTitleBar.portraitImageRightPadding = 16;
 ComposeTitleBar.instanceCount = 0;
 class CollapsibleMenuSection extends ViewPU {
-    constructor(k6, l6, m6, n6 = -1, o6 = undefined, p6) {
-        super(k6, m6, n6, p6);
-        if (typeof o6 === 'function') {
-            this.paramsGenerator_ = o6;
+    constructor(f7, g7, h7, i7 = -1, j7 = undefined, k7) {
+        super(f7, h7, i7, k7);
+        if (typeof j7 === 'function') {
+            this.paramsGenerator_ = j7;
         }
         this.menuItems = [];
         this.item = {
@@ -362,10 +362,10 @@ class CollapsibleMenuSection extends ViewPU {
         this.__isMoreIconOnFocus = new ObservedPropertySimplePU(false, this, 'isMoreIconOnFocus');
         this.__isMoreIconOnHover = new ObservedPropertySimplePU(false, this, 'isMoreIconOnHover');
         this.__isMoreIconOnClick = new ObservedPropertySimplePU(false, this, 'isMoreIconOnClick');
-        this.__fontSize = new SynchedPropertySimpleOneWayPU(l6.fontSize, this, 'fontSize');
+        this.__fontSize = new SynchedPropertySimpleOneWayPU(g7.fontSize, this, 'fontSize');
         this.dialogController = new CustomDialogController({
             builder: () => {
-                let q6 = new ComposeTitleBarDialog(this, {
+                let l7 = new ComposeTitleBarDialog(this, {
                     cancel: () => {
                     },
                     confirm: () => {
@@ -373,10 +373,10 @@ class CollapsibleMenuSection extends ViewPU {
                     itemComposeTitleDialog: this.item,
                     composeTitleBarDialog: this.item.label ? this.item.label : '',
                     fontSize: this.fontSize,
-                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/ComposeTitleBar.ets', line: 221, col: 14 });
-                q6.setController(this.dialogController);
-                ViewPU.create(q6);
-                let r6 = () => {
+                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/composetitlebar.ets', line: 224, col: 14 });
+                l7.setController(this.dialogController);
+                ViewPU.create(l7);
+                let m7 = () => {
                     return {
                         cancel: () => {
                         },
@@ -387,74 +387,74 @@ class CollapsibleMenuSection extends ViewPU {
                         fontSize: this.fontSize
                     };
                 };
-                q6.paramsGenerator_ = r6;
+                l7.paramsGenerator_ = m7;
             },
             maskColor: Color.Transparent,
             isModal: true,
             customStyle: true
         }, this);
         this.__buttonGestureModifier = new ObservedPropertyObjectPU(new ButtonGestureModifier(this.dialogController), this, 'buttonGestureModifier');
-        this.setInitiallyProvidedValue(l6);
+        this.setInitiallyProvidedValue(g7);
         this.declareWatch('fontSize', this.onFontSizeUpdated);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(j6) {
-        if (j6.menuItems !== undefined) {
-            this.menuItems = j6.menuItems;
+    setInitiallyProvidedValue(e7) {
+        if (e7.menuItems !== undefined) {
+            this.menuItems = e7.menuItems;
         }
-        if (j6.item !== undefined) {
-            this.item = j6.item;
+        if (e7.item !== undefined) {
+            this.item = e7.item;
         }
-        if (j6.index !== undefined) {
-            this.index = j6.index;
+        if (e7.index !== undefined) {
+            this.index = e7.index;
         }
-        if (j6.minFontSize !== undefined) {
-            this.minFontSize = j6.minFontSize;
+        if (e7.minFontSize !== undefined) {
+            this.minFontSize = e7.minFontSize;
         }
-        if (j6.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = j6.isFollowingSystemFontScale;
+        if (e7.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = e7.isFollowingSystemFontScale;
         }
-        if (j6.maxFontScale !== undefined) {
-            this.maxFontScale = j6.maxFontScale;
+        if (e7.maxFontScale !== undefined) {
+            this.maxFontScale = e7.maxFontScale;
         }
-        if (j6.systemFontScale !== undefined) {
-            this.systemFontScale = j6.systemFontScale;
+        if (e7.systemFontScale !== undefined) {
+            this.systemFontScale = e7.systemFontScale;
         }
-        if (j6.firstFocusableIndex !== undefined) {
-            this.firstFocusableIndex = j6.firstFocusableIndex;
+        if (e7.firstFocusableIndex !== undefined) {
+            this.firstFocusableIndex = e7.firstFocusableIndex;
         }
-        if (j6.isPopupShown !== undefined) {
-            this.isPopupShown = j6.isPopupShown;
+        if (e7.isPopupShown !== undefined) {
+            this.isPopupShown = e7.isPopupShown;
         }
-        if (j6.isMoreIconOnFocus !== undefined) {
-            this.isMoreIconOnFocus = j6.isMoreIconOnFocus;
+        if (e7.isMoreIconOnFocus !== undefined) {
+            this.isMoreIconOnFocus = e7.isMoreIconOnFocus;
         }
-        if (j6.isMoreIconOnHover !== undefined) {
-            this.isMoreIconOnHover = j6.isMoreIconOnHover;
+        if (e7.isMoreIconOnHover !== undefined) {
+            this.isMoreIconOnHover = e7.isMoreIconOnHover;
         }
-        if (j6.isMoreIconOnClick !== undefined) {
-            this.isMoreIconOnClick = j6.isMoreIconOnClick;
+        if (e7.isMoreIconOnClick !== undefined) {
+            this.isMoreIconOnClick = e7.isMoreIconOnClick;
         }
-        if (j6.fontSize === undefined) {
+        if (e7.fontSize === undefined) {
             this.__fontSize.set(1);
         }
-        if (j6.dialogController !== undefined) {
-            this.dialogController = j6.dialogController;
+        if (e7.dialogController !== undefined) {
+            this.dialogController = e7.dialogController;
         }
-        if (j6.buttonGestureModifier !== undefined) {
-            this.buttonGestureModifier = j6.buttonGestureModifier;
+        if (e7.buttonGestureModifier !== undefined) {
+            this.buttonGestureModifier = e7.buttonGestureModifier;
         }
     }
-    updateStateVars(i6) {
-        this.__fontSize.reset(i6.fontSize);
+    updateStateVars(d7) {
+        this.__fontSize.reset(d7.fontSize);
     }
-    purgeVariableDependenciesOnElmtId(h6) {
-        this.__isPopupShown.purgeDependencyOnElmtId(h6);
-        this.__isMoreIconOnFocus.purgeDependencyOnElmtId(h6);
-        this.__isMoreIconOnHover.purgeDependencyOnElmtId(h6);
-        this.__isMoreIconOnClick.purgeDependencyOnElmtId(h6);
-        this.__fontSize.purgeDependencyOnElmtId(h6);
-        this.__buttonGestureModifier.purgeDependencyOnElmtId(h6);
+    purgeVariableDependenciesOnElmtId(c7) {
+        this.__isPopupShown.purgeDependencyOnElmtId(c7);
+        this.__isMoreIconOnFocus.purgeDependencyOnElmtId(c7);
+        this.__isMoreIconOnHover.purgeDependencyOnElmtId(c7);
+        this.__isMoreIconOnClick.purgeDependencyOnElmtId(c7);
+        this.__fontSize.purgeDependencyOnElmtId(c7);
+        this.__buttonGestureModifier.purgeDependencyOnElmtId(c7);
     }
     aboutToBeDeleted() {
         this.__isPopupShown.aboutToBeDeleted();
@@ -469,38 +469,38 @@ class CollapsibleMenuSection extends ViewPU {
     get isPopupShown() {
         return this.__isPopupShown.get();
     }
-    set isPopupShown(g6) {
-        this.__isPopupShown.set(g6);
+    set isPopupShown(b7) {
+        this.__isPopupShown.set(b7);
     }
     get isMoreIconOnFocus() {
         return this.__isMoreIconOnFocus.get();
     }
-    set isMoreIconOnFocus(f6) {
-        this.__isMoreIconOnFocus.set(f6);
+    set isMoreIconOnFocus(a7) {
+        this.__isMoreIconOnFocus.set(a7);
     }
     get isMoreIconOnHover() {
         return this.__isMoreIconOnHover.get();
     }
-    set isMoreIconOnHover(e6) {
-        this.__isMoreIconOnHover.set(e6);
+    set isMoreIconOnHover(z6) {
+        this.__isMoreIconOnHover.set(z6);
     }
     get isMoreIconOnClick() {
         return this.__isMoreIconOnClick.get();
     }
-    set isMoreIconOnClick(d6) {
-        this.__isMoreIconOnClick.set(d6);
+    set isMoreIconOnClick(y6) {
+        this.__isMoreIconOnClick.set(y6);
     }
     get fontSize() {
         return this.__fontSize.get();
     }
-    set fontSize(c6) {
-        this.__fontSize.set(c6);
+    set fontSize(x6) {
+        this.__fontSize.set(x6);
     }
     get buttonGestureModifier() {
         return this.__buttonGestureModifier.get();
     }
-    set buttonGestureModifier(b6) {
-        this.__buttonGestureModifier.set(b6);
+    set buttonGestureModifier(w6) {
+        this.__buttonGestureModifier.set(w6);
     }
     getMoreIconFgColor() {
         return this.isMoreIconOnClick ? { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon_pressed'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } : { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_titlebar_icon'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
@@ -518,20 +518,20 @@ class CollapsibleMenuSection extends ViewPU {
     }
     aboutToAppear() {
         try {
-            let a6 = this.getUIContext();
-            this.isFollowingSystemFontScale = a6.isFollowingSystemFontScale();
-            this.maxFontScale = a6.getMaxFontScale();
+            let v6 = this.getUIContext();
+            this.isFollowingSystemFontScale = v6.isFollowingSystemFontScale();
+            this.maxFontScale = v6.getMaxFontScale();
         }
-        catch (x5) {
-            let y5 = x5.code;
-            let z5 = x5.message;
-            hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${y5}, message: ${z5}`);
+        catch (s6) {
+            let t6 = s6.code;
+            let u6 = s6.message;
+            hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${t6}, message: ${u6}`);
         }
         if (this.menuItems) {
-            this.menuItems.forEach((v5, w5) => {
-                if (v5.isEnabled && this.firstFocusableIndex == -1 &&
-                    w5 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
-                    this.firstFocusableIndex = this.index * 1000 + w5 + 1;
+            this.menuItems.forEach((q6, r6) => {
+                if (q6.isEnabled && this.firstFocusableIndex === -1 &&
+                    r6 > CollapsibleMenuSection.maxCountOfVisibleItems - 2) {
+                    this.firstFocusableIndex = this.index * 1000 + r6 + 1;
                 }
             });
         }
@@ -539,17 +539,17 @@ class CollapsibleMenuSection extends ViewPU {
     }
     decideFontScale() {
         try {
-            let u5 = this.getUIContext();
-            this.systemFontScale = u5.getHostContext()?.config?.fontSizeScale ?? 1;
+            let p6 = this.getUIContext();
+            this.systemFontScale = p6.getHostContext()?.config?.fontSizeScale ?? 1;
             if (!this.isFollowingSystemFontScale) {
                 return 1;
             }
             return Math.min(this.systemFontScale, this.maxFontScale);
         }
-        catch (r5) {
-            let s5 = r5.code;
-            let t5 = r5.message;
-            hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${s5}, message: ${t5}`);
+        catch (m6) {
+            let n6 = m6.code;
+            let o6 = m6.message;
+            hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${n6}, message: ${o6}`);
             return 1;
         }
     }
@@ -557,82 +557,82 @@ class CollapsibleMenuSection extends ViewPU {
         this.buttonGestureModifier.fontSize = this.fontSize;
     }
     initialRender() {
-        this.observeComponentCreation2((p5, q5) => {
+        this.observeComponentCreation2((k6, l6) => {
             Column.create();
             Column.height('100%');
             Column.margin({ right: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_default_padding_end'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' } });
             Column.justifyContent(FlexAlign.Center);
         }, Column);
-        this.observeComponentCreation2((n5, o5) => {
+        this.observeComponentCreation2((i6, j6) => {
             Row.create();
         }, Row);
-        this.observeComponentCreation2((h4, i4) => {
+        this.observeComponentCreation2((c5, d5) => {
             If.create();
             if (this.menuItems) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((j4, k4) => {
+                    this.observeComponentCreation2((e5, f5) => {
                         If.create();
                         if (this.menuItems.length <= CollapsibleMenuSection.maxCountOfVisibleItems) {
                             this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((d5, e5) => {
+                                this.observeComponentCreation2((y5, z5) => {
                                     ForEach.create();
-                                    const f5 = (g5, h5) => {
-                                        const i5 = g5;
+                                    const a6 = (b6, c6) => {
+                                        const d6 = b6;
                                         {
-                                            this.observeComponentCreation2((j5, k5) => {
-                                                if (k5) {
-                                                    let l5 = new ImageMenuItem(this, { item: i5, index: this.index * 1000 + h5 + 1, itemIndex: h5 }, undefined, j5, () => { }, { page: 'library/src/main/ets/components/ComposeTitleBar.ets', line: 301, col: 15 });
-                                                    ViewPU.create(l5);
-                                                    let m5 = () => {
+                                            this.observeComponentCreation2((e6, f6) => {
+                                                if (f6) {
+                                                    let g6 = new ImageMenuItem(this, { item: d6, index: this.index * 1000 + c6 + 1, itemIndex: c6 }, undefined, e6, () => { }, { page: 'library/src/main/ets/components/composetitlebar.ets', line: 304, col: 15 });
+                                                    ViewPU.create(g6);
+                                                    let h6 = () => {
                                                         return {
-                                                            item: i5,
-                                                            index: this.index * 1000 + h5 + 1,
-                                                            itemIndex: h5
+                                                            item: d6,
+                                                            index: this.index * 1000 + c6 + 1,
+                                                            itemIndex: c6
                                                         };
                                                     };
-                                                    l5.paramsGenerator_ = m5;
+                                                    g6.paramsGenerator_ = h6;
                                                 }
                                                 else {
-                                                    this.updateStateVarsOfChildByElmtId(j5, {});
+                                                    this.updateStateVarsOfChildByElmtId(e6, {});
                                                 }
                                             }, { name: 'ImageMenuItem' });
                                         }
                                     };
-                                    this.forEachUpdateFunction(d5, this.menuItems, f5, undefined, true, false);
+                                    this.forEachUpdateFunction(y5, this.menuItems, a6, undefined, true, false);
                                 }, ForEach);
                                 ForEach.pop();
                             });
                         }
                         else {
                             this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((t4, u4) => {
+                                this.observeComponentCreation2((o5, p5) => {
                                     ForEach.create();
-                                    const v4 = (w4, x4) => {
-                                        const y4 = w4;
+                                    const q5 = (r5, s5) => {
+                                        const t5 = r5;
                                         {
-                                            this.observeComponentCreation2((z4, a5) => {
-                                                if (a5) {
-                                                    let b5 = new ImageMenuItem(this, { item: y4, index: this.index * 1000 + x4 + 1, itemIndex: x4 }, undefined, z4, () => { }, { page: 'library/src/main/ets/components/ComposeTitleBar.ets', line: 306, col: 17 });
-                                                    ViewPU.create(b5);
-                                                    let c5 = () => {
+                                            this.observeComponentCreation2((u5, v5) => {
+                                                if (v5) {
+                                                    let w5 = new ImageMenuItem(this, { item: t5, index: this.index * 1000 + s5 + 1, itemIndex: s5 }, undefined, u5, () => { }, { page: 'library/src/main/ets/components/composetitlebar.ets', line: 309, col: 17 });
+                                                    ViewPU.create(w5);
+                                                    let x5 = () => {
                                                         return {
-                                                            item: y4,
-                                                            index: this.index * 1000 + x4 + 1,
-                                                            itemIndex: x4
+                                                            item: t5,
+                                                            index: this.index * 1000 + s5 + 1,
+                                                            itemIndex: s5
                                                         };
                                                     };
-                                                    b5.paramsGenerator_ = c5;
+                                                    w5.paramsGenerator_ = x5;
                                                 }
                                                 else {
-                                                    this.updateStateVarsOfChildByElmtId(z4, {});
+                                                    this.updateStateVarsOfChildByElmtId(u5, {});
                                                 }
                                             }, { name: 'ImageMenuItem' });
                                         }
                                     };
-                                    this.forEachUpdateFunction(t4, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), v4, undefined, true, false);
+                                    this.forEachUpdateFunction(o5, this.menuItems.slice(0, CollapsibleMenuSection.maxCountOfVisibleItems - 1), q5, undefined, true, false);
                                 }, ForEach);
                                 ForEach.pop();
-                                this.observeComponentCreation2((n4, o4) => {
+                                this.observeComponentCreation2((i5, j5) => {
                                     Button.createWithChild({ type: ButtonType.Normal, stateEffect: true });
                                     Button.accessibilityText({ 'id': -1, 'type': 10003, params: ['sys.string.ohos_toolbar_more'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
                                     Button.width(ImageMenuItem.imageHotZoneWidth);
@@ -655,24 +655,24 @@ class CollapsibleMenuSection extends ViewPU {
                                     ViewStackProcessor.visualState();
                                     Button.onFocus(() => this.isMoreIconOnFocus = true);
                                     Button.onBlur(() => this.isMoreIconOnFocus = false);
-                                    Button.onHover((s4) => this.isMoreIconOnHover = s4);
-                                    Button.onKeyEvent((r4) => {
-                                        if (r4.keyCode !== KeyCode.KEYCODE_ENTER &&
-                                            r4.keyCode !== KeyCode.KEYCODE_SPACE) {
+                                    Button.onHover((n5) => this.isMoreIconOnHover = n5);
+                                    Button.onKeyEvent((m5) => {
+                                        if (m5.keyCode !== KeyCode.KEYCODE_ENTER &&
+                                            m5.keyCode !== KeyCode.KEYCODE_SPACE) {
                                             return;
                                         }
-                                        if (r4.type === KeyType.Down) {
+                                        if (m5.type === KeyType.Down) {
                                             this.isMoreIconOnClick = true;
                                         }
-                                        if (r4.type === KeyType.Up) {
+                                        if (m5.type === KeyType.Up) {
                                             this.isMoreIconOnClick = false;
                                         }
                                     });
-                                    Button.onTouch((q4) => {
-                                        if (q4.type === TouchType.Down) {
+                                    Button.onTouch((l5) => {
+                                        if (l5.type === TouchType.Down) {
                                             this.isMoreIconOnClick = true;
                                         }
-                                        if (q4.type === TouchType.Up || q4.type === TouchType.Cancel) {
+                                        if (l5.type === TouchType.Up || l5.type === TouchType.Cancel) {
                                             this.isMoreIconOnClick = false;
                                             if (this.fontSize >= this.minFontSize) {
                                                 this.dialogController?.close();
@@ -686,15 +686,15 @@ class CollapsibleMenuSection extends ViewPU {
                                         placement: Placement.Bottom,
                                         popupColor: Color.White,
                                         enableArrow: false,
-                                        onStateChange: (p4) => {
-                                            this.isPopupShown = p4.isVisible;
-                                            if (!p4.isVisible) {
+                                        onStateChange: (k5) => {
+                                            this.isPopupShown = k5.isVisible;
+                                            if (!k5.isVisible) {
                                                 this.isMoreIconOnClick = false;
                                             }
                                         }
                                     });
                                 }, Button);
-                                this.observeComponentCreation2((l4, m4) => {
+                                this.observeComponentCreation2((g5, h5) => {
                                     SymbolGlyph.create(PUBLIC_MORE);
                                     SymbolGlyph.fontSize(`${ImageMenuItem.imageSize}vp`);
                                     SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
@@ -717,51 +717,57 @@ class CollapsibleMenuSection extends ViewPU {
         Row.pop();
         Column.pop();
     }
-    popupBuilder(s3 = null) {
-        this.observeComponentCreation2((f4, g4) => {
+    onPlaceChildren(y4, z4, a5) {
+        z4.forEach((b5) => {
+            b5.layout({ x: 0, y: 0 });
+        });
+        this.fontSize = this.decideFontScale();
+    }
+    popupBuilder(j4 = null) {
+        this.observeComponentCreation2((w4, x4) => {
             Column.create();
             Column.width(ImageMenuItem.imageHotZoneWidth +
                 CollapsibleMenuSection.focusPadding * CollapsibleMenuSection.marginsNum);
             Column.margin({ top: CollapsibleMenuSection.focusPadding, bottom: CollapsibleMenuSection.focusPadding });
             Column.onAppear(() => {
                 focusControl.requestFocus(ImageMenuItem.focusablePrefix +
-                    this.firstFocusableIndex);
+                this.firstFocusableIndex);
             });
         }, Column);
-        this.observeComponentCreation2((t3, u3) => {
+        this.observeComponentCreation2((k4, l4) => {
             If.create();
             if (this.menuItems) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((v3, w3) => {
+                    this.observeComponentCreation2((m4, n4) => {
                         ForEach.create();
-                        const x3 = (y3, z3) => {
-                            const a4 = y3;
+                        const o4 = (p4, q4) => {
+                            const r4 = p4;
                             {
-                                this.observeComponentCreation2((b4, c4) => {
-                                    if (c4) {
-                                        let d4 = new ImageMenuItem(this, {
-                                            item: a4, index: this.index * 1000 +
-                                                CollapsibleMenuSection.maxCountOfVisibleItems + z3,
-                                            isPopup: true
-                                        }, undefined, b4, () => { }, { page: 'library/src/main/ets/components/ComposeTitleBar.ets', line: 394, col: 13 });
-                                        ViewPU.create(d4);
-                                        let e4 = () => {
+                                this.observeComponentCreation2((s4, t4) => {
+                                    if (t4) {
+                                        let u4 = new ImageMenuItem(this, {
+                                            item: r4, index: this.index * 1000 +
+                                            CollapsibleMenuSection.maxCountOfVisibleItems + q4,
+                                            isPopup: false
+                                        }, undefined, s4, () => { }, { page: 'library/src/main/ets/components/composetitlebar.ets', line: 404, col: 13 });
+                                        ViewPU.create(u4);
+                                        let v4 = () => {
                                             return {
-                                                item: a4,
+                                                item: r4,
                                                 index: this.index * 1000 +
-                                                    CollapsibleMenuSection.maxCountOfVisibleItems + z3,
-                                                isPopup: true
+                                                CollapsibleMenuSection.maxCountOfVisibleItems + q4,
+                                                isPopup: false
                                             };
                                         };
-                                        d4.paramsGenerator_ = e4;
+                                        u4.paramsGenerator_ = v4;
                                     }
                                     else {
-                                        this.updateStateVarsOfChildByElmtId(b4, {});
+                                        this.updateStateVarsOfChildByElmtId(s4, {});
                                     }
                                 }, { name: 'ImageMenuItem' });
                             }
                         };
-                        this.forEachUpdateFunction(v3, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), x3, undefined, true, false);
+                        this.forEachUpdateFunction(m4, this.menuItems.slice(CollapsibleMenuSection.maxCountOfVisibleItems - 1, this.menuItems.length), o4, undefined, true, false);
                     }, ForEach);
                     ForEach.pop();
                 });
@@ -782,10 +788,10 @@ CollapsibleMenuSection.maxCountOfVisibleItems = 3;
 CollapsibleMenuSection.focusPadding = 4;
 CollapsibleMenuSection.marginsNum = 2;
 class ImageMenuItem extends ViewPU {
-    constructor(k3, l3, m3, n3 = -1, o3 = undefined, p3) {
-        super(k3, m3, n3, p3);
-        if (typeof o3 === 'function') {
-            this.paramsGenerator_ = o3;
+    constructor(b4, c4, d4, e4 = -1, f4 = undefined, g4) {
+        super(b4, d4, e4, g4);
+        if (typeof f4 === 'function') {
+            this.paramsGenerator_ = f4;
         }
         this.item = {};
         this.index = 0;
@@ -794,15 +800,15 @@ class ImageMenuItem extends ViewPU {
         this.isFollowingSystemFontScale = false;
         this.maxFontScale = 1;
         this.systemFontScale = 1;
-        this.isPopup = false;
+        this.isPopup = true;
         this.__isOnFocus = new ObservedPropertySimplePU(false, this, 'isOnFocus');
         this.__isOnHover = new ObservedPropertySimplePU(false, this, 'isOnHover');
         this.__isOnClick = new ObservedPropertySimplePU(false, this, 'isOnClick');
-        this.__fontSize = new SynchedPropertySimpleOneWayPU(l3.fontSize, this, 'fontSize');
+        this.__fontSize = new SynchedPropertySimpleOneWayPU(c4.fontSize, this, 'fontSize');
         this.__parentParentUniqueId = this.initializeConsume('uniqueId', 'parentParentUniqueId');
         this.dialogController = new CustomDialogController({
             builder: () => {
-                let q3 = new ComposeTitleBarDialog(this, {
+                let h4 = new ComposeTitleBarDialog(this, {
                     cancel: () => {
                     },
                     confirm: () => {
@@ -810,10 +816,10 @@ class ImageMenuItem extends ViewPU {
                     itemComposeTitleDialog: this.item,
                     composeTitleBarDialog: this.item.label ? this.item.label : this.textDialog(),
                     fontSize: this.fontSize,
-                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/ComposeTitleBar.ets', line: 432, col: 14 });
-                q3.setController(this.dialogController);
-                ViewPU.create(q3);
-                let r3 = () => {
+                }, undefined, -1, () => { }, { page: 'library/src/main/ets/components/composetitlebar.ets', line: 442, col: 14 });
+                h4.setController(this.dialogController);
+                ViewPU.create(h4);
+                let i4 = () => {
                     return {
                         cancel: () => {
                         },
@@ -824,71 +830,71 @@ class ImageMenuItem extends ViewPU {
                         fontSize: this.fontSize
                     };
                 };
-                q3.paramsGenerator_ = r3;
+                h4.paramsGenerator_ = i4;
             },
             maskColor: Color.Transparent,
             isModal: true,
             customStyle: true
         }, this);
         this.__buttonGestureModifier = new ObservedPropertyObjectPU(new ButtonGestureModifier(this.dialogController), this, 'buttonGestureModifier');
-        this.setInitiallyProvidedValue(l3);
+        this.setInitiallyProvidedValue(c4);
         this.declareWatch('fontSize', this.onFontSizeUpdated);
         this.finalizeConstruction();
     }
-    setInitiallyProvidedValue(j3) {
-        if (j3.item !== undefined) {
-            this.item = j3.item;
+    setInitiallyProvidedValue(a4) {
+        if (a4.item !== undefined) {
+            this.item = a4.item;
         }
-        if (j3.index !== undefined) {
-            this.index = j3.index;
+        if (a4.index !== undefined) {
+            this.index = a4.index;
         }
-        if (j3.itemIndex !== undefined) {
-            this.itemIndex = j3.itemIndex;
+        if (a4.itemIndex !== undefined) {
+            this.itemIndex = a4.itemIndex;
         }
-        if (j3.minFontSize !== undefined) {
-            this.minFontSize = j3.minFontSize;
+        if (a4.minFontSize !== undefined) {
+            this.minFontSize = a4.minFontSize;
         }
-        if (j3.isFollowingSystemFontScale !== undefined) {
-            this.isFollowingSystemFontScale = j3.isFollowingSystemFontScale;
+        if (a4.isFollowingSystemFontScale !== undefined) {
+            this.isFollowingSystemFontScale = a4.isFollowingSystemFontScale;
         }
-        if (j3.maxFontScale !== undefined) {
-            this.maxFontScale = j3.maxFontScale;
+        if (a4.maxFontScale !== undefined) {
+            this.maxFontScale = a4.maxFontScale;
         }
-        if (j3.systemFontScale !== undefined) {
-            this.systemFontScale = j3.systemFontScale;
+        if (a4.systemFontScale !== undefined) {
+            this.systemFontScale = a4.systemFontScale;
         }
-        if (j3.isPopup !== undefined) {
-            this.isPopup = j3.isPopup;
+        if (a4.isPopup !== undefined) {
+            this.isPopup = a4.isPopup;
         }
-        if (j3.isOnFocus !== undefined) {
-            this.isOnFocus = j3.isOnFocus;
+        if (a4.isOnFocus !== undefined) {
+            this.isOnFocus = a4.isOnFocus;
         }
-        if (j3.isOnHover !== undefined) {
-            this.isOnHover = j3.isOnHover;
+        if (a4.isOnHover !== undefined) {
+            this.isOnHover = a4.isOnHover;
         }
-        if (j3.isOnClick !== undefined) {
-            this.isOnClick = j3.isOnClick;
+        if (a4.isOnClick !== undefined) {
+            this.isOnClick = a4.isOnClick;
         }
-        if (j3.fontSize === undefined) {
+        if (a4.fontSize === undefined) {
             this.__fontSize.set(1);
         }
-        if (j3.dialogController !== undefined) {
-            this.dialogController = j3.dialogController;
+        if (a4.dialogController !== undefined) {
+            this.dialogController = a4.dialogController;
         }
-        if (j3.buttonGestureModifier !== undefined) {
-            this.buttonGestureModifier = j3.buttonGestureModifier;
+        if (a4.buttonGestureModifier !== undefined) {
+            this.buttonGestureModifier = a4.buttonGestureModifier;
         }
     }
-    updateStateVars(i3) {
-        this.__fontSize.reset(i3.fontSize);
+    updateStateVars(z3) {
+        this.__fontSize.reset(z3.fontSize);
     }
-    purgeVariableDependenciesOnElmtId(h3) {
-        this.__isOnFocus.purgeDependencyOnElmtId(h3);
-        this.__isOnHover.purgeDependencyOnElmtId(h3);
-        this.__isOnClick.purgeDependencyOnElmtId(h3);
-        this.__fontSize.purgeDependencyOnElmtId(h3);
-        this.__parentParentUniqueId.purgeDependencyOnElmtId(h3);
-        this.__buttonGestureModifier.purgeDependencyOnElmtId(h3);
+    purgeVariableDependenciesOnElmtId(y3) {
+        this.__isOnFocus.purgeDependencyOnElmtId(y3);
+        this.__isOnHover.purgeDependencyOnElmtId(y3);
+        this.__isOnClick.purgeDependencyOnElmtId(y3);
+        this.__fontSize.purgeDependencyOnElmtId(y3);
+        this.__parentParentUniqueId.purgeDependencyOnElmtId(y3);
+        this.__buttonGestureModifier.purgeDependencyOnElmtId(y3);
     }
     aboutToBeDeleted() {
         this.__isOnFocus.aboutToBeDeleted();
@@ -903,38 +909,38 @@ class ImageMenuItem extends ViewPU {
     get isOnFocus() {
         return this.__isOnFocus.get();
     }
-    set isOnFocus(g3) {
-        this.__isOnFocus.set(g3);
+    set isOnFocus(x3) {
+        this.__isOnFocus.set(x3);
     }
     get isOnHover() {
         return this.__isOnHover.get();
     }
-    set isOnHover(f3) {
-        this.__isOnHover.set(f3);
+    set isOnHover(w3) {
+        this.__isOnHover.set(w3);
     }
     get isOnClick() {
         return this.__isOnClick.get();
     }
-    set isOnClick(e3) {
-        this.__isOnClick.set(e3);
+    set isOnClick(v3) {
+        this.__isOnClick.set(v3);
     }
     get fontSize() {
         return this.__fontSize.get();
     }
-    set fontSize(d3) {
-        this.__fontSize.set(d3);
+    set fontSize(u3) {
+        this.__fontSize.set(u3);
     }
     get parentParentUniqueId() {
         return this.__parentParentUniqueId.get();
     }
-    set parentParentUniqueId(c3) {
-        this.__parentParentUniqueId.set(c3);
+    set parentParentUniqueId(t3) {
+        this.__parentParentUniqueId.set(t3);
     }
     get buttonGestureModifier() {
         return this.__buttonGestureModifier.get();
     }
-    set buttonGestureModifier(b3) {
-        this.__buttonGestureModifier.set(b3);
+    set buttonGestureModifier(s3) {
+        this.__buttonGestureModifier.set(s3);
     }
     textDialog() {
         if (this.item.value === PUBLIC_MORE) {
@@ -947,24 +953,24 @@ class ImageMenuItem extends ViewPU {
             return this.item.label ? this.item.label : '';
         }
     }
-    toStringFormat(w2) {
-        if (typeof w2 === 'string') {
-            return w2;
+    toStringFormat(n3) {
+        if (typeof n3 === 'string') {
+            return n3;
         }
-        else if (typeof w2 === 'undefined') {
+        else if (typeof n3 === 'undefined') {
             return '';
         }
         else {
-            let x2 = '';
+            let o3 = '';
             try {
-                x2 = getContext()?.resourceManager?.getStringSync(w2);
+                o3 = getContext()?.resourceManager?.getStringSync(n3);
             }
-            catch (y2) {
-                let z2 = y2?.code;
-                let a3 = y2?.message;
-                hilog.error(0x3900, 'Ace', `Faild to ComposeTitleBar toStringFormat,code: ${z2},message:${a3}`);
+            catch (p3) {
+                let q3 = p3?.code;
+                let r3 = p3?.message;
+                hilog.error(0x3900, 'Ace', `Faild to ComposeTitleBar toStringFormat,code: ${q3},message:${r3}`);
             }
-            return x2;
+            return o3;
         }
     }
     getAccessibilityReadText() {
@@ -982,9 +988,9 @@ class ImageMenuItem extends ViewPU {
         }
         return ' ';
     }
-    onPlaceChildren(s2, t2, u2) {
-        t2.forEach((v2) => {
-            v2.layout({ x: 0, y: 0 });
+    onPlaceChildren(j3, k3, l3) {
+        k3.forEach((m3) => {
+            m3.layout({ x: 0, y: 0 });
         });
         this.fontSize = this.decideFontScale();
     }
@@ -1005,14 +1011,14 @@ class ImageMenuItem extends ViewPU {
     }
     aboutToAppear() {
         try {
-            let r2 = this.getUIContext();
-            this.isFollowingSystemFontScale = r2.isFollowingSystemFontScale();
-            this.maxFontScale = r2.getMaxFontScale();
+            let i3 = this.getUIContext();
+            this.isFollowingSystemFontScale = i3.isFollowingSystemFontScale();
+            this.maxFontScale = i3.getMaxFontScale();
         }
-        catch (o2) {
-            let p2 = o2.code;
-            let q2 = o2.message;
-            hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${p2}, message: ${q2}`);
+        catch (f3) {
+            let g3 = f3.code;
+            let h3 = f3.message;
+            hilog.error(0x3900, 'ComposeTitleBar', `Failed to init fontsizescale info, cause, code: ${g3}, message: ${h3}`);
         }
         this.fontSize = this.decideFontScale();
     }
@@ -1021,148 +1027,292 @@ class ImageMenuItem extends ViewPU {
     }
     decideFontScale() {
         try {
-            let n2 = this.getUIContext();
-            this.systemFontScale = n2.getHostContext()?.config?.fontSizeScale ?? 1;
+            let e3 = this.getUIContext();
+            this.systemFontScale = e3.getHostContext()?.config?.fontSizeScale ?? 1;
             if (!this.isFollowingSystemFontScale) {
                 return 1;
             }
             return Math.min(this.systemFontScale, this.maxFontScale);
         }
-        catch (k2) {
-            let l2 = k2.code;
-            let m2 = k2.message;
-            hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${l2}, message: ${m2}`);
+        catch (b3) {
+            let c3 = b3.code;
+            let d3 = b3.message;
+            hilog.error(0x3900, 'ComposeTitleBar', `Faild to decideFontScale,cause, code: ${c3}, message: ${d3}`);
             return 1;
         }
     }
     initialRender() {
-        this.observeComponentCreation2((f2, g2) => {
-            Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
-            Button.id(`ComposeTitleBar_ImageMenuItem_${this.parentParentUniqueId}_${this.itemIndex}`);
-            Button.accessibilityText(this.getAccessibilityReadText());
-            Button.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
-            Button.accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription));
-            Button.enabled(this.item.isEnabled ? this.item.isEnabled : false);
-            Button.width(ImageMenuItem.imageHotZoneWidth);
-            Button.height(ImageMenuItem.imageHotZoneWidth);
-            Button.borderRadius(ImageMenuItem.buttonBorderRadius);
-            Button.foregroundColor(this.getFgColor());
-            Button.backgroundColor(this.getBgColor());
-            ViewStackProcessor.visualState('focused');
-            Button.border({
-                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                width: ImageMenuItem.focusBorderWidth,
-                color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                style: BorderStyle.Solid
-            });
-            ViewStackProcessor.visualState('normal');
-            Button.border({
-                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
-                width: 0
-            });
-            ViewStackProcessor.visualState();
-            Button.onFocus(() => {
-                if (!this.item?.isEnabled) {
-                    return;
-                }
-                this.isOnFocus = true;
-            });
-            Button.onBlur(() => this.isOnFocus = false);
-            Button.onHover((j2) => {
-                if (!this.item?.isEnabled) {
-                    return;
-                }
-                this.isOnHover = j2;
-            });
-            Button.onKeyEvent((i2) => {
-                if (!this.item?.isEnabled) {
-                    return;
-                }
-                if (i2.keyCode !== KeyCode.KEYCODE_ENTER &&
-                    i2.keyCode !== KeyCode.KEYCODE_SPACE) {
-                    return;
-                }
-                if (i2.type === KeyType.Down) {
-                    this.isOnClick = true;
-                }
-                if (i2.type === KeyType.Up) {
-                    this.isOnClick = false;
-                }
-            });
-            Button.onTouch((h2) => {
-                if (!this.item?.isEnabled) {
-                    return;
-                }
-                if (h2.type === TouchType.Down) {
-                    this.isOnClick = true;
-                }
-                if (h2.type === TouchType.Up || h2.type === TouchType.Cancel) {
-                    this.isOnClick = false;
-                    if (this.fontSize >= this.minFontSize && this.isPopup === false) {
-                        this.dialogController?.close();
-                    }
-                }
-            });
-            Button.onClick(() => {
-                if (this.item) {
-                    return this.item.isEnabled && this.item.action?.();
-                }
-            });
-            Button.gestureModifier(ObservedObject.GetRawObject(this.buttonGestureModifier));
-        }, Button);
         this.observeComponentCreation2((v1, w1) => {
             If.create();
-            if (this.item?.symbolStyle) {
+            if (this.isPopup) {
                 this.ifElseBranchUpdateFunction(0, () => {
-                    this.observeComponentCreation2((d2, e2) => {
-                        SymbolGlyph.create();
-                        SymbolGlyph.attributeModifier.bind(this)(this.item?.symbolStyle);
-                        SymbolGlyph.fontSize(`${ImageMenuItem.imageSize}vp`);
-                        SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
-                        SymbolGlyph.symbolEffect(new SymbolEffect(), false);
-                        SymbolGlyph.draggable(false);
-                        SymbolGlyph.focusable(this.item?.isEnabled);
-                        SymbolGlyph.key(ImageMenuItem.focusablePrefix + this.index);
-                    }, SymbolGlyph);
+                    if (!If.canRetake(`ComposeTitleBar_ImageMenuItem_${this.parentParentUniqueId}_${this.itemIndex}`)) {
+                        this.observeComponentCreation2((w2, x2) => {
+                            Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
+                            Button.id(`ComposeTitleBar_ImageMenuItem_${this.parentParentUniqueId}_${this.itemIndex}`);
+                            Button.accessibilityText(this.getAccessibilityReadText());
+                            Button.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
+                            Button.accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription));
+                            Button.enabled(this.item.isEnabled ? this.item.isEnabled : false);
+                            Button.width(ImageMenuItem.imageHotZoneWidth);
+                            Button.height(ImageMenuItem.imageHotZoneWidth);
+                            Button.borderRadius(ImageMenuItem.buttonBorderRadius);
+                            Button.foregroundColor(this.getFgColor());
+                            Button.backgroundColor(this.getBgColor());
+                            ViewStackProcessor.visualState('focused');
+                            Button.border({
+                                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                width: ImageMenuItem.focusBorderWidth,
+                                color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                style: BorderStyle.Solid
+                            });
+                            ViewStackProcessor.visualState('normal');
+                            Button.border({
+                                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                width: 0
+                            });
+                            ViewStackProcessor.visualState();
+                            Button.onFocus(() => {
+                                if (!this.item?.isEnabled) {
+                                    return;
+                                }
+                                this.isOnFocus = true;
+                            });
+                            Button.onBlur(() => this.isOnFocus = false);
+                            Button.onHover((a3) => {
+                                if (!this.item?.isEnabled) {
+                                    return;
+                                }
+                                this.isOnHover = a3;
+                            });
+                            Button.onKeyEvent((z2) => {
+                                if (!this.item?.isEnabled) {
+                                    return;
+                                }
+                                if (z2.keyCode !== KeyCode.KEYCODE_ENTER &&
+                                    z2.keyCode !== KeyCode.KEYCODE_SPACE) {
+                                    return;
+                                }
+                                if (z2.type === KeyType.Down) {
+                                    this.isOnClick = true;
+                                }
+                                if (z2.type === KeyType.Up) {
+                                    this.isOnClick = false;
+                                }
+                            });
+                            Button.onTouch((y2) => {
+                                if (!this.item?.isEnabled) {
+                                    return;
+                                }
+                                if (y2.type === TouchType.Down) {
+                                    this.isOnClick = true;
+                                }
+                                if (y2.type === TouchType.Up || y2.type === TouchType.Cancel) {
+                                    this.isOnClick = false;
+                                    if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+                                        this.dialogController?.close();
+                                    }
+                                }
+                            });
+                            Button.onClick(() => {
+                                if (this.item) {
+                                    return this.item.isEnabled && this.item.action?.();
+                                }
+                            });
+                            Button.gestureModifier(ObservedObject.GetRawObject(this.buttonGestureModifier));
+                        }, Button);
+                        this.observeComponentCreation2((m2, n2) => {
+                            If.create();
+                            if (this.item?.symbolStyle) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    this.observeComponentCreation2((u2, v2) => {
+                                        SymbolGlyph.create();
+                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                        SymbolGlyph.attributeModifier.bind(this)(this.item?.symbolStyle);
+                                        SymbolGlyph.fontSize(`${ImageMenuItem.imageSize}vp`);
+                                        SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                        SymbolGlyph.symbolEffect(new SymbolEffect(), false);
+                                        SymbolGlyph.draggable(false);
+                                        SymbolGlyph.focusable(this.item?.isEnabled);
+                                        SymbolGlyph.key(ImageMenuItem.focusablePrefix + this.index);
+                                    }, SymbolGlyph);
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                    this.observeComponentCreation2((o2, p2) => {
+                                        If.create();
+                                        if (Util.isSymbolResource(this.item.value)) {
+                                            this.ifElseBranchUpdateFunction(0, () => {
+                                                this.observeComponentCreation2((s2, t2) => {
+                                                    SymbolGlyph.create(this.item.value);
+                                                    SymbolGlyph.fontSize(`${ImageMenuItem.imageSize}vp`);
+                                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                    SymbolGlyph.draggable(false);
+                                                    SymbolGlyph.focusable(this.item?.isEnabled);
+                                                    SymbolGlyph.key(ImageMenuItem.focusablePrefix + this.index);
+                                                }, SymbolGlyph);
+                                            });
+                                        }
+                                        else {
+                                            this.ifElseBranchUpdateFunction(1, () => {
+                                                this.observeComponentCreation2((q2, r2) => {
+                                                    Image.create(this.item?.value);
+                                                    Image.matchTextDirection(this.item?.value === PUBLIC_BACK ? true : false);
+                                                    Image.width(ImageMenuItem.imageSize);
+                                                    Image.draggable(false);
+                                                    Image.height(ImageMenuItem.imageSize);
+                                                    Image.focusable(this.item?.isEnabled);
+                                                    Image.key(ImageMenuItem.focusablePrefix + this.index);
+                                                    Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                }, Image);
+                                            });
+                                        }
+                                    }, If);
+                                    If.pop();
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        Button.pop();
+                    }
                 });
             }
             else {
                 this.ifElseBranchUpdateFunction(1, () => {
-                    this.observeComponentCreation2((x1, y1) => {
-                        If.create();
-                        if (Util.isSymbolResource(this.item.value)) {
-                            this.ifElseBranchUpdateFunction(0, () => {
-                                this.observeComponentCreation2((b2, c2) => {
-                                    SymbolGlyph.create(this.item.value);
-                                    SymbolGlyph.fontSize(`${ImageMenuItem.imageSize}vp`);
-                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
-                                    SymbolGlyph.draggable(false);
-                                    SymbolGlyph.focusable(this.item?.isEnabled);
-                                    SymbolGlyph.key(ImageMenuItem.focusablePrefix + this.index);
-                                }, SymbolGlyph);
+                    if (!If.canRetake(`ComposeTitleBar_ImageMenuItem_${this.parentParentUniqueId}_${this.itemIndex}`)) {
+                        this.observeComponentCreation2((h2, i2) => {
+                            Button.createWithChild({ type: ButtonType.Normal, stateEffect: this.item.isEnabled });
+                            Button.id(`ComposeTitleBar_ImageMenuItem_${this.parentParentUniqueId}_${this.itemIndex}`);
+                            Button.accessibilityText(this.getAccessibilityReadText());
+                            Button.accessibilityLevel(this.item?.accessibilityLevel ?? 'auto');
+                            Button.accessibilityDescription(this.toStringFormat(this.item?.accessibilityDescription));
+                            Button.enabled(this.item.isEnabled ? this.item.isEnabled : false);
+                            Button.width(ImageMenuItem.imageHotZoneWidth);
+                            Button.height(ImageMenuItem.imageHotZoneWidth);
+                            Button.borderRadius(ImageMenuItem.buttonBorderRadius);
+                            Button.foregroundColor(this.getFgColor());
+                            Button.backgroundColor(this.getBgColor());
+                            ViewStackProcessor.visualState('focused');
+                            Button.border({
+                                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                width: ImageMenuItem.focusBorderWidth,
+                                color: { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_focused_outline'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                style: BorderStyle.Solid
                             });
-                        }
-                        else {
-                            this.ifElseBranchUpdateFunction(1, () => {
-                                this.observeComponentCreation2((z1, a2) => {
-                                    Image.create(this.item?.value);
-                                    Image.matchTextDirection(this.item?.value === PUBLIC_BACK ? true : false);
-                                    Image.width(ImageMenuItem.imageSize);
-                                    Image.draggable(false);
-                                    Image.height(ImageMenuItem.imageSize);
-                                    Image.focusable(this.item?.isEnabled);
-                                    Image.key(ImageMenuItem.focusablePrefix + this.index);
-                                    Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
-                                }, Image);
+                            ViewStackProcessor.visualState('normal');
+                            Button.border({
+                                radius: { 'id': -1, 'type': 10002, params: ['sys.float.ohos_id_corner_radius_clicked'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
+                                width: 0
                             });
-                        }
-                    }, If);
-                    If.pop();
+                            ViewStackProcessor.visualState();
+                            Button.onFocus(() => {
+                                if (!this.item?.isEnabled) {
+                                    return;
+                                }
+                                this.isOnFocus = true;
+                            });
+                            Button.onBlur(() => this.isOnFocus = false);
+                            Button.onHover((l2) => {
+                                if (!this.item?.isEnabled) {
+                                    return;
+                                }
+                                this.isOnHover = l2;
+                            });
+                            Button.onKeyEvent((k2) => {
+                                if (!this.item?.isEnabled) {
+                                    return;
+                                }
+                                if (k2.keyCode !== KeyCode.KEYCODE_ENTER &&
+                                    k2.keyCode !== KeyCode.KEYCODE_SPACE) {
+                                    return;
+                                }
+                                if (k2.type === KeyType.Down) {
+                                    this.isOnClick = true;
+                                }
+                                if (k2.type === KeyType.Up) {
+                                    this.isOnClick = false;
+                                }
+                            });
+                            Button.onTouch((j2) => {
+                                if (!this.item?.isEnabled) {
+                                    return;
+                                }
+                                if (j2.type === TouchType.Down) {
+                                    this.isOnClick = true;
+                                }
+                                if (j2.type === TouchType.Up || j2.type === TouchType.Cancel) {
+                                    this.isOnClick = false;
+                                    if (this.fontSize >= this.minFontSize && this.isPopup === false) {
+                                        this.dialogController?.close();
+                                    }
+                                }
+                            });
+                            Button.onClick(() => {
+                                if (this.item) {
+                                    return this.item.isEnabled && this.item.action?.();
+                                }
+                            });
+                        }, Button);
+                        this.observeComponentCreation2((x1, y1) => {
+                            If.create();
+                            if (this.item?.symbolStyle) {
+                                this.ifElseBranchUpdateFunction(0, () => {
+                                    this.observeComponentCreation2((f2, g2) => {
+                                        SymbolGlyph.create();
+                                        SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                        SymbolGlyph.attributeModifier.bind(this)(this.item?.symbolStyle);
+                                        SymbolGlyph.fontSize(`${ImageMenuItem.imageSize}vp`);
+                                        SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
+                                        SymbolGlyph.symbolEffect(new SymbolEffect(), false);
+                                        SymbolGlyph.draggable(false);
+                                        SymbolGlyph.focusable(this.item?.isEnabled);
+                                        SymbolGlyph.key(ImageMenuItem.focusablePrefix + this.index);
+                                    }, SymbolGlyph);
+                                });
+                            }
+                            else {
+                                this.ifElseBranchUpdateFunction(1, () => {
+                                    this.observeComponentCreation2((z1, a2) => {
+                                        If.create();
+                                        if (Util.isSymbolResource(this.item.value)) {
+                                            this.ifElseBranchUpdateFunction(0, () => {
+                                                this.observeComponentCreation2((d2, e2) => {
+                                                    SymbolGlyph.create(this.item.value);
+                                                    SymbolGlyph.fontSize(`${ImageMenuItem.imageSize}vp`);
+                                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
+                                                    SymbolGlyph.draggable(false);
+                                                    SymbolGlyph.focusable(this.item?.isEnabled);
+                                                    SymbolGlyph.key(ImageMenuItem.focusablePrefix + this.index);
+                                                }, SymbolGlyph);
+                                            });
+                                        }
+                                        else {
+                                            this.ifElseBranchUpdateFunction(1, () => {
+                                                this.observeComponentCreation2((b2, c2) => {
+                                                    Image.create(this.item?.value);
+                                                    Image.matchTextDirection(this.item?.value === PUBLIC_BACK ? true : false);
+                                                    Image.width(ImageMenuItem.imageSize);
+                                                    Image.draggable(false);
+                                                    Image.height(ImageMenuItem.imageSize);
+                                                    Image.focusable(this.item?.isEnabled);
+                                                    Image.key(ImageMenuItem.focusablePrefix + this.index);
+                                                    Image.fillColor({ 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_text_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' });
+                                                }, Image);
+                                            });
+                                        }
+                                    }, If);
+                                    If.pop();
+                                });
+                            }
+                        }, If);
+                        If.pop();
+                        Button.pop();
+                    }
                 });
             }
         }, If);
         If.pop();
-        Button.pop();
     }
     rerender() {
         this.updateDirtyElements();
@@ -1306,8 +1456,9 @@ class ComposeTitleBarDialog extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((d1, e1) => {
                                     SymbolGlyph.create();
+                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.itemComposeTitleDialog.symbolStyle);
-                                    SymbolGlyph.fontSize(`${IMAGE_SIZE}vp`);
+                                    SymbolGlyph.fontSize(IMAGE_SIZE);
                                     SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                     SymbolGlyph.margin({
@@ -1325,7 +1476,7 @@ class ComposeTitleBarDialog extends ViewPU {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((b1, c1) => {
                                                 SymbolGlyph.create(this.itemComposeTitleDialog.value);
-                                                SymbolGlyph.fontSize(`${IMAGE_SIZE}vp`);
+                                                SymbolGlyph.fontSize(IMAGE_SIZE);
                                                 SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                                 SymbolGlyph.margin({
                                                     top: { 'id': -1, 'type': 10002, params: ['sys.float.padding_level24'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' },
@@ -1394,8 +1545,9 @@ class ComposeTitleBarDialog extends ViewPU {
                             this.ifElseBranchUpdateFunction(0, () => {
                                 this.observeComponentCreation2((n, o) => {
                                     SymbolGlyph.create();
+                                    SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                     SymbolGlyph.attributeModifier.bind(this)(this.itemComposeTitleDialog.symbolStyle);
-                                    SymbolGlyph.fontSize(`${IMAGE_SIZE}vp`);
+                                    SymbolGlyph.fontSize(IMAGE_SIZE);
                                     SymbolGlyph.effectStrategy(SymbolEffectStrategy.NONE);
                                     SymbolGlyph.symbolEffect(new SymbolEffect(), false);
                                 }, SymbolGlyph);
@@ -1409,7 +1561,7 @@ class ComposeTitleBarDialog extends ViewPU {
                                         this.ifElseBranchUpdateFunction(0, () => {
                                             this.observeComponentCreation2((l, m) => {
                                                 SymbolGlyph.create(this.itemComposeTitleDialog.value);
-                                                SymbolGlyph.fontSize(`${IMAGE_SIZE}vp`);
+                                                SymbolGlyph.fontSize(IMAGE_SIZE);
                                                 SymbolGlyph.fontColor([{ 'id': -1, 'type': 10001, params: ['sys.color.icon_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' }]);
                                             }, SymbolGlyph);
                                         });

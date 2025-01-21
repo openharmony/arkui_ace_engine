@@ -37,10 +37,14 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_surface_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_proxy.h"
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
+#include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "core/event/ace_events.h"
+#ifdef SUPPORT_DIGITAL_CROWN
+#include "core/event/crown_event.h"
+#endif
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
 #include "core/event/pointer_event.h"
@@ -77,7 +81,7 @@ bool StartWith(const std::string &source, const std::string &prefix)
 
 class UIExtensionAccessibilityChildTreeCallback : public AccessibilityChildTreeCallback {
 public:
-    UIExtensionAccessibilityChildTreeCallback(const WeakPtr<UIExtensionPattern> &weakPattern, int64_t accessibilityId)
+    UIExtensionAccessibilityChildTreeCallback(const WeakPtr<UIExtensionPattern>& weakPattern, int64_t accessibilityId)
         : AccessibilityChildTreeCallback(accessibilityId), weakPattern_(weakPattern)
     {}
 
@@ -391,9 +395,10 @@ void UIExtensionPattern::OnConnect()
         return;
     }
     context->SetRSNode(surfaceNode);
-    RemovePlaceholderNode();
-    host->AddChild(contentNode_, 0);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (curPlaceholderType_ != PlaceholderType::INITIAL) {
+        host->AddChild(contentNode_, 0);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
     surfaceNode->CreateNodeInRenderThread();
     surfaceNode->SetForeground(usage_ == UIExtensionUsage::MODAL);
     FireOnRemoteReadyCallback();
@@ -414,6 +419,14 @@ void UIExtensionPattern::OnConnect()
     }
     InitializeAccessibility();
     ReDispatchDisplayArea();
+    InitBusinessDataHandleCallback();
+    RegisterReplyPageModeCallback();
+    NotifyHostWindowMode();
+}
+
+void UIExtensionPattern::InitBusinessDataHandleCallback()
+{
+    RegisterEventProxyFlagCallback();
 }
 
 void UIExtensionPattern::ReplacePlaceholderByContent()
@@ -432,6 +445,42 @@ void UIExtensionPattern::ReplacePlaceholderByContent()
 void UIExtensionPattern::OnAreaUpdated()
 {
     PostDelayRemovePlaceholder(REMOVE_PLACEHOLDER_DELAY_TIME);
+}
+
+void UIExtensionPattern::RegisterWindowSceneVisibleChangeCallback(
+    const RefPtr<Pattern>& windowScenePattern)
+{
+    auto systemWindowScene = AceType::DynamicCast<SystemWindowScene>(windowScenePattern);
+    CHECK_NULL_VOID(systemWindowScene);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto callback = [weak = WeakClaim(this)](bool visible) {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->OnWindowSceneVisibleChange(visible);
+        }
+    };
+    systemWindowScene->RegisterVisibleChangeCallback(host->GetId(), callback);
+    weakSystemWindowScene_ = systemWindowScene;
+    UIEXT_LOGI("RegisterWindowSceneVisibleChangeCallback %{public}d.", host->GetId());
+}
+
+void UIExtensionPattern::UnRegisterWindowSceneVisibleChangeCallback(int32_t nodeId)
+{
+    auto pattern = weakSystemWindowScene_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto systemWindowScene = AceType::DynamicCast<SystemWindowScene>(pattern);
+    CHECK_NULL_VOID(systemWindowScene);
+    systemWindowScene->UnRegisterVisibleChangeCallback(nodeId);
+    UIEXT_LOGI("UnRegisterWindowSceneVisibleChangeCallback %{public}d.", nodeId);
+}
+
+void UIExtensionPattern::OnWindowSceneVisibleChange(bool visible)
+{
+    UIEXT_LOGI("OnWindowSceneVisibleChange %{public}d.", visible);
+    if (!visible) {
+        OnWindowHide();
+    }
 }
 
 void UIExtensionPattern::PostDelayRemovePlaceholder(uint32_t delay)
@@ -459,7 +508,23 @@ void UIExtensionPattern::OnExtensionEvent(UIExtCallbackEventId eventId)
         case UIExtCallbackEventId::ON_UEA_ACCESSIBILITY_READY:
             OnUeaAccessibilityEventAsync();
             break;
+        case UIExtCallbackEventId::ON_DRAW_FIRST:
+            FireOnDrawReadyCallback();
+            break;
     }
+}
+
+void UIExtensionPattern::UpdateFrameNodeState()
+{
+    auto frameNode = frameNode_.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto ngPipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(ngPipeline);
+    auto frontend = ngPipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->UpdateFrameNodeState(frameNode->GetId());
 }
 
 void UIExtensionPattern::OnUeaAccessibilityEventAsync()
@@ -468,6 +533,7 @@ void UIExtensionPattern::OnUeaAccessibilityEventAsync()
     CHECK_NULL_VOID(frameNode);
     auto accessibilityProperty = frameNode->GetAccessibilityProperty<AccessibilityProperty>();
     CHECK_NULL_VOID(accessibilityProperty);
+    UpdateFrameNodeState();
     if ((accessibilityChildTreeCallback_ != nullptr) && (accessibilityProperty->GetChildTreeId() != -1)) {
         UIEXT_LOGI("uec need notify register accessibility again %{public}d, %{public}d.",
             accessibilityProperty->GetChildWindowId(), accessibilityProperty->GetChildTreeId());
@@ -616,13 +682,36 @@ void UIExtensionPattern::NotifyDestroy()
     }
 }
 
+class UECAccessibilitySAObserverCallback : public AccessibilitySAObserverCallback {
+public:
+    UECAccessibilitySAObserverCallback(
+        const WeakPtr<UIExtensionPattern>& weakPattern, int64_t accessibilityId)
+        : AccessibilitySAObserverCallback(accessibilityId), weakUECPattern_(weakPattern)
+    {}
+
+    ~UECAccessibilitySAObserverCallback() override = default;
+
+    bool OnState(bool state) override
+    {
+        auto pattern = weakUECPattern_.Upgrade();
+        CHECK_NULL_RETURN(pattern, false);
+        if (state) {
+            // first time turn on Accessibility, add TransferAccessibilityRectInfo
+            pattern->TransferAccessibilityRectInfo();
+        }
+        return true;
+    }
+private:
+    WeakPtr<UIExtensionPattern> weakUECPattern_;
+};
+
 void UIExtensionPattern::OnAttachToFrameNode()
 {
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [weak = WeakClaim(this)](
@@ -649,20 +738,39 @@ void UIExtensionPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(pattern);
         pattern->SetFoldStatusChanged(true);
     });
+    auto frontend = pipeline->GetFrontend();
+    CHECK_NULL_VOID(frontend);
+    auto accessibilityManager = frontend->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->SendFrameNodeToAccessibility(host, true);
+    host->RegisterNodeChangeListener();
+    accessibilitySAObserverCallback_ = std::make_shared<UECAccessibilitySAObserverCallback>(
+        WeakClaim(this), host->GetAccessibilityId());
+#ifndef ACE_UNITTEST
+    accessibilityManager->RegisterAccessibilitySAObserverCallback(host->GetAccessibilityId(),
+        accessibilitySAObserverCallback_);
+#endif
     UIEXT_LOGI("OnAttachToFrameNode");
 }
 
 void UIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     auto id = frameNode->GetId();
+    UnRegisterWindowSceneVisibleChangeCallback(id);
     ContainerScope scope(instanceId_);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = frameNode->GetContextRefPtr();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveOnAreaChangeNode(id);
     pipeline->RemoveWindowSizeChangeCallback(id);
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->UnregisterSurfacePositionChangedCallback(surfacePositionCallBackId_);
     pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayCallBackId_);
+    frameNode->UnregisterNodeChangeListener();
+#ifndef ACE_UNITTEST
+    auto accessibilityManager = pipeline->GetAccessibilityManager();
+    CHECK_NULL_VOID(accessibilityManager);
+    accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
+#endif
 }
 
 void UIExtensionPattern::OnModifyDone()
@@ -682,6 +790,9 @@ void UIExtensionPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitKeyEvent(focusHub);
+#ifdef SUPPORT_DIGITAL_CROWN
+    InitCrownEvent(focusHub);
+#endif
 }
 
 void UIExtensionPattern::InitKeyEventOnFocus(const RefPtr<FocusHub>& focusHub)
@@ -764,6 +875,33 @@ void UIExtensionPattern::InitKeyEventOnKeyEvent(const RefPtr<FocusHub>& focusHub
         return false;
     });
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void UIExtensionPattern::InitCrownEvent(const RefPtr<FocusHub>& focusHub)
+{
+    focusHub->SetOnCrownEventInternal([wp = WeakClaim(this)](const CrownEvent& event) -> bool {
+        auto pattern = wp.Upgrade();
+        if (pattern) {
+            pattern->HandleCrownEvent(event);
+        }
+        return false;
+    });
+}
+
+void UIExtensionPattern::HandleCrownEvent(const CrownEvent& event)
+{
+    if (event.action == Ace::CrownAction::UNKNOWN) {
+        UIEXT_LOGE("action is UNKNOWN");
+        return;
+    }
+    auto pointerEvent = event.GetPointerEvent();
+    CHECK_NULL_VOID(pointerEvent);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    Platform::CalculatePointerEvent(pointerEvent, host);
+    DispatchPointerEvent(pointerEvent);
+}
+#endif
 
 void UIExtensionPattern::InitKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
@@ -993,7 +1131,7 @@ void UIExtensionPattern::DispatchDisplayArea(bool isForce)
     CHECK_NULL_VOID(sessionWrapper_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate();
+    auto [displayOffset, err] = host->GetPaintRectGlobalOffsetWithTranslate(false, true);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto renderContext = host->GetRenderContext();
@@ -1456,7 +1594,7 @@ int32_t UIExtensionPattern::GetInstanceId() const
     return instanceId_;
 }
 
-int32_t UIExtensionPattern::GetInstanceIdFromHost()
+int32_t UIExtensionPattern::GetInstanceIdFromHost() const
 {
     auto instanceId = GetHostInstanceId();
     if (instanceId != instanceId_) {
@@ -1606,5 +1744,197 @@ void UIExtensionPattern::DumpOthers()
             }
         }
     }
+}
+
+void UIExtensionPattern::RegisterEventProxyFlagCallback()
+{
+    RegisterUIExtBusinessConsumeCallback(UIContentBusinessCode::EVENT_PROXY,
+        [weak = WeakClaim(this)](const AAFwk::Want& data) -> int32_t {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, -1);
+            std::string type = "";
+            int32_t eventFlags = 0;
+            if (data.HasParameter("type")) {
+                type = data.GetStringParam("type");
+            }
+            if (type == "OccupyEvents") {
+                if (data.HasParameter("eventFlags")) {
+                    eventFlags = data.GetIntParam("eventFlags", 0);
+                }
+                pattern->SetEventProxyFlag(eventFlags);
+                return 0;
+            } else {
+                return -1;
+            }
+        });
+}
+
+void UIExtensionPattern::RegisterReplyPageModeCallback()
+{
+    auto callback = [weak = WeakClaim(this)](const AAFwk::Want& data, std::optional<AAFwk::Want>& reply) -> int32_t {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_RETURN(pattern, -1);
+        auto host = pattern->GetHost();
+        CHECK_NULL_RETURN(host, -1);
+        auto accessibilityProperty = host->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_RETURN(accessibilityProperty, -1);
+
+        if (reply.has_value() && data.HasParameter("requestPageMode")) {
+            reply->SetParam("pageMode", accessibilityProperty->GetAccessibilitySamePage());
+            return 0;
+        }
+        return -1;
+    };
+    RegisterUIExtBusinessConsumeReplyCallback(UIContentBusinessCode::SEND_PAGE_MODE, callback);
+}
+
+bool UIExtensionPattern::SendBusinessDataSyncReply(UIContentBusinessCode code, AAFwk::Want&& data, AAFwk::Want& reply)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    UIEXT_LOGI("SendBusinessDataSyncReply businessCode=%{public}u.", code);
+    return sessionWrapper_->SendBusinessDataSyncReply(code, std::move(data), reply);
+}
+
+bool UIExtensionPattern::SendBusinessData(UIContentBusinessCode code, AAFwk::Want&& data, BusinessDataSendType type)
+{
+    CHECK_NULL_RETURN(sessionWrapper_, false);
+    UIEXT_LOGI("SendBusinessData businessCode=%{public}u.", code);
+    return sessionWrapper_->SendBusinessData(code, std::move(data), type);
+}
+
+void UIExtensionPattern::OnUIExtBusinessReceiveReply(
+    UIContentBusinessCode code, const AAFwk::Want& data, std::optional<AAFwk::Want>& reply)
+{
+    UIEXT_LOGI("OnUIExtBusinessReceiveReply businessCode=%{public}u.", code);
+    auto it = businessDataUECConsumeReplyCallbacks_.find(code);
+    if (it == businessDataUECConsumeReplyCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data, reply);
+}
+
+void UIExtensionPattern::OnUIExtBusinessReceive(
+    UIContentBusinessCode code, const AAFwk::Want& data)
+{
+    UIEXT_LOGI("OnUIExtBusinessReceive businessCode=%{public}u.", code);
+    auto it = businessDataUECConsumeCallbacks_.find(code);
+    if (it == businessDataUECConsumeCallbacks_.end()) {
+        return;
+    }
+    auto callback = it->second;
+    CHECK_NULL_VOID(callback);
+    callback(data);
+}
+
+void UIExtensionPattern::RegisterUIExtBusinessConsumeReplyCallback(
+    UIContentBusinessCode code, BusinessDataUECConsumeReplyCallback callback)
+{
+    UIEXT_LOGI("RegisterUIExtBusinessConsumeReplyCallback businessCode=%{public}u.", code);
+    businessDataUECConsumeReplyCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionPattern::RegisterUIExtBusinessConsumeCallback(
+    UIContentBusinessCode code, BusinessDataUECConsumeCallback callback)
+{
+    UIEXT_LOGI("RegisterUIExtBusinessConsumeCallback businessCode=%{public}u.", code);
+    businessDataUECConsumeCallbacks_.try_emplace(code, callback);
+}
+
+void UIExtensionPattern::SetOnDrawReadyCallback(const std::function<void()>&& callback)
+{
+    onDrawReadyCallback_ = std::move(callback);
+}
+
+void UIExtensionPattern::FireOnDrawReadyCallback()
+{
+    ReplacePlaceholderByContent();
+    if (onDrawReadyCallback_) {
+        onDrawReadyCallback_();
+    }
+}
+
+void UIExtensionPattern::NotifyHostWindowMode()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    auto mode = container->GetWindowMode();
+    NotifyHostWindowMode(mode);
+}
+
+void UIExtensionPattern::NotifyHostWindowMode(Rosen::WindowMode mode)
+{
+    UIEXT_LOGI("NotifyHostWindowMode: instanceId = %{public}d, followStrategy = %{public}d, mode = %{public}d",
+        instanceId_, isWindowModeFollowHost_, static_cast<int32_t>(mode));
+    CHECK_NULL_VOID(sessionWrapper_);
+    if (isWindowModeFollowHost_ && mode != Rosen::WindowMode::WINDOW_MODE_UNDEFINED) {
+        int32_t windowMode = static_cast<int32_t>(mode);
+        sessionWrapper_->NotifyHostWindowMode(windowMode);
+    }
+}
+
+bool UIExtensionPattern::IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag)
+{
+    return ((flag & FRAME_NODE_CHANGE_GEOMETRY_CHANGE) == FRAME_NODE_CHANGE_GEOMETRY_CHANGE);
+}
+
+bool UIExtensionPattern::IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag)
+{
+    return ((flag & FRAME_NODE_CHANGE_TRANSFORM_CHANGE) == FRAME_NODE_CHANGE_TRANSFORM_CHANGE);
+}
+
+void UIExtensionPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
+{
+    if (!(IsAncestorNodeTransformChange(flag) || IsAncestorNodeTransformChange(flag))) {
+        return;
+    }
+    if (!AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
+        return;
+    }
+    TransferAccessibilityRectInfo();
+}
+
+AccessibilityParentRectInfo UIExtensionPattern::GetAccessibilityRectInfo() const
+{
+    ACE_SCOPED_TRACE("GetAccessibilityRectInfo");
+    AccessibilityParentRectInfo rectInfo;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, rectInfo);
+    auto rect = host->GetTransformRectRelativeToWindow();
+    VectorF finalScale = host->GetTransformScaleRelativeToWindow();
+    
+    rectInfo.left = static_cast<int32_t>(rect.Left());
+    rectInfo.top = static_cast<int32_t>(rect.Top());
+    rectInfo.scaleX = finalScale.x;
+    rectInfo.scaleY = finalScale.y;
+    auto pipeline = host->GetContextRefPtr();
+    if (pipeline) {
+        auto accessibilityManager = pipeline->GetAccessibilityManager();
+        if (accessibilityManager) {
+            auto windowInfo = accessibilityManager->GenerateWindowInfo(host, pipeline);
+            rectInfo.left =
+                rectInfo.left * windowInfo.scaleX + static_cast<int32_t>(windowInfo.left);
+            rectInfo.top = rectInfo.top * windowInfo.scaleY + static_cast<int32_t>(windowInfo.top);
+            rectInfo.scaleX *= windowInfo.scaleX;
+            rectInfo.scaleY *= windowInfo.scaleY;
+        }
+    }
+    return rectInfo;
+}
+
+// Once enter this function, must calculate and transfer data to provider
+void UIExtensionPattern::TransferAccessibilityRectInfo()
+{
+    auto parentRectInfo = GetAccessibilityRectInfo();
+    AAFwk::Want data;
+    data.SetParam("left", parentRectInfo.left);
+    data.SetParam("top", parentRectInfo.top);
+    data.SetParam("scaleX", parentRectInfo.scaleX);
+    data.SetParam("scaleY", parentRectInfo.scaleY);
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "UEC Transform rect param[scaleX:%{public}f, scaleY:%{public}f].",
+        parentRectInfo.scaleX, parentRectInfo.scaleY);
+    SendBusinessData(UIContentBusinessCode::TRANSFORM_PARAM, std::move(data), BusinessDataSendType::ASYNC);
 }
 } // namespace OHOS::Ace::NG

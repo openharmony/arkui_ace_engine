@@ -44,6 +44,10 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     CHECK_NULL_VOID(context);
     auto pathInfo = pattern->GetNavPathInfo();
     CHECK_NULL_VOID(pathInfo);
+    auto host = AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetHost());
+    CHECK_NULL_VOID(host);
+    NavDestinationMode mode = host->GetNavDestinationMode();
+    auto uniqueId = host->GetId();
     if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         if (state == NavDestinationState::ON_SHOWN || state == NavDestinationState::ON_HIDDEN) {
             NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state);
@@ -52,7 +56,7 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
         return;
     }
     NavDestinationInfo info(GetNavigationId(pattern), pattern->GetName(), state, context->GetIndex(),
-        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
+        pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()), mode, std::to_string(uniqueId));
     navigationHandleFunc_(info);
 }
 
@@ -163,6 +167,8 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
     auto pathInfo = pattern->GetNavPathInfo();
     CHECK_NULL_RETURN(pathInfo, nullptr);
     NavDestinationState state = NavDestinationState::NONE;
+    NavDestinationMode mode = host->GetNavDestinationMode();
+    auto uniqueId = host->GetId();
     if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         state = pattern->GetNavDestinationState();
         if (state == NavDestinationState::NONE) {
@@ -173,7 +179,8 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
     }
     return std::make_shared<NavDestinationInfo>(
         GetNavigationId(pattern), pattern->GetName(),
-        state, host->GetIndex(), pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()));
+        state, host->GetIndex(), pathInfo->GetParamObj(), std::to_string(pattern->GetNavDestinationId()),
+        mode, std::to_string(uniqueId));
 }
 
 std::shared_ptr<ScrollEventInfo> UIObserverHandler::GetScrollEventState(const RefPtr<AceType>& node)

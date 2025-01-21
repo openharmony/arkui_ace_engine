@@ -201,8 +201,37 @@ void JSSideBar::OnChange(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+void ParseSideBarWidthObject(const JSCallbackInfo& info, JSRef<JSVal> arrowFunc, bool isNumber)
+{
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(arrowFunc));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onChangeEvent = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
+                        node = targetNode, useNumber = isNumber](const Dimension& sideBarWidth) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("SideBarContainer.onSideBarWidthChangeEvent");
+        PipelineContext::SetCallBackNode(node);
+        auto newJSVal = useNumber ? JSRef<JSVal>::Make(ToJSValue(sideBarWidth.ConvertToVp())) :
+            JSRef<JSVal>::Make(ToJSValue(sideBarWidth.ToString()));
+        func->ExecuteJS(1, &newJSVal);
+    };
+    SideBarContainerModel::GetInstance()->SetOnSideBarWidthChangeEvent(std::move(onChangeEvent));
+}
+
 void JSSideBar::JsSideBarWidth(const JSCallbackInfo& info)
 {
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> callbackObj = JSRef<JSObject>::Cast(info[0]);
+        CalcDimension value;
+        auto sideBarWidthValue = callbackObj->GetProperty("value");
+        auto sideBarWidthCallbackValue = callbackObj->GetProperty("$value");
+        auto isValid = JSViewAbstract::ParseJsDimensionVpNG(sideBarWidthValue, value);
+        bool isNumber = sideBarWidthValue->IsNumber();
+        if (isValid && sideBarWidthCallbackValue->IsFunction()) {
+            SideBarContainerModel::GetInstance()->ParseAndSetWidth(WidthType::SIDEBAR_WIDTH, value, true);
+            ParseSideBarWidthObject(info, sideBarWidthCallbackValue, isNumber);
+            return;
+        }
+    }
     ParseAndSetWidth(info, WidthType::SIDEBAR_WIDTH);
 }
 

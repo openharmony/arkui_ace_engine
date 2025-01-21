@@ -37,9 +37,9 @@ void PanRecognizer::ForceCleanRecognizer()
     isStartTriggered_ = false;
 }
 
-PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, double distance)
-    : MultiFingersRecognizer(fingers), direction_(direction), distance_(distance), mouseDistance_(distance),
-      newFingers_(fingers_), newDistance_(distance_), newDirection_(direction_)
+PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, double distance, bool isLimitFingerCount)
+    : MultiFingersRecognizer(fingers, isLimitFingerCount), direction_(direction), distance_(distance),
+    mouseDistance_(distance), newFingers_(fingers_), newDistance_(distance_), newDirection_(direction_)
 {
     panVelocity_.SetDirection(direction_.type);
     if (fingers_ > MAX_PAN_FINGERS || fingers_ < DEFAULT_PAN_FINGERS) {
@@ -49,7 +49,7 @@ PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, dou
 
 RefPtr<Gesture> PanRecognizer::CreateGestureFromRecognizer() const
 {
-    return AceType::MakeRefPtr<PanGesture>(fingers_, direction_, distance_);
+    return AceType::MakeRefPtr<PanGesture>(fingers_, direction_, distance_, isLimitFingerCount_);
 }
 
 PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) : panGestureOption_(panGestureOption)
@@ -57,9 +57,11 @@ PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) :
     uint32_t directNum = panGestureOption->GetDirection().type;
     double distanceNumber = panGestureOption->GetDistance();
     int32_t fingersNumber = panGestureOption->GetFingers();
+    bool isLimitFingerCount = panGestureOption->GetIsLimitFingerCount();
 
     distance_ = LessNotEqual(distanceNumber, 0.0) ? DEFAULT_PAN_DISTANCE.ConvertToPx() : distanceNumber;
     fingers_ = fingersNumber;
+    isLimitFingerCount_ = isLimitFingerCount;
     if (fingers_ > MAX_PAN_FINGERS || fingers_ < DEFAULT_PAN_FINGERS) {
         fingers_ = DEFAULT_PAN_FINGERS;
     }
@@ -116,6 +118,7 @@ void PanRecognizer::OnAccepted()
         node ? node->GetTag().c_str() : "null", averageDistance_.GetX(), averageDistance_.GetY());
     refereeState_ = RefereeState::SUCCEED;
     SendCallbackMsg(onActionStart_);
+    isNeedResetVoluntarily_ = false;
     // only report the pan gesture starting for touch event
     DispatchPanStartedToPerf(lastTouchEvent_);
     if (IsEnabled()) {
@@ -213,10 +216,6 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         extraInfo_ += "mouse event is not allowed.";
         return;
     }
-    if (!IsInAttachedNode(event)) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
 
     if (fingersId_.find(event.id) == fingersId_.end()) {
         fingersId_.insert(event.id);
@@ -290,10 +289,12 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         "Id:%{public}d, pan %{public}d up, state: %{public}d, currentFingers: %{public}d, fingers: %{public}d",
         event.touchEventId, event.id, refereeState_, currentFingers_, fingers_);
     extraInfo_ = "currentFingers: " + std::to_string(currentFingers_) + " fingers: " + std::to_string(fingers_);
-    if (fingersId_.find(event.id) != fingersId_.end()) {
-        fingersId_.erase(event.id);
-    }
+    fingersId_.erase(event.id);
     if (currentFingers_ < fingers_) {
+        if (isNeedResetVoluntarily_ && currentFingers_ == 1) {
+            ResetStateVoluntarily();
+            isNeedResetVoluntarily_ = false;
+        }
         return;
     }
 
@@ -327,6 +328,11 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             averageDistance_.Reset();
             AddOverTimeTrace();
             refereeState_ = RefereeState::READY;
+            if (currentFingers_ > 1) {
+                isNeedResetVoluntarily_ = true;
+            } else {
+                ResetStateVoluntarily();
+            }
         }
     }
 
@@ -415,6 +421,9 @@ void PanRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
             if (!isStartTriggered_ && IsEnabled()) {
                 SendCallbackMsg(onActionStart_);
                 isStartTriggered_ = true;
+            }
+            if (static_cast<int32_t>(touchPoints_.size()) > fingers_ && isLimitFingerCount_) {
+                return;
             }
             SendCallbackMsg(onActionUpdate_);
         }
@@ -505,6 +514,10 @@ bool PanRecognizer::HandlePanAccept()
         }
         return true;
     }
+    if (CheckLimitFinger()) {
+        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+        return false;
+    }
     if (IsBridgeMode()) {
         OnAccepted();
         return false;
@@ -523,7 +536,7 @@ void PanRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
     if (refereeState_ == RefereeState::SUCCEED && currentFingers_ == fingers_) {
         // AxisEvent is single one.
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
         refereeState_ = RefereeState::READY;
     } else if (refereeState_ == RefereeState::SUCCEED) {
         TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
@@ -541,7 +554,7 @@ void PanRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
     }
 
     if (refereeState_ == RefereeState::SUCCEED) {
-        SendCancelMsg();
+        SendCallbackMsg(onActionCancel_);
     }
 }
 
@@ -642,8 +655,8 @@ PanRecognizer::GestureAcceptResult PanRecognizer::IsPanGestureAccept() const
     if (deviceType_ == SourceType::MOUSE) { // use mouseDistance_
         judgeDistance = mouseDistance_;
     }
-    // when version >= 14, if distance_ = 0, panGesture will accept when receive Down event
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) &&
+    // when version >= 16, if distance_ = 0, panGesture will accept when receive Down event
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
         NearZero(judgeDistance) && direction_.type != PanDirection::NONE) {
         return GestureAcceptResult::ACCEPT;
     }
@@ -683,7 +696,7 @@ void PanRecognizer::OnResetStatus()
 
 void PanRecognizer::OnSucceedCancel()
 {
-    SendCancelMsg();
+    SendCallbackMsg(onActionCancel_);
 }
 
 GestureEvent PanRecognizer::GetGestureEventInfo()
@@ -740,7 +753,7 @@ GestureEvent PanRecognizer::GetGestureEventInfo()
 
 void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback)
 {
-    if (callback && *callback && IsEnabled()) {
+    if (callback && *callback && IsEnabled() && (!gestureInfo_ || !gestureInfo_->GetDisposeTag())) {
         GestureEvent info = GetGestureEventInfo();
         // callback may be overwritten in its invoke so we copy it first
         auto callbackFunction = *callback;
@@ -814,7 +827,7 @@ bool PanRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
 
     if (curr->fingers_ != fingers_ || curr->priorityMask_ != priorityMask_) {
         if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(touchPoints_.size()) >= fingers_) {
-            SendCancelMsg();
+            SendCallbackMsg(onActionCancel_);
         }
         ResetStatus();
         return false;

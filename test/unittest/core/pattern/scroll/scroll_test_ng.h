@@ -26,15 +26,6 @@
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 
 namespace OHOS::Ace::NG {
-using namespace testing;
-using namespace testing::ext;
-constexpr float SCROLL_WIDTH = 240.f;
-constexpr float SCROLL_HEIGHT = 400.f;
-constexpr float CONTENT_MAIN_SIZE = 1000.f;
-constexpr float ITEM_MAIN_SIZE = 100.f;
-constexpr float VERTICAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - SCROLL_HEIGHT;
-constexpr float HORIZONTAL_SCROLLABLE_DISTANCE = CONTENT_MAIN_SIZE - SCROLL_WIDTH;
-
 constexpr float DEFAULT_ACTIVE_WIDTH = 8.0f;
 constexpr float DEFAULT_INACTIVE_WIDTH = 4.0f;
 constexpr float DEFAULT_NORMAL_WIDTH = 4.0f;
@@ -42,7 +33,6 @@ constexpr float DEFAULT_TOUCH_WIDTH = 32.0f;
 constexpr float NORMAL_WIDTH = 4.f;
 
 constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
-constexpr int32_t TICK = 2;
 constexpr float BAR_WIDTH = 10.f;
 constexpr char SCROLL_BAR_COLOR[] = "#66182431";
 

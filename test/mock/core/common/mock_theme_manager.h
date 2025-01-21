@@ -33,6 +33,7 @@ public:
     MOCK_METHOD(RefPtr<ThemeConstants>, GetThemeConstants, (), (const));
     MOCK_METHOD(RefPtr<ThemeConstants>, GetThemeConstants,
         (const std::string& bundleName, const std::string& moduleName), (const));
+    MOCK_METHOD(void, RegisterThemeKit, (ThemeType type, Ace::Kit::BuildFunc func));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_MOCK_THEME_MOCK_THEME_MANAGER_H

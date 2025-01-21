@@ -33,6 +33,9 @@ constexpr double HALF = 0.5;
 constexpr double PARENT_PAGE_OFFSET = 0.2;
 const Color MASK_COLOR = Color::FromARGB(25, 0, 0, 0);
 const Color DEFAULT_MASK_COLOR = Color::FromARGB(0, 0, 0, 0);
+const std::unordered_set<std::string> EMBEDDED_DIALOG_NODE_TAG = { V2::ALERT_DIALOG_ETS_TAG,
+    V2::ACTION_SHEET_DIALOG_ETS_TAG, V2::DIALOG_ETS_TAG };
+
 void IterativeAddToSharedMap(const RefPtr<UINode>& node, SharedTransitionMap& map)
 {
     const auto& children = node->GetChildren();
@@ -65,6 +68,7 @@ void PagePattern::OnAttachToFrameNode()
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+    pipelineContext->GetMemoryManager()->AddRecyclePageNode(host);
 }
 
 bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& /* config */)
@@ -161,7 +165,7 @@ void PagePattern::ProcessHideState()
     host->SetActive(false);
     host->NotifyVisibleChange(VisibleType::VISIBLE, VisibleType::INVISIBLE);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
@@ -174,7 +178,7 @@ void PagePattern::ProcessShowState()
     host->SetActive(true);
     host->NotifyVisibleChange(VisibleType::INVISIBLE, VisibleType::VISIBLE);
     host->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
-    auto parent = host->GetAncestorNodeOfFrame();
+    auto parent = host->GetAncestorNodeOfFrame(false);
     CHECK_NULL_VOID(parent);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -229,6 +233,7 @@ void PagePattern::OnDetachFromFrameNode(FrameNode* frameNode)
     auto pipelineContext = frameNode->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    pipelineContext->GetMemoryManager()->RemoveRecyclePageNode(frameNode->GetId());
 }
 
 void PagePattern::OnWindowSizeChanged(int32_t /*width*/, int32_t /*height*/, WindowSizeChangeReason /*type*/)
@@ -255,10 +260,12 @@ void PagePattern::OnShow()
         LOGW("no need to trigger onPageShow callback when not in the foreground");
         return;
     }
-    std::string bundleName = container->GetBundleName();
-    NotifyPerfMonitorPageMsg(pageInfo_->GetFullPath(), bundleName);
+    NotifyPerfMonitorPageMsg(pageInfo_->GetFullPath(), container->GetBundleName());
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), true);
+        auto navigationManager = context->GetNavigationManager();
+        CHECK_NULL_VOID(navigationManager);
+        navigationManager->FireNavigationLifecycle(GetHost(), static_cast<int32_t>(NavDestinationLifecycle::ON_ACTIVE));
     }
     UpdatePageParam();
     isOnShow_ = true;
@@ -302,11 +309,14 @@ void PagePattern::OnHide()
     JankFrameReport::GetInstance().FlushRecord();
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (pageInfo_) {
-        context->FirePageChanged(pageInfo_->GetPageId(), false);
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (pageInfo_) {
+        auto navigationManager = context->GetNavigationManager();
+        CHECK_NULL_VOID(navigationManager);
+        navigationManager->FireNavigationLifecycle(host, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE));
+        context->FirePageChanged(pageInfo_->GetPageId(), false);
+    }
     host->SetJSViewActive(false);
     isOnShow_ = false;
     host->SetAccessibilityVisible(false);
@@ -352,7 +362,7 @@ bool PagePattern::OnBackPressed()
         TAG_LOGI(AceLogTag::ACE_OVERLAY, "page removes it's overlay when on backpressed");
         return true;
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_SIXTEEN) && isPageInTransition_) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) && isPageInTransition_) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "page is in transition");
         return true;
     }
@@ -503,12 +513,16 @@ bool PagePattern::AvoidKeyboard() const
 bool PagePattern::RemoveOverlay()
 {
     CHECK_NULL_RETURN(overlayManager_, false);
-    CHECK_NULL_RETURN(!overlayManager_->IsModalEmpty(), false);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto taskExecutor = pipeline->GetTaskExecutor();
-    CHECK_NULL_RETURN(taskExecutor, false);
-    return overlayManager_->RemoveOverlay(true);
+    auto lastNode = overlayManager_->GetLastChildNotRemoving(GetHost());
+    if (!overlayManager_->IsModalEmpty() ||
+        (lastNode && EMBEDDED_DIALOG_NODE_TAG.find(lastNode->GetTag()) != EMBEDDED_DIALOG_NODE_TAG.end())) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_RETURN(taskExecutor, false);
+        return overlayManager_->RemoveOverlay(true);
+    }
+    return false;
 }
 
 void PagePattern::NotifyPerfMonitorPageMsg(const std::string& pageUrl, const std::string& bundleName)
@@ -540,14 +554,10 @@ void PagePattern::InitTransitionIn(const RefPtr<PageTransitionEffect>& effect, P
     renderContext->UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
     renderContext->UpdateTransformTranslate(translateOptions.value());
     renderContext->UpdateOpacity(effect->GetOpacityEffect().value());
-    if (type == PageTransitionType::ENTER_POP) {
-        renderContext->RemoveClipWithRRect();
-    } else {
-        auto context = hostNode->GetContext();
-        CHECK_NULL_VOID(context);
-        renderContext->UpdateBackgroundColor(context->GetAppBgColor());
-        renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-    }
+    auto context = hostNode->GetContext();
+    CHECK_NULL_VOID(context);
+    renderContext->UpdateBackgroundColor(context->GetAppBgColor());
+    renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
 }
 
 void PagePattern::InitTransitionOut(const RefPtr<PageTransitionEffect> & effect, PageTransitionType type)
@@ -562,10 +572,6 @@ void PagePattern::InitTransitionOut(const RefPtr<PageTransitionEffect> & effect,
     renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     renderContext->UpdateOpacity(1.0);
-    if (type == PageTransitionType::EXIT_PUSH) {
-        renderContext->RemoveClipWithRRect();
-        return;
-    }
     renderContext->ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
     auto context = hostNode->GetContext();
     CHECK_NULL_VOID(context);
@@ -694,9 +700,7 @@ void PagePattern::TransitionInFinish(const RefPtr<PageTransitionEffect>& effect,
     renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
     renderContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
     renderContext->UpdateOpacity(1.0);
-    if (type == PageTransitionType::ENTER_PUSH) {
-        renderContext->ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-    }
+    renderContext->ClipWithRRect(effect->GetDefaultPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
 }
 
 void PagePattern::TransitionOutFinish(const RefPtr<PageTransitionEffect>& effect, PageTransitionType type)
@@ -711,9 +715,7 @@ void PagePattern::TransitionOutFinish(const RefPtr<PageTransitionEffect>& effect
     renderContext->UpdateTransformScale(VectorF(scaleOptions->xScale, scaleOptions->yScale));
     renderContext->UpdateTransformTranslate(translateOptions.value());
     renderContext->UpdateOpacity(effect->GetOpacityEffect().value());
-    if (type == PageTransitionType::EXIT_POP) {
-        renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
-    }
+    renderContext->ClipWithRRect(effect->GetPageTransitionRectF().value(), RadiusF(EdgeF(0.0f, 0.0f)));
 }
 
 void PagePattern::MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor)
@@ -825,7 +827,7 @@ void PagePattern::FinishOutPage(const int32_t animationId, PageTransitionType ty
         return;
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s finish out page transition.", GetPageUrl().c_str());
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         FocusViewHide();
     }
     auto context = PipelineContext::GetCurrentContext();
@@ -862,7 +864,7 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
     }
     TAG_LOGI(AceLogTag::ACE_ROUTER, "%{public}s push animation finished", GetPageUrl().c_str());
     isPageInTransition_ = false;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         FocusViewShow();
     }
     auto context = PipelineContext::GetCurrentContext();
@@ -871,11 +873,6 @@ void PagePattern::FinishInPage(const int32_t animationId, PageTransitionType typ
     if (type == PageTransitionType::ENTER_PUSH) {
         auto renderContext = inPage->GetRenderContext();
         renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        auto layoutProperty = inPage->GetLayoutProperty();
-        CHECK_NULL_VOID(layoutProperty);
-        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_NONE, .edges = SAFE_AREA_EDGE_NONE };
-        layoutProperty->UpdateSafeAreaExpandOpts(opts);
-        inPage->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }
     ResetPageTransitionEffect();
     auto stageManager = context->GetStageManager();
@@ -938,14 +935,19 @@ void PagePattern::UpdateAnimationOption(const RefPtr<PageTransitionEffect>& tran
     effect = GetDefaultPageTransition(type);
     const RefPtr<InterpolatingSpring> springCurve =
         AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_SIXTEEN)) {
-        const float defaultAmplitudePx = 0.005f;
-        springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudePx);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        CHECK_NULL_VOID(pipeline);
+        auto appTheme = pipeline->GetTheme<AppTheme>();
+        CHECK_NULL_VOID(appTheme);
+        float defaultAmplitudeRatio = appTheme->GetPageTransitionAmplitudeRatio();
+        springCurve->UpdateMinimumAmplitudeRatio(defaultAmplitudeRatio);
     }
     option.SetCurve(springCurve);
     option.SetDuration(DEFAULT_ANIMATION_DURATION);
 #ifdef QUICK_PUSH_TRANSITION
-    auto pipeline = PipelineBase::GetCurrentContext();
     if (pipeline) {
         const int32_t nanoToMilliSeconds = 1000000;
         const int32_t minTransitionDuration = DEFAULT_ANIMATION_DURATION / 2;

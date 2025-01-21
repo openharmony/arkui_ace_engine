@@ -919,7 +919,7 @@ HWTEST_F(DatePickerColumnTest, DatePickerPatternTest001, TestSize.Level1)
     pickerPattern->OnModifyDone();
 
     auto eventHub = frameNode->GetEventHub<EventHub>();
-    eventHub->focusHub_ = nullptr;
+    frameNode->focusHub_ = nullptr;
     pickerPattern->isFiredDateChange_ = false;
     pickerPattern->isForceUpdate_ = true;
     pickerPattern->lunar_ = !(datePickerRowLayoutProperty->GetLunar().value_or(false));

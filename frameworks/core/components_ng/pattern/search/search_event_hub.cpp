@@ -37,7 +37,7 @@ void SearchEventHub::UpdateChangeEvent(const std::u16string& value) const
     pattern->UpdateChangeEvent(value);
     auto id = host->GetInspectorIdValue("");
     if (!id.empty()) {
-        Recorder::NodeDataCache::Get().PutString(host, id, UtfUtils::Str16ToStr8(value));
+        Recorder::NodeDataCache::Get().PutString(host, id, UtfUtils::Str16DebugToStr8(value));
     }
 }
 } // namespace OHOS::Ace::NG

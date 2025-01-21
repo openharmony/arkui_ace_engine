@@ -25,14 +25,10 @@
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/svg/svg_context.h"
+#include "core/components_ng/svg/base/svg_bounding_box_context.h"
 #include "core/components_ng/svg/parse/svg_attributes_parser.h"
 
 namespace OHOS::Ace::NG {
-enum class SvgLengthType {
-    HORIZONTAL,
-    VERTICAL,
-    OTHER,
-};
 
 class SvgContext;
 class SvgAnimation;
@@ -51,7 +47,7 @@ public:
 
     // draw entrance function, approve override by second level class.
     virtual void Draw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color);
-
+    virtual void Draw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule);
     virtual void SetAttr(const std::string& name, const std::string& value);
 
     virtual bool ParseAndSetSpecializedAttr(const std::string& name, const std::string& value)
@@ -80,6 +76,11 @@ public:
         return {};
     }
 
+    virtual RSRecordingPath AsPath(const SvgLengthScaleRule& lengthRule)
+    {
+        return {};
+    }
+
     virtual RSPath AsRSPath(const Size& viewPort) const;
 
     Rect AsBounds(const Size& viewPort) const
@@ -91,6 +92,11 @@ public:
     void SetContext(const WeakPtr<SvgContext>& svgContext)
     {
         svgContext_ = svgContext;
+    }
+
+    WeakPtr<SvgContext>& GetContext()
+    {
+        return svgContext_;
     }
 
     void SetNodeId(const std::string& value)
@@ -151,6 +157,10 @@ public:
     {
         isRootNode_ = isRoot;
     }
+    float GetMeasuredLength(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
+    float GetMeasuredPosition(Dimension origin, const SvgLengthScaleRule& boxMeasureRule, SvgLengthType lengthType);
+    Rect GetSvgContainerRect() const;
+    bool drawTraversed_ = true; // enable OnDraw, TAGS mask/defs/pattern/filter = false
 protected:
     // override as need by derived class
     // called by function AppendChild
@@ -159,7 +169,8 @@ protected:
     virtual void OnInitStyle() {}
     // function override by graphic tag
     virtual void OnDraw(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color) {}
-
+    virtual void OnDraw(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule) {}
+    virtual void OnDrawTraversed(RSCanvas& canvas, const SvgLengthScaleRule& lengthRule);
     virtual void OnDrawTraversed(RSCanvas& canvas, const Size& viewPort, const std::optional<Color>& color);
     virtual void AdjustContentAreaByViewBox(RSCanvas& canvas, const Size& viewPort) {}
     bool OnCanvas(RSCanvas& canvas);
@@ -167,7 +178,13 @@ protected:
     void OnFilter(RSCanvas& canvas, const Size& viewPort);
     void OnMask(RSCanvas& canvas, const Size& viewPort);
     void OnTransform(RSCanvas& canvas, const Size& viewPort);
-
+    virtual void OnClipEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) {}
+    virtual void OnMaskEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) {}
+    virtual void OnFilterEffect(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext) {}
+    void OnClipPath(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    void OnFilter(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    void OnMask(RSCanvas& canvas, const SvgCoordinateSystemContext& svgCoordinateSystemContext);
+    void OnTransform(RSCanvas& canvas);
     double ConvertDimensionToPx(const Dimension& value, const Size& viewPort, SvgLengthType type) const;
     double ConvertDimensionToPx(const Dimension& value, double baseValue) const;
 
@@ -220,10 +237,9 @@ protected:
     bool hrefRender_ = true; // get render attr (mask, filter, transform, opacity, clip path) from reference
     bool passStyle_ = true; // pass style attributes to child node, TAGS circle/path/line/... = false
     bool inheritStyle_ = true;  // inherit style attributes from parent node, TAGS mask/defs/pattern/filter = false
-    bool drawTraversed_ = true; // enable OnDraw, TAGS mask/defs/pattern/filter = false
     bool isRootNode_ = false;
     RSCanvas* rsCanvas_ = nullptr;
-
+    SvgLengthScaleRule lengthRule_;
     ACE_DISALLOW_COPY_AND_MOVE(SvgNode);
 };
 

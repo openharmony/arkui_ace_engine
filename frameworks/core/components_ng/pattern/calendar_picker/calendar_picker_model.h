@@ -25,7 +25,7 @@
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 
 namespace OHOS::Ace {
-class ACE_EXPORT CalendarPickerModel {
+class ACE_FORCE_EXPORT CalendarPickerModel {
 public:
     static CalendarPickerModel* GetInstance();
     virtual ~CalendarPickerModel() = default;
@@ -45,7 +45,7 @@ public:
 
 private:
     static std::unique_ptr<CalendarPickerModel> instance_;
-    static std::mutex mutex_;
+    static std::once_flag onceFlag_;
 };
 } // namespace OHOS::Ace
 

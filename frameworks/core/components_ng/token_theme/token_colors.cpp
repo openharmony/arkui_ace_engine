@@ -20,66 +20,66 @@
 namespace OHOS::Ace::NG {
 
 static const std::vector<TokenColorData> colorData = {
-    { /* BRAND = 0 */                               "brand",                            125830976 },
-    { /* WARNING = 1; */                            "warning",                          125830979 },
-    { /* ALERT = 2 */                               "alert",                            125830980 },
-    { /* CONFIRM = 3 */                             "confirm",                          125830981 },
+    { "brand", 125830976 }, /* BRAND = 0 */
+    { "warning", 125830979 }, /* WARNING = 1; */
+    { "alert", 125830980 }, /* ALERT = 2 */
+    { "confirm", 125830981 }, /* CONFIRM = 3 */
 
-    { /* FONT_PRIMARY = 4 */                        "fontPrimary",                      125830982 },
-    { /* FONT_SECONDARY = 5 */                      "fontSecondary",                    125830983 },
-    { /* FONT_TERTIARY = 6 */                       "fontTertiary",                     125830984 },
-    { /* FONT_FOURTH = 7 */                         "fontFourth",                       125830985 },
-    { /* FONT_EMPHASIZE = 8 */                      "fontEmphasize",                    125830986 },
+    { "fontPrimary", 125830982 }, /* FONT_PRIMARY = 4 */
+    { "fontSecondary", 125830983 }, /* FONT_SECONDARY = 5 */
+    { "fontTertiary", 125830984 }, /* FONT_TERTIARY = 6 */
+    { "fontFourth", 125830985 }, /* FONT_FOURTH = 7 */
+    { "fontEmphasize", 125830986 }, /* FONT_EMPHASIZE = 8 */
 
-    { /* FONT_ON_PRIMARY = 9 */                     "fontOnPrimary",                    125830987 },
-    { /* FONT_ON_SECONDARY = 10 */                  "fontOnSecondary",                  125830988 },
-    { /* FONT_ON_TERTIARY = 11 */                   "fontOnTertiary",                   125830989 },
-    { /* FONT_ON_FOURTH = 12 */                     "fontOnFourth",                     125830990 },
+    { "fontOnPrimary", 125830987 }, /* FONT_ON_PRIMARY = 9 */
+    { "fontOnSecondary", 125830988 }, /* FONT_ON_SECONDARY = 10 */
+    { "fontOnTertiary", 125830989 }, /* FONT_ON_TERTIARY = 11 */
+    { "fontOnFourth", 125830990 }, /* FONT_ON_FOURTH = 12 */
 
-    { /* ICON_PRIMARY = 13 */                       "iconPrimary",                      125830991 },
-    { /* ICON_SECONDARY = 14 */                     "iconSecondary",                    125830992 },
-    { /* ICON_TERTIARY = 15 */                      "iconTertiary",                     125830993 },
-    { /* ICON_FOURTH = 16 */                        "iconFourth",                       125830994 },
-    { /* ICON_EMPHASIZE = 17 */                     "iconEmphasize",                    125830995 },
-    { /* ICON_SUB_EMPHASIZE = 18 */                 "iconSubEmphasize",                 125830996 },
+    { "iconPrimary", 125830991 }, /* ICON_PRIMARY = 13 */
+    { "iconSecondary", 125830992 }, /* ICON_SECONDARY = 14 */
+    { "iconTertiary", 125830993 }, /* ICON_TERTIARY = 15 */
+    { "iconFourth", 125830994 }, /* ICON_FOURTH = 16 */
+    { "iconEmphasize", 125830995 }, /* ICON_EMPHASIZE = 17 */
+    { "iconSubEmphasize", 125830996 }, /* ICON_SUB_EMPHASIZE = 18 */
 
-    { /* ICON_ON_PRIMARY = 19 */                    "iconOnPrimary",                    125831057 },
-    { /* ICON_ON_SECONDARY = 20 */                  "iconOnSecondary",                  125831058 },
-    { /* ICON_ON_TERTIARY = 21 */                   "iconOnTertiary",                   125831059 },
-    { /* ICON_ON_FOURTH = 22 */                     "iconOnFourth",                     125831060 },
+    { "iconOnPrimary", 125831057 }, /* ICON_ON_PRIMARY = 19 */
+    { "iconOnSecondary", 125831058 }, /* ICON_ON_SECONDARY = 20 */
+    { "iconOnTertiary", 125831059 }, /* ICON_ON_TERTIARY = 21 */
+    { "iconOnFourth", 125831060 }, /* ICON_ON_FOURTH = 22 */
 
-    { /* BACKGROUND_PRIMARY = 23 */                 "backgroundPrimary",                125831061 },
-    { /* BACKGROUND_SECONDARY = 24 */               "backgroundSecondary",              125831062 },
-    { /* BACKGROUND_TERTIARY = 25 */                "backgroundTertiary",               125831063 },
-    { /* BACKGROUND_FOURTH = 26 */                  "backgroundFourth",                 125831064 },
-    { /* BACKGROUND_EMPHASIZE = 27 */               "backgroundEmphasize",              125831065 },
+    { "backgroundPrimary", 125831061 }, /* BACKGROUND_PRIMARY = 23 */
+    { "backgroundSecondary", 125831062 }, /* BACKGROUND_SECONDARY = 24 */
+    { "backgroundTertiary", 125831063 }, /* BACKGROUND_TERTIARY = 25 */
+    { "backgroundFourth", 125831064 }, /* BACKGROUND_FOURTH = 26 */
+    { "backgroundEmphasize", 125831065 }, /* BACKGROUND_EMPHASIZE = 27 */
 
-    { /* COMP_FOREGROUND_PRIMARY = 28 */            "compForegroundPrimary",            125831003 },
-    { /* COMP_BACKGROUND_PRIMARY = 29 */            "compBackgroundPrimary",            125831004 },
-    { /* COMP_BACKGROUND_PRIMARY_TRAN = 30 */       "compBackgroundPrimaryTran",        -1 }, // not defined
-    { /* COMP_BACKGROUND_PRIMARY_CONTRARY = 31 */   "compBackgroundPrimaryContrary",    125831005 },
-    { /* COMP_BACKGROUND_GRAY = 32 */               "compBackgroundGray",               125831006 },
-    { /* COMP_BACKGROUND_SECONDARY = 33 */          "compBackgroundSecondary",          125831007 },
-    { /* COMP_BACKGROUND_TERTIARY = 34 */           "compBackgroundTertiary",           125831008 },
-    { /* COMP_BACKGROUND_EMPHASIZE = 35 */          "compBackgroundEmphasize",          125831009 },
-    { /* COMP_BACKGROUND_NEUTRAL = 36 */            "compBackgroundNeutral",            125831066 },
-    { /* COMP_EMPHASIZE_SECONDARY = 37 */           "compEmphasizeSecondary",           125831011 },
-    { /* COMP_EMPHASIZE_TERTIARY = 38 */            "compEmphasizeTertiary",            125831012 },
-    { /* COMP_DIVIDER = 39 */                       "compDivider",                      125831013 },
-    { /* COMP_COMMON_CONTRARY = 40 */               "compCommonContrary",               125831014 },
-    { /* COMP_BACKGROUND_FOCUS = 41 */              "compBackgroundFocus",              125831015 },
-    { /* COMP_FOCUSED_PRIMARY = 42 */               "compFocusedPrimary",               125831016 },
-    { /* COMP_FOCUSED_SECONDARY = 43 */             "compFocusedSecondary",             125831017 },
-    { /* COMP_FOCUSED_TERTIARY = 44 */              "compFocusedTertiary",              125831018 },
+    { "compForegroundPrimary", 125831003 }, /* COMP_FOREGROUND_PRIMARY = 28 */
+    { "compBackgroundPrimary", 125831004 }, /* COMP_BACKGROUND_PRIMARY = 29 */
+    { "compBackgroundPrimaryTran", -1 }, /* COMP_BACKGROUND_PRIMARY_TRAN = 30 */
+    { "compBackgroundPrimaryContrary", 125831005 }, /* COMP_BACKGROUND_PRIMARY_CONTRARY = 31 */
+    { "compBackgroundGray", 125831006 }, /* COMP_BACKGROUND_GRAY = 32 */
+    { "compBackgroundSecondary", 125831007 }, /* COMP_BACKGROUND_SECONDARY = 33 */
+    { "compBackgroundTertiary", 125831008 }, /* COMP_BACKGROUND_TERTIARY = 34 */
+    { "compBackgroundEmphasize", 125831009 }, /* COMP_BACKGROUND_EMPHASIZE = 35 */
+    { "compBackgroundNeutral", 125831066 }, /* COMP_BACKGROUND_NEUTRAL = 36 */
+    { "compEmphasizeSecondary", 125831011 }, /* COMP_EMPHASIZE_SECONDARY = 37 */
+    { "compEmphasizeTertiary", 125831012 }, /* COMP_EMPHASIZE_TERTIARY = 38 */
+    { "compDivider", 125831013 }, /* COMP_DIVIDER = 39 */
+    { "compCommonContrary", 125831014 }, /* COMP_COMMON_CONTRARY = 40 */
+    { "compBackgroundFocus", 125831015 }, /* COMP_BACKGROUND_FOCUS = 41 */
+    { "compFocusedPrimary", 125831016 }, /* COMP_FOCUSED_PRIMARY = 42 */
+    { "compFocusedSecondary", 125831017 }, /* COMP_FOCUSED_SECONDARY = 43 */
+    { "compFocusedTertiary", 125831018 }, /* COMP_FOCUSED_TERTIARY = 44 */
 
-    { /* INTERACTIVE_HOVER = 45 */                  "interactiveHover",                 125831019 },
-    { /* INTERACTIVE_PRESSED = 46 */                "interactivePressed",               125831020 },
-    { /* INTERACTIVE_FOCUS = 47 */                  "interactiveFocus",                 125831021 },
-    { /* INTERACTIVE_ACTIVE = 48 */                 "interactiveActive",                125831022 },
-    { /* INTERACTIVE_SELECT = 49 */                 "interactiveSelect",                125831023 },
-    { /* INTERACTIVE_CLICK = 50 */                  "interactiveClick",                 125831024 },
+    { "interactiveHover", 125831019 }, /* INTERACTIVE_HOVER = 45 */
+    { "interactivePressed", 125831020 }, /* INTERACTIVE_PRESSED = 46 */
+    { "interactiveFocus", 125831021 }, /* INTERACTIVE_FOCUS = 47 */
+    { "interactiveActive", 125831022 }, /* INTERACTIVE_ACTIVE = 48 */
+    { "interactiveSelect", 125831023 }, /* INTERACTIVE_SELECT = 49 */
+    { "interactiveClick", 125831024 }, /* INTERACTIVE_CLICK = 50 */
 
-    { /* TOTAL_NUMBER = 51; */                      nullptr,                            -1        }
+    { nullptr, -1 } /* TOTAL_NUMBER = 51; */
 };
 
 void TokenColors::SetColors(const std::vector<Color>& colors)

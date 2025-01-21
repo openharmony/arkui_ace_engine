@@ -33,22 +33,26 @@
 #include "frameworks/core/components_ng/svg/parse/svg_gradient.h"
 #include "frameworks/core/components_ng/svg/parse/svg_image.h"
 #include "frameworks/core/components_ng/svg/parse/svg_line.h"
+#include "frameworks/core/components_ng/svg/parse/svg_linear_gradient.h"
 #include "frameworks/core/components_ng/svg/parse/svg_mask.h"
 #include "frameworks/core/components_ng/svg/parse/svg_path.h"
 #include "frameworks/core/components_ng/svg/parse/svg_pattern.h"
 #include "frameworks/core/components_ng/svg/parse/svg_polygon.h"
+#include "frameworks/core/components_ng/svg/parse/svg_radial_gradient.h"
 #include "frameworks/core/components_ng/svg/parse/svg_rect.h"
 #include "frameworks/core/components_ng/svg/parse/svg_stop.h"
 #include "frameworks/core/components_ng/svg/parse/svg_svg.h"
 #include "frameworks/core/components_ng/svg/parse/svg_use.h"
 #include "frameworks/core/components_ng/svg/svg_fit_convertor.h"
 #include "frameworks/core/components_ng/svg/svg_ulils.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 
 const char DOM_SVG_STYLE[] = "style";
 const char DOM_SVG_CLASS[] = "class";
+constexpr int32_t ONE_BYTE_TO_HEX_LEN = 2;
 } // namespace
 
 static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
@@ -69,13 +73,25 @@ static const LinearMapNode<RefPtr<SvgNode> (*)()> TAG_FACTORIES[] = {
     { "g", []() -> RefPtr<SvgNode> { return SvgG::Create(); } },
     { "image", []() -> RefPtr<SvgNode> { return SvgImage::Create(); } },
     { "line", []() -> RefPtr<SvgNode> { return SvgLine::Create(); } },
-    { "linearGradient", []() -> RefPtr<SvgNode> { return SvgGradient::CreateLinearGradient(); } },
+    { "linearGradient", []() -> RefPtr<SvgNode> {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+             return SvgGradient::CreateLinearGradient();
+        } else {
+            return SvgLinearGradient::Create();
+        }
+        } },
     { "mask", []() -> RefPtr<SvgNode> { return SvgMask::Create(); } },
     { "path", []() -> RefPtr<SvgNode> { return SvgPath::Create(); } },
     { "pattern", []() -> RefPtr<SvgNode> { return SvgPattern::Create(); } },
     { "polygon", []() -> RefPtr<SvgNode> { return SvgPolygon::CreatePolygon(); } },
     { "polyline", []() -> RefPtr<SvgNode> { return SvgPolygon::CreatePolyline(); } },
-    { "radialGradient", []() -> RefPtr<SvgNode> { return SvgGradient::CreateRadialGradient(); } },
+    { "radialGradient", []() -> RefPtr<SvgNode> {
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            return SvgGradient::CreateRadialGradient();
+        } else {
+            return SvgRadialGradient::Create();
+        }
+        } },
     { "rect", []() -> RefPtr<SvgNode> { return SvgRect::Create(); } },
     { "stop", []() -> RefPtr<SvgNode> { return SvgStop::Create(); } },
     { "style", []() -> RefPtr<SvgNode> { return SvgStyle::Create(); } },
@@ -131,6 +147,29 @@ bool SvgDom::ParseSvg(SkStream& svgStream)
 
 RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& parent)
 {
+    auto root = CreateSvgNodeFromDom(dom, xmlNode, parent);
+    CHECK_NULL_RETURN(root, nullptr);
+    std::stack<SvgTranslateProcessInfo> translateTaskSt;
+    translateTaskSt.emplace(root, dom.getFirstChild(xmlNode, nullptr));
+    while (!translateTaskSt.empty()) {
+        auto& [currentNode, curXmlNode] = translateTaskSt.top();
+        if (!curXmlNode) {
+            translateTaskSt.pop();
+        } else {
+            const auto& childNode = CreateSvgNodeFromDom(dom, curXmlNode, currentNode);
+            if (childNode) {
+                translateTaskSt.emplace(childNode, dom.getFirstChild(curXmlNode, nullptr));
+                currentNode->AppendChild(childNode);
+            }
+            curXmlNode = dom.getNextSibling(curXmlNode);
+        }
+    }
+    return root;
+}
+
+RefPtr<SvgNode> SvgDom::CreateSvgNodeFromDom(
+    const SkDOM& dom, const SkDOM::Node* xmlNode, const RefPtr<SvgNode>& parent)
+{
     const char* element = dom.getName(xmlNode);
     if (dom.getType(xmlNode) == SkDOM::kText_Type) {
         CHECK_NULL_RETURN(parent, nullptr);
@@ -151,12 +190,6 @@ RefPtr<SvgNode> SvgDom::TranslateSvgNode(const SkDOM& dom, const SkDOM::Node* xm
     node->SetContext(svgContext_);
     node->SetImagePath(path_);
     ParseAttrs(dom, xmlNode, node);
-    for (auto* child = dom.getFirstChild(xmlNode, nullptr); child; child = dom.getNextSibling(child)) {
-        const auto& childNode = TranslateSvgNode(dom, child, node);
-        if (childNode) {
-            node->AppendChild(childNode);
-        }
-    }
     return node;
 }
 
@@ -184,9 +217,17 @@ void SvgDom::ParseFillAttr(const WeakPtr<SvgNode>& weakSvgNode, const std::strin
     auto svgNode = weakSvgNode.Upgrade();
     CHECK_NULL_VOID(svgNode);
     if (fillColor_) {
+        std::string newValue;
         std::stringstream stream;
-        stream << std::hex << fillColor_.value().GetValue();
-        std::string newValue(stream.str());
+        auto fillColor = fillColor_.value();
+        if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+            stream << std::hex << fillColor.GetValue();
+            newValue = stream.str();
+        } else {
+            //convert color to #rgba format.
+            newValue = IntToHexString(fillColor.GetRed()) + IntToHexString(fillColor.GetGreen()) +
+                       IntToHexString(fillColor.GetBlue()) + IntToHexString(fillColor.GetAlpha());
+        }
         svgNode->SetAttr(SVG_FILL, "#" + newValue);
     } else {
         svgNode->SetAttr(SVG_FILL, value);
@@ -315,7 +356,14 @@ void SvgDom::DrawImage(
         root_->SetSmoothEdge(smoothEdge_);
     }
     root_->SetColorFilter(colorFilter_);
-    root_->Draw(canvas, svgContext_->GetViewPort(), fillColor_);
+    if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
+        root_->Draw(canvas, svgContext_->GetViewPort(), fillColor_);
+    } else {
+        SvgLengthScaleRule lengthRule(Rect(0, 0, svgContext_->GetViewPort().Width(),
+            svgContext_->GetViewPort().Height()), SvgLengthScaleUnit::USER_SPACE_ON_USE);
+        svgContext_->SetFillColor(fillColor_);
+        root_->Draw(canvas, lengthRule);
+    }
     canvas.Restore();
 }
 
@@ -368,5 +416,12 @@ void SvgDom::SetSmoothEdge(float value)
 void SvgDom::SetColorFilter(const std::optional<ImageColorFilter>& colorFilter)
 {
     colorFilter_ = colorFilter;
+}
+
+std::string SvgDom::IntToHexString(const int number)
+{
+    std::stringstream stringStream;
+    stringStream << std::setw(ONE_BYTE_TO_HEX_LEN) << std::setfill('0') << std::hex << number;
+    return stringStream.str();
 }
 } // namespace OHOS::Ace::NG

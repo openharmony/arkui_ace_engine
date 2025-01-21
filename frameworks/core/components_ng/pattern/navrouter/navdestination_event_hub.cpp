@@ -87,6 +87,11 @@ void NavDestinationEventHub::FireOnShownEvent(const std::string& name, const std
             .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnNavDstShow(std::move(builder));
     }
+    auto host = GetFrameNode();
+    CHECK_NULL_VOID(host);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->GetMemoryManager()->RebuildImageByPage(AceType::DynamicCast<FrameNode>(navDestination));
 }
 
 void NavDestinationEventHub::FireOnHiddenEvent(const std::string& name)
@@ -227,5 +232,35 @@ bool NavDestinationEventHub::FireOnBackPressedEvent()
         return onBackPressedEvent_();
     }
     return false;
+}
+
+void NavDestinationEventHub::FireOnActive(int32_t reason)
+{
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "%{public}s lifecycle change to onActive state. navdestinationId:%{public}d, navigationId:%{public}d",
+        name_.c_str(), navDestination->GetId(), navDestination->GetNavigationNodeId());
+    state_ = NavDestinationState::ON_ACTIVE;
+    UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+        NavDestinationState::ON_ACTIVE);
+    if (onActive_) {
+        onActive_(reason);
+    }
+}
+
+void NavDestinationEventHub::FireOnInactive(int32_t reason)
+{
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetFrameNode());
+    CHECK_NULL_VOID(navDestination);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION,
+        "%{public}s lifecycle change to onInactive state. navdestinationId:%{public}d, navigationId:%{public}d",
+        name_.c_str(), navDestination->GetId(), navDestination->GetNavigationNodeId());
+    state_ = NavDestinationState::ON_INACTIVE;
+    UIObserverHandler::GetInstance().NotifyNavigationStateChange(GetNavDestinationPattern(),
+        NavDestinationState::ON_INACTIVE);
+    if (onInactive_) {
+        onInactive_(reason);
+    }
 }
 }

@@ -416,9 +416,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     float mainGap = GetMainGap();
     auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular);
     if (info_.offsetEnd_) {
-        if (GetEffectEdge() == EffectEdge::START && NonPositive(offset) && source == SCROLL_FROM_UPDATE) {
-            return true;
-        }
         if (source == SCROLL_FROM_UPDATE) {
             float overScroll = 0.0f;
             if (irregular) {
@@ -442,9 +439,6 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return true;
     }
     if (info_.reachStart_) {
-        if (GetEffectEdge() == EffectEdge::END && NonNegative(offset) && source == SCROLL_FROM_UPDATE) {
-            return true;
-        }
         if (source == SCROLL_FROM_UPDATE) {
             auto friction = CalculateFriction(std::abs(info_.currentOffset_) / GetMainContentSize());
             offset *= friction;
@@ -1051,7 +1045,7 @@ void GridPattern::SyncLayoutBeforeSpring()
 
     preSpring_ = true;
     host->SetActive();
-    auto context = host->GetContext();
+    auto* context = host->GetContext();
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(host);
     }
@@ -1060,20 +1054,20 @@ void GridPattern::SyncLayoutBeforeSpring()
 
 void GridPattern::GetEndOverScrollIrregular(OverScrollOffset& offset, float delta) const
 {
-    const auto& info = info_;
-    float contentHeight = std::max(GetMainContentSize(), info.totalHeightOfItemsInView_);
-    if (info.reachStart_ && info.currentOffset_ + delta > 0) {
-        offset.end = 0;
-        return;
+    const float mainGap = GetMainGap();
+    const float viewport = info_.lastMainSize_ - info_.contentEndPadding_;
+    float heightInView = info_.totalHeightOfItemsInView_;
+    if (info_.HeightSumSmaller(viewport, mainGap)) {
+        // content < viewport, use viewport height to calculate overScroll
+        heightInView = viewport - info_.GetHeightInRange(0, info_.startMainLineIndex_, mainGap);
     }
-    float disToBot =
-        info.GetDistanceToBottom(info.lastMainSize_ - info.contentEndPadding_, contentHeight, GetMainGap());
-    if (!info.offsetEnd_) {
-        offset.end = std::min(0.0f, disToBot + static_cast<float>(delta));
+    float disToBot = info_.GetDistanceToBottom(viewport, heightInView, mainGap);
+    if (!info_.IsOutOfEnd(mainGap, true)) {
+        offset.end = std::min(0.0f, disToBot + delta);
     } else if (Negative(delta)) {
         offset.end = delta;
     } else {
-        offset.end = std::min(static_cast<float>(delta), -disToBot);
+        offset.end = std::min(delta, -disToBot);
     }
 }
 
@@ -1614,14 +1608,15 @@ ScopeFocusAlgorithm GridPattern::GetScopeFocusAlgorithm()
     }
     return ScopeFocusAlgorithm(property->IsVertical(), true, ScopeType::OTHERS,
         [wp = WeakClaim(this)](
-            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) {
+            FocusStep step, const WeakPtr<FocusHub>& currFocusNode, WeakPtr<FocusHub>& nextFocusNode) -> bool {
             auto grid = wp.Upgrade();
-            CHECK_NULL_VOID(grid);
+            CHECK_NULL_RETURN(grid, false);
             if (grid->UseIrregularLayout() && (step == FocusStep::TAB || step == FocusStep::SHIFT_TAB)) {
                 nextFocusNode = grid->focusHandler_.GetNextFocusSimplified(step, currFocusNode.Upgrade());
             } else {
                 nextFocusNode = grid->focusHandler_.GetNextFocusNode(step, currFocusNode);
             }
+            return nextFocusNode.Upgrade() != currFocusNode.Upgrade();
         });
 }
 

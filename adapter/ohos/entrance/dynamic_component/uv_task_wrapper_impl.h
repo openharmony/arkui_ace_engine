@@ -30,8 +30,8 @@ public:
     void Call(const TaskExecutor::Task& task) override;
 
 private:
-    uv_loop_t* loop_ = nullptr;
     pthread_t threadId_ = 0;
+    napi_env env_;
 };
 
 class UVWorkWrapper : public uv_work_t {

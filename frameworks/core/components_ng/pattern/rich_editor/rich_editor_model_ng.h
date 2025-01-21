@@ -48,6 +48,7 @@ public:
     void SetOnDidChange(std::function<void(const RichEditorChangeValue&)>&& func) override;
     void SetOnCut(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)>&& func) override;
+    void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func) override;
     void SetSelectionMenuOptions(const OnCreateMenuCallback&& onCreateMenuCallback,
         const OnMenuItemClickCallback&& onMenuItemClick) override;
     void SetRequestKeyboardOnFocus(bool needToRequest) override;
@@ -55,6 +56,11 @@ public:
     void SetPreviewMenuParam(TextSpanType spanType, std::function<void()>& buildFunc,
         const SelectMenuParam& menuParam) override;
     void SetBarState(DisplayMode mode) override;
+    void SetMaxLength(std::optional<int32_t> value) override;
+    void ResetMaxLength() override;
+    void SetMaxLines(uint32_t value) override;
+    void SetStopBackPress(bool isStopBackPress) override;
+    void SetKeyboardAppearance(KeyboardAppearance value) override;
 
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
@@ -88,6 +94,10 @@ public:
     static void SetPreviewMenuParam(FrameNode* frameNode,
         TextSpanType spanType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
     static void SetBarState(FrameNode* frameNode, DisplayMode mode);
+    static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
+    static void SetMaxLines(FrameNode* frameNode, uint32_t value);
+    static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
+    static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
 
 private:
     void SetDraggable(bool draggable);

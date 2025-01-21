@@ -105,6 +105,7 @@ private:
     // fill end of viewport
     void FillBlankAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength);
     float FillNewLineBackward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper, bool reverse);
+    void FillCurrentLine(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
 
     // Measure grid item which not exist in grid matrix already, need to place it and save to grid matrix.
     int32_t MeasureNewChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
@@ -218,10 +219,9 @@ private:
      * @param line index of line to measure
      * updates @param mainLength by adding this line's measured height
      * updates @param endIdx with max item index in this line
-     * set @param cacheValid to false if line height has changed.
      * @return false if line isn't recorded.
      */
-    bool MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx, bool& cacheValid);
+    bool MeasureExistingLine(int32_t line, float& mainLength, int32_t& endIdx);
 
     LayoutWrapper* wrapper_;
     SizeF frameSize_;

@@ -117,6 +117,8 @@ bool FormManagerDelegate::GetFormInfo(const std::string& bundleName, const std::
 {
     return true;
 }
+
+void FormManagerDelegate::SetParamForWant(const RequestFormInfo& info, const AppExecFwk::FormInfo& formInfo) {}
 #endif
 
 bool FormManagerDelegate::CheckFormBundleForbidden(const std::string& bundleName)

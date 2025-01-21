@@ -188,7 +188,7 @@ public:
     JsiObject();
     explicit JsiObject(panda::Local<panda::ObjectRef> val);
     explicit JsiObject(const EcmaVM *vm, panda::Local<panda::ObjectRef> val);
-    explicit JsiObject(const panda::CopyableGlobal<panda::ObjectRef>& val);
+    ACE_FORCE_EXPORT explicit JsiObject(const panda::CopyableGlobal<panda::ObjectRef>& val);
     bool IsUndefined() const;
     ~JsiObject() override = default;
     enum InternalFieldIndex { INSTANCE = 0 };

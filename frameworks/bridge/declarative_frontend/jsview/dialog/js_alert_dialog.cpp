@@ -58,6 +58,9 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
 const std::vector<DialogButtonDirection> DIALOG_BUTTONS_DIRECTION = { DialogButtonDirection::AUTO,
     DialogButtonDirection::HORIZONTAL, DialogButtonDirection::VERTICAL };
 constexpr int32_t ALERT_DIALOG_VALID_PRIMARY_BUTTON_NUM = 1;
+const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
+const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = {
+    ImmersiveMode::DEFAULT, ImmersiveMode::PAGE, ImmersiveMode::FULL};
 } // namespace
 
 void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
@@ -202,7 +205,7 @@ void ParseButtons(const JsiExecutionContext& execContext, DialogProperties& prop
     auto directionValue = obj->GetProperty("buttonDirection");
     if (directionValue->IsNumber()) {
         auto buttonDirection = directionValue->ToNumber<int32_t>();
-        if (buttonDirection >= 0 && buttonDirection <= static_cast<int32_t>(DIALOG_BUTTONS_DIRECTION.size())) {
+        if (buttonDirection >= 0 && buttonDirection < static_cast<int32_t>(DIALOG_BUTTONS_DIRECTION.size())) {
             properties.buttonDirection = DIALOG_BUTTONS_DIRECTION[buttonDirection];
         }
     }
@@ -304,7 +307,7 @@ void ParseAlertAlignment(DialogProperties& properties, JSRef<JSObject> obj)
     auto alignmentValue = obj->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
         auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             properties.alignment = DIALOG_ALIGNMENT[alignment];
             UpdateAlertAlignment(properties.alignment);
         }
@@ -363,6 +366,32 @@ void ParseAlertMaskRect(DialogProperties& properties, JSRef<JSObject> obj)
     }
 }
 
+void ParseAlertDialogLevelMode(DialogProperties& properties, JSRef<JSObject> obj)
+{
+    auto levelMode = obj->GetProperty("levelMode");
+    auto levelUniqueId = obj->GetProperty("levelUniqueId");
+    auto immersiveMode = obj->GetProperty("immersiveMode");
+    bool showInMainWindow = true;
+    if (obj->GetProperty("showInSubWindow")->IsBoolean() && obj->GetProperty("showInSubWindow")->ToBoolean()) {
+        showInMainWindow = false;
+    }
+    if (levelMode->IsNumber() && showInMainWindow) {
+        auto mode = levelMode->ToNumber<int32_t>();
+        if (mode >= 0 && mode < static_cast<int32_t>(DIALOG_LEVEL_MODE.size())) {
+            properties.dialogLevelMode = DIALOG_LEVEL_MODE[mode];
+        }
+    }
+    if (levelUniqueId->IsNumber()) {
+        properties.dialogLevelUniqueId = levelUniqueId->ToNumber<int32_t>();
+    }
+    if (immersiveMode->IsNumber()) {
+        auto immersiveVal = immersiveMode->ToNumber<int32_t>();
+        if (immersiveVal >= 0 && immersiveVal < static_cast<int32_t>(DIALOG_IMMERSIVE_MODE.size())) {
+            properties.dialogImmersiveMode = DIALOG_IMMERSIVE_MODE[immersiveVal];
+        }
+    }
+}
+
 void JSAlertDialog::Show(const JSCallbackInfo& args)
 {
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
@@ -387,12 +416,14 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         ParseAlertOffset(properties, obj);
         ParseTextStyle(properties, obj);
         ParseAlertMaskRect(properties, obj);
+        ParseAlertDialogLevelMode(properties, obj);
 
         auto onLanguageChange = [execContext, obj, parseContent = ParseDialogTitleAndMessage,
                                     parseButton = ParseButtons, parseShadow = ParseAlertShadow,
                                     parseBorderProps = ParseAlertBorderWidthAndColor,
                                     parseRadius = ParseAlertRadius, parseAlignment = ParseAlertAlignment,
                                     parseOffset = ParseAlertOffset, parseMaskRect = ParseAlertMaskRect,
+                                    parseDialogLevelMode = ParseAlertDialogLevelMode,
                                     node = dialogNode](DialogProperties& dialogProps) {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execContext);
             ACE_SCORING_EVENT("AlertDialog.property.onLanguageChange");
@@ -407,6 +438,7 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
             parseAlignment(dialogProps, obj);
             parseOffset(dialogProps, obj);
             parseMaskRect(dialogProps, obj);
+            parseDialogLevelMode(dialogProps, obj);
         };
         properties.onLanguageChange = std::move(onLanguageChange);
 

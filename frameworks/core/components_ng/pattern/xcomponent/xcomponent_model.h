@@ -82,6 +82,7 @@ public:
     virtual void SetRenderFit(RenderFit renderFit) {}
     virtual void EnableSecure(bool isSecure) {}
     virtual void HdrBrightness(float hdrBrightness) {}
+    virtual void EnableTransparentLayer(bool isTransparentLayer) {}
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_MODEL_H
