@@ -36,6 +36,17 @@ constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
 constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 } // namespace
 
+RefPtr<ContainerModalPattern> ContainerModalPattern::GetCurrentContainerModalPattern()
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_RETURN(rootNode, nullptr);
+    auto containerNode = AceType::DynamicCast<FrameNode>(rootNode->GetFirstChild());
+    CHECK_NULL_RETURN(containerNode, nullptr);
+    return containerNode->GetPattern<ContainerModalPattern>();
+}
+
 void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)
 {
     auto containerNode = GetHost();

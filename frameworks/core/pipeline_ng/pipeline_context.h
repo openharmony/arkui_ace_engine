@@ -826,7 +826,6 @@ public:
     const RefPtr<PostEventManager>& GetPostEventManager();
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
-    bool GetContainerModalTitleVisible();
     void SetContainerModalTitleHeight(int32_t height);
     int32_t GetContainerModalTitleHeight();
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);

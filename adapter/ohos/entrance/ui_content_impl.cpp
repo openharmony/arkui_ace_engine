@@ -101,6 +101,7 @@
 #include "core/components/popup/popup_theme.h"
 #include "core/components_ng/base/inspector.h"
 #include "core/components_ng/base/view_abstract.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -4178,9 +4179,9 @@ void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bo
 bool UIContentImpl::GetContainerModalTitleVisible()
 {
     ContainerScope scope(instanceId_);
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    return pipeline->GetContainerModalTitleVisible();
+    auto containerPattern = NG::ContainerModalPattern::GetCurrentContainerModalPattern();
+    CHECK_NULL_RETURN(containerPattern, false);
+    return containerPattern->GetContainerModalTitleVisible();
 }
 
 void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
