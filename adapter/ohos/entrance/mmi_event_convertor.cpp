@@ -640,9 +640,9 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     event.targetWindowId = pointerItem.GetTargetWindowId();
     event.x = event.windowX;
     event.y = event.windowY;
-    event.pressedKeyCodes_.clear();
+    event.pressedKeyCodes.clear();
     for (const auto& curCode : pointerEvent->GetPressedKeys()) {
-        event.pressedKeyCodes_.emplace_back(static_cast<KeyCode>(curCode));
+        event.pressedKeyCodes.emplace_back(static_cast<KeyCode>(curCode));
     }
     int32_t orgAction = pointerEvent->GetPointerAction();
     GetPointerEventAction(orgAction, event);
