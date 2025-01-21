@@ -19,7 +19,7 @@ import hilog from '@ohos.hilog';
 import measure from '@ohos.measure';
 import resourceManager from '@ohos.resourceManager';
 import { Theme } from '@ohos.arkui.theme';
-import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
+import { ColorMetrics, LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import common from '@ohos.app.ability.common';
 import accessibility from '@ohos.accessibility';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
@@ -100,7 +100,8 @@ export class AdvancedDialogV2Button {
   public role?: ButtonRole;
   @Trace
   public defaultFocus?: boolean;
-
+  @Trace
+  public enabled?: boolean;
   constructor(options: AdvancedDialogV2ButtonOptions) {
     this.content = options.content;
     this.action = options.action;
@@ -109,6 +110,7 @@ export class AdvancedDialogV2Button {
     this.buttonStyle = options.buttonStyle;
     this.role = options.role;
     this.defaultFocus = options.defaultFocus;
+    this.enabled = options.enabled;
   };
 }
 
@@ -120,12 +122,15 @@ export declare interface AdvancedDialogV2ButtonOptions {
   buttonStyle?: ButtonStyleMode;
   role?: ButtonRole;
   defaultFocus?: boolean;
+  enabled?: boolean;
 }
 
 @ComponentV2
 export struct TipsDialogV2 {
   @Require @Param imageRes: ResourceStr | PixelMap;
   @Param imageSize?: SizeOptions = { width: DEFAULT_IMAGE_SIZE, height: DEFAULT_IMAGE_SIZE };
+  @Param imageBorderColor?: ColorMetrics = undefined;
+  @Param imageBorderWidth?: LengthMetrics = undefined;
   @Param title?: ResourceStr | null = null;
   @Param content?: ResourceStr | null = null;
   @Param onCheckedChange?: AdvancedDialogV2OnCheckedChange = undefined;
@@ -261,6 +266,8 @@ export struct TipsDialogV2 {
           maxWidth: this.imageSize?.width ?? DEFAULT_IMAGE_SIZE,
           maxHeight: this.imageSize?.height ?? DEFAULT_IMAGE_SIZE
         })
+        .borderColor(this.imageBorderColor?.color)
+        .borderWidth(toLengthString(this.imageBorderWidth))
     }
     .width('100%')
   }
@@ -1484,6 +1491,7 @@ function setButtonProperties(
   .buttonStyle(buttonOptions?.buttonStyle ?? ALERT_BUTTON_STYLE)
   .layoutWeight(BUTTON_LAYOUT_WEIGHT)
   .type(ButtonType.ROUNDED_RECTANGLE)
+  .enabled(buttonOptions?.enabled ?? true)
 }
 
 /**
@@ -1765,4 +1773,32 @@ export struct PopoverDialogV2 {
   }
 }
 
+function toLengthString(value?: LengthMetrics): string | undefined {
+  if (!value) {
+    return undefined;
+  }
+  const length: number = value.value;
+  let lengthString: string = '';
+  switch (value.unit) {
+    case LengthUnit.PX:
+      lengthString = `${length}px`;
+      break;
+    case LengthUnit.FP:
+      lengthString = `${length}fp`;
+      break;
+    case LengthUnit.LPX:
+      lengthString = `${length}lpx`;
+      break;
+    case LengthUnit.PERCENT:
+      lengthString = `${length * 100}%`;
+      break;
+    case LengthUnit.VP:
+      lengthString = `${length}vp`;
+      break;
+    default:
+      lengthString = `${length}vp`;
+      break;
+  }
+  return lengthString;
+}
 export declare interface PopoverDialogV2Options extends CustomPopupOptions {}
