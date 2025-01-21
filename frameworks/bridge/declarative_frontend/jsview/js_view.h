@@ -423,8 +423,6 @@ public:
     void JSGetDialogController(const JSCallbackInfo& info);
 
     bool JSAllowReusableV2Descendant();
-
-    static JSView* GetNativeViewPartialUpdate(JSRef<JSObject> obj);
 private:
     void MarkNeedUpdate() override;
 
