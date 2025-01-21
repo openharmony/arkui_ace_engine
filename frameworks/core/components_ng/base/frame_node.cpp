@@ -752,24 +752,6 @@ void FrameNode::DumpCommonInfo()
     DumpLog::GetInstance().AddDesc(std::string("FrameRect: ").append(geometryNode_->GetFrameRect().ToString()));
     DumpLog::GetInstance().AddDesc(
         std::string("PaintRect without transform: ").append(renderContext_->GetPaintRectWithoutTransform().ToString()));
-    if (GetHostTag() == V2::COLUMN_ETS_TAG || GetHostTag() == V2::ROW_ETS_TAG) {
-        auto widthLayoutPolicy = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty_)
-                                     ->GetWidthLayoutPolicy()
-                                     .value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH));
-        auto heightLayoutPolicy = AceType::DynamicCast<FlexLayoutProperty>(layoutProperty_)
-                                      ->GetHeightLayoutPolicy()
-                                      .value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH));
-        std::string layoutPolicy = "";
-        if (widthLayoutPolicy != static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) {
-            layoutPolicy.append("WidthLayoutPolicy: ").append(std::to_string(widthLayoutPolicy));
-        }
-        if (heightLayoutPolicy != static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) {
-            layoutPolicy.append("HeightLayoutPolicy: ").append(std::to_string(heightLayoutPolicy));
-        }
-        if (layoutPolicy.length() > 0) {
-            DumpLog::GetInstance().AddDesc(layoutPolicy);
-        }
-    }
     if (renderContext_->GetBackgroundColor()->ColorToString().compare("#00000000") != 0) {
         DumpLog::GetInstance().AddDesc(
             std::string("BackgroundColor: ").append(renderContext_->GetBackgroundColor()->ColorToString()));

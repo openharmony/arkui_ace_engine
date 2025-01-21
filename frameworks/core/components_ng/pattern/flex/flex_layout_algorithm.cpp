@@ -309,10 +309,12 @@ void FlexLayoutAlgorithm::TravelChildrenFlexProps(LayoutWrapper* layoutWrapper)
 
 bool FlexLayoutAlgorithm::AddElementIntoLayoutPolicyChildren(LayoutWrapper* layoutWrapper, RefPtr<LayoutWrapper> child)
 {
-    auto widthLayoutPolicy =
-        AceType::DynamicCast<FlexLayoutProperty>(child->GetLayoutProperty())->GetWidthLayoutPolicy();
-    auto heightLayoutPolicy =
-        AceType::DynamicCast<FlexLayoutProperty>(child->GetLayoutProperty())->GetHeightLayoutPolicy();
+    CHECK_NULL_RETURN(layoutWrapper, false);
+    CHECK_NULL_RETURN(child, false);
+    auto childLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(child->GetLayoutProperty());
+    CHECK_NULL_RETURN(childLayoutProperty, false);
+    auto widthLayoutPolicy = childLayoutProperty->GetWidthLayoutPolicy();
+    auto heightLayoutPolicy = childLayoutProperty->GetHeightLayoutPolicy();
     if (widthLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
         static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH) &&
         heightLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
@@ -350,10 +352,10 @@ void FlexLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWra
         child->Measure(layoutConstraint);
         auto geometryNode = child->GetGeometryNode();
         CHECK_NULL_CONTINUE(geometryNode);
-        auto widthLayoutPolicy =
-            AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty())->GetWidthLayoutPolicy();
-        auto heightLayoutPolicy =
-            AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty())->GetHeightLayoutPolicy();
+        auto childLayoutProperty = AceType::DynamicCast<FlexLayoutProperty>(child->GetLayoutProperty());
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        auto widthLayoutPolicy = childLayoutProperty->GetWidthLayoutPolicy();
+        auto heightLayoutPolicy = childLayoutProperty->GetHeightLayoutPolicy();
         if (widthLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
             static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT)) {
             geometryNode->SetFrameWidth(realSize.Width());
