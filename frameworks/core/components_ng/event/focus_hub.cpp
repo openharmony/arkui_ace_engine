@@ -1891,10 +1891,10 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
     rect = frameNode->GetPaintRectWithTransform();
 
     //  Calculate currentNode -> childNode offset
-    auto parent = frameNode->GetAncestorNodeOfFrame(false);
+    auto parent = frameNode->GetAncestorNodeOfFrame(true);
     while (parent && parent != GetFrameNode()) {
         rect += parent->GetPaintRectWithTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame(false);
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     return true;
 }
