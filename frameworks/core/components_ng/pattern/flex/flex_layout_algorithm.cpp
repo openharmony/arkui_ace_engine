@@ -351,9 +351,9 @@ void FlexLayoutAlgorithm::MeasureAdaptiveLayoutChildren(LayoutWrapper* layoutWra
         auto geometryNode = child->GetGeometryNode();
         CHECK_NULL_CONTINUE(geometryNode);
         auto widthLayoutPolicy =
-            AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty())->GetWidthLayoutPolicy();
+            AceType::DynamicCast<FlexLayoutProperty>(child->GetLayoutProperty())->GetWidthLayoutPolicy();
         auto heightLayoutPolicy =
-            AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty())->GetHeightLayoutPolicy();
+            AceType::DynamicCast<FlexLayoutProperty>(child->GetLayoutProperty())->GetHeightLayoutPolicy();
         if (widthLayoutPolicy.value_or(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH)) ==
             static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT)) {
             geometryNode->SetFrameWidth(realSize.Width());
