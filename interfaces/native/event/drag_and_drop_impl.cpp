@@ -699,8 +699,12 @@ int32_t OH_ArkUI_DragEvent_StartDataLoading(
     query.intention = OHOS::UDMF::Intention::UD_INTENTION_DRAG;
     OHOS::UDMF::GetDataParams getDataParams;
     OH_UdmfGetDataParams &optionsRef = *options;
-    OHOS::UDMF::DataParamsConversion::GetInnerDataParams(optionsRef, query, getDataParams);
     auto status = static_cast<int32_t>(
+        OHOS::UDMF::DataParamsConversion::GetInnerDataParams(optionsRef, query, getDataParams));
+    if (status != 0) {
+        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    }
+    status = static_cast<int32_t>(
         OHOS::UDMF::UdmfAsyncClient::GetInstance().StartAsyncDataRetrieval(getDataParams));
     if (status != 0) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
