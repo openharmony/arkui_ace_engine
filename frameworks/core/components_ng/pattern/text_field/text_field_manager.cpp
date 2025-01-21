@@ -67,7 +67,8 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
         CHECK_NULL_VOID(host);
         auto parent = host->GetAncestorNodeOfFrame(true);
         while (parent) {
-            if (parent->GetTag() == "Panel" || parent->GetTag() == "SheetPage") {
+            // when Panel and SheetPage is out of screen, no need to update position_ for keyboard avoidance
+            if (parent->GetTag() == V2::PANEL_ETS_TAG || parent->GetTag() == V2::SHEET_PAGE_TAG) {
                 return;
             }
             parent = parent->GetAncestorNodeOfFrame(true);
@@ -77,7 +78,7 @@ void TextFieldManagerNG::SetClickPosition(const Offset& position)
     if (GreatOrEqual(position.GetX(), rootWidth) || LessNotEqual(position.GetX(), 0.0f)) {
         return;
     }
-    position_ = position;
+    position_ = position; // use for keyboard avoidance, uses like caret position
     optionalPosition_ = position;
 }
 
