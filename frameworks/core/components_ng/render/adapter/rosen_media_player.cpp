@@ -239,13 +239,12 @@ bool RosenMediaPlayer::RawFileWithModuleInfoPlay(const std::string& src, const s
         CHECK_NULL_RETURN(themeConstants, false);
     }
 
-    static std::mutex rawFdMutex_;
-    std::lock_guard lock(rawFdMutex_);
     auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
     std::string rawFile;
     RawfileDescription rawfileDescription;
+    rawfileDescription.fd = -1;
     if (GetResourceId(src, rawFile)) {
-        if (!resourceWrapper->GetRawFileDescription(rawFile, rawfileDescription)) {
+        if (!resourceWrapper->GetRawFD(rawFile, rawfileDescription)) {
             TAG_LOGW(AceLogTag::ACE_VIDEO, "get video data by name failed");
             return false;
         }
@@ -254,10 +253,14 @@ bool RosenMediaPlayer::RawFileWithModuleInfoPlay(const std::string& src, const s
     if (!mediaPlayer_ ||
         mediaPlayer_->SetSource(rawfileDescription.fd, rawfileDescription.offset, rawfileDescription.length) != 0) {
         LOGE("Player SetSource failed");
-        resourceWrapper->CloseRawFileDescription(rawFile);
+        if (rawfileDescription.fd >= 0) {
+            close(rawfileDescription.fd);
+        }
         return false;
     }
-    resourceWrapper->CloseRawFileDescription(rawFile);
+    if (rawfileDescription.fd >= 0) {
+        close(rawfileDescription.fd);
+    }
     return true;
 }
 
