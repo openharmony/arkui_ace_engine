@@ -41,7 +41,6 @@
 #include "core/components_v2/inspector/inspector.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_object_template.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -195,7 +194,7 @@ void UpdatePageLifeCycleFunctions(RefPtr<NG::FrameNode> pageNode, JSView* view)
 
 void UpdateCardRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj)
 {
-    auto* view = JsiObjectTemplate::GetNativeViewPartialUpdate(obj);
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return;
     }
@@ -358,7 +357,7 @@ panda::Local<panda::JSValueRef> JSPostCardAction(panda::JsiRuntimeCallInfo* runt
     }
 
     panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
-    auto* view = JsiObjectTemplate::GetNativeViewPartialUpdate(obj);
+    auto* view = static_cast<JSView*>(obj->GetNativePointerField(vm, 0));
     if (!view && !static_cast<JSViewPartialUpdate*>(view) && !static_cast<JSViewFullUpdate*>(view)) {
         return panda::JSValueRef::Undefined(vm);
     }
