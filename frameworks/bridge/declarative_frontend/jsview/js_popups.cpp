@@ -2004,4 +2004,26 @@ void JSViewAbstract::SetDialogHoverModeProperties(const JSRef<JSObject>& obj, Di
         }
     }
 }
+
+void JSViewAbstract::SetDialogBlurStyleOption(const JSRef<JSObject>& obj, DialogProperties& properties)
+{
+    auto blurStyleValue = obj->GetProperty("backgroundBlurStyleOptions");
+    if (blurStyleValue->IsObject()) {
+        if (!properties.blurStyleOption.has_value()) {
+            properties.blurStyleOption.emplace();
+        }
+        JSViewAbstract::ParseBlurStyleOption(blurStyleValue, properties.blurStyleOption.value());
+    }
+}
+
+void JSViewAbstract::SetDialogEffectOption(const JSRef<JSObject>& obj, DialogProperties& properties)
+{
+    auto effectOptionValue = obj->GetProperty("backgroundEffect");
+    if (effectOptionValue->IsObject()) {
+        if (!properties.effectOption.has_value()) {
+            properties.effectOption.emplace();
+        }
+        JSViewAbstract::ParseEffectOption(effectOptionValue, properties.effectOption.value());
+    }
+}
 }

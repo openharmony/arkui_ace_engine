@@ -540,6 +540,8 @@ void JSAlertDialog::Show(const JSCallbackInfo& args)
         ParseAlertLevelOrder(properties, obj);
         JSViewAbstract::SetDialogProperties(obj, properties);
         JSViewAbstract::SetDialogHoverModeProperties(obj, properties);
+        JSViewAbstract::SetDialogBlurStyleOption(obj, properties);
+        JSViewAbstract::SetDialogEffectOption(obj, properties);
         AlertDialogModel::GetInstance()->SetShowDialog(properties);
     }
 }

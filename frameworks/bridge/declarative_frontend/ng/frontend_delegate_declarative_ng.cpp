@@ -746,6 +746,12 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
     if (dialogAttr.backgroundBlurStyle.has_value()) {
         dialogProperties.backgroundBlurStyle = dialogAttr.backgroundBlurStyle.value();
     }
+    if (dialogAttr.blurStyleOption.has_value()) {
+        dialogProperties.blurStyleOption = dialogAttr.blurStyleOption.value();
+    }
+    if (dialogAttr.effectOption.has_value()) {
+        dialogProperties.effectOption = dialogAttr.effectOption.value();
+    }
     if (dialogAttr.hoverModeArea.has_value()) {
         dialogProperties.hoverModeArea = dialogAttr.hoverModeArea.value();
     }
@@ -798,7 +804,9 @@ DialogProperties FrontendDelegateDeclarativeNG::ParsePropertiesFromAttr(const Pr
         .dialogLevelMode = dialogAttr.dialogLevelMode,
         .dialogLevelUniqueId = dialogAttr.dialogLevelUniqueId,
         .isUserCreatedDialog = dialogAttr.isUserCreatedDialog,
-        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode
+        .dialogImmersiveMode = dialogAttr.dialogImmersiveMode,
+        .blurStyleOption = dialogAttr.blurStyleOption,
+        .effectOption = dialogAttr.effectOption
     };
 #if defined(PREVIEW)
     if (dialogProperties.isShowInSubWindow) {
