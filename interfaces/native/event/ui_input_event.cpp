@@ -1461,7 +1461,7 @@ int64_t OH_ArkUI_PointerEvent_GetPressedTimeByIndex(const ArkUI_UIInputEvent* ev
     switch (event->eventTypeId) {
         case C_TOUCH_EVENT_ID: {
             const auto* touchEvent = reinterpret_cast<ArkUITouchEvent*>(event->inputEvent);
-            if (!touchEvent || pointerIndex < 0) {
+            if (!isCurrentCTouchEventParamValid(touchEvent, pointerIndex)) {
                 return 0;
             }
             return touchEvent->touchPointes[pointerIndex].pressedTime;
@@ -1547,19 +1547,26 @@ int32_t OH_ArkUI_MouseEvent_GetPressedButtons(const ArkUI_UIInputEvent* event, i
     if (!event || !pressedButtons || !length) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    const auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
-    if (!mouseEvent) {
-        return ARKUI_ERROR_CODE_PARAM_INVALID;
+    switch (event->eventTypeId) {
+        case C_MOUSE_EVENT_ID: {
+            auto* mouseEvent = reinterpret_cast<ArkUIMouseEvent*>(event->inputEvent);
+            if (!mouseEvent) {
+                return ARKUI_ERROR_CODE_PARAM_INVALID;
+            }
+            auto inputLength = *length;
+            if (mouseEvent->pressedButtonsLength > inputLength) {
+                return ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH;
+            }
+            *length = mouseEvent->pressedButtonsLength;
+            for (int i = 0; i < mouseEvent->pressedButtonsLength; i++) {
+                pressedButtons[i] = mouseEvent->pressedButtons[i];
+            }
+            return ARKUI_ERROR_CODE_NO_ERROR;
+        }
+        default:
+            break;
     }
-    auto inputLength = *length;
-    if (mouseEvent->pressedButtonsLength > inputLength) {
-        return ARKUI_ERROR_CODE_BUFFER_SIZE_NOT_ENOUGH;
-    }
-    *length = mouseEvent->pressedButtonsLength;
-    for (int i = 0; i < mouseEvent->pressedButtonsLength; i++) {
-        pressedButtons[i] = mouseEvent->pressedButtons[i];
-    }
-    return ARKUI_ERROR_CODE_NO_ERROR;
+    return ARKUI_ERROR_CODE_PARAM_INVALID;
 }
 
 double OH_ArkUI_FocusAxisEvent_GetAxisValue(const ArkUI_UIInputEvent* event, int32_t axis)
