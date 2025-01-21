@@ -34,13 +34,21 @@ JSRef<JSObject> JsCrownFunction::createCrownEvent(CrownEventInfo& event)
 
 void JsCrownFunction::Execute(OHOS::Ace::CrownEventInfo& event)
 {
-    JSRef<JSVal> param = JSRef<JSObject>::Cast(createCrownEvent(event));
+    auto eventObj = createCrownEvent(event);
+    if (!eventObj->IsObject()) {
+        return;
+    }
+    JSRef<JSVal> param = JSRef<JSObject>::Cast(eventObj);
     JsFunction::ExecuteJS(1, &param);
 }
 
 JSRef<JSVal> JsCrownFunction::ExecuteWithValue(OHOS::Ace::CrownEventInfo& event)
 {
-    JSRef<JSVal> param = JSRef<JSObject>::Cast(createCrownEvent(event));
+    auto eventObj = createCrownEvent(event);
+    if (!eventObj->IsObject()) {
+        return;
+    }
+    JSRef<JSVal> param = JSRef<JSObject>::Cast(eventObj);
     return JsFunction::ExecuteJS(1, &param);
 }
 
