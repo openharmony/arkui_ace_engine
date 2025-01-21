@@ -917,6 +917,7 @@ void EventManager::CleanHoverStatusForDragBegin()
         DispatchMouseHoverEventNG(falsifyEvent);
     }
     mouseTestResults_.clear();
+    pressMouseTestResultsMap_.clear();
 }
 
 void EventManager::RegisterDragTouchEventListener(
