@@ -6056,7 +6056,7 @@ void WebPattern::OnActive()
     CHECK_NULL_VOID(delegate_);
     bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "WebPattern::OnActive wIsActivePolicyDisableebId:%{public}d, isActive:%{public}d, policyDisable %{public}d",
+        "WebPattern::OnActive webId:%{public}d, isActive:%{public}d, policyDisable %{public}d",
         GetWebId(), isActive_, policyDisable);
     if (isActive_) {
         return;
