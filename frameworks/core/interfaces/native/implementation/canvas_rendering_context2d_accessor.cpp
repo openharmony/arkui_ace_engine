@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -87,7 +87,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void ToDataURLImpl(CanvasRenderingContext2DPeer* peer,
                    const Opt_String* type,
-                   const Opt_CustomObject* quality)
+                   const Opt_Number* quality)
 {
     auto peerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl);
@@ -118,19 +118,19 @@ void StopImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer)
     peerImpl->TriggerStopImageAnalyzer();
 }
 void OnOnAttachImpl(CanvasRenderingContext2DPeer* peer,
-                    const Callback_Void* callback)
+                    const Callback_Void* callback_)
 {
 }
 void OffOnAttachImpl(CanvasRenderingContext2DPeer* peer,
-                     const Opt_Callback_Void* callback)
+                     const Opt_Callback_Void* callback_)
 {
 }
 void OnOnDetachImpl(CanvasRenderingContext2DPeer* peer,
-                    const Callback_Void* callback)
+                    const Callback_Void* callback_)
 {
 }
 void OffOnDetachImpl(CanvasRenderingContext2DPeer* peer,
-                     const Opt_Callback_Void* callback)
+                     const Opt_Callback_Void* callback_)
 {
 }
 Ark_Int32 GetHeightImpl(CanvasRenderingContext2DPeer* peer)

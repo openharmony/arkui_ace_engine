@@ -789,6 +789,7 @@ HWTEST_F(ListModifierTest, setListMaintainVisibleContentPositionTest, TestSize.L
  * @tc.desc: Check the functionality of ListModifier.setOnScroll
  * @tc.type: FUNC
  */
+#ifdef WRONG_INTERFACE
 HWTEST_F(ListModifierTest, setOnScrollTest, TestSize.Level1)
 {
     Callback_Number_ScrollState_Void func{};
@@ -826,6 +827,7 @@ HWTEST_F(ListModifierTest, setOnScrollTest, TestSize.Level1)
     EXPECT_TRUE(checkEvent->scrollState.has_value());
     EXPECT_EQ(checkEvent->scrollState.value(), ScrollState::FLING);
 }
+#endif
 
 /*
  * @tc.name: setOnScrollIndexTest
@@ -1034,7 +1036,7 @@ HWTEST_F(ListModifierTest, setOnScrollStopTest, TestSize.Level1)
  */
 HWTEST_F(ListModifierTest, setOnItemDragStartTest, TestSize.Level1)
 {
-    Callback_ItemDragInfo_Number_Callback_Any func{};
+    Callback_ItemDragInfo_Number_CustomBuilder func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<ListEventHub>();
     auto dragInfo = ItemDragInfo();

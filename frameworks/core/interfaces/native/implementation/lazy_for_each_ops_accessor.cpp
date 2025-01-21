@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,8 +54,9 @@ Ark_NativePointer NeedMoreElementsImpl(Ark_NativePointer node, Ark_NativePointer
     return scrollWindowAdapter->NeedMoreElements(
         reinterpret_cast<FrameNode*>(mark), static_cast<FillDirection>(direction));
 }
-
-void OnRangeUpdateImpl(Ark_NativePointer node, ArkUI_Int32 totalCount, const Callback_RangeUpdate* updater)
+void OnRangeUpdateImpl(Ark_NativePointer node,
+                       Ark_Int32 totalCount,
+                       const Callback_RangeUpdate* updater)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -68,10 +69,18 @@ void OnRangeUpdateImpl(Ark_NativePointer node, ArkUI_Int32 totalCount, const Cal
     scrollWindowAdapter->RegisterUpdater(std::move(onEvent));
     scrollWindowAdapter->SetTotalCount(totalCount);
 }
-
-void SetCurrentIndexImpl(Ark_NativePointer node, Ark_Int32 index) {}
-
-} // namespace LazyForEachOpsAccessor
+void SetCurrentIndexImpl(Ark_NativePointer node,
+                         Ark_Int32 index)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+}
+void PrepareImpl(Ark_NativePointer node)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+}
+} // LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
 {
     static const GENERATED_ArkUILazyForEachOpsAccessor LazyForEachOpsAccessorImpl {
@@ -81,6 +90,7 @@ const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
         LazyForEachOpsAccessor::NeedMoreElementsImpl,
         LazyForEachOpsAccessor::OnRangeUpdateImpl,
         LazyForEachOpsAccessor::SetCurrentIndexImpl,
+        LazyForEachOpsAccessor::PrepareImpl,
     };
     return &LazyForEachOpsAccessorImpl;
 }

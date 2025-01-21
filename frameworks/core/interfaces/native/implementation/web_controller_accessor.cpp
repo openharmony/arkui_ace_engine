@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,7 +71,7 @@ void ClearHistoryImpl(WebControllerPeer* peer)
     peerImpl->GetController()->ClearHistory();
 }
 void RunJavaScriptImpl(WebControllerPeer* peer,
-                       const Ark_Literal_String_script_Callback_String_Void_callback* options)
+                       const Ark_Literal_String_script_Callback_String_Void_callback_* options)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl && peerImpl->GetController());
@@ -79,7 +79,7 @@ void RunJavaScriptImpl(WebControllerPeer* peer,
     CHECK_NULL_VOID(options);
     std::string script = Converter::Convert<std::string>(options->script);
     std::function<void(std::string)> callback = nullptr;
-    auto arkFun = Converter::OptConvert<Callback_String_Void>(options->callback);
+    auto arkFun = Converter::OptConvert<Callback_String_Void>(options->callback_);
     if (arkFun) {
         callback = [arkCallback = CallbackHelper(arkFun.value())](std::string result) {
             Ark_String breakpoints = Converter::ArkValue<Ark_String>(result);
@@ -134,7 +134,7 @@ void StopImpl(WebControllerPeer* peer)
     peerImpl->GetController()->StopLoading();
 }
 void RegisterJavaScriptProxyImpl(WebControllerPeer* peer,
-                                 const Ark_Literal_Object_object_String_name_Array_String_methodList* options)
+                                 const Ark_Literal_Object_object__String_name_Array_String_methodList* options)
 {
     auto peerImpl = reinterpret_cast<WebControllerPeerImpl*>(peer);
     CHECK_NULL_VOID(peerImpl && peerImpl->GetController());

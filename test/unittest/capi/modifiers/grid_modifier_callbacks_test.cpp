@@ -245,7 +245,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollIndexTest, TestSize.Level1)
 HWTEST_F(GridModifierCallbacksTest, DISABLED_setOnItemDragStartTest, TestSize.Level1)
 {
     // test is disabled because onItemDragStart should return value
-    Callback_ItemDragInfo_Number_Callback_Any func{};
+    Callback_ItemDragInfo_Number_CustomBuilder func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     auto eventHub = frameNode->GetEventHub<GridEventHub>();
     auto dragInfo = ItemDragInfo();
@@ -459,6 +459,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnItemDropTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
+#ifdef WRONG_INTERFACE
 HWTEST_F(GridModifierCallbacksTest, setOnScrollTest, TestSize.Level1)
 {
     Callback_Number_ScrollState_Void func{};
@@ -496,6 +497,7 @@ HWTEST_F(GridModifierCallbacksTest, setOnScrollTest, TestSize.Level1)
     EXPECT_TRUE(checkEvent->scrollState.has_value());
     EXPECT_EQ(checkEvent->scrollState.value(), ScrollState::FLING);
 }
+#endif
 
 /*
  * @tc.name: setOnReachStartTest

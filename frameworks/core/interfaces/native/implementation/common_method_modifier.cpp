@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1237,9 +1237,11 @@ void AssignArkValue(Ark_DragBehavior& dst, const DragBehavior& src)
 
 void AssignArkValue(Ark_DragEvent& dst, const DragEvent& src)
 {
+#ifdef WRONG_TYPE
     bool isUseCustomAnimation2 = src.IsUseCustomAnimation();
     dst.useCustomDropAnimation = NG::Converter::ArkValue<Ark_Boolean>(isUseCustomAnimation2);
     dst.dragBehavior = NG::Converter::ArkValue<Ark_DragBehavior>(src.GetDragBehavior());
+#endif
 }
 } // namespace OHOS::Ace::NG
 
@@ -1976,6 +1978,7 @@ void OnTouchImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(value);
     auto onEvent = [frameNode](TouchEventInfo& eventInfo) {
         Ark_TouchEvent onTouch{};
+#ifdef WRONG_TYPE
         onTouch.axisHorizontal.tag = Ark_Tag::ARK_TAG_UNDEFINED;
         onTouch.axisVertical.tag = Ark_Tag::ARK_TAG_UNDEFINED;
         onTouch.changedTouches.array = nullptr;
@@ -2021,6 +2024,7 @@ void OnTouchImpl(Ark_NativePointer node,
             onTouch.touches.array = &array[0];
             onTouch.touches.length = touches.size();
         }
+#endif
 
         GetFullAPI()->getEventsAPI()->getCommonMethodEventsReceiver()->onTouch(frameNode->GetId(), onTouch);
     };
@@ -3280,13 +3284,13 @@ void OnGestureRecognizerJudgeBegin0Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnGestureRecognizerJudgeBegin0(frameNode, convValue);
 }
 void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
-                                        const GestureRecognizerJudgeBeginCallback* callback,
+                                        const GestureRecognizerJudgeBeginCallback* callback_,
                                         Ark_Boolean exposeInnerGesture)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(callback);
-    //auto convValue = Converter::OptConvert<type>(callback); // for enums
+    //auto convValue = Converter::Convert<type>(callback_);
+    //auto convValue = Converter::OptConvert<type>(callback_); // for enums
     //CommonMethodModelNG::SetOnGestureRecognizerJudgeBegin1(frameNode, convValue);
 }
 void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,

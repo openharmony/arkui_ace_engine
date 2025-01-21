@@ -21,13 +21,11 @@
 namespace OHOS::Ace::NG::Converter {
 inline void AssignArkValue(Ark_CustomObject& dst, const float& src)
 {
-    dst.id = ARK_TAG_FLOAT32;
     *dst.floats = src;
 }
 
 inline void AssignArkValue(Ark_CustomObject& dst, const int& src)
 {
-    dst.id = ARK_TAG_INT32;
     *dst.ints = src;
 }
 

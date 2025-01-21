@@ -94,53 +94,53 @@ void AssignArkValue(Ark_StyledString& dst, const StyledStringPeer& src)
 
 void AssignArkValue(Ark_Length& dst, const Dimension& src)
 {
-    dst.type = ARK_RUNTIME_NUMBER;
+    dst.type = INTEROP_RUNTIME_NUMBER;
     dst.value = src.Unit() == DimensionUnit::PERCENT ? src.Value() * 100.f : src.Value();
     dst.unit = static_cast<int32_t>(src.Unit());
 }
 
 void AssignArkValue(Ark_Length& dst, const float& src)
 {
-    dst.type = ARK_RUNTIME_NUMBER;
+    dst.type = INTEROP_RUNTIME_NUMBER;
     dst.value = src;
     dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::VP);
 }
 
 void AssignArkValue(Ark_Number& dst, const int32_t& src)
 {
-    dst.tag = ARK_TAG_INT32;
+    dst.tag = INTEROP_TAG_INT32;
     dst.i32 = src;
 }
 
 void AssignArkValue(Ark_Number& dst, const long& src)
 {
     LOGE("Ark_Number doesn`t support long");
-    dst.tag = ARK_TAG_INT32;
+    dst.tag = INTEROP_TAG_INT32;
     dst.i32 = static_cast<int32_t>(src);
 }
 
 void AssignArkValue(Ark_Number& dst, const long long& src)
 {
     LOGE("Ark_Number doesn`t support long long");
-    dst.tag = ARK_TAG_INT32;
+    dst.tag = INTEROP_TAG_INT32;
     dst.i32 = static_cast<int32_t>(src);
 }
 
 void AssignArkValue(Ark_Number& dst, const uint32_t& src)
 {
-    dst.tag = ARK_TAG_INT32;
+    dst.tag = INTEROP_TAG_INT32;
     dst.i32 = src;
 }
 
 void AssignArkValue(Ark_Number& dst, const float& src)
 {
-    dst.tag = ARK_TAG_FLOAT32;
+    dst.tag = INTEROP_TAG_FLOAT32;
     dst.f32 = src;
 }
 
 void AssignArkValue(Ark_Number& dst, const double& src)
 {
-    dst.tag = ARK_TAG_FLOAT32;
+    dst.tag = INTEROP_TAG_FLOAT32;
     dst.f32 = static_cast<float>(src);
 }
 
@@ -152,7 +152,7 @@ void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src)
 
 void AssignArkValue(Ark_Length& dst, const int& src)
 {
-    dst.type = ARK_RUNTIME_NUMBER;
+    dst.type = INTEROP_RUNTIME_NUMBER;
     dst.value = src;
     dst.unit = static_cast<int32_t>(OHOS::Ace::DimensionUnit::PX);
 }

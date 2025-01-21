@@ -59,6 +59,13 @@
 #include "core/interfaces/native/utility/generated/converter_generated.h"
 #include "converter_union.h"
 
+#define ARK_TAG_UNDEFINED INTEROP_TAG_UNDEFINED
+#define ARK_TAG_OBJECT INTEROP_TAG_OBJECT
+#define ARK_TAG_RESOURCE INTEROP_TAG_RESOURCE
+#define ARK_TAG_INT32 INTEROP_TAG_INT32
+#define ARK_TAG_FLOAT32 INTEROP_TAG_FLOAT32
+#define ARK_TAG_LENGTH INTEROP_TAG_LENGTH
+
 namespace OHOS::Ace::NG {
 std::optional<double> FloatToDouble(const std::optional<float>& src);
 template<typename T>
@@ -232,7 +239,7 @@ namespace Converter {
     template<>
     inline int Convert(const Ark_Number& src)
     {
-        return src.tag == ARK_TAG_FLOAT32 ? static_cast<int>(src.f32) : src.i32;
+        return src.tag == INTEROP_TAG_FLOAT32 ? static_cast<int>(src.f32) : src.i32;
     }
 
     template<>
@@ -245,14 +252,14 @@ namespace Converter {
     template<>
     inline float Convert(const Ark_Number& src)
     {
-        return src.tag == ARK_TAG_FLOAT32 ? src.f32 : static_cast<float>(src.i32);
+        return src.tag == INTEROP_TAG_FLOAT32 ? src.f32 : static_cast<float>(src.i32);
     }
 
     template<>
     inline double Convert(const Ark_Number& src)
     {
         LOGE("Ark_Number doesn`t support double type");
-        return src.tag == ARK_TAG_FLOAT32 ? static_cast<double>(src.f32) : static_cast<double>(src.i32);
+        return src.tag == INTEROP_TAG_FLOAT32 ? static_cast<double>(src.f32) : static_cast<double>(src.i32);
     }
 
     // Implementation is in cpp
@@ -263,7 +270,7 @@ namespace Converter {
     template<>
     inline uint32_t Convert(const Ark_Number& src)
     {
-        return src.tag == ARK_TAG_FLOAT32 ? static_cast<uint32_t>(src.f32) : static_cast<uint32_t>(src.i32);
+        return src.tag == INTEROP_TAG_FLOAT32 ? static_cast<uint32_t>(src.f32) : static_cast<uint32_t>(src.i32);
     }
 
     template<>

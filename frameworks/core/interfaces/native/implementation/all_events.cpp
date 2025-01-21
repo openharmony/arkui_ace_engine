@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -308,8 +308,8 @@ void onVisibleAreaChangeImpl(Ark_Int32 nodeId,
 }
 namespace ScrollableCommonMethod {
 void onScrollImpl(Ark_Int32 nodeId,
-                  const Ark_Number scrollOffset,
-                  const Ark_ScrollState scrollState)
+                  const Ark_Number first,
+                  const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -449,8 +449,8 @@ void onItemDropImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onScrollImpl(Ark_Int32 nodeId,
-                  const Ark_Number scrollOffset,
-                  const Ark_ScrollState scrollState)
+                  const Ark_Number first,
+                  const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -543,8 +543,8 @@ void onErrorImpl(Ark_Int32 nodeId,
 }
 namespace List {
 void onScrollImpl(Ark_Int32 nodeId,
-                  const Ark_Number scrollOffset,
-                  const Ark_ScrollState scrollState)
+                  const Ark_Number first,
+                  const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -885,8 +885,8 @@ void onClickImpl(Ark_Int32 nodeId,
 }
 namespace Scroll {
 void onScrollImpl(Ark_Int32 nodeId,
-                  const Ark_Number scrollOffset,
-                  const Ark_ScrollState scrollState)
+                  const Ark_Number first,
+                  const Ark_Number last)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }
@@ -1505,7 +1505,7 @@ void onShowFileSelectorImpl(Ark_Int32 nodeId,
     // GENERATED EMPTY IMPLEMENTATION
 }
 void onFileSelectorShowImpl(Ark_Int32 nodeId,
-                            const Opt_Literal_Function_callback_Object_fileSelector event)
+                            const Opt_Literal_Function_callback__Object_fileSelector event)
 {
     // GENERATED EMPTY IMPLEMENTATION
 }

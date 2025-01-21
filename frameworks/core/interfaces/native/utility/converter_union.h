@@ -319,7 +319,7 @@ void VisitUnion(const T& src, Fs... funcs)
 template<typename T, typename... Fs, decltype(T().value.selector) = 0>
 void VisitUnion(const T& src, Fs... funcs)
 {
-    if (src.tag != ARK_TAG_UNDEFINED) {
+    if (src.tag != INTEROP_TAG_UNDEFINED) {
         using U = decltype(T().value);
         detail::UnionVisitor<U, UnionLastIndex<U>>::Visit(src.value, detail::Overloaded{funcs...});
     } else {

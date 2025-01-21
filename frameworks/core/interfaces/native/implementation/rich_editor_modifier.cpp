@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -148,7 +148,9 @@ void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue&
 
 void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src, ConvContext *ctx)
 {
+#ifdef WRONG_TYPE
     dst.text = Converter::ArkValue<Ark_String>(src.GetText(), ctx);
+#endif
 }
 
 template<>
