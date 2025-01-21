@@ -83,6 +83,8 @@ void JSDataChangeListener::JSBind(BindingTarget globalObj)
     JSClass<JSDataChangeListener>::CustomMethod("onDataBulkAdd", &JSDataChangeListener::OnDataBulkAdded);
     JSClass<JSDataChangeListener>::CustomMethod("onDataBulkDeleted", &JSDataChangeListener::OnDataBulkDeleted);
     JSClass<JSDataChangeListener>::CustomMethod("onDataBulkDelete", &JSDataChangeListener::OnDataBulkDeleted);
+    JSClass<JSDataChangeListener>::CustomMethod("onDataBulkChanged", &JSDataChangeListener::OnDataBulkChanged);
+    JSClass<JSDataChangeListener>::CustomMethod("onDataBulkChange", &JSDataChangeListener::OnDataBulkChanged);
     // API12 onDatasetChange
     JSClass<JSDataChangeListener>::CustomMethod("onDatasetChange", &JSDataChangeListener::OnDatasetChange);
     JSClass<JSDataChangeListener>::Bind(
