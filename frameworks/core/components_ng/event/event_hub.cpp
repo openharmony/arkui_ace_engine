@@ -655,20 +655,26 @@ const RefPtr<InputEventHub>& EventHub::GetInputEventHub() const
     return inputEventHub_;
 }
 
-const RefPtr<FocusHub>& EventHub::GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
+RefPtr<FocusHub> EventHub::GetOrCreateFocusHub(FocusType type, bool focusable, FocusStyleType focusStyleType,
     const std::unique_ptr<FocusPaintParam>& paintParamsPtr)
 {
-    return GetFrameNode()->GetOrCreateFocusHub(type, focusable, focusStyleType, paintParamsPtr);
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetOrCreateFocusHub(type, focusable, focusStyleType, paintParamsPtr);
 }
 
-const RefPtr<FocusHub>& EventHub::GetOrCreateFocusHub(const FocusPattern& focusPattern)
+RefPtr<FocusHub> EventHub::GetOrCreateFocusHub(const FocusPattern& focusPattern)
 {
-    return GetFrameNode()->GetOrCreateFocusHub(focusPattern);
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetOrCreateFocusHub(focusPattern);
 }
 
-const RefPtr<FocusHub>& EventHub::GetFocusHub() const
+RefPtr<FocusHub> EventHub::GetFocusHub() const
 {
-    return GetFrameNode()->GetFocusHub();
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode->GetFocusHub();
 }
 
 void EventHub::OnContextAttached()

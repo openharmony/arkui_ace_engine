@@ -92,8 +92,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0017, TestSize.Level1)
     auto buttonNode = FrameNode::CreateFrameNode("buttonNode", 44, AceType::MakeRefPtr<ButtonPattern>());
     titleBarNode->backButton_ = buttonNode;
     ASSERT_NE(buttonNode->GetEventHub<EventHub>(), nullptr);
-    auto eventHub = AceType::MakeRefPtr<NavDestinationEventHub>();
-    navDestinationNode->eventHub_ = eventHub;
+    auto eventHub = navDestinationNode->GetEventHub<NavDestinationEventHub>();
     auto onBack = []() { return true; };
     eventHub->onBackPressedEvent_ = onBack;
     auto layoutProperty = AceType::MakeRefPtr<NavigationLayoutProperty>();
@@ -348,7 +347,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0025, TestSize.Level1)
     auto destinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
         "titleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
     auto backButton = FrameNode::CreateFrameNode("BackButton", 77, AceType::MakeRefPtr<ButtonPattern>());
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto eventHub = backButton->GetEventHub<EventHub>();
     auto pattern = navigation->GetPattern<NavigationPattern>();
     /**
      * @tc.steps: step2. call navigation->SetBackButtonEvent.
@@ -357,7 +356,7 @@ HWTEST_F(NavrouterModelTestNg, NavrouterTestNg0025, TestSize.Level1)
     navDestination->titleBarNode_ = destinationTitleBarNode;
     destinationTitleBarNode->backButton_ = backButton;
     backButton->eventHub_ = eventHub;
-    navDestination->eventHub_ = AceType::MakeRefPtr<NavDestinationEventHub>();
+    navDestination->GetEventHub<NavDestinationEventHub>();
     navDestination->contentNode_ = nullptr;
     navigation->SetBackButtonEvent(navDestination);
     pattern->navigationMode_ = NavigationMode::STACK;

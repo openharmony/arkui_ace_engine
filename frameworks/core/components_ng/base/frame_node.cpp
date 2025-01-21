@@ -509,11 +509,13 @@ FrameNode::~FrameNode()
 
 void FrameNode::CreateEventHubInner()
 {
-    if (eventHub_) {
+    if (eventHub_ || !pattern_) {
         return;
     }
     eventHub_ = pattern_->CreateEventHub();
-    eventHub_->AttachHost(WeakClaim(this));
+    if (eventHub_) {
+        eventHub_->AttachHost(WeakClaim(this));
+    }
 }
 
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
@@ -1602,6 +1604,7 @@ void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
 {
     InitLastArea();
     CreateEventHubInner();
+    CHECK_NULL_VOID(eventHub_);
     eventHub_->SetOnAreaChanged(std::move(callback));
 }
 
@@ -1682,6 +1685,7 @@ void FrameNode::SetOnSizeChangeCallback(OnSizeChangedFunc&& callback)
         lastFrameNodeRect_ = std::make_unique<RectF>();
     }
     CreateEventHubInner();
+    CHECK_NULL_VOID(eventHub_);
     eventHub_->SetOnSizeChanged(std::move(callback));
 }
 
@@ -1691,6 +1695,7 @@ void FrameNode::AddInnerOnSizeChangeCallback(int32_t id, OnSizeChangedFunc&& cal
         lastFrameNodeRect_ = std::make_unique<RectF>();
     }
     CreateEventHubInner();
+    CHECK_NULL_VOID(eventHub_);
     eventHub_->AddInnerOnSizeChanged(id, std::move(callback));
 }
 
@@ -1700,6 +1705,7 @@ void FrameNode::SetJSFrameNodeOnSizeChangeCallback(OnSizeChangedFunc&& callback)
         lastFrameNodeRect_ = std::make_unique<RectF>();
     }
     CreateEventHubInner();
+    CHECK_NULL_VOID(eventHub_);
     eventHub_->SetJSFrameNodeOnSizeChangeCallback(std::move(callback));
 }
 
