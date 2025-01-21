@@ -87,8 +87,10 @@ RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostN
     auto dragPattern = dragNode->GetPattern<TextDragPattern>();
     auto data = CalculateTextDragData(hostPattern, dragNode);
     TAG_LOGI(AceLogTag::ACE_TEXT, "CreateDragNode SelectPositionInfo startX = %{public}f, startY = %{public}f,\
-             endX = %{public}f, endY = %{public}f", data.selectPosition_.startX_, data.selectPosition_.startY_,
-             data.selectPosition_.endX_, data.selectPosition_.endY_);
+             endX = %{public}f, endY = %{public}f, globalX = %{public}f, globalY = %{public}f",
+             data.selectPosition_.startX_, data.selectPosition_.startY_,
+             data.selectPosition_.endX_, data.selectPosition_.endY_,
+             data.selectPosition_.globalX_, data.selectPosition_.globalY_);
     dragPattern->Initialize(hostPattern->GetDragParagraph(), data);
     dragPattern->SetLastLineHeight(data.lineHeight_);
 
