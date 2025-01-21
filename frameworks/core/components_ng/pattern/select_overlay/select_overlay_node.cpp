@@ -2459,7 +2459,9 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
     }
     auto selectProperty = selectMenu_->GetLayoutProperty();
     CHECK_NULL_VOID(selectProperty);
-    selectProperty->ClearUserDefinedIdealSize(true, false);
+    auto pipeline = GetContext();
+    bool clearIdealHeight = pipeline && GreatOrEqual(pipeline->GetFontScale(), AGING_MIN_SCALE);
+    selectProperty->ClearUserDefinedIdealSize(true, clearIdealHeight);
     UpdateMenuOptions(info);
 }
 
