@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,12 @@
  * limitations under the License.
  */
 
-#include "adapter/preview/osal/system_bar_style_ohos.h"
-
-#include "base/log/log.h"
+#include "base/system_bar/system_bar_style.h"
 
 namespace OHOS::Ace {
-RefPtr<SystemBarStyle> SystemBarStyle::CreateStyleFromJsObj(void* env, void* value)
-{
-    LOGI("Not supported in previewer");
-    return nullptr;
-}
 
 RefPtr<SystemBarStyle> SystemBarStyle::CreateStyleFromColor(const uint32_t colorValue)
 {
-    LOGI("Not supported in previewer");
     return nullptr;
 }
 } // namespace OHOS::Ace
