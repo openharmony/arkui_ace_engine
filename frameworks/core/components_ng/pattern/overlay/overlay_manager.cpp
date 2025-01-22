@@ -3919,6 +3919,10 @@ void OverlayManager::OnBindContentCover(bool isShow, std::function<void(const st
             targetModalPattern->UpdateOnAppear(std::move(onAppear));
             targetModalPattern->UpdateOnWillDismiss(std::move(contentCoverParam.onWillDismiss));
             targetModalPattern->SetType(modalTransition.value());
+
+            auto modal = std::underlying_type_t<ModalTransition>(targetModalPattern->GetType());
+            std::printf("bindContent0: OnBindContentCover modalNode: %d pattern: %d modalList: %zu\n", targetModalNode->GetId(), modal, modalList_.size());
+
             targetModalPattern->SetHasTransitionEffect(contentCoverParam.transitionEffect != nullptr);
             modalRenderContext->UpdateChainedTransition(contentCoverParam.transitionEffect);
             return;
@@ -3970,6 +3974,10 @@ void OverlayManager::HandleModalShow(std::function<void(const std::string&)>&& c
     modalNode->GetRenderContext()->UpdateChainedTransition(contentCoverParam.transitionEffect);
     modalStack_.push(WeakClaim(RawPtr(modalNode)));
     modalList_.emplace_back(WeakClaim(RawPtr(modalNode)));
+
+    auto modal = std::underlying_type_t<ModalTransition>(modalPagePattern->GetType());
+    std::printf("bindContent0: HandleModalShow modalNode: %d pattern: %d modalList: %zu\n", modalNode->GetId(), modal, modalList_.size());
+    
     SaveLastModalNode();
     if (targetId < 0) {
         // modaluiextention node mounting
