@@ -700,6 +700,7 @@ public:
     static void SetOnCrownEvent(FrameNode* frameNode, OnCrownCallbackFunc &&onCrownCallback);
 #endif
 
+    static ImageResizableSlice GetBackgroundImageResizableSlice(FrameNode* frameNode);
     static bool GetFocusable(FrameNode* frameNode);
     static bool GetTabStop(FrameNode* frameNode);
     static bool GetDefaultFocus(FrameNode* frameNode);
