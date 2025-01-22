@@ -36,6 +36,10 @@ TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
     const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme)
 {
     TextStyle textStyle = textTheme ? textTheme->GetTextStyle() : TextStyle();
+#if defined(IOS_PLATFORM) || defined(ANDROID_PLATFORM)
+    const std::vector<std::string> defaultFontFamily = { "sans-serif" };
+    textStyle.SetFontFamilies(defaultFontFamily);
+#endif
     if (fontStyle) {
         UPDATE_TEXT_STYLE(fontStyle, FontSize, SetFontSize);
         UPDATE_TEXT_STYLE(fontStyle, TextColor, SetTextColor);
