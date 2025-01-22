@@ -389,6 +389,8 @@ private:
     void MoveByStep(int32_t step);
     void AdjustVolume(int32_t step);
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
     RefPtr<VideoControllerV2> videoControllerV2_;
     RefPtr<FrameNode> controlBar_;
 
