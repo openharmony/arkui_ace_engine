@@ -2835,14 +2835,14 @@ void JSViewAbstract::JsBackgroundImageSize(const JSCallbackInfo& info)
 
 void SetBgImgPositionWithAlign(BackgroundImagePosition& bgImgPosition, int32_t align)
 {
-    if (align > 8 || align < 0) {
+    if (align > 8 || align < 0) { // align ranges from [0, 8].
         return;
     }
     std::vector<std::pair<double, double>> vec = { { 0.0, 0.0 }, { HALF_DIMENSION, 0.0 }, { FULL_DIMENSION, 0.0 },
         { 0.0, HALF_DIMENSION }, { HALF_DIMENSION, HALF_DIMENSION }, { FULL_DIMENSION, HALF_DIMENSION },
         { 0.0, FULL_DIMENSION }, { HALF_DIMENSION, FULL_DIMENSION }, { FULL_DIMENSION, FULL_DIMENSION } };
     SetBgImgPosition(
-                DimensionUnit::PERCENT, DimensionUnit::PERCENT, vec[align].first, vec[align].second, bgImgPosition);
+        DimensionUnit::PERCENT, DimensionUnit::PERCENT, vec[align].first, vec[align].second, bgImgPosition);
 }
 
 void JSViewAbstract::JsBackgroundImagePosition(const JSCallbackInfo& info)
@@ -5018,7 +5018,7 @@ bool JSViewAbstract::ParseJsStringObj(const JSRef<JSVal>& jsValue, std::string& 
             }
             count = countJsVal->ToNumber<int>();
             auto pluralStr = resourceWrapper->GetPluralStringByName(param->ToString(), count);
-            ReplaceHolder(pluralStr, params, 2);
+            ReplaceHolder(pluralStr, params, 2); // params[2] applys pluralStr.
             result = pluralStr;
         } else {
             return false;
@@ -9229,9 +9229,9 @@ void JSViewAbstract::JsFocusScopeId(const JSCallbackInfo& info)
         isGroup = info[1]->ToBoolean();
     }
     bool arrowKeyStepOut = true;
-    if (info.Length() >= PARAMETER_LENGTH_THIRD && !info[2]->IsNull() && !info[2]->IsUndefined() &&
-        info[2]->IsBoolean()) {
-        arrowKeyStepOut = info[2]->ToBoolean();
+    if (info.Length() >= PARAMETER_LENGTH_THIRD && !info[2]->IsNull() && !info[2]->IsUndefined() && // 2:args index.
+        info[2]->IsBoolean()) { // 2:args index.
+        arrowKeyStepOut = info[2]->ToBoolean(); // 2:args index.
     }
     ViewAbstractModel::GetInstance()->SetFocusScopeId(focusScopeId, isGroup, arrowKeyStepOut);
 }
