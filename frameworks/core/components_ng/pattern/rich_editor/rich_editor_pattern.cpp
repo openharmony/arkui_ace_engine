@@ -4529,7 +4529,7 @@ void RichEditorPattern::InitMouseEvent()
 void RichEditorPattern::OnHover(bool isHover)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isHover=%{public}d", isHover);
-    if (lastHoverSpanItem_) {
+    if (!isHover && lastHoverSpanItem_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "spanItem hover false");
         lastHoverSpanItem_->onHover_(false, lastHoverInfo_);
         lastHoverSpanItem_.Reset();
