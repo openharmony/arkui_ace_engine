@@ -170,6 +170,7 @@ public:
         return false;
     }
 
+    void UpdateSingleHandTransform(const OHOS::Rosen::SingleHandTransform& transform) override {};
 private:
     UIContentErrorCode InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);

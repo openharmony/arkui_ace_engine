@@ -340,6 +340,9 @@ public:
         FrameNode* frameNode, std::function<void(const RefPtr<OHOS::Ace::DragEvent>&)>&& onDragEnd);
     static void SetMonopolizeEvents(bool monopolizeEvents);
     static void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled);
+    static int32_t CancelDataLoading(const std::string& key);
+    static void SetDisableDataPrefetch(bool disableDataPrefetch);
+    static void SetDisableDataPrefetch(FrameNode* frameNode, bool disableDataPrefetch);
 
     // flex properties
     static void SetAlignSelf(FlexAlign value);
@@ -357,7 +360,6 @@ public:
     // Bind properties
     static void BindPopup(const RefPtr<PopupParam> &param, const RefPtr<FrameNode> &targetNode,
         const RefPtr<UINode> &customNode);
-    static RefPtr<OverlayManager> GetCurOverlayManager(const RefPtr<UINode>& node);
     static int32_t OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
     static int32_t UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode);
     static int32_t ClosePopup(const RefPtr<UINode>& customNode);
@@ -836,8 +838,9 @@ private:
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
-    static int32_t OpenBindPopup(
-        const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode);
+    static PopupInfo GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode);
+    static PopupInfo GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId);
+    static RefPtr<OverlayManager> GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
     static std::mutex visualEffectMutex_;

@@ -37,6 +37,9 @@ constexpr uint32_t DEFAULT_NODE_ID = 0;
 constexpr uint32_t UKNOWN_VALUE = 0;
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_OPACITY = 2;
+constexpr uint32_t MAX_LINES_VALUE0 = 3;
+constexpr uint32_t MAX_LINES_VALUE1 = 4;
+constexpr uint32_t MAX_LINES_VALUE2 = 7;
 void ConstructGestureStyle(GestureStyle& gestureInfo)
 {
     auto onClick = [](const BaseEventInfo* info) {};
@@ -4062,5 +4065,258 @@ HWTEST_F(TextTestNg, TextContentModifierSetFontSize001, TestSize.Level1)
     EXPECT_EQ(textContentModifier->fontSize_.value(), Dimension(25.0, DimensionUnit::PX));
 
     pipeline->SetFontScale(1.0f);
+}
+
+/**
+ * @tc.name: ProcessSpanString001
+ * @tc.desc: Test TextPattern ProcessSpanString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ProcessSpanString001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create imageSpanItem.
+     * Set the image to be loaded synchronously
+     */
+    
+    ImageSpanOptions options;
+    options.image = "image";
+    options.bundleName = "bundleName";
+    options.moduleName = "moduleName";
+    ImageSpanAttribute imageStyle;
+    imageStyle.syncLoad = true;
+    options.imageAttribute = imageStyle;
+    auto spanString = AceType::MakeRefPtr<SpanString>(options);
+
+    /**
+     * @tc.steps: step2. create textNode and call setStyledString.
+     */
+    
+    auto [frameNode, pattern] = Init();
+    pattern->SetStyledString(spanString);
+    EXPECT_EQ(pattern->spans_.size(), 1);
+
+    /**
+     * @tc.steps: step3. Check that the image is mounted to the text.
+     */
+    
+    auto children = frameNode->GetChildren();
+    auto node = children.front();
+    auto imageNode = AceType::DynamicCast<FrameNode>(node);
+    ASSERT_NE(imageNode, nullptr);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. Check that the image is set to synchronous loading.
+     */
+    
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    EXPECT_TRUE(imagePattern->GetSyncLoad());
+}
+
+/**
+ * @tc.name: ProcessSpanString002
+ * @tc.desc: Test TextPattern ProcessSpanString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ProcessSpanString002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create imageSpanItem.
+     */
+    
+    ImageSpanOptions options;
+    options.image = "image";
+    options.bundleName = "bundleName";
+    options.moduleName = "moduleName";
+    ImageSpanAttribute imageStyle;
+    options.imageAttribute = imageStyle;
+    auto spanString = AceType::MakeRefPtr<SpanString>(options);
+
+    /**
+     * @tc.steps: step2. create textNode and call setStyledString.
+     */
+    
+    auto [frameNode, pattern] = Init();
+    pattern->SetStyledString(spanString);
+    EXPECT_EQ(pattern->spans_.size(), 1);
+
+    /**
+     * @tc.steps: step3. Check that the image is mounted to the text.
+     */
+    
+    auto children = frameNode->GetChildren();
+    auto node = children.front();
+    auto imageNode = AceType::DynamicCast<FrameNode>(node);
+    ASSERT_NE(imageNode, nullptr);
+    auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(imageLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step4. Check the default loading method of image.
+     */
+    
+    auto imagePattern = imageNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    EXPECT_FALSE(imagePattern->GetSyncLoad());
+
+    /**
+     * @tc.steps: step4. Check that the image is not of the pixmap type.
+     */
+    
+    auto info = imageLayoutProperty->GetImageSourceInfo();
+    ASSERT_NE(info.has_value(), false);
+    EXPECT_EQ(info->pixmap_, nullptr);
+
+    EXPECT_EQ(info->bundleName_, "bundleName");
+    EXPECT_EQ(info->moduleName_, "moduleName");
+}
+
+/**
+ * @tc.name: UpdateParagraphBySpan002
+ * @tc.desc: Test the maxlines of UpdateParagraphBySpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, UpdateParagraphBySpan002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text.
+     */
+    
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Use span to construct two paragraphs
+     */
+    
+    std::vector<std::list<RefPtr<SpanItem>>> spans;
+    std::list<RefPtr<SpanItem>> spanList1;
+    RefPtr<SpanItem> span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = u"span1";
+    span1->textLineStyle->propMaxLines = MAX_LINES_VALUE0;
+    spanList1.emplace_back(span1);
+    spans.emplace_back(spanList1);
+
+    std::list<RefPtr<SpanItem>> spanList2;
+    RefPtr<SpanItem> span2 = AceType::MakeRefPtr<SpanItem>();
+    span2->content = u"span2";
+    span2->textLineStyle->propMaxLines = MAX_LINES_VALUE0;
+    spanList2.emplace_back(span2);
+    spans.emplace_back(spanList2);
+
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(textPattern->CreateLayoutAlgorithm());
+    textLayoutAlgorithm->spans_ = spans;
+    EXPECT_EQ(textLayoutAlgorithm->spans_.size(), 2);
+
+    /**
+     * @tc.steps: step3. Call UpdateParagraphBySpan.
+     * Set the total maximum number of lines to be 4.
+     */
+    
+    ParagraphStyle paraStyle;
+    paraStyle.maxLines = MAX_LINES_VALUE1;
+    TextStyle textStyle;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetLineCount).WillRepeatedly(Return(3));
+    textLayoutAlgorithm->UpdateParagraphBySpan(
+        AceType::RawPtr(layoutWrapper), paraStyle, 100, textStyle);
+    auto paragraphs = textLayoutAlgorithm->paragraphManager_->GetParagraphs();
+
+
+    /**
+     * @tc.expected: There are two paragraphs to expect.
+     */
+    EXPECT_EQ(paragraphs.size(), 2);
+
+    /**
+     * @tc.expected: The maximum number of lines in the first segment is expected to be 3,
+     * and the maximum function in the second segment is 1.
+     */
+    auto paragraphInfo = paragraphs.begin();
+    EXPECT_EQ((*paragraphInfo).paragraphStyle.maxLines, MAX_LINES_VALUE0);
+    ++paragraphInfo;
+    EXPECT_EQ((*paragraphInfo).paragraphStyle.maxLines, 1);
+}
+
+/**
+ * @tc.name: UpdateParagraphBySpan003
+ * @tc.desc: Test the maxlines of UpdateParagraphBySpan
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, UpdateParagraphBySpan003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create text.
+     */
+    
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Use span to construct two paragraphs
+     */
+    
+    std::vector<std::list<RefPtr<SpanItem>>> spans;
+    std::list<RefPtr<SpanItem>> spanList1;
+    RefPtr<SpanItem> span1 = AceType::MakeRefPtr<SpanItem>();
+    span1->content = u"span1";
+    span1->textLineStyle->propMaxLines = MAX_LINES_VALUE0;
+    spanList1.emplace_back(span1);
+    spans.emplace_back(spanList1);
+
+    std::list<RefPtr<SpanItem>> spanList2;
+    RefPtr<SpanItem> span2 = AceType::MakeRefPtr<SpanItem>();
+    span2->content = u"span2";
+    span2->textLineStyle->propMaxLines = MAX_LINES_VALUE0;
+    spanList2.emplace_back(span2);
+    spans.emplace_back(spanList2);
+
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(textPattern->CreateLayoutAlgorithm());
+    textLayoutAlgorithm->spans_ = spans;
+    EXPECT_EQ(textLayoutAlgorithm->spans_.size(), 2);
+
+    /**
+     * @tc.steps: step3. Call UpdateParagraphBySpan.
+     * Set the total maximum number of lines to be 7.
+     */
+    
+    ParagraphStyle paraStyle;
+    paraStyle.maxLines = MAX_LINES_VALUE2;
+    TextStyle textStyle;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetLineCount).WillRepeatedly(Return(3));
+    textLayoutAlgorithm->UpdateParagraphBySpan(
+        AceType::RawPtr(layoutWrapper), paraStyle, 100, textStyle);
+    auto paragraphs = textLayoutAlgorithm->paragraphManager_->GetParagraphs();
+
+
+    /**
+     * @tc.expected: There are two paragraphs to expect.
+     */
+    EXPECT_EQ(paragraphs.size(), 2);
+
+    /**
+     * @tc.expected: The maximum number of lines in the first segment is expected to be 3,
+     * and the maximum function in the second segment is 3.
+     */
+    auto paragraphInfo = paragraphs.begin();
+    EXPECT_EQ((*paragraphInfo).paragraphStyle.maxLines, MAX_LINES_VALUE0);
+    ++paragraphInfo;
+    EXPECT_EQ((*paragraphInfo).paragraphStyle.maxLines, MAX_LINES_VALUE0);
 }
 } // namespace OHOS::Ace::NG

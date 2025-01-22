@@ -52,6 +52,7 @@ protected:
     static void SetDisableSwipe(bool disableSwipe);
     static void SetCurve(const JSCallbackInfo& info);
     static void SetOnChange(const JSCallbackInfo& info);
+    static void SetOnUnselected(const JSCallbackInfo& info);
     static void SetOnAnimationStart(const JSCallbackInfo& info);
     static void SetOnAnimationEnd(const JSCallbackInfo& info);
     static void SetOnGestureSwipe(const JSCallbackInfo& info);
@@ -69,7 +70,9 @@ protected:
     static void SetNestedScroll(const JSCallbackInfo& info);
     static void SetCustomContentTransition(const JSCallbackInfo& info);
     static void SetOnContentDidScroll(const JSCallbackInfo& info);
+    static void SetOnContentWillScroll(const JSCallbackInfo& info);
     static void SetPageFlipMode(const JSCallbackInfo& info);
+    static void SetOnSelected(const JSCallbackInfo& info);
     static bool ParseLengthMetricsToDimension(const JSRef<JSVal>& jsValue, CalcDimension& result);
     static void GetAutoPlayOptionsInfo(const JSRef<JSObject>& obj, SwiperAutoPlayOptions& swiperAutoPlayOptions);
     static void SetIndicatorController(const JSCallbackInfo& info);

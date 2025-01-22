@@ -146,10 +146,16 @@ void SystemWindowScene::SetWindowScenePosition()
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
         auto windowRect = session->GetSessionGlobalRect();
-        windowSceneInfo.left = windowRect.posX_;
-        windowSceneInfo.top = windowRect.posY_;
-        windowSceneInfo.scaleX = session->GetScaleX();
-        windowSceneInfo.scaleY = session->GetScaleY();
+
+        // get transform info in single hand mode,
+        // adjust the position (x, y) of window scene with the transform pos and scale data.
+        OHOS::Rosen::SingleHandTransform transform =
+            session->GetSingleHandTransform();
+        windowSceneInfo.left = windowRect.posX_ * transform.scaleX + transform.posX;
+        windowSceneInfo.top = windowRect.posY_ * transform.scaleY + transform.posY;
+        windowSceneInfo.scaleX = session->GetScaleX() * transform.scaleX;
+        windowSceneInfo.scaleY = session->GetScaleY() * transform.scaleY;
+
         windowSceneInfo.innerWindowId = session->GetPersistentId();
     });
 }

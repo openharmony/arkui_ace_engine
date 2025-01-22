@@ -723,7 +723,7 @@ void MenuItemPattern::ShowSubMenuHelper(const RefPtr<FrameNode>& subMenu)
         SetClickMenuItemId(host->GetId());
         subMenu->MountToParent(menuWrapper);
         menuWrapper->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
-        menuPattern->SetSubMenuShow();
+        menuPattern->SetSubMenuShow(true);
         RegisterWrapperMouseEvent();
     } else {
         subMenu->MountToParent(menuWrapper);
@@ -1399,15 +1399,15 @@ void MenuItemPattern::AddSelfHoverRegion(const RefPtr<FrameNode>& targetNode)
     OffsetF topLeftPoint;
     OffsetF bottomRightPoint;
     auto frameSize = targetNode->GetGeometryNode()->GetMarginFrameSize();
-    topLeftPoint = targetNode->GetPaintRectOffset();
-    bottomRightPoint = targetNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), frameSize.Height());
+    topLeftPoint = targetNode->GetPaintRectOffset(false, true);
+    bottomRightPoint = targetNode->GetPaintRectOffset(false, true) + OffsetF(frameSize.Width(), frameSize.Height());
     AddHoverRegions(topLeftPoint, bottomRightPoint);
 }
 
 OffsetF MenuItemPattern::GetSubMenuPosition(const RefPtr<FrameNode>& targetNode)
 { // show menu at left top point of targetNode
     auto frameSize = targetNode->GetGeometryNode()->GetMarginFrameSize();
-    OffsetF position = targetNode->GetPaintRectOffset() + OffsetF(frameSize.Width(), 0.0);
+    OffsetF position = targetNode->GetPaintRectOffset(false, true) + OffsetF(frameSize.Width(), 0.0);
     return position;
 }
 
@@ -1659,6 +1659,30 @@ void MenuItemPattern::AddClickableArea()
         accessibilityProperty->SetAccessibilityText(content + "," + label);
         clickableArea_ = clickableArea;
         clickableArea_->MountToParent(host, CLICKABLE_AREA_VIEW_INDEX);
+
+        SetRowAccessibilityLevel();
+    }
+}
+
+void MenuItemPattern::SetRowAccessibilityLevel()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RefPtr<FrameNode> leftRow =
+        host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
+    if (leftRow) {
+        auto nodeAccessibilityProps = leftRow->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(nodeAccessibilityProps);
+        nodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        nodeAccessibilityProps->SetAccessibilityGroup(true);
+    }
+    RefPtr<FrameNode> rightRow =
+        host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
+    if (rightRow) {
+        auto nodeAccessibilityProps = rightRow->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(nodeAccessibilityProps);
+        nodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        nodeAccessibilityProps->SetAccessibilityGroup(true);
     }
 }
 
@@ -1879,6 +1903,11 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
     node->MarkModifyDone();
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (isLabel) {
+        label_ = node;
+    } else {
+        content_ = node;
+    }
 }
 
 void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty,
@@ -2179,7 +2208,7 @@ RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const OffsetF& po
         return host;
     }
     CHECK_NULL_RETURN(clickableArea_, host);
-    auto clickableAreaOffset = clickableArea_->GetPaintRectOffset();
+    auto clickableAreaOffset = clickableArea_->GetPaintRectOffset(false, true);
     auto clickableAreaSize = clickableArea_->GetGeometryNode()->GetFrameSize();
     auto clickableAreaZone = RectF(clickableAreaOffset.GetX(), clickableAreaOffset.GetY(),
         clickableAreaSize.Width(), clickableAreaSize.Height());
@@ -2192,7 +2221,7 @@ RefPtr<FrameNode> MenuItemPattern::FindTouchedEmbeddedMenuItem(const OffsetF& po
             menuItem = AceType::DynamicCast<FrameNode>(child);
         }
         if (menuItem) {
-            auto menuItemOffset = menuItem->GetPaintRectOffset();
+            auto menuItemOffset = menuItem->GetPaintRectOffset(false, true);
             auto menuItemSize = menuItem->GetGeometryNode()->GetFrameSize();
             auto menuItemZone = RectF(menuItemOffset.GetX(), menuItemOffset.GetY(),
                 menuItemSize.Width(), menuItemSize.Height());

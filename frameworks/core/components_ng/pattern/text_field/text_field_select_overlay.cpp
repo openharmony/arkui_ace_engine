@@ -61,6 +61,7 @@ bool TextFieldSelectOverlay::PreProcessOverlay(const OverlayRequest& request)
     CHECK_NULL_RETURN(!pattern->IsTransparent(), false);
     pattern->ShowSelect();
     SetEnableHandleLevel(true);
+    SetEnableSubWindowMenu(true);
     CheckEnableContainerModal();
     return true;
 }
@@ -74,9 +75,6 @@ void TextFieldSelectOverlay::UpdatePattern(const OverlayRequest& request)
     CHECK_NULL_VOID(pattern);
     bool isRequestSelectAll = (static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) == REQUEST_SELECT_ALL;
     auto selectController = pattern->GetTextSelectController();
-    if ((static_cast<uint32_t>(request.requestCode) & REQUEST_SELECT_ALL) != REQUEST_SELECT_ALL) {
-        selectController->CalculateHandleOffset();
-    }
     if (pattern->IsSelected() && selectController->IsHandleSamePosition()) {
         SetIsSingleHandle(true);
         selectController->UpdateCaretIndex(selectController->GetFirstHandleIndex());
@@ -192,6 +190,7 @@ RectF TextFieldSelectOverlay::GetHandleLocalPaintRect(DragHandleIndex dragHandle
     CHECK_NULL_RETURN(pattern, RectF());
     auto controller = pattern->GetTextSelectController();
     CHECK_NULL_RETURN(controller, RectF());
+    controller->AdjustAllHandlesWithBoundary();
     if (dragHandleIndex == DragHandleIndex::FIRST) {
         return controller->GetFirstHandleRect();
     } else if (dragHandleIndex == DragHandleIndex::SECOND) {
@@ -305,7 +304,9 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     menuInfo.showCopy = hasText && pattern->AllowCopy() && pattern->IsSelected();
     menuInfo.showCut = menuInfo.showCopy;
     menuInfo.showCopyAll = hasText && !pattern->IsSelectAll();
+    menuInfo.showTranslate = menuInfo.showCopy && pattern->IsShowTranslate() && IsNeedMenuTranslate();
     menuInfo.showSearch = menuInfo.showCopy && pattern->IsShowSearch() && IsNeedMenuSearch();
+    menuInfo.showShare = menuInfo.showCopy && IsSupportMenuShare() && IsNeedMenuShare();
     menuInfo.showAIWrite = pattern->IsShowAIWrite() && pattern->IsSelected();
 }
 
@@ -333,7 +334,7 @@ void TextFieldSelectOverlay::OnUpdateSelectOverlayInfo(SelectOverlayInfo& overla
     }
 }
 
-RectF TextFieldSelectOverlay::GetSelectArea()
+RectF TextFieldSelectOverlay::GetSelectAreaFromRects(SelectRectsType pos)
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, {});
@@ -347,7 +348,17 @@ RectF TextFieldSelectOverlay::GetSelectArea()
     } else {
         auto contentRect = pattern->GetContentRect();
         auto textRect = pattern->GetTextRect();
+        if (pos == SelectRectsType::LEFT_TOP_POINT) {
+            selectRects.erase(std::next(selectRects.begin()), selectRects.end());
+            selectRects.front().SetSize({0, 0});
+        } else if (pos == SelectRectsType::RIGHT_BOTTOM_POINT) {
+            selectRects.erase(selectRects.begin(), std::prev(selectRects.end()));
+            selectRects.front().SetRect({selectRects.front().Right(), selectRects.front().Bottom()}, {0, 0});
+        }
         res = MergeSelectedBoxes(selectRects, contentRect, textRect, textPaintOffset);
+        if (NearZero(res.Width())) {
+            res.SetWidth(TextBase::GetSelectedBlankLineWidth());
+        }
     }
     auto globalContentRect = GetVisibleContentRect(true);
     auto intersectRect = res.IntersectRectT(globalContentRect);
@@ -388,8 +399,14 @@ void TextFieldSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenuT
         case OptionMenuActionId::PASTE:
             pattern->HandleOnPaste();
             return;
+        case OptionMenuActionId::TRANSLATE:
+            HandleOnTranslate();
+            return;
         case OptionMenuActionId::SEARCH:
             HandleOnSearch();
+            return;
+        case OptionMenuActionId::SHARE:
+            HandleOnShare();
             return;
         case OptionMenuActionId::CAMERA_INPUT:
             pattern->HandleOnCameraInput();
@@ -688,7 +705,21 @@ void TextFieldSelectOverlay::UpdateSecondHandleOffset()
     BaseTextSelectOverlay::UpdateSecondHandleOffset();
 }
 
+bool TextFieldSelectOverlay::AllowTranslate()
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->AllowCopy();
+}
+
 bool TextFieldSelectOverlay::AllowSearch()
+{
+    auto pattern = GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->AllowCopy();
+}
+
+bool TextFieldSelectOverlay::AllowShare()
 {
     auto pattern = GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, false);

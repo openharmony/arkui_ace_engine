@@ -65,19 +65,19 @@ const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = {
     ImmersiveMode::DEFAULT, ImmersiveMode::PAGE, ImmersiveMode::FULL};
 } // namespace
 
+#ifndef ARKUI_WEARABLE
 static void SetParseStyle(ButtonInfo& buttonInfo, const int32_t styleValue)
 {
-#ifndef ARKUI_WAERABLE
     if (styleValue >= static_cast<int32_t>(DialogButtonStyle::DEFAULT) &&
         styleValue <= static_cast<int32_t>(DialogButtonStyle::HIGHTLIGHT)) {
         buttonInfo.dlgButtonStyle = static_cast<DialogButtonStyle>(styleValue);
     }
-#endif
 }
+#endif
 
+#ifndef ARKUI_WEARABLE
 ActionSheetInfo ParseSheetInfo(const JsiExecutionContext& execContext, JSRef<JSVal> val)
 {
-#ifndef ARKUI_WAERABLE
     ActionSheetInfo sheetInfo;
     if (!val->IsObject()) {
         LOGW("param is not an object.");
@@ -112,12 +112,12 @@ ActionSheetInfo ParseSheetInfo(const JsiExecutionContext& execContext, JSRef<JSV
         ActionSheetModel::GetInstance()->SetAction(eventFunc, sheetInfo);
     }
     return sheetInfo;
-#endif
 }
+#endif
 
 void ParseTitleAndMessage(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     // Parse title.
     auto titleValue = obj->GetProperty("title");
     std::string title;
@@ -143,7 +143,7 @@ void ParseTitleAndMessage(DialogProperties& properties, JSRef<JSObject> obj)
 
 void ParseConfirmButton(const JsiExecutionContext& execContext, DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     auto confirmVal = obj->GetProperty("confirm");
     if (!confirmVal->IsObject()) {
         return;
@@ -200,7 +200,7 @@ void ParseConfirmButton(const JsiExecutionContext& execContext, DialogProperties
 
 void ParseShadow(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     // Parse shadow.
     auto shadowValue = obj->GetProperty("shadow");
     Shadow shadow;
@@ -212,7 +212,7 @@ void ParseShadow(DialogProperties& properties, JSRef<JSObject> obj)
 
 void ParseBorderWidthAndColor(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     auto borderWidthValue = obj->GetProperty("borderWidth");
     NG::BorderWidthProperty borderWidth;
     if (JSActionSheet::ParseBorderWidthProps(borderWidthValue, borderWidth)) {
@@ -231,7 +231,7 @@ void ParseBorderWidthAndColor(DialogProperties& properties, JSRef<JSObject> obj)
 
 void ParseRadius(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     auto cornerRadiusValue = obj->GetProperty("cornerRadius");
     NG::BorderRadiusProperty radius;
     if (JSActionSheet::ParseBorderRadius(cornerRadiusValue, radius)) {
@@ -242,7 +242,7 @@ void ParseRadius(DialogProperties& properties, JSRef<JSObject> obj)
 
 void UpdateDialogAlignment(DialogAlignment& alignment)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (alignment == DialogAlignment::TOP_START) {
         if (isRtl) {
@@ -274,12 +274,12 @@ void UpdateDialogAlignment(DialogAlignment& alignment)
 
 void ParseDialogAlignment(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     // Parse alignment
     auto alignmentValue = obj->GetProperty("alignment");
     if (alignmentValue->IsNumber()) {
         auto alignment = alignmentValue->ToNumber<int32_t>();
-        if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+        if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
             properties.alignment = DIALOG_ALIGNMENT[alignment];
             UpdateDialogAlignment(properties.alignment);
         }
@@ -294,7 +294,7 @@ void ParseDialogAlignment(DialogProperties& properties, JSRef<JSObject> obj)
 
 void ParseOffset(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     // Parse offset
     auto offsetValue = obj->GetProperty("offset");
     if (offsetValue->IsObject()) {
@@ -315,7 +315,7 @@ void ParseOffset(DialogProperties& properties, JSRef<JSObject> obj)
 
 void ParseMaskRect(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     // Parse maskRect.
     auto maskRectValue = obj->GetProperty("maskRect");
     DimensionRect maskRect;
@@ -332,7 +332,7 @@ void ParseMaskRect(DialogProperties& properties, JSRef<JSObject> obj)
 
 void ParseDialogLevelMode(DialogProperties& properties, JSRef<JSObject> obj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     auto levelMode = obj->GetProperty("levelMode");
     auto levelUniqueId = obj->GetProperty("levelUniqueId");
     auto immersiveMode = obj->GetProperty("immersiveMode");
@@ -360,7 +360,7 @@ void ParseDialogLevelMode(DialogProperties& properties, JSRef<JSObject> obj)
 
 void JSActionSheet::Show(const JSCallbackInfo& args)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     auto scopedDelegate = EngineHelper::GetCurrentDelegateSafely();
     if (!scopedDelegate) {
         // this case usually means there is no foreground container, need to figure out the reason.
@@ -507,7 +507,7 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
 
 void JSActionSheet::JSBind(BindingTarget globalObj)
 {
-#ifndef ARKUI_WAERABLE
+#ifndef ARKUI_WEARABLE
     JSClass<JSActionSheet>::Declare("ActionSheet");
     JSClass<JSActionSheet>::StaticMethod("show", &JSActionSheet::Show);
     JSClass<JSActionSheet>::InheritAndBind<JSViewAbstract>(globalObj);

@@ -40,12 +40,14 @@ public:
     void ResetPreScaledPixelMapForDragThroughTouch() override;
     void RestartDragTask(const GestureEvent& info) override;
     bool GetIsNotInPreviewState() const override;
+    bool IsNeedGather() const override;
     void SetThumbnailCallback(std::function<void(Offset)>&& callback) override;
     void HandleTouchEvent(const TouchEventInfo& info, bool isRestartDrag = false) override;
 
     void NotifyDragStart() override;
     void NotifyTransDragWindowToFwk() override;
     void NotifyMenuShow(bool isMenuShow) override;
+    void NotifyDragEnd() override;
 
 private:
     void InitPanAction();

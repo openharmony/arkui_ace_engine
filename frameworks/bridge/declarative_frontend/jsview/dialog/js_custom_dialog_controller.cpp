@@ -63,7 +63,7 @@ const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode
 const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = {
     ImmersiveMode::DEFAULT, ImmersiveMode::PAGE, ImmersiveMode::FULL };
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
-constexpr float AVOID_DISTANCE = 16.0f;
+constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
 
 } // namespace
 
@@ -137,7 +137,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         auto alignmentValue = constructorArg->GetProperty("alignment");
         if (alignmentValue->IsNumber()) {
             auto alignment = alignmentValue->ToNumber<int32_t>();
-            if (alignment >= 0 && alignment <= static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
+            if (alignment >= 0 && alignment < static_cast<int32_t>(DIALOG_ALIGNMENT.size())) {
                 instance->dialogProperties_.alignment = DIALOG_ALIGNMENT[alignment];
             }
         }
@@ -167,7 +167,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
                 Dimension avoidDistanceDimension(avoidDisValue->ToNumber<double>(), avoidDisUnit);
                 instance->dialogProperties_.keyboardAvoidDistance = avoidDistanceDimension;
             } else {
-                Dimension avoidDistanceDimension(AVOID_DISTANCE, OHOS::Ace::DimensionUnit::VP);
+                Dimension avoidDistanceDimension(DEFAULT_AVOID_DISTANCE, OHOS::Ace::DimensionUnit::VP);
                 instance->dialogProperties_.keyboardAvoidDistance = avoidDistanceDimension;
             }
         }

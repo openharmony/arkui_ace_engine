@@ -137,9 +137,13 @@ public:
 
     void UpdateAllChildNode();
 
-    void HandleHourColumnBuilding(const PickerTime& value);
+    void HandleHourColumnBuilding();
 
     void HandleMinAndSecColumnBuilding();
+
+    void HandleHourColumnBuildingRange(const PickerTime& value);
+
+    void HandleMinAndSecColumnBuildingRange();
 
     void FlushColumn();
 
@@ -258,11 +262,13 @@ public:
 
     void ClearOptionsHour()
     {
-        // when switch IsUseMilitaryTime state, should clear options_[hourColumn]
-        // Hour24 : Index = [0, 23] -> hour = [0, 23]
-        // Hour12 : Index = [0, 11] -> hour = [1, 12]
-        auto hourColumn = allChildNode_["hour"];
-        options_[hourColumn].clear();
+        if (!IsStartEndTimeDefined()) {
+            // when switch IsUseMilitaryTime state, should clear options_[hourColumn]
+            // Hour24 : Index = [0, 23] -> hour = [0, 23]
+            // Hour12 : Index = [0, 11] -> hour = [1, 12]
+            auto hourColumn = allChildNode_["hour"];
+            options_[hourColumn].clear();
+        }
     }
 
     void SetSelectedTime(const PickerTime& value);
@@ -670,21 +676,22 @@ private:
     void HandleMinColumnChange(const PickerTime& value);
     uint32_t ParseHourOf24(uint32_t hourOf24) const;
     PickerTime AdjustTime(const PickerTime& time);
-
     bool IsStartEndTimeDefined();
     void HourChangeBuildTimeRange();
-    void MinuteChangeBuildTimeRange(const std::string& hourStr);
+    void MinuteChangeBuildTimeRange(uint32_t hourOf24);
     void RecordHourAndMinuteOptions();
     void RecordHourMinuteValues();
     int32_t GetOptionsIndex(const RefPtr<FrameNode>& frameNode, const std::string& value);
     std::string GetOptionsCurrentValue(const RefPtr<FrameNode>& frameNode);
     std::string GetOptionsValueWithIndex(const RefPtr<FrameNode>& frameNode, uint32_t optionIndex);
     void HandleColumnsChangeTimeRange(const RefPtr<FrameNode>& tag);
-    void UpdateHourAndMinuteTimeRange(bool isAmPmColumnChange = false);
+    void UpdateHourAndMinuteTimeRange(const RefPtr<FrameNode>& tag);
     void Hour24ChangeBuildTimeRange();
     void Hour12ChangeBuildTimeRange();
-    int32_t GetOldHourIndex(const std::vector<std::string>& hourVector);
     void RecordHourOptions();
+    void UpdateSecondTimeRange();
+    void HandleSecondsChangeTimeRange(const RefPtr<FrameNode>& secondColumn);
+    void LimitSelectedTimeInRange();
 
     RefPtr<ClickEvent> clickEventListener_;
     bool enabled_ = true;

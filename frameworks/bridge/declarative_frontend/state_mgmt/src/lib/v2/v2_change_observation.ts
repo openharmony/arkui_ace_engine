@@ -780,7 +780,7 @@ class ObserveV2 {
   public getElementInfoById(elmtId: number, isProfiler: boolean = false): string | ElementType {
     let weak: WeakRef<IView> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
     let view;
-    return (weak && (view = weak.deref())) ? view.debugInfoElmtId(elmtId, isProfiler) : '';
+    return (weak && (view = weak.deref()) && (view instanceof PUV2ViewBase)) ? view.debugInfoElmtId(elmtId, isProfiler) : `unknown component type[${elmtId}]`;
   }
 
   /**

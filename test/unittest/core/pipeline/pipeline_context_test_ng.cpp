@@ -337,7 +337,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     dirtyFocusNode = context_->dirtyFocusNode_.Upgrade();
     ASSERT_NE(dirtyFocusNode, nullptr);
     EXPECT_EQ(dirtyFocusNode->GetFocusType(), FocusType::NODE);
-    frameNode_->eventHub_->focusHub_ = nullptr;
+    frameNode_->focusHub_ = nullptr;
     context_->FlushFocus();
     EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
 }
@@ -2061,6 +2061,108 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg102, TestSize.Level1)
         EXPECT_EQ(mouseEvents.size(), 0);
     }
     context_->mouseEvents_.clear();
+}
+
+/**
+ * @tc.name: IsDirtyLayoutNodesEmpty
+ * @tc.desc: Test IsDirtyLayoutNodesEmpty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, IsDirtyLayoutNodesEmpty, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Create taskScheduler.
+     */
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Create some frameNode and configure the required parameters.
+     */
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, 1, nullptr);
+    frameNode->layoutProperty_ = nullptr;
+    auto frameNode2 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 2, nullptr);
+
+    /**
+     * @tc.steps3: Call AddDirtyLayoutNode with different parameters.
+     * @tc.expected: IsDirtyLayoutNodesEmpty return false.
+     */
+    taskScheduler.AddDirtyLayoutNode(frameNode);
+    taskScheduler.AddDirtyLayoutNode(frameNode2);
+    EXPECT_FALSE(taskScheduler.IsDirtyLayoutNodesEmpty());
+    context_->dirtyNodes_.clear();
+}
+
+/**
+ * @tc.name: IsDirtyNodesEmpty
+ * @tc.desc: Test IsDirtyNodesEmpty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, IsDirtyNodesEmpty, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.Create taskScheduler.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Call the function IsDirtyNodesEmpty.
+     * @tc.expected: The dirtyNodes is not empty.
+     */
+    auto customNode_1 = CustomNode::CreateCustomNode(customNodeId_ + 20, TEST_TAG);
+    context_->AddDirtyCustomNode(customNode_1);
+    EXPECT_FALSE(context_->IsDirtyNodesEmpty());
+    taskScheduler.dirtyLayoutNodes_.clear();
+}
+
+/**
+ * @tc.name: FlushAnimationDirtysWhenExist
+ * @tc.desc: Branch: !isDirtyLayoutNodesEmpty && !IsLayouting() && !isReloading_
+ *           Condition: isDirtyLayoutNodesEmpty = false, IsLayouting() = false, isReloading_ = false
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, FlushAnimationDirtysWhenExist, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.Create taskScheduler.
+     * @tc.expected: All pointer is non-null.
+     */
+    ASSERT_NE(context_, nullptr);
+    UITaskScheduler taskScheduler;
+
+    /**
+     * @tc.steps2: Create some frameNode and configure the required parameters.
+     */
+    auto propertyNode01 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 1, nullptr);
+    auto propertyNode02 = FrameNode::GetOrCreateFrameNode(TEST_TAG, 2, nullptr);
+
+    /**
+     * @tc.steps3: Call AddDirtyPropertyNode with different parameters.
+     * @tc.expected: IsDirtyLayoutNodesEmpty return false.
+     */
+    taskScheduler.AddDirtyLayoutNode(propertyNode01);
+    taskScheduler.AddDirtyLayoutNode(propertyNode02);
+    EXPECT_FALSE(context_->IsDirtyLayoutNodesEmpty());
+
+    /**
+     * @tc.steps4: Test FlushAnimationDirtysWhenExist when start animation.
+     * @tc.expected: IsDirtyLayoutNodesEmpty return false.
+     */
+    AnimationOption option = AnimationOption();
+    option.SetDuration(10);
+    context_->FlushAnimationDirtysWhenExist(option);
+    EXPECT_FALSE(context_->IsDirtyLayoutNodesEmpty());
+
+    /**
+     * @tc.steps5: Test FlushAnimationDirtysWhenExist when start infinite animation.
+     * @tc.expected: IsDirtyLayoutNodesEmpty return false.
+     */
+    context_->isReloading_ = false;
+    taskScheduler.isLayouting_ = false;
+    option.SetIteration(-1);
+    context_->FlushAnimationDirtysWhenExist(option);
+    EXPECT_TRUE(context_->IsDirtyLayoutNodesEmpty());
 }
 } // namespace NG
 } // namespace OHOS::Ace

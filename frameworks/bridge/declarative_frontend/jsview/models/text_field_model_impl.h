@@ -64,7 +64,7 @@ public:
     void SetOnEditChanged(std::function<void(bool)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t)>&& func) override;
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override {};
-    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func) override;
+    void SetOnChange(std::function<void(const ChangeValueInfo&)>&& func) override;
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override {};
     void SetOnSecurityStateChange(std::function<void(bool)>&& func) override {};
     void SetOnContentScroll(std::function<void(float, float)>&& func) override {};
@@ -77,6 +77,8 @@ public:
     static void InitTextInputDefaultStyle();
     void SetForegroundColor(const Color& value) override {};
     void SetShowUnit(std::function<void()>&& unitAction) override {};
+    void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func) override {};
+    void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& func) override {};
     void SetOnChangeEvent(std::function<void(const std::u16string&)>&& func) override {};
     void SetBackgroundColor(const Color& color, bool tmp) override;
     void ResetBackgroundColor() override {};
@@ -107,6 +109,7 @@ public:
     void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func) override {};
     void SetEnablePreviewText(bool enablePreviewText) override {};
     void SetEnableHapticFeedback(bool state) override {};
+    void SetKeyboardAppearance(KeyboardAppearance value) override {};
 
 private:
     static void UpdateDecoration(const RefPtr<BoxComponent>& boxComponent, const RefPtr<TextFieldComponent>& component,

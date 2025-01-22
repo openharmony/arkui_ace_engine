@@ -243,6 +243,9 @@ public:
     void NotifyHostWindowMode(Rosen::WindowMode mode);
     void NotifyHostWindowMode();
 
+    void TransferAccessibilityRectInfo();
+    void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
+
 protected:
     virtual void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
     virtual void DispatchKeyEvent(const KeyEvent& event);
@@ -331,10 +334,12 @@ private:
     }
     void InitBusinessDataHandleCallback();
     void RegisterEventProxyFlagCallback();
-    void RegisterTransformParamGetCallback();
 
     void RegisterReplyPageModeCallback();
     void UpdateFrameNodeState();
+    bool IsAncestorNodeGeometryChange(FrameNodeChangeInfoFlag flag);
+    bool IsAncestorNodeTransformChange(FrameNodeChangeInfoFlag flag);
+    AccessibilityParentRectInfo GetAccessibilityRectInfo() const;
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> mouseEvent_;
@@ -400,7 +405,8 @@ private:
     std::map<UIContentBusinessCode, BusinessDataUECConsumeCallback> businessDataUECConsumeCallbacks_;
     std::map<UIContentBusinessCode, BusinessDataUECConsumeReplyCallback> businessDataUECConsumeReplyCallbacks_;
 
-    bool isWindowModeFollowHost_;
+    bool isWindowModeFollowHost_ = false;
+    std::shared_ptr<AccessibilitySAObserverCallback> accessibilitySAObserverCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

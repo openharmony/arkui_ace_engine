@@ -32,31 +32,38 @@ public:
     static int32_t UnregisterSecurityComponent(int32_t& scId);
     static int32_t ReportSecurityComponentClickEvent(int32_t& scId,
         RefPtr<FrameNode>& node, GestureEvent& event,
-        Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback);
+        Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback,
+        std::string& message);
     static int32_t ReportSecurityComponentClickEvent(int32_t& scId,
         RefPtr<FrameNode>& node, const KeyEvent& event,
         Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback);
     static bool InitButtonInfo(std::string& componentInfo,
-        RefPtr<FrameNode>& node, Security::SecurityComponent::SecCompType& scType);
+        RefPtr<FrameNode>& node, Security::SecurityComponent::SecCompType& scType, std::string& message);
     static bool GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY);
     static bool GetWindowRect(RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompRect& winRect);
     static OHOS::Security::SecurityComponent::SecCompUiRegister uiRegister;
     static SecurityComponentProbe probe;
     static int32_t ReportSecurityComponentClickEventInner(int32_t& scId,
         RefPtr<FrameNode>& node, Security::SecurityComponent::SecCompClickEvent& event,
-        Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback);
+        Security::SecurityComponent::OnFirstUseDialogCloseFunc&& callback, std::string& message);
     static bool IsSecurityComponentServiceExist();
     static bool LoadSecurityComponentService();
     static bool IsSystemAppCalling();
 
 private:
-    static bool CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckBrightness(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckVisibility(const RefPtr<FrameNode>& node, RefPtr<LayoutProperty>& layoutProperty);
-    static bool CheckBlur(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckForegroundBlurStyle(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckBlendMode(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckParentBorder(const RefPtr<FrameNode>& parentNode, const RectF& scRect);
+    static bool CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckBrightness(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckVisibility(const RefPtr<FrameNode>& node, RefPtr<LayoutProperty>& layoutProperty,
+        std::string& message);
+    static bool CheckBlur(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckForegroundBlurStyle(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckBlendMode(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckParentBorder(const RefPtr<FrameNode>& parentNode, const RectF& scRect, std::string& message);
     static bool GetBorderRect(const RefPtr<FrameNode>& parentNode, std::vector<RectF>& borderRects);
     static float GetLinearGradientBlurRatio(std::vector<std::pair<float, float>>& fractionStops);
     static bool CheckDistance(const float& deltaY, const float& radius, const float& distance,
@@ -65,21 +72,34 @@ private:
         const NG::GradientDirection direction, const float& ratio, const float& radius);
     static float GetBorderRadius(RefPtr<FrameNode>& node, const NG::GradientDirection direction);
     static bool CheckLinearGradientBlur(const RefPtr<FrameNode>& parentNode, RefPtr<FrameNode>& node);
-    static bool CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckContrast(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckInvert(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckSepia(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckHueRotate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckColorBlend(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckClipMask(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckForegroundColor(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckSphericalEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckLightUpEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckPixelStretchEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext);
-    static bool CheckRenderEffect(RefPtr<FrameNode>& node);
+    static bool CheckGrayScale(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckSaturate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckContrast(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckInvert(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckSepia(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckHueRotate(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckColorBlend(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckClipMask(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckForegroundColor(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckSphericalEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckLightUpEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckPixelStretchEffect(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext,
+        std::string& message);
+    static bool CheckRenderEffect(RefPtr<FrameNode>& node, std::string& message);
     static bool CheckParentNodesEffect(RefPtr<FrameNode>& node,
-        OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
+        OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
+        std::string& message);
     static void GetVisibleRect(RefPtr<FrameNode>& node, RectF& visibleRect);
     static bool IsOutOfParentWithRound(const RectF& visibleRect, const RectF& renderRect,
         OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
@@ -87,20 +107,23 @@ private:
     static bool InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static bool CheckSecurityComponentStatus(const RefPtr<UINode>& root,
-        std::unordered_map<int32_t, NG::RectF>& nodeId2Rect, int32_t secNodeId,
-        std::unordered_map<int32_t, int32_t>& nodeId2Zindex);
+        std::unordered_map<int32_t, std::pair<std::string, NG::RectF>>& nodeId2Rect, int32_t secNodeId,
+        std::unordered_map<int32_t, int32_t>& nodeId2Zindex, std::string& message);
     static bool CheckRectIntersect(const RectF& dest, int32_t secNodeId,
-        const std::unordered_map<int32_t, NG::RectF>& nodeId2Rect,
-        std::unordered_map<int32_t, int32_t>& nodeId2Zindex);
+        const std::unordered_map<int32_t, std::pair<std::string, NG::RectF>>& nodeId2Rect,
+        std::unordered_map<int32_t, int32_t>& nodeId2Zindex, std::string& message);
     static bool IsSecurityComponent(RefPtr<FrameNode>& node);
-    static bool CheckComponentCoveredStatus(int32_t secNodeId);
+    static bool CheckComponentCoveredStatus(int32_t secNodeId, std::string& message);
     static bool IsContextTransparent(const RefPtr<FrameNode>& frameNode);
     static bool CheckContainerTags(const RefPtr<FrameNode>& frameNode);
     static bool IsInModalPage(const RefPtr<UINode>& node);
     static int32_t GetNodeZIndex(const RefPtr<UINode>& root);
     static void UpdateAllZindex(const RefPtr<UINode>& root, std::unordered_map<int32_t, int32_t>& nodeId2Zindex);
     static void WriteButtonInfo(const RefPtr<OHOS::Ace::NG::SecurityComponentLayoutProperty>& layoutProperty,
-        RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
+        RefPtr<FrameNode>& node, OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, std::string& message);
+    static bool IsSecComponentClipped(RefPtr<FrameNode>& parentNode, RectF& visibleRect, const RectF& frameRect,
+        OHOS::Security::SecurityComponent::SecCompBase& buttonInfo);
+    static bool CheckSecurityComponentTextLimits(const RefPtr<FrameNode>& node, std::string& message);
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SECURITY_COMPONENT_HANDLER_H

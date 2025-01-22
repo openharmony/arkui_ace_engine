@@ -521,6 +521,13 @@ enum class ImageFit {
     MATRIX,
 };
 
+enum class KeyboardAppearance {
+    NONE_IMMERSIVE = 0,
+    IMMERSIVE = 1,
+    LIGHT_IMMERSIVE = 2,
+    DARK_IMMERSIVE = 3
+};
+
 namespace StringUtils {
 inline std::string ToString(const ImageFit& imageFit)
 {
@@ -679,6 +686,11 @@ enum class PixelRoundCalcPolicy {
     FORCE_FLOOR = 2,
 };
 
+enum class LayoutCalPolicy {
+    NO_MATCH = 0,
+    MATCH_PARENT = 1,
+};
+
 const ImageRepeat IMAGE_REPEATS[] = {
     ImageRepeat::REPEAT,
     ImageRepeat::REPEAT_X,
@@ -795,6 +807,8 @@ enum class TabAnimateMode {
     CONTENT_FIRST = 0,
     ACTION_FIRST,
     NO_ANIMATION,
+    CONTENT_FIRST_WITH_JUMP,
+    ACTION_FIRST_WITH_JUMP,
     MAX_VALUE,
 };
 
@@ -1101,6 +1115,13 @@ enum class SafeAreaSyncType : uint32_t {
     SYNC_TYPE_KEYBOARD,
     SYNC_TYPE_AVOID_AREA,
     SYNC_TYPE_WINDOW_IGNORE
+};
+
+enum class SwiperAnimationMode {
+    NO_ANIMATION = 0,
+    DEFAULT_ANIMATION,
+    FAST_ANIMATION,
+    MAX_VALUE,
 };
 } // namespace OHOS::Ace
 

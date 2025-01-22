@@ -53,6 +53,7 @@ public:
                 return;
             }
             std::string fadingEdge = pattern->GetAttr<std::string>("list_fadeout_enable", "");
+            theme->velocity_scale_ = pattern->GetAttr<double>("arclist_velocity_scale", 0.6f);
             theme->fadingEdge_ = (fadingEdge == "true");
         }
     };
@@ -64,11 +65,17 @@ public:
         return fadingEdge_;
     }
 
+    float GetVelocityScale() const
+    {
+        return velocity_scale_;
+    }
+
 protected:
     ArcListTheme() = default;
 
 private:
     bool fadingEdge_ = false;
+    float velocity_scale_ = 0.6f;
 };
 
 } // namespace OHOS::Ace

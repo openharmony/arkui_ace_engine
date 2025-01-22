@@ -35,6 +35,7 @@ class GestureHandler {
 class TapGestureHandler extends GestureHandler {
     fingers?: number;
     count?: number;
+    limitFingerCount?: boolean;
     gestureTag?: string;
     allowedTypes?: Array<SourceTool>;
     onActionCallback?: Callback<GestureEvent>;
@@ -44,6 +45,7 @@ class TapGestureHandler extends GestureHandler {
         if (options !== undefined) {
             this.fingers = options.fingers;
             this.count = options.count;
+            this.limitFingerCount = options.isFingerCountLimited;
         }
     }
     onAction(event: Callback<GestureEvent>): TapGestureHandler {
@@ -65,6 +67,7 @@ class LongPressGestureHandler extends GestureHandler {
     repeat?: boolean;
     duration?: number;
     gestureTag?: string;
+    limitFingerCount?: boolean;
     allowedTypes?: Array<SourceTool>;
     onActionCallback?: Callback<GestureEvent>;
     onActionEndCallback?: Callback<GestureEvent>;
@@ -75,6 +78,7 @@ class LongPressGestureHandler extends GestureHandler {
             this.fingers = options.fingers;
             this.repeat = options.repeat;
             this.duration = options.duration;
+            this.limitFingerCount = options.isFingerCountLimited;
         }
     }
 
@@ -108,6 +112,7 @@ class PanGestureHandler extends GestureHandler {
     fingers?: number;
     direction?: PanDirection;
     distance?: number;
+    limitFingerCount?: boolean;
     gestureTag?: string;
     allowedTypes?: Array<SourceTool>;
     onActionStartCallback?: Callback<GestureEvent>;
@@ -120,6 +125,7 @@ class PanGestureHandler extends GestureHandler {
             this.fingers = options.fingers;
             this.direction = options.direction;
             this.distance = options.distance;
+            this.limitFingerCount = options.isFingerCountLimited;
         }
     }
 
@@ -158,6 +164,7 @@ class SwipeGestureHandler extends GestureHandler {
     fingers?: number;
     direction?: SwipeDirection;
     speed?: number;
+    limitFingerCount?: boolean;
     gestureTag?: string;
     allowedTypes?: Array<SourceTool>;
     onActionCallback?: Callback<GestureEvent>;
@@ -167,6 +174,7 @@ class SwipeGestureHandler extends GestureHandler {
             this.fingers = options.fingers;
             this.direction = options.direction;
             this.speed = options.speed;
+            this.limitFingerCount = options.isFingerCountLimited;
         }
     }
 
@@ -189,6 +197,7 @@ class SwipeGestureHandler extends GestureHandler {
 class PinchGestureHandler extends GestureHandler {
     fingers?: number;
     distance?: number;
+    limitFingerCount?: boolean;
     gestureTag?: string;
     allowedTypes?: Array<SourceTool>;
     onActionStartCallback?: Callback<GestureEvent>;
@@ -200,6 +209,7 @@ class PinchGestureHandler extends GestureHandler {
         if (options !== undefined) {
             this.fingers = options.fingers;
             this.distance = options.distance;
+            this.limitFingerCount = options.isFingerCountLimited;
         }
     }
 
@@ -237,6 +247,7 @@ class PinchGestureHandler extends GestureHandler {
 class RotationGestureHandler extends GestureHandler {
     fingers?: number;
     angle?: number;
+    limitFingerCount?: boolean;
     gestureTag?: string;
     allowedTypes?: Array<SourceTool>;
     onActionStartCallback?: Callback<GestureEvent>;
@@ -248,6 +259,7 @@ class RotationGestureHandler extends GestureHandler {
         if (options !== undefined) {
             this.fingers = options.fingers;
             this.angle = options.angle;
+            this.limitFingerCount = options.isFingerCountLimited;
         }
     }
 

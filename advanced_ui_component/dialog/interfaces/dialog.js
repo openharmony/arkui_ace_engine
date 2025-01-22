@@ -2518,6 +2518,8 @@ class CustomDialogContentComponent extends ViewPU {
         this.titleIndex = 0;
         this.contentIndex = 1;
         this.buttonIndex = 2;
+        this.isHasDefaultFocus = false;
+        this.isAllFocusFalse = false;
         this.setInitiallyProvidedValue(h17);
         this.finalizeConstruction();
     }
@@ -2611,6 +2613,12 @@ class CustomDialogContentComponent extends ViewPU {
         }
         if (f17.buttonIndex !== undefined) {
             this.buttonIndex = f17.buttonIndex;
+        }
+        if (f17.isHasDefaultFocus !== undefined) {
+            this.isHasDefaultFocus = f17.isHasDefaultFocus;
+        }
+        if (f17.isAllFocusFalse !== undefined) {
+            this.isAllFocusFalse = f17.isAllFocusFalse;
         }
     }
     updateStateVars(e17) {
@@ -3004,6 +3012,7 @@ class CustomDialogContentComponent extends ViewPU {
                 'moduleName': '__harDefaultModuleName__'
             };
         this.initTitleTextAlign();
+        this.setDefaultFocusState(this.buttons);
     }
     updateFontSize() {
         if (this.fontSizeScale > MAX_FONT_SCALE) {
@@ -3294,6 +3303,25 @@ class CustomDialogContentComponent extends ViewPU {
             return 0;
         }
     }
+
+    setDefaultFocusState(buttonList) {
+        if (!buttonList) {
+            return;
+        }
+        let falseNum = 0;
+        buttonList.forEach((button) => {
+            if (button.defaultFocus) {
+                this.isHasDefaultFocus = true;
+            }
+            if (button.defaultFocus === false) {
+                falseNum++;
+            }
+        });
+        if (falseNum === buttonList.length) {
+            this.isAllFocusFalse = true;
+        }
+    }
+
     ButtonBuilder(g6 = null) {
         this.observeComponentCreation2((m6, n6) => {
             Column.create();
@@ -3397,7 +3425,7 @@ class CustomDialogContentComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(0, () => {
                     this.observeComponentCreation2((d6, e6) => {
                         Button.createWithLabel(t5.value);
-                        __Button__setButtonProperties(t5, this.buttons, this.controller);
+                        __Button__setButtonProperties(t5, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller);
                         Button.role(t5.role ?? ButtonRole.NORMAL);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                         Button.labelStyle({
@@ -3413,7 +3441,7 @@ class CustomDialogContentComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(1, () => {
                     this.observeComponentCreation2((b6, c6) => {
                         Button.createWithLabel(t5.value);
-                        __Button__setButtonProperties(t5, this.buttons, this.controller);
+                        __Button__setButtonProperties(t5, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller);
                         Button.backgroundColor(t5.background);
                         Button.fontColor(t5.fontColor);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
@@ -3430,7 +3458,7 @@ class CustomDialogContentComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(2, () => {
                     this.observeComponentCreation2((z5, a6) => {
                         Button.createWithLabel(t5.value);
-                        __Button__setButtonProperties(t5, this.buttons, this.controller);
+                        __Button__setButtonProperties(t5, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller);
                         Button.backgroundColor(t5.background);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                         Button.labelStyle({
@@ -3446,7 +3474,7 @@ class CustomDialogContentComponent extends ViewPU {
                 this.ifElseBranchUpdateFunction(3, () => {
                     this.observeComponentCreation2((x5, y5) => {
                         Button.createWithLabel(t5.value);
-                        __Button__setButtonProperties(t5, this.buttons, this.controller);
+                        __Button__setButtonProperties(t5, this.isHasDefaultFocus, this.isAllFocusFalse, this.controller);
                         Button.fontColor(t5.fontColor);
                         Button.key(`advanced_dialog_button_${this.keyIndex++}`);
                         Button.labelStyle({
@@ -3645,7 +3673,7 @@ class CustomDialogContentComponent extends ViewPU {
         this.updateDirtyElements();
     }
 }
-function __Button__setButtonProperties(u3, v3, w3) {
+function __Button__setButtonProperties(u3, isHasDefaultFocus, isAllFocusFalse, w3) {
     Button.onKeyEvent((event) => {
         if (!event) {
             return;
@@ -3665,27 +3693,30 @@ function __Button__setButtonProperties(u3, v3, w3) {
         }
         w3?.close();
     });
-    Button.defaultFocus(u3.defaultFocus ? true : isHasDefaultFocus(v3) ? false : true);
+    Button.defaultFocus(isDefaultFocus(u3, isHasDefaultFocus, isAllFocusFalse));
     Button.buttonStyle(u3.buttonStyle ??
         (u3.role === ButtonRole.ERROR ? ERROR_BUTTON_STYLE() : ALERT_BUTTON_STYLE()));
     Button.layoutWeight(BUTTON_LAYOUT_WEIGHT);
     Button.type(ButtonType.ROUNDED_RECTANGLE);
 }
-function isHasDefaultFocus(m3) {
+function isDefaultFocus(m3, isHasDefaultFocus, isAllFocusFalse) {
     try {
+        if (m3.defaultFocus) {
+            return true;
+        }
         let q3 = false;
-        m3?.forEach((t3) => {
-            if (t3.defaultFocus) {
-                q3 = true;
-            }
-        });
+        if (isHasDefaultFocus || isAllFocusFalse) {
+            q3 = false;
+        } else {
+            q3 = true;
+        }
         return q3;
     }
     catch (n3) {
         let o3 = n3.code;
         let p3 = n3.message;
         hilog.error(0x3900, 'Ace', `get defaultFocus exist error, code: ${o3}, message: ${p3}`);
-        return false;
+        return true;
     }
 }
 function getNumberByResourceId(f3, g3, h3) {

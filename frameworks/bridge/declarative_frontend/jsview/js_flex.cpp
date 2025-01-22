@@ -98,8 +98,19 @@ void JSFlex::JsHeight(const JSCallbackInfo& info)
 
 void JSFlex::SetHeight(const JSRef<JSVal>& jsValue)
 {
+    FlexModel::GetInstance()->SetHeightLayoutPolicy(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH));
     if (!JSViewAbstract::JsHeight(jsValue)) {
-        // JsHeight return false, just return.
+        // JsHeight return false, check if set LayoutPolicy before return.
+        if (!jsValue->IsObject()) {
+            return;
+        }
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+        JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+        if (layoutPolicy->IsString() && layoutPolicy->ToString() == "matchParent") {
+            FlexModel::GetInstance()->SetHeightLayoutPolicy(
+                static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT));
+            FlexModel::GetInstance()->SetHasHeight();
+        }
         return;
     }
     FlexModel::GetInstance()->SetHasHeight();
@@ -116,8 +127,19 @@ void JSFlex::JsWidth(const JSCallbackInfo& info)
 
 void JSFlex::SetWidth(const JSRef<JSVal>& jsValue)
 {
+    FlexModel::GetInstance()->SetWidthLayoutPolicy(static_cast<uint8_t>(LayoutCalPolicy::NO_MATCH));
     if (!JSViewAbstract::JsWidth(jsValue)) {
-        // JsWidth return false, just return.
+        // JsWidth return false, check if set LayoutPolicy before return.
+        if (!jsValue->IsObject()) {
+            return;
+        }
+        JSRef<JSObject> object = JSRef<JSObject>::Cast(jsValue);
+        JSRef<JSVal> layoutPolicy = object->GetProperty("id_");
+        if (layoutPolicy->IsString() && layoutPolicy->ToString() == "matchParent") {
+            FlexModel::GetInstance()->SetWidthLayoutPolicy(
+                static_cast<uint8_t>(LayoutCalPolicy::MATCH_PARENT));
+            FlexModel::GetInstance()->SetHasWidth();
+        }
         return;
     }
     FlexModel::GetInstance()->SetHasWidth();

@@ -39,6 +39,7 @@ public:
     MOCK_METHOD1(SetSurfaceRotation, void(bool));
     MOCK_METHOD1(SetRenderFit, void(RenderFit));
     MOCK_METHOD1(SetSecurityLayer, void(bool));
+    MOCK_METHOD1(SetHDRBrightness, void(float));
     MOCK_METHOD1(SetContentClip, void(const std::variant<RectF, RefPtr<ShapeRect>>&));
     MOCK_METHOD1(SetTransparentLayer, void(bool));
 

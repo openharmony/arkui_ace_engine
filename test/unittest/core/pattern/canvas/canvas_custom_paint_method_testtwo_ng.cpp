@@ -23,6 +23,12 @@
 
 #define protected public
 #define private public
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_font_manager.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components_ng/pattern/canvas/canvas_event_hub.h"
 #include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
 #include "core/components_ng/pattern/canvas/canvas_model.h"
@@ -35,11 +41,6 @@
 #include "core/components_ng/pattern/canvas/custom_paint_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_paint_method.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
-#include "test/mock/core/common/mock_container.h"
-#include "test/mock/core/common/mock_font_manager.h"
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
 #undef private
 #undef protected
 
@@ -665,7 +666,6 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo021, Te
     EXPECT_CALL(path, ArcTo(_, _, _, _)).WillRepeatedly(Return());
     paintMethod->Path2DEllipse(args);
 }
-
 
 /**
  * @tc.name: CanvasCustomPaintMethodTestTwo022

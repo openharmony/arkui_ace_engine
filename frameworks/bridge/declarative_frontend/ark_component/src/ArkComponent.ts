@@ -3443,6 +3443,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
       this._gestureEvent = new UIGestureEvent();
       this._gestureEvent.setNodePtr(this.nativePtr);
       this._gestureEvent.setWeakNodePtr(this._weakPtr);
+      this._gestureEvent.registerFrameNodeDeletedCallback(this.nativePtr);
     }
     return this._gestureEvent;
   }
@@ -5030,11 +5031,18 @@ class UIGestureEvent {
   private _nodePtr: Object | null;
   private _weakNodePtr: JsPointerClass;
   private _gestures: GestureHandler[] | undefined;
+  private _destructorCallback: Callback<number>;
   setNodePtr(nodePtr: Object | null): void {
     this._nodePtr = nodePtr;
   }
   setWeakNodePtr(weakNodePtr: JsPointerClass): void {
     this._weakNodePtr = weakNodePtr;
+  }
+  registerFrameNodeDeletedCallback(nodePtr): void {
+    this._destructorCallback = (elementId: number): void => {
+      globalThis.__mapOfModifier__.delete(elementId);
+    };
+    getUINativeModule().common.registerFrameNodeDestructorCallback(nodePtr, this._destructorCallback);
   }
   addGesture(gesture: GestureHandler, priority?: GesturePriority, mask?: GestureMask): void {
     if (this._weakNodePtr.invalid()) {
@@ -5049,40 +5057,45 @@ class UIGestureEvent {
       case CommonGestureType.TAP_GESTURE: {
         let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
         getUINativeModule().common.addTapGesture(this._nodePtr, priority, mask, tapGesture.gestureTag,
-          tapGesture.allowedTypes, tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback);
+          tapGesture.allowedTypes, tapGesture.fingers, tapGesture.count, tapGesture.limitFingerCount, tapGesture.onActionCallback);
         break;
       }
       case CommonGestureType.LONG_PRESS_GESTURE: {
         let longPressGesture: LongPressGestureHandler = gesture as LongPressGestureHandler;
         getUINativeModule().common.addLongPressGesture(this._nodePtr, priority, mask, longPressGesture.gestureTag,
-          longPressGesture.allowedTypes, longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
+          longPressGesture.allowedTypes, longPressGesture.fingers, longPressGesture.repeat,
+          longPressGesture.duration, longPressGesture.limitFingerCount,
           longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback);
         break;
       }
       case CommonGestureType.PAN_GESTURE: {
         let panGesture: PanGestureHandler = gesture as PanGestureHandler;
         getUINativeModule().common.addPanGesture(this._nodePtr, priority, mask, panGesture.gestureTag,
-          panGesture.allowedTypes, panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
-          panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback);
+          panGesture.allowedTypes, panGesture.fingers, panGesture.direction, panGesture.distance,
+          panGesture.limitFingerCount, panGesture.onActionStartCallback, panGesture.onActionUpdateCallback,
+          panGesture.onActionEndCallback, panGesture.onActionCancelCallback);
         break;
       }
       case CommonGestureType.SWIPE_GESTURE: {
         let swipeGesture: SwipeGestureHandler = gesture as SwipeGestureHandler;
         getUINativeModule().common.addSwipeGesture(this._nodePtr, priority, mask, swipeGesture.gestureTag,
-          swipeGesture.allowedTypes, swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback);
+          swipeGesture.allowedTypes, swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed,
+          swipeGesture.limitFingerCount, swipeGesture.onActionCallback);
         break;
       }
       case CommonGestureType.PINCH_GESTURE: {
         let pinchGesture: PinchGestureHandler = gesture as PinchGestureHandler;
         getUINativeModule().common.addPinchGesture(this._nodePtr, priority, mask, pinchGesture.gestureTag,
-          pinchGesture.allowedTypes, pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
+          pinchGesture.allowedTypes, pinchGesture.fingers, pinchGesture.distance,
+          pinchGesture.limitFingerCount, pinchGesture.onActionStartCallback,
           pinchGesture.onActionUpdateCallback, pinchGesture.onActionEndCallback, pinchGesture.onActionCancelCallback);
         break;
       }
       case CommonGestureType.ROTATION_GESTURE: {
         let rotationGesture: RotationGestureHandler = gesture as RotationGestureHandler;
         getUINativeModule().common.addRotationGesture(this._nodePtr, priority, mask, rotationGesture.gestureTag,
-          rotationGesture.allowedTypes, rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
+          rotationGesture.allowedTypes, rotationGesture.fingers, rotationGesture.angle,
+          rotationGesture.limitFingerCount, rotationGesture.onActionStartCallback,
           rotationGesture.onActionUpdateCallback, rotationGesture.onActionEndCallback,
           rotationGesture.onActionCancelCallback);
         break;
@@ -5146,42 +5159,44 @@ function addGestureToGroup(nodePtr: Object | null, gesture: any, gestureGroupPtr
     case CommonGestureType.TAP_GESTURE: {
       let tapGesture: TapGestureHandler = gesture as TapGestureHandler;
       getUINativeModule().common.addTapGestureToGroup(nodePtr, tapGesture.gestureTag, tapGesture.allowedTypes,
-        tapGesture.fingers, tapGesture.count, tapGesture.onActionCallback, gestureGroupPtr);
+        tapGesture.fingers, tapGesture.count, tapGesture.limitFingerCount, tapGesture.onActionCallback,
+        gestureGroupPtr);
       break;
     }
     case CommonGestureType.LONG_PRESS_GESTURE: {
       let longPressGesture: LongPressGestureHandler = gesture as LongPressGestureHandler;
       getUINativeModule().common.addLongPressGestureToGroup(nodePtr, longPressGesture.gestureTag, longPressGesture.allowedTypes,
-        longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration,
+        longPressGesture.fingers, longPressGesture.repeat, longPressGesture.duration, longPressGesture.limitFingerCount,
         longPressGesture.onActionCallback, longPressGesture.onActionEndCallback, longPressGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.PAN_GESTURE: {
       let panGesture: PanGestureHandler = gesture as PanGestureHandler;
       getUINativeModule().common.addPanGestureToGroup(nodePtr, panGesture.gestureTag, panGesture.allowedTypes,
-        panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.onActionStartCallback,
+        panGesture.fingers, panGesture.direction, panGesture.distance, panGesture.limitFingerCount, panGesture.onActionStartCallback,
         panGesture.onActionUpdateCallback, panGesture.onActionEndCallback, panGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.SWIPE_GESTURE: {
       let swipeGesture: SwipeGestureHandler = gesture as SwipeGestureHandler;
       getUINativeModule().common.addSwipeGestureToGroup(nodePtr, swipeGesture.gestureTag, swipeGesture.allowedTypes,
-        swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.onActionCallback, gestureGroupPtr);
+        swipeGesture.fingers, swipeGesture.direction, swipeGesture.speed, swipeGesture.limitFingerCount,
+        swipeGesture.onActionCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.PINCH_GESTURE: {
       let pinchGesture: PinchGestureHandler = gesture as PinchGestureHandler;
       getUINativeModule().common.addPinchGestureToGroup(nodePtr, pinchGesture.gestureTag, pinchGesture.allowedTypes,
-        pinchGesture.fingers, pinchGesture.distance, pinchGesture.onActionStartCallback,
+        pinchGesture.fingers, pinchGesture.distance, pinchGesture.limitFingerCount, pinchGesture.onActionStartCallback,
         pinchGesture.onActionUpdateCallback, pinchGesture.onActionEndCallback, pinchGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.ROTATION_GESTURE: {
       let rotationGesture: RotationGestureHandler = gesture as RotationGestureHandler;
       getUINativeModule().common.addRotationGestureToGroup(nodePtr, rotationGesture.gestureTag, rotationGesture.allowedTypes,
-        rotationGesture.fingers, rotationGesture.angle, rotationGesture.onActionStartCallback,
-        rotationGesture.onActionUpdateCallback, rotationGesture.onActionEndCallback,
-        rotationGesture.onActionCancelCallback, gestureGroupPtr);
+        rotationGesture.fingers, rotationGesture.angle, rotationGesture.limitFingerCount,
+        rotationGesture.onActionStartCallback, rotationGesture.onActionUpdateCallback,
+        rotationGesture.onActionEndCallback, rotationGesture.onActionCancelCallback, gestureGroupPtr);
       break;
     }
     case CommonGestureType.GESTURE_GROUP: {
@@ -5209,9 +5224,6 @@ function applyGesture(modifier: GestureModifier, component: ArkComponent): void 
 
 globalThis.__mapOfModifier__ = new Map();
 function __gestureModifier__(modifier) {
-  if (globalThis.__mapOfModifier__.size === 0) {
-    __modifierElmtDeleteCallback__();
-  }
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
   let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   if (globalThis.__mapOfModifier__.get(elmtId)) {
@@ -5222,16 +5234,6 @@ function __gestureModifier__(modifier) {
     globalThis.__mapOfModifier__.set(elmtId, component);
     applyGesture(modifier, component);
   }
-}
-
-declare class UINodeRegisterProxy {
-  public static registerModifierElmtDeleteCallback(): void;
-}
-
-function __modifierElmtDeleteCallback__() {
-  UINodeRegisterProxy.registerModifierElmtDeleteCallback((elmtId) => {
-    globalThis.__mapOfModifier__.delete(elmtId);
-  });
 }
 
 const __elementIdToCustomProperties__ = new Map();

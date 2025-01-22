@@ -36,6 +36,7 @@
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/overlay/dialog_manager.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -2023,43 +2024,83 @@ void ViewAbstract::BindPopup(
     }
 }
 
-RefPtr<OverlayManager> ViewAbstract::GetCurOverlayManager(const RefPtr<UINode>& node)
+PopupInfo ViewAbstract::GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode)
 {
-    CHECK_NULL_RETURN(node, nullptr);
-    auto context = node->GetContextWithCheck();
-    CHECK_NULL_RETURN(context, nullptr);
-    RefPtr<OverlayManager> overlayManager = nullptr;
+    PopupInfo popupInfoError;
+    popupInfoError.popupNode = nullptr;
+    auto context = customNode->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, popupInfoError);
     auto instanceId = context->GetInstanceId();
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
     if (subwindow) {
-        overlayManager = subwindow->GetOverlayManager();
-    } else {
-        overlayManager = context->GetOverlayManager();
+        auto overlayManager = subwindow->GetOverlayManager();
+        if (overlayManager) {
+            auto popupInfo = overlayManager->GetPopupInfoWithExistContent(customNode);
+            if (popupInfo.popupNode) {
+                return popupInfo;
+            }
+        }
     }
-    return overlayManager;
+    auto overlayManager = context->GetOverlayManager();
+    if (overlayManager) {
+        auto popupInfo = overlayManager->GetPopupInfoWithExistContent(customNode);
+        if (popupInfo.popupNode) {
+            return popupInfo;
+        }
+    }
+    return popupInfoError;
 }
 
-int32_t ViewAbstract::OpenBindPopup(
-    const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode, const RefPtr<UINode>& customNode)
+PopupInfo ViewAbstract::GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId)
 {
-    BindPopup(param, targetNode, customNode);
-    auto overlayManager = GetCurOverlayManager(customNode);
-    if (!overlayManager) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "The overlayManager of popup is null.");
-        return ERROR_CODE_INTERNAL_ERROR;
+    PopupInfo popupInfoError;
+    popupInfoError.popupNode = nullptr;
+    auto context = customNode->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, popupInfoError);
+    auto instanceId = context->GetInstanceId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+    if (subwindow) {
+        auto overlayManager = subwindow->GetOverlayManager();
+        if (overlayManager) {
+            auto popupInfo = overlayManager->GetPopupInfo(targetId);
+            if (popupInfo.popupNode) {
+                return popupInfo;
+            }
+        }
     }
-    auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
-    if (!popupInfo.popupNode) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupNode of popup is null.");
-        return ERROR_CODE_INTERNAL_ERROR;
+    auto overlayManager = context->GetOverlayManager();
+    if (overlayManager) {
+        auto popupInfo = overlayManager->GetPopupInfo(targetId);
+        if (popupInfo.popupNode) {
+            return popupInfo;
+        }
     }
-    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
-    if (!popupPattern) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupPattern does not exist.");
-        return ERROR_CODE_INTERNAL_ERROR;
+    return popupInfoError;
+}
+
+RefPtr<OverlayManager> ViewAbstract::GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId)
+{
+    auto context = customNode->GetContextWithCheck();
+    CHECK_NULL_RETURN(context, nullptr);
+    auto instanceId = context->GetInstanceId();
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
+    if (subwindow) {
+        auto overlayManager = subwindow->GetOverlayManager();
+        if (overlayManager) {
+            auto popupInfo = overlayManager->GetPopupInfo(targetId);
+            if (popupInfo.popupNode) {
+                return overlayManager;
+            }
+        }
     }
-    popupPattern->SetCustomNode(AceType::WeakClaim(AceType::RawPtr(customNode)));
-    return ERROR_CODE_NO_ERROR;
+    auto overlayManager = context->GetOverlayManager();
+    if (overlayManager) {
+        auto popupInfo = overlayManager->GetPopupInfo(targetId);
+        if (popupInfo.popupNode) {
+            return overlayManager;
+        }
+    }
+    return nullptr;
 }
 
 int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode)
@@ -2071,19 +2112,6 @@ int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UI
     if (!customNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The customNode of popup is null.");
         return ERROR_CODE_DIALOG_CONTENT_ERROR;
-    }
-    auto overlayManager = GetCurOverlayManager(customNode);
-    if (overlayManager) {
-        auto popupInfo = overlayManager->GetPopupInfoWithExistContent(customNode);
-        if (popupInfo.popupNode) {
-            TAG_LOGE(AceLogTag::ACE_DIALOG, "The customNode of popup is already existed.");
-            return ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST;
-        }
-        popupInfo = overlayManager->GetPopupInfo(std::stoi(param->GetTargetId()));
-        if (popupInfo.popupNode) {
-            TAG_LOGE(AceLogTag::ACE_DIALOG, "The customNode of popup is already existed.");
-            return ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST;
-        }
     }
     if (param->GetTargetId().empty() || std::stoi(param->GetTargetId()) < 0) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetId is error.");
@@ -2099,7 +2127,29 @@ int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UI
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
         return ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE;
     }
-    return OpenBindPopup(param, targetNode, customNode);
+    auto popupInfo = GetPopupInfoWithCustomNode(customNode);
+    if (popupInfo.popupNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The customNode of popup is already existed.");
+        return ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST;
+    }
+    popupInfo = GetPopupInfoWithTargetId(customNode, targetId);
+    if (popupInfo.popupNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetId of popup is already existed.");
+        return ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST;
+    }
+    BindPopup(param, targetNode, customNode);
+    popupInfo = GetPopupInfoWithTargetId(customNode, targetId);
+    if (!popupInfo.popupNode) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupNode of popup is null.");
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
+    if (!popupPattern) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupPattern does not exist.");
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    popupPattern->SetCustomNode(AceType::WeakClaim(AceType::RawPtr(customNode)));
+    return ERROR_CODE_NO_ERROR;
 }
 
 int32_t ViewAbstract::UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode)
@@ -2122,12 +2172,7 @@ int32_t ViewAbstract::UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist when update popup.");
         return ERROR_CODE_INTERNAL_ERROR;
     }
-    auto overlayManager = GetCurOverlayManager(customNode);
-    if (!overlayManager) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "The overlayManager of popup is null.");
-        return ERROR_CODE_INTERNAL_ERROR;
-    }
-    auto popupInfo = overlayManager->GetPopupInfo(targetNode->GetId());
+    auto popupInfo = GetPopupInfoWithTargetId(customNode, targetId);
     if (!popupInfo.popupNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupNode of popup is null.");
         return ERROR_CODE_INTERNAL_ERROR;
@@ -2162,12 +2207,7 @@ int32_t ViewAbstract::ClosePopup(const RefPtr<UINode>& customNode)
         return ERROR_CODE_INTERNAL_ERROR;
     }
     int32_t targetId = std::stoi(param->GetTargetId());
-    auto overlayManager = GetCurOverlayManager(customNode);
-    if (!overlayManager) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "The overlayManager of popup is null.");
-        return ERROR_CODE_INTERNAL_ERROR;
-    }
-    auto popupInfo = overlayManager->GetPopupInfo(targetId);
+    auto popupInfo = GetPopupInfoWithTargetId(customNode, targetId);
     if (!popupInfo.popupNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupNode of popup is null.");
         return ERROR_CODE_INTERNAL_ERROR;
@@ -2177,11 +2217,12 @@ int32_t ViewAbstract::ClosePopup(const RefPtr<UINode>& customNode)
         return ERROR_CODE_INTERNAL_ERROR;
     }
     popupInfo.markNeedUpdate = true;
-    if (param->IsShowInSubWindow()) {
-        SubwindowManager::GetInstance()->HidePopupNG(targetId);
-    } else {
-        overlayManager->HidePopup(targetId, popupInfo);
+    auto overlayManager = GetPopupOverlayManager(customNode, targetId);
+    if (!overlayManager) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The overlayManager of popup is null.");
+        return ERROR_CODE_INTERNAL_ERROR;
     }
+    overlayManager->HidePopup(targetId, popupInfo);
     return ERROR_CODE_NO_ERROR;
 }
 
@@ -2189,9 +2230,7 @@ int32_t ViewAbstract::GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<UINo
 {
     CHECK_NULL_RETURN(param, ERROR_CODE_INTERNAL_ERROR);
     CHECK_NULL_RETURN(customNode, ERROR_CODE_DIALOG_CONTENT_ERROR);
-    auto overlayManager = GetCurOverlayManager(customNode);
-    CHECK_NULL_RETURN(overlayManager, ERROR_CODE_DIALOG_CONTENT_ERROR);
-    auto popupInfo = overlayManager->GetPopupInfoWithExistContent(customNode);
+    auto popupInfo = GetPopupInfoWithCustomNode(customNode);
     CHECK_NULL_RETURN(popupInfo.popupNode, ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
     auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_RETURN(popupPattern, ERROR_CODE_INTERNAL_ERROR);
@@ -2220,21 +2259,25 @@ void ViewAbstract::DismissDialog()
     CHECK_NULL_VOID(overlayManager);
     auto rootNode = overlayManager->GetRootNode().Upgrade();
     CHECK_NULL_VOID(rootNode);
-    RefPtr<FrameNode> overlay;
-    if (overlayManager->GetDismissDialogId()) {
-        overlay = overlayManager->GetDialog(overlayManager->GetDismissDialogId());
-    } else {
-        overlay = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
+    RefPtr<FrameNode> dialogNode;
+    auto dialogId = DialogManager::GetInstance().GetDismissDialogId();
+    auto dialogTag = DialogManager::GetInstance().GetDialogTag();
+    if (dialogId && !dialogTag.empty()) {
+        dialogNode = FrameNode::GetFrameNode(dialogTag, dialogId);
     }
-    CHECK_NULL_VOID(overlay);
-    auto pattern = overlay->GetPattern();
+    if (!dialogNode) {
+        if (overlayManager->GetDismissDialogId()) {
+            dialogNode = overlayManager->GetDialog(overlayManager->GetDismissDialogId());
+        } else {
+            dialogNode = AceType::DynamicCast<FrameNode>(rootNode->GetLastChild());
+        }
+    }
+    CHECK_NULL_VOID(dialogNode);
+    auto pattern = dialogNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
     if (dialogPattern) {
-        overlayManager->RemoveDialog(overlay, false);
-        if (overlayManager->isMaskNode(dialogPattern->GetHost()->GetId())) {
-            overlayManager->PopModalDialog(dialogPattern->GetHost()->GetId());
-        }
+        dialogPattern->OverlayDismissDialog(dialogNode);
 #if !defined(PREVIEW) && !defined(ACE_UNITTEST) && defined(OHOS_PLATFORM)
         UiSessionManager::GetInstance().ReportComponentChangeEvent("onVisibleChange", "destroy");
 #endif
@@ -5550,4 +5593,28 @@ void ViewAbstract::RemoveCustomProperty(UINode* frameNode, const std::string& ke
     frameNode->RemoveCustomProperty(key);
 }
 
+int32_t ViewAbstract::CancelDataLoading(const std::string& key)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, -1);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, -1);
+    return dragDropManager->CancelUDMFDataLoading(key);
+}
+
+void ViewAbstract::SetDisableDataPrefetch(bool disableDataPrefetch)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetDisableDataPrefetch(disableDataPrefetch);
+}
+
+void ViewAbstract::SetDisableDataPrefetch(FrameNode* frameNode, bool disableDataPrefetch)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+
+    eventHub->SetDisableDataPrefetch(disableDataPrefetch);
+}
 } // namespace OHOS::Ace::NG

@@ -292,7 +292,7 @@ void ImagePattern::CheckHandles(SelectHandleInfo& handleInfo)
     const auto& geometryNode = host->GetGeometryNode();
     auto contentRect = geometryNode->GetContentRect();
     RectF visibleContentRect(contentRect.GetOffset() + parentGlobalOffset_, contentRect.GetSize());
-    auto parent = host->GetAncestorNodeOfFrame(false);
+    auto parent = host->GetAncestorNodeOfFrame(true);
     visibleContentRect = GetVisibleContentRect(parent, visibleContentRect);
     auto paintRect = handleInfo.paintRect;
     PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
@@ -326,7 +326,7 @@ OffsetF ImagePattern::GetParentGlobalOffset() const
     auto pipeline = host->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto rootOffset = pipeline->GetRootRect().GetOffset();
-    return host->GetPaintRectOffset() - rootOffset;
+    return host->GetPaintRectOffset(false, true) - rootOffset;
 }
 
 void ImagePattern::OnAreaChangedInner()
@@ -557,6 +557,8 @@ void ImagePattern::StartDecoding(const SizeF& dstSize)
     if (!host->GetGeometryNode()->GetContent()) {
         return;
     }
+
+    ACE_SCOPED_TRACE("StartDecoding imageInfo: [%s]", imageDfxConfig_.ToStringWithSrc().c_str());
 
     const auto& props = DynamicCast<ImageLayoutProperty>(host->GetLayoutProperty());
     CHECK_NULL_VOID(props);

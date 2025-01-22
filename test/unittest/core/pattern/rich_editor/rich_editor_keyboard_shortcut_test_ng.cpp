@@ -144,10 +144,10 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts001, TestS
     richEditorPattern->CursorMove(CaretMoveIntent::Left);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
     richEditorPattern->CursorMove(CaretMoveIntent::LeftWord);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 17);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::RightWord);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 20);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 21);
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->CursorMove(CaretMoveIntent::ParagraghBegin);
     EXPECT_EQ(richEditorPattern->GetCaretPosition(), 0);
@@ -332,9 +332,9 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, RichEditorKeyBoardShortCuts201, TestS
     EXPECT_EQ(textOptions.value.length(), richEditorPattern->GetTextContentLength());
     richEditorPattern->SetCaretPosition(20);
     richEditorPattern->HandleOnDeleteComb(true);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 20);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
     richEditorPattern->HandleOnDeleteComb(false);
-    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 20);
+    EXPECT_EQ(richEditorPattern->GetCaretPosition(), 19);
 }
 
 /**
@@ -1151,7 +1151,9 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, GetSelectArea101, TestSize.Level1)
     richEditorPattern->textSelector_ = TextSelector(0, 6);
     richEditorPattern->contentRect_ = { 0.0, 10.0, 500.0, 500.0 };
     richEditorPattern->isShowPlaceholder_ = true;
-    auto res = richEditorPattern->GetSelectArea();
+    auto res = richEditorPattern->GetSelectArea(SelectRectsType::ALL_LINES);
+    EXPECT_TRUE(res.IsValid());
+    res = richEditorPattern->GetSelectArea(SelectRectsType::LEFT_TOP_POINT);
     EXPECT_TRUE(res.IsValid());
 }
 

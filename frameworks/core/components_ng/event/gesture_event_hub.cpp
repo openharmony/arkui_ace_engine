@@ -450,7 +450,7 @@ void GestureEventHub::SetFocusClickEvent(GestureEventFunc&& clickEvent)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
-    auto focusHub = eventHub->GetFocusHub();
+    auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetOnClickCallback(std::move(clickEvent));
 }
@@ -648,7 +648,7 @@ bool GestureEventHub::ActClick(std::shared_ptr<JsonValue> secComphandle)
     TimeStamp time(microseconds);
     info.SetTimeStamp(time);
     EventTarget clickEventTarget;
-    clickEventTarget.id = host->GetId();
+    clickEventTarget.id = host->GetInspectorId().value_or("").c_str();
     clickEventTarget.type = host->GetTag();
 #ifdef SECURITY_COMPONENT_ENABLE
     info.SetSecCompHandleEvent(secComphandle);
@@ -690,7 +690,7 @@ bool GestureEventHub::ActLongClick()
     TimeStamp time(microseconds);
     info.SetTimeStamp(time);
     EventTarget longPressTarget;
-    longPressTarget.id = host->GetId();
+    longPressTarget.id = host->GetInspectorId().value_or("").c_str();
     longPressTarget.type = host->GetTag();
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
@@ -745,7 +745,7 @@ bool GestureEventHub::KeyBoardShortCutClick(const KeyEvent& event, const WeakPtr
     info.SetSourceDevice(event.sourceType);
     info.SetTimeStamp(event.timeStamp);
     EventTarget target;
-    target.id = host->GetId();
+    target.id = host->GetInspectorId().value_or("").c_str();
     target.type = host->GetTag();
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);

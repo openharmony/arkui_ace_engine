@@ -177,6 +177,8 @@ constexpr Color SELECTED_OPTION_BACKGROUND_COLOR = Color(0x19254FF7);
 constexpr Dimension SELECT_HANDLE_DEFAULT_HEIGHT = 16.0_vp;
 constexpr int32_t HALF = 2;
 constexpr int32_t AI_TIMEOUT_LIMIT = 200;
+constexpr int32_t CHECK_PRE_SIZE = 5;
+constexpr int32_t ADJUST_RATIO = 10;
 
 bool ParseDateTimeJson(const std::string& timeJson, NWeb::DateTime& result)
 {
@@ -3262,6 +3264,7 @@ void WebPattern::OnModifyDone()
         delegate_->UpdateTextAutosizing(GetTextAutosizingValue(true));
         delegate_->UpdateAllowFileAccess(GetFileAccessEnabledValue(isApiGteTwelve ? false : true));
         delegate_->UpdateOptimizeParserBudgetEnabled(GetOptimizeParserBudgetEnabledValue(false));
+        delegate_->UpdateWebMediaAVSessionEnabled(GetWebMediaAVSessionEnabledValue(false));
         if (GetMetaViewport()) {
             delegate_->UpdateMetaViewport(GetMetaViewport().value());
         }
@@ -3510,6 +3513,30 @@ bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool 
     return true;
 }
 
+bool WebPattern::UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double keyboard)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    lastKeyboardHeight_ = keyboard;
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this), width, height]() {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            // In split-screen mode, the keyboard height is reported multiple times and is not the same.
+            // Use the last height.
+            webPattern->UpdateLayoutAfterKeyboardShow(width,
+                                                      height,
+                                                      webPattern->lastKeyboardHeight_,
+                                                      webPattern->GetDrawSize().Height());
+        }, TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
+    return true;
+}
+
 bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled)
 {
     if (IsDialogNested()) {
@@ -3523,6 +3550,7 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
     if (drawSizeCache_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
         TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow not obstruct");
         isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+        lastKeyboardHeight_ = keyboard;
         return !safeAreaEnabled;
     }
     if (height - GetCoordinatePoint()->GetY() < keyboard) {
@@ -3545,20 +3573,10 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
         lastKeyboardHeight_ = keyboard;
         return false;
     }
-    auto frameNode = GetHost();
-    CHECK_NULL_RETURN(frameNode, false);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(context, false);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_RETURN(taskExecutor, false);
-    lastKeyboardHeight_ = keyboard;
-    taskExecutor->PostDelayedTask(
-        [weak = WeakClaim(this), width, height, keyboard, oldWebHeight = drawSize_.Height()]() {
-            auto webPattern = weak.Upgrade();
-            CHECK_NULL_VOID(webPattern);
-            webPattern->UpdateLayoutAfterKeyboardShow(width, height, keyboard, oldWebHeight);
-        }, TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
+
+    if (!UpdateLayoutAfterKeyboard(width, height, keyboard)) {
+        return false;
+    }
     return true;
 }
 
@@ -5901,6 +5919,11 @@ void WebPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCh
         case WindowSizeChangeReason::DRAG_END:
         default:
             delegate_->SetDragResizeStartFlag(false);
+            auto frameNode = GetHost();
+            CHECK_NULL_VOID(frameNode);
+            auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
+            delegate_->SetBoundsOrResize(drawSize_, offset, false);
+            delegate_->ResizeVisibleViewport(visibleViewportSize_, false);
             dragWindowFlag_ = false;
             lastHeight_ = 0;
             lastWidth_ = 0;
@@ -5918,9 +5941,18 @@ void WebPattern::WindowDrag(int32_t width, int32_t height)
         if (!GetPendingSizeStatus() && dragWindowFlag_) {
             int64_t pre_height = height - lastHeight_;
             int64_t pre_width = width - lastWidth_;
-            delegate_->SetDragResizePreSize(pre_height, pre_width);
+            if (pre_height <= CHECK_PRE_SIZE && pre_height > 0) {
+                pre_height = 0;
+            }
+            if (pre_width <= CHECK_PRE_SIZE && pre_width > 0) {
+                pre_width = 0;
+            }
             lastHeight_ = height;
             lastWidth_ = width;
+            if (pre_width == 0 && pre_height == 0) {
+                return;
+            }
+            delegate_->SetDragResizePreSize(pre_height * ADJUST_RATIO, pre_width * ADJUST_RATIO);
         }
     }
 }
@@ -6024,7 +6056,7 @@ void WebPattern::OnActive()
     CHECK_NULL_VOID(delegate_);
     bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "WebPattern::OnActive wIsActivePolicyDisableebId:%{public}d, isActive:%{public}d, policyDisable %{public}d",
+        "WebPattern::OnActive webId:%{public}d, isActive:%{public}d, policyDisable %{public}d",
         GetWebId(), isActive_, policyDisable);
     if (isActive_) {
         return;
@@ -6842,15 +6874,19 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
         focusedAccessibilityId_ = accessibilityId;
     }
     RectT<int32_t> rect;
-    if (focusedAccessibilityId_ <= 0 || !GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
+    if (focusedAccessibilityId_ <= 0) {
         focusedAccessibilityId_ = -1;
         renderContext->ResetAccessibilityFocusRect();
         renderContext->UpdateAccessibilityFocus(false);
         return;
     }
-
-    renderContext->UpdateAccessibilityFocusRect(rect);
-    renderContext->UpdateAccessibilityFocus(true);
+    if (GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
+        renderContext->UpdateAccessibilityFocusRect(rect);
+        renderContext->UpdateAccessibilityFocus(true);
+    } else {
+        renderContext->ResetAccessibilityFocusRect();
+        renderContext->UpdateAccessibilityFocus(false);
+    }
 }
 
 void WebPattern::ClearFocusedAccessibilityId()
@@ -7071,7 +7107,7 @@ void WebPattern::OnShowAutofillPopup(
     auto menuPattern = menuContainer->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto options = menuPattern->GetOptions();
-    for (auto && option : options) {
+    for (auto &&option : options) {
         auto selectCallback = [weak = WeakClaim(this)](int32_t index) {
             auto webPattern = weak.Upgrade();
             CHECK_NULL_VOID(webPattern);
@@ -7098,6 +7134,57 @@ void WebPattern::OnShowAutofillPopup(
     overlayManager->ShowMenu(id, offset, menu);
 }
 
+void WebPattern::OnShowAutofillPopupV2(
+    const float offsetX, const float offsetY, const float height, const float width,
+    const std::vector<std::string>& menu_items)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnShowAutofillPopupV2");
+    isShowAutofillPopup_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    std::vector<OptionParam> optionParam;
+    for (auto& item : menu_items) {
+        optionParam.push_back({ item, "", nullptr });
+    }
+    NG::MenuParam menuParam;
+    menuParam.isShow = true;
+    menuParam.setShow = true;
+    menuParam.placement = Placement::BOTTOM_LEFT;
+    menuParam.isShowInSubWindow = false;
+    auto dataListNode = CreateDataListFrameNode(OffsetF(offsetX, offsetY), height, width);
+    CHECK_NULL_VOID(dataListNode);
+    auto menu = MenuView::Create(std::move(optionParam), dataListNode->GetId(), dataListNode->GetTag(),
+        MenuType::MENU, menuParam);
+    auto menuContainer = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
+    CHECK_NULL_VOID(menuContainer);
+    auto menuPattern = menuContainer->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto options = menuPattern->GetOptions();
+    for (auto &&option : options) {
+        auto selectCallback = [weak = WeakClaim(this)](int32_t index) {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            webPattern->SuggestionSelected(index);
+        };
+        auto optionNode = AceType::DynamicCast<FrameNode>(option);
+        if (optionNode) {
+            auto hub = optionNode->GetEventHub<MenuItemEventHub>();
+            auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
+            if (!hub || !optionPattern) {
+                continue;
+            }
+            hub->SetOnSelect(std::move(selectCallback));
+            optionNode->MarkModifyDone();
+        }
+    }
+    auto context = dataListNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    menu->GetOrCreateFocusHub()->SetFocusable(false);
+    overlayManager->ShowMenu(dataListNode->GetId(), OffsetF(), menu);
+}
+
 void WebPattern::OnHideAutofillPopup()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnHideAutofillPopup");
@@ -7112,7 +7199,75 @@ void WebPattern::OnHideAutofillPopup()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->DeleteMenu(id);
+    RemoveDataListNode();
     isShowAutofillPopup_ = false;
+}
+
+RefPtr<FrameNode> WebPattern::CreateDataListFrameNode(const OffsetF& offfset, const float height, const float width)
+{
+    RemoveDataListNode();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_RETURN(host, nullptr);
+    dataListNodeId_ = ElementRegister::GetInstance()->MakeUniqueId();
+    auto dataListNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, dataListNodeId_.value(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    CHECK_NULL_RETURN(dataListNode, nullptr);
+    auto dataListRenderContext = dataListNode->GetRenderContext();
+    CHECK_NULL_RETURN(dataListRenderContext, nullptr);
+    auto dataListGesture = dataListNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_RETURN(dataListGesture, nullptr);
+
+    dataListNode->SetDraggable(false);
+    dataListGesture->SetDragEvent(nullptr, { PanDirection::DOWN }, 0, Dimension(0));
+
+    if (width <= 0 || height <= 0) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "CreateDataListFrameNode get size(%{public}f, %{public}f) error",
+            width, height);
+        return nullptr;
+    }
+    dataListRenderContext->UpdatePosition(
+        OffsetT<Dimension>(Dimension(offfset.GetX()), Dimension(offfset.GetY() - height)));
+
+    SizeF dataListSize;
+    dataListSize.SetWidth(width);
+    dataListSize.SetHeight(height / pipeline->GetDipScale());
+    auto dataListProperty = dataListNode->GetLayoutProperty<ImageLayoutProperty>();
+    dataListProperty->UpdateMarginSelfIdealSize(dataListSize);
+    MeasureProperty layoutConstraint;
+    CalcSize idealSize = { CalcLength(Dimension(dataListSize.Width(), DimensionUnit::VP).ConvertToPx()),
+        CalcLength(Dimension(dataListSize.Height(), DimensionUnit::VP).ConvertToPx()) };
+    layoutConstraint.selfIdealSize = idealSize;
+    layoutConstraint.maxSize = idealSize;
+    dataListNode->UpdateLayoutConstraint(layoutConstraint);
+    host->AddChild(dataListNode);
+    dataListNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    dataListNode->MarkModifyDone();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkModifyDone();
+    return dataListNode;
+}
+
+void WebPattern::RemoveDataListNode()
+{
+    if (!dataListNodeId_.has_value()) {
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_WEB, "RemoveDataListNode");
+    auto dataListNode = FrameNode::GetFrameNode(V2::IMAGE_ETS_TAG, dataListNodeId_.value());
+    CHECK_NULL_VOID(dataListNode);
+    auto context = dataListNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->DeleteMenu(dataListNode->GetId());
+    
+    auto parent = dataListNode->GetParent();
+    CHECK_NULL_VOID(parent);
+    parent->RemoveChild(dataListNode);
+    dataListNodeId_.reset();
+    parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void WebPattern::CloseKeyboard()
@@ -7619,6 +7774,13 @@ void WebPattern::OnOptimizeParserBudgetEnabledUpdate(bool value)
 {
     if (delegate_) {
         delegate_->UpdateOptimizeParserBudgetEnabled(value);
+    }
+}
+
+void WebPattern::OnWebMediaAVSessionEnabledUpdate(bool enable)
+{
+    if (delegate_) {
+        delegate_->UpdateWebMediaAVSessionEnabled(enable);
     }
 }
 } // namespace OHOS::Ace::NG

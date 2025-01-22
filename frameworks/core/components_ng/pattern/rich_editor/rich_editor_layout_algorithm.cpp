@@ -147,14 +147,15 @@ LayoutConstraintF RichEditorLayoutAlgorithm::ReMeasureContent(
         newContentConstraint.maxSize.SetHeight(pattern->GetMaxLinesHeight());
         return newContentConstraint;
     }
-    if (pattern->GetMaxLines() == INT32_MAX || pManager_->GetHeight() <= 0.0f) {
+    if (pattern->GetMaxLines() == -1 || pManager_->GetHeight() <= 0.0f) {
         return newContentConstraint;
     }
     pattern->SetMaxLinesHeight(pManager_->GetHeight());
     newContentConstraint.maxSize.SetHeight(pattern->GetMaxLinesHeight());
-    layoutProperty->UpdateMaxLines(INT32_MAX);
+    layoutProperty->UpdateMaxLines(-1);
     TextStyle textStyle;
     ConstructTextStyles(newContentConstraint, layoutWrapper, textStyle);
+    layoutProperty->UpdateMaxLines(pattern->GetMaxLines());
     CHECK_NULL_RETURN(BuildParagraph(textStyle, layoutProperty, newContentConstraint, layoutWrapper), {});
     pManager_->SetParagraphs(GetParagraphs());
     textSize = SizeF(pManager_->GetMaxWidth(), pManager_->GetHeight());
@@ -184,9 +185,6 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
 bool RichEditorLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
     const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
 {
-    auto pattern = GetRichEditorPattern(layoutWrapper);
-    CHECK_NULL_RETURN(pattern, {});
-    layoutProperty->UpdateMaxLines(pattern->GetMaxLines());
     auto maxSize = MultipleParagraphLayoutAlgorithm::GetMaxMeasureSize(contentConstraint);
     if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(u""), layoutWrapper, maxSize.Width())) {
         return false;
@@ -327,6 +325,7 @@ void RichEditorLayoutAlgorithm::HandleEmptyParagraph(RefPtr<Paragraph> paragraph
 
 RefPtr<SpanItem> RichEditorLayoutAlgorithm::GetParagraphStyleSpanItem(const std::list<RefPtr<SpanItem>>& spanGroup)
 {
+    CHECK_NULL_RETURN(!spanGroup.empty(), nullptr);
     auto it = spanGroup.begin();
     while (it != spanGroup.end()) {
         if (!AceType::DynamicCast<PlaceholderSpanItem>(*it)) {

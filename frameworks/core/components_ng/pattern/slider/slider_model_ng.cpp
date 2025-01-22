@@ -773,6 +773,29 @@ void SliderModelNG::SetChangeValue(FrameNode* frameNode, double value, int32_t m
     pattern->SetSliderValue(value, mode);
 }
 
+bool SliderModelNG::GetEnableHapticFeedback(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, true);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_RETURN(sliderPattern, true);
+    return sliderPattern->GetEnableHapticFeedback();
+}
+
+void SliderModelNG::SetEnableHapticFeedback(bool isEnableHapticFeedback)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    SetEnableHapticFeedback(frameNode, isEnableHapticFeedback);
+}
+
+void SliderModelNG::SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto sliderPattern = frameNode->GetPattern<SliderPattern>();
+    CHECK_NULL_VOID(sliderPattern);
+    sliderPattern->SetEnableHapticFeedback(isEnableHapticFeedback);
+}
+
 Dimension SliderModelNG::GetThickness(FrameNode* frameNode)
 {
     Dimension defaultTrackThickness = Dimension(0.0f);

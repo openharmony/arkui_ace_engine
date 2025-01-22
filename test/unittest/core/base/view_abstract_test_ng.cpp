@@ -562,8 +562,8 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest010, TestSize.Level1)
     ViewAbstract::SetOnBlur(callback);
     ViewAbstract::SetFlexBasis(VALUE);
 
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     focusHub->focusable_ = true;
     focusHub->parentFocusable_ = true;
     ViewAbstract::SetVisibility(VisibleType::VISIBLE);
@@ -1692,13 +1692,16 @@ HWTEST_F(ViewAbstractTestNg, UpdatePopup, TestSize.Level1)
     rootNode->MarkDirtyNode();
     param->SetIsShow(true);
     param->SetUseCustomComponent(true);
+    param->SetShowInSubWindow(false);
     param->SetTargetId(std::to_string(targetNode->GetId()));
 
     /**
      * @tc.expected: Return expected results.
      */
     EXPECT_EQ(ViewAbstract::OpenPopup(param, contentNode), ERROR_CODE_NO_ERROR);
-    auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
+    auto context = contentNode->GetContextWithCheck();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     overlayManager->popupMap_[targetNode->GetId()].isCurrentOnShow = true;
     param->SetIsPartialUpdate(true);
@@ -1740,7 +1743,9 @@ HWTEST_F(ViewAbstractTestNg, ClosePopup, TestSize.Level1)
      * @tc.expected: Return expected results.
      */
     EXPECT_EQ(ViewAbstract::OpenPopup(param, contentNode), ERROR_CODE_NO_ERROR);
-    auto overlayManager = ViewAbstract::GetCurOverlayManager(contentNode);
+    auto context = contentNode->GetContextWithCheck();
+    ASSERT_NE(context, nullptr);
+    auto overlayManager = context->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     overlayManager->popupMap_[targetNode->GetId()].isCurrentOnShow = true;
     EXPECT_EQ(ViewAbstract::ClosePopup(contentNode), ERROR_CODE_NO_ERROR);

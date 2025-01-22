@@ -46,8 +46,14 @@ public:
         hoverPoint_ = hoverPoint;
     }
 
+    void SetIsSingle(bool isSingle)
+    {
+        isSingle_ = isSingle;
+    }
+
 private:
     bool isHoverOrPress_ = false;
+    bool isSingle_ = false;
     PointF hoverPoint_;
 };
 } // namespace OHOS::Ace::NG

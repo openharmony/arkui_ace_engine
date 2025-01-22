@@ -17,8 +17,9 @@
 
 #include "input_manager.h"
 
-#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/ace_extra_input_data.h"
+#include "adapter/ohos/entrance/ace_container.h"
+#include "adapter/ohos/entrance/tsa_advanced_feature.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -73,6 +74,9 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem)
     touchPoint.tiltY = pointerItem.GetTiltY();
     touchPoint.sourceTool = GetSourceTool(pointerItem.GetToolType());
     touchPoint.originalId = pointerItem.GetOriginPointerId();
+    touchPoint.width = pointerItem.GetWidth();
+    touchPoint.height = pointerItem.GetHeight();
+    touchPoint.operatingHand = pointerItem.GetBlobId() & (OPERATING_HAND_LEFT | OPERATING_HAND_RIGHT);
     return touchPoint;
 }
 
@@ -167,7 +171,8 @@ TouchEvent ConvertTouchEventFromTouchPoint(TouchPoint touchPoint)
         .SetSourceType(SourceType::NONE)
         .SetSourceTool(touchPoint.sourceTool)
         .SetOriginalId(touchPoint.originalId)
-        .SetSourceType(SourceType::NONE);
+        .SetSourceType(SourceType::NONE)
+        .SetOperatingHand(touchPoint.operatingHand);
     return event;
 }
 
@@ -290,27 +295,21 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
     }
 }
 
-void GetMouseEventButton(int32_t button, MouseEvent& events)
+MouseButton GetMouseEventButton(int32_t button)
 {
     switch (button) {
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_LEFT:
-            events.button = MouseButton::LEFT_BUTTON;
-            break;
+            return MouseButton::LEFT_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_RIGHT:
-            events.button = MouseButton::RIGHT_BUTTON;
-            break;
+            return MouseButton::RIGHT_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_MIDDLE:
-            events.button = MouseButton::MIDDLE_BUTTON;
-            break;
+            return MouseButton::MIDDLE_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_SIDE:
-            events.button = MouseButton::BACK_BUTTON;
-            break;
+            return MouseButton::BACK_BUTTON;
         case OHOS::MMI::PointerEvent::MOUSE_BUTTON_EXTRA:
-            events.button = MouseButton::FORWARD_BUTTON;
-            break;
+            return MouseButton::FORWARD_BUTTON;
         default:
-            events.button = MouseButton::NONE_BUTTON;
-            break;
+            return MouseButton::NONE_BUTTON;
     }
 }
 
@@ -329,10 +328,12 @@ void ConvertMouseEvent(
     events.y = item.GetWindowY();
     events.screenX = item.GetDisplayX();
     events.screenY = item.GetDisplayY();
+    events.rawDeltaX = item.GetRawDx();
+    events.rawDeltaY = item.GetRawDy();
     int32_t orgAction = pointerEvent->GetPointerAction();
     GetMouseEventAction(orgAction, events, isScenceBoardWindow);
     int32_t orgButton = pointerEvent->GetButtonId();
-    GetMouseEventButton(orgButton, events);
+    events.button = GetMouseEventButton(orgButton);
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, events);
     events.isPrivacyMode = pointerEvent->HasFlag(OHOS::MMI::InputEvent::EVENT_FLAG_PRIVACY_MODE);
@@ -353,8 +354,10 @@ void ConvertMouseEvent(
     }
     events.pressedButtons = static_cast<int32_t>(pressedButtons);
 
-    std::chrono::microseconds microseconds(pointerEvent->GetActionTime());
-    events.time = TimeStamp(microseconds);
+    for (const auto& pressedButton : pressedSet) {
+        events.pressedButtonsArray.emplace_back(GetMouseEventButton(pressedButton));
+    }
+    events.time = TimeStamp(std::chrono::microseconds(pointerEvent->GetActionTime()));
     events.pointerEvent = pointerEvent;
     events.sourceTool = GetSourceTool(item.GetToolType());
     UpdateMouseEventForPen(item, events);

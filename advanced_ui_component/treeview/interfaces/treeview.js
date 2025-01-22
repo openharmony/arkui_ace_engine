@@ -277,6 +277,15 @@ let NodeInfo = class NodeInfo {
             this.nodeItemView.imageCollapse = undefined;
         }
     }
+    addImageExpand(a2) {
+        if (a2) {
+            this.nodeItemView.imageCollapse =
+                CollapseImageNodeFlyweightFactory.getCollapseImageNodeByType(CollapseImageType.ARROW_DOWN);
+        }
+        else {
+            this.nodeItemView.imageCollapse = undefined;
+        }
+    }
     setFontColor(g34) {
         this.fontColor = g34;
     }
@@ -1325,7 +1334,7 @@ export class TreeView extends ViewPU {
                                         index: this.listNodeDataSource.findIndex(y25.getNodeCurrentNodeId()),
                                         listTreeViewMenu: this.listTreeViewMenu,
                                         callBackClick: () => this.clickInner(y25),
-                                    }, undefined, f26, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1287, col: 13 });
+                                    }, undefined, f26, () => { }, { page: 'library/src/main/ets/components/MainPage.ets', line: 1301, col: 13 });
                                     ViewPU.create(h26);
                                     let z1 = () => {
                                         return {
@@ -1433,8 +1442,8 @@ export class TreeController {
             return this;
         }
         else {
-            for (let e25 = 0; e25 < this.listNodeDataSource.listNode.length; e25++) {
-                if (b25.currentNodeId === this.listNodeDataSource.listNode[e25].getNodeCurrentNodeId()) {
+            for (let e25 = 0; e25 < this.nodeIdList.length; e25++) {
+                if (b25.currentNodeId === this.nodeIdList[e25].valueOf()) {
                     throw new Error('ListTreeNode[addNode]: ' +
                         'The parameters of the new node cannot contain the same currentNodeId.');
                     return this;
@@ -3086,11 +3095,11 @@ class ListNodeDataSource extends BasicDataSource {
         let c11 = this.nodeIdAndNodeIndexMap.get(a11);
         if (b11.children.length > 0) {
             if (this.nodeIdAndNodeIndexMap.has(a11)) {
-                this.listNode[c11]?.addImageCollapse(true);
+                this.listNode[c11]?.addImageExpand(true);
             }
         }
         else {
-            this.listNode[c11]?.addImageCollapse(false);
+            this.listNode[c11]?.addImageExpand(false);
         }
     }
     freeNodeMemory(s10, t10) {
@@ -3577,9 +3586,7 @@ export class TreeViewInner extends ViewPU {
         return a8;
     }
     getLeftIconColor() {
-        if (this.item.getIsModify()
-            || this.item.getNodeItem().imageCollapse?.collapseSource === ARROW_RIGHT_WITHE
-            || this.item.getNodeItem().imageCollapse?.collapseSource === ARROW_DOWN_WITHE) {
+        if (this.item.getIsModify() || this.item.getIsHighLight()) {
             return { 'id': -1, 'type': 10001, params: ['sys.color.icon_on_primary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
         }
         else if (this.item.getIsSelected()) {
@@ -3587,6 +3594,17 @@ export class TreeViewInner extends ViewPU {
         }
         else {
             return this.treeViewTheme.leftIconColor;
+        }
+    }
+    getPrimaryTextColor() {
+        if (this.item.getIsModify() || this.item.getIsHighLight()) {
+            return { 'id': -1, 'type': 10001, params: ['sys.color.ohos_id_color_primary_contrary'], 'bundleName': '__harDefaultBundleName__', 'moduleName': '__harDefaultModuleName__' };
+        }
+        else if (this.item.getIsSelected()) {
+            return this.treeViewTheme.primaryTitleActiveFontColor;
+        }
+        else {
+            return this.treeViewTheme.primaryTitleFontColor;
         }
     }
     checkInvalidPattern(z7) {
@@ -3990,8 +4008,7 @@ export class TreeViewInner extends ViewPU {
                                     Text.maxFontScale(this.decideFontScale());
                                     Text.maxLines(1);
                                     Text.fontSize(this.item.getNodeItem().mainTitleNode?.size);
-                                    Text.fontColor(this.item.getIsSelected() ?
-                                    this.treeViewTheme.primaryTitleActiveFontColor : this.treeViewTheme.primaryTitleFontColor);
+                                    Text.fontColor(this.getPrimaryTextColor());
                                     Text.margin({
                                         end: getLengthMetricsByResourceOrNumber(this.item.getNodeItem()
                                             .mainTitleNode?.itemRightMargin)

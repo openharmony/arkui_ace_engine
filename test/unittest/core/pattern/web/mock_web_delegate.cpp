@@ -1081,7 +1081,7 @@ bool WebDelegate::ExecuteAction(
 bool WebDelegate::GetAccessibilityNodeRectById(
     int64_t accessibilityId, int32_t* width, int32_t* height, int32_t* offsetX, int32_t* offsetY)
 {
-    return false;
+    return g_setReturnStatus == STATUS_TRUE;
 }
 void WebDelegate::SetAccessibilityState(bool state, bool isDelayed) {}
 std::shared_ptr<OHOS::NWeb::NWebAccessibilityNodeInfo> WebDelegate::GetFocusedAccessibilityNodeInfo(
@@ -1154,6 +1154,10 @@ Offset WebDelegate::GetPosition(const std::string& embedId)
 void WebDelegate::OnShowAutofillPopup(
     const float offsetX, const float offsetY, const std::vector<std::string>& menu_items)
 {}
+void WebDelegate::OnShowAutofillPopupV2(
+    const float offsetX, const float offsetY, const float height, const float width,
+    const std::vector<std::string>& menu_items)
+{}
 void WebDelegate::SuggestionSelected(int32_t index) {}
 void WebDelegate::OnHideAutofillPopup() {}
 void WebDelegate::OnAreaChange(const OHOS::Ace::Rect& area) {}
@@ -1208,4 +1212,5 @@ bool WebDelegate::IsActivePolicyDisable()
 }
 void WebDelegate::SetDragResizeStartFlag(bool isDragResizeStart) {}
 void WebDelegate::SetDragResizePreSize(const double& pre_height, const double& pre_width) {}
+void WebDelegate::UpdateWebMediaAVSessionEnabled(bool isEnabled) {}
 } // namespace OHOS::Ace

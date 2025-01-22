@@ -265,7 +265,10 @@ void RosenRenderContext::OnNodeAppear(bool recursive)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // restore eventHub state when node appears.
-    host->GetEventHub<EventHub>()->RestoreEnabled();
+    auto eventHub = host->GetEventHubOnly<EventHub>();
+    if (eventHub) {
+        eventHub->RestoreEnabled();
+    }
     if (recursive && !propTransitionAppearing_ && !transitionEffect_) {
         // recursive and has no transition, no need to handle transition.
         return;
@@ -3037,7 +3040,7 @@ OffsetF RosenRenderContext::GetRectOffsetWithPositionEdges(
     std::unique_ptr<MarginProperty> margin(
         marginOri ? std::make_unique<MarginProperty>(*marginOri) : std::make_unique<MarginProperty>());
 
-    auto parentNode = frameNode->GetAncestorNodeOfFrame(false);
+    auto parentNode = frameNode->GetAncestorNodeOfFrame(true);
     CHECK_NULL_RETURN(parentNode, OffsetF {});
     auto parentLayoutProperty = parentNode->GetLayoutProperty();
     CHECK_NULL_RETURN(parentLayoutProperty, OffsetF {});
@@ -3425,7 +3428,7 @@ void RosenRenderContext::GetPaddingOfFirstFrameNodeParent(Dimension& parentPaddi
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    auto frameNodeParent = frameNode->GetAncestorNodeOfFrame(false);
+    auto frameNodeParent = frameNode->GetAncestorNodeOfFrame(true);
     CHECK_NULL_VOID(frameNodeParent);
     auto layoutProperty = frameNodeParent->GetLayoutProperty();
     if (layoutProperty && layoutProperty->GetPaddingProperty()) {
@@ -3521,7 +3524,7 @@ void RosenRenderContext::OnZIndexUpdate(int32_t value)
     rsNode_->SetPositionZ(static_cast<float>(value));
     auto uiNode = GetHost();
     CHECK_NULL_VOID(uiNode);
-    auto parent = uiNode->GetAncestorNodeOfFrame(false);
+    auto parent = uiNode->GetAncestorNodeOfFrame(true);
     CHECK_NULL_VOID(parent);
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();

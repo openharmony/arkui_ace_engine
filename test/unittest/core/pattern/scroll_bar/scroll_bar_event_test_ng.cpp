@@ -92,7 +92,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
     float delta = SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
@@ -102,7 +102,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      */
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
     float expectOffset = delta * controlDistance / scrollableDistance;
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset); // 50.f
@@ -112,7 +112,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      * @tc.expected: Scroll down
      */
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta * 2);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset * 2); // 100.f
 
@@ -122,7 +122,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      */
     info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset); // 50.f
 
@@ -130,7 +130,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag001, TestSize.Level1)
      * @tc.steps: step6. HandleDragEnd, drag end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), expectOffset);
 }
@@ -165,7 +165,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
     float delta = -SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     float expectBarPosition = -delta / controlDistance * scrollableDistance;
     EXPECT_EQ(pattern_->GetCurrentPosition(), expectBarPosition); // 512.f
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), -delta);
@@ -175,7 +175,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
      * @tc.expected: Scroll down
      */
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance); // 640.f
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance);
 
@@ -185,7 +185,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
      */
     info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance - expectBarPosition); // 138
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance + delta);              // 40.f
 
@@ -193,7 +193,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag002, TestSize.Level1)
      * @tc.steps: step5. HandleDragEnd, mouse wheel end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance - expectBarPosition); // 138
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), controlDistance + delta);              // 40.f
 }
@@ -233,7 +233,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag003, TestSize.Level1)
     float delta = SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(-delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
     EXPECT_TRUE(IsEqual(GetChildOffset(frameNode_, 0), OffsetF(delta, 0.f)));
 
@@ -242,7 +242,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag003, TestSize.Level1)
      * @tc.expected: Scroll left
      */
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
 
     /**
@@ -251,14 +251,14 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag003, TestSize.Level1)
      */
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
 
     /**
      * @tc.steps: step5. HandleDragEnd, drag end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), delta);
 }
 
@@ -292,7 +292,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag004, TestSize.Level1)
     float delta = -SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
@@ -300,7 +300,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag004, TestSize.Level1)
      * @tc.steps: step3. HandleDragEnd, mouse wheel end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0.f);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 }
@@ -334,7 +334,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag005, TestSize.Level1)
     float delta = SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
@@ -342,7 +342,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag005, TestSize.Level1)
      * @tc.steps: step3. HandleDragEnd, mouse wheel end
      */
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0);
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 }
@@ -370,11 +370,11 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag006, TestSize.Level1)
     float delta = SCROLL_BAR_CHILD_HEIGHT;
     info.SetMainDelta(delta);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     info.SetMainVelocity(1200.f);
     HandleDragEnd(info);
     pattern_->frictionMotion_->NotifyListener(0.f);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->frictionController_->IsRunning());
 
     /**
@@ -383,9 +383,9 @@ HWTEST_F(ScrollBarEventTestNg, HandleDrag006, TestSize.Level1)
      */
     HandleDragStart(info);
     HandleDragUpdate(info);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     HandleDragEnd(info);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_TRUE(pattern_->frictionController_->IsRunning());
 }
 
@@ -533,12 +533,12 @@ HWTEST_F(ScrollBarEventTestNg, ScrollScrollBar001, TestSize.Level1)
 
     auto scrollCallback = pattern_->scrollBar_->GetScrollPositionCallback();
     scrollCallback(-100.f, SCROLL_FROM_BAR);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 100.f);
 
     auto scrollEnd = pattern_->scrollBar_->GetScrollEndCallback();
     scrollEnd();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
 
     Container::Current()->SetApiTargetVersion(apiTargetVersion);
 }
@@ -628,7 +628,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleClickEvent001, TestSize.Level1)
     mouseInfo.SetLocalLocation(Offset());
     HandleMouseEvent(mouseInfo);
     HandleClickEvent();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
     /**
@@ -638,7 +638,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleClickEvent001, TestSize.Level1)
     mouseInfo.SetLocalLocation(Offset(0, SCROLL_BAR_CHILD_HEIGHT + 1.f));
     HandleMouseEvent(mouseInfo);
     HandleClickEvent();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(scrollPattern_->GetTotalOffset(), 0.f);
 
     /**
@@ -647,13 +647,13 @@ HWTEST_F(ScrollBarEventTestNg, HandleClickEvent001, TestSize.Level1)
      */
     // scroll down
     pattern_->UpdateCurrentOffset(1.f, SCROLL_FROM_BAR);
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), 1.f);
     // click above scrollBar
     mouseInfo.SetLocalLocation(Offset());
     HandleMouseEvent(mouseInfo);
     HandleClickEvent();
-    FlushLayoutTask(stackNode_);
+    FlushUITasks();
     EXPECT_GT(scrollPattern_->GetTotalOffset(), 0.f);
     EXPECT_LT(scrollPattern_->GetTotalOffset(), 1.f);
 }
@@ -892,7 +892,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDragEnd001, TestSize.Level1)
     info.SetMainVelocity(-1000.f);
     HandleDragEnd(info);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_LE(pattern_->GetCurrentPosition(), 60.f);
 
     /**
@@ -902,7 +902,7 @@ HWTEST_F(ScrollBarEventTestNg, HandleDragEnd001, TestSize.Level1)
     info.SetMainVelocity(1000.f);
     HandleDragEnd(info);
     MockAnimationManager::GetInstance().Tick();
-    FlushLayoutTask(stackNode_, true);
+    FlushUITasks();
     EXPECT_EQ(pattern_->GetCurrentPosition(), scrollableDistance);
 }
 } // namespace OHOS::Ace::NG

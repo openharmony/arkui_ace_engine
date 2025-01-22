@@ -138,22 +138,22 @@ public:
 
     void SetCallback(OH_NativeXComponent_Callback* callback)
     {
-        callback_ = callback;
+        callback_ = *callback;
     }
 
     const OH_NativeXComponent_Callback* GetCallback() const
     {
-        return callback_;
+        return &callback_;
     }
 
     void SetMouseEventCallback(OH_NativeXComponent_MouseEvent_Callback* callback)
     {
-        mouseEventCallback_ = callback;
+        mouseEventCallback_ = *callback;
     }
 
     const OH_NativeXComponent_MouseEvent_Callback* GetMouseEventCallback()
     {
-        return mouseEventCallback_;
+        return &mouseEventCallback_;
     }
 
     NativeXComponent_Surface_Callback GetSurfaceShowCallback() const
@@ -456,8 +456,8 @@ private:
     OH_NativeXComponent_MouseEvent mouseEvent_ { .x = 0, .y = 0 };
     OH_NativeXComponent_KeyEvent keyEvent_;
     std::shared_ptr<ArkUI_AccessibilityProvider> accessbilityProvider_;
-    OH_NativeXComponent_Callback* callback_ = nullptr;
-    OH_NativeXComponent_MouseEvent_Callback* mouseEventCallback_ = nullptr;
+    OH_NativeXComponent_Callback callback_ {};
+    OH_NativeXComponent_MouseEvent_Callback mouseEventCallback_ {};
     NativeXComponent_Surface_Callback surfaceShowCallback_ = nullptr;
     NativeXComponent_Surface_Callback surfaceHideCallback_ = nullptr;
     NativeXComponent_Callback focusEventCallback_ = nullptr;

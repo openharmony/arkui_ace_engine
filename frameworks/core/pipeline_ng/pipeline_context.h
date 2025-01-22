@@ -1159,7 +1159,8 @@ private:
 
     FrameInfo* GetCurrentFrameInfo(uint64_t recvTime, uint64_t timeStamp);
 
-    void DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node);
+    void DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node,
+        SerializedGesture& etsSerializedGesture);
 
     // only used for static form.
     void UpdateFormLinkInfos();
@@ -1197,6 +1198,8 @@ private:
 
     uint64_t AdjustVsyncTimeStamp(uint64_t nanoTimestamp);
     bool FlushModifierAnimation(uint64_t nanoTimestamp);
+    
+    void FlushAnimationDirtysWhenExist(const AnimationOption& option);
 
     std::unique_ptr<UITaskScheduler> taskScheduler_ = std::make_unique<UITaskScheduler>();
 
@@ -1260,7 +1263,6 @@ private:
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
     RefPtr<PrivacySensitiveManager> privacySensitiveManager_ = MakeRefPtr<PrivacySensitiveManager>();
     Rect displayAvailableRect_;
-    std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     WeakPtr<FrameNode> dirtyRequestFocusNode_;

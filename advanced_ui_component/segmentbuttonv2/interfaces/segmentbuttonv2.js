@@ -38,10 +38,11 @@ if (!('finalizeConstruction' in ViewPU.prototype)) {
 if (PUV2ViewBase.contextStack === undefined) {
   Reflect.set(PUV2ViewBase, 'contextStack', []);
 }
-import curves from '@ohos.curves';
-import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
-import i18n from '@ohos.i18n';
-import util from '@ohos.util';
+const curves = requireNativeModule('ohos.curves');
+const LengthMetrics = requireNapi('arkui.node').LengthMetrics;
+const LengthUnit = requireNapi('arkui.node').LengthUnit;
+const i18n = requireNapi('i18n');
+const util = requireNapi('util');
 const t = 1;
 const u = 2;
 const a1 = 0;

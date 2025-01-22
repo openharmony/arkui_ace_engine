@@ -344,6 +344,8 @@ public:
         RefPtr<NG::CustomAnimatableArithmetic>& value) override {};
     void UpdateSafeAreaExpandOpts(const NG::SafeAreaExpandOpts& opts) override {};
     void SetDragEventStrictReportingEnabled(bool dragEventStrictReportingEnabled) override {};
+    int32_t CancelDataLoading(const std::string& key) override { return 0; };
+    void SetDisableDataPrefetch(bool disableDataPrefetch) override {};
     void SetBackgroundImageResizableSlice(const ImageResizableSlice& Slice) override {};
     // global light
     void SetLightPosition(

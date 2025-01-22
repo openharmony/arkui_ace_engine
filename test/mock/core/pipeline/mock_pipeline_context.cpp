@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "test/mock/base/mock_task_executor.h"
 
 namespace OHOS::Ace {
 
@@ -146,6 +147,7 @@ void MockPipelineContext::SetUp()
     pipeline_->windowManager_ = AceType::MakeRefPtr<WindowManager>();
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
+    pipeline_->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     pipeline_->SetupRootElement();
     windowRect_ = { 0., 0., NG::DISPLAY_WIDTH, NG::DISPLAY_HEIGHT };
 }
@@ -271,6 +273,12 @@ void PipelineContext::SetupRootElement()
         V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StagePattern>());
     rootNode_->AddChild(stageNode);
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
+    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
+        auto frontend = weakFrontend.Upgrade();
+        CHECK_NULL_RETURN(frontend, "");
+        return frontend->GetPagePathByUrl(url);
+    };
+    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
@@ -304,6 +312,12 @@ void PipelineContext::SetupSubRootElement()
     if (!stageManager_) {
         stageManager_ = MakeRefPtr<StageManager>(nullptr);
     }
+    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
+        auto frontend = weakFrontend.Upgrade();
+        CHECK_NULL_RETURN(frontend, "");
+        return frontend->GetPagePathByUrl(url);
+    };
+    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
@@ -999,6 +1013,10 @@ bool PipelineContext::GetContainerModalButtonsRect(RectF& containerModal, RectF&
 
 // pipeline_base ===============================================================
 namespace OHOS::Ace {
+namespace {
+const int32_t IGNORE_POSITION_TRANSITION_SWITCH = -990;
+} // namespace
+
 class ManagerInterface : public AceType {
     DECLARE_ACE_TYPE(ManagerInterface, AceType);
 };
@@ -1114,6 +1132,9 @@ void PipelineBase::PostSyncEvent(const TaskExecutor::Task& task, const std::stri
 
 RefPtr<AccessibilityManager> PipelineBase::GetAccessibilityManager() const
 {
+    if (instanceId_ == IGNORE_POSITION_TRANSITION_SWITCH) {
+        return nullptr;
+    }
     return AceType::MakeRefPtr<MockAccessibilityManager>();
 }
 
@@ -1214,7 +1235,7 @@ void NG::PipelineContext::FlushUITaskWithSingleDirtyNode(const RefPtr<NG::FrameN
         node->Measure(std::nullopt);
         node->Layout();
     } else {
-        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame(false);
+        auto ancestorNodeOfFrame = node->GetAncestorNodeOfFrame(true);
         node->Measure(layoutConstraint);
         node->Layout();
     }

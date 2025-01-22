@@ -19,6 +19,7 @@
 #include "test/unittest/core/pattern/scrollable/mock_scrollable.h"
 
 #include "frameworks/core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2002,5 +2003,41 @@ HWTEST_F(GestureEventHubTestNg, ExecuteDropAnimation, TestSize.Level1)
     dragEvent->SetDropAnimation(std::move(dropAnimationFun));
     dragEvent->ExecuteDropAnimation();
     EXPECT_TRUE(isExecuted);
+}
+
+/**
+ * @tc.name: StartVibratorByDrag001
+ * @tc.desc: Test StartVibratorByDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, StartVibratorByDrag001, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::WEB_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    NG::DragPreviewOption previewOption;
+    previewOption.enableHapticFeedback = true;
+    frameNode->SetDragPreviewOptions(previewOption, false);
+    DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
+    guestureEventHub->StartVibratorByDrag(frameNode);
+    bool dragFilter = DragDropGlobalController::GetInstance().IsDragFilterShowing();
+    EXPECT_FALSE(dragFilter);
+}
+
+/**
+ * @tc.name: StartVibratorByDrag002
+ * @tc.desc: Test StartVibratorByDrag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, StartVibratorByDrag002, TestSize.Level1)
+{
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::RICH_EDITOR_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    NG::DragPreviewOption previewOption;
+    previewOption.enableHapticFeedback = true;
+    frameNode->SetDragPreviewOptions(previewOption, false);
+    DragDropGlobalController::GetInstance().UpdateDragFilterShowingStatus(true);
+    guestureEventHub->StartVibratorByDrag(frameNode);
+    bool dragFilter = DragDropGlobalController::GetInstance().IsDragFilterShowing();
+    EXPECT_FALSE(dragFilter);
 }
 } // namespace OHOS::Ace::NG

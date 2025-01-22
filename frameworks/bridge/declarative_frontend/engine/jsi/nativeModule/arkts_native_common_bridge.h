@@ -286,17 +286,21 @@ public:
     static void SetGestureAllowedTypes(
         ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t argNumber, ArkUIGesture* gesture);
     static void GetTapGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers,
-        int32_t& count, double& distanceThreshold, uint32_t argNumber);
+        int32_t& count, double& distanceThreshold, bool& limitFingerCount, uint32_t argNumber);
     static void GetLongPressGestureValue(
-        ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, bool& repeat, int32_t& duration, uint32_t argNumber);
+        ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, bool& repeat, int32_t& duration,
+        bool& limitFingerCount, uint32_t argNumber);
     static void GetPanGestureValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction,
-        double& distance, uint32_t argNumber);
+        double& distance, bool& limitFingerCount, uint32_t argNumber);
     static void GetSwipeGestureValue(
-        ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction, double& speed, uint32_t argNumber);
+        ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, int32_t& direction, double& speed,
+        bool& limitFingerCount, uint32_t argNumber);
     static void GetPinchGestureValue(
-        ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, double& distance, uint32_t argNumber);
+        ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, double& distance,
+        bool& limitFingerCount, uint32_t argNumber);
     static void GetRotationGestureValue(
-        ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, double& angle, uint32_t argNumber);
+        ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& fingers, double& angle, bool& limitFingerCount,
+        uint32_t argNumber);
     static void GetGestureModeValue(ArkUIRuntimeCallInfo* runtimeCallInfo, int32_t& mode, uint32_t argNumber);
     static void SetOnGestureEvent(ArkUIRuntimeCallInfo* runtimeCallInfo, const GestureEventAction& action,
         uint32_t argNumber, ArkUIGesture* gesture);
@@ -389,9 +393,9 @@ public:
     static Local<panda::ObjectRef> CreateFocusAxisEventInfo(EcmaVM* vm, NG::FocusAxisEventInfo& info);
     static ArkUINativeModuleValue SetOnFocusAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnFocusAxisEvent(ArkUIRuntimeCallInfo* runtimeCallInfo);
-
     static void SetEnableHapticFeedback(ArkUIDragInteractionOptions &interactionOptions,
         ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue RegisterFrameNodeDestructorCallback(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

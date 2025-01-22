@@ -16,6 +16,7 @@
 
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_constants.h"
+#include "core/components/theme/app_theme.h"
 #include "core/event/focus_axis_event.h"
 #include "core/event/key_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -178,8 +179,10 @@ bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension int
         return true;
     }
     // Handle on click
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) &&
-        !pipeline->GetIsFocusActive()) {
+    auto appTheme = pipeline->GetTheme<AppTheme>();
+    CHECK_NULL_RETURN(appTheme, false);
+    if (!pipeline->GetIsFocusActive() && (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN) ||
+                                             !appTheme->NeedFocusHandleClick())) {
         return false;
     }
     if (intension == FocusIntension::SELECT && !IsTabStop()) {
@@ -189,8 +192,9 @@ bool FocusEventHandler::HandleKeyEvent(const KeyEvent& event, FocusIntension int
     if (intension == FocusIntension::SPACE) {
         ret = OnClick(event);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnClick: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
-            GetFrameName().c_str(), GetFrameId(), event.code, event.action, ret);
+            "OnClick: Node %{public}s/%{public}d handle KeyEvent("
+            SEC_PLD(%{private}d) ", %{public}d) return: %{public}d",
+            GetFrameName().c_str(), GetFrameId(), SEC_PARAM(event.code), event.action, ret);
     }
     return ret;
 }
@@ -317,17 +321,19 @@ bool FocusEventHandler::OnKeyEventNodeInternal(const KeyEvent& keyEvent)
     if (isNodeNeedKey_) {
         retInternal =  ProcessOnKeyEventInternal(keyEvent);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) "
+            "OnKeyEventInteral Node process self: Node %{public}s/%{public}d"
+            "handle KeyEvent(" SEC_PLD(%{private}d) ", %{public}d) "
             "return: %{public}d",
-            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
+            GetFrameName().c_str(), GetFrameId(), SEC_PARAM(keyEvent.code), keyEvent.action, retInternal);
         return retInternal;
     }
     if (!isBypassInner && !onKeyEventsInternal_.empty()) {
         retInternal = ProcessOnKeyEventInternal(keyEvent);
         TAG_LOGI(AceLogTag::ACE_FOCUS,
-            "OnKeyEventInteral: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) "
+            "OnKeyEventInteral: Node %{public}s/%{public}d"
+            "handle KeyEvent(" SEC_PLD(%{private}d) ", %{public}d) "
             "return: %{public}d",
-            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retInternal);
+            GetFrameName().c_str(), GetFrameId(), SEC_PARAM(keyEvent.code), keyEvent.action, retInternal);
     }
     return retInternal;
 }
@@ -359,8 +365,9 @@ bool FocusEventHandler::OnKeyEventNodeUser(KeyEventInfo& info, const KeyEvent& k
 void FocusEventHandler::PrintOnKeyEventUserInfo(const KeyEvent& keyEvent, bool retCallback)
 {
     TAG_LOGI(AceLogTag::ACE_FOCUS,
-        "OnKeyEventUser: Node %{public}s/%{public}d handle KeyEvent(%{private}d, %{public}d) return: %{public}d",
-        GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, retCallback);
+        "OnKeyEventUser: Node %{public}s/%{public}d"
+        "handle KeyEvent(" SEC_PLD(%{private}d) ", %{public}d) return: %{public}d",
+        GetFrameName().c_str(), GetFrameId(), SEC_PARAM(keyEvent.code), keyEvent.action, retCallback);
 }
 
 bool FocusEventHandler::ProcessOnKeyEventInternal(const KeyEvent& event)

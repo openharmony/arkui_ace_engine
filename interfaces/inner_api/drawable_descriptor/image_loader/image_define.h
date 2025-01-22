@@ -92,8 +92,9 @@ struct PaintConfig {
 
 class SourceInfo {
 public:
-    SourceInfo(const std::string& uri, const std::string& bundleName, const std::string& moduleName) :
-        uri_(uri), bundleName_(bundleName), moduleName_(moduleName) {}
+    SourceInfo(const std::string& uri, const std::string& bundleName, const std::string& moduleName)
+        : uri_(uri), bundleName_(bundleName), moduleName_(moduleName)
+    {}
     const std::string& GetSrc() const
     {
         return uri_;

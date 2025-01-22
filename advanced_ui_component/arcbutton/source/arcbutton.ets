@@ -24,9 +24,9 @@ export enum ArcButtonPosition {
 
 export enum ArcButtonStyleMode {
   EMPHASIZED_LIGHT = 0,
-  EMPHASIZED_DEEP = 1,
+  EMPHASIZED_DARK = 1,
   NORMAL_LIGHT = 2,
-  NORMAL_DEEP = 3,
+  NORMAL_DARK = 3,
   CUSTOM = 4
 }
 
@@ -41,77 +41,62 @@ interface CommonArcButtonOptions {
    * 弧形按钮位置类型属性,默认为下弧形按钮
    */
   position?: ArcButtonPosition
-
   /**
    *强调、普通01、普通02、警告、自定义  默认是强调状态
    */
   styleMode?: ArcButtonStyleMode
-
   /**
    *初始态、按压、不可用形态,默认为初始态
    */
   status?: ArcButtonStatus
-
   /**
    *文字
    */
   label?: ResourceStr
-
   /**
    *背景模糊能力
    */
   backgroundBlurStyle?: BlurStyle
-
   /**
    *按钮背景色
    */
   backgroundColor?: ColorMetrics
-
   /**
    *按钮阴影色
    */
   shadowColor?: ColorMetrics
-
   /**
    *打开关闭弧形按钮阴影
    */
   shadowEnabled?: boolean
-
   /**
    *字体大小
    */
   fontSize?: LengthMetrics
-
   /**
    *字体颜色
    */
   fontColor?: ColorMetrics
-
   /**
    *字体按压颜色
    */
   pressedFontColor?: ColorMetrics
-
   /**
    *文字样式
    */
   fontStyle?: FontStyle
-
   /**
    *文字字体族
    */
   fontFamily?: string | Resource
-
   /**
    *文字到边框的距离
    */
   fontMargin?: LocalizedMargin
-
   /**
    * TouchEvent
    */
   onTouch?: Callback<TouchEvent>
-
   /**
    * ClickEvent
    */
@@ -146,21 +131,21 @@ class Constants {
   public static readonly TEXT_HORIZONTAL_MARGIN = 24;
   public static readonly TEXT_MARGIN_TOP = 10;
   public static readonly TEXT_MARGIN_BOTTOM = 16;
-  public static readonly EMPHASIZED_NORMAL_BTN_COLOR = '#1F71FF';
+  public static readonly EMPHASIZED_NORMAL_BTN_COLOR = $r('sys.color.comp_background_tertiary');
   public static readonly EMPHASIZED_TEXT_COLOR = '#FFFFFF';
   public static readonly EMPHASIZED_PRESSED_BTN_COLOR = '#357FFF';
   public static readonly EMPHASIZED_DISABLE_BTN_COLOR = '#1F71FF';
   public static readonly EMPHASIZED_DISABLE_TEXT_COLOR = '#FFFFFF';
-  public static readonly NORMAL01_NORMAL_BTN_COLOR = '#17273F';
-  public static readonly NORMAL01_TEXT_COLOR = '#5EA1FF';
-  public static readonly NORMAL01_PRESSED_BTN_COLOR = '#2E3D52';
-  public static readonly NORMAL01_DISABLE_BTN_COLOR = '#17273F';
-  public static readonly NORMAL01_DISABLE_TEXT_COLOR = '#995ea1ff';
-  public static readonly NORMAL02_NORMAL_BTN_COLOR = '#252525';
-  public static readonly NORMAL02_TEXT_COLOR = '#5EA1FF';
-  public static readonly NORMAL02_PRESSED_BTN_COLOR = '#3B3B3B';
-  public static readonly NORMAL02_DISABLE_BTN_COLOR = '#262626';
-  public static readonly NORMAL02_DISABLE_TEXT_COLOR = '#995ea1ff';
+  public static readonly NORMAL_LIGHT_NORMAL_BTN_COLOR = '#17273F';
+  public static readonly NORMAL_LIGHT_TEXT_COLOR = '#5EA1FF';
+  public static readonly NORMAL_LIGHT_PRESSED_BTN_COLOR = '#2E3D52';
+  public static readonly NORMAL_LIGHT_DISABLE_BTN_COLOR = '#17273F';
+  public static readonly NORMAL_LIGHT_DISABLE_TEXT_COLOR = '#995ea1ff';
+  public static readonly NORMAL_DARK_NORMAL_BTN_COLOR = '#252525';
+  public static readonly NORMAL_DARK_TEXT_COLOR = '#5EA1FF';
+  public static readonly NORMAL_DARK_PRESSED_BTN_COLOR = '#3B3B3B';
+  public static readonly NORMAL_DARK_DISABLE_BTN_COLOR = '#262626';
+  public static readonly NORMAL_DARK_DISABLE_TEXT_COLOR = '#995ea1ff';
   public static readonly EMPHASIZEWARN_NORMAL_BTN_COLOR = '#BF2629';
   public static readonly EMPHASIZEWARN_TEXT_COLOR = '#FFFFFF';
   public static readonly EMPHASIZEWARN_PRESSED_BTN_COLOR = '#C53C3E';
@@ -174,6 +159,7 @@ interface ArcButtonThemeInterface {
    * 弧形按钮高度
    */
   BUTTON_HEIGHT: number,
+
   /**
    * 辅助圆半径
    */
@@ -191,10 +177,29 @@ interface ArcButtonThemeInterface {
 }
 
 const arcButtonTheme: ArcButtonThemeInterface = {
-  BUTTON_HEIGHT: LengthMetrics.resource($r('sys.float.arc_button_height')).value;
-  ARC_CIRCLE_DIAMETER: LengthMetrics.resource($r('sys.float.arc_button_auxiliary_circle_diameter')).value;
-  DIAL_CIRCLE_DIAMETER: LengthMetrics.resource($r('sys.float.arc_button_dial_circle_diameter')).value;
-  CHAMFER_CIRCLE_RADIUS: LengthMetrics.resource($r('sys.float.arc_button_chamfer_radius')).value;
+  BUTTON_HEIGHT: getArcButtonThemeVpValue($r('sys.float.arc_button_height')),
+  ARC_CIRCLE_DIAMETER: getArcButtonThemeVpValue($r('sys.float.arc_button_auxiliary_circle_diameter')),
+  DIAL_CIRCLE_DIAMETER: getArcButtonThemeVpValue($r('sys.float.arc_button_dial_circle_diameter')),
+  CHAMFER_CIRCLE_RADIUS: getArcButtonThemeVpValue($r('sys.float.arc_button_chamfer_radius'))
+}
+
+function getArcButtonThemeVpValue(res: Resource): number {
+  if (!res) {
+    return 0
+  }
+  let metrics = LengthMetrics.resource(res)
+  let value = metrics.value
+  switch (metrics.unit) {
+    case LengthUnit.PX:
+      return px2vp(value)
+
+    case LengthUnit.LPX:
+      return px2vp(lpx2px(value))
+
+    case LengthUnit.FP:
+      return px2vp(fp2px(value))
+  }
+  return value
 }
 
 @ObservedV2
@@ -286,24 +291,24 @@ export struct ArcButton {
         break;
 
       case ArcButtonStyleMode.NORMAL_LIGHT:
-        this.btnNormalColor = ColorMetrics.resourceColor(Constants.NORMAL01_NORMAL_BTN_COLOR);
-        this.textNormalColor = ColorMetrics.resourceColor(Constants.NORMAL01_TEXT_COLOR);
-        this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL01_PRESSED_BTN_COLOR);
-        this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL01_DISABLE_BTN_COLOR);
-        this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL01_DISABLE_TEXT_COLOR);
-        this.textPressColor = ColorMetrics.resourceColor(Constants.NORMAL01_TEXT_COLOR);
+        this.btnNormalColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_NORMAL_BTN_COLOR);
+        this.textNormalColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_TEXT_COLOR);
+        this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_PRESSED_BTN_COLOR);
+        this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_DISABLE_BTN_COLOR);
+        this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_DISABLE_TEXT_COLOR);
+        this.textPressColor = ColorMetrics.resourceColor(Constants.NORMAL_LIGHT_TEXT_COLOR);
         break;
 
-      case ArcButtonStyleMode.NORMAL_DEEP:
-        this.btnNormalColor = ColorMetrics.resourceColor(Constants.NORMAL02_NORMAL_BTN_COLOR);
-        this.textNormalColor = ColorMetrics.resourceColor(Constants.NORMAL02_TEXT_COLOR);
-        this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL02_PRESSED_BTN_COLOR);
-        this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL02_DISABLE_BTN_COLOR);
-        this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL02_DISABLE_TEXT_COLOR);
-        this.textPressColor = ColorMetrics.resourceColor(Constants.NORMAL02_TEXT_COLOR);
+      case ArcButtonStyleMode.NORMAL_DARK:
+        this.btnNormalColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_NORMAL_BTN_COLOR);
+        this.textNormalColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_TEXT_COLOR);
+        this.btnPressColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_PRESSED_BTN_COLOR);
+        this.btnDisableColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_DISABLE_BTN_COLOR);
+        this.textDisableColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_DISABLE_TEXT_COLOR);
+        this.textPressColor = ColorMetrics.resourceColor(Constants.NORMAL_DARK_TEXT_COLOR);
         break;
 
-      case ArcButtonStyleMode.EMPHASIZED_DEEP:
+      case ArcButtonStyleMode.EMPHASIZED_DARK:
         this.btnNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_NORMAL_BTN_COLOR);
         this.textNormalColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_TEXT_COLOR);
         this.btnPressColor = ColorMetrics.resourceColor(Constants.EMPHASIZEWARN_PRESSED_BTN_COLOR);
@@ -345,8 +350,8 @@ export struct ArcButton {
    */
   private judgeTextWidth() {
     const measureTextWidth = measure.measureText({
-      textContent: this.options.label;
-      fontSize: this.cover(this.options.fontSize);
+      textContent: this.options.label,
+      fontSize: this.cover(this.options.fontSize)
     })
     this.isExceed = measureTextWidth > this.getUIContext().vp2px(this.textWidth);
   }
@@ -396,14 +401,13 @@ export struct ArcButton {
 
     const pathStr = `M ${leftTopPoint.x} ${leftTopPoint.y} A ${upperArcCircleR} ${upperArcCircleR}, 0, 0, 0,
        ${rightTopPoint.x} ${rightTopPoint.y}` +
-      `M ${rightTopPoint.x} ${rightTopPoint.y} A ${chamferCircleR} ${chamferCircleR}, 0, 0, 0, ${rightBottomPoint.x}
-       ${rightBottomPoint.y}` +
-      `M ${rightBottomPoint.x} ${rightBottomPoint.y} A ${lowerArcCircleR} ${lowerArcCircleR}, 0, 0, 0, ${leftBottomPoint.x}
+      `Q ${rightTopPoint.x - chamferCircleR * 1.2} ${rightTopPoint.y +
+        chamferCircleR * 0.6} ${rightBottomPoint.x} ${rightBottomPoint.y}` +
+      `A ${lowerArcCircleR} ${lowerArcCircleR}, 0, 0, 0, ${leftBottomPoint.x}
        ${leftBottomPoint.y}` +
-      `M ${leftBottomPoint.x} ${leftBottomPoint.y} A ${chamferCircleR} ${chamferCircleR}, 0, 0, 0, ${leftTopPoint.x}
-       ${leftTopPoint.y}` +
-      `M ${leftTopPoint.x} ${leftTopPoint.y} L ${rightTopPoint.x} ${rightTopPoint.y} L ${rightBottomPoint.x}
-       ${rightBottomPoint.y} L ${leftBottomPoint.x} ${leftBottomPoint.y} L ${leftTopPoint.x} ${leftTopPoint.y}`
+      `Q ${leftTopPoint.x + chamferCircleR * 1.2} ${leftTopPoint.y +
+        chamferCircleR * 0.6} ${leftTopPoint.x} ${leftTopPoint.y}`
+
     this.pathString = pathStr
   }
 
@@ -461,7 +465,6 @@ export struct ArcButton {
         .width('100%')
         .height('100%')
         .rotate({ angle: !this.isUp ? 0 : 180 })
-        .opacity(this.options.status === ArcButtonStatus.DISABLED ? Constants.DEFAULT_TRANSPARENCY : 1)
         .clipShape(new Path({ commands: this.pathString }))
         .backgroundColor(this.btnColor.color)
         .backgroundBlurStyle(this.options.backgroundBlurStyle)
@@ -469,6 +472,8 @@ export struct ArcButton {
       this.TextBuilder()
     }
     .enabled(this.options.status !== ArcButtonStatus.DISABLED)
+    .opacity((this.options.styleMode === ArcButtonStyleMode.EMPHASIZED_LIGHT &&
+      this.options.status === ArcButtonStatus.DISABLED) ? Constants.DEFAULT_TRANSPARENCY : 1)
     .animation({ curve: this.curves })
     .width(this.canvasWidth)
     .height(this.canvasHeight)
@@ -688,12 +693,12 @@ class AllPoints {
   public canvasLeftTop: ArcButtonPoint;
 
   constructor(btnWidth: number,
-              btnHeight: number,
-              leftTopPoint: ArcButtonPoint,
-              rightTopPoint: ArcButtonPoint,
-              leftBottomPoint: ArcButtonPoint,
-              rightBottomPoint: ArcButtonPoint,
-              canvasLeftTop: ArcButtonPoint) {
+    btnHeight: number,
+    leftTopPoint: ArcButtonPoint,
+    rightTopPoint: ArcButtonPoint,
+    leftBottomPoint: ArcButtonPoint,
+    rightBottomPoint: ArcButtonPoint,
+    canvasLeftTop: ArcButtonPoint) {
     this.btnWidth = btnWidth;
     this.btnHeight = btnHeight;
     this.leftTopPoint = leftTopPoint;

@@ -41,7 +41,7 @@ const int32_t PRESENT_CUSTOM_DIALOG_PARAM_MAND_COUNT = 1;
 const int32_t PRESENT_CUSTOM_DIALOG_PARAM_INDEX_CONTROLLER = 1;
 const int32_t PRESENT_CUSTOM_DIALOG_PARAM_INDEX_OPTIONS = 2;
 constexpr char DEFAULT_FONT_COLOR_STRING_VALUE[] = "#ff007dff";
-constexpr float AVOID_DISTANCE = 16.0f;
+constexpr float DEFAULT_AVOID_DISTANCE = 16.0f;
 const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, DialogAlignment::CENTER,
     DialogAlignment::BOTTOM, DialogAlignment::DEFAULT, DialogAlignment::TOP_START, DialogAlignment::TOP_END,
     DialogAlignment::CENTER_START, DialogAlignment::CENTER_END, DialogAlignment::BOTTOM_START,
@@ -1229,7 +1229,7 @@ std::optional<CalcDimension> GetKeyboardAvoidDistanceProps(
                 Dimension dimension(avoidDistanceValue, avoidDistanceUnitValueType);
                 keyboardAvoidDistanceProperty = dimension;
             } else {
-                Dimension dimension(AVOID_DISTANCE, DimensionUnit::VP);
+                Dimension dimension(DEFAULT_AVOID_DISTANCE, DimensionUnit::VP);
                 keyboardAvoidDistanceProperty = dimension;
             }
         }
@@ -2415,6 +2415,7 @@ void ParseBaseDialogOptions(napi_env env, napi_value arg, std::shared_ptr<Prompt
     napi_get_named_property(env, arg, "transition", &asyncContext->transitionApi);
     napi_get_named_property(env, arg, "maskColor", &asyncContext->maskColorApi);
     napi_get_named_property(env, arg, "keyboardAvoidMode", &asyncContext->keyboardAvoidModeApi);
+    napi_get_named_property(env, arg, "keyboardAvoidDistance", &asyncContext->keyboardAvoidDistanceApi);
     napi_get_named_property(env, arg, "enableHoverMode", &asyncContext->enableHoverMode);
     napi_typeof(env, asyncContext->enableHoverMode, &valueType);
     if (valueType == napi_boolean) {

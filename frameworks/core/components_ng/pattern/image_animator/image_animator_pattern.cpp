@@ -448,7 +448,7 @@ void ImageAnimatorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const I
     json->PutExtAttr("fillMode", FILL_MODE[static_cast<int32_t>(animator_->GetFillMode())], filter);
     json->PutExtAttr("iterations", std::to_string(animator_->GetIteration()).c_str(), filter);
     json->PutExtAttr("images", ImagesToString().c_str(), filter);
-    json->PutExtAttr("autoMonitorInvisibleArea", isAutoMonitorInvisibleArea_ ? "true" : "false", filter);
+    json->PutExtAttr("monitorInvisibleArea", isAutoMonitorInvisibleArea_ ? "true" : "false", filter);
 }
 
 std::string ImageAnimatorPattern::ImagesToString() const

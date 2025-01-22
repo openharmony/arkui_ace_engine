@@ -224,6 +224,8 @@ public:
 
             theme->inlinePaddingLeft_ = pattern->GetAttr<Dimension>("inline_padding_left", 2.0_vp);
             theme->inlinePaddingRight_ = pattern->GetAttr<Dimension>("inline_padding_right", 12.0_vp);
+            auto supportTranslate = pattern->GetAttr<std::string>("menu_translate_is_support", "0");
+            theme->translateIsSupport_ = StringUtils::StringToInt(supportTranslate);
             auto supportSearch = pattern->GetAttr<std::string>("textfield_menu_search_is_support", "0");
             theme->supportSearch_ = StringUtils::StringToInt(supportSearch);
         }
@@ -704,6 +706,11 @@ public:
         return aiWriteAbilityName_;
     }
 
+    bool GetTranslateIsSupport() const
+    {
+        return translateIsSupport_;
+    }
+
     bool GetIsSupportSearch() const
     {
         return supportSearch_;
@@ -906,6 +913,7 @@ private:
     bool draggable_ = false;
     bool showPasswordDirectly_ = false;
     bool textfieldShowHandle_ = false;
+    bool translateIsSupport_ = false;
     bool supportSearch_ = false;
     Dimension passwordTypeHeight_ = 40.0_vp;
 

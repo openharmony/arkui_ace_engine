@@ -361,7 +361,7 @@ void EventManager::TouchTest(
     ContainerScope scope(instanceId_);
 
     if (refereeNG_->CheckSourceTypeChange(event.sourceType, true)) {
-        TouchEvent touchEvent;
+        TouchEvent touchEvent = ConvertAxisEventToTouchEvent(event);
         FalsifyCancelEventAndDispatch(touchEvent, event.sourceTool != lastSourceTool_);
         responseCtrl_->Reset();
         refereeNG_->CleanAll(true);
@@ -917,6 +917,7 @@ void EventManager::CleanHoverStatusForDragBegin()
         DispatchMouseHoverEventNG(falsifyEvent);
     }
     mouseTestResults_.clear();
+    pressMouseTestResultsMap_.clear();
 }
 
 void EventManager::RegisterDragTouchEventListener(
@@ -1635,10 +1636,13 @@ void EventManager::AxisTest(const AxisEvent& event, const RefPtr<NG::FrameNode>&
 
 bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
 {
-    if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&
-        !event.isRotationEvent) {
-        axisTestResults_.clear();
-        return false;
+    // when api >= 15, do not block this event.
+    if (!AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        if (event.horizontalAxis == 0 && event.verticalAxis == 0 && event.pinchAxisScale == 0 &&
+            !event.isRotationEvent) {
+            axisTestResults_.clear();
+            return false;
+        }
     }
     for (const auto& axisTarget : axisTestResults_) {
         if (axisTarget && axisTarget->HandleAxisEvent(event)) {
@@ -1911,6 +1915,7 @@ void EventManager::FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, b
         if (touchPoint.id != iter.first) {
             falsifyEvent.history.clear();
         }
+        falsifyEvent.originalId = iter.second;
         DispatchTouchEvent(falsifyEvent, sendOnTouch);
     }
 }

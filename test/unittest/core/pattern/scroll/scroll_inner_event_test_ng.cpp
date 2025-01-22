@@ -117,7 +117,7 @@ void ScrollInnerEventTestNg::DragScrollBarUpdate(GestureEvent& gesture)
     gesture.SetMainVelocity(velocity);
     auto HandleDragUpdate = *(scrollBar_->panRecognizer_->onActionUpdate_);
     HandleDragUpdate(gesture);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void ScrollInnerEventTestNg::DragScrollBarEnd(GestureEvent& gesture)
@@ -129,7 +129,7 @@ void ScrollInnerEventTestNg::DragScrollBarEnd(GestureEvent& gesture)
     TouchOnScrollBar(TouchType::UP, SourceType::TOUCH, gesture.GetLocalLocation());
     auto HandleDragEnd = *(scrollBar_->panRecognizer_->onActionEnd_);
     HandleDragEnd(gesture);
-    FlushLayoutTask(frameNode_);
+    FlushUITasks();
 }
 
 void ScrollInnerEventTestNg::DragScrollBarAction(Offset startOffset, float dragDelta, float velocity)

@@ -28,7 +28,7 @@ class RotationRecognizer : public MultiFingersRecognizer {
     DECLARE_ACE_TYPE(RotationRecognizer, MultiFingersRecognizer);
 
 public:
-    RotationRecognizer(int32_t fingers, double angle);
+    RotationRecognizer(int32_t fingers, double angle, bool isLimitFingerCount = false);
     ~RotationRecognizer() override = default;
 
     void OnAccepted() override;

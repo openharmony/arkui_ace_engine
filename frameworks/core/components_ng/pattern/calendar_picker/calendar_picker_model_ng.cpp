@@ -33,6 +33,7 @@ constexpr int32_t DATE_NODE_COUNT = 3;
 constexpr int32_t ONE_DIGIT_BOUNDARY = 10;
 constexpr uint32_t MAX_MONTH = 12;
 constexpr float DEFAULT_HINT_RADIUS = 16.0f;
+constexpr uint32_t YEAR_LENGTH = 4;
 static int32_t yearNodeIndex_ = 0;
 static int32_t monthNodeIndex_ = 2;
 static int32_t dayNodeIndex_ = 4;
@@ -672,7 +673,8 @@ void CalendarPickerModelNG::UpdateSelectedDateContent(FrameNode* frameNode, cons
         if (yearNode) {
             auto textLayoutProperty = yearNode->GetLayoutProperty<TextLayoutProperty>();
             if (textLayoutProperty) {
-                textLayoutProperty->UpdateContent(std::to_string(year));
+                auto selectedYearStr = AddLeadingZeroToYear(year);
+                textLayoutProperty->UpdateContent(selectedYearStr);
                 yearNode->MarkModifyDone();
                 yearNode->MarkDirtyNode();
             }
@@ -784,7 +786,7 @@ std::map<std::size_t, std::string> CalendarPickerModelNG::GetDateNodeOrder(const
         monthNodeIndex_ = MONTH_NODE_INDEX;
         dayNodeIndex_ = DAY_NODE_INDEX;
         auto num = 0;
-        order[num++] = std::to_string(date.GetYear());
+        order[num++] = AddLeadingZeroToYear(date.GetYear());
         order[num++] = (date.GetMonth() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetMonth());
         order[num] = (date.GetDay() < ONE_DIGIT_BOUNDARY ? "0" : "") + std::to_string(date.GetDay());
     } else {
@@ -792,7 +794,7 @@ std::map<std::size_t, std::string> CalendarPickerModelNG::GetDateNodeOrder(const
         for (size_t i = 0; i < outOrder.size(); ++i) {
             if (outOrder[i] == "year") {
                 yearNodeIndex_ = static_cast<int32_t>(i + index);
-                order[i] = std::to_string(date.GetYear());
+                order[i] = AddLeadingZeroToYear(date.GetYear());
             }
             if (outOrder[i] == "month") {
                 monthNodeIndex_ = static_cast<int32_t>(i + index);
@@ -807,5 +809,12 @@ std::map<std::size_t, std::string> CalendarPickerModelNG::GetDateNodeOrder(const
     }
 
     return order;
+}
+
+std::string CalendarPickerModelNG::AddLeadingZeroToYear(uint32_t year)
+{
+    std::string yearStr = std::string(YEAR_LENGTH - std::to_string(year).length(), '0');
+    yearStr += std::to_string(year);
+    return yearStr;
 }
 } // namespace OHOS::Ace::NG

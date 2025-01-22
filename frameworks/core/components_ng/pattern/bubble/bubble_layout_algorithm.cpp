@@ -293,6 +293,9 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         childLayoutConstraint.UpdateMaxSizeWithCheck(size);
     }
     // childSize_ and childOffset_ is used in Layout.
+    auto childProp = child->GetLayoutProperty();
+    CHECK_NULL_VOID(childProp);
+    childProp->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
     child->Measure(childLayoutConstraint);
     measureChildSizeAfter_ = child->GetGeometryNode()->GetFrameSize();
     if (!NearEqual(measureChildSizeBefore_, measureChildSizeAfter_)) {
@@ -317,7 +320,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto geometryNode = targetNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         auto targetSize = geometryNode->GetFrameSize();
-        auto targetOffset = targetNode->GetPaintRectOffset();
+        auto targetOffset = targetNode->GetPaintRectOffset(false, true);
         auto constrainHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height();
         auto constrainWidth = layoutWrapper->GetGeometryNode()->GetFrameSize().Width();
         float maxWidth = constrainWidth - targetSecurity_ * DOUBLE;
@@ -672,7 +675,7 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
         return;
     }
     if (IsUIExtensionWindow()) {
-        HandleUIExtensionKeyboard(showInSubWindow);
+        HandleUIExtensionKeyboard(layoutWrapper, showInSubWindow);
         return;
     }
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
@@ -684,7 +687,7 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
         marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
         wrapperSize_.SetHeight(wrapperSize_.Height() - keyboardHeight);
     } else if (showInSubWindow) {
-        auto currentContext = PipelineContext::GetCurrentContext();
+        auto currentContext = bubbleNode->GetContextRefPtr();
         CHECK_NULL_VOID(currentContext);
         auto currentSafeAreaManager = currentContext->GetSafeAreaManager();
         CHECK_NULL_VOID(currentSafeAreaManager);
@@ -696,7 +699,7 @@ void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool sh
     }
 }
 
-void BubbleLayoutAlgorithm::HandleUIExtensionKeyboard(bool showInSubWindow)
+void BubbleLayoutAlgorithm::HandleUIExtensionKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow)
 {
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
@@ -711,7 +714,9 @@ void BubbleLayoutAlgorithm::HandleUIExtensionKeyboard(bool showInSubWindow)
             wrapperSize_.SetHeight(wrapperSize_.Height() - keyboardHeight);
             marginBottom_ = KEYBOARD_SPACE.ConvertToPx();
         } else {
-            auto currentContext = PipelineContext::GetCurrentContext();
+            auto bubbleNode = layoutWrapper->GetHostNode();
+            CHECK_NULL_VOID(bubbleNode);
+            auto currentContext = bubbleNode->GetContextRefPtr();
             CHECK_NULL_VOID(currentContext);
             auto currentSafeAreaManager = currentContext->GetSafeAreaManager();
             CHECK_NULL_VOID(currentSafeAreaManager);
@@ -752,7 +757,7 @@ void BubbleLayoutAlgorithm::InitWrapperRect(LayoutWrapper* layoutWrapper)
     }
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
-    auto targetOffset = targetNode->GetPaintRectOffset();
+    auto targetOffset = targetNode->GetPaintRectOffset(false, true);
     float getY = 0;
     getY = targetOffset.GetY();
     auto bubbleNode = layoutWrapper->GetHostNode();
@@ -1476,7 +1481,7 @@ void BubbleLayoutAlgorithm::InitTargetSizeAndPosition(bool showInSubWindow, Layo
         auto geometryNode = targetNode->GetGeometryNode();
         CHECK_NULL_VOID(geometryNode);
         targetSize_ = geometryNode->GetFrameSize();
-        targetOffset_ = targetNode->GetPaintRectOffset();
+        targetOffset_ = targetNode->GetPaintRectOffset(false, true);
     }
     auto pipelineContext = GetMainPipelineContext(layoutWrapper);
     CHECK_NULL_VOID(pipelineContext);

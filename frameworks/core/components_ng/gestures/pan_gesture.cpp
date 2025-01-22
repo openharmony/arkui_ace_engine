@@ -28,7 +28,7 @@ RefPtr<NGGestureRecognizer> PanGesture::CreateRecognizer()
     if (panGestureOption_) {
         panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption_);
     } else {
-        panRecognizer = AceType::MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
+        panRecognizer = AceType::MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_, isLimitFingerCount_);
     }
     if (onActionStartId_) {
         panRecognizer->SetOnActionStart(*onActionStartId_);

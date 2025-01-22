@@ -15,6 +15,11 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_interactable_view_ffi.h"
 
+#include <cstddef>
+#include <cstdint>
+#include <vector>
+
+#include "cj_common_ffi.h"
 #include "cj_lambda.h"
 
 #include "core/components_ng/base/view_abstract_model_ng.h"
@@ -29,6 +34,9 @@ using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace {
+const std::vector<NG::TouchTestStrategy> TOUCH_TEST_STRATEGY = { NG::TouchTestStrategy::DEFAULT,
+    NG::TouchTestStrategy::FORWARD_COMPETITION, NG::TouchTestStrategy::FORWARD };
+
 void FFiSetDragInfo(
     const RefPtr<DragEvent>& info, const std::string& extraParams, CJPosition& cjPosition, CJDragInfo& ffiDragInfo)
 {
@@ -78,6 +86,34 @@ RefPtr<PixelMap> ParseDragPixelMap(int64_t pixelMapId)
 #endif
 }
 
+bool CheckKeysPressed(const std::vector<KeyCode>& pressedKeyCodes, std::vector<std::string>& checkKeyCodes)
+{
+    auto hasKeyCode = [pressedKeyCodes](const KeyCode& keyCode) -> bool {
+        auto it = std::find(pressedKeyCodes.begin(), pressedKeyCodes.end(), keyCode);
+        return it != pressedKeyCodes.end();
+    };
+    for (auto& checkKeyCode : checkKeyCodes)
+        if (checkKeyCode == "ctrl") {
+            if (!hasKeyCode(KeyCode::KEY_CTRL_LEFT) && !hasKeyCode(KeyCode::KEY_CTRL_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "shift") {
+            if (!hasKeyCode(KeyCode::KEY_SHIFT_LEFT) && !hasKeyCode(KeyCode::KEY_SHIFT_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "alt") {
+            if (!hasKeyCode(KeyCode::KEY_ALT_LEFT) && !hasKeyCode(KeyCode::KEY_ALT_RIGHT)) {
+                return false;
+            }
+        } else if (checkKeyCode == "fn") {
+            if (!hasKeyCode(KeyCode::KEY_FN)) {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    return true;
+}
 } // namespace OHOS::Ace
 
 extern "C" {
@@ -179,6 +215,65 @@ void FfiOHOSAceFrameworkInteractableViewOnHover(void (*callback)(bool))
     ViewAbstractModel::GetInstance()->SetOnHover([onHover](bool param, HoverInfo& info) { onHover(param); });
 }
 
+VectorTouchTestInfoHandle FFICJCreateVectorTouchTestInfo(int64_t size)
+{
+    return new std::vector<CJTouchTestInfo>(size);
+}
+
+void FFICJVectorTouchTestInfoSetElement(VectorTouchTestInfoHandle vec, int64_t index, CJTouchTestInfo touchTestInfo)
+{
+    auto actualVec = reinterpret_cast<std::vector<CJTouchTestInfo>*>(vec);
+    (*actualVec)[index] = touchTestInfo;
+}
+
+CJTouchTestInfo FFICJVectorTouchTestInfoGetElement(VectorTouchTestInfoHandle vec, int64_t index)
+{
+    auto actualVec = reinterpret_cast<std::vector<CJTouchTestInfo>*>(vec);
+    return (*actualVec)[index];
+}
+
+void FFICJVectorTouchTestInfoDelete(VectorTouchTestInfoHandle vec)
+{
+    auto actualVec = reinterpret_cast<std::vector<CJTouchTestInfo>*>(vec);
+    delete actualVec;
+}
+
+int64_t FFICJVectorTouchTestInfoGetSize(VectorTouchTestInfoHandle vec)
+{
+    auto actualVec = reinterpret_cast<std::vector<CJTouchTestInfo>*>(vec);
+    return (*actualVec).size();
+}
+
+void FfiOHOSAceFrameworkInteractableOnChildTouchTest(CJTouchResult (*callback)(VectorTouchTestInfoHandle handle))
+{
+    auto onChildTouchTest = [ffiCallback = CJLambda::Create(callback)](
+                                const std::vector<NG::TouchTestInfo>& touchInfo) -> NG::TouchResult {
+        NG::TouchResult touchRes;
+        auto arr = new std::vector<CJTouchTestInfo>(touchInfo.size());
+        size_t size = touchInfo.size();
+        for (size_t i = 0; i < size; i++) {
+            CJTouchTestInfo tmp;
+            tmp.windowX = touchInfo[i].windowPoint.GetX();
+            tmp.windowY = touchInfo[i].windowPoint.GetY();
+            tmp.parentX = touchInfo[i].currentCmpPoint.GetX();
+            tmp.parentY = touchInfo[i].currentCmpPoint.GetY();
+            tmp.x = touchInfo[i].subCmpPoint.GetX();
+            tmp.y = touchInfo[i].subCmpPoint.GetY();
+            tmp.rect.x = static_cast<double>(touchInfo[i].subRect.GetX());
+            tmp.rect.y = static_cast<double>(touchInfo[i].subRect.GetY());
+            tmp.rect.width = static_cast<double>(touchInfo[i].subRect.Width());
+            tmp.rect.height = static_cast<double>(touchInfo[i].subRect.Height());
+            tmp.id = Utils::MallocCString(touchInfo[i].id);
+            (*arr)[i] = tmp;
+        }
+        auto ret = ffiCallback(arr);
+        touchRes.strategy = static_cast<NG::TouchTestStrategy>(ret.strategy);
+        touchRes.id = ret.id.value;
+        return touchRes;
+    };
+    ViewAbstractModel::GetInstance()->SetOnTouchTestFunc(std::move(onChildTouchTest));
+}
+
 void FfiOHOSAceFrameworkInteractableViewOnAreaChanged(void (*callback)(CJArea, CJArea))
 {
     auto onAreaChanged = CJLambda::Create(callback);
@@ -244,7 +339,7 @@ void FfiOHOSAceFrameworkInteractableViewOnMouse(void (*callback)(CJMouseEvent))
 // can not trigged this event on eTS app
 void FfiOHOSAceFrameworkInteractableViewOnKey(bool (*callback)(CJKeyEvent info))
 {
-    auto onKeyEvent = [ffiCallback = CJLambda::Create(callback)](KeyEventInfo& keyInfo) -> bool  {
+    auto onKeyEvent = [ffiCallback = CJLambda::Create(callback)](KeyEventInfo& keyInfo) -> bool {
         CJKeyEvent ffiKeyInfo {};
         ffiKeyInfo.keyText = keyInfo.GetKeyText();
         ffiKeyInfo.type = static_cast<int32_t>(keyInfo.GetKeyType());
@@ -376,5 +471,221 @@ void FfiOHOSAceFrameworkInteractableViewOnDrop(void (*callback)(CJDragInfo info)
     };
 
     ViewAbstractModel::GetInstance()->SetOnDrop(std::move(onDrop));
+}
+
+void FfiInteractableViewOnDragStart(CJDragItemInfo (*callback)(CJDragEvent event, const char* extraParams))
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](
+                          const RefPtr<DragEvent>& info, const std::string& extraParams) -> NG::DragDropBaseInfo {
+        NG::DragDropBaseInfo dragDropInfo;
+        PipelineContext::SetCallBackNode(node);
+        CJDragEvent cjEvent { .evtPtr = new RefPtr<DragEvent>(info),
+            .useCustomDropAnimation = info->IsUseCustomAnimation(),
+            .dragBehavior = static_cast<int32_t>(info->GetDragBehavior()) };
+        auto ret = func(cjEvent, extraParams.c_str());
+        auto retNode = ParseDragNode(ret.builder);
+#if defined(PIXEL_MAP_SUPPORTED)
+        dragDropInfo.pixelMap = ParseDragPixelMap(ret.pixelMapId);
+#endif
+        dragDropInfo.extraInfo = ret.extraInfo;
+        dragDropInfo.node = retNode;
+        return dragDropInfo;
+    };
+    ViewAbstractModel::GetInstance()->SetOnDragStart(std::move(cjCallback));
+}
+
+void FfiDragEventSetResult(void* ptr, int32_t result)
+{
+    auto dragEvent = *reinterpret_cast<RefPtr<DragEvent>*>(ptr);
+    CHECK_NULL_VOID(dragEvent);
+    auto res = static_cast<DragRet>(result);
+    dragEvent->SetResult(res);
+}
+
+int32_t FfiDragEventGetResult(void* ptr)
+{
+    auto dragEvent = *reinterpret_cast<RefPtr<DragEvent>*>(ptr);
+    CHECK_NULL_RETURN(dragEvent, -1);
+    return static_cast<int32_t>(dragEvent->GetResult());
+}
+
+NativeRectangle FfiDragEventGetPreviewRect(void* ptr)
+{
+    auto dragEvent = *reinterpret_cast<RefPtr<DragEvent>*>(ptr);
+    CHECK_NULL_RETURN(dragEvent, NativeRectangle {});
+    auto rect = dragEvent->GetPreviewRect();
+    NativeRectangle resRect { .x = rect.GetOffset().GetX(),
+        .xUnit = static_cast<int32_t>(DimensionUnit::VP),
+        .y = rect.GetOffset().GetY(),
+        .yUnit = static_cast<int32_t>(DimensionUnit::VP),
+        .width = rect.Width(),
+        .widthUnit = static_cast<int32_t>(DimensionUnit::PERCENT),
+        .height = rect.Height(),
+        .heightUnit = static_cast<int32_t>(DimensionUnit::PERCENT) };
+    return resRect;
+}
+
+double FfiDragEventGetVelocityX(void* ptr)
+{
+    auto dragEvent = *reinterpret_cast<RefPtr<DragEvent>*>(ptr);
+    CHECK_NULL_RETURN(dragEvent, 0.0);
+    auto velocity = dragEvent->GetVelocity();
+    return PipelineBase::Px2VpWithCurrentDensity(velocity.GetVelocityX());
+}
+
+double FfiDragEventGetVelocityY(void* ptr)
+{
+    auto dragEvent = *reinterpret_cast<RefPtr<DragEvent>*>(ptr);
+    CHECK_NULL_RETURN(dragEvent, 0.0);
+    auto velocity = dragEvent->GetVelocity();
+    return PipelineBase::Px2VpWithCurrentDensity(velocity.GetVelocityY());
+}
+
+double FfiDragEventGetVelocity(void* ptr)
+{
+    auto dragEvent = *reinterpret_cast<RefPtr<DragEvent>*>(ptr);
+    CHECK_NULL_RETURN(dragEvent, 0.0);
+    auto velocity = dragEvent->GetVelocity();
+    return PipelineBase::Px2VpWithCurrentDensity(velocity.GetVelocityValue());
+}
+
+double FfiDragEventGetWindowX(void* ptr)
+{
+    auto dragEvent = *reinterpret_cast<RefPtr<DragEvent>*>(ptr);
+    CHECK_NULL_RETURN(dragEvent, 0.0);
+    return PipelineBase::Px2VpWithCurrentDensity(dragEvent->GetX());
+}
+
+double FfiDragEventGetWindowY(void* ptr)
+{
+    auto dragEvent = *reinterpret_cast<RefPtr<DragEvent>*>(ptr);
+    CHECK_NULL_RETURN(dragEvent, 0.0);
+    return PipelineBase::Px2VpWithCurrentDensity(dragEvent->GetY());
+}
+
+double FfiDragEventGetDisplayX(void* ptr)
+{
+    auto dragEvent = *reinterpret_cast<RefPtr<DragEvent>*>(ptr);
+    CHECK_NULL_RETURN(dragEvent, 0.0);
+    return PipelineBase::Px2VpWithCurrentDensity(dragEvent->GetScreenX());
+}
+
+double FfiDragEventGetDisplayY(void* ptr)
+{
+    auto dragEvent = *reinterpret_cast<RefPtr<DragEvent>*>(ptr);
+    CHECK_NULL_RETURN(dragEvent, 0.0);
+    return PipelineBase::Px2VpWithCurrentDensity(dragEvent->GetScreenY());
+}
+
+void FfiDragEventFree(void* ptr)
+{
+    RefPtr<DragEvent>* evtPtr = reinterpret_cast<RefPtr<DragEvent>*>(ptr);
+    if (evtPtr != nullptr) {
+        delete evtPtr;
+    }
+}
+
+bool FfiDragEventGetModifierKeyState(void* ptr, VectorStringHandle keys)
+{
+    auto dragEvent = *reinterpret_cast<RefPtr<DragEvent>*>(ptr);
+    CHECK_NULL_RETURN(dragEvent, false);
+    auto keyVec = reinterpret_cast<std::vector<std::string>*>(keys);
+    auto pressedKeyCodes = dragEvent->GetPressedKeyCodes();
+    std::vector<std::string> checkKeyCodes;
+    std::vector<std::string> validKeyCodes = { "ctrl", "shift", "alt", "fn" };
+    for (size_t i = 0; i < keyVec->size(); i++) {
+        auto code = (*keyVec)[0];
+        std::transform(code.begin(), code.end(), code.begin(), [](char& c) { return std::tolower(c); });
+        auto it = std::find(validKeyCodes.begin(), validKeyCodes.end(), code.c_str());
+        if (it == validKeyCodes.end()) {
+            return false;
+        } else {
+            checkKeyCodes.emplace_back(code);
+        }
+    }
+    if (checkKeyCodes.empty()) {
+        return false;
+    }
+    return CheckKeysPressed(pressedKeyCodes, checkKeyCodes);
+}
+
+void FfiInteractableViewOnDragEnter(void (*callback)(CJDragEvent event, const char* extraParams))
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](
+                          const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        PipelineContext::SetCallBackNode(node);
+        CJDragEvent cjEvent { .evtPtr = new RefPtr<DragEvent>(info),
+            .useCustomDropAnimation = info->IsUseCustomAnimation(),
+            .dragBehavior = static_cast<int32_t>(info->GetDragBehavior()) };
+        func(cjEvent, extraParams.c_str());
+    };
+    ViewAbstractModel::GetInstance()->SetOnDragEnter(std::move(cjCallback));
+}
+
+void FfiInteractableViewOnDragMove(void (*callback)(CJDragEvent event, const char* extraParams))
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](
+                          const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        PipelineContext::SetCallBackNode(node);
+        CJDragEvent cjEvent { .evtPtr = new RefPtr<DragEvent>(info),
+            .useCustomDropAnimation = info->IsUseCustomAnimation(),
+            .dragBehavior = static_cast<int32_t>(info->GetDragBehavior()) };
+        func(cjEvent, extraParams.c_str());
+    };
+    ViewAbstractModel::GetInstance()->SetOnDragMove(std::move(cjCallback));
+}
+
+void FfiInteractableViewOnDragLeave(void (*callback)(CJDragEvent event, const char* extraParams))
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](
+                          const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        PipelineContext::SetCallBackNode(node);
+        CJDragEvent cjEvent { .evtPtr = new RefPtr<DragEvent>(info),
+            .useCustomDropAnimation = info->IsUseCustomAnimation(),
+            .dragBehavior = static_cast<int32_t>(info->GetDragBehavior()) };
+        func(cjEvent, extraParams.c_str());
+    };
+    ViewAbstractModel::GetInstance()->SetOnDragLeave(std::move(cjCallback));
+}
+
+void FfiInteractableViewOnDrop(void (*callback)(CJDragEvent event, const char* extraParams))
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](
+                          const RefPtr<DragEvent>& info, const std::string& extraParams) {
+        PipelineContext::SetCallBackNode(node);
+        CJDragEvent cjEvent { .evtPtr = new RefPtr<DragEvent>(info),
+            .useCustomDropAnimation = info->IsUseCustomAnimation(),
+            .dragBehavior = static_cast<int32_t>(info->GetDragBehavior()) };
+        func(cjEvent, extraParams.c_str());
+    };
+    ViewAbstractModel::GetInstance()->SetOnDrop(std::move(cjCallback));
+}
+
+void FfiInteractableViewOnDragEnd(void (*callback)(CJDragEvent event, const char* extraParams))
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](const RefPtr<DragEvent>& info) {
+        PipelineContext::SetCallBackNode(node);
+        CJDragEvent cjEvent { .evtPtr = new RefPtr<DragEvent>(info),
+            .useCustomDropAnimation = info->IsUseCustomAnimation(),
+            .dragBehavior = static_cast<int32_t>(info->GetDragBehavior()) };
+        func(cjEvent, nullptr);
+    };
+    ViewAbstractModel::GetInstance()->SetOnDragEnd(std::move(cjCallback));
+}
+
+void FfiInteractableViewOnPreDrag(void (*callback)(int32_t status))
+{
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto cjCallback = [func = CJLambda::Create(callback), node = frameNode](const PreDragStatus preDragStatus) {
+        PipelineContext::SetCallBackNode(node);
+        func(static_cast<int32_t>(preDragStatus));
+    };
+    ViewAbstractModel::GetInstance()->SetOnPreDrag(std::move(cjCallback));
 }
 }

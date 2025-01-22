@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,8 +35,10 @@ public:
     virtual void SetSearchButton(const std::string& text);
     virtual void SetCaretWidth(const Dimension& value);
     virtual void SetCaretColor(const Color& color);
+    virtual void ResetCaretColor();
     virtual void SetSearchIconSize(const Dimension& value);
     virtual void SetSearchIconColor(const Color& color);
+    virtual void ResetSearchIconColor();
     virtual void SetSearchSrcPath(const std::string& src, const std::string& bundleName, const std::string& moduleName);
     virtual void SetSearchSymbolIcon(std::function<void(WeakPtr<NG::FrameNode>)> iconSymbol);
     virtual void SetSearchDefaultIcon();
@@ -48,15 +50,21 @@ public:
     virtual void SetCancelButtonStyle(CancelButtonStyle cancelButtonStyle);
     virtual void SetCancelIconSize(const Dimension& value);
     virtual void SetCancelIconColor(const Color& color);
+    virtual void ResetCancelIconColor();
     virtual void SetSearchButtonFontSize(const Dimension& value);
     virtual void SetSearchButtonFontColor(const Color& color);
+    virtual void ResetSearchButtonFontColor();
     virtual void SetSearchButtonAutoDisable(bool needToDisable);
     virtual void SetPlaceholderColor(const Color& color);
+    virtual void ResetPlaceholderColor();
     virtual void SetPlaceholderFont(const Font& font);
     virtual void SetTextFont(const Font& font);
     virtual void SetMinFontScale(const float value) = 0;
     virtual void SetMaxFontScale(const float value) = 0;
     virtual void SetTextColor(const Color& color);
+    virtual void ResetTextColor();
+    virtual void SetBackgroundColor(const Color& color);
+    virtual void ResetBackgroundColor();
     virtual void SetTextAlign(const TextAlign& textAlign);
     virtual void SetCopyOption(const CopyOptions& copyOptions);
     virtual void SetFocusable(bool focusable) {};
@@ -66,6 +74,7 @@ public:
     virtual void SetOnSubmit(std::function<void(const std::string&)>&& onSubmit);
     virtual void SetOnSubmit(std::function<void(const std::u16string&, NG::TextFieldCommonEvent&)>&& onSubmit);
     virtual void SetOnChange(std::function<void(const std::u16string&, PreviewText&)>&& onChange);
+    virtual void SetOnChange(std::function<void(const ChangeValueInfo&)>&& onChange);
     virtual void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) = 0;
     virtual void SetOnScroll(std::function<void(float, float)>&& func) = 0;
     virtual void SetOnCopy(std::function<void(const std::u16string&)>&& func);
@@ -76,6 +85,7 @@ public:
     virtual void SetOnDidInsertValueEvent(std::function<void(const InsertValueInfo&)>&& func);
     virtual void SetOnWillDeleteEvent(std::function<bool(const DeleteValueInfo&)>&& func);
     virtual void SetOnDidDeleteEvent(std::function<void(const DeleteValueInfo&)>&& func);
+    virtual void SetOnWillChangeEvent(std::function<bool(const ChangeValueInfo&)>&& func);
     virtual void SetOnChangeEvent(std::function<void(const std::u16string&)>&& onChangeEvent);
     virtual void SetSelectionMenuHidden(bool selectionMenuHidden) = 0;
     virtual void SetLetterSpacing(const Dimension& value) {};
@@ -95,6 +105,7 @@ public:
     virtual void UpdateInspectorId(const std::string& key) {};
     virtual void SetDragPreviewOptions(const NG::DragPreviewOption option) {};
     virtual void SetSelectedBackgroundColor(const Color& value) {};
+    virtual void ResetSelectedBackgroundColor() {};
 
     virtual void SetInputFilter(const std::string& value, const std::function<void(const std::u16string&)>& onError) {};
     virtual void SetOnEditChanged(std::function<void(bool)>&& func) {};
@@ -105,6 +116,7 @@ public:
     virtual void SetEnableHapticFeedback(bool state) = 0;
     virtual void SetBackBorderRadius() {};
     virtual void SetStopBackPress(bool isStopBackPress) {};
+    virtual void SetKeyboardAppearance(KeyboardAppearance value) = 0;
 
 private:
     static std::unique_ptr<SearchModel> instance_;

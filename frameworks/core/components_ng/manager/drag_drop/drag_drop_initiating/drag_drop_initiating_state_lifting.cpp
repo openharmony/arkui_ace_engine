@@ -28,6 +28,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 300;
 constexpr int32_t PIXELMAP_ANIMATION_TIME = 800;
+constexpr float SCALE_NUMBER = 0.95;
 constexpr float PIXELMAP_DRAG_SCALE_MULTIPLE = 1.05f;
 constexpr float MENU_DRAG_SCALE = 0.05f;
 constexpr float SPRING_RESPONSE = 0.416f;
@@ -251,6 +252,7 @@ void DragDropInitiatingStateLifting::SetPixelMap()
     // create imageNode
     auto imageNode = DragAnimationHelper::CreateImageNode(pixelMap);
     CHECK_NULL_VOID(imageNode);
+    imageNode->SetDragPreviewOptions(frameNode->GetDragPreviewOption());
     // create columnNode
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -273,7 +275,6 @@ void DragDropInitiatingStateLifting::SetPixelMap()
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(imageNode);
     }
-    pipelineContext->FlushSyncGeometryNodeTasks();
     DragEventActuator::UpdateDragNodePosition(imageNode, frameNode, width, height);
     ShowPixelMapAnimation(imageNode, frameNode);
     DragEventActuator::SetPreviewDefaultAnimateProperty(imageNode);
@@ -292,6 +293,12 @@ void DragDropInitiatingStateLifting::ShowPixelMapAnimation(
     auto params = machine->GetDragDropInitiatingParams();
     frameNode->SetOptionsAfterApplied(params.optionsAfterApplied);
     DragAnimationHelper::SetImageNodeInitAttr(frameNode, imageNode);
+
+    auto previewOption = frameNode->GetDragPreviewOption();
+    if (params.isNeedGather && previewOption.defaultAnimationBeforeLifting) {
+        imageContext->UpdateTransformScale({ SCALE_NUMBER, SCALE_NUMBER });
+    }
+
     // pixel map animation
     AnimationOption option;
     option.SetDuration(PIXELMAP_ANIMATION_DURATION);
@@ -301,14 +308,58 @@ void DragDropInitiatingStateLifting::ShowPixelMapAnimation(
 
     AnimationUtils::Animate(
         option,
-        [imageNode, weak = WeakClaim(RawPtr(frameNode))]() mutable {
-            auto imageContext = imageNode->GetRenderContext();
-            CHECK_NULL_VOID(imageContext);
+        [imageNode, weak = WeakClaim(RawPtr(frameNode)), isNeedGather = params.isNeedGather]() mutable {
             auto frameNode = weak.Upgrade();
+            if (isNeedGather) {
+                DragDropFuncWrapper::ResetNode(frameNode);
+            }
             DragDropFuncWrapper::ApplyNewestOptionExecutedFromModifierToNode(frameNode, imageNode);
-            DragDropFuncWrapper::ResetNode(frameNode);
         },
         option.GetOnFinishEvent());
+}
+
+void DragDropInitiatingStateLifting::SetGatherAnimation(const RefPtr<PipelineBase>& context)
+{
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    if (!params.isNeedGather) {
+        return;
+    }
+    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    auto columnNode = manager->GetPixelMapNode();
+    CHECK_NULL_VOID(columnNode);
+    auto imageNode = AceType::DynamicCast<FrameNode>(columnNode->GetFirstChild());
+    auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    DragAnimationHelper::HideDragNodeCopy(manager);
+    DragAnimationHelper::PlayGatherAnimation(imageNode, manager);
+    DragAnimationHelper::ShowPreviewBadgeAnimation(gestureHub, manager);
+}
+
+void DragDropInitiatingStateLifting::ResetNodeInMultiDrag()
+{
+    auto machine = GetStateMachine();
+    CHECK_NULL_VOID(machine);
+    auto params = machine->GetDragDropInitiatingParams();
+    if (!params.isNeedGather) {
+        return;
+    }
+    auto mainPipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(mainPipeline);
+    auto frameNode = params.frameNode.Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    mainPipeline->AddAfterRenderTask([mainPipeline, weak = WeakClaim(RawPtr(frameNode))]() {
+        CHECK_NULL_VOID(mainPipeline);
+        auto manager = mainPipeline->GetOverlayManager();
+        auto frameNode = weak.Upgrade();
+        DragAnimationHelper::HideDragNodeCopy(manager);
+        DragDropFuncWrapper::ResetNode(frameNode);
+    });
 }
 
 void DragDropInitiatingStateLifting::SetEventColumn()
@@ -372,6 +423,7 @@ void DragDropInitiatingStateLifting::Init(int32_t currentState)
     auto params = machine->GetDragDropInitiatingParams();
     auto frameNode = params.frameNode.Upgrade();
     if (!CheckDoShowPreview(frameNode)) {
+        ResetNodeInMultiDrag();
         return;
     }
     DragDropGlobalController::GetInstance().SetPrepareDragFrameNode(frameNode);
@@ -382,7 +434,9 @@ void DragDropInitiatingStateLifting::Init(int32_t currentState)
     dragDropManager->SetDraggingPointer(params.idleFingerId);
     dragDropManager->SetDraggingPressedState(true);
     SetPixelMap();
+    SetGatherAnimation(pipeline);
     SetScaleAnimation(params.idleFingerId);
     SetEventColumn();
+    pipeline->FlushSyncGeometryNodeTasks();
 }
 } // namespace OHOS::Ace::NG

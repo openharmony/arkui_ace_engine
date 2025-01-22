@@ -50,6 +50,9 @@ struct TouchPoint final {
     SourceTool sourceTool = SourceTool::UNKNOWN;
     bool isPressed = false;
     int32_t originalId = 0;
+    int32_t operatingHand = 0;
+    int32_t width;
+    int32_t height;
 };
 
 /**
@@ -73,6 +76,7 @@ struct TouchEvent final : public PointerEvent {
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     int32_t touchEventId = 0;
+    int32_t operatingHand = 0;
     bool isInterpolated = false;
     bool isMouseTouchTest = false;
     bool isFalsified = false;
@@ -125,6 +129,7 @@ struct TouchEvent final : public PointerEvent {
     TouchEvent& SetInputYDeltaSlope(float inputYDeltaSlope);
     TouchEvent& SetPressedKeyCodes(const std::vector<KeyCode>& pressedKeyCodes);
     TouchEvent& SetIsPassThroughMode(bool isPassThroughMode);
+    TouchEvent& SetOperatingHand(int32_t operatingHand);
     TouchEvent CloneWith(float scale) const;
     TouchEvent CloneWith(float scale, float offsetX, float offsetY, std::optional<int32_t> pointId) const;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
@@ -243,6 +248,13 @@ public:
     }
     void SetTouchType(TouchType type);
 
+    void SetPressedTime(TimeStamp pressedTime);
+    TimeStamp GetPressedTime() const;
+    void SetWidth(int32_t width);
+    int32_t GetWidth() const;
+    void SetHeight(int32_t height);
+    int32_t GetHeight() const;
+
 private:
     // The finger id is used to identify the point of contact between the finger and the screen. Different fingers have
     // different ids.
@@ -259,6 +271,9 @@ private:
     int64_t touchDeviceId_ = 0;
     // touch type
     TouchType touchType_ = TouchType::UNKNOWN;
+    TimeStamp pressedTime_;
+    int32_t width_;
+    int32_t height_;
 };
 
 using GetEventTargetImpl = std::function<std::optional<EventTarget>()>;

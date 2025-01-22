@@ -220,6 +220,12 @@ class DragController {
         JSViewAbstract.notifyDragStartRequest(request);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    cancelDataLoading(key) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        JSViewAbstract.cancelDataLoading(key);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class UIObserver {
@@ -804,6 +810,13 @@ class UIContext {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         Context.enableSwipeBack(enabled);
         __JSScopeUtil__.restoreInstanceId();
+    }
+
+    getTextMenuController() {
+        if (this.textMenuController_ == null) {
+            this.textMenuController_ = new TextMenuController(this.instanceId_);
+        }
+        return this.textMenuController_;
     }
 }
 
@@ -1437,6 +1450,13 @@ class AtomicServiceBar {
         this.ohos_atomicServiceBar.setIconColor(color);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    getBarRect() {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        let rect = this.ohos_atomicServiceBar.getBarRect();
+        __JSScopeUtil__.restoreInstanceId();
+        return rect;
+    }
 }
 
 class OverlayManager {
@@ -1505,6 +1525,25 @@ class OverlayManager {
         __JSScopeUtil__.restoreInstanceId();
     }
 }
+
+class TextMenuController {
+    /**
+     * Construct new instance of TextMenuController.
+     * initialzie with instanceId.
+     * @param instanceId obtained on the c++ side.
+     * @since 16
+     */
+    constructor(instanceId) {
+        this.instanceId_ = instanceId;
+    }
+
+    setMenuOptions(textMenuOptions) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        TextMenu.setMenuOptions(textMenuOptions);
+        __JSScopeUtil__.restoreInstanceId();
+    }
+}
+
 /**
  * Get UIContext instance.
  * @param instanceId obtained on the c++ side.

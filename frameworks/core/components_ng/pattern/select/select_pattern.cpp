@@ -198,7 +198,7 @@ void SelectPattern::ShowSelectMenu()
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     UpdateTargetSize();
-    auto offset = host->GetPaintRectOffset();
+    auto offset = host->GetPaintRectOffset(false, true);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
         offset.AddX(-CALIBERATE_X.ConvertToPx());
@@ -1074,7 +1074,7 @@ void SelectPattern::UpdateSelectedProps(int32_t index)
     }
     if (selectedFont_.FontSize.has_value()) {
         newSelected->SetFontSize(selectedFont_.FontSize.value());
-    } else {
+    } else if (!optionFont_.FontSize.has_value()) {
         auto selectedFontSizeText = theme->GetSelectFontSizeText();
         newSelected->SetFontSize(selectedFontSizeText);
     }

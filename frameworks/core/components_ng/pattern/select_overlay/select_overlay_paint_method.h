@@ -68,6 +68,8 @@ private:
 
     void CheckHandleIsShown();
 
+    bool IsModeSwitchComplete() const;
+
     RefPtr<SelectOverlayModifier> selectOverlayModifier_;
 
     RefPtr<SelectOverlayContentModifier> selectOverlayContentModifier_;

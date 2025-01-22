@@ -5296,7 +5296,7 @@ HWTEST_F(NativeNodeTest, NativeNodeTest080, TestSize.Level1)
 }
 
 /**
- * @tc.name: NativeNodeTest080
+ * @tc.name: NativeNodeTest081
  * @tc.desc: Test native style string.
  * @tc.type: FUNC
  */
@@ -5313,10 +5313,13 @@ HWTEST_F(NativeNodeTest, NativeNodeTest081, TestSize.Level1)
     delete placeholder;
     OH_ArkUI_StyledString_PushTextStyle(styleString, textStyle);
     OH_ArkUI_StyledString_AddPlaceholder(styleString, placeholder);
+    EXPECT_NE(styleString, nullptr);
+    EXPECT_NE(textStyle, nullptr);
+    EXPECT_NE(placeholder, nullptr);
 }
 
 /**
- * @tc.name: NativeNodeTest081
+ * @tc.name: NativeNodeTest082
  * @tc.desc: Test OH_ArkUI_NodeEvent_GetTextChangeEvent function.
  * @tc.type: FUNC
  */
@@ -5331,8 +5334,8 @@ HWTEST_F(NativeNodeTest, NativeNodeTest082, TestSize.Level1)
     EXPECT_EQ(OH_ArkUI_NodeEvent_GetTextChangeEvent(&event), nullptr);
     ArkUINodeEvent origin = { 0, 0, 0};
     origin.textChangeEvent.subKind = ArkUIEventSubKind::ON_TEXT_AREA_CHANGE_WITH_PREVIEW_TEXT;
-    origin.textChangeEvent.nativeStringPtr = reinterpret_cast<intptr_t>(str.c_str());
-    origin.textChangeEvent.extendStringPtr = reinterpret_cast<intptr_t>(str.c_str());
+    origin.textChangeEvent.nativeStringPtr = const_cast<char*>(str.c_str());
+    origin.textChangeEvent.extendStringPtr = const_cast<char*>(str.c_str());
     origin.textChangeEvent.numArgs = 0;
     event.origin = &origin;
     EXPECT_NE(OH_ArkUI_NodeEvent_GetTextChangeEvent(&event), nullptr);

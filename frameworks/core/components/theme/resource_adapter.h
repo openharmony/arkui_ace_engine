@@ -202,6 +202,17 @@ public:
         return false;
     }
 
+    /*
+     * Get rawfile file description which will not be cached.
+     * NOTE: false value will be returned if not found.
+     * @param[in] rawfileName Target rawfile.
+     * @return success or not to close file info.
+     */
+    virtual bool GetRawFD(const std::string& /* rawfileName */, RawfileDescription& /* rawfileDescription */) const
+    {
+        return false;
+    }
+
     virtual bool GetMediaById(const int32_t& resId, std::string& mediaPath) const
     {
         return false;
