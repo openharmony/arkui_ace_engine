@@ -57,10 +57,10 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
-const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
-
 namespace OHOS::Ace::NG {
 namespace {
+const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+
 std::string XComponentTypeToString(XComponentType type)
 {
     switch (type) {
