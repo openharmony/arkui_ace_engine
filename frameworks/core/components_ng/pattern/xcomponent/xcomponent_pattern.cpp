@@ -57,6 +57,8 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
+const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+
 namespace OHOS::Ace::NG {
 namespace {
 std::string XComponentTypeToString(XComponentType type)
@@ -237,6 +239,7 @@ void XComponentPattern::InitSurface()
     renderSurface_ = RenderSurface::Create();
 #endif
     renderSurface_->SetInstanceId(GetHostInstanceId());
+    renderSurface_->SetBufferUsage(BUFFER_USAGE_XCOMPONENT);
     if (type_ == XComponentType::SURFACE) {
         InitializeRenderContext();
         if (!SystemProperties::GetExtSurfaceEnabled()) {
