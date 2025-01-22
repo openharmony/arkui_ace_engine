@@ -771,9 +771,17 @@ void WebDelegate::UnRegisterScreenLockFunction()
 void WebAvoidAreaChangedListener::OnAvoidAreaChanged(
     const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type)
 {
-    if (auto delegate = webDelegate_.Upgrade()) {
-        delegate->OnAvoidAreaChanged(avoidArea, type);
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
     }
+    context->GetTaskExecutor()->PostTask(
+        [weak = webDelegate_, avoidArea, type]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            delegate->OnAvoidAreaChanged(avoidArea, type);
+        },
+        TaskExecutor::TaskType::UI, "OnAvoidAreaChanged");
 }
 
 WebDelegate::~WebDelegate()
@@ -2885,8 +2893,9 @@ void WebDelegate::RegisterAvoidAreaChangeListener(int32_t instanceId)
         navigationIndicatorSafeArea_ =
             container->GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR);
         OnSafeInsetsChange();
-
-        avoidAreaChangedListener_ = new WebAvoidAreaChangedListener(AceType::WeakClaim(this));
+        auto context = context_.Upgrade();
+        CHECK_NULL_VOID(context);
+        avoidAreaChangedListener_ = new WebAvoidAreaChangedListener(AceType::WeakClaim(this), context);
         OHOS::Rosen::WMError regCode = container->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         TAG_LOGI(AceLogTag::ACE_WEB, "RegisterAvoidAreaChangeListener result:%{public}d", (int) regCode);
     } else {

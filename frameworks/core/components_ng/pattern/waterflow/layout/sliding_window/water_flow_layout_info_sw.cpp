@@ -25,7 +25,7 @@ void WaterFlowLayoutInfoSW::Sync(int32_t itemCnt, float mainSize, const std::vec
     startIndex_ = StartIndex();
     endIndex_ = EndIndex();
     if (startIndex_ > endIndex_) {
-        SyncOnEmptyLanes();
+        SyncOnEmptyLanes(mainSize);
         return;
     }
     const auto* startLane = GetLane(startIndex_);
@@ -144,7 +144,7 @@ OverScrollOffset WaterFlowLayoutInfoSW::GetOverScrolledDelta(float delta) const
         return res;
     }
     delta += delta_;
-    if (startIndex_ == 0) {
+    if (startIndex_ == 0 || startIndex_ == Infinity<int32_t>()) {
         float disToTop = -StartPosWithMargin();
         if (!itemStart_) {
             res.start = std::max(0.0f, delta - disToTop);
@@ -221,6 +221,10 @@ float WaterFlowLayoutInfoSW::EndPos() const
     if (synced_) {
         return endPos_;
     }
+    if (startIndex_ > endIndex_) {
+        // when lanes_ is empty, the endPos of all section is same.
+        return lanes_[0][0].endPos;
+    }
     for (auto it = lanes_.rbegin(); it != lanes_.rend(); ++it) {
         if (SectionEmpty(*it)) {
             continue;
@@ -234,6 +238,10 @@ float WaterFlowLayoutInfoSW::StartPos() const
 {
     if (synced_) {
         return startPos_;
+    }
+    if (startIndex_ > endIndex_) {
+        // when lanes_ is empty, the startPos of all section is same.
+        return lanes_[0][0].startPos;
     }
     for (const auto& section : lanes_) {
         if (SectionEmpty(section)) {
@@ -922,16 +930,18 @@ std::optional<float> WaterFlowLayoutInfoSW::GetCachedHeight(int32_t idx) const
     return std::nullopt;
 }
 
-void WaterFlowLayoutInfoSW::SyncOnEmptyLanes()
+void WaterFlowLayoutInfoSW::SyncOnEmptyLanes(float mainSize)
 {
-    startPos_ = 0.0f;
-    endPos_ = 0.0f;
-    itemStart_ = true;
+    startPos_ = StartPos();
+    endPos_ = EndPos();
+    itemStart_ = NonNegative(startPos_ + delta_ - TopMargin());
     itemEnd_ = true;
-    offsetEnd_ = true;
+    offsetEnd_ = OverScrollBottom();
     maxHeight_ = footerHeight_;
     knowTotalHeight_ = true;
     newStartIndex_ = EMPTY_NEW_START_INDEX;
+    delta_ = 0.0f;
+    lastMainSize_ = mainSize;
     synced_ = true;
 }
 

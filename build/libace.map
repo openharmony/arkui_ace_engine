@@ -47,6 +47,7 @@
       "OHOS::Ace::Backend::Create()";
       "OHOS::Ace::Backend::TypeId()::myTypeId";
       "OHOS::Ace::BaseId::BaseId()";
+      OHOS::Ace::CalendarPickerModel::*;
       OHOS::Ace::ConnectServerManager::*;
       OHOS::Ace::Container::*;
       OHOS::Ace::CubicCurve::*;
@@ -364,6 +365,7 @@
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
+      OHOS::Ace::BorderImage::*;
       OHOS::Ace::ContainerScope::*;
       OHOS::Ace::Dimension::*;
       OHOS::Ace::ImageSourceInfo::*;
@@ -410,6 +412,7 @@
       OHOS::Ace::NG::ListModelNG::*;
       OHOS::Ace::NG::ListItemModelNG::*;
       OHOS::Ace::NG::ScrollBarModelNG::*;
+      OHOS::Ace::NG::ScrollableModelNG::*;
 
       vtable?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::Kit::BoxLayoutAlgorithm;
@@ -454,6 +457,7 @@
       vtable?for?OHOS::Ace::NG::ListModelNG;
       vtable?for?OHOS::Ace::NG::ListItemModelNG;
       vtable?for?OHOS::Ace::NG::ScrollBarModelNG;
+      vtable?for?OHOS::Ace::NG::ScrollableModelNG;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;

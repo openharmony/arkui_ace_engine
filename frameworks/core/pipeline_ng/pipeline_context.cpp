@@ -449,7 +449,7 @@ void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
         idToPoints[iter->pointerId].history.insert(idToPoints[iter->pointerId].history.begin(), *iter);
         needInterpolation = iter->action != PointerAction::PULL_MOVE ? false : true;
     }
-    if (focusWindowId_.has_value()) {
+    if (!NeedTouchInterpolation()) {
         needInterpolation = false;
     }
     if (needInterpolation) {
@@ -1154,7 +1154,13 @@ void PipelineContext::SetupRootElement()
     if (!stageManager_) {
         stageManager_ = MakeRefPtr<StageManager>(stageNode);
     }
-    auto frameNode = DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() :
+    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
+        auto frontend = weakFrontend.Upgrade();
+        CHECK_NULL_RETURN(frontend, "");
+        return frontend->GetPagePathByUrl(url);
+    };
+    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
+    auto frameNode = DynamicCast<FrameNode>(installationFree_ ? atomicService->GetParent() :
         stageNode->GetParent());
     overlayManager_ = MakeRefPtr<OverlayManager>(frameNode);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
@@ -1167,7 +1173,7 @@ void PipelineContext::SetupRootElement()
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     focusManager_ = GetOrCreateFocusManager();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
-        DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
+        DynamicCast<FrameNode>(installationFree_ ? atomicService->GetParent() : stageNode->GetParent()));
 
     OnAreaChangedFunc onAreaChangedFunc = [weakOverlayManger = AceType::WeakClaim(AceType::RawPtr(overlayManager_))](
                                               const RectF& /* oldRect */, const OffsetF& /* oldOrigin */,
@@ -1240,6 +1246,12 @@ void PipelineContext::SetupSubRootElement()
     if (!stageManager_) {
         stageManager_ = MakeRefPtr<StageManager>(nullptr);
     }
+    auto getPagePathCallback = [weakFrontend = weakFrontend_](const std::string& url) -> std::string {
+        auto frontend = weakFrontend.Upgrade();
+        CHECK_NULL_RETURN(frontend, "");
+        return frontend->GetPagePathByUrl(url);
+    };
+    stageManager_->SetGetPagePathCallback(std::move(getPagePathCallback));
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
@@ -1954,6 +1966,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
     CHECK_RUN_ON(UI);
     // prevent repeated trigger with same keyboardHeight
     CHECK_NULL_VOID(safeAreaManager_);
+    if (keyboardHeight >= rootHeight_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Keyboard higher than whole rootrect, no need to avoid");
+        return;
+    }
+
     if (UsingCaretAvoidMode()) {
         OnCaretPositionChangeOrKeyboardHeightChange(keyboardHeight,
             positionY, height, rsTransaction, forceChange);
@@ -1975,11 +1992,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
         prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
         TAG_LOGI(
             AceLogTag::ACE_KEYBOARD, "Ignore ileagal keyboard height change");
-        return;
-    }
-
-    if (keyboardHeight > rootHeight_) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Keyboard higher than whole rootrect, no need to avoid");
         return;
     }
 
@@ -2233,7 +2245,7 @@ float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positi
     CHECK_NULL_RETURN(host, newKeyboardOffset);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, newKeyboardOffset);
-    auto paintOffset = host->GetPaintRectOffset();
+    auto paintOffset = host->GetPaintRectOffset(false, true);
     auto frameSize = geometryNode->GetFrameSize();
     auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffsetDirectly(),
         frameSize.Height() + CARET_AVOID_OFFSET.ConvertToPx(), rootSize);
@@ -2564,8 +2576,9 @@ void PipelineContext::OnTouchEvent(
         if (!touchRestrict.childTouchTestList.empty()) {
             scalePoint.childTouchTestList = touchRestrict.childTouchTestList;
         }
-        touchTestResults_ = eventManager_->touchTestResults_;
-        if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(scalePoint, touchTestResults_)) {
+        auto touchTestResults = eventManager_->touchTestResults_;
+        if (StylusDetectorMgr::GetInstance()->IsNeedInterceptedTouchEvent(
+            scalePoint, eventManager_->touchTestResults_)) {
             eventManager_->ClearTouchTestTargetForPenStylus(scalePoint);
             return;
         }
@@ -2583,25 +2596,25 @@ void PipelineContext::OnTouchEvent(
                 recognizer->BeginReferee(scalePoint.id, true);
                 std::list<RefPtr<NGGestureRecognizer>> combined;
                 combined.emplace_back(recognizer);
-                for (auto iter = touchTestResults_[point.id].begin();
-                    iter != touchTestResults_[point.id].end(); iter++) {
+                for (auto iter = touchTestResults[point.id].begin();
+                    iter != touchTestResults[point.id].end(); iter++) {
                     auto outRecognizer = AceType::DynamicCast<NGGestureRecognizer>(*iter);
                     if (outRecognizer) {
                         combined.emplace_back(outRecognizer);
-                        touchTestResults_[point.id].erase(iter);
+                        touchTestResults[point.id].erase(iter);
                         break;
                     }
                 }
                 auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(combined));
                 exclusiveRecognizer->AttachFrameNode(node);
                 exclusiveRecognizer->BeginReferee(scalePoint.id);
-                touchTestResults_[point.id].emplace_back(exclusiveRecognizer);
-                eventManager_->touchTestResults_ = touchTestResults_;
+                touchTestResults[point.id].emplace_back(exclusiveRecognizer);
+                eventManager_->touchTestResults_ = touchTestResults;
                 eventManager_->SetInnerFlag(true);
             }
         }
-        if (IsFormRender() && touchTestResults_.find(point.id) != touchTestResults_.end()) {
-            for (const auto& touchResult : touchTestResults_[point.id]) {
+        if (IsFormRender() && touchTestResults.find(point.id) != touchTestResults.end()) {
+            for (const auto& touchResult : touchTestResults[point.id]) {
                 auto recognizer = AceType::DynamicCast<NG::RecognizerGroup>(touchResult);
                 if (recognizer) {
                     auto gesture = recognizer->CreateGestureFromRecognizer();
@@ -2814,7 +2827,8 @@ bool PipelineContext::DumpPageViewData(const RefPtr<FrameNode>& node, RefPtr<Vie
     // The page path may not be obtained in the container, use the node tag as the page path.
     if (node) {
         const auto& nodeTag = node->GetTag();
-        if (nodeTag == V2::DIALOG_ETS_TAG || nodeTag == V2::SHEET_PAGE_TAG || nodeTag == V2::MODAL_PAGE_TAG) {
+        if (nodeTag == V2::DIALOG_ETS_TAG || nodeTag == V2::SHEET_PAGE_TAG ||
+            nodeTag == V2::MODAL_PAGE_TAG || nodeTag == V2::POPUP_ETS_TAG) {
             viewDataWrap->SetPageUrl(nodeTag);
             return true;
         }
@@ -3131,7 +3145,7 @@ void PipelineContext::FlushTouchEvents()
             idToTouchPoints[scalePoint.id].history.insert(idToTouchPoints[scalePoint.id].history.begin(), scalePoint);
             needInterpolation = iter->type != TouchType::MOVE ? false : true;
         }
-        if (focusWindowId_.has_value()) {
+        if (!NeedTouchInterpolation()) {
             needInterpolation = false;
         }
         if (needInterpolation && SystemProperties::IsNeedResampleTouchPoints()) {
@@ -3315,13 +3329,13 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         lastMouseTime_ = GetTimeFromExternalTimer();
         CompensateMouseMoveEvent(event, node);
     }
+    DispatchMouseToTouchEvent(event, node);
     if (event.action == MouseAction::MOVE) {
         mouseEvents_[node].emplace_back(event);
         hasIdleTasks_ = true;
         RequestFrame();
         return;
     }
-    DispatchMouseToTouchEvent(event, node);
     DispatchMouseEvent(event, node);
 }
 
@@ -3488,7 +3502,7 @@ void PipelineContext::OnFlushMouseEvent(
         nodeToMousePoints[node].emplace_back(idToMousePoints[scaleEvent.id]);
         needInterpolation = iter->action != MouseAction::MOVE ? false : true;
     }
-    if (focusWindowId_.has_value()) {
+    if (!NeedTouchInterpolation()) {
         needInterpolation = false;
     }
     if (needInterpolation) {
@@ -3558,8 +3572,8 @@ bool PipelineContext::ChangeMouseStyle(int32_t nodeId, MouseFormat format, int32
 void PipelineContext::ReDispatch(KeyEvent& keyEvent)
 {
     CHECK_NULL_VOID(eventManager_);
-    TAG_LOGD(AceLogTag::ACE_WEB, "Web ReDispach key event: code:%{public}d/action:%{public}d.", keyEvent.code,
-        keyEvent.action);
+    TAG_LOGD(AceLogTag::ACE_WEB, "Web ReDispach key event: code:" SEC_PLD(%{public}d) "/action:%{public}d.",
+        SEC_PARAM(keyEvent.code), keyEvent.action);
     eventManager_->ReDispatch(keyEvent);
 }
 
@@ -3650,11 +3664,18 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
     }
 
-    DispatchAxisEventToDragDropManager(event, node);
-
-    if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
-        eventManager_->AxisTest(scaleEvent, node);
-        eventManager_->DispatchAxisEventNG(scaleEvent);
+    DispatchAxisEventToDragDropManager(event, node, etsSerializedGesture);
+    // when api >= 15, do not block end and cancel action.
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        if (event.action != AxisAction::NONE) {
+            eventManager_->AxisTest(scaleEvent, node);
+            eventManager_->DispatchAxisEventNG(scaleEvent);
+        }
+    } else {
+        if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
+            eventManager_->AxisTest(scaleEvent, node);
+            eventManager_->DispatchAxisEventNG(scaleEvent);
+        }
     }
     if (event.action == AxisAction::BEGIN && formEventMgr) {
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);
@@ -3680,7 +3701,8 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     }
 }
 
-void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node)
+void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event, const RefPtr<FrameNode>& node,
+    SerializedGesture& etsSerializedGesture)
 {
     auto scaleEvent = event.CreateScaleEvent(viewScale_);
     auto dragManager = GetDragDropManager();
@@ -3694,6 +3716,16 @@ void PipelineContext::DispatchAxisEventToDragDropManager(const AxisEvent& event,
             // If received rotate event, no need to touchtest.
             if (!event.isRotationEvent) {
                 eventManager_->TouchTest(scaleEvent, node, touchRestrict);
+                auto axisTouchTestResults_ = eventManager_->GetAxisTouchTestResults();
+                auto formEventMgr = this->GetFormEventManager();
+                if (formEventMgr) {
+                    formEventMgr->HandleEtsCardTouchEvent(touchRestrict.touchEvent, etsSerializedGesture);
+                }
+                auto formGestureMgr =  this->GetFormGestureManager();
+                if (formGestureMgr) {
+                    formGestureMgr->LinkGesture(event, this, node, axisTouchTestResults_,
+                        etsSerializedGesture, eventManager_);
+                }
             }
         }
         eventManager_->DispatchTouchEvent(scaleEvent);
@@ -5305,7 +5337,8 @@ void PipelineContext::UpdateHalfFoldHoverStatus(int32_t windowWidth, int32_t win
 
 void PipelineContext::OnHalfFoldHoverChangedCallback()
 {
-    for (auto&& [id, callback] : halfFoldHoverChangedCallbackMap_) {
+    auto tempHalfFoldHoverChangedCallbackMap = halfFoldHoverChangedCallbackMap_;
+    for (auto&& [id, callback] : tempHalfFoldHoverChangedCallbackMap) {
         if (callback) {
             callback(isHalfFoldHoverStatus_);
         }

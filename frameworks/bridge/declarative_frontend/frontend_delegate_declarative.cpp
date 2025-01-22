@@ -3657,4 +3657,20 @@ std::optional<NG::OverlayManagerInfo> FrontendDelegateDeclarative::GetOverlayMan
     return overlayManager->GetOverlayManagerOptions();
 };
 
+std::string FrontendDelegateDeclarative::GetPagePathByUrl(const std::string& url) const
+{
+    if (!Container::IsCurrentUseNewPipeline()) {
+        return "";
+    }
+    CHECK_NULL_RETURN(pageRouterManager_, "");
+    auto currentId = GetEffectiveContainerId();
+    if (!currentId.has_value()) {
+        return "";
+    }
+    ContainerScope scope(currentId.value());
+    std::string name;
+    std::string path;
+    pageRouterManager_->GetPageNameAndPath(url, name, path);
+    return path + name;
+}
 } // namespace OHOS::Ace::Framework

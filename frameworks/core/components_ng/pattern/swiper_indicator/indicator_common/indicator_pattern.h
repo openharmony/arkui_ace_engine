@@ -98,11 +98,13 @@ public:
             indicatorLayoutAlgorithm->SetIsHoverOrPress(IsHover() || IsPressed());
             indicatorLayoutAlgorithm->SetHoverPoint(GetHoverPoint());
             indicatorLayoutAlgorithm->SetIndicatorDisplayCount(GetCountFromProperty());
+            indicatorLayoutAlgorithm->SetIsSingle(true);
             return indicatorLayoutAlgorithm;
         } else {
             auto indicatorLayoutAlgorithm = MakeRefPtr<DigitIndicatorLayoutAlgorithm>();
             indicatorLayoutAlgorithm->SetIsHoverOrPress(IsHover() || IsPressed());
             indicatorLayoutAlgorithm->SetHoverPoint(GetHoverPoint());
+            indicatorLayoutAlgorithm->SetIsSingle(true);
             return indicatorLayoutAlgorithm;
         }
     }
@@ -136,6 +138,9 @@ public:
         if (!GetDotIndicatorModifier()) {
             SetDotIndicatorModifier(AceType::MakeRefPtr<DotIndicatorModifier>());
         }
+        const int32_t DEFAULT_DURATION = 400;
+        GetDotIndicatorModifier()->SetAnimationDuration(DEFAULT_DURATION);
+        GetDotIndicatorModifier()->SetLongPointHeadCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 328, 34), 0);
 
         auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(GetDotIndicatorModifier());
         SetDotIndicatorPaintMethodInfoInSingleMode(paintMethod);
@@ -152,6 +157,7 @@ public:
         paintMethod->SetHorizontalAndRightToLeft(GetNonAutoLayoutDirection());
         paintMethod->SetItemCount(RealTotalCount());
         paintMethod->SetGestureState(singleGestureState_);
+        singleGestureState_ = GestureState::GESTURE_STATE_INIT;
         paintMethod->SetIsLoop(IsLoop());
         paintMethod->SetIsHover(IsHover());
         paintMethod->SetIsPressed(IsPressed());
@@ -161,7 +167,7 @@ public:
         }
         paintMethod->SetMouseClickIndex(GetOptinalMouseClickIndex());
         paintMethod->SetIsTouchBottom(GetTouchBottomType());
-        GetOptinalMouseClickIndex() = std::nullopt;
+        ResetOptinalMouseClickIndex();
     }
 
     const bool& IsIndicatorCustomSize() const
@@ -195,7 +201,7 @@ public:
     int32_t hasSetInitialIndex_ = false;
 
 protected:
-    void FireChangeEvent() const override;
+    void FireChangeEvent(int32_t index) const override;
     SwiperIndicatorType GetIndicatorTypeFromProperty() const;
     Axis GetDirectionFromProperty() const;
     int32_t GetInitialIndexFromProperty() const;

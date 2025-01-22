@@ -215,6 +215,13 @@ void TextPickerColumnPattern::OnWindowHide()
     }
 }
 
+void TextPickerColumnPattern::StopHapticController()
+{
+    if (hapticController_) {
+        hapticController_->Stop();
+    }
+}
+
 void TextPickerColumnPattern::OnWindowShow()
 {
     isShow_ = true;
@@ -372,6 +379,7 @@ RefPtr<TouchEventImpl> TextPickerColumnPattern::CreateItemTouchEventListener()
                 auto TossEndPosition = toss->GetTossEndPosition();
                 pattern->SetYLast(TossEndPosition);
                 toss->StopTossAnimation();
+                pattern->StopHapticController();
             } else {
                 pattern->animationBreak_ = false;
                 pattern->clickBreak_ = false;
@@ -1806,15 +1814,13 @@ void TextPickerColumnPattern::UpdateColumnChildPosition(double offsetY)
     yOffset_ = dragDelta;
     yLast_ = offsetY;
 
+    StopHapticController();
     if (useRebound && !pressed_ && isTossStatus_ && !isReboundInProgress_ && overscroller_.IsOverScroll()) {
         overscroller_.UpdateTossSpring(offsetY);
         if (overscroller_.ShouldStartRebound()) {
             auto toss = GetToss();
             CHECK_NULL_VOID(toss);
             toss->StopTossAnimation(); // Stop fling animation and start rebound animation implicitly
-            if (hapticController_) {
-                hapticController_->Stop();
-            }
         }
     }
     SpringCurveTailEndProcess(useRebound, stopMove);

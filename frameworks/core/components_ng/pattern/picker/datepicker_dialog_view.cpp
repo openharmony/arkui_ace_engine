@@ -66,6 +66,10 @@ constexpr size_t ACCEPT_BUTTON_INDEX = 0;
 constexpr size_t CANCEL_BUTTON_INDEX = 1;
 constexpr int32_t NODE_ZERO = 0;
 constexpr int32_t NODE_TWO = 2;
+constexpr int32_t FIRST_STACK  = 0;
+constexpr int32_t SECOND_STACK = 1;
+constexpr int32_t FIRST_PAGE  = 0;
+constexpr int32_t SECOND_PAGE = 1;
 } // namespace
 bool DatePickerDialogView::switchFlag_ = false;
 bool DatePickerDialogView::switchTimePickerFlag_ = false;
@@ -102,7 +106,6 @@ RefPtr<FrameNode> DatePickerDialogView::Show(const DialogProperties& dialogPrope
     pickerPattern->SetIsShowInDialog(true);
     pickerPattern->SetShowLunarSwitch(settingData.lunarswitch);
     pickerPattern->SetTextProperties(settingData.properties);
-    pickerPattern->SetMode(settingData.mode);
     if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_SIXTEEN)) {
         isEnableHapticFeedback_ = settingData.isEnableHapticFeedback;
         pickerPattern->SetEnableHapticFeedback(isEnableHapticFeedback_);
@@ -515,6 +518,12 @@ void DatePickerDialogView::SwitchDatePickerPage(const RefPtr<FrameNode>& dateNod
         auto result = UpdateVisibilityForNode(dateStackNode, isSwitchByTitle, index);
         CHECK_NULL_VOID(result);
     }
+
+    auto datePickerPattern = dateNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetCurrentFocusKeyID(switchDatePickerFlag_ ? SECOND_STACK : FIRST_STACK);
+    datePickerPattern->SetCurrentPage(switchDatePickerFlag_ ? SECOND_PAGE : FIRST_PAGE);
+
     switchDatePickerFlag_ = !switchDatePickerFlag_;
     dateNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -1375,6 +1384,16 @@ void DatePickerDialogView::SetSelectedDate(const RefPtr<FrameNode>& frameNode, c
     pickerProperty->UpdateSelectedDate(datePickerPattern->GetSelectDate());
 }
 
+void DatePickerDialogView::SetMode(const RefPtr<FrameNode>& frameNode, const DatePickerMode& mode)
+{
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetMode(mode);
+    auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    pickerProperty->UpdateMode(mode);
+}
+
 void DatePickerDialogView::SetShowLunar(const RefPtr<FrameNode>& frameNode, bool lunar)
 {
     auto pickerProperty = frameNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
@@ -1575,6 +1594,7 @@ RefPtr<FrameNode> DatePickerDialogView::CreateAndMountDateNode(
     datePickerMode_ = settingData.mode;
     auto dateNode =
         CreateDateNode(dateNodeId, settingData.datePickerProperty, settingData.properties, settingData.isLunar, false);
+    SetMode(dateNode, settingData.mode);
     ViewStackProcessor::GetInstance()->Push(dateNode);
     dateNode->MountToParent(pickerStack);
     return dateNode;

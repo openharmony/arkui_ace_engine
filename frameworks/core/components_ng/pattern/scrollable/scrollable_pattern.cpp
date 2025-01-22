@@ -286,7 +286,8 @@ void ScrollablePattern::ProcessNavBarReactOnStart()
 float ScrollablePattern::ProcessNavBarReactOnUpdate(float offset)
 {
     CHECK_NULL_RETURN(navBarPattern_, false);
-    return navBarPattern_->OnCoordScrollUpdate(offset);
+    auto currentOffset = GetTotalOffset();
+    return navBarPattern_->OnCoordScrollUpdate(offset, currentOffset);
 }
 
 void ScrollablePattern::ProcessNavBarReactOnEnd()
@@ -762,6 +763,10 @@ void ScrollablePattern::OnTouchDown(const TouchEventInfo& info)
         auto child = GetScrollOriginChild();
         CHECK_NULL_VOID(child);
         child->StopScrollAnimation();
+    }
+    if (isClickAnimationStop_) {
+        StopAnimate();
+        isClickAnimationStop_ = false;
     }
 }
 
@@ -1313,7 +1318,7 @@ void ScrollablePattern::GetParentNavigation()
             (frameNode->GetTag() == V2::SCROLL_ETS_TAG) || (frameNode->GetTag() == V2::ARC_LIST_ETS_TAG)) {
             break;
         }
-        navBarPattern_ = frameNode->GetPattern<NavBarPattern>();
+        navBarPattern_ = frameNode->GetPattern<NavDestinationPatternBase>();
         if (!navBarPattern_) {
             continue;
         }
@@ -1417,6 +1422,7 @@ void ScrollablePattern::OnAnimateFinish()
                 .c_str());
     }
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::END);
+    isClickAnimationStop_ = false;
 }
 
 void ScrollablePattern::PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping,
@@ -2404,13 +2410,7 @@ bool ScrollablePattern::HandleScrollableOverScroll(float velocity)
         OnScrollEndRecursiveInner(velocity);
         return true;
     }
-    OnScrollEnd();
-    auto parent = GetNestedScrollParent();
-    auto nestedScroll = GetNestedScroll();
-    if (!result && parent && nestedScroll.NeedParent()) {
-        result = parent->HandleScrollVelocity(velocity, Claim(this));
-    }
-    return result;
+    return false;
 }
 
 bool ScrollablePattern::CanSpringOverScroll() const
@@ -2435,8 +2435,9 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
     auto isOutOfBoundary = IsOutOfBoundary();
     ACE_SCOPED_TRACE("HandleOverScroll, IsOutOfBoundary:%u, id:%d, tag:%s", isOutOfBoundary,
         static_cast<int32_t>(host->GetAccessibilityId()), host->GetTag().c_str());
+    auto needSpringEffect = GetEdgeEffect() == EdgeEffect::SPRING && CanSpringOverScroll();
     if (!parent || !nestedScroll.NeedParent(velocity < 0) || isOutOfBoundary) {
-        if (GetEdgeEffect() == EdgeEffect::SPRING && AnimateStoped() && CanSpringOverScroll()) {
+        if (needSpringEffect && AnimateStoped()) {
             // trigger onScrollEnd later, when spring animation finishes
             ProcessSpringEffect(velocity, true);
             return true;
@@ -2444,10 +2445,10 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
         OnScrollEndRecursiveInner(velocity);
         return false;
     }
-    if (parent && InstanceOf<ScrollablePattern>(parent)) {
-        // Components that are not ScrollablePattern do not implement NestedScrollOutOfBoundary and
-        // handleScroll is handled differently, so isolate the implementation of handleOverScroll
-        return HandleScrollableOverScroll(velocity);
+    if (InstanceOf<ScrollablePattern>(parent) && HandleScrollableOverScroll(velocity)) {
+        // Triggers ancestor spring animation that out of boundary, and after ancestor returns to the boundary,
+        // triggers child RemainVelocityToChild
+        return true;
     }
     // parent handle over scroll first
     if ((velocity < 0 && (nestedScroll.forward == NestedScrollMode::SELF_FIRST)) ||
@@ -2457,16 +2458,20 @@ bool ScrollablePattern::HandleOverScroll(float velocity)
             OnScrollEnd();
             return true;
         }
-        if (GetEdgeEffect() == EdgeEffect::SPRING && CanSpringOverScroll()) {
+        if (needSpringEffect) {
             ProcessSpringEffect(velocity);
             return true;
         }
     }
 
     // self handle over scroll first
-    if (GetEdgeEffect() == EdgeEffect::SPRING && CanSpringOverScroll()) {
+    if (needSpringEffect) {
         ProcessSpringEffect(velocity);
         return true;
+    }
+    if (GetEdgeEffect() == EdgeEffect::FADE) {
+        OnScrollEndRecursiveInner(velocity);
+        return false;
     }
     OnScrollEnd();
     return parent->HandleScrollVelocity(velocity);
@@ -2588,6 +2593,55 @@ float ScrollablePattern::GetMainContentSize() const
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, 0.0);
     return geometryNode->GetPaddingSize().MainSize(axis_);
+}
+
+void ScrollablePattern::SetBackToTop(bool backToTop)
+{
+    backToTop_ = backToTop;
+    auto* eventProxy = StatusBarEventProxy::GetInstance();
+    if (!eventProxy) {
+        TAG_LOGI(AceLogTag::ACE_SCROLLABLE, "StatusBarEventProxy is null");
+        return;
+    }
+    if (backToTop_) {
+        eventProxy->Register(WeakClaim(this));
+    } else {
+        eventProxy->UnRegister(WeakClaim(this));
+    }
+}
+
+void ScrollablePattern::OnStatusBarClick()
+{
+    if (!backToTop_) {
+        return;
+    }
+
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (!pipeline->GetOnShow() || !host->IsActive()) {
+        return;
+    }
+
+    bool isActive = true;
+    // If any of the parent components is not active while traversing the parent components, do not scroll to the top.
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        if (!frameNode->IsActive() || !frameNode->IsVisible()) {
+            isActive = false;
+            break;
+        }
+    }
+    if (!isActive) {
+        return;
+    }
+
+    isClickAnimationStop_ = true; // set stop animation flag when click status bar.
+    AnimateTo(0 - GetContentStartOffset(), -1, nullptr, true);
 }
 
 void ScrollablePattern::ScrollToEdge(ScrollEdgeType scrollEdgeType, bool smooth)

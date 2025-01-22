@@ -384,6 +384,8 @@ public:
         return manifestParser_;
     }
 
+    std::string GetPagePathByUrl(const std::string& url) const;
+
 protected:
     bool isCardDelegate_ = false;
 

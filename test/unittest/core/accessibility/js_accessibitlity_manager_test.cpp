@@ -17,7 +17,7 @@
 
 #define private public
 #define protected public
-
+#include "accessibility_system_ability_client.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
@@ -346,6 +346,62 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager007, TestSize.Level1)
      * @tc.steps: step5. test UnsubscribeStateObserver
      */
     ret = jsAccessibilityManager->UnsubscribeStateObserver(16);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: JsAccessibilityManager008
+ * @tc.desc: SendAccessibilitySyncEvent, TransferAccessibilityAsyncEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    jsAccessibilityManager->SetPipelineContext(context);
+    jsAccessibilityManager->Register(true);
+    auto client = Accessibility::AccessibilitySystemAbilityClient::GetInstance();
+
+    /**
+     * @tc.steps: step2. test SendAccessibilitySyncEvent with register true
+     */
+    AccessibilityEvent accessibilityEvent;
+    Accessibility::AccessibilityEventInfo eventInfo;
+    auto ret = jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
+    if (client) {
+        bool isEnabled = false;
+        client->IsEnabled(isEnabled);
+        EXPECT_EQ(ret, isEnabled);
+    } else {
+        EXPECT_EQ(ret, false);
+    }
+    
+    /**
+     * @tc.steps: step3. test TransferAccessibilityAsyncEvent with register true
+     */
+    int64_t uiExtensionOffset = 1000;
+    ret = jsAccessibilityManager->TransferAccessibilityAsyncEvent(eventInfo, uiExtensionOffset);
+    if (client) {
+        bool isEnabled = false;
+        client->IsEnabled(isEnabled);
+        EXPECT_EQ(ret, isEnabled);
+    } else {
+        EXPECT_EQ(ret, false);
+    }
+
+    /**
+     * @tc.steps: step4. test SendAccessibilitySyncEvent with register false
+     */
+    jsAccessibilityManager->Register(false);
+    ret = jsAccessibilityManager->SendAccessibilitySyncEvent(accessibilityEvent, eventInfo);
+    EXPECT_EQ(ret, false);
+    /**
+     * @tc.steps: step5. test TransferAccessibilityAsyncEvent with register false
+     */
+    ret = jsAccessibilityManager->TransferAccessibilityAsyncEvent(eventInfo, uiExtensionOffset);
     EXPECT_EQ(ret, false);
 }
 

@@ -166,6 +166,11 @@ void JsThirdProviderInteractionOperation::SearchElementInfoByAccessibilityId(
     const int64_t elementId, const int32_t requestId,
     Accessibility::AccessibilityElementOperatorCallback& callback, const int32_t mode)
 {
+    uint32_t realMode = mode;
+    if (realMode & static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN_REDUCED)) {
+        realMode &= ~static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN_REDUCED);
+        realMode |= static_cast<uint32_t>(PREFETCH_RECURSIVE_CHILDREN);
+    }
     // 1. Get real elementId
     int64_t splitElementId = AccessibilityElementInfo::UNDEFINED_ACCESSIBILITY_ID;
     int32_t splitTreeId = AccessibilityElementInfo::UNDEFINED_TREE_ID;
@@ -175,7 +180,7 @@ void JsThirdProviderInteractionOperation::SearchElementInfoByAccessibilityId(
     // 2. FindAccessibilityNodeInfosById by provider
     std::list<Accessibility::AccessibilityElementInfo> infos;
     bool ret = FindAccessibilityNodeInfosByIdFromProvider(
-        splitElementId, mode, requestId, infos);
+        splitElementId, realMode, requestId, infos);
     if (!ret) {
         TAG_LOGW(AceLogTag::ACE_ACCESSIBILITY,
             "SearchElementInfoByAccessibilityId failed.");

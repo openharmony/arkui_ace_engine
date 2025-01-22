@@ -1869,7 +1869,7 @@ void SheetPresentationPattern::GetSheetTypeWithAuto(SheetType& sheetType)
     if (container->IsFoldable() && container->GetCurrentFoldStatus() == FoldStatus::EXPAND) {
 #else
     // when big fold expand
-    if (IsFold() && !sheetTheme->IsOnlyBottom()) {
+    if (IsFoldExpand() && !sheetTheme->IsOnlyBottom()) {
 #endif
         sheetType = SheetType::SHEET_CENTER;
         auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
@@ -2060,13 +2060,22 @@ void SheetPresentationPattern::ResetToInvisible()
     renderContext->UpdateTransformTranslate({ 0.0f, Dimension(sheetOffsetY_ - SHEET_INVISIABLE_OFFSET), 0.0f });
 }
 
-bool SheetPresentationPattern::IsFold()
+bool SheetPresentationPattern::IsFoldExpand()
 {
-    auto containerId = Container::CurrentId();
-    auto foldWindow = FoldableWindow::CreateFoldableWindow(containerId);
-    CHECK_NULL_RETURN(foldWindow, false);
-    if (foldWindow->IsFoldExpand()) {
-        TAG_LOGD(AceLogTag::ACE_SHEET, "Get FoldableWindow IsFoldExpand is true");
+    bool isExpand = false;
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        auto container = Container::Current();
+        CHECK_NULL_RETURN(container, false);
+        auto foldStatus = container->GetCurrentFoldStatus();
+        isExpand = foldStatus != FoldStatus::FOLDED && foldStatus != FoldStatus::UNKNOWN;
+    } else {
+        auto containerId = Container::CurrentId();
+        auto foldWindow = FoldableWindow::CreateFoldableWindow(containerId);
+        CHECK_NULL_RETURN(foldWindow, false);
+        isExpand = foldWindow->IsFoldExpand();
+    }
+    if (isExpand) {
+        TAG_LOGD(AceLogTag::ACE_SHEET, "Get Fold status IsFoldExpand is true");
         return true;
     } else {
         return false;
@@ -3598,5 +3607,21 @@ void SheetPresentationPattern::RecoverScrollOrResizeAvoidStatus()
     scrollHeight_ = 0.f;
     ScrollTo(0.f);
     isScrolling_ = false;
+}
+
+void SheetPresentationPattern::OnWillDisappear()
+{
+    if (onWillDisappear_) {
+        TAG_LOGI(AceLogTag::ACE_SHEET, "bindsheet lifecycle change to onWillDisappear state.");
+        onWillDisappear_();
+    }
+    auto hostNode = GetHost();
+    CHECK_NULL_VOID(hostNode);
+    auto pipelineContext = hostNode->GetContextRefPtr();
+    CHECK_NULL_VOID(pipelineContext);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    CHECK_NULL_VOID(navigationManager);
+    navigationManager->FireOverlayLifecycle(hostNode, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE),
+        static_cast<int32_t>(NavDestinationActiveReason::SHEET));
 }
 } // namespace OHOS::Ace::NG

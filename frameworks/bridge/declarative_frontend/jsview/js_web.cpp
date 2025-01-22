@@ -2028,7 +2028,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnHeadEnd", &JSWeb::RunJavaScriptOnHeadEnd);
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentStart", &JSWeb::RunJavaScriptOnDocumentStart);
     JSClass<JSWeb>::StaticMethod("runJavaScriptOnDocumentEnd", &JSWeb::RunJavaScriptOnDocumentEnd);
-    JSClass<JSWeb>::StaticMethod("enableWebMediaAVSession", &JSWeb::EnableWebMediaAVSession);
+    JSClass<JSWeb>::StaticMethod("enableWebAVSession", &JSWeb::EnableWebAVSession);
     JSClass<JSWeb>::InheritAndBind<JSViewAbstract>(globalObj);
     JSWebDialog::JSBind(globalObj);
     JSWebGeolocation::JSBind(globalObj);
@@ -5622,7 +5622,7 @@ void JSWeb::OptimizeParserBudgetEnabled(bool enable)
     WebModel::GetInstance()->SetOptimizeParserBudgetEnabled(enable);
 }
 
-void JSWeb::EnableWebMediaAVSession(const JSCallbackInfo& args)
+void JSWeb::EnableWebAVSession(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsBoolean()) {
         return;

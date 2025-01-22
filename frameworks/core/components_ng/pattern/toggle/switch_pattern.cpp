@@ -23,6 +23,7 @@ namespace {
 constexpr int32_t DEFAULT_DURATION = 200;
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
 constexpr double NUMBER_TWO = 2.0;
+constexpr int32_t  HOTZONE_SPACE = 2;
 } // namespace
 
 void SwitchPattern::OnAttachToFrameNode()
@@ -278,6 +279,8 @@ void SwitchPattern::UpdateSwitchLayoutProperty()
     layoutProperty->UpdateMargin(margin);
     hotZoneHorizontalPadding_ = switchTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = switchTheme->GetHotZoneVerticalPadding();
+    hotZoneHorizontalSize_ = switchTheme->GetHotZoneHorizontalSize();
+    hotZoneVerticalSize_ = switchTheme->GetHotZoneVerticalSize();
     if (layoutProperty->GetPositionProperty()) {
         layoutProperty->UpdateAlignment(
             layoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER));
@@ -725,8 +728,8 @@ void SwitchPattern::AddHotZoneRect()
 {
     hotZoneOffset_.SetX(offset_.GetX() - hotZoneHorizontalPadding_.ConvertToPx());
     hotZoneOffset_.SetY(offset_.GetY() - hotZoneVerticalPadding_.ConvertToPx());
-    hotZoneSize_.SetWidth(size_.Width() + 2 * hotZoneHorizontalPadding_.ConvertToPx());
-    hotZoneSize_.SetHeight(size_.Height() + 2 * hotZoneVerticalPadding_.ConvertToPx());
+    hotZoneSize_.SetWidth(size_.Width() + HOTZONE_SPACE * hotZoneHorizontalSize_.ConvertToPx());
+    hotZoneSize_.SetHeight(size_.Height() + HOTZONE_SPACE * hotZoneVerticalSize_.ConvertToPx());
     DimensionRect hotZoneRegion;
     hotZoneRegion.SetSize(DimensionSize(Dimension(hotZoneSize_.Width()), Dimension(hotZoneSize_.Height())));
     hotZoneRegion.SetOffset(DimensionOffset(Dimension(hotZoneOffset_.GetX()), Dimension(hotZoneOffset_.GetY())));

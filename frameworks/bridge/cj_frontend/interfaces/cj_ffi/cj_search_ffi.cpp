@@ -629,4 +629,40 @@ int64_t FfiOHOSAceFrameworkSearchTextMenuItemGetSize(SearchTextMenuItemHandle ve
     auto actualVec = reinterpret_cast<std::vector<FFiSearchTextMenuItem>*>(vec);
     return (*actualVec).size();
 }
+
+CJRectResult FfiOHOSAceFrameworkSearchGetTextContentRect(int64_t selfID)
+{
+    CJRectResult result;
+    auto self = FFIData::GetData<SearchController>(selfID);
+    if (self != nullptr) {
+        result = self->GetTextContentRect();
+    } else {
+        LOGE("invalid SearchControllerID");
+    }
+    return result;
+}
+
+int32_t FfiOHOSAceFrameworkSearchGetTextContentLineCount(int64_t selfID)
+{
+    int32_t result = 0;
+    auto self = FFIData::GetData<SearchController>(selfID);
+    if (self != nullptr) {
+        result = self->GetTextContentLinesNum();
+    } else {
+        LOGE("invalid SearchControllerID");
+    }
+    return result;
+}
+
+CJCaretOffset FfiOHOSAceFrameworkSearchGetCaretOffset(int64_t selfID)
+{
+    CJCaretOffset result;
+    auto self = FFIData::GetData<SearchController>(selfID);
+    if (self != nullptr) {
+        result = self->GetCaretOffset();
+    } else {
+        LOGE("invalid SearchControllerID");
+    }
+    return result;
+}
 }

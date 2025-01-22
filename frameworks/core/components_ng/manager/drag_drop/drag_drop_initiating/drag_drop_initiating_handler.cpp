@@ -149,6 +149,12 @@ void DragDropInitiatingHandler::NotifyDragStart()
     return initiatingFlow_->HandleDragStart();
 }
 
+void DragDropInitiatingHandler::NotifyDragEnd()
+{
+    CHECK_NULL_VOID(initiatingFlow_);
+    return initiatingFlow_->HandleDragEnd();
+}
+
 void DragDropInitiatingHandler::NotifyTransDragWindowToFwk()
 {
     CHECK_NULL_VOID(initiatingFlow_);

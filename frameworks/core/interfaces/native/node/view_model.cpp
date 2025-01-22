@@ -666,7 +666,6 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
     createBlankNode,
     createDividerNode,
     createAlphabetIndexerNode,
-    createArcAlphabetIndexerNode,
     createSearchNode,
     createGridRowNode,
     createGridColNode,
@@ -697,6 +696,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
 #else
     nullptr,
 #endif
+    createArcAlphabetIndexerNode,
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)

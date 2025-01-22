@@ -19,6 +19,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr bool DEFAULT_BACKTOTOP = false;
 ArkUI_Int32 GetContentClip(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -244,6 +245,27 @@ float GetFlingSpeedLimit(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, -1.0f);
     return ScrollableModelNG::GetMaxFlingSpeed(frameNode);
 }
+
+void SetBackToTop(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetBackToTop(frameNode, value);
+}
+
+void ResetBackToTop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollableModelNG::SetBackToTop(frameNode, false);
+}
+
+int32_t GetBackToTop(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, DEFAULT_BACKTOTOP);
+    return ScrollableModelNG::GetBackToTop(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -277,6 +299,9 @@ const ArkUIScrollableModifier* GetScrollableModifier()
         .getFlingSpeedLimit = GetFlingSpeedLimit,
         .setFlingSpeedLimit = SetFlingSpeedLimit,
         .resetFlingSpeedLimit = ResetFlingSpeedLimit,
+        .setBackToTop = SetBackToTop,
+        .resetBackToTop = ResetBackToTop,
+        .getBackToTop = GetBackToTop,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

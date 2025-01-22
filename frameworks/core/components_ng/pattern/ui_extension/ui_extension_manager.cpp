@@ -455,7 +455,7 @@ void UIExtensionManager::NotifyWindowMode(Rosen::WindowMode mode)
     }
 }
 
-void UIExtensionManager::SendPageModeToUEA(const RefPtr<PipelineContext>& pipeline)
+void UIExtensionManager::SendPageModeRequestToHost(const RefPtr<PipelineContext>& pipeline)
 {
     AAFwk::Want data;
     data.SetParam("requestPageMode", std::string("yes"));

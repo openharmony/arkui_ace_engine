@@ -234,6 +234,10 @@ HintToTypeWrap AceContainer::PlaceHolderToType(const std::string& onePlaceHolder
     return hintToTypeWrap;
 }
 void AceContainer::TerminateUIExtension() {}
+bool AceContainer::UIExtensionIsHalfScreen()
+{
+    return false;
+}
 bool AceContainer::MaybeRelease()
 {
     return true;
@@ -264,4 +268,9 @@ uint32_t AceContainer::GetStatusBarHeight()
 }
 void AceContainer::NotifyConfigurationChange(
     bool needReloadTransition, const ConfigurationChange& configurationChange) {}
+
+bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent)
+{
+    return true;
+}
 } // namespace OHOS::Ace::NG

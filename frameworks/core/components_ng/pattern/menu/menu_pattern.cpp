@@ -2213,4 +2213,14 @@ float MenuPattern::GetSelectMenuWidthFromTheme() const
     }
     return finalWidth;
 }
+
+bool MenuPattern::IsSelectOverlayDefaultModeRightClickMenu()
+{
+    CHECK_NULL_RETURN(IsSelectOverlayRightClickMenu(), false);
+    auto menuWrapper = GetMenuWrapper();
+    CHECK_NULL_RETURN(menuWrapper, false);
+    auto menuWrapperPattern = menuWrapper->GetPattern<MenuWrapperPattern>();
+    CHECK_NULL_RETURN(menuWrapperPattern, false);
+    return !menuWrapperPattern->GetIsSelectOverlaySubWindowWrapper();
+}
 } // namespace OHOS::Ace::NG

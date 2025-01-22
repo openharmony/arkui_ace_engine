@@ -89,7 +89,7 @@ let WordBreak;
   WordBreak[WordBreak.NORMAL = 0] = 'normal';
   WordBreak[WordBreak.BREAK_ALL = 1] = 'break-all';
   WordBreak[WordBreak.BREAK_WORD = 2] = 'break-word';
-  WordBreak[WordBreak.HYPHENATION = 3] = "hyphenation";
+  WordBreak[WordBreak.HYPHENATION = 3] = 'hyphenation';
 })(WordBreak || (WordBreak = {}));
 
 let DpiFollowStrategy;
@@ -639,6 +639,18 @@ let FlexWrap;
   FlexWrap[FlexWrap.WrapReverse = 2] = 'WrapReverse';
 })(FlexWrap || (FlexWrap = {}));
 
+class LayoutPolicy {
+  id_ = '';
+
+  constructor(id) {
+    this.id_ = id;
+  }
+
+  static get matchParent() {
+    return new LayoutPolicy('matchParent');
+  }
+}
+
 var BlurStyle;
 (function (BlurStyle) {
   BlurStyle[BlurStyle.SmallLight = 100] = 'SmallLight';
@@ -1093,6 +1105,10 @@ let NavigationSystemTransitionType;
   NavigationSystemTransitionType[NavigationSystemTransitionType.NONE = 1] = 'NONE';
   NavigationSystemTransitionType[NavigationSystemTransitionType.TITLE = 2] = 'TITLE';
   NavigationSystemTransitionType[NavigationSystemTransitionType.CONTENT = 3] = 'CONTENT';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.FADE = 4] = 'FADE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.EXPLODE = 5] = 'EXPLODE';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.SLIDE_RIGHT = 6] = 'SLIDE_RIGHT';
+  NavigationSystemTransitionType[NavigationSystemTransitionType.SLIDE_BOTTOM = 7] = 'SLIDE_BOTTOM';
 }(NavigationSystemTransitionType || (NavigationSystemTransitionType = {})));
 
 let NavigationOperation;
@@ -1387,6 +1403,14 @@ let WebKeyboardAvoidMode;
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.RESIZE_CONTENT = 1] = 'RESIZE_CONTENT';
   WebKeyboardAvoidMode[WebKeyboardAvoidMode.OVERLAYS_CONTENT = 2] = 'OVERLAYS_CONTENT';
 })(WebKeyboardAvoidMode || (WebKeyboardAvoidMode = {}));
+
+let KeyboardAppearance;
+(function (KeyboardAppearance) {
+  KeyboardAppearance[KeyboardAppearance.NONE_IMMERSIVE = 0] = 'NONE_IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.IMMERSIVE = 1] = 'IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.LIGHT_IMMERSIVE = 2] = 'LIGHT_IMMERSIVE';
+  KeyboardAppearance[KeyboardAppearance.DARK_IMMERSIVE = 3] = 'DARK_IMMERSIVE';
+})(KeyboardAppearance || (KeyboardAppearance = {}));
 
 class SymbolEffect {
 }
@@ -1755,6 +1779,18 @@ let ContentType;
   ContentType[ContentType.NICKNAME = 23] = 'NICKNAME';
   ContentType[ContentType.DETAIL_INFO_WITHOUT_STREET = 24] = 'DETAIL_INFO_WITHOUT_STREET';
   ContentType[ContentType.FORMAT_ADDRESS = 25] = 'FORMAT_ADDRESS';
+  ContentType[ContentType.PASSPORT_NUMBER = 26] = 'PASSPORT_NUMBER';
+  ContentType[ContentType.VALIDITY = 27] = 'VALIDITY';
+  ContentType[ContentType.ISSUE_AT = 28] = 'ISSUE_AT';
+  ContentType[ContentType.ORGANIZATION = 29] = 'ORGANIZATION';
+  ContentType[ContentType.TAX_ID = 30] = 'TAX_ID';
+  ContentType[ContentType.ADDRESS_CITY_AND_STATE = 31] = 'ADDRESS_CITY_AND_STATE';
+  ContentType[ContentType.FLIGHT_NUMBER = 32] = 'FLIGHT_NUMBER';
+  ContentType[ContentType.LICENSE_NUMBER = 33] = 'LICENSE_NUMBER';
+  ContentType[ContentType.LICENSE_FILE_NUMBER = 34] = 'LICENSE_FILE_NUMBER';
+  ContentType[ContentType.LICENSE_PLATE = 35] = 'LICENSE_PLATE';
+  ContentType[ContentType.ENGINE_NUMBER = 36] = 'ENGINE_NUMBER';
+  ContentType[ContentType.LICENSE_CHASSIS_NUMBER = 37] = 'LICENSE_CHASSIS_NUMBER';
 })(ContentType || (ContentType = {}));
 
 let GestureJudgeResult;
@@ -2119,6 +2155,10 @@ class TextMenuItemId {
 
   static get SELECT_ALL() {
     return new TextMenuItemId('OH_DEFAULT_SELECT_ALL');
+  }
+
+  static get TRANSLATE() {
+    return new TextMenuItemId('OH_DEFAULT_TRANSLATE');
   }
 
   static get SEARCH() {
@@ -3790,3 +3830,9 @@ let AccessibilitySamePageMode;
   AccessibilitySamePageMode[AccessibilitySamePageMode.SEMI_SILENT = 0] = 'SEMI_SILENT';
   AccessibilitySamePageMode[AccessibilitySamePageMode.FULL_SILENT = 1] = 'FULL_SILENT';
 })(AccessibilitySamePageMode || (AccessibilitySamePageMode = {}));
+
+let TextMenuShowMode;
+(function (TextMenuShowMode) {
+  TextMenuShowMode[TextMenuShowMode.DEFAULT = 0] = 'DEFAULT';
+  TextMenuShowMode[TextMenuShowMode.PREFER_WINDOW = 1] = 'PREFER_WINDOW';
+})(TextMenuShowMode || (TextMenuShowMode = {}));

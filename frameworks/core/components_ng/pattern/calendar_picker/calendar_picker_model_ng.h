@@ -73,6 +73,7 @@ public:
     static std::map<std::size_t, std::string> GetDateNodeOrder(const CalendarSettingData& settingData);
 private:
     static void UpdateSelectedDateContent(FrameNode* frameNode, const PickerDate& selectedDate);
+    static std::string AddLeadingZeroToYear(uint32_t year);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_CALENDAR_PICKER_CALENDAR_PICKER_MODEL_NG_H

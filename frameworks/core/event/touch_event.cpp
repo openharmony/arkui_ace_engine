@@ -184,6 +184,12 @@ TouchEvent& TouchEvent::SetIsPassThroughMode(bool isPassThroughMode)
     return *this;
 }
 
+TouchEvent& TouchEvent::SetOperatingHand(int32_t operatingHand)
+{
+    this->operatingHand = operatingHand;
+    return *this;
+}
+
 TouchEvent TouchEvent::CloneWith(float scale) const
 {
     return CloneWith(scale, 0.0f, 0.0f, std::nullopt);
@@ -220,6 +226,7 @@ TouchEvent TouchEvent::CloneWith(float scale, float offsetX, float offsetY, std:
     event.inputYDeltaSlope = inputYDeltaSlope;
     event.eventType = UIInputEventType::TOUCH;
     event.isPassThroughMode = isPassThroughMode;
+    event.operatingHand = operatingHand;
     return event;
 }
 
@@ -340,7 +347,8 @@ TouchEvent TouchEvent::UpdatePointers() const
         .downTime = time,
         .size = size,
         .force = force,
-        .isPressed = (type == TouchType::DOWN) };
+        .isPressed = (type == TouchType::DOWN),
+        .operatingHand = operatingHand };
     TouchEvent event;
     event.SetId(id)
         .SetX(x)
@@ -357,7 +365,8 @@ TouchEvent TouchEvent::UpdatePointers() const
         .SetIsInterpolated(isInterpolated)
         .SetPointerEvent(pointerEvent)
         .SetOriginalId(originalId)
-        .SetIsPassThroughMode(isPassThroughMode);
+        .SetIsPassThroughMode(isPassThroughMode)
+        .SetOperatingHand(operatingHand);
     event.pointers.emplace_back(std::move(point));
     return event;
 }

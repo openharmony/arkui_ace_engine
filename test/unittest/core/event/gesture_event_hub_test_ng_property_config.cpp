@@ -87,6 +87,18 @@ RefPtr<FrameNode> ProcessDragItemGroupScene()
         if (!childNode) {
             continue;
         }
+        auto itemGestureHub = childNode->GetOrCreateGestureEventHub();
+        if (!itemGestureHub) {
+            continue;
+        }
+        itemGestureHub->InitDragDropEvent();
+        auto itemActuator = itemGestureHub->GetDragEventActuator();
+        if (!itemActuator) {
+            continue;
+        }
+        itemActuator->isSelectedItemNode_ = true;
+        itemActuator->itemParentNode_ = gridNode;
+
         auto gridItemPattern = childNode->GetPattern<GridItemPattern>();
         if (!gridItemPattern) {
             continue;
@@ -1954,7 +1966,9 @@ HWTEST_F(GestureEventHubTestNg, GetSelectItemSize001, TestSize.Level1)
      */
     auto gridNode = ProcessDragItemGroupScene();
     ASSERT_NE(gridNode, nullptr);
-    auto gestureEventHub = gridNode->GetOrCreateGestureEventHub();
+    auto gridItem = AceType::DynamicCast<FrameNode>(gridNode->GetChildByIndex(0));
+    ASSERT_NE(gridItem, nullptr);
+    auto gestureEventHub = gridItem->GetOrCreateGestureEventHub();
     ASSERT_NE(gestureEventHub, nullptr);
 
     /**

@@ -32,6 +32,7 @@
 #include "core/components_ng/pattern/root/root_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -52,6 +53,7 @@ public:
 void SheetPresentationTestNg::SetUpTestCase()
 {
     MockPipelineContext::SetUp();
+    MockContainer::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
         if (type == SheetTheme::TypeId()) {
@@ -100,6 +102,7 @@ void SheetPresentationTestNg::SetSheetType(RefPtr<SheetPresentationPattern> shee
 void SheetPresentationTestNg::TearDownTestCase()
 {
     MockPipelineContext::TearDown();
+    MockContainer::TearDown();
 }
 
 /**
@@ -446,6 +449,14 @@ HWTEST_F(SheetPresentationTestNg, GetSheetType001, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto001, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+
+    /**
+     * @tc.steps: step1. set API14.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -459,7 +470,7 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto001, TestSize.Level1)
     EXPECT_CALL(*foldablewindow, IsFoldExpand()).WillRepeatedly([]() -> bool { return false; });
     MockPipelineContext::GetCurrent()->rootHeight_ = 6.0f;
     MockPipelineContext::GetCurrent()->rootWidth_ = 5.0f;
-    EXPECT_FALSE(sheetPattern->IsFold());
+    EXPECT_FALSE(sheetPattern->IsFoldExpand());
     EXPECT_FALSE(LessNotEqual(PipelineContext::GetCurrentRootHeight(), PipelineContext::GetCurrentRootWidth()));
     SheetType sheetType;
     sheetPattern->GetSheetTypeWithAuto(sheetType);
@@ -470,7 +481,7 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto001, TestSize.Level1)
     sheetTheme->sheetBottom_ = "bottom";
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
     MockPipelineContext::GetCurrent()->rootHeight_ = 4.0f;
-    EXPECT_TRUE(sheetPattern->IsFold());
+    EXPECT_TRUE(sheetPattern->IsFoldExpand());
     EXPECT_TRUE(sheetTheme->IsOnlyBottom());
     EXPECT_TRUE(LessNotEqual(PipelineContext::GetCurrentRootHeight(), PipelineContext::GetCurrentRootWidth()));
     sheetPattern->GetSheetTypeWithAuto(sheetType);
@@ -491,6 +502,14 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto001, TestSize.Level1)
 HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto002, TestSize.Level1)
 {
     SheetPresentationTestNg::SetUpTestCase();
+
+    /**
+     * @tc.steps: step1. set API14.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FOURTEEN));
+
     auto callback = [](const std::string&) {};
     auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
         AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
@@ -506,7 +525,7 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto002, TestSize.Level1)
     sheetTheme->sheetBottom_ = "undefined";
     SheetPresentationTestNg::SetSheetTheme(sheetTheme);
     AceApplicationInfo::GetInstance().packageName_ = "com.ohos.useriam.authwidget";
-    EXPECT_TRUE(sheetPattern->IsFold());
+    EXPECT_TRUE(sheetPattern->IsFoldExpand());
     EXPECT_FALSE(sheetTheme->IsOnlyBottom());
     EXPECT_FALSE(sheetStyle.sheetType.has_value());
     SheetType sheetType;
@@ -523,6 +542,45 @@ HWTEST_F(SheetPresentationTestNg, GetSheetTypeWithAuto002, TestSize.Level1)
     EXPECT_TRUE(sheetStyle.sheetType.has_value());
     EXPECT_EQ(sheetStyle.sheetType.value(), SheetType::SHEET_CENTER);
     sheetPattern->GetSheetTypeWithAuto(sheetType);
+    SheetPresentationTestNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: IsFoldExpand001
+ * @tc.desc: Branch: if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FIFTEEN))
+ *           Condition: SetFoldStatus(FoldStatus::FOLDED)
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, IsFoldExpand001, TestSize.Level1)
+{
+    SheetPresentationTestNg::SetUpTestCase();
+
+    /**
+     * @tc.steps: step1. set API15.
+     */
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_FIFTEEN));
+
+    /**
+     * @tc.steps: step2. set container FoldStatus FOLDED.
+     */
+    RefPtr<DisplayInfo> displayInfo = AceType::MakeRefPtr<DisplayInfo>();
+    displayInfo->SetFoldStatus(FoldStatus::FOLDED);
+    MockContainer::Current()->SetDisplayInfo(displayInfo);
+
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. excute IsFoldExpand func.
+     * @tc.expected: false
+     */
+    EXPECT_FALSE(sheetPattern->IsFoldExpand());
     SheetPresentationTestNg::TearDownTestCase();
 }
 

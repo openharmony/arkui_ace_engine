@@ -690,7 +690,7 @@ public:
         int32_t eventType, int64_t timeMs);
 
     void TerminateUIExtension() override;
-
+    bool UIExtensionIsHalfScreen() override;
     void SetUIExtensionSubWindow(bool isUIExtensionSubWindow)
     {
         isUIExtensionSubWindow_ = isUIExtensionSubWindow;
@@ -804,6 +804,9 @@ public:
     {
         return singleHandTransform_;
     }
+
+    bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();

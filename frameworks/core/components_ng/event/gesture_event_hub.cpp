@@ -450,7 +450,7 @@ void GestureEventHub::SetFocusClickEvent(GestureEventFunc&& clickEvent)
 {
     auto eventHub = eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
-    auto focusHub = eventHub->GetFocusHub();
+    auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetOnClickCallback(std::move(clickEvent));
 }

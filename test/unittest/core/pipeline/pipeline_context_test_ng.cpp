@@ -337,7 +337,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg005, TestSize.Level1)
     dirtyFocusNode = context_->dirtyFocusNode_.Upgrade();
     ASSERT_NE(dirtyFocusNode, nullptr);
     EXPECT_EQ(dirtyFocusNode->GetFocusType(), FocusType::NODE);
-    frameNode_->eventHub_->focusHub_ = nullptr;
+    frameNode_->focusHub_ = nullptr;
     context_->FlushFocus();
     EXPECT_EQ(context_->dirtyFocusNode_.Upgrade(), nullptr);
 }

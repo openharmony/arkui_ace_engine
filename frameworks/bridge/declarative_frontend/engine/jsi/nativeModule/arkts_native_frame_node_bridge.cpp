@@ -115,7 +115,7 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
     const Offset& localOffset = touchInfo.GetLocalLocation();
     const Offset& screenOffset = touchInfo.GetScreenLocation();
     const char* keys[] = { "type", "id", "displayX", "displayY", "windowX", "windowY", "screenX", "screenY", "x", "y",
-        "pressedTime", "pressure", "width", "height" };
+        "pressedTime", "pressure", "width", "height", "hand" };
     Local<JSValueRef> values[] = { panda::NumberRef::New(vm, static_cast<int32_t>(touchInfo.GetTouchType())),
         panda::NumberRef::New(vm, touchInfo.GetFingerId()), panda::NumberRef::New(vm, screenOffset.GetX() / density),
         panda::NumberRef::New(vm, screenOffset.GetY() / density),
@@ -128,7 +128,8 @@ Local<panda::ObjectRef> FrameNodeBridge::CreateTouchInfo(
         panda::NumberRef::New(vm, static_cast<double>(touchInfo.GetPressedTime().time_since_epoch().count())),
         panda::NumberRef::New(vm, touchInfo.GetForce()),
         panda::NumberRef::New(vm, touchInfo.GetWidth() / density),
-        panda::NumberRef::New(vm, touchInfo.GetHeight() / density) };
+        panda::NumberRef::New(vm, touchInfo.GetHeight() / density),
+        panda::NumberRef::New(vm, touchInfo.GetOperatingHand()) };
     auto touchInfoObj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
     touchInfoObj->SetNativePointerFieldCount(vm, 1);
     touchInfoObj->SetNativePointerField(vm, 0, static_cast<void*>(&info));
@@ -1784,5 +1785,37 @@ ArkUINativeModuleValue FrameNodeBridge::TriggerOnRecycle(ArkUIRuntimeCallInfo* r
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
     frameNode->OnRecycle();
     return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::SetCrossLanguageOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::NumberRef::New(vm, ERROR_CODE_PARAM_INVALID));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    bool attributeSetting = secondArg->ToBoolean(vm)->Value();
+    int result = GetArkUINodeModifiers()->getFrameNodeModifier()->setCrossLanguageOptions(nativeNode, attributeSetting);
+    return panda::NumberRef::New(vm, result);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::GetCrossLanguageOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    bool result = GetArkUINodeModifiers()->getFrameNodeModifier()->getCrossLanguageOptions(nativeNode);
+    return panda::BooleanRef::New(vm, result);
+}
+
+ArkUINativeModuleValue FrameNodeBridge::CheckIfCanCrossLanguageAttributeSetting(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    CHECK_NULL_RETURN(!firstArg.IsNull(), panda::BooleanRef::New(vm, false));
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    bool result = GetArkUINodeModifiers()->getFrameNodeModifier()->checkIfCanCrossLanguageAttributeSetting(nativeNode);
+    return panda::BooleanRef::New(vm, result);
 }
 } // namespace OHOS::Ace::NG

@@ -3730,6 +3730,13 @@ void ResetDragPreviewOptions(ArkUINodeHandle node)
         { true, false, false, false, false, false, true, false, true, false, false, { .isShowBadge = true } });
 }
 
+void SetDisableDataPrefetch(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDisableDataPrefetch(frameNode, value);
+}
+
 void SetMouseResponseRegion(
     ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
 {
@@ -7009,6 +7016,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .setEnableAnalyzer = nullptr,
         .setNodeBackdropBlur = SetNodeBackdropBlur,
         .getNodeBackdropBlur = GetNodeBackdropBlur,
+        .setDisableDataPrefetch = SetDisableDataPrefetch,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -7789,6 +7797,7 @@ void ConvertTouchLocationInfoToPoint(const TouchLocationInfo& locationInfo, ArkU
     touchPoint.tiltY = locationInfo.GetTiltY().value_or(0.0f);
     touchPoint.toolType = static_cast<int32_t>(locationInfo.GetSourceTool());
     touchPoint.pressedTime = locationInfo.GetPressedTime().time_since_epoch().count();
+    touchPoint.operatingHand = locationInfo.GetOperatingHand();
 }
 
 void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
@@ -7823,6 +7832,7 @@ void ConvertTouchPointsToPoints(std::vector<TouchPoint>& touchPointes,
         points[i].tiltY = touchPoint.tiltY.value_or(0.0f);
         points[i].pressedTime = touchPoint.downTime.time_since_epoch().count();
         points[i].toolType = static_cast<int32_t>(historyLoaction.GetSourceTool());
+        points[i].operatingHand = touchPoint.operatingHand;
         i++;
     }
 }

@@ -28,7 +28,7 @@ export enum ItemState {
 }
 
 // “更多”栏图标
-const PUBLIC_MORE: Resource = $r('sys.media.ohos_ic_public_more');
+const PUBLIC_MORE: Resource = $r('sys.symbol.dot_grid_2x2');
 const IMAGE_SIZE: string = '24vp';
 const DEFAULT_TOOLBAR_HEIGHT: number = 56;
 const TOOLBAR_MAX_LENGTH: number = 5;
@@ -39,6 +39,7 @@ const MIN_DIALOG = '216vp';
 const TEXT_TOOLBAR_DIALOG = '18.3fp';
 const FOCUS_BOX_MARGIN: number = -2;
 const FOCUS_BOX_BORDER_WIDTH: number = 2;
+const RESOURCE_TYPE_SYMBOL: number = 40000;
 
 interface MenuController {
   value: ResourceStr;
@@ -77,6 +78,26 @@ class ButtonGestureModifier implements GestureModifier {
     } else {
       event.clearGestures();
     }
+  }
+}
+
+class Util {
+  public static isSymbolResource(resourceStr: ResourceStr | undefined | null): boolean {
+    if (!Util.isResourceType(resourceStr)) {
+      return false;
+    }
+    let resource: Resource = resourceStr as Resource;
+    return resource.type === RESOURCE_TYPE_SYMBOL;
+  }
+
+  public static isResourceType(resource: ResourceStr | Resource | undefined | null): boolean {
+    if (!resource) {
+      return false;
+    }
+    if (typeof resource === 'string' || typeof resource === 'undefined') {
+      return false;
+    }
+    return true;
   }
 }
 
@@ -138,11 +159,11 @@ export struct ToolBar {
   @Prop activateIndex: number = -1;
   @Prop dividerModifier: DividerModifier = new DividerModifier();
   @Prop toolBarModifier: ToolBarModifier =
-  new ToolBarModifier()
-    .padding(LengthMetrics.resource($r('sys.float.padding_level12')))
-    .stateEffect(true)
-    .height(LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT))
-    .backgroundColor('sys.color.ohos_id_color_toolbar_bg');
+    new ToolBarModifier()
+      .padding(LengthMetrics.resource($r('sys.float.padding_level12')))
+      .stateEffect(true)
+      .height(LengthMetrics.vp(DEFAULT_TOOLBAR_HEIGHT))
+      .backgroundColor('sys.color.ohos_id_color_toolbar_bg');
   @Prop moreText: Resource = $r('sys.string.ohos_toolbar_more');
   @State menuContent: MenuController[] = [];
   @State toolBarItemBackground: ResourceColor[] = [];
@@ -170,13 +191,11 @@ export struct ToolBar {
   @Builder
   MoreTabBuilder(index: number) {
     Column() {
-      Image(PUBLIC_MORE)
-        .width(IMAGE_SIZE)
-        .height(IMAGE_SIZE)
-        .fillColor(this.iconPrimaryColor)
-        .margin({ bottom: $r('sys.float.padding_level1') })
-        .objectFit(ImageFit.Contain)
+      SymbolGlyph(PUBLIC_MORE)
+        .fontSize(IMAGE_SIZE)
+        .fontColor([this.iconPrimaryColor])
         .draggable(false)
+        .margin({ bottom: $r('sys.float.padding_level1') })
       Text(this.moreText)
         .fontColor(this.fontPrimaryColor)
         .fontSize($r('sys.float.ohos_id_text_size_caption'))
@@ -229,6 +248,11 @@ export struct ToolBar {
           .fontSize(IMAGE_SIZE)
           .symbolEffect(this.symbolEffect, false)
           .attributeModifier(this.getToolBarSymbolModifier(index))
+          .margin({ bottom: $r('sys.float.padding_level1') })
+      } else if (Util.isSymbolResource(this.toolBarList[index]?.icon)) {
+        SymbolGlyph(this.toolBarList[index]?.icon)
+          .fontSize(IMAGE_SIZE)
+          .fontColor([this.getIconColor(index)])
           .margin({ bottom: $r('sys.float.padding_level1') })
       } else {
         Image(this.toolBarList[index]?.icon)
@@ -449,6 +473,7 @@ export struct ToolBar {
       Tabs({ controller: this.controller }) {
       }
       .visibility(Visibility.None)
+
       Divider()
         .width('100%').height(1)
         .attributeModifier(this.dividerModifier)
@@ -531,6 +556,14 @@ struct ToolBarDialog {
               top: $r('sys.float.padding_level24'),
               bottom: $r('sys.float.padding_level8'),
             })
+        } else if (Util.isSymbolResource(this.itemDialog.icon)) {
+          SymbolGlyph(this.itemDialog?.icon)
+            .fontColor([$r('sys.color.icon_primary')])
+            .fontSize(DIALOG_IMAGE_SIZE)
+            .margin({
+              top: $r('sys.float.padding_level24'),
+              bottom: $r('sys.float.padding_level8'),
+            })
         } else {
           Image(this.itemDialog.icon)
             .width(DIALOG_IMAGE_SIZE)
@@ -569,6 +602,10 @@ struct ToolBarDialog {
           SymbolGlyph()
             .attributeModifier(this.itemSymbolModifier)
             .symbolEffect(this.symbolEffect, false)
+            .fontColor([$r('sys.color.icon_primary')])
+            .fontSize(DIALOG_IMAGE_SIZE)
+        } else if (Util.isSymbolResource(this.itemDialog.icon)) {
+          SymbolGlyph(this.itemDialog?.icon)
             .fontColor([$r('sys.color.icon_primary')])
             .fontSize(DIALOG_IMAGE_SIZE)
         } else {

@@ -459,10 +459,12 @@ void SecurityUIExtensionPattern::OnAttachToFrameNode()
     host->RegisterNodeChangeListener();
     accessibilitySAObserverCallback_ = std::make_shared<SecUECAccessibilitySAObserverCallback>(
         WeakClaim(this), host->GetAccessibilityId());
+#ifndef ACE_UNITTEST
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->RegisterAccessibilitySAObserverCallback(host->GetAccessibilityId(),
         accessibilitySAObserverCallback_);
+#endif
     PLATFORM_LOGI("OnAttachToFrameNode");
 }
 
@@ -475,9 +477,11 @@ void SecurityUIExtensionPattern::OnDetachFromFrameNode(FrameNode* frameNode)
     pipeline->RemoveWindowStateChangedCallback(id);
     pipeline->UnregisterSurfacePositionChangedCallback(callbackId_);
     frameNode->UnregisterNodeChangeListener();
+#ifndef ACE_UNITTEST
     auto accessibilityManager = pipeline->GetAccessibilityManager();
     CHECK_NULL_VOID(accessibilityManager);
     accessibilityManager->DeregisterAccessibilitySAObserverCallback(frameNode->GetAccessibilityId());
+#endif
 }
 
 void SecurityUIExtensionPattern::OnModifyDone()

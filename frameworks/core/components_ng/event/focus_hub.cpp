@@ -97,11 +97,16 @@ RefPtr<FocusManager> FocusHub::GetFocusManager() const
 }
 
 FocusState::FocusState(const WeakPtr<EventHub>& eventHub, FocusType type) : eventHub_(eventHub), focusType_(type) {}
+FocusState::FocusState(const WeakPtr<FrameNode>& frameNode, FocusType type) : frameNode_(frameNode), focusType_(type) {}
 
 RefPtr<FrameNode> FocusState::GetFrameNode() const
 {
-    auto eventHub = eventHub_.Upgrade();
-    return eventHub ? eventHub->GetFrameNode() : nullptr;
+    auto frameNode = frameNode_.Upgrade();
+    if (!frameNode) {
+        auto eventHub = eventHub_.Upgrade();
+        return eventHub ? eventHub->GetFrameNode() : nullptr;
+    }
+    return frameNode;
 }
 
 RefPtr<GeometryNode> FocusState::GetGeometryNode() const
@@ -668,7 +673,8 @@ bool FocusHub::IsSyncRequestFocusableNode()
 
 bool FocusHub::IsEnabled() const
 {
-    auto eventHub = eventHub_.Upgrade();
+    auto frameNode = frameNode_.Upgrade();
+    auto eventHub = frameNode ? frameNode->GetEventHubOnly<EventHub>() : eventHub_.Upgrade();
     return eventHub ? eventHub->IsEnabled() : true;
 }
 
@@ -1373,7 +1379,8 @@ void FocusHub::OnBlurNode()
 
 void FocusHub::CheckFocusStateStyle(bool onFocus)
 {
-    auto eventHub = eventHub_.Upgrade();
+    auto frameNode = frameNode_.Upgrade();
+    auto eventHub = frameNode ? frameNode->GetEventHubOnly<EventHub>() : eventHub_.Upgrade();
     CHECK_NULL_VOID(eventHub);
     if (onFocus) {
         eventHub->UpdateCurrentUIState(UI_STATE_FOCUSED);
@@ -1384,7 +1391,8 @@ void FocusHub::CheckFocusStateStyle(bool onFocus)
 
 bool FocusHub::HasFocusStateStyle()
 {
-    auto eventHub = eventHub_.Upgrade();
+    auto frameNode = frameNode_.Upgrade();
+    auto eventHub = frameNode ? frameNode->GetEventHubOnly<EventHub>() : eventHub_.Upgrade();
     CHECK_NULL_RETURN(eventHub, false);
     return eventHub->HasStateStyle(UI_STATE_FOCUSED);
 }
@@ -1695,7 +1703,10 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate
     if (NEAR_ZERO(paintWidth.Value())) {
         return true;
     }
-    renderContext->PaintFocusState(paintRect, paintColor, paintWidth, false, appTheme->IsFocusBoxGlow());
+    Dimension focusPaddingVp;
+    GetPaintPaddingVp(focusPaddingVp);
+    renderContext->PaintFocusState(
+        paintRect, focusPaddingVp, paintColor, paintWidth, {false, appTheme->IsFocusBoxGlow()});
     return true;
 }
 
@@ -1880,10 +1891,10 @@ bool FocusHub::CalculateRect(const RefPtr<FocusHub>& childNode, RectF& rect) con
     rect = frameNode->GetPaintRectWithTransform();
 
     //  Calculate currentNode -> childNode offset
-    auto parent = frameNode->GetAncestorNodeOfFrame(false);
+    auto parent = frameNode->GetAncestorNodeOfFrame(true);
     while (parent && parent != GetFrameNode()) {
         rect += parent->GetPaintRectWithTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame(false);
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     return true;
 }

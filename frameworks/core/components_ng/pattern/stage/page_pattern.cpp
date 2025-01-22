@@ -260,10 +260,12 @@ void PagePattern::OnShow()
         LOGW("no need to trigger onPageShow callback when not in the foreground");
         return;
     }
-    std::string bundleName = container->GetBundleName();
-    NotifyPerfMonitorPageMsg(pageInfo_->GetFullPath(), bundleName);
+    NotifyPerfMonitorPageMsg(pageInfo_->GetFullPath(), container->GetBundleName());
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), true);
+        auto navigationManager = context->GetNavigationManager();
+        CHECK_NULL_VOID(navigationManager);
+        navigationManager->FireNavigationLifecycle(GetHost(), static_cast<int32_t>(NavDestinationLifecycle::ON_ACTIVE));
     }
     UpdatePageParam();
     isOnShow_ = true;
@@ -307,11 +309,14 @@ void PagePattern::OnHide()
     JankFrameReport::GetInstance().FlushRecord();
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    if (pageInfo_) {
-        context->FirePageChanged(pageInfo_->GetPageId(), false);
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    if (pageInfo_) {
+        auto navigationManager = context->GetNavigationManager();
+        CHECK_NULL_VOID(navigationManager);
+        navigationManager->FireNavigationLifecycle(host, static_cast<int32_t>(NavDestinationLifecycle::ON_INACTIVE));
+        context->FirePageChanged(pageInfo_->GetPageId(), false);
+    }
     host->SetJSViewActive(false);
     isOnShow_ = false;
     host->SetAccessibilityVisible(false);

@@ -3513,6 +3513,30 @@ bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool 
     return true;
 }
 
+bool WebPattern::UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double keyboard)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    lastKeyboardHeight_ = keyboard;
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this), width, height]() {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            // In split-screen mode, the keyboard height is reported multiple times and is not the same.
+            // Use the last height.
+            webPattern->UpdateLayoutAfterKeyboardShow(width,
+                                                      height,
+                                                      webPattern->lastKeyboardHeight_,
+                                                      webPattern->GetDrawSize().Height());
+        }, TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
+    return true;
+}
+
 bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled)
 {
     if (IsDialogNested()) {
@@ -3526,6 +3550,7 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
     if (drawSizeCache_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
         TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow not obstruct");
         isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+        lastKeyboardHeight_ = keyboard;
         return !safeAreaEnabled;
     }
     if (height - GetCoordinatePoint()->GetY() < keyboard) {
@@ -3548,20 +3573,10 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
         lastKeyboardHeight_ = keyboard;
         return false;
     }
-    auto frameNode = GetHost();
-    CHECK_NULL_RETURN(frameNode, false);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(context, false);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_RETURN(taskExecutor, false);
-    lastKeyboardHeight_ = keyboard;
-    taskExecutor->PostDelayedTask(
-        [weak = WeakClaim(this), width, height, keyboard, oldWebHeight = drawSize_.Height()]() {
-            auto webPattern = weak.Upgrade();
-            CHECK_NULL_VOID(webPattern);
-            webPattern->UpdateLayoutAfterKeyboardShow(width, height, keyboard, oldWebHeight);
-        }, TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
+
+    if (!UpdateLayoutAfterKeyboard(width, height, keyboard)) {
+        return false;
+    }
     return true;
 }
 
@@ -6041,7 +6056,7 @@ void WebPattern::OnActive()
     CHECK_NULL_VOID(delegate_);
     bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "WebPattern::OnActive wIsActivePolicyDisableebId:%{public}d, isActive:%{public}d, policyDisable %{public}d",
+        "WebPattern::OnActive webId:%{public}d, isActive:%{public}d, policyDisable %{public}d",
         GetWebId(), isActive_, policyDisable);
     if (isActive_) {
         return;
@@ -6859,15 +6874,19 @@ void WebPattern::UpdateFocusedAccessibilityId(int64_t accessibilityId)
         focusedAccessibilityId_ = accessibilityId;
     }
     RectT<int32_t> rect;
-    if (focusedAccessibilityId_ <= 0 || !GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
+    if (focusedAccessibilityId_ <= 0) {
         focusedAccessibilityId_ = -1;
         renderContext->ResetAccessibilityFocusRect();
         renderContext->UpdateAccessibilityFocus(false);
         return;
     }
-
-    renderContext->UpdateAccessibilityFocusRect(rect);
-    renderContext->UpdateAccessibilityFocus(true);
+    if (GetAccessibilityFocusRect(rect, focusedAccessibilityId_)) {
+        renderContext->UpdateAccessibilityFocusRect(rect);
+        renderContext->UpdateAccessibilityFocus(true);
+    } else {
+        renderContext->ResetAccessibilityFocusRect();
+        renderContext->UpdateAccessibilityFocus(false);
+    }
 }
 
 void WebPattern::ClearFocusedAccessibilityId()
@@ -7131,6 +7150,7 @@ void WebPattern::OnShowAutofillPopupV2(
     menuParam.isShow = true;
     menuParam.setShow = true;
     menuParam.placement = Placement::BOTTOM_LEFT;
+    menuParam.isShowInSubWindow = false;
     auto dataListNode = CreateDataListFrameNode(OffsetF(offsetX, offsetY), height, width);
     CHECK_NULL_VOID(dataListNode);
     auto menu = MenuView::Create(std::move(optionParam), dataListNode->GetId(), dataListNode->GetTag(),
@@ -7161,11 +7181,8 @@ void WebPattern::OnShowAutofillPopupV2(
     CHECK_NULL_VOID(context);
     auto overlayManager = context->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
-    auto offset = GetCoordinatePoint().value_or(OffsetF());
-    offset.AddX(offsetX);
-    offset.AddY(offsetY);
     menu->GetOrCreateFocusHub()->SetFocusable(false);
-    overlayManager->ShowMenu(dataListNode->GetId(), offset, menu);
+    overlayManager->ShowMenu(dataListNode->GetId(), OffsetF(), menu);
 }
 
 void WebPattern::OnHideAutofillPopup()

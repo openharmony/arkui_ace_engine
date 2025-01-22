@@ -717,7 +717,7 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc041, TestSize.Level1)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
-    TextContentType type = TextContentType(30);
+    TextContentType type = TextContentType(38);
     auto state = pattern->TextContentTypeToAceAutoFillType(type);
     EXPECT_TRUE(state == AceAutoFillType::ACE_UNSPECIFIED);
 }
@@ -869,14 +869,15 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc051, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
 
-    SourceAndValueInfo info;
-    info.isIME = true;
     auto state = false;
     auto eventHub = pattern->GetHost()->GetEventHub<TextFieldEventHub>();
     ASSERT_NE(eventHub, nullptr);
     auto callback = [&state](const InsertValueInfo& info){ return (state = true); };
     eventHub->SetOnWillInsertValueEvent(callback);
-    pattern->InsertValueOperation(info);
+    InsertCommandInfo info;
+    info.insertValue = u"";
+    info.reason = InputReason::IME;
+    pattern->ExecuteInsertValueCommand(info);
     EXPECT_TRUE(state);
 }
 
@@ -896,12 +897,13 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc052, TestSize.Level1)
     auto state = false;
     auto callback = [&state](const InsertValueInfo&){ return (state = true); };
     eventHub->SetOnWillInsertValueEvent(callback);
-    SourceAndValueInfo info;
-    info.isIME = true;
     pattern->selectController_->firstHandleInfo_.index = 0;
     pattern->selectController_->secondHandleInfo_.index = 0;
 
-    pattern->InsertValueOperation(info);
+    InsertCommandInfo info;
+    info.insertValue = u"";
+    info.reason = InputReason::IME;
+    pattern->ExecuteInsertValueCommand(info);
     EXPECT_TRUE(state);
 }
 
@@ -920,12 +922,10 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc053, TestSize.Level1)
     auto state = false;
     auto callback = [&state](const DeleteValueInfo&){ state = true; };
     eventHub->SetOnDidDeleteEvent(callback);
-    SourceAndValueInfo info;
-    info.isIME = true;
     pattern->selectController_->firstHandleInfo_.index = 0;
     pattern->selectController_->secondHandleInfo_.index = 0;
 
-    pattern->InsertValueOperation(info);
+    pattern->AddInsertCommand(u"", InputReason::IME);
     EXPECT_FALSE(pattern->cursorVisible_);
 }
 
@@ -1077,14 +1077,14 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc062, TestSize.Level1)
     auto eventHub = pattern->GetFocusHub();
     eventHub->currentFocus_ = true;
     pattern->isEdit_ = true;
-    while (!pattern->insertValueOperations_.empty()) {
-        pattern->insertValueOperations_.pop();
+    while (!pattern->insertCommands_.empty()) {
+        pattern->insertCommands_.pop();
     }
 
     pattern->focusIndex_ = FocuseIndex::TEXT;
     pattern->hasPreviewText_ = false;
     pattern->InsertValue(u"", true);
-    EXPECT_FALSE(pattern->insertValueOperations_.empty());
+    EXPECT_FALSE(pattern->insertCommands_.empty());
 }
 
 HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc063, TestSize.Level1)

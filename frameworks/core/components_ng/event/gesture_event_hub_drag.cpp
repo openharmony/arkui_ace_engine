@@ -127,6 +127,8 @@ void GestureEventHub::InitDragDropEvent()
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     auto distance = SystemProperties::GetDragStartPanDistanceThreshold();
     SetDragEvent(dragEvent, { PanDirection::ALL }, DEFAULT_PAN_FINGER, Dimension(distance, DimensionUnit::VP));
+    CHECK_NULL_VOID(dragEventActuator_);
+    dragEventActuator_->SetIsForDragDrop(false);
 }
 
 bool GestureEventHub::IsAllowedDrag(RefPtr<EventHub> eventHub)
@@ -1126,6 +1128,9 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                     (eventHub->GetOnDragEnd())(dragEvent);
                 }
                 gestureEventHubPtr->HandleDragEndAction(dragframeNodeInfo);
+                auto dragEventActuator = gestureEventHubPtr->GetDragEventActuator();
+                CHECK_NULL_VOID(dragEventActuator);
+                dragEventActuator->NotifyDragEnd();
             },
             TaskExecutor::TaskType::UI, "ArkUIGestureDragEnd");
     };
@@ -1535,7 +1540,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     CHECK_NULL_RETURN(subWindowOverlayManager, false);
     DragEventActuator::MountGatherNode(subWindowOverlayManager, frameNode, gatherNode, childrenInfo);
     DragEventActuator::MountPixelMap(
-        subWindowOverlayManager, eventHub->GetGestureEventHub(), data.imageNode, textNode, true);
+        subWindowOverlayManager, eventHub->GetOrCreateGestureEventHub(), data.imageNode, textNode, true);
 
     // update position
     DragAnimationHelper::UpdateBadgeTextNodePosition(frameNode, textNode, data.badgeNumber, data.previewScale,
@@ -1556,7 +1561,7 @@ bool GestureEventHub::TryDoDragStartAnimation(const RefPtr<PipelineBase>& contex
     CHECK_NULL_RETURN(dragDropManager, false);
 
     dragDropManager->DoDragStartAnimation(
-        subWindowOverlayManager, info, eventHub->GetGestureEventHub(), data.isMenuShow);
+        subWindowOverlayManager, info, eventHub->GetOrCreateGestureEventHub(), data.isMenuShow);
     return true;
 }
 

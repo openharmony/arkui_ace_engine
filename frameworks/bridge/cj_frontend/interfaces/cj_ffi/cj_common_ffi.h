@@ -130,6 +130,22 @@ struct CJRectResult {
     double height;
 };
 
+struct CJTouchTestInfo {
+    float windowX;
+    float windowY;
+    float parentX;
+    float parentY;
+    float x;
+    float y;
+    CJRectResult rect;
+    ExternalString id;
+};
+
+struct CJTouchResult {
+    int32_t strategy;
+    ExternalString id;
+};
+
 struct CJTouchInfo {
     uint8_t type;
     int32_t fingerId;
@@ -140,6 +156,11 @@ struct CJTouchInfo {
 };
 
 struct CJTextPickerResult {
+    const char* value;
+    uint32_t index;
+};
+
+struct CJDatePickerResult {
     const char* value;
     uint32_t index;
 };
@@ -261,6 +282,12 @@ struct CJGestureEvent {
 struct CJDragInfo {
     const char* extraParams;
     CJPosition* position;
+};
+
+struct CJDragEvent {
+    void* evtPtr;
+    bool useCustomDropAnimation;
+    int32_t dragBehavior;
 };
 
 struct CJDragItemInfo {

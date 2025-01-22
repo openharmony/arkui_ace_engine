@@ -245,7 +245,8 @@ public:
     virtual bool GetDigitFrameSize(RefPtr<GeometryNode>& geoNode, SizeF& frameSize) const;
     virtual int32_t RealTotalCount() const;
     virtual int32_t GetCurrentIndex() const;
-
+    void ResetDotModifier();
+    
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -293,7 +294,6 @@ private:
     void RegisterIndicatorChangeEvent();
     std::pair<int32_t, int32_t> CalculateStepAndItemCount() const;
     std::pair<int32_t, int32_t> CalculateStepAndItemCountDefault() const;
-    void ResetDotModifier();
     void UpdateFocusable() const;
     void CheckDragAndUpdate(
         const RefPtr<SwiperPattern>& swiperPattern, int32_t animationStartIndex, int32_t animationEndIndex);
@@ -330,7 +330,7 @@ private:
 protected:
     OffsetF CalculateAngleOffset(float centerX, float centerY, float radius, double angle);
     OffsetF CalculateRectLayout(double angle, float radius, OffsetF angleOffset, Dimension& width, Dimension& height);
-    virtual void FireChangeEvent() const {}
+    virtual void FireChangeEvent(int32_t index) const {}
     virtual void SwipeTo(std::optional<int32_t> mouseClickIndex);
     virtual void ShowPrevious();
     virtual void ShowNext();
@@ -383,6 +383,11 @@ protected:
         }
     }
 
+    void ResetOptinalMouseClickIndex()
+    {
+        mouseClickIndex_ = std::nullopt;
+    }
+
     const TouchBottomType& GetTouchBottomType() const
     {
         return touchBottomType_;
@@ -420,6 +425,7 @@ protected:
     RectF CalcBoundsRect() const;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     void ResetOverlongModifier();
+    int32_t lastNotifyIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

@@ -1659,6 +1659,30 @@ void MenuItemPattern::AddClickableArea()
         accessibilityProperty->SetAccessibilityText(content + "," + label);
         clickableArea_ = clickableArea;
         clickableArea_->MountToParent(host, CLICKABLE_AREA_VIEW_INDEX);
+
+        SetRowAccessibilityLevel();
+    }
+}
+
+void MenuItemPattern::SetRowAccessibilityLevel()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    RefPtr<FrameNode> leftRow =
+        host->GetChildAtIndex(0) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0)) : nullptr;
+    if (leftRow) {
+        auto nodeAccessibilityProps = leftRow->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(nodeAccessibilityProps);
+        nodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        nodeAccessibilityProps->SetAccessibilityGroup(true);
+    }
+    RefPtr<FrameNode> rightRow =
+        host->GetChildAtIndex(1) ? AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(1)) : nullptr;
+    if (rightRow) {
+        auto nodeAccessibilityProps = rightRow->GetAccessibilityProperty<AccessibilityProperty>();
+        CHECK_NULL_VOID(nodeAccessibilityProps);
+        nodeAccessibilityProps->SetAccessibilityLevel(AccessibilityProperty::Level::NO_STR);
+        nodeAccessibilityProps->SetAccessibilityGroup(true);
     }
 }
 
@@ -1879,6 +1903,11 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     node->MountToParent(row, isLabel ? 0 : DEFAULT_NODE_SLOT);
     node->MarkModifyDone();
     node->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (isLabel) {
+        label_ = node;
+    } else {
+        content_ = node;
+    }
 }
 
 void MenuItemPattern::UpdateTextOverflow(RefPtr<TextLayoutProperty>& textProperty,

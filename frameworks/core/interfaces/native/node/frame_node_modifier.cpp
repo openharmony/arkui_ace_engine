@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/frame_node_modifier.h"
 #include <cstdlib>
+#include <vector>
 
 #include "base/error/error_code.h"
 #include "core/components_ng/base/inspector.h"
@@ -396,19 +397,19 @@ ArkUINodeHandle GetFrameNodeByUniqueId(ArkUI_Int32 uniqueId)
 
 ArkUINodeHandle GetFrameNodeByKey(ArkUI_CharPtr key)
 {
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    if (!pipeline || !pipeline->CheckThreadSafe()) {
-        LOGF("GetFrameNodeByKey doesn't run on UI thread");
-        abort();
-    }
     auto node = NG::Inspector::GetFrameNodeByKey(key, true);
-    CHECK_NULL_RETURN(node, nullptr);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
 ArkUINodeHandle GetAttachedFrameNodeById(ArkUI_CharPtr key)
 {
+    auto pipeline = NG::PipelineContext::GetCurrentContextSafely();
+    if (pipeline && !pipeline->CheckThreadSafe()) {
+        LOGF("GetAttachedNodeHandleById doesn't run on UI thread");
+        abort();
+    }
     auto node = ElementRegister::GetInstance()->GetAttachedFrameNodeById(key);
+    CHECK_NULL_RETURN(node, nullptr);
     return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
 }
 
@@ -529,6 +530,35 @@ ArkUI_Int32 ResetLayoutEvent(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, -1);
     ViewAbstract::SetLayoutEvent(frameNode, nullptr);
     return 0;
+}
+
+ArkUI_Int32 SetCrossLanguageOptions(ArkUINodeHandle node, bool attributeSetting)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(currentNode, ERROR_CODE_PARAM_INVALID);
+    static const std::vector<const char*> nodeTypeArray = {
+        OHOS::Ace::V2::SCROLL_ETS_TAG,
+    };
+    auto pos = std::find(nodeTypeArray.begin(), nodeTypeArray.end(), currentNode->GetTag());
+    if (pos == nodeTypeArray.end()) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    currentNode->SetIsCrossLanguageAttributeSetting(attributeSetting);
+    return ERROR_CODE_NO_ERROR;
+}
+
+ArkUI_Bool GetCrossLanguageOptions(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(currentNode, false);
+    return currentNode->isCrossLanguageAttributeSetting();
+}
+
+ArkUI_Bool CheckIfCanCrossLanguageAttributeSetting(ArkUINodeHandle node)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_RETURN(currentNode, false);
+    return currentNode -> IsCNode() ? currentNode->isCrossLanguageAttributeSetting() : false;
 }
 
 ArkUI_Int32 SetSystemFontStyleChangeEvent(ArkUINodeHandle node, void* userData, void* onFontStyleChange)
@@ -880,6 +910,9 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .focusActivate = FocusActivate,
         .setAutoFocusTransfer = SetAutoFocusTransfer,
         .moveNodeTo = MoveNodeTo,
+        .setCrossLanguageOptions = SetCrossLanguageOptions,
+        .getCrossLanguageOptions = GetCrossLanguageOptions,
+        .checkIfCanCrossLanguageAttributeSetting = CheckIfCanCrossLanguageAttributeSetting,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

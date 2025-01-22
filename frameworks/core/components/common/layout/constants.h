@@ -521,6 +521,13 @@ enum class ImageFit {
     MATRIX,
 };
 
+enum class KeyboardAppearance {
+    NONE_IMMERSIVE = 0,
+    IMMERSIVE = 1,
+    LIGHT_IMMERSIVE = 2,
+    DARK_IMMERSIVE = 3
+};
+
 namespace StringUtils {
 inline std::string ToString(const ImageFit& imageFit)
 {
@@ -677,6 +684,11 @@ enum class PixelRoundCalcPolicy {
     NO_FORCE_ROUND = 0,
     FORCE_CEIL = 1,
     FORCE_FLOOR = 2,
+};
+
+enum class LayoutCalPolicy {
+    NO_MATCH = 0,
+    MATCH_PARENT = 1,
 };
 
 const ImageRepeat IMAGE_REPEATS[] = {

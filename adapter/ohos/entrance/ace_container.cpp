@@ -27,6 +27,7 @@
 #include "js_native_api.h"
 #include "pointer_event.h"
 #include "scene_board_judgement.h"
+#include "ui/base/utils/utils.h"
 #include "ui_extension_context.h"
 #include "ui/rs_surface_node.h"
 #include "window_manager.h"
@@ -117,7 +118,7 @@ const char ENABLE_PERFORMANCE_MONITOR_KEY[] = "persist.ace.performance.monitor.e
 const char IS_FOCUS_ACTIVE_KEY[] = "persist.gesture.smart_gesture_enable";
 std::mutex g_mutexFormRenderFontFamily;
 constexpr uint32_t RES_TYPE_CROWN_ROTATION_STATUS = 129;
-
+constexpr int32_t EXTENSION_HALF_SCREEN_MODE = 2;
 #ifdef _ARM64_
 const std::string ASSET_LIBARCH_PATH = "/lib/arm64";
 #else
@@ -386,6 +387,7 @@ void AceContainer::Destroy()
         }
     }
     DestroyToastSubwindow(instanceId_);
+    DestroySelectOverlaySubwindow(instanceId_);
     resRegister_.Reset();
     assetManager_.Reset();
 }
@@ -2446,7 +2448,7 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, const RefPtr<AceVi
         CHECK_NULL_VOID(ngPipeline);
         auto uiExtManager = ngPipeline->GetUIExtensionManager();
         CHECK_NULL_VOID(uiExtManager);
-        uiExtManager->SendPageModeToUEA(ngPipeline);
+        uiExtManager->SendPageModeRequestToHost(ngPipeline);
     }
 }
 
@@ -3297,7 +3299,8 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
     while (callbacksIter != stopDragCallbackMap_.end()) {
         auto pointerId = callbacksIter->first;
         MMI::PointerEvent::PointerItem pointerItem;
-        if (!currentEvent->GetPointerItem(pointerId, pointerItem)) {
+        if (!currentEvent->GetPointerItem(pointerId, pointerItem) || !pointerItem.IsPressed() ||
+            pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
             for (const auto& callback : callbacksIter->second) {
                 if (callback) {
                     callback();
@@ -3305,16 +3308,7 @@ void AceContainer::SetCurPointerEvent(const std::shared_ptr<MMI::PointerEvent>& 
             }
             callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
         } else {
-            if (!pointerItem.IsPressed() || pointerAction == MMI::PointerEvent::POINTER_ACTION_CANCEL) {
-                for (const auto& callback : callbacksIter->second) {
-                    if (callback) {
-                        callback();
-                    }
-                }
-                callbacksIter = stopDragCallbackMap_.erase(callbacksIter);
-            } else {
-                ++callbacksIter;
-            }
+            ++callbacksIter;
         }
     }
 }
@@ -3341,6 +3335,7 @@ bool AceContainer::GetCurPointerEventInfo(DragPointerEvent& dragPointerEvent, St
     dragPointerEvent.sourceTool = static_cast<SourceTool>(GetSourceTool(pointerItem.GetToolType()));
     dragPointerEvent.displayId = currentPointerEvent->GetTargetDisplayId();
     dragPointerEvent.pointerEventId = currentPointerEvent->GetId();
+    dragPointerEvent.originId = pointerItem.GetOriginPointerId();
     RegisterStopDragCallback(dragPointerEvent.pointerId, std::move(stopDragCallback));
     return true;
 }
@@ -3364,6 +3359,25 @@ void AceContainer::RegisterStopDragCallback(int32_t pointerId, StopDragCallback&
         list.emplace_back(std::move(stopDragCallback));
         stopDragCallbackMap_.emplace(pointerId, list);
     }
+}
+
+bool AceContainer::GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent)
+{
+    std::lock_guard<std::mutex> lock(pointerEventMutex_);
+    auto iter = currentEvents_.find(dragPointerEvent.originId);
+    if (iter == currentEvents_.end()) {
+        return false;
+    }
+    MMI::PointerEvent::PointerItem pointerItem;
+    auto currentPointerEvent = iter->second;
+    CHECK_NULL_RETURN(currentPointerEvent, false);
+    if (!currentPointerEvent->GetPointerItem(currentPointerEvent->GetPointerId(), pointerItem) ||
+        !pointerItem.IsPressed()) {
+        return false;
+    }
+    dragPointerEvent.displayX = pointerItem.GetDisplayX();
+    dragPointerEvent.displayY = pointerItem.GetDisplayY();
+    return true;
 }
 
 void AceContainer::SearchElementInfoByAccessibilityIdNG(
@@ -3542,6 +3556,17 @@ void AceContainer::TerminateUIExtension()
     auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
     CHECK_NULL_VOID(uiExtensionContext);
     uiExtensionContext->TerminateSelf();
+}
+
+bool AceContainer::UIExtensionIsHalfScreen()
+{
+    if (!IsUIExtensionWindow()) {
+        return false;
+    }
+    auto sharedContext = runtimeContext_.lock();
+    auto uiExtensionContext = AbilityRuntime::Context::ConvertTo<AbilityRuntime::UIExtensionContext>(sharedContext);
+    CHECK_NULL_RETURN(uiExtensionContext, false);
+    return uiExtensionContext->GetScreenMode() == EXTENSION_HALF_SCREEN_MODE;
 }
 
 Rosen::WMError AceContainer::RegisterAvoidAreaChangeListener(sptr<Rosen::IAvoidAreaChangedListener>& listener)

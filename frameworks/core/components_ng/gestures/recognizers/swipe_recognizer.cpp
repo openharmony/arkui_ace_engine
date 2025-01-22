@@ -110,11 +110,6 @@ void SwipeRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
 
-    if (!IsInAttachedNode(event)) {
-        Adjudicate(Claim(this), GestureDisposal::REJECT);
-        return;
-    }
-
     if (fingersId_.find(event.id) == fingersId_.end()) {
         fingersId_.insert(event.id);
     }
@@ -190,6 +185,10 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             }
             auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
             if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+                Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
+                return;
+            }
+            if (CheckLimitFinger()) {
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
                 return;
             }
