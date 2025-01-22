@@ -1644,13 +1644,13 @@ void SelectOverlayNode::GetFlexibleOptionsParams(
     if (!isShowInDefaultMenu_[OPTION_INDEX_CAMERA_INPUT]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_TAKEPHOTO_SVG) : "";
         auto iconName = textOverlayTheme ? textOverlayTheme->GetCameraInput() : "";
-        params.emplace_back(iconName, iconPath, GetMenuCallbackWithContainerId(info->menuCallback.onCameraInput)
+        params.emplace_back(iconName, iconPath, GetMenuCallbackWithContainerId(info->menuCallback.onCameraInput),
             GetSymbolFunc(OH_DEFAULT_CAMERA_INPUT));
     }
     if (!isShowInDefaultMenu_[OPTION_INDEX_AI_WRITE]) {
         auto iconPath = iconTheme ? iconTheme->GetIconPath(InternalResource::ResourceId::IC_AI_WRITE_SVG) : "";
         auto iconName = textOverlayTheme ? textOverlayTheme->GetAIWrite() : "";
-        params.emplace_back(iconName, iconPath, GetMenuCallbackWithContainerId(info->menuCallback.onAIWrite)
+        params.emplace_back(iconName, iconPath, GetMenuCallbackWithContainerId(info->menuCallback.onAIWrite),
             GetSymbolFunc(OH_DEFAULT_AI_WRITE));
     }
 }
