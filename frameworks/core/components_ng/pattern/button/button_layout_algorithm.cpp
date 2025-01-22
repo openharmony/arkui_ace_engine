@@ -175,12 +175,8 @@ void ButtonLayoutAlgorithm::HandleAdaptiveText(LayoutWrapper* layoutWrapper, Lay
         CHECK_NULL_VOID(textLayoutProperty);
         if (buttonTheme->GetIsApplyTextFontSize() && !buttonLayoutProperty->GetMaxFontSize().has_value() &&
             !buttonLayoutProperty->GetMinFontSize().has_value()) {
-            if (!buttonLayoutProperty->GetMaxFontSize().has_value()) {
-                textLayoutProperty->ResetAdaptMaxFontSize();
-            }
-            if (!buttonLayoutProperty->GetMinFontSize().has_value()) {
-                textLayoutProperty->ResetAdaptMinFontSize();
-            }
+            textLayoutProperty->ResetAdaptMaxFontSize();
+            textLayoutProperty->ResetAdaptMinFontSize();
         } else {
             textLayoutProperty->UpdateAdaptMaxFontSize(
                 buttonLayoutProperty->GetMaxFontSize().value_or(buttonTheme->GetMaxFontSize()));
