@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -874,51 +874,6 @@ HWTEST_F(TabsEventTestNg, OnWillShowAndOnWillHideTest005, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnAppearAndOnDisappearTest001
- * @tc.desc: test OnAppear and OnDisappear
- * @tc.type: FUNC
- */
-HWTEST_F(TabsEventTestNg, OnAppearAndOnDisappearTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: steps1. Create tabs
-     */
-    TabsModelNG model = CreateTabs();
-    TabContentModelNG tabContentModel = CreateTabContent();
-    CreateTabsDone(model);
-
-    auto isOnAppear = false;
-    auto isOnDisappear = false;
-    std::function<void()> appearEvent = [&isOnAppear]() { isOnAppear = true; };
-    std::function<void()> disappearEvent = [&isOnDisappear]() { isOnDisappear = true; };
-    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
-    auto eventHub = tabContentFrameNode->GetEventHub<EventHub>();
-    eventHub->SetOnAppear(std::move(appearEvent));
-    eventHub->SetOnDisappear(std::move(disappearEvent));
-    auto pipeline = frameNode_->GetContext();
-    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-
-    EXPECT_FALSE(isOnAppear);
-    EXPECT_FALSE(isOnDisappear);
-
-    /**
-     * @tc.steps: step2. trigger OnAttachToMainTree.
-     * @tc.expected: isOnAppear is true.
-     */
-    tabContentFrameNode->OnAttachToMainTree(true);
-    EXPECT_TRUE(isOnAppear);
-    EXPECT_FALSE(isOnDisappear);
-
-    /**
-     * @tc.steps: step3. trigger OnDetachFromMainTree.
-     * @tc.expected: isOnDisappear is true.
-     */
-    tabContentFrameNode->OnDetachFromMainTree(true, pipeline);
-    EXPECT_TRUE(isOnAppear);
-    EXPECT_TRUE(isOnDisappear);
-}
-
-/**
  * @tc.name: TabBarPatternHandleTouchEvent001
  * @tc.desc: test HandleTouchEvent
  * @tc.type: FUNC
@@ -1414,5 +1369,50 @@ HWTEST_F(TabsEventTestNg, SetOnSelectedEvent001, TestSize.Level1)
      */
     SwipeToWithoutAnimation(3);
     EXPECT_EQ(currentIndex, 3);
+}
+
+/**
+ * @tc.name: OnAppearAndOnDisappearTest001
+ * @tc.desc: test OnAppear and OnDisappear
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, OnAppearAndOnDisappearTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabs
+     */
+    TabsModelNG model = CreateTabs();
+    TabContentModelNG tabContentModel = CreateTabContent();
+    CreateTabsDone(model);
+
+    auto isOnAppear = false;
+    auto isOnDisappear = false;
+    std::function<void()> appearEvent = [&isOnAppear]() { isOnAppear = true; };
+    std::function<void()> disappearEvent = [&isOnDisappear]() { isOnDisappear = true; };
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(GetChildFrameNode(swiperNode_, 0));
+    auto eventHub = tabContentFrameNode->GetEventHub<EventHub>();
+    eventHub->SetOnAppear(std::move(appearEvent));
+    eventHub->SetOnDisappear(std::move(disappearEvent));
+    auto pipeline = frameNode_->GetContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+
+    EXPECT_FALSE(isOnAppear);
+    EXPECT_FALSE(isOnDisappear);
+
+    /**
+     * @tc.steps: step2. trigger OnAttachToMainTree.
+     * @tc.expected: isOnAppear is true.
+     */
+    tabContentFrameNode->OnAttachToMainTree(true);
+    EXPECT_TRUE(isOnAppear);
+    EXPECT_FALSE(isOnDisappear);
+
+    /**
+     * @tc.steps: step3. trigger OnDetachFromMainTree.
+     * @tc.expected: isOnDisappear is true.
+     */
+    tabContentFrameNode->OnDetachFromMainTree(true, pipeline);
+    EXPECT_TRUE(isOnAppear);
+    EXPECT_TRUE(isOnDisappear);
 }
 } // namespace OHOS::Ace::NG

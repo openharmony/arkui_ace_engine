@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,8 +46,8 @@ void TabsTestNg::SetUpTestSuite()
     auto tabTheme = TabTheme::Builder().Build(themeConstants);
     EXPECT_CALL(*themeManager, GetTheme(TabTheme::TypeId())).WillRepeatedly(Return(tabTheme));
     tabTheme->defaultTabBarName_ = "tabBarItemName";
-    tabTheme->tabBarDefaultWidth_ = Dimension(TABBAR_DEFAULT_WIDTH);
-    tabTheme->tabBarDefaultHeight_ = Dimension(TABBAR_DEFAULT_HEIGHT);
+    tabTheme->tabBarDefaultWidth_ = Dimension(TAB_BAR_SIZE);
+    tabTheme->tabBarDefaultHeight_ = Dimension(TAB_BAR_SIZE);
     tabTheme->subTabBarHoverColor_ = Color::RED;
     tabTheme->subTabBarPressedColor_ = Color::GREEN;
     tabTheme->bottomTabSymbolOn_ = Color::BLUE;
@@ -173,8 +173,8 @@ TabBarBuilderFunc TabsTestNg::TabBarItemBuilder()
     return []() {
         ColumnModelNG colModel;
         colModel.Create(Dimension(0), nullptr, "");
-        ViewAbstract::SetWidth(CalcLength(BARITEM_SIZE));
-        ViewAbstract::SetHeight(CalcLength(BARITEM_SIZE));
+        ViewAbstract::SetWidth(CalcLength(BAR_ITEM_SIZE));
+        ViewAbstract::SetHeight(CalcLength(BAR_ITEM_SIZE));
     };
 }
 
@@ -232,6 +232,39 @@ void TabsTestNg::HandleTouchEvent(TouchType type, Offset location)
     touchInfo.SetTouchType(type);
     touchInfo.SetLocalLocation(location);
     tabBarPattern_->HandleTouchEvent(touchInfo);
+}
+
+GestureEvent TabsTestNg::CreateDragInfo(bool moveDirection)
+{
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::AXIS);
+    info.SetSourceTool(SourceTool::TOUCHPAD);
+    info.SetGlobalLocation(Offset(100.f, 100.f));
+    info.SetMainDelta(moveDirection ? -DRAG_DELTA : DRAG_DELTA);
+    info.SetMainVelocity(moveDirection ? -2000.f : 2000.f);
+    return info;
+}
+
+AssertionResult TabsTestNg::CurrentIndex(int32_t expectIndex)
+{
+    if (swiperPattern_->GetCurrentIndex() != expectIndex) {
+        return IsEqual(swiperPattern_->GetCurrentIndex(), expectIndex);
+    }
+    if (!GetChildFrameNode(swiperNode_, expectIndex)) {
+        return AssertionFailure() << "There is no item at expectIndex: " << expectIndex;
+    }
+    if (!GetChildFrameNode(swiperNode_, expectIndex)->IsActive()) {
+        return AssertionFailure() << "The expectIndex item is not active";
+    }
+    if (GetChildFrameNode(swiperNode_, expectIndex)->GetLayoutProperty()->GetVisibility() != VisibleType::GONE) {
+        if (NearZero(GetChildWidth(swiperNode_, expectIndex))) {
+            return AssertionFailure() << "The expectIndex item width is 0";
+        }
+        if (NearZero(GetChildHeight(swiperNode_, expectIndex))) {
+            return AssertionFailure() << "The expectIndex item height is 0";
+        }
+    }
+    return AssertionSuccess();
 }
 
 /**
@@ -628,7 +661,7 @@ HWTEST_F(TabsTestNg, CustomAnimationTest001, TestSize.Level1)
     EXPECT_EQ(tabBarLayoutProperty_->GetAxisValue(), Axis::VERTICAL);
     tabBarPattern_->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
     tabBarPattern_->visibleItemPosition_[0] = { 0.0f, 10.0f };
-    swiperLayoutProperty_->UpdateIndex(INDEX_ONE);
+    swiperLayoutProperty_->UpdateIndex(1);
     GestureEvent info;
     Offset offset(1, 1);
     info.SetLocalLocation(offset);
@@ -637,10 +670,10 @@ HWTEST_F(TabsTestNg, CustomAnimationTest001, TestSize.Level1)
     EXPECT_TRUE(swiperPattern_->IsDisableSwipe());
     EXPECT_TRUE(swiperPattern_->customAnimationToIndex_.has_value());
 
-    swiperPattern_->OnCustomAnimationFinish(INDEX_ONE, INDEX_ZERO, false);
+    swiperPattern_->OnCustomAnimationFinish(1, 0, false);
     EXPECT_FALSE(swiperPattern_->customAnimationToIndex_.has_value());
 
-    swiperPattern_->SwipeTo(INDEX_ONE);
+    swiperPattern_->SwipeTo(1);
     EXPECT_TRUE(swiperPattern_->customAnimationToIndex_.has_value());
 }
 
@@ -656,5 +689,24 @@ HWTEST_F(TabsTestNg, CustomAnimationTest002, TestSize.Level1)
     CreateTabContents(TABCONTENT_NUMBER);
     CreateTabsDone(model);
     EXPECT_FALSE(swiperPattern_->IsDisableSwipe());
+}
+
+/**
+ * @tc.name: DragSwiper001
+ * @tc.desc: Could drag swiper, change tabBar index
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, DragSwiper001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    GestureEvent info = CreateDragInfo(true);
+    swiperPattern_->HandleDragStart(info);
+    swiperPattern_->HandleDragUpdate(info);
+    swiperPattern_->HandleDragEnd(info.GetMainVelocity());
+    EXPECT_EQ(swiperPattern_->GetCurrentShownIndex(), 1);
+    EXPECT_EQ(tabBarLayoutProperty_->GetIndicatorValue(), 1);
 }
 } // namespace OHOS::Ace::NG
