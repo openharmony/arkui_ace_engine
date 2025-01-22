@@ -1041,7 +1041,7 @@ struct CustomDialogContentComponent {
   @Local buttonHeight: number = 0;
   @Local contentMaxHeight: Length = '100%';
   @Param fontSizeScale: number = -1;
-  @Event onFontSizeScaleChange?: (val: number) => void = undefined;
+  @Param onFontSizeScaleChange?: (val: number) => void = undefined;
   @Local customStyle: boolean | undefined = undefined;
   @Local buttonMaxFontSize: Length = `${BODY_L}fp`;
   @Local buttonMinFontSize: Length = 9;
