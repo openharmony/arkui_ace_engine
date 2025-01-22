@@ -7218,6 +7218,9 @@ RefPtr<UINode> OverlayManager::FindChildNodeByKey(const RefPtr<NG::UINode>& pare
     CHECK_NULL_RETURN(parentNode, nullptr);
     const auto& children = parentNode->GetChildren();
     for (const auto& childNode : children) {
+        if (childNode->GetTag() == V2::STAGE_ETS_TAG) {
+            continue;
+        }
         if (childNode && childNode->GetInspectorId().value_or("") == key) {
             return childNode;
         }
