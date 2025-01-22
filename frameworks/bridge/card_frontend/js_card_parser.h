@@ -203,6 +203,8 @@ private:
     int32_t maxNodeId_ = 0;
     int32_t numberOfForNode_ = 0;
     int32_t listNodeIndex_ = 0;
+    int32_t baseDepth_ = 0;
+    const int32_t maxDepth_ = 5;
     ColorMode colorMode_ = ColorMode::LIGHT;
     ParsingStatus parsingStatus_ = ParsingStatus::CREATE;
     std::vector<int32_t> idArray_;
