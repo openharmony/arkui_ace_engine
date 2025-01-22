@@ -536,6 +536,8 @@ void UpdateBackButtonPadding(
             CHECK_NULL_VOID(geometryNode);
             auto selectMenuHeight = geometryNode->GetFrameSize().Height();
             top = CalcLength((selectMenuHeight - sideWidth.GetDimension().Value()) / 2.0f);
+            bool isSymbol = Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE);
+            top = isSymbol ? CalcLength(padding.Top().ConvertToPx()) : top;
         }
     }
     buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
