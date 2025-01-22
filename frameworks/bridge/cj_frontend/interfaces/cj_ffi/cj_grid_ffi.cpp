@@ -275,22 +275,22 @@ void FfiOHOSAceFrameworkGridOnItemDragStartWithBack(
     auto lambda = CJLambda::Create(callback);
     auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onItemDragStart = [node = targetNode, lambda](const ItemDragInfo& dragInfo, int32_t itemIndex) {
-        PipelineContext::SetCallBackNode(node);
         auto x = dragInfo.GetX();
         auto y = dragInfo.GetY();
         CJItemDragInfo itemDragInfo = {
             .x = x, .y = y
         };
+        LOGI("FfiOHOSAceFrameworkGridOnItemDragStartWithBack lambda start");
         auto ret = lambda(itemDragInfo, itemIndex);
         if (ret.builder == nullptr) {
+            LOGE("FfiOHOSAceFrameworkGridOnItemDragStartWithBack lambda ret is nullptr");
             return;
         }
+
         std::function<void(void)> builderFunc = CJLambda::Create(ret.builder);
-        ViewStackModel::GetInstance()->NewScope();
-        {
-            builderFunc();
-        }
-        ViewStackModel::GetInstance()->Finish();
+        // use another VSP instance while executing the builder function
+        PipelineContext::SetCallBackNode(node);
+        builderFunc();
     };
     GridModel::GetInstance()->SetOnItemDragStart(std::move(onItemDragStart));
 }
