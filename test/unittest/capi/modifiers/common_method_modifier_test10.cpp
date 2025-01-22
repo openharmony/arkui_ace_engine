@@ -98,7 +98,7 @@ HWTEST_F(CommonMethodModifierTest10, setBackgroundTestDefaultValues, TestSize.Le
 }
 
 /*
- * @tc.name: setBackgroundTestValidValues
+ * @tc.name: setBackgroundCustomNodeBuilderTest
  * @tc.desc:
  * @tc.type: FUNC
  */
@@ -108,24 +108,28 @@ HWTEST_F(CommonMethodModifierTest10, setBackgroundCustomNodeBuilderTest, TestSiz
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    // Test of using two helpers
+    // Test of using three helpers
     int callsCount(0);
     CustomNodeBuilderTestHelper<CommonMethodModifierTest10> builderHelper1(this, frameNode);
     CustomNodeBuilderTestHelper<CommonMethodModifierTest10> builderHelper2(this, frameNode);
+    CustomNodeBuilderTestHelper<CommonMethodModifierTest10> builderHelper3(this, frameNode);
 
-    const CustomNodeBuilder builder = builderHelper2.GetBuilder();
+    const CustomNodeBuilder builder1 = builderHelper1.GetBuilder();
+    const CustomNodeBuilder builder2 = builderHelper2.GetBuilder();
+    const CustomNodeBuilder builder3 = builderHelper3.GetBuilder();
+
+    // Testing builderHelper3
+    modifier_->setBackground(node_, &builder3, nullptr);
+    EXPECT_EQ(builderHelper3.GetCallsCount(), ++callsCount);
 
     // Testing builderHelper2
-    modifier_->setBackground(node_, &builder, nullptr);
-    EXPECT_EQ(builderHelper2.GetCallsCount(), ++callsCount);
-
-    // Selecting builderHelper1
-    builderHelper1.SetSelector(); // Selecting builderHelper1
+    modifier_->setBackground(node_, &builder2, nullptr);
+    EXPECT_EQ(builderHelper2.GetCallsCount(), callsCount);
 
     // Testing builderHelper1
-    modifier_->setBackground(node_, &builder, nullptr);
+    modifier_->setBackground(node_, &builder1, nullptr);
     EXPECT_EQ(builderHelper1.GetCallsCount(), callsCount);
-    modifier_->setBackground(node_, &builder, nullptr);
+    modifier_->setBackground(node_, &builder1, nullptr);
     EXPECT_EQ(builderHelper1.GetCallsCount(), ++callsCount);
 }
 

@@ -22,6 +22,8 @@
 #include "test/unittest/capi/modifiers/modifier_test_base.h"
 #include "core/interfaces/native/common/extension_companion_node.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/utility/converter.h"
+#include "core/interfaces/native/utility/reverse_converter.h"
 
 namespace OHOS::Ace::NG {
 class ICustomNodeBuilderTestHelper {
@@ -40,17 +42,28 @@ public:
         return instance;
     }
 
-    static int64_t Register(ICustomNodeBuilderTestHelper* helper)
+    static int32_t Register(ICustomNodeBuilderTestHelper* helper)
     {
         if (helper != nullptr) {
-            auto uniqueId = reinterpret_cast<int64_t>(helper);
-            GetInstance().instances_[uniqueId] = helper;
+            auto& instances = GetInstance().instances_;
+            int32_t uniqueId;
+            if (!instances.empty()) {
+                // Find the maximum key in the map
+                uniqueId = std::max_element(instances.begin(), instances.end(),
+                    [](const std::pair<int32_t, ICustomNodeBuilderTestHelper*>& a,
+                       const std::pair<int32_t, ICustomNodeBuilderTestHelper*>& b) {
+                        return a.first < b.first;
+                    })->first + 1;
+            } else {
+                uniqueId = 1;
+            }
+            instances[uniqueId] = helper;
             return uniqueId;
         }
         return 0;
     }
 
-    static void Unregister(int64_t uniqueId)
+    static void Unregister(int32_t uniqueId)
     {
         auto instances = GetInstance().instances_;
         auto it = instances.find(uniqueId);
@@ -59,7 +72,7 @@ public:
         }
     }
 
-    ICustomNodeBuilderTestHelper* GetHelperById(int64_t uniqueId)
+    ICustomNodeBuilderTestHelper* GetHelperById(int32_t uniqueId)
     {
         auto it = instances_.find(uniqueId);
         if (it != instances_.end()) {
@@ -71,7 +84,7 @@ public:
 private:
     TestHelperManager() {}
     ~TestHelperManager() {}
-    std::unordered_map<int64_t, ICustomNodeBuilderTestHelper*> instances_;
+    std::unordered_map<int32_t, ICustomNodeBuilderTestHelper*> instances_;
     TestHelperManager(const TestHelperManager&) = delete;
     TestHelperManager& operator=(const TestHelperManager&) = delete;
 };
@@ -88,29 +101,28 @@ public:
 
     ~CustomNodeBuilderTestHelper()
     {
-        if (helperSwitcher_ == uniqueId_) {
-            helperSwitcher_ = 0;
-        }
         TestHelperManager::Unregister(uniqueId_);
         if (testClassObject_ && expectedCustomNode_) {
             testClassObject_->DisposeNode(expectedCustomNode_);
         }
         expectedParentNode_ = nullptr;
         testClassObject_ = nullptr;
+        syncCallbackCounter_ = 0;
+        asyncCallbackCounter_ = 0;
     }
 
     int GetCallsCount() const
     {
-        return callbackCounter_;
+        return syncCallbackCounter_;
     }
 
     CustomNodeBuilder GetBuilder()
     {
-        SetSelector();
         CustomNodeBuilder builder = {
+            .resource = {.resourceId = uniqueId_, .hold = nullptr, .release = nullptr},
             .callSync = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                 const Callback_Pointer_Void continuation) {
-                auto testHelper = TestHelperManager::GetInstance().GetHelperById(helperSwitcher_);
+                auto testHelper = TestHelperManager::GetInstance().GetHelperById(resourceId);
                 if (testHelper) {
                     testHelper->TestFunction(context, resourceId, parentNode, continuation);
                 } else {
@@ -119,11 +131,6 @@ public:
             }
         };
         return builder;
-    }
-
-    void SetSelector()
-    {
-        helperSwitcher_ = uniqueId_;
     }
 
     Ark_NodeHandle GetCustomNodeHandle() const
@@ -139,7 +146,7 @@ public:
     void TestFunction(Ark_VMContext context, const Ark_Int32 resourceId, const Ark_NativePointer parentNode,
                     const Callback_Pointer_Void continuation)
     {
-        callbackCounter_++;
+        syncCallbackCounter_++;
         EXPECT_EQ(reinterpret_cast<FrameNode*>(parentNode), expectedParentNode_);
         CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode_));
     }
@@ -148,9 +155,9 @@ private:
     T* testClassObject_;
     FrameNode* expectedParentNode_;
     Ark_NodeHandle expectedCustomNode_;
-    int callbackCounter_ = 0;
-    const int64_t uniqueId_;
-    static inline int64_t helperSwitcher_;
+    int syncCallbackCounter_ = 0;
+    int asyncCallbackCounter_ = 0;
+    const int32_t uniqueId_;
 };
 
 } // OHOS::Ace::NG
