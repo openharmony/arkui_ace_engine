@@ -2592,7 +2592,7 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
-    this.nativeStack.onPopCallback(typeof result === 'boolean' ? undefined : result);
+    this.nativeStack?.onPopCallback(typeof result === 'boolean' ? undefined : result);
     this.nativeStack?.onStateChanged();
     return pathInfo;
   }
@@ -2621,7 +2621,7 @@ class NavPathStack {
     } else {
       this.animated = animated;
     }
-    this.nativeStack.onPopCallback(typeof result == 'boolean' ? undefined : result);
+    this.nativeStack?.onPopCallback(typeof result == 'boolean' ? undefined : result);
     this.nativeStack?.onStateChanged();
     return index;
   }
@@ -2647,7 +2647,7 @@ class NavPathStack {
       this.animated = animated;
     }
     if (needFireOnResult) {
-      this.nativeStack.onPopCallback(typeof result == 'boolean' ? undefined : result);
+      this.nativeStack?.onPopCallback(typeof result == 'boolean' ? undefined : result);
     }
     this.nativeStack?.onStateChanged();
   }
