@@ -355,8 +355,12 @@ Ark_Int32 AddSymbolSpanImpl(RichEditorControllerPeer* peer,
     CHECK_NULL_RETURN(peerImpl, 0);
     int32_t result = 0;
     std::optional<SymbolSpanOptions> locOptions;
-    if (options) {
+    if (options && value) {
         locOptions = Converter::OptConvert<SymbolSpanOptions>(*options);
+        auto convValue = Converter::OptConvert<Converter::SymbolData>(*value);
+        if (convValue && convValue->symbol) {
+            locOptions->symbolId = convValue->symbol.value();
+        }
     }
     if (locOptions) {
         result = peerImpl->AddSymbolSpanImpl(locOptions.value());
