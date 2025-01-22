@@ -67,7 +67,7 @@ public:
 
     FrameNode* InitPivotItem(FillDirection direction);
 
-    RefPtr<FrameNode> GetChildByIndex(uint32_t index)
+    RefPtr<FrameNode> GetChildByIndex(uint32_t index) const
     {
         auto iter = indexToNode_.find(index);
         if (iter != indexToNode_.end()) {
@@ -107,6 +107,8 @@ public:
         return totalCount_;
     }
 
+    void Prepare();
+
 private:
     void RequestRecompose();
 
@@ -122,5 +124,6 @@ private:
     std::unordered_map<FrameNode*, int32_t> nodeToIndex_;
 
     Axis axis_ = Axis::VERTICAL;
+    bool rangeMode_ = false; // true  if providing item range to frontend directly
 };
 } // namespace OHOS::Ace::NG

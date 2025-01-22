@@ -38,13 +38,8 @@ public:
 
     void FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) override;
 
-    void OnSlidingOffsetUpdate(float delta) override
-    {
-        range_.offset += delta;
-        if (range_.startLine == 0) {
-            range_.offset = std::min(range_.offset, 0.0f);
-        }
-    }
+    void OnSlidingOffsetUpdate(float delta) override;
+    bool OnSlidingOffsetUpdate(const SizeF& viewport, Axis axis, float delta) override; // for parallel mode
 
     bool IsReady() const override
     {
@@ -55,7 +50,16 @@ public:
 
     void PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt) override;
 
+    int32_t GetMarkIndex() override {
+        return range_.startIdx;
+    }
+
+    std::pair<int32_t, int32_t> GetRange() const override {
+        return {range_.startIdx, range_.endIdx};
+    }
+
 private:
+    void Init(const SizeF& viewport, Axis axis, int32_t totalCnt);
     const GridLayoutProperty& props_;
     GridLayoutInfo& info_;
 
@@ -73,9 +77,20 @@ private:
          */
         void AdjustForward(const decltype(info_.lineHeightMap_)& lineHeights, float gap);
 
+        std::string ToString() const
+        {
+            return "LayoutRange { startLine: " + std::to_string(startLine) +
+                   ", offset: " + std::to_string(offset) +
+                   ", endLine: " + std::to_string(endLine) +
+                   ", startIdx: " + std::to_string(startIdx) +
+                   ", endIdx: " + std::to_string(endIdx) + " }";
+        }
+
         int32_t startLine = 0; // first line in viewport
         float offset = 0.0f;   // main-axis offset of the first line in viewport
         int32_t endLine = 0;   // last line in viewport
+        int32_t startIdx = 0;
+        int32_t endIdx = 0;
     };
     LayoutRange range_;
     GridIrregularFiller::FillParameters params_;

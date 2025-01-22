@@ -32,15 +32,15 @@ void ScrollWindowAdapter::UpdateMarkItem(int32_t index, bool notify)
         return;
     }
     markIndex_ = index;
-    if (notify) {
-        RequestRecompose();
-    }
+    RequestRecompose();
 }
 
 FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
 {
     auto* item = GetChildPtrByIndex(markIndex_);
     if (!item) {
+        nodeToIndex_.clear();
+        indexToNode_.clear();
         item = static_cast<FrameNode*>(container_->GetLastChild().GetRawPtr());
     }
     if (!item) {
@@ -53,7 +53,6 @@ FrameNode* ScrollWindowAdapter::InitPivotItem(FillDirection direction)
     indexToNode_[markIndex_] = WeakClaim(item);
     nodeToIndex_[item] = markIndex_;
     // 2: check if more space for new item.
-    LOGI("ZTE pivot canFillMore %d", markIndex_);
     if (!fillAlgorithm_->CanFillMore(axis_, size_, markIndex_, direction)) {
         LOGI("no more space left");
         return nullptr;
@@ -72,10 +71,10 @@ FrameNode* ScrollWindowAdapter::NeedMoreElements(FrameNode* markItem, FillDirect
         return nullptr;
     }
     if (markItem == nullptr) {
-        fillAlgorithm_->PreFill(size_, axis_, totalCount_);
         return InitPivotItem(direction);
     }
-    auto* pendingNode = static_cast<FrameNode*>(
+
+    FrameNode* pendingNode = static_cast<FrameNode*>(
         direction == FillDirection::START ? container_->GetChildBefore(markItem) : container_->GetChildAfter(markItem));
     if (!pendingNode) {
         LOGE("fail to find pendingNode");
@@ -108,6 +107,15 @@ void ScrollWindowAdapter::UpdateSlidingOffset(float delta)
         return;
     }
     fillAlgorithm_->OnSlidingOffsetUpdate(delta);
+    if (rangeMode_) {
+        bool res = fillAlgorithm_->OnSlidingOffsetUpdate(size_, axis_, delta);
+        if (res && updater_) {
+            auto range = fillAlgorithm_->GetRange();
+            updater_(range.first, (void*)range.second);
+        }
+        return;
+    }
+
     if (Negative(delta)) {
         if (!fillAlgorithm_->CanFillMore(axis_, size_, -1, FillDirection::END)) {
             return;
@@ -118,6 +126,8 @@ void ScrollWindowAdapter::UpdateSlidingOffset(float delta)
         }
     }
     LOGD("need to load");
+    markIndex_ = fillAlgorithm_->GetMarkIndex();
+
     RequestRecompose();
 }
 
@@ -127,5 +137,9 @@ void ScrollWindowAdapter::RequestRecompose()
         // nullptr to mark the first item
         updater_(markIndex_, nullptr);
     }
+}
+void ScrollWindowAdapter::Prepare()
+{
+    fillAlgorithm_->PreFill(size_, axis_, totalCount_);
 }
 } // namespace OHOS::Ace::NG

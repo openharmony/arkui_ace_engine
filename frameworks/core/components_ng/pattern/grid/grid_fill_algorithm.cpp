@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/grid/grid_fill_algorithm.h"
 
+#include "irregular/grid_layout_range_solver.h"
+
 #include "base/geometry/axis.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/grid/grid_layout_property.h"
@@ -25,6 +27,13 @@
 namespace OHOS::Ace::NG {
 void GridFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t totalCnt)
 {
+    Init(viewport, axis, totalCnt);
+}
+void GridFillAlgorithm::Init(const SizeF& viewport, Axis axis, int32_t totalCnt)
+{
+    if (viewport.IsNonPositive()) {
+        return;
+    }
     params_.mainGap = GridUtils::GetMainGap(props_, viewport, axis);
 
     std::string args = (axis == Axis::VERTICAL ? props_.GetColumnsTemplate() : props_.GetRowsTemplate()).value_or("");
@@ -41,8 +50,11 @@ void GridFillAlgorithm::PreFill(const SizeF& viewport, Axis axis, int32_t totalC
     info_.childrenCount_ = totalCnt;
 
     range_.startLine = info_.startMainLineIndex_;
-    // range_.offset = info_.currentOffset_;
+    range_.offset = info_.currentOffset_;
     range_.endLine = info_.endMainLineIndex_;
+    if (range_.startLine == 0) {
+        range_.offset = std::min(range_.offset, 0.0f);
+    }
 }
 
 void GridFillAlgorithm::FillMarkItem(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index)
@@ -88,8 +100,7 @@ bool GridFillAlgorithm::CanFillMore(Axis axis, const SizeF& scrollWindowSize, in
 
     range_.endLine = row - 1;
     range_.AdjustForward(info_.lineHeightMap_, params_.mainGap);
-    float contentHeight = info_.GetHeightInRange(range_.startLine, row, params_.mainGap) + range_.offset;
-
+    float contentHeight = info_.GetHeightInRange(range_.startLine, range_.endLine + 1, params_.mainGap) + range_.offset;
     return LessNotEqual(contentHeight, scrollWindowSize.MainSize(axis));
 }
 
@@ -120,5 +131,54 @@ void GridFillAlgorithm::LayoutRange::AdjustForward(const decltype(info_.lineHeig
         offset += height->second + gap;
         ++startLine;
     }
+}
+void GridFillAlgorithm::OnSlidingOffsetUpdate(float delta)
+{
+    range_.offset += delta;
+    if (range_.startLine == 0) {
+        range_.offset = std::min(range_.offset, 0.0f);
+    }
+}
+
+bool GridFillAlgorithm::OnSlidingOffsetUpdate(const SizeF& viewport, Axis axis, float delta)
+{
+    // update range
+    auto prevRange = std::pair { range_.startIdx, range_.endIdx };
+    range_.startLine = info_.startMainLineIndex_;
+    range_.endLine = info_.endMainLineIndex_;
+    range_.offset = info_.currentOffset_;
+    GridLayoutRangeSolver solver(&info_, props_.GetHost().GetRawPtr());
+    if (Positive(range_.offset)) {
+        auto res = solver.FindStartingRow(params_.mainGap);
+        range_.startIdx = res.idx;
+        range_.startLine = res.row;
+        range_.offset = res.pos;
+
+        auto [endLine, endIdx] =
+            solver.SolveForwardForEndIdx(params_.mainGap, viewport.MainSize(axis) - res.pos, res.row);
+        range_.endLine = endLine;
+        range_.endIdx = endIdx;
+        return prevRange != std::pair(range_.startIdx, range_.endIdx);
+    }
+
+    float heightToFill = viewport.MainSize(axis) - info_.currentOffset_ -
+                         info_.GetHeightInRange(range_.startLine, range_.endLine, params_.mainGap);
+    GridIrregularFiller filler(&info_, props_.GetHost().GetRawPtr());
+    constexpr float LINE_HEIGHT = 450.0f;
+    while (Positive(heightToFill)) {
+        filler.FillMatrixByLine(range_.endLine, ++range_.endLine);
+        heightToFill -= LINE_HEIGHT;
+        info_.lineHeightMap_[range_.endLine - 1] = LINE_HEIGHT;
+    }
+
+    auto solveRes = solver.FindStartingRow(params_.mainGap);
+    range_.startLine = solveRes.row;
+    range_.offset = solveRes.pos;
+    range_.startIdx = solveRes.idx;
+    auto [endMainLineIdx, endIdx] =
+        solver.SolveForwardForEndIdx(params_.mainGap, viewport.MainSize(axis) - solveRes.pos, solveRes.row);
+    range_.endLine = endMainLineIdx;
+    range_.endIdx = endIdx;
+    return prevRange != std::pair(range_.startIdx, range_.endIdx);
 }
 } // namespace OHOS::Ace::NG

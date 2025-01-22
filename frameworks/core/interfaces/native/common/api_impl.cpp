@@ -191,8 +191,7 @@ Ark_Int32 InsertChildBefore(Ark_NodeHandle parentNode, Ark_NodeHandle childNode,
         parent->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         return result;
     }
-    if (siblingNode == nullptr ||
-        siblingNode == reinterpret_cast<Ark_NodeHandle>(0x01) /*lazyForEach markItem case.*/) {
+    if (siblingNode == nullptr) {
         parent->AddChild(AceType::Claim(child));
     } else {
         auto* sibling = reinterpret_cast<UINode*>(siblingNode);

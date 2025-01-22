@@ -58,7 +58,7 @@ void OnRangeUpdateImpl(Ark_NativePointer node,
                        Ark_Int32 totalCount,
                        const Callback_RangeUpdate* updater)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(updater);
 
@@ -77,8 +77,11 @@ void SetCurrentIndexImpl(Ark_NativePointer node,
 }
 void PrepareImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    auto* scrollWindowAdapter = frameNode->GetScrollWindowAdapter();
+    CHECK_NULL_VOID(scrollWindowAdapter);
+    scrollWindowAdapter->Prepare();
 }
 } // LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()

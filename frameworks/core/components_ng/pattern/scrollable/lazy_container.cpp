@@ -28,7 +28,6 @@ void LazyContainer::UpdateLayoutRange(Axis axis, int32_t markIdx)
     if (adapter_) {
         adapter_->UpdateSize(GetHost()->GetGeometryNode()->GetFrameSize());
         adapter_->UpdateAxis(axis);
-        adapter_->UpdateMarkItem(markIdx, false);
     }
 }
 

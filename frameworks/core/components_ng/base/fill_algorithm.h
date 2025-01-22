@@ -45,6 +45,8 @@ public:
      */
     virtual void FillPrev(const SizeF& viewport, Axis axis, FrameNode* node, int32_t index) = 0;
 
+    virtual bool OnSlidingOffsetUpdate(const SizeF& viewport, Axis axis, float delta) {return false;} // for parallel mode
+
     virtual void OnSlidingOffsetUpdate(float delta) = 0;
 
     /**
@@ -58,10 +60,9 @@ public:
         return false;
     }
 
-    virtual int32_t GetMarkIndex()
-    {
-        return -1;
-    }
+    virtual int32_t GetMarkIndex() = 0;
+
+    virtual std::pair<int32_t, int32_t> GetRange() const {return {};}
 };
 } // namespace OHOS::Ace::NG
 
