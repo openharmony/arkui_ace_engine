@@ -5000,6 +5000,7 @@ void TextPattern::OnTextGenstureSelectionEnd(const TouchLocationInfo& locationIn
     }
     if (HasContent()) {
         CalculateHandleOffsetAndShowOverlay();
+        oldSelectedType_ = selectedType_.value_or(TextSpanType::NONE);
         ShowSelectOverlay({ .animation = true });
     }
 }
