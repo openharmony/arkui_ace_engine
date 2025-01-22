@@ -615,7 +615,7 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorParagraphStylePixe
     auto spans = peer_->spanString->GetSpans(TEST_START_PSPM, TEST_LENGTH);
     EXPECT_EQ(spans.size(), 1);
     auto paragraphSpan = AceType::DynamicCast<ParagraphStyleSpan>(spans[0]);
-    EXPECT_NE(paragraphSpan, nullptr);
+    ASSERT_NE(paragraphSpan, nullptr);
     SpanParagraphStyle style = paragraphSpan->GetParagraphStyle();
     ASSERT_TRUE(style.leadingMargin.has_value());
     auto size = style.leadingMargin.value().size;
@@ -741,7 +741,7 @@ HWTEST_F(StyledStringAccessorUnionImageAttachmentTest, styledStringCtorImageAtta
     auto spans = peer_->spanString->GetSpans(0, 1);
     EXPECT_EQ(spans.size(), 1);
     auto imageSpan = AceType::DynamicCast<ImageSpan>(spans[0]);
-    EXPECT_NE(imageSpan, nullptr);
+    ASSERT_NE(imageSpan, nullptr);
     const ImageSpanOptions& options = imageSpan->GetImageSpanOptions();
     auto pixMapPeer = reinterpret_cast<PixelMapPeer*>(TEST_PIXELMAP.ptr);
     ASSERT_TRUE(options.imagePixelMap.has_value());
