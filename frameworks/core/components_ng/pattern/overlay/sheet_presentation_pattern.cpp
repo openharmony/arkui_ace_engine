@@ -3161,6 +3161,9 @@ void SheetPresentationPattern::ResetClipShape()
 
 void SheetPresentationPattern::GetCurrentScrollHeight()
 {
+    if (!isScrolling_) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto scrollNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
