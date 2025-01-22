@@ -289,6 +289,10 @@ void FormRenderer::UpdateFormSize(float width, float height, float borderWidth)
         std::shared_ptr<EventHandler> eventHandler = eventHandler_.lock();
         if (eventHandler) {
             eventHandler->PostTask([uiContent = uiContent_, resizedWidth, resizedHeight]() {
+                if (!uiContent) {
+                    HILOG_ERROR("uiContent is null");
+                    return;
+                }
                 uiContent->OnFormSurfaceChange(resizedWidth, resizedHeight);
             });
         }
