@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -73,7 +73,9 @@ void SwiperAnimationTestNg::CreateWithCustomAnimation()
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation001, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     double dragVelocity = 2000.0;
     pattern_->springAnimation_ = nullptr;
     pattern_->currentOffset_ = 1;
@@ -126,7 +128,9 @@ HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation002, TestSize.Level1
  */
 HWTEST_F(SwiperAnimationTestNg, SwiperPatternSpringAnimation003, TestSize.Level1)
 {
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     double dragVelocity = 2000.0;
     pattern_->springAnimation_ = nullptr;
     pattern_->currentOffset_ = 1;
@@ -330,7 +334,9 @@ HWTEST_F(SwiperAnimationTestNg, SwiperAutoLinearAnimationNeedReset002, TestSize.
      * @tc.steps: step1. Has items, but !IsAutoLinear
      * @tc.expected: AutoLinearAnimationNeedReset return false
      */
-    CreateDefaultSwiper();
+    CreateSwiper();
+    CreateSwiperItems();
+    CreateSwiperDone();
     EXPECT_FALSE(pattern_->AutoLinearAnimationNeedReset(1.f));
 }
 
@@ -1135,7 +1141,7 @@ HWTEST_F(SwiperAnimationTestNg, StopAnimate001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     pattern_->HandleTouchDown({ touch });
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+    EXPECT_TRUE(CurrentIndex(2));
 
     /**
      * @tc.steps: step3. ShowPrevious and force stop animate when currentOffset not more than half of swiper width
@@ -1145,7 +1151,7 @@ HWTEST_F(SwiperAnimationTestNg, StopAnimate001, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     pattern_->HandleTouchDown({ touch });
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 2);
+    EXPECT_TRUE(CurrentIndex(2));
 
     /**
      * @tc.steps: step4. ShowPrevious and force stop animate when currentOffset more than half of swiper width
@@ -1194,7 +1200,7 @@ HWTEST_F(SwiperAnimationTestNg, StopAnimate002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     pattern_->HandleTouchDown({ touch });
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+    EXPECT_TRUE(CurrentIndex(1));
 
     /**
      * @tc.steps: step3. ShowPrevious and force stop animate when currentOffset not more than half of swiper width
@@ -1204,7 +1210,7 @@ HWTEST_F(SwiperAnimationTestNg, StopAnimate002, TestSize.Level1)
     MockAnimationManager::GetInstance().Tick();
     FlushUITasks();
     pattern_->HandleTouchDown({ touch });
-    EXPECT_EQ(pattern_->GetCurrentShownIndex(), 1);
+    EXPECT_TRUE(CurrentIndex(1));
 
     /**
      * @tc.steps: step4. ShowPrevious and force stop animate when currentOffset more than half of swiper width
