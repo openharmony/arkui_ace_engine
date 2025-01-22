@@ -18,6 +18,49 @@
 namespace OHOS::Ace::NG {
 using namespace TestConst::TextInput;
 /*
+ * @tc.name: setFontFeatureTestDefaultValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, DISABLED_setFontFeatureTestDefaultValues, TestSize.Level1)
+{
+    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
+    std::string resultStr;
+
+    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
+    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE) << "Default value for attribute 'fontFeature'";
+}
+
+/*
+ * @tc.name: setFontFeatureTestFontFeatureValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, DISABLED_setFontFeatureTestFontFeatureValidValues, TestSize.Level1)
+{
+    Ark_String initValueFontFeature;
+
+    // Initial setup
+    initValueFontFeature = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
+
+    auto checkValue = [this, &initValueFontFeature](
+                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
+        Ark_String inputValueFontFeature = initValueFontFeature;
+
+        inputValueFontFeature = value;
+        modifier_->setFontFeature(node_, &inputValueFontFeature);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setFontFeature, attribute: fontFeature";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+        checkValue(input, expected, value);
+    }
+}
+
+/*
  * @tc.name: setShowPasswordTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC

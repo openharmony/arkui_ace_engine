@@ -709,4 +709,65 @@ void CanvasRendererPeerImpl::SetLineJoin(const std::string& joinStr)
     }
     pattern_->UpdateLineJoin(join);
 }
+void CanvasRendererPeerImpl::Clip(const Ace::CanvasFillRule& fillRule)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::Clip pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillRuleForPath(fillRule);
+    pattern_->Clip();
+}
+void CanvasRendererPeerImpl::Clip(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::Clip pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillRuleForPath(fillRule);
+    pattern_->Clip(path);
+}
+void CanvasRendererPeerImpl::Fill(const Ace::CanvasFillRule& fillRule)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::Fill pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillRuleForPath(fillRule);
+    pattern_->Fill();
+}
+void CanvasRendererPeerImpl::Fill(const Ace::CanvasFillRule& fillRule, const RefPtr<CanvasPath2D>& path)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::Fill pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateFillRuleForPath(fillRule);
+    pattern_->Fill(path);
+}
+void CanvasRendererPeerImpl::SetTextDirection(const Ace::TextDirection& direction)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetTextDirection pattern not bound to component.");
+        return;
+    }
+    pattern_->SetTextDirection(direction);
+}
+
+void CanvasRendererPeerImpl::SetTextAlign(const TextAlign& align)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetTextAlign pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateTextAlign(align);
+}
+void CanvasRendererPeerImpl::SetTextBaseline(const TextBaseline& baseline)
+{
+    if (!pattern_) {
+        LOGE("ARKOALA CanvasRendererPeerImpl::SetTextBaseline pattern not bound to component.");
+        return;
+    }
+    pattern_->UpdateTextBaseline(baseline);
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier

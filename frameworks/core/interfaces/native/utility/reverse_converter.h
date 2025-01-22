@@ -229,6 +229,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_SubmitEvent& dst, const NG::TextFieldCommonEvent& src);
     void AssignArkValue(Ark_SwipeActionState& dst, const SwipeActionState& src);
     void AssignArkValue(Ark_SwipeEdgeEffect& dst, const V2::SwipeEdgeEffect& src);
+    void AssignArkValue(Ark_TextAreaController& dst, const TextAreaControllerPeer& src);
     void AssignArkValue(Ark_TextDecorationStyle& dst, const OHOS::Ace::TextDecorationStyle& src);
     void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration& src);
     void AssignArkValue(Ark_TextDeleteDirection& dst, const TextDeleteDirection& src);
@@ -442,6 +443,15 @@ namespace OHOS::Ace::NG::Converter {
         return {
             .selector = SELECTOR_ID_11,
             .value11 = ArkValue<Which>(src, ctx),
+        };
+    }
+    template<typename To, typename Which, typename From,
+        std::enable_if_t<std::is_same_v<Which, decltype(To().value12)>, int> = SELECTOR_ID_12>
+    To ArkUnion(const From& src, ConvContext *ctx = nullptr)
+    {
+        return {
+            .selector = SELECTOR_ID_12,
+            .value12 = ArkValue<Which>(src, ctx),
         };
     }
     template<typename To, typename Which,

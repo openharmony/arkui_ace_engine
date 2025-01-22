@@ -18,6 +18,45 @@
 namespace OHOS::Ace::NG {
 using namespace TestConst::TextInput;
 /*
+ * @tc.name: setShowErrorTestShowErrorValidValues
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputModifierTest, setShowErrorTestShowErrorValidValues, TestSize.Level1)
+{
+    Opt_ResourceStr initValueShowError;
+
+    // Initial setup
+    initValueShowError = ArkUnion<Opt_ResourceStr, Ark_Resource>(
+        std::get<1>(Fixtures::testFixtureStringEmptyResUndefinedValidValues[0]));
+
+    auto checkValue = [this, &initValueShowError](
+                          const std::string& input, const std::string& expectedStr, const Opt_ResourceStr& value) {
+        Opt_ResourceStr inputValueShowError = initValueShowError;
+
+        inputValueShowError = value;
+        modifier_->setShowError(node_, &inputValueShowError);
+        auto jsonValue = GetJsonValue(node_);
+        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SHOW_ERROR_NAME);
+        EXPECT_EQ(resultStr, expectedStr) <<
+            "Input value is: " << input << ", method: setShowError, attribute: showError";
+    };
+
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringEmptyResUndefinedValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringEmptyUndefinedValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringNoEmptyValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_String>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureStringResNoEmptyValidValues) {
+        checkValue(input, expected, ArkUnion<Opt_ResourceStr, Ark_Resource>(value));
+    }
+}
+
+/*
  * @tc.name: setShowErrorTestShowErrorInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
@@ -2196,49 +2235,6 @@ HWTEST_F(TextInputModifierTest, setPasswordRulesTestPasswordRulesValidValues, Te
         auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_PASSWORD_RULES_NAME);
         EXPECT_EQ(resultStr, expectedStr) <<
             "Input value is: " << input << ", method: setPasswordRules, attribute: passwordRules";
-    };
-
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
-        checkValue(input, expected, value);
-    }
-}
-
-/*
- * @tc.name: setFontFeatureTestDefaultValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, DISABLED_setFontFeatureTestDefaultValues, TestSize.Level1)
-{
-    std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
-    std::string resultStr;
-
-    resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
-    EXPECT_EQ(resultStr, ATTRIBUTE_FONT_FEATURE_DEFAULT_VALUE) << "Default value for attribute 'fontFeature'";
-}
-
-/*
- * @tc.name: setFontFeatureTestFontFeatureValidValues
- * @tc.desc:
- * @tc.type: FUNC
- */
-HWTEST_F(TextInputModifierTest, DISABLED_setFontFeatureTestFontFeatureValidValues, TestSize.Level1)
-{
-    Ark_String initValueFontFeature;
-
-    // Initial setup
-    initValueFontFeature = std::get<1>(Fixtures::testFixtureStringValidValues[0]);
-
-    auto checkValue = [this, &initValueFontFeature](
-                          const std::string& input, const std::string& expectedStr, const Ark_String& value) {
-        Ark_String inputValueFontFeature = initValueFontFeature;
-
-        inputValueFontFeature = value;
-        modifier_->setFontFeature(node_, &inputValueFontFeature);
-        auto jsonValue = GetJsonValue(node_);
-        auto resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_FONT_FEATURE_NAME);
-        EXPECT_EQ(resultStr, expectedStr) <<
-            "Input value is: " << input << ", method: setFontFeature, attribute: fontFeature";
     };
 
     for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {

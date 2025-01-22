@@ -47,6 +47,11 @@ void CanvasPattern::DetachRenderContext()
 
 void CanvasPattern::SetOnContext2DAttach(std::function<void()>&& callback)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+    }
     onContext2DAttach_ = std::move(callback);
 }
 
@@ -58,6 +63,11 @@ void CanvasPattern::SetOnContext2DDetach(std::function<void()>&& callback)
 void CanvasPattern::FireOnContext2DAttach()
 {
     if (onContext2DAttach_) {
+        auto holder = TestHolder::GetInstance();
+        if (holder->request) {
+            holder->counter++;
+            holder->isCalled = true;
+        }
         onContext2DAttach_();
     }
 }
@@ -65,6 +75,11 @@ void CanvasPattern::FireOnContext2DAttach()
 void CanvasPattern::FireOnContext2DDetach()
 {
     if (onContext2DDetach_) {
+        auto holder = TestHolder::GetInstance();
+        if (holder->request) {
+            holder->counter++;
+            holder->isCalled = true;
+        }
         onContext2DDetach_();
     }
 }
@@ -231,6 +246,11 @@ void CanvasPattern::ClearRect(const Rect& rect)
 
 void CanvasPattern::Fill()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled2 = true;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Fill();
@@ -243,6 +263,12 @@ void CanvasPattern::Fill()
 
 void CanvasPattern::Fill(const RefPtr<CanvasPath2D>& path)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled2 = true;
+        holder->path = path;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [path](CanvasPaintMethod& paintMethod) {
         paintMethod.Fill(path);
@@ -294,6 +320,11 @@ void CanvasPattern::Stroke(const RefPtr<CanvasPath2D>& path)
 
 void CanvasPattern::Clip()
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled2 = true;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [](CanvasPaintMethod& paintMethod) {
         paintMethod.Clip();
@@ -306,6 +337,12 @@ void CanvasPattern::Clip()
 
 void CanvasPattern::Clip(const RefPtr<CanvasPath2D>& path)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled2 = true;
+        holder->path = path;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [path](CanvasPaintMethod& paintMethod) {
         paintMethod.Clip(path);
@@ -898,6 +935,12 @@ void CanvasPattern::UpdateShadowOffsetY(double offsetY)
 
 void CanvasPattern::UpdateTextAlign(TextAlign align)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->textAlign = align;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [align](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextAlign(align);
@@ -910,6 +953,12 @@ void CanvasPattern::UpdateTextAlign(TextAlign align)
 
 void CanvasPattern::UpdateTextBaseline(TextBaseline baseline)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->baseline = baseline;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [baseline](CanvasPaintMethod& paintMethod) {
         paintMethod.SetTextBaseline(baseline);
@@ -1074,6 +1123,12 @@ void CanvasPattern::UpdateFillPattern(const std::weak_ptr<Ace::Pattern>& pattern
 
 void CanvasPattern::UpdateFillRuleForPath(const CanvasFillRule rule)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->fillRule = rule;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [rule](CanvasPaintMethod& paintMethod) {
         paintMethod.SetFillRuleForPath(rule);
@@ -1366,6 +1421,12 @@ void CanvasPattern::SetInvalidate()
 
 void CanvasPattern::SetTextDirection(TextDirection direction)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->isCalled = true;
+        holder->direction = direction;
+        return;
+    }
     currentSetTextDirection_ = direction;
     auto host = GetHost();
     CHECK_NULL_VOID(host);

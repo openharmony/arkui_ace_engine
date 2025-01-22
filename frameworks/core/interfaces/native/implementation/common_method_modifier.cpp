@@ -43,6 +43,7 @@
 using namespace OHOS::Ace::NG::Converter;
 
 namespace {
+constexpr double PERCENT_100 = 100.0;
 constexpr double FULL_DIMENSION = 100.0;
 constexpr double HALF_DIMENSION = 50.0;
 constexpr double VISIBLE_RATIO_MIN = 0.0;
@@ -707,8 +708,17 @@ Gradient Convert(const Ark_RadialGradientOptions& src)
     gradient.CreateGradientWithType(NG::GradientType::RADIAL);
 
     // center
-    gradient.GetRadialGradient()->radialCenterX = Converter::Convert<Dimension>(src.center.value0);
-    gradient.GetRadialGradient()->radialCenterY = Converter::Convert<Dimension>(src.center.value1);
+    auto centerX = Converter::Convert<Dimension>(src.center.value0);
+    if (centerX.Unit() == DimensionUnit::PERCENT) {
+        centerX = centerX * PERCENT_100;
+    }
+    gradient.GetRadialGradient()->radialCenterX = centerX;
+
+    auto centerY = Converter::Convert<Dimension>(src.center.value1);
+    if (centerY.Unit() == DimensionUnit::PERCENT) {
+        centerY = centerY * PERCENT_100;
+    }
+    gradient.GetRadialGradient()->radialCenterY = centerY;
 
     // radius
     std::optional<Dimension> radiusOpt = Converter::OptConvert<Dimension>(src.radius);
@@ -2041,6 +2051,7 @@ void SafeAreaPaddingImpl(Ark_NativePointer node,
             ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },
         [frameNode](const Ark_LocalizedPadding& value) {
+             LOGE("ARKOALA: CommonMethod::SafeAreaPaddingImpl: Ark_LocalizedPadding is not supported.\n");
             auto convValue = Converter::Convert<PaddingProperty>(value);
              ViewAbstract::SetSafeAreaPadding(frameNode, convValue);
         },
@@ -4669,6 +4680,7 @@ void CustomPropertyImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    LOGE("CommonMethodModifier::CustomPropertyImpl is not implemented");
     //auto convValue = Converter::Convert<type>(name);
     //auto convValue = Converter::OptConvert<type>(name); // for enums
     //CommonMethodModelNG::SetCustomProperty(frameNode, convValue);
@@ -4686,7 +4698,7 @@ void ExpandSafeAreaImpl(Ark_NativePointer node,
     if (convTypes.has_value()) {
         std::vector<std::optional<uint32_t>> vec = convTypes.value();
         for (size_t i = 0; i < vec.size(); ++i) {
-            safeAreaType |= (1 << (vec[i].has_value() ? vec[i].value() : 0));
+            safeAreaType |= vec[i].value_or(0);
         }
         opts.type = safeAreaType;
     }
@@ -4694,7 +4706,7 @@ void ExpandSafeAreaImpl(Ark_NativePointer node,
     if (convEdges.has_value()) {
         std::vector<std::optional<uint32_t>> vec = convEdges.value();
         for (size_t i = 0; i < vec.size(); ++i) {
-            safeAreaEdge |= (1 << (vec[i].has_value() ? vec[i].value() : 0));
+            safeAreaEdge |= vec[i].value_or(0);
         }
         opts.edges = safeAreaEdge;
     }

@@ -38,25 +38,6 @@ OHOS::Ace::FontStyle Convert(const Ark_FontStyle& src)
 }
 
 template<>
-TextDecoration Convert(const Ark_TextDecorationType& src)
-{
-    switch (src) {
-        case Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_UNDERLINE:
-            return TextDecoration::UNDERLINE;
-        case Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_OVERLINE:
-            return TextDecoration::OVERLINE;
-        case Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_LINE_THROUGH:
-            return TextDecoration::LINE_THROUGH;
-        case Ark_TextDecorationType::ARK_TEXT_DECORATION_TYPE_NONE:
-            return TextDecoration::NONE;
-        default:
-            LOGE("Unexpected enum value in Ark_TextDecorationType: %{public}d", src);
-            break;
-    }
-    return TextDecoration::NONE;
-}
-
-template<>
 TextDecorationStruct Convert(const Ark_DecorationStyleInterface& src)
 {
     TextDecorationStruct ret;

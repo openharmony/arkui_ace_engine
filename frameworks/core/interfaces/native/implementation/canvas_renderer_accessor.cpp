@@ -35,6 +35,23 @@ const auto SEGMENT_LIMIT_MIN = 0.0;
 const auto SCALE_LIMIT_MIN = 0.0;
 constexpr uint32_t COLOR_WHITE = 0xffffffff;
 const auto EMPTY_STRING = "";
+const auto FILL_RULE_EVEN_ODD = "evenodd";
+const auto DIR_AUTO = "auto";
+const auto DIR_INHERIT = "inherit";
+const auto DIR_LTR = "ltr";
+const auto DIR_RTL = "rtl";
+const auto DOM_CENTER = "center";
+const auto DOM_END = "end";
+const auto DOM_JUSTIFY = "justify";
+const auto DOM_LEFT = "left";
+const auto DOM_RIGHT = "right";
+const auto DOM_START = "start";
+const auto DOM_ALPHABETIC = "alphabetic";
+const auto DOM_BOTTOM = "bottom";
+const auto DOM_HANGING = "hanging";
+const auto DOM_IDEOGRAPHIC = "ideographic";
+const auto DOM_MIDDLE = "middle";
+const auto DOM_TOP = "top";
 struct Ark_Custom_Rect {
     Ark_Number x;
     Ark_Number y;
@@ -77,6 +94,49 @@ std::optional<double> ConvertDimension(
 }
 } // namespace
 namespace Converter {
+template<>
+TextBaseline Convert(const Ark_String& src)
+{
+    auto baseLine = Converter::Convert<std::string>(src);
+    static const LinearMapNode<TextBaseline> textBaseAlignTable[] = {
+        { DOM_ALPHABETIC, TextBaseline::ALPHABETIC },
+        { DOM_BOTTOM, TextBaseline::BOTTOM },
+        { DOM_HANGING, TextBaseline::HANGING },
+        { DOM_IDEOGRAPHIC, TextBaseline::IDEOGRAPHIC },
+        { DOM_MIDDLE, TextBaseline::MIDDLE },
+        { DOM_TOP, TextBaseline::TOP },
+    };
+    auto index = BinarySearchFindIndex(textBaseAlignTable, ArraySize(textBaseAlignTable), baseLine.c_str());
+    return index < 0 ? TextBaseline::ALPHABETIC : textBaseAlignTable[index].value;
+}
+template<>
+TextAlign Convert(const Ark_String& src)
+{
+    auto align = Converter::Convert<std::string>(src);
+    static const LinearMapNode<TextAlign> textAlignTable[] = {
+        { DOM_CENTER, TextAlign::CENTER },
+        { DOM_END, TextAlign::END },
+        { DOM_JUSTIFY, TextAlign::JUSTIFY },
+        { DOM_LEFT, TextAlign::LEFT },
+        { DOM_RIGHT, TextAlign::RIGHT },
+        { DOM_START, TextAlign::START },
+    };
+    auto index = BinarySearchFindIndex(textAlignTable, ArraySize(textAlignTable), align.c_str());
+    return index < 0 ? TextAlign::CENTER : textAlignTable[index].value;
+}
+template<>
+TextDirection Convert(const Ark_String& src)
+{
+    auto val = Converter::Convert<std::string>(src);
+    static const LinearMapNode<TextDirection> textDirectionTable[] = {
+        { DIR_AUTO, TextDirection::AUTO },
+        { DIR_INHERIT, TextDirection::INHERIT },
+        { DIR_LTR, TextDirection::LTR },
+        { DIR_RTL, TextDirection::RTL },
+    };
+    auto index = BinarySearchFindIndex(textDirectionTable, ArraySize(textDirectionTable), val.c_str());
+    return index < 0 ? TextDirection::LTR : textDirectionTable[index].value;
+}
 template<>
 std::vector<uint32_t> Convert(const Ark_Buffer& src)
 {
@@ -191,28 +251,56 @@ void BeginPathImpl(CanvasRendererPeer* peer)
 void Clip0Impl(CanvasRendererPeer* peer,
                const Opt_String* fillRule)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::Clip0Impl Opt_String parameter "
-        "should be replaced with a valid ark enum for CanvasFillRule type.");
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(fillRule);
+    auto opt = Converter::OptConvert<std::string>(*fillRule);
+    auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+    peerImpl->Clip(rule);
 }
 void Clip1Impl(CanvasRendererPeer* peer,
                const Ark_Path2D* path,
                const Opt_String* fillRule)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::Clip1Impl Opt_String parameter "
-        "should be replaced with a valid ark enum for CanvasFillRule type.");
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(path);
+    CHECK_NULL_VOID(fillRule);
+    auto opt = Converter::OptConvert<std::string>(*fillRule);
+    auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path->ptr);
+    CHECK_NULL_VOID(pathImpl);
+    CHECK_NULL_VOID(pathImpl->path);
+    peerImpl->Clip(rule, pathImpl->path);
 }
 void Fill0Impl(CanvasRendererPeer* peer,
                const Opt_String* fillRule)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::Fill0Impl Opt_String parameter "
-        "should be replaced with a valid ark enum for CanvasFillRule type.");
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(fillRule);
+    auto opt = Converter::OptConvert<std::string>(*fillRule);
+    auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+    peerImpl->Fill(rule);
 }
 void Fill1Impl(CanvasRendererPeer* peer,
                const Ark_Path2D* path,
                const Opt_String* fillRule)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::Fill1Impl Opt_String parameter "
-        "should be replaced with a valid ark enum for CanvasFillRule type.");
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(path);
+    CHECK_NULL_VOID(fillRule);
+    auto opt = Converter::OptConvert<std::string>(*fillRule);
+    auto rule = opt && *opt == FILL_RULE_EVEN_ODD ? CanvasFillRule::EVENODD : CanvasFillRule::NONZERO;
+    auto pathImpl = reinterpret_cast<CanvasPathPeerImpl*>(path->ptr);
+    CHECK_NULL_VOID(pathImpl);
+    CHECK_NULL_VOID(pathImpl->path);
+    peerImpl->Fill(rule, pathImpl->path);
 }
 void Stroke0Impl(CanvasRendererPeer* peer)
 {
@@ -1152,8 +1240,12 @@ Ark_NativePointer GetDirectionImpl(CanvasRendererPeer* peer)
 void SetDirectionImpl(CanvasRendererPeer* peer,
                       const Ark_String* direction)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::SetDirectionImpl Ark_String type parameter "
-        "should be replaced with a valid ark enum for CanvasDirection type.");
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(direction);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto dir = Converter::Convert<TextDirection>(*direction);
+    peerImpl->SetTextDirection(dir);
 }
 void GetFontImpl(CanvasRendererPeer* peer)
 {
@@ -1181,8 +1273,12 @@ Ark_NativePointer GetTextAlignImpl(CanvasRendererPeer* peer)
 void SetTextAlignImpl(CanvasRendererPeer* peer,
                       const Ark_String* textAlign)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::SetTextAlignImpl Ark_String type parameter "
-        "should be replaced with a valid ark enum for CanvasTextAlign type.");
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(textAlign);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto align = Converter::Convert<TextAlign>(*textAlign);
+    peerImpl->SetTextAlign(align);
 }
 Ark_NativePointer GetTextBaselineImpl(CanvasRendererPeer* peer)
 {
@@ -1195,8 +1291,12 @@ Ark_NativePointer GetTextBaselineImpl(CanvasRendererPeer* peer)
 void SetTextBaselineImpl(CanvasRendererPeer* peer,
                          const Ark_String* textBaseline)
 {
-    LOGE("ARKOALA CanvasRendererAccessor::SetTextBaselineImpl Ark_String type parameter "
-        "should be replaced with a valid ark enum for CanvasTextBaseline type.");
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(textBaseline);
+    auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto baseLine = Converter::Convert<TextBaseline>(*textBaseline);
+    peerImpl->SetTextBaseline(baseLine);
 }
 } // CanvasRendererAccessor
 const GENERATED_ArkUICanvasRendererAccessor* GetCanvasRendererAccessor()

@@ -68,6 +68,7 @@ ace_unittest("capi_all_accessors_test") {
     "styled_string_accessor_test.cpp",
     "swiper_content_transition_proxy_accessor_test.cpp",
     "swiper_controller_accessor_test.cpp",
+    "tab_content_transition_proxy_accessor_test.cpp",
     "tabs_controller_accessor_test.cpp",
     "text_area_controller_test.cpp",
     "text_base_controller_accessor_test.cpp",

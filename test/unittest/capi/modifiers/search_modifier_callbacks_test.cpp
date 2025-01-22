@@ -256,6 +256,87 @@ HWTEST_F(SearchModifierCallbackTest, setOnCutTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: setOnCutTest
+ * @tc.desc: Test Seacrh setOnCut event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierCallbackTest, setOnPasteTestCallEvent, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnPaste, nullptr);
+    TextCommonEvent event;
+    const std::u16string testString = u"testText";
+    const int contextId = 99999;
+    struct CheckEvent {
+        int32_t resourceId;
+        std::u16string content;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto testCallback = [](const Ark_Int32 resourceId, const Ark_String content, const Ark_PasteEvent event) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .content = Convert<std::u16string>(content),
+        };
+        auto arkCallback = OptConvert<Callback_Void>(event.preventDefault);
+        if (arkCallback) {
+            auto helper = CallbackHelper(*arkCallback);
+            helper.Invoke();
+        }
+    };
+    auto arkCallback = ArkValue<OnPasteCallback>(testCallback, contextId);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(textFieldEventHub, nullptr);
+    modifier_->setOnPaste(node_, &arkCallback);
+    EXPECT_FALSE(checkEvent);
+    EXPECT_FALSE(event.IsPreventDefault());
+    textFieldEventHub->FireOnPasteWithEvent(testString, event);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_TRUE(event.IsPreventDefault());
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->content, testString);
+}
+
+/**
+ * @tc.name: setOnPasteTest
+ * @tc.desc: Test Seacrh setOnPaste event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchModifierCallbackTest, setOnPasteTest, TestSize.Level1)
+{
+    ASSERT_NE(modifier_->setOnPaste, nullptr);
+    TextCommonEvent event;
+    const std::u16string testString = u"testText";
+    const int contextId = 99999;
+    struct CheckEvent {
+        int32_t resourceId;
+        std::u16string content;
+    };
+    static std::optional<CheckEvent> checkEvent = std::nullopt;
+    auto testCallback = [](const Ark_Int32 resourceId, const Ark_String content, const Ark_PasteEvent event) {
+        checkEvent = {
+            .resourceId = resourceId,
+            .content = Convert<std::u16string>(content),
+        };
+    };
+    auto arkCallback = ArkValue<OnPasteCallback>(testCallback, contextId);
+    auto frameNode = reinterpret_cast<FrameNode*>(node_);
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
+    ASSERT_NE(textFieldChild, nullptr);
+    auto textFieldEventHub = textFieldChild->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(textFieldEventHub, nullptr);
+    modifier_->setOnPaste(node_, &arkCallback);
+    EXPECT_FALSE(checkEvent);
+    EXPECT_FALSE(event.IsPreventDefault());
+    textFieldEventHub->FireOnPasteWithEvent(testString, event);
+    ASSERT_TRUE(checkEvent);
+    EXPECT_FALSE(event.IsPreventDefault());
+    EXPECT_EQ(checkEvent->resourceId, contextId);
+    EXPECT_EQ(checkEvent->content, testString);
+}
+
+/**
  * @tc.name: setOnContentScrollTest
  * @tc.desc: Check the functionality of setOnContentScroll
  * @tc.type: FUNC

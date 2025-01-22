@@ -82,138 +82,120 @@ const std::vector<Ace::SpanType> SPAN_TYPE_TEST_VALUES = {
     };
 
 namespace {
+    const Ark_TextStyle_styled_string textStyle {
+        .fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_FONT_COLOR)),
+        .fontFamily = Converter::ArkValue<Opt_String>(TEST_FONT_FAMILIES[0]),
+        .fontSize = Converter::ArkValue<Opt_Number>(std::get<1>(TEST_FONT_SIZE)),
+        .fontWeight = Converter::ArkValue<Opt_Number>(std::get<1>(TEST_FONT_WEIGHT)),
+        .fontStyle = Converter::ArkValue<Opt_FontStyle>(TEST_FONT_STYLE),
+    };
+    const Ark_DecorationStyle decorationStyle {
+        .type = Converter::ArkValue<Ark_TextDecorationType>(TEST_DCRN_TYPE),
+        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_DCRN_COLOR)),
+        .style = Converter::ArkValue<Opt_TextDecorationStyle>(TEST_DCRN_STYLE),
+    };
+    const Ark_BaselineOffsetStyle baselineOffsetStyle {
+        .baselineOffset = Converter::ArkValue<Ark_Number>(std::get<1>(TEST_BASELINE_OFFSET))
+    };
+    const Ark_LetterSpacingStyle letterSpacingStyle {
+        .letterSpacing = Converter::ArkValue<Ark_Number>(std::get<1>(TEST_LETTER_SPACING))
+    };
+    const Ark_TextShadowStyle textShadowStyle {
+        .textShadow = {
+            .array = new Ark_ShadowOptions[1] {
+                {
+                    .radius = Converter::ArkUnion<
+                        Ark_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_RADIUS),
+                    .type = Converter::ArkValue<Opt_ShadowType>(std::get<1>(TEST_TEXT_SHADOW_TYPE)),
+                    .color= Converter::ArkUnion<
+                        Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
+                        std::get<1>(TEST_TEXT_SHADOW_COLOR)),
+                    .offsetX = Converter::ArkUnion<
+                        Opt_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_OFFSET),
+                    .offsetY = Converter::ArkUnion<
+                        Opt_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_OFFSET),
+                    .fill = Converter::ArkValue<Opt_Boolean>(true)
+                }
+            },
+            .length = 1
+        }
+    };
+    const Ark_LineHeightStyle lineHeightStyle {
+        .lineHeight = Converter::ArkValue<Ark_Number>(std::get<1>(TEST_LINE_HEIGHT))
+    };
+    const Ark_BackgroundColorStyle backgroundColorStyle {
+        .textBackgroundStyle = {
+            .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_BGCL_COLOR)),
+            .radius = Converter::ArkUnion<
+                Opt_Union_Dimension_BorderRadiuses, Ark_Length>(std::get<1>(TEST_BGCL_RADIUS))
+        }
+    };
+    const Ark_UrlStyle urlStyle {
+        .url= Converter::ArkValue<Ark_String>(TEST_URL)
+    };
+    const Ark_ParagraphStyle paragraphStyle {
+        .textAlign = Converter::ArkValue<Opt_TextAlign>(std::get<1>(TEST_PSST_TEXT_ALIGN)),
+        .textIndent = Converter::ArkValue<Opt_Number>(TEST_PSST_TEXT_INDEN),
+        .maxLines = Converter::ArkValue<Opt_Number>(TEST_PSST_MAX_LINES),
+        .overflow = Converter::ArkValue<Opt_TextOverflow>(std::get<1>(TEST_PSST_OVERFLOW)),
+        .wordBreak = Converter::ArkValue<Opt_WordBreak>(std::get<1>(TEST_PSST_WORD_BREAK)),
+        .leadingMargin = Converter::ArkUnion<
+            Opt_Union_Number_LeadingMarginPlaceholder, Ark_Number>(std::get<1>(TEST_PSST_LEADING_MARGIN)),
+    };
     const std::vector<Ark_StyleOptions> testArrayStyles = std::vector {
         Ark_StyleOptions {
             .start = Converter::ArkValue<Opt_Number>(TEST_START_STR),
             .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
             .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[0]),
-            .styledValue = {
-                .selector = 0, // Ark_TextStyle_styled_string
-                .value0 = {
-                    .fontColor = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_FONT_COLOR)),
-                    .fontFamily = Converter::ArkValue<Opt_String>(TEST_FONT_FAMILIES[0]),
-                    .fontSize = Converter::ArkValue<Opt_Number>(std::get<1>(TEST_FONT_SIZE)),
-                    .fontWeight = Converter::ArkValue<Opt_Number>(std::get<1>(TEST_FONT_WEIGHT)),
-                    .fontStyle = Converter::ArkValue<Opt_FontStyle>(TEST_FONT_STYLE),
-                }
-            }
+            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_TextStyle_styled_string>(textStyle)
         },
         Ark_StyleOptions {
             .start = Converter::ArkValue<Opt_Number>(TEST_START_DCRN),
             .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
             .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[1]),
-            .styledValue = {
-                .selector = 1, // Ark_DecorationStyle
-                .value1 = {
-                    .type = Converter::ArkValue<Ark_TextDecorationType>(TEST_DCRN_TYPE),
-                    .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_DCRN_COLOR)),
-                    .style = Converter::ArkValue<Opt_TextDecorationStyle>(TEST_DCRN_STYLE),
-                }
-            }
+            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_DecorationStyle>(decorationStyle)
         },
         Ark_StyleOptions {
             .start = Converter::ArkValue<Opt_Number>(TEST_START_BSL),
             .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
             .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[2]),
-            .styledValue = {
-                .selector = 2, // Ark_BaselineOffsetStyle
-                .value2 = {
-                    .baselineOffset = Converter::ArkValue<Ark_Number>(std::get<1>(TEST_BASELINE_OFFSET))
-                }
-            }
+            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_BaselineOffsetStyle>(baselineOffsetStyle)
         },
         Ark_StyleOptions {
             .start = Converter::ArkValue<Opt_Number>(TEST_START_LSP),
             .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
             .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[3]),
-            .styledValue = {
-                .selector = 3, // Ark_LetterSpacingStyle
-                .value3 = {
-                    .letterSpacing = Converter::ArkValue<Ark_Number>(std::get<1>(TEST_LETTER_SPACING))
-                }
-            }
+            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_LetterSpacingStyle>(letterSpacingStyle)
         },
         Ark_StyleOptions {
             .start = Converter::ArkValue<Opt_Number>(TEST_START_TSH),
             .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
             .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[4]),
-            .styledValue = {
-                .selector = 4, // Ark_TextShadowStyle
-                .value4 = {
-                    .textShadow = {
-                        .array = new Ark_ShadowOptions[1] {
-                            {
-                                .radius = Converter::ArkUnion<
-                                    Ark_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_RADIUS),
-                                .type = Converter::ArkValue<Opt_ShadowType>(std::get<1>(TEST_TEXT_SHADOW_TYPE)),
-                                .color= Converter::ArkUnion<
-                                    Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(
-                                    std::get<1>(TEST_TEXT_SHADOW_COLOR)),
-                                .offsetX = Converter::ArkUnion<
-                                    Opt_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_OFFSET),
-                                .offsetY = Converter::ArkUnion<
-                                    Opt_Union_Number_Resource, Ark_Number>(TEST_TEXT_SHADOW_OFFSET),
-                                .fill = Converter::ArkValue<Opt_Boolean>(true)
-                            }
-                        },
-                        .length = 1
-                    }
-                }
-            }
+            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_TextShadowStyle>(textShadowStyle)
         },
         Ark_StyleOptions {
             .start = Converter::ArkValue<Opt_Number>(TEST_START_LNHT),
             .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
             .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[5]),
-            .styledValue = {
-                .selector = 8, // Ark_LineHeightStyle
-                .value8 = {
-                    .lineHeight = Converter::ArkValue<Ark_Number>(std::get<1>(TEST_LINE_HEIGHT))
-                }
-            }
+            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_LineHeightStyle>(lineHeightStyle)
         },
         Ark_StyleOptions {
             .start = Converter::ArkValue<Opt_Number>(TEST_START_BGCL),
             .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
             .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[6]),
-            .styledValue = {
-                .selector = 12, // Ark_BackgroundColorStyle
-                .value12 = {
-                    .textBackgroundStyle = {
-                        .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Color>(std::get<1>(TEST_BGCL_COLOR)),
-                        .radius = Converter::ArkUnion<
-                            Opt_Union_Dimension_BorderRadiuses, Ark_Length>(std::get<1>(TEST_BGCL_RADIUS))
-                    }
-                }
-            }
+            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_BackgroundColorStyle>(backgroundColorStyle)
         },
         Ark_StyleOptions {
             .start = Converter::ArkValue<Opt_Number>(TEST_START_URL),
             .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
             .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[7]),
-            .styledValue = {
-                .selector = 9, // Ark_UrlStyle
-                .value9 = {
-                    .url= Converter::ArkValue<Ark_String>(TEST_URL)
-                }
-            }
+            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_UrlStyle>(urlStyle)
         },
         Ark_StyleOptions {
             .start = Converter::ArkValue<Opt_Number>(TEST_START_PSST),
             .length = Converter::ArkValue<Opt_Number>(TEST_LENGTH),
             .styledKey = Converter::ArkValue<Ark_StyledStringKey>(SPAN_TYPE_TEST_VALUES[8]),
-            .styledValue = {
-                .selector = 7, // Ark_ParagraphStyle
-                .value7 = {
-                    .textAlign = Converter::ArkValue<Opt_TextAlign>(std::get<1>(TEST_PSST_TEXT_ALIGN)),
-                    .textIndent = Converter::ArkValue<Opt_Number>(TEST_PSST_TEXT_INDEN),
-                    .maxLines = Converter::ArkValue<Opt_Number>(TEST_PSST_MAX_LINES),
-                    .overflow = Converter::ArkValue<Opt_TextOverflow>(std::get<1>(TEST_PSST_OVERFLOW)),
-                    .wordBreak = Converter::ArkValue<Opt_WordBreak>(std::get<1>(TEST_PSST_WORD_BREAK)),
-                    .leadingMargin = Converter::ArkUnion<
-                        Opt_Union_Number_LeadingMarginPlaceholder, Ark_Number>(std::get<1>(TEST_PSST_LEADING_MARGIN)),
-                }
-            }
+            .styledValue = Converter::ArkUnion<Ark_StyledStringValue, Ark_ParagraphStyle>(paragraphStyle)
         }
     };
     Converter::ArkArrayHolder<Array_StyleOptions> holderStyles(testArrayStyles);

@@ -733,13 +733,13 @@ HWTEST_F(TextAreaModifierTest, setLineHeightTestDefaultValues, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setLineHeightTestLineHeightValidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setLineHeightTestLineHeightValidValues, TestSize.Level1)
 {
     Ark_Union_Number_String_Resource initValueLineHeight;
 
     // Initial setup
     initValueLineHeight = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueLineHeight](const std::string& input, const std::string& expectedStr,
                           const Ark_Union_Number_String_Resource& value) {
@@ -753,13 +753,15 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setLineHeightTestLineHeightValidValues, 
             "Input value is: " << input << ", method: setLineHeight, attribute: lineHeight";
     };
 
-    for (auto& [input, value, expected] : Fixtures::testFixtureNumberAnythingValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsNumNonNegValidValues) {
         checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
     }
-    for (auto& [input, value, expected] : Fixtures::testFixtureStringValidValues) {
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsResNonNegValidValues) {
+        checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+    }
+    for (auto& [input, value, expected] : Fixtures::testFixtureDimensionsStrNonNegValidValues) {
         checkValue(input, expected, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
     }
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
 }
 
 /*
@@ -767,13 +769,13 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setLineHeightTestLineHeightValidValues, 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setLineHeightTestLineHeightInvalidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setLineHeightTestLineHeightInvalidValues, TestSize.Level1)
 {
     Ark_Union_Number_String_Resource initValueLineHeight;
 
     // Initial setup
     initValueLineHeight = ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(
-        std::get<1>(Fixtures::testFixtureNumberAnythingValidValues[0]));
+        std::get<1>(Fixtures::testFixtureDimensionsNumNonNegValidValues[0]));
 
     auto checkValue = [this, &initValueLineHeight](
                           const std::string& input, const Ark_Union_Number_String_Resource& value) {
@@ -788,7 +790,15 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setLineHeightTestLineHeightInvalidValues
             "Input value is: " << input << ", method: setLineHeight, attribute: lineHeight";
     };
 
-    ADD_FAILURE() << "No fixture is defined for type Ark_Resource";
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsNumNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Number>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsStrNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_String>(value));
+    }
+    for (auto& [input, value] : Fixtures::testFixtureDimensionsResNonNegInvalidValues) {
+        checkValue(input, ArkUnion<Ark_Union_Number_String_Resource, Ark_Resource>(value));
+    }
     // Check invalid union
     checkValue("invalid union", ArkUnion<Ark_Union_Number_String_Resource, Ark_Empty>(nullptr));
 }

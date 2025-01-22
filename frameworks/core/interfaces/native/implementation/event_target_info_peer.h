@@ -18,7 +18,9 @@
 #include <string>
 #include "arkoala_api_generated.h"
 
-struct EventTargetInfoPeer {
+struct EventTargetInfoPeer : public OHOS::Ace::AceType {
+    DECLARE_ACE_TYPE(EventTargetInfoPeer, OHOS::Ace::AceType);
+public:
     EventTargetInfoPeer() = default;
     virtual ~EventTargetInfoPeer() = default;
 

@@ -22,12 +22,29 @@
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "arkoala_api_generated.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/form/resource/form_request_data.h"
 namespace OHOS::Ace::NG {
+struct OptRequestFormInfo {
+    std::optional<int64_t> id = std::nullopt;
+    std::string name;
+    std::string bundle;
+    std::string ability;
+    std::string module;
+    std::optional<int32_t> dimension = std::nullopt;
+    std::optional<bool> temporary = std::nullopt;
+    RefPtr<WantWrap> want = nullptr;
+    std::optional<int32_t> renderingMode = std::nullopt;
+    std::optional<int32_t> shape = std::nullopt;
+};
 struct LiteralDimension {
     Dimension width;
     Dimension height;
 };
 namespace {
+const auto FORM_SHAPE_RECT = 1;
+const auto FORM_SHAPE_CIRCLE = 2;
+const auto FORM_RENDERING_MODE_FULL_COLOR = 0;
+const auto FORM_RENDERING_MODE_SINGLE_COLOR = 1;
 const auto FORM_DIMENSION_DIMENSION_1_2 = 1;
 const auto FORM_DIMENSION_DIMENSION_2_2 = 2;
 const auto FORM_DIMENSION_DIMENSION_2_4 = 3;
@@ -49,6 +66,43 @@ const int32_t MIN_SIGNED_NUMBER_OF_ARK = INT_MIN;
 const int32_t MAX_SIGNED_NUMBER_OF_ARK = INT_MAX;
 } // namespace
 namespace Converter {
+template<>
+OptRequestFormInfo Convert(const Ark_FormInfo& src)
+{
+    OptRequestFormInfo dst;
+    auto id = Converter::OptConvert<Dimension>(src.id);
+    if (id) {
+        dst.id = (int64_t)(*id).Value();
+    }
+    dst.name = Converter::Convert<std::string>(src.name);
+    dst.bundle = Converter::Convert<std::string>(src.bundle);
+    dst.ability = Converter::Convert<std::string>(src.ability);
+    dst.module = Converter::Convert<std::string>(src.module);
+    dst.dimension = Converter::OptConvert<int32_t>(src.dimension);
+    dst.temporary = Converter::OptConvert<bool>(src.temporary);
+    dst.want = nullptr;
+    dst.renderingMode = Converter::OptConvert<int32_t>(src.renderingMode);
+    dst.shape = Converter::OptConvert<int32_t>(src.shape);
+    return dst;
+}
+template<>
+void AssignCast(std::optional<int32_t>& dst, const Ark_FormShape& src)
+{
+    switch (src) {
+        case ARK_FORM_SHAPE_RECT: dst = FORM_SHAPE_RECT; break;
+        case ARK_FORM_SHAPE_CIRCLE: dst = FORM_SHAPE_CIRCLE; break;
+        default: LOGE("Unexpected enum value in Ark_FormRenderingMode: %{public}d", src);
+    }
+}
+template<>
+void AssignCast(std::optional<int32_t>& dst, const Ark_FormRenderingMode& src)
+{
+    switch (src) {
+        case ARK_FORM_RENDERING_MODE_FULL_COLOR: dst = FORM_RENDERING_MODE_FULL_COLOR; break;
+        case ARK_FORM_RENDERING_MODE_SINGLE_COLOR: dst = FORM_RENDERING_MODE_SINGLE_COLOR; break;
+        default: LOGE("Unexpected enum value in Ark_FormRenderingMode: %{public}d", src);
+    }
+}
 template<>
 LiteralDimension Convert(const Ark_SizeOptions& src)
 {
@@ -102,11 +156,20 @@ namespace FormComponentInterfaceModifier {
 void SetFormComponentOptionsImpl(Ark_NativePointer node,
                                  const Ark_FormInfo* value)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
+#ifdef FORM_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
+    auto formInfo = Converter::Convert<OptRequestFormInfo>(*value);
+    FormModelNG::SetModuleName(frameNode, formInfo.module);
+    if (formInfo.dimension) {
+        FormModelNG::SetDimension(frameNode, *formInfo.dimension);
+    }
+    LOGE("ARKOALA FormComponentInterfaceModifier::OnAcquiredImpl - Ark_Number width of int32_t is not enough "
+         "for implementation of int64_t functionality.");
     LOGE("ARKOALA FormComponentInterfaceModifier::SetFormComponentOptionsImpl - CustomObject is not supported "
-        "the type Ark_FormInfo::Opt_Want::Opt_Map_String_CustomObject::Ark_CustomObject.");
+         "the type Ark_FormInfo::Opt_Want::Opt_Map_String_CustomObject::Ark_CustomObject.");
+#endif // FORM_SUPPORTED
 }
 } // FormComponentInterfaceModifier
 namespace FormComponentAttributeModifier {

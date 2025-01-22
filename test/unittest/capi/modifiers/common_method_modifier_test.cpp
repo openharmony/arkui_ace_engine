@@ -1456,7 +1456,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter1TestValidValues, Test
         { Converter::ArkValue<Ark_Length>(-65.0_fp), "[\"-65.00fp\",\"0.00vp\"]" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "[\"4.30fp\",\"0.00vp\"]" },
         { Converter::ArkValue<Ark_Length>(-4.3_fp), "[\"-4.30fp\",\"0.00vp\"]" },
-        { Converter::ArkValue<Ark_Length>("10.00%"), "[\"10.00%\",\"0.00vp\"]" },
+        { Converter::ArkValue<Ark_Length>("10.00%"), "[\"1000.00%\",\"0.00vp\"]" },
         { RES_ARK_LENGTH, "[\"10.00px\",\"0.00vp\"]" },
     };
 
@@ -1512,7 +1512,7 @@ HWTEST_F(CommonMethodModifierTest, setRadialGradientCenter2TestValidValues, Test
         { Converter::ArkValue<Ark_Length>(-65.0_fp), "[\"0.00vp\",\"-65.00fp\"]" },
         { Converter::ArkValue<Ark_Length>(4.3_fp), "[\"0.00vp\",\"4.30fp\"]" },
         { Converter::ArkValue<Ark_Length>(-4.3_fp), "[\"0.00vp\",\"-4.30fp\"]" },
-        { Converter::ArkValue<Ark_Length>("10.00%"), "[\"0.00vp\",\"10.00%\"]" },
+        { Converter::ArkValue<Ark_Length>("10.00%"), "[\"0.00vp\",\"1000.00%\"]" },
         { RES_ARK_LENGTH, "[\"0.00vp\",\"10.00px\"]" },
     };
 

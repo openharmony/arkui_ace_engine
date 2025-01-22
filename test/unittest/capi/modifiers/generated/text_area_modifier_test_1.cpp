@@ -144,7 +144,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderColorTestPlaceholderColorInvalidVal
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTestDefaultValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setPlaceholderFontTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::unique_ptr<JsonValue> resultPlaceholderFont =
@@ -173,7 +173,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTestDefaultValues, Tes
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontSizeValidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setPlaceholderFontTestPlaceholderFontSizeValidValues, TestSize.Level1)
 {
     Ark_Font initValuePlaceholderFont;
 
@@ -251,7 +251,7 @@ HWTEST_F(TextAreaModifierTest, setPlaceholderFontTestPlaceholderFontSizeInvalidV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontWeightValidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setPlaceholderFontTestPlaceholderFontWeightValidValues, TestSize.Level1)
 {
     Ark_Font initValuePlaceholderFont;
 
@@ -295,7 +295,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontWei
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontWeightInvalidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setPlaceholderFontTestPlaceholderFontWeightInvalidValues, TestSize.Level1)
 {
     Ark_Font initValuePlaceholderFont;
 
@@ -344,7 +344,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontWei
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontFamilyValidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setPlaceholderFontTestPlaceholderFontFamilyValidValues, TestSize.Level1)
 {
     Ark_Font initValuePlaceholderFont;
 
@@ -385,7 +385,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontFam
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setPlaceholderFontTestPlaceholderFontFamilyInvalidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setPlaceholderFontTestPlaceholderFontFamilyInvalidValues, TestSize.Level1)
 {
     Ark_Font initValuePlaceholderFont;
 
@@ -1562,7 +1562,7 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setCopyOptionTestCopyOptionValidValues, 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(TextAreaModifierTest, DISABLED_setCopyOptionTestCopyOptionInvalidValues, TestSize.Level1)
+HWTEST_F(TextAreaModifierTest, setCopyOptionTestCopyOptionInvalidValues, TestSize.Level1)
 {
     Ark_CopyOptions initValueCopyOption;
 

@@ -26,11 +26,14 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ScrollableTargetInfoAccessor {
 void DestroyPeerImpl(ScrollableTargetInfoPeer* peer)
 {
-    delete peer;
+    CHECK_NULL_VOID(peer);
+    peer->DecRefCount();
 }
 Ark_NativePointer CtorImpl()
 {
-    return new ScrollableTargetInfoPeer();
+    auto peer = AceType::MakeRefPtr<ScrollableTargetInfoPeer>();
+    peer->IncRefCount();
+    return AceType::RawPtr(peer);
 }
 Ark_NativePointer GetFinalizerImpl()
 {

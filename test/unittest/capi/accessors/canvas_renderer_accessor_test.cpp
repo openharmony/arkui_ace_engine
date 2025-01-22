@@ -229,7 +229,41 @@ std::vector<std::tuple<Ark_String, LineJoinStyle>> LINE_JOIN_TEST_PLAN = {
     { Converter::ArkValue<Ark_String>(""), LineJoinStyle::MITER },
     { Converter::ArkValue<Ark_String>("invalid"), LineJoinStyle::MITER }
 };
-
+std::vector<std::tuple<Opt_String, Ace::CanvasFillRule>> FILL_RULE_TEST_PLAN = {
+    { Converter::ArkValue<Opt_String>("evenodd"), Ace::CanvasFillRule::EVENODD },
+    { Converter::ArkValue<Opt_String>("nonzero"), Ace::CanvasFillRule::NONZERO },
+    { Converter::ArkValue<Opt_String>("invalid"), Ace::CanvasFillRule::NONZERO },
+    { Converter::ArkValue<Opt_String>(""), Ace::CanvasFillRule::NONZERO },
+    { Converter::ArkValue<Opt_String>(Ark_Empty()), Ace::CanvasFillRule::NONZERO }
+};
+std::vector<std::tuple<Ark_String, Ace::TextDirection>> DIRECTION_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("ltr"), Ace::TextDirection::LTR },
+    { Converter::ArkValue<Ark_String>("rtl"), Ace::TextDirection::RTL },
+    { Converter::ArkValue<Ark_String>("inherit"), Ace::TextDirection::INHERIT },
+    { Converter::ArkValue<Ark_String>("auto"), Ace::TextDirection::AUTO },
+    { Converter::ArkValue<Ark_String>("invalid"), Ace::TextDirection::LTR },
+    { Converter::ArkValue<Ark_String>(""), Ace::TextDirection::LTR },
+};
+std::vector<std::tuple<Ark_String, Ace::TextAlign>> TEXT_ALIGN_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("center"), Ace::TextAlign::CENTER },
+    { Converter::ArkValue<Ark_String>("end"), Ace::TextAlign::END },
+    { Converter::ArkValue<Ark_String>("justify"), Ace::TextAlign::JUSTIFY },
+    { Converter::ArkValue<Ark_String>("left"), Ace::TextAlign::LEFT },
+    { Converter::ArkValue<Ark_String>("right"), Ace::TextAlign::RIGHT },
+    { Converter::ArkValue<Ark_String>("start"), Ace::TextAlign::START },
+    { Converter::ArkValue<Ark_String>("invalid"), Ace::TextAlign::CENTER },
+    { Converter::ArkValue<Ark_String>(""), Ace::TextAlign::CENTER },
+};
+std::vector<std::tuple<Ark_String, TextBaseline>> TEXT_BASE_LINE_TEST_PLAN = {
+    { Converter::ArkValue<Ark_String>("alphabetic"), Ace::TextBaseline::ALPHABETIC },
+    { Converter::ArkValue<Ark_String>("bottom"), Ace::TextBaseline::BOTTOM },
+    { Converter::ArkValue<Ark_String>("hanging"), Ace::TextBaseline::HANGING },
+    { Converter::ArkValue<Ark_String>("ideographic"), Ace::TextBaseline::IDEOGRAPHIC },
+    { Converter::ArkValue<Ark_String>("middle"), Ace::TextBaseline::MIDDLE },
+    { Converter::ArkValue<Ark_String>("top"), Ace::TextBaseline::TOP },
+    { Converter::ArkValue<Ark_String>("invalid"), Ace::TextBaseline::ALPHABETIC },
+    { Converter::ArkValue<Ark_String>(""), Ace::TextBaseline::ALPHABETIC },
+};
 class MockPixelMap : public PixelMap {
 public:
     MOCK_METHOD(bool, GetPixelsVec, (std::vector<uint8_t> & data), (const override));
@@ -2132,5 +2166,185 @@ HWTEST_F(CanvasRendererAccessorTest, setPixelMapTest, TestSize.Level1)
     accessor_->setPixelMap(peer_, nullptr);
     EXPECT_TRUE(true);
 #endif
+}
+
+/**
+ * @tc.name: clip0Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, clip0Test, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->clip0, nullptr);
+    for (const auto& [actual, expected] : FILL_RULE_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->clip0(peer_, &actual);
+        auto rule = *holder->fillRule;
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_TRUE(holder->isCalled2);
+        EXPECT_EQ(rule, expected);
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: clip1Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, clip1Test, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->clip1, nullptr);
+    auto peerImpl = Referenced::MakeRefPtr<GeneratedModifier::CanvasPathPeerImpl>();
+    Ark_Materialized arkPath = {
+        .ptr = reinterpret_cast<CanvasPathPeer*>(Referenced::RawPtr(peerImpl))
+    };
+    for (const auto& [arkRule, expected] : FILL_RULE_TEST_PLAN) {
+        for (const auto& actual : PATH2D_TEST_PLAN) {
+            holder->SetUp();
+            auto path = AceType::MakeRefPtr<CanvasPath2D>();
+            auto cmd = std::get<0>(actual);
+            auto x = std::get<1>(actual);
+            auto y = std::get<2>(actual);
+            if (cmd == PathCmd::MOVE_TO) {
+                path->MoveTo(x, y);
+            } else {
+                path->LineTo(x, y);
+            }
+            peerImpl->path = path;
+            accessor_->clip1(peer_, &arkPath, &arkRule);
+            auto result = holder->path->GetCaches();
+            auto rcmd = result[0].first;
+            auto rx = result[0].second.para1;
+            auto ry = result[0].second.para2;
+            auto rule = *holder->fillRule;
+            EXPECT_TRUE(holder->isCalled);
+            EXPECT_TRUE(holder->isCalled2);
+            EXPECT_EQ(rule, expected);
+            EXPECT_EQ(rcmd, cmd);
+            EXPECT_TRUE(LessOrEqualCustomPrecision(rx, x));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(ry, y));
+        }
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: fill0Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, fill0Test, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->fill0, nullptr);
+    for (const auto& [actual, expected] : FILL_RULE_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->fill0(peer_, &actual);
+        auto rule = *holder->fillRule;
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_TRUE(holder->isCalled2);
+        EXPECT_EQ(rule, expected);
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: fill1Test
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, fill1Test, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->fill1, nullptr);
+    auto peerImpl = Referenced::MakeRefPtr<GeneratedModifier::CanvasPathPeerImpl>();
+    Ark_Materialized arkPath = {
+        .ptr = reinterpret_cast<CanvasPathPeer*>(Referenced::RawPtr(peerImpl))
+    };
+    for (const auto& [arkRule, expected] : FILL_RULE_TEST_PLAN) {
+        for (const auto& actual : PATH2D_TEST_PLAN) {
+            holder->SetUp();
+            auto path = AceType::MakeRefPtr<CanvasPath2D>();
+            auto cmd = std::get<0>(actual);
+            auto x = std::get<1>(actual);
+            auto y = std::get<2>(actual);
+            if (cmd == PathCmd::MOVE_TO) {
+                path->MoveTo(x, y);
+            } else {
+                path->LineTo(x, y);
+            }
+            peerImpl->path = path;
+            accessor_->fill1(peer_, &arkPath, &arkRule);
+            auto result = holder->path->GetCaches();
+            auto rcmd = result[0].first;
+            auto rx = result[0].second.para1;
+            auto ry = result[0].second.para2;
+            auto rule = *holder->fillRule;
+            EXPECT_TRUE(holder->isCalled);
+            EXPECT_TRUE(holder->isCalled2);
+            EXPECT_EQ(rule, expected);
+            EXPECT_EQ(rcmd, cmd);
+            EXPECT_TRUE(LessOrEqualCustomPrecision(rx, x));
+            EXPECT_TRUE(LessOrEqualCustomPrecision(ry, y));
+        }
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setDirectionTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setDirectionTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->setDirection, nullptr);
+    for (const auto& [actual, expected] : DIRECTION_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->setDirection(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(*holder->direction, expected);
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setTextAlignTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setTextAlignTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->setTextAlign, nullptr);
+    for (const auto& [actual, expected] : TEXT_ALIGN_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->setTextAlign(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(*holder->textAlign, expected);
+    }
+    holder->TearDown();
+}
+
+/**
+ * @tc.name: setTextBaselineTest
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasRendererAccessorTest, setTextBaselineTest, TestSize.Level1)
+{
+    auto holder = TestHolder::GetInstance();
+    ASSERT_NE(accessor_->setTextBaseline, nullptr);
+    for (const auto& [actual, expected] : TEXT_BASE_LINE_TEST_PLAN) {
+        holder->SetUp();
+        accessor_->setTextBaseline(peer_, &actual);
+        EXPECT_TRUE(holder->isCalled);
+        EXPECT_EQ(*holder->baseline, expected);
+    }
+    holder->TearDown();
 }
 } // namespace OHOS::Ace::NG

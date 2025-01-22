@@ -849,7 +849,7 @@ Font Convert(const Ark_Font& src)
     }
     auto fontSize = OptConvert<Dimension>(src.size);
     if (fontSize) {
-        Validator::ValidatePositive(fontSize);
+        Validator::ValidateNonNegative(fontSize);
         Validator::ValidateNonPercent(fontSize);
         font.fontSize = fontSize;
     }

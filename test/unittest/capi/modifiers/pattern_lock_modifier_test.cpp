@@ -78,6 +78,8 @@ class PatternLockModifierTest : public ModifierTestBase<GENERATED_ArkUIPatternLo
     static void SetUpTestCase()
     {
         ModifierTestBase::SetUpTestCase();
+        auto themeStyle = SetupThemeStyle("pattern_lock_pattern");
+        themeStyle->SetAttr("side_length", { .value = V2::DEFAULT_SIDE_LENGTH });
         SetupTheme<V2::PatternLockTheme>();
         AddResource(RES_COLOR_ID, COLOR_BY_NUMBER);
         AddResource(RES_COLOR_NAME, COLOR_BY_STRING1);
@@ -89,11 +91,10 @@ class PatternLockModifierTest : public ModifierTestBase<GENERATED_ArkUIPatternLo
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockModifierTest, DISABLED_setSideLengthTestDefaultValues, TestSize.Level1)
+HWTEST_F(PatternLockModifierTest, setSideLengthTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
-
     resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_SIDE_LENGTH_NAME);
     EXPECT_EQ(resultStr, ATTRIBUTE_SIDE_LENGTH_DEFAULT_VALUE);
 }
@@ -111,7 +112,7 @@ static std::vector<std::tuple<std::string, Ark_Length, std::string>> sideLengthV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(PatternLockModifierTest, DISABLED_setSideLengthTestValidValues, TestSize.Level1)
+HWTEST_F(PatternLockModifierTest, setSideLengthTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
