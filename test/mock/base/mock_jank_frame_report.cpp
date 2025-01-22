@@ -70,4 +70,6 @@ void PerfMonitor::SetAppStartStatus() {}
 void PerfMonitor::SetPageName(const std::string& pageName) {}
 void PerfMonitor::ReportPageShowMsg(const std::string& pageUrl, const std::string& bundleName,
                                     const std::string& pageName) {}
+void PerfMonitor::NotifyAppJankStatsBegin() {}
+void PerfMonitor::NotifyAppJankStatsEnd() {}
 } // namespace OHOS::Ace
