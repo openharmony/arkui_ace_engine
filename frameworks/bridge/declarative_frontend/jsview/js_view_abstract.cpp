@@ -6578,7 +6578,8 @@ bool JSViewAbstract::ParseBindSheetBorderRadiusProps(const JSRef<JSVal>& args, N
         if (CheckLengthMetrics(object)) {
             std::optional<CalcDimension> radiusTopStart = ParseBindSheetBorderRadiusProp(object, TOP_START_PROPERTY);
             std::optional<CalcDimension> radiusTopEnd = ParseBindSheetBorderRadiusProp(object, TOP_END_PROPERTY);
-            std::optional<CalcDimension> radiusBottomStart = ParseBindSheetBorderRadiusProp(object, BOTTOM_START_PROPERTY);
+            std::optional<CalcDimension> radiusBottomStart =
+                ParseBindSheetBorderRadiusProp(object, BOTTOM_START_PROPERTY);
             std::optional<CalcDimension> radiusBottomEnd = ParseBindSheetBorderRadiusProp(object, BOTTOM_END_PROPERTY);
             auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
             radius.radiusTopLeft = isRightToLeft ? radiusTopEnd : radiusTopStart;
