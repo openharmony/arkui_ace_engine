@@ -19,7 +19,6 @@
 #include "ecmascript/napi/include/jsnapi.h"
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -27,7 +26,6 @@ class JsiObjectTemplate {
 public:
     JsiObjectTemplate();
     ~JsiObjectTemplate() = default;
-    static JSView* GetNativeViewPartialUpdate(const panda::Local<panda::ObjectRef> obj);
 
 protected:
     panda::Local<panda::ObjectRef> operator*() const;

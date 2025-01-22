@@ -2881,7 +2881,8 @@ namespace {
     {
         return eventType && (eventType == Accessibility::EventType::TYPE_PAGE_STATE_UPDATE
             || eventType == Accessibility::EventType::TYPE_PAGE_CONTENT_UPDATE
-            || eventType == Accessibility::EventType::TYPE_PAGE_OPEN);
+            || eventType == Accessibility::EventType::TYPE_PAGE_OPEN
+            || eventType == Accessibility::EventType::TYPE_PAGE_CLOSE);
     }
 
     bool IsRootOrPageComponent(const std::string& componentType)
@@ -2922,8 +2923,10 @@ namespace {
         return !accessibilityProperty->HasAccessibilitySamePage();
     }
 
-    void UpdateExtensionComponentStatusVec(std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>>& nodeVec)
+    void UpdateExtensionComponentStatusVec(
+        std::vector<std::pair<WeakPtr<NG::FrameNode>, bool>>& nodeVec, std::mutex& mutex)
     {
+        std::lock_guard<std::mutex> lock(mutex);
         for (auto it = nodeVec.begin(); it != nodeVec.end();) {
             if (IsDelNode(it->first)) {
                 it = nodeVec.erase(it);
@@ -2947,8 +2950,9 @@ namespace {
         pageId = node->GetPageId();
     }
 
-    void ClearDefaultFocusList(std::list<WeakPtr<NG::FrameNode>>& nodeList)
+    void ClearDefaultFocusList(std::list<WeakPtr<NG::FrameNode>>& nodeList, std::mutex& mutex)
     {
+        std::lock_guard<std::mutex> lock(mutex);
         for (auto it = nodeList.begin(); it != nodeList.end();) {
             auto node = it->Upgrade();
             if (!node) {
@@ -2981,6 +2985,7 @@ bool JsAccessibilityManager::HandleAccessibilityEvent(
 bool JsAccessibilityManager::HandleAccessibilityEventForUEA(
     std::shared_ptr<AccessibilitySystemAbilityClient>& client, const Accessibility::AccessibilityEventInfo& eventInfo)
 {
+    std::lock_guard<std::mutex> lock(cacheEventVecMutex_);
     if (pageMode_.empty()) {
         if (treeId_ == -1) {
             cacheEventVec_.push_back(eventInfo);
@@ -3001,13 +3006,14 @@ bool JsAccessibilityManager::HandleAccessibilityEventForUEA(
 bool JsAccessibilityManager::HandleAccessibilityEventForHost(std::shared_ptr<AccessibilitySystemAbilityClient>& client,
     const Accessibility::AccessibilityEventInfo& eventInfo, const int32_t pageId)
 {
-    UpdateExtensionComponentStatusVec(extensionComponentStatusVec_);
-    ClearDefaultFocusList(defaultFocusList_);
+    UpdateExtensionComponentStatusVec(extensionComponentStatusVec_, extensionComponentStatusVecMutex_);
+    ClearDefaultFocusList(defaultFocusList_, defaultFocusListMutex_);
 
     if (extensionComponentStatusVec_.empty() || defaultFocusList_.empty()) {
         return SendEvent(client, eventInfo);
     }
 
+    std::lock_guard<std::mutex> lock(extensionComponentStatusVecMutex_);
     for (const auto& [node, status] : extensionComponentStatusVec_) {
         auto frameNode = node.Upgrade();
         CHECK_NULL_CONTINUE(frameNode);
@@ -3041,6 +3047,7 @@ void JsAccessibilityManager::SendCacheAccessibilityEvent(int32_t instanceId)
     client->IsEnabled(isEnabled);
     CHECK_NULL_VOID(isEnabled);
 
+    std::lock_guard<std::mutex> lock(cacheEventVecMutex_);
     if (!cacheEventVec_.empty()) {
         for (const auto& event : cacheEventVec_) {
             SendEvent(client, event);
@@ -3070,6 +3077,7 @@ void JsAccessibilityManager::SendCacheAccessibilityEventForHost(const int32_t pa
 bool JsAccessibilityManager::SendEvent(std::shared_ptr<AccessibilitySystemAbilityClient>& client,
     const Accessibility::AccessibilityEventInfo& eventInfo)
 {
+    CHECK_NULL_RETURN(client, false);
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY,
         "send accessibility componentType:%{public}s event:%{public}d accessibilityId:%{public}" PRId64,
         eventInfo.GetComponentType().c_str(), eventInfo.GetEventType(), eventInfo.GetAccessibilityId());
@@ -3079,14 +3087,17 @@ bool JsAccessibilityManager::SendEvent(std::shared_ptr<AccessibilitySystemAbilit
 void JsAccessibilityManager::SendFrameNodeToAccessibility(const RefPtr<NG::FrameNode>& node, bool isExtensionComponent)
 {
     if (isExtensionComponent) {
+        std::lock_guard<std::mutex> lock(extensionComponentStatusVecMutex_);
         extensionComponentStatusVec_.emplace_back(WeakPtr(node), false);
         return;
     }
+    std::lock_guard<std::mutex> lock(defaultFocusListMutex_);
     defaultFocusList_.push_back(WeakPtr(node));
 }
 
 void JsAccessibilityManager::UpdateFrameNodeState(int32_t nodeId)
 {
+    std::lock_guard<std::mutex> lock(extensionComponentStatusVecMutex_);
     for (auto& [node, status] : extensionComponentStatusVec_) {
         auto frameNode = node.Upgrade();
         if (frameNode && (frameNode->GetId() == nodeId)) {
@@ -4849,18 +4860,14 @@ void JsAccessibilityManager::SearchDefaultFocusByWindowId(const int32_t windowId
         }
     }
 
-    auto weak = WeakClaim(this);
-    auto jsAccessibilityManager = weak.Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
-    auto defaultFocusNodeList = jsAccessibilityManager->GetDefaultFocusList();
-
+    auto defaultFocusNodeList = GetDefaultFocusList();
     for (const auto& defaultFocusNode : defaultFocusNodeList) {
         auto frameNode = defaultFocusNode.Upgrade();
         if (frameNode && (frameNode->GetPageId() == pageId || pageId == -1)) {
-            auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage(frameNode->GetId());
+            auto node = GetAccessibilityNodeFromPage(frameNode->GetAccessibilityId());
             CHECK_NULL_CONTINUE(node);
             AccessibilityElementInfo nodeInfo;
-            UpdateAccessibilityNodeInfo(node, nodeInfo, jsAccessibilityManager, jsAccessibilityManager->windowId_);
+            UpdateAccessibilityNodeInfo(node, nodeInfo, Claim(this), windowId_);
             infos.emplace_back(nodeInfo);
         }
     }
@@ -4878,12 +4885,12 @@ void JsAccessibilityManager::SearchDefaultFocusByWindowIdNG(const int32_t pageId
     for (const auto& defaultFocusNode : defaultFocusList_) {
         auto node = defaultFocusNode.Upgrade();
         if (node && (node->GetPageId() == pageId || pageId == -1)) {
-        AccessibilityElementInfo nodeInfo;
+            AccessibilityElementInfo nodeInfo;
 
-        CommonProperty commonProperty;
-        GenerateCommonProperty(ngPipeline, commonProperty, mainContext, node);
-        UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
-        infos.emplace_back(nodeInfo);
+            CommonProperty commonProperty;
+            GenerateCommonProperty(ngPipeline, commonProperty, mainContext, node);
+            UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
+            infos.emplace_back(nodeInfo);
         }
     }
 }

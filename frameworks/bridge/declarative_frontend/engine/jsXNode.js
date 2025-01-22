@@ -1294,6 +1294,12 @@ class FrameNode {
     triggerOnRecycle() {
         getUINativeModule().frameNode.triggerOnRecycle(this.getNodePtr());
     }
+    reuse() {
+        this.triggerOnReuse();
+    }
+    recycle() {
+        this.triggerOnRecycle();
+    }
 }
 class ImmutableFrameNode extends FrameNode {
     isModifiable() {

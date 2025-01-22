@@ -110,7 +110,6 @@ public:
         ResetTextMarqueeOptions();
         ResetCursorColor();
         ResetSelectedBackgroundColor();
-        ResetTextColorFlagByUser();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
@@ -246,8 +245,6 @@ public:
 
     // Used to mark whether a paragraph needs to be recreated for Measure.
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP_GET(NeedReCreateParagraph, bool);
-
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TextColorFlagByUser, bool, PROPERTY_UPDATE_NORMAL);
 
     std::string GetTextMarqueeOptionsString() const;
     void UpdateMarqueeOptionsFromJson(const std::unique_ptr<JsonValue>& json);

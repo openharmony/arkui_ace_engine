@@ -413,4 +413,120 @@ HWTEST_F(NavigationManagerTestNg, OnContainerModalButtonsRectChange001, TestSize
     EXPECT_EQ(buttonWidth, 100.0f);
     NavigationManagerTestNg::TearDownTestSuite();
 }
+
+/**
+ * @tc.name: NavigationMapsTest001
+ * @tc.desc: Test AddNavigation/RemoveNavigation/FindNavigationInTargetParent
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationManagerTestNg, NavigationMapsTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_TRUE(navigationManager->navigationMaps_.empty());
+
+    /**
+     * @tc.steps: step2. configure parameters .
+     */
+    int32_t parentId1 = 1;
+    int32_t navigationId1 = 11;
+    int32_t parentId2 = 2;
+    int32_t navigationId2 = 21;
+    int32_t parentId3 = 3;
+    int32_t navigationId3 = 31;
+    int32_t navigationId4 = 41;
+
+    /**
+     * @tc.steps: step3. Register navigation to manager.
+     */
+    navigationManager->AddNavigation(parentId1, navigationId1);
+    ASSERT_EQ(navigationManager->navigationMaps_.size(), 1);
+    navigationManager->AddNavigation(parentId2, navigationId2);
+    ASSERT_EQ(navigationManager->navigationMaps_.size(), 2);
+    navigationManager->AddNavigation(parentId3, navigationId3);
+    ASSERT_EQ(navigationManager->navigationMaps_.size(), 3);
+    navigationManager->AddNavigation(parentId3, navigationId4);
+    ASSERT_EQ(navigationManager->navigationMaps_.size(), 3);
+
+    /**
+     * @tc.steps: step4. Find navigation in target parent.
+     */
+    std::vector<int32_t> result = navigationManager->FindNavigationInTargetParent(parentId1);
+    std::vector<int32_t> expected = {navigationId1};
+    EXPECT_EQ(result, expected);
+    result = navigationManager->FindNavigationInTargetParent(parentId2);
+    expected = {navigationId2};
+    EXPECT_EQ(result, expected);
+    result = navigationManager->FindNavigationInTargetParent(parentId3);
+    expected = {navigationId3, navigationId4};
+    EXPECT_EQ(result, expected);
+}
+
+/**
+ * @tc.name: NavigationMapsTest002
+ * @tc.desc: Test AddNavigation/RemoveNavigation/FindNavigationInTargetParent
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(NavigationManagerTestNg, NavigationMapsTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get navigation manager
+     */
+    NavigationManagerTestNg::SetUpTestSuite();
+    auto navigationGroupNode = NavigationGroupNode::GetOrCreateGroupNode(V2::NAVIGATION_VIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
+    auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+    navigationPattern->SetNavigationStack(std::move(navigationStack));
+    auto pipelineContext = navigationGroupNode->GetContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto navigationManager = pipelineContext->GetNavigationManager();
+    ASSERT_TRUE(navigationManager->navigationMaps_.empty());
+
+    /**
+     * @tc.steps: step2. configure parameters .
+     */
+    int32_t parentId1 = 1;
+    int32_t navigationId1 = 11;
+    int32_t parentId2 = 2;
+    int32_t navigationId2 = 21;
+    int32_t parentId3 = 3;
+    int32_t navigationId3 = 31;
+    int32_t navigationId4 = 41;
+
+    /**
+     * @tc.steps: step3. Register navigation to manager.
+     */
+    navigationManager->AddNavigation(parentId1, navigationId1);
+    ASSERT_EQ(navigationManager->navigationMaps_.size(), 1);
+    navigationManager->AddNavigation(parentId2, navigationId2);
+    ASSERT_EQ(navigationManager->navigationMaps_.size(), 2);
+    navigationManager->AddNavigation(parentId3, navigationId3);
+    ASSERT_EQ(navigationManager->navigationMaps_.size(), 3);
+    navigationManager->AddNavigation(parentId3, navigationId4);
+    ASSERT_EQ(navigationManager->navigationMaps_.size(), 3);
+
+    /**
+     * @tc.steps: step4. remove navigation to manager.
+     */
+    navigationManager->RemoveNavigation(navigationId1);
+    ASSERT_EQ(navigationManager->navigationMaps_.size(), 2);
+
+    navigationManager->RemoveNavigation(navigationId2);
+    ASSERT_EQ(navigationManager->navigationMaps_.size(), 1);
+}
 } // namespace OHOS::Ace::NG

@@ -73,15 +73,19 @@ class MyModifier implements AttributeModifier<ImageAnimatorAttribute> {
   applyNormalAttribute(instance: ImageAnimatorAttribute) {
     instance.backgroundColor('#0A59F7')
   }
+
   applyPressedAttribute(instance: ImageAnimatorAttribute) {
     instance.backgroundColor('#ED6F21')
   }
+
   applyFocusedAttribute(instance: ImageAnimatorAttribute) {
     instance.backgroundColor(Color.Gray)
   }
+
   applyDisabledAttribute(instance: ImageAnimatorAttribute) {
     instance.backgroundColor('#E5E5E5')
   }
+
   applySelectedAttribute(instance: ImageAnimatorAttribute) {
     instance.backgroundColor('#ffedea21')
   }
@@ -128,7 +132,6 @@ export struct ImageAnimatorBootcamp {
   @State fillMode: FillMode = FillMode.Forwards
   @State enableIterations: boolean = false;
   @State eIterations: number = 1;
-
   @State enableCompWidth: boolean = false;
   @State compWidth: Length = 300;
   @State enableCompHeight: boolean = false;
@@ -866,7 +869,6 @@ export struct ImageAnimatorBootcamp {
   @State compCursorControl: pointer.PointerStyle = pointer.PointerStyle.DEFAULT
   @State enableCompUseEffect: boolean = false
   @State compUseEffect: boolean = false
-
   @StorageLink('Block') listEventTriggeredTags: Array<BlockTag> = [];
   @State listEventTriggeredTagsTemp: Array<BlockTag> = [];
 
@@ -881,7 +883,7 @@ export struct ImageAnimatorBootcamp {
   compEventTriggeredLog(value: string) {
     let time = formatDate(new Date(Date.now()))
     this.listEventTriggeredTagsTemp.push(
-      new BlockTag(time,value)
+      new BlockTag(time, value)
     )
     setTimeout(() => {
       if (AppStorage.get('Block')) {
@@ -901,7 +903,6 @@ export struct ImageAnimatorBootcamp {
       }
     }, 200)
   }
-
 
   build() {
     NavDestination() {
@@ -1044,10 +1045,9 @@ export struct ImageAnimatorBootcamp {
     .justifyContent(FlexAlign.Center)
   }
 
-
   @Builder
   Content() {
-    Column({space:10}) {
+    Column({ space: 10 }) {
       ImageAnimator()
         .images([
           {
@@ -1509,7 +1509,7 @@ export struct ImageAnimatorBootcamp {
             this.compPixelStretchEffectOptionsBottom)
         })
         .freeze(useEnabled(this.enableCompFreeze, this.compFreeze))
-        .linearGradient( {
+        .linearGradient({
           angle: useEnabled(this.enableCompLinearGradientAngle, this.compLinearGradientAngle),
           direction: useEnabled(this.enableCompLinearGradientDirection, this.compLinearGradientDirection),
           colors: [
@@ -1995,6 +1995,21 @@ export struct ImageAnimatorBootcamp {
           this.compEventTriggeredLog('自定义事件拦截onChildTouchTest触发')
           return HitTestMode.Default;
         })
+        .onStart(() => {
+          this.compEventTriggeredLog('动画开始播放onStart触发')
+        })
+        .onPause(() => {
+          this.compEventTriggeredLog('动画暂停播放onPause触发')
+        })
+        .onRepeat(() => {
+          this.compEventTriggeredLog('动画重复播放onRepeat触发')
+        })
+        .onCancel(() => {
+          this.compEventTriggeredLog('动画返回最初状态onCancel触发')
+        })
+        .onFinish(() => {
+          this.compEventTriggeredLog('动画播放完成或停止播放onFinish触发')
+        })
 
 
       Row() {
@@ -2002,10 +2017,10 @@ export struct ImageAnimatorBootcamp {
           this.state = AnimationStatus.Running
         }).margin(5)
         Button('pause').width(100).padding(5).onClick(() => {
-          this.state = AnimationStatus.Paused     // 显示当前帧图片
+          this.state = AnimationStatus.Paused // 显示当前帧图片
         }).margin(5)
         Button('stop').width(100).padding(5).onClick(() => {
-          this.state = AnimationStatus.Stopped    // 显示动画的起始帧图片
+          this.state = AnimationStatus.Stopped // 显示动画的起始帧图片
         }).margin(5)
       }
 

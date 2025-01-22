@@ -42,6 +42,8 @@
 using namespace Commonlibrary::Concurrent::WorkerModule;
 
 namespace OHOS::Ace::Framework {
+const CalcDimension DYNAMIC_COMPONENT_MIN_WIDTH(10.0f, DimensionUnit::VP);
+const CalcDimension DYNAMIC_COMPONENT_MIN_HEIGHT(10.0f, DimensionUnit::VP);
 
 void JSDynamicComponent::JSBind(BindingTarget globalObj)
 {
@@ -83,6 +85,10 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     config.sessionType = NG::SessionType::DYNAMIC_COMPONENT;
     config.backgroundTransparent = backgroundTransparent;
     UIExtensionModel::GetInstance()->Create(config);
+    ViewAbstractModel::GetInstance()->SetWidth(DYNAMIC_COMPONENT_MIN_WIDTH);
+    ViewAbstractModel::GetInstance()->SetHeight(DYNAMIC_COMPONENT_MIN_HEIGHT);
+    ViewAbstractModel::GetInstance()->SetMinWidth(DYNAMIC_COMPONENT_MIN_WIDTH);
+    ViewAbstractModel::GetInstance()->SetMinHeight(DYNAMIC_COMPONENT_MIN_HEIGHT);
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto hostEngine = EngineHelper::GetCurrentEngine();
@@ -154,29 +160,25 @@ void JSDynamicComponent::SetOnSizeChanged(const JSCallbackInfo& info)
 
 void JSDynamicComponent::Width(const JSCallbackInfo& info)
 {
-    JSViewAbstract::JsWidth(info);
-
-    CalcDimension value;
-    bool parseResult = ParseJsDimensionVpNG(info[0], value);
-    if (NearEqual(value.Value(), 0)) {
-        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(true);
-        UIExtensionModel::GetInstance()->SetAdaptiveWidth(true);
+    if (info[0]->IsUndefined()) {
         return;
     }
-    UIExtensionModel::GetInstance()->SetAdaptiveWidth(!parseResult || value.Unit() == DimensionUnit::AUTO);
+
+    CalcDimension value;
+    if (JSViewAbstract::ParseJsDimensionVpNG(info[0], value)) {
+        ViewAbstractModel::GetInstance()->SetWidth(value);
+    }
 }
 
 void JSDynamicComponent::Height(const JSCallbackInfo& info)
 {
-    JSViewAbstract::JsHeight(info);
-
-    CalcDimension value;
-    bool parseResult = ParseJsDimensionVpNG(info[0], value);
-    if (NearEqual(value.Value(), 0)) {
-        ViewAbstractModel::GetInstance()->ClearWidthOrHeight(false);
-        UIExtensionModel::GetInstance()->SetAdaptiveHeight(true);
+    if (info[0]->IsUndefined()) {
         return;
     }
-    UIExtensionModel::GetInstance()->SetAdaptiveHeight(!parseResult || value.Unit() == DimensionUnit::AUTO);
+
+    CalcDimension value;
+    if (JSViewAbstract::ParseJsDimensionVpNG(info[0], value)) {
+        ViewAbstractModel::GetInstance()->SetHeight(value);
+    }
 }
 } // namespace OHOS::Ace::Framework

@@ -332,7 +332,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     InitializePadding(layoutWrapper);
     InitializeParam(layoutWrapper, menuPattern);
     if (canExpandCurrentWindow_ && isExpandDisplay_ && !menuPattern->IsSelectMenu() &&
-        !menuPattern->IsSelectOverlayRightClickMenu()) {
+        !menuPattern->IsSelectOverlayDefaultModeRightClickMenu()) {
         position_ += NG::OffsetF { displayWindowRect_.Left(), displayWindowRect_.Top() };
         TAG_LOGI(AceLogTag::ACE_MENU, "original postion after applying displayWindowRect : %{public}s",
             position_.ToString().c_str());
@@ -2173,6 +2173,16 @@ void MenuLayoutAlgorithm::UpdateConstraintBaseOnOptions(LayoutWrapper* layoutWra
         maxChildrenWidth = std::max(maxChildrenWidth, childSize.Width());
     }
     UpdateOptionConstraint(optionsLayoutWrapper, maxChildrenWidth);
+    auto pipelineContext = menuNode->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto selectTheme = pipelineContext->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(selectTheme);
+    auto textAlign = static_cast<TextAlign>(selectTheme->GetOptionContentNormalAlign());
+    if (textAlign == TextAlign::CENTER) {
+        for (const auto& optionWrapper : optionsLayoutWrapper) {
+            optionWrapper->Measure(optionConstraint);
+        }
+    }
     constraint.minSize.SetWidth(maxChildrenWidth + optionPadding_ * 2.0f);
 }
 

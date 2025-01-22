@@ -505,14 +505,14 @@ void FrontendDelegateDeclarative::NotifyAppStorage(
 
 void FrontendDelegateDeclarative::OnBackGround()
 {
-    OnPageHide();
+    OnPageHide(true);
 }
 
 void FrontendDelegateDeclarative::OnForeground()
 {
     // first page show will be called by push page successfully
     if (Container::IsCurrentUseNewPipeline() || !isFirstNotifyShow_) {
-        OnPageShow();
+        OnPageShow(true);
     }
     isFirstNotifyShow_ = false;
 }
@@ -3107,9 +3107,9 @@ void FrontendDelegateDeclarative::RebuildAllPages()
     }
 }
 
-void FrontendDelegateDeclarative::OnPageShow()
+void FrontendDelegateDeclarative::OnPageShow(bool isFromWindow)
 {
-    auto task = [weak = AceType::WeakClaim(this)] {
+    auto task = [weak = AceType::WeakClaim(this), isFromWindow] {
         auto delegate = weak.Upgrade();
         CHECK_NULL_VOID(delegate);
         if (Container::IsCurrentUseNewPipeline()) {
@@ -3119,7 +3119,7 @@ void FrontendDelegateDeclarative::OnPageShow()
             CHECK_NULL_VOID(pageNode);
             auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
             CHECK_NULL_VOID(pagePattern);
-            pagePattern->OnShow();
+            pagePattern->OnShow(isFromWindow);
             return;
         }
 
@@ -3140,9 +3140,9 @@ void FrontendDelegateDeclarative::OnPageShow()
     }
 }
 
-void FrontendDelegateDeclarative::OnPageHide()
+void FrontendDelegateDeclarative::OnPageHide(bool isFromWindow)
 {
-    auto task = [weak = AceType::WeakClaim(this)] {
+    auto task = [weak = AceType::WeakClaim(this), isFromWindow] {
         auto delegate = weak.Upgrade();
         CHECK_NULL_VOID(delegate);
         if (Container::IsCurrentUseNewPipeline()) {
@@ -3152,7 +3152,7 @@ void FrontendDelegateDeclarative::OnPageHide()
             CHECK_NULL_VOID(pageNode);
             auto pagePattern = pageNode->GetPattern<NG::PagePattern>();
             CHECK_NULL_VOID(pagePattern);
-            pagePattern->OnHide();
+            pagePattern->OnHide(isFromWindow);
             return;
         }
 

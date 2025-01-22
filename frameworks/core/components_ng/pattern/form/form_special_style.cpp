@@ -14,6 +14,8 @@
  */
 
 #include "form_special_style.h"
+
+#include "form_info.h"
 #include "form_constants.h"
 namespace OHOS::Ace::NG {
 constexpr char TIME_LIMIT_RESOURCE_NAME[] = "form_disable_time_limit";

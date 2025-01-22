@@ -389,6 +389,7 @@ RefPtr<FrameNode> ArcIndexerPattern::BuildIcon()
     }
     imageSourceInfo.SetFillColor(Color(ARC_INDEXER_STR_DOT_COLOR));
     auto iconLayoutProperty = icon->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(iconLayoutProperty, nullptr);
     iconLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     // size
     iconLayoutProperty->UpdateUserDefinedIdealSize(
@@ -815,9 +816,10 @@ void ArcIndexerPattern::ApplyIndexChanged(bool isTextNodeInTree, bool selectChan
         auto child = host->GetChildByIndex(i);
         CHECK_NULL_VOID(child);
         auto childNode = child->GetHostNode();
-        UpdateChildBoundary(childNode);
+        CHECK_NULL_VOID(childNode);
         UpdateChildNodeStyle(index);
         auto childRenderContext = childNode->GetRenderContext();
+        CHECK_NULL_VOID(childRenderContext);
         childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
         auto nodeStr = GetChildNodeContent(index);
         SetChildNodeStyle(index, nodeStr, fromTouchUp);
@@ -872,15 +874,17 @@ void ArcIndexerPattern::UpdateChildNodeStyle(int32_t index)
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     auto childNode = child->GetHostNode();
+    CHECK_NULL_VOID(childNode);
     UpdateChildBoundary(childNode);
     auto childRenderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(childRenderContext);
     childRenderContext->SetClipToBounds(true);
     if (arcArrayValue_[index].second != ArcIndexerBarState::INVALID) {
-        auto nodeLayoutProperty = childNode->GetLayoutProperty<ImageLayoutProperty>();
         float itemAngle = CalcArcItemAngle(index) + STR_DOT_ROTATE_ANGLE;
         childRenderContext->UpdateTransformRotate(Vector5F(0.0f, 0.0f, 1.0f, itemAngle, 0.0f));
     } else {
         auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(nodeLayoutProperty);
         nodeLayoutProperty->UpdateTextColor(
             layoutProperty->GetColor().value_or(indexerTheme->GetDefaultTextColor()));
     }
@@ -920,11 +924,14 @@ void ArcIndexerPattern::SetChildNodeStyle(int32_t index, const std::string &node
     auto child = host->GetChildByIndex(index);
     CHECK_NULL_VOID(child);
     auto childNode = child->GetHostNode();
+    CHECK_NULL_VOID(childNode);
     auto childRenderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(childRenderContext);
     UpdateChildBoundary(childNode);
     if (StringUtils::Str16ToStr8(ARC_INDEXER_STR_EXPANDED) != nodeStr &&
         StringUtils::Str16ToStr8(ARC_INDEXER_STR_COLLAPSED) != nodeStr) {
         auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(nodeLayoutProperty);
         Dimension borderWidth;
         nodeLayoutProperty->UpdateContent(nodeStr);
         nodeLayoutProperty->UpdateMaxLines(1);
@@ -952,10 +959,11 @@ void ArcIndexerPattern::SetFocusIndexStyle(int32_t index, const std::string &nod
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto child = host->GetChildByIndex(index);
+    CHECK_NULL_VOID(child);
     auto layoutProperty = host->GetLayoutProperty<ArcIndexerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    CHECK_NULL_VOID(child);
     auto childNode = child->GetHostNode();
+    CHECK_NULL_VOID(childNode);
     auto paintProperty = host->GetPaintProperty<ArcIndexerPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     UpdateChildBoundary(childNode);
@@ -964,7 +972,9 @@ void ArcIndexerPattern::SetFocusIndexStyle(int32_t index, const std::string &nod
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     auto childRenderContext = childNode->GetRenderContext();
+    CHECK_NULL_VOID(childRenderContext);
     auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(nodeLayoutProperty);
     nodeLayoutProperty->UpdateContent(nodeStr);
     nodeLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
     nodeLayoutProperty->UpdateAlignment(Alignment::CENTER);
@@ -1057,6 +1067,7 @@ void ArcIndexerPattern::UpdateIndexerNodeOpacityByIdx(RefPtr<RenderContext>& con
 void ArcIndexerPattern::StartIndexerNodeAppearAnimation(int32_t nodeIndex)
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto total = fullArrayValue_.size();
     if (nodeIndex > static_cast<int32_t>(total)) {
         return;
@@ -1156,6 +1167,7 @@ void ArcIndexerPattern::UpdateBubbleBackgroundView()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
+    CHECK_NULL_VOID(indexerTheme);
     BlurStyleOption styleOption;
     if (paintProperty->GetPopupBackgroundBlurStyle().has_value()) {
         styleOption = paintProperty->GetPopupBackgroundBlurStyle().value();

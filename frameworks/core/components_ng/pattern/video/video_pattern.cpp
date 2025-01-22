@@ -2275,4 +2275,20 @@ void VideoPattern::OnWindowHide()
 #endif
 }
 
+void VideoPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    Pattern::ToJsonValue(json, filter);
+    if (filter.IsFastFilter()) {
+        return;
+    }
+
+    json->PutExtAttr("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false", filter);
+    json->PutExtAttr("currentProgressRate", progressRate_, filter);
+    json->PutExtAttr("surfaceBackgroundColor",
+        renderContextForMediaPlayer_
+            ? renderContextForMediaPlayer_->GetBackgroundColorValue(Color::BLACK).ColorToString().c_str()
+            : "",
+        filter);
+    json->PutExtAttr("enableShortcutKey", isEnableShortcutKey_ ? "true" : "false", filter);
+}
 } // namespace OHOS::Ace::NG

@@ -25,6 +25,7 @@ constexpr int NUM_2 = 2;
 constexpr int NUM_3 = 3;
 constexpr int SIZE_OF_TWO = 2;
 constexpr Dimension DEFAULT_TEXTSTYLE_FONTSIZE = 16.0_fp;
+const bool DEFAULT_MARK_TODAY = false;
 
 void ParseCalendarPickerPadding(
     const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dim, ArkUISizeType& result)
@@ -316,6 +317,31 @@ ArkUINativeModuleValue CalendarPickerBridge::ResetCalendarPickerBorderRadius(Ark
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerBorderRadius(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CalendarPickerBridge::SetCalendarPickerMarkToday(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> markTodayArg = runtimeCallInfo->GetCallArgRef(1); // markToday value
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    bool isMarkToday = DEFAULT_MARK_TODAY;
+    if (markTodayArg->IsBoolean()) {
+        isMarkToday = markTodayArg->ToBoolean(vm)->Value();
+    }
+    GetArkUINodeModifiers()->getCalendarPickerModifier()->setCalendarPickerMarkToday(nativeNode, isMarkToday);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CalendarPickerBridge::ResetCalendarPickerMarkToday(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getCalendarPickerModifier()->resetCalendarPickerMarkToday(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG
