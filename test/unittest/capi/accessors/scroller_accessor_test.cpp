@@ -502,14 +502,67 @@ HWTEST_F(ScrollerAccessorTest, scrollToIndexAlignTest, TestSize.Level1)
     accessor_->scrollToIndex(peer_, &arkIndex, &arkSmooth, &arkAlignAuto, &arkOptions);
 }
 
+static Opt_ScrollToIndexOptions GetOptions(Ark_LengthUnit unit, float value)
+{
+    const Ark_LengthMetrics arkLengthMetrics {
+        .unit = ARK_LENGTH_UNIT_PX,
+        .value = Converter::ArkValue<Ark_Number>(value)
+    };
+    const Ark_ScrollToIndexOptions arkOptions {
+        .extraOffset = Converter::ArkValue<Opt_LengthMetrics, Ark_LengthMetrics>(arkLengthMetrics)
+    };
+    return Converter::ArkValue<Opt_ScrollToIndexOptions, Ark_ScrollToIndexOptions>(arkOptions);
+}
+
 /**
- * @tc.name: DISABLED_scrollToIndexOptionsTest
+ * @tc.name: scrollToIndexOptionsTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ScrollerAccessorTest, DISABLED_scrollToIndexOptionsTest, TestSize.Level1)
+HWTEST_F(ScrollerAccessorTest, scrollToIndexOptionsTest, TestSize.Level1)
 {
-    // wait for Ark_LengthMetrics instead of Ark_CustomObject in CAPI
+    constexpr int32_t index = 0;
+    std::optional<float> emptyOptionsRes = std::nullopt;
+
+    const auto arkIndex = Converter::ArkValue<Ark_Number>(index);
+    const auto optSmooth = Converter::ArkValue<Opt_Boolean>(Ark_Empty());
+    const auto optAlign = Converter::ArkValue<Opt_ScrollAlign>(Ark_Empty());
+    const auto optOptionsEmpty1 = Converter::ArkValue<Opt_ScrollToIndexOptions>(Ark_Empty());
+    Ark_ScrollToIndexOptions arkOptionsEmpty2 {
+        .extraOffset = Converter::ArkValue<Opt_LengthMetrics>(Ark_Empty())
+    };
+    const auto optOptionsEmpty2 = Converter::ArkValue<Opt_ScrollToIndexOptions, Ark_ScrollToIndexOptions>(
+        arkOptionsEmpty2);
+
+    EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, false, ScrollAlign::NONE, emptyOptionsRes)).Times(3);
+    accessor_->scrollToIndex(peer_, &arkIndex, &optSmooth, &optAlign, &optOptionsEmpty1);
+    accessor_->scrollToIndex(peer_, &arkIndex, &optSmooth, &optAlign, &optOptionsEmpty2);
+    accessor_->scrollToIndex(peer_, &arkIndex, &optSmooth, &optAlign, nullptr);
+
+    emptyOptionsRes = 0.0f;
+    const auto optOptions1 = GetOptions(ARK_LENGTH_UNIT_PX, emptyOptionsRes.value());
+    EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, false, ScrollAlign::NONE, emptyOptionsRes)).Times(1);
+    accessor_->scrollToIndex(peer_, &arkIndex, &optSmooth, &optAlign, &optOptions1);
+
+    emptyOptionsRes = 0.5f;
+    const auto optOptions2 = GetOptions(ARK_LENGTH_UNIT_VP, emptyOptionsRes.value());
+    EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, false, ScrollAlign::NONE, emptyOptionsRes)).Times(1);
+    accessor_->scrollToIndex(peer_, &arkIndex, &optSmooth, &optAlign, &optOptions2);
+
+    emptyOptionsRes = 10.0f;
+    const auto optOptions3 = GetOptions(ARK_LENGTH_UNIT_FP, emptyOptionsRes.value());
+    EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, false, ScrollAlign::NONE, emptyOptionsRes)).Times(1);
+    accessor_->scrollToIndex(peer_, &arkIndex, &optSmooth, &optAlign, &optOptions3);
+
+    emptyOptionsRes = 100.0f;
+    const auto optOptions4 = GetOptions(ARK_LENGTH_UNIT_PERCENT, emptyOptionsRes.value());
+    EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, false, ScrollAlign::NONE, emptyOptionsRes)).Times(1);
+    accessor_->scrollToIndex(peer_, &arkIndex, &optSmooth, &optAlign, &optOptions4);
+
+    emptyOptionsRes = 999.5f;
+    const auto optOptions5 = GetOptions(ARK_LENGTH_UNIT_LPX, emptyOptionsRes.value());
+    EXPECT_CALL(*mockScrollerController_, ScrollToIndex(index, false, ScrollAlign::NONE, emptyOptionsRes)).Times(1);
+    accessor_->scrollToIndex(peer_, &arkIndex, &optSmooth, &optAlign, &optOptions5);
 }
 
 /**
