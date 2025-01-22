@@ -108,6 +108,7 @@ void PushPath0Impl(NavPathStackPeer* peer,
     auto convNavInfo = Converter::Convert<Nav::PathInfo>(*info);
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
     navStack->Nav::PathStack::PushPath(convNavInfo, Nav::Options{std::nullopt, convAnimated});
+    peer->InvokeUpdateCallback();
 }
 void PushPath1Impl(NavPathStackPeer* peer,
                    const Ark_NavPathInfo* info,
@@ -123,6 +124,7 @@ void PushPath1Impl(NavPathStackPeer* peer,
     auto convNavInfo = Converter::Convert<Nav::PathInfo>(*info);
     auto convNavOptions = options ? Converter::OptConvert<Nav::Options>(*options) : std::nullopt;
     navStack->Nav::PathStack::PushPath(convNavInfo, convNavOptions);
+    peer->InvokeUpdateCallback();
 }
 void PushDestination0Impl(NavPathStackPeer* peer,
                           const Ark_NavPathInfo* info,
@@ -141,6 +143,7 @@ void PushDestination0Impl(NavPathStackPeer* peer,
     auto convAnimated = animated ? Converter::OptConvert<bool>(*animated) : std::nullopt;
     LOGE("NavPathStackAccessor::PushDestination0Impl does not return required type");
     navStack->Nav::PathStack::PushDestination(convNavInfo, Nav::Options{std::nullopt, convAnimated});
+    peer->InvokeUpdateCallback();
 }
 void PushDestination1Impl(NavPathStackPeer* peer,
                           const Ark_NavPathInfo* info,
@@ -157,6 +160,7 @@ void PushDestination1Impl(NavPathStackPeer* peer,
     auto convNavInfo = Converter::Convert<Nav::PathInfo>(*info);
     auto convNavOptions = options ? Converter::OptConvert<Nav::Options>(*options) : std::nullopt;
     navStack->Nav::PathStack::PushDestination(convNavInfo, convNavOptions);
+    peer->InvokeUpdateCallback();
 }
 void PushPathByName0Impl(NavPathStackPeer* peer,
                          const Ark_String* name,
@@ -304,6 +308,7 @@ Ark_NativePointer Pop0Impl(NavPathStackPeer* peer,
     navStack->Nav::PathStack::Pop(Nav::PopResultType(), convAnimated);
     // convert the result of above to Ark_NavPathInfo should be here
     LOGE("NavPathStackAccessor::Pop0Impl - the result type does not match to documentation");
+    peer->InvokeUpdateCallback();
     return invalid;
 }
 Ark_NativePointer Pop1Impl(NavPathStackPeer* peer,
@@ -320,6 +325,7 @@ Ark_NativePointer Pop1Impl(NavPathStackPeer* peer,
     navStack->Nav::PathStack::Pop(convResult, convAnimated);
     // convert the result of above to Ark_NavPathInfo should be here
     LOGE("NavPathStackAccessor::Pop1Impl - the result type does not match to documentation");
+    peer->InvokeUpdateCallback();
     return invalid;
 }
 Ark_Int32 PopToName0Impl(NavPathStackPeer* peer,

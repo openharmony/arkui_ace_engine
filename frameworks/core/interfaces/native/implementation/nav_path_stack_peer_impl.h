@@ -26,7 +26,11 @@ namespace Nav = OHOS::Ace::NG::GeneratedModifier::NavigationContext;
 
 struct NavPathStackPeer {
 public:
-    NavPathStackPeer(): navStack_(nullptr) {}
+    NavPathStackPeer(): navStack_(nullptr)
+    {
+        auto* stack = new Nav::NavigationStack();
+        navStack_ = AceType::Claim(stack);
+    }
 
     void SetNavigationStack(const RefPtr<AceType>& stack)
     {
@@ -35,6 +39,23 @@ public:
         auto navStack = AceType::DynamicCast<Nav::NavigationStack>(stack);
         CHECK_NULL_VOID(navStack);
         navStack_ = navStack;
+    }
+
+    void SetUpdateCallback(std::function<void(const std::string&)>&& func)
+    {
+        _updater = std::move(func);
+    }
+
+    void InvokeUpdateCallback()
+    {
+        if (_updater) {
+            auto list = navStack_->GetAllPathName();
+            if (!list.empty()) {
+                _updater(list.back());
+            } else {
+                _updater("");
+            }
+        }
     }
 
     void SetInstanceId(int32_t instanceId)
@@ -55,5 +76,8 @@ public:
 protected:
     RefPtr<Nav::NavigationStack> navStack_;
     int32_t instanceId_ = OHOS::Ace::INSTANCE_ID_UNDEFINED;
+
+private:
+    std::function<void(const std::string&)> _updater;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_IMPL_NAV_PATH_STACK_PEER_IMPL_H

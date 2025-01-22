@@ -62,7 +62,7 @@ std::pair<int, std::optional<std::string>> PathStack::FindInPopArray(const std::
     for (int i = popArray_.size() - 1; i >= 0; i--) {
         if (name == popArray_[i].name_) {
             auto info = popArray_[i];
-            popArray_.erase(std::next(pathArray_.begin(), i));
+            popArray_.erase(popArray_.begin() + i);
             return {info.index_, info.navDestinationId_};
         }
     }

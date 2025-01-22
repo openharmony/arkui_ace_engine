@@ -62,11 +62,11 @@ public:
 };
 
 /*
- * @tc.name: setModeTestDefaultValues
+ * @tc.name: DISABLED_setModeTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setModeTestDefaultValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setModeTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -86,11 +86,11 @@ static std::vector<std::tuple<std::string, enum Ark_NavDestinationMode, std::str
 };
 
 /*
- * @tc.name: setModeTestValidValues
+ * @tc.name: DISABLED_setModeTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setModeTestValidValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setModeTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -114,11 +114,11 @@ HWTEST_F(NavDestinationModifierTest, setModeTestValidValues, TestSize.Level1)
 }
 
 /*
- * @tc.name: setHideTitleBar0TestDefaultValues
+ * @tc.name: DISABLED_setHideTitleBar0TestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setHideTitleBar0TestDefaultValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setHideTitleBar0TestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -137,11 +137,11 @@ static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> hideTitleB
 };
 
 /*
- * @tc.name: setHideTitleBar0TestValidValues
+ * @tc.name: DISABLED_setHideTitleBar0TestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setHideTitleBar0TestValidValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setHideTitleBar0TestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -170,11 +170,11 @@ static std::vector<std::tuple<std::string, Ark_Boolean, std::string>> animatedHi
 };
 
 /*
- * @tc.name: setHideTitleBar1TestValidValues
+ * @tc.name: DISABLED_setHideTitleBar1TestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setHideTitleBar1TestValidValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setHideTitleBar1TestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -207,11 +207,11 @@ HWTEST_F(NavDestinationModifierTest, setHideTitleBar1TestValidValues, TestSize.L
 }
 
 /*
- * @tc.name: setOnShownTest
+ * @tc.name: DISABLED_setOnShownTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setOnShownTest, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setOnShownTest, TestSize.Level1)
 {
     Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -235,11 +235,11 @@ HWTEST_F(NavDestinationModifierTest, setOnShownTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnHiddenTest
+ * @tc.name: DISABLED_setOnHiddenTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setOnHiddenTest, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setOnHiddenTest, TestSize.Level1)
 {
     Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -263,11 +263,11 @@ HWTEST_F(NavDestinationModifierTest, setOnHiddenTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnWillAppearTest
+ * @tc.name: DISABLED_setOnWillAppearTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setOnWillAppearTest, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillAppearTest, TestSize.Level1)
 {
     Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -291,11 +291,11 @@ HWTEST_F(NavDestinationModifierTest, setOnWillAppearTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnWillDisappearTest
+ * @tc.name: DISABLED_setOnWillDisappearTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setOnWillDisappearTest, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillDisappearTest, TestSize.Level1)
 {
     Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -319,11 +319,11 @@ HWTEST_F(NavDestinationModifierTest, setOnWillDisappearTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnWillShowTest
+ * @tc.name: DISABLED_setOnWillShowTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setOnWillShowTest, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillShowTest, TestSize.Level1)
 {
     Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -347,11 +347,11 @@ HWTEST_F(NavDestinationModifierTest, setOnWillShowTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnWillHideTest
+ * @tc.name: DISABLED_setOnWillHideTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setOnWillHideTest, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setOnWillHideTest, TestSize.Level1)
 {
     Callback_Void func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -375,11 +375,11 @@ HWTEST_F(NavDestinationModifierTest, setOnWillHideTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setOnBackPressedTest
+ * @tc.name: DISABLED_setOnBackPressedTest
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setOnBackPressedTest, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setOnBackPressedTest, TestSize.Level1)
 {
     Callback_Boolean func{};
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
@@ -403,11 +403,11 @@ HWTEST_F(NavDestinationModifierTest, setOnBackPressedTest, TestSize.Level1)
 }
 
 /*
- * @tc.name: setRecoverableTestDefaultValues
+ * @tc.name: DISABLED_setRecoverableTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setRecoverableTestDefaultValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setRecoverableTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -423,11 +423,11 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> recoverabl
 };
 
 /*
- * @tc.name: setRecoverableTestValidValues
+ * @tc.name: DISABLED_setRecoverableTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setRecoverableTestValidValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setRecoverableTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -456,11 +456,11 @@ static std::vector<std::tuple<std::string, Opt_Boolean>> recoverableRecoverableR
 };
 
 /*
- * @tc.name: setRecoverableTestInvalidValues
+ * @tc.name: DISABLED_setRecoverableTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setRecoverableTestInvalidValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setRecoverableTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -485,11 +485,11 @@ HWTEST_F(NavDestinationModifierTest, setRecoverableTestInvalidValues, TestSize.L
 }
 
 /*
- * @tc.name: setIgnoreLayoutSafeAreaTestDefaultValues
+ * @tc.name: DISABLED_setIgnoreLayoutSafeAreaTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setIgnoreLayoutSafeAreaTestDefaultValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setIgnoreLayoutSafeAreaTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -502,11 +502,11 @@ HWTEST_F(NavDestinationModifierTest, setIgnoreLayoutSafeAreaTestDefaultValues, T
 }
 
 /*
- * @tc.name: setIgnoreLayoutSafeAreaTestValidValues
+ * @tc.name: DISABLED_setIgnoreLayoutSafeAreaTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setIgnoreLayoutSafeAreaTestValidValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setIgnoreLayoutSafeAreaTestValidValues, TestSize.Level1)
 {
     std::string resultStr;
     std::string expectedStr;

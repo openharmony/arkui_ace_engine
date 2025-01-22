@@ -18291,6 +18291,15 @@ typedef struct GENERATED_ArkUIPixelMapAccessor {
                                  Ark_Int32 isStrideAlignment);
 } GENERATED_ArkUIPixelMapAccessor;
 
+typedef struct NavExtenderPeer NavExtenderPeer;
+typedef struct GENERATED_ArkUINavExtenderAccessor {
+    void (*destroyPeer)(NavExtenderPeer* peer);
+    Ark_NativePointer (*ctor)();
+    Ark_NativePointer (*getFinalizer)();
+    void (*setUpdateStackCallback)(const Ark_NavPathStack* peer,
+                                   const Callback_String_Void* callback);
+} GENERATED_ArkUINavExtenderAccessor;
+
 typedef struct EventEmulatorPeer EventEmulatorPeer;
 typedef struct GENERATED_ArkUIEventEmulatorAccessor {
     void (*destroyPeer)(EventEmulatorPeer* peer);
@@ -21304,6 +21313,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIDrawingCanvasAccessor* (*getDrawingCanvasAccessor)();
     const GENERATED_ArkUIFrameNodeAccessor* (*getFrameNodeAccessor)();
     const GENERATED_ArkUIPixelMapAccessor* (*getPixelMapAccessor)();
+    const GENERATED_ArkUINavExtenderAccessor* (*getNavExtenderAccessor)();
     const GENERATED_ArkUIEventEmulatorAccessor* (*getEventEmulatorAccessor)();
     const GENERATED_ArkUIActionSheetAccessor* (*getActionSheetAccessor)();
     const GENERATED_ArkUIAlertDialogAccessor* (*getAlertDialogAccessor)();
