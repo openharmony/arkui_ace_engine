@@ -275,6 +275,7 @@ HWTEST_F(WebPatternWindowTestNg, OnDateTimeChooserCloseTest001, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
 
     webPattern->OnDateTimeChooserClose();
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>(), nullptr);
 }
 
 /**
