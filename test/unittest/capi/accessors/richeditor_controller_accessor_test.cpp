@@ -298,13 +298,18 @@ HWTEST_F(RichEditorControllerAccessorTest, addTextSpanTest, TestSize.Level1)
  * @tc.desc: Check the functionality of addSymbolSpan
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorControllerAccessorTest, DISABLED_addSymbolSpanTest, TestSize.Level1)
+HWTEST_F(RichEditorControllerAccessorTest, addSymbolSpanTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->addSymbolSpan, nullptr);
 
     SymbolSpanOptions symbolSpanOptions;
     symbolSpanOptions.offset = TEST_OFFSET;
-    Ark_Resource value; // Ark_Resource is not supported
+
+    std::string text = "S";
+    std::string resName = "app.string.symbol";
+    Ark_Resource value = CreateResource(resName.c_str(), Converter::ResourceType::INTEGER);
+    AddResource(resName, text);
+
     auto options = Converter::ArkValue<Opt_RichEditorSymbolSpanOptions>(symbolSpanOptions);
 
     EXPECT_CALL(*mockRichEditorController_, AddSymbolSpan(symbolSpanOptions)).Times(1);
