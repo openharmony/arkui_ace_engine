@@ -175,8 +175,13 @@ void FfiOHOSAceFrameworkSearchSetCopyOption(int32_t copyOption)
 
 void FfiOHOSAceFrameworkSearchOnSubmit(void (*callback)(const char* value))
 {
-    auto onSubmit = [lambda = CJLambda::Create(callback)](const std::string& value) -> void { lambda(value.c_str()); };
-    SearchModel::GetInstance()->SetOnSubmit(std::move(onSubmit));
+    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto task = [func = CJLambda::Create(callback), node = targetNode](
+                    const std::string& value, NG::TextFieldCommonEvent& event) {
+        PipelineContext::SetCallBackNode(node);
+        func(value.c_str());
+    };
+    SearchModel::GetInstance()->SetOnSubmit(std::move(task));
 }
 
 void FfiOHOSAceFrameworkSearchOnChange(void (*callback)(const char* value))
