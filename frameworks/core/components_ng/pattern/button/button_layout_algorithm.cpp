@@ -173,10 +173,16 @@ void ButtonLayoutAlgorithm::HandleAdaptiveText(LayoutWrapper* layoutWrapper, Lay
         // size to no less than 9sp.
         auto textLayoutProperty = DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
         CHECK_NULL_VOID(textLayoutProperty);
-        textLayoutProperty->UpdateAdaptMaxFontSize(
-            buttonLayoutProperty->GetMaxFontSize().value_or(buttonTheme->GetMaxFontSize()));
-        textLayoutProperty->UpdateAdaptMinFontSize(
-            buttonLayoutProperty->GetMinFontSize().value_or(buttonTheme->GetMinFontSize()));
+        if (buttonTheme->GetIsApplyTextFontSize() && !buttonLayoutProperty->GetMaxFontSize().has_value() &&
+            !buttonLayoutProperty->GetMinFontSize().has_value()) {
+            textLayoutProperty->ResetAdaptMaxFontSize();
+            textLayoutProperty->ResetAdaptMinFontSize();
+        } else {
+            textLayoutProperty->UpdateAdaptMaxFontSize(
+                buttonLayoutProperty->GetMaxFontSize().value_or(buttonTheme->GetMaxFontSize()));
+            textLayoutProperty->UpdateAdaptMinFontSize(
+                buttonLayoutProperty->GetMinFontSize().value_or(buttonTheme->GetMinFontSize()));
+        }
     }
     childWrapper->Measure(layoutConstraint);
     childSize_ = childWrapper->GetGeometryNode()->GetContentSize();

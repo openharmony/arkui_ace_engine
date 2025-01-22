@@ -332,7 +332,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     InitializePadding(layoutWrapper);
     InitializeParam(layoutWrapper, menuPattern);
     if (canExpandCurrentWindow_ && isExpandDisplay_ && !menuPattern->IsSelectMenu() &&
-        !menuPattern->IsSelectOverlayRightClickMenu()) {
+        !menuPattern->IsSelectOverlayDefaultModeRightClickMenu()) {
         position_ += NG::OffsetF { displayWindowRect_.Left(), displayWindowRect_.Top() };
         TAG_LOGI(AceLogTag::ACE_MENU, "original postion after applying displayWindowRect : %{public}s",
             position_.ToString().c_str());

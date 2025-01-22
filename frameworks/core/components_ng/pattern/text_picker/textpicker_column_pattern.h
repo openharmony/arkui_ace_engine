@@ -404,6 +404,7 @@ public:
         isDisableTextStyleAnimation_ = value;
     }
     void UpdateColumnButtonFocusState(bool haveFocus, bool needMarkDirty);
+    void StopHapticController();
 
 private:
     void OnModifyDone() override;

@@ -658,4 +658,52 @@ HWTEST_F(XComponentTestTwoNg, HdrBrightnessTest, TestSize.Level1)
                 SetHDRBrightness(0.5f)).Times(0);
     pattern->HdrBrightness(0.5f);
 }
+
+/**
+ * @tc.name: NativeStartImageAnalyzerTest
+ * @tc.desc: Test NativeStartImageAnalyzer Func.
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestTwoNg, NativeStartImageAnalyzerTest, TestSize.Level1)
+{
+    g_testProperty.xcType = XCOMPONENT_TEXTURE_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(g_testProperty);
+    ASSERT_TRUE(frameNode);
+
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+
+    int32_t nativeAnalyzerState = -1;
+    std::function<void(int32_t)> nativeOnAnalyzed = [&](int32_t state) {
+        nativeAnalyzerState = state;
+    };
+
+    EXPECT_FALSE(pattern->GetEnableAnalyzer());
+    pattern->NativeStartImageAnalyzer(nativeOnAnalyzed);
+    EXPECT_EQ(nativeAnalyzerState, ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_DISABLED);
+
+    pattern->EnableAnalyzer(true);
+    EXPECT_TRUE(pattern->GetEnableAnalyzer());
+
+    auto imageAnalyzerManager =
+        std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::XCOMPONENT);
+    imageAnalyzerManager->SetSupportImageAnalyzerFeature(true);
+    pattern->imageAnalyzerManager_ = imageAnalyzerManager;
+
+    pattern->isOnTree_ = false;
+    pattern->NativeStartImageAnalyzer(nativeOnAnalyzed);
+    EXPECT_EQ(nativeAnalyzerState, ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_DISABLED);
+
+    pattern->isOnTree_ = true;
+    imageAnalyzerManager->SetSupportImageAnalyzerFeature(false);
+    pattern->NativeStartImageAnalyzer(nativeOnAnalyzed);
+    EXPECT_EQ(nativeAnalyzerState, ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_UNSUPPORTED);
+
+    imageAnalyzerManager->SetSupportImageAnalyzerFeature(true);
+    pattern->NativeStartImageAnalyzer(nativeOnAnalyzed);
+    EXPECT_TRUE(pattern->isNativeImageAnalyzing_);
+
+    pattern->NativeStartImageAnalyzer(nativeOnAnalyzed);
+    EXPECT_EQ(nativeAnalyzerState, ArkUI_XComponent_ImageAnalyzerState::ARKUI_XCOMPONENT_AI_ANALYSIS_ONGOING);
+}
 } // namespace OHOS::Ace::NG

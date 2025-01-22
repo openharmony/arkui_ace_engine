@@ -804,6 +804,9 @@ public:
     {
         return singleHandTransform_;
     }
+
+    bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
+
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();

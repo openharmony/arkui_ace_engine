@@ -314,6 +314,14 @@ bool ThemeConstants::CloseRawFileDescription(const std::string& rawfileName) con
     return resAdapter_->CloseRawFileDescription(rawfileName);
 }
 
+bool ThemeConstants::GetRawFD(const std::string& rawfileName, RawfileDescription& rawfileDescription) const
+{
+    if (!resAdapter_) {
+        return false;
+    }
+    return resAdapter_->GetRawFD(rawfileName, rawfileDescription);
+}
+
 bool ThemeConstants::GetMediaById(const int32_t& resId, std::string& mediaPath) const
 {
     if (!resAdapter_) {

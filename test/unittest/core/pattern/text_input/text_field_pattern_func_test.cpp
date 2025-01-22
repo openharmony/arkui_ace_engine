@@ -18,11 +18,34 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const int32_t TWO = 2;
+const int32_t FIVE = 5;
+} // namespace
 
 class TextFieldPatternFuncTest : public TextInputBases {
 public:
 };
+
+Rect MyGetTextContentRect()
+{
+    return { TWO, TWO, TWO, TWO };
+}
+
+int32_t MyGetTextContentLinesNum()
+{
+    return FIVE;
+}
+
+int32_t MyGetCaretIndex()
+{
+    return FIVE;
+}
+
+NG::OffsetF MyGetCaretPosition()
+{
+    return OffsetF(FIVE, FIVE);
+}
 
 HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc001, TestSize.Level1)
 {
@@ -1815,5 +1838,125 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc091, TestSize.Level1)
     pattern->keyboardHeight_ = 5.0f;
     pattern->OnAreaChangedInner();
     EXPECT_EQ(pattern->keyboardHeight_, 0.0f);
+}
+
+/**
+ * @tc.name: GetTextContentRect001
+ * @tc.desc: test GetTextContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, GetTextContentRect001, TestSize.Level1)
+{
+    TextFieldController textFieldController;
+    textFieldController.SetGetTextContentRect(MyGetTextContentRect);
+    auto result = textFieldController.GetTextContentRect();
+    EXPECT_EQ(result.GetOffset().GetX(), 2);
+}
+
+/**
+ * @tc.name: GetTextContentRect002
+ * @tc.desc: test GetTextContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, GetTextContentRect002, TestSize.Level1)
+{
+    TextFieldController textFieldController;
+    auto result = textFieldController.GetTextContentRect();
+    EXPECT_EQ(result.GetOffset().GetX(), 0);
+}
+
+/**
+ * @tc.name: GetTextContentRect003
+ * @tc.desc: test GetTextContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, GetTextContentRect003, TestSize.Level1)
+{
+    TextFieldController textFieldController;
+    auto pattern_ = AceType::MakeRefPtr<TextFieldPattern>();
+    pattern_->GetTextSelectController()->caretInfo_.rect.SetRect(1, 1, 1, 1);
+    textFieldController.SetPattern(pattern_);
+    auto result = textFieldController.GetTextContentRect();
+    EXPECT_EQ(result.GetOffset().GetX(), 1);
+}
+
+/**
+ * @tc.name: GetTextContentRect004
+ * @tc.desc: test GetTextContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, GetTextContentRect004, TestSize.Level1)
+{
+    TextFieldController textFieldController;
+    auto pattern_ = AceType::MakeRefPtr<TextFieldPattern>();
+    pattern_->GetTextContentController()->SetTextValue(u"value");
+    RectF textRect(3, 3, 3, 3);
+    pattern_->SetTextRect(textRect);
+    textFieldController.SetPattern(pattern_);
+    auto result = textFieldController.GetTextContentRect();
+    EXPECT_EQ(result.GetOffset().GetX(), 3);
+}
+
+/**
+ * @tc.name: GetTextContentRect001
+ * @tc.desc: test GetTextContentRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, GetTextContentLinesNum001, TestSize.Level1)
+{
+    TextFieldController textFieldController;
+    textFieldController.SetGetTextContentLinesNum(MyGetTextContentLinesNum);
+    auto result = textFieldController.GetTextContentLinesNum();
+    EXPECT_EQ(result, 5);
+}
+
+/**
+ * @tc.name: GetCaretIndex001
+ * @tc.desc: test GetCaretIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, GetCaretIndex001, TestSize.Level1)
+{
+    TextFieldController textFieldController;
+    textFieldController.SetGetCaretIndex(MyGetCaretIndex);
+    auto result = textFieldController.GetCaretIndex();
+    EXPECT_EQ(result, 5);
+}
+
+/**
+ * @tc.name: GetCaretIndex002
+ * @tc.desc: test GetCaretIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, GetCaretIndex002, TestSize.Level1)
+{
+    TextFieldController textFieldController;
+    auto result = textFieldController.GetCaretIndex();
+    EXPECT_EQ(result, -1);
+}
+
+/**
+ * @tc.name: GetCaretPosition001
+ * @tc.desc: test GetCaretPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, GetCaretPosition001, TestSize.Level1)
+{
+    TextFieldController textFieldController;
+    textFieldController.SetGetCaretPosition(MyGetCaretPosition);
+    auto result = textFieldController.GetCaretPosition();
+    EXPECT_EQ(result.GetX(), 5);
+}
+
+/**
+ * @tc.name: GetCaretPosition002
+ * @tc.desc: test GetCaretPosition.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, GetCaretPosition002, TestSize.Level1)
+{
+    TextFieldController textFieldController;
+    auto result = textFieldController.GetCaretPosition();
+    EXPECT_EQ(result.GetX(), -1);
 }
 } // namespace OHOS::Ace

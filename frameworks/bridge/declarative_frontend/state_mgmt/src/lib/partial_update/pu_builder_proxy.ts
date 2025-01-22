@@ -65,6 +65,7 @@ function makeBuilderParameterProxy(builderName: string, source: Object): Object 
                 } else {
                     stateMgmtConsole.debug(`      - func - is ObservedPropertybstract - ret get()`);
                     const result = funcRet.get();
+                    stateMgmtConsole.debug(`                                          - returns ${result}`);
                     return result;
                 }
             }

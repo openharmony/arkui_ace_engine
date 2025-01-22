@@ -250,6 +250,7 @@ using SwipeSpeedFuncType = OnSwipeSpeedFunc::FunctionType;
 
 struct FingerInfo {
     int32_t fingerId_ = -1;
+    int32_t operatingHand_ = 0;
     // global position at which the touch point contacts the screen.
     Offset globalLocation_;
     // Different from global location, The local location refers to the location of the contact point relative to the

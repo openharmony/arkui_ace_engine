@@ -232,6 +232,11 @@ ArkUINodeHandle GetOrCreateCustomNode(ArkUI_CharPtr tag)
     return reinterpret_cast<ArkUINodeHandle>(ViewModel::GetOrCreateCustomNode(tag));
 }
 
+ArkUI_Bool IsRightToLeft()
+{
+    return AceApplicationInfo::GetInstance().IsRightToLeft();
+}
+
 void CreateNewScope()
 {
     ViewStackModel::GetInstance()->NewScope();
@@ -494,6 +499,7 @@ const ComponentAsyncEventHandler SWIPER_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetSwiperGestureSwipe,
     NodeModifier::SetSwiperOnContentDidScroll,
     NodeModifier::SetSwiperSelected,
+    NodeModifier::SetSwiperUnselected,
     NodeModifier::SetSwiperContentWillScroll,
 };
 
@@ -697,6 +703,7 @@ const ResetComponentAsyncEventHandler SLIDER_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
 };
 
 const ResetComponentAsyncEventHandler SWIPER_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
+    nullptr,
     nullptr,
     nullptr,
     nullptr,
@@ -2005,6 +2012,7 @@ ArkUIExtendedNodeAPI impl_extended = {
     .createCustomNode = CreateCustomNode,
     .getOrCreateCustomNode = GetOrCreateCustomNode,
     .getRSNodeByNode = GetRSNodeByNode,
+    .isRightToLeft = IsRightToLeft,
     .createNewScope = CreateNewScope,
     .registerOEMVisualEffect = RegisterOEMVisualEffect,
     .setOnNodeDestroyCallback = SetOnNodeDestroyCallback,

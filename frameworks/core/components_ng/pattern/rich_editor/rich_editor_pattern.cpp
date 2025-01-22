@@ -42,6 +42,7 @@
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/ime/text_input_client.h"
+#include "core/common/share/text_share_adapter.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
@@ -128,6 +129,8 @@ constexpr int32_t CUSTOM_CONTENT_LENGTH = 1;
 constexpr int32_t SYMBOL_CONTENT_LENGTH = 2;
 constexpr int32_t PLACEHOLDER_LENGTH = 6;
 const std::u16string PLACEHOLDER_MARK = u"![id";
+const std::string SPACE_CHARS = "^\\s+|\\s+$";
+const static std::regex REMOVE_SPACE_CHARS{SPACE_CHARS};
 } // namespace
 
 RichEditorPattern::RichEditorPattern() :
@@ -155,15 +158,18 @@ RichEditorPattern::~RichEditorPattern()
 void RichEditorPattern::SetStyledString(const RefPtr<SpanString>& value)
 {
     if (GetTextContentLength() > maxLength_.value_or(INT_MAX)) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{public}d", maxLength_.value_or(INT_MAX));
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "SetStyledString: Reach the maxLength. maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return;
     }
     CHECK_NULL_VOID(value && styledString_);
-    auto insertLength = value->GetLength() - maxLength_.value_or(INT_MAX);
-    auto subLength = CalculateTruncationLength(value->GetU16string(), maxLength_.value_or(INT_MAX), insertLength);
     auto subValue = value;
     if (value->GetLength() != styledString_->GetLength() && value->GetLength() > maxLength_.value_or(INT_MAX)) {
-        subValue = value->GetSubSpanString(0, value->GetLength() - subLength);
+        auto subLength = CalculateTruncationLength(value->GetU16string(), maxLength_.value_or(INT_MAX));
+        if (subLength == 0) {
+            IF_TRUE(IsPreviewTextInputting(), NotifyExitTextPreview(true));
+            return;
+        }
+        subValue = value->GetSubSpanString(0, subLength);
     }
     IF_TRUE(IsPreviewTextInputting(), NotifyExitTextPreview(true));
     CloseSelectOverlay();
@@ -277,6 +283,14 @@ void RichEditorPattern::SetImageLayoutProperty(RefPtr<ImageSpanNode> imageNode, 
             auto imageRenderCtx = imageNode->GetRenderContext();
             imageRenderCtx->UpdateBorderRadius(imgAttr.borderRadius.value());
             imageRenderCtx->SetClipToBounds(true);
+        }
+        auto paintProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+        if (imgAttr.colorFilterMatrix.has_value() && paintProperty) {
+            paintProperty->UpdateColorFilter(imgAttr.colorFilterMatrix.value());
+            paintProperty->ResetDrawingColorFilter();
+        } else if (imgAttr.drawingColorFilter.has_value() && paintProperty) {
+            paintProperty->UpdateDrawingColorFilter(imgAttr.drawingColorFilter.value());
+            paintProperty->ResetColorFilter();
         }
     }
     imageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -858,7 +872,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     bool updateCaret)
 {
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{public}d", maxLength_.value_or(INT_MAX));
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "AddImageSpan: Reach the maxLength. maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return 0;
     }
     auto host = GetHost();
@@ -1040,7 +1054,7 @@ void RichEditorPattern::OnDetachFromFrameNode(FrameNode* node)
 int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
 {
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{public}d", maxLength_.value_or(INT_MAX));
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "AddPlaceholderSpan: Reach the maxLength. maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return 0;
     }
     CHECK_NULL_RETURN(customNode, 0);
@@ -1132,14 +1146,14 @@ void RichEditorPattern::SetSelfAndChildDraggableFalse(const RefPtr<UINode>& cust
 int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, bool isPaste, int32_t index)
 {
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{public}d", maxLength_.value_or(INT_MAX));
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "AddTextSpan: Reach the maxLength. maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return 0;
     }
-    auto allowInsertValue =
-        GetTextContentLength() + static_cast<int32_t>(options.value.length()) - maxLength_.value_or(INT_MAX);
-    auto length = CalculateTruncationLength(
-        options.value, maxLength_.value_or(INT_MAX) - GetTextContentLength(), allowInsertValue);
-    options.value = options.value.substr(0, static_cast<int32_t>(options.value.length()) - length);
+    auto length = CalculateTruncationLength(options.value, maxLength_.value_or(INT_MAX) - GetTextContentLength());
+    if (length == 0) {
+        return -1;
+    }
+    options.value = options.value.substr(0, length);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddTextSpan, opts=%{public}s", ToBriefString(options).c_str());
     SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "AddTextSpan, opts=%{public}s", options.ToString().c_str());
     AdjustAddPosition(options);
@@ -1260,7 +1274,7 @@ void RichEditorPattern::UpdateTextBackgroundStyle(
 int32_t RichEditorPattern::AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste, int32_t index)
 {
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX) - 1) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{public}d", maxLength_.value_or(INT_MAX));
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "AddSymbolSpan: Reach the maxLength. maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return 0;
     }
     TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "options=%{public}s", options.ToString().c_str());
@@ -4341,7 +4355,7 @@ void RichEditorPattern::HandleOnDragInsertStyledString(const RefPtr<SpanString>&
 void RichEditorPattern::AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& spans)
 {
     if (GetTextContentLength() >= maxLength_.value_or(INT_MAX)) {
-        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{public}d", maxLength_.value_or(INT_MAX));
+        TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "AddSpansByPaste: Reach the maxLength. maxLength=%{public}d", maxLength_.value_or(INT_MAX));
         return;
     }
     if (textSelector_.IsValid()) {
@@ -4365,13 +4379,14 @@ void RichEditorPattern::AddSpansByPaste(const std::list<RefPtr<NG::SpanItem>>& s
     }
 }
 
-int32_t RichEditorPattern::CalculateTruncationLength(const std::u16string& insertValue, int32_t index, int32_t allowInsertLength)
+int32_t RichEditorPattern::CalculateTruncationLength(const std::u16string& insertValue, int32_t start)
 {
     if (!textSelector_.SelectNothing()) {
-        allowInsertLength += textSelector_.GetTextEnd() - textSelector_.GetTextStart();
+        start += textSelector_.GetTextEnd() - textSelector_.GetTextStart();
     }
-    auto range = TextEmojiProcessor::CalSubU16stringRange(index, allowInsertLength, insertValue, true, true);
-    allowInsertLength = range.endIndex - range.startIndex;
+    auto truncationLength = static_cast<int32_t>(insertValue.length()) - start;
+    auto range = TextEmojiProcessor::CalSubU16stringRange(start, truncationLength, insertValue, true, true);
+    auto allowInsertLength = static_cast<int32_t>(insertValue.length()) - range.endIndex + range.startIndex;
     return allowInsertLength;
 }
 
@@ -4522,7 +4537,7 @@ void RichEditorPattern::InitMouseEvent()
 void RichEditorPattern::OnHover(bool isHover)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "isHover=%{public}d", isHover);
-    if (lastHoverSpanItem_) {
+    if (!isHover && lastHoverSpanItem_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "spanItem hover false");
         lastHoverSpanItem_->onHover_(false, lastHoverInfo_);
         lastHoverSpanItem_.Reset();
@@ -5138,8 +5153,13 @@ bool RichEditorPattern::ProcessTextTruncationOperation(std::u16string& text, boo
     if (!needTruncationInsertValue || GetTextContentLength() - previewContentLength < maxLength_.value_or(INT_MAX)) {
         if (needTruncationInsertValue && text.length() != 1) {
             auto maxLength = maxLength_.value_or(INT_MAX) - GetTextContentLength() + previewContentLength;
-            auto allowInsertLength =
-                static_cast<int32_t>(text.length()) - CalculateTruncationLength(text, maxLength, text.length() - maxLength);
+            auto allowInsertLength =  CalculateTruncationLength(text, maxLength);
+            if (allowInsertLength == 0) {
+                TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
+                    "ProcessTextTruncation: No space to insert text. maxLength=%{public}d",
+                    maxLength_.value_or(INT_MAX));
+                return false;
+            }
             text = text.substr(0, allowInsertLength);
             return true;
         }
@@ -5151,16 +5171,16 @@ bool RichEditorPattern::ProcessTextTruncationOperation(std::u16string& text, boo
         return true;
     }
     if (!textSelector_.SelectNothing()) {
-        auto maxLength = static_cast<int32_t>(text.length()) - selectLength - selectLength;
-        auto allowInsertLength = static_cast<int32_t>(text.length()) - CalculateTruncationLength(text, selectLength, maxLength);
+        auto allowInsertLength = CalculateTruncationLength(text, 0);
         if (allowInsertLength == 0) {
-            TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+            TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "ProcessTextTruncation: No space to insert text. maxLength=%{public}d",
+                maxLength_.value_or(INT_MAX));
             return false;
         }
         text = text.substr(0, allowInsertLength);
         return true;
     }
-    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "maxLength=%{private}d", maxLength_.value_or(INT_MAX));
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "ProcessTextTruncation: maxLength=%{public}d", maxLength_.value_or(INT_MAX));
     IF_TRUE(IsPreviewTextInputting(), FinishTextPreviewInner());
     return false;
 }
@@ -7734,6 +7754,23 @@ void RichEditorPattern::HandleOnCut()
     DeleteBackward(1);
 }
 
+void RichEditorPattern::HandleOnShare()
+{
+    auto eventHub = GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    TextCommonEvent event;
+    eventHub->FireOnShare(event);
+    selectOverlay_->HideMenu(true);
+    auto value = selectOverlay_->GetSelectedText();
+    auto shareWord = std::regex_replace(value, REMOVE_SPACE_CHARS, "");
+    CHECK_NULL_VOID(!shareWord.empty());
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto containerId = pipeline->GetInstanceId();
+    auto contentRect = selectOverlay_->GetSelectArea();
+    TextShareAdapter::StartTextShareTask(containerId, contentRect, shareWord);
+}
+
 std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
 {
     return [wk = WeakClaim(this)](const Offset& point) {
@@ -8089,6 +8126,8 @@ void RichEditorPattern::DumpInfo()
     CHECK_NULL_VOID(selectOverlayInfo);
     dumpLog.AddDesc(std::string("selectOverlay info: ").append(selectOverlayInfo->ToString()));
     dumpLog.AddDesc(std::string("IsAIWrite: ").append(std::to_string(IsShowAIWrite())));
+    dumpLog.AddDesc(std::string("keyboardAppearance: ")
+            .append(std::to_string(static_cast<int32_t>(keyboardAppearance_))));
 }
 
 bool RichEditorPattern::HasFocus() const
@@ -8622,11 +8661,9 @@ void RichEditorPattern::UpdateScrollStateAfterLayout(bool shouldDisappear)
 
 bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
 {
+    auto scrollBar = GetScrollBar();
     if (source == SCROLL_FROM_START) {
-        auto scrollBar = GetScrollBar();
-        if (scrollBar) {
-            scrollBar->PlayScrollBarAppearAnimation();
-        }
+        IF_PRESENT(scrollBar, PlayScrollBarAppearAnimation());
         if (SelectOverlayIsOn()) {
             selectOverlay_->HideMenu(true);
         }
@@ -8637,6 +8674,10 @@ bool RichEditorPattern::OnScrollCallback(float offset, int32_t source)
     }
     if (IsReachedBoundary(offset)) {
         return false;
+    }
+    if (scrollBar && source == SCROLL_FROM_JUMP) {
+        scrollBar->PlayScrollBarAppearAnimation();
+        scrollBar->ScheduleDisappearDelayTask();
     }
     auto newOffset = MoveTextRect(offset);
     MoveFirstHandle(newOffset);

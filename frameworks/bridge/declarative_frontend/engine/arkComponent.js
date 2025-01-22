@@ -29548,6 +29548,10 @@ class ArkSwiperComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, SwiperOnGestureSwipeModifier.identity, SwiperOnGestureSwipeModifier, value);
     return this;
   }
+  onUnselected(value) {
+    modifierWithKey(this._modifiersWithKeys, SwiperOnUnselectedModifier.identity, SwiperOnUnselectedModifier, value);
+    return this;
+  }
   nestedScroll(value) {
     modifierWithKey(this._modifiersWithKeys, SwiperNestedScrollModifier.identity, SwiperNestedScrollModifier, value);
     return this;
@@ -30123,6 +30127,22 @@ class SwiperOnGestureSwipeModifier extends ModifierWithKey {
   }
 }
 SwiperOnGestureSwipeModifier.identity = Symbol('swiperOnGestureSwipe');
+class SwiperOnUnselectedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperOnUnselected(node);
+    } else {
+      getUINativeModule().swiper.setSwiperOnUnselected(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SwiperOnUnselectedModifier.identity = Symbol('swiperOnUnselected');
 class SwiperIndicatorInteractiveModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -30516,6 +30536,10 @@ class ArkTabsComponent extends ArkComponent {
   onTabBarClick(event) {
     throw new Error('Method not implemented.');
   }
+  onUnselected(value) {
+    modifierWithKey(this._modifiersWithKeys, TabsOnUnselectedModifier.identity, TabsOnUnselectedModifier, value);
+    return this;
+  }
   fadingEdge(value) {
     modifierWithKey(this._modifiersWithKeys, FadingEdgeModifier.identity, FadingEdgeModifier, value);
     return this;
@@ -30902,6 +30926,20 @@ class BarBackgroundEffectModifier extends ModifierWithKey {
   }
 }
 BarBackgroundEffectModifier.identity = Symbol('barBackgroundEffect');
+class TabsOnUnselectedModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().tabs.resetTabOnUnselected(node);
+    }
+    else {
+      getUINativeModule().tabs.setTabOnUnselected(node, this.value);
+    }
+  }
+}
+TabsOnUnselectedModifier.identity = Symbol('tabOnUnselected');
 class FadingEdgeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

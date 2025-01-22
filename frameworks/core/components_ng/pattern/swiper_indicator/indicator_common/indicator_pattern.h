@@ -122,8 +122,6 @@ public:
 
         if (GetIndicatorType() == SwiperIndicatorType::DOT) {
             return CreateDotIndicatorPaintMethodInSingleMode();
-        } else {
-            ResetDotModifier();
         }
         return nullptr;
     }
@@ -169,7 +167,7 @@ public:
         }
         paintMethod->SetMouseClickIndex(GetOptinalMouseClickIndex());
         paintMethod->SetIsTouchBottom(GetTouchBottomType());
-        GetOptinalMouseClickIndex() = std::nullopt;
+        ResetOptinalMouseClickIndex();
     }
 
     const bool& IsIndicatorCustomSize() const

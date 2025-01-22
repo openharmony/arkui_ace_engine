@@ -2025,7 +2025,12 @@ bool TextPattern::HandleKeyEvent(const KeyEvent& keyEvent)
     }
 
     if (keyEvent.IsCtrlWith(KeyCode::KEY_A)) {
-        HandleOnSelectAll();
+        auto textSize = static_cast<int32_t>(textForDisplay_.length()) + placeholderCount_;
+        HandleSelectionChange(0, textSize);
+        CalculateHandleOffsetAndShowOverlay();
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         return true;
     }
 
@@ -3852,6 +3857,12 @@ void TextPattern::DumpTextStyleInfo3()
     CHECK_NULL_VOID(textLayoutProp);
     if (textStyle_.has_value()) {
         dumpLog.AddDesc(
+            std::string("fontFamily: ")
+                .append(GetFontFamilyInJson(textStyle_->GetFontFamilies()))
+                .append(" pro: ")
+                .append(textLayoutProp->HasFontFamily() ? GetFontFamilyInJson(textLayoutProp->GetFontFamily().value())
+                                                        : "Na"));
+        dumpLog.AddDesc(
             std::string("LetterSpacing: ")
                 .append(textStyle_->GetLetterSpacing().ToString())
                 .append(" pro: ")
@@ -4009,7 +4020,11 @@ void TextPattern::OnColorConfigurationUpdate()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    OnThemeScopeUpdate(host->GetThemeScopeId());
+    auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (!textLayoutProperty->HasTextColor()) {
+        host->MarkDirtyWithOnProChange(PROPERTY_UPDATE_MEASURE_SELF);
+    }
     if (GetOrCreateMagnifier()) {
         magnifierController_->SetColorModeChange(true);
     }
@@ -4025,7 +4040,7 @@ bool TextPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, false);
 
-    if (!textLayoutProperty->GetTextColorFlagByUserValue(false) && !contex->HasForegroundColor()) {
+    if (!textLayoutProperty->HasTextColor() && !contex->HasForegroundColor()) {
         auto pipeline = host->GetContext();
         CHECK_NULL_RETURN(pipeline, false);
         auto textTheme = pipeline->GetTheme<TextTheme>(themeScopeId);

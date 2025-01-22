@@ -11,18 +11,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
-*/
-
-/**
- * 
- * This file includes only framework internal classes and functions 
- * non are part of SDK. Do not access from app.
- * 
- * ViewBuildNodeBase is the common base class of PUV2ViewBase and BaseNode
- * 
  */
 
-class ViewBuildNodeBase {
-  
+#include "base/system_bar/system_bar_style.h"
+
+namespace OHOS::Ace {
+
+RefPtr<SystemBarStyle> SystemBarStyle::CreateStyleFromColor(const uint32_t colorValue)
+{
+    return nullptr;
 }
+} // namespace OHOS::Ace

@@ -758,4 +758,29 @@ void TabsPattern::UpdateSelectedState(const RefPtr<FrameNode>& tabBarNode, const
     swiperLayoutProperty->UpdateIndex(index);
     tabsLayoutProperty->UpdateIndex(index);
 }
+
+void TabsPattern::SetOnUnselectedEvent(std::function<void(const BaseEventInfo*)>&& event)
+{
+    ChangeEvent unselectedEvent([jsEvent = std::move(event)](int32_t index) {
+        /* js callback */
+        if (jsEvent) {
+            TabContentChangeEvent eventInfo(index);
+            jsEvent(&eventInfo);
+        }
+    });
+    if (unselectedEvent_) {
+        (*unselectedEvent_).swap(unselectedEvent);
+    } else {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto tabsNode = AceType::DynamicCast<TabsNode>(host);
+        CHECK_NULL_VOID(tabsNode);
+        auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+        CHECK_NULL_VOID(swiperNode);
+        auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        unselectedEvent_ = std::make_shared<ChangeEvent>(std::move(unselectedEvent));
+        eventHub->AddOnUnselectedEvent(unselectedEvent_);
+    }
+}
 } // namespace OHOS::Ace::NG

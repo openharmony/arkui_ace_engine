@@ -265,6 +265,24 @@ public:
     void CancelShowTitleAndToolBarTask();
     // Restore the titleBar&toolBar to its original position (hide or show state).
     void ResetTitleAndToolBarState();
+    
+    void OnCoordScrollStart() override;
+    float OnCoordScrollUpdate(float offset, float currentOffset) override;
+    void OnCoordScrollEnd() override;
+    bool NeedCoordWithScroll() override
+    {
+        return true;
+    }
+    
+    float GetTitleBarHeightLessThanMaxBarHeight() const override
+    {
+        return 0.0;
+    }
+    
+    bool CanCoordScrollUp(float offset) const override
+    {
+        return true;
+    }
 
     void SetIsActive(bool isActive)
     {

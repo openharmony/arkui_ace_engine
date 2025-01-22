@@ -449,7 +449,7 @@ void PipelineContext::FlushDragEvents(const RefPtr<DragDropManager>& manager,
         idToPoints[iter->pointerId].history.insert(idToPoints[iter->pointerId].history.begin(), *iter);
         needInterpolation = iter->action != PointerAction::PULL_MOVE ? false : true;
     }
-    if (focusWindowId_.has_value()) {
+    if (!NeedTouchInterpolation()) {
         needInterpolation = false;
     }
     if (needInterpolation) {
@@ -3145,7 +3145,7 @@ void PipelineContext::FlushTouchEvents()
             idToTouchPoints[scalePoint.id].history.insert(idToTouchPoints[scalePoint.id].history.begin(), scalePoint);
             needInterpolation = iter->type != TouchType::MOVE ? false : true;
         }
-        if (focusWindowId_.has_value()) {
+        if (!NeedTouchInterpolation()) {
             needInterpolation = false;
         }
         if (needInterpolation && SystemProperties::IsNeedResampleTouchPoints()) {
@@ -3502,7 +3502,7 @@ void PipelineContext::OnFlushMouseEvent(
         nodeToMousePoints[node].emplace_back(idToMousePoints[scaleEvent.id]);
         needInterpolation = iter->action != MouseAction::MOVE ? false : true;
     }
-    if (focusWindowId_.has_value()) {
+    if (!NeedTouchInterpolation()) {
         needInterpolation = false;
     }
     if (needInterpolation) {
@@ -3665,10 +3665,17 @@ void PipelineContext::OnAxisEvent(const AxisEvent& event, const RefPtr<FrameNode
     }
 
     DispatchAxisEventToDragDropManager(event, node, etsSerializedGesture);
-
-    if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
-        eventManager_->AxisTest(scaleEvent, node);
-        eventManager_->DispatchAxisEventNG(scaleEvent);
+    // when api >= 15, do not block end and cancel action.
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_FIFTEEN)) {
+        if (event.action != AxisAction::NONE) {
+            eventManager_->AxisTest(scaleEvent, node);
+            eventManager_->DispatchAxisEventNG(scaleEvent);
+        }
+    } else {
+        if (event.action == AxisAction::BEGIN || event.action == AxisAction::UPDATE) {
+            eventManager_->AxisTest(scaleEvent, node);
+            eventManager_->DispatchAxisEventNG(scaleEvent);
+        }
     }
     if (event.action == AxisAction::BEGIN && formEventMgr) {
         formEventMgr->HandleEtsCardAxisEvent(scaleEvent, etsSerializedGesture);

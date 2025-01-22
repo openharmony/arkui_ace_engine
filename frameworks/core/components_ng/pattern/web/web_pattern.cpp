@@ -245,6 +245,18 @@ const std::map<std::string, AceAutoFillType> NWEB_AUTOFILL_TYPE_TO_ACE = {
     {OHOS::NWeb::NWEB_AUTOFILL_USERNAME, AceAutoFillType::ACE_USER_NAME},
     {OHOS::NWeb::NWEB_AUTOFILL_PASSWORD, AceAutoFillType::ACE_PASSWORD},
     {OHOS::NWeb::NWEB_AUTOFILL_NEW_PASSWORD, AceAutoFillType::ACE_NEW_PASSWORD},
+    {OHOS::NWeb::NWEB_AUTOFILL_PASSPORT_NUMBER, AceAutoFillType::ACE_PASSPORT_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_VALIDITY, AceAutoFillType::ACE_VALIDITY},
+    {OHOS::NWeb::NWEB_AUTOFILL_ISSUE_AT, AceAutoFillType::ACE_ISSUE_AT},
+    {OHOS::NWeb::NWEB_AUTOFILL_ORGANIZATION, AceAutoFillType::ACE_ORGANIZATION},
+    {OHOS::NWeb::NWEB_AUTOFILL_TAX_ID, AceAutoFillType::ACE_TAX_ID},
+    {OHOS::NWeb::NWEB_AUTOFILL_ADDRESS_CITY_AND_STATE, AceAutoFillType::ACE_ADDRESS_CITY_AND_STATE},
+    {OHOS::NWeb::NWEB_AUTOFILL_FLIGHT_NUMBER, AceAutoFillType::ACE_FLIGHT_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_LICENSE_NUMBER, AceAutoFillType::ACE_LICENSE_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_LICENSE_FILE_NUMBER, AceAutoFillType::ACE_LICENSE_FILE_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_LICENSE_PLATE, AceAutoFillType::ACE_LICENSE_PLATE},
+    {OHOS::NWeb::NWEB_AUTOFILL_ENGINE_NUMBER, AceAutoFillType::ACE_ENGINE_NUMBER},
+    {OHOS::NWeb::NWEB_AUTOFILL_LICENSE_CHASSIS_NUMBER, AceAutoFillType::ACE_LICENSE_CHASSIS_NUMBER},
 };
 
 const std::map<AceAutoFillType, std::string> ACE_AUTOFILL_TYPE_TO_NWEB = {
@@ -268,6 +280,18 @@ const std::map<AceAutoFillType, std::string> ACE_AUTOFILL_TYPE_TO_NWEB = {
     {AceAutoFillType::ACE_USER_NAME, OHOS::NWeb::NWEB_AUTOFILL_USERNAME},
     {AceAutoFillType::ACE_PASSWORD, OHOS::NWeb::NWEB_AUTOFILL_PASSWORD},
     {AceAutoFillType::ACE_NEW_PASSWORD, OHOS::NWeb::NWEB_AUTOFILL_NEW_PASSWORD},
+    {AceAutoFillType::ACE_PASSPORT_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_PASSPORT_NUMBER},
+    {AceAutoFillType::ACE_VALIDITY, OHOS::NWeb::NWEB_AUTOFILL_VALIDITY},
+    {AceAutoFillType::ACE_ISSUE_AT, OHOS::NWeb::NWEB_AUTOFILL_ISSUE_AT},
+    {AceAutoFillType::ACE_ORGANIZATION, OHOS::NWeb::NWEB_AUTOFILL_ORGANIZATION},
+    {AceAutoFillType::ACE_TAX_ID, OHOS::NWeb::NWEB_AUTOFILL_TAX_ID},
+    {AceAutoFillType::ACE_ADDRESS_CITY_AND_STATE, OHOS::NWeb::NWEB_AUTOFILL_ADDRESS_CITY_AND_STATE},
+    {AceAutoFillType::ACE_FLIGHT_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_FLIGHT_NUMBER},
+    {AceAutoFillType::ACE_LICENSE_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_LICENSE_NUMBER},
+    {AceAutoFillType::ACE_LICENSE_FILE_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_LICENSE_FILE_NUMBER},
+    {AceAutoFillType::ACE_LICENSE_PLATE, OHOS::NWeb::NWEB_AUTOFILL_LICENSE_PLATE},
+    {AceAutoFillType::ACE_ENGINE_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_ENGINE_NUMBER},
+    {AceAutoFillType::ACE_LICENSE_CHASSIS_NUMBER, OHOS::NWeb::NWEB_AUTOFILL_LICENSE_CHASSIS_NUMBER},
 };
 
 const std::map<std::string, OHOS::NWeb::NWebAutofillEvent> NWEB_AUTOFILL_EVENTS = {
@@ -3513,6 +3537,30 @@ bool WebPattern::ProcessVirtualKeyBoardHide(int32_t width, int32_t height, bool 
     return true;
 }
 
+bool WebPattern::UpdateLayoutAfterKeyboard(int32_t width, int32_t height, double keyboard)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(context, false);
+    auto taskExecutor = context->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    lastKeyboardHeight_ = keyboard;
+    taskExecutor->PostDelayedTask(
+        [weak = WeakClaim(this), width, height]() {
+            auto webPattern = weak.Upgrade();
+            CHECK_NULL_VOID(webPattern);
+            // In split-screen mode, the keyboard height is reported multiple times and is not the same.
+            // Use the last height.
+            webPattern->UpdateLayoutAfterKeyboardShow(width,
+                                                      height,
+                                                      webPattern->lastKeyboardHeight_,
+                                                      webPattern->GetDrawSize().Height());
+        }, TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
+    return true;
+}
+
 bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, double keyboard, bool safeAreaEnabled)
 {
     if (IsDialogNested()) {
@@ -3526,6 +3574,7 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
     if (drawSizeCache_.Height() <= (height - keyboard - GetCoordinatePoint()->GetY())) {
         TAG_LOGI(AceLogTag::ACE_WEB, "ProcessVirtualKeyBoardShow not obstruct");
         isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+        lastKeyboardHeight_ = keyboard;
         return !safeAreaEnabled;
     }
     if (height - GetCoordinatePoint()->GetY() < keyboard) {
@@ -3548,20 +3597,10 @@ bool WebPattern::ProcessVirtualKeyBoardShow(int32_t width, int32_t height, doubl
         lastKeyboardHeight_ = keyboard;
         return false;
     }
-    auto frameNode = GetHost();
-    CHECK_NULL_RETURN(frameNode, false);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(context, false);
-    auto taskExecutor = context->GetTaskExecutor();
-    CHECK_NULL_RETURN(taskExecutor, false);
-    lastKeyboardHeight_ = keyboard;
-    taskExecutor->PostDelayedTask(
-        [weak = WeakClaim(this), width, height, keyboard, oldWebHeight = drawSize_.Height()]() {
-            auto webPattern = weak.Upgrade();
-            CHECK_NULL_VOID(webPattern);
-            webPattern->UpdateLayoutAfterKeyboardShow(width, height, keyboard, oldWebHeight);
-        }, TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME, "ArkUIWebUpdateLayoutAfterKeyboardShow");
+
+    if (!UpdateLayoutAfterKeyboard(width, height, keyboard)) {
+        return false;
+    }
     return true;
 }
 
@@ -4901,6 +4940,10 @@ AceAutoFillType WebPattern::GetFocusedType()
             break;
         }
     }
+    if (ACE_AUTOFILL_TYPE_TO_NWEB.count(type) != 0) {
+        std::string key = ACE_AUTOFILL_TYPE_TO_NWEB.at(type);
+        TAG_LOGI(AceLogTag::ACE_WEB, "type:%{public}s", key.c_str());
+    }
     return type;
 }
 
@@ -6041,7 +6084,7 @@ void WebPattern::OnActive()
     CHECK_NULL_VOID(delegate_);
     bool policyDisable = delegate_->IsActivePolicyDisable();
     TAG_LOGI(AceLogTag::ACE_WEB,
-        "WebPattern::OnActive wIsActivePolicyDisableebId:%{public}d, isActive:%{public}d, policyDisable %{public}d",
+        "WebPattern::OnActive webId:%{public}d, isActive:%{public}d, policyDisable %{public}d",
         GetWebId(), isActive_, policyDisable);
     if (isActive_) {
         return;

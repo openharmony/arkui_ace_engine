@@ -25,6 +25,7 @@ const std::string ARKUI_APP_BAR_MENU_SAFE_AREA = "arkui_app_bar_menu_safe_area";
 const std::string ARKUI_APP_BAR_CONTENT_SAFE_AREA = "arkui_app_bar_content_safe_area";
 const std::string ARKUI_APP_BAR_BAR_INFO = "arkui_app_bar_info";
 const std::string ARKUI_APP_BAR_SCREEN = "arkui_app_bar_screen";
+const std::string ARKUI_APP_BG_COLOR = "arkui_app_bg_color";
 
 class ACE_EXPORT CustomAppBarNode : public CustomNode {
     DECLARE_ACE_TYPE(CustomAppBarNode, CustomNode);
@@ -56,12 +57,25 @@ public:
         }
     }
 
+    void SetAppIconCallback(const std::function<void(const RefPtr<PixelMap>&)>& callback)
+    {
+        appIconCallback_ = callback;
+    }
+
+    void FireAppIconCallback(const RefPtr<PixelMap>& icon)
+    {
+        if (appIconCallback_) {
+            appIconCallback_(icon);
+        }
+    }
+
 private:
     std::string BoolToString(bool value)
     {
         return value ? "true" : "false";
     }
     std::function<void(const std::string&, const std::string&)> customCallback_ = nullptr;
+    std::function<void(const RefPtr<PixelMap>&)> appIconCallback_ = nullptr;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_BASE_CUSTOM_APP_BAR_NODE_H

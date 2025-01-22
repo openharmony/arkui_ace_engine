@@ -150,6 +150,7 @@ struct ArkUITouchPoint {
     ArkUI_Float32 rawX;
     ArkUI_Float32 rawY;
     ArkUI_Int32 toolType;
+    ArkUI_Int32 operatingHand;
 };
 
 struct ArkUIOffsetType {
@@ -935,6 +936,7 @@ enum ArkUIEventSubKind {
     ON_SWIPER_GESTURE_SWIPE,
     ON_SWIPER_DID_CONTENT_SCROLL,
     ON_SWIPER_SELECTED,
+    ON_SWIPER_UNSELECTED,
     ON_SWIPER_CONTENT_WILL_SCROLL,
 
     ON_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_SCROLL,
@@ -2803,6 +2805,8 @@ struct ArkUISwiperModifier {
     ArkUINodeHandle (*getSwiperController)(ArkUINodeHandle node);
     void (*setSwiperOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnChange)(ArkUINodeHandle node);
+    void (*setSwiperOnUnselected)(ArkUINodeHandle node, void* callback);
+    void (*resetSwiperOnUnselected)(ArkUINodeHandle node);
     void (*setSwiperOnAnimationStart)(ArkUINodeHandle node, void* callback);
     void (*resetSwiperOnAnimationStart)(ArkUINodeHandle node);
     void (*setSwiperOnAnimationEnd)(ArkUINodeHandle node, void* callback);
@@ -3176,6 +3180,7 @@ struct ArkUITabsModifier {
     void (*setDivider)(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const ArkUI_Int32* units,
         ArkUI_Int32 length);
     void (*setFadingEdge)(ArkUINodeHandle node, ArkUI_Bool fadingEdge);
+    void (*setTabOnUnselected)(ArkUINodeHandle node, void* callback);
     void (*setBarBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setBarBackgroundBlurStyle)(ArkUINodeHandle node, ArkUITabBarBackgroundBlurStyle* styleOption);
     void (*setBarOverlap)(ArkUINodeHandle node, ArkUI_Bool overlap);
@@ -3193,6 +3198,7 @@ struct ArkUITabsModifier {
     void (*resetBarGridAlign)(ArkUINodeHandle node);
     void (*resetDivider)(ArkUINodeHandle node);
     void (*resetFadingEdge)(ArkUINodeHandle node);
+    void (*resetTabOnUnselected)(ArkUINodeHandle node);
     void (*resetBarBackgroundColor)(ArkUINodeHandle node);
     void (*resetBarBackgroundBlurStyle)(ArkUINodeHandle node);
     void (*resetBarOverlap)(ArkUINodeHandle node);
@@ -3218,7 +3224,6 @@ struct ArkUITabsModifier {
     void (*resetAnimateMode)(ArkUINodeHandle node);
     void (*setBarBackgroundEffect)(ArkUINodeHandle node, ArkUITabBarBackgroundEffect* effectOption);
     void (*resetBarBackgroundEffect)(ArkUINodeHandle node);
-
 };
 
 struct ArkUIStepperItemModifier {
@@ -3473,6 +3478,18 @@ struct ArkUINavDestinationModifier {
     void (*resetRecoverable)(ArkUINodeHandle node);
     void (*setNavDestinationSystemTransition)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetNavDestinationSystemTransition)(ArkUINodeHandle node);
+    void (*setNavDestinationCustomTitle)(ArkUINodeHandle node, ArkUINodeHandle titleNode);
+    ArkUINodeHandle (*getNavDestinationCustomTitle)(ArkUINodeHandle node);
+    void (*setNavDestinationTitleHeight)(ArkUINodeHandle node, const struct ArkUIDimensionType height);
+    void (*setNavDestinationTitlebarOptions)(ArkUINodeHandle node, ArkUINavigationTitlebarOptions opts);
+    void (*setNavDestinationOnCoordScrollStartAction)(ArkUINodeHandle node,
+        void (*onCoordScrollStartAction)(ArkUINodeHandle node));
+    void (*setNavDestinationOnCoordScrollUpdateAction)(ArkUINodeHandle node,
+        void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 currentOffset));
+    void (*setNavDestinationOnCoordScrollEndAction)(ArkUINodeHandle node,
+        void (*onCoordScrollEndAction)(ArkUINodeHandle node));
+    void (*setNavDestinationSystemBarStyle)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    void (*setCustomBackButtonNode)(ArkUINodeHandle node, ArkUINodeHandle backButtonNode);
 };
 
 struct ArkUITextAreaModifier {
@@ -4181,6 +4198,15 @@ struct ArkUINavigationModifier {
     void (*resetRecoverable)(ArkUINodeHandle node);
     void (*setEnableDragBar)(ArkUINodeHandle node, ArkUI_Bool enbaleDragBar);
     void (*resetEnableDragBar)(ArkUINodeHandle node);
+    void (*setCustomTitle)(ArkUINodeHandle node, ArkUINodeHandle titleNode);
+    ArkUINodeHandle (*getCustomTitle)(ArkUINodeHandle node);
+    void (*setTitleHeight)(ArkUINodeHandle node, const struct ArkUIDimensionType height);
+    void (*setTitlebarOptions)(ArkUINodeHandle node, ArkUINavigationTitlebarOptions opts);
+    void (*setOnCoordScrollStartAction)(ArkUINodeHandle node, void (*onCoordScrollStartAction)(ArkUINodeHandle node));
+    void (*setOnCoordScrollUpdateAction)(ArkUINodeHandle node,
+        void (*onCoordScrollUpdateAction)(ArkUINodeHandle node, ArkUI_Float32 currentOffset));
+    void (*setOnCoordScrollEndAction)(ArkUINodeHandle node, void (*onCoordScrollEndAction)(ArkUINodeHandle node));
+    void (*setSystemBarStyle)(ArkUINodeHandle node, ArkUI_Uint32 value);
 };
 
 struct ArkUINavRouterModifier {
@@ -5255,6 +5281,7 @@ struct ArkUIRenderNodeModifier {
     void (*setCommandPathClip)(ArkUINodeHandle node, ArkUI_CharPtr commands);
     void (*setPosition)(ArkUINodeHandle node, ArkUI_Float32 xAxis, ArkUI_Float32 yAxis, ArkUI_Int32 unitValue);
     void (*setMarkNodeGroup)(ArkUINodeHandle node, ArkUI_Bool isNodeGroup);
+    void (*setTransformScale)(ArkUINodeHandle node, ArkUI_Float32 xF, ArkUI_Float32 yF);
 };
 
 struct ArkUIFrameNodeModifier {
@@ -5779,6 +5806,7 @@ struct ArkUIExtendedNodeAPI {
     ArkUINodeHandle (*createCustomNode)(ArkUI_CharPtr tag);
     ArkUINodeHandle (*getOrCreateCustomNode)(ArkUI_CharPtr tag);
     ArkUIRSNodeHandle (*getRSNodeByNode)(ArkUINodeHandle node);
+    ArkUI_Bool (*isRightToLeft)();
     void (*createNewScope)();
     void (*registerOEMVisualEffect)(ArkUIOEMVisualEffectFuncHandle func);
     void (*setOnNodeDestroyCallback)(ArkUINodeHandle node, void (*onDestroy)(ArkUINodeHandle node));

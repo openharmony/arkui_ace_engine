@@ -249,7 +249,7 @@ public:
         udKey_ = udKey;
     }
 
-    std::string GetUdKey()
+    const std::string& GetUdKey()
     {
         return udKey_;
     }

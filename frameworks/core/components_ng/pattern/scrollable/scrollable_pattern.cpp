@@ -286,7 +286,8 @@ void ScrollablePattern::ProcessNavBarReactOnStart()
 float ScrollablePattern::ProcessNavBarReactOnUpdate(float offset)
 {
     CHECK_NULL_RETURN(navBarPattern_, false);
-    return navBarPattern_->OnCoordScrollUpdate(offset);
+    auto currentOffset = GetTotalOffset();
+    return navBarPattern_->OnCoordScrollUpdate(offset, currentOffset);
 }
 
 void ScrollablePattern::ProcessNavBarReactOnEnd()
@@ -1317,7 +1318,7 @@ void ScrollablePattern::GetParentNavigation()
             (frameNode->GetTag() == V2::SCROLL_ETS_TAG) || (frameNode->GetTag() == V2::ARC_LIST_ETS_TAG)) {
             break;
         }
-        navBarPattern_ = frameNode->GetPattern<NavBarPattern>();
+        navBarPattern_ = frameNode->GetPattern<NavDestinationPatternBase>();
         if (!navBarPattern_) {
             continue;
         }

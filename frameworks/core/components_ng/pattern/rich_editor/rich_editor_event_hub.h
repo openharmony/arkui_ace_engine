@@ -376,6 +376,8 @@ public:
     void FireOnCut(NG::TextCommonEvent& value);
     void SetOnCopy(std::function<void(NG::TextCommonEvent&)> && func);
     void FireOnCopy(NG::TextCommonEvent& value);
+    void SetOnShare(std::function<void(NG::TextCommonEvent&)>&& func);
+    void FireOnShare(NG::TextCommonEvent& value);
     void SetOnStyledStringWillChange(std::function<bool(const StyledStringChangeValue&)> && func);
     bool FireOnStyledStringWillChange(const StyledStringChangeValue& info);
     bool HasOnStyledStringWillChange() const;
@@ -400,6 +402,7 @@ private:
     std::function<void(const RichEditorChangeValue&)> onDidChange_;
     std::function<void(NG::TextCommonEvent&)> onCut_;
     std::function<void(NG::TextCommonEvent&)> onCopy_;
+    std::function<void(NG::TextCommonEvent&)> onShare_;
     std::function<bool(const StyledStringChangeValue&)> onStyledStringWillChange_;
     std::function<void(const StyledStringChangeValue&)> onStyledStringDidChange_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorEventHub);

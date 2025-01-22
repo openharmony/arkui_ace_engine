@@ -62,7 +62,8 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         UpdateTextStyle(frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled(),
             textFieldPaintProperty->HasTextColorFlagByUser());
         textContent = pattern->GetTextUtf16Value();
-        UpdateTextStyleTextOverflowAndWordBreak(textStyle, isTextArea, isInlineStyle, textFieldLayoutProperty);
+        UpdateTextStyleTextOverflowAndWordBreak(textStyle, isTextArea, isInlineStyle, textFieldLayoutProperty,
+            textFieldTheme->TextFadeoutEnabled());
     } else {
         UpdatePlaceholderTextStyle(
             frameNode, textFieldLayoutProperty, textFieldTheme, textStyle, pattern->IsDisabled(),
@@ -86,14 +87,15 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
 }
 
 void TextFieldLayoutAlgorithm::UpdateTextStyleTextOverflowAndWordBreak(TextStyle& textStyle, bool isTextArea,
-    bool isInlineStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty)
+    bool isInlineStyle, const RefPtr<TextFieldLayoutProperty>& textFieldLayoutProperty, bool isTextFadeout)
 {
     CHECK_NULL_VOID(textFieldLayoutProperty);
     if (textFieldLayoutProperty->HasTextOverflow() &&
         textFieldLayoutProperty->GetTextOverflow() != TextOverflow::DEFAULT) {
         textStyle.SetTextOverflow(textFieldLayoutProperty->GetTextOverflow().value());
     } else {
-        auto overflowStyle = (!isTextArea && isInlineStyle) ? TextOverflow::ELLIPSIS : TextOverflow::CLIP;
+        auto overflowStyle =
+            (!isTextArea && isInlineStyle && !isTextFadeout) ? TextOverflow::ELLIPSIS : TextOverflow::CLIP;
         textStyle.SetTextOverflow(overflowStyle);
     }
 

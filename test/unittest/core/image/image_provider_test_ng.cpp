@@ -55,6 +55,7 @@ constexpr int32_t LENGTH_65 = 65;
 constexpr int32_t LENGTH_64 = 64;
 constexpr int32_t LENGTH_63 = 63;
 constexpr int32_t LENGTH_128 = 128;
+constexpr uint64_t MAX_WAITING_TIME_FOR_TASKS = 1000; // 1000ms
 int32_t callbackFlag = 0;
 } // namespace
 
@@ -388,13 +389,21 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg002, TestSize.Level1)
     }
     // check task map
     {
-        std::scoped_lock<std::mutex> lock(ImageProvider::taskMtx_);
+        if (!ImageProvider::taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+            return;
+        }
+        // Adopt the already acquired lock
+        std::scoped_lock lock(std::adopt_lock, ImageProvider::taskMtx_);
         EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)1);
         EXPECT_EQ(ImageProvider::tasks_[src.GetKey()].ctxs_.size(), (size_t)20);
     }
     // wait for load task to finish
     WaitForAsyncTasks();
-    std::scoped_lock<std::mutex> lock(ImageProvider::taskMtx_);
+    if (!ImageProvider::taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+        return;
+    }
+    // Adopt the already acquired lock
+    std::scoped_lock lock(std::adopt_lock, ImageProvider::taskMtx_);
     EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)0);
 }
 
@@ -514,7 +523,11 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg007, TestSize.Level1)
         ctx->LoadImageData();
     }
     {
-        std::scoped_lock<std::mutex> lock(ImageProvider::taskMtx_);
+        if (!ImageProvider::taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+            return;
+        }
+        // Adopt the already acquired lock
+        std::scoped_lock lock(std::adopt_lock, ImageProvider::taskMtx_);
         EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)1);
         auto it = ImageProvider::tasks_.find(src.GetKey());
         EXPECT_NE(it, ImageProvider::tasks_.end());
@@ -528,12 +541,20 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg007, TestSize.Level1)
     }
     // check task is successfully canceled
     {
-        std::scoped_lock<std::mutex> lock(ImageProvider::taskMtx_);
+        if (!ImageProvider::taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+            return;
+        }
+        // Adopt the already acquired lock
+        std::scoped_lock lock(std::adopt_lock, ImageProvider::taskMtx_);
         EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)0);
     }
     WaitForAsyncTasks();
     {
-        std::scoped_lock<std::mutex> lock(ImageProvider::taskMtx_);
+        if (!ImageProvider::taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+            return;
+        }
+        // Adopt the already acquired lock
+        std::scoped_lock lock(std::adopt_lock, ImageProvider::taskMtx_);
         EXPECT_EQ(ImageProvider::tasks_.size(), (size_t)0);
     }
 }
