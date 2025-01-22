@@ -729,6 +729,7 @@ public:
 
     float CalcCurrentTurnPageRate() const;
     int32_t GetFirstIndexInVisibleArea() const;
+    float CalculateGroupTurnPageRate(float additionalOffset);
 
     bool IsBindIndicator() const
     {
@@ -917,7 +918,6 @@ private:
     {
         return Positive(GetNextMargin()) ? GetNextMargin() + GetItemSpace() : 0.0f;
     }
-    float CalculateGroupTurnPageRate(float additionalOffset);
     int32_t CurrentIndex() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
