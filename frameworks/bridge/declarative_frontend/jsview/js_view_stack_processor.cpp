@@ -166,7 +166,7 @@ void JSViewStackProcessor::JsSendStateInfo(const std::string& stateInfo)
     if (!LayoutInspector::GetStateProfilerStatus()) {
         return;
     }
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     CHECK_NULL_VOID(container);
     auto pipeline = container->GetPipelineContext();
     CHECK_NULL_VOID(pipeline);

@@ -38,8 +38,38 @@ class stateMgmtDFX {
   }
 
   public static reportStateInfoToProfilerV2(target: object, attrName: string, changeIdSet: Set<number>): void {
-    let stateInfo: DumpInfo = new DumpInfo();
-    let decoratorInfo: string = target instanceof ViewV2 ? ObserveV2.getObserve().getDecoratorInfo(target, attrName) : '@Trace';
+    const stateInfo: DumpInfo = new DumpInfo();
+    try {
+      stateMgmtDFX.HandlerStateInfoToProfilerV2(target, attrName, changeIdSet, stateInfo);
+      ViewStackProcessor.sendStateInfo(JSON.stringify(stateInfo));
+    } catch (error) {
+      stateMgmtConsole.applicationError(`An ${error.message} occurred when reporting ${target.constructor.name} information`);
+    }
+  }
+
+  private static HandlerStateInfoToProfilerV2(target: object, attrName: string, changeIdSet: Set<number>, stateInfo: DumpInfo) {
+    const decoratorInfo: string = ObserveV2.getObserve().getDecoratorInfo(target, attrName);
+    let val;
+    let id;
+    if (Array.isArray(target) || target instanceof Set || target instanceof Map || target instanceof Date) {
+      val = target;
+      id = Utils.getArkTsUtil().getHash(target)?.toString();
+    }
+    if ((target instanceof ViewV2) || ObserveV2.IsObservedObjectV2(target)) {
+      val = Reflect.get(target, attrName);
+      id = Utils.getArkTsUtil().getHash(target)?.toString() + attrName;
+    }
+    // handle MakeObsered
+    if (target[RefInfo.MAKE_OBSERVED_PROXY]) {
+      let raw = UIUtilsImpl.instance().getTarget(target[RefInfo.MAKE_OBSERVED_PROXY]);
+      if (Array.isArray(raw) || raw instanceof Set || raw instanceof Map || raw instanceof Date) {
+        val = raw;
+        id = Utils.getArkTsUtil().getHash(target)?.toString();
+      } else {
+        val = Reflect.get(raw, attrName);
+        id = Utils.getArkTsUtil().getHash(raw)?.toString() + attrName;
+      }
+    }
 
     const dependentElementIds: Array<ElementType | string> = Array<ElementType | string>();
     changeIdSet.forEach((id: number) => {
@@ -55,16 +85,10 @@ class stateMgmtDFX {
       ownedTarget = { className: target.constructor.name, id: Utils.getArkTsUtil().getHash(target) };
     }
     stateInfo.observedPropertiesInfo.push({
-      decorator: decoratorInfo, propertyName: attrName,
-      idV2: target instanceof ViewV2 ? target.id__().toString() + attrName : Utils.getArkTsUtil().getHash(target)?.toString() + attrName,
-      value: stateMgmtDFX.getRawValue(Reflect.get(target, attrName)), inRenderingElementId: ObserveV2.getCurrentRecordedId(),
+      decorator: decoratorInfo, propertyName: attrName, idV2: id,
+      value: stateMgmtDFX.getRawValue(val), inRenderingElementId: ObserveV2.getCurrentRecordedId(),
       dependentElementIds: { mode: 'v2', propertyDependencies: dependentElementIds }, owningView: ownedTarget
     });
-    try {
-      ViewStackProcessor.sendStateInfo(JSON.stringify(stateInfo));
-    } catch (error) {
-      stateMgmtConsole.applicationError(`An ${error.message} occurred when reporting ${target.constructor.name} information`);
-    }
   }
 
   /**
