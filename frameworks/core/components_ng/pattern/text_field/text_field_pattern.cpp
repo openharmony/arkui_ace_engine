@@ -9041,6 +9041,8 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     if (!hasPreviewText_) {
         auto fullStr = GetTextUtf16Value();
         if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_FOURTEEN) && IsSelected()) {
@@ -9073,6 +9075,12 @@ void TextFieldPattern::SetPreviewTextOperation(PreviewTextInfo info)
 
     bool hasInsertValue = false;
     auto originLength = static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) - (end - start);
+    auto attemptInsertLength = static_cast<int32_t>(info.text.length()) - (end - start);
+    if (layoutProperty->HasMaxLength() &&
+        attemptInsertLength + static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) >
+        static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()))) {
+        isPreviewTextOverCount_ = true;
+    }
     hasInsertValue = contentController_->ReplaceSelectedValue(start, end, info.text);
     int32_t caretMoveLength = abs(static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) -
         originLength);
@@ -9120,8 +9128,9 @@ void TextFieldPattern::FinishTextPreviewOperation()
     CHECK_NULL_VOID(layoutProperty);
     if (layoutProperty->HasMaxLength()) {
         int32_t len = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
-        showCountBorderStyle_ = len >
-            static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>()));
+        showCountBorderStyle_ = isPreviewTextOverCount_ || (len >
+            static_cast<int32_t>(layoutProperty->GetMaxLengthValue(Infinity<uint32_t>())));
+        isPreviewTextOverCount_ = false;
         HandleCountStyle();
     }
 
