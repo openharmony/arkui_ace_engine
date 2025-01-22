@@ -240,8 +240,8 @@ private:
     void HandleLockEvent(bool isLock);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle);
     void HandleFormStyleOperation(const FormSpecialStyle& formSpecialStyle, const RequestFormInfo& info);
+    void UpdateForbiddenRootNodeStyle(const RefPtr<RenderContext> &renderContext);
     RefPtr<FrameNode> CreateActionNode();
-    Color GetFormStyleBackGroundColor();
     // used by ArkTS Card, for RSSurfaceNode from FRS,
     void enhancesSubContainer(bool hasContainer);
     RefPtr<RenderContext> externalRenderContext_;
