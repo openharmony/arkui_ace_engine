@@ -2064,60 +2064,6 @@ void ViewAbstract::BindPopup(
     }
 }
 
-PopupInfo ViewAbstract::GetPopupInfoWithCustomNode(const RefPtr<UINode>& customNode)
-{
-    PopupInfo popupInfoError;
-    popupInfoError.popupNode = nullptr;
-    auto context = customNode->GetContextWithCheck();
-    CHECK_NULL_RETURN(context, popupInfoError);
-    auto instanceId = context->GetInstanceId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
-    if (subwindow) {
-        auto overlayManager = subwindow->GetOverlayManager();
-        if (overlayManager) {
-            auto popupInfo = overlayManager->GetPopupInfoWithExistContent(customNode);
-            if (popupInfo.popupNode) {
-                return popupInfo;
-            }
-        }
-    }
-    auto overlayManager = context->GetOverlayManager();
-    if (overlayManager) {
-        auto popupInfo = overlayManager->GetPopupInfoWithExistContent(customNode);
-        if (popupInfo.popupNode) {
-            return popupInfo;
-        }
-    }
-    return popupInfoError;
-}
-
-PopupInfo ViewAbstract::GetPopupInfoWithTargetId(const RefPtr<UINode>& customNode, const int32_t targetId)
-{
-    PopupInfo popupInfoError;
-    popupInfoError.popupNode = nullptr;
-    auto context = customNode->GetContextWithCheck();
-    CHECK_NULL_RETURN(context, popupInfoError);
-    auto instanceId = context->GetInstanceId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
-    if (subwindow) {
-        auto overlayManager = subwindow->GetOverlayManager();
-        if (overlayManager) {
-            auto popupInfo = overlayManager->GetPopupInfo(targetId);
-            if (popupInfo.popupNode) {
-                return popupInfo;
-            }
-        }
-    }
-    auto overlayManager = context->GetOverlayManager();
-    if (overlayManager) {
-        auto popupInfo = overlayManager->GetPopupInfo(targetId);
-        if (popupInfo.popupNode) {
-            return popupInfo;
-        }
-    }
-    return popupInfoError;
-}
-
 RefPtr<OverlayManager> ViewAbstract::GetCurOverlayManager(const RefPtr<UINode>& node)
 {
     auto context = node->GetContextWithCheck();
@@ -2147,31 +2093,6 @@ bool ViewAbstract::GetTargetNodeIsInSubwindow(const RefPtr<UINode>& targetNode)
     return aceContainer->IsSubContainer();
 }
 
-RefPtr<OverlayManager> ViewAbstract::GetPopupOverlayManager(const RefPtr<UINode>& customNode, const int32_t targetId)
-{
-    auto context = customNode->GetContextWithCheck();
-    CHECK_NULL_RETURN(context, nullptr);
-    auto instanceId = context->GetInstanceId();
-    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(instanceId);
-    if (subwindow) {
-        auto overlayManager = subwindow->GetOverlayManager();
-        if (overlayManager) {
-            auto popupInfo = overlayManager->GetPopupInfo(targetId);
-            if (popupInfo.popupNode) {
-                return overlayManager;
-            }
-        }
-    }
-    auto overlayManager = context->GetOverlayManager();
-    if (overlayManager) {
-        auto popupInfo = overlayManager->GetPopupInfo(targetId);
-        if (popupInfo.popupNode) {
-            return overlayManager;
-        }
-    }
-    return nullptr;
-}
-
 int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UINode>& customNode)
 {
     if (!param) {
@@ -2196,18 +2117,21 @@ int32_t ViewAbstract::OpenPopup(const RefPtr<PopupParam>& param, const RefPtr<UI
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not on main tree.");
         return ERROR_CODE_TARGET_NOT_ON_COMPONET_TREE;
     }
-    auto popupInfo = GetPopupInfoWithCustomNode(customNode);
+    auto popupInfo = BubbleView::GetPopupInfoWithCustomNode(customNode);
     if (popupInfo.popupNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The customNode of popup is already existed.");
         return ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST;
     }
-    popupInfo = GetPopupInfoWithTargetId(customNode, targetId);
-    if (popupInfo.popupNode) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetId of popup is already existed.");
-        return ERROR_CODE_DIALOG_CONTENT_ALREADY_EXIST;
+    auto overlayManager = BubbleView::GetPopupOverlayManager(customNode, targetId);
+    if (overlayManager) {
+        auto popupInfo = overlayManager->GetPopupInfo(targetId);
+        if (popupInfo.popupNode) {
+            popupInfo.markNeedUpdate = true;
+            overlayManager->HidePopup(targetId, popupInfo, true);
+        }
     }
     BindPopup(param, targetNode, customNode);
-    popupInfo = GetPopupInfoWithTargetId(customNode, targetId);
+    popupInfo = BubbleView::GetPopupInfoWithTargetId(customNode, targetId);
     if (!popupInfo.popupNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupNode of popup is null.");
         return ERROR_CODE_INTERNAL_ERROR;
@@ -2241,7 +2165,7 @@ int32_t ViewAbstract::UpdatePopup(const RefPtr<PopupParam>& param, const RefPtr<
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The targetNode does not exist when update popup.");
         return ERROR_CODE_INTERNAL_ERROR;
     }
-    auto popupInfo = GetPopupInfoWithTargetId(customNode, targetId);
+    auto popupInfo = BubbleView::GetPopupInfoWithTargetId(customNode, targetId);
     if (!popupInfo.popupNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupNode of popup is null.");
         return ERROR_CODE_INTERNAL_ERROR;
@@ -2276,7 +2200,12 @@ int32_t ViewAbstract::ClosePopup(const RefPtr<UINode>& customNode)
         return ERROR_CODE_INTERNAL_ERROR;
     }
     int32_t targetId = std::stoi(param->GetTargetId());
-    auto popupInfo = GetPopupInfoWithTargetId(customNode, targetId);
+    auto overlayManager = BubbleView::GetPopupOverlayManager(customNode, targetId);
+    if (!overlayManager) {
+        TAG_LOGE(AceLogTag::ACE_DIALOG, "The overlayManager of popup is null.");
+        return ERROR_CODE_INTERNAL_ERROR;
+    }
+    auto popupInfo = overlayManager->GetPopupInfo(targetId);
     if (!popupInfo.popupNode) {
         TAG_LOGE(AceLogTag::ACE_DIALOG, "The popupNode of popup is null.");
         return ERROR_CODE_INTERNAL_ERROR;
@@ -2286,11 +2215,6 @@ int32_t ViewAbstract::ClosePopup(const RefPtr<UINode>& customNode)
         return ERROR_CODE_INTERNAL_ERROR;
     }
     popupInfo.markNeedUpdate = true;
-    auto overlayManager = GetPopupOverlayManager(customNode, targetId);
-    if (!overlayManager) {
-        TAG_LOGE(AceLogTag::ACE_DIALOG, "The overlayManager of popup is null.");
-        return ERROR_CODE_INTERNAL_ERROR;
-    }
     overlayManager->HidePopup(targetId, popupInfo);
     return ERROR_CODE_NO_ERROR;
 }
@@ -2299,7 +2223,7 @@ int32_t ViewAbstract::GetPopupParam(RefPtr<PopupParam>& param, const RefPtr<UINo
 {
     CHECK_NULL_RETURN(param, ERROR_CODE_INTERNAL_ERROR);
     CHECK_NULL_RETURN(customNode, ERROR_CODE_DIALOG_CONTENT_ERROR);
-    auto popupInfo = GetPopupInfoWithCustomNode(customNode);
+    auto popupInfo = BubbleView::GetPopupInfoWithCustomNode(customNode);
     CHECK_NULL_RETURN(popupInfo.popupNode, ERROR_CODE_DIALOG_CONTENT_NOT_FOUND);
     auto popupPattern = popupInfo.popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_RETURN(popupPattern, ERROR_CODE_INTERNAL_ERROR);

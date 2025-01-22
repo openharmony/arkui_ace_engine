@@ -109,7 +109,7 @@ public:
     void ShowIndexerPopup(int32_t targetId, RefPtr<FrameNode>& customNode);
     void RemoveIndexerPopupById(int32_t targetId);
     void RemoveIndexerPopup();
-    void HidePopup(int32_t targetId, const PopupInfo& popupInfo);
+    void HidePopup(int32_t targetId, const PopupInfo& popupInfo, bool isEraseFromMap = false);
     RefPtr<FrameNode> HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo);
     void ShowPopup(int32_t targetId, const PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
@@ -791,6 +791,7 @@ private:
     void CheckReturnFocus(RefPtr<FrameNode> node);
     void MountPopup(int32_t targetId, const PopupInfo& popupInfo,
         const std::function<void(int32_t)>&& onWillDismiss = nullptr, bool interactiveDismiss = true);
+    bool IsContentUpdatePopup(const RefPtr<Pattern>& pattern);
 
     int32_t GetPopupIdByNode(const RefPtr<FrameNode>& overlay);
     bool PopupInteractiveDismiss(const RefPtr<FrameNode>& overlay);

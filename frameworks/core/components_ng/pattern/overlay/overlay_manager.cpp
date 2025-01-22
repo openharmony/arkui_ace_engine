@@ -1714,9 +1714,7 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
     popupPattern->AddPipelineCallBack();
-    auto param = popupPattern->GetPopupParam();
-    CHECK_NULL_VOID(param);
-    if ((!(param->GetIsPartialUpdate().has_value()))) {
+    if (!IsContentUpdatePopup(popupPattern)) {
         popupPattern->SetInteractiveDismiss(interactiveDismiss);
         popupPattern->UpdateOnWillDismiss(move(onWillDismiss));
     }
@@ -1732,6 +1730,20 @@ void OverlayManager::MountPopup(int32_t targetId, const PopupInfo& popupInfo,
     accessibilityProperty->SetShowedState(1);
     popupNode->OnAccessibilityEvent(
         AccessibilityEventType::PAGE_OPEN, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
+}
+
+bool OverlayManager::IsContentUpdatePopup(const RefPtr<Pattern>& pattern)
+{
+    bool result = false;
+    CHECK_NULL_RETURN(pattern, result);
+    auto popupPattern = DynamicCast<BubblePattern>(pattern);
+    auto param = popupPattern->GetPopupParam();
+    if (param) {
+        if (param->GetIsPartialUpdate().has_value()) {
+            result = true;
+        }
+    }
+    return result;
 }
 
 void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
@@ -1762,15 +1774,19 @@ void OverlayManager::SetPopupHotAreas(RefPtr<FrameNode> popupNode)
     }
 }
 
-void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
+void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo, bool isEraseFromMap)
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "hide popup enter");
-    popupMap_[targetId] = popupInfo;
-    if (!popupInfo.markNeedUpdate) {
-        TAG_LOGW(AceLogTag::ACE_OVERLAY, "mark need update failed");
-        return;
+    if (isEraseFromMap) {
+        ErasePopupInfo(targetId);
+    } else {
+        popupMap_[targetId] = popupInfo;
+        if (!popupInfo.markNeedUpdate) {
+            TAG_LOGW(AceLogTag::ACE_OVERLAY, "mark need update failed");
+            return;
+        }
+        popupMap_[targetId].markNeedUpdate = false;
     }
-    popupMap_[targetId].markNeedUpdate = false;
     auto focusable = popupInfo.focusable;
     auto popupNode = popupInfo.popupNode;
     CHECK_NULL_VOID(popupNode);
@@ -1793,12 +1809,13 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     CHECK_NULL_VOID(pipeline);
     const auto& rootChildren = rootNode->GetChildren();
     auto iter = std::find(rootChildren.rbegin(), rootChildren.rend(), popupNode);
-    // There is no overlay under the root node or it is not in atomicservice
-    if (iter == rootChildren.rend() && !pipeline->GetInstallationFree()) {
-        popupMap_[targetId].isCurrentOnShow = false;
-        return;
+    if (!isEraseFromMap) {
+        // There is no overlay under the root node or it is not in atomicservice
+        if (iter == rootChildren.rend() && !pipeline->GetInstallationFree()) {
+            popupMap_[targetId].isCurrentOnShow = false;
+            return;
+        }
     }
-
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
     if (popupPattern->GetTransitionStatus() == TransitionStatus::EXITING) {
@@ -1824,7 +1841,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         auto popupNode = popupNodeWk.Upgrade();
         auto overlayManager = weak.Upgrade();
         CHECK_NULL_VOID(rootNode && popupNode && overlayManager);
-        if (overlayManager->popupMap_[targetId].isCurrentOnShow) {
+        auto popupNodeIsInMap = overlayManager->popupMap_[targetId].popupNode == popupNode;
+        if (popupNodeIsInMap && overlayManager->popupMap_[targetId].isCurrentOnShow) {
             return;
         }
         auto popupPattern = popupNode->GetPattern<BubblePattern>();
@@ -1834,7 +1852,9 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         popupNode->GetRenderContext()->UpdateChainedTransition(nullptr);
         overlayManager->RemoveChildWithService(rootNode, popupNode);
         rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        overlayManager->ErasePopupInfo(targetId);
+        if (popupNodeIsInMap) {
+            overlayManager->ErasePopupInfo(targetId);
+        }
         if ((isTypeWithOption && !isShowInSubWindow) ||
             (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom && focusable)) {
             overlayManager->BlurOverlayNode(popupNode);
