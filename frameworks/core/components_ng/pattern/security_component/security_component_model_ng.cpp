@@ -208,7 +208,7 @@ void SecurityComponentModelNG::SetDefaultSymbolIconStyle(
     CHECK_NULL_VOID(iconProp);
     SymbolSourceInfo symbolSourceInfo(symbolId);
     if (isButtonVisible) {
-        iconProp->UpdateSymbolColorList({secCompTheme->GetMenuIconColor()});
+        iconProp->UpdateSymbolColorList({secCompTheme->GetDefaultSymbolIconColor()});
     } else {
         iconProp->UpdateSymbolColorList({secCompTheme->GetIconColorNoBg()});
     }
