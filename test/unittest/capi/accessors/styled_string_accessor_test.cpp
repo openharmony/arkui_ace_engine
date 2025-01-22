@@ -39,7 +39,7 @@ constexpr auto STRING_TEST_VALUE = "This is a test string for styled text, and m
 PixelMapPeer* CreatePixelMap()
 {
     static PixelMapPeer pixelMapPeer;
-    if (pixelMapPeer.pixelMap && pixelMapPeer.pixelMap->RefCount() > 0 ) {
+    if (pixelMapPeer.pixelMap && pixelMapPeer.pixelMap->RefCount() > 0) {
         pixelMapPeer.pixelMap->DecRefCount();
     }
     static std::string src = "test";
@@ -623,7 +623,6 @@ HWTEST_F(StyledStringAccessorUnionStringTest, styledStringCtorParagraphStylePixe
     auto pixMap = style.leadingMargin.value().pixmap;
     auto pixMapPeer = reinterpret_cast<PixelMapPeer*>(TEST_PIXELMAP.ptr);
     EXPECT_EQ(pixMap, pixMapPeer->pixelMap);
-    
 }
 
 /**
