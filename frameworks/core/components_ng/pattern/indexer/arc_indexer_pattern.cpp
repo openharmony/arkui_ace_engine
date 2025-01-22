@@ -377,6 +377,7 @@ bool ArcIndexerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
 
 RefPtr<FrameNode> ArcIndexerPattern::BuildIcon()
 {
+    CHECK_EQUAL_RETURN(arcArrayValue_.size(), 0, nullptr);
     int32_t indexerSize = static_cast<int32_t>(arcArrayValue_.size() - 1);
     auto icon = FrameNode::CreateFrameNode(
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
@@ -812,6 +813,7 @@ void ArcIndexerPattern::ApplyIndexChanged(bool isTextNodeInTree, bool selectChan
     UpdateIndexerRender();
     int32_t focusIndex = GetFocusIndex(selected_);
     auto radiusSize =  Dimension(lastItemSize_ * HALF);
+    bool isSetIndexStyle = false;
     for (int32_t i = 0; i < total; i++) {
         auto child = host->GetChildByIndex(i);
         CHECK_NULL_VOID(child);
@@ -823,7 +825,8 @@ void ArcIndexerPattern::ApplyIndexChanged(bool isTextNodeInTree, bool selectChan
         childRenderContext->UpdateBorderRadius({ radiusSize, radiusSize, radiusSize, radiusSize });
         auto nodeStr = GetChildNodeContent(index);
         SetChildNodeStyle(index, nodeStr, fromTouchUp);
-        if (index == childPressIndex_ || index == childFocusIndex_ || index == focusIndex) {
+        if (!isSetIndexStyle && (index == childPressIndex_ || index == childFocusIndex_ || index == focusIndex)) {
+            isSetIndexStyle = true;
             SetFocusIndexStyle(index, nodeStr, isTextNodeInTree);
         } else {
             if (!fromTouchUp || animateSelected_ == lastSelected_ || index != lastSelected_) {
@@ -1125,19 +1128,10 @@ void ArcIndexerPattern::ShowBubble(bool isShow)
 
 RefPtr<FrameNode> ArcIndexerPattern::CreatePopupNode()
 {
-    auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
-        AceType::MakeRefPtr<LinearLayoutPattern>(true));
-    CHECK_NULL_RETURN(columnNode, nullptr);
-
-    auto letterNode = FrameNode::CreateFrameNode(
+    auto textNode = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    CHECK_NULL_RETURN(letterNode, nullptr);
-    auto letterStackNode = FrameNode::CreateFrameNode(
-        V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
-    CHECK_NULL_RETURN(letterStackNode, nullptr);
-    letterStackNode->AddChild(letterNode);
-    columnNode->AddChild(letterStackNode);
-    return columnNode;
+    CHECK_NULL_RETURN(textNode, nullptr);
+    return textNode;
 }
 
 void ArcIndexerPattern::UpdateBubbleView()
@@ -1145,14 +1139,14 @@ void ArcIndexerPattern::UpdateBubbleView()
     CHECK_NULL_VOID(popupNode_);
     auto currentListData = std::vector<std::string>();
     UpdateBubbleLetterView(false, currentListData);
-    auto columnRenderContext = popupNode_->GetRenderContext();
-    CHECK_NULL_VOID(columnRenderContext);
+    auto textRenderContext = popupNode_->GetRenderContext();
+    CHECK_NULL_VOID(textRenderContext);
     auto radius = Dimension(ARC_BUBBLE_BOX_RADIUS, DimensionUnit::VP);
-    columnRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
-    columnRenderContext->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::OuterDefaultLG));
+    textRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
+    textRenderContext->UpdateBackShadow(Shadow::CreateShadow(ShadowStyle::OuterDefaultLG));
 
     UpdateBubbleBackgroundView();
-    columnRenderContext->SetClipToBounds(true);
+    textRenderContext->SetClipToBounds(true);
     popupNode_->MarkModifyDone();
     popupNode_->MarkDirtyNode();
 }
@@ -1203,25 +1197,9 @@ void ArcIndexerPattern::UpdateBubbleLetterView(bool showDivider, std::vector<std
     letterNodeRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
     letterNodeRenderContext->UpdateBackgroundColor(
         paintProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor()));
-    auto letterStackNode = DynamicCast<FrameNode>(popupNode_->GetFirstChild());
-    CHECK_NULL_VOID(letterStackNode);
-    auto letterStackLayoutProperty = letterStackNode->GetLayoutProperty<StackLayoutProperty>();
-    CHECK_NULL_VOID(letterStackLayoutProperty);
-    auto letterStackRenderContext = letterStackNode->GetRenderContext();
-    CHECK_NULL_VOID(letterStackRenderContext);
-    letterStackRenderContext->UpdateBorderRadius({ radius, radius, radius, radius });
-    letterStackRenderContext->UpdateBackgroundColor(
-        paintProperty->GetPopupBackground().value_or(indexerTheme->GetPopupBackgroundColor()));
-    auto letterStackSize = Dimension(ARC_BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-    letterStackLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(letterStackSize), CalcLength(letterStackSize)));
-
     letterNodeRenderContext->SetClipToBounds(true);
-    letterStackRenderContext->SetClipToBounds(true);
     letterNode->MarkModifyDone();
     letterNode->MarkDirtyNode();
-    letterStackNode->MarkModifyDone();
-    letterStackNode->MarkDirtyNode();
 }
 
 void ArcIndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
@@ -1272,7 +1250,7 @@ void ArcIndexerPattern::UpdateBubbleLetterStackAndLetterTextView()
 RefPtr<FrameNode> ArcIndexerPattern::GetLetterNode()
 {
     CHECK_NULL_RETURN(popupNode_, nullptr);
-    return DynamicCast<FrameNode>(popupNode_->GetFirstChild()->GetFirstChild());
+    return DynamicCast<FrameNode>(popupNode_);
 }
 
 bool ArcIndexerPattern::NeedShowBubble()
