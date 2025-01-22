@@ -10338,16 +10338,6 @@ void TextFieldPattern::AddInputCommand(const InputCommandInfo& inputCommandInfo)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (!isEdit_ && (inputCommandInfo.reason != InputReason::CANCEL_BUTTON)) {
-        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "textfield %{public}d on blur, can't input", host->GetId());
-        return;
-    }
-    if (inputCommandInfo.reason == InputReason::IME && IsDragging()) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-            "textfield %{public}d NOT allow input when dragging", host->GetId());
-        return;
-    }
-
     inputOperations_.emplace(InputOperation::INPUT);
     inputCommands_.emplace(inputCommandInfo);
     CloseSelectOverlay(true);

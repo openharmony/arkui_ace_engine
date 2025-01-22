@@ -1597,6 +1597,25 @@ void GetTextAreaMargin(ArkUINodeHandle node, ArkUI_Float32 (*values)[4], ArkUI_I
     length = NUM_4;
 }
 
+void SetTextAreaOnWillChange(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillChange = reinterpret_cast<std::function<bool(const ChangeValueInfo&)>*>(callback);
+        TextFieldModelNG::SetOnWillChangeEvent(frameNode, std::move(*onWillChange));
+    } else {
+        TextFieldModelNG::SetOnWillChangeEvent(frameNode, nullptr);
+    }
+}
+
+void ResetTextAreaOnWillChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelNG::SetOnWillChangeEvent(frameNode, nullptr);
+}
+
 void SetTextAreaOnWillInsert(ArkUINodeHandle node, ArkUI_Int64 callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1933,6 +1952,8 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .resetTextAreaMargin = ResetTextAreaMargin,
         .setTextAreaCaret = SetTextAreaCaret,
         .getTextAreaMargin = GetTextAreaMargin,
+        .setTextAreaOnWillChange = SetTextAreaOnWillChange,
+        .resetTextAreaOnWillChange = ResetTextAreaOnWillChange,
         .setTextAreaOnWillInsert = SetTextAreaOnWillInsert,
         .resetTextAreaOnWillInsert = ResetTextAreaOnWillInsert,
         .setTextAreaOnDidInsert = SetTextAreaOnDidInsert,

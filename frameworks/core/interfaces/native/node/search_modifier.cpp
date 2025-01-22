@@ -701,6 +701,25 @@ void ResetSearchIcon(ArkUINodeHandle node)
     SearchModelNG::SetIcon(frameNode, "");
 }
 
+void SetSearchOnWillChange(ArkUINodeHandle node, ArkUI_Int64 callback)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (callback) {
+        auto onWillChange = reinterpret_cast<std::function<bool(const ChangeValueInfo&)>*>(callback);
+        SearchModelNG::SetOnWillChangeEvent(frameNode, std::move(*onWillChange));
+    } else {
+        SearchModelNG::SetOnWillChangeEvent(frameNode, nullptr);
+    }
+}
+
+void ResetSearchOnWillChange(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetOnWillChangeEvent(frameNode, nullptr);
+}
+
 void SetSearchOnWillInsert(ArkUINodeHandle node, ArkUI_Int64 callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -975,6 +994,8 @@ const ArkUISearchModifier* GetSearchModifier()
         .setSearchShowCounter = SetSearchShowCounterOptions,
         .resetSearchShowCounter = ResetSearchShowCounterOptions,
         .getSearchController = GetSearchController,
+        .setSearchOnWillChange = SetSearchOnWillChange,
+        .resetSearchOnWillChange = ResetSearchOnWillChange,
         .setSearchOnWillInsert = SetSearchOnWillInsert,
         .resetSearchOnWillInsert = ResetSearchOnWillInsert,
         .setSearchOnDidInsert = SetSearchOnDidInsert,

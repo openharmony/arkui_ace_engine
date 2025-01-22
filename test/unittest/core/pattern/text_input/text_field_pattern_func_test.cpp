@@ -1841,6 +1841,34 @@ HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc091, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TextPatternFunc092
+ * @tc.desc: test SetOnWillChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternFuncTest, TextPatternFunc092, TestSize.Level1)
+{
+    CreateTextField();
+    auto frameId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(
+        V2::TEXTINPUT_ETS_TAG, frameId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto state = false;
+    auto eventHub = pattern->GetHost()->GetEventHub<TextFieldEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto callback = [&state](const ChangeValueInfo& info){ return (state = true); };
+    eventHub->SetOnWillChangeEvent(callback);
+
+    InsertCommandInfo info;
+    info.insertValue = u"openharmony";
+    info.reason = InputReason::IME;
+    pattern->ExecuteInsertValueCommand(info);
+    EXPECT_TRUE(state);
+}
+
+/**
  * @tc.name: GetTextContentRect001
  * @tc.desc: test GetTextContentRect.
  * @tc.type: FUNC
