@@ -92,6 +92,7 @@ private:
     void CheckMenuParamChange(SelectOverlayInfo& selectInfo, TextSpanType selectType, TextResponseType responseType);
     void SwitchCaretState(std::shared_ptr<SelectOverlayInfo> info);
     void SetMagnifierOffset(const OffsetF& localOffset, const RectF& handleRect);
+    void OnUpdateSelectOverlayInfo(SelectOverlayInfo& selectInfo);
     void ResumeTwinkling();
     std::shared_ptr<SelectionMenuParams> lastMenuParams_ = nullptr;
     std::pair<TextSpanType, TextResponseType> lastSelectResponseComb_;
