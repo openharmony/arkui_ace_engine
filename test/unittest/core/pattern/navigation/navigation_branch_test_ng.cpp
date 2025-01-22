@@ -1846,4 +1846,45 @@ HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg003, TestSize.Level1)
     RefPtr<UINode> parent = destination;
     navigationGroupNode->AddDestinationNode(parent);
 }
+
+/**
+ * @tc.name: NavigationGroupNodeTestNg004
+ * @tc.desc: Test NavigationGroupNode::CheckNeedUpdateParentNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationBranchTestNg, NavigationGroupNodeTestNg004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation.
+     */
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    navigationModel.SetTitle("navigationModel", false);
+    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(hostNode, nullptr);
+    RefPtr<NavigationPattern> pattern = frameNode->GetPattern<NavigationPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tempNode = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, 44, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(
+        hostNode->GetNavDestinationNode(tempNode));
+    EXPECT_NE(navDestinationNode, nullptr);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
+    EXPECT_NE(pageNode, nullptr);
+    auto modelNode = FrameNode::CreateFrameNode(V2::MODAL_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<ModalPresentationPattern>(1, ModalTransition::NONE, nullptr));
+    ASSERT_NE(modelNode, nullptr);
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
+    ASSERT_NE(sheetNode, nullptr);
+
+    EXPECT_FALSE(hostNode->CheckNeedUpdateParentNode(navDestinationNode));
+    EXPECT_TRUE(hostNode->CheckNeedUpdateParentNode(pageNode));
+    EXPECT_TRUE(hostNode->CheckNeedUpdateParentNode(modelNode));
+    EXPECT_TRUE(hostNode->CheckNeedUpdateParentNode(sheetNode));
+}
 } // namespace OHOS::Ace::NG
