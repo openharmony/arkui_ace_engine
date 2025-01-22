@@ -1175,6 +1175,13 @@ private:
     bool ComputeTargetIndex(int32_t index, int32_t& targetIndex) const;
     void FastAnimation(int32_t targetIndex);
     void MarkDirtyBindIndicatorNode() const;
+
+    RefPtr<FrameNode> GetCommonIndicatorNode();
+    bool IsIndicator(const std::string& tag) const
+    {
+        return tag == V2::SWIPER_INDICATOR_ETS_TAG || tag == V2::INDICATOR_ETS_TAG;
+    }
+
     friend class SwiperHelper;
 
     RefPtr<PanEvent> panEvent_;
@@ -1350,11 +1357,6 @@ private:
     bool stopWhenTouched_ = true;
     WeakPtr<NG::UINode> indicatorNode_;
     bool isBindIndicator_ = false;
-    RefPtr<FrameNode> GetCommonIndicatorNode();
-    bool IsIndicator(const std::string& tag) const
-    {
-        return tag == V2::SWIPER_INDICATOR_ETS_TAG || tag == V2::INDICATOR_ETS_TAG;
-    }
 };
 } // namespace OHOS::Ace::NG
 

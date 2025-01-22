@@ -22,6 +22,10 @@
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_accessibility.h"
 namespace OHOS::Ace::NG {
+namespace {
+constexpr int32_t INDICATOR_DEFAULT_DURATION = 400;
+const auto DEFAULT_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 34.0f);
+} // namespace
 class IndicatorPattern : public SwiperIndicatorPattern {
     DECLARE_ACE_TYPE(IndicatorPattern, SwiperIndicatorPattern);
 
@@ -138,9 +142,9 @@ public:
         if (!GetDotIndicatorModifier()) {
             SetDotIndicatorModifier(AceType::MakeRefPtr<DotIndicatorModifier>());
         }
-        const int32_t DEFAULT_DURATION = 400;
-        GetDotIndicatorModifier()->SetAnimationDuration(DEFAULT_DURATION);
-        GetDotIndicatorModifier()->SetLongPointHeadCurve(AceType::MakeRefPtr<InterpolatingSpring>(0, 1, 328, 34), 0);
+        GetDotIndicatorModifier()->SetAnimationDuration(INDICATOR_DEFAULT_DURATION);
+        float motionVelocity = 0.0f;
+        GetDotIndicatorModifier()->SetLongPointHeadCurve(DEFAULT_CURVE, motionVelocity);
 
         auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(GetDotIndicatorModifier());
         SetDotIndicatorPaintMethodInfoInSingleMode(paintMethod);
@@ -167,6 +171,8 @@ public:
         }
         paintMethod->SetMouseClickIndex(GetOptinalMouseClickIndex());
         paintMethod->SetIsTouchBottom(GetTouchBottomType());
+        paintMethod->SetTouchBottomTypeLoop(singleIndicatorTouchBottomTypeLoop_);
+        paintMethod->SetFirstIndex(lastIndex_);
         ResetOptinalMouseClickIndex();
     }
 
@@ -221,6 +227,8 @@ private:
     ChangeEventPtr changeEvent_;
     GestureState singleGestureState_ = GestureState::GESTURE_STATE_INIT;
     bool isCustomSize_ = false;
+    TouchBottomTypeLoop singleIndicatorTouchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    int32_t lastIndex_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

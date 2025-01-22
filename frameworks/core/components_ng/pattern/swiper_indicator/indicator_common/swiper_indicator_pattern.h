@@ -346,6 +346,7 @@ protected:
     virtual int32_t DisplayIndicatorTotalCount() const;
     virtual bool IsLoop() const;
     virtual void HandleLongDragUpdate(const TouchLocationInfo& info);
+
     RefPtr<SwiperPattern> GetSwiperPattern() const
     {
         auto swiperNode = GetSwiperNode();
@@ -426,9 +427,11 @@ protected:
     {
         dragStartPoint_ = dragStartPoint;
     }
+
     RectF CalcBoundsRect() const;
     int32_t GetLoopIndex(int32_t originalIndex) const;
     void ResetOverlongModifier();
+
     int32_t lastNotifyIndex_ = -1;
 };
 } // namespace OHOS::Ace::NG

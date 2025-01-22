@@ -92,6 +92,9 @@ const RefPtr<FrameRateRange> SWIPER_DEFAULT_FRAME_RATE =
     AceType::MakeRefPtr<FrameRateRange>(0, 0, 0, COMPONENT_SWIPER_FLING);
 
 constexpr int32_t JUMP_NEAR_VALUE = 3;
+constexpr float MASS = 1.0f;
+constexpr float STIFFNESS = 328.0f;
+constexpr float DAMPING = 34.0f;
 } // namespace
 
 SwiperPattern::SwiperPattern()
@@ -3797,7 +3800,7 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion()
 #endif
     // use spring motion feature.
     // interpolatingSpring: (mass: 1, stiffness:328, damping: 34)
-    return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, 1, 328, 34);
+    return AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, MASS, STIFFNESS, DAMPING);
 }
 
 void SwiperPattern::PlayIndicatorTranslateAnimation(float translate, std::optional<int32_t> nextIndex)
