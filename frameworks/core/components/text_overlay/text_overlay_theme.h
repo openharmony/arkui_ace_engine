@@ -59,7 +59,7 @@ public:
             theme->cameraInputSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.auto_camera");
             theme->aiWriteSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.edit_badge_star");
             theme->searchSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.magnifyingglass");
-            theme->translateSymbolId_ = themeConstants->GetSymbolByName('sys.symbol.translate_c2e');
+            theme->translateSymbolId_ = themeConstants->GetSymbolByName("sys.symbol.translate_c2e");
             ParsePattern(themeConstants->GetThemeStyle(), theme);
             ParseMenuPattern(themeConstants->GetThemeStyle(), theme);
             return theme;
