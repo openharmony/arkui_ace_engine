@@ -1383,4 +1383,36 @@ HWTEST_F(TabsEventTestNg, SetOnUnselectedEvent002, TestSize.Level1)
     SwipeToWithoutAnimation(3);
     EXPECT_EQ(currentIndex2, 1);
 }
+
+/**
+ * @tc.name: SetOnSelectedEvent001
+ * @tc.desc: test SetOnSelectedEvent, event will be triggered when index selected
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsEventTestNg, SetOnSelectedEvent001, TestSize.Level1)
+{
+    int32_t currentIndex;
+    auto event = [&currentIndex](const BaseEventInfo* info) {
+        const auto* tabInfo = TypeInfoHelper::DynamicCast<TabContentChangeEvent>(info);
+        currentIndex = tabInfo->GetIndex();
+    };
+    TabsModelNG model = CreateTabs();
+    model.SetOnSelected(event);
+    CreateTabContents(TABCONTENT_NUMBER);
+    CreateTabsDone(model);
+
+    /**
+     * @tc.steps: step1. Change swiper index to 1
+     * @tc.expected: currentIndex is 1
+     */
+    SwipeToWithoutAnimation(1);
+    EXPECT_EQ(currentIndex, 1);
+
+    /**
+     * @tc.steps: step2. Change swiper index to 3
+     * @tc.expected: currentIndex is 3
+     */
+    SwipeToWithoutAnimation(3);
+    EXPECT_EQ(currentIndex, 3);
+}
 } // namespace OHOS::Ace::NG
