@@ -4179,9 +4179,9 @@ void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bo
 bool UIContentImpl::GetContainerModalTitleVisible()
 {
     ContainerScope scope(instanceId_);
-    auto containerPattern = NG::ContainerModalPattern::GetCurrentContainerModalPattern();
-    CHECK_NULL_RETURN(containerPattern, false);
-    return containerPattern->GetContainerModalTitleVisible();
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return NG::ContainerModalPattern::GetContainerModalTitleVisible(pipeline);
 }
 
 void UIContentImpl::SetContainerModalTitleHeight(int32_t height)

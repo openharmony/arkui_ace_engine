@@ -36,15 +36,18 @@ constexpr double MOVE_POPUP_DISTANCE_Y = 20.0;    // 20.0px
 constexpr double TITLE_POPUP_DISTANCE = 37.0;     // 37vp height of title
 } // namespace
 
-RefPtr<ContainerModalPattern> ContainerModalPattern::GetCurrentContainerModalPattern()
+bool ContainerModalPattern::GetContainerModalTitleVisible(RefPtr<PipelineContext> pipeline)
 {
-    auto pipeline = NG::PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
+    if (pipeline->GetWindowModal() != WindowModal::CONTAINER_MODAL){
+        return false;
+    }
     auto rootNode = pipeline->GetRootElement();
-    CHECK_NULL_RETURN(rootNode, nullptr);
+    CHECK_NULL_RETURN(rootNode, false);
     auto containerNode = AceType::DynamicCast<FrameNode>(rootNode->GetFirstChild());
-    CHECK_NULL_RETURN(containerNode, nullptr);
-    return containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerNode, false);
+    auto containerModalPattern = containerNode->GetPattern<ContainerModalPattern>();
+    CHECK_NULL_RETURN(containerModalPattern, false);
+    return containerModalPattern->GetContainerModalTitleVisible();
 }
 
 void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate)

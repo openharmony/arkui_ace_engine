@@ -33,9 +33,9 @@ public:
     ContainerModalPattern() = default;
     ~ContainerModalPattern() override = default;
 
-    static RefPtr<ContainerModalPattern> GetCurrentContainerModalPattern();
+    static bool GetContainerModalTitleVisible(RefPtr<PipelineContext> pipeline);
 
-     void OnColorConfigurationUpdate() override;
+    void OnColorConfigurationUpdate() override;
 
     RefPtr<AccessibilityProperty> CreateAccessibilityProperty() override
     {
