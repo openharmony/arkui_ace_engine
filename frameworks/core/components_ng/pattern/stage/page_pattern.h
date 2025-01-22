@@ -78,9 +78,9 @@ public:
         return pageInfo_ ? pageInfo_->GetPageUrl() : "";
     }
 
-    virtual void OnShow();
+    virtual void OnShow(bool isFromWindow = false);
 
-    virtual void OnHide();
+    virtual void OnHide(bool isFromWindow = false);
 
     bool OnBackPressed();
 
@@ -340,6 +340,8 @@ protected:
     virtual void TriggerDefaultTransition(const std::function<void()>& onFinish, PageTransitionType type);
 
     void MaskAnimation(const Color& initialBackgroundColor, const Color& backgroundColor);
+
+    void NotifyNavigationLifecycle(bool isShow, bool isFromWindow);
 
     RefPtr<PageInfo> pageInfo_;
     RefPtr<OverlayManager> overlayManager_;
