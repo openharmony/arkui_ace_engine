@@ -34,6 +34,7 @@ ace_unittest("capi_all_accessors_test") {
     "custom_dialog_controller_accessor_test.cpp",
     "data_resubmission_handler_accessor_test.cpp",
     "date_picker_dialog_accessor_test.cpp",
+    "draw_modifier_accessor_test.cpp",
     "drawing_rendering_context_accessor_test.cpp",
     "event_result_accessor_test.cpp",
     "event_target_info_accessor_test.cpp",
