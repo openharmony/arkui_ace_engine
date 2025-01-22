@@ -24,7 +24,7 @@ void DestroyPeerImpl(WebKeyboardControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new WebKeyboardControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

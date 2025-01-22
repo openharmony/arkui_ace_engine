@@ -24,7 +24,7 @@ void DestroyPeerImpl(DrawModifierPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new DrawModifierPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

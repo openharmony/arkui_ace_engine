@@ -24,7 +24,7 @@ void DestroyPeerImpl(DataResubmissionHandlerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new DataResubmissionHandlerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

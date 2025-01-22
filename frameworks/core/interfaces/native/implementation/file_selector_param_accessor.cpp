@@ -24,7 +24,7 @@ void DestroyPeerImpl(FileSelectorParamPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new FileSelectorParamPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

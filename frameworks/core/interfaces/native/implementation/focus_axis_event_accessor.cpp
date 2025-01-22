@@ -24,7 +24,7 @@ void DestroyPeerImpl(FocusAxisEventPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new FocusAxisEventPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

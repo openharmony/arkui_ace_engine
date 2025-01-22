@@ -24,7 +24,7 @@ void DestroyPeerImpl(CustomSpanPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new CustomSpanPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

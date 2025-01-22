@@ -55,7 +55,7 @@ void RadiusHeightImpl(Ark_NativePointer node,
     //RectModelNG::SetRadiusHeight(frameNode, convValue);
 }
 void RadiusImpl(Ark_NativePointer node,
-                const Ark_Union_Number_String_Array_Any* value)
+                const Ark_Union_Number_String_Array_Union_Number_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

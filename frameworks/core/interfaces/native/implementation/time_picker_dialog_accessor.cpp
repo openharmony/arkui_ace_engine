@@ -24,7 +24,7 @@ void DestroyPeerImpl(TimePickerDialogPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new TimePickerDialogPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

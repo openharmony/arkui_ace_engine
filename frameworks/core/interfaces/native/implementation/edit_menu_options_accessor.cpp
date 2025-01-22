@@ -24,7 +24,7 @@ void DestroyPeerImpl(EditMenuOptionsPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new EditMenuOptionsPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

@@ -46,7 +46,7 @@ void ScrollableImpl(Ark_NativePointer node,
     //ScrollModelNG::SetScrollable(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
-                  const Callback_Number_ScrollState_Void* value)
+                  const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -63,7 +63,7 @@ void OnWillScrollImpl(Ark_NativePointer node,
     //ScrollModelNG::SetOnWillScroll(frameNode, convValue);
 }
 void OnDidScrollImpl(Ark_NativePointer node,
-                     const Opt_ScrollOnWillScrollCallback* value)
+                     const Opt_ScrollOnScrollCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -80,7 +80,7 @@ void OnScrollEdgeImpl(Ark_NativePointer node,
     //ScrollModelNG::SetOnScrollEdge(frameNode, convValue);
 }
 void OnScrollStartImpl(Ark_NativePointer node,
-                       const Callback_Void* value)
+                       const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -98,7 +98,7 @@ void OnScrollEndImpl(Ark_NativePointer node,
     //ScrollModelNG::SetOnScrollEnd(frameNode, convValue);
 }
 void OnScrollStopImpl(Ark_NativePointer node,
-                      const Callback_Void* value)
+                      const VoidCallback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

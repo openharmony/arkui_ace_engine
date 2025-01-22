@@ -24,7 +24,7 @@ void DestroyPeerImpl(TextMenuItemIdPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new TextMenuItemIdPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

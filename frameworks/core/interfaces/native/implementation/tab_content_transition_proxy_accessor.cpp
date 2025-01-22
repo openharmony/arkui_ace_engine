@@ -24,7 +24,7 @@ void DestroyPeerImpl(TabContentTransitionProxyPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new TabContentTransitionProxyPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

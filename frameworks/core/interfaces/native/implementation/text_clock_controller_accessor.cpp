@@ -24,7 +24,7 @@ void DestroyPeerImpl(TextClockControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new TextClockControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

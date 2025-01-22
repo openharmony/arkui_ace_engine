@@ -24,7 +24,7 @@ void DestroyPeerImpl(RichEditorStyledStringControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new RichEditorStyledStringControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

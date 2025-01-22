@@ -24,7 +24,7 @@ void DestroyPeerImpl(PixelMapPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new PixelMapPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

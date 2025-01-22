@@ -24,7 +24,7 @@ void DestroyPeerImpl(CalendarControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new CalendarControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

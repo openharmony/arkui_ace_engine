@@ -24,7 +24,7 @@ void DestroyPeerImpl(WaterFlowSectionsPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new WaterFlowSectionsPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

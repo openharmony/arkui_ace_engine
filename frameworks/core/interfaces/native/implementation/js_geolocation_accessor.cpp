@@ -24,7 +24,7 @@ void DestroyPeerImpl(JsGeolocationPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new JsGeolocationPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

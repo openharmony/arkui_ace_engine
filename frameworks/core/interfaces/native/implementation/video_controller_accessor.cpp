@@ -24,7 +24,7 @@ void DestroyPeerImpl(VideoControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new VideoControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

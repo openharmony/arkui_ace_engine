@@ -24,7 +24,7 @@ void DestroyPeerImpl(GestureRecognizerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new GestureRecognizerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

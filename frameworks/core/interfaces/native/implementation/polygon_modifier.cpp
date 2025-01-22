@@ -37,7 +37,7 @@ void SetPolygonOptionsImpl(Ark_NativePointer node,
 } // PolygonInterfaceModifier
 namespace PolygonAttributeModifier {
 void PointsImpl(Ark_NativePointer node,
-                const Array_CustomObject* value)
+                const Array_Point* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

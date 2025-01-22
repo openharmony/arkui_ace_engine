@@ -24,7 +24,7 @@ void DestroyPeerImpl(NavDestinationContextPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new NavDestinationContextPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

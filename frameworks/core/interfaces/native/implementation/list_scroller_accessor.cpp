@@ -24,7 +24,7 @@ void DestroyPeerImpl(ListScrollerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new ListScrollerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

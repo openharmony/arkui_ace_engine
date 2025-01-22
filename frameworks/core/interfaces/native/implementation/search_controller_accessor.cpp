@@ -24,7 +24,7 @@ void DestroyPeerImpl(SearchControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new SearchControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

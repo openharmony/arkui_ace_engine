@@ -24,7 +24,7 @@ void DestroyPeerImpl(PixelMapMockPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new PixelMapMockPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

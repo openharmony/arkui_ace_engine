@@ -24,7 +24,7 @@ void DestroyPeerImpl(SwiperContentTransitionProxyPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new SwiperContentTransitionProxyPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

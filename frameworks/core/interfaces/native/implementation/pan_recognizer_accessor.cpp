@@ -24,7 +24,7 @@ void DestroyPeerImpl(PanRecognizerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new PanRecognizerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

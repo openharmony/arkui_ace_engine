@@ -24,7 +24,7 @@ void DestroyPeerImpl(ClientAuthenticationHandlerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new ClientAuthenticationHandlerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

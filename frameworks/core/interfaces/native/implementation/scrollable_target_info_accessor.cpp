@@ -24,7 +24,7 @@ void DestroyPeerImpl(ScrollableTargetInfoPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new ScrollableTargetInfoPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

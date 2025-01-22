@@ -24,7 +24,7 @@ void DestroyPeerImpl(MouseEventPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new MouseEventPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

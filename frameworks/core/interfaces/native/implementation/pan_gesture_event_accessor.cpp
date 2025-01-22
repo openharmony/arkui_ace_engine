@@ -24,7 +24,7 @@ void DestroyPeerImpl(PanGestureEventPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new PanGestureEventPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

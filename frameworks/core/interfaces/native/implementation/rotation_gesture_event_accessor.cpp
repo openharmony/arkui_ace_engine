@@ -24,7 +24,7 @@ void DestroyPeerImpl(RotationGestureEventPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new RotationGestureEventPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

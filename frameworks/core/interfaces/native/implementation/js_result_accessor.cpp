@@ -24,7 +24,7 @@ void DestroyPeerImpl(JsResultPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new JsResultPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

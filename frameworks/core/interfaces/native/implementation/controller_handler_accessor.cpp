@@ -24,7 +24,7 @@ void DestroyPeerImpl(ControllerHandlerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new ControllerHandlerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

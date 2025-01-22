@@ -24,7 +24,7 @@ void DestroyPeerImpl(UnifiedDataPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new UnifiedDataPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

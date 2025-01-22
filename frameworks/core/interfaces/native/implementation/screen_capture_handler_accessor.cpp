@@ -24,7 +24,7 @@ void DestroyPeerImpl(ScreenCaptureHandlerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new ScreenCaptureHandlerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

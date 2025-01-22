@@ -24,7 +24,7 @@ void DestroyPeerImpl(ImageAnalyzerControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new ImageAnalyzerControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

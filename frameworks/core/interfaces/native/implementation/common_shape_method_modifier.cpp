@@ -114,7 +114,7 @@ void AntiAliasImpl(Ark_NativePointer node,
     //CommonShapeMethodModelNG::SetAntiAlias(frameNode, convValue);
 }
 void StrokeDashArrayImpl(Ark_NativePointer node,
-                         const Array_CustomObject* value)
+                         const Array_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

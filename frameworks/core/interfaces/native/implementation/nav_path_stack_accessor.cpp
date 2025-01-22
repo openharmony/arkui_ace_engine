@@ -24,7 +24,7 @@ void DestroyPeerImpl(NavPathStackPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new NavPathStackPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

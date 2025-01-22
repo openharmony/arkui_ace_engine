@@ -24,7 +24,7 @@ void DestroyPeerImpl(ViewPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new ViewPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

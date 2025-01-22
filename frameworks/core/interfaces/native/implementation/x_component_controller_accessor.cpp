@@ -24,7 +24,7 @@ void DestroyPeerImpl(XComponentControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new XComponentControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

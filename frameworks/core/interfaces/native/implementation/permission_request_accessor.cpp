@@ -24,7 +24,7 @@ void DestroyPeerImpl(PermissionRequestPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new PermissionRequestPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

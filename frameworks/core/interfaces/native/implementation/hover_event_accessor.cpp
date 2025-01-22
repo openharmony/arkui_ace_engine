@@ -24,7 +24,7 @@ void DestroyPeerImpl(HoverEventPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new HoverEventPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

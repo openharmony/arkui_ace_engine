@@ -24,7 +24,7 @@ void DestroyPeerImpl(TabsControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new TabsControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

@@ -24,7 +24,7 @@ void DestroyPeerImpl(TextInputControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new TextInputControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

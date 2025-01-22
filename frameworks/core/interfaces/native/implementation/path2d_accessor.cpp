@@ -24,7 +24,7 @@ void DestroyPeerImpl(Path2DPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new Path2DPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

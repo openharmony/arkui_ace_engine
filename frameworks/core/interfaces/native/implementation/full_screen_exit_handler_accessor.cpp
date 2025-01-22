@@ -24,7 +24,7 @@ void DestroyPeerImpl(FullScreenExitHandlerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new FullScreenExitHandlerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

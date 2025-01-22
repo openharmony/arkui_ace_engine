@@ -24,7 +24,7 @@ void DestroyPeerImpl(TextPickerDialogPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new TextPickerDialogPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

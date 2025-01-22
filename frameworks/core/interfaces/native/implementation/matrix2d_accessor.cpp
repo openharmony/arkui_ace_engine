@@ -24,7 +24,7 @@ void DestroyPeerImpl(Matrix2DPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new Matrix2DPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

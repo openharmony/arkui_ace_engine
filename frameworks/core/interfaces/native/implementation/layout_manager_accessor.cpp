@@ -24,7 +24,7 @@ void DestroyPeerImpl(LayoutManagerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new LayoutManagerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

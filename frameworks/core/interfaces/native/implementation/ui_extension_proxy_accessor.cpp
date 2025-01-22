@@ -24,7 +24,7 @@ void DestroyPeerImpl(UIExtensionProxyPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new UIExtensionProxyPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -40,19 +40,19 @@ Ark_NativePointer SendSyncImpl(UIExtensionProxyPeer* peer,
     return 0;
 }
 void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                 const Callback_UIExtensionProxy_Void* callback)
+                                 const Callback_UIExtensionProxy_Void* callback_)
 {
 }
 void OnSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                const Callback_UIExtensionProxy_Void* callback)
+                                const Callback_UIExtensionProxy_Void* callback_)
 {
 }
 void OffAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                  const Opt_Callback_UIExtensionProxy_Void* callback)
+                                  const Opt_Callback_UIExtensionProxy_Void* callback_)
 {
 }
 void OffSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                 const Opt_Callback_UIExtensionProxy_Void* callback)
+                                 const Opt_Callback_UIExtensionProxy_Void* callback_)
 {
 }
 } // UIExtensionProxyAccessor

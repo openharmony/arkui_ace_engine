@@ -24,7 +24,7 @@ void DestroyPeerImpl(PatternLockControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new PatternLockControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

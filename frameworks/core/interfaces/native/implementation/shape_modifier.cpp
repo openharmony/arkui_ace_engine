@@ -82,7 +82,7 @@ void StrokeDashOffsetImpl(Ark_NativePointer node,
     //ShapeModelNG::SetStrokeDashOffset(frameNode, convValue);
 }
 void StrokeDashArrayImpl(Ark_NativePointer node,
-                         const Array_CustomObject* value)
+                         const Array_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -153,7 +153,7 @@ void AntiAliasImpl(Ark_NativePointer node,
     //ShapeModelNG::SetAntiAlias(frameNode, convValue);
 }
 void MeshImpl(Ark_NativePointer node,
-              const Array_CustomObject* value,
+              const Array_Number* value,
               const Ark_Number* column,
               const Ark_Number* row)
 {

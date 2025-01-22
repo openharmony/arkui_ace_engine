@@ -24,7 +24,7 @@ void DestroyPeerImpl(WebResourceRequestPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new WebResourceRequestPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

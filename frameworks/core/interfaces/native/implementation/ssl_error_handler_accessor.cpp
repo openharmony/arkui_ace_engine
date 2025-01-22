@@ -24,7 +24,7 @@ void DestroyPeerImpl(SslErrorHandlerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new SslErrorHandlerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

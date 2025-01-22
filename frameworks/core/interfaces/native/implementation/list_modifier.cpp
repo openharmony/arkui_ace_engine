@@ -203,7 +203,7 @@ void MaintainVisibleContentPositionImpl(Ark_NativePointer node,
     //ListModelNG::SetMaintainVisibleContentPosition(frameNode, convValue);
 }
 void OnScrollImpl(Ark_NativePointer node,
-                  const Callback_Number_ScrollState_Void* value)
+                  const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -284,7 +284,7 @@ void OnItemMoveImpl(Ark_NativePointer node,
     //ListModelNG::SetOnItemMove(frameNode, convValue);
 }
 void OnItemDragStartImpl(Ark_NativePointer node,
-                         const Callback_ItemDragInfo_Number_Callback_Any* value)
+                         const Callback_ItemDragInfo_Number_CustomBuilder* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

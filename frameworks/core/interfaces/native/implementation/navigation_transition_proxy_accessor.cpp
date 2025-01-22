@@ -24,7 +24,7 @@ void DestroyPeerImpl(NavigationTransitionProxyPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new NavigationTransitionProxyPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

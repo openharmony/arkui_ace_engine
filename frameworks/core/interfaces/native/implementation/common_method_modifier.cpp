@@ -1754,13 +1754,13 @@ void OnGestureRecognizerJudgeBegin0Impl(Ark_NativePointer node,
     //CommonMethodModelNG::SetOnGestureRecognizerJudgeBegin0(frameNode, convValue);
 }
 void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
-                                        const GestureRecognizerJudgeBeginCallback* callback,
+                                        const GestureRecognizerJudgeBeginCallback* callback_,
                                         Ark_Boolean exposeInnerGesture)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(callback);
-    //auto convValue = Converter::OptConvert<type>(callback); // for enums
+    //auto convValue = Converter::Convert<type>(callback_);
+    //auto convValue = Converter::OptConvert<type>(callback_); // for enums
     //CommonMethodModelNG::SetOnGestureRecognizerJudgeBegin1(frameNode, convValue);
 }
 void ShouldBuiltInRecognizerParallelWithImpl(Ark_NativePointer node,

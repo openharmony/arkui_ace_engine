@@ -242,6 +242,7 @@ const GENERATED_ArkUIDynamicNodeAccessor* GetDynamicNodeAccessor();
 const GENERATED_ArkUIChildrenMainSizeAccessor* GetChildrenMainSizeAccessor();
 const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor();
 const GENERATED_ArkUIGestureModifierAccessor* GetGestureModifierAccessor();
+const GENERATED_ArkUIGlobalScope_commonAccessor* GetGlobalScope_commonAccessor();
 const GENERATED_ArkUIContextMenuAccessor* GetContextMenuAccessor();
 const GENERATED_ArkUICustomDialogControllerAccessor* GetCustomDialogControllerAccessor();
 const GENERATED_ArkUIDatePickerDialogAccessor* GetDatePickerDialogAccessor();
@@ -318,6 +319,7 @@ const GENERATED_ArkUIStyledStringAccessor* GetStyledStringAccessor();
 const GENERATED_ArkUIMutableStyledStringAccessor* GetMutableStyledStringAccessor();
 const GENERATED_ArkUICustomSpanAccessor* GetCustomSpanAccessor();
 const GENERATED_ArkUILinearIndicatorControllerAccessor* GetLinearIndicatorControllerAccessor();
+const GENERATED_ArkUIGlobalScope_inspectorAccessor* GetGlobalScope_inspectorAccessor();
 const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
 {
     static const GENERATED_ArkUINodeModifiers modifiersImpl = {
@@ -479,6 +481,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetChildrenMainSizeAccessor,
         GetUICommonEventAccessor,
         GetGestureModifierAccessor,
+        GetGlobalScope_commonAccessor,
         GetContextMenuAccessor,
         GetCustomDialogControllerAccessor,
         GetDatePickerDialogAccessor,
@@ -555,6 +558,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetMutableStyledStringAccessor,
         GetCustomSpanAccessor,
         GetLinearIndicatorControllerAccessor,
+        GetGlobalScope_inspectorAccessor,
     };
     return &accessorsImpl;
 }

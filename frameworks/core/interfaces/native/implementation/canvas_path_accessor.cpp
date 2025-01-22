@@ -24,7 +24,7 @@ void DestroyPeerImpl(CanvasPathPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new CanvasPathPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

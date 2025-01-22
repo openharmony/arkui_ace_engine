@@ -438,7 +438,7 @@ void OnShowFileSelectorImpl(Ark_NativePointer node,
     //WebModelNG::SetOnShowFileSelector(frameNode, convValue);
 }
 void OnFileSelectorShowImpl(Ark_NativePointer node,
-                            const Callback_Literal_Function_callback_Object_fileSelector_Void* value)
+                            const Type_WebAttribute_onFileSelectorShow_callback* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

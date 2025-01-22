@@ -24,7 +24,7 @@ void DestroyPeerImpl(HttpAuthHandlerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new HttpAuthHandlerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

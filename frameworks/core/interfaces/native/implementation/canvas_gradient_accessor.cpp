@@ -24,7 +24,7 @@ void DestroyPeerImpl(CanvasGradientPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new CanvasGradientPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

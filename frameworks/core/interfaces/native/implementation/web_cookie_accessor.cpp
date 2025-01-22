@@ -24,7 +24,7 @@ void DestroyPeerImpl(WebCookiePeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new WebCookiePeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

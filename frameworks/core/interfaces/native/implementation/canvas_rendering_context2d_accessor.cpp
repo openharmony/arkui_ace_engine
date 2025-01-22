@@ -32,7 +32,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void ToDataURLImpl(CanvasRenderingContext2DPeer* peer,
                    const Opt_String* type,
-                   const Opt_CustomObject* quality)
+                   const Opt_Number* quality)
 {
 }
 void StartImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer,
@@ -44,19 +44,19 @@ void StopImageAnalyzerImpl(CanvasRenderingContext2DPeer* peer)
 {
 }
 void OnOnAttachImpl(CanvasRenderingContext2DPeer* peer,
-                    const Callback_Void* callback)
+                    const Callback_Void* callback_)
 {
 }
 void OffOnAttachImpl(CanvasRenderingContext2DPeer* peer,
-                     const Opt_Callback_Void* callback)
+                     const Opt_Callback_Void* callback_)
 {
 }
 void OnOnDetachImpl(CanvasRenderingContext2DPeer* peer,
-                    const Callback_Void* callback)
+                    const Callback_Void* callback_)
 {
 }
 void OffOnDetachImpl(CanvasRenderingContext2DPeer* peer,
-                     const Opt_Callback_Void* callback)
+                     const Opt_Callback_Void* callback_)
 {
 }
 Ark_Int32 GetHeightImpl(CanvasRenderingContext2DPeer* peer)

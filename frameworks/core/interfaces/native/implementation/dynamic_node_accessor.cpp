@@ -24,7 +24,7 @@ void DestroyPeerImpl(DynamicNodePeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new DynamicNodePeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

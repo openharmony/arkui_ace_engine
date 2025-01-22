@@ -24,7 +24,7 @@ void DestroyPeerImpl(TextAreaControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new TextAreaControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

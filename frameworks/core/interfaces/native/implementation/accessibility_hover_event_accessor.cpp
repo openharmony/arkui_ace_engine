@@ -24,7 +24,7 @@ void DestroyPeerImpl(AccessibilityHoverEventPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new AccessibilityHoverEventPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

@@ -24,7 +24,7 @@ void DestroyPeerImpl(LinearIndicatorControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new LinearIndicatorControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

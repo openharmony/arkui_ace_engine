@@ -24,7 +24,7 @@ void DestroyPeerImpl(StyledStringControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new StyledStringControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

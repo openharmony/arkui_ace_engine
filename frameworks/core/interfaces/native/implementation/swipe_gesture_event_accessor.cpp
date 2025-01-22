@@ -24,7 +24,7 @@ void DestroyPeerImpl(SwipeGestureEventPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new SwipeGestureEventPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

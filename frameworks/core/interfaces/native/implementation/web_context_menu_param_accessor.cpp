@@ -24,7 +24,7 @@ void DestroyPeerImpl(WebContextMenuParamPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new WebContextMenuParamPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

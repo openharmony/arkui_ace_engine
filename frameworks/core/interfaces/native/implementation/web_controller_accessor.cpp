@@ -24,7 +24,7 @@ void DestroyPeerImpl(WebControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new WebControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -44,7 +44,7 @@ void ClearHistoryImpl(WebControllerPeer* peer)
 {
 }
 void RunJavaScriptImpl(WebControllerPeer* peer,
-                       const Ark_Literal_String_script_Callback_String_Void_callback* options)
+                       const Ark_Literal_String_script_Callback_String_Void_callback_* options)
 {
 }
 void LoadDataImpl(WebControllerPeer* peer,
@@ -62,7 +62,7 @@ void StopImpl(WebControllerPeer* peer)
 {
 }
 void RegisterJavaScriptProxyImpl(WebControllerPeer* peer,
-                                 const Ark_Literal_Object_object_String_name_Array_String_methodList* options)
+                                 const Ark_Literal_Object_object__String_name_Array_String_methodList* options)
 {
 }
 void DeleteJavaScriptRegisterImpl(WebControllerPeer* peer,

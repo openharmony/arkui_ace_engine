@@ -24,7 +24,7 @@ void DestroyPeerImpl(EventTargetInfoPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new EventTargetInfoPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {

@@ -24,7 +24,7 @@ void DestroyPeerImpl(SwiperControllerPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new SwiperControllerPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -42,7 +42,7 @@ void ChangeIndexImpl(SwiperControllerPeer* peer,
 {
 }
 void FinishAnimationImpl(SwiperControllerPeer* peer,
-                         const Opt_VoidCallback* callback)
+                         const Opt_VoidCallback* callback_)
 {
 }
 void PreloadItemsImpl(SwiperControllerPeer* peer,

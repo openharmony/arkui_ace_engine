@@ -24,7 +24,7 @@ void DestroyPeerImpl(ICurvePeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new ICurvePeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
