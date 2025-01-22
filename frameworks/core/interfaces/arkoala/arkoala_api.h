@@ -62,6 +62,7 @@ typedef double ArkUI_Float64;
 typedef char* ArkUI_CommonCharPtr;
 typedef const char* ArkUI_CharPtr;
 typedef unsigned long long ArkUI_Uint64;
+typedef void (*ActionFuncPtr)(void*);
 
 // Several opaque struct declarations.
 struct _ArkUIVMContext;
@@ -762,6 +763,12 @@ struct ArkUIBadgeParam {
 struct ArkUI_StyledString_Descriptor {
     void* spanString;
     ArkUI_CharPtr html;
+};
+
+struct GestrueFunction {
+    ActionFuncPtr acceptFunction;
+    ActionFuncPtr updateFunction;
+    ActionFuncPtr endFunction;
 };
 
 enum ArkUINodeType {
@@ -3341,6 +3348,8 @@ struct ArkUIGestureModifier {
     void (*addGestureToGestureGroupWithRefCountDecrease)(ArkUIGesture* group, ArkUIGesture* child);
     void (*addGestureToNodeWithRefCountDecrease)(
         ArkUINodeHandle node, ArkUIGesture* gesture, ArkUI_Int32 priorityNum, ArkUI_Int32 mask);
+    void (*registerGestureEventExt)(ArkUIGesture* gesture, ArkUI_Uint32 actionTypeMask,
+        GestrueFunction* gestrueFunction, void* gestureData);
 };
 
 struct ArkUISliderModifier {
