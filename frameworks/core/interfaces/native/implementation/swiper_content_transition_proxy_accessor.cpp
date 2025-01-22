@@ -21,8 +21,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SwiperContentTransitionProxyAccessor {
 void DestroyPeerImpl(SwiperContentTransitionProxyPeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_NativePointer CtorImpl()

@@ -22,8 +22,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace JsResultAccessor {
 void DestroyPeerImpl(JsResultPeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->result = nullptr;
     delete peer;
 }
 Ark_NativePointer CtorImpl()

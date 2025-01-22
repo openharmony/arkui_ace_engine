@@ -69,11 +69,11 @@ void ChangeIndexImpl(SwiperControllerPeer* peer,
     peerImpl->TriggerChangeIndex(aceIdx, aceUseAnim);
 }
 void FinishAnimationImpl(SwiperControllerPeer* peer,
-                         const Opt_VoidCallback* callback)
+                         const Opt_VoidCallback* callback_)
 {
     auto peerImpl = reinterpret_cast<SwiperControllerPeerImpl *>(peer);
     CHECK_NULL_VOID(peerImpl);
-    auto arkCallbackOpt = callback ? Converter::OptConvert<VoidCallback>(*callback) : std::nullopt;
+    auto arkCallbackOpt = callback_ ? Converter::OptConvert<VoidCallback>(*callback_) : std::nullopt;
     if (arkCallbackOpt) {
         auto onFinish = [arkCallback = CallbackHelper(*arkCallbackOpt)]() -> void {
             arkCallback.Invoke();

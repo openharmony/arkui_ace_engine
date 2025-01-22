@@ -71,7 +71,7 @@ void SetLineOptionsImpl(Ark_NativePointer node,
 } // LineInterfaceModifier
 namespace LineAttributeModifier {
 void StartPointImpl(Ark_NativePointer node,
-                    const Array_CustomObject* value)
+                    const Array_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -80,7 +80,7 @@ void StartPointImpl(Ark_NativePointer node,
     //LineModelNG::SetStartPoint(frameNode, convValue);
 }
 void EndPointImpl(Ark_NativePointer node,
-                  const Array_CustomObject* value)
+                  const Array_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

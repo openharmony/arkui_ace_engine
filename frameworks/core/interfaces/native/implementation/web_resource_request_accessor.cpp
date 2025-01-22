@@ -23,8 +23,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebResourceRequestAccessor {
 void DestroyPeerImpl(WebResourceRequestPeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->webRequest = nullptr;
     delete peer;
 }
 Ark_NativePointer CtorImpl()

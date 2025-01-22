@@ -188,7 +188,7 @@ HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1
 HWTEST_F(ScrollModifierTest, OnScrollStart_SetCallback, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Void func{};
+    VoidCallback func{};
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -248,7 +248,7 @@ HWTEST_F(ScrollModifierTest, SetOnScrollEnd_SetCallBack, testing::ext::TestSize.
 HWTEST_F(ScrollModifierTest, OnScrollStop_setCallback, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Void func{};
+    VoidCallback func{};
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);

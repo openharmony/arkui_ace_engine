@@ -49,7 +49,7 @@ Ark_NativePointer SendSyncImpl(UIExtensionProxyPeer* peer,
     return nullptr;
 }
 void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                 const Callback_UIExtensionProxy_Void* callback)
+                                 const Callback_UIExtensionProxy_Void* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(peer);
@@ -73,7 +73,7 @@ void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OnSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                const Callback_UIExtensionProxy_Void* callback)
+                                const Callback_UIExtensionProxy_Void* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(peer);
@@ -97,7 +97,7 @@ void OnSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OffAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                  const Opt_Callback_UIExtensionProxy_Void* callback)
+                                  const Opt_Callback_UIExtensionProxy_Void* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(peer);
@@ -116,7 +116,7 @@ void OffAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
 #endif //WINDOW_SCENE_SUPPORTED
 }
 void OffSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                 const Opt_Callback_UIExtensionProxy_Void* callback)
+                                 const Opt_Callback_UIExtensionProxy_Void* callback_)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
     CHECK_NULL_VOID(peer);

@@ -59,8 +59,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace PanGestureOptionsAccessor {
 static void DestroyPeerImpl(PanGestureOptionsPeer *peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_NativePointer CtorImpl(const Opt_Literal_Number_distance_fingers_PanDirection_direction* value)

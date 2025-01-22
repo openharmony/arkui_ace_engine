@@ -23,8 +23,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace WebKeyboardControllerAccessor {
 void DestroyPeerImpl(WebKeyboardControllerPeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_NativePointer CtorImpl()

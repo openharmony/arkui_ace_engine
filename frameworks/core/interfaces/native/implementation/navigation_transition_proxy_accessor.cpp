@@ -51,8 +51,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace NavigationTransitionProxyAccessor {
 void DestroyPeerImpl(NavigationTransitionProxyPeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_NativePointer CtorImpl()

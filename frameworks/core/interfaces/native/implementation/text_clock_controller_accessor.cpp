@@ -23,7 +23,6 @@ namespace TextClockControllerAccessor {
 void DestroyPeerImpl(TextClockControllerPeer* peer)
 {
     if (peer) {
-        peer->controller = nullptr;
         delete peer;
     }
 }

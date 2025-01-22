@@ -92,6 +92,8 @@ generated_sources = [
   "implementation/gesture_event_accessor.cpp",
   "implementation/gesture_modifier_accessor.cpp",
   "implementation/gesture_recognizer_accessor.cpp",
+  "implementation/global_scope_common_accessor.cpp",
+  "implementation/global_scope_inspector_accessor.cpp",
   "implementation/grid_col_modifier.cpp",
   "implementation/grid_container_modifier.cpp",
   "implementation/grid_item_modifier.cpp",

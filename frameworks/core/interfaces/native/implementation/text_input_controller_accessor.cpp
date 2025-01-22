@@ -22,8 +22,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextInputControllerAccessor {
 void DestroyPeerImpl(TextInputControllerPeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->controller_ = nullptr;
     delete peer;
 }
 Ark_NativePointer CtorImpl()

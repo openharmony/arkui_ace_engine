@@ -24,8 +24,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace TextMenuItemIdAccessor {
 void DestroyPeerImpl(TextMenuItemIdPeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->id = std::nullopt;
     delete peer;
 }
 Ark_NativePointer CtorImpl()

@@ -772,7 +772,7 @@ void OnShowFileSelectorImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void OnFileSelectorShowImpl(Ark_NativePointer node,
-                            const Callback_Literal_Function_callback_Object_fileSelector_Void* value)
+                            const Type_WebAttribute_onFileSelectorShow_callback* value)
 {
     // deprecated
 }

@@ -24,8 +24,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 namespace FileSelectorParamAccessor {
 void DestroyPeerImpl(FileSelectorParamPeer* peer)
 {
-    CHECK_NULL_VOID(peer);
-    peer->handler = nullptr;
     delete peer;
 }
 Ark_NativePointer CtorImpl()

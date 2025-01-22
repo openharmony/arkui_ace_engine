@@ -60,6 +60,14 @@ void SetCurrentIndexImpl(Ark_NativePointer node,
     //auto convValue = Converter::OptConvert<type>(node); // for enums
     //undefinedModelNG::SetSetCurrentIndex(frameNode, convValue);
 }
+void PrepareImpl(Ark_NativePointer node)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(node);
+    //auto convValue = Converter::OptConvert<type>(node); // for enums
+    //undefinedModelNG::SetPrepare(frameNode, convValue);
+}
 } // LazyForEachOpsAccessor
 const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
 {
@@ -70,6 +78,7 @@ const GENERATED_ArkUILazyForEachOpsAccessor* GetLazyForEachOpsAccessor()
         LazyForEachOpsAccessor::NeedMoreElementsImpl,
         LazyForEachOpsAccessor::OnRangeUpdateImpl,
         LazyForEachOpsAccessor::SetCurrentIndexImpl,
+        LazyForEachOpsAccessor::PrepareImpl,
     };
     return &LazyForEachOpsAccessorImpl;
 }

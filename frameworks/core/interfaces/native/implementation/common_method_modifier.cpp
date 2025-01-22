@@ -4525,14 +4525,14 @@ void OnGestureRecognizerJudgeBegin0Impl(Ark_NativePointer node,
     OnGestureRecognizerJudgeBegin1Impl(node, value, false);
 }
 void OnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
-                                        const GestureRecognizerJudgeBeginCallback* callback,
+                                        const GestureRecognizerJudgeBeginCallback* callback_,
                                         Ark_Boolean exposeInnerGesture)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(callback);
+    CHECK_NULL_VOID(callback_);
     auto weakNode = AceType::WeakClaim(frameNode);
-    auto onGestureRecognizerJudgefunc = [callback = CallbackHelper(*callback, frameNode), node = weakNode](
+    auto onGestureRecognizerJudgefunc = [callback = CallbackHelper(*callback_, frameNode), node = weakNode](
             const std::shared_ptr<BaseGestureEvent>& info,
             const RefPtr<NG::NGGestureRecognizer>& current,
             const std::list<RefPtr<NG::NGGestureRecognizer>>& others

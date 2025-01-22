@@ -130,7 +130,7 @@ void AntiAliasImpl(Ark_NativePointer node,
     ShapeModelNG::SetAntiAlias(frameNode, Converter::Convert<bool>(value));
 }
 void StrokeDashArrayImpl(Ark_NativePointer node,
-                         const Array_CustomObject* value)
+                         const Array_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

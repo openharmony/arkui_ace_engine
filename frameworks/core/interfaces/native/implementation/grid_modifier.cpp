@@ -267,7 +267,7 @@ void SupportAnimationImpl(Ark_NativePointer node,
     GridModelNG::SetSupportAnimation(frameNode, Converter::Convert<bool>(value));
 }
 void OnItemDragStartImpl(Ark_NativePointer node,
-                         const Callback_ItemDragInfo_Number_Callback_Any* value)
+                         const Callback_ItemDragInfo_Number_CustomBuilder* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -374,16 +374,18 @@ void AlignItemsImpl(Ark_NativePointer node,
         value ? Converter::OptConvert<GridItemAlignment>(*value) : std::nullopt);
 }
 void OnScrollImpl(Ark_NativePointer node,
-                  const Callback_Number_ScrollState_Void* value)
+                  const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onScroll = [frameNode](const CalcDimension& scrollOffset, const ScrollState& scrollState) {
+#ifdef WRONG_INTERFACE
         auto arkScrollOffset = Converter::ArkValue<Ark_Number>(scrollOffset);
         auto arkScrollState = Converter::ArkValue<Ark_ScrollState>(scrollState);
         GetFullAPI()->getEventsAPI()->getGridEventsReceiver()->onScroll(
             frameNode->GetId(), arkScrollOffset, arkScrollState);
+#endif
     };
     GridModelNG::SetOnScroll(frameNode, std::move(onScroll));
 }

@@ -359,10 +359,10 @@ HWTEST_F(WebControllerAccessorTest, DISABLED_runJavaScriptTest, TestSize.Level1)
 {
     std::string script = "script";
 
-    Ark_Literal_String_script_Callback_String_Void_callback options;
+    Ark_Literal_String_script_Callback_String_Void_callback_ options;
     std::function<void(std::string)> callback = nullptr;
     options.script = Converter::ArkValue<Ark_String>(script);
-    options.callback = Converter::ArkValue<Opt_Callback_String_Void>(Ark_Empty());
+    options.callback_ = Converter::ArkValue<Opt_Callback_String_Void>(Ark_Empty());
 
     ASSERT_NE(accessor_->runJavaScript, nullptr);
 
@@ -380,7 +380,7 @@ HWTEST_F(WebControllerAccessorTest, registerJavaScriptProxyTest, TestSize.Level1
     std::string name = "name";
     std::string methodListItem = "methodListItem";
 
-    Ark_Literal_Object_object_String_name_Array_String_methodList options;
+    Ark_Literal_Object_object__String_name_Array_String_methodList options;
     options.name = Converter::ArkValue<Ark_String>(name);
     std::vector<std::string> vec { methodListItem };
     Converter::ArkArrayHolder<Array_String> vecHolder(vec);
