@@ -6032,9 +6032,33 @@ bool SwiperPattern::CheckSwiperPanEvent(float mainDeltaOrVelocity)
     return ret;
 }
 
+std::pair<int32_t, SwiperItemInfo> SwiperPattern::CalcFirstItemWithoutItemSpace() const
+{
+    if (itemPosition_.empty()) {
+        return std::make_pair(0, SwiperItemInfo {});
+    }
+    for (const auto& item : itemPosition_) {
+        auto startPos = item.second.startPos;
+        auto endPos = item.second.endPos;
+        auto itemSpace = GetItemSpace();
+        startPos -= itemSpace;
+        if (startPos < 0 && endPos < 0) {
+            continue;
+        }
+        if (startPos <= 0 && endPos > 0) {
+            return std::make_pair(item.first, SwiperItemInfo { item.second.startPos, endPos });
+        }
+        if (startPos > 0 && endPos > 0) {
+            return std::make_pair(item.first, SwiperItemInfo { item.second.startPos, endPos });
+        }
+    }
+    return std::make_pair(itemPosition_.begin()->first,
+        SwiperItemInfo { itemPosition_.begin()->second.startPos, itemPosition_.begin()->second.endPos });
+}
+
 int32_t SwiperPattern::CalcComingIndex(float mainDelta) const
 {
-    auto firstItemInfoInVisibleArea = GetFirstItemInfoInVisibleArea();
+    auto firstItemInfoInVisibleArea = CalcFirstItemWithoutItemSpace();
     auto firstStartPos = firstItemInfoInVisibleArea.second.startPos;
     auto firstEndPos = firstItemInfoInVisibleArea.second.endPos;
     auto firstItemLength = firstEndPos - firstStartPos;
@@ -6051,8 +6075,7 @@ int32_t SwiperPattern::CalcComingIndex(float mainDelta) const
         } else if (firstIndex >= currentIndex_) {
             step = -1;
         } else {
-            step = firstIndex - currentIndex_;
-            step += -static_cast<int32_t>(std::floor(std::abs(firstStartPos) / firstItemLength));
+            step = firstEndPos > firstItemLength ? firstIndex - currentIndex_ - 1 : firstIndex - currentIndex_;
         }
     } else if (LessNotEqual(mainDelta, 0.0)) {
         if (IsSwipeByGroup()) {

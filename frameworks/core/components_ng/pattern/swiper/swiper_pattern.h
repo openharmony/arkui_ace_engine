@@ -1169,6 +1169,7 @@ private:
     bool CheckContentWillScroll(float checkValue, float mainDelta);
     float CalcWillScrollOffset(int32_t comingIndex);
     std::optional<bool> OnContentWillScroll(int32_t currentIndex, int32_t comingIndex, float offset) const;
+    std::pair<int32_t, SwiperItemInfo> CalcFirstItemWithoutItemSpace() const;
     int32_t CalcComingIndex(float mainDelta) const;
     void TriggerAddTabBarEvent() const;
 
