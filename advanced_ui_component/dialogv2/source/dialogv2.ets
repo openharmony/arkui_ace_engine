@@ -182,7 +182,10 @@ export struct TipsDialogV2 {
         this.contentBuilder();
       },
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale!!,
+      fontSizeScale: this.fontSizeScale,
+      onFontSizeScaleChange: (fontSizeScale: number) => {
+        this.fontSizeScale = fontSizeScale;
+      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -213,7 +216,7 @@ export struct TipsDialogV2 {
   @Builder
   checkBoxPart(): void {
     Row() {
-      if (this.checkTips !== null) {
+      if (this.checkTips !== null && this.checkTips !== undefined) {
         Checkbox({ name: '', group: 'checkboxGroup' }).select(this.checkedInner)
           .onChange((checked: boolean) => {
             this.checkedInner = checked;
@@ -241,7 +244,7 @@ export struct TipsDialogV2 {
           type: 'announceForAccessibility',
           bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
           triggerAction: 'common',
-          textAnnouncedForAccessibility: this.checked ? getContext().resourceManager.getStringSync(125833934) :
+          textAnnouncedForAccessibility: this.checkedInner ? getContext().resourceManager.getStringSync(125833934) :
           getContext().resourceManager.getStringSync(125833935)
         });
         accessibility.sendAccessibilityEvent(eventInfo);
@@ -364,7 +367,7 @@ struct TipsDialogContentLayout {
     }
     let height: number = 0;
     let checkBoxHeight: number = 0;
-    if (this.checkTips !== null) {
+    if (this.checkTips !== null && this.checkTips !== undefined) {
       let checkboxChild: Measurable = children[this.checkBoxIndex];
       let checkboxConstraint: ConstraintSizeOptions = {
         maxWidth: constraint.maxWidth,
@@ -598,7 +601,10 @@ export struct SelectDialogV2 {
       },
       buttons: this.buttons,
       contentAreaPadding: this.contentPadding,
-      fontSizeScale: this.fontSizeScale!!,
+      fontSizeScale: this.fontSizeScale,
+      onFontSizeScaleChange: (fontSizeScale: number) => {
+        this.fontSizeScale = fontSizeScale;
+      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -773,7 +779,7 @@ export struct ConfirmDialogV2 {
           type: 'announceForAccessibility',
           bundleName: (getContext() as common.UIAbilityContext)?.abilityInfo?.bundleName,
           triggerAction: 'common',
-          textAnnouncedForAccessibility: this.checked ? getContext().resourceManager.getStringSync(125833934) :
+          textAnnouncedForAccessibility: this.checkedInner ? getContext().resourceManager.getStringSync(125833934) :
           getContext().resourceManager.getStringSync(125833935)
         });
         accessibility.sendAccessibilityEvent(eventInfo);
@@ -808,7 +814,10 @@ export struct ConfirmDialogV2 {
       },
       minContentHeight: this.minContentHeight!!,
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale!!,
+      fontSizeScale: this.fontSizeScale,
+      onFontSizeScaleChange: (fontSizeScale: number) => {
+        this.fontSizeScale = fontSizeScale;
+      },
     }).constraintSize({ maxHeight: '100%' });
   }
 
@@ -854,7 +863,10 @@ export struct AlertDialogV2 {
         this.AlertDialogContentBuilder();
       },
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale!!,
+      fontSizeScale: this.fontSizeScale,
+      onFontSizeScaleChange: (fontSizeScale: number) => {
+        this.fontSizeScale = fontSizeScale;
+      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -920,7 +932,10 @@ export struct CustomContentDialogV2 {
       },
       contentAreaPadding: this.contentAreaPadding,
       buttons: this.buttons,
-      fontSizeScale: this.fontSizeScale!!,
+      fontSizeScale: this.fontSizeScale,
+      onFontSizeScaleChange: (fontSizeScale: number) => {
+        this.fontSizeScale = fontSizeScale;
+      },
       minContentHeight: this.minContentHeight!!,
     }).constraintSize({ maxHeight: '100%' });
   }
@@ -1026,7 +1041,7 @@ struct CustomDialogContentComponent {
   @Local buttonHeight: number = 0;
   @Local contentMaxHeight: Length = '100%';
   @Param fontSizeScale: number = -1;
-  @Event $fontSizeScale?: (val: number) => void = undefined;
+  @Event onFontSizeScaleChange?: (val: number) => void = undefined;
   @Local customStyle: boolean | undefined = undefined;
   @Local buttonMaxFontSize: Length = `${BODY_L}fp`;
   @Local buttonMinFontSize: Length = 9;
@@ -1083,7 +1098,7 @@ struct CustomDialogContentComponent {
     let sizeResult: SizeResult = { width: selfLayoutInfo.width, height: selfLayoutInfo.height };
     let maxWidth: number = Number(constraint.maxWidth);
     let maxHeight: number = Number(constraint.maxHeight);
-    this.$fontSizeScale?.(this.updateFontScale());
+    this.onFontSizeScaleChange?.(this.updateFontScale());
     this.updateFontSize();
     this.isButtonVertical = this.isVerticalAlignButton(maxWidth - BUTTON_HORIZONTAL_MARGIN * 2);
     let height: number = 0;
@@ -1110,7 +1125,7 @@ struct CustomDialogContentComponent {
     let uiContext: UIContext = this.getUIContext();
     this.isFollowingSystemFontScale = uiContext.isFollowingSystemFontScale();
     this.appMaxFontScale = uiContext.getMaxFontScale();
-    this.$fontSizeScale?.(this.updateFontScale());
+    this.onFontSizeScaleChange?.(this.updateFontScale());
     this.initTitleTextAlign();
   }
 
@@ -1658,7 +1673,10 @@ export struct LoadingDialogV2 {
         contentBuilder: () => {
           this.contentBuilder();
         },
-        fontSizeScale: this.fontSizeScale!!,
+        fontSizeScale: this.fontSizeScale,
+        onFontSizeScaleChange: (fontSizeScale: number) => {
+          this.fontSizeScale = fontSizeScale;
+        },
         minContentHeight: this.minContentHeight!!,
       }).constraintSize({ maxHeight: '100%' });
     }
