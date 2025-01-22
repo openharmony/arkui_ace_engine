@@ -5082,6 +5082,8 @@ int32_t SetTextInputKeyboardAppearance(ArkUI_NodeHandle node, const ArkUI_Attrib
 {
     auto* fullImpl = GetFullImpl();
     if (item->size != 1 || !CheckAttributeIsKeyboardAppearance(item->value[0].i32)) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputKeyboardAppearance(
+            node->uiNodeHandle, ArkUI_KeyboardAppearance::ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE);
         return ERROR_CODE_PARAM_INVALID;
     }
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputKeyboardAppearance(

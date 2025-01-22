@@ -1014,9 +1014,15 @@ ArkUINativeModuleValue TextAreaBridge::SetKeyboardAppearance(ArkUIRuntimeCallInf
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     if (secondArg->IsNumber()) {
         uint32_t keyboardAppearance = secondArg->Uint32Value(vm);
-        GetArkUINodeModifiers()->getTextAreaModifier()->
-            setTextAreaKeyboardAppearance(nativeNode, keyboardAppearance);
+        if (keyboardAppearance >= static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE) &&
+            keyboardAppearance <= static_cast<int32_t>(KeyboardAppearance::DARK_IMMERSIVE)) {
+            GetArkUINodeModifiers()->getTextAreaModifier()->
+                setTextAreaKeyboardAppearance(nativeNode, keyboardAppearance); // when input is valid
+            return panda::JSValueRef::Undefined(vm);
+        }
     }
+    GetArkUINodeModifiers()->getTextAreaModifier()->
+        setTextAreaKeyboardAppearance(nativeNode, static_cast<int32_t>(KeyboardAppearance::NONE_IMMERSIVE));
     return panda::JSValueRef::Undefined(vm);
 }
 
