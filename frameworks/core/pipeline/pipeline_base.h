@@ -806,6 +806,8 @@ public:
         windowId_ = windowId;
     }
 
+    bool NeedTouchInterpolation();
+
     void SetFocusWindowId(uint32_t windowId)
     {
         focusWindowId_ = windowId;

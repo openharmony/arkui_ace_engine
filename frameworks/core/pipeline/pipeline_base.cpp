@@ -249,6 +249,18 @@ void PipelineBase::SetFontScale(float fontScale)
     }
 }
 
+bool PipelineBase::NeedTouchInterpolation()
+{
+    if (!IsFocusWindowIdSetted()) {
+        return true;
+    }
+    auto container = Container::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, false);
+    auto uIContentType = container->GetUIContentType();
+    return uIContentType == UIContentType::SECURITY_UI_EXTENSION ||
+        uIContentType == UIContentType::MODAL_UI_EXTENSION;
+}
+
 void PipelineBase::SetFontWeightScale(float fontWeightScale)
 {
     const static float CARD_MAX_FONT_WEIGHT_SCALE = 1.25f;
