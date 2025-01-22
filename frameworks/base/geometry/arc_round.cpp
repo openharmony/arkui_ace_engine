@@ -19,7 +19,6 @@
 #endif
 
 namespace OHOS::Ace {
-constexpr float HZEXPARAMETER = 1.5f;      // hot zone adjustment parameters
 
 ArcRound::ArcRound(const ArcRound& other)
 {
@@ -108,17 +107,17 @@ void ArcRound::SetWidth(float width)
 double ArcRound::Get2PIRadians(double radian) const
 {
     if (radian < 0) {
-        return 2 * PI_NUM + radian; // 2 * PI: 360度
+        return SQUARE * PI_NUM + radian; // 2 * PI: 360度
     }
     return radian;
 }
 
-bool ArcRound::IsInRegion(const Point& point) const
+bool ArcRound::IsInRegion(const Point& point, float minHotRegion) const
 {
     float distance = pow(pow(point.GetX() - centerPoint_.GetX(), SQUARE) +
         pow(point.GetY() - centerPoint_.GetY(), SQUARE), HALF);
     float angle = GetPositionAngle(Offset(point.GetX(), point.GetY()));
-    float width = width_ * HZEXPARAMETER;
+    float width = std::max(minHotRegion, width_);
     if (distance > outerRadius_ || distance < outerRadius_ - width) {
         return false;
     }
