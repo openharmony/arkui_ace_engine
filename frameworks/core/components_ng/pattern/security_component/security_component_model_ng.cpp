@@ -56,7 +56,7 @@ void SecurityComponentModelNG::InitLayoutProperty(RefPtr<FrameNode>& node, int32
     property->UpdateSymbolIconStyle(symbolIcon);
     property->UpdateBackgroundType(backgroundType);
 
-    bool isNullSymbolIcon = !symbolIcon || 
+    bool isNullSymbolIcon = !symbolIcon ||
                             symbolIcon == static_cast<uint32_t>(SecurityComponentIconStyle::ICON_NULL);
     if ((text == static_cast<int32_t>(SecurityComponentDescription::TEXT_NULL)) ||
         ((icon == static_cast<int32_t>(SecurityComponentIconStyle::ICON_NULL)) && isNullSymbolIcon)) {
