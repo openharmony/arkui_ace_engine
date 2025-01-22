@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -209,7 +209,11 @@ void OnSubmitImpl(Ark_NativePointer node,
                         const int32_t& value, const NG::TextFieldCommonEvent& event) {
         auto enterKeyType = Converter::ArkValue<Ark_EnterKeyType>(static_cast<TextInputAction>(value));
         Converter::ConvContext ctx;
-        auto submitEvent = Ark_SubmitEvent { .text = Converter::ArkValue<Ark_String>(event.GetText(), &ctx) };
+        auto submitEvent = Ark_SubmitEvent{
+#ifdef WRONG_TYPE
+            .text = Converter::ArkValue<Ark_String>(event.GetText(), &ctx)
+#endif
+        };
         arkCallback.Invoke(enterKeyType, submitEvent);
     };
     TextFieldModelNG::SetOnSubmit(frameNode, onSubmit);

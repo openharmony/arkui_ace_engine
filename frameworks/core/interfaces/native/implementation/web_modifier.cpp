@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -149,6 +149,7 @@ void AssignArkValue(Ark_EventTarget& dst, const EventTarget& src)
 
 void AssignArkValue(Ark_TouchEvent& dst, const TouchEventInfo& src)
 {
+#ifdef WRONG_TYPE
     TouchEvent touchEvent = src.ConvertToTouchEvent();
     dst.tiltX = Converter::ArkValue<Ark_Number>(src.GetTiltX().value_or(0.0f));
     dst.tiltY = Converter::ArkValue<Ark_Number>(src.GetTiltY().value_or(0.0f));
@@ -163,6 +164,7 @@ void AssignArkValue(Ark_TouchEvent& dst, const TouchEventInfo& src)
                 src.GetTimeStamp().time_since_epoch()).count());
     dst.pressure = Converter::ArkValue<Ark_Number>(touchEvent.force);
     dst.type = Converter::ArkValue<Ark_TouchType>(touchEvent.type);
+#endif
 }
 
 void AssignArkValue(Ark_WebNavigationType& dst, const NavigationType& src)
@@ -777,7 +779,7 @@ void OnShowFileSelectorImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 void OnFileSelectorShowImpl(Ark_NativePointer node,
-                            const Callback_Literal_Function_callback_Object_fileSelector_Void* value)
+                            const Type_WebAttribute_onFileSelectorShow_callback* value)
 {
     // deprecated
 }

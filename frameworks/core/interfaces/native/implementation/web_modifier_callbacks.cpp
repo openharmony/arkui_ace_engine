@@ -698,6 +698,7 @@ bool OnInterceptKey(const Callback_KeyEvent_Boolean* value,
     CHECK_NULL_RETURN(pipelineContext, false);
     pipelineContext->UpdateCurrentActiveNode(weakNode);
     Ark_KeyEvent parameter;
+#ifdef WRONG_TYPE
     parameter.type = Converter::ArkValue<Ark_KeyType>(keyEventInfo.GetKeyType());
     parameter.keyCode = Converter::ArkValue<Ark_Number>(static_cast<int32_t>(keyEventInfo.GetKeyCode()));
     parameter.keyText = Converter::ArkValue<Ark_String>(keyEventInfo.GetKeyText());
@@ -709,6 +710,7 @@ bool OnInterceptKey(const Callback_KeyEvent_Boolean* value,
             keyEventInfo.GetTimeStamp().time_since_epoch()).count());
     LOGE("WebAttributeModifier::OnInterceptKeyEventImpl IntentionCode supporting is not implemented yet");
     parameter.unicode = Converter::ArkValue<Opt_Number>(keyEventInfo.GetUnicode());
+#endif
     Callback_Boolean_Void continuation;
     auto arkCallback = CallbackHelper(*value);
     arkCallback.Invoke(parameter, continuation);
@@ -1070,6 +1072,7 @@ void OnNativeEmbedTouchInfo(const Callback_NativeEmbedTouchInfo_Void* value,
     parameter.embedId = Converter::ArkValue<Opt_String>(eventInfo->GetEmbedId());
     auto touchEventInfo = eventInfo->GetTouchEventInfo();
     Ark_TouchEvent touchEvent = Converter::ArkValue<Ark_TouchEvent>(touchEventInfo);
+#ifdef WRONG_TYPE
     std::list<TouchLocationInfo> touches = touchEventInfo.GetTouches();
     std::vector<TouchLocationInfo> vTouches { std::begin(touches), std::end(touches) };
     Converter::ArkArrayHolder<Array_TouchObject> touchesHolder(vTouches);
@@ -1079,6 +1082,7 @@ void OnNativeEmbedTouchInfo(const Callback_NativeEmbedTouchInfo_Void* value,
     Converter::ArkArrayHolder<Array_TouchObject> changedTouchesHolder(vChangedTouches);
     touchEvent.changedTouches = changedTouchesHolder.ArkValue();
     parameter.touchEvent = Converter::ArkValue<Opt_TouchEvent>(touchEvent);
+#endif
     Ark_EventResult arkEventResult;
     auto peer = new EventResultPeer();
     peer->handler = eventInfo->GetResult();

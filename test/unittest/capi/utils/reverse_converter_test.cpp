@@ -64,19 +64,19 @@ HWTEST_F(ReverseConvertorTest, SimpleTypes, TestSize.Level1)
     EXPECT_EQ(stringResult.length, 4);
 
     auto numberResult = Converter::ArkValue<Ark_Number>(123);
-    EXPECT_EQ(numberResult.tag, ARK_TAG_INT32);
+    EXPECT_EQ(numberResult.tag, INTEROP_TAG_INT32);
     EXPECT_EQ(numberResult.i32, 123);
 
     numberResult = Converter::ArkValue<Ark_Number>(-123);
-    EXPECT_EQ(numberResult.tag, ARK_TAG_INT32);
+    EXPECT_EQ(numberResult.tag, INTEROP_TAG_INT32);
     EXPECT_EQ(numberResult.i32, -123);
 
     numberResult = Converter::ArkValue<Ark_Number>(123u);
-    EXPECT_EQ(numberResult.tag, ARK_TAG_INT32);
+    EXPECT_EQ(numberResult.tag, INTEROP_TAG_INT32);
     EXPECT_EQ(numberResult.i32, 123);
 
     numberResult = Converter::ArkValue<Ark_Number>(123.f);
-    EXPECT_EQ(numberResult.tag, ARK_TAG_FLOAT32);
+    EXPECT_EQ(numberResult.tag, INTEROP_TAG_FLOAT32);
     EXPECT_EQ(numberResult.f32, 123.f);
 
     auto ptrResult = Converter::ArkValue<Ark_NativePointer>(&numberResult);
@@ -127,7 +127,7 @@ HWTEST_F(ReverseConvertorTest, ArrayTypes, TestSize.Level1)
 
     // Check optional version
     auto optResult = listHolder.OptValue<Opt_Array_String>();
-    EXPECT_EQ(optResult.tag, ARK_TAG_OBJECT);
+    EXPECT_EQ(optResult.tag, INTEROP_TAG_OBJECT);
     EXPECT_EQ(optResult.value.length, 2);
     EXPECT_EQ(optResult.value.array[0].chars, "def"sv);
     EXPECT_EQ(optResult.value.array[0].length, 3);
@@ -149,48 +149,48 @@ HWTEST_F(ReverseConvertorTest, OptionalTypes, TestSize.Level1)
 {
     auto emptyOpt = std::optional<int>{};
     auto optNumber = Converter::ArkValue<Opt_Number>(emptyOpt);
-    EXPECT_EQ(optNumber.tag, ARK_TAG_UNDEFINED);
+    EXPECT_EQ(optNumber.tag, INTEROP_TAG_UNDEFINED);
 
     optNumber = Converter::ArkValue<Opt_Number>();
-    EXPECT_EQ(optNumber.tag, ARK_TAG_UNDEFINED);
+    EXPECT_EQ(optNumber.tag, INTEROP_TAG_UNDEFINED);
 
     optNumber = Converter::ArkValue<Opt_Number>(Ark_Empty());
-    EXPECT_EQ(optNumber.tag, ARK_TAG_UNDEFINED);
+    EXPECT_EQ(optNumber.tag, INTEROP_TAG_UNDEFINED);
 
     optNumber = Converter::ArkValue<Opt_Number>(std::nullopt);
-    EXPECT_EQ(optNumber.tag, ARK_TAG_UNDEFINED);
+    EXPECT_EQ(optNumber.tag, INTEROP_TAG_UNDEFINED);
 
     auto numOpt = std::optional(123);
     optNumber = Converter::ArkValue<Opt_Number>(numOpt);
-    EXPECT_NE(optNumber.tag, ARK_TAG_UNDEFINED);
-    EXPECT_EQ(optNumber.value.tag, ARK_TAG_INT32);
+    EXPECT_NE(optNumber.tag, INTEROP_TAG_UNDEFINED);
+    EXPECT_EQ(optNumber.value.tag, INTEROP_TAG_INT32);
     EXPECT_EQ(optNumber.value.i32, 123);
 
     optNumber = Converter::ArkValue<Opt_Number>(123);
-    EXPECT_NE(optNumber.tag, ARK_TAG_UNDEFINED);
-    EXPECT_EQ(optNumber.value.tag, ARK_TAG_INT32);
+    EXPECT_NE(optNumber.tag, INTEROP_TAG_UNDEFINED);
+    EXPECT_EQ(optNumber.value.tag, INTEROP_TAG_INT32);
     EXPECT_EQ(optNumber.value.i32, 123);
 
     optNumber = Converter::ArkValue<Opt_Number>(12.3f);
-    EXPECT_NE(optNumber.tag, ARK_TAG_UNDEFINED);
-    EXPECT_EQ(optNumber.value.tag, ARK_TAG_FLOAT32);
+    EXPECT_NE(optNumber.tag, INTEROP_TAG_UNDEFINED);
+    EXPECT_EQ(optNumber.value.tag, INTEROP_TAG_FLOAT32);
     EXPECT_EQ(optNumber.value.f32, 12.3f);
 
     auto ark = Converter::ArkValue<Ark_Number>(123);
     optNumber = Converter::ArkValue<Opt_Number>(ark);
-    EXPECT_NE(optNumber.tag, ARK_TAG_UNDEFINED);
-    EXPECT_EQ(optNumber.value.tag, ARK_TAG_INT32);
+    EXPECT_NE(optNumber.tag, INTEROP_TAG_UNDEFINED);
+    EXPECT_EQ(optNumber.value.tag, INTEROP_TAG_INT32);
     EXPECT_EQ(optNumber.value.i32, 123);
 
     std::string testStr = "abc";
     auto optString = Converter::ArkValue<Opt_String>(testStr);
-    EXPECT_NE(optString.tag, ARK_TAG_UNDEFINED);
+    EXPECT_NE(optString.tag, INTEROP_TAG_UNDEFINED);
     EXPECT_EQ(optString.value.chars, testStr.data());
     EXPECT_EQ(optString.value.length, 3);
 
     std::optional<std::string> testStrOpt = testStr;
     auto optString1 = Converter::ArkValue<Opt_String>(testStrOpt);
-    EXPECT_NE(optString1.tag, ARK_TAG_UNDEFINED);
+    EXPECT_NE(optString1.tag, INTEROP_TAG_UNDEFINED);
     EXPECT_EQ(optString1.value.chars, testStrOpt->data());
     EXPECT_EQ(optString1.value.length, 3);
 }
@@ -204,7 +204,7 @@ HWTEST_F(ReverseConvertorTest, UnionTypes, TestSize.Level1)
 {
     auto unionResult = Converter::ArkUnion<Ark_Union_Number_String, Ark_Number>(123);
     EXPECT_EQ(unionResult.selector, 0);
-    EXPECT_EQ(unionResult.value0.tag, ARK_TAG_INT32);
+    EXPECT_EQ(unionResult.value0.tag, INTEROP_TAG_INT32);
     EXPECT_EQ(unionResult.value0.i32, 123);
 
     unionResult = Converter::ArkUnion<Ark_Union_Number_String, Ark_String>("abc");
@@ -212,19 +212,19 @@ HWTEST_F(ReverseConvertorTest, UnionTypes, TestSize.Level1)
     EXPECT_EQ(unionResult.value1.chars, "abc"s);
 
     auto optUnionResult = Converter::ArkUnion<Opt_Union_Number_String, Ark_Number>(123);
-    EXPECT_NE(optUnionResult.tag, ARK_TAG_UNDEFINED);
+    EXPECT_NE(optUnionResult.tag, INTEROP_TAG_UNDEFINED);
     EXPECT_EQ(optUnionResult.value.selector, 0);
-    EXPECT_EQ(optUnionResult.value.value0.tag, ARK_TAG_INT32);
+    EXPECT_EQ(optUnionResult.value.value0.tag, INTEROP_TAG_INT32);
     EXPECT_EQ(optUnionResult.value.value0.i32, 123);
 
     std::string testStr = "abc";
     optUnionResult = Converter::ArkUnion<Opt_Union_Number_String, Ark_String>(testStr);
-    EXPECT_NE(optUnionResult.tag, ARK_TAG_UNDEFINED);
+    EXPECT_NE(optUnionResult.tag, INTEROP_TAG_UNDEFINED);
     EXPECT_EQ(optUnionResult.value.selector, 1);
     EXPECT_EQ(optUnionResult.value.value1.chars, testStr.data());
 
     optUnionResult = Converter::ArkUnion<Opt_Union_Number_String>(Ark_Empty());
-    EXPECT_EQ(optUnionResult.tag, ARK_TAG_UNDEFINED);
+    EXPECT_EQ(optUnionResult.tag, INTEROP_TAG_UNDEFINED);
 }
 
 /**

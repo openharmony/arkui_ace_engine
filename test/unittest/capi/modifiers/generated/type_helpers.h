@@ -24,7 +24,7 @@ namespace OHOS::Ace::NG::TypeHelper {
 template<typename T, typename = std::void_t<decltype(T().tag), decltype(T().value)>>
 decltype(T().value)& WriteTo(T& value)
 {
-    value.tag = ARK_TAG_OBJECT;
+    value.tag = INTEROP_TAG_OBJECT;
     return value.value;
 }
 template<typename Which, typename To,

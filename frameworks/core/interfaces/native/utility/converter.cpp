@@ -130,7 +130,7 @@ void stubHoldRelease(Ark_Int32 _) {}
 void AssignArkValue(Ark_Length& dst, const std::string& src)
 {
     char *suffixPtr = nullptr;
-    dst.type = ARK_TAG_FLOAT32;
+    dst.type = INTEROP_TAG_FLOAT32;
     dst.value = std::strtof(src.c_str(), &suffixPtr);
     dst.unit = -NUM_1;
     if (!suffixPtr || suffixPtr == src.c_str()) { return; }
@@ -160,42 +160,43 @@ void AssignArkValue(Ark_TouchObject& touch, const OHOS::Ace::TouchLocationInfo& 
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
 
-    touch.displayX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.displayX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     touch.displayX.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetX()));
-    touch.displayY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.displayY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     touch.displayY.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(screenOffset.GetY()));
 
-    touch.id.tag = Ark_Tag::ARK_TAG_INT32;
+    touch.id.tag = Ark_Tag::INTEROP_TAG_INT32;
     touch.id.i32 = static_cast<int32_t>(info.GetTouchDeviceId());
 
-    touch.screenX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.screenX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     touch.screenX.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    touch.screenY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.screenY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     touch.screenY.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
 
     touch.type = static_cast<Ark_TouchType>(info.GetTouchType());
 
-    touch.windowX.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.windowX.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     touch.windowX.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetX()));
-    touch.windowY.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.windowY.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     touch.windowY.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(globalOffset.GetY()));
 
-    touch.x.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.x.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     touch.x.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(localOffset.GetX()));
-    touch.y.tag = Ark_Tag::ARK_TAG_FLOAT32;
+    touch.y.tag = Ark_Tag::INTEROP_TAG_FLOAT32;
     touch.y.f32 = static_cast<float>(
         PipelineBase::Px2VpWithCurrentDensity(localOffset.GetY()));
 }
 
 void AssignArkValue(Ark_ClickEvent& onClick, const OHOS::Ace::GestureEvent& info)
 {
+#ifdef WRONG_TYPE
     Offset globalOffset = info.GetGlobalLocation();
     Offset localOffset = info.GetLocalLocation();
     Offset screenOffset = info.GetScreenLocation();
@@ -214,10 +215,10 @@ void AssignArkValue(Ark_ClickEvent& onClick, const OHOS::Ace::GestureEvent& info
 
     onClick.sourceTool = static_cast<Ark_SourceTool>(0);
     onClick.deviceId = ArkValue<Opt_Number>();
-    onClick.target.area.globalPosition.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-    onClick.target.area.globalPosition.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-    onClick.target.area.position.x.tag = Ark_Tag::ARK_TAG_UNDEFINED;
-    onClick.target.area.position.y.tag = Ark_Tag::ARK_TAG_UNDEFINED;
+    onClick.target.area.globalPosition.x.tag = Ark_Tag::INTEROP_TAG_UNDEFINED;
+    onClick.target.area.globalPosition.y.tag = Ark_Tag::INTEROP_TAG_UNDEFINED;
+    onClick.target.area.position.x.tag = Ark_Tag::INTEROP_TAG_UNDEFINED;
+    onClick.target.area.position.y.tag = Ark_Tag::INTEROP_TAG_UNDEFINED;
     onClick.target.area.height = ArkValue<Ark_Length>(0);
     onClick.target.area.width = ArkValue<Ark_Length>(0);
 
@@ -237,6 +238,7 @@ void AssignArkValue(Ark_ClickEvent& onClick, const OHOS::Ace::GestureEvent& info
         { 0, stubHoldRelease, stubHoldRelease },
         stubCall,
     };
+#endif
 }
 
 void AssignArkValue(Ark_Date& dst, const PickerDate& src)
@@ -294,12 +296,12 @@ uint32_t ColorAlphaAdapt(uint32_t origin)
 
 ResourceConverter::ResourceConverter(const Ark_Resource& resource)
 {
-    if (resource.id.tag == ARK_TAG_INT32) {
+    if (resource.id.tag == INTEROP_TAG_INT32) {
         id_ = resource.id.i32;
         type_ = static_cast<ResourceType>(OptConvert<int>(resource.type).value_or(0));
         bundleName_ = Convert<std::string>(resource.bundleName);
         moduleName_ = Convert<std::string>(resource.moduleName);
-        if (resource.params.tag != ARK_TAG_UNDEFINED) {
+        if (resource.params.tag != INTEROP_TAG_UNDEFINED) {
             for (int i = 0; i < resource.params.value.length; i++) {
                 params_.emplace_back(resource.params.value.array[i].chars);
             }
@@ -1007,7 +1009,7 @@ ItemDragInfo Convert(const Ark_ItemDragInfo& src)
 template<>
 void AssignCast(std::optional<FontWeight>& dst, const Ark_Number& src)
 {
-    auto intVal = src.tag == Ark_Tag::ARK_TAG_INT32 ? src.i32 : static_cast<int32_t>(src.f32);
+    auto intVal = src.tag == Ark_Tag::INTEROP_TAG_INT32 ? src.i32 : static_cast<int32_t>(src.f32);
     if (intVal >= 0) {
         auto strVal = std::to_string(intVal);
         if (auto [parseOk, val] = StringUtils::ParseFontWeight(strVal); parseOk) {
@@ -1066,7 +1068,7 @@ void AssignCast(std::optional<float>& dst, const Ark_String& src)
 template<>
 Dimension Convert(const Ark_Length& src)
 {
-    if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
+    if (src.type == Ark_Tag::INTEROP_TAG_RESOURCE) {
         auto resource = ArkValue<Ark_Resource>(src);
         ResourceConverter converter(resource);
         return converter.ToDimension().value_or(Dimension());
@@ -1310,7 +1312,7 @@ BorderStyleProperty Convert(const Ark_EdgeStyles& src)
 template<>
 CalcLength Convert(const Ark_Length& src)
 {
-    if (src.type == Ark_Tag::ARK_TAG_RESOURCE) {
+    if (src.type == Ark_Tag::INTEROP_TAG_RESOURCE) {
         auto resource = ArkValue<Ark_Resource>(src);
         ResourceConverter converter(resource);
         return converter.ToCalcLength().value_or(CalcLength());

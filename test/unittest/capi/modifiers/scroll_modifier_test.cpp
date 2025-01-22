@@ -151,7 +151,7 @@ HWTEST_F(ScrollModifierTest, Scrollable_SetBadDirectionOnSlide, testing::ext::Te
 HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Number_ScrollState_Void func{};
+    Callback_Number_Number_Void func{};
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -160,14 +160,14 @@ HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1
     struct ScrollData
     {
         Ark_Int32 nodeId;
-        Ark_Number scrollOffset;
-        Ark_ScrollState scrollState;
+        Ark_Number scrollOffsetX;
+        Ark_Number scrollOffsetY;
     };
     static std::optional<ScrollData> data;
     EventsTracker::eventsReceiver.onScroll =
-        [] (Ark_Int32 nodeId, const Ark_Number offset, const Ark_ScrollState scrollState)
+        [] (Ark_Int32 nodeId, const Ark_Number offsetX, const Ark_Number offsetY)
     {
-        data = {nodeId, offset, scrollState};
+        data = {nodeId, offsetX, offsetY};
     };
 
     modifier_->setOnScroll(node_, &func);
@@ -185,7 +185,7 @@ HWTEST_F(ScrollModifierTest, OnScroll_SetCallback, testing::ext::TestSize.Level1
 HWTEST_F(ScrollModifierTest, OnScrollStart_SetCallback, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Void func{};
+    VoidCallback func{};
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);
@@ -245,7 +245,7 @@ HWTEST_F(ScrollModifierTest, SetOnScrollEnd_SetCallBack, testing::ext::TestSize.
 HWTEST_F(ScrollModifierTest, OnScrollStop_setCallback, testing::ext::TestSize.Level1)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
-    Callback_Void func{};
+    VoidCallback func{};
 
     auto eventHub = frameNode->GetEventHub<NG::ScrollEventHub>();
     ASSERT_NE(eventHub, nullptr);

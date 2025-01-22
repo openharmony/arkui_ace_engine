@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -319,16 +319,18 @@ void MaintainVisibleContentPositionImpl(Ark_NativePointer node,
     ListModelNG::SetListMaintainVisibleContentPosition(frameNode, Converter::Convert<bool>(value));
 }
 void OnScrollImpl(Ark_NativePointer node,
-                  const Callback_Number_ScrollState_Void* value)
+                  const Callback_Number_Number_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(value);
     auto onScroll = [frameNode](const CalcDimension& scrollOffset, const ScrollState& scrollState) {
+#ifdef WRON_INTERFACE
         auto arkScrollOffset = Converter::ArkValue<Ark_Number>(scrollOffset);
         auto arkScrollState = Converter::ArkValue<Ark_ScrollState>(scrollState);
         GetFullAPI()->getEventsAPI()->getListEventsReceiver()->
             onScroll(frameNode->GetId(), arkScrollOffset, arkScrollState);
+#endif
     };
     ListModelNG::SetOnScroll(frameNode, std::move(onScroll));
 }
@@ -433,7 +435,7 @@ void OnItemMoveImpl(Ark_NativePointer node,
     ListModelNG::SetOnItemMove(frameNode, std::move(onItemMove));
 }
 void OnItemDragStartImpl(Ark_NativePointer node,
-                         const Callback_ItemDragInfo_Number_Callback_Any* value)
+                         const Callback_ItemDragInfo_Number_CustomBuilder* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

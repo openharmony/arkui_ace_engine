@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ void DestroyPeerImpl(UIExtensionProxyPeer* peer)
 }
 Ark_NativePointer CtorImpl()
 {
-    return new UIExtensionProxyPeer();
+    return nullptr;
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -42,19 +42,19 @@ Ark_NativePointer SendSyncImpl(UIExtensionProxyPeer* peer,
     return 0;
 }
 void OnAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                 const Callback_UIExtensionProxy_Void* callback)
+                                 const Callback_UIExtensionProxy_Void* callback_)
 {
 }
 void OnSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                const Callback_UIExtensionProxy_Void* callback)
+                                const Callback_UIExtensionProxy_Void* callback_)
 {
 }
 void OffAsyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                  const Opt_Callback_UIExtensionProxy_Void* callback)
+                                  const Opt_Callback_UIExtensionProxy_Void* callback_)
 {
 }
 void OffSyncReceiverRegisterImpl(UIExtensionProxyPeer* peer,
-                                 const Opt_Callback_UIExtensionProxy_Void* callback)
+                                 const Opt_Callback_UIExtensionProxy_Void* callback_)
 {
 }
 } // UIExtensionProxyAccessor
