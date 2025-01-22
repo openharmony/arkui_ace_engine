@@ -59,7 +59,4 @@ const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
     return &NavExtenderAccessorImpl;
 }
 
-struct NavExtenderPeer {
-    virtual ~NavExtenderPeer() = default;
-};
 }
