@@ -6110,6 +6110,34 @@ typedef enum {
      *
     */
     NODE_IMAGE_ANIMATOR_ITERATION = 19006,
+    /**
+     * @brief Defines the disabled date range of the calendar picker.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .string: A string of dates. The `1st start date`,`1st end date`,`2nd start date`,`2nd end date`,
+     * ...,`nth start date`,`nth end date` of the disabled date range.\n
+     *  Example: 1910-01-01,1910-12-31,2020-01-01,2020-12-31\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .string: A string of dates.\n
+     *
+     * @since 16
+     */
+    NODE_CALENDAR_PICKER_DISABLED_DATE_RANGE = 16006,
+    /**
+     * @brief Defines whether the calendar picker marks today.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to the calendar picker marks today. The default value is: <b>false</b>.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .value[0].i32: whether to the calendar picker marks today.
+     *
+     * @since 16
+     */
+    NODE_CALENDAR_PICKER_MARK_TODAY = 16007,
 } ArkUI_NodeAttributeType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12

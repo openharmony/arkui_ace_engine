@@ -24418,6 +24418,24 @@ class CalendarPickerBorderColorModifier extends ModifierWithKey {
 }
 CalendarPickerBorderColorModifier.identity = Symbol('calendarPickerBorderColor');
 
+class CalendarPickerMarkTodayModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().calendarPicker.resetCalendarPickerMarkToday(node);
+    }
+    else {
+      getUINativeModule().calendarPicker.setCalendarPickerMarkToday(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CalendarPickerMarkTodayModifier.identity = Symbol('calendarPickerMarkToday');
+
 class ArkCalendarPickerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -24536,6 +24554,10 @@ class ArkCalendarPickerComponent extends ArkComponent {
   }
   borderColor(value) {
     modifierWithKey(this._modifiersWithKeys, CalendarPickerBorderColorModifier.identity, CalendarPickerBorderColorModifier, value);
+    return this;
+  }
+  markToday(value) {
+    modifierWithKey(this._modifiersWithKeys, CalendarPickerMarkTodayModifier.identity, CalendarPickerMarkTodayModifier, value);
     return this;
   }
 }
