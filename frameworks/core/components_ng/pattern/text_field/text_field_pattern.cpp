@@ -4789,10 +4789,10 @@ bool TextFieldPattern::OnThemeScopeUpdate(int32_t themeScopeId)
     textFieldTheme_ = textFieldTheme;
     CHECK_NULL_RETURN(textFieldTheme, result);
 
-    if (!paintProperty->HasBackgroundColor() && !IsUnderlineMode() && !IsInlineMode()) {
-        Color bgColor = textFieldTheme->GetBgColor();
+    if (!paintProperty->HasBackgroundColor() && !IsUnderlineMode()) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, result);
+        auto bgColor = IsInlineMode() ? textFieldTheme->GetInlineBgColor() : textFieldTheme->GetBgColor();
         renderContext->UpdateBackgroundColor(bgColor);
         result = true;
     }
