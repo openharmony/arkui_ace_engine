@@ -259,6 +259,7 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto bubbleLayoutProperty = AceType::DynamicCast<BubbleLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(bubbleLayoutProperty);
     bool showInSubWindow = bubbleLayoutProperty->GetShowInSubWindowValue(false);
+    useCustom_ = bubbleLayoutProperty->GetUseCustom().value_or(false);
     InitProps(bubbleProp, showInSubWindow, layoutWrapper);
     auto bubbleNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(bubbleNode);
@@ -267,7 +268,6 @@ void BubbleLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         LOGE("fail to measure bubble due to layoutConstraint is nullptr");
         return;
     }
-    useCustom_ = bubbleLayoutProperty->GetUseCustom().value_or(false);
     // bubble size fit screen.
     layoutWrapper->GetGeometryNode()->SetFrameSize(layoutConstraint->maxSize);
     layoutWrapper->GetGeometryNode()->SetContentSize(layoutConstraint->maxSize);
@@ -661,7 +661,9 @@ void BubbleLayoutAlgorithm::InitProps(const RefPtr<BubbleLayoutProperty>& layout
     maxColumns_ = popupTheme->GetMaxColumns();
     isHalfFoldHover_ = pipelineContext->IsHalfFoldHoverStatus();
     InitWrapperRect(layoutWrapper);
-    UpdateScrollHeight(layoutWrapper, showInSubWindow);
+    if (!useCustom_) {
+        UpdateScrollHeight(layoutWrapper, showInSubWindow);
+    }
 }
 
 void BubbleLayoutAlgorithm::HandleKeyboard(LayoutWrapper* layoutWrapper, bool showInSubWindow)
